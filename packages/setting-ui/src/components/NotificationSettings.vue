@@ -229,9 +229,11 @@ async function updateBrowserNotification(value: boolean) {
       browserNotificationEnabled.value = false;
       return;
     }
-    browserNotificationPermission.value = await settingUiHost.browserNotification.requestPermission();
+    browserNotificationPermission.value =
+      await settingUiHost.browserNotification.requestPermission();
     browserNotificationEnabled.value =
-      browserNotificationPermission.value === 'granted' && settingUiHost.browserNotification.isEnabled();
+      browserNotificationPermission.value === 'granted' &&
+      settingUiHost.browserNotification.isEnabled();
   } finally {
     browserNotificationBusy.value = false;
   }
@@ -241,7 +243,8 @@ onMounted(() => {
   browserNotificationAvailable.value = settingUiHost.browserNotification.isSupported();
   browserNotificationPermission.value = settingUiHost.browserNotification.permission();
   browserNotificationEnabled.value =
-    browserNotificationPermission.value === 'granted' && settingUiHost.browserNotification.isEnabled();
+    browserNotificationPermission.value === 'granted' &&
+    settingUiHost.browserNotification.isEnabled();
 
   void loadPreferences();
   if (devicePreferencePort) {

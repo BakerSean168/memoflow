@@ -43,8 +43,7 @@ const { t } = useI18n();
 const uid = `ai-native-${useId()}`;
 const modelVisibility = settingUiHost.useNativeModelVisibility(
   settingUiHost.useServerStateIdentityScope(),
-  () =>
-  props.status?.status === 'ready' ? props.status.modelVisibilityContext : undefined,
+  () => (props.status?.status === 'ready' ? props.status.modelVisibilityContext : undefined),
 );
 const visibilityInstanceId = computed(
   () =>

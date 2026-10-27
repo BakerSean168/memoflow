@@ -535,7 +535,10 @@ export function createScheduleUiAliasEntries(workspaceRoot: string): Alias[] {
 }
 
 export function createSettingContractsAliasEntries(workspaceRoot: string): Alias[] {
-  const settingContractsRoot = resolveFromWorkspace(workspaceRoot, 'packages/setting-contracts/src');
+  const settingContractsRoot = resolveFromWorkspace(
+    workspaceRoot,
+    'packages/setting-contracts/src',
+  );
 
   return [
     {

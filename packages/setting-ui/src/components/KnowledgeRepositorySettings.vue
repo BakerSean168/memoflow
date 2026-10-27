@@ -1284,7 +1284,9 @@ onBeforeUnmount(() => {
 onMounted(async () => {
   if (desktopApi) {
     if (!sharedDesktopAccess)
-      desktopAccess.value = await settingUiHost.readDesktopAccessSnapshot(desktopApi, { refreshCloud: true });
+      desktopAccess.value = await settingUiHost.readDesktopAccessSnapshot(desktopApi, {
+        refreshCloud: true,
+      });
     desktopAccessLoaded.value = true;
   }
   await Promise.all([loadConnections(), loadLocalVault()]);

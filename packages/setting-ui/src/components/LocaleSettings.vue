@@ -8,7 +8,9 @@
             (value) =>
               emit('update:modelValue', {
                 ...modelValue,
-                language: LocaleIdSchema.parse(settingUiHost.normalizeSelectString(value) ?? modelValue.language),
+                language: LocaleIdSchema.parse(
+                  settingUiHost.normalizeSelectString(value) ?? modelValue.language,
+                ),
               })
           "
         >

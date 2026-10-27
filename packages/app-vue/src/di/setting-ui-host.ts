@@ -29,7 +29,10 @@ import AccountProfileSection from '../modules/account/components/AccountProfileS
 import CloudPasswordSection from '../modules/account/components/CloudPasswordSection.vue';
 import ExternalAgentConnectionsSection from '../modules/account/components/ExternalAgentConnectionsSection.vue';
 import { KnowledgeWriteRequestLedger } from '../modules/repository/components';
-import { getAIErrorMessage, getNativeAgentExecutionFailureMessage } from '../modules/ai/composables/error';
+import {
+  getAIErrorMessage,
+  getNativeAgentExecutionFailureMessage,
+} from '../modules/ai/composables/error';
 import { useAI } from '../modules/ai/composables/useAI';
 import { useNativeModelVisibility } from '../modules/ai/composables/nativeModelVisibility';
 import { sortAgentInstances } from '../modules/ai/agent-instance-order';
@@ -51,10 +54,7 @@ import { readDesktopAccessSnapshot } from '../shared/utils/desktop-profile-acces
 import { getDesktopAuthApi } from '../shared/utils/desktop-auth-recovery';
 import { sanitizeForIpc } from '../shared/utils/ipc';
 import { normalizeSelectString } from '../shared/utils/normalize-select-string';
-import {
-  getProductTime,
-  setProductTimePreferences,
-} from '../shared/utils/product-time';
+import { getProductTime, setProductTimePreferences } from '../shared/utils/product-time';
 import {
   getGlobalResultErrorT,
   translateResultError,

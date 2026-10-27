@@ -91,11 +91,7 @@ import { Button } from '@memoflow/ui-vue-shadcn';
 import { Download, Upload } from '@lucide/vue';
 import { settingUiHost } from '../setting-ui-host';
 
-const {
-  SettingsPropertyRow,
-  SettingsSection,
-  SettingsStatusBlock,
-} = settingUiHost.components;
+const { SettingsPropertyRow, SettingsSection, SettingsStatusBlock } = settingUiHost.components;
 
 const { t } = useI18n();
 

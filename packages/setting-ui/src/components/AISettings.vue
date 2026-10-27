@@ -25,7 +25,6 @@ import AgentInstanceWizard from './AgentInstanceWizard.vue';
 import LocalAgentSettings from './LocalAgentSettings.vue';
 import MastraAgentSettings from './MastraAgentSettings.vue';
 
-
 const { t } = useI18n();
 const registry = inject(settingUiHost.AI_AGENT_REGISTRY_KEY, undefined);
 const local = inject(settingUiHost.AI_LOCAL_AGENT_KEY, undefined);

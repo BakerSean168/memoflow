@@ -7,7 +7,10 @@ import { settingUiHost } from '../setting-ui-host';
 
 export function usePreferencePortability() {
   const { t } = useI18n();
-  const service = settingUiHost.useStrictInject(settingUiHost.SETTING_SERVICE_KEY, 'SettingService');
+  const service = settingUiHost.useStrictInject(
+    settingUiHost.SETTING_SERVICE_KEY,
+    'SettingService',
+  );
   const error = ref<string | null>(null);
   const handleError = settingUiHost.createComposableHandleError({
     t,

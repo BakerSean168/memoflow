@@ -13,6 +13,9 @@
  */
 
 // ===== Port Interface / 端口接口 =====
-export type { ISettingApiClient, ISettingApiClient as SettingClientPort } from './ports/setting-api-client.port';
+export type {
+  ISettingApiClient,
+  ISettingApiClient as SettingClientPort,
+} from './ports/setting-api-client.port';
 
 export { createSettingServiceFromHttpClient } from './setting-http-service-factory';

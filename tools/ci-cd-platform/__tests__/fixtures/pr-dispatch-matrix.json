@@ -146,15 +146,7 @@
             "ui-storybook",
             "web"
           ],
-          "test": [
-            "ai",
-            "api",
-            "app-vue",
-            "desktop",
-            "governance-tools",
-            "setting-ui",
-            "web"
-          ],
+          "test": ["ai", "api", "app-vue", "desktop", "governance-tools", "setting-ui", "web"],
           "test:contract": [],
           "test:smoke": ["api"],
           "test:integration": ["ai", "api"],
@@ -255,12 +247,7 @@
           "unit-1": ["desktop:test"],
           "unit-2": [],
           "unit-3": [],
-          "build": [
-            "desktop:build",
-            "web:build",
-            "desktop:typecheck",
-            "web:typecheck"
-          ],
+          "build": ["desktop:build", "web:build", "desktop:typecheck", "web:typecheck"],
           "web-unit-1": ["web:test"],
           "web-unit-2": [],
           "server-unit": [],
@@ -309,12 +296,7 @@
           "unit-1": ["desktop:test"],
           "unit-2": [],
           "unit-3": [],
-          "build": [
-            "desktop:build",
-            "web:build",
-            "desktop:typecheck",
-            "web:typecheck"
-          ],
+          "build": ["desktop:build", "web:build", "desktop:typecheck", "web:typecheck"],
           "web-unit-1": ["web:test"],
           "web-unit-2": [],
           "server-unit": [],
@@ -334,9 +316,7 @@
     },
     {
       "id": "apiRoute",
-      "files": [
-        "apps/api/src/shared/infrastructure/http/routes/infrastructure-routes.ts"
-      ],
+      "files": ["apps/api/src/shared/infrastructure/http/routes/infrastructure-routes.ts"],
       "expected": {
         "full": false,
         "targets": {
@@ -385,9 +365,7 @@
     },
     {
       "id": "taskServer",
-      "files": [
-        "packages/task/src/server/transport/task.transport-handlers.ts"
-      ],
+      "files": ["packages/task/src/server/transport/task.transport-handlers.ts"],
       "expected": {
         "full": false,
         "targets": {
@@ -446,11 +424,7 @@
             "workspace:sync",
             "memoflow:governance-check"
           ],
-          "unit-1": [
-            "task:test",
-            "account:test",
-            "schedule-orchestration:test"
-          ],
+          "unit-1": ["task:test", "account:test", "schedule-orchestration:test"],
           "unit-2": ["desktop:test"],
           "unit-3": ["notification:test"],
           "build": [
@@ -494,11 +468,7 @@
         "serverShards": [
           {
             "id": "1/2",
-            "keys": [
-              "api:test:integration",
-              "desktop:test:main",
-              "desktop:test:ipc"
-            ],
+            "keys": ["api:test:integration", "desktop:test:main", "desktop:test:ipc"],
             "estimatedMs": 33529
           },
           {
@@ -1564,19 +1534,11 @@
     },
     {
       "id": "testOnly",
-      "files": [
-        "packages/app-vue/src/modules/ai/components/AIMessageContent.spec.ts"
-      ],
+      "files": ["packages/app-vue/src/modules/ai/components/AIMessageContent.spec.ts"],
       "expected": {
         "full": false,
         "targets": {
-          "build": [
-            "goal-ui",
-            "governance-tools",
-            "notification-ui",
-            "routine-ui",
-            "ui-storybook"
-          ],
+          "build": ["goal-ui", "governance-tools", "notification-ui", "routine-ui", "ui-storybook"],
           "typecheck": ["app-vue"],
           "test": ["app-vue", "governance-tools", "test-system-v2"],
           "test:contract": ["goal-ui", "notification-ui", "routine-ui"],
@@ -2217,11 +2179,7 @@
             "workspace:sync",
             "memoflow:governance-check"
           ],
-          "unit-1": [
-            "task:test",
-            "account:test",
-            "schedule-orchestration:test"
-          ],
+          "unit-1": ["task:test", "account:test", "schedule-orchestration:test"],
           "unit-2": ["desktop:test"],
           "unit-3": ["notification:test"],
           "build": [
@@ -2265,11 +2223,7 @@
         "serverShards": [
           {
             "id": "1/2",
-            "keys": [
-              "api:test:integration",
-              "desktop:test:main",
-              "desktop:test:ipc"
-            ],
+            "keys": ["api:test:integration", "desktop:test:main", "desktop:test:ipc"],
             "estimatedMs": 33529
           },
           {
@@ -2746,10 +2700,7 @@
           "verification-children": ["desktop:test:ipc", "desktop:test:main"],
           "web-visual": ["web:e2e:visual-regression"],
           "component-browser": ["ui-storybook:test:interaction"],
-          "contract": [
-            "routine-client:test:contract",
-            "routine-ui:test:contract"
-          ]
+          "contract": ["routine-client:test:contract", "routine-ui:test:contract"]
         },
         "serverShards": [
           {
@@ -2775,22 +2726,8 @@
             "ui-storybook",
             "web"
           ],
-          "typecheck": [
-            "app-vue",
-            "desktop",
-            "routine-ui",
-            "schedule-ui",
-            "ui-storybook",
-            "web"
-          ],
-          "test": [
-            "app-vue",
-            "desktop",
-            "governance-tools",
-            "routine-ui",
-            "schedule-ui",
-            "web"
-          ],
+          "typecheck": ["app-vue", "desktop", "routine-ui", "schedule-ui", "ui-storybook", "web"],
+          "test": ["app-vue", "desktop", "governance-tools", "routine-ui", "schedule-ui", "web"],
           "test:contract": ["routine-ui"],
           "test:smoke": [],
           "test:integration": [],

@@ -8,7 +8,6 @@ const { AccountProfileSection, CloudPasswordSection, ExternalAgentConnectionsSec
 
 const cloudPasswordService = inject(settingUiHost.AUTH_SERVICE_KEY, null);
 const externalAgents = inject(settingUiHost.EXTERNAL_AGENT_SERVICE_KEY, null);
-
 </script>
 
 <template>

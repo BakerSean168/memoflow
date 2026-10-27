@@ -165,7 +165,10 @@ async function importKeymap(event: Event) {
   try {
     if (!file) return;
     if (file.size > 65536) throw new Error('配置文件不能超过 64 KB');
-    const parsed = settingUiHost.validateKeymap(JSON.parse(await file.text()), keyboard.engine.host);
+    const parsed = settingUiHost.validateKeymap(
+      JSON.parse(await file.text()),
+      keyboard.engine.host,
+    );
     if (parsed.conflicts.length)
       throw new Error(`导入配置存在冲突：${parsed.conflicts.map((c) => c.chord).join('、')}`);
     if (
@@ -241,8 +244,9 @@ onBeforeUnmount(stopRecording);
           :disabled="busy"
           @click="record(command.id)"
           >{{
-            command.keys.map((key) => settingUiHost.displayChord(key, keyboard.engine.host)).join(' / ') ||
-            '未绑定'
+            command.keys
+              .map((key) => settingUiHost.displayChord(key, keyboard.engine.host))
+              .join(' / ') || '未绑定'
           }}</Button
         >
         <Button

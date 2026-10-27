@@ -16,7 +16,10 @@ type RegionalResponse = Extract<PreferenceNamespaceResponse, { namespace: 'regio
 
 export function useUserPreferences() {
   const { t } = useI18n();
-  const service = settingUiHost.useStrictInject(settingUiHost.SETTING_SERVICE_KEY, 'SettingService');
+  const service = settingUiHost.useStrictInject(
+    settingUiHost.SETTING_SERVICE_KEY,
+    'SettingService',
+  );
   const presentation = ref<PresentationResponse | null>(null);
   const regional = ref<RegionalResponse | null>(null);
   const isLoading = ref(false);

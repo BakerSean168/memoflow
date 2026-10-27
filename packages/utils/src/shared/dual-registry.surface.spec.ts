@@ -548,10 +548,7 @@ import {
       'utf8',
     );
     const appVueStore = readFileSync(
-      resolve(
-        sharedDir,
-        '../../../setting-ui/src/stores/presentation-preference-store.ts',
-      ),
+      resolve(sharedDir, '../../../setting-ui/src/stores/presentation-preference-store.ts'),
       'utf8',
     );
 

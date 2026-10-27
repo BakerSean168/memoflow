@@ -122,7 +122,11 @@ export interface SettingLocalAgentPort {
   startLogin(connectionId: string): Promise<LocalAgentAuthState>;
   loginStatus(connectionId: string): Promise<LocalAgentAuthState>;
   cancelLogin(connectionId: string, flowId: string): Promise<LocalAgentAuthState>;
-  completeLogin(connectionId: string, flowId: string, callbackUrl: string): Promise<LocalAgentAuthState>;
+  completeLogin(
+    connectionId: string,
+    flowId: string,
+    callbackUrl: string,
+  ): Promise<LocalAgentAuthState>;
   signOut(connectionId: string): Promise<LocalAgentAuthState>;
 }
 
@@ -187,9 +191,7 @@ export interface SettingDesktopUpdateService {
 
 /** Data portability service surface used by the backup/restore section. */
 export interface SettingDataPortabilityPort {
-  exportPortableDataV3(
-    payload: Record<string, never>,
-  ): Promise<
+  exportPortableDataV3(payload: Record<string, never>): Promise<
     Result<{
       fileName: string;
       content: string;
@@ -393,9 +395,7 @@ export interface SettingUiHost {
 /** Desktop notification device preference port. */
 export interface SettingNotificationDevicePreferencePort {
   get(): Promise<Result<DesktopNotificationPreference>>;
-  update(
-    patch: DesktopNotificationPreferencePatch,
-  ): Promise<Result<DesktopNotificationPreference>>;
+  update(patch: DesktopNotificationPreferencePatch): Promise<Result<DesktopNotificationPreference>>;
   reset(): Promise<Result<DesktopNotificationPreference>>;
 }
 
