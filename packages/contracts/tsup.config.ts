@@ -25,7 +25,6 @@ export default createTsupConfig({
     'src/modules/account/index.ts',
     'src/modules/setting/index.ts',
     'src/modules/notification/index.ts',
-    'src/modules/routine/index.ts',
     'src/modules/ai/index.ts',
     // 其他模块入口
     'src/result/index.ts',

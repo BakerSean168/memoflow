@@ -11,7 +11,7 @@ import { describe, expect, it } from 'vitest';
 // --- merged from integration-global-setup-dual.surface.spec.ts ---
 {
   /**
-   * Residual 1037: goal/schedule/reminder/task integration-global-setup duals retired
+   * Residual 1037: goal/schedule/routine/task integration-global-setup duals retired
    * onto test-utils setup sole.
    * Soft residual 1038: tip focused suite numbers track Residual 1038 evidence tip (309/1339).
    * Does not flip §13.2 checkboxes.
@@ -21,7 +21,7 @@ import { describe, expect, it } from 'vitest';
       resolve(__dirname, '../../../test-utils/src/setup/integration-global-setup.ts'),
       'utf8',
     );
-    const packages = ['goal', 'schedule', 'reminder', 'task'] as const;
+    const packages = ['goal', 'schedule', 'routine', 'task'] as const;
 
     it('owns sole setup/teardown helper body', () => {
       expect(sole).toContain('Residual 1037');
@@ -72,7 +72,7 @@ import { describe, expect, it } from 'vitest';
 // --- merged from integration-helpers-dual.surface.spec.ts ---
 {
   /**
-   * Residual 1043: goal/schedule/reminder/task integration-helpers duals retired
+   * Residual 1043: goal/schedule/routine/task integration-helpers duals retired
    * onto test-utils setup sole (getPrisma/disconnectPrisma/cleanAll/seedAccount).
    * Task keeps only canonical vNext cleanTaskTables; Folder/DAG seed helpers are retired.
    * Soft residual 1044: tip focused suite numbers track Residual 1044 evidence tip (312/1351).
@@ -83,7 +83,7 @@ import { describe, expect, it } from 'vitest';
       resolve(__dirname, '../../../test-utils/src/setup/integration-helpers.ts'),
       'utf8',
     );
-    const packages = ['goal', 'schedule', 'reminder', 'task'] as const;
+    const packages = ['goal', 'schedule', 'routine', 'task'] as const;
 
     it('owns sole getPrisma/disconnectPrisma/cleanAll/seedAccount bodies', () => {
       expect(sole).toContain('Residual 1043');
@@ -133,8 +133,8 @@ import { describe, expect, it } from 'vitest';
       expect(task).not.toContain('taskFolder');
     });
 
-    it('goal/schedule/reminder shims stay re-export-only (no task-only helpers)', () => {
-      for (const pkg of ['goal', 'schedule', 'reminder'] as const) {
+    it('goal/schedule/routine shims stay re-export-only (no task-only helpers)', () => {
+      for (const pkg of ['goal', 'schedule', 'routine'] as const) {
         const source = readFileSync(
           resolve(__dirname, `../../../${pkg}/src/__tests__/integration-helpers.ts`),
           'utf8',

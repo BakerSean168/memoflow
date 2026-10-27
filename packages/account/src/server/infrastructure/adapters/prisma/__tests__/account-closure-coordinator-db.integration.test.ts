@@ -12,7 +12,7 @@ import { Account } from '../../../../domain/aggregates/account';
 // consumers into AccountClosedWorker. scope:account may not depend on other
 // feature scopes; the boundary exemption is test-only and documented here.
 // eslint-disable-next-line @nx/enforce-module-boundaries
-import { RoutineAccountClosedConsumer } from '@memoflow/reminder/server';
+import { RoutineAccountClosedConsumer } from '@memoflow/routine/server';
 // eslint-disable-next-line @nx/enforce-module-boundaries
 import { NotificationAccountClosedConsumer } from '@memoflow/notification/server';
 // eslint-disable-next-line @nx/enforce-module-boundaries

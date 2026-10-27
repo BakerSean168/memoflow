@@ -38,7 +38,7 @@
     "cloud-auth": "runtime-lib",
     "goal": "runtime-lib",
     "notification": "runtime-lib",
-    "reminder": "runtime-lib",
+    "routine": "runtime-lib",
     "schedule": "runtime-lib",
     "scheduler": "runtime-lib",
     "schedule-orchestration": "runtime-lib",
@@ -90,7 +90,10 @@
     "schedule-client": "runtime-lib",
     "schedule-ui": "ui-lib",
     "notification-client": "runtime-lib",
-    "notification-ui": "ui-lib"
+    "notification-ui": "ui-lib",
+    "routine-client": "runtime-lib",
+    "routine-contracts": "runtime-lib",
+    "routine-ui": "ui-lib"
   },
   "exemptions": [
     {

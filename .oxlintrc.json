@@ -169,8 +169,13 @@
             ]
           },
           {
-            "sourceTag": "scope:reminder",
-            "onlyDependOnLibsWithTags": ["scope:shared", "scope:patterns", "scope:reminder"]
+            "sourceTag": "scope:routine",
+            "onlyDependOnLibsWithTags": [
+              "scope:shared",
+              "scope:patterns",
+              "scope:routine",
+              "scope:ui"
+            ]
           },
           {
             "sourceTag": "scope:repository",
@@ -210,7 +215,7 @@
               "scope:data-portability",
               "scope:goal",
               "scope:task",
-              "scope:reminder",
+              "scope:routine",
               "scope:notification",
               "scope:setting"
             ]
@@ -227,7 +232,7 @@
               "scope:authentication",
               "scope:goal",
               "scope:notification",
-              "scope:reminder",
+              "scope:routine",
               "scope:repository",
               "scope:schedule",
               "scope:scheduler",
@@ -248,7 +253,7 @@
               "scope:authentication",
               "scope:goal",
               "scope:notification",
-              "scope:reminder",
+              "scope:routine",
               "scope:repository",
               "scope:schedule",
               "scope:scheduler",
@@ -268,7 +273,7 @@
               "scope:authentication",
               "scope:goal",
               "scope:notification",
-              "scope:reminder",
+              "scope:routine",
               "scope:repository",
               "scope:schedule",
               "scope:scheduler",
@@ -297,7 +302,7 @@
               "scope:authentication",
               "scope:goal",
               "scope:notification",
-              "scope:reminder",
+              "scope:routine",
               "scope:repository",
               "scope:schedule",
               "scope:scheduler",
@@ -326,7 +331,7 @@
               "scope:authentication",
               "scope:goal",
               "scope:notification",
-              "scope:reminder",
+              "scope:routine",
               "scope:repository",
               "scope:schedule",
               "scope:scheduler",
@@ -355,7 +360,7 @@
               "scope:authentication",
               "scope:goal",
               "scope:notification",
-              "scope:reminder",
+              "scope:routine",
               "scope:repository",
               "scope:schedule",
               "scope:scheduler",
@@ -400,6 +405,354 @@
     ]
   },
   "overrides": [
+    {
+      "files": ["packages/schedule-ui/src/test/test-host.ts"],
+      "rules": {
+        "@nx/enforce-module-boundaries": [
+          "error",
+          {
+            "enforceBuildableLibDependency": true,
+            "allow": [
+              "./generated/prisma/**",
+              "@memoflow/test-utils",
+              "@memoflow/test-utils/*",
+              "@memoflow/routine-ui/composables/routineUpcomingCache"
+            ],
+            "checkDynamicDependenciesExceptions": ["@memoflow/database"],
+            "depConstraints": [
+              {
+                "sourceTag": "layer:shared",
+                "onlyDependOnLibsWithTags": ["layer:shared"]
+              },
+              {
+                "sourceTag": "layer:infra",
+                "onlyDependOnLibsWithTags": ["layer:shared", "layer:infra"]
+              },
+              {
+                "sourceTag": "layer:domain",
+                "onlyDependOnLibsWithTags": ["layer:shared", "layer:infra", "layer:domain"]
+              },
+              {
+                "sourceTag": "layer:ui",
+                "onlyDependOnLibsWithTags": [
+                  "layer:shared",
+                  "layer:infra",
+                  "layer:domain",
+                  "layer:ui"
+                ]
+              },
+              {
+                "sourceTag": "layer:app",
+                "onlyDependOnLibsWithTags": [
+                  "layer:shared",
+                  "layer:infra",
+                  "layer:domain",
+                  "layer:ui",
+                  "layer:app"
+                ]
+              },
+              {
+                "sourceTag": "layer:testing",
+                "onlyDependOnLibsWithTags": ["layer:shared", "layer:infra", "layer:testing"]
+              },
+              {
+                "sourceTag": "layer:service",
+                "onlyDependOnLibsWithTags": ["layer:shared"]
+              },
+              {
+                "sourceTag": "tier:platform-contracts",
+                "onlyDependOnLibsWithTags": ["platform:contract-foundation"],
+                "notDependOnLibsWithTags": ["tier:core", "tier:client", "tier:server"]
+              },
+              {
+                "sourceTag": "tier:core",
+                "notDependOnLibsWithTags": ["tier:client", "tier:server", "tier:ui"]
+              },
+              {
+                "sourceTag": "tier:client",
+                "notDependOnLibsWithTags": ["tier:server", "tier:ui"]
+              },
+              {
+                "sourceTag": "tier:server",
+                "notDependOnLibsWithTags": ["tier:client", "tier:ui"]
+              },
+              {
+                "sourceTag": "tier:ui",
+                "notDependOnLibsWithTags": ["tier:server", "tier:ui"]
+              },
+              {
+                "sourceTag": "scope:account",
+                "onlyDependOnLibsWithTags": ["scope:shared", "scope:patterns", "scope:account"]
+              },
+              {
+                "sourceTag": "scope:ai",
+                "onlyDependOnLibsWithTags": ["scope:shared", "scope:patterns", "scope:ai"]
+              },
+              {
+                "sourceTag": "scope:authentication",
+                "onlyDependOnLibsWithTags": [
+                  "scope:shared",
+                  "scope:patterns",
+                  "scope:authentication"
+                ]
+              },
+              {
+                "sourceTag": "scope:goal",
+                "onlyDependOnLibsWithTags": [
+                  "scope:shared",
+                  "scope:patterns",
+                  "scope:goal",
+                  "scope:ui",
+                  "scope:schedule",
+                  "scope:scheduler"
+                ]
+              },
+              {
+                "sourceTag": "scope:notification",
+                "onlyDependOnLibsWithTags": [
+                  "scope:shared",
+                  "scope:patterns",
+                  "scope:notification",
+                  "scope:ui"
+                ]
+              },
+              {
+                "sourceTag": "scope:routine",
+                "onlyDependOnLibsWithTags": [
+                  "scope:shared",
+                  "scope:patterns",
+                  "scope:routine",
+                  "scope:ui"
+                ]
+              },
+              {
+                "sourceTag": "scope:repository",
+                "onlyDependOnLibsWithTags": ["scope:shared", "scope:patterns", "scope:repository"]
+              },
+              {
+                "sourceTag": "scope:schedule",
+                "onlyDependOnLibsWithTags": [
+                  "scope:shared",
+                  "scope:patterns",
+                  "scope:schedule",
+                  "scope:ui"
+                ]
+              },
+              {
+                "sourceTag": "scope:scheduler",
+                "onlyDependOnLibsWithTags": ["scope:shared", "scope:patterns", "scope:scheduler"]
+              },
+              {
+                "sourceTag": "scope:setting",
+                "onlyDependOnLibsWithTags": ["scope:shared", "scope:patterns", "scope:setting"]
+              },
+              {
+                "sourceTag": "scope:task",
+                "onlyDependOnLibsWithTags": [
+                  "scope:shared",
+                  "scope:patterns",
+                  "scope:task",
+                  "scope:scheduler"
+                ]
+              },
+              {
+                "sourceTag": "scope:data-portability",
+                "onlyDependOnLibsWithTags": [
+                  "scope:shared",
+                  "scope:patterns",
+                  "scope:data-portability",
+                  "scope:goal",
+                  "scope:task",
+                  "scope:routine",
+                  "scope:notification",
+                  "scope:setting"
+                ]
+              },
+              {
+                "sourceTag": "scope:app-vue",
+                "onlyDependOnLibsWithTags": [
+                  "scope:shared",
+                  "scope:patterns",
+                  "scope:app-vue",
+                  "scope:ui",
+                  "scope:account",
+                  "scope:ai",
+                  "scope:authentication",
+                  "scope:goal",
+                  "scope:notification",
+                  "scope:routine",
+                  "scope:repository",
+                  "scope:schedule",
+                  "scope:scheduler",
+                  "scope:setting",
+                  "scope:task",
+                  "scope:data-portability"
+                ]
+              },
+              {
+                "sourceTag": "scope:app-react",
+                "onlyDependOnLibsWithTags": [
+                  "scope:shared",
+                  "scope:patterns",
+                  "scope:app-react",
+                  "scope:ui",
+                  "scope:account",
+                  "scope:ai",
+                  "scope:authentication",
+                  "scope:goal",
+                  "scope:notification",
+                  "scope:routine",
+                  "scope:repository",
+                  "scope:schedule",
+                  "scope:scheduler",
+                  "scope:setting",
+                  "scope:task",
+                  "scope:data-portability"
+                ]
+              },
+              {
+                "sourceTag": "scope:web",
+                "onlyDependOnLibsWithTags": [
+                  "scope:shared",
+                  "scope:patterns",
+                  "scope:ui",
+                  "scope:account",
+                  "scope:ai",
+                  "scope:authentication",
+                  "scope:goal",
+                  "scope:notification",
+                  "scope:routine",
+                  "scope:repository",
+                  "scope:schedule",
+                  "scope:scheduler",
+                  "scope:setting",
+                  "scope:task",
+                  "scope:data-portability",
+                  "scope:app-vue",
+                  "scope:app-react",
+                  "scope:web",
+                  "scope:desktop",
+                  "scope:mobile",
+                  "scope:api",
+                  "scope:test-utils",
+                  "scope:tools",
+                  "scope:meta"
+                ]
+              },
+              {
+                "sourceTag": "scope:desktop",
+                "onlyDependOnLibsWithTags": [
+                  "scope:shared",
+                  "scope:patterns",
+                  "scope:ui",
+                  "scope:account",
+                  "scope:ai",
+                  "scope:authentication",
+                  "scope:goal",
+                  "scope:notification",
+                  "scope:routine",
+                  "scope:repository",
+                  "scope:schedule",
+                  "scope:scheduler",
+                  "scope:setting",
+                  "scope:task",
+                  "scope:data-portability",
+                  "scope:app-vue",
+                  "scope:app-react",
+                  "scope:web",
+                  "scope:desktop",
+                  "scope:mobile",
+                  "scope:api",
+                  "scope:test-utils",
+                  "scope:tools",
+                  "scope:meta"
+                ]
+              },
+              {
+                "sourceTag": "scope:mobile",
+                "onlyDependOnLibsWithTags": [
+                  "scope:shared",
+                  "scope:patterns",
+                  "scope:ui",
+                  "scope:account",
+                  "scope:ai",
+                  "scope:authentication",
+                  "scope:goal",
+                  "scope:notification",
+                  "scope:routine",
+                  "scope:repository",
+                  "scope:schedule",
+                  "scope:scheduler",
+                  "scope:setting",
+                  "scope:task",
+                  "scope:data-portability",
+                  "scope:app-vue",
+                  "scope:app-react",
+                  "scope:web",
+                  "scope:desktop",
+                  "scope:mobile",
+                  "scope:api",
+                  "scope:test-utils",
+                  "scope:tools",
+                  "scope:meta"
+                ]
+              },
+              {
+                "sourceTag": "scope:api",
+                "onlyDependOnLibsWithTags": [
+                  "scope:shared",
+                  "scope:patterns",
+                  "scope:ui",
+                  "scope:account",
+                  "scope:ai",
+                  "scope:authentication",
+                  "scope:goal",
+                  "scope:notification",
+                  "scope:routine",
+                  "scope:repository",
+                  "scope:schedule",
+                  "scope:scheduler",
+                  "scope:setting",
+                  "scope:task",
+                  "scope:data-portability",
+                  "scope:app-vue",
+                  "scope:app-react",
+                  "scope:web",
+                  "scope:desktop",
+                  "scope:mobile",
+                  "scope:api",
+                  "scope:test-utils",
+                  "scope:tools",
+                  "scope:meta"
+                ]
+              },
+              {
+                "sourceTag": "scope:ui",
+                "onlyDependOnLibsWithTags": ["scope:shared", "scope:patterns", "scope:ui"]
+              },
+              {
+                "sourceTag": "scope:test-utils",
+                "onlyDependOnLibsWithTags": [
+                  "scope:shared",
+                  "scope:patterns",
+                  "scope:test-utils",
+                  "scope:tools"
+                ]
+              },
+              {
+                "sourceTag": "scope:tools",
+                "onlyDependOnLibsWithTags": [
+                  "scope:shared",
+                  "scope:patterns",
+                  "scope:tools",
+                  "scope:test-utils"
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    },
     {
       "files": ["**/*.{js,mjs,cjs,ts,mts,cts,vue}"],
       "env": {
@@ -541,7 +894,7 @@
         "packages/authentication/src/**/*.ts",
         "packages/ai/src/**/*.ts",
         "packages/repository/src/**/*.ts",
-        "packages/reminder/src/**/*.ts",
+        "packages/routine/src/**/*.ts",
         "packages/schedule/src/**/*.ts",
         "packages/task/src/**/*.ts",
         "packages/goal/src/**/*.ts"

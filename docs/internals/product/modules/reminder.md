@@ -13,7 +13,7 @@ updated: 2026-09-21T20:45:00+08:00
 
 ## 1. 功能定位
 
-`packages/reminder` 仅保留历史物理包名；R4-2201C 后产品与持久化真值已经单轨收敛到 **Routine Coach**。长期配置由 `RoutineDefinition / RoutineProfile / ProfileMembership` 表达，确定性的 WallClock / ActiveUsage / Protocol runtime 执行，Notification 只负责用户触达。
+`packages/routine` 仅保留历史物理包名；R4-2201C 后产品与持久化真值已经单轨收敛到 **Routine Coach**。长期配置由 `RoutineDefinition / RoutineProfile / ProfileMembership` 表达，确定性的 WallClock / ActiveUsage / Protocol runtime 执行，Notification 只负责用户触达。
 
 Legacy `ReminderTemplate / ReminderGroup / ReminderInstance / ReminderResponse`、旧 `/reminders` HTTP/UI、Reminder IPC/client 与可靠运维 owner 已按 ADR-111 破坏式退休，不存在兼容写入口、双写或旧 row converter。
 

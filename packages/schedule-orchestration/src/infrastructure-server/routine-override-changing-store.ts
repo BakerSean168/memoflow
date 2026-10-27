@@ -1,5 +1,6 @@
-import type { RoutineOverrideChangedEvent } from '@memoflow/reminder/schedule-projection/routine';
-import type { RoutineTemporaryOverrideStore } from '@memoflow/reminder/schedule-execution/routine';
+import { type RoutineOverrideChangedEvent } from '@memoflow/routine-contracts';
+
+import type { RoutineTemporaryOverrideStore } from '@memoflow/routine/schedule-execution/routine';
 
 /**
  * ROUTINE-3401: publish `routine:override-changed` after a durable snooze write.

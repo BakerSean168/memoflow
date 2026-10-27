@@ -1,4 +1,8 @@
-import { installGoalUiHost, installNotificationUiHost } from '@memoflow/app-vue/di';
+import {
+  installGoalUiHost,
+  installNotificationUiHost,
+  installRoutineUiHost,
+} from '@memoflow/app-vue/di';
 /**
  * Desktop Platform DI — IPC Adapter Injection
  */
@@ -16,7 +20,7 @@ import { createTaskIpcClient } from '@memoflow/task/client';
 import { createScheduleIpcClient } from '@memoflow/schedule-client';
 import { createRepositoryIpcClient } from '@memoflow/repository/client';
 import { createNotificationIpcClient } from '@memoflow/notification-client';
-import { createRoutineIpcClient } from '@memoflow/reminder/client';
+import { createRoutineIpcClient } from '@memoflow/routine-client';
 import { createSettingIpcClient } from '@memoflow/setting/client';
 import {
   createAIIpcClient,
@@ -89,6 +93,7 @@ export function installDesktopAppServices(
 ): void {
   installGoalUiHost();
   installNotificationUiHost();
+  installRoutineUiHost();
   const bridge = requireElectronBridge('installDesktopAppServices');
 
   const resultIpcClient = createResultIpcClient({ bridge });

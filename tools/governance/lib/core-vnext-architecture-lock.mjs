@@ -6,13 +6,13 @@
 
 import { findPatternMatches } from './source-scan.mjs';
 
-const FEATURE_ROOTS = ['packages/goal/src/', 'packages/task/src/', 'packages/reminder/src/'];
+const FEATURE_ROOTS = ['packages/goal/src/', 'packages/task/src/', 'packages/routine/src/'];
 const EXECUTION_ROOTS = [
   'packages/scheduler/src/server/',
   'packages/schedule-orchestration/src/',
   'packages/goal/src/server/',
   'packages/task/src/server/',
-  'packages/reminder/src/server/',
+  'packages/routine/src/server/',
 ];
 const UI_ROOTS = [
   'packages/app-react/src/',
@@ -277,7 +277,7 @@ export function findCoreVnextArchitectureLockViolations(files) {
       );
     }
 
-    if (relPath.startsWith('packages/reminder/src/')) {
+    if (relPath.startsWith('packages/routine/src/')) {
       pushPatternViolations(
         violations,
         relPath,

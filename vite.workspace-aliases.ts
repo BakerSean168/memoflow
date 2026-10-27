@@ -67,6 +67,22 @@ export function createContractsAliasEntries(workspaceRoot: string): Alias[] {
 
   return [
     {
+      find: /^@memoflow\/routine-contracts\/method-library$/,
+      replacement: resolveFromWorkspace(
+        workspaceRoot,
+        'packages/routine-contracts/src/method-library/index.ts',
+      ),
+    },
+    {
+      find: /^@memoflow\/routine-contracts$/,
+      replacement: resolveFromWorkspace(workspaceRoot, 'packages/routine-contracts/src/index.ts'),
+    },
+    {
+      find: /^@memoflow\/routine-client$/,
+      replacement: resolveFromWorkspace(workspaceRoot, 'packages/routine-client/src/index.ts'),
+    },
+
+    {
       find: /^@memoflow\/contracts\/primitives$/,
       replacement: `${contractsRoot}/primitives/index.ts`,
     },
@@ -310,6 +326,46 @@ export function createUiVueSourceAliasEntries(workspaceRoot: string): Alias[] {
   const uiCoreRoot = resolveFromWorkspace(workspaceRoot, 'packages/ui-core/src');
 
   return [
+    {
+      find: /^@memoflow\/routine-ui$/,
+      replacement: resolveFromWorkspace(workspaceRoot, 'packages/routine-ui/src/index.ts'),
+    },
+    {
+      find: /^@memoflow\/routine-ui\/host$/,
+      replacement: resolveFromWorkspace(
+        workspaceRoot,
+        'packages/routine-ui/src/routine-ui-host.ts',
+      ),
+    },
+    {
+      find: /^@memoflow\/routine-ui\/components\/RoutineCapsulePreview$/,
+      replacement: resolveFromWorkspace(
+        workspaceRoot,
+        'packages/routine-ui/src/components/RoutineCapsulePreview.vue',
+      ),
+    },
+    {
+      find: /^@memoflow\/routine-ui\/components\/RoutineUpcomingWidget$/,
+      replacement: resolveFromWorkspace(
+        workspaceRoot,
+        'packages/routine-ui/src/components/RoutineUpcomingWidget.vue',
+      ),
+    },
+    {
+      find: /^@memoflow\/routine-ui\/views\/RoutineConfigurationView$/,
+      replacement: resolveFromWorkspace(
+        workspaceRoot,
+        'packages/routine-ui/src/views/RoutineConfigurationView.vue',
+      ),
+    },
+    {
+      find: /^@memoflow\/routine-ui\/composables\/routineUpcomingCache$/,
+      replacement: resolveFromWorkspace(
+        workspaceRoot,
+        'packages/routine-ui/src/composables/routineUpcomingCache.ts',
+      ),
+    },
+
     {
       find: /^@memoflow\/ui-vue-shadcn\/(.+)$/,
       replacement: `${uiVueRoot}/$1`,

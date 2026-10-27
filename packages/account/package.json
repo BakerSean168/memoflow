@@ -47,7 +47,7 @@
   },
   "devDependencies": {
     "@memoflow/notification": "workspace:*",
-    "@memoflow/reminder": "workspace:*",
+    "@memoflow/routine": "workspace:*",
     "@memoflow/repository": "workspace:*",
     "@types/express": "^5.0.0"
   }

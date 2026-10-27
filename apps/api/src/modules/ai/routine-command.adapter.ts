@@ -3,8 +3,8 @@ import {
   createActiveUsageTrigger,
   createElapsedTrigger,
   createWallClockTrigger,
-} from '@memoflow/reminder/server';
-import type { RoutineCoachCommandPort } from '@memoflow/reminder/routine-runtime';
+} from '@memoflow/routine/server';
+import type { RoutineCoachCommandPort } from '@memoflow/routine/routine-runtime';
 
 function canonicalTrigger(input: AIRoutineCreateInput['trigger']) {
   switch (input.type) {

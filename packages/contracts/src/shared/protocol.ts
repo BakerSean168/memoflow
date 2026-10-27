@@ -9,6 +9,7 @@ import type { NotificationEventMap } from '@memoflow/notification-contracts';
 import type { NotificationRpcMap } from '@memoflow/notification-contracts';
 import type { RepositoryEventMap } from '../modules/repository/protocol/repository-event-map';
 import type { RepositoryRpcMap } from '../modules/repository/protocol/repository-rpc-map';
+import type { RoutineScheduleProjectionEventMap } from '@memoflow/routine-contracts';
 import type { ScheduleEventMap } from '@memoflow/schedule-contracts';
 import type { ScheduleRpcMap } from '@memoflow/schedule-contracts';
 import type { SettingEventMap } from '../modules/setting/protocol/setting-event-map';
@@ -37,6 +38,7 @@ type CoreAppEventRegistry = AccountEventMap &
   GoalEventMap &
   NotificationEventMap &
   RepositoryEventMap &
+  RoutineScheduleProjectionEventMap &
   ScheduleEventMap &
   SettingEventMap &
   TaskEventMap & { 'system:ready': void; 'system:error': Error }; // 也可以加一些全局通用的

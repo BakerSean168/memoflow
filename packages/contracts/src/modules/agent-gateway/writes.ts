@@ -1,5 +1,8 @@
 import { z } from 'zod';
-import { RoutineAgentCreateSchema, RoutineAgentPersistedReceiptSchema } from '../routine';
+import {
+  RoutineAgentCreateSchema,
+  RoutineAgentPersistedReceiptSchema,
+} from '@memoflow/routine-contracts';
 import {
   GoalAgentCreateSchema,
   GoalAgentUpdateSchema,

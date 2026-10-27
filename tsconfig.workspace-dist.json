@@ -2,6 +2,42 @@
   "extends": "./tsconfig.base.json",
   "compilerOptions": {
     "paths": {
+      "@memoflow/routine-ui": ["./packages/routine-ui/dist/index.d.ts"],
+      "@memoflow/routine-ui/host": ["./packages/routine-ui/dist/routine-ui-host.d.ts"],
+      "@memoflow/routine-ui/components/RoutineCapsulePreview": [
+        "./packages/routine-ui/dist/components/RoutineCapsulePreview.vue.d.ts"
+      ],
+      "@memoflow/routine-ui/components/RoutineUpcomingWidget": [
+        "./packages/routine-ui/dist/components/RoutineUpcomingWidget.vue.d.ts"
+      ],
+      "@memoflow/routine-ui/views/RoutineConfigurationView": [
+        "./packages/routine-ui/dist/views/RoutineConfigurationView.vue.d.ts"
+      ],
+      "@memoflow/routine-ui/composables/routineUpcomingCache": [
+        "./packages/routine-ui/dist/composables/routineUpcomingCache.d.ts"
+      ],
+
+      "@memoflow/routine": ["./packages/routine/dist/index.d.ts"],
+      "@memoflow/routine/schedule-execution": [
+        "./packages/routine/dist/schedule-execution/index.d.ts"
+      ],
+      "@memoflow/routine/schedule-execution/routine": [
+        "./packages/routine/dist/schedule-execution/routine.d.ts"
+      ],
+      "@memoflow/routine/schedule-projection": [
+        "./packages/routine/dist/schedule-projection/index.d.ts"
+      ],
+      "@memoflow/routine/schedule-projection/routine": [
+        "./packages/routine/dist/schedule-projection/routine.d.ts"
+      ],
+      "@memoflow/routine/routine-runtime": ["./packages/routine/dist/routine-runtime/index.d.ts"],
+      "@memoflow/routine/server": ["./packages/routine/dist/server/index.d.ts"],
+      "@memoflow/routine-contracts": ["./packages/routine-contracts/dist/index.d.ts"],
+      "@memoflow/routine-contracts/method-library": [
+        "./packages/routine-contracts/dist/method-library/index.d.ts"
+      ],
+      "@memoflow/routine-client": ["./packages/routine-client/dist/index.d.ts"],
+
       "@memoflow/goal-core": ["./packages/goal-core/dist/index.d.ts"],
       "@memoflow/goal-core/*": ["./packages/goal-core/dist/*.d.ts"],
       "@memoflow/shared-primitives": ["./packages/shared-primitives/dist/index.d.ts"],
@@ -86,8 +122,6 @@
       "@memoflow/task/*": ["./packages/task/dist/*/index.d.ts"],
       "@memoflow/repository": ["./packages/repository/dist/index.d.ts"],
       "@memoflow/repository/*": ["./packages/repository/dist/*/index.d.ts"],
-      "@memoflow/reminder": ["./packages/reminder/dist/index.d.ts"],
-      "@memoflow/reminder/*": ["./packages/reminder/dist/*/index.d.ts"],
       "@memoflow/notification": ["./packages/notification/dist/index.d.ts"],
       "@memoflow/notification/*": ["./packages/notification/dist/*/index.d.ts"],
       "@memoflow/schedule": ["./packages/schedule/dist/index.d.ts"],

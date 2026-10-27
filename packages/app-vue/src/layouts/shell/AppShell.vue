@@ -44,7 +44,7 @@ import WindowHeader, { type WindowHeaderCapsule } from './WindowHeader.vue';
 import DesktopUpdateShellIndicator from './DesktopUpdateShellIndicator.vue';
 import GoalCapsulePreview from './previews/GoalCapsulePreview.vue';
 import TaskCapsulePreview from './previews/TaskCapsulePreview.vue';
-import RoutineCapsulePreview from '../../modules/routine/components/RoutineCapsulePreview.vue';
+import RoutineCapsulePreview from '@memoflow/routine-ui/components/RoutineCapsulePreview';
 import NoteCapsulePreview from './previews/NoteCapsulePreview.vue';
 import ScheduleCapsulePreview from './previews/ScheduleCapsulePreview.vue';
 import type { CalendarEventItem } from '@memoflow/schedule-ui';
