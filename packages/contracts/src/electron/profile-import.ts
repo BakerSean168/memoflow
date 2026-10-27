@@ -4,7 +4,7 @@ import {
   ProfileImportBlockerSchema,
   ProfileImportPlanSchema,
   ProfileImportRequestSchema,
-} from '../modules/data-portability/profile-import';
+} from '@memoflow/data-portability-contracts';
 
 const LocalProfileId = z.string().regex(/^p_[a-f0-9]{24}$/);
 export const DesktopProfileImportTargetSchema = z
