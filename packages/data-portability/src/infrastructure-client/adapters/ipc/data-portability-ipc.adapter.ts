@@ -4,9 +4,9 @@
  * Implements IDataPortabilityApiClient via Electron IPC.
  */
 
-import type { Result } from '@memoflow/contracts/result';
-import { fail } from '@memoflow/contracts/result';
-import { DataPortabilityChannels } from '@memoflow/contracts/electron';
+import type { Result } from '@memoflow/transport-contracts/result';
+import { fail } from '@memoflow/transport-contracts/result';
+import { DataPortabilityChannels } from '@memoflow/desktop-contracts';
 import type { IResultIpcClient, IDataPortabilityApiClient } from '../types';
 import type {
   ExportServerHeldDataDisclosureReq,
@@ -15,7 +15,7 @@ import type {
   ExportPortableDataV3Res,
   PortableDataV3ImportReq,
   PortableDataV3ImportRes,
-} from '@memoflow/contracts/data-portability';
+} from '@memoflow/data-portability-contracts';
 
 export class DataPortabilityIpcAdapter implements IDataPortabilityApiClient {
   constructor(private readonly ipcClient: IResultIpcClient) {}

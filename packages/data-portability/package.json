@@ -30,10 +30,13 @@
   "scripts": {},
   "dependencies": {
     "@memoflow/contracts": "workspace:*",
+    "@memoflow/data-portability-contracts": "workspace:*",
     "@memoflow/database": "workspace:*",
+    "@memoflow/desktop-contracts": "workspace:*",
     "@memoflow/host-runtime": "workspace:*",
     "@memoflow/http-client": "workspace:*",
     "@memoflow/ipc-client": "workspace:*",
+    "@memoflow/transport-contracts": "workspace:*",
     "@memoflow/utils": "workspace:*",
     "express": "^5.2.1",
     "zod": "^4.6.5"

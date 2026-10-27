@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { z } from 'zod';
-import type { PortableBackupEnvelopeV3 } from '@memoflow/contracts/data-portability';
+import type { PortableBackupEnvelopeV3 } from '@memoflow/data-portability-contracts';
 import {
   PortableCapabilityCoordinator,
   type PortableCapabilityCoordinatorOptions,

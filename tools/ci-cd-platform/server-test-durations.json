@@ -14,7 +14,7 @@
     "scheduler:test:integration": 1550,
     "database:test:integration": 6060,
     "relation:test:integration": 1480,
-    "reminder:test:integration": 3410,
+    "routine:test:integration": 3410,
     "schedule:test:integration": 3590,
     "account:test:integration": 9960,
     "label:test:integration": 1480,

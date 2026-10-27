@@ -33,7 +33,7 @@ const REQUIRED_SCOPE_PREFIXES = [
   'scope:authentication',
   'scope:goal',
   'scope:notification',
-  'scope:reminder',
+  'scope:routine',
   'scope:repository',
   'scope:schedule',
   'scope:scheduler',

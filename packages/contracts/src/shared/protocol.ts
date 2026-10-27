@@ -2,13 +2,14 @@ import type { AccountEventMap } from '../modules/account/protocol/account-event-
 import type { AccountRpcMap } from '../modules/account/protocol/account-rpc-map';
 import type { AIEventMap } from '../modules/ai/protocol/ai-event-map';
 import type { AIRpcMap } from '../modules/ai/protocol/ai-rpc-map';
-import type { DataPortabilityRpcMap } from '../modules/data-portability/protocol/data-portability-rpc-map';
+import type { DataPortabilityRpcMap } from '@memoflow/data-portability-contracts';
 import type { GoalEventMap } from '@memoflow/goal-contracts';
 import type { GoalRpcMap } from '@memoflow/goal-contracts';
 import type { NotificationEventMap } from '@memoflow/notification-contracts';
 import type { NotificationRpcMap } from '@memoflow/notification-contracts';
 import type { RepositoryEventMap } from '../modules/repository/protocol/repository-event-map';
 import type { RepositoryRpcMap } from '../modules/repository/protocol/repository-rpc-map';
+import type { RoutineScheduleProjectionEventMap } from '@memoflow/routine-contracts';
 import type { ScheduleEventMap } from '@memoflow/schedule-contracts';
 import type { ScheduleRpcMap } from '@memoflow/schedule-contracts';
 import type { SettingEventMap } from '@memoflow/setting-contracts';
@@ -37,6 +38,7 @@ type CoreAppEventRegistry = AccountEventMap &
   GoalEventMap &
   NotificationEventMap &
   RepositoryEventMap &
+  RoutineScheduleProjectionEventMap &
   ScheduleEventMap &
   SettingEventMap &
   TaskEventMap & { 'system:ready': void; 'system:error': Error }; // 也可以加一些全局通用的

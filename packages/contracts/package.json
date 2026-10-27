@@ -33,17 +33,9 @@
       "types": "./dist/modules/account/index.d.ts",
       "import": "./dist/modules/account/index.js"
     },
-    "./routine": {
-      "types": "./dist/modules/routine/index.d.ts",
-      "import": "./dist/modules/routine/index.js"
-    },
     "./ai": {
       "types": "./dist/modules/ai/index.d.ts",
       "import": "./dist/modules/ai/index.js"
-    },
-    "./data-portability": {
-      "types": "./dist/modules/data-portability/index.d.ts",
-      "import": "./dist/modules/data-portability/index.js"
     },
     "./result": {
       "types": "./dist/result/index.d.ts",
@@ -77,6 +69,7 @@
     "@memoflow/goal-contracts": "workspace:*",
     "@memoflow/label-contracts": "workspace:*",
     "@memoflow/notification-contracts": "workspace:*",
+    "@memoflow/routine-contracts": "workspace:*",
     "@memoflow/schedule-contracts": "workspace:*",
     "@memoflow/setting-contracts": "workspace:*",
     "@memoflow/shared-primitives": "workspace:*",

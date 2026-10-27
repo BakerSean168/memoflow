@@ -14,7 +14,7 @@ import type {
   PortableCapabilityExecutionContext,
   PortableCapabilityReceipt,
   PortableReferenceV3,
-} from '@memoflow/contracts/data-portability';
+} from '@memoflow/data-portability-contracts';
 import type {
   INotificationInteractionRepository,
   INotificationRepository,

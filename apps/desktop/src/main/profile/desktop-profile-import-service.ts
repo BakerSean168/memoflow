@@ -14,7 +14,7 @@ import {
   ProfileImportPlanSchema,
   ProfileImportCommittedSchema,
   ProfileImportOperationSchema,
-} from '@memoflow/contracts/data-portability';
+} from '@memoflow/data-portability-contracts';
 import { profileImportDigest } from '@memoflow/data-portability';
 import { ResultErrorException } from '@memoflow/contracts/result';
 import type { DesktopProfileRuntimeManager } from './desktop-profile-runtime-manager';

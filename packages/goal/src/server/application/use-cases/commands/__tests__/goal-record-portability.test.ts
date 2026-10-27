@@ -1,7 +1,7 @@
 import { expect, it, vi } from 'vitest';
 import { aPrefixedUuid } from '@memoflow/test-utils/fixtures';
 import { createMockRepo } from '@memoflow/test-utils/mocks';
-import type { PortableReferenceV3 } from '@memoflow/contracts/data-portability';
+import type { PortableReferenceV3 } from '@memoflow/data-portability-contracts';
 import {
   Goal,
   GoalPolicy,

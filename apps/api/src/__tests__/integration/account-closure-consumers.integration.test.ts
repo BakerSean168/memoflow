@@ -3,7 +3,7 @@ import { prisma } from '@memoflow/database';
 import { IdentityId } from '@memoflow/domain-shared';
 import { Account } from '@memoflow/account/server';
 import { createAccountPrismaModule } from '@memoflow/account/server';
-import { RoutineAccountClosedConsumer } from '@memoflow/reminder/server';
+import { RoutineAccountClosedConsumer } from '@memoflow/routine/server';
 import { NotificationAccountClosedConsumer } from '@memoflow/notification/server';
 import { RepositoryAccountClosedConsumer } from '@memoflow/repository/server';
 import { AccountClosedWorker } from '@memoflow/account/server';

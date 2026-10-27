@@ -10,9 +10,9 @@ import { createMemoryHistory, createRouter, RouterView } from 'vue-router';
 import type {
   CreateRoutineRequest,
   CreateRoutineProfileRequest,
-} from '@memoflow/contracts/routine';
+} from '@memoflow/routine-contracts';
 import type { CreateTaskPlanReq } from '@memoflow/contracts/task';
-import { RoutineConfigurationSnapshotSchema } from '@memoflow/contracts/routine';
+import { RoutineConfigurationSnapshotSchema } from '@memoflow/routine-contracts';
 import { AIWorkflowRunViewSchema } from '@memoflow/contracts/ai';
 import { fail, ok } from '@memoflow/contracts/result';
 import * as keys from '@memoflow/app-vue/di/keys';
@@ -21,7 +21,7 @@ import { installServerStateRuntime } from '@memoflow/app-vue/platform/server-sta
 import { providePanelWidth } from '@memoflow/app-vue/layouts/shell/usePanelWidth';
 import { useAuthenticationStore } from '@memoflow/app-vue/modules/authentication/stores/authentication-store';
 import { useAppShellStore } from '@memoflow/app-vue/layouts/shell/useAppShellStore';
-import RoutineConfigurationView from '@memoflow/app-vue/modules/routine/views/RoutineConfigurationView.vue';
+import RoutineConfigurationView from '@memoflow/routine-ui/views/RoutineConfigurationView';
 import { NotificationListPage } from '@memoflow/notification-ui';
 import KnowledgeProjectionWorkspaceView from '@memoflow/app-vue/modules/repository/views/KnowledgeProjectionWorkspaceView.vue';
 import { UserSettingsView } from '@memoflow/app-vue';

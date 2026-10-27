@@ -46,6 +46,7 @@ const STANDALONE_CLIENT_PACKAGES = new Map([
   ['schedule', 'schedule-client'],
   ['notification', 'notification-client'],
   ['setting', 'setting-client'],
+  ['routine', 'routine-client'],
 ]);
 
 const EXCEPTIONS = new Set([
@@ -73,7 +74,7 @@ const AUDITED_PACKAGES = new Set([
   'data-portability',
   'goal',
   'notification',
-  'reminder',
+  'routine',
   'repository',
   'schedule',
   'setting',

@@ -2,6 +2,42 @@
   "extends": "./tsconfig.base.json",
   "compilerOptions": {
     "paths": {
+      "@memoflow/routine-ui": ["./packages/routine-ui/src/index.ts"],
+      "@memoflow/routine-ui/host": ["./packages/routine-ui/src/routine-ui-host.ts"],
+      "@memoflow/routine-ui/components/RoutineCapsulePreview": [
+        "./packages/routine-ui/src/components/RoutineCapsulePreview.vue"
+      ],
+      "@memoflow/routine-ui/components/RoutineUpcomingWidget": [
+        "./packages/routine-ui/src/components/RoutineUpcomingWidget.vue"
+      ],
+      "@memoflow/routine-ui/views/RoutineConfigurationView": [
+        "./packages/routine-ui/src/views/RoutineConfigurationView.vue"
+      ],
+      "@memoflow/routine-ui/composables/routineUpcomingCache": [
+        "./packages/routine-ui/src/composables/routineUpcomingCache.ts"
+      ],
+
+      "@memoflow/routine": ["./packages/routine/src/index.ts"],
+      "@memoflow/routine/schedule-execution": [
+        "./packages/routine/src/schedule-execution/index.ts"
+      ],
+      "@memoflow/routine/schedule-execution/routine": [
+        "./packages/routine/src/schedule-execution/routine.ts"
+      ],
+      "@memoflow/routine/schedule-projection": [
+        "./packages/routine/src/schedule-projection/index.ts"
+      ],
+      "@memoflow/routine/schedule-projection/routine": [
+        "./packages/routine/src/schedule-projection/routine.ts"
+      ],
+      "@memoflow/routine/routine-runtime": ["./packages/routine/src/routine-runtime/index.ts"],
+      "@memoflow/routine/server": ["./packages/routine/src/server/index.ts"],
+      "@memoflow/routine-contracts": ["./packages/routine-contracts/src/index.ts"],
+      "@memoflow/routine-contracts/method-library": [
+        "./packages/routine-contracts/src/method-library/index.ts"
+      ],
+      "@memoflow/routine-client": ["./packages/routine-client/src/index.ts"],
+
       "@memoflow/goal-core": ["./packages/goal-core/src/index.ts"],
       "@memoflow/goal-core/*": ["./packages/goal-core/src/*.ts"],
       "@memoflow/shared-primitives": ["./packages/shared-primitives/src/index.ts"],
@@ -90,8 +126,6 @@
       "@memoflow/task/*": ["./packages/task/src/*/index.ts"],
       "@memoflow/repository": ["./packages/repository/src/index.ts"],
       "@memoflow/repository/*": ["./packages/repository/src/*/index.ts"],
-      "@memoflow/reminder": ["./packages/reminder/src/index.ts"],
-      "@memoflow/reminder/*": ["./packages/reminder/src/*/index.ts"],
       "@memoflow/notification": ["./packages/notification/src/index.ts"],
       "@memoflow/notification/*": ["./packages/notification/src/*/index.ts"],
       "@memoflow/schedule": ["./packages/schedule/src/index.ts"],

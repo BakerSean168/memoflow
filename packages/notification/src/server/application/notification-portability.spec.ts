@@ -4,7 +4,7 @@ import type {
   PortableCapabilityExecutionContext,
   PortableReferencePort,
   PortableReferenceV3,
-} from '@memoflow/contracts/data-portability';
+} from '@memoflow/data-portability-contracts';
 import { Notification } from '../domain/aggregates/notification';
 import type {
   INotificationInteractionRepository,

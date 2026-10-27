@@ -4,8 +4,8 @@ import type {
   ProfileImportBinding,
   ProfileImportManifest,
   ProfileImportBlocker,
-} from '@memoflow/contracts/data-portability';
-import { parsePortableBackupEnvelopeV3 } from '@memoflow/contracts/data-portability';
+} from '@memoflow/data-portability-contracts';
+import { parsePortableBackupEnvelopeV3 } from '@memoflow/data-portability-contracts';
 import type {
   PortableCapabilityExecutionContext,
   PortableCapabilityReceipt,

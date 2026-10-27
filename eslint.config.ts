@@ -46,8 +46,8 @@ const featureScopeConstraints = [
     onlyDependOnLibsWithTags: [...sharedScopeTags, 'scope:notification', 'scope:ui'],
   },
   {
-    sourceTag: 'scope:reminder',
-    onlyDependOnLibsWithTags: [...sharedScopeTags, 'scope:reminder'],
+    sourceTag: 'scope:routine',
+    onlyDependOnLibsWithTags: [...sharedScopeTags, 'scope:routine', 'scope:ui'],
   },
   {
     sourceTag: 'scope:repository',
@@ -79,7 +79,7 @@ const featureScopeConstraints = [
       'scope:data-portability',
       'scope:goal',
       'scope:task',
-      'scope:reminder',
+      'scope:routine',
       'scope:notification',
       'scope:setting',
     ],
@@ -179,7 +179,7 @@ const moduleBoundaryDepConstraints = [
       'scope:authentication',
       'scope:goal',
       'scope:notification',
-      'scope:reminder',
+      'scope:routine',
       'scope:repository',
       'scope:schedule',
       'scope:scheduler',
@@ -199,7 +199,7 @@ const moduleBoundaryDepConstraints = [
       'scope:authentication',
       'scope:goal',
       'scope:notification',
-      'scope:reminder',
+      'scope:routine',
       'scope:repository',
       'scope:schedule',
       'scope:scheduler',
@@ -220,7 +220,7 @@ const moduleBoundaryDepConstraints = [
       'scope:authentication',
       'scope:goal',
       'scope:notification',
-      'scope:reminder',
+      'scope:routine',
       'scope:repository',
       'scope:schedule',
       'scope:scheduler',
@@ -249,7 +249,7 @@ const moduleBoundaryDepConstraints = [
       'scope:authentication',
       'scope:goal',
       'scope:notification',
-      'scope:reminder',
+      'scope:routine',
       'scope:repository',
       'scope:schedule',
       'scope:scheduler',
@@ -278,7 +278,7 @@ const moduleBoundaryDepConstraints = [
       'scope:authentication',
       'scope:goal',
       'scope:notification',
-      'scope:reminder',
+      'scope:routine',
       'scope:repository',
       'scope:schedule',
       'scope:scheduler',
@@ -307,7 +307,7 @@ const moduleBoundaryDepConstraints = [
       'scope:authentication',
       'scope:goal',
       'scope:notification',
-      'scope:reminder',
+      'scope:routine',
       'scope:repository',
       'scope:schedule',
       'scope:scheduler',
@@ -551,6 +551,22 @@ export default tseslint.config(
       },
     },
     {
+      // The schedule test composition root wires the routine UI cache into its host port.
+      files: ['packages/schedule-ui/src/test/test-host.ts'],
+      rules: {
+        '@nx/enforce-module-boundaries': [
+          'error',
+          {
+            ...moduleBoundaryOptions,
+            allow: [
+              ...moduleBoundaryOptions.allow,
+              '@memoflow/routine-ui/composables/routineUpcomingCache',
+            ],
+          },
+        ],
+      },
+    },
+    {
       // Test files still inherit @nx/enforce-module-boundaries.
       // Only @memoflow/test-utils is allowlisted by moduleBoundaryOptions, and
       // production files are explicitly blocked from importing it above.
@@ -716,7 +732,7 @@ export default tseslint.config(
       },
     },
     {
-      files: ['packages/reminder/src/**/*.ts'],
+      files: ['packages/routine/src/**/*.ts'],
       ignores: ['**/__tests__/**', '**/test/**', '**/*.spec.ts', '**/*.test.ts'],
       rules: {
         '@typescript-eslint/no-explicit-any': 'error',

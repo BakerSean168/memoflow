@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import type { PortableCapabilityExecutionContext } from '@memoflow/contracts/data-portability';
+import type { PortableCapabilityExecutionContext } from '@memoflow/data-portability-contracts';
 import type {
   PreferenceNamespace,
   PreferenceNamespaceResponse,

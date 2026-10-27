@@ -1,0 +1,69 @@
+{
+  "name": "routine",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "packages/routine/src",
+  "projectType": "library",
+  "tags": ["scope:routine", "type:lib", "layer:domain", "tier:server"],
+  "targets": {
+    "build": {
+      "executor": "nx:run-commands",
+      "outputs": ["{projectRoot}/dist"],
+      "dependsOn": ["^build"],
+      "options": {
+        "command": "node -e \"require('fs').rmSync('dist',{recursive:true,force:true})\" && node ../../node_modules/tsup/dist/cli-default.js --clean=false && tsc -p tsconfig.build.json --emitDeclarationOnly",
+        "cwd": "packages/routine"
+      }
+    },
+    "lint": {
+      "options": {
+        "args": ["**/*.{ts,js}"]
+      }
+    },
+    "typecheck": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "tsc --noEmit -p tsconfig.json",
+        "cwd": "packages/routine"
+      },
+      "dependsOn": ["^build"]
+    },
+    "test": {
+      "executor": "nx:run-commands",
+      "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
+      "inputs": ["default", "^production"],
+      "cache": true,
+      "options": {
+        "command": "node ../../node_modules/vitest/vitest.mjs run --config vitest.config.ts",
+        "cwd": "packages/routine"
+      }
+    },
+    "test:watch": {
+      "executor": "nx:run-commands",
+      "cache": false,
+      "options": {
+        "command": "node ../../node_modules/vitest/vitest.mjs --config vitest.config.ts",
+        "cwd": "packages/routine"
+      }
+    },
+    "test:integration": {
+      "executor": "nx:run-commands",
+      "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
+      "inputs": ["default", "^production"],
+      "cache": false,
+      "options": {
+        "command": "vitest run --config vitest.integration.config.ts",
+        "cwd": "packages/routine"
+      }
+    },
+    "test:coverage": {
+      "executor": "nx:run-commands",
+      "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
+      "inputs": ["default", "^production"],
+      "cache": true,
+      "options": {
+        "command": "node ../../node_modules/vitest/vitest.mjs run --config vitest.config.ts --coverage",
+        "cwd": "packages/routine"
+      }
+    }
+  }
+}

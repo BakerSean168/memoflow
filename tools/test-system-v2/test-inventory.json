@@ -4930,7 +4930,7 @@
       ]
     },
     {
-      "path": "packages/app-vue/src/modules/routine/components/RoutineCapsulePreview.spec.ts",
+      "path": "packages/app-vue/src/modules/setting/components/AISettings.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/app-vue/vitest.config.ts"
@@ -4940,7 +4940,7 @@
       ]
     },
     {
-      "path": "packages/app-vue/src/modules/routine/components/RoutineEditorDialog.spec.ts",
+      "path": "packages/app-vue/src/modules/setting/components/AccountSettingsSection.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/app-vue/vitest.config.ts"
@@ -4950,7 +4950,7 @@
       ]
     },
     {
-      "path": "packages/app-vue/src/modules/routine/components/RoutineProfileDialog.spec.ts",
+      "path": "packages/app-vue/src/modules/setting/components/AntigravityAcpDownload.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/app-vue/vitest.config.ts"
@@ -4960,7 +4960,7 @@
       ]
     },
     {
-      "path": "packages/app-vue/src/modules/routine/components/RoutineUpcomingWidget.spec.ts",
+      "path": "packages/app-vue/src/modules/setting/components/DesktopUpdateSettingsSection.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/app-vue/vitest.config.ts"
@@ -4970,7 +4970,107 @@
       ]
     },
     {
-      "path": "packages/app-vue/src/modules/routine/views/RoutineConfigurationView.spec.ts",
+      "path": "packages/app-vue/src/modules/setting/components/KeyboardSettings.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/app-vue/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "packages/app-vue/vitest.store-coverage.config.ts"
+      ]
+    },
+    {
+      "path": "packages/app-vue/src/modules/setting/components/KnowledgeRepositorySettings.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/app-vue/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "packages/app-vue/vitest.store-coverage.config.ts"
+      ]
+    },
+    {
+      "path": "packages/app-vue/src/modules/setting/components/NotificationSettings.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/app-vue/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "packages/app-vue/vitest.store-coverage.config.ts"
+      ]
+    },
+    {
+      "path": "packages/app-vue/src/modules/setting/components/SettingAdvancedActions.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/app-vue/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "packages/app-vue/vitest.store-coverage.config.ts"
+      ]
+    },
+    {
+      "path": "packages/app-vue/src/modules/setting/components/SettingsResetSection.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/app-vue/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "packages/app-vue/vitest.store-coverage.config.ts"
+      ]
+    },
+    {
+      "path": "packages/app-vue/src/modules/setting/components/UserPreferenceSettingsSection.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/app-vue/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "packages/app-vue/vitest.store-coverage.config.ts"
+      ]
+    },
+    {
+      "path": "packages/app-vue/src/modules/setting/components/ai-provider-default-policy.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/app-vue/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "packages/app-vue/vitest.store-coverage.config.ts"
+      ]
+    },
+    {
+      "path": "packages/app-vue/src/modules/setting/components/desktop-update-settings.presentation.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/app-vue/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "packages/app-vue/vitest.store-coverage.config.ts"
+      ]
+    },
+    {
+      "path": "packages/app-vue/src/modules/setting/composables/usePreferencePortability.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/app-vue/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "packages/app-vue/vitest.store-coverage.config.ts"
+      ]
+    },
+    {
+      "path": "packages/app-vue/src/modules/setting/composables/usePresentationBootstrap.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/app-vue/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "packages/app-vue/vitest.store-coverage.config.ts"
+      ]
+    },
+    {
+      "path": "packages/app-vue/src/modules/setting/stores/presentationPreferenceStore.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/app-vue/vitest.config.ts"
@@ -6120,14 +6220,6 @@
       "measurementCollectors": []
     },
     {
-      "path": "packages/contracts/src/modules/data-portability/portable-v3-contract.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/contracts/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
       "path": "packages/contracts/src/modules/repository/aggregates/dual-registry.surface.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -6153,6 +6245,30 @@
     },
     {
       "path": "packages/contracts/src/modules/repository/api/knowledge-note-projection.dto.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/contracts/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/contracts/src/modules/setting/preferences/canonical.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/contracts/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/contracts/src/modules/setting/preferences/portable-v3.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/contracts/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/contracts/src/modules/setting/preferences/product-feature-map-public.surface.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/contracts/vitest.config.ts"
@@ -6276,6 +6392,22 @@
       "primarySuite": "unit",
       "collectors": [
         "packages/contracts/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/data-portability-contracts/src/import-boundary.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/data-portability-contracts/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/data-portability-contracts/src/portable-v3-contract.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/data-portability-contracts/vitest.config.ts"
       ],
       "measurementCollectors": []
     },
@@ -8970,360 +9102,6 @@
       "measurementCollectors": []
     },
     {
-      "path": "packages/reminder/src/__tests__/package-root-owner-surface.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/reminder/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/reminder/vitest.config.ts"
-      ]
-    },
-    {
-      "path": "packages/reminder/src/client/client.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/reminder/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/reminder/vitest.config.ts"
-      ]
-    },
-    {
-      "path": "packages/reminder/src/method-library/method-library.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/reminder/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/reminder/vitest.config.ts"
-      ]
-    },
-    {
-      "path": "packages/reminder/src/server/application/routine-portability.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/reminder/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/reminder/vitest.config.ts"
-      ]
-    },
-    {
-      "path": "packages/reminder/src/server/application/services/routine-coach-command.service.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/reminder/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/reminder/vitest.config.ts"
-      ]
-    },
-    {
-      "path": "packages/reminder/src/server/application/services/routine-configuration-query.service.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/reminder/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/reminder/vitest.config.ts"
-      ]
-    },
-    {
-      "path": "packages/reminder/src/server/domain/routine/__tests__/next-eligible-occurrence.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/reminder/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/reminder/vitest.config.ts"
-      ]
-    },
-    {
-      "path": "packages/reminder/src/server/domain/routine/__tests__/protocol.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/reminder/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/reminder/vitest.config.ts"
-      ]
-    },
-    {
-      "path": "packages/reminder/src/server/domain/routine/__tests__/routine-profile.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/reminder/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/reminder/vitest.config.ts"
-      ]
-    },
-    {
-      "path": "packages/reminder/src/server/domain/routine/__tests__/routine-trigger.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/reminder/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/reminder/vitest.config.ts"
-      ]
-    },
-    {
-      "path": "packages/reminder/src/server/domain/routine/durable-elapsed.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/reminder/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/reminder/vitest.config.ts"
-      ]
-    },
-    {
-      "path": "packages/reminder/src/server/infrastructure/__tests__/powersync.closure-checker.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/reminder/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/reminder/vitest.config.ts"
-      ]
-    },
-    {
-      "path": "packages/reminder/src/server/infrastructure/routine-schedule/__tests__/routine-elapsed-scheduled-handler.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/reminder/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/reminder/vitest.config.ts"
-      ]
-    },
-    {
-      "path": "packages/reminder/src/server/infrastructure/routine-schedule/__tests__/routine-prisma-adapters.integration.test.ts",
-      "primarySuite": "integration",
-      "collectors": [
-        "packages/reminder/vitest.integration.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
-      "path": "packages/reminder/src/server/infrastructure/routine-schedule/__tests__/routine-schedule-execution-source.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/reminder/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/reminder/vitest.config.ts"
-      ]
-    },
-    {
-      "path": "packages/reminder/src/server/infrastructure/routine-schedule/__tests__/routine-schedule-projection-source.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/reminder/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/reminder/vitest.config.ts"
-      ]
-    },
-    {
-      "path": "packages/reminder/src/server/infrastructure/routine-schedule/__tests__/routine-wall-clock-scheduled-handler.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/reminder/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/reminder/vitest.config.ts"
-      ]
-    },
-    {
-      "path": "packages/reminder/src/server/infrastructure/routine-schedule/routine-occurrence-notification-writer.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/reminder/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/reminder/vitest.config.ts"
-      ]
-    },
-    {
-      "path": "packages/reminder/src/server/infrastructure/routine-schedule/routine-temporary-override-store.powersync.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/reminder/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/reminder/vitest.config.ts"
-      ]
-    },
-    {
-      "path": "packages/reminder/src/server/infrastructure/routine-vnext/profile-persistence-parity.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/reminder/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/reminder/vitest.config.ts"
-      ]
-    },
-    {
-      "path": "packages/reminder/src/server/infrastructure/routine-vnext/protocol-persistence-parity.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/reminder/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/reminder/vitest.config.ts"
-      ]
-    },
-    {
-      "path": "packages/reminder/src/server/infrastructure/routine-vnext/protocol-session-store.powersync.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/reminder/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/reminder/vitest.config.ts"
-      ]
-    },
-    {
-      "path": "packages/reminder/src/server/infrastructure/routine-vnext/protocol-session-store.prisma.integration.test.ts",
-      "primarySuite": "integration",
-      "collectors": [
-        "packages/reminder/vitest.integration.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
-      "path": "packages/reminder/src/server/infrastructure/routine-vnext/routine-local-registrations.powersync.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/reminder/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/reminder/vitest.config.ts"
-      ]
-    },
-    {
-      "path": "packages/reminder/src/server/infrastructure/routine-vnext/routine-occurrence-truth-store.powersync.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/reminder/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/reminder/vitest.config.ts"
-      ]
-    },
-    {
-      "path": "packages/reminder/src/server/infrastructure/routine-vnext/routine-preferences-store.powersync.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/reminder/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/reminder/vitest.config.ts"
-      ]
-    },
-    {
-      "path": "packages/reminder/src/server/infrastructure/routine-vnext/routine-preferences-store.prisma.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/reminder/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/reminder/vitest.config.ts"
-      ]
-    },
-    {
-      "path": "packages/reminder/src/server/infrastructure/routine-vnext/routine-profile-store.powersync.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/reminder/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/reminder/vitest.config.ts"
-      ]
-    },
-    {
-      "path": "packages/reminder/src/server/infrastructure/routine-vnext/routine-profile-store.prisma.integration.test.ts",
-      "primarySuite": "integration",
-      "collectors": [
-        "packages/reminder/vitest.integration.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
-      "path": "packages/reminder/src/server/infrastructure/routine-vnext/trigger-persistence-parity.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/reminder/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/reminder/vitest.config.ts"
-      ]
-    },
-    {
-      "path": "packages/reminder/src/server/runtime/active-usage/active-usage.runtime.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/reminder/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/reminder/vitest.config.ts"
-      ]
-    },
-    {
-      "path": "packages/reminder/src/server/runtime/elapsed/elapsed.runtime.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/reminder/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/reminder/vitest.config.ts"
-      ]
-    },
-    {
-      "path": "packages/reminder/src/server/runtime/intervention/intervention.runtime.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/reminder/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/reminder/vitest.config.ts"
-      ]
-    },
-    {
-      "path": "packages/reminder/src/server/runtime/protocol-break-credit/protocol-break-credit.runtime.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/reminder/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/reminder/vitest.config.ts"
-      ]
-    },
-    {
-      "path": "packages/reminder/src/server/runtime/protocol/protocol-session.runtime.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/reminder/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/reminder/vitest.config.ts"
-      ]
-    },
-    {
-      "path": "packages/reminder/src/server/runtime/routine-activity/routine-activity-sensor.runtime.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/reminder/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/reminder/vitest.config.ts"
-      ]
-    },
-    {
       "path": "packages/repository/src/api/module-lifecycle.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -9626,6 +9404,396 @@
         "packages/repository/vitest.config.ts"
       ],
       "measurementCollectors": []
+    },
+    {
+      "path": "packages/routine-client/src/client.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/routine-client/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/routine-contracts/src/method-library/method-library.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/routine-contracts/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/routine-ui/src/components/RoutineCapsulePreview.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/routine-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/routine-ui/src/components/RoutineEditorDialog.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/routine-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/routine-ui/src/components/RoutineProfileDialog.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/routine-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/routine-ui/src/components/RoutineUpcomingWidget.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/routine-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/routine-ui/src/views/RoutineConfigurationView.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/routine-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/routine/src/__tests__/package-root-owner-surface.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/routine/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "packages/routine/vitest.config.ts"
+      ]
+    },
+    {
+      "path": "packages/routine/src/server/application/routine-portability.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/routine/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "packages/routine/vitest.config.ts"
+      ]
+    },
+    {
+      "path": "packages/routine/src/server/application/services/routine-coach-command.service.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/routine/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "packages/routine/vitest.config.ts"
+      ]
+    },
+    {
+      "path": "packages/routine/src/server/application/services/routine-configuration-query.service.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/routine/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "packages/routine/vitest.config.ts"
+      ]
+    },
+    {
+      "path": "packages/routine/src/server/domain/routine/__tests__/next-eligible-occurrence.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/routine/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "packages/routine/vitest.config.ts"
+      ]
+    },
+    {
+      "path": "packages/routine/src/server/domain/routine/__tests__/protocol.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/routine/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "packages/routine/vitest.config.ts"
+      ]
+    },
+    {
+      "path": "packages/routine/src/server/domain/routine/__tests__/routine-profile.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/routine/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "packages/routine/vitest.config.ts"
+      ]
+    },
+    {
+      "path": "packages/routine/src/server/domain/routine/__tests__/routine-trigger.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/routine/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "packages/routine/vitest.config.ts"
+      ]
+    },
+    {
+      "path": "packages/routine/src/server/domain/routine/durable-elapsed.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/routine/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "packages/routine/vitest.config.ts"
+      ]
+    },
+    {
+      "path": "packages/routine/src/server/infrastructure/__tests__/powersync.closure-checker.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/routine/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "packages/routine/vitest.config.ts"
+      ]
+    },
+    {
+      "path": "packages/routine/src/server/infrastructure/routine-schedule/__tests__/routine-elapsed-scheduled-handler.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/routine/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "packages/routine/vitest.config.ts"
+      ]
+    },
+    {
+      "path": "packages/routine/src/server/infrastructure/routine-schedule/__tests__/routine-prisma-adapters.integration.test.ts",
+      "primarySuite": "integration",
+      "collectors": [
+        "packages/routine/vitest.integration.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/routine/src/server/infrastructure/routine-schedule/__tests__/routine-schedule-execution-source.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/routine/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "packages/routine/vitest.config.ts"
+      ]
+    },
+    {
+      "path": "packages/routine/src/server/infrastructure/routine-schedule/__tests__/routine-schedule-projection-source.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/routine/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "packages/routine/vitest.config.ts"
+      ]
+    },
+    {
+      "path": "packages/routine/src/server/infrastructure/routine-schedule/__tests__/routine-wall-clock-scheduled-handler.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/routine/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "packages/routine/vitest.config.ts"
+      ]
+    },
+    {
+      "path": "packages/routine/src/server/infrastructure/routine-schedule/routine-occurrence-notification-writer.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/routine/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "packages/routine/vitest.config.ts"
+      ]
+    },
+    {
+      "path": "packages/routine/src/server/infrastructure/routine-schedule/routine-temporary-override-store.powersync.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/routine/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "packages/routine/vitest.config.ts"
+      ]
+    },
+    {
+      "path": "packages/routine/src/server/infrastructure/routine-vnext/profile-persistence-parity.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/routine/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "packages/routine/vitest.config.ts"
+      ]
+    },
+    {
+      "path": "packages/routine/src/server/infrastructure/routine-vnext/protocol-persistence-parity.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/routine/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "packages/routine/vitest.config.ts"
+      ]
+    },
+    {
+      "path": "packages/routine/src/server/infrastructure/routine-vnext/protocol-session-store.powersync.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/routine/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "packages/routine/vitest.config.ts"
+      ]
+    },
+    {
+      "path": "packages/routine/src/server/infrastructure/routine-vnext/protocol-session-store.prisma.integration.test.ts",
+      "primarySuite": "integration",
+      "collectors": [
+        "packages/routine/vitest.integration.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/routine/src/server/infrastructure/routine-vnext/routine-local-registrations.powersync.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/routine/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "packages/routine/vitest.config.ts"
+      ]
+    },
+    {
+      "path": "packages/routine/src/server/infrastructure/routine-vnext/routine-occurrence-truth-store.powersync.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/routine/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "packages/routine/vitest.config.ts"
+      ]
+    },
+    {
+      "path": "packages/routine/src/server/infrastructure/routine-vnext/routine-preferences-store.powersync.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/routine/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "packages/routine/vitest.config.ts"
+      ]
+    },
+    {
+      "path": "packages/routine/src/server/infrastructure/routine-vnext/routine-preferences-store.prisma.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/routine/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "packages/routine/vitest.config.ts"
+      ]
+    },
+    {
+      "path": "packages/routine/src/server/infrastructure/routine-vnext/routine-profile-store.powersync.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/routine/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "packages/routine/vitest.config.ts"
+      ]
+    },
+    {
+      "path": "packages/routine/src/server/infrastructure/routine-vnext/routine-profile-store.prisma.integration.test.ts",
+      "primarySuite": "integration",
+      "collectors": [
+        "packages/routine/vitest.integration.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/routine/src/server/infrastructure/routine-vnext/trigger-persistence-parity.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/routine/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "packages/routine/vitest.config.ts"
+      ]
+    },
+    {
+      "path": "packages/routine/src/server/runtime/active-usage/active-usage.runtime.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/routine/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "packages/routine/vitest.config.ts"
+      ]
+    },
+    {
+      "path": "packages/routine/src/server/runtime/elapsed/elapsed.runtime.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/routine/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "packages/routine/vitest.config.ts"
+      ]
+    },
+    {
+      "path": "packages/routine/src/server/runtime/intervention/intervention.runtime.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/routine/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "packages/routine/vitest.config.ts"
+      ]
+    },
+    {
+      "path": "packages/routine/src/server/runtime/protocol-break-credit/protocol-break-credit.runtime.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/routine/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "packages/routine/vitest.config.ts"
+      ]
+    },
+    {
+      "path": "packages/routine/src/server/runtime/protocol/protocol-session.runtime.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/routine/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "packages/routine/vitest.config.ts"
+      ]
+    },
+    {
+      "path": "packages/routine/src/server/runtime/routine-activity/routine-activity-sensor.runtime.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/routine/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "packages/routine/vitest.config.ts"
+      ]
     },
     {
       "path": "packages/schedule-client/src/application-client/planner-conflict-read-model.spec.ts",
@@ -10184,166 +10352,6 @@
       ]
     },
     {
-      "path": "packages/setting-client/src/infrastructure-client/adapters/canonical-preference-client.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/setting-client/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
-      "path": "packages/setting-client/src/setting-dto-port.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/setting-client/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
-      "path": "packages/setting-contracts/src/preferences/canonical.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/setting-contracts/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
-      "path": "packages/setting-contracts/src/preferences/portable-v3.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/setting-contracts/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
-      "path": "packages/setting-contracts/src/preferences/product-feature-map-public.surface.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/setting-contracts/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
-      "path": "packages/setting-ui/src/components/AISettings.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/setting-ui/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
-      "path": "packages/setting-ui/src/components/AccountSettingsSection.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/setting-ui/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
-      "path": "packages/setting-ui/src/components/AntigravityAcpDownload.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/setting-ui/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
-      "path": "packages/setting-ui/src/components/DesktopUpdateSettingsSection.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/setting-ui/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
-      "path": "packages/setting-ui/src/components/KeyboardSettings.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/setting-ui/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
-      "path": "packages/setting-ui/src/components/KnowledgeRepositorySettings.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/setting-ui/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
-      "path": "packages/setting-ui/src/components/NotificationSettings.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/setting-ui/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
-      "path": "packages/setting-ui/src/components/SettingAdvancedActions.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/setting-ui/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
-      "path": "packages/setting-ui/src/components/SettingsResetSection.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/setting-ui/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
-      "path": "packages/setting-ui/src/components/UserPreferenceSettingsSection.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/setting-ui/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
-      "path": "packages/setting-ui/src/components/ai-provider-default-policy.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/setting-ui/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
-      "path": "packages/setting-ui/src/components/desktop-update-settings.presentation.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/setting-ui/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
-      "path": "packages/setting-ui/src/composables/usePreferencePortability.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/setting-ui/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
-      "path": "packages/setting-ui/src/composables/usePresentationBootstrap.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/setting-ui/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
-      "path": "packages/setting-ui/src/stores/presentationPreferenceStore.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/setting-ui/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
       "path": "packages/setting/src/api/module-lifecycle.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -10365,6 +10373,16 @@
     },
     {
       "path": "packages/setting/src/electron/index-lifecycle.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/setting/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "packages/setting/vitest.config.ts"
+      ]
+    },
+    {
+      "path": "packages/setting/src/infrastructure-client/adapters/canonical-preference-client.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/setting/vitest.config.ts"
@@ -12397,7 +12415,7 @@
       "type": "measurement",
       "suite": "coverage",
       "runner": "vitest",
-      "fileCount": 184
+      "fileCount": 194
     },
     {
       "id": "packages/data-portability/vitest.config.ts",
@@ -12442,11 +12460,11 @@
       "fileCount": 39
     },
     {
-      "id": "packages/reminder/vitest.config.ts",
+      "id": "packages/routine/vitest.config.ts",
       "type": "measurement",
       "suite": "coverage",
       "runner": "vitest",
-      "fileCount": 33
+      "fileCount": 31
     },
     {
       "id": "packages/schedule/vitest.config.ts",
@@ -12481,7 +12499,7 @@
       "type": "measurement",
       "suite": "coverage",
       "runner": "vitest",
-      "fileCount": 11
+      "fileCount": 12
     },
     {
       "id": "packages/task/vitest.config.ts",
@@ -12766,18 +12784,18 @@
       "fileCount": 1
     },
     {
-      "id": "packages/reminder/vitest.integration.config.ts",
-      "type": "primary",
-      "suite": "integration",
-      "runner": "vitest",
-      "fileCount": 3
-    },
-    {
       "id": "packages/repository/vitest.integration.config.ts",
       "type": "primary",
       "suite": "integration",
       "runner": "vitest",
       "fileCount": 2
+    },
+    {
+      "id": "packages/routine/vitest.integration.config.ts",
+      "type": "primary",
+      "suite": "integration",
+      "runner": "vitest",
+      "fileCount": 3
     },
     {
       "id": "packages/schedule/vitest.integration.config.ts",
@@ -12875,7 +12893,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 184
+      "fileCount": 194
     },
     {
       "id": "packages/assets/vitest.config.ts",
@@ -12896,14 +12914,14 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 42
+      "fileCount": 44
     },
     {
       "id": "packages/data-portability-contracts/vitest.config.ts",
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 1
+      "fileCount": 3
     },
     {
       "id": "packages/data-portability/vitest.config.ts",
@@ -13074,18 +13092,39 @@
       "fileCount": 1
     },
     {
-      "id": "packages/reminder/vitest.config.ts",
-      "type": "primary",
-      "suite": "unit",
-      "runner": "vitest",
-      "fileCount": 33
-    },
-    {
       "id": "packages/repository/vitest.config.ts",
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
       "fileCount": 36
+    },
+    {
+      "id": "packages/routine-client/vitest.config.ts",
+      "type": "primary",
+      "suite": "unit",
+      "runner": "vitest",
+      "fileCount": 1
+    },
+    {
+      "id": "packages/routine-contracts/vitest.config.ts",
+      "type": "primary",
+      "suite": "unit",
+      "runner": "vitest",
+      "fileCount": 1
+    },
+    {
+      "id": "packages/routine-ui/vitest.config.ts",
+      "type": "primary",
+      "suite": "unit",
+      "runner": "vitest",
+      "fileCount": 5
+    },
+    {
+      "id": "packages/routine/vitest.config.ts",
+      "type": "primary",
+      "suite": "unit",
+      "runner": "vitest",
+      "fileCount": 31
     },
     {
       "id": "packages/schedule-client/vitest.config.ts",
@@ -13130,32 +13169,11 @@
       "fileCount": 14
     },
     {
-      "id": "packages/setting-client/vitest.config.ts",
-      "type": "primary",
-      "suite": "unit",
-      "runner": "vitest",
-      "fileCount": 2
-    },
-    {
-      "id": "packages/setting-contracts/vitest.config.ts",
-      "type": "primary",
-      "suite": "unit",
-      "runner": "vitest",
-      "fileCount": 3
-    },
-    {
-      "id": "packages/setting-ui/vitest.config.ts",
-      "type": "primary",
-      "suite": "unit",
-      "runner": "vitest",
-      "fileCount": 15
-    },
-    {
       "id": "packages/setting/vitest.config.ts",
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 11
+      "fileCount": 12
     },
     {
       "id": "packages/shared-primitives/vitest.config.ts",
@@ -13516,11 +13534,21 @@
       "packages/app-vue/src/modules/repository/router/index.spec.ts",
       "packages/app-vue/src/modules/repository/views/KnowledgeProjectionWorkspaceView.spec.ts",
       "packages/app-vue/src/modules/repository/views/LocalVaultWorkspaceView.spec.ts",
-      "packages/app-vue/src/modules/routine/components/RoutineCapsulePreview.spec.ts",
-      "packages/app-vue/src/modules/routine/components/RoutineEditorDialog.spec.ts",
-      "packages/app-vue/src/modules/routine/components/RoutineProfileDialog.spec.ts",
-      "packages/app-vue/src/modules/routine/components/RoutineUpcomingWidget.spec.ts",
-      "packages/app-vue/src/modules/routine/views/RoutineConfigurationView.spec.ts",
+      "packages/app-vue/src/modules/setting/components/AISettings.spec.ts",
+      "packages/app-vue/src/modules/setting/components/AccountSettingsSection.spec.ts",
+      "packages/app-vue/src/modules/setting/components/AntigravityAcpDownload.spec.ts",
+      "packages/app-vue/src/modules/setting/components/DesktopUpdateSettingsSection.spec.ts",
+      "packages/app-vue/src/modules/setting/components/KeyboardSettings.spec.ts",
+      "packages/app-vue/src/modules/setting/components/KnowledgeRepositorySettings.spec.ts",
+      "packages/app-vue/src/modules/setting/components/NotificationSettings.spec.ts",
+      "packages/app-vue/src/modules/setting/components/SettingAdvancedActions.spec.ts",
+      "packages/app-vue/src/modules/setting/components/SettingsResetSection.spec.ts",
+      "packages/app-vue/src/modules/setting/components/UserPreferenceSettingsSection.spec.ts",
+      "packages/app-vue/src/modules/setting/components/ai-provider-default-policy.spec.ts",
+      "packages/app-vue/src/modules/setting/components/desktop-update-settings.presentation.spec.ts",
+      "packages/app-vue/src/modules/setting/composables/usePreferencePortability.spec.ts",
+      "packages/app-vue/src/modules/setting/composables/usePresentationBootstrap.spec.ts",
+      "packages/app-vue/src/modules/setting/stores/presentationPreferenceStore.spec.ts",
       "packages/app-vue/src/modules/task/components/TaskOccurrenceCompactList.spec.ts",
       "packages/app-vue/src/modules/task/components/TaskOccurrenceQuickRow.spec.ts",
       "packages/app-vue/src/modules/task/components/TaskOccurrenceQuickSurface.spec.ts",
@@ -13758,39 +13786,37 @@
       "packages/notification/src/server/infrastructure/runtime/notification.runtime.spec.ts",
       "packages/notification/src/server/transport/__tests__/notification-transport-parity.spec.ts",
       "packages/notification/src/server/transport/notification-usecases-export.surface.spec.ts",
-      "packages/reminder/src/__tests__/package-root-owner-surface.spec.ts",
-      "packages/reminder/src/client/client.spec.ts",
-      "packages/reminder/src/method-library/method-library.spec.ts",
-      "packages/reminder/src/server/application/routine-portability.spec.ts",
-      "packages/reminder/src/server/application/services/routine-coach-command.service.spec.ts",
-      "packages/reminder/src/server/application/services/routine-configuration-query.service.spec.ts",
-      "packages/reminder/src/server/domain/routine/__tests__/next-eligible-occurrence.spec.ts",
-      "packages/reminder/src/server/domain/routine/__tests__/protocol.spec.ts",
-      "packages/reminder/src/server/domain/routine/__tests__/routine-profile.spec.ts",
-      "packages/reminder/src/server/domain/routine/__tests__/routine-trigger.spec.ts",
-      "packages/reminder/src/server/domain/routine/durable-elapsed.spec.ts",
-      "packages/reminder/src/server/infrastructure/__tests__/powersync.closure-checker.spec.ts",
-      "packages/reminder/src/server/infrastructure/routine-schedule/__tests__/routine-elapsed-scheduled-handler.spec.ts",
-      "packages/reminder/src/server/infrastructure/routine-schedule/__tests__/routine-schedule-execution-source.spec.ts",
-      "packages/reminder/src/server/infrastructure/routine-schedule/__tests__/routine-schedule-projection-source.spec.ts",
-      "packages/reminder/src/server/infrastructure/routine-schedule/__tests__/routine-wall-clock-scheduled-handler.spec.ts",
-      "packages/reminder/src/server/infrastructure/routine-schedule/routine-occurrence-notification-writer.spec.ts",
-      "packages/reminder/src/server/infrastructure/routine-schedule/routine-temporary-override-store.powersync.spec.ts",
-      "packages/reminder/src/server/infrastructure/routine-vnext/profile-persistence-parity.spec.ts",
-      "packages/reminder/src/server/infrastructure/routine-vnext/protocol-persistence-parity.spec.ts",
-      "packages/reminder/src/server/infrastructure/routine-vnext/protocol-session-store.powersync.spec.ts",
-      "packages/reminder/src/server/infrastructure/routine-vnext/routine-local-registrations.powersync.spec.ts",
-      "packages/reminder/src/server/infrastructure/routine-vnext/routine-occurrence-truth-store.powersync.spec.ts",
-      "packages/reminder/src/server/infrastructure/routine-vnext/routine-preferences-store.powersync.spec.ts",
-      "packages/reminder/src/server/infrastructure/routine-vnext/routine-preferences-store.prisma.spec.ts",
-      "packages/reminder/src/server/infrastructure/routine-vnext/routine-profile-store.powersync.spec.ts",
-      "packages/reminder/src/server/infrastructure/routine-vnext/trigger-persistence-parity.spec.ts",
-      "packages/reminder/src/server/runtime/active-usage/active-usage.runtime.spec.ts",
-      "packages/reminder/src/server/runtime/elapsed/elapsed.runtime.spec.ts",
-      "packages/reminder/src/server/runtime/intervention/intervention.runtime.spec.ts",
-      "packages/reminder/src/server/runtime/protocol-break-credit/protocol-break-credit.runtime.spec.ts",
-      "packages/reminder/src/server/runtime/protocol/protocol-session.runtime.spec.ts",
-      "packages/reminder/src/server/runtime/routine-activity/routine-activity-sensor.runtime.spec.ts",
+      "packages/routine/src/__tests__/package-root-owner-surface.spec.ts",
+      "packages/routine/src/server/application/routine-portability.spec.ts",
+      "packages/routine/src/server/application/services/routine-coach-command.service.spec.ts",
+      "packages/routine/src/server/application/services/routine-configuration-query.service.spec.ts",
+      "packages/routine/src/server/domain/routine/__tests__/next-eligible-occurrence.spec.ts",
+      "packages/routine/src/server/domain/routine/__tests__/protocol.spec.ts",
+      "packages/routine/src/server/domain/routine/__tests__/routine-profile.spec.ts",
+      "packages/routine/src/server/domain/routine/__tests__/routine-trigger.spec.ts",
+      "packages/routine/src/server/domain/routine/durable-elapsed.spec.ts",
+      "packages/routine/src/server/infrastructure/__tests__/powersync.closure-checker.spec.ts",
+      "packages/routine/src/server/infrastructure/routine-schedule/__tests__/routine-elapsed-scheduled-handler.spec.ts",
+      "packages/routine/src/server/infrastructure/routine-schedule/__tests__/routine-schedule-execution-source.spec.ts",
+      "packages/routine/src/server/infrastructure/routine-schedule/__tests__/routine-schedule-projection-source.spec.ts",
+      "packages/routine/src/server/infrastructure/routine-schedule/__tests__/routine-wall-clock-scheduled-handler.spec.ts",
+      "packages/routine/src/server/infrastructure/routine-schedule/routine-occurrence-notification-writer.spec.ts",
+      "packages/routine/src/server/infrastructure/routine-schedule/routine-temporary-override-store.powersync.spec.ts",
+      "packages/routine/src/server/infrastructure/routine-vnext/profile-persistence-parity.spec.ts",
+      "packages/routine/src/server/infrastructure/routine-vnext/protocol-persistence-parity.spec.ts",
+      "packages/routine/src/server/infrastructure/routine-vnext/protocol-session-store.powersync.spec.ts",
+      "packages/routine/src/server/infrastructure/routine-vnext/routine-local-registrations.powersync.spec.ts",
+      "packages/routine/src/server/infrastructure/routine-vnext/routine-occurrence-truth-store.powersync.spec.ts",
+      "packages/routine/src/server/infrastructure/routine-vnext/routine-preferences-store.powersync.spec.ts",
+      "packages/routine/src/server/infrastructure/routine-vnext/routine-preferences-store.prisma.spec.ts",
+      "packages/routine/src/server/infrastructure/routine-vnext/routine-profile-store.powersync.spec.ts",
+      "packages/routine/src/server/infrastructure/routine-vnext/trigger-persistence-parity.spec.ts",
+      "packages/routine/src/server/runtime/active-usage/active-usage.runtime.spec.ts",
+      "packages/routine/src/server/runtime/elapsed/elapsed.runtime.spec.ts",
+      "packages/routine/src/server/runtime/intervention/intervention.runtime.spec.ts",
+      "packages/routine/src/server/runtime/protocol-break-credit/protocol-break-credit.runtime.spec.ts",
+      "packages/routine/src/server/runtime/protocol/protocol-session.runtime.spec.ts",
+      "packages/routine/src/server/runtime/routine-activity/routine-activity-sensor.runtime.spec.ts",
       "packages/schedule/src/api/module-lifecycle.spec.ts",
       "packages/schedule/src/api/routes.spec.ts",
       "packages/schedule/src/api/schedule-event-routes-roundtrip.spec.ts",
@@ -13827,6 +13853,7 @@
       "packages/setting/src/api/module-lifecycle.spec.ts",
       "packages/setting/src/api/routes.spec.ts",
       "packages/setting/src/electron/index-lifecycle.spec.ts",
+      "packages/setting/src/infrastructure-client/adapters/canonical-preference-client.spec.ts",
       "packages/setting/src/server/application/use-cases/commands/__tests__/import-settings.test.ts",
       "packages/setting/src/server/application/use-cases/queries/__tests__/export-settings.test.ts",
       "packages/setting/src/server/infrastructure/__tests__/setting-module-partial-start.spec.ts",

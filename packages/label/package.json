@@ -18,10 +18,11 @@
   },
   "dependencies": {
     "@memoflow/contracts": "workspace:*",
-    "@memoflow/label-contracts": "workspace:*",
+    "@memoflow/data-portability-contracts": "workspace:*",
     "@memoflow/database": "workspace:*",
     "@memoflow/http-client": "workspace:*",
     "@memoflow/ipc-client": "workspace:*",
+    "@memoflow/label-contracts": "workspace:*",
     "@memoflow/time": "workspace:*"
   },
   "devDependencies": {

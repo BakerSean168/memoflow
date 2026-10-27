@@ -3,7 +3,7 @@ import type {
   PortableCapabilityExecutionContext,
   PortableReferencePort,
   PortableReferenceV3,
-} from '@memoflow/contracts/data-portability';
+} from '@memoflow/data-portability-contracts';
 import { ConversationStatus } from '@memoflow/contracts/ai';
 import { AIConversation } from '../domain/aggregates/ai-conversation';
 import { AIConversationMemoryRepository } from '../infrastructure/adapters/memory/ai-conversation-memory.repository';

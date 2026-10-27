@@ -15,7 +15,7 @@ import {
 import {
   createRoutinePortableCapability,
   createRoutinePowerSyncRepositories,
-} from '@memoflow/reminder';
+} from '@memoflow/routine';
 import { createNotificationPowerSyncPortability } from '@memoflow/notification';
 import {
   createLabelPortableCapability,
