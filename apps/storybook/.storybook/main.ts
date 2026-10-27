@@ -31,6 +31,7 @@ const config: StorybookConfig = {
     : [
         '../../../packages/ui-vue-shadcn/src/**/*.stories.@(js|jsx|ts|tsx|vue)',
         '../../../packages/app-vue/src/**/*.stories.@(js|jsx|ts|tsx|vue)',
+        '../../../packages/notification-ui/src/**/*.stories.@(js|jsx|ts|tsx|vue)',
         '../../../apps/web/src/auth/*.stories.ts',
       ],
   addons: ['@storybook/addon-docs', '@storybook/addon-vitest'],
@@ -142,6 +143,11 @@ const config: StorybookConfig = {
               'packages/goal-ui/src/composables/useGoal.ts',
             ],
             ['@memoflow/goal-ui/host', 'packages/goal-ui/src/goal-ui-host.ts'],
+            [
+              '@memoflow/notification-ui/host',
+              'packages/notification-ui/src/notification-ui-host.ts',
+            ],
+            ['@memoflow/notification-ui', 'packages/notification-ui/src/index.ts'],
             ['@memoflow/goal-ui', 'packages/goal-ui/src/index.ts'],
             ['@goal-ui-test-host', 'packages/app-vue/src'],
             ['@memoflow/workspace-contracts', 'packages/workspace-contracts/src/index.ts'],

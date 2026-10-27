@@ -114,6 +114,11 @@ export default defineConfig(({ mode }) =>
           ['@memoflow/goal-contracts', 'packages/goal-contracts/src/index.ts'],
           ['@memoflow/goal-ui/composables/useGoal', 'packages/goal-ui/src/composables/useGoal.ts'],
           ['@memoflow/goal-ui/host', 'packages/goal-ui/src/goal-ui-host.ts'],
+          [
+            '@memoflow/notification-ui/host',
+            'packages/notification-ui/src/notification-ui-host.ts',
+          ],
+          ['@memoflow/notification-ui', 'packages/notification-ui/src/index.ts'],
           ['@memoflow/goal-ui', 'packages/goal-ui/src/index.ts'],
           ['@memoflow/workspace-contracts', 'packages/workspace-contracts/src/index.ts'],
           [
@@ -158,7 +163,7 @@ export default defineConfig(({ mode }) =>
           ['@memoflow/reminder/client', 'packages/reminder/src/client/index.ts'],
           ['@memoflow/repository/client', 'packages/repository/src/client/index.ts'],
           ['@memoflow/ai/client', 'packages/ai/src/client/index.ts'],
-          ['@memoflow/notification/client', 'packages/notification/src/client/index.ts'],
+          ['@memoflow/notification-client', 'packages/notification-client/src/index.ts'],
         ]),
       ],
     },

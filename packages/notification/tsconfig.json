@@ -7,7 +7,6 @@
       "@/*": ["./src/*"],
       "@memoflow/database/transaction": ["../database/src/transaction.ts"],
       "@memoflow/database": ["../database/src/index.ts"],
-      "@memoflow/http-client": ["../http-client/src/index.ts"],
       "@memoflow/contracts": ["../contracts/src/index.ts"],
       "@memoflow/domain-shared": ["../domain-shared/src/index.ts"],
       "@memoflow/notification-contracts": ["../notification-contracts/src/index.ts"],

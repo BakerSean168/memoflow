@@ -7,10 +7,8 @@ import type {
   NotificationType,
   NotificationCategory,
 } from '@memoflow/notification-contracts';
-import type {
-  IdentityId,
-  NotificationId as NotificationIdBranded,
-} from '@memoflow/contracts/primitives';
+import type { NotificationId as NotificationIdBranded } from '@memoflow/notification-contracts';
+import type { IdentityId } from '@memoflow/shared-primitives';
 import { ImportanceLevel, UrgencyLevel } from '@memoflow/shared-primitives';
 import { AggregateRoot } from '@memoflow/utils/domain';
 import { NotificationId, NotificationAction, NotificationMetadata } from '../value-objects';

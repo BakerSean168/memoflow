@@ -162,12 +162,10 @@ import {
   isBrowserSystemNotificationSupported,
   requestBrowserSystemNotificationPermission,
   setBrowserSystemNotificationEnabled,
-} from '../../notification/browser-system-notification';
-import {
   useNotificationPreferences,
   type NotificationPreferenceModule,
   type PreferenceChannelFlag,
-} from '../../notification/composables/useNotificationPreferences';
+} from '@memoflow/notification-ui';
 
 const { t } = useI18n();
 const devicePreferencePort = inject(DESKTOP_NOTIFICATION_DEVICE_PREFERENCE_KEY, null);

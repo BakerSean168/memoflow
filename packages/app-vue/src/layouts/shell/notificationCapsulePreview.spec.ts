@@ -9,13 +9,16 @@ import { createI18n } from 'vue-i18n';
 import { expect, it, vi } from 'vitest';
 import { ok } from '@memoflow/contracts/result';
 import { NOTIFICATION_SERVICE_KEY } from '../../di/keys';
-import NotificationCapsulePreview from '../../modules/notification/components/NotificationCapsulePreview.vue';
+import { installNotificationUiHost } from '../../di/notification-ui-host';
+import { NotificationCapsulePreview } from '@memoflow/notification-ui';
 import {
   createServerStateRuntime,
   SERVER_STATE_IDENTITY_SCOPE_KEY,
   SERVER_STATE_RUNTIME_KEY,
 } from '../../platform/server-state';
 import ModuleCapsule from './ModuleCapsule.vue';
+
+installNotificationUiHost();
 
 it('reuses the notification owner queries through hover, pin and keyboard reopen', async () => {
   vi.useFakeTimers();

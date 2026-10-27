@@ -42,7 +42,8 @@ const featureScopeConstraints = [
   },
   {
     sourceTag: 'scope:notification',
-    onlyDependOnLibsWithTags: [...sharedScopeTags, 'scope:notification'],
+    // Notification UI surfaces consume the shared UI kit plus this scope's own packages.
+    onlyDependOnLibsWithTags: [...sharedScopeTags, 'scope:notification', 'scope:ui'],
   },
   {
     sourceTag: 'scope:reminder',

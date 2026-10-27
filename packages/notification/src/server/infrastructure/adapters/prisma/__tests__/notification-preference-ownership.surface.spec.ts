@@ -42,20 +42,23 @@ describe('notification preference ownership and product/operations split', () =>
     'utf8',
   );
   const clientPort = readFileSync(
-    resolve(__dirname, '../../../../../application-client/ports/notification-api-client.port.ts'),
+    resolve(
+      __dirname,
+      '../../../../../../../notification-client/src/application-client/ports/notification-api-client.port.ts',
+    ),
     'utf8',
   );
   const httpAdapter = readFileSync(
     resolve(
       __dirname,
-      '../../../../../infrastructure-client/adapters/http/notification-http.adapter.ts',
+      '../../../../../../../notification-client/src/infrastructure-client/adapters/http/notification-http.adapter.ts',
     ),
     'utf8',
   );
   const ipcAdapter = readFileSync(
     resolve(
       __dirname,
-      '../../../../../infrastructure-client/adapters/ipc/notification-ipc.adapter.ts',
+      '../../../../../../../notification-client/src/infrastructure-client/adapters/ipc/notification-ipc.adapter.ts',
     ),
     'utf8',
   );
