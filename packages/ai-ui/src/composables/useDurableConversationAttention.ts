@@ -1,6 +1,6 @@
 import { computed, onMounted, onUnmounted, ref, watch, type Ref } from 'vue';
 import type { AssistantAttentionView, AssistantAttentionRuntimeKind } from '@memoflow/ai-contracts';
-import { subscribeWorkspaceEvents } from '../ai-ui-host';
+import { aiUiHost } from '../ai-ui-host';
 import type { WorkflowRuntimeClient, AssistantRuntimeClient } from '@memoflow/ai-client';
 import type {
   ConversationAttentionMap,
@@ -171,38 +171,40 @@ export function useDurableConversationAttention(input: {
   onMounted(() => {
     alive = true;
     if (input.workspaceRuntime?.streamWorkspaceEvents) {
-      void subscribeWorkspaceEvents(input.workspaceRuntime, {
-        signal: streamController.signal,
-        onEvent: async (event) => {
-          if (!alive) return;
-          if (event.type === 'stream.reset_required') {
-            versions.clear();
-            snapshots.value = {};
-            await refresh(true);
-          } else if (event.type === 'stream.ready') {
-            if (refreshRequest) await refreshRequest;
-            await refresh(true);
-          } else if (event.type === 'attention.changed') {
-            const { conversationId: id, runtimeKind, attention } = event.data;
-            if (
-              !input.conversations.value.some((item) => String(item.id) === id) ||
-              kindOf(id) !== runtimeKind ||
-              event.resourceVersion <= (versions.get(id) ?? 0)
-            )
-              return;
-            versions.set(id, event.resourceVersion);
-            if (attention) snapshots.value = { ...snapshots.value, [id]: attention };
-            else {
-              const next = { ...snapshots.value };
-              delete next[id];
-              snapshots.value = next;
+      void aiUiHost
+        .subscribeWorkspaceEvents(input.workspaceRuntime, {
+          signal: streamController.signal,
+          onEvent: async (event) => {
+            if (!alive) return;
+            if (event.type === 'stream.reset_required') {
+              versions.clear();
+              snapshots.value = {};
+              await refresh(true);
+            } else if (event.type === 'stream.ready') {
+              if (refreshRequest) await refreshRequest;
+              await refresh(true);
+            } else if (event.type === 'attention.changed') {
+              const { conversationId: id, runtimeKind, attention } = event.data;
+              if (
+                !input.conversations.value.some((item) => String(item.id) === id) ||
+                kindOf(id) !== runtimeKind ||
+                event.resourceVersion <= (versions.get(id) ?? 0)
+              )
+                return;
+              versions.set(id, event.resourceVersion);
+              if (attention) snapshots.value = { ...snapshots.value, [id]: attention };
+              else {
+                const next = { ...snapshots.value };
+                delete next[id];
+                snapshots.value = next;
+              }
+              if (id === input.activeConversationId.value && isVisible()) void acknowledge(id);
             }
-            if (id === input.activeConversationId.value && isVisible()) void acknowledge(id);
-          }
-        },
-      }).catch(() => {
-        /* Foreground or explicit refresh can recover a failed projection. */
-      });
+          },
+        })
+        .catch(() => {
+          /* Foreground or explicit refresh can recover a failed projection. */
+        });
     } else void refresh();
     if (typeof document !== 'undefined')
       document.addEventListener('visibilitychange', onAttentionVisible);

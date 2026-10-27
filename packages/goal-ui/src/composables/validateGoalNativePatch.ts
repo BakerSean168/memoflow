@@ -5,7 +5,7 @@ import {
   goalTimeframeStartBoundary,
   ReminderTriggerType,
 } from '@memoflow/goal-contracts';
-import type { GoalNativeDraft, GoalNativePatch } from './goalNativeEditSession';
+import type { GoalNativeDraft, GoalNativePatch } from '@memoflow/goal-client';
 import { isGoalStatusTransitionAllowed } from './goalStatusTransitions';
 
 /** Preflight AI commands without mutating the native draft. Save still uses the same owner validation. */

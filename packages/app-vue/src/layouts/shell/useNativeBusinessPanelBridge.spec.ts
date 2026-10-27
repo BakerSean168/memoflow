@@ -3,7 +3,7 @@ import { createPinia, setActivePinia } from 'pinia';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { useAppShellStore } from './useAppShellStore';
 import { useNativeBusinessPanelBridge } from './useNativeBusinessPanelBridge';
-import type { GoalNativeDraftState, GoalNativeEditSession } from '@memoflow/goal-ui';
+import type { GoalNativeDraftState, GoalNativeEditSession } from '@memoflow/goal-client';
 import { GoalStatus } from '@memoflow/goal-contracts';
 
 // Mock useGoalNativeSurface

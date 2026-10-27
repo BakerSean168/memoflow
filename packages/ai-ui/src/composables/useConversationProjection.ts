@@ -6,7 +6,7 @@ import {
 } from '@memoflow/ai-contracts';
 import { unwrap } from '@memoflow/transport-contracts/result';
 import { computed, ref, watch, onMounted, onUnmounted } from 'vue';
-import { resetWorkspaceEvents, subscribeWorkspaceEvents } from '../ai-ui-host';
+import { aiUiHost } from '../ai-ui-host';
 import { useI18n } from 'vue-i18n';
 import { toast } from 'vue-sonner';
 import { getAIErrorMessage } from './error';
@@ -106,71 +106,73 @@ export function useConversationProjection(input: {
 
   onMounted(() => {
     if (!options.workspaceRuntime?.streamWorkspaceEvents) return;
-    void subscribeWorkspaceEvents(options.workspaceRuntime, {
-      signal: streamController.signal,
-      onEvent: async (event) => {
-        if (streamController.signal.aborted) return;
-        if (event.type === 'stream.reset_required') {
-          conversationProjectionLive.value = false;
-          versions.clear();
-          // Pending native mutations survive reset; drop ordering metadata from the old epoch.
-          for (const change of pendingListChanges.values()) {
-            change.resourceVersion = undefined;
-            if (change.item && change.item.runtimeKind !== 'local_agent')
-              change.item = { ...change.item, resourceVersion: undefined };
+    void aiUiHost
+      .subscribeWorkspaceEvents(options.workspaceRuntime, {
+        signal: streamController.signal,
+        onEvent: async (event) => {
+          if (streamController.signal.aborted) return;
+          if (event.type === 'stream.reset_required') {
+            conversationProjectionLive.value = false;
+            versions.clear();
+            // Pending native mutations survive reset; drop ordering metadata from the old epoch.
+            for (const change of pendingListChanges.values()) {
+              change.resourceVersion = undefined;
+              if (change.item && change.item.runtimeKind !== 'local_agent')
+                change.item = { ...change.item, resourceVersion: undefined };
+            }
+            conversationList.value = conversationList.value.map((item) =>
+              item.runtimeKind === 'local_agent' ? item : { ...item, resourceVersion: undefined },
+            );
+            await loadConversationList(options.service, true, mutationRevision);
+            conversationProjectionLive.value = true;
+          } else if (event.type === 'stream.ready') {
+            conversationProjectionLive.value = false;
+            // A discovery request may have read before the stream watermark.
+            // Only a snapshot started after ready closes that initial race.
+            if (listRequest) await listRequest;
+            const beforeCalibration = mutationRevision;
+            // Every reconnect snapshot is authoritative for completed mutations
+            // before it, including resets requested by a different consumer.
+            await loadConversationList(options.service, true, beforeCalibration);
+            // Completed mutations now belong to this post-watermark snapshot.
+            for (const [id, change] of pendingListChanges) {
+              if (change.revision <= beforeCalibration) pendingListChanges.delete(id);
+            }
+            versions.clear();
+            for (const item of conversationList.value) {
+              if (item.runtimeKind !== 'local_agent' && item.resourceVersion !== undefined)
+                versions.set(item.id, item.resourceVersion);
+            }
+            conversationProjectionLive.value = true;
+          } else if (event.type === 'conversation.updated') {
+            const id = event.data.conversationId;
+            if (!versions.has(id) && versions.size >= MAX_TRACKED_CONVERSATIONS) {
+              aiUiHost.resetWorkspaceEvents(options.workspaceRuntime!);
+              return;
+            }
+            if (event.resourceVersion <= (versions.get(id) ?? 0)) return;
+            if (event.data.conversation) {
+              upsertConversation(event.data.conversation);
+              if (chatConversationId.value === id)
+                conversationTitle.value = event.data.conversation.name;
+            } else {
+              versions.set(id, event.resourceVersion);
+              pendingListChanges.set(id, {
+                revision: ++mutationRevision,
+                resourceVersion: event.resourceVersion,
+                item: null,
+                runtimeKind: 'builtin',
+              });
+              conversationList.value = conversationList.value.filter((item) => item.id !== id);
+              if (chatConversationId.value === id) startNewConversation();
+              if (lastActiveConversationId.value === id) clearLastActiveConversation();
+            }
           }
-          conversationList.value = conversationList.value.map((item) =>
-            item.runtimeKind === 'local_agent' ? item : { ...item, resourceVersion: undefined },
-          );
-          await loadConversationList(options.service, true, mutationRevision);
-          conversationProjectionLive.value = true;
-        } else if (event.type === 'stream.ready') {
-          conversationProjectionLive.value = false;
-          // A discovery request may have read before the stream watermark.
-          // Only a snapshot started after ready closes that initial race.
-          if (listRequest) await listRequest;
-          const beforeCalibration = mutationRevision;
-          // Every reconnect snapshot is authoritative for completed mutations
-          // before it, including resets requested by a different consumer.
-          await loadConversationList(options.service, true, beforeCalibration);
-          // Completed mutations now belong to this post-watermark snapshot.
-          for (const [id, change] of pendingListChanges) {
-            if (change.revision <= beforeCalibration) pendingListChanges.delete(id);
-          }
-          versions.clear();
-          for (const item of conversationList.value) {
-            if (item.runtimeKind !== 'local_agent' && item.resourceVersion !== undefined)
-              versions.set(item.id, item.resourceVersion);
-          }
-          conversationProjectionLive.value = true;
-        } else if (event.type === 'conversation.updated') {
-          const id = event.data.conversationId;
-          if (!versions.has(id) && versions.size >= MAX_TRACKED_CONVERSATIONS) {
-            resetWorkspaceEvents(options.workspaceRuntime!);
-            return;
-          }
-          if (event.resourceVersion <= (versions.get(id) ?? 0)) return;
-          if (event.data.conversation) {
-            upsertConversation(event.data.conversation);
-            if (chatConversationId.value === id)
-              conversationTitle.value = event.data.conversation.name;
-          } else {
-            versions.set(id, event.resourceVersion);
-            pendingListChanges.set(id, {
-              revision: ++mutationRevision,
-              resourceVersion: event.resourceVersion,
-              item: null,
-              runtimeKind: 'builtin',
-            });
-            conversationList.value = conversationList.value.filter((item) => item.id !== id);
-            if (chatConversationId.value === id) startNewConversation();
-            if (lastActiveConversationId.value === id) clearLastActiveConversation();
-          }
-        }
-      },
-    }).catch(() => {
-      /* Explicit refresh remains available after transport or projection loss. */
-    });
+        },
+      })
+      .catch(() => {
+        /* Explicit refresh remains available after transport or projection loss. */
+      });
   });
   onUnmounted(() => {
     streamController.abort();

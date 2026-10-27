@@ -66,7 +66,7 @@ import {
   useGoalNativeSurfaceRegistration,
   useGoalSurfaceStatus,
 } from '../composables/goalSurfaceHost';
-import type { GoalNativeEditSession } from '../composables/goalNativeEditSession';
+import type { GoalNativeEditSession } from '@memoflow/goal-client';
 
 const nativeSurface = useGoalNativeSurfaceRegistration();
 let unregisterSession: (() => void) | null = null;

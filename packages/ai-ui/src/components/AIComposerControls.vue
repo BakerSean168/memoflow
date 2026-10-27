@@ -20,7 +20,7 @@ import type {
   LocalAgentModelOptions,
 } from '@memoflow/ai-contracts';
 import type { ComposerModel, ModelCatalog } from '../composables/useAIModelCatalog';
-import { useServerStateIdentityScope } from '../ai-ui-host';
+import { aiUiHost } from '../ai-ui-host';
 import AgentDriverIcon from './AgentDriverIcon.vue';
 
 interface ComposerAgentOption {
@@ -54,7 +54,7 @@ const emit = defineEmits<{
   settings: [];
 }>();
 const { t } = useI18n();
-const resolveIdentityScope = useServerStateIdentityScope();
+const resolveIdentityScope = aiUiHost.useServerStateIdentityScope();
 const favoritesStorageKey = computed(() => {
   const identity = resolveIdentityScope();
   return identity ? `${FAVORITES_KEY}:${identity}` : '';

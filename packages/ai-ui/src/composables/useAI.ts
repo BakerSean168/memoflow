@@ -15,7 +15,7 @@ import type {
 } from '@memoflow/ai-contracts';
 import { unwrap } from '@memoflow/transport-contracts/result';
 import { AI_CLIENT_KEY, AI_CONFIGURATION_REVISION_KEY } from '../ai-ui-host';
-import { useStrictInject } from '../ai-ui-host';
+import { aiUiHost } from '../ai-ui-host';
 
 /**
  * AI provider/capabilities composable.
@@ -23,7 +23,7 @@ import { useStrictInject } from '../ai-ui-host';
  * Result ports (residual 96–98); message/stream/agent still throw-unwrap.
  */
 export function useAI() {
-  const client = useStrictInject(AI_CLIENT_KEY, 'AIClient');
+  const client = aiUiHost.useStrictInject(AI_CLIENT_KEY, 'AIClient');
   const configurationRevision = inject(AI_CONFIGURATION_REVISION_KEY, undefined);
   const invalidateConfiguration = () => {
     if (configurationRevision) configurationRevision.value++;

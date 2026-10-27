@@ -13,9 +13,7 @@ import { computed, onScopeDispose, ref, type Ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { toast } from 'vue-sonner';
 import { TASK_SERVICE_KEY } from '../ai-ui-host';
-import { useTaskNativeSurface } from '../ai-ui-host';
-import { useLabelCatalog } from '../ai-ui-host';
-import { useStrictInject } from '../ai-ui-host';
+import { aiUiHost } from '../ai-ui-host';
 import type { TaskNativeEditSession } from '../host-ports/task-session';
 import { getAIErrorMessage } from './error';
 import type { UseAITaskWorkflowOptions } from './types';
@@ -33,9 +31,9 @@ export function useTaskNativeReviewCoordinator(input: {
 }) {
   const { options, taskWorkflowRun, taskAgentResuming, reviewDraft, projectRun, resume } = input;
   const { t } = useI18n();
-  const nativeSurface = useTaskNativeSurface();
-  const taskService = useStrictInject(TASK_SERVICE_KEY, 'TaskService');
-  const labelCatalog = useLabelCatalog();
+  const nativeSurface = aiUiHost.useTaskNativeSurface();
+  const taskService = aiUiHost.useStrictInject(TASK_SERVICE_KEY, 'TaskService');
+  const labelCatalog = aiUiHost.useLabelCatalog();
   let nativeSession: TaskNativeEditSession | null = null;
   let projectedRunId: string | null = null;
   let projectedRevision: number | null = null;

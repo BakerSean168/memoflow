@@ -8,7 +8,7 @@ import type { AIChatService } from './types';
 import type { AIWorkflowRunView, AIConversationClientDTO } from '@memoflow/ai-contracts';
 import { type IWorkflowRuntimeService } from '../ai-ui-host';
 import { unwrap } from '@memoflow/transport-contracts/result';
-import { translateResultError } from '../ai-ui-host';
+import { aiUiHost } from '../ai-ui-host';
 
 /** In-flight owner work blocks departure before consulting the native dirty guard. */
 export function canLeaveAIWorkflowReview(
@@ -198,7 +198,7 @@ export async function initializeChatView(ctx: ChatViewInitContext): Promise<void
     }
   } catch (error) {
     ctx.toastError(
-      translateResultError(error, ctx.translate, {
+      aiUiHost.translateResultError(error, ctx.translate, {
         fallbackKey: 'common.operationFailed',
       }),
     );

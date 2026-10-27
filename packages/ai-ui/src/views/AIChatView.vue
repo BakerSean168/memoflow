@@ -350,7 +350,7 @@ import AIGoalWorkflowPanel from '../components/AIGoalWorkflowPanel.vue';
 import AITaskWorkflowPanel from '../components/AITaskWorkflowPanel.vue';
 import AIKnowledgeCapturePanel from '../components/AIKnowledgeCapturePanel.vue';
 import AIRuntimeUsageBadge from '../components/AIRuntimeUsageBadge.vue';
-import { useAppShellStore } from '../ai-ui-host';
+import { aiUiHost } from '../ai-ui-host';
 import { SHELL_COMPOSER_DENSITY_KEY, SHELL_COMPOSER_MOUNT_KEY } from '../ai-ui-host';
 import { type ComposerDensity } from '../ai-ui-host';
 import { useAIChatView } from '../composables/useAIChatView';
@@ -372,7 +372,7 @@ withDefaults(
 const shellComposerMountRef = inject(SHELL_COMPOSER_MOUNT_KEY, null);
 const shellComposerDensityRef = inject(SHELL_COMPOSER_DENSITY_KEY, null);
 const shellComposerMount = computed(() => shellComposerMountRef?.value ?? null);
-const shellStore = shellComposerMountRef ? useAppShellStore() : null;
+const shellStore = shellComposerMountRef ? aiUiHost.useAppShellStore() : null;
 const composerDensity = computed<ComposerDensity>(
   () => shellComposerDensityRef?.value ?? 'comfortable',
 );

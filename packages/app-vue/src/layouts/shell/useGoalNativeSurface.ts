@@ -1,11 +1,8 @@
 import { nextTick, onScopeDispose, provide, shallowRef, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
-import {
-  GoalNativeSurfaceKey,
-  type GoalNativeEditSession,
-  type GoalNativeSurfaceHost,
-} from '@memoflow/goal-ui';
+import type { GoalNativeEditSession } from '@memoflow/goal-client';
+import { GoalNativeSurfaceKey, type GoalNativeSurfaceHost } from '@memoflow/goal-ui';
 import { navigateBusinessSurface } from './surface-leave-protocol';
 import { useAppShellStore } from './useAppShellStore';
 

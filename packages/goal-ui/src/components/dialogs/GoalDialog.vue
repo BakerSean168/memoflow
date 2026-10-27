@@ -335,7 +335,7 @@ import type {
   GoalNativeDraft,
   GoalNativeSubmitContext,
   GoalNativeEditSession,
-} from '../../composables/goalNativeEditSession';
+} from '@memoflow/goal-client';
 
 const props = withDefaults(
   defineProps<{

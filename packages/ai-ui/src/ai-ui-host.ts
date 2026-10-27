@@ -1,4 +1,4 @@
-import type { GoalNativeDraftState } from './host-ports/goal-session';
+import type { GoalNativeDraftState } from '@memoflow/goal-client';
 export interface GoalAIEditSurface {
   openCreate(): Promise<GoalNativeEditSession>;
   openExisting(id: string): Promise<GoalNativeEditSession>;
@@ -22,7 +22,7 @@ export interface GoalAIEditSurface {
 import type { GoalClientDTO } from '@memoflow/goal-contracts';
 import type { TaskPlanClientDTO } from '@memoflow/task-contracts';
 import type { ConfirmedLocalVaultWriteReq } from '@memoflow/repository-contracts';
-import type { GoalNativeEditSession } from './host-ports/goal-session';
+import type { GoalNativeEditSession } from '@memoflow/goal-client';
 import type { KnowledgeCaptureNativeDraft } from './host-ports/knowledge-session';
 import type { KnowledgeDraft } from '@memoflow/ai-contracts';
 import type { InjectionKey, Ref, ShallowRef } from 'vue';
@@ -197,65 +197,3 @@ export function bindAiUiHost(host: AiUiHost): void {
   SHELL_COMPOSER_MOUNT_KEY = host.SHELL_COMPOSER_MOUNT_KEY;
   TASK_SERVICE_KEY = host.TASK_SERVICE_KEY;
 }
-export const canLeaveBusinessSurface: AiUiHost['canLeaveBusinessSurface'] = (
-  ...args: Parameters<AiUiHost['canLeaveBusinessSurface']>
-) => aiUiHost.canLeaveBusinessSurface(...args);
-export const renderSafeMarkdown: AiUiHost['renderSafeMarkdown'] = (
-  ...args: Parameters<AiUiHost['renderSafeMarkdown']>
-) => aiUiHost.renderSafeMarkdown(...args);
-export const resetWorkspaceEvents: AiUiHost['resetWorkspaceEvents'] = (
-  ...args: Parameters<AiUiHost['resetWorkspaceEvents']>
-) => aiUiHost.resetWorkspaceEvents(...args);
-export const semanticElevationClass: AiUiHost['semanticElevationClass'] = (
-  ...args: Parameters<AiUiHost['semanticElevationClass']>
-) => aiUiHost.semanticElevationClass(...args);
-export const semanticToneStatusClass: AiUiHost['semanticToneStatusClass'] = (
-  ...args: Parameters<AiUiHost['semanticToneStatusClass']>
-) => aiUiHost.semanticToneStatusClass(...args);
-export const subscribeWorkspaceEvents: AiUiHost['subscribeWorkspaceEvents'] = (
-  ...args: Parameters<AiUiHost['subscribeWorkspaceEvents']>
-) => aiUiHost.subscribeWorkspaceEvents(...args);
-export const translateResultError: AiUiHost['translateResultError'] = (
-  ...args: Parameters<AiUiHost['translateResultError']>
-) => aiUiHost.translateResultError(...args);
-export const useAppShellStore: AiUiHost['useAppShellStore'] = (
-  ...args: Parameters<AiUiHost['useAppShellStore']>
-) => aiUiHost.useAppShellStore(...args);
-export const useKnowledgeNativeSurface: AiUiHost['useKnowledgeNativeSurface'] = (
-  ...args: Parameters<AiUiHost['useKnowledgeNativeSurface']>
-) => aiUiHost.useKnowledgeNativeSurface(...args);
-export const useKnowledgeNativeSurfaceRegistration: AiUiHost['useKnowledgeNativeSurfaceRegistration'] =
-  (...args: Parameters<AiUiHost['useKnowledgeNativeSurfaceRegistration']>) =>
-    aiUiHost.useKnowledgeNativeSurfaceRegistration(...args);
-export const useLabelCatalog: AiUiHost['useLabelCatalog'] = (
-  ...args: Parameters<AiUiHost['useLabelCatalog']>
-) => aiUiHost.useLabelCatalog(...args);
-export const useServerStateIdentityScope: AiUiHost['useServerStateIdentityScope'] = (
-  ...args: Parameters<AiUiHost['useServerStateIdentityScope']>
-) => aiUiHost.useServerStateIdentityScope(...args);
-export function useStrictInject<T>(key: InjectionKey<T>, name?: string): T {
-  return aiUiHost.useStrictInject(key, name);
-}
-export const useTaskNativeSurface: AiUiHost['useTaskNativeSurface'] = (
-  ...args: Parameters<AiUiHost['useTaskNativeSurface']>
-) => aiUiHost.useTaskNativeSurface(...args);
-
-export const useGoal: AiUiHost['useGoal'] = (...args: Parameters<AiUiHost['useGoal']>) =>
-  aiUiHost.useGoal(...args);
-export const useTask: AiUiHost['useTask'] = (...args: Parameters<AiUiHost['useTask']>) =>
-  aiUiHost.useTask(...args);
-export const useRecentKnowledgeNotes: AiUiHost['useRecentKnowledgeNotes'] = (
-  ...args: Parameters<AiUiHost['useRecentKnowledgeNotes']>
-) => aiUiHost.useRecentKnowledgeNotes(...args);
-export const openLocalAgentNoteReview: AiUiHost['openLocalAgentNoteReview'] = (
-  ...args: Parameters<AiUiHost['openLocalAgentNoteReview']>
-) => aiUiHost.openLocalAgentNoteReview(...args);
-export const useReferenceableKnowledgeNotes: AiUiHost['useReferenceableKnowledgeNotes'] = (
-  ...args: Parameters<AiUiHost['useReferenceableKnowledgeNotes']>
-) => aiUiHost.useReferenceableKnowledgeNotes(...args);
-export const useGoalNativeSurface: AiUiHost['useGoalNativeSurface'] = (
-  ...args: Parameters<AiUiHost['useGoalNativeSurface']>
-) => aiUiHost.useGoalNativeSurface(...args);
-export const nativeDraftFromKnowledgeDraft: AiUiHost['nativeDraftFromKnowledgeDraft'] = (
-  ...args: Parameters<AiUiHost['nativeDraftFromKnowledgeDraft']>
-) => aiUiHost.nativeDraftFromKnowledgeDraft(...args);

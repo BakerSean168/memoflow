@@ -35,6 +35,21 @@ export type {
   IResultIpcClient,
 };
 
+/**
+ * Owner-native editing protocol. The Goal renderer implements it; AI surfaces
+ * consume it through the host. It lives with the client seam because the
+ * provider (goal-ui) cannot be a dependency of other UI packages.
+ */
+export type {
+  GoalDraftKeyResult,
+  GoalNativeDraft,
+  GoalNativeDraftState,
+  GoalNativeEditSession,
+  GoalNativeField,
+  GoalNativePatch,
+  GoalNativeSubmitContext,
+} from './application-client';
+
 export function createGoalHttpClient(httpClient: IResultHttpClient): GoalClientPort {
   return createGoalServiceFromHttpClient(httpClient);
 }

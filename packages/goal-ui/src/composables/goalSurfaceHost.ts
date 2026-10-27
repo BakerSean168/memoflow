@@ -8,7 +8,7 @@ import {
   type Ref,
 } from 'vue';
 import type { RouteLocationNormalized } from 'vue-router';
-import type { GoalNativeDraftState, GoalNativeEditSession } from './goalNativeEditSession';
+import type { GoalNativeDraftState, GoalNativeEditSession } from '@memoflow/goal-client';
 
 /**
  * Goal surface host ports (P2 goal-ui step 0: goal ↔ shell dependency inversion).

@@ -150,10 +150,11 @@ import {
   type GoalTimeframe,
 } from '@memoflow/goal-contracts';
 import { Button } from '@memoflow/ui-vue-shadcn';
+import type { GoalDraftKeyResult } from '@memoflow/goal-client';
 import { getKeyResultCalculationLabel } from '../utils';
 import GoalKeyResultCardEditor from './GoalKeyResultCardEditor.vue';
 
-type DraftKeyResult = import('../composables/goalNativeEditSession').GoalDraftKeyResult;
+type DraftKeyResult = GoalDraftKeyResult;
 type KrId = DraftKeyResult['id'];
 
 const props = withDefaults(
