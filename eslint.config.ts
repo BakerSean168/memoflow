@@ -550,6 +550,22 @@ export default tseslint.config(
       },
     },
     {
+      // The schedule test composition root wires the routine UI cache into its host port.
+      files: ['packages/schedule-ui/src/test/test-host.ts'],
+      rules: {
+        '@nx/enforce-module-boundaries': [
+          'error',
+          {
+            ...moduleBoundaryOptions,
+            allow: [
+              ...moduleBoundaryOptions.allow,
+              '@memoflow/routine-ui/composables/routineUpcomingCache',
+            ],
+          },
+        ],
+      },
+    },
+    {
       // Test files still inherit @nx/enforce-module-boundaries.
       // Only @memoflow/test-utils is allowlisted by moduleBoundaryOptions, and
       // production files are explicitly blocked from importing it above.
