@@ -1,8 +1,5 @@
 import type { z } from 'zod';
-import type {
-  PortableCapabilityKey,
-  PortableReferenceV3,
-} from './dtos/portable-v3.dto';
+import type { PortableCapabilityKey, PortableReferenceV3 } from './dtos/portable-v3.dto';
 
 /** Operation-local portable reference seam exposed to owner capabilities. */
 export interface PortableReferencePort {

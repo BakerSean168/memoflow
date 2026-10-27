@@ -26,6 +26,7 @@
     "@memoflow/data-portability": "workspace:*",
     "@memoflow/data-portability-contracts": "workspace:*",
     "@memoflow/database": "workspace:*",
+    "@memoflow/desktop-contracts": "workspace:*",
     "@memoflow/domain-shared": "workspace:*",
     "@memoflow/goal": "workspace:*",
     "@memoflow/goal-client": "workspace:*",

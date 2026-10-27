@@ -585,6 +585,9 @@ importers:
       '@memoflow/database':
         specifier: workspace:*
         version: link:../../packages/database
+      '@memoflow/desktop-contracts':
+        specifier: workspace:*
+        version: link:../../packages/desktop-contracts
       '@memoflow/domain-shared':
         specifier: workspace:*
         version: link:../../packages/domain-shared
@@ -1480,6 +1483,9 @@ importers:
       '@memoflow/data-portability':
         specifier: workspace:*
         version: link:../data-portability
+      '@memoflow/desktop-contracts':
+        specifier: workspace:*
+        version: link:../desktop-contracts
       '@memoflow/goal-client':
         specifier: workspace:*
         version: link:../goal-client
