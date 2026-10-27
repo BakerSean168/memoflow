@@ -22,7 +22,12 @@ export default defineConfig({
       tsconfigPath: path.resolve(__dirname, 'tsconfig.build.json'),
       entryRoot: path.resolve(__dirname, 'src'),
       include: ['src/**/*.ts', 'src/**/*.vue'],
-      exclude: ['src/**/*.stories.ts', 'src/**/*.stories.vue', 'src/**/*.test.ts', 'src/**/*.spec.ts'],
+      exclude: [
+        'src/**/*.stories.ts',
+        'src/**/*.stories.vue',
+        'src/**/*.test.ts',
+        'src/**/*.spec.ts',
+      ],
       outDir: path.resolve(__dirname, 'dist'),
     }),
   ],

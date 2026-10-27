@@ -66,6 +66,7 @@
     "@memoflow/account": "workspace:*",
     "@memoflow/account-client": "workspace:*",
     "@memoflow/account-contracts": "workspace:*",
+    "@memoflow/account-ui": "workspace:*",
     "@memoflow/ai": "workspace:*",
     "@memoflow/assets": "workspace:*",
     "@memoflow/contracts": "workspace:*",

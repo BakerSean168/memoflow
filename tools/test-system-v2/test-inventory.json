@@ -2546,6 +2546,62 @@
       "measurementCollectors": []
     },
     {
+      "path": "packages/account-ui/src/account/components/AccountProfileSection.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/account-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/account-ui/src/account/components/CloudPasswordSection.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/account-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/account-ui/src/account/components/account-logout-locale.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/account-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/account-ui/src/account/index.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/account-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/account-ui/src/account/stores/accountStore.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/account-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/account-ui/src/authentication/composables/usePassword.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/account-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/account-ui/src/authentication/stores/authenticationStore.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/account-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "packages/account/src/api/account-void-success-envelope.surface.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -4396,56 +4452,6 @@
       ]
     },
     {
-      "path": "packages/app-vue/src/modules/account/components/AccountProfileSection.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/app-vue/vitest.store-coverage.config.ts"
-      ]
-    },
-    {
-      "path": "packages/app-vue/src/modules/account/components/CloudPasswordSection.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/app-vue/vitest.store-coverage.config.ts"
-      ]
-    },
-    {
-      "path": "packages/app-vue/src/modules/account/components/account-logout-locale.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/app-vue/vitest.store-coverage.config.ts"
-      ]
-    },
-    {
-      "path": "packages/app-vue/src/modules/account/index.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/app-vue/vitest.store-coverage.config.ts"
-      ]
-    },
-    {
-      "path": "packages/app-vue/src/modules/account/stores/accountStore.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/app-vue/vitest.store-coverage.config.ts"
-      ]
-    },
-    {
       "path": "packages/app-vue/src/modules/ai/agent-instance-order.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -4807,26 +4813,6 @@
     },
     {
       "path": "packages/app-vue/src/modules/ai/composables/workspaceEventSubscription.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/app-vue/vitest.store-coverage.config.ts"
-      ]
-    },
-    {
-      "path": "packages/app-vue/src/modules/authentication/composables/usePassword.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/app-vue/vitest.store-coverage.config.ts"
-      ]
-    },
-    {
-      "path": "packages/app-vue/src/modules/authentication/stores/authenticationStore.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/app-vue/vitest.config.ts"
@@ -12411,7 +12397,7 @@
       "type": "measurement",
       "suite": "coverage",
       "runner": "vitest",
-      "fileCount": 194
+      "fileCount": 187
     },
     {
       "id": "packages/data-portability/vitest.config.ts",
@@ -12878,6 +12864,13 @@
       "fileCount": 5
     },
     {
+      "id": "packages/account-ui/vitest.config.ts",
+      "type": "primary",
+      "suite": "unit",
+      "runner": "vitest",
+      "fileCount": 7
+    },
+    {
       "id": "packages/account/vitest.config.ts",
       "type": "primary",
       "suite": "unit",
@@ -12903,7 +12896,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 194
+      "fileCount": 187
     },
     {
       "id": "packages/assets/vitest.config.ts",
@@ -13485,11 +13478,6 @@
       "packages/app-vue/src/layouts/shell/useTaskNativeSurface.spec.ts",
       "packages/app-vue/src/locales/localePresentation.spec.ts",
       "packages/app-vue/src/locales/setting-updates-locale.spec.ts",
-      "packages/app-vue/src/modules/account/components/AccountProfileSection.spec.ts",
-      "packages/app-vue/src/modules/account/components/CloudPasswordSection.spec.ts",
-      "packages/app-vue/src/modules/account/components/account-logout-locale.spec.ts",
-      "packages/app-vue/src/modules/account/index.spec.ts",
-      "packages/app-vue/src/modules/account/stores/accountStore.spec.ts",
       "packages/app-vue/src/modules/ai/agent-instance-order.spec.ts",
       "packages/app-vue/src/modules/ai/components/AIComposerControls.spec.ts",
       "packages/app-vue/src/modules/ai/components/AIConversationSidebar.email-verification.spec.ts",
@@ -13527,8 +13515,6 @@
       "packages/app-vue/src/modules/ai/composables/useLocalAssistantChoices.spec.ts",
       "packages/app-vue/src/modules/ai/composables/workflow-intent.spec.ts",
       "packages/app-vue/src/modules/ai/composables/workspaceEventSubscription.spec.ts",
-      "packages/app-vue/src/modules/authentication/composables/usePassword.spec.ts",
-      "packages/app-vue/src/modules/authentication/stores/authenticationStore.spec.ts",
       "packages/app-vue/src/modules/repository/components/DocumentPresentationPrimitives.spec.ts",
       "packages/app-vue/src/modules/repository/components/KnowledgeCaptureReviewDialog.spec.ts",
       "packages/app-vue/src/modules/repository/components/KnowledgeMarkdownPreview.spec.ts",

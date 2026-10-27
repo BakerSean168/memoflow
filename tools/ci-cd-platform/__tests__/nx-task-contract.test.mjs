@@ -436,6 +436,7 @@ test('Unit/Contract aliases come from exact Nx execution configuration, not proj
   assert.deepEqual(selected.unitContractAliases, [
     'account-client',
     'account-contracts',
+    'account-ui',
     'contracts',
     'data-portability-contracts',
     'desktop-contracts',

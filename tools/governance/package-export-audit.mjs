@@ -47,6 +47,7 @@ const PACKAGE_SPECIFIC_SUBPATHS = {
   'account-client': [],
   'routine-contracts': ['./method-library'],
   'notification-ui': ['./host'],
+  'account-ui': ['./host'],
   'routine-ui': [
     './host',
     './components/RoutineCapsulePreview',
@@ -138,8 +139,6 @@ const PACKAGE_SPECIFIC_SUBPATHS = {
     './shared/utils/desktop-profile-access',
     './plugins/i18n',
     './router',
-    './modules/authentication',
-    './modules/account',
     './modules/goal',
     './modules/task',
     './modules/schedule',

@@ -32,7 +32,6 @@ import { useAccount } from '../composables/useAccount';
 import { useAuthenticationStore } from '../../authentication/stores/authentication-store';
 import { ProfileAccessChannels } from '@memoflow/contracts/electron';
 
-
 const { t } = useI18n();
 const { SettingsDangerZone, SettingsSection } = accountUiHost.components;
 const logout = inject(accountUiHost.LOGOUT_HANDLER_KEY);
