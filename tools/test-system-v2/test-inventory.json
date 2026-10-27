@@ -11264,14 +11264,6 @@
       "measurementCollectors": []
     },
     {
-      "path": "packages/time/src/__tests__/third-party-contract-boundary.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/time/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
       "path": "packages/time/src/__tests__/time-context-calendar.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -12064,6 +12056,14 @@
       "measurementCollectors": []
     },
     {
+      "path": "tools/governance/__tests__/third-party-contract-boundary.test.mjs",
+      "primarySuite": "governance",
+      "collectors": [
+        "tools/governance/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "tools/governance/__tests__/unflushed-events.test.mjs",
       "primarySuite": "governance",
       "collectors": [
@@ -12530,7 +12530,7 @@
       "type": "primary",
       "suite": "governance",
       "runner": "vitest",
-      "fileCount": 20
+      "fileCount": 21
     },
     {
       "id": "apps/api/vitest.integration.config.ts",
@@ -13097,7 +13097,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 10
+      "fileCount": 9
     },
     {
       "id": "packages/transport-contracts/vitest.config.ts",
@@ -13738,14 +13738,14 @@
   "duplicate": [],
   "unexpected": [],
   "counts": {
-    "unit": 1131,
+    "unit": 1130,
     "integration": 58,
     "smoke": 3,
     "boundary-ipc": 6,
     "boundary-main": 12,
     "e2e": 40,
     "perf": 2,
-    "governance": 85
+    "governance": 86
   },
   "e2eGovernance": {
     "version": 2,
