@@ -585,7 +585,7 @@
     },
     {
       "id": "r757",
-      "path": "packages/contracts/src/modules/ai/api/dual-registry.surface.spec.ts",
+      "path": "packages/ai-contracts/src/api/dual-registry.surface.spec.ts",
       "package": "packages/contracts",
       "class": "retired",
       "sole": "ai-agent.dto.ts",
@@ -596,7 +596,7 @@
     },
     {
       "id": "r1186",
-      "path": "packages/contracts/src/modules/ai/configs/get-template-by-id-keep-boundary.surface.spec.ts",
+      "path": "packages/ai-contracts/src/configs/get-template-by-id-keep-boundary.surface.spec.ts",
       "package": "packages/contracts",
       "class": "keep_boundary",
       "sole": "ai-provider-template.ts",

@@ -1,5 +1,5 @@
 import { computed, onMounted, onUnmounted, ref, watch, type Ref } from 'vue';
-import type { AssistantAttentionView, AssistantAttentionRuntimeKind } from '@memoflow/contracts/ai';
+import type { AssistantAttentionView, AssistantAttentionRuntimeKind } from '@memoflow/ai-contracts';
 import { subscribeWorkspaceEvents } from '../../../shared/services/workspace-event-subscription';
 import type { WorkflowRuntimeClient, AssistantRuntimeClient } from '@memoflow/ai/client';
 import type {

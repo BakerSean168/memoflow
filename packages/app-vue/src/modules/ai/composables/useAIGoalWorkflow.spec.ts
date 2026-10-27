@@ -8,7 +8,7 @@ import {
   type AIWorkflowRunView,
   type GoalPlanDraft,
   type GoalPlanExecutionReceipt,
-} from '@memoflow/contracts/ai';
+} from '@memoflow/ai-contracts';
 import type { WorkflowRuntimeClient, WorkspaceEventStreamOptions } from '@memoflow/ai/client';
 import { useAIGoalWorkflow, type UseAIGoalWorkflowOptions } from './useAIGoalWorkflow';
 import { AI_WORKFLOW_STORAGE_KEY, useAIWorkflowPersistence } from './useAIWorkflowPersistence';

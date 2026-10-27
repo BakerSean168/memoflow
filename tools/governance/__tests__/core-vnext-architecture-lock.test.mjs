@@ -171,7 +171,7 @@ describe('HARD-7102 core vNext architecture lock', () => {
         content: `interface GoalTemplate { suggestedStartValue?: number } const BUILT_IN_TEMPLATES = [];`,
       },
       {
-        relPath: 'packages/contracts/src/modules/ai/api/ai-goal-create-workflow.dto.ts',
+        relPath: 'packages/ai-contracts/src/api/ai-goal-create-workflow.dto.ts',
         content: `const legacy = { dueDate: 1, startingValue: 0, progressBaselineValue: 0 };`,
       },
       {
@@ -289,7 +289,7 @@ describe('HARD-7102 core vNext architecture lock', () => {
         content: `const overdue = occurrence.isOverdue; const dueDate = occurrence.dueDate;`,
       },
       {
-        relPath: 'packages/contracts/src/modules/ai/api/ai-goal-create-workflow.dto.ts',
+        relPath: 'packages/ai-contracts/src/api/ai-goal-create-workflow.dto.ts',
         content: `const GoalPlanDraftV2 = z.object({ target: GoalTimeframeSchema, initialValue: z.number(), currentValue: z.number(), targetValue: z.number() });`,
       },
       {

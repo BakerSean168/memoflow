@@ -6,8 +6,8 @@ import type {
   LocalAgentAuthState,
   LocalAgentConnection,
   LocalAgentStatus,
-} from '@memoflow/contracts/ai';
-import { LocalAgentConnectionSchema } from '@memoflow/contracts/ai';
+} from '@memoflow/ai-contracts';
+import { LocalAgentConnectionSchema } from '@memoflow/ai-contracts';
 import { useLocalAssistantChoices } from './useLocalAssistantChoices';
 import { useNativeModelVisibility } from './nativeModelVisibility';
 

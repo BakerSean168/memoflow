@@ -2,10 +2,10 @@ import {
   AIRateLimitPublicFailureSchema,
   type AIWorkflowExecutionFailure,
   type AIWorkflowTerminalFailure,
-} from '@memoflow/contracts/ai';
+} from '@memoflow/ai-contracts';
 import { extractStructuredResultError } from '@memoflow/contracts/result';
 import { translateResultError } from '../../../shared/utils/translate-result-error';
-import type { LocalAgentExecutionFailure } from '@memoflow/contracts/ai';
+import type { LocalAgentExecutionFailure } from '@memoflow/ai-contracts';
 import type { ChatItem } from './types';
 
 export function getAIErrorMessage(error: unknown, t: (key: string) => string, fallbackKey: string) {

@@ -6,7 +6,7 @@ import {
   AssistantAttentionRuntimeKindSchema,
   AssistantAttentionStateSchema,
   type AssistantAttentionRuntimeKind,
-} from '@memoflow/contracts/ai';
+} from '@memoflow/ai-contracts';
 import type {
   AttentionChange,
   AttentionEventSource,

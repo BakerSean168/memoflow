@@ -6,7 +6,7 @@ import {
   AgentRegistrySnapshotSchema,
   type AgentConversationSelection,
   type AIModelInfo,
-} from '@memoflow/contracts/ai';
+} from '@memoflow/ai-contracts';
 import { useAIModelSelection } from './useAIModelSelection';
 import type { ModelCatalog } from './useAIModelCatalog';
 

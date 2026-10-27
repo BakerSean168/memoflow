@@ -57,7 +57,7 @@ import type {
 } from '../application/ports';
 
 import { createLogger } from '@memoflow/utils/logger';
-import { AI_PROVIDER_CATALOG } from '@memoflow/contracts/ai';
+import { AI_PROVIDER_CATALOG } from '@memoflow/ai-contracts';
 import type { AIWorkflowRuntimePort, MastraAIRuntime } from '../mastra/runtime';
 import type { LocalAgentRuntime } from '../local-agent/local-agent-runtime';
 import { AgentInstanceRegistry } from '../application/agent-instance/agent-instance.registry';
@@ -90,7 +90,7 @@ import type {
   ListAIProviderCatalogRes,
   ProbeAIProviderConnectionRes,
   TestAIProviderOnboardingModelRes,
-} from '@memoflow/contracts/ai';
+} from '@memoflow/ai-contracts';
 
 // Value imports for services assembled directly by this module.
 import {

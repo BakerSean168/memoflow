@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { mount } from '@vue/test-utils';
-import { AgentDriverKindSchema } from '@memoflow/contracts/ai';
+import { AgentDriverKindSchema } from '@memoflow/ai-contracts';
 import AgentDriverIcon from './AgentDriverIcon.vue';
 import {
   AGENT_BRAND_GLYPH_BOX_RATIO,

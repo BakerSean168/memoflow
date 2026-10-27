@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import type { AgentInstance } from '@memoflow/contracts/ai';
+import type { AgentInstance } from '@memoflow/ai-contracts';
 import { sortAgentInstances } from './agent-instance-order';
 
 const native = (

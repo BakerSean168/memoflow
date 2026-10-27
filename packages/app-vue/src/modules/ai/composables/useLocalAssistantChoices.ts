@@ -5,7 +5,7 @@ import type {
   AssistantRuntimeChoice,
   LocalAgentConnection,
   LocalAgentStatus,
-} from '@memoflow/contracts/ai';
+} from '@memoflow/ai-contracts';
 
 /** Presentation only: discovery is explicit and never sends an inference request. */
 export function useLocalAssistantChoices(

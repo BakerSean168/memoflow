@@ -3,7 +3,7 @@ import type {
   AssistantRuntimeEvent,
   AssistantRuntimeSelectedEntity,
   LocalAgentRequestResponse,
-} from '@memoflow/contracts/ai';
+} from '@memoflow/ai-contracts';
 import { nextTick, ref, shallowRef, watch, type Ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { toast } from 'vue-sonner';

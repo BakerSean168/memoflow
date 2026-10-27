@@ -2,7 +2,7 @@ import { defineComponent, h, nextTick, ref } from 'vue';
 import { mount } from '@vue/test-utils';
 import { createI18n } from 'vue-i18n';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { AIWorkflowRunViewSchema, KnowledgeDraftSchema } from '@memoflow/contracts/ai';
+import { AIWorkflowRunViewSchema, KnowledgeDraftSchema } from '@memoflow/ai-contracts';
 import type { KnowledgeCaptureNativeEditSession } from '@memoflow/repository-ui';
 import { nativeDraftFromKnowledgeDraft } from '@memoflow/repository-ui';
 import { useAIKnowledgeCapture } from './useAIKnowledgeCapture';

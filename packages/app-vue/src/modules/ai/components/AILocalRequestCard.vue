@@ -64,7 +64,7 @@
 import { reactive } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { Button, Input } from '@memoflow/ui-vue-shadcn';
-import type { LocalAgentRequestResponse } from '@memoflow/contracts/ai';
+import type { LocalAgentRequestResponse } from '@memoflow/ai-contracts';
 import type { ChatNativeRequest } from '../composables/types';
 const props = defineProps<{ request: ChatNativeRequest }>();
 const emit = defineEmits<{ respond: [response: LocalAgentRequestResponse['response']] }>();

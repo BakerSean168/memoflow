@@ -2,7 +2,7 @@ import { AIChannels } from '@memoflow/contracts/electron';
 import type {
   GetAIEvaluationOverviewReq,
   GetAIEvaluationOverviewRes,
-} from '@memoflow/contracts/ai';
+} from '@memoflow/ai-contracts';
 import type { Result } from '@memoflow/transport-contracts/result';
 import type { AIEvaluationReportApiClient, IResultIpcClient } from '../types';
 

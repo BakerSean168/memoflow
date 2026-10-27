@@ -5,7 +5,7 @@ import {
   LocalAgentClientCommandSchema,
   AgentRegistryCommandSchema,
   AssistantRuntimeClientCommandSchema,
-} from '@memoflow/contracts/ai';
+} from '@memoflow/ai-contracts';
 import { createLocalAgentIpcClient } from '../client/local-agent';
 import { createAgentRegistryIpcClient } from '../client/agent-instance';
 import { createAssistantRuntimeIpcClient } from '../client/runtime-assistant';

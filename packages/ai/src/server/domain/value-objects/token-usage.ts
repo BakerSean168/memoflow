@@ -3,7 +3,7 @@
  * Token 使用量值对象 - 服务端
  */
 
-import type { TokenUsageDTO } from '@memoflow/contracts/ai';
+import type { TokenUsageDTO } from '@memoflow/ai-contracts';
 
 /**
  * TokenUsage 值对象 - 服务端

@@ -6,7 +6,7 @@ import {
   GoalPlanDraftSchema,
   type AIWorkflowRunView,
   type GoalPlanDraft,
-} from '@memoflow/contracts/ai';
+} from '@memoflow/ai-contracts';
 import { AI_WORKFLOW_STORAGE_KEY, useAIWorkflowPersistence } from './useAIWorkflowPersistence';
 import {
   createEmptyGoalDraft,

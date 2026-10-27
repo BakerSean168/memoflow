@@ -3,7 +3,7 @@ import {
   type TaskPlanDraft,
   type TaskPlanExecutionFailure,
   type TaskPlanExecutionReceipt,
-} from '@memoflow/contracts/ai';
+} from '@memoflow/ai-contracts';
 import type { ResultError } from '@memoflow/transport-contracts/result';
 import type { CreateTaskPlanReq } from '@memoflow/task-contracts';
 import { taskWorkflowEntityId } from './deterministic-entity-id';

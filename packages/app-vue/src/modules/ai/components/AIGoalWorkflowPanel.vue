@@ -424,7 +424,7 @@
 </template>
 
 <script setup lang="ts">
-import type { AIWorkflowExecutionFailure, AIWorkflowRunView } from '@memoflow/contracts/ai';
+import type { AIWorkflowExecutionFailure, AIWorkflowRunView } from '@memoflow/ai-contracts';
 import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { Button } from '@memoflow/ui-vue-shadcn';

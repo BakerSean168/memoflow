@@ -17,7 +17,7 @@ import {
   type LocalAgentRequestResponse,
   type LocalAgentStatus,
   type LocalAgentAuthState,
-} from '@memoflow/contracts/ai';
+} from '@memoflow/ai-contracts';
 import { AIChannels } from '@memoflow/contracts/electron';
 import { unwrapOrThrowError } from '@memoflow/transport-contracts/result';
 import type { IResultIpcClient } from '@memoflow/ipc-client';

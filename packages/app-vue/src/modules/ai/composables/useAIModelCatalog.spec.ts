@@ -4,7 +4,7 @@ import type {
   AgentInstance,
   AgentRegistrySnapshot,
   LocalAgentStatus,
-} from '@memoflow/contracts/ai';
+} from '@memoflow/ai-contracts';
 import { useAIModelCatalog, listSelectableModels, isModelSelectable } from './useAIModelCatalog';
 
 const instance = (

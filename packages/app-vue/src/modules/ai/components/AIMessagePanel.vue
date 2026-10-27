@@ -464,7 +464,7 @@ import {
   Target,
 } from '@lucide/vue';
 import { useI18n } from 'vue-i18n';
-import type { LocalAgentRequestResponse } from '@memoflow/contracts/ai';
+import type { LocalAgentRequestResponse } from '@memoflow/ai-contracts';
 import AILocalRequestCard from './AILocalRequestCard.vue';
 import AIMessageContent from './AIMessageContent.vue';
 import MemoFlowAiIcon from './MemoFlowAiIcon.vue';

@@ -1,0 +1,35 @@
+{
+  "name": "@memoflow/ai-contracts",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./*": {
+      "types": "./dist/*.d.ts",
+      "import": "./dist/*.js"
+    }
+  },
+  "dependencies": {
+    "@memoflow/data-portability-contracts": "workspace:*",
+    "@memoflow/label-contracts": "workspace:*",
+    "@memoflow/shared-primitives": "workspace:*",
+    "zod": "^4.6.5",
+    "@memoflow/transport-contracts": "workspace:*",
+    "@memoflow/repository-contracts": "workspace:*",
+    "@memoflow/task-contracts": "workspace:*",
+    "@memoflow/goal-contracts": "workspace:*"
+  },
+  "devDependencies": {
+    "@asteasolutions/zod-to-openapi": "^9.1.0",
+    "@faker-js/faker": "10.6.0"
+  }
+}

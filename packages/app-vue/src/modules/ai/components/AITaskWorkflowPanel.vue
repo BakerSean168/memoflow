@@ -143,7 +143,7 @@
 import { computed } from 'vue';
 import { Button } from '@memoflow/ui-vue-shadcn';
 import { useI18n } from 'vue-i18n';
-import type { AIWorkflowExecutionFailure, AIWorkflowRunView } from '@memoflow/contracts/ai';
+import type { AIWorkflowExecutionFailure, AIWorkflowRunView } from '@memoflow/ai-contracts';
 import type { WorkflowMode } from '../composables/types';
 import AIRuntimeUsageBadge from './AIRuntimeUsageBadge.vue';
 import { getAIWorkflowFailureMessage } from '../composables/error';

@@ -30,7 +30,7 @@ import type {
   ProbeAIProviderReplacementReq,
   CommitAIProviderReplacementReq,
   AIProviderModelCatalogSnapshot,
-} from '@memoflow/contracts/ai';
+} from '@memoflow/ai-contracts';
 
 /**
  * Settings and provider onboarding/configuration capability.

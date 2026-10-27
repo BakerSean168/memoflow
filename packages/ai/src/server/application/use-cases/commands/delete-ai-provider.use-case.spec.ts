@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import type { AIProviderConfigServerDTO } from '@memoflow/contracts/ai';
+import type { AIProviderConfigServerDTO } from '@memoflow/ai-contracts';
 import { createAIProviderConfigServerDTO } from '../../../../testing';
 import { DeleteAIProviderUseCase } from './delete-ai-provider.use-case';
 

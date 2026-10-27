@@ -4,7 +4,7 @@ import { delimiter, dirname, isAbsolute, join } from 'node:path';
 import {
   AntigravityAuthorizationUrlSchema,
   type LocalAgentConnection,
-} from '@memoflow/contracts/ai';
+} from '@memoflow/ai-contracts';
 import { LocalAgentError } from '../../shared/local-agent-error';
 import { resolveNativeExecutable } from './native-executable';
 

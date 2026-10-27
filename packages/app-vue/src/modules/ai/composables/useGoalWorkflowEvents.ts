@@ -4,7 +4,7 @@ import {
   GoalWorkflowLiveActionJournalSchema,
   type AIWorkflowRunView,
   type WorkspaceEvent,
-} from '@memoflow/contracts/ai';
+} from '@memoflow/ai-contracts';
 import type { IWorkflowRuntimeService } from '../../../di/types';
 
 type GoalRun = Extract<AIWorkflowRunView, { kind: 'goal.create' }>;

@@ -32,7 +32,7 @@ import type {
   ProbeAIProviderReplacementReq,
   CommitAIProviderReplacementReq,
   AIProviderModelCatalogSnapshot,
-} from '@memoflow/contracts/ai';
+} from '@memoflow/ai-contracts';
 
 export type { IResultHttpClient };
 export type { IResultIpcClient } from '@memoflow/ipc-client';

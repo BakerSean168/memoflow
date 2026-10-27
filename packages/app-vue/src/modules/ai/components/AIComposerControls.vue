@@ -18,7 +18,7 @@ import type {
   AgentDriverKind,
   AIChatPermissionMode,
   LocalAgentModelOptions,
-} from '@memoflow/contracts/ai';
+} from '@memoflow/ai-contracts';
 import type { ComposerModel, ModelCatalog } from '../composables/useAIModelCatalog';
 import { useServerStateIdentityScope } from '../../../platform/server-state';
 import AgentDriverIcon from './AgentDriverIcon.vue';

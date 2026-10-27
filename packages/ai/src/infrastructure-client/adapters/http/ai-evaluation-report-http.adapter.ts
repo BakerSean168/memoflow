@@ -2,7 +2,7 @@ import type { AIEvaluationReportApiClient, IResultHttpClient } from '../types';
 import type {
   GetAIEvaluationOverviewReq,
   GetAIEvaluationOverviewRes,
-} from '@memoflow/contracts/ai';
+} from '@memoflow/ai-contracts';
 import type { Result } from '@memoflow/transport-contracts/result';
 
 /** HTTP adapter — returns Result, never throws (residual 98). */

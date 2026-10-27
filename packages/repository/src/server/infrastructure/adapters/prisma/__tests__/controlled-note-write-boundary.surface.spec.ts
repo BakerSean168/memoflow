@@ -55,7 +55,7 @@ describe('controlled note-write boundary surface', () => {
     'utf8',
   );
   const aiKnowledgeDto = readFileSync(
-    resolve(repoRoot, 'packages/contracts/src/modules/ai/api/ai-knowledge-note.dto.ts'),
+    resolve(repoRoot, 'packages/ai-contracts/src/api/ai-knowledge-note.dto.ts'),
     'utf8',
   );
   const vueRepositoryRouter = readFileSync(

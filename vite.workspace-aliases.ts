@@ -270,6 +270,21 @@ export function createGoalContractsAliasEntries(workspaceRoot: string): Alias[] 
   ];
 }
 
+export function createAiContractsAliasEntries(workspaceRoot: string): Alias[] {
+  const aiContractsRoot = resolveFromWorkspace(workspaceRoot, 'packages/ai-contracts/src');
+
+  return [
+    {
+      find: /^@memoflow\/ai-contracts$/,
+      replacement: `${aiContractsRoot}/index.ts`,
+    },
+    {
+      find: /^@memoflow\/ai-contracts\/(.+)$/,
+      replacement: `${aiContractsRoot}/$1`,
+    },
+  ];
+}
+
 export function createWorkspaceContractsAliasEntries(workspaceRoot: string): Alias[] {
   const workspaceContractsRoot = resolveFromWorkspace(
     workspaceRoot,

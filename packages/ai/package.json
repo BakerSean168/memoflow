@@ -70,7 +70,8 @@
     "express": "^5.2.1",
     "pg": "8.23.0",
     "undici": "^8.11.2",
-    "zod": "^4.6.5"
+    "zod": "^4.6.5",
+    "@memoflow/ai-contracts": "workspace:*"
   },
   "devDependencies": {
     "@types/express": "^5.0.0"

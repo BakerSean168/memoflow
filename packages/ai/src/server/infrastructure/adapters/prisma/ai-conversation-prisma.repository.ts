@@ -2,8 +2,8 @@ import type { ConversationEventSource } from '../../../domain/repositories/conve
 import type { PrismaClient, AiConversation as PrismaAiConversation } from '@memoflow/database';
 import type { IAIConversationRepository } from '../../../domain';
 import { AIConversation } from '../../../domain/aggregates/ai-conversation';
-import type { AIEventMap } from '@memoflow/contracts/ai';
-import { ConversationStatus } from '@memoflow/contracts/ai';
+import type { AIEventMap } from '@memoflow/ai-contracts';
+import { ConversationStatus } from '@memoflow/ai-contracts';
 import { AiConversationId } from '../../../domain/value-objects/ai-conversation-id';
 import { IdentityId } from '@memoflow/domain-shared/shared';
 import { createTypedEventPublisher, eventBus, flushDomainEvents } from '@memoflow/utils/domain';

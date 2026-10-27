@@ -78,6 +78,7 @@
     "label-contracts": "runtime-lib",
     "data-portability-contracts": "runtime-lib",
     "goal-contracts": "runtime-lib",
+    "ai-contracts": "runtime-lib",
     "goal-ui": "runtime-lib",
     "notification-contracts": "runtime-lib",
     "workspace-contracts": "runtime-lib",

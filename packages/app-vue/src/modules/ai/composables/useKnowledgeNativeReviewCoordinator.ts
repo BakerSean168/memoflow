@@ -1,4 +1,4 @@
-import type { AIWorkflowRunView, KnowledgeDraft } from '@memoflow/contracts/ai';
+import type { AIWorkflowRunView, KnowledgeDraft } from '@memoflow/ai-contracts';
 import { onScopeDispose, type Ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { toast } from 'vue-sonner';

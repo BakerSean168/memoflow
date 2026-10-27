@@ -8,7 +8,7 @@ import { createPinia } from 'pinia';
 import { createI18n } from 'vue-i18n';
 import { createMemoryHistory, createRouter } from 'vue-router';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import type { AIWorkflowRunView, AssistantRuntimeChoice } from '@memoflow/contracts/ai';
+import type { AIWorkflowRunView, AssistantRuntimeChoice } from '@memoflow/ai-contracts';
 import AIChatView from '../views/AIChatView.vue';
 import enAI from '../../../locales/en-US/aiAssistant';
 import enErrors from '../../../locales/en-US/errors';
@@ -72,7 +72,7 @@ const fixture = await vi.hoisted(async () => {
     service: {} as import('./types').AIChatService,
     nativeRunSettled: vi.fn<(connectionId: string) => void>(),
     getRun: vi.fn(),
-    providers: ref<import('@memoflow/contracts/ai').AIProviderConfigClientDTO[]>([]),
+    providers: ref<import('@memoflow/ai-contracts').AIProviderConfigClientDTO[]>([]),
     loadProviders: vi.fn(async () => undefined),
     session,
     openGoal,
@@ -651,7 +651,7 @@ describe('AI conversation restoration and business navigation', () => {
         name: 'Provider',
         defaultModel: 'model',
         isActive: true,
-      } as import('@memoflow/contracts/ai').AIProviderConfigClientDTO,
+      } as import('@memoflow/ai-contracts').AIProviderConfigClientDTO,
     ];
     const entries = ['mastra', 'work'].map((instanceId) => ({
       instanceId,

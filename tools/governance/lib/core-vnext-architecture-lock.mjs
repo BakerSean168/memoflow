@@ -99,7 +99,7 @@ const GOAL_TIME_OWNER_FILES = new Set([
   'packages/app-react/src/components/GoalCard.tsx',
   'packages/app-react/src/hooks/useGoals.ts',
   'packages/database/prisma/schema/goal.prisma',
-  'packages/contracts/src/modules/ai/api/ai-goal-create-workflow.dto.ts',
+  'packages/ai-contracts/src/api/ai-goal-create-workflow.dto.ts',
   'packages/ai/src/server/mastra/agents/goal-planner.worker.ts',
   'packages/ai/src/server/mastra/workflows/apply-goal-plan.service.ts',
   'packages/ai/src/server/mastra/workflows/goal-create.workflow.ts',
@@ -129,7 +129,7 @@ const KR_MEASUREMENT_OWNER_FILES = new Set([
   'packages/data-portability/src/server/application/use-cases/projections/goal.projection.ts',
   'packages/data-portability/src/server/infrastructure/powersync/powersync-import-store.ts',
   'packages/task-ui/src/composables/useTaskGoalBindingOptions.ts',
-  'packages/contracts/src/modules/ai/api/ai-goal-create-workflow.dto.ts',
+  'packages/ai-contracts/src/api/ai-goal-create-workflow.dto.ts',
   'packages/ai/src/server/mastra/agents/goal-planner.worker.ts',
   'packages/ai/src/server/mastra/workflows/apply-goal-plan.service.ts',
   'apps/api/src/modules/ai/goal-plan-mutation.adapter.ts',
@@ -390,7 +390,7 @@ export function findCoreVnextArchitectureLockViolations(files) {
         'task-legacy-classification',
       );
     }
-    if (relPath === 'packages/contracts/src/modules/ai/api/ai-task-create-workflow.dto.ts') {
+    if (relPath === 'packages/ai-contracts/src/api/ai-task-create-workflow.dto.ts') {
       pushPatternViolations(
         violations,
         relPath,

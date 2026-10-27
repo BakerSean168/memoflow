@@ -1,7 +1,7 @@
 import type { AttentionEventSource } from '../../../application/ports/attention-events.port';
 import { randomUUID } from 'node:crypto';
 import type { PrismaClient } from '@memoflow/database';
-import type { AssistantAttentionView } from '@memoflow/contracts/ai';
+import type { AssistantAttentionView } from '@memoflow/ai-contracts';
 import {
   effectiveAssistantAttentionState,
   type AssistantAttentionAcknowledge,

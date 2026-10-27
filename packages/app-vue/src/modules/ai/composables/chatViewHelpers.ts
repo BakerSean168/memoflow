@@ -5,7 +5,7 @@
  */
 
 import type { AIChatService } from './types';
-import type { AIWorkflowRunView, AIConversationClientDTO } from '@memoflow/contracts/ai';
+import type { AIWorkflowRunView, AIConversationClientDTO } from '@memoflow/ai-contracts';
 import type { IWorkflowRuntimeService } from '../../../di/types';
 import { unwrap } from '@memoflow/contracts/result';
 import { translateResultError } from '../../../shared/utils/translate-result-error';

@@ -3,7 +3,7 @@ import {
   type GoalPlanDraft,
   type GoalWorkflowLiveActionRecord,
   type GoalCreateClientInput,
-} from '@memoflow/contracts/ai';
+} from '@memoflow/ai-contracts';
 import { computed, onScopeDispose, ref, type Ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { toast } from 'vue-sonner';

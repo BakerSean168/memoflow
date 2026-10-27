@@ -17,7 +17,7 @@ import {
   type AIWorkflowStartClientRequest,
   WorkspaceEventSchema,
   type WorkspaceEvent,
-} from '@memoflow/contracts/ai';
+} from '@memoflow/ai-contracts';
 import { AIChannels, AIStreamChannels } from '@memoflow/contracts/electron';
 import { unwrapOrThrowError } from '@memoflow/transport-contracts/result';
 import type { IResultHttpClient } from '@memoflow/http-client';

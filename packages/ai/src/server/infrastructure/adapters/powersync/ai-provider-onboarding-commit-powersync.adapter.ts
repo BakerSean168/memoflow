@@ -4,7 +4,7 @@ import type {
   AIProviderReplacementCommitOutcome,
   IAIProviderOnboardingCommitPort,
 } from '../../../application/ports/provider-onboarding-commit.port';
-import type { AIProviderConnectionServerDTO } from '@memoflow/contracts/ai';
+import type { AIProviderConnectionServerDTO } from '@memoflow/ai-contracts';
 
 interface OnboardingCommitRow {
   identity_id: string;

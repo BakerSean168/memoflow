@@ -11,7 +11,7 @@
       "@memoflow/contracts/account": [
         "../../../../packages/contracts/src/modules/account/index.ts"
       ],
-      "@memoflow/contracts/ai": ["../../../../packages/contracts/src/modules/ai/index.ts"],
+      "@memoflow/ai-contracts": ["../../../../packages/ai-contracts/src/index.ts"],
       "@memoflow/goal-contracts": ["../../../../packages/goal-contracts/src/index.ts"],
       "@memoflow/notification-contracts": [
         "../../../../packages/notification-contracts/src/index.ts"

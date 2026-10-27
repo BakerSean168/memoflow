@@ -1,4 +1,4 @@
-import type { AICapabilities } from '@memoflow/contracts/ai';
+import type { AICapabilities } from '@memoflow/ai-contracts';
 import type { Result } from '@memoflow/transport-contracts/result';
 import type { IAICapabilitiesApiClient, IResultHttpClient } from '../types';
 

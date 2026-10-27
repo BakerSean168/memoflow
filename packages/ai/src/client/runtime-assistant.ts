@@ -21,7 +21,7 @@ import {
   type AssistantRuntimeClientCommand,
   type AssistantRuntimeEvent,
   type AssistantRuntimeHistoryView,
-} from '@memoflow/contracts/ai';
+} from '@memoflow/ai-contracts';
 import { AIChannels, AIStreamChannels } from '@memoflow/contracts/electron';
 import { unwrapOrThrowError } from '@memoflow/transport-contracts/result';
 import type { IResultHttpClient } from '@memoflow/http-client';
@@ -69,7 +69,7 @@ export interface AssistantRuntimeClient {
   answerToolSuspension(command: AssistantRuntimeToolAnswerCommand): Promise<boolean>;
   listAskUserSuspensions(
     conversationId: string,
-  ): Promise<readonly import('@memoflow/contracts/ai').AssistantRuntimeAskUserSuspension[]>;
+  ): Promise<readonly import('@memoflow/ai-contracts').AssistantRuntimeAskUserSuspension[]>;
   decideToolApproval(command: AssistantRuntimeApprovalCommand): Promise<boolean>;
 }
 

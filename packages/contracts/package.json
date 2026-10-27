@@ -25,10 +25,6 @@
       "types": "./dist/modules/account/index.d.ts",
       "import": "./dist/modules/account/index.js"
     },
-    "./ai": {
-      "types": "./dist/modules/ai/index.d.ts",
-      "import": "./dist/modules/ai/index.js"
-    },
     "./result": {
       "types": "./dist/result/index.d.ts",
       "import": "./dist/result/index.js"
@@ -68,7 +64,8 @@
     "@memoflow/shared-primitives": "workspace:*",
     "@memoflow/task-contracts": "workspace:*",
     "@memoflow/transport-contracts": "workspace:*",
-    "zod": "^4.6.5"
+    "zod": "^4.6.5",
+    "@memoflow/ai-contracts": "workspace:*"
   },
   "devDependencies": {
     "@faker-js/faker": "10.6.0",

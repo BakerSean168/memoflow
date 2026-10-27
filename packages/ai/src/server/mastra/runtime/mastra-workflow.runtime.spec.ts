@@ -3,7 +3,7 @@ import {
   MEMOFLOW_PRODUCT_TOOL_POLICY,
 } from '../tools/product-tool-policy';
 import { RequestContext } from '@mastra/core/request-context';
-import type { AIWorkflowStartClientRequest, AssistantRuntimeEvent } from '@memoflow/contracts/ai';
+import type { AIWorkflowStartClientRequest, AssistantRuntimeEvent } from '@memoflow/ai-contracts';
 import { randomUUID } from 'node:crypto';
 import { rm, readFile, writeFile } from 'node:fs/promises';
 import { execFile } from 'node:child_process';
@@ -16,7 +16,7 @@ import {
   GoalPlanDraftContentSchema,
   KnowledgeNoteDraftContentSchema,
   TaskPlanDraftContentSchema,
-} from '@memoflow/contracts/ai';
+} from '@memoflow/ai-contracts';
 import { error, ok } from '@memoflow/transport-contracts/result';
 import type { ExecutionContext } from '@memoflow/contracts/shared';
 import { afterEach, describe, expect, it, vi } from 'vitest';

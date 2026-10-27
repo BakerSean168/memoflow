@@ -1,4 +1,4 @@
-import type { AIEvaluationReport } from '@memoflow/contracts/ai';
+import type { AIEvaluationReport } from '@memoflow/ai-contracts';
 import type {
   AIEvalCaseType,
   AIEvalComparisonPolicy,

@@ -13,7 +13,7 @@ import {
   type LocalAgentConnectionInput,
   type LocalAgentConnection,
   type LocalAgentConversationCreate,
-} from '@memoflow/contracts/ai';
+} from '@memoflow/ai-contracts';
 import { nextHistoryTimestamp } from '../../../../shared/history-order';
 import { LocalAgentError } from '../../../../shared/local-agent-error';
 

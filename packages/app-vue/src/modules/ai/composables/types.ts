@@ -15,7 +15,7 @@ import type {
   GoalPlanKnowledge,
   GoalPlanTask,
   QueryKnowledgeRes,
-} from '@memoflow/contracts/ai';
+} from '@memoflow/ai-contracts';
 import type { KnowledgeDocumentRef } from '@memoflow/repository-contracts';
 import type { IAIClient, IWorkflowRuntimeService } from '../../../di/types';
 

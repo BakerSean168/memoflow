@@ -14,7 +14,7 @@ import {
   type ContextEntityRef,
   type ContextSection,
   type KnowledgeEvidence,
-} from '@memoflow/contracts/ai';
+} from '@memoflow/ai-contracts';
 import type { KnowledgeDocumentRef } from '@memoflow/repository-contracts';
 
 /** RequestContext keys used only for the invocation-scoped context projection. */

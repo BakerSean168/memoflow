@@ -137,7 +137,7 @@ import {
 } from '@memoflow/ui-vue-shadcn';
 import { repositoryUiHost, type PanelSurfaceStatus } from '../repository-ui-host';
 import { useKnowledgeNativeSurfaceRegistration } from '../composables/useKnowledgeNativeSurface';
-import type { KnowledgeDraft } from '@memoflow/contracts/ai';
+import type { KnowledgeDraft } from '@memoflow/ai-contracts';
 import {
   knowledgeCaptureSourceKey,
   nativeDraftFromKnowledgeDraft,

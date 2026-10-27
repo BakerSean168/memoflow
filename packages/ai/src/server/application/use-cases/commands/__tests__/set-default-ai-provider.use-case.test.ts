@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import type { AIProviderConfigServerDTO } from '@memoflow/contracts/ai';
+import type { AIProviderConfigServerDTO } from '@memoflow/ai-contracts';
 import { AIProviderConfigMemoryRepository } from '../../../../infrastructure/adapters/memory/ai-provider-config-memory.repository';
 import { SetDefaultAIProviderUseCase } from '../set-default-ai-provider.use-case';
 

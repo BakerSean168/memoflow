@@ -1,7 +1,7 @@
 import { computed, onBeforeUnmount, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import type { Ref } from 'vue';
-import type { AgentConversationSelection, AgentRegistrySnapshot } from '@memoflow/contracts/ai';
+import type { AgentConversationSelection, AgentRegistrySnapshot } from '@memoflow/ai-contracts';
 import type { ChatModelOption, PersistedConversationModelMap, ProviderListItem } from './types';
 import { isModelSelectable, listSelectableModels, type ModelCatalog } from './useAIModelCatalog';
 

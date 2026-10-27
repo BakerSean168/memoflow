@@ -492,7 +492,7 @@
     },
     {
       "id": "aiContract",
-      "files": ["packages/contracts/src/modules/ai/api/response-schemas.ts"],
+      "files": ["packages/ai-contracts/src/api/response-schemas.ts"],
       "expected": {
         "full": true,
         "targets": {

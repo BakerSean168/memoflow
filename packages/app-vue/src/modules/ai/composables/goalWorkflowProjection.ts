@@ -1,4 +1,4 @@
-import type { AIWorkflowRunView } from '@memoflow/contracts/ai';
+import type { AIWorkflowRunView } from '@memoflow/ai-contracts';
 import type { ChatItem } from './types';
 import { getAIWorkflowTerminalFailureMessage } from './error';
 

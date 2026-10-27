@@ -107,8 +107,8 @@ Product Governance Runtime 已由 ADR-113 退休，因此其已删除 dual/keep-
 | `retired`       | `packages/contracts/src/modules/account/api/dual-registry.surface.spec.ts`                                                         |
 | `retired`       | `packages/contracts/src/modules/account/empty-dual-barrel.surface.spec.ts`                                                         |
 | `retired`       | `packages/contracts/src/modules/account/entities/account-entities-dual.surface.spec.ts`                                            |
-| `retired`       | `packages/contracts/src/modules/ai/api/dual-registry.surface.spec.ts`                                                              |
-| `keep_boundary` | `packages/contracts/src/modules/ai/configs/get-template-by-id-keep-boundary.surface.spec.ts`                                       |
+| `retired`       | `packages/ai-contracts/src/api/dual-registry.surface.spec.ts`                                                              |
+| `keep_boundary` | `packages/ai-contracts/src/configs/get-template-by-id-keep-boundary.surface.spec.ts`                                       |
 | `retired`       | `packages/contracts/src/modules/goal/api/dual-registry.surface.spec.ts`                                                            |
 | `retired`       | `packages/contracts/src/modules/goal/value-objects/dual-registry.surface.spec.ts`                                                  |
 | `retired`       | `packages/contracts/src/modules/notification/aggregates/notification-client-dto-dual.surface.spec.ts`                              |

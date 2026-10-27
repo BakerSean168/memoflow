@@ -1,7 +1,7 @@
 import { mount } from '@vue/test-utils';
 import { createI18n } from 'vue-i18n';
 import { describe, expect, it } from 'vitest';
-import type { AIWorkflowRunView } from '@memoflow/contracts/ai';
+import type { AIWorkflowRunView } from '@memoflow/ai-contracts';
 import AIGoalWorkflowPanel from './AIGoalWorkflowPanel.vue';
 
 type PanelProps = InstanceType<typeof AIGoalWorkflowPanel>['$props'];

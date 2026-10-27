@@ -2,7 +2,7 @@ import { defineComponent, h, nextTick, ref, type Ref } from 'vue';
 import { mount } from '@vue/test-utils';
 import { createI18n } from 'vue-i18n';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import type { AssistantRuntimeEvent } from '@memoflow/contracts/ai';
+import type { AssistantRuntimeEvent } from '@memoflow/ai-contracts';
 import { useAssistantStream } from './useAssistantStream';
 import type { ChatModelOption, ChatAskUserRequest, ChatItem } from './types';
 

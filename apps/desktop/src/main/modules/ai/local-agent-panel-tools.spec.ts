@@ -4,7 +4,7 @@ import { LocalAgentRepository } from '@memoflow/ai';
 import { createTimeContext } from '@memoflow/time';
 import { createDesktopLocalAgentTools } from './local-agent-tools';
 import type { IDesktopNativePanelBridge } from './desktop-native-panel-bridge';
-import type { NativePanelIpcResponse } from '@memoflow/contracts/ai';
+import type { NativePanelIpcResponse } from '@memoflow/ai-contracts';
 
 describe('Desktop Local Agent Goal Panel Tools', () => {
   it('registers panel tools, dispatches commands to bridge and triggers release on revoke', async () => {

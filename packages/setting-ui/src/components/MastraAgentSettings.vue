@@ -18,7 +18,7 @@ import type {
   AIModelInfo,
   AIProviderConfigClientDTO,
   ProbeAIProviderConnectionRes,
-} from '@memoflow/contracts/ai';
+} from '@memoflow/ai-contracts';
 import { settingUiHost } from '../setting-ui-host';
 
 const { SettingsPropertyRow, AgentDriverIcon } = settingUiHost.components;

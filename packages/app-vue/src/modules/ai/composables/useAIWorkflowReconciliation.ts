@@ -1,5 +1,5 @@
 import { watch } from 'vue';
-import type { AIWorkflowRunView } from '@memoflow/contracts/ai';
+import type { AIWorkflowRunView } from '@memoflow/ai-contracts';
 import type { IWorkflowRuntimeService } from '../../../di/types';
 
 export type WorkflowReadStopReason = 'missing' | 'invalid' | 'unavailable';

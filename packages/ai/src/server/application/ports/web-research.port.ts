@@ -1,4 +1,4 @@
-import type { GoalResearchEvidence, GoalResearchIntent } from '@memoflow/contracts/ai';
+import type { GoalResearchEvidence, GoalResearchIntent } from '@memoflow/ai-contracts';
 
 export interface AIWebResearchCapabilityInput {
   readonly identityId: string;

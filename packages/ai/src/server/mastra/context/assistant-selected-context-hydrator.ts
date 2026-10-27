@@ -1,4 +1,4 @@
-import type { AssistantRuntimeSelectedEntity } from '@memoflow/contracts/ai';
+import type { AssistantRuntimeSelectedEntity } from '@memoflow/ai-contracts';
 import type {
   IAISelectedEntityContextReadPort,
   IKnowledgeSourcePort,

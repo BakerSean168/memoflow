@@ -1,4 +1,4 @@
-import type { KnowledgeCaptureSource, KnowledgeNotePersistedRef } from '@memoflow/contracts/ai';
+import type { KnowledgeCaptureSource, KnowledgeNotePersistedRef } from '@memoflow/ai-contracts';
 import type { KnowledgeDocumentId } from '@memoflow/contracts/primitives';
 import type { ExecutionContext } from '@memoflow/contracts/shared';
 

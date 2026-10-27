@@ -17,7 +17,7 @@ import type {
   LocalAgentConnection,
   LocalAgentConnectionInput,
   LocalAgentStatus,
-} from '@memoflow/contracts/ai';
+} from '@memoflow/ai-contracts';
 import { settingUiHost } from '../setting-ui-host';
 
 const { SettingsStatusBlock, AgentDriverIcon } = settingUiHost.components;

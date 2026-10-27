@@ -2,7 +2,7 @@ import {
   type AIProviderConfigClientDTO,
   type AIProviderConfigServerDTO,
   type TestAIProviderReq,
-} from '@memoflow/contracts/ai';
+} from '@memoflow/ai-contracts';
 import type { IAIProviderConfigRepository } from '../../../domain/repositories/i-ai-provider-config-repository';
 import type { IAIProviderSecretVault } from '../../ports/provider-secret-vault.port';
 import { toChatExecutionProviderConfig } from './ai-provider-resolution';

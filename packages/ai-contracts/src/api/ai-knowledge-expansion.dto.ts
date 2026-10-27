@@ -1,7 +1,7 @@
 import { AgentInstanceSlugSchema } from './local-agent.dto';
 import { z } from 'zod';
 import { brandedId } from '@memoflow/shared-primitives';
-import type { AiProviderConfigId } from '@memoflow/shared-primitives';
+import type { AiProviderConfigId } from '../ids';
 import { ExpandKnowledgeResSchema } from './response-schemas';
 
 export const ExpandKnowledgeSchema = z.object({

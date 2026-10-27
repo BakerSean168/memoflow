@@ -1,6 +1,7 @@
 import { z } from 'zod';
 import { brandedId } from '@memoflow/shared-primitives';
-import type { AiProviderConfigId, AiConversationId, IdentityId } from '@memoflow/shared-primitives';
+import type { IdentityId } from '@memoflow/shared-primitives';
+import type { AiProviderConfigId, AiConversationId } from '../ids';
 import {
   KnowledgeDocumentIdSchema,
   KnowledgeDocumentRefSchema,

@@ -1,4 +1,4 @@
-import { AIModel as AIModelContract, type AIModel as IAIModel } from '@memoflow/contracts/ai';
+import { AIModel as AIModelContract, type AIModel as IAIModel } from '@memoflow/ai-contracts';
 
 /**
  * AIModel 枚举类型

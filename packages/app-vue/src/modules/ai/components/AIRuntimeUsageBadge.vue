@@ -13,7 +13,7 @@
 
 <script setup lang="ts">
 import { computed } from 'vue';
-import type { AIRuntimeUsage } from '@memoflow/contracts/ai';
+import type { AIRuntimeUsage } from '@memoflow/ai-contracts';
 
 const props = defineProps<{ usage?: AIRuntimeUsage | null }>();
 

@@ -3,7 +3,7 @@ import {
   AssistantRuntimeMessageViewSchema,
   type AIRuntimeUsage,
   type AssistantRuntimeChoice,
-} from '@memoflow/contracts/ai';
+} from '@memoflow/ai-contracts';
 import { unwrap } from '@memoflow/contracts/result';
 import { computed, ref, watch, onMounted, onUnmounted } from 'vue';
 import {

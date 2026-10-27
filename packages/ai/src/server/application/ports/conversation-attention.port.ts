@@ -3,7 +3,7 @@ import type {
   AssistantAttentionState,
   AssistantAttentionRuntimeKind,
   AssistantAttentionView,
-} from '@memoflow/contracts/ai';
+} from '@memoflow/ai-contracts';
 
 export const ASSISTANT_ATTENTION_LEASE_MS = 120_000;
 

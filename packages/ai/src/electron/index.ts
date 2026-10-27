@@ -97,7 +97,7 @@ import {
   WorkspaceStreamRequestSchema,
   WorkspaceStreamAckSchema,
   WorkspaceStreamStopSchema,
-} from '@memoflow/contracts/ai';
+} from '@memoflow/ai-contracts';
 import { workspaceEventStream } from '../server/transport/workspace-event-stream';
 import { fail, ok } from '@memoflow/transport-contracts/result';
 import { formatZodErrors } from '@memoflow/utils/result';

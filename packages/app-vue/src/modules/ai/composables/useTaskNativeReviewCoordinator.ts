@@ -4,7 +4,7 @@ import {
   type AIWorkflowRunView,
   type TaskPlanDraft,
   type TaskPlanTask,
-} from '@memoflow/contracts/ai';
+} from '@memoflow/ai-contracts';
 import {
   CreateTaskPlanSchema,
   TaskGoalProgressConfigurationSchema,

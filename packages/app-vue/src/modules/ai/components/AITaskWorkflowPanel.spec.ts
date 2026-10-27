@@ -1,7 +1,7 @@
 import { mount } from '@vue/test-utils';
 import { createI18n } from 'vue-i18n';
 import { describe, expect, it } from 'vitest';
-import { AIWorkflowRunViewSchema } from '@memoflow/contracts/ai';
+import { AIWorkflowRunViewSchema } from '@memoflow/ai-contracts';
 import AITaskWorkflowPanel from './AITaskWorkflowPanel.vue';
 
 const i18n = createI18n({

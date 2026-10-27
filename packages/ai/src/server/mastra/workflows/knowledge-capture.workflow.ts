@@ -10,7 +10,7 @@ import {
   type KnowledgeCaptureDecision,
   type KnowledgeDraft,
   type KnowledgeCaptureWorkflowInput,
-} from '@memoflow/contracts/ai';
+} from '@memoflow/ai-contracts';
 import type { ExecutionContext } from '@memoflow/contracts/shared';
 import type {
   KnowledgeCapturePlannerMode,

@@ -2,18 +2,18 @@
  * App-local AI host adapter (API lane).
  * apps/api 本地的 AI 宿主适配器（API lane）。
  *
- * Import seam: this adapter consumes public package roots (`@memoflow/contracts/ai`,
+ * Import seam: this adapter consumes public package roots (`@memoflow/ai-contracts`,
  * `@memoflow/repository`) and the public `@memoflow/ai/ports` seam. It must never
  * import the package-internal `/server` subpath (any deep package-internal
  * path). Only `apps/api/src/runtime/compose-ai.ts` imports the package `/api`
  * transport seam; app-local adapters stay behind the port interfaces.
  *
- * 导入边界：本适配器只使用公开的包根（`@memoflow/contracts/ai`、
+ * 导入边界：本适配器只使用公开的包根（`@memoflow/ai-contracts`、
  * `@memoflow/repository`）与公开的 `@memoflow/ai/ports` seam，绝不导入
  * 包内 `/server` 子路径（或任何包内深路径）。只有 `apps/api/src/runtime/compose-ai.ts`
  * 导入 package `/api` transport seam；app-local adapter 保持在 port 接口之后。
  */
-import type { KnowledgeNotePersistedRef } from '@memoflow/contracts/ai';
+import type { KnowledgeNotePersistedRef } from '@memoflow/ai-contracts';
 import type { KnowledgeDocumentId } from '@memoflow/contracts/primitives';
 import type { RepositoryApplicationPort } from '@memoflow/repository';
 import { ResultErrorException } from '@memoflow/contracts/result';

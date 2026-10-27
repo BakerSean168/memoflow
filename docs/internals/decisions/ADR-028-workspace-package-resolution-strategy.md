@@ -101,7 +101,7 @@ This includes root entrypoints and any supported subpaths such as:
 
 - `@memoflow/ai/application-client`
 - `@memoflow/ai/infrastructure-client`
-- `@memoflow/contracts/ai`
+- `@memoflow/ai-contracts`
 
 Rule:
 

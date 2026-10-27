@@ -12,7 +12,7 @@ import {
   ReindexKnowledgeResSchema,
   QueryKnowledgeResSchema,
   ExpandKnowledgeResSchema,
-} from '@memoflow/contracts/ai';
+} from '@memoflow/ai-contracts';
 import type { AIKnowledgeQueryController } from '../../server/transport/ai-knowledge-query.controller';
 
 interface PlatformMiddleware {

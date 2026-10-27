@@ -1,4 +1,4 @@
-import { LocalAgentModelVisibilityContextSchema } from '@memoflow/contracts/ai';
+import { LocalAgentModelVisibilityContextSchema } from '@memoflow/ai-contracts';
 import { computed, getCurrentInstance, onBeforeUnmount, onMounted, ref } from 'vue';
 
 const STORAGE_PREFIX = 'ai:native-model-hidden:v2';

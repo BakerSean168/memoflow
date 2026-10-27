@@ -2,7 +2,7 @@ import type {
   AssistantAttentionRuntimeKind,
   AssistantAttentionState,
   AssistantRuntimeEvent,
-} from '@memoflow/contracts/ai';
+} from '@memoflow/ai-contracts';
 import type { IConversationAttentionPort } from '../ports/conversation-attention.port';
 
 /**

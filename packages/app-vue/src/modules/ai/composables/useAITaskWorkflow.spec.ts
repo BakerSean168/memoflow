@@ -2,7 +2,7 @@ import { defineComponent, h, ref } from 'vue';
 import { mount } from '@vue/test-utils';
 import { createI18n } from 'vue-i18n';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { AIWorkflowRunViewSchema, TaskPlanDraftSchema } from '@memoflow/contracts/ai';
+import { AIWorkflowRunViewSchema, TaskPlanDraftSchema } from '@memoflow/ai-contracts';
 import { error, ok } from '@memoflow/contracts/result';
 import type { TaskPlanViewModel } from '@memoflow/task-ui';
 import type { TaskNativeEditSession } from '@memoflow/task-ui';

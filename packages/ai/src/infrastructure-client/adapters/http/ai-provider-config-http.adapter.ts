@@ -15,7 +15,7 @@ import type {
   ProbeAIProviderReplacementReq,
   CommitAIProviderReplacementReq,
   AIProviderModelCatalogSnapshot,
-} from '@memoflow/contracts/ai';
+} from '@memoflow/ai-contracts';
 import { map, type Result } from '@memoflow/transport-contracts/result';
 
 /**

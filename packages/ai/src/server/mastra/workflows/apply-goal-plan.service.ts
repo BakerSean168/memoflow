@@ -5,7 +5,7 @@ import {
   type GoalPlanExecutionFailure,
   type GoalPlanExecutionReceipt,
   type GoalPlanTask,
-} from '@memoflow/contracts/ai';
+} from '@memoflow/ai-contracts';
 import type { CreateGoalReq } from '@memoflow/goal-contracts';
 import type { KnowledgeDocumentId } from '@memoflow/contracts/primitives';
 import type { KnowledgeDocumentRef } from '@memoflow/repository-contracts';

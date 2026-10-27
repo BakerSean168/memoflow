@@ -1,4 +1,5 @@
-import type { IdentityId, AiConversationId } from '@memoflow/shared-primitives';
+import type { IdentityId } from '@memoflow/shared-primitives';
+import type { AiConversationId } from '../../ids';
 import type { AIConversationServerDTO } from '../../aggregates/ai-conversation-server';
 
 export interface AIConversationDeletedEvent {

@@ -6,7 +6,7 @@ import {
   AIWorkflowRunViewSchema,
   type AIWorkflowRunView,
   type GoalPlanDraft,
-} from '@memoflow/contracts/ai';
+} from '@memoflow/ai-contracts';
 import { TIMEOUT_CONFIG } from '../config';
 import { registerAndLogin } from '../helpers/testHelpers';
 

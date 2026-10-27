@@ -1,4 +1,4 @@
-import type { AssistantRuntimeSelectedEntity } from '@memoflow/contracts/ai';
+import type { AssistantRuntimeSelectedEntity } from '@memoflow/ai-contracts';
 import { ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { toast } from 'vue-sonner';

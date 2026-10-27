@@ -6,7 +6,7 @@ import type {
   AIModelInfo,
   LocalAgentModel,
   LocalAgentStatus,
-} from '@memoflow/contracts/ai';
+} from '@memoflow/ai-contracts';
 import type { ChatModelOption } from './types';
 import { useNativeModelVisibility } from './nativeModelVisibility';
 

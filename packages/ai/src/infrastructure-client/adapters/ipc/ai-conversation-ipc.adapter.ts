@@ -5,7 +5,7 @@ import type {
   ConversationListRes,
   CreateConversationReq,
   UpdateConversationReq,
-} from '@memoflow/contracts/ai';
+} from '@memoflow/ai-contracts';
 import type { Result } from '@memoflow/transport-contracts/result';
 
 /**

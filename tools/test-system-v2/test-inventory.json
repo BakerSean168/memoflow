@@ -5498,7 +5498,7 @@
       "measurementCollectors": []
     },
     {
-      "path": "packages/contracts/src/modules/ai/api/agent-instance.dto.spec.ts",
+      "path": "packages/ai-contracts/src/api/agent-instance.dto.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/contracts/vitest.config.ts"
@@ -5506,7 +5506,7 @@
       "measurementCollectors": []
     },
     {
-      "path": "packages/contracts/src/modules/ai/api/ai-capabilities.dto.test.ts",
+      "path": "packages/ai-contracts/src/api/ai-capabilities.dto.test.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/contracts/vitest.config.ts"
@@ -5514,7 +5514,7 @@
       "measurementCollectors": []
     },
     {
-      "path": "packages/contracts/src/modules/ai/api/ai-goal-create-workflow.dto.test.ts",
+      "path": "packages/ai-contracts/src/api/ai-goal-create-workflow.dto.test.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/contracts/vitest.config.ts"
@@ -5522,7 +5522,7 @@
       "measurementCollectors": []
     },
     {
-      "path": "packages/contracts/src/modules/ai/api/ai-goal-research.dto.test.ts",
+      "path": "packages/ai-contracts/src/api/ai-goal-research.dto.test.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/contracts/vitest.config.ts"
@@ -5530,7 +5530,7 @@
       "measurementCollectors": []
     },
     {
-      "path": "packages/contracts/src/modules/ai/api/ai-knowledge-capture-workflow.dto.spec.ts",
+      "path": "packages/ai-contracts/src/api/ai-knowledge-capture-workflow.dto.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/contracts/vitest.config.ts"
@@ -5538,7 +5538,7 @@
       "measurementCollectors": []
     },
     {
-      "path": "packages/contracts/src/modules/ai/api/ai-knowledge-note.dto.spec.ts",
+      "path": "packages/ai-contracts/src/api/ai-knowledge-note.dto.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/contracts/vitest.config.ts"
@@ -5546,7 +5546,7 @@
       "measurementCollectors": []
     },
     {
-      "path": "packages/contracts/src/modules/ai/api/ai-knowledge-query.dto.test.ts",
+      "path": "packages/ai-contracts/src/api/ai-knowledge-query.dto.test.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/contracts/vitest.config.ts"
@@ -5554,7 +5554,7 @@
       "measurementCollectors": []
     },
     {
-      "path": "packages/contracts/src/modules/ai/api/ai-provider-onboarding.dto.spec.ts",
+      "path": "packages/ai-contracts/src/api/ai-provider-onboarding.dto.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/contracts/vitest.config.ts"
@@ -5562,7 +5562,7 @@
       "measurementCollectors": []
     },
     {
-      "path": "packages/contracts/src/modules/ai/api/ai-runtime.dto.test.ts",
+      "path": "packages/ai-contracts/src/api/ai-runtime.dto.test.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/contracts/vitest.config.ts"
@@ -5570,7 +5570,7 @@
       "measurementCollectors": []
     },
     {
-      "path": "packages/contracts/src/modules/ai/api/ai-task-create-workflow.dto.spec.ts",
+      "path": "packages/ai-contracts/src/api/ai-task-create-workflow.dto.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/contracts/vitest.config.ts"
@@ -5578,7 +5578,7 @@
       "measurementCollectors": []
     },
     {
-      "path": "packages/contracts/src/modules/ai/api/dual-registry.surface.spec.ts",
+      "path": "packages/ai-contracts/src/api/dual-registry.surface.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/contracts/vitest.config.ts"
@@ -5586,7 +5586,7 @@
       "measurementCollectors": []
     },
     {
-      "path": "packages/contracts/src/modules/ai/api/goal-panel.dto.spec.ts",
+      "path": "packages/ai-contracts/src/api/goal-panel.dto.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/contracts/vitest.config.ts"
@@ -5594,7 +5594,7 @@
       "measurementCollectors": []
     },
     {
-      "path": "packages/contracts/src/modules/ai/api/local-agent.dto.test.ts",
+      "path": "packages/ai-contracts/src/api/local-agent.dto.test.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/contracts/vitest.config.ts"
@@ -5602,7 +5602,7 @@
       "measurementCollectors": []
     },
     {
-      "path": "packages/contracts/src/modules/ai/api/workspace-event.dto.test.ts",
+      "path": "packages/ai-contracts/src/api/workspace-event.dto.test.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/contracts/vitest.config.ts"
@@ -5610,7 +5610,7 @@
       "measurementCollectors": []
     },
     {
-      "path": "packages/contracts/src/modules/ai/portable-v3.spec.ts",
+      "path": "packages/ai-contracts/src/portable-v3.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/contracts/vitest.config.ts"

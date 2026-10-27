@@ -2,7 +2,7 @@ import {
   GoalPlanDraftSchema,
   type AIWorkflowRunView,
   type GoalPlanDraft,
-} from '@memoflow/contracts/ai';
+} from '@memoflow/ai-contracts';
 import { computed, onScopeDispose, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';

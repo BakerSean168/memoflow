@@ -12,7 +12,7 @@ import {
   type AgentInstanceModelBinding,
   type AgentRegistrySnapshot,
   type LocalAgentConnection,
-} from '@memoflow/contracts/ai';
+} from '@memoflow/ai-contracts';
 import {
   AgentRegistryError,
   type IAgentInstanceRepository,

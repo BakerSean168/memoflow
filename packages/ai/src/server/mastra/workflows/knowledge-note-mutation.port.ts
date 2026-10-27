@@ -1,7 +1,7 @@
 import type {
   KnowledgeCaptureExecutionFailure,
   KnowledgeCaptureSource,
-} from '@memoflow/contracts/ai';
+} from '@memoflow/ai-contracts';
 import type { KnowledgeDocumentId } from '@memoflow/contracts/primitives';
 import type { Result } from '@memoflow/transport-contracts/result';
 import type { ExecutionContext } from '@memoflow/contracts/shared';
@@ -43,9 +43,9 @@ export interface KnowledgeCaptureMutationPort {
 
 export interface ApplyKnowledgeNoteInput {
   readonly workflowRunId: string;
-  readonly draft: import('@memoflow/contracts/ai').KnowledgeDraft;
+  readonly draft: import('@memoflow/ai-contracts').KnowledgeDraft;
   readonly context: ExecutionContext;
-  readonly priorReceipt?: import('@memoflow/contracts/ai').KnowledgeCaptureExecutionReceipt;
+  readonly priorReceipt?: import('@memoflow/ai-contracts').KnowledgeCaptureExecutionReceipt;
 }
 
 export type KnowledgeCaptureExecutionFailureList = KnowledgeCaptureExecutionFailure;

@@ -1,7 +1,7 @@
 import type { Result } from '@memoflow/transport-contracts/result';
 import { ok } from '@memoflow/transport-contracts/result';
 import type { ExecutionContext } from '@memoflow/contracts/shared';
-import type { AIProviderConfigClientDTO } from '@memoflow/contracts/ai';
+import type { AIProviderConfigClientDTO } from '@memoflow/ai-contracts';
 import { createLogger } from '@memoflow/utils/logger';
 import type { IAIProviderConfigRepository } from '../../../domain/repositories/i-ai-provider-config-repository';
 import { toClientDTO } from './ai-provider-config-helpers';

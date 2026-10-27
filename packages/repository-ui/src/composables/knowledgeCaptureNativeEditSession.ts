@@ -4,7 +4,7 @@ import {
   type KnowledgeCaptureSource,
   type KnowledgeDraft,
   type KnowledgeNoteDraftContent,
-} from '@memoflow/contracts/ai';
+} from '@memoflow/ai-contracts';
 import type { OwnerNativeEditSession } from '../repository-ui-host';
 
 export type KnowledgeCaptureNativeDraft = KnowledgeNoteDraftContent & {

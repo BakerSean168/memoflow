@@ -15,11 +15,11 @@ import { describe, expect, it } from 'vitest';
     const responseSchemas = readFileSync(resolve(apiDir, 'response-schemas.ts'), 'utf8');
     const dto = readFileSync(resolve(apiDir, 'ai-chat.dto.ts'), 'utf8');
     const chatRoutes = readFileSync(
-      resolve(apiDir, '../../../../../ai/src/api/routes/ai-chat.routes.ts'),
+      resolve(apiDir, '../../../ai/src/api/routes/ai-chat.routes.ts'),
       'utf8',
     );
     const runtimeRoutes = readFileSync(
-      resolve(apiDir, '../../../../../ai/src/api/routes/ai-runtime.routes.ts'),
+      resolve(apiDir, '../../../ai/src/api/routes/ai-runtime.routes.ts'),
       'utf8',
     );
 
@@ -121,7 +121,7 @@ import { describe, expect, it } from 'vitest';
     );
     const responseSchemas = readFileSync(resolve(apiDir, 'response-schemas.ts'), 'utf8');
     const routes = readFileSync(
-      resolve(apiDir, '../../../../../ai/src/api/routes/ai-provider.routes.ts'),
+      resolve(apiDir, '../../../ai/src/api/routes/ai-provider.routes.ts'),
       'utf8',
     );
 
@@ -218,23 +218,23 @@ import { describe, expect, it } from 'vitest';
 
     it('OpenAPI AI routes reference the shared response schemas', () => {
       const chatRoutes = readFileSync(
-        resolve(apiDir, '../../../../../ai/src/api/routes/ai-chat.routes.ts'),
+        resolve(apiDir, '../../../ai/src/api/routes/ai-chat.routes.ts'),
         'utf8',
       );
       const providerRoutes = readFileSync(
-        resolve(apiDir, '../../../../../ai/src/api/routes/ai-provider.routes.ts'),
+        resolve(apiDir, '../../../ai/src/api/routes/ai-provider.routes.ts'),
         'utf8',
       );
       const analyticsRoutes = readFileSync(
-        resolve(apiDir, '../../../../../ai/src/api/routes/ai-analytics-query.routes.ts'),
+        resolve(apiDir, '../../../ai/src/api/routes/ai-analytics-query.routes.ts'),
         'utf8',
       );
       const knowledgeRoutes = readFileSync(
-        resolve(apiDir, '../../../../../ai/src/api/routes/ai-knowledge-query.routes.ts'),
+        resolve(apiDir, '../../../ai/src/api/routes/ai-knowledge-query.routes.ts'),
         'utf8',
       );
       const runtimeRoutes = readFileSync(
-        resolve(apiDir, '../../../../../ai/src/api/routes/ai-runtime.routes.ts'),
+        resolve(apiDir, '../../../ai/src/api/routes/ai-runtime.routes.ts'),
         'utf8',
       );
 
@@ -258,11 +258,11 @@ import { describe, expect, it } from 'vitest';
     const apiDir = __dirname;
     const dto = readFileSync(resolve(apiDir, 'ai-chat.dto.ts'), 'utf8');
     const routes = readFileSync(
-      resolve(apiDir, '../../../../../ai/src/api/routes/ai-chat.routes.ts'),
+      resolve(apiDir, '../../../ai/src/api/routes/ai-chat.routes.ts'),
       'utf8',
     );
     const controller = readFileSync(
-      resolve(apiDir, '../../../../../ai/src/server/transport/ai-chat.controller.ts'),
+      resolve(apiDir, '../../../ai/src/server/transport/ai-chat.controller.ts'),
       'utf8',
     );
 
@@ -393,11 +393,11 @@ import { describe, expect, it } from 'vitest';
     const dto = readFileSync(resolve(apiDir, 'ai-provider-config.dto.ts'), 'utf8');
     const onboardingDto = readFileSync(resolve(apiDir, 'ai-provider-onboarding.dto.ts'), 'utf8');
     const routes = readFileSync(
-      resolve(apiDir, '../../../../../ai/src/api/routes/ai-provider.routes.ts'),
+      resolve(apiDir, '../../../ai/src/api/routes/ai-provider.routes.ts'),
       'utf8',
     );
     const controller = readFileSync(
-      resolve(apiDir, '../../../../../ai/src/server/transport/ai-provider-config.controller.ts'),
+      resolve(apiDir, '../../../ai/src/server/transport/ai-provider-config.controller.ts'),
       'utf8',
     );
 
@@ -497,7 +497,7 @@ import { describe, expect, it } from 'vitest';
     const responseSchemas = readFileSync(resolve(apiDir, 'response-schemas.ts'), 'utf8');
     const providerDto = readFileSync(resolve(apiDir, 'ai-provider-config.dto.ts'), 'utf8');
     const routes = readFileSync(
-      resolve(apiDir, '../../../../../ai/src/api/routes/ai-provider.routes.ts'),
+      resolve(apiDir, '../../../ai/src/api/routes/ai-provider.routes.ts'),
       'utf8',
     );
 
@@ -536,7 +536,7 @@ import { describe, expect, it } from 'vitest';
     const apiDir = __dirname;
     const dto = readFileSync(resolve(apiDir, 'ai-knowledge-query.dto.ts'), 'utf8');
     const routes = readFileSync(
-      resolve(apiDir, '../../../../../ai/src/api/routes/ai-knowledge-query.routes.ts'),
+      resolve(apiDir, '../../../ai/src/api/routes/ai-knowledge-query.routes.ts'),
       'utf8',
     );
 

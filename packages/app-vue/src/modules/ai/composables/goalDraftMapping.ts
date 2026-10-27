@@ -5,7 +5,7 @@ import {
   type AIWorkflowRunView,
   type GoalPlanDraft,
   type GoalPlanDraftContent,
-} from '@memoflow/contracts/ai';
+} from '@memoflow/ai-contracts';
 import type { GoalNativeEditSession } from '@memoflow/goal-ui';
 import type { EditableGoalKnowledge, EditableGoalTask } from './types';
 export type GoalNativeProjection = {

@@ -5,7 +5,7 @@ import {
   type GoalPanelSnapshot,
   type NativePanelIpcRequest,
   type NativePanelIpcResponse,
-} from '@memoflow/contracts/ai';
+} from '@memoflow/ai-contracts';
 import { getCurrentInstance, onBeforeUnmount, onMounted } from 'vue';
 import { useAppShellStore } from './useAppShellStore';
 import { moduleForPath } from './useShellRouterSync';

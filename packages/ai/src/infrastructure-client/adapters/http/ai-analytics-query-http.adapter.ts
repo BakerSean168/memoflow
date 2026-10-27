@@ -1,5 +1,5 @@
 import type { AIAnalyticsQueryApiClient, IResultHttpClient } from '../types';
-import type { QueryAnalyticsReq, QueryAnalyticsRes } from '@memoflow/contracts/ai';
+import type { QueryAnalyticsReq, QueryAnalyticsRes } from '@memoflow/ai-contracts';
 import type { Result } from '@memoflow/transport-contracts/result';
 
 /** HTTP adapter — returns Result, never throws (residual 98). */

@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 
-import type { TestAIProviderReq } from '@memoflow/contracts/ai';
+import type { TestAIProviderReq } from '@memoflow/ai-contracts';
 
 import type {
   ChatExecutionCompleteInput,

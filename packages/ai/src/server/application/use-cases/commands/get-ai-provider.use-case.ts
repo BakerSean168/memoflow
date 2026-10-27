@@ -1,6 +1,6 @@
 import type { Result } from '@memoflow/transport-contracts/result';
 import { ok, error } from '@memoflow/transport-contracts/result';
-import type { AIProviderConfigClientDTO } from '@memoflow/contracts/ai';
+import type { AIProviderConfigClientDTO } from '@memoflow/ai-contracts';
 import type { IAIProviderConfigRepository } from '../../../domain/repositories/i-ai-provider-config-repository';
 import { toClientDTO } from './ai-provider-config-helpers';
 

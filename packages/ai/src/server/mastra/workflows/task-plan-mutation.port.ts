@@ -1,4 +1,4 @@
-import type { TaskPlanExecutionReceipt } from '@memoflow/contracts/ai';
+import type { TaskPlanExecutionReceipt } from '@memoflow/ai-contracts';
 import type { Result } from '@memoflow/transport-contracts/result';
 import type { ExecutionContext } from '@memoflow/contracts/shared';
 import type { CreateTaskPlanReq } from '@memoflow/task-contracts';
@@ -24,7 +24,7 @@ export interface TaskPlanMutationPort {
 
 export interface ApplyTaskPlanInput {
   readonly workflowRunId: string;
-  readonly draft: import('@memoflow/contracts/ai').TaskPlanDraft;
+  readonly draft: import('@memoflow/ai-contracts').TaskPlanDraft;
   readonly context: ExecutionContext;
   readonly priorReceipt?: TaskPlanExecutionReceipt;
 }

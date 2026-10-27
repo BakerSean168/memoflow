@@ -9,7 +9,7 @@
 
 import type { IResultHttpClient } from '@memoflow/http-client';
 import type { IResultIpcClient } from '@memoflow/ipc-client';
-import type { AiProviderConfigId } from '@memoflow/contracts/primitives';
+import type { AiProviderConfigId } from '@memoflow/ai-contracts';
 import type { Result } from '@memoflow/transport-contracts/result';
 import type {
   AICapabilities,
@@ -40,7 +40,7 @@ import type {
   ProbeAIProviderReplacementReq,
   CommitAIProviderReplacementReq,
   AIProviderModelCatalogSnapshot,
-} from '@memoflow/contracts/ai';
+} from '@memoflow/ai-contracts';
 import { createAIHttpAdapters, type AIHttpAdapters } from '../infrastructure-client/adapters/http';
 import { createAIIpcAdapters, type AIIpcAdapters } from '../infrastructure-client/adapters/ipc';
 

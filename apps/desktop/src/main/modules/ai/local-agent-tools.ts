@@ -43,7 +43,7 @@ import {
   GoalPanelSubmitCommandSchema,
   GoalPanelSubmitResultSchema,
   type GoalPanelCommand,
-} from '@memoflow/contracts/ai';
+} from '@memoflow/ai-contracts';
 import type { IDesktopNativePanelBridge } from './desktop-native-panel-bridge';
 
 function ownerResult<T>(result: Result<T>): T {

@@ -1,4 +1,4 @@
-import type { AICapabilities, AIRuntimeMode } from '@memoflow/contracts/ai';
+import type { AICapabilities, AIRuntimeMode } from '@memoflow/ai-contracts';
 
 export const ADVANCED_AI_REASON =
   'Some optional AI product capabilities are unavailable in this host composition.';

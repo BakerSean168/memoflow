@@ -8,7 +8,7 @@ import {
   type AgentInstance,
   type AgentRegistryCommand,
   type AgentRegistrySnapshot,
-} from '@memoflow/contracts/ai';
+} from '@memoflow/ai-contracts';
 import { AgentRegistryError, type IAgentInstanceRepository } from './agent-instance.repository';
 
 const names = {

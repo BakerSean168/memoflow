@@ -1,7 +1,7 @@
 import { EventEmitter } from 'node:events';
 import { Router, type Request, type Response } from 'express';
 import { describe, expect, it, vi } from 'vitest';
-import type { AssistantRuntimeEvent } from '@memoflow/contracts/ai';
+import type { AssistantRuntimeEvent } from '@memoflow/ai-contracts';
 import type { AIWorkflowRuntimePort, MastraAIRuntime } from '../../server/mastra/runtime';
 import { AIExecutionError } from '../../shared/ai-execution-error';
 import { registerAIRuntimeRoutes } from './ai-runtime.routes';

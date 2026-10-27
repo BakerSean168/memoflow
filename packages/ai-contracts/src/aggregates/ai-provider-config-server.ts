@@ -3,12 +3,8 @@
  * 用户自定义 AI 服务提供商配置（服务端视图）
  */
 
-import type {
-  AiProviderConnectionId,
-  AIProviderCredentialRef,
-  IdentityId,
-  TransferDate,
-} from '@memoflow/shared-primitives';
+import type { IdentityId, TransferDate } from '@memoflow/shared-primitives';
+import type { AiProviderConnectionId, AIProviderCredentialRef } from '../ids';
 import type { AIProviderDefinitionId } from '../configs/ai-provider-catalog';
 
 /**

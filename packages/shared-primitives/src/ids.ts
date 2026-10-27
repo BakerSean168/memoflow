@@ -45,7 +45,6 @@ export type ResourceLinkId = string & { readonly __brand: 'ResourceLinkId' };
 export type BookmarkId = string & { readonly __brand: 'BookmarkId' };
 
 /** AI 对话 ID */
-export type AiConversationId = string & { readonly __brand: 'AiConversationId' };
 
 /** 同步配置 ID */
 export type SyncProfileId = string & { readonly __brand: 'SyncProfileId' };
@@ -63,13 +62,10 @@ export type PendingChangeId = string & { readonly __brand: 'PendingChangeId' };
 export type AppConfigId = string & { readonly __brand: 'AppConfigId' };
 
 /** AI Provider 配置 ID */
-export type AiProviderConfigId = string & { readonly __brand: 'AiProviderConfigId' };
 
 /** AI Provider connection ID (the persisted user-owned provider connection). */
-export type AiProviderConnectionId = AiProviderConfigId;
 
 /** Opaque reference into the host-owned provider SecretVault. */
-export type AIProviderCredentialRef = string & { readonly __brand: 'AIProviderCredentialRef' };
 
 // ==========================================
 // ID Prefix Constants

@@ -814,7 +814,7 @@ async function reloadCheckpoint(): Promise<void> {
 
 let checkpointCheck: Promise<void> | null = null;
 async function checkCheckpoint(
-  run?: import('@memoflow/contracts/ai').AIWorkflowRunView,
+  run?: import('@memoflow/ai-contracts').AIWorkflowRunView,
   required = false,
 ): Promise<void> {
   const epoch = checkpointEpoch;

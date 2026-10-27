@@ -13,7 +13,7 @@ import type {
 } from '@memoflow/routine-contracts';
 import type { CreateTaskPlanReq } from '@memoflow/task-contracts';
 import { RoutineConfigurationSnapshotSchema } from '@memoflow/routine-contracts';
-import { AIWorkflowRunViewSchema } from '@memoflow/contracts/ai';
+import { AIWorkflowRunViewSchema } from '@memoflow/ai-contracts';
 import { fail, ok } from '@memoflow/contracts/result';
 import * as keys from '@memoflow/app-vue/di/keys';
 import { productionLocaleMessages } from '@memoflow/app-vue/locales/production-messages';

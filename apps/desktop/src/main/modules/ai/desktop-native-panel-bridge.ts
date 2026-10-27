@@ -8,7 +8,7 @@ import {
   type GoalPanelCommand,
   type NativePanelIpcRequest,
   type NativePanelIpcResponse,
-} from '@memoflow/contracts/ai';
+} from '@memoflow/ai-contracts';
 import type { LocalToolContext } from '@memoflow/ai';
 
 export interface DesktopNativePanelBridgeOptions {

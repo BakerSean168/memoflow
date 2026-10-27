@@ -3,7 +3,7 @@ import {
   AIRuntimeUsageSummarySchema,
   type AIRuntimeUsageQueryClientRequest,
   type AIRuntimeUsageSummary,
-} from '@memoflow/contracts/ai';
+} from '@memoflow/ai-contracts';
 import { AIChannels } from '@memoflow/contracts/electron';
 import { unwrapOrThrowError } from '@memoflow/transport-contracts/result';
 import type { IResultHttpClient } from '@memoflow/http-client';

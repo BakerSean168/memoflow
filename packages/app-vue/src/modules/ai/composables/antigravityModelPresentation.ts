@@ -1,4 +1,4 @@
-import type { AgentDriverKind } from '@memoflow/contracts/ai';
+import type { AgentDriverKind } from '@memoflow/ai-contracts';
 import type { ComposerModel } from './useAIModelCatalog';
 
 export interface PickerAgentIdentity {

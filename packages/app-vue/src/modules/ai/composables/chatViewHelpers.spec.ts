@@ -2,7 +2,7 @@ import { createPinia, setActivePinia } from 'pinia';
 import { useAppShellStore } from '../../../layouts/shell/useAppShellStore';
 import { canLeaveBusinessSurface } from '../../../layouts/shell/surface-leave-protocol';
 import { describe, expect, it, vi } from 'vitest';
-import type { AIWorkflowRunView } from '@memoflow/contracts/ai';
+import type { AIWorkflowRunView } from '@memoflow/ai-contracts';
 import type { IWorkflowRuntimeService } from '../../../di/types';
 import { AIWorkflowRestoreError, loadAuthoritativeWorkflowRun } from './chatViewHelpers';
 import { canLeaveAIWorkflowReview } from './chatViewHelpers';

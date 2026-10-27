@@ -1,5 +1,5 @@
 import type { WorkspaceEventStreamOptions, WorkflowRuntimeClient } from '@memoflow/ai/client';
-import type { WorkspaceEvent } from '@memoflow/contracts/ai';
+import type { WorkspaceEvent } from '@memoflow/ai-contracts';
 
 type Listener = { receive(event: WorkspaceEvent): Promise<void>; stop(): void };
 type WorkspaceEventSource = Pick<WorkflowRuntimeClient, 'streamWorkspaceEvents'>;

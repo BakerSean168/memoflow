@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import type { AiProviderConnectionId } from '@memoflow/shared-primitives';
+import type { AiProviderConnectionId } from '../ids';
 import { AIModelInfoSchema, type AIModelInfo } from './ai-provider-config-client';
 
 /** Capabilities that can change whether an AI workflow is executable. */

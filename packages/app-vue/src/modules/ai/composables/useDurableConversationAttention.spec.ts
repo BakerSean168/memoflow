@@ -3,7 +3,7 @@ import { defineComponent, h, nextTick, ref } from 'vue';
 import { mount } from '@vue/test-utils';
 import { describe, expect, it, vi } from 'vitest';
 import { useDurableConversationAttention } from './useDurableConversationAttention';
-import type { AssistantAttentionView } from '@memoflow/contracts/ai';
+import type { AssistantAttentionView } from '@memoflow/ai-contracts';
 import type { ConversationSummary } from './types';
 import type { WorkflowRuntimeClient, WorkspaceEventStreamOptions } from '@memoflow/ai/client';
 

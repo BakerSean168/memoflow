@@ -1,4 +1,4 @@
-import type { AgentDriverKind, AgentInstance } from '@memoflow/contracts/ai';
+import type { AgentDriverKind, AgentInstance } from '@memoflow/ai-contracts';
 
 /** Fixed Desktop grouping, independent of enabled/probe state or display name. */
 const DRIVER_ORDER: readonly AgentDriverKind[] = [

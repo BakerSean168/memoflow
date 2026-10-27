@@ -335,6 +335,9 @@ importers:
       '@memoflow/ai':
         specifier: workspace:*
         version: link:../../packages/ai
+      '@memoflow/ai-contracts':
+        specifier: workspace:*
+        version: link:../../packages/ai-contracts
       '@memoflow/cloud-auth':
         specifier: workspace:*
         version: link:../../packages/cloud-auth
@@ -576,6 +579,9 @@ importers:
       '@memoflow/ai':
         specifier: workspace:*
         version: link:../../packages/ai
+      '@memoflow/ai-contracts':
+        specifier: workspace:*
+        version: link:../../packages/ai-contracts
       '@memoflow/app-vue':
         specifier: workspace:*
         version: link:../../packages/app-vue
@@ -1367,6 +1373,9 @@ importers:
       '@mastra/pg':
         specifier: 1.27.0
         version: 1.27.0(@mastra/core@1.70.0(@bufbuild/protobuf@2.15.0)(@grpc/grpc-js@1.14.4)(effect@3.20.0)(express@5.2.1(supports-color@10.2.2))(rxjs@7.8.2)(supports-color@10.2.2)(valibot@1.4.2(@typescript/typescript6@6.0.2))(zod-to-json-schema@3.25.2(zod@4.6.5))(zod@4.6.5))
+      '@memoflow/ai-contracts':
+        specifier: workspace:*
+        version: link:../ai-contracts
       '@memoflow/contracts':
         specifier: workspace:*
         version: link:../contracts
@@ -1438,6 +1447,40 @@ importers:
         specifier: ^5.0.0
         version: 5.0.6
 
+  packages/ai-contracts:
+    dependencies:
+      '@memoflow/data-portability-contracts':
+        specifier: workspace:*
+        version: link:../data-portability-contracts
+      '@memoflow/goal-contracts':
+        specifier: workspace:*
+        version: link:../goal-contracts
+      '@memoflow/label-contracts':
+        specifier: workspace:*
+        version: link:../label-contracts
+      '@memoflow/repository-contracts':
+        specifier: workspace:*
+        version: link:../repository-contracts
+      '@memoflow/shared-primitives':
+        specifier: workspace:*
+        version: link:../shared-primitives
+      '@memoflow/task-contracts':
+        specifier: workspace:*
+        version: link:../task-contracts
+      '@memoflow/transport-contracts':
+        specifier: workspace:*
+        version: link:../transport-contracts
+      zod:
+        specifier: ^4.6.5
+        version: 4.6.5
+    devDependencies:
+      '@asteasolutions/zod-to-openapi':
+        specifier: ^9.1.0
+        version: 9.1.0(zod@4.6.5)
+      '@faker-js/faker':
+        specifier: 10.6.0
+        version: 10.6.0
+
   packages/app-react:
     dependencies:
       '@memoflow/account':
@@ -1446,6 +1489,9 @@ importers:
       '@memoflow/ai':
         specifier: workspace:*
         version: link:../ai
+      '@memoflow/ai-contracts':
+        specifier: workspace:*
+        version: link:../ai-contracts
       '@memoflow/cloud-auth':
         specifier: workspace:*
         version: link:../cloud-auth
@@ -1570,6 +1616,9 @@ importers:
       '@memoflow/ai':
         specifier: workspace:*
         version: link:../ai
+      '@memoflow/ai-contracts':
+        specifier: workspace:*
+        version: link:../ai-contracts
       '@memoflow/assets':
         specifier: workspace:*
         version: link:../assets
@@ -1830,6 +1879,9 @@ importers:
       '@asteasolutions/zod-to-openapi':
         specifier: ^9.1.0
         version: 9.1.0(zod@4.6.5)
+      '@memoflow/ai-contracts':
+        specifier: workspace:*
+        version: link:../ai-contracts
       '@memoflow/data-portability-contracts':
         specifier: workspace:*
         version: link:../data-portability-contracts
@@ -2142,6 +2194,9 @@ importers:
       '@lucide/vue':
         specifier: ^1.48.0
         version: 1.48.0(vue@3.5.43(@typescript/typescript6@6.0.2))
+      '@memoflow/ai-contracts':
+        specifier: workspace:*
+        version: link:../ai-contracts
       '@memoflow/contracts':
         specifier: workspace:*
         version: link:../contracts
@@ -2676,6 +2731,9 @@ importers:
       '@lucide/vue':
         specifier: ^1.48.0
         version: 1.48.0(vue@3.5.43(@typescript/typescript6@6.0.2))
+      '@memoflow/ai-contracts':
+        specifier: workspace:*
+        version: link:../ai-contracts
       '@memoflow/contracts':
         specifier: workspace:*
         version: link:../contracts
@@ -3197,6 +3255,9 @@ importers:
       '@lucide/vue':
         specifier: ^1.48.0
         version: 1.48.0(vue@3.5.43(@typescript/typescript6@6.0.2))
+      '@memoflow/ai-contracts':
+        specifier: workspace:*
+        version: link:../ai-contracts
       '@memoflow/contracts':
         specifier: workspace:*
         version: link:../contracts

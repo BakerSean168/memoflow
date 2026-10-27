@@ -21,7 +21,7 @@ import type {
   AIWorkflowRunView,
   AIChatPermissionMode,
   LocalAgentModelOptions,
-} from '@memoflow/contracts/ai';
+} from '@memoflow/ai-contracts';
 import { useAI } from './useAI';
 import { useGoal } from '@memoflow/goal-ui';
 import { useTask } from '@memoflow/task-ui';
@@ -1217,7 +1217,7 @@ export function useAIChatView(options: UseAIChatViewOptions) {
       ),
       canSaveNote: Boolean(repository && knowledgeNativeSurface),
       saveNote: saveLocalNote,
-      async select(choice: import('@memoflow/contracts/ai').AssistantRuntimeChoice) {
+      async select(choice: import('@memoflow/ai-contracts').AssistantRuntimeChoice) {
         const key =
           choice.runtimeKind === 'local_agent'
             ? `local:${choice.connectionId}`

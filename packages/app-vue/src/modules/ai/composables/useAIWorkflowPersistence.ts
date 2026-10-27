@@ -1,5 +1,5 @@
 import { ref, watch, type Ref } from 'vue';
-import { GoalPlanDraftContentSchema, type AIWorkflowRunView } from '@memoflow/contracts/ai';
+import { GoalPlanDraftContentSchema, type AIWorkflowRunView } from '@memoflow/ai-contracts';
 import {
   type EditableGoalKnowledge,
   type EditableGoalTask,

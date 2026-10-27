@@ -1,6 +1,6 @@
 import { AggregateRoot } from '@memoflow/utils/domain';
-import type { AIConversationClientDTO } from '@memoflow/contracts/ai';
-import { ConversationStatus } from '@memoflow/contracts/ai';
+import type { AIConversationClientDTO } from '@memoflow/ai-contracts';
+import { ConversationStatus } from '@memoflow/ai-contracts';
 import { AiConversationId } from '../../server/domain/value-objects/ai-conversation-id';
 import { IdentityId } from '@memoflow/domain-shared/shared';
 

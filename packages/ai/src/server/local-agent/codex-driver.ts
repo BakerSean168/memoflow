@@ -8,11 +8,11 @@ import type {
   LocalAgentModel,
   LocalAgentModelOptions,
   LocalAgentAccountSummary,
-} from '@memoflow/contracts/ai';
+} from '@memoflow/ai-contracts';
 import {
   LocalAgentModelOptionValueSchema,
   LocalAgentAccountSummarySchema,
-} from '@memoflow/contracts/ai';
+} from '@memoflow/ai-contracts';
 import {
   NativeRpcTransport,
   type NativeProcessOptions,

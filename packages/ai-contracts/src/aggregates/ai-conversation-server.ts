@@ -1,6 +1,7 @@
 /** Product-owned AI conversation shell. Message history is Mastra-owned. */
 
-import type { AiConversationId, IdentityId, TransferDate } from '@memoflow/shared-primitives';
+import type { IdentityId, TransferDate } from '@memoflow/shared-primitives';
+import type { AiConversationId } from '../ids';
 import type { ConversationStatus } from '../value-objects/conversation-status';
 
 export interface AIConversationServerDTO {

@@ -1,7 +1,7 @@
 import { effectScope, ref } from 'vue';
 import { flushPromises } from '@vue/test-utils';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import type { AIWorkflowRunView, WorkspaceEvent } from '@memoflow/contracts/ai';
+import type { AIWorkflowRunView, WorkspaceEvent } from '@memoflow/ai-contracts';
 import type { WorkspaceEventStreamOptions, WorkflowRuntimeClient } from '@memoflow/ai/client';
 import { useGoalWorkflowEvents } from './useGoalWorkflowEvents';
 

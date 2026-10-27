@@ -3,7 +3,7 @@ import type { AgentInstanceRegistry } from '../../agent-instance/agent-instance.
 import type { Result } from '@memoflow/transport-contracts/result';
 import { ok, error } from '@memoflow/transport-contracts/result';
 import type { ExecutionContext } from '@memoflow/contracts/shared';
-import type { QueryKnowledgeReq, QueryKnowledgeRes } from '@memoflow/contracts/ai';
+import type { QueryKnowledgeReq, QueryKnowledgeRes } from '@memoflow/ai-contracts';
 import { createLogger } from '@memoflow/utils/logger';
 
 import type { IAIProviderConfigRepository } from '../../../domain/repositories/i-ai-provider-config-repository';

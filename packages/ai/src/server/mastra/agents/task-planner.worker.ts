@@ -6,7 +6,7 @@ import {
   type TaskCreateWorkflowInput,
   type TaskPlanDraft,
   type TaskPlanningDecision,
-} from '@memoflow/contracts/ai';
+} from '@memoflow/ai-contracts';
 import type { IAIExecutionRecordPort } from '../../application/ports';
 import type { MastraModelResolver } from '../models/model-resolver';
 import {

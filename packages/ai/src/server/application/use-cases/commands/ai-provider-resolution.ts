@@ -2,7 +2,7 @@ import { AgentRegistryError } from '../../agent-instance/agent-instance.reposito
 import type { AgentInstanceRegistry } from '../../agent-instance/agent-instance.registry';
 import { AIExecutionError } from '../../../../shared/ai-execution-error';
 import { normalizeOpenAICompatibleModelId } from '../../../shared/openai-compatible-normalize';
-import type { AIProviderConfigServerDTO } from '@memoflow/contracts/ai';
+import type { AIProviderConfigServerDTO } from '@memoflow/ai-contracts';
 
 import type { IAIProviderConfigRepository } from '../../../domain/repositories/i-ai-provider-config-repository';
 import type {

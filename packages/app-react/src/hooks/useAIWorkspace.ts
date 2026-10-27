@@ -6,7 +6,7 @@ import {
   type AIProviderConfigClientDTO,
   type AssistantRuntimeHistoryView,
   type AssistantRuntimeMessageView,
-} from '@memoflow/contracts/ai';
+} from '@memoflow/ai-contracts';
 import { unwrap } from '@memoflow/contracts/result';
 import { presentErrorMessage } from '@memoflow/http-client';
 

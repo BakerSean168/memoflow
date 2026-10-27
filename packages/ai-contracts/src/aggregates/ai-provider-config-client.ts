@@ -10,11 +10,8 @@
 
 import { z } from 'zod';
 import { brandedId } from '@memoflow/shared-primitives';
-import type {
-  AiProviderConnectionId,
-  AIProviderCredentialRef,
-  IdentityId,
-} from '@memoflow/shared-primitives';
+import type { IdentityId } from '@memoflow/shared-primitives';
+import type { AiProviderConnectionId, AIProviderCredentialRef } from '../ids';
 import { AI_PROVIDER_CATALOG_IDS } from '../configs/ai-provider-catalog';
 
 // Residual 751: AIModelInfo dual body retired — OpenAPI + transport use

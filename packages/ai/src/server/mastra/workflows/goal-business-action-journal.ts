@@ -2,11 +2,11 @@ import {
   GoalWorkflowLiveActionJournalSchema,
   GoalWorkflowLiveActionSchema,
   type GoalWorkflowLiveActionRecord,
-} from '@memoflow/contracts/ai';
+} from '@memoflow/ai-contracts';
 
 import type { MastraCompositeStore } from '@mastra/core/storage';
 import type { RequestContext } from '@mastra/core/request-context';
-import type { GoalWorkflowLiveAction } from '@memoflow/contracts/ai';
+import type { GoalWorkflowLiveAction } from '@memoflow/ai-contracts';
 
 export const GOAL_WORKFLOW_LIVE_ACTION_SINK_KEY = 'goalWorkflowLiveActionSink';
 

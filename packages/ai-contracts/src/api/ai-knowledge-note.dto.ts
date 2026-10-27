@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import { brandedId } from '@memoflow/shared-primitives';
-import type { AiProviderConfigId } from '@memoflow/shared-primitives';
+import type { AiProviderConfigId } from '../ids';
 import { CreateKnowledgeNoteResSchema, KnowledgeNotePersistedRefSchema } from './response-schemas';
 
 function normalizeKnowledgeNoteTargetSubpath(value: string): string {

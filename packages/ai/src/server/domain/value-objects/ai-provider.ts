@@ -1,7 +1,7 @@
 import {
   AIProvider as AIProviderContract,
   type AIProvider as IAIProvider,
-} from '@memoflow/contracts/ai';
+} from '@memoflow/ai-contracts';
 
 /**
  * AIProvider 枚举类型
