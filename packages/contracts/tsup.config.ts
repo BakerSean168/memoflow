@@ -19,14 +19,12 @@ export default createTsupConfig({
     // 根入口（精简版，只导出核心类型和常用枚举）
     'src/index.ts',
     // 模块入口（完整模块导出）
-    'src/modules/agent-gateway/index.ts',
     'src/modules/account/index.ts',
     'src/modules/notification/index.ts',
     // 其他模块入口
     'src/result/index.ts',
     'src/shared/index.ts',
     'src/electron/index.ts',
-    'src/cloud-auth.ts',
 
     // 原语类型入口
     'src/primitives/index.ts',

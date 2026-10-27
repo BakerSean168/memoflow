@@ -4,7 +4,7 @@ import type {
   CloudAuthResponse,
   CloudSessionState,
   CloudSessionSummary,
-} from '@memoflow/contracts/cloud-auth';
+} from '@memoflow/cloud-auth-contracts';
 
 export type PasswordMutationOperation = 'change-password' | 'reset-password' | 'forgot-password';
 

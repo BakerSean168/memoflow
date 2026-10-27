@@ -37,17 +37,9 @@
       "types": "./dist/electron/index.d.ts",
       "import": "./dist/electron/index.js"
     },
-    "./cloud-auth": {
-      "types": "./dist/cloud-auth.d.ts",
-      "import": "./dist/cloud-auth.js"
-    },
     "./mocks": {
       "types": "./dist/mocks/index.d.ts",
       "import": "./dist/mocks/index.js"
-    },
-    "./agent-gateway": {
-      "types": "./dist/modules/agent-gateway/index.d.ts",
-      "import": "./dist/modules/agent-gateway/index.js"
     }
   },
   "dependencies": {

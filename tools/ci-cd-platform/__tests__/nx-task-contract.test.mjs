@@ -437,6 +437,7 @@ test('Unit/Contract aliases come from exact Nx execution configuration, not proj
     'ai-client',
     'ai-contracts',
     'ai-ui',
+    'cloud-auth-contracts',
     'contracts',
     'data-portability-contracts',
     'desktop-contracts',

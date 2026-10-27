@@ -8,7 +8,7 @@ import {
   type ExternalAgentClientPort,
   type ExternalAgentResult,
   type ExternalAgentFailureCode,
-} from '@memoflow/contracts/agent-gateway';
+} from '@memoflow/agent-gateway';
 import { fail, ok } from '@memoflow/contracts/result';
 
 /** Cookie-authenticated account controls with validated wire responses. */

@@ -1,4 +1,4 @@
-import type { CloudAccountSummary } from '@memoflow/contracts/cloud-auth';
+import type { CloudAccountSummary } from '@memoflow/cloud-auth-contracts';
 import type { ResultError } from '@memoflow/contracts/result';
 import { computed, ref } from 'vue';
 import { startGithubPopupSignIn } from './github-popup-sign-in';

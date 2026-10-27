@@ -10,8 +10,10 @@ import { TaskOccurrenceReadQuerySchema } from '@memoflow/task-contracts';
 it('rejects instants outside canonical calendar bounds at the MCP boundary', () => {
   for (const schema of [TaskOccurrenceListInputSchema, TaskOccurrenceReadQuerySchema]) {
     expect(
-      schema.safeParse({ startDate: Number.MAX_SAFE_INTEGER, endDate: Number.MAX_SAFE_INTEGER })
-        .success,
+      schema.safeParse({
+        startDate: Number.MAX_SAFE_INTEGER,
+        endDate: Number.MAX_SAFE_INTEGER,
+      }).success,
     ).toBe(false);
     expect(
       schema.safeParse({

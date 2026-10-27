@@ -8,8 +8,8 @@ import type { GoalDraftCheckpointStore } from '@memoflow/goal-ui';
  */
 
 import type { InjectionKey, Ref, ShallowRef } from 'vue';
-import type { CloudAuthDesktopClientPort } from '@memoflow/contracts/cloud-auth';
-import type { ExternalAgentClientPort } from '@memoflow/contracts/agent-gateway';
+import type { CloudAuthDesktopClientPort } from '@memoflow/cloud-auth-contracts';
+import type { ExternalAgentClientPort } from '@memoflow/agent-gateway';
 import type {
   DesktopAccessSnapshot,
   DesktopNotificationPreference,

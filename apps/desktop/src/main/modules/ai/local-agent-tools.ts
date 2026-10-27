@@ -20,7 +20,7 @@ import {
 } from '@memoflow/goal';
 import { GatewayReadError } from '@memoflow/agent-gateway';
 import { registerReadTools } from '@memoflow/agent-gateway/server';
-import { GatewayFailureCodeSchema } from '@memoflow/contracts/agent-gateway';
+import { GatewayFailureCodeSchema } from '@memoflow/agent-gateway';
 import {
   GoalAgentCreateSchema,
   GoalAgentUpdateSchema,

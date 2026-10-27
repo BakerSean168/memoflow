@@ -2,6 +2,10 @@
   "extends": "./tsconfig.json",
   "compilerOptions": {
     "paths": {
+      "@memoflow/cloud-auth-contracts": ["../cloud-auth-contracts/dist/index.d.ts"],
+      "@memoflow/cloud-auth-contracts/*": ["../cloud-auth-contracts/dist/*.d.ts"],
+      "@memoflow/agent-gateway": ["../agent-gateway/dist/index.d.ts"],
+      "@memoflow/agent-gateway/*": ["../agent-gateway/dist/*/index.d.ts"],
       "@/*": ["./src/*"],
       "@memoflow/goal-ui/host": ["../goal-ui/dist/goal-ui-host.d.ts"],
       "@memoflow/goal-ui": ["../goal-ui/dist/index.d.ts"],

@@ -3,7 +3,7 @@ import { flushPromises, mount } from '@vue/test-utils';
 import { createI18n } from 'vue-i18n';
 import { createPinia } from 'pinia';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import type { DesktopCloudConnectionAttempt } from '@memoflow/contracts/cloud-auth';
+import type { DesktopCloudConnectionAttempt } from '@memoflow/cloud-auth-contracts';
 import { ok } from '@memoflow/contracts/result';
 import { SystemChannels, WindowChannels } from '@memoflow/contracts/electron';
 import { DESKTOP_BRIDGE_KEY, DESKTOP_CLOUD_AUTH_SERVICE_KEY } from '../../di/keys';

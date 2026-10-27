@@ -3,6 +3,10 @@
   "compilerOptions": {
     "noEmit": true,
     "paths": {
+      "@memoflow/cloud-auth-contracts": ["../../packages/cloud-auth-contracts/dist/index.d.ts"],
+      "@memoflow/cloud-auth-contracts/*": ["../../packages/cloud-auth-contracts/dist/*.d.ts"],
+      "@memoflow/agent-gateway": ["../../packages/agent-gateway/dist/index.d.ts"],
+      "@memoflow/agent-gateway/*": ["../../packages/agent-gateway/dist/*/index.d.ts"],
       "@/*": ["../../apps/web/src/*"],
       "@memoflow/app-vue/web-core": ["../../packages/app-vue/src/web-core.ts"],
       "@memoflow/app-vue/web-shell-core": ["../../packages/app-vue/src/web-shell-core.ts"],

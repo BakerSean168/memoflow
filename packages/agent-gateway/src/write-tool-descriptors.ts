@@ -10,7 +10,7 @@ import {
   GatewayTaskCompleteSchema,
   GatewayGoalReceiptSchema,
   GatewayTaskReceiptSchema,
-} from '@memoflow/contracts/agent-gateway';
+} from './contracts';
 const annotations = {
   readOnlyHint: false,
   destructiveHint: false,

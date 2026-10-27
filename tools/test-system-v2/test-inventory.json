@@ -2816,6 +2816,30 @@
       ]
     },
     {
+      "path": "packages/agent-gateway/src/contracts/assisted.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/agent-gateway/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/agent-gateway/src/contracts/routine-writes.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/agent-gateway/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/agent-gateway/src/contracts/task-mcp-read-boundary.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/agent-gateway/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "packages/agent-gateway/src/server/read-gateway.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -5380,6 +5404,14 @@
       "measurementCollectors": []
     },
     {
+      "path": "packages/cloud-auth-contracts/src/index.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/cloud-auth-contracts/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "packages/cloud-auth/src/client/external-agent-client.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -5509,30 +5541,6 @@
     },
     {
       "path": "packages/contracts/src/modules/account/portable-v3.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/contracts/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
-      "path": "packages/contracts/src/modules/agent-gateway/assisted.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/contracts/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
-      "path": "packages/contracts/src/modules/agent-gateway/routine-writes.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/contracts/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
-      "path": "packages/contracts/src/modules/agent-gateway/task-mcp-read-boundary.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/contracts/vitest.config.ts"
@@ -12703,7 +12711,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 1
+      "fileCount": 4
     },
     {
       "id": "packages/ai-client/vitest.config.ts",
@@ -12748,6 +12756,13 @@
       "fileCount": 1
     },
     {
+      "id": "packages/cloud-auth-contracts/vitest.config.ts",
+      "type": "primary",
+      "suite": "unit",
+      "runner": "vitest",
+      "fileCount": 1
+    },
+    {
       "id": "packages/cloud-auth/vitest.config.ts",
       "type": "primary",
       "suite": "unit",
@@ -12759,7 +12774,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 10
+      "fileCount": 7
     },
     {
       "id": "packages/data-portability-contracts/vitest.config.ts",
@@ -13753,7 +13768,7 @@
   "duplicate": [],
   "unexpected": [],
   "counts": {
-    "unit": 1130,
+    "unit": 1131,
     "integration": 58,
     "smoke": 3,
     "boundary-ipc": 6,
