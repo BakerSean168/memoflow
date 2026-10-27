@@ -241,7 +241,7 @@ function taskResult(command: string, status: TaskOccurrenceClientDTO['status'], 
     result: instance({ status }).result,
     version: occurrence.version + 1,
   };
-  return ok({ toDTO: () => occurrence });
+  return ok(occurrence);
 }
 const taskService = {
   rescheduleOccurrence: async (id: string, request: unknown) => {
@@ -258,15 +258,15 @@ const taskService = {
       ],
     });
   },
-  getOccurrence: async () => ok({ toDTO: () => occurrence }),
-  getPlan: async () => ok({ toDTO: () => taskPlan }),
+  getOccurrence: async () => ok(occurrence),
+  getPlan: async () => ok(taskPlan),
   listPlans: async () =>
     ok({
-      plans: surface === 'task-quick' || surface === 'collision' ? [{ toDTO: () => taskPlan }] : [],
+      plans: surface === 'task-quick' || surface === 'collision' ? [taskPlan] : [],
       total: surface === 'task-quick' || surface === 'collision' ? 1 : 0,
     }),
   listOccurrencesByDateRange: async () =>
-    ok(surface === 'task-quick' || surface === 'collision' ? [{ toDTO: () => occurrence }] : []),
+    ok(surface === 'task-quick' || surface === 'collision' ? [occurrence] : []),
   completeOccurrence: async (_id: string, request?: unknown) =>
     taskResult('complete', 'Completed', request),
   uncompleteOccurrence: async () => taskResult('uncomplete', 'Pending'),

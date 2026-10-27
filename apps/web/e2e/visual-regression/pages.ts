@@ -160,14 +160,14 @@ const task = {
     writes.push({ owner: 'task', name: request.name });
     if (params.has('failCreate') && taskAttempts++ === 0)
       return fail({ code: 'INTERNAL_ERROR', message: 'Offline: retry the same draft' });
-    const created = { ...template, title: request.name, schedule: request.schedule };
-    return ok({ plan: { toDTO: () => created }, occurrenceCount: 1, todayOccurrenceCreated: true });
+    const created = { ...template, name: request.name, schedule: request.schedule };
+    return ok({ plan: created, occurrenceCount: 1, todayOccurrenceCreated: true });
   },
-  listPlans: async () => ok({ plans: [{ toDTO: () => template }], total: 1 }),
-  listOccurrencesByDateRange: async () => ok([{ toDTO: () => instance() }]),
+  listPlans: async () => ok({ plans: [template], total: 1 }),
+  listOccurrencesByDateRange: async () => ok([instance()]),
   getPlan: async (id: string) =>
     id === String(template.id)
-      ? ok({ id: template.id, toDTO: () => template })
+      ? ok(template)
       : fail({ code: 'NOT_FOUND', message: 'Fixture owner has not been created' }),
 };
 const notifications = [

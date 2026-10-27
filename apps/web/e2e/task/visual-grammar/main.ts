@@ -62,16 +62,16 @@ const ok = <T>(data: T) => ({ ok: true as const, data });
 // Partial injected ports: unexpected operations fail instead of pretending success.
 const taskService = {
   async listPlans() {
-    return ok({ plans: [{ toDTO: () => plan }], total: 1 });
+    return ok({ plans: [plan], total: 1 });
   },
   async listOccurrencesByDateRange() {
-    return ok([{ toDTO: () => instance() }]);
+    return ok([instance()]);
   },
   async getPlan() {
-    return ok({ toDTO: () => plan });
+    return ok(plan);
   },
   async getOccurrence() {
-    return ok({ toDTO: () => instance() });
+    return ok(instance());
   },
   async getWorkspace() {
     return ok({
@@ -113,7 +113,7 @@ const taskService = {
         : plan.labels,
       version: plan.version + 1,
     } as TaskPlanClientDTO;
-    return ok({ toDTO: () => plan });
+    return ok(plan);
   },
 } as unknown as ITaskService;
 const goalService = {
