@@ -1,6 +1,7 @@
+import { type RoutineOverrideChangedEvent } from '@memoflow/routine-contracts';
 import { describe, expect, it, vi } from 'vitest';
-import type { RoutineTemporaryOverride } from '@memoflow/reminder/schedule-execution/routine';
-import type { RoutineOverrideChangedEvent } from '@memoflow/reminder/schedule-projection/routine';
+import type { RoutineTemporaryOverride } from '@memoflow/routine/schedule-execution/routine';
+
 import { createRoutineOverrideChangedPublishingStore } from '../infrastructure-server/routine-override-changing-store';
 
 function override(): RoutineTemporaryOverride {

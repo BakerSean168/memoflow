@@ -1,7 +1,7 @@
 {
   "name": "@memoflow/account",
   "version": "0.0.1",
-  "description": "\u8d26\u6237\u6a21\u5757 - \u7528\u6237\u8d26\u6237\u751f\u547d\u5468\u671f\u7ba1\u7406",
+  "description": "账户模块 - 用户账户生命周期管理",
   "type": "module",
   "files": [
     "dist"
@@ -30,23 +30,24 @@
   "scripts": {},
   "dependencies": {
     "@memoflow/contracts": "workspace:*",
+    "@memoflow/data-portability-contracts": "workspace:*",
     "@memoflow/database": "workspace:*",
     "@memoflow/domain-shared": "workspace:*",
     "@memoflow/host-runtime": "workspace:*",
     "@memoflow/http-client": "workspace:*",
     "@memoflow/ipc-client": "workspace:*",
+    "@memoflow/operations-contracts": "workspace:*",
     "@memoflow/patterns": "workspace:*",
+    "@memoflow/reliable-messaging-contracts": "workspace:*",
+    "@memoflow/time": "workspace:*",
     "@memoflow/utils": "workspace:*",
     "express": "^5.2.1",
     "tslib": "^2.3.0",
-    "zod": "^4.6.5",
-    "@memoflow/time": "workspace:*",
-    "@memoflow/reliable-messaging-contracts": "workspace:*",
-    "@memoflow/operations-contracts": "workspace:*"
+    "zod": "^4.6.5"
   },
   "devDependencies": {
     "@memoflow/notification": "workspace:*",
-    "@memoflow/reminder": "workspace:*",
+    "@memoflow/routine": "workspace:*",
     "@memoflow/repository": "workspace:*",
     "@types/express": "^5.0.0"
   }

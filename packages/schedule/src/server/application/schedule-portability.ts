@@ -8,7 +8,7 @@ import type {
   PortableCapabilityExecutionContext,
   PortableCapabilityReceipt,
   PortableReferenceV3,
-} from '@memoflow/contracts/data-portability';
+} from '@memoflow/data-portability-contracts';
 import type { CalendarEntry } from '../domain/aggregates/calendar-entry';
 import { CalendarEntry as CalendarEntryEntity } from '../domain/aggregates/calendar-entry';
 import { ScheduleId } from '../domain/value-objects/schedule-id';

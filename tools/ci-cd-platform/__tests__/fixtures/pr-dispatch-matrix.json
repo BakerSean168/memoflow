@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "review": "P1.1 #628: explicit existing Nx project owners, exact merged Build/Types, Provider acceptance Nightly-only + P2 #634 label-contracts registration + P2 #634 goal-contracts / workspace-contracts / data-portability-contracts registration + P2 #630 relation-contracts registration + P2 #630 notification-contracts registration",
+  "review": "P1.1 #628: explicit existing Nx project owners, exact merged Build/Types, Provider acceptance Nightly-only + P2 #634 label-contracts registration + P2 #634 goal-contracts / workspace-contracts / data-portability-contracts registration + P2 #630 relation-contracts registration + P2 #630 notification-contracts registration + #630 routine domain rename and contracts/client/UI extraction (real Nx replay) + #630 routine domain rename and contracts/client/UI extraction (real Nx replay)",
   "cases": [
     {
       "id": "docs",
@@ -66,6 +66,7 @@
             "governance-tools",
             "notification-ui",
             "repository-ui",
+            "routine-ui",
             "ui-storybook",
             "web"
           ],
@@ -84,7 +85,8 @@
           "test:contract": [
             "goal-ui",
             "notification-ui",
-            "repository-ui"
+            "repository-ui",
+            "routine-ui"
           ],
           "test:smoke": [],
           "test:integration": [],
@@ -129,6 +131,7 @@
             "goal-ui:build",
             "notification-ui:build",
             "repository-ui:build",
+            "routine-ui:build",
             "ui-storybook:build",
             "web:build",
             "app-vue:typecheck",
@@ -157,7 +160,8 @@
           "contract": [
             "goal-ui:test:contract",
             "notification-ui:test:contract",
-            "repository-ui:test:contract"
+            "repository-ui:test:contract",
+            "routine-ui:test:contract"
           ]
         },
         "serverShards": [
@@ -772,11 +776,14 @@
             "relation",
             "relation-contracts",
             "reliable-messaging-contracts",
-            "reminder",
             "repository",
             "repository-client",
             "repository-contracts",
             "repository-ui",
+            "routine",
+            "routine-client",
+            "routine-contracts",
+            "routine-ui",
             "schedule",
             "schedule-client",
             "schedule-contracts",
@@ -834,11 +841,14 @@
             "relation",
             "relation-contracts",
             "reliable-messaging-contracts",
-            "reminder",
             "repository",
             "repository-client",
             "repository-contracts",
             "repository-ui",
+            "routine",
+            "routine-client",
+            "routine-contracts",
+            "routine-ui",
             "schedule",
             "schedule-client",
             "schedule-contracts",
@@ -897,11 +907,14 @@
             "relation",
             "relation-contracts",
             "reliable-messaging-contracts",
-            "reminder",
             "repository",
             "repository-client",
             "repository-contracts",
             "repository-ui",
+            "routine",
+            "routine-client",
+            "routine-contracts",
+            "routine-ui",
             "schedule",
             "schedule-client",
             "schedule-contracts",
@@ -937,6 +950,9 @@
             "repository-client",
             "repository-contracts",
             "repository-ui",
+            "routine-client",
+            "routine-contracts",
+            "routine-ui",
             "schedule-client",
             "schedule-contracts",
             "shared-primitives",
@@ -955,8 +971,8 @@
             "label",
             "notification",
             "relation",
-            "reminder",
             "repository",
+            "routine",
             "schedule",
             "scheduler",
             "task"
@@ -991,7 +1007,7 @@
             "domain-shared",
             "goal",
             "notification",
-            "reminder",
+            "routine",
             "schedule",
             "scheduler",
             "setting",
@@ -1008,7 +1024,7 @@
           "unit-1": [
             "goal:test",
             "ai:test",
-            "reminder:test",
+            "routine:test",
             "schedule:test",
             "goal-client:test",
             "powersync-schema:test",
@@ -1079,11 +1095,14 @@
             "relation:build",
             "relation-contracts:build",
             "reliable-messaging-contracts:build",
-            "reminder:build",
             "repository:build",
             "repository-client:build",
             "repository-contracts:build",
             "repository-ui:build",
+            "routine:build",
+            "routine-client:build",
+            "routine-contracts:build",
+            "routine-ui:build",
             "schedule:build",
             "schedule-client:build",
             "schedule-contracts:build",
@@ -1139,11 +1158,14 @@
             "relation:typecheck",
             "relation-contracts:typecheck",
             "reliable-messaging-contracts:typecheck",
-            "reminder:typecheck",
             "repository:typecheck",
             "repository-client:typecheck",
             "repository-contracts:typecheck",
             "repository-ui:typecheck",
+            "routine:typecheck",
+            "routine-client:typecheck",
+            "routine-contracts:typecheck",
+            "routine-ui:typecheck",
             "schedule:typecheck",
             "schedule-client:typecheck",
             "schedule-contracts:typecheck",
@@ -1188,8 +1210,8 @@
             "label:test:integration",
             "notification:test:integration",
             "relation:test:integration",
-            "reminder:test:integration",
             "repository:test:integration",
+            "routine:test:integration",
             "schedule:test:integration",
             "scheduler:test:integration",
             "task:test:integration"
@@ -1217,6 +1239,9 @@
             "repository-client:test:contract",
             "repository-contracts:test:contract",
             "repository-ui:test:contract",
+            "routine-client:test:contract",
+            "routine-contracts:test:contract",
+            "routine-ui:test:contract",
             "schedule-client:test:contract",
             "schedule-contracts:test:contract",
             "shared-primitives:test:contract",
@@ -1253,7 +1278,7 @@
               "notification:test:integration",
               "database:test:integration",
               "task:test:integration",
-              "reminder:test:integration",
+              "routine:test:integration",
               "api:test:smoke",
               "label:test:integration"
             ],
@@ -1308,11 +1333,14 @@
             "relation",
             "relation-contracts",
             "reliable-messaging-contracts",
-            "reminder",
             "repository",
             "repository-client",
             "repository-contracts",
             "repository-ui",
+            "routine",
+            "routine-client",
+            "routine-contracts",
+            "routine-ui",
             "schedule",
             "schedule-client",
             "schedule-contracts",
@@ -1370,11 +1398,14 @@
             "relation",
             "relation-contracts",
             "reliable-messaging-contracts",
-            "reminder",
             "repository",
             "repository-client",
             "repository-contracts",
             "repository-ui",
+            "routine",
+            "routine-client",
+            "routine-contracts",
+            "routine-ui",
             "schedule",
             "schedule-client",
             "schedule-contracts",
@@ -1433,11 +1464,14 @@
             "relation",
             "relation-contracts",
             "reliable-messaging-contracts",
-            "reminder",
             "repository",
             "repository-client",
             "repository-contracts",
             "repository-ui",
+            "routine",
+            "routine-client",
+            "routine-contracts",
+            "routine-ui",
             "schedule",
             "schedule-client",
             "schedule-contracts",
@@ -1473,6 +1507,9 @@
             "repository-client",
             "repository-contracts",
             "repository-ui",
+            "routine-client",
+            "routine-contracts",
+            "routine-ui",
             "schedule-client",
             "schedule-contracts",
             "shared-primitives",
@@ -1491,8 +1528,8 @@
             "label",
             "notification",
             "relation",
-            "reminder",
             "repository",
+            "routine",
             "schedule",
             "scheduler",
             "task"
@@ -1527,7 +1564,7 @@
             "domain-shared",
             "goal",
             "notification",
-            "reminder",
+            "routine",
             "schedule",
             "scheduler",
             "setting",
@@ -1544,7 +1581,7 @@
           "unit-1": [
             "goal:test",
             "ai:test",
-            "reminder:test",
+            "routine:test",
             "schedule:test",
             "goal-client:test",
             "powersync-schema:test",
@@ -1615,11 +1652,14 @@
             "relation:build",
             "relation-contracts:build",
             "reliable-messaging-contracts:build",
-            "reminder:build",
             "repository:build",
             "repository-client:build",
             "repository-contracts:build",
             "repository-ui:build",
+            "routine:build",
+            "routine-client:build",
+            "routine-contracts:build",
+            "routine-ui:build",
             "schedule:build",
             "schedule-client:build",
             "schedule-contracts:build",
@@ -1675,11 +1715,14 @@
             "relation:typecheck",
             "relation-contracts:typecheck",
             "reliable-messaging-contracts:typecheck",
-            "reminder:typecheck",
             "repository:typecheck",
             "repository-client:typecheck",
             "repository-contracts:typecheck",
             "repository-ui:typecheck",
+            "routine:typecheck",
+            "routine-client:typecheck",
+            "routine-contracts:typecheck",
+            "routine-ui:typecheck",
             "schedule:typecheck",
             "schedule-client:typecheck",
             "schedule-contracts:typecheck",
@@ -1724,8 +1767,8 @@
             "label:test:integration",
             "notification:test:integration",
             "relation:test:integration",
-            "reminder:test:integration",
             "repository:test:integration",
+            "routine:test:integration",
             "schedule:test:integration",
             "scheduler:test:integration",
             "task:test:integration"
@@ -1753,6 +1796,9 @@
             "repository-client:test:contract",
             "repository-contracts:test:contract",
             "repository-ui:test:contract",
+            "routine-client:test:contract",
+            "routine-contracts:test:contract",
+            "routine-ui:test:contract",
             "schedule-client:test:contract",
             "schedule-contracts:test:contract",
             "shared-primitives:test:contract",
@@ -1789,7 +1835,7 @@
               "notification:test:integration",
               "database:test:integration",
               "task:test:integration",
-              "reminder:test:integration",
+              "routine:test:integration",
               "api:test:smoke",
               "label:test:integration"
             ],
@@ -1811,6 +1857,7 @@
             "governance-tools",
             "notification-ui",
             "repository-ui",
+            "routine-ui",
             "ui-storybook"
           ],
           "typecheck": [
@@ -1824,7 +1871,8 @@
           "test:contract": [
             "goal-ui",
             "notification-ui",
-            "repository-ui"
+            "repository-ui",
+            "routine-ui"
           ],
           "test:smoke": [],
           "test:integration": [],
@@ -1865,6 +1913,7 @@
             "goal-ui:build",
             "notification-ui:build",
             "repository-ui:build",
+            "routine-ui:build",
             "ui-storybook:build",
             "app-vue:typecheck"
           ],
@@ -1888,7 +1937,8 @@
           "contract": [
             "goal-ui:test:contract",
             "notification-ui:test:contract",
-            "repository-ui:test:contract"
+            "repository-ui:test:contract",
+            "routine-ui:test:contract"
           ]
         },
         "serverShards": [
@@ -1950,11 +2000,14 @@
             "relation",
             "relation-contracts",
             "reliable-messaging-contracts",
-            "reminder",
             "repository",
             "repository-client",
             "repository-contracts",
             "repository-ui",
+            "routine",
+            "routine-client",
+            "routine-contracts",
+            "routine-ui",
             "schedule",
             "schedule-client",
             "schedule-contracts",
@@ -2012,11 +2065,14 @@
             "relation",
             "relation-contracts",
             "reliable-messaging-contracts",
-            "reminder",
             "repository",
             "repository-client",
             "repository-contracts",
             "repository-ui",
+            "routine",
+            "routine-client",
+            "routine-contracts",
+            "routine-ui",
             "schedule",
             "schedule-client",
             "schedule-contracts",
@@ -2075,11 +2131,14 @@
             "relation",
             "relation-contracts",
             "reliable-messaging-contracts",
-            "reminder",
             "repository",
             "repository-client",
             "repository-contracts",
             "repository-ui",
+            "routine",
+            "routine-client",
+            "routine-contracts",
+            "routine-ui",
             "schedule",
             "schedule-client",
             "schedule-contracts",
@@ -2115,6 +2174,9 @@
             "repository-client",
             "repository-contracts",
             "repository-ui",
+            "routine-client",
+            "routine-contracts",
+            "routine-ui",
             "schedule-client",
             "schedule-contracts",
             "shared-primitives",
@@ -2133,8 +2195,8 @@
             "label",
             "notification",
             "relation",
-            "reminder",
             "repository",
+            "routine",
             "schedule",
             "scheduler",
             "task"
@@ -2169,7 +2231,7 @@
             "domain-shared",
             "goal",
             "notification",
-            "reminder",
+            "routine",
             "schedule",
             "scheduler",
             "setting",
@@ -2186,7 +2248,7 @@
           "unit-1": [
             "goal:test",
             "ai:test",
-            "reminder:test",
+            "routine:test",
             "schedule:test",
             "goal-client:test",
             "powersync-schema:test",
@@ -2257,11 +2319,14 @@
             "relation:build",
             "relation-contracts:build",
             "reliable-messaging-contracts:build",
-            "reminder:build",
             "repository:build",
             "repository-client:build",
             "repository-contracts:build",
             "repository-ui:build",
+            "routine:build",
+            "routine-client:build",
+            "routine-contracts:build",
+            "routine-ui:build",
             "schedule:build",
             "schedule-client:build",
             "schedule-contracts:build",
@@ -2317,11 +2382,14 @@
             "relation:typecheck",
             "relation-contracts:typecheck",
             "reliable-messaging-contracts:typecheck",
-            "reminder:typecheck",
             "repository:typecheck",
             "repository-client:typecheck",
             "repository-contracts:typecheck",
             "repository-ui:typecheck",
+            "routine:typecheck",
+            "routine-client:typecheck",
+            "routine-contracts:typecheck",
+            "routine-ui:typecheck",
             "schedule:typecheck",
             "schedule-client:typecheck",
             "schedule-contracts:typecheck",
@@ -2366,8 +2434,8 @@
             "label:test:integration",
             "notification:test:integration",
             "relation:test:integration",
-            "reminder:test:integration",
             "repository:test:integration",
+            "routine:test:integration",
             "schedule:test:integration",
             "scheduler:test:integration",
             "task:test:integration",
@@ -2396,6 +2464,9 @@
             "repository-client:test:contract",
             "repository-contracts:test:contract",
             "repository-ui:test:contract",
+            "routine-client:test:contract",
+            "routine-contracts:test:contract",
+            "routine-ui:test:contract",
             "schedule-client:test:contract",
             "schedule-contracts:test:contract",
             "shared-primitives:test:contract",
@@ -2432,7 +2503,7 @@
               "notification:test:integration",
               "database:test:integration",
               "task:test:integration",
-              "reminder:test:integration",
+              "routine:test:integration",
               "desktop:test:main",
               "scheduler:test:integration",
               "desktop:test:ipc"
@@ -2611,6 +2682,665 @@
               "api:test:smoke"
             ],
             "estimatedMs": 31460
+          }
+        ]
+      }
+    },
+    {
+      "id": "routine-contracts",
+      "files": [
+        "packages/routine-contracts/src/routine.ts"
+      ],
+      "expected": {
+        "full": false,
+        "targets": {
+          "build": [
+            "@memoflow/test-utils",
+            "account",
+            "agent-gateway",
+            "ai",
+            "api",
+            "app-vue",
+            "cloud-auth",
+            "contracts",
+            "data-portability",
+            "database",
+            "desktop",
+            "domain-shared",
+            "goal",
+            "goal-client",
+            "goal-core",
+            "goal-ui",
+            "governance-tools",
+            "label",
+            "migrator",
+            "notification",
+            "notification-ui",
+            "patterns",
+            "relation",
+            "repository",
+            "repository-ui",
+            "routine",
+            "routine-client",
+            "routine-contracts",
+            "routine-ui",
+            "schedule",
+            "schedule-client",
+            "schedule-orchestration",
+            "schedule-ui",
+            "scheduler",
+            "setting",
+            "task",
+            "ui-storybook",
+            "ui-vue-shadcn",
+            "utils",
+            "web",
+            "workspace-contracts"
+          ],
+          "typecheck": [
+            "@memoflow/test-utils",
+            "account",
+            "agent-gateway",
+            "ai",
+            "api",
+            "app-react",
+            "app-vue",
+            "cloud-auth",
+            "contracts",
+            "data-portability",
+            "database",
+            "desktop",
+            "domain-shared",
+            "goal",
+            "goal-client",
+            "goal-core",
+            "goal-ui",
+            "label",
+            "migrator",
+            "mobile",
+            "notification",
+            "notification-ui",
+            "patterns",
+            "relation",
+            "repository",
+            "repository-ui",
+            "routine",
+            "routine-client",
+            "routine-contracts",
+            "routine-ui",
+            "schedule",
+            "schedule-client",
+            "schedule-orchestration",
+            "schedule-ui",
+            "scheduler",
+            "setting",
+            "task",
+            "ui-storybook",
+            "ui-vue-shadcn",
+            "utils",
+            "web",
+            "workspace-contracts"
+          ],
+          "test": [
+            "account",
+            "agent-gateway",
+            "ai",
+            "api",
+            "app-vue",
+            "cloud-auth",
+            "contracts",
+            "data-portability",
+            "database",
+            "desktop",
+            "domain-shared",
+            "goal",
+            "goal-client",
+            "goal-core",
+            "goal-ui",
+            "governance-tools",
+            "label",
+            "migrator",
+            "notification",
+            "notification-ui",
+            "patterns",
+            "relation",
+            "repository",
+            "repository-ui",
+            "routine",
+            "routine-client",
+            "routine-contracts",
+            "routine-ui",
+            "schedule",
+            "schedule-client",
+            "schedule-orchestration",
+            "schedule-ui",
+            "scheduler",
+            "setting",
+            "task",
+            "ui-vue-shadcn",
+            "utils",
+            "web",
+            "workspace-contracts"
+          ],
+          "test:contract": [
+            "contracts",
+            "goal-ui",
+            "notification-ui",
+            "repository-ui",
+            "routine-client",
+            "routine-contracts",
+            "routine-ui",
+            "schedule-client",
+            "workspace-contracts"
+          ],
+          "test:smoke": [
+            "api"
+          ],
+          "test:integration": [
+            "account",
+            "ai",
+            "api",
+            "database",
+            "goal",
+            "label",
+            "notification",
+            "relation",
+            "repository",
+            "routine",
+            "schedule",
+            "scheduler",
+            "task"
+          ],
+          "test:boundary": [
+            "desktop"
+          ],
+          "test:ipc": [
+            "desktop"
+          ],
+          "test:main": [
+            "desktop"
+          ],
+          "test:perf": [
+            "task"
+          ],
+          "test:interaction": [
+            "ui-storybook"
+          ],
+          "e2e:ai-provider": [
+            "web"
+          ],
+          "e2e:visual-regression": [
+            "web"
+          ],
+          "test:coverage": [
+            "account",
+            "ai",
+            "api",
+            "app-vue",
+            "data-portability",
+            "domain-shared",
+            "goal",
+            "notification",
+            "routine",
+            "schedule",
+            "scheduler",
+            "setting",
+            "task"
+          ]
+        },
+        "jobs": {
+          "lint": [
+            "workspace:lint",
+            "workspace:format",
+            "workspace:sync",
+            "memoflow:governance-check"
+          ],
+          "unit-1": [
+            "goal:test",
+            "ai:test",
+            "routine:test",
+            "goal-client:test",
+            "schedule-ui:test",
+            "setting:test",
+            "utils:test",
+            "label:test"
+          ],
+          "unit-2": [
+            "task:test",
+            "account:test",
+            "repository:test",
+            "goal-core:test",
+            "schedule-orchestration:test",
+            "data-portability:test",
+            "relation:test",
+            "agent-gateway:test",
+            "domain-shared:test"
+          ],
+          "unit-3": [
+            "desktop:test",
+            "notification:test",
+            "schedule:test",
+            "cloud-auth:test",
+            "ui-vue-shadcn:test",
+            "scheduler:test",
+            "patterns:test"
+          ],
+          "build": [
+            "account:build",
+            "agent-gateway:build",
+            "ai:build",
+            "api:build",
+            "app-vue:build",
+            "cloud-auth:build",
+            "contracts:build",
+            "data-portability:build",
+            "database:build",
+            "desktop:build",
+            "domain-shared:build",
+            "goal:build",
+            "goal-client:build",
+            "goal-core:build",
+            "goal-ui:build",
+            "label:build",
+            "migrator:build",
+            "notification:build",
+            "notification-ui:build",
+            "patterns:build",
+            "relation:build",
+            "repository:build",
+            "repository-ui:build",
+            "routine:build",
+            "routine-client:build",
+            "routine-contracts:build",
+            "routine-ui:build",
+            "schedule:build",
+            "schedule-client:build",
+            "schedule-orchestration:build",
+            "schedule-ui:build",
+            "scheduler:build",
+            "setting:build",
+            "task:build",
+            "ui-storybook:build",
+            "ui-vue-shadcn:build",
+            "utils:build",
+            "web:build",
+            "workspace-contracts:build",
+            "@memoflow/test-utils:typecheck",
+            "account:typecheck",
+            "agent-gateway:typecheck",
+            "ai:typecheck",
+            "api:typecheck",
+            "app-react:typecheck",
+            "app-vue:typecheck",
+            "cloud-auth:typecheck",
+            "contracts:typecheck",
+            "data-portability:typecheck",
+            "database:typecheck",
+            "desktop:typecheck",
+            "domain-shared:typecheck",
+            "goal:typecheck",
+            "goal-client:typecheck",
+            "goal-core:typecheck",
+            "goal-ui:typecheck",
+            "label:typecheck",
+            "migrator:typecheck",
+            "mobile:typecheck",
+            "notification:typecheck",
+            "notification-ui:typecheck",
+            "patterns:typecheck",
+            "relation:typecheck",
+            "repository:typecheck",
+            "repository-ui:typecheck",
+            "routine:typecheck",
+            "routine-client:typecheck",
+            "routine-contracts:typecheck",
+            "routine-ui:typecheck",
+            "schedule:typecheck",
+            "schedule-client:typecheck",
+            "schedule-orchestration:typecheck",
+            "schedule-ui:typecheck",
+            "scheduler:typecheck",
+            "setting:typecheck",
+            "task:typecheck",
+            "ui-storybook:typecheck",
+            "ui-vue-shadcn:typecheck",
+            "utils:typecheck",
+            "web:typecheck",
+            "workspace-contracts:typecheck"
+          ],
+          "web-unit-1": [
+            "app-vue:test#1/2",
+            "web:test"
+          ],
+          "web-unit-2": [
+            "app-vue:test#2/2"
+          ],
+          "server-unit": [
+            "api:test",
+            "database:test",
+            "migrator:test"
+          ],
+          "verification-children": [
+            "desktop:test:ipc",
+            "desktop:test:main",
+            "api:test:smoke",
+            "account:test:integration",
+            "ai:test:integration",
+            "api:test:integration",
+            "database:test:integration",
+            "goal:test:integration",
+            "label:test:integration",
+            "notification:test:integration",
+            "relation:test:integration",
+            "repository:test:integration",
+            "routine:test:integration",
+            "schedule:test:integration",
+            "scheduler:test:integration",
+            "task:test:integration"
+          ],
+          "web-visual": [
+            "web:e2e:visual-regression"
+          ],
+          "component-browser": [
+            "ui-storybook:test:interaction"
+          ],
+          "contract": [
+            "contracts:test:contract",
+            "goal-ui:test:contract",
+            "notification-ui:test:contract",
+            "repository-ui:test:contract",
+            "routine-client:test:contract",
+            "routine-contracts:test:contract",
+            "routine-ui:test:contract",
+            "schedule-client:test:contract",
+            "workspace-contracts:test:contract"
+          ]
+        },
+        "serverShards": [
+          {
+            "id": "1/3",
+            "keys": [
+              "api:test:integration",
+              "desktop:test:main",
+              "scheduler:test:integration",
+              "desktop:test:ipc"
+            ],
+            "estimatedMs": 37079
+          },
+          {
+            "id": "2/3",
+            "keys": [
+              "account:test:integration",
+              "goal:test:integration",
+              "schedule:test:integration",
+              "repository:test:integration",
+              "ai:test:integration",
+              "relation:test:integration"
+            ],
+            "estimatedMs": 37020
+          },
+          {
+            "id": "3/3",
+            "keys": [
+              "notification:test:integration",
+              "database:test:integration",
+              "task:test:integration",
+              "routine:test:integration",
+              "api:test:smoke",
+              "label:test:integration"
+            ],
+            "estimatedMs": 36450
+          }
+        ]
+      }
+    },
+    {
+      "id": "routine-client",
+      "files": [
+        "packages/routine-client/src/index.ts"
+      ],
+      "expected": {
+        "full": false,
+        "targets": {
+          "build": [
+            "app-vue",
+            "desktop",
+            "governance-tools",
+            "routine-client",
+            "routine-ui",
+            "schedule-ui",
+            "ui-storybook",
+            "web"
+          ],
+          "typecheck": [
+            "app-vue",
+            "desktop",
+            "routine-client",
+            "routine-ui",
+            "schedule-ui",
+            "ui-storybook",
+            "web"
+          ],
+          "test": [
+            "app-vue",
+            "desktop",
+            "governance-tools",
+            "routine-client",
+            "routine-ui",
+            "schedule-ui",
+            "web"
+          ],
+          "test:contract": [
+            "routine-client",
+            "routine-ui"
+          ],
+          "test:smoke": [],
+          "test:integration": [],
+          "test:boundary": [
+            "desktop"
+          ],
+          "test:ipc": [
+            "desktop"
+          ],
+          "test:main": [
+            "desktop"
+          ],
+          "test:perf": [],
+          "test:interaction": [
+            "ui-storybook"
+          ],
+          "e2e:ai-provider": [
+            "web"
+          ],
+          "e2e:visual-regression": [
+            "web"
+          ],
+          "test:coverage": [
+            "app-vue"
+          ]
+        },
+        "jobs": {
+          "lint": [
+            "workspace:lint",
+            "workspace:format",
+            "workspace:sync",
+            "memoflow:governance-check"
+          ],
+          "unit-1": [],
+          "unit-2": [],
+          "unit-3": [
+            "desktop:test",
+            "schedule-ui:test"
+          ],
+          "build": [
+            "app-vue:build",
+            "desktop:build",
+            "routine-client:build",
+            "routine-ui:build",
+            "schedule-ui:build",
+            "ui-storybook:build",
+            "web:build",
+            "app-vue:typecheck",
+            "desktop:typecheck",
+            "routine-client:typecheck",
+            "routine-ui:typecheck",
+            "schedule-ui:typecheck",
+            "ui-storybook:typecheck",
+            "web:typecheck"
+          ],
+          "web-unit-1": [
+            "app-vue:test#1/2",
+            "web:test"
+          ],
+          "web-unit-2": [
+            "app-vue:test#2/2"
+          ],
+          "server-unit": [],
+          "verification-children": [
+            "desktop:test:ipc",
+            "desktop:test:main"
+          ],
+          "web-visual": [
+            "web:e2e:visual-regression"
+          ],
+          "component-browser": [
+            "ui-storybook:test:interaction"
+          ],
+          "contract": [
+            "routine-client:test:contract",
+            "routine-ui:test:contract"
+          ]
+        },
+        "serverShards": [
+          {
+            "id": "1/1",
+            "keys": [
+              "desktop:test:main",
+              "desktop:test:ipc"
+            ],
+            "estimatedMs": 7849
+          }
+        ]
+      }
+    },
+    {
+      "id": "routine-ui",
+      "files": [
+        "packages/routine-ui/src/components/RoutineEditorDialog.vue"
+      ],
+      "expected": {
+        "full": false,
+        "targets": {
+          "build": [
+            "app-vue",
+            "desktop",
+            "governance-tools",
+            "routine-ui",
+            "schedule-ui",
+            "ui-storybook",
+            "web"
+          ],
+          "typecheck": [
+            "app-vue",
+            "desktop",
+            "routine-ui",
+            "schedule-ui",
+            "ui-storybook",
+            "web"
+          ],
+          "test": [
+            "app-vue",
+            "desktop",
+            "governance-tools",
+            "routine-ui",
+            "schedule-ui",
+            "web"
+          ],
+          "test:contract": [
+            "routine-ui"
+          ],
+          "test:smoke": [],
+          "test:integration": [],
+          "test:boundary": [
+            "desktop"
+          ],
+          "test:ipc": [
+            "desktop"
+          ],
+          "test:main": [
+            "desktop"
+          ],
+          "test:perf": [],
+          "test:interaction": [
+            "ui-storybook"
+          ],
+          "e2e:ai-provider": [
+            "web"
+          ],
+          "e2e:visual-regression": [
+            "web"
+          ],
+          "test:coverage": [
+            "app-vue"
+          ]
+        },
+        "jobs": {
+          "lint": [
+            "workspace:lint",
+            "workspace:format",
+            "workspace:sync",
+            "memoflow:governance-check"
+          ],
+          "unit-1": [],
+          "unit-2": [],
+          "unit-3": [
+            "desktop:test",
+            "schedule-ui:test"
+          ],
+          "build": [
+            "app-vue:build",
+            "desktop:build",
+            "routine-ui:build",
+            "schedule-ui:build",
+            "ui-storybook:build",
+            "web:build",
+            "app-vue:typecheck",
+            "desktop:typecheck",
+            "routine-ui:typecheck",
+            "schedule-ui:typecheck",
+            "ui-storybook:typecheck",
+            "web:typecheck"
+          ],
+          "web-unit-1": [
+            "app-vue:test#1/2",
+            "web:test"
+          ],
+          "web-unit-2": [
+            "app-vue:test#2/2"
+          ],
+          "server-unit": [],
+          "verification-children": [
+            "desktop:test:ipc",
+            "desktop:test:main"
+          ],
+          "web-visual": [
+            "web:e2e:visual-regression"
+          ],
+          "component-browser": [
+            "ui-storybook:test:interaction"
+          ],
+          "contract": [
+            "routine-ui:test:contract"
+          ]
+        },
+        "serverShards": [
+          {
+            "id": "1/1",
+            "keys": [
+              "desktop:test:main",
+              "desktop:test:ipc"
+            ],
+            "estimatedMs": 7849
           }
         ]
       }

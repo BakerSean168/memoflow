@@ -88,12 +88,12 @@
       "focused": [
         {
           "runner": "reminder-unit",
-          "file": "packages/reminder/src/server/domain/routine/__tests__/next-eligible-occurrence.spec.ts",
+          "file": "packages/routine/src/server/domain/routine/__tests__/next-eligible-occurrence.spec.ts",
           "title": "resolves the next 23:30 occurrence in a non-UTC IANA timezone"
         },
         {
           "runner": "reminder-integration",
-          "file": "packages/reminder/src/server/infrastructure/routine-schedule/__tests__/routine-prisma-adapters.integration.test.ts",
+          "file": "packages/routine/src/server/infrastructure/routine-schedule/__tests__/routine-prisma-adapters.integration.test.ts",
           "title": "honors a durably persisted snooze in the production projection (Fixture F)"
         }
       ]
@@ -104,7 +104,7 @@
       "focused": [
         {
           "runner": "reminder-unit",
-          "file": "packages/reminder/src/server/runtime/active-usage/active-usage.runtime.spec.ts",
+          "file": "packages/routine/src/server/runtime/active-usage/active-usage.runtime.spec.ts",
           "title": "Fixture G: 40m active -> due, then a 6m natural break satisfies and resets without duplicate occurrence"
         }
       ]
@@ -115,12 +115,12 @@
       "focused": [
         {
           "runner": "reminder-unit",
-          "file": "packages/reminder/src/server/runtime/protocol-break-credit/protocol-break-credit.runtime.spec.ts",
+          "file": "packages/routine/src/server/runtime/protocol-break-credit/protocol-break-credit.runtime.spec.ts",
           "title": "Fixture H: a completed 50/10 break satisfies Stand/Eye/Movement and prevents immediate duplicate intervention"
         },
         {
           "runner": "reminder-unit",
-          "file": "packages/reminder/src/server/runtime/protocol/protocol-session.runtime.spec.ts",
+          "file": "packages/routine/src/server/runtime/protocol/protocol-session.runtime.spec.ts",
           "title": "recovers crash-during-focus and crash-during-break from persisted deadlines"
         }
       ]

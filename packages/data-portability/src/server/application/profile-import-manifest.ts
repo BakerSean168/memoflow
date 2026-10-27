@@ -1,6 +1,6 @@
 import { createHash } from 'node:crypto';
 import { z } from 'zod';
-import type { ProfileImportBinding } from '@memoflow/contracts/data-portability';
+import type { ProfileImportBinding } from '@memoflow/data-portability-contracts';
 
 type JsonValue = z.infer<ReturnType<typeof z.json>>;
 

@@ -3,7 +3,7 @@ import type {
   ExportPortableDataV3Res,
   PortableDataV3ImportReq,
   PortableDataV3ImportRes,
-} from '@memoflow/contracts/data-portability';
+} from '@memoflow/data-portability-contracts';
 
 /**
  * Transport-neutral data portability application surface.

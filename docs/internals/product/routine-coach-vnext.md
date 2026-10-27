@@ -1600,7 +1600,7 @@ vNext 原则：
 
 ### 18.3 当前代码事实（2026-09-17）
 
-- `packages/reminder` 仍是历史物理包名，但旧 Reminder 兼容写入口已由 R4-2201C 删除；canonical `RoutineDefinition`、M:N `ProfileMembership`、RoutineOccurrence/Interaction 是唯一真值；
+- `packages/routine` 仍是历史物理包名，但旧 Reminder 兼容写入口已由 R4-2201C 删除；canonical `RoutineDefinition`、M:N `ProfileMembership`、RoutineOccurrence/Interaction 是唯一真值；
 - Profile 只作为 Gate；`ControlMode` 与 single-group ownership 已删除；
 - WallClock 由 Scheduler 唯一 durable wake-up authority 驱动，旧 `ReminderSchedulerService` / cron scanner 已删除；
 - ActiveUsage runtime 与 activity sensor 在 Desktop 本地执行，端能力不伪造；
@@ -1808,7 +1808,7 @@ Renderer Window 只是 Runtime state 的投影。
 这些问题不改变当前已实施的 Routine owner/runtime 边界；若未来扩展产品能力，实施前需要另行收敛：
 
 1. 产品最终中文名称：提醒 / 节律 / 习惯 / Routine / Focus；
-2. `packages/reminder` 是否最终物理重命名为 `packages/routine`，还是先保持 package 名兼容、仅迁领域模型；
+2. `packages/routine` 是否最终物理重命名为 `packages/routine`，还是先保持 package 名兼容、仅迁领域模型；
 3. 第一阶段平台传感器只做 Windows，还是同时抽象 Windows/macOS/Linux；
 4. Work / Study / Gaming 是否在 UI 上默认互斥，还是允许用户并行激活；
 5. DND / active app detection 第一版是否进入 MVP；

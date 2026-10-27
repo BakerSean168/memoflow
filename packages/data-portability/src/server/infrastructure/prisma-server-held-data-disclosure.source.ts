@@ -13,7 +13,7 @@ import type {
   ServerHeldRemoteHistoryFence,
   ServerHeldKnowledgeProjectionCheckpoint,
   ServerHeldKnowledgeWriteRequest,
-} from '@memoflow/contracts/data-portability';
+} from '../application/server-held-data-disclosure.v1.dto';
 import {
   KnowledgeDocumentIdSchema,
   KnowledgeDocumentIdentityOriginSchema,

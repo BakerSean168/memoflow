@@ -1,3 +1,4 @@
+import { installRoutineUiHost } from '../../di/routine-ui-host';
 /** @vitest-environment happy-dom */
 
 import { flushPromises, mount } from '@vue/test-utils';
@@ -800,3 +801,5 @@ describe('AppShell right-panel integration', () => {
     wrapper.unmount();
   });
 });
+
+installRoutineUiHost();

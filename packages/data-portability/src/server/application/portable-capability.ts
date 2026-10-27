@@ -3,14 +3,14 @@ import type {
   PortableCapabilityExecutionContext,
   PortableCapabilityKey,
   PortableCapabilityReceipt,
-} from '@memoflow/contracts/data-portability';
-import { PortableCapabilityKeySchema } from '@memoflow/contracts/data-portability';
+} from '@memoflow/data-portability-contracts';
+import { PortableCapabilityKeySchema } from '@memoflow/data-portability-contracts';
 
 export type {
   PortableCapability,
   PortableCapabilityExecutionContext,
   PortableCapabilityReceipt,
-} from '@memoflow/contracts/data-portability';
+} from '@memoflow/data-portability-contracts';
 
 export interface RegisteredPortableCapability {
   readonly key: PortableCapabilityKey;

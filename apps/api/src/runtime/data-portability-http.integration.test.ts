@@ -1,7 +1,7 @@
 import request from 'supertest';
 import type { Express } from 'express';
 import { afterAll, afterEach, beforeEach, describe, expect, it } from 'vitest';
-import { PortableBackupEnvelopeV3Schema } from '@memoflow/contracts/data-portability';
+import { PortableBackupEnvelopeV3Schema } from '@memoflow/data-portability-contracts';
 import {
   cleanAll,
   disconnectPrisma,

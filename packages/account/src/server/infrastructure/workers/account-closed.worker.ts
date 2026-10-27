@@ -1,7 +1,7 @@
 import type { PrismaClient } from '@memoflow/database';
 
 // Structural consumer shape (boundary: scope:account must not import
-// scope:reminder/scope:notification libs; real consumers injected at composition root).
+// scope:routine/scope:notification libs; real consumers injected at composition root).
 export interface AccountClosedConsumerLike {
   handleAccountClosed(event: unknown, eventId: string): Promise<void>;
 }
