@@ -196,7 +196,7 @@
           },
           {
             "sourceTag": "scope:setting",
-            "onlyDependOnLibsWithTags": ["scope:shared", "scope:patterns", "scope:setting"]
+            "onlyDependOnLibsWithTags": ["scope:shared", "scope:patterns", "scope:setting", "scope:ui"]
           },
           {
             "sourceTag": "scope:task",
