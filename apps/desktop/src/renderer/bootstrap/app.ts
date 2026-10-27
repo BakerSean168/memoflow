@@ -60,7 +60,7 @@ export async function bootstrapMainApp() {
   const localAccount = await createAccountIpcClient(
     createResultIpcClient({ bridge }),
   ).getMyProfile();
-  if (localAccount.ok) accountStore.setCurrentAccount(localAccount.data.account.toDTO());
+  if (localAccount.ok) accountStore.setCurrentAccount(localAccount.data.account);
   else accountStore.reset();
 
   const router = createAppRouter({
