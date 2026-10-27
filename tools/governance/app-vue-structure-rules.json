@@ -360,7 +360,9 @@
       "reason": "use-ai-chat-host-dispatch: AST/type structural rules replacing source-text locks (#502).",
       "file": "packages/ai-ui/src/composables/useAIChatView.ts",
       "requireIdentifiers": ["AI_ASSISTANT_RUNTIME_KEY"],
-      "requireExpressions": ["useStrictInject(AI_ASSISTANT_RUNTIME_KEY, 'AIAssistantRuntime')"]
+      "requireExpressions": [
+        "aiUiHost.useStrictInject(AI_ASSISTANT_RUNTIME_KEY, 'AIAssistantRuntime')"
+      ]
     },
     {
       "id": "rule-use-ai-chat-host-dispatch-101",
