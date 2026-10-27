@@ -5,8 +5,8 @@
  * Extracted from TaskPlan aggregate to reduce aggregate size.
  */
 
-import type { TaskGoalProgressRule, GoalContributionRule } from '@memoflow/contracts/task';
-import { TaskGoalBindingTrigger, TaskRecurrenceEndKind } from '@memoflow/contracts/task';
+import type { TaskGoalProgressRule, GoalContributionRule } from '@memoflow/task-contracts';
+import { TaskGoalBindingTrigger, TaskRecurrenceEndKind } from '@memoflow/task-contracts';
 import { TaskPlanStatus } from '../../domain/value-objects/task-plan-status';
 import { TaskGoalBinding, type TaskPlanSchedule } from '../value-objects';
 import { InvalidGoalBindingError } from '../value-objects/task-errors';

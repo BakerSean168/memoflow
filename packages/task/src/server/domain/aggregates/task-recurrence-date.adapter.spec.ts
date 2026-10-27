@@ -3,7 +3,7 @@ import {
   RecurrenceFrequency,
   TaskRecurrenceEndKind,
   type TaskRecurrence,
-} from '@memoflow/contracts/task';
+} from '@memoflow/task-contracts';
 import type { RecurrenceEnginePort, RecurrenceSchedule } from '@memoflow/time';
 import { asYmd, createTimeContext, createTimeFacade } from '@memoflow/time';
 import { createTaskRecurrenceDateAdapter } from './task-recurrence-date.adapter';

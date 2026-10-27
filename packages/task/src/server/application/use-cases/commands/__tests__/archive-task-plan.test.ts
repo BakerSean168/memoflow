@@ -8,7 +8,7 @@ import {
 } from '../../../../../testing';
 import type { ITaskPlanRepository } from '../../../../domain/repositories/i-task-plan-repository';
 import { ArchiveTaskPlanUseCase } from '../archive-task-plan.use-case';
-import { TaskPlanStatus } from '@memoflow/contracts/task';
+import { TaskPlanStatus } from '@memoflow/task-contracts';
 
 describe('ArchiveTaskPlanUseCase', () => {
   let templateRepo: ReturnType<typeof createMockRepo<ITaskPlanRepository>>;

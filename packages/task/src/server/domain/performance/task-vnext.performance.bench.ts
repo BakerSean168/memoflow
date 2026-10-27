@@ -6,7 +6,7 @@ import {
   TaskPlanScheduleKind,
   TaskRecurrenceEndKind,
   type TaskPlanOutcomeValue,
-} from '@memoflow/contracts/task';
+} from '@memoflow/task-contracts';
 import { TaskPlan } from '../aggregates/task-plan';
 import { TaskPlanId } from '../value-objects/task-plan-id';
 import { TaskPlanStatus } from '../value-objects/task-plan-status';

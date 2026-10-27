@@ -133,8 +133,8 @@
       "reason": "Aggressive reduction authorized in Issue #625: routine behavior is owned by existing component/unit/API/database tests. Browser-specific geometry and complete UI-to-server journeys are deliberately no longer duplicated; this is not a claim of assertion-for-assertion equivalence.",
       "sourceSha256": "4f9ff5c5d5eb47b207523ef8962d76bd1a89ed24f0ad57a814a0d536eee7363c",
       "replacements": [
-        "packages/app-vue/src/modules/task/components/TaskPlanForm/TaskPlanForm.spec.ts",
-        "packages/app-vue/src/modules/task/views/TaskDetailView.spec.ts",
+        "packages/task-ui/src/components/TaskPlanForm/TaskPlanForm.spec.ts",
+        "packages/task-ui/src/views/TaskDetailView.spec.ts",
         "apps/api/src/runtime/goal-task-http.integration.test.ts"
       ],
       "issue": "https://github.com/BakerSean168/memoflow/issues/625",

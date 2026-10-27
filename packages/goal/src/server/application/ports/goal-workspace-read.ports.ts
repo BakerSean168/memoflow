@@ -4,7 +4,7 @@ import type {
   TaskGoalContextPage,
   TaskGoalContextPageRequest,
   TaskGoalContextSummary,
-} from '@memoflow/contracts/task';
+} from '@memoflow/task-contracts';
 
 /** Structural consumer port implemented by the Task owner at host composition. */
 export interface GoalWorkspaceTaskContextReadPort {

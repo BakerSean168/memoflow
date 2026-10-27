@@ -6,7 +6,7 @@ import { describe, expect, it } from 'vitest';
 describe('Task vNext simplified domain surface', () => {
   const taskSrc = resolve(__dirname, '../..');
   const taskRoot = resolve(taskSrc, '..');
-  const contractsTask = resolve(taskRoot, '../contracts/src/modules/task');
+  const taskContracts = resolve(taskRoot, '../task-contracts/src');
   const plan = readFileSync(resolve(__dirname, 'aggregates/task-plan.ts'), 'utf8');
   const templateState = readFileSync(resolve(__dirname, 'aggregates/task-plan.state.ts'), 'utf8');
   const integrationHelpers = readFileSync(
@@ -18,8 +18,8 @@ describe('Task vNext simplified domain surface', () => {
     'utf8',
   );
   const module = readFileSync(resolve(taskSrc, 'server/infrastructure/task.module.ts'), 'utf8');
-  const rpcMap = readFileSync(resolve(contractsTask, 'protocol/task-rpc-map.ts'), 'utf8');
-  const templateContract = readFileSync(resolve(contractsTask, 'api/task-plan.dto.ts'), 'utf8');
+  const rpcMap = readFileSync(resolve(taskContracts, 'protocol/task-rpc-map.ts'), 'utf8');
+  const templateContract = readFileSync(resolve(taskContracts, 'api/task-plan.dto.ts'), 'utf8');
 
   it('retires folder, hierarchy, dependency graph, and dynamic-priority domain artifacts', () => {
     for (const path of [
@@ -56,14 +56,14 @@ describe('Task vNext simplified domain surface', () => {
 
   it('keeps materialization cursor-free at product and domain boundaries (TASK-7304)', () => {
     const serverContract = readFileSync(
-      resolve(contractsTask, 'aggregates/task-plan-server.ts'),
+      resolve(taskContracts, 'aggregates/task-plan-server.ts'),
       'utf8',
     );
     const clientContract = readFileSync(
-      resolve(contractsTask, 'aggregates/task-plan-client.ts'),
+      resolve(taskContracts, 'aggregates/task-plan-client.ts'),
       'utf8',
     );
-    const responseSchema = readFileSync(resolve(contractsTask, 'api/response-schemas.ts'), 'utf8');
+    const responseSchema = readFileSync(resolve(taskContracts, 'api/response-schemas.ts'), 'utf8');
     const generationService = readFileSync(
       resolve(__dirname, 'services/task-occurrence-generation-service.ts'),
       'utf8',
@@ -76,7 +76,7 @@ describe('Task vNext simplified domain surface', () => {
       resolve(taskRoot, 'src/server/application/task-portability.ts'),
       'utf8',
     );
-    const portableTaskContract = readFileSync(resolve(contractsTask, 'portable-v3.ts'), 'utf8');
+    const portableTaskContract = readFileSync(resolve(taskContracts, 'portable-v3.ts'), 'utf8');
 
     for (const source of [
       templateState,
@@ -113,8 +113,8 @@ describe('Task vNext simplified domain surface', () => {
     const activeSources = [
       plan,
       templateState,
-      readFileSync(resolve(contractsTask, 'api/response-schemas.ts'), 'utf8'),
-      readFileSync(resolve(contractsTask, 'api/task-plan.dto.ts'), 'utf8'),
+      readFileSync(resolve(taskContracts, 'api/response-schemas.ts'), 'utf8'),
+      readFileSync(resolve(taskContracts, 'api/task-plan.dto.ts'), 'utf8'),
       readFileSync(resolve(taskRoot, '../desktop-contracts/src/ipc-channels.ts'), 'utf8'),
       readFileSync(resolve(taskRoot, '../database/prisma/schema/task.prisma'), 'utf8'),
       readFileSync(resolve(taskRoot, '../powersync-schema/src/index.ts'), 'utf8'),

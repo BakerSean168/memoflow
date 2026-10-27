@@ -60,6 +60,7 @@
     "@memoflow/notification-contracts": "workspace:*",
     "@memoflow/repository-contracts": "workspace:*",
     "@memoflow/schedule-contracts": "workspace:*",
+    "@memoflow/task-contracts": "workspace:*",
     "@memoflow/time": "workspace:*",
     "@memoflow/transport-contracts": "workspace:*",
     "@memoflow/utils": "workspace:*",

@@ -1,6 +1,6 @@
 import { createIdType } from '@memoflow/utils/domain';
 
-import type { TaskOccurrenceId as ITaskOccurrenceId } from '@memoflow/contracts/primitives';
+import type { TaskOccurrenceId as ITaskOccurrenceId } from '@memoflow/task-contracts';
 
 /**
  * TaskOccurrenceId 值对象

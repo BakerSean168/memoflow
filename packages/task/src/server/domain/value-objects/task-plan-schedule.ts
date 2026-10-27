@@ -3,8 +3,8 @@ import type {
   TaskPlanSchedule as TaskPlanScheduleDTO,
   TaskTiming,
   TaskRecurrence,
-} from '@memoflow/contracts/task';
-import { TaskPlanScheduleKind, TaskPlanScheduleSchema } from '@memoflow/contracts/task';
+} from '@memoflow/task-contracts';
+import { TaskPlanScheduleKind, TaskPlanScheduleSchema } from '@memoflow/task-contracts';
 
 /** Canonical Task Plan schedule value object (ADR-072). */
 export class TaskPlanSchedule extends ValueObject<TaskPlanScheduleDTO> {

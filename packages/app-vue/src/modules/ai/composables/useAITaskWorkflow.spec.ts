@@ -4,8 +4,8 @@ import { createI18n } from 'vue-i18n';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { AIWorkflowRunViewSchema, TaskPlanDraftSchema } from '@memoflow/contracts/ai';
 import { error, ok } from '@memoflow/contracts/result';
-import type { TaskPlanViewModel } from '../../task/components/types';
-import type { TaskNativeEditSession } from '../../task/composables/taskNativeEditSession';
+import type { TaskPlanViewModel } from '@memoflow/task-ui';
+import type { TaskNativeEditSession } from '@memoflow/task-ui';
 import { useAITaskWorkflow } from './useAITaskWorkflow';
 import type { UseAITaskWorkflowOptions } from './types';
 

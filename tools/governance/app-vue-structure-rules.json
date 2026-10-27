@@ -6,7 +6,7 @@
       "id": "rule-task-authority-49",
       "contract": "task-authority",
       "reason": "task-authority: AST/type structural rules replacing source-text locks (#502).",
-      "file": "packages/app-vue/src/modules/task/stores/task-store.ts",
+      "file": "packages/task-ui/src/stores/task-store.ts",
       "forbidElements": ["TaskPlanClientDTO"],
       "forbidObjectProperties": [
         {
@@ -25,7 +25,7 @@
       "id": "rule-task-authority-50",
       "contract": "task-authority",
       "reason": "task-authority: AST/type structural rules replacing source-text locks (#502).",
-      "file": "packages/app-vue/src/modules/task/views/TaskManagementView.vue",
+      "file": "packages/task-ui/src/views/TaskManagementView.vue",
       "forbidIdentifiers": ["fetchTaskGraph", "refreshTaskManagement"],
       "forbidExpressionPatterns": [
         {
@@ -37,7 +37,7 @@
       "id": "rule-task-authority-51",
       "contract": "task-authority",
       "reason": "task-authority: AST/type structural rules replacing source-text locks (#502).",
-      "file": "packages/app-vue/src/modules/task/views/TaskDetailView.vue",
+      "file": "packages/task-ui/src/views/TaskDetailView.vue",
       "forbidIdentifiers": ["fetchTaskGraph", "fetchTemplate", "loadDetailPage"],
       "forbidExpressionPatterns": [
         {

@@ -1,5 +1,5 @@
 import type { GoalClientDTO } from '@memoflow/goal-contracts';
-import type { TaskPlanClientDTO } from '@memoflow/contracts/task';
+import type { TaskPlanClientDTO } from '@memoflow/task-contracts';
 import type { AISelectedEntityContextProjection } from '../ports/selected-entity-context-read.port';
 
 /** Bounded authoritative Goal projection exposed to the assistant context layer. */

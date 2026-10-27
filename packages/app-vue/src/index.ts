@@ -59,7 +59,7 @@ export { createAppRouter } from './router';
 export { useAuthenticationStore } from './modules/authentication';
 export { useAccountStore } from './modules/account';
 export { useGoalStore } from '@memoflow/goal-ui';
-export { useTaskStore } from './modules/task';
+export { useTaskStore } from '@memoflow/task-ui';
 export { useScheduleStore } from '@memoflow/schedule-ui';
 export { useNotificationStore } from '@memoflow/notification-ui';
 export { usePresentationPreferenceStore, UserSettingsView } from '@memoflow/setting-ui';

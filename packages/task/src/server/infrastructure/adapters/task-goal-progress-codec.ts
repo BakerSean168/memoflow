@@ -1,4 +1,4 @@
-import { TaskGoalProgressRuleSchema, type TaskGoalProgressRule } from '@memoflow/contracts/task';
+import { TaskGoalProgressRuleSchema, type TaskGoalProgressRule } from '@memoflow/task-contracts';
 
 /** Legacy NULL mode uses only the original Fixed value/trigger columns. */
 export function decodeTaskGoalProgress(columns: {

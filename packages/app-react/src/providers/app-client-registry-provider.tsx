@@ -14,8 +14,8 @@ import type { ScheduleClientPort } from '@memoflow/schedule-client';
 import { createScheduleHttpClient } from '@memoflow/schedule-client';
 import type { SettingClientPort } from '@memoflow/setting-client';
 import { createSettingHttpClient } from '@memoflow/setting-client';
-import type { TaskClientPort } from '@memoflow/task/client';
-import { createTaskHttpClient } from '@memoflow/task/client';
+import type { TaskClientPort } from '@memoflow/task-client';
+import { createTaskHttpClient } from '@memoflow/task-client';
 import type { IResultHttpClient } from '@memoflow/http-client';
 
 import { useAppSession } from './app-session-provider';

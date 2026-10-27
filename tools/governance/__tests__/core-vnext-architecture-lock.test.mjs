@@ -151,7 +151,7 @@ describe('HARD-7102 core vNext architecture lock', () => {
         content: `function read(template) { return template.tags; }`,
       },
       {
-        relPath: 'packages/contracts/src/modules/task/api/task-plan.dto.ts',
+        relPath: 'packages/task-contracts/src/api/task-plan.dto.ts',
         content: `export interface LegacyTaskInput { tags?: string[]; color?: string | null; }`,
       },
       {
@@ -187,8 +187,16 @@ describe('HARD-7102 core vNext architecture lock', () => {
         content: `findByKeyResultId(identityId, keyResultId);`,
       },
       {
-        relPath: 'packages/task/src/domain-client/aggregates/task-plan.ts',
+        relPath: 'packages/task-client/src/application-client/task-client-service.ts',
         content: `return { keyResultId: String(binding.keyResultId) };`,
+      },
+      {
+        relPath: 'packages/task-client/src/application-client/legacy-classification.ts',
+        content: `function read(template) { return template.tags; }`,
+      },
+      {
+        relPath: 'packages/task-client/src/infrastructure-client/legacy-kr-query.ts',
+        content: `findByKeyResultId(identityId, keyResultId);`,
       },
     );
     const kinds = new Set(violations.map((v) => v.kind));
@@ -261,7 +269,7 @@ describe('HARD-7102 core vNext architecture lock', () => {
         content: `export interface RecurrenceRule { frequency: 'daily' | 'weekly'; }`,
       },
       {
-        relPath: 'packages/contracts/src/modules/task/api/task-plan.dto.ts',
+        relPath: 'packages/task-contracts/src/api/task-plan.dto.ts',
         content: `export interface TaskInput { labelIds?: string[]; }`,
       },
       {
@@ -273,7 +281,7 @@ describe('HARD-7102 core vNext architecture lock', () => {
         content: `model TaskPlan { id String @id }\nmodel TaskLabel { labelId String }`,
       },
       {
-        relPath: 'packages/app-vue/src/modules/task/TaskView.vue',
+        relPath: 'packages/task-ui/src/views/TaskView.vue',
         content: `const labelIds = template.labels.map((label) => label.id);`,
       },
       {

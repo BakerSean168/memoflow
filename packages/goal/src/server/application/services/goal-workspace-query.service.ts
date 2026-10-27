@@ -6,9 +6,9 @@ import {
   GoalWorkspacePageRequestSchema,
   GoalWorkspaceReadModelSchema,
   GoalWorkspaceTaskPageRequestSchema,
-  GoalWorkspaceTaskPageSchema,
   type GoalWorkspaceKnowledgeItem,
 } from '@memoflow/workspace-contracts';
+import { TaskGoalContextPageSchema } from '@memoflow/task-contracts';
 import { error, ok } from '@memoflow/contracts/result';
 import type { KnowledgeDocumentId } from '@memoflow/contracts/primitives';
 import { GoalKnowledgeEdgeListReqSchema } from '@memoflow/relation-contracts';
@@ -109,7 +109,7 @@ export class GoalWorkspaceQueryService implements GoalWorkspaceApplicationPort {
             parsed.data,
           )
         : await this.deps.taskContextReadPort.listTasksByGoal(identityId, goalId, parsed.data);
-      return ok(GoalWorkspaceTaskPageSchema.parse(page));
+      return ok(TaskGoalContextPageSchema.parse(page));
     } catch {
       return error('SERVICE_UNAVAILABLE', 'Task context is currently unavailable');
     }

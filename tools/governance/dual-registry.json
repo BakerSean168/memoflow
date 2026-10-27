@@ -794,8 +794,8 @@
     },
     {
       "id": "r649",
-      "path": "packages/contracts/src/modules/task/aggregates/task-dependency-server-dual.surface.spec.ts",
-      "package": "packages/contracts",
+      "path": "packages/task-contracts/src/aggregates/task-dependency-server-dual.surface.spec.ts",
+      "package": "packages/task-contracts",
       "class": "retired",
       "sole": "../entities",
       "blast": "surface lock (retired)",
@@ -805,8 +805,8 @@
     },
     {
       "id": "r697",
-      "path": "packages/contracts/src/modules/task/api/dual-registry.surface.spec.ts",
-      "package": "packages/contracts",
+      "path": "packages/task-contracts/src/api/dual-registry.surface.spec.ts",
+      "package": "packages/task-contracts",
       "class": "retired",
       "sole": "response-schemas.ts",
       "blast": "surface lock (retired); suite describes=13",
@@ -1113,7 +1113,7 @@
     },
     {
       "id": "r296",
-      "path": "packages/task/src/application-client/task-client-port-facade-dual.surface.spec.ts",
+      "path": "packages/task-client/src/application-client/task-client-port-facade-dual.surface.spec.ts",
       "package": "packages/task",
       "class": "retired",
       "sole": "task-client-service.ts",

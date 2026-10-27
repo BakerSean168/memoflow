@@ -15,7 +15,7 @@ import {
   type TaskFilters,
   type TaskPlanPageQuery,
 } from '../../../domain/repositories/i-task-plan-repository';
-import type { TaskPlanStatus } from '@memoflow/contracts/task';
+import type { TaskPlanStatus } from '@memoflow/task-contracts';
 import { LabelColorSchema, type LabelClientDTO } from '@memoflow/label-contracts';
 import { AggregateRepositoryBase, createEventBusAdapter, type IEventBus } from '@memoflow/patterns';
 import { eventBus } from '@memoflow/utils/domain';

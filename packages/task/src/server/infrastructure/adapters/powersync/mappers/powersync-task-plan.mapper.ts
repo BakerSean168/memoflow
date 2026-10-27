@@ -8,7 +8,7 @@ import {
   TaskReminderConfigSchema,
   type TaskPlanCompletionPolicyValue,
   type TaskPlanOutcomeValue,
-} from '@memoflow/contracts/task';
+} from '@memoflow/task-contracts';
 import { TaskPlan } from '../../../../domain/aggregates/task-plan';
 import type { TaskPlanState } from '../../../../domain/aggregates/task-plan.state';
 import { TaskPlanId } from '../../../../domain/value-objects/task-plan-id';

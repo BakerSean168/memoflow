@@ -2,7 +2,7 @@ import type {
   TaskGoalContextPage,
   TaskGoalContextPageRequest,
   TaskGoalContextSummary,
-} from '@memoflow/contracts/task';
+} from '@memoflow/task-contracts';
 
 /**
  * Task-owned Goal context read capability (ADR-069).

@@ -15,11 +15,10 @@ import { productionLocaleMessages } from '@schedule-ui-test-host/locales/product
 import ScheduleCalendarView from './ScheduleCalendarView.vue';
 import PlannerDayDialog from '../components/PlannerDayDialog.vue';
 import { createMemoryHistory, createRouter } from 'vue-router';
-import TaskOccurrenceQuickSurface from '@schedule-ui-test-host/modules/task/components/TaskOccurrenceQuickSurface.vue';
 import { toast } from 'vue-sonner';
 import PlannerEventDialog from '../components/PlannerEventDialog.vue';
 import { bindScheduleUiHost } from '../schedule-ui-host';
-import { createScheduleUiTestHost } from '../test/test-host';
+import { createScheduleUiTestHost, TaskOccurrenceQuickSurface } from '../test/test-host';
 
 const mocks = vi.hoisted(() => ({
   confirm: vi.fn(),

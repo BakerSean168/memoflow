@@ -4800,336 +4800,6 @@
       ]
     },
     {
-      "path": "packages/app-vue/src/modules/task/components/TaskOccurrenceCompactList.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/app-vue/vitest.store-coverage.config.ts"
-      ]
-    },
-    {
-      "path": "packages/app-vue/src/modules/task/components/TaskOccurrenceQuickRow.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/app-vue/vitest.store-coverage.config.ts"
-      ]
-    },
-    {
-      "path": "packages/app-vue/src/modules/task/components/TaskOccurrenceQuickSurface.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/app-vue/vitest.store-coverage.config.ts"
-      ]
-    },
-    {
-      "path": "packages/app-vue/src/modules/task/components/TaskOccurrenceRow.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/app-vue/vitest.store-coverage.config.ts"
-      ]
-    },
-    {
-      "path": "packages/app-vue/src/modules/task/components/TaskPageToolbar.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/app-vue/vitest.store-coverage.config.ts"
-      ]
-    },
-    {
-      "path": "packages/app-vue/src/modules/task/components/TaskPlanForm/TaskPlanForm.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/app-vue/vitest.store-coverage.config.ts"
-      ]
-    },
-    {
-      "path": "packages/app-vue/src/modules/task/components/TaskPlanForm/sections/BasicInfoSection.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/app-vue/vitest.store-coverage.config.ts"
-      ]
-    },
-    {
-      "path": "packages/app-vue/src/modules/task/components/TaskPlanForm/sections/ChecklistSection.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/app-vue/vitest.store-coverage.config.ts"
-      ]
-    },
-    {
-      "path": "packages/app-vue/src/modules/task/components/TaskPlanForm/sections/KeyResultLinksSection.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/app-vue/vitest.store-coverage.config.ts"
-      ]
-    },
-    {
-      "path": "packages/app-vue/src/modules/task/components/TaskPlanForm/sections/ReminderSection.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/app-vue/vitest.store-coverage.config.ts"
-      ]
-    },
-    {
-      "path": "packages/app-vue/src/modules/task/components/TaskPlanForm/widgets/selectors-accessibility.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/app-vue/vitest.store-coverage.config.ts"
-      ]
-    },
-    {
-      "path": "packages/app-vue/src/modules/task/components/TaskPlanRow.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/app-vue/vitest.store-coverage.config.ts"
-      ]
-    },
-    {
-      "path": "packages/app-vue/src/modules/task/components/TaskQuickSurface.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/app-vue/vitest.store-coverage.config.ts"
-      ]
-    },
-    {
-      "path": "packages/app-vue/src/modules/task/components/dialogs/QuickTaskDialog.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/app-vue/vitest.store-coverage.config.ts"
-      ]
-    },
-    {
-      "path": "packages/app-vue/src/modules/task/components/dialogs/TaskCompletionMeasurementDialog.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/app-vue/vitest.store-coverage.config.ts"
-      ]
-    },
-    {
-      "path": "packages/app-vue/src/modules/task/components/dialogs/TaskOccurrenceInspectDialog.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/app-vue/vitest.store-coverage.config.ts"
-      ]
-    },
-    {
-      "path": "packages/app-vue/src/modules/task/components/dialogs/TaskPlanDialog.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/app-vue/vitest.store-coverage.config.ts"
-      ]
-    },
-    {
-      "path": "packages/app-vue/src/modules/task/components/widgets/DailyTodoWidget.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/app-vue/vitest.store-coverage.config.ts"
-      ]
-    },
-    {
-      "path": "packages/app-vue/src/modules/task/composables/taskPlanCache.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/app-vue/vitest.store-coverage.config.ts"
-      ]
-    },
-    {
-      "path": "packages/app-vue/src/modules/task/composables/useTask.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/app-vue/vitest.store-coverage.config.ts"
-      ]
-    },
-    {
-      "path": "packages/app-vue/src/modules/task/composables/useTaskGoalBindingOptions.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/app-vue/vitest.store-coverage.config.ts"
-      ]
-    },
-    {
-      "path": "packages/app-vue/src/modules/task/composables/useTaskOccurrenceActionCoordinator.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/app-vue/vitest.store-coverage.config.ts"
-      ]
-    },
-    {
-      "path": "packages/app-vue/src/modules/task/composables/useTaskOccurrenceDetailQuery.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/app-vue/vitest.store-coverage.config.ts"
-      ]
-    },
-    {
-      "path": "packages/app-vue/src/modules/task/composables/useTaskOccurrences.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/app-vue/vitest.store-coverage.config.ts"
-      ]
-    },
-    {
-      "path": "packages/app-vue/src/modules/task/composables/useTaskPlanMutations.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/app-vue/vitest.store-coverage.config.ts"
-      ]
-    },
-    {
-      "path": "packages/app-vue/src/modules/task/composables/useTaskPlanQueries.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/app-vue/vitest.store-coverage.config.ts"
-      ]
-    },
-    {
-      "path": "packages/app-vue/src/modules/task/composables/useTaskToday.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/app-vue/vitest.store-coverage.config.ts"
-      ]
-    },
-    {
-      "path": "packages/app-vue/src/modules/task/stores/taskStore.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/app-vue/vitest.store-coverage.config.ts"
-      ]
-    },
-    {
-      "path": "packages/app-vue/src/modules/task/utils/format-task-duration.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/app-vue/vitest.store-coverage.config.ts"
-      ]
-    },
-    {
-      "path": "packages/app-vue/src/modules/task/utils/task-occurrence-presentation.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/app-vue/vitest.store-coverage.config.ts"
-      ]
-    },
-    {
-      "path": "packages/app-vue/src/modules/task/utils/task-plan-presentation.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/app-vue/vitest.store-coverage.config.ts"
-      ]
-    },
-    {
-      "path": "packages/app-vue/src/modules/task/views/TaskDetailView.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/app-vue/vitest.store-coverage.config.ts"
-      ]
-    },
-    {
-      "path": "packages/app-vue/src/modules/task/views/TaskManagementView.runtime.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/app-vue/vitest.store-coverage.config.ts"
-      ]
-    },
-    {
       "path": "packages/app-vue/src/platform/server-state/invalidation-dispatcher.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -5820,6 +5490,14 @@
       "measurementCollectors": []
     },
     {
+      "path": "packages/contracts/src/modules/agent-gateway/task-mcp-read-boundary.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/contracts/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "packages/contracts/src/modules/ai/api/agent-instance.dto.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -5933,110 +5611,6 @@
     },
     {
       "path": "packages/contracts/src/modules/ai/portable-v3.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/contracts/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
-      "path": "packages/contracts/src/modules/task/api/complete-task-occurrence.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/contracts/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
-      "path": "packages/contracts/src/modules/task/api/dual-registry.surface.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/contracts/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
-      "path": "packages/contracts/src/modules/task/api/task-goal-context.dto.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/contracts/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
-      "path": "packages/contracts/src/modules/task/api/task-plan.dto.test.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/contracts/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
-      "path": "packages/contracts/src/modules/task/api/task-read-schema.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/contracts/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
-      "path": "packages/contracts/src/modules/task/api/task-workspace.dto.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/contracts/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
-      "path": "packages/contracts/src/modules/task/domain/events/task-goal-progress-outbox.event.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/contracts/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
-      "path": "packages/contracts/src/modules/task/portable-v3.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/contracts/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
-      "path": "packages/contracts/src/modules/task/protocol/task-rpc-map.surface.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/contracts/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
-      "path": "packages/contracts/src/modules/task/value-objects/checklist-item-definition.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/contracts/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
-      "path": "packages/contracts/src/modules/task/value-objects/task-goal-binding.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/contracts/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
-      "path": "packages/contracts/src/modules/task/value-objects/task-occurrence-result.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/contracts/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
-      "path": "packages/contracts/src/modules/task/value-objects/task-plan-schedule.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/contracts/vitest.config.ts"
@@ -10454,6 +10028,398 @@
       "measurementCollectors": []
     },
     {
+      "path": "packages/task-client/src/application-client/task-client-service-goal-binding.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/task-client/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/task-client/src/application-client/task-client-service.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/task-client/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/task-client/src/infrastructure-client/adapters/http/task-occurrence-http.adapter.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/task-client/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/task-contracts/src/api/complete-task-occurrence.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/task-contracts/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/task-contracts/src/api/dual-registry.surface.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/task-contracts/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/task-contracts/src/api/task-goal-context.dto.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/task-contracts/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/task-contracts/src/api/task-plan.dto.test.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/task-contracts/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/task-contracts/src/api/task-read-schema.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/task-contracts/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/task-contracts/src/domain/events/task-goal-progress-outbox.event.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/task-contracts/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/task-contracts/src/portable-v3.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/task-contracts/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/task-contracts/src/protocol/task-rpc-map.surface.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/task-contracts/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/task-contracts/src/value-objects/checklist-item-definition.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/task-contracts/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/task-contracts/src/value-objects/task-goal-binding.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/task-contracts/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/task-contracts/src/value-objects/task-occurrence-result.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/task-contracts/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/task-contracts/src/value-objects/task-plan-schedule.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/task-contracts/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/task-ui/src/components/TaskOccurrenceCompactList.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/task-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/task-ui/src/components/TaskOccurrenceQuickRow.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/task-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/task-ui/src/components/TaskOccurrenceQuickSurface.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/task-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/task-ui/src/components/TaskOccurrenceRow.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/task-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/task-ui/src/components/TaskPageToolbar.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/task-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/task-ui/src/components/TaskPlanForm/TaskPlanForm.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/task-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/task-ui/src/components/TaskPlanForm/sections/BasicInfoSection.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/task-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/task-ui/src/components/TaskPlanForm/sections/ChecklistSection.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/task-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/task-ui/src/components/TaskPlanForm/sections/KeyResultLinksSection.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/task-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/task-ui/src/components/TaskPlanForm/sections/ReminderSection.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/task-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/task-ui/src/components/TaskPlanForm/widgets/selectors-accessibility.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/task-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/task-ui/src/components/TaskPlanRow.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/task-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/task-ui/src/components/TaskQuickSurface.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/task-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/task-ui/src/components/dialogs/QuickTaskDialog.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/task-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/task-ui/src/components/dialogs/TaskCompletionMeasurementDialog.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/task-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/task-ui/src/components/dialogs/TaskOccurrenceInspectDialog.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/task-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/task-ui/src/components/dialogs/TaskPlanDialog.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/task-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/task-ui/src/components/widgets/DailyTodoWidget.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/task-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/task-ui/src/composables/taskPlanCache.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/task-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/task-ui/src/composables/useTask.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/task-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/task-ui/src/composables/useTaskGoalBindingOptions.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/task-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/task-ui/src/composables/useTaskOccurrenceActionCoordinator.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/task-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/task-ui/src/composables/useTaskOccurrenceDetailQuery.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/task-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/task-ui/src/composables/useTaskOccurrences.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/task-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/task-ui/src/composables/useTaskPlanMutations.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/task-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/task-ui/src/composables/useTaskPlanQueries.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/task-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/task-ui/src/composables/useTaskToday.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/task-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/task-ui/src/import-boundary.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/task-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/task-ui/src/stores/taskStore.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/task-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/task-ui/src/utils/format-task-duration.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/task-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/task-ui/src/utils/task-occurrence-presentation.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/task-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/task-ui/src/utils/task-plan-presentation.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/task-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/task-ui/src/views/TaskDetailView.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/task-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/task-ui/src/views/TaskManagementView.runtime.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/task-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "packages/task/src/api/module-lifecycle.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -10504,26 +10470,6 @@
       ]
     },
     {
-      "path": "packages/task/src/application-client/task-client-service.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/task/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/task/vitest.config.ts"
-      ]
-    },
-    {
-      "path": "packages/task/src/domain-client/aggregates/task-plan.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/task/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/task/vitest.config.ts"
-      ]
-    },
-    {
       "path": "packages/task/src/electron/authenticated-ipc.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -10545,16 +10491,6 @@
     },
     {
       "path": "packages/task/src/import-safety.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/task/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/task/vitest.config.ts"
-      ]
-    },
-    {
-      "path": "packages/task/src/infrastructure-client/adapters/http/task-occurrence-http.adapter.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/task/vitest.config.ts"
@@ -11666,6 +11602,14 @@
       "measurementCollectors": []
     },
     {
+      "path": "packages/workspace-contracts/src/task-workspace.dto.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/workspace-contracts/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "tools/agent-skills/validate-local-deploy/scripts/image-freshness.spec.mjs",
       "primarySuite": "governance",
       "collectors": [
@@ -12373,7 +12317,7 @@
       "type": "measurement",
       "suite": "coverage",
       "runner": "vitest",
-      "fileCount": 166
+      "fileCount": 133
     },
     {
       "id": "packages/data-portability/vitest.config.ts",
@@ -12464,7 +12408,7 @@
       "type": "measurement",
       "suite": "coverage",
       "runner": "vitest",
-      "fileCount": 84
+      "fileCount": 81
     },
     {
       "id": "packages/task/vitest.mappers.config.ts",
@@ -12851,7 +12795,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 166
+      "fileCount": 133
     },
     {
       "id": "packages/assets/vitest.config.ts",
@@ -12872,7 +12816,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 37
+      "fileCount": 25
     },
     {
       "id": "packages/data-portability-contracts/vitest.config.ts",
@@ -13183,11 +13127,32 @@
       "fileCount": 3
     },
     {
+      "id": "packages/task-client/vitest.config.ts",
+      "type": "primary",
+      "suite": "unit",
+      "runner": "vitest",
+      "fileCount": 3
+    },
+    {
+      "id": "packages/task-contracts/vitest.config.ts",
+      "type": "primary",
+      "suite": "unit",
+      "runner": "vitest",
+      "fileCount": 12
+    },
+    {
+      "id": "packages/task-ui/vitest.config.ts",
+      "type": "primary",
+      "suite": "unit",
+      "runner": "vitest",
+      "fileCount": 34
+    },
+    {
       "id": "packages/task/vitest.config.ts",
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 84
+      "fileCount": 81
     },
     {
       "id": "packages/time/vitest.config.ts",
@@ -13229,7 +13194,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 1
+      "fileCount": 2
     }
   ],
   "measurementSuites": {
@@ -13521,39 +13486,6 @@
       "packages/app-vue/src/modules/ai/composables/workspaceEventSubscription.spec.ts",
       "packages/app-vue/src/modules/authentication/composables/usePassword.spec.ts",
       "packages/app-vue/src/modules/authentication/stores/authenticationStore.spec.ts",
-      "packages/app-vue/src/modules/task/components/TaskOccurrenceCompactList.spec.ts",
-      "packages/app-vue/src/modules/task/components/TaskOccurrenceQuickRow.spec.ts",
-      "packages/app-vue/src/modules/task/components/TaskOccurrenceQuickSurface.spec.ts",
-      "packages/app-vue/src/modules/task/components/TaskOccurrenceRow.spec.ts",
-      "packages/app-vue/src/modules/task/components/TaskPageToolbar.spec.ts",
-      "packages/app-vue/src/modules/task/components/TaskPlanForm/TaskPlanForm.spec.ts",
-      "packages/app-vue/src/modules/task/components/TaskPlanForm/sections/BasicInfoSection.spec.ts",
-      "packages/app-vue/src/modules/task/components/TaskPlanForm/sections/ChecklistSection.spec.ts",
-      "packages/app-vue/src/modules/task/components/TaskPlanForm/sections/KeyResultLinksSection.spec.ts",
-      "packages/app-vue/src/modules/task/components/TaskPlanForm/sections/ReminderSection.spec.ts",
-      "packages/app-vue/src/modules/task/components/TaskPlanForm/widgets/selectors-accessibility.spec.ts",
-      "packages/app-vue/src/modules/task/components/TaskPlanRow.spec.ts",
-      "packages/app-vue/src/modules/task/components/TaskQuickSurface.spec.ts",
-      "packages/app-vue/src/modules/task/components/dialogs/QuickTaskDialog.spec.ts",
-      "packages/app-vue/src/modules/task/components/dialogs/TaskCompletionMeasurementDialog.spec.ts",
-      "packages/app-vue/src/modules/task/components/dialogs/TaskOccurrenceInspectDialog.spec.ts",
-      "packages/app-vue/src/modules/task/components/dialogs/TaskPlanDialog.spec.ts",
-      "packages/app-vue/src/modules/task/components/widgets/DailyTodoWidget.spec.ts",
-      "packages/app-vue/src/modules/task/composables/taskPlanCache.spec.ts",
-      "packages/app-vue/src/modules/task/composables/useTask.spec.ts",
-      "packages/app-vue/src/modules/task/composables/useTaskGoalBindingOptions.spec.ts",
-      "packages/app-vue/src/modules/task/composables/useTaskOccurrenceActionCoordinator.spec.ts",
-      "packages/app-vue/src/modules/task/composables/useTaskOccurrenceDetailQuery.spec.ts",
-      "packages/app-vue/src/modules/task/composables/useTaskOccurrences.spec.ts",
-      "packages/app-vue/src/modules/task/composables/useTaskPlanMutations.spec.ts",
-      "packages/app-vue/src/modules/task/composables/useTaskPlanQueries.spec.ts",
-      "packages/app-vue/src/modules/task/composables/useTaskToday.spec.ts",
-      "packages/app-vue/src/modules/task/stores/taskStore.spec.ts",
-      "packages/app-vue/src/modules/task/utils/format-task-duration.spec.ts",
-      "packages/app-vue/src/modules/task/utils/task-occurrence-presentation.spec.ts",
-      "packages/app-vue/src/modules/task/utils/task-plan-presentation.spec.ts",
-      "packages/app-vue/src/modules/task/views/TaskDetailView.spec.ts",
-      "packages/app-vue/src/modules/task/views/TaskManagementView.runtime.spec.ts",
       "packages/app-vue/src/platform/server-state/invalidation-dispatcher.spec.ts",
       "packages/app-vue/src/platform/server-state/query-keys.spec.ts",
       "packages/app-vue/src/platform/server-state/result-query.spec.ts",
@@ -13838,12 +13770,9 @@
       "packages/task/src/api/routes/task-occurrence.routes.spec.ts",
       "packages/task/src/api/routes/task-plan.routes.spec.ts",
       "packages/task/src/api/routes/task-void-success-envelope.surface.spec.ts",
-      "packages/task/src/application-client/task-client-service.spec.ts",
-      "packages/task/src/domain-client/aggregates/task-plan.spec.ts",
       "packages/task/src/electron/authenticated-ipc.spec.ts",
       "packages/task/src/electron/index.spec.ts",
       "packages/task/src/import-safety.spec.ts",
-      "packages/task/src/infrastructure-client/adapters/http/task-occurrence-http.adapter.spec.ts",
       "packages/task/src/server/application/outbox/task-goal-outbox-dispatcher.test.ts",
       "packages/task/src/server/application/services/task-canonical-restore.service.spec.ts",
       "packages/task/src/server/application/services/task-workspace-query.service.spec.ts",
@@ -13924,7 +13853,7 @@
   "duplicate": [],
   "unexpected": [],
   "counts": {
-    "unit": 1127,
+    "unit": 1129,
     "integration": 58,
     "smoke": 3,
     "boundary-ipc": 6,

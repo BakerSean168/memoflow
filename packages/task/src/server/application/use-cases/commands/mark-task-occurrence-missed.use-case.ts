@@ -2,7 +2,7 @@ import type { ITaskOccurrenceRepository } from '../../../domain/repositories/i-t
 import type {
   MarkTaskOccurrenceMissedReq,
   TaskOccurrenceOperationRes,
-} from '@memoflow/contracts/task';
+} from '@memoflow/task-contracts';
 import type { Result } from '@memoflow/contracts/result';
 import { ok, error, fail } from '@memoflow/contracts/result';
 import { createLogger } from '@memoflow/utils/logger';

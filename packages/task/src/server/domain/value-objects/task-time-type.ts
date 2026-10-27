@@ -1,7 +1,7 @@
 import {
   TaskTimeType as TaskTimeTypeContract,
   type TaskTimeType as ITaskTimeType,
-} from '@memoflow/contracts/task';
+} from '@memoflow/task-contracts';
 
 /**
  * 📝 任务时间类型 - 任务的时间类型

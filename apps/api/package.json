@@ -39,6 +39,7 @@
     "@memoflow/setting-contracts": "workspace:*",
     "@memoflow/shared-primitives": "workspace:*",
     "@memoflow/task": "workspace:*",
+    "@memoflow/task-contracts": "workspace:*",
     "@memoflow/utils": "workspace:*",
     "@memoflow/workspace-contracts": "workspace:*",
     "@opentelemetry/api": "^1.9.1",

@@ -423,6 +423,18 @@ export const domainResolveAliases = [
     replacement: path.resolve(import.meta.dirname, './packages/notification-ui/src/index.ts'),
   },
   {
+    find: /^@memoflow\/task-ui\/host$/,
+    replacement: path.resolve(import.meta.dirname, './packages/task-ui/src/task-ui-host.ts'),
+  },
+  {
+    find: /^@memoflow\/task-ui\/(.+)$/,
+    replacement: path.resolve(import.meta.dirname, './packages/task-ui/src/$1'),
+  },
+  {
+    find: /^@memoflow\/task-ui$/,
+    replacement: path.resolve(import.meta.dirname, './packages/task-ui/src/index.ts'),
+  },
+  {
     find: /^@memoflow\/repository-ui\/host$/,
     replacement: path.resolve(
       import.meta.dirname,
@@ -487,6 +499,14 @@ export const domainResolveAliases = [
   {
     find: '@memoflow/goal-contracts',
     replacement: path.resolve(import.meta.dirname, './packages/goal-contracts/src/index.ts'),
+  },
+  {
+    find: /^@memoflow\/task-contracts\/(.+)/,
+    replacement: path.resolve(import.meta.dirname, './packages/task-contracts/src/$1'),
+  },
+  {
+    find: '@memoflow/task-contracts',
+    replacement: path.resolve(import.meta.dirname, './packages/task-contracts/src/index.ts'),
   },
   {
     find: /^@memoflow\/schedule-contracts\/(.+)/,

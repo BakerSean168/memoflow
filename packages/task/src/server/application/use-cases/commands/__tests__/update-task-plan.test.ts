@@ -1,6 +1,6 @@
 import { ok } from '@memoflow/contracts/result';
 import { KeyResultCalculationMethod } from '@memoflow/goal-contracts';
-import { TaskGoalLinkSchema } from '@memoflow/contracts/task';
+import { TaskGoalLinkSchema } from '@memoflow/task-contracts';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import '@memoflow/test-utils/helpers/result-matchers';
 import { createMockRepo } from '@memoflow/test-utils/mocks';
@@ -21,7 +21,7 @@ import {
   TaskGoalBindingTrigger,
   TaskPlanScheduleKind,
   TaskTimingKind,
-} from '@memoflow/contracts/task';
+} from '@memoflow/task-contracts';
 import {
   createInlineTaskWriteTransactionRunner,
   type TaskWriteTransactionRunner,

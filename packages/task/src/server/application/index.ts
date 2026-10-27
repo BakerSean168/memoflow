@@ -3,7 +3,7 @@
  *
  * 提供 Task 模块的所有 Application Services、Use Cases 和 Query Services
  *
- * 类型定义请从 @memoflow/contracts/task 导入
+ * 类型定义请从 @memoflow/task-contracts 导入
  */
 
 // ===== Use Cases (CQRS Commands and Queries) =====

@@ -10,7 +10,7 @@ import {
   aTimePointTiming,
   anIdentityId,
 } from '../../../../../testing';
-import { TaskPlanStatus } from '@memoflow/contracts/task';
+import { TaskPlanStatus } from '@memoflow/task-contracts';
 import { createTimeContext, type UserTimeContextPort } from '@memoflow/time';
 
 const NOW = new Date('2026-09-08T12:00:00+08:00').getTime();

@@ -17,7 +17,7 @@ export default mergeConfig(
       '@memoflow/ai/client': '../../packages/ai/src/client/index.ts',
       '@memoflow/ai/testing': '../../packages/ai/src/testing/index.ts',
       '@memoflow/goal-client': '../../packages/goal-client/src/index.ts',
-      '@memoflow/task/client': '../../packages/task/src/client/index.ts',
+      '@memoflow/task-client': '../../packages/task-client/src/index.ts',
       '@memoflow/repository-client': '../../packages/repository-client/src/index.ts',
     },
   }),

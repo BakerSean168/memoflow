@@ -24,9 +24,8 @@ import type {
 } from '@memoflow/contracts/ai';
 import { useAI } from './useAI';
 import { useGoal } from '@memoflow/goal-ui';
-import { useTask } from '../../task/composables/useTask';
+import { useTask } from '@memoflow/task-ui';
 import { useRecentKnowledgeNotes } from '@memoflow/repository-ui';
-
 import { useAIModelCatalog, composerAgentKey } from './useAIModelCatalog';
 import { sortAgentInstances } from '../agent-instance-order';
 import { antigravityEffortVariant, presentAntigravityModels } from './antigravityModelPresentation';

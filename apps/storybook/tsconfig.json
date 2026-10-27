@@ -2,7 +2,10 @@
   "extends": "../../packages/app-vue/tsconfig.json",
   "compilerOptions": {
     "noEmit": true,
-    "paths": { "@goal-ui-test-host/*": ["../../packages/app-vue/src/*"] },
+    "paths": {
+      "@goal-ui-test-host/*": ["../../packages/app-vue/src/*"],
+      "@task-ui-test-host/*": ["../../packages/app-vue/src/*"]
+    },
     "declaration": false,
     "declarationMap": false,
     "allowImportingTsExtensions": true
@@ -11,7 +14,7 @@
     ".storybook/**/*.ts",
     "../../packages/app-vue/src/env.d.ts",
     "../../packages/goal-ui/src/components/dialogs/GoalDialog.stories.ts",
-    "../../packages/app-vue/src/modules/task/components/TaskPlanForm/TaskPlanForm.stories.ts",
+    "../../packages/task-ui/src/components/TaskPlanForm/TaskPlanForm.stories.ts",
     "../../packages/app-vue/src/shared/components/__stories__/BrowserInteraction.stories.ts"
   ],
   "exclude": []

@@ -3,8 +3,7 @@ import { useEffect, useMemo, useState } from 'react';
 import type { ImportanceLevel } from '@memoflow/shared-primitives';
 import type { GoalId, KeyResultId } from '@memoflow/goal-contracts';
 import type { LabelClientDTO } from '@memoflow/label-contracts';
-import type { TaskPlanClientDTO, TaskPlanStatus, TaskPlanSchedule } from '@memoflow/contracts/task';
-import type { TaskPlan } from '@memoflow/task/client';
+import type { TaskPlanClientDTO, TaskPlanStatus, TaskPlanSchedule } from '@memoflow/task-contracts';
 import { presentErrorMessage } from '@memoflow/http-client';
 
 import { useAppSession } from './useAppSession';
@@ -40,7 +39,7 @@ export type TaskPlanDetail = TaskPlanSummary & {
   schedule: TaskPlanSchedule;
 };
 
-function mapTemplate(template: TaskPlan): TaskPlanSummary {
+function mapTemplate(template: TaskPlanClientDTO): TaskPlanSummary {
   return {
     id: String(template.id),
     name: template.name,
@@ -64,7 +63,7 @@ function mapTemplate(template: TaskPlan): TaskPlanSummary {
   };
 }
 
-export function mapTaskPlanDetail(template: TaskPlan): TaskPlanDetail {
+export function mapTaskPlanDetail(template: TaskPlanClientDTO): TaskPlanDetail {
   return {
     ...mapTemplate(template),
     createdAt: template.createdAt,

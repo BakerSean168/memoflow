@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { TaskGoalBindingTrigger, type CreateTaskPlanReq } from '@memoflow/contracts/task';
+import { TaskGoalBindingTrigger, type CreateTaskPlanReq } from '@memoflow/task-contracts';
 
 describe('TASK-2205 Goal link / contribution V2 contract', () => {
   it('uses the canonical settlement triggers', () => {

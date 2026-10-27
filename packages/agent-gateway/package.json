@@ -19,6 +19,7 @@
   "dependencies": {
     "@memoflow/contracts": "workspace:*",
     "@memoflow/goal-contracts": "workspace:*",
+    "@memoflow/task-contracts": "workspace:*",
     "@modelcontextprotocol/node": "2.1.1",
     "@modelcontextprotocol/server": "2.3.1",
     "zod": "4.6.5",

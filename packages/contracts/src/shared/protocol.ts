@@ -14,8 +14,7 @@ import type { ScheduleEventMap } from '@memoflow/schedule-contracts';
 import type { ScheduleRpcMap } from '@memoflow/schedule-contracts';
 import type { SettingEventMap } from '@memoflow/setting-contracts';
 import type { SettingRpcMap } from '@memoflow/setting-contracts';
-import type { TaskEventMap } from '../modules/task/protocol/task-event-map';
-import type { TaskRpcMap } from '../modules/task/protocol/task-rpc-map';
+import type { TaskEventMap, TaskRpcMap } from '@memoflow/task-contracts';
 
 /**
  * Event registry extension seam.

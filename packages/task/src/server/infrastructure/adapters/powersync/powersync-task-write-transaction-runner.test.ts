@@ -12,7 +12,7 @@ import {
   TaskPlanOutcome,
   TaskPlanScheduleKind,
   TaskRecurrenceEndKind,
-} from '@memoflow/contracts/task';
+} from '@memoflow/task-contracts';
 import { eventBus } from '@memoflow/utils/domain';
 import { TaskPlan } from '../../../domain/aggregates/task-plan';
 import { TaskOccurrenceId } from '../../../domain/value-objects';

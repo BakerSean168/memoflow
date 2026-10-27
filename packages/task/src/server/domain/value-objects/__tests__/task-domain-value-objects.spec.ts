@@ -12,7 +12,7 @@ import {
   ReminderTimeUnit,
   TaskOccurrenceResultSchema,
   TaskPlanScheduleKind,
-} from '@memoflow/contracts/task';
+} from '@memoflow/task-contracts';
 
 describe('task domain value objects', () => {
   it('covers canonical task plan schedules and reminder configuration', () => {

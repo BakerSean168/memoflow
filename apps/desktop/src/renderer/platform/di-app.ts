@@ -3,6 +3,7 @@ import {
   installNotificationUiHost,
   installRepositoryUiHost,
   installRoutineUiHost,
+  installTaskUiHost,
 } from '@memoflow/app-vue/di';
 /**
  * Desktop Platform DI — IPC Adapter Injection
@@ -17,7 +18,7 @@ import { createCloudAuthIpcClient } from '@memoflow/cloud-auth';
 import { createGoalIpcClient } from '@memoflow/goal-client';
 import { createGoalKnowledgeIpcClient } from '@memoflow/relation/client';
 import { createLabelIpcClient } from '@memoflow/label/client';
-import { createTaskIpcClient } from '@memoflow/task/client';
+import { createTaskIpcClient } from '@memoflow/task-client';
 import { createScheduleIpcClient } from '@memoflow/schedule-client';
 import { createRepositoryIpcClient } from '@memoflow/repository-client';
 import { createNotificationIpcClient } from '@memoflow/notification-client';
@@ -94,6 +95,7 @@ export function installDesktopAppServices(
   initialSnapshot: DesktopAccessSnapshot | null = null,
 ): void {
   installGoalUiHost();
+  installTaskUiHost();
   installNotificationUiHost();
   installRepositoryUiHost();
   installRoutineUiHost();

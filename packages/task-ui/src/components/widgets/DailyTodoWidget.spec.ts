@@ -1,0 +1,180 @@
+import { defineComponent, ref } from 'vue';
+import { createI18n } from 'vue-i18n';
+import { flushPromises, mount } from '@vue/test-utils';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+import type { TaskOccurrenceClientDTO, TaskPlanClientDTO } from '@memoflow/task-contracts';
+import { useTaskToday } from '../../composables/useTaskToday';
+import DailyTodoWidget from './DailyTodoWidget.vue';
+import { installTaskUiHost } from '@task-ui-test-host/di/task-ui-host';
+installTaskUiHost();
+
+vi.mock('../../composables/useTaskPlanMutations', () => ({
+  useTaskPlanMutations: () => ({ createPlanSafe: vi.fn(), isSaving: ref(false) }),
+}));
+
+vi.mock('../../composables/useTaskToday', () => ({
+  useTaskToday: vi.fn(),
+}));
+
+const PassThroughStub = defineComponent({
+  template: '<div><slot /></div>',
+});
+
+function createInstance(status: TaskOccurrenceClientDTO['status']): TaskOccurrenceClientDTO {
+  const now = Date.now();
+  return {
+    id: 'TaskOccurrenceId_today' as TaskOccurrenceClientDTO['id'],
+    planId: 'TaskPlanId_today' as TaskOccurrenceClientDTO['planId'],
+    identityId: 'IdentityId_today' as TaskOccurrenceClientDTO['identityId'],
+    occurrenceKey: 'TaskPlanId_today:today',
+    scheduleSnapshot: {
+      date: '2026-09-13' as TaskOccurrenceClientDTO['scheduleSnapshot']['date'],
+      timing: { kind: 'AllDay' },
+    },
+    importanceSnapshot: 'Moderate',
+    status,
+    actualStartAt: null,
+    result: null,
+    checklistState: [],
+    dueAt: now,
+    isOverdue: false,
+    version: 1,
+    createdAt: now,
+    updatedAt: now,
+    deletedAt: null,
+  };
+}
+
+describe('DailyTodoWidget', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it("refreshes the home progress and completed statistics after completing today's task", async () => {
+    const instances = ref<TaskOccurrenceClientDTO[]>([createInstance('Pending')]);
+    const templates = ref<TaskPlanClientDTO[]>([
+      {
+        id: 'TaskPlanId_today',
+        name: 'Close the daily loop',
+      } as TaskPlanClientDTO,
+    ]);
+    const completeOccurrence = vi.fn(async (id: string) => {
+      instances.value = instances.value.map((instance) =>
+        instance.id === id ? { ...instance, status: 'Completed' } : instance,
+      );
+      return instances.value.find((instance) => instance.id === id) ?? null;
+    });
+    const uncompleteOccurrence = vi.fn(async (id: string) => {
+      instances.value = instances.value.map((instance) =>
+        instance.id === id ? { ...instance, status: 'Pending' } : instance,
+      );
+      return instances.value.find((instance) => instance.id === id) ?? null;
+    });
+
+    vi.mocked(useTaskToday).mockReturnValue({
+      instances,
+      templates,
+      isLoading: ref(false),
+      resolveIdentityScope: () => 'identity-1',
+      load: vi.fn().mockResolvedValue(undefined),
+      operations: { completeOccurrence, uncompleteOccurrence },
+    } as unknown as ReturnType<typeof useTaskToday>);
+
+    const wrapper = mount(DailyTodoWidget, {
+      global: {
+        plugins: [createI18n({ legacy: false, locale: 'en', messages: {} })],
+        stubs: {
+          Card: PassThroughStub,
+          CardHeader: PassThroughStub,
+          CardTitle: PassThroughStub,
+          CardContent: PassThroughStub,
+          ScrollArea: PassThroughStub,
+          Button: PassThroughStub,
+          Skeleton: true,
+          ListTodo: true,
+          ArrowRight: true,
+          CheckCircle2: true,
+          Check: true,
+          Loader2: true,
+        },
+      },
+    });
+    await flushPromises();
+
+    expect(wrapper.text()).toContain('0/1');
+    expect(wrapper.get('.h-full.rounded-full.bg-emerald-500').attributes('style')).toContain(
+      'width: 0%',
+    );
+
+    await wrapper.get('button[aria-label="task.action.complete"]').trigger('click');
+    await flushPromises();
+
+    expect(completeOccurrence).toHaveBeenCalledWith('TaskOccurrenceId_today');
+    expect(wrapper.emitted('completed')).toEqual([
+      [expect.objectContaining({ id: 'TaskOccurrenceId_today', status: 'Completed' })],
+    ]);
+    expect(wrapper.text()).toContain('1/1');
+    expect(wrapper.get('.h-full.rounded-full.bg-emerald-500').attributes('style')).toContain(
+      'width: 100%',
+    );
+    const undoButton = wrapper.get('button[aria-label="task.action.undoComplete"]');
+    expect(undoButton.attributes('disabled')).toBeUndefined();
+
+    await undoButton.trigger('click');
+    await flushPromises();
+
+    expect(uncompleteOccurrence).toHaveBeenCalledWith('TaskOccurrenceId_today');
+    expect(wrapper.text()).toContain('0/1');
+    expect(wrapper.get('.h-full.rounded-full.bg-emerald-500').attributes('style')).toContain(
+      'width: 0%',
+    );
+  });
+
+  it('refreshes today data when the kept-alive Home surface becomes active again', async () => {
+    const load = vi.fn().mockResolvedValue(undefined);
+
+    vi.mocked(useTaskToday).mockReturnValue({
+      instances: ref<TaskOccurrenceClientDTO[]>([]),
+      templates: ref<TaskPlanClientDTO[]>([]),
+      isLoading: ref(false),
+      resolveIdentityScope: () => 'identity-1',
+      load,
+      operations: { completeOccurrence: vi.fn(), uncompleteOccurrence: vi.fn() },
+    } as unknown as ReturnType<typeof useTaskToday>);
+
+    const wrapper = mount(DailyTodoWidget, {
+      props: { active: false },
+      global: {
+        plugins: [createI18n({ legacy: false, locale: 'en', messages: {} })],
+        stubs: {
+          Card: PassThroughStub,
+          CardHeader: PassThroughStub,
+          CardTitle: PassThroughStub,
+          CardContent: PassThroughStub,
+          ScrollArea: PassThroughStub,
+          Button: PassThroughStub,
+          Skeleton: true,
+          ListTodo: true,
+          ArrowRight: true,
+          CheckCircle2: true,
+          Check: true,
+          Loader2: true,
+        },
+      },
+    });
+    await flushPromises();
+
+    expect(load).not.toHaveBeenCalled();
+
+    await wrapper.setProps({ active: true });
+    await flushPromises();
+
+    expect(load).toHaveBeenCalledOnce();
+
+    await wrapper.setProps({ active: false });
+    await wrapper.setProps({ active: true });
+    await flushPromises();
+
+    expect(load).toHaveBeenCalledTimes(2);
+  });
+});

@@ -17,7 +17,12 @@ const PKG_ROOT = resolve(WORKSPACE_ROOT, 'packages/app-vue');
 const LOCALES_ROOT = resolve(PKG_ROOT, 'src/locales');
 const { default: zhCN } = await import(resolve(LOCALES_ROOT, 'zh-CN/index.ts'));
 const { default: enUS } = await import(resolve(LOCALES_ROOT, 'en-US/index.ts'));
-const SCAN_ROOTS = [resolve(PKG_ROOT, 'src'), resolve(WORKSPACE_ROOT, 'apps/web/src')];
+const SCAN_ROOTS = [
+  resolve(PKG_ROOT, 'src'),
+  resolve(WORKSPACE_ROOT, 'apps/web/src'),
+  // Extracted UI packages keep their surface keys in their own sources (#630 §4.9).
+  resolve(WORKSPACE_ROOT, 'packages/setting-ui/src'),
+];
 const SOURCE_EXTS = new Set(['.vue', '.ts', '.tsx']);
 /** Match t('a.b'), $t("a.b.c"), te(`x.y`) with dotted keys only. */
 const KEY_RE = /(?:[^\w$.]|^)(?:\$t|t|te|tm)\(\s*(['"`])((?:[\w-]+\.)+[\w-]+)\1/g;

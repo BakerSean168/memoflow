@@ -2,7 +2,7 @@ import request from 'supertest';
 import type { Express } from 'express';
 import { afterAll, afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { GoalMutationReceiptSchema } from '@memoflow/goal-contracts';
-import { CreateTaskPlanResponseSchema, TaskPlanResponseSchema } from '@memoflow/contracts/task';
+import { CreateTaskPlanResponseSchema, TaskPlanResponseSchema } from '@memoflow/task-contracts';
 import { PrismaGoalRelationCleanupCapability } from '@memoflow/relation';
 import { PrismaTaskBindingReadPort } from '@memoflow/task';
 import { createSettingPrismaPortability } from '@memoflow/setting';

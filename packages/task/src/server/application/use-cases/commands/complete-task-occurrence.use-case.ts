@@ -7,12 +7,12 @@ import type { ITaskPlanRepository } from '../../../domain/repositories/i-task-pl
 import type {
   CompleteTaskOccurrenceReq,
   TaskOccurrenceOperationRes,
-} from '@memoflow/contracts/task';
+} from '@memoflow/task-contracts';
 import {
   TaskOccurrenceStatus,
   TaskGoalMeasurementSchema,
   TaskGoalProgressConfigurationSchema,
-} from '@memoflow/contracts/task';
+} from '@memoflow/task-contracts';
 import type { Result } from '@memoflow/contracts/result';
 import { ok, error, fail } from '@memoflow/contracts/result';
 import { createLogger } from '@memoflow/utils/logger';

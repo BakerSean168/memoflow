@@ -26,7 +26,7 @@ export default defineConfig({
       ...createWorkspaceSourceAliasEntries(workspace, [
         // Harness-only source access; production package exports stay unchanged.
         ['@memoflow/app-vue', 'packages/app-vue/src'],
-        ['@memoflow/task/client', 'packages/task/src/client/index.ts'],
+        ['@memoflow/task-client', 'packages/task-client/src/index.ts'],
         ['@memoflow/goal-client', 'packages/goal-client/src/index.ts'],
         ['@memoflow/goal-core/ids', 'packages/goal-core/src/ids.ts'],
         [
@@ -110,6 +110,8 @@ export default defineConfig({
         ['@memoflow/goal-ui/composables/useGoal', 'packages/goal-ui/src/composables/useGoal.ts'],
         ['@memoflow/goal-ui/host', 'packages/goal-ui/src/goal-ui-host.ts'],
         ['@memoflow/goal-ui', 'packages/goal-ui/src/index.ts'],
+        ['@memoflow/task-ui/host', 'packages/task-ui/src/task-ui-host.ts'],
+        ['@memoflow/task-ui', 'packages/task-ui/src'],
         ['@memoflow/workspace-contracts', 'packages/workspace-contracts/src/index.ts'],
         [
           '@memoflow/desktop-contracts/auth-context',

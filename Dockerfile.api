@@ -72,6 +72,7 @@ COPY packages/setting/package.json ./packages/setting/package.json
 COPY packages/setting-contracts/package.json ./packages/setting-contracts/package.json
 COPY packages/shared-primitives/package.json ./packages/shared-primitives/package.json
 COPY packages/task/package.json ./packages/task/package.json
+COPY packages/task-contracts/package.json ./packages/task-contracts/package.json
 COPY packages/test-utils/package.json ./packages/test-utils/package.json
 COPY packages/time/package.json ./packages/time/package.json
 COPY packages/transport-contracts/package.json ./packages/transport-contracts/package.json
@@ -128,6 +129,7 @@ COPY packages/setting ./packages/setting
 COPY packages/setting-contracts ./packages/setting-contracts
 COPY packages/shared-primitives ./packages/shared-primitives
 COPY packages/task ./packages/task
+COPY packages/task-contracts ./packages/task-contracts
 COPY packages/test-utils ./packages/test-utils
 COPY packages/time ./packages/time
 COPY packages/transport-contracts ./packages/transport-contracts

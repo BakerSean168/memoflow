@@ -4,7 +4,7 @@ import {
   TaskGoalMeasurementSchema,
   type TaskGoalProgressOutboxEventV2,
   type TaskGoalSettlementSource,
-} from '@memoflow/contracts/task';
+} from '@memoflow/task-contracts';
 import { createLogger } from '@memoflow/utils/logger';
 
 const logger = createLogger('TaskGoalOutboxDispatcher');

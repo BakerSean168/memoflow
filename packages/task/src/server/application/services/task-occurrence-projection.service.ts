@@ -1,4 +1,4 @@
-import type { TaskOccurrenceClientDTO } from '@memoflow/contracts/task';
+import type { TaskOccurrenceClientDTO } from '@memoflow/task-contracts';
 import type { TimeContext, UserTimeContextPort } from '@memoflow/time';
 import type { TaskOccurrence } from '../../domain/aggregates/task-occurrence';
 

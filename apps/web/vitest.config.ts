@@ -32,8 +32,10 @@ const sharedConfig = createSharedConfig({
     '@memoflow/setting-ui/host': '../../packages/setting-ui/src/setting-ui-host.ts',
     '@memoflow/setting-ui': '../../packages/setting-ui/src/index.ts',
     '@memoflow/repository/client': '../../packages/repository/src/client/index.ts',
+    '@memoflow/task-ui/host': '../../packages/task-ui/src/task-ui-host.ts',
+    '@memoflow/task-ui': '../../packages/task-ui/src/index.ts',
+    '@memoflow/task-client': '../../packages/task-client/src/index.ts',
     '@memoflow/repository-client': '../../packages/repository-client/src/index.ts',
-    '@memoflow/task/client': '../../packages/task/src/client/index.ts',
   },
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
 }) as any;

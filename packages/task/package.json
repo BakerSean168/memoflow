@@ -22,10 +22,6 @@
       "types": "./dist/api/index.d.ts",
       "import": "./dist/api/index.js"
     },
-    "./client": {
-      "types": "./dist/client/index.d.ts",
-      "import": "./dist/client/index.js"
-    },
     "./schedule-execution": {
       "types": "./dist/schedule-execution/index.d.ts",
       "import": "./dist/schedule-execution/index.js"
@@ -51,8 +47,6 @@
     "@memoflow/domain-shared": "workspace:*",
     "@memoflow/goal-contracts": "workspace:*",
     "@memoflow/host-runtime": "workspace:*",
-    "@memoflow/http-client": "workspace:*",
-    "@memoflow/ipc-client": "workspace:*",
     "@memoflow/label-contracts": "workspace:*",
     "@memoflow/notification-contracts": "workspace:*",
     "@memoflow/patterns": "workspace:*",
@@ -60,8 +54,10 @@
     "@memoflow/reliable-messaging-contracts": "workspace:*",
     "@memoflow/schedule-contracts": "workspace:*",
     "@memoflow/shared-primitives": "workspace:*",
+    "@memoflow/task-contracts": "workspace:*",
     "@memoflow/time": "workspace:*",
     "@memoflow/utils": "workspace:*",
+    "@memoflow/workspace-contracts": "workspace:*",
     "date-fns": "^4.4.0",
     "express": "^5.2.1",
     "zod": "^4.6.5"

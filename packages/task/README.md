@@ -5,13 +5,14 @@
 ## 公开 seam
 
 ```text
-@memoflow/contracts/task
+@memoflow/task-contracts
 
 @memoflow/task
 @memoflow/task/api
 @memoflow/task/electron
-@memoflow/task/client
 @memoflow/task/testing
+
+@memoflow/task-client
 ```
 
 ## 模块职责
@@ -19,7 +20,7 @@
 - `@memoflow/task`：transport-neutral 深模块工厂 `createTaskModule` + 宿主装配 ingredient factory（`createTaskPrismaRepositories` / `createTaskPowerSyncRepositories` / `createTaskRuntimeContribution` / `createTaskPrismaGoalOutboxRuntime` / `createTaskPowerSyncGoalOutboxRuntime`）+ port/set 类型（`TaskRepositorySet` 等）
 - `@memoflow/task/api`：HTTP 传输与生命周期适配器（接收已装配的 `{ instance }`，不含组合）
 - `@memoflow/task/electron`：IPC 传输与生命周期适配器（接收已装配的 `{ instance }`，不含组合）
-- `@memoflow/task/client`：Web / Desktop renderer 客户端 seam
+- `@memoflow/task-client`：Web / Desktop renderer 客户端 seam（独立包，不再由 `@memoflow/task` 暴露子入口）
 - `@memoflow/task/testing`：测试 fixture seam
 
 ## 内部结构标准
@@ -27,7 +28,6 @@
 ```text
 packages/task/src/
 ├── api/                    # HTTP module 与 resource-first routes（transport-only）
-├── client/                 # renderer client seam
 ├── electron/               # desktop main seam（transport-only）
 ├── server/
 │   ├── domain/             # 聚合根、实体、仓储接口、值对象

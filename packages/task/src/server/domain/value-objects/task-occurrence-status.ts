@@ -1,7 +1,7 @@
 import {
   TaskOccurrenceStatus as TaskOccurrenceStatusContract,
   type TaskOccurrenceStatus as ITaskOccurrenceStatus,
-} from '@memoflow/contracts/task';
+} from '@memoflow/task-contracts';
 
 /**
  * 📝 任务实例状态 - 循环任务实例的生命周期状态

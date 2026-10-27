@@ -7,6 +7,9 @@
 import { findPatternMatches } from './source-scan.mjs';
 
 const FEATURE_ROOTS = ['packages/goal/src/', 'packages/task/src/', 'packages/routine/src/'];
+// Task-owned product source spans the server package and the extracted client
+// package; locks that scope Task roots must keep covering both.
+const TASK_SOURCE_ROOTS = ['packages/task/src/', 'packages/task-client/src/'];
 const EXECUTION_ROOTS = [
   'packages/scheduler/src/server/',
   'packages/schedule-orchestration/src/',
@@ -125,7 +128,7 @@ const KR_MEASUREMENT_OWNER_FILES = new Set([
   'packages/data-portability/src/server/application/use-cases/importers/goal.importer.ts',
   'packages/data-portability/src/server/application/use-cases/projections/goal.projection.ts',
   'packages/data-portability/src/server/infrastructure/powersync/powersync-import-store.ts',
-  'packages/app-vue/src/modules/task/composables/useTaskGoalBindingOptions.ts',
+  'packages/task-ui/src/composables/useTaskGoalBindingOptions.ts',
   'packages/contracts/src/modules/ai/api/ai-goal-create-workflow.dto.ts',
   'packages/ai/src/server/mastra/agents/goal-planner.worker.ts',
   'packages/ai/src/server/mastra/workflows/apply-goal-plan.service.ts',
@@ -139,7 +142,7 @@ const KR_CLIENT_SURFACE_ROOTS = ['packages/goal-ui/src/', 'packages/app-react/sr
 const KR_CLIENT_SURFACE_FILES = new Set([
   'packages/app-react/src/components/GoalCard.tsx',
   'packages/app-react/src/hooks/useGoals.ts',
-  'packages/app-vue/src/modules/task/composables/useTaskGoalBindingOptions.ts',
+  'packages/task-ui/src/composables/useTaskGoalBindingOptions.ts',
 ]);
 
 export function isTestLikePath(relPath) {
@@ -302,7 +305,8 @@ export function findCoreVnextArchitectureLockViolations(files) {
 
     if (
       relPath.startsWith('packages/contracts/src/') ||
-      relPath.startsWith('packages/schedule-contracts/src/')
+      relPath.startsWith('packages/schedule-contracts/src/') ||
+      relPath.startsWith('packages/task-contracts/src/')
     ) {
       pushPatternViolations(
         violations,
@@ -361,8 +365,8 @@ export function findCoreVnextArchitectureLockViolations(files) {
     // intentionally target only Task-owned product/contract files so Reminder,
     // Scheduler metadata may keep its unrelated tag/color semantics.
     if (
-      relPath.startsWith('packages/task/src/') ||
-      relPath.startsWith('packages/app-vue/src/modules/task/') ||
+      startsWithAny(relPath, TASK_SOURCE_ROOTS) ||
+      relPath.startsWith('packages/task-ui/src/') ||
       relPath.startsWith('packages/app-react/src/screens/Task') ||
       relPath === 'packages/app-react/src/hooks/useTaskPlans.ts'
     ) {
@@ -375,7 +379,7 @@ export function findCoreVnextArchitectureLockViolations(files) {
       );
     }
     if (
-      relPath === 'packages/contracts/src/modules/task/api/task-plan.dto.ts' ||
+      relPath === 'packages/task-contracts/src/api/task-plan.dto.ts' ||
       relPath === 'packages/task/src/server/domain/aggregates/task-plan.state.ts'
     ) {
       pushPatternViolations(
@@ -407,7 +411,7 @@ export function findCoreVnextArchitectureLockViolations(files) {
 
     // ADR-069 / GOAL-7205: Key Result task reads are always scoped by their owning Goal,
     // and a nullable KR link must remain null on ordinary client projections.
-    if (relPath.startsWith('packages/task/src/')) {
+    if (startsWithAny(relPath, TASK_SOURCE_ROOTS)) {
       pushPatternViolations(
         violations,
         relPath,
@@ -416,7 +420,7 @@ export function findCoreVnextArchitectureLockViolations(files) {
         'task-goal-ownerless-kr-query',
       );
     }
-    if (relPath === 'packages/task/src/domain-client/aggregates/task-plan.ts') {
+    if (relPath === 'packages/task-client/src/application-client/task-client-service.ts') {
       pushPatternViolations(
         violations,
         relPath,

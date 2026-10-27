@@ -67,7 +67,7 @@ const goalSchema = read('packages/goal-contracts/src/api/response-schemas.ts');
 if (!goalSchema.includes('color: LabelColorSchema.nullable()')) {
   violations.push('Goal label projection must reuse LabelColorSchema');
 }
-const taskSchema = read('packages/contracts/src/modules/task/api/response-schemas.ts');
+const taskSchema = read('packages/task-contracts/src/api/response-schemas.ts');
 if (!taskSchema.includes('labels: z.array(LabelClientDTOSchema)')) {
   violations.push('Task label projection must reuse LabelClientDTOSchema');
 }

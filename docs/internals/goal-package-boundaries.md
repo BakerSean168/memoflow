@@ -40,6 +40,12 @@ flowchart TD
 
 语言资源与 i18n 插件留在 app-vue。迁移的单元测试通过 Vitest 的测试宿主别名读取原有 fixture 和装配器；这些文件作为 goal-ui 的 Nx 命名输入参与缓存，不产生反向运行时依赖。与真实 shell 交互的深链与布局集成测试留在 app 层。测试用的 `composables/useGoal` 子入口与包根消费同一模块，保证 mock 和实际组件使用同一实例。
 
+## 后续同构提取（Issue #635）
+
+Notification、Schedule、Task 都按同一形状提取：`packages/<X>-ui` 持有 Vue 组件、路由、Composable、Store 与视图，宿主经 `host` 入口绑定平台能力，UI 不导入 app-vue，也不导入其他业务 UI。`task-ui` 的宿主绑定在 `app-vue/src/di/task-ui-host.ts`。
+
+`tier:ui` 之间不允许互相依赖，因此业务 UI 的跨域访问只走宿主槽位（裁决二）。Task 需要 Goal 的 Key Result 计算词表与记录 Composer 时，读取的是 `taskUiHost` 上的端口与组件槽（`getKeyResultCalculationLabel`、`KEY_RESULT_CALCULATION_PRESENTATION`、`components['GoalRecordComposerSurface']`），实现由 app-vue 从 `@memoflow/goal-ui` 注入；task-ui 与 goal-ui 的源码都不引用对方。单测同样用槽位替身覆盖该分支，而不是引入跨包 mock。测试宿主里的兄弟域组件也是本地替身：`schedule-ui/src/test/test-host.ts` 自行声明 Task occurrence 组件与 `useTask`，不为此放宽全局边界例外。
+
 ## 必须保持
 
 Goal 公共协议与 DTO、HTTP/IPC 通道、PowerSync / Prisma 数据映射、本地 Profile 边界、离线读写语义、Desktop 原生窗口和认证边界、用户可见路径与现有测试主流程。

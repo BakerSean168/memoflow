@@ -4,7 +4,7 @@ import '@memoflow/test-utils/helpers/result-matchers';
 import { IdentityId } from '@memoflow/domain-shared';
 import { ImportanceLevel } from '@memoflow/shared-primitives';
 import { ok } from '@memoflow/contracts/result';
-import { TaskGoalBindingTrigger, TaskPlanScheduleKind } from '@memoflow/contracts/task';
+import { TaskGoalBindingTrigger, TaskPlanScheduleKind } from '@memoflow/task-contracts';
 import { eventBus } from '@memoflow/utils/domain';
 import { TaskPlan } from '../../../domain/aggregates/task-plan';
 import { TaskOccurrence } from '../../../domain/aggregates/task-occurrence';
