@@ -1,34 +1,98 @@
-import { installGoalUiHost } from '@task-ui-test-host/di/goal-ui-host';
 import { flushPromises, mount } from '@vue/test-utils';
 import { createI18n } from 'vue-i18n';
 import { beforeEach, expect, it, vi } from 'vitest';
-import { defineComponent, h } from 'vue';
+import { computed, defineComponent, h, ref, watch } from 'vue';
 import TaskCompletionMeasurementDialog from './TaskCompletionMeasurementDialog.vue';
 import { useTaskOccurrenceActionCoordinator } from '../../composables/useTaskOccurrenceActionCoordinator';
 import { instance } from '../task-quick-test-fixtures';
 import enUS from '@task-ui-test-host/locales/en-US';
 import type { TaskGoalBindingDTO } from '@memoflow/task-contracts';
 import { installTaskUiHost } from '@task-ui-test-host/di/task-ui-host';
+import { taskUiHost } from '../../task-ui-host';
 installTaskUiHost();
 
-installGoalUiHost();
-const owner = vi.hoisted(() => ({ read: vi.fn() }));
-vi.mock('@memoflow/goal-ui/composables/useGoal', () => ({
-  useGoal: () => ({ getKeyResultById: () => undefined, getGoalRecordPreviewContext: owner.read }),
-}));
-beforeEach(() => {
-  owner.read.mockReset();
-  owner.read.mockResolvedValue({
-    keyResultId: 'kr',
-    aggregationMethod: 'Sum',
-    initialValue: 0,
-    currentValue: 40,
-    trackingBaseValue: 40,
-    targetValue: 100,
-    unit: 'kg',
-    aggregationSnapshot: { count: 0, sum: 0, min: null, max: null, last: null },
-  });
+// 裁决二 boundary: the Goal composer reaches this dialog only as a host slot, so
+// the Task-side contract is exercised against a slot double that reproduces the
+// published props, events and exposed submit(). Goal-owned rendering (preview
+// text, calculation vocabulary) stays covered by the goal-ui specs for
+// GoalRecordComposerSurface.
+const composerState = vi.hoisted(() => ({ available: true }));
+const GoalComposerDouble = defineComponent({
+  name: 'GoalRecordComposerSurface',
+  props: {
+    goalId: { type: String, required: true },
+    keyResultId: { type: String, required: true },
+    initialValue: { type: Number, default: null },
+    initialNote: { type: String, default: '' },
+    disabled: { type: Boolean, default: false },
+  },
+  emits: ['submit', 'cancel', 'validity-change', 'dirty-change'],
+  setup(props, { emit, expose }) {
+    const draft = ref<{ value: number | string; note: string }>({
+      value: props.initialValue ?? '',
+      note: props.initialNote,
+    });
+    const isValid = computed(
+      () =>
+        composerState.available &&
+        typeof draft.value.value === 'number' &&
+        Number.isFinite(draft.value.value),
+    );
+    watch(isValid, (valid) => emit('validity-change', valid), { immediate: true });
+    const isDirty = computed(
+      () => draft.value.value !== (props.initialValue ?? '') || draft.value.note !== props.initialNote,
+    );
+    watch(isDirty, (dirty) => emit('dirty-change', dirty), { immediate: true });
+    function submit() {
+      if (props.disabled || !isValid.value || typeof draft.value.value !== 'number') return;
+      emit('submit', { value: draft.value.value, note: draft.value.note });
+    }
+    function onKeydown(event: KeyboardEvent) {
+      if (event.key === 'Escape') {
+        event.stopPropagation();
+        if (!props.disabled) emit('cancel');
+        return;
+      }
+      if (event.key !== 'Enter') return;
+      if ((event.target as HTMLElement).tagName === 'TEXTAREA') return;
+      event.preventDefault();
+      submit();
+    }
+    expose({ submit });
+    return () =>
+      h('form', { id: 'goal-record-form' }, [
+        composerState.available
+          ? null
+          : h('p', { 'data-testid': 'goal-record-preview' }, 'Preview unavailable'),
+        h('input', {
+          id: 'change-amount',
+          type: 'number',
+          value: String(draft.value.value),
+          disabled: props.disabled,
+          onInput: (event: Event) => {
+            const target = event.target as HTMLInputElement;
+            draft.value.value = target.value === '' ? '' : Number(target.value);
+          },
+          onKeydown,
+        }),
+        h('textarea', {
+          id: 'record-note',
+          value: draft.value.note,
+          disabled: props.disabled,
+          onInput: (event: Event) => {
+            draft.value.note = (event.target as HTMLTextAreaElement).value;
+          },
+          onKeydown,
+        }),
+      ]);
+  },
 });
+taskUiHost.components.GoalRecordComposerSurface = GoalComposerDouble;
+
+beforeEach(() => {
+  composerState.available = true;
+});
+
 async function dialog() {
   const result = instance({ status: 'Completed' });
   const operations = {
@@ -92,9 +156,8 @@ it('retains edited value/note on completion failure and retries the same Task co
   w.unmount();
 });
 it('keeps complete-only available when Goal is unavailable and clears cancel/reopen state', async () => {
-  owner.read.mockRejectedValue(new Error('offline'));
+  composerState.available = false;
   const { wrapper: w, coordinator: c, operations: o } = await dialog();
-  expect(w.text()).toContain('Preview unavailable');
   expect(
     w.get<HTMLButtonElement>('[data-testid="task-record-and-complete"]').element.disabled,
   ).toBe(true);

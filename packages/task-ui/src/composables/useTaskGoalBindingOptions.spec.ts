@@ -1,16 +1,18 @@
-import {
-  KEY_RESULT_CALCULATION_METHODS,
-  getKeyResultCalculationLabel,
-  KEY_RESULT_CALCULATION_PRESENTATION,
-} from '@memoflow/goal-ui';
 import { createApp, defineComponent, h } from 'vue';
 import { createI18n } from 'vue-i18n';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { ok } from '@memoflow/contracts/result';
 import { DESKTOP_AUTH_API_KEY, GOAL_SERVICE_KEY } from '@task-ui-test-host/di/keys';
 import { useTaskGoalBindingOptions } from './useTaskGoalBindingOptions';
+import { taskUiHost } from '../task-ui-host';
 import { installTaskUiHost } from '@task-ui-test-host/di/task-ui-host';
 installTaskUiHost();
+
+// The canonical Key Result calculation vocabulary is Goal-owned and reaches Task
+// only through the host slot, so the table is driven off that slot.
+const KEY_RESULT_CALCULATION_METHODS = Object.keys(
+  taskUiHost.KEY_RESULT_CALCULATION_PRESENTATION,
+);
 
 
 const i18n = createI18n({
@@ -146,8 +148,9 @@ describe('useTaskGoalBindingOptions', () => {
       expect(options[0]).toMatchObject({
         title: 'Temperature',
         calculationMethod: method,
-        methodLabel: getKeyResultCalculationLabel(method, i18n.global.t),
-        recordInputKind: KEY_RESULT_CALCULATION_PRESENTATION[method].recordInputKind,
+        methodLabel: taskUiHost.getKeyResultCalculationLabel(method, i18n.global.t),
+        recordInputKind:
+          taskUiHost.KEY_RESULT_CALCULATION_PRESENTATION[method].recordInputKind,
         unit: '°C',
         currentValue: -2,
         targetValue: 10,

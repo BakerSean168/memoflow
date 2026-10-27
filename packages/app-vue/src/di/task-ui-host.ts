@@ -2,7 +2,6 @@ import { bindTaskUiHost } from '@memoflow/task-ui/host';
 import {
   DESKTOP_AUTH_API_KEY,
   GOAL_SERVICE_KEY,
-  LABEL_SERVICE_KEY,
   TASK_SERVICE_KEY,
 } from './keys';
 import {

@@ -14,35 +14,17 @@
       "types": "./dist/task-ui-host.d.ts",
       "import": "./dist/host.js"
     },
-    "./stores": {
-      "types": "./dist/stores/task-store.d.ts",
-      "import": "./dist/stores/task-store.js"
-    },
-    "./router": {
-      "types": "./dist/router/index.d.ts",
-      "import": "./dist/router/index.js"
-    },
-    "./composables": {
-      "types": "./dist/composables/index.d.ts",
-      "import": "./dist/composables/index.js"
-    },
     "./composables/*": {
       "types": "./dist/composables/*.d.ts",
       "import": "./dist/composables/*.js"
     },
-    "./components/*": "./dist/components/*",
-    "./views/*": "./dist/views/*",
-    "./utils/*": {
-      "types": "./dist/utils/*.d.ts",
-      "import": "./dist/utils/*.js"
-    }
+    "./components/*": "./dist/components/*"
   },
   "dependencies": {
     "@lucide/vue": "^1.48.0",
     "@memoflow/contracts": "workspace:*",
     "@memoflow/goal-client": "workspace:*",
     "@memoflow/goal-contracts": "workspace:*",
-    "@memoflow/goal-ui": "workspace:*",
     "@memoflow/http-client": "workspace:*",
     "@memoflow/label-contracts": "workspace:*",
     "@memoflow/shared-primitives": "workspace:*",

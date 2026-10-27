@@ -6,7 +6,7 @@
  * app-vue implementations through the `@schedule-ui-test-host/*` alias so the
  * package still imports no host internals from production code.
  */
-import { ref } from 'vue';
+import { defineComponent, h, ref } from 'vue';
 import { bindScheduleUiHost, type ScheduleUiHost } from '../schedule-ui-host';
 import {
   GOAL_SERVICE_KEY,
@@ -29,7 +29,7 @@ import {
   PLANNER_OWNER_STALE_TIME_MS,
   SCHEDULE_CALENDAR_STALE_TIME_MS,
 } from '@schedule-ui-test-host/platform/server-state/query-policy';
-import { useTask } from '@memoflow/task-ui';
+import { ok } from '@memoflow/contracts/result';
 import { fetchRoutineUpcomingCached } from '@schedule-ui-test-host/modules/routine/composables/routineUpcomingCache';
 import { usePanelWidth } from '@schedule-ui-test-host/layouts/shell/usePanelWidth';
 import { usePanelSurfaceStatus } from '@schedule-ui-test-host/layouts/shell/usePanelSurfaceStatus';
@@ -51,7 +51,37 @@ import {
   ProductSurfaceHeader,
   ResponsivePrimaryAction,
 } from '@schedule-ui-test-host/shared/components/index.ts';
-import { TaskOccurrenceQuickSurface } from '@memoflow/task-ui';
+
+/**
+ * Task presentation is a sibling tier:ui package, which the tier rules forbid
+ * Schedule UI from importing. The test host therefore doubles the two Task
+ * slots the app-vue composition root binds in production (`useTask` facade and
+ * the occurrence quick surface), keeping the published prop/emit contract and
+ * component name so slot assertions stay meaningful.
+ */
+const useTask = () => ({
+  instances: ref([]),
+  templates: ref([]),
+  isLoading: ref(false),
+  error: ref(null),
+  fetchInstancesByDateRange: async () => undefined,
+  fetchTemplates: async () => undefined,
+  rescheduleOccurrence: async () => ok(null),
+});
+
+export const TaskOccurrenceQuickSurface = defineComponent({
+  name: 'TaskOccurrenceQuickSurface',
+  props: { occurrenceId: { type: String, required: true } },
+  emits: ['open-plan'],
+  setup: (props, { emit }) => () =>
+    h('div', { 'data-testid': 'task-occurrence-quick-surface' }, [
+      h('button', {
+        type: 'button',
+        'data-testid': 'task-open-plan',
+        onClick: () => emit('open-plan', props.occurrenceId),
+      }),
+    ]),
+});
 
 export function createScheduleUiTestHost(overrides: Partial<ScheduleUiHost> = {}): ScheduleUiHost {
   return {

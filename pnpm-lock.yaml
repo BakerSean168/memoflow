@@ -2679,9 +2679,6 @@ importers:
       '@memoflow/task-contracts':
         specifier: workspace:*
         version: link:../task-contracts
-      '@memoflow/task-ui':
-        specifier: workspace:*
-        version: link:../task-ui
       '@memoflow/time':
         specifier: workspace:*
         version: link:../time
@@ -2963,9 +2960,6 @@ importers:
       '@memoflow/goal-contracts':
         specifier: workspace:*
         version: link:../goal-contracts
-      '@memoflow/goal-ui':
-        specifier: workspace:*
-        version: link:../goal-ui
       '@memoflow/http-client':
         specifier: workspace:*
         version: link:../http-client

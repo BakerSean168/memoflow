@@ -23,7 +23,6 @@
     "@memoflow/schedule-client": "workspace:*",
     "@memoflow/schedule-contracts": "workspace:*",
     "@memoflow/task-contracts": "workspace:*",
-    "@memoflow/task-ui": "workspace:*",
     "@memoflow/time": "workspace:*",
     "@memoflow/ui-vue-shadcn": "workspace:*",
     "@tanstack/vue-query": "5.103.2",
