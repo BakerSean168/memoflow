@@ -3,7 +3,7 @@ import { fail, ok } from '@memoflow/contracts/result';
 import type { NotificationClientDTO } from '@memoflow/notification-contracts';
 import { createServerStateRuntime } from '@notification-ui-test-host/platform/server-state';
 import { useNotificationStore } from '../stores/notification-store';
-import { mountNotificationComposable } from '../test-support/notificationQueryTestUtils';
+import { mountNotificationComposable } from '../test-support/notification-query-test-utils';
 import { useNotificationListQuery } from './useNotificationListQuery';
 
 function createNotification(overrides: Partial<NotificationClientDTO> = {}): NotificationClientDTO {

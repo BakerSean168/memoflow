@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { fail, ok } from '@memoflow/contracts/result';
 import { createServerStateRuntime } from '@notification-ui-test-host/platform/server-state';
-import { mountNotificationComposable } from '../test-support/notificationQueryTestUtils';
+import { mountNotificationComposable } from '../test-support/notification-query-test-utils';
 import { useNotificationUnreadQuery } from './useNotificationUnreadQuery';
 
 function makeService(getUnreadCount = vi.fn()) {
