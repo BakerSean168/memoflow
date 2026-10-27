@@ -86,6 +86,7 @@
     "@memoflow/relation": "workspace:*",
     "@memoflow/relation-contracts": "workspace:*",
     "@memoflow/repository": "workspace:*",
+    "@memoflow/repository-client": "workspace:*",
     "@memoflow/repository-contracts": "workspace:*",
     "@memoflow/repository-ui": "workspace:*",
     "@memoflow/routine-client": "workspace:*",

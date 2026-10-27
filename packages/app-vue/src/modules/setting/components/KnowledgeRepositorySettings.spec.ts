@@ -16,7 +16,10 @@ import {
   REPOSITORY_SERVICE_KEY,
 } from '../../../di/keys';
 import type { IRepositoryService } from '../../../di/types';
+import { installRepositoryUiHost } from '../../../di/repository-ui-host';
 import KnowledgeRepositorySettings from './KnowledgeRepositorySettings.vue';
+
+installRepositoryUiHost();
 
 const routerMocks = vi.hoisted(() => ({
   query: {} as Record<string, string>,

@@ -648,6 +648,9 @@ importers:
       '@memoflow/repository':
         specifier: workspace:*
         version: link:../../packages/repository
+      '@memoflow/repository-client':
+        specifier: workspace:*
+        version: link:../../packages/repository-client
       '@memoflow/repository-contracts':
         specifier: workspace:*
         version: link:../../packages/repository-contracts
@@ -1128,6 +1131,9 @@ importers:
       '@memoflow/repository':
         specifier: workspace:*
         version: link:../../packages/repository
+      '@memoflow/repository-client':
+        specifier: workspace:*
+        version: link:../../packages/repository-client
       '@memoflow/repository-contracts':
         specifier: workspace:*
         version: link:../../packages/repository-contracts
@@ -1558,6 +1564,9 @@ importers:
       '@memoflow/repository':
         specifier: workspace:*
         version: link:../repository
+      '@memoflow/repository-client':
+        specifier: workspace:*
+        version: link:../repository-client
       '@memoflow/repository-contracts':
         specifier: workspace:*
         version: link:../repository-contracts
