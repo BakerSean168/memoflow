@@ -8,7 +8,7 @@ import type {
   KnowledgeProjectionCheckpoint,
   RemoteHistoryFence,
   RemoteRepositoryObservation,
-} from '@memoflow/contracts/repository';
+} from '@memoflow/repository-contracts';
 import type {
   IKnowledgeProjectionCheckpointRepository,
   IKnowledgeRemoteBindingRepository,

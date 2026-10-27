@@ -6,8 +6,8 @@ import { useKnowledgeNativeSurface } from '../../../layouts/shell/useKnowledgeNa
 import type {
   KnowledgeCaptureNativeDraft,
   KnowledgeCaptureNativeEditSession,
-} from '../../repository/composables/knowledgeCaptureNativeEditSession';
-import { nativeDraftFromKnowledgeDraft } from '../../repository/composables/knowledgeCaptureNativeEditSession';
+} from '@memoflow/repository-ui';
+import { nativeDraftFromKnowledgeDraft } from '@memoflow/repository-ui';
 import { getAIErrorMessage } from './error';
 import type { UseAIKnowledgeCaptureOptions } from './types';
 

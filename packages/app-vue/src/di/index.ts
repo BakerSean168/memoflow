@@ -9,5 +9,5 @@ export { defaultModuleCapsules } from './navigation';
 
 export { installGoalUiHost } from './goal-ui-host';
 export { installNotificationUiHost } from './notification-ui-host';
-
+export { installRepositoryUiHost } from './repository-ui-host';
 export { installRoutineUiHost } from './routine-ui-host';

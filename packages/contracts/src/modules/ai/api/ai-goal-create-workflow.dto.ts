@@ -8,7 +8,7 @@ import {
   KeyResultCalculationMethod,
   CreateGoalSchema,
 } from '@memoflow/goal-contracts';
-import { KnowledgeDocumentRefSchema } from '../../repository';
+import { KnowledgeDocumentRefSchema } from '@memoflow/repository-contracts';
 import {
   GoalContributionRuleSchema,
   TaskPlanScheduleSchema,

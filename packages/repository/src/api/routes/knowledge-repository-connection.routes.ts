@@ -26,7 +26,7 @@ import {
   KnowledgeAttachmentProjectionListResponseSchema,
   ListKnowledgeWriteRequestsResSchema,
   KnowledgeWriteRequestReplayResponseSchema,
-} from '@memoflow/contracts/repository';
+} from '@memoflow/repository-contracts';
 import {
   OperationTimelineEntrySchema,
   OperationAuditRecordSchema,

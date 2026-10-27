@@ -9,7 +9,7 @@ import type {
   ListReferenceableKnowledgeDocumentsReq,
   ReferenceableKnowledgeDocumentListResponse,
   ReferenceableKnowledgeDocumentSummaryDTO,
-} from '@memoflow/contracts/repository';
+} from '@memoflow/repository-contracts';
 import type {
   IKnowledgeNoteProjectionRepository,
   KnowledgeNoteProjectionDeletion,

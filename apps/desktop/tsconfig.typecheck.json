@@ -17,6 +17,8 @@
       "@memoflow/notification-ui/host": [
         "../../packages/notification-ui/dist/notification-ui-host.d.ts"
       ],
+      "@memoflow/repository-ui": ["../../packages/repository-ui/dist/index.d.ts"],
+      "@memoflow/repository-ui/host": ["../../packages/repository-ui/dist/repository-ui-host.d.ts"],
       "@memoflow/ui-vue-shadcn/composables/*": ["../../packages/ui-vue-shadcn/src/composables/*"],
       "@memoflow/ai/client": ["../../packages/ai/dist/client/index.d.ts"],
       "@memoflow/ai/electron": ["../../packages/ai/dist/electron/index.d.ts"],
@@ -38,6 +40,9 @@
       "@memoflow/contracts": ["../../packages/contracts/dist/index.d.ts"],
       "@memoflow/notification-contracts": ["../../packages/notification-contracts/dist/index.d.ts"],
       "@memoflow/notification-contracts/*": ["../../packages/notification-contracts/dist/*.d.ts"],
+      "@memoflow/repository-client": ["../../packages/repository-client/dist/index.d.ts"],
+      "@memoflow/repository-contracts": ["../../packages/repository-contracts/dist/index.d.ts"],
+      "@memoflow/repository-contracts/*": ["../../packages/repository-contracts/dist/*.d.ts"],
       "@memoflow/contracts/*": [
         "../../packages/contracts/dist/modules/*/index.d.ts",
         "../../packages/contracts/dist/*/index.d.ts"

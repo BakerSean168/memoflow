@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 import { ok } from '@memoflow/contracts/result';
-import type { KnowledgeRemoteBindingClientDTO } from '@memoflow/contracts/repository';
+import type { KnowledgeRemoteBindingClientDTO } from '@memoflow/repository-contracts';
 import type { KnowledgeRepositoryConnectionService } from '../application/services/knowledge-repository-connection.service';
 import type { IKnowledgeRepositoryProjectionService } from '../application/ports/knowledge-repository-projection.service.port';
 import { createRepositoryModule } from './repository.module';

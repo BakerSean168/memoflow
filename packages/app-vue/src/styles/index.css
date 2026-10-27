@@ -11,5 +11,6 @@
 @source '../../../goal-ui/src';
 @source '../../../schedule-ui/src';
 @source '../../../notification-ui/src';
+@source '../../../repository-ui/src';
 @source '../../../routine-ui/src';
 @source '..';

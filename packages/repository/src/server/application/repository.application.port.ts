@@ -35,7 +35,7 @@ import type {
   ListKnowledgeWriteRequestsReq,
   ListKnowledgeWriteRequestsRes,
   KnowledgeWriteRequestReplayResponse,
-} from '@memoflow/contracts/repository';
+} from '@memoflow/repository-contracts';
 
 /**
  * Transport-neutral knowledge repository application surface.

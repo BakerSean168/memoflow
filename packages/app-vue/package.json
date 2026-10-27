@@ -47,10 +47,6 @@
       "types": "./dist/modules/task/index.d.ts",
       "import": "./dist/modules/task/index.js"
     },
-    "./modules/repository": {
-      "types": "./dist/modules/repository/index.d.ts",
-      "import": "./dist/modules/repository/index.js"
-    },
     "./modules/setting": {
       "types": "./dist/modules/setting/index.d.ts",
       "import": "./dist/modules/setting/index.js"
@@ -90,6 +86,12 @@
     "@memoflow/relation": "workspace:*",
     "@memoflow/relation-contracts": "workspace:*",
     "@memoflow/repository": "workspace:*",
+    "@memoflow/repository-client": "workspace:*",
+    "@memoflow/repository-contracts": "workspace:*",
+    "@memoflow/repository-ui": "workspace:*",
+    "@memoflow/routine-client": "workspace:*",
+    "@memoflow/routine-contracts": "workspace:*",
+    "@memoflow/routine-ui": "workspace:*",
     "@memoflow/schedule-client": "workspace:*",
     "@memoflow/schedule-contracts": "workspace:*",
     "@memoflow/schedule-ui": "workspace:*",
@@ -115,10 +117,7 @@
     "vue-echarts": "^8.3.0",
     "vue-i18n": "^11.4.12",
     "vue-router": "^5.3.1",
-    "vue-sonner": "^2.0.8",
-    "@memoflow/routine-contracts": "workspace:*",
-    "@memoflow/routine-client": "workspace:*",
-    "@memoflow/routine-ui": "workspace:*"
+    "vue-sonner": "^2.0.8"
   },
   "peerDependencies": {
     "vue": "^3.5.39"

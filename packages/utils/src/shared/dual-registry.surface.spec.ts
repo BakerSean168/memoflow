@@ -134,7 +134,7 @@ import {
       '../../../ai/src/server/infrastructure/runtime/ai-runtime.ts',
     );
     const localVault = readFileSync(
-      resolve(sharedDir, '../../../app-vue/src/modules/repository/composables/useLocalVault.ts'),
+      resolve(sharedDir, '../../../repository-ui/src/composables/useLocalVault.ts'),
       'utf8',
     );
     const databaseScript = readFileSync(

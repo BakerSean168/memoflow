@@ -53,16 +53,28 @@
 import { ipcMain } from 'electron';
 import { RepositoryChannels, type IElectronModuleContext } from '@memoflow/contracts/electron';
 import type {
+  CompleteKnowledgeRepositoryInstallationReq,
+  CompleteKnowledgeRepositoryInstallationRes,
+  CreateKnowledgeRepositoryConnectionReq,
+  DisconnectKnowledgeRepositoryConnectionRes,
   ExecuteKnowledgeRepositoryReconciliationRes,
+  KnowledgeRemoteBindingClientDTO,
   KnowledgeRepositoryContentState,
+  KnowledgeRepositoryInstallationIntentStatusResponse,
+  KnowledgeRepositoryInstallationTokenRes,
   KnowledgeRepositoryReconciliationPreview,
+  KnowledgeWriteRequestReplayResponse,
+  ListKnowledgeRepositoryConnectionsRes,
+  ListKnowledgeWriteRequestsReq,
+  ListKnowledgeWriteRequestsRes,
+  StartKnowledgeRepositoryInstallationReq,
+  StartKnowledgeRepositoryInstallationRes,
   SyncKnowledgeRepositoryRes,
-} from '@memoflow/contracts/repository';
+} from '@memoflow/repository-contracts';
 import { fail, ok, type Result } from '@memoflow/contracts/result';
 import { createLogger } from '@memoflow/utils/logger';
 import { withAuthenticatedValue } from './authenticated-ipc';
 import { LocalVaultRuntimeError, type LocalVaultElectronPort } from './local-vault-runtime';
-import type { IRepositoryApiClient } from '../application-client/ports/repository-api-client.port';
 
 export {
   createLocalVaultRuntime,
@@ -112,25 +124,44 @@ export interface RepositoryElectronModuleOptions {
   knowledgeRepositoryAutoSyncScheduler?: KnowledgeRepositoryAutoSyncSchedulerElectronPort;
 }
 
-export type KnowledgeRepositoryConnectionElectronPort = Pick<
-  IRepositoryApiClient,
-  | 'startKnowledgeRepositoryInstallation'
-  | 'completeKnowledgeRepositoryInstallation'
-  | 'getKnowledgeRepositoryInstallationIntentStatus'
-  | 'finalizeKnowledgeRepositoryInstallationIntent'
-  | 'listKnowledgeRepositoryConnections'
-  | 'refreshKnowledgeRepositoryObservation'
-  | 'connectKnowledgeRepository'
-  | 'disconnectKnowledgeRepository'
-  | 'issueDesktopKnowledgeRepositoryToken'
-  | 'listKnowledgeWriteRequests'
-  | 'replayKnowledgeWriteRequestProjection'
-> & {
+export interface KnowledgeRepositoryConnectionElectronPort {
+  startKnowledgeRepositoryInstallation(
+    request?: StartKnowledgeRepositoryInstallationReq,
+  ): Promise<Result<StartKnowledgeRepositoryInstallationRes>>;
+  completeKnowledgeRepositoryInstallation(
+    request: CompleteKnowledgeRepositoryInstallationReq,
+  ): Promise<Result<CompleteKnowledgeRepositoryInstallationRes>>;
+  getKnowledgeRepositoryInstallationIntentStatus(
+    intentId: string,
+  ): Promise<Result<KnowledgeRepositoryInstallationIntentStatusResponse>>;
+  finalizeKnowledgeRepositoryInstallationIntent(
+    intentId: string,
+  ): Promise<Result<CompleteKnowledgeRepositoryInstallationRes>>;
+  listKnowledgeRepositoryConnections(): Promise<Result<ListKnowledgeRepositoryConnectionsRes>>;
+  refreshKnowledgeRepositoryObservation(
+    connectionId: string,
+  ): Promise<Result<KnowledgeRemoteBindingClientDTO>>;
+  connectKnowledgeRepository(
+    request: CreateKnowledgeRepositoryConnectionReq,
+  ): Promise<Result<KnowledgeRemoteBindingClientDTO>>;
+  disconnectKnowledgeRepository(
+    connectionId: string,
+    purgeCloudData?: boolean,
+  ): Promise<Result<DisconnectKnowledgeRepositoryConnectionRes>>;
+  issueDesktopKnowledgeRepositoryToken(
+    connectionId: string,
+  ): Promise<Result<KnowledgeRepositoryInstallationTokenRes>>;
+  listKnowledgeWriteRequests(
+    request?: ListKnowledgeWriteRequestsReq,
+  ): Promise<Result<ListKnowledgeWriteRequestsRes>>;
+  replayKnowledgeWriteRequestProjection(
+    requestId: string,
+  ): Promise<Result<KnowledgeWriteRequestReplayResponse>>;
   previewKnowledgeRepositoryReconciliation(
     connectionId: string,
     localState: KnowledgeRepositoryContentState,
   ): Promise<Result<KnowledgeRepositoryReconciliationPreview>>;
-};
+}
 
 export interface KnowledgeRepositoryReconciliationElectronPort {
   execute(

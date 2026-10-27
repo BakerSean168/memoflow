@@ -1,0 +1,44 @@
+{
+  "name": "@memoflow/repository-ui",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./host": {
+      "types": "./dist/repository-ui-host.d.ts",
+      "import": "./dist/host.js"
+    }
+  },
+  "dependencies": {
+    "@lucide/vue": "^1.48.0",
+    "@memoflow/contracts": "workspace:*",
+    "@memoflow/desktop-contracts": "workspace:*",
+    "@memoflow/http-client": "workspace:*",
+    "@memoflow/ipc-client": "workspace:*",
+    "@memoflow/repository-client": "workspace:*",
+    "@memoflow/repository-contracts": "workspace:*",
+    "@memoflow/shared-primitives": "workspace:*",
+    "@memoflow/transport-contracts": "workspace:*",
+    "@memoflow/ui-vue-shadcn": "workspace:*",
+    "@memoflow/utils": "workspace:*",
+    "@tanstack/vue-query": "5.103.2",
+    "@vueuse/core": "15.0.0",
+    "pinia": "^4.0.3",
+    "vue": "^3.5.43",
+    "vue-i18n": "^11.4.12",
+    "vue-router": "^5.3.1",
+    "vue-sonner": "^2.0.8"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-vue": "6.0.9",
+    "typescript": "npm:@typescript/typescript6@6.0.2",
+    "vite": "8.3.1",
+    "vite-plugin-dts": "5.1.1"
+  }
+}

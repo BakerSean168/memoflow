@@ -54,6 +54,7 @@ describe('server feature shape semantic core', () => {
     // goal-client and schedule-client; packages without one still need src/client.
     const src = makeSourceRoot({ omit: ['client'] });
     expect(auditPackageShape('notification', src)).toBeNull();
+    expect(auditPackageShape('repository', src)).toBeNull();
     expect(auditPackageShape('task', src)).toEqual({ package: 'task', missing: ['client'] });
   });
 });

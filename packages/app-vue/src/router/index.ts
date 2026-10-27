@@ -18,7 +18,7 @@ import { goalRoutes } from '@memoflow/goal-ui';
 import { taskRoutes } from '../modules/task/router';
 import { routineRoutes } from '@memoflow/routine-ui';
 import { scheduleRoutes } from '@memoflow/schedule-ui';
-import { repositoryRoutes } from '../modules/repository/router';
+import { repositoryRoutes } from '@memoflow/repository-ui';
 import { notificationRoutes } from '@memoflow/notification-ui';
 import { settingRoutes } from '../modules/setting/router';
 import { aiRoutes } from '../modules/ai/router';

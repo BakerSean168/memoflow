@@ -2,7 +2,7 @@ import type { KnowledgeDocumentId } from '@memoflow/contracts/primitives';
 import {
   KnowledgeDocumentRefSchema,
   type KnowledgeDocumentRef,
-} from '@memoflow/contracts/repository';
+} from '@memoflow/repository-contracts';
 import { LocalVaultRuntimeError, type LocalVaultElectronPort } from '@memoflow/repository/electron';
 
 /** Desktop adapter that resolves durable Knowledge identity from the active Local Vault. */

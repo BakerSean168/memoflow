@@ -1,6 +1,6 @@
 import { AgentInstanceSlugSchema } from './local-agent.dto';
 import { z } from 'zod';
-import { KnowledgeDocumentIdSchema } from '../../repository/aggregates/knowledge-document-identity';
+import { KnowledgeDocumentIdSchema } from '@memoflow/repository-contracts';
 
 /**
  * Canonical product contract for the ADR-052-style `knowledge.capture` Mastra

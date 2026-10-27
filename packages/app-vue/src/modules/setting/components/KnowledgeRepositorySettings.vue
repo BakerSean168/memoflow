@@ -484,11 +484,11 @@ import type {
   KnowledgeRepositorySyncOutcome,
   KnowledgeRepositorySyncPendingContext,
   RemoteRepositoryBlockReason,
-} from '@memoflow/contracts/repository';
+} from '@memoflow/repository-contracts';
 import {
   KnowledgeRepositorySyncConflictContextSchema,
   KnowledgeRepositorySyncPendingContextSchema,
-} from '@memoflow/contracts/repository';
+} from '@memoflow/repository-contracts';
 import {
   DESKTOP_ACCESS_SNAPSHOT_KEY,
   DESKTOP_BRIDGE_KEY,
@@ -502,7 +502,7 @@ import {
   SettingsSection,
   SettingsStatusBlock,
 } from '../../../components/shared/settings';
-import { KnowledgeWriteRequestLedger } from '../../repository/components';
+import { KnowledgeWriteRequestLedger } from '@memoflow/repository-ui';
 
 const { t } = useI18n();
 const route = useRoute();

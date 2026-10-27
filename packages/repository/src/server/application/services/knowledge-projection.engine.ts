@@ -3,7 +3,7 @@ import matter from 'gray-matter';
 import {
   RepositoryNoteMutationType,
   type KnowledgeRemoteBindingServerDTO,
-} from '@memoflow/contracts/repository';
+} from '@memoflow/repository-contracts';
 import type {
   IdentityId,
   KnowledgeDocumentId,
