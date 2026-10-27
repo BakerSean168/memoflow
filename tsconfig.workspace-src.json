@@ -165,6 +165,7 @@
       "@memoflow/ipc-client": ["./packages/ipc-client/src/index.ts"],
       "@memoflow/ui-core": ["./packages/ui-core/src/index.ts"],
       "@memoflow/ui-core/*": ["./packages/ui-core/src/*", "./packages/ui-core/src/*/index.ts"],
+      "@memoflow/ui-host-contracts": ["./packages/ui-host-contracts/src/index.ts"],
       "@memoflow/ui-react-native": ["./packages/ui-react-native/src/index.ts"],
       "@memoflow/app-react": ["./packages/app-react/src/index.ts"],
       "@memoflow/app-vue": ["./packages/app-vue/src/index.ts"],

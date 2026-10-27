@@ -11416,6 +11416,14 @@
       "measurementCollectors": []
     },
     {
+      "path": "packages/ui-host-contracts/src/platform-renderer-host.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/ui-host-contracts/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "packages/ui-vue-shadcn/src/components/custom/form/date-time/date-time-fields.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -13160,6 +13168,13 @@
       "fileCount": 2
     },
     {
+      "id": "packages/ui-host-contracts/vitest.config.ts",
+      "type": "primary",
+      "suite": "unit",
+      "runner": "vitest",
+      "fileCount": 1
+    },
+    {
       "id": "packages/ui-vue-shadcn/vitest.config.ts",
       "type": "primary",
       "suite": "unit",
@@ -13781,7 +13796,7 @@
   "duplicate": [],
   "unexpected": [],
   "counts": {
-    "unit": 1133,
+    "unit": 1134,
     "integration": 58,
     "smoke": 3,
     "boundary-ipc": 6,

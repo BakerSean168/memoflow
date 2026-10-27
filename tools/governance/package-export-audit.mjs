@@ -115,6 +115,7 @@ const PACKAGE_SPECIFIC_SUBPATHS = {
   ],
   assets: ['./images', './audio'],
   'ui-core': ['./styles/globals.css', './styles/theme.css'],
+  'ui-host-contracts': ['.'],
   'ui-vue-shadcn': [
     './components/ui/button',
     './components/ui/card',

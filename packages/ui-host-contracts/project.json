@@ -1,0 +1,57 @@
+{
+  "name": "ui-host-contracts",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "projectType": "library",
+  "sourceRoot": "packages/ui-host-contracts/src",
+  "tags": ["scope:ui", "type:lib", "layer:ui"],
+  "targets": {
+    "typecheck": {
+      "executor": "nx:run-commands",
+      "dependsOn": ["^build"],
+      "options": {
+        "command": "tsc --noEmit -p tsconfig.json",
+        "cwd": "packages/ui-host-contracts"
+      }
+    },
+    "build": {
+      "executor": "nx:run-commands",
+      "outputs": ["{workspaceRoot}/packages/ui-host-contracts/dist"],
+      "cache": true,
+      "dependsOn": ["^build"],
+      "options": {
+        "command": "node ../../node_modules/tsup/dist/cli-default.js && tsc -p tsconfig.build.json",
+        "cwd": "packages/ui-host-contracts"
+      }
+    },
+    "serve": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "node ../../node_modules/tsup/dist/cli-default.js --watch",
+        "cwd": "packages/ui-host-contracts"
+      }
+    },
+    "lint": {
+      "options": {
+        "args": ["**/*.ts"]
+      }
+    },
+    "test": {
+      "executor": "nx:run-commands",
+      "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
+      "inputs": ["default", "^production"],
+      "cache": true,
+      "options": {
+        "command": "node ../../node_modules/vitest/vitest.mjs run --config vitest.config.ts",
+        "cwd": "packages/ui-host-contracts"
+      }
+    },
+    "test:watch": {
+      "executor": "nx:run-commands",
+      "cache": false,
+      "options": {
+        "command": "node ../../node_modules/vitest/vitest.mjs --config vitest.config.ts",
+        "cwd": "packages/ui-host-contracts"
+      }
+    }
+  }
+}

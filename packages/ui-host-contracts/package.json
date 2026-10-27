@@ -1,0 +1,31 @@
+{
+  "name": "@memoflow/ui-host-contracts",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "peerDependencies": {
+    "vue": "^3.5.39"
+  },
+  "dependencies": {
+    "@memoflow/http-client": "workspace:*",
+    "@memoflow/label-contracts": "workspace:*",
+    "@memoflow/time": "workspace:*",
+    "@tanstack/vue-query": "5.103.2"
+  },
+  "devDependencies": {
+    "tsup": "^8.0.0",
+    "typescript": "npm:@typescript/typescript6@6.0.2",
+    "vitest": "4.1.11"
+  }
+}

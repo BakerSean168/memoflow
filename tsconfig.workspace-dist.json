@@ -162,6 +162,7 @@
       "@memoflow/ipc-client": ["./packages/ipc-client/dist/index.d.ts"],
       "@memoflow/ui-core": ["./packages/ui-core/dist/index.d.ts"],
       "@memoflow/ui-core/*": ["./packages/ui-core/dist/*", "./packages/ui-core/dist/*/index.d.ts"],
+      "@memoflow/ui-host-contracts": ["./packages/ui-host-contracts/dist/index.d.ts"],
       "@memoflow/ui-react-native": ["./packages/ui-react-native/dist/index.d.ts"],
       "@memoflow/app-react": ["./packages/app-react/dist/index.d.ts"],
       "@memoflow/app-vue": ["./packages/app-vue/dist/index.d.ts"],
