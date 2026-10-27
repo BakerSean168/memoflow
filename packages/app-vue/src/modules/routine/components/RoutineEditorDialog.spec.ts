@@ -8,7 +8,7 @@ import type {
 } from '@memoflow/contracts/routine';
 import { RoutineTriggerSchema } from '@memoflow/contracts/routine';
 import { requireTimeZoneId, requireYmd } from '@memoflow/contracts/primitives';
-import { createDefaultUserPreferenceProfile } from '@memoflow/contracts/setting';
+import { createDefaultUserPreferenceProfile } from '@memoflow/setting-contracts';
 import { productionLocaleMessages } from '../../../locales/production-messages';
 import { getProductTodayYmd, setProductTimePreferences } from '../../../shared/utils/product-time';
 const confirmMock = vi.hoisted(() => vi.fn(async () => true));

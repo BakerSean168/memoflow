@@ -36,6 +36,7 @@
     "@memoflow/http-client": "workspace:*",
     "@memoflow/ipc-client": "workspace:*",
     "@memoflow/patterns": "workspace:*",
+    "@memoflow/setting-contracts": "workspace:*",
     "@memoflow/utils": "workspace:*",
     "express": "^5.2.1",
     "tslib": "^2.3.0",

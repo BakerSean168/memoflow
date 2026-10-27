@@ -5,7 +5,7 @@ import { fail, ok } from '@memoflow/contracts/result';
 import type {
   PreferenceNamespaceResponse,
   UserPreferenceProfile,
-} from '@memoflow/contracts/setting';
+} from '@memoflow/setting-contracts';
 import { createTestPinia } from '@memoflow/test-utils';
 import { SETTING_SERVICE_KEY } from '../../../di/keys';
 import { getProductTime } from '../../../shared/utils/product-time';

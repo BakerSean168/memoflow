@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import type { UserPreferenceProfile } from '@memoflow/contracts/setting';
+import type { UserPreferenceProfile } from '@memoflow/setting-contracts';
 import type { PreferencePortableService } from '../../../../preferences/preference-portability';
 import { ImportSettings } from '../import-settings';
 

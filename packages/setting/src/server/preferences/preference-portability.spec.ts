@@ -4,7 +4,7 @@ import type {
   PreferenceNamespace,
   PreferenceNamespaceResponse,
   UserPreferenceProfile,
-} from '@memoflow/contracts/setting';
+} from '@memoflow/setting-contracts';
 import { PreferencePortableCapability, PreferencePortableService } from './preference-portability';
 import type { UserPreferenceService } from './user-preference-service';
 

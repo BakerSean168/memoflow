@@ -2,7 +2,7 @@
 import { ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { unwrapOrThrowError } from '@memoflow/contracts/result';
-import type { ExportSettingsRes, ImportSettingsRes } from '@memoflow/contracts/setting';
+import type { ExportSettingsRes, ImportSettingsRes } from '@memoflow/setting-contracts';
 import { SETTING_SERVICE_KEY } from '../../../di/keys';
 import { useStrictInject } from '../../../shared/utils/useStrictInject';
 import { sanitizeForIpc } from '../../../shared/utils/ipc';

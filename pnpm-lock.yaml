@@ -410,6 +410,9 @@ importers:
       '@memoflow/setting':
         specifier: workspace:*
         version: link:../../packages/setting
+      '@memoflow/setting-contracts':
+        specifier: workspace:*
+        version: link:../../packages/setting-contracts
       '@memoflow/shared-primitives':
         specifier: workspace:*
         version: link:../../packages/shared-primitives
@@ -657,6 +660,9 @@ importers:
       '@memoflow/setting':
         specifier: workspace:*
         version: link:../../packages/setting
+      '@memoflow/setting-contracts':
+        specifier: workspace:*
+        version: link:../../packages/setting-contracts
       '@memoflow/task':
         specifier: workspace:*
         version: link:../../packages/task
@@ -1113,6 +1119,9 @@ importers:
       '@memoflow/setting':
         specifier: workspace:*
         version: link:../../packages/setting
+      '@memoflow/setting-contracts':
+        specifier: workspace:*
+        version: link:../../packages/setting-contracts
       '@memoflow/task':
         specifier: workspace:*
         version: link:../../packages/task
@@ -1201,6 +1210,9 @@ importers:
       '@memoflow/reliable-messaging-contracts':
         specifier: workspace:*
         version: link:../reliable-messaging-contracts
+      '@memoflow/setting-contracts':
+        specifier: workspace:*
+        version: link:../setting-contracts
       '@memoflow/time':
         specifier: workspace:*
         version: link:../time
@@ -1383,6 +1395,9 @@ importers:
       '@memoflow/setting':
         specifier: workspace:*
         version: link:../setting
+      '@memoflow/setting-contracts':
+        specifier: workspace:*
+        version: link:../setting-contracts
       '@memoflow/shared-primitives':
         specifier: workspace:*
         version: link:../shared-primitives
@@ -1522,6 +1537,9 @@ importers:
       '@memoflow/setting':
         specifier: workspace:*
         version: link:../setting
+      '@memoflow/setting-contracts':
+        specifier: workspace:*
+        version: link:../setting-contracts
       '@memoflow/shared-primitives':
         specifier: workspace:*
         version: link:../shared-primitives
@@ -1704,6 +1722,9 @@ importers:
       '@memoflow/schedule-contracts':
         specifier: workspace:*
         version: link:../schedule-contracts
+      '@memoflow/setting-contracts':
+        specifier: workspace:*
+        version: link:../setting-contracts
       '@memoflow/shared-primitives':
         specifier: workspace:*
         version: link:../shared-primitives
@@ -2625,6 +2646,9 @@ importers:
       '@memoflow/schedule-contracts':
         specifier: workspace:*
         version: link:../schedule-contracts
+      '@memoflow/setting-contracts':
+        specifier: workspace:*
+        version: link:../setting-contracts
       '@memoflow/time':
         specifier: workspace:*
         version: link:../time
@@ -2735,6 +2759,9 @@ importers:
       '@memoflow/ipc-client':
         specifier: workspace:*
         version: link:../ipc-client
+      '@memoflow/setting-contracts':
+        specifier: workspace:*
+        version: link:../setting-contracts
       '@memoflow/time':
         specifier: workspace:*
         version: link:../time
@@ -2754,6 +2781,15 @@ importers:
       '@types/express':
         specifier: ^5.0.0
         version: 5.0.6
+
+  packages/setting-contracts:
+    dependencies:
+      '@memoflow/shared-primitives':
+        specifier: workspace:*
+        version: link:../shared-primitives
+      zod:
+        specifier: ^4.6.5
+        version: 4.6.5
 
   packages/shared-primitives:
     dependencies:

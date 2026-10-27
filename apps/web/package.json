@@ -28,6 +28,7 @@
     "@memoflow/reminder": "workspace:*",
     "@memoflow/repository": "workspace:*",
     "@memoflow/setting": "workspace:*",
+    "@memoflow/setting-contracts": "workspace:*",
     "@memoflow/task": "workspace:*",
     "@memoflow/test-utils": "workspace:*",
     "@memoflow/ui-core": "workspace:*",

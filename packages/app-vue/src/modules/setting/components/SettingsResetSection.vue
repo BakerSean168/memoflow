@@ -11,7 +11,7 @@ import {
   SelectValue,
 } from '@memoflow/ui-vue-shadcn';
 import { RotateCcw } from '@lucide/vue';
-import type { PresentationPreferences } from '@memoflow/contracts/setting';
+import type { PresentationPreferences } from '@memoflow/setting-contracts';
 import { SettingsDangerZone, SettingsPropertyRow } from '../../../components/shared/settings';
 
 type PreferenceResetTarget = 'all' | 'presentation' | 'regional';

@@ -9,7 +9,7 @@ import {
   type PreferenceNamespace,
   type PreferenceNamespaceResponse,
   type PreferencePortablePayloadV3,
-} from '@memoflow/contracts/setting';
+} from '@memoflow/setting-contracts';
 import type { UserPreferenceService } from './user-preference-service';
 
 const NAMESPACES = ['presentation', 'regional'] as const satisfies readonly PreferenceNamespace[];

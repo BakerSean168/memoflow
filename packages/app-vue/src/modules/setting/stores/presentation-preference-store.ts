@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia';
-import type { UserPreferenceProfile } from '@memoflow/contracts/setting';
+import type { UserPreferenceProfile } from '@memoflow/setting-contracts';
 import type { AppLocale } from '../../../plugins/i18n';
 // Residual 1005: sole presentation helpers (local dual retired).
 import {

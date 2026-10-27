@@ -1,6 +1,6 @@
 import { DOMWrapper, flushPromises, mount } from '@vue/test-utils';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { createDefaultUserPreferenceProfile } from '@memoflow/contracts/setting';
+import { createDefaultUserPreferenceProfile } from '@memoflow/setting-contracts';
 import { setProductTimePreferences } from '../utils/product-time';
 import { productTimeZoneOptions } from '../utils/product-time-zone-options';
 import ProductTimeZoneSelector from './ProductTimeZoneSelector.vue';

@@ -8,7 +8,7 @@ import type {
   PresentationPreferences,
   RegionalPreferences,
   ResetUserPreferencesResponse,
-} from '@memoflow/contracts/setting';
+} from '@memoflow/setting-contracts';
 import { SETTING_SERVICE_KEY } from '../../../di/keys';
 import { useStrictInject } from '../../../shared/utils/useStrictInject';
 import { createComposableHandleError } from '../../../shared/utils/create-composable-handle-error';

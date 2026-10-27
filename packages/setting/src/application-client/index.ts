@@ -9,7 +9,7 @@ import type {
   UserPreferenceProfile,
   ExportSettingsRes,
   ImportSettingsRes,
-} from '@memoflow/contracts/setting';
+} from '@memoflow/setting-contracts';
 import type { ISettingApiClient } from './ports/setting-api-client.port';
 
 export type { ISettingApiClient } from './ports/setting-api-client.port';

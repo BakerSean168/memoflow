@@ -7,7 +7,7 @@ import {
   PortableAccountProfileV3Schema,
   type PortableAccountProfileV3,
 } from '@memoflow/contracts/account';
-import { PreferencePortablePayloadV3Schema } from '@memoflow/contracts/setting';
+import { PreferencePortablePayloadV3Schema } from '@memoflow/setting-contracts';
 import {
   instantToYmdInTimeZone,
   type Clock,

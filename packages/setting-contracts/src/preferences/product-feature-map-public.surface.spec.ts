@@ -7,7 +7,7 @@ import { describe, expect, it } from 'vitest';
  * web public debug/test pages stay deleted (stage-6 runtime surface cleanup).
  */
 describe('product feature-map + web public debug surface', () => {
-  const repoRoot = resolve(__dirname, '../../../../../../');
+  const repoRoot = resolve(__dirname, '../../../../');
   const featureMap = readFileSync(
     resolve(repoRoot, 'docs/internals/product/feature-map.md'),
     'utf8',

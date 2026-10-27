@@ -11,7 +11,7 @@ import type {
   UserPreferenceProfile,
   ExportSettingsRes,
   ImportSettingsRes,
-} from '@memoflow/contracts/setting';
+} from '@memoflow/setting-contracts';
 
 export class SettingIpcAdapter implements ISettingApiClient {
   constructor(private readonly ipcClient: IResultIpcClient) {}

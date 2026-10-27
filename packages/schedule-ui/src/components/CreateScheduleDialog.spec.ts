@@ -1,7 +1,7 @@
 import { DOMWrapper, flushPromises, mount } from '@vue/test-utils';
 import { createI18n } from 'vue-i18n';
 import { nextTick } from 'vue';
-import { createDefaultUserPreferenceProfile } from '@memoflow/contracts/setting';
+import { createDefaultUserPreferenceProfile } from '@memoflow/setting-contracts';
 import { setProductTimePreferences } from '@schedule-ui-test-host/shared/utils/product-time';
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 import enUS from '@schedule-ui-test-host/locales/en-US';

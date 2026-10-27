@@ -10,7 +10,7 @@ import type {
   UserPreferenceProfile,
   ExportSettingsRes,
   ImportSettingsRes,
-} from '@memoflow/contracts/setting';
+} from '@memoflow/setting-contracts';
 
 export class SettingHttpAdapter implements ISettingApiClient {
   private readonly baseUrl = '/settings';

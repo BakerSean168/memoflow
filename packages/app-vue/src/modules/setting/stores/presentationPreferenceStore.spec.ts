@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import type { UserPreferenceProfile } from '@memoflow/contracts/setting';
+import type { UserPreferenceProfile } from '@memoflow/setting-contracts';
 import { createTestPinia } from '@memoflow/test-utils';
 import { usePresentationPreferenceStore } from './presentation-preference-store';
 

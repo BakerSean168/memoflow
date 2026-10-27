@@ -147,7 +147,7 @@ import {
   WeekStartsOnSchema,
   type PresentationPreferences,
   type RegionalPreferences,
-} from '@memoflow/contracts/setting';
+} from '@memoflow/setting-contracts';
 import { TimeZoneIdSchema } from '@memoflow/contracts/primitives';
 
 type DateStyle = RegionalPreferences['dateStyle'];

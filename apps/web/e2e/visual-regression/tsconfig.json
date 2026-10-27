@@ -26,8 +26,11 @@
       "@memoflow/contracts/result": ["../../../../packages/contracts/src/result/index.ts"],
       "@memoflow/schedule-contracts": ["../../../../packages/schedule-contracts/src/index.ts"],
       "@memoflow/schedule-contracts/*": ["../../../../packages/schedule-contracts/src/*.ts"],
-      "@memoflow/contracts/setting": [
-        "../../../../packages/contracts/src/modules/setting/index.ts"
+      "@memoflow/setting-contracts": [
+        "../../../../packages/setting-contracts/src/index.ts"
+      ],
+      "@memoflow/setting-contracts/*": [
+        "../../../../packages/setting-contracts/src/*.ts"
       ],
       "@memoflow/contracts/shared": ["../../../../packages/contracts/src/shared/index.ts"],
       "@memoflow/contracts/task": ["../../../../packages/contracts/src/modules/task/index.ts"],

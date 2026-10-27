@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
-import { createDefaultUserPreferenceProfile } from '@memoflow/contracts/setting';
+import { createDefaultUserPreferenceProfile } from '@memoflow/setting-contracts';
 import { setProductTimePreferences } from '@schedule-ui-test-host/shared/utils/product-time';
 import {
   calendarEventSourceLabel,

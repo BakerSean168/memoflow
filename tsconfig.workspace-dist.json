@@ -54,6 +54,8 @@
       "@memoflow/schedule-contracts": ["./packages/schedule-contracts/dist/index.d.ts"],
       "@memoflow/schedule-contracts/*": ["./packages/schedule-contracts/dist/*.d.ts"],
       "@memoflow/schedule-client": ["./packages/schedule-client/dist/index.d.ts"],
+      "@memoflow/setting-contracts": ["./packages/setting-contracts/dist/index.d.ts"],
+      "@memoflow/setting-contracts/*": ["./packages/setting-contracts/dist/*.d.ts"],
       "@memoflow/schedule-ui": ["./packages/schedule-ui/dist/index.d.ts"],
       "@memoflow/workspace-contracts": ["./packages/workspace-contracts/dist/index.d.ts"],
       "@memoflow/workspace-contracts/*": ["./packages/workspace-contracts/dist/*.d.ts"],

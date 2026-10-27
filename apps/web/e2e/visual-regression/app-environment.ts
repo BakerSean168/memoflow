@@ -2,7 +2,7 @@ import { TimeZoneIdSchema } from '@memoflow/time';
 import {
   DEFAULT_USER_PREFERENCE_PROFILE,
   type UserPreferenceProfile,
-} from '@memoflow/contracts/setting';
+} from '@memoflow/setting-contracts';
 import { installGoalUiHost, installNotificationUiHost } from '@memoflow/app-vue/di';
 import { setProductTimePreferences } from '@memoflow/app-vue/shared/utils/product-time';
 

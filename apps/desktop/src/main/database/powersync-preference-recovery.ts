@@ -3,7 +3,7 @@ import { isDeepStrictEqual } from 'node:util';
 import {
   parsePreferenceNamespace,
   parsePreferenceNamespacePayload,
-} from '@memoflow/contracts/setting';
+} from '@memoflow/setting-contracts';
 import type { SerializedCrudOperation } from './powersync-crud';
 
 function record(value: unknown): value is Record<string, unknown> {

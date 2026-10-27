@@ -1,5 +1,5 @@
 import type { PrismaClient } from '@memoflow/database';
-import type { PreferenceNamespace } from '@memoflow/contracts/setting';
+import type { PreferenceNamespace } from '@memoflow/setting-contracts';
 import type {
   IUserPreferenceRepository,
   PreferenceCompareAndSwapResult,

@@ -9,7 +9,7 @@ import {
   type PresentationPreferences,
   type RegionalPreferences,
   type UserPreferenceProfile,
-} from '@memoflow/contracts/setting';
+} from '@memoflow/setting-contracts';
 import AppearanceSettings from './AppearanceSettings.vue';
 import LocaleSettings from './LocaleSettings.vue';
 import SettingsResetSection from './SettingsResetSection.vue';

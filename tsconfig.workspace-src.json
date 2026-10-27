@@ -48,6 +48,8 @@
       "@memoflow/schedule-contracts": ["./packages/schedule-contracts/src/index.ts"],
       "@memoflow/schedule-contracts/*": ["./packages/schedule-contracts/src/*.ts"],
       "@memoflow/schedule-client": ["./packages/schedule-client/src/index.ts"],
+      "@memoflow/setting-contracts": ["./packages/setting-contracts/src/index.ts"],
+      "@memoflow/setting-contracts/*": ["./packages/setting-contracts/src/*.ts"],
       "@memoflow/schedule-ui": ["./packages/schedule-ui/src/index.ts"],
       "@memoflow/workspace-contracts": ["./packages/workspace-contracts/src/index.ts"],
       "@memoflow/workspace-contracts/*": ["./packages/workspace-contracts/src/*.ts"],

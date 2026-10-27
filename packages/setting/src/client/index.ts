@@ -1,7 +1,7 @@
 /**
  * Setting client seam.
  *
- * Public setting contracts stay centralized in `@memoflow/contracts/setting`.
+ * Public setting contracts stay centralized in `@memoflow/setting-contracts`.
  * Callers depend on this seam instead of the old application-client /
  * infrastructure-client layered exports.
  */

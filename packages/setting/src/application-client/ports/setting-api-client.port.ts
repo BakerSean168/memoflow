@@ -9,7 +9,7 @@ import type {
   UserPreferenceProfile,
   ExportSettingsRes,
   ImportSettingsRes,
-} from '@memoflow/contracts/setting';
+} from '@memoflow/setting-contracts';
 
 export interface ISettingApiClient {
   getPreferenceProfile(): Promise<Result<UserPreferenceProfile>>;

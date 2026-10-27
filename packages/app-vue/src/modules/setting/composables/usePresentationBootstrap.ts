@@ -2,7 +2,7 @@ import { unwrapOrThrowError } from '@memoflow/contracts/result';
 import type {
   PreferenceNamespaceResponse,
   UserPreferenceProfile,
-} from '@memoflow/contracts/setting';
+} from '@memoflow/setting-contracts';
 import { createSystemTimeZoneSource } from '@memoflow/time';
 import { SETTING_SERVICE_KEY } from '../../../di/keys';
 import { useStrictInject } from '../../../shared/utils/useStrictInject';

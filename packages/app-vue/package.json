@@ -80,6 +80,7 @@
     "@memoflow/assets": "workspace:*",
     "@memoflow/contracts": "workspace:*",
     "@memoflow/notification-contracts": "workspace:*",
+    "@memoflow/setting-contracts": "workspace:*",
     "@memoflow/shared-primitives": "workspace:*",
     "@memoflow/data-portability": "workspace:*",
     "@memoflow/goal-client": "workspace:*",
