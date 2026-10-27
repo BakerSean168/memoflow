@@ -17,6 +17,7 @@ import { describe, expect, it } from 'vitest';
   describe('contracts dead *Res dual single-track surface', () => {
     const goalApi = __dirname;
     const modules = resolve(goalApi, '../../../contracts/src/modules');
+    const settingApi = resolve(goalApi, '../../../setting-contracts/src/api');
 
     const files: Array<[string, string[]]> = [
       [
@@ -31,7 +32,7 @@ import { describe, expect, it } from 'vitest';
         ['CreateKnowledgeRepositoryConnectionRes'],
       ],
       [resolve(modules, 'task/api/task-schedule.dto.ts'), ['ToggleTaskCompletionRes']],
-      [resolve(modules, 'setting/api/sync.dto.ts'), ['SyncSettingsRes']],
+      [resolve(settingApi, 'sync.dto.ts'), ['SyncSettingsRes']],
       // residual 290
       [
         resolve(goalApi, 'goal-crud.dto.ts'),

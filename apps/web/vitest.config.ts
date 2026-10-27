@@ -23,6 +23,7 @@ const sharedConfig = createSharedConfig({
     '@memoflow/schedule-client': '../../packages/schedule-client/src/index.ts',
     '@memoflow/notification-client': '../../packages/notification-client/src/index.ts',
     '@memoflow/setting-client': '../../packages/setting-client/src/index.ts',
+    '@memoflow/ipc-client': '../../packages/ipc-client/src/index.ts',
     '@memoflow/routine-client': '../../packages/routine-client/src/index.ts',
     '@memoflow/ai/client': '../../packages/ai/src/client/index.ts',
     '@memoflow/goal-client': '../../packages/goal-client/src/index.ts',
