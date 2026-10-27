@@ -3,7 +3,7 @@ import {
   type KnowledgeDraft,
   type KnowledgeNoteDraftContent,
 } from '@memoflow/ai-contracts';
-import type { OwnerNativeEditSession } from './owner-session';
+import type { OwnerNativeEditSession } from '@memoflow/task-client';
 
 export type KnowledgeCaptureNativeDraft = KnowledgeNoteDraftContent & {
   source?: KnowledgeCaptureSource;

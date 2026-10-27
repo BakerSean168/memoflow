@@ -45,6 +45,21 @@ export type {
   TaskPlanListParams,
 };
 
+/**
+ * Owner-native editing protocol. The Task renderer implements it; AI surfaces
+ * consume it through the host. It lives with the client seam because the
+ * provider (task-ui) cannot be a dependency of other UI packages, and each
+ * renderer instantiates `TaskNativeEditSession` with its own draft view model.
+ */
+export type {
+  OwnerNativeEditSession,
+  TaskNativeDraftState,
+  TaskNativeEditSession,
+  TaskNativePatch,
+  TaskNativePatchField,
+  TaskNativeSubmitContext,
+} from './application-client';
+
 export function createTaskHttpClient(httpClient: IResultHttpClient): TaskClientPort {
   return createTaskServiceFromHttpClient(httpClient);
 }
