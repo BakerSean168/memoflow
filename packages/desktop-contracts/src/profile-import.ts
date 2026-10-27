@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { ProfilePinSchema } from '@memoflow/desktop-contracts';
+import { ProfilePinSchema } from './profile-access';
 import {
   ProfileImportBlockerSchema,
   ProfileImportPlanSchema,

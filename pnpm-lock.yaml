@@ -1833,6 +1833,9 @@ importers:
 
   packages/desktop-contracts:
     dependencies:
+      '@memoflow/data-portability-contracts':
+        specifier: workspace:*
+        version: link:../data-portability-contracts
       '@memoflow/transport-contracts':
         specifier: workspace:*
         version: link:../transport-contracts
