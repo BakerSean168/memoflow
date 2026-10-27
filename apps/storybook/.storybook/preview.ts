@@ -13,6 +13,7 @@ import '../../../packages/ui-vue-shadcn/src/styles/globals.css';
 setup((app) => {
   installGoalUiHost();
   installNotificationUiHost();
+  installSettingUiHost();
   app.use(createPinia());
   app.use(createI18n({ legacy: false, locale: 'en-US', messages: productionLocaleMessages }));
   app.use(

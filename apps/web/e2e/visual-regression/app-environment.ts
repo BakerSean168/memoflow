@@ -7,6 +7,7 @@ import {
   installGoalUiHost,
   installNotificationUiHost,
   installRoutineUiHost,
+  installSettingUiHost,
 } from '@memoflow/app-vue/di';
 import { setProductTimePreferences } from '@memoflow/app-vue/shared/utils/product-time';
 
@@ -17,6 +18,7 @@ export function bootstrapVisualApp(params: URLSearchParams, timeZone = 'UTC') {
   installGoalUiHost();
   installNotificationUiHost();
   installRoutineUiHost();
+  installSettingUiHost();
   const locale = params.get('locale') === 'zh-CN' ? 'zh-CN' : 'en-US';
   const theme = params.get('theme') === 'dark' ? 'dark' : 'light';
   document.documentElement.lang = locale;
