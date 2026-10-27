@@ -192,6 +192,16 @@
       ]
     },
     {
+      "path": "apps/api/src/modules/ai/owner-activity-read.adapter.equivalence.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "apps/api/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "apps/api/vitest.config.ts"
+      ]
+    },
+    {
       "path": "apps/api/src/modules/ai/owner-activity-read.adapter.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -12244,7 +12254,7 @@
       "type": "measurement",
       "suite": "coverage",
       "runner": "vitest",
-      "fileCount": 64
+      "fileCount": 65
     },
     {
       "id": "packages/account/vitest.config.ts",
@@ -12687,7 +12697,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 64
+      "fileCount": 65
     },
     {
       "id": "apps/desktop/vitest.config.ts",
@@ -13189,6 +13199,7 @@
       "apps/api/src/modules/ai/controlled-analytics-read.adapter.spec.ts",
       "apps/api/src/modules/ai/goal-plan-mutation.adapter.spec.ts",
       "apps/api/src/modules/ai/notification-read.adapter.spec.ts",
+      "apps/api/src/modules/ai/owner-activity-read.adapter.equivalence.spec.ts",
       "apps/api/src/modules/ai/owner-activity-read.adapter.spec.ts",
       "apps/api/src/modules/ai/planner-read.adapter.spec.ts",
       "apps/api/src/modules/ai/repository-knowledge-cloud-data-purger.adapter.test.ts",
@@ -13786,7 +13797,7 @@
   "duplicate": [],
   "unexpected": [],
   "counts": {
-    "unit": 1134,
+    "unit": 1135,
     "integration": 58,
     "smoke": 3,
     "boundary-ipc": 6,
