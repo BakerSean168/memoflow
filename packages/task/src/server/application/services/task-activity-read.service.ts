@@ -46,9 +46,7 @@ export class TaskActivityReadService {
       this.dependencies.taskOccurrenceRepository.findByIdentityId(identityId),
     ]);
 
-    const planTitles = new Map(
-      taskPlans.map((task) => [String(task.id), task.title] as const),
-    );
+    const planTitles = new Map(taskPlans.map((task) => [String(task.id), task.title] as const));
     const items: TaskActivityItem[] = [];
 
     for (const occurrence of taskOccurrences) {

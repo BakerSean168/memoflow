@@ -45,6 +45,23 @@ function boundedLimit(limit: number | undefined): number {
 }
 
 /**
+ * Orders and bounds pre-projected activity entries.
+ *
+ * Domains project their own entries; hosts assemble the streams and use this
+ * seam so ordering, tie stability and the consumer limit stay identical across
+ * hosts. Each domain stream is already bounded, so a per-stream bound cannot
+ * change the global top-N.
+ */
+export function mergeAIActivityItems(
+  items: readonly AIActivityItem[],
+  limit?: number,
+): AIActivityItem[] {
+  return [...items]
+    .sort((left, right) => right.timestamp - left.timestamp)
+    .slice(0, boundedLimit(limit));
+}
+
+/**
  * Projects owner facts into the small recent-activity view consumed by AI.
  *
  * This is deliberately a pure consumer projection. It stores nothing and owns
@@ -94,7 +111,5 @@ export function projectAIOwnerActivity(input: ProjectAIOwnerActivityInput): AIAc
     });
   }
 
-  return items
-    .sort((left, right) => right.timestamp - left.timestamp)
-    .slice(0, boundedLimit(input.limit));
+  return mergeAIActivityItems(items, input.limit);
 }

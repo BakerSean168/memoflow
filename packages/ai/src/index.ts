@@ -72,6 +72,7 @@ export { AgentInstanceRegistry } from './server/application/agent-instance/agent
 export { LocalAgentRepository } from './server/infrastructure/adapters/powersync/local-agent.repository';
 export {
   projectAIOwnerActivity,
+  mergeAIActivityItems,
   type AIOwnerActivityGoalFact,
   type AIOwnerActivityTaskPlanFact,
   type AIOwnerActivityTaskOccurrenceFact,
