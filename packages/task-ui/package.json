@@ -22,7 +22,6 @@
   },
   "dependencies": {
     "@lucide/vue": "^1.48.0",
-    "@memoflow/goal-client": "workspace:*",
     "@memoflow/goal-contracts": "workspace:*",
     "@memoflow/http-client": "workspace:*",
     "@memoflow/label-contracts": "workspace:*",
@@ -31,7 +30,6 @@
     "@memoflow/task-contracts": "workspace:*",
     "@memoflow/time": "workspace:*",
     "@memoflow/ui-vue-shadcn": "workspace:*",
-    "@memoflow/utils": "workspace:*",
     "@memoflow/task-workspace-contracts": "workspace:*",
     "@tanstack/vue-query": "5.103.2",
     "@vueuse/core": "15.0.0",

@@ -55,7 +55,6 @@
     "@internationalized/date": "^3.12.4",
     "@lucide/vue": "^1.48.0",
     "@memoflow/ui-core": "workspace:*",
-    "@memoflow/utils": "workspace:*",
     "@radix-icons/vue": "1.0.0",
     "@unovis/ts": "1.7.0",
     "@unovis/vue": "1.7.0",
