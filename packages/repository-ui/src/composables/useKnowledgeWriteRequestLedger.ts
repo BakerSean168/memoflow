@@ -31,7 +31,10 @@ export interface LedgerReplayResult {
 }
 
 export function useKnowledgeWriteRequestLedger() {
-  const service = repositoryUiHost.useStrictInject(repositoryUiHost.REPOSITORY_SERVICE_KEY, 'RepositoryService');
+  const service = repositoryUiHost.useStrictInject(
+    repositoryUiHost.REPOSITORY_SERVICE_KEY,
+    'RepositoryService',
+  );
   const t = safeT();
 
   const writeRequests = ref<KnowledgeWriteRequestClientDTO[]>([]);

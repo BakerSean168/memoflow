@@ -201,7 +201,10 @@ const props = withDefaults(defineProps<{ projectionId: string; compact?: boolean
 });
 const emit = defineEmits<{ select: [projectionId: string] }>();
 const { t } = useI18n();
-const service = repositoryUiHost.useStrictInject(repositoryUiHost.REPOSITORY_SERVICE_KEY, 'RepositoryService');
+const service = repositoryUiHost.useStrictInject(
+  repositoryUiHost.REPOSITORY_SERVICE_KEY,
+  'RepositoryService',
+);
 const depths = [1, 2, 3] as const;
 const depth = ref<1 | 2 | 3>(1);
 const graph = ref<KnowledgeNoteLinkGraphResponse | null>(null);

@@ -37,7 +37,6 @@
       "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
       "inputs": ["default", "^production"],
       "cache": true,
-      "dependsOn": ["build"],
       "options": {
         "command": "node ../../node_modules/vitest/vitest.mjs run --config vitest.config.ts",
         "cwd": "packages/repository-contracts"

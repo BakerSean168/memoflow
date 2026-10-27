@@ -424,7 +424,10 @@ const { t, locale } = useI18n();
 const router = useRouter();
 const route = useRoute();
 const { ProductDialogShell, ProductSheetSurface } = repositoryUiHost.components;
-const service = repositoryUiHost.useStrictInject(repositoryUiHost.REPOSITORY_SERVICE_KEY, 'RepositoryService');
+const service = repositoryUiHost.useStrictInject(
+  repositoryUiHost.REPOSITORY_SERVICE_KEY,
+  'RepositoryService',
+);
 const { isNarrow } = repositoryUiHost.usePanelWidth();
 
 const PAGE_SIZE = 50;

@@ -11,10 +11,7 @@ import { describe, expect, it } from 'vitest';
  */
 describe('knowledge write-request ledger client/server contract surface (W6-A)', () => {
   const dto = readFileSync(
-    resolve(
-      __dirname,
-      '../../../repository-contracts/src/api/knowledge-note-projection.dto.ts',
-    ),
+    resolve(__dirname, '../../../repository-contracts/src/api/knowledge-note-projection.dto.ts'),
     'utf8',
   );
   const clientPort = readFileSync(
@@ -34,7 +31,10 @@ describe('knowledge write-request ledger client/server contract surface (W6-A)',
     'utf8',
   );
   const routes = readFileSync(
-    resolve(__dirname, '../../../repository/src/api/routes/knowledge-repository-connection.routes.ts'),
+    resolve(
+      __dirname,
+      '../../../repository/src/api/routes/knowledge-repository-connection.routes.ts',
+    ),
     'utf8',
   );
 
@@ -70,7 +70,10 @@ describe('knowledge write-request ledger client/server contract surface (W6-A)',
   });
 
   it('electron main registers list/replay IPC handlers over the remote connection port', () => {
-    const electron = readFileSync(resolve(__dirname, '../../../repository/src/electron/index.ts'), 'utf8');
+    const electron = readFileSync(
+      resolve(__dirname, '../../../repository/src/electron/index.ts'),
+      'utf8',
+    );
     expect(electron).toContain('RepositoryChannels.KNOWLEDGE_WRITE_REQUEST_LIST');
     expect(electron).toContain('RepositoryChannels.KNOWLEDGE_WRITE_REQUEST_REPLAY');
     expect(electron).toContain('port.listKnowledgeWriteRequests(');

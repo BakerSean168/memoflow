@@ -73,7 +73,9 @@ export function useRecentKnowledgeNotes() {
       source,
       limit,
     );
-    const cachedSnapshot = (runtime.queryClient as any).getQueryData(queryKey) as RecentKnowledgeSnapshot | undefined;
+    const cachedSnapshot = (runtime.queryClient as any).getQueryData(queryKey) as
+      | RecentKnowledgeSnapshot
+      | undefined;
     if (cachedSnapshot) applySnapshot(cachedSnapshot);
     isLoading.value = cachedSnapshot === undefined;
     if (!cachedSnapshot) {

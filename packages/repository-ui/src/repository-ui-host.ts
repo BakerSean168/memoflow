@@ -9,8 +9,6 @@ import type {
 import type { QueryClient, QueryKey } from '@tanstack/vue-query';
 import type { RepositoryClientPort } from '@memoflow/repository-client';
 import type { translateResultErrorMessage } from '@memoflow/http-client';
-import { useStrictInject } from './utils/useStrictInject';
-
 export { useStrictInject } from './utils/useStrictInject';
 
 export type PanelSurfaceStatus = 'clean' | 'dirty' | 'busy';

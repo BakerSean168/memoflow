@@ -47,7 +47,6 @@
       "types": "./dist/modules/task/index.d.ts",
       "import": "./dist/modules/task/index.js"
     },
-
     "./modules/setting": {
       "types": "./dist/modules/setting/index.d.ts",
       "import": "./dist/modules/setting/index.js"

@@ -122,10 +122,7 @@ export default defineConfig(({ mode }) =>
             'packages/notification-ui/src/notification-ui-host.ts',
           ],
           ['@memoflow/notification-ui', 'packages/notification-ui/src/index.ts'],
-          [
-            '@memoflow/repository-ui/host',
-            'packages/repository-ui/src/repository-ui-host.ts',
-          ],
+          ['@memoflow/repository-ui/host', 'packages/repository-ui/src/repository-ui-host.ts'],
           ['@memoflow/repository-ui', 'packages/repository-ui/src/index.ts'],
           ['@memoflow/repository-contracts', 'packages/repository-contracts/src/index.ts'],
           ['@memoflow/goal-ui', 'packages/goal-ui/src/index.ts'],

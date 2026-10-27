@@ -2,7 +2,10 @@ import { z } from 'zod';
 import type { TaskPlanId } from '@memoflow/shared-primitives';
 import type { GoalId, KeyResultId } from '@memoflow/goal-contracts';
 import { brandedId } from '@memoflow/shared-primitives';
-import { KnowledgeDocumentIdSchema, KnowledgeDocumentRefSchema } from '@memoflow/repository-contracts';
+import {
+  KnowledgeDocumentIdSchema,
+  KnowledgeDocumentRefSchema,
+} from '@memoflow/repository-contracts';
 import { GoalClientDTOSchema, KeyResultClientDTOSchema } from '@memoflow/goal-contracts';
 import { TaskOccurrenceResponseSchema, TaskPlanResponseSchema } from './response-schemas';
 import { LabelClientDTOSchema } from '@memoflow/label-contracts';

@@ -31,7 +31,10 @@ import { errorMessage } from '@memoflow/utils/shared';
 // Residual 999: errorMessage elevated to @memoflow/utils/shared.
 
 export function useLocalVault() {
-  const service = repositoryUiHost.useStrictInject(repositoryUiHost.REPOSITORY_SERVICE_KEY, 'RepositoryService');
+  const service = repositoryUiHost.useStrictInject(
+    repositoryUiHost.REPOSITORY_SERVICE_KEY,
+    'RepositoryService',
+  );
   const t = safeT();
   const bindingSnapshot = ref<LocalVaultBindingSnapshotDTO | null>(null);
   const binding = computed(() => bindingSnapshot.value?.binding ?? null);

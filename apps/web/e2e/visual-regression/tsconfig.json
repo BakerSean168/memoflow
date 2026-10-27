@@ -20,9 +20,7 @@
         "../../../../packages/notification-contracts/src/*.ts"
       ],
       "@memoflow/contracts/primitives": ["../../../../packages/contracts/src/primitives/index.ts"],
-      "@memoflow/repository-contracts": [
-        "../../../../packages/repository-contracts/src/index.ts"
-      ],
+      "@memoflow/repository-contracts": ["../../../../packages/repository-contracts/src/index.ts"],
       "@memoflow/contracts/result": ["../../../../packages/contracts/src/result/index.ts"],
       "@memoflow/schedule-contracts": ["../../../../packages/schedule-contracts/src/index.ts"],
       "@memoflow/schedule-contracts/*": ["../../../../packages/schedule-contracts/src/*.ts"],
