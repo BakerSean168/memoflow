@@ -53,7 +53,7 @@ schedule:task:created        ❌ (旧形态，已废弃)
 
 ## 3. Payload 接口定义 (Contracts)
 
-在 `packages/contracts/src/modules/{module}/domain/events/` 下定义 payload-only 接口。
+在 `packages/{domain}-contracts/src/domain/events/` 下定义 payload-only 接口。
 
 **命名**: `{Entity}{Action}Event`
 
@@ -80,7 +80,7 @@ export interface ScheduleTaskCreatedEvent {
 
 ## 4. Event Map 定义
 
-在 `packages/contracts/src/modules/{module}/protocol/{module}-event-map.ts` 中注册所有事件 key 到 payload 类型的映射。
+在 `packages/{domain}-contracts/src/protocol/{domain}-event-map.ts` 中注册所有事件 key 到 payload 类型的映射。
 
 ```typescript
 import type { ScheduleTaskCreatedEvent } from '../domain/events';
@@ -133,11 +133,11 @@ IPC channel 命名（如 `schedule:task:create`）遵循**不同的约定** — 
 
 ## 总结
 
-| 要素             | 规范                                                                     |
-| ---------------- | ------------------------------------------------------------------------ |
-| Payload 接口位置 | `packages/contracts/src/modules/{module}/domain/events/`                 |
-| Payload 接口命名 | `{Entity}{Action}Event`                                                  |
-| Payload 字段     | 只含业务数据，`readonly`，不含信封字段                                   |
-| Event Map 位置   | `packages/contracts/src/modules/{module}/protocol/{module}-event-map.ts` |
-| Event Key 格式   | `domain:action` 或 `domain:entity-action`（最多两个冒号）                |
-| 信封字段         | `aggregateId`、`occurredAt` 由 `addDomainEvent()` 自动生成               |
+| 要素             | 规范                                                             |
+| ---------------- | ---------------------------------------------------------------- |
+| Payload 接口位置 | `packages/{domain}-contracts/src/domain/events/`                 |
+| Payload 接口命名 | `{Entity}{Action}Event`                                          |
+| Payload 字段     | 只含业务数据，`readonly`，不含信封字段                           |
+| Event Map 位置   | `packages/{domain}-contracts/src/protocol/{domain}-event-map.ts` |
+| Event Key 格式   | `domain:action` 或 `domain:entity-action`（最多两个冒号）        |
+| 信封字段         | `aggregateId`、`occurredAt` 由 `addDomainEvent()` 自动生成       |

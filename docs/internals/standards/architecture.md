@@ -155,6 +155,20 @@ Controller 不应二次解析 raw request，也不应执行 provider/domain erro
 
 “多层都会用”不等于“跨边界 public”。contracts 与 domain 通过命名 mapper连接，不通过 class `implements` 强耦合。
 
+### 4.3 跨域契约边例外登记
+
+各契约包同为 `layer:shared`，Nx/eslint 不会阻止彼此引用，因此跨域契约边按域所有权人工审查，并在
+`tools/governance/cross-domain-ownership-manifest.json` 的 `exceptions` 中登记（由
+`cross-domain-ownership-audit` 校验）。裁决依据是 ADR-049：不做全局类型注册中心，业务 ID 归域所有，
+引用方只组合拥有方导出的 ID / 引用类型，不复制其定义。
+
+| 边                                      | 内容                                                                                                   |
+| --------------------------------------- | ------------------------------------------------------------------------------------------------------ |
+| `task-contracts` → `goal-contracts`     | 仅 `GoalId` / `KeyResultId` 两个 branded ID，涉及 4 个文件                                             |
+| `relation-contracts` → 三个域 contracts | `SubjectRef` 等关系语义组合引用 `GoalId`、`TaskPlanId`、`KnowledgeDocumentId` / `KnowledgeDocumentRef` |
+
+新增跨域契约边必须更新该登记并说明组合语义，而不是扩大通用边界例外。
+
 ## 5. 失败与结果所有权
 
 | 语义                      | Owner                               | 示例                               |

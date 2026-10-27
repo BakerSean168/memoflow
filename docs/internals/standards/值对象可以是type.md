@@ -83,7 +83,8 @@ console.log(id); // 输出 "123"
 TypeScript
 
 ```
-// packages/contracts/src/domain/types/IdentityId.ts
+// packages/shared-primitives/src/ids.ts（branded 类型）
+// packages/utils/src/domain/identity-id.ts（同名伴生工厂）
 
 // 1. 定义数据结构 (它就是个带标签的 string)
 export type IdentityId = string & { readonly __brand: unique symbol };

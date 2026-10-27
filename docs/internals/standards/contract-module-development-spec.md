@@ -10,9 +10,13 @@ updated: 2026-08-17T00:00:00+09:00
 
 # Contracts 模块开发规范
 
-适用范围：`packages/contracts`
+适用范围：
 
-`packages/contracts` 是 MemoFlow 的**跨边界契约中心**，不是所有 TypeScript 类型、领域实体和实现接口的
+- `packages/<domain>-contracts`（如 `goal-contracts`、`task-contracts`、`label-contracts`）：本域的稳定 DTO、Schema、ID、Event/RPC Map；
+- `packages/goal-workspace-contracts`、`packages/task-workspace-contracts`：跨域组合契约，只组合域叶契约成 workspace 读模型，不反向拥有域语义；
+- `packages/shared-primitives`、`packages/transport-contracts`：平台原语与 Result/传输协议。
+
+这些包合起来构成 MemoFlow 的**跨边界契约层**，不是所有 TypeScript 类型、领域实体和实现接口的
 绝对注册中心。本文实现 ADR-049，并取代 ADR-017 所定义的 absolute type centralization。
 
 ## 1. 核心原则
@@ -89,21 +93,30 @@ TaskDomainFault -> mapTaskFaultToFailure() -> TaskFailure
 新模块优先采用：
 
 ```text
-modules/{feature}/
+packages/<domain>-contracts/src/
 ├── api/
 │   ├── commands.ts
 │   ├── queries.ts
 │   ├── snapshots.ts
 │   └── schemas.ts
-├── events/
-│   └── *.event.ts
+├── domain/
+│   └── events/
+│       └── *.event.ts
 ├── failures.ts
 ├── outcomes.ts
 ├── protocol/
-│   ├── {feature}-event-map.ts
-│   └── {feature}-rpc-map.ts
-├── primitives/
+│   ├── {domain}-event-map.ts
+│   └── {domain}-rpc-map.ts
+├── value-objects/
+├── configs/
 └── index.ts
+```
+
+跨域组合契约单独成包，不自建第二套域类型：
+
+```text
+packages/goal-workspace-contracts/src/index.ts
+packages/task-workspace-contracts/src/index.ts
 ```
 
 当前已有 `aggregates/`、`entities/`、`value-objects/` 目录不要求一次性删除，但新增类型前必须判断它是
@@ -111,7 +124,7 @@ wire snapshot 还是 domain model：
 
 - wire snapshot：重命名/迁移到 `api/snapshots` 或明确的 transfer 目录；
 - domain model：迁回 owning feature；
-- shared serialization primitive：保留在 contracts/shared/primitives；
+- shared serialization primitive：保留在 `shared-primitives`；
 - legacy：登记 owner 和退役条件。
 
 ## 4. API 规则
@@ -194,7 +207,7 @@ Domain model 不需要 `implements TaskSnapshot`，也不直接 `toClientDTO()`�
 
 ## 8. Shared Primitive 规则
 
-一个 primitive 进入 contracts/shared 或 contracts/primitives，必须满足：
+一个 primitive 进入 `shared-primitives`（或本域 contracts 的 `value-objects/`），必须满足：
 
 1. 语义跨 bounded context 完全一致；
 2. 是 serialization-safe representation；
@@ -254,9 +267,9 @@ Domain model 不需要 `implements TaskSnapshot`，也不直接 `toClientDTO()`�
 推荐命令：
 
 ```bash
-node node_modules/vitest/vitest.mjs run --config packages/contracts/vitest.config.ts
-pnpm nx run contracts:typecheck
-pnpm nx run contracts:lint
+node node_modules/vitest/vitest.mjs run --config packages/task-contracts/vitest.config.ts
+pnpm nx run task-contracts:typecheck
+pnpm nx run task-contracts:lint
 pnpm nx run memoflow:governance-check --skip-nx-cache
 ```
 

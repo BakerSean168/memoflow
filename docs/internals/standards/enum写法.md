@@ -16,7 +16,7 @@ DTO 对象的定义中不要使用 enum
 使用 **`const object as const`** 配合 **`typeof`**。
 
 ```TypeScript
-// packages/contracts/src/enums/DeviceType.ts
+// packages/{domain}-contracts/src/value-objects/device-type.ts
 
 // 1. 定义常量对象 (运行时用，方便引用)
 export const DeviceType = {
