@@ -2,15 +2,10 @@ import { computed, onScopeDispose, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import type { TaskPlanClientDTO } from '@memoflow/task-contracts';
 import { unwrap } from '@memoflow/contracts/result';
-import { TASK_SERVICE_KEY } from '../../../di/keys';
-import { useStrictInject } from '../../../shared/utils/useStrictInject';
-import { startOfDayMs, endOfDayMs } from '../../../shared/utils/product-time';
-import { useServerStateIdentityScope, useServerStateRuntime } from '../../../platform/server-state';
-import { taskPlanQueryKeys } from '../../../platform/server-state/query-keys';
-import { TASK_TEMPLATE_STALE_TIME_MS } from '../../../platform/server-state/query-policy';
 import { isTaskOccurrenceOnTodaySurface } from '../utils/task-occurrence-presentation';
 import { useTaskStore } from '../stores/task-store';
 import { useTaskOccurrences } from './useTaskOccurrences';
+import { TASK_SERVICE_KEY, TASK_TEMPLATE_STALE_TIME_MS, endOfDayMs, startOfDayMs, taskPlanQueryKeys, useServerStateIdentityScope, useServerStateRuntime, useStrictInject } from '../task-ui-host.ts';
 
 /** Canonical Today owner projection shared by Management, Home and Capsule. */
 export function useTaskToday() {

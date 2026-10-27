@@ -7,6 +7,9 @@ import TaskCompletionMeasurementDialog from './dialogs/TaskCompletionMeasurement
 import TaskOccurrenceCompactList from './TaskOccurrenceCompactList.vue';
 import { instance, template } from './task-quick-test-fixtures';
 import { buildQuickTaskRequest } from '../utils/quick-task-request';
+import { installTaskUiHost } from '@task-ui-test-host/di/task-ui-host';
+installTaskUiHost();
+
 const { createPlanSafe } = vi.hoisted(() => ({ createPlanSafe: vi.fn() }));
 vi.mock('../composables/useTaskPlanMutations', () => ({
   useTaskPlanMutations: () => ({ createPlanSafe, isSaving: ref(false) }),

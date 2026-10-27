@@ -62,8 +62,10 @@ import { computed, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { Zap } from '@lucide/vue';
 import { Button, Input, Label } from '@memoflow/ui-vue-shadcn';
-import { ProductEditorFrame, ProductInlineValidation } from '../../../../shared/components';
-import { useDialogCloseGuard } from '../../../../shared/composables/useDialogCloseGuard';
+import { useDialogCloseGuard } from '../../task-ui-host.ts';
+import { taskUiHost } from '../../task-ui-host.ts';
+const ProductEditorFrame = taskUiHost.components['ProductEditorFrame'];
+const ProductInlineValidation = taskUiHost.components['ProductInlineValidation'];
 
 const props = withDefaults(
   defineProps<{

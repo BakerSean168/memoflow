@@ -5,14 +5,14 @@ import { createI18n } from 'vue-i18n';
 import { createTestPinia } from '@memoflow/test-utils';
 import { ok } from '@memoflow/contracts/result';
 import type { UseTaskPlanListQueryComposableOptions } from '../composables/useTaskPlanListQuery';
-import type { TaskPlanListQueryInput } from '../../../platform/server-state/query-keys';
+import type { TaskPlanListQueryInput } from '@task-ui-test-host/platform/server-state/query-keys';
 import type { TaskOccurrenceClientDTO } from '@memoflow/task-contracts';
-import { GOAL_SERVICE_KEY, TASK_SERVICE_KEY } from '../../../di/keys';
+import { GOAL_SERVICE_KEY, TASK_SERVICE_KEY } from '@task-ui-test-host/di/keys';
 import {
   createTestServerStateRuntime,
   SERVER_STATE_IDENTITY_SCOPE_KEY,
   SERVER_STATE_RUNTIME_KEY,
-} from '../../../platform/server-state';
+} from '@task-ui-test-host/platform/server-state';
 import { useTaskStore } from '../stores/task-store';
 import type { LocationQuery } from 'vue-router';
 import TaskCompletionMeasurementDialog from '../components/dialogs/TaskCompletionMeasurementDialog.vue';
@@ -102,6 +102,9 @@ vi.mock('../components/dialogs/TaskPlanDialog.vue', () => ({
   }),
 }));
 import TaskManagementView from './TaskManagementView.vue';
+import { installTaskUiHost } from '@task-ui-test-host/di/task-ui-host';
+installTaskUiHost();
+
 
 const toolbar = defineComponent({
   name: 'TaskPageToolbar',

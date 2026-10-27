@@ -1,8 +1,8 @@
 import { createI18n } from 'vue-i18n';
 import { describe, expect, it } from 'vitest';
 import type { TaskOccurrenceClientDTO, TaskPlanClientDTO } from '@memoflow/task-contracts';
-import enTask from '../../../locales/en-US/task';
-import { startOfDayMs } from '../../../shared/utils/product-time';
+import enTask from '@task-ui-test-host/locales/en-US/task';
+import { startOfDayMs } from '@task-ui-test-host/shared/utils/product-time';
 import {
   getTaskOccurrenceDueAt,
   getTaskOccurrencePosition,
@@ -11,6 +11,9 @@ import {
   isTaskOccurrenceOverdue,
   sortTaskOccurrences,
 } from './task-occurrence-presentation';
+import { installTaskUiHost } from '@task-ui-test-host/di/task-ui-host';
+installTaskUiHost();
+
 
 const i18n = createI18n({
   legacy: false,

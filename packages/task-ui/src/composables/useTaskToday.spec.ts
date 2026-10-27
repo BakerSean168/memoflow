@@ -3,11 +3,14 @@ import { flushPromises } from '@vue/test-utils';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { ok } from '@memoflow/contracts/result';
 import type { TaskOccurrenceClientDTO, TaskPlanClientDTO } from '@memoflow/task-contracts';
-import { createTestServerStateRuntime } from '../../../platform/server-state';
-import { taskPlanQueryKeys } from '../../../platform/server-state/query-keys';
-import { startOfDayMs, endOfDayMs } from '../../../shared/utils/product-time';
+import { createTestServerStateRuntime } from '@task-ui-test-host/platform/server-state';
+import { taskPlanQueryKeys } from '@task-ui-test-host/platform/server-state/query-keys';
+import { startOfDayMs, endOfDayMs } from '@task-ui-test-host/shared/utils/product-time';
 import { mountTaskComposable } from './taskQueryTestUtils';
 import { useTaskToday } from './useTaskToday';
+import { installTaskUiHost } from '@task-ui-test-host/di/task-ui-host';
+installTaskUiHost();
+
 
 vi.mock('vue-sonner', () => ({ toast: { error: vi.fn(), success: vi.fn() } }));
 

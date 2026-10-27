@@ -5,21 +5,14 @@ import { inject } from 'vue';
 import { toast } from 'vue-sonner';
 import { useI18n } from 'vue-i18n';
 import { useTaskStore } from '../stores/task-store';
-import { TASK_SERVICE_KEY, DESKTOP_AUTH_API_KEY } from '../../../di/keys';
-import { useStrictInject } from '../../../shared/utils/useStrictInject';
-import { sanitizeForIpc } from '../../../shared/utils/ipc';
 import type {
   CompleteTaskOccurrenceReq,
   RescheduleTaskInput,
   SetTaskOccurrenceChecklistItemReq,
 } from '@memoflow/task-contracts';
 import type { Result } from '@memoflow/contracts/result';
-import { createComposableHandleError } from '../../../shared/utils/create-composable-handle-error';
-import { executeDesktopAuthenticatedResult } from '../../../shared/utils/execute-desktop-authenticated-result';
-import { useServerStateIdentityScope, useServerStateRuntime } from '../../../platform/server-state';
-import { taskOccurrenceQueryKeys } from '../../../platform/server-state/query-keys';
-import { TASK_OCCURRENCE_STALE_TIME_MS } from '../../../platform/server-state/query-policy';
 import { patchTaskPlanEverywhere } from './taskPlanCache';
+import { DESKTOP_AUTH_API_KEY, TASK_OCCURRENCE_STALE_TIME_MS, TASK_SERVICE_KEY, createComposableHandleError, executeDesktopAuthenticatedResult, sanitizeForIpc, taskOccurrenceQueryKeys, useServerStateIdentityScope, useServerStateRuntime, useStrictInject } from '../task-ui-host.ts';
 
 type TaskOccurrenceDTO = ReturnType<typeof useTaskStore>['instances'][number];
 

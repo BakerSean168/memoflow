@@ -1,13 +1,16 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import type { TaskPlanClientDTO } from '@memoflow/task-contracts';
-import { createTestServerStateRuntime } from '../../../platform/server-state';
-import { taskPlanQueryKeys } from '../../../platform/server-state/query-keys';
+import { createTestServerStateRuntime } from '@task-ui-test-host/platform/server-state';
+import { taskPlanQueryKeys } from '@task-ui-test-host/platform/server-state/query-keys';
 import {
   patchTaskPlanEverywhere,
   restoreTaskPlanSnapshot,
   snapshotTaskPlanCache,
   waitForTaskPlanQuery,
 } from './taskPlanCache';
+import { installTaskUiHost } from '@task-ui-test-host/di/task-ui-host';
+installTaskUiHost();
+
 
 const SCOPE = 'identity-1';
 

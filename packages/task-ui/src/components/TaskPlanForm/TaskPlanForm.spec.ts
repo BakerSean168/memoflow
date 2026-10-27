@@ -4,6 +4,9 @@ import { createI18n } from 'vue-i18n';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import TaskPlanForm from './TaskPlanForm.vue';
 import type { TaskPlanViewModel } from '../types';
+import { installTaskUiHost } from '@task-ui-test-host/di/task-ui-host';
+installTaskUiHost();
+
 
 const isFormValid = ref(true);
 const validateForm = vi.fn().mockResolvedValue(true);

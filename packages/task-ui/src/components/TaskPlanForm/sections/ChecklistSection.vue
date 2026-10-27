@@ -131,8 +131,9 @@ import { computed, nextTick, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { Button, Label } from '@memoflow/ui-vue-shadcn';
 import { Plus, X } from '@lucide/vue';
-import { ProductAutoTextarea } from '../../../../../shared/components';
 import type { TaskPlanViewModel } from '../../types';
+import { taskUiHost } from '../../../task-ui-host.ts';
+const ProductAutoTextarea = taskUiHost.components['ProductAutoTextarea'];
 
 const { t } = useI18n();
 const props = withDefaults(defineProps<{ modelValue: TaskPlanViewModel; disabled?: boolean }>(), {

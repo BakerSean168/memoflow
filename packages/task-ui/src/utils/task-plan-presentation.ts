@@ -4,7 +4,7 @@ import type { TaskPlanClientDTO, TaskPlanSchedule } from '@memoflow/task-contrac
 import { ImportanceLevel } from '@memoflow/shared-primitives';
 import { TaskPlanScheduleSchema } from '@memoflow/task-contracts';
 import type { TaskPlanViewModel } from '../components/types';
-import { formatProductDate, formatProductDateTime } from '../../../shared/utils/product-time';
+import { formatProductDate, formatProductDateTime } from '../task-ui-host.ts';
 
 type Translate = ComposerTranslation<Record<string, never>, string>;
 

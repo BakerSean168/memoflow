@@ -3,12 +3,6 @@ import { computed, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { ArrowRight, CheckCircle2, Plus, RotateCcw } from '@lucide/vue';
 import { Button, Input } from '@memoflow/ui-vue-shadcn';
-import {
-  CapsulePreviewFooter,
-  CapsulePreviewHeader,
-  CapsulePreviewShell,
-  CapsulePreviewState,
-} from '../../../shared/components';
 import type { TaskOccurrenceClientDTO, TaskPlanClientDTO } from '@memoflow/task-contracts';
 import {
   useTaskOccurrenceActionCoordinator,
@@ -18,6 +12,11 @@ import { useTaskPlanMutations } from '../composables/useTaskPlanMutations';
 import { buildQuickTaskRequest } from '../utils/quick-task-request';
 import TaskCompletionMeasurementDialog from './dialogs/TaskCompletionMeasurementDialog.vue';
 import TaskOccurrenceCompactList from './TaskOccurrenceCompactList.vue';
+import { taskUiHost } from '../task-ui-host.ts';
+const CapsulePreviewFooter = taskUiHost.components['CapsulePreviewFooter'];
+const CapsulePreviewHeader = taskUiHost.components['CapsulePreviewHeader'];
+const CapsulePreviewShell = taskUiHost.components['CapsulePreviewShell'];
+const CapsulePreviewState = taskUiHost.components['CapsulePreviewState'];
 
 const props = withDefaults(
   defineProps<{

@@ -106,12 +106,14 @@ import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { CircleStop, Trash2 } from '@lucide/vue';
 import { Badge, Progress } from '@memoflow/ui-vue-shadcn';
-import { ActionableWrapper, type MenuAction } from '../../../components/shared';
 import type { TaskPlanViewModel } from './types';
 import {
   getTaskPlanScheduleDate,
   getTaskPlanScheduleTimeDisplay,
 } from '../utils/task-plan-presentation';
+import { type MenuAction } from '../task-ui-host.ts';
+import { taskUiHost } from '../task-ui-host.ts';
+const ActionableWrapper = taskUiHost.components['ActionableWrapper'];
 
 const props = defineProps<{ plan: TaskPlanViewModel }>();
 const emit = defineEmits<{ view: []; abandon: []; delete: [] }>();

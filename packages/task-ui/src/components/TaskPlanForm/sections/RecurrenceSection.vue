@@ -190,7 +190,6 @@
 </template>
 
 <script setup lang="ts">
-import { ProductInlineValidation } from '../../../../../shared/components';
 import { computed, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import {
@@ -228,10 +227,11 @@ import {
   Repeat2,
   Sun,
 } from '@lucide/vue';
-import { formatDisplayDate } from '../../../../../shared/utils/format-display-date';
-import { handleCalendarSelect } from '../../../../../shared/utils/handle-calendar-select';
-import { getProductTime } from '../../../../../shared/utils/product-time';
 import { addYmdDays } from '@memoflow/time';
+import { formatDisplayDate } from '@memoflow/time';
+import { getProductTime, handleCalendarSelect } from '../../../task-ui-host.ts';
+import { taskUiHost } from '../../../task-ui-host.ts';
+const ProductInlineValidation = taskUiHost.components['ProductInlineValidation'];
 
 const { t, locale } = useI18n();
 const props = defineProps<{ modelValue: TaskPlanViewModel }>();

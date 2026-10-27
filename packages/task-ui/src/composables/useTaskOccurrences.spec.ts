@@ -6,16 +6,19 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { ok } from '@memoflow/contracts/result';
 import type { TaskOccurrenceClientDTO, TaskPlanClientDTO } from '@memoflow/task-contracts';
 import { createTestPinia } from '@memoflow/test-utils';
-import { TASK_SERVICE_KEY } from '../../../di/keys';
+import { TASK_SERVICE_KEY } from '@task-ui-test-host/di/keys';
 import {
   createTestServerStateRuntime,
   SERVER_STATE_IDENTITY_SCOPE_KEY,
   SERVER_STATE_RUNTIME_KEY,
-} from '../../../platform/server-state';
-import { TASK_OCCURRENCE_STALE_TIME_MS } from '../../../platform/server-state/query-policy';
-import { taskPlanQueryKeys } from '../../../platform/server-state/query-keys';
+} from '@task-ui-test-host/platform/server-state';
+import { TASK_OCCURRENCE_STALE_TIME_MS } from '@task-ui-test-host/platform/server-state/query-policy';
+import { taskPlanQueryKeys } from '@task-ui-test-host/platform/server-state/query-keys';
 import { useTaskStore } from '../stores/task-store';
 import { useTaskOccurrences } from './useTaskOccurrences';
+import { installTaskUiHost } from '@task-ui-test-host/di/task-ui-host';
+installTaskUiHost();
+
 
 vi.mock('vue-sonner', () => ({
   toast: { error: vi.fn(), success: vi.fn() },

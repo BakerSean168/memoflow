@@ -246,7 +246,6 @@
 </template>
 
 <script setup lang="ts">
-import { ProductInlineValidation } from '../../../../../shared/components';
 import { computed, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { TaskReminderType, ReminderTimeUnit } from '@memoflow/task-contracts';
@@ -270,9 +269,10 @@ import {
   Calendar,
 } from '@memoflow/ui-vue-shadcn';
 import { Bell, Calendar as CalendarIcon, CalendarClock, Plus, Timer, Trash2 } from '@lucide/vue';
-import { handleCalendarSelect } from '../../../../../shared/utils/handle-calendar-select';
-import { padTwoDigits } from '../../../../../shared/utils/pad-two-digits';
-import { getProductTime } from '../../../../../shared/utils/product-time';
+import { padTwoDigits } from '@memoflow/time';
+import { getProductTime, handleCalendarSelect } from '../../../task-ui-host.ts';
+import { taskUiHost } from '../../../task-ui-host.ts';
+const ProductInlineValidation = taskUiHost.components['ProductInlineValidation'];
 
 const { t } = useI18n();
 

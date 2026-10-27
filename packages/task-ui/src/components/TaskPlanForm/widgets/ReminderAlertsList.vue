@@ -114,7 +114,7 @@ import {
 } from '@memoflow/ui-vue-shadcn';
 import { Plus, Trash2 } from '@lucide/vue';
 import { useI18n } from 'vue-i18n';
-import { getProductTime } from '../../../../../shared/utils/product-time';
+import { getProductTime } from '../../../task-ui-host.ts';
 
 const { t } = useI18n();
 

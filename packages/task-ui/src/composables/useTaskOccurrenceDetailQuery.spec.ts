@@ -1,11 +1,14 @@
 import { ref } from 'vue';
 import { expect, it, vi } from 'vitest';
 import { ok } from '@memoflow/contracts/result';
-import { createTestServerStateRuntime } from '../../../platform/server-state';
-import { taskOccurrenceQueryKeys } from '../../../platform/server-state/query-keys';
+import { createTestServerStateRuntime } from '@task-ui-test-host/platform/server-state';
+import { taskOccurrenceQueryKeys } from '@task-ui-test-host/platform/server-state/query-keys';
 import { mountTaskComposable } from './taskQueryTestUtils';
 import { useTaskOccurrenceDetailQuery } from './useTaskOccurrenceDetailQuery';
 import { instance } from '../components/task-quick-test-fixtures';
+import { installTaskUiHost } from '@task-ui-test-host/di/task-ui-host';
+installTaskUiHost();
+
 
 it('deduplicates owner reads in the shared cache and isolates identity changes', async () => {
   const identity = ref('identity-1');

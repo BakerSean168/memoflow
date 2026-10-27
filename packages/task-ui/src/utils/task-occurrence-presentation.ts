@@ -1,6 +1,7 @@
 import type { ComposerTranslation } from 'vue-i18n';
 import type { TaskOccurrenceClientDTO, TaskPlanClientDTO } from '@memoflow/task-contracts';
-import { formatProductYmd, isSameDayMs } from '../../../shared/utils/product-time';
+import { formatProductYmd, isSameDayMs } from '../task-ui-host.ts';
+
 export type TaskOccurrenceSort = 'time' | 'status' | 'title';
 
 const OPEN_STATUSES = new Set<TaskOccurrenceClientDTO['status']>(['Pending', 'InProgress']);

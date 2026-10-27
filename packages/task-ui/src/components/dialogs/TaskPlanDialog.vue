@@ -97,13 +97,12 @@ import type {
   TaskNativeSubmitContext,
 } from '../../composables/taskNativeEditSession';
 import type { TaskPlanClientDTO } from '@memoflow/task-contracts';
-import { useLabelCatalog } from '../../../../shared/composables/useLabelCatalog';
 import { TaskPlanScheduleSchema } from '@memoflow/task-contracts';
-import { getProductTime } from '../../../../shared/utils/product-time';
 import { useTaskGoalBindingOptions } from '../../composables/useTaskGoalBindingOptions';
-import { ProductEditorFrame, ProductInlineValidation } from '../../../../shared/components';
-import { useDialogDraftStore } from '../../../../layouts/shell/dialog-draft-store';
-import { useDialogCloseGuard } from '../../../../shared/composables/useDialogCloseGuard';
+import { getProductTime, useDialogCloseGuard, useDialogDraftStore, useLabelCatalog } from '../../task-ui-host.ts';
+import { taskUiHost } from '../../task-ui-host.ts';
+const ProductEditorFrame = taskUiHost.components['ProductEditorFrame'];
+const ProductInlineValidation = taskUiHost.components['ProductInlineValidation'];
 
 const { t } = useI18n();
 const submitError = ref('');

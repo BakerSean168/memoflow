@@ -259,12 +259,6 @@ import {
 } from '@lucide/vue';
 import { Button, Label, Popover, PopoverContent, PopoverTrigger } from '@memoflow/ui-vue-shadcn';
 import { ImportanceLevel } from '@memoflow/shared-primitives';
-import {
-  LabelPicker,
-  ProductAutoTextarea,
-  ProductPropertyChip,
-} from '../../../../shared/components';
-import { useLabelCatalog } from '../../../../shared/composables/useLabelCatalog';
 import BasicInfoSection from './sections/BasicInfoSection.vue';
 import TimeConfigSection from './sections/TimeConfigSection.vue';
 import RecurrenceSection from './sections/RecurrenceSection.vue';
@@ -274,6 +268,11 @@ import ChecklistSection from './sections/ChecklistSection.vue';
 import { useTaskPlanForm } from '../../composables/useTaskPlanForm';
 import type { TaskPlanFormEmits, TaskPlanFormProps, TaskPlanViewModel } from '../types';
 import { getTaskPlanScheduleTimeDisplay } from '../../utils/task-plan-presentation';
+import { useLabelCatalog } from '../../task-ui-host.ts';
+import { taskUiHost } from '../../task-ui-host.ts';
+const LabelPicker = taskUiHost.components['LabelPicker'];
+const ProductAutoTextarea = taskUiHost.components['ProductAutoTextarea'];
+const ProductPropertyChip = taskUiHost.components['ProductPropertyChip'];
 
 const { t } = useI18n();
 const props = withDefaults(defineProps<TaskPlanFormProps>(), {

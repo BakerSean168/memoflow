@@ -3,16 +3,17 @@ import { computed, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { Button, Dialog } from '@memoflow/ui-vue-shadcn';
 import type { TaskOccurrenceClientDTO } from '@memoflow/task-contracts';
-import { GoalRecordComposerSurface } from '@memoflow/goal-ui';
-import { ProductDialogShell } from '../../../../shared/components';
-import { useDialogCloseGuard } from '../../../../shared/composables/useDialogCloseGuard';
 import type { useTaskOccurrenceActionCoordinator } from '../../composables/useTaskOccurrenceActionCoordinator';
+import { taskUiHost, useDialogCloseGuard } from '../../task-ui-host.ts';
+const ProductDialogShell = taskUiHost.components['ProductDialogShell'];
+// 裁决二: the Goal composer is injected by the host (slot) — no direct goal-ui import.
+const GoalComposerSlot = taskUiHost.components['GoalRecordComposerSurface'];
 const props = defineProps<{ coordinator: ReturnType<typeof useTaskOccurrenceActionCoordinator> }>();
 const emit = defineEmits<{ completed: [occurrence: TaskOccurrenceClientDTO] }>();
 const { t } = useI18n();
 const session = computed(() => props.coordinator.pendingMeasurement.value);
 const busy = computed(() => props.coordinator.busyOccurrenceId.value !== null);
-const composer = ref<InstanceType<typeof GoalRecordComposerSurface> | null>(null);
+const composer = ref<{ submit(): void } | null>(null);
 const valid = ref(false);
 const dirty = ref(false);
 const failed = ref(false);
@@ -67,7 +68,8 @@ async function complete(intent?: { value: number; note: string }) {
     >
       <template #title>{{ t('task.measurement.title') }}</template>
       <template #description>{{ t('task.measurement.description') }}</template>
-      <GoalRecordComposerSurface
+      <component
+        :is="GoalComposerSlot"
         :key="composerSession"
         ref="composer"
         :goal-id="session.goalId"

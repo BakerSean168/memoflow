@@ -1,6 +1,6 @@
 import type { CreateTaskPlanReq, TaskPlanClientDTO } from '@memoflow/task-contracts';
-import type { OwnerNativeEditSession } from '../../../shared/composables/ownerNativeEditSession';
 import type { TaskPlanViewModel } from '../components/types';
+import { type OwnerNativeEditSession } from '../task-ui-host.ts';
 
 export type TaskNativePatch = Partial<
   Pick<

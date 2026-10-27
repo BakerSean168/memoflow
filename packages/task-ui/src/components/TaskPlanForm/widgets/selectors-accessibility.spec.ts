@@ -1,9 +1,12 @@
 import { mount } from '@vue/test-utils';
 import { createI18n } from 'vue-i18n';
 import { describe, expect, it } from 'vitest';
-import enUS from '../../../../../locales/en-US';
+import enUS from '@task-ui-test-host/locales/en-US';
 import WeekdaySelector from './WeekdaySelector.vue';
 import MonthDaySelector from './MonthDaySelector.vue';
+import { installTaskUiHost } from '@task-ui-test-host/di/task-ui-host';
+installTaskUiHost();
+
 
 const i18n = createI18n({
   legacy: false,

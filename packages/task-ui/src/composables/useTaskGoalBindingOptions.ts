@@ -1,20 +1,21 @@
-import {
-  getKeyResultCalculationLabel,
-  KEY_RESULT_CALCULATION_PRESENTATION,
-} from '@memoflow/goal-ui';
 import { inject, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import type { Result } from '@memoflow/contracts/result';
 import type { GetGoalAggregateRes, KeyResultClientDTO } from '@memoflow/goal-contracts';
-import { GOAL_SERVICE_KEY, DESKTOP_AUTH_API_KEY } from '../../../di/keys';
-import { useStrictInject } from '../../../shared/utils/useStrictInject';
 import type {
   GoalBindingOption,
   KeyResultBindingOption,
   TaskGoalBindingDisplay,
   TaskGoalBindingViewModel,
 } from '../components/types';
-import { executeDesktopAuthenticatedResult } from '../../../shared/utils/execute-desktop-authenticated-result';
+import {
+  DESKTOP_AUTH_API_KEY,
+  GOAL_SERVICE_KEY,
+  KEY_RESULT_CALCULATION_PRESENTATION,
+  executeDesktopAuthenticatedResult,
+  getKeyResultCalculationLabel,
+  useStrictInject,
+} from '../task-ui-host.ts';
 
 type GoalOptionDTO = {
   id: string;

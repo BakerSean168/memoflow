@@ -86,12 +86,7 @@ import {
 import type { Ymd } from '@memoflow/contracts/primitives';
 import { DropdownMenuItem, DropdownMenuSeparator } from '@memoflow/ui-vue-shadcn';
 import { addYmdDays } from '@memoflow/time';
-import {
-  formatProductDateTime,
-  getProductTime,
-  getProductTodayYmd,
-  productTimeRevision,
-} from '../../../shared/utils/product-time';
+import { formatProductDateTime, getProductTime, getProductTodayYmd, productTimeRevision } from '../task-ui-host.ts';
 
 const props = withDefaults(
   defineProps<{

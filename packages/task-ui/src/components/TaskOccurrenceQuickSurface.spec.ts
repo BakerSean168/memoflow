@@ -4,22 +4,25 @@ import { createPinia } from 'pinia';
 import { createI18n } from 'vue-i18n';
 import { VueQueryPlugin } from '@tanstack/vue-query';
 import { ok } from '@memoflow/contracts/result';
-import { TASK_SERVICE_KEY } from '../../../di/keys';
+import { TASK_SERVICE_KEY } from '@task-ui-test-host/di/keys';
 import {
   createTestServerStateRuntime,
   SERVER_STATE_RUNTIME_KEY,
   SERVER_STATE_IDENTITY_SCOPE_KEY,
-} from '../../../platform/server-state';
+} from '@task-ui-test-host/platform/server-state';
 import {
   taskOccurrenceQueryKeys,
   taskPlanQueryKeys,
-} from '../../../platform/server-state/query-keys';
-import { productionLocaleMessages } from '../../../locales/production-messages';
+} from '@task-ui-test-host/platform/server-state/query-keys';
+import { productionLocaleMessages } from '@task-ui-test-host/locales/production-messages';
 import { instance, template } from './task-quick-test-fixtures';
 import TaskOccurrenceQuickSurface from './TaskOccurrenceQuickSurface.vue';
 import TaskOccurrenceCompactList from './TaskOccurrenceCompactList.vue';
 import TaskCompletionMeasurementDialog from './dialogs/TaskCompletionMeasurementDialog.vue';
 import { useTaskStore } from '../stores/task-store';
+import { installTaskUiHost } from '@task-ui-test-host/di/task-ui-host';
+installTaskUiHost();
+
 
 enableAutoUnmount(afterEach);
 function host(prompt = false, missing?: 'occurrence' | 'plan') {

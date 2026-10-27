@@ -6,6 +6,9 @@ import type {
 } from '@memoflow/task-contracts';
 import { createTestPinia } from '@memoflow/test-utils';
 import { useTaskStore } from './task-store';
+import { installTaskUiHost } from '@task-ui-test-host/di/task-ui-host';
+installTaskUiHost();
+
 
 function createInstance(overrides: Partial<TaskOccurrenceClientDTO> = {}): TaskOccurrenceClientDTO {
   return {

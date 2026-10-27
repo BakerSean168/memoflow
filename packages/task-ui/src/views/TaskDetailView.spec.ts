@@ -5,10 +5,13 @@ import { createI18n } from 'vue-i18n';
 import { instance, template } from '../components/task-quick-test-fixtures';
 import TaskOccurrenceRow from '../components/TaskOccurrenceRow.vue';
 import TaskCompletionMeasurementDialog from '../components/dialogs/TaskCompletionMeasurementDialog.vue';
-import { ProductMoreProperties } from '../../../shared/components';
+import { ProductMoreProperties } from '@task-ui-test-host/shared/components';
 import TaskDetailView from './TaskDetailView.vue';
-import enTask from '../../../locales/en-US/task';
-import zhTask from '../../../locales/zh-CN/task';
+import enTask from '@task-ui-test-host/locales/en-US/task';
+import zhTask from '@task-ui-test-host/locales/zh-CN/task';
+import { installTaskUiHost } from '@task-ui-test-host/di/task-ui-host';
+installTaskUiHost();
+
 
 const actions = vi.hoisted(() => ({
   completeOccurrence: vi.fn(),

@@ -1,4 +1,4 @@
-import { installGoalUiHost } from '../../../../di/goal-ui-host';
+import { installGoalUiHost } from '@task-ui-test-host/di/goal-ui-host';
 import { flushPromises, mount } from '@vue/test-utils';
 import { createI18n } from 'vue-i18n';
 import { beforeEach, expect, it, vi } from 'vitest';
@@ -6,8 +6,11 @@ import { defineComponent, h } from 'vue';
 import TaskCompletionMeasurementDialog from './TaskCompletionMeasurementDialog.vue';
 import { useTaskOccurrenceActionCoordinator } from '../../composables/useTaskOccurrenceActionCoordinator';
 import { instance } from '../task-quick-test-fixtures';
-import enUS from '../../../../locales/en-US';
+import enUS from '@task-ui-test-host/locales/en-US';
 import type { TaskGoalBindingDTO } from '@memoflow/task-contracts';
+import { installTaskUiHost } from '@task-ui-test-host/di/task-ui-host';
+installTaskUiHost();
+
 installGoalUiHost();
 const owner = vi.hoisted(() => ({ read: vi.fn() }));
 vi.mock('@memoflow/goal-ui/composables/useGoal', () => ({

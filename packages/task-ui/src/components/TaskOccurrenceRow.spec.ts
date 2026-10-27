@@ -4,8 +4,11 @@ import { mount } from '@vue/test-utils';
 import { createI18n } from 'vue-i18n';
 import { describe, expect, it, vi } from 'vitest';
 import type { TaskOccurrenceClientDTO, TaskPlanClientDTO } from '@memoflow/task-contracts';
-import enTask from '../../../locales/en-US/task';
+import enTask from '@task-ui-test-host/locales/en-US/task';
 import TaskOccurrenceRow from './TaskOccurrenceRow.vue';
+import { installTaskUiHost } from '@task-ui-test-host/di/task-ui-host';
+installTaskUiHost();
+
 
 const i18n = createI18n({
   legacy: false,

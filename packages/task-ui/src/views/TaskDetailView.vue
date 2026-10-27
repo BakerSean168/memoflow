@@ -727,19 +727,6 @@ import {
   type TaskReminderConfigDTO,
   type UpdateTaskPlanReq,
 } from '@memoflow/task-contracts';
-import AppEmptyState from '../../../components/shared/AppEmptyState.vue';
-import ModuleHeader from '../../../components/shared/ModuleHeader.vue';
-import {
-  ProductAutoTextarea,
-  ProductDateTimePicker,
-  ProductEntityIdentity,
-  ProductMetadataRow,
-  ProductMoreProperties,
-  ProductPropertyChip,
-} from '../../../shared/components';
-import LabelCommandPanel from '../../../shared/components/LabelCommandPanel.vue';
-import { useLabelCatalog } from '../../../shared/composables/useLabelCatalog';
-import { getProductTime } from '../../../shared/utils/product-time';
 import TaskOccurrenceRow from '../components/TaskOccurrenceRow.vue';
 import TaskReminderMenuItems from '../components/TaskReminderMenuItems.vue';
 import ChecklistSection from '../components/TaskPlanForm/sections/ChecklistSection.vue';
@@ -762,6 +749,17 @@ import {
   toTaskPlanSchedulePayload,
 } from '../utils/task-plan-presentation';
 import { sortTaskOccurrences } from '../utils/task-occurrence-presentation';
+import { getProductTime, useLabelCatalog } from '../task-ui-host.ts';
+import { taskUiHost } from '../task-ui-host.ts';
+const AppEmptyState = taskUiHost.components['AppEmptyState'];
+const LabelCommandPanel = taskUiHost.components['LabelCommandPanel'];
+const ModuleHeader = taskUiHost.components['ModuleHeader'];
+const ProductAutoTextarea = taskUiHost.components['ProductAutoTextarea'];
+const ProductDateTimePicker = taskUiHost.components['ProductDateTimePicker'];
+const ProductEntityIdentity = taskUiHost.components['ProductEntityIdentity'];
+const ProductMetadataRow = taskUiHost.components['ProductMetadataRow'];
+const ProductMoreProperties = taskUiHost.components['ProductMoreProperties'];
+const ProductPropertyChip = taskUiHost.components['ProductPropertyChip'];
 
 type PropertyEditor = 'schedule' | 'recurrence' | 'goal' | 'reminder' | 'importance';
 

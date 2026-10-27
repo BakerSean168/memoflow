@@ -245,15 +245,14 @@ import {
   DropdownMenuTrigger,
 } from '@memoflow/ui-vue-shadcn';
 import type { TaskOccurrenceClientDTO } from '@memoflow/task-contracts';
-import {
-  LabelFilterPopover,
-  ProductSingleSelectFilter,
-  ProductSurfaceHeader,
-  ResponsivePrimaryAction,
-  type LabelPickerOption,
-} from '../../../shared/components';
 import type { TaskPlanStateFilter, TaskSurface } from './types';
 import type { TaskOccurrenceSort } from '../utils/task-occurrence-presentation';
+import { type LabelPickerOption } from '../task-ui-host.ts';
+import { taskUiHost } from '../task-ui-host.ts';
+const LabelFilterPopover = taskUiHost.components['LabelFilterPopover'];
+const ProductSingleSelectFilter = taskUiHost.components['ProductSingleSelectFilter'];
+const ProductSurfaceHeader = taskUiHost.components['ProductSurfaceHeader'];
+const ResponsivePrimaryAction = taskUiHost.components['ResponsivePrimaryAction'];
 
 type StatusFilter = 'all' | TaskOccurrenceClientDTO['status'];
 

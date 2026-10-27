@@ -8,13 +8,8 @@ import { mount } from '@vue/test-utils';
 import { createI18n } from 'vue-i18n';
 import { createPinia, setActivePinia } from 'pinia';
 import { VueQueryPlugin } from '@tanstack/vue-query';
-import {
-  createTestServerStateRuntime,
-  SERVER_STATE_IDENTITY_SCOPE_KEY,
-  SERVER_STATE_RUNTIME_KEY,
-  type ServerStateRuntime,
-} from '../../../platform/server-state';
-import { TASK_SERVICE_KEY } from '../../../di/keys';
+import { type ServerStateRuntime } from '../task-ui-host.ts';
+import { SERVER_STATE_IDENTITY_SCOPE_KEY, SERVER_STATE_RUNTIME_KEY, TASK_SERVICE_KEY, createTestServerStateRuntime } from '../task-ui-host.ts';
 
 const i18n = createI18n({
   legacy: false,

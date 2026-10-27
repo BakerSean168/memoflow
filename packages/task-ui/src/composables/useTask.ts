@@ -10,15 +10,11 @@
 
 import { computed, ref } from 'vue';
 import { useTaskStore } from '../stores/task-store';
-import { useServerStateIdentityScope, useServerStateRuntime } from '../../../platform/server-state';
-import {
-  canonicalizeTaskPlanListQuery,
-  taskPlanQueryKeys,
-  type TaskPlanListQueryInput,
-} from '../../../platform/server-state/query-keys';
 import { useTaskOccurrences } from './useTaskOccurrences';
 import { useTaskPlanListQuery } from './useTaskPlanListQuery';
 import { waitForTaskPlanQuery } from './taskPlanCache';
+import { type TaskPlanListQueryInput } from '../task-ui-host.ts';
+import { canonicalizeTaskPlanListQuery, taskPlanQueryKeys, useServerStateIdentityScope, useServerStateRuntime } from '../task-ui-host.ts';
 
 export function useTask() {
   const store = useTaskStore();

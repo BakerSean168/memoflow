@@ -10,7 +10,7 @@
 
 import { hashKey, type QueryClient, type QueryKey } from '@tanstack/vue-query';
 import type { TaskPlanClientDTO, UpdateTaskPlanReq } from '@memoflow/task-contracts';
-import { taskPlanQueryKeys } from '../../../platform/server-state/query-keys';
+import { taskPlanQueryKeys } from '../task-ui-host.ts';
 
 /** Shape of a list data payload stored under a task-plan list key. */
 interface TemplateCollectionData {

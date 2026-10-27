@@ -3,10 +3,13 @@
 import { mount } from '@vue/test-utils';
 import { createI18n } from 'vue-i18n';
 import { describe, expect, it } from 'vitest';
-import enTask from '../../../locales/en-US/task';
-import { ActionableWrapper, type MenuAction } from '../../../components/shared';
+import enTask from '@task-ui-test-host/locales/en-US/task';
+import { ActionableWrapper, type MenuAction } from '@task-ui-test-host/components/shared';
 import type { TaskPlanViewModel } from './types';
 import TaskPlanRow from './TaskPlanRow.vue';
+import { installTaskUiHost } from '@task-ui-test-host/di/task-ui-host';
+installTaskUiHost();
+
 
 const i18n = createI18n({
   legacy: false,

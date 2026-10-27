@@ -1,9 +1,12 @@
 import { describe, expect, it, vi } from 'vitest';
 import { fail, ok, type Result } from '@memoflow/contracts/result';
 import type { TaskPlanClientDTO } from '@memoflow/task-contracts';
-import { taskPlanQueryKeys } from '../../../platform/server-state/query-keys';
+import { taskPlanQueryKeys } from '@task-ui-test-host/platform/server-state/query-keys';
 import { mountTaskComposable } from './taskQueryTestUtils';
 import { useTaskPlanMutations } from './useTaskPlanMutations';
+import { installTaskUiHost } from '@task-ui-test-host/di/task-ui-host';
+installTaskUiHost();
+
 
 const SCOPE = 'identity-1';
 

@@ -4,6 +4,9 @@ import { expect, it } from 'vitest';
 import TaskOccurrenceCompactList from './TaskOccurrenceCompactList.vue';
 import TaskOccurrenceQuickRow from './TaskOccurrenceQuickRow.vue';
 import { instance, template } from './task-quick-test-fixtures';
+import { installTaskUiHost } from '@task-ui-test-host/di/task-ui-host';
+installTaskUiHost();
+
 it('renders quick rows and forwards semantic events without fetching', () => {
   const w = mount(TaskOccurrenceCompactList, {
     props: { rows: [{ occurrence: instance(), template }], busyOccurrenceId: 'occurrence-1' },

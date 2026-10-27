@@ -4,6 +4,9 @@ import { describe, expect, it } from 'vitest';
 import { Checkbox, DropdownMenuItem } from '@memoflow/ui-vue-shadcn';
 import TaskOccurrenceQuickRow from './TaskOccurrenceQuickRow.vue';
 import { instance, template } from './task-quick-test-fixtures';
+import { installTaskUiHost } from '@task-ui-test-host/di/task-ui-host';
+installTaskUiHost();
+
 const i18n = createI18n({ legacy: false, locale: 'en', messages: {} });
 function row(status = 'Pending' as ReturnType<typeof instance>['status']) {
   return mount(TaskOccurrenceQuickRow, {

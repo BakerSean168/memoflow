@@ -213,7 +213,6 @@
 </template>
 
 <script setup lang="ts">
-import { vKeyboardList } from '../../../shared/keyboard/list-adapter';
 import { buildTaskPlanCreateRequest } from '../utils/task-plan-create-request';
 
 import {
@@ -243,11 +242,8 @@ import type { TaskPlanStateFilter, TaskPlanViewModel, TaskSurface } from '../com
 import { useTaskStore } from '../stores/task-store';
 import { useTaskToday } from '../composables/useTaskToday';
 import TaskCompletionMeasurementDialog from '../components/dialogs/TaskCompletionMeasurementDialog.vue';
-import AppEmptyState from '../../../components/shared/AppEmptyState.vue';
 import { useTaskOccurrenceActionCoordinator } from '../composables/useTaskOccurrenceActionCoordinator';
 import { useTaskPlanListQuery } from '../composables/useTaskPlanListQuery';
-import { useTaskNativeSurfaceRegistration } from '../../../layouts/shell/useTaskNativeSurface';
-import { usePanelSurfaceStatus } from '../../../layouts/shell/usePanelSurfaceStatus';
 import type {
   TaskNativeEditSession,
   TaskNativeSubmitContext,
@@ -260,11 +256,10 @@ import {
   sortTaskOccurrences,
   type TaskOccurrenceSort,
 } from '../utils/task-occurrence-presentation';
-import { isTodayMs } from '../../../shared/utils/product-time';
-import { GOAL_SERVICE_KEY } from '../../../di/keys';
-import { type TaskPlanListQueryInput } from '../../../platform/server-state/query-keys';
-import { useServerStateIdentityScope } from '../../../platform/server-state';
-import { useStrictInject } from '../../../shared/utils/useStrictInject';
+import { type TaskPlanListQueryInput } from '../task-ui-host.ts';
+import { GOAL_SERVICE_KEY, isTodayMs, usePanelSurfaceStatus, useServerStateIdentityScope, useStrictInject, useTaskNativeSurfaceRegistration, vKeyboardList } from '../task-ui-host.ts';
+import { taskUiHost } from '../task-ui-host.ts';
+const AppEmptyState = taskUiHost.components['AppEmptyState'];
 
 const route = useRoute();
 const router = useRouter();

@@ -4,6 +4,9 @@ import { createI18n } from 'vue-i18n';
 import { describe, expect, it, vi } from 'vitest';
 import type { TaskPlanViewModel } from '../../types';
 import ChecklistSection from './ChecklistSection.vue';
+import { installTaskUiHost } from '@task-ui-test-host/di/task-ui-host';
+installTaskUiHost();
+
 
 const i18n = createI18n({
   legacy: false,

@@ -144,10 +144,11 @@
 import { useI18n } from 'vue-i18n';
 import { Badge, Button, Checkbox, Dialog } from '@memoflow/ui-vue-shadcn';
 import type { TaskOccurrenceClientDTO } from '@memoflow/task-contracts';
-import ProductDialogShell from '../../../../shared/components/ProductDialogShell.vue';
-import { formatProductDateTime } from '../../../../shared/utils/product-time';
 import { useTaskPlanWorkspaceQuery } from '../../composables/useTaskPlanWorkspaceQuery';
 import { getTaskOccurrenceScheduleLabel } from '../../utils/task-occurrence-presentation';
+import { formatProductDateTime } from '../../task-ui-host.ts';
+import { taskUiHost } from '../../task-ui-host.ts';
+const ProductDialogShell = taskUiHost.components['ProductDialogShell'];
 
 const props = defineProps<{
   modelValue: boolean;

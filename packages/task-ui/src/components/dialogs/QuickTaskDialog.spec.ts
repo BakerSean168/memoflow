@@ -9,6 +9,9 @@ vi.mock('@memoflow/ui-vue-shadcn', async (importOriginal) => {
 });
 
 import QuickTaskDialog from './QuickTaskDialog.vue';
+import { installTaskUiHost } from '@task-ui-test-host/di/task-ui-host';
+installTaskUiHost();
+
 
 const passThrough = (name: string, tag = 'div') =>
   defineComponent({

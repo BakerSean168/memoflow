@@ -20,12 +20,6 @@ import type {
   TaskPlanClientDTO,
   UpdateTaskPlanReq,
 } from '@memoflow/task-contracts';
-import { useStrictInject } from '../../../shared/utils/useStrictInject';
-import { TASK_SERVICE_KEY, DESKTOP_AUTH_API_KEY } from '../../../di/keys';
-import { useServerStateIdentityScope, useServerStateRuntime } from '../../../platform/server-state';
-import { createComposableHandleError } from '../../../shared/utils/create-composable-handle-error';
-import { executeDesktopAuthenticatedResult } from '../../../shared/utils/execute-desktop-authenticated-result';
-import { sanitizeForIpc } from '../../../shared/utils/ipc';
 import {
   getTaskPlanFromCache,
   mergeTaskPlanUpdate,
@@ -34,7 +28,7 @@ import {
   restoreTaskPlanSnapshot,
   snapshotTaskPlanCache,
 } from './taskPlanCache';
-import { taskPlanQueryKeys } from '../../../platform/server-state/query-keys';
+import { DESKTOP_AUTH_API_KEY, TASK_SERVICE_KEY, createComposableHandleError, executeDesktopAuthenticatedResult, sanitizeForIpc, taskPlanQueryKeys, useServerStateIdentityScope, useServerStateRuntime, useStrictInject } from '../task-ui-host.ts';
 
 /** Feedback intent for create (plan §2.2: preserve occurrenceCount/todayOccurrenceCreated feedback). */
 export type CreatePlanFeedbackIntent = 'plan' | 'quick';

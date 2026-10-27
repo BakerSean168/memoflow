@@ -4,6 +4,9 @@ import { createI18n } from 'vue-i18n';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import type { KeyResultBindingOption, TaskPlanViewModel } from '../../types';
 import KeyResultLinksSection from './KeyResultLinksSection.vue';
+import { installTaskUiHost } from '@task-ui-test-host/di/task-ui-host';
+installTaskUiHost();
+
 
 const SelectStub = defineComponent({
   name: 'TestSelect',

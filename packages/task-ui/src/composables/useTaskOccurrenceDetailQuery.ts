@@ -2,12 +2,8 @@ import { computed, type MaybeRefOrGetter, toValue } from 'vue';
 import { useQuery } from '@tanstack/vue-query';
 import { useI18n } from 'vue-i18n';
 import { unwrap } from '@memoflow/contracts/result';
-import { TASK_SERVICE_KEY } from '../../../di/keys';
-import { useStrictInject } from '../../../shared/utils/useStrictInject';
-import { useServerStateIdentityScope } from '../../../platform/server-state';
-import { taskOccurrenceQueryKeys } from '../../../platform/server-state/query-keys';
-import { TASK_OCCURRENCE_STALE_TIME_MS } from '../../../platform/server-state/query-policy';
-import { translateResultError } from '../../../shared/utils/translate-result-error';
+import { translateResultErrorMessage as translateResultError } from '@memoflow/http-client';
+import { TASK_OCCURRENCE_STALE_TIME_MS, TASK_SERVICE_KEY, taskOccurrenceQueryKeys, useServerStateIdentityScope, useStrictInject } from '../task-ui-host.ts';
 
 /** Task owns the occurrence read; mutations patch this same identity-scoped cache. */
 export function useTaskOccurrenceDetailQuery(id: MaybeRefOrGetter<string>) {

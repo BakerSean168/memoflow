@@ -1,14 +1,17 @@
 import { DOMWrapper, flushPromises, mount } from '@vue/test-utils';
 import { nextTick } from 'vue';
 import { createI18n } from 'vue-i18n';
-import { productionLocaleMessages } from '../../../../locales/production-messages';
-import { clearDialogDrafts } from '../../../../layouts/shell/dialog-draft-store';
+import { productionLocaleMessages } from '@task-ui-test-host/locales/production-messages';
+import { clearDialogDrafts } from '@task-ui-test-host/layouts/shell/dialog-draft-store';
 import TaskPlanDialog from './TaskPlanDialog.vue';
 import TaskPlanForm from '../TaskPlanForm/TaskPlanForm.vue';
 import type { TaskNativeEditSession } from '../../composables/taskNativeEditSession';
 import { CreateTaskPlanSchema } from '@memoflow/task-contracts';
 import { createMockTaskPlan } from '@memoflow/task-contracts/test-support/task.mock';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { installTaskUiHost } from '@task-ui-test-host/di/task-ui-host';
+installTaskUiHost();
+
 
 const confirmMock = vi.hoisted(() => vi.fn(async () => true));
 vi.mock('@memoflow/ui-vue-shadcn', async (importOriginal) => {

@@ -61,8 +61,9 @@ import { ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { Dialog, Card, CardContent, Button } from '@memoflow/ui-vue-shadcn';
 import { FileText, FolderOpen, LayoutGrid, Loader2 } from '@lucide/vue';
-import { ProductDialogShell } from '../../../../shared/components';
 import type { TaskPlanViewModel } from '../types';
+import { taskUiHost } from '../../task-ui-host.ts';
+const ProductDialogShell = taskUiHost.components['ProductDialogShell'];
 
 const { t } = useI18n();
 

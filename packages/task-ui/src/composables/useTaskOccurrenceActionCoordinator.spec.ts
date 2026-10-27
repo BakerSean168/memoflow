@@ -2,6 +2,9 @@ import { describe, expect, it, vi } from 'vitest';
 import type { TaskGoalBindingDTO } from '@memoflow/task-contracts';
 import { instance } from '../components/task-quick-test-fixtures';
 import { useTaskOccurrenceActionCoordinator } from './useTaskOccurrenceActionCoordinator';
+import { installTaskUiHost } from '@task-ui-test-host/di/task-ui-host';
+installTaskUiHost();
+
 
 function setup(binding?: TaskGoalBindingDTO) {
   const result = instance({ status: 'Completed' });

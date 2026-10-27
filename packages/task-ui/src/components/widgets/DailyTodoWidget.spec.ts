@@ -5,6 +5,9 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { TaskOccurrenceClientDTO, TaskPlanClientDTO } from '@memoflow/task-contracts';
 import { useTaskToday } from '../../composables/useTaskToday';
 import DailyTodoWidget from './DailyTodoWidget.vue';
+import { installTaskUiHost } from '@task-ui-test-host/di/task-ui-host';
+installTaskUiHost();
+
 
 vi.mock('../../composables/useTaskPlanMutations', () => ({
   useTaskPlanMutations: () => ({ createPlanSafe: vi.fn(), isSaving: ref(false) }),

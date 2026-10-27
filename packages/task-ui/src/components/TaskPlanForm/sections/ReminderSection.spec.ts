@@ -6,6 +6,9 @@ import { describe, expect, it } from 'vitest';
 import { ReminderTimeUnit, TaskReminderType } from '@memoflow/task-contracts';
 import type { TaskPlanViewModel } from '../../types';
 import ReminderSection from './ReminderSection.vue';
+import { installTaskUiHost } from '@task-ui-test-host/di/task-ui-host';
+installTaskUiHost();
+
 
 const i18n = createI18n({
   legacy: false,

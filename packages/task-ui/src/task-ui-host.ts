@@ -12,7 +12,13 @@ import type { Ymd } from '@memoflow/shared-primitives';
 import type { TaskClientPort } from '@memoflow/task-client';
 import type { LabelClientDTO } from '@memoflow/label-contracts';
 import type { Result } from '@memoflow/contracts/result';
-import type { GetGoalAggregateRes, GoalClientDTO, KeyResultClientDTO } from '@memoflow/goal-contracts';
+import type {
+  GetGoalAggregateRes,
+  GoalClientDTO,
+  GoalSystemView,
+  KeyResultClientDTO,
+  QueryGoalsRes,
+} from '@memoflow/goal-contracts';
 
 /** Minimal desktop auth invoke surface (mirrors app-vue DesktopAuthApi). */
 export interface TaskUiDesktopAuthApi {
@@ -119,15 +125,18 @@ export interface TaskUiGoalBindingPort {
     pageSize?: number;
     query?: string;
     status?: string[];
-  }): Promise<Result<{ goals: GoalClientDTO[]; pagination: { total: number; page: number; pageSize: number } }>>;
+    systemView?: GoalSystemView;
+    labelIdsAll?: string[];
+  }): Promise<Result<{ goals: GoalClientDTO[]; pagination: QueryGoalsRes['pagination'] }>>;
   getGoalAggregateView(id: string): Promise<Result<GetGoalAggregateRes>>;
   getGoal(id: string): Promise<Result<GoalClientDTO>>;
   getKeyResults(goalId: string): Promise<Result<{ keyResults: KeyResultClientDTO[] }>>;
 }
 
 export interface TaskUiKeyResultCalculationPresentation {
-  recordInputKind: string;
   labelKey: string;
+  recordInputKind: string;
+  recordPromptLabelKey: string;
 }
 
 /** Renderer composition dependencies for the Task surfaces. */
@@ -212,17 +221,22 @@ export interface TaskUiHost {
 
   // ---- goal binding port (裁决二) ----
   getKeyResultCalculationLabel(method: string, t?: TaskUiTranslateFn): string;
+  getKeyResultRecordPromptLabel(method: string, t?: TaskUiTranslateFn): string;
   KEY_RESULT_CALCULATION_PRESENTATION: Record<string, TaskUiKeyResultCalculationPresentation>;
 
   // ---- shared components ----
   components: Record<
     | 'ActionableWrapper'
+    | 'AppEmptyState'
     | 'CapsulePreviewFooter'
     | 'CapsulePreviewHeader'
     | 'CapsulePreviewShell'
     | 'CapsulePreviewState'
+    | 'GoalRecordComposerSurface'
+    | 'LabelCommandPanel'
     | 'LabelFilterPopover'
     | 'LabelPicker'
+    | 'ModuleHeader'
     | 'ProductAutoTextarea'
     | 'ProductDatePicker'
     | 'ProductDateTimePicker'

@@ -10,17 +10,9 @@ import { useQuery } from '@tanstack/vue-query';
 import { useI18n } from 'vue-i18n';
 import { unwrap } from '@memoflow/contracts/result';
 import type { TaskPlanClientDTO } from '@memoflow/task-contracts';
-import { useStrictInject } from '../../../shared/utils/useStrictInject';
-import { TASK_SERVICE_KEY } from '../../../di/keys';
-import { useServerStateIdentityScope } from '../../../platform/server-state';
-import {
-  canonicalizeTaskPlanListQuery,
-  taskPlanQueryKeys,
-  type TaskPlanListQueryInput,
-} from '../../../platform/server-state/query-keys';
-import { TASK_TEMPLATE_STALE_TIME_MS } from '../../../platform/server-state/query-policy';
-import { translateResultError } from '../../../shared/utils/translate-result-error';
-import { sanitizeForIpc } from '../../../shared/utils/ipc';
+import { type TaskPlanListQueryInput } from '../task-ui-host.ts';
+import { translateResultErrorMessage as translateResultError } from '@memoflow/http-client';
+import { TASK_SERVICE_KEY, TASK_TEMPLATE_STALE_TIME_MS, canonicalizeTaskPlanListQuery, sanitizeForIpc, taskPlanQueryKeys, useServerStateIdentityScope, useStrictInject } from '../task-ui-host.ts';
 
 /** Options for the Task template list query. 任务模板列表查询选项。 */
 export type UseTaskPlanListQueryOptions = TaskPlanListQueryInput;

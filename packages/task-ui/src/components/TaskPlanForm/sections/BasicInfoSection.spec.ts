@@ -2,10 +2,13 @@ import { mount, type VueWrapper } from '@vue/test-utils';
 import { nextTick, ref } from 'vue';
 import { createI18n } from 'vue-i18n';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import task from '../../../../../locales/zh-CN/task';
+import task from '@task-ui-test-host/locales/zh-CN/task';
 import type { TaskPlanViewModel } from '../../types';
 import BasicInfoSection from './BasicInfoSection.vue';
 import TaskPlanForm from '../TaskPlanForm.vue';
+import { installTaskUiHost } from '@task-ui-test-host/di/task-ui-host';
+installTaskUiHost();
+
 
 vi.mock('../../../../../shared/composables/useLabelCatalog', () => ({
   useLabelCatalog: () => ({

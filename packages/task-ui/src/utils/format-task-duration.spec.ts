@@ -1,5 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import { formatTaskDuration } from './format-task-duration';
+import { installTaskUiHost } from '@task-ui-test-host/di/task-ui-host';
+installTaskUiHost();
+
 
 describe('formatTaskDuration', () => {
   it('uses locale-aware duration units', () => {

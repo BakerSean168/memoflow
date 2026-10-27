@@ -214,11 +214,13 @@ import {
   SelectContent,
   SelectItem,
 } from '@memoflow/ui-vue-shadcn';
-import { translateResultError } from '../../../../../shared/utils/translate-result-error';
-import { padTwoDigits } from '../../../../../shared/utils/pad-two-digits';
-import { ProductDatePicker, ProductInlineValidation } from '../../../../../shared/components';
 import { CalendarDays, Check, Clock3, Timer } from '@lucide/vue';
 import { requireYmd, type Ymd } from '@memoflow/contracts/primitives';
+import { translateResultErrorMessage as translateResultError } from '@memoflow/http-client';
+import { padTwoDigits } from '@memoflow/time';
+import { taskUiHost } from '../../../task-ui-host.ts';
+const ProductDatePicker = taskUiHost.components['ProductDatePicker'];
+const ProductInlineValidation = taskUiHost.components['ProductInlineValidation'];
 
 const { t } = useI18n();
 

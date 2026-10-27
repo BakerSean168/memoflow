@@ -1,10 +1,7 @@
 import { computed, type MaybeRefOrGetter, toValue } from 'vue';
 import { useQuery } from '@tanstack/vue-query';
 import type { GetTaskWorkspaceReq } from '@memoflow/workspace-contracts';
-import { useStrictInject } from '../../../shared/utils/useStrictInject';
-import { TASK_SERVICE_KEY } from '../../../di/keys';
-import { useServerStateIdentityScope } from '../../../platform/server-state';
-import { taskPlanQueryKeys } from '../../../platform/server-state/query-keys';
+import { TASK_SERVICE_KEY, taskPlanQueryKeys, useServerStateIdentityScope, useStrictInject } from '../task-ui-host.ts';
 
 export function useTaskPlanWorkspaceQuery(
   id: MaybeRefOrGetter<string | undefined | null>,

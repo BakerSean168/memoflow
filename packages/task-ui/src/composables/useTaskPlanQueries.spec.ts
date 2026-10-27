@@ -3,10 +3,13 @@ import { flushPromises } from '@vue/test-utils';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { ok } from '@memoflow/contracts/result';
 import type { TaskPlanClientDTO } from '@memoflow/task-contracts';
-import { createServerStateRuntime } from '../../../platform/server-state';
+import { createServerStateRuntime } from '@task-ui-test-host/platform/server-state';
 import { mountTaskComposable } from './taskQueryTestUtils';
 import { useTaskPlanListQuery } from './useTaskPlanListQuery';
 import { useTaskPlanDetailQuery } from './useTaskPlanDetailQuery';
+import { installTaskUiHost } from '@task-ui-test-host/di/task-ui-host';
+installTaskUiHost();
+
 
 function template(overrides: Partial<TaskPlanClientDTO> = {}): TaskPlanClientDTO {
   return {

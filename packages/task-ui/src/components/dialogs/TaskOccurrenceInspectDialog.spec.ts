@@ -5,8 +5,11 @@ import { createI18n } from 'vue-i18n';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { TaskOccurrenceClientDTO } from '@memoflow/task-contracts';
 import type { TaskPlanWorkspace } from '@memoflow/workspace-contracts';
-import enTask from '../../../../locales/en-US/task';
+import enTask from '@task-ui-test-host/locales/en-US/task';
 import TaskOccurrenceInspectDialog from './TaskOccurrenceInspectDialog.vue';
+import { installTaskUiHost } from '@task-ui-test-host/di/task-ui-host';
+installTaskUiHost();
+
 
 const context = vi.hoisted(() => ({ read: vi.fn() }));
 vi.mock('../../composables/useTaskPlanWorkspaceQuery', () => ({

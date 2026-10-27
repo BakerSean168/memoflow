@@ -1,8 +1,8 @@
 import type { Meta, StoryObj } from '@storybook/vue3-vite';
 import { expect, userEvent, within } from 'storybook/test';
 import { provide, ref, toRaw } from 'vue';
-import { LABEL_SERVICE_KEY } from '../../../../di/keys';
-import type { ILabelService } from '../../../../di/types';
+import { LABEL_SERVICE_KEY } from '@task-ui-test-host/di/keys';
+import type { ILabelService } from '@task-ui-test-host/di/types';
 import { TaskYmdSchema } from '@memoflow/task-contracts';
 import type { TaskPlanViewModel } from '../types';
 import TaskPlanForm from './TaskPlanForm.vue';
