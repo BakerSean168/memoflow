@@ -1340,6 +1340,9 @@ importers:
       '@memoflow/task-contracts':
         specifier: workspace:*
         version: link:../task-contracts
+      '@memoflow/transport-contracts':
+        specifier: workspace:*
+        version: link:../transport-contracts
       '@modelcontextprotocol/node':
         specifier: 2.1.1
         version: 2.1.1(@modelcontextprotocol/server@2.3.1)
