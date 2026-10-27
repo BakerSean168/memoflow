@@ -2,8 +2,8 @@ import type { Component, InjectionKey, Ref } from 'vue';
 import type { DesktopAccessSnapshot } from '@memoflow/desktop-contracts';
 import type { ElectronBridge } from '@memoflow/ipc-client';
 import type { ResultErrorTranslateFn } from '@memoflow/http-client';
-import type { CloudAuthClientPort } from '@memoflow/contracts/cloud-auth';
-import type { ExternalAgentClientPort } from '@memoflow/contracts/agent-gateway';
+import type { CloudAuthClientPort } from '@memoflow/cloud-auth-contracts';
+import type { ExternalAgentClientPort } from '@memoflow/agent-gateway';
 import type { AccountClientPort } from '@memoflow/account-client';
 
 /** Translation helper signature owned by the host i18n platform. */
