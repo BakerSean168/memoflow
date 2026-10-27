@@ -1,6 +1,6 @@
 import { computed, type MaybeRefOrGetter, toValue } from 'vue';
 import { useQuery } from '@tanstack/vue-query';
-import type { GetTaskWorkspaceReq } from '@memoflow/workspace-contracts';
+import type { GetTaskWorkspaceReq } from '@memoflow/task-workspace-contracts';
 import { taskUiHost } from '../task-ui-host';
 
 export function useTaskPlanWorkspaceQuery(

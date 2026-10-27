@@ -1,5 +1,5 @@
 {
-  "name": "@memoflow/workspace-contracts",
+  "name": "@memoflow/task-workspace-contracts",
   "version": "0.0.1",
   "private": true,
   "type": "module",

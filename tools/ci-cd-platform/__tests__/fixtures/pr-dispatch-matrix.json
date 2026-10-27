@@ -919,6 +919,7 @@
             "goal-contracts",
             "goal-core",
             "goal-ui",
+            "goal-workspace-contracts",
             "governance-tools",
             "host-runtime",
             "http-client",
@@ -959,14 +960,14 @@
             "task-client",
             "task-contracts",
             "task-ui",
+            "task-workspace-contracts",
             "time",
             "transport-contracts",
             "ui-core",
             "ui-storybook",
             "ui-vue-shadcn",
             "utils",
-            "web",
-            "workspace-contracts"
+            "web"
           ],
           "typecheck": [
             "@memoflow/test-utils",
@@ -995,6 +996,7 @@
             "goal-contracts",
             "goal-core",
             "goal-ui",
+            "goal-workspace-contracts",
             "host-runtime",
             "http-client",
             "ipc-client",
@@ -1035,6 +1037,7 @@
             "task-client",
             "task-contracts",
             "task-ui",
+            "task-workspace-contracts",
             "time",
             "transport-contracts",
             "ui-core",
@@ -1042,8 +1045,7 @@
             "ui-storybook",
             "ui-vue-shadcn",
             "utils",
-            "web",
-            "workspace-contracts"
+            "web"
           ],
           "test": [
             "account",
@@ -1071,6 +1073,7 @@
             "goal-contracts",
             "goal-core",
             "goal-ui",
+            "goal-workspace-contracts",
             "governance-tools",
             "host-runtime",
             "http-client",
@@ -1112,14 +1115,14 @@
             "task-client",
             "task-contracts",
             "task-ui",
+            "task-workspace-contracts",
             "test-system-v2",
             "time",
             "transport-contracts",
             "ui-core",
             "ui-vue-shadcn",
             "utils",
-            "web",
-            "workspace-contracts"
+            "web"
           ],
           "test:contract": [
             "account-client",
@@ -1133,6 +1136,7 @@
             "desktop-contracts",
             "goal-contracts",
             "goal-ui",
+            "goal-workspace-contracts",
             "host-runtime",
             "label-contracts",
             "notification-client",
@@ -1154,8 +1158,8 @@
             "task-client",
             "task-contracts",
             "task-ui",
-            "transport-contracts",
-            "workspace-contracts"
+            "task-workspace-contracts",
+            "transport-contracts"
           ],
           "test:smoke": ["api"],
           "test:integration": [
@@ -1266,6 +1270,7 @@
             "goal-contracts:build",
             "goal-core:build",
             "goal-ui:build",
+            "goal-workspace-contracts:build",
             "host-runtime:build",
             "http-client:build",
             "ipc-client:build",
@@ -1305,6 +1310,7 @@
             "task-client:build",
             "task-contracts:build",
             "task-ui:build",
+            "task-workspace-contracts:build",
             "time:build",
             "transport-contracts:build",
             "ui-core:build",
@@ -1312,7 +1318,6 @@
             "ui-vue-shadcn:build",
             "utils:build",
             "web:build",
-            "workspace-contracts:build",
             "@memoflow/test-utils:typecheck",
             "account:typecheck",
             "account-client:typecheck",
@@ -1339,6 +1344,7 @@
             "goal-contracts:typecheck",
             "goal-core:typecheck",
             "goal-ui:typecheck",
+            "goal-workspace-contracts:typecheck",
             "host-runtime:typecheck",
             "http-client:typecheck",
             "ipc-client:typecheck",
@@ -1379,6 +1385,7 @@
             "task-client:typecheck",
             "task-contracts:typecheck",
             "task-ui:typecheck",
+            "task-workspace-contracts:typecheck",
             "time:typecheck",
             "transport-contracts:typecheck",
             "ui-core:typecheck",
@@ -1387,7 +1394,6 @@
             "ui-vue-shadcn:typecheck",
             "utils:typecheck",
             "web:typecheck",
-            "workspace-contracts:typecheck",
             "database:runtime-scripts:build"
           ],
           "web-unit-1": ["web:test", "app-vue:test#1/2"],
@@ -1425,6 +1431,7 @@
             "desktop-contracts:test:contract",
             "goal-contracts:test:contract",
             "goal-ui:test:contract",
+            "goal-workspace-contracts:test:contract",
             "host-runtime:test:contract",
             "label-contracts:test:contract",
             "notification-client:test:contract",
@@ -1446,8 +1453,8 @@
             "task-client:test:contract",
             "task-contracts:test:contract",
             "task-ui:test:contract",
-            "transport-contracts:test:contract",
-            "workspace-contracts:test:contract"
+            "task-workspace-contracts:test:contract",
+            "transport-contracts:test:contract"
           ]
         },
         "serverShards": [
@@ -1606,6 +1613,7 @@
             "goal-contracts",
             "goal-core",
             "goal-ui",
+            "goal-workspace-contracts",
             "governance-tools",
             "host-runtime",
             "http-client",
@@ -1646,14 +1654,14 @@
             "task-client",
             "task-contracts",
             "task-ui",
+            "task-workspace-contracts",
             "time",
             "transport-contracts",
             "ui-core",
             "ui-storybook",
             "ui-vue-shadcn",
             "utils",
-            "web",
-            "workspace-contracts"
+            "web"
           ],
           "typecheck": [
             "@memoflow/test-utils",
@@ -1682,6 +1690,7 @@
             "goal-contracts",
             "goal-core",
             "goal-ui",
+            "goal-workspace-contracts",
             "host-runtime",
             "http-client",
             "ipc-client",
@@ -1722,6 +1731,7 @@
             "task-client",
             "task-contracts",
             "task-ui",
+            "task-workspace-contracts",
             "time",
             "transport-contracts",
             "ui-core",
@@ -1729,8 +1739,7 @@
             "ui-storybook",
             "ui-vue-shadcn",
             "utils",
-            "web",
-            "workspace-contracts"
+            "web"
           ],
           "test": [
             "account",
@@ -1758,6 +1767,7 @@
             "goal-contracts",
             "goal-core",
             "goal-ui",
+            "goal-workspace-contracts",
             "governance-tools",
             "host-runtime",
             "http-client",
@@ -1799,14 +1809,14 @@
             "task-client",
             "task-contracts",
             "task-ui",
+            "task-workspace-contracts",
             "test-system-v2",
             "time",
             "transport-contracts",
             "ui-core",
             "ui-vue-shadcn",
             "utils",
-            "web",
-            "workspace-contracts"
+            "web"
           ],
           "test:contract": [
             "account-client",
@@ -1820,6 +1830,7 @@
             "desktop-contracts",
             "goal-contracts",
             "goal-ui",
+            "goal-workspace-contracts",
             "host-runtime",
             "label-contracts",
             "notification-client",
@@ -1841,8 +1852,8 @@
             "task-client",
             "task-contracts",
             "task-ui",
-            "transport-contracts",
-            "workspace-contracts"
+            "task-workspace-contracts",
+            "transport-contracts"
           ],
           "test:smoke": ["api"],
           "test:integration": [
@@ -1953,6 +1964,7 @@
             "goal-contracts:build",
             "goal-core:build",
             "goal-ui:build",
+            "goal-workspace-contracts:build",
             "host-runtime:build",
             "http-client:build",
             "ipc-client:build",
@@ -1992,6 +2004,7 @@
             "task-client:build",
             "task-contracts:build",
             "task-ui:build",
+            "task-workspace-contracts:build",
             "time:build",
             "transport-contracts:build",
             "ui-core:build",
@@ -1999,7 +2012,6 @@
             "ui-vue-shadcn:build",
             "utils:build",
             "web:build",
-            "workspace-contracts:build",
             "@memoflow/test-utils:typecheck",
             "account:typecheck",
             "account-client:typecheck",
@@ -2026,6 +2038,7 @@
             "goal-contracts:typecheck",
             "goal-core:typecheck",
             "goal-ui:typecheck",
+            "goal-workspace-contracts:typecheck",
             "host-runtime:typecheck",
             "http-client:typecheck",
             "ipc-client:typecheck",
@@ -2066,6 +2079,7 @@
             "task-client:typecheck",
             "task-contracts:typecheck",
             "task-ui:typecheck",
+            "task-workspace-contracts:typecheck",
             "time:typecheck",
             "transport-contracts:typecheck",
             "ui-core:typecheck",
@@ -2074,7 +2088,6 @@
             "ui-vue-shadcn:typecheck",
             "utils:typecheck",
             "web:typecheck",
-            "workspace-contracts:typecheck",
             "database:runtime-scripts:build"
           ],
           "web-unit-1": ["web:test", "app-vue:test#1/2"],
@@ -2113,6 +2126,7 @@
             "desktop-contracts:test:contract",
             "goal-contracts:test:contract",
             "goal-ui:test:contract",
+            "goal-workspace-contracts:test:contract",
             "host-runtime:test:contract",
             "label-contracts:test:contract",
             "notification-client:test:contract",
@@ -2134,8 +2148,8 @@
             "task-client:test:contract",
             "task-contracts:test:contract",
             "task-ui:test:contract",
-            "transport-contracts:test:contract",
-            "workspace-contracts:test:contract"
+            "task-workspace-contracts:test:contract",
+            "transport-contracts:test:contract"
           ]
         },
         "serverShards": [
@@ -3557,6 +3571,7 @@
             "goal-contracts",
             "goal-core",
             "goal-ui",
+            "goal-workspace-contracts",
             "governance-tools",
             "host-runtime",
             "http-client",
@@ -3597,14 +3612,14 @@
             "task-client",
             "task-contracts",
             "task-ui",
+            "task-workspace-contracts",
             "time",
             "transport-contracts",
             "ui-core",
             "ui-storybook",
             "ui-vue-shadcn",
             "utils",
-            "web",
-            "workspace-contracts"
+            "web"
           ],
           "typecheck": [
             "@memoflow/test-utils",
@@ -3633,6 +3648,7 @@
             "goal-contracts",
             "goal-core",
             "goal-ui",
+            "goal-workspace-contracts",
             "host-runtime",
             "http-client",
             "ipc-client",
@@ -3673,6 +3689,7 @@
             "task-client",
             "task-contracts",
             "task-ui",
+            "task-workspace-contracts",
             "time",
             "transport-contracts",
             "ui-core",
@@ -3680,8 +3697,7 @@
             "ui-storybook",
             "ui-vue-shadcn",
             "utils",
-            "web",
-            "workspace-contracts"
+            "web"
           ],
           "test": [
             "account",
@@ -3709,6 +3725,7 @@
             "goal-contracts",
             "goal-core",
             "goal-ui",
+            "goal-workspace-contracts",
             "governance-tools",
             "host-runtime",
             "http-client",
@@ -3750,14 +3767,14 @@
             "task-client",
             "task-contracts",
             "task-ui",
+            "task-workspace-contracts",
             "test-system-v2",
             "time",
             "transport-contracts",
             "ui-core",
             "ui-vue-shadcn",
             "utils",
-            "web",
-            "workspace-contracts"
+            "web"
           ],
           "test:contract": [
             "account-client",
@@ -3771,6 +3788,7 @@
             "desktop-contracts",
             "goal-contracts",
             "goal-ui",
+            "goal-workspace-contracts",
             "host-runtime",
             "label-contracts",
             "notification-client",
@@ -3792,8 +3810,8 @@
             "task-client",
             "task-contracts",
             "task-ui",
-            "transport-contracts",
-            "workspace-contracts"
+            "task-workspace-contracts",
+            "transport-contracts"
           ],
           "test:smoke": ["api"],
           "test:integration": [
@@ -3904,6 +3922,7 @@
             "goal-contracts:build",
             "goal-core:build",
             "goal-ui:build",
+            "goal-workspace-contracts:build",
             "host-runtime:build",
             "http-client:build",
             "ipc-client:build",
@@ -3943,6 +3962,7 @@
             "task-client:build",
             "task-contracts:build",
             "task-ui:build",
+            "task-workspace-contracts:build",
             "time:build",
             "transport-contracts:build",
             "ui-core:build",
@@ -3950,7 +3970,6 @@
             "ui-vue-shadcn:build",
             "utils:build",
             "web:build",
-            "workspace-contracts:build",
             "@memoflow/test-utils:typecheck",
             "account:typecheck",
             "account-client:typecheck",
@@ -3977,6 +3996,7 @@
             "goal-contracts:typecheck",
             "goal-core:typecheck",
             "goal-ui:typecheck",
+            "goal-workspace-contracts:typecheck",
             "host-runtime:typecheck",
             "http-client:typecheck",
             "ipc-client:typecheck",
@@ -4017,6 +4037,7 @@
             "task-client:typecheck",
             "task-contracts:typecheck",
             "task-ui:typecheck",
+            "task-workspace-contracts:typecheck",
             "time:typecheck",
             "transport-contracts:typecheck",
             "ui-core:typecheck",
@@ -4025,7 +4046,6 @@
             "ui-vue-shadcn:typecheck",
             "utils:typecheck",
             "web:typecheck",
-            "workspace-contracts:typecheck",
             "database:runtime-scripts:build"
           ],
           "web-unit-1": ["web:test", "app-vue:test#1/2"],
@@ -4063,6 +4083,7 @@
             "desktop-contracts:test:contract",
             "goal-contracts:test:contract",
             "goal-ui:test:contract",
+            "goal-workspace-contracts:test:contract",
             "host-runtime:test:contract",
             "label-contracts:test:contract",
             "notification-client:test:contract",
@@ -4084,8 +4105,8 @@
             "task-client:test:contract",
             "task-contracts:test:contract",
             "task-ui:test:contract",
-            "transport-contracts:test:contract",
-            "workspace-contracts:test:contract"
+            "task-workspace-contracts:test:contract",
+            "transport-contracts:test:contract"
           ]
         },
         "serverShards": [

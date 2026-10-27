@@ -18,7 +18,7 @@ import type {
   AbandonTaskPlanReq,
   TaskPlanOccurrencesQuery,
 } from '@memoflow/task-contracts';
-import type { GetTaskWorkspaceReq, TaskPlanWorkspace } from '@memoflow/workspace-contracts';
+import type { GetTaskWorkspaceReq, TaskPlanWorkspace } from '@memoflow/task-workspace-contracts';
 
 export interface TaskPlanListParams extends Record<string, unknown>, ListTaskPlanFilters {
   page?: number;

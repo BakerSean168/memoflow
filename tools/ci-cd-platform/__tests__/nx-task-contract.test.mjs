@@ -445,6 +445,7 @@ test('Unit/Contract aliases come from exact Nx execution configuration, not proj
     'desktop-contracts',
     'goal-contracts',
     'goal-ui',
+    'goal-workspace-contracts',
     'host-runtime',
     'label-contracts',
     'notification-client',
@@ -466,7 +467,7 @@ test('Unit/Contract aliases come from exact Nx execution configuration, not proj
     'task-client',
     'task-contracts',
     'task-ui',
+    'task-workspace-contracts',
     'transport-contracts',
-    'workspace-contracts',
   ]);
 });

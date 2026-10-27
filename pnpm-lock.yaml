@@ -353,6 +353,9 @@ importers:
       '@memoflow/goal-contracts':
         specifier: workspace:*
         version: link:../../packages/goal-contracts
+      '@memoflow/goal-workspace-contracts':
+        specifier: workspace:*
+        version: link:../../packages/goal-workspace-contracts
       '@memoflow/host-runtime':
         specifier: workspace:*
         version: link:../../packages/host-runtime
@@ -425,15 +428,15 @@ importers:
       '@memoflow/task-contracts':
         specifier: workspace:*
         version: link:../../packages/task-contracts
+      '@memoflow/task-workspace-contracts':
+        specifier: workspace:*
+        version: link:../../packages/task-workspace-contracts
       '@memoflow/transport-contracts':
         specifier: workspace:*
         version: link:../../packages/transport-contracts
       '@memoflow/utils':
         specifier: workspace:*
         version: link:../../packages/utils
-      '@memoflow/workspace-contracts':
-        specifier: workspace:*
-        version: link:../../packages/workspace-contracts
       '@opentelemetry/api':
         specifier: ^1.9.1
         version: 1.9.1
@@ -624,6 +627,9 @@ importers:
       '@memoflow/goal-ui':
         specifier: workspace:*
         version: link:../../packages/goal-ui
+      '@memoflow/goal-workspace-contracts':
+        specifier: workspace:*
+        version: link:../../packages/goal-workspace-contracts
       '@memoflow/host-runtime':
         specifier: workspace:*
         version: link:../../packages/host-runtime
@@ -726,6 +732,9 @@ importers:
       '@memoflow/task-ui':
         specifier: workspace:*
         version: link:../../packages/task-ui
+      '@memoflow/task-workspace-contracts':
+        specifier: workspace:*
+        version: link:../../packages/task-workspace-contracts
       '@memoflow/transport-contracts':
         specifier: workspace:*
         version: link:../../packages/transport-contracts
@@ -735,9 +744,6 @@ importers:
       '@memoflow/utils':
         specifier: workspace:*
         version: link:../../packages/utils
-      '@memoflow/workspace-contracts':
-        specifier: workspace:*
-        version: link:../../packages/workspace-contracts
       '@powersync/common':
         specifier: 2.3.0
         version: 2.3.0
@@ -1641,6 +1647,9 @@ importers:
       '@memoflow/goal-contracts':
         specifier: workspace:*
         version: link:../goal-contracts
+      '@memoflow/goal-workspace-contracts':
+        specifier: workspace:*
+        version: link:../goal-workspace-contracts
       '@memoflow/http-client':
         specifier: workspace:*
         version: link:../http-client
@@ -1665,6 +1674,9 @@ importers:
       '@memoflow/task-contracts':
         specifier: workspace:*
         version: link:../task-contracts
+      '@memoflow/task-workspace-contracts':
+        specifier: workspace:*
+        version: link:../task-workspace-contracts
       '@memoflow/time':
         specifier: workspace:*
         version: link:../time
@@ -1677,9 +1689,6 @@ importers:
       '@memoflow/utils':
         specifier: workspace:*
         version: link:../utils
-      '@memoflow/workspace-contracts':
-        specifier: workspace:*
-        version: link:../workspace-contracts
       '@tanstack/vue-query':
         specifier: 5.103.2
         version: 5.103.2(vue@3.5.43(@typescript/typescript6@6.0.2))
@@ -1768,6 +1777,9 @@ importers:
       '@memoflow/goal-contracts':
         specifier: workspace:*
         version: link:../goal-contracts
+      '@memoflow/goal-workspace-contracts':
+        specifier: workspace:*
+        version: link:../goal-workspace-contracts
       '@memoflow/http-client':
         specifier: workspace:*
         version: link:../http-client
@@ -1819,9 +1831,6 @@ importers:
       '@memoflow/ui-react-native':
         specifier: workspace:*
         version: link:../ui-react-native
-      '@memoflow/workspace-contracts':
-        specifier: workspace:*
-        version: link:../workspace-contracts
     devDependencies:
       expo:
         specifier: ~57.0.25
@@ -1925,6 +1934,9 @@ importers:
       '@memoflow/goal-ui':
         specifier: workspace:*
         version: link:../goal-ui
+      '@memoflow/goal-workspace-contracts':
+        specifier: workspace:*
+        version: link:../goal-workspace-contracts
       '@memoflow/http-client':
         specifier: workspace:*
         version: link:../http-client
@@ -2006,6 +2018,9 @@ importers:
       '@memoflow/task-ui':
         specifier: workspace:*
         version: link:../task-ui
+      '@memoflow/task-workspace-contracts':
+        specifier: workspace:*
+        version: link:../task-workspace-contracts
       '@memoflow/time':
         specifier: workspace:*
         version: link:../time
@@ -2018,9 +2033,6 @@ importers:
       '@memoflow/utils':
         specifier: workspace:*
         version: link:../utils
-      '@memoflow/workspace-contracts':
-        specifier: workspace:*
-        version: link:../workspace-contracts
       '@tanstack/vue-query':
         specifier: 5.103.2
         version: 5.103.2(vue@3.5.43(@typescript/typescript6@6.0.2))
@@ -2298,6 +2310,9 @@ importers:
       '@memoflow/goal-core':
         specifier: workspace:*
         version: link:../goal-core
+      '@memoflow/goal-workspace-contracts':
+        specifier: workspace:*
+        version: link:../goal-workspace-contracts
       '@memoflow/host-runtime':
         specifier: workspace:*
         version: link:../host-runtime
@@ -2337,9 +2352,6 @@ importers:
       '@memoflow/utils':
         specifier: workspace:*
         version: link:../utils
-      '@memoflow/workspace-contracts':
-        specifier: workspace:*
-        version: link:../workspace-contracts
       express:
         specifier: ^5.2.1
         version: 5.2.1(supports-color@10.2.2)
@@ -2365,6 +2377,9 @@ importers:
       '@memoflow/goal-core':
         specifier: workspace:*
         version: link:../goal-core
+      '@memoflow/goal-workspace-contracts':
+        specifier: workspace:*
+        version: link:../goal-workspace-contracts
       '@memoflow/http-client':
         specifier: workspace:*
         version: link:../http-client
@@ -2380,9 +2395,6 @@ importers:
       '@memoflow/transport-contracts':
         specifier: workspace:*
         version: link:../transport-contracts
-      '@memoflow/workspace-contracts':
-        specifier: workspace:*
-        version: link:../workspace-contracts
 
   packages/goal-contracts:
     dependencies:
@@ -2429,6 +2441,9 @@ importers:
       '@memoflow/goal-contracts':
         specifier: workspace:*
         version: link:../goal-contracts
+      '@memoflow/goal-workspace-contracts':
+        specifier: workspace:*
+        version: link:../goal-workspace-contracts
       '@memoflow/http-client':
         specifier: workspace:*
         version: link:../http-client
@@ -2456,9 +2471,6 @@ importers:
       '@memoflow/utils':
         specifier: workspace:*
         version: link:../utils
-      '@memoflow/workspace-contracts':
-        specifier: workspace:*
-        version: link:../workspace-contracts
       '@tanstack/vue-query':
         specifier: 5.103.2
         version: 5.103.2(vue@3.5.43(@typescript/typescript6@6.0.2))
@@ -2505,6 +2517,24 @@ importers:
       vite-plugin-dts:
         specifier: 5.1.1
         version: 5.1.1(@typescript/typescript6@6.0.2)(@vue/language-core@3.3.11)(esbuild@0.28.1)(rolldown@1.2.9)(rollup@4.57.1)(supports-color@10.2.2)(vite@8.3.1(@types/node@24.13.3)(esbuild@0.28.1)(jiti@2.7.0)(sass-embedded@1.105.0)(sass@1.105.0)(stylus@0.57.0(supports-color@10.2.2))(terser@5.46.1)(tsx@4.23.15)(yaml@2.9.0))
+
+  packages/goal-workspace-contracts:
+    dependencies:
+      '@memoflow/goal-contracts':
+        specifier: workspace:*
+        version: link:../goal-contracts
+      '@memoflow/repository-contracts':
+        specifier: workspace:*
+        version: link:../repository-contracts
+      '@memoflow/shared-primitives':
+        specifier: workspace:*
+        version: link:../shared-primitives
+      '@memoflow/task-contracts':
+        specifier: workspace:*
+        version: link:../task-contracts
+      zod:
+        specifier: ^4.6.5
+        version: 4.6.5
 
   packages/host-runtime:
     dependencies:
@@ -3647,6 +3677,9 @@ importers:
       '@memoflow/task-contracts':
         specifier: workspace:*
         version: link:../task-contracts
+      '@memoflow/task-workspace-contracts':
+        specifier: workspace:*
+        version: link:../task-workspace-contracts
       '@memoflow/time':
         specifier: workspace:*
         version: link:../time
@@ -3656,9 +3689,6 @@ importers:
       '@memoflow/utils':
         specifier: workspace:*
         version: link:../utils
-      '@memoflow/workspace-contracts':
-        specifier: workspace:*
-        version: link:../workspace-contracts
       date-fns:
         specifier: ^4.4.0
         version: 4.4.0
@@ -3705,15 +3735,15 @@ importers:
       '@memoflow/task-contracts':
         specifier: workspace:*
         version: link:../task-contracts
+      '@memoflow/task-workspace-contracts':
+        specifier: workspace:*
+        version: link:../task-workspace-contracts
       '@memoflow/transport-contracts':
         specifier: workspace:*
         version: link:../transport-contracts
       '@memoflow/utils':
         specifier: workspace:*
         version: link:../utils
-      '@memoflow/workspace-contracts':
-        specifier: workspace:*
-        version: link:../workspace-contracts
 
   packages/task-contracts:
     dependencies:
@@ -3766,6 +3796,9 @@ importers:
       '@memoflow/task-contracts':
         specifier: workspace:*
         version: link:../task-contracts
+      '@memoflow/task-workspace-contracts':
+        specifier: workspace:*
+        version: link:../task-workspace-contracts
       '@memoflow/time':
         specifier: workspace:*
         version: link:../time
@@ -3778,9 +3811,6 @@ importers:
       '@memoflow/utils':
         specifier: workspace:*
         version: link:../utils
-      '@memoflow/workspace-contracts':
-        specifier: workspace:*
-        version: link:../workspace-contracts
       '@tanstack/vue-query':
         specifier: 5.103.2
         version: 5.103.2(vue@3.5.43(@typescript/typescript6@6.0.2))
@@ -3824,6 +3854,27 @@ importers:
       vite-plugin-dts:
         specifier: 5.1.1
         version: 5.1.1(@typescript/typescript6@6.0.2)(@vue/language-core@3.3.11)(esbuild@0.28.1)(rolldown@1.2.9)(rollup@4.57.1)(supports-color@10.2.2)(vite@8.3.1(@types/node@24.13.3)(esbuild@0.28.1)(jiti@2.7.0)(sass-embedded@1.105.0)(sass@1.105.0)(stylus@0.57.0(supports-color@10.2.2))(terser@5.46.1)(tsx@4.23.15)(yaml@2.9.0))
+
+  packages/task-workspace-contracts:
+    dependencies:
+      '@memoflow/goal-contracts':
+        specifier: workspace:*
+        version: link:../goal-contracts
+      '@memoflow/label-contracts':
+        specifier: workspace:*
+        version: link:../label-contracts
+      '@memoflow/repository-contracts':
+        specifier: workspace:*
+        version: link:../repository-contracts
+      '@memoflow/shared-primitives':
+        specifier: workspace:*
+        version: link:../shared-primitives
+      '@memoflow/task-contracts':
+        specifier: workspace:*
+        version: link:../task-contracts
+      zod:
+        specifier: ^4.6.5
+        version: 4.6.5
 
   packages/test-utils:
     dependencies:
@@ -4081,27 +4132,6 @@ importers:
       typescript:
         specifier: npm:@typescript/typescript6@6.0.2
         version: '@typescript/typescript6@6.0.2'
-
-  packages/workspace-contracts:
-    dependencies:
-      '@memoflow/goal-contracts':
-        specifier: workspace:*
-        version: link:../goal-contracts
-      '@memoflow/label-contracts':
-        specifier: workspace:*
-        version: link:../label-contracts
-      '@memoflow/repository-contracts':
-        specifier: workspace:*
-        version: link:../repository-contracts
-      '@memoflow/shared-primitives':
-        specifier: workspace:*
-        version: link:../shared-primitives
-      '@memoflow/task-contracts':
-        specifier: workspace:*
-        version: link:../task-contracts
-      zod:
-        specifier: ^4.6.5
-        version: 4.6.5
 
 packages:
 

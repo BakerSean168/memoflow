@@ -203,8 +203,18 @@ const ipcWorkspaceAliasEntries = [
     replacement: resolve(import.meta.dirname, '../../packages/goal-contracts/src/index.ts'),
   },
   {
-    find: '@memoflow/workspace-contracts',
-    replacement: resolve(import.meta.dirname, '../../packages/workspace-contracts/src/index.ts'),
+    find: '@memoflow/goal-workspace-contracts',
+    replacement: resolve(
+      import.meta.dirname,
+      '../../packages/goal-workspace-contracts/src/index.ts',
+    ),
+  },
+  {
+    find: '@memoflow/task-workspace-contracts',
+    replacement: resolve(
+      import.meta.dirname,
+      '../../packages/task-workspace-contracts/src/index.ts',
+    ),
   },
   {
     find: '@memoflow/desktop-contracts/auth-context',

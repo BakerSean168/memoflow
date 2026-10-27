@@ -97,6 +97,11 @@ const featureScopeConstraints = [
 
 const moduleBoundaryDepConstraints = [
   {
+    // Workspace compositions may consume domain leaves, never each other or implementations.
+    sourceTag: 'contracts:workspace',
+    onlyDependOnLibsWithTags: ['contracts:workspace-leaf'],
+  },
+  {
     // shared: pure primitives, cannot depend on anything else
     sourceTag: 'layer:shared',
     onlyDependOnLibsWithTags: ['layer:shared'],

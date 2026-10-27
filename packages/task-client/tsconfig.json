@@ -14,8 +14,8 @@
       "@memoflow/task-contracts/*": ["../task-contracts/src/*.ts"],
       "@memoflow/utils": ["../utils/src/index.ts"],
       "@memoflow/utils/domain": ["../utils/src/domain/index.ts"],
-      "@memoflow/workspace-contracts": ["../workspace-contracts/src/index.ts"],
-      "@memoflow/workspace-contracts/*": ["../workspace-contracts/src/*.ts"]
+      "@memoflow/task-workspace-contracts": ["../task-workspace-contracts/src/index.ts"],
+      "@memoflow/task-workspace-contracts/*": ["../task-workspace-contracts/src/*.ts"]
     }
   },
   "include": ["src"],

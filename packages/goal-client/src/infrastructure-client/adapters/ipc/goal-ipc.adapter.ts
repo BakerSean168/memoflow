@@ -40,7 +40,7 @@ import type {
   GoalWorkspaceTaskPageRequest,
   GoalWorkspacePageRequest,
   GoalWorkspaceKnowledgePage,
-} from '@memoflow/workspace-contracts';
+} from '@memoflow/goal-workspace-contracts';
 import type { TaskGoalContextPage } from '@memoflow/task-contracts';
 
 export class GoalIpcAdapter implements IGoalApiClient {

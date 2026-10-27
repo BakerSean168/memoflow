@@ -55,7 +55,7 @@
     "@memoflow/task-contracts": "workspace:*",
     "@memoflow/time": "workspace:*",
     "@memoflow/utils": "workspace:*",
-    "@memoflow/workspace-contracts": "workspace:*",
+    "@memoflow/task-workspace-contracts": "workspace:*",
     "date-fns": "^4.4.0",
     "express": "^5.2.1",
     "zod": "^4.6.5",

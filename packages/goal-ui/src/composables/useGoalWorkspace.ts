@@ -6,7 +6,7 @@ import type {
   GoalWorkspacePageRequest,
   GoalWorkspaceReadModel,
   GoalWorkspaceTaskPageRequest,
-} from '@memoflow/workspace-contracts';
+} from '@memoflow/goal-workspace-contracts';
 import type { TaskGoalContextPage } from '@memoflow/task-contracts';
 import { presentErrorMessage } from '@memoflow/http-client';
 

@@ -82,6 +82,10 @@
         "checkDynamicDependenciesExceptions": ["@memoflow/database"],
         "depConstraints": [
           {
+            "sourceTag": "contracts:workspace",
+            "onlyDependOnLibsWithTags": ["contracts:workspace-leaf"]
+          },
+          {
             "sourceTag": "layer:shared",
             "onlyDependOnLibsWithTags": ["layer:shared"]
           },

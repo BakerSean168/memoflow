@@ -28,7 +28,7 @@
     "@memoflow/schedule-contracts": "workspace:*",
     "@memoflow/ai-contracts": "workspace:*",
     "@memoflow/task-client": "workspace:*",
-    "@memoflow/workspace-contracts": "workspace:*",
+    "@memoflow/goal-workspace-contracts": "workspace:*",
     "@memoflow/setting-client": "workspace:*",
     "@memoflow/schedule-client": "workspace:*",
     "@memoflow/time": "workspace:*",

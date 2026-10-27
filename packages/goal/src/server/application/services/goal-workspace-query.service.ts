@@ -7,7 +7,7 @@ import {
   GoalWorkspaceReadModelSchema,
   GoalWorkspaceTaskPageRequestSchema,
   type GoalWorkspaceKnowledgeItem,
-} from '@memoflow/workspace-contracts';
+} from '@memoflow/goal-workspace-contracts';
 import { TaskGoalContextPageSchema } from '@memoflow/task-contracts';
 import { error, ok } from '@memoflow/transport-contracts/result';
 import type { KnowledgeDocumentId } from '@memoflow/repository-contracts';

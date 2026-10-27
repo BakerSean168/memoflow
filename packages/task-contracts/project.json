@@ -3,7 +3,7 @@
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "projectType": "library",
   "sourceRoot": "packages/task-contracts/src",
-  "tags": ["scope:shared", "type:lib", "layer:shared", "tier:core"],
+  "tags": ["scope:shared", "type:lib", "layer:shared", "tier:core", "contracts:workspace-leaf"],
   "targets": {
     "typecheck": {
       "executor": "nx:run-commands",

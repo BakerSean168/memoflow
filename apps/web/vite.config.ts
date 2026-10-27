@@ -123,7 +123,8 @@ const webDevWorkspaceEntries = [
   ['@memoflow/setting-ui/host', 'packages/setting-ui/src/setting-ui-host.ts'],
   ['@memoflow/setting-ui', 'packages/setting-ui/src/index.ts'],
   ['@memoflow/goal-ui', 'packages/goal-ui/src/index.ts'],
-  ['@memoflow/workspace-contracts', 'packages/workspace-contracts/src/index.ts'],
+  ['@memoflow/goal-workspace-contracts', 'packages/goal-workspace-contracts/src/index.ts'],
+  ['@memoflow/task-workspace-contracts', 'packages/task-workspace-contracts/src/index.ts'],
   ['@memoflow/desktop-contracts/auth-context', 'packages/desktop-contracts/src/auth-context.ts'],
   ['@memoflow/desktop-contracts/database', 'packages/desktop-contracts/src/database.ts'],
   [

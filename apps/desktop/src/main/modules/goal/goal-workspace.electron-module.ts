@@ -9,7 +9,7 @@ import {
   GetGoalWorkspaceInvocationSchema,
   GoalWorkspaceKnowledgePageInvocationSchema,
   GoalWorkspaceTaskPageInvocationSchema,
-} from '@memoflow/workspace-contracts';
+} from '@memoflow/goal-workspace-contracts';
 import { fail } from '@memoflow/transport-contracts/result';
 import type { GoalWorkspaceApplicationPort } from '@memoflow/goal';
 

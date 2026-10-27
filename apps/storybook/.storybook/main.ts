@@ -173,7 +173,14 @@ const config: StorybookConfig = {
             ['@memoflow/repository-ui/host', 'packages/repository-ui/src/repository-ui-host.ts'],
             ['@memoflow/repository-ui', 'packages/repository-ui/src/index.ts'],
             ['@repository-ui-test-host', 'packages/app-vue/src'],
-            ['@memoflow/workspace-contracts', 'packages/workspace-contracts/src/index.ts'],
+            [
+              '@memoflow/goal-workspace-contracts',
+              'packages/goal-workspace-contracts/src/index.ts',
+            ],
+            [
+              '@memoflow/task-workspace-contracts',
+              'packages/task-workspace-contracts/src/index.ts',
+            ],
             [
               '@memoflow/desktop-contracts/auth-context',
               'packages/desktop-contracts/src/auth-context.ts',
