@@ -2869,6 +2869,9 @@ importers:
       '@memoflow/task-contracts':
         specifier: workspace:*
         version: link:../task-contracts
+      '@memoflow/transport-contracts':
+        specifier: workspace:*
+        version: link:../transport-contracts
       zod:
         specifier: ^4.6.5
         version: 4.6.5
