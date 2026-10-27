@@ -76,7 +76,6 @@ const PACKAGE_SPECIFIC_SUBPATHS = {
     './ai',
     './response',
     './result',
-    './data-portability',
     './shared',
     './primitives',
     './primitives/*',

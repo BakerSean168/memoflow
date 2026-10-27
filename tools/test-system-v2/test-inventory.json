@@ -6270,14 +6270,6 @@
       "measurementCollectors": []
     },
     {
-      "path": "packages/contracts/src/modules/data-portability/portable-v3-contract.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/contracts/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
       "path": "packages/contracts/src/modules/repository/aggregates/dual-registry.surface.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -6450,6 +6442,22 @@
       "primarySuite": "unit",
       "collectors": [
         "packages/contracts/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/data-portability-contracts/src/import-boundary.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/data-portability-contracts/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/data-portability-contracts/src/portable-v3-contract.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/data-portability-contracts/vitest.config.ts"
       ],
       "measurementCollectors": []
     },
@@ -12920,14 +12928,14 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 45
+      "fileCount": 44
     },
     {
       "id": "packages/data-portability-contracts/vitest.config.ts",
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 1
+      "fileCount": 3
     },
     {
       "id": "packages/data-portability/vitest.config.ts",
@@ -13945,7 +13953,7 @@
   "duplicate": [],
   "unexpected": [],
   "counts": {
-    "unit": 1124,
+    "unit": 1125,
     "integration": 58,
     "smoke": 3,
     "boundary-ipc": 6,
