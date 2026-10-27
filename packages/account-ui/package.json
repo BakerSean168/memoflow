@@ -1,0 +1,39 @@
+{
+  "name": "@memoflow/account-ui",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./host": {
+      "types": "./dist/account-ui-host.d.ts",
+      "import": "./dist/host.js"
+    }
+  },
+  "dependencies": {
+    "@lucide/vue": "^1.48.0",
+    "@memoflow/account-client": "workspace:*",
+    "@memoflow/account-contracts": "workspace:*",
+    "@memoflow/contracts": "workspace:*",
+    "@memoflow/desktop-contracts": "workspace:*",
+    "@memoflow/http-client": "workspace:*",
+    "@memoflow/ipc-client": "workspace:*",
+    "@memoflow/ui-vue-shadcn": "workspace:*",
+    "pinia": "^4.0.3",
+    "vue": "^3.5.43",
+    "vue-i18n": "^11.4.12",
+    "vue-router": "^5.3.1",
+    "vue-sonner": "^2.0.8"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-vue": "6.0.9",
+    "typescript": "npm:@typescript/typescript6@6.0.2",
+    "vite": "8.3.1",
+    "vite-plugin-dts": "5.1.1"
+  }
+}

@@ -7,6 +7,7 @@ export * from './keys';
 export type * from './types';
 export { defaultModuleCapsules } from './navigation';
 
+export { installAccountUiHost } from './account-ui-host';
 export { installGoalUiHost } from './goal-ui-host';
 export { installNotificationUiHost } from './notification-ui-host';
 

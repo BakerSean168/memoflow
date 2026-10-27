@@ -35,14 +35,6 @@
       "types": "./dist/router/index.d.ts",
       "import": "./dist/router/index.js"
     },
-    "./modules/authentication": {
-      "types": "./dist/modules/authentication/index.d.ts",
-      "import": "./dist/modules/authentication/index.js"
-    },
-    "./modules/account": {
-      "types": "./dist/modules/account/index.d.ts",
-      "import": "./dist/modules/account/index.js"
-    },
     "./modules/task": {
       "types": "./dist/modules/task/index.d.ts",
       "import": "./dist/modules/task/index.js"

@@ -42,16 +42,6 @@ vi.mock('@memoflow/schedule-ui', async (importOriginal) => ({
   }),
 }));
 
-vi.mock('../../modules/authentication/composables/useAuth', async () => {
-  const { ref: vueRef } = await import('vue');
-  return {
-    useAuth: () => ({
-      isAuthenticated: vueRef(false),
-      logout: vi.fn(async () => undefined),
-    }),
-  };
-});
-
 vi.mock('../../shared/composables/useDesktopWindowControls', () => ({
   useDesktopWindowControls: () => ({
     windowControlsState: { isMaximized: false },

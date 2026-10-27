@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import enUS from '../../../locales/en-US';
-import zhCN from '../../../locales/zh-CN';
+import enUS from '@account-ui-test-host/locales/en-US';
+import zhCN from '@account-ui-test-host/locales/zh-CN';
 
 describe('account logout production locale contract', () => {
   it.each([

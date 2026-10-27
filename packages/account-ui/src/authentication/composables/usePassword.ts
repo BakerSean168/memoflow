@@ -19,19 +19,17 @@ import { useI18n } from 'vue-i18n';
 import type { CloudAuthClientPort } from '@memoflow/contracts/cloud-auth';
 import { useAuthenticationStore } from '../stores/authentication-store';
 import { buildPasswordMutationErrorReceipt } from './reportAuthOperationFailure';
-import { AUTH_SERVICE_KEY } from '../../../di/keys';
-import { useStrictInject } from '../../../shared/utils/useStrictInject';
-import { translateResultError } from '../../../shared/utils/translate-result-error';
+import { accountUiHost } from '../../account-ui-host';
 
 export function usePassword() {
   const store = useAuthenticationStore();
-  const service = useStrictInject(AUTH_SERVICE_KEY, 'AuthService');
+  const service = accountUiHost.useStrictInject(accountUiHost.AUTH_SERVICE_KEY, 'AuthService');
   const { t } = useI18n();
 
   const isLoading = ref(false);
 
   function getPasswordErrorMessage(error: unknown, fallbackKey: string) {
-    return translateResultError(error, t, {
+    return accountUiHost.translateResultError(error, t, {
       scope: 'auth',
       fallbackKey,
     });

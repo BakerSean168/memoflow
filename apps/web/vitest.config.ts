@@ -12,8 +12,7 @@ const sharedConfig = createSharedConfig({
   aliasEntries: createUiVueSourceAliasEntries(workspaceRoot),
   aliases: {
     '@memoflow/app-vue': '../../packages/app-vue/src/index.ts',
-    '@memoflow/app-vue/modules/authentication':
-      '../../packages/app-vue/src/modules/authentication/index.ts',
+    '@memoflow/account-ui': '../../packages/account-ui/src/index.ts',
     '@memoflow/app-vue/web-core': '../../packages/app-vue/src/web-core.ts',
     '@memoflow/app-vue/web-shell-core': '../../packages/app-vue/src/web-shell-core.ts',
     '@memoflow/app-vue/web-overlays': '../../packages/app-vue/src/web-overlays.ts',

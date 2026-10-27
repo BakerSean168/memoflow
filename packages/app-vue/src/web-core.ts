@@ -25,6 +25,6 @@ export {
 
 export { defaultModuleCapsules } from './di/navigation';
 
-export { useAuthenticationStore } from './modules/authentication/stores/authentication-store';
+export { useAuthenticationStore } from '@memoflow/account-ui';
 
 export { createGoalDraftCheckpointStore } from '@memoflow/goal-ui';

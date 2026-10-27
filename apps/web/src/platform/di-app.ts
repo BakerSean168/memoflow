@@ -1,4 +1,5 @@
 import {
+  installAccountUiHost,
   installGoalUiHost,
   installNotificationUiHost,
   installRoutineUiHost,
@@ -136,6 +137,7 @@ const taskService = createLazyService(async () => {
 });
 
 export function installAppServices(app: App): void {
+  installAccountUiHost();
   installGoalUiHost();
   installNotificationUiHost();
   installRoutineUiHost();

@@ -25,25 +25,20 @@ import {
   Switch,
   useConfirm,
 } from '@memoflow/ui-vue-shadcn';
-import { SettingsDangerZone, SettingsSection } from '../../../components/shared/settings';
+import { accountUiHost } from '../../account-ui-host';
 import { LockKeyhole, LogOut } from '@lucide/vue';
 import { toast } from 'vue-sonner';
 import { useAccount } from '../composables/useAccount';
 import { useAuthenticationStore } from '../../authentication/stores/authentication-store';
 import { ProfileAccessChannels } from '@memoflow/contracts/electron';
-import {
-  DESKTOP_ACCESS_SNAPSHOT_KEY,
-  DESKTOP_BRIDGE_KEY,
-  LOGOUT_HANDLER_KEY,
-  PROFILE_LOCK_HANDLER_KEY,
-} from '../../../di/keys';
-import { translateResultError } from '../../../shared/utils/translate-result-error';
+
 
 const { t } = useI18n();
-const logout = inject(LOGOUT_HANDLER_KEY);
-const lockProfile = inject(PROFILE_LOCK_HANDLER_KEY, null);
-const desktopBridge = inject(DESKTOP_BRIDGE_KEY, null);
-const desktopAccess = inject(DESKTOP_ACCESS_SNAPSHOT_KEY, ref(null));
+const { SettingsDangerZone, SettingsSection } = accountUiHost.components;
+const logout = inject(accountUiHost.LOGOUT_HANDLER_KEY);
+const lockProfile = inject(accountUiHost.PROFILE_LOCK_HANDLER_KEY, null);
+const desktopBridge = inject(accountUiHost.DESKTOP_BRIDGE_KEY, null);
+const desktopAccess = inject(accountUiHost.DESKTOP_ACCESS_SNAPSHOT_KEY, ref(null));
 const authStore = useAuthenticationStore();
 const pinSetupOpen = ref(false);
 const localPin = ref('');
@@ -118,7 +113,7 @@ async function handleLogout() {
     toast.success(t('auth.toast.loggedOut'));
   } catch (error) {
     toast.error(t('auth.toast.operationFailed'), {
-      description: translateResultError(error, t, {
+      description: accountUiHost.translateResultError(error, t, {
         fallbackKey: 'common.operationFailed',
       }),
     });

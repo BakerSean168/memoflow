@@ -7,7 +7,7 @@ import type { DesktopCloudConnectionAttempt } from '@memoflow/contracts/cloud-au
 import { ok } from '@memoflow/contracts/result';
 import { SystemChannels, WindowChannels } from '@memoflow/contracts/electron';
 import { DESKTOP_BRIDGE_KEY, DESKTOP_CLOUD_AUTH_SERVICE_KEY } from '../../di/keys';
-import { useAuthenticationStore } from '../../modules/authentication/stores/authentication-store';
+import { useAuthenticationStore } from '@memoflow/account-ui';
 import CloudConnectionDialog from './CloudConnectionDialog.vue';
 
 const attempt: DesktopCloudConnectionAttempt = {

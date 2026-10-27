@@ -108,11 +108,8 @@ vi.mock('@memoflow/app-vue/router', () => ({
   createAppRouter: mocks.createAppRouter,
 }));
 
-vi.mock('@memoflow/app-vue/modules/authentication', () => ({
+vi.mock('@memoflow/account-ui', () => ({
   useAuthenticationStore: mocks.useAuthenticationStore,
-}));
-
-vi.mock('@memoflow/app-vue/modules/account', () => ({
   useAccountStore: vi.fn(() => mocks.accountStore),
 }));
 

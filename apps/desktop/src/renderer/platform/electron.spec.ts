@@ -37,7 +37,7 @@ vi.mock('./server-state', async (importOriginal) => {
   };
 });
 
-vi.mock('@memoflow/app-vue/modules/account', () => ({
+vi.mock('@memoflow/account-ui', () => ({
   useAccountStore: () => ({ getCurrentAccountId: 'profile-1', setInitialized: vi.fn() }),
 }));
 

@@ -8,7 +8,7 @@
 import type { App } from 'vue';
 import { RendererEventChannels } from '@memoflow/contracts/electron';
 
-import { useAccountStore } from '@memoflow/app-vue/modules/account';
+import { useAccountStore } from '@memoflow/account-ui';
 import { useGoalStore } from '@memoflow/goal-ui';
 import { useTaskStore } from '@memoflow/app-vue/modules/task';
 import { useScheduleStore } from '@memoflow/schedule-ui';

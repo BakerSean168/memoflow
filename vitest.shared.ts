@@ -253,6 +253,7 @@ export function createSharedConfig(options: SharedConfigOptions) {
     'account',
     'account-client',
     'account-contracts',
+    'account-ui',
     'agent-gateway',
     'ai',
     'app-vue',

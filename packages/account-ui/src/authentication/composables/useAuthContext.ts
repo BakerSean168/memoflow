@@ -1,19 +1,16 @@
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
-import type { CloudAuthResponse } from '@memoflow/contracts/cloud-auth';
+import type { CloudAuthClientPort, CloudAuthResponse } from '@memoflow/contracts/cloud-auth';
 import type { ResultError } from '@memoflow/contracts/result';
-import type { IAuthService } from '../../../di/types';
 import { useAuthenticationStore } from '../stores/authentication-store';
-import { AUTH_SERVICE_KEY } from '../../../di/keys';
-import { useStrictInject } from '../../../shared/utils/useStrictInject';
-import { translateResultError } from '../../../shared/utils/translate-result-error';
+import { accountUiHost } from '../../account-ui-host';
 // Residual 909: desktop detect via hasDesktopAuthApi (DesktopAuthApi sole body; no inline dual).
 // Residual 923: isDesktopEnvironment name dual fully retired — callers use hasDesktopAuthApi(window).
 
 export interface AuthContext {
   store: ReturnType<typeof useAuthenticationStore>;
-  service: IAuthService;
+  service: CloudAuthClientPort;
   t: ReturnType<typeof useI18n>['t'];
   lastResultError: ReturnType<typeof ref<ResultError | null>>;
   redirectWithReload: (path: string) => void;
@@ -24,7 +21,7 @@ export interface AuthContext {
 export function createAuthContext(): AuthContext {
   const store = useAuthenticationStore();
   const router = useRouter();
-  const service = useStrictInject(AUTH_SERVICE_KEY, 'AuthService');
+  const service = accountUiHost.useStrictInject(accountUiHost.AUTH_SERVICE_KEY, 'AuthService');
   const { t } = useI18n();
   const lastResultError = ref<ResultError | null>(null);
 
@@ -47,7 +44,7 @@ export function createAuthContext(): AuthContext {
   }
 
   function getLocalizedAuthError(errorLike: unknown, fallbackKey: string): string {
-    return translateResultError(errorLike, t, {
+    return accountUiHost.translateResultError(errorLike, t, {
       scope: 'auth',
       fallbackKey,
     });

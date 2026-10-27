@@ -4,7 +4,7 @@ import { createI18n } from 'vue-i18n';
 import { createPinia } from 'pinia';
 import { describe, expect, it, vi } from 'vitest';
 import { fail } from '@memoflow/contracts/result';
-import type { IAccountService } from '../../../di/types';
+import type { AccountClientPort } from '@memoflow/account-client';
 import {
   ACCOUNT_SERVICE_KEY,
   AUTH_SERVICE_KEY,
@@ -12,7 +12,7 @@ import {
   PROFILE_LOCK_HANDLER_KEY,
   DESKTOP_ACCESS_SNAPSHOT_KEY,
   DESKTOP_BRIDGE_KEY,
-} from '../../../di/keys';
+} from '@account-ui-test-host/di/keys';
 import { ProfileAccessChannels } from '@memoflow/contracts/electron';
 import AccountProfileSection from './AccountProfileSection.vue';
 import { useAuthenticationStore } from '../../authentication/stores/authentication-store';
@@ -181,7 +181,7 @@ const SwitchStub = defineComponent({
 });
 
 function mountSection(
-  accountService: IAccountService,
+  accountService: AccountClientPort,
   lockProfile?: () => Promise<void>,
   cloudConnected = false,
   desktop?: { invoke: ReturnType<typeof vi.fn>; hasPin?: boolean },
@@ -277,7 +277,7 @@ describe('AccountProfileSection', () => {
       getMyProfile,
       updateMyProfile: vi.fn(),
       closeAccount: vi.fn(),
-    } as unknown as IAccountService;
+    } as unknown as AccountClientPort;
 
     const wrapper = mountSection(accountService);
     await flushPromises();
@@ -322,7 +322,7 @@ describe('AccountProfileSection', () => {
         ok: true,
         data: { account: dto, cloudIdentity: null },
       }),
-    } as unknown as IAccountService;
+    } as unknown as AccountClientPort;
 
     const wrapper = mountSection(accountService, lockProfile);
     await flushPromises();
@@ -363,7 +363,7 @@ describe('AccountProfileSection', () => {
         ok: true,
         data: { account: dto, cloudIdentity: null },
       }),
-    } as unknown as IAccountService;
+    } as unknown as AccountClientPort;
 
     const wrapper = mountSection(accountService, lockProfile, true);
     await flushPromises();
@@ -398,7 +398,7 @@ describe('AccountProfileSection', () => {
         data: { account: dto, cloudIdentity: null },
       }),
       updateMyProfile: vi.fn(),
-    } as unknown as IAccountService;
+    } as unknown as AccountClientPort;
     const wrapper = mountSection(accountService, undefined, false, { invoke });
     await flushPromises();
 

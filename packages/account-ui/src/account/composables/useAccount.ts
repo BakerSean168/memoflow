@@ -20,15 +20,15 @@ import type {
 } from '@memoflow/account-contracts';
 import { useAccountStore } from '../stores/account-store';
 import { useAuthenticationStore } from '../../authentication/stores/authentication-store';
-import { ACCOUNT_SERVICE_KEY } from '../../../di/keys';
-import { useStrictInject } from '../../../shared/utils/useStrictInject';
-import { createComposableHandleError } from '../../../shared/utils/create-composable-handle-error';
-import { translateResultError } from '../../../shared/utils/translate-result-error';
+import { accountUiHost } from '../../account-ui-host';
 
 export function useAccount() {
   const accountStore = useAccountStore();
   const authStore = useAuthenticationStore();
-  const accountService = useStrictInject(ACCOUNT_SERVICE_KEY, 'AccountService');
+  const accountService = accountUiHost.useStrictInject(
+    accountUiHost.ACCOUNT_SERVICE_KEY,
+    'AccountService',
+  );
   const { t } = useI18n();
   const viewCloudIdentity = ref<CloudIdentitySummary | null>(null);
 
@@ -44,7 +44,7 @@ export function useAccount() {
   const isGuest = computed(() => loginIdentity.value === null);
 
   function makeAccountHandleError(toastKey: string) {
-    return createComposableHandleError({
+    return accountUiHost.createComposableHandleError({
       t,
       setError: (message) => accountStore.setError(message),
       report: (message) => toast.error(t(toastKey), { description: message }),

@@ -18,8 +18,9 @@ const sharedScopeTags = ['scope:shared', 'scope:patterns'] as const;
  */
 const featureScopeConstraints = [
   {
+    // Account UI surfaces consume the shared UI kit plus this scope's own packages.
     sourceTag: 'scope:account',
-    onlyDependOnLibsWithTags: [...sharedScopeTags, 'scope:account'],
+    onlyDependOnLibsWithTags: [...sharedScopeTags, 'scope:account', 'scope:ui'],
   },
   {
     sourceTag: 'scope:ai',

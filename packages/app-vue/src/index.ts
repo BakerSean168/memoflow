@@ -50,8 +50,7 @@ export { useDesktopWindowControls } from './shared/composables/useDesktopWindowC
 export { createAppRouter } from './router';
 
 // ── Stores (consumed by app containers for DI/provide) ──
-export { useAuthenticationStore } from './modules/authentication';
-export { useAccountStore } from './modules/account';
+export { useAccountStore, useAuthenticationStore } from '@memoflow/account-ui';
 export { useGoalStore } from '@memoflow/goal-ui';
 export { useTaskStore } from './modules/task';
 export { useScheduleStore } from '@memoflow/schedule-ui';

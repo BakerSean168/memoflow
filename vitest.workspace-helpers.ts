@@ -256,6 +256,14 @@ export const domainResolveAliases = [
     replacement: path.resolve(import.meta.dirname, './packages/routine-client/src/index.ts'),
   },
   {
+    find: /^@memoflow\/account-ui\/host$/,
+    replacement: path.resolve(import.meta.dirname, './packages/account-ui/src/account-ui-host.ts'),
+  },
+  {
+    find: /^@memoflow\/account-ui$/,
+    replacement: path.resolve(import.meta.dirname, './packages/account-ui/src/index.ts'),
+  },
+  {
     find: /^@memoflow\/routine-ui\/host$/,
     replacement: path.resolve(import.meta.dirname, './packages/routine-ui/src/routine-ui-host.ts'),
   },

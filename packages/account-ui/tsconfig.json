@@ -1,0 +1,21 @@
+{
+  "extends": "../../tsconfig.workspace-dist.json",
+  "compilerOptions": {
+    "lib": ["ES2020", "DOM", "DOM.Iterable"],
+    "types": ["node", "vite/client", "pinia-plugin-persistedstate"],
+    "declaration": true,
+    "declarationMap": true,
+    "composite": false,
+    "incremental": false
+  },
+  "include": ["src/**/*.ts", "src/**/*.vue"],
+  "exclude": [
+    "node_modules",
+    "dist",
+    "src/test",
+    "src/test-support",
+    "**/*.spec.ts",
+    "**/*.test.ts",
+    "**/*.stories.ts"
+  ]
+}

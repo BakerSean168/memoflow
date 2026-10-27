@@ -2,6 +2,8 @@
   "extends": "./tsconfig.base.json",
   "compilerOptions": {
     "paths": {
+      "@memoflow/account-ui": ["./packages/account-ui/src/index.ts"],
+      "@memoflow/account-ui/host": ["./packages/account-ui/src/account-ui-host.ts"],
       "@memoflow/routine-ui": ["./packages/routine-ui/src/index.ts"],
       "@memoflow/routine-ui/host": ["./packages/routine-ui/src/routine-ui-host.ts"],
       "@memoflow/routine-ui/components/RoutineCapsulePreview": [

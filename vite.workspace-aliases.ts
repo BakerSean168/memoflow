@@ -327,6 +327,14 @@ export function createUiVueSourceAliasEntries(workspaceRoot: string): Alias[] {
 
   return [
     {
+      find: /^@memoflow\/account-ui\/host$/,
+      replacement: resolveFromWorkspace(workspaceRoot, 'packages/account-ui/src/account-ui-host.ts'),
+    },
+    {
+      find: /^@memoflow\/account-ui$/,
+      replacement: resolveFromWorkspace(workspaceRoot, 'packages/account-ui/src/index.ts'),
+    },
+    {
       find: /^@memoflow\/routine-ui$/,
       replacement: resolveFromWorkspace(workspaceRoot, 'packages/routine-ui/src/index.ts'),
     },

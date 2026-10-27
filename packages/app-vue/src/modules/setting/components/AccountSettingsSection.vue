@@ -1,16 +1,16 @@
 <script setup lang="ts">
 /** Account/Auth owner composition with capability-based password gating. */
 import { defineAsyncComponent, inject } from 'vue';
-import AccountProfileSection from '../../account/components/AccountProfileSection.vue';
+import { AccountProfileSection } from '@memoflow/account-ui';
 import { AUTH_SERVICE_KEY, EXTERNAL_AGENT_SERVICE_KEY } from '../../../di/keys';
 
-const CloudPasswordSection = defineAsyncComponent(
-  () => import('../../account/components/CloudPasswordSection.vue'),
+const CloudPasswordSection = defineAsyncComponent(() =>
+  import('@memoflow/account-ui').then((module) => module.CloudPasswordSection),
 );
 const cloudPasswordService = inject(AUTH_SERVICE_KEY, null);
 const externalAgents = inject(EXTERNAL_AGENT_SERVICE_KEY, null);
-const ExternalAgentConnectionsSection = defineAsyncComponent(
-  () => import('../../account/components/ExternalAgentConnectionsSection.vue'),
+const ExternalAgentConnectionsSection = defineAsyncComponent(() =>
+  import('@memoflow/account-ui').then((module) => module.ExternalAgentConnectionsSection),
 );
 </script>
 

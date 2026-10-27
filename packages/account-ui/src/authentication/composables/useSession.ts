@@ -13,13 +13,11 @@ import { computed } from 'vue';
 import { toast } from 'vue-sonner';
 import { useI18n } from 'vue-i18n';
 import { useAuthenticationStore } from '../stores/authentication-store';
-import { AUTH_SERVICE_KEY } from '../../../di/keys';
-import { useStrictInject } from '../../../shared/utils/useStrictInject';
-import { createComposableHandleError } from '../../../shared/utils/create-composable-handle-error';
+import { accountUiHost } from '../../account-ui-host';
 
 export function useSession() {
   const store = useAuthenticationStore();
-  const service = useStrictInject(AUTH_SERVICE_KEY, 'AuthService');
+  const service = accountUiHost.useStrictInject(accountUiHost.AUTH_SERVICE_KEY, 'AuthService');
   const { t } = useI18n();
 
   // ========== Computed State ==========
@@ -27,12 +25,12 @@ export function useSession() {
   const currentSession = computed(() => store.currentSession);
   const sessionCount = computed(() => store.getActiveSessionCount);
 
-  const handleLoadError = createComposableHandleError({
+  const handleLoadError = accountUiHost.createComposableHandleError({
     t,
     setError: (message) => store.setError(message),
     report: (message) => toast.error(t('auth.toast.loadFailed'), { description: message }),
   });
-  const handleOperationError = createComposableHandleError({
+  const handleOperationError = accountUiHost.createComposableHandleError({
     t,
     setError: (message) => store.setError(message),
     report: (message) => toast.error(t('auth.toast.operationFailed'), { description: message }),

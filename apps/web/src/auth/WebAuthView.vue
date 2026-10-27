@@ -6,7 +6,7 @@ import { Button } from '@memoflow/ui-vue-shadcn/components/ui/button';
 import { Input } from '@memoflow/ui-vue-shadcn/components/ui/input';
 import { Label } from '@memoflow/ui-vue-shadcn/components/ui/label';
 import { Loader2 } from '@lucide/vue';
-import { usePassword, useAuthenticationStore } from '@memoflow/app-vue/modules/authentication';
+import { usePassword, useAuthenticationStore } from '@memoflow/account-ui';
 import { loadWebAuthCapabilities } from './capabilities';
 import { useWebAuth } from './useWebAuth';
 import {

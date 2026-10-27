@@ -8,10 +8,9 @@ import type {
 } from '@memoflow/contracts/agent-gateway';
 import { Button } from '@memoflow/ui-vue-shadcn/components/ui/button';
 import { Input } from '@memoflow/ui-vue-shadcn/components/ui/input';
-import { EXTERNAL_AGENT_SERVICE_KEY } from '../../../di/keys';
-import { formatProductDateTime } from '../../../shared/utils/product-time';
+import { accountUiHost } from '../../account-ui-host';
 
-const injected = inject(EXTERNAL_AGENT_SERVICE_KEY);
+const injected = inject(accountUiHost.EXTERNAL_AGENT_SERVICE_KEY);
 if (!injected) throw new Error('External agent service is required');
 const service = injected;
 const { t } = useI18n();
@@ -131,11 +130,11 @@ onMounted(load);
         <p class="break-all text-xs text-muted-foreground">{{ connection.clientId }}</p>
         <p class="text-sm">{{ connection.scopes.map(scopeName).join(' · ') }}</p>
         <p class="text-xs text-muted-foreground">
-          连接于 {{ formatProductDateTime(connection.createdAt) }} · 最近使用
-          {{ formatProductDateTime(connection.lastUsedAt) }}
+          连接于 {{ accountUiHost.formatProductDateTime(connection.createdAt) }} · 最近使用
+          {{ accountUiHost.formatProductDateTime(connection.lastUsedAt) }}
         </p>
         <p class="text-xs text-muted-foreground">
-          到期：{{ formatProductDateTime(connection.expiresAt) }}
+          到期：{{ accountUiHost.formatProductDateTime(connection.expiresAt) }}
         </p>
         <Button
           v-if="status(connection) === '已连接'"
@@ -160,7 +159,7 @@ onMounted(load);
         <p class="mt-2 font-mono">{{ pat.prefix }}…</p>
         <p class="mt-1">{{ pat.scopes.map(scopeName).join(' · ') }}</p>
         <p class="mt-1 text-xs text-muted-foreground">
-          到期：{{ formatProductDateTime(pat.expiresAt) }}
+          到期：{{ accountUiHost.formatProductDateTime(pat.expiresAt) }}
         </p>
         <Button
           v-if="status(pat) === '已连接'"

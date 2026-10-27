@@ -1,4 +1,5 @@
 import {
+  installAccountUiHost,
   installGoalUiHost,
   installNotificationUiHost,
   installRoutineUiHost,
@@ -64,8 +65,7 @@ import {
   defaultModuleCapsules,
 } from '@memoflow/app-vue/di';
 import { createGoalDraftCheckpointStore } from '@memoflow/goal-ui';
-import { useAuthenticationStore } from '@memoflow/app-vue/modules/authentication';
-import { useAccountStore } from '@memoflow/app-vue/modules/account';
+import { useAccountStore, useAuthenticationStore } from '@memoflow/account-ui';
 import { readDesktopAccessSnapshot } from '@memoflow/app-vue/desktop';
 // Residual 941: host bridge via requireElectronBridge sole helper.
 import { requireElectronBridge } from './electron-bridge';
@@ -91,6 +91,7 @@ export function installDesktopAppServices(
   app: App,
   initialSnapshot: DesktopAccessSnapshot | null = null,
 ): void {
+  installAccountUiHost();
   installGoalUiHost();
   installNotificationUiHost();
   installRoutineUiHost();
