@@ -159,6 +159,7 @@ it('retains edited value/note on completion failure and retries the same Task co
 it('keeps complete-only available when Goal is unavailable and clears cancel/reopen state', async () => {
   composerState.available = false;
   const { wrapper: w, coordinator: c, operations: o } = await dialog();
+  expect(w.text()).toContain('Preview unavailable');
   expect(
     w.get<HTMLButtonElement>('[data-testid="task-record-and-complete"]').element.disabled,
   ).toBe(true);
