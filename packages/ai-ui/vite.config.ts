@@ -41,6 +41,31 @@ export default defineConfig({
       entry: {
         host: path.resolve(__dirname, 'src/ai-ui-host.ts'),
         index: path.resolve(__dirname, 'src/index.ts'),
+        router: path.resolve(__dirname, 'src/router/index.ts'),
+        'components/AIComposerControls.vue': path.resolve(
+          __dirname,
+          'src/components/AIComposerControls.vue',
+        ),
+        'components/AgentDriverIcon.vue': path.resolve(
+          __dirname,
+          'src/components/AgentDriverIcon.vue',
+        ),
+        'views/AIChatView.vue': path.resolve(__dirname, 'src/views/AIChatView.vue'),
+        'composables/chatViewHelpers': path.resolve(
+          __dirname,
+          'src/composables/chatViewHelpers.ts',
+        ),
+        'composables/error': path.resolve(__dirname, 'src/composables/error.ts'),
+        'composables/useAI': path.resolve(__dirname, 'src/composables/useAI.ts'),
+        'composables/nativeModelVisibility': path.resolve(
+          __dirname,
+          'src/composables/nativeModelVisibility.ts',
+        ),
+        'agent-instance-order': path.resolve(__dirname, 'src/agent-instance-order.ts'),
+        'composables/useConversationAttention': path.resolve(
+          __dirname,
+          'src/composables/useConversationAttention.ts',
+        ),
       },
       formats: ['es'],
       fileName: (_format, entryName) => `${entryName}.js`,
