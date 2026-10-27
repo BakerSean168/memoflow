@@ -74,7 +74,8 @@ export interface RepositoryUiHost {
   useServerStateIdentityScope(): () => string;
   recentKnowledgeQueryKeys: {
     all: readonly unknown[];
-    list(identityScope: string, query?: unknown): QueryKey;
+    identity?(identityScope: string): QueryKey;
+    list?(identityScope: string, query?: unknown): QueryKey;
     recent(identityScope: string, source: string, limit: number): QueryKey;
   };
   RECENT_KNOWLEDGE_STALE_TIME_MS: number;

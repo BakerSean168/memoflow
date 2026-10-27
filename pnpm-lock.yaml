@@ -392,6 +392,9 @@ importers:
       '@memoflow/repository':
         specifier: workspace:*
         version: link:../../packages/repository
+      '@memoflow/repository-contracts':
+        specifier: workspace:*
+        version: link:../../packages/repository-contracts
       '@memoflow/routine':
         specifier: workspace:*
         version: link:../../packages/routine
@@ -645,6 +648,9 @@ importers:
       '@memoflow/repository':
         specifier: workspace:*
         version: link:../../packages/repository
+      '@memoflow/repository-contracts':
+        specifier: workspace:*
+        version: link:../../packages/repository-contracts
       '@memoflow/repository-ui':
         specifier: workspace:*
         version: link:../../packages/repository-ui
@@ -1122,6 +1128,9 @@ importers:
       '@memoflow/repository':
         specifier: workspace:*
         version: link:../../packages/repository
+      '@memoflow/repository-contracts':
+        specifier: workspace:*
+        version: link:../../packages/repository-contracts
       '@memoflow/repository-ui':
         specifier: workspace:*
         version: link:../../packages/repository-ui
@@ -1334,6 +1343,9 @@ importers:
       '@memoflow/notification-contracts':
         specifier: workspace:*
         version: link:../notification-contracts
+      '@memoflow/repository-contracts':
+        specifier: workspace:*
+        version: link:../repository-contracts
       '@memoflow/schedule-contracts':
         specifier: workspace:*
         version: link:../schedule-contracts
@@ -1546,6 +1558,9 @@ importers:
       '@memoflow/repository':
         specifier: workspace:*
         version: link:../repository
+      '@memoflow/repository-contracts':
+        specifier: workspace:*
+        version: link:../repository-contracts
       '@memoflow/repository-ui':
         specifier: workspace:*
         version: link:../repository-ui
@@ -1792,9 +1807,6 @@ importers:
 
   packages/data-portability:
     dependencies:
-      '@memoflow/repository-contracts':
-        specifier: workspace:*
-        version: link:../repository-contracts
       '@memoflow/contracts':
         specifier: workspace:*
         version: link:../contracts
@@ -1816,6 +1828,9 @@ importers:
       '@memoflow/ipc-client':
         specifier: workspace:*
         version: link:../ipc-client
+      '@memoflow/repository-contracts':
+        specifier: workspace:*
+        version: link:../repository-contracts
       '@memoflow/transport-contracts':
         specifier: workspace:*
         version: link:../transport-contracts
@@ -2443,6 +2458,9 @@ importers:
       '@memoflow/relation-contracts':
         specifier: workspace:*
         version: link:../relation-contracts
+      '@memoflow/repository-contracts':
+        specifier: workspace:*
+        version: link:../repository-contracts
     devDependencies:
       '@memoflow/test-utils':
         specifier: workspace:*
@@ -2542,84 +2560,11 @@ importers:
         specifier: workspace:*
         version: link:../transport-contracts
 
-  packages/routine:
-    dependencies:
-      '@memoflow/contracts':
-        specifier: workspace:*
-        version: link:../contracts
-      '@memoflow/data-portability-contracts':
-        specifier: workspace:*
-        version: link:../data-portability-contracts
-      '@memoflow/database':
-        specifier: workspace:*
-        version: link:../database
-      '@memoflow/host-runtime':
-        specifier: workspace:*
-        version: link:../host-runtime
-      '@memoflow/notification-contracts':
-        specifier: workspace:*
-        version: link:../notification-contracts
-      '@memoflow/reliable-messaging-contracts':
-        specifier: workspace:*
-        version: link:../reliable-messaging-contracts
-      '@memoflow/routine-contracts':
-        specifier: workspace:*
-        version: link:../routine-contracts
-      '@memoflow/schedule-contracts':
-        specifier: workspace:*
-        version: link:../schedule-contracts
-      '@memoflow/time':
-        specifier: workspace:*
-        version: link:../time
-      '@memoflow/utils':
-        specifier: workspace:*
-        version: link:../utils
-      zod:
-        specifier: ^4.6.5
-        version: 4.6.5
-    devDependencies:
-      '@memoflow/test-utils':
-        specifier: workspace:*
-        version: link:../test-utils
-
-  packages/routine-client:
-    dependencies:
-      '@memoflow/desktop-contracts':
-        specifier: workspace:*
-        version: link:../desktop-contracts
-      '@memoflow/http-client':
-        specifier: workspace:*
-        version: link:../http-client
-      '@memoflow/ipc-client':
-        specifier: workspace:*
-        version: link:../ipc-client
-      '@memoflow/routine-contracts':
-        specifier: workspace:*
-        version: link:../routine-contracts
-      '@memoflow/transport-contracts':
-        specifier: workspace:*
-        version: link:../transport-contracts
-
   packages/repository-contracts:
     dependencies:
       '@memoflow/shared-primitives':
         specifier: workspace:*
         version: link:../shared-primitives
-      zod:
-        specifier: ^4.6.5
-        version: 4.6.5
-
-  packages/routine-contracts:
-    dependencies:
-      '@memoflow/data-portability-contracts':
-        specifier: workspace:*
-        version: link:../data-portability-contracts
-      '@memoflow/shared-primitives':
-        specifier: workspace:*
-        version: link:../shared-primitives
-      '@memoflow/transport-contracts':
-        specifier: workspace:*
-        version: link:../transport-contracts
       zod:
         specifier: ^4.6.5
         version: 4.6.5
@@ -2693,6 +2638,79 @@ importers:
       vite-plugin-dts:
         specifier: 5.1.1
         version: 5.1.1(@typescript/typescript6@6.0.2)(@vue/language-core@3.3.11)(esbuild@0.28.1)(rolldown@1.2.9)(rollup@4.57.1)(supports-color@10.2.2)(vite@8.3.1(@types/node@24.13.3)(esbuild@0.28.1)(jiti@2.7.0)(sass-embedded@1.105.0)(sass@1.105.0)(stylus@0.57.0(supports-color@10.2.2))(terser@5.46.1)(tsx@4.23.15)(yaml@2.9.0))
+
+  packages/routine:
+    dependencies:
+      '@memoflow/contracts':
+        specifier: workspace:*
+        version: link:../contracts
+      '@memoflow/data-portability-contracts':
+        specifier: workspace:*
+        version: link:../data-portability-contracts
+      '@memoflow/database':
+        specifier: workspace:*
+        version: link:../database
+      '@memoflow/host-runtime':
+        specifier: workspace:*
+        version: link:../host-runtime
+      '@memoflow/notification-contracts':
+        specifier: workspace:*
+        version: link:../notification-contracts
+      '@memoflow/reliable-messaging-contracts':
+        specifier: workspace:*
+        version: link:../reliable-messaging-contracts
+      '@memoflow/routine-contracts':
+        specifier: workspace:*
+        version: link:../routine-contracts
+      '@memoflow/schedule-contracts':
+        specifier: workspace:*
+        version: link:../schedule-contracts
+      '@memoflow/time':
+        specifier: workspace:*
+        version: link:../time
+      '@memoflow/utils':
+        specifier: workspace:*
+        version: link:../utils
+      zod:
+        specifier: ^4.6.5
+        version: 4.6.5
+    devDependencies:
+      '@memoflow/test-utils':
+        specifier: workspace:*
+        version: link:../test-utils
+
+  packages/routine-client:
+    dependencies:
+      '@memoflow/desktop-contracts':
+        specifier: workspace:*
+        version: link:../desktop-contracts
+      '@memoflow/http-client':
+        specifier: workspace:*
+        version: link:../http-client
+      '@memoflow/ipc-client':
+        specifier: workspace:*
+        version: link:../ipc-client
+      '@memoflow/routine-contracts':
+        specifier: workspace:*
+        version: link:../routine-contracts
+      '@memoflow/transport-contracts':
+        specifier: workspace:*
+        version: link:../transport-contracts
+
+  packages/routine-contracts:
+    dependencies:
+      '@memoflow/data-portability-contracts':
+        specifier: workspace:*
+        version: link:../data-portability-contracts
+      '@memoflow/shared-primitives':
+        specifier: workspace:*
+        version: link:../shared-primitives
+      '@memoflow/transport-contracts':
+        specifier: workspace:*
+        version: link:../transport-contracts
+      zod:
+        specifier: ^4.6.5
+        version: 4.6.5
 
   packages/routine-ui:
     dependencies:

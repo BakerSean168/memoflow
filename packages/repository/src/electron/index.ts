@@ -136,7 +136,7 @@ export interface KnowledgeRepositoryConnectionElectronPort {
   ): Promise<Result<KnowledgeRepositoryInstallationIntentStatusResponse>>;
   finalizeKnowledgeRepositoryInstallationIntent(
     intentId: string,
-  ): Promise<Result<KnowledgeRepositoryInstallationIntentStatusResponse>>;
+  ): Promise<Result<CompleteKnowledgeRepositoryInstallationRes>>;
   listKnowledgeRepositoryConnections(): Promise<Result<ListKnowledgeRepositoryConnectionsRes>>;
   refreshKnowledgeRepositoryObservation(
     connectionId: string,
