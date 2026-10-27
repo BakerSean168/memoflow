@@ -1,6 +1,6 @@
 import fs from 'node:fs';
 import path from 'node:path';
-import { DeviceKeymapSchema, DeviceKeymapWriteSchema } from '@memoflow/contracts/shared';
+import { DeviceKeymapSchema, DeviceKeymapWriteSchema } from '@memoflow/desktop-contracts';
 
 export interface KeymapProfile {
   profileId: string;

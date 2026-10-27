@@ -133,3 +133,14 @@ export {
   RenameProfileRequestSchema,
 } from './profile-access';
 export type { CreateGuestProfileRequest, RenameProfileRequest } from './profile-access';
+
+// Device-local keyboard bindings (Issue #630 §4.9 / Q5). Owner: desktop platform
+// contracts — the setting surfaces only consume and persist them.
+export {
+  keyboardCommandIds,
+  DeviceKeymapSchema,
+  DeviceKeymapWriteSchema,
+  DeviceKeymapSnapshotSchema,
+  type KeyboardCommandId,
+  type DeviceKeymap,
+} from './keyboard-keymap';

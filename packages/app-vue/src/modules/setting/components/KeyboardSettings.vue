@@ -12,7 +12,7 @@ import {
   DialogDescription,
   useConfirm,
 } from '@memoflow/ui-vue-shadcn';
-import type { DeviceKeymap } from '@memoflow/contracts/shared';
+import type { DeviceKeymap } from '@memoflow/desktop-contracts';
 import { keyboard } from '../../../shared/keyboard/runtime';
 import {
   eventChord,

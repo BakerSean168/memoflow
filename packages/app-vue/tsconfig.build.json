@@ -28,6 +28,8 @@
       "@memoflow/schedule-client": ["../schedule-client/dist/index.d.ts"],
       "@memoflow/notification-client": ["../notification-client/dist/index.d.ts"],
       "@memoflow/setting-client": ["../setting-client/dist/index.d.ts"],
+      "@memoflow/desktop-contracts": ["../desktop-contracts/dist/index.d.ts"],
+      "@memoflow/desktop-contracts/*": ["../desktop-contracts/dist/*.d.ts"],
       "@memoflow/reminder/client": ["../reminder/dist/client/index.d.ts"],
       "@memoflow/task/client": ["../task/dist/client/index.d.ts"],
       "@memoflow/repository/client": ["../repository/dist/client/index.d.ts"]

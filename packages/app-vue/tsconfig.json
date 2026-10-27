@@ -30,6 +30,8 @@
       "@memoflow/schedule-contracts/*": ["../../packages/schedule-contracts/src/*.ts"],
       "@memoflow/setting-contracts": ["../../packages/setting-contracts/src/index.ts"],
       "@memoflow/setting-contracts/*": ["../../packages/setting-contracts/src/*.ts"],
+      "@memoflow/desktop-contracts": ["../../packages/desktop-contracts/src/index.ts"],
+      "@memoflow/desktop-contracts/*": ["../../packages/desktop-contracts/src/*.ts"],
       "@memoflow/contracts/shared": ["../../packages/contracts/src/shared/index.ts"],
       "@memoflow/contracts/task": ["../../packages/contracts/src/modules/task/index.ts"],
       "@memoflow/contracts/*": [

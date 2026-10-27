@@ -1,4 +1,4 @@
-import { DeviceKeymapSchema, type DeviceKeymap } from '@memoflow/contracts/shared';
+import { DeviceKeymapSchema, type DeviceKeymap } from '@memoflow/desktop-contracts';
 import { commandDefinitions, type KeyboardHost, type ShortcutScope } from './commands';
 
 const aliases: Record<string, string> = {

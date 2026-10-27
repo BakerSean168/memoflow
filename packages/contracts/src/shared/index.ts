@@ -36,4 +36,5 @@ export * from './account-active-checker';
 // 任何指向 host-runtime 的导入（含 type-only）都会触发
 // @nx/enforce-module-boundaries。因此全部消费方已在本步直接改引
 // @memoflow/host-runtime，此处不再转出这批符号。
-export * from './keyboard-keymap';
+// Issue #630 §4.9 / Q5：keyboard-keymap（设备键位契约）真身迁至
+// @memoflow/desktop-contracts，消费方直接改引该包，本桶不再转出。

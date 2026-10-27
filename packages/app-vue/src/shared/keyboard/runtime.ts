@@ -4,7 +4,7 @@ import { useEventListener } from '@vueuse/core';
 import { _getCommandPaletteState, toggleCommandPalette } from '@memoflow/ui-vue-shadcn';
 import { toast } from 'vue-sonner';
 import { hasDesktopAuthApi } from '../utils/desktop-auth-recovery';
-import { DeviceKeymapSchema, type DeviceKeymap } from '@memoflow/contracts/shared';
+import { DeviceKeymapSchema, type DeviceKeymap } from '@memoflow/desktop-contracts';
 import { createShortcutEngine, type CommandHandler } from './shortcut-engine';
 import { keyboardModules, type KeyboardCommandId, type KeyboardHost } from './commands';
 import { isKeyboardVisible, listAdapterFor } from './list-adapter';
