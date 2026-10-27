@@ -35,6 +35,9 @@
 </template>
 
 <script setup lang="ts">
+import { routineUiHost } from '../routine-ui-host';
+const { ProductPropertyChip } = routineUiHost.components;
+
 import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { Layers3 } from '@lucide/vue';
@@ -47,7 +50,7 @@ import {
   DropdownMenuLabel,
   DropdownMenuTrigger,
 } from '@memoflow/ui-vue-shadcn';
-import { ProductPropertyChip } from '../../../shared/components';
+
 
 const props = defineProps<{
   profiles: readonly RoutineProfileDto[];

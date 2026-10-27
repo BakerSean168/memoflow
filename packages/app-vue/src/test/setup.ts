@@ -51,3 +51,7 @@ registerFastTestHooks({
   timezone: false,
 });
 installCommonBrowserMocks();
+
+// Bind the same renderer capabilities used by mounted Routine shell surfaces.
+import { installRoutineUiHost } from '../di/routine-ui-host';
+installRoutineUiHost();

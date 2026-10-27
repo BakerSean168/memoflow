@@ -47,7 +47,7 @@ const featureScopeConstraints = [
   },
   {
     sourceTag: 'scope:routine',
-    onlyDependOnLibsWithTags: [...sharedScopeTags, 'scope:routine'],
+    onlyDependOnLibsWithTags: [...sharedScopeTags, 'scope:routine', 'scope:ui'],
   },
   {
     sourceTag: 'scope:repository',

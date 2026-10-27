@@ -1,7 +1,7 @@
 import { enableAutoUnmount, mount } from '@vue/test-utils';
 import { createI18n } from 'vue-i18n';
 import { afterEach, describe, expect, it } from 'vitest';
-import { productionLocaleMessages } from '../../../locales/production-messages';
+import { productionLocaleMessages } from '@routine-ui-test-host/locales/production-messages';
 import RoutineProfileDialog from './RoutineProfileDialog.vue';
 
 enableAutoUnmount(afterEach);

@@ -9,8 +9,8 @@ import type {
 import { RoutineTriggerSchema } from '@memoflow/routine-contracts';
 import { requireTimeZoneId, requireYmd } from '@memoflow/contracts/primitives';
 import { createDefaultUserPreferenceProfile } from '@memoflow/contracts/setting';
-import { productionLocaleMessages } from '../../../locales/production-messages';
-import { getProductTodayYmd, setProductTimePreferences } from '../../../shared/utils/product-time';
+import { productionLocaleMessages } from '@routine-ui-test-host/locales/production-messages';
+import { getProductTodayYmd, setProductTimePreferences } from '@routine-ui-test-host/shared/utils/product-time';
 const confirmMock = vi.hoisted(() => vi.fn(async () => true));
 vi.mock('@memoflow/ui-vue-shadcn', async (importOriginal) => {
   const actual = await importOriginal<typeof import('@memoflow/ui-vue-shadcn')>();

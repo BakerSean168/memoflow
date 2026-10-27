@@ -1,3 +1,4 @@
+import { routineUiHost } from '../routine-ui-host';
 import { computed, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import type {
@@ -13,10 +14,7 @@ import type {
   UpdateRoutineProfileRequest,
   UpdateRoutineRequest,
 } from '@memoflow/routine-contracts';
-import { toResultErrorException, type Result } from '@memoflow/contracts/result';
-import { ROUTINE_SERVICE_KEY } from '../../../di/keys';
-import { useStrictInject } from '../../../shared/utils/useStrictInject';
-import { translateResultError } from '../../../shared/utils/translate-result-error';
+import { toResultErrorException, type Result } from '@memoflow/transport-contracts';
 
 const EMPTY_SNAPSHOT: RoutineConfigurationSnapshot = {
   definitions: [],
@@ -35,7 +33,10 @@ function unwrapResult<T>(result: Result<T>): T {
 
 export function useRoutineConfiguration() {
   const { t } = useI18n();
-  const service = useStrictInject(ROUTINE_SERVICE_KEY, 'ROUTINE_SERVICE_KEY');
+  const service = routineUiHost.useStrictInject(
+    routineUiHost.ROUTINE_SERVICE_KEY,
+    'routineUiHost.ROUTINE_SERVICE_KEY',
+  );
   const snapshot = ref<RoutineConfigurationSnapshot>(EMPTY_SNAPSHOT);
   const loading = ref(false);
   const mutating = ref(false);
@@ -54,7 +55,7 @@ export function useRoutineConfiguration() {
     try {
       snapshot.value = unwrapResult(await service.getConfigurationSnapshot());
     } catch (cause) {
-      error.value = translateResultError(cause, t, {
+      error.value = routineUiHost.translateResultError(cause, t, {
         fallbackKey: 'routine.toast.operationFailed',
       });
     } finally {
@@ -69,7 +70,7 @@ export function useRoutineConfiguration() {
       unwrapResult(await work());
       await load();
     } catch (cause) {
-      error.value = translateResultError(cause, t, {
+      error.value = routineUiHost.translateResultError(cause, t, {
         fallbackKey: 'routine.toast.operationFailed',
       });
       throw cause;

@@ -1,4 +1,7 @@
 <script setup lang="ts">
+import { routineUiHost } from '../routine-ui-host';
+const { ROUTINE_SERVICE_KEY, endOfDayMs, formatProductHm, productTimeRevision, useStrictInject } = routineUiHost;
+
 import { computed, ref, watch } from 'vue';
 import { ArrowRight, Repeat2 } from '@lucide/vue';
 import {
@@ -11,13 +14,9 @@ import {
 } from '@memoflow/ui-vue-shadcn';
 import type { RoutineUpcomingOccurrence } from '@memoflow/routine-contracts';
 import { useI18n } from 'vue-i18n';
-import { ROUTINE_SERVICE_KEY } from '../../../di/keys';
-import { useStrictInject } from '../../../shared/utils/useStrictInject';
-import {
-  endOfDayMs,
-  formatProductHm,
-  productTimeRevision,
-} from '../../../shared/utils/product-time';
+
+
+
 
 const props = withDefaults(defineProps<{ active?: boolean; maxItems?: number }>(), {
   active: true,

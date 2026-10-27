@@ -100,22 +100,21 @@
 </template>
 
 <script setup lang="ts">
+import { routineUiHost } from '../routine-ui-host';
+const { ROUTINE_SERVICE_KEY, endOfDayMs, formatProductHm, routineUpcomingQueryKeys, startOfDayMs, useServerStateIdentityScope, useServerStateRuntime, useStrictInject } = routineUiHost;
+const { CapsulePreviewFooter, CapsulePreviewHeader, CapsulePreviewShell, CapsulePreviewState } = routineUiHost.components;
+
 import { onMounted, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { ArrowRight, Clock3, Loader2, RotateCcw } from '@lucide/vue';
 import { Button } from '@memoflow/ui-vue-shadcn';
 import type { RoutineUpcomingOccurrence } from '@memoflow/routine-contracts';
-import { ROUTINE_SERVICE_KEY } from '../../../di/keys';
-import {
-  CapsulePreviewFooter,
-  CapsulePreviewHeader,
-  CapsulePreviewShell,
-  CapsulePreviewState,
-} from '../../../shared/components';
-import { useStrictInject } from '../../../shared/utils/useStrictInject';
-import { endOfDayMs, formatProductHm, startOfDayMs } from '../../../shared/utils/product-time';
-import { useServerStateIdentityScope, useServerStateRuntime } from '../../../platform/server-state';
-import { routineUpcomingQueryKeys } from '../../../platform/server-state/query-keys';
+
+
+
+
+
+
 import { fetchRoutineUpcomingCached } from '../composables/routineUpcomingCache';
 
 const emit = defineEmits<{

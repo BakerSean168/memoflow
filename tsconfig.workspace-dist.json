@@ -2,6 +2,21 @@
   "extends": "./tsconfig.base.json",
   "compilerOptions": {
     "paths": {
+      "@memoflow/routine-ui": ["./packages/routine-ui/dist/index.d.ts"],
+      "@memoflow/routine-ui/host": ["./packages/routine-ui/dist/routine-ui-host.d.ts"],
+      "@memoflow/routine-ui/components/RoutineCapsulePreview": [
+        "./packages/routine-ui/dist/components/RoutineCapsulePreview.vue.d.ts"
+      ],
+      "@memoflow/routine-ui/components/RoutineUpcomingWidget": [
+        "./packages/routine-ui/dist/components/RoutineUpcomingWidget.vue.d.ts"
+      ],
+      "@memoflow/routine-ui/views/RoutineConfigurationView": [
+        "./packages/routine-ui/dist/views/RoutineConfigurationView.vue.d.ts"
+      ],
+      "@memoflow/routine-ui/composables/routineUpcomingCache": [
+        "./packages/routine-ui/dist/composables/routineUpcomingCache.d.ts"
+      ],
+
       "@memoflow/routine": ["./packages/routine/dist/index.d.ts"],
       "@memoflow/routine/schedule-execution": [
         "./packages/routine/dist/schedule-execution/index.d.ts"

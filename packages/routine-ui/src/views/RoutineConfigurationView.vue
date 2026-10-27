@@ -424,7 +424,11 @@
 </template>
 
 <script setup lang="ts">
-import { vKeyboardList } from '../../../shared/keyboard/list-adapter';
+import { routineUiHost } from '../routine-ui-host';
+const { formatProductHm, getProductTime, getProductTodayYmd, usePanelSurfaceStatus, vKeyboardList } = routineUiHost;
+const { AppEmptyState, ModuleHeader, ProductSingleSelectFilter } = routineUiHost.components;
+
+
 import { computed, onMounted, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
@@ -465,20 +469,16 @@ import {
   type RoutineMethodId,
   type RoutineMethodRecord,
 } from '@memoflow/routine-contracts/method-library';
-import AppEmptyState from '../../../components/shared/AppEmptyState.vue';
-import ModuleHeader from '../../../components/shared/ModuleHeader.vue';
-import { ProductSingleSelectFilter } from '../../../shared/components';
+
+
+
 import RoutineEditorDialog, {
   type RoutineEditorPreset,
 } from '../components/RoutineEditorDialog.vue';
 import RoutineProfileDialog from '../components/RoutineProfileDialog.vue';
-import { usePanelSurfaceStatus } from '../../../layouts/shell/usePanelSurfaceStatus';
+
 import { useRoutineConfiguration } from '../composables/useRoutineConfiguration';
-import {
-  formatProductHm,
-  getProductTime,
-  getProductTodayYmd,
-} from '../../../shared/utils/product-time';
+
 
 type RoutineStateFilter = 'all' | 'enabled' | 'disabled';
 

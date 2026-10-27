@@ -64,9 +64,9 @@
       "requiredPaths": [
         "packages/routine-contracts/src/index.ts",
         "packages/routine-client/src/index.ts",
-        "packages/app-vue/src/modules/routine/index.ts",
-        "packages/app-vue/src/modules/routine/router/index.ts",
-        "packages/app-vue/src/modules/routine/components/RoutineUpcomingWidget.vue",
+        "packages/routine-ui/src/index.ts",
+        "packages/routine-ui/src/router/index.ts",
+        "packages/routine-ui/src/components/RoutineUpcomingWidget.vue",
         "apps/api/src/modules/routine/module.ts",
         "apps/desktop/src/main/modules/routine/configuration.electron-module.ts"
       ]

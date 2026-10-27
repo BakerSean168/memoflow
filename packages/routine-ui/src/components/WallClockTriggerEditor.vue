@@ -116,10 +116,13 @@
 </template>
 
 <script setup lang="ts">
+import { routineUiHost } from '../routine-ui-host';
+const { ProductDatePicker, ProductPropertyChip, ProductTimePicker, ProductTimeZoneSelector } = routineUiHost.components;
+
 import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { Repeat2 } from '@lucide/vue';
-import { parseYmd } from '@memoflow/contracts/primitives';
+import { parseYmd } from '@memoflow/shared-primitives';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -132,12 +135,7 @@ import {
   NumberFieldIncrement,
   NumberFieldInput,
 } from '@memoflow/ui-vue-shadcn';
-import {
-  ProductDatePicker,
-  ProductPropertyChip,
-  ProductTimePicker,
-  ProductTimeZoneSelector,
-} from '../../../shared/components';
+
 import type { RoutineFrequency } from './routine-editor.types';
 
 defineProps<{ disabled?: boolean }>();

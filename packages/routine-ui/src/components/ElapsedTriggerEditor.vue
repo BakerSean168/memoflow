@@ -3,67 +3,30 @@
     <PopoverTrigger as-child>
       <ProductPropertyChip
         :disabled="disabled"
-        :aria-label="t('routine.form.activeMinutes')"
-        data-testid="routine-active-duration-chip"
+        :aria-label="t('routine.form.durationMinutes')"
+        data-testid="routine-duration-chip"
       >
-        <template #icon><Activity class="h-3.5 w-3.5" /></template>
-        {{ t('routine.form.activeMinutesValue', { value: activeMinutes }) }}
+        <template #icon><Clock3 class="h-3.5 w-3.5" /></template>
+        {{ t('routine.form.minutesValue', { value: durationMinutes }) }}
       </ProductPropertyChip>
     </PopoverTrigger>
     <ProductPopoverSurface recipe="property">
       <p class="text-xs font-medium text-muted-foreground">
-        {{ t('routine.form.activeMinutes') }}
+        {{ t('routine.form.durationMinutes') }}
       </p>
       <div class="flex items-center gap-2">
         <NumberField
-          v-model="activeMinutes"
+          v-model="durationMinutes"
           :min="1"
           :step="1"
           :disabled="disabled"
-          data-testid="routine-activeMinutes"
+          data-testid="routine-durationMinutes"
           class="w-36"
         >
           <NumberFieldContent>
-            <NumberFieldDecrement :aria-label="t('routine.form.activeMinutes') + ' −'" />
-            <NumberFieldInput :aria-label="t('routine.form.activeMinutes')" class="h-8" />
-            <NumberFieldIncrement :aria-label="t('routine.form.activeMinutes') + ' +'" />
-          </NumberFieldContent>
-        </NumberField>
-        <span class="shrink-0 text-xs text-muted-foreground">
-          {{ t('routine.form.minutes') }}
-        </span>
-      </div>
-    </ProductPopoverSurface>
-  </Popover>
-
-  <Popover>
-    <PopoverTrigger as-child>
-      <ProductPropertyChip
-        :disabled="disabled"
-        :aria-label="t('routine.form.naturalBreakMinutes')"
-        data-testid="routine-natural-break-chip"
-      >
-        <template #icon><Clock3 class="h-3.5 w-3.5" /></template>
-        {{ t('routine.form.naturalBreakValue', { value: naturalBreakMinutes }) }}
-      </ProductPropertyChip>
-    </PopoverTrigger>
-    <ProductPopoverSurface recipe="property">
-      <p class="text-xs font-medium text-muted-foreground">
-        {{ t('routine.form.naturalBreakMinutes') }}
-      </p>
-      <div class="flex items-center gap-2">
-        <NumberField
-          v-model="naturalBreakMinutes"
-          :min="0"
-          :step="1"
-          :disabled="disabled"
-          data-testid="routine-naturalBreakMinutes"
-          class="w-36"
-        >
-          <NumberFieldContent>
-            <NumberFieldDecrement :aria-label="t('routine.form.naturalBreakMinutes') + ' −'" />
-            <NumberFieldInput :aria-label="t('routine.form.naturalBreakMinutes')" class="h-8" />
-            <NumberFieldIncrement :aria-label="t('routine.form.naturalBreakMinutes') + ' +'" />
+            <NumberFieldDecrement :aria-label="t('routine.form.durationMinutes') + ' −'" />
+            <NumberFieldInput :aria-label="t('routine.form.durationMinutes')" class="h-8" />
+            <NumberFieldIncrement :aria-label="t('routine.form.durationMinutes') + ' +'" />
           </NumberFieldContent>
         </NumberField>
         <span class="shrink-0 text-xs text-muted-foreground">
@@ -99,9 +62,12 @@
 </template>
 
 <script setup lang="ts">
+import { routineUiHost } from '../routine-ui-host';
+const { ProductPopoverSurface, ProductPropertyChip } = routineUiHost.components;
+
 import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { Activity, Clock3, Repeat2 } from '@lucide/vue';
+import { Clock3, Repeat2 } from '@lucide/vue';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -116,18 +82,18 @@ import {
   Popover,
   PopoverTrigger,
 } from '@memoflow/ui-vue-shadcn';
-import { ProductPopoverSurface, ProductPropertyChip } from '../../../shared/components';
-import type { RoutineActiveAnchor } from './routine-editor.types';
+
+import type { RoutineElapsedAnchor } from './routine-editor.types';
 
 defineProps<{ disabled?: boolean }>();
 
-const activeMinutes = defineModel<number>('activeMinutes', { required: true });
-const naturalBreakMinutes = defineModel<number>('naturalBreakMinutes', { required: true });
-const anchor = defineModel<RoutineActiveAnchor>('anchor', { required: true });
+const durationMinutes = defineModel<number>('durationMinutes', { required: true });
+const anchor = defineModel<RoutineElapsedAnchor>('anchor', { required: true });
 const { t } = useI18n();
 
 const anchorOptions = computed(() => [
   { value: 'last-satisfied' as const, label: t('routine.trigger.lastSatisfied') },
+  { value: 'routine-activation' as const, label: t('routine.trigger.routineActivation') },
   { value: 'profile-activation' as const, label: t('routine.trigger.profileActivation') },
 ]);
 

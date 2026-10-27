@@ -3,6 +3,7 @@
   "extends": "../../tsconfig.workspace-src.json",
 
   "compilerOptions": {
+    "rootDir": "../..",
     // 输出目录：编译后的 JavaScript 和类型声明文件
     "outDir": "./dist",
 

@@ -5,7 +5,7 @@ import { createI18n } from 'vue-i18n';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { ok } from '@memoflow/contracts/result';
 import type { RoutineClientPort } from '@memoflow/routine-client';
-import { ROUTINE_SERVICE_KEY } from '../../../di/keys';
+import { ROUTINE_SERVICE_KEY } from '@routine-ui-test-host/di/keys';
 import RoutineUpcomingWidget from './RoutineUpcomingWidget.vue';
 
 const i18n = createI18n({

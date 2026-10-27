@@ -2,13 +2,13 @@
 import { flushPromises, mount } from '@vue/test-utils';
 import { createI18n } from 'vue-i18n';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { ROUTINE_SERVICE_KEY } from '../../../di/keys';
+import { ROUTINE_SERVICE_KEY } from '@routine-ui-test-host/di/keys';
 import {
   createTestServerStateRuntime,
   SERVER_STATE_IDENTITY_SCOPE_KEY,
   SERVER_STATE_RUNTIME_KEY,
-} from '../../../platform/server-state';
-import { ROUTINE_UPCOMING_STALE_TIME_MS } from '../../../platform/server-state/query-policy';
+} from '@routine-ui-test-host/platform/server-state';
+import { ROUTINE_UPCOMING_STALE_TIME_MS } from '@routine-ui-test-host/platform/server-state/query-policy';
 import RoutineCapsulePreview from './RoutineCapsulePreview.vue';
 
 const getUpcomingOccurrences = vi.fn();

@@ -3,9 +3,9 @@ import { createI18n } from 'vue-i18n';
 import { createMemoryHistory, createRouter } from 'vue-router';
 import { describe, expect, it, vi } from 'vitest';
 import type { RoutineClientPort } from '@memoflow/routine-client';
-import { ROUTINE_SERVICE_KEY } from '../../../di/keys';
-import { ProductSingleSelectFilter } from '../../../shared/components';
-import { productionLocaleMessages } from '../../../locales/production-messages';
+import { ROUTINE_SERVICE_KEY } from '@routine-ui-test-host/di/keys';
+import { ProductSingleSelectFilter } from '@routine-ui-test-host/shared/components';
+import { productionLocaleMessages } from '@routine-ui-test-host/locales/production-messages';
 import RoutineConfigurationView from './RoutineConfigurationView.vue';
 
 const snapshot = {

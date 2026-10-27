@@ -92,17 +92,17 @@
 </template>
 
 <script setup lang="ts">
+import { routineUiHost } from '../routine-ui-host';
+const { useDialogCloseGuard, useTransientFeedback } = routineUiHost;
+const { ProductAutoTextarea, ProductEditorFrame, ProductInlineValidation } = routineUiHost.components;
+
 import { computed, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { Button } from '@memoflow/ui-vue-shadcn';
 import type { RoutineProfileDto } from '@memoflow/routine-contracts';
-import {
-  ProductAutoTextarea,
-  ProductEditorFrame,
-  ProductInlineValidation,
-} from '../../../shared/components';
-import { useTransientFeedback } from '../../../shared/composables/useTransientFeedback';
-import { useDialogCloseGuard } from '../../../shared/composables/useDialogCloseGuard';
+
+
+
 
 const props = withDefaults(
   defineProps<{

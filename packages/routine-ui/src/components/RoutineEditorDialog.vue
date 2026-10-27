@@ -181,6 +181,10 @@
 </template>
 
 <script setup lang="ts">
+import { routineUiHost } from '../routine-ui-host';
+const { getProductTime, getProductTodayYmd, useDialogCloseGuard, useTransientFeedback } = routineUiHost;
+const { ProductAutoTextarea, ProductEditorFrame, ProductInlineValidation, ProductPropertyChip } = routineUiHost.components;
+
 import { computed, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { Activity, CircleOff, Clock3, Monitor, Repeat2 } from '@lucide/vue';
@@ -202,16 +206,11 @@ import {
   parseYmd,
   requireTimeZoneId,
   requireYmd,
-} from '@memoflow/contracts/primitives';
-import {
-  ProductAutoTextarea,
-  ProductEditorFrame,
-  ProductInlineValidation,
-  ProductPropertyChip,
-} from '../../../shared/components';
-import { useTransientFeedback } from '../../../shared/composables/useTransientFeedback';
-import { useDialogCloseGuard } from '../../../shared/composables/useDialogCloseGuard';
-import { getProductTime, getProductTodayYmd } from '../../../shared/utils/product-time';
+} from '@memoflow/shared-primitives';
+
+
+
+
 import ActiveUsageTriggerEditor from './ActiveUsageTriggerEditor.vue';
 import ElapsedTriggerEditor from './ElapsedTriggerEditor.vue';
 import ProfileScopeControl from './ProfileScopeControl.vue';

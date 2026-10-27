@@ -21,7 +21,7 @@ import { installServerStateRuntime } from '@memoflow/app-vue/platform/server-sta
 import { providePanelWidth } from '@memoflow/app-vue/layouts/shell/usePanelWidth';
 import { useAuthenticationStore } from '@memoflow/app-vue/modules/authentication/stores/authentication-store';
 import { useAppShellStore } from '@memoflow/app-vue/layouts/shell/useAppShellStore';
-import RoutineConfigurationView from '@memoflow/app-vue/modules/routine/views/RoutineConfigurationView.vue';
+import RoutineConfigurationView from '@memoflow/routine-ui/views/RoutineConfigurationView';
 import { NotificationListPage } from '@memoflow/notification-ui';
 import KnowledgeProjectionWorkspaceView from '@memoflow/app-vue/modules/repository/views/KnowledgeProjectionWorkspaceView.vue';
 import UserSettingsView from '@memoflow/app-vue/modules/setting/views/UserSettingsView.vue';

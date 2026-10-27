@@ -4930,7 +4930,7 @@
       ]
     },
     {
-      "path": "packages/app-vue/src/modules/routine/components/RoutineCapsulePreview.spec.ts",
+      "path": "packages/routine-ui/src/components/RoutineCapsulePreview.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/app-vue/vitest.config.ts"
@@ -4940,7 +4940,7 @@
       ]
     },
     {
-      "path": "packages/app-vue/src/modules/routine/components/RoutineEditorDialog.spec.ts",
+      "path": "packages/routine-ui/src/components/RoutineEditorDialog.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/app-vue/vitest.config.ts"
@@ -4950,7 +4950,7 @@
       ]
     },
     {
-      "path": "packages/app-vue/src/modules/routine/components/RoutineProfileDialog.spec.ts",
+      "path": "packages/routine-ui/src/components/RoutineProfileDialog.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/app-vue/vitest.config.ts"
@@ -4960,7 +4960,7 @@
       ]
     },
     {
-      "path": "packages/app-vue/src/modules/routine/components/RoutineUpcomingWidget.spec.ts",
+      "path": "packages/routine-ui/src/components/RoutineUpcomingWidget.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/app-vue/vitest.config.ts"
@@ -4970,7 +4970,7 @@
       ]
     },
     {
-      "path": "packages/app-vue/src/modules/routine/views/RoutineConfigurationView.spec.ts",
+      "path": "packages/routine-ui/src/views/RoutineConfigurationView.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/app-vue/vitest.config.ts"
@@ -13519,11 +13519,11 @@
       "packages/app-vue/src/modules/repository/router/index.spec.ts",
       "packages/app-vue/src/modules/repository/views/KnowledgeProjectionWorkspaceView.spec.ts",
       "packages/app-vue/src/modules/repository/views/LocalVaultWorkspaceView.spec.ts",
-      "packages/app-vue/src/modules/routine/components/RoutineCapsulePreview.spec.ts",
-      "packages/app-vue/src/modules/routine/components/RoutineEditorDialog.spec.ts",
-      "packages/app-vue/src/modules/routine/components/RoutineProfileDialog.spec.ts",
-      "packages/app-vue/src/modules/routine/components/RoutineUpcomingWidget.spec.ts",
-      "packages/app-vue/src/modules/routine/views/RoutineConfigurationView.spec.ts",
+      "packages/routine-ui/src/components/RoutineCapsulePreview.spec.ts",
+      "packages/routine-ui/src/components/RoutineEditorDialog.spec.ts",
+      "packages/routine-ui/src/components/RoutineProfileDialog.spec.ts",
+      "packages/routine-ui/src/components/RoutineUpcomingWidget.spec.ts",
+      "packages/routine-ui/src/views/RoutineConfigurationView.spec.ts",
       "packages/app-vue/src/modules/setting/components/AISettings.spec.ts",
       "packages/app-vue/src/modules/setting/components/AccountSettingsSection.spec.ts",
       "packages/app-vue/src/modules/setting/components/AntigravityAcpDownload.spec.ts",
