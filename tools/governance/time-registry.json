@@ -75,7 +75,7 @@
     },
     {
       "kind": "boundary",
-      "path": "packages/app-vue/src/modules/task/utils/format-task-duration.ts",
+      "path": "packages/task-ui/src/utils/format-task-duration.ts",
       "symbol": "formatTaskDuration",
       "reason": "L4 duration dictionary over Product Time duration splitting",
       "owner": "task"

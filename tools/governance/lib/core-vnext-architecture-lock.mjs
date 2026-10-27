@@ -130,7 +130,7 @@ const KR_MEASUREMENT_OWNER_FILES = new Set([
   'packages/data-portability/src/server/application/use-cases/importers/goal.importer.ts',
   'packages/data-portability/src/server/application/use-cases/projections/goal.projection.ts',
   'packages/data-portability/src/server/infrastructure/powersync/powersync-import-store.ts',
-  'packages/app-vue/src/modules/task/composables/useTaskGoalBindingOptions.ts',
+  'packages/task-ui/src/composables/useTaskGoalBindingOptions.ts',
   'packages/contracts/src/modules/ai/api/ai-goal-create-workflow.dto.ts',
   'packages/ai/src/server/mastra/agents/goal-planner.worker.ts',
   'packages/ai/src/server/mastra/workflows/apply-goal-plan.service.ts',
@@ -144,7 +144,7 @@ const KR_CLIENT_SURFACE_ROOTS = ['packages/goal-ui/src/', 'packages/app-react/sr
 const KR_CLIENT_SURFACE_FILES = new Set([
   'packages/app-react/src/components/GoalCard.tsx',
   'packages/app-react/src/hooks/useGoals.ts',
-  'packages/app-vue/src/modules/task/composables/useTaskGoalBindingOptions.ts',
+  'packages/task-ui/src/composables/useTaskGoalBindingOptions.ts',
 ]);
 
 export function isTestLikePath(relPath) {
@@ -368,7 +368,7 @@ export function findCoreVnextArchitectureLockViolations(files) {
     // Scheduler metadata may keep its unrelated tag/color semantics.
     if (
       startsWithAny(relPath, TASK_SOURCE_ROOTS) ||
-      relPath.startsWith('packages/app-vue/src/modules/task/') ||
+      relPath.startsWith('packages/task-ui/src/') ||
       relPath.startsWith('packages/app-react/src/screens/Task') ||
       relPath === 'packages/app-react/src/hooks/useTaskPlans.ts'
     ) {

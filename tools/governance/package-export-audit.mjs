@@ -46,6 +46,7 @@ const PACKAGE_SPECIFIC_SUBPATHS = {
   'notification-ui': ['./host'],
   'notification-contracts': ['./*'],
   'task-contracts': ['./*'],
+  'task-ui': ['./host', './composables/*', './components/*'],
   'schedule-contracts': ['./*'],
   'workspace-contracts': ['./*'],
   'relation-contracts': ['./*'],

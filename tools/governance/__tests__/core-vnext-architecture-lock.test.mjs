@@ -281,7 +281,7 @@ describe('HARD-7102 core vNext architecture lock', () => {
         content: `model TaskPlan { id String @id }\nmodel TaskLabel { labelId String }`,
       },
       {
-        relPath: 'packages/app-vue/src/modules/task/TaskView.vue',
+        relPath: 'packages/task-ui/src/views/TaskView.vue',
         content: `const labelIds = template.labels.map((label) => label.id);`,
       },
       {
