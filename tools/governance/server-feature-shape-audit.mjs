@@ -42,6 +42,7 @@ const SERVER_SEMANTIC_CORE_DIRS = new Map([['setting', ['preferences']]]);
  * instead of an in-package `src/client` directory.
  */
 const STANDALONE_CLIENT_PACKAGES = new Map([
+  ['account', 'account-client'],
   ['goal', 'goal-client'],
   ['schedule', 'schedule-client'],
   ['notification', 'notification-client'],

@@ -251,6 +251,7 @@ export function createSharedConfig(options: SharedConfigOptions) {
   const workspaceRoot = path.resolve(projectRoot, '../..');
   const commonWorkspacePackages = [
     'account',
+    'account-client',
     'account-contracts',
     'agent-gateway',
     'ai',

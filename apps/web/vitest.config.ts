@@ -20,6 +20,7 @@ const sharedConfig = createSharedConfig({
     '@memoflow/app-vue/web-bootstrap': '../../packages/app-vue/src/web-bootstrap.ts',
     '@memoflow/cloud-auth': '../../packages/cloud-auth/src/index.ts',
     '@memoflow/app-vue/web-i18n': '../../packages/app-vue/src/web-i18n.ts',
+    '@memoflow/account-client': '../../packages/account-client/src/index.ts',
     '@memoflow/schedule-client': '../../packages/schedule-client/src/index.ts',
     '@memoflow/notification-client': '../../packages/notification-client/src/index.ts',
     '@memoflow/routine-client': '../../packages/routine-client/src/index.ts',

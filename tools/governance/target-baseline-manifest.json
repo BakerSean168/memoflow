@@ -94,7 +94,8 @@
     "routine-client": "runtime-lib",
     "routine-contracts": "runtime-lib",
     "routine-ui": "ui-lib",
-    "account-contracts": "runtime-lib"
+    "account-contracts": "runtime-lib",
+    "account-client": "runtime-lib"
   },
   "exemptions": [
     {

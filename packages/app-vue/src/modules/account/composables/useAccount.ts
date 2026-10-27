@@ -62,7 +62,7 @@ export function useAccount() {
     const result = await accountService.getMyProfile();
     accountStore.setLoading(false);
     if (result.ok) {
-      accountStore.setCurrentAccount(result.data.account.toDTO());
+      accountStore.setCurrentAccount(result.data.account);
       viewCloudIdentity.value = result.data.cloudIdentity;
       return true;
     } else {
@@ -77,7 +77,7 @@ export function useAccount() {
     const result = await accountService.updateMyProfile(req);
     accountStore.setLoading(false);
     if (result.ok) {
-      accountStore.setCurrentAccount(result.data.account.toDTO());
+      accountStore.setCurrentAccount(result.data.account);
       viewCloudIdentity.value = result.data.cloudIdentity;
       toast.success(t('account.toast.profileUpdated'));
       return true;

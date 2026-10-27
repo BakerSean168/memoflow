@@ -44,6 +44,7 @@ const PACKAGE_SPECIFIC_SUBPATHS = {
   'goal-ui': ['./composables/useGoal', './host'],
   'notification-client': [],
   'routine-client': [],
+  'account-client': [],
   'routine-contracts': ['./method-library'],
   'notification-ui': ['./host'],
   'routine-ui': [
@@ -55,6 +56,7 @@ const PACKAGE_SPECIFIC_SUBPATHS = {
   ],
   'notification-contracts': ['./*'],
   'account-contracts': ['./*'],
+  account: ['./api', './electron'],
   'schedule-contracts': ['./*'],
   'workspace-contracts': ['./*'],
   'relation-contracts': ['./*'],

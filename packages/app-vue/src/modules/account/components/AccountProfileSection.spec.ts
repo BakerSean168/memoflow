@@ -316,11 +316,11 @@ describe('AccountProfileSection', () => {
     const accountService = {
       getMyProfile: vi.fn().mockResolvedValue({
         ok: true,
-        data: { account: { toDTO: () => dto }, cloudIdentity: null },
+        data: { account: dto, cloudIdentity: null },
       }),
       updateMyProfile: vi.fn().mockResolvedValue({
         ok: true,
-        data: { account: { toDTO: () => dto }, cloudIdentity: null },
+        data: { account: dto, cloudIdentity: null },
       }),
     } as unknown as IAccountService;
 
@@ -357,11 +357,11 @@ describe('AccountProfileSection', () => {
     const accountService = {
       getMyProfile: vi.fn().mockResolvedValue({
         ok: true,
-        data: { account: { toDTO: () => dto }, cloudIdentity: null },
+        data: { account: dto, cloudIdentity: null },
       }),
       updateMyProfile: vi.fn().mockResolvedValue({
         ok: true,
-        data: { account: { toDTO: () => dto }, cloudIdentity: null },
+        data: { account: dto, cloudIdentity: null },
       }),
     } as unknown as IAccountService;
 
@@ -395,7 +395,7 @@ describe('AccountProfileSection', () => {
     const accountService = {
       getMyProfile: vi.fn().mockResolvedValue({
         ok: true,
-        data: { account: { toDTO: () => dto }, cloudIdentity: null },
+        data: { account: dto, cloudIdentity: null },
       }),
       updateMyProfile: vi.fn(),
     } as unknown as IAccountService;

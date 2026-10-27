@@ -23,6 +23,7 @@ export const PROJECT_LAYERS = {
   // domain layer
   relation: 'domain',
   account: 'domain',
+  'account-client': 'domain',
   ai: 'domain',
   'data-portability': 'domain',
   goal: 'domain',

@@ -561,6 +561,9 @@ importers:
       '@memoflow/account':
         specifier: workspace:*
         version: link:../../packages/account
+      '@memoflow/account-client':
+        specifier: workspace:*
+        version: link:../../account-client
       '@memoflow/account-contracts':
         specifier: workspace:*
         version: link:../../packages/account-contracts
@@ -1065,6 +1068,9 @@ importers:
       '@memoflow/account':
         specifier: workspace:*
         version: link:../../packages/account
+      '@memoflow/account-client':
+        specifier: workspace:*
+        version: link:../../account-client
       '@memoflow/ai':
         specifier: workspace:*
         version: link:../../packages/ai
@@ -1216,12 +1222,6 @@ importers:
       '@memoflow/host-runtime':
         specifier: workspace:*
         version: link:../host-runtime
-      '@memoflow/http-client':
-        specifier: workspace:*
-        version: link:../http-client
-      '@memoflow/ipc-client':
-        specifier: workspace:*
-        version: link:../ipc-client
       '@memoflow/operations-contracts':
         specifier: workspace:*
         version: link:../operations-contracts
@@ -1408,6 +1408,9 @@ importers:
       '@memoflow/account':
         specifier: workspace:*
         version: link:../account
+      '@memoflow/account-client':
+        specifier: workspace:*
+        version: link:../account-client
       '@memoflow/account-contracts':
         specifier: workspace:*
         version: link:../account-contracts
@@ -1526,6 +1529,9 @@ importers:
       '@memoflow/account':
         specifier: workspace:*
         version: link:../account
+      '@memoflow/account-client':
+        specifier: workspace:*
+        version: link:../account-client
       '@memoflow/account-contracts':
         specifier: workspace:*
         version: link:../account-contracts
