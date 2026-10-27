@@ -187,8 +187,16 @@ describe('HARD-7102 core vNext architecture lock', () => {
         content: `findByKeyResultId(identityId, keyResultId);`,
       },
       {
-        relPath: 'packages/task/src/domain-client/aggregates/task-plan.ts',
+        relPath: 'packages/task-client/src/domain-client/aggregates/task-plan.ts',
         content: `return { keyResultId: String(binding.keyResultId) };`,
+      },
+      {
+        relPath: 'packages/task-client/src/domain-client/legacy-classification.ts',
+        content: `function read(template) { return template.tags; }`,
+      },
+      {
+        relPath: 'packages/task-client/src/infrastructure-client/legacy-kr-query.ts',
+        content: `findByKeyResultId(identityId, keyResultId);`,
       },
     );
     const kinds = new Set(violations.map((v) => v.kind));

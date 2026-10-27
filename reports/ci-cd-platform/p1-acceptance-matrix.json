@@ -1005,6 +1005,8 @@
           "setting",
           "shared-primitives",
           "task",
+          "task-client",
+          "task-contracts",
           "time",
           "transport-contracts",
           "ui-core",
@@ -1062,6 +1064,8 @@
           "setting",
           "shared-primitives",
           "task",
+          "task-client",
+          "task-contracts",
           "time",
           "transport-contracts",
           "ui-core",
@@ -1120,6 +1124,8 @@
           "setting",
           "shared-primitives",
           "task",
+          "task-client",
+          "task-contracts",
           "test-system-v2",
           "time",
           "transport-contracts",
@@ -1144,6 +1150,8 @@
           "schedule-client",
           "schedule-contracts",
           "shared-primitives",
+          "task-client",
+          "task-contracts",
           "transport-contracts",
           "workspace-contracts"
         ],
@@ -1276,6 +1284,8 @@
           "setting:build",
           "shared-primitives:build",
           "task:build",
+          "task-client:build",
+          "task-contracts:build",
           "time:build",
           "transport-contracts:build",
           "ui-core:build",
@@ -1331,6 +1341,8 @@
           "setting:typecheck",
           "shared-primitives:typecheck",
           "task:typecheck",
+          "task-client:typecheck",
+          "task-contracts:typecheck",
           "time:typecheck",
           "transport-contracts:typecheck",
           "ui-core:typecheck",
@@ -1380,6 +1392,8 @@
           "schedule-client:test:contract",
           "schedule-contracts:test:contract",
           "shared-primitives:test:contract",
+          "task-client:test:contract",
+          "task-contracts:test:contract",
           "transport-contracts:test:contract",
           "workspace-contracts:test:contract"
         ]
@@ -1471,6 +1485,8 @@
           "setting",
           "shared-primitives",
           "task",
+          "task-client",
+          "task-contracts",
           "time",
           "transport-contracts",
           "ui-core",
@@ -1528,6 +1544,8 @@
           "setting",
           "shared-primitives",
           "task",
+          "task-client",
+          "task-contracts",
           "time",
           "transport-contracts",
           "ui-core",
@@ -1586,6 +1604,8 @@
           "setting",
           "shared-primitives",
           "task",
+          "task-client",
+          "task-contracts",
           "test-system-v2",
           "time",
           "transport-contracts",
@@ -1610,6 +1630,8 @@
           "schedule-client",
           "schedule-contracts",
           "shared-primitives",
+          "task-client",
+          "task-contracts",
           "transport-contracts",
           "workspace-contracts"
         ],
@@ -1742,6 +1764,8 @@
           "setting:build",
           "shared-primitives:build",
           "task:build",
+          "task-client:build",
+          "task-contracts:build",
           "time:build",
           "transport-contracts:build",
           "ui-core:build",
@@ -1797,6 +1821,8 @@
           "setting:typecheck",
           "shared-primitives:typecheck",
           "task:typecheck",
+          "task-client:typecheck",
+          "task-contracts:typecheck",
           "time:typecheck",
           "transport-contracts:typecheck",
           "ui-core:typecheck",
@@ -1846,6 +1872,8 @@
           "schedule-client:test:contract",
           "schedule-contracts:test:contract",
           "shared-primitives:test:contract",
+          "task-client:test:contract",
+          "task-contracts:test:contract",
           "transport-contracts:test:contract",
           "workspace-contracts:test:contract"
         ]
@@ -1887,7 +1915,7 @@
         }
       ]
     },
-    "manifestDigest": "43ec160cb52c010b092f5067ce0dd7329e0d57236dd517aaef6c077e813ddf9f",
+    "manifestDigest": "0f90ea0b1bda8c9a553eaf69a84d415e5d52000990f882240c43cbde083a60a6",
     "skips": {},
     "receiptExecution": "unverified: replay computes the real Nx plan; it does not execute product suites"
   },
@@ -1944,6 +1972,8 @@
           "setting",
           "shared-primitives",
           "task",
+          "task-client",
+          "task-contracts",
           "time",
           "transport-contracts",
           "ui-core",
@@ -2001,6 +2031,8 @@
           "setting",
           "shared-primitives",
           "task",
+          "task-client",
+          "task-contracts",
           "time",
           "transport-contracts",
           "ui-core",
@@ -2059,6 +2091,8 @@
           "setting",
           "shared-primitives",
           "task",
+          "task-client",
+          "task-contracts",
           "test-system-v2",
           "time",
           "transport-contracts",
@@ -2083,6 +2117,8 @@
           "schedule-client",
           "schedule-contracts",
           "shared-primitives",
+          "task-client",
+          "task-contracts",
           "transport-contracts",
           "workspace-contracts"
         ],
@@ -2215,6 +2251,8 @@
           "setting:build",
           "shared-primitives:build",
           "task:build",
+          "task-client:build",
+          "task-contracts:build",
           "time:build",
           "transport-contracts:build",
           "ui-core:build",
@@ -2270,6 +2308,8 @@
           "setting:typecheck",
           "shared-primitives:typecheck",
           "task:typecheck",
+          "task-client:typecheck",
+          "task-contracts:typecheck",
           "time:typecheck",
           "transport-contracts:typecheck",
           "ui-core:typecheck",
@@ -2319,6 +2359,8 @@
           "schedule-client:test:contract",
           "schedule-contracts:test:contract",
           "shared-primitives:test:contract",
+          "task-client:test:contract",
+          "task-contracts:test:contract",
           "transport-contracts:test:contract",
           "workspace-contracts:test:contract"
         ]
@@ -2410,6 +2452,8 @@
           "setting",
           "shared-primitives",
           "task",
+          "task-client",
+          "task-contracts",
           "time",
           "transport-contracts",
           "ui-core",
@@ -2467,6 +2511,8 @@
           "setting",
           "shared-primitives",
           "task",
+          "task-client",
+          "task-contracts",
           "time",
           "transport-contracts",
           "ui-core",
@@ -2525,6 +2571,8 @@
           "setting",
           "shared-primitives",
           "task",
+          "task-client",
+          "task-contracts",
           "test-system-v2",
           "time",
           "transport-contracts",
@@ -2549,6 +2597,8 @@
           "schedule-client",
           "schedule-contracts",
           "shared-primitives",
+          "task-client",
+          "task-contracts",
           "transport-contracts",
           "workspace-contracts"
         ],
@@ -2681,6 +2731,8 @@
           "setting:build",
           "shared-primitives:build",
           "task:build",
+          "task-client:build",
+          "task-contracts:build",
           "time:build",
           "transport-contracts:build",
           "ui-core:build",
@@ -2736,6 +2788,8 @@
           "setting:typecheck",
           "shared-primitives:typecheck",
           "task:typecheck",
+          "task-client:typecheck",
+          "task-contracts:typecheck",
           "time:typecheck",
           "transport-contracts:typecheck",
           "ui-core:typecheck",
@@ -2785,6 +2839,8 @@
           "schedule-client:test:contract",
           "schedule-contracts:test:contract",
           "shared-primitives:test:contract",
+          "task-client:test:contract",
+          "task-contracts:test:contract",
           "transport-contracts:test:contract",
           "workspace-contracts:test:contract"
         ]
@@ -2826,7 +2882,7 @@
         }
       ]
     },
-    "manifestDigest": "f20173f4bf901546064dc43e1cadcd607ab032d31bca89a71e4f019c174a4b9f",
+    "manifestDigest": "0c14461819cccb781b44d2595dec60acd10327a25cbfa4bb7aac4cd026a79d6b",
     "skips": {},
     "receiptExecution": "unverified: replay computes the real Nx plan; it does not execute product suites"
   },
@@ -2985,6 +3041,8 @@
           "setting",
           "shared-primitives",
           "task",
+          "task-client",
+          "task-contracts",
           "time",
           "transport-contracts",
           "ui-core",
@@ -3042,6 +3100,8 @@
           "setting",
           "shared-primitives",
           "task",
+          "task-client",
+          "task-contracts",
           "time",
           "transport-contracts",
           "ui-core",
@@ -3100,6 +3160,8 @@
           "setting",
           "shared-primitives",
           "task",
+          "task-client",
+          "task-contracts",
           "test-system-v2",
           "time",
           "transport-contracts",
@@ -3124,6 +3186,8 @@
           "schedule-client",
           "schedule-contracts",
           "shared-primitives",
+          "task-client",
+          "task-contracts",
           "transport-contracts",
           "workspace-contracts"
         ],
@@ -3256,6 +3320,8 @@
           "setting:build",
           "shared-primitives:build",
           "task:build",
+          "task-client:build",
+          "task-contracts:build",
           "time:build",
           "transport-contracts:build",
           "ui-core:build",
@@ -3311,6 +3377,8 @@
           "setting:typecheck",
           "shared-primitives:typecheck",
           "task:typecheck",
+          "task-client:typecheck",
+          "task-contracts:typecheck",
           "time:typecheck",
           "transport-contracts:typecheck",
           "ui-core:typecheck",
@@ -3361,6 +3429,8 @@
           "schedule-client:test:contract",
           "schedule-contracts:test:contract",
           "shared-primitives:test:contract",
+          "task-client:test:contract",
+          "task-contracts:test:contract",
           "transport-contracts:test:contract",
           "workspace-contracts:test:contract"
         ]
@@ -3453,6 +3523,8 @@
           "setting",
           "shared-primitives",
           "task",
+          "task-client",
+          "task-contracts",
           "time",
           "transport-contracts",
           "ui-core",
@@ -3510,6 +3582,8 @@
           "setting",
           "shared-primitives",
           "task",
+          "task-client",
+          "task-contracts",
           "time",
           "transport-contracts",
           "ui-core",
@@ -3568,6 +3642,8 @@
           "setting",
           "shared-primitives",
           "task",
+          "task-client",
+          "task-contracts",
           "test-system-v2",
           "time",
           "transport-contracts",
@@ -3592,6 +3668,8 @@
           "schedule-client",
           "schedule-contracts",
           "shared-primitives",
+          "task-client",
+          "task-contracts",
           "transport-contracts",
           "workspace-contracts"
         ],
@@ -3724,6 +3802,8 @@
           "setting:build",
           "shared-primitives:build",
           "task:build",
+          "task-client:build",
+          "task-contracts:build",
           "time:build",
           "transport-contracts:build",
           "ui-core:build",
@@ -3779,6 +3859,8 @@
           "setting:typecheck",
           "shared-primitives:typecheck",
           "task:typecheck",
+          "task-client:typecheck",
+          "task-contracts:typecheck",
           "time:typecheck",
           "transport-contracts:typecheck",
           "ui-core:typecheck",
@@ -3829,6 +3911,8 @@
           "schedule-client:test:contract",
           "schedule-contracts:test:contract",
           "shared-primitives:test:contract",
+          "task-client:test:contract",
+          "task-contracts:test:contract",
           "transport-contracts:test:contract",
           "workspace-contracts:test:contract"
         ]
@@ -3871,63 +3955,38 @@
         }
       ]
     },
-    "manifestDigest": "1f4d08ba97e220c392adbbbc6acc9cdf55092f0b23591936a9ad9eefedcd8cd7",
+    "manifestDigest": "5083c495916a07f1b082463b3b2b683c618c5446d13323cb32e6bfa83c18b23a",
     "skips": {},
     "receiptExecution": "unverified: replay computes the real Nx plan; it does not execute product suites"
   },
   {
     "id": "taskClient",
-    "files": ["packages/task/src/client/index.ts"],
+    "files": ["packages/task-client/src/index.ts"],
     "expected": {
       "full": false,
       "targets": {
-        "build": [
-          "account",
-          "api",
-          "app-vue",
-          "desktop",
-          "governance-tools",
-          "notification",
-          "schedule-orchestration",
-          "task",
-          "ui-storybook",
-          "web"
-        ],
+        "build": ["app-vue", "desktop", "governance-tools", "task-client", "ui-storybook", "web"],
         "typecheck": [
-          "account",
-          "api",
           "app-react",
           "app-vue",
           "desktop",
           "mobile",
-          "notification",
-          "schedule-orchestration",
-          "task",
+          "task-client",
           "ui-storybook",
           "web"
         ],
-        "test": [
-          "account",
-          "api",
-          "app-vue",
-          "desktop",
-          "governance-tools",
-          "notification",
-          "schedule-orchestration",
-          "task",
-          "web"
-        ],
-        "test:contract": [],
-        "test:smoke": ["api"],
-        "test:integration": ["account", "api", "notification", "task"],
+        "test": ["app-vue", "desktop", "governance-tools", "task-client", "web"],
+        "test:contract": ["task-client"],
+        "test:smoke": [],
+        "test:integration": [],
         "test:boundary": ["desktop"],
         "test:ipc": ["desktop"],
         "test:main": ["desktop"],
-        "test:perf": ["task"],
+        "test:perf": [],
         "test:interaction": ["ui-storybook"],
         "e2e:ai-provider": ["web"],
         "e2e:visual-regression": ["web"],
-        "test:coverage": ["account", "api", "app-vue", "notification", "task"]
+        "test:coverage": ["app-vue"]
       },
       "jobs": {
         "lint": [
@@ -3936,115 +3995,64 @@
           "workspace:sync",
           "memoflow:governance-check"
         ],
-        "unit-1": ["task:test", "account:test", "schedule-orchestration:test"],
-        "unit-2": ["desktop:test"],
-        "unit-3": ["notification:test"],
+        "unit-1": [],
+        "unit-2": [],
+        "unit-3": ["desktop:test"],
         "build": [
-          "account:build",
-          "api:build",
           "app-vue:build",
           "desktop:build",
-          "notification:build",
-          "schedule-orchestration:build",
-          "task:build",
+          "task-client:build",
           "ui-storybook:build",
           "web:build",
-          "account:typecheck",
-          "api:typecheck",
           "app-react:typecheck",
           "app-vue:typecheck",
           "desktop:typecheck",
           "mobile:typecheck",
-          "notification:typecheck",
-          "schedule-orchestration:typecheck",
-          "task:typecheck",
+          "task-client:typecheck",
           "ui-storybook:typecheck",
           "web:typecheck"
         ],
         "web-unit-1": ["app-vue:test#1/2", "web:test"],
         "web-unit-2": ["app-vue:test#2/2"],
-        "server-unit": ["api:test"],
-        "verification-children": [
-          "desktop:test:ipc",
-          "desktop:test:main",
-          "api:test:smoke",
-          "account:test:integration",
-          "api:test:integration",
-          "notification:test:integration",
-          "task:test:integration"
-        ],
+        "server-unit": [],
+        "verification-children": ["desktop:test:ipc", "desktop:test:main"],
         "web-visual": ["web:e2e:visual-regression"],
         "component-browser": ["ui-storybook:test:interaction"],
-        "contract": []
+        "contract": ["task-client:test:contract"]
       },
       "serverShards": [
         {
-          "id": "1/2",
-          "keys": ["api:test:integration", "desktop:test:main", "desktop:test:ipc"],
-          "estimatedMs": 33529
-        },
-        {
-          "id": "2/2",
-          "keys": [
-            "account:test:integration",
-            "notification:test:integration",
-            "task:test:integration",
-            "api:test:smoke"
-          ],
-          "estimatedMs": 31460
+          "id": "1/1",
+          "keys": ["desktop:test:main", "desktop:test:ipc"],
+          "estimatedMs": 7849
         }
       ]
     },
     "actual": {
       "full": false,
       "targets": {
-        "build": [
-          "account",
-          "api",
-          "app-vue",
-          "desktop",
-          "governance-tools",
-          "notification",
-          "schedule-orchestration",
-          "task",
-          "ui-storybook",
-          "web"
-        ],
+        "build": ["app-vue", "desktop", "governance-tools", "task-client", "ui-storybook", "web"],
         "typecheck": [
-          "account",
-          "api",
           "app-react",
           "app-vue",
           "desktop",
           "mobile",
-          "notification",
-          "schedule-orchestration",
-          "task",
+          "task-client",
           "ui-storybook",
           "web"
         ],
-        "test": [
-          "account",
-          "api",
-          "app-vue",
-          "desktop",
-          "governance-tools",
-          "notification",
-          "schedule-orchestration",
-          "task",
-          "web"
-        ],
-        "test:contract": [],
-        "test:smoke": ["api"],
-        "test:integration": ["account", "api", "notification", "task"],
+        "test": ["app-vue", "desktop", "governance-tools", "task-client", "web"],
+        "test:contract": ["task-client"],
+        "test:smoke": [],
+        "test:integration": [],
         "test:boundary": ["desktop"],
         "test:ipc": ["desktop"],
         "test:main": ["desktop"],
-        "test:perf": ["task"],
+        "test:perf": [],
         "test:interaction": ["ui-storybook"],
         "e2e:ai-provider": ["web"],
         "e2e:visual-regression": ["web"],
-        "test:coverage": ["account", "api", "app-vue", "notification", "task"]
+        "test:coverage": ["app-vue"]
       },
       "jobs": {
         "lint": [
@@ -4053,68 +4061,44 @@
           "workspace:sync",
           "memoflow:governance-check"
         ],
-        "unit-1": ["task:test", "account:test", "schedule-orchestration:test"],
-        "unit-2": ["desktop:test"],
-        "unit-3": ["notification:test"],
+        "unit-1": [],
+        "unit-2": [],
+        "unit-3": ["desktop:test"],
         "build": [
-          "account:build",
-          "api:build",
           "app-vue:build",
           "desktop:build",
-          "notification:build",
-          "schedule-orchestration:build",
-          "task:build",
+          "task-client:build",
           "ui-storybook:build",
           "web:build",
-          "account:typecheck",
-          "api:typecheck",
           "app-react:typecheck",
           "app-vue:typecheck",
           "desktop:typecheck",
           "mobile:typecheck",
-          "notification:typecheck",
-          "schedule-orchestration:typecheck",
-          "task:typecheck",
+          "task-client:typecheck",
           "ui-storybook:typecheck",
           "web:typecheck"
         ],
         "web-unit-1": ["app-vue:test#1/2", "web:test"],
         "web-unit-2": ["app-vue:test#2/2"],
-        "server-unit": ["api:test"],
-        "verification-children": [
-          "desktop:test:ipc",
-          "desktop:test:main",
-          "api:test:smoke",
-          "account:test:integration",
-          "api:test:integration",
-          "notification:test:integration",
-          "task:test:integration"
-        ],
+        "server-unit": [],
+        "verification-children": ["desktop:test:ipc", "desktop:test:main"],
         "web-visual": ["web:e2e:visual-regression"],
         "component-browser": ["ui-storybook:test:interaction"],
-        "contract": []
+        "contract": ["task-client:test:contract"]
       },
       "serverShards": [
         {
-          "id": "1/2",
-          "keys": ["api:test:integration", "desktop:test:main", "desktop:test:ipc"],
-          "estimatedMs": 33529
-        },
-        {
-          "id": "2/2",
-          "keys": [
-            "account:test:integration",
-            "notification:test:integration",
-            "task:test:integration",
-            "api:test:smoke"
-          ],
-          "estimatedMs": 31460
+          "id": "1/1",
+          "keys": ["desktop:test:main", "desktop:test:ipc"],
+          "estimatedMs": 7849
         }
       ]
     },
-    "manifestDigest": "6cc288f14a90459a437c694378bb06746d445ecca63fc567d0c9f4cec643165d",
+    "manifestDigest": "8bed92ead518d71bad6ed9f4bd3d64d72ae6e9b49371b6fe05d892f575588560",
     "skips": {
-      "contract": "no affected primary tasks for this resource pool"
+      "unit-1": "no affected primary tasks for this resource pool",
+      "unit-2": "no affected primary tasks for this resource pool",
+      "server-unit": "no affected primary tasks for this resource pool"
     },
     "receiptExecution": "unverified: replay computes the real Nx plan; it does not execute product suites"
   }

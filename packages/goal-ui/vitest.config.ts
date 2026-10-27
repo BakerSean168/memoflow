@@ -22,7 +22,7 @@ export default mergeConfig(
       '@memoflow/ipc-client': '../../packages/ipc-client/src/index.ts',
       '@memoflow/ai/client': '../../packages/ai/src/client/index.ts',
       '@memoflow/ai/testing': '../../packages/ai/src/testing/index.ts',
-      '@memoflow/task/client': '../../packages/task/src/client/index.ts',
+      '@memoflow/task-client': '../../packages/task-client/src/index.ts',
       '@memoflow/repository/client': '../../packages/repository/src/client/index.ts',
     },
     setupFiles: ['../app-vue/src/test/setup.ts'],

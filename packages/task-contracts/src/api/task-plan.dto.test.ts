@@ -72,7 +72,7 @@ describe('task plan contracts', () => {
     const client = readFileSync(resolve(__dirname, '../aggregates/task-plan-client.ts'), 'utf8');
     const server = readFileSync(resolve(__dirname, '../aggregates/task-plan-server.ts'), 'utf8');
     const domainClient = readFileSync(
-      resolve(__dirname, '../../../task/src/domain-client/aggregates/task-plan.ts'),
+      resolve(__dirname, '../../../task-client/src/domain-client/aggregates/task-plan.ts'),
       'utf8',
     );
     const request = readFileSync(resolve(__dirname, 'task-plan.dto.ts'), 'utf8');

@@ -27,7 +27,7 @@
     "@memoflow/schedule-contracts": "workspace:*",
     "@memoflow/setting": "workspace:*",
     "@memoflow/shared-primitives": "workspace:*",
-    "@memoflow/task": "workspace:*",
+    "@memoflow/task-client": "workspace:*",
     "@memoflow/task-contracts": "workspace:*",
     "@memoflow/time": "workspace:*",
     "@memoflow/ui-react-native": "workspace:*",

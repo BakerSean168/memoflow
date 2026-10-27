@@ -43,6 +43,7 @@
       "@memoflow/notification-contracts/*": ["./packages/notification-contracts/src/*.ts"],
       "@memoflow/task-contracts": ["./packages/task-contracts/src/index.ts"],
       "@memoflow/task-contracts/*": ["./packages/task-contracts/src/*.ts"],
+      "@memoflow/task-client": ["./packages/task-client/src/index.ts"],
       "@memoflow/schedule-contracts": ["./packages/schedule-contracts/src/index.ts"],
       "@memoflow/schedule-contracts/*": ["./packages/schedule-contracts/src/*.ts"],
       "@memoflow/schedule-client": ["./packages/schedule-client/src/index.ts"],

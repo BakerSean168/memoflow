@@ -180,7 +180,7 @@ const config: StorybookConfig = {
               'packages/host-runtime/src/electron-ipc/index.ts',
             ],
             ['@memoflow/host-runtime', 'packages/host-runtime/src/index.ts'],
-            ['@memoflow/task/client', 'packages/task/src/client/index.ts'],
+            ['@memoflow/task-client', 'packages/task-client/src/index.ts'],
             ['@memoflow/time', 'packages/time/src/index.ts'],
             ['@memoflow/utils/domain', 'packages/utils/src/domain/index.ts'],
             ['@memoflow/utils/errors', 'packages/utils/src/errors/index.ts'],

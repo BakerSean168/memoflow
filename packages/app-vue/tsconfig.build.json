@@ -26,7 +26,7 @@
       "@memoflow/schedule-client": ["../schedule-client/dist/index.d.ts"],
       "@memoflow/notification/client": ["../notification/dist/client/index.d.ts"],
       "@memoflow/reminder/client": ["../reminder/dist/client/index.d.ts"],
-      "@memoflow/task/client": ["../task/dist/client/index.d.ts"],
+      "@memoflow/task-client": ["../task-client/dist/index.d.ts"],
       "@memoflow/repository/client": ["../repository/dist/client/index.d.ts"]
     }
   }

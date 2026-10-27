@@ -657,6 +657,9 @@ importers:
       '@memoflow/task':
         specifier: workspace:*
         version: link:../../packages/task
+      '@memoflow/task-client':
+        specifier: workspace:*
+        version: link:../../packages/task-client
       '@memoflow/task-contracts':
         specifier: workspace:*
         version: link:../../packages/task-contracts
@@ -1107,9 +1110,9 @@ importers:
       '@memoflow/setting':
         specifier: workspace:*
         version: link:../../packages/setting
-      '@memoflow/task':
+      '@memoflow/task-client':
         specifier: workspace:*
-        version: link:../../packages/task
+        version: link:../../packages/task-client
       '@memoflow/task-contracts':
         specifier: workspace:*
         version: link:../../packages/task-contracts
@@ -1386,9 +1389,9 @@ importers:
       '@memoflow/shared-primitives':
         specifier: workspace:*
         version: link:../shared-primitives
-      '@memoflow/task':
+      '@memoflow/task-client':
         specifier: workspace:*
-        version: link:../task
+        version: link:../task-client
       '@memoflow/task-contracts':
         specifier: workspace:*
         version: link:../task-contracts
@@ -1525,9 +1528,9 @@ importers:
       '@memoflow/shared-primitives':
         specifier: workspace:*
         version: link:../shared-primitives
-      '@memoflow/task':
+      '@memoflow/task-client':
         specifier: workspace:*
-        version: link:../task
+        version: link:../task-client
       '@memoflow/task-contracts':
         specifier: workspace:*
         version: link:../task-contracts
@@ -2726,12 +2729,6 @@ importers:
       '@memoflow/host-runtime':
         specifier: workspace:*
         version: link:../host-runtime
-      '@memoflow/http-client':
-        specifier: workspace:*
-        version: link:../http-client
-      '@memoflow/ipc-client':
-        specifier: workspace:*
-        version: link:../ipc-client
       '@memoflow/label-contracts':
         specifier: workspace:*
         version: link:../label-contracts
@@ -2787,6 +2784,36 @@ importers:
       jsonwebtoken:
         specifier: ^9.0.3
         version: 9.0.3
+
+  packages/task-client:
+    dependencies:
+      '@memoflow/contracts':
+        specifier: workspace:*
+        version: link:../contracts
+      '@memoflow/goal-contracts':
+        specifier: workspace:*
+        version: link:../goal-contracts
+      '@memoflow/http-client':
+        specifier: workspace:*
+        version: link:../http-client
+      '@memoflow/ipc-client':
+        specifier: workspace:*
+        version: link:../ipc-client
+      '@memoflow/label-contracts':
+        specifier: workspace:*
+        version: link:../label-contracts
+      '@memoflow/shared-primitives':
+        specifier: workspace:*
+        version: link:../shared-primitives
+      '@memoflow/task-contracts':
+        specifier: workspace:*
+        version: link:../task-contracts
+      '@memoflow/utils':
+        specifier: workspace:*
+        version: link:../utils
+      '@memoflow/workspace-contracts':
+        specifier: workspace:*
+        version: link:../workspace-contracts
 
   packages/task-contracts:
     dependencies:

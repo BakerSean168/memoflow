@@ -1113,7 +1113,7 @@
     },
     {
       "id": "r296",
-      "path": "packages/task/src/application-client/task-client-port-facade-dual.surface.spec.ts",
+      "path": "packages/task-client/src/application-client/task-client-port-facade-dual.surface.spec.ts",
       "package": "packages/task",
       "class": "retired",
       "sole": "task-client-service.ts",

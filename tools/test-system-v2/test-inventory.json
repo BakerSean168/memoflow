@@ -10426,6 +10426,30 @@
       "measurementCollectors": []
     },
     {
+      "path": "packages/task-client/src/application-client/task-client-service.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/task-client/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/task-client/src/domain-client/aggregates/task-plan.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/task-client/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/task-client/src/infrastructure-client/adapters/http/task-occurrence-http.adapter.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/task-client/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "packages/task-contracts/src/api/complete-task-occurrence.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -10572,26 +10596,6 @@
       ]
     },
     {
-      "path": "packages/task/src/application-client/task-client-service.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/task/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/task/vitest.config.ts"
-      ]
-    },
-    {
-      "path": "packages/task/src/domain-client/aggregates/task-plan.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/task/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/task/vitest.config.ts"
-      ]
-    },
-    {
       "path": "packages/task/src/electron/authenticated-ipc.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -10613,16 +10617,6 @@
     },
     {
       "path": "packages/task/src/import-safety.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/task/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/task/vitest.config.ts"
-      ]
-    },
-    {
-      "path": "packages/task/src/infrastructure-client/adapters/http/task-occurrence-http.adapter.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/task/vitest.config.ts"
@@ -12540,7 +12534,7 @@
       "type": "measurement",
       "suite": "coverage",
       "runner": "vitest",
-      "fileCount": 84
+      "fileCount": 81
     },
     {
       "id": "packages/task/vitest.mappers.config.ts",
@@ -13182,6 +13176,13 @@
       "fileCount": 3
     },
     {
+      "id": "packages/task-client/vitest.config.ts",
+      "type": "primary",
+      "suite": "unit",
+      "runner": "vitest",
+      "fileCount": 3
+    },
+    {
       "id": "packages/task-contracts/vitest.config.ts",
       "type": "primary",
       "suite": "unit",
@@ -13193,7 +13194,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 84
+      "fileCount": 81
     },
     {
       "id": "packages/time/vitest.config.ts",
@@ -13894,12 +13895,9 @@
       "packages/task/src/api/routes/task-occurrence.routes.spec.ts",
       "packages/task/src/api/routes/task-plan.routes.spec.ts",
       "packages/task/src/api/routes/task-void-success-envelope.surface.spec.ts",
-      "packages/task/src/application-client/task-client-service.spec.ts",
-      "packages/task/src/domain-client/aggregates/task-plan.spec.ts",
       "packages/task/src/electron/authenticated-ipc.spec.ts",
       "packages/task/src/electron/index.spec.ts",
       "packages/task/src/import-safety.spec.ts",
-      "packages/task/src/infrastructure-client/adapters/http/task-occurrence-http.adapter.spec.ts",
       "packages/task/src/server/application/outbox/task-goal-outbox-dispatcher.test.ts",
       "packages/task/src/server/application/services/task-canonical-restore.service.spec.ts",
       "packages/task/src/server/application/services/task-workspace-query.service.spec.ts",

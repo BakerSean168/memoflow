@@ -17,7 +17,7 @@
       "@memoflow/notification/client": ["../../packages/notification/dist/client/index.d.ts"],
       "@memoflow/reminder/client": ["../../packages/reminder/dist/client/index.d.ts"],
       "@memoflow/repository/client": ["../../packages/repository/dist/client/index.d.ts"],
-      "@memoflow/task/client": ["../../packages/task/dist/client/index.d.ts"],
+      "@memoflow/task-client": ["../../packages/task-client/dist/index.d.ts"],
       "@memoflow/data-portability/client": [
         "../../packages/data-portability/dist/client/index.d.ts"
       ],

@@ -4,7 +4,7 @@ import type { ImportanceLevel } from '@memoflow/shared-primitives';
 import type { GoalId, KeyResultId } from '@memoflow/goal-contracts';
 import type { LabelClientDTO } from '@memoflow/label-contracts';
 import type { TaskPlanClientDTO, TaskPlanStatus, TaskPlanSchedule } from '@memoflow/task-contracts';
-import type { TaskPlan } from '@memoflow/task/client';
+import type { TaskPlan } from '@memoflow/task-client';
 import { presentErrorMessage } from '@memoflow/http-client';
 
 import { useAppSession } from './useAppSession';

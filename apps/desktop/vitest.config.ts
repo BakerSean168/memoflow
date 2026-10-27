@@ -17,7 +17,7 @@ const desktopTestWorkspaceEntries = [
   ['@memoflow/goal/electron', 'packages/goal/src/electron/index.ts'],
   ['@memoflow/goal/schedule-execution', 'packages/goal/src/schedule-execution/index.ts'],
   ['@memoflow/goal/schedule-projection', 'packages/goal/src/schedule-projection/index.ts'],
-  ['@memoflow/task/client', 'packages/task/src/client/index.ts'],
+  ['@memoflow/task-client', 'packages/task-client/src/index.ts'],
   ['@memoflow/task/electron', 'packages/task/src/electron/index.ts'],
   ['@memoflow/task/schedule-execution', 'packages/task/src/schedule-execution/index.ts'],
   ['@memoflow/task/schedule-projection', 'packages/task/src/schedule-projection/index.ts'],

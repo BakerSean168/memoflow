@@ -26,7 +26,7 @@
       "@memoflow/goal/schedule-projection": [
         "../../packages/goal/src/schedule-projection/index.ts"
       ],
-      "@memoflow/task/client": ["../../packages/task/src/client/index.ts"],
+      "@memoflow/task-client": ["../../packages/task-client/src/index.ts"],
       "@memoflow/task/electron": ["../../packages/task/src/electron/index.ts"],
       "@memoflow/task/schedule-execution": ["../../packages/task/src/schedule-execution/index.ts"],
       "@memoflow/task/schedule-projection": [

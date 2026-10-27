@@ -50,6 +50,7 @@
     "@memoflow/scheduler": "workspace:*",
     "@memoflow/setting": "workspace:*",
     "@memoflow/task": "workspace:*",
+    "@memoflow/task-client": "workspace:*",
     "@memoflow/task-contracts": "workspace:*",
     "@memoflow/ui-vue-shadcn": "workspace:*",
     "@memoflow/utils": "workspace:*",

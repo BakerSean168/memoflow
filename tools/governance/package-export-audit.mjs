@@ -66,7 +66,6 @@ const PACKAGE_SPECIFIC_SUBPATHS = {
   ],
   contracts: [
     './agent-gateway',
-    './task',
     './relation',
     './routine',
     './repository',

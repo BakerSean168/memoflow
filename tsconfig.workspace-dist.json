@@ -47,6 +47,7 @@
       "@memoflow/notification-contracts/*": ["./packages/notification-contracts/dist/*.d.ts"],
       "@memoflow/task-contracts": ["./packages/task-contracts/dist/index.d.ts"],
       "@memoflow/task-contracts/*": ["./packages/task-contracts/dist/*.d.ts"],
+      "@memoflow/task-client": ["./packages/task-client/dist/index.d.ts"],
       "@memoflow/schedule-contracts": ["./packages/schedule-contracts/dist/index.d.ts"],
       "@memoflow/schedule-contracts/*": ["./packages/schedule-contracts/dist/*.d.ts"],
       "@memoflow/schedule-client": ["./packages/schedule-client/dist/index.d.ts"],

@@ -19,7 +19,7 @@
       "@memoflow/ai/ports": ["../../packages/ai/dist/ports/index.d.ts"],
       "@memoflow/goal-client": ["../../packages/goal-client/dist/index.d.ts"],
       "@memoflow/goal/electron": ["../../packages/goal/dist/electron/index.d.ts"],
-      "@memoflow/task/client": ["../../packages/task/dist/client/index.d.ts"],
+      "@memoflow/task-client": ["../../packages/task-client/dist/index.d.ts"],
       "@memoflow/task/electron": ["../../packages/task/dist/electron/index.d.ts"],
       "@memoflow/schedule-client": ["../../packages/schedule-client/dist/index.d.ts"],
       "@memoflow/schedule/electron": ["../../packages/schedule/dist/electron/index.d.ts"],

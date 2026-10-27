@@ -102,7 +102,7 @@
     "@memoflow/schedule-ui": "workspace:*",
     "@memoflow/setting": "workspace:*",
     "@memoflow/shared-primitives": "workspace:*",
-    "@memoflow/task": "workspace:*",
+    "@memoflow/task-client": "workspace:*",
     "@memoflow/task-contracts": "workspace:*",
     "@memoflow/time": "workspace:*",
     "@memoflow/ui-vue-shadcn": "workspace:*",

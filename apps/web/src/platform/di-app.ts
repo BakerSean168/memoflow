@@ -127,7 +127,7 @@ const aiRuntimeUsage = createLazyService(async () => {
 });
 
 const taskService = createLazyService(async () => {
-  const { createTaskHttpClient } = await import('@memoflow/task/client');
+  const { createTaskHttpClient } = await import('@memoflow/task-client');
   return createTaskHttpClient(resultHttpClient);
 });
 

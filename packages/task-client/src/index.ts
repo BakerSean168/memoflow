@@ -10,9 +10,9 @@ import {
   createTaskClientService,
   createTaskServiceFromHttpClient,
   type TaskClientPort,
-} from '../application-client';
-import { TaskOccurrence } from '../domain-client/aggregates/task-occurrence';
-import { TaskPlan } from '../domain-client/aggregates/task-plan';
+} from './application-client';
+import { TaskOccurrence } from './domain-client/aggregates/task-occurrence';
+import { TaskPlan } from './domain-client/aggregates/task-plan';
 import {
   TaskOccurrenceHttpAdapter,
   TaskPlanHttpAdapter,
@@ -20,7 +20,7 @@ import {
   createTaskOccurrenceHttpAdapter,
   createTaskPlanHttpAdapter,
   type TaskHttpAdapters,
-} from '../infrastructure-client/adapters/http';
+} from './infrastructure-client/adapters/http';
 import {
   TaskOccurrenceIpcAdapter,
   TaskPlanIpcAdapter,
@@ -28,13 +28,13 @@ import {
   createTaskOccurrenceIpcAdapter,
   createTaskPlanIpcAdapter,
   type TaskIpcAdapters,
-} from '../infrastructure-client/adapters/ipc';
+} from './infrastructure-client/adapters/ipc';
 import type {
   IResultIpcClient,
   ITaskOccurrenceApiClient,
   ITaskPlanApiClient,
   TaskPlanListParams,
-} from '../infrastructure-client/adapters/types';
+} from './infrastructure-client/adapters/types';
 
 export type {
   IResultHttpClient,

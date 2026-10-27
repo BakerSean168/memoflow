@@ -155,7 +155,7 @@ Product Governance Runtime 已由 ADR-113 退休，因此其已删除 dual/keep-
 | `retired`       | `packages/schedule/src/server/application/scheduler/patterns-scheduler-dual.surface.spec.ts`                                       |
 | `retired`       | `packages/setting/src/application-client/setting-client-port-dual.surface.spec.ts`                                                 |
 | `retired`       | `packages/task/src/api/routes/get-first-query-value-dual.surface.spec.ts`                                                          |
-| `retired`       | `packages/task/src/application-client/task-client-port-facade-dual.surface.spec.ts`                                                |
+| `retired`       | `packages/task-client/src/application-client/task-client-port-facade-dual.surface.spec.ts`                                         |
 | `retired`       | `packages/task/src/server/infrastructure/normalize-runtime-contributions-dual.surface.spec.ts`                                     |
 | `retired`       | `packages/task/src/testing/an-identity-id-dual.surface.spec.ts`                                                                    |
 | `retired`       | `packages/utils/src/frontend/delay-dual.surface.spec.ts`                                                                           |

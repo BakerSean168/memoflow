@@ -31,7 +31,7 @@ export default defineConfig(({ mode }) =>
         ...createWorkspaceSourceAliasEntries(workspace, [
           ['@memoflow/reminder/method-library', 'packages/reminder/src/method-library/index.ts'],
           ['@memoflow/utils/domain', 'packages/utils/src/domain/index.ts'],
-          ['@memoflow/task/client', 'packages/task/src/client/index.ts'],
+          ['@memoflow/task-client', 'packages/task-client/src/index.ts'],
           ['@memoflow/goal-client', 'packages/goal-client/src/index.ts'],
           ['@memoflow/goal-core/ids', 'packages/goal-core/src/ids.ts'],
           [
