@@ -67,6 +67,7 @@ COPY packages/schedule-contracts/package.json ./packages/schedule-contracts/pack
 COPY packages/scheduler/package.json ./packages/scheduler/package.json
 COPY packages/schedule-orchestration/package.json ./packages/schedule-orchestration/package.json
 COPY packages/setting/package.json ./packages/setting/package.json
+COPY packages/setting-contracts/package.json ./packages/setting-contracts/package.json
 COPY packages/shared-primitives/package.json ./packages/shared-primitives/package.json
 COPY packages/task/package.json ./packages/task/package.json
 COPY packages/test-utils/package.json ./packages/test-utils/package.json
@@ -120,6 +121,7 @@ COPY packages/schedule-contracts ./packages/schedule-contracts
 COPY packages/scheduler ./packages/scheduler
 COPY packages/schedule-orchestration ./packages/schedule-orchestration
 COPY packages/setting ./packages/setting
+COPY packages/setting-contracts ./packages/setting-contracts
 COPY packages/shared-primitives ./packages/shared-primitives
 COPY packages/task ./packages/task
 COPY packages/test-utils ./packages/test-utils
