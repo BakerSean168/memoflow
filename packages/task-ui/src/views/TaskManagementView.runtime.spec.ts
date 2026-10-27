@@ -78,7 +78,8 @@ vi.mock('../utils/task-occurrence-presentation', () => ({
   isTaskOccurrenceOverdue: () => false,
   sortTaskOccurrences: (rows: unknown[]) => rows,
 }));
-vi.mock('../../../shared/utils/product-time', () => ({
+vi.mock('@task-ui-test-host/shared/utils/product-time', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('@task-ui-test-host/shared/utils/product-time')>()),
   startOfDayMs: () => 1000,
   endOfDayMs: () => 2000,
   isTodayMs: () => true,

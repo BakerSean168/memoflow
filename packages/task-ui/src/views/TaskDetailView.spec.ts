@@ -50,7 +50,7 @@ vi.mock('../composables/useTaskGoalBindingOptions', () => ({
     loadKeyResults: vi.fn(),
   }),
 }));
-vi.mock('../../../shared/composables/useLabelCatalog', () => ({
+vi.mock('@task-ui-test-host/shared/composables/useLabelCatalog', () => ({
   useLabelCatalog: () => ({ options: ref([]), isLoading: ref(false), createLabel: vi.fn() }),
 }));
 

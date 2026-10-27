@@ -20,7 +20,7 @@ vi.mock('@memoflow/ui-vue-shadcn', async (importOriginal) => {
 });
 
 const mocks = vi.hoisted(() => ({ resolveNames: vi.fn(async () => ['resolved-label']) }));
-vi.mock('../../../../shared/composables/useLabelCatalog', async () => {
+vi.mock('@task-ui-test-host/shared/composables/useLabelCatalog', async () => {
   const { ref } = await import('vue');
   return {
     useLabelCatalog: () => ({
