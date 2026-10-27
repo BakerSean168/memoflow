@@ -567,9 +567,18 @@ export const domainResolveAliases = [
       './packages/schedule-orchestration/src/index.ts',
     ),
   },
-  { find: /^@memoflow\/cloud-auth-contracts\/(.+)$/, replacement: path.resolve(import.meta.dirname, './packages/cloud-auth-contracts/src/$1') },
-  { find: /^@memoflow\/agent-gateway$/, replacement: path.resolve(import.meta.dirname, './packages/agent-gateway/src/index.ts') },
-  { find: /^@memoflow\/agent-gateway\/server$/, replacement: path.resolve(import.meta.dirname, './packages/agent-gateway/src/server/index.ts') },
+  {
+    find: /^@memoflow\/cloud-auth-contracts\/(.+)$/,
+    replacement: path.resolve(import.meta.dirname, './packages/cloud-auth-contracts/src/$1'),
+  },
+  {
+    find: /^@memoflow\/agent-gateway$/,
+    replacement: path.resolve(import.meta.dirname, './packages/agent-gateway/src/index.ts'),
+  },
+  {
+    find: /^@memoflow\/agent-gateway\/server$/,
+    replacement: path.resolve(import.meta.dirname, './packages/agent-gateway/src/server/index.ts'),
+  },
   {
     find: /^@memoflow\/cloud-auth\/(.+)/,
     replacement: path.resolve(import.meta.dirname, './packages/cloud-auth/src/$1/index.ts'),

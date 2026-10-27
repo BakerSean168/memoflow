@@ -24,15 +24,15 @@ updated: 2026-10-19T00:00:00Z
 
 下列包及 API host 复用 R1/PAT/OAuth 与 Owner 契约；写入由 Owner 持有事务，assisted workflow 尚未发布。
 
-| 所在位置                                        | 责任                                                                  | 不承担                                           |
-| ----------------------------------------------- | --------------------------------------------------------------------- | ------------------------------------------------ |
-| `apps/api/src/modules/agent-gateway/`           | Gateway host composer、owner port wiring、root `/mcp` 注册            | 领域规则与协议重实现                             |
-| `packages/agent-gateway/`（support package）    | MCP adapter、入站能力调用、gateway-owned ports；server 子入口隔离 SDK | Goal/Task repository、OAuth 实现、Mastra runtime |
-| `packages/agent-gateway/src/contracts/` | 公开 tool input/output/失败与 descriptor 数据；从 owner schema 组合   | handler、SDK 类型、Prisma 类型                   |
-| `packages/cloud-auth/`                          | external grant/PAT 认证、provider ACL、撤销和登录集成                 | Goal/Task 权限规则                               |
-| `packages/goal/`、`packages/task/` 等           | application operation、ownership、事务、并发、领域事件                | MCP envelope 与 OAuth token                      |
-| `packages/ai/`                                  | Mastra adapter、assisted workflow 与原有内部 policy                   | 普通 MCP deterministic 命令的必经路径            |
-| `packages/database/` 与 host infra              | credential/receipt schema 和端口实现，由各语义 owner 使用             | Gateway 直接操作业务表                           |
+| 所在位置                                     | 责任                                                                  | 不承担                                           |
+| -------------------------------------------- | --------------------------------------------------------------------- | ------------------------------------------------ |
+| `apps/api/src/modules/agent-gateway/`        | Gateway host composer、owner port wiring、root `/mcp` 注册            | 领域规则与协议重实现                             |
+| `packages/agent-gateway/`（support package） | MCP adapter、入站能力调用、gateway-owned ports；server 子入口隔离 SDK | Goal/Task repository、OAuth 实现、Mastra runtime |
+| `packages/agent-gateway/src/contracts/`      | 公开 tool input/output/失败与 descriptor 数据；从 owner schema 组合   | handler、SDK 类型、Prisma 类型                   |
+| `packages/cloud-auth/`                       | external grant/PAT 认证、provider ACL、撤销和登录集成                 | Goal/Task 权限规则                               |
+| `packages/goal/`、`packages/task/` 等        | application operation、ownership、事务、并发、领域事件                | MCP envelope 与 OAuth token                      |
+| `packages/ai/`                               | Mastra adapter、assisted workflow 与原有内部 policy                   | 普通 MCP deterministic 命令的必经路径            |
+| `packages/database/` 与 host infra           | credential/receipt schema 和端口实现，由各语义 owner 使用             | Gateway 直接操作业务表                           |
 
 新包属于接入 support，不是虚构 bounded context；不建立 domain CRUD、同步模型或独立数据库。Goal slice 先使用具体类型与显式 handler；第二 owner 后才提取重复 descriptor/dispatcher。`@memoflow/capabilities` 独立包暂不创建。
 

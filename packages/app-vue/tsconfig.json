@@ -8,6 +8,10 @@
     "lib": ["ES2020", "DOM", "DOM.Iterable"],
     "types": ["node", "vite/client"],
     "paths": {
+      "@memoflow/cloud-auth-contracts": ["../cloud-auth-contracts/src/index.ts"],
+      "@memoflow/cloud-auth-contracts/*": ["../cloud-auth-contracts/src/*.ts"],
+      "@memoflow/agent-gateway": ["../agent-gateway/src/index.ts"],
+      "@memoflow/agent-gateway/*": ["../agent-gateway/src/*/index.ts"],
       "@/*": ["./src/*"],
       "@memoflow/goal-ui/host": ["../goal-ui/dist/goal-ui-host.d.ts"],
       "@memoflow/goal-ui": ["../goal-ui/dist/index.d.ts"],

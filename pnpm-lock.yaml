@@ -585,6 +585,9 @@ importers:
       '@memoflow/cloud-auth':
         specifier: workspace:*
         version: link:../../packages/cloud-auth
+      '@memoflow/cloud-auth-contracts':
+        specifier: workspace:*
+        version: link:../../packages/cloud-auth-contracts
       '@memoflow/contracts':
         specifier: workspace:*
         version: link:../../packages/contracts
@@ -1098,6 +1101,9 @@ importers:
       '@memoflow/account':
         specifier: workspace:*
         version: link:../../packages/account
+      '@memoflow/agent-gateway':
+        specifier: workspace:*
+        version: link:../../packages/agent-gateway
       '@memoflow/ai':
         specifier: workspace:*
         version: link:../../packages/ai
@@ -1110,6 +1116,9 @@ importers:
       '@memoflow/cloud-auth':
         specifier: workspace:*
         version: link:../../packages/cloud-auth
+      '@memoflow/cloud-auth-contracts':
+        specifier: workspace:*
+        version: link:../../packages/cloud-auth-contracts
       '@memoflow/contracts':
         specifier: workspace:*
         version: link:../../packages/contracts
@@ -1367,6 +1376,9 @@ importers:
       '@mastra/pg':
         specifier: 1.27.0
         version: 1.27.0(@mastra/core@1.70.0(@bufbuild/protobuf@2.15.0)(@grpc/grpc-js@1.14.4)(effect@3.20.0)(express@5.2.1(supports-color@10.2.2))(rxjs@7.8.2)(supports-color@10.2.2)(valibot@1.4.2(@typescript/typescript6@6.0.2))(zod-to-json-schema@3.25.2(zod@4.6.5))(zod@4.6.5))
+      '@memoflow/agent-gateway':
+        specifier: workspace:*
+        version: link:../agent-gateway
       '@memoflow/contracts':
         specifier: workspace:*
         version: link:../contracts
@@ -1449,6 +1461,9 @@ importers:
       '@memoflow/cloud-auth':
         specifier: workspace:*
         version: link:../cloud-auth
+      '@memoflow/cloud-auth-contracts':
+        specifier: workspace:*
+        version: link:../cloud-auth-contracts
       '@memoflow/contracts':
         specifier: workspace:*
         version: link:../contracts
@@ -1567,12 +1582,18 @@ importers:
       '@memoflow/account':
         specifier: workspace:*
         version: link:../account
+      '@memoflow/agent-gateway':
+        specifier: workspace:*
+        version: link:../agent-gateway
       '@memoflow/ai':
         specifier: workspace:*
         version: link:../ai
       '@memoflow/assets':
         specifier: workspace:*
         version: link:../assets
+      '@memoflow/cloud-auth-contracts':
+        specifier: workspace:*
+        version: link:../cloud-auth-contracts
       '@memoflow/contracts':
         specifier: workspace:*
         version: link:../contracts
@@ -1775,6 +1796,12 @@ importers:
       '@better-auth/prisma-adapter':
         specifier: 1.7.6
         version: 1.7.6(@better-auth/core@1.7.6(@better-auth/utils@0.4.2)(@better-fetch/fetch@1.3.2)(@opentelemetry/api@1.9.1)(better-call@1.4.0(zod@4.6.5))(jose@6.2.9)(kysely@0.29.4)(nanostores@1.4.2))(@better-auth/utils@0.4.2)(@prisma/client@7.10.0(@typescript/typescript6@6.0.2)(prisma@7.10.0(@types/react@19.2.14)(@typescript/typescript6@6.0.2)(better-sqlite3@13.0.3)(magicast@0.5.5)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)))(prisma@7.10.0(@types/react@19.2.14)(@typescript/typescript6@6.0.2)(better-sqlite3@13.0.3)(magicast@0.5.5)(react-dom@19.2.3(react@19.2.3))(react@19.2.3))
+      '@memoflow/agent-gateway':
+        specifier: workspace:*
+        version: link:../agent-gateway
+      '@memoflow/cloud-auth-contracts':
+        specifier: workspace:*
+        version: link:../cloud-auth-contracts
       '@memoflow/contracts':
         specifier: workspace:*
         version: link:../contracts
@@ -1824,6 +1851,18 @@ importers:
       '@types/nodemailer':
         specifier: ^8.0.2
         version: 8.0.2
+
+  packages/cloud-auth-contracts:
+    dependencies:
+      '@memoflow/shared-primitives':
+        specifier: workspace:*
+        version: link:../shared-primitives
+      '@memoflow/transport-contracts':
+        specifier: workspace:*
+        version: link:../transport-contracts
+      zod:
+        specifier: ^4.6.5
+        version: 4.6.5
 
   packages/contracts:
     dependencies:

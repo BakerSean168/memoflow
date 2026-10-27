@@ -7,7 +7,11 @@ import {
 } from './assisted';
 
 it('requires explicit pinned provider/model fee consent and a canonical review token, never approved:true', () => {
-  const start = { idempotencyKey: 'retry', kind: 'task.create', input: { idea: 'Ship report' } };
+  const start = {
+    idempotencyKey: 'retry',
+    kind: 'task.create',
+    input: { idea: 'Ship report' },
+  };
   expect(AssistedStartSchema.safeParse(start).success).toBe(false);
   expect(
     AssistedStartSchema.safeParse({

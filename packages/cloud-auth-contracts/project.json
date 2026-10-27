@@ -5,6 +5,7 @@
   "sourceRoot": "packages/cloud-auth-contracts/src",
   "tags": [
     "scope:shared",
+    "scope:authentication",
     "type:lib",
     "layer:shared",
     "tier:platform-contracts"
@@ -18,9 +19,7 @@
     },
     "build": {
       "executor": "nx:run-commands",
-      "outputs": [
-        "{workspaceRoot}/packages/cloud-auth-contracts/dist"
-      ],
+      "outputs": ["{workspaceRoot}/packages/cloud-auth-contracts/dist"],
       "cache": true,
       "options": {
         "command": "node ../../node_modules/tsup/dist/cli-default.js && tsc -p tsconfig.build.json",
@@ -36,20 +35,13 @@
     },
     "lint": {
       "options": {
-        "args": [
-          "**/*.{ts,js}"
-        ]
+        "args": ["**/*.{ts,js}"]
       }
     },
     "test": {
       "executor": "nx:run-commands",
-      "outputs": [
-        "{workspaceRoot}/coverage/{projectRoot}"
-      ],
-      "inputs": [
-        "default",
-        "^production"
-      ],
+      "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
+      "inputs": ["default", "^production"],
       "cache": true,
       "options": {
         "command": "node ../../node_modules/vitest/vitest.mjs run --config vitest.config.ts",
@@ -66,14 +58,9 @@
     },
     "test:contract": {
       "executor": "nx:run-commands",
-      "inputs": [
-        "default",
-        "^production"
-      ],
+      "inputs": ["default", "^production"],
       "cache": true,
-      "dependsOn": [
-        "build"
-      ],
+      "dependsOn": ["build"],
       "options": {
         "command": "node ../../node_modules/vitest/vitest.mjs run --config vitest.config.ts",
         "cwd": "packages/cloud-auth-contracts"

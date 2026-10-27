@@ -1,9 +1,6 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { createExternalAgentHttpClient } from './external-agent-client';
-import {
-  ExternalAgentFailureSchema,
-  externalAgentFailure,
-} from '@memoflow/agent-gateway';
+import { ExternalAgentFailureSchema, externalAgentFailure } from '@memoflow/agent-gateway';
 
 afterEach(() => vi.unstubAllGlobals());
 describe('external agent management failure contract', () => {
