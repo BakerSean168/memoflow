@@ -9,6 +9,7 @@ import {
   createReliableMessagingContractsAliasEntries,
   createOperationsContractsAliasEntries,
   createNotificationContractsAliasEntries,
+  createTaskContractsAliasEntries,
   createContractsAliasEntries,
   createUiVueSourceAliasEntries,
   createWorkspaceSourceAliasEntries,
@@ -51,6 +52,7 @@ const config: StorybookConfig = {
           ...createReliableMessagingContractsAliasEntries(workspace),
           ...createOperationsContractsAliasEntries(workspace),
           ...createNotificationContractsAliasEntries(workspace),
+          ...createTaskContractsAliasEntries(workspace),
           ...createContractsAliasEntries(workspace),
           ...createWorkspaceSourceAliasEntries(workspace, [
             ['@memoflow/domain-shared/shared', 'packages/domain-shared/src/shared/index.ts'],
@@ -153,6 +155,7 @@ const config: StorybookConfig = {
             ['@memoflow/task-ui', 'packages/task-ui/src'],
             ['@memoflow/goal-ui', 'packages/goal-ui/src/index.ts'],
             ['@goal-ui-test-host', 'packages/app-vue/src'],
+            ['@task-ui-test-host', 'packages/app-vue/src'],
             ['@memoflow/workspace-contracts', 'packages/workspace-contracts/src/index.ts'],
             [
               '@memoflow/desktop-contracts/auth-context',

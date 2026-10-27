@@ -45,7 +45,8 @@ vi.mock('@memoflow/goal-ui', () => ({
   useGoalStore: () => ({ setInitialized: vi.fn() }),
 }));
 
-vi.mock('@memoflow/task-ui', () => ({
+vi.mock('@memoflow/task-ui', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('@memoflow/task-ui')>()),
   useTaskStore: () => ({ setInitialized: vi.fn() }),
 }));
 
