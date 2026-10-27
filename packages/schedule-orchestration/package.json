@@ -22,7 +22,8 @@
     "@memoflow/schedule-contracts": "workspace:*",
     "@memoflow/scheduler": "workspace:*",
     "@memoflow/task": "workspace:*",
-    "@memoflow/utils": "workspace:*"
+    "@memoflow/utils": "workspace:*",
+    "@memoflow/routine-contracts": "workspace:*"
   },
   "devDependencies": {
     "tsup": "^8.3.5",

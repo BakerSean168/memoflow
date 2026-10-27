@@ -2709,6 +2709,9 @@ importers:
       '@memoflow/routine':
         specifier: workspace:*
         version: link:../routine
+      '@memoflow/routine-contracts':
+        specifier: workspace:*
+        version: link:../routine-contracts
       '@memoflow/schedule-contracts':
         specifier: workspace:*
         version: link:../schedule-contracts
