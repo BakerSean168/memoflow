@@ -1,16 +1,22 @@
 {
   "version": 1,
-  "review": "P1.1 #628: explicit existing Nx project owners, exact merged Build/Types, Provider acceptance Nightly-only + P2 #634 label-contracts registration + P2 #634 goal-contracts / workspace-contracts / data-portability-contracts registration + P2 #630 relation-contracts registration + P2 #630 notification-contracts registration + #630 routine domain rename and contracts/client/UI extraction (real Nx replay) + #630 routine domain rename and contracts/client/UI extraction (real Nx replay) + #630 account domain contracts package extraction (real Nx replay) + #630 account domain UI extraction (real Nx replay)",
+  "review": "P1.1 #628: explicit existing Nx project owners, exact merged Build/Types, Provider acceptance Nightly-only + P2 #634 label-contracts registration + P2 #634 goal-contracts / workspace-contracts / data-portability-contracts registration + P2 #630 relation-contracts registration + P2 #630 notification-contracts registration + P2 #635 task-contracts registration + #630 routine domain rename and contracts/client/UI extraction (real Nx replay) + #630 repository contracts/client/UI merge (real Nx replay) + #630 account domain contracts package extraction (real Nx replay) + #630 account domain UI extraction (real Nx replay)",
   "cases": [
     {
       "id": "docs",
-      "files": ["docs/internals/testing/README.md"],
+      "files": [
+        "docs/internals/testing/README.md"
+      ],
       "expected": {
         "full": false,
         "targets": {
-          "build": ["governance-tools"],
+          "build": [
+            "governance-tools"
+          ],
           "typecheck": [],
-          "test": ["governance-tools"],
+          "test": [
+            "governance-tools"
+          ],
           "test:contract": [],
           "test:smoke": [],
           "test:integration": [],
@@ -47,34 +53,71 @@
     },
     {
       "id": "chat",
-      "files": ["packages/app-vue/src/modules/ai/views/AIChatView.vue"],
+      "files": [
+        "packages/app-vue/src/di/ai-ui-host.ts"
+      ],
       "expected": {
         "full": false,
         "targets": {
           "build": [
             "account-ui",
+            "ai-ui",
             "app-vue",
             "desktop",
             "goal-ui",
             "governance-tools",
             "notification-ui",
+            "repository-ui",
             "routine-ui",
+            "task-ui",
             "ui-storybook",
             "web"
           ],
-          "typecheck": ["app-vue", "desktop", "ui-storybook", "web"],
-          "test": ["app-vue", "desktop", "governance-tools", "web"],
-          "test:contract": ["account-ui", "goal-ui", "notification-ui", "routine-ui"],
+          "typecheck": [
+            "app-vue",
+            "desktop",
+            "ui-storybook",
+            "web"
+          ],
+          "test": [
+            "app-vue",
+            "desktop",
+            "governance-tools",
+            "web"
+          ],
+          "test:contract": [
+            "account-ui",
+            "ai-ui",
+            "goal-ui",
+            "notification-ui",
+            "repository-ui",
+            "routine-ui",
+            "task-ui"
+          ],
           "test:smoke": [],
           "test:integration": [],
-          "test:boundary": ["desktop"],
-          "test:ipc": ["desktop"],
-          "test:main": ["desktop"],
+          "test:boundary": [
+            "desktop"
+          ],
+          "test:ipc": [
+            "desktop"
+          ],
+          "test:main": [
+            "desktop"
+          ],
           "test:perf": [],
-          "test:interaction": ["ui-storybook"],
-          "e2e:ai-provider": ["web"],
-          "e2e:visual-regression": ["web"],
-          "test:coverage": ["app-vue"]
+          "test:interaction": [
+            "ui-storybook"
+          ],
+          "e2e:ai-provider": [
+            "web"
+          ],
+          "e2e:visual-regression": [
+            "web"
+          ],
+          "test:coverage": [
+            "app-vue"
+          ]
         },
         "jobs": {
           "lint": [
@@ -85,14 +128,19 @@
           ],
           "unit-1": [],
           "unit-2": [],
-          "unit-3": ["desktop:test"],
+          "unit-3": [
+            "desktop:test"
+          ],
           "build": [
             "account-ui:build",
+            "ai-ui:build",
             "app-vue:build",
             "desktop:build",
             "goal-ui:build",
             "notification-ui:build",
+            "repository-ui:build",
             "routine-ui:build",
+            "task-ui:build",
             "ui-storybook:build",
             "web:build",
             "app-vue:typecheck",
@@ -100,23 +148,41 @@
             "ui-storybook:typecheck",
             "web:typecheck"
           ],
-          "web-unit-1": ["app-vue:test#1/2", "web:test"],
-          "web-unit-2": ["app-vue:test#2/2"],
+          "web-unit-1": [
+            "app-vue:test#1/2",
+            "web:test"
+          ],
+          "web-unit-2": [
+            "app-vue:test#2/2"
+          ],
           "server-unit": [],
-          "verification-children": ["desktop:test:ipc", "desktop:test:main"],
-          "web-visual": ["web:e2e:visual-regression"],
-          "component-browser": ["ui-storybook:test:interaction"],
+          "verification-children": [
+            "desktop:test:ipc",
+            "desktop:test:main"
+          ],
+          "web-visual": [
+            "web:e2e:visual-regression"
+          ],
+          "component-browser": [
+            "ui-storybook:test:interaction"
+          ],
           "contract": [
             "account-ui:test:contract",
+            "ai-ui:test:contract",
             "goal-ui:test:contract",
             "notification-ui:test:contract",
-            "routine-ui:test:contract"
+            "repository-ui:test:contract",
+            "routine-ui:test:contract",
+            "task-ui:test:contract"
           ]
         },
         "serverShards": [
           {
             "id": "1/1",
-            "keys": ["desktop:test:main", "desktop:test:ipc"],
+            "keys": [
+              "desktop:test:main",
+              "desktop:test:ipc"
+            ],
             "estimatedMs": 7849
           }
         ]
@@ -124,33 +190,79 @@
     },
     {
       "id": "aiServer",
-      "files": ["packages/ai/src/server/transport/ai-chat.controller.ts"],
+      "files": [
+        "packages/ai/src/server/transport/ai-chat.controller.ts"
+      ],
       "expected": {
         "full": false,
         "targets": {
-          "build": ["ai", "api", "app-vue", "desktop", "governance-tools", "ui-storybook", "web"],
+          "build": [
+            "ai",
+            "ai-ui",
+            "api",
+            "app-vue",
+            "desktop",
+            "governance-tools",
+            "setting-ui",
+            "ui-storybook",
+            "web"
+          ],
           "typecheck": [
             "ai",
+            "ai-ui",
             "api",
             "app-react",
             "app-vue",
             "desktop",
             "mobile",
+            "setting-ui",
             "ui-storybook",
             "web"
           ],
-          "test": ["ai", "api", "app-vue", "desktop", "governance-tools", "web"],
-          "test:contract": [],
-          "test:smoke": ["api"],
-          "test:integration": ["ai", "api"],
-          "test:boundary": ["desktop"],
-          "test:ipc": ["desktop"],
-          "test:main": ["desktop"],
+          "test": [
+            "ai",
+            "ai-ui",
+            "api",
+            "app-vue",
+            "desktop",
+            "governance-tools",
+            "setting-ui",
+            "web"
+          ],
+          "test:contract": [
+            "ai-ui"
+          ],
+          "test:smoke": [
+            "api"
+          ],
+          "test:integration": [
+            "ai",
+            "api"
+          ],
+          "test:boundary": [
+            "desktop"
+          ],
+          "test:ipc": [
+            "desktop"
+          ],
+          "test:main": [
+            "desktop"
+          ],
           "test:perf": [],
-          "test:interaction": ["ui-storybook"],
-          "e2e:ai-provider": ["web"],
-          "e2e:visual-regression": ["web"],
-          "test:coverage": ["ai", "api", "app-vue"]
+          "test:interaction": [
+            "ui-storybook"
+          ],
+          "e2e:ai-provider": [
+            "web"
+          ],
+          "e2e:visual-regression": [
+            "web"
+          ],
+          "test:coverage": [
+            "ai",
+            "api",
+            "app-vue"
+          ]
         },
         "jobs": {
           "lint": [
@@ -160,27 +272,43 @@
             "memoflow:governance-check"
           ],
           "unit-1": [],
-          "unit-2": [],
-          "unit-3": ["desktop:test", "ai:test"],
+          "unit-2": [
+            "setting-ui:test"
+          ],
+          "unit-3": [
+            "desktop:test",
+            "ai:test"
+          ],
           "build": [
             "ai:build",
+            "ai-ui:build",
             "api:build",
             "app-vue:build",
             "desktop:build",
+            "setting-ui:build",
             "ui-storybook:build",
             "web:build",
             "ai:typecheck",
+            "ai-ui:typecheck",
             "api:typecheck",
             "app-react:typecheck",
             "app-vue:typecheck",
             "desktop:typecheck",
             "mobile:typecheck",
+            "setting-ui:typecheck",
             "ui-storybook:typecheck",
             "web:typecheck"
           ],
-          "web-unit-1": ["app-vue:test#1/2", "web:test"],
-          "web-unit-2": ["app-vue:test#2/2"],
-          "server-unit": ["api:test"],
+          "web-unit-1": [
+            "app-vue:test#1/2",
+            "web:test"
+          ],
+          "web-unit-2": [
+            "app-vue:test#2/2"
+          ],
+          "server-unit": [
+            "api:test"
+          ],
           "verification-children": [
             "desktop:test:ipc",
             "desktop:test:main",
@@ -190,7 +318,9 @@
           ],
           "web-visual": [],
           "component-browser": [],
-          "contract": []
+          "contract": [
+            "ai-ui:test:contract"
+          ]
         },
         "serverShards": [
           {
@@ -209,23 +339,46 @@
     },
     {
       "id": "desktopMain",
-      "files": ["apps/desktop/src/main/bootstrap.ts"],
+      "files": [
+        "apps/desktop/src/main/bootstrap.ts"
+      ],
       "expected": {
         "full": false,
         "targets": {
-          "build": ["desktop", "governance-tools", "web"],
-          "typecheck": ["desktop", "web"],
-          "test": ["desktop", "governance-tools", "web"],
+          "build": [
+            "desktop",
+            "governance-tools",
+            "web"
+          ],
+          "typecheck": [
+            "desktop",
+            "web"
+          ],
+          "test": [
+            "desktop",
+            "governance-tools",
+            "web"
+          ],
           "test:contract": [],
           "test:smoke": [],
           "test:integration": [],
-          "test:boundary": ["desktop"],
-          "test:ipc": ["desktop"],
-          "test:main": ["desktop"],
+          "test:boundary": [
+            "desktop"
+          ],
+          "test:ipc": [
+            "desktop"
+          ],
+          "test:main": [
+            "desktop"
+          ],
           "test:perf": [],
           "test:interaction": [],
-          "e2e:ai-provider": ["web"],
-          "e2e:visual-regression": ["web"],
+          "e2e:ai-provider": [
+            "web"
+          ],
+          "e2e:visual-regression": [
+            "web"
+          ],
           "test:coverage": []
         },
         "jobs": {
@@ -235,14 +388,26 @@
             "workspace:sync",
             "memoflow:governance-check"
           ],
-          "unit-1": ["desktop:test"],
+          "unit-1": [
+            "desktop:test"
+          ],
           "unit-2": [],
           "unit-3": [],
-          "build": ["desktop:build", "web:build", "desktop:typecheck", "web:typecheck"],
-          "web-unit-1": ["web:test"],
+          "build": [
+            "desktop:build",
+            "web:build",
+            "desktop:typecheck",
+            "web:typecheck"
+          ],
+          "web-unit-1": [
+            "web:test"
+          ],
           "web-unit-2": [],
           "server-unit": [],
-          "verification-children": ["desktop:test:ipc", "desktop:test:main"],
+          "verification-children": [
+            "desktop:test:ipc",
+            "desktop:test:main"
+          ],
           "web-visual": [],
           "component-browser": [],
           "contract": []
@@ -250,7 +415,10 @@
         "serverShards": [
           {
             "id": "1/1",
-            "keys": ["desktop:test:main", "desktop:test:ipc"],
+            "keys": [
+              "desktop:test:main",
+              "desktop:test:ipc"
+            ],
             "estimatedMs": 7849
           }
         ]
@@ -258,23 +426,46 @@
     },
     {
       "id": "desktopRenderer",
-      "files": ["apps/desktop/src/renderer/App.vue"],
+      "files": [
+        "apps/desktop/src/renderer/App.vue"
+      ],
       "expected": {
         "full": false,
         "targets": {
-          "build": ["desktop", "governance-tools", "web"],
-          "typecheck": ["desktop", "web"],
-          "test": ["desktop", "governance-tools", "web"],
+          "build": [
+            "desktop",
+            "governance-tools",
+            "web"
+          ],
+          "typecheck": [
+            "desktop",
+            "web"
+          ],
+          "test": [
+            "desktop",
+            "governance-tools",
+            "web"
+          ],
           "test:contract": [],
           "test:smoke": [],
           "test:integration": [],
-          "test:boundary": ["desktop"],
-          "test:ipc": ["desktop"],
-          "test:main": ["desktop"],
+          "test:boundary": [
+            "desktop"
+          ],
+          "test:ipc": [
+            "desktop"
+          ],
+          "test:main": [
+            "desktop"
+          ],
           "test:perf": [],
           "test:interaction": [],
-          "e2e:ai-provider": ["web"],
-          "e2e:visual-regression": ["web"],
+          "e2e:ai-provider": [
+            "web"
+          ],
+          "e2e:visual-regression": [
+            "web"
+          ],
           "test:coverage": []
         },
         "jobs": {
@@ -284,22 +475,39 @@
             "workspace:sync",
             "memoflow:governance-check"
           ],
-          "unit-1": ["desktop:test"],
+          "unit-1": [
+            "desktop:test"
+          ],
           "unit-2": [],
           "unit-3": [],
-          "build": ["desktop:build", "web:build", "desktop:typecheck", "web:typecheck"],
-          "web-unit-1": ["web:test"],
+          "build": [
+            "desktop:build",
+            "web:build",
+            "desktop:typecheck",
+            "web:typecheck"
+          ],
+          "web-unit-1": [
+            "web:test"
+          ],
           "web-unit-2": [],
           "server-unit": [],
-          "verification-children": ["desktop:test:ipc", "desktop:test:main"],
-          "web-visual": ["web:e2e:visual-regression"],
+          "verification-children": [
+            "desktop:test:ipc",
+            "desktop:test:main"
+          ],
+          "web-visual": [
+            "web:e2e:visual-regression"
+          ],
           "component-browser": [],
           "contract": []
         },
         "serverShards": [
           {
             "id": "1/1",
-            "keys": ["desktop:test:main", "desktop:test:ipc"],
+            "keys": [
+              "desktop:test:main",
+              "desktop:test:ipc"
+            ],
             "estimatedMs": 7849
           }
         ]
@@ -307,16 +515,30 @@
     },
     {
       "id": "apiRoute",
-      "files": ["apps/api/src/shared/infrastructure/http/routes/infrastructure-routes.ts"],
+      "files": [
+        "apps/api/src/shared/infrastructure/http/routes/infrastructure-routes.ts"
+      ],
       "expected": {
         "full": false,
         "targets": {
-          "build": ["api", "governance-tools"],
-          "typecheck": ["api"],
-          "test": ["api", "governance-tools"],
+          "build": [
+            "api",
+            "governance-tools"
+          ],
+          "typecheck": [
+            "api"
+          ],
+          "test": [
+            "api",
+            "governance-tools"
+          ],
           "test:contract": [],
-          "test:smoke": ["api"],
-          "test:integration": ["api"],
+          "test:smoke": [
+            "api"
+          ],
+          "test:integration": [
+            "api"
+          ],
           "test:boundary": [],
           "test:ipc": [],
           "test:main": [],
@@ -324,7 +546,9 @@
           "test:interaction": [],
           "e2e:ai-provider": [],
           "e2e:visual-regression": [],
-          "test:coverage": ["api"]
+          "test:coverage": [
+            "api"
+          ]
         },
         "jobs": {
           "lint": [
@@ -336,11 +560,19 @@
           "unit-1": [],
           "unit-2": [],
           "unit-3": [],
-          "build": ["api:build", "api:typecheck"],
+          "build": [
+            "api:build",
+            "api:typecheck"
+          ],
           "web-unit-1": [],
           "web-unit-2": [],
-          "server-unit": ["api:test"],
-          "verification-children": ["api:test:smoke", "api:test:integration"],
+          "server-unit": [
+            "api:test"
+          ],
+          "verification-children": [
+            "api:test:smoke",
+            "api:test:integration"
+          ],
           "web-visual": [],
           "component-browser": [],
           "contract": []
@@ -348,7 +580,10 @@
         "serverShards": [
           {
             "id": "1/1",
-            "keys": ["api:test:integration", "api:test:smoke"],
+            "keys": [
+              "api:test:integration",
+              "api:test:smoke"
+            ],
             "estimatedMs": 30330
           }
         ]
@@ -356,7 +591,9 @@
     },
     {
       "id": "taskServer",
-      "files": ["packages/task/src/server/transport/task.transport-handlers.ts"],
+      "files": [
+        "packages/task/src/server/transport/task.transport-handlers.ts"
+      ],
       "expected": {
         "full": false,
         "targets": {
@@ -397,16 +634,43 @@
             "web"
           ],
           "test:contract": [],
-          "test:smoke": ["api"],
-          "test:integration": ["account", "api", "notification", "task"],
-          "test:boundary": ["desktop"],
-          "test:ipc": ["desktop"],
-          "test:main": ["desktop"],
-          "test:perf": ["task"],
-          "test:interaction": ["ui-storybook"],
-          "e2e:ai-provider": ["web"],
-          "e2e:visual-regression": ["web"],
-          "test:coverage": ["account", "api", "app-vue", "notification", "task"]
+          "test:smoke": [
+            "api"
+          ],
+          "test:integration": [
+            "account",
+            "api",
+            "notification",
+            "task"
+          ],
+          "test:boundary": [
+            "desktop"
+          ],
+          "test:ipc": [
+            "desktop"
+          ],
+          "test:main": [
+            "desktop"
+          ],
+          "test:perf": [
+            "task"
+          ],
+          "test:interaction": [
+            "ui-storybook"
+          ],
+          "e2e:ai-provider": [
+            "web"
+          ],
+          "e2e:visual-regression": [
+            "web"
+          ],
+          "test:coverage": [
+            "account",
+            "api",
+            "app-vue",
+            "notification",
+            "task"
+          ]
         },
         "jobs": {
           "lint": [
@@ -415,9 +679,17 @@
             "workspace:sync",
             "memoflow:governance-check"
           ],
-          "unit-1": ["task:test", "account:test", "schedule-orchestration:test"],
-          "unit-2": ["desktop:test"],
-          "unit-3": ["notification:test"],
+          "unit-1": [
+            "task:test",
+            "account:test",
+            "schedule-orchestration:test"
+          ],
+          "unit-2": [
+            "desktop:test"
+          ],
+          "unit-3": [
+            "notification:test"
+          ],
           "build": [
             "account:build",
             "api:build",
@@ -440,9 +712,16 @@
             "ui-storybook:typecheck",
             "web:typecheck"
           ],
-          "web-unit-1": ["app-vue:test#1/2", "web:test"],
-          "web-unit-2": ["app-vue:test#2/2"],
-          "server-unit": ["api:test"],
+          "web-unit-1": [
+            "app-vue:test#1/2",
+            "web:test"
+          ],
+          "web-unit-2": [
+            "app-vue:test#2/2"
+          ],
+          "server-unit": [
+            "api:test"
+          ],
           "verification-children": [
             "desktop:test:ipc",
             "desktop:test:main",
@@ -459,7 +738,11 @@
         "serverShards": [
           {
             "id": "1/2",
-            "keys": ["api:test:integration", "desktop:test:main", "desktop:test:ipc"],
+            "keys": [
+              "api:test:integration",
+              "desktop:test:main",
+              "desktop:test:ipc"
+            ],
             "estimatedMs": 33529
           },
           {
@@ -477,7 +760,9 @@
     },
     {
       "id": "aiContract",
-      "files": ["packages/contracts/src/modules/ai/api/response-schemas.ts"],
+      "files": [
+        "packages/contracts/src/shared/protocol.ts"
+      ],
       "expected": {
         "full": true,
         "targets": {
@@ -489,10 +774,14 @@
             "account-ui",
             "agent-gateway",
             "ai",
+            "ai-client",
+            "ai-contracts",
+            "ai-ui",
             "api",
             "app-vue",
             "assets",
             "cloud-auth",
+            "cloud-auth-contracts",
             "contracts",
             "data-portability",
             "data-portability-contracts",
@@ -523,6 +812,9 @@
             "relation-contracts",
             "reliable-messaging-contracts",
             "repository",
+            "repository-client",
+            "repository-contracts",
+            "repository-ui",
             "routine",
             "routine-client",
             "routine-contracts",
@@ -534,8 +826,14 @@
             "schedule-ui",
             "scheduler",
             "setting",
+            "setting-client",
+            "setting-contracts",
+            "setting-ui",
             "shared-primitives",
             "task",
+            "task-client",
+            "task-contracts",
+            "task-ui",
             "time",
             "transport-contracts",
             "ui-core",
@@ -553,11 +851,15 @@
             "account-ui",
             "agent-gateway",
             "ai",
+            "ai-client",
+            "ai-contracts",
+            "ai-ui",
             "api",
             "app-react",
             "app-vue",
             "assets",
             "cloud-auth",
+            "cloud-auth-contracts",
             "contracts",
             "data-portability",
             "data-portability-contracts",
@@ -588,6 +890,9 @@
             "relation-contracts",
             "reliable-messaging-contracts",
             "repository",
+            "repository-client",
+            "repository-contracts",
+            "repository-ui",
             "routine",
             "routine-client",
             "routine-contracts",
@@ -599,8 +904,14 @@
             "schedule-ui",
             "scheduler",
             "setting",
+            "setting-client",
+            "setting-contracts",
+            "setting-ui",
             "shared-primitives",
             "task",
+            "task-client",
+            "task-contracts",
+            "task-ui",
             "time",
             "transport-contracts",
             "ui-core",
@@ -618,11 +929,15 @@
             "account-ui",
             "agent-gateway",
             "ai",
+            "ai-client",
+            "ai-contracts",
+            "ai-ui",
             "api",
             "app-vue",
             "assets",
             "ci-cd-platform",
             "cloud-auth",
+            "cloud-auth-contracts",
             "contracts",
             "data-portability",
             "data-portability-contracts",
@@ -654,6 +969,9 @@
             "relation-contracts",
             "reliable-messaging-contracts",
             "repository",
+            "repository-client",
+            "repository-contracts",
+            "repository-ui",
             "routine",
             "routine-client",
             "routine-contracts",
@@ -665,8 +983,14 @@
             "schedule-ui",
             "scheduler",
             "setting",
+            "setting-client",
+            "setting-contracts",
+            "setting-ui",
             "shared-primitives",
             "task",
+            "task-client",
+            "task-contracts",
+            "task-ui",
             "test-system-v2",
             "time",
             "transport-contracts",
@@ -680,6 +1004,10 @@
             "account-client",
             "account-contracts",
             "account-ui",
+            "ai-client",
+            "ai-contracts",
+            "ai-ui",
+            "cloud-auth-contracts",
             "contracts",
             "data-portability-contracts",
             "desktop-contracts",
@@ -693,16 +1021,25 @@
             "operations-contracts",
             "relation-contracts",
             "reliable-messaging-contracts",
+            "repository-client",
+            "repository-contracts",
+            "repository-ui",
             "routine-client",
             "routine-contracts",
             "routine-ui",
             "schedule-client",
             "schedule-contracts",
+            "setting-contracts",
             "shared-primitives",
+            "task-client",
+            "task-contracts",
+            "task-ui",
             "transport-contracts",
             "workspace-contracts"
           ],
-          "test:smoke": ["api"],
+          "test:smoke": [
+            "api"
+          ],
           "test:integration": [
             "account",
             "ai",
@@ -718,13 +1055,27 @@
             "scheduler",
             "task"
           ],
-          "test:boundary": ["desktop"],
-          "test:ipc": ["desktop"],
-          "test:main": ["desktop"],
-          "test:perf": ["task"],
-          "test:interaction": ["ui-storybook"],
-          "e2e:ai-provider": ["web"],
-          "e2e:visual-regression": ["web"],
+          "test:boundary": [
+            "desktop"
+          ],
+          "test:ipc": [
+            "desktop"
+          ],
+          "test:main": [
+            "desktop"
+          ],
+          "test:perf": [
+            "task"
+          ],
+          "test:interaction": [
+            "ui-storybook"
+          ],
+          "e2e:ai-provider": [
+            "web"
+          ],
+          "e2e:visual-regression": [
+            "web"
+          ],
           "test:coverage": [
             "account",
             "ai",
@@ -755,9 +1106,11 @@
             "schedule:test",
             "goal-client:test",
             "powersync-schema:test",
-            "ui-core:test",
-            "cloud-auth:test",
-            "data-portability:test",
+            "setting-client:test",
+            "schedule-orchestration:test",
+            "setting:test",
+            "utils:test",
+            "relation:test",
             "label:test",
             "ipc-client:test"
           ],
@@ -766,11 +1119,11 @@
             "account:test",
             "assets:test",
             "schedule-ui:test",
-            "time:test",
-            "ui-vue-shadcn:test",
-            "scheduler:test",
+            "ui-core:test",
+            "cloud-auth:test",
+            "data-portability:test",
             "patterns:test",
-            "http-client:test"
+            "domain-shared:test"
           ],
           "unit-3": [
             "desktop:test",
@@ -779,12 +1132,12 @@
             "repository:test",
             "goal-core:test",
             "quality:test",
-            "schedule-orchestration:test",
-            "setting:test",
-            "utils:test",
-            "relation:test",
+            "setting-ui:test",
+            "time:test",
+            "ui-vue-shadcn:test",
+            "scheduler:test",
             "agent-gateway:test",
-            "domain-shared:test"
+            "http-client:test"
           ],
           "build": [
             "account:build",
@@ -793,10 +1146,14 @@
             "account-ui:build",
             "agent-gateway:build",
             "ai:build",
+            "ai-client:build",
+            "ai-contracts:build",
+            "ai-ui:build",
             "api:build",
             "app-vue:build",
             "assets:build",
             "cloud-auth:build",
+            "cloud-auth-contracts:build",
             "contracts:build",
             "data-portability:build",
             "data-portability-contracts:build",
@@ -826,6 +1183,9 @@
             "relation-contracts:build",
             "reliable-messaging-contracts:build",
             "repository:build",
+            "repository-client:build",
+            "repository-contracts:build",
+            "repository-ui:build",
             "routine:build",
             "routine-client:build",
             "routine-contracts:build",
@@ -837,8 +1197,14 @@
             "schedule-ui:build",
             "scheduler:build",
             "setting:build",
+            "setting-client:build",
+            "setting-contracts:build",
+            "setting-ui:build",
             "shared-primitives:build",
             "task:build",
+            "task-client:build",
+            "task-contracts:build",
+            "task-ui:build",
             "time:build",
             "transport-contracts:build",
             "ui-core:build",
@@ -854,11 +1220,15 @@
             "account-ui:typecheck",
             "agent-gateway:typecheck",
             "ai:typecheck",
+            "ai-client:typecheck",
+            "ai-contracts:typecheck",
+            "ai-ui:typecheck",
             "api:typecheck",
             "app-react:typecheck",
             "app-vue:typecheck",
             "assets:typecheck",
             "cloud-auth:typecheck",
+            "cloud-auth-contracts:typecheck",
             "contracts:typecheck",
             "data-portability:typecheck",
             "data-portability-contracts:typecheck",
@@ -889,6 +1259,9 @@
             "relation-contracts:typecheck",
             "reliable-messaging-contracts:typecheck",
             "repository:typecheck",
+            "repository-client:typecheck",
+            "repository-contracts:typecheck",
+            "repository-ui:typecheck",
             "routine:typecheck",
             "routine-client:typecheck",
             "routine-contracts:typecheck",
@@ -900,8 +1273,14 @@
             "schedule-ui:typecheck",
             "scheduler:typecheck",
             "setting:typecheck",
+            "setting-client:typecheck",
+            "setting-contracts:typecheck",
+            "setting-ui:typecheck",
             "shared-primitives:typecheck",
             "task:typecheck",
+            "task-client:typecheck",
+            "task-contracts:typecheck",
+            "task-ui:typecheck",
             "time:typecheck",
             "transport-contracts:typecheck",
             "ui-core:typecheck",
@@ -913,9 +1292,18 @@
             "workspace-contracts:typecheck",
             "database:runtime-scripts:build"
           ],
-          "web-unit-1": ["web:test", "app-vue:test#1/2"],
-          "web-unit-2": ["app-vue:test#2/2"],
-          "server-unit": ["api:test", "database:test", "migrator:test"],
+          "web-unit-1": [
+            "web:test",
+            "app-vue:test#1/2"
+          ],
+          "web-unit-2": [
+            "app-vue:test#2/2"
+          ],
+          "server-unit": [
+            "api:test",
+            "migrator:test",
+            "database:test"
+          ],
           "verification-children": [
             "desktop:test:ipc",
             "desktop:test:main",
@@ -934,12 +1322,20 @@
             "scheduler:test:integration",
             "task:test:integration"
           ],
-          "web-visual": ["web:e2e:visual-regression"],
-          "component-browser": ["ui-storybook:test:interaction"],
+          "web-visual": [
+            "web:e2e:visual-regression"
+          ],
+          "component-browser": [
+            "ui-storybook:test:interaction"
+          ],
           "contract": [
             "account-client:test:contract",
             "account-contracts:test:contract",
             "account-ui:test:contract",
+            "ai-client:test:contract",
+            "ai-contracts:test:contract",
+            "ai-ui:test:contract",
+            "cloud-auth-contracts:test:contract",
             "contracts:test:contract",
             "data-portability-contracts:test:contract",
             "desktop-contracts:test:contract",
@@ -953,12 +1349,19 @@
             "operations-contracts:test:contract",
             "relation-contracts:test:contract",
             "reliable-messaging-contracts:test:contract",
+            "repository-client:test:contract",
+            "repository-contracts:test:contract",
+            "repository-ui:test:contract",
             "routine-client:test:contract",
             "routine-contracts:test:contract",
             "routine-ui:test:contract",
             "schedule-client:test:contract",
             "schedule-contracts:test:contract",
+            "setting-contracts:test:contract",
             "shared-primitives:test:contract",
+            "task-client:test:contract",
+            "task-contracts:test:contract",
+            "task-ui:test:contract",
             "transport-contracts:test:contract",
             "workspace-contracts:test:contract"
           ]
@@ -1003,7 +1406,9 @@
     },
     {
       "id": "workflow",
-      "files": [".github/workflows/ci.yml"],
+      "files": [
+        ".github/workflows/ci.yml"
+      ],
       "expected": {
         "full": true,
         "targets": {
@@ -1015,10 +1420,14 @@
             "account-ui",
             "agent-gateway",
             "ai",
+            "ai-client",
+            "ai-contracts",
+            "ai-ui",
             "api",
             "app-vue",
             "assets",
             "cloud-auth",
+            "cloud-auth-contracts",
             "contracts",
             "data-portability",
             "data-portability-contracts",
@@ -1049,6 +1458,9 @@
             "relation-contracts",
             "reliable-messaging-contracts",
             "repository",
+            "repository-client",
+            "repository-contracts",
+            "repository-ui",
             "routine",
             "routine-client",
             "routine-contracts",
@@ -1060,8 +1472,14 @@
             "schedule-ui",
             "scheduler",
             "setting",
+            "setting-client",
+            "setting-contracts",
+            "setting-ui",
             "shared-primitives",
             "task",
+            "task-client",
+            "task-contracts",
+            "task-ui",
             "time",
             "transport-contracts",
             "ui-core",
@@ -1079,11 +1497,15 @@
             "account-ui",
             "agent-gateway",
             "ai",
+            "ai-client",
+            "ai-contracts",
+            "ai-ui",
             "api",
             "app-react",
             "app-vue",
             "assets",
             "cloud-auth",
+            "cloud-auth-contracts",
             "contracts",
             "data-portability",
             "data-portability-contracts",
@@ -1114,6 +1536,9 @@
             "relation-contracts",
             "reliable-messaging-contracts",
             "repository",
+            "repository-client",
+            "repository-contracts",
+            "repository-ui",
             "routine",
             "routine-client",
             "routine-contracts",
@@ -1125,8 +1550,14 @@
             "schedule-ui",
             "scheduler",
             "setting",
+            "setting-client",
+            "setting-contracts",
+            "setting-ui",
             "shared-primitives",
             "task",
+            "task-client",
+            "task-contracts",
+            "task-ui",
             "time",
             "transport-contracts",
             "ui-core",
@@ -1144,11 +1575,15 @@
             "account-ui",
             "agent-gateway",
             "ai",
+            "ai-client",
+            "ai-contracts",
+            "ai-ui",
             "api",
             "app-vue",
             "assets",
             "ci-cd-platform",
             "cloud-auth",
+            "cloud-auth-contracts",
             "contracts",
             "data-portability",
             "data-portability-contracts",
@@ -1180,6 +1615,9 @@
             "relation-contracts",
             "reliable-messaging-contracts",
             "repository",
+            "repository-client",
+            "repository-contracts",
+            "repository-ui",
             "routine",
             "routine-client",
             "routine-contracts",
@@ -1191,8 +1629,14 @@
             "schedule-ui",
             "scheduler",
             "setting",
+            "setting-client",
+            "setting-contracts",
+            "setting-ui",
             "shared-primitives",
             "task",
+            "task-client",
+            "task-contracts",
+            "task-ui",
             "test-system-v2",
             "time",
             "transport-contracts",
@@ -1206,6 +1650,10 @@
             "account-client",
             "account-contracts",
             "account-ui",
+            "ai-client",
+            "ai-contracts",
+            "ai-ui",
+            "cloud-auth-contracts",
             "contracts",
             "data-portability-contracts",
             "desktop-contracts",
@@ -1219,16 +1667,25 @@
             "operations-contracts",
             "relation-contracts",
             "reliable-messaging-contracts",
+            "repository-client",
+            "repository-contracts",
+            "repository-ui",
             "routine-client",
             "routine-contracts",
             "routine-ui",
             "schedule-client",
             "schedule-contracts",
+            "setting-contracts",
             "shared-primitives",
+            "task-client",
+            "task-contracts",
+            "task-ui",
             "transport-contracts",
             "workspace-contracts"
           ],
-          "test:smoke": ["api"],
+          "test:smoke": [
+            "api"
+          ],
           "test:integration": [
             "account",
             "ai",
@@ -1244,13 +1701,27 @@
             "scheduler",
             "task"
           ],
-          "test:boundary": ["desktop"],
-          "test:ipc": ["desktop"],
-          "test:main": ["desktop"],
-          "test:perf": ["task"],
-          "test:interaction": ["ui-storybook"],
-          "e2e:ai-provider": ["web"],
-          "e2e:visual-regression": ["web"],
+          "test:boundary": [
+            "desktop"
+          ],
+          "test:ipc": [
+            "desktop"
+          ],
+          "test:main": [
+            "desktop"
+          ],
+          "test:perf": [
+            "task"
+          ],
+          "test:interaction": [
+            "ui-storybook"
+          ],
+          "e2e:ai-provider": [
+            "web"
+          ],
+          "e2e:visual-regression": [
+            "web"
+          ],
           "test:coverage": [
             "account",
             "ai",
@@ -1281,9 +1752,11 @@
             "schedule:test",
             "goal-client:test",
             "powersync-schema:test",
-            "ui-core:test",
-            "cloud-auth:test",
-            "data-portability:test",
+            "setting-client:test",
+            "schedule-orchestration:test",
+            "setting:test",
+            "utils:test",
+            "relation:test",
             "label:test",
             "ipc-client:test"
           ],
@@ -1292,11 +1765,11 @@
             "account:test",
             "assets:test",
             "schedule-ui:test",
-            "time:test",
-            "ui-vue-shadcn:test",
-            "scheduler:test",
+            "ui-core:test",
+            "cloud-auth:test",
+            "data-portability:test",
             "patterns:test",
-            "http-client:test"
+            "domain-shared:test"
           ],
           "unit-3": [
             "desktop:test",
@@ -1305,12 +1778,12 @@
             "repository:test",
             "goal-core:test",
             "quality:test",
-            "schedule-orchestration:test",
-            "setting:test",
-            "utils:test",
-            "relation:test",
+            "setting-ui:test",
+            "time:test",
+            "ui-vue-shadcn:test",
+            "scheduler:test",
             "agent-gateway:test",
-            "domain-shared:test"
+            "http-client:test"
           ],
           "build": [
             "account:build",
@@ -1319,10 +1792,14 @@
             "account-ui:build",
             "agent-gateway:build",
             "ai:build",
+            "ai-client:build",
+            "ai-contracts:build",
+            "ai-ui:build",
             "api:build",
             "app-vue:build",
             "assets:build",
             "cloud-auth:build",
+            "cloud-auth-contracts:build",
             "contracts:build",
             "data-portability:build",
             "data-portability-contracts:build",
@@ -1352,6 +1829,9 @@
             "relation-contracts:build",
             "reliable-messaging-contracts:build",
             "repository:build",
+            "repository-client:build",
+            "repository-contracts:build",
+            "repository-ui:build",
             "routine:build",
             "routine-client:build",
             "routine-contracts:build",
@@ -1363,8 +1843,14 @@
             "schedule-ui:build",
             "scheduler:build",
             "setting:build",
+            "setting-client:build",
+            "setting-contracts:build",
+            "setting-ui:build",
             "shared-primitives:build",
             "task:build",
+            "task-client:build",
+            "task-contracts:build",
+            "task-ui:build",
             "time:build",
             "transport-contracts:build",
             "ui-core:build",
@@ -1380,11 +1866,15 @@
             "account-ui:typecheck",
             "agent-gateway:typecheck",
             "ai:typecheck",
+            "ai-client:typecheck",
+            "ai-contracts:typecheck",
+            "ai-ui:typecheck",
             "api:typecheck",
             "app-react:typecheck",
             "app-vue:typecheck",
             "assets:typecheck",
             "cloud-auth:typecheck",
+            "cloud-auth-contracts:typecheck",
             "contracts:typecheck",
             "data-portability:typecheck",
             "data-portability-contracts:typecheck",
@@ -1415,6 +1905,9 @@
             "relation-contracts:typecheck",
             "reliable-messaging-contracts:typecheck",
             "repository:typecheck",
+            "repository-client:typecheck",
+            "repository-contracts:typecheck",
+            "repository-ui:typecheck",
             "routine:typecheck",
             "routine-client:typecheck",
             "routine-contracts:typecheck",
@@ -1426,8 +1919,14 @@
             "schedule-ui:typecheck",
             "scheduler:typecheck",
             "setting:typecheck",
+            "setting-client:typecheck",
+            "setting-contracts:typecheck",
+            "setting-ui:typecheck",
             "shared-primitives:typecheck",
             "task:typecheck",
+            "task-client:typecheck",
+            "task-contracts:typecheck",
+            "task-ui:typecheck",
             "time:typecheck",
             "transport-contracts:typecheck",
             "ui-core:typecheck",
@@ -1439,9 +1938,18 @@
             "workspace-contracts:typecheck",
             "database:runtime-scripts:build"
           ],
-          "web-unit-1": ["web:test", "app-vue:test#1/2"],
-          "web-unit-2": ["app-vue:test#2/2"],
-          "server-unit": ["api:test", "database:test", "migrator:test"],
+          "web-unit-1": [
+            "web:test",
+            "app-vue:test#1/2"
+          ],
+          "web-unit-2": [
+            "app-vue:test#2/2"
+          ],
+          "server-unit": [
+            "api:test",
+            "migrator:test",
+            "database:test"
+          ],
           "verification-children": [
             "desktop:test:ipc",
             "desktop:test:main",
@@ -1460,12 +1968,20 @@
             "scheduler:test:integration",
             "task:test:integration"
           ],
-          "web-visual": ["web:e2e:visual-regression"],
-          "component-browser": ["ui-storybook:test:interaction"],
+          "web-visual": [
+            "web:e2e:visual-regression"
+          ],
+          "component-browser": [
+            "ui-storybook:test:interaction"
+          ],
           "contract": [
             "account-client:test:contract",
             "account-contracts:test:contract",
             "account-ui:test:contract",
+            "ai-client:test:contract",
+            "ai-contracts:test:contract",
+            "ai-ui:test:contract",
+            "cloud-auth-contracts:test:contract",
             "contracts:test:contract",
             "data-portability-contracts:test:contract",
             "desktop-contracts:test:contract",
@@ -1479,12 +1995,19 @@
             "operations-contracts:test:contract",
             "relation-contracts:test:contract",
             "reliable-messaging-contracts:test:contract",
+            "repository-client:test:contract",
+            "repository-contracts:test:contract",
+            "repository-ui:test:contract",
             "routine-client:test:contract",
             "routine-contracts:test:contract",
             "routine-ui:test:contract",
             "schedule-client:test:contract",
             "schedule-contracts:test:contract",
+            "setting-contracts:test:contract",
             "shared-primitives:test:contract",
+            "task-client:test:contract",
+            "task-contracts:test:contract",
+            "task-ui:test:contract",
             "transport-contracts:test:contract",
             "workspace-contracts:test:contract"
           ]
@@ -1529,31 +2052,64 @@
     },
     {
       "id": "testOnly",
-      "files": ["packages/app-vue/src/modules/ai/components/AIMessageContent.spec.ts"],
+      "files": [
+        "packages/app-vue/src/shared/utils/safe-markdown.spec.ts"
+      ],
       "expected": {
         "full": false,
         "targets": {
           "build": [
             "account-ui",
+            "ai-ui",
             "goal-ui",
             "governance-tools",
             "notification-ui",
+            "repository-ui",
             "routine-ui",
+            "task-ui",
             "ui-storybook"
           ],
-          "typecheck": ["app-vue"],
-          "test": ["app-vue", "governance-tools", "test-system-v2"],
-          "test:contract": ["account-ui", "goal-ui", "notification-ui", "routine-ui"],
+          "typecheck": [
+            "app-vue"
+          ],
+          "test": [
+            "app-vue",
+            "governance-tools",
+            "test-system-v2"
+          ],
+          "test:contract": [
+            "account-ui",
+            "ai-ui",
+            "goal-ui",
+            "notification-ui",
+            "repository-ui",
+            "routine-ui",
+            "task-ui"
+          ],
           "test:smoke": [],
           "test:integration": [],
-          "test:boundary": ["desktop"],
-          "test:ipc": ["desktop"],
-          "test:main": ["desktop"],
+          "test:boundary": [
+            "desktop"
+          ],
+          "test:ipc": [
+            "desktop"
+          ],
+          "test:main": [
+            "desktop"
+          ],
           "test:perf": [],
-          "test:interaction": ["ui-storybook"],
-          "e2e:ai-provider": ["web"],
-          "e2e:visual-regression": ["web"],
-          "test:coverage": ["app-vue"]
+          "test:interaction": [
+            "ui-storybook"
+          ],
+          "e2e:ai-provider": [
+            "web"
+          ],
+          "e2e:visual-regression": [
+            "web"
+          ],
+          "test:coverage": [
+            "app-vue"
+          ]
         },
         "jobs": {
           "lint": [
@@ -1567,29 +2123,49 @@
           "unit-3": [],
           "build": [
             "account-ui:build",
+            "ai-ui:build",
             "goal-ui:build",
             "notification-ui:build",
+            "repository-ui:build",
             "routine-ui:build",
+            "task-ui:build",
             "ui-storybook:build",
             "app-vue:typecheck"
           ],
-          "web-unit-1": ["app-vue:test#1/2"],
-          "web-unit-2": ["app-vue:test#2/2"],
+          "web-unit-1": [
+            "app-vue:test#1/2"
+          ],
+          "web-unit-2": [
+            "app-vue:test#2/2"
+          ],
           "server-unit": [],
-          "verification-children": ["desktop:test:ipc", "desktop:test:main"],
-          "web-visual": ["web:e2e:visual-regression"],
-          "component-browser": ["ui-storybook:test:interaction"],
+          "verification-children": [
+            "desktop:test:ipc",
+            "desktop:test:main"
+          ],
+          "web-visual": [
+            "web:e2e:visual-regression"
+          ],
+          "component-browser": [
+            "ui-storybook:test:interaction"
+          ],
           "contract": [
             "account-ui:test:contract",
+            "ai-ui:test:contract",
             "goal-ui:test:contract",
             "notification-ui:test:contract",
-            "routine-ui:test:contract"
+            "repository-ui:test:contract",
+            "routine-ui:test:contract",
+            "task-ui:test:contract"
           ]
         },
         "serverShards": [
           {
             "id": "1/1",
-            "keys": ["desktop:test:main", "desktop:test:ipc"],
+            "keys": [
+              "desktop:test:main",
+              "desktop:test:ipc"
+            ],
             "estimatedMs": 7849
           }
         ]
@@ -1597,7 +2173,9 @@
     },
     {
       "id": "mainDocs",
-      "files": ["docs/internals/testing/README.md"],
+      "files": [
+        "docs/internals/testing/README.md"
+      ],
       "event": "push",
       "expected": {
         "full": true,
@@ -1610,10 +2188,14 @@
             "account-ui",
             "agent-gateway",
             "ai",
+            "ai-client",
+            "ai-contracts",
+            "ai-ui",
             "api",
             "app-vue",
             "assets",
             "cloud-auth",
+            "cloud-auth-contracts",
             "contracts",
             "data-portability",
             "data-portability-contracts",
@@ -1644,6 +2226,9 @@
             "relation-contracts",
             "reliable-messaging-contracts",
             "repository",
+            "repository-client",
+            "repository-contracts",
+            "repository-ui",
             "routine",
             "routine-client",
             "routine-contracts",
@@ -1655,8 +2240,14 @@
             "schedule-ui",
             "scheduler",
             "setting",
+            "setting-client",
+            "setting-contracts",
+            "setting-ui",
             "shared-primitives",
             "task",
+            "task-client",
+            "task-contracts",
+            "task-ui",
             "time",
             "transport-contracts",
             "ui-core",
@@ -1674,11 +2265,15 @@
             "account-ui",
             "agent-gateway",
             "ai",
+            "ai-client",
+            "ai-contracts",
+            "ai-ui",
             "api",
             "app-react",
             "app-vue",
             "assets",
             "cloud-auth",
+            "cloud-auth-contracts",
             "contracts",
             "data-portability",
             "data-portability-contracts",
@@ -1709,6 +2304,9 @@
             "relation-contracts",
             "reliable-messaging-contracts",
             "repository",
+            "repository-client",
+            "repository-contracts",
+            "repository-ui",
             "routine",
             "routine-client",
             "routine-contracts",
@@ -1720,8 +2318,14 @@
             "schedule-ui",
             "scheduler",
             "setting",
+            "setting-client",
+            "setting-contracts",
+            "setting-ui",
             "shared-primitives",
             "task",
+            "task-client",
+            "task-contracts",
+            "task-ui",
             "time",
             "transport-contracts",
             "ui-core",
@@ -1739,11 +2343,15 @@
             "account-ui",
             "agent-gateway",
             "ai",
+            "ai-client",
+            "ai-contracts",
+            "ai-ui",
             "api",
             "app-vue",
             "assets",
             "ci-cd-platform",
             "cloud-auth",
+            "cloud-auth-contracts",
             "contracts",
             "data-portability",
             "data-portability-contracts",
@@ -1775,6 +2383,9 @@
             "relation-contracts",
             "reliable-messaging-contracts",
             "repository",
+            "repository-client",
+            "repository-contracts",
+            "repository-ui",
             "routine",
             "routine-client",
             "routine-contracts",
@@ -1786,8 +2397,14 @@
             "schedule-ui",
             "scheduler",
             "setting",
+            "setting-client",
+            "setting-contracts",
+            "setting-ui",
             "shared-primitives",
             "task",
+            "task-client",
+            "task-contracts",
+            "task-ui",
             "test-system-v2",
             "time",
             "transport-contracts",
@@ -1801,6 +2418,10 @@
             "account-client",
             "account-contracts",
             "account-ui",
+            "ai-client",
+            "ai-contracts",
+            "ai-ui",
+            "cloud-auth-contracts",
             "contracts",
             "data-portability-contracts",
             "desktop-contracts",
@@ -1814,16 +2435,25 @@
             "operations-contracts",
             "relation-contracts",
             "reliable-messaging-contracts",
+            "repository-client",
+            "repository-contracts",
+            "repository-ui",
             "routine-client",
             "routine-contracts",
             "routine-ui",
             "schedule-client",
             "schedule-contracts",
+            "setting-contracts",
             "shared-primitives",
+            "task-client",
+            "task-contracts",
+            "task-ui",
             "transport-contracts",
             "workspace-contracts"
           ],
-          "test:smoke": ["api"],
+          "test:smoke": [
+            "api"
+          ],
           "test:integration": [
             "account",
             "ai",
@@ -1839,13 +2469,27 @@
             "scheduler",
             "task"
           ],
-          "test:boundary": ["desktop"],
-          "test:ipc": ["desktop"],
-          "test:main": ["desktop"],
-          "test:perf": ["task"],
-          "test:interaction": ["ui-storybook"],
-          "e2e:ai-provider": ["web"],
-          "e2e:visual-regression": ["web"],
+          "test:boundary": [
+            "desktop"
+          ],
+          "test:ipc": [
+            "desktop"
+          ],
+          "test:main": [
+            "desktop"
+          ],
+          "test:perf": [
+            "task"
+          ],
+          "test:interaction": [
+            "ui-storybook"
+          ],
+          "e2e:ai-provider": [
+            "web"
+          ],
+          "e2e:visual-regression": [
+            "web"
+          ],
           "test:coverage": [
             "account",
             "ai",
@@ -1876,9 +2520,11 @@
             "schedule:test",
             "goal-client:test",
             "powersync-schema:test",
-            "ui-core:test",
-            "cloud-auth:test",
-            "data-portability:test",
+            "setting-client:test",
+            "schedule-orchestration:test",
+            "setting:test",
+            "utils:test",
+            "relation:test",
             "label:test",
             "ipc-client:test"
           ],
@@ -1887,11 +2533,11 @@
             "account:test",
             "assets:test",
             "schedule-ui:test",
-            "time:test",
-            "ui-vue-shadcn:test",
-            "scheduler:test",
+            "ui-core:test",
+            "cloud-auth:test",
+            "data-portability:test",
             "patterns:test",
-            "http-client:test"
+            "domain-shared:test"
           ],
           "unit-3": [
             "desktop:test",
@@ -1900,12 +2546,12 @@
             "repository:test",
             "goal-core:test",
             "quality:test",
-            "schedule-orchestration:test",
-            "setting:test",
-            "utils:test",
-            "relation:test",
+            "setting-ui:test",
+            "time:test",
+            "ui-vue-shadcn:test",
+            "scheduler:test",
             "agent-gateway:test",
-            "domain-shared:test"
+            "http-client:test"
           ],
           "build": [
             "account:build",
@@ -1914,10 +2560,14 @@
             "account-ui:build",
             "agent-gateway:build",
             "ai:build",
+            "ai-client:build",
+            "ai-contracts:build",
+            "ai-ui:build",
             "api:build",
             "app-vue:build",
             "assets:build",
             "cloud-auth:build",
+            "cloud-auth-contracts:build",
             "contracts:build",
             "data-portability:build",
             "data-portability-contracts:build",
@@ -1947,6 +2597,9 @@
             "relation-contracts:build",
             "reliable-messaging-contracts:build",
             "repository:build",
+            "repository-client:build",
+            "repository-contracts:build",
+            "repository-ui:build",
             "routine:build",
             "routine-client:build",
             "routine-contracts:build",
@@ -1958,8 +2611,14 @@
             "schedule-ui:build",
             "scheduler:build",
             "setting:build",
+            "setting-client:build",
+            "setting-contracts:build",
+            "setting-ui:build",
             "shared-primitives:build",
             "task:build",
+            "task-client:build",
+            "task-contracts:build",
+            "task-ui:build",
             "time:build",
             "transport-contracts:build",
             "ui-core:build",
@@ -1975,11 +2634,15 @@
             "account-ui:typecheck",
             "agent-gateway:typecheck",
             "ai:typecheck",
+            "ai-client:typecheck",
+            "ai-contracts:typecheck",
+            "ai-ui:typecheck",
             "api:typecheck",
             "app-react:typecheck",
             "app-vue:typecheck",
             "assets:typecheck",
             "cloud-auth:typecheck",
+            "cloud-auth-contracts:typecheck",
             "contracts:typecheck",
             "data-portability:typecheck",
             "data-portability-contracts:typecheck",
@@ -2010,6 +2673,9 @@
             "relation-contracts:typecheck",
             "reliable-messaging-contracts:typecheck",
             "repository:typecheck",
+            "repository-client:typecheck",
+            "repository-contracts:typecheck",
+            "repository-ui:typecheck",
             "routine:typecheck",
             "routine-client:typecheck",
             "routine-contracts:typecheck",
@@ -2021,8 +2687,14 @@
             "schedule-ui:typecheck",
             "scheduler:typecheck",
             "setting:typecheck",
+            "setting-client:typecheck",
+            "setting-contracts:typecheck",
+            "setting-ui:typecheck",
             "shared-primitives:typecheck",
             "task:typecheck",
+            "task-client:typecheck",
+            "task-contracts:typecheck",
+            "task-ui:typecheck",
             "time:typecheck",
             "transport-contracts:typecheck",
             "ui-core:typecheck",
@@ -2034,9 +2706,18 @@
             "workspace-contracts:typecheck",
             "database:runtime-scripts:build"
           ],
-          "web-unit-1": ["web:test", "app-vue:test#1/2"],
-          "web-unit-2": ["app-vue:test#2/2"],
-          "server-unit": ["api:test", "database:test", "migrator:test"],
+          "web-unit-1": [
+            "web:test",
+            "app-vue:test#1/2"
+          ],
+          "web-unit-2": [
+            "app-vue:test#2/2"
+          ],
+          "server-unit": [
+            "api:test",
+            "migrator:test",
+            "database:test"
+          ],
           "verification-children": [
             "desktop:test:ipc",
             "desktop:test:main",
@@ -2056,12 +2737,20 @@
             "task:test:integration",
             "task:test:perf"
           ],
-          "web-visual": ["web:e2e:visual-regression#1/1"],
-          "component-browser": ["ui-storybook:test:interaction"],
+          "web-visual": [
+            "web:e2e:visual-regression#1/1"
+          ],
+          "component-browser": [
+            "ui-storybook:test:interaction"
+          ],
           "contract": [
             "account-client:test:contract",
             "account-contracts:test:contract",
             "account-ui:test:contract",
+            "ai-client:test:contract",
+            "ai-contracts:test:contract",
+            "ai-ui:test:contract",
+            "cloud-auth-contracts:test:contract",
             "contracts:test:contract",
             "data-portability-contracts:test:contract",
             "desktop-contracts:test:contract",
@@ -2075,12 +2764,19 @@
             "operations-contracts:test:contract",
             "relation-contracts:test:contract",
             "reliable-messaging-contracts:test:contract",
+            "repository-client:test:contract",
+            "repository-contracts:test:contract",
+            "repository-ui:test:contract",
             "routine-client:test:contract",
             "routine-contracts:test:contract",
             "routine-ui:test:contract",
             "schedule-client:test:contract",
             "schedule-contracts:test:contract",
+            "setting-contracts:test:contract",
             "shared-primitives:test:contract",
+            "task-client:test:contract",
+            "task-contracts:test:contract",
+            "task-ui:test:contract",
             "transport-contracts:test:contract",
             "workspace-contracts:test:contract"
           ]
@@ -2126,57 +2822,71 @@
     },
     {
       "id": "taskClient",
-      "files": ["packages/task/src/client/index.ts"],
+      "files": [
+        "packages/task-client/src/index.ts"
+      ],
       "expected": {
         "full": false,
         "targets": {
           "build": [
-            "account",
-            "api",
+            "ai-ui",
             "app-vue",
             "desktop",
             "governance-tools",
-            "notification",
-            "schedule-orchestration",
-            "task",
+            "task-client",
+            "task-ui",
             "ui-storybook",
             "web"
           ],
           "typecheck": [
-            "account",
-            "api",
+            "ai-ui",
             "app-react",
             "app-vue",
             "desktop",
             "mobile",
-            "notification",
-            "schedule-orchestration",
-            "task",
+            "task-client",
+            "task-ui",
             "ui-storybook",
             "web"
           ],
           "test": [
-            "account",
-            "api",
+            "ai-ui",
             "app-vue",
             "desktop",
             "governance-tools",
-            "notification",
-            "schedule-orchestration",
-            "task",
+            "task-client",
+            "task-ui",
             "web"
           ],
-          "test:contract": [],
-          "test:smoke": ["api"],
-          "test:integration": ["account", "api", "notification", "task"],
-          "test:boundary": ["desktop"],
-          "test:ipc": ["desktop"],
-          "test:main": ["desktop"],
-          "test:perf": ["task"],
-          "test:interaction": ["ui-storybook"],
-          "e2e:ai-provider": ["web"],
-          "e2e:visual-regression": ["web"],
-          "test:coverage": ["account", "api", "app-vue", "notification", "task"]
+          "test:contract": [
+            "ai-ui",
+            "task-client",
+            "task-ui"
+          ],
+          "test:smoke": [],
+          "test:integration": [],
+          "test:boundary": [
+            "desktop"
+          ],
+          "test:ipc": [
+            "desktop"
+          ],
+          "test:main": [
+            "desktop"
+          ],
+          "test:perf": [],
+          "test:interaction": [
+            "ui-storybook"
+          ],
+          "e2e:ai-provider": [
+            "web"
+          ],
+          "e2e:visual-regression": [
+            "web"
+          ],
+          "test:coverage": [
+            "app-vue"
+          ]
         },
         "jobs": {
           "lint": [
@@ -2185,69 +2895,70 @@
             "workspace:sync",
             "memoflow:governance-check"
           ],
-          "unit-1": ["task:test", "account:test", "schedule-orchestration:test"],
-          "unit-2": ["desktop:test"],
-          "unit-3": ["notification:test"],
+          "unit-1": [],
+          "unit-2": [],
+          "unit-3": [
+            "desktop:test"
+          ],
           "build": [
-            "account:build",
-            "api:build",
+            "ai-ui:build",
             "app-vue:build",
             "desktop:build",
-            "notification:build",
-            "schedule-orchestration:build",
-            "task:build",
+            "task-client:build",
+            "task-ui:build",
             "ui-storybook:build",
             "web:build",
-            "account:typecheck",
-            "api:typecheck",
+            "ai-ui:typecheck",
             "app-react:typecheck",
             "app-vue:typecheck",
             "desktop:typecheck",
             "mobile:typecheck",
-            "notification:typecheck",
-            "schedule-orchestration:typecheck",
-            "task:typecheck",
+            "task-client:typecheck",
+            "task-ui:typecheck",
             "ui-storybook:typecheck",
             "web:typecheck"
           ],
-          "web-unit-1": ["app-vue:test#1/2", "web:test"],
-          "web-unit-2": ["app-vue:test#2/2"],
-          "server-unit": ["api:test"],
+          "web-unit-1": [
+            "app-vue:test#1/2",
+            "web:test"
+          ],
+          "web-unit-2": [
+            "app-vue:test#2/2"
+          ],
+          "server-unit": [],
           "verification-children": [
             "desktop:test:ipc",
-            "desktop:test:main",
-            "api:test:smoke",
-            "account:test:integration",
-            "api:test:integration",
-            "notification:test:integration",
-            "task:test:integration"
+            "desktop:test:main"
           ],
-          "web-visual": ["web:e2e:visual-regression"],
-          "component-browser": ["ui-storybook:test:interaction"],
-          "contract": []
+          "web-visual": [
+            "web:e2e:visual-regression"
+          ],
+          "component-browser": [
+            "ui-storybook:test:interaction"
+          ],
+          "contract": [
+            "ai-ui:test:contract",
+            "task-client:test:contract",
+            "task-ui:test:contract"
+          ]
         },
         "serverShards": [
           {
-            "id": "1/2",
-            "keys": ["api:test:integration", "desktop:test:main", "desktop:test:ipc"],
-            "estimatedMs": 33529
-          },
-          {
-            "id": "2/2",
+            "id": "1/1",
             "keys": [
-              "account:test:integration",
-              "notification:test:integration",
-              "task:test:integration",
-              "api:test:smoke"
+              "desktop:test:main",
+              "desktop:test:ipc"
             ],
-            "estimatedMs": 31460
+            "estimatedMs": 7849
           }
         ]
       }
     },
     {
       "id": "routine-contracts",
-      "files": ["packages/routine-contracts/src/routine.ts"],
+      "files": [
+        "packages/routine-contracts/src/routine.ts"
+      ],
       "expected": {
         "full": false,
         "targets": {
@@ -2257,6 +2968,7 @@
             "account-ui",
             "agent-gateway",
             "ai",
+            "ai-ui",
             "api",
             "app-vue",
             "cloud-auth",
@@ -2276,8 +2988,8 @@
             "notification-ui",
             "patterns",
             "relation",
-            "relation-contracts",
             "repository",
+            "repository-ui",
             "routine",
             "routine-client",
             "routine-contracts",
@@ -2288,7 +3000,10 @@
             "schedule-ui",
             "scheduler",
             "setting",
+            "setting-ui",
             "task",
+            "task-client",
+            "task-ui",
             "ui-storybook",
             "ui-vue-shadcn",
             "utils",
@@ -2301,6 +3016,7 @@
             "account-ui",
             "agent-gateway",
             "ai",
+            "ai-ui",
             "api",
             "app-react",
             "app-vue",
@@ -2321,8 +3037,8 @@
             "notification-ui",
             "patterns",
             "relation",
-            "relation-contracts",
             "repository",
+            "repository-ui",
             "routine",
             "routine-client",
             "routine-contracts",
@@ -2333,7 +3049,10 @@
             "schedule-ui",
             "scheduler",
             "setting",
+            "setting-ui",
             "task",
+            "task-client",
+            "task-ui",
             "ui-storybook",
             "ui-vue-shadcn",
             "utils",
@@ -2345,6 +3064,7 @@
             "account-ui",
             "agent-gateway",
             "ai",
+            "ai-ui",
             "api",
             "app-vue",
             "cloud-auth",
@@ -2364,8 +3084,8 @@
             "notification-ui",
             "patterns",
             "relation",
-            "relation-contracts",
             "repository",
+            "repository-ui",
             "routine",
             "routine-client",
             "routine-contracts",
@@ -2376,7 +3096,10 @@
             "schedule-ui",
             "scheduler",
             "setting",
+            "setting-ui",
             "task",
+            "task-client",
+            "task-ui",
             "ui-vue-shadcn",
             "utils",
             "web",
@@ -2384,17 +3107,22 @@
           ],
           "test:contract": [
             "account-ui",
+            "ai-ui",
             "contracts",
             "goal-ui",
             "notification-ui",
-            "relation-contracts",
+            "repository-ui",
             "routine-client",
             "routine-contracts",
             "routine-ui",
             "schedule-client",
+            "task-client",
+            "task-ui",
             "workspace-contracts"
           ],
-          "test:smoke": ["api"],
+          "test:smoke": [
+            "api"
+          ],
           "test:integration": [
             "account",
             "ai",
@@ -2410,13 +3138,27 @@
             "scheduler",
             "task"
           ],
-          "test:boundary": ["desktop"],
-          "test:ipc": ["desktop"],
-          "test:main": ["desktop"],
-          "test:perf": ["task"],
-          "test:interaction": ["ui-storybook"],
-          "e2e:ai-provider": ["web"],
-          "e2e:visual-regression": ["web"],
+          "test:boundary": [
+            "desktop"
+          ],
+          "test:ipc": [
+            "desktop"
+          ],
+          "test:main": [
+            "desktop"
+          ],
+          "test:perf": [
+            "task"
+          ],
+          "test:interaction": [
+            "ui-storybook"
+          ],
+          "e2e:ai-provider": [
+            "web"
+          ],
+          "e2e:visual-regression": [
+            "web"
+          ],
           "test:coverage": [
             "account",
             "ai",
@@ -2446,35 +3188,37 @@
             "routine:test",
             "goal-client:test",
             "schedule-ui:test",
-            "setting:test",
-            "utils:test",
-            "label:test"
+            "cloud-auth:test",
+            "data-portability:test",
+            "agent-gateway:test",
+            "domain-shared:test"
           ],
           "unit-2": [
             "task:test",
             "account:test",
             "repository:test",
             "goal-core:test",
-            "schedule-orchestration:test",
-            "data-portability:test",
-            "relation:test",
-            "agent-gateway:test",
-            "domain-shared:test"
+            "setting-ui:test",
+            "setting:test",
+            "scheduler:test",
+            "patterns:test",
+            "label:test"
           ],
           "unit-3": [
             "desktop:test",
             "notification:test",
             "schedule:test",
-            "cloud-auth:test",
+            "schedule-orchestration:test",
             "ui-vue-shadcn:test",
-            "scheduler:test",
-            "patterns:test"
+            "utils:test",
+            "relation:test"
           ],
           "build": [
             "account:build",
             "account-ui:build",
             "agent-gateway:build",
             "ai:build",
+            "ai-ui:build",
             "api:build",
             "app-vue:build",
             "cloud-auth:build",
@@ -2493,8 +3237,8 @@
             "notification-ui:build",
             "patterns:build",
             "relation:build",
-            "relation-contracts:build",
             "repository:build",
+            "repository-ui:build",
             "routine:build",
             "routine-client:build",
             "routine-contracts:build",
@@ -2505,7 +3249,10 @@
             "schedule-ui:build",
             "scheduler:build",
             "setting:build",
+            "setting-ui:build",
             "task:build",
+            "task-client:build",
+            "task-ui:build",
             "ui-storybook:build",
             "ui-vue-shadcn:build",
             "utils:build",
@@ -2516,6 +3263,7 @@
             "account-ui:typecheck",
             "agent-gateway:typecheck",
             "ai:typecheck",
+            "ai-ui:typecheck",
             "api:typecheck",
             "app-react:typecheck",
             "app-vue:typecheck",
@@ -2536,8 +3284,8 @@
             "notification-ui:typecheck",
             "patterns:typecheck",
             "relation:typecheck",
-            "relation-contracts:typecheck",
             "repository:typecheck",
+            "repository-ui:typecheck",
             "routine:typecheck",
             "routine-client:typecheck",
             "routine-contracts:typecheck",
@@ -2548,16 +3296,28 @@
             "schedule-ui:typecheck",
             "scheduler:typecheck",
             "setting:typecheck",
+            "setting-ui:typecheck",
             "task:typecheck",
+            "task-client:typecheck",
+            "task-ui:typecheck",
             "ui-storybook:typecheck",
             "ui-vue-shadcn:typecheck",
             "utils:typecheck",
             "web:typecheck",
             "workspace-contracts:typecheck"
           ],
-          "web-unit-1": ["app-vue:test#1/2", "web:test"],
-          "web-unit-2": ["app-vue:test#2/2"],
-          "server-unit": ["api:test", "database:test", "migrator:test"],
+          "web-unit-1": [
+            "app-vue:test#1/2",
+            "web:test"
+          ],
+          "web-unit-2": [
+            "app-vue:test#2/2"
+          ],
+          "server-unit": [
+            "api:test",
+            "database:test",
+            "migrator:test"
+          ],
           "verification-children": [
             "desktop:test:ipc",
             "desktop:test:main",
@@ -2576,18 +3336,25 @@
             "scheduler:test:integration",
             "task:test:integration"
           ],
-          "web-visual": ["web:e2e:visual-regression"],
-          "component-browser": ["ui-storybook:test:interaction"],
+          "web-visual": [
+            "web:e2e:visual-regression"
+          ],
+          "component-browser": [
+            "ui-storybook:test:interaction"
+          ],
           "contract": [
             "account-ui:test:contract",
+            "ai-ui:test:contract",
             "contracts:test:contract",
             "goal-ui:test:contract",
             "notification-ui:test:contract",
-            "relation-contracts:test:contract",
+            "repository-ui:test:contract",
             "routine-client:test:contract",
             "routine-contracts:test:contract",
             "routine-ui:test:contract",
             "schedule-client:test:contract",
+            "task-client:test:contract",
+            "task-ui:test:contract",
             "workspace-contracts:test:contract"
           ]
         },
@@ -2631,7 +3398,9 @@
     },
     {
       "id": "routine-client",
-      "files": ["packages/routine-client/src/index.ts"],
+      "files": [
+        "packages/routine-client/src/index.ts"
+      ],
       "expected": {
         "full": false,
         "targets": {
@@ -2663,17 +3432,34 @@
             "schedule-ui",
             "web"
           ],
-          "test:contract": ["routine-client", "routine-ui"],
+          "test:contract": [
+            "routine-client",
+            "routine-ui"
+          ],
           "test:smoke": [],
           "test:integration": [],
-          "test:boundary": ["desktop"],
-          "test:ipc": ["desktop"],
-          "test:main": ["desktop"],
+          "test:boundary": [
+            "desktop"
+          ],
+          "test:ipc": [
+            "desktop"
+          ],
+          "test:main": [
+            "desktop"
+          ],
           "test:perf": [],
-          "test:interaction": ["ui-storybook"],
-          "e2e:ai-provider": ["web"],
-          "e2e:visual-regression": ["web"],
-          "test:coverage": ["app-vue"]
+          "test:interaction": [
+            "ui-storybook"
+          ],
+          "e2e:ai-provider": [
+            "web"
+          ],
+          "e2e:visual-regression": [
+            "web"
+          ],
+          "test:coverage": [
+            "app-vue"
+          ]
         },
         "jobs": {
           "lint": [
@@ -2684,7 +3470,10 @@
           ],
           "unit-1": [],
           "unit-2": [],
-          "unit-3": ["desktop:test", "schedule-ui:test"],
+          "unit-3": [
+            "desktop:test",
+            "schedule-ui:test"
+          ],
           "build": [
             "app-vue:build",
             "desktop:build",
@@ -2701,18 +3490,36 @@
             "ui-storybook:typecheck",
             "web:typecheck"
           ],
-          "web-unit-1": ["app-vue:test#1/2", "web:test"],
-          "web-unit-2": ["app-vue:test#2/2"],
+          "web-unit-1": [
+            "app-vue:test#1/2",
+            "web:test"
+          ],
+          "web-unit-2": [
+            "app-vue:test#2/2"
+          ],
           "server-unit": [],
-          "verification-children": ["desktop:test:ipc", "desktop:test:main"],
-          "web-visual": ["web:e2e:visual-regression"],
-          "component-browser": ["ui-storybook:test:interaction"],
-          "contract": ["routine-client:test:contract", "routine-ui:test:contract"]
+          "verification-children": [
+            "desktop:test:ipc",
+            "desktop:test:main"
+          ],
+          "web-visual": [
+            "web:e2e:visual-regression"
+          ],
+          "component-browser": [
+            "ui-storybook:test:interaction"
+          ],
+          "contract": [
+            "routine-client:test:contract",
+            "routine-ui:test:contract"
+          ]
         },
         "serverShards": [
           {
             "id": "1/1",
-            "keys": ["desktop:test:main", "desktop:test:ipc"],
+            "keys": [
+              "desktop:test:main",
+              "desktop:test:ipc"
+            ],
             "estimatedMs": 7849
           }
         ]
@@ -2720,7 +3527,9 @@
     },
     {
       "id": "routine-ui",
-      "files": ["packages/routine-ui/src/components/RoutineEditorDialog.vue"],
+      "files": [
+        "packages/routine-ui/src/components/RoutineEditorDialog.vue"
+      ],
       "expected": {
         "full": false,
         "targets": {
@@ -2733,19 +3542,49 @@
             "ui-storybook",
             "web"
           ],
-          "typecheck": ["app-vue", "desktop", "routine-ui", "schedule-ui", "ui-storybook", "web"],
-          "test": ["app-vue", "desktop", "governance-tools", "routine-ui", "schedule-ui", "web"],
-          "test:contract": ["routine-ui"],
+          "typecheck": [
+            "app-vue",
+            "desktop",
+            "routine-ui",
+            "schedule-ui",
+            "ui-storybook",
+            "web"
+          ],
+          "test": [
+            "app-vue",
+            "desktop",
+            "governance-tools",
+            "routine-ui",
+            "schedule-ui",
+            "web"
+          ],
+          "test:contract": [
+            "routine-ui"
+          ],
           "test:smoke": [],
           "test:integration": [],
-          "test:boundary": ["desktop"],
-          "test:ipc": ["desktop"],
-          "test:main": ["desktop"],
+          "test:boundary": [
+            "desktop"
+          ],
+          "test:ipc": [
+            "desktop"
+          ],
+          "test:main": [
+            "desktop"
+          ],
           "test:perf": [],
-          "test:interaction": ["ui-storybook"],
-          "e2e:ai-provider": ["web"],
-          "e2e:visual-regression": ["web"],
-          "test:coverage": ["app-vue"]
+          "test:interaction": [
+            "ui-storybook"
+          ],
+          "e2e:ai-provider": [
+            "web"
+          ],
+          "e2e:visual-regression": [
+            "web"
+          ],
+          "test:coverage": [
+            "app-vue"
+          ]
         },
         "jobs": {
           "lint": [
@@ -2756,7 +3595,10 @@
           ],
           "unit-1": [],
           "unit-2": [],
-          "unit-3": ["desktop:test", "schedule-ui:test"],
+          "unit-3": [
+            "desktop:test",
+            "schedule-ui:test"
+          ],
           "build": [
             "app-vue:build",
             "desktop:build",
@@ -2771,18 +3613,753 @@
             "ui-storybook:typecheck",
             "web:typecheck"
           ],
-          "web-unit-1": ["app-vue:test#1/2", "web:test"],
-          "web-unit-2": ["app-vue:test#2/2"],
+          "web-unit-1": [
+            "app-vue:test#1/2",
+            "web:test"
+          ],
+          "web-unit-2": [
+            "app-vue:test#2/2"
+          ],
           "server-unit": [],
-          "verification-children": ["desktop:test:ipc", "desktop:test:main"],
-          "web-visual": ["web:e2e:visual-regression"],
-          "component-browser": ["ui-storybook:test:interaction"],
-          "contract": ["routine-ui:test:contract"]
+          "verification-children": [
+            "desktop:test:ipc",
+            "desktop:test:main"
+          ],
+          "web-visual": [
+            "web:e2e:visual-regression"
+          ],
+          "component-browser": [
+            "ui-storybook:test:interaction"
+          ],
+          "contract": [
+            "routine-ui:test:contract"
+          ]
         },
         "serverShards": [
           {
             "id": "1/1",
-            "keys": ["desktop:test:main", "desktop:test:ipc"],
+            "keys": [
+              "desktop:test:main",
+              "desktop:test:ipc"
+            ],
+            "estimatedMs": 7849
+          }
+        ]
+      }
+    },
+    {
+      "id": "ai-contracts",
+      "files": [
+        "packages/ai-contracts/src/api/ai-chat.dto.ts"
+      ],
+      "expected": {
+        "full": false,
+        "targets": {
+          "build": [
+            "@memoflow/test-utils",
+            "account",
+            "account-ui",
+            "agent-gateway",
+            "ai",
+            "ai-client",
+            "ai-contracts",
+            "ai-ui",
+            "api",
+            "app-vue",
+            "cloud-auth",
+            "contracts",
+            "data-portability",
+            "database",
+            "desktop",
+            "domain-shared",
+            "goal",
+            "goal-client",
+            "goal-core",
+            "goal-ui",
+            "governance-tools",
+            "label",
+            "migrator",
+            "notification",
+            "notification-ui",
+            "patterns",
+            "relation",
+            "repository",
+            "repository-ui",
+            "routine",
+            "routine-ui",
+            "schedule",
+            "schedule-client",
+            "schedule-orchestration",
+            "schedule-ui",
+            "scheduler",
+            "setting",
+            "setting-ui",
+            "task",
+            "task-client",
+            "task-ui",
+            "ui-storybook",
+            "ui-vue-shadcn",
+            "utils",
+            "web",
+            "workspace-contracts"
+          ],
+          "typecheck": [
+            "@memoflow/test-utils",
+            "account",
+            "account-ui",
+            "agent-gateway",
+            "ai",
+            "ai-client",
+            "ai-contracts",
+            "ai-ui",
+            "api",
+            "app-react",
+            "app-vue",
+            "cloud-auth",
+            "contracts",
+            "data-portability",
+            "database",
+            "desktop",
+            "domain-shared",
+            "goal",
+            "goal-client",
+            "goal-core",
+            "goal-ui",
+            "label",
+            "migrator",
+            "mobile",
+            "notification",
+            "notification-ui",
+            "patterns",
+            "relation",
+            "repository",
+            "repository-ui",
+            "routine",
+            "routine-ui",
+            "schedule",
+            "schedule-client",
+            "schedule-orchestration",
+            "schedule-ui",
+            "scheduler",
+            "setting",
+            "setting-ui",
+            "task",
+            "task-client",
+            "task-ui",
+            "ui-storybook",
+            "ui-vue-shadcn",
+            "utils",
+            "web",
+            "workspace-contracts"
+          ],
+          "test": [
+            "account",
+            "account-ui",
+            "agent-gateway",
+            "ai",
+            "ai-client",
+            "ai-contracts",
+            "ai-ui",
+            "api",
+            "app-vue",
+            "cloud-auth",
+            "contracts",
+            "data-portability",
+            "database",
+            "desktop",
+            "domain-shared",
+            "goal",
+            "goal-client",
+            "goal-core",
+            "goal-ui",
+            "governance-tools",
+            "label",
+            "migrator",
+            "notification",
+            "notification-ui",
+            "patterns",
+            "relation",
+            "repository",
+            "repository-ui",
+            "routine",
+            "routine-ui",
+            "schedule",
+            "schedule-client",
+            "schedule-orchestration",
+            "schedule-ui",
+            "scheduler",
+            "setting",
+            "setting-ui",
+            "task",
+            "task-client",
+            "task-ui",
+            "ui-vue-shadcn",
+            "utils",
+            "web",
+            "workspace-contracts"
+          ],
+          "test:contract": [
+            "account-ui",
+            "ai-client",
+            "ai-contracts",
+            "ai-ui",
+            "contracts",
+            "goal-ui",
+            "notification-ui",
+            "repository-ui",
+            "routine-ui",
+            "schedule-client",
+            "task-client",
+            "task-ui",
+            "workspace-contracts"
+          ],
+          "test:smoke": [
+            "api"
+          ],
+          "test:integration": [
+            "account",
+            "ai",
+            "api",
+            "database",
+            "goal",
+            "label",
+            "notification",
+            "relation",
+            "repository",
+            "routine",
+            "schedule",
+            "scheduler",
+            "task"
+          ],
+          "test:boundary": [
+            "desktop"
+          ],
+          "test:ipc": [
+            "desktop"
+          ],
+          "test:main": [
+            "desktop"
+          ],
+          "test:perf": [
+            "task"
+          ],
+          "test:interaction": [
+            "ui-storybook"
+          ],
+          "e2e:ai-provider": [
+            "web"
+          ],
+          "e2e:visual-regression": [
+            "web"
+          ],
+          "test:coverage": [
+            "account",
+            "ai",
+            "api",
+            "app-vue",
+            "data-portability",
+            "domain-shared",
+            "goal",
+            "notification",
+            "routine",
+            "schedule",
+            "scheduler",
+            "setting",
+            "task"
+          ]
+        },
+        "jobs": {
+          "lint": [
+            "workspace:lint",
+            "workspace:format",
+            "workspace:sync",
+            "memoflow:governance-check"
+          ],
+          "unit-1": [
+            "goal:test",
+            "ai:test",
+            "routine:test",
+            "goal-client:test",
+            "schedule-ui:test",
+            "cloud-auth:test",
+            "data-portability:test",
+            "agent-gateway:test",
+            "domain-shared:test"
+          ],
+          "unit-2": [
+            "task:test",
+            "account:test",
+            "repository:test",
+            "goal-core:test",
+            "setting-ui:test",
+            "setting:test",
+            "scheduler:test",
+            "patterns:test",
+            "label:test"
+          ],
+          "unit-3": [
+            "desktop:test",
+            "notification:test",
+            "schedule:test",
+            "schedule-orchestration:test",
+            "ui-vue-shadcn:test",
+            "utils:test",
+            "relation:test"
+          ],
+          "build": [
+            "account:build",
+            "account-ui:build",
+            "agent-gateway:build",
+            "ai:build",
+            "ai-client:build",
+            "ai-contracts:build",
+            "ai-ui:build",
+            "api:build",
+            "app-vue:build",
+            "cloud-auth:build",
+            "contracts:build",
+            "data-portability:build",
+            "database:build",
+            "desktop:build",
+            "domain-shared:build",
+            "goal:build",
+            "goal-client:build",
+            "goal-core:build",
+            "goal-ui:build",
+            "label:build",
+            "migrator:build",
+            "notification:build",
+            "notification-ui:build",
+            "patterns:build",
+            "relation:build",
+            "repository:build",
+            "repository-ui:build",
+            "routine:build",
+            "routine-ui:build",
+            "schedule:build",
+            "schedule-client:build",
+            "schedule-orchestration:build",
+            "schedule-ui:build",
+            "scheduler:build",
+            "setting:build",
+            "setting-ui:build",
+            "task:build",
+            "task-client:build",
+            "task-ui:build",
+            "ui-storybook:build",
+            "ui-vue-shadcn:build",
+            "utils:build",
+            "web:build",
+            "workspace-contracts:build",
+            "@memoflow/test-utils:typecheck",
+            "account:typecheck",
+            "account-ui:typecheck",
+            "agent-gateway:typecheck",
+            "ai:typecheck",
+            "ai-client:typecheck",
+            "ai-contracts:typecheck",
+            "ai-ui:typecheck",
+            "api:typecheck",
+            "app-react:typecheck",
+            "app-vue:typecheck",
+            "cloud-auth:typecheck",
+            "contracts:typecheck",
+            "data-portability:typecheck",
+            "database:typecheck",
+            "desktop:typecheck",
+            "domain-shared:typecheck",
+            "goal:typecheck",
+            "goal-client:typecheck",
+            "goal-core:typecheck",
+            "goal-ui:typecheck",
+            "label:typecheck",
+            "migrator:typecheck",
+            "mobile:typecheck",
+            "notification:typecheck",
+            "notification-ui:typecheck",
+            "patterns:typecheck",
+            "relation:typecheck",
+            "repository:typecheck",
+            "repository-ui:typecheck",
+            "routine:typecheck",
+            "routine-ui:typecheck",
+            "schedule:typecheck",
+            "schedule-client:typecheck",
+            "schedule-orchestration:typecheck",
+            "schedule-ui:typecheck",
+            "scheduler:typecheck",
+            "setting:typecheck",
+            "setting-ui:typecheck",
+            "task:typecheck",
+            "task-client:typecheck",
+            "task-ui:typecheck",
+            "ui-storybook:typecheck",
+            "ui-vue-shadcn:typecheck",
+            "utils:typecheck",
+            "web:typecheck",
+            "workspace-contracts:typecheck"
+          ],
+          "web-unit-1": [
+            "app-vue:test#1/2",
+            "web:test"
+          ],
+          "web-unit-2": [
+            "app-vue:test#2/2"
+          ],
+          "server-unit": [
+            "api:test",
+            "database:test",
+            "migrator:test"
+          ],
+          "verification-children": [
+            "desktop:test:ipc",
+            "desktop:test:main",
+            "api:test:smoke",
+            "account:test:integration",
+            "ai:test:integration",
+            "api:test:integration",
+            "database:test:integration",
+            "goal:test:integration",
+            "label:test:integration",
+            "notification:test:integration",
+            "relation:test:integration",
+            "repository:test:integration",
+            "routine:test:integration",
+            "schedule:test:integration",
+            "scheduler:test:integration",
+            "task:test:integration"
+          ],
+          "web-visual": [
+            "web:e2e:visual-regression"
+          ],
+          "component-browser": [
+            "ui-storybook:test:interaction"
+          ],
+          "contract": [
+            "account-ui:test:contract",
+            "ai-client:test:contract",
+            "ai-contracts:test:contract",
+            "ai-ui:test:contract",
+            "contracts:test:contract",
+            "goal-ui:test:contract",
+            "notification-ui:test:contract",
+            "repository-ui:test:contract",
+            "routine-ui:test:contract",
+            "schedule-client:test:contract",
+            "task-client:test:contract",
+            "task-ui:test:contract",
+            "workspace-contracts:test:contract"
+          ]
+        },
+        "serverShards": [
+          {
+            "id": "1/3",
+            "keys": [
+              "api:test:integration",
+              "desktop:test:main",
+              "scheduler:test:integration",
+              "desktop:test:ipc"
+            ],
+            "estimatedMs": 37079
+          },
+          {
+            "id": "2/3",
+            "keys": [
+              "account:test:integration",
+              "goal:test:integration",
+              "schedule:test:integration",
+              "repository:test:integration",
+              "ai:test:integration",
+              "relation:test:integration"
+            ],
+            "estimatedMs": 37020
+          },
+          {
+            "id": "3/3",
+            "keys": [
+              "notification:test:integration",
+              "database:test:integration",
+              "task:test:integration",
+              "routine:test:integration",
+              "api:test:smoke",
+              "label:test:integration"
+            ],
+            "estimatedMs": 36450
+          }
+        ]
+      }
+    },
+    {
+      "id": "ai-client",
+      "files": [
+        "packages/ai-client/src/index.ts"
+      ],
+      "expected": {
+        "full": false,
+        "targets": {
+          "build": [
+            "ai",
+            "ai-client",
+            "ai-ui",
+            "api",
+            "app-vue",
+            "desktop",
+            "governance-tools",
+            "setting-ui",
+            "ui-storybook",
+            "web"
+          ],
+          "typecheck": [
+            "ai",
+            "ai-client",
+            "ai-ui",
+            "api",
+            "app-react",
+            "app-vue",
+            "desktop",
+            "mobile",
+            "setting-ui",
+            "ui-storybook",
+            "web"
+          ],
+          "test": [
+            "ai",
+            "ai-client",
+            "ai-ui",
+            "api",
+            "app-vue",
+            "desktop",
+            "governance-tools",
+            "setting-ui",
+            "web"
+          ],
+          "test:contract": [
+            "ai-client",
+            "ai-ui"
+          ],
+          "test:smoke": [
+            "api"
+          ],
+          "test:integration": [
+            "ai",
+            "api"
+          ],
+          "test:boundary": [
+            "desktop"
+          ],
+          "test:ipc": [
+            "desktop"
+          ],
+          "test:main": [
+            "desktop"
+          ],
+          "test:perf": [],
+          "test:interaction": [
+            "ui-storybook"
+          ],
+          "e2e:ai-provider": [
+            "web"
+          ],
+          "e2e:visual-regression": [
+            "web"
+          ],
+          "test:coverage": [
+            "ai",
+            "api",
+            "app-vue"
+          ]
+        },
+        "jobs": {
+          "lint": [
+            "workspace:lint",
+            "workspace:format",
+            "workspace:sync",
+            "memoflow:governance-check"
+          ],
+          "unit-1": [],
+          "unit-2": [
+            "setting-ui:test"
+          ],
+          "unit-3": [
+            "desktop:test",
+            "ai:test"
+          ],
+          "build": [
+            "ai:build",
+            "ai-client:build",
+            "ai-ui:build",
+            "api:build",
+            "app-vue:build",
+            "desktop:build",
+            "setting-ui:build",
+            "ui-storybook:build",
+            "web:build",
+            "ai:typecheck",
+            "ai-client:typecheck",
+            "ai-ui:typecheck",
+            "api:typecheck",
+            "app-react:typecheck",
+            "app-vue:typecheck",
+            "desktop:typecheck",
+            "mobile:typecheck",
+            "setting-ui:typecheck",
+            "ui-storybook:typecheck",
+            "web:typecheck"
+          ],
+          "web-unit-1": [
+            "app-vue:test#1/2",
+            "web:test"
+          ],
+          "web-unit-2": [
+            "app-vue:test#2/2"
+          ],
+          "server-unit": [
+            "api:test"
+          ],
+          "verification-children": [
+            "desktop:test:ipc",
+            "desktop:test:main",
+            "api:test:smoke",
+            "ai:test:integration",
+            "api:test:integration"
+          ],
+          "web-visual": [
+            "web:e2e:visual-regression"
+          ],
+          "component-browser": [
+            "ui-storybook:test:interaction"
+          ],
+          "contract": [
+            "ai-client:test:contract",
+            "ai-ui:test:contract"
+          ]
+        },
+        "serverShards": [
+          {
+            "id": "1/1",
+            "keys": [
+              "api:test:integration",
+              "desktop:test:main",
+              "api:test:smoke",
+              "ai:test:integration",
+              "desktop:test:ipc"
+            ],
+            "estimatedMs": 42239
+          }
+        ]
+      }
+    },
+    {
+      "id": "ai-ui",
+      "files": [
+        "packages/ai-ui/src/components/AIComposerControls.vue"
+      ],
+      "expected": {
+        "full": false,
+        "targets": {
+          "build": [
+            "ai-ui",
+            "app-vue",
+            "desktop",
+            "governance-tools",
+            "ui-storybook",
+            "web"
+          ],
+          "typecheck": [
+            "ai-ui",
+            "app-vue",
+            "desktop",
+            "ui-storybook",
+            "web"
+          ],
+          "test": [
+            "ai-ui",
+            "app-vue",
+            "desktop",
+            "governance-tools",
+            "web"
+          ],
+          "test:contract": [
+            "ai-ui"
+          ],
+          "test:smoke": [],
+          "test:integration": [],
+          "test:boundary": [
+            "desktop"
+          ],
+          "test:ipc": [
+            "desktop"
+          ],
+          "test:main": [
+            "desktop"
+          ],
+          "test:perf": [],
+          "test:interaction": [
+            "ui-storybook"
+          ],
+          "e2e:ai-provider": [
+            "web"
+          ],
+          "e2e:visual-regression": [
+            "web"
+          ],
+          "test:coverage": [
+            "app-vue"
+          ]
+        },
+        "jobs": {
+          "lint": [
+            "workspace:lint",
+            "workspace:format",
+            "workspace:sync",
+            "memoflow:governance-check"
+          ],
+          "unit-1": [],
+          "unit-2": [],
+          "unit-3": [
+            "desktop:test"
+          ],
+          "build": [
+            "ai-ui:build",
+            "app-vue:build",
+            "desktop:build",
+            "ui-storybook:build",
+            "web:build",
+            "ai-ui:typecheck",
+            "app-vue:typecheck",
+            "desktop:typecheck",
+            "ui-storybook:typecheck",
+            "web:typecheck"
+          ],
+          "web-unit-1": [
+            "app-vue:test#1/2",
+            "web:test"
+          ],
+          "web-unit-2": [
+            "app-vue:test#2/2"
+          ],
+          "server-unit": [],
+          "verification-children": [
+            "desktop:test:ipc",
+            "desktop:test:main"
+          ],
+          "web-visual": [
+            "web:e2e:visual-regression"
+          ],
+          "component-browser": [
+            "ui-storybook:test:interaction"
+          ],
+          "contract": [
+            "ai-ui:test:contract"
+          ]
+        },
+        "serverShards": [
+          {
+            "id": "1/1",
+            "keys": [
+              "desktop:test:main",
+              "desktop:test:ipc"
+            ],
             "estimatedMs": 7849
           }
         ]
@@ -2790,7 +4367,9 @@
     },
     {
       "id": "account-client",
-      "files": ["packages/account-client/src/index.ts"],
+      "files": [
+        "packages/account-client/src/index.ts"
+      ],
       "expected": {
         "full": false,
         "targets": {
@@ -2813,18 +4392,42 @@
             "ui-storybook",
             "web"
           ],
-          "test": ["account-client", "account-ui", "app-vue", "desktop", "governance-tools", "web"],
-          "test:contract": ["account-client", "account-ui"],
+          "test": [
+            "account-client",
+            "account-ui",
+            "app-vue",
+            "desktop",
+            "governance-tools",
+            "web"
+          ],
+          "test:contract": [
+            "account-client",
+            "account-ui"
+          ],
           "test:smoke": [],
           "test:integration": [],
-          "test:boundary": ["desktop"],
-          "test:ipc": ["desktop"],
-          "test:main": ["desktop"],
+          "test:boundary": [
+            "desktop"
+          ],
+          "test:ipc": [
+            "desktop"
+          ],
+          "test:main": [
+            "desktop"
+          ],
           "test:perf": [],
-          "test:interaction": ["ui-storybook"],
-          "e2e:ai-provider": ["web"],
-          "e2e:visual-regression": ["web"],
-          "test:coverage": ["app-vue"]
+          "test:interaction": [
+            "ui-storybook"
+          ],
+          "e2e:ai-provider": [
+            "web"
+          ],
+          "e2e:visual-regression": [
+            "web"
+          ],
+          "test:coverage": [
+            "app-vue"
+          ]
         },
         "jobs": {
           "lint": [
@@ -2835,7 +4438,9 @@
           ],
           "unit-1": [],
           "unit-2": [],
-          "unit-3": ["desktop:test"],
+          "unit-3": [
+            "desktop:test"
+          ],
           "build": [
             "account-client:build",
             "account-ui:build",
@@ -2852,18 +4457,36 @@
             "ui-storybook:typecheck",
             "web:typecheck"
           ],
-          "web-unit-1": ["app-vue:test#1/2", "web:test"],
-          "web-unit-2": ["app-vue:test#2/2"],
+          "web-unit-1": [
+            "app-vue:test#1/2",
+            "web:test"
+          ],
+          "web-unit-2": [
+            "app-vue:test#2/2"
+          ],
           "server-unit": [],
-          "verification-children": ["desktop:test:ipc", "desktop:test:main"],
-          "web-visual": ["web:e2e:visual-regression"],
-          "component-browser": ["ui-storybook:test:interaction"],
-          "contract": ["account-client:test:contract", "account-ui:test:contract"]
+          "verification-children": [
+            "desktop:test:ipc",
+            "desktop:test:main"
+          ],
+          "web-visual": [
+            "web:e2e:visual-regression"
+          ],
+          "component-browser": [
+            "ui-storybook:test:interaction"
+          ],
+          "contract": [
+            "account-client:test:contract",
+            "account-ui:test:contract"
+          ]
         },
         "serverShards": [
           {
             "id": "1/1",
-            "keys": ["desktop:test:main", "desktop:test:ipc"],
+            "keys": [
+              "desktop:test:main",
+              "desktop:test:ipc"
+            ],
             "estimatedMs": 7849
           }
         ]
@@ -2871,24 +4494,61 @@
     },
     {
       "id": "account-ui",
-      "files": ["packages/account-ui/src/account/components/AccountProfileSection.vue"],
+      "files": [
+        "packages/account-ui/src/account/components/AccountProfileSection.vue"
+      ],
       "expected": {
         "full": false,
         "targets": {
-          "build": ["account-ui", "app-vue", "desktop", "governance-tools", "ui-storybook", "web"],
-          "typecheck": ["account-ui", "app-vue", "desktop", "ui-storybook", "web"],
-          "test": ["account-ui", "app-vue", "desktop", "governance-tools", "web"],
-          "test:contract": ["account-ui"],
+          "build": [
+            "account-ui",
+            "app-vue",
+            "desktop",
+            "governance-tools",
+            "ui-storybook",
+            "web"
+          ],
+          "typecheck": [
+            "account-ui",
+            "app-vue",
+            "desktop",
+            "ui-storybook",
+            "web"
+          ],
+          "test": [
+            "account-ui",
+            "app-vue",
+            "desktop",
+            "governance-tools",
+            "web"
+          ],
+          "test:contract": [
+            "account-ui"
+          ],
           "test:smoke": [],
           "test:integration": [],
-          "test:boundary": ["desktop"],
-          "test:ipc": ["desktop"],
-          "test:main": ["desktop"],
+          "test:boundary": [
+            "desktop"
+          ],
+          "test:ipc": [
+            "desktop"
+          ],
+          "test:main": [
+            "desktop"
+          ],
           "test:perf": [],
-          "test:interaction": ["ui-storybook"],
-          "e2e:ai-provider": ["web"],
-          "e2e:visual-regression": ["web"],
-          "test:coverage": ["app-vue"]
+          "test:interaction": [
+            "ui-storybook"
+          ],
+          "e2e:ai-provider": [
+            "web"
+          ],
+          "e2e:visual-regression": [
+            "web"
+          ],
+          "test:coverage": [
+            "app-vue"
+          ]
         },
         "jobs": {
           "lint": [
@@ -2899,7 +4559,9 @@
           ],
           "unit-1": [],
           "unit-2": [],
-          "unit-3": ["desktop:test"],
+          "unit-3": [
+            "desktop:test"
+          ],
           "build": [
             "account-ui:build",
             "app-vue:build",
@@ -2912,18 +4574,35 @@
             "ui-storybook:typecheck",
             "web:typecheck"
           ],
-          "web-unit-1": ["app-vue:test#1/2", "web:test"],
-          "web-unit-2": ["app-vue:test#2/2"],
+          "web-unit-1": [
+            "app-vue:test#1/2",
+            "web:test"
+          ],
+          "web-unit-2": [
+            "app-vue:test#2/2"
+          ],
           "server-unit": [],
-          "verification-children": ["desktop:test:ipc", "desktop:test:main"],
-          "web-visual": ["web:e2e:visual-regression"],
-          "component-browser": ["ui-storybook:test:interaction"],
-          "contract": ["account-ui:test:contract"]
+          "verification-children": [
+            "desktop:test:ipc",
+            "desktop:test:main"
+          ],
+          "web-visual": [
+            "web:e2e:visual-regression"
+          ],
+          "component-browser": [
+            "ui-storybook:test:interaction"
+          ],
+          "contract": [
+            "account-ui:test:contract"
+          ]
         },
         "serverShards": [
           {
             "id": "1/1",
-            "keys": ["desktop:test:main", "desktop:test:ipc"],
+            "keys": [
+              "desktop:test:main",
+              "desktop:test:ipc"
+            ],
             "estimatedMs": 7849
           }
         ]

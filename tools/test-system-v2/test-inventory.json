@@ -2908,10 +2908,506 @@
       ]
     },
     {
+      "path": "packages/agent-gateway/src/contracts/assisted.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/agent-gateway/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/agent-gateway/src/contracts/routine-writes.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/agent-gateway/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/agent-gateway/src/contracts/task-mcp-read-boundary.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/agent-gateway/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "packages/agent-gateway/src/server/read-gateway.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/agent-gateway/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/ai-client/src/import-boundary.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/ai-client/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/ai-client/src/infrastructure-client/adapters/__tests__/ai-provider-onboarding-v2.adapters.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/ai-client/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/ai-client/src/infrastructure-client/adapters/read-string-keep-boundary.surface.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/ai-client/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/ai-client/src/infrastructure-client/adapters/result-client-error.test.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/ai-client/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/ai-client/src/runtime-assistant.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/ai-client/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/ai-client/src/runtime-usage.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/ai-client/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/ai-client/src/runtime-workflow.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/ai-client/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/ai-contracts/src/api/agent-instance.dto.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/ai-contracts/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/ai-contracts/src/api/ai-capabilities.dto.test.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/ai-contracts/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/ai-contracts/src/api/ai-goal-create-workflow.dto.test.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/ai-contracts/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/ai-contracts/src/api/ai-goal-research.dto.test.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/ai-contracts/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/ai-contracts/src/api/ai-knowledge-capture-workflow.dto.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/ai-contracts/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/ai-contracts/src/api/ai-knowledge-note.dto.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/ai-contracts/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/ai-contracts/src/api/ai-knowledge-query.dto.test.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/ai-contracts/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/ai-contracts/src/api/ai-provider-onboarding.dto.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/ai-contracts/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/ai-contracts/src/api/ai-runtime.dto.test.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/ai-contracts/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/ai-contracts/src/api/ai-task-create-workflow.dto.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/ai-contracts/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/ai-contracts/src/api/dual-registry.surface.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/ai-contracts/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/ai-contracts/src/api/goal-panel.dto.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/ai-contracts/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/ai-contracts/src/api/local-agent.dto.test.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/ai-contracts/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/ai-contracts/src/api/workspace-event.dto.test.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/ai-contracts/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/ai-contracts/src/portable-v3.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/ai-contracts/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/ai-ui/src/agent-instance-order.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/ai-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/ai-ui/src/components/AIComposerControls.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/ai-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/ai-ui/src/components/AIConversationSidebar.email-verification.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/ai-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/ai-ui/src/components/AIConversationSidebar.status.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/ai-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/ai-ui/src/components/AIFooterComposer.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/ai-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/ai-ui/src/components/AIGoalWorkflowPanel.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/ai-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/ai-ui/src/components/AIKnowledgeCapturePanel.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/ai-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/ai-ui/src/components/AIMessageContent.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/ai-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/ai-ui/src/components/AIMessagePanel.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/ai-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/ai-ui/src/components/AIRuntimeUsageBadge.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/ai-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/ai-ui/src/components/AITaskWorkflowPanel.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/ai-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/ai-ui/src/components/AgentDriverIcon.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/ai-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/ai-ui/src/components/MemoFlowAiIcon.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/ai-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/ai-ui/src/composables/antigravityModelPresentation.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/ai-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/ai-ui/src/composables/chatViewHelpers.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/ai-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/ai-ui/src/composables/error.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/ai-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/ai-ui/src/composables/native-model-visibility.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/ai-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/ai-ui/src/composables/surface-context.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/ai-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/ai-ui/src/composables/useAI.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/ai-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/ai-ui/src/composables/useAIChatSession.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/ai-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/ai-ui/src/composables/useAIChatView.lifecycle.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/ai-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/ai-ui/src/composables/useAIGoalWorkflow.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/ai-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/ai-ui/src/composables/useAIKnowledgeCapture.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/ai-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/ai-ui/src/composables/useAIKnowledgeQaWorkflow.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/ai-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/ai-ui/src/composables/useAIModelCatalog.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/ai-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/ai-ui/src/composables/useAIModelSelection.agent-instance.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/ai-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/ai-ui/src/composables/useAITaskWorkflow.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/ai-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/ai-ui/src/composables/useAIWorkflowPersistence.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/ai-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/ai-ui/src/composables/useAIWorkflowReconciliation.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/ai-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/ai-ui/src/composables/useAssistantStream.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/ai-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/ai-ui/src/composables/useConversationAttention.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/ai-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/ai-ui/src/composables/useDurableConversationAttention.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/ai-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/ai-ui/src/composables/useGoalSurfaceLease.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/ai-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/ai-ui/src/composables/useGoalWorkflowEvents.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/ai-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/ai-ui/src/composables/useLocalAssistantChoices.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/ai-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/ai-ui/src/composables/workflow-intent.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/ai-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/ai-ui/src/composables/workspaceEventSubscription.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/ai-ui/vitest.config.ts"
       ],
       "measurementCollectors": []
     },
@@ -2994,36 +3490,6 @@
       ]
     },
     {
-      "path": "packages/ai/src/client/runtime-assistant.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/ai/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/ai/vitest.config.ts"
-      ]
-    },
-    {
-      "path": "packages/ai/src/client/runtime-usage.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/ai/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/ai/vitest.config.ts"
-      ]
-    },
-    {
-      "path": "packages/ai/src/client/runtime-workflow.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/ai/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/ai/vitest.config.ts"
-      ]
-    },
-    {
       "path": "packages/ai/src/electron/index-lifecycle.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -3035,36 +3501,6 @@
     },
     {
       "path": "packages/ai/src/evals/eval-runner.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/ai/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/ai/vitest.config.ts"
-      ]
-    },
-    {
-      "path": "packages/ai/src/infrastructure-client/adapters/__tests__/ai-provider-onboarding-v2.adapters.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/ai/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/ai/vitest.config.ts"
-      ]
-    },
-    {
-      "path": "packages/ai/src/infrastructure-client/adapters/read-string-keep-boundary.surface.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/ai/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/ai/vitest.config.ts"
-      ]
-    },
-    {
-      "path": "packages/ai/src/infrastructure-client/adapters/result-client-error.test.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/ai/vitest.config.ts"
@@ -4452,986 +4888,6 @@
       ]
     },
     {
-      "path": "packages/app-vue/src/modules/ai/agent-instance-order.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/app-vue/vitest.store-coverage.config.ts"
-      ]
-    },
-    {
-      "path": "packages/app-vue/src/modules/ai/components/AIComposerControls.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/app-vue/vitest.store-coverage.config.ts"
-      ]
-    },
-    {
-      "path": "packages/app-vue/src/modules/ai/components/AIConversationSidebar.email-verification.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/app-vue/vitest.store-coverage.config.ts"
-      ]
-    },
-    {
-      "path": "packages/app-vue/src/modules/ai/components/AIConversationSidebar.status.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/app-vue/vitest.store-coverage.config.ts"
-      ]
-    },
-    {
-      "path": "packages/app-vue/src/modules/ai/components/AIFooterComposer.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/app-vue/vitest.store-coverage.config.ts"
-      ]
-    },
-    {
-      "path": "packages/app-vue/src/modules/ai/components/AIGoalWorkflowPanel.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/app-vue/vitest.store-coverage.config.ts"
-      ]
-    },
-    {
-      "path": "packages/app-vue/src/modules/ai/components/AIKnowledgeCapturePanel.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/app-vue/vitest.store-coverage.config.ts"
-      ]
-    },
-    {
-      "path": "packages/app-vue/src/modules/ai/components/AIMessageContent.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/app-vue/vitest.store-coverage.config.ts"
-      ]
-    },
-    {
-      "path": "packages/app-vue/src/modules/ai/components/AIMessagePanel.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/app-vue/vitest.store-coverage.config.ts"
-      ]
-    },
-    {
-      "path": "packages/app-vue/src/modules/ai/components/AIRuntimeUsageBadge.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/app-vue/vitest.store-coverage.config.ts"
-      ]
-    },
-    {
-      "path": "packages/app-vue/src/modules/ai/components/AITaskWorkflowPanel.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/app-vue/vitest.store-coverage.config.ts"
-      ]
-    },
-    {
-      "path": "packages/app-vue/src/modules/ai/components/AgentDriverIcon.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/app-vue/vitest.store-coverage.config.ts"
-      ]
-    },
-    {
-      "path": "packages/app-vue/src/modules/ai/components/MemoFlowAiIcon.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/app-vue/vitest.store-coverage.config.ts"
-      ]
-    },
-    {
-      "path": "packages/app-vue/src/modules/ai/composables/antigravityModelPresentation.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/app-vue/vitest.store-coverage.config.ts"
-      ]
-    },
-    {
-      "path": "packages/app-vue/src/modules/ai/composables/chatViewHelpers.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/app-vue/vitest.store-coverage.config.ts"
-      ]
-    },
-    {
-      "path": "packages/app-vue/src/modules/ai/composables/error.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/app-vue/vitest.store-coverage.config.ts"
-      ]
-    },
-    {
-      "path": "packages/app-vue/src/modules/ai/composables/native-model-visibility.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/app-vue/vitest.store-coverage.config.ts"
-      ]
-    },
-    {
-      "path": "packages/app-vue/src/modules/ai/composables/surface-context.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/app-vue/vitest.store-coverage.config.ts"
-      ]
-    },
-    {
-      "path": "packages/app-vue/src/modules/ai/composables/useAI.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/app-vue/vitest.store-coverage.config.ts"
-      ]
-    },
-    {
-      "path": "packages/app-vue/src/modules/ai/composables/useAIChatSession.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/app-vue/vitest.store-coverage.config.ts"
-      ]
-    },
-    {
-      "path": "packages/app-vue/src/modules/ai/composables/useAIChatView.lifecycle.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/app-vue/vitest.store-coverage.config.ts"
-      ]
-    },
-    {
-      "path": "packages/app-vue/src/modules/ai/composables/useAIGoalWorkflow.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/app-vue/vitest.store-coverage.config.ts"
-      ]
-    },
-    {
-      "path": "packages/app-vue/src/modules/ai/composables/useAIKnowledgeCapture.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/app-vue/vitest.store-coverage.config.ts"
-      ]
-    },
-    {
-      "path": "packages/app-vue/src/modules/ai/composables/useAIKnowledgeQaWorkflow.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/app-vue/vitest.store-coverage.config.ts"
-      ]
-    },
-    {
-      "path": "packages/app-vue/src/modules/ai/composables/useAIModelCatalog.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/app-vue/vitest.store-coverage.config.ts"
-      ]
-    },
-    {
-      "path": "packages/app-vue/src/modules/ai/composables/useAIModelSelection.agent-instance.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/app-vue/vitest.store-coverage.config.ts"
-      ]
-    },
-    {
-      "path": "packages/app-vue/src/modules/ai/composables/useAITaskWorkflow.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/app-vue/vitest.store-coverage.config.ts"
-      ]
-    },
-    {
-      "path": "packages/app-vue/src/modules/ai/composables/useAIWorkflowPersistence.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/app-vue/vitest.store-coverage.config.ts"
-      ]
-    },
-    {
-      "path": "packages/app-vue/src/modules/ai/composables/useAIWorkflowReconciliation.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/app-vue/vitest.store-coverage.config.ts"
-      ]
-    },
-    {
-      "path": "packages/app-vue/src/modules/ai/composables/useAssistantStream.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/app-vue/vitest.store-coverage.config.ts"
-      ]
-    },
-    {
-      "path": "packages/app-vue/src/modules/ai/composables/useConversationAttention.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/app-vue/vitest.store-coverage.config.ts"
-      ]
-    },
-    {
-      "path": "packages/app-vue/src/modules/ai/composables/useDurableConversationAttention.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/app-vue/vitest.store-coverage.config.ts"
-      ]
-    },
-    {
-      "path": "packages/app-vue/src/modules/ai/composables/useGoalSurfaceLease.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/app-vue/vitest.store-coverage.config.ts"
-      ]
-    },
-    {
-      "path": "packages/app-vue/src/modules/ai/composables/useGoalWorkflowEvents.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/app-vue/vitest.store-coverage.config.ts"
-      ]
-    },
-    {
-      "path": "packages/app-vue/src/modules/ai/composables/useLocalAssistantChoices.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/app-vue/vitest.store-coverage.config.ts"
-      ]
-    },
-    {
-      "path": "packages/app-vue/src/modules/ai/composables/workflow-intent.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/app-vue/vitest.store-coverage.config.ts"
-      ]
-    },
-    {
-      "path": "packages/app-vue/src/modules/ai/composables/workspaceEventSubscription.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/app-vue/vitest.store-coverage.config.ts"
-      ]
-    },
-    {
-      "path": "packages/app-vue/src/modules/repository/components/DocumentPresentationPrimitives.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/app-vue/vitest.store-coverage.config.ts"
-      ]
-    },
-    {
-      "path": "packages/app-vue/src/modules/repository/components/KnowledgeCaptureReviewDialog.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/app-vue/vitest.store-coverage.config.ts"
-      ]
-    },
-    {
-      "path": "packages/app-vue/src/modules/repository/components/KnowledgeMarkdownPreview.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/app-vue/vitest.store-coverage.config.ts"
-      ]
-    },
-    {
-      "path": "packages/app-vue/src/modules/repository/components/KnowledgeNoteCatalog.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/app-vue/vitest.store-coverage.config.ts"
-      ]
-    },
-    {
-      "path": "packages/app-vue/src/modules/repository/components/KnowledgeNoteContextPanel.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/app-vue/vitest.store-coverage.config.ts"
-      ]
-    },
-    {
-      "path": "packages/app-vue/src/modules/repository/components/KnowledgeProjectionRelationsView.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/app-vue/vitest.store-coverage.config.ts"
-      ]
-    },
-    {
-      "path": "packages/app-vue/src/modules/repository/components/KnowledgeWriteRequestLedger.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/app-vue/vitest.store-coverage.config.ts"
-      ]
-    },
-    {
-      "path": "packages/app-vue/src/modules/repository/composables/localAgentNoteReview.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/app-vue/vitest.store-coverage.config.ts"
-      ]
-    },
-    {
-      "path": "packages/app-vue/src/modules/repository/composables/useRecentKnowledgeNotes.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/app-vue/vitest.store-coverage.config.ts"
-      ]
-    },
-    {
-      "path": "packages/app-vue/src/modules/repository/composables/useReferenceableKnowledgeNotes.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/app-vue/vitest.store-coverage.config.ts"
-      ]
-    },
-    {
-      "path": "packages/app-vue/src/modules/repository/router/index.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/app-vue/vitest.store-coverage.config.ts"
-      ]
-    },
-    {
-      "path": "packages/app-vue/src/modules/repository/views/KnowledgeProjectionWorkspaceView.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/app-vue/vitest.store-coverage.config.ts"
-      ]
-    },
-    {
-      "path": "packages/app-vue/src/modules/repository/views/LocalVaultWorkspaceView.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/app-vue/vitest.store-coverage.config.ts"
-      ]
-    },
-    {
-      "path": "packages/app-vue/src/modules/setting/components/AISettings.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/app-vue/vitest.store-coverage.config.ts"
-      ]
-    },
-    {
-      "path": "packages/app-vue/src/modules/setting/components/AccountSettingsSection.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/app-vue/vitest.store-coverage.config.ts"
-      ]
-    },
-    {
-      "path": "packages/app-vue/src/modules/setting/components/AntigravityAcpDownload.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/app-vue/vitest.store-coverage.config.ts"
-      ]
-    },
-    {
-      "path": "packages/app-vue/src/modules/setting/components/DesktopUpdateSettingsSection.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/app-vue/vitest.store-coverage.config.ts"
-      ]
-    },
-    {
-      "path": "packages/app-vue/src/modules/setting/components/KeyboardSettings.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/app-vue/vitest.store-coverage.config.ts"
-      ]
-    },
-    {
-      "path": "packages/app-vue/src/modules/setting/components/KnowledgeRepositorySettings.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/app-vue/vitest.store-coverage.config.ts"
-      ]
-    },
-    {
-      "path": "packages/app-vue/src/modules/setting/components/NotificationSettings.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/app-vue/vitest.store-coverage.config.ts"
-      ]
-    },
-    {
-      "path": "packages/app-vue/src/modules/setting/components/SettingAdvancedActions.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/app-vue/vitest.store-coverage.config.ts"
-      ]
-    },
-    {
-      "path": "packages/app-vue/src/modules/setting/components/SettingsResetSection.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/app-vue/vitest.store-coverage.config.ts"
-      ]
-    },
-    {
-      "path": "packages/app-vue/src/modules/setting/components/UserPreferenceSettingsSection.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/app-vue/vitest.store-coverage.config.ts"
-      ]
-    },
-    {
-      "path": "packages/app-vue/src/modules/setting/components/ai-provider-default-policy.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/app-vue/vitest.store-coverage.config.ts"
-      ]
-    },
-    {
-      "path": "packages/app-vue/src/modules/setting/components/desktop-update-settings.presentation.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/app-vue/vitest.store-coverage.config.ts"
-      ]
-    },
-    {
-      "path": "packages/app-vue/src/modules/setting/composables/usePreferencePortability.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/app-vue/vitest.store-coverage.config.ts"
-      ]
-    },
-    {
-      "path": "packages/app-vue/src/modules/setting/composables/usePresentationBootstrap.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/app-vue/vitest.store-coverage.config.ts"
-      ]
-    },
-    {
-      "path": "packages/app-vue/src/modules/setting/stores/presentationPreferenceStore.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/app-vue/vitest.store-coverage.config.ts"
-      ]
-    },
-    {
-      "path": "packages/app-vue/src/modules/task/components/TaskOccurrenceCompactList.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/app-vue/vitest.store-coverage.config.ts"
-      ]
-    },
-    {
-      "path": "packages/app-vue/src/modules/task/components/TaskOccurrenceQuickRow.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/app-vue/vitest.store-coverage.config.ts"
-      ]
-    },
-    {
-      "path": "packages/app-vue/src/modules/task/components/TaskOccurrenceQuickSurface.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/app-vue/vitest.store-coverage.config.ts"
-      ]
-    },
-    {
-      "path": "packages/app-vue/src/modules/task/components/TaskOccurrenceRow.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/app-vue/vitest.store-coverage.config.ts"
-      ]
-    },
-    {
-      "path": "packages/app-vue/src/modules/task/components/TaskPageToolbar.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/app-vue/vitest.store-coverage.config.ts"
-      ]
-    },
-    {
-      "path": "packages/app-vue/src/modules/task/components/TaskPlanForm/TaskPlanForm.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/app-vue/vitest.store-coverage.config.ts"
-      ]
-    },
-    {
-      "path": "packages/app-vue/src/modules/task/components/TaskPlanForm/sections/BasicInfoSection.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/app-vue/vitest.store-coverage.config.ts"
-      ]
-    },
-    {
-      "path": "packages/app-vue/src/modules/task/components/TaskPlanForm/sections/ChecklistSection.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/app-vue/vitest.store-coverage.config.ts"
-      ]
-    },
-    {
-      "path": "packages/app-vue/src/modules/task/components/TaskPlanForm/sections/KeyResultLinksSection.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/app-vue/vitest.store-coverage.config.ts"
-      ]
-    },
-    {
-      "path": "packages/app-vue/src/modules/task/components/TaskPlanForm/sections/ReminderSection.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/app-vue/vitest.store-coverage.config.ts"
-      ]
-    },
-    {
-      "path": "packages/app-vue/src/modules/task/components/TaskPlanForm/widgets/selectors-accessibility.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/app-vue/vitest.store-coverage.config.ts"
-      ]
-    },
-    {
-      "path": "packages/app-vue/src/modules/task/components/TaskPlanRow.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/app-vue/vitest.store-coverage.config.ts"
-      ]
-    },
-    {
-      "path": "packages/app-vue/src/modules/task/components/TaskQuickSurface.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/app-vue/vitest.store-coverage.config.ts"
-      ]
-    },
-    {
-      "path": "packages/app-vue/src/modules/task/components/dialogs/QuickTaskDialog.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/app-vue/vitest.store-coverage.config.ts"
-      ]
-    },
-    {
-      "path": "packages/app-vue/src/modules/task/components/dialogs/TaskCompletionMeasurementDialog.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/app-vue/vitest.store-coverage.config.ts"
-      ]
-    },
-    {
-      "path": "packages/app-vue/src/modules/task/components/dialogs/TaskOccurrenceInspectDialog.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/app-vue/vitest.store-coverage.config.ts"
-      ]
-    },
-    {
-      "path": "packages/app-vue/src/modules/task/components/dialogs/TaskPlanDialog.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/app-vue/vitest.store-coverage.config.ts"
-      ]
-    },
-    {
-      "path": "packages/app-vue/src/modules/task/components/widgets/DailyTodoWidget.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/app-vue/vitest.store-coverage.config.ts"
-      ]
-    },
-    {
-      "path": "packages/app-vue/src/modules/task/composables/taskPlanCache.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/app-vue/vitest.store-coverage.config.ts"
-      ]
-    },
-    {
-      "path": "packages/app-vue/src/modules/task/composables/useTask.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/app-vue/vitest.store-coverage.config.ts"
-      ]
-    },
-    {
-      "path": "packages/app-vue/src/modules/task/composables/useTaskGoalBindingOptions.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/app-vue/vitest.store-coverage.config.ts"
-      ]
-    },
-    {
-      "path": "packages/app-vue/src/modules/task/composables/useTaskOccurrenceActionCoordinator.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/app-vue/vitest.store-coverage.config.ts"
-      ]
-    },
-    {
-      "path": "packages/app-vue/src/modules/task/composables/useTaskOccurrenceDetailQuery.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/app-vue/vitest.store-coverage.config.ts"
-      ]
-    },
-    {
-      "path": "packages/app-vue/src/modules/task/composables/useTaskOccurrences.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/app-vue/vitest.store-coverage.config.ts"
-      ]
-    },
-    {
-      "path": "packages/app-vue/src/modules/task/composables/useTaskPlanMutations.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/app-vue/vitest.store-coverage.config.ts"
-      ]
-    },
-    {
-      "path": "packages/app-vue/src/modules/task/composables/useTaskPlanQueries.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/app-vue/vitest.store-coverage.config.ts"
-      ]
-    },
-    {
-      "path": "packages/app-vue/src/modules/task/composables/useTaskToday.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/app-vue/vitest.store-coverage.config.ts"
-      ]
-    },
-    {
-      "path": "packages/app-vue/src/modules/task/stores/taskStore.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/app-vue/vitest.store-coverage.config.ts"
-      ]
-    },
-    {
-      "path": "packages/app-vue/src/modules/task/utils/format-task-duration.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/app-vue/vitest.store-coverage.config.ts"
-      ]
-    },
-    {
-      "path": "packages/app-vue/src/modules/task/utils/task-occurrence-presentation.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/app-vue/vitest.store-coverage.config.ts"
-      ]
-    },
-    {
-      "path": "packages/app-vue/src/modules/task/utils/task-plan-presentation.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/app-vue/vitest.store-coverage.config.ts"
-      ]
-    },
-    {
-      "path": "packages/app-vue/src/modules/task/views/TaskDetailView.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/app-vue/vitest.store-coverage.config.ts"
-      ]
-    },
-    {
-      "path": "packages/app-vue/src/modules/task/views/TaskManagementView.runtime.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/app-vue/vitest.store-coverage.config.ts"
-      ]
-    },
-    {
       "path": "packages/app-vue/src/platform/server-state/invalidation-dispatcher.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -5970,6 +5426,14 @@
       "measurementCollectors": []
     },
     {
+      "path": "packages/cloud-auth-contracts/src/index.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/cloud-auth-contracts/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "packages/cloud-auth/src/client/external-agent-client.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -6062,302 +5526,6 @@
       "primarySuite": "unit",
       "collectors": [
         "packages/cloud-auth/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
-      "path": "packages/contracts/src/modules/agent-gateway/assisted.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/contracts/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
-      "path": "packages/contracts/src/modules/agent-gateway/routine-writes.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/contracts/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
-      "path": "packages/contracts/src/modules/ai/api/agent-instance.dto.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/contracts/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
-      "path": "packages/contracts/src/modules/ai/api/ai-capabilities.dto.test.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/contracts/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
-      "path": "packages/contracts/src/modules/ai/api/ai-goal-create-workflow.dto.test.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/contracts/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
-      "path": "packages/contracts/src/modules/ai/api/ai-goal-research.dto.test.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/contracts/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
-      "path": "packages/contracts/src/modules/ai/api/ai-knowledge-capture-workflow.dto.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/contracts/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
-      "path": "packages/contracts/src/modules/ai/api/ai-knowledge-note.dto.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/contracts/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
-      "path": "packages/contracts/src/modules/ai/api/ai-knowledge-query.dto.test.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/contracts/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
-      "path": "packages/contracts/src/modules/ai/api/ai-provider-onboarding.dto.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/contracts/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
-      "path": "packages/contracts/src/modules/ai/api/ai-runtime.dto.test.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/contracts/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
-      "path": "packages/contracts/src/modules/ai/api/ai-task-create-workflow.dto.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/contracts/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
-      "path": "packages/contracts/src/modules/ai/api/dual-registry.surface.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/contracts/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
-      "path": "packages/contracts/src/modules/ai/api/goal-panel.dto.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/contracts/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
-      "path": "packages/contracts/src/modules/ai/api/local-agent.dto.test.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/contracts/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
-      "path": "packages/contracts/src/modules/ai/api/workspace-event.dto.test.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/contracts/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
-      "path": "packages/contracts/src/modules/ai/portable-v3.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/contracts/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
-      "path": "packages/contracts/src/modules/repository/aggregates/dual-registry.surface.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/contracts/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
-      "path": "packages/contracts/src/modules/repository/api/dual-registry.surface.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/contracts/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
-      "path": "packages/contracts/src/modules/repository/api/knowledge-document-identity.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/contracts/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
-      "path": "packages/contracts/src/modules/repository/api/knowledge-note-projection.dto.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/contracts/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
-      "path": "packages/contracts/src/modules/setting/preferences/canonical.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/contracts/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
-      "path": "packages/contracts/src/modules/setting/preferences/portable-v3.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/contracts/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
-      "path": "packages/contracts/src/modules/setting/preferences/product-feature-map-public.surface.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/contracts/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
-      "path": "packages/contracts/src/modules/task/api/complete-task-occurrence.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/contracts/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
-      "path": "packages/contracts/src/modules/task/api/dual-registry.surface.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/contracts/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
-      "path": "packages/contracts/src/modules/task/api/task-goal-context.dto.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/contracts/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
-      "path": "packages/contracts/src/modules/task/api/task-plan.dto.test.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/contracts/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
-      "path": "packages/contracts/src/modules/task/api/task-read-schema.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/contracts/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
-      "path": "packages/contracts/src/modules/task/api/task-workspace.dto.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/contracts/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
-      "path": "packages/contracts/src/modules/task/domain/events/task-goal-progress-outbox.event.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/contracts/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
-      "path": "packages/contracts/src/modules/task/portable-v3.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/contracts/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
-      "path": "packages/contracts/src/modules/task/protocol/task-rpc-map.surface.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/contracts/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
-      "path": "packages/contracts/src/modules/task/value-objects/checklist-item-definition.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/contracts/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
-      "path": "packages/contracts/src/modules/task/value-objects/task-goal-binding.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/contracts/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
-      "path": "packages/contracts/src/modules/task/value-objects/task-occurrence-result.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/contracts/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
-      "path": "packages/contracts/src/modules/task/value-objects/task-plan-schedule.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/contracts/vitest.config.ts"
       ],
       "measurementCollectors": []
     },
@@ -9084,6 +8252,182 @@
       "measurementCollectors": []
     },
     {
+      "path": "packages/repository-client/src/application-client/knowledge-write-request-ledger-contract.surface.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/repository-client/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/repository-client/src/application-client/repository-client-service.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/repository-client/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/repository-client/src/infrastructure-client/adapters/http/repository-http.adapter.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/repository-client/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/repository-client/src/infrastructure-client/adapters/ipc/repository-ipc.adapter.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/repository-client/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/repository-client/src/repository-dto-port.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/repository-client/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/repository-contracts/src/aggregates/dual-registry.surface.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/repository-contracts/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/repository-contracts/src/api/dual-registry.surface.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/repository-contracts/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/repository-contracts/src/api/knowledge-document-identity.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/repository-contracts/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/repository-contracts/src/api/knowledge-note-projection.dto.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/repository-contracts/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/repository-ui/src/components/DocumentPresentationPrimitives.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/repository-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/repository-ui/src/components/KnowledgeCaptureReviewDialog.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/repository-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/repository-ui/src/components/KnowledgeMarkdownPreview.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/repository-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/repository-ui/src/components/KnowledgeNoteCatalog.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/repository-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/repository-ui/src/components/KnowledgeNoteContextPanel.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/repository-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/repository-ui/src/components/KnowledgeProjectionRelationsView.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/repository-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/repository-ui/src/components/KnowledgeWriteRequestLedger.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/repository-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/repository-ui/src/composables/localAgentNoteReview.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/repository-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/repository-ui/src/composables/useRecentKnowledgeNotes.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/repository-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/repository-ui/src/composables/useReferenceableKnowledgeNotes.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/repository-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/repository-ui/src/router/index.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/repository-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/repository-ui/src/views/KnowledgeProjectionWorkspaceView.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/repository-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/repository-ui/src/views/LocalVaultWorkspaceView.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/repository-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "packages/repository/src/api/module-lifecycle.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -9101,22 +8445,6 @@
     },
     {
       "path": "packages/repository/src/api/routes/knowledge-repository-connection.routes.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/repository/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
-      "path": "packages/repository/src/application-client/knowledge-write-request-ledger-contract.surface.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/repository/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
-      "path": "packages/repository/src/application-client/repository-client-service.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/repository/vitest.config.ts"
@@ -9165,22 +8493,6 @@
     },
     {
       "path": "packages/repository/src/electron/vault-fs-guards-dual.surface.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/repository/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
-      "path": "packages/repository/src/infrastructure-client/adapters/http/repository-http.adapter.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/repository/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
-      "path": "packages/repository/src/infrastructure-client/adapters/ipc/repository-ipc.adapter.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/repository/vitest.config.ts"
@@ -10334,6 +9646,166 @@
       ]
     },
     {
+      "path": "packages/setting-client/src/infrastructure-client/adapters/canonical-preference-client.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/setting-client/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/setting-client/src/setting-dto-port.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/setting-client/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/setting-contracts/src/preferences/canonical.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/setting-contracts/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/setting-contracts/src/preferences/portable-v3.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/setting-contracts/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/setting-contracts/src/preferences/product-feature-map-public.surface.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/setting-contracts/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/setting-ui/src/components/AISettings.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/setting-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/setting-ui/src/components/AccountSettingsSection.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/setting-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/setting-ui/src/components/AntigravityAcpDownload.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/setting-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/setting-ui/src/components/DesktopUpdateSettingsSection.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/setting-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/setting-ui/src/components/KeyboardSettings.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/setting-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/setting-ui/src/components/KnowledgeRepositorySettings.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/setting-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/setting-ui/src/components/NotificationSettings.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/setting-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/setting-ui/src/components/SettingAdvancedActions.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/setting-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/setting-ui/src/components/SettingsResetSection.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/setting-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/setting-ui/src/components/UserPreferenceSettingsSection.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/setting-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/setting-ui/src/components/ai-provider-default-policy.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/setting-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/setting-ui/src/components/desktop-update-settings.presentation.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/setting-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/setting-ui/src/composables/usePreferencePortability.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/setting-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/setting-ui/src/composables/usePresentationBootstrap.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/setting-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/setting-ui/src/stores/presentationPreferenceStore.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/setting-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "packages/setting/src/api/module-lifecycle.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -10355,16 +9827,6 @@
     },
     {
       "path": "packages/setting/src/electron/index-lifecycle.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/setting/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/setting/vitest.config.ts"
-      ]
-    },
-    {
-      "path": "packages/setting/src/infrastructure-client/adapters/canonical-preference-client.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/setting/vitest.config.ts"
@@ -10478,6 +9940,398 @@
       "measurementCollectors": []
     },
     {
+      "path": "packages/task-client/src/application-client/task-client-service-goal-binding.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/task-client/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/task-client/src/application-client/task-client-service.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/task-client/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/task-client/src/infrastructure-client/adapters/http/task-occurrence-http.adapter.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/task-client/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/task-contracts/src/api/complete-task-occurrence.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/task-contracts/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/task-contracts/src/api/dual-registry.surface.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/task-contracts/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/task-contracts/src/api/task-goal-context.dto.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/task-contracts/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/task-contracts/src/api/task-plan.dto.test.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/task-contracts/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/task-contracts/src/api/task-read-schema.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/task-contracts/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/task-contracts/src/domain/events/task-goal-progress-outbox.event.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/task-contracts/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/task-contracts/src/portable-v3.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/task-contracts/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/task-contracts/src/protocol/task-rpc-map.surface.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/task-contracts/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/task-contracts/src/value-objects/checklist-item-definition.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/task-contracts/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/task-contracts/src/value-objects/task-goal-binding.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/task-contracts/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/task-contracts/src/value-objects/task-occurrence-result.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/task-contracts/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/task-contracts/src/value-objects/task-plan-schedule.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/task-contracts/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/task-ui/src/components/TaskOccurrenceCompactList.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/task-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/task-ui/src/components/TaskOccurrenceQuickRow.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/task-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/task-ui/src/components/TaskOccurrenceQuickSurface.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/task-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/task-ui/src/components/TaskOccurrenceRow.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/task-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/task-ui/src/components/TaskPageToolbar.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/task-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/task-ui/src/components/TaskPlanForm/TaskPlanForm.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/task-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/task-ui/src/components/TaskPlanForm/sections/BasicInfoSection.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/task-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/task-ui/src/components/TaskPlanForm/sections/ChecklistSection.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/task-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/task-ui/src/components/TaskPlanForm/sections/KeyResultLinksSection.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/task-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/task-ui/src/components/TaskPlanForm/sections/ReminderSection.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/task-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/task-ui/src/components/TaskPlanForm/widgets/selectors-accessibility.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/task-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/task-ui/src/components/TaskPlanRow.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/task-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/task-ui/src/components/TaskQuickSurface.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/task-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/task-ui/src/components/dialogs/QuickTaskDialog.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/task-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/task-ui/src/components/dialogs/TaskCompletionMeasurementDialog.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/task-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/task-ui/src/components/dialogs/TaskOccurrenceInspectDialog.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/task-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/task-ui/src/components/dialogs/TaskPlanDialog.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/task-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/task-ui/src/components/widgets/DailyTodoWidget.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/task-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/task-ui/src/composables/taskPlanCache.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/task-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/task-ui/src/composables/useTask.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/task-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/task-ui/src/composables/useTaskGoalBindingOptions.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/task-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/task-ui/src/composables/useTaskOccurrenceActionCoordinator.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/task-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/task-ui/src/composables/useTaskOccurrenceDetailQuery.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/task-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/task-ui/src/composables/useTaskOccurrences.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/task-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/task-ui/src/composables/useTaskPlanMutations.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/task-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/task-ui/src/composables/useTaskPlanQueries.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/task-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/task-ui/src/composables/useTaskToday.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/task-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/task-ui/src/import-boundary.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/task-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/task-ui/src/stores/taskStore.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/task-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/task-ui/src/utils/format-task-duration.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/task-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/task-ui/src/utils/task-occurrence-presentation.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/task-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/task-ui/src/utils/task-plan-presentation.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/task-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/task-ui/src/views/TaskDetailView.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/task-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/task-ui/src/views/TaskManagementView.runtime.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/task-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "packages/task/src/api/module-lifecycle.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -10528,26 +10382,6 @@
       ]
     },
     {
-      "path": "packages/task/src/application-client/task-client-service.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/task/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/task/vitest.config.ts"
-      ]
-    },
-    {
-      "path": "packages/task/src/domain-client/aggregates/task-plan.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/task/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/task/vitest.config.ts"
-      ]
-    },
-    {
       "path": "packages/task/src/electron/authenticated-ipc.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -10569,16 +10403,6 @@
     },
     {
       "path": "packages/task/src/import-safety.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/task/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/task/vitest.config.ts"
-      ]
-    },
-    {
-      "path": "packages/task/src/infrastructure-client/adapters/http/task-occurrence-http.adapter.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/task/vitest.config.ts"
@@ -11690,6 +11514,14 @@
       "measurementCollectors": []
     },
     {
+      "path": "packages/workspace-contracts/src/task-workspace.dto.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/workspace-contracts/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "tools/agent-skills/validate-local-deploy/scripts/image-freshness.spec.mjs",
       "primarySuite": "governance",
       "collectors": [
@@ -12390,14 +12222,14 @@
       "type": "measurement",
       "suite": "coverage",
       "runner": "vitest",
-      "fileCount": 116
+      "fileCount": 110
     },
     {
       "id": "packages/app-vue/vitest.store-coverage.config.ts",
       "type": "measurement",
       "suite": "coverage",
       "runner": "vitest",
-      "fileCount": 187
+      "fileCount": 89
     },
     {
       "id": "packages/data-portability/vitest.config.ts",
@@ -12481,14 +12313,14 @@
       "type": "measurement",
       "suite": "coverage",
       "runner": "vitest",
-      "fileCount": 12
+      "fileCount": 11
     },
     {
       "id": "packages/task/vitest.config.ts",
       "type": "measurement",
       "suite": "coverage",
       "runner": "vitest",
-      "fileCount": 84
+      "fileCount": 81
     },
     {
       "id": "packages/task/vitest.mappers.config.ts",
@@ -12882,24 +12714,52 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 1
+      "fileCount": 4
+    },
+    {
+      "id": "packages/ai-client/vitest.config.ts",
+      "type": "primary",
+      "suite": "unit",
+      "runner": "vitest",
+      "fileCount": 7
+    },
+    {
+      "id": "packages/ai-contracts/vitest.config.ts",
+      "type": "primary",
+      "suite": "unit",
+      "runner": "vitest",
+      "fileCount": 15
+    },
+    {
+      "id": "packages/ai-ui/vitest.config.ts",
+      "type": "primary",
+      "suite": "unit",
+      "runner": "vitest",
+      "fileCount": 37
     },
     {
       "id": "packages/ai/vitest.config.ts",
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 116
+      "fileCount": 110
     },
     {
       "id": "packages/app-vue/vitest.config.ts",
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 187
+      "fileCount": 89
     },
     {
       "id": "packages/assets/vitest.config.ts",
+      "type": "primary",
+      "suite": "unit",
+      "runner": "vitest",
+      "fileCount": 1
+    },
+    {
+      "id": "packages/cloud-auth-contracts/vitest.config.ts",
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
@@ -12917,7 +12777,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 39
+      "fileCount": 2
     },
     {
       "id": "packages/data-portability-contracts/vitest.config.ts",
@@ -13095,11 +12955,32 @@
       "fileCount": 1
     },
     {
+      "id": "packages/repository-client/vitest.config.ts",
+      "type": "primary",
+      "suite": "unit",
+      "runner": "vitest",
+      "fileCount": 5
+    },
+    {
+      "id": "packages/repository-contracts/vitest.config.ts",
+      "type": "primary",
+      "suite": "unit",
+      "runner": "vitest",
+      "fileCount": 4
+    },
+    {
+      "id": "packages/repository-ui/vitest.config.ts",
+      "type": "primary",
+      "suite": "unit",
+      "runner": "vitest",
+      "fileCount": 13
+    },
+    {
       "id": "packages/repository/vitest.config.ts",
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 36
+      "fileCount": 32
     },
     {
       "id": "packages/routine-client/vitest.config.ts",
@@ -13172,11 +13053,32 @@
       "fileCount": 14
     },
     {
+      "id": "packages/setting-client/vitest.config.ts",
+      "type": "primary",
+      "suite": "unit",
+      "runner": "vitest",
+      "fileCount": 2
+    },
+    {
+      "id": "packages/setting-contracts/vitest.config.ts",
+      "type": "primary",
+      "suite": "unit",
+      "runner": "vitest",
+      "fileCount": 3
+    },
+    {
+      "id": "packages/setting-ui/vitest.config.ts",
+      "type": "primary",
+      "suite": "unit",
+      "runner": "vitest",
+      "fileCount": 15
+    },
+    {
       "id": "packages/setting/vitest.config.ts",
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 12
+      "fileCount": 11
     },
     {
       "id": "packages/shared-primitives/vitest.config.ts",
@@ -13186,11 +13088,32 @@
       "fileCount": 3
     },
     {
+      "id": "packages/task-client/vitest.config.ts",
+      "type": "primary",
+      "suite": "unit",
+      "runner": "vitest",
+      "fileCount": 3
+    },
+    {
+      "id": "packages/task-contracts/vitest.config.ts",
+      "type": "primary",
+      "suite": "unit",
+      "runner": "vitest",
+      "fileCount": 12
+    },
+    {
+      "id": "packages/task-ui/vitest.config.ts",
+      "type": "primary",
+      "suite": "unit",
+      "runner": "vitest",
+      "fileCount": 34
+    },
+    {
       "id": "packages/task/vitest.config.ts",
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 84
+      "fileCount": 81
     },
     {
       "id": "packages/time/vitest.config.ts",
@@ -13232,7 +13155,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 1
+      "fileCount": 2
     }
   ],
   "measurementSuites": {
@@ -13333,14 +13256,8 @@
       "packages/ai/src/api/routes/ai-void-success-envelope.surface.spec.ts",
       "packages/ai/src/api/routes/assistant-sse.http.spec.ts",
       "packages/ai/src/api/routes/workspace-sse.http.spec.ts",
-      "packages/ai/src/client/runtime-assistant.spec.ts",
-      "packages/ai/src/client/runtime-usage.spec.ts",
-      "packages/ai/src/client/runtime-workflow.spec.ts",
       "packages/ai/src/electron/index-lifecycle.spec.ts",
       "packages/ai/src/evals/eval-runner.spec.ts",
-      "packages/ai/src/infrastructure-client/adapters/__tests__/ai-provider-onboarding-v2.adapters.spec.ts",
-      "packages/ai/src/infrastructure-client/adapters/read-string-keep-boundary.surface.spec.ts",
-      "packages/ai/src/infrastructure-client/adapters/result-client-error.test.ts",
       "packages/ai/src/server/application/agent-instance/agent-instance.registry.spec.ts",
       "packages/ai/src/server/application/ai-application-capabilities.surface.spec.ts",
       "packages/ai/src/server/application/ai-conversation-portability.spec.ts",
@@ -13478,104 +13395,6 @@
       "packages/app-vue/src/layouts/shell/useTaskNativeSurface.spec.ts",
       "packages/app-vue/src/locales/localePresentation.spec.ts",
       "packages/app-vue/src/locales/setting-updates-locale.spec.ts",
-      "packages/app-vue/src/modules/ai/agent-instance-order.spec.ts",
-      "packages/app-vue/src/modules/ai/components/AIComposerControls.spec.ts",
-      "packages/app-vue/src/modules/ai/components/AIConversationSidebar.email-verification.spec.ts",
-      "packages/app-vue/src/modules/ai/components/AIConversationSidebar.status.spec.ts",
-      "packages/app-vue/src/modules/ai/components/AIFooterComposer.spec.ts",
-      "packages/app-vue/src/modules/ai/components/AIGoalWorkflowPanel.spec.ts",
-      "packages/app-vue/src/modules/ai/components/AIKnowledgeCapturePanel.spec.ts",
-      "packages/app-vue/src/modules/ai/components/AIMessageContent.spec.ts",
-      "packages/app-vue/src/modules/ai/components/AIMessagePanel.spec.ts",
-      "packages/app-vue/src/modules/ai/components/AIRuntimeUsageBadge.spec.ts",
-      "packages/app-vue/src/modules/ai/components/AITaskWorkflowPanel.spec.ts",
-      "packages/app-vue/src/modules/ai/components/AgentDriverIcon.spec.ts",
-      "packages/app-vue/src/modules/ai/components/MemoFlowAiIcon.spec.ts",
-      "packages/app-vue/src/modules/ai/composables/antigravityModelPresentation.spec.ts",
-      "packages/app-vue/src/modules/ai/composables/chatViewHelpers.spec.ts",
-      "packages/app-vue/src/modules/ai/composables/error.spec.ts",
-      "packages/app-vue/src/modules/ai/composables/native-model-visibility.spec.ts",
-      "packages/app-vue/src/modules/ai/composables/surface-context.spec.ts",
-      "packages/app-vue/src/modules/ai/composables/useAI.spec.ts",
-      "packages/app-vue/src/modules/ai/composables/useAIChatSession.spec.ts",
-      "packages/app-vue/src/modules/ai/composables/useAIChatView.lifecycle.spec.ts",
-      "packages/app-vue/src/modules/ai/composables/useAIGoalWorkflow.spec.ts",
-      "packages/app-vue/src/modules/ai/composables/useAIKnowledgeCapture.spec.ts",
-      "packages/app-vue/src/modules/ai/composables/useAIKnowledgeQaWorkflow.spec.ts",
-      "packages/app-vue/src/modules/ai/composables/useAIModelCatalog.spec.ts",
-      "packages/app-vue/src/modules/ai/composables/useAIModelSelection.agent-instance.spec.ts",
-      "packages/app-vue/src/modules/ai/composables/useAITaskWorkflow.spec.ts",
-      "packages/app-vue/src/modules/ai/composables/useAIWorkflowPersistence.spec.ts",
-      "packages/app-vue/src/modules/ai/composables/useAIWorkflowReconciliation.spec.ts",
-      "packages/app-vue/src/modules/ai/composables/useAssistantStream.spec.ts",
-      "packages/app-vue/src/modules/ai/composables/useConversationAttention.spec.ts",
-      "packages/app-vue/src/modules/ai/composables/useDurableConversationAttention.spec.ts",
-      "packages/app-vue/src/modules/ai/composables/useGoalSurfaceLease.spec.ts",
-      "packages/app-vue/src/modules/ai/composables/useGoalWorkflowEvents.spec.ts",
-      "packages/app-vue/src/modules/ai/composables/useLocalAssistantChoices.spec.ts",
-      "packages/app-vue/src/modules/ai/composables/workflow-intent.spec.ts",
-      "packages/app-vue/src/modules/ai/composables/workspaceEventSubscription.spec.ts",
-      "packages/app-vue/src/modules/repository/components/DocumentPresentationPrimitives.spec.ts",
-      "packages/app-vue/src/modules/repository/components/KnowledgeCaptureReviewDialog.spec.ts",
-      "packages/app-vue/src/modules/repository/components/KnowledgeMarkdownPreview.spec.ts",
-      "packages/app-vue/src/modules/repository/components/KnowledgeNoteCatalog.spec.ts",
-      "packages/app-vue/src/modules/repository/components/KnowledgeNoteContextPanel.spec.ts",
-      "packages/app-vue/src/modules/repository/components/KnowledgeProjectionRelationsView.spec.ts",
-      "packages/app-vue/src/modules/repository/components/KnowledgeWriteRequestLedger.spec.ts",
-      "packages/app-vue/src/modules/repository/composables/localAgentNoteReview.spec.ts",
-      "packages/app-vue/src/modules/repository/composables/useRecentKnowledgeNotes.spec.ts",
-      "packages/app-vue/src/modules/repository/composables/useReferenceableKnowledgeNotes.spec.ts",
-      "packages/app-vue/src/modules/repository/router/index.spec.ts",
-      "packages/app-vue/src/modules/repository/views/KnowledgeProjectionWorkspaceView.spec.ts",
-      "packages/app-vue/src/modules/repository/views/LocalVaultWorkspaceView.spec.ts",
-      "packages/app-vue/src/modules/setting/components/AISettings.spec.ts",
-      "packages/app-vue/src/modules/setting/components/AccountSettingsSection.spec.ts",
-      "packages/app-vue/src/modules/setting/components/AntigravityAcpDownload.spec.ts",
-      "packages/app-vue/src/modules/setting/components/DesktopUpdateSettingsSection.spec.ts",
-      "packages/app-vue/src/modules/setting/components/KeyboardSettings.spec.ts",
-      "packages/app-vue/src/modules/setting/components/KnowledgeRepositorySettings.spec.ts",
-      "packages/app-vue/src/modules/setting/components/NotificationSettings.spec.ts",
-      "packages/app-vue/src/modules/setting/components/SettingAdvancedActions.spec.ts",
-      "packages/app-vue/src/modules/setting/components/SettingsResetSection.spec.ts",
-      "packages/app-vue/src/modules/setting/components/UserPreferenceSettingsSection.spec.ts",
-      "packages/app-vue/src/modules/setting/components/ai-provider-default-policy.spec.ts",
-      "packages/app-vue/src/modules/setting/components/desktop-update-settings.presentation.spec.ts",
-      "packages/app-vue/src/modules/setting/composables/usePreferencePortability.spec.ts",
-      "packages/app-vue/src/modules/setting/composables/usePresentationBootstrap.spec.ts",
-      "packages/app-vue/src/modules/setting/stores/presentationPreferenceStore.spec.ts",
-      "packages/app-vue/src/modules/task/components/TaskOccurrenceCompactList.spec.ts",
-      "packages/app-vue/src/modules/task/components/TaskOccurrenceQuickRow.spec.ts",
-      "packages/app-vue/src/modules/task/components/TaskOccurrenceQuickSurface.spec.ts",
-      "packages/app-vue/src/modules/task/components/TaskOccurrenceRow.spec.ts",
-      "packages/app-vue/src/modules/task/components/TaskPageToolbar.spec.ts",
-      "packages/app-vue/src/modules/task/components/TaskPlanForm/TaskPlanForm.spec.ts",
-      "packages/app-vue/src/modules/task/components/TaskPlanForm/sections/BasicInfoSection.spec.ts",
-      "packages/app-vue/src/modules/task/components/TaskPlanForm/sections/ChecklistSection.spec.ts",
-      "packages/app-vue/src/modules/task/components/TaskPlanForm/sections/KeyResultLinksSection.spec.ts",
-      "packages/app-vue/src/modules/task/components/TaskPlanForm/sections/ReminderSection.spec.ts",
-      "packages/app-vue/src/modules/task/components/TaskPlanForm/widgets/selectors-accessibility.spec.ts",
-      "packages/app-vue/src/modules/task/components/TaskPlanRow.spec.ts",
-      "packages/app-vue/src/modules/task/components/TaskQuickSurface.spec.ts",
-      "packages/app-vue/src/modules/task/components/dialogs/QuickTaskDialog.spec.ts",
-      "packages/app-vue/src/modules/task/components/dialogs/TaskCompletionMeasurementDialog.spec.ts",
-      "packages/app-vue/src/modules/task/components/dialogs/TaskOccurrenceInspectDialog.spec.ts",
-      "packages/app-vue/src/modules/task/components/dialogs/TaskPlanDialog.spec.ts",
-      "packages/app-vue/src/modules/task/components/widgets/DailyTodoWidget.spec.ts",
-      "packages/app-vue/src/modules/task/composables/taskPlanCache.spec.ts",
-      "packages/app-vue/src/modules/task/composables/useTask.spec.ts",
-      "packages/app-vue/src/modules/task/composables/useTaskGoalBindingOptions.spec.ts",
-      "packages/app-vue/src/modules/task/composables/useTaskOccurrenceActionCoordinator.spec.ts",
-      "packages/app-vue/src/modules/task/composables/useTaskOccurrenceDetailQuery.spec.ts",
-      "packages/app-vue/src/modules/task/composables/useTaskOccurrences.spec.ts",
-      "packages/app-vue/src/modules/task/composables/useTaskPlanMutations.spec.ts",
-      "packages/app-vue/src/modules/task/composables/useTaskPlanQueries.spec.ts",
-      "packages/app-vue/src/modules/task/composables/useTaskToday.spec.ts",
-      "packages/app-vue/src/modules/task/stores/taskStore.spec.ts",
-      "packages/app-vue/src/modules/task/utils/format-task-duration.spec.ts",
-      "packages/app-vue/src/modules/task/utils/task-occurrence-presentation.spec.ts",
-      "packages/app-vue/src/modules/task/utils/task-plan-presentation.spec.ts",
-      "packages/app-vue/src/modules/task/views/TaskDetailView.spec.ts",
-      "packages/app-vue/src/modules/task/views/TaskManagementView.runtime.spec.ts",
       "packages/app-vue/src/platform/server-state/invalidation-dispatcher.spec.ts",
       "packages/app-vue/src/platform/server-state/query-keys.spec.ts",
       "packages/app-vue/src/platform/server-state/result-query.spec.ts",
@@ -13847,7 +13666,6 @@
       "packages/setting/src/api/module-lifecycle.spec.ts",
       "packages/setting/src/api/routes.spec.ts",
       "packages/setting/src/electron/index-lifecycle.spec.ts",
-      "packages/setting/src/infrastructure-client/adapters/canonical-preference-client.spec.ts",
       "packages/setting/src/server/application/use-cases/commands/__tests__/import-settings.test.ts",
       "packages/setting/src/server/application/use-cases/queries/__tests__/export-settings.test.ts",
       "packages/setting/src/server/infrastructure/__tests__/setting-module-partial-start.spec.ts",
@@ -13861,12 +13679,9 @@
       "packages/task/src/api/routes/task-occurrence.routes.spec.ts",
       "packages/task/src/api/routes/task-plan.routes.spec.ts",
       "packages/task/src/api/routes/task-void-success-envelope.surface.spec.ts",
-      "packages/task/src/application-client/task-client-service.spec.ts",
-      "packages/task/src/domain-client/aggregates/task-plan.spec.ts",
       "packages/task/src/electron/authenticated-ipc.spec.ts",
       "packages/task/src/electron/index.spec.ts",
       "packages/task/src/import-safety.spec.ts",
-      "packages/task/src/infrastructure-client/adapters/http/task-occurrence-http.adapter.spec.ts",
       "packages/task/src/server/application/outbox/task-goal-outbox-dispatcher.test.ts",
       "packages/task/src/server/application/services/task-canonical-restore.service.spec.ts",
       "packages/task/src/server/application/services/task-workspace-query.service.spec.ts",
@@ -13947,7 +13762,7 @@
   "duplicate": [],
   "unexpected": [],
   "counts": {
-    "unit": 1125,
+    "unit": 1131,
     "integration": 58,
     "smoke": 3,
     "boundary-ipc": 6,
