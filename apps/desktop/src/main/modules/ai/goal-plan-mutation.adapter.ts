@@ -1,142 +1,86 @@
 import type { GoalPlanMutationPort, IKnowledgeNotePersistencePort } from '@memoflow/ai';
-import type { IdentityId } from '@memoflow/shared-primitives';
-import { error, ok } from '@memoflow/transport-contracts/result';
+import {
+  createGoalPlanMutationAdapter,
+  type GoalPlanMutationAdapterDeps,
+} from '@memoflow/ai/adapters';
 import type { GoalApplicationPort } from '@memoflow/goal';
 import type { LabelService } from '@memoflow/label';
 import type { GoalKnowledgeService, KnowledgeDocumentRefResolver } from '@memoflow/relation';
 import type { TaskApplicationPort } from '@memoflow/task';
 
-/** Desktop-host binding for the GoalPlanDraft V2 durable workflow. */
+/**
+ * Desktop-host binding for the GoalPlanDraft V2 durable workflow.
+ *
+ * The host only composes already-owned application capabilities; the behaviour
+ * lives in `@memoflow/ai/adapters`.
+ */
 export class DesktopGoalPlanMutationAdapter implements GoalPlanMutationPort {
-  constructor(
-    private readonly goal: GoalApplicationPort,
-    private readonly task: TaskApplicationPort,
-    private readonly labels: LabelService,
-    private readonly knowledgeNotes: IKnowledgeNotePersistencePort,
-    private readonly knowledgeRefs: KnowledgeDocumentRefResolver,
-    private readonly goalKnowledge: Pick<GoalKnowledgeService, 'link'>,
-  ) {}
+  readonly #port: GoalPlanMutationPort;
 
-  async readGoal(goalId: string, context: Parameters<GoalPlanMutationPort['readGoal']>[1]) {
-    const result = await this.goal.getGoalAggregate(goalId, context.identityId);
-    if (!result.ok) return result;
-    return ok({
-      goalId: String(result.data.goal.id),
-      goalVersion: result.data.goal.version,
-      goalStatus: result.data.goal.status,
-      keyResultIds: result.data.keyResults.map((item) => String(item.id)),
-    });
+  constructor(
+    goal: GoalApplicationPort,
+    task: TaskApplicationPort,
+    labels: LabelService,
+    knowledgeNotes: IKnowledgeNotePersistencePort,
+    knowledgeRefs: KnowledgeDocumentRefResolver,
+    goalKnowledge: Pick<GoalKnowledgeService, 'link'>,
+  ) {
+    const deps: GoalPlanMutationAdapterDeps = {
+      goal,
+      task,
+      labels,
+      knowledgeNotes,
+      knowledgeRefs,
+      goalKnowledge,
+    };
+    this.#port = createGoalPlanMutationAdapter(deps);
   }
 
-  async resolveLabels(
+  readGoal(goalId: string, context: Parameters<GoalPlanMutationPort['readGoal']>[1]) {
+    return this.#port.readGoal(goalId, context);
+  }
+
+  resolveLabels(
     names: readonly string[],
     context: Parameters<GoalPlanMutationPort['resolveLabels']>[1],
   ) {
-    try {
-      const labels = await this.labels.resolveNames(context.identityId, names);
-      return ok(labels.map((label) => label.id));
-    } catch (cause) {
-      return error(
-        'AI_LABEL_RESOLUTION_FAILED',
-        cause instanceof Error ? cause.message : 'Failed to resolve Shared Labels',
-      );
-    }
+    return this.#port.resolveLabels(names, context);
   }
 
-  async createGoal(
+  createGoal(
     request: Parameters<GoalPlanMutationPort['createGoal']>[0],
     context: Parameters<GoalPlanMutationPort['createGoal']>[1],
   ) {
-    const result = await this.goal.createGoal(request, context);
-    if (!result.ok) return result;
-    return ok({
-      goalId: String(result.data.goalId),
-      goalVersion: result.data.goalVersion,
-      goalStatus: result.data.readModel.status,
-      keyResultIds: result.data.affectedEntityIds.keyResultIds.map(String),
-    });
+    return this.#port.createGoal(request, context);
   }
 
-  async activateGoal(
+  activateGoal(
     goalId: string,
     expectedVersion: number,
     context: Parameters<GoalPlanMutationPort['activateGoal']>[2],
   ) {
-    const result = await this.goal.activateGoal(goalId, context.identityId, expectedVersion);
-    if (!result.ok) return result;
-    return ok({ goalVersion: result.data.goalVersion });
+    return this.#port.activateGoal(goalId, expectedVersion, context);
   }
 
-  async createTaskPlan(
+  createTaskPlan(
     request: Parameters<GoalPlanMutationPort['createTaskPlan']>[0],
     context: Parameters<GoalPlanMutationPort['createTaskPlan']>[1],
   ) {
-    const result = await this.task.createTaskPlan({
-      ...request,
-      identityId: context.identityId as IdentityId,
-    });
-    if (!result.ok) return result;
-    return ok({ taskId: String(result.data.plan.id) });
+    return this.#port.createTaskPlan(request, context);
   }
 
-  async createKnowledgeDocument(
+  createKnowledgeDocument(
     request: Parameters<GoalPlanMutationPort['createKnowledgeDocument']>[0],
     context: Parameters<GoalPlanMutationPort['createKnowledgeDocument']>[1],
   ) {
-    try {
-      const fileName = request.targetSubpath.split('/').slice(-1)[0] ?? `${request.title}.md`;
-      const persisted = await this.knowledgeNotes.createKnowledgeNote({
-        identityId: context.identityId,
-        context,
-        knowledgeDocumentId: request.knowledgeDocumentId,
-        fileName,
-        path: request.targetSubpath,
-        content: request.markdown,
-        proposalId: request.workflowRunId,
-        proposalRevision: request.revision,
-        requestId: request.requestId,
-      });
-      if (persisted.note.id !== request.knowledgeDocumentId) {
-        return error(
-          'INTERNAL_ERROR',
-          'Knowledge persistence returned an unexpected deterministic document identity',
-        );
-      }
-      const knowledgeDocument = await this.knowledgeRefs.resolve(
-        context.identityId,
-        request.knowledgeDocumentId,
-      );
-      if (!knowledgeDocument) {
-        return error(
-          'NOT_FOUND',
-          'Confirmed Knowledge document could not be resolved to the current KnowledgeSpace',
-        );
-      }
-      return ok({ knowledgeDocument });
-    } catch (cause) {
-      return error(
-        'INTERNAL_ERROR',
-        cause instanceof Error ? cause.message : 'Failed to create confirmed Knowledge document',
-      );
-    }
+    return this.#port.createKnowledgeDocument(request, context);
   }
 
-  async linkGoalKnowledge(
+  linkGoalKnowledge(
     goalId: string,
     knowledgeDocument: Parameters<GoalPlanMutationPort['linkGoalKnowledge']>[1],
     context: Parameters<GoalPlanMutationPort['linkGoalKnowledge']>[2],
   ) {
-    try {
-      const linked = await this.goalKnowledge.link(context.identityId, {
-        goalId: goalId as never,
-        knowledgeDocument,
-      });
-      return ok({ relationId: linked.relationId });
-    } catch (cause) {
-      return error(
-        'NOT_FOUND',
-        cause instanceof Error ? cause.message : 'Failed to link Goal Knowledge',
-      );
-    }
+    return this.#port.linkGoalKnowledge(goalId, knowledgeDocument, context);
   }
 }

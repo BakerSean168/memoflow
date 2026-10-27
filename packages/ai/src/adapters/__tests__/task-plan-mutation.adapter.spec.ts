@@ -1,11 +1,11 @@
 import { describe, expect, it, vi } from 'vitest';
 import { error, ok } from '@memoflow/transport-contracts/result';
 import type { ExecutionContext } from '@memoflow/transport-contracts';
-import { TaskPlanMutationAdapter } from './task-plan-mutation.adapter';
+import { createTaskPlanMutationAdapter } from '../task-plan-mutation.adapter';
 const context = { identityId: 'identity-1' } as ExecutionContext;
 function setup() {
   const task = { getTaskPlan: vi.fn() };
-  const adapter = new TaskPlanMutationAdapter(task as never, {} as never);
+  const adapter = createTaskPlanMutationAdapter({ task: task as never, labels: {} as never });
   return { task, adapter };
 }
 describe('TaskPlanMutationAdapter canonical Task probe', () => {

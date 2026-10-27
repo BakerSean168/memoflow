@@ -1,96 +1,40 @@
-import type { Context } from '@memoflow/transport-contracts';
-import { CalendarEntryResponseSchema } from '@memoflow/schedule-contracts';
-import { unwrap } from '@memoflow/transport-contracts/result';
-import {
-  projectPlannerCalendarEntry,
-  projectPlannerTaskOccurrence,
-  type IAIPlannerReadPort,
-  type PlannerProductTimePort,
-} from '@memoflow/ai';
-import { IdentityId } from '@memoflow/utils/domain';
+import type { IAIPlannerReadPort } from '@memoflow/ai';
+import { createPlannerReadAdapter, type PlannerReadAdapterDeps } from '@memoflow/ai/adapters';
 import type { ScheduleEventApplicationPort } from '@memoflow/schedule';
 import { derivePlannerConflicts } from '@memoflow/schedule-client';
 import type { TaskApplicationPort } from '@memoflow/task';
-import { createTimeFacade, type UserTimeContextPort } from '@memoflow/time';
+import type { UserTimeContextPort } from '@memoflow/time';
 
-function ownerContext(identityId: string, startedAt: number): Context {
-  const requestId = `ai-planner:${identityId}:${startedAt}`;
-  return { identityId, requestId, traceId: requestId, startedAt, source: 'system' };
-}
-
-/** Planner adapter over Schedule/Task owner application reads only. */
+/**
+ * Desktop-host binding for the canonical `@memoflow/ai/adapters` Planner factory.
+ * Only owner dependencies are wired here; behaviour lives in the AI package.
+ */
 export class DesktopPlannerAIReadAdapter implements IAIPlannerReadPort {
+  readonly #port: IAIPlannerReadPort;
+
   constructor(
-    private readonly scheduleEventApi: ScheduleEventApplicationPort,
-    private readonly taskApplicationPort: TaskApplicationPort,
-    private readonly userTimeContextPort: UserTimeContextPort,
-  ) {}
-
-  private async readProjections(
-    identityId: string,
-    range: { readonly start: number; readonly end: number },
+    scheduleEventApi: ScheduleEventApplicationPort,
+    taskApplicationPort: TaskApplicationPort,
+    userTimeContextPort: UserTimeContextPort,
   ) {
-    const [scheduleResult, occurrenceResult, planResult, userTimeContext] = await Promise.all([
-      this.scheduleEventApi.listEvents(
-        {
-          identityId: IdentityId.of(identityId),
-          startTime: range.start,
-          endTime: range.end,
-        },
-        ownerContext(identityId, range.start),
-      ),
-      this.taskApplicationPort.getTaskOccurrencesByDateRange(identityId, range.start, range.end),
-      this.taskApplicationPort.listTaskPlans({ identityId: IdentityId.of(identityId) }),
-      this.userTimeContextPort.getUserTimeContext(identityId),
-    ]);
-
-    const scheduleEntries = CalendarEntryResponseSchema.array().parse(unwrap(scheduleResult));
-    const occurrences = unwrap(occurrenceResult).data;
-    const plans = unwrap(planResult).plans;
-    const planById = new Map(plans.map((plan) => [String(plan.id), plan] as const));
-    const time = createTimeFacade({ context: userTimeContext });
-    const productTime: PlannerProductTimePort = {
-      combine: (date, hm) => time.input.combine(date, hm),
+    const deps: PlannerReadAdapterDeps = {
+      scheduleEvents: scheduleEventApi,
+      tasks: taskApplicationPort,
+      userTime: userTimeContextPort,
+      deriveConflicts: derivePlannerConflicts,
     };
-    return [
-      ...scheduleEntries.map(projectPlannerCalendarEntry),
-      ...occurrences.flatMap((occurrence) => {
-        const projection = projectPlannerTaskOccurrence(
-          occurrence,
-          planById.get(String(occurrence.planId)),
-          productTime,
-        );
-        return projection ? [projection] : [];
-      }),
-    ];
+    this.#port = createPlannerReadAdapter(deps);
   }
 
-  async getWindowSummary(input: Parameters<IAIPlannerReadPort['getWindowSummary']>[0]) {
-    const projections = await this.readProjections(input.identityId, input.range);
-    return {
-      range: input.range,
-      projections,
-      conflicts: derivePlannerConflicts(projections),
-    };
+  getWindowSummary(input: Parameters<IAIPlannerReadPort['getWindowSummary']>[0]) {
+    return this.#port.getWindowSummary(input);
   }
 
-  async getConflicts(input: Parameters<IAIPlannerReadPort['getConflicts']>[0]) {
-    const summary = await this.getWindowSummary(input);
-    return { range: input.range, conflicts: summary.conflicts };
+  getConflicts(input: Parameters<IAIPlannerReadPort['getConflicts']>[0]) {
+    return this.#port.getConflicts(input);
   }
 
-  async getUpcomingTasks(input: Parameters<IAIPlannerReadPort['getUpcomingTasks']>[0]) {
-    const summary = await this.getWindowSummary(input);
-    return summary.projections
-      .filter(
-        (projection): projection is Extract<typeof projection, { sourceType: 'task' }> =>
-          projection.sourceType === 'task' &&
-          !['Completed', 'Skipped', 'Missed'].includes(projection.displayMetadata.status ?? ''),
-      )
-      .sort((left, right) => {
-        if (left.allDay !== right.allDay) return left.allDay ? -1 : 1;
-        return String(left.start).localeCompare(String(right.start));
-      })
-      .slice(0, input.limit ?? 20);
+  getUpcomingTasks(input: Parameters<IAIPlannerReadPort['getUpcomingTasks']>[0]) {
+    return this.#port.getUpcomingTasks(input);
   }
 }

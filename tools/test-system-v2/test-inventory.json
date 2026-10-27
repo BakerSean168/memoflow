@@ -172,26 +172,6 @@
       ]
     },
     {
-      "path": "apps/api/src/modules/ai/goal-plan-mutation.adapter.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "apps/api/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "apps/api/vitest.config.ts"
-      ]
-    },
-    {
-      "path": "apps/api/src/modules/ai/notification-read.adapter.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "apps/api/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "apps/api/vitest.config.ts"
-      ]
-    },
-    {
       "path": "apps/api/src/modules/ai/owner-activity-read.adapter.equivalence.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -253,16 +233,6 @@
     },
     {
       "path": "apps/api/src/modules/ai/routine-command.adapter.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "apps/api/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "apps/api/vitest.config.ts"
-      ]
-    },
-    {
-      "path": "apps/api/src/modules/ai/task-plan-mutation.adapter.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "apps/api/vitest.config.ts"
@@ -1210,14 +1180,6 @@
       "measurementCollectors": []
     },
     {
-      "path": "apps/desktop/src/main/modules/ai/goal-plan-mutation.adapter.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "apps/desktop/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
       "path": "apps/desktop/src/main/modules/ai/local-agent-knowledge.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -1275,14 +1237,6 @@
     },
     {
       "path": "apps/desktop/src/main/modules/ai/stable-knowledge-note-ref-boundary.surface.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "apps/desktop/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
-      "path": "apps/desktop/src/main/modules/ai/task-plan-mutation.adapter.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "apps/desktop/vitest.config.ts"
@@ -3428,6 +3382,36 @@
         "packages/ai-ui/vitest.config.ts"
       ],
       "measurementCollectors": []
+    },
+    {
+      "path": "packages/ai/src/adapters/__tests__/goal-plan-mutation.adapter.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/ai/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "packages/ai/vitest.config.ts"
+      ]
+    },
+    {
+      "path": "packages/ai/src/adapters/__tests__/notification-read.adapter.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/ai/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "packages/ai/vitest.config.ts"
+      ]
+    },
+    {
+      "path": "packages/ai/src/adapters/__tests__/task-plan-mutation.adapter.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/ai/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "packages/ai/vitest.config.ts"
+      ]
     },
     {
       "path": "packages/ai/src/api/routes/ai-chat.routes.spec.ts",
@@ -12254,7 +12238,7 @@
       "type": "measurement",
       "suite": "coverage",
       "runner": "vitest",
-      "fileCount": 65
+      "fileCount": 62
     },
     {
       "id": "packages/account/vitest.config.ts",
@@ -12268,7 +12252,7 @@
       "type": "measurement",
       "suite": "coverage",
       "runner": "vitest",
-      "fileCount": 110
+      "fileCount": 113
     },
     {
       "id": "packages/app-vue/vitest.store-coverage.config.ts",
@@ -12697,14 +12681,14 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 65
+      "fileCount": 62
     },
     {
       "id": "apps/desktop/vitest.config.ts",
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 100
+      "fileCount": 98
     },
     {
       "id": "apps/migrator/vitest.config.ts",
@@ -12781,7 +12765,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 110
+      "fileCount": 113
     },
     {
       "id": "packages/app-vue/vitest.config.ts",
@@ -13197,8 +13181,6 @@
       "apps/api/src/modules/agent-gateway/audit.spec.ts",
       "apps/api/src/modules/agent-gateway/module.spec.ts",
       "apps/api/src/modules/ai/controlled-analytics-read.adapter.spec.ts",
-      "apps/api/src/modules/ai/goal-plan-mutation.adapter.spec.ts",
-      "apps/api/src/modules/ai/notification-read.adapter.spec.ts",
       "apps/api/src/modules/ai/owner-activity-read.adapter.equivalence.spec.ts",
       "apps/api/src/modules/ai/owner-activity-read.adapter.spec.ts",
       "apps/api/src/modules/ai/planner-read.adapter.spec.ts",
@@ -13206,7 +13188,6 @@
       "apps/api/src/modules/ai/repository-knowledge-note-persistence.adapter.test.ts",
       "apps/api/src/modules/ai/repository-knowledge-source.adapter.test.ts",
       "apps/api/src/modules/ai/routine-command.adapter.spec.ts",
-      "apps/api/src/modules/ai/task-plan-mutation.adapter.spec.ts",
       "apps/api/src/modules/goal/goal-workspace.module.spec.ts",
       "apps/api/src/modules/label/module.spec.ts",
       "apps/api/src/modules/powersync/crud-executor.routine-schedule.spec.ts",
@@ -13282,6 +13263,9 @@
       "packages/account/src/server/infrastructure/adapters/prisma/mappers/account-prisma.mapper.spec.ts",
       "packages/account/src/server/infrastructure/cloud-account-provisioner.spec.ts",
       "packages/account/src/server/transport/__tests__/account.controller.test.ts",
+      "packages/ai/src/adapters/__tests__/goal-plan-mutation.adapter.spec.ts",
+      "packages/ai/src/adapters/__tests__/notification-read.adapter.spec.ts",
+      "packages/ai/src/adapters/__tests__/task-plan-mutation.adapter.spec.ts",
       "packages/ai/src/api/routes/ai-chat.routes.spec.ts",
       "packages/ai/src/api/routes/ai-provider-onboarding.routes.spec.ts",
       "packages/ai/src/api/routes/ai-runtime.goal-surface-lease.spec.ts",
@@ -13797,7 +13781,7 @@
   "duplicate": [],
   "unexpected": [],
   "counts": {
-    "unit": 1135,
+    "unit": 1133,
     "integration": 58,
     "smoke": 3,
     "boundary-ipc": 6,

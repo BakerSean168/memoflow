@@ -1,41 +1,23 @@
-import { unwrap } from '@memoflow/transport-contracts/result';
 import type { IAINotificationReadPort } from '@memoflow/ai';
-import { projectNotificationAction, projectNotificationInboxPage } from '@memoflow/ai';
+import { createNotificationReadAdapter } from '@memoflow/ai/adapters';
 import type { NotificationInboxPort } from '@memoflow/notification';
-import { z } from 'zod';
 
-const UnreadCountSchema = z.object({ count: z.number().int().nonnegative() });
-
-/** Notification Fact/Inbox adapter. Delivery workers and channel state stay owner-private. */
+/**
+ * Desktop-host binding for the canonical `@memoflow/ai/adapters` Notification
+ * factory. Owner delivery workers and channel state stay host-private.
+ */
 export class DesktopNotificationAIReadAdapter implements IAINotificationReadPort {
-  constructor(private readonly inbox: NotificationInboxPort) {}
+  readonly #port: IAINotificationReadPort;
 
-  async getUnreadSummary(input: Parameters<IAINotificationReadPort['getUnreadSummary']>[0]) {
-    const [unreadResult, pageResult] = await Promise.all([
-      this.inbox.getUnreadCount(input.identityId),
-      this.inbox.listNotifications({
-        identityId: input.identityId,
-        isRead: false,
-        archiveState: 'active',
-        page: 1,
-        limit: input.limit ?? 10,
-        sortBy: 'createdAt',
-        sortOrder: 'desc',
-      }),
-    ]);
-    const unreadCount = UnreadCountSchema.parse(unwrap(unreadResult)).count;
-    return {
-      unreadCount,
-      items: projectNotificationInboxPage(unwrap(pageResult)),
-    };
+  constructor(inbox: NotificationInboxPort) {
+    this.#port = createNotificationReadAdapter(inbox);
   }
 
-  async executeAction(input: Parameters<IAINotificationReadPort['executeAction']>[0]) {
-    const result = await this.inbox.executeAction(
-      input.notificationId,
-      input.actionKey,
-      input.context.identityId,
-    );
-    return projectNotificationAction(unwrap(result));
+  getUnreadSummary(input: Parameters<IAINotificationReadPort['getUnreadSummary']>[0]) {
+    return this.#port.getUnreadSummary(input);
+  }
+
+  executeAction(input: Parameters<IAINotificationReadPort['executeAction']>[0]) {
+    return this.#port.executeAction(input);
   }
 }

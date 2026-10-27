@@ -1,8 +1,8 @@
 import { describe, expect, it, vi } from 'vitest';
 import { ok } from '@memoflow/transport-contracts/result';
-import { NotificationAIReadAdapter } from './notification-read.adapter';
+import { createNotificationReadAdapter } from '../notification-read.adapter';
 
-describe('NotificationAIReadAdapter', () => {
+describe('createNotificationReadAdapter', () => {
   it('projects Notification Fact/Inbox data without retired compatibility fields', async () => {
     const inbox = {
       getUnreadCount: vi.fn(async () => ok({ count: 2 })),
@@ -48,7 +48,7 @@ describe('NotificationAIReadAdapter', () => {
         }),
       ),
     };
-    const adapter = new NotificationAIReadAdapter(inbox as never);
+    const adapter = createNotificationReadAdapter(inbox);
 
     await expect(adapter.getUnreadSummary({ identityId: 'identity-1', limit: 5 })).resolves.toEqual(
       {
@@ -77,6 +77,8 @@ describe('NotificationAIReadAdapter', () => {
 
   it('routes typed actions through the Notification Inbox owner port', async () => {
     const inbox = {
+      getUnreadCount: vi.fn(),
+      listNotifications: vi.fn(),
       executeAction: vi.fn(async () =>
         ok({
           interaction: {
@@ -92,7 +94,7 @@ describe('NotificationAIReadAdapter', () => {
         }),
       ),
     };
-    const adapter = new NotificationAIReadAdapter(inbox as never);
+    const adapter = createNotificationReadAdapter(inbox);
     const receipt = await adapter.executeAction({
       notificationId: 'notification-1',
       actionKey: 'archive',
