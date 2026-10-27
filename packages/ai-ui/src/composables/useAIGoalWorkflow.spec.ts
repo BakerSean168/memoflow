@@ -1,6 +1,7 @@
 import { installAiUiHost } from '@ai-ui-test-host/di/ai-ui-host';
 installAiUiHost();
 import { installGoalUiHost } from '@ai-ui-test-host/di/goal-ui-host';
+import type { GoalNativeDraft } from '@memoflow/goal-client';
 import { defineComponent, h, ref } from 'vue';
 import { flushPromises, mount } from '@vue/test-utils';
 import { createI18n } from 'vue-i18n';
@@ -31,7 +32,7 @@ const native = vi.hoisted(() => ({
   requestCancel: vi.fn(),
   active: true,
   blocked: false,
-  state: null as import('@memoflow/goal-client').GoalNativeDraft | null,
+  state: null as GoalNativeDraft | null,
 }));
 vi.mock('@ai-ui-test-host/shared/utils/useStrictInject', () => ({
   useStrictInject: () => ({ getGoalAggregateView: native.readGoal }),
