@@ -56,6 +56,10 @@ const config: StorybookConfig = {
             ['@memoflow/domain-shared/shared', 'packages/domain-shared/src/shared/index.ts'],
             ['@memoflow/domain-shared', 'packages/domain-shared/src/index.ts'],
             ['@memoflow/http-client', 'packages/http-client/src/index.ts'],
+            ['@memoflow/ipc-client', 'packages/ipc-client/src/index.ts'],
+            ['@memoflow/setting-client', 'packages/setting-client/src/index.ts'],
+            ['@memoflow/setting-contracts', 'packages/setting-contracts/src/index.ts'],
+            ['@memoflow/setting-contracts/*', 'packages/setting-contracts/src/*.ts'],
             ['@memoflow/goal-client', 'packages/goal-client/src/index.ts'],
             ['@memoflow/goal-core/ids', 'packages/goal-core/src/ids.ts'],
             [

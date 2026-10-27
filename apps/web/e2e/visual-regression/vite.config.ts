@@ -173,6 +173,8 @@ export default defineConfig(({ mode }) =>
           ['@memoflow/ai/client', 'packages/ai/src/client/index.ts'],
           ['@memoflow/notification-client', 'packages/notification-client/src/index.ts'],
           ['@memoflow/setting-client', 'packages/setting-client/src/index.ts'],
+          ['@memoflow/setting-contracts', 'packages/setting-contracts/src/index.ts'],
+          ['@memoflow/setting-contracts/*', 'packages/setting-contracts/src/*.ts'],
         ]),
       ],
     },
