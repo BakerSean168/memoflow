@@ -1,4 +1,4 @@
-import { installGoalUiHost } from '@memoflow/app-vue/di';
+import { installGoalUiHost, installNotificationUiHost } from '@memoflow/app-vue/di';
 /**
  * Web Platform - full app DI container.
  *
@@ -68,7 +68,7 @@ const goalKnowledgeService = createLazyService(async () => {
 });
 
 const notificationService = createLazyService(async () => {
-  const { createNotificationHttpClient } = await import('@memoflow/notification/client');
+  const { createNotificationHttpClient } = await import('@memoflow/notification-client');
   return createNotificationHttpClient(resultHttpClient);
 });
 
@@ -133,6 +133,7 @@ const taskService = createLazyService(async () => {
 
 export function installAppServices(app: App): void {
   installGoalUiHost();
+  installNotificationUiHost();
   app.provide(ACCOUNT_SERVICE_KEY, accountService);
   app.provide(AUTH_SERVICE_KEY, authService);
   app.provide(EXTERNAL_AGENT_SERVICE_KEY, createExternalAgentHttpClient(window.location.origin));

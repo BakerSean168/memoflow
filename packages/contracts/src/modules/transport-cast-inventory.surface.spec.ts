@@ -43,6 +43,7 @@ const AUDITED_PATHS = [
   'packages/goal/src',
   'packages/task/src',
   'packages/notification/src',
+  'packages/notification-client/src',
 ] as const;
 
 /**
@@ -82,11 +83,6 @@ const ALLOWLIST: Record<string, string> = {
   // objects to pick server DTOs and targets.
   'packages/notification/src/server/infrastructure/adapters/deliverers/real-channel-deliverers.ts':
     'native deliverer duck-typing casts (allowlist)',
-  // Notification: domain-client branded-id boundaries on server DTO projection.
-  'packages/notification/src/domain-client/aggregates/notification.ts':
-    'domain-client branded-id boundary (allowlist)',
-  'packages/notification/src/domain-client/aggregates/notification-preference.ts':
-    'domain-client branded-id boundary (allowlist)',
   // Notification SSE: stream adapter flush + event id structural probing.
   'packages/notification/src/api/routes.ts': 'SSE stream adapter structural casts (allowlist)',
 };

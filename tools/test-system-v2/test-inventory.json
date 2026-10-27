@@ -4800,136 +4800,6 @@
       ]
     },
     {
-      "path": "packages/app-vue/src/modules/notification/browser-system-notification.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/app-vue/vitest.store-coverage.config.ts"
-      ]
-    },
-    {
-      "path": "packages/app-vue/src/modules/notification/components/NotificationCapsulePreview.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/app-vue/vitest.store-coverage.config.ts"
-      ]
-    },
-    {
-      "path": "packages/app-vue/src/modules/notification/components/notificationSemanticControls.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/app-vue/vitest.store-coverage.config.ts"
-      ]
-    },
-    {
-      "path": "packages/app-vue/src/modules/notification/composables/useNotificationListQuery.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/app-vue/vitest.store-coverage.config.ts"
-      ]
-    },
-    {
-      "path": "packages/app-vue/src/modules/notification/composables/useNotificationMutations.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/app-vue/vitest.store-coverage.config.ts"
-      ]
-    },
-    {
-      "path": "packages/app-vue/src/modules/notification/composables/useNotificationPreferences.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/app-vue/vitest.store-coverage.config.ts"
-      ]
-    },
-    {
-      "path": "packages/app-vue/src/modules/notification/composables/useNotificationUnreadQuery.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/app-vue/vitest.store-coverage.config.ts"
-      ]
-    },
-    {
-      "path": "packages/app-vue/src/modules/notification/desktop/notification-click-navigation.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/app-vue/vitest.store-coverage.config.ts"
-      ]
-    },
-    {
-      "path": "packages/app-vue/src/modules/notification/initialization/index.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/app-vue/vitest.store-coverage.config.ts"
-      ]
-    },
-    {
-      "path": "packages/app-vue/src/modules/notification/initialization/notification-sse-invalidation-source.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/app-vue/vitest.store-coverage.config.ts"
-      ]
-    },
-    {
-      "path": "packages/app-vue/src/modules/notification/stores/notificationStore.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/app-vue/vitest.store-coverage.config.ts"
-      ]
-    },
-    {
-      "path": "packages/app-vue/src/modules/notification/views/NotificationListPage.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/app-vue/vitest.store-coverage.config.ts"
-      ]
-    },
-    {
-      "path": "packages/app-vue/src/modules/notification/web-live-notification.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/app-vue/vitest.store-coverage.config.ts"
-      ]
-    },
-    {
       "path": "packages/app-vue/src/modules/repository/components/DocumentPresentationPrimitives.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -8452,6 +8322,22 @@
       "measurementCollectors": []
     },
     {
+      "path": "packages/notification-client/src/infrastructure-client/adapters/http/notification-http.adapter.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/notification-client/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/notification-client/src/notification-dto-port.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/notification-client/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "packages/notification-contracts/src/api/dual-registry.surface.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -8508,6 +8394,110 @@
       "measurementCollectors": []
     },
     {
+      "path": "packages/notification-ui/src/browser-system-notification.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/notification-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/notification-ui/src/components/NotificationCapsulePreview.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/notification-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/notification-ui/src/components/notificationSemanticControls.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/notification-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/notification-ui/src/composables/useNotificationListQuery.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/notification-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/notification-ui/src/composables/useNotificationMutations.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/notification-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/notification-ui/src/composables/useNotificationPreferences.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/notification-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/notification-ui/src/composables/useNotificationUnreadQuery.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/notification-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/notification-ui/src/desktop/notification-click-navigation.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/notification-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/notification-ui/src/initialization/index.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/notification-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/notification-ui/src/initialization/notification-sse-invalidation-source.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/notification-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/notification-ui/src/stores/notificationStore.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/notification-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/notification-ui/src/views/NotificationListPage.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/notification-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/notification-ui/src/web-live-notification.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/notification-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "packages/notification/src/api/__tests__/notification-lane-bootstrap.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -8549,16 +8539,6 @@
     },
     {
       "path": "packages/notification/src/electron/index-lifecycle.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/notification/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/notification/vitest.config.ts"
-      ]
-    },
-    {
-      "path": "packages/notification/src/infrastructure-client/adapters/http/notification-http.adapter.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/notification/vitest.config.ts"
@@ -12443,7 +12423,7 @@
       "type": "measurement",
       "suite": "coverage",
       "runner": "vitest",
-      "fileCount": 212
+      "fileCount": 199
     },
     {
       "id": "packages/data-portability/vitest.config.ts",
@@ -12485,7 +12465,7 @@
       "type": "measurement",
       "suite": "coverage",
       "runner": "vitest",
-      "fileCount": 40
+      "fileCount": 39
     },
     {
       "id": "packages/reminder/vitest.config.ts",
@@ -12921,7 +12901,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 212
+      "fileCount": 199
     },
     {
       "id": "packages/assets/vitest.config.ts",
@@ -13050,6 +13030,13 @@
       "fileCount": 6
     },
     {
+      "id": "packages/notification-client/vitest.config.ts",
+      "type": "primary",
+      "suite": "unit",
+      "runner": "vitest",
+      "fileCount": 2
+    },
+    {
       "id": "packages/notification-contracts/vitest.config.ts",
       "type": "primary",
       "suite": "unit",
@@ -13057,11 +13044,18 @@
       "fileCount": 7
     },
     {
+      "id": "packages/notification-ui/vitest.config.ts",
+      "type": "primary",
+      "suite": "unit",
+      "runner": "vitest",
+      "fileCount": 13
+    },
+    {
       "id": "packages/notification/vitest.config.ts",
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 40
+      "fileCount": 39
     },
     {
       "id": "packages/operations-contracts/vitest.config.ts",
@@ -13528,19 +13522,6 @@
       "packages/app-vue/src/modules/ai/composables/workspaceEventSubscription.spec.ts",
       "packages/app-vue/src/modules/authentication/composables/usePassword.spec.ts",
       "packages/app-vue/src/modules/authentication/stores/authenticationStore.spec.ts",
-      "packages/app-vue/src/modules/notification/browser-system-notification.spec.ts",
-      "packages/app-vue/src/modules/notification/components/NotificationCapsulePreview.spec.ts",
-      "packages/app-vue/src/modules/notification/components/notificationSemanticControls.spec.ts",
-      "packages/app-vue/src/modules/notification/composables/useNotificationListQuery.spec.ts",
-      "packages/app-vue/src/modules/notification/composables/useNotificationMutations.spec.ts",
-      "packages/app-vue/src/modules/notification/composables/useNotificationPreferences.spec.ts",
-      "packages/app-vue/src/modules/notification/composables/useNotificationUnreadQuery.spec.ts",
-      "packages/app-vue/src/modules/notification/desktop/notification-click-navigation.spec.ts",
-      "packages/app-vue/src/modules/notification/initialization/index.spec.ts",
-      "packages/app-vue/src/modules/notification/initialization/notification-sse-invalidation-source.spec.ts",
-      "packages/app-vue/src/modules/notification/stores/notificationStore.spec.ts",
-      "packages/app-vue/src/modules/notification/views/NotificationListPage.spec.ts",
-      "packages/app-vue/src/modules/notification/web-live-notification.spec.ts",
       "packages/app-vue/src/modules/repository/components/DocumentPresentationPrimitives.spec.ts",
       "packages/app-vue/src/modules/repository/components/KnowledgeCaptureReviewDialog.spec.ts",
       "packages/app-vue/src/modules/repository/components/KnowledgeMarkdownPreview.spec.ts",
@@ -13777,7 +13758,6 @@
       "packages/notification/src/api/notification-void-success-envelope.surface.spec.ts",
       "packages/notification/src/api/routes.spec.ts",
       "packages/notification/src/electron/index-lifecycle.spec.ts",
-      "packages/notification/src/infrastructure-client/adapters/http/notification-http.adapter.spec.ts",
       "packages/notification/src/server/application/notification-portability.spec.ts",
       "packages/notification/src/server/application/notification-preference-portability.spec.ts",
       "packages/notification/src/server/application/services/notification-maintenance-application-service.test.ts",

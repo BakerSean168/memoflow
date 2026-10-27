@@ -22,6 +22,7 @@
     "@memoflow/label": "workspace:*",
     "@memoflow/label-contracts": "workspace:*",
     "@memoflow/notification": "workspace:*",
+    "@memoflow/notification-client": "workspace:*",
     "@memoflow/notification-contracts": "workspace:*",
     "@memoflow/schedule-client": "workspace:*",
     "@memoflow/schedule-contracts": "workspace:*",

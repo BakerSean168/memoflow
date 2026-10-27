@@ -48,4 +48,12 @@ describe('server feature shape semantic core', () => {
       missing: ['server/transport'],
     });
   });
+
+  it('accepts an extracted standalone client package for the client root requirement', () => {
+    // notification-client owns the extracted client surface (#630), exactly like
+    // goal-client and schedule-client; packages without one still need src/client.
+    const src = makeSourceRoot({ omit: ['client'] });
+    expect(auditPackageShape('notification', src)).toBeNull();
+    expect(auditPackageShape('task', src)).toEqual({ package: 'task', missing: ['client'] });
+  });
 });

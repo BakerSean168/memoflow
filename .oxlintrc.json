@@ -161,7 +161,12 @@
           },
           {
             "sourceTag": "scope:notification",
-            "onlyDependOnLibsWithTags": ["scope:shared", "scope:patterns", "scope:notification"]
+            "onlyDependOnLibsWithTags": [
+              "scope:shared",
+              "scope:patterns",
+              "scope:notification",
+              "scope:ui"
+            ]
           },
           {
             "sourceTag": "scope:reminder",

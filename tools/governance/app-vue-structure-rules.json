@@ -201,7 +201,7 @@
       "id": "rule-notification-authority-66",
       "contract": "notification-authority",
       "reason": "notification-authority: AST/type structural rules replacing source-text locks (#502).",
-      "file": "packages/app-vue/src/modules/notification/stores/notification-store.ts",
+      "file": "packages/notification-ui/src/stores/notification-store.ts",
       "forbidElements": ["NotificationClientDTO"],
       "forbidObjectProperties": [
         {
@@ -217,7 +217,7 @@
       "id": "rule-notification-authority-67",
       "contract": "notification-authority",
       "reason": "notification-authority: AST/type structural rules replacing source-text locks (#502).",
-      "file": "packages/app-vue/src/modules/notification/initialization/index.ts",
+      "file": "packages/notification-ui/src/initialization/index.ts",
       "forbidExpressionPatterns": [
         {
           "pattern": "\\.\\./stores/notification-store"
@@ -238,7 +238,7 @@
       "id": "rule-notification-authority-68",
       "contract": "notification-authority",
       "reason": "notification-authority: AST/type structural rules replacing source-text locks (#502).",
-      "file": "packages/app-vue/src/modules/notification/initialization/notification-sse-invalidation-source.ts",
+      "file": "packages/notification-ui/src/initialization/notification-sse-invalidation-source.ts",
       "forbidIdentifiers": ["setQueryData", "invalidateQueries", "getQueryData"]
     },
     {
@@ -246,7 +246,7 @@
       "contract": "notification-authority",
       "reason": "notification-authority: AST/type structural rules replacing source-text locks (#502).",
       "scan": {
-        "root": "packages/app-vue/src/modules/notification",
+        "root": "packages/notification-ui/src",
         "extensions": [".ts", ".vue"],
         "exclude": [".spec.", "notificationCache.ts"]
       },

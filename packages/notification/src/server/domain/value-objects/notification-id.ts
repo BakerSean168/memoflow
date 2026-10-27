@@ -1,6 +1,6 @@
 import { createIdType } from '@memoflow/utils/domain';
 
-import type { NotificationId as INotificationId } from '@memoflow/contracts/primitives';
+import type { NotificationId as INotificationId } from '@memoflow/notification-contracts';
 
 /**
  * NotificationId 值对象

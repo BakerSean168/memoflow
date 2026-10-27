@@ -3,10 +3,8 @@ import type {
   NotificationPreferenceClientDTO,
   NotificationChannelType,
 } from '@memoflow/notification-contracts';
-import type {
-  IdentityId,
-  NotificationPreferenceId as NotificationPreferenceIdBranded,
-} from '@memoflow/contracts/primitives';
+import type { NotificationPreferenceId as NotificationPreferenceIdBranded } from '@memoflow/notification-contracts';
+import type { IdentityId } from '@memoflow/shared-primitives';
 import { AggregateRoot } from '@memoflow/utils/domain';
 import { NotificationPreferenceId } from '../value-objects/notification-preference-id';
 import { QuietHours } from '../value-objects/quiet-hours';

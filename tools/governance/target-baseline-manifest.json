@@ -90,7 +90,9 @@
     "task-client": "runtime-lib",
     "schedule-contracts": "runtime-lib",
     "schedule-client": "runtime-lib",
-    "schedule-ui": "ui-lib"
+    "schedule-ui": "ui-lib",
+    "notification-client": "runtime-lib",
+    "notification-ui": "ui-lib"
   },
   "exemptions": [
     {

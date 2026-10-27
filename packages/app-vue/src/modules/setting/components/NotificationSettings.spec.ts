@@ -8,7 +8,10 @@ import {
   DESKTOP_NOTIFICATION_DEVICE_PREFERENCE_KEY,
   NOTIFICATION_SERVICE_KEY,
 } from '../../../di/keys';
+import { installNotificationUiHost } from '../../../di/notification-ui-host';
 import NotificationSettings from './NotificationSettings.vue';
+
+installNotificationUiHost();
 
 const service = {
   getPreferences: vi.fn(),
