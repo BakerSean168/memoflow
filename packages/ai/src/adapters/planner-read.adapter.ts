@@ -36,9 +36,9 @@ export interface PlannerReadAdapterDeps {
       start: number,
       end: number,
     ): Promise<Result<{ readonly data: readonly TaskOccurrenceClientDTO[] }>>;
-    listTaskPlans(
-      query: { readonly identityId: string },
-    ): Promise<Result<{ readonly plans: readonly TaskPlanClientDTO[] }>>;
+    listTaskPlans(query: {
+      readonly identityId: string;
+    }): Promise<Result<{ readonly plans: readonly TaskPlanClientDTO[] }>>;
   };
   readonly userTime: {
     getUserTimeContext(identityId: string): Promise<UserTimeContext>;

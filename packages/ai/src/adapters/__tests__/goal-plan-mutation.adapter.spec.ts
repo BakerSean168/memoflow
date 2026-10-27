@@ -1,19 +1,19 @@
 import { describe, expect, it, vi } from 'vitest';
 import { error, ok } from '@memoflow/transport-contracts/result';
 import type { ExecutionContext } from '@memoflow/transport-contracts';
-import { GoalPlanMutationAdapter } from './goal-plan-mutation.adapter';
+import { createGoalPlanMutationAdapter } from '../goal-plan-mutation.adapter';
 
 const context = { identityId: 'identity-1' } as ExecutionContext;
 function setup() {
   const goal = { getGoalAggregate: vi.fn() };
-  const adapter = new GoalPlanMutationAdapter(
-    goal as never,
-    {} as never,
-    {} as never,
-    {} as never,
-    {} as never,
-    {} as never,
-  );
+  const adapter = createGoalPlanMutationAdapter({
+    goal: goal as never,
+    task: {} as never,
+    labels: {} as never,
+    knowledgeNotes: {} as never,
+    knowledgeRefs: {} as never,
+    goalKnowledge: {} as never,
+  });
   return { goal, adapter };
 }
 describe('GoalPlanMutationAdapter owner read', () => {
