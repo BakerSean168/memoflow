@@ -488,3 +488,19 @@ export function createRepositoryContractsAliasEntries(workspaceRoot: string): Al
     },
   ];
 }
+
+export function createRepositoryUiAliasEntries(workspaceRoot: string): Alias[] {
+  return [
+    {
+      find: /^@memoflow\/repository-ui\/host$/,
+      replacement: resolveFromWorkspace(
+        workspaceRoot,
+        'packages/repository-ui/src/repository-ui-host.ts',
+      ),
+    },
+    {
+      find: /^@memoflow\/repository-ui$/,
+      replacement: resolveFromWorkspace(workspaceRoot, 'packages/repository-ui/src/index.ts'),
+    },
+  ];
+}

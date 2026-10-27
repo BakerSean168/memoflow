@@ -502,7 +502,7 @@ import {
   SettingsSection,
   SettingsStatusBlock,
 } from '../../../components/shared/settings';
-import { KnowledgeWriteRequestLedger } from '../../repository/components';
+import { KnowledgeWriteRequestLedger } from '@memoflow/repository-ui';
 
 const { t } = useI18n();
 const route = useRoute();

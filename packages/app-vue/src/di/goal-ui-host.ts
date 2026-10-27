@@ -8,7 +8,7 @@ import {
   GOAL_KNOWLEDGE_SERVICE_KEY,
   GOAL_SERVICE_KEY,
 } from '../di/keys';
-import { useReferenceableKnowledgeNotes } from '../modules/repository/composables/useReferenceableKnowledgeNotes';
+import { useReferenceableKnowledgeNotes } from '@memoflow/repository-ui';
 import { useServerStateIdentityScope, useServerStateRuntime } from '../platform/server-state';
 import { goalHomeQueryKeys } from '../platform/server-state/query-keys';
 import { GOAL_HOME_STALE_TIME_MS } from '../platform/server-state/query-policy';

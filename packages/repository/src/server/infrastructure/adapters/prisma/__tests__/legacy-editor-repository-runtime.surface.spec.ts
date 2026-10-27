@@ -41,7 +41,7 @@ describe('legacy editor/repository runtime surface', () => {
   );
   const desktopMain = readFileSync(resolve(repoRoot, 'apps/desktop/src/main/main.ts'), 'utf8');
   const vueRepositoryRouter = readFileSync(
-    resolve(repoRoot, 'packages/app-vue/src/modules/repository/router/index.ts'),
+    resolve(repoRoot, 'packages/repository-ui/src/router/index.ts'),
     'utf8',
   );
   const apiServer = readFileSync(resolve(repoRoot, 'apps/api/src/server.ts'), 'utf8');

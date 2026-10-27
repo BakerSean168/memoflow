@@ -3,7 +3,7 @@ import {
   DEFAULT_USER_PREFERENCE_PROFILE,
   type UserPreferenceProfile,
 } from '@memoflow/contracts/setting';
-import { installGoalUiHost, installNotificationUiHost } from '@memoflow/app-vue/di';
+import { installGoalUiHost, installNotificationUiHost, installRepositoryUiHost } from '@memoflow/app-vue/di';
 import { setProductTimePreferences } from '@memoflow/app-vue/shared/utils/product-time';
 
 /** Shared isolated-app bootstrap; Goal retains its cross-day timezone contract. */
@@ -12,6 +12,7 @@ export function bootstrapVisualApp(params: URLSearchParams, timeZone = 'UTC') {
   // goal-ui surfaces without it, so bind the extracted host up front.
   installGoalUiHost();
   installNotificationUiHost();
+  installRepositoryUiHost();
   const locale = params.get('locale') === 'zh-CN' ? 'zh-CN' : 'en-US';
   const theme = params.get('theme') === 'dark' ? 'dark' : 'light';
   document.documentElement.lang = locale;

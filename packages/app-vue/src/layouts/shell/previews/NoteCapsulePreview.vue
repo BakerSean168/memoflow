@@ -9,7 +9,7 @@ import { computed, onMounted, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { ArrowRight, FileText, Link2, Search } from '@lucide/vue';
 import { Input } from '@memoflow/ui-vue-shadcn';
-import { useRecentKnowledgeNotes } from '../../../modules/repository/composables/useRecentKnowledgeNotes';
+import { useRecentKnowledgeNotes } from '@memoflow/repository-ui';
 import {
   CapsulePreviewFooter,
   CapsulePreviewHeader,

@@ -59,18 +59,18 @@ describe('controlled note-write boundary surface', () => {
     'utf8',
   );
   const vueRepositoryRouter = readFileSync(
-    resolve(repoRoot, 'packages/app-vue/src/modules/repository/router/index.ts'),
+    resolve(repoRoot, 'packages/repository-ui/src/router/index.ts'),
     'utf8',
   );
   const projectionWorkspace = readFileSync(
     resolve(
       repoRoot,
-      'packages/app-vue/src/modules/repository/views/KnowledgeProjectionWorkspaceView.vue',
+      'packages/repository-ui/src/views/KnowledgeProjectionWorkspaceView.vue',
     ),
     'utf8',
   );
   const localVaultWorkspace = readFileSync(
-    resolve(repoRoot, 'packages/app-vue/src/modules/repository/views/LocalVaultWorkspaceView.vue'),
+    resolve(repoRoot, 'packages/repository-ui/src/views/LocalVaultWorkspaceView.vue'),
     'utf8',
   );
 

@@ -329,15 +329,15 @@ export const domainResolveAliases = [
     ),
   },
   {
-    find: /^@memoflow/repository-contracts$/,
+    find: /^@memoflow\/repository-contracts$/,
     replacement: path.resolve(import.meta.dirname, './packages/repository-contracts/src/index.ts'),
   },
   {
-    find: /^@memoflow/repository-contracts/(.+)/,
+    find: /^@memoflow\/repository-contracts\/(.+)/,
     replacement: path.resolve(import.meta.dirname, './packages/repository-contracts/src/$1'),
   },
   {
-    find: /^@memoflow/repository-client$/,
+    find: /^@memoflow\/repository-client$/,
     replacement: path.resolve(import.meta.dirname, './packages/repository-client/src/index.ts'),
   },
   {
@@ -354,6 +354,17 @@ export const domainResolveAliases = [
   {
     find: /^@memoflow\/notification-ui$/,
     replacement: path.resolve(import.meta.dirname, './packages/notification-ui/src/index.ts'),
+  },
+  {
+    find: /^@memoflow\/repository-ui\/host$/,
+    replacement: path.resolve(
+      import.meta.dirname,
+      './packages/repository-ui/src/repository-ui-host.ts',
+    ),
+  },
+  {
+    find: /^@memoflow\/repository-ui$/,
+    replacement: path.resolve(import.meta.dirname, './packages/repository-ui/src/index.ts'),
   },
   {
     find: /^@memoflow\/operations-contracts\/(.+)/,
