@@ -20,7 +20,7 @@ import { describe, expect, it } from 'vitest';
     const routes = readFileSync(
       resolve(
         apiDir,
-        '../../../../../repository/src/api/routes/knowledge-repository-connection.routes.ts',
+        '../../../repository/src/api/routes/knowledge-repository-connection.routes.ts',
       ),
       'utf8',
     );
@@ -103,7 +103,7 @@ import { describe, expect, it } from 'vitest';
     const routes = readFileSync(
       resolve(
         apiDir,
-        '../../../../../repository/src/api/routes/knowledge-repository-connection.routes.ts',
+        '../../../repository/src/api/routes/knowledge-repository-connection.routes.ts',
       ),
       'utf8',
     );
@@ -152,7 +152,7 @@ import { describe, expect, it } from 'vitest';
     const controller = readFileSync(
       resolve(
         apiDir,
-        '../../../../../repository/src/server/transport/knowledge-repository-connection.controller.ts',
+        '../../../repository/src/server/transport/knowledge-repository-connection.controller.ts',
       ),
       'utf8',
     );
@@ -213,7 +213,7 @@ import { describe, expect, it } from 'vitest';
       const desktop = readFileSync(
         resolve(
           apiDir,
-          '../../../../../../apps/desktop/src/main/modules/repository/desktop-knowledge-repository-sync.service.ts',
+          '../../../../apps/desktop/src/main/modules/repository/desktop-knowledge-repository-sync.service.ts',
         ),
         'utf8',
       );
