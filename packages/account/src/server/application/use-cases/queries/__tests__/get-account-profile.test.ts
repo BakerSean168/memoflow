@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { createMockRepo } from '@memoflow/test-utils/mocks';
 import type { IAccountRepository } from '../../../../domain/repositories/i-account-repository';
 import { Account } from '../../../../domain/aggregates/account';
-import { AccountStatus } from '@memoflow/contracts/account';
+import { AccountStatus } from '@memoflow/account-contracts';
 import { IdentityId } from '@memoflow/domain-shared/shared';
 import { GetAccountProfileUseCase } from '../get-account-profile.use-case';
 import { asInstant } from '@memoflow/time';

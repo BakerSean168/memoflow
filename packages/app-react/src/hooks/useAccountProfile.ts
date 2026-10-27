@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 
-import type { AccountClientDTO, CloudIdentitySummary } from '@memoflow/contracts/account';
+import type { AccountClientDTO, CloudIdentitySummary } from '@memoflow/account-contracts';
 import { presentErrorMessage } from '@memoflow/http-client';
 
 import { useAppSession } from './useAppSession';

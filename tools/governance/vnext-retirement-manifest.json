@@ -52,7 +52,7 @@
       "status": "active",
       "decision": "ADR-104 / ACC-1403",
       "forbiddenPaths": [
-        "packages/contracts/src/modules/account/value-objects/account-settings.ts",
+        "packages/account-contracts/src/value-objects/account-settings.ts",
         "packages/account/src/server/application/use-cases/commands/update-account-settings.use-case.ts"
       ]
     },

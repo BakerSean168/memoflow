@@ -29,10 +29,6 @@
       "types": "./dist/modules/repository/index.d.ts",
       "import": "./dist/modules/repository/index.js"
     },
-    "./account": {
-      "types": "./dist/modules/account/index.d.ts",
-      "import": "./dist/modules/account/index.js"
-    },
     "./setting": {
       "types": "./dist/modules/setting/index.d.ts",
       "import": "./dist/modules/setting/index.js"
@@ -76,6 +72,7 @@
   },
   "dependencies": {
     "@asteasolutions/zod-to-openapi": "^9.1.0",
+    "@memoflow/account-contracts": "workspace:*",
     "@memoflow/data-portability-contracts": "workspace:*",
     "@memoflow/desktop-contracts": "workspace:*",
     "@memoflow/goal-contracts": "workspace:*",

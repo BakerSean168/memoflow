@@ -1,7 +1,7 @@
 /**
  * Account client seam.
  *
- * Public account contracts stay centralized in `@memoflow/contracts/account`.
+ * Public account contracts stay centralized in `@memoflow/account-contracts`.
  * Callers depend on this seam instead of the old application-client /
  * infrastructure-client layered exports.
  */

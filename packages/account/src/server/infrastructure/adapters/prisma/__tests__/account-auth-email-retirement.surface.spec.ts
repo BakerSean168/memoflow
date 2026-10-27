@@ -25,7 +25,7 @@ describe('ACC-1406 Account auth-email retirement surface', () => {
     'utf8',
   );
   const responseSchemas = readFileSync(
-    resolve(repoRoot, 'packages/contracts/src/modules/account/api/response-schemas.ts'),
+    resolve(repoRoot, 'packages/account-contracts/src/api/response-schemas.ts'),
     'utf8',
   );
   const repositoryPort = readFileSync(

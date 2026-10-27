@@ -7,6 +7,7 @@ import {
   createWorkspaceSourceAliasEntries,
   createReliableMessagingContractsAliasEntries,
   createOperationsContractsAliasEntries,
+  createAccountContractsAliasEntries,
   createNotificationContractsAliasEntries,
   createContractsAliasEntries,
 } from '../../../../../vite.workspace-aliases.ts';
@@ -21,6 +22,7 @@ export default defineConfig({
       ...createUiVueSourceAliasEntries(workspace),
       ...createReliableMessagingContractsAliasEntries(workspace),
       ...createOperationsContractsAliasEntries(workspace),
+      ...createAccountContractsAliasEntries(workspace),
       ...createNotificationContractsAliasEntries(workspace),
       ...createContractsAliasEntries(workspace),
       ...createWorkspaceSourceAliasEntries(workspace, [

@@ -22,7 +22,7 @@
  * - @memoflow/contracts/task       - 任务模块
  * - @memoflow/goal-contracts       - 目标模块（P2 已独立成包）
  * - @memoflow/contracts/repository - 仓库模块
- * - @memoflow/contracts/account    - 账户模块
+ * - @memoflow/account-contracts    - 账户模块（已独立成包）
  * - @memoflow/schedule-contracts   - 调度模块
  * - @memoflow/contracts/setting    - 设置模块
  * - @memoflow/contracts/ai         - AI模块

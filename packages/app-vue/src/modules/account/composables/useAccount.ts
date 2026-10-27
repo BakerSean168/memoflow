@@ -17,7 +17,7 @@ import type {
   UpdateAccountReq,
   CloseAccountReq,
   CloudIdentitySummary,
-} from '@memoflow/contracts/account';
+} from '@memoflow/account-contracts';
 import { useAccountStore } from '../stores/account-store';
 import { useAuthenticationStore } from '../../authentication/stores/authentication-store';
 import { ACCOUNT_SERVICE_KEY } from '../../../di/keys';

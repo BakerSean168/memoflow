@@ -2,7 +2,7 @@ import { ValueObject } from '@memoflow/utils/domain';
 import type {
   AccountProfileDTO,
   AccountProfile as IAccountProfile,
-} from '@memoflow/contracts/account';
+} from '@memoflow/account-contracts';
 import { requireYmd, type Ymd } from '@memoflow/contracts/primitives';
 import { GenderType } from './gender-type';
 

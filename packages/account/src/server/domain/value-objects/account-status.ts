@@ -1,7 +1,7 @@
 import {
   AccountStatus as AccountStatusContract,
   type AccountStatus as IAccountStatus,
-} from '@memoflow/contracts/account';
+} from '@memoflow/account-contracts';
 
 export type AccountStatus = IAccountStatus & { readonly __brand: unique symbol };
 

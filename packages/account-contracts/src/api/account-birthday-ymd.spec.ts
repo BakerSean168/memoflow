@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { createMockAccount } from '../../../mocks/account.mock';
+import { createMockAccount } from '../test-support/account.mock';
 import { requireYmd } from '@memoflow/shared-primitives';
 import { AccountResponseSchema } from './response-schemas';
 

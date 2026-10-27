@@ -6,6 +6,7 @@ import type { Alias, UserConfig } from 'vite';
 import {
   createReliableMessagingContractsAliasEntries,
   createOperationsContractsAliasEntries,
+  createAccountContractsAliasEntries,
   createNotificationContractsAliasEntries,
   createContractsAliasEntries,
   createGoalCoreAliasEntries,
@@ -250,6 +251,7 @@ export function createSharedConfig(options: SharedConfigOptions) {
   const workspaceRoot = path.resolve(projectRoot, '../..');
   const commonWorkspacePackages = [
     'account',
+    'account-contracts',
     'agent-gateway',
     'ai',
     'app-vue',
@@ -356,6 +358,7 @@ export function createSharedConfig(options: SharedConfigOptions) {
     ...commonWorkspaceAliasEntries,
     ...createReliableMessagingContractsAliasEntries(workspaceRoot),
     ...createOperationsContractsAliasEntries(workspaceRoot),
+    ...createAccountContractsAliasEntries(workspaceRoot),
     ...createNotificationContractsAliasEntries(workspaceRoot),
     ...createContractsAliasEntries(workspaceRoot),
     ...createGoalCoreAliasEntries(workspaceRoot),

@@ -3,7 +3,7 @@ import {
   BusinessDataSummarySchema,
   type BusinessDataOwner,
   type BusinessDataSummary,
-} from '@memoflow/contracts/account';
+} from '@memoflow/account-contracts';
 
 /** Host-composed owner probes. Missing or unavailable owners remain unknown. */
 export type BusinessDataPresenceReaders = Partial<

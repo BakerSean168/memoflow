@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it } from 'vitest';
-import type { AccountClientDTO } from '@memoflow/contracts/account';
-import { AccountStatus } from '@memoflow/contracts/account';
+import type { AccountClientDTO } from '@memoflow/account-contracts';
+import { AccountStatus } from '@memoflow/account-contracts';
 import { createTestPinia } from '@memoflow/test-utils';
 import { useAccountStore } from './account-store';
 

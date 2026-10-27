@@ -94,7 +94,7 @@ import { DesktopKnowledgeSourceAdapter } from './modules/ai/desktop-knowledge-so
 import { configureDesktopShellIdentity } from './utils/app-icon';
 import { getApiBaseUrl } from './utils/api-config';
 import { createLogger } from '@memoflow/utils/logger';
-import type { AccountClosureReceiptDTO } from '@memoflow/contracts/account';
+import type { AccountClosureReceiptDTO } from '@memoflow/account-contracts';
 import { createRuntimeOwnership } from '@memoflow/contracts/primitives';
 import { ResultErrorException } from '@memoflow/contracts/result';
 import { getSharedPathResolver } from './runtime-init';

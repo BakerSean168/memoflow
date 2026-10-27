@@ -6,13 +6,13 @@
  *
  * Usage:
  * ```ts
- * import { createMockAccount } from '@memoflow/contracts/mocks';
+ * import { createMockAccount } from '@memoflow/account-contracts/test-support/account.mock';
  * const account = createMockAccount();
  * ```
  */
 
 import { faker } from '@faker-js/faker';
-import type { AccountClientDTO } from '../modules/account/aggregates/account-client';
+import type { AccountClientDTO } from '../aggregates/account-client';
 import type { IdentityId } from '@memoflow/shared-primitives';
 
 // ============================================================================

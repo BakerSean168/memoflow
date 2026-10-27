@@ -2490,6 +2490,46 @@
       "measurementCollectors": []
     },
     {
+      "path": "packages/account-contracts/src/api/account-birthday-ymd.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/account-contracts/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/account-contracts/src/api/account-view.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/account-contracts/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/account-contracts/src/api/dual-registry.surface.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/account-contracts/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/account-contracts/src/empty-dual-barrel.surface.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/account-contracts/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/account-contracts/src/portable-v3.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/account-contracts/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "packages/account/src/api/account-void-success-envelope.surface.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -6090,46 +6130,6 @@
       "primarySuite": "unit",
       "collectors": [
         "packages/cloud-auth/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
-      "path": "packages/contracts/src/modules/account/api/account-birthday-ymd.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/contracts/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
-      "path": "packages/contracts/src/modules/account/api/account-view.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/contracts/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
-      "path": "packages/contracts/src/modules/account/api/dual-registry.surface.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/contracts/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
-      "path": "packages/contracts/src/modules/account/empty-dual-barrel.surface.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/contracts/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
-      "path": "packages/contracts/src/modules/account/portable-v3.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/contracts/vitest.config.ts"
       ],
       "measurementCollectors": []
     },
@@ -12874,6 +12874,13 @@
       "fileCount": 19
     },
     {
+      "id": "packages/account-contracts/vitest.config.ts",
+      "type": "primary",
+      "suite": "unit",
+      "runner": "vitest",
+      "fileCount": 5
+    },
+    {
       "id": "packages/account/vitest.config.ts",
       "type": "primary",
       "suite": "unit",
@@ -12920,7 +12927,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 45
+      "fileCount": 40
     },
     {
       "id": "packages/data-portability-contracts/vitest.config.ts",

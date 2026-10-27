@@ -1,4 +1,4 @@
-import type { AccountServerDTO } from '@memoflow/contracts/account';
+import type { AccountServerDTO } from '@memoflow/account-contracts';
 
 export interface AccountClosedEventPayload {
   identityId: string;

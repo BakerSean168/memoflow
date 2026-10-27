@@ -16,7 +16,7 @@ import type {
   AccountView,
   CloudIdentitySummary,
   AccountProfileDTO,
-} from '@memoflow/contracts/account';
+} from '@memoflow/account-contracts';
 import { Account } from '../../domain-client';
 import { IdentityId } from '@memoflow/domain-shared/shared';
 import { AccountProfile, AccountStatus } from '../../server/domain/value-objects';

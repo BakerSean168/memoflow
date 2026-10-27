@@ -17,10 +17,7 @@ import { describe, expect, it } from 'vitest';
     const apiDir = __dirname;
     const responseSchemas = readFileSync(resolve(apiDir, 'response-schemas.ts'), 'utf8');
     const aggregate = readFileSync(resolve(apiDir, '../aggregates/account-client.ts'), 'utf8');
-    const routes = readFileSync(
-      resolve(apiDir, '../../../../../account/src/api/routes.ts'),
-      'utf8',
-    );
+    const routes = readFileSync(resolve(apiDir, '../../../account/src/api/routes.ts'), 'utf8');
 
     it('owns AccountClientDTO as z.infer of AccountResponseSchema', () => {
       expect(aggregate).toContain('Residual 825');

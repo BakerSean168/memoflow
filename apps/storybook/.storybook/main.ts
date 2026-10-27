@@ -8,6 +8,7 @@ import {
   createAssetsAliasEntries,
   createReliableMessagingContractsAliasEntries,
   createOperationsContractsAliasEntries,
+  createAccountContractsAliasEntries,
   createNotificationContractsAliasEntries,
   createContractsAliasEntries,
   createUiVueSourceAliasEntries,
@@ -49,6 +50,7 @@ const config: StorybookConfig = {
           ...createUiVueSourceAliasEntries(workspace),
           ...createReliableMessagingContractsAliasEntries(workspace),
           ...createOperationsContractsAliasEntries(workspace),
+          ...createAccountContractsAliasEntries(workspace),
           ...createNotificationContractsAliasEntries(workspace),
           ...createContractsAliasEntries(workspace),
           ...createWorkspaceSourceAliasEntries(workspace, [

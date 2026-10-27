@@ -76,6 +76,8 @@
       ],
       "@memoflow/domain-shared": ["./packages/domain-shared/dist/index.d.ts"],
       "@memoflow/domain-shared/*": ["./packages/domain-shared/dist/*/index.d.ts"],
+      "@memoflow/account-contracts": ["./packages/account-contracts/dist/index.d.ts"],
+      "@memoflow/account-contracts/*": ["./packages/account-contracts/dist/*.d.ts"],
       "@memoflow/account": ["./packages/account/dist/index.d.ts"],
       "@memoflow/account/*": ["./packages/account/dist/*/index.d.ts"],
       "@memoflow/cloud-auth": ["./packages/cloud-auth/dist/index.d.ts"],

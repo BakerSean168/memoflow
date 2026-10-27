@@ -76,8 +76,8 @@
 import { ipcMain } from 'electron';
 import { ok } from '@memoflow/contracts/result';
 import { AccountChannels, type IElectronModuleContext } from '@memoflow/contracts/electron';
-import type { CloseAccountReq, UpdateAccountReq } from '@memoflow/contracts/account';
-import { CloseAccountSchema } from '@memoflow/contracts/account';
+import type { CloseAccountReq, UpdateAccountReq } from '@memoflow/account-contracts';
+import { CloseAccountSchema } from '@memoflow/account-contracts';
 import { fail } from '@memoflow/contracts/result';
 import { formatZodErrors } from '@memoflow/utils/result';
 import { createLogger } from '@memoflow/utils/logger';

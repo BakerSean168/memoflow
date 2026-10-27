@@ -461,3 +461,21 @@ export function createScheduleUiAliasEntries(workspaceRoot: string): Alias[] {
     },
   ];
 }
+
+export function createAccountContractsAliasEntries(workspaceRoot: string): Alias[] {
+  const accountContractsRoot = resolveFromWorkspace(
+    workspaceRoot,
+    'packages/account-contracts/src',
+  );
+
+  return [
+    {
+      find: /^@memoflow\/account-contracts$/,
+      replacement: `${accountContractsRoot}/index.ts`,
+    },
+    {
+      find: /^@memoflow\/account-contracts\/(.+)$/,
+      replacement: `${accountContractsRoot}/$1`,
+    },
+  ];
+}

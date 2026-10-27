@@ -5,7 +5,7 @@ import type { Instant } from '@memoflow/contracts/primitives';
  * Read-only client-side representation of the Account aggregate.
  */
 
-import type { AccountClientDTO } from '@memoflow/contracts/account';
+import type { AccountClientDTO } from '@memoflow/account-contracts';
 import { AggregateRoot } from '@memoflow/utils/domain';
 import { IdentityId } from '@memoflow/domain-shared/shared';
 import { AccountProfile, AccountStatus } from '../../server/domain/value-objects';

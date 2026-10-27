@@ -50,9 +50,15 @@ import { describe, expect, it } from 'vitest';
 
     it('shared.ts keeps ClientInfo/UserAgreement and drops dual error/pagination schemas', () => {
       const source = readFileSync(join(here, 'shared.ts'), 'utf8');
+      // §5.2-4 / #630 §2.2：UserAgreement 随 account 域迁出，断言按 canonical 新位置钉定，
+      // 覆盖不变（同一符号仍在公开契约面上）。
+      const accountShared = readFileSync(
+        join(here, '../../../account-contracts/src/value-objects/user-agreement.ts'),
+        'utf8',
+      );
       expect(source).toContain('Residual 645');
       expect(source).toContain('export type ClientInfo');
-      expect(source).toContain('export type UserAgreement');
+      expect(accountShared).toContain('export type UserAgreement');
       expect(source).not.toMatch(/export const ZodErrorResponse/);
       expect(source).not.toMatch(/export type ZodErrorResponse/);
       expect(source).not.toMatch(/export const PaginationQuery/);

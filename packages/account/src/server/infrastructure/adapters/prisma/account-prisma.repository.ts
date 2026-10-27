@@ -8,7 +8,7 @@
  */
 
 import type { PrismaClient, Account as PrismaAccount, Prisma } from '@memoflow/database';
-import type { AccountProfileDTO } from '@memoflow/contracts/account';
+import type { AccountProfileDTO } from '@memoflow/account-contracts';
 import type { IAccountRepository } from '../../../domain';
 import { Account } from '../../../domain';
 import { AccountPrismaMapper } from './mappers/account-prisma.mapper';

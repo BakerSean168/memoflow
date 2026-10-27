@@ -15,7 +15,7 @@ import type {
   UpdateAccountReq,
   CloseAccountReq,
   CloseAccountRes,
-} from '@memoflow/contracts/account';
+} from '@memoflow/account-contracts';
 
 export class AccountIpcAdapter implements IAccountApiClient {
   constructor(private readonly ipcClient: IResultIpcClient) {}

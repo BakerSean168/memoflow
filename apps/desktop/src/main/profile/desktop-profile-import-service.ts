@@ -1,7 +1,7 @@
 import { promises as fs } from 'node:fs';
 import path from 'node:path';
 import { z } from 'zod';
-import { BusinessDataSummarySchema } from '@memoflow/contracts/account';
+import { BusinessDataSummarySchema } from '@memoflow/account-contracts';
 import {
   DesktopProfileImportViewSchema,
   type DesktopProfileImportView,

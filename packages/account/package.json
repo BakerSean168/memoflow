@@ -29,6 +29,7 @@
   },
   "scripts": {},
   "dependencies": {
+    "@memoflow/account-contracts": "workspace:*",
     "@memoflow/contracts": "workspace:*",
     "@memoflow/database": "workspace:*",
     "@memoflow/domain-shared": "workspace:*",

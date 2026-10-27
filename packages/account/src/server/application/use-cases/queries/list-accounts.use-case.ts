@@ -1,4 +1,4 @@
-import type { AccountClientDTO } from '@memoflow/contracts/account';
+import type { AccountClientDTO } from '@memoflow/account-contracts';
 import type { IAccountRepository } from '../../../domain';
 
 export class ListAccountsUseCase {

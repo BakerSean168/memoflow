@@ -10,7 +10,7 @@ import type { AccountState } from '../../../../domain';
 import { Account } from '../../../../domain';
 import { IdentityId } from '@memoflow/domain-shared/shared';
 import { AccountProfile, AccountStatus } from '../../../../domain/value-objects';
-import type { AccountProfileDTO } from '@memoflow/contracts/account';
+import type { AccountProfileDTO } from '@memoflow/account-contracts';
 
 export type PowerSyncAccountRow = {
   id: string;

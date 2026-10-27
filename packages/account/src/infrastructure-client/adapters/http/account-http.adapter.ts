@@ -13,7 +13,7 @@ import type {
   UpdateAccountReq,
   CloseAccountReq,
   CloseAccountRes,
-} from '@memoflow/contracts/account';
+} from '@memoflow/account-contracts';
 
 export class AccountHttpAdapter implements IAccountApiClient {
   private readonly baseUrl = '/accounts';

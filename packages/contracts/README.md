@@ -85,7 +85,7 @@ src/modules/account/
 
 4. **模块导出**：在 `index.ts` 统一导出
    ```typescript
-   // src/modules/account/index.ts
+   // packages/account-contracts/src/index.ts
    export * from './protocol';
    export * from './api';
    export * from './dtos';
@@ -101,7 +101,7 @@ src/modules/account/
 // ✅ 方式: 从子路径导入完整模块（推荐，极致 Tree-Shaking）
 import { GoalServerDTO, GoalClientDTO } from '@memoflow/goal-contracts';
 import { TaskPlanServer } from '@memoflow/contracts/task';
-import { AccountDTO } from '@memoflow/contracts/account';
+import { AccountClientDTO } from '@memoflow/account-contracts';
 ```
 
 ### 子路径列表
@@ -111,7 +111,7 @@ import { AccountDTO } from '@memoflow/contracts/account';
 | `@memoflow/contracts/task`             | 任务模块契约     |
 | `@memoflow/goal-contracts`             | 目标模块契约     |
 | `@memoflow/contracts/repository`       | 仓库模块契约     |
-| `@memoflow/contracts/account`          | 账户模块契约     |
+| `@memoflow/account-contracts`          | 账户模块契约     |
 | `@memoflow/schedule-contracts`         | 调度模块契约     |
 | `@memoflow/contracts/setting`          | 设置模块契约     |
 | `@memoflow/contracts/ai`               | AI 模块契约      |

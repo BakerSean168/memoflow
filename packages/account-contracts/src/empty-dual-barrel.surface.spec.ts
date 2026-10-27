@@ -7,10 +7,12 @@ import { describe, expect, it } from 'vitest';
  * Residual note barrels may remain; public module index must not re-export them.
  */
 describe('empty dual barrel re-export single-track surface (residual 661)', () => {
-  const modules = resolve(__dirname, '..');
+  // §5.2-4：下列路径按 account 契约迁出后的 canonical 位置钉定（断言不变）。
+  const packagesRoot = resolve(__dirname, '../..');
+  const contractsModules = resolve(packagesRoot, 'contracts/src/modules');
 
   it('account module index does not re-export empty entities/dtos dual barrels', () => {
-    const index = readFileSync(resolve(modules, 'account/index.ts'), 'utf8');
+    const index = readFileSync(resolve(__dirname, 'index.ts'), 'utf8');
     expect(index).toMatch(/Residual 661/);
     expect(index).not.toContain("export * from './entities'");
     expect(index).not.toContain("export * from './dtos'");
@@ -19,22 +21,22 @@ describe('empty dual barrel re-export single-track surface (residual 661)', () =
   });
 
   it('schedule contracts and Setting both delete retired DTO barrels from their public surface', () => {
-    const packages = resolve(__dirname, '../../../..');
+    const packages = packagesRoot;
     const schedule = readFileSync(resolve(packages, 'schedule-contracts/src/index.ts'), 'utf8');
-    const setting = readFileSync(resolve(modules, 'setting/index.ts'), 'utf8');
+    const setting = readFileSync(resolve(contractsModules, 'setting/index.ts'), 'utf8');
     expect(schedule).not.toContain("export * from './dtos'");
     expect(setting).not.toContain("export * from './dtos'");
     expect(schedule).toContain("export * from './api'");
     expect(setting).toContain("export * from './api'");
     expect(setting).toContain("export * from './preferences'");
     expect(existsSync(resolve(packages, 'schedule-contracts/src/dtos'))).toBe(false);
-    expect(existsSync(resolve(modules, 'schedule'))).toBe(false);
-    expect(existsSync(resolve(modules, 'setting/dtos'))).toBe(false);
+    expect(existsSync(resolve(contractsModules, 'schedule'))).toBe(false);
+    expect(existsSync(resolve(contractsModules, 'setting/dtos'))).toBe(false);
   });
 
   it('keeps residual-empty dual barrels as note-only files', () => {
-    const accountDtos = readFileSync(resolve(modules, 'account/dtos/index.ts'), 'utf8');
-    const accountEntities = readFileSync(resolve(modules, 'account/entities/index.ts'), 'utf8');
+    const accountDtos = readFileSync(resolve(__dirname, 'dtos/index.ts'), 'utf8');
+    const accountEntities = readFileSync(resolve(__dirname, 'entities/index.ts'), 'utf8');
     expect(accountDtos).toContain('export {}');
     expect(accountEntities).toMatch(/Residual 655/);
   });

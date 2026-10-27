@@ -24,6 +24,7 @@ export const domainResolveAtAlias = {
       'ai',
       'cloud-auth',
       'account',
+      'account-contracts',
       'notification',
       'editor',
       'repository',
@@ -254,6 +255,14 @@ export const domainResolveAliases = [
   {
     find: '@memoflow/notification',
     replacement: path.resolve(import.meta.dirname, './packages/notification/src/index.ts'),
+  },
+  {
+    find: /^@memoflow\/account-contracts\/(.+)/,
+    replacement: path.resolve(import.meta.dirname, './packages/account-contracts/src/$1'),
+  },
+  {
+    find: '@memoflow/account-contracts',
+    replacement: path.resolve(import.meta.dirname, './packages/account-contracts/src/index.ts'),
   },
   {
     find: /^@memoflow\/account\/(.+)/,

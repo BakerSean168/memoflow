@@ -10,8 +10,8 @@
  */
 
 import { defineStore } from 'pinia';
-import type { AccountClientDTO } from '@memoflow/contracts/account';
-import { AccountStatus } from '@memoflow/contracts/account';
+import type { AccountClientDTO } from '@memoflow/account-contracts';
+import { AccountStatus } from '@memoflow/account-contracts';
 
 // ============ State Interface ============
 export interface AccountState {

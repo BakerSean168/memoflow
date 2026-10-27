@@ -3,12 +3,12 @@
  */
 
 import type { Result } from '@memoflow/contracts/result';
-import type { AccountView } from '@memoflow/contracts/account';
+import type { AccountView } from '@memoflow/account-contracts';
 import type {
   UpdateAccountReq,
   CloseAccountReq,
   CloseAccountRes,
-} from '@memoflow/contracts/account';
+} from '@memoflow/account-contracts';
 
 export interface IAccountApiClient {
   getMyProfile(): Promise<Result<AccountView>>;

@@ -17,6 +17,7 @@
   "dependencies": {
     "@anthropic-ai/claude-agent-sdk": "0.3.295",
     "@memoflow/account": "workspace:*",
+    "@memoflow/account-contracts": "workspace:*",
     "@memoflow/agent-gateway": "workspace:*",
     "@memoflow/ai": "workspace:*",
     "@memoflow/app-vue": "workspace:*",
