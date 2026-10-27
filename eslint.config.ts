@@ -594,6 +594,24 @@ export default tseslint.config(
       },
     },
     {
+      // Native integration fixture composes real clients with the server runtime.
+      files: ['packages/ai/src/testing/native-agent-flow.ts'],
+      rules: {
+        '@nx/enforce-module-boundaries': [
+          'error',
+          {
+            ...moduleBoundaryOptions,
+            allow: [
+              ...moduleBoundaryOptions.allow,
+              '@memoflow/ai-client/local-agent',
+              '@memoflow/ai-client/agent-instance',
+              '@memoflow/ai-client/runtime-assistant',
+            ],
+          },
+        ],
+      },
+    },
+    {
       // Test files still inherit @nx/enforce-module-boundaries.
       // Only @memoflow/test-utils is allowlisted by moduleBoundaryOptions, and
       // production files are explicitly blocked from importing it above.
