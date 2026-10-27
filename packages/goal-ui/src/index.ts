@@ -30,11 +30,6 @@ export type {
   GoalSurfaceStatusSink,
   GoalSurfaceLeaveGuard,
 } from './composables';
-export type {
-  GoalNativeDraftState,
-  GoalNativeEditSession,
-  GoalNativeSubmitContext,
-} from './composables/goalNativeEditSession';
 
 // ===== Stores =====
 export { useGoalStore } from './stores/goal-store';

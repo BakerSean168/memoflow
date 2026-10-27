@@ -31,7 +31,7 @@ const native = vi.hoisted(() => ({
   requestCancel: vi.fn(),
   active: true,
   blocked: false,
-  state: null as import('../../goal/composables/goalNativeEditSession').GoalNativeDraft | null,
+  state: null as import('@memoflow/goal-client').GoalNativeDraft | null,
 }));
 vi.mock('@ai-ui-test-host/shared/utils/useStrictInject', () => ({
   useStrictInject: () => ({ getGoalAggregateView: native.readGoal }),

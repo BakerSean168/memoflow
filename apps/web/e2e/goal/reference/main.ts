@@ -34,8 +34,8 @@ import {
   GoalDetailView,
   GoalDialog,
   goalRoutes,
-  type GoalNativeEditSession,
 } from '@memoflow/goal-ui';
+import type { GoalNativeEditSession } from '@memoflow/goal-client';
 import '../../../../../apps/web/src/styles/index.css';
 
 const { previewGoalRecord } = await import('@memoflow/goal-client');

@@ -7,6 +7,15 @@
 
 // ===== Port Interfaces =====
 export type { IGoalApiClient } from './ports/goal-api-client.port';
+export type {
+  GoalDraftKeyResult,
+  GoalNativeDraft,
+  GoalNativeDraftState,
+  GoalNativeEditSession,
+  GoalNativeField,
+  GoalNativePatch,
+  GoalNativeSubmitContext,
+} from './ports/goal-native-edit-session';
 
 // ===== Constructor-Injected Service (Result-based) =====
 export { GoalClientService, createGoalClientService } from './goal-client-service';

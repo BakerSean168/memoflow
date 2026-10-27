@@ -12,10 +12,10 @@ import { useGoalNativeSurface } from '../ai-ui-host';
 import { useLabelCatalog } from '../ai-ui-host';
 import { useStrictInject } from '../ai-ui-host';
 import type {
-  GoalNativeEditSession,
   GoalNativeDraftState,
+  GoalNativeEditSession,
   GoalNativeSubmitContext,
-} from '../host-ports/goal-session';
+} from '@memoflow/goal-client';
 import { getAIErrorMessage } from './error';
 import { useGoalSurfaceLease } from './useGoalSurfaceLease';
 import {

@@ -153,7 +153,7 @@ import { Button } from '@memoflow/ui-vue-shadcn';
 import { getKeyResultCalculationLabel } from '../utils';
 import GoalKeyResultCardEditor from './GoalKeyResultCardEditor.vue';
 
-type DraftKeyResult = import('../composables/goalNativeEditSession').GoalDraftKeyResult;
+type DraftKeyResult = import('@memoflow/goal-client').GoalDraftKeyResult;
 type KrId = DraftKeyResult['id'];
 
 const props = withDefaults(

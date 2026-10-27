@@ -27,7 +27,7 @@ import GoalReminderChip from '../GoalReminderChip.vue';
 import GoalTimeframePicker from '../GoalTimeframePicker.vue';
 import GoalStatusPicker from '../GoalStatusPicker.vue';
 import GoalDialog from './GoalDialog.vue';
-import type { GoalNativeEditSession } from '../../composables/goalNativeEditSession';
+import type { GoalNativeEditSession } from '@memoflow/goal-client';
 import {
   GOAL_DRAFT_CHECKPOINT_KEY,
   GOAL_SERVICE_KEY,
@@ -1484,10 +1484,10 @@ describe('Goal owner native edit session (PVC-AI-8001)', () => {
       },
       onCreateAttempt,
       createId:
-        'GoalId_550e8400-e29b-41d4-a716-446655440001' as import('../../composables/goalNativeEditSession').GoalNativeSubmitContext['createId'],
+        'GoalId_550e8400-e29b-41d4-a716-446655440001' as import('@memoflow/goal-client').GoalNativeSubmitContext['createId'],
       keyResultIds: [
         'KeyResultId_550e8400-e29b-41d4-a716-446655440002',
-      ] as import('../../composables/goalNativeEditSession').GoalNativeSubmitContext['keyResultIds'],
+      ] as import('@memoflow/goal-client').GoalNativeSubmitContext['keyResultIds'],
       pendingLabelNames: ['New proposed label'],
       expectedDraft: session.readDraftState().draft,
     });

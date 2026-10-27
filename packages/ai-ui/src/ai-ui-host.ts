@@ -1,4 +1,4 @@
-import type { GoalNativeDraftState } from './host-ports/goal-session';
+import type { GoalNativeDraftState } from '@memoflow/goal-client';
 export interface GoalAIEditSurface {
   openCreate(): Promise<GoalNativeEditSession>;
   openExisting(id: string): Promise<GoalNativeEditSession>;
@@ -22,7 +22,7 @@ export interface GoalAIEditSurface {
 import type { GoalClientDTO } from '@memoflow/goal-contracts';
 import type { TaskPlanClientDTO } from '@memoflow/task-contracts';
 import type { ConfirmedLocalVaultWriteReq } from '@memoflow/repository-contracts';
-import type { GoalNativeEditSession } from './host-ports/goal-session';
+import type { GoalNativeEditSession } from '@memoflow/goal-client';
 import type { KnowledgeCaptureNativeDraft } from './host-ports/knowledge-session';
 import type { KnowledgeDraft } from '@memoflow/ai-contracts';
 import type { InjectionKey, Ref, ShallowRef } from 'vue';

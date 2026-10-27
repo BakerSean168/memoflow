@@ -25,7 +25,7 @@ import { GOAL_DRAFT_CHECKPOINT_KEY } from '../di/keys';
 import type { GoalDraftCheckpointStore } from '@memoflow/goal-ui';
 import type { GoalDraftCheckpointSnapshot } from '@memoflow/goal-contracts';
 import type { GetGoalAggregateRes } from '@memoflow/goal-contracts';
-import type { GoalNativeEditSession } from '@memoflow/goal-ui';
+import type { GoalNativeEditSession } from '@memoflow/goal-client';
 import { provideGoalNativeSurface } from '../layouts/shell/useGoalNativeSurface';
 import {
   GoalSurfaceStatusSinkKey,
