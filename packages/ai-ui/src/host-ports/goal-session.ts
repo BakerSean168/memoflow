@@ -3,24 +3,24 @@ import type {
   GoalClientDTO,
   GoalNativeAiLease,
   GoalNativeDraftDTO,
-} from "@memoflow/goal-contracts";
+} from '@memoflow/goal-contracts';
 
 export type GoalNativeDraft = GoalNativeDraftDTO;
-export type GoalDraftKeyResult = GoalNativeDraft["keyResults"][number];
+export type GoalDraftKeyResult = GoalNativeDraft['keyResults'][number];
 
 /** Child positions refer to the current snapshot, just like the native KR rows. */
-export type GoalNativePatch = Partial<Omit<GoalNativeDraft, "keyResults">> & {
+export type GoalNativePatch = Partial<Omit<GoalNativeDraft, 'keyResults'>> & {
   keyResults?: GoalDraftKeyResult[];
   keyResult?: {
     index: number;
-    changes: Partial<Omit<GoalDraftKeyResult, "id">>;
+    changes: Partial<Omit<GoalDraftKeyResult, 'id'>>;
   };
 };
-export type GoalNativeField = "name" | "summary" | "description";
+export type GoalNativeField = 'name' | 'summary' | 'description';
 export interface GoalNativeDraftState {
   revision: number;
   restoredWorkflowRunId?: string;
-  mode: "create" | "edit";
+  mode: 'create' | 'edit';
   goalId: string | null;
   draft: GoalNativeDraft;
   dirty: boolean;
@@ -32,9 +32,7 @@ export type GoalNativeEditSession = {
   addChild(child: GoalDraftKeyResult): void;
   removeChild(child: number): void;
   focus(field: GoalNativeField): Promise<void>;
-  requestSubmit(
-    context?: GoalNativeSubmitContext,
-  ): Promise<GoalClientDTO | null>;
+  requestSubmit(context?: GoalNativeSubmitContext): Promise<GoalClientDTO | null>;
   requestCancel(): void;
   readDraftState(): GoalNativeDraftState;
   /** Claim atomically; only the returned capability may mutate until released. */
@@ -45,10 +43,7 @@ export type GoalNativeEditSession = {
   detachWorkflow(): void;
   /** Native Save/Enter and user dismissal delegate to workflow coordinators; semantic owner validation remains native. */
   setEditingBlocked(blocked: boolean): void;
-  coordinateSubmit(
-    submit: () => Promise<void>,
-    cancel: () => Promise<void>,
-  ): void;
+  coordinateSubmit(submit: () => Promise<void>, cancel: () => Promise<void>): void;
 };
 
 export interface GoalNativeSubmitContext {
@@ -56,10 +51,8 @@ export interface GoalNativeSubmitContext {
   nativeAiLease: GoalNativeAiLease;
   /** Called after validation/label resolution, immediately before owner persistence. */
   onCreateAttempt?: () => void;
-  createId: NonNullable<CreateGoalReq["id"]>;
-  keyResultIds: NonNullable<
-    NonNullable<CreateGoalReq["initialKeyResults"]>[number]["id"]
-  >[];
+  createId: NonNullable<CreateGoalReq['id']>;
+  keyResultIds: NonNullable<NonNullable<CreateGoalReq['initialKeyResults']>[number]['id']>[];
   pendingLabelNames: string[];
   /** Refuse submission if the user changed the native draft while its durable revision was saved. */
   expectedDraft: GoalNativeDraft;

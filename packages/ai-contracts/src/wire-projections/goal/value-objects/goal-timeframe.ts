@@ -1,45 +1,39 @@
 // AI-owned wire projection; validation retained from the owner contract at extraction.
-import { z } from "zod";
-import { requireYmd, YmdSchema, type Ymd } from "@memoflow/shared-primitives";
+import { z } from 'zod';
+import { requireYmd, YmdSchema, type Ymd } from '@memoflow/shared-primitives';
 
 const GoalYearSchema = z.number().int().min(1).max(9999);
 
-export const GoalTimeframeKindSchema = z.enum([
-  "day",
-  "month",
-  "quarter",
-  "halfYear",
-  "year",
-]);
+export const GoalTimeframeKindSchema = z.enum(['day', 'month', 'quarter', 'halfYear', 'year']);
 
 /**
  * Goal target precision. The discriminant is product meaning, not a storage hint.
  * A month/quarter/half-year/year target must never be collapsed into a fake deadline day.
  */
-export const GoalTimeframeSchema = z.discriminatedUnion("kind", [
-  z.object({ kind: z.literal("day"), date: YmdSchema }).strict(),
+export const GoalTimeframeSchema = z.discriminatedUnion('kind', [
+  z.object({ kind: z.literal('day'), date: YmdSchema }).strict(),
   z
     .object({
-      kind: z.literal("month"),
+      kind: z.literal('month'),
       year: GoalYearSchema,
       month: z.number().int().min(1).max(12),
     })
     .strict(),
   z
     .object({
-      kind: z.literal("quarter"),
+      kind: z.literal('quarter'),
       year: GoalYearSchema,
       quarter: z.number().int().min(1).max(4),
     })
     .strict(),
   z
     .object({
-      kind: z.literal("halfYear"),
+      kind: z.literal('halfYear'),
       year: GoalYearSchema,
       half: z.number().int().min(1).max(2),
     })
     .strict(),
-  z.object({ kind: z.literal("year"), year: GoalYearSchema }).strict(),
+  z.object({ kind: z.literal('year'), year: GoalYearSchema }).strict(),
 ]);
 
 export type GoalTimeframe = z.infer<typeof GoalTimeframeSchema>;
@@ -56,22 +50,22 @@ function daysInMonth(year: number, month: number): number {
 
 function ymd(year: number, month: number, day: number): Ymd {
   return requireYmd(
-    `${String(year).padStart(4, "0")}-${String(month).padStart(2, "0")}-${String(day).padStart(2, "0")}`,
+    `${String(year).padStart(4, '0')}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`,
   );
 }
 
 /** First calendar day represented by a Goal target, without timezone conversion. */
 export function goalTimeframeStartBoundary(target: GoalTimeframe): Ymd {
   switch (target.kind) {
-    case "day":
+    case 'day':
       return target.date;
-    case "month":
+    case 'month':
       return ymd(target.year, target.month, 1);
-    case "quarter":
+    case 'quarter':
       return ymd(target.year, (target.quarter - 1) * 3 + 1, 1);
-    case "halfYear":
+    case 'halfYear':
       return ymd(target.year, target.half === 1 ? 1 : 7, 1);
-    case "year":
+    case 'year':
       return ymd(target.year, 1, 1);
   }
 }
@@ -79,32 +73,23 @@ export function goalTimeframeStartBoundary(target: GoalTimeframe): Ymd {
 /** Last calendar day represented by a Goal target, without inventing a product deadline. */
 export function goalTimeframeEndBoundary(target: GoalTimeframe): Ymd {
   switch (target.kind) {
-    case "day":
+    case 'day':
       return target.date;
-    case "month":
-      return ymd(
-        target.year,
-        target.month,
-        daysInMonth(target.year, target.month),
-      );
-    case "quarter": {
+    case 'month':
+      return ymd(target.year, target.month, daysInMonth(target.year, target.month));
+    case 'quarter': {
       const month = target.quarter * 3;
       return ymd(target.year, month, daysInMonth(target.year, month));
     }
-    case "halfYear":
-      return target.half === 1
-        ? ymd(target.year, 6, 30)
-        : ymd(target.year, 12, 31);
-    case "year":
+    case 'halfYear':
+      return target.half === 1 ? ymd(target.year, 6, 30) : ymd(target.year, 12, 31);
+    case 'year':
       return ymd(target.year, 12, 31);
   }
 }
 
 /** Passing the target period is a derived signal only; it never mutates Goal lifecycle. */
-export function isPastGoalTarget(
-  target: GoalTimeframe | null,
-  today: Ymd,
-): boolean {
+export function isPastGoalTarget(target: GoalTimeframe | null, today: Ymd): boolean {
   return target != null && today > goalTimeframeEndBoundary(target);
 }
 
@@ -122,28 +107,25 @@ export function compareGoalTimeframesByEnd(
 }
 
 /** Compact product label that preserves the precision the user actually chose. */
-export function goalTimeframeLabel(
-  target: GoalTimeframe,
-  locale = "en",
-): string {
-  const zh = locale.toLowerCase().startsWith("zh");
+export function goalTimeframeLabel(target: GoalTimeframe, locale = 'en'): string {
+  const zh = locale.toLowerCase().startsWith('zh');
   switch (target.kind) {
-    case "day":
+    case 'day':
       return target.date;
-    case "month":
+    case 'month':
       return zh
         ? `${target.year} 年 ${target.month} 月`
-        : `${target.year}-${String(target.month).padStart(2, "0")}`;
-    case "quarter":
+        : `${target.year}-${String(target.month).padStart(2, '0')}`;
+    case 'quarter':
       return `${target.year} Q${target.quarter}`;
-    case "halfYear":
+    case 'halfYear':
       return `${target.year} H${target.half}`;
-    case "year":
+    case 'year':
       return zh ? `${target.year} 年` : String(target.year);
   }
 }
 
-export type GoalTimeframeKind = GoalTimeframe["kind"];
+export type GoalTimeframeKind = GoalTimeframe['kind'];
 
 /**
  * Reconstruct the semantic timeframe from the normalized persistence pair.
@@ -154,72 +136,59 @@ export function goalTimeframeFromStartBoundary(
   startDate: Ymd,
 ): GoalTimeframe {
   const canonicalStart = requireYmd(startDate);
-  const [year, month] = canonicalStart.split("-").map(Number);
+  const [year, month] = canonicalStart.split('-').map(Number);
   let candidate: GoalTimeframe;
   switch (kind) {
-    case "day":
+    case 'day':
       candidate = { kind, date: canonicalStart };
       break;
-    case "month":
+    case 'month':
       candidate = { kind, year, month };
       break;
-    case "quarter":
+    case 'quarter':
       candidate = { kind, year, quarter: (month + 2) / 3 };
       break;
-    case "halfYear":
+    case 'halfYear':
       candidate = { kind, year, half: month === 1 ? 1 : month === 7 ? 2 : 0 };
       break;
-    case "year":
+    case 'year':
       candidate = { kind, year };
       break;
   }
   const invalidPair = () =>
-    new TypeError(
-      `Non-canonical GoalTimeframe start persistence pair: ${kind}/${canonicalStart}`,
-    );
+    new TypeError(`Non-canonical GoalTimeframe start persistence pair: ${kind}/${canonicalStart}`);
   const parsed = GoalTimeframeSchema.safeParse(candidate);
-  if (
-    !parsed.success ||
-    goalTimeframeStartBoundary(parsed.data) !== canonicalStart
-  ) {
+  if (!parsed.success || goalTimeframeStartBoundary(parsed.data) !== canonicalStart) {
     throw invalidPair();
   }
   return parsed.data;
 }
 
-export function goalTimeframeFromEndBoundary(
-  kind: GoalTimeframeKind,
-  endDate: Ymd,
-): GoalTimeframe {
+export function goalTimeframeFromEndBoundary(kind: GoalTimeframeKind, endDate: Ymd): GoalTimeframe {
   const canonicalEnd = requireYmd(endDate);
-  const [year, month] = canonicalEnd.split("-").map(Number);
+  const [year, month] = canonicalEnd.split('-').map(Number);
   let candidate: GoalTimeframe;
   switch (kind) {
-    case "day":
+    case 'day':
       candidate = { kind, date: canonicalEnd };
       break;
-    case "month":
+    case 'month':
       candidate = { kind, year, month };
       break;
-    case "quarter":
+    case 'quarter':
       candidate = { kind, year, quarter: month / 3 };
       break;
-    case "halfYear":
+    case 'halfYear':
       candidate = { kind, year, half: month === 6 ? 1 : month === 12 ? 2 : 0 };
       break;
-    case "year":
+    case 'year':
       candidate = { kind, year };
       break;
   }
   const invalidPair = () =>
-    new TypeError(
-      `Non-canonical GoalTimeframe end persistence pair: ${kind}/${canonicalEnd}`,
-    );
+    new TypeError(`Non-canonical GoalTimeframe end persistence pair: ${kind}/${canonicalEnd}`);
   const parsed = GoalTimeframeSchema.safeParse(candidate);
-  if (
-    !parsed.success ||
-    goalTimeframeEndBoundary(parsed.data) !== canonicalEnd
-  ) {
+  if (!parsed.success || goalTimeframeEndBoundary(parsed.data) !== canonicalEnd) {
     throw invalidPair();
   }
   return parsed.data;

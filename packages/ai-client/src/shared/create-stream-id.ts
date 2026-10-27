@@ -6,7 +6,7 @@
 
 export function createStreamId(): string {
   const crypto = globalThis.crypto;
-  if (crypto && typeof crypto.randomUUID === "function") {
+  if (crypto && typeof crypto.randomUUID === 'function') {
     return crypto.randomUUID();
   }
   return `stream-${Date.now()}-${Math.random().toString(16).slice(2)}`;

@@ -1,21 +1,18 @@
-import type {
-  CreateTaskPlanReq,
-  TaskPlanClientDTO,
-} from "@memoflow/task-contracts";
-import type { TaskPlanViewModel } from "./task-view";
-import type { OwnerNativeEditSession } from "./owner-session";
+import type { CreateTaskPlanReq, TaskPlanClientDTO } from '@memoflow/task-contracts';
+import type { TaskPlanViewModel } from './task-view';
+import type { OwnerNativeEditSession } from './owner-session';
 
 export type TaskNativePatch = Partial<
   Pick<
     TaskPlanViewModel,
-    | "title"
-    | "description"
-    | "schedule"
-    | "reminderConfig"
-    | "importance"
-    | "labelIds"
-    | "goalBinding"
-    | "checklist"
+    | 'title'
+    | 'description'
+    | 'schedule'
+    | 'reminderConfig'
+    | 'importance'
+    | 'labelIds'
+    | 'goalBinding'
+    | 'checklist'
   >
 >;
 export interface TaskNativeDraftState {
@@ -24,7 +21,7 @@ export interface TaskNativeDraftState {
   busy: boolean;
 }
 export interface TaskNativeSubmitContext {
-  createId: NonNullable<CreateTaskPlanReq["id"]>;
+  createId: NonNullable<CreateTaskPlanReq['id']>;
   pendingLabelNames: string[];
   expectedDraft: TaskPlanViewModel;
   onCreateAttempt: () => void;
@@ -35,16 +32,13 @@ export type TaskNativeEditSession = Pick<
     TaskNativePatch,
     never,
     never,
-    "title",
+    'title',
     TaskNativeDraftState,
     TaskNativeSubmitContext,
     TaskPlanClientDTO | null
   >,
-  "patch" | "focus" | "readDraftState" | "requestSubmit" | "requestCancel"
+  'patch' | 'focus' | 'readDraftState' | 'requestSubmit' | 'requestCancel'
 > & {
-  coordinateSubmit(
-    submit: () => Promise<void>,
-    cancel: () => Promise<void>,
-  ): void;
+  coordinateSubmit(submit: () => Promise<void>, cancel: () => Promise<void>): void;
   setEditingBlocked(blocked: boolean): void;
 };

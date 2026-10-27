@@ -9,12 +9,5 @@
     "incremental": false
   },
   "include": ["src/**/*.ts", "src/**/*.vue"],
-  "exclude": [
-    "node_modules",
-    "dist",
-    "src/test",
-    "**/*.spec.ts",
-    "**/*.test.ts",
-    "**/*.stories.ts"
-  ]
+  "exclude": ["node_modules", "dist", "src/test", "**/*.spec.ts", "**/*.test.ts", "**/*.stories.ts"]
 }

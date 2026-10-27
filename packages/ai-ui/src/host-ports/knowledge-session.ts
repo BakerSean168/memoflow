@@ -1,11 +1,9 @@
 import {
-  KnowledgeCaptureSourceSchema,
-  KnowledgeNoteDraftContentSchema,
   type KnowledgeCaptureSource,
   type KnowledgeDraft,
   type KnowledgeNoteDraftContent,
-} from "@memoflow/ai-contracts";
-import type { OwnerNativeEditSession } from "./owner-session";
+} from '@memoflow/ai-contracts';
+import type { OwnerNativeEditSession } from './owner-session';
 
 export type KnowledgeCaptureNativeDraft = KnowledgeNoteDraftContent & {
   source?: KnowledgeCaptureSource;
@@ -40,17 +38,14 @@ export type KnowledgeCaptureNativeEditSession = Pick<
     KnowledgeCaptureNativePatch,
     never,
     never,
-    "title" | "markdown" | "targetSubpath" | "source",
+    'title' | 'markdown' | 'targetSubpath' | 'source',
     KnowledgeCaptureNativeDraftState,
     KnowledgeCaptureNativeSubmitContext,
     KnowledgeCaptureNativeDraft | null
   >,
-  "patch" | "focus" | "readDraftState" | "requestSubmit" | "requestCancel"
+  'patch' | 'focus' | 'readDraftState' | 'requestSubmit' | 'requestCancel'
 > & {
   projectDraft(draft: KnowledgeDraft): void;
-  coordinateSubmit(
-    submit: () => Promise<void>,
-    cancel: () => Promise<void>,
-  ): void;
+  coordinateSubmit(submit: () => Promise<void>, cancel: () => Promise<void>): void;
   setEditingBlocked(blocked: boolean): void;
 };

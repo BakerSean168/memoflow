@@ -36,7 +36,8 @@ const native = vi.hoisted(() => ({
 vi.mock('@ai-ui-test-host/shared/utils/useStrictInject', () => ({
   useStrictInject: () => ({ getGoalAggregateView: native.readGoal }),
 }));
-vi.mock('@memoflow/goal-ui', () => ({
+vi.mock('@memoflow/goal-ui', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('@memoflow/goal-ui')>()),
   useGoalNativeSurface: () => ({
     openCreate: native.openCreate,
     openControlledCreate: native.openCreate,

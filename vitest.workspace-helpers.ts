@@ -442,6 +442,10 @@ export const domainResolveAliases = [
     ),
   },
   {
+    find: /^@memoflow\/repository-ui\/(.+)$/,
+    replacement: path.resolve(import.meta.dirname, './packages/repository-ui/src/$1'),
+  },
+  {
     find: /^@memoflow\/repository-ui$/,
     replacement: path.resolve(import.meta.dirname, './packages/repository-ui/src/index.ts'),
   },
@@ -519,6 +523,10 @@ export const domainResolveAliases = [
   {
     find: /^@memoflow\/goal-ui\/composables\/useGoal$/,
     replacement: path.resolve(import.meta.dirname, './packages/goal-ui/src/composables/useGoal.ts'),
+  },
+  {
+    find: /^@memoflow\/goal-ui\/(.+)$/,
+    replacement: path.resolve(import.meta.dirname, './packages/goal-ui/src/$1'),
   },
   {
     find: /^@memoflow\/goal-ui$/,

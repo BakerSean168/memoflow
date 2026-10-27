@@ -1,13 +1,11 @@
-import { defineConfig } from "vite";
-import vue from "@vitejs/plugin-vue";
-import dts from "vite-plugin-dts";
-import fs from "fs";
-import path from "path";
-import { fileURLToPath } from "url";
+import { defineConfig } from 'vite';
+import vue from '@vitejs/plugin-vue';
+import dts from 'vite-plugin-dts';
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const pkg = JSON.parse(
-  fs.readFileSync(path.resolve(__dirname, "package.json"), "utf8"),
-) as {
+const pkg = JSON.parse(fs.readFileSync(path.resolve(__dirname, 'package.json'), 'utf8')) as {
   dependencies?: Record<string, string>;
   peerDependencies?: Record<string, string>;
 };
@@ -21,37 +19,36 @@ export default defineConfig({
   plugins: [
     vue(),
     dts({
-      tsconfigPath: path.resolve(__dirname, "tsconfig.build.json"),
-      entryRoot: path.resolve(__dirname, "src"),
-      include: ["src/**/*.ts", "src/**/*.vue"],
+      tsconfigPath: path.resolve(__dirname, 'tsconfig.build.json'),
+      entryRoot: path.resolve(__dirname, 'src'),
+      include: ['src/**/*.ts', 'src/**/*.vue'],
       exclude: [
-        "src/**/*.stories.ts",
-        "src/**/*.stories.vue",
-        "src/**/*.test.ts",
-        "src/**/*.spec.ts",
+        'src/**/*.stories.ts',
+        'src/**/*.stories.vue',
+        'src/**/*.test.ts',
+        'src/**/*.spec.ts',
       ],
-      outDir: path.resolve(__dirname, "dist"),
+      outDir: path.resolve(__dirname, 'dist'),
     }),
   ],
   resolve: {
     alias: {
-      "@": path.resolve(__dirname, "src"),
+      '@': path.resolve(__dirname, 'src'),
     },
   },
   build: {
     lib: {
       entry: {
-        host: path.resolve(__dirname, "src/ai-ui-host.ts"),
-        index: path.resolve(__dirname, "src/index.ts"),
+        host: path.resolve(__dirname, 'src/ai-ui-host.ts'),
+        index: path.resolve(__dirname, 'src/index.ts'),
       },
-      formats: ["es"],
+      formats: ['es'],
       fileName: (_format, entryName) => `${entryName}.js`,
     },
     rolldownOptions: {
-      external: (id) =>
-        external.some((dep) => id === dep || id.startsWith(dep + "/")),
+      external: (id) => external.some((dep) => id === dep || id.startsWith(dep + '/')),
       output: {
-        exports: "named",
+        exports: 'named',
       },
     },
   },

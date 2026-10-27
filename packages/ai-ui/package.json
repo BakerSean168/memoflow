@@ -48,17 +48,16 @@
     "@memoflow/ai-contracts": "workspace:*",
     "@memoflow/task-client": "workspace:*",
     "@memoflow/repository-client": "workspace:*",
-    "@memoflow/goal-ui": "workspace:*",
     "@memoflow/ai-client": "workspace:*",
-    "@memoflow/repository-contracts": "workspace:*",
-    "@memoflow/repository-ui": "workspace:*",
-    "@memoflow/task-ui": "workspace:*"
+    "@memoflow/repository-contracts": "workspace:*"
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "6.0.9",
     "typescript": "npm:@typescript/typescript6@6.0.2",
     "vite": "8.3.1",
     "vite-plugin-dts": "5.1.1",
-    "@memoflow/ai": "workspace:*"
+    "@memoflow/ai": "workspace:*",
+    "@memoflow/task-ui": "workspace:*",
+    "@memoflow/repository-ui": "workspace:*"
   }
 }

@@ -15,6 +15,7 @@ export default defineConfig({
   sourcemap: true,
   external: [
     'electron',
+    '@memoflow/ai-client',
     '@memoflow/utils',
     '@memoflow/contracts',
     '@memoflow/http-client',

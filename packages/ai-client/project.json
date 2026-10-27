@@ -44,6 +44,24 @@
         "command": "node ../../node_modules/vitest/vitest.mjs --config vitest.config.ts",
         "cwd": "packages/ai-client"
       }
+    },
+    "test:contract": {
+      "executor": "nx:run-commands",
+      "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
+      "inputs": ["default", "^production"],
+      "cache": true,
+      "options": {
+        "command": "node ../../node_modules/vitest/vitest.mjs run --config vitest.config.ts",
+        "cwd": "packages/ai-client"
+      },
+      "dependsOn": ["build"]
+    },
+    "serve": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "node ../../node_modules/tsup/dist/cli-default.js --watch",
+        "cwd": "packages/ai-client"
+      }
     }
   }
 }

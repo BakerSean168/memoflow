@@ -5,7 +5,7 @@
  * Uses sole findSSEBoundary (residual 963) for CRLF/LF blank-line framing.
  */
 
-import { findSSEBoundary } from "./find-sse-boundary";
+import { findSSEBoundary } from './find-sse-boundary';
 
 export async function* parseSSE(
   response: Response,
@@ -18,13 +18,9 @@ export async function* parseSSE(
   // POST carrying JSON body data (better fit than the GET-only EventSource API).
   const reader = response.body.getReader();
   const decoder = new TextDecoder();
-  let buffer = "";
+  let buffer = '';
 
-  const emitBufferedEvents = function* (): Generator<
-    { event: string; data: string },
-    void,
-    void
-  > {
+  const emitBufferedEvents = function* (): Generator<{ event: string; data: string }, void, void> {
     while (true) {
       // An SSE event may span multiple network chunks. Keep buffering until a
       // blank-line boundary is found, then emit exactly one parsed event.
@@ -36,21 +32,21 @@ export async function* parseSSE(
       const rawEvent = buffer.slice(0, boundary.index);
       buffer = buffer.slice(boundary.index + boundary.length);
 
-      let event = "message";
+      let event = 'message';
       const dataLines: string[] = [];
       for (const line of rawEvent.split(/\r?\n/)) {
-        if (line.startsWith("event:")) {
+        if (line.startsWith('event:')) {
           event = line.slice(6).trim();
           continue;
         }
-        if (line.startsWith("data:")) {
+        if (line.startsWith('data:')) {
           dataLines.push(line.slice(5).trimStart());
         }
       }
 
       yield {
         event,
-        data: dataLines.join("\n"),
+        data: dataLines.join('\n'),
       };
     }
   };
@@ -62,8 +58,7 @@ export async function* parseSSE(
       // Decode that last value and flush framed events before exiting.
       if (value) {
         buffer += decoder.decode(value, { stream: !done });
-        if (buffer.length > 1_048_576)
-          throw new Error("AI SSE frame exceeds the supported size");
+        if (buffer.length > 1_048_576) throw new Error('AI SSE frame exceeds the supported size');
       }
       if (done) {
         buffer += decoder.decode();

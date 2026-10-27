@@ -9,7 +9,9 @@ import { productionLocaleMessages } from '@ai-ui-test-host/locales/production-me
 import { SERVER_STATE_IDENTITY_SCOPE_KEY } from '@ai-ui-test-host/platform/server-state';
 import AIComposerControls from './AIComposerControls.vue';
 
-vi.mock('@memoflow/ui-vue-shadcn', () => {
+vi.mock('@memoflow/ui-vue-shadcn', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@memoflow/ui-vue-shadcn')>();
+  const { defineComponent, h } = await import('vue');
   const passthrough = (name: string) =>
     defineComponent({
       name,
@@ -19,6 +21,7 @@ vi.mock('@memoflow/ui-vue-shadcn', () => {
       },
     });
   return {
+    ...actual,
     Popover: passthrough('Popover'),
     PopoverTrigger: passthrough('PopoverTrigger'),
     PopoverContent: passthrough('PopoverContent'),

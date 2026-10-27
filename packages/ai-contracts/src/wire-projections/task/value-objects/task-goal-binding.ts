@@ -1,9 +1,9 @@
 // AI-owned wire projection; validation retained from the owner contract at extraction.
 /** Task-owned link configuration; Goal owns measurement and aggregation. */
-import { z } from "zod";
-import { brandedId } from "@memoflow/shared-primitives";
-import type { GoalId, KeyResultId } from "../goal-ids";
-import { TaskGoalBindingTrigger } from "./task-goal-binding-trigger";
+import { z } from 'zod';
+import { brandedId } from '@memoflow/shared-primitives';
+import type { GoalId, KeyResultId } from '../goal-ids';
+import { TaskGoalBindingTrigger } from './task-goal-binding-trigger';
 
 /** User fact only; binding and provenance are resolved by Task. */
 export const TaskGoalMeasurementSchema = z
@@ -17,7 +17,7 @@ export type TaskGoalMeasurement = z.infer<typeof TaskGoalMeasurementSchema>;
 const FixedValueSchema = z
   .number()
   .finite()
-  .refine((value) => value !== 0, "Fixed delta must be non-zero");
+  .refine((value) => value !== 0, 'Fixed delta must be non-zero');
 /** @deprecated Use TaskGoalProgressRule. */
 export const GoalContributionRuleSchema = z.object({
   value: FixedValueSchema,
@@ -25,18 +25,18 @@ export const GoalContributionRuleSchema = z.object({
 });
 export type GoalContributionRule = z.infer<typeof GoalContributionRuleSchema>;
 
-export const TaskGoalProgressRuleSchema = z.discriminatedUnion("mode", [
+export const TaskGoalProgressRuleSchema = z.discriminatedUnion('mode', [
   z
     .object({
-      mode: z.literal("Fixed"),
+      mode: z.literal('Fixed'),
       trigger: z.enum(TaskGoalBindingTrigger),
       value: FixedValueSchema,
     })
     .strict(),
   z
     .object({
-      mode: z.literal("Prompt"),
-      trigger: z.literal("EachCompletion"),
+      mode: z.literal('Prompt'),
+      trigger: z.literal('EachCompletion'),
       suggestedValue: z.number().finite().nullable().optional(),
     })
     .strict(),
@@ -52,7 +52,7 @@ export const TaskGoalProgressConfigurationSchema = z
   .superRefine((value, ctx) => {
     if (value.progressRule !== undefined && value.contribution !== undefined) {
       const mirror =
-        value.progressRule?.mode === "Fixed"
+        value.progressRule?.mode === 'Fixed'
           ? {
               value: value.progressRule.value,
               trigger: value.progressRule.trigger,
@@ -64,8 +64,8 @@ export const TaskGoalProgressConfigurationSchema = z
       ) {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
-          path: ["contribution"],
-          message: "Conflicting progressRule and contribution",
+          path: ['contribution'],
+          message: 'Conflicting progressRule and contribution',
         });
       }
     }
@@ -74,17 +74,15 @@ export const TaskGoalProgressConfigurationSchema = z
     const rule =
       value.progressRule === undefined
         ? value.contribution
-          ? { mode: "Fixed" as const, ...value.contribution }
+          ? { mode: 'Fixed' as const, ...value.contribution }
           : null
         : value.progressRule;
     const progressRule: TaskGoalProgressRule | null =
-      rule?.mode === "Prompt"
-        ? { ...rule, suggestedValue: rule.suggestedValue ?? null }
-        : rule;
+      rule?.mode === 'Prompt' ? { ...rule, suggestedValue: rule.suggestedValue ?? null } : rule;
     return {
       progressRule,
       contribution:
-        progressRule?.mode === "Fixed"
+        progressRule?.mode === 'Fixed'
           ? { value: progressRule.value, trigger: progressRule.trigger }
           : null,
     };
@@ -102,15 +100,15 @@ export const TaskGoalLinkSchema = z
     if (!parsed.success) {
       for (const issue of parsed.error.issues)
         ctx.addIssue({
-          code: "custom",
+          code: 'custom',
           path: issue.path,
           message: issue.message,
         });
     } else if (parsed.data.progressRule && !value.keyResultId) {
       ctx.addIssue({
-        code: "custom",
-        path: ["keyResultId"],
-        message: "Goal contribution requires a Key Result",
+        code: 'custom',
+        path: ['keyResultId'],
+        message: 'Goal contribution requires a Key Result',
       });
     }
   })
@@ -120,9 +118,9 @@ export const TaskGoalLinkSchema = z
   });
 export type TaskGoalLinkInput = Omit<
   TaskGoalLinkDTO,
-  "keyResultId" | "progressRule" | "contribution"
+  'keyResultId' | 'progressRule' | 'contribution'
 > & { keyResultId?: KeyResultId | null } & Partial<
-    Pick<TaskGoalLinkDTO, "progressRule" | "contribution">
+    Pick<TaskGoalLinkDTO, 'progressRule' | 'contribution'>
   >;
 // overwrite preserves the object schema API (including existing strict callers).
 // Its normalized fields are required on read DTOs, while legacy write input remains optional.

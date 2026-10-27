@@ -4,10 +4,10 @@
  */
 
 // Ensure Zod.openapi() is available before schema construction (residual 1331).
-import "@memoflow/shared-primitives/zod-extensions";
-import { z } from "zod";
-import { TaskReminderType } from "./task-reminder-type";
-import { ReminderTimeUnit } from "./reminder-time-unit";
+import '@memoflow/shared-primitives/zod-extensions';
+import { z } from 'zod';
+import { TaskReminderType } from './task-reminder-type';
+import { ReminderTimeUnit } from './reminder-time-unit';
 
 // ============ 接口定义 ============
 
@@ -33,29 +33,19 @@ export const TaskReminderConfigSchema = z
       .array(
         z
           .object({
-            type: z.enum([
-              TaskReminderType.Absolute,
-              TaskReminderType.Relative,
-            ]),
+            type: z.enum([TaskReminderType.Absolute, TaskReminderType.Relative]),
             absoluteTime: z.number().int().nullable(),
             relativeValue: z.number().int().nullable(),
             relativeUnit: z
-              .enum([
-                ReminderTimeUnit.Minutes,
-                ReminderTimeUnit.Hours,
-                ReminderTimeUnit.Days,
-              ])
+              .enum([ReminderTimeUnit.Minutes, ReminderTimeUnit.Hours, ReminderTimeUnit.Days])
               .nullable(),
           })
           .superRefine((trigger, ctx) => {
-            if (
-              trigger.type === TaskReminderType.Absolute &&
-              trigger.absoluteTime == null
-            ) {
+            if (trigger.type === TaskReminderType.Absolute && trigger.absoluteTime == null) {
               ctx.addIssue({
                 code: z.ZodIssueCode.custom,
-                path: ["absoluteTime"],
-                message: "绝对时间提醒必须提供 absoluteTime",
+                path: ['absoluteTime'],
+                message: '绝对时间提醒必须提供 absoluteTime',
               });
             }
 
@@ -63,16 +53,16 @@ export const TaskReminderConfigSchema = z
               if (trigger.relativeValue == null) {
                 ctx.addIssue({
                   code: z.ZodIssueCode.custom,
-                  path: ["relativeValue"],
-                  message: "相对时间提醒必须提供 relativeValue",
+                  path: ['relativeValue'],
+                  message: '相对时间提醒必须提供 relativeValue',
                 });
               }
 
               if (trigger.relativeUnit == null) {
                 ctx.addIssue({
                   code: z.ZodIssueCode.custom,
-                  path: ["relativeUnit"],
-                  message: "相对时间提醒必须提供 relativeUnit",
+                  path: ['relativeUnit'],
+                  message: '相对时间提醒必须提供 relativeUnit',
                 });
               }
             }
@@ -80,6 +70,6 @@ export const TaskReminderConfigSchema = z
       )
       .max(10),
   })
-  .openapi({ type: "object", description: "任务提醒配置" });
+  .openapi({ type: 'object', description: '任务提醒配置' });
 
 export type TaskReminderConfigDTO = z.infer<typeof TaskReminderConfigSchema>;

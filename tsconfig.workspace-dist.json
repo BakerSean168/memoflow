@@ -55,6 +55,7 @@
       ],
       "@memoflow/host-runtime/*": ["./packages/host-runtime/dist/*.d.ts"],
       "@memoflow/goal-client": ["./packages/goal-client/dist/index.d.ts"],
+      "@memoflow/ai-client/*": ["./packages/ai-client/dist/*.d.ts"],
       "@memoflow/ai-client": ["./packages/ai-client/dist/index.d.ts"],
       "@memoflow/label-contracts": ["./packages/label-contracts/dist/index.d.ts"],
       "@memoflow/label-contracts/*": ["./packages/label-contracts/dist/*.d.ts"],
@@ -75,7 +76,6 @@
         "./packages/data-portability-contracts/dist/*.d.ts"
       ],
       "@memoflow/goal-ui/composables/useGoal": ["./packages/goal-ui/dist/composables/useGoal.d.ts"],
-      "@memoflow/ai-ui/composables/useGoal": ["./packages/ai-ui/dist/composables/useGoal.d.ts"],
       "@memoflow/goal-ui/*": ["./packages/goal-ui/dist/*.d.ts"],
       "@memoflow/ai-ui/*": ["./packages/ai-ui/dist/*.d.ts"],
       "@memoflow/goal-ui/host": ["./packages/goal-ui/dist/goal-ui-host.d.ts"],

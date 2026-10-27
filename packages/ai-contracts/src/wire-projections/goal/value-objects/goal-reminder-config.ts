@@ -6,8 +6,8 @@
  * 注意：Contracts 包只包含纯类型定义，不包含业务逻辑或方法
  */
 
-import { z } from "zod";
-import { ReminderTriggerType } from "./reminder-trigger-type";
+import { z } from 'zod';
+import { ReminderTriggerType } from './reminder-trigger-type';
 
 // Residual 741: GoalReminderConfigDTO / ReminderTrigger dual bodies retired —
 // OpenAPI + transport use *Schema (semantic types are z.infer aliases).

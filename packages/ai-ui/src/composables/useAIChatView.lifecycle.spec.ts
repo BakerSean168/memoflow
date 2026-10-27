@@ -181,11 +181,7 @@ vi.mock('@memoflow/repository-ui', async (importOriginal) => {
   return {
     ...actual,
     useRecentKnowledgeNotes: () => ({ notes: ref([]), load: vi.fn() }),
-    useReferenceableKnowledgeNotes: () => ({
-      notes: ref([]),
-      load: vi.fn(),
-      cancel: vi.fn(),
-    }),
+    useReferenceableKnowledgeNotes: () => ({ notes: ref([]), load: vi.fn(), cancel: vi.fn() }),
   };
 });
 vi.mock('@ai-ui-test-host/shared/utils/useStrictInject', async (original) => {

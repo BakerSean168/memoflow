@@ -23,7 +23,14 @@ const featureScopeConstraints = [
   },
   {
     sourceTag: 'scope:ai',
-    onlyDependOnLibsWithTags: [...sharedScopeTags, 'scope:ai'],
+    onlyDependOnLibsWithTags: [
+      ...sharedScopeTags,
+      'scope:ai',
+      'scope:ui',
+      'scope:repository',
+      'scope:goal',
+      'scope:task',
+    ],
   },
   {
     sourceTag: 'scope:authentication',
@@ -562,6 +569,24 @@ export default tseslint.config(
             allow: [
               ...moduleBoundaryOptions.allow,
               '@memoflow/routine-ui/composables/routineUpcomingCache',
+            ],
+          },
+        ],
+      },
+    },
+    {
+      // AI renderer integration tests compose real owner editors and native harnesses.
+      files: ['packages/ai-ui/src/**/*.spec.ts'],
+      rules: {
+        '@nx/enforce-module-boundaries': [
+          'error',
+          {
+            ...moduleBoundaryOptions,
+            allow: [
+              ...moduleBoundaryOptions.allow,
+              '@memoflow/ai/testing',
+              '@memoflow/repository-ui',
+              '@memoflow/task-ui',
             ],
           },
         ],

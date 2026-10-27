@@ -252,6 +252,10 @@ export function createGoalUiAliasEntries(workspaceRoot: string): Alias[] {
       ),
     },
     {
+      find: /^@memoflow\/goal-ui\/(.+)$/,
+      replacement: resolveFromWorkspace(workspaceRoot, 'packages/goal-ui/src/$1'),
+    },
+    {
       find: /^@memoflow\/goal-ui$/,
       replacement: resolveFromWorkspace(workspaceRoot, 'packages/goal-ui/src/index.ts'),
     },
@@ -646,6 +650,10 @@ export function createRepositoryUiAliasEntries(workspaceRoot: string): Alias[] {
         workspaceRoot,
         'packages/repository-ui/src/repository-ui-host.ts',
       ),
+    },
+    {
+      find: /^@memoflow\/repository-ui\/(.+)$/,
+      replacement: resolveFromWorkspace(workspaceRoot, 'packages/repository-ui/src/$1'),
     },
     {
       find: /^@memoflow\/repository-ui$/,

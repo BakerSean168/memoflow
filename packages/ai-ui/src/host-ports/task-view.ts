@@ -1,22 +1,22 @@
-import type { TaskGoalProgressRule } from "@memoflow/task-contracts";
-import type { KeyResultCalculationMethod } from "@memoflow/goal-contracts";
+import type { TaskGoalProgressRule } from '@memoflow/task-contracts';
+import type { KeyResultCalculationMethod } from '@memoflow/goal-contracts';
 import type {
   ChecklistItemDefinitionDTO,
   TaskGoalBindingTriggerValue,
   TaskPlanClientDTO,
   TaskPlanSchedule,
-} from "@memoflow/task-contracts";
-import type { LabelClientDTO } from "@memoflow/label-contracts";
+} from '@memoflow/task-contracts';
+import type { LabelClientDTO } from '@memoflow/label-contracts';
 
-export type TaskSurface = "today" | "plans";
+export type TaskSurface = 'today' | 'plans';
 export type TaskPlanStateFilter =
-  | "all"
-  | "active"
-  | "paused"
-  | "succeeded"
-  | "failed"
-  | "abandoned"
-  | "archived";
+  | 'all'
+  | 'active'
+  | 'paused'
+  | 'succeeded'
+  | 'failed'
+  | 'abandoned'
+  | 'archived';
 
 export interface TaskGoalContributionViewModel {
   value: number;
@@ -52,7 +52,7 @@ export interface GoalBindingOption {
 export interface KeyResultBindingOption {
   calculationMethod: KeyResultCalculationMethod;
   methodLabel: string;
-  recordInputKind: "delta" | "sample";
+  recordInputKind: 'delta' | 'sample';
   unit: string | null;
   currentValue: number;
   targetValue: number;
@@ -68,7 +68,7 @@ export interface TaskPlanViewModel {
   description?: string;
   status: string;
   statusText?: string;
-  outcome?: TaskPlanClientDTO["outcome"];
+  outcome?: TaskPlanClientDTO['outcome'];
   outcomeText?: string;
   stateText?: string;
   isClosed?: boolean;
@@ -91,8 +91,7 @@ export interface TaskPlanViewModel {
   completedDueOccurrenceCount?: number;
   completionWindowDays?: 30;
   futurePendingOccurrenceCount?: number;
-  singleOccurrenceStatus?:
-    "Pending" | "InProgress" | "Completed" | "Missed" | "Skipped" | null;
+  singleOccurrenceStatus?: 'Pending' | 'InProgress' | 'Completed' | 'Missed' | 'Skipped' | null;
   completionRate?: number;
   formattedCreatedAt?: string;
 }

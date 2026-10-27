@@ -71,6 +71,7 @@
     "@memoflow/desktop-contracts": "workspace:*"
   },
   "devDependencies": {
-    "@types/express": "^5.0.0"
+    "@types/express": "^5.0.0",
+    "@memoflow/ai-client": "workspace:*"
   }
 }

@@ -55,11 +55,7 @@
     },
     "test:contract": {
       "executor": "nx:run-commands",
-      "inputs": [
-        "default",
-        "^production",
-        "{workspaceRoot}/packages/app-vue/src/**/*"
-      ],
+      "inputs": ["default", "^production", "{workspaceRoot}/packages/app-vue/src/**/*"],
       "cache": true,
       "dependsOn": ["build"],
       "options": {

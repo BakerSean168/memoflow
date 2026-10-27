@@ -22,11 +22,11 @@ export interface GoalAIEditSurface {
 import type { GoalClientDTO } from '@memoflow/goal-contracts';
 import type { TaskPlanClientDTO } from '@memoflow/task-contracts';
 import type { ConfirmedLocalVaultWriteReq } from '@memoflow/repository-contracts';
-import type { GoalNativeEditSession } from "./host-ports/goal-session";
-import type { KnowledgeCaptureNativeDraft } from "./host-ports/knowledge-session";
-import type { KnowledgeDraft } from "@memoflow/ai-contracts";
-import type { InjectionKey, Ref, ShallowRef } from "vue";
-import type { RouteLocationNormalized } from "vue-router";
+import type { GoalNativeEditSession } from './host-ports/goal-session';
+import type { KnowledgeCaptureNativeDraft } from './host-ports/knowledge-session';
+import type { KnowledgeDraft } from '@memoflow/ai-contracts';
+import type { InjectionKey, Ref, ShallowRef } from 'vue';
+import type { RouteLocationNormalized } from 'vue-router';
 import type {
   AIClientPort,
   AssistantRuntimeClient,
@@ -35,32 +35,71 @@ import type {
   AgentRegistryClient,
   LocalAgentClient,
   WorkspaceEventStreamOptions,
-} from "@memoflow/ai-client";
-import type { AIRuntimeSurface } from "@memoflow/ai-contracts";
-import type { GoalClientPort } from "@memoflow/goal-client";
-import type { TaskClientPort } from "@memoflow/task-client";
-import type { RepositoryClientPort } from "@memoflow/repository-client";
-import type { LabelClientDTO } from "@memoflow/label-contracts";
-import type { TaskNativeEditSession } from "./host-ports/task-session";
-import type { KnowledgeCaptureNativeEditSession } from "./host-ports/knowledge-session";
-import type { translateResultErrorMessage } from "@memoflow/http-client";
+} from '@memoflow/ai-client';
+import type { AIRuntimeSurface } from '@memoflow/ai-contracts';
+import type { GoalClientPort } from '@memoflow/goal-client';
+import type { TaskClientPort } from '@memoflow/task-client';
+import type { RepositoryClientPort } from '@memoflow/repository-client';
+import type { LabelClientDTO } from '@memoflow/label-contracts';
+import type { TaskNativeEditSession } from './host-ports/task-session';
+import type { KnowledgeCaptureNativeEditSession } from './host-ports/knowledge-session';
+import type { translateResultErrorMessage } from '@memoflow/http-client';
 
 export type IAIClient = AIClientPort;
 export type IWorkflowRuntimeService = WorkflowRuntimeClient;
-export type ComposerDensity = "comfortable" | "compact" | "icon";
+export type ComposerDensity = 'comfortable' | 'compact' | 'icon';
 interface KnowledgeSurface {
   openCreate(): Promise<KnowledgeCaptureNativeEditSession>;
   locate(): KnowledgeCaptureNativeEditSession | null;
 }
 /** AI renderer dependencies supplied by the application composition root. */
 export interface AiUiHost {
-  nativeDraftFromKnowledgeDraft: (typeof import("@memoflow/repository-ui"))["nativeDraftFromKnowledgeDraft"];
-  useGoalNativeSurface: (typeof import("@memoflow/goal-ui"))["useGoalNativeSurface"];
-  useReferenceableKnowledgeNotes: (typeof import("@memoflow/repository-ui"))["useReferenceableKnowledgeNotes"];
-  openLocalAgentNoteReview: (typeof import("@memoflow/repository-ui"))["openLocalAgentNoteReview"];
-  useRecentKnowledgeNotes: (typeof import("@memoflow/repository-ui"))["useRecentKnowledgeNotes"];
-  useTask: (typeof import("@memoflow/task-ui"))["useTask"];
-  useGoal: (typeof import("@memoflow/goal-ui"))["useGoal"];
+  nativeDraftFromKnowledgeDraft: (draft: KnowledgeDraft) => KnowledgeCaptureNativeDraft;
+  useGoalNativeSurface: () => GoalAIEditSurface;
+  useReferenceableKnowledgeNotes: () => {
+    notes: Ref<
+      Array<{
+        documentId: string;
+        knowledgeSpaceId: string;
+        title: string;
+        path: string;
+        updatedAt: number;
+      }>
+    >;
+    load(options?: { query?: string; limit?: number }): Promise<void>;
+    cancel(): void;
+  };
+  openLocalAgentNoteReview: (options: {
+    content: string;
+    surface: KnowledgeSurface;
+    bindingId: string;
+    currentBindingId(): Promise<string | null>;
+    persist(
+      request: ConfirmedLocalVaultWriteReq,
+    ): Promise<{ note: { knowledgeDocumentId: string | null } }>;
+    onSaved(documentId: string): Promise<void>;
+    onError?(error: unknown): void;
+  }) => Promise<void>;
+  useRecentKnowledgeNotes: () => {
+    notes: Ref<
+      Array<{
+        id: string;
+        title: string;
+        path: string;
+        knowledgeDocumentId: string | null;
+        updatedAt: number;
+        source: 'projection' | 'local-vault';
+      }>
+    >;
+    load(limit?: number): Promise<void>;
+    emailVerificationRequired: Ref<boolean>;
+    errorMessageKey: Ref<string | null>;
+  };
+  useTask: () => {
+    templates: Ref<TaskPlanClientDTO[] | null>;
+    fetchTemplates(query: { page: number; limit: number }): Promise<unknown>;
+  };
+  useGoal: () => { goals: Ref<GoalClientDTO[]>; fetchGoals(): Promise<unknown> };
   AI_CLIENT_KEY: InjectionKey<AIClientPort>;
   AI_ASSISTANT_RUNTIME_KEY: InjectionKey<AssistantRuntimeClient>;
   AI_WORKFLOW_RUNTIME_KEY: InjectionKey<WorkflowRuntimeClient>;
@@ -96,64 +135,48 @@ export interface AiUiHost {
   useKnowledgeNativeSurface(): KnowledgeSurface;
   useKnowledgeNativeSurfaceRegistration():
     | (KnowledgeSurface & {
-        register(
-          path: string,
-          session: KnowledgeCaptureNativeEditSession,
-        ): () => void;
+        register(path: string, session: KnowledgeCaptureNativeEditSession): () => void;
       })
     | null;
   useAppShellStore(): {
     rightPanelOpen: boolean;
     panelSurface: string;
     activeTab: {
-      module:
-        "goal" | "task" | "note" | "schedule" | "routine" | "notification";
+      module: 'goal' | 'task' | 'note' | 'schedule' | 'routine' | 'notification';
       route: string;
       title: string;
     } | null;
-    openTab(input: {
-      module: "goal";
-      route: string;
-      title: string;
-      intent: "deeplink";
-    }): unknown;
+    openTab(input: { module: 'goal'; route: string; title: string; intent: 'deeplink' }): unknown;
   };
-  canLeaveBusinessSurface(
-    t?: (key: string) => string,
-    to?: RouteLocationNormalized,
-  ): boolean;
+  canLeaveBusinessSurface(t?: (key: string) => string, to?: RouteLocationNormalized): boolean;
   renderSafeMarkdown(source: string): string;
-  semanticElevationClass(
-    value: "inset" | "raised" | "floating" | "floating-interactive",
-  ): string;
+  semanticElevationClass(value: 'inset' | 'raised' | 'floating' | 'floating-interactive'): string;
   semanticToneStatusClass(
-    value: "primary" | "info" | "success" | "warning" | "destructive" | "muted",
+    value: 'primary' | 'info' | 'success' | 'warning' | 'destructive' | 'muted',
   ): string;
   translateResultError: typeof translateResultErrorMessage;
   subscribeWorkspaceEvents(
-    runtime: Pick<WorkflowRuntimeClient, "streamWorkspaceEvents">,
+    runtime: Pick<WorkflowRuntimeClient, 'streamWorkspaceEvents'>,
     options: WorkspaceEventStreamOptions,
   ): Promise<void>;
-  resetWorkspaceEvents(
-    runtime: Pick<WorkflowRuntimeClient, "streamWorkspaceEvents">,
-  ): void;
+  resetWorkspaceEvents(runtime: Pick<WorkflowRuntimeClient, 'streamWorkspaceEvents'>): void;
 }
 export let aiUiHost: AiUiHost;
 
-export let AI_AGENT_REGISTRY_KEY: AiUiHost["AI_AGENT_REGISTRY_KEY"];
-export let AI_ASSISTANT_RUNTIME_KEY: AiUiHost["AI_ASSISTANT_RUNTIME_KEY"];
-export let AI_CLIENT_KEY: AiUiHost["AI_CLIENT_KEY"];
-export let AI_CONFIGURATION_REVISION_KEY: AiUiHost["AI_CONFIGURATION_REVISION_KEY"];
-export let AI_LOCAL_AGENT_KEY: AiUiHost["AI_LOCAL_AGENT_KEY"];
-export let AI_RUNTIME_USAGE_KEY: AiUiHost["AI_RUNTIME_USAGE_KEY"];
-export let AI_WORKFLOW_RUNTIME_KEY: AiUiHost["AI_WORKFLOW_RUNTIME_KEY"];
-export let ASSISTANT_SURFACE_KEY: AiUiHost["ASSISTANT_SURFACE_KEY"];
-export let COMPOSER_TEXTAREA_MAX_PX: AiUiHost["COMPOSER_TEXTAREA_MAX_PX"];
-export let GOAL_SERVICE_KEY: AiUiHost["GOAL_SERVICE_KEY"];
-export let REPOSITORY_SERVICE_KEY: AiUiHost["REPOSITORY_SERVICE_KEY"];
-export let SHELL_COMPOSER_DENSITY_KEY: AiUiHost["SHELL_COMPOSER_DENSITY_KEY"];
-export let SHELL_COMPOSER_MOUNT_KEY: AiUiHost["SHELL_COMPOSER_MOUNT_KEY"];
-export let TASK_SERVICE_KEY: AiUiHost["TASK_SERVICE_KEY"];
+export let AI_AGENT_REGISTRY_KEY: AiUiHost['AI_AGENT_REGISTRY_KEY'];
+export let AI_ASSISTANT_RUNTIME_KEY: AiUiHost['AI_ASSISTANT_RUNTIME_KEY'];
+export let AI_CLIENT_KEY: AiUiHost['AI_CLIENT_KEY'];
+export let AI_CONFIGURATION_REVISION_KEY: AiUiHost['AI_CONFIGURATION_REVISION_KEY'];
+export let AI_LOCAL_AGENT_KEY: AiUiHost['AI_LOCAL_AGENT_KEY'];
+export let AI_RUNTIME_USAGE_KEY: AiUiHost['AI_RUNTIME_USAGE_KEY'];
+export let AI_WORKFLOW_RUNTIME_KEY: AiUiHost['AI_WORKFLOW_RUNTIME_KEY'];
+export let ASSISTANT_SURFACE_KEY: AiUiHost['ASSISTANT_SURFACE_KEY'];
+export let COMPOSER_TEXTAREA_MAX_PX: AiUiHost['COMPOSER_TEXTAREA_MAX_PX'];
+export let GOAL_SERVICE_KEY: AiUiHost['GOAL_SERVICE_KEY'];
+export let REPOSITORY_SERVICE_KEY: AiUiHost['REPOSITORY_SERVICE_KEY'];
+export let SHELL_COMPOSER_DENSITY_KEY: AiUiHost['SHELL_COMPOSER_DENSITY_KEY'];
+export let SHELL_COMPOSER_MOUNT_KEY: AiUiHost['SHELL_COMPOSER_MOUNT_KEY'];
+export let TASK_SERVICE_KEY: AiUiHost['TASK_SERVICE_KEY'];
 export function bindAiUiHost(host: AiUiHost): void {
   aiUiHost = host;
   AI_AGENT_REGISTRY_KEY = host.AI_AGENT_REGISTRY_KEY;
@@ -171,73 +194,65 @@ export function bindAiUiHost(host: AiUiHost): void {
   SHELL_COMPOSER_MOUNT_KEY = host.SHELL_COMPOSER_MOUNT_KEY;
   TASK_SERVICE_KEY = host.TASK_SERVICE_KEY;
 }
-export const canLeaveBusinessSurface: AiUiHost["canLeaveBusinessSurface"] = (
-  ...args: Parameters<AiUiHost["canLeaveBusinessSurface"]>
+export const canLeaveBusinessSurface: AiUiHost['canLeaveBusinessSurface'] = (
+  ...args: Parameters<AiUiHost['canLeaveBusinessSurface']>
 ) => aiUiHost.canLeaveBusinessSurface(...args);
-export const renderSafeMarkdown: AiUiHost["renderSafeMarkdown"] = (
-  ...args: Parameters<AiUiHost["renderSafeMarkdown"]>
+export const renderSafeMarkdown: AiUiHost['renderSafeMarkdown'] = (
+  ...args: Parameters<AiUiHost['renderSafeMarkdown']>
 ) => aiUiHost.renderSafeMarkdown(...args);
-export const resetWorkspaceEvents: AiUiHost["resetWorkspaceEvents"] = (
-  ...args: Parameters<AiUiHost["resetWorkspaceEvents"]>
+export const resetWorkspaceEvents: AiUiHost['resetWorkspaceEvents'] = (
+  ...args: Parameters<AiUiHost['resetWorkspaceEvents']>
 ) => aiUiHost.resetWorkspaceEvents(...args);
-export const semanticElevationClass: AiUiHost["semanticElevationClass"] = (
-  ...args: Parameters<AiUiHost["semanticElevationClass"]>
+export const semanticElevationClass: AiUiHost['semanticElevationClass'] = (
+  ...args: Parameters<AiUiHost['semanticElevationClass']>
 ) => aiUiHost.semanticElevationClass(...args);
-export const semanticToneStatusClass: AiUiHost["semanticToneStatusClass"] = (
-  ...args: Parameters<AiUiHost["semanticToneStatusClass"]>
+export const semanticToneStatusClass: AiUiHost['semanticToneStatusClass'] = (
+  ...args: Parameters<AiUiHost['semanticToneStatusClass']>
 ) => aiUiHost.semanticToneStatusClass(...args);
-export const subscribeWorkspaceEvents: AiUiHost["subscribeWorkspaceEvents"] = (
-  ...args: Parameters<AiUiHost["subscribeWorkspaceEvents"]>
+export const subscribeWorkspaceEvents: AiUiHost['subscribeWorkspaceEvents'] = (
+  ...args: Parameters<AiUiHost['subscribeWorkspaceEvents']>
 ) => aiUiHost.subscribeWorkspaceEvents(...args);
-export const translateResultError: AiUiHost["translateResultError"] = (
-  ...args: Parameters<AiUiHost["translateResultError"]>
+export const translateResultError: AiUiHost['translateResultError'] = (
+  ...args: Parameters<AiUiHost['translateResultError']>
 ) => aiUiHost.translateResultError(...args);
-export const useAppShellStore: AiUiHost["useAppShellStore"] = (
-  ...args: Parameters<AiUiHost["useAppShellStore"]>
+export const useAppShellStore: AiUiHost['useAppShellStore'] = (
+  ...args: Parameters<AiUiHost['useAppShellStore']>
 ) => aiUiHost.useAppShellStore(...args);
-export const useKnowledgeNativeSurface: AiUiHost["useKnowledgeNativeSurface"] =
-  (...args: Parameters<AiUiHost["useKnowledgeNativeSurface"]>) =>
-    aiUiHost.useKnowledgeNativeSurface(...args);
-export const useKnowledgeNativeSurfaceRegistration: AiUiHost["useKnowledgeNativeSurfaceRegistration"] =
-  (...args: Parameters<AiUiHost["useKnowledgeNativeSurfaceRegistration"]>) =>
+export const useKnowledgeNativeSurface: AiUiHost['useKnowledgeNativeSurface'] = (
+  ...args: Parameters<AiUiHost['useKnowledgeNativeSurface']>
+) => aiUiHost.useKnowledgeNativeSurface(...args);
+export const useKnowledgeNativeSurfaceRegistration: AiUiHost['useKnowledgeNativeSurfaceRegistration'] =
+  (...args: Parameters<AiUiHost['useKnowledgeNativeSurfaceRegistration']>) =>
     aiUiHost.useKnowledgeNativeSurfaceRegistration(...args);
-export const useLabelCatalog: AiUiHost["useLabelCatalog"] = (
-  ...args: Parameters<AiUiHost["useLabelCatalog"]>
+export const useLabelCatalog: AiUiHost['useLabelCatalog'] = (
+  ...args: Parameters<AiUiHost['useLabelCatalog']>
 ) => aiUiHost.useLabelCatalog(...args);
-export const useServerStateIdentityScope: AiUiHost["useServerStateIdentityScope"] =
-  (...args: Parameters<AiUiHost["useServerStateIdentityScope"]>) =>
-    aiUiHost.useServerStateIdentityScope(...args);
+export const useServerStateIdentityScope: AiUiHost['useServerStateIdentityScope'] = (
+  ...args: Parameters<AiUiHost['useServerStateIdentityScope']>
+) => aiUiHost.useServerStateIdentityScope(...args);
 export function useStrictInject<T>(key: InjectionKey<T>, name?: string): T {
   return aiUiHost.useStrictInject(key, name);
 }
-export const useTaskNativeSurface: AiUiHost["useTaskNativeSurface"] = (
-  ...args: Parameters<AiUiHost["useTaskNativeSurface"]>
+export const useTaskNativeSurface: AiUiHost['useTaskNativeSurface'] = (
+  ...args: Parameters<AiUiHost['useTaskNativeSurface']>
 ) => aiUiHost.useTaskNativeSurface(...args);
 
-export const useGoal: AiUiHost["useGoal"] = (
-  ...args: Parameters<AiUiHost["useGoal"]>
-) => aiUiHost.useGoal(...args);
-
-export const useTask: AiUiHost["useTask"] = (
-  ...args: Parameters<AiUiHost["useTask"]>
-) => aiUiHost.useTask(...args);
-
-export const useRecentKnowledgeNotes: AiUiHost["useRecentKnowledgeNotes"] = (
-  ...args: Parameters<AiUiHost["useRecentKnowledgeNotes"]>
+export const useGoal: AiUiHost['useGoal'] = (...args: Parameters<AiUiHost['useGoal']>) =>
+  aiUiHost.useGoal(...args);
+export const useTask: AiUiHost['useTask'] = (...args: Parameters<AiUiHost['useTask']>) =>
+  aiUiHost.useTask(...args);
+export const useRecentKnowledgeNotes: AiUiHost['useRecentKnowledgeNotes'] = (
+  ...args: Parameters<AiUiHost['useRecentKnowledgeNotes']>
 ) => aiUiHost.useRecentKnowledgeNotes(...args);
-
-export const openLocalAgentNoteReview: AiUiHost["openLocalAgentNoteReview"] = (
-  ...args: Parameters<AiUiHost["openLocalAgentNoteReview"]>
+export const openLocalAgentNoteReview: AiUiHost['openLocalAgentNoteReview'] = (
+  ...args: Parameters<AiUiHost['openLocalAgentNoteReview']>
 ) => aiUiHost.openLocalAgentNoteReview(...args);
-
-export const useReferenceableKnowledgeNotes: AiUiHost["useReferenceableKnowledgeNotes"] =
-  (...args: Parameters<AiUiHost["useReferenceableKnowledgeNotes"]>) =>
-    aiUiHost.useReferenceableKnowledgeNotes(...args);
-
-export const useGoalNativeSurface: AiUiHost["useGoalNativeSurface"] = (
-  ...args: Parameters<AiUiHost["useGoalNativeSurface"]>
+export const useReferenceableKnowledgeNotes: AiUiHost['useReferenceableKnowledgeNotes'] = (
+  ...args: Parameters<AiUiHost['useReferenceableKnowledgeNotes']>
+) => aiUiHost.useReferenceableKnowledgeNotes(...args);
+export const useGoalNativeSurface: AiUiHost['useGoalNativeSurface'] = (
+  ...args: Parameters<AiUiHost['useGoalNativeSurface']>
 ) => aiUiHost.useGoalNativeSurface(...args);
-
-export const nativeDraftFromKnowledgeDraft: AiUiHost["nativeDraftFromKnowledgeDraft"] =
-  (...args: Parameters<AiUiHost["nativeDraftFromKnowledgeDraft"]>) =>
-    aiUiHost.nativeDraftFromKnowledgeDraft(...args);
+export const nativeDraftFromKnowledgeDraft: AiUiHost['nativeDraftFromKnowledgeDraft'] = (
+  ...args: Parameters<AiUiHost['nativeDraftFromKnowledgeDraft']>
+) => aiUiHost.nativeDraftFromKnowledgeDraft(...args);
