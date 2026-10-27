@@ -495,7 +495,6 @@ export default tseslint.config(
     // ============ ADR-037 P9: ban L5 private formatDate* + product toLocale* ============
     {
       files: [
-        'packages/app-vue/src/modules/**/*.{ts,tsx,vue}',
         'packages/app-vue/src/layouts/**/*.{ts,tsx,vue}',
         'packages/ai-ui/src/**/*.{ts,tsx,vue}',
         'packages/app-react/src/**/*.{ts,tsx}',
@@ -506,13 +505,8 @@ export default tseslint.config(
         '**/*.stories.*',
         '**/surface.spec.ts',
         // L4 presentation allowlist (business sentences / duration dictionaries)
-        'packages/app-vue/src/modules/schedule/utils/schedule-presentation.ts',
-        'packages/app-vue/src/modules/task/utils/task-plan-presentation.ts',
-        'packages/app-vue/src/modules/task/utils/format-task-duration.ts',
         'packages/app-vue/src/shared/utils/format-schedule-duration-minutes.ts',
         'packages/goal-ui/src/utils/goal-timeline.ts',
-        // P3 residual 1207 durable boundary
-        'packages/app-vue/src/modules/notification/views/SSEMonitorPage.vue',
         // Session bootstrap may createTimeFacade
         'packages/app-vue/src/shared/utils/product-time.ts',
         'packages/app-react/src/utils/product-time.ts',

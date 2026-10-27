@@ -134,10 +134,6 @@ const PACKAGE_SPECIFIC_SUBPATHS = {
     './shared/utils/desktop-profile-access',
     './plugins/i18n',
     './router',
-    './modules/goal',
-    './modules/task',
-    './modules/schedule',
-    './modules/repository',
   ],
 };
 
