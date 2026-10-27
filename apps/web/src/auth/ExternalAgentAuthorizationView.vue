@@ -5,7 +5,7 @@ import { EXTERNAL_AGENT_SERVICE_KEY } from '@memoflow/app-vue/di';
 import type {
   ExternalAgentConsent,
   ExternalAgentFailureCode,
-} from '@memoflow/contracts/agent-gateway';
+} from '@memoflow/agent-gateway';
 import { Button } from '@memoflow/ui-vue-shadcn/components/ui/button';
 import { APP_DISPLAY_NAME, logo128 } from '@memoflow/assets';
 import { useAuthService } from './service';

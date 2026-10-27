@@ -23,7 +23,7 @@ import {
   GatewayTaskCreateSchema,
   GatewayTaskUpdateSchema,
   GatewayTaskCompleteSchema,
-} from '@memoflow/contracts/agent-gateway';
+} from '@memoflow/agent-gateway';
 import type { ExecutionContext } from '@memoflow/contracts/shared';
 import type { UserTimeContextPort } from '@memoflow/time';
 import { ResultErrorException } from '@memoflow/contracts/result';

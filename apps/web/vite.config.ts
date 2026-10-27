@@ -53,6 +53,8 @@ const webBundledDevWorkspaceEntries = [
 ] as const;
 
 const webDevWorkspaceEntries = [
+  ['@memoflow/cloud-auth-contracts', 'packages/cloud-auth-contracts/src/index.ts'],
+  ['@memoflow/agent-gateway', 'packages/agent-gateway/src/index.ts'],
   ['@memoflow/cloud-auth', 'packages/cloud-auth/src/index.ts'],
   ['@memoflow/goal-client', 'packages/goal-client/src/index.ts'],
   ['@memoflow/goal-core/ids', 'packages/goal-core/src/ids.ts'],

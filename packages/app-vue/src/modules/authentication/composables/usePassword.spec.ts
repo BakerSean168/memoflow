@@ -3,7 +3,7 @@ import { mount } from '@vue/test-utils';
 import { createI18n } from 'vue-i18n';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { fail, ok } from '@memoflow/contracts/result';
-import type { CloudAuthClientPort } from '@memoflow/contracts/cloud-auth';
+import type { CloudAuthClientPort } from '@memoflow/cloud-auth-contracts';
 import { createTestPinia } from '@memoflow/test-utils';
 import { AUTH_SERVICE_KEY } from '../../../di/keys';
 import { useAuthenticationStore } from '../stores/authentication-store';

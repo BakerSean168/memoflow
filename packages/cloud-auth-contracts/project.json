@@ -1,0 +1,83 @@
+{
+  "name": "cloud-auth-contracts",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "projectType": "library",
+  "sourceRoot": "packages/cloud-auth-contracts/src",
+  "tags": [
+    "scope:shared",
+    "type:lib",
+    "layer:shared",
+    "tier:platform-contracts"
+  ],
+  "targets": {
+    "typecheck": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "tsc --build packages/cloud-auth-contracts/tsconfig.json"
+      }
+    },
+    "build": {
+      "executor": "nx:run-commands",
+      "outputs": [
+        "{workspaceRoot}/packages/cloud-auth-contracts/dist"
+      ],
+      "cache": true,
+      "options": {
+        "command": "node ../../node_modules/tsup/dist/cli-default.js && tsc -p tsconfig.build.json",
+        "cwd": "packages/cloud-auth-contracts"
+      }
+    },
+    "serve": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "node ../../node_modules/tsup/dist/cli-default.js --watch",
+        "cwd": "packages/cloud-auth-contracts"
+      }
+    },
+    "lint": {
+      "options": {
+        "args": [
+          "**/*.{ts,js}"
+        ]
+      }
+    },
+    "test": {
+      "executor": "nx:run-commands",
+      "outputs": [
+        "{workspaceRoot}/coverage/{projectRoot}"
+      ],
+      "inputs": [
+        "default",
+        "^production"
+      ],
+      "cache": true,
+      "options": {
+        "command": "node ../../node_modules/vitest/vitest.mjs run --config vitest.config.ts",
+        "cwd": "packages/cloud-auth-contracts"
+      }
+    },
+    "test:watch": {
+      "executor": "nx:run-commands",
+      "cache": false,
+      "options": {
+        "command": "node ../../node_modules/vitest/vitest.mjs --config vitest.config.ts",
+        "cwd": "packages/cloud-auth-contracts"
+      }
+    },
+    "test:contract": {
+      "executor": "nx:run-commands",
+      "inputs": [
+        "default",
+        "^production"
+      ],
+      "cache": true,
+      "dependsOn": [
+        "build"
+      ],
+      "options": {
+        "command": "node ../../node_modules/vitest/vitest.mjs run --config vitest.config.ts",
+        "cwd": "packages/cloud-auth-contracts"
+      }
+    }
+  }
+}

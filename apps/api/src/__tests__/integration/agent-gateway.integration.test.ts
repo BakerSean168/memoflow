@@ -5,7 +5,7 @@ import {
   TaskPlanSearchOutputSchema,
   TaskPlanGetOutputSchema,
   TaskOccurrenceListOutputSchema,
-} from '@memoflow/contracts/agent-gateway';
+} from '@memoflow/agent-gateway';
 import { bindTaskReadPort } from '../../modules/agent-gateway/task-read.port';
 import { afterAll, beforeEach, describe, expect, it } from 'vitest';
 import { once } from 'node:events';

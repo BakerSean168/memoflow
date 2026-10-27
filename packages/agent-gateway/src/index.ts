@@ -1,3 +1,5 @@
+export * from './contracts';
+
 export type {
   GoalReadPort,
   TaskReadPort,

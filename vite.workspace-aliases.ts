@@ -66,6 +66,9 @@ export function createContractsAliasEntries(workspaceRoot: string): Alias[] {
   const contractsRoot = resolveFromWorkspace(workspaceRoot, 'packages/contracts/src');
 
   return [
+    { find: /^@memoflow\/cloud-auth-contracts\/(.+)$/, replacement: resolveFromWorkspace(workspaceRoot, 'packages/cloud-auth-contracts/src/$1') },
+    { find: /^@memoflow\/agent-gateway$/, replacement: resolveFromWorkspace(workspaceRoot, 'packages/agent-gateway/src/index.ts') },
+    { find: /^@memoflow\/agent-gateway\/server$/, replacement: resolveFromWorkspace(workspaceRoot, 'packages/agent-gateway/src/server/index.ts') },
     {
       find: /^@memoflow\/routine-contracts\/method-library$/,
       replacement: resolveFromWorkspace(
@@ -103,8 +106,8 @@ export function createContractsAliasEntries(workspaceRoot: string): Alias[] {
       replacement: `${contractsRoot}/electron/index.ts`,
     },
     {
-      find: /^@memoflow\/contracts\/cloud-auth$/,
-      replacement: `${contractsRoot}/cloud-auth.ts`,
+      find: /^@memoflow\/cloud-auth-contracts$/,
+      replacement: resolveFromWorkspace(workspaceRoot, 'packages/cloud-auth-contracts/src/index.ts'),
     },
     {
       find: /^@memoflow\/contracts\/mocks$/,

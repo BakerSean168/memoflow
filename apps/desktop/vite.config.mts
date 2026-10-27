@@ -114,6 +114,8 @@ const desktopRendererDevWorkspaceEntries = [
   ['@memoflow/host-runtime', 'packages/host-runtime/src/index.ts'],
   ['@memoflow/goal/electron', 'packages/goal/src/electron/index.ts'],
   ['@memoflow/ipc-client', 'packages/ipc-client/src/index.ts'],
+  ['@memoflow/cloud-auth-contracts', 'packages/cloud-auth-contracts/src/index.ts'],
+  ['@memoflow/agent-gateway', 'packages/agent-gateway/src/index.ts'],
   ['@memoflow/cloud-auth', 'packages/cloud-auth/src/index.ts'],
   ['@memoflow/task-client', 'packages/task-client/src/index.ts'],
   ['@memoflow/schedule-client', 'packages/schedule-client/src/index.ts'],

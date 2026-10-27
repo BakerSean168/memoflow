@@ -10,7 +10,7 @@ import {
   GatewayTaskReceiptSchema,
   type AssistedStart,
   type AssistedView,
-} from '@memoflow/contracts/agent-gateway';
+} from '@memoflow/agent-gateway';
 import {
   AIWorkflowRunViewSchema,
   TaskPlanExecutionReceiptSchema,

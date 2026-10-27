@@ -3,7 +3,7 @@ import { createExternalAgentHttpClient } from './external-agent-client';
 import {
   ExternalAgentFailureSchema,
   externalAgentFailure,
-} from '@memoflow/contracts/agent-gateway';
+} from '@memoflow/agent-gateway';
 
 afterEach(() => vi.unstubAllGlobals());
 describe('external agent management failure contract', () => {
