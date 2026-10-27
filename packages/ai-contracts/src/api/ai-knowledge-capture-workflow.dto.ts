@@ -1,6 +1,6 @@
 import { AgentInstanceSlugSchema } from './local-agent.dto';
 import { z } from 'zod';
-import { KnowledgeDocumentIdSchema } from '@memoflow/repository-contracts';
+import { KnowledgeDocumentIdSchema } from '../wire-projections';
 
 /**
  * Canonical product contract for the ADR-052-style `knowledge.capture` Mastra
@@ -68,7 +68,9 @@ export const KnowledgeNoteDraftSchema = z
   .strict();
 export type KnowledgeNoteDraft = z.infer<typeof KnowledgeNoteDraftSchema>;
 
-export const KnowledgeNoteDraftContentSchema = KnowledgeNoteDraftSchema.omit({ title: true })
+export const KnowledgeNoteDraftContentSchema = KnowledgeNoteDraftSchema.omit({
+  title: true,
+})
   .extend({
     title: z.string().trim().min(1).max(256),
   })

@@ -5,7 +5,7 @@ import {
   TaskGoalLinkSchema,
   TaskPlanScheduleSchema,
   TaskReminderConfigSchema,
-} from '@memoflow/task-contracts';
+} from '../wire-projections';
 
 /**
  * Canonical product contract for ADR-052-style `task.create` Mastra Workflow.

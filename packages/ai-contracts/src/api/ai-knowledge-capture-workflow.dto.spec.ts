@@ -7,7 +7,10 @@ import {
 describe('Knowledge capture owner source boundary', () => {
   it('accepts only host-neutral repository or local Vault references', () => {
     expect(
-      KnowledgeCaptureSourceSchema.parse({ kind: 'repository', connectionId: 'binding' }),
+      KnowledgeCaptureSourceSchema.parse({
+        kind: 'repository',
+        connectionId: 'binding',
+      }),
     ).toEqual({ kind: 'repository', connectionId: 'binding' });
     expect(KnowledgeCaptureSourceSchema.parse({ kind: 'local_vault' })).toEqual({
       kind: 'local_vault',
@@ -38,7 +41,10 @@ describe('Knowledge capture owner source boundary', () => {
     ).toBe(false);
     for (const targetSubpath of ['/vault/note.md', 'C:\\vault\\note.md', '\\\\server\\note.md']) {
       expect(
-        KnowledgeNoteDraftContentSchema.safeParse({ ...candidateDraft, targetSubpath }).success,
+        KnowledgeNoteDraftContentSchema.safeParse({
+          ...candidateDraft,
+          targetSubpath,
+        }).success,
       ).toBe(false);
     }
   });

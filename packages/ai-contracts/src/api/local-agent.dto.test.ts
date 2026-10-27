@@ -59,7 +59,10 @@ describe('selectable assistant runtime contracts', () => {
     };
     expect(AssistantRuntimeClientCommandSchema.safeParse(command).success).toBe(true);
     expect(
-      AssistantRuntimeClientCommandSchema.safeParse({ ...command, runtimeKind: 'builtin' }).success,
+      AssistantRuntimeClientCommandSchema.safeParse({
+        ...command,
+        runtimeKind: 'builtin',
+      }).success,
     ).toBe(false);
     expect(
       AssistantRuntimeClientCommandSchema.safeParse({
@@ -110,7 +113,10 @@ describe('selectable assistant runtime contracts', () => {
       }).success,
     ).toBe(false);
     expect(
-      LocalAgentConnectionInputSchema.safeParse({ ...connection, apiKey: 'secret' }).success,
+      LocalAgentConnectionInputSchema.safeParse({
+        ...connection,
+        apiKey: 'secret',
+      }).success,
     ).toBe(false);
   });
 
@@ -150,7 +156,12 @@ describe('selectable assistant runtime contracts', () => {
 describe('implicit default native probe commands', () => {
   it('accepts only a known driver and never renderer-controlled executable, identity or secrets', () => {
     for (const driver of ['codex', 'claude', 'pi', 'dsh']) {
-      expect(LocalAgentClientCommandSchema.parse({ action: 'probe_default', driver })).toEqual({
+      expect(
+        LocalAgentClientCommandSchema.parse({
+          action: 'probe_default',
+          driver,
+        }),
+      ).toEqual({
         action: 'probe_default',
         driver,
       });
@@ -181,7 +192,12 @@ describe('implicit default native probe commands', () => {
 
 describe('local instance identity', () => {
   it('accepts optional identity metadata and rejects unsafe slugs, colors and secrets', () => {
-    const base = { driver: 'codex', name: 'Personal', executablePath: 'codex', enabled: true };
+    const base = {
+      driver: 'codex',
+      name: 'Personal',
+      executablePath: 'codex',
+      enabled: true,
+    };
     expect(LocalAgentConnectionInputSchema.safeParse(base).success).toBe(true);
     expect(
       LocalAgentConnectionInputSchema.safeParse({
@@ -196,7 +212,10 @@ describe('local instance identity', () => {
       );
     }
     expect(
-      LocalAgentConnectionInputSchema.safeParse({ ...base, accentColor: 'url(secret)' }).success,
+      LocalAgentConnectionInputSchema.safeParse({
+        ...base,
+        accentColor: 'url(secret)',
+      }).success,
     ).toBe(false);
     expect(LocalAgentConnectionInputSchema.safeParse({ ...base, apiKey: 'secret' }).success).toBe(
       false,
@@ -207,7 +226,11 @@ describe('local instance identity', () => {
 it('accepts only an opaque native visibility context on a ready probe, never on saved configuration', () => {
   const context = 'mvc1:' + 'a'.repeat(64);
   expect(
-    LocalAgentStatusSchema.parse({ status: 'ready', models: [], modelVisibilityContext: context }),
+    LocalAgentStatusSchema.parse({
+      status: 'ready',
+      models: [],
+      modelVisibilityContext: context,
+    }),
   ).toHaveProperty('modelVisibilityContext', context);
   for (const modelVisibilityContext of [
     '/private/home',
@@ -216,8 +239,11 @@ it('accepts only an opaque native visibility context on a ready probe, never on 
     'mvc1:bad',
   ]) {
     expect(
-      LocalAgentStatusSchema.safeParse({ status: 'ready', models: [], modelVisibilityContext })
-        .success,
+      LocalAgentStatusSchema.safeParse({
+        status: 'ready',
+        models: [],
+        modelVisibilityContext,
+      }).success,
     ).toBe(false);
   }
   expect(
@@ -259,7 +285,10 @@ it('keeps a bound request limit separate from discovery without allowing raw dia
       false,
     );
   expect(
-    LocalAgentStatusSchema.safeParse({ ...status, modelVisibilityContext: undefined }).success,
+    LocalAgentStatusSchema.safeParse({
+      ...status,
+      modelVisibilityContext: undefined,
+    }).success,
   ).toBe(false);
   expect(
     LocalAgentStatusSchema.safeParse({
@@ -280,14 +309,22 @@ it('accepts an Antigravity native connection without API credentials or arbitrar
   };
   expect(LocalAgentConnectionInputSchema.safeParse(connection).success).toBe(true);
   expect(
-    LocalAgentClientCommandSchema.safeParse({ action: 'probe_default', driver: 'antigravity' })
-      .success,
+    LocalAgentClientCommandSchema.safeParse({
+      action: 'probe_default',
+      driver: 'antigravity',
+    }).success,
   ).toBe(true);
   expect(
-    LocalAgentConnectionInputSchema.safeParse({ ...connection, apiKey: 'forbidden' }).success,
+    LocalAgentConnectionInputSchema.safeParse({
+      ...connection,
+      apiKey: 'forbidden',
+    }).success,
   ).toBe(false);
   expect(
-    LocalAgentConnectionInputSchema.safeParse({ ...connection, args: ['--unsafe'] }).success,
+    LocalAgentConnectionInputSchema.safeParse({
+      ...connection,
+      args: ['--unsafe'],
+    }).success,
   ).toBe(false);
 });
 
@@ -298,9 +335,14 @@ describe('read-only cached model directory contract', () => {
         action: 'catalog_cached_connection',
         id: 'native-antigravity',
       }),
-    ).toEqual({ action: 'catalog_cached_connection', id: 'native-antigravity' });
+    ).toEqual({
+      action: 'catalog_cached_connection',
+      id: 'native-antigravity',
+    });
     expect(
-      LocalAgentClientCommandSchema.safeParse({ action: 'catalog_cached_connection' }).success,
+      LocalAgentClientCommandSchema.safeParse({
+        action: 'catalog_cached_connection',
+      }).success,
     ).toBe(false);
     for (const injected of [
       { identityId: 'other-profile' },
@@ -363,7 +405,10 @@ describe('explicit Antigravity sign-in contracts', () => {
       }).success,
     ).toBe(false);
     expect(
-      LocalAgentAuthStateSchema.safeParse({ ...waiting, failure: 'login_denied' }).success,
+      LocalAgentAuthStateSchema.safeParse({
+        ...waiting,
+        failure: 'login_denied',
+      }).success,
     ).toBe(true);
   });
 

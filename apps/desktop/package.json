@@ -114,7 +114,8 @@
     "winston": "3.19.0",
     "winston-daily-rotate-file": "5.0.0",
     "xtend": "4.0.2",
-    "@memoflow/ai-contracts": "workspace:*"
+    "@memoflow/ai-contracts": "workspace:*",
+    "@memoflow/ai-client": "workspace:*"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",

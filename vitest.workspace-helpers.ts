@@ -489,6 +489,26 @@ export const domainResolveAliases = [
     replacement: path.resolve(import.meta.dirname, './packages/ai-contracts/src/index.ts'),
   },
   {
+    find: /^@memoflow\/ai-ui\/host$/,
+    replacement: path.resolve(import.meta.dirname, './packages/ai-ui/src/ai-ui-host.ts'),
+  },
+  {
+    find: /^@memoflow\/ai-client\/(.+)$/,
+    replacement: path.resolve(import.meta.dirname, './packages/ai-client/src/$1'),
+  },
+  {
+    find: /^@memoflow\/ai-client$/,
+    replacement: path.resolve(import.meta.dirname, './packages/ai-client/src/index.ts'),
+  },
+  {
+    find: /^@memoflow\/ai-ui\/(.+)$/,
+    replacement: path.resolve(import.meta.dirname, './packages/ai-ui/src/$1'),
+  },
+  {
+    find: /^@memoflow\/ai-ui$/,
+    replacement: path.resolve(import.meta.dirname, './packages/ai-ui/src/index.ts'),
+  },
+  {
     find: /^@memoflow\/goal-contracts\/(.+)/,
     replacement: path.resolve(import.meta.dirname, './packages/goal-contracts/src/$1'),
   },

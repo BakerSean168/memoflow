@@ -1,7 +1,7 @@
 {
   "name": "@memoflow/data-portability",
   "version": "0.0.1",
-  "description": "数据可迁移性模块 - 用户数据导入导出",
+  "description": "\u6570\u636e\u53ef\u8fc1\u79fb\u6027\u6a21\u5757 - \u7528\u6237\u6570\u636e\u5bfc\u5165\u5bfc\u51fa",
   "type": "module",
   "files": [
     "dist"

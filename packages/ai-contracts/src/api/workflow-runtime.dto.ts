@@ -5,7 +5,7 @@ import {
   FailureReferenceSchema,
   strictFailureDetails,
 } from '@memoflow/transport-contracts/result';
-import { CreateTaskPlanSchema } from '@memoflow/task-contracts';
+import { CreateTaskPlanSchema } from '../wire-projections';
 import {
   GoalCreateClientInputSchema,
   GoalPlanDraftSchema,
@@ -49,13 +49,22 @@ export const AIWorkflowExecutionFailureSchema = z.discriminatedUnion('operation'
 export type AIWorkflowExecutionFailure = z.infer<typeof AIWorkflowExecutionFailureSchema>;
 
 const GoalWorkflowRecoveryReceiptSchema = z
-  .object({ kind: z.literal('goal.create'), receipt: GoalPlanExecutionReceiptSchema })
+  .object({
+    kind: z.literal('goal.create'),
+    receipt: GoalPlanExecutionReceiptSchema,
+  })
   .strict();
 const TaskWorkflowRecoveryReceiptSchema = z
-  .object({ kind: z.literal('task.create'), receipt: TaskPlanExecutionReceiptSchema })
+  .object({
+    kind: z.literal('task.create'),
+    receipt: TaskPlanExecutionReceiptSchema,
+  })
   .strict();
 const KnowledgeWorkflowRecoveryReceiptSchema = z
-  .object({ kind: z.literal('knowledge.capture'), receipt: KnowledgeCaptureExecutionReceiptSchema })
+  .object({
+    kind: z.literal('knowledge.capture'),
+    receipt: KnowledgeCaptureExecutionReceiptSchema,
+  })
   .strict();
 export const AIWorkflowRecoveryReceiptSchema = z.discriminatedUnion('kind', [
   GoalWorkflowRecoveryReceiptSchema,
@@ -183,7 +192,10 @@ export const KnowledgeWorkflowSuspensionSchema = z.discriminatedUnion('type', [
 export type AIWorkflowSuspension = z.infer<typeof AIWorkflowSuspensionSchema>;
 
 export const AIWorkflowResumeCommandSchema = z.discriminatedUnion('type', [
-  z.object({ type: z.literal('answer'), answers: z.array(z.string().min(1)).min(1).max(3) }),
+  z.object({
+    type: z.literal('answer'),
+    answers: z.array(z.string().min(1)).min(1).max(3),
+  }),
   z.object({ type: z.literal('approve') }),
   z.object({ type: z.literal('cancel') }),
   z.object({
@@ -302,7 +314,12 @@ export const AIGoalSurfaceLeaseResponseSchema = z.discriminatedUnion('status', [
     })
     .strict(),
   z.object({ status: z.literal('busy') }).strict(),
-  z.object({ status: z.literal('renewed'), expiresAt: z.number().int().positive() }).strict(),
+  z
+    .object({
+      status: z.literal('renewed'),
+      expiresAt: z.number().int().positive(),
+    })
+    .strict(),
   z.object({ status: z.literal('lost') }).strict(),
   z.object({ status: z.literal('released') }).strict(),
 ]);
@@ -391,7 +408,11 @@ export const AIWorkflowEventSchema = z.discriminatedUnion('type', [
     type: z.literal('workflow.suspended'),
     data: z.object({ suspension: AIWorkflowSuspensionSchema }),
   }),
-  z.object({ ...RuntimeEventBaseShape, type: z.literal('workflow.resumed'), data: z.object({}) }),
+  z.object({
+    ...RuntimeEventBaseShape,
+    type: z.literal('workflow.resumed'),
+    data: z.object({}),
+  }),
   z.object({
     ...RuntimeEventBaseShape,
     type: z.literal('workflow.usage.updated'),

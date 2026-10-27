@@ -90,7 +90,10 @@ describe('GOAL-7208 goal.create Workflow V2 contracts', () => {
       }).success,
     ).toBe(false);
     expect(
-      GoalCreateClientInputSchema.safeParse({ idea: 'Pass JLPT N1', apiKey: 'secret' }).success,
+      GoalCreateClientInputSchema.safeParse({
+        idea: 'Pass JLPT N1',
+        apiKey: 'secret',
+      }).success,
     ).toBe(false);
   });
 
@@ -246,7 +249,10 @@ describe('Goal native review identity contract', () => {
         ...value,
         ownerCreate: {
           ...value.ownerCreate,
-          keyResultIds: { ...value.ownerCreate.keyResultIds, 'kr:stale': 'IKeyResultId_stale' },
+          keyResultIds: {
+            ...value.ownerCreate.keyResultIds,
+            'kr:stale': 'IKeyResultId_stale',
+          },
         },
       }).success,
     ).toBe(false);

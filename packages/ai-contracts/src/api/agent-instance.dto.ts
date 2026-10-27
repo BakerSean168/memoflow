@@ -83,10 +83,24 @@ const cas = {
 export const AgentRegistryCommandSchema = z.discriminatedUnion('action', [
   z.object({ action: z.literal('list') }).strict(),
   z
-    .object({ action: z.literal('conversation_selection'), conversationId: z.string().min(1) })
+    .object({
+      action: z.literal('conversation_selection'),
+      conversationId: z.string().min(1),
+    })
     .strict(),
-  z.object({ action: z.literal('create'), instance: CreateAgentInstanceSchema }).strict(),
-  z.object({ action: z.literal('update'), ...cas, patch: UpdateAgentInstanceSchema }).strict(),
+  z
+    .object({
+      action: z.literal('create'),
+      instance: CreateAgentInstanceSchema,
+    })
+    .strict(),
+  z
+    .object({
+      action: z.literal('update'),
+      ...cas,
+      patch: UpdateAgentInstanceSchema,
+    })
+    .strict(),
   z.object({ action: z.literal('remove'), ...cas }).strict(),
   z.object({ action: z.literal('reset'), ...cas }).strict(),
   z
@@ -98,7 +112,11 @@ export const AgentRegistryCommandSchema = z.discriminatedUnion('action', [
     })
     .strict(),
   z
-    .object({ action: z.literal('unbind'), ...cas, connectionId: z.string().min(1).max(512) })
+    .object({
+      action: z.literal('unbind'),
+      ...cas,
+      connectionId: z.string().min(1).max(512),
+    })
     .strict(),
 ]);
 export type AgentRegistryCommand = z.infer<typeof AgentRegistryCommandSchema>;

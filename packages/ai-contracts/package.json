@@ -23,13 +23,11 @@
     "@memoflow/label-contracts": "workspace:*",
     "@memoflow/shared-primitives": "workspace:*",
     "zod": "^4.6.5",
-    "@memoflow/transport-contracts": "workspace:*",
-    "@memoflow/repository-contracts": "workspace:*",
-    "@memoflow/task-contracts": "workspace:*",
-    "@memoflow/goal-contracts": "workspace:*"
+    "@memoflow/transport-contracts": "workspace:*"
   },
   "devDependencies": {
     "@asteasolutions/zod-to-openapi": "^9.1.0",
-    "@faker-js/faker": "10.6.0"
+    "@faker-js/faker": "10.6.0",
+    "@memoflow/goal-contracts": "workspace:*"
   }
 }

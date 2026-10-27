@@ -127,7 +127,7 @@
     {
       "id": "use-ai-chat-host-dispatch",
       "decision": "#502 triaged: documentation prose locks kept; .md has no AST equivalent.",
-      "origin": "packages/app-vue/src/modules/ai/composables/use-ai-chat-host-dispatch.surface.spec.ts",
+      "origin": "packages/ai-ui/src/composables/use-ai-chat-host-dispatch.surface.spec.ts",
       "locks": [
         {
           "file": "docs/internals/ai-runtime-path-map.md",

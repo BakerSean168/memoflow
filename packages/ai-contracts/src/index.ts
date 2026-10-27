@@ -33,4 +33,9 @@ export * from './context';
 // ============ Owner-driven Data Portability V3 ============
 export * from './portable-v3';
 
-export type { AiConversationId, AiProviderConfigId, AiProviderConnectionId, AIProviderCredentialRef } from './ids';
+export type {
+  AiConversationId,
+  AiProviderConfigId,
+  AiProviderConnectionId,
+  AIProviderCredentialRef,
+} from './ids';

@@ -435,7 +435,7 @@ import { describe, expect, it } from 'vitest';
    */
   describe('contracts summary dual single-track surface (residual 647)', () => {
     const aiApi = __dirname;
-    const modules = resolve(aiApi, '../..');
+    const modules = resolve(aiApi, '../../../contracts/src/modules');
 
     it('retires AIProviderConfigSummary interface dual', () => {
       const client = readFileSync(

@@ -15,14 +15,25 @@ import {
 
 describe('AI vNext runtime contracts', () => {
   it('accepts only explicit supported permission names without widening native configuration', () => {
-    const input = { type: 'message', conversationId: 'c', content: 'Read this', surface: 'web' };
+    const input = {
+      type: 'message',
+      conversationId: 'c',
+      content: 'Read this',
+      surface: 'web',
+    };
     for (const permissionMode of ['supervised', 'read-only', 'auto-approve'])
       expect(
-        AssistantRuntimeClientCommandSchema.safeParse({ ...input, permissionMode }).success,
+        AssistantRuntimeClientCommandSchema.safeParse({
+          ...input,
+          permissionMode,
+        }).success,
       ).toBe(true);
     for (const permissionMode of ['fullAccess', 'ignore-security', { yolo: true }])
       expect(
-        AssistantRuntimeClientCommandSchema.safeParse({ ...input, permissionMode }).success,
+        AssistantRuntimeClientCommandSchema.safeParse({
+          ...input,
+          permissionMode,
+        }).success,
       ).toBe(false);
     expect(
       AssistantRuntimeClientCommandSchema.safeParse({
@@ -44,14 +55,23 @@ describe('AI vNext runtime contracts', () => {
         createdAt: 1,
         updatedAt: 2,
       };
-      const receipt = { workflowRunId: 'r', revision: 1, status: 'success', retryable: false };
+      const receipt = {
+        workflowRunId: 'r',
+        revision: 1,
+        status: 'success',
+        retryable: false,
+      };
       const operations = {
         'goal.create': 'goal_create',
         'task.create': 'task_plan',
         'knowledge.capture': 'knowledge_note',
       };
       for (const candidate of ['goal.create', 'task.create', 'knowledge.capture'] as const) {
-        const base = { type: 'recovery_required', message: 'Retry', retryable: true };
+        const base = {
+          type: 'recovery_required',
+          message: 'Retry',
+          retryable: true,
+        };
         expect(
           AIWorkflowRunViewSchema.safeParse({
             ...view,
@@ -71,7 +91,9 @@ describe('AI vNext runtime contracts', () => {
                   operation: operations[candidate],
                   ...(candidate === 'knowledge.capture'
                     ? {}
-                    : { draftRef: candidate === 'task.create' ? 'task:one' : 'goal' }),
+                    : {
+                        draftRef: candidate === 'task.create' ? 'task:one' : 'goal',
+                      }),
                   code: 'FAILED',
                   message: 'Retry',
                   retryable: true,
@@ -88,7 +110,10 @@ describe('AI vNext runtime contracts', () => {
     const suspension = {
       type: 'goal_draft_review',
       revision: 1,
-      draft: { revision: 1, goal: { draftRef: 'goal', name: 'Goal', status: 'Planned' } },
+      draft: {
+        revision: 1,
+        goal: { draftRef: 'goal', name: 'Goal', status: 'Planned' },
+      },
       ownerCreate: { goalId: 'goal-id', keyResultIds: {} },
     };
     for (const kind of ['goal.create', 'task.create', 'knowledge.capture']) {
@@ -131,12 +156,19 @@ describe('AI vNext runtime contracts', () => {
       sequence: 1,
       createdAt: 0,
       type: 'assistant.approval.required',
-      data: { toolCallId: 't', toolName: 'routine_create', category: 'edit', risk: 'high' },
+      data: {
+        toolCallId: 't',
+        toolName: 'routine_create',
+        category: 'edit',
+        risk: 'high',
+      },
     };
     expect(AssistantRuntimeEventSchema.safeParse(event).success).toBe(true);
     expect(
-      AssistantRuntimeEventSchema.safeParse({ ...event, data: { ...event.data, args: 'private' } })
-        .success,
+      AssistantRuntimeEventSchema.safeParse({
+        ...event,
+        data: { ...event.data, args: 'private' },
+      }).success,
     ).toBe(false);
   });
   it('accepts a stable Agent instance ID on new chat messages, but never accepts identity or arbitrary runtime configuration', () => {
@@ -224,7 +256,12 @@ describe('AI vNext runtime contracts', () => {
     expect(
       AssistantRuntimeClientCommandSchema.safeParse({
         ...parsed,
-        attachments: [{ data: 'https://example.invalid/screen.png', mediaType: 'image/png' }],
+        attachments: [
+          {
+            data: 'https://example.invalid/screen.png',
+            mediaType: 'image/png',
+          },
+        ],
       }).success,
     ).toBe(false);
 
@@ -239,7 +276,10 @@ describe('AI vNext runtime contracts', () => {
       AssistantRuntimeClientCommandSchema.safeParse({
         ...parsed,
         attachments: [
-          { data: 'data:image/svg+xml;base64,PHN2Zz48L3N2Zz4=', mediaType: 'image/svg+xml' },
+          {
+            data: 'data:image/svg+xml;base64,PHN2Zz48L3N2Zz4=',
+            mediaType: 'image/svg+xml',
+          },
         ],
       }).success,
     ).toBe(false);
@@ -255,8 +295,14 @@ describe('AI vNext runtime contracts', () => {
       AssistantRuntimeClientCommandSchema.safeParse({
         ...parsed,
         attachments: [
-          { data: `data:text/plain;base64,${'a'.repeat(950_000)}`, mediaType: 'text/plain' },
-          { data: `data:text/plain;base64,${'a'.repeat(950_000)}`, mediaType: 'text/plain' },
+          {
+            data: `data:text/plain;base64,${'a'.repeat(950_000)}`,
+            mediaType: 'text/plain',
+          },
+          {
+            data: `data:text/plain;base64,${'a'.repeat(950_000)}`,
+            mediaType: 'text/plain',
+          },
         ],
       }).success,
     ).toBe(false);
@@ -372,7 +418,12 @@ describe('AI vNext runtime contracts', () => {
     ).toBe(false);
     expect(
       AssistantRuntimeAskUserSuspensionsSchema.safeParse([
-        { runId: 'r', toolCallId: 't', question: 'Choose', options: [{ label: 'A' }] },
+        {
+          runId: 'r',
+          toolCallId: 't',
+          question: 'Choose',
+          options: [{ label: 'A' }],
+        },
       ]).success,
     ).toBe(true);
     const approval = {
@@ -384,7 +435,10 @@ describe('AI vNext runtime contracts', () => {
     expect(AssistantRuntimeAskUserSuspensionsSchema.safeParse([approval]).success).toBe(true);
     expect(
       AssistantRuntimeAskUserSuspensionsSchema.safeParse([
-        { ...approval, approval: { ...approval.approval, args: { secret: 'private' } } },
+        {
+          ...approval,
+          approval: { ...approval.approval, args: { secret: 'private' } },
+        },
       ]).success,
     ).toBe(false);
     expect(
@@ -395,7 +449,11 @@ describe('AI vNext runtime contracts', () => {
         sequence: 1,
         createdAt: 1,
         type: 'assistant.ask_user.required',
-        data: { toolCallId: 't', question: 'Choose', options: [{ label: 'A' }] },
+        data: {
+          toolCallId: 't',
+          question: 'Choose',
+          options: [{ label: 'A' }],
+        },
       }).success,
     ).toBe(true);
   });
@@ -412,7 +470,10 @@ describe('AI vNext runtime contracts', () => {
     expect(
       AIWorkflowResumeClientRequestSchema.safeParse({
         runId: 'workflow-1',
-        command: { type: 'revise_natural_language', instruction: 'make it smaller' },
+        command: {
+          type: 'revise_natural_language',
+          instruction: 'make it smaller',
+        },
         workflowTurn: 'Please make it smaller',
       }).success,
     ).toBe(true);
@@ -640,7 +701,10 @@ describe('AI vNext runtime contracts', () => {
       expect(parsed.suspension.failures[0]?.draftRef).toBe('task:recovery');
       expect(parsed.suspension.receipt).toMatchObject({
         kind: 'task.create',
-        receipt: { status: 'partial', referenceMap: { 'task:recovery': 'TaskId_recovery' } },
+        receipt: {
+          status: 'partial',
+          referenceMap: { 'task:recovery': 'TaskId_recovery' },
+        },
       });
     }
   });

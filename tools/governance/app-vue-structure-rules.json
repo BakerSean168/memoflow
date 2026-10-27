@@ -266,7 +266,7 @@
           "from": "@memoflow/goal-client"
         },
         {
-          "from": "@memoflow/ai/client"
+          "from": "@memoflow/ai-client"
         },
         {
           "from": "@memoflow/repository-client"
@@ -351,14 +351,14 @@
       "id": "rule-use-ai-chat-host-dispatch-99",
       "contract": "use-ai-chat-host-dispatch",
       "reason": "use-ai-chat-host-dispatch: AST/type structural rules replacing source-text locks (#502).",
-      "file": "packages/app-vue/src/modules/ai/composables/types.ts",
+      "file": "packages/ai-ui/src/composables/types.ts",
       "forbidStringLiterals": ["streamMessage", "listMessages"]
     },
     {
       "id": "rule-use-ai-chat-host-dispatch-100",
       "contract": "use-ai-chat-host-dispatch",
       "reason": "use-ai-chat-host-dispatch: AST/type structural rules replacing source-text locks (#502).",
-      "file": "packages/app-vue/src/modules/ai/composables/useAIChatView.ts",
+      "file": "packages/ai-ui/src/composables/useAIChatView.ts",
       "requireIdentifiers": ["AI_ASSISTANT_RUNTIME_KEY"],
       "requireExpressions": ["useStrictInject(AI_ASSISTANT_RUNTIME_KEY, 'AIAssistantRuntime')"]
     },
@@ -380,7 +380,7 @@
       "id": "rule-use-ai-chat-host-dispatch-103",
       "contract": "use-ai-chat-host-dispatch",
       "reason": "use-ai-chat-host-dispatch: AST/type structural rules replacing source-text locks (#502).",
-      "file": "packages/app-vue/src/modules/ai/components/AIFooterComposer.vue",
+      "file": "packages/ai-ui/src/components/AIFooterComposer.vue",
       "forbidClassTokens": ["ai-chat-execution-profile", "select-execution-profile"],
       "forbidAttributes": [
         {
@@ -398,7 +398,7 @@
       "id": "rule-use-ai-chat-host-dispatch-104",
       "contract": "use-ai-chat-host-dispatch",
       "reason": "use-ai-chat-host-dispatch: AST/type structural rules replacing source-text locks (#502).",
-      "file": "packages/app-vue/src/modules/ai/views/AIChatView.vue",
+      "file": "packages/ai-ui/src/views/AIChatView.vue",
       "forbidAttributes": [
         {
           "name": ":execution-profile-id",
@@ -426,10 +426,10 @@
       "contract": "use-ai-chat-host-dispatch",
       "reason": "use-ai-chat-host-dispatch: AST/type structural rules replacing source-text locks (#502).",
       "files": [
-        "packages/app-vue/src/modules/ai/composables/useAIChatSession.ts",
-        "packages/app-vue/src/modules/ai/composables/useAssistantStream.ts",
-        "packages/app-vue/src/modules/ai/composables/useConversationProjection.ts",
-        "packages/app-vue/src/modules/ai/composables/useAIComposerContext.ts"
+        "packages/ai-ui/src/composables/useAIChatSession.ts",
+        "packages/ai-ui/src/composables/useAssistantStream.ts",
+        "packages/ai-ui/src/composables/useConversationProjection.ts",
+        "packages/ai-ui/src/composables/useAIComposerContext.ts"
       ],
       "forbidIdentifiers": [
         "useAssistantDispatch",

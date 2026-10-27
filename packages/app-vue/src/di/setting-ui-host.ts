@@ -24,7 +24,7 @@ import {
   SettingsSection,
   SettingsStatusBlock,
 } from '../components/shared/settings';
-import AgentDriverIcon from '../modules/ai/components/AgentDriverIcon.vue';
+import AgentDriverIcon from '@memoflow/ai-ui/components/AgentDriverIcon.vue';
 import AccountProfileSection from '../modules/account/components/AccountProfileSection.vue';
 import CloudPasswordSection from '../modules/account/components/CloudPasswordSection.vue';
 import ExternalAgentConnectionsSection from '../modules/account/components/ExternalAgentConnectionsSection.vue';
@@ -32,10 +32,10 @@ import { KnowledgeWriteRequestLedger } from '@memoflow/repository-ui';
 import {
   getAIErrorMessage,
   getNativeAgentExecutionFailureMessage,
-} from '../modules/ai/composables/error';
-import { useAI } from '../modules/ai/composables/useAI';
-import { useNativeModelVisibility } from '../modules/ai/composables/nativeModelVisibility';
-import { sortAgentInstances } from '../modules/ai/agent-instance-order';
+} from '@memoflow/ai-ui/composables/error';
+import { useAI } from '@memoflow/ai-ui/composables/useAI';
+import { useNativeModelVisibility } from '@memoflow/ai-ui/composables/nativeModelVisibility';
+import { sortAgentInstances } from '@memoflow/ai-ui/agent-instance-order';
 import ProductSurfaceHeader from '../shared/components/ProductSurfaceHeader.vue';
 import ReleaseNotes from '../shared/components/ReleaseNotes.vue';
 import { useAppShellStore } from '../layouts/shell/useAppShellStore';

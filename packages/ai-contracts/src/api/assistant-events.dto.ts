@@ -39,7 +39,10 @@ export const AssistantRuntimeEventSchema = z.discriminatedUnion('type', [
         activityType: z.literal('native_tool'),
       }).strict(),
       z
-        .object({ activityType: z.literal('generating'), message: z.string().max(240).optional() })
+        .object({
+          activityType: z.literal('generating'),
+          message: z.string().max(240).optional(),
+        })
         .strict(),
     ]),
   }),

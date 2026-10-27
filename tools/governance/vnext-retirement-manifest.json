@@ -105,9 +105,9 @@
       "status": "active",
       "decision": "ADR-112 / PVC-AI-8121",
       "forbiddenPaths": [
-        "packages/app-vue/src/modules/ai/components/AIGoalDraftEditor.vue",
-        "packages/app-vue/src/modules/ai/components/AIGoalDraftEditor.spec.ts",
-        "packages/app-vue/src/modules/ai/components/AITaskDraftEditor.vue"
+        "packages/ai-ui/src/components/AIGoalDraftEditor.vue",
+        "packages/ai-ui/src/components/AIGoalDraftEditor.spec.ts",
+        "packages/ai-ui/src/components/AITaskDraftEditor.vue"
       ],
       "requiredPaths": [
         "packages/goal-ui/src/components/dialogs/GoalDialog.vue",

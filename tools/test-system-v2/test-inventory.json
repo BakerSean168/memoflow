@@ -2902,7 +2902,7 @@
       ]
     },
     {
-      "path": "packages/ai/src/client/runtime-assistant.spec.ts",
+      "path": "packages/ai-client/src/runtime-assistant.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/ai/vitest.config.ts"
@@ -2912,7 +2912,7 @@
       ]
     },
     {
-      "path": "packages/ai/src/client/runtime-usage.spec.ts",
+      "path": "packages/ai-client/src/runtime-usage.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/ai/vitest.config.ts"
@@ -2922,7 +2922,7 @@
       ]
     },
     {
-      "path": "packages/ai/src/client/runtime-workflow.spec.ts",
+      "path": "packages/ai-client/src/runtime-workflow.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/ai/vitest.config.ts"
@@ -4410,7 +4410,7 @@
       ]
     },
     {
-      "path": "packages/app-vue/src/modules/ai/agent-instance-order.spec.ts",
+      "path": "packages/ai-ui/src/agent-instance-order.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/app-vue/vitest.config.ts"
@@ -4420,7 +4420,7 @@
       ]
     },
     {
-      "path": "packages/app-vue/src/modules/ai/components/AIComposerControls.spec.ts",
+      "path": "packages/ai-ui/src/components/AIComposerControls.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/app-vue/vitest.config.ts"
@@ -4430,7 +4430,7 @@
       ]
     },
     {
-      "path": "packages/app-vue/src/modules/ai/components/AIConversationSidebar.email-verification.spec.ts",
+      "path": "packages/ai-ui/src/components/AIConversationSidebar.email-verification.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/app-vue/vitest.config.ts"
@@ -4440,7 +4440,7 @@
       ]
     },
     {
-      "path": "packages/app-vue/src/modules/ai/components/AIConversationSidebar.status.spec.ts",
+      "path": "packages/ai-ui/src/components/AIConversationSidebar.status.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/app-vue/vitest.config.ts"
@@ -4450,7 +4450,7 @@
       ]
     },
     {
-      "path": "packages/app-vue/src/modules/ai/components/AIFooterComposer.spec.ts",
+      "path": "packages/ai-ui/src/components/AIFooterComposer.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/app-vue/vitest.config.ts"
@@ -4460,7 +4460,7 @@
       ]
     },
     {
-      "path": "packages/app-vue/src/modules/ai/components/AIGoalWorkflowPanel.spec.ts",
+      "path": "packages/ai-ui/src/components/AIGoalWorkflowPanel.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/app-vue/vitest.config.ts"
@@ -4470,7 +4470,7 @@
       ]
     },
     {
-      "path": "packages/app-vue/src/modules/ai/components/AIKnowledgeCapturePanel.spec.ts",
+      "path": "packages/ai-ui/src/components/AIKnowledgeCapturePanel.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/app-vue/vitest.config.ts"
@@ -4480,7 +4480,7 @@
       ]
     },
     {
-      "path": "packages/app-vue/src/modules/ai/components/AIMessageContent.spec.ts",
+      "path": "packages/ai-ui/src/components/AIMessageContent.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/app-vue/vitest.config.ts"
@@ -4490,7 +4490,7 @@
       ]
     },
     {
-      "path": "packages/app-vue/src/modules/ai/components/AIMessagePanel.spec.ts",
+      "path": "packages/ai-ui/src/components/AIMessagePanel.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/app-vue/vitest.config.ts"
@@ -4500,7 +4500,7 @@
       ]
     },
     {
-      "path": "packages/app-vue/src/modules/ai/components/AIRuntimeUsageBadge.spec.ts",
+      "path": "packages/ai-ui/src/components/AIRuntimeUsageBadge.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/app-vue/vitest.config.ts"
@@ -4510,7 +4510,7 @@
       ]
     },
     {
-      "path": "packages/app-vue/src/modules/ai/components/AITaskWorkflowPanel.spec.ts",
+      "path": "packages/ai-ui/src/components/AITaskWorkflowPanel.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/app-vue/vitest.config.ts"
@@ -4520,7 +4520,7 @@
       ]
     },
     {
-      "path": "packages/app-vue/src/modules/ai/components/AgentDriverIcon.spec.ts",
+      "path": "packages/ai-ui/src/components/AgentDriverIcon.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/app-vue/vitest.config.ts"
@@ -4530,7 +4530,7 @@
       ]
     },
     {
-      "path": "packages/app-vue/src/modules/ai/components/MemoFlowAiIcon.spec.ts",
+      "path": "packages/ai-ui/src/components/MemoFlowAiIcon.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/app-vue/vitest.config.ts"
@@ -4540,7 +4540,7 @@
       ]
     },
     {
-      "path": "packages/app-vue/src/modules/ai/composables/antigravityModelPresentation.spec.ts",
+      "path": "packages/ai-ui/src/composables/antigravityModelPresentation.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/app-vue/vitest.config.ts"
@@ -4550,7 +4550,7 @@
       ]
     },
     {
-      "path": "packages/app-vue/src/modules/ai/composables/chatViewHelpers.spec.ts",
+      "path": "packages/ai-ui/src/composables/chatViewHelpers.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/app-vue/vitest.config.ts"
@@ -4560,7 +4560,7 @@
       ]
     },
     {
-      "path": "packages/app-vue/src/modules/ai/composables/error.spec.ts",
+      "path": "packages/ai-ui/src/composables/error.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/app-vue/vitest.config.ts"
@@ -4570,7 +4570,7 @@
       ]
     },
     {
-      "path": "packages/app-vue/src/modules/ai/composables/native-model-visibility.spec.ts",
+      "path": "packages/ai-ui/src/composables/native-model-visibility.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/app-vue/vitest.config.ts"
@@ -4580,7 +4580,7 @@
       ]
     },
     {
-      "path": "packages/app-vue/src/modules/ai/composables/surface-context.spec.ts",
+      "path": "packages/ai-ui/src/composables/surface-context.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/app-vue/vitest.config.ts"
@@ -4590,7 +4590,7 @@
       ]
     },
     {
-      "path": "packages/app-vue/src/modules/ai/composables/useAI.spec.ts",
+      "path": "packages/ai-ui/src/composables/useAI.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/app-vue/vitest.config.ts"
@@ -4600,7 +4600,7 @@
       ]
     },
     {
-      "path": "packages/app-vue/src/modules/ai/composables/useAIChatSession.spec.ts",
+      "path": "packages/ai-ui/src/composables/useAIChatSession.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/app-vue/vitest.config.ts"
@@ -4610,7 +4610,7 @@
       ]
     },
     {
-      "path": "packages/app-vue/src/modules/ai/composables/useAIChatView.lifecycle.spec.ts",
+      "path": "packages/ai-ui/src/composables/useAIChatView.lifecycle.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/app-vue/vitest.config.ts"
@@ -4620,7 +4620,7 @@
       ]
     },
     {
-      "path": "packages/app-vue/src/modules/ai/composables/useAIGoalWorkflow.spec.ts",
+      "path": "packages/ai-ui/src/composables/useAIGoalWorkflow.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/app-vue/vitest.config.ts"
@@ -4630,7 +4630,7 @@
       ]
     },
     {
-      "path": "packages/app-vue/src/modules/ai/composables/useAIKnowledgeCapture.spec.ts",
+      "path": "packages/ai-ui/src/composables/useAIKnowledgeCapture.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/app-vue/vitest.config.ts"
@@ -4640,7 +4640,7 @@
       ]
     },
     {
-      "path": "packages/app-vue/src/modules/ai/composables/useAIKnowledgeQaWorkflow.spec.ts",
+      "path": "packages/ai-ui/src/composables/useAIKnowledgeQaWorkflow.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/app-vue/vitest.config.ts"
@@ -4650,7 +4650,7 @@
       ]
     },
     {
-      "path": "packages/app-vue/src/modules/ai/composables/useAIModelCatalog.spec.ts",
+      "path": "packages/ai-ui/src/composables/useAIModelCatalog.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/app-vue/vitest.config.ts"
@@ -4660,7 +4660,7 @@
       ]
     },
     {
-      "path": "packages/app-vue/src/modules/ai/composables/useAIModelSelection.agent-instance.spec.ts",
+      "path": "packages/ai-ui/src/composables/useAIModelSelection.agent-instance.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/app-vue/vitest.config.ts"
@@ -4670,7 +4670,7 @@
       ]
     },
     {
-      "path": "packages/app-vue/src/modules/ai/composables/useAITaskWorkflow.spec.ts",
+      "path": "packages/ai-ui/src/composables/useAITaskWorkflow.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/app-vue/vitest.config.ts"
@@ -4680,7 +4680,7 @@
       ]
     },
     {
-      "path": "packages/app-vue/src/modules/ai/composables/useAIWorkflowPersistence.spec.ts",
+      "path": "packages/ai-ui/src/composables/useAIWorkflowPersistence.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/app-vue/vitest.config.ts"
@@ -4690,7 +4690,7 @@
       ]
     },
     {
-      "path": "packages/app-vue/src/modules/ai/composables/useAIWorkflowReconciliation.spec.ts",
+      "path": "packages/ai-ui/src/composables/useAIWorkflowReconciliation.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/app-vue/vitest.config.ts"
@@ -4700,7 +4700,7 @@
       ]
     },
     {
-      "path": "packages/app-vue/src/modules/ai/composables/useAssistantStream.spec.ts",
+      "path": "packages/ai-ui/src/composables/useAssistantStream.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/app-vue/vitest.config.ts"
@@ -4710,7 +4710,7 @@
       ]
     },
     {
-      "path": "packages/app-vue/src/modules/ai/composables/useConversationAttention.spec.ts",
+      "path": "packages/ai-ui/src/composables/useConversationAttention.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/app-vue/vitest.config.ts"
@@ -4720,7 +4720,7 @@
       ]
     },
     {
-      "path": "packages/app-vue/src/modules/ai/composables/useDurableConversationAttention.spec.ts",
+      "path": "packages/ai-ui/src/composables/useDurableConversationAttention.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/app-vue/vitest.config.ts"
@@ -4730,7 +4730,7 @@
       ]
     },
     {
-      "path": "packages/app-vue/src/modules/ai/composables/useGoalSurfaceLease.spec.ts",
+      "path": "packages/ai-ui/src/composables/useGoalSurfaceLease.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/app-vue/vitest.config.ts"
@@ -4740,7 +4740,7 @@
       ]
     },
     {
-      "path": "packages/app-vue/src/modules/ai/composables/useGoalWorkflowEvents.spec.ts",
+      "path": "packages/ai-ui/src/composables/useGoalWorkflowEvents.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/app-vue/vitest.config.ts"
@@ -4750,7 +4750,7 @@
       ]
     },
     {
-      "path": "packages/app-vue/src/modules/ai/composables/useLocalAssistantChoices.spec.ts",
+      "path": "packages/ai-ui/src/composables/useLocalAssistantChoices.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/app-vue/vitest.config.ts"
@@ -4760,7 +4760,7 @@
       ]
     },
     {
-      "path": "packages/app-vue/src/modules/ai/composables/workflow-intent.spec.ts",
+      "path": "packages/ai-ui/src/composables/workflow-intent.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/app-vue/vitest.config.ts"
@@ -4770,7 +4770,7 @@
       ]
     },
     {
-      "path": "packages/app-vue/src/modules/ai/composables/workspaceEventSubscription.spec.ts",
+      "path": "packages/ai-ui/src/composables/workspaceEventSubscription.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/app-vue/vitest.config.ts"
@@ -13297,9 +13297,9 @@
       "packages/ai/src/api/routes/ai-void-success-envelope.surface.spec.ts",
       "packages/ai/src/api/routes/assistant-sse.http.spec.ts",
       "packages/ai/src/api/routes/workspace-sse.http.spec.ts",
-      "packages/ai/src/client/runtime-assistant.spec.ts",
-      "packages/ai/src/client/runtime-usage.spec.ts",
-      "packages/ai/src/client/runtime-workflow.spec.ts",
+      "packages/ai-client/src/runtime-assistant.spec.ts",
+      "packages/ai-client/src/runtime-usage.spec.ts",
+      "packages/ai-client/src/runtime-workflow.spec.ts",
       "packages/ai/src/electron/index-lifecycle.spec.ts",
       "packages/ai/src/evals/eval-runner.spec.ts",
       "packages/ai/src/infrastructure-client/adapters/__tests__/ai-provider-onboarding-v2.adapters.spec.ts",
@@ -13447,43 +13447,43 @@
       "packages/app-vue/src/modules/account/components/account-logout-locale.spec.ts",
       "packages/app-vue/src/modules/account/index.spec.ts",
       "packages/app-vue/src/modules/account/stores/accountStore.spec.ts",
-      "packages/app-vue/src/modules/ai/agent-instance-order.spec.ts",
-      "packages/app-vue/src/modules/ai/components/AIComposerControls.spec.ts",
-      "packages/app-vue/src/modules/ai/components/AIConversationSidebar.email-verification.spec.ts",
-      "packages/app-vue/src/modules/ai/components/AIConversationSidebar.status.spec.ts",
-      "packages/app-vue/src/modules/ai/components/AIFooterComposer.spec.ts",
-      "packages/app-vue/src/modules/ai/components/AIGoalWorkflowPanel.spec.ts",
-      "packages/app-vue/src/modules/ai/components/AIKnowledgeCapturePanel.spec.ts",
-      "packages/app-vue/src/modules/ai/components/AIMessageContent.spec.ts",
-      "packages/app-vue/src/modules/ai/components/AIMessagePanel.spec.ts",
-      "packages/app-vue/src/modules/ai/components/AIRuntimeUsageBadge.spec.ts",
-      "packages/app-vue/src/modules/ai/components/AITaskWorkflowPanel.spec.ts",
-      "packages/app-vue/src/modules/ai/components/AgentDriverIcon.spec.ts",
-      "packages/app-vue/src/modules/ai/components/MemoFlowAiIcon.spec.ts",
-      "packages/app-vue/src/modules/ai/composables/antigravityModelPresentation.spec.ts",
-      "packages/app-vue/src/modules/ai/composables/chatViewHelpers.spec.ts",
-      "packages/app-vue/src/modules/ai/composables/error.spec.ts",
-      "packages/app-vue/src/modules/ai/composables/native-model-visibility.spec.ts",
-      "packages/app-vue/src/modules/ai/composables/surface-context.spec.ts",
-      "packages/app-vue/src/modules/ai/composables/useAI.spec.ts",
-      "packages/app-vue/src/modules/ai/composables/useAIChatSession.spec.ts",
-      "packages/app-vue/src/modules/ai/composables/useAIChatView.lifecycle.spec.ts",
-      "packages/app-vue/src/modules/ai/composables/useAIGoalWorkflow.spec.ts",
-      "packages/app-vue/src/modules/ai/composables/useAIKnowledgeCapture.spec.ts",
-      "packages/app-vue/src/modules/ai/composables/useAIKnowledgeQaWorkflow.spec.ts",
-      "packages/app-vue/src/modules/ai/composables/useAIModelCatalog.spec.ts",
-      "packages/app-vue/src/modules/ai/composables/useAIModelSelection.agent-instance.spec.ts",
-      "packages/app-vue/src/modules/ai/composables/useAITaskWorkflow.spec.ts",
-      "packages/app-vue/src/modules/ai/composables/useAIWorkflowPersistence.spec.ts",
-      "packages/app-vue/src/modules/ai/composables/useAIWorkflowReconciliation.spec.ts",
-      "packages/app-vue/src/modules/ai/composables/useAssistantStream.spec.ts",
-      "packages/app-vue/src/modules/ai/composables/useConversationAttention.spec.ts",
-      "packages/app-vue/src/modules/ai/composables/useDurableConversationAttention.spec.ts",
-      "packages/app-vue/src/modules/ai/composables/useGoalSurfaceLease.spec.ts",
-      "packages/app-vue/src/modules/ai/composables/useGoalWorkflowEvents.spec.ts",
-      "packages/app-vue/src/modules/ai/composables/useLocalAssistantChoices.spec.ts",
-      "packages/app-vue/src/modules/ai/composables/workflow-intent.spec.ts",
-      "packages/app-vue/src/modules/ai/composables/workspaceEventSubscription.spec.ts",
+      "packages/ai-ui/src/agent-instance-order.spec.ts",
+      "packages/ai-ui/src/components/AIComposerControls.spec.ts",
+      "packages/ai-ui/src/components/AIConversationSidebar.email-verification.spec.ts",
+      "packages/ai-ui/src/components/AIConversationSidebar.status.spec.ts",
+      "packages/ai-ui/src/components/AIFooterComposer.spec.ts",
+      "packages/ai-ui/src/components/AIGoalWorkflowPanel.spec.ts",
+      "packages/ai-ui/src/components/AIKnowledgeCapturePanel.spec.ts",
+      "packages/ai-ui/src/components/AIMessageContent.spec.ts",
+      "packages/ai-ui/src/components/AIMessagePanel.spec.ts",
+      "packages/ai-ui/src/components/AIRuntimeUsageBadge.spec.ts",
+      "packages/ai-ui/src/components/AITaskWorkflowPanel.spec.ts",
+      "packages/ai-ui/src/components/AgentDriverIcon.spec.ts",
+      "packages/ai-ui/src/components/MemoFlowAiIcon.spec.ts",
+      "packages/ai-ui/src/composables/antigravityModelPresentation.spec.ts",
+      "packages/ai-ui/src/composables/chatViewHelpers.spec.ts",
+      "packages/ai-ui/src/composables/error.spec.ts",
+      "packages/ai-ui/src/composables/native-model-visibility.spec.ts",
+      "packages/ai-ui/src/composables/surface-context.spec.ts",
+      "packages/ai-ui/src/composables/useAI.spec.ts",
+      "packages/ai-ui/src/composables/useAIChatSession.spec.ts",
+      "packages/ai-ui/src/composables/useAIChatView.lifecycle.spec.ts",
+      "packages/ai-ui/src/composables/useAIGoalWorkflow.spec.ts",
+      "packages/ai-ui/src/composables/useAIKnowledgeCapture.spec.ts",
+      "packages/ai-ui/src/composables/useAIKnowledgeQaWorkflow.spec.ts",
+      "packages/ai-ui/src/composables/useAIModelCatalog.spec.ts",
+      "packages/ai-ui/src/composables/useAIModelSelection.agent-instance.spec.ts",
+      "packages/ai-ui/src/composables/useAITaskWorkflow.spec.ts",
+      "packages/ai-ui/src/composables/useAIWorkflowPersistence.spec.ts",
+      "packages/ai-ui/src/composables/useAIWorkflowReconciliation.spec.ts",
+      "packages/ai-ui/src/composables/useAssistantStream.spec.ts",
+      "packages/ai-ui/src/composables/useConversationAttention.spec.ts",
+      "packages/ai-ui/src/composables/useDurableConversationAttention.spec.ts",
+      "packages/ai-ui/src/composables/useGoalSurfaceLease.spec.ts",
+      "packages/ai-ui/src/composables/useGoalWorkflowEvents.spec.ts",
+      "packages/ai-ui/src/composables/useLocalAssistantChoices.spec.ts",
+      "packages/ai-ui/src/composables/workflow-intent.spec.ts",
+      "packages/ai-ui/src/composables/workspaceEventSubscription.spec.ts",
       "packages/app-vue/src/modules/authentication/composables/usePassword.spec.ts",
       "packages/app-vue/src/modules/authentication/stores/authenticationStore.spec.ts",
       "packages/app-vue/src/platform/server-state/invalidation-dispatcher.spec.ts",

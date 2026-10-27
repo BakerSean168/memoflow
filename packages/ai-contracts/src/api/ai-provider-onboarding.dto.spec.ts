@@ -46,8 +46,10 @@ describe('AI Provider Onboarding V2 contracts', () => {
 describe('Provider onboarding V2 secret-bearing request boundary', () => {
   it('allows raw apiKey only on the initial probe request', () => {
     expect(
-      ProbeAIProviderConnectionSchema.safeParse({ catalogId: 'openai', apiKey: 'sk-secret' })
-        .success,
+      ProbeAIProviderConnectionSchema.safeParse({
+        catalogId: 'openai',
+        apiKey: 'sk-secret',
+      }).success,
     ).toBe(true);
     expect(
       CommitAIProviderOnboardingSchema.safeParse({
@@ -61,10 +63,15 @@ describe('Provider onboarding V2 secret-bearing request boundary', () => {
 
   it('rejects raw secret and endpoint fields on saved-provider metadata updates', () => {
     expect(
-      UpdateAIProviderConfigSchema.safeParse({ name: 'renamed', apiKey: 'secret' }).success,
+      UpdateAIProviderConfigSchema.safeParse({
+        name: 'renamed',
+        apiKey: 'secret',
+      }).success,
     ).toBe(false);
     expect(
-      UpdateAIProviderConfigSchema.safeParse({ baseUrl: 'https://evil.example/v1' }).success,
+      UpdateAIProviderConfigSchema.safeParse({
+        baseUrl: 'https://evil.example/v1',
+      }).success,
     ).toBe(false);
     expect(UpdateAIProviderConfigSchema.safeParse({ model: 'hidden-model' }).success).toBe(false);
     expect(UpdateAIProviderConfigSchema.safeParse({ isActive: false }).success).toBe(true);
@@ -85,8 +92,9 @@ describe('Provider onboarding V2 secret-bearing request boundary', () => {
       }).success,
     ).toBe(false);
     expect(
-      TestAIProviderSchema.safeParse({ providerId: '550e8400-e29b-41d4-a716-446655440000' })
-        .success,
+      TestAIProviderSchema.safeParse({
+        providerId: '550e8400-e29b-41d4-a716-446655440000',
+      }).success,
     ).toBe(true);
   });
 });

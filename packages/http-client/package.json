@@ -2,7 +2,7 @@
   "name": "@memoflow/http-client",
   "version": "0.0.1",
   "private": false,
-  "description": "MemoFlow HTTP Client — Axios wrapper with Result Pattern support",
+  "description": "MemoFlow HTTP Client \u2014 Axios wrapper with Result Pattern support",
   "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

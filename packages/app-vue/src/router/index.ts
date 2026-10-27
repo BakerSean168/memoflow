@@ -21,7 +21,7 @@ import { scheduleRoutes } from '@memoflow/schedule-ui';
 import { repositoryRoutes } from '@memoflow/repository-ui';
 import { notificationRoutes } from '@memoflow/notification-ui';
 import { settingRoutes } from '@memoflow/setting-ui';
-import { aiRoutes } from '../modules/ai/router';
+import { aiRoutes } from '@memoflow/ai-ui/router';
 
 export function createAppRouter(options?: {
   history?: RouterHistory;

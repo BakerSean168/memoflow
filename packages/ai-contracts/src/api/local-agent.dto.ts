@@ -16,7 +16,13 @@ export const AssistantRuntimeChoiceSchema = z.discriminatedUnion('runtimeKind', 
       modelId: id.optional(),
     })
     .strict(),
-  z.object({ runtimeKind: z.literal('local_agent'), connectionId: id, modelId: id }).strict(),
+  z
+    .object({
+      runtimeKind: z.literal('local_agent'),
+      connectionId: id,
+      modelId: id,
+    })
+    .strict(),
 ]);
 export type AssistantRuntimeChoice = z.infer<typeof AssistantRuntimeChoiceSchema>;
 
@@ -117,7 +123,14 @@ export const LocalAgentModelSchema = z
     reasoningEfforts: z.array(LocalAgentModelOptionValueSchema).max(20).optional(),
     defaultReasoningEffort: LocalAgentModelOptionValueSchema.optional(),
     serviceTiers: z
-      .array(z.object({ id: LocalAgentModelOptionValueSchema, name: z.string().max(100) }).strict())
+      .array(
+        z
+          .object({
+            id: LocalAgentModelOptionValueSchema,
+            name: z.string().max(100),
+          })
+          .strict(),
+      )
       .max(20)
       .optional(),
     defaultServiceTier: LocalAgentModelOptionValueSchema.optional(),
@@ -267,7 +280,13 @@ export const LocalAgentAuthStateSchema = z
 export type LocalAgentAuthState = z.infer<typeof LocalAgentAuthStateSchema>;
 
 export const LocalAgentRequestSchema = z.discriminatedUnion('type', [
-  z.object({ type: z.literal('permission'), requestId: id, title: z.string().max(500) }).strict(),
+  z
+    .object({
+      type: z.literal('permission'),
+      requestId: id,
+      title: z.string().max(500),
+    })
+    .strict(),
   z
     .object({
       type: z.literal('user_input'),
@@ -295,7 +314,10 @@ export const LocalAgentRequestResponseSchema = z
     requestId: id,
     response: z.discriminatedUnion('type', [
       z
-        .object({ type: z.literal('permission'), decision: z.enum(['approve_once', 'decline']) })
+        .object({
+          type: z.literal('permission'),
+          decision: z.enum(['approve_once', 'decline']),
+        })
         .strict(),
       z
         .object({
@@ -319,7 +341,12 @@ export type LocalAgentRequestResponse = z.infer<typeof LocalAgentRequestResponse
 
 export const LocalAgentClientCommandSchema = z.discriminatedUnion('action', [
   z.object({ action: z.literal('get_default') }).strict(),
-  z.object({ action: z.literal('set_default'), choice: AssistantRuntimeChoiceSchema }).strict(),
+  z
+    .object({
+      action: z.literal('set_default'),
+      choice: AssistantRuntimeChoiceSchema,
+    })
+    .strict(),
   z.object({ action: z.literal('list_connections') }).strict(),
   z
     .object({
@@ -334,7 +361,12 @@ export const LocalAgentClientCommandSchema = z.discriminatedUnion('action', [
   /** Read-only, account-bound, recently verified model directory; null means probe needed. */
   z.object({ action: z.literal('catalog_cached_connection'), id }).strict(),
   /** Desktop-only implicit driver probe. No connection ID or untrusted executable arguments. */
-  z.object({ action: z.literal('probe_default'), driver: LocalAgentDriverSchema }).strict(),
+  z
+    .object({
+      action: z.literal('probe_default'),
+      driver: LocalAgentDriverSchema,
+    })
+    .strict(),
   z.object({ action: z.literal('list_conversations') }).strict(),
   z
     .object({
@@ -342,7 +374,12 @@ export const LocalAgentClientCommandSchema = z.discriminatedUnion('action', [
       conversation: LocalAgentConversationCreateSchema,
     })
     .strict(),
-  z.object({ action: z.literal('respond'), response: LocalAgentRequestResponseSchema }).strict(),
+  z
+    .object({
+      action: z.literal('respond'),
+      response: LocalAgentRequestResponseSchema,
+    })
+    .strict(),
   /** Explicit, user-initiated Google OAuth for one saved Antigravity instance. */
   z.object({ action: z.literal('auth_start'), connectionId: id }).strict(),
   z.object({ action: z.literal('auth_status'), connectionId: id }).strict(),

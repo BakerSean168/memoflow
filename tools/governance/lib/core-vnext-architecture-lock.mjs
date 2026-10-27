@@ -61,11 +61,11 @@ export const AI_RETIRED_GOAL_TASK_DRAFT_PATTERN =
   /\b(validateKeyResultsOutput|validateTasksOutput|valueType|folderId|estimatedHours|progressTrigger|PER_INSTANCE|ALL_INSTANCES_COMPLETED)\b/;
 
 const AI_WORKFLOW_CONTEXT_FILES = new Set([
-  'packages/app-vue/src/modules/ai/components/AIContextPanel.vue',
-  'packages/app-vue/src/modules/ai/components/AIGoalWorkflowPanel.vue',
-  'packages/app-vue/src/modules/ai/components/AITaskWorkflowPanel.vue',
-  'packages/app-vue/src/modules/ai/components/AIKnowledgeCapturePanel.vue',
-  'packages/app-vue/src/modules/ai/views/AIChatView.vue',
+  'packages/ai-ui/src/components/AIContextPanel.vue',
+  'packages/ai-ui/src/components/AIGoalWorkflowPanel.vue',
+  'packages/ai-ui/src/components/AITaskWorkflowPanel.vue',
+  'packages/ai-ui/src/components/AIKnowledgeCapturePanel.vue',
+  'packages/ai-ui/src/views/AIChatView.vue',
 ]);
 export const AI_WORKFLOW_CONTEXT_OWNER_MUTATION_PATTERN =
   /\b(?:GoalDialog|TaskPlanDialog|KnowledgeCaptureReviewDialog|createConfirmedKnowledgeNote|createPlanSafe|createGoalSafe)\b/;
@@ -105,8 +105,8 @@ const GOAL_TIME_OWNER_FILES = new Set([
   'packages/ai/src/server/mastra/workflows/goal-create.workflow.ts',
   'apps/api/src/modules/ai/goal-plan-mutation.adapter.ts',
   'apps/desktop/src/main/modules/ai/goal-plan-mutation.adapter.ts',
-  'packages/app-vue/src/modules/ai/composables/types.ts',
-  'packages/app-vue/src/modules/ai/composables/useAIGoalWorkflow.ts',
+  'packages/ai-ui/src/composables/types.ts',
+  'packages/ai-ui/src/composables/useAIGoalWorkflow.ts',
   'packages/powersync-schema/src/index.ts',
   'packages/data-portability/src/server/application/use-cases/importers/goal.importer.ts',
   'packages/data-portability/src/server/application/use-cases/projections/goal.projection.ts',
@@ -134,8 +134,8 @@ const KR_MEASUREMENT_OWNER_FILES = new Set([
   'packages/ai/src/server/mastra/workflows/apply-goal-plan.service.ts',
   'apps/api/src/modules/ai/goal-plan-mutation.adapter.ts',
   'apps/desktop/src/main/modules/ai/goal-plan-mutation.adapter.ts',
-  'packages/app-vue/src/modules/ai/composables/types.ts',
-  'packages/app-vue/src/modules/ai/composables/useAIGoalWorkflow.ts',
+  'packages/ai-ui/src/composables/types.ts',
+  'packages/ai-ui/src/composables/useAIGoalWorkflow.ts',
   'packages/database/src/generated/prisma/schema.prisma',
 ]);
 const KR_CLIENT_SURFACE_ROOTS = ['packages/goal-ui/src/', 'packages/app-react/src/screens/Goal'];
@@ -497,7 +497,7 @@ export function findCoreVnextArchitectureLockViolations(files) {
   requireTokens(
     violations,
     fileMap,
-    'packages/app-vue/src/modules/ai/views/AIChatView.vue',
+    'packages/ai-ui/src/views/AIChatView.vue',
     [
       '<AIMessagePanel',
       '<template #workflow-context>',
@@ -510,7 +510,7 @@ export function findCoreVnextArchitectureLockViolations(files) {
   requireTokens(
     violations,
     fileMap,
-    'packages/app-vue/src/modules/ai/components/AIMessagePanel.vue',
+    'packages/ai-ui/src/components/AIMessagePanel.vue',
     ['data-testid="ai-message-panel"', '<slot name="workflow-context" />'],
     'ai-workflow-diagnostics-missing',
   );

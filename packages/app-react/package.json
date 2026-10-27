@@ -35,7 +35,8 @@
     "@memoflow/time": "workspace:*",
     "@memoflow/ui-react-native": "workspace:*",
     "@memoflow/workspace-contracts": "workspace:*",
-    "@memoflow/ai-contracts": "workspace:*"
+    "@memoflow/ai-contracts": "workspace:*",
+    "@memoflow/ai-client": "workspace:*"
   },
   "peerDependencies": {
     "@react-native-async-storage/async-storage": "2.2.0",

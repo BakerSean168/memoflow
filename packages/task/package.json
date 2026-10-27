@@ -1,7 +1,7 @@
 {
   "name": "@memoflow/task",
   "version": "0.0.1",
-  "description": "任务模块 - 任务模板、实例与依赖管理",
+  "description": "\u4efb\u52a1\u6a21\u5757 - \u4efb\u52a1\u6a21\u677f\u3001\u5b9e\u4f8b\u4e0e\u4f9d\u8d56\u7ba1\u7406",
   "type": "module",
   "files": [
     "dist"

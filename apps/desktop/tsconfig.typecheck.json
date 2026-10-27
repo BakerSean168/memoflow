@@ -30,7 +30,7 @@
       "@memoflow/repository-ui": ["../../packages/repository-ui/dist/index.d.ts"],
       "@memoflow/repository-ui/host": ["../../packages/repository-ui/dist/repository-ui-host.d.ts"],
       "@memoflow/ui-vue-shadcn/composables/*": ["../../packages/ui-vue-shadcn/src/composables/*"],
-      "@memoflow/ai/client": ["../../packages/ai/dist/client/index.d.ts"],
+      "@memoflow/ai-client": ["../../packages/ai/dist/client/index.d.ts"],
       "@memoflow/ai/electron": ["../../packages/ai/dist/electron/index.d.ts"],
       "@memoflow/ai/ports": ["../../packages/ai/dist/ports/index.d.ts"],
       "@memoflow/goal-client": ["../../packages/goal-client/dist/index.d.ts"],

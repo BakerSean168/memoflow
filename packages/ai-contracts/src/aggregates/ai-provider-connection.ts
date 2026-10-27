@@ -5,7 +5,7 @@
  * surface; this file is the ownership vocabulary used by new code. It
  * intentionally contains only the opaque credentialRef.
  */
-export type { AIProviderCredentialRef } from '@memoflow/ai-contracts';
+export type { AIProviderCredentialRef } from '../ids';
 export type {
   AIProviderConnectionClientDTO,
   AIProviderConfigClientDTO,

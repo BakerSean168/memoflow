@@ -100,7 +100,7 @@ Every reusable workspace package must publish its supported public surface throu
 This includes root entrypoints and any supported subpaths such as:
 
 - `@memoflow/ai/application-client`
-- `@memoflow/ai/infrastructure-client`
+- `@memoflow/ai-client/infrastructure-client`
 - `@memoflow/ai-contracts`
 
 Rule:

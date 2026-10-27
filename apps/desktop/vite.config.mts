@@ -21,7 +21,7 @@ import {
 } from '../../vite.workspace-aliases.ts';
 
 const desktopRendererDevWorkspaceEntries = [
-  ['@memoflow/ai/client', 'packages/ai/src/client/index.ts'],
+  ['@memoflow/ai-client', 'packages/ai-client/src/index.ts'],
   ['@memoflow/ai/electron', 'packages/ai/src/electron/index.ts'],
   ['@memoflow/goal-client', 'packages/goal-client/src/index.ts'],
   ['@memoflow/goal-core/ids', 'packages/goal-core/src/ids.ts'],

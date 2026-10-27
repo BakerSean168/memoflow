@@ -13,7 +13,7 @@
       "@memoflow/domain-shared/shared": ["../domain-shared/src/shared/index.ts"],
       "@memoflow/contracts": ["../contracts/src/index.ts"],
       "@memoflow/ai-contracts": ["../ai-contracts/src/index.ts"],
-      "@memoflow/contracts/electron": ["../contracts/src/electron/index.ts"],
+      "@memoflow/desktop-contracts": ["../contracts/src/electron/index.ts"],
       "@memoflow/goal-contracts": ["../goal-contracts/src/index.ts"],
       "@memoflow/contracts/primitives": ["../contracts/src/primitives/index.ts"],
       "@memoflow/repository-contracts": ["../../packages/repository-contracts/src/index.ts"],

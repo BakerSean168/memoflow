@@ -915,8 +915,8 @@
         "apps/web/e2e/ai/provider-onboarding.spec.ts",
         "packages/app-vue/src/locales/en-US/aiAssistant.ts",
         "packages/app-vue/src/locales/zh-CN/aiAssistant.ts",
-        "packages/app-vue/src/modules/ai/components/AIComposerControls.spec.ts",
-        "packages/app-vue/src/modules/ai/components/AIComposerControls.vue"
+        "packages/ai-ui/src/components/AIComposerControls.spec.ts",
+        "packages/ai-ui/src/components/AIComposerControls.vue"
       ],
       "scope": {
         "projects": [
@@ -1640,15 +1640,15 @@
         "packages/app-vue/src/locales/en-US/shell.ts",
         "packages/app-vue/src/locales/zh-CN/aiAssistant.ts",
         "packages/app-vue/src/locales/zh-CN/shell.ts",
-        "packages/app-vue/src/modules/ai/components/AIContextPanel.spec.ts",
-        "packages/app-vue/src/modules/ai/components/AIContextPanel.vue",
-        "packages/app-vue/src/modules/ai/components/AIFooterComposer.vue",
-        "packages/app-vue/src/modules/ai/components/AIMessageContent.spec.ts",
-        "packages/app-vue/src/modules/ai/components/AIMessageContent.vue",
-        "packages/app-vue/src/modules/ai/components/AIMessagePanel.spec.ts",
-        "packages/app-vue/src/modules/ai/components/AIMessagePanel.vue",
-        "packages/app-vue/src/modules/ai/views/AIChatView.spec.ts",
-        "packages/app-vue/src/modules/ai/views/AIChatView.vue",
+        "packages/ai-ui/src/components/AIContextPanel.spec.ts",
+        "packages/ai-ui/src/components/AIContextPanel.vue",
+        "packages/ai-ui/src/components/AIFooterComposer.vue",
+        "packages/ai-ui/src/components/AIMessageContent.spec.ts",
+        "packages/ai-ui/src/components/AIMessageContent.vue",
+        "packages/ai-ui/src/components/AIMessagePanel.spec.ts",
+        "packages/ai-ui/src/components/AIMessagePanel.vue",
+        "packages/ai-ui/src/views/AIChatView.spec.ts",
+        "packages/ai-ui/src/views/AIChatView.vue",
         "tools/test-system-v2/test-inventory.json"
       ],
       "scope": {

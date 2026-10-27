@@ -174,7 +174,7 @@ export default defineConfig(({ mode }) =>
           ['@memoflow/domain-shared', 'packages/domain-shared/src/index.ts'],
           ['@memoflow/routine-client', 'packages/routine-client/src/index.ts'],
           ['@memoflow/repository-client', 'packages/repository-client/src/index.ts'],
-          ['@memoflow/ai/client', 'packages/ai/src/client/index.ts'],
+          ['@memoflow/ai-client', 'packages/ai-client/src/index.ts'],
           ['@memoflow/notification-client', 'packages/notification-client/src/index.ts'],
           ['@memoflow/setting-client', 'packages/setting-client/src/index.ts'],
           ['@memoflow/setting-contracts', 'packages/setting-contracts/src/index.ts'],

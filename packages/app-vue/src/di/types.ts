@@ -17,7 +17,7 @@ import type {
   AssistantRuntimeClient,
   RuntimeUsageClient,
   WorkflowRuntimeClient,
-} from '@memoflow/ai/client';
+} from '@memoflow/ai-client';
 import type { CloudAuthClientPort } from '@memoflow/contracts/cloud-auth';
 import type { GoalClientPort } from '@memoflow/goal-client';
 import type { LabelClientPort } from '@memoflow/label/client';

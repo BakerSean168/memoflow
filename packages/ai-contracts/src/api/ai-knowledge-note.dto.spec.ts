@@ -32,7 +32,10 @@ describe('knowledge note target path contract', () => {
 
   it('does not require a hidden user-level default path', () => {
     expect(
-      CreateKnowledgeNoteSchema.parse({ topic: 'Proposal chooses its path', confirmation }),
+      CreateKnowledgeNoteSchema.parse({
+        topic: 'Proposal chooses its path',
+        confirmation,
+      }),
     ).toEqual({ topic: 'Proposal chooses its path', confirmation });
   });
 

@@ -18,7 +18,7 @@ The distributed dependency retains its upstream license and copyright informatio
 - Source: https://github.com/lobehub/lobe-icons (npm package `@lobehub/icons`)
 - Version used: 5.23.1
 - License: MIT (c) 2023 LobeHub
-- Use: Path data of the Codex, Claude, DeepSeek and Mastra monochrome brand marks (package files `es/Codex/components/Mono.mjs`, `es/Claude/components/Mono.mjs`, `es/DeepSeek/components/Mono.mjs`, `es/Mastra/components/Mono.mjs`) is copied verbatim into `packages/app-vue/src/modules/ai/components/agent-brand-glyphs.ts` for the `AgentDriverIcon` component (#457). No package code or React components are distributed; only the SVG path data of the four marks is reproduced. Retrieval evidence, exact upstream URLs and license notes: [`AgentDriverIcon.SOURCES.md`](packages/app-vue/src/modules/ai/components/AgentDriverIcon.SOURCES.md).
+- Use: Path data of the Codex, Claude, DeepSeek and Mastra monochrome brand marks (package files `es/Codex/components/Mono.mjs`, `es/Claude/components/Mono.mjs`, `es/DeepSeek/components/Mono.mjs`, `es/Mastra/components/Mono.mjs`) is copied verbatim into `packages/ai-ui/src/components/agent-brand-glyphs.ts` for the `AgentDriverIcon` component (#457). No package code or React components are distributed; only the SVG path data of the four marks is reproduced. Retrieval evidence, exact upstream URLs and license notes: [`AgentDriverIcon.SOURCES.md`](packages/ai-ui/src/components/AgentDriverIcon.SOURCES.md).
 
 Upstream license text (npm package `LICENSE`, verbatim):
 
@@ -57,7 +57,7 @@ and claims no endorsement.
 - Project: Pi (coding agent) — Earendil Inc. & Contributors
 - Source: official press kit at https://pi.dev/press-kit (square badge mark `https://pi.dev/favicon.svg`)
 - License: MIT, declared on the press-kit page itself, which states: "Earendil Inc. & Contributors — Press Kit — MIT License"
-- Use: The three path segments of the monochrome square badge mark are copied verbatim into `packages/app-vue/src/modules/ai/components/agent-brand-glyphs.ts` for the `pi` driver of the `AgentDriverIcon` component (#457). The badge's original explicit light/dark fills are rendered with `currentColor` instead; the geometry is unmodified. Retrieval evidence and notes: [`AgentDriverIcon.SOURCES.md`](packages/app-vue/src/modules/ai/components/AgentDriverIcon.SOURCES.md).
+- Use: The three path segments of the monochrome square badge mark are copied verbatim into `packages/ai-ui/src/components/agent-brand-glyphs.ts` for the `pi` driver of the `AgentDriverIcon` component (#457). The badge's original explicit light/dark fills are rendered with `currentColor` instead; the geometry is unmodified. Retrieval evidence and notes: [`AgentDriverIcon.SOURCES.md`](packages/ai-ui/src/components/AgentDriverIcon.SOURCES.md).
 
 The press kit declares its assets MIT-licensed with the attribution above, but the
 page does not reprint the license text. To keep the full grant and disclaimer

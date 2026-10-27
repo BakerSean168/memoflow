@@ -2,10 +2,7 @@ import { z } from 'zod';
 import { brandedId } from '@memoflow/shared-primitives';
 import type { IdentityId } from '@memoflow/shared-primitives';
 import type { AiProviderConfigId, AiConversationId } from '../ids';
-import {
-  KnowledgeDocumentIdSchema,
-  KnowledgeDocumentRefSchema,
-} from '@memoflow/repository-contracts';
+import { KnowledgeDocumentIdSchema, KnowledgeDocumentRefSchema } from '../wire-projections';
 import { TestAIProviderResultDTOSchema } from '../dtos/provider-test-result.dto';
 import { TokenUsageSchema } from '../value-objects/token-usage';
 import { ConversationStatus } from '../value-objects/conversation-status';

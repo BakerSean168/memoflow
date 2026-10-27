@@ -1,6 +1,6 @@
 import type { AttentionEventsPowerSync } from './attention-events.powersync';
 import { randomUUID } from 'node:crypto';
-import type { IElectronDatabase } from '@memoflow/contracts/electron';
+import type { IElectronDatabase } from '@memoflow/desktop-contracts';
 import type { AssistantAttentionView } from '@memoflow/ai-contracts';
 import {
   effectiveAssistantAttentionState,

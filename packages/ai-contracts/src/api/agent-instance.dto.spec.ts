@@ -23,7 +23,10 @@ describe('Agent registry contracts', () => {
     };
     expect(CreateAgentInstanceSchema.safeParse({ ...input, apiKey: 'secret' }).success).toBe(false);
     expect(
-      CreateAgentInstanceSchema.safeParse({ ...input, instanceId: 'Not a slug' }).success,
+      CreateAgentInstanceSchema.safeParse({
+        ...input,
+        instanceId: 'Not a slug',
+      }).success,
     ).toBe(false);
     expect(
       AgentRegistryCommandSchema.safeParse({

@@ -7,13 +7,13 @@ import {
   KEY_RESULT_TITLE_MAX_LENGTH,
   KeyResultCalculationMethod,
   CreateGoalSchema,
-} from '@memoflow/goal-contracts';
-import { KnowledgeDocumentRefSchema } from '@memoflow/repository-contracts';
+} from '../wire-projections';
+import { KnowledgeDocumentRefSchema } from '../wire-projections';
 import {
   GoalContributionRuleSchema,
   TaskPlanScheduleSchema,
   TaskReminderConfigSchema,
-} from '@memoflow/task-contracts';
+} from '../wire-projections';
 
 /**
  * Canonical product contract for the durable `goal.create` Workflow.

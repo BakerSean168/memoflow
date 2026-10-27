@@ -2,8 +2,8 @@ import { createContext, type PropsWithChildren, useContext, useRef } from 'react
 
 import type { AccountClientPort } from '@memoflow/account/client';
 import { createAccountHttpClient } from '@memoflow/account/client';
-import type { AIClientPort, AssistantRuntimeClient } from '@memoflow/ai/client';
-import { createAIHttpClient, createAssistantRuntimeHttpClient } from '@memoflow/ai/client';
+import type { AIClientPort, AssistantRuntimeClient } from '@memoflow/ai-client';
+import { createAIHttpClient, createAssistantRuntimeHttpClient } from '@memoflow/ai-client';
 import type { GoalClientPort } from '@memoflow/goal-client';
 import type { LabelClientPort } from '@memoflow/label/client';
 import { createLabelHttpClient } from '@memoflow/label/client';

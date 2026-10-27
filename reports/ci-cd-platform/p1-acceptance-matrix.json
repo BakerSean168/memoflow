@@ -98,7 +98,7 @@
   },
   {
     "id": "chat",
-    "files": ["packages/app-vue/src/modules/ai/views/AIChatView.vue"],
+    "files": ["packages/ai-ui/src/views/AIChatView.vue"],
     "expected": {
       "full": false,
       "targets": {
@@ -3182,7 +3182,7 @@
   },
   {
     "id": "testOnly",
-    "files": ["packages/app-vue/src/modules/ai/components/AIMessageContent.spec.ts"],
+    "files": ["packages/ai-ui/src/components/AIMessageContent.spec.ts"],
     "expected": {
       "full": false,
       "targets": {

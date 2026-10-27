@@ -310,7 +310,7 @@
     },
     {
       "id": "r248",
-      "path": "packages/app-vue/src/modules/ai/composables/dual-registry.surface.spec.ts",
+      "path": "packages/ai-ui/src/composables/dual-registry.surface.spec.ts",
       "package": "packages/app-vue",
       "class": "retired",
       "sole": "types.ts",

@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import { TimeZoneIdSchema } from '@memoflow/shared-primitives';
-import { KnowledgeDocumentRefSchema } from '@memoflow/repository-contracts';
+import { KnowledgeDocumentRefSchema } from './wire-projections';
 
 /** The bounded categories that can participate in one AI invocation. */
 export const AIContextSectionCategorySchema = z.enum([

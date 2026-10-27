@@ -1,5 +1,5 @@
 import type { ConversationEventsPowerSync } from './conversation-events.powersync';
-import type { IElectronDatabase } from '@memoflow/contracts/electron';
+import type { IElectronDatabase } from '@memoflow/desktop-contracts';
 import type { AIEventMap } from '@memoflow/ai-contracts';
 import { AIConversation } from '../../../domain/aggregates/ai-conversation';
 import type { IAIConversationRepository } from '../../../domain/repositories/i-ai-conversation-repository';

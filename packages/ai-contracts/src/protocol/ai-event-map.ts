@@ -16,7 +16,10 @@ export type AIEventMap = {
   'ai:provider-config-created': AIProviderConfigCreatedEvent;
   'ai:provider-config-models-updated': AIProviderConfigModelsUpdatedEvent;
   'ai:provider-config-set-default': AIProviderConfigSetDefaultEvent;
-  'ai:runtime:assistant:event': { streamId: string; event: AssistantRuntimeEvent };
+  'ai:runtime:assistant:event': {
+    streamId: string;
+    event: AssistantRuntimeEvent;
+  };
   'ai:runtime:assistant:error': {
     streamId: string;
     code: string;

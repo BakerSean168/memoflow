@@ -42,10 +42,6 @@
     "./modules/account": {
       "types": "./dist/modules/account/index.d.ts",
       "import": "./dist/modules/account/index.js"
-    },
-    "./modules/ai": {
-      "types": "./dist/modules/ai/index.d.ts",
-      "import": "./dist/modules/ai/index.js"
     }
   },
   "dependencies": {
@@ -115,7 +111,9 @@
     "vue-i18n": "^11.4.12",
     "vue-router": "^5.3.1",
     "vue-sonner": "^2.0.8",
-    "@memoflow/ai-contracts": "workspace:*"
+    "@memoflow/ai-contracts": "workspace:*",
+    "@memoflow/ai-client": "workspace:*",
+    "@memoflow/ai-ui": "workspace:*"
   },
   "peerDependencies": {
     "vue": "^3.5.39"

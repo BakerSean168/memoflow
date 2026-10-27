@@ -41,7 +41,7 @@ const canonicalWorkflowContextFiles = [
     `,
   },
   {
-    relPath: 'packages/app-vue/src/modules/ai/views/AIChatView.vue',
+    relPath: 'packages/ai-ui/src/views/AIChatView.vue',
     content: `
       <AIMessagePanel>
         <template #workflow-context>
@@ -53,7 +53,7 @@ const canonicalWorkflowContextFiles = [
     `,
   },
   {
-    relPath: 'packages/app-vue/src/modules/ai/components/AIMessagePanel.vue',
+    relPath: 'packages/ai-ui/src/components/AIMessagePanel.vue',
     content: '<div data-testid="ai-message-panel"><slot name="workflow-context" /></div>',
   },
 ];
@@ -355,7 +355,7 @@ describe('AI workflow diagnostics boundary', () => {
     'rejects owner form or mutation symbol %s inside AI workflow diagnostics',
     (symbol) => {
       const { violations } = scan({
-        relPath: 'packages/app-vue/src/modules/ai/components/AIContextPanel.vue',
+        relPath: 'packages/ai-ui/src/components/AIContextPanel.vue',
         content: symbol,
       });
       expect(violations.some(({ kind }) => kind === 'ai-workflow-context-owner-leakage')).toBe(
@@ -366,7 +366,7 @@ describe('AI workflow diagnostics boundary', () => {
 
   it('requires inline Goal, Task and Knowledge diagnostics on both chat widths', () => {
     const brokenWorkflowFiles = canonicalWorkflowContextFiles.map((file) =>
-      file.relPath === 'packages/app-vue/src/modules/ai/views/AIChatView.vue'
+      file.relPath === 'packages/ai-ui/src/views/AIChatView.vue'
         ? {
             ...file,
             content:
@@ -384,7 +384,7 @@ describe('AI workflow diagnostics boundary', () => {
 
   it('rejects dropping the workflow context outlet from the chat timeline', () => {
     const brokenWorkflowFiles = canonicalWorkflowContextFiles.map((file) =>
-      file.relPath === 'packages/app-vue/src/modules/ai/components/AIMessagePanel.vue'
+      file.relPath === 'packages/ai-ui/src/components/AIMessagePanel.vue'
         ? { ...file, content: '<div data-testid="ai-message-panel"></div>' }
         : file,
     );
@@ -425,19 +425,19 @@ describe('AI-owned business editor retirement', () => {
     'knowledge-capture-draft-editor',
   ])('rejects %s in production imports, exports or wiring', (symbol) => {
     const result = findCoreVnextArchitectureLockViolations([
-      { relPath: 'packages/app-vue/src/modules/ai/components/index.ts', content: symbol },
+      { relPath: 'packages/ai-ui/src/components/index.ts', content: symbol },
     ]);
     expect(result.violations.some(({ kind }) => kind === 'ai-owned-business-editor')).toBe(true);
   });
   it('allows native and supporting state and historical test assertions', () => {
     const result = findCoreVnextArchitectureLockViolations([
       {
-        relPath: 'packages/app-vue/src/modules/ai/composables/current.ts',
+        relPath: 'packages/ai-ui/src/composables/current.ts',
         content:
           'GoalDialog; TaskPlanDialog; KnowledgeCaptureReviewDialog; editableTasks; editableKnowledge; editorOverlay;',
       },
       {
-        relPath: 'packages/app-vue/src/modules/ai/components/retirement.spec.ts',
+        relPath: 'packages/ai-ui/src/components/retirement.spec.ts',
         content: 'AIGoalDraftEditor; showGoalDraftEditor;',
       },
     ]);

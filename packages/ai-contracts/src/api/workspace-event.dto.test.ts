@@ -6,7 +6,12 @@ import { CreateGoalSchema } from '@memoflow/goal-contracts';
 describe('Workspace workflow event contract', () => {
   const action = {
     sequence: 1,
-    command: { actionId: 'name', revision: 1, operation: 'goal.setName', value: 'Plan' },
+    command: {
+      actionId: 'name',
+      revision: 1,
+      operation: 'goal.setName',
+      value: 'Plan',
+    },
   };
   const event = {
     type: 'workflow.updated',
@@ -32,7 +37,10 @@ describe('Workspace workflow event contract', () => {
     expect(WorkspaceEventSchema.safeParse({ ...event, resourceVersion: 3 }).success).toBe(false);
     expect(WorkspaceEventSchema.safeParse({ ...event, lastActionSequence: 2 }).success).toBe(false);
     expect(
-      WorkspaceEventSchema.safeParse({ ...event, actions: [{ ...action, sequence: 2 }] }).success,
+      WorkspaceEventSchema.safeParse({
+        ...event,
+        actions: [{ ...action, sequence: 2 }],
+      }).success,
     ).toBe(false);
     expect(WorkspaceEventSchema.safeParse({ ...event, providerKey: 'private' }).success).toBe(
       false,
@@ -47,8 +55,11 @@ describe('Workspace workflow event contract', () => {
       );
     }
     expect(
-      GoalPlanGoalSchema.safeParse({ draftRef: 'goal', name: 'Plan', summary: 'x'.repeat(256) })
-        .success,
+      GoalPlanGoalSchema.safeParse({
+        draftRef: 'goal',
+        name: 'Plan',
+        summary: 'x'.repeat(256),
+      }).success,
     ).toBe(false);
     expect(
       GoalPlanningSeedSchema.safeParse({

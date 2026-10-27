@@ -35,7 +35,11 @@ describe('TaskPlanTaskSchema owner-aligned contract', () => {
     });
     expect(parsed.schedule).toEqual(baseTask.schedule);
     expect(
-      TaskPlanTaskSchema.safeParse({ ...baseTask, cadence: 'weekly', timeOfDay: '09:00' }).success,
+      TaskPlanTaskSchema.safeParse({
+        ...baseTask,
+        cadence: 'weekly',
+        timeOfDay: '09:00',
+      }).success,
     ).toBe(false);
     expect(TaskPlanTaskSchema.safeParse({ ...baseTask, folderId: 'legacy-folder' }).success).toBe(
       false,
@@ -117,7 +121,10 @@ describe('TaskPlanTaskSchema owner-aligned contract', () => {
   });
 
   it('requires a stable task draftRef for durable apply identity', () => {
-    const result = TaskPlanTaskSchema.safeParse({ ...baseTask, draftRef: undefined });
+    const result = TaskPlanTaskSchema.safeParse({
+      ...baseTask,
+      draftRef: undefined,
+    });
     expect(result.success).toBe(false);
   });
 });
@@ -144,7 +151,10 @@ describe('Task review owner identities', () => {
       }).success,
     ).toBe(false);
     expect(
-      AIWorkflowSuspensionSchema.safeParse({ ...review, ownerCreate: undefined }).success,
+      AIWorkflowSuspensionSchema.safeParse({
+        ...review,
+        ownerCreate: undefined,
+      }).success,
     ).toBe(false);
     expect(
       AIWorkflowSuspensionSchema.safeParse({

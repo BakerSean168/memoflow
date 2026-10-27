@@ -1,4 +1,4 @@
-import type { IElectronDatabase } from '@memoflow/contracts/electron';
+import type { IElectronDatabase } from '@memoflow/desktop-contracts';
 import type { AIProviderConfigServerDTO } from '@memoflow/ai-contracts';
 import type { IAIProviderConfigRepository } from '../../../domain/repositories/i-ai-provider-config-repository';
 import { PowerSyncAIProviderConfigMapper, type PowerSyncAIProviderConfigRow } from './mappers';

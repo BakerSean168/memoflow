@@ -42,6 +42,8 @@ const PACKAGE_SPECIFIC_SUBPATHS = {
   'data-portability-contracts': ['./*'],
   'goal-contracts': ['./*'],
   'ai-contracts': ['./*'],
+  'ai-client': ['./*'],
+  'ai-ui': ['./*'],
   'goal-ui': ['./composables/useGoal', './host'],
   'notification-client': [],
   'routine-client': [],
@@ -148,7 +150,6 @@ const PACKAGE_SPECIFIC_SUBPATHS = {
     './modules/task',
     './modules/schedule',
     './modules/repository',
-    './modules/ai',
   ],
 };
 
