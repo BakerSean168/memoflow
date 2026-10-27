@@ -24,6 +24,7 @@ const result = `${mode}-results`;
 const external = process.env.PLAYWRIGHT_DISABLE_WEBSERVER === 'true' || mode === 'provider';
 
 export default defineConfig({
+  tsconfig: '../../tsconfig.workspace-src.json',
   testDir: './e2e',
   testMatch: specs.map((spec) => `**/${spec}`),
   outputDir: `test-results/${mode === 'provider' ? 'ai-provider' : mode}`,

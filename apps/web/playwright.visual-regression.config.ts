@@ -1,5 +1,6 @@
 import { defineConfig } from '@playwright/test';
 export default defineConfig({
+  tsconfig: '../../tsconfig.workspace-src.json',
   testDir: './e2e/visual-regression',
   testMatch: ['matrix.spec.ts', 'scrollbar-gutter.spec.ts', 'composer-footer.spec.ts'],
   fullyParallel: true,

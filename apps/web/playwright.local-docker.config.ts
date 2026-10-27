@@ -10,6 +10,7 @@ if (!webOrigin || !apiOrigin) {
 }
 
 export default defineConfig({
+  tsconfig: '../../tsconfig.workspace-src.json',
   testDir: './e2e',
   testMatch: [
     '**/authentication/auth-login.spec.ts',

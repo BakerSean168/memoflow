@@ -2,6 +2,7 @@ import { defineConfig } from '@playwright/test';
 
 // Isolated production components + service doubles. Never starts or mutates a database.
 export default defineConfig({
+  tsconfig: '../../tsconfig.workspace-src.json',
   testDir: './e2e/goal/reference',
   testMatch: '*.spec.ts',
   fullyParallel: false,

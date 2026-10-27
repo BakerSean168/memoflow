@@ -14,6 +14,7 @@ if (mode === 'sync') configurePowerSyncTestEnv();
 const inventory = process.env.TEST_INVENTORY_LIST === '1';
 
 export default defineConfig({
+  tsconfig: '../../tsconfig.workspace-src.json',
   testDir: './e2e',
   testMatch: inventory
     ? ['**/sync/*.spec.ts', '**/shell/*.spec.ts', '**/desktop-screenshots/*.spec.ts']
