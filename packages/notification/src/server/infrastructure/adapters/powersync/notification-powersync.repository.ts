@@ -5,8 +5,8 @@ import type {
   NotificationServerDTO,
   NotificationType,
   NotificationChannelType,
-} from '@memoflow/contracts/notification';
-import type { ImportanceLevel, UrgencyLevel } from '@memoflow/contracts/shared';
+} from '@memoflow/notification-contracts';
+import type { ImportanceLevel, UrgencyLevel } from '@memoflow/shared-primitives';
 import type {
   INotificationRepository,
   NotificationDeliveryUsage,
@@ -127,7 +127,7 @@ function hydrateNotification(row: NotificationRow): Notification {
   });
 }
 
-import { NotificationOutboxDispatchInputSchema } from '@memoflow/contracts/reliable-messaging';
+import { NotificationOutboxDispatchInputSchema } from '@memoflow/reliable-messaging-contracts';
 import { randomUUID } from 'crypto';
 import type { NotificationMetricsService } from '../../../domain/services/notification-metrics-service';
 

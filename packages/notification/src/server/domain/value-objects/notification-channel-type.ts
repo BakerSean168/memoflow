@@ -1,7 +1,7 @@
 import {
   NotificationChannelType as NotificationChannelTypeContract,
   type NotificationChannelType as INotificationChannelType,
-} from '@memoflow/contracts/notification';
+} from '@memoflow/notification-contracts';
 
 /**
  * 📝 通知渠道类型 - 通知的投递渠道

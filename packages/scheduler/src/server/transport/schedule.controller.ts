@@ -1,5 +1,5 @@
 import type { Context } from '@memoflow/contracts/shared';
-import type { ScheduledInvocationDiagnosticQuery } from '@memoflow/contracts/schedule';
+import type { ScheduledInvocationDiagnosticQuery } from '@memoflow/schedule-contracts';
 import type { SchedulerApplicationPort } from '../application';
 
 /** Read-only canonical Scheduler diagnostics controller. */

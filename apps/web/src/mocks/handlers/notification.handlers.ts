@@ -6,7 +6,10 @@
  */
 
 import { http, HttpResponse } from 'msw';
-import { createMockNotification, createMockNotificationList } from '@memoflow/contracts/mocks';
+import {
+  createMockNotification,
+  createMockNotificationList,
+} from '@memoflow/notification-contracts/test-support/notification.mock';
 
 const API_BASE = import.meta.env.VITE_API_BASE_URL || '/api/v1';
 const BASE = `${API_BASE}/notifications`;

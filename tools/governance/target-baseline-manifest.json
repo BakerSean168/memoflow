@@ -78,10 +78,19 @@
     "label-contracts": "runtime-lib",
     "data-portability-contracts": "runtime-lib",
     "goal-contracts": "runtime-lib",
+    "goal-ui": "runtime-lib",
+    "notification-contracts": "runtime-lib",
     "workspace-contracts": "runtime-lib",
     "desktop-contracts": "runtime-lib",
     "host-runtime": "runtime-lib",
-    "operations-contracts": "runtime-lib"
+    "relation-contracts": "runtime-lib",
+    "reliable-messaging-contracts": "runtime-lib",
+    "operations-contracts": "runtime-lib",
+    "schedule-contracts": "runtime-lib",
+    "schedule-client": "runtime-lib",
+    "schedule-ui": "ui-lib",
+    "notification-client": "runtime-lib",
+    "notification-ui": "ui-lib"
   },
   "exemptions": [
     {

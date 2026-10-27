@@ -3,7 +3,7 @@ import {
   NotificationChannelType as ChannelTypeEnum,
   NotificationRequestedSchema,
   NOTIFICATION_REQUESTED_MESSAGE_TYPE,
-} from '@memoflow/contracts/notification';
+} from '@memoflow/notification-contracts';
 import { Notification } from '../../domain/aggregates/notification';
 import { CreateNotificationUseCase } from '../../application/use-cases/commands/create-notification.use-case';
 import type { INotificationRepository } from '../../domain/repositories/i-notification-repository';
@@ -16,7 +16,7 @@ import {
   type CapabilityStatus,
   type LeaseClaim,
   type NotificationOutboxDispatchInput,
-} from '@memoflow/contracts/reliable-messaging';
+} from '@memoflow/reliable-messaging-contracts';
 import type {
   OperationAuditRecordInput,
   OperationAuditRepository,
@@ -653,7 +653,7 @@ export function createNotificationRuntimeContribution(
       );
     }
     const useCase = getCreateNotificationUseCase();
-    let envelope: import('@memoflow/contracts/notification').NotificationRequested;
+    let envelope: import('@memoflow/notification-contracts').NotificationRequested;
     try {
       envelope = NotificationRequestedSchema.parse(JSON.parse(sharedMsg.payloadJson));
     } catch (cause) {

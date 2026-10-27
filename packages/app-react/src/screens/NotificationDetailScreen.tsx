@@ -5,7 +5,7 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 
 import { presentErrorMessage } from '@memoflow/http-client';
 
-import type { NotificationClientDTO } from '@memoflow/contracts/notification';
+import type { NotificationClientDTO } from '@memoflow/notification-contracts';
 
 import { useAppSession } from '../hooks/useAppSession';
 import { useNotificationService } from '../hooks/useNotificationService';

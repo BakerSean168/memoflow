@@ -20,7 +20,7 @@ import type { TaskPlanState } from '../task-plan.state';
 import { TaskPlanStatus } from '../../../domain/value-objects/task-plan-status';
 import { TaskPlanId } from '../../../domain/value-objects/task-plan-id';
 import { IdentityId } from '@memoflow/domain-shared';
-import { ImportanceLevel } from '@memoflow/contracts/shared';
+import { ImportanceLevel } from '@memoflow/shared-primitives';
 import {
   DayOfWeek,
   TaskGoalBindingTrigger,

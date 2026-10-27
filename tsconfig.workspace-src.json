@@ -19,14 +19,36 @@
       "@memoflow/goal-client": ["./packages/goal-client/src/index.ts"],
       "@memoflow/label-contracts": ["./packages/label-contracts/src/index.ts"],
       "@memoflow/label-contracts/*": ["./packages/label-contracts/src/*.ts"],
+      "@memoflow/reliable-messaging-contracts": [
+        "./packages/reliable-messaging-contracts/src/index.ts"
+      ],
+      "@memoflow/reliable-messaging-contracts/*": [
+        "./packages/reliable-messaging-contracts/src/*.ts"
+      ],
       "@memoflow/operations-contracts": ["./packages/operations-contracts/src/index.ts"],
       "@memoflow/operations-contracts/*": ["./packages/operations-contracts/src/*.ts"],
+      "@memoflow/relation-contracts": ["./packages/relation-contracts/src/index.ts"],
+      "@memoflow/relation-contracts/*": ["./packages/relation-contracts/src/*.ts"],
       "@memoflow/data-portability-contracts": [
         "./packages/data-portability-contracts/src/index.ts"
       ],
       "@memoflow/data-portability-contracts/*": ["./packages/data-portability-contracts/src/*.ts"],
+      "@memoflow/goal-ui/composables/useGoal": ["./packages/goal-ui/src/composables/useGoal.ts"],
+      "@memoflow/goal-ui/*": ["./packages/goal-ui/src/*.ts"],
+      "@memoflow/goal-ui/host": ["./packages/goal-ui/src/goal-ui-host.ts"],
+      "@memoflow/goal-ui": ["./packages/goal-ui/src/index.ts"],
       "@memoflow/goal-contracts": ["./packages/goal-contracts/src/index.ts"],
       "@memoflow/goal-contracts/*": ["./packages/goal-contracts/src/*.ts"],
+      "@memoflow/notification-contracts": ["./packages/notification-contracts/src/index.ts"],
+      "@memoflow/notification-contracts/*": ["./packages/notification-contracts/src/*.ts"],
+      "@memoflow/notification-client": ["./packages/notification-client/src/index.ts"],
+      "@memoflow/notification-ui/*": ["./packages/notification-ui/src/*.ts"],
+      "@memoflow/notification-ui/host": ["./packages/notification-ui/src/notification-ui-host.ts"],
+      "@memoflow/notification-ui": ["./packages/notification-ui/src/index.ts"],
+      "@memoflow/schedule-contracts": ["./packages/schedule-contracts/src/index.ts"],
+      "@memoflow/schedule-contracts/*": ["./packages/schedule-contracts/src/*.ts"],
+      "@memoflow/schedule-client": ["./packages/schedule-client/src/index.ts"],
+      "@memoflow/schedule-ui": ["./packages/schedule-ui/src/index.ts"],
       "@memoflow/workspace-contracts": ["./packages/workspace-contracts/src/index.ts"],
       "@memoflow/workspace-contracts/*": ["./packages/workspace-contracts/src/*.ts"],
       "@memoflow/database": ["./packages/database/src/index.ts"],
@@ -44,9 +66,6 @@
       "@memoflow/utils": ["./packages/utils/src/index.ts"],
       "@memoflow/utils/*": ["./packages/utils/src/*/index.ts", "./packages/utils/src/*.ts"],
       "@memoflow/contracts": ["./packages/contracts/src/index.ts"],
-      "@memoflow/contracts/notification": [
-        "./packages/contracts/src/modules/notification/index.ts"
-      ],
       "@memoflow/contracts/cloud-auth": ["./packages/contracts/src/cloud-auth.ts"],
       "@memoflow/contracts/*": [
         "./packages/contracts/src/modules/*/index.ts",

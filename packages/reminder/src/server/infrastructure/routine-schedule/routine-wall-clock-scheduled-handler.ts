@@ -1,4 +1,4 @@
-import type { ScheduledHandlerRegistration } from '@memoflow/contracts/schedule';
+import type { ScheduledHandlerRegistration } from '@memoflow/schedule-contracts';
 import {
   ROUTINE_WALLCLOCK_HANDLER_KEY,
   ROUTINE_WALLCLOCK_PAYLOAD_VERSION,

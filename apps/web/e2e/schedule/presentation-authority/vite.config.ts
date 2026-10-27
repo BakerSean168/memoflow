@@ -5,7 +5,9 @@ import tailwindcss from '@tailwindcss/vite';
 import {
   createUiVueSourceAliasEntries,
   createWorkspaceSourceAliasEntries,
+  createReliableMessagingContractsAliasEntries,
   createOperationsContractsAliasEntries,
+  createNotificationContractsAliasEntries,
   createContractsAliasEntries,
 } from '../../../../../vite.workspace-aliases.ts';
 
@@ -24,14 +26,12 @@ export default defineConfig({
           importer?.includes(
             '/packages/app-vue/src/layouts/shell/previews/ScheduleCapsulePreview.vue',
           ) &&
-          source.endsWith('modules/schedule/composables/useCalendarView')
+          source === '@memoflow/schedule-ui'
         ) {
           return capsuleCalendarFixture;
         }
         if (
-          importer?.includes(
-            '/packages/app-vue/src/modules/schedule/views/ScheduleCalendarView.vue',
-          ) &&
+          importer?.includes('/packages/schedule-ui/src/views/ScheduleCalendarView.vue') &&
           source.endsWith('composables/useCalendarView')
         ) {
           return path.resolve(root, 'plannerCalendar.fixture.ts');
@@ -45,11 +45,17 @@ export default defineConfig({
   resolve: {
     alias: [
       ...createUiVueSourceAliasEntries(workspace),
+      ...createReliableMessagingContractsAliasEntries(workspace),
       ...createOperationsContractsAliasEntries(workspace),
+      ...createNotificationContractsAliasEntries(workspace),
       ...createContractsAliasEntries(workspace),
       ...createWorkspaceSourceAliasEntries(workspace, [
         ['@memoflow/app-vue', 'packages/app-vue/src'],
-        ['@memoflow/schedule/client', 'packages/schedule/src/client/index.ts'],
+        ['@memoflow/schedule-ui', 'packages/schedule-ui/src'],
+        ['@memoflow/schedule-contracts', 'packages/schedule-contracts/src/index.ts'],
+        ['@memoflow/schedule-client', 'packages/schedule-client/src/index.ts'],
+        ['@memoflow/goal-contracts', 'packages/goal-contracts/src/index.ts'],
+        ['@memoflow/http-client', 'packages/http-client/src/index.ts'],
         ['@memoflow/time', 'packages/time/src/index.ts'],
         ['@memoflow/utils/logger', 'packages/utils/src/logger/index.ts'],
         ['@memoflow/utils/shared', 'packages/utils/src/shared/index.ts'],

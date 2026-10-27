@@ -21,16 +21,40 @@
       "@memoflow/goal-client": ["./packages/goal-client/dist/index.d.ts"],
       "@memoflow/label-contracts": ["./packages/label-contracts/dist/index.d.ts"],
       "@memoflow/label-contracts/*": ["./packages/label-contracts/dist/*.d.ts"],
+      "@memoflow/reliable-messaging-contracts": [
+        "./packages/reliable-messaging-contracts/dist/index.d.ts"
+      ],
+      "@memoflow/reliable-messaging-contracts/*": [
+        "./packages/reliable-messaging-contracts/dist/*.d.ts"
+      ],
       "@memoflow/operations-contracts": ["./packages/operations-contracts/dist/index.d.ts"],
       "@memoflow/operations-contracts/*": ["./packages/operations-contracts/dist/*.d.ts"],
+      "@memoflow/relation-contracts": ["./packages/relation-contracts/dist/index.d.ts"],
+      "@memoflow/relation-contracts/*": ["./packages/relation-contracts/dist/*.d.ts"],
       "@memoflow/data-portability-contracts": [
         "./packages/data-portability-contracts/dist/index.d.ts"
       ],
       "@memoflow/data-portability-contracts/*": [
         "./packages/data-portability-contracts/dist/*.d.ts"
       ],
+      "@memoflow/goal-ui/composables/useGoal": ["./packages/goal-ui/dist/composables/useGoal.d.ts"],
+      "@memoflow/goal-ui/*": ["./packages/goal-ui/dist/*.d.ts"],
+      "@memoflow/goal-ui/host": ["./packages/goal-ui/dist/goal-ui-host.d.ts"],
+      "@memoflow/goal-ui": ["./packages/goal-ui/dist/index.d.ts"],
       "@memoflow/goal-contracts": ["./packages/goal-contracts/dist/index.d.ts"],
       "@memoflow/goal-contracts/*": ["./packages/goal-contracts/dist/*.d.ts"],
+      "@memoflow/notification-contracts": ["./packages/notification-contracts/dist/index.d.ts"],
+      "@memoflow/notification-contracts/*": ["./packages/notification-contracts/dist/*.d.ts"],
+      "@memoflow/notification-client": ["./packages/notification-client/dist/index.d.ts"],
+      "@memoflow/notification-ui/*": ["./packages/notification-ui/dist/*.d.ts"],
+      "@memoflow/notification-ui/host": [
+        "./packages/notification-ui/dist/notification-ui-host.d.ts"
+      ],
+      "@memoflow/notification-ui": ["./packages/notification-ui/dist/index.d.ts"],
+      "@memoflow/schedule-contracts": ["./packages/schedule-contracts/dist/index.d.ts"],
+      "@memoflow/schedule-contracts/*": ["./packages/schedule-contracts/dist/*.d.ts"],
+      "@memoflow/schedule-client": ["./packages/schedule-client/dist/index.d.ts"],
+      "@memoflow/schedule-ui": ["./packages/schedule-ui/dist/index.d.ts"],
       "@memoflow/workspace-contracts": ["./packages/workspace-contracts/dist/index.d.ts"],
       "@memoflow/workspace-contracts/*": ["./packages/workspace-contracts/dist/*.d.ts"],
       "@memoflow/database": ["./packages/database/dist/index.d.ts"],

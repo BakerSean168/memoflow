@@ -4,7 +4,7 @@ import type {
   SchedulingOwner,
   SchedulingPort,
   SchedulingReconcileReceipt,
-} from '@memoflow/contracts/schedule';
+} from '@memoflow/schedule-contracts';
 import {
   TASK_REMINDER_PAYLOAD_VERSION,
   TASK_SCHEDULING_OWNER_TYPE,

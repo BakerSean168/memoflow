@@ -49,10 +49,12 @@
       "id": "rule-normal-planner-scheduler-boundary-52",
       "contract": "normal-planner-scheduler-boundary",
       "reason": "normal-planner-scheduler-boundary: AST/type structural rules replacing source-text locks (#502).",
-      "file": "packages/app-vue/src/modules/schedule/views/ScheduleCalendarView.vue",
+      "file": "packages/schedule-ui/src/views/ScheduleCalendarView.vue",
       "forbidElements": ["DevScheduleDebugPanel"],
       "forbidIdentifiers": ["scheduleTasks"],
-      "requireExpressions": ["useStrictInject(GOAL_SERVICE_KEY, 'GoalService')"],
+      "requireExpressions": [
+        "scheduleUiHost.useStrictInject(scheduleUiHost.GOAL_SERVICE_KEY, 'GoalService')"
+      ],
       "requireExpressionPatterns": [
         {
           "pattern": "goal: \\{ updateGoal: goal\\.updateGoal\\.bind\\(goal\\) \\}"
@@ -63,7 +65,7 @@
       "id": "rule-normal-planner-scheduler-boundary-53",
       "contract": "normal-planner-scheduler-boundary",
       "reason": "normal-planner-scheduler-boundary: AST/type structural rules replacing source-text locks (#502).",
-      "file": "packages/app-vue/src/modules/schedule/composables/useCalendarView.ts",
+      "file": "packages/schedule-ui/src/composables/useCalendarView.ts",
       "forbidObjectProperties": [
         {
           "name": "scheduleTasks"
@@ -79,7 +81,12 @@
         }
       ],
       "requireIdentifiers": ["projections", "fetchRoutineUpcomingCached"],
-      "requireExpressions": ["useStrictInject(ROUTINE_SERVICE_KEY, 'RoutineService')"],
+      "requireExpressions": [],
+      "requireExpressionPatterns": [
+        {
+          "pattern": "scheduleUiHost\\.useStrictInject\\(\\s*scheduleUiHost\\.ROUTINE_SERVICE_KEY,\\s*'RoutineService',?\\s*\\)"
+        }
+      ],
       "requireObjectProperties": [
         {
           "name": "service",
@@ -91,7 +98,7 @@
       "id": "rule-scheduler-boundary-54",
       "contract": "scheduler-boundary",
       "reason": "scheduler-boundary: AST/type structural rules replacing source-text locks (#502).",
-      "file": "packages/app-vue/src/modules/schedule/planner/calendar-event-projection.ts",
+      "file": "packages/schedule-ui/src/planner/calendar-event-projection.ts",
       "forbidExpressionPatterns": [
         {
           "pattern": "import[^;]*(?:ScheduleTaskClientDTO|ScheduledInvocationContext|SchedulingPort)",
@@ -105,14 +112,14 @@
       "id": "rule-scheduler-boundary-55",
       "contract": "scheduler-boundary",
       "reason": "scheduler-boundary: AST/type structural rules replacing source-text locks (#502).",
-      "file": "packages/contracts/src/modules/schedule/planner.ts",
+      "file": "packages/schedule-contracts/src/planner.ts",
       "forbidCalls": ["readonly"]
     },
     {
       "id": "rule-planner-owner-command-boundary-56",
       "contract": "planner-owner-command-boundary",
       "reason": "planner-owner-command-boundary: AST/type structural rules replacing source-text locks (#502).",
-      "file": "packages/app-vue/src/modules/schedule/planner/planner-owner-command.router.ts",
+      "file": "packages/schedule-ui/src/planner/planner-owner-command.router.ts",
       "forbidClassPatterns": [
         {
           "pattern": "from ['\"]@memoflow\\/schedule-orchestration"
@@ -123,8 +130,8 @@
       "forbidCalls": ["createTask"],
       "requireTypeNodes": [
         "Pick<ScheduleClientPort, 'updateSchedule'>",
-        "Pick<TaskClientPort, 'rescheduleOccurrence'>",
-        "Pick<GoalClientPort, 'updateGoal'>"
+        "PlannerTaskCommandPort",
+        "PlannerGoalCommandPort"
       ]
     },
     {
@@ -194,7 +201,7 @@
       "id": "rule-notification-authority-66",
       "contract": "notification-authority",
       "reason": "notification-authority: AST/type structural rules replacing source-text locks (#502).",
-      "file": "packages/app-vue/src/modules/notification/stores/notification-store.ts",
+      "file": "packages/notification-ui/src/stores/notification-store.ts",
       "forbidElements": ["NotificationClientDTO"],
       "forbidObjectProperties": [
         {
@@ -210,7 +217,7 @@
       "id": "rule-notification-authority-67",
       "contract": "notification-authority",
       "reason": "notification-authority: AST/type structural rules replacing source-text locks (#502).",
-      "file": "packages/app-vue/src/modules/notification/initialization/index.ts",
+      "file": "packages/notification-ui/src/initialization/index.ts",
       "forbidExpressionPatterns": [
         {
           "pattern": "\\.\\./stores/notification-store"
@@ -231,7 +238,7 @@
       "id": "rule-notification-authority-68",
       "contract": "notification-authority",
       "reason": "notification-authority: AST/type structural rules replacing source-text locks (#502).",
-      "file": "packages/app-vue/src/modules/notification/initialization/notification-sse-invalidation-source.ts",
+      "file": "packages/notification-ui/src/initialization/notification-sse-invalidation-source.ts",
       "forbidIdentifiers": ["setQueryData", "invalidateQueries", "getQueryData"]
     },
     {
@@ -239,7 +246,7 @@
       "contract": "notification-authority",
       "reason": "notification-authority: AST/type structural rules replacing source-text locks (#502).",
       "scan": {
-        "root": "packages/app-vue/src/modules/notification",
+        "root": "packages/notification-ui/src",
         "extensions": [".ts", ".vue"],
         "exclude": [".spec.", "notificationCache.ts"]
       },

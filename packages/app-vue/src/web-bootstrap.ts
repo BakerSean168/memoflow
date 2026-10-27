@@ -1,7 +1,7 @@
 export { createAppRouter } from './router';
 
 export { useAuthenticationStore } from './modules/authentication/stores/authentication-store';
-export { createNotificationStartupHook } from './modules/notification/initialization';
+export { createNotificationStartupHook } from '@memoflow/notification-ui';
 export {
   presentBrowserSystemNotification,
   browserSystemNotificationPermission,
@@ -10,11 +10,11 @@ export {
   requestBrowserSystemNotificationPermission,
   setBrowserSystemNotificationEnabled,
   type BrowserSystemNotificationPermission,
-} from './modules/notification/browser-system-notification';
+} from '@memoflow/notification-ui';
 export {
   presentWebLiveNotification,
   type WebLiveNotificationPresenterOptions,
   type WebLiveNotificationPresentation,
-} from './modules/notification/web-live-notification';
+} from '@memoflow/notification-ui';
 export { usePresentationPreferenceStore } from './modules/setting/stores/presentation-preference-store';
 export { applyThemeMode } from './modules/setting/composables/useThemeSync';

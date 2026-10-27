@@ -122,15 +122,19 @@
           },
           {
             "sourceTag": "tier:core",
-            "notDependOnLibsWithTags": ["tier:client", "tier:server"]
+            "notDependOnLibsWithTags": ["tier:client", "tier:server", "tier:ui"]
           },
           {
             "sourceTag": "tier:client",
-            "notDependOnLibsWithTags": ["tier:server"]
+            "notDependOnLibsWithTags": ["tier:server", "tier:ui"]
           },
           {
             "sourceTag": "tier:server",
-            "notDependOnLibsWithTags": ["tier:client"]
+            "notDependOnLibsWithTags": ["tier:client", "tier:ui"]
+          },
+          {
+            "sourceTag": "tier:ui",
+            "notDependOnLibsWithTags": ["tier:server", "tier:ui"]
           },
           {
             "sourceTag": "scope:account",
@@ -150,22 +154,23 @@
               "scope:shared",
               "scope:patterns",
               "scope:goal",
+              "scope:ui",
               "scope:schedule",
               "scope:scheduler"
             ]
           },
           {
             "sourceTag": "scope:notification",
-            "onlyDependOnLibsWithTags": ["scope:shared", "scope:patterns", "scope:notification"]
-          },
-          {
-            "sourceTag": "scope:reminder",
             "onlyDependOnLibsWithTags": [
               "scope:shared",
               "scope:patterns",
-              "scope:reminder",
-              "scope:schedule"
+              "scope:notification",
+              "scope:ui"
             ]
+          },
+          {
+            "sourceTag": "scope:reminder",
+            "onlyDependOnLibsWithTags": ["scope:shared", "scope:patterns", "scope:reminder"]
           },
           {
             "sourceTag": "scope:repository",
@@ -173,7 +178,12 @@
           },
           {
             "sourceTag": "scope:schedule",
-            "onlyDependOnLibsWithTags": ["scope:shared", "scope:patterns", "scope:schedule"]
+            "onlyDependOnLibsWithTags": [
+              "scope:shared",
+              "scope:patterns",
+              "scope:schedule",
+              "scope:ui"
+            ]
           },
           {
             "sourceTag": "scope:scheduler",
@@ -189,7 +199,6 @@
               "scope:shared",
               "scope:patterns",
               "scope:task",
-              "scope:schedule",
               "scope:scheduler"
             ]
           },

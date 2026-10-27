@@ -13,7 +13,7 @@ import {
   goalTimeframeLabel,
   type GoalHomeProgressItem,
 } from '@memoflow/goal-contracts';
-import { useGoalHomeSummary } from '../../../modules/goal';
+import { useGoalHomeSummary } from '@memoflow/goal-ui';
 import {
   CapsulePreviewFooter,
   CapsulePreviewHeader,

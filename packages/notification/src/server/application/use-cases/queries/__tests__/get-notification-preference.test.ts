@@ -3,7 +3,7 @@ import { createMockRepo } from '@memoflow/test-utils/mocks';
 import { anIdentityId } from '@memoflow/test-utils/fixtures';
 import type { INotificationPreferenceRepository } from '../../../../domain/repositories/i-notification-preference-repository';
 import { NotificationPreference } from '../../../../domain/aggregates/notification-preference';
-import { NotificationChannelType } from '@memoflow/contracts/notification';
+import { NotificationChannelType } from '@memoflow/notification-contracts';
 import { GetNotificationPreferenceUseCase } from '../get-notification-preference.use-case';
 
 describe('GetNotificationPreferenceUseCase', () => {

@@ -1,4 +1,8 @@
 import { bootstrapVisualApp } from './app-environment';
+// The harness mounts App-vue surfaces directly, so it must also run the
+// renderer composition root that binds the @memoflow/schedule-ui host; the real
+// app gets this from packages/app-vue/src/index.ts.
+import '@memoflow/app-vue/di/schedule-ui-host';
 import { createApp, defineComponent, h } from 'vue';
 import { createPinia } from 'pinia';
 import { createI18n } from 'vue-i18n';
@@ -18,7 +22,7 @@ import { providePanelWidth } from '@memoflow/app-vue/layouts/shell/usePanelWidth
 import { useAuthenticationStore } from '@memoflow/app-vue/modules/authentication/stores/authentication-store';
 import { useAppShellStore } from '@memoflow/app-vue/layouts/shell/useAppShellStore';
 import RoutineConfigurationView from '@memoflow/app-vue/modules/routine/views/RoutineConfigurationView.vue';
-import NotificationListPage from '@memoflow/app-vue/modules/notification/views/NotificationListPage.vue';
+import { NotificationListPage } from '@memoflow/notification-ui';
 import KnowledgeProjectionWorkspaceView from '@memoflow/app-vue/modules/repository/views/KnowledgeProjectionWorkspaceView.vue';
 import UserSettingsView from '@memoflow/app-vue/modules/setting/views/UserSettingsView.vue';
 import TaskManagementView from '@memoflow/app-vue/modules/task/views/TaskManagementView.vue';
@@ -294,6 +298,21 @@ app.provide(keys.ROUTINE_SERVICE_KEY, {
 } as never);
 app.provide(keys.REPOSITORY_SERVICE_KEY, repository as never);
 app.provide(keys.TASK_SERVICE_KEY, task as never);
+// The shell capsules read the Schedule owner surface through its DI key; the
+// visual fixture has no schedule rows, so reads resolve to an empty window and
+// any write fails closed like the other fixtures.
+app.provide(keys.SCHEDULE_SERVICE_KEY, {
+  getSchedulesByAccount: async () => ok([]),
+  createSchedule: async () => {
+    throw new Error('Unexpected fixture write');
+  },
+  updateSchedule: async () => {
+    throw new Error('Unexpected fixture write');
+  },
+  deleteSchedule: async () => {
+    throw new Error('Unexpected fixture write');
+  },
+} as never);
 app.provide(keys.GOAL_SERVICE_KEY, {
   listGoals: async () => ok({ goals: [], pagination: { hasMore: false } }),
 } as never);

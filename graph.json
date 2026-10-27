@@ -26208,7 +26208,7 @@
                 }
               ],
               "outputs": [
-                "{workspaceRoot}/coverage/packages/schedule/src/application-client/planner-conflict-read-model.spec.ts"
+                "{workspaceRoot}/coverage/packages/schedule-client/src/application-client/planner-conflict-read-model.spec.ts"
               ],
               "metadata": {
                 "technologies": [
@@ -26227,7 +26227,7 @@
               "executor": "nx:run-commands",
               "options": {
                 "cwd": "packages/schedule",
-                "command": "vitest run src/application-client/planner-conflict-read-model.spec.ts --coverage.reportsDirectory=/home/dev/projects/_worktrees/memoflow-gov-7903/coverage/packages/schedule/src/application-client/planner-conflict-read-model.spec.ts"
+                "command": "vitest run src/application-client/planner-conflict-read-model.spec.ts --coverage.reportsDirectory=/home/dev/projects/_worktrees/memoflow-gov-7903/coverage/packages/schedule-client/src/application-client/planner-conflict-read-model.spec.ts"
               },
               "configurations": {},
               "parallelism": true
@@ -26271,7 +26271,7 @@
                 }
               ],
               "outputs": [
-                "{workspaceRoot}/coverage/packages/schedule/src/application-client/schedule-client-port-facade-dual.surface.spec.ts"
+                "{workspaceRoot}/coverage/packages/schedule-client/src/application-client/schedule-client-port-facade-dual.surface.spec.ts"
               ],
               "metadata": {
                 "technologies": [
@@ -26290,7 +26290,7 @@
               "executor": "nx:run-commands",
               "options": {
                 "cwd": "packages/schedule",
-                "command": "vitest run src/application-client/schedule-client-port-facade-dual.surface.spec.ts --coverage.reportsDirectory=/home/dev/projects/_worktrees/memoflow-gov-7903/coverage/packages/schedule/src/application-client/schedule-client-port-facade-dual.surface.spec.ts"
+                "command": "vitest run src/application-client/schedule-client-port-facade-dual.surface.spec.ts --coverage.reportsDirectory=/home/dev/projects/_worktrees/memoflow-gov-7903/coverage/packages/schedule-client/src/application-client/schedule-client-port-facade-dual.surface.spec.ts"
               },
               "configurations": {},
               "parallelism": true
@@ -26523,7 +26523,7 @@
                 }
               ],
               "outputs": [
-                "{workspaceRoot}/coverage/packages/schedule/src/infrastructure-client/adapters/ipc/schedule-ipc.adapter.surface.spec.ts"
+                "{workspaceRoot}/coverage/packages/schedule-client/src/infrastructure-client/adapters/ipc/schedule-ipc.adapter.surface.spec.ts"
               ],
               "metadata": {
                 "technologies": [
@@ -26542,7 +26542,7 @@
               "executor": "nx:run-commands",
               "options": {
                 "cwd": "packages/schedule",
-                "command": "vitest run src/infrastructure-client/adapters/ipc/schedule-ipc.adapter.surface.spec.ts --coverage.reportsDirectory=/home/dev/projects/_worktrees/memoflow-gov-7903/coverage/packages/schedule/src/infrastructure-client/adapters/ipc/schedule-ipc.adapter.surface.spec.ts"
+                "command": "vitest run src/infrastructure-client/adapters/ipc/schedule-ipc.adapter.surface.spec.ts --coverage.reportsDirectory=/home/dev/projects/_worktrees/memoflow-gov-7903/coverage/packages/schedule-client/src/infrastructure-client/adapters/ipc/schedule-ipc.adapter.surface.spec.ts"
               },
               "configurations": {},
               "parallelism": true
@@ -27286,12 +27286,12 @@
                 "{workspaceRoot}/coverage/packages/schedule/src/api/schedule-event.routes.spec.ts",
                 "{workspaceRoot}/coverage/packages/schedule/src/api/schedule-route-parsers-keep-boundary.surface.spec.ts",
                 "{workspaceRoot}/coverage/packages/schedule/src/api/schedule-void-success-envelope.surface.spec.ts",
-                "{workspaceRoot}/coverage/packages/schedule/src/application-client/planner-conflict-read-model.spec.ts",
-                "{workspaceRoot}/coverage/packages/schedule/src/application-client/schedule-client-port-facade-dual.surface.spec.ts",
+                "{workspaceRoot}/coverage/packages/schedule-client/src/application-client/planner-conflict-read-model.spec.ts",
+                "{workspaceRoot}/coverage/packages/schedule-client/src/application-client/schedule-client-port-facade-dual.surface.spec.ts",
                 "{workspaceRoot}/coverage/packages/schedule/src/electron/index-lifecycle.spec.ts",
                 "{workspaceRoot}/coverage/packages/schedule/src/electron/schedule-electron-delete-contract.spec.ts",
                 "{workspaceRoot}/coverage/packages/schedule/src/electron/schedule-electron.surface.spec.ts",
-                "{workspaceRoot}/coverage/packages/schedule/src/infrastructure-client/adapters/ipc/schedule-ipc.adapter.surface.spec.ts",
+                "{workspaceRoot}/coverage/packages/schedule-client/src/infrastructure-client/adapters/ipc/schedule-ipc.adapter.surface.spec.ts",
                 "{workspaceRoot}/coverage/packages/schedule/src/server/application/schedule-portability.spec.ts",
                 "{workspaceRoot}/coverage/packages/schedule/src/server/application/services/__tests__/schedule-domain-event-publisher.spec.ts",
                 "{workspaceRoot}/coverage/packages/schedule/src/server/application/services/__tests__/schedule-w5-concurrency-projection.spec.ts",

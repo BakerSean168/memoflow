@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { NotificationCategory, NotificationType } from '@memoflow/contracts/notification';
+import { NotificationCategory, NotificationType } from '@memoflow/notification-contracts';
 import { Notification } from '../notification';
 
 function createFact() {

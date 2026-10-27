@@ -1,4 +1,4 @@
-export * from '@memoflow/contracts/relation';
+export * from '@memoflow/relation-contracts';
 export type { AddRelationInput, RelationRepository } from './domain/relation-repository';
 export { RelationService } from './application/relation-service';
 export {
@@ -11,7 +11,7 @@ export {
   type KnowledgeDocumentRefResolver,
 } from './application/goal-knowledge-service';
 export { TaskKnowledgeService } from './application/task-knowledge-service';
-export type { TaskKnowledgeEdgeListReq, TaskKnowledgeEdgePage } from '@memoflow/contracts/relation';
+export type { TaskKnowledgeEdgeListReq, TaskKnowledgeEdgePage } from '@memoflow/relation-contracts';
 export { PrismaRelationRepository } from './infrastructure/prisma/prisma-relation.repository';
 export { PowerSyncRelationRepository } from './infrastructure/powersync/powersync-relation.repository';
 export { PrismaGoalRelationCleanupCapability } from './infrastructure/prisma/prisma-goal-relation-cleanup';

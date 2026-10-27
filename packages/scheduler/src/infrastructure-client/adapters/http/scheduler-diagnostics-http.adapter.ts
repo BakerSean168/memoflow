@@ -2,7 +2,7 @@ import type { Result } from '@memoflow/contracts/result';
 import type {
   ScheduledInvocationDiagnostic,
   ScheduledInvocationDiagnosticQuery,
-} from '@memoflow/contracts/schedule';
+} from '@memoflow/schedule-contracts';
 import type { IResultHttpClient } from '@memoflow/http-client';
 import type { SchedulerDiagnosticsApiClient } from '../types';
 

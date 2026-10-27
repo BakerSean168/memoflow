@@ -3,6 +3,12 @@
   "compilerOptions": {
     "paths": {
       "@/*": ["./src/*"],
+      "@memoflow/goal-ui/host": ["../goal-ui/dist/goal-ui-host.d.ts"],
+      "@memoflow/goal-ui": ["../goal-ui/dist/index.d.ts"],
+      "@memoflow/goal-ui/composables/useGoal": ["../goal-ui/dist/composables/useGoal.d.ts"],
+      "@memoflow/goal-ui/*": ["../goal-ui/dist/*.d.ts"],
+      "@memoflow/notification-ui/host": ["../notification-ui/dist/notification-ui-host.d.ts"],
+      "@memoflow/notification-ui": ["../notification-ui/dist/index.d.ts"],
       "@memoflow/contracts": ["../contracts/dist/index.d.ts"],
       "@memoflow/contracts/*": [
         "../contracts/dist/modules/*/index.d.ts",
@@ -19,8 +25,8 @@
       "@memoflow/http-client": ["../http-client/dist/index.d.ts"],
       "@memoflow/ai/client": ["../ai/dist/client/index.d.ts"],
       "@memoflow/goal-client": ["../goal-client/dist/index.d.ts"],
-      "@memoflow/schedule/client": ["../schedule/dist/client/index.d.ts"],
-      "@memoflow/notification/client": ["../notification/dist/client/index.d.ts"],
+      "@memoflow/schedule-client": ["../schedule-client/dist/index.d.ts"],
+      "@memoflow/notification-client": ["../notification-client/dist/index.d.ts"],
       "@memoflow/reminder/client": ["../reminder/dist/client/index.d.ts"],
       "@memoflow/task/client": ["../task/dist/client/index.d.ts"],
       "@memoflow/repository/client": ["../repository/dist/client/index.d.ts"]

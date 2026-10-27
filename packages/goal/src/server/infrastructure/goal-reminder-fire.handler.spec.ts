@@ -5,9 +5,9 @@ import {
   NotificationCategory,
   NotificationChannelType,
   NotificationType,
-} from '@memoflow/contracts/notification';
-import { buildIdempotencyKeyString } from '@memoflow/contracts/reliable-messaging';
-import type { BusinessOperationReceipt } from '@memoflow/contracts/reliable-messaging';
+} from '@memoflow/notification-contracts';
+import { buildIdempotencyKeyString } from '@memoflow/reliable-messaging-contracts';
+import type { BusinessOperationReceipt } from '@memoflow/reliable-messaging-contracts';
 import {
   GOAL_REMINDER_NOTIFICATION_SOURCE,
   GOAL_REMINDER_WORKFLOW_KEY,

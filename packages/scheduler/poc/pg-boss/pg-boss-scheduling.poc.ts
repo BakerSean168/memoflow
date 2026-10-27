@@ -2,7 +2,7 @@ import { randomUUID } from 'node:crypto';
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import { PgBoss } from 'pg-boss';
 import { prisma } from '@memoflow/database';
-import type { ScheduledIntent, SchedulingOwner } from '@memoflow/contracts/schedule';
+import type { ScheduledIntent, SchedulingOwner } from '@memoflow/schedule-contracts';
 import { TEST_DATABASE_URL } from '@memoflow/test-utils/setup/database';
 import {
   PGBOSS_POC_DLQ,

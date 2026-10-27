@@ -14,9 +14,12 @@
   },
   "dependencies": {
     "@memoflow/contracts": "workspace:*",
+    "@memoflow/notification-contracts": "workspace:*",
     "@memoflow/goal": "workspace:*",
     "@memoflow/goal-contracts": "workspace:*",
+    "@memoflow/reliable-messaging-contracts": "workspace:*",
     "@memoflow/reminder": "workspace:*",
+    "@memoflow/schedule-contracts": "workspace:*",
     "@memoflow/scheduler": "workspace:*",
     "@memoflow/task": "workspace:*",
     "@memoflow/utils": "workspace:*"

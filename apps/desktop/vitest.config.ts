@@ -5,6 +5,7 @@ import {
   createAppVueSourceAliasEntries,
   createWorkspaceSourceAliasEntries,
   createUiVueSourceAliasEntries,
+  createGoalUiAliasEntries,
 } from '../../vite.workspace-aliases.ts';
 
 // Desktop renderer tests import many workspace packages through their source
@@ -13,6 +14,8 @@ const desktopTestWorkspaceEntries = [
   ['@memoflow/account/client', 'packages/account/src/client/index.ts'],
   ['@memoflow/account/electron', 'packages/account/src/electron/index.ts'],
   ['@memoflow/goal-client', 'packages/goal-client/src/index.ts'],
+  ['@memoflow/notification-ui/host', 'packages/notification-ui/src/notification-ui-host.ts'],
+  ['@memoflow/notification-ui', 'packages/notification-ui/src/index.ts'],
   ['@memoflow/goal/electron', 'packages/goal/src/electron/index.ts'],
   ['@memoflow/goal/schedule-execution', 'packages/goal/src/schedule-execution/index.ts'],
   ['@memoflow/goal/schedule-projection', 'packages/goal/src/schedule-projection/index.ts'],
@@ -20,12 +23,12 @@ const desktopTestWorkspaceEntries = [
   ['@memoflow/task/electron', 'packages/task/src/electron/index.ts'],
   ['@memoflow/task/schedule-execution', 'packages/task/src/schedule-execution/index.ts'],
   ['@memoflow/task/schedule-projection', 'packages/task/src/schedule-projection/index.ts'],
-  ['@memoflow/schedule/client', 'packages/schedule/src/client/index.ts'],
+  ['@memoflow/schedule-client', 'packages/schedule-client/src/index.ts'],
   ['@memoflow/schedule/electron', 'packages/schedule/src/electron/index.ts'],
   ['@memoflow/reminder/routine-runtime', 'packages/reminder/src/routine-runtime/index.ts'],
   ['@memoflow/repository/client', 'packages/repository/src/client/index.ts'],
   ['@memoflow/repository/electron', 'packages/repository/src/electron/index.ts'],
-  ['@memoflow/notification/client', 'packages/notification/src/client/index.ts'],
+  ['@memoflow/notification-client', 'packages/notification-client/src/index.ts'],
   ['@memoflow/reminder/client', 'packages/reminder/src/client/index.ts'],
   ['@memoflow/notification/electron', 'packages/notification/src/electron/index.ts'],
   ['@memoflow/setting/client', 'packages/setting/src/client/index.ts'],
@@ -46,6 +49,7 @@ const sharedConfig = createSharedConfig({
   aliasEntries: [
     { find: /^electron$/, replacement: './test-support/electron.stub.ts' },
     ...createAppVueSourceAliasEntries(import.meta.dirname + '/../..'),
+    ...createGoalUiAliasEntries(import.meta.dirname + '/../..'),
     ...createUiVueSourceAliasEntries(import.meta.dirname + '/../..'),
     ...createWorkspaceSourceAliasEntries(
       import.meta.dirname + '/../..',

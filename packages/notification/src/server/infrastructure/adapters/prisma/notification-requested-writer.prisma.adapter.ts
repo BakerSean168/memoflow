@@ -15,14 +15,14 @@ import {
   NotificationRequestedOutboxInputSchema,
   type NotificationRequestedWriterPort,
   NOTIFICATION_REQUESTED_MESSAGE_TYPE,
-} from '@memoflow/contracts/notification';
+} from '@memoflow/notification-contracts';
 import {
   assertValidBusinessOperationReceipt,
   type BusinessOperationReceipt,
   mapOutboxStatusToBusinessOperationStatus,
   type OutboxMessageStatus,
   parseIdempotencyKeyString,
-} from '@memoflow/contracts/reliable-messaging';
+} from '@memoflow/reliable-messaging-contracts';
 
 /**
  * Map a shared `outboxMessage` row to a unified BusinessOperationReceipt used by

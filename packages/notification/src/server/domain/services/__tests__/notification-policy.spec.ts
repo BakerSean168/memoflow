@@ -7,7 +7,7 @@ import {
   NotificationPreferenceControl,
   NotificationPreferenceDecisionSource,
   type NotificationWorkflowDefinitionDTO,
-} from '@memoflow/contracts/notification';
+} from '@memoflow/notification-contracts';
 import { asHm, requireTimeZoneId } from '@memoflow/time';
 import { NotificationPolicy } from '../notification-policy';
 import { NotificationWorkflowCatalog } from '../notification-workflow-catalog';

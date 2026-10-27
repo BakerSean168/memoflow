@@ -49,8 +49,8 @@ import {
   ReplayDeadLetterInvocationSchema,
   ExecuteNotificationActionSchema,
   ExecuteNotificationActionResponseSchema,
-} from '@memoflow/contracts/notification';
-import { BusinessOperationReceiptSchema } from '@memoflow/contracts/reliable-messaging';
+} from '@memoflow/notification-contracts';
+import { BusinessOperationReceiptSchema } from '@memoflow/reliable-messaging-contracts';
 import {
   OperationAuditRecordSchema,
   OperationTimelineEntrySchema,

@@ -22,7 +22,7 @@ import type {
   TaskPlanCompletionPolicyValue,
   ChecklistItemDefinitionDTO,
 } from '@memoflow/contracts/task';
-import type { ImportanceLevel } from '@memoflow/contracts/shared';
+import type { ImportanceLevel } from '@memoflow/shared-primitives';
 import type { LabelClientDTO } from '@memoflow/label-contracts';
 import type { IdentityId, Instant, TaskPlanId } from '@memoflow/contracts/primitives';
 import type { GoalId, KeyResultId } from '@memoflow/goal-contracts';

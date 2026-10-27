@@ -259,7 +259,7 @@
       "evidence": [
         {
           "runner": "app-vue-unit",
-          "file": "packages/app-vue/src/modules/schedule/planner/planner-owner-command.router.spec.ts",
+          "file": "packages/schedule-ui/src/planner/planner-owner-command.router.spec.ts",
           "title": "Fixture J routes Task 14:00 -> 16:00 to Task owner and reverts optimistic UI on conflict"
         }
       ]

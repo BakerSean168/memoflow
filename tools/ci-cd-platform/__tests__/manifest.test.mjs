@@ -528,7 +528,7 @@ test('manifest carries laneDetails with skip reasons (VNext Q2)', async () => {
     base: 'base',
     head: 'head',
     scope,
-    files: ['packages/app-vue/src/modules/goal/components/dialogs/GoalDialog.stories.ts'],
+    files: ['packages/goal-ui/src/components/dialogs/GoalDialog.stories.ts'],
   });
   assert.equal(m.laneDetails.componentBrowser.required, true);
   assert.deepEqual(m.laneDetails.componentBrowser.targets, ['ui-storybook:test:interaction']);
@@ -633,7 +633,7 @@ test('migrated browser contracts run for production views and transitive package
   for (const [file, projects] of [
     ['apps/web/src/auth/WebAuthView.vue', ['web']],
     ['apps/web/src/auth/validation.ts', ['web']],
-    ['packages/app-vue/src/modules/goal/components/dialogs/GoalDialog.vue', ['app-vue']],
+    ['packages/goal-ui/src/components/dialogs/GoalDialog.vue', ['app-vue']],
     ['packages/ui-vue-shadcn/src/components/ui/input/Input.vue', ['ui-vue-shadcn']],
     ['packages/contracts/src/index.ts', ['contracts', 'ui-storybook']],
   ]) {

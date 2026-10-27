@@ -1,7 +1,7 @@
 import {
   ConflictSeverity as ConflictSeverityContract,
   type ConflictSeverity as IConflictSeverity,
-} from '@memoflow/contracts/schedule';
+} from '@memoflow/schedule-contracts';
 
 /**
  * 📝 冲突严重程度 - 日程冲突的严重程度分类

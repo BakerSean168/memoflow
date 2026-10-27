@@ -8,7 +8,7 @@ import { createTypedEventPublisher, eventBus } from '@memoflow/utils/domain';
 import type {
   NotificationDispatchDesktopEvent,
   NotificationEventMap,
-} from '@memoflow/contracts/notification';
+} from '@memoflow/notification-contracts';
 
 const notificationDispatchEvents =
   createTypedEventPublisher<

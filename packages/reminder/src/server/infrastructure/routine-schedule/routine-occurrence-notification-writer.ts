@@ -3,14 +3,14 @@ import {
   assertValidBusinessOperationReceipt,
   buildIdempotencyKeyString,
   type BusinessOperationReceipt,
-} from '@memoflow/contracts/reliable-messaging';
+} from '@memoflow/reliable-messaging-contracts';
 import {
   NotificationCategory,
   NotificationChannelType,
   NotificationType,
   type NotificationRequestedOutboxInput,
   type NotificationRequestedWriterPort,
-} from '@memoflow/contracts/notification';
+} from '@memoflow/notification-contracts';
 import type {
   RoutineOccurrenceNotificationRequestInput,
   RoutineOccurrenceNotificationWriterPort,

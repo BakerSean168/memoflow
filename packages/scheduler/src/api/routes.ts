@@ -6,7 +6,7 @@ import { RouteRegistrar, type OpenApiRegistryLike, successResponse } from '@memo
 import {
   ScheduledInvocationDiagnosticQuerySchema,
   ScheduledInvocationDiagnosticSchema,
-} from '@memoflow/contracts/schedule';
+} from '@memoflow/schedule-contracts';
 import type { SchedulerApplicationPort } from '../server/application';
 import { SchedulerController } from '../server/transport/schedule.controller';
 

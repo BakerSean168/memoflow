@@ -5,7 +5,6 @@
  */
 
 import { vi } from 'vitest';
-import { Goal } from '@memoflow/goal-client';
 import { GoalStatus, type GoalServerDTO, type GoalId } from '@memoflow/goal-contracts';
 import type { IdentityId } from '@memoflow/contracts/primitives';
 
@@ -128,34 +127,6 @@ export function createMockGoalDTO(overrides: Partial<GoalServerDTO> = {}): GoalS
     deletedAt: null,
     ...overrides,
   };
-}
-
-export function createMockGoal(overrides: Partial<GoalServerDTO> = {}): Goal {
-  const dto = createMockGoalDTO(overrides);
-  return Goal.load({
-    id: dto.id,
-    identityId: dto.identityId,
-    name: dto.name,
-    summary: dto.summary,
-    description: dto.description,
-    status: dto.status,
-    start: dto.start ?? null,
-    target: dto.target ?? null,
-    completedAt: dto.completedAt ?? null,
-    archivedAt: dto.archivedAt ?? null,
-    sortOrder: dto.sortOrder,
-    reminderConfig: null,
-    labels: [],
-    keyResults: [],
-    reviews: [],
-    totalKeyResults: 0,
-    completedKeyResults: 0,
-    overallProgress: 0,
-    version: dto.version,
-    createdAt: dto.createdAt,
-    updatedAt: dto.updatedAt,
-    deletedAt: dto.deletedAt ?? null,
-  });
 }
 
 /**

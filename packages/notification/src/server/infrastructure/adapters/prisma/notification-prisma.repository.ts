@@ -18,7 +18,7 @@ import type {
   NotificationCategory,
   NotificationEventMap,
   NotificationChannelType,
-} from '@memoflow/contracts/notification';
+} from '@memoflow/notification-contracts';
 import { Notification } from '../../../domain/aggregates/notification';
 import { createTypedEventPublisher, eventBus, flushDomainEvents } from '@memoflow/utils/domain';
 import {
@@ -26,7 +26,7 @@ import {
   type PrismaNotificationWithRelations,
 } from './mappers/notification-prisma.mapper';
 
-import { NotificationOutboxDispatchInputSchema } from '@memoflow/contracts/reliable-messaging';
+import { NotificationOutboxDispatchInputSchema } from '@memoflow/reliable-messaging-contracts';
 import { randomUUID } from 'crypto';
 
 const notificationEventPublisher = createTypedEventPublisher<NotificationEventMap>(eventBus);

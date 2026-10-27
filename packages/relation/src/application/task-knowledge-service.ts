@@ -3,7 +3,7 @@ import {
   TaskKnowledgeEdgePageSchema,
   type TaskKnowledgeEdgeListReq,
   type TaskKnowledgeEdgePage,
-} from '@memoflow/contracts/relation';
+} from '@memoflow/relation-contracts';
 import type { RelationRepository } from '../domain/relation-repository';
 
 /** Relation-owned typed Task -> Knowledge reader; durable identity is documentId. */

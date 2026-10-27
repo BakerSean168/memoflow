@@ -258,7 +258,7 @@ import {
   Target,
 } from '@lucide/vue';
 import { Button, Label, Popover, PopoverContent, PopoverTrigger } from '@memoflow/ui-vue-shadcn';
-import { ImportanceLevel } from '@memoflow/contracts/shared';
+import { ImportanceLevel } from '@memoflow/shared-primitives';
 import {
   LabelPicker,
   ProductAutoTextarea,

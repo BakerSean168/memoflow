@@ -15,13 +15,13 @@ import {
   NotificationRequestedSchema,
   NotificationType,
   type NotificationRequestedWriterPort,
-} from '@memoflow/contracts/notification';
-import { buildIdempotencyKeyString } from '@memoflow/contracts/reliable-messaging';
+} from '@memoflow/notification-contracts';
+import { buildIdempotencyKeyString } from '@memoflow/reliable-messaging-contracts';
 import type {
   ScheduledHandlerRegistration,
   ScheduledInvocationContext,
   ScheduledHandlerResult,
-} from '@memoflow/contracts/schedule';
+} from '@memoflow/schedule-contracts';
 import {
   ReminderTimeUnit,
   TaskOccurrenceStatus,

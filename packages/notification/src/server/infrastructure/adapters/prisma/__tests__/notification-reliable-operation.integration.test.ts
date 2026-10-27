@@ -1,12 +1,12 @@
 import { afterAll, beforeEach, describe, expect, it } from 'vitest';
 import { randomUUID } from 'crypto';
-import { buildIdempotencyKeyString } from '@memoflow/contracts/reliable-messaging';
+import { buildIdempotencyKeyString } from '@memoflow/reliable-messaging-contracts';
 import { createTimeContext } from '@memoflow/time';
 import {
   NotificationType,
   NotificationCategory,
   NotificationChannelType,
-} from '@memoflow/contracts/notification';
+} from '@memoflow/notification-contracts';
 import { NotificationReliableOperationPrismaAdapter } from '../notification-reliable-operation-prisma.adapter';
 import { NotificationPrismaRepository } from '../notification-prisma.repository';
 import { NotificationPreferencePrismaRepository } from '../notification-preference-prisma.repository';

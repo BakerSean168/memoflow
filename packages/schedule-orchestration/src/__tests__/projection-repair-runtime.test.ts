@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import type { SchedulingOwner, SchedulingReconcileReceipt } from '@memoflow/contracts/schedule';
+import type { SchedulingOwner, SchedulingReconcileReceipt } from '@memoflow/schedule-contracts';
 import { createCompositeRuntimeContribution } from '../runtime/composite-runtime';
 import {
   createProjectionRepairRuntime,

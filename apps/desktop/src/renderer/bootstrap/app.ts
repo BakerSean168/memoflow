@@ -13,7 +13,7 @@ import { readDesktopAccessSnapshot } from '@memoflow/app-vue/desktop';
 import {
   createNotificationStartupHook,
   createNotificationClickNavigation,
-} from '@memoflow/app-vue/modules/notification';
+} from '@memoflow/notification-ui';
 import { usePresentationPreferenceStore } from '@memoflow/app-vue/modules/setting';
 import { useAuthenticationStore } from '@memoflow/app-vue/modules/authentication';
 import { useAccountStore } from '@memoflow/app-vue/modules/account';

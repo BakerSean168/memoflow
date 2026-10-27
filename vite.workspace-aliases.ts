@@ -75,10 +75,6 @@ export function createContractsAliasEntries(workspaceRoot: string): Alias[] {
       replacement: `${contractsRoot}/primitives/$1`,
     },
     {
-      find: /^@memoflow\/contracts\/reliable-messaging$/,
-      replacement: `${contractsRoot}/modules/reliable-messaging/index.ts`,
-    },
-    {
       find: /^@memoflow\/contracts\/shared$/,
       replacement: `${contractsRoot}/shared/index.ts`,
     },
@@ -187,6 +183,24 @@ export function createLabelContractsAliasEntries(workspaceRoot: string): Alias[]
   ];
 }
 
+export function createRelationContractsAliasEntries(workspaceRoot: string): Alias[] {
+  const relationContractsRoot = resolveFromWorkspace(
+    workspaceRoot,
+    'packages/relation-contracts/src',
+  );
+
+  return [
+    {
+      find: /^@memoflow\/relation-contracts$/,
+      replacement: `${relationContractsRoot}/index.ts`,
+    },
+    {
+      find: /^@memoflow\/relation-contracts\/(.+)$/,
+      replacement: `${relationContractsRoot}/$1`,
+    },
+  ];
+}
+
 export function createDataPortabilityContractsAliasEntries(workspaceRoot: string): Alias[] {
   const dataPortabilityContractsRoot = resolveFromWorkspace(
     workspaceRoot,
@@ -201,6 +215,26 @@ export function createDataPortabilityContractsAliasEntries(workspaceRoot: string
     {
       find: /^@memoflow\/data-portability-contracts\/(.+)$/,
       replacement: `${dataPortabilityContractsRoot}/$1`,
+    },
+  ];
+}
+
+export function createGoalUiAliasEntries(workspaceRoot: string): Alias[] {
+  return [
+    {
+      find: /^@memoflow\/goal-ui\/host$/,
+      replacement: resolveFromWorkspace(workspaceRoot, 'packages/goal-ui/src/goal-ui-host.ts'),
+    },
+    {
+      find: /^@memoflow\/goal-ui\/composables\/useGoal$/,
+      replacement: resolveFromWorkspace(
+        workspaceRoot,
+        'packages/goal-ui/src/composables/useGoal.ts',
+      ),
+    },
+    {
+      find: /^@memoflow\/goal-ui$/,
+      replacement: resolveFromWorkspace(workspaceRoot, 'packages/goal-ui/src/index.ts'),
     },
   ];
 }
@@ -322,6 +356,67 @@ export function createAssetsAliasEntries(workspaceRoot: string): Alias[] {
   ];
 }
 
+export function createReliableMessagingContractsAliasEntries(workspaceRoot: string): Alias[] {
+  const reliableMessagingContractsRoot = resolveFromWorkspace(
+    workspaceRoot,
+    'packages/reliable-messaging-contracts/src',
+  );
+
+  return [
+    {
+      find: /^@memoflow\/reliable-messaging-contracts$/,
+      replacement: `${reliableMessagingContractsRoot}/index.ts`,
+    },
+    {
+      find: /^@memoflow\/reliable-messaging-contracts\/(.+)$/,
+      replacement: `${reliableMessagingContractsRoot}/$1`,
+    },
+  ];
+}
+
+export function createNotificationContractsAliasEntries(workspaceRoot: string): Alias[] {
+  const notificationContractsRoot = resolveFromWorkspace(
+    workspaceRoot,
+    'packages/notification-contracts/src',
+  );
+
+  return [
+    {
+      find: /^@memoflow\/notification-contracts$/,
+      replacement: `${notificationContractsRoot}/index.ts`,
+    },
+    {
+      find: /^@memoflow\/notification-contracts\/(.+)$/,
+      replacement: `${notificationContractsRoot}/$1`,
+    },
+  ];
+}
+
+export function createNotificationClientAliasEntries(workspaceRoot: string): Alias[] {
+  return [
+    {
+      find: /^@memoflow\/notification-client$/,
+      replacement: resolveFromWorkspace(workspaceRoot, 'packages/notification-client/src/index.ts'),
+    },
+  ];
+}
+
+export function createNotificationUiAliasEntries(workspaceRoot: string): Alias[] {
+  return [
+    {
+      find: /^@memoflow\/notification-ui\/host$/,
+      replacement: resolveFromWorkspace(
+        workspaceRoot,
+        'packages/notification-ui/src/notification-ui-host.ts',
+      ),
+    },
+    {
+      find: /^@memoflow\/notification-ui$/,
+      replacement: resolveFromWorkspace(workspaceRoot, 'packages/notification-ui/src/index.ts'),
+    },
+  ];
+}
+
 export function createOperationsContractsAliasEntries(workspaceRoot: string): Alias[] {
   const operationsContractsRoot = resolveFromWorkspace(
     workspaceRoot,
@@ -336,6 +431,33 @@ export function createOperationsContractsAliasEntries(workspaceRoot: string): Al
     {
       find: /^@memoflow\/operations-contracts\/(.+)$/,
       replacement: `${operationsContractsRoot}/$1`,
+    },
+  ];
+}
+
+export function createScheduleContractsAliasEntries(workspaceRoot: string): Alias[] {
+  const scheduleContractsRoot = resolveFromWorkspace(
+    workspaceRoot,
+    'packages/schedule-contracts/src',
+  );
+
+  return [
+    {
+      find: /^@memoflow\/schedule-contracts$/,
+      replacement: `${scheduleContractsRoot}/index.ts`,
+    },
+    {
+      find: /^@memoflow\/schedule-contracts\/(.+)$/,
+      replacement: `${scheduleContractsRoot}/$1`,
+    },
+  ];
+}
+
+export function createScheduleUiAliasEntries(workspaceRoot: string): Alias[] {
+  return [
+    {
+      find: /^@memoflow\/schedule-ui$/,
+      replacement: resolveFromWorkspace(workspaceRoot, 'packages/schedule-ui/src/index.ts'),
     },
   ];
 }

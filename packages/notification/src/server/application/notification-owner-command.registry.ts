@@ -1,7 +1,7 @@
 import type {
   NotificationActionIntent,
   NotificationEntityRef,
-} from '@memoflow/contracts/notification';
+} from '@memoflow/notification-contracts';
 import type { JsonValue } from '@memoflow/contracts/result';
 
 interface InputSchema<T> {

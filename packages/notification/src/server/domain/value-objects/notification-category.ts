@@ -1,7 +1,7 @@
 import {
   NotificationCategory as NotificationCategoryContract,
   type NotificationCategory as INotificationCategory,
-} from '@memoflow/contracts/notification';
+} from '@memoflow/notification-contracts';
 
 /**
  * 📝 通知分类 - 通知所属的业务分类

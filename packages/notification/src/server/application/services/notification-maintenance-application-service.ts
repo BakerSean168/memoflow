@@ -3,7 +3,7 @@ import type {
   DeleteNotificationsBatchReq,
   NotificationCategory,
   NotificationClientDTO,
-} from '@memoflow/contracts/notification';
+} from '@memoflow/notification-contracts';
 import type { Result } from '@memoflow/contracts/result';
 import { fail, ok } from '@memoflow/contracts/result';
 import { toNotificationClientDTO } from '../use-cases/commands/notification-dto-converters';

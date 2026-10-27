@@ -1,3 +1,4 @@
+import { installGoalUiHost } from '../di/goal-ui-host';
 import { flushPromises, mount } from '@vue/test-utils';
 import { createI18n } from 'vue-i18n';
 import { createPinia, setActivePinia } from 'pinia';
@@ -15,22 +16,22 @@ import {
 } from 'vue';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { providePanelWidth } from '../layouts/shell/usePanelWidth';
-import GoalModuleLayout from '../modules/goal/views/GoalModuleLayout.vue';
-import GoalDialog from '../modules/goal/components/dialogs/GoalDialog.vue';
+import { GoalModuleLayout } from '@memoflow/goal-ui';
+import { GoalDialog } from '@memoflow/goal-ui';
 import { productionLocaleMessages } from '../locales/production-messages';
-import { useGoal } from '../modules/goal/composables/useGoal';
+import { useGoal } from '@memoflow/goal-ui/composables/useGoal';
 import { createMockGoal } from '@memoflow/goal-contracts/test-support/goal.mock';
 import { GOAL_DRAFT_CHECKPOINT_KEY } from '../di/keys';
-import type { GoalDraftCheckpointStore } from '../modules/goal/infrastructure/goal-draft-checkpoint.indexeddb';
+import type { GoalDraftCheckpointStore } from '@memoflow/goal-ui';
 import type { GoalDraftCheckpointSnapshot } from '@memoflow/goal-contracts';
 import type { GetGoalAggregateRes } from '@memoflow/goal-contracts';
-import type { GoalNativeEditSession } from '../modules/goal/composables/goalNativeEditSession';
+import type { GoalNativeEditSession } from '@memoflow/goal-ui';
 import { provideGoalNativeSurface } from '../layouts/shell/useGoalNativeSurface';
 import {
   GoalSurfaceStatusSinkKey,
   useGoalNativeSurface,
   type GoalSurfaceStatus,
-} from '../modules/goal';
+} from '@memoflow/goal-ui';
 import { useNativeBusinessPanelBridge } from '../layouts/shell/useNativeBusinessPanelBridge';
 import { useShellRouterSync } from '../layouts/shell/useShellRouterSync';
 import { useAppShellStore, MAX_BUSINESS_TABS } from '../layouts/shell/useAppShellStore';
@@ -49,7 +50,7 @@ const goalMocks = vi.hoisted(() => ({
   getGoalAggregateView: vi.fn(async (): Promise<GetGoalAggregateRes | null> => null),
 }));
 
-vi.mock('../modules/goal/composables/useGoal', async () => {
+vi.mock('@memoflow/goal-ui/composables/useGoal', async () => {
   const { ref: vueRef } = await import('vue');
   const state = {
     goals: vueRef([]),
@@ -1190,3 +1191,5 @@ describe('Goal native surface host (PVC-AI-8001)', () => {
     wrapper.unmount();
   });
 });
+
+installGoalUiHost();

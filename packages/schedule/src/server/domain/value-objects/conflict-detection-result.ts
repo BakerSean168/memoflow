@@ -10,7 +10,7 @@ import type {
   ConflictDetectionResult as IConflictDetectionResult,
   ConflictDetail,
   ConflictSuggestion,
-} from '@memoflow/contracts/schedule';
+} from '@memoflow/schedule-contracts';
 
 interface ConflictDetectionResultDTO {
   hasConflict: boolean;

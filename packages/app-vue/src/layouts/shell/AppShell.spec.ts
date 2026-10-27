@@ -15,12 +15,15 @@ import BusinessPanel from './BusinessPanel.vue';
 import { useAppShellStore } from './useAppShellStore';
 import { keyboard } from '../../shared/keyboard/runtime';
 import { installShellTestCleanup } from '../../test/shell-cleanup';
+import { installNotificationUiHost } from '../../di/notification-ui-host';
 
 installShellTestCleanup();
+installNotificationUiHost();
 
-vi.mock('../../modules/notification/composables/useNotificationUnreadQuery', async () => {
+vi.mock('@memoflow/notification-ui', async (importOriginal) => {
   const { ref: vueRef } = await import('vue');
   return {
+    ...(await importOriginal<typeof import('@memoflow/notification-ui')>()),
     useNotificationUnreadQuery: () => ({
       unreadCount: vueRef(0),
       hasUnread: vueRef(false),
@@ -29,7 +32,8 @@ vi.mock('../../modules/notification/composables/useNotificationUnreadQuery', asy
   };
 });
 
-vi.mock('../../modules/schedule/composables/useCalendarView', () => ({
+vi.mock('@memoflow/schedule-ui', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('@memoflow/schedule-ui')>()),
   formatScheduleCapsuleLabel: () => '',
   useCalendarView: () => ({
     getScheduleCapsuleSnapshot: () => null,

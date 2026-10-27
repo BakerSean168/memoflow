@@ -17,6 +17,7 @@ const EXECUTION_ROOTS = [
 const UI_ROOTS = [
   'packages/app-react/src/',
   'packages/app-vue/src/',
+  'packages/schedule-ui/src/',
   'apps/desktop/src/renderer/',
   'apps/web/src/',
 ];
@@ -88,7 +89,7 @@ export const TASK_GOAL_NULL_STRINGIFY_PATTERN =
 const GOAL_TIME_OWNER_ROOTS = [
   'packages/goal/src/',
   'packages/goal-contracts/src/',
-  'packages/app-vue/src/modules/goal/',
+  'packages/goal-ui/src/',
   'packages/app-react/src/screens/Goal',
 ];
 const GOAL_TIME_OWNER_FILES = new Set([
@@ -113,7 +114,7 @@ const GOAL_TIME_OWNER_FILES = new Set([
 const KR_MEASUREMENT_OWNER_ROOTS = [
   'packages/goal/src/',
   'packages/goal-contracts/src/',
-  'packages/app-vue/src/modules/goal/',
+  'packages/goal-ui/src/',
   'packages/app-react/src/screens/Goal',
 ];
 const KR_MEASUREMENT_OWNER_FILES = new Set([
@@ -136,10 +137,7 @@ const KR_MEASUREMENT_OWNER_FILES = new Set([
   'packages/app-vue/src/modules/ai/composables/useAIGoalWorkflow.ts',
   'packages/database/src/generated/prisma/schema.prisma',
 ]);
-const KR_CLIENT_SURFACE_ROOTS = [
-  'packages/app-vue/src/modules/goal/',
-  'packages/app-react/src/screens/Goal',
-];
+const KR_CLIENT_SURFACE_ROOTS = ['packages/goal-ui/src/', 'packages/app-react/src/screens/Goal'];
 const KR_CLIENT_SURFACE_FILES = new Set([
   'packages/app-react/src/components/GoalCard.tsx',
   'packages/app-react/src/hooks/useGoals.ts',
@@ -293,7 +291,7 @@ export function findCoreVnextArchitectureLockViolations(files) {
 
     if (
       relPath.startsWith('packages/notification/src/') ||
-      relPath.startsWith('packages/contracts/src/modules/notification/')
+      relPath.startsWith('packages/notification-contracts/src/')
     ) {
       pushPatternViolations(
         violations,
@@ -304,7 +302,10 @@ export function findCoreVnextArchitectureLockViolations(files) {
       );
     }
 
-    if (relPath.startsWith('packages/contracts/src/')) {
+    if (
+      relPath.startsWith('packages/contracts/src/') ||
+      relPath.startsWith('packages/schedule-contracts/src/')
+    ) {
       pushPatternViolations(
         violations,
         relPath,
@@ -450,10 +451,7 @@ export function findCoreVnextArchitectureLockViolations(files) {
       );
     }
 
-    if (
-      relPath.startsWith('packages/goal/src/') ||
-      relPath.startsWith('packages/app-vue/src/modules/goal/')
-    ) {
+    if (relPath.startsWith('packages/goal/src/') || relPath.startsWith('packages/goal-ui/src/')) {
       pushPatternViolations(
         violations,
         relPath,

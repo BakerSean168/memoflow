@@ -1,3 +1,4 @@
+import { installGoalUiHost, installNotificationUiHost } from '@memoflow/app-vue/di';
 /**
  * Desktop Platform DI — IPC Adapter Injection
  */
@@ -12,9 +13,9 @@ import { createGoalIpcClient } from '@memoflow/goal-client';
 import { createGoalKnowledgeIpcClient } from '@memoflow/relation/client';
 import { createLabelIpcClient } from '@memoflow/label/client';
 import { createTaskIpcClient } from '@memoflow/task/client';
-import { createScheduleIpcClient } from '@memoflow/schedule/client';
+import { createScheduleIpcClient } from '@memoflow/schedule-client';
 import { createRepositoryIpcClient } from '@memoflow/repository/client';
-import { createNotificationIpcClient } from '@memoflow/notification/client';
+import { createNotificationIpcClient } from '@memoflow/notification-client';
 import { createRoutineIpcClient } from '@memoflow/reminder/client';
 import { createSettingIpcClient } from '@memoflow/setting/client';
 import {
@@ -58,7 +59,7 @@ import {
   ASSISTANT_SURFACE_KEY,
   defaultModuleCapsules,
 } from '@memoflow/app-vue/di';
-import { createGoalDraftCheckpointStore } from '@memoflow/app-vue/modules/goal';
+import { createGoalDraftCheckpointStore } from '@memoflow/goal-ui';
 import { useAuthenticationStore } from '@memoflow/app-vue/modules/authentication';
 import { useAccountStore } from '@memoflow/app-vue/modules/account';
 import { readDesktopAccessSnapshot } from '@memoflow/app-vue/desktop';
@@ -86,6 +87,8 @@ export function installDesktopAppServices(
   app: App,
   initialSnapshot: DesktopAccessSnapshot | null = null,
 ): void {
+  installGoalUiHost();
+  installNotificationUiHost();
   const bridge = requireElectronBridge('installDesktopAppServices');
 
   const resultIpcClient = createResultIpcClient({ bridge });

@@ -1,3 +1,4 @@
+import { installGoalUiHost } from '../../di/goal-ui-host';
 /** @vitest-environment happy-dom */
 
 import { mount } from '@vue/test-utils';
@@ -5,7 +6,7 @@ import { createI18n } from 'vue-i18n';
 import { defineComponent, h, nextTick } from 'vue';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import TodayOverviewPanel from './TodayOverviewPanel.vue';
-import { GoalProgressWidget } from '../../modules/goal';
+import { GoalProgressWidget } from '@memoflow/goal-ui';
 import type { GoalHomeProgressItem } from '@memoflow/goal-contracts';
 
 const goalHomeMocks = vi.hoisted(() => ({
@@ -13,8 +14,8 @@ const goalHomeMocks = vi.hoisted(() => ({
   errorMessage: null as string | null,
 }));
 
-vi.mock('../../modules/goal', async (importOriginal) => {
-  const actual = await importOriginal<typeof import('../../modules/goal')>();
+vi.mock('@memoflow/goal-ui', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@memoflow/goal-ui')>();
   const { computed, ref } = await import('vue');
   return {
     ...actual,
@@ -255,3 +256,5 @@ describe('TodayOverviewPanel', () => {
     expect(goalHomeMocks.refresh).toHaveBeenCalledTimes(5);
   });
 });
+
+installGoalUiHost();

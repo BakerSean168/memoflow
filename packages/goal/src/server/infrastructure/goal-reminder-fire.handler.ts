@@ -37,13 +37,13 @@ import {
   type NotificationRequested,
   type NotificationRequestedOutboxInput,
   type NotificationRequestedWriterPort,
-} from '@memoflow/contracts/notification';
-import { buildIdempotencyKeyString } from '@memoflow/contracts/reliable-messaging';
+} from '@memoflow/notification-contracts';
+import { buildIdempotencyKeyString } from '@memoflow/reliable-messaging-contracts';
 import type {
   ScheduledHandlerRegistration,
   ScheduledHandlerResult,
   ScheduledInvocationContext,
-} from '@memoflow/contracts/schedule';
+} from '@memoflow/schedule-contracts';
 import { z } from 'zod';
 import type { IGoalRepository } from '../domain';
 import {

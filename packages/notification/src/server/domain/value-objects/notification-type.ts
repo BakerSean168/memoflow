@@ -1,7 +1,7 @@
 import {
   NotificationType as NotificationTypeContract,
   type NotificationType as INotificationType,
-} from '@memoflow/contracts/notification';
+} from '@memoflow/notification-contracts';
 
 /**
  * 📝 通知类型 - 通知的分类类型

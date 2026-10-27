@@ -6,7 +6,7 @@ import {
   type BusinessOperationReceipt,
   type GoalRecordReceiptInput,
   type GoalReliableOperationPort,
-} from '@memoflow/contracts/reliable-messaging';
+} from '@memoflow/reliable-messaging-contracts';
 
 export interface PowerSyncGoalOperationReceiptRow {
   idempotency_key: string;

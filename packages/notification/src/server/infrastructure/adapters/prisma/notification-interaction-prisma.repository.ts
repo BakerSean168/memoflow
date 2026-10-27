@@ -1,6 +1,6 @@
 import { randomUUID } from 'node:crypto';
 import type { Prisma, PrismaClient } from '@memoflow/database';
-import type { NotificationInteractionDTO } from '@memoflow/contracts/notification';
+import type { NotificationInteractionDTO } from '@memoflow/notification-contracts';
 import type {
   INotificationInteractionRepository,
   RecordNotificationInteractionInput,

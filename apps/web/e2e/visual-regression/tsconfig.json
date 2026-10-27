@@ -13,17 +13,19 @@
       ],
       "@memoflow/contracts/ai": ["../../../../packages/contracts/src/modules/ai/index.ts"],
       "@memoflow/goal-contracts": ["../../../../packages/goal-contracts/src/index.ts"],
-      "@memoflow/contracts/notification": [
-        "../../../../packages/contracts/src/modules/notification/index.ts"
+      "@memoflow/notification-contracts": [
+        "../../../../packages/notification-contracts/src/index.ts"
+      ],
+      "@memoflow/notification-contracts/*": [
+        "../../../../packages/notification-contracts/src/*.ts"
       ],
       "@memoflow/contracts/primitives": ["../../../../packages/contracts/src/primitives/index.ts"],
       "@memoflow/repository-contracts": [
         "../../../../packages/repository-contracts/src/index.ts"
       ],
       "@memoflow/contracts/result": ["../../../../packages/contracts/src/result/index.ts"],
-      "@memoflow/contracts/schedule": [
-        "../../../../packages/contracts/src/modules/schedule/index.ts"
-      ],
+      "@memoflow/schedule-contracts": ["../../../../packages/schedule-contracts/src/index.ts"],
+      "@memoflow/schedule-contracts/*": ["../../../../packages/schedule-contracts/src/*.ts"],
       "@memoflow/contracts/setting": [
         "../../../../packages/contracts/src/modules/setting/index.ts"
       ],
@@ -47,7 +49,7 @@
       "@memoflow/http-client": ["../../../../packages/http-client/src/index.ts"],
       "@memoflow/ai/client": ["../../../../packages/ai/dist/client/index.d.ts"],
       "@memoflow/goal-client": ["../../../../packages/goal-client/dist/index.d.ts"],
-      "@memoflow/schedule/client": ["../../../../packages/schedule/dist/client/index.d.ts"],
+      "@memoflow/schedule-client": ["../../../../packages/schedule-client/dist/index.d.ts"],
       "@memoflow/notification/client": ["../../../../packages/notification/dist/client/index.d.ts"],
       "@memoflow/reminder/client": ["../../../../packages/reminder/dist/client/index.d.ts"],
       "@memoflow/task/client": ["../../../../packages/task/dist/client/index.d.ts"],

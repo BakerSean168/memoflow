@@ -9,7 +9,7 @@ const canonicalNotificationFiles = [
   {
     relPath: 'packages/notification/src/server/infrastructure/runtime/notification.runtime.ts',
     content: `
-      import { NOTIFICATION_REQUESTED_MESSAGE_TYPE } from '@memoflow/contracts/notification';
+      import { NOTIFICATION_REQUESTED_MESSAGE_TYPE } from '@memoflow/notification-contracts';
       function getCreateNotificationUseCase() { return null; }
       async function processNotificationRequested() { getCreateNotificationUseCase(); }
     `,
@@ -131,11 +131,11 @@ describe('HARD-7102 core vNext architecture lock', () => {
         content: `const type = 'notification.dispatch';`,
       },
       {
-        relPath: 'packages/contracts/src/modules/schedule/vendor.ts',
+        relPath: 'packages/schedule-contracts/src/vendor.ts',
         content: `import type { EventInput } from '@fullcalendar/core';`,
       },
       {
-        relPath: 'packages/app-vue/src/modules/schedule/use-worker.ts',
+        relPath: 'packages/schedule-ui/src/use-worker.ts',
         content: `import type { SchedulingPort } from '@memoflow/scheduler/scheduling'; const x: ScheduledInvocation = y;`,
       },
       {
@@ -179,7 +179,7 @@ describe('HARD-7102 core vNext architecture lock', () => {
         content: `const base = kr.startingValue ?? kr.progressBaselineValue;`,
       },
       {
-        relPath: 'packages/app-vue/src/modules/goal/LegacyKr.vue',
+        relPath: 'packages/goal-ui/src/LegacyKr.vue',
         content: `const hidden = keyResult.trackingBaseValue;`,
       },
       {
@@ -257,7 +257,7 @@ describe('HARD-7102 core vNext architecture lock', () => {
         content: `http.get(TASKS, handler); http.get(\`${'${TASKS}'}/:taskId\`, handler);`,
       },
       {
-        relPath: 'packages/contracts/src/modules/schedule/product-time.ts',
+        relPath: 'packages/schedule-contracts/src/product-time.ts',
         content: `export interface RecurrenceRule { frequency: 'daily' | 'weekly'; }`,
       },
       {

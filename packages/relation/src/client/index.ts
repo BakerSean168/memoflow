@@ -6,7 +6,7 @@ import type {
   GoalKnowledgeListReq,
   GoalKnowledgeRelation,
   GoalsForKnowledgeReq,
-} from '@memoflow/contracts/relation';
+} from '@memoflow/relation-contracts';
 import type { Result } from '@memoflow/contracts/result';
 
 export interface GoalKnowledgeClientPort {

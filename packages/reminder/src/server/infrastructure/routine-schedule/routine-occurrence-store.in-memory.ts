@@ -4,7 +4,7 @@ import {
   buildIdempotencyKeyString,
   LeaseFencingException,
   type BusinessOperationReceipt,
-} from '@memoflow/contracts/reliable-messaging';
+} from '@memoflow/reliable-messaging-contracts';
 import type {
   RoutineHistoryEntry,
   RoutineOccurrenceClaimInput,

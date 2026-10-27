@@ -1,3 +1,4 @@
+import { installGoalUiHost, installNotificationUiHost } from '@memoflow/app-vue/di';
 /**
  * Web Platform - full app DI container.
  *
@@ -8,7 +9,7 @@
  */
 
 import { ref, type App } from 'vue';
-import type { ExecuteNotificationActionReq } from '@memoflow/contracts/notification';
+import type { ExecuteNotificationActionReq } from '@memoflow/notification-contracts';
 import { createCloudAuthHttpClient, createExternalAgentHttpClient } from '@memoflow/cloud-auth';
 import { EXTERNAL_AGENT_SERVICE_KEY } from '@memoflow/app-vue/di';
 import {
@@ -67,7 +68,7 @@ const goalKnowledgeService = createLazyService(async () => {
 });
 
 const notificationService = createLazyService(async () => {
-  const { createNotificationHttpClient } = await import('@memoflow/notification/client');
+  const { createNotificationHttpClient } = await import('@memoflow/notification-client');
   return createNotificationHttpClient(resultHttpClient);
 });
 
@@ -86,7 +87,7 @@ const routineService = createLazyService(async () => {
 });
 
 const scheduleService = createLazyService(async () => {
-  const { createScheduleHttpClient } = await import('@memoflow/schedule/client');
+  const { createScheduleHttpClient } = await import('@memoflow/schedule-client');
   return createScheduleHttpClient(resultHttpClient);
 });
 
@@ -131,6 +132,8 @@ const taskService = createLazyService(async () => {
 });
 
 export function installAppServices(app: App): void {
+  installGoalUiHost();
+  installNotificationUiHost();
   app.provide(ACCOUNT_SERVICE_KEY, accountService);
   app.provide(AUTH_SERVICE_KEY, authService);
   app.provide(EXTERNAL_AGENT_SERVICE_KEY, createExternalAgentHttpClient(window.location.origin));

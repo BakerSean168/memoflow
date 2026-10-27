@@ -1,5 +1,5 @@
 import type { Prisma, PrismaClient, OutboxMessage } from '@memoflow/database';
-import { NOTIFICATION_REQUESTED_MESSAGE_TYPE } from '@memoflow/contracts/notification';
+import { NOTIFICATION_REQUESTED_MESSAGE_TYPE } from '@memoflow/notification-contracts';
 import {
   assertValidBusinessOperationReceipt,
   buildIdempotencyKeyString,
@@ -7,7 +7,7 @@ import {
   parseIdempotencyKeyString,
   type BusinessOperationReceipt,
   type OutboxMessageStatus,
-} from '@memoflow/contracts/reliable-messaging';
+} from '@memoflow/reliable-messaging-contracts';
 import type { RoutineOccurrenceTransactionHandle } from '../../domain/ports/routine-occurrence-store.port';
 import type {
   RoutineOccurrenceNotificationRequestInput,

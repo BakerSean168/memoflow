@@ -6,7 +6,9 @@ import path from 'node:path';
 import {
   createAppVueSourceAliasEntries,
   createAssetsAliasEntries,
+  createReliableMessagingContractsAliasEntries,
   createOperationsContractsAliasEntries,
+  createNotificationContractsAliasEntries,
   createContractsAliasEntries,
   createUiVueSourceAliasEntries,
   createWorkspaceSourceAliasEntries,
@@ -101,12 +103,18 @@ const webDevWorkspaceEntries = [
   ],
   ['@memoflow/transport-contracts', 'packages/transport-contracts/src/index.ts'],
   ['@memoflow/label-contracts', 'packages/label-contracts/src/index.ts'],
+  ['@memoflow/relation-contracts', 'packages/relation-contracts/src/index.ts'],
   ['@memoflow/data-portability-contracts', 'packages/data-portability-contracts/src/index.ts'],
   [
     '@memoflow/goal-contracts/test-support/goal.mock',
     'packages/goal-contracts/src/test-support/goal.mock.ts',
   ],
   ['@memoflow/goal-contracts', 'packages/goal-contracts/src/index.ts'],
+  ['@memoflow/goal-ui/composables/useGoal', 'packages/goal-ui/src/composables/useGoal.ts'],
+  ['@memoflow/goal-ui/host', 'packages/goal-ui/src/goal-ui-host.ts'],
+  ['@memoflow/notification-ui/host', 'packages/notification-ui/src/notification-ui-host.ts'],
+  ['@memoflow/notification-ui', 'packages/notification-ui/src/index.ts'],
+  ['@memoflow/goal-ui', 'packages/goal-ui/src/index.ts'],
   ['@memoflow/workspace-contracts', 'packages/workspace-contracts/src/index.ts'],
   ['@memoflow/desktop-contracts/auth-context', 'packages/desktop-contracts/src/auth-context.ts'],
   ['@memoflow/desktop-contracts/database', 'packages/desktop-contracts/src/database.ts'],
@@ -131,8 +139,8 @@ const webDevWorkspaceEntries = [
   ['@memoflow/desktop-contracts', 'packages/desktop-contracts/src/index.ts'],
   ['@memoflow/host-runtime/electron-ipc', 'packages/host-runtime/src/electron-ipc/index.ts'],
   ['@memoflow/host-runtime', 'packages/host-runtime/src/index.ts'],
-  ['@memoflow/schedule/client', 'packages/schedule/src/client/index.ts'],
-  ['@memoflow/notification/client', 'packages/notification/src/client/index.ts'],
+  ['@memoflow/schedule-client', 'packages/schedule-client/src/index.ts'],
+  ['@memoflow/notification-client', 'packages/notification-client/src/index.ts'],
   ['@memoflow/repository/client', 'packages/repository/src/client/index.ts'],
   ['@memoflow/reminder/client', 'packages/reminder/src/client/index.ts'],
   ['@memoflow/task/client', 'packages/task/src/client/index.ts'],
@@ -209,7 +217,9 @@ export default defineConfig(({ mode, command }) => {
 
   const envSpecificAliases = isDev
     ? [
+        ...createReliableMessagingContractsAliasEntries(workspaceRoot),
         ...createOperationsContractsAliasEntries(workspaceRoot),
+        ...createNotificationContractsAliasEntries(workspaceRoot),
         ...createContractsAliasEntries(workspaceRoot),
       ]
     : [];

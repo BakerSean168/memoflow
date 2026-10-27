@@ -5,7 +5,7 @@ import type {
   GoalPortablePayloadV3,
 } from '@memoflow/goal-contracts';
 import { GoalPortablePayloadV3Schema, GoalStatus } from '@memoflow/goal-contracts';
-import { LabelPortablePayloadV3Schema } from '@memoflow/contracts/label';
+import { LabelPortablePayloadV3Schema } from '@memoflow/label-contracts';
 import type {
   PortableCapability,
   PortableCapabilityExecutionContext,

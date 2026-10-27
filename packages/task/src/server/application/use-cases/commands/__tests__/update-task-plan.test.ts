@@ -16,7 +16,7 @@ import {
 import type { ITaskPlanRepository } from '../../../../domain/repositories/i-task-plan-repository';
 import type { ITaskOccurrenceRepository } from '../../../../domain/repositories/i-task-occurrence-repository';
 import { UpdateTaskPlanUseCase } from '../update-task-plan.use-case';
-import { ImportanceLevel } from '@memoflow/contracts/shared';
+import { ImportanceLevel } from '@memoflow/shared-primitives';
 import {
   TaskGoalBindingTrigger,
   TaskPlanScheduleKind,

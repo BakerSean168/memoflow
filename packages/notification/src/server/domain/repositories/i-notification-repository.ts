@@ -9,9 +9,9 @@
  */
 
 import type { Notification } from '../aggregates/notification';
-import { NotificationCategory } from '@memoflow/contracts/notification';
-import type { NotificationChannelType } from '@memoflow/contracts/notification';
-import type { NotificationOutboxDispatchInput } from '@memoflow/contracts/reliable-messaging';
+import { NotificationCategory } from '@memoflow/notification-contracts';
+import type { NotificationChannelType } from '@memoflow/notification-contracts';
+import type { NotificationOutboxDispatchInput } from '@memoflow/reliable-messaging-contracts';
 import type { NotificationDeliveryDecision } from '../services/notification-policy';
 
 export interface NotificationOutboxDispatchPlan extends NotificationOutboxDispatchInput {

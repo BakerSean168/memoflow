@@ -5,7 +5,7 @@ import {
   GoalNativeSurfaceKey,
   type GoalNativeEditSession,
   type GoalNativeSurfaceHost,
-} from '../../modules/goal';
+} from '@memoflow/goal-ui';
 import { navigateBusinessSurface } from './surface-leave-protocol';
 import { useAppShellStore } from './useAppShellStore';
 

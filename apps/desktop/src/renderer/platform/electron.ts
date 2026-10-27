@@ -9,9 +9,9 @@ import type { App } from 'vue';
 import { RendererEventChannels } from '@memoflow/contracts/electron';
 
 import { useAccountStore } from '@memoflow/app-vue/modules/account';
-import { useGoalStore } from '@memoflow/app-vue/modules/goal';
+import { useGoalStore } from '@memoflow/goal-ui';
 import { useTaskStore } from '@memoflow/app-vue/modules/task';
-import { useScheduleStore } from '@memoflow/app-vue/modules/schedule';
+import { useScheduleStore } from '@memoflow/schedule-ui';
 // Residual 941: host bridge via getElectronBridge sole helper.
 import { getElectronBridge } from './electron-bridge';
 import { getDesktopServerStateRuntime, mapTablesToInvalidationIntents } from './server-state';

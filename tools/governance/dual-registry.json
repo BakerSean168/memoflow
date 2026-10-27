@@ -739,8 +739,8 @@
     },
     {
       "id": "r717",
-      "path": "packages/contracts/src/modules/schedule/api/dual-registry.surface.spec.ts",
-      "package": "packages/contracts",
+      "path": "packages/schedule-contracts/src/api/dual-registry.surface.spec.ts",
+      "package": "packages/schedule-contracts",
       "class": "retired",
       "sole": "requests/schedule-task-requests.ts",
       "blast": "surface lock (retired); suite describes=13",
@@ -1069,7 +1069,7 @@
     },
     {
       "id": "r298",
-      "path": "packages/schedule/src/application-client/schedule-client-port-facade-dual.surface.spec.ts",
+      "path": "packages/schedule-client/src/application-client/schedule-client-port-facade-dual.surface.spec.ts",
       "package": "packages/schedule",
       "class": "retired",
       "sole": "schedule-client-service.ts",

@@ -1,4 +1,4 @@
-import type { SchedulingPort } from '@memoflow/contracts/schedule';
+import type { SchedulingPort } from '@memoflow/schedule-contracts';
 import type { GoalScheduleProjectionSource } from '@memoflow/goal/schedule-projection';
 
 export interface GoalProjector {

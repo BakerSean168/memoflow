@@ -3,7 +3,7 @@ import type { ITaskPlanRepository } from '../../../domain/repositories/i-task-pl
 import type { ITaskOccurrenceRepository } from '../../../domain/repositories/i-task-occurrence-repository';
 import type { TaskFilters } from '../../../domain/repositories/i-task-plan-repository';
 import type { TaskPlanClientDTO, TaskOccurrenceClientDTO } from '@memoflow/contracts/task';
-import { ImportanceLevel } from '@memoflow/contracts/shared';
+import { ImportanceLevel } from '@memoflow/shared-primitives';
 import { TaskOccurrenceStatus, TaskPlanStatus } from '@memoflow/contracts/task';
 import type { Result } from '@memoflow/contracts/result';
 import { ok } from '@memoflow/contracts/result';

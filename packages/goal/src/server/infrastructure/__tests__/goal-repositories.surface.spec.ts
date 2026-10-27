@@ -3,7 +3,7 @@ import { resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import type { PrismaClient } from '@memoflow/database';
 import type { IElectronDatabase } from '@memoflow/contracts/electron';
-import type { GoalDependencyReadPort } from '@memoflow/contracts/reliable-messaging';
+import type { GoalDependencyReadPort } from '@memoflow/reliable-messaging-contracts';
 import { createTimeContext } from '@memoflow/time';
 import {
   createGoalPrismaRepositories,

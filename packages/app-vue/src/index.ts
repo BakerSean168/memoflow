@@ -1,3 +1,6 @@
+// Schedule surfaces are hosted by this composition root (Issue #630 §4.4).
+import './di/schedule-ui-host';
+
 // ── DI ──
 export {
   ACCOUNT_SERVICE_KEY,
@@ -49,10 +52,10 @@ export { createAppRouter } from './router';
 // ── Stores (consumed by app containers for DI/provide) ──
 export { useAuthenticationStore } from './modules/authentication';
 export { useAccountStore } from './modules/account';
-export { useGoalStore } from './modules/goal';
+export { useGoalStore } from '@memoflow/goal-ui';
 export { useTaskStore } from './modules/task';
-export { useScheduleStore } from './modules/schedule';
-export { useNotificationStore } from './modules/notification';
+export { useScheduleStore } from '@memoflow/schedule-ui';
+export { useNotificationStore } from '@memoflow/notification-ui';
 export { usePresentationPreferenceStore } from './modules/setting';
 
 // ── Startup hooks ──
@@ -61,8 +64,8 @@ export {
   createNotificationSseInvalidationSource,
   type NotificationStartupHookOptions,
   type NotificationSseInvalidationSourceOptions,
-} from './modules/notification';
-export { createGoalStartupHook } from './modules/goal';
+} from '@memoflow/notification-ui';
+export { createGoalStartupHook } from '@memoflow/goal-ui';
 
 // ── Server-state (RefArch Phase 5 Query Cache pilots) ──
 // Host composition surface only (§3.6): feature query keys and cache-patch helpers stay

@@ -5,7 +5,7 @@ import {
   type CreateRelationReq,
   type RelationDTO,
   type SubjectRef,
-} from '@memoflow/contracts/relation';
+} from '@memoflow/relation-contracts';
 import type { RelationRepository } from '../domain/relation-repository';
 
 export class RelationService {

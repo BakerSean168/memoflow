@@ -950,13 +950,13 @@
       "key": "dashboard.goalProgress.empty",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/widgets/GoalProgressWidget.vue"]
+      "files": ["packages/goal-ui/src/components/widgets/GoalProgressWidget.vue"]
     },
     {
       "key": "dashboard.goalProgress.title",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/widgets/GoalProgressWidget.vue"]
+      "files": ["packages/goal-ui/src/components/widgets/GoalProgressWidget.vue"]
     },
     {
       "key": "dashboard.stats.activeGoals",
@@ -1016,202 +1016,202 @@
       "key": "dashboard.viewAll",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/widgets/GoalProgressWidget.vue"]
+      "files": ["packages/goal-ui/src/components/widgets/GoalProgressWidget.vue"]
     },
     {
       "key": "goal.aiGenerateKR.cancel",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/AIGenerateKRButton.vue"]
+      "files": ["packages/goal-ui/src/components/AIGenerateKRButton.vue"]
     },
     {
       "key": "goal.aiGenerateKR.endDate",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/AIGenerateKRButton.vue"]
+      "files": ["packages/goal-ui/src/components/AIGenerateKRButton.vue"]
     },
     {
       "key": "goal.aiGenerateKR.error",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/AIGenerateKRButton.vue"]
+      "files": ["packages/goal-ui/src/components/AIGenerateKRButton.vue"]
     },
     {
       "key": "goal.aiGenerateKR.extraContext",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/AIGenerateKRButton.vue"]
+      "files": ["packages/goal-ui/src/components/AIGenerateKRButton.vue"]
     },
     {
       "key": "goal.aiGenerateKR.extraContextPlaceholder",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/AIGenerateKRButton.vue"]
+      "files": ["packages/goal-ui/src/components/AIGenerateKRButton.vue"]
     },
     {
       "key": "goal.aiGenerateKR.generate",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/AIGenerateKRButton.vue"]
+      "files": ["packages/goal-ui/src/components/AIGenerateKRButton.vue"]
     },
     {
       "key": "goal.aiGenerateKR.generating",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/AIGenerateKRButton.vue"]
+      "files": ["packages/goal-ui/src/components/AIGenerateKRButton.vue"]
     },
     {
       "key": "goal.aiGenerateKR.goalDesc",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/AIGenerateKRButton.vue"]
+      "files": ["packages/goal-ui/src/components/AIGenerateKRButton.vue"]
     },
     {
       "key": "goal.aiGenerateKR.goalDescPlaceholder",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/AIGenerateKRButton.vue"]
+      "files": ["packages/goal-ui/src/components/AIGenerateKRButton.vue"]
     },
     {
       "key": "goal.aiGenerateKR.goalTitle",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/AIGenerateKRButton.vue"]
+      "files": ["packages/goal-ui/src/components/AIGenerateKRButton.vue"]
     },
     {
       "key": "goal.aiGenerateKR.goalTitlePlaceholder",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/AIGenerateKRButton.vue"]
+      "files": ["packages/goal-ui/src/components/AIGenerateKRButton.vue"]
     },
     {
       "key": "goal.aiGenerateKR.quotaReset",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/AIGenerateKRButton.vue"]
+      "files": ["packages/goal-ui/src/components/AIGenerateKRButton.vue"]
     },
     {
       "key": "goal.aiGenerateKR.quotaUnit",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/AIGenerateKRButton.vue"]
+      "files": ["packages/goal-ui/src/components/AIGenerateKRButton.vue"]
     },
     {
       "key": "goal.aiGenerateKR.startDate",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/AIGenerateKRButton.vue"]
+      "files": ["packages/goal-ui/src/components/AIGenerateKRButton.vue"]
     },
     {
       "key": "goal.aiGenerateKR.subtitle",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/AIGenerateKRButton.vue"]
+      "files": ["packages/goal-ui/src/components/AIGenerateKRButton.vue"]
     },
     {
       "key": "goal.aiGenerateKR.title",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/AIGenerateKRButton.vue"]
+      "files": ["packages/goal-ui/src/components/AIGenerateKRButton.vue"]
     },
     {
       "key": "goal.aiGenerateKR.todayQuota",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/AIGenerateKRButton.vue"]
+      "files": ["packages/goal-ui/src/components/AIGenerateKRButton.vue"]
     },
     {
       "key": "goal.aiKeyResults.adoptSuccess",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/AIKeyResultsSection.vue"]
+      "files": ["packages/goal-ui/src/components/AIKeyResultsSection.vue"]
     },
     {
       "key": "goal.aiKeyResults.adoptedKR",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/AIKeyResultsSection.vue"]
+      "files": ["packages/goal-ui/src/components/AIKeyResultsSection.vue"]
     },
     {
       "key": "goal.aiKeyResults.count",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/AIKeyResultsSection.vue"]
+      "files": ["packages/goal-ui/src/components/AIKeyResultsSection.vue"]
     },
     {
       "key": "goal.aiKeyResults.generateSuccess",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/AIKeyResultsSection.vue"]
+      "files": ["packages/goal-ui/src/components/AIKeyResultsSection.vue"]
     },
     {
       "key": "goal.aiKeyResults.hint",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/AIKeyResultsSection.vue"]
+      "files": ["packages/goal-ui/src/components/AIKeyResultsSection.vue"]
     },
     {
       "key": "goal.aiKeyResults.hintText",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/AIKeyResultsSection.vue"]
+      "files": ["packages/goal-ui/src/components/AIKeyResultsSection.vue"]
     },
     {
       "key": "goal.aiKeyResults.manualAdd",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/AIKeyResultsSection.vue"]
+      "files": ["packages/goal-ui/src/components/AIKeyResultsSection.vue"]
     },
     {
       "key": "goal.aiKeyResults.removed",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/AIKeyResultsSection.vue"]
+      "files": ["packages/goal-ui/src/components/AIKeyResultsSection.vue"]
     },
     {
       "key": "goal.aiKeyResults.target",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/AIKeyResultsSection.vue"]
+      "files": ["packages/goal-ui/src/components/AIKeyResultsSection.vue"]
     },
     {
       "key": "goal.aiKeyResults.title",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/AIKeyResultsSection.vue"]
+      "files": ["packages/goal-ui/src/components/AIKeyResultsSection.vue"]
     },
     {
       "key": "goal.aiKeyResults.weight",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/AIKeyResultsSection.vue"]
+      "files": ["packages/goal-ui/src/components/AIKeyResultsSection.vue"]
     },
     {
       "key": "goal.cards.cardsRecordCard.recordValue",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/cards/GoalRecordCard.vue"]
+      "files": ["packages/goal-ui/src/components/cards/GoalRecordCard.vue"]
     },
     {
       "key": "goal.cards.daysLeft",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/cards/GoalCard.vue"]
+      "files": ["packages/goal-ui/src/components/cards/GoalCard.vue"]
     },
     {
       "key": "goal.cards.daysOverdue",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/cards/GoalCard.vue"]
+      "files": ["packages/goal-ui/src/components/cards/GoalCard.vue"]
     },
     {
       "key": "goal.cards.goalStatus.active",
       "zh": false,
       "en": false,
       "files": [
-        "packages/app-vue/src/modules/goal/components/cards/GoalCard.vue",
-        "packages/app-vue/src/modules/goal/components/cards/GoalInfoShowCard.vue",
-        "packages/app-vue/src/modules/goal/views/GoalDetailView.vue"
+        "packages/goal-ui/src/components/cards/GoalCard.vue",
+        "packages/goal-ui/src/components/cards/GoalInfoShowCard.vue",
+        "packages/goal-ui/src/views/GoalDetailView.vue"
       ]
     },
     {
@@ -1219,9 +1219,9 @@
       "zh": false,
       "en": false,
       "files": [
-        "packages/app-vue/src/modules/goal/components/cards/GoalCard.vue",
-        "packages/app-vue/src/modules/goal/components/cards/GoalInfoShowCard.vue",
-        "packages/app-vue/src/modules/goal/views/GoalDetailView.vue"
+        "packages/goal-ui/src/components/cards/GoalCard.vue",
+        "packages/goal-ui/src/components/cards/GoalInfoShowCard.vue",
+        "packages/goal-ui/src/views/GoalDetailView.vue"
       ]
     },
     {
@@ -1229,9 +1229,9 @@
       "zh": false,
       "en": false,
       "files": [
-        "packages/app-vue/src/modules/goal/components/cards/GoalCard.vue",
-        "packages/app-vue/src/modules/goal/components/cards/GoalInfoShowCard.vue",
-        "packages/app-vue/src/modules/goal/views/GoalDetailView.vue"
+        "packages/goal-ui/src/components/cards/GoalCard.vue",
+        "packages/goal-ui/src/components/cards/GoalInfoShowCard.vue",
+        "packages/goal-ui/src/views/GoalDetailView.vue"
       ]
     },
     {
@@ -1239,629 +1239,619 @@
       "zh": false,
       "en": false,
       "files": [
-        "packages/app-vue/src/modules/goal/components/cards/GoalCard.vue",
-        "packages/app-vue/src/modules/goal/views/GoalDetailView.vue"
+        "packages/goal-ui/src/components/cards/GoalCard.vue",
+        "packages/goal-ui/src/views/GoalDetailView.vue"
       ]
     },
     {
       "key": "goal.cards.infoShow.completion",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/cards/GoalInfoShowCard.vue"]
+      "files": ["packages/goal-ui/src/components/cards/GoalInfoShowCard.vue"]
     },
     {
       "key": "goal.cards.infoShow.keyResults",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/cards/GoalInfoShowCard.vue"]
+      "files": ["packages/goal-ui/src/components/cards/GoalInfoShowCard.vue"]
     },
     {
       "key": "goal.cards.keyResultCard.addRecord",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/cards/KeyResultCard.vue"]
+      "files": ["packages/goal-ui/src/components/cards/KeyResultCard.vue"]
     },
     {
       "key": "goal.cards.keyResultCard.weight",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/cards/KeyResultCard.vue"]
+      "files": ["packages/goal-ui/src/components/cards/KeyResultCard.vue"]
     },
     {
       "key": "goal.cards.keyResultsCount",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/cards/GoalCard.vue"]
+      "files": ["packages/goal-ui/src/components/cards/GoalCard.vue"]
     },
     {
       "key": "goal.cards.motivateCard.clickHint",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/cards/MotivateCard.vue"]
+      "files": ["packages/goal-ui/src/components/cards/MotivateCard.vue"]
     },
     {
       "key": "goal.cards.motivateCard.feasibility",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/cards/MotivateCard.vue"]
+      "files": ["packages/goal-ui/src/components/cards/MotivateCard.vue"]
     },
     {
       "key": "goal.cards.motivateCard.goalMotivation",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/cards/MotivateCard.vue"]
+      "files": ["packages/goal-ui/src/components/cards/MotivateCard.vue"]
     },
     {
       "key": "goal.cards.motivateCard.noContent",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/cards/MotivateCard.vue"]
+      "files": ["packages/goal-ui/src/components/cards/MotivateCard.vue"]
     },
     {
       "key": "goal.cards.motivateCard.sourceGoal",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/cards/MotivateCard.vue"]
+      "files": ["packages/goal-ui/src/components/cards/MotivateCard.vue"]
     },
     {
       "key": "goal.cards.recordCard.recordValue",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/GoalRecordCard.vue"]
+      "files": ["packages/goal-ui/src/components/GoalRecordCard.vue"]
     },
     {
       "key": "goal.cards.reviewListCard.achievement",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/cards/GoalReviewListCard.vue"]
+      "files": ["packages/goal-ui/src/components/cards/GoalReviewListCard.vue"]
     },
     {
       "key": "goal.cards.reviewListCard.close",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/cards/GoalReviewListCard.vue"]
+      "files": ["packages/goal-ui/src/components/cards/GoalReviewListCard.vue"]
     },
     {
       "key": "goal.cards.reviewListCard.count",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/cards/GoalReviewListCard.vue"]
+      "files": ["packages/goal-ui/src/components/cards/GoalReviewListCard.vue"]
     },
     {
       "key": "goal.cards.reviewListCard.createReview",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/cards/GoalReviewListCard.vue"]
+      "files": ["packages/goal-ui/src/components/cards/GoalReviewListCard.vue"]
     },
     {
       "key": "goal.cards.reviewListCard.delete",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/cards/GoalReviewListCard.vue"]
+      "files": ["packages/goal-ui/src/components/cards/GoalReviewListCard.vue"]
     },
     {
       "key": "goal.cards.reviewListCard.empty",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/cards/GoalReviewListCard.vue"]
+      "files": ["packages/goal-ui/src/components/cards/GoalReviewListCard.vue"]
     },
     {
       "key": "goal.cards.reviewListCard.goal",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/cards/GoalReviewListCard.vue"]
+      "files": ["packages/goal-ui/src/components/cards/GoalReviewListCard.vue"]
     },
     {
       "key": "goal.cards.reviewListCard.newReview",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/cards/GoalReviewListCard.vue"]
+      "files": ["packages/goal-ui/src/components/cards/GoalReviewListCard.vue"]
     },
     {
       "key": "goal.cards.reviewListCard.records",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/cards/GoalReviewListCard.vue"]
+      "files": ["packages/goal-ui/src/components/cards/GoalReviewListCard.vue"]
     },
     {
       "key": "goal.cards.reviewListCard.title",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/cards/GoalReviewListCard.vue"]
+      "files": ["packages/goal-ui/src/components/cards/GoalReviewListCard.vue"]
     },
     {
       "key": "goal.cards.reviewListCard.typeAdhoc",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/cards/GoalReviewListCard.vue"]
+      "files": ["packages/goal-ui/src/components/cards/GoalReviewListCard.vue"]
     },
     {
       "key": "goal.cards.reviewListCard.typeFinal",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/cards/GoalReviewListCard.vue"]
+      "files": ["packages/goal-ui/src/components/cards/GoalReviewListCard.vue"]
     },
     {
       "key": "goal.cards.reviewListCard.typeMonthly",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/cards/GoalReviewListCard.vue"]
+      "files": ["packages/goal-ui/src/components/cards/GoalReviewListCard.vue"]
     },
     {
       "key": "goal.cards.reviewListCard.typeQuarterly",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/cards/GoalReviewListCard.vue"]
+      "files": ["packages/goal-ui/src/components/cards/GoalReviewListCard.vue"]
     },
     {
       "key": "goal.cards.reviewListCard.typeWeekly",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/cards/GoalReviewListCard.vue"]
+      "files": ["packages/goal-ui/src/components/cards/GoalReviewListCard.vue"]
     },
     {
       "key": "goal.cards.reviewListCard.typeYearly",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/cards/GoalReviewListCard.vue"]
+      "files": ["packages/goal-ui/src/components/cards/GoalReviewListCard.vue"]
     },
     {
       "key": "goal.cards.reviewListCard.view",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/cards/GoalReviewListCard.vue"]
+      "files": ["packages/goal-ui/src/components/cards/GoalReviewListCard.vue"]
     },
     {
       "key": "goal.chart.goalGantt.completedLegend",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/echarts/GoalGanttChart.vue"]
+      "files": ["packages/goal-ui/src/components/echarts/GoalGanttChart.vue"]
     },
     {
       "key": "goal.chart.goalGantt.description",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/echarts/GoalGanttChart.vue"]
+      "files": ["packages/goal-ui/src/components/echarts/GoalGanttChart.vue"]
     },
     {
       "key": "goal.chart.goalGantt.goalAxis",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/echarts/GoalGanttChart.vue"]
+      "files": ["packages/goal-ui/src/components/echarts/GoalGanttChart.vue"]
     },
     {
       "key": "goal.chart.goalGantt.timeAxis",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/echarts/GoalGanttChart.vue"]
+      "files": ["packages/goal-ui/src/components/echarts/GoalGanttChart.vue"]
     },
     {
       "key": "goal.chart.goalGantt.title",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/echarts/GoalGanttChart.vue"]
+      "files": ["packages/goal-ui/src/components/echarts/GoalGanttChart.vue"]
     },
     {
       "key": "goal.chart.goalGantt.totalLegend",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/echarts/GoalGanttChart.vue"]
+      "files": ["packages/goal-ui/src/components/echarts/GoalGanttChart.vue"]
     },
     {
       "key": "goal.chart.krCompletion.completed",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/echarts/KrCompletionChart.vue"]
+      "files": ["packages/goal-ui/src/components/echarts/KrCompletionChart.vue"]
     },
     {
       "key": "goal.chart.krCompletion.inProgress",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/echarts/KrCompletionChart.vue"]
+      "files": ["packages/goal-ui/src/components/echarts/KrCompletionChart.vue"]
     },
     {
       "key": "goal.chart.krCompletion.notStarted",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/echarts/KrCompletionChart.vue"]
+      "files": ["packages/goal-ui/src/components/echarts/KrCompletionChart.vue"]
     },
     {
       "key": "goal.chart.krCompletion.seriesName",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/echarts/KrCompletionChart.vue"]
+      "files": ["packages/goal-ui/src/components/echarts/KrCompletionChart.vue"]
     },
     {
       "key": "goal.chart.krCompletion.subtextPrefix",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/echarts/KrCompletionChart.vue"]
+      "files": ["packages/goal-ui/src/components/echarts/KrCompletionChart.vue"]
     },
     {
       "key": "goal.chart.krCompletion.title",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/echarts/KrCompletionChart.vue"]
+      "files": ["packages/goal-ui/src/components/echarts/KrCompletionChart.vue"]
     },
     {
       "key": "goal.chart.krCompletion.tooltipUnit",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/echarts/KrCompletionChart.vue"]
+      "files": ["packages/goal-ui/src/components/echarts/KrCompletionChart.vue"]
     },
     {
       "key": "goal.chart.krProgressChart.title",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/echarts/KrProgressChart.vue"]
+      "files": ["packages/goal-ui/src/components/echarts/KrProgressChart.vue"]
     },
     {
       "key": "goal.chart.krProgressChart.tooltipCurrent",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/echarts/KrProgressChart.vue"]
+      "files": ["packages/goal-ui/src/components/echarts/KrProgressChart.vue"]
     },
     {
       "key": "goal.chart.krProgressChart.tooltipStart",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/echarts/KrProgressChart.vue"]
+      "files": ["packages/goal-ui/src/components/echarts/KrProgressChart.vue"]
     },
     {
       "key": "goal.chart.krProgressChart.tooltipTarget",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/echarts/KrProgressChart.vue"]
+      "files": ["packages/goal-ui/src/components/echarts/KrProgressChart.vue"]
     },
     {
       "key": "goal.chart.krWeightDistribution.seriesName",
       "zh": false,
       "en": false,
-      "files": [
-        "packages/app-vue/src/modules/goal/components/echarts/KrWeightDistributionChart.vue"
-      ]
+      "files": ["packages/goal-ui/src/components/echarts/KrWeightDistributionChart.vue"]
     },
     {
       "key": "goal.chart.krWeightDistribution.subtextPrefix",
       "zh": false,
       "en": false,
-      "files": [
-        "packages/app-vue/src/modules/goal/components/echarts/KrWeightDistributionChart.vue"
-      ]
+      "files": ["packages/goal-ui/src/components/echarts/KrWeightDistributionChart.vue"]
     },
     {
       "key": "goal.chart.krWeightDistribution.title",
       "zh": false,
       "en": false,
-      "files": [
-        "packages/app-vue/src/modules/goal/components/echarts/KrWeightDistributionChart.vue"
-      ]
+      "files": ["packages/goal-ui/src/components/echarts/KrWeightDistributionChart.vue"]
     },
     {
       "key": "goal.chart.krWeightDistribution.tooltipPercent",
       "zh": false,
       "en": false,
-      "files": [
-        "packages/app-vue/src/modules/goal/components/echarts/KrWeightDistributionChart.vue"
-      ]
+      "files": ["packages/goal-ui/src/components/echarts/KrWeightDistributionChart.vue"]
     },
     {
       "key": "goal.chart.krWeightDistribution.tooltipWeight",
       "zh": false,
       "en": false,
-      "files": [
-        "packages/app-vue/src/modules/goal/components/echarts/KrWeightDistributionChart.vue"
-      ]
+      "files": ["packages/goal-ui/src/components/echarts/KrWeightDistributionChart.vue"]
     },
     {
       "key": "goal.chart.periodBar.afternoon",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/echarts/PeriodBarChart.vue"]
+      "files": ["packages/goal-ui/src/components/echarts/PeriodBarChart.vue"]
     },
     {
       "key": "goal.chart.periodBar.evening",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/echarts/PeriodBarChart.vue"]
+      "files": ["packages/goal-ui/src/components/echarts/PeriodBarChart.vue"]
     },
     {
       "key": "goal.chart.periodBar.lateNight",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/echarts/PeriodBarChart.vue"]
+      "files": ["packages/goal-ui/src/components/echarts/PeriodBarChart.vue"]
     },
     {
       "key": "goal.chart.periodBar.morning",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/echarts/PeriodBarChart.vue"]
+      "files": ["packages/goal-ui/src/components/echarts/PeriodBarChart.vue"]
     },
     {
       "key": "goal.chart.periodBar.seriesName",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/echarts/PeriodBarChart.vue"]
+      "files": ["packages/goal-ui/src/components/echarts/PeriodBarChart.vue"]
     },
     {
       "key": "goal.chart.periodBar.title",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/echarts/PeriodBarChart.vue"]
+      "files": ["packages/goal-ui/src/components/echarts/PeriodBarChart.vue"]
     },
     {
       "key": "goal.chart.reviewProgress.ahead",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/echarts/ReviewProgressChart.vue"]
+      "files": ["packages/goal-ui/src/components/echarts/ReviewProgressChart.vue"]
     },
     {
       "key": "goal.chart.reviewProgress.current",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/echarts/ReviewProgressChart.vue"]
+      "files": ["packages/goal-ui/src/components/echarts/ReviewProgressChart.vue"]
     },
     {
       "key": "goal.chart.reviewProgress.delay",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/echarts/ReviewProgressChart.vue"]
+      "files": ["packages/goal-ui/src/components/echarts/ReviewProgressChart.vue"]
     },
     {
       "key": "goal.chart.reviewProgress.differentRanges",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/echarts/ReviewProgressChart.vue"]
+      "files": ["packages/goal-ui/src/components/echarts/ReviewProgressChart.vue"]
     },
     {
       "key": "goal.chart.reviewProgress.goalProgress",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/echarts/ReviewProgressChart.vue"]
+      "files": ["packages/goal-ui/src/components/echarts/ReviewProgressChart.vue"]
     },
     {
       "key": "goal.chart.reviewProgress.krProgress",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/echarts/ReviewProgressChart.vue"]
+      "files": ["packages/goal-ui/src/components/echarts/ReviewProgressChart.vue"]
     },
     {
       "key": "goal.chart.reviewProgress.lagging",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/echarts/ReviewProgressChart.vue"]
+      "files": ["packages/goal-ui/src/components/echarts/ReviewProgressChart.vue"]
     },
     {
       "key": "goal.chart.reviewProgress.normal",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/echarts/ReviewProgressChart.vue"]
+      "files": ["packages/goal-ui/src/components/echarts/ReviewProgressChart.vue"]
     },
     {
       "key": "goal.chart.reviewProgress.seriesName",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/echarts/ReviewProgressChart.vue"]
+      "files": ["packages/goal-ui/src/components/echarts/ReviewProgressChart.vue"]
     },
     {
       "key": "goal.chart.reviewProgress.target",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/echarts/ReviewProgressChart.vue"]
+      "files": ["packages/goal-ui/src/components/echarts/ReviewProgressChart.vue"]
     },
     {
       "key": "goal.chart.reviewProgress.timeProgress",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/echarts/ReviewProgressChart.vue"]
+      "files": ["packages/goal-ui/src/components/echarts/ReviewProgressChart.vue"]
     },
     {
       "key": "goal.chart.reviewProgress.title",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/echarts/ReviewProgressChart.vue"]
+      "files": ["packages/goal-ui/src/components/echarts/ReviewProgressChart.vue"]
     },
     {
       "key": "goal.chart.reviewProgress.vsTitle",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/echarts/ReviewProgressChart.vue"]
+      "files": ["packages/goal-ui/src/components/echarts/ReviewProgressChart.vue"]
     },
     {
       "key": "goal.chart.reviewProgress.yAxisName",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/echarts/ReviewProgressChart.vue"]
+      "files": ["packages/goal-ui/src/components/echarts/ReviewProgressChart.vue"]
     },
     {
       "key": "goal.comparison.activeDays",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/comparison/ComparisonStatsPanel.vue"]
+      "files": ["packages/goal-ui/src/components/comparison/ComparisonStatsPanel.vue"]
     },
     {
       "key": "goal.comparison.avgWeight",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/comparison/ComparisonStatsPanel.vue"]
+      "files": ["packages/goal-ui/src/components/comparison/ComparisonStatsPanel.vue"]
     },
     {
       "key": "goal.comparison.chartTab",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/comparison/ComparisonStatsPanel.vue"]
+      "files": ["packages/goal-ui/src/components/comparison/ComparisonStatsPanel.vue"]
     },
     {
       "key": "goal.comparison.createTime",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/comparison/ComparisonStatsPanel.vue"]
+      "files": ["packages/goal-ui/src/components/comparison/ComparisonStatsPanel.vue"]
     },
     {
       "key": "goal.comparison.dayUnit",
       "zh": false,
       "en": false,
       "files": [
-        "packages/app-vue/src/modules/goal/components/comparison/ComparisonStatsPanel.vue",
-        "packages/app-vue/src/modules/goal/widgets/GoalTimelineWidget.vue"
+        "packages/goal-ui/src/components/comparison/ComparisonStatsPanel.vue",
+        "packages/goal-ui/src/widgets/GoalTimelineWidget.vue"
       ]
     },
     {
       "key": "goal.comparison.fastestProgress",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/comparison/ComparisonStatsPanel.vue"]
+      "files": ["packages/goal-ui/src/components/comparison/ComparisonStatsPanel.vue"]
     },
     {
       "key": "goal.comparison.insights",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/comparison/ComparisonStatsPanel.vue"]
+      "files": ["packages/goal-ui/src/components/comparison/ComparisonStatsPanel.vue"]
     },
     {
       "key": "goal.comparison.krCount",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/comparison/ComparisonStatsPanel.vue"]
+      "files": ["packages/goal-ui/src/components/comparison/ComparisonStatsPanel.vue"]
     },
     {
       "key": "goal.comparison.krCountCompare",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/comparison/ComparisonStatsPanel.vue"]
+      "files": ["packages/goal-ui/src/components/comparison/ComparisonStatsPanel.vue"]
     },
     {
       "key": "goal.comparison.lastUpdate",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/comparison/ComparisonStatsPanel.vue"]
+      "files": ["packages/goal-ui/src/components/comparison/ComparisonStatsPanel.vue"]
     },
     {
       "key": "goal.comparison.longestActive",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/comparison/ComparisonStatsPanel.vue"]
+      "files": ["packages/goal-ui/src/components/comparison/ComparisonStatsPanel.vue"]
     },
     {
       "key": "goal.comparison.metricHeader",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/comparison/ComparisonStatsPanel.vue"]
+      "files": ["packages/goal-ui/src/components/comparison/ComparisonStatsPanel.vue"]
     },
     {
       "key": "goal.comparison.mostKR",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/comparison/ComparisonStatsPanel.vue"]
+      "files": ["packages/goal-ui/src/components/comparison/ComparisonStatsPanel.vue"]
     },
     {
       "key": "goal.comparison.overallProgress",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/comparison/ComparisonStatsPanel.vue"]
+      "files": ["packages/goal-ui/src/components/comparison/ComparisonStatsPanel.vue"]
     },
     {
       "key": "goal.comparison.progress",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/comparison/ComparisonStatsPanel.vue"]
+      "files": ["packages/goal-ui/src/components/comparison/ComparisonStatsPanel.vue"]
     },
     {
       "key": "goal.comparison.progressCompare",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/comparison/ComparisonStatsPanel.vue"]
+      "files": ["packages/goal-ui/src/components/comparison/ComparisonStatsPanel.vue"]
     },
     {
       "key": "goal.comparison.statsTitle",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/comparison/ComparisonStatsPanel.vue"]
+      "files": ["packages/goal-ui/src/components/comparison/ComparisonStatsPanel.vue"]
     },
     {
       "key": "goal.comparison.status",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/comparison/ComparisonStatsPanel.vue"]
+      "files": ["packages/goal-ui/src/components/comparison/ComparisonStatsPanel.vue"]
     },
     {
       "key": "goal.comparison.statusActive",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/comparison/ComparisonStatsPanel.vue"]
+      "files": ["packages/goal-ui/src/components/comparison/ComparisonStatsPanel.vue"]
     },
     {
       "key": "goal.comparison.statusArchived",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/comparison/ComparisonStatsPanel.vue"]
+      "files": ["packages/goal-ui/src/components/comparison/ComparisonStatsPanel.vue"]
     },
     {
       "key": "goal.comparison.statusCompleted",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/comparison/ComparisonStatsPanel.vue"]
+      "files": ["packages/goal-ui/src/components/comparison/ComparisonStatsPanel.vue"]
     },
     {
       "key": "goal.comparison.statusDraft",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/comparison/ComparisonStatsPanel.vue"]
+      "files": ["packages/goal-ui/src/components/comparison/ComparisonStatsPanel.vue"]
     },
     {
       "key": "goal.comparison.tableTab",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/comparison/ComparisonStatsPanel.vue"]
+      "files": ["packages/goal-ui/src/components/comparison/ComparisonStatsPanel.vue"]
     },
     {
       "key": "goal.comparison.unit",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/comparison/ComparisonStatsPanel.vue"]
+      "files": ["packages/goal-ui/src/components/comparison/ComparisonStatsPanel.vue"]
     },
     {
       "key": "goal.comparison.weightAnalysis",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/comparison/ComparisonStatsPanel.vue"]
+      "files": ["packages/goal-ui/src/components/comparison/ComparisonStatsPanel.vue"]
     },
     {
       "key": "goal.comparison.weightAvg",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/comparison/ComparisonStatsPanel.vue"]
+      "files": ["packages/goal-ui/src/components/comparison/ComparisonStatsPanel.vue"]
     },
     {
       "key": "goal.comparison.weightMax",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/comparison/ComparisonStatsPanel.vue"]
+      "files": ["packages/goal-ui/src/components/comparison/ComparisonStatsPanel.vue"]
     },
     {
       "key": "goal.comparison.weightMin",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/comparison/ComparisonStatsPanel.vue"]
+      "files": ["packages/goal-ui/src/components/comparison/ComparisonStatsPanel.vue"]
     },
     {
       "key": "goal.comparison.weightSum",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/comparison/ComparisonStatsPanel.vue"]
+      "files": ["packages/goal-ui/src/components/comparison/ComparisonStatsPanel.vue"]
     },
     {
       "key": "goal.comparison.weightSum2",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/comparison/ComparisonStatsPanel.vue"]
+      "files": ["packages/goal-ui/src/components/comparison/ComparisonStatsPanel.vue"]
     },
     {
       "key": "goal.dag.export",
       "zh": false,
       "en": false,
       "files": [
-        "packages/app-vue/src/modules/goal/components/dag/GoalDAGVisualization.vue",
+        "packages/goal-ui/src/components/dag/GoalDAGVisualization.vue",
         "packages/app-vue/src/modules/task/components/dag/TaskDAGVisualization.vue"
       ]
     },
@@ -1869,301 +1859,301 @@
       "key": "goal.dag.exportFailed",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/dag/GoalDAGVisualization.vue"]
+      "files": ["packages/goal-ui/src/components/dag/GoalDAGVisualization.vue"]
     },
     {
       "key": "goal.dag.forceLayout",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/dag/GoalDAGVisualization.vue"]
+      "files": ["packages/goal-ui/src/components/dag/GoalDAGVisualization.vue"]
     },
     {
       "key": "goal.dag.layeredLayout",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/dag/GoalDAGVisualization.vue"]
+      "files": ["packages/goal-ui/src/components/dag/GoalDAGVisualization.vue"]
     },
     {
       "key": "goal.dag.legendGoalNode",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/dag/GoalDAGVisualization.vue"]
+      "files": ["packages/goal-ui/src/components/dag/GoalDAGVisualization.vue"]
     },
     {
       "key": "goal.dag.legendHint",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/dag/GoalDAGVisualization.vue"]
+      "files": ["packages/goal-ui/src/components/dag/GoalDAGVisualization.vue"]
     },
     {
       "key": "goal.dag.legendWeight1to3",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/dag/GoalDAGVisualization.vue"]
+      "files": ["packages/goal-ui/src/components/dag/GoalDAGVisualization.vue"]
     },
     {
       "key": "goal.dag.legendWeight4to7",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/dag/GoalDAGVisualization.vue"]
+      "files": ["packages/goal-ui/src/components/dag/GoalDAGVisualization.vue"]
     },
     {
       "key": "goal.dag.legendWeight7to10",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/dag/GoalDAGVisualization.vue"]
+      "files": ["packages/goal-ui/src/components/dag/GoalDAGVisualization.vue"]
     },
     {
       "key": "goal.dag.loadFailed",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/dag/GoalDAGVisualization.vue"]
+      "files": ["packages/goal-ui/src/components/dag/GoalDAGVisualization.vue"]
     },
     {
       "key": "goal.dag.loading",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/dag/GoalDAGVisualization.vue"]
+      "files": ["packages/goal-ui/src/components/dag/GoalDAGVisualization.vue"]
     },
     {
       "key": "goal.dag.noKeyResult",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/dag/GoalDAGVisualization.vue"]
+      "files": ["packages/goal-ui/src/components/dag/GoalDAGVisualization.vue"]
     },
     {
       "key": "goal.dag.resetLayout",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/dag/GoalDAGVisualization.vue"]
+      "files": ["packages/goal-ui/src/components/dag/GoalDAGVisualization.vue"]
     },
     {
       "key": "goal.dag.retry",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/dag/GoalDAGVisualization.vue"]
+      "files": ["packages/goal-ui/src/components/dag/GoalDAGVisualization.vue"]
     },
     {
       "key": "goal.dag.title",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/dag/GoalDAGVisualization.vue"]
+      "files": ["packages/goal-ui/src/components/dag/GoalDAGVisualization.vue"]
     },
     {
       "key": "goal.dag.tooltipEdgeHint",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/dag/GoalDAGVisualization.vue"]
+      "files": ["packages/goal-ui/src/components/dag/GoalDAGVisualization.vue"]
     },
     {
       "key": "goal.dag.tooltipWeight",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/dag/GoalDAGVisualization.vue"]
+      "files": ["packages/goal-ui/src/components/dag/GoalDAGVisualization.vue"]
     },
     {
       "key": "goal.dag.tooltipWeightAllocation",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/dag/GoalDAGVisualization.vue"]
+      "files": ["packages/goal-ui/src/components/dag/GoalDAGVisualization.vue"]
     },
     {
       "key": "goal.dag.totalWeight",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/dag/GoalDAGVisualization.vue"]
+      "files": ["packages/goal-ui/src/components/dag/GoalDAGVisualization.vue"]
     },
     {
       "key": "goal.dag.weightInfo",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/dag/GoalDAGVisualization.vue"]
+      "files": ["packages/goal-ui/src/components/dag/GoalDAGVisualization.vue"]
     },
     {
       "key": "goal.dag.weightInfoDesc",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/dag/GoalDAGVisualization.vue"]
+      "files": ["packages/goal-ui/src/components/dag/GoalDAGVisualization.vue"]
     },
     {
       "key": "goal.detail.addKR",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/views/GoalDetailView.vue"]
+      "files": ["packages/goal-ui/src/views/GoalDetailView.vue"]
     },
     {
       "key": "goal.detail.backToList",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/views/GoalDetailView.vue"]
+      "files": ["packages/goal-ui/src/views/GoalDetailView.vue"]
     },
     {
       "key": "goal.detail.keyResults",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/views/GoalDetailView.vue"]
+      "files": ["packages/goal-ui/src/views/GoalDetailView.vue"]
     },
     {
       "key": "goal.detail.krCompleted",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/views/GoalDetailView.vue"]
+      "files": ["packages/goal-ui/src/views/GoalDetailView.vue"]
     },
     {
       "key": "goal.detail.noKrDescription",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/views/GoalDetailView.vue"]
+      "files": ["packages/goal-ui/src/views/GoalDetailView.vue"]
     },
     {
       "key": "goal.detail.noKrTitle",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/views/GoalDetailView.vue"]
+      "files": ["packages/goal-ui/src/views/GoalDetailView.vue"]
     },
     {
       "key": "goal.detail.noRecords",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/views/GoalDetailView.vue"]
+      "files": ["packages/goal-ui/src/views/GoalDetailView.vue"]
     },
     {
       "key": "goal.detail.noRemarks",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/views/GoalDetailView.vue"]
+      "files": ["packages/goal-ui/src/views/GoalDetailView.vue"]
     },
     {
       "key": "goal.detail.noReviews",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/views/GoalDetailView.vue"]
+      "files": ["packages/goal-ui/src/views/GoalDetailView.vue"]
     },
     {
       "key": "goal.detail.noSummary",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/views/GoalDetailView.vue"]
+      "files": ["packages/goal-ui/src/views/GoalDetailView.vue"]
     },
     {
       "key": "goal.detail.notFound",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/views/GoalDetailView.vue"]
+      "files": ["packages/goal-ui/src/views/GoalDetailView.vue"]
     },
     {
       "key": "goal.detail.progressRecords",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/views/GoalDetailView.vue"]
+      "files": ["packages/goal-ui/src/views/GoalDetailView.vue"]
     },
     {
       "key": "goal.detail.recordIncrement",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/views/GoalDetailView.vue"]
+      "files": ["packages/goal-ui/src/views/GoalDetailView.vue"]
     },
     {
       "key": "goal.detail.recordKeyResult",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/views/GoalDetailView.vue"]
+      "files": ["packages/goal-ui/src/views/GoalDetailView.vue"]
     },
     {
       "key": "goal.detail.recordNeedsKr",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/views/GoalDetailView.vue"]
+      "files": ["packages/goal-ui/src/views/GoalDetailView.vue"]
     },
     {
       "key": "goal.detail.recordProgress",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/views/GoalDetailView.vue"]
+      "files": ["packages/goal-ui/src/views/GoalDetailView.vue"]
     },
     {
       "key": "goal.detail.recordTime",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/views/GoalDetailView.vue"]
+      "files": ["packages/goal-ui/src/views/GoalDetailView.vue"]
     },
     {
       "key": "goal.detail.recordValue",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/views/GoalDetailView.vue"]
+      "files": ["packages/goal-ui/src/views/GoalDetailView.vue"]
     },
     {
       "key": "goal.detail.recordValueAfter",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/views/GoalDetailView.vue"]
+      "files": ["packages/goal-ui/src/views/GoalDetailView.vue"]
     },
     {
       "key": "goal.detail.review",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/views/GoalDetailView.vue"]
+      "files": ["packages/goal-ui/src/views/GoalDetailView.vue"]
     },
     {
       "key": "goal.detail.reviewSuffix",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/views/GoalDetailView.vue"]
+      "files": ["packages/goal-ui/src/views/GoalDetailView.vue"]
     },
     {
       "key": "goal.detail.title",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/views/GoalDetailView.vue"]
+      "files": ["packages/goal-ui/src/views/GoalDetailView.vue"]
     },
     {
       "key": "goal.detail.uncategorized",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/views/GoalDetailView.vue"]
+      "files": ["packages/goal-ui/src/views/GoalDetailView.vue"]
     },
     {
       "key": "goal.dialog.addKeyResult",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/dialogs/GoalDialog.vue"]
+      "files": ["packages/goal-ui/src/components/dialogs/GoalDialog.vue"]
     },
     {
       "key": "goal.dialog.addReminderTrigger",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/dialogs/GoalDialog.vue"]
+      "files": ["packages/goal-ui/src/components/dialogs/GoalDialog.vue"]
     },
     {
       "key": "goal.dialog.cancel",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/dialogs/GoalDialog.vue"]
+      "files": ["packages/goal-ui/src/components/dialogs/GoalDialog.vue"]
     },
     {
       "key": "goal.dialog.clearColor",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/dialogs/GoalDialog.vue"]
+      "files": ["packages/goal-ui/src/components/dialogs/GoalDialog.vue"]
     },
     {
       "key": "goal.dialog.color",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/dialogs/GoalDialog.vue"]
+      "files": ["packages/goal-ui/src/components/dialogs/GoalDialog.vue"]
     },
     {
       "key": "goal.dialog.createGoal",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/dialogs/GoalDialog.vue"]
+      "files": ["packages/goal-ui/src/components/dialogs/GoalDialog.vue"]
     },
     {
       "key": "goal.dialog.enableReminder",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/dialogs/GoalDialog.vue"]
+      "files": ["packages/goal-ui/src/components/dialogs/GoalDialog.vue"]
     },
     {
       "key": "goal.dialog.feasibilityAnalysis",
@@ -2171,7 +2161,7 @@
       "en": false,
       "files": [
         "packages/app-vue/src/modules/ai/components/AIGoalDraftEditor.vue",
-        "packages/app-vue/src/modules/goal/components/dialogs/GoalDialog.vue"
+        "packages/goal-ui/src/components/dialogs/GoalDialog.vue"
       ]
     },
     {
@@ -2180,26 +2170,26 @@
       "en": false,
       "files": [
         "packages/app-vue/src/modules/ai/components/AIGoalDraftEditor.vue",
-        "packages/app-vue/src/modules/goal/components/dialogs/GoalDialog.vue"
+        "packages/goal-ui/src/components/dialogs/GoalDialog.vue"
       ]
     },
     {
       "key": "goal.dialog.folder",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/dialogs/GoalDialog.vue"]
+      "files": ["packages/goal-ui/src/components/dialogs/GoalDialog.vue"]
     },
     {
       "key": "goal.dialog.folderNone",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/dialogs/GoalDialog.vue"]
+      "files": ["packages/goal-ui/src/components/dialogs/GoalDialog.vue"]
     },
     {
       "key": "goal.dialog.folderPlaceholder",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/dialogs/GoalDialog.vue"]
+      "files": ["packages/goal-ui/src/components/dialogs/GoalDialog.vue"]
     },
     {
       "key": "goal.dialog.importance",
@@ -2207,7 +2197,7 @@
       "en": false,
       "files": [
         "packages/app-vue/src/modules/ai/components/AIGoalDraftEditor.vue",
-        "packages/app-vue/src/modules/goal/components/dialogs/GoalDialog.vue"
+        "packages/goal-ui/src/components/dialogs/GoalDialog.vue"
       ]
     },
     {
@@ -2216,8 +2206,8 @@
       "en": false,
       "files": [
         "packages/app-vue/src/modules/ai/components/AIGoalDraftEditor.vue",
-        "packages/app-vue/src/modules/goal/components/dialogs/GoalDialog.vue",
-        "packages/app-vue/src/modules/goal/views/GoalDetailView.vue"
+        "packages/goal-ui/src/components/dialogs/GoalDialog.vue",
+        "packages/goal-ui/src/views/GoalDetailView.vue"
       ]
     },
     {
@@ -2226,8 +2216,8 @@
       "en": false,
       "files": [
         "packages/app-vue/src/modules/ai/components/AIGoalDraftEditor.vue",
-        "packages/app-vue/src/modules/goal/components/dialogs/GoalDialog.vue",
-        "packages/app-vue/src/modules/goal/views/GoalDetailView.vue"
+        "packages/goal-ui/src/components/dialogs/GoalDialog.vue",
+        "packages/goal-ui/src/views/GoalDetailView.vue"
       ]
     },
     {
@@ -2236,8 +2226,8 @@
       "en": false,
       "files": [
         "packages/app-vue/src/modules/ai/components/AIGoalDraftEditor.vue",
-        "packages/app-vue/src/modules/goal/components/dialogs/GoalDialog.vue",
-        "packages/app-vue/src/modules/goal/views/GoalDetailView.vue"
+        "packages/goal-ui/src/components/dialogs/GoalDialog.vue",
+        "packages/goal-ui/src/views/GoalDetailView.vue"
       ]
     },
     {
@@ -2246,7 +2236,7 @@
       "en": false,
       "files": [
         "packages/app-vue/src/modules/ai/components/AIGoalDraftEditor.vue",
-        "packages/app-vue/src/modules/goal/components/dialogs/GoalDialog.vue"
+        "packages/goal-ui/src/components/dialogs/GoalDialog.vue"
       ]
     },
     {
@@ -2255,8 +2245,8 @@
       "en": false,
       "files": [
         "packages/app-vue/src/modules/ai/components/AIGoalDraftEditor.vue",
-        "packages/app-vue/src/modules/goal/components/dialogs/GoalDialog.vue",
-        "packages/app-vue/src/modules/goal/views/GoalDetailView.vue"
+        "packages/goal-ui/src/components/dialogs/GoalDialog.vue",
+        "packages/goal-ui/src/views/GoalDetailView.vue"
       ]
     },
     {
@@ -2265,51 +2255,51 @@
       "en": false,
       "files": [
         "packages/app-vue/src/modules/ai/components/AIGoalDraftEditor.vue",
-        "packages/app-vue/src/modules/goal/components/dialogs/GoalDialog.vue",
-        "packages/app-vue/src/modules/goal/views/GoalDetailView.vue"
+        "packages/goal-ui/src/components/dialogs/GoalDialog.vue",
+        "packages/goal-ui/src/views/GoalDetailView.vue"
       ]
     },
     {
       "key": "goal.dialog.krEmptyDesc",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/dialogs/GoalDialog.vue"]
+      "files": ["packages/goal-ui/src/components/dialogs/GoalDialog.vue"]
     },
     {
       "key": "goal.dialog.krEmptyTitle",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/dialogs/GoalDialog.vue"]
+      "files": ["packages/goal-ui/src/components/dialogs/GoalDialog.vue"]
     },
     {
       "key": "goal.dialog.krTargetInvalid",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/dialogs/GoalDialog.vue"]
+      "files": ["packages/goal-ui/src/components/dialogs/GoalDialog.vue"]
     },
     {
       "key": "goal.dialog.krTitle",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/dialogs/GoalDialog.vue"]
+      "files": ["packages/goal-ui/src/components/dialogs/GoalDialog.vue"]
     },
     {
       "key": "goal.dialog.krTitleRequired",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/dialogs/GoalDialog.vue"]
+      "files": ["packages/goal-ui/src/components/dialogs/GoalDialog.vue"]
     },
     {
       "key": "goal.dialog.krWeight",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/dialogs/GoalDialog.vue"]
+      "files": ["packages/goal-ui/src/components/dialogs/GoalDialog.vue"]
     },
     {
       "key": "goal.dialog.krWeightInvalid",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/dialogs/GoalDialog.vue"]
+      "files": ["packages/goal-ui/src/components/dialogs/GoalDialog.vue"]
     },
     {
       "key": "goal.dialog.motivation",
@@ -2317,7 +2307,7 @@
       "en": false,
       "files": [
         "packages/app-vue/src/modules/ai/components/AIGoalDraftEditor.vue",
-        "packages/app-vue/src/modules/goal/components/dialogs/GoalDialog.vue"
+        "packages/goal-ui/src/components/dialogs/GoalDialog.vue"
       ]
     },
     {
@@ -2326,98 +2316,98 @@
       "en": false,
       "files": [
         "packages/app-vue/src/modules/ai/components/AIGoalDraftEditor.vue",
-        "packages/app-vue/src/modules/goal/components/dialogs/GoalDialog.vue"
+        "packages/goal-ui/src/components/dialogs/GoalDialog.vue"
       ]
     },
     {
       "key": "goal.dialog.parentGoal",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/dialogs/GoalDialog.vue"]
+      "files": ["packages/goal-ui/src/components/dialogs/GoalDialog.vue"]
     },
     {
       "key": "goal.dialog.parentGoalNone",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/dialogs/GoalDialog.vue"]
+      "files": ["packages/goal-ui/src/components/dialogs/GoalDialog.vue"]
     },
     {
       "key": "goal.dialog.parentGoalPlaceholder",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/dialogs/GoalDialog.vue"]
+      "files": ["packages/goal-ui/src/components/dialogs/GoalDialog.vue"]
     },
     {
       "key": "goal.dialog.pickColor",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/dialogs/GoalDialog.vue"]
+      "files": ["packages/goal-ui/src/components/dialogs/GoalDialog.vue"]
     },
     {
       "key": "goal.dialog.reminderAtLeastOneTrigger",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/dialogs/GoalDialog.vue"]
+      "files": ["packages/goal-ui/src/components/dialogs/GoalDialog.vue"]
     },
     {
       "key": "goal.dialog.reminderRemainingDaysInvalid",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/dialogs/GoalDialog.vue"]
+      "files": ["packages/goal-ui/src/components/dialogs/GoalDialog.vue"]
     },
     {
       "key": "goal.dialog.reminderRemainingDaysRequiresTargetDate",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/dialogs/GoalDialog.vue"]
+      "files": ["packages/goal-ui/src/components/dialogs/GoalDialog.vue"]
     },
     {
       "key": "goal.dialog.reminderTimeProgressInvalid",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/dialogs/GoalDialog.vue"]
+      "files": ["packages/goal-ui/src/components/dialogs/GoalDialog.vue"]
     },
     {
       "key": "goal.dialog.reminderTimeProgressRequiresRange",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/dialogs/GoalDialog.vue"]
+      "files": ["packages/goal-ui/src/components/dialogs/GoalDialog.vue"]
     },
     {
       "key": "goal.dialog.reminderType",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/dialogs/GoalDialog.vue"]
+      "files": ["packages/goal-ui/src/components/dialogs/GoalDialog.vue"]
     },
     {
       "key": "goal.dialog.saveChanges",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/dialogs/GoalDialog.vue"]
+      "files": ["packages/goal-ui/src/components/dialogs/GoalDialog.vue"]
     },
     {
       "key": "goal.dialog.sectionMotivation",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/dialogs/GoalDialog.vue"]
+      "files": ["packages/goal-ui/src/components/dialogs/GoalDialog.vue"]
     },
     {
       "key": "goal.dialog.sectionOrganization",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/dialogs/GoalDialog.vue"]
+      "files": ["packages/goal-ui/src/components/dialogs/GoalDialog.vue"]
     },
     {
       "key": "goal.dialog.sectionReminder",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/dialogs/GoalDialog.vue"]
+      "files": ["packages/goal-ui/src/components/dialogs/GoalDialog.vue"]
     },
     {
       "key": "goal.dialog.selectReminderType",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/dialogs/GoalDialog.vue"]
+      "files": ["packages/goal-ui/src/components/dialogs/GoalDialog.vue"]
     },
     {
       "key": "goal.dialog.startDate",
@@ -2425,7 +2415,7 @@
       "en": false,
       "files": [
         "packages/app-vue/src/modules/ai/components/AIGoalDraftEditor.vue",
-        "packages/app-vue/src/modules/goal/components/dialogs/GoalDialog.vue"
+        "packages/goal-ui/src/components/dialogs/GoalDialog.vue"
       ]
     },
     {
@@ -2434,7 +2424,7 @@
       "en": false,
       "files": [
         "packages/app-vue/src/modules/ai/components/AIGoalDraftEditor.vue",
-        "packages/app-vue/src/modules/goal/components/dialogs/GoalDialog.vue"
+        "packages/goal-ui/src/components/dialogs/GoalDialog.vue"
       ]
     },
     {
@@ -2443,7 +2433,7 @@
       "en": false,
       "files": [
         "packages/app-vue/src/modules/ai/components/AIGoalDraftEditor.vue",
-        "packages/app-vue/src/modules/goal/components/dialogs/GoalDialog.vue"
+        "packages/goal-ui/src/components/dialogs/GoalDialog.vue"
       ]
     },
     {
@@ -2452,7 +2442,7 @@
       "en": false,
       "files": [
         "packages/app-vue/src/modules/ai/components/AIGoalDraftEditor.vue",
-        "packages/app-vue/src/modules/goal/components/dialogs/GoalDialog.vue"
+        "packages/goal-ui/src/components/dialogs/GoalDialog.vue"
       ]
     },
     {
@@ -2461,647 +2451,647 @@
       "en": false,
       "files": [
         "packages/app-vue/src/modules/ai/components/AIGoalDraftEditor.vue",
-        "packages/app-vue/src/modules/goal/components/dialogs/GoalDialog.vue"
+        "packages/goal-ui/src/components/dialogs/GoalDialog.vue"
       ]
     },
     {
       "key": "goal.dialog.timeline",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/dialogs/GoalDialog.vue"]
+      "files": ["packages/goal-ui/src/components/dialogs/GoalDialog.vue"]
     },
     {
       "key": "goal.dialog.triggerRemainingDays",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/dialogs/GoalDialog.vue"]
+      "files": ["packages/goal-ui/src/components/dialogs/GoalDialog.vue"]
     },
     {
       "key": "goal.dialog.triggerTimeProgress",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/dialogs/GoalDialog.vue"]
+      "files": ["packages/goal-ui/src/components/dialogs/GoalDialog.vue"]
     },
     {
       "key": "goal.dialog.triggerValueDays",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/dialogs/GoalDialog.vue"]
+      "files": ["packages/goal-ui/src/components/dialogs/GoalDialog.vue"]
     },
     {
       "key": "goal.dialog.triggerValuePercent",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/dialogs/GoalDialog.vue"]
+      "files": ["packages/goal-ui/src/components/dialogs/GoalDialog.vue"]
     },
     {
       "key": "goal.exportDialog.bgColor",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/dag/ExportDialog.vue"]
+      "files": ["packages/goal-ui/src/components/dag/ExportDialog.vue"]
     },
     {
       "key": "goal.exportDialog.bgTransparent",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/dag/ExportDialog.vue"]
+      "files": ["packages/goal-ui/src/components/dag/ExportDialog.vue"]
     },
     {
       "key": "goal.exportDialog.bgWhite",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/dag/ExportDialog.vue"]
+      "files": ["packages/goal-ui/src/components/dag/ExportDialog.vue"]
     },
     {
       "key": "goal.exportDialog.cancel",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/dag/ExportDialog.vue"]
+      "files": ["packages/goal-ui/src/components/dag/ExportDialog.vue"]
     },
     {
       "key": "goal.exportDialog.export",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/dag/ExportDialog.vue"]
+      "files": ["packages/goal-ui/src/components/dag/ExportDialog.vue"]
     },
     {
       "key": "goal.exportDialog.exporting",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/dag/ExportDialog.vue"]
+      "files": ["packages/goal-ui/src/components/dag/ExportDialog.vue"]
     },
     {
       "key": "goal.exportDialog.format",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/dag/ExportDialog.vue"]
+      "files": ["packages/goal-ui/src/components/dag/ExportDialog.vue"]
     },
     {
       "key": "goal.exportDialog.hd",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/dag/ExportDialog.vue"]
+      "files": ["packages/goal-ui/src/components/dag/ExportDialog.vue"]
     },
     {
       "key": "goal.exportDialog.includeMetadata",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/dag/ExportDialog.vue"]
+      "files": ["packages/goal-ui/src/components/dag/ExportDialog.vue"]
     },
     {
       "key": "goal.exportDialog.pdf",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/dag/ExportDialog.vue"]
+      "files": ["packages/goal-ui/src/components/dag/ExportDialog.vue"]
     },
     {
       "key": "goal.exportDialog.pdfDesc",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/dag/ExportDialog.vue"]
+      "files": ["packages/goal-ui/src/components/dag/ExportDialog.vue"]
     },
     {
       "key": "goal.exportDialog.png",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/dag/ExportDialog.vue"]
+      "files": ["packages/goal-ui/src/components/dag/ExportDialog.vue"]
     },
     {
       "key": "goal.exportDialog.pngDesc",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/dag/ExportDialog.vue"]
+      "files": ["packages/goal-ui/src/components/dag/ExportDialog.vue"]
     },
     {
       "key": "goal.exportDialog.resolution",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/dag/ExportDialog.vue"]
+      "files": ["packages/goal-ui/src/components/dag/ExportDialog.vue"]
     },
     {
       "key": "goal.exportDialog.standard",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/dag/ExportDialog.vue"]
+      "files": ["packages/goal-ui/src/components/dag/ExportDialog.vue"]
     },
     {
       "key": "goal.exportDialog.svg",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/dag/ExportDialog.vue"]
+      "files": ["packages/goal-ui/src/components/dag/ExportDialog.vue"]
     },
     {
       "key": "goal.exportDialog.svgDesc",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/dag/ExportDialog.vue"]
+      "files": ["packages/goal-ui/src/components/dag/ExportDialog.vue"]
     },
     {
       "key": "goal.exportDialog.svgNote",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/dag/ExportDialog.vue"]
+      "files": ["packages/goal-ui/src/components/dag/ExportDialog.vue"]
     },
     {
       "key": "goal.exportDialog.svgNoteDesc",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/dag/ExportDialog.vue"]
+      "files": ["packages/goal-ui/src/components/dag/ExportDialog.vue"]
     },
     {
       "key": "goal.exportDialog.title",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/dag/ExportDialog.vue"]
+      "files": ["packages/goal-ui/src/components/dag/ExportDialog.vue"]
     },
     {
       "key": "goal.exportDialog.ultra",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/dag/ExportDialog.vue"]
+      "files": ["packages/goal-ui/src/components/dag/ExportDialog.vue"]
     },
     {
       "key": "goal.focusMode.activateDialog.activate",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/ActivateFocusModeDialog.vue"]
+      "files": ["packages/goal-ui/src/components/ActivateFocusModeDialog.vue"]
     },
     {
       "key": "goal.focusMode.activateDialog.autoEndHint",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/ActivateFocusModeDialog.vue"]
+      "files": ["packages/goal-ui/src/components/ActivateFocusModeDialog.vue"]
     },
     {
       "key": "goal.focusMode.activateDialog.cancel",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/ActivateFocusModeDialog.vue"]
+      "files": ["packages/goal-ui/src/components/ActivateFocusModeDialog.vue"]
     },
     {
       "key": "goal.focusMode.activateDialog.dialogDescription",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/ActivateFocusModeDialog.vue"]
+      "files": ["packages/goal-ui/src/components/ActivateFocusModeDialog.vue"]
     },
     {
       "key": "goal.focusMode.activateDialog.emptyGoals",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/ActivateFocusModeDialog.vue"]
+      "files": ["packages/goal-ui/src/components/ActivateFocusModeDialog.vue"]
     },
     {
       "key": "goal.focusMode.activateDialog.hiddenMode",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/ActivateFocusModeDialog.vue"]
+      "files": ["packages/goal-ui/src/components/ActivateFocusModeDialog.vue"]
     },
     {
       "key": "goal.focusMode.activateDialog.hiddenModeHint",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/ActivateFocusModeDialog.vue"]
+      "files": ["packages/goal-ui/src/components/ActivateFocusModeDialog.vue"]
     },
     {
       "key": "goal.focusMode.activateDialog.modeDim",
       "zh": false,
       "en": false,
       "files": [
-        "packages/app-vue/src/modules/goal/components/ActivateFocusModeDialog.vue",
-        "packages/app-vue/src/modules/goal/views/GoalFocusView.vue"
+        "packages/goal-ui/src/components/ActivateFocusModeDialog.vue",
+        "packages/goal-ui/src/views/GoalFocusView.vue"
       ]
     },
     {
       "key": "goal.focusMode.activateDialog.modeDimDesc",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/ActivateFocusModeDialog.vue"]
+      "files": ["packages/goal-ui/src/components/ActivateFocusModeDialog.vue"]
     },
     {
       "key": "goal.focusMode.activateDialog.modeFold",
       "zh": false,
       "en": false,
       "files": [
-        "packages/app-vue/src/modules/goal/components/ActivateFocusModeDialog.vue",
-        "packages/app-vue/src/modules/goal/views/GoalFocusView.vue"
+        "packages/goal-ui/src/components/ActivateFocusModeDialog.vue",
+        "packages/goal-ui/src/views/GoalFocusView.vue"
       ]
     },
     {
       "key": "goal.focusMode.activateDialog.modeFoldDesc",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/ActivateFocusModeDialog.vue"]
+      "files": ["packages/goal-ui/src/components/ActivateFocusModeDialog.vue"]
     },
     {
       "key": "goal.focusMode.activateDialog.modeHide",
       "zh": false,
       "en": false,
       "files": [
-        "packages/app-vue/src/modules/goal/components/ActivateFocusModeDialog.vue",
-        "packages/app-vue/src/modules/goal/views/GoalFocusView.vue"
+        "packages/goal-ui/src/components/ActivateFocusModeDialog.vue",
+        "packages/goal-ui/src/views/GoalFocusView.vue"
       ]
     },
     {
       "key": "goal.focusMode.activateDialog.modeHideDesc",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/ActivateFocusModeDialog.vue"]
+      "files": ["packages/goal-ui/src/components/ActivateFocusModeDialog.vue"]
     },
     {
       "key": "goal.focusMode.activateDialog.selectGoal",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/ActivateFocusModeDialog.vue"]
+      "files": ["packages/goal-ui/src/components/ActivateFocusModeDialog.vue"]
     },
     {
       "key": "goal.focusMode.activateDialog.selectGoalHint",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/ActivateFocusModeDialog.vue"]
+      "files": ["packages/goal-ui/src/components/ActivateFocusModeDialog.vue"]
     },
     {
       "key": "goal.focusMode.activateDialog.title",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/ActivateFocusModeDialog.vue"]
+      "files": ["packages/goal-ui/src/components/ActivateFocusModeDialog.vue"]
     },
     {
       "key": "goal.focusMode.panel.empty",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/views/GoalFocusView.vue"]
+      "files": ["packages/goal-ui/src/views/GoalFocusView.vue"]
     },
     {
       "key": "goal.focusMode.panel.endTime",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/views/GoalFocusView.vue"]
+      "files": ["packages/goal-ui/src/views/GoalFocusView.vue"]
     },
     {
       "key": "goal.focusMode.panel.hiddenMode",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/views/GoalFocusView.vue"]
+      "files": ["packages/goal-ui/src/views/GoalFocusView.vue"]
     },
     {
       "key": "goal.focusMode.panel.remainingDays",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/views/GoalFocusView.vue"]
+      "files": ["packages/goal-ui/src/views/GoalFocusView.vue"]
     },
     {
       "key": "goal.focusMode.panel.startTime",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/views/GoalFocusView.vue"]
+      "files": ["packages/goal-ui/src/views/GoalFocusView.vue"]
     },
     {
       "key": "goal.focusMode.remainingDaysShort",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/GoalPageToolbar.vue"]
+      "files": ["packages/goal-ui/src/components/GoalPageToolbar.vue"]
     },
     {
       "key": "goal.focusMode.routeCurrentDescription",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/views/GoalFocusView.vue"]
+      "files": ["packages/goal-ui/src/views/GoalFocusView.vue"]
     },
     {
       "key": "goal.focusMode.routeCurrentTitle",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/views/GoalFocusView.vue"]
+      "files": ["packages/goal-ui/src/views/GoalFocusView.vue"]
     },
     {
       "key": "goal.focusMode.routeExit",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/views/GoalFocusView.vue"]
+      "files": ["packages/goal-ui/src/views/GoalFocusView.vue"]
     },
     {
       "key": "goal.focusMode.routeGoalsDescription",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/views/GoalFocusView.vue"]
+      "files": ["packages/goal-ui/src/views/GoalFocusView.vue"]
     },
     {
       "key": "goal.focusMode.routeGoalsTitle",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/views/GoalFocusView.vue"]
+      "files": ["packages/goal-ui/src/views/GoalFocusView.vue"]
     },
     {
       "key": "goal.focusMode.routeNoGoals",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/views/GoalFocusView.vue"]
+      "files": ["packages/goal-ui/src/views/GoalFocusView.vue"]
     },
     {
       "key": "goal.focusMode.routeSubtitle",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/views/GoalFocusView.vue"]
+      "files": ["packages/goal-ui/src/views/GoalFocusView.vue"]
     },
     {
       "key": "goal.focusMode.routeTitle",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/views/GoalFocusView.vue"]
+      "files": ["packages/goal-ui/src/views/GoalFocusView.vue"]
     },
     {
       "key": "goal.focusMode.sidebarTitle",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/GoalPageToolbar.vue"]
+      "files": ["packages/goal-ui/src/components/GoalPageToolbar.vue"]
     },
     {
       "key": "goal.folder.archived",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/GoalFolder.vue"]
+      "files": ["packages/goal-ui/src/components/GoalFolder.vue"]
     },
     {
       "key": "goal.folder.folders",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/GoalFolder.vue"]
+      "files": ["packages/goal-ui/src/components/GoalFolder.vue"]
     },
     {
       "key": "goal.folderDialog.cancel",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/dialogs/GoalFolderDialog.vue"]
+      "files": ["packages/goal-ui/src/components/dialogs/GoalFolderDialog.vue"]
     },
     {
       "key": "goal.folderDialog.clearColor",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/dialogs/GoalFolderDialog.vue"]
+      "files": ["packages/goal-ui/src/components/dialogs/GoalFolderDialog.vue"]
     },
     {
       "key": "goal.folderDialog.color",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/dialogs/GoalFolderDialog.vue"]
+      "files": ["packages/goal-ui/src/components/dialogs/GoalFolderDialog.vue"]
     },
     {
       "key": "goal.folderDialog.confirm",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/dialogs/GoalFolderDialog.vue"]
+      "files": ["packages/goal-ui/src/components/dialogs/GoalFolderDialog.vue"]
     },
     {
       "key": "goal.folderDialog.createTitle",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/dialogs/GoalFolderDialog.vue"]
+      "files": ["packages/goal-ui/src/components/dialogs/GoalFolderDialog.vue"]
     },
     {
       "key": "goal.folderDialog.descPlaceholder",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/dialogs/GoalFolderDialog.vue"]
+      "files": ["packages/goal-ui/src/components/dialogs/GoalFolderDialog.vue"]
     },
     {
       "key": "goal.folderDialog.description",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/dialogs/GoalFolderDialog.vue"]
+      "files": ["packages/goal-ui/src/components/dialogs/GoalFolderDialog.vue"]
     },
     {
       "key": "goal.folderDialog.editTitle",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/dialogs/GoalFolderDialog.vue"]
+      "files": ["packages/goal-ui/src/components/dialogs/GoalFolderDialog.vue"]
     },
     {
       "key": "goal.folderDialog.hint",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/dialogs/GoalFolderDialog.vue"]
+      "files": ["packages/goal-ui/src/components/dialogs/GoalFolderDialog.vue"]
     },
     {
       "key": "goal.folderDialog.icon",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/dialogs/GoalFolderDialog.vue"]
+      "files": ["packages/goal-ui/src/components/dialogs/GoalFolderDialog.vue"]
     },
     {
       "key": "goal.folderDialog.iconFolder",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/dialogs/GoalFolderDialog.vue"]
+      "files": ["packages/goal-ui/src/components/dialogs/GoalFolderDialog.vue"]
     },
     {
       "key": "goal.folderDialog.iconHealth",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/dialogs/GoalFolderDialog.vue"]
+      "files": ["packages/goal-ui/src/components/dialogs/GoalFolderDialog.vue"]
     },
     {
       "key": "goal.folderDialog.iconLife",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/dialogs/GoalFolderDialog.vue"]
+      "files": ["packages/goal-ui/src/components/dialogs/GoalFolderDialog.vue"]
     },
     {
       "key": "goal.folderDialog.iconStudy",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/dialogs/GoalFolderDialog.vue"]
+      "files": ["packages/goal-ui/src/components/dialogs/GoalFolderDialog.vue"]
     },
     {
       "key": "goal.folderDialog.iconTarget",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/dialogs/GoalFolderDialog.vue"]
+      "files": ["packages/goal-ui/src/components/dialogs/GoalFolderDialog.vue"]
     },
     {
       "key": "goal.folderDialog.iconWork",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/dialogs/GoalFolderDialog.vue"]
+      "files": ["packages/goal-ui/src/components/dialogs/GoalFolderDialog.vue"]
     },
     {
       "key": "goal.folderDialog.name",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/dialogs/GoalFolderDialog.vue"]
+      "files": ["packages/goal-ui/src/components/dialogs/GoalFolderDialog.vue"]
     },
     {
       "key": "goal.folderDialog.nameMaxLength",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/dialogs/GoalFolderDialog.vue"]
+      "files": ["packages/goal-ui/src/components/dialogs/GoalFolderDialog.vue"]
     },
     {
       "key": "goal.folderDialog.nameMinLength",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/dialogs/GoalFolderDialog.vue"]
+      "files": ["packages/goal-ui/src/components/dialogs/GoalFolderDialog.vue"]
     },
     {
       "key": "goal.folderDialog.namePlaceholder",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/dialogs/GoalFolderDialog.vue"]
+      "files": ["packages/goal-ui/src/components/dialogs/GoalFolderDialog.vue"]
     },
     {
       "key": "goal.folderDialog.nameRequired",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/dialogs/GoalFolderDialog.vue"]
+      "files": ["packages/goal-ui/src/components/dialogs/GoalFolderDialog.vue"]
     },
     {
       "key": "goal.folderDialog.selectColor",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/dialogs/GoalFolderDialog.vue"]
+      "files": ["packages/goal-ui/src/components/dialogs/GoalFolderDialog.vue"]
     },
     {
       "key": "goal.folderDialog.selectIcon",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/dialogs/GoalFolderDialog.vue"]
+      "files": ["packages/goal-ui/src/components/dialogs/GoalFolderDialog.vue"]
     },
     {
       "key": "goal.keyResultFallback",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/composables/useGoalTimeline.ts"]
+      "files": ["packages/goal-ui/src/composables/useGoalTimeline.ts"]
     },
     {
       "key": "goal.krDetail.addRecord",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/views/KeyResultDetailView.vue"]
+      "files": ["packages/goal-ui/src/views/KeyResultDetailView.vue"]
     },
     {
       "key": "goal.krDetail.addRecordDesc",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/views/KeyResultDetailView.vue"]
+      "files": ["packages/goal-ui/src/views/KeyResultDetailView.vue"]
     },
     {
       "key": "goal.krDetail.addRecordTitle",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/views/KeyResultDetailView.vue"]
+      "files": ["packages/goal-ui/src/views/KeyResultDetailView.vue"]
     },
     {
       "key": "goal.krDetail.addSuccess",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/views/KeyResultDetailView.vue"]
+      "files": ["packages/goal-ui/src/views/KeyResultDetailView.vue"]
     },
     {
       "key": "goal.krDetail.back",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/views/KeyResultDetailView.vue"]
+      "files": ["packages/goal-ui/src/views/KeyResultDetailView.vue"]
     },
     {
       "key": "goal.krDetail.cancel",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/views/KeyResultDetailView.vue"]
+      "files": ["packages/goal-ui/src/views/KeyResultDetailView.vue"]
     },
     {
       "key": "goal.krDetail.confirm",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/views/KeyResultDetailView.vue"]
+      "files": ["packages/goal-ui/src/views/KeyResultDetailView.vue"]
     },
     {
       "key": "goal.krDetail.currentProgress",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/views/KeyResultDetailView.vue"]
+      "files": ["packages/goal-ui/src/views/KeyResultDetailView.vue"]
     },
     {
       "key": "goal.krDetail.fillValue",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/views/KeyResultDetailView.vue"]
+      "files": ["packages/goal-ui/src/views/KeyResultDetailView.vue"]
     },
     {
       "key": "goal.krDetail.incrementValue",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/views/KeyResultDetailView.vue"]
+      "files": ["packages/goal-ui/src/views/KeyResultDetailView.vue"]
     },
     {
       "key": "goal.krDetail.loading",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/views/KeyResultDetailView.vue"]
+      "files": ["packages/goal-ui/src/views/KeyResultDetailView.vue"]
     },
     {
       "key": "goal.krDetail.noRecords",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/views/KeyResultDetailView.vue"]
+      "files": ["packages/goal-ui/src/views/KeyResultDetailView.vue"]
     },
     {
       "key": "goal.krDetail.notFound",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/views/KeyResultDetailView.vue"]
+      "files": ["packages/goal-ui/src/views/KeyResultDetailView.vue"]
     },
     {
       "key": "goal.krDetail.progressRecords",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/views/KeyResultDetailView.vue"]
+      "files": ["packages/goal-ui/src/views/KeyResultDetailView.vue"]
     },
     {
       "key": "goal.krDetail.recordValue",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/views/KeyResultDetailView.vue"]
+      "files": ["packages/goal-ui/src/views/KeyResultDetailView.vue"]
     },
     {
       "key": "goal.krDetail.remarks",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/views/KeyResultDetailView.vue"]
+      "files": ["packages/goal-ui/src/views/KeyResultDetailView.vue"]
     },
     {
       "key": "goal.krDetail.remarksPlaceholder",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/views/KeyResultDetailView.vue"]
+      "files": ["packages/goal-ui/src/views/KeyResultDetailView.vue"]
     },
     {
       "key": "goal.krDetail.saving",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/views/KeyResultDetailView.vue"]
+      "files": ["packages/goal-ui/src/views/KeyResultDetailView.vue"]
     },
     {
       "key": "goal.krDetail.title",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/views/KeyResultDetailView.vue"]
+      "files": ["packages/goal-ui/src/views/KeyResultDetailView.vue"]
     },
     {
       "key": "goal.krDetail.weight",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/views/KeyResultDetailView.vue"]
+      "files": ["packages/goal-ui/src/views/KeyResultDetailView.vue"]
     },
     {
       "key": "goal.krDialog.advancedConfig",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/dialogs/KeyResultDialog.vue"]
+      "files": ["packages/goal-ui/src/components/dialogs/KeyResultDialog.vue"]
     },
     {
       "key": "goal.krDialog.basicInfo",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/dialogs/KeyResultDialog.vue"]
+      "files": ["packages/goal-ui/src/components/dialogs/KeyResultDialog.vue"]
     },
     {
       "key": "goal.krDialog.calcAverage",
@@ -3109,7 +3099,7 @@
       "en": false,
       "files": [
         "packages/app-vue/src/modules/ai/components/AIGoalDraftEditor.vue",
-        "packages/app-vue/src/modules/goal/components/dialogs/KeyResultDialog.vue"
+        "packages/goal-ui/src/components/dialogs/KeyResultDialog.vue"
       ]
     },
     {
@@ -3118,7 +3108,7 @@
       "en": false,
       "files": [
         "packages/app-vue/src/modules/ai/components/AIGoalDraftEditor.vue",
-        "packages/app-vue/src/modules/goal/components/dialogs/KeyResultDialog.vue"
+        "packages/goal-ui/src/components/dialogs/KeyResultDialog.vue"
       ]
     },
     {
@@ -3127,7 +3117,7 @@
       "en": false,
       "files": [
         "packages/app-vue/src/modules/ai/components/AIGoalDraftEditor.vue",
-        "packages/app-vue/src/modules/goal/components/dialogs/KeyResultDialog.vue"
+        "packages/goal-ui/src/components/dialogs/KeyResultDialog.vue"
       ]
     },
     {
@@ -3136,7 +3126,7 @@
       "en": false,
       "files": [
         "packages/app-vue/src/modules/ai/components/AIGoalDraftEditor.vue",
-        "packages/app-vue/src/modules/goal/components/dialogs/KeyResultDialog.vue"
+        "packages/goal-ui/src/components/dialogs/KeyResultDialog.vue"
       ]
     },
     {
@@ -3145,14 +3135,14 @@
       "en": false,
       "files": [
         "packages/app-vue/src/modules/ai/components/AIGoalDraftEditor.vue",
-        "packages/app-vue/src/modules/goal/components/dialogs/KeyResultDialog.vue"
+        "packages/goal-ui/src/components/dialogs/KeyResultDialog.vue"
       ]
     },
     {
       "key": "goal.krDialog.calcMethodHint",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/dialogs/KeyResultDialog.vue"]
+      "files": ["packages/goal-ui/src/components/dialogs/KeyResultDialog.vue"]
     },
     {
       "key": "goal.krDialog.calcMin",
@@ -3160,26 +3150,26 @@
       "en": false,
       "files": [
         "packages/app-vue/src/modules/ai/components/AIGoalDraftEditor.vue",
-        "packages/app-vue/src/modules/goal/components/dialogs/KeyResultDialog.vue"
+        "packages/goal-ui/src/components/dialogs/KeyResultDialog.vue"
       ]
     },
     {
       "key": "goal.krDialog.cancel",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/dialogs/KeyResultDialog.vue"]
+      "files": ["packages/goal-ui/src/components/dialogs/KeyResultDialog.vue"]
     },
     {
       "key": "goal.krDialog.create",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/dialogs/KeyResultDialog.vue"]
+      "files": ["packages/goal-ui/src/components/dialogs/KeyResultDialog.vue"]
     },
     {
       "key": "goal.krDialog.createTitle",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/dialogs/KeyResultDialog.vue"]
+      "files": ["packages/goal-ui/src/components/dialogs/KeyResultDialog.vue"]
     },
     {
       "key": "goal.krDialog.currentValue",
@@ -3187,14 +3177,14 @@
       "en": false,
       "files": [
         "packages/app-vue/src/modules/ai/components/AIGoalDraftEditor.vue",
-        "packages/app-vue/src/modules/goal/components/dialogs/KeyResultDialog.vue"
+        "packages/goal-ui/src/components/dialogs/KeyResultDialog.vue"
       ]
     },
     {
       "key": "goal.krDialog.currentValueHint",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/dialogs/KeyResultDialog.vue"]
+      "files": ["packages/goal-ui/src/components/dialogs/KeyResultDialog.vue"]
     },
     {
       "key": "goal.krDialog.descPlaceholder",
@@ -3202,32 +3192,32 @@
       "en": false,
       "files": [
         "packages/app-vue/src/modules/ai/components/AIGoalDraftEditor.vue",
-        "packages/app-vue/src/modules/goal/components/dialogs/KeyResultDialog.vue"
+        "packages/goal-ui/src/components/dialogs/KeyResultDialog.vue"
       ]
     },
     {
       "key": "goal.krDialog.description",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/dialogs/KeyResultDialog.vue"]
+      "files": ["packages/goal-ui/src/components/dialogs/KeyResultDialog.vue"]
     },
     {
       "key": "goal.krDialog.descriptionText",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/dialogs/KeyResultDialog.vue"]
+      "files": ["packages/goal-ui/src/components/dialogs/KeyResultDialog.vue"]
     },
     {
       "key": "goal.krDialog.krName",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/dialogs/KeyResultDialog.vue"]
+      "files": ["packages/goal-ui/src/components/dialogs/KeyResultDialog.vue"]
     },
     {
       "key": "goal.krDialog.name",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/dialogs/KeyResultDialog.vue"]
+      "files": ["packages/goal-ui/src/components/dialogs/KeyResultDialog.vue"]
     },
     {
       "key": "goal.krDialog.namePlaceholder",
@@ -3235,20 +3225,20 @@
       "en": false,
       "files": [
         "packages/app-vue/src/modules/ai/components/AIGoalDraftEditor.vue",
-        "packages/app-vue/src/modules/goal/components/dialogs/KeyResultDialog.vue"
+        "packages/goal-ui/src/components/dialogs/KeyResultDialog.vue"
       ]
     },
     {
       "key": "goal.krDialog.numConfig",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/dialogs/KeyResultDialog.vue"]
+      "files": ["packages/goal-ui/src/components/dialogs/KeyResultDialog.vue"]
     },
     {
       "key": "goal.krDialog.progressPreview",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/dialogs/KeyResultDialog.vue"]
+      "files": ["packages/goal-ui/src/components/dialogs/KeyResultDialog.vue"]
     },
     {
       "key": "goal.krDialog.selectCalcMethod",
@@ -3256,7 +3246,7 @@
       "en": false,
       "files": [
         "packages/app-vue/src/modules/ai/components/AIGoalDraftEditor.vue",
-        "packages/app-vue/src/modules/goal/components/dialogs/KeyResultDialog.vue"
+        "packages/goal-ui/src/components/dialogs/KeyResultDialog.vue"
       ]
     },
     {
@@ -3265,7 +3255,7 @@
       "en": false,
       "files": [
         "packages/app-vue/src/modules/ai/components/AIGoalDraftEditor.vue",
-        "packages/app-vue/src/modules/goal/components/dialogs/KeyResultDialog.vue"
+        "packages/goal-ui/src/components/dialogs/KeyResultDialog.vue"
       ]
     },
     {
@@ -3274,14 +3264,14 @@
       "en": false,
       "files": [
         "packages/app-vue/src/modules/ai/components/AIGoalDraftEditor.vue",
-        "packages/app-vue/src/modules/goal/components/dialogs/KeyResultDialog.vue"
+        "packages/goal-ui/src/components/dialogs/KeyResultDialog.vue"
       ]
     },
     {
       "key": "goal.krDialog.startValueHint",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/dialogs/KeyResultDialog.vue"]
+      "files": ["packages/goal-ui/src/components/dialogs/KeyResultDialog.vue"]
     },
     {
       "key": "goal.krDialog.targetValue",
@@ -3289,26 +3279,26 @@
       "en": false,
       "files": [
         "packages/app-vue/src/modules/ai/components/AIGoalDraftEditor.vue",
-        "packages/app-vue/src/modules/goal/components/dialogs/KeyResultDialog.vue"
+        "packages/goal-ui/src/components/dialogs/KeyResultDialog.vue"
       ]
     },
     {
       "key": "goal.krDialog.targetValueHint",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/dialogs/KeyResultDialog.vue"]
+      "files": ["packages/goal-ui/src/components/dialogs/KeyResultDialog.vue"]
     },
     {
       "key": "goal.krDialog.update",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/dialogs/KeyResultDialog.vue"]
+      "files": ["packages/goal-ui/src/components/dialogs/KeyResultDialog.vue"]
     },
     {
       "key": "goal.krDialog.updateTitle",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/dialogs/KeyResultDialog.vue"]
+      "files": ["packages/goal-ui/src/components/dialogs/KeyResultDialog.vue"]
     },
     {
       "key": "goal.krDialog.valueType",
@@ -3316,7 +3306,7 @@
       "en": false,
       "files": [
         "packages/app-vue/src/modules/ai/components/AIGoalDraftEditor.vue",
-        "packages/app-vue/src/modules/goal/components/dialogs/KeyResultDialog.vue"
+        "packages/goal-ui/src/components/dialogs/KeyResultDialog.vue"
       ]
     },
     {
@@ -3325,7 +3315,7 @@
       "en": false,
       "files": [
         "packages/app-vue/src/modules/ai/components/AIGoalDraftEditor.vue",
-        "packages/app-vue/src/modules/goal/components/dialogs/KeyResultDialog.vue"
+        "packages/goal-ui/src/components/dialogs/KeyResultDialog.vue"
       ]
     },
     {
@@ -3334,14 +3324,14 @@
       "en": false,
       "files": [
         "packages/app-vue/src/modules/ai/components/AIGoalDraftEditor.vue",
-        "packages/app-vue/src/modules/goal/components/dialogs/KeyResultDialog.vue"
+        "packages/goal-ui/src/components/dialogs/KeyResultDialog.vue"
       ]
     },
     {
       "key": "goal.krDialog.valueTypeHint",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/dialogs/KeyResultDialog.vue"]
+      "files": ["packages/goal-ui/src/components/dialogs/KeyResultDialog.vue"]
     },
     {
       "key": "goal.krDialog.valueTypeIncremental",
@@ -3349,7 +3339,7 @@
       "en": false,
       "files": [
         "packages/app-vue/src/modules/ai/components/AIGoalDraftEditor.vue",
-        "packages/app-vue/src/modules/goal/components/dialogs/KeyResultDialog.vue"
+        "packages/goal-ui/src/components/dialogs/KeyResultDialog.vue"
       ]
     },
     {
@@ -3358,7 +3348,7 @@
       "en": false,
       "files": [
         "packages/app-vue/src/modules/ai/components/AIGoalDraftEditor.vue",
-        "packages/app-vue/src/modules/goal/components/dialogs/KeyResultDialog.vue"
+        "packages/goal-ui/src/components/dialogs/KeyResultDialog.vue"
       ]
     },
     {
@@ -3367,250 +3357,250 @@
       "en": false,
       "files": [
         "packages/app-vue/src/modules/ai/components/AIGoalDraftEditor.vue",
-        "packages/app-vue/src/modules/goal/components/dialogs/KeyResultDialog.vue"
+        "packages/goal-ui/src/components/dialogs/KeyResultDialog.vue"
       ]
     },
     {
       "key": "goal.krDialog.weightHint",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/dialogs/KeyResultDialog.vue"]
+      "files": ["packages/goal-ui/src/components/dialogs/KeyResultDialog.vue"]
     },
     {
       "key": "goal.krPreview.adoptSelected",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/KRPreviewList.vue"]
+      "files": ["packages/goal-ui/src/components/KRPreviewList.vue"]
     },
     {
       "key": "goal.krPreview.cancel",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/KRPreviewList.vue"]
+      "files": ["packages/goal-ui/src/components/KRPreviewList.vue"]
     },
     {
       "key": "goal.krPreview.clearList",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/KRPreviewList.vue"]
+      "files": ["packages/goal-ui/src/components/KRPreviewList.vue"]
     },
     {
       "key": "goal.krPreview.cleared",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/KRPreviewList.vue"]
+      "files": ["packages/goal-ui/src/components/KRPreviewList.vue"]
     },
     {
       "key": "goal.krPreview.confirmClear",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/KRPreviewList.vue"]
+      "files": ["packages/goal-ui/src/components/KRPreviewList.vue"]
     },
     {
       "key": "goal.krPreview.confirmClearTitle",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/KRPreviewList.vue"]
+      "files": ["packages/goal-ui/src/components/KRPreviewList.vue"]
     },
     {
       "key": "goal.krPreview.confirmRemove",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/KRPreviewList.vue"]
+      "files": ["packages/goal-ui/src/components/KRPreviewList.vue"]
     },
     {
       "key": "goal.krPreview.confirmRemoveTitle",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/KRPreviewList.vue"]
+      "files": ["packages/goal-ui/src/components/KRPreviewList.vue"]
     },
     {
       "key": "goal.krPreview.descPlaceholder",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/KRPreviewList.vue"]
+      "files": ["packages/goal-ui/src/components/KRPreviewList.vue"]
     },
     {
       "key": "goal.krPreview.deselectAll",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/KRPreviewList.vue"]
+      "files": ["packages/goal-ui/src/components/KRPreviewList.vue"]
     },
     {
       "key": "goal.krPreview.editTitle",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/KRPreviewList.vue"]
+      "files": ["packages/goal-ui/src/components/KRPreviewList.vue"]
     },
     {
       "key": "goal.krPreview.empty",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/KRPreviewList.vue"]
+      "files": ["packages/goal-ui/src/components/KRPreviewList.vue"]
     },
     {
       "key": "goal.krPreview.emptyHint",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/KRPreviewList.vue"]
+      "files": ["packages/goal-ui/src/components/KRPreviewList.vue"]
     },
     {
       "key": "goal.krPreview.fieldDesc",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/KRPreviewList.vue"]
+      "files": ["packages/goal-ui/src/components/KRPreviewList.vue"]
     },
     {
       "key": "goal.krPreview.fieldImportance",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/KRPreviewList.vue"]
+      "files": ["packages/goal-ui/src/components/KRPreviewList.vue"]
     },
     {
       "key": "goal.krPreview.fieldTarget",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/KRPreviewList.vue"]
+      "files": ["packages/goal-ui/src/components/KRPreviewList.vue"]
     },
     {
       "key": "goal.krPreview.fieldTitle",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/KRPreviewList.vue"]
+      "files": ["packages/goal-ui/src/components/KRPreviewList.vue"]
     },
     {
       "key": "goal.krPreview.fieldUnit",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/KRPreviewList.vue"]
+      "files": ["packages/goal-ui/src/components/KRPreviewList.vue"]
     },
     {
       "key": "goal.krPreview.fieldWeight",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/KRPreviewList.vue"]
+      "files": ["packages/goal-ui/src/components/KRPreviewList.vue"]
     },
     {
       "key": "goal.krPreview.importanceHigh",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/KRPreviewList.vue"]
+      "files": ["packages/goal-ui/src/components/KRPreviewList.vue"]
     },
     {
       "key": "goal.krPreview.importanceLow",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/KRPreviewList.vue"]
+      "files": ["packages/goal-ui/src/components/KRPreviewList.vue"]
     },
     {
       "key": "goal.krPreview.importanceMedium",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/KRPreviewList.vue"]
+      "files": ["packages/goal-ui/src/components/KRPreviewList.vue"]
     },
     {
       "key": "goal.krPreview.removed",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/KRPreviewList.vue"]
+      "files": ["packages/goal-ui/src/components/KRPreviewList.vue"]
     },
     {
       "key": "goal.krPreview.save",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/KRPreviewList.vue"]
+      "files": ["packages/goal-ui/src/components/KRPreviewList.vue"]
     },
     {
       "key": "goal.krPreview.selectAll",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/KRPreviewList.vue"]
+      "files": ["packages/goal-ui/src/components/KRPreviewList.vue"]
     },
     {
       "key": "goal.krPreview.selectAtLeastOne",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/KRPreviewList.vue"]
+      "files": ["packages/goal-ui/src/components/KRPreviewList.vue"]
     },
     {
       "key": "goal.krPreview.selectImportance",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/KRPreviewList.vue"]
+      "files": ["packages/goal-ui/src/components/KRPreviewList.vue"]
     },
     {
       "key": "goal.krPreview.selected",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/KRPreviewList.vue"]
+      "files": ["packages/goal-ui/src/components/KRPreviewList.vue"]
     },
     {
       "key": "goal.krPreview.targetLabel",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/KRPreviewList.vue"]
+      "files": ["packages/goal-ui/src/components/KRPreviewList.vue"]
     },
     {
       "key": "goal.krPreview.targetPlaceholder",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/KRPreviewList.vue"]
+      "files": ["packages/goal-ui/src/components/KRPreviewList.vue"]
     },
     {
       "key": "goal.krPreview.title",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/KRPreviewList.vue"]
+      "files": ["packages/goal-ui/src/components/KRPreviewList.vue"]
     },
     {
       "key": "goal.krPreview.titlePlaceholder",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/KRPreviewList.vue"]
+      "files": ["packages/goal-ui/src/components/KRPreviewList.vue"]
     },
     {
       "key": "goal.krPreview.unitPlaceholder",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/KRPreviewList.vue"]
+      "files": ["packages/goal-ui/src/components/KRPreviewList.vue"]
     },
     {
       "key": "goal.krPreview.updated",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/KRPreviewList.vue"]
+      "files": ["packages/goal-ui/src/components/KRPreviewList.vue"]
     },
     {
       "key": "goal.krPreview.weightLabel",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/KRPreviewList.vue"]
+      "files": ["packages/goal-ui/src/components/KRPreviewList.vue"]
     },
     {
       "key": "goal.list.allGoals",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/GoalFolder.vue"]
+      "files": ["packages/goal-ui/src/components/GoalFolder.vue"]
     },
     {
       "key": "goal.list.askAi",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/views/GoalListView.vue"]
+      "files": ["packages/goal-ui/src/views/GoalListView.vue"]
     },
     {
       "key": "goal.list.compare",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/GoalPageToolbar.vue"]
+      "files": ["packages/goal-ui/src/components/GoalPageToolbar.vue"]
     },
     {
       "key": "goal.list.confirmDelete",
       "zh": false,
       "en": false,
       "files": [
-        "packages/app-vue/src/modules/goal/views/GoalDetailView.vue",
-        "packages/app-vue/src/modules/goal/views/GoalListView.vue"
+        "packages/goal-ui/src/views/GoalDetailView.vue",
+        "packages/goal-ui/src/views/GoalListView.vue"
       ]
     },
     {
@@ -3618,1843 +3608,1797 @@
       "zh": false,
       "en": false,
       "files": [
-        "packages/app-vue/src/modules/goal/views/GoalDetailView.vue",
-        "packages/app-vue/src/modules/goal/views/GoalListView.vue"
+        "packages/goal-ui/src/views/GoalDetailView.vue",
+        "packages/goal-ui/src/views/GoalListView.vue"
       ]
     },
     {
       "key": "goal.list.createToStart",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/views/GoalListView.vue"]
+      "files": ["packages/goal-ui/src/views/GoalListView.vue"]
     },
     {
       "key": "goal.list.newFolder",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/GoalPageToolbar.vue"]
+      "files": ["packages/goal-ui/src/components/GoalPageToolbar.vue"]
     },
     {
       "key": "goal.list.newGoal",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/GoalPageToolbar.vue"]
+      "files": ["packages/goal-ui/src/components/GoalPageToolbar.vue"]
     },
     {
       "key": "goal.list.noGoalsFound",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/views/GoalListView.vue"]
+      "files": ["packages/goal-ui/src/views/GoalListView.vue"]
     },
     {
       "key": "goal.list.searchGoals",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/GoalPageToolbar.vue"]
+      "files": ["packages/goal-ui/src/components/GoalPageToolbar.vue"]
     },
     {
       "key": "goal.list.viewEmpty",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/views/GoalListView.vue"]
+      "files": ["packages/goal-ui/src/views/GoalListView.vue"]
     },
     {
       "key": "goal.multiComparison.importance",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/views/MultiGoalComparisonView.vue"]
+      "files": ["packages/goal-ui/src/views/MultiGoalComparisonView.vue"]
     },
     {
       "key": "goal.multiComparison.priority",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/views/MultiGoalComparisonView.vue"]
+      "files": ["packages/goal-ui/src/views/MultiGoalComparisonView.vue"]
     },
     {
       "key": "goal.multiComparison.selectAtLeastTwo",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/views/MultiGoalComparisonView.vue"]
+      "files": ["packages/goal-ui/src/views/MultiGoalComparisonView.vue"]
     },
     {
       "key": "goal.multiComparison.selectGoals",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/views/MultiGoalComparisonView.vue"]
+      "files": ["packages/goal-ui/src/views/MultiGoalComparisonView.vue"]
     },
     {
       "key": "goal.multiComparison.startDate",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/views/MultiGoalComparisonView.vue"]
+      "files": ["packages/goal-ui/src/views/MultiGoalComparisonView.vue"]
     },
     {
       "key": "goal.multiComparison.tags",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/views/MultiGoalComparisonView.vue"]
+      "files": ["packages/goal-ui/src/views/MultiGoalComparisonView.vue"]
     },
     {
       "key": "goal.multiComparison.targetDate",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/views/MultiGoalComparisonView.vue"]
+      "files": ["packages/goal-ui/src/views/MultiGoalComparisonView.vue"]
     },
     {
       "key": "goal.multiComparison.title",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/views/MultiGoalComparisonView.vue"]
+      "files": ["packages/goal-ui/src/views/MultiGoalComparisonView.vue"]
     },
     {
       "key": "goal.multiGoalSelector.cannotStart",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/comparison/MultiGoalSelector.vue"]
+      "files": ["packages/goal-ui/src/components/comparison/MultiGoalSelector.vue"]
     },
     {
       "key": "goal.multiGoalSelector.clearSelection",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/comparison/MultiGoalSelector.vue"]
+      "files": ["packages/goal-ui/src/components/comparison/MultiGoalSelector.vue"]
     },
     {
       "key": "goal.multiGoalSelector.importantGoals",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/comparison/MultiGoalSelector.vue"]
+      "files": ["packages/goal-ui/src/components/comparison/MultiGoalSelector.vue"]
     },
     {
       "key": "goal.multiGoalSelector.maxMessage",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/comparison/MultiGoalSelector.vue"]
+      "files": ["packages/goal-ui/src/components/comparison/MultiGoalSelector.vue"]
     },
     {
       "key": "goal.multiGoalSelector.needMore",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/comparison/MultiGoalSelector.vue"]
+      "files": ["packages/goal-ui/src/components/comparison/MultiGoalSelector.vue"]
     },
     {
       "key": "goal.multiGoalSelector.noGoals",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/comparison/MultiGoalSelector.vue"]
+      "files": ["packages/goal-ui/src/components/comparison/MultiGoalSelector.vue"]
     },
     {
       "key": "goal.multiGoalSelector.reachedMax",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/comparison/MultiGoalSelector.vue"]
+      "files": ["packages/goal-ui/src/components/comparison/MultiGoalSelector.vue"]
     },
     {
       "key": "goal.multiGoalSelector.searchPlaceholder",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/comparison/MultiGoalSelector.vue"]
+      "files": ["packages/goal-ui/src/components/comparison/MultiGoalSelector.vue"]
     },
     {
       "key": "goal.multiGoalSelector.startComparison",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/comparison/MultiGoalSelector.vue"]
+      "files": ["packages/goal-ui/src/components/comparison/MultiGoalSelector.vue"]
     },
     {
       "key": "goal.multiGoalSelector.statusActive",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/comparison/MultiGoalSelector.vue"]
+      "files": ["packages/goal-ui/src/components/comparison/MultiGoalSelector.vue"]
     },
     {
       "key": "goal.multiGoalSelector.statusArchived",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/comparison/MultiGoalSelector.vue"]
+      "files": ["packages/goal-ui/src/components/comparison/MultiGoalSelector.vue"]
     },
     {
       "key": "goal.multiGoalSelector.statusCompleted",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/comparison/MultiGoalSelector.vue"]
+      "files": ["packages/goal-ui/src/components/comparison/MultiGoalSelector.vue"]
     },
     {
       "key": "goal.multiGoalSelector.subtitle",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/comparison/MultiGoalSelector.vue"]
+      "files": ["packages/goal-ui/src/components/comparison/MultiGoalSelector.vue"]
     },
     {
       "key": "goal.multiGoalSelector.title",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/comparison/MultiGoalSelector.vue"]
+      "files": ["packages/goal-ui/src/components/comparison/MultiGoalSelector.vue"]
     },
     {
       "key": "goal.progressBreakdown.calcFormula",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/ProgressBreakdownPanel.vue"]
+      "files": ["packages/goal-ui/src/components/ProgressBreakdownPanel.vue"]
     },
     {
       "key": "goal.progressBreakdown.calcMode",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/ProgressBreakdownPanel.vue"]
+      "files": ["packages/goal-ui/src/components/ProgressBreakdownPanel.vue"]
     },
     {
       "key": "goal.progressBreakdown.close",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/ProgressBreakdownPanel.vue"]
+      "files": ["packages/goal-ui/src/components/ProgressBreakdownPanel.vue"]
     },
     {
       "key": "goal.progressBreakdown.contribution",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/ProgressBreakdownPanel.vue"]
+      "files": ["packages/goal-ui/src/components/ProgressBreakdownPanel.vue"]
     },
     {
       "key": "goal.progressBreakdown.krContribution",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/ProgressBreakdownPanel.vue"]
+      "files": ["packages/goal-ui/src/components/ProgressBreakdownPanel.vue"]
     },
     {
       "key": "goal.progressBreakdown.lastUpdate",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/ProgressBreakdownPanel.vue"]
+      "files": ["packages/goal-ui/src/components/ProgressBreakdownPanel.vue"]
     },
     {
       "key": "goal.progressBreakdown.loading",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/ProgressBreakdownPanel.vue"]
+      "files": ["packages/goal-ui/src/components/ProgressBreakdownPanel.vue"]
     },
     {
       "key": "goal.progressBreakdown.progress",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/ProgressBreakdownPanel.vue"]
+      "files": ["packages/goal-ui/src/components/ProgressBreakdownPanel.vue"]
     },
     {
       "key": "goal.progressBreakdown.retry",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/ProgressBreakdownPanel.vue"]
+      "files": ["packages/goal-ui/src/components/ProgressBreakdownPanel.vue"]
     },
     {
       "key": "goal.progressBreakdown.title",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/ProgressBreakdownPanel.vue"]
+      "files": ["packages/goal-ui/src/components/ProgressBreakdownPanel.vue"]
     },
     {
       "key": "goal.progressBreakdown.totalProgress",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/ProgressBreakdownPanel.vue"]
+      "files": ["packages/goal-ui/src/components/ProgressBreakdownPanel.vue"]
     },
     {
       "key": "goal.progressBreakdown.weight",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/ProgressBreakdownPanel.vue"]
+      "files": ["packages/goal-ui/src/components/ProgressBreakdownPanel.vue"]
     },
     {
       "key": "goal.progressChart.ahead",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/echarts/GoalProgressChart.vue"]
+      "files": ["packages/goal-ui/src/components/echarts/GoalProgressChart.vue"]
     },
     {
       "key": "goal.progressChart.behind",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/echarts/GoalProgressChart.vue"]
+      "files": ["packages/goal-ui/src/components/echarts/GoalProgressChart.vue"]
     },
     {
       "key": "goal.progressChart.goalProgress",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/echarts/GoalProgressChart.vue"]
+      "files": ["packages/goal-ui/src/components/echarts/GoalProgressChart.vue"]
     },
     {
       "key": "goal.progressChart.notSet",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/echarts/GoalProgressChart.vue"]
+      "files": ["packages/goal-ui/src/components/echarts/GoalProgressChart.vue"]
     },
     {
       "key": "goal.progressChart.remaining",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/echarts/GoalProgressChart.vue"]
+      "files": ["packages/goal-ui/src/components/echarts/GoalProgressChart.vue"]
     },
     {
       "key": "goal.progressChart.timeProgress",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/echarts/GoalProgressChart.vue"]
+      "files": ["packages/goal-ui/src/components/echarts/GoalProgressChart.vue"]
     },
     {
       "key": "goal.progressChart.title",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/echarts/GoalProgressChart.vue"]
+      "files": ["packages/goal-ui/src/components/echarts/GoalProgressChart.vue"]
     },
     {
       "key": "goal.recordDialog.addTitle",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/dialogs/GoalRecordDialog.vue"]
+      "files": ["packages/goal-ui/src/components/dialogs/GoalRecordDialog.vue"]
     },
     {
       "key": "goal.recordDialog.cancel",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/dialogs/GoalRecordDialog.vue"]
+      "files": ["packages/goal-ui/src/components/dialogs/GoalRecordDialog.vue"]
     },
     {
       "key": "goal.recordDialog.editNotAllowed",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/dialogs/GoalRecordDialog.vue"]
+      "files": ["packages/goal-ui/src/components/dialogs/GoalRecordDialog.vue"]
     },
     {
       "key": "goal.recordDialog.editTitle",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/dialogs/GoalRecordDialog.vue"]
+      "files": ["packages/goal-ui/src/components/dialogs/GoalRecordDialog.vue"]
     },
     {
       "key": "goal.recordDialog.goalNotFound",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/dialogs/GoalRecordDialog.vue"]
+      "files": ["packages/goal-ui/src/components/dialogs/GoalRecordDialog.vue"]
     },
     {
       "key": "goal.recordDialog.incrementValue",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/dialogs/GoalRecordDialog.vue"]
+      "files": ["packages/goal-ui/src/components/dialogs/GoalRecordDialog.vue"]
     },
     {
       "key": "goal.recordDialog.krNotFound",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/dialogs/GoalRecordDialog.vue"]
+      "files": ["packages/goal-ui/src/components/dialogs/GoalRecordDialog.vue"]
     },
     {
       "key": "goal.recordDialog.quickSelect",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/dialogs/GoalRecordDialog.vue"]
+      "files": ["packages/goal-ui/src/components/dialogs/GoalRecordDialog.vue"]
     },
     {
       "key": "goal.recordDialog.remarks",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/dialogs/GoalRecordDialog.vue"]
+      "files": ["packages/goal-ui/src/components/dialogs/GoalRecordDialog.vue"]
     },
     {
       "key": "goal.recordDialog.remarksPlaceholder",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/dialogs/GoalRecordDialog.vue"]
+      "files": ["packages/goal-ui/src/components/dialogs/GoalRecordDialog.vue"]
     },
     {
       "key": "goal.recordDialog.save",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/dialogs/GoalRecordDialog.vue"]
+      "files": ["packages/goal-ui/src/components/dialogs/GoalRecordDialog.vue"]
     },
     {
       "key": "goal.recordDialog.unit",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/dialogs/GoalRecordDialog.vue"]
+      "files": ["packages/goal-ui/src/components/dialogs/GoalRecordDialog.vue"]
     },
     {
       "key": "goal.recordDialog.valueMax",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/dialogs/GoalRecordDialog.vue"]
+      "files": ["packages/goal-ui/src/components/dialogs/GoalRecordDialog.vue"]
     },
     {
       "key": "goal.recordDialog.valuePositive",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/dialogs/GoalRecordDialog.vue"]
+      "files": ["packages/goal-ui/src/components/dialogs/GoalRecordDialog.vue"]
     },
     {
       "key": "goal.recordDialog.valueRequired",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/dialogs/GoalRecordDialog.vue"]
+      "files": ["packages/goal-ui/src/components/dialogs/GoalRecordDialog.vue"]
     },
     {
       "key": "goal.reviewCreation.achievements",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/views/GoalReviewCreationView.vue"]
+      "files": ["packages/goal-ui/src/views/GoalReviewCreationView.vue"]
     },
     {
       "key": "goal.reviewCreation.achievementsPlaceholder",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/views/GoalReviewCreationView.vue"]
+      "files": ["packages/goal-ui/src/views/GoalReviewCreationView.vue"]
     },
     {
       "key": "goal.reviewCreation.back",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/views/GoalReviewCreationView.vue"]
+      "files": ["packages/goal-ui/src/views/GoalReviewCreationView.vue"]
     },
     {
       "key": "goal.reviewCreation.cancel",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/views/GoalReviewCreationView.vue"]
+      "files": ["packages/goal-ui/src/views/GoalReviewCreationView.vue"]
     },
     {
       "key": "goal.reviewCreation.challenges",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/views/GoalReviewCreationView.vue"]
+      "files": ["packages/goal-ui/src/views/GoalReviewCreationView.vue"]
     },
     {
       "key": "goal.reviewCreation.challengesPlaceholder",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/views/GoalReviewCreationView.vue"]
+      "files": ["packages/goal-ui/src/views/GoalReviewCreationView.vue"]
     },
     {
       "key": "goal.reviewCreation.contentPlaceholder",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/views/GoalReviewCreationView.vue"]
+      "files": ["packages/goal-ui/src/views/GoalReviewCreationView.vue"]
     },
     {
       "key": "goal.reviewCreation.create",
       "zh": false,
       "en": false,
       "files": [
-        "packages/app-vue/src/modules/goal/views/GoalDetailView.vue",
-        "packages/app-vue/src/modules/goal/views/GoalReviewCreationView.vue"
+        "packages/goal-ui/src/views/GoalDetailView.vue",
+        "packages/goal-ui/src/views/GoalReviewCreationView.vue"
       ]
     },
     {
       "key": "goal.reviewCreation.createSuccess",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/views/GoalReviewCreationView.vue"]
+      "files": ["packages/goal-ui/src/views/GoalReviewCreationView.vue"]
     },
     {
       "key": "goal.reviewCreation.fillContent",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/views/GoalReviewCreationView.vue"]
+      "files": ["packages/goal-ui/src/views/GoalReviewCreationView.vue"]
     },
     {
       "key": "goal.reviewCreation.final",
       "zh": false,
       "en": false,
       "files": [
-        "packages/app-vue/src/modules/goal/views/GoalReviewCreationView.vue",
-        "packages/app-vue/src/modules/goal/views/GoalReviewDetailView.vue"
+        "packages/goal-ui/src/views/GoalReviewCreationView.vue",
+        "packages/goal-ui/src/views/GoalReviewDetailView.vue"
       ]
     },
     {
       "key": "goal.reviewCreation.improvements",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/views/GoalReviewCreationView.vue"]
+      "files": ["packages/goal-ui/src/views/GoalReviewCreationView.vue"]
     },
     {
       "key": "goal.reviewCreation.improvementsPlaceholder",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/views/GoalReviewCreationView.vue"]
+      "files": ["packages/goal-ui/src/views/GoalReviewCreationView.vue"]
     },
     {
       "key": "goal.reviewCreation.monthly",
       "zh": false,
       "en": false,
       "files": [
-        "packages/app-vue/src/modules/goal/views/GoalReviewCreationView.vue",
-        "packages/app-vue/src/modules/goal/views/GoalReviewDetailView.vue"
+        "packages/goal-ui/src/views/GoalReviewCreationView.vue",
+        "packages/goal-ui/src/views/GoalReviewDetailView.vue"
       ]
     },
     {
       "key": "goal.reviewCreation.overallRating",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/views/GoalReviewCreationView.vue"]
+      "files": ["packages/goal-ui/src/views/GoalReviewCreationView.vue"]
     },
     {
       "key": "goal.reviewCreation.quarterly",
       "zh": false,
       "en": false,
       "files": [
-        "packages/app-vue/src/modules/goal/views/GoalReviewCreationView.vue",
-        "packages/app-vue/src/modules/goal/views/GoalReviewDetailView.vue"
+        "packages/goal-ui/src/views/GoalReviewCreationView.vue",
+        "packages/goal-ui/src/views/GoalReviewDetailView.vue"
       ]
     },
     {
       "key": "goal.reviewCreation.reviewContent",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/views/GoalReviewCreationView.vue"]
+      "files": ["packages/goal-ui/src/views/GoalReviewCreationView.vue"]
     },
     {
       "key": "goal.reviewCreation.reviewTitle",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/views/GoalReviewCreationView.vue"]
+      "files": ["packages/goal-ui/src/views/GoalReviewCreationView.vue"]
     },
     {
       "key": "goal.reviewCreation.reviewType",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/views/GoalReviewCreationView.vue"]
+      "files": ["packages/goal-ui/src/views/GoalReviewCreationView.vue"]
     },
     {
       "key": "goal.reviewCreation.reviewTypeSuffix",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/views/GoalReviewCreationView.vue"]
+      "files": ["packages/goal-ui/src/views/GoalReviewCreationView.vue"]
     },
     {
       "key": "goal.reviewCreation.saving",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/views/GoalReviewCreationView.vue"]
+      "files": ["packages/goal-ui/src/views/GoalReviewCreationView.vue"]
     },
     {
       "key": "goal.reviewCreation.selectType",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/views/GoalReviewCreationView.vue"]
+      "files": ["packages/goal-ui/src/views/GoalReviewCreationView.vue"]
     },
     {
       "key": "goal.reviewCreation.title",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/views/GoalReviewCreationView.vue"]
+      "files": ["packages/goal-ui/src/views/GoalReviewCreationView.vue"]
     },
     {
       "key": "goal.reviewCreation.weekly",
       "zh": false,
       "en": false,
       "files": [
-        "packages/app-vue/src/modules/goal/views/GoalReviewCreationView.vue",
-        "packages/app-vue/src/modules/goal/views/GoalReviewDetailView.vue"
+        "packages/goal-ui/src/views/GoalReviewCreationView.vue",
+        "packages/goal-ui/src/views/GoalReviewDetailView.vue"
       ]
     },
     {
       "key": "goal.reviewDetail.achievements",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/views/GoalReviewDetailView.vue"]
+      "files": ["packages/goal-ui/src/views/GoalReviewDetailView.vue"]
     },
     {
       "key": "goal.reviewDetail.back",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/views/GoalReviewDetailView.vue"]
+      "files": ["packages/goal-ui/src/views/GoalReviewDetailView.vue"]
     },
     {
       "key": "goal.reviewDetail.challenges",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/views/GoalReviewDetailView.vue"]
+      "files": ["packages/goal-ui/src/views/GoalReviewDetailView.vue"]
     },
     {
       "key": "goal.reviewDetail.currentValueColumn",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/views/GoalReviewDetailView.vue"]
+      "files": ["packages/goal-ui/src/views/GoalReviewDetailView.vue"]
     },
     {
       "key": "goal.reviewDetail.improvements",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/views/GoalReviewDetailView.vue"]
+      "files": ["packages/goal-ui/src/views/GoalReviewDetailView.vue"]
     },
     {
       "key": "goal.reviewDetail.krName",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/views/GoalReviewDetailView.vue"]
+      "files": ["packages/goal-ui/src/views/GoalReviewDetailView.vue"]
     },
     {
       "key": "goal.reviewDetail.krSnapshot",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/views/GoalReviewDetailView.vue"]
+      "files": ["packages/goal-ui/src/views/GoalReviewDetailView.vue"]
     },
     {
       "key": "goal.reviewDetail.krSnapshotDesc",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/views/GoalReviewDetailView.vue"]
+      "files": ["packages/goal-ui/src/views/GoalReviewDetailView.vue"]
     },
     {
       "key": "goal.reviewDetail.loading",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/views/GoalReviewDetailView.vue"]
+      "files": ["packages/goal-ui/src/views/GoalReviewDetailView.vue"]
     },
     {
       "key": "goal.reviewDetail.noTimelineData",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/views/GoalReviewDetailView.vue"]
+      "files": ["packages/goal-ui/src/views/GoalReviewDetailView.vue"]
     },
     {
       "key": "goal.reviewDetail.notFound",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/views/GoalReviewDetailView.vue"]
+      "files": ["packages/goal-ui/src/views/GoalReviewDetailView.vue"]
     },
     {
       "key": "goal.reviewDetail.overallRating",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/views/GoalReviewDetailView.vue"]
+      "files": ["packages/goal-ui/src/views/GoalReviewDetailView.vue"]
     },
     {
       "key": "goal.reviewDetail.recordCountColumn",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/views/GoalReviewDetailView.vue"]
+      "files": ["packages/goal-ui/src/views/GoalReviewDetailView.vue"]
     },
     {
       "key": "goal.reviewDetail.recordsBeforeReview",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/views/GoalReviewDetailView.vue"]
+      "files": ["packages/goal-ui/src/views/GoalReviewDetailView.vue"]
     },
     {
       "key": "goal.reviewDetail.recordsTimeline",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/views/GoalReviewDetailView.vue"]
+      "files": ["packages/goal-ui/src/views/GoalReviewDetailView.vue"]
     },
     {
       "key": "goal.reviewDetail.recordsTimelineDesc",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/views/GoalReviewDetailView.vue"]
+      "files": ["packages/goal-ui/src/views/GoalReviewDetailView.vue"]
     },
     {
       "key": "goal.reviewDetail.reviewProgressColumn",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/views/GoalReviewDetailView.vue"]
+      "files": ["packages/goal-ui/src/views/GoalReviewDetailView.vue"]
     },
     {
       "key": "goal.reviewDetail.reviewedAt",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/views/GoalReviewDetailView.vue"]
+      "files": ["packages/goal-ui/src/views/GoalReviewDetailView.vue"]
     },
     {
       "key": "goal.reviewDetail.snapshotProgress",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/views/GoalReviewDetailView.vue"]
+      "files": ["packages/goal-ui/src/views/GoalReviewDetailView.vue"]
     },
     {
       "key": "goal.reviewDetail.summary",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/views/GoalReviewDetailView.vue"]
+      "files": ["packages/goal-ui/src/views/GoalReviewDetailView.vue"]
     },
     {
       "key": "goal.reviewDetail.targetValueColumn",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/views/GoalReviewDetailView.vue"]
+      "files": ["packages/goal-ui/src/views/GoalReviewDetailView.vue"]
     },
     {
       "key": "goal.reviewDetail.title",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/views/GoalReviewDetailView.vue"]
+      "files": ["packages/goal-ui/src/views/GoalReviewDetailView.vue"]
     },
     {
       "key": "goal.statusRule.action",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/rules/StatusRuleEditor.vue"]
+      "files": ["packages/goal-ui/src/components/rules/StatusRuleEditor.vue"]
     },
     {
       "key": "goal.statusRule.actionSettings",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/rules/StatusRuleEditor.vue"]
+      "files": ["packages/goal-ui/src/components/rules/StatusRuleEditor.vue"]
     },
     {
       "key": "goal.statusRule.addCondition",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/rules/StatusRuleEditor.vue"]
+      "files": ["packages/goal-ui/src/components/rules/StatusRuleEditor.vue"]
     },
     {
       "key": "goal.statusRule.addRule",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/rules/StatusRuleEditor.vue"]
+      "files": ["packages/goal-ui/src/components/rules/StatusRuleEditor.vue"]
     },
     {
       "key": "goal.statusRule.alertDeleteConfirm",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/rules/StatusRuleEditor.vue"]
+      "files": ["packages/goal-ui/src/components/rules/StatusRuleEditor.vue"]
     },
     {
       "key": "goal.statusRule.alertDeleteTitle",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/rules/StatusRuleEditor.vue"]
+      "files": ["packages/goal-ui/src/components/rules/StatusRuleEditor.vue"]
     },
     {
       "key": "goal.statusRule.allowManualOverride",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/rules/StatusRuleEditor.vue"]
+      "files": ["packages/goal-ui/src/components/rules/StatusRuleEditor.vue"]
     },
     {
       "key": "goal.statusRule.andNotify",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/rules/StatusRuleEditor.vue"]
+      "files": ["packages/goal-ui/src/components/rules/StatusRuleEditor.vue"]
     },
     {
       "key": "goal.statusRule.atLeastOneCondition",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/rules/StatusRuleEditor.vue"]
+      "files": ["packages/goal-ui/src/components/rules/StatusRuleEditor.vue"]
     },
     {
       "key": "goal.statusRule.builtIn",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/rules/StatusRuleEditor.vue"]
+      "files": ["packages/goal-ui/src/components/rules/StatusRuleEditor.vue"]
     },
     {
       "key": "goal.statusRule.cancel",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/rules/StatusRuleEditor.vue"]
+      "files": ["packages/goal-ui/src/components/rules/StatusRuleEditor.vue"]
     },
     {
       "key": "goal.statusRule.condition",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/rules/StatusRuleEditor.vue"]
+      "files": ["packages/goal-ui/src/components/rules/StatusRuleEditor.vue"]
     },
     {
       "key": "goal.statusRule.conditionSettings",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/rules/StatusRuleEditor.vue"]
+      "files": ["packages/goal-ui/src/components/rules/StatusRuleEditor.vue"]
     },
     {
       "key": "goal.statusRule.conditionType",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/rules/StatusRuleEditor.vue"]
+      "files": ["packages/goal-ui/src/components/rules/StatusRuleEditor.vue"]
     },
     {
       "key": "goal.statusRule.conditionTypeManual",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/rules/StatusRuleEditor.vue"]
+      "files": ["packages/goal-ui/src/components/rules/StatusRuleEditor.vue"]
     },
     {
       "key": "goal.statusRule.conditionTypeProgress",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/rules/StatusRuleEditor.vue"]
+      "files": ["packages/goal-ui/src/components/rules/StatusRuleEditor.vue"]
     },
     {
       "key": "goal.statusRule.conditionTypeTime",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/rules/StatusRuleEditor.vue"]
+      "files": ["packages/goal-ui/src/components/rules/StatusRuleEditor.vue"]
     },
     {
       "key": "goal.statusRule.connectorAnd",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/rules/StatusRuleEditor.vue"]
+      "files": ["packages/goal-ui/src/components/rules/StatusRuleEditor.vue"]
     },
     {
       "key": "goal.statusRule.connectorOr",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/rules/StatusRuleEditor.vue"]
+      "files": ["packages/goal-ui/src/components/rules/StatusRuleEditor.vue"]
     },
     {
       "key": "goal.statusRule.description",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/rules/StatusRuleEditor.vue"]
+      "files": ["packages/goal-ui/src/components/rules/StatusRuleEditor.vue"]
     },
     {
       "key": "goal.statusRule.disableNote",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/rules/StatusRuleEditor.vue"]
+      "files": ["packages/goal-ui/src/components/rules/StatusRuleEditor.vue"]
     },
     {
       "key": "goal.statusRule.disabled",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/rules/StatusRuleEditor.vue"]
+      "files": ["packages/goal-ui/src/components/rules/StatusRuleEditor.vue"]
     },
     {
       "key": "goal.statusRule.editRule",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/rules/StatusRuleEditor.vue"]
+      "files": ["packages/goal-ui/src/components/rules/StatusRuleEditor.vue"]
     },
     {
       "key": "goal.statusRule.enableAutoRules",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/rules/StatusRuleEditor.vue"]
+      "files": ["packages/goal-ui/src/components/rules/StatusRuleEditor.vue"]
     },
     {
       "key": "goal.statusRule.enabled",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/rules/StatusRuleEditor.vue"]
+      "files": ["packages/goal-ui/src/components/rules/StatusRuleEditor.vue"]
     },
     {
       "key": "goal.statusRule.messagePlaceholder",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/rules/StatusRuleEditor.vue"]
+      "files": ["packages/goal-ui/src/components/rules/StatusRuleEditor.vue"]
     },
     {
       "key": "goal.statusRule.metricKRCompletion",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/rules/StatusRuleEditor.vue"]
+      "files": ["packages/goal-ui/src/components/rules/StatusRuleEditor.vue"]
     },
     {
       "key": "goal.statusRule.metricPlaceholder",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/rules/StatusRuleEditor.vue"]
+      "files": ["packages/goal-ui/src/components/rules/StatusRuleEditor.vue"]
     },
     {
       "key": "goal.statusRule.metricProgress",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/rules/StatusRuleEditor.vue"]
+      "files": ["packages/goal-ui/src/components/rules/StatusRuleEditor.vue"]
     },
     {
       "key": "goal.statusRule.metricTimeElapsed",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/rules/StatusRuleEditor.vue"]
+      "files": ["packages/goal-ui/src/components/rules/StatusRuleEditor.vue"]
     },
     {
       "key": "goal.statusRule.newRule",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/rules/StatusRuleEditor.vue"]
+      "files": ["packages/goal-ui/src/components/rules/StatusRuleEditor.vue"]
     },
     {
       "key": "goal.statusRule.notificationMessage",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/rules/StatusRuleEditor.vue"]
+      "files": ["packages/goal-ui/src/components/rules/StatusRuleEditor.vue"]
     },
     {
       "key": "goal.statusRule.notifyOnChange",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/rules/StatusRuleEditor.vue"]
+      "files": ["packages/goal-ui/src/components/rules/StatusRuleEditor.vue"]
     },
     {
       "key": "goal.statusRule.operatorEq",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/rules/StatusRuleEditor.vue"]
+      "files": ["packages/goal-ui/src/components/rules/StatusRuleEditor.vue"]
     },
     {
       "key": "goal.statusRule.operatorGt",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/rules/StatusRuleEditor.vue"]
+      "files": ["packages/goal-ui/src/components/rules/StatusRuleEditor.vue"]
     },
     {
       "key": "goal.statusRule.operatorGte",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/rules/StatusRuleEditor.vue"]
+      "files": ["packages/goal-ui/src/components/rules/StatusRuleEditor.vue"]
     },
     {
       "key": "goal.statusRule.operatorLt",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/rules/StatusRuleEditor.vue"]
+      "files": ["packages/goal-ui/src/components/rules/StatusRuleEditor.vue"]
     },
     {
       "key": "goal.statusRule.operatorLte",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/rules/StatusRuleEditor.vue"]
+      "files": ["packages/goal-ui/src/components/rules/StatusRuleEditor.vue"]
     },
     {
       "key": "goal.statusRule.operatorPlaceholder",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/rules/StatusRuleEditor.vue"]
+      "files": ["packages/goal-ui/src/components/rules/StatusRuleEditor.vue"]
     },
     {
       "key": "goal.statusRule.priority",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/rules/StatusRuleEditor.vue"]
+      "files": ["packages/goal-ui/src/components/rules/StatusRuleEditor.vue"]
     },
     {
       "key": "goal.statusRule.priorityHint",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/rules/StatusRuleEditor.vue"]
+      "files": ["packages/goal-ui/src/components/rules/StatusRuleEditor.vue"]
     },
     {
       "key": "goal.statusRule.ruleDesc",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/rules/StatusRuleEditor.vue"]
+      "files": ["packages/goal-ui/src/components/rules/StatusRuleEditor.vue"]
     },
     {
       "key": "goal.statusRule.ruleList",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/rules/StatusRuleEditor.vue"]
+      "files": ["packages/goal-ui/src/components/rules/StatusRuleEditor.vue"]
     },
     {
       "key": "goal.statusRule.ruleName",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/rules/StatusRuleEditor.vue"]
+      "files": ["packages/goal-ui/src/components/rules/StatusRuleEditor.vue"]
     },
     {
       "key": "goal.statusRule.rulePriority",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/rules/StatusRuleEditor.vue"]
+      "files": ["packages/goal-ui/src/components/rules/StatusRuleEditor.vue"]
     },
     {
       "key": "goal.statusRule.save",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/rules/StatusRuleEditor.vue"]
+      "files": ["packages/goal-ui/src/components/rules/StatusRuleEditor.vue"]
     },
     {
       "key": "goal.statusRule.scopeAll",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/rules/StatusRuleEditor.vue"]
+      "files": ["packages/goal-ui/src/components/rules/StatusRuleEditor.vue"]
     },
     {
       "key": "goal.statusRule.scopeAny",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/rules/StatusRuleEditor.vue"]
+      "files": ["packages/goal-ui/src/components/rules/StatusRuleEditor.vue"]
     },
     {
       "key": "goal.statusRule.scopePlaceholder",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/rules/StatusRuleEditor.vue"]
+      "files": ["packages/goal-ui/src/components/rules/StatusRuleEditor.vue"]
     },
     {
       "key": "goal.statusRule.sendNotification",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/rules/StatusRuleEditor.vue"]
+      "files": ["packages/goal-ui/src/components/rules/StatusRuleEditor.vue"]
     },
     {
       "key": "goal.statusRule.setStatusTo",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/rules/StatusRuleEditor.vue"]
+      "files": ["packages/goal-ui/src/components/rules/StatusRuleEditor.vue"]
     },
     {
       "key": "goal.statusRule.statusActive",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/rules/StatusRuleEditor.vue"]
+      "files": ["packages/goal-ui/src/components/rules/StatusRuleEditor.vue"]
     },
     {
       "key": "goal.statusRule.statusArchived",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/rules/StatusRuleEditor.vue"]
+      "files": ["packages/goal-ui/src/components/rules/StatusRuleEditor.vue"]
     },
     {
       "key": "goal.statusRule.statusCompleted",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/rules/StatusRuleEditor.vue"]
+      "files": ["packages/goal-ui/src/components/rules/StatusRuleEditor.vue"]
     },
     {
       "key": "goal.statusRule.targetStatus",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/rules/StatusRuleEditor.vue"]
+      "files": ["packages/goal-ui/src/components/rules/StatusRuleEditor.vue"]
     },
     {
       "key": "goal.statusRule.targetStatusHint",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/rules/StatusRuleEditor.vue"]
+      "files": ["packages/goal-ui/src/components/rules/StatusRuleEditor.vue"]
     },
     {
       "key": "goal.statusRule.title",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/rules/StatusRuleEditor.vue"]
+      "files": ["packages/goal-ui/src/components/rules/StatusRuleEditor.vue"]
     },
     {
       "key": "goal.statusRule.valuePlaceholder",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/rules/StatusRuleEditor.vue"]
+      "files": ["packages/goal-ui/src/components/rules/StatusRuleEditor.vue"]
     },
     {
       "key": "goal.statusRulesDemo.addRulesFirst",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/views/StatusRulesDemoView.vue"]
+      "files": ["packages/goal-ui/src/views/StatusRulesDemoView.vue"]
     },
     {
       "key": "goal.statusRulesDemo.condition",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/views/StatusRulesDemoView.vue"]
+      "files": ["packages/goal-ui/src/views/StatusRulesDemoView.vue"]
     },
     {
       "key": "goal.statusRulesDemo.none",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/views/StatusRulesDemoView.vue"]
+      "files": ["packages/goal-ui/src/views/StatusRulesDemoView.vue"]
     },
     {
       "key": "goal.statusRulesDemo.rulesConfig",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/views/StatusRulesDemoView.vue"]
+      "files": ["packages/goal-ui/src/views/StatusRulesDemoView.vue"]
     },
     {
       "key": "goal.statusRulesDemo.rulesConfigDesc",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/views/StatusRulesDemoView.vue"]
+      "files": ["packages/goal-ui/src/views/StatusRulesDemoView.vue"]
     },
     {
       "key": "goal.statusRulesDemo.rulesSaved",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/views/StatusRulesDemoView.vue"]
+      "files": ["packages/goal-ui/src/views/StatusRulesDemoView.vue"]
     },
     {
       "key": "goal.statusRulesDemo.rulesTimeline",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/views/StatusRulesDemoView.vue"]
+      "files": ["packages/goal-ui/src/views/StatusRulesDemoView.vue"]
     },
     {
       "key": "goal.statusRulesDemo.rulesTimelineDesc",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/views/StatusRulesDemoView.vue"]
+      "files": ["packages/goal-ui/src/views/StatusRulesDemoView.vue"]
     },
     {
       "key": "goal.statusRulesDemo.subtitle",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/views/StatusRulesDemoView.vue"]
+      "files": ["packages/goal-ui/src/views/StatusRulesDemoView.vue"]
     },
     {
       "key": "goal.statusRulesDemo.title",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/views/StatusRulesDemoView.vue"]
+      "files": ["packages/goal-ui/src/views/StatusRulesDemoView.vue"]
     },
     {
       "key": "goal.systemFolders.active",
       "zh": false,
       "en": false,
       "files": [
-        "packages/app-vue/src/modules/goal/components/GoalPageToolbar.vue",
-        "packages/app-vue/src/modules/goal/views/GoalModuleLayout.vue"
+        "packages/goal-ui/src/components/GoalPageToolbar.vue",
+        "packages/goal-ui/src/views/GoalModuleLayout.vue"
       ]
     },
     {
       "key": "goal.systemFolders.completed",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/views/GoalModuleLayout.vue"]
+      "files": ["packages/goal-ui/src/views/GoalModuleLayout.vue"]
     },
     {
       "key": "goal.systemFolders.deleted",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/views/GoalModuleLayout.vue"]
+      "files": ["packages/goal-ui/src/views/GoalModuleLayout.vue"]
     },
     {
       "key": "goal.systemFolders.expired",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/views/GoalModuleLayout.vue"]
+      "files": ["packages/goal-ui/src/views/GoalModuleLayout.vue"]
     },
     {
       "key": "goal.templateBrowser.all",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/template/TemplateBrowser.vue"]
+      "files": ["packages/goal-ui/src/components/template/TemplateBrowser.vue"]
     },
     {
       "key": "goal.templateBrowser.cancel",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/template/TemplateBrowser.vue"]
+      "files": ["packages/goal-ui/src/components/template/TemplateBrowser.vue"]
     },
     {
       "key": "goal.templateBrowser.catEngineering",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/template/TemplateBrowser.vue"]
+      "files": ["packages/goal-ui/src/components/template/TemplateBrowser.vue"]
     },
     {
       "key": "goal.templateBrowser.catGeneral",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/template/TemplateBrowser.vue"]
+      "files": ["packages/goal-ui/src/components/template/TemplateBrowser.vue"]
     },
     {
       "key": "goal.templateBrowser.catMarketing",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/template/TemplateBrowser.vue"]
+      "files": ["packages/goal-ui/src/components/template/TemplateBrowser.vue"]
     },
     {
       "key": "goal.templateBrowser.catProduct",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/template/TemplateBrowser.vue"]
+      "files": ["packages/goal-ui/src/components/template/TemplateBrowser.vue"]
     },
     {
       "key": "goal.templateBrowser.catSales",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/template/TemplateBrowser.vue"]
+      "files": ["packages/goal-ui/src/components/template/TemplateBrowser.vue"]
     },
     {
       "key": "goal.templateBrowser.category",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/template/TemplateBrowser.vue"]
+      "files": ["packages/goal-ui/src/components/template/TemplateBrowser.vue"]
     },
     {
       "key": "goal.templateBrowser.close",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/template/TemplateBrowser.vue"]
+      "files": ["packages/goal-ui/src/components/template/TemplateBrowser.vue"]
     },
     {
       "key": "goal.templateBrowser.filtered",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/template/TemplateBrowser.vue"]
+      "files": ["packages/goal-ui/src/components/template/TemplateBrowser.vue"]
     },
     {
       "key": "goal.templateBrowser.krCount",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/template/TemplateBrowser.vue"]
+      "files": ["packages/goal-ui/src/components/template/TemplateBrowser.vue"]
     },
     {
       "key": "goal.templateBrowser.matchPercent",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/template/TemplateBrowser.vue"]
+      "files": ["packages/goal-ui/src/components/template/TemplateBrowser.vue"]
     },
     {
       "key": "goal.templateBrowser.matchedCount",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/template/TemplateBrowser.vue"]
+      "files": ["packages/goal-ui/src/components/template/TemplateBrowser.vue"]
     },
     {
       "key": "goal.templateBrowser.moreKR",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/template/TemplateBrowser.vue"]
+      "files": ["packages/goal-ui/src/components/template/TemplateBrowser.vue"]
     },
     {
       "key": "goal.templateBrowser.noMatch",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/template/TemplateBrowser.vue"]
+      "files": ["packages/goal-ui/src/components/template/TemplateBrowser.vue"]
     },
     {
       "key": "goal.templateBrowser.preview",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/template/TemplateBrowser.vue"]
+      "files": ["packages/goal-ui/src/components/template/TemplateBrowser.vue"]
     },
     {
       "key": "goal.templateBrowser.previewCycleDays",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/template/TemplateBrowser.vue"]
+      "files": ["packages/goal-ui/src/components/template/TemplateBrowser.vue"]
     },
     {
       "key": "goal.templateBrowser.previewIndustry",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/template/TemplateBrowser.vue"]
+      "files": ["packages/goal-ui/src/components/template/TemplateBrowser.vue"]
     },
     {
       "key": "goal.templateBrowser.previewKR",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/template/TemplateBrowser.vue"]
+      "files": ["packages/goal-ui/src/components/template/TemplateBrowser.vue"]
     },
     {
       "key": "goal.templateBrowser.previewMeasure",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/template/TemplateBrowser.vue"]
+      "files": ["packages/goal-ui/src/components/template/TemplateBrowser.vue"]
     },
     {
       "key": "goal.templateBrowser.previewRole",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/template/TemplateBrowser.vue"]
+      "files": ["packages/goal-ui/src/components/template/TemplateBrowser.vue"]
     },
     {
       "key": "goal.templateBrowser.previewTarget",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/template/TemplateBrowser.vue"]
+      "files": ["packages/goal-ui/src/components/template/TemplateBrowser.vue"]
     },
     {
       "key": "goal.templateBrowser.role",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/template/TemplateBrowser.vue"]
+      "files": ["packages/goal-ui/src/components/template/TemplateBrowser.vue"]
     },
     {
       "key": "goal.templateBrowser.roleMarketingDirector",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/template/TemplateBrowser.vue"]
+      "files": ["packages/goal-ui/src/components/template/TemplateBrowser.vue"]
     },
     {
       "key": "goal.templateBrowser.roleProductManager",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/template/TemplateBrowser.vue"]
+      "files": ["packages/goal-ui/src/components/template/TemplateBrowser.vue"]
     },
     {
       "key": "goal.templateBrowser.roleSalesDirector",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/template/TemplateBrowser.vue"]
+      "files": ["packages/goal-ui/src/components/template/TemplateBrowser.vue"]
     },
     {
       "key": "goal.templateBrowser.roleTeamLead",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/template/TemplateBrowser.vue"]
+      "files": ["packages/goal-ui/src/components/template/TemplateBrowser.vue"]
     },
     {
       "key": "goal.templateBrowser.roleTechLead",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/template/TemplateBrowser.vue"]
+      "files": ["packages/goal-ui/src/components/template/TemplateBrowser.vue"]
     },
     {
       "key": "goal.templateBrowser.search",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/template/TemplateBrowser.vue"]
+      "files": ["packages/goal-ui/src/components/template/TemplateBrowser.vue"]
     },
     {
       "key": "goal.templateBrowser.selected",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/template/TemplateBrowser.vue"]
+      "files": ["packages/goal-ui/src/components/template/TemplateBrowser.vue"]
     },
     {
       "key": "goal.templateBrowser.title",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/template/TemplateBrowser.vue"]
+      "files": ["packages/goal-ui/src/components/template/TemplateBrowser.vue"]
     },
     {
       "key": "goal.templateBrowser.useTemplate",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/template/TemplateBrowser.vue"]
+      "files": ["packages/goal-ui/src/components/template/TemplateBrowser.vue"]
     },
     {
       "key": "goal.timeline.avgWeightChange",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/timeline/GoalTimelineView.vue"]
+      "files": ["packages/goal-ui/src/components/timeline/GoalTimelineView.vue"]
     },
     {
       "key": "goal.timeline.changeCount",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/timeline/GoalTimelineView.vue"]
+      "files": ["packages/goal-ui/src/components/timeline/GoalTimelineView.vue"]
     },
     {
       "key": "goal.timeline.controls.keyResults",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/timeline/TimelineControls.vue"]
+      "files": ["packages/goal-ui/src/components/timeline/TimelineControls.vue"]
     },
     {
       "key": "goal.timeline.controls.loop",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/timeline/TimelineControls.vue"]
+      "files": ["packages/goal-ui/src/components/timeline/TimelineControls.vue"]
     },
     {
       "key": "goal.timeline.controls.next",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/timeline/TimelineControls.vue"]
+      "files": ["packages/goal-ui/src/components/timeline/TimelineControls.vue"]
     },
     {
       "key": "goal.timeline.controls.noDescription",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/timeline/TimelineControls.vue"]
+      "files": ["packages/goal-ui/src/components/timeline/TimelineControls.vue"]
     },
     {
       "key": "goal.timeline.controls.pause",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/timeline/TimelineControls.vue"]
+      "files": ["packages/goal-ui/src/components/timeline/TimelineControls.vue"]
     },
     {
       "key": "goal.timeline.controls.play",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/timeline/TimelineControls.vue"]
+      "files": ["packages/goal-ui/src/components/timeline/TimelineControls.vue"]
     },
     {
       "key": "goal.timeline.controls.prev",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/timeline/TimelineControls.vue"]
+      "files": ["packages/goal-ui/src/components/timeline/TimelineControls.vue"]
     },
     {
       "key": "goal.timeline.controls.speed",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/timeline/TimelineControls.vue"]
+      "files": ["packages/goal-ui/src/components/timeline/TimelineControls.vue"]
     },
     {
       "key": "goal.timeline.controls.totalProgress",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/timeline/TimelineControls.vue"]
+      "files": ["packages/goal-ui/src/components/timeline/TimelineControls.vue"]
     },
     {
       "key": "goal.timeline.controls.totalWeight",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/timeline/TimelineControls.vue"]
+      "files": ["packages/goal-ui/src/components/timeline/TimelineControls.vue"]
     },
     {
       "key": "goal.timeline.empty",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/timeline/GoalTimelineView.vue"]
+      "files": ["packages/goal-ui/src/components/timeline/GoalTimelineView.vue"]
     },
     {
       "key": "goal.timeline.emptyHint",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/timeline/GoalTimelineView.vue"]
+      "files": ["packages/goal-ui/src/components/timeline/GoalTimelineView.vue"]
     },
     {
       "key": "goal.timeline.exportImage",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/timeline/GoalTimelineView.vue"]
+      "files": ["packages/goal-ui/src/components/timeline/GoalTimelineView.vue"]
     },
     {
       "key": "goal.timeline.exporting",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/timeline/GoalTimelineView.vue"]
+      "files": ["packages/goal-ui/src/components/timeline/GoalTimelineView.vue"]
     },
     {
       "key": "goal.timeline.krDetails",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/timeline/GoalTimelineView.vue"]
+      "files": ["packages/goal-ui/src/components/timeline/GoalTimelineView.vue"]
     },
     {
       "key": "goal.timeline.krWeightDistribution",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/timeline/GoalTimelineView.vue"]
+      "files": ["packages/goal-ui/src/components/timeline/GoalTimelineView.vue"]
     },
     {
       "key": "goal.timeline.loading",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/timeline/GoalTimelineView.vue"]
+      "files": ["packages/goal-ui/src/components/timeline/GoalTimelineView.vue"]
     },
     {
       "key": "goal.timeline.snapshotCount",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/timeline/GoalTimelineView.vue"]
+      "files": ["packages/goal-ui/src/components/timeline/GoalTimelineView.vue"]
     },
     {
       "key": "goal.timeline.untitledGoal",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/timeline/GoalTimelineView.vue"]
+      "files": ["packages/goal-ui/src/components/timeline/GoalTimelineView.vue"]
     },
     {
       "key": "goal.timeline.viewTitle",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/timeline/GoalTimelineView.vue"]
+      "files": ["packages/goal-ui/src/components/timeline/GoalTimelineView.vue"]
     },
     {
       "key": "goal.timeline.weightSeriesName",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/timeline/GoalTimelineView.vue"]
+      "files": ["packages/goal-ui/src/components/timeline/GoalTimelineView.vue"]
     },
     {
       "key": "goal.timeline.widget.completed",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/widgets/GoalTimelineWidget.vue"]
+      "files": ["packages/goal-ui/src/widgets/GoalTimelineWidget.vue"]
     },
     {
       "key": "goal.timeline.widget.empty",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/widgets/GoalTimelineWidget.vue"]
+      "files": ["packages/goal-ui/src/widgets/GoalTimelineWidget.vue"]
     },
     {
       "key": "goal.timeline.widget.loading",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/widgets/GoalTimelineWidget.vue"]
+      "files": ["packages/goal-ui/src/widgets/GoalTimelineWidget.vue"]
     },
     {
       "key": "goal.timeline.widget.overdue",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/widgets/GoalTimelineWidget.vue"]
+      "files": ["packages/goal-ui/src/widgets/GoalTimelineWidget.vue"]
     },
     {
       "key": "goal.timeline.widget.remaining",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/widgets/GoalTimelineWidget.vue"]
+      "files": ["packages/goal-ui/src/widgets/GoalTimelineWidget.vue"]
     },
     {
       "key": "goal.timeline.widget.time",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/widgets/GoalTimelineWidget.vue"]
+      "files": ["packages/goal-ui/src/widgets/GoalTimelineWidget.vue"]
     },
     {
       "key": "goal.timeline.widget.title",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/widgets/GoalTimelineWidget.vue"]
+      "files": ["packages/goal-ui/src/widgets/GoalTimelineWidget.vue"]
     },
     {
       "key": "goal.weightComparison.addTimePoint",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/weight-snapshot/WeightComparison.vue"]
+      "files": ["packages/goal-ui/src/components/weight-snapshot/WeightComparison.vue"]
     },
     {
       "key": "goal.weightComparison.barChartTitle",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/weight-snapshot/WeightComparison.vue"]
+      "files": ["packages/goal-ui/src/components/weight-snapshot/WeightComparison.vue"]
     },
     {
       "key": "goal.weightComparison.maxPoints",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/weight-snapshot/WeightComparison.vue"]
+      "files": ["packages/goal-ui/src/components/weight-snapshot/WeightComparison.vue"]
     },
     {
       "key": "goal.weightComparison.radarChartTitle",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/weight-snapshot/WeightComparison.vue"]
+      "files": ["packages/goal-ui/src/components/weight-snapshot/WeightComparison.vue"]
     },
     {
       "key": "goal.weightComparison.selectHint",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/weight-snapshot/WeightComparison.vue"]
+      "files": ["packages/goal-ui/src/components/weight-snapshot/WeightComparison.vue"]
     },
     {
       "key": "goal.weightComparison.startComparison",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/weight-snapshot/WeightComparison.vue"]
+      "files": ["packages/goal-ui/src/components/weight-snapshot/WeightComparison.vue"]
     },
     {
       "key": "goal.weightComparison.tableKeyResult",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/weight-snapshot/WeightComparison.vue"]
+      "files": ["packages/goal-ui/src/components/weight-snapshot/WeightComparison.vue"]
     },
     {
       "key": "goal.weightComparison.tableTotalChange",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/weight-snapshot/WeightComparison.vue"]
+      "files": ["packages/goal-ui/src/components/weight-snapshot/WeightComparison.vue"]
     },
     {
       "key": "goal.weightComparison.timePoint",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/weight-snapshot/WeightComparison.vue"]
+      "files": ["packages/goal-ui/src/components/weight-snapshot/WeightComparison.vue"]
     },
     {
       "key": "goal.weightComparison.title",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/weight-snapshot/WeightComparison.vue"]
+      "files": ["packages/goal-ui/src/components/weight-snapshot/WeightComparison.vue"]
     },
     {
       "key": "goal.weightComparison.yAxisLabel",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/weight-snapshot/WeightComparison.vue"]
+      "files": ["packages/goal-ui/src/components/weight-snapshot/WeightComparison.vue"]
     },
     {
       "key": "goal.weightSnapshotList.afterWeight",
       "zh": false,
       "en": false,
-      "files": [
-        "packages/app-vue/src/modules/goal/components/weight-snapshot/WeightSnapshotList.vue"
-      ]
+      "files": ["packages/goal-ui/src/components/weight-snapshot/WeightSnapshotList.vue"]
     },
     {
       "key": "goal.weightSnapshotList.allKR",
       "zh": false,
       "en": false,
-      "files": [
-        "packages/app-vue/src/modules/goal/components/weight-snapshot/WeightSnapshotList.vue"
-      ]
+      "files": ["packages/goal-ui/src/components/weight-snapshot/WeightSnapshotList.vue"]
     },
     {
       "key": "goal.weightSnapshotList.beforeWeight",
       "zh": false,
       "en": false,
-      "files": [
-        "packages/app-vue/src/modules/goal/components/weight-snapshot/WeightSnapshotList.vue"
-      ]
+      "files": ["packages/goal-ui/src/components/weight-snapshot/WeightSnapshotList.vue"]
     },
     {
       "key": "goal.weightSnapshotList.empty",
       "zh": false,
       "en": false,
-      "files": [
-        "packages/app-vue/src/modules/goal/components/weight-snapshot/WeightSnapshotList.vue"
-      ]
+      "files": ["packages/goal-ui/src/components/weight-snapshot/WeightSnapshotList.vue"]
     },
     {
       "key": "goal.weightSnapshotList.filterKR",
       "zh": false,
       "en": false,
-      "files": [
-        "packages/app-vue/src/modules/goal/components/weight-snapshot/WeightSnapshotList.vue"
-      ]
+      "files": ["packages/goal-ui/src/components/weight-snapshot/WeightSnapshotList.vue"]
     },
     {
       "key": "goal.weightSnapshotList.nextPage",
       "zh": false,
       "en": false,
-      "files": [
-        "packages/app-vue/src/modules/goal/components/weight-snapshot/WeightSnapshotList.vue"
-      ]
+      "files": ["packages/goal-ui/src/components/weight-snapshot/WeightSnapshotList.vue"]
     },
     {
       "key": "goal.weightSnapshotList.operator",
       "zh": false,
       "en": false,
-      "files": [
-        "packages/app-vue/src/modules/goal/components/weight-snapshot/WeightSnapshotList.vue"
-      ]
+      "files": ["packages/goal-ui/src/components/weight-snapshot/WeightSnapshotList.vue"]
     },
     {
       "key": "goal.weightSnapshotList.prevPage",
       "zh": false,
       "en": false,
-      "files": [
-        "packages/app-vue/src/modules/goal/components/weight-snapshot/WeightSnapshotList.vue"
-      ]
+      "files": ["packages/goal-ui/src/components/weight-snapshot/WeightSnapshotList.vue"]
     },
     {
       "key": "goal.weightSnapshotList.reason",
       "zh": false,
       "en": false,
-      "files": [
-        "packages/app-vue/src/modules/goal/components/weight-snapshot/WeightSnapshotList.vue"
-      ]
+      "files": ["packages/goal-ui/src/components/weight-snapshot/WeightSnapshotList.vue"]
     },
     {
       "key": "goal.weightSnapshotList.timeRange30d",
       "zh": false,
       "en": false,
-      "files": [
-        "packages/app-vue/src/modules/goal/components/weight-snapshot/WeightSnapshotList.vue"
-      ]
+      "files": ["packages/goal-ui/src/components/weight-snapshot/WeightSnapshotList.vue"]
     },
     {
       "key": "goal.weightSnapshotList.timeRange7d",
       "zh": false,
       "en": false,
-      "files": [
-        "packages/app-vue/src/modules/goal/components/weight-snapshot/WeightSnapshotList.vue"
-      ]
+      "files": ["packages/goal-ui/src/components/weight-snapshot/WeightSnapshotList.vue"]
     },
     {
       "key": "goal.weightSnapshotList.timeRange90d",
       "zh": false,
       "en": false,
-      "files": [
-        "packages/app-vue/src/modules/goal/components/weight-snapshot/WeightSnapshotList.vue"
-      ]
+      "files": ["packages/goal-ui/src/components/weight-snapshot/WeightSnapshotList.vue"]
     },
     {
       "key": "goal.weightSnapshotList.timeRangeAll",
       "zh": false,
       "en": false,
-      "files": [
-        "packages/app-vue/src/modules/goal/components/weight-snapshot/WeightSnapshotList.vue"
-      ]
+      "files": ["packages/goal-ui/src/components/weight-snapshot/WeightSnapshotList.vue"]
     },
     {
       "key": "goal.weightSnapshotList.title",
       "zh": false,
       "en": false,
-      "files": [
-        "packages/app-vue/src/modules/goal/components/weight-snapshot/WeightSnapshotList.vue"
-      ]
+      "files": ["packages/goal-ui/src/components/weight-snapshot/WeightSnapshotList.vue"]
     },
     {
       "key": "goal.weightSnapshotList.triggerAuto",
       "zh": false,
       "en": false,
-      "files": [
-        "packages/app-vue/src/modules/goal/components/weight-snapshot/WeightSnapshotList.vue"
-      ]
+      "files": ["packages/goal-ui/src/components/weight-snapshot/WeightSnapshotList.vue"]
     },
     {
       "key": "goal.weightSnapshotList.triggerImport",
       "zh": false,
       "en": false,
-      "files": [
-        "packages/app-vue/src/modules/goal/components/weight-snapshot/WeightSnapshotList.vue"
-      ]
+      "files": ["packages/goal-ui/src/components/weight-snapshot/WeightSnapshotList.vue"]
     },
     {
       "key": "goal.weightSnapshotList.triggerLabelAuto",
       "zh": false,
       "en": false,
-      "files": [
-        "packages/app-vue/src/modules/goal/components/weight-snapshot/WeightSnapshotList.vue"
-      ]
+      "files": ["packages/goal-ui/src/components/weight-snapshot/WeightSnapshotList.vue"]
     },
     {
       "key": "goal.weightSnapshotList.triggerLabelImport",
       "zh": false,
       "en": false,
-      "files": [
-        "packages/app-vue/src/modules/goal/components/weight-snapshot/WeightSnapshotList.vue"
-      ]
+      "files": ["packages/goal-ui/src/components/weight-snapshot/WeightSnapshotList.vue"]
     },
     {
       "key": "goal.weightSnapshotList.triggerLabelManual",
       "zh": false,
       "en": false,
-      "files": [
-        "packages/app-vue/src/modules/goal/components/weight-snapshot/WeightSnapshotList.vue"
-      ]
+      "files": ["packages/goal-ui/src/components/weight-snapshot/WeightSnapshotList.vue"]
     },
     {
       "key": "goal.weightSnapshotList.triggerLabelRestore",
       "zh": false,
       "en": false,
-      "files": [
-        "packages/app-vue/src/modules/goal/components/weight-snapshot/WeightSnapshotList.vue"
-      ]
+      "files": ["packages/goal-ui/src/components/weight-snapshot/WeightSnapshotList.vue"]
     },
     {
       "key": "goal.weightSnapshotList.triggerManual",
       "zh": false,
       "en": false,
-      "files": [
-        "packages/app-vue/src/modules/goal/components/weight-snapshot/WeightSnapshotList.vue"
-      ]
+      "files": ["packages/goal-ui/src/components/weight-snapshot/WeightSnapshotList.vue"]
     },
     {
       "key": "goal.weightSnapshotList.triggerRestore",
       "zh": false,
       "en": false,
-      "files": [
-        "packages/app-vue/src/modules/goal/components/weight-snapshot/WeightSnapshotList.vue"
-      ]
+      "files": ["packages/goal-ui/src/components/weight-snapshot/WeightSnapshotList.vue"]
     },
     {
       "key": "goal.weightSnapshotList.unknownKeyResult",
       "zh": false,
       "en": false,
-      "files": [
-        "packages/app-vue/src/modules/goal/components/weight-snapshot/WeightSnapshotList.vue"
-      ]
+      "files": ["packages/goal-ui/src/components/weight-snapshot/WeightSnapshotList.vue"]
     },
     {
       "key": "goal.weightSuggestion.applyStrategy",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/weight/WeightSuggestionPanel.vue"]
+      "files": ["packages/goal-ui/src/components/weight/WeightSuggestionPanel.vue"]
     },
     {
       "key": "goal.weightSuggestion.cancel",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/weight/WeightSuggestionPanel.vue"]
+      "files": ["packages/goal-ui/src/components/weight/WeightSuggestionPanel.vue"]
     },
     {
       "key": "goal.weightSuggestion.confirm",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/weight/WeightSuggestionPanel.vue"]
+      "files": ["packages/goal-ui/src/components/weight/WeightSuggestionPanel.vue"]
     },
     {
       "key": "goal.weightSuggestion.current",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/weight/WeightSuggestionPanel.vue"]
+      "files": ["packages/goal-ui/src/components/weight/WeightSuggestionPanel.vue"]
     },
     {
       "key": "goal.weightSuggestion.hasKeywords",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/weight/WeightSuggestionPanel.vue"]
+      "files": ["packages/goal-ui/src/components/weight/WeightSuggestionPanel.vue"]
     },
     {
       "key": "goal.weightSuggestion.keyResultIndex",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/weight/WeightSuggestionPanel.vue"]
+      "files": ["packages/goal-ui/src/components/weight/WeightSuggestionPanel.vue"]
     },
     {
       "key": "goal.weightSuggestion.krList",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/weight/WeightSuggestionPanel.vue"]
+      "files": ["packages/goal-ui/src/components/weight/WeightSuggestionPanel.vue"]
     },
     {
       "key": "goal.weightSuggestion.matchPercent",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/weight/WeightSuggestionPanel.vue"]
+      "files": ["packages/goal-ui/src/components/weight/WeightSuggestionPanel.vue"]
     },
     {
       "key": "goal.weightSuggestion.noKeywords",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/weight/WeightSuggestionPanel.vue"]
+      "files": ["packages/goal-ui/src/components/weight/WeightSuggestionPanel.vue"]
     },
     {
       "key": "goal.weightSuggestion.subtitle",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/weight/WeightSuggestionPanel.vue"]
+      "files": ["packages/goal-ui/src/components/weight/WeightSuggestionPanel.vue"]
     },
     {
       "key": "goal.weightSuggestion.title",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/weight/WeightSuggestionPanel.vue"]
+      "files": ["packages/goal-ui/src/components/weight/WeightSuggestionPanel.vue"]
     },
     {
       "key": "goal.weightTrend.chartTitle",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/weight-snapshot/WeightTrendChart.vue"]
+      "files": ["packages/goal-ui/src/components/weight-snapshot/WeightTrendChart.vue"]
     },
     {
       "key": "goal.weightTrend.empty",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/weight-snapshot/WeightTrendChart.vue"]
+      "files": ["packages/goal-ui/src/components/weight-snapshot/WeightTrendChart.vue"]
     },
     {
       "key": "goal.weightTrend.range180d",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/weight-snapshot/WeightTrendChart.vue"]
+      "files": ["packages/goal-ui/src/components/weight-snapshot/WeightTrendChart.vue"]
     },
     {
       "key": "goal.weightTrend.range30d",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/weight-snapshot/WeightTrendChart.vue"]
+      "files": ["packages/goal-ui/src/components/weight-snapshot/WeightTrendChart.vue"]
     },
     {
       "key": "goal.weightTrend.range7d",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/weight-snapshot/WeightTrendChart.vue"]
+      "files": ["packages/goal-ui/src/components/weight-snapshot/WeightTrendChart.vue"]
     },
     {
       "key": "goal.weightTrend.range90d",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/weight-snapshot/WeightTrendChart.vue"]
+      "files": ["packages/goal-ui/src/components/weight-snapshot/WeightTrendChart.vue"]
     },
     {
       "key": "goal.weightTrend.title",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/weight-snapshot/WeightTrendChart.vue"]
+      "files": ["packages/goal-ui/src/components/weight-snapshot/WeightTrendChart.vue"]
     },
     {
       "key": "goal.weightTrend.yAxisLabel",
       "zh": false,
       "en": false,
-      "files": ["packages/app-vue/src/modules/goal/components/weight-snapshot/WeightTrendChart.vue"]
+      "files": ["packages/goal-ui/src/components/weight-snapshot/WeightTrendChart.vue"]
     },
     {
       "key": "governance.detail.badExamples",

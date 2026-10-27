@@ -10,7 +10,7 @@
  */
 import { describe, expect, it } from 'vitest';
 import { toImportanceLevel } from '../task-row.mapper';
-import { ImportanceLevel } from '@memoflow/contracts/shared';
+import { ImportanceLevel } from '@memoflow/shared-primitives';
 
 describe('task row mappers', () => {
   it('toImportanceLevel preserves known values', () => {

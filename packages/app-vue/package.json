@@ -43,25 +43,13 @@
       "types": "./dist/modules/account/index.d.ts",
       "import": "./dist/modules/account/index.js"
     },
-    "./modules/goal": {
-      "types": "./dist/modules/goal/index.d.ts",
-      "import": "./dist/modules/goal/index.js"
-    },
     "./modules/task": {
       "types": "./dist/modules/task/index.d.ts",
       "import": "./dist/modules/task/index.js"
     },
-    "./modules/schedule": {
-      "types": "./dist/modules/schedule/index.d.ts",
-      "import": "./dist/modules/schedule/index.js"
-    },
     "./modules/routine": {
       "types": "./dist/modules/routine/index.d.ts",
       "import": "./dist/modules/routine/index.js"
-    },
-    "./modules/notification": {
-      "types": "./dist/modules/notification/index.d.ts",
-      "import": "./dist/modules/notification/index.js"
     },
     "./modules/repository": {
       "types": "./dist/modules/repository/index.d.ts",
@@ -91,18 +79,25 @@
     "@memoflow/ai": "workspace:*",
     "@memoflow/assets": "workspace:*",
     "@memoflow/contracts": "workspace:*",
+    "@memoflow/notification-contracts": "workspace:*",
+    "@memoflow/shared-primitives": "workspace:*",
     "@memoflow/data-portability": "workspace:*",
     "@memoflow/goal-client": "workspace:*",
     "@memoflow/goal-contracts": "workspace:*",
+    "@memoflow/goal-ui": "workspace:*",
     "@memoflow/http-client": "workspace:*",
     "@memoflow/ipc-client": "workspace:*",
     "@memoflow/label": "workspace:*",
     "@memoflow/label-contracts": "workspace:*",
-    "@memoflow/notification": "workspace:*",
+    "@memoflow/notification-client": "workspace:*",
+    "@memoflow/notification-ui": "workspace:*",
     "@memoflow/relation": "workspace:*",
+    "@memoflow/relation-contracts": "workspace:*",
     "@memoflow/reminder": "workspace:*",
     "@memoflow/repository": "workspace:*",
-    "@memoflow/schedule": "workspace:*",
+    "@memoflow/schedule-client": "workspace:*",
+    "@memoflow/schedule-contracts": "workspace:*",
+    "@memoflow/schedule-ui": "workspace:*",
     "@memoflow/setting": "workspace:*",
     "@memoflow/task": "workspace:*",
     "@memoflow/time": "workspace:*",

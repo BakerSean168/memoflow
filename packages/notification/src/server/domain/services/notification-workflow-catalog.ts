@@ -1,4 +1,4 @@
-import { ImportanceLevel, UrgencyLevel } from '@memoflow/contracts/shared';
+import { ImportanceLevel, UrgencyLevel } from '@memoflow/shared-primitives';
 import {
   NotificationCategory,
   NotificationChannelType,
@@ -8,7 +8,7 @@ import {
   NotificationType,
   type NotificationWorkflowChannelCapabilityDTO,
   type NotificationWorkflowDefinitionDTO,
-} from '@memoflow/contracts/notification';
+} from '@memoflow/notification-contracts';
 
 const USER_CONFIGURABLE_DEFER: NotificationWorkflowChannelCapabilityDTO = {
   supported: true,

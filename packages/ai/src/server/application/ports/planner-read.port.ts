@@ -1,7 +1,7 @@
 import type {
   CalendarEventProjection,
   PlannerConflictProjection,
-} from '@memoflow/contracts/schedule';
+} from '@memoflow/schedule-contracts';
 
 export interface AIPlannerRange {
   readonly start: number;

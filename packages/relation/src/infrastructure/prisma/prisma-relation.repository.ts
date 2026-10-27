@@ -1,5 +1,5 @@
 import type { PrismaClient } from '@memoflow/database';
-import { RelationDTOSchema, type RelationDTO, type SubjectRef } from '@memoflow/contracts/relation';
+import { RelationDTOSchema, type RelationDTO, type SubjectRef } from '@memoflow/relation-contracts';
 import type {
   AddRelationInput,
   RelationPage,

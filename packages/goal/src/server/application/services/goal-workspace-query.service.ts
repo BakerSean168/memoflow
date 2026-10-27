@@ -11,7 +11,7 @@ import {
 } from '@memoflow/workspace-contracts';
 import { error, ok } from '@memoflow/contracts/result';
 import type { KnowledgeDocumentId } from '@memoflow/contracts/primitives';
-import { GoalKnowledgeEdgeListReqSchema } from '@memoflow/contracts/relation';
+import { GoalKnowledgeEdgeListReqSchema } from '@memoflow/relation-contracts';
 import type { IGoalRecordRepository, IGoalRepository } from '../../domain';
 import { ListGoalRecordsUseCase } from '../use-cases/queries/list-goal-records.use-case';
 import type { GoalWorkspaceApplicationPort } from '../goal-workspace.application.port';

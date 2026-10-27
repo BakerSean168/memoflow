@@ -3,12 +3,12 @@ import type {
   NotificationPortableFactV3,
   NotificationPortableInteractionV3,
   NotificationPortablePayloadV3,
-} from '@memoflow/contracts/notification';
+} from '@memoflow/notification-contracts';
 import {
   NotificationActionIntentSchema,
   NotificationPortableFactV3Schema,
   NotificationPortablePayloadV3Schema,
-} from '@memoflow/contracts/notification';
+} from '@memoflow/notification-contracts';
 import type {
   PortableCapability,
   PortableCapabilityExecutionContext,

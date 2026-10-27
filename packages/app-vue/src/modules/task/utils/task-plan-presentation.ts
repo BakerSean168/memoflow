@@ -1,7 +1,7 @@
 import { TaskGoalProgressConfigurationSchema } from '@memoflow/contracts/task';
 import type { ComposerTranslation } from 'vue-i18n';
 import type { TaskPlanClientDTO, TaskPlanSchedule } from '@memoflow/contracts/task';
-import { ImportanceLevel } from '@memoflow/contracts/shared';
+import { ImportanceLevel } from '@memoflow/shared-primitives';
 import { TaskPlanScheduleSchema } from '@memoflow/contracts/task';
 import type { TaskPlanViewModel } from '../components/types';
 import { formatProductDate, formatProductDateTime } from '../../../shared/utils/product-time';

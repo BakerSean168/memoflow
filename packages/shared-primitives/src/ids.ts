@@ -21,9 +21,6 @@ export type TaskOccurrenceId = string & { readonly __brand: 'TaskOccurrenceId' }
 /** Routine Profile ID */
 export type RoutineProfileId = string & { readonly __brand: 'RoutineProfileId' };
 
-/** 日程 ID */
-export type ScheduleId = string & { readonly __brand: 'ScheduleId' };
-
 /** 设置 ID */
 export type SettingId = string & { readonly __brand: 'SettingId' };
 
@@ -34,15 +31,6 @@ export type SettingHistoryId = string & { readonly __brand: 'SettingHistoryId' }
 
 /** 设置分组 ID */
 export type SettingGroupId = string & { readonly __brand: 'SettingGroupId' };
-
-/** 通知 ID */
-export type NotificationId = string & { readonly __brand: 'NotificationId' };
-
-/** 通知偏好 ID */
-export type NotificationPreferenceId = string & { readonly __brand: 'NotificationPreferenceId' };
-
-/** Notification interaction fact ID */
-export type NotificationInteractionId = string & { readonly __brand: 'NotificationInteractionId' };
 
 /** AI 对话 ID */
 export type AiConversationId = string & { readonly __brand: 'AiConversationId' };

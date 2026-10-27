@@ -1,6 +1,6 @@
 import { createIdType } from '@memoflow/utils/domain';
 
-import type { ScheduleId as IScheduleId } from '@memoflow/contracts/primitives';
+import type { ScheduleId as IScheduleId } from '@memoflow/schedule-contracts';
 
 /**
  * ScheduleId 值对象

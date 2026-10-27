@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import type { ScheduledInvocation } from '@memoflow/contracts/schedule';
+import type { ScheduledInvocation } from '@memoflow/schedule-contracts';
 import { FakeTimer } from '@memoflow/patterns/scheduler';
 import type {
   IScheduledInvocationRepository,

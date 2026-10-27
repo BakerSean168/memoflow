@@ -1,3 +1,4 @@
+import { installGoalUiHost } from '../../../di/goal-ui-host';
 /** @vitest-environment jsdom */
 import { computed, nextTick, ref } from 'vue';
 import { mount } from '@vue/test-utils';
@@ -21,8 +22,8 @@ const errorRef = ref<string | null>(null);
 const ensureGoalSummary = vi.fn().mockResolvedValue(undefined);
 const refreshGoalSummary = vi.fn().mockResolvedValue(undefined);
 
-vi.mock('../../../modules/goal', async (importOriginal) => {
-  const actual = await importOriginal<typeof import('../../../modules/goal')>();
+vi.mock('@memoflow/goal-ui', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@memoflow/goal-ui')>();
   return {
     ...actual,
     useGoalHomeSummary: () => ({
@@ -132,3 +133,5 @@ describe('GoalCapsulePreview', () => {
     wrapper.unmount();
   });
 });
+
+installGoalUiHost();

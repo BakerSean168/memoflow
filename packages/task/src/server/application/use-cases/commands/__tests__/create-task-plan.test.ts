@@ -9,7 +9,7 @@ import type { ITaskPlanRepository } from '../../../../domain/repositories/i-task
 import type { ITaskOccurrenceRepository } from '../../../../domain/repositories/i-task-occurrence-repository';
 import type { CreateTaskPlanUseCaseReq } from '@memoflow/contracts/task';
 import { TaskGoalBindingTrigger } from '@memoflow/contracts/task';
-import { ImportanceLevel } from '@memoflow/contracts/shared';
+import { ImportanceLevel } from '@memoflow/shared-primitives';
 import { CreateTaskPlanUseCase } from '../create-task-plan.use-case';
 import { createInlineTaskWriteTransactionRunner } from '../task-write-support';
 import { createTimeFacade } from '@memoflow/time';

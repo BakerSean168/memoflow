@@ -27,4 +27,4 @@ export { defaultModuleCapsules } from './di/navigation';
 
 export { useAuthenticationStore } from './modules/authentication/stores/authentication-store';
 
-export { createGoalDraftCheckpointStore } from './modules/goal/infrastructure/goal-draft-checkpoint.indexeddb';
+export { createGoalDraftCheckpointStore } from '@memoflow/goal-ui';

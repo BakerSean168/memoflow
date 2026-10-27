@@ -2,7 +2,7 @@ import type {
   NotificationCategory,
   NotificationChannelType,
   NotificationType,
-} from '@memoflow/contracts/notification';
+} from '@memoflow/notification-contracts';
 
 export interface ScheduleNotificationRequest {
   readonly identityId: string;

@@ -169,7 +169,7 @@ for (const clientPath of [
     'getGoalWorkspaceKnowledge(',
   ]);
 }
-requireTokens('packages/app-vue/src/modules/goal/composables/useGoalWorkspace.ts', [
+requireTokens('packages/goal-ui/src/composables/useGoalWorkspace.ts', [
   'service.getGoalWorkspace(',
   'service.getGoalWorkspaceTasks(',
   'service.getGoalWorkspaceKnowledge(',

@@ -1,3 +1,4 @@
+import { installGoalUiHost } from '../../../di/goal-ui-host';
 import { defineComponent, h, ref } from 'vue';
 import { flushPromises, mount } from '@vue/test-utils';
 import { createI18n } from 'vue-i18n';
@@ -33,7 +34,7 @@ const native = vi.hoisted(() => ({
 vi.mock('../../../shared/utils/useStrictInject', () => ({
   useStrictInject: () => ({ getGoalAggregateView: native.readGoal }),
 }));
-vi.mock('../../../modules/goal', () => ({
+vi.mock('@memoflow/goal-ui', () => ({
   useGoalNativeSurface: () => ({
     openCreate: native.openCreate,
     openControlledCreate: native.openCreate,
@@ -2125,3 +2126,5 @@ describe('useAIGoalWorkflow (AI-VNEXT-05: UI projects workflow state, does not o
     expect(native.state!.keyResults[0].id).toBe('KeyResultId_revision-2-0');
   });
 });
+
+installGoalUiHost();

@@ -1,8 +1,9 @@
+import { installGoalUiHost } from '../../di/goal-ui-host';
 import { createPinia, setActivePinia } from 'pinia';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { useAppShellStore } from './useAppShellStore';
 import { useNativeBusinessPanelBridge } from './useNativeBusinessPanelBridge';
-import type { GoalNativeDraftState, GoalNativeEditSession } from '../../modules/goal';
+import type { GoalNativeDraftState, GoalNativeEditSession } from '@memoflow/goal-ui';
 import { GoalStatus } from '@memoflow/goal-contracts';
 
 // Mock useGoalNativeSurface
@@ -30,7 +31,7 @@ const mockGoalSurface = {
   }),
 };
 
-vi.mock('../../modules/goal', () => ({
+vi.mock('@memoflow/goal-ui', () => ({
   useGoalNativeSurface: () => mockGoalSurface,
 }));
 
@@ -274,3 +275,5 @@ describe('useNativeBusinessPanelBridge', () => {
     expect(patchResp.error?.code).toBe('PANEL_NOT_CONTROLLED');
   });
 });
+
+installGoalUiHost();

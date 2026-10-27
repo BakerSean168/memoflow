@@ -1,4 +1,6 @@
 /* eslint-disable @nx/enforce-module-boundaries -- Storybook config imports workspace helpers and packages */
+import { installGoalUiHost } from '../../../packages/app-vue/src/di/goal-ui-host';
+import { installNotificationUiHost } from '../../../packages/app-vue/src/di/notification-ui-host';
 import { setup, type Preview } from '@storybook/vue3-vite';
 import { createPinia } from 'pinia';
 import { createI18n } from 'vue-i18n';
@@ -8,6 +10,8 @@ import { installServerStateRuntime } from '../../../packages/app-vue/src/platfor
 import '../../../packages/ui-vue-shadcn/src/styles/globals.css';
 
 setup((app) => {
+  installGoalUiHost();
+  installNotificationUiHost();
   app.use(createPinia());
   app.use(createI18n({ legacy: false, locale: 'en-US', messages: productionLocaleMessages }));
   app.use(

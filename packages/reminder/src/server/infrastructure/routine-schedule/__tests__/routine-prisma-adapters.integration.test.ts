@@ -3,8 +3,8 @@ import { IdentityId } from '@memoflow/domain-shared';
 import {
   buildIdempotencyKeyString,
   LeaseFencingException,
-} from '@memoflow/contracts/reliable-messaging';
-import { NOTIFICATION_REQUESTED_MESSAGE_TYPE } from '@memoflow/contracts/notification';
+} from '@memoflow/reliable-messaging-contracts';
+import { NOTIFICATION_REQUESTED_MESSAGE_TYPE } from '@memoflow/notification-contracts';
 import {
   cleanAll,
   disconnectPrisma,

@@ -152,7 +152,7 @@ describe('findScheduleNotificationSeparationViolations', () => {
       {
         relPath: 'packages/schedule-orchestration/src/execution/router.ts',
         content: [
-          `import { SourceModule } from '@memoflow/contracts/schedule';`,
+          `import { SourceModule } from '@memoflow/schedule-contracts';`,
           `export function route(task) {`,
           `  if (task.sourceModule === SourceModule.Reminder) return reminder;`,
           `  if (task.sourceModule === SourceModule.Task) return taskSource;`,
@@ -162,7 +162,7 @@ describe('findScheduleNotificationSeparationViolations', () => {
       },
       {
         relPath: 'packages/task/src/server/infrastructure/schedule-execution-source.ts',
-        content: `import { NotificationRequestedWriterPort } from '@memoflow/contracts/notification';\nswitch (source.sourceModule) { ... }`,
+        content: `import { NotificationRequestedWriterPort } from '@memoflow/notification-contracts';\nswitch (source.sourceModule) { ... }`,
       },
       {
         relPath: 'packages/notification/src/server/infrastructure/adapters/prisma/x.ts',

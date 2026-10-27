@@ -1,4 +1,4 @@
-import type { InvocationAttempt } from '@memoflow/contracts/schedule';
+import type { InvocationAttempt } from '@memoflow/schedule-contracts';
 
 export interface IInvocationAttemptRepository {
   append(attempt: InvocationAttempt): Promise<void>;

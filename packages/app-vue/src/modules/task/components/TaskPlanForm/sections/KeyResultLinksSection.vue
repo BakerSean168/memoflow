@@ -287,7 +287,7 @@ import {
 } from '@memoflow/ui-vue-shadcn';
 import { Target, Flag, PlusCircle, Link2, LoaderCircle, RotateCw } from '@lucide/vue';
 import { useI18n } from 'vue-i18n';
-import { getKeyResultRecordPromptLabel } from '../../../../goal';
+import { getKeyResultRecordPromptLabel } from '@memoflow/goal-ui';
 import { normalizeSelectString } from '../../../../../shared/utils/normalize-select-string';
 
 const { t } = useI18n();

@@ -6,7 +6,9 @@ import vue from '@vitejs/plugin-vue';
 import {
   createAppVueSourceAliasEntries,
   createAssetsAliasEntries,
+  createReliableMessagingContractsAliasEntries,
   createOperationsContractsAliasEntries,
+  createNotificationContractsAliasEntries,
   createContractsAliasEntries,
   createUiVueSourceAliasEntries,
   createWorkspaceSourceAliasEntries,
@@ -19,7 +21,7 @@ const workspace = path.resolve(import.meta.dirname, '../../..');
 // in a test browser also loads unverified deep application imports.
 const browserTestStories = [
   '../../../apps/web/src/auth/WebAuthView.stories.ts',
-  '../../../packages/app-vue/src/modules/goal/components/dialogs/GoalDialog.stories.ts',
+  '../../../packages/goal-ui/src/components/dialogs/GoalDialog.stories.ts',
   '../../../packages/app-vue/src/modules/task/components/TaskPlanForm/TaskPlanForm.stories.ts',
   '../../../packages/app-vue/src/shared/components/__stories__/BrowserInteraction.stories.ts',
 ];
@@ -29,6 +31,7 @@ const config: StorybookConfig = {
     : [
         '../../../packages/ui-vue-shadcn/src/**/*.stories.@(js|jsx|ts|tsx|vue)',
         '../../../packages/app-vue/src/**/*.stories.@(js|jsx|ts|tsx|vue)',
+        '../../../packages/notification-ui/src/**/*.stories.@(js|jsx|ts|tsx|vue)',
         '../../../apps/web/src/auth/*.stories.ts',
       ],
   addons: ['@storybook/addon-docs', '@storybook/addon-vitest'],
@@ -44,7 +47,9 @@ const config: StorybookConfig = {
           ...createAppVueSourceAliasEntries(workspace),
           ...createAssetsAliasEntries(workspace),
           ...createUiVueSourceAliasEntries(workspace),
+          ...createReliableMessagingContractsAliasEntries(workspace),
           ...createOperationsContractsAliasEntries(workspace),
+          ...createNotificationContractsAliasEntries(workspace),
           ...createContractsAliasEntries(workspace),
           ...createWorkspaceSourceAliasEntries(workspace, [
             ['@memoflow/domain-shared/shared', 'packages/domain-shared/src/shared/index.ts'],
@@ -123,6 +128,7 @@ const config: StorybookConfig = {
             ],
             ['@memoflow/transport-contracts', 'packages/transport-contracts/src/index.ts'],
             ['@memoflow/label-contracts', 'packages/label-contracts/src/index.ts'],
+            ['@memoflow/relation-contracts', 'packages/relation-contracts/src/index.ts'],
             [
               '@memoflow/data-portability-contracts',
               'packages/data-portability-contracts/src/index.ts',
@@ -132,6 +138,18 @@ const config: StorybookConfig = {
               'packages/goal-contracts/src/test-support/goal.mock.ts',
             ],
             ['@memoflow/goal-contracts', 'packages/goal-contracts/src/index.ts'],
+            [
+              '@memoflow/goal-ui/composables/useGoal',
+              'packages/goal-ui/src/composables/useGoal.ts',
+            ],
+            ['@memoflow/goal-ui/host', 'packages/goal-ui/src/goal-ui-host.ts'],
+            [
+              '@memoflow/notification-ui/host',
+              'packages/notification-ui/src/notification-ui-host.ts',
+            ],
+            ['@memoflow/notification-ui', 'packages/notification-ui/src/index.ts'],
+            ['@memoflow/goal-ui', 'packages/goal-ui/src/index.ts'],
+            ['@goal-ui-test-host', 'packages/app-vue/src'],
             ['@memoflow/workspace-contracts', 'packages/workspace-contracts/src/index.ts'],
             [
               '@memoflow/desktop-contracts/auth-context',

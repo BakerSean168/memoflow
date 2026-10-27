@@ -2,7 +2,7 @@ import {
   KEY_RESULT_CALCULATION_METHODS,
   getKeyResultCalculationLabel,
   KEY_RESULT_CALCULATION_PRESENTATION,
-} from '../../goal';
+} from '@memoflow/goal-ui';
 import { createApp, defineComponent, h } from 'vue';
 import { createI18n } from 'vue-i18n';
 import { afterEach, describe, expect, it, vi } from 'vitest';

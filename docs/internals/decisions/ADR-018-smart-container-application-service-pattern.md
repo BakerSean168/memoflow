@@ -74,7 +74,7 @@ packages/application-client/src/goal/
 └─ index.ts                         (exports service singleton)
 
 📌 KEY PRINCIPLES:
-  - No types/ folder - All types from @memoflow/contracts/goal
+  - No types/ folder - All types from @memoflow/goal-contracts
   - Each file = One use case service with execute() method
   - Singleton pattern with getInstance()
   - Dependency injection from infrastructure-client containers
@@ -143,7 +143,7 @@ apps/desktop/src/renderer/modules/goal/presentation/
 
 import { ref, computed } from 'vue';
 import { goalApplicationService } from '@memoflow/application-client/goal';
-import type { Goal, CreateGoalRequest, UpdateGoalRequest } from '@memoflow/contracts/goal';
+import type { Goal, CreateGoalRequest, UpdateGoalRequest } from '@memoflow/goal-contracts';
 import { useGoalStore } from '../stores/goal.store';
 import { useMessage } from '@memoflow/ui-vuetify';
 
@@ -204,7 +204,7 @@ export function useGoal() {
 
 import { useState, useCallback } from 'react';
 import { goalApplicationService } from '@memoflow/application-client/goal';
-import type { Goal, CreateGoalRequest } from '@memoflow/contracts/goal';
+import type { Goal, CreateGoalRequest } from '@memoflow/goal-contracts';
 import { useGoalStore } from '../stores/goal.store';
 import { useMessage } from '@memoflow/ui-react';
 

@@ -4800,386 +4800,6 @@
       ]
     },
     {
-      "path": "packages/app-vue/src/modules/goal/components/GoalKeyResultDirectControls.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/app-vue/vitest.store-coverage.config.ts"
-      ]
-    },
-    {
-      "path": "packages/app-vue/src/modules/goal/components/GoalKeyResultEditors.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/app-vue/vitest.store-coverage.config.ts"
-      ]
-    },
-    {
-      "path": "packages/app-vue/src/modules/goal/components/GoalKeyResultTrajectoryPlot.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/app-vue/vitest.store-coverage.config.ts"
-      ]
-    },
-    {
-      "path": "packages/app-vue/src/modules/goal/components/GoalPageToolbar.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/app-vue/vitest.store-coverage.config.ts"
-      ]
-    },
-    {
-      "path": "packages/app-vue/src/modules/goal/components/GoalProgressRow.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/app-vue/vitest.store-coverage.config.ts"
-      ]
-    },
-    {
-      "path": "packages/app-vue/src/modules/goal/components/GoalRecordComposerSurface.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/app-vue/vitest.store-coverage.config.ts"
-      ]
-    },
-    {
-      "path": "packages/app-vue/src/modules/goal/components/GoalRecordPreview.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/app-vue/vitest.store-coverage.config.ts"
-      ]
-    },
-    {
-      "path": "packages/app-vue/src/modules/goal/components/cards/GoalRecordCard.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/app-vue/vitest.store-coverage.config.ts"
-      ]
-    },
-    {
-      "path": "packages/app-vue/src/modules/goal/components/dialogs/GoalDialog.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/app-vue/vitest.store-coverage.config.ts"
-      ]
-    },
-    {
-      "path": "packages/app-vue/src/modules/goal/components/dialogs/GoalKeyResultInspectDialog.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/app-vue/vitest.store-coverage.config.ts"
-      ]
-    },
-    {
-      "path": "packages/app-vue/src/modules/goal/components/dialogs/GoalRecordDialog.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/app-vue/vitest.store-coverage.config.ts"
-      ]
-    },
-    {
-      "path": "packages/app-vue/src/modules/goal/components/dialogs/KeyResultDialog.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/app-vue/vitest.store-coverage.config.ts"
-      ]
-    },
-    {
-      "path": "packages/app-vue/src/modules/goal/composables/goal-status-transitions.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/app-vue/vitest.store-coverage.config.ts"
-      ]
-    },
-    {
-      "path": "packages/app-vue/src/modules/goal/composables/useGoal.label-filter.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/app-vue/vitest.store-coverage.config.ts"
-      ]
-    },
-    {
-      "path": "packages/app-vue/src/modules/goal/composables/useGoalDraftCheckpoint.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/app-vue/vitest.store-coverage.config.ts"
-      ]
-    },
-    {
-      "path": "packages/app-vue/src/modules/goal/composables/useGoalHomeSummary.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/app-vue/vitest.store-coverage.config.ts"
-      ]
-    },
-    {
-      "path": "packages/app-vue/src/modules/goal/composables/useGoalRecords.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/app-vue/vitest.store-coverage.config.ts"
-      ]
-    },
-    {
-      "path": "packages/app-vue/src/modules/goal/composables/useGoalWorkspace.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/app-vue/vitest.store-coverage.config.ts"
-      ]
-    },
-    {
-      "path": "packages/app-vue/src/modules/goal/index.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/app-vue/vitest.store-coverage.config.ts"
-      ]
-    },
-    {
-      "path": "packages/app-vue/src/modules/goal/stores/goalStore.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/app-vue/vitest.store-coverage.config.ts"
-      ]
-    },
-    {
-      "path": "packages/app-vue/src/modules/goal/utils/key-result-calculation-presentation.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/app-vue/vitest.store-coverage.config.ts"
-      ]
-    },
-    {
-      "path": "packages/app-vue/src/modules/goal/utils/progress.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/app-vue/vitest.store-coverage.config.ts"
-      ]
-    },
-    {
-      "path": "packages/app-vue/src/modules/goal/views/GoalDetailView.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/app-vue/vitest.store-coverage.config.ts"
-      ]
-    },
-    {
-      "path": "packages/app-vue/src/modules/goal/views/GoalListView.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/app-vue/vitest.store-coverage.config.ts"
-      ]
-    },
-    {
-      "path": "packages/app-vue/src/modules/goal/views/GoalReviewSignals.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/app-vue/vitest.store-coverage.config.ts"
-      ]
-    },
-    {
-      "path": "packages/app-vue/src/modules/notification/browser-system-notification.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/app-vue/vitest.store-coverage.config.ts"
-      ]
-    },
-    {
-      "path": "packages/app-vue/src/modules/notification/components/NotificationCapsulePreview.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/app-vue/vitest.store-coverage.config.ts"
-      ]
-    },
-    {
-      "path": "packages/app-vue/src/modules/notification/components/notificationSemanticControls.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/app-vue/vitest.store-coverage.config.ts"
-      ]
-    },
-    {
-      "path": "packages/app-vue/src/modules/notification/composables/useNotificationListQuery.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/app-vue/vitest.store-coverage.config.ts"
-      ]
-    },
-    {
-      "path": "packages/app-vue/src/modules/notification/composables/useNotificationMutations.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/app-vue/vitest.store-coverage.config.ts"
-      ]
-    },
-    {
-      "path": "packages/app-vue/src/modules/notification/composables/useNotificationPreferences.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/app-vue/vitest.store-coverage.config.ts"
-      ]
-    },
-    {
-      "path": "packages/app-vue/src/modules/notification/composables/useNotificationUnreadQuery.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/app-vue/vitest.store-coverage.config.ts"
-      ]
-    },
-    {
-      "path": "packages/app-vue/src/modules/notification/desktop/notification-click-navigation.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/app-vue/vitest.store-coverage.config.ts"
-      ]
-    },
-    {
-      "path": "packages/app-vue/src/modules/notification/initialization/index.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/app-vue/vitest.store-coverage.config.ts"
-      ]
-    },
-    {
-      "path": "packages/app-vue/src/modules/notification/initialization/notification-sse-invalidation-source.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/app-vue/vitest.store-coverage.config.ts"
-      ]
-    },
-    {
-      "path": "packages/app-vue/src/modules/notification/stores/notificationStore.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/app-vue/vitest.store-coverage.config.ts"
-      ]
-    },
-    {
-      "path": "packages/app-vue/src/modules/notification/views/NotificationListPage.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/app-vue/vitest.store-coverage.config.ts"
-      ]
-    },
-    {
-      "path": "packages/app-vue/src/modules/notification/web-live-notification.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/app-vue/vitest.store-coverage.config.ts"
-      ]
-    },
-    {
       "path": "packages/app-vue/src/modules/repository/components/DocumentPresentationPrimitives.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -5351,136 +4971,6 @@
     },
     {
       "path": "packages/app-vue/src/modules/routine/views/RoutineConfigurationView.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/app-vue/vitest.store-coverage.config.ts"
-      ]
-    },
-    {
-      "path": "packages/app-vue/src/modules/schedule/components/CreateScheduleDialog.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/app-vue/vitest.store-coverage.config.ts"
-      ]
-    },
-    {
-      "path": "packages/app-vue/src/modules/schedule/components/calendar-event-semantics.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/app-vue/vitest.store-coverage.config.ts"
-      ]
-    },
-    {
-      "path": "packages/app-vue/src/modules/schedule/composables/useCalendarView.capsule.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/app-vue/vitest.store-coverage.config.ts"
-      ]
-    },
-    {
-      "path": "packages/app-vue/src/modules/schedule/composables/useCalendarView.owner-cache.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/app-vue/vitest.store-coverage.config.ts"
-      ]
-    },
-    {
-      "path": "packages/app-vue/src/modules/schedule/composables/useCalendarView.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/app-vue/vitest.store-coverage.config.ts"
-      ]
-    },
-    {
-      "path": "packages/app-vue/src/modules/schedule/composables/useScheduleCalendar.cache.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/app-vue/vitest.store-coverage.config.ts"
-      ]
-    },
-    {
-      "path": "packages/app-vue/src/modules/schedule/planner/PlannerCalendar.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/app-vue/vitest.store-coverage.config.ts"
-      ]
-    },
-    {
-      "path": "packages/app-vue/src/modules/schedule/planner/calendar-event-projection.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/app-vue/vitest.store-coverage.config.ts"
-      ]
-    },
-    {
-      "path": "packages/app-vue/src/modules/schedule/planner/planner-fullcalendar-mutation.adapter.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/app-vue/vitest.store-coverage.config.ts"
-      ]
-    },
-    {
-      "path": "packages/app-vue/src/modules/schedule/planner/planner-owner-command.router.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/app-vue/vitest.store-coverage.config.ts"
-      ]
-    },
-    {
-      "path": "packages/app-vue/src/modules/schedule/planner/planner-presentation.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/app-vue/vitest.store-coverage.config.ts"
-      ]
-    },
-    {
-      "path": "packages/app-vue/src/modules/schedule/stores/scheduleStore.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/app-vue/vitest.store-coverage.config.ts"
-      ]
-    },
-    {
-      "path": "packages/app-vue/src/modules/schedule/views/ScheduleInspect.characterization.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/app-vue/vitest.config.ts"
@@ -6788,86 +6278,6 @@
       "measurementCollectors": []
     },
     {
-      "path": "packages/contracts/src/modules/label/label-portable-v3.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/contracts/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
-      "path": "packages/contracts/src/modules/notification/api/dual-registry.surface.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/contracts/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
-      "path": "packages/contracts/src/modules/notification/api/notification-entity-ref.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/contracts/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
-      "path": "packages/contracts/src/modules/notification/integration/notification-requested.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/contracts/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
-      "path": "packages/contracts/src/modules/notification/portable-v3.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/contracts/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
-      "path": "packages/contracts/src/modules/notification/protocol/asset-image-key-dual.surface.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/contracts/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
-      "path": "packages/contracts/src/modules/notification/protocol/notification-rpc-map.surface.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/contracts/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
-      "path": "packages/contracts/src/modules/notification/value-objects/dual-registry.surface.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/contracts/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
-      "path": "packages/contracts/src/modules/relation/relation-contract.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/contracts/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
-      "path": "packages/contracts/src/modules/reliable-messaging/reliable-messaging-contracts.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/contracts/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
       "path": "packages/contracts/src/modules/repository/aggregates/dual-registry.surface.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -6893,30 +6303,6 @@
     },
     {
       "path": "packages/contracts/src/modules/repository/api/knowledge-note-projection.dto.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/contracts/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
-      "path": "packages/contracts/src/modules/schedule/api/dual-registry.surface.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/contracts/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
-      "path": "packages/contracts/src/modules/schedule/calendar-entry-range.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/contracts/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
-      "path": "packages/contracts/src/modules/schedule/portable-v3.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/contracts/vitest.config.ts"
@@ -7458,6 +6844,14 @@
       ]
     },
     {
+      "path": "packages/goal-client/src/goal-dto-port.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/goal-client/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "packages/goal-client/src/goal-review-mapping.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -7622,6 +7016,214 @@
       "primarySuite": "unit",
       "collectors": [
         "packages/goal-core/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/goal-ui/src/components/GoalKeyResultDirectControls.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/goal-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/goal-ui/src/components/GoalKeyResultEditors.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/goal-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/goal-ui/src/components/GoalKeyResultTrajectoryPlot.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/goal-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/goal-ui/src/components/GoalPageToolbar.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/goal-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/goal-ui/src/components/GoalProgressRow.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/goal-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/goal-ui/src/components/GoalRecordComposerSurface.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/goal-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/goal-ui/src/components/GoalRecordPreview.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/goal-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/goal-ui/src/components/cards/GoalRecordCard.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/goal-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/goal-ui/src/components/dialogs/GoalDialog.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/goal-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/goal-ui/src/components/dialogs/GoalKeyResultInspectDialog.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/goal-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/goal-ui/src/components/dialogs/GoalRecordDialog.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/goal-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/goal-ui/src/components/dialogs/KeyResultDialog.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/goal-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/goal-ui/src/composables/goal-status-transitions.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/goal-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/goal-ui/src/composables/useGoal.label-filter.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/goal-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/goal-ui/src/composables/useGoalDraftCheckpoint.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/goal-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/goal-ui/src/composables/useGoalHomeSummary.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/goal-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/goal-ui/src/composables/useGoalRecords.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/goal-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/goal-ui/src/composables/useGoalWorkspace.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/goal-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/goal-ui/src/import-boundary.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/goal-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/goal-ui/src/index.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/goal-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/goal-ui/src/stores/goalStore.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/goal-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/goal-ui/src/utils/key-result-calculation-presentation.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/goal-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/goal-ui/src/utils/progress.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/goal-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/goal-ui/src/views/GoalDetailView.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/goal-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/goal-ui/src/views/GoalListView.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/goal-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/goal-ui/src/views/GoalReviewSignals.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/goal-ui/vitest.config.ts"
       ],
       "measurementCollectors": []
     },
@@ -8752,6 +8354,14 @@
       "measurementCollectors": []
     },
     {
+      "path": "packages/label-contracts/src/label-portable-v3.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/label-contracts/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "packages/label/src/__tests__/label-registry-characterization.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -8808,6 +8418,182 @@
       "measurementCollectors": []
     },
     {
+      "path": "packages/notification-client/src/infrastructure-client/adapters/http/notification-http.adapter.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/notification-client/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/notification-client/src/notification-dto-port.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/notification-client/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/notification-contracts/src/api/dual-registry.surface.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/notification-contracts/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/notification-contracts/src/api/notification-entity-ref.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/notification-contracts/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/notification-contracts/src/integration/notification-requested.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/notification-contracts/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/notification-contracts/src/portable-v3.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/notification-contracts/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/notification-contracts/src/protocol/asset-image-key-dual.surface.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/notification-contracts/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/notification-contracts/src/protocol/notification-rpc-map.surface.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/notification-contracts/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/notification-contracts/src/value-objects/dual-registry.surface.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/notification-contracts/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/notification-ui/src/browser-system-notification.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/notification-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/notification-ui/src/components/NotificationCapsulePreview.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/notification-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/notification-ui/src/components/notificationSemanticControls.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/notification-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/notification-ui/src/composables/useNotificationListQuery.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/notification-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/notification-ui/src/composables/useNotificationMutations.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/notification-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/notification-ui/src/composables/useNotificationPreferences.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/notification-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/notification-ui/src/composables/useNotificationUnreadQuery.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/notification-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/notification-ui/src/desktop/notification-click-navigation.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/notification-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/notification-ui/src/initialization/index.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/notification-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/notification-ui/src/initialization/notification-sse-invalidation-source.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/notification-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/notification-ui/src/stores/notificationStore.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/notification-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/notification-ui/src/views/NotificationListPage.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/notification-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/notification-ui/src/web-live-notification.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/notification-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "packages/notification/src/api/__tests__/notification-lane-bootstrap.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -8849,16 +8635,6 @@
     },
     {
       "path": "packages/notification/src/electron/index-lifecycle.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/notification/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/notification/vitest.config.ts"
-      ]
-    },
-    {
-      "path": "packages/notification/src/infrastructure-client/adapters/http/notification-http.adapter.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/notification/vitest.config.ts"
@@ -9304,6 +9080,14 @@
       "measurementCollectors": []
     },
     {
+      "path": "packages/relation-contracts/src/relation-contract.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/relation-contracts/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "packages/relation/src/__tests__/goal-knowledge-service.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -9348,6 +9132,14 @@
       "primarySuite": "unit",
       "collectors": [
         "packages/relation/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/reliable-messaging-contracts/src/reliable-messaging-contracts.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/reliable-messaging-contracts/vitest.config.ts"
       ],
       "measurementCollectors": []
     },
@@ -10010,6 +9802,46 @@
       "measurementCollectors": []
     },
     {
+      "path": "packages/schedule-client/src/application-client/planner-conflict-read-model.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/schedule-client/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/schedule-client/src/application-client/schedule-client-port-facade-dual.surface.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/schedule-client/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/schedule-contracts/src/api/dual-registry.surface.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/schedule-contracts/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/schedule-contracts/src/calendar-entry-range.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/schedule-contracts/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/schedule-contracts/src/portable-v3.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/schedule-contracts/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "packages/schedule-orchestration/src/__tests__/goal-handler-registry.test.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -10066,6 +9898,110 @@
       "measurementCollectors": []
     },
     {
+      "path": "packages/schedule-ui/src/components/CreateScheduleDialog.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/schedule-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/schedule-ui/src/components/calendar-event-semantics.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/schedule-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/schedule-ui/src/composables/useCalendarView.capsule.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/schedule-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/schedule-ui/src/composables/useCalendarView.owner-cache.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/schedule-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/schedule-ui/src/composables/useCalendarView.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/schedule-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/schedule-ui/src/composables/useScheduleCalendar.cache.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/schedule-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/schedule-ui/src/planner/PlannerCalendar.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/schedule-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/schedule-ui/src/planner/calendar-event-projection.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/schedule-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/schedule-ui/src/planner/planner-fullcalendar-mutation.adapter.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/schedule-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/schedule-ui/src/planner/planner-owner-command.router.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/schedule-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/schedule-ui/src/planner/planner-presentation.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/schedule-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/schedule-ui/src/stores/scheduleStore.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/schedule-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/schedule-ui/src/views/ScheduleInspect.characterization.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/schedule-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "packages/schedule/src/api/module-lifecycle.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -10117,26 +10053,6 @@
     },
     {
       "path": "packages/schedule/src/api/schedule-void-success-envelope.surface.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/schedule/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/schedule/vitest.config.ts"
-      ]
-    },
-    {
-      "path": "packages/schedule/src/application-client/planner-conflict-read-model.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/schedule/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/schedule/vitest.config.ts"
-      ]
-    },
-    {
-      "path": "packages/schedule/src/application-client/schedule-client-port-facade-dual.surface.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/schedule/vitest.config.ts"
@@ -12505,7 +12421,7 @@
       "type": "measurement",
       "suite": "coverage",
       "runner": "vitest",
-      "fileCount": 250
+      "fileCount": 199
     },
     {
       "id": "packages/data-portability/vitest.config.ts",
@@ -12547,7 +12463,7 @@
       "type": "measurement",
       "suite": "coverage",
       "runner": "vitest",
-      "fileCount": 40
+      "fileCount": 39
     },
     {
       "id": "packages/reminder/vitest.config.ts",
@@ -12561,7 +12477,7 @@
       "type": "measurement",
       "suite": "coverage",
       "runner": "vitest",
-      "fileCount": 21
+      "fileCount": 19
     },
     {
       "id": "packages/schedule/vitest.mappers.config.ts",
@@ -12983,7 +12899,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 250
+      "fileCount": 199
     },
     {
       "id": "packages/assets/vitest.config.ts",
@@ -13004,7 +12920,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 58
+      "fileCount": 45
     },
     {
       "id": "packages/data-portability-contracts/vitest.config.ts",
@@ -13046,7 +12962,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 7
+      "fileCount": 8
     },
     {
       "id": "packages/goal-contracts/vitest.config.ts",
@@ -13061,6 +12977,13 @@
       "suite": "unit",
       "runner": "vitest",
       "fileCount": 1
+    },
+    {
+      "id": "packages/goal-ui/vitest.config.ts",
+      "type": "primary",
+      "suite": "unit",
+      "runner": "vitest",
+      "fileCount": 26
     },
     {
       "id": "packages/goal/vitest.config.ts",
@@ -13095,7 +13018,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 1
+      "fileCount": 2
     },
     {
       "id": "packages/label/vitest.config.ts",
@@ -13105,11 +13028,32 @@
       "fileCount": 6
     },
     {
+      "id": "packages/notification-client/vitest.config.ts",
+      "type": "primary",
+      "suite": "unit",
+      "runner": "vitest",
+      "fileCount": 2
+    },
+    {
+      "id": "packages/notification-contracts/vitest.config.ts",
+      "type": "primary",
+      "suite": "unit",
+      "runner": "vitest",
+      "fileCount": 7
+    },
+    {
+      "id": "packages/notification-ui/vitest.config.ts",
+      "type": "primary",
+      "suite": "unit",
+      "runner": "vitest",
+      "fileCount": 13
+    },
+    {
       "id": "packages/notification/vitest.config.ts",
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 40
+      "fileCount": 39
     },
     {
       "id": "packages/operations-contracts/vitest.config.ts",
@@ -13133,11 +13077,25 @@
       "fileCount": 1
     },
     {
+      "id": "packages/relation-contracts/vitest.config.ts",
+      "type": "primary",
+      "suite": "unit",
+      "runner": "vitest",
+      "fileCount": 1
+    },
+    {
       "id": "packages/relation/vitest.config.ts",
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
       "fileCount": 5
+    },
+    {
+      "id": "packages/reliable-messaging-contracts/vitest.config.ts",
+      "type": "primary",
+      "suite": "unit",
+      "runner": "vitest",
+      "fileCount": 1
     },
     {
       "id": "packages/reminder/vitest.config.ts",
@@ -13154,6 +13112,20 @@
       "fileCount": 36
     },
     {
+      "id": "packages/schedule-client/vitest.config.ts",
+      "type": "primary",
+      "suite": "unit",
+      "runner": "vitest",
+      "fileCount": 2
+    },
+    {
+      "id": "packages/schedule-contracts/vitest.config.ts",
+      "type": "primary",
+      "suite": "unit",
+      "runner": "vitest",
+      "fileCount": 3
+    },
+    {
       "id": "packages/schedule-orchestration/vitest.config.ts",
       "type": "primary",
       "suite": "unit",
@@ -13161,11 +13133,18 @@
       "fileCount": 7
     },
     {
+      "id": "packages/schedule-ui/vitest.config.ts",
+      "type": "primary",
+      "suite": "unit",
+      "runner": "vitest",
+      "fileCount": 13
+    },
+    {
       "id": "packages/schedule/vitest.config.ts",
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 21
+      "fileCount": 19
     },
     {
       "id": "packages/scheduler/vitest.config.ts",
@@ -13527,44 +13506,6 @@
       "packages/app-vue/src/modules/ai/composables/workspaceEventSubscription.spec.ts",
       "packages/app-vue/src/modules/authentication/composables/usePassword.spec.ts",
       "packages/app-vue/src/modules/authentication/stores/authenticationStore.spec.ts",
-      "packages/app-vue/src/modules/goal/components/GoalKeyResultDirectControls.spec.ts",
-      "packages/app-vue/src/modules/goal/components/GoalKeyResultEditors.spec.ts",
-      "packages/app-vue/src/modules/goal/components/GoalKeyResultTrajectoryPlot.spec.ts",
-      "packages/app-vue/src/modules/goal/components/GoalPageToolbar.spec.ts",
-      "packages/app-vue/src/modules/goal/components/GoalProgressRow.spec.ts",
-      "packages/app-vue/src/modules/goal/components/GoalRecordComposerSurface.spec.ts",
-      "packages/app-vue/src/modules/goal/components/GoalRecordPreview.spec.ts",
-      "packages/app-vue/src/modules/goal/components/cards/GoalRecordCard.spec.ts",
-      "packages/app-vue/src/modules/goal/components/dialogs/GoalDialog.spec.ts",
-      "packages/app-vue/src/modules/goal/components/dialogs/GoalKeyResultInspectDialog.spec.ts",
-      "packages/app-vue/src/modules/goal/components/dialogs/GoalRecordDialog.spec.ts",
-      "packages/app-vue/src/modules/goal/components/dialogs/KeyResultDialog.spec.ts",
-      "packages/app-vue/src/modules/goal/composables/goal-status-transitions.spec.ts",
-      "packages/app-vue/src/modules/goal/composables/useGoal.label-filter.spec.ts",
-      "packages/app-vue/src/modules/goal/composables/useGoalDraftCheckpoint.spec.ts",
-      "packages/app-vue/src/modules/goal/composables/useGoalHomeSummary.spec.ts",
-      "packages/app-vue/src/modules/goal/composables/useGoalRecords.spec.ts",
-      "packages/app-vue/src/modules/goal/composables/useGoalWorkspace.spec.ts",
-      "packages/app-vue/src/modules/goal/index.spec.ts",
-      "packages/app-vue/src/modules/goal/stores/goalStore.spec.ts",
-      "packages/app-vue/src/modules/goal/utils/key-result-calculation-presentation.spec.ts",
-      "packages/app-vue/src/modules/goal/utils/progress.spec.ts",
-      "packages/app-vue/src/modules/goal/views/GoalDetailView.spec.ts",
-      "packages/app-vue/src/modules/goal/views/GoalListView.spec.ts",
-      "packages/app-vue/src/modules/goal/views/GoalReviewSignals.spec.ts",
-      "packages/app-vue/src/modules/notification/browser-system-notification.spec.ts",
-      "packages/app-vue/src/modules/notification/components/NotificationCapsulePreview.spec.ts",
-      "packages/app-vue/src/modules/notification/components/notificationSemanticControls.spec.ts",
-      "packages/app-vue/src/modules/notification/composables/useNotificationListQuery.spec.ts",
-      "packages/app-vue/src/modules/notification/composables/useNotificationMutations.spec.ts",
-      "packages/app-vue/src/modules/notification/composables/useNotificationPreferences.spec.ts",
-      "packages/app-vue/src/modules/notification/composables/useNotificationUnreadQuery.spec.ts",
-      "packages/app-vue/src/modules/notification/desktop/notification-click-navigation.spec.ts",
-      "packages/app-vue/src/modules/notification/initialization/index.spec.ts",
-      "packages/app-vue/src/modules/notification/initialization/notification-sse-invalidation-source.spec.ts",
-      "packages/app-vue/src/modules/notification/stores/notificationStore.spec.ts",
-      "packages/app-vue/src/modules/notification/views/NotificationListPage.spec.ts",
-      "packages/app-vue/src/modules/notification/web-live-notification.spec.ts",
       "packages/app-vue/src/modules/repository/components/DocumentPresentationPrimitives.spec.ts",
       "packages/app-vue/src/modules/repository/components/KnowledgeCaptureReviewDialog.spec.ts",
       "packages/app-vue/src/modules/repository/components/KnowledgeMarkdownPreview.spec.ts",
@@ -13583,19 +13524,6 @@
       "packages/app-vue/src/modules/routine/components/RoutineProfileDialog.spec.ts",
       "packages/app-vue/src/modules/routine/components/RoutineUpcomingWidget.spec.ts",
       "packages/app-vue/src/modules/routine/views/RoutineConfigurationView.spec.ts",
-      "packages/app-vue/src/modules/schedule/components/CreateScheduleDialog.spec.ts",
-      "packages/app-vue/src/modules/schedule/components/calendar-event-semantics.spec.ts",
-      "packages/app-vue/src/modules/schedule/composables/useCalendarView.capsule.spec.ts",
-      "packages/app-vue/src/modules/schedule/composables/useCalendarView.owner-cache.spec.ts",
-      "packages/app-vue/src/modules/schedule/composables/useCalendarView.spec.ts",
-      "packages/app-vue/src/modules/schedule/composables/useScheduleCalendar.cache.spec.ts",
-      "packages/app-vue/src/modules/schedule/planner/PlannerCalendar.spec.ts",
-      "packages/app-vue/src/modules/schedule/planner/calendar-event-projection.spec.ts",
-      "packages/app-vue/src/modules/schedule/planner/planner-fullcalendar-mutation.adapter.spec.ts",
-      "packages/app-vue/src/modules/schedule/planner/planner-owner-command.router.spec.ts",
-      "packages/app-vue/src/modules/schedule/planner/planner-presentation.spec.ts",
-      "packages/app-vue/src/modules/schedule/stores/scheduleStore.spec.ts",
-      "packages/app-vue/src/modules/schedule/views/ScheduleInspect.characterization.spec.ts",
       "packages/app-vue/src/modules/setting/components/AISettings.spec.ts",
       "packages/app-vue/src/modules/setting/components/AccountSettingsSection.spec.ts",
       "packages/app-vue/src/modules/setting/components/AntigravityAcpDownload.spec.ts",
@@ -13814,7 +13742,6 @@
       "packages/notification/src/api/notification-void-success-envelope.surface.spec.ts",
       "packages/notification/src/api/routes.spec.ts",
       "packages/notification/src/electron/index-lifecycle.spec.ts",
-      "packages/notification/src/infrastructure-client/adapters/http/notification-http.adapter.spec.ts",
       "packages/notification/src/server/application/notification-portability.spec.ts",
       "packages/notification/src/server/application/notification-preference-portability.spec.ts",
       "packages/notification/src/server/application/services/notification-maintenance-application-service.test.ts",
@@ -13888,8 +13815,6 @@
       "packages/schedule/src/api/schedule-event.routes.spec.ts",
       "packages/schedule/src/api/schedule-route-parsers-keep-boundary.surface.spec.ts",
       "packages/schedule/src/api/schedule-void-success-envelope.surface.spec.ts",
-      "packages/schedule/src/application-client/planner-conflict-read-model.spec.ts",
-      "packages/schedule/src/application-client/schedule-client-port-facade-dual.surface.spec.ts",
       "packages/schedule/src/electron/index-lifecycle.spec.ts",
       "packages/schedule/src/electron/schedule-electron-delete-contract.spec.ts",
       "packages/schedule/src/server/application/schedule-portability.spec.ts",
@@ -14020,7 +13945,7 @@
   "duplicate": [],
   "unexpected": [],
   "counts": {
-    "unit": 1121,
+    "unit": 1124,
     "integration": 58,
     "smoke": 3,
     "boundary-ipc": 6,
