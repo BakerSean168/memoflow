@@ -6,7 +6,7 @@
  * instead of hydrating the full `GoalClientDTO` aggregate, which carries
  * description, reminders, labels, every KeyResult and every Review.
  *
- * Composition owners (workspace-contracts) depend on this file, never on the
+ * Composition owners (goal-workspace-contracts and task-workspace-contracts) depend on this file, never on the
  * aggregate, so a Task detail surface cannot drag the whole Goal tree over the
  * wire (ADR-069 / ADR-075 read-side composition).
  */

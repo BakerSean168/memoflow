@@ -258,6 +258,7 @@
           "goal-contracts",
           "goal-core",
           "goal-ui",
+          "goal-workspace-contracts",
           "governance-tools",
           "host-runtime",
           "http-client",
@@ -299,6 +300,7 @@
           "task-client",
           "task-contracts",
           "task-ui",
+          "task-workspace-contracts",
           "test-system-v2",
           "time",
           "transport-contracts",
@@ -307,8 +309,7 @@
           "ui-storybook",
           "ui-vue-shadcn",
           "utils",
-          "web",
-          "workspace-contracts"
+          "web"
         ],
         "unit": [
           "account",
@@ -331,6 +332,7 @@
           "goal-contracts",
           "goal-core",
           "goal-ui",
+          "goal-workspace-contracts",
           "governance-tools",
           "host-runtime",
           "http-client",
@@ -369,14 +371,14 @@
           "task-client",
           "task-contracts",
           "task-ui",
+          "task-workspace-contracts",
           "test-system-v2",
           "time",
           "transport-contracts",
           "ui-core",
           "ui-vue-shadcn",
           "utils",
-          "web",
-          "workspace-contracts"
+          "web"
         ],
         "coverage": [
           "account",
@@ -594,6 +596,7 @@
           "goal-client",
           "goal-core",
           "goal-ui",
+          "goal-workspace-contracts",
           "governance-tools",
           "label",
           "memoflow",
@@ -616,12 +619,12 @@
           "task",
           "task-client",
           "task-ui",
+          "task-workspace-contracts",
           "test-system-v2",
           "ui-storybook",
           "ui-vue-shadcn",
           "utils",
-          "web",
-          "workspace-contracts"
+          "web"
         ],
         "unit": [
           "account",
@@ -640,6 +643,7 @@
           "goal-client",
           "goal-core",
           "goal-ui",
+          "goal-workspace-contracts",
           "governance-tools",
           "label",
           "migrator",
@@ -660,11 +664,11 @@
           "task",
           "task-client",
           "task-ui",
+          "task-workspace-contracts",
           "test-system-v2",
           "ui-vue-shadcn",
           "utils",
-          "web",
-          "workspace-contracts"
+          "web"
         ],
         "coverage": [
           "account",
@@ -1016,6 +1020,7 @@
           "goal-client",
           "goal-core",
           "goal-ui",
+          "goal-workspace-contracts",
           "governance-tools",
           "label",
           "memoflow",
@@ -1038,12 +1043,12 @@
           "task",
           "task-client",
           "task-ui",
+          "task-workspace-contracts",
           "test-system-v2",
           "ui-storybook",
           "ui-vue-shadcn",
           "utils",
-          "web",
-          "workspace-contracts"
+          "web"
         ],
         "unit": [
           "account",
@@ -1062,6 +1067,7 @@
           "goal-client",
           "goal-core",
           "goal-ui",
+          "goal-workspace-contracts",
           "governance-tools",
           "label",
           "migrator",
@@ -1082,11 +1088,11 @@
           "task",
           "task-client",
           "task-ui",
+          "task-workspace-contracts",
           "test-system-v2",
           "ui-vue-shadcn",
           "utils",
-          "web",
-          "workspace-contracts"
+          "web"
         ],
         "coverage": [
           "account",
@@ -1778,6 +1784,7 @@
           "goal-contracts",
           "goal-core",
           "goal-ui",
+          "goal-workspace-contracts",
           "governance-tools",
           "host-runtime",
           "http-client",
@@ -1819,6 +1826,7 @@
           "task-client",
           "task-contracts",
           "task-ui",
+          "task-workspace-contracts",
           "test-system-v2",
           "time",
           "transport-contracts",
@@ -1827,8 +1835,7 @@
           "ui-storybook",
           "ui-vue-shadcn",
           "utils",
-          "web",
-          "workspace-contracts"
+          "web"
         ],
         "unit": [
           "account",
@@ -1851,6 +1858,7 @@
           "goal-contracts",
           "goal-core",
           "goal-ui",
+          "goal-workspace-contracts",
           "governance-tools",
           "host-runtime",
           "http-client",
@@ -1889,14 +1897,14 @@
           "task-client",
           "task-contracts",
           "task-ui",
+          "task-workspace-contracts",
           "test-system-v2",
           "time",
           "transport-contracts",
           "ui-core",
           "ui-vue-shadcn",
           "utils",
-          "web",
-          "workspace-contracts"
+          "web"
         ],
         "coverage": [
           "account",

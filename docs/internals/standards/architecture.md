@@ -15,7 +15,7 @@ updated: 2026-08-17T00:00:00+09:00
 
 - `apps/*` 是运行时容器，负责入口、宿主装配、环境配置、生命周期和平台适配。
 - `packages/<feature>` 是垂直业务切片，内部包含 domain、application、transport、infrastructure 和 client seam。
-- `packages/<feature>-contracts` 拥有本域稳定 DTO、Schema、ID 与 Event/RPC Map；shared-primitives 与 transport-contracts 拥有平台原语和 Result 协议。跨域工作区读模型归 workspace-contracts，宿主的全局 Event/RPC 注册表归 host-runtime。
+- `packages/<feature>-contracts` 拥有本域稳定 DTO、Schema、ID 与 Event/RPC Map；shared-primitives 与 transport-contracts 拥有平台原语和 Result 协议。跨域工作区读模型分别归 goal-workspace-contracts 与 task-workspace-contracts，宿主的全局 Event/RPC 注册表归 host-runtime。
 - 共享纯类型归 shared-primitives；IdentityId companion 等技术实现归 utils/domain。旧聚合契约包与 domain-shared 已解散（#630 / #637）。
 - `packages/utils` 保存技术性、无业务所有权的通用能力，不拥有全局业务错误层级。
 - 数据库、PowerSync、HTTP client、IPC client 等基础设施 package 不承载 feature business policy。

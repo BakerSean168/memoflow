@@ -6310,6 +6310,14 @@
       "measurementCollectors": []
     },
     {
+      "path": "packages/goal-workspace-contracts/src/goal-workspace.dto.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/goal-workspace-contracts/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "packages/goal/src/__tests__/dual-registry.surface.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -10322,6 +10330,14 @@
       "measurementCollectors": []
     },
     {
+      "path": "packages/task-workspace-contracts/src/task-workspace.dto.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/task-workspace-contracts/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "packages/task/src/api/module-lifecycle.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -11492,22 +11508,6 @@
       "primarySuite": "unit",
       "collectors": [
         "packages/utils/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
-      "path": "packages/workspace-contracts/src/goal-workspace.dto.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/workspace-contracts/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
-      "path": "packages/workspace-contracts/src/task-workspace.dto.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/workspace-contracts/vitest.config.ts"
       ],
       "measurementCollectors": []
     },
@@ -12820,6 +12820,13 @@
       "fileCount": 26
     },
     {
+      "id": "packages/goal-workspace-contracts/vitest.config.ts",
+      "type": "primary",
+      "suite": "unit",
+      "runner": "vitest",
+      "fileCount": 1
+    },
+    {
       "id": "packages/goal/vitest.config.ts",
       "type": "primary",
       "suite": "unit",
@@ -13086,6 +13093,13 @@
       "fileCount": 34
     },
     {
+      "id": "packages/task-workspace-contracts/vitest.config.ts",
+      "type": "primary",
+      "suite": "unit",
+      "runner": "vitest",
+      "fileCount": 1
+    },
+    {
       "id": "packages/task/vitest.config.ts",
       "type": "primary",
       "suite": "unit",
@@ -13126,13 +13140,6 @@
       "suite": "unit",
       "runner": "vitest",
       "fileCount": 14
-    },
-    {
-      "id": "packages/workspace-contracts/vitest.config.ts",
-      "type": "primary",
-      "suite": "unit",
-      "runner": "vitest",
-      "fileCount": 2
     }
   ],
   "measurementSuites": {

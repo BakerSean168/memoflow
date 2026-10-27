@@ -38,7 +38,7 @@ function forbidPatterns(relativePath, patterns) {
   }
 }
 
-requireTokens('packages/workspace-contracts/src/goal-workspace.dto.ts', [
+requireTokens('packages/goal-workspace-contracts/src/goal-workspace.dto.ts', [
   'GoalWorkspaceReadModelSchema',
   'taskContext:',
   'knowledgeContext:',
@@ -47,19 +47,19 @@ requireTokens('packages/workspace-contracts/src/goal-workspace.dto.ts', [
   'GoalWorkspaceTaskPageInvocationSchema',
   'GoalWorkspaceKnowledgePageInvocationSchema',
 ]);
-forbidPatterns('packages/workspace-contracts/src/goal-workspace.dto.ts', [
+forbidPatterns('packages/goal-workspace-contracts/src/goal-workspace.dto.ts', [
   [/\btaskIds\b/, 'Workspace contract must not copy Task ids into Goal authority'],
   [/\bnoteIds\b/, 'Workspace contract must not copy Knowledge ids into Goal authority'],
   [/^\s*keyResults:\s/m, 'Workspace must not duplicate goal.keyResults at the top level'],
 ]);
 // Issue #635 step 2: the Task Workspace goal context is a reference, not the
 // Goal aggregate. Four scalars were the whole consumer surface.
-requireTokens('packages/workspace-contracts/src/task-workspace.dto.ts', [
+requireTokens('packages/task-workspace-contracts/src/task-workspace.dto.ts', [
   'TaskWorkspaceGoalContextSchema',
   'GoalReferenceSchema',
   'KeyResultReferenceSchema',
 ]);
-forbidPatterns('packages/workspace-contracts/src/task-workspace.dto.ts', [
+forbidPatterns('packages/task-workspace-contracts/src/task-workspace.dto.ts', [
   [
     /\bGoalClientDTOSchema\b/,
     'Task Workspace contract must not embed the Goal aggregate (use GoalReferenceSchema)',
