@@ -7,7 +7,7 @@
 
 import type { IAccountApiClient } from '../types';
 import type { IResultHttpClient } from '@memoflow/http-client';
-import type { Result } from '@memoflow/contracts/result';
+import type { Result } from '@memoflow/transport-contracts';
 import type {
   AccountView,
   UpdateAccountReq,

@@ -5,9 +5,9 @@
  * Uses ResultIpcClient — all methods return Result<T> directly.
  */
 
-import type { Result } from '@memoflow/contracts/result';
-import { map as mapResult } from '@memoflow/contracts/result';
-import { AccountChannels } from '@memoflow/contracts/electron';
+import type { Result } from '@memoflow/transport-contracts';
+import { map as mapResult } from '@memoflow/transport-contracts';
+import { AccountChannels } from '@memoflow/desktop-contracts';
 import type { IAccountApiClient, IResultIpcClient } from '../types';
 import type {
   AccountClientDTO,

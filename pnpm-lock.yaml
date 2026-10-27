@@ -1260,6 +1260,24 @@ importers:
         specifier: ^5.0.0
         version: 5.0.6
 
+  packages/account-client:
+    dependencies:
+      '@memoflow/account-contracts':
+        specifier: workspace:*
+        version: link:../account-contracts
+      '@memoflow/desktop-contracts':
+        specifier: workspace:*
+        version: link:../desktop-contracts
+      '@memoflow/http-client':
+        specifier: workspace:*
+        version: link:../http-client
+      '@memoflow/ipc-client':
+        specifier: workspace:*
+        version: link:../ipc-client
+      '@memoflow/transport-contracts':
+        specifier: workspace:*
+        version: link:../transport-contracts
+
   packages/account-contracts:
     dependencies:
       '@memoflow/shared-primitives':

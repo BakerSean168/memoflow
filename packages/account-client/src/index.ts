@@ -2,23 +2,27 @@
  * Account client seam.
  *
  * Public account contracts stay centralized in `@memoflow/account-contracts`.
- * Callers depend on this seam instead of the old application-client /
- * infrastructure-client layered exports.
+ * Callers depend on this seam instead of the layered application-client /
+ * infrastructure-client internals.
  */
 
 import type { IResultHttpClient } from '@memoflow/http-client';
-import { createAccountClientService, type AccountClientPort } from '../application-client';
+import {
+  AccountClientService,
+  createAccountClientService,
+  type AccountClientPort,
+} from './application-client';
 import {
   AccountHttpAdapter,
   createAccountHttpAdapters,
   type AccountHttpAdapters,
-} from '../infrastructure-client/adapters/http';
+} from './infrastructure-client/adapters/http';
 import {
   AccountIpcAdapter,
   createAccountIpcAdapters,
   type AccountIpcAdapters,
-} from '../infrastructure-client/adapters/ipc';
-import type { IAccountApiClient, IResultIpcClient } from '../infrastructure-client/adapters/types';
+} from './infrastructure-client/adapters/ipc';
+import type { IAccountApiClient, IResultIpcClient } from './infrastructure-client/adapters/types';
 
 export type {
   AccountClientPort,
@@ -44,8 +48,10 @@ export function createAccountIpcClient(ipcClient: IResultIpcClient): AccountClie
 }
 
 export {
+  AccountClientService,
   AccountHttpAdapter,
   AccountIpcAdapter,
+  createAccountClientService,
   createAccountHttpAdapters,
   createAccountIpcAdapters,
 };

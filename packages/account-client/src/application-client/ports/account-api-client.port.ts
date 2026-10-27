@@ -2,7 +2,7 @@
  * Account API Client Port Interface
  */
 
-import type { Result } from '@memoflow/contracts/result';
+import type { Result } from '@memoflow/transport-contracts';
 import type { AccountView } from '@memoflow/account-contracts';
 import type {
   UpdateAccountReq,
