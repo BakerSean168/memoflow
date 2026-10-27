@@ -59,7 +59,7 @@ export function useTaskToday() {
           runtime.queryClient.fetchQuery({
             queryKey: taskPlanQueryKeys.detail(identityScope, planId),
             staleTime: force ? 0 : TASK_TEMPLATE_STALE_TIME_MS,
-            queryFn: async () => unwrap(await taskService.getPlan(planId)).toDTO(),
+            queryFn: async () => unwrap(await taskService.getPlan(planId)),
           }),
         ),
       );

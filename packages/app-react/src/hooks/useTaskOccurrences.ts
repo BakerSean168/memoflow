@@ -1,17 +1,12 @@
 import { useEffect, useState } from 'react';
 
 import type { TaskOccurrenceClientDTO } from '@memoflow/task-contracts';
-import type { TaskOccurrence } from '@memoflow/task-client';
 import { presentErrorMessage } from '@memoflow/http-client';
 
 import { useAppSession } from './useAppSession';
 import { useTaskService } from './useTaskService';
 
 export type TaskOccurrenceSummary = TaskOccurrenceClientDTO;
-
-function mapInstance(instance: TaskOccurrence): TaskOccurrenceSummary {
-  return instance.toDTO();
-}
 
 export function useTaskOccurrences(taskId: string | null) {
   const service = useTaskService();
@@ -39,9 +34,9 @@ export function useTaskOccurrences(taskId: string | null) {
       return;
     }
 
-    const sorted = result.data
-      .map((instance) => mapInstance(instance))
-      .sort((left, right) => right.scheduleSnapshot.date.localeCompare(left.scheduleSnapshot.date));
+    const sorted = [...result.data].sort((left, right) =>
+      right.scheduleSnapshot.date.localeCompare(left.scheduleSnapshot.date),
+    );
     setInstances(sorted);
     setIsLoading(false);
   }

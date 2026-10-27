@@ -7,5 +7,5 @@
 import type { z } from 'zod';
 import { TaskOccurrenceResponseSchema } from '../api/response-schemas';
 
-// HTTP, IPC and domain-client all consume this canonical Plan/Occurrence shape.
+// HTTP, IPC and the client service all consume this canonical Plan/Occurrence shape.
 export type TaskOccurrenceClientDTO = z.infer<typeof TaskOccurrenceResponseSchema>;

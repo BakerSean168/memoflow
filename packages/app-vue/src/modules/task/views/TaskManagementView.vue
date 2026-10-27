@@ -623,7 +623,7 @@ async function handleSubmit(vm: TaskPlanViewModel, context?: TaskNativeSubmitCon
     closeDialog();
     await reloadSurface();
   }
-  return saved?.plan.toDTO() ?? null;
+  return saved?.plan ?? null;
 }
 async function abandon(id: string) {
   if (await abandonPlanSafe(id)) await refetchTemplates();

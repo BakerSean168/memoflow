@@ -10,7 +10,7 @@ import { instance } from '../components/task-quick-test-fixtures';
 it('deduplicates owner reads in the shared cache and isolates identity changes', async () => {
   const identity = ref('identity-1');
   const runtime = createTestServerStateRuntime();
-  const service = { getOccurrence: vi.fn(async () => ok({ toDTO: () => instance() })) };
+  const service = { getOccurrence: vi.fn(async () => ok(instance())) };
   const first = mountTaskComposable(() => useTaskOccurrenceDetailQuery('occurrence-1'), {
     service,
     runtime,
@@ -39,26 +39,21 @@ it('deduplicates owner reads in the shared cache and isolates identity changes',
 });
 it('captures reactive owner ids per request so an old response cannot replace the next owner', async () => {
   const id = ref('occurrence-1');
-  let resolveFirst!: (
-    value: ReturnType<typeof ok<{ toDTO: () => ReturnType<typeof instance> }>>,
-  ) => void;
+  type OccurrenceResult = ReturnType<typeof ok<ReturnType<typeof instance>>>;
+  let resolveFirst!: (value: OccurrenceResult) => void;
   const service = {
     getOccurrence: vi.fn((ownerId: string) =>
       ownerId === 'occurrence-1'
-        ? new Promise<ReturnType<typeof ok<{ toDTO: () => ReturnType<typeof instance> }>>>(
-            (resolve) => {
-              resolveFirst = resolve;
-            },
-          )
-        : Promise.resolve(
-            ok({ toDTO: () => instance({ id: 'second' as ReturnType<typeof instance>['id'] }) }),
-          ),
+        ? new Promise<OccurrenceResult>((resolve) => {
+            resolveFirst = resolve;
+          })
+        : Promise.resolve(ok(instance({ id: 'second' as ReturnType<typeof instance>['id'] }))),
     ),
   };
   const { api } = mountTaskComposable(() => useTaskOccurrenceDetailQuery(id), { service });
   id.value = 'second';
   await vi.waitFor(() => expect(api.occurrence.value?.id).toBe('second'));
-  resolveFirst(ok({ toDTO: () => instance() }));
+  resolveFirst(ok(instance()));
   await vi.waitFor(() => expect(api.occurrence.value?.id).toBe('second'));
   expect(service.getOccurrence.mock.calls.map((call) => call[0])).toEqual([
     'occurrence-1',

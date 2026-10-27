@@ -94,42 +94,36 @@ function template(completionRate: number): TaskPlanClientDTO {
   } as TaskPlanClientDTO;
 }
 
-function entity<T>(dto: T) {
-  return { toDTO: vi.fn(() => dto) };
-}
-
 function mountComposable(resolveIdentityScope = () => 'identity-1') {
   const completed = instance('Completed');
   const pending = instance('Pending');
   const missed = instance('Missed');
   const service = {
-    completeOccurrence: vi.fn().mockResolvedValue(ok(entity(completed))),
-    uncompleteOccurrence: vi.fn().mockResolvedValue(ok(entity(pending))),
-    markOccurrenceMissed: vi.fn().mockResolvedValue(ok(entity(missed))),
+    completeOccurrence: vi.fn().mockResolvedValue(ok(completed)),
+    uncompleteOccurrence: vi.fn().mockResolvedValue(ok(pending)),
+    markOccurrenceMissed: vi.fn().mockResolvedValue(ok(missed)),
     setOccurrenceChecklistItem: vi.fn().mockResolvedValue(
       ok(
-        entity(
-          instance('Pending', {
-            version: 2,
-            checklistState: [
-              {
-                definitionId: 'check-1',
-                titleSnapshot: 'Prepare evidence',
-                orderSnapshot: 0,
-                completed: true,
-                completedAt: Date.now(),
-              },
-            ],
-          }),
-        ),
+        instance('Pending', {
+          version: 2,
+          checklistState: [
+            {
+              definitionId: 'check-1',
+              titleSnapshot: 'Prepare evidence',
+              orderSnapshot: 0,
+              completed: true,
+              completedAt: Date.now(),
+            },
+          ],
+        }),
       ),
     ),
-    listOccurrencesByDateRange: vi.fn().mockResolvedValue(ok([entity(instance('Pending'))])),
+    listOccurrencesByDateRange: vi.fn().mockResolvedValue(ok([instance('Pending')])),
     getPlan: vi
       .fn()
-      .mockResolvedValueOnce(ok(entity(template(100))))
-      .mockResolvedValueOnce(ok(entity(template(0))))
-      .mockResolvedValueOnce(ok(entity(template(25)))),
+      .mockResolvedValueOnce(ok(template(100)))
+      .mockResolvedValueOnce(ok(template(0)))
+      .mockResolvedValueOnce(ok(template(25))),
   };
   const runtime = createTestServerStateRuntime();
   const pinia = createTestPinia();
@@ -204,7 +198,7 @@ describe('useTaskOccurrences template projection refresh', () => {
     const pending = composable.fetchInstancesByDateRange(1000, 2000);
     await vi.waitFor(() => expect(resolve).toBeTypeOf('function'));
     identityScope = 'identity-2';
-    resolve(ok([entity(instance('Pending'))]));
+    resolve(ok([instance('Pending')]));
     expect(await pending).toEqual([]);
     expect(store.instances).toEqual([]);
   });
@@ -269,7 +263,7 @@ describe('useTaskOccurrences template projection refresh', () => {
     service.listOccurrencesByDateRange.mockImplementationOnce(
       () =>
         new Promise((resolve) => {
-          release = () => resolve(ok([entity(instance('Pending'))]));
+          release = () => resolve(ok([instance('Pending')]));
         }),
     );
     const start = Date.UTC(2026, 8, 28);

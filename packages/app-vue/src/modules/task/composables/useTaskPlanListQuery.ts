@@ -87,9 +87,7 @@ function useTaskPlanListQueryImpl({
         );
         const data = unwrap(result);
         return {
-          templates: (data.plans ?? []).map((template: { toDTO(): TaskPlanClientDTO }) =>
-            template.toDTO(),
-          ),
+          templates: data.plans ?? [],
           total: data.total ?? 0,
         };
       },

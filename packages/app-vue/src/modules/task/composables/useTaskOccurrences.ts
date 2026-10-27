@@ -12,7 +12,6 @@ import type {
   CompleteTaskOccurrenceReq,
   RescheduleTaskInput,
   SetTaskOccurrenceChecklistItemReq,
-  TaskPlanClientDTO,
 } from '@memoflow/task-contracts';
 import type { Result } from '@memoflow/contracts/result';
 import { createComposableHandleError } from '../../../shared/utils/create-composable-handle-error';
@@ -23,8 +22,6 @@ import { TASK_OCCURRENCE_STALE_TIME_MS } from '../../../platform/server-state/qu
 import { patchTaskPlanEverywhere } from './taskPlanCache';
 
 type TaskOccurrenceDTO = ReturnType<typeof useTaskStore>['instances'][number];
-type TaskOccurrenceEntityLike = { toDTO(): TaskOccurrenceDTO };
-type TaskPlanEntityLike = { toDTO(): TaskPlanClientDTO };
 
 export function useTaskOccurrences() {
   const service = useStrictInject(TASK_SERVICE_KEY, 'TaskService');
@@ -68,18 +65,11 @@ export function useTaskOccurrences() {
     );
     if (result.ok) {
       // 模板投影现在属于 Query Cache authority；instance mutation 仍以本地 patch 收敛。
-      patchTaskPlanEverywhere(
-        runtime.queryClient,
-        resolveIdentityScope(),
-        (result.data as TaskPlanEntityLike).toDTO(),
-      );
+      patchTaskPlanEverywhere(runtime.queryClient, resolveIdentityScope(), result.data);
     }
   }
 
-  async function updateInstanceProjection(
-    entity: TaskOccurrenceEntityLike,
-  ): Promise<TaskOccurrenceDTO> {
-    const dto = entity.toDTO();
+  async function updateInstanceProjection(dto: TaskOccurrenceDTO): Promise<TaskOccurrenceDTO> {
     store.updateInstance(dto);
     runtime.queryClient.setQueryData(
       taskOccurrenceQueryKeys.detail(resolveIdentityScope(), String(dto.id)),
@@ -105,9 +95,7 @@ export function useTaskOccurrences() {
       );
 
       if (result.ok) {
-        store.setInstances(
-          (result.data ?? []).map((instance) => (instance as TaskOccurrenceEntityLike).toDTO()),
-        );
+        store.setInstances(result.data ?? []);
       }
     } finally {
       store.setLoading(false);
@@ -145,9 +133,7 @@ export function useTaskOccurrences() {
             { suppressErrorReport: true },
           );
           if (!result.ok) throw result.error;
-          return (result.data ?? []).map((instance) =>
-            (instance as TaskOccurrenceEntityLike).toDTO(),
-          );
+          return result.data ?? [];
         },
       });
       if (identityScope !== resolveIdentityScope()) return [];

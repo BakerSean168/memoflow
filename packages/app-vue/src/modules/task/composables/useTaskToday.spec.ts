@@ -17,9 +17,6 @@ function occurrence(id: string, planId: string, dueAt = Date.now(), status = 'Pe
 function plan(id: string) {
   return { id, name: `Plan ${id}` } as TaskPlanClientDTO;
 }
-function entity<T>(dto: T) {
-  return { toDTO: () => dto };
-}
 function service() {
   return {
     listPlans: vi.fn(),
@@ -27,12 +24,12 @@ function service() {
       .fn()
       .mockResolvedValue(
         ok([
-          entity(occurrence('a', 'outside-page')),
-          entity(occurrence('b', 'outside-page')),
-          entity(occurrence('overdue', 'older-plan', startOfDayMs(Date.now()) - 1)),
+          occurrence('a', 'outside-page'),
+          occurrence('b', 'outside-page'),
+          occurrence('overdue', 'older-plan', startOfDayMs(Date.now()) - 1),
         ]),
       ),
-    getPlan: vi.fn(async (id: string) => ok(entity(plan(id)))),
+    getPlan: vi.fn(async (id: string) => ok(plan(id))),
   };
 }
 
@@ -75,9 +72,9 @@ describe('canonical Task Today projection', () => {
     const owner = service();
     owner.listOccurrencesByDateRange.mockResolvedValue(
       ok([
-        entity(occurrence('today', 'p')),
-        entity(occurrence('completed-old', 'p', startOfDayMs(Date.now()) - 1, 'Completed')),
-        entity(occurrence('future', 'p', endOfDayMs(Date.now()) + 1)),
+        occurrence('today', 'p'),
+        occurrence('completed-old', 'p', startOfDayMs(Date.now()) - 1, 'Completed'),
+        occurrence('future', 'p', endOfDayMs(Date.now()) + 1),
       ]),
     );
     const { api } = mountTaskComposable(useTaskToday, { service: owner });
@@ -107,7 +104,7 @@ describe('canonical Task Today projection', () => {
           release = resolve;
         }),
     );
-    owner.listOccurrencesByDateRange.mockResolvedValue(ok([entity(occurrence('a', 'p'))]));
+    owner.listOccurrencesByDateRange.mockResolvedValue(ok([occurrence('a', 'p')]));
     const identity = ref('identity-a');
     const { api } = mountTaskComposable(useTaskToday, {
       service: owner,
@@ -117,7 +114,7 @@ describe('canonical Task Today projection', () => {
     await flushPromises();
     identity.value = 'identity-b';
     await flushPromises();
-    release(ok(entity(plan('p'))));
+    release(ok(plan('p')));
     await loading;
     expect(api.templates.value).toEqual([]);
     expect(api.isLoading.value).toBe(false);

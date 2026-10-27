@@ -33,8 +33,7 @@ export function useTaskPlanDetailQuery(id: MaybeRefOrGetter<string | undefined |
       queryKey: taskPlanQueryKeys.detail(resolveIdentityScope(), templateId ?? ''),
       queryFn: async () => {
         const result = await service.getPlan(templateId as string);
-        const dto = unwrap(result);
-        return dto.toDTO() as TaskPlanClientDTO;
+        return unwrap(result);
       },
       enabled,
       staleTime: TASK_TEMPLATE_STALE_TIME_MS,

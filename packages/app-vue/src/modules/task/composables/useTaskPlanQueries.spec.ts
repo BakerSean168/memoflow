@@ -17,10 +17,6 @@ function template(overrides: Partial<TaskPlanClientDTO> = {}): TaskPlanClientDTO
   } as TaskPlanClientDTO;
 }
 
-function entity(dto: TaskPlanClientDTO) {
-  return { toDTO: () => dto };
-}
-
 function makeService() {
   return {
     listPlans: vi.fn(),
@@ -39,7 +35,7 @@ describe('useTaskPlanListQuery', () => {
 
   it('fetches the flat Task Plan list and dedupes same-key consumers', async () => {
     const service = makeService();
-    service.listPlans.mockResolvedValue(ok({ plans: [entity(template())], total: 1 }));
+    service.listPlans.mockResolvedValue(ok({ plans: [template()], total: 1 }));
     const runtime = createServerStateRuntime('web');
     const first = mountTaskComposable(() => useTaskPlanListQuery({ page: 1, limit: 20 }), {
       service,
@@ -127,7 +123,7 @@ describe('useTaskPlanDetailQuery', () => {
 
   it('stays disabled when the id is missing or "new"', async () => {
     const service = makeService();
-    service.getPlan.mockResolvedValue(ok(entity(template())));
+    service.getPlan.mockResolvedValue(ok(template()));
     const missing = mountTaskComposable(() => useTaskPlanDetailQuery(() => null), { service });
     const creating = mountTaskComposable(() => useTaskPlanDetailQuery(() => 'new'), { service });
     await Promise.resolve();
@@ -138,7 +134,7 @@ describe('useTaskPlanDetailQuery', () => {
 
   it('fetches detail once for a stable id and isolates a different id', async () => {
     const service = makeService();
-    service.getPlan.mockResolvedValue(ok(entity(template())));
+    service.getPlan.mockResolvedValue(ok(template()));
     const first = mountTaskComposable(() => useTaskPlanDetailQuery(() => 'template-1'), {
       service,
     });

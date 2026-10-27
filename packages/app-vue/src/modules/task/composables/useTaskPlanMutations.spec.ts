@@ -40,10 +40,6 @@ function template(overrides: Partial<TaskPlanClientDTO> = {}): TaskPlanClientDTO
   } as TaskPlanClientDTO;
 }
 
-function entity(dto: TaskPlanClientDTO) {
-  return { toDTO: () => dto };
-}
-
 function makeService(overrides: Record<string, ReturnType<typeof vi.fn>> = {}) {
   return {
     listPlans: vi.fn(),
@@ -65,7 +61,7 @@ describe('useTaskPlanMutations (plan §3.4)', () => {
     const service = makeService({
       updatePlan: vi
         .fn()
-        .mockResolvedValueOnce(ok(entity(template({ name: 'Published', version: 2 }))))
+        .mockResolvedValueOnce(ok(template({ name: 'Published', version: 2 })))
         .mockResolvedValueOnce(fail({ code: 'VALIDATION_ERROR', message: 'nope' })),
     });
     const { api, runtime } = mountTaskComposable(() => useTaskPlanMutations(), { service });
@@ -92,7 +88,7 @@ describe('useTaskPlanMutations (plan §3.4)', () => {
   it('status mutations (activate/pause) apply optimistic status and restore on failure', async () => {
     const tpl = template();
     const service = makeService({
-      activatePlan: vi.fn().mockResolvedValue(ok(entity(template({ status: 'Active' })))),
+      activatePlan: vi.fn().mockResolvedValue(ok(template({ status: 'Active' }))),
       pausePlan: vi.fn().mockResolvedValue(fail({ code: 'VALIDATION_ERROR', message: 'nope' })),
     });
     const { api, runtime } = mountTaskComposable(() => useTaskPlanMutations(), { service });
@@ -130,15 +126,13 @@ describe('useTaskPlanMutations (plan §3.4)', () => {
 
     resolveAbandon(
       ok(
-        entity(
-          template({
-            status: 'Closed',
-            outcome: 'Abandoned',
-            closedAt: 2,
-            abandonedReason: null,
-            version: 2,
-          }),
-        ),
+        template({
+          status: 'Closed',
+          outcome: 'Abandoned',
+          closedAt: 2,
+          abandonedReason: null,
+          version: 2,
+        }),
       ),
     );
     await inFlight;
@@ -163,7 +157,7 @@ describe('useTaskPlanMutations (plan §3.4)', () => {
     await Promise.resolve();
     expect(runtime.queryClient.getQueryData(detailKey)?.status).toBe('Active');
 
-    resolveArchive(ok(entity(template({ archivedAt: 2, version: 2 }))));
+    resolveArchive(ok(template({ archivedAt: 2, version: 2 })));
     await inFlight;
     expect(runtime.queryClient.getQueryData(detailKey)?.archivedAt).toBe(2);
   });
@@ -217,7 +211,7 @@ describe('useTaskPlanMutations (plan §3.4)', () => {
       createPlan: vi
         .fn()
         .mockResolvedValue(
-          ok({ plan: entity(created), occurrenceCount: 7, todayOccurrenceCreated: true }),
+          ok({ plan: created, occurrenceCount: 7, todayOccurrenceCreated: true }),
         ),
     });
     const { api, runtime } = mountTaskComposable(() => useTaskPlanMutations(), { service });
@@ -226,7 +220,7 @@ describe('useTaskPlanMutations (plan §3.4)', () => {
     const result = await api.createPlanSafe({ name: 'New' } as never);
     expect(result?.occurrenceCount).toBe(7);
     expect(result?.todayOccurrenceCreated).toBe(true);
-    expect(result?.plan.toDTO().id).toBe('template-new');
+    expect(result?.plan.id).toBe('template-new');
     expect(invalidate).toHaveBeenCalledWith(
       expect.objectContaining({ target: 'task-plan', source: 'mutation' }),
     );
@@ -291,7 +285,7 @@ describe('useTaskPlanMutations (plan §3.4)', () => {
   it('resolves identityScope at mutation begin and carries it through callbacks (P1-2)', async () => {
     const tpl = template();
     const service = makeService({
-      updatePlan: vi.fn().mockResolvedValue(ok(entity(template({ name: 'Confirmed' })))),
+      updatePlan: vi.fn().mockResolvedValue(ok(template({ name: 'Confirmed' }))),
     });
     const { api, runtime } = mountTaskComposable(() => useTaskPlanMutations(), { service });
 

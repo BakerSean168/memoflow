@@ -71,15 +71,15 @@ describe('task plan contracts', () => {
   it('keeps TaskPlan occurrence children out of every plan boundary', () => {
     const client = readFileSync(resolve(__dirname, '../aggregates/task-plan-client.ts'), 'utf8');
     const server = readFileSync(resolve(__dirname, '../aggregates/task-plan-server.ts'), 'utf8');
-    const domainClient = readFileSync(
-      resolve(__dirname, '../../../task-client/src/domain-client/aggregates/task-plan.ts'),
+    const clientService = readFileSync(
+      resolve(__dirname, '../../../task-client/src/application-client/task-client-service.ts'),
       'utf8',
     );
     const request = readFileSync(resolve(__dirname, 'task-plan.dto.ts'), 'utf8');
 
     expect(client).not.toMatch(/occurrences\?:/);
     expect(server).not.toMatch(/occurrences\?:/);
-    expect(domainClient).not.toMatch(/occurrences\?:/);
+    expect(clientService).not.toMatch(/occurrences\?:/);
     expect(request).not.toContain('includeChildren');
   });
 

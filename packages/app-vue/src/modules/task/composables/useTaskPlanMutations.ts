@@ -105,7 +105,7 @@ export function useTaskPlanMutations() {
     onSuccess: (data, _vars, context) => {
       // Seed the detail key from the server response (plan §3.4).
       // 用 server 返回的 plan seed detail key（§3.4）。
-      patchTaskPlanEverywhere(runtime.queryClient, context!.identityScope, data.plan.toDTO());
+      patchTaskPlanEverywhere(runtime.queryClient, context!.identityScope, data.plan);
       toast.success(
         t(createFeedbackKey(_vars.feedbackIntent ?? 'plan', data.todayOccurrenceCreated), {
           count: data.occurrenceCount,
@@ -147,7 +147,7 @@ export function useTaskPlanMutations() {
       }
     },
     onSuccess: (dto, _vars, context) => {
-      patchTaskPlanEverywhere(runtime.queryClient, context!.identityScope, dto.toDTO());
+      patchTaskPlanEverywhere(runtime.queryClient, context!.identityScope, dto);
       toast.success(t('task.error.updateSuccess'));
     },
     onSettled: (_data, _error, vars, context) => {
@@ -219,7 +219,7 @@ export function useTaskPlanMutations() {
   });
 
   function createStatusMutation(
-    operation: (id: string) => Promise<Result<{ toDTO(): TaskPlanClientDTO }>>,
+    operation: (id: string) => Promise<Result<TaskPlanClientDTO>>,
     fallbackKey: string,
     successKey: string,
     optimisticStatus: TaskPlanClientDTO['status'],
@@ -253,7 +253,7 @@ export function useTaskPlanMutations() {
         }
       },
       onSuccess: (dto, _id, context) => {
-        patchTaskPlanEverywhere(runtime.queryClient, context!.identityScope, dto.toDTO());
+        patchTaskPlanEverywhere(runtime.queryClient, context!.identityScope, dto);
         toast.success(t(successKey));
       },
       onSettled: (_data, _error, id, context) => {
@@ -280,7 +280,7 @@ export function useTaskPlanMutations() {
     'Paused',
   );
   function createServerConfirmedPlanMutation(
-    operation: (id: string) => Promise<Result<{ toDTO(): TaskPlanClientDTO }>>,
+    operation: (id: string) => Promise<Result<TaskPlanClientDTO>>,
     fallbackKey: string,
     successKey: string,
   ) {
@@ -291,7 +291,7 @@ export function useTaskPlanMutations() {
       },
       onMutate: () => ({ identityScope: resolveIdentityScope() }),
       onSuccess: (dto, _id, context) => {
-        patchTaskPlanEverywhere(runtime.queryClient, context!.identityScope, dto.toDTO());
+        patchTaskPlanEverywhere(runtime.queryClient, context!.identityScope, dto);
         toast.success(t(successKey));
       },
       onSettled: (_data, _error, id, context) => {

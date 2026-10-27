@@ -1,4 +1,3 @@
-import { TaskGoalProgressConfigurationSchema } from '@memoflow/task-contracts';
 /**
  * Task Client Service
  *
@@ -10,6 +9,7 @@ import { TaskGoalProgressConfigurationSchema } from '@memoflow/task-contracts';
 
 import type { Result } from '@memoflow/contracts/result';
 import { error, ok, map as mapResult } from '@memoflow/contracts/result';
+import { TaskGoalProgressConfigurationSchema } from '@memoflow/task-contracts';
 import type {
   CreateTaskPlanReq,
   UpdateTaskPlanReq,
@@ -24,66 +24,30 @@ import type {
   GetTaskOccurrencesByRangeReq,
   TaskOccurrenceClientDTO,
   TaskPlanClientDTO,
-  TaskReminderConfig,
-  TaskGoalBinding,
-  TaskGoalBindingDTO,
 } from '@memoflow/task-contracts';
 import type { GetTaskWorkspaceReq, TaskPlanWorkspace } from '@memoflow/workspace-contracts';
 import type { ITaskPlanApiClient, TaskPlanListParams } from './ports/task-plan-api-client.port';
 import type { ITaskOccurrenceApiClient } from './ports/task-occurrence-api-client.port';
-import { TaskPlan } from '../domain-client/aggregates/task-plan';
-import { TaskOccurrence } from '../domain-client/aggregates/task-occurrence';
+import type { TaskClientPort } from './task-client.port';
 
-// ===== DTO-to-State Mappers =====
+// ===== Canonical DTO normalization =====
 
-function taskPlanFromDTO(dto: TaskPlanClientDTO): TaskPlan {
-  return TaskPlan.load({
-    id: dto.id,
-    identityId: dto.identityId,
-    name: dto.name,
-    description: dto.description,
-    schedule: structuredClone(dto.schedule),
-    reminderConfig: dto.reminderConfig as TaskReminderConfig | null,
-    importance: dto.importance,
-    goalBinding: dto.goalBinding ? parseGoalBinding(dto.goalBinding) : null,
-    checklist: dto.checklist.map((item) => ({ ...item })),
-    labels: dto.labels ?? [],
-    status: dto.status,
-    outcome: dto.outcome,
-    completionPolicy: dto.completionPolicy,
-    closedAt: dto.closedAt,
-    archivedAt: dto.archivedAt,
-    abandonedReason: dto.abandonedReason,
-    version: dto.version,
-    createdAt: dto.createdAt,
-    updatedAt: dto.updatedAt,
-    deletedAt: dto.deletedAt ? dto.deletedAt : null,
-    occurrenceCount: dto.occurrenceCount,
-    completedOccurrenceCount: dto.completedOccurrenceCount,
-    pendingOccurrenceCount: dto.pendingOccurrenceCount,
-    dueOccurrenceCount: dto.dueOccurrenceCount,
-    completedDueOccurrenceCount: dto.completedDueOccurrenceCount,
-    completionWindowDays: dto.completionWindowDays,
-    futurePendingOccurrenceCount: dto.futurePendingOccurrenceCount,
-    singleOccurrenceStatus: dto.singleOccurrenceStatus,
-    completionRate: dto.completionRate,
-    history: dto.history,
-  });
-}
-
-function taskOccurrenceFromDTO(dto: TaskOccurrenceClientDTO): TaskOccurrence {
-  return TaskOccurrence.load(dto);
-}
-
-function parseGoalBinding(dto: TaskGoalBindingDTO): TaskGoalBinding {
+/**
+ * ADR-069 / GOAL-7205: the only client-side shaping the Task read model applies is
+ * goalBinding progress-configuration normalization, identical to the canonical
+ * TaskPlanResponseSchema transform. A nullable Key Result link stays `null`; the
+ * transport DTO itself is passed through untouched.
+ */
+function normalizeTaskPlanDTO(dto: TaskPlanClientDTO): TaskPlanClientDTO {
+  if (!dto.goalBinding) return dto;
   return {
-    goalId: dto.goalId,
-    keyResultId: dto.keyResultId,
-    ...TaskGoalProgressConfigurationSchema.parse(dto),
+    ...dto,
+    goalBinding: {
+      ...dto.goalBinding,
+      ...TaskGoalProgressConfigurationSchema.parse(dto.goalBinding),
+    },
   };
 }
-
-import type { TaskClientPort } from './task-client.port';
 
 export class TaskClientService implements TaskClientPort {
   constructor(
@@ -126,10 +90,10 @@ export class TaskClientService implements TaskClientPort {
 
   async createPlan(
     request: CreateTaskPlanReq,
-  ): Promise<Result<{ plan: TaskPlan; occurrenceCount: number; todayOccurrenceCreated: boolean }>> {
+  ): Promise<Result<{ plan: TaskPlanClientDTO; occurrenceCount: number; todayOccurrenceCreated: boolean }>> {
     const result = await this.templateApi.createTaskPlan(request);
     return mapResult(result, (data) => ({
-      plan: taskPlanFromDTO(data.plan),
+      plan: normalizeTaskPlanDTO(data.plan),
       occurrenceCount: data.occurrenceCount,
       todayOccurrenceCreated: data.todayOccurrenceCreated,
     }));
@@ -137,79 +101,77 @@ export class TaskClientService implements TaskClientPort {
 
   async listPlans(
     params?: TaskPlanListParams,
-  ): Promise<Result<{ plans: TaskPlan[]; total: number }>> {
+  ): Promise<Result<{ plans: TaskPlanClientDTO[]; total: number }>> {
     const result = await this.templateApi.getTaskPlans(params);
     return mapResult(result, (data) => {
       const plans = data.plans ?? [];
       const total = data.total ?? plans.length;
       return {
-        plans: plans.map((dto) => taskPlanFromDTO(dto)),
+        plans: plans.map((dto) => normalizeTaskPlanDTO(dto)),
         total,
       };
     });
   }
 
-  async getPlan(id: string): Promise<Result<TaskPlan>> {
+  async getPlan(id: string): Promise<Result<TaskPlanClientDTO>> {
     const result = await this.templateApi.getTaskPlanById(id);
     if (!result.ok) return result;
     if (!result.data) return error('NOT_FOUND', 'Task plan not found');
-    return ok(taskPlanFromDTO(result.data));
+    return ok(normalizeTaskPlanDTO(result.data));
   }
 
-  async updatePlan(id: string, request: UpdateTaskPlanReq): Promise<Result<TaskPlan>> {
+  async updatePlan(id: string, request: UpdateTaskPlanReq): Promise<Result<TaskPlanClientDTO>> {
     const result = await this.templateApi.updateTaskPlan(id, request);
-    return mapResult(result, (dto) => taskPlanFromDTO(dto));
+    return mapResult(result, (dto) => normalizeTaskPlanDTO(dto));
   }
 
   async deletePlan(id: string): Promise<Result<void>> {
     return this.templateApi.deleteTaskPlan(id);
   }
 
-  async activatePlan(id: string): Promise<Result<TaskPlan>> {
+  async activatePlan(id: string): Promise<Result<TaskPlanClientDTO>> {
     const result = await this.templateApi.activateTaskPlan(id);
-    return mapResult(result, (dto) => taskPlanFromDTO(dto));
+    return mapResult(result, (dto) => normalizeTaskPlanDTO(dto));
   }
 
-  async pausePlan(id: string): Promise<Result<TaskPlan>> {
+  async pausePlan(id: string): Promise<Result<TaskPlanClientDTO>> {
     const result = await this.templateApi.pauseTaskPlan(id);
-    return mapResult(result, (dto) => taskPlanFromDTO(dto));
+    return mapResult(result, (dto) => normalizeTaskPlanDTO(dto));
   }
 
-  async archivePlan(id: string): Promise<Result<TaskPlan>> {
+  async archivePlan(id: string): Promise<Result<TaskPlanClientDTO>> {
     const result = await this.templateApi.archiveTaskPlan(id);
-    return mapResult(result, (dto) => taskPlanFromDTO(dto));
+    return mapResult(result, (dto) => normalizeTaskPlanDTO(dto));
   }
 
-  async abandonPlan(id: string, request?: AbandonTaskPlanReq): Promise<Result<TaskPlan>> {
+  async abandonPlan(id: string, request?: AbandonTaskPlanReq): Promise<Result<TaskPlanClientDTO>> {
     const result = await this.templateApi.abandonTaskPlan(id, request);
-    return mapResult(result, (dto) => taskPlanFromDTO(dto));
+    return mapResult(result, (dto) => normalizeTaskPlanDTO(dto));
   }
 
   async generateOccurrences(
     planId: string,
     request: GenerateOccurrencesReq,
-  ): Promise<Result<TaskOccurrence[]>> {
-    const result = await this.templateApi.generateOccurrences(planId, request);
-    return mapResult(result, (dtos) => dtos.map((dto) => taskOccurrenceFromDTO(dto)));
+  ): Promise<Result<TaskOccurrenceClientDTO[]>> {
+    return this.templateApi.generateOccurrences(planId, request);
   }
 
   async getOccurrencesByDateRange(
     planId: string,
     from: number,
     to: number,
-  ): Promise<Result<TaskOccurrence[]>> {
-    const result = await this.templateApi.getOccurrencesByDateRange(planId, { from, to });
-    return mapResult(result, (dtos) => dtos.map((dto) => taskOccurrenceFromDTO(dto)));
+  ): Promise<Result<TaskOccurrenceClientDTO[]>> {
+    return this.templateApi.getOccurrencesByDateRange(planId, { from, to });
   }
 
-  async bindToGoal(planId: string, request: BindToGoalReq): Promise<Result<TaskPlan>> {
+  async bindToGoal(planId: string, request: BindToGoalReq): Promise<Result<TaskPlanClientDTO>> {
     const result = await this.templateApi.bindToGoal(planId, request);
-    return mapResult(result, (dto) => taskPlanFromDTO(dto));
+    return mapResult(result, (dto) => normalizeTaskPlanDTO(dto));
   }
 
-  async unbindFromGoal(planId: string): Promise<Result<TaskPlan>> {
+  async unbindFromGoal(planId: string): Promise<Result<TaskPlanClientDTO>> {
     const result = await this.templateApi.unbindFromGoal(planId);
-    return mapResult(result, (dto) => taskPlanFromDTO(dto));
+    return mapResult(result, (dto) => normalizeTaskPlanDTO(dto));
   }
 
   // ===== Task Occurrence Operations =====
@@ -219,86 +181,74 @@ export class TaskClientService implements TaskClientPort {
     limit?: number;
     planId?: string;
     status?: string;
-  }): Promise<Result<TaskOccurrence[]>> {
+  }): Promise<Result<TaskOccurrenceClientDTO[]>> {
     const result = await this.instanceApi.getTaskOccurrences(params);
-    return mapResult(result, (dtos) =>
-      (Array.isArray(dtos) ? dtos : []).map((dto) => taskOccurrenceFromDTO(dto)),
-    );
+    return mapResult(result, (dtos) => (Array.isArray(dtos) ? dtos : []));
   }
 
   async listOccurrencesByDateRange(
     from: number,
     to: number,
     options: { includeOverdueOpen?: boolean } = {},
-  ): Promise<Result<TaskOccurrence[]>> {
+  ): Promise<Result<TaskOccurrenceClientDTO[]>> {
     const request: GetTaskOccurrencesByRangeReq = {
       startDate: from,
       endDate: to,
       includeOverdueOpen: options.includeOverdueOpen ?? false,
     };
     const result = await this.instanceApi.getTaskOccurrencesByDateRange(request);
-    return mapResult(result, (dtos) =>
-      (Array.isArray(dtos) ? dtos : []).map((dto) => taskOccurrenceFromDTO(dto)),
-    );
+    return mapResult(result, (dtos) => (Array.isArray(dtos) ? dtos : []));
   }
 
-  async getOccurrence(id: string): Promise<Result<TaskOccurrence>> {
-    const result = await this.instanceApi.getTaskOccurrenceById(id);
-    return mapResult(result, (dto) => taskOccurrenceFromDTO(dto));
+  async getOccurrence(id: string): Promise<Result<TaskOccurrenceClientDTO>> {
+    return this.instanceApi.getTaskOccurrenceById(id);
   }
 
   async deleteOccurrence(id: string): Promise<Result<void>> {
     return this.instanceApi.deleteTaskOccurrence(id);
   }
 
-  async startOccurrence(id: string): Promise<Result<TaskOccurrence>> {
-    const result = await this.instanceApi.startTaskOccurrence(id);
-    return mapResult(result, (dto) => taskOccurrenceFromDTO(dto));
+  async startOccurrence(id: string): Promise<Result<TaskOccurrenceClientDTO>> {
+    return this.instanceApi.startTaskOccurrence(id);
   }
 
   async completeOccurrence(
     id: string,
     request?: CompleteTaskOccurrenceReq,
-  ): Promise<Result<TaskOccurrence>> {
-    const result = await this.instanceApi.completeTaskOccurrence(id, request);
-    return mapResult(result, (dto) => taskOccurrenceFromDTO(dto));
+  ): Promise<Result<TaskOccurrenceClientDTO>> {
+    return this.instanceApi.completeTaskOccurrence(id, request);
   }
 
-  async uncompleteOccurrence(id: string): Promise<Result<TaskOccurrence>> {
-    const result = await this.instanceApi.uncompleteTaskOccurrence(id);
-    return mapResult(result, (dto) => taskOccurrenceFromDTO(dto));
+  async uncompleteOccurrence(id: string): Promise<Result<TaskOccurrenceClientDTO>> {
+    return this.instanceApi.uncompleteTaskOccurrence(id);
   }
 
   async skipOccurrence(
     id: string,
     request?: SkipTaskOccurrenceReq,
-  ): Promise<Result<TaskOccurrence>> {
-    const result = await this.instanceApi.skipTaskOccurrence(id, request);
-    return mapResult(result, (dto) => taskOccurrenceFromDTO(dto));
+  ): Promise<Result<TaskOccurrenceClientDTO>> {
+    return this.instanceApi.skipTaskOccurrence(id, request);
   }
 
   async markOccurrenceMissed(
     id: string,
     request?: MarkTaskOccurrenceMissedReq,
-  ): Promise<Result<TaskOccurrence>> {
-    const result = await this.instanceApi.markTaskOccurrenceMissed(id, request);
-    return mapResult(result, (dto) => taskOccurrenceFromDTO(dto));
+  ): Promise<Result<TaskOccurrenceClientDTO>> {
+    return this.instanceApi.markTaskOccurrenceMissed(id, request);
   }
 
   async rescheduleOccurrence(
     id: string,
     request: RescheduleTaskInput,
-  ): Promise<Result<TaskOccurrence>> {
-    const result = await this.instanceApi.rescheduleTaskOccurrence(id, request);
-    return mapResult(result, (dto) => taskOccurrenceFromDTO(dto));
+  ): Promise<Result<TaskOccurrenceClientDTO>> {
+    return this.instanceApi.rescheduleTaskOccurrence(id, request);
   }
 
   async setOccurrenceChecklistItem(
     id: string,
     request: SetTaskOccurrenceChecklistItemReq,
-  ): Promise<Result<TaskOccurrence>> {
-    const result = await this.instanceApi.setTaskOccurrenceChecklistItem(id, request);
-    return mapResult(result, (dto) => taskOccurrenceFromDTO(dto));
+  ): Promise<Result<TaskOccurrenceClientDTO>> {
+    return this.instanceApi.setTaskOccurrenceChecklistItem(id, request);
   }
 }
 

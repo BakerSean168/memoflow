@@ -38,7 +38,7 @@ describe('useTask legacy facade (P2-2)', () => {
     service.listPlans
       .mockResolvedValueOnce(fail({ code: 'VALIDATION_ERROR', message: 'boom' }))
       .mockResolvedValueOnce(
-        ok({ plans: [{ toDTO: () => ({ id: 'tpl-1', name: 'Write tests' }) }], total: 1 }),
+        ok({ plans: [{ id: 'tpl-1', name: 'Write tests' }], total: 1 }),
       );
     const { api } = mountTaskComposable(() => useTask(), { service });
 

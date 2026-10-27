@@ -18,7 +18,7 @@ export function useTaskOccurrenceDetailQuery(id: MaybeRefOrGetter<string>) {
     const occurrenceId = toValue(id);
     return {
       queryKey: taskOccurrenceQueryKeys.detail(resolveIdentityScope(), occurrenceId),
-      queryFn: async () => unwrap(await service.getOccurrence(occurrenceId)).toDTO(),
+      queryFn: async () => unwrap(await service.getOccurrence(occurrenceId)),
       enabled: !!occurrenceId,
       staleTime: TASK_OCCURRENCE_STALE_TIME_MS,
     };

@@ -151,12 +151,10 @@ function render(
     ? vi.fn().mockRejectedValue(new Error('offline'))
     : vi.fn().mockResolvedValue(
         ok({
-          toDTO: () => ({
-            id: 'outside-page',
-            name: 'Plan outside page',
-            labels: [],
-            goalBinding,
-          }),
+          id: 'outside-page',
+          name: 'Plan outside page',
+          labels: [],
+          goalBinding,
         }),
       );
   const goalService = {

@@ -187,11 +187,11 @@ describe('HARD-7102 core vNext architecture lock', () => {
         content: `findByKeyResultId(identityId, keyResultId);`,
       },
       {
-        relPath: 'packages/task-client/src/domain-client/aggregates/task-plan.ts',
+        relPath: 'packages/task-client/src/application-client/task-client-service.ts',
         content: `return { keyResultId: String(binding.keyResultId) };`,
       },
       {
-        relPath: 'packages/task-client/src/domain-client/legacy-classification.ts',
+        relPath: 'packages/task-client/src/application-client/legacy-classification.ts',
         content: `function read(template) { return template.tags; }`,
       },
       {

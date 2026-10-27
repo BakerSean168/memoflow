@@ -422,7 +422,7 @@ export function findCoreVnextArchitectureLockViolations(files) {
         'task-goal-ownerless-kr-query',
       );
     }
-    if (relPath === 'packages/task-client/src/domain-client/aggregates/task-plan.ts') {
+    if (relPath === 'packages/task-client/src/application-client/task-client-service.ts') {
       pushPatternViolations(
         violations,
         relPath,

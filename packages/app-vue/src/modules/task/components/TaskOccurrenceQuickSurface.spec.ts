@@ -37,28 +37,21 @@ function host(prompt = false, missing?: 'occurrence' | 'plan') {
       }
     : template;
   const service = {
-    getOccurrence: vi.fn(async () => ok({ toDTO: () => instance() })),
-    getPlan: vi.fn(async () => ok({ toDTO: () => plan })),
-    completeOccurrence: vi.fn(async () =>
-      ok({ toDTO: () => instance({ status: 'Completed', version: 2 }) }),
-    ),
-    uncompleteOccurrence: vi.fn(async () => ok({ toDTO: () => instance({ version: 3 }) })),
-    markOccurrenceMissed: vi.fn(async () =>
-      ok({ toDTO: () => instance({ status: 'Missed', version: 4 }) }),
-    ),
-    skipOccurrence: vi.fn(async () =>
-      ok({ toDTO: () => instance({ status: 'Skipped', version: 5 }) }),
-    ),
+    getOccurrence: vi.fn(async () => ok(instance())),
+    getPlan: vi.fn(async () => ok(plan)),
+    completeOccurrence: vi.fn(async () => ok(instance({ status: 'Completed', version: 2 }))),
+    uncompleteOccurrence: vi.fn(async () => ok(instance({ version: 3 }))),
+    markOccurrenceMissed: vi.fn(async () => ok(instance({ status: 'Missed', version: 4 }))),
+    skipOccurrence: vi.fn(async () => ok(instance({ status: 'Skipped', version: 5 }))),
     setOccurrenceChecklistItem: vi.fn(async () =>
-      ok({
-        toDTO: () =>
-          instance({
-            version: 6,
-            checklistState: [
-              { definitionId: 'step', titleSnapshot: 'Review', completed: true, completedAt: 0 },
-            ],
-          }),
-      }),
+      ok(
+        instance({
+          version: 6,
+          checklistState: [
+            { definitionId: 'step', titleSnapshot: 'Review', completed: true, completedAt: 0 },
+          ],
+        }),
+      ),
     ),
   };
   if (missing === 'occurrence')
@@ -107,8 +100,8 @@ it.each(['occurrence', 'plan'])(
     );
     expect(wrapper.findComponent(TaskOccurrenceCompactList).exists()).toBe(false);
     if (owner === 'occurrence') expect(service.getPlan).not.toHaveBeenCalled();
-    service.getOccurrence.mockResolvedValue(ok({ toDTO: () => instance() }));
-    service.getPlan.mockResolvedValue(ok({ toDTO: () => template }));
+    service.getOccurrence.mockResolvedValue(ok(instance()));
+    service.getPlan.mockResolvedValue(ok(template));
     await wrapper.get('[data-testid="task-quick-error"] button').trigger('click');
     await ready(wrapper);
   },
