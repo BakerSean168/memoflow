@@ -114,6 +114,7 @@ COPY packages/operations-contracts ./packages/operations-contracts
 COPY packages/patterns ./packages/patterns
 COPY packages/powersync-schema ./packages/powersync-schema
 COPY packages/routine ./packages/routine
+COPY packages/routine-contracts ./packages/routine-contracts
 COPY packages/repository ./packages/repository
 COPY packages/schedule ./packages/schedule
 COPY packages/schedule-client ./packages/schedule-client

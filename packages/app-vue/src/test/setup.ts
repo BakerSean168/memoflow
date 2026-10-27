@@ -1,4 +1,4 @@
-import { beforeAll, beforeEach } from 'vitest';
+import { beforeEach } from 'vitest';
 import { Window } from 'happy-dom';
 import {
   installCommonBrowserMocks,
@@ -51,9 +51,3 @@ registerFastTestHooks({
   timezone: false,
 });
 installCommonBrowserMocks();
-
-// Bind the same renderer capabilities used by mounted Routine shell surfaces.
-beforeAll(async () => {
-  const { installRoutineUiHost } = await import('../di/routine-ui-host');
-  installRoutineUiHost();
-});

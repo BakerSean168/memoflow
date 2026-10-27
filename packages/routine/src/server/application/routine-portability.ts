@@ -2,12 +2,6 @@ import {
   RoutinePortablePayloadV3Schema,
   type RoutinePortablePayloadV3,
 } from '@memoflow/routine-contracts';
-import {
-  ROUTINE_INTERACTION_ACTIONS,
-  ROUTINE_OCCURRENCE_RESOLUTION_KINDS,
-  ROUTINE_OCCURRENCE_RESOLUTION_STATES,
-  ROUTINE_OCCURRENCE_TRIGGER_KINDS,
-} from '@memoflow/routine-contracts';
 import { createHash } from 'node:crypto';
 import {
   type PortableCapability,

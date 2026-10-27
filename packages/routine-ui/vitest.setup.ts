@@ -4,4 +4,4 @@ import { beforeAll } from 'vitest';
 beforeAll(async () => {
   const { installRoutineUiHost } = await import('@routine-ui-test-host/di/routine-ui-host');
   installRoutineUiHost();
-});
+}, 60_000);

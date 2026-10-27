@@ -58,4 +58,3 @@ export const routineScheduleProjectionEventNames = [
   'routine:override-changed',
   'routine:schedule-changed',
 ] as const satisfies readonly (keyof RoutineScheduleProjectionEventMap)[];
-

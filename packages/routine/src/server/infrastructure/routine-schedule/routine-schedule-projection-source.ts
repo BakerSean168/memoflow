@@ -1,5 +1,4 @@
 import {
-  routineScheduleProjectionEventNames,
   type RoutineScheduleProjectionEventMap,
 } from '@memoflow/routine-contracts';
 import {

@@ -255,6 +255,42 @@ export const domainResolveAliases = [
     replacement: path.resolve(import.meta.dirname, './packages/routine-client/src/index.ts'),
   },
   {
+    find: /^@memoflow\/routine-ui\/host$/,
+    replacement: path.resolve(import.meta.dirname, './packages/routine-ui/src/routine-ui-host.ts'),
+  },
+  {
+    find: /^@memoflow\/routine-ui\/components\/RoutineCapsulePreview$/,
+    replacement: path.resolve(
+      import.meta.dirname,
+      './packages/routine-ui/src/components/RoutineCapsulePreview.vue',
+    ),
+  },
+  {
+    find: /^@memoflow\/routine-ui\/components\/RoutineUpcomingWidget$/,
+    replacement: path.resolve(
+      import.meta.dirname,
+      './packages/routine-ui/src/components/RoutineUpcomingWidget.vue',
+    ),
+  },
+  {
+    find: /^@memoflow\/routine-ui\/views\/RoutineConfigurationView$/,
+    replacement: path.resolve(
+      import.meta.dirname,
+      './packages/routine-ui/src/views/RoutineConfigurationView.vue',
+    ),
+  },
+  {
+    find: /^@memoflow\/routine-ui\/composables\/routineUpcomingCache$/,
+    replacement: path.resolve(
+      import.meta.dirname,
+      './packages/routine-ui/src/composables/routineUpcomingCache.ts',
+    ),
+  },
+  {
+    find: /^@memoflow\/routine-ui$/,
+    replacement: path.resolve(import.meta.dirname, './packages/routine-ui/src/index.ts'),
+  },
+  {
     find: /^@memoflow\/routine\/(.+)/,
     replacement: path.resolve(import.meta.dirname, './packages/routine/src/$1'),
   },

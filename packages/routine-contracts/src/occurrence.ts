@@ -27,4 +27,3 @@ export const ROUTINE_INTERACTION_ACTIONS = [
   'Skipped',
 ] as const;
 export type RoutineInteractionAction = (typeof ROUTINE_INTERACTION_ACTIONS)[number];
-

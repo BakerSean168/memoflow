@@ -1,3 +1,4 @@
+import { installRoutineUiHost } from '@schedule-ui-test-host/di/routine-ui-host';
 /**
  * Schedule UI test host.
  *
@@ -94,6 +95,7 @@ export function createScheduleUiTestHost(overrides: Partial<ScheduleUiHost> = {}
 }
 
 export function bindDefaultScheduleUiHost(): ScheduleUiHost {
+  installRoutineUiHost();
   const host = createScheduleUiTestHost();
   bindScheduleUiHost(host);
   return host;
