@@ -3,7 +3,7 @@ import { computed, onBeforeUnmount, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { Button } from '@memoflow/ui-vue-shadcn';
 import { Plus, Target } from '@lucide/vue';
-import DailyTodoWidget from '../../modules/task/components/widgets/DailyTodoWidget.vue';
+import { DailyTodoWidget } from '@memoflow/task-ui';
 import RoutineUpcomingWidget from '../../modules/routine/components/RoutineUpcomingWidget.vue';
 import { GoalProgressWidget, useGoalHomeSummary } from '@memoflow/goal-ui';
 import { getProductTime, productTimeRevision } from '../../shared/utils/product-time';

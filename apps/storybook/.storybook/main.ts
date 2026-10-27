@@ -22,7 +22,7 @@ const workspace = path.resolve(import.meta.dirname, '../../..');
 const browserTestStories = [
   '../../../apps/web/src/auth/WebAuthView.stories.ts',
   '../../../packages/goal-ui/src/components/dialogs/GoalDialog.stories.ts',
-  '../../../packages/app-vue/src/modules/task/components/TaskPlanForm/TaskPlanForm.stories.ts',
+  '../../../packages/task-ui/src/components/TaskPlanForm/TaskPlanForm.stories.ts',
   '../../../packages/app-vue/src/shared/components/__stories__/BrowserInteraction.stories.ts',
 ];
 const config: StorybookConfig = {

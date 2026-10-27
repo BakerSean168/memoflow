@@ -29,7 +29,7 @@ import {
 import {
   instance,
   template,
-} from '@memoflow/app-vue/modules/task/components/task-quick-test-fixtures';
+} from '@memoflow/task-ui/components/task-quick-test-fixtures';
 import { createPinia } from 'pinia';
 import { Toaster } from 'vue-sonner';
 import GlobalConfirmDialog from '@memoflow/app-vue/shared/components/GlobalConfirmDialog.vue';

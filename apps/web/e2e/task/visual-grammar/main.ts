@@ -14,13 +14,12 @@ import { GOAL_SERVICE_KEY, LABEL_SERVICE_KEY, TASK_SERVICE_KEY } from '@memoflow
 import type { IGoalService, ILabelService, ITaskService } from '@memoflow/app-vue/di/types';
 import { productionLocaleMessages } from '@memoflow/app-vue/locales/production-messages';
 import { installServerStateRuntime } from '@memoflow/app-vue/platform/server-state';
-import TaskManagementView from '@memoflow/app-vue/modules/task/views/TaskManagementView.vue';
-import TaskDetailView from '@memoflow/app-vue/modules/task/views/TaskDetailView.vue';
-import TaskPlanDialog from '@memoflow/app-vue/modules/task/components/dialogs/TaskPlanDialog.vue';
+import { TaskDetailView, TaskManagementView } from '@memoflow/task-ui';
+import TaskPlanDialog from '@memoflow/task-ui/components/dialogs/TaskPlanDialog.vue';
 import {
   template,
   instance,
-} from '@memoflow/app-vue/modules/task/components/task-quick-test-fixtures';
+} from '@memoflow/task-ui/components/task-quick-test-fixtures';
 import '../../../../../apps/web/src/styles/index.css';
 
 faker.seed(3101);

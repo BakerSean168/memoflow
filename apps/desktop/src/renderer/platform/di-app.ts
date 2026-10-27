@@ -1,4 +1,4 @@
-import { installGoalUiHost, installNotificationUiHost } from '@memoflow/app-vue/di';
+import { installGoalUiHost, installNotificationUiHost, installTaskUiHost } from '@memoflow/app-vue/di';
 /**
  * Desktop Platform DI — IPC Adapter Injection
  */
@@ -88,6 +88,7 @@ export function installDesktopAppServices(
   initialSnapshot: DesktopAccessSnapshot | null = null,
 ): void {
   installGoalUiHost();
+  installTaskUiHost();
   installNotificationUiHost();
   const bridge = requireElectronBridge('installDesktopAppServices');
 

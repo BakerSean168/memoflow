@@ -10,8 +10,7 @@ import ProductEditorFrame from '@memoflow/app-vue/shared/components/ProductEdito
 import ProductDateTimePicker from '@memoflow/app-vue/shared/components/ProductDateTimePicker.vue';
 import ProductSingleSelectFilter from '@memoflow/app-vue/shared/components/ProductSingleSelectFilter.vue';
 import AIComposerControls from '@memoflow/app-vue/modules/ai/components/AIComposerControls.vue';
-import WeekdaySelector from '@memoflow/app-vue/modules/task/components/TaskPlanForm/widgets/WeekdaySelector.vue';
-import MonthDaySelector from '@memoflow/app-vue/modules/task/components/TaskPlanForm/widgets/MonthDaySelector.vue';
+import { MonthDaySelector, WeekdaySelector } from '@memoflow/task-ui';
 
 const props = defineProps<{
   scenario?: 'dialog' | 'panel' | 'picker' | 'filter' | 'recurrence' | 'model';

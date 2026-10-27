@@ -8,4 +8,5 @@ export type * from './types';
 export { defaultModuleCapsules } from './navigation';
 
 export { installGoalUiHost } from './goal-ui-host';
+export { installTaskUiHost } from './task-ui-host';
 export { installNotificationUiHost } from './notification-ui-host';

@@ -25,14 +25,14 @@ import RoutineConfigurationView from '@memoflow/app-vue/modules/routine/views/Ro
 import { NotificationListPage } from '@memoflow/notification-ui';
 import KnowledgeProjectionWorkspaceView from '@memoflow/app-vue/modules/repository/views/KnowledgeProjectionWorkspaceView.vue';
 import UserSettingsView from '@memoflow/app-vue/modules/setting/views/UserSettingsView.vue';
-import TaskManagementView from '@memoflow/app-vue/modules/task/views/TaskManagementView.vue';
+import { TaskManagementView } from '@memoflow/task-ui';
 import GlobalConfirmDialog from '@memoflow/app-vue/shared/components/GlobalConfirmDialog.vue';
 import AppShell from '@memoflow/app-vue/layouts/shell/AppShell.vue';
 import ListPageShell from '@memoflow/app-vue/components/shared/ListPageShell.vue';
 import {
   template,
   instance,
-} from '@memoflow/app-vue/modules/task/components/task-quick-test-fixtures';
+} from '@memoflow/task-ui/components/task-quick-test-fixtures';
 import '../../src/styles/index.css';
 
 const params = new URLSearchParams(location.search);

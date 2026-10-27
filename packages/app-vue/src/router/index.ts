@@ -15,7 +15,7 @@ import ShellHomeRoute from '../layouts/shell/shell-home-route';
 // Module routes
 import { accountRoutes } from '../modules/account/router';
 import { goalRoutes } from '@memoflow/goal-ui';
-import { taskRoutes } from '../modules/task/router';
+import { taskRoutes } from '@memoflow/task-ui';
 import { routineRoutes } from '../modules/routine/router';
 import { scheduleRoutes } from '@memoflow/schedule-ui';
 import { repositoryRoutes } from '../modules/repository/router';

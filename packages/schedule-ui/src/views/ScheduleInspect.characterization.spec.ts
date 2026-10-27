@@ -15,7 +15,7 @@ import { productionLocaleMessages } from '@schedule-ui-test-host/locales/product
 import ScheduleCalendarView from './ScheduleCalendarView.vue';
 import PlannerDayDialog from '../components/PlannerDayDialog.vue';
 import { createMemoryHistory, createRouter } from 'vue-router';
-import TaskOccurrenceQuickSurface from '@schedule-ui-test-host/modules/task/components/TaskOccurrenceQuickSurface.vue';
+import { TaskOccurrenceQuickSurface } from '@memoflow/task-ui';
 import { toast } from 'vue-sonner';
 import PlannerEventDialog from '../components/PlannerEventDialog.vue';
 import { bindScheduleUiHost } from '../schedule-ui-host';

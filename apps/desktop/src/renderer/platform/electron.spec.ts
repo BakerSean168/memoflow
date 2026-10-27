@@ -45,7 +45,7 @@ vi.mock('@memoflow/goal-ui', () => ({
   useGoalStore: () => ({ setInitialized: vi.fn() }),
 }));
 
-vi.mock('@memoflow/app-vue/modules/task', () => ({
+vi.mock('@memoflow/task-ui', () => ({
   useTaskStore: () => ({ setInitialized: vi.fn() }),
 }));
 

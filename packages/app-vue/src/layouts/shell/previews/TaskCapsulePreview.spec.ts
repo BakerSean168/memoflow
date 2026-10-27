@@ -17,7 +17,7 @@ const setOccurrenceChecklistItem = vi.fn().mockResolvedValue(undefined);
 const createPlanSafe = vi.fn().mockResolvedValue({ todayOccurrenceCreated: true });
 const createSaving = ref(false);
 
-vi.mock('../../../modules/task/composables/useTaskToday', () => ({
+vi.mock('@memoflow/task-ui/composables/useTaskToday', () => ({
   useTaskToday: () => ({
     instances: computed(() => instancesRef.value),
     templates: computed(() => templatesRef.value),
@@ -34,7 +34,7 @@ vi.mock('../../../modules/task/composables/useTaskToday', () => ({
   }),
 }));
 
-vi.mock('../../../modules/task/composables/useTaskPlanMutations', () => ({
+vi.mock('@memoflow/task-ui/composables/useTaskPlanMutations', () => ({
   useTaskPlanMutations: () => ({
     createPlanSafe,
     isSaving: createSaving,
