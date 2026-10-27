@@ -38,7 +38,7 @@
 import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { Layers3 } from '@lucide/vue';
-import type { RoutineProfileDto } from '@memoflow/contracts/routine';
+import type { RoutineProfileDto } from '@memoflow/routine-contracts';
 import {
   DropdownMenu,
   DropdownMenuCheckboxItem,

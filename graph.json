@@ -23358,7 +23358,7 @@
                 }
               ],
               "outputs": [
-                "{workspaceRoot}/coverage/packages/routine/src/client/client.spec.ts"
+                "{workspaceRoot}/coverage/packages/routine-client/src/client.spec.ts"
               ],
               "metadata": {
                 "technologies": [
@@ -23377,7 +23377,7 @@
               "executor": "nx:run-commands",
               "options": {
                 "cwd": "packages/routine",
-                "command": "vitest run src/client/client.spec.ts --coverage.reportsDirectory=/home/dev/projects/_worktrees/memoflow-gov-7903/coverage/packages/routine/src/client/client.spec.ts"
+                "command": "vitest run src/client/client.spec.ts --coverage.reportsDirectory=/home/dev/projects/_worktrees/memoflow-gov-7903/coverage/packages/routine-client/src/client.spec.ts"
               },
               "configurations": {},
               "parallelism": true
@@ -23421,7 +23421,7 @@
                 }
               ],
               "outputs": [
-                "{workspaceRoot}/coverage/packages/routine/src/method-library/method-library.spec.ts"
+                "{workspaceRoot}/coverage/packages/routine-contracts/src/method-library/method-library.spec.ts"
               ],
               "metadata": {
                 "technologies": [
@@ -23440,7 +23440,7 @@
               "executor": "nx:run-commands",
               "options": {
                 "cwd": "packages/routine",
-                "command": "vitest run src/method-library/method-library.spec.ts --coverage.reportsDirectory=/home/dev/projects/_worktrees/memoflow-gov-7903/coverage/packages/routine/src/method-library/method-library.spec.ts"
+                "command": "vitest run src/method-library/method-library.spec.ts --coverage.reportsDirectory=/home/dev/projects/_worktrees/memoflow-gov-7903/coverage/packages/routine-contracts/src/method-library/method-library.spec.ts"
               },
               "configurations": {},
               "parallelism": true
@@ -25376,8 +25376,8 @@
               ],
               "outputs": [
                 "{workspaceRoot}/coverage/packages/routine/src/__tests__/package-root-owner-surface.spec.ts",
-                "{workspaceRoot}/coverage/packages/routine/src/client/client.spec.ts",
-                "{workspaceRoot}/coverage/packages/routine/src/method-library/method-library.spec.ts",
+                "{workspaceRoot}/coverage/packages/routine-client/src/client.spec.ts",
+                "{workspaceRoot}/coverage/packages/routine-contracts/src/method-library/method-library.spec.ts",
                 "{workspaceRoot}/coverage/packages/routine/src/server/application/routine-portability.spec.ts",
                 "{workspaceRoot}/coverage/packages/routine/src/server/application/services/routine-coach-command.service.spec.ts",
                 "{workspaceRoot}/coverage/packages/routine/src/server/application/services/routine-configuration-query.service.spec.ts",

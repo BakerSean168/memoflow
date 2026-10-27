@@ -67,6 +67,22 @@ export function createContractsAliasEntries(workspaceRoot: string): Alias[] {
 
   return [
     {
+      find: /^@memoflow\/routine-contracts\/method-library$/,
+      replacement: resolveFromWorkspace(
+        workspaceRoot,
+        'packages/routine-contracts/src/method-library/index.ts',
+      ),
+    },
+    {
+      find: /^@memoflow\/routine-contracts$/,
+      replacement: resolveFromWorkspace(workspaceRoot, 'packages/routine-contracts/src/index.ts'),
+    },
+    {
+      find: /^@memoflow\/routine-client$/,
+      replacement: resolveFromWorkspace(workspaceRoot, 'packages/routine-client/src/index.ts'),
+    },
+
+    {
       find: /^@memoflow\/contracts\/primitives$/,
       replacement: `${contractsRoot}/primitives/index.ts`,
     },

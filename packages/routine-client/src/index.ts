@@ -1,4 +1,4 @@
-import type { Result } from '@memoflow/contracts/result';
+import type { Result } from '@memoflow/transport-contracts';
 import type {
   ClearRoutineTemporaryOverrideRequest,
   CreateRoutineProfileRequest,
@@ -16,8 +16,8 @@ import type {
   UpdateRoutinePreferencesRequest,
   UpdateRoutineProfileRequest,
   UpdateRoutineRequest,
-} from '@memoflow/contracts/routine';
-import { RoutineChannels } from '@memoflow/contracts/electron';
+} from '@memoflow/routine-contracts';
+import { RoutineChannels } from '@memoflow/desktop-contracts';
 import type { IResultHttpClient } from '@memoflow/http-client';
 import type { IResultIpcClient } from '@memoflow/ipc-client';
 

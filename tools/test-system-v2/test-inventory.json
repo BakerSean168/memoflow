@@ -9458,7 +9458,7 @@
       ]
     },
     {
-      "path": "packages/routine/src/client/client.spec.ts",
+      "path": "packages/routine-client/src/client.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/routine/vitest.config.ts"
@@ -9468,7 +9468,7 @@
       ]
     },
     {
-      "path": "packages/routine/src/method-library/method-library.spec.ts",
+      "path": "packages/routine-contracts/src/method-library/method-library.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/routine/vitest.config.ts"
@@ -13777,8 +13777,8 @@
       "packages/notification/src/server/transport/__tests__/notification-transport-parity.spec.ts",
       "packages/notification/src/server/transport/notification-usecases-export.surface.spec.ts",
       "packages/routine/src/__tests__/package-root-owner-surface.spec.ts",
-      "packages/routine/src/client/client.spec.ts",
-      "packages/routine/src/method-library/method-library.spec.ts",
+      "packages/routine-client/src/client.spec.ts",
+      "packages/routine-contracts/src/method-library/method-library.spec.ts",
       "packages/routine/src/server/application/routine-portability.spec.ts",
       "packages/routine/src/server/application/services/routine-coach-command.service.spec.ts",
       "packages/routine/src/server/application/services/routine-configuration-query.service.spec.ts",

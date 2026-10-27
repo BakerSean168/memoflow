@@ -115,7 +115,7 @@ const desktopRendererDevWorkspaceEntries = [
   ['@memoflow/schedule-client', 'packages/schedule-client/src/index.ts'],
   ['@memoflow/schedule/electron', 'packages/schedule/src/electron/index.ts'],
   ['@memoflow/notification-client', 'packages/notification-client/src/index.ts'],
-  ['@memoflow/routine/client', 'packages/routine/src/client/index.ts'],
+  ['@memoflow/routine-client', 'packages/routine-client/src/index.ts'],
   ['@memoflow/notification/electron', 'packages/notification/src/electron/index.ts'],
 ] as const;
 

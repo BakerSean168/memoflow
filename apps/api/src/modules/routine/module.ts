@@ -13,7 +13,7 @@ import {
   UpdateRoutinePreferencesRequestSchema,
   UpdateRoutineProfileRequestSchema,
   UpdateRoutineRequestSchema,
-} from '@memoflow/contracts/routine';
+} from '@memoflow/routine-contracts';
 import { ResultCode, extractStructuredResultError } from '@memoflow/contracts/result';
 import type {
   RoutineCoachCommandPort,

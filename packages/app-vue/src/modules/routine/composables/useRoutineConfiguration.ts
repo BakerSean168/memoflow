@@ -12,7 +12,7 @@ import type {
   SetRoutineTemporaryOverrideRequest,
   UpdateRoutineProfileRequest,
   UpdateRoutineRequest,
-} from '@memoflow/contracts/routine';
+} from '@memoflow/routine-contracts';
 import { toResultErrorException, type Result } from '@memoflow/contracts/result';
 import { ROUTINE_SERVICE_KEY } from '../../../di/keys';
 import { useStrictInject } from '../../../shared/utils/useStrictInject';

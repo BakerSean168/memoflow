@@ -9,7 +9,7 @@ import {
   CardTitle,
   Skeleton,
 } from '@memoflow/ui-vue-shadcn';
-import type { RoutineUpcomingOccurrence } from '@memoflow/contracts/routine';
+import type { RoutineUpcomingOccurrence } from '@memoflow/routine-contracts';
 import { useI18n } from 'vue-i18n';
 import { ROUTINE_SERVICE_KEY } from '../../../di/keys';
 import { useStrictInject } from '../../../shared/utils/useStrictInject';

@@ -459,12 +459,12 @@ import type {
   RoutineDefinitionDto,
   RoutineProfileDto,
   RoutineTriggerDto,
-} from '@memoflow/contracts/routine';
+} from '@memoflow/routine-contracts';
 import {
   ROUTINE_METHOD_CATALOG,
   type RoutineMethodId,
   type RoutineMethodRecord,
-} from '@memoflow/routine/method-library';
+} from '@memoflow/routine-contracts/method-library';
 import AppEmptyState from '../../../components/shared/AppEmptyState.vue';
 import ModuleHeader from '../../../components/shared/ModuleHeader.vue';
 import { ProductSingleSelectFilter } from '../../../shared/components';

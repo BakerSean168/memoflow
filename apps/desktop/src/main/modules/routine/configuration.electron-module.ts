@@ -19,7 +19,7 @@ import {
   UpdateRoutinePreferencesRequestSchema,
   UpdateRoutineProfileRequestSchema,
   UpdateRoutineRequestSchema,
-} from '@memoflow/contracts/routine';
+} from '@memoflow/routine-contracts';
 import {
   ResultCode,
   extractStructuredResultError,

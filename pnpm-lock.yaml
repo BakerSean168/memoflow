@@ -392,6 +392,9 @@ importers:
       '@memoflow/routine':
         specifier: workspace:*
         version: link:../../packages/routine
+      '@memoflow/routine-contracts':
+        specifier: workspace:*
+        version: link:../../packages/routine-contracts
       '@memoflow/schedule':
         specifier: workspace:*
         version: link:../../packages/schedule
@@ -636,6 +639,12 @@ importers:
       '@memoflow/routine':
         specifier: workspace:*
         version: link:../../packages/routine
+      '@memoflow/routine-client':
+        specifier: workspace:*
+        version: link:../../packages/routine-client
+      '@memoflow/routine-contracts':
+        specifier: workspace:*
+        version: link:../../packages/routine-contracts
       '@memoflow/schedule':
         specifier: workspace:*
         version: link:../../packages/schedule
@@ -1104,6 +1113,9 @@ importers:
       '@memoflow/routine':
         specifier: workspace:*
         version: link:../../packages/routine
+      '@memoflow/routine-client':
+        specifier: workspace:*
+        version: link:../../packages/routine-client
       '@memoflow/schedule-client':
         specifier: workspace:*
         version: link:../../packages/schedule-client
@@ -1238,6 +1250,9 @@ importers:
       '@memoflow/goal-contracts':
         specifier: workspace:*
         version: link:../goal-contracts
+      '@memoflow/routine-contracts':
+        specifier: workspace:*
+        version: link:../routine-contracts
       '@modelcontextprotocol/node':
         specifier: 2.1.1
         version: 2.1.1(@modelcontextprotocol/server@2.3.1)
@@ -1510,6 +1525,12 @@ importers:
       '@memoflow/routine':
         specifier: workspace:*
         version: link:../routine
+      '@memoflow/routine-client':
+        specifier: workspace:*
+        version: link:../routine-client
+      '@memoflow/routine-contracts':
+        specifier: workspace:*
+        version: link:../routine-contracts
       '@memoflow/schedule-client':
         specifier: workspace:*
         version: link:../schedule-client
@@ -2457,18 +2478,18 @@ importers:
       '@memoflow/database':
         specifier: workspace:*
         version: link:../database
-      '@memoflow/http-client':
+      '@memoflow/host-runtime':
         specifier: workspace:*
-        version: link:../http-client
-      '@memoflow/ipc-client':
-        specifier: workspace:*
-        version: link:../ipc-client
+        version: link:../host-runtime
       '@memoflow/notification-contracts':
         specifier: workspace:*
         version: link:../notification-contracts
       '@memoflow/reliable-messaging-contracts':
         specifier: workspace:*
         version: link:../reliable-messaging-contracts
+      '@memoflow/routine-contracts':
+        specifier: workspace:*
+        version: link:../routine-contracts
       '@memoflow/schedule-contracts':
         specifier: workspace:*
         version: link:../schedule-contracts
@@ -2485,6 +2506,36 @@ importers:
       '@memoflow/test-utils':
         specifier: workspace:*
         version: link:../test-utils
+
+  packages/routine-client:
+    dependencies:
+      '@memoflow/desktop-contracts':
+        specifier: workspace:*
+        version: link:../desktop-contracts
+      '@memoflow/http-client':
+        specifier: workspace:*
+        version: link:../http-client
+      '@memoflow/ipc-client':
+        specifier: workspace:*
+        version: link:../ipc-client
+      '@memoflow/routine-contracts':
+        specifier: workspace:*
+        version: link:../routine-contracts
+      '@memoflow/transport-contracts':
+        specifier: workspace:*
+        version: link:../transport-contracts
+
+  packages/routine-contracts:
+    dependencies:
+      '@memoflow/shared-primitives':
+        specifier: workspace:*
+        version: link:../shared-primitives
+      '@memoflow/transport-contracts':
+        specifier: workspace:*
+        version: link:../transport-contracts
+      zod:
+        specifier: ^4.6.5
+        version: 4.6.5
 
   packages/schedule:
     dependencies:

@@ -11,7 +11,7 @@ import { TimeZoneIdSchema, YmdSchema } from '@memoflow/contracts/primitives';
 import {
   ROUTINE_DESCRIPTION_MAX_LENGTH,
   ROUTINE_NAME_MAX_LENGTH,
-} from '@memoflow/contracts/routine';
+} from '@memoflow/routine-contracts';
 import type {
   ProfileMembership,
   RoutineDefinition,

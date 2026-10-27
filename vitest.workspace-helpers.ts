@@ -240,11 +240,26 @@ export const domainResolveAliases = [
     replacement: path.resolve(import.meta.dirname, './packages/scheduler/src/index.ts'),
   },
   {
+    find: /^@memoflow\/routine-contracts\/method-library$/,
+    replacement: path.resolve(
+      import.meta.dirname,
+      './packages/routine-contracts/src/method-library/index.ts',
+    ),
+  },
+  {
+    find: /^@memoflow\/routine-contracts$/,
+    replacement: path.resolve(import.meta.dirname, './packages/routine-contracts/src/index.ts'),
+  },
+  {
+    find: /^@memoflow\/routine-client$/,
+    replacement: path.resolve(import.meta.dirname, './packages/routine-client/src/index.ts'),
+  },
+  {
     find: /^@memoflow\/routine\/(.+)/,
     replacement: path.resolve(import.meta.dirname, './packages/routine/src/$1'),
   },
   {
-    find: '@memoflow/routine',
+    find: /^@memoflow\/routine$/,
     replacement: path.resolve(import.meta.dirname, './packages/routine/src/index.ts'),
   },
   {

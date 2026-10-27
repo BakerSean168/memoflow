@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
-import { ok } from '@memoflow/contracts/result';
-import { RoutineChannels } from '@memoflow/contracts/electron';
+import { ok } from '@memoflow/transport-contracts';
+import { RoutineChannels } from '@memoflow/desktop-contracts';
 import { createRoutineHttpClient, createRoutineIpcClient } from './index';
 
 describe('Routine client seam', () => {

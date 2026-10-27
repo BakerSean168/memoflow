@@ -275,7 +275,7 @@
           "from": "@memoflow/relation/client"
         },
         {
-          "from": "@memoflow/routine/client"
+          "from": "@memoflow/routine-client"
         },
         {
           "from": "@memoflow/label/client"

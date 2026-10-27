@@ -62,8 +62,8 @@
       "decision": "ADR-076..079 / ROUTINE-2201",
       "forbiddenPaths": ["packages/routine/src/server/domain/aggregates/reminder-template.ts"],
       "requiredPaths": [
-        "packages/contracts/src/modules/routine/index.ts",
-        "packages/routine/src/client/index.ts",
+        "packages/routine-contracts/src/index.ts",
+        "packages/routine-client/src/index.ts",
         "packages/app-vue/src/modules/routine/index.ts",
         "packages/app-vue/src/modules/routine/router/index.ts",
         "packages/app-vue/src/modules/routine/components/RoutineUpcomingWidget.vue",

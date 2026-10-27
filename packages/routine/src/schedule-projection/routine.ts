@@ -5,7 +5,6 @@
  * PowerSync) into orchestrators that only join the durable Routine recurrence
  * projection. The full seam at ./index.ts continues to export both lanes.
  */
-import './routine-event-registry.augment';
 export {
   routineScheduleProjectionEventNames,
   createRoutineScheduleProjectionEventHandlers,

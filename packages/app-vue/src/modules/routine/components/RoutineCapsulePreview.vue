@@ -104,7 +104,7 @@ import { onMounted, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { ArrowRight, Clock3, Loader2, RotateCcw } from '@lucide/vue';
 import { Button } from '@memoflow/ui-vue-shadcn';
-import type { RoutineUpcomingOccurrence } from '@memoflow/contracts/routine';
+import type { RoutineUpcomingOccurrence } from '@memoflow/routine-contracts';
 import { ROUTINE_SERVICE_KEY } from '../../../di/keys';
 import {
   CapsulePreviewFooter,

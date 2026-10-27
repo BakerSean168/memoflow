@@ -34,17 +34,9 @@
       "types": "./dist/routine-runtime/index.d.ts",
       "import": "./dist/routine-runtime/index.js"
     },
-    "./client": {
-      "types": "./dist/client/index.d.ts",
-      "import": "./dist/client/index.js"
-    },
     "./server": {
       "types": "./dist/server/index.d.ts",
       "import": "./dist/server/index.js"
-    },
-    "./method-library": {
-      "types": "./dist/method-library/index.d.ts",
-      "import": "./dist/method-library/index.js"
     }
   },
   "scripts": {},
@@ -52,13 +44,13 @@
     "@memoflow/contracts": "workspace:*",
     "@memoflow/notification-contracts": "workspace:*",
     "@memoflow/database": "workspace:*",
-    "@memoflow/http-client": "workspace:*",
-    "@memoflow/ipc-client": "workspace:*",
     "@memoflow/reliable-messaging-contracts": "workspace:*",
     "@memoflow/schedule-contracts": "workspace:*",
     "@memoflow/time": "workspace:*",
     "@memoflow/utils": "workspace:*",
-    "zod": "^4.6.5"
+    "zod": "^4.6.5",
+    "@memoflow/routine-contracts": "workspace:*",
+    "@memoflow/host-runtime": "workspace:*"
   },
   "devDependencies": {
     "@memoflow/test-utils": "workspace:*"

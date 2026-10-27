@@ -10,9 +10,9 @@ import { createMemoryHistory, createRouter, RouterView } from 'vue-router';
 import type {
   CreateRoutineRequest,
   CreateRoutineProfileRequest,
-} from '@memoflow/contracts/routine';
+} from '@memoflow/routine-contracts';
 import type { CreateTaskPlanReq } from '@memoflow/contracts/task';
-import { RoutineConfigurationSnapshotSchema } from '@memoflow/contracts/routine';
+import { RoutineConfigurationSnapshotSchema } from '@memoflow/routine-contracts';
 import { AIWorkflowRunViewSchema } from '@memoflow/contracts/ai';
 import { fail, ok } from '@memoflow/contracts/result';
 import * as keys from '@memoflow/app-vue/di/keys';

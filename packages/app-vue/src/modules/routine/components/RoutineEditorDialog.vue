@@ -196,7 +196,7 @@ import type {
   RoutineDefinitionDto,
   RoutineProfileDto,
   RoutineTriggerDto,
-} from '@memoflow/contracts/routine';
+} from '@memoflow/routine-contracts';
 import {
   parseTimeZoneId,
   parseYmd,

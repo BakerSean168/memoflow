@@ -297,3 +297,5 @@ export const RoutineAgentPersistedReceiptSchema = z.strictObject({
   }),
 });
 export type RoutineAgentPersistedReceipt = z.infer<typeof RoutineAgentPersistedReceiptSchema>;
+
+export type RoutineProfileId = string & { readonly __brand: 'RoutineProfileId' };

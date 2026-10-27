@@ -5,8 +5,8 @@ import type {
   RoutineDefinitionDto,
   RoutineProfileDto,
   RoutineTriggerDto,
-} from '@memoflow/contracts/routine';
-import { RoutineTriggerSchema } from '@memoflow/contracts/routine';
+} from '@memoflow/routine-contracts';
+import { RoutineTriggerSchema } from '@memoflow/routine-contracts';
 import { requireTimeZoneId, requireYmd } from '@memoflow/contracts/primitives';
 import { createDefaultUserPreferenceProfile } from '@memoflow/contracts/setting';
 import { productionLocaleMessages } from '../../../locales/production-messages';

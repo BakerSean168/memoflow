@@ -42,7 +42,8 @@
     "vue-router": "^5.3.1",
     "vue-sonner": "^2.0.9",
     "@memoflow/schedule-contracts": "workspace:*",
-    "@memoflow/schedule-client": "workspace:*"
+    "@memoflow/schedule-client": "workspace:*",
+    "@memoflow/routine-client": "workspace:*"
   },
   "devDependencies": {
     "@faker-js/faker": "10.6.0",

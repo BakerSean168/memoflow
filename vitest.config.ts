@@ -39,6 +39,8 @@ export default defineConfig({
       './packages/goal/vitest.config.ts',
       './packages/notification/vitest.config.ts',
       './packages/routine/vitest.config.ts',
+      './packages/routine-client/vitest.config.ts',
+      './packages/routine-contracts/vitest.config.ts',
       './packages/repository/vitest.config.ts',
       './packages/schedule/vitest.config.ts',
       './packages/setting/vitest.config.ts',

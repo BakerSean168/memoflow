@@ -1,4 +1,4 @@
-import type { RoutineTriggerDto } from '@memoflow/contracts/routine';
+import type { RoutineTriggerDto } from '@memoflow/routine-contracts';
 
 export type RoutineEditorTriggerType = 'None' | RoutineTriggerDto['type'];
 export type RoutineFrequency = 'daily' | 'weekly' | 'monthly' | 'yearly';

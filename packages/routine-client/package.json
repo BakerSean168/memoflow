@@ -1,0 +1,24 @@
+{
+  "name": "@memoflow/routine-client",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "dependencies": {
+    "@memoflow/routine-contracts": "workspace:*",
+    "@memoflow/desktop-contracts": "workspace:*",
+    "@memoflow/transport-contracts": "workspace:*",
+    "@memoflow/http-client": "workspace:*",
+    "@memoflow/ipc-client": "workspace:*"
+  }
+}

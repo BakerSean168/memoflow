@@ -60,6 +60,7 @@ COPY packages/operations-contracts/package.json ./packages/operations-contracts/
 COPY packages/patterns/package.json ./packages/patterns/package.json
 COPY packages/powersync-schema/package.json ./packages/powersync-schema/package.json
 COPY packages/routine/package.json ./packages/routine/package.json
+COPY packages/routine-contracts/package.json ./packages/routine-contracts/package.json
 COPY packages/repository/package.json ./packages/repository/package.json
 COPY packages/schedule/package.json ./packages/schedule/package.json
 COPY packages/schedule-client/package.json ./packages/schedule-client/package.json

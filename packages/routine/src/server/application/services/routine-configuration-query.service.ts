@@ -7,7 +7,7 @@ import type {
   RoutineTriggerDto,
   RoutineUpcomingQuery,
   RoutineUpcomingResponse,
-} from '@memoflow/contracts/routine';
+} from '@memoflow/routine-contracts';
 import { asInstant, createRecurrenceEngine, type RecurrenceEnginePort } from '@memoflow/time';
 import type {
   RoutineProfileStore,

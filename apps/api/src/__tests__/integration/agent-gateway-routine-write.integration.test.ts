@@ -2,7 +2,7 @@ import { afterAll, beforeEach, expect, it, vi } from 'vitest';
 import { prisma, type Prisma } from '@memoflow/database';
 import { createGoalPrismaAgentMutations } from '@memoflow/goal';
 import { IdentityId } from '@memoflow/domain-shared';
-import { RoutineAgentCreateSchema } from '@memoflow/contracts/routine';
+import { RoutineAgentCreateSchema } from '@memoflow/routine-contracts';
 import { RoutineDefinition, createRoutinePrismaAgentMutations } from '@memoflow/routine';
 import { createReadGateway } from '@memoflow/agent-gateway/server';
 import { createScopedPatService, isScopedPatAuthorityCurrent } from '@memoflow/cloud-auth/server';
