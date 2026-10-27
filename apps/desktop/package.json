@@ -23,8 +23,8 @@
     "@memoflow/assets": "workspace:*",
     "@memoflow/cloud-auth": "workspace:*",
     "@memoflow/contracts": "workspace:*",
-    "@memoflow/notification-contracts": "workspace:*",
     "@memoflow/data-portability": "workspace:*",
+    "@memoflow/data-portability-contracts": "workspace:*",
     "@memoflow/database": "workspace:*",
     "@memoflow/domain-shared": "workspace:*",
     "@memoflow/goal": "workspace:*",
@@ -37,10 +37,12 @@
     "@memoflow/label-contracts": "workspace:*",
     "@memoflow/notification": "workspace:*",
     "@memoflow/notification-client": "workspace:*",
+    "@memoflow/notification-contracts": "workspace:*",
     "@memoflow/notification-ui": "workspace:*",
     "@memoflow/powersync-schema": "workspace:*",
     "@memoflow/relation": "workspace:*",
     "@memoflow/relation-contracts": "workspace:*",
+    "@memoflow/reliable-messaging-contracts": "workspace:*",
     "@memoflow/reminder": "workspace:*",
     "@memoflow/repository": "workspace:*",
     "@memoflow/schedule": "workspace:*",
@@ -99,8 +101,7 @@
     "undici": "^8.11.2",
     "winston": "3.19.0",
     "winston-daily-rotate-file": "5.0.0",
-    "xtend": "4.0.2",
-    "@memoflow/reliable-messaging-contracts": "workspace:*"
+    "xtend": "4.0.2"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",

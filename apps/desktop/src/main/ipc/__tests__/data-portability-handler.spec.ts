@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { z } from 'zod';
 import { DataPortabilityChannels, type IElectronModuleContext } from '@memoflow/contracts/electron';
-import type { PortableCapability } from '@memoflow/contracts/data-portability';
+import type { PortableCapability } from '@memoflow/data-portability-contracts';
 import type { DataPortabilityElectronModuleDef } from '@memoflow/data-portability/electron';
 import { composeDataPortability } from '../../runtime/compose-data-portability';
 

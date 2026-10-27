@@ -1,5 +1,5 @@
 import type { Prisma } from '@memoflow/database';
-import type { PortableCapability } from '@memoflow/contracts/data-portability';
+import type { PortableCapability } from '@memoflow/data-portability-contracts';
 import { createAccountPrismaPortableCapability } from '@memoflow/account';
 import { createAiPrismaPortableCapability } from '@memoflow/ai';
 import { createGoalPrismaPortableCapability } from '@memoflow/goal';

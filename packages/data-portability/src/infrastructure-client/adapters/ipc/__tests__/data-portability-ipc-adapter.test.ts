@@ -3,8 +3,8 @@ import type { IResultIpcClient } from '../../types';
 import type {
   ExportPortableDataV3Res,
   PortableDataV3ImportRes,
-} from '@memoflow/contracts/data-portability';
-import type { Result } from '@memoflow/contracts/result';
+} from '@memoflow/data-portability-contracts';
+import type { Result } from '@memoflow/transport-contracts/result';
 import { DataPortabilityIpcAdapter } from '../data-portability-ipc.adapter';
 
 function createMockIpcClient(): IResultIpcClient & { invoke: ReturnType<typeof vi.fn> } {

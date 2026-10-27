@@ -6,7 +6,7 @@ import { DesktopProfileImportViewSchema } from '@memoflow/contracts/electron';
 import {
   ProfileImportCommittedSchema,
   ProfileImportRequestSchema,
-} from '@memoflow/contracts/data-portability';
+} from '@memoflow/data-portability-contracts';
 import { LocalProfileIdSchema } from './profile-cleanup';
 import { writeProfileDurableFile } from './profile-durable-file';
 

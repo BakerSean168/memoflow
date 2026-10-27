@@ -4,7 +4,7 @@ import {
   type PortableReferencePort,
   type PortableReferenceV3,
   PortableReferenceV3Schema,
-} from '@memoflow/contracts/data-portability';
+} from '@memoflow/data-portability-contracts';
 import { CalendarEntry } from '../domain/aggregates/calendar-entry';
 import type { IScheduleRepository } from '../domain/repositories/i-schedule-repository';
 import { SchedulePortableCapability } from './schedule-portability';

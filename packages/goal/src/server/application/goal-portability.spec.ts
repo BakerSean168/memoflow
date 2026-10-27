@@ -4,7 +4,7 @@ import type {
   PortableCapabilityExecutionContext,
   PortableReferencePort,
   PortableReferenceV3,
-} from '@memoflow/contracts/data-portability';
+} from '@memoflow/data-portability-contracts';
 import { GoalStatus, KeyResultCalculationMethod } from '@memoflow/goal-contracts';
 import { error, ok } from '@memoflow/contracts/result';
 import type { GoalApplicationPort } from './goal.application.port';

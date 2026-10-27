@@ -3,7 +3,7 @@ import { GoalPortablePayloadV3Schema } from '@memoflow/goal-contracts';
 import type {
   PortableCapabilityExecutionContext,
   PortableReferenceV3,
-} from '@memoflow/contracts/data-portability';
+} from '@memoflow/data-portability-contracts';
 import { ok } from '@memoflow/contracts/result';
 import { Goal } from '../domain';
 import { GoalPortableCapability } from './goal-portability';

@@ -1,4 +1,4 @@
-import { ResultErrorException } from '@memoflow/contracts/result';
+import { ResultErrorException } from '@memoflow/transport-contracts/result';
 
 export type ProfileImportErrorCode =
   | 'TARGET_UNAVAILABLE'

@@ -6,7 +6,7 @@ import {
   type PortableCapabilityExecutionContext,
   type PortableCapabilityReceipt,
   type PortableReferenceV3,
-} from '@memoflow/contracts/data-portability';
+} from '@memoflow/data-portability-contracts';
 import { TimeZoneIdSchema, YmdSchema } from '@memoflow/contracts/primitives';
 import {
   ROUTINE_DESCRIPTION_MAX_LENGTH,
