@@ -22,7 +22,6 @@
     "@memoflow/ipc-client": "workspace:*",
     "@memoflow/repository-client": "workspace:*",
     "@memoflow/repository-contracts": "workspace:*",
-    "@memoflow/shared-primitives": "workspace:*",
     "@memoflow/transport-contracts": "workspace:*",
     "@memoflow/ui-vue-shadcn": "workspace:*",
     "@memoflow/utils": "workspace:*",

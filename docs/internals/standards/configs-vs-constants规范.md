@@ -20,7 +20,7 @@ tags: [standard, architecture, config, constant]
 - ✅ 使用 `SCREAMING_SNAKE_CASE` 命名
 - ✅ 必须添加 `as const` 断言
 
-**放置位置：** `packages/contracts/src/modules/{module}/configs/config.ts`
+**放置位置：** `packages/{domain}-contracts/src/configs/config.ts`
 
 ### 📁 **constants/** - 常量文件夹（已废弃）
 
@@ -37,7 +37,7 @@ tags: [standard, architecture, config, constant]
 ## 📂 当前模块结构
 
 ```
-modules/{module}/
+packages/{domain}-contracts/src/
 ├── aggregates/       # 聚合根（有 ID 的领域对象）
 ├── entities/         # 子实体（有 ID 但不是聚合根）
 ├── value-objects/    # 值对象（无 ID，不可变）+ 枚举类常量
@@ -69,7 +69,7 @@ modules/{module}/
 **示例：**
 
 ```typescript
-// modules/task/value-objects/task-instance-status.ts
+// packages/task-contracts/src/value-objects/task-instance-status.ts
 
 /**
  * 任务实例状态
@@ -109,7 +109,7 @@ export type TaskInstanceStatus = (typeof TaskInstanceStatus)[keyof typeof TaskIn
 **示例：**
 
 ```typescript
-// modules/task/configs/config.ts
+// packages/task-contracts/src/configs/config.ts
 
 /**
  * 任务实例生成配置
@@ -186,7 +186,7 @@ export const TASK_VALIDATION_CONFIG = {
 
    ```bash
    # 查找所有 constants 文件夹
-   find packages/contracts/src/modules -type d -name "constants"
+   find packages/*-contracts/src -type d -name "constants"
    ```
 
 2. **分类迁移**
@@ -198,7 +198,7 @@ export const TASK_VALIDATION_CONFIG = {
 
    ```bash
    # 删除空的 constants 文件夹
-   rmdir packages/contracts/src/modules/*/constants
+   rmdir packages/*-contracts/src/constants
    ```
 
 4. **更新导入语句**

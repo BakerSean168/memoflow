@@ -21,7 +21,6 @@
   "dependencies": {
     "@memoflow/ai-contracts": "workspace:*",
     "@memoflow/desktop-contracts": "workspace:*",
-    "@memoflow/shared-primitives": "workspace:*",
     "@memoflow/transport-contracts": "workspace:*",
     "@memoflow/http-client": "workspace:*",
     "@memoflow/ipc-client": "workspace:*",

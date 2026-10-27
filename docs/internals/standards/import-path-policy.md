@@ -62,7 +62,7 @@ import { rawDataToGoalState } from '../../../infrastructure/adapters/prisma/mapp
 
 **必须用相对路径（或本包公开 re-export）的场景：**
 
-- `packages/contracts`、`packages/time`、以及其它 **可发布 / 被大量依赖的库包** 内部引用。
+- `packages/<domain>-contracts`、`packages/shared-primitives`、`packages/time`、以及其它 **可发布 / 被大量依赖的库包** 内部引用。
 - 可能被 **另一个 package 的 typecheck / vite / vitest 直接 include 源码** 的模块  
   （典型：`packages/app-vue` 被 `apps/web` / desktop 消费）。  
   此时 `@/` 会解析到 **消费方** 的 `@/*`，而不是文件所属包（ADR-037 product-time CI 已踩坑）。

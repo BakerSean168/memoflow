@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "review": "P1.1 #628: explicit existing Nx project owners, exact merged Build/Types, Provider acceptance Nightly-only + P2 #634 label-contracts registration + P2 #634 goal-contracts / workspace-contracts / data-portability-contracts registration + P2 #630 relation-contracts registration + P2 #630 notification-contracts registration + P2 #635 task-contracts registration + #630 routine domain rename and contracts/client/UI extraction (real Nx replay) + #630 repository contracts/client/UI merge (real Nx replay) + #630 account domain contracts package extraction (real Nx replay) + #630 account domain UI extraction (real Nx replay) + #637 aggregate contracts / domain-shared retirement (live Nx replay)",
+  "review": "P1.1 #628: explicit existing Nx project owners, exact merged Build/Types, Provider acceptance Nightly-only + P2 #634 label-contracts registration + P2 #634 goal-contracts / workspace-contracts / data-portability-contracts registration + P2 #630 relation-contracts registration + P2 #630 notification-contracts registration + P2 #635 task-contracts registration + #630 routine domain rename and contracts/client/UI extraction (real Nx replay) + #630 repository contracts/client/UI merge (real Nx replay) + #630 account domain contracts package extraction (real Nx replay) + #630 account domain UI extraction (real Nx replay) + #637 aggregate contracts / domain-shared retirement (live Nx replay) + #671 remove unreferenced @memoflow/* dependencies (live Nx replay re-record)",
   "cases": [
     {
       "id": "docs",
@@ -160,10 +160,8 @@
             "ai",
             "ai-ui",
             "api",
-            "app-react",
             "app-vue",
             "desktop",
-            "mobile",
             "setting-ui",
             "ui-storybook",
             "web"
@@ -212,10 +210,8 @@
             "ai:typecheck",
             "ai-ui:typecheck",
             "api:typecheck",
-            "app-react:typecheck",
             "app-vue:typecheck",
             "desktop:typecheck",
-            "mobile:typecheck",
             "setting-ui:typecheck",
             "ui-storybook:typecheck",
             "web:typecheck"
@@ -405,7 +401,6 @@
           "build": [
             "account",
             "api",
-            "app-vue",
             "desktop",
             "governance-tools",
             "notification",
@@ -417,20 +412,15 @@
           "typecheck": [
             "account",
             "api",
-            "app-react",
-            "app-vue",
             "desktop",
-            "mobile",
             "notification",
             "schedule-orchestration",
             "task",
-            "ui-storybook",
             "web"
           ],
           "test": [
             "account",
             "api",
-            "app-vue",
             "desktop",
             "governance-tools",
             "notification",
@@ -445,10 +435,10 @@
           "test:ipc": ["desktop"],
           "test:main": ["desktop"],
           "test:perf": ["task"],
-          "test:interaction": ["ui-storybook"],
+          "test:interaction": [],
           "e2e:ai-provider": ["web"],
           "e2e:visual-regression": ["web"],
-          "test:coverage": ["account", "api", "app-vue", "notification", "task"]
+          "test:coverage": ["account", "api", "notification", "task"]
         },
         "jobs": {
           "lint": [
@@ -457,13 +447,12 @@
             "workspace:sync",
             "memoflow:governance-check"
           ],
-          "unit-1": ["task:test", "account:test", "schedule-orchestration:test"],
+          "unit-1": ["task:test"],
           "unit-2": ["desktop:test"],
-          "unit-3": ["notification:test"],
+          "unit-3": ["notification:test", "account:test", "schedule-orchestration:test"],
           "build": [
             "account:build",
             "api:build",
-            "app-vue:build",
             "desktop:build",
             "notification:build",
             "schedule-orchestration:build",
@@ -472,18 +461,14 @@
             "web:build",
             "account:typecheck",
             "api:typecheck",
-            "app-react:typecheck",
-            "app-vue:typecheck",
             "desktop:typecheck",
-            "mobile:typecheck",
             "notification:typecheck",
             "schedule-orchestration:typecheck",
             "task:typecheck",
-            "ui-storybook:typecheck",
             "web:typecheck"
           ],
-          "web-unit-1": ["app-vue:test#1/2", "web:test"],
-          "web-unit-2": ["app-vue:test#2/2"],
+          "web-unit-1": ["web:test"],
+          "web-unit-2": [],
           "server-unit": ["api:test"],
           "verification-children": [
             "desktop:test:ipc",
@@ -550,7 +535,6 @@
             "repository",
             "repository-ui",
             "routine",
-            "routine-ui",
             "schedule",
             "schedule-orchestration",
             "schedule-ui",
@@ -561,7 +545,6 @@
             "task-client",
             "task-ui",
             "ui-storybook",
-            "ui-vue-shadcn",
             "utils",
             "web"
           ],
@@ -593,7 +576,6 @@
             "repository",
             "repository-ui",
             "routine",
-            "routine-ui",
             "schedule",
             "schedule-orchestration",
             "schedule-ui",
@@ -604,7 +586,6 @@
             "task-client",
             "task-ui",
             "ui-storybook",
-            "ui-vue-shadcn",
             "utils",
             "web"
           ],
@@ -634,7 +615,6 @@
             "repository",
             "repository-ui",
             "routine",
-            "routine-ui",
             "schedule",
             "schedule-orchestration",
             "schedule-ui",
@@ -644,7 +624,6 @@
             "task",
             "task-client",
             "task-ui",
-            "ui-vue-shadcn",
             "utils",
             "web"
           ],
@@ -655,7 +634,6 @@
             "host-runtime",
             "notification-ui",
             "repository-ui",
-            "routine-ui",
             "task-client",
             "task-ui"
           ],
@@ -711,7 +689,8 @@
             "goal-client:test",
             "schedule-ui:test",
             "cloud-auth:test",
-            "data-portability:test",
+            "utils:test",
+            "scheduler:test",
             "patterns:test"
           ],
           "unit-2": [
@@ -721,17 +700,15 @@
             "goal-core:test",
             "setting-ui:test",
             "setting:test",
-            "scheduler:test",
-            "label:test"
+            "relation:test"
           ],
           "unit-3": [
             "desktop:test",
             "notification:test",
             "schedule:test",
             "schedule-orchestration:test",
-            "ui-vue-shadcn:test",
-            "utils:test",
-            "relation:test"
+            "data-portability:test",
+            "label:test"
           ],
           "build": [
             "account:build",
@@ -758,7 +735,6 @@
             "repository:build",
             "repository-ui:build",
             "routine:build",
-            "routine-ui:build",
             "schedule:build",
             "schedule-orchestration:build",
             "schedule-ui:build",
@@ -769,7 +745,6 @@
             "task-client:build",
             "task-ui:build",
             "ui-storybook:build",
-            "ui-vue-shadcn:build",
             "utils:build",
             "web:build",
             "@memoflow/test-utils:typecheck",
@@ -799,7 +774,6 @@
             "repository:typecheck",
             "repository-ui:typecheck",
             "routine:typecheck",
-            "routine-ui:typecheck",
             "schedule:typecheck",
             "schedule-orchestration:typecheck",
             "schedule-ui:typecheck",
@@ -810,13 +784,12 @@
             "task-client:typecheck",
             "task-ui:typecheck",
             "ui-storybook:typecheck",
-            "ui-vue-shadcn:typecheck",
             "utils:typecheck",
             "web:typecheck"
           ],
           "web-unit-1": ["app-vue:test#1/2", "web:test"],
           "web-unit-2": ["app-vue:test#2/2"],
-          "server-unit": ["api:test", "database:test", "migrator:test"],
+          "server-unit": ["api:test", "migrator:test", "database:test"],
           "verification-children": [
             "desktop:test:ipc",
             "desktop:test:main",
@@ -844,7 +817,6 @@
             "host-runtime:test:contract",
             "notification-ui:test:contract",
             "repository-ui:test:contract",
-            "routine-ui:test:contract",
             "task-client:test:contract",
             "task-ui:test:contract"
           ]
@@ -2331,7 +2303,6 @@
             "task-client",
             "task-ui",
             "ui-storybook",
-            "ui-vue-shadcn",
             "utils",
             "web"
           ],
@@ -2377,7 +2348,6 @@
             "task-client",
             "task-ui",
             "ui-storybook",
-            "ui-vue-shadcn",
             "utils",
             "web"
           ],
@@ -2420,7 +2390,6 @@
             "task",
             "task-client",
             "task-ui",
-            "ui-vue-shadcn",
             "utils",
             "web"
           ],
@@ -2489,7 +2458,8 @@
             "goal-client:test",
             "schedule-ui:test",
             "cloud-auth:test",
-            "data-portability:test",
+            "utils:test",
+            "scheduler:test",
             "agent-gateway:test"
           ],
           "unit-2": [
@@ -2499,8 +2469,7 @@
             "goal-core:test",
             "setting-ui:test",
             "setting:test",
-            "scheduler:test",
-            "patterns:test",
+            "relation:test",
             "label:test"
           ],
           "unit-3": [
@@ -2508,9 +2477,8 @@
             "notification:test",
             "schedule:test",
             "schedule-orchestration:test",
-            "ui-vue-shadcn:test",
-            "utils:test",
-            "relation:test"
+            "data-portability:test",
+            "patterns:test"
           ],
           "build": [
             "account:build",
@@ -2551,7 +2519,6 @@
             "task-client:build",
             "task-ui:build",
             "ui-storybook:build",
-            "ui-vue-shadcn:build",
             "utils:build",
             "web:build",
             "@memoflow/test-utils:typecheck",
@@ -2595,13 +2562,12 @@
             "task-client:typecheck",
             "task-ui:typecheck",
             "ui-storybook:typecheck",
-            "ui-vue-shadcn:typecheck",
             "utils:typecheck",
             "web:typecheck"
           ],
           "web-unit-1": ["app-vue:test#1/2", "web:test"],
           "web-unit-2": ["app-vue:test#2/2"],
-          "server-unit": ["api:test", "database:test", "migrator:test"],
+          "server-unit": ["api:test", "migrator:test", "database:test"],
           "verification-children": [
             "desktop:test:ipc",
             "desktop:test:main",
@@ -2869,7 +2835,6 @@
             "repository",
             "repository-ui",
             "routine",
-            "routine-ui",
             "schedule",
             "schedule-orchestration",
             "schedule-ui",
@@ -2880,7 +2845,6 @@
             "task-client",
             "task-ui",
             "ui-storybook",
-            "ui-vue-shadcn",
             "utils",
             "web"
           ],
@@ -2915,7 +2879,6 @@
             "repository",
             "repository-ui",
             "routine",
-            "routine-ui",
             "schedule",
             "schedule-orchestration",
             "schedule-ui",
@@ -2926,7 +2889,6 @@
             "task-client",
             "task-ui",
             "ui-storybook",
-            "ui-vue-shadcn",
             "utils",
             "web"
           ],
@@ -2959,7 +2921,6 @@
             "repository",
             "repository-ui",
             "routine",
-            "routine-ui",
             "schedule",
             "schedule-orchestration",
             "schedule-ui",
@@ -2969,7 +2930,6 @@
             "task",
             "task-client",
             "task-ui",
-            "ui-vue-shadcn",
             "utils",
             "web"
           ],
@@ -2982,7 +2942,6 @@
             "host-runtime",
             "notification-ui",
             "repository-ui",
-            "routine-ui",
             "task-client",
             "task-ui"
           ],
@@ -3038,7 +2997,8 @@
             "goal-client:test",
             "schedule-ui:test",
             "cloud-auth:test",
-            "data-portability:test",
+            "utils:test",
+            "scheduler:test",
             "agent-gateway:test"
           ],
           "unit-2": [
@@ -3048,8 +3008,7 @@
             "goal-core:test",
             "setting-ui:test",
             "setting:test",
-            "scheduler:test",
-            "patterns:test",
+            "relation:test",
             "label:test"
           ],
           "unit-3": [
@@ -3057,9 +3016,8 @@
             "notification:test",
             "schedule:test",
             "schedule-orchestration:test",
-            "ui-vue-shadcn:test",
-            "utils:test",
-            "relation:test"
+            "data-portability:test",
+            "patterns:test"
           ],
           "build": [
             "account:build",
@@ -3089,7 +3047,6 @@
             "repository:build",
             "repository-ui:build",
             "routine:build",
-            "routine-ui:build",
             "schedule:build",
             "schedule-orchestration:build",
             "schedule-ui:build",
@@ -3100,7 +3057,6 @@
             "task-client:build",
             "task-ui:build",
             "ui-storybook:build",
-            "ui-vue-shadcn:build",
             "utils:build",
             "web:build",
             "@memoflow/test-utils:typecheck",
@@ -3133,7 +3089,6 @@
             "repository:typecheck",
             "repository-ui:typecheck",
             "routine:typecheck",
-            "routine-ui:typecheck",
             "schedule:typecheck",
             "schedule-orchestration:typecheck",
             "schedule-ui:typecheck",
@@ -3144,13 +3099,12 @@
             "task-client:typecheck",
             "task-ui:typecheck",
             "ui-storybook:typecheck",
-            "ui-vue-shadcn:typecheck",
             "utils:typecheck",
             "web:typecheck"
           ],
           "web-unit-1": ["app-vue:test#1/2", "web:test"],
           "web-unit-2": ["app-vue:test#2/2"],
-          "server-unit": ["api:test", "database:test", "migrator:test"],
+          "server-unit": ["api:test", "migrator:test", "database:test"],
           "verification-children": [
             "desktop:test:ipc",
             "desktop:test:main",
@@ -3180,7 +3134,6 @@
             "host-runtime:test:contract",
             "notification-ui:test:contract",
             "repository-ui:test:contract",
-            "routine-ui:test:contract",
             "task-client:test:contract",
             "task-ui:test:contract"
           ]
