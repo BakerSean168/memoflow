@@ -19,6 +19,7 @@ const sharedConfig = createSharedConfig({
     '@memoflow/app-vue/web-overlays': '../../packages/app-vue/src/web-overlays.ts',
     '@memoflow/app-vue/web-bootstrap': '../../packages/app-vue/src/web-bootstrap.ts',
     '@memoflow/cloud-auth-contracts': '../../packages/cloud-auth-contracts/src/index.ts',
+    '@memoflow/agent-gateway/server': '../../packages/agent-gateway/src/server/index.ts',
     '@memoflow/agent-gateway': '../../packages/agent-gateway/src/index.ts',
     '@memoflow/cloud-auth': '../../packages/cloud-auth/src/index.ts',
     '@memoflow/app-vue/web-i18n': '../../packages/app-vue/src/web-i18n.ts',
