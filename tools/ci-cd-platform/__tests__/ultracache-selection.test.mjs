@@ -124,6 +124,14 @@ test('selection context registers checkout parents without requesting Workers or
   const parents = ['b'.repeat(40), 'c'.repeat(40)];
   const payload = selectionContextPayload(env, head, parents);
   assert.equal(payload.branch, '690');
+  assert.equal(
+    selectionContextPayload(
+      { ...env, GITHUB_REF: 'refs/heads/main', GITHUB_HEAD_REF: '', GITHUB_REF_NAME: 'main' },
+      head,
+      parents,
+    ).branch,
+    'main',
+  );
   assert.equal(payload.ciExecutionId, '123-2');
   assert.equal(payload.runGroup, '123-2-selection');
   assert.equal(payload.pipelineHeadSha, head);

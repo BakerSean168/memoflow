@@ -16,9 +16,9 @@ export function selectionContextPayload(env, head, parents) {
   const ciExecutionEnv = env.NX_CI_EXECUTION_ENV ?? '';
   const branch =
     env.NX_BRANCH ??
-    env.GITHUB_REF?.match(/^refs\/pull\/(\d+)\/merge$/u)?.[1] ??
-    env.GITHUB_HEAD_REF ??
-    env.GITHUB_REF_NAME;
+    (env.GITHUB_REF?.match(/^refs\/pull\/(\d+)\/merge$/u)?.[1] ||
+      env.GITHUB_HEAD_REF ||
+      env.GITHUB_REF_NAME);
   if (!branch) throw new Error('Ultracache selection requires a CI branch');
   return {
     branch,
