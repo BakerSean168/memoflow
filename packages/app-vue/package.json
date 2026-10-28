@@ -34,6 +34,7 @@
     }
   },
   "dependencies": {
+    "@memoflow/ui-host-contracts": "workspace:*",
     "@tanstack/vue-query": "5.103.2",
     "@memoflow/account-client": "workspace:*",
     "@memoflow/account-contracts": "workspace:*",

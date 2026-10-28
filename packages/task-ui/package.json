@@ -21,6 +21,7 @@
     "./components/*": "./dist/components/*"
   },
   "dependencies": {
+    "@memoflow/ui-host-contracts": "workspace:*",
     "@lucide/vue": "^1.48.0",
     "@memoflow/goal-contracts": "workspace:*",
     "@memoflow/http-client": "workspace:*",

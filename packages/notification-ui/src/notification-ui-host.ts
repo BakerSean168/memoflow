@@ -1,8 +1,8 @@
-import type { Component, InjectionKey, ObjectDirective, Ref } from 'vue';
+import type { Component, InjectionKey, Ref } from 'vue';
 import type { QueryClient, QueryKey } from '@tanstack/vue-query';
 import type { NotificationClientPort } from '@memoflow/notification-client';
 import type { Result } from '@memoflow/transport-contracts';
-import type { TimeFacade } from '@memoflow/time';
+import type { PlatformRendererHost } from '@memoflow/ui-host-contracts';
 
 /** Semantic presentation tone vocabulary owned by the host design system. */
 export type NotificationSemanticTone =
@@ -72,8 +72,11 @@ export interface NotificationQueryKeys {
   unread(identityScope: string): QueryKey;
 }
 
-/** Renderer composition dependencies. The host retains DI, cache, locale and platform ownership. */
-export interface NotificationUiHost {
+/**
+ * Renderer composition dependencies. Platform capabilities come from
+ * {@link PlatformRendererHost}; this port only declares the Notification slots.
+ */
+export interface NotificationUiHost extends PlatformRendererHost {
   NOTIFICATION_SERVICE_KEY: InjectionKey<NotificationClientPort>;
   components: Record<
     | 'ModuleHeader'
@@ -87,18 +90,10 @@ export interface NotificationUiHost {
     Component
   >;
   menuLabel(key: string): string;
-  vKeyboardList: ObjectDirective<HTMLElement>;
-  useStrictInject<T>(key: InjectionKey<T>, name?: string): T;
-  createComposableHandleError(options: {
-    t: (key: string, params?: Record<string, unknown>) => string;
-    setError(message: string | null): void;
-    report?(message: string): void;
-  }): (error: unknown, fallbackKey: string) => void;
   useServerStateRuntime(): {
     queryClient: QueryClient;
     dispatcher: NotificationInvalidationDispatcher;
   };
-  useServerStateIdentityScope(): () => string;
   notificationQueryKeys: NotificationQueryKeys;
   canonicalizeNotificationListQuery(
     query?: Partial<NotificationListQueryKeyInput>,
@@ -108,8 +103,6 @@ export interface NotificationUiHost {
   semanticToneSurfaceClass(tone: NotificationSemanticTone): string;
   semanticToneBorderClass(tone: NotificationSemanticTone): string;
   semanticElevationClass(elevation: NotificationSemanticElevation): string;
-  getProductTime(): TimeFacade;
-  productTimeRevision: Ref<number>;
   formatProductRelative(value: number | null | undefined, empty?: string): string;
 }
 

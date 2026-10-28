@@ -14,5 +14,7 @@ export { installNotificationUiHost } from './notification-ui-host';
 export { installSettingUiHost } from './setting-ui-host';
 export { installRepositoryUiHost } from './repository-ui-host';
 export { installRoutineUiHost } from './routine-ui-host';
+export { installScheduleUiHost } from './schedule-ui-host';
+export { installPlatformRendererHost } from './platform-ui-host';
 
 export { installAiUiHost } from './ai-ui-host';

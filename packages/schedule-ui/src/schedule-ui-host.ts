@@ -1,6 +1,5 @@
-import type { Component, InjectionKey, MaybeRefOrGetter, ObjectDirective, Ref } from 'vue';
+import type { Component, InjectionKey, Ref } from 'vue';
 import type { QueryClient } from '@tanstack/vue-query';
-import type { TimeFacade } from '@memoflow/time';
 import type { Result } from '@memoflow/transport-contracts/result';
 import type { GoalClientDTO } from '@memoflow/goal-contracts';
 import type { RoutineUpcomingOccurrence } from '@memoflow/routine-contracts';
@@ -10,8 +9,10 @@ import type {
   TaskPlanClientDTO,
 } from '@memoflow/task-contracts';
 import type { ScheduleClientPort } from '@memoflow/schedule-client';
+import type { PlatformRendererHost } from '@memoflow/ui-host-contracts';
 
-export type PanelSurfaceStatus = 'clean' | 'dirty' | 'busy';
+/** Panel transition status; single declaration lives in the platform contract. */
+export type { PanelSurfaceStatus } from '@memoflow/ui-host-contracts';
 
 /** Narrow Goal read/command seam consumed by the Planner calendar. */
 export interface ScheduleGoalPort {
@@ -69,26 +70,15 @@ export interface FetchRoutineUpcomingCachedOptions {
   force?: boolean;
 }
 
-export interface ScheduleUiHost {
+/**
+ * Renderer composition dependencies. Platform capabilities come from
+ * {@link PlatformRendererHost}; this port only declares the Schedule slots.
+ */
+export interface ScheduleUiHost extends PlatformRendererHost {
   SCHEDULE_SERVICE_KEY: InjectionKey<ScheduleClientPort>;
   GOAL_SERVICE_KEY: InjectionKey<ScheduleGoalPort>;
   ROUTINE_SERVICE_KEY: InjectionKey<RoutineUpcomingSourcePort>;
 
-  useStrictInject<T>(key: InjectionKey<T>, name?: string): T;
-  sanitizeForIpc<T>(value: T): T;
-  createComposableHandleError(options: {
-    t: (key: string, params?: Record<string, unknown>) => string;
-    setError(message: string | null): void;
-    report?(message: string): void;
-  }): (error: unknown, fallbackKey: string) => void;
-  useDialogCloseGuard(options: {
-    dirty: MaybeRefOrGetter<boolean>;
-    busy?: MaybeRefOrGetter<boolean>;
-    onClose(): void | Promise<void>;
-  }): { confirming: Ref<boolean>; requestClose(): Promise<boolean> };
-
-  useServerStateRuntime(): { queryClient: QueryClient };
-  useServerStateIdentityScope(): () => string;
   scheduleCalendarQueryKeys: { entries(identityScope: string): readonly unknown[] };
   plannerOwnerQueryKeys: { goals(identityScope: string): readonly unknown[] };
   SCHEDULE_CALENDAR_STALE_TIME_MS: number;
@@ -99,14 +89,8 @@ export interface ScheduleUiHost {
     options: FetchRoutineUpcomingCachedOptions,
   ): Promise<RoutineUpcomingOccurrence[]>;
 
-  usePanelWidth(): { isNarrow: Readonly<Ref<boolean>> };
-  usePanelSurfaceStatus(status: Ref<PanelSurfaceStatus>): void;
-
-  getProductTime(): TimeFacade;
-  productTimeRevision: Readonly<Ref<number>>;
   startOfDayMs(ms: number): number;
   endOfDayMs(ms: number): number;
-  formatProductDateTime(value: number | null | undefined): string;
 
   components: Record<
     | 'ProductSurfaceHeader'
@@ -120,7 +104,6 @@ export interface ScheduleUiHost {
     | 'TaskOccurrenceQuickSurface',
     Component
   >;
-  vKeyboardList: ObjectDirective<HTMLElement>;
 }
 
 // Bound once in the renderer composition root. The host retains DI, cache,

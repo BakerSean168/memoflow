@@ -1,0 +1,15 @@
+{
+  "extends": "../../tsconfig.workspace-src.json",
+  "compilerOptions": {
+    "outDir": "./dist",
+    "noEmit": true,
+    "incremental": false,
+    "lib": ["ES2020", "DOM", "DOM.Iterable"],
+    "types": ["node"],
+    "paths": {
+      "@/*": ["./src/*"]
+    }
+  },
+  "include": ["src"],
+  "exclude": ["node_modules", "dist", "**/*.test.ts", "**/*.spec.ts"]
+}

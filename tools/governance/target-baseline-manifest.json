@@ -58,6 +58,7 @@
     "ui-vue-shadcn": "ui-lib",
     "ui-react-native": "ui-lib",
     "ui-core": "ui-lib",
+    "ui-host-contracts": "ui-lib",
     "app-react": "ui-lib",
     "assets": "ui-lib",
     "@memoflow/test-utils": "tooling-lib",

@@ -19,6 +19,7 @@
  * 不在此处直连 router。
  */
 import { defineStore } from 'pinia';
+import type { PanelSurfaceStatus } from '@memoflow/ui-host-contracts';
 import { BUSINESS_HARD_MIN, SIDEBAR_HARD_MIN, computePanelGeometry } from './panel-geometry';
 // Residual 1001: sole clamp (local dual retired).
 import { clamp } from './clamp';
@@ -32,7 +33,7 @@ const SIDEBAR_DEFAULT = 260;
 
 export type ShellLayout = 'split' | 'focus';
 export type PanelSurface = 'home' | 'business';
-export type PanelSurfaceStatus = 'clean' | 'dirty' | 'busy';
+export type { PanelSurfaceStatus } from '@memoflow/ui-host-contracts';
 
 /**
  * 布局来源（诊断修订 §4.2）：

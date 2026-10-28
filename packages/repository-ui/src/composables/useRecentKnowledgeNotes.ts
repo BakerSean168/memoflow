@@ -12,7 +12,6 @@ import {
 } from '@memoflow/http-client';
 import { useI18n } from 'vue-i18n';
 import { repositoryUiHost } from '../repository-ui-host';
-import { useStrictInject } from '../utils/useStrictInject';
 
 function safeT(): (key: string, params?: Record<string, unknown>) => string {
   try {
@@ -40,16 +39,17 @@ type RecentKnowledgeSnapshot = {
 };
 
 export function useRecentKnowledgeNotes() {
-  const service = useStrictInject(repositoryUiHost.REPOSITORY_SERVICE_KEY, 'RepositoryService');
+  const service = repositoryUiHost.useStrictInject(
+    repositoryUiHost.REPOSITORY_SERVICE_KEY,
+    'RepositoryService',
+  );
   const desktopBridge = inject(repositoryUiHost.DESKTOP_BRIDGE_KEY, undefined);
   const runtime =
-    (repositoryUiHost.SERVER_STATE_RUNTIME_KEY
-      ? inject(repositoryUiHost.SERVER_STATE_RUNTIME_KEY, null)
-      : null) ?? repositoryUiHost.useServerStateRuntime();
+    inject(repositoryUiHost.SERVER_STATE_RUNTIME_KEY, null) ??
+    repositoryUiHost.useServerStateRuntime();
   const resolveIdentityScope =
-    (repositoryUiHost.SERVER_STATE_IDENTITY_SCOPE_KEY
-      ? inject(repositoryUiHost.SERVER_STATE_IDENTITY_SCOPE_KEY, null)
-      : null) ?? repositoryUiHost.useServerStateIdentityScope();
+    inject(repositoryUiHost.SERVER_STATE_IDENTITY_SCOPE_KEY, null) ??
+    repositoryUiHost.useServerStateIdentityScope();
   const t = safeT();
 
   const notes = ref<RecentKnowledgeNote[]>([]);

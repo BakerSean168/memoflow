@@ -37,7 +37,9 @@ import {
 } from '@memoflow/app-vue/di/keys';
 import { installServerStateRuntime } from '@memoflow/app-vue/platform/server-state';
 // Bind the Schedule host port exactly as the production renderer does.
-import '@memoflow/app-vue/di/schedule-ui-host';
+import { installScheduleUiHost } from '@memoflow/app-vue/di/schedule-ui-host';
+
+installScheduleUiHost();
 import '../../../src/styles/index.css';
 
 const params = new URLSearchParams(location.search);

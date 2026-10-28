@@ -26,6 +26,7 @@ import type { GoalNativeEditSession } from '@memoflow/goal-client';
 import type { KnowledgeCaptureNativeDraft } from './host-ports/knowledge-session';
 import type { KnowledgeDraft } from '@memoflow/ai-contracts';
 import type { InjectionKey, Ref, ShallowRef } from 'vue';
+import type { PlatformLabelCatalog, PlatformRendererHost } from '@memoflow/ui-host-contracts';
 import type { RouteLocationNormalized } from 'vue-router';
 import type {
   AIClientPort,
@@ -43,7 +44,6 @@ import type { RepositoryClientPort } from '@memoflow/repository-client';
 import type { LabelClientDTO } from '@memoflow/label-contracts';
 import type { TaskNativeEditSession } from './host-ports/task-session';
 import type { KnowledgeCaptureNativeEditSession } from './host-ports/knowledge-session';
-import type { translateResultErrorMessage } from '@memoflow/http-client';
 
 export type IAIClient = AIClientPort;
 export type IWorkflowRuntimeService = WorkflowRuntimeClient;
@@ -52,8 +52,13 @@ interface KnowledgeSurface {
   openCreate(): Promise<KnowledgeCaptureNativeEditSession>;
   locate(): KnowledgeCaptureNativeEditSession | null;
 }
-/** AI renderer dependencies supplied by the application composition root. */
-export interface AiUiHost {
+/**
+ * AI renderer dependencies supplied by the application composition root.
+ *
+ * Platform capabilities come from {@link PlatformRendererHost}; this port only
+ * declares the AI slots.
+ */
+export interface AiUiHost extends PlatformRendererHost {
   nativeDraftFromKnowledgeDraft: (draft: KnowledgeDraft) => KnowledgeCaptureNativeDraft;
   useGoalNativeSurface: () => GoalAIEditSurface;
   useReferenceableKnowledgeNotes: () => {
@@ -114,15 +119,7 @@ export interface AiUiHost {
   SHELL_COMPOSER_DENSITY_KEY: InjectionKey<Ref<ComposerDensity>>;
   SHELL_COMPOSER_MOUNT_KEY: InjectionKey<ShallowRef<HTMLElement | null>>;
   COMPOSER_TEXTAREA_MAX_PX: number;
-  useStrictInject<T>(key: InjectionKey<T>, name?: string): T;
-  useServerStateIdentityScope(): () => string;
-  useLabelCatalog(): {
-    options: Ref<Array<{ id: string; name: string; color?: string | null }>>;
-    isLoading: Ref<boolean>;
-    isCreating: Ref<boolean>;
-    createLabel(name: string): Promise<LabelClientDTO>;
-    resolveNames(names: readonly string[]): Promise<string[]>;
-  } & {
+  useLabelCatalog(): PlatformLabelCatalog & {
     labels: Ref<LabelClientDTO[]>;
     existingNames(
       names: readonly string[],
@@ -157,7 +154,6 @@ export interface AiUiHost {
   semanticToneStatusClass(
     value: 'primary' | 'info' | 'success' | 'warning' | 'destructive' | 'muted',
   ): string;
-  translateResultError: typeof translateResultErrorMessage;
   subscribeWorkspaceEvents(
     runtime: Pick<WorkflowRuntimeClient, 'streamWorkspaceEvents'>,
     options: WorkspaceEventStreamOptions,

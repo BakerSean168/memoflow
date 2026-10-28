@@ -7,7 +7,9 @@ import {
 import { createAppAccessGuard } from './guards';
 import { createSettingsSceneGuard } from '../layouts/shell/surface-leave-protocol';
 // The Schedule surfaces consume a host port bound by this composition root.
-import '../di/schedule-ui-host';
+import { installScheduleUiHost } from '../di/schedule-ui-host';
+
+installScheduleUiHost();
 
 import AppShell from '../layouts/shell/AppShell.vue';
 import ShellHomeRoute from '../layouts/shell/shell-home-route';
