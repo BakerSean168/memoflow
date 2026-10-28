@@ -5,6 +5,7 @@
   "type": "module",
   "devDependencies": {
     "@faker-js/faker": "10.6.0",
+    "@memoflow/test-utils": "workspace:*",
     "msw": "2.15.0",
     "pg": "8.23.0",
     "shadcn": "4.21.0",
