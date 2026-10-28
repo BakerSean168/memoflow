@@ -116,6 +116,14 @@
       }
     },
     {
+      "plugin": "@nx/js/typescript",
+      "options": {
+        "typecheck": {
+          "targetName": "typecheck"
+        }
+      }
+    },
+    {
       "plugin": "@nx/vite/plugin",
       "options": {
         "buildTargetName": "vite:build",
@@ -156,5 +164,8 @@
       "preVersionCommand": "pnpm dlx nx run-many -t build"
     }
   },
-  "analytics": true
+  "analytics": true,
+  "affected": {
+    "legacy": false
+  }
 }

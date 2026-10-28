@@ -46,7 +46,7 @@
     "@memoflow/shared-primitives": "workspace:*"
   },
   "devDependencies": {
-    "@nx/vite": "23.2.1",
+    "@nx/vite": "24.0.2",
     "tsup": "^8.5.0",
     "vite": "8.3.1",
     "vitest": "4.1.11"
