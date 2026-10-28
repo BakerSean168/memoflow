@@ -10,7 +10,6 @@ import {
   presentWebLiveNotification,
   usePresentationPreferenceStore,
 } from '@memoflow/app-vue/web-bootstrap';
-import { installSettingUiHost } from '@memoflow/app-vue/di';
 import {
   createNotificationStartupHook,
   createNotificationSseInvalidationSource,
@@ -56,9 +55,6 @@ export async function bootstrapMainApp() {
   }
 
   const presentationStore = usePresentationPreferenceStore();
-  // The Setting host is bound explicitly (Issue #630 §4.9) and `applyThemeMode`
-  // already reads it, so bind it here rather than later in installAppServices.
-  installSettingUiHost();
   applyThemeMode(presentationStore.theme);
   document.documentElement.lang = presentationStore.locale;
 

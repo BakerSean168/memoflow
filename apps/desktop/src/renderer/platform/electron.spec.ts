@@ -37,7 +37,8 @@ vi.mock('./server-state', async (importOriginal) => {
   };
 });
 
-vi.mock('@memoflow/account-ui', () => ({
+vi.mock('@memoflow/account-ui', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('@memoflow/account-ui')>()),
   useAccountStore: () => ({ getCurrentAccountId: 'profile-1', setInitialized: vi.fn() }),
 }));
 

@@ -51,7 +51,6 @@ const mocks = vi.hoisted(() => {
     })),
     usePresentationPreferenceStore: vi.fn(() => ({ theme: 'dark', locale: 'zh-CN' })),
     applyThemeMode: vi.fn(),
-    installSettingUiHost: vi.fn(),
     presentWebLiveNotification: vi.fn(),
     executeWebNotificationAction: vi.fn(async () => ({
       ok: true,
@@ -112,10 +111,6 @@ vi.mock('@memoflow/app-vue/web-bootstrap', () => ({
 vi.mock('@memoflow/app-vue', () => ({
   createNotificationStartupHook: mocks.createNotificationStartupHook,
   createNotificationSseInvalidationSource: mocks.createNotificationSseInvalidationSource,
-}));
-
-vi.mock('@memoflow/app-vue/di', () => ({
-  installSettingUiHost: mocks.installSettingUiHost,
 }));
 
 vi.mock('@memoflow/cloud-auth', () => ({
@@ -194,11 +189,6 @@ describe('bootstrapMainApp', () => {
     expect(mocks.createApp).toHaveBeenCalledTimes(1);
     expect(mocks.createPinia).toHaveBeenCalledTimes(1);
     expect(mocks.pinia.use).toHaveBeenCalledWith('persisted-plugin');
-    // The Setting host must be bound before applyThemeMode reads it (Issue #630 §4.9).
-    expect(mocks.installSettingUiHost).toHaveBeenCalledTimes(1);
-    expect(mocks.installSettingUiHost.mock.invocationCallOrder[0]).toBeLessThan(
-      mocks.applyThemeMode.mock.invocationCallOrder[0]!,
-    );
     expect(mocks.applyThemeMode).toHaveBeenCalledWith('dark');
     expect(document.documentElement.lang).toBe('zh-CN');
     expect(mocks.loadLocaleMessages).toHaveBeenCalledWith('zh-CN');

@@ -14,7 +14,7 @@
     "node_modules/file-uri-to-path/**/*",
     "node_modules/undici/**/*"
   ],
-  "electronVersion": "44.4.5",
+  "electronVersion": "44.10.0",
   "productName": "MemoFlow",
   "executableName": "memoflow",
   "extraMetadata": {

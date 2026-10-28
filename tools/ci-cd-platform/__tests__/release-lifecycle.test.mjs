@@ -7,9 +7,16 @@ import YAML from 'yaml';
 import lifecycle from '../lib/release-lifecycle.cjs';
 import { prepareReleaseSource } from '../release-tools/prepare-release-source.mjs';
 import { finalizeReleaseChannel } from '../release-tools/finalize-release-channel.mjs';
+import {
+  createAncestry,
+  installCompareRoutes,
+  compareUrl,
+  httpError,
+} from './helpers/octokit-routes.mjs';
 
 const SHA = 'a'.repeat(40),
   OTHER = 'b'.repeat(40),
+  ROOT = 'e'.repeat(40),
   TAG = 'v1.4.2-nightly.20261026.9';
 const coordinates = { owner: 'owner', repo: 'repo' };
 const ci = {
@@ -53,11 +60,19 @@ function fixture(change = () => {}) {
   );
   const state = {
     sha: SHA,
+    mainSha: SHA,
     tag: TAG,
     version: '1.4.2',
     ci: structuredClone(ci),
     run: structuredClone(run),
-    comparison: 'ahead',
+    // SHA sits on main; OTHER shares only the root commit, so pointing main at
+    // OTHER makes the source comparison diverged instead of identical.
+    ancestry: createAncestry({
+      chains: [
+        [ROOT, SHA],
+        [ROOT, OTHER],
+      ],
+    }),
     jobs: [{ name: 'CI Check', status: 'completed', conclusion: 'success' }],
     desktop: {
       kind: 'desktop-release',
@@ -181,8 +196,7 @@ function fixture(change = () => {}) {
             ).toString('base64'),
           },
         }),
-        getBranch: async () => ({ data: { commit: { sha: SHA } } }),
-        compareCommits: async () => ({ data: { status: state.comparison } }),
+        getBranch: async () => ({ data: { commit: { sha: state.mainSha } } }),
         getReleaseAsset: async ({ asset_id }) => ({
           data: state.assetCorrupt ? Buffer.from('tampered') : binary.get(asset_id),
         }),
@@ -217,10 +231,102 @@ function fixture(change = () => {}) {
       throw Error('unexpected API');
     },
   };
-  return { state, github, metadata, data };
+  const compareCalls = installCompareRoutes(github.rest.repos, { ancestry: state.ancestry });
+  return { state, github, metadata, data, compareCalls };
 }
 const verify = (f) =>
   lifecycle.verifyPublishedNightly({ github: f.github, ...coordinates, tag: TAG });
+
+const HEAD_SHA = 'd'.repeat(40),
+  SIDE_SHA = 'f'.repeat(40);
+// main: ROOT -> SHA -> HEAD_SHA; a sibling branch leaves the root at ROOT.
+const MAIN_CHAINS = [
+  [ROOT, SHA, HEAD_SHA],
+  [ROOT, SIDE_SHA],
+];
+
+function mainCiHarness({ sha = SHA, mainSha = SHA, chains = MAIN_CHAINS, errors = {} } = {}) {
+  const calls = [];
+  const repos = {};
+  installCompareRoutes(repos, { ancestry: createAncestry({ chains }), errors, calls });
+  const github = {
+    rest: {
+      repos: {
+        getBranch: async () => ({ data: { commit: { sha: mainSha } } }),
+        ...repos,
+      },
+      actions: { getWorkflowRun: async () => ({ data: { ...ci, head_sha: sha } }) },
+    },
+    paginate: async (method) =>
+      method === github.rest.actions.listJobsForWorkflowRun
+        ? [{ name: 'CI Check', status: 'completed', conclusion: 'success' }]
+        : [],
+  };
+  return { github, calls };
+}
+
+test('main CI ancestry gate issues GET /repos/{owner}/{repo}/compare/{base}...{head}', async () => {
+  for (const [name, sha, mainSha] of [
+    ['identical', SHA, SHA],
+    ['ahead', SHA, HEAD_SHA],
+  ]) {
+    const h = mainCiHarness({ sha, mainSha });
+    await lifecycle.verifyMainCi(h.github, coordinates, sha, 5);
+    assert.equal(h.calls.length, 1, name);
+    const [call] = h.calls;
+    assert.equal(call.adapter, 'compareCommitsWithBasehead', name);
+    assert.equal(call.method, 'GET', name);
+    assert.deepEqual(call.missing, [], name);
+    assert.equal(call.url, compareUrl('owner', 'repo', sha, mainSha), name);
+  }
+});
+
+test('main CI ancestry gate rejects behind, diverged and unknown commits without relaxing the check', async () => {
+  for (const [name, sha, mainSha] of [
+    ['behind', HEAD_SHA, SHA],
+    ['diverged', SIDE_SHA, SHA],
+  ]) {
+    const h = mainCiHarness({ sha, mainSha });
+    await assert.rejects(
+      () => lifecycle.verifyMainCi(h.github, coordinates, sha, 5),
+      /source is not an ancestor of main/u,
+      name,
+    );
+    assert.equal(h.calls[0].url, compareUrl('owner', 'repo', sha, mainSha), name);
+  }
+  const missing = mainCiHarness({ sha: '9'.repeat(40), mainSha: SHA });
+  await assert.rejects(
+    () => lifecycle.verifyMainCi(missing.github, coordinates, '9'.repeat(40), 5),
+    {
+      status: 404,
+    },
+  );
+});
+
+test('main CI ancestry gate propagates 403 and 429 instead of degrading to eligible', async () => {
+  for (const status of [403, 429]) {
+    const h = mainCiHarness({ errors: { compareCommitsWithBasehead: httpError(status) } });
+    await assert.rejects(() => lifecycle.verifyMainCi(h.github, coordinates, SHA, 5), { status });
+  }
+});
+
+test('main CI ancestry gate compares against the main SHA it just observed', async () => {
+  const h = mainCiHarness({ sha: SHA, mainSha: HEAD_SHA });
+  await lifecycle.verifyMainCi(h.github, coordinates, SHA, 5);
+  assert.equal(h.calls[0].url, compareUrl('owner', 'repo', SHA, HEAD_SHA));
+  assert.equal(h.calls[0].params.basehead, SHA + '...' + HEAD_SHA);
+});
+
+test('invalid source SHA never reaches the compare endpoint', async () => {
+  const h = mainCiHarness();
+  for (const sha of ['deadbeef', 'A'.repeat(40), SHA + '0']) {
+    await assert.rejects(
+      () => lifecycle.verifyMainCi(h.github, coordinates, sha, 5),
+      /full immutable source SHA required/u,
+    );
+  }
+  assert.equal(h.calls.length, 0);
+});
 
 test('published Nightly verifies source, native platforms, OCI parity, API hashes and successful run', async () => {
   const f = fixture();
@@ -352,7 +458,7 @@ for (const [name, mutate, pattern] of [
   [
     'source not on main',
     (s) => {
-      s.comparison = 'diverged';
+      s.mainSha = OTHER;
     },
     /ancestor/u,
   ],

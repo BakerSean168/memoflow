@@ -270,7 +270,7 @@ jobs:
             if (matches.length > 1) throw new Error('ambiguous Release Please milestone');
             const releasePr = matches[0];
             if (!releasePr) { core.notice('No pending Release Please PR for this already-versioned source'); return; }
-            const comparison = (await github.rest.repos.compareCommits({ ...context.repo, basehead: `${releasePr.merge_commit_sha}...${process.env.RELEASE_SHA}` })).data;
+            const comparison = (await github.rest.repos.compareCommitsWithBasehead({ ...context.repo, basehead: `${releasePr.merge_commit_sha}...${process.env.RELEASE_SHA}` })).data;
             if (!['ahead', 'identical'].includes(comparison.status)) throw new Error('Release Please milestone is not in selected Nightly source');
             await github.rest.issues.addLabels({ ...context.repo, issue_number: releasePr.number, labels: ['autorelease: tagged'] });
             if (releasePr.labels.some(l => (typeof l === 'string' ? l : l.name) === 'autorelease: pending')) {
