@@ -1,7 +1,12 @@
 import { statSync } from 'node:fs';
+import os from 'node:os';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { expect, test } from '../helpers/fixtures';
 import { AUTH_STATE_DIR } from '../helpers/worker-auth';
 import { WEB_CONFIG } from '../config';
+
+const workspaceRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../../../..');
 
 /**
  * Self-verification for the worker auth / per-test isolation fixture itself.
@@ -48,7 +53,10 @@ test.describe('worker auth fixture', () => {
     workerAccount,
   }) => {
     expect(workerAccount.statePath.startsWith(AUTH_STATE_DIR)).toBe(true);
-    expect(workerAccount.statePath).toContain('/test-results/');
+    // The state file carries credentials: it must live outside the worktree so
+    // it can never be committed or captured by a test-results artifact upload.
+    expect(workerAccount.statePath.startsWith(workspaceRoot)).toBe(false);
+    expect(AUTH_STATE_DIR.startsWith(os.tmpdir())).toBe(true);
     expect(statSync(workerAccount.statePath).mode & 0o777).toBe(0o600);
     expect(authSession.identity.email).toBe(workerAccount.email);
     expect(authSession.identity.email).toContain(`e2e-worker-${workerAccount.workerIndex}`);

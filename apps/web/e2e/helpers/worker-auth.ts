@@ -1,6 +1,6 @@
 import { mkdirSync, rmSync, writeFileSync } from 'node:fs';
+import os from 'node:os';
 import path from 'node:path';
-import { fileURLToPath } from 'node:url';
 import type { APIRequestContext, Playwright } from '@playwright/test';
 import { TIMEOUT_CONFIG, TEST_USERS, WEB_CONFIG } from '../config';
 import {
@@ -14,21 +14,22 @@ import {
  *
  * One Better Auth account is created through the API (sign-up + captured email
  * verification + sign-in) for every Playwright worker, and its storageState is
- * written to a runner-local, Git-ignored directory. Tests share that identity
- * only for authentication; mutable business data is namespaced per test by
- * `fixtures.ts` so one test can never observe another test's records.
+ * written to a runner-local temp directory outside the repository. Tests share
+ * that identity only for authentication; mutable business data is namespaced per
+ * test by `fixtures.ts` so one test can never observe another test's records.
  *
- * The authentication directory is intentionally outside `e2e/` source paths:
- * `apps/web/test-results/` is Git-ignored, and the state file also carries the
- * throwaway account credentials so a worker can re-sign-in after its session
- * expires. Never copy this file into a report, artifact or commit.
+ * Location invariants:
+ * - outside the worktree, so `git status` can never see it and CI artifact
+ *   uploads of `apps/web/test-results` cannot leak it;
+ * - the file also carries the throwaway account credentials so a worker can
+ *   re-sign-in after its session expires, so it must stay private to the runner.
  */
 
-const helpersDir = path.dirname(fileURLToPath(import.meta.url));
+const DEFAULT_AUTH_STATE_ROOT = path.join(os.tmpdir(), 'memoflow-e2e-auth');
 
-export const AUTH_STATE_DIR = path.resolve(
-  process.env.E2E_AUTH_STATE_DIR?.trim() || path.join(helpersDir, '..', '..', 'test-results', '.auth'),
-);
+export const AUTH_STATE_DIR = process.env.E2E_AUTH_STATE_DIR?.trim()
+  ? path.resolve(process.env.E2E_AUTH_STATE_DIR)
+  : DEFAULT_AUTH_STATE_ROOT;
 
 /**
  * State is scoped by the Playwright runner process (workers share the parent
