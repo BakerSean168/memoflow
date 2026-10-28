@@ -6,10 +6,7 @@
  * renderer's platform implementations are handed over; domain binders spread
  * the returned base and add their own slots.
  */
-import {
-  bindPlatformRendererHost,
-  type PlatformRendererHost,
-} from '@memoflow/ui-host-contracts';
+import { bindPlatformRendererHost, type PlatformRendererHost } from '@memoflow/ui-host-contracts';
 import { useDialogCloseGuard } from '../shared/composables/useDialogCloseGuard';
 import { useLabelCatalog } from '../shared/composables/useLabelCatalog';
 import { vKeyboardList } from '../shared/keyboard/list-adapter';
