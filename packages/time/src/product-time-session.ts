@@ -164,9 +164,11 @@ export function createProductTimeSession(options: ProductTimeSessionOptions): Pr
         timeZone: createSystemTimeZoneSource().currentTimeZoneId(),
         weekStartsOn: 1,
       }),
-      presentation: options.empty ? { locale: options.locale, empty: options.empty } : {
-        locale: options.locale,
-      },
+      presentation: options.empty
+        ? { locale: options.locale, empty: options.empty }
+        : {
+            locale: options.locale,
+          },
       ...(options.clock ? { clock: options.clock } : {}),
     });
 
