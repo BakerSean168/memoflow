@@ -23,8 +23,43 @@ export {
 } from './composables/useCalendarView';
 
 // Canonical owner-aware Planner read projection (PLAN-4302)
-export * from './planner';
-export * from './planner/planner-presentation';
+export {
+  defaultPlannerProductTimePort,
+  projectCalendarEntry,
+  projectGoalDates,
+  projectPlannerReadModel,
+  projectRoutineWallClockOccurrence,
+  projectTaskOccurrence,
+  type PlannerProductTimePort,
+  type PlannerReadProjectionInput,
+  type RoutineWallClockPlannerOccurrence,
+  createPlannerOwnerCommandRouter,
+  defaultPlannerMutationTimePort,
+  type PlannerMutationConflictReason,
+  type PlannerMutationKind,
+  type PlannerMutationOutcome,
+  type PlannerMutationRequest,
+  type PlannerMutationTimePort,
+  type PlannerOwnerCommandDependencies,
+  type PlannerOwnerCommandRouter,
+  type RoutinePlannerOwnerCommandPort,
+  applyPlannerOptimisticMutation,
+  type PlannerOptimisticMutationInput,
+  applyFullCalendarPlannerMutation,
+  fullCalendarEventToPlannerRange,
+  type PlannerFullCalendarMutationInfo,
+} from './planner';
+export {
+  type PlannerProjectionSource,
+  type PlannerProjectionSourcePresentation,
+  plannerProjectionSourcePresentation,
+  plannerProjectionSourceLabel,
+  plannerProjectionToneClass,
+  plannerProjectionKeyForUi,
+  formatPlannerProjectionTimeRange,
+  plannerProjectionDateKey,
+  plannerSemanticI18nKey,
+} from './planner/planner-presentation';
 export {
   default as PlannerCalendar,
   type PlannerCalendarView,
@@ -46,13 +81,11 @@ export { scheduleRoutes } from './router';
 // Components
 export * from './components';
 
-// Host composition
-export {
-  bindScheduleUiHost,
-  scheduleUiHost,
-  type FetchRoutineUpcomingCachedOptions,
-  type PanelSurfaceStatus,
-  type ScheduleGoalPort,
-  type ScheduleTaskPlannerPort,
-  type ScheduleUiHost,
+// Host composition lives on the `./host` subpath only (`ScheduleUiHost` and
+// `bindScheduleUiHost` are not part of the root surface).
+export type {
+  FetchRoutineUpcomingCachedOptions,
+  PanelSurfaceStatus,
+  ScheduleGoalPort,
+  ScheduleTaskPlannerPort,
 } from './schedule-ui-host';

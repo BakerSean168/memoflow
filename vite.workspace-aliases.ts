@@ -398,6 +398,14 @@ export function createUiVueSourceAliasEntries(workspaceRoot: string): Alias[] {
     },
 
     {
+      find: /^@memoflow\/schedule-ui\/host$/,
+      replacement: resolveFromWorkspace(
+        workspaceRoot,
+        'packages/schedule-ui/src/schedule-ui-host.ts',
+      ),
+    },
+
+    {
       find: /^@memoflow\/ui-vue-shadcn\/(.+)$/,
       replacement: `${uiVueRoot}/$1`,
     },

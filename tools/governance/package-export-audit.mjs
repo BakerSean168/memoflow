@@ -64,6 +64,7 @@ const PACKAGE_SPECIFIC_SUBPATHS = {
   account: ['./api', './electron'],
   'task-contracts': ['./*'],
   'task-ui': ['./host', './composables/*', './components/*'],
+  'schedule-ui': ['./host'],
   'schedule-contracts': ['./*'],
   'setting-contracts': ['./*'],
   'cloud-auth-contracts': ['./*'],

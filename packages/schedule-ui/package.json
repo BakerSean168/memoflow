@@ -12,9 +12,14 @@
     ".": {
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js"
+    },
+    "./host": {
+      "types": "./dist/schedule-ui-host.d.ts",
+      "import": "./dist/host.js"
     }
   },
   "dependencies": {
+    "@memoflow/ui-host-contracts": "workspace:*",
     "@fullcalendar/vue3": "7.1.0",
     "@lucide/vue": "^1.48.0",
     "@memoflow/goal-contracts": "workspace:*",

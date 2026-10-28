@@ -39,6 +39,7 @@ export default defineConfig({
   build: {
     lib: {
       entry: {
+        host: path.resolve(__dirname, 'src/schedule-ui-host.ts'),
         index: path.resolve(__dirname, 'src/index.ts'),
       },
       formats: ['es'],

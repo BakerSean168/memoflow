@@ -494,6 +494,13 @@ export const domainResolveAliases = [
     replacement: path.resolve(import.meta.dirname, './packages/schedule-client/src/index.ts'),
   },
   {
+    find: /^@memoflow\/schedule-ui\/host$/,
+    replacement: path.resolve(
+      import.meta.dirname,
+      './packages/schedule-ui/src/schedule-ui-host.ts',
+    ),
+  },
+  {
     find: '@memoflow/schedule-ui',
     replacement: path.resolve(import.meta.dirname, './packages/schedule-ui/src/index.ts'),
   },
