@@ -357,7 +357,7 @@ const moduleBoundaryDepConstraints = [
 const moduleBoundaryOptions = {
   enforceBuildableLibDependency: true,
   allow: ['./generated/prisma/**', '@memoflow/test-utils', '@memoflow/test-utils/*'],
-  checkDynamicDependenciesExceptions: ['@memoflow/database'],
+  checkDynamicDependenciesExceptions: ['@memoflow/database', '@memoflow/app-vue'],
   depConstraints: moduleBoundaryDepConstraints,
 } as const;
 
