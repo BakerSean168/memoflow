@@ -9,7 +9,15 @@ import { installScheduleUiHost } from './di/schedule-ui-host';
 
 installScheduleUiHost();
 
-import './di/setting-ui-host';
+// Setting surfaces are hosted by this composition root (Issue #630 §4.9).
+// Same explicit-install contract as Schedule: the DI module only declares the
+// binder, so a bare side-effect import never assigns `settingUiHost`. Without
+// this call `useThemeSync` -> `applyThemeMode` dereferences `undefined` while
+// the renderer root is still in setup, which aborts the mount before AppShell
+// renders (packaged smoke: blank window, no DOM).
+import { installSettingUiHost } from './di/setting-ui-host';
+
+installSettingUiHost();
 
 // ── DI ──
 export {
