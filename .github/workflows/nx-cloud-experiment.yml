@@ -45,6 +45,10 @@ jobs:
             --files=packages/task-workspace-contracts/src/task-workspace.dto.ts \
             --explain=stdout > reports/nx-cloud-experiment/local-affected.txt
           cat reports/nx-cloud-experiment/local-affected.txt
+          pnpm exec nx affected -t test:contract \
+            --files=packages/shared-primitives/src/nx-cloud-input-probe.txt \
+            --explain=stdout > reports/nx-cloud-experiment/local-probe-affected.txt
+          cat reports/nx-cloud-experiment/local-probe-affected.txt
       - name: Run selected contract targets without Cloud
         shell: bash
         run: |
@@ -96,6 +100,10 @@ jobs:
             --files=packages/task-workspace-contracts/src/task-workspace.dto.ts \
             --explain=stdout > reports/nx-cloud-experiment/cloud-affected.txt
           cat reports/nx-cloud-experiment/cloud-affected.txt
+          pnpm exec nx affected -t test:contract \
+            --files=packages/shared-primitives/src/nx-cloud-input-probe.txt \
+            --explain=stdout > reports/nx-cloud-experiment/cloud-probe-affected.txt
+          cat reports/nx-cloud-experiment/cloud-probe-affected.txt
       - name: Distribute the identical contract task graph
         shell: bash
         run: |
