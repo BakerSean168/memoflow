@@ -1,11 +1,25 @@
 /// <reference types='vitest' />
 import { defineConfig } from 'vite';
-import { nxCopyAssetsPlugin } from '@nx/vite/plugins/nx-copy-assets.plugin';
+import { readFileSync, readdirSync } from 'node:fs';
+import { join } from 'node:path';
 
 export default defineConfig(() => ({
   root: import.meta.dirname,
   cacheDir: '../../node_modules/.vite/packages/patterns',
-  plugins: [nxCopyAssetsPlugin(['*.md'])],
+  plugins: [
+    {
+      name: 'patterns-markdown-assets',
+      buildStart() {
+        // Keep the former *.md copy paths; publicDir would copy the whole package.
+        for (const entry of readdirSync(import.meta.dirname, { withFileTypes: true })) {
+          if (!entry.isFile() || !entry.name.endsWith('.md')) continue;
+          const file = join(import.meta.dirname, entry.name);
+          this.addWatchFile(file);
+          this.emitFile({ type: 'asset', fileName: entry.name, source: readFileSync(file) });
+        }
+      },
+    },
+  ],
   resolve: { tsconfigPaths: true },
   // Uncomment this if you are using workers.
   // worker: {
