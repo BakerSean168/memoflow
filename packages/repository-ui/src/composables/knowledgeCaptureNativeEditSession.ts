@@ -5,7 +5,6 @@ import {
   type KnowledgeDraft,
   type KnowledgeNoteDraftContent,
 } from '@memoflow/ai-contracts';
-import type { OwnerNativeEditSession } from '../repository-ui-host';
 
 export type KnowledgeCaptureNativeDraft = KnowledgeNoteDraftContent & {
   source?: KnowledgeCaptureSource;
@@ -61,18 +60,14 @@ export function nativeDraftFromKnowledgeDraft(draft: KnowledgeDraft): KnowledgeC
  * requestSubmit validates and returns the owner-reviewed snapshot only. It never persists
  * Knowledge content; durable mutation remains behind the host-bound workflow persistence port.
  */
-export type KnowledgeCaptureNativeEditSession = Pick<
-  OwnerNativeEditSession<
-    KnowledgeCaptureNativePatch,
-    never,
-    never,
-    'title' | 'markdown' | 'targetSubpath' | 'source',
-    KnowledgeCaptureNativeDraftState,
-    KnowledgeCaptureNativeSubmitContext,
-    KnowledgeCaptureNativeDraft | null
-  >,
-  'patch' | 'focus' | 'readDraftState' | 'requestSubmit' | 'requestCancel'
-> & {
+export type KnowledgeCaptureNativeEditSession = {
+  patch(changes: KnowledgeCaptureNativePatch): void;
+  focus(field: 'title' | 'markdown' | 'targetSubpath' | 'source'): Promise<void>;
+  readDraftState(): KnowledgeCaptureNativeDraftState;
+  requestSubmit(
+    context?: KnowledgeCaptureNativeSubmitContext,
+  ): Promise<KnowledgeCaptureNativeDraft | null>;
+  requestCancel(): void;
   projectDraft(draft: KnowledgeDraft): void;
   coordinateSubmit(submit: () => Promise<void>, cancel: () => Promise<void>): void;
   setEditingBlocked(blocked: boolean): void;
