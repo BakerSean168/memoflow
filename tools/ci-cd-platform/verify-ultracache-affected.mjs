@@ -95,6 +95,10 @@ if (mode === 'baseline' || mode === 'cloud') {
       cloud.unrelated.contractTargets.length < baseline.unrelated.contractTargets.length,
       'Production dispatch did not remove unrelated Contract tasks',
     );
+    assert(
+      cloud.unrelated.dispatchedTasks < baseline.unrelated.dispatchedTasks,
+      'Production dispatch did not reduce the total execution task set',
+    );
     for (const project of projects) {
       assert(baseline.unrelated.contractTargets.includes(`${project}:test:contract`));
       assert(!cloud.unrelated.contractTargets.includes(`${project}:test:contract`), project);

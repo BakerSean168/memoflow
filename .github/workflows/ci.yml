@@ -86,10 +86,6 @@ jobs:
           setup-uv: 'false'
           enable-nx-cache: 'false'
           changes-only: 'true'
-      # Run the existing lightweight schema check to register a normal Cloud
-      # task context before standalone selection. No distribution is requested.
-      - name: Validate schemas and initialize Cloud selection context
-        run: pnpm exec nx run ci-cd-platform:schema --outputStyle=static
       - name: Calculate versioned scope once
         id: scope
         env:

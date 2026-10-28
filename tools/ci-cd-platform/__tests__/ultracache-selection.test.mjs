@@ -7,6 +7,10 @@ import test from 'node:test';
 import YAML from 'yaml';
 import { CI_TARGETS, loadAffectedRunnerInputs, selectCiTasks } from '../lib/task-selection.mjs';
 import { verifyRecording } from '../verify-ultracache-recording.mjs';
+import {
+  initializeSelectionContext,
+  selectionContextPayload,
+} from '../initialize-ultracache-selection.mjs';
 
 const require = createRequire(import.meta.url);
 
@@ -81,27 +85,84 @@ test('Cloud Workers record traces only in an explicit manual workflow', async ()
   assert.equal(workflow.on.workflow_dispatch.inputs.record.default, true);
   assert.equal(workflow.env.NX_CLOUD_AUTO_TASK_PACKING, 'false');
   assert.equal(config.dte['distribute-on'], '3 linux-medium-js');
-  assert.deepEqual(config.lifecycle['stop-after'], ['test:contract']);
+  assert.deepEqual(config.lifecycle['stop-after'], ['test', 'test:contract']);
   const steps = workflow.jobs['record-contracts'].steps;
   assert.ok(steps.some((step) => step.run?.includes('nx-cloud start-workers')));
   assert.ok(
     steps.some((step) => step.run?.includes('nx-cloud stop-all-workers') && step.if === 'always()'),
   );
   const record = steps.find((step) => step.name === 'Record real file reads for contract tasks');
-  assert.match(record.run, /nx run-many -t test:contract/u);
+  assert.match(record.run, /nx run-many -t test:contract,test/u);
   assert.doesNotMatch(record.run, /--skip-nx-cache|--no-cloud/u);
   assert.match(
-    record.run,
-    /--reporter=default --reporter=json --outputFile=.*GITHUB_RUN_ID.*GITHUB_RUN_ATTEMPT/u,
+    workflow.jobs['record-contracts'].env.NX_ULTRACACHE_RECORDING_SEED,
+    /github.run_id.*github.run_attempt/u,
   );
+  assert.equal(workflow.jobs['verify-affected'].env.NX_ULTRACACHE_RECORDING_SEED, undefined);
+  assert.equal(workflow.env.NX_ULTRACACHE_RECORDING_SEED, undefined);
+  const nxJson = JSON.parse(await readFile('nx.json', 'utf8'));
+  assert(nxJson.namedInputs.default.some((input) => input.env === 'NX_ULTRACACHE_RECORDING_SEED'));
   assert.match(record.run, /verify-ultracache-recording\.mjs/u);
   assert.equal(workflow.jobs['verify-affected'].needs, 'record-contracts');
   assert.ok(
     workflow.jobs['verify-affected'].steps.some((step) =>
-      step.run?.includes('nx run ci-cd-platform:schema'),
+      step.run?.includes('initialize-ultracache-selection.mjs'),
     ),
   );
   assert.doesNotMatch(regularCi, /nx-cloud start-workers/u);
+});
+
+test('selection context registers checkout parents without requesting Workers or manual DTE', async () => {
+  const env = {
+    CI: 'true',
+    GITHUB_RUN_ID: '123',
+    GITHUB_RUN_ATTEMPT: '2',
+    GITHUB_REF: 'refs/pull/690/merge',
+    NX_CI_EXECUTION_ENV: 'selection',
+  };
+  const head = 'a'.repeat(40);
+  const parents = ['b'.repeat(40), 'c'.repeat(40)];
+  const payload = selectionContextPayload(env, head, parents);
+  assert.equal(payload.branch, '690');
+  assert.equal(payload.ciExecutionId, '123-2');
+  assert.equal(payload.runGroup, '123-2-selection');
+  assert.equal(payload.pipelineHeadSha, head);
+  assert.deepEqual(payload.commitParentShas, parents);
+  assert.deepEqual(YAML.parse(payload.ciConfiguration), {
+    dte: { 'enabled-by-default': false, 'distribute-on': 'manual' },
+  });
+  let calls = 0;
+  const git = (args) =>
+    args[0] === 'rev-parse'
+      ? head
+      : `tree unused\nparent ${parents[0]}\nparent ${parents[1]}\n\nparent ignored-message`;
+  const request = async (url, options) => {
+    calls++;
+    assert.equal(url.href, 'https://cloud.nx.app/nx-cloud/run-groups/v1/configure');
+    assert.equal(options.method, 'POST');
+    assert.equal(options.headers['Nx-Cloud-Id'], 'workspace');
+    assert.deepEqual(JSON.parse(options.body), payload);
+    return { ok: true };
+  };
+  await initializeSelectionContext({ nxCloudId: 'workspace' }, { env, git, request });
+  assert.equal(calls, 1);
+  await initializeSelectionContext(
+    { nxCloudId: 'workspace' },
+    { env: { ...env, NX_NO_CLOUD: 'true' }, git, request },
+  );
+  assert.equal(calls, 1);
+  await assert.rejects(
+    initializeSelectionContext(
+      { nxCloudId: 'workspace' },
+      {
+        env,
+        git,
+        request: async () => ({ ok: false, status: 503 }),
+      },
+    ),
+    /HTTP 503/u,
+  );
+  assert.equal(selectionContextPayload({}, head, parents), null);
 });
 
 test('recording success requires cache misses, real Workers, processed reports and config generation', () => {
@@ -169,6 +230,30 @@ test('native configuration handle narrows unrelated inputs and preserves real co
   });
   try {
     const options = { files: ['packages/shared-primitives/src/unread-probe.txt'], full: false };
+    const { createProjectGraphAsync } = require('nx/src/project-graph/project-graph');
+    const { createTaskPlanningContext } = require('nx/src/hasher/task-planning-context');
+    const { createTaskGraph } = require('nx/src/tasks-runner/create-task-graph');
+    const graph = await createProjectGraphAsync({ exitOnError: true });
+    const nxJson = JSON.parse(await readFile('nx.json', 'utf8'));
+    const taskGraph = createTaskGraph(
+      graph,
+      {},
+      ['task-workspace-contracts'],
+      ['test:contract'],
+      undefined,
+      {},
+    );
+    const plans = createTaskPlanningContext(graph, nxJson).planner.getPlans(
+      Object.keys(taskGraph.tasks),
+      taskGraph,
+      configurations,
+    );
+    for (const [id, plan] of Object.entries(plans)) {
+      assert(
+        plan.includes('env:NX_ULTRACACHE_RECORDING_SEED'),
+        `${id} lost the recording cache namespace`,
+      );
+    }
     const baseline = await selectCiTasks(options, { loadRunnerInputs: nativeInputs });
     const recorded = await selectCiTasks(options, { loadRunnerInputs });
     assert.equal(recorded.fallback, null);

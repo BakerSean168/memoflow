@@ -29,6 +29,10 @@ env:
 jobs:
   record-contracts:
     if: inputs.record
+    env:
+      # A declared optional hash input isolates this attempt's cache namespace,
+      # including prerequisite Builds. NX_* values are forwarded to Workers.
+      NX_ULTRACACHE_RECORDING_SEED: '${{ github.run_id }}-${{ github.run_attempt }}'
     name: Record contract inputs on Cloud Workers
     runs-on: ubuntu-latest
     timeout-minutes: 20
@@ -49,11 +53,10 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p reports/ultracache
-          # A real Vitest invocation input changes on every attempt. Every test
-          # still runs, and Workers receive the same arguments. No cache bypass.
-          pnpm exec nx run-many -t test:contract \
+          # Cache normally under this attempt's explicit recording input.
+          # Include prerequisite Builds: their output edges can affect tests.
+          pnpm exec nx run-many -t test:contract,test \
             --projects=goal-contracts,task-contracts,goal-workspace-contracts,task-workspace-contracts \
-            --args="--reporter=default --reporter=json --outputFile=.tmp-ultracache-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}.json" \
             --outputStyle=static 2>&1 | tee reports/ultracache/recording.log
           node tools/ci-cd-platform/verify-ultracache-recording.mjs reports/ultracache/recording.log
       - name: Stop Cloud Workers
@@ -88,8 +91,8 @@ jobs:
         run: |
           corepack enable
           pnpm install --frozen-lockfile --reporter=append-only
-      - name: Validate schemas and initialize Cloud context without Workers
-        run: pnpm exec nx run ci-cd-platform:schema --outputStyle=static
+      - name: Register checkout ancestry without Workers
+        run: node tools/ci-cd-platform/initialize-ultracache-selection.mjs
       - name: Compare native selection and production delivery dispatch
         run: node tools/ci-cd-platform/verify-ultracache-affected.mjs
       - uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6

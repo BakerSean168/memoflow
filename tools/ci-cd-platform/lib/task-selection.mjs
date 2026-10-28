@@ -1,5 +1,6 @@
 import { createRequire } from 'node:module';
 import { digest } from './contracts.mjs';
+import { initializeSelectionContext } from '../initialize-ultracache-selection.mjs';
 
 const require = createRequire(import.meta.url);
 process.env.NX_DAEMON ??= 'false';
@@ -47,9 +48,14 @@ export async function loadAffectedRunnerInputs(
   };
 }
 
+async function loadCiRunnerInputs(nxJson) {
+  await initializeSelectionContext(nxJson);
+  return loadAffectedRunnerInputs(nxJson);
+}
+
 export async function selectCiTasks(
   { files, base, head, full },
-  { loadRunnerInputs = loadAffectedRunnerInputs } = {},
+  { loadRunnerInputs = loadCiRunnerInputs } = {},
 ) {
   const { createProjectGraphAsync } = require('nx/src/project-graph/project-graph');
   const { selectAffectedTasks } = require('nx/src/project-graph/affected/affected-tasks');
@@ -68,7 +74,16 @@ export async function selectCiTasks(
   );
   let targets = all;
   let fallback = null;
-  let ultracache = { status: 'not-requested', reason: 'full-scope' };
+  let ultracache = { status: 'not-requested', reason: full ? 'full-scope' : 'not-initialized' };
+  if (full) {
+    try {
+      // Main intentionally keeps the complete task set. Register its checkout
+      // too, so downstream normal runners can resolve recorded hash inputs.
+      await initializeSelectionContext(nxJson);
+    } catch (error) {
+      fallback = `Nx Cloud selection context failed: ${error.message}`;
+    }
+  }
   if (!full) {
     try {
       // Removed/unregistered projects disappear from the current graph. Nx
