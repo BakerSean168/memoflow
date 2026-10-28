@@ -73,7 +73,9 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 25
     env:
-      NX_CLOUD_AUTO_TASK_PACKING: 'true'
+      # Disable resource packing for this trial: Nx Cloud reported missing Valkey/continuous assignment.
+      # Standard distributed execution still uses the three configured Workers.
+      NX_CLOUD_AUTO_TASK_PACKING: 'false'
     steps:
       - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
         with:
