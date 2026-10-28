@@ -11,20 +11,23 @@ vi.mock('vue', async () => {
   };
 });
 
-vi.mock('@repository-ui-test-host/shared/utils/useStrictInject', () => ({
-  useStrictInject: (key: symbol) => {
-    const value = provideMap.get(key);
-    if (!value) throw new Error('missing inject');
-    return value;
-  },
-}));
-
 import { DESKTOP_BRIDGE_KEY, REPOSITORY_SERVICE_KEY } from '@repository-ui-test-host/di/keys';
+import { bindRepositoryUiHost, repositoryUiHost } from '../repository-ui-host';
+import type { RepositoryUiHost } from '../repository-ui-host';
 import { useReferenceableKnowledgeNotes } from './useReferenceableKnowledgeNotes';
 
 describe('useReferenceableKnowledgeNotes', () => {
   beforeEach(() => {
     provideMap.clear();
+    // The injection seam moved to the host port (G4): drive it from the fixture map.
+    bindRepositoryUiHost({
+      ...repositoryUiHost,
+      useStrictInject: ((key: symbol) => {
+        const value = provideMap.get(key);
+        if (!value) throw new Error('missing inject');
+        return value;
+      }) as RepositoryUiHost['useStrictInject'],
+    });
   });
 
   it('uses the dedicated durable-document query on web', async () => {

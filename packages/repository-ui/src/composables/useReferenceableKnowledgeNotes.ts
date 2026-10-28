@@ -8,7 +8,6 @@
 import { inject, ref } from 'vue';
 import { unwrapOrThrowError } from '@memoflow/transport-contracts/result';
 import { repositoryUiHost } from '../repository-ui-host';
-import { useStrictInject } from '../utils/useStrictInject';
 
 export type ReferenceableKnowledgeNote = {
   documentId: string;
@@ -24,7 +23,10 @@ export interface ReferenceableKnowledgeNoteQuery {
 }
 
 export function useReferenceableKnowledgeNotes() {
-  const service = useStrictInject(repositoryUiHost.REPOSITORY_SERVICE_KEY, 'RepositoryService');
+  const service = repositoryUiHost.useStrictInject(
+    repositoryUiHost.REPOSITORY_SERVICE_KEY,
+    'RepositoryService',
+  );
   const desktopBridge = inject(repositoryUiHost.DESKTOP_BRIDGE_KEY, undefined);
 
   const notes = ref<ReferenceableKnowledgeNote[]>([]);

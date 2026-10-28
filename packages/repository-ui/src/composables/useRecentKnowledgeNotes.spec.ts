@@ -11,14 +11,6 @@ vi.mock('vue', async () => {
   };
 });
 
-vi.mock('@repository-ui-test-host/shared/utils/useStrictInject', () => ({
-  useStrictInject: (key: symbol) => {
-    const value = provideMap.get(key);
-    if (!value) throw new Error('missing inject');
-    return value;
-  },
-}));
-
 import { DESKTOP_BRIDGE_KEY, REPOSITORY_SERVICE_KEY } from '@repository-ui-test-host/di/keys';
 import {
   createTestServerStateRuntime,
@@ -26,6 +18,8 @@ import {
   SERVER_STATE_RUNTIME_KEY,
 } from '@repository-ui-test-host/platform/server-state';
 import { RECENT_KNOWLEDGE_STALE_TIME_MS } from '@repository-ui-test-host/platform/server-state/query-policy';
+import { bindRepositoryUiHost, repositoryUiHost } from '../repository-ui-host';
+import type { RepositoryUiHost } from '../repository-ui-host';
 import { useRecentKnowledgeNotes } from './useRecentKnowledgeNotes';
 
 let runtime: ReturnType<typeof createTestServerStateRuntime>;
@@ -33,6 +27,15 @@ let runtime: ReturnType<typeof createTestServerStateRuntime>;
 describe('useRecentKnowledgeNotes', () => {
   beforeEach(() => {
     provideMap.clear();
+    // The injection seam moved to the host port (G4): drive it from the fixture map.
+    bindRepositoryUiHost({
+      ...repositoryUiHost,
+      useStrictInject: ((key: symbol) => {
+        const value = provideMap.get(key);
+        if (!value) throw new Error('missing inject');
+        return value;
+      }) as RepositoryUiHost['useStrictInject'],
+    });
     runtime = createTestServerStateRuntime();
     provideMap.set(SERVER_STATE_RUNTIME_KEY, runtime);
     provideMap.set(SERVER_STATE_IDENTITY_SCOPE_KEY, () => 'test-identity');
