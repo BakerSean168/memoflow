@@ -444,5 +444,9 @@ opt-in 用例。日常 PR/Main 不执行 `web:e2e:ai-provider`，也没有它专
 Nightly Audit 独立配置 Postgres/schema、Chromium、完整 Web lane manifest/input。
 [build-api.ts](../../../apps/web/e2e/helpers/build-api.ts) 在没有 `E2E_PREBUILT_ARTIFACT=1` 的情况下
 实际调用 `nx run api:build`；契约测试以独立工作目录执行该 helper，验证其自建分支。
+`web:e2e:audit` 与 `web:e2e:ai-provider` 在 Nx 图中声明 `dependsOn: ["^build"]`：二者启动的
+apps/web Vite dev server 只把 `vite.config.ts` 别名表覆盖的 workspace 包解析到源码，其余包
+（当前是 `@memoflow/repository-ui`、其 `/host` 与 `@memoflow/schedule-ui`）从 `packages/*/dist`
+解析，全新 runner 上缺少构建产物时入口图转换会直接 `Failed to resolve import`。
 Nightly 上传 audit/provider 两份报告；本轮不触发真实 Nightly Release、Stable 或 Production，
 也不更改旧 Main CD 入口。P2–P4 仍待完成。
