@@ -1413,6 +1413,9 @@ importers:
       '@memoflow/transport-contracts':
         specifier: workspace:*
         version: link:../transport-contracts
+      '@memoflow/ui-host-contracts':
+        specifier: workspace:*
+        version: link:../ui-host-contracts
       '@memoflow/ui-vue-shadcn':
         specifier: workspace:*
         version: link:../ui-vue-shadcn
@@ -1662,6 +1665,9 @@ importers:
       '@memoflow/transport-contracts':
         specifier: workspace:*
         version: link:../transport-contracts
+      '@memoflow/ui-host-contracts':
+        specifier: workspace:*
+        version: link:../ui-host-contracts
       '@memoflow/ui-vue-shadcn':
         specifier: workspace:*
         version: link:../ui-vue-shadcn
@@ -1970,6 +1976,9 @@ importers:
       '@memoflow/transport-contracts':
         specifier: workspace:*
         version: link:../transport-contracts
+      '@memoflow/ui-host-contracts':
+        specifier: workspace:*
+        version: link:../ui-host-contracts
       '@memoflow/ui-vue-shadcn':
         specifier: workspace:*
         version: link:../ui-vue-shadcn
@@ -2399,6 +2408,9 @@ importers:
       '@memoflow/transport-contracts':
         specifier: workspace:*
         version: link:../transport-contracts
+      '@memoflow/ui-host-contracts':
+        specifier: workspace:*
+        version: link:../ui-host-contracts
       '@memoflow/ui-vue-shadcn':
         specifier: workspace:*
         version: link:../ui-vue-shadcn
@@ -2727,6 +2739,9 @@ importers:
       '@memoflow/transport-contracts':
         specifier: workspace:*
         version: link:../transport-contracts
+      '@memoflow/ui-host-contracts':
+        specifier: workspace:*
+        version: link:../ui-host-contracts
       '@memoflow/ui-vue-shadcn':
         specifier: workspace:*
         version: link:../ui-vue-shadcn
@@ -2984,6 +2999,9 @@ importers:
       '@memoflow/transport-contracts':
         specifier: workspace:*
         version: link:../transport-contracts
+      '@memoflow/ui-host-contracts':
+        specifier: workspace:*
+        version: link:../ui-host-contracts
       '@memoflow/ui-vue-shadcn':
         specifier: workspace:*
         version: link:../ui-vue-shadcn
@@ -3130,6 +3148,9 @@ importers:
       '@memoflow/transport-contracts':
         specifier: workspace:*
         version: link:../transport-contracts
+      '@memoflow/ui-host-contracts':
+        specifier: workspace:*
+        version: link:../ui-host-contracts
       '@memoflow/ui-vue-shadcn':
         specifier: workspace:*
         version: link:../ui-vue-shadcn
@@ -3331,6 +3352,9 @@ importers:
       '@memoflow/transport-contracts':
         specifier: workspace:*
         version: link:../transport-contracts
+      '@memoflow/ui-host-contracts':
+        specifier: workspace:*
+        version: link:../ui-host-contracts
       '@memoflow/ui-vue-shadcn':
         specifier: workspace:*
         version: link:../ui-vue-shadcn
@@ -3517,6 +3541,9 @@ importers:
       '@memoflow/transport-contracts':
         specifier: workspace:*
         version: link:../transport-contracts
+      '@memoflow/ui-host-contracts':
+        specifier: workspace:*
+        version: link:../ui-host-contracts
       '@memoflow/ui-vue-shadcn':
         specifier: workspace:*
         version: link:../ui-vue-shadcn
@@ -3730,6 +3757,9 @@ importers:
       '@memoflow/transport-contracts':
         specifier: workspace:*
         version: link:../transport-contracts
+      '@memoflow/ui-host-contracts':
+        specifier: workspace:*
+        version: link:../ui-host-contracts
       '@memoflow/ui-vue-shadcn':
         specifier: workspace:*
         version: link:../ui-vue-shadcn

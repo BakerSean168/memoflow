@@ -12,32 +12,13 @@
  * 阈值 900px：略高于 split 上限 750，确保分栏态永远判定为 narrow，
  * 只有进入 focus（满屏）才升 wide。
  */
-import {
-  computed,
-  inject,
-  provide,
-  readonly,
-  ref,
-  type ComputedRef,
-  type InjectionKey,
-  type Ref,
-} from 'vue';
+import { computed, inject, provide, readonly, ref, type InjectionKey, type Ref } from 'vue';
+import type { PanelWidthContext, PanelWidthTier } from '@memoflow/ui-host-contracts';
 
-export type PanelWidthTier = 'narrow' | 'wide';
+export type { PanelWidthContext, PanelWidthTier } from '@memoflow/ui-host-contracts';
 
 /** narrow ↔ wide 的临界像素宽度（面板内容宽度）。 */
 export const PANEL_WIDE_THRESHOLD = 900;
-
-interface PanelWidthContext {
-  /** 面板内容当前像素宽度（未挂载/未测量时为 null）。 */
-  width: Readonly<Ref<number | null>>;
-  /** 宽度档位（V2 §7 两档）。 */
-  tier: ComputedRef<PanelWidthTier>;
-  /** 便捷判定：是否窄档（split）。 */
-  isNarrow: ComputedRef<boolean>;
-  /** 便捷判定：是否宽档（focus）。 */
-  isWide: ComputedRef<boolean>;
-}
 
 const PANEL_WIDTH_KEY: InjectionKey<PanelWidthContext> = Symbol('PanelWidthContext');
 

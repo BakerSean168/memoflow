@@ -11,8 +11,6 @@ import {
   subscribeWorkspaceEvents,
 } from '../shared/services/workspace-event-subscription';
 import { canLeaveBusinessSurface } from '../layouts/shell/surface-leave-protocol';
-import { useServerStateIdentityScope } from '../platform/server-state';
-import { useStrictInject } from '../shared/utils/useStrictInject';
 import {
   AI_AGENT_REGISTRY_KEY,
   AI_ASSISTANT_RUNTIME_KEY,
@@ -32,7 +30,6 @@ import {
   useKnowledgeNativeSurface,
   useKnowledgeNativeSurfaceRegistration,
 } from '../layouts/shell/useKnowledgeNativeSurface';
-import { translateResultError } from '../shared/utils/translate-result-error';
 import { useTaskNativeSurface } from '../layouts/shell/useTaskNativeSurface';
 import { useLabelCatalog } from '../shared/composables/useLabelCatalog';
 import { semanticElevationClass } from '../shared/constants/semantic-elevation';
@@ -40,9 +37,11 @@ import { COMPOSER_TEXTAREA_MAX_PX } from '../layouts/shell/panel-geometry';
 import { semanticToneStatusClass } from '../shared/constants/semantic-tone';
 import { renderSafeMarkdown } from '../shared/utils/safe-markdown';
 import { useAppShellStore } from '../layouts/shell/useAppShellStore';
+import { installPlatformRendererHost } from './platform-ui-host';
 
 export function installAiUiHost(): void {
   bindAiUiHost({
+    ...installPlatformRendererHost(),
     nativeDraftFromKnowledgeDraft: (...args) => nativeDraftFromKnowledgeDraft(...args),
     useGoalNativeSurface: (...args) => useGoalNativeSurface(...args),
     useReferenceableKnowledgeNotes: (...args) => useReferenceableKnowledgeNotes(...args),
@@ -70,13 +69,10 @@ export function installAiUiHost(): void {
     semanticElevationClass,
     semanticToneStatusClass,
     subscribeWorkspaceEvents,
-    translateResultError,
     useAppShellStore,
     useKnowledgeNativeSurface,
     useKnowledgeNativeSurfaceRegistration,
     useLabelCatalog,
-    useServerStateIdentityScope,
-    useStrictInject,
     useTaskNativeSurface,
   });
 }

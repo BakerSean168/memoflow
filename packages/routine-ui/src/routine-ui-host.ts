@@ -1,12 +1,13 @@
-import type { Component, InjectionKey, MaybeRefOrGetter, ObjectDirective, Ref } from 'vue';
-import type { QueryClient } from '@tanstack/vue-query';
+import type { Component, InjectionKey, Ref } from 'vue';
 import type { RoutineClientPort } from '@memoflow/routine-client';
-import type { TimeFacade } from '@memoflow/time';
 import type { Ymd } from '@memoflow/shared-primitives';
-import type { translateResultErrorMessage } from '@memoflow/http-client';
+import type { PlatformRendererHost } from '@memoflow/ui-host-contracts';
 
-/** Renderer capabilities supplied by the application's composition root. */
-export interface RoutineUiHost {
+/**
+ * Renderer composition dependencies. Platform capabilities come from
+ * {@link PlatformRendererHost}; this port only declares the Routine slots.
+ */
+export interface RoutineUiHost extends PlatformRendererHost {
   ROUTINE_SERVICE_KEY: InjectionKey<RoutineClientPort>;
   components: Record<
     | 'AppEmptyState'
@@ -26,25 +27,12 @@ export interface RoutineUiHost {
     | 'ProductTimeZoneSelector',
     Component
   >;
-  vKeyboardList: ObjectDirective<HTMLElement>;
-  useStrictInject<T>(key: InjectionKey<T>, name?: string): T;
-  translateResultError: typeof translateResultErrorMessage;
   useTransientFeedback(durationMs?: number): { visible: Ref<boolean>; show(): void; hide(): void };
-  useDialogCloseGuard(options: {
-    dirty: MaybeRefOrGetter<boolean>;
-    busy?: MaybeRefOrGetter<boolean>;
-    onClose(): void | Promise<void>;
-  }): { confirming: Ref<boolean>; requestClose(): Promise<boolean> };
-  usePanelSurfaceStatus(status: Ref<'clean' | 'dirty' | 'busy'>): void;
-  useServerStateRuntime(): { queryClient: QueryClient };
-  useServerStateIdentityScope(): () => string;
   routineUpcomingQueryKeys: {
     range(identityScope: string, start: number, end: number, limit: number): readonly unknown[];
   };
   ROUTINE_UPCOMING_STALE_TIME_MS: number;
-  getProductTime(): TimeFacade;
   getProductTodayYmd(): Ymd;
-  productTimeRevision: Ref<number>;
   formatProductHm(
     value: number | string | Date | null | undefined,
     empty?: string | { display?: string; unknown?: string },

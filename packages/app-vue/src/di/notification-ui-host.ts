@@ -13,15 +13,8 @@ import {
   semanticToneBorderClass,
   semanticToneSurfaceClass,
 } from '../shared/constants/semantic-tone';
-import { vKeyboardList } from '../shared/keyboard/list-adapter';
-import { createComposableHandleError } from '../shared/utils/create-composable-handle-error';
-import {
-  formatProductRelative,
-  getProductTime,
-  productTimeRevision,
-} from '../shared/utils/product-time';
-import { useStrictInject } from '../shared/utils/useStrictInject';
-import { useServerStateIdentityScope, useServerStateRuntime } from '../platform/server-state';
+import { formatProductRelative } from '../shared/utils/product-time';
+import { useServerStateRuntime } from '../platform/server-state';
 import {
   canonicalizeNotificationListQuery,
   notificationQueryKeys,
@@ -29,10 +22,12 @@ import {
 import { NOTIFICATION_STALE_TIME_MS } from '../platform/server-state/query-policy';
 import { resultQueryFn } from '../platform/server-state/result-query';
 import { NOTIFICATION_SERVICE_KEY } from './keys';
+import { installPlatformRendererHost } from './platform-ui-host';
 
 /** Bind the renderer capabilities the Notification surfaces rely on before mounting them. */
 export function installNotificationUiHost(): void {
   bindNotificationUiHost({
+    ...installPlatformRendererHost(),
     NOTIFICATION_SERVICE_KEY,
     components: {
       ActionableWrapper,
@@ -45,11 +40,7 @@ export function installNotificationUiHost(): void {
       ResponsiveSegmentedFilter,
     },
     menuLabel,
-    vKeyboardList,
-    useStrictInject,
-    createComposableHandleError,
     useServerStateRuntime,
-    useServerStateIdentityScope,
     notificationQueryKeys,
     canonicalizeNotificationListQuery,
     NOTIFICATION_STALE_TIME_MS,
@@ -57,8 +48,6 @@ export function installNotificationUiHost(): void {
     semanticToneSurfaceClass,
     semanticToneBorderClass,
     semanticElevationClass,
-    getProductTime,
-    productTimeRevision,
     formatProductRelative,
   });
 }
