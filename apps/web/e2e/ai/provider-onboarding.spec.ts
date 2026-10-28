@@ -1,5 +1,5 @@
 import { writeFileSync } from 'node:fs';
-import { expect, test, type Page } from '@playwright/test';
+import { expect, test, type Page } from '../helpers/fixtures';
 import { registerAndLogin } from '../helpers/auth-api';
 import { TIMEOUT_CONFIG } from '../config';
 
@@ -25,10 +25,8 @@ async function selectModel(page: Page, name: RegExp) {
 test('[P0] T3 Agent wizard and inline Endpoint/Key configure the persistent composer without a browser refresh', async ({
   page,
 }, testInfo) => {
-  await registerAndLogin(page, {
-    email: `e2e-parity-${Date.now()}-${Math.random().toString(36).slice(2)}@test.com`,
-    password,
-  });
+  // Single-owner provider onboarding uses the worker session; the cross-owner
+  // registry case below intentionally keeps two independent identities.
   await page.goto('/settings?tab=ai', { waitUntil: 'domcontentloaded' });
   await expect(page.getByTestId('ai-settings-panel')).toBeVisible({
     timeout: TIMEOUT_CONFIG.NAVIGATION,
