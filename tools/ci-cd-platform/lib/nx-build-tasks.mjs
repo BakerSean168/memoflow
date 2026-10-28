@@ -3,7 +3,7 @@ import { createRequire } from 'node:module';
 
 const require = createRequire(import.meta.url);
 
-// Nx 23.3 adapter: one scheduler deduplicates ^build / prisma-generate writers
+// One Nx scheduler deduplicates ^build / prisma-generate writers
 // shared by build and typecheck, without selecting their project/target product.
 export function selectBuildTasks(projectGraph, keys) {
   const { createTaskGraph } = require('nx/src/tasks-runner/create-task-graph');
@@ -37,9 +37,14 @@ export function selectBuildTasks(projectGraph, keys) {
         assert.deepEqual(graph.tasks[id], task, `conflicting Nx dependency: ${id}`);
       graph.tasks[id] = task;
       for (const field of ['dependencies', 'continuousDependencies']) {
-        graph[field][id] = [
-          ...new Set([...(graph[field][id] ?? []), ...(selected[field][id] ?? [])]),
-        ];
+        const edges = new Map((graph[field][id] ?? []).map((edge) => [edge.id, edge]));
+        for (const edge of selected[field][id] ?? []) {
+          if (edges.has(edge.id)) {
+            assert.deepEqual(edges.get(edge.id), edge, `conflicting Nx dependency edge: ${id}`);
+          }
+          edges.set(edge.id, edge);
+        }
+        graph[field][id] = [...edges.values()];
       }
     }
   }
@@ -47,16 +52,30 @@ export function selectBuildTasks(projectGraph, keys) {
   // nested output. Restore/finish the parent artifact before the child writer.
   // Keep this CI resource ordering here rather than changing a business target.
   if (graph.tasks['database:build'] && graph.tasks['database:runtime-scripts:build']) {
-    graph.dependencies['database:runtime-scripts:build'] = [
-      ...new Set([...graph.dependencies['database:runtime-scripts:build'], 'database:build']),
-    ];
+    const dependencies = graph.dependencies['database:runtime-scripts:build'];
+    if (!dependencies.some((edge) => edge.id === 'database:build')) {
+      dependencies.push({ id: 'database:build' });
+    }
   }
   graph.roots = Object.keys(graph.tasks).filter(
     (id) => graph.dependencies[id].length === 0 && graph.continuousDependencies[id].length === 0,
   );
   // Nx can rebuild after sync generators. Prune that rebuild to this exact
   // selection and all dependencies, so it cannot add unrelated primary tasks.
-  return { taskGraph: graph, initiatingTaskIds, taskIds: Object.keys(graph.tasks) };
+  // Nx 24 uses edge objects. Keep task IDs at the CI/receipt boundary while
+  // handing the full native edges (including readiness metadata) to Nx.
+  const taskGraph = { ...graph };
+  for (const field of ['dependencies', 'continuousDependencies']) {
+    taskGraph[field] = Object.fromEntries(
+      Object.entries(graph[field]).map(([id, edges]) => [id, edges.map((edge) => edge.id)]),
+    );
+  }
+  return {
+    taskGraph,
+    nativeTaskGraph: graph,
+    initiatingTaskIds,
+    taskIds: Object.keys(graph.tasks),
+  };
 }
 
 export const successfulNxStatus = (status) =>
@@ -71,7 +90,7 @@ export async function executeBuildTasks(keys) {
   const projectGraph = await createProjectGraphAsync({ exitOnError: true });
   const selection = selectBuildTasks(projectGraph, keys);
   const { taskResults, completed } = await runTasksForCommand(
-    selection,
+    { ...selection, taskGraph: selection.nativeTaskGraph },
     projectGraph,
     { nxJson: readNxJson() },
     {

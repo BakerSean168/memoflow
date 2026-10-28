@@ -268,6 +268,35 @@ test('mixed Build + Typecheck selects exact initiating tasks with one shared dep
   assert.throws(() => selectBuildTasks(graph, ['api:test']));
 });
 
+test('Nx 24 edge objects deduplicate by task ID and retain native readiness metadata', async () => {
+  const { selectBuildTasks } = await import('../lib/nx-build-tasks.mjs');
+  const target = (dependsOn = []) => ({
+    executor: 'nx:run-commands',
+    options: { command: 'echo ok' },
+    dependsOn,
+  });
+  const graph = { nodes: {}, dependencies: {} };
+  for (const [name, targets] of Object.entries({
+    a: { build: target(['middle:build']) },
+    b: { typecheck: target(['middle:build']) },
+    middle: {
+      build: target(['leaf:build', { projects: ['service'], target: 'serve', waitFor: 'ready' }]),
+    },
+    leaf: { build: target() },
+    service: { serve: { ...target(), continuous: true, readyWhen: { signal: true } } },
+  })) {
+    graph.nodes[name] = { name, type: 'lib', data: { root: name, targets } };
+    graph.dependencies[name] = [];
+  }
+  const selection = selectBuildTasks(graph, ['a:build', 'b:typecheck']);
+  assert.deepEqual(selection.nativeTaskGraph.dependencies['middle:build'], [{ id: 'leaf:build' }]);
+  assert.deepEqual(selection.nativeTaskGraph.continuousDependencies['middle:build'], [
+    { id: 'service:serve', waitFor: 'ready' },
+  ]);
+  assert.deepEqual(selection.taskGraph.dependencies['middle:build'], ['leaf:build']);
+  assert.deepEqual(selection.taskGraph.continuousDependencies['middle:build'], ['service:serve']);
+});
+
 test('real Nx merged scheduler runs both targets concurrently, deduplicates dependencies and exposes failures', async () => {
   const { mkdtemp, mkdir, writeFile, symlink, rm, readdir } = await import('node:fs/promises');
   const { tmpdir } = await import('node:os');
