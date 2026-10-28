@@ -1,3 +1,0 @@
-
-[7m[1m[31m NX [39m[22m[27m  [31mCannot find project 'web-e2e'[39m
-

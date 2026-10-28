@@ -12,12 +12,12 @@ import { parse } from '@vue/compiler-sfc';
 import { NodeTypes } from '@vue/compiler-core';
 
 const root = resolve(import.meta.dirname, '../..');
-const moduleRoot = join(root, 'packages/app-vue/src/modules');
+const appVueSourceRoot = join(root, 'packages/app-vue/src');
 const forbiddenTags = new Set(['div', 'span', 'Badge']);
 const booleanControlTags = new Set(['Switch', 'Checkbox']);
 const violations = [];
 
-for (const file of walk(moduleRoot)) {
+for (const file of walk(appVueSourceRoot)) {
   const source = readFileSync(file, 'utf8');
   const { descriptor } = parse(source, { filename: file });
   if (!descriptor.template?.ast) continue;
@@ -38,7 +38,7 @@ if (violations.length > 0) {
 }
 
 console.log(
-  '[accessible-interaction-audit] OK: module click targets use semantic controls; icon Buttons are named.',
+  '[accessible-interaction-audit] OK: app-vue click targets use semantic controls; icon Buttons are named.',
 );
 
 function visit(node, file) {

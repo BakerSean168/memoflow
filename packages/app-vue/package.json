@@ -16,6 +16,14 @@
       "types": "./dist/di/index.d.ts",
       "import": "./dist/di/index.js"
     },
+    "./di/keys": {
+      "types": "./dist/di/keys.d.ts",
+      "import": "./dist/di/keys.js"
+    },
+    "./di/schedule-ui-host": {
+      "types": "./dist/di/schedule-ui-host.d.ts",
+      "import": "./dist/di/schedule-ui-host.js"
+    },
     "./desktop": {
       "types": "./dist/desktop.d.ts",
       "import": "./dist/desktop.js"
@@ -24,6 +32,10 @@
       "types": "./dist/shared/utils/desktop-profile-access.d.ts",
       "import": "./dist/shared/utils/desktop-profile-access.js"
     },
+    "./shared/utils/product-time": {
+      "types": "./dist/shared/utils/product-time.d.ts",
+      "import": "./dist/shared/utils/product-time.js"
+    },
     "./plugins/i18n": {
       "types": "./dist/plugins/i18n.d.ts",
       "import": "./dist/plugins/i18n.js"
@@ -31,6 +43,54 @@
     "./router": {
       "types": "./dist/router/index.d.ts",
       "import": "./dist/router/index.js"
+    },
+    "./web-core": {
+      "types": "./dist/web-core.d.ts",
+      "import": "./dist/web-core.js"
+    },
+    "./web-shell-core": {
+      "types": "./dist/web-shell-core.d.ts",
+      "import": "./dist/web-shell-core.js"
+    },
+    "./web-bootstrap": {
+      "types": "./dist/web-bootstrap.d.ts",
+      "import": "./dist/web-bootstrap.js"
+    },
+    "./web-i18n": {
+      "types": "./dist/web-i18n.d.ts",
+      "import": "./dist/web-i18n.js"
+    },
+    "./platform/server-state": {
+      "types": "./dist/platform/server-state/index.d.ts",
+      "import": "./dist/platform/server-state.js"
+    },
+    "./locales/production-messages": {
+      "types": "./dist/locales/production-messages.d.ts",
+      "import": "./dist/locales/production-messages.js"
+    },
+    "./layouts/shell/AppShell.vue": {
+      "types": "./dist/layouts/shell/AppShell.vue.d.ts",
+      "import": "./dist/layouts/shell/AppShell.vue.js"
+    },
+    "./layouts/shell/previews/ScheduleCapsulePreview.vue": {
+      "types": "./dist/layouts/shell/previews/ScheduleCapsulePreview.vue.d.ts",
+      "import": "./dist/layouts/shell/previews/ScheduleCapsulePreview.vue.js"
+    },
+    "./layouts/shell/useAppShellStore": {
+      "types": "./dist/layouts/shell/useAppShellStore.d.ts",
+      "import": "./dist/layouts/shell/useAppShellStore.js"
+    },
+    "./layouts/shell/usePanelWidth": {
+      "types": "./dist/layouts/shell/usePanelWidth.d.ts",
+      "import": "./dist/layouts/shell/usePanelWidth.js"
+    },
+    "./shared/components/GlobalConfirmDialog.vue": {
+      "types": "./dist/shared/components/GlobalConfirmDialog.vue.d.ts",
+      "import": "./dist/shared/components/GlobalConfirmDialog.vue.js"
+    },
+    "./components/shared/ListPageShell.vue": {
+      "types": "./dist/components/shared/ListPageShell.vue.d.ts",
+      "import": "./dist/components/shared/ListPageShell.vue.js"
     }
   },
   "dependencies": {

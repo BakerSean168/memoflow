@@ -1,17 +1,19 @@
 /**
  * App-react session product time facade (ADR-037 P1/P2).
  * Single session — Screens must not createTimeFacade for routine display.
+ *
+ * Session construction, preferences and the formatter set live in
+ * `createProductTimeSession` (@memoflow/time); this module only keeps the React
+ * locale detection and the string-shaped empty-label API the screens use.
  */
 import type { UserPreferenceProfile } from '@memoflow/setting-contracts';
 import type { Ymd } from '@memoflow/shared-primitives';
 import type { GoalTimeframe } from '@memoflow/goal-contracts';
 import {
-  createSystemTimeZoneSource,
-  createTimeContext,
-  createTimeFacade,
+  createProductTimeSession,
   resolveEmptyLabel,
-  type TimeFacade,
   type TimeEmptyKind,
+  type TimeFacade,
   type ResolveEmptyLabelOptions,
 } from '@memoflow/time';
 
@@ -23,79 +25,46 @@ function resolveSystemLocale(): string {
   }
 }
 
-function createLocalSessionTime(): TimeFacade {
-  const timeZoneSource = createSystemTimeZoneSource();
-  return createTimeFacade({
-    context: createTimeContext({
-      timeZone: timeZoneSource.currentTimeZoneId(),
-      weekStartsOn: 1,
-    }),
-    presentation: {
-      locale: resolveSystemLocale(),
-      empty: {
-        display: resolveEmptyLabel('emdash'),
-        unknown: resolveEmptyLabel('unknown'),
-      },
-    },
-  });
-}
-
-let sessionTime: TimeFacade = createLocalSessionTime();
+const session = createProductTimeSession({
+  locale: resolveSystemLocale(),
+  empty: {
+    display: resolveEmptyLabel('emdash'),
+    unknown: resolveEmptyLabel('unknown'),
+  },
+  // React falls back to the display label (not "unknown") for unparsable
+  // values. Kept per shell: the Vue shell returns the unknown label there.
+  invalidValueLabel: 'display',
+});
 
 export function getProductTime(): TimeFacade {
-  return sessionTime;
+  return session.getFacade();
 }
 
 /** Apply canonical cross-device presentation/regional preferences to the React session facade. */
 export function setProductTimePreferences(profile: UserPreferenceProfile): TimeFacade {
-  sessionTime = sessionTime
-    .withContext(
-      createTimeContext({
-        timeZone: profile.regional.timeZone,
-        weekStartsOn: profile.regional.weekStartsOn,
-      }),
-    )
-    .withPresentation({
-      locale: profile.presentation.language,
-      dateStyle: profile.regional.dateStyle,
-      timeStyle: profile.regional.timeStyle,
-    });
-  return sessionTime;
+  return session.setPreferences(profile);
 }
 
 /** Restore guest/signed-out Product Time to the device locale/timezone source. */
 export function resetProductTimePreferences(): TimeFacade {
-  sessionTime = createLocalSessionTime();
-  return sessionTime;
+  return session.reset();
 }
 
 export function emptyKind(kind: TimeEmptyKind, options?: ResolveEmptyLabelOptions): string {
-  return resolveEmptyLabel(kind, options);
-}
-
-function toMs(value: number | string | Date | null | undefined): number | null {
-  if (value == null || value === '') return null;
-  if (typeof value === 'number') return Number.isFinite(value) ? value : null;
-  if (value instanceof Date) {
-    const t = value.getTime();
-    return Number.isFinite(t) ? t : null;
-  }
-  const parsed = Date.parse(String(value));
-  return Number.isFinite(parsed) ? parsed : null;
+  return session.emptyKind(kind, options);
 }
 
 /** Empty-safe date via session (optional empty override string). */
 export function formatProductYmd(value: Ymd | null | undefined, empty?: string): string {
-  if (value == null) return empty ?? sessionTime.presentation.empty.display;
-  return sessionTime.format.ymdDisplay(value) || (empty ?? sessionTime.presentation.empty.unknown);
+  return session.formatYmd(value, { display: empty, unknown: empty });
 }
 
 export function getProductTodayYmd(): Ymd {
-  return sessionTime.calendar.toYmd(sessionTime.now());
+  return session.getTodayYmd();
 }
 
 export function parseProductYmdInput(value: string): Ymd | null {
-  return sessionTime.input.parseDateValue(value.trim());
+  return session.fromYmdInputValue(value.trim());
 }
 
 /** Mobile-friendly precision-preserving Goal target parser. */
@@ -158,9 +127,7 @@ export function formatProductDate(
   value: number | string | Date | null | undefined,
   empty?: string,
 ): string {
-  const ms = toMs(value);
-  if (ms == null) return empty ?? sessionTime.presentation.empty.display;
-  return sessionTime.format.date(ms, empty != null ? { empty: { display: empty } } : undefined);
+  return session.formatDate(value, { display: empty });
 }
 
 /** Empty-safe dateTime via session. */
@@ -168,17 +135,12 @@ export function formatProductDateTime(
   value: number | string | Date | null | undefined,
   empty?: string,
 ): string {
-  const ms = toMs(value);
-  if (ms == null) return empty ?? sessionTime.presentation.empty.display;
-  return sessionTime.format.dateTime(ms, empty != null ? { empty: { display: empty } } : undefined);
+  return session.formatDateTime(value, { display: empty });
 }
 
 /** Relative product time via session facade. */
 export function formatProductRelative(value: number | null | undefined, empty?: string): string {
-  if (value == null || !Number.isFinite(value)) {
-    return empty ?? sessionTime.presentation.empty.display;
-  }
-  return sessionTime.format.relative(value);
+  return session.formatRelative(value, { display: empty });
 }
 
 export { resolveEmptyLabel };

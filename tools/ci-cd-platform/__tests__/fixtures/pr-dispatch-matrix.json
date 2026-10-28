@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "review": "P1.1 #628: explicit existing Nx project owners, exact merged Build/Types, Provider acceptance Nightly-only + P2 #634 label-contracts registration + P2 #634 goal-contracts / workspace-contracts / data-portability-contracts registration + P2 #630 relation-contracts registration + P2 #630 notification-contracts registration + P2 #635 task-contracts registration + #630 routine domain rename and contracts/client/UI extraction (real Nx replay) + #630 repository contracts/client/UI merge (real Nx replay) + #630 account domain contracts package extraction (real Nx replay) + #630 account domain UI extraction (real Nx replay) + #637 aggregate contracts / domain-shared retirement (live Nx replay) + #671 remove unreferenced @memoflow/* dependencies (live Nx replay re-record) + #671 M4 platform renderer host convergence (live Nx replay re-record)",
+  "review": "P1.1 #628: explicit existing Nx project owners, exact merged Build/Types, Provider acceptance Nightly-only + P2 #634 label-contracts registration + P2 #634 goal-contracts / workspace-contracts / data-portability-contracts registration + P2 #630 relation-contracts registration + P2 #630 notification-contracts registration + P2 #635 task-contracts registration + #630 routine domain rename and contracts/client/UI extraction (real Nx replay) + #630 repository contracts/client/UI merge (real Nx replay) + #630 account domain contracts package extraction (real Nx replay) + #630 account domain UI extraction (real Nx replay) + #637 aggregate contracts / domain-shared retirement (live Nx replay) + #671 remove unreferenced @memoflow/* dependencies (live Nx replay re-record)",
   "cases": [
     {
       "id": "docs",
@@ -61,6 +61,8 @@
             "notification-ui",
             "repository-ui",
             "routine-ui",
+            "schedule-ui",
+            "setting-ui",
             "task-ui",
             "ui-storybook",
             "web"
@@ -74,6 +76,8 @@
             "notification-ui",
             "repository-ui",
             "routine-ui",
+            "schedule-ui",
+            "setting-ui",
             "task-ui"
           ],
           "test:smoke": [],
@@ -106,6 +110,8 @@
             "notification-ui:build",
             "repository-ui:build",
             "routine-ui:build",
+            "schedule-ui:build",
+            "setting-ui:build",
             "task-ui:build",
             "ui-storybook:build",
             "web:build",
@@ -127,6 +133,8 @@
             "notification-ui:test:contract",
             "repository-ui:test:contract",
             "routine-ui:test:contract",
+            "schedule-ui:test:contract",
+            "setting-ui:test:contract",
             "task-ui:test:contract"
           ]
         },
@@ -176,7 +184,7 @@
             "setting-ui",
             "web"
           ],
-          "test:contract": ["ai-ui"],
+          "test:contract": ["ai-ui", "setting-ui"],
           "test:smoke": ["api"],
           "test:integration": ["ai", "api"],
           "test:boundary": ["desktop"],
@@ -196,7 +204,7 @@
             "memoflow:governance-check"
           ],
           "unit-1": [],
-          "unit-2": ["setting-ui:test"],
+          "unit-2": [],
           "unit-3": ["desktop:test", "ai:test"],
           "build": [
             "ai:build",
@@ -228,7 +236,7 @@
           ],
           "web-visual": [],
           "component-browser": [],
-          "contract": ["ai-ui:test:contract"]
+          "contract": ["ai-ui:test:contract", "setting-ui:test:contract"]
         },
         "serverShards": [
           {
@@ -634,6 +642,8 @@
             "host-runtime",
             "notification-ui",
             "repository-ui",
+            "schedule-ui",
+            "setting-ui",
             "task-client",
             "task-ui"
           ],
@@ -687,28 +697,26 @@
             "ai:test",
             "routine:test",
             "goal-client:test",
-            "schedule-ui:test",
-            "cloud-auth:test",
-            "utils:test",
-            "scheduler:test",
-            "patterns:test"
+            "schedule-orchestration:test",
+            "data-portability:test",
+            "label:test"
           ],
           "unit-2": [
             "task:test",
             "account:test",
             "repository:test",
             "goal-core:test",
-            "setting-ui:test",
-            "setting:test",
-            "relation:test"
+            "cloud-auth:test",
+            "utils:test",
+            "patterns:test"
           ],
           "unit-3": [
             "desktop:test",
             "notification:test",
             "schedule:test",
-            "schedule-orchestration:test",
-            "data-portability:test",
-            "label:test"
+            "setting:test",
+            "scheduler:test",
+            "relation:test"
           ],
           "build": [
             "account:build",
@@ -789,7 +797,7 @@
           ],
           "web-unit-1": ["app-vue:test#1/2", "web:test"],
           "web-unit-2": ["app-vue:test#2/2"],
-          "server-unit": ["api:test", "migrator:test", "database:test"],
+          "server-unit": ["api:test", "database:test", "migrator:test"],
           "verification-children": [
             "desktop:test:ipc",
             "desktop:test:main",
@@ -817,6 +825,8 @@
             "host-runtime:test:contract",
             "notification-ui:test:contract",
             "repository-ui:test:contract",
+            "schedule-ui:test:contract",
+            "setting-ui:test:contract",
             "task-client:test:contract",
             "task-ui:test:contract"
           ]
@@ -1128,7 +1138,9 @@
             "routine-ui",
             "schedule-client",
             "schedule-contracts",
+            "schedule-ui",
             "setting-contracts",
+            "setting-ui",
             "shared-primitives",
             "task-client",
             "task-contracts",
@@ -1188,23 +1200,23 @@
             "schedule:test",
             "goal-client:test",
             "powersync-schema:test",
-            "setting-client:test",
-            "ui-host-contracts:test",
-            "cloud-auth:test",
-            "data-portability:test",
-            "label:test"
-          ],
-          "unit-2": [
-            "task:test",
-            "account:test",
-            "assets:test",
-            "schedule-ui:test",
             "ui-core:test",
             "time:test",
             "ui-vue-shadcn:test",
             "scheduler:test",
             "patterns:test",
-            "http-client:test"
+            "ipc-client:test"
+          ],
+          "unit-2": [
+            "task:test",
+            "account:test",
+            "assets:test",
+            "setting-client:test",
+            "schedule-orchestration:test",
+            "setting:test",
+            "utils:test",
+            "relation:test",
+            "label:test"
           ],
           "unit-3": [
             "desktop:test",
@@ -1213,13 +1225,11 @@
             "repository:test",
             "goal-core:test",
             "quality:test",
-            "setting-ui:test",
-            "schedule-orchestration:test",
-            "setting:test",
-            "utils:test",
-            "relation:test",
+            "ui-host-contracts:test",
+            "cloud-auth:test",
+            "data-portability:test",
             "agent-gateway:test",
-            "ipc-client:test"
+            "http-client:test"
           ],
           "build": [
             "account:build",
@@ -1376,7 +1386,7 @@
           ],
           "web-unit-1": ["web:test", "app-vue:test#1/2"],
           "web-unit-2": ["app-vue:test#2/2"],
-          "server-unit": ["api:test", "database:test", "migrator:test"],
+          "server-unit": ["api:test", "migrator:test", "database:test"],
           "verification-children": [
             "desktop:test:ipc",
             "desktop:test:main",
@@ -1426,7 +1436,9 @@
             "routine-ui:test:contract",
             "schedule-client:test:contract",
             "schedule-contracts:test:contract",
+            "schedule-ui:test:contract",
             "setting-contracts:test:contract",
+            "setting-ui:test:contract",
             "shared-primitives:test:contract",
             "task-client:test:contract",
             "task-contracts:test:contract",
@@ -1487,6 +1499,8 @@
             "notification-ui",
             "repository-ui",
             "routine-ui",
+            "schedule-ui",
+            "setting-ui",
             "task-ui",
             "ui-storybook"
           ],
@@ -1499,6 +1513,8 @@
             "notification-ui",
             "repository-ui",
             "routine-ui",
+            "schedule-ui",
+            "setting-ui",
             "task-ui"
           ],
           "test:smoke": [],
@@ -1529,6 +1545,8 @@
             "notification-ui:build",
             "repository-ui:build",
             "routine-ui:build",
+            "schedule-ui:build",
+            "setting-ui:build",
             "task-ui:build",
             "ui-storybook:build",
             "app-vue:typecheck"
@@ -1546,6 +1564,8 @@
             "notification-ui:test:contract",
             "repository-ui:test:contract",
             "routine-ui:test:contract",
+            "schedule-ui:test:contract",
+            "setting-ui:test:contract",
             "task-ui:test:contract"
           ]
         },
@@ -1828,7 +1848,9 @@
             "routine-ui",
             "schedule-client",
             "schedule-contracts",
+            "schedule-ui",
             "setting-contracts",
+            "setting-ui",
             "shared-primitives",
             "task-client",
             "task-contracts",
@@ -1888,23 +1910,23 @@
             "schedule:test",
             "goal-client:test",
             "powersync-schema:test",
-            "setting-client:test",
-            "ui-host-contracts:test",
-            "cloud-auth:test",
-            "data-portability:test",
-            "label:test"
-          ],
-          "unit-2": [
-            "task:test",
-            "account:test",
-            "assets:test",
-            "schedule-ui:test",
             "ui-core:test",
             "time:test",
             "ui-vue-shadcn:test",
             "scheduler:test",
             "patterns:test",
-            "http-client:test"
+            "ipc-client:test"
+          ],
+          "unit-2": [
+            "task:test",
+            "account:test",
+            "assets:test",
+            "setting-client:test",
+            "schedule-orchestration:test",
+            "setting:test",
+            "utils:test",
+            "relation:test",
+            "label:test"
           ],
           "unit-3": [
             "desktop:test",
@@ -1913,13 +1935,11 @@
             "repository:test",
             "goal-core:test",
             "quality:test",
-            "setting-ui:test",
-            "schedule-orchestration:test",
-            "setting:test",
-            "utils:test",
-            "relation:test",
+            "ui-host-contracts:test",
+            "cloud-auth:test",
+            "data-portability:test",
             "agent-gateway:test",
-            "ipc-client:test"
+            "http-client:test"
           ],
           "build": [
             "account:build",
@@ -2076,7 +2096,7 @@
           ],
           "web-unit-1": ["web:test", "app-vue:test#1/2"],
           "web-unit-2": ["app-vue:test#2/2"],
-          "server-unit": ["api:test", "database:test", "migrator:test"],
+          "server-unit": ["api:test", "migrator:test", "database:test"],
           "verification-children": [
             "desktop:test:ipc",
             "desktop:test:main",
@@ -2127,7 +2147,9 @@
             "routine-ui:test:contract",
             "schedule-client:test:contract",
             "schedule-contracts:test:contract",
+            "schedule-ui:test:contract",
             "setting-contracts:test:contract",
+            "setting-ui:test:contract",
             "shared-primitives:test:contract",
             "task-client:test:contract",
             "task-contracts:test:contract",
@@ -2415,6 +2437,8 @@
             "routine-client",
             "routine-contracts",
             "routine-ui",
+            "schedule-ui",
+            "setting-ui",
             "task-client",
             "task-ui"
           ],
@@ -2468,29 +2492,27 @@
             "ai:test",
             "routine:test",
             "goal-client:test",
-            "schedule-ui:test",
-            "cloud-auth:test",
-            "utils:test",
-            "scheduler:test",
-            "agent-gateway:test"
+            "schedule-orchestration:test",
+            "data-portability:test",
+            "patterns:test"
           ],
           "unit-2": [
             "task:test",
             "account:test",
             "repository:test",
             "goal-core:test",
-            "setting-ui:test",
-            "setting:test",
-            "relation:test",
-            "label:test"
+            "cloud-auth:test",
+            "utils:test",
+            "agent-gateway:test"
           ],
           "unit-3": [
             "desktop:test",
             "notification:test",
             "schedule:test",
-            "schedule-orchestration:test",
-            "data-portability:test",
-            "patterns:test"
+            "setting:test",
+            "scheduler:test",
+            "relation:test",
+            "label:test"
           ],
           "build": [
             "account:build",
@@ -2579,7 +2601,7 @@
           ],
           "web-unit-1": ["app-vue:test#1/2", "web:test"],
           "web-unit-2": ["app-vue:test#2/2"],
-          "server-unit": ["api:test", "migrator:test", "database:test"],
+          "server-unit": ["api:test", "database:test", "migrator:test"],
           "verification-children": [
             "desktop:test:ipc",
             "desktop:test:main",
@@ -2610,6 +2632,8 @@
             "routine-client:test:contract",
             "routine-contracts:test:contract",
             "routine-ui:test:contract",
+            "schedule-ui:test:contract",
+            "setting-ui:test:contract",
             "task-client:test:contract",
             "task-ui:test:contract"
           ]
@@ -2686,7 +2710,7 @@
             "schedule-ui",
             "web"
           ],
-          "test:contract": ["routine-client", "routine-ui"],
+          "test:contract": ["routine-client", "routine-ui", "schedule-ui"],
           "test:smoke": [],
           "test:integration": [],
           "test:boundary": ["desktop"],
@@ -2707,7 +2731,7 @@
           ],
           "unit-1": [],
           "unit-2": [],
-          "unit-3": ["desktop:test", "schedule-ui:test"],
+          "unit-3": ["desktop:test"],
           "build": [
             "app-vue:build",
             "desktop:build",
@@ -2730,7 +2754,11 @@
           "verification-children": ["desktop:test:ipc", "desktop:test:main"],
           "web-visual": ["web:e2e:visual-regression"],
           "component-browser": ["ui-storybook:test:interaction"],
-          "contract": ["routine-client:test:contract", "routine-ui:test:contract"]
+          "contract": [
+            "routine-client:test:contract",
+            "routine-ui:test:contract",
+            "schedule-ui:test:contract"
+          ]
         },
         "serverShards": [
           {
@@ -2758,7 +2786,7 @@
           ],
           "typecheck": ["app-vue", "desktop", "routine-ui", "schedule-ui", "ui-storybook", "web"],
           "test": ["app-vue", "desktop", "governance-tools", "routine-ui", "schedule-ui", "web"],
-          "test:contract": ["routine-ui"],
+          "test:contract": ["routine-ui", "schedule-ui"],
           "test:smoke": [],
           "test:integration": [],
           "test:boundary": ["desktop"],
@@ -2779,7 +2807,7 @@
           ],
           "unit-1": [],
           "unit-2": [],
-          "unit-3": ["desktop:test", "schedule-ui:test"],
+          "unit-3": ["desktop:test"],
           "build": [
             "app-vue:build",
             "desktop:build",
@@ -2800,7 +2828,7 @@
           "verification-children": ["desktop:test:ipc", "desktop:test:main"],
           "web-visual": ["web:e2e:visual-regression"],
           "component-browser": ["ui-storybook:test:interaction"],
-          "contract": ["routine-ui:test:contract"]
+          "contract": ["routine-ui:test:contract", "schedule-ui:test:contract"]
         },
         "serverShards": [
           {
@@ -2954,6 +2982,8 @@
             "host-runtime",
             "notification-ui",
             "repository-ui",
+            "schedule-ui",
+            "setting-ui",
             "task-client",
             "task-ui"
           ],
@@ -3007,29 +3037,27 @@
             "ai:test",
             "routine:test",
             "goal-client:test",
-            "schedule-ui:test",
-            "cloud-auth:test",
-            "utils:test",
-            "scheduler:test",
-            "agent-gateway:test"
+            "schedule-orchestration:test",
+            "data-portability:test",
+            "patterns:test"
           ],
           "unit-2": [
             "task:test",
             "account:test",
             "repository:test",
             "goal-core:test",
-            "setting-ui:test",
-            "setting:test",
-            "relation:test",
-            "label:test"
+            "cloud-auth:test",
+            "utils:test",
+            "agent-gateway:test"
           ],
           "unit-3": [
             "desktop:test",
             "notification:test",
             "schedule:test",
-            "schedule-orchestration:test",
-            "data-portability:test",
-            "patterns:test"
+            "setting:test",
+            "scheduler:test",
+            "relation:test",
+            "label:test"
           ],
           "build": [
             "account:build",
@@ -3116,7 +3144,7 @@
           ],
           "web-unit-1": ["app-vue:test#1/2", "web:test"],
           "web-unit-2": ["app-vue:test#2/2"],
-          "server-unit": ["api:test", "migrator:test", "database:test"],
+          "server-unit": ["api:test", "database:test", "migrator:test"],
           "verification-children": [
             "desktop:test:ipc",
             "desktop:test:main",
@@ -3146,6 +3174,8 @@
             "host-runtime:test:contract",
             "notification-ui:test:contract",
             "repository-ui:test:contract",
+            "schedule-ui:test:contract",
+            "setting-ui:test:contract",
             "task-client:test:contract",
             "task-ui:test:contract"
           ]
@@ -3230,7 +3260,7 @@
             "setting-ui",
             "web"
           ],
-          "test:contract": ["ai-client", "ai-ui"],
+          "test:contract": ["ai-client", "ai-ui", "setting-ui"],
           "test:smoke": ["api"],
           "test:integration": ["ai", "api"],
           "test:boundary": ["desktop"],
@@ -3250,7 +3280,7 @@
             "memoflow:governance-check"
           ],
           "unit-1": [],
-          "unit-2": ["setting-ui:test"],
+          "unit-2": [],
           "unit-3": ["desktop:test", "ai:test"],
           "build": [
             "ai:build",
@@ -3286,7 +3316,7 @@
           ],
           "web-visual": ["web:e2e:visual-regression"],
           "component-browser": ["ui-storybook:test:interaction"],
-          "contract": ["ai-client:test:contract", "ai-ui:test:contract"]
+          "contract": ["ai-client:test:contract", "ai-ui:test:contract", "setting-ui:test:contract"]
         },
         "serverShards": [
           {
@@ -3773,7 +3803,9 @@
             "routine-ui",
             "schedule-client",
             "schedule-contracts",
+            "schedule-ui",
             "setting-contracts",
+            "setting-ui",
             "shared-primitives",
             "task-client",
             "task-contracts",
@@ -3833,23 +3865,23 @@
             "schedule:test",
             "goal-client:test",
             "powersync-schema:test",
-            "setting-client:test",
-            "ui-host-contracts:test",
-            "cloud-auth:test",
-            "data-portability:test",
-            "label:test"
-          ],
-          "unit-2": [
-            "task:test",
-            "account:test",
-            "assets:test",
-            "schedule-ui:test",
             "ui-core:test",
             "time:test",
             "ui-vue-shadcn:test",
             "scheduler:test",
             "patterns:test",
-            "http-client:test"
+            "ipc-client:test"
+          ],
+          "unit-2": [
+            "task:test",
+            "account:test",
+            "assets:test",
+            "setting-client:test",
+            "schedule-orchestration:test",
+            "setting:test",
+            "utils:test",
+            "relation:test",
+            "label:test"
           ],
           "unit-3": [
             "desktop:test",
@@ -3858,13 +3890,11 @@
             "repository:test",
             "goal-core:test",
             "quality:test",
-            "setting-ui:test",
-            "schedule-orchestration:test",
-            "setting:test",
-            "utils:test",
-            "relation:test",
+            "ui-host-contracts:test",
+            "cloud-auth:test",
+            "data-portability:test",
             "agent-gateway:test",
-            "ipc-client:test"
+            "http-client:test"
           ],
           "build": [
             "account:build",
@@ -4021,7 +4051,7 @@
           ],
           "web-unit-1": ["web:test", "app-vue:test#1/2"],
           "web-unit-2": ["app-vue:test#2/2"],
-          "server-unit": ["api:test", "database:test", "migrator:test"],
+          "server-unit": ["api:test", "migrator:test", "database:test"],
           "verification-children": [
             "desktop:test:ipc",
             "desktop:test:main",
@@ -4071,7 +4101,9 @@
             "routine-ui:test:contract",
             "schedule-client:test:contract",
             "schedule-contracts:test:contract",
+            "schedule-ui:test:contract",
             "setting-contracts:test:contract",
+            "setting-ui:test:contract",
             "shared-primitives:test:contract",
             "task-client:test:contract",
             "task-contracts:test:contract",

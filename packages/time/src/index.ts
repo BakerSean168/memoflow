@@ -99,3 +99,11 @@ export {
   type TimeEmptyKind,
   type ResolveEmptyLabelOptions,
 } from './empty-catalog';
+
+export {
+  createProductTimeSession,
+  type ProductTimeSession,
+  type ProductTimeSessionOptions,
+  type ProductTimePreferences,
+  type ProductTimeEmptyLabels,
+} from './product-time-session';
