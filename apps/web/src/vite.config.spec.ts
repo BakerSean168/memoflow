@@ -1,5 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import viteConfig from '../vite.config';
+import goalReferenceFixtureViteConfig from '../e2e/goal/reference/vite.config';
+import schedulePresentationViteConfig from '../e2e/schedule/presentation-authority/vite.config';
+import taskVisualGrammarFixtureViteConfig from '../e2e/task/visual-grammar/vite.config';
 
 describe('web Vite development configuration', () => {
   it('routes both versioned APIs and Better Auth through the shared /api boundary', async () => {
@@ -260,4 +263,31 @@ describe('web Vite development configuration', () => {
       else process.env.NODE_ENV = previousNodeEnv;
     }
   });
+});
+
+describe('E2E fixture Vite configuration', () => {
+  // #598: fixture builds run on a cold checkout with no packages/*/dist. Their
+  // entry points boot the shared visual app, which loads the app-vue DI barrel
+  // and therefore @memoflow/repository-ui (bare and ./host) at module load.
+  for (const [name, config] of [
+    ['goal-reference', goalReferenceFixtureViteConfig],
+    ['schedule-presentation-authority', schedulePresentationViteConfig],
+    ['task-visual-grammar', taskVisualGrammarFixtureViteConfig],
+  ] as const) {
+    it(`resolves Repository UI from source on the cold lane: ${name}`, () => {
+      const aliases = (config.resolve?.alias ?? []) as Array<{
+        find: string | RegExp;
+        replacement: string;
+      }>;
+
+      for (const [specifier, sourcePath] of [
+        ['@memoflow/repository-ui/host', 'packages/repository-ui/src/repository-ui-host.ts'],
+        ['@memoflow/repository-ui', 'packages/repository-ui/src/index.ts'],
+      ] as const) {
+        const alias = aliases.find((entry) => entry.find === specifier);
+        expect(alias, `${name}: ${specifier}`).toBeDefined();
+        expect(String(alias?.replacement).replace(/\\/g, '/')).toContain(`/${sourcePath}`);
+      }
+    });
+  }
 });
