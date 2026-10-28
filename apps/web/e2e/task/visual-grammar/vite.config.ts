@@ -114,6 +114,8 @@ export default defineConfig({
         ['@memoflow/goal-ui', 'packages/goal-ui/src/index.ts'],
         ['@memoflow/task-ui/host', 'packages/task-ui/src/task-ui-host.ts'],
         ['@memoflow/task-ui', 'packages/task-ui/src'],
+        ['@memoflow/repository-ui/host', 'packages/repository-ui/src/repository-ui-host.ts'],
+        ['@memoflow/repository-ui', 'packages/repository-ui/src/index.ts'],
         ['@memoflow/goal-workspace-contracts', 'packages/goal-workspace-contracts/src/index.ts'],
         ['@memoflow/task-workspace-contracts', 'packages/task-workspace-contracts/src/index.ts'],
         [
