@@ -63,6 +63,18 @@ test('Nx cache in CI is written to the same directory the cache action saves', a
   );
 });
 
+test('Nx maintenance keeps task affected mode and one pinned release toolchain', async () => {
+  const nxJson = JSON.parse(await read('nx.json'));
+  const root = JSON.parse(await read('package.json'));
+  const patterns = JSON.parse(await read('packages/patterns/package.json'));
+  assert.equal(nxJson.affected.legacy, false);
+  assert.equal(nxJson.release.version.preVersionCommand, 'pnpm exec nx run-many -t build');
+  for (const [name, version] of Object.entries(root.devDependencies)) {
+    if (name.startsWith('@nx/')) assert.equal(version, root.devDependencies.nx, name);
+  }
+  assert.equal(patterns.devDependencies['@nx/vite'], root.devDependencies.nx);
+});
+
 test('Lint validates Nx sync independently of Changes', async () => {
   const workflow = (await import('yaml')).default.parse(await read('.github/workflows/ci.yml'));
   assert.equal(workflow.jobs.lint.needs, undefined);
