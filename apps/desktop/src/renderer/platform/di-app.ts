@@ -5,6 +5,7 @@ import {
   installNotificationUiHost,
   installRepositoryUiHost,
   installRoutineUiHost,
+  installSettingUiHost,
   installTaskUiHost,
 } from '@memoflow/app-vue/di';
 /**
@@ -102,6 +103,8 @@ export function installDesktopAppServices(
   installNotificationUiHost();
   installRepositoryUiHost();
   installRoutineUiHost();
+  // Setting surfaces and the theme sync read `settingUiHost`; bind it before mount.
+  installSettingUiHost();
   const bridge = requireElectronBridge('installDesktopAppServices');
 
   const resultIpcClient = createResultIpcClient({ bridge });
