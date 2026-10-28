@@ -6,7 +6,7 @@ tags:
   - delivery
 description: CI/CD Platform V2 的目标架构、边界与稳定契约
 created: 2026-08-05T00:00:00Z
-updated: 2026-08-05T00:00:00Z
+updated: 2026-10-28T00:00:00Z
 ---
 
 # CI/CD Platform V2
@@ -378,3 +378,46 @@ preserve the first failure. Cache restoration and actual Nx task hits are distin
 measure both from real logs rather than cached Vitest output. The manual quality
 shadow benchmark follows the same six logical children (static, three Unit jobs,
 typecheck, build), preserving command parity and rejecting incomplete receipts.
+
+### Nx Cloud Ultracache：文件级 Affected 与按需录制（2026-10-28）
+
+PR 的 `Changes` 仍由 `tools/ci-cd-platform/lib/task-selection.mjs` 统一生成
+`delivery-manifest-v1`，并继续使用既有的 risk、Unit 分片、Build+Typecheck、
+测试收据和 CI Check 门禁。它直接调用 Nx 24 的 Task-based Affected 选择器；
+现在还从 Nx 原生 `runnerInputsForSelection` 获取 Ultracache 配置与
+`selectivelyHashTsConfig`，避免 CI 使用与 `nx affected` 不同的输入规划。
+
+- `nx.json` 的 `nxCloudId` 连接远程缓存。常规 PR/main CI 不调用
+  `nx-cloud start-workers`，仍在现有 GitHub Actions Runner 上运行任务。
+- Ultracache **只在有有效文件读取记录时**缩小 Affected；没有记录、Cloud 不可用或显式
+  `NX_NO_CLOUD=true` 时，Nx 回到原始 `inputs` 和 `^production`，
+  不以空任务清单代替缺失证据。升级 Nx 时必须回归内部适配接口。
+- `Build + Typecheck` **暂时例外**：现有混合目标调度器直接调用 Nx 内部
+  `runTasksForCommand`，接入 Nx Cloud 后在任务显示成功时仍可能不退出。
+  为防止 CI 卡住，此 Job 保留 `NX_NO_CLOUD=true`（使用原有 GitHub
+  Nx 缓存）并设置 40 分钟超时；其他单测/契约任务和 Changes 继续使用 Cloud。
+  后续跟踪 [#687](https://github.com/BakerSean168/memoflow/issues/687)。
+  这是一个待单独修复的兼容性问题，不等于构建已经获得远程缓存提速。
+- Workers 只用于按需采集记录：从 main 手动触发
+  `.github/workflows/nx-ultracache-recording.yml`，使用 3 个
+  `linux-medium-js` Worker，执行 4 个领域 Contract 的 `test:contract`
+  及其真实前置 Build。绝不作为日常 PR 质量门禁或自动定时任务。
+  **不要加 `--skip-nx-cache`**：跳过 Nx 缓存同时会跳过 Cloud 记录。
+  如果全命中缓存，需要在真实输入变化后的运行中重新采集；不人为制造漏算输入。
+- Cloud Workers 的最小数量为 3；`NX_CLOUD_AUTO_TASK_PACKING=false`
+  避免 Hobby 环境的 Valkey / continuous assignment 限制。即使录制成功，
+  是否节省端到端 CI 时间仍须用同一任务集合和完整墙钟时间验证。
+
+2026-10-28 隔离实证：
+[手动分布式试验](https://github.com/BakerSean168/memoflow/actions/runs/40664287272)
+中 12 项小任务的本地执行为 13 秒，Cloud Workers 为 122 秒，说明不应将 Workers
+加入轻量日常 CI。随后只修改未被测试实际读取的探针文件，
+[Ultracache Affected 验证](https://github.com/BakerSean168/memoflow/actions/runs/40664908542)
+使 `test:contract` 的受影响目标从 32/37 缩至 28/37；真正修改 Task Workspace
+契约的正向对照仍选中 4 项，未观察到漏选。该收益只发生在已录制覆盖的任务；
+并不等于全量 CI 都会获得相同比例的减少。
+
+可在隔离环境用 `NX_NO_CLOUD=true` 与默认 Cloud 模式分别执行
+`nx affected -t test:contract --files=<changed-file> --explain=stdout`，
+比较原生选择结果。生产追踪应保留普通 Nx 缓存、监控免费额度，不使用
+`nx-cloud start-workers` 改写现有的分片与产物验证策略。

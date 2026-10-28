@@ -20,8 +20,24 @@ export const CI_TARGETS = Object.freeze([
   'test:coverage',
 ]);
 
-// Use the same Nx 23.3 task planner as nx affected (NX_LEGACY_AFFECTED=false).
-// Keep the internal API in one adapter, covered by live replay tests.
+// Use the same Nx 24 task planner and Ultracache file-read inputs as
+// "nx affected". Keep internal Nx API imports isolated and covered by tests.
+// Without a valid Cloud recording Nx safely falls back to declared task inputs.
+export async function loadAffectedRunnerInputs(
+  nxJson,
+  {
+    runnerInputsForSelection = require('nx/src/tasks-runner/run-command').runnerInputsForSelection,
+    configurationsOf = require('nx/src/ultracache/store').configurationsOf,
+  } = {},
+) {
+  const { ultracacheConfigurationOutcome, selectivelyHashTsConfig } =
+    await runnerInputsForSelection({ targets: [...CI_TARGETS] }, nxJson);
+  return {
+    selectivelyHashTsConfig,
+    ultracacheConfigurations: configurationsOf(ultracacheConfigurationOutcome),
+  };
+}
+
 export async function selectCiTasks({ files, base, head, full }) {
   const { createProjectGraphAsync } = require('nx/src/project-graph/project-graph');
   const { selectAffectedTasks } = require('nx/src/project-graph/affected/affected-tasks');
@@ -55,6 +71,10 @@ export async function selectCiTasks({ files, base, head, full }) {
       );
       if (unowned.length) throw new Error(`Unknown project owner: ${unowned.join(', ')}`);
       const fileChangeArgs = base && head ? { base, head, files: [] } : { files };
+      // Nx's own affected CLI calls runnerInputsForSelection() before planning.
+      // Pass that same context to our selector; otherwise Nx Cloud's recorded
+      // file reads never reach the planner and PR CI remains project-grained.
+      const runnerInputs = await loadAffectedRunnerInputs(nxJson);
       const result = await selectAffectedTasks(
         graph,
         nxJson,
@@ -67,11 +87,13 @@ export async function selectCiTasks({ files, base, head, full }) {
           extraTargetDependencies: {},
           excludeTaskDependencies: false,
           exclude: [],
+          selectivelyHashTsConfig: runnerInputs.selectivelyHashTsConfig,
           explain: false,
         },
         {
           touchedFiles: calculateFileChanges(files, fileChangeArgs),
           packageJson: readPackageJson(),
+          ultracacheConfigurations: runnerInputs.ultracacheConfigurations,
         },
       );
       const selected = [...result.taskSelection.initiatingTaskIds].map(
