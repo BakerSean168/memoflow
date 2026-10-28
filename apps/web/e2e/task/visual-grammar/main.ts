@@ -11,7 +11,7 @@ import {
 import { toGoalReference, toKeyResultReference } from '@memoflow/goal-contracts';
 import type { UpdateTaskPlanReq, TaskPlanClientDTO } from '@memoflow/task-contracts';
 import { GOAL_SERVICE_KEY, LABEL_SERVICE_KEY, TASK_SERVICE_KEY } from '@memoflow/app-vue/di/keys';
-import type { IGoalService, ILabelService, ITaskService } from '@memoflow/app-vue/di/types';
+import type { IGoalService, ILabelService, ITaskService } from '@memoflow/app-vue/di';
 import { productionLocaleMessages } from '@memoflow/app-vue/locales/production-messages';
 import { installServerStateRuntime } from '@memoflow/app-vue/platform/server-state';
 import { TaskDetailView, TaskManagementView } from '@memoflow/task-ui';

@@ -21,11 +21,7 @@ import {
   LABEL_SERVICE_KEY,
   GOAL_KNOWLEDGE_SERVICE_KEY,
 } from '@memoflow/app-vue/di/keys';
-import type {
-  IGoalService,
-  ILabelService,
-  IGoalKnowledgeService,
-} from '@memoflow/app-vue/di/types';
+import type { IGoalService, ILabelService, IGoalKnowledgeService } from '@memoflow/app-vue/di';
 import { productionLocaleMessages } from '@memoflow/app-vue/locales/production-messages';
 import { installServerStateRuntime } from '@memoflow/app-vue/platform/server-state';
 import {
