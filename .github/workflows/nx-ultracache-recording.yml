@@ -1,0 +1,50 @@
+name: Nx Ultracache recording (manual)
+
+# Ultracache needs real file reads from Cloud Workers. This deliberately never
+# runs on PRs, pushes, or a schedule; normal CI stays on GitHub-hosted runners.
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: nx-ultracache-recording
+  cancel-in-progress: false
+
+env:
+  CI: 'true'
+  NX_DAEMON: 'false'
+  NX_TUI: 'false'
+  NX_LEGACY_AFFECTED: 'false'
+  # Resource packing failed on the Hobby workspace without a Valkey index.
+  # Standard Nx Cloud Workers distribution has been verified separately.
+  NX_CLOUD_AUTO_TASK_PACKING: 'false'
+
+jobs:
+  record-contracts:
+    if: github.ref == 'refs/heads/main'
+    name: Record contract inputs on Cloud Workers
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          fetch-depth: 2
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version: '24'
+      - name: Prepare pnpm
+        run: corepack enable
+      - name: Start three Cloud Workers
+        run: pnpm dlx nx-cloud start-workers
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile --reporter=append-only
+      - name: Record real file reads for contract tasks
+        run: |
+          pnpm exec nx run-many -t test:contract \
+            --projects=goal-contracts,task-contracts,goal-workspace-contracts,task-workspace-contracts \
+            --outputStyle=static
+      - name: Stop Cloud Workers
+        if: always()
+        run: pnpm dlx nx-cloud stop-all-workers || true

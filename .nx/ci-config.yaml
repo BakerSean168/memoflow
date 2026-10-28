@@ -1,0 +1,8 @@
+# Nx Cloud Workers are started only by the manual Ultracache recording workflow.
+# PR/main CI keeps its existing GitHub Actions orchestration and does not call start-workers.
+dte:
+  distribute-on: 3 linux-medium-js
+
+lifecycle:
+  stop-after:
+    - test:contract

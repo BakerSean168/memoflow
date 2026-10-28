@@ -319,6 +319,11 @@ jobs:
     needs: scope-detector
     if: needs.scope-detector.result == 'success' && needs.scope-detector.outputs.job_build == 'true'
     runs-on: ubuntu-latest
+    timeout-minutes: 40
+    # The exact mixed-target Nx internal scheduler currently hangs in Nx Cloud
+    # after reporting successful builds. Keep the existing local runner and
+    # GitHub cache here until its Cloud lifecycle is fixed and reverified.
+    env: { NX_NO_CLOUD: 'true' }
     steps:
       - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
         with: { fetch-depth: 2 }
