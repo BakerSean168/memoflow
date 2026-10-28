@@ -187,7 +187,7 @@ async function resolveNightlyEligibility({
     latestNightly = { ...last, sha: assertSha(sha, 'last Nightly') };
     if (sha !== mainSha) {
       comparison = data(
-        await github.rest.repos.compareCommits({
+        await github.rest.repos.compareCommitsWithBasehead({
           owner,
           repo,
           basehead: last.tag + '...' + mainSha,
