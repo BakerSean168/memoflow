@@ -148,6 +148,7 @@ export async function detectScope({
       version: 1,
       engine: 'nx-task-inputs',
       fallback: selection.fallback,
+      ultracache: selection.ultracache,
       noopTasks: selection.noopTasks,
       unitContractAliases: selection.unitContractAliases,
     },

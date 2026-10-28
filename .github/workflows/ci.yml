@@ -86,6 +86,10 @@ jobs:
           setup-uv: 'false'
           enable-nx-cache: 'false'
           changes-only: 'true'
+      # The standalone planner does not execute a task to register the checkout
+      # with Cloud. Register its CI context before resolving recorded inputs.
+      - name: Initialize Nx Cloud selection context without Workers
+        run: pnpm exec nx-cloud start-ci-run --no-distribution
       - name: Calculate versioned scope once
         id: scope
         env:

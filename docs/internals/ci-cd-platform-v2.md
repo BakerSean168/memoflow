@@ -389,6 +389,10 @@ PR 的 `Changes` 仍由 `tools/ci-cd-platform/lib/task-selection.mjs` 统一生�
 
 - `nx.json` 的 `nxCloudId` 连接远程缓存。常规 PR/main CI 不调用
   `nx-cloud start-workers`，仍在现有 GitHub Actions Runner 上运行任务。
+  Changes 在独立规划前以 `nx-cloud start-ci-run --no-distribution` 注册当前
+  checkout 的 CI 上下文，供配置读取使用；该命令不启动 Workers。
+  `scope.selection.ultracache` 保留加载状态、配置提交/数量，以及各任务实际使用或
+  回退的诊断；`fetched` 但 `tasks: 0` 不能作为优化生效的证据。
 - Ultracache **只在有有效文件读取记录时**缩小 Affected；没有记录、Cloud 不可用或显式
   `NX_NO_CLOUD=true` 时，Nx 回到原始 `inputs` 和 `^production`，
   不以空任务清单代替缺失证据。升级 Nx 时必须回归内部适配接口。
@@ -398,12 +402,18 @@ PR 的 `Changes` 仍由 `tools/ci-cd-platform/lib/task-selection.mjs` 统一生�
   Nx 缓存）并设置 40 分钟超时；其他单测/契约任务和 Changes 继续使用 Cloud。
   后续跟踪 [#687](https://github.com/BakerSean168/memoflow/issues/687)。
   这是一个待单独修复的兼容性问题，不等于构建已经获得远程缓存提速。
-- Workers 只用于按需采集记录：从 main 手动触发
+- Workers 只用于按需采集记录：手动选择可信分支触发
   `.github/workflows/nx-ultracache-recording.yml`，使用 3 个
   `linux-medium-js` Worker，执行 4 个领域 Contract 的 `test:contract`
   及其真实前置 Build。绝不作为日常 PR 质量门禁或自动定时任务。
   **不要加 `--skip-nx-cache`**：跳过 Nx 缓存同时会跳过 Cloud 记录。
-  如果全命中缓存，需要在真实输入变化后的运行中重新采集；不人为制造漏算输入。
+  录制命令传入 Vitest 的 default + JSON reporter 和每个 Run/Attempt 唯一的
+  `.tmp-ultracache-*.json` 输出路径。这是实际命令输入变化，完整执行同一测试集，
+  不更改业务代码、断言或远程缓存设置。前置 Build 可继续命中缓存。
+  录制门禁要求真实 Cache Miss、执行任务的 Worker、`processed > 0`、零拒绝和
+  配置生成；全命中缓存会失败。日志作为 Actions artifact 保存。
+  随后的独立 CI 上下文加载发布后的配置，对比原生 Nx 与正式 Manifest/Dispatch
+  在无关文件和 Task Workspace 契约变化下的任务集合；缺少配置或没有减少任务会失败。
 - Cloud Workers 的最小数量为 3；`NX_CLOUD_AUTO_TASK_PACKING=false`
   避免 Hobby 环境的 Valkey / continuous assignment 限制。即使录制成功，
   是否节省端到端 CI 时间仍须用同一任务集合和完整墙钟时间验证。
