@@ -4,7 +4,11 @@
 import './di/repository-ui-host';
 
 // Schedule surfaces are hosted by this composition root (Issue #630 §4.4).
-import './di/schedule-ui-host';
+// The binder is explicit: importing the DI module no longer has side effects.
+import { installScheduleUiHost } from './di/schedule-ui-host';
+
+installScheduleUiHost();
+
 import './di/setting-ui-host';
 
 // ── DI ──

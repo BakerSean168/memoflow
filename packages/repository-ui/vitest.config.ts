@@ -18,10 +18,6 @@ export default mergeConfig(
         ),
       },
       {
-        find: '@repository-ui-test-host/shared/utils/useStrictInject',
-        replacement: path.resolve(import.meta.dirname, 'src/utils/useStrictInject.ts'),
-      },
-      {
         find: '@repository-ui-test-host/layouts/shell/useKnowledgeNativeSurface',
         replacement: path.resolve(
           import.meta.dirname,

@@ -5,7 +5,9 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { createDefaultUserPreferenceProfile } from '@memoflow/setting-contracts';
 import { setProductTimePreferences } from '../../../shared/utils/product-time';
 // The preview consumes @memoflow/schedule-ui helpers that read the bound host.
-import '../../../di/schedule-ui-host';
+import { installScheduleUiHost } from '../../../di/schedule-ui-host';
+
+installScheduleUiHost();
 import type { CalendarEventItem, ScheduleCapsuleSnapshot } from '@memoflow/schedule-ui';
 import ScheduleCapsulePreview from './ScheduleCapsulePreview.vue';
 

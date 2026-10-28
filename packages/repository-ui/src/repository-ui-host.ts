@@ -1,77 +1,39 @@
-import type {
-  Component,
-  ComputedRef,
-  InjectionKey,
-  MaybeRefOrGetter,
-  ObjectDirective,
-  Ref,
-} from 'vue';
-import type { QueryClient, QueryKey } from '@tanstack/vue-query';
+import type { Component, InjectionKey } from 'vue';
+import type { QueryKey } from '@tanstack/vue-query';
 import type { RepositoryClientPort } from '@memoflow/repository-client';
-import type { translateResultErrorMessage } from '@memoflow/http-client';
-export { useStrictInject } from './utils/useStrictInject';
+import type { ElectronBridge } from '@memoflow/ipc-client';
+import type { PlatformRendererHost, PlatformServerStateRuntime } from '@memoflow/ui-host-contracts';
+import type { KnowledgeCaptureNativeEditSession } from './composables/knowledgeCaptureNativeEditSession';
 
-export type PanelSurfaceStatus = 'clean' | 'dirty' | 'busy';
-export type PanelWidthTier = 'narrow' | 'wide';
-
-export interface PanelWidthContext {
-  width: Readonly<Ref<number | null>>;
-  tier: ComputedRef<PanelWidthTier>;
-  isNarrow: ComputedRef<boolean>;
-  isWide: ComputedRef<boolean>;
-}
-
-export interface OwnerNativeEditSession<
-  Patch,
-  Child,
-  ChildId,
-  Field,
-  State,
-  SubmitContext = void,
-  SubmitResult = void,
-> {
-  patch(changes: Patch): void;
-  addChild(child: Child): void;
-  removeChild(child: ChildId): void;
-  focus(field: Field): Promise<void>;
-  requestSubmit(context?: SubmitContext): Promise<SubmitResult>;
-  requestCancel(): void;
-  readDraftState(): State;
-}
+/** Panel transition status; single declaration lives in the platform contract. */
+export type { PanelSurfaceStatus } from '@memoflow/ui-host-contracts';
+/** Panel width shape; single declaration lives in the platform contract. */
+export type { PanelWidthContext, PanelWidthTier } from '@memoflow/ui-host-contracts';
 
 export interface KnowledgeNativeSurfaceHost {
-  openCreate(): Promise<any>;
-  locate(): any;
-  register(fullPath: string, session: any): () => void;
+  openCreate(): Promise<KnowledgeCaptureNativeEditSession>;
+  locate(): KnowledgeCaptureNativeEditSession | null;
+  register(fullPath: string, session: KnowledgeCaptureNativeEditSession): () => void;
 }
 
-/** Renderer composition dependencies. The host retains DI, cache, locale and platform ownership. */
-export interface RepositoryUiHost {
+/**
+ * Renderer composition dependencies. Platform capabilities come from
+ * {@link PlatformRendererHost}; this port only declares the Repository slots.
+ */
+export interface RepositoryUiHost extends PlatformRendererHost {
   REPOSITORY_SERVICE_KEY: InjectionKey<RepositoryClientPort>;
-  DESKTOP_BRIDGE_KEY: InjectionKey<any>;
-  SERVER_STATE_RUNTIME_KEY?: InjectionKey<any>;
-  SERVER_STATE_IDENTITY_SCOPE_KEY?: InjectionKey<any>;
+  DESKTOP_BRIDGE_KEY: InjectionKey<ElectronBridge>;
+  SERVER_STATE_RUNTIME_KEY: InjectionKey<PlatformServerStateRuntime>;
+  SERVER_STATE_IDENTITY_SCOPE_KEY: InjectionKey<() => string>;
   components: {
     ProductSurfaceHeader: Component;
     ProductSurfaceState: Component;
     ProductDialogShell: Component;
     ProductSheetSurface: Component;
   };
-  vKeyboardList: ObjectDirective<HTMLElement>;
-  useStrictInject<T>(key: InjectionKey<T>, name?: string): T;
-  translateResultError: typeof translateResultErrorMessage;
   stripMarkdownFrontmatter(source: string): string;
   renderSafeMarkdown(source: string): string;
-  useDialogCloseGuard(options: {
-    dirty: MaybeRefOrGetter<boolean>;
-    busy?: MaybeRefOrGetter<boolean>;
-    onClose(): void | Promise<void>;
-  }): { confirming: Ref<boolean>; requestClose(): Promise<boolean> };
   useKnowledgeNativeSurfaceRegistration(): KnowledgeNativeSurfaceHost | null;
-  usePanelSurfaceStatus(status: Ref<PanelSurfaceStatus>): void;
-  usePanelWidth(): PanelWidthContext;
-  useServerStateRuntime(): { queryClient: QueryClient };
-  useServerStateIdentityScope(): () => string;
   recentKnowledgeQueryKeys: {
     all: readonly unknown[];
     identity?(identityScope: string): QueryKey;

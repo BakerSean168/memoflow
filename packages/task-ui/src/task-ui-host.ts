@@ -1,14 +1,12 @@
-import type {
-  Component,
-  InjectionKey,
-  MaybeRefOrGetter,
-  ObjectDirective,
-  Ref,
-  ShallowRef,
-} from 'vue';
+import type { Component, InjectionKey, Ref, ShallowRef } from 'vue';
 import type { QueryClient } from '@tanstack/vue-query';
-import type { TimeFacade } from '@memoflow/time';
 import type { Ymd } from '@memoflow/shared-primitives';
+import type {
+  PanelSurfaceStatus,
+  PlatformLabelCatalog,
+  PlatformLabelOption,
+  PlatformRendererHost,
+} from '@memoflow/ui-host-contracts';
 import type { TaskClientPort } from '@memoflow/task-client';
 import type { LabelClientDTO } from '@memoflow/label-contracts';
 import type { Result } from '@memoflow/transport-contracts/result';
@@ -96,11 +94,8 @@ export interface TaskUiServerStateRuntime {
   clearIdentity(identityScope: string): void;
 }
 
-export interface TaskUiLabelOption {
-  readonly id: string;
-  readonly name: string;
-  readonly color?: string | null;
-}
+/** Label option projection; single declaration lives in the platform contract. */
+export type TaskUiLabelOption = PlatformLabelOption;
 
 export interface TaskUiMenuAction {
   key: string;
@@ -121,7 +116,7 @@ export interface TaskUiDialogDraftStore {
   clear(key: string): void;
 }
 
-export type TaskUiPanelSurfaceStatus = 'clean' | 'dirty' | 'busy';
+export type TaskUiPanelSurfaceStatus = PanelSurfaceStatus;
 
 /**
  * Task-native edit session surface. The concrete session shape lives with the
@@ -168,7 +163,7 @@ export type ServerStateRuntime = TaskUiServerStateRuntime;
 export type TaskPlanListQueryInput = TaskUiTaskPlanListQueryInput;
 
 /** Renderer composition dependencies for the Task surfaces. */
-export interface TaskUiHost {
+export interface TaskUiHost extends PlatformRendererHost {
   // ---- DI keys ----
   TASK_SERVICE_KEY: InjectionKey<TaskClientPort>;
   GOAL_SERVICE_KEY: InjectionKey<TaskUiGoalBindingPort>;
@@ -178,7 +173,6 @@ export interface TaskUiHost {
   SERVER_STATE_RUNTIME_KEY: InjectionKey<TaskUiServerStateRuntime>;
   SERVER_STATE_IDENTITY_SCOPE_KEY: InjectionKey<ShallowRef<string> | Ref<string>>;
   useServerStateRuntime(): TaskUiServerStateRuntime;
-  useServerStateIdentityScope(): () => string;
   createTestServerStateRuntime(): TaskUiServerStateRuntime;
   taskPlanQueryKeys: TaskUiTaskPlanQueryKeys;
   taskOccurrenceQueryKeys: TaskUiTaskOccurrenceQueryKeys;
@@ -189,13 +183,6 @@ export interface TaskUiHost {
   TASK_OCCURRENCE_STALE_TIME_MS: number;
 
   // ---- DI & error helpers ----
-  useStrictInject<T>(key: InjectionKey<T>, name?: string): T;
-  sanitizeForIpc<T>(value: T): T;
-  createComposableHandleError(options: {
-    t: TaskUiTranslateFn;
-    setError(message: string | null): void;
-    report?(message: string): void;
-  }): (error: unknown, fallbackKey: string) => void;
   executeDesktopAuthenticatedResult<T>(options: {
     operation: () => Promise<Result<T>>;
     logScope: string;
@@ -209,38 +196,20 @@ export interface TaskUiHost {
   }): Promise<Result<T>>;
 
   // ---- shell / dialog / i18n ----
-  useDialogCloseGuard(options: {
-    dirty: MaybeRefOrGetter<boolean>;
-    busy?: MaybeRefOrGetter<boolean>;
-    onClose(): void | Promise<void>;
-  }): { confirming: Ref<boolean>; requestClose(): Promise<boolean> };
   useDialogDraftStore(): TaskUiDialogDraftStore;
   clearDialogDrafts(): void;
-  useLabelCatalog(): {
-    options: Ref<TaskUiLabelOption[]>;
-    labels: Ref<LabelClientDTO[]>;
-    isLoading: Ref<boolean>;
-    isCreating: Ref<boolean>;
-    createLabel(name: string): Promise<LabelClientDTO>;
-    resolveNames(names: readonly string[]): Promise<string[]>;
-  };
-  getI18nGlobal(): { t(key: string, ...args: unknown[]): unknown };
+  useLabelCatalog(): PlatformLabelCatalog & { labels: Ref<LabelClientDTO[]> };
 
   // ---- surface status & native registration ----
-  usePanelSurfaceStatus(status: Ref<TaskUiPanelSurfaceStatus>): void;
   useTaskNativeSurfaceRegistration(): TaskUiNativeSurfaceHost<unknown> | null;
 
   // ---- select / calendar / keyboard ----
   normalizeSelectString(value: unknown): string | null;
   handleCalendarSelect(date: unknown, setter: (value: string) => void): void;
-  vKeyboardList: ObjectDirective<HTMLElement>;
 
   // ---- product time ----
-  getProductTime(): TimeFacade;
   getProductTodayYmd(): Ymd;
-  productTimeRevision: Ref<number>;
   formatProductDate(value: number | string | Date | null | undefined, empty?: string): string;
-  formatProductDateTime(value: number | string | Date | null | undefined, empty?: string): string;
   formatProductYmd(value: Ymd | null | undefined, empty?: string): string;
   startOfDayMs(ms: number): number;
   endOfDayMs(ms: number): number;

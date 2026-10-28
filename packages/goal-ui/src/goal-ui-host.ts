@@ -1,10 +1,9 @@
-import type { Component, InjectionKey, Ref, ObjectDirective, MaybeRefOrGetter } from 'vue';
-import type { QueryClient } from '@tanstack/vue-query';
-import type { TimeFacade } from '@memoflow/time';
+import type { Component, InjectionKey, Ref } from 'vue';
 import type { Ymd } from '@memoflow/shared-primitives';
 import type { GoalClientPort } from '@memoflow/goal-client';
 import type { LabelClientDTO } from '@memoflow/label-contracts';
 import type { GoalKnowledgeClientPort } from '@memoflow/relation-contracts';
+import type { PlatformLabelOption, PlatformRendererHost } from '@memoflow/ui-host-contracts';
 import type {
   AIWorkflowRunView,
   AIWorkflowGetClientRequest,
@@ -29,14 +28,10 @@ export type GoalKnowledgePort = Pick<
   GoalKnowledgeClientPort,
   'linkGoalKnowledge' | 'unlinkGoalKnowledge' | 'listGoalKnowledge'
 >;
-import type { ResultErrorTranslateFn, translateResultErrorMessage } from '@memoflow/http-client';
 import type { GoalDraftCheckpointStore } from './infrastructure/goal-draft-checkpoint.indexeddb';
 
-export interface GoalLabelOption {
-  readonly id: string;
-  readonly name: string;
-  readonly color?: string | null;
-}
+/** Label option projection; single declaration lives in the platform contract. */
+export type GoalLabelOption = PlatformLabelOption;
 export interface GoalMenuAction {
   key: string;
   testId?: string;
@@ -52,8 +47,12 @@ export interface GoalMenuAction {
 type DateValue = number | string | Date | null | undefined;
 type EmptyLabel = string | { display?: string; unknown?: string };
 
-/** Renderer composition dependencies. The host retains DI, cache, locale and platform ownership. */
-export interface GoalUiHost {
+/**
+ * Renderer composition dependencies. The host retains DI, cache, locale and
+ * platform ownership; platform-level capabilities come from
+ * {@link PlatformRendererHost} and only Goal slots remain here.
+ */
+export interface GoalUiHost extends PlatformRendererHost {
   GOAL_SERVICE_KEY: InjectionKey<GoalClientPort>;
   GOAL_DRAFT_CHECKPOINT_KEY: InjectionKey<GoalDraftCheckpointStore>;
   GOAL_KNOWLEDGE_SERVICE_KEY: InjectionKey<GoalKnowledgePort>;
@@ -81,28 +80,7 @@ export interface GoalUiHost {
     | 'ProductInlineValidation',
     Component
   >;
-  vKeyboardList: ObjectDirective<HTMLElement>;
-  useStrictInject<T>(key: InjectionKey<T>, name?: string): T;
-  sanitizeForIpc<T>(value: T): T;
-  translateResultError: typeof translateResultErrorMessage;
-  createComposableHandleError(options: {
-    t: ResultErrorTranslateFn;
-    setError(message: string | null): void;
-    report?(message: string): void;
-  }): (error: unknown, fallbackKey: string) => void;
   useTransientFeedback(durationMs?: number): { visible: Ref<boolean>; show(): void; hide(): void };
-  useDialogCloseGuard(options: {
-    dirty: MaybeRefOrGetter<boolean>;
-    busy?: MaybeRefOrGetter<boolean>;
-    onClose(): void | Promise<void>;
-  }): { confirming: Ref<boolean>; requestClose(): Promise<boolean> };
-  useLabelCatalog(): {
-    options: Ref<GoalLabelOption[]>;
-    isLoading: Ref<boolean>;
-    isCreating: Ref<boolean>;
-    createLabel(name: string): Promise<LabelClientDTO>;
-    resolveNames(names: readonly string[]): Promise<string[]>;
-  };
   useReferenceableKnowledgeNotes(): {
     notes: Ref<Array<{ documentId: string; knowledgeSpaceId: string; title: string }>>;
     isLoading: Ref<boolean>;
@@ -110,20 +88,14 @@ export interface GoalUiHost {
     load(options?: { query?: string; limit?: number }): Promise<void>;
     cancel(): void;
   };
-  useServerStateRuntime(): { queryClient: QueryClient };
-  useServerStateIdentityScope(): () => string;
   goalHomeQueryKeys: { summary(identityScope: string): readonly string[] };
   GOAL_HOME_STALE_TIME_MS: number;
   subscribeWorkspaceEvents(
     runtime: GoalWorkflowReadPort,
     options: GoalWorkspaceEventStreamOptions,
   ): Promise<void>;
-  getI18nGlobal(): { t(key: string): string };
-  getProductTime(): TimeFacade;
   getProductTodayYmd(): Ymd;
-  productTimeRevision: Ref<number>;
   formatProductDate(value: DateValue, empty?: EmptyLabel): string;
-  formatProductDateTime(value: DateValue, empty?: EmptyLabel): string;
   formatProductYmd(value: Ymd | null | undefined, empty?: EmptyLabel): string;
   formatProductPattern(value: DateValue, pattern: string, empty?: EmptyLabel): string;
   formatProductRelative(value: number | null | undefined, empty?: EmptyLabel): string;

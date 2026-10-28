@@ -16,6 +16,7 @@
     }
   },
   "dependencies": {
+    "@memoflow/ui-host-contracts": "workspace:*",
     "@lucide/vue": "^1.48.0",
     "@memoflow/desktop-contracts": "workspace:*",
     "@memoflow/http-client": "workspace:*",

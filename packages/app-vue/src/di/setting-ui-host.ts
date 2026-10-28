@@ -42,7 +42,6 @@ import ProductSurfaceHeader from '../shared/components/ProductSurfaceHeader.vue'
 import ReleaseNotes from '../shared/components/ReleaseNotes.vue';
 import { useAppShellStore } from '../layouts/shell/useAppShellStore';
 import { returnFromSettingsScene } from '../layouts/shell/useShellRouterSync';
-import { useServerStateIdentityScope } from '../platform/server-state';
 import {
   displayChord,
   eventChord,
@@ -51,17 +50,11 @@ import {
 } from '../shared/keyboard/keymap';
 import { keyboard } from '../shared/keyboard/runtime';
 import { saveDeviceKeymap } from '../shared/keyboard/device-keymap';
-import { createComposableHandleError } from '../shared/utils/create-composable-handle-error';
 import { readDesktopAccessSnapshot } from '../shared/utils/desktop-profile-access';
 import { getDesktopAuthApi } from '../shared/utils/desktop-auth-recovery';
-import { sanitizeForIpc } from '../shared/utils/ipc';
 import { normalizeSelectString } from '../shared/utils/normalize-select-string';
-import { getProductTime, setProductTimePreferences } from '../shared/utils/product-time';
-import {
-  getGlobalResultErrorT,
-  translateResultError,
-} from '../shared/utils/translate-result-error';
-import { useStrictInject } from '../shared/utils/useStrictInject';
+import { setProductTimePreferences } from '../shared/utils/product-time';
+import { getGlobalResultErrorT } from '../shared/utils/translate-result-error';
 import { setI18nLocale } from '../plugins/i18n';
 import {
   AI_AGENT_REGISTRY_KEY,
@@ -77,11 +70,13 @@ import {
   REPOSITORY_SERVICE_KEY,
   SETTING_SERVICE_KEY,
 } from './keys';
+import { installPlatformRendererHost } from './platform-ui-host';
 import type { SettingUiHost } from '@memoflow/setting-ui/host';
 
 /** Bind the renderer capabilities the Settings surfaces rely on before mounting them. */
 export function installSettingUiHost(): void {
   bindSettingUiHost({
+    ...installPlatformRendererHost(),
     SETTING_SERVICE_KEY,
     DATA_PORTABILITY_SERVICE_KEY,
     DESKTOP_AUTH_API_KEY,
@@ -94,18 +89,12 @@ export function installSettingUiHost(): void {
     AUTH_SERVICE_KEY,
     EXTERNAL_AGENT_SERVICE_KEY,
     REPOSITORY_SERVICE_KEY,
-    useStrictInject,
-    createComposableHandleError,
-    sanitizeForIpc,
     getGlobalResultErrorT,
-    translateResultError,
     normalizeSelectString,
     readDesktopAccessSnapshot,
     getDesktopAuthApi,
     setProductTimePreferences,
-    getProductTime,
     setI18nLocale,
-    useServerStateIdentityScope,
     keyboard,
     eventChord,
     normalizeChord,

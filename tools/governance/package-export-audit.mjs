@@ -64,6 +64,7 @@ const PACKAGE_SPECIFIC_SUBPATHS = {
   account: ['./api', './electron'],
   'task-contracts': ['./*'],
   'task-ui': ['./host', './composables/*', './components/*'],
+  'schedule-ui': ['./host'],
   'schedule-contracts': ['./*'],
   'setting-contracts': ['./*'],
   'cloud-auth-contracts': ['./*'],
@@ -115,6 +116,7 @@ const PACKAGE_SPECIFIC_SUBPATHS = {
   ],
   assets: ['./images', './audio'],
   'ui-core': ['./styles/globals.css', './styles/theme.css'],
+  'ui-host-contracts': ['.'],
   'ui-vue-shadcn': [
     './components/ui/button',
     './components/ui/card',

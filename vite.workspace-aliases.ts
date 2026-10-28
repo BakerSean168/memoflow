@@ -335,6 +335,7 @@ export function createHostRuntimeAliasEntries(workspaceRoot: string): Alias[] {
 export function createUiVueSourceAliasEntries(workspaceRoot: string): Alias[] {
   const uiVueRoot = resolveFromWorkspace(workspaceRoot, 'packages/ui-vue-shadcn/src');
   const uiCoreRoot = resolveFromWorkspace(workspaceRoot, 'packages/ui-core/src');
+  const uiHostContractsRoot = resolveFromWorkspace(workspaceRoot, 'packages/ui-host-contracts/src');
 
   return [
     {
@@ -389,6 +390,14 @@ export function createUiVueSourceAliasEntries(workspaceRoot: string): Alias[] {
     },
 
     {
+      find: /^@memoflow\/schedule-ui\/host$/,
+      replacement: resolveFromWorkspace(
+        workspaceRoot,
+        'packages/schedule-ui/src/schedule-ui-host.ts',
+      ),
+    },
+
+    {
       find: /^@memoflow\/ui-vue-shadcn\/(.+)$/,
       replacement: `${uiVueRoot}/$1`,
     },
@@ -403,6 +412,10 @@ export function createUiVueSourceAliasEntries(workspaceRoot: string): Alias[] {
     {
       find: /^@memoflow\/ui-core$/,
       replacement: `${uiCoreRoot}/index.ts`,
+    },
+    {
+      find: /^@memoflow\/ui-host-contracts$/,
+      replacement: `${uiHostContractsRoot}/index.ts`,
     },
     {
       find: /^@\/components\/ui\/(.+)$/,

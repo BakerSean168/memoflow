@@ -60,7 +60,7 @@ import type {
 } from '@memoflow/repository-contracts';
 import type { DeviceKeymap, KeyboardCommandId } from '@memoflow/desktop-contracts';
 import type { SettingClientPort } from '@memoflow/setting-client';
-import type { TimeFacade } from '@memoflow/time';
+import type { PlatformRendererHost } from '@memoflow/ui-host-contracts';
 
 /** Renderer locales owned by the host i18n platform. */
 export type SettingLocale = 'zh-CN' | 'en-US';
@@ -301,8 +301,11 @@ export interface SettingShellStore {
   setSettingsNavigationOpen(open: boolean): void;
 }
 
-/** Renderer composition dependencies. */
-export interface SettingUiHost {
+/**
+ * Renderer composition dependencies. Platform capabilities come from
+ * {@link PlatformRendererHost}; this port only declares the Settings slots.
+ */
+export interface SettingUiHost extends PlatformRendererHost {
   SETTING_SERVICE_KEY: InjectionKey<SettingClientPort>;
   DATA_PORTABILITY_SERVICE_KEY: InjectionKey<SettingDataPortabilityPort>;
   DESKTOP_AUTH_API_KEY: InjectionKey<SettingDesktopAuthApi>;
@@ -317,19 +320,7 @@ export interface SettingUiHost {
 
   REPOSITORY_SERVICE_KEY: InjectionKey<SettingRepositoryServicePort>;
 
-  useStrictInject<T>(key: InjectionKey<T>, name?: string): T;
-  createComposableHandleError(options: {
-    t: (key: string, params?: Record<string, unknown>) => string;
-    setError(message: string | null): void;
-    report?(message: string): void;
-  }): (error: unknown, fallbackKey: string) => void;
-  sanitizeForIpc<T>(value: T): unknown;
   getGlobalResultErrorT(): (key: string, params?: Record<string, unknown>) => string;
-  translateResultError(
-    error: unknown,
-    t: (key: string, params?: Record<string, unknown>) => string,
-    options: { scope?: string; fallbackKey: string },
-  ): string;
   normalizeSelectString(value: unknown): string | null;
   readDesktopAccessSnapshot(
     api?: SettingDesktopAuthApi,
@@ -337,9 +328,7 @@ export interface SettingUiHost {
   ): Promise<DesktopAccessSnapshot | null>;
   getDesktopAuthApi(target?: unknown): SettingDesktopAuthApi | undefined;
   setProductTimePreferences(preferences: Record<string, unknown>): void;
-  getProductTime(): TimeFacade;
   setI18nLocale(locale: SettingLocale): Promise<void>;
-  useServerStateIdentityScope(): () => string;
 
   keyboard: SettingKeyboardRuntime;
   eventChord(event: KeyboardEvent, host: SettingKeyboardHost): string | null;
