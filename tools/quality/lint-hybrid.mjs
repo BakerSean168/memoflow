@@ -6,6 +6,7 @@
  * change the task receipt identity or allow a partial success to pass.
  */
 import { spawn } from 'node:child_process';
+import { createRequire } from 'node:module';
 import { readFile } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
@@ -35,18 +36,33 @@ async function run(label, command, args) {
   return result;
 }
 
-const [oxc, residual] = await Promise.all([
-  run('Oxlint', process.execPath, [
-    path.join(root, 'node_modules', 'nx', 'dist', 'bin', 'nx.js'),
-    'run-many',
-    '-t',
-    'lint-oxc',
-    '--all',
-    '--parallel=3',
-    '--outputStyle=static',
-  ]),
-  run('ESLint residual', process.execPath, [path.join(root, 'tools/quality/eslint-residual.mjs')]),
-]);
-if (oxc.code !== 0 || residual.code !== 0 || oxc.signal || residual.signal) {
-  throw new Error(`Hybrid lint failed: Oxlint=${oxc.code} ESLint-residual=${residual.code}`);
+export async function runHybridLint({
+  prepareGraph = () =>
+    createRequire(import.meta.url)('@nx/devkit').createProjectGraphAsync({ exitOnError: true }),
+  execute = run,
+} = {}) {
+  // ESLint's Nx rule reads the on-disk graph synchronously. Starting it while
+  // Oxlint is still building that graph can skip rules or leave a partial locator.
+  await prepareGraph();
+  const [oxc, residual] = await Promise.all([
+    execute('Oxlint', process.execPath, [
+      path.join(root, 'node_modules', 'nx', 'dist', 'bin', 'nx.js'),
+      'run-many',
+      '-t',
+      'lint-oxc',
+      '--all',
+      '--parallel=3',
+      '--outputStyle=static',
+    ]),
+    execute('ESLint residual', process.execPath, [
+      path.join(root, 'tools/quality/eslint-residual.mjs'),
+    ]),
+  ]);
+  if (oxc.code !== 0 || residual.code !== 0 || oxc.signal || residual.signal) {
+    throw new Error(`Hybrid lint failed: Oxlint=${oxc.code} ESLint-residual=${residual.code}`);
+  }
+}
+
+if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
+  await runHybridLint();
 }
