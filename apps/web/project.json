@@ -195,7 +195,6 @@
     "e2e:ai-provider": {
       "executor": "nx:run-commands",
       "cache": false,
-      "dependsOn": ["^build"],
       "outputs": [
         "{workspaceRoot}/apps/web/test-results/ai-provider",
         "{workspaceRoot}/apps/web/playwright-ai-provider-report"
