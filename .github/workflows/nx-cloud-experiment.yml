@@ -1,0 +1,121 @@
+name: Nx Cloud native Workers experiment
+
+# Explicitly confined to a temporary branch; never runs on main or production PRs.
+on:
+  push:
+    branches:
+      - experiment/nx-cloud-workers-20261028
+
+permissions:
+  contents: read
+  actions: read
+
+concurrency:
+  group: nx-cloud-experiment-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  CI: 'true'
+  NX_DAEMON: 'false'
+  NX_TUI: 'false'
+  NX_LEGACY_AFFECTED: 'false'
+
+jobs:
+  local-baseline:
+    name: Control - local Nx scheduler
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    env:
+      NX_NO_CLOUD: 'true'
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          fetch-depth: 2
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version: '24'
+      - name: Install dependencies
+        run: |
+          corepack enable
+          pnpm install --frozen-lockfile --reporter=append-only
+      - name: Capture baseline affected selection
+        run: |
+          mkdir -p reports/nx-cloud-experiment
+          pnpm exec nx affected -t test:contract \
+            --files=packages/task-workspace-contracts/src/task-workspace.dto.ts \
+            --explain=stdout > reports/nx-cloud-experiment/local-affected.txt
+          cat reports/nx-cloud-experiment/local-affected.txt
+      - name: Run selected contract targets without Cloud
+        shell: bash
+        run: |
+          mkdir -p reports/nx-cloud-experiment
+          start=$SECONDS
+          set +e
+          pnpm exec nx run-many -t test:contract \
+            --projects=goal-contracts,task-contracts,goal-workspace-contracts,task-workspace-contracts \
+            --outputStyle=static 2>&1 | tee reports/nx-cloud-experiment/local-tasks.log
+          result=${PIPESTATUS[0]}
+          set -e
+          elapsed=$((SECONDS-start))
+          printf '{"mode":"local","elapsed_seconds":%s,"exit_code":%s}\n' "$elapsed" "$result" > reports/nx-cloud-experiment/local-result.json
+          printf 'Local contract task graph: %s seconds, exit %s\n' "$elapsed" "$result" >> "$GITHUB_STEP_SUMMARY"
+          exit "$result"
+      - uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        if: always()
+        with:
+          name: nx-cloud-experiment-local
+          path: reports/nx-cloud-experiment/
+          if-no-files-found: warn
+          retention-days: 7
+
+  cloud-workers:
+    name: Trial - 2 Nx Cloud Workers
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    env:
+      NX_CLOUD_AUTO_TASK_PACKING: 'true'
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          fetch-depth: 2
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version: '24'
+      - name: Prepare package manager
+        run: corepack enable
+      - name: Start 2 Nx Cloud Workers
+        run: pnpm dlx nx-cloud start-workers
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile --reporter=append-only
+      - name: Capture native Nx affected selection
+        run: |
+          mkdir -p reports/nx-cloud-experiment
+          pnpm exec nx affected -t test:contract \
+            --files=packages/task-workspace-contracts/src/task-workspace.dto.ts \
+            --explain=stdout > reports/nx-cloud-experiment/cloud-affected.txt
+          cat reports/nx-cloud-experiment/cloud-affected.txt
+      - name: Distribute the identical contract task graph
+        shell: bash
+        run: |
+          mkdir -p reports/nx-cloud-experiment
+          start=$SECONDS
+          set +e
+          pnpm exec nx run-many -t test:contract \
+            --projects=goal-contracts,task-contracts,goal-workspace-contracts,task-workspace-contracts \
+            --outputStyle=static 2>&1 | tee reports/nx-cloud-experiment/cloud-tasks.log
+          result=${PIPESTATUS[0]}
+          set -e
+          elapsed=$((SECONDS-start))
+          printf '{"mode":"workers","elapsed_seconds":%s,"exit_code":%s}\n' "$elapsed" "$result" > reports/nx-cloud-experiment/cloud-result.json
+          printf '2-worker contract task graph: %s seconds, exit %s\n' "$elapsed" "$result" >> "$GITHUB_STEP_SUMMARY"
+          exit "$result"
+      - name: Stop experiment Workers
+        if: always()
+        run: pnpm dlx nx-cloud stop-all-workers || true
+      - uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        if: always()
+        with:
+          name: nx-cloud-experiment-workers
+          path: reports/nx-cloud-experiment/
+          if-no-files-found: warn
+          retention-days: 7
