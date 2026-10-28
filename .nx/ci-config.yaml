@@ -1,0 +1,8 @@
+# Isolated Nx Cloud Workers experiment. Only used by the experiment branch/workflow.
+# Main CI keeps its existing scope detector, fixed shards, and artifact gates.
+dte:
+  distribute-on: 2 linux-medium-js
+
+lifecycle:
+  stop-after:
+    - test:contract
