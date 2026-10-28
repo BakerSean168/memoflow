@@ -3,98 +3,64 @@ import { shallowRef } from 'vue';
  * App-vue session product time facade (ADR-037).
  * Guest bootstrap uses explicit device context; signed-in bootstrap applies canonical preferences.
  * P1: empty kinds via resolveEmptyLabel / emptyKind — no L5 formatDate wrappers.
+ *
+ * Session construction, preferences and the formatter set live in
+ * `createProductTimeSession` (@memoflow/time); this module only owns the Vue
+ * reactivity and the object-shaped empty-label API the Vue components use.
  */
 import type { UserPreferenceProfile } from '@memoflow/setting-contracts';
 import type { Ymd } from '@memoflow/shared-primitives';
 import {
-  createSystemTimeZoneSource,
-  createTimeContext,
-  createTimeFacade,
+  createProductTimeSession,
   resolveEmptyLabel,
-  type TimeFacade,
+  type ProductTimeEmptyLabels,
   type TimeEmptyKind,
+  type TimeFacade,
   type ResolveEmptyLabelOptions,
 } from '@memoflow/time';
 import { detectBrowserLocale } from '@memoflow/utils/shared';
 
 export const productTimeRevision = shallowRef(0);
 
-function createLocalSessionTime(): TimeFacade {
-  const timeZoneSource = createSystemTimeZoneSource();
-  return createTimeFacade({
-    context: createTimeContext({
-      timeZone: timeZoneSource.currentTimeZoneId(),
-      weekStartsOn: 1,
-    }),
-    presentation: { locale: detectBrowserLocale() },
-  });
-}
-
-let sessionTime: TimeFacade = createLocalSessionTime();
+const session = createProductTimeSession({
+  locale: detectBrowserLocale(),
+  // Vue surfaces an "unknown" label (not the display dash) when a value cannot
+  // be parsed. Kept per shell: the React shell returns the display label there.
+  invalidValueLabel: 'unknown',
+});
 
 export function getProductTime(): TimeFacade {
-  return sessionTime;
+  return session.getFacade();
 }
 
 /** Apply canonical cross-device regional/presentation preferences to the session facade. */
 export function setProductTimePreferences(profile: UserPreferenceProfile): TimeFacade {
-  sessionTime = sessionTime
-    .withContext(
-      createTimeContext({
-        timeZone: profile.regional.timeZone,
-        weekStartsOn: profile.regional.weekStartsOn,
-      }),
-    )
-    .withPresentation({
-      locale: profile.presentation.language,
-      dateStyle: profile.regional.dateStyle,
-      timeStyle: profile.regional.timeStyle,
-    });
+  const facade = session.setPreferences(profile);
   productTimeRevision.value += 1;
-  return sessionTime;
+  return facade;
 }
 
 /** Product empty label override (i18n / copy). Falls back to canonical TimePresentationStyle.empty. */
 export type EmptyLabel = string | { display?: string; unknown?: string };
 
+function toEmptyLabels(override?: EmptyLabel): ProductTimeEmptyLabels | undefined {
+  if (override == null) return undefined;
+  return typeof override === 'string' ? { display: override, unknown: override } : override;
+}
+
 /** Resolve catalog kind → EmptyLabel string (optional i18n via options.translate). */
 export function emptyKind(kind: TimeEmptyKind, options?: ResolveEmptyLabelOptions): string {
-  return resolveEmptyLabel(kind, options);
+  return session.emptyKind(kind, options);
 }
 
 /** Common: i18n notSet key for goal/task detail empty. */
 export function emptyNotSet(t: (key: string) => string, key = 'goal.detail.notSet'): string {
-  return resolveEmptyLabel('notSet', { translate: () => t(key) });
+  return session.emptyKind('notSet', { translate: () => t(key) });
 }
 
 /** Common: i18n unknown. */
 export function emptyUnknown(t: (key: string) => string, key = 'common.unknown'): string {
-  return resolveEmptyLabel('unknown', { translate: () => t(key) });
-}
-
-function emptyLabels(override?: EmptyLabel): { display: string; unknown: string } {
-  const base = sessionTime.presentation.empty;
-  if (override == null) {
-    return { display: base.display, unknown: base.unknown };
-  }
-  if (typeof override === 'string') {
-    return { display: override, unknown: override };
-  }
-  return {
-    display: override.display ?? base.display,
-    unknown: override.unknown ?? base.unknown,
-  };
-}
-
-function toMs(value: number | string | Date | null | undefined): number | null {
-  if (value == null || value === '') return null;
-  if (typeof value === 'number') return Number.isFinite(value) ? value : null;
-  if (value instanceof Date) {
-    const t = value.getTime();
-    return Number.isFinite(t) ? t : null;
-  }
-  const parsed = Date.parse(String(value));
-  return Number.isFinite(parsed) ? parsed : null;
+  return session.emptyKind('unknown', { translate: () => t(key) });
 }
 
 /** List/cell empty-safe dateTime */
@@ -102,77 +68,61 @@ export function formatProductDateTime(
   value: number | string | Date | null | undefined,
   empty?: EmptyLabel,
 ): string {
-  const labels = emptyLabels(empty);
-  if (value == null || value === '') return labels.display;
-  const ms = toMs(value);
-  if (ms == null) return labels.unknown;
-  return sessionTime.format.dateTime(ms);
+  return session.formatDateTime(value, toEmptyLabels(empty));
 }
 
 /** Product-time conversion for native date input values (YYYY-MM-DD). */
 export function toProductDateInputValue(value: number | null | undefined): string {
-  return sessionTime.input.dateValue(value);
+  return session.toDateInputValue(value);
 }
 
 /** Parse a native date input value at local product-day midnight. */
 export function fromProductDateInputValue(raw: string): number | null {
-  const ymd = sessionTime.input.parseDateValue(raw);
-  if (ymd == null) return null;
-  return sessionTime.input.combine(ymd, '00:00') as number | null;
+  return session.fromDateInputValue(raw);
 }
 
 /** Calendar-native Goal/date-only input value. Never converts through Instant/JS Date. */
 export function toProductYmdInputValue(value: Ymd | null | undefined): string {
-  return value ?? '';
+  return session.toYmdInputValue(value);
 }
 
 /** Parse a native date input as canonical Ymd without applying a timezone. */
 export function fromProductYmdInputValue(raw: string): Ymd | null {
-  return sessionTime.input.parseDateValue(raw);
+  return session.fromYmdInputValue(raw);
 }
 
 /** Render a calendar-native Ymd without host-timezone reinterpretation. */
 export function formatProductYmd(value: Ymd | null | undefined, empty?: EmptyLabel): string {
-  const labels = emptyLabels(empty);
-  if (value == null || value === '') return labels.display;
-  return sessionTime.format.ymdDisplay(value) || labels.unknown;
+  return session.formatYmd(value, toEmptyLabels(empty));
 }
 
 /** Current product calendar day in the signed-in user's canonical timezone. */
 export function getProductTodayYmd(): Ymd {
-  return sessionTime.calendar.toYmd(sessionTime.now());
+  return session.getTodayYmd();
 }
 
 /** Current product presentation locale without exposing the TimeFacade to UI components. */
 export function getProductLocale(): string {
-  return sessionTime.presentation.locale;
+  return session.getLocale();
 }
 
 /** Current product week-start preference without exposing the TimeFacade to UI components. */
 export function getProductWeekStartsOn(): 0 | 1 | 2 | 3 | 4 | 5 | 6 {
-  return sessionTime.context.weekStartsOn as 0 | 1 | 2 | 3 | 4 | 5 | 6;
+  return session.getWeekStartsOn();
 }
 
 export function formatProductDate(
   value: number | string | Date | null | undefined,
   empty?: EmptyLabel,
 ): string {
-  const labels = emptyLabels(empty);
-  if (value == null || value === '') return labels.display;
-  const ms = toMs(value);
-  if (ms == null) return labels.unknown;
-  return sessionTime.format.date(ms);
+  return session.formatDate(value, toEmptyLabels(empty));
 }
 
 export function formatProductHm(
   value: number | string | Date | null | undefined,
   empty?: EmptyLabel,
 ): string {
-  const ms = toMs(value);
-  if (ms == null) {
-    return emptyLabels(empty).display;
-  }
-  return sessionTime.format.hm(ms);
+  return session.formatHm(value, toEmptyLabels(empty));
 }
 
 export function formatProductPattern(
@@ -180,32 +130,21 @@ export function formatProductPattern(
   pattern: string,
   empty?: EmptyLabel,
 ): string {
-  const labels = emptyLabels(empty);
-  if (value == null || value === '') return labels.display;
-  const ms = toMs(value);
-  if (ms == null) return labels.unknown;
-  return sessionTime.format.pattern(ms, pattern);
+  return session.formatPattern(value, pattern, toEmptyLabels(empty));
 }
 
 export function formatProductDateTimeSeconds(
   value: number | string | Date | null | undefined,
   empty?: EmptyLabel,
 ): string {
-  const labels = emptyLabels(empty);
-  if (value == null || value === '') return labels.display;
-  const ms = toMs(value);
-  if (ms == null) return labels.unknown;
-  return sessionTime.format.dateTimeSeconds(ms);
+  return session.formatDateTimeSeconds(value, toEmptyLabels(empty));
 }
 
 export function formatProductRelative(
   value: number | null | undefined,
   empty?: EmptyLabel,
 ): string {
-  if (value == null || !Number.isFinite(value)) {
-    return emptyLabels(empty).display;
-  }
-  return sessionTime.format.relative(value);
+  return session.formatRelative(value, toEmptyLabels(empty));
 }
 
 /** Month short + day for compact product lists. */
@@ -213,17 +152,13 @@ export function formatProductMonthDay(
   value: number | string | Date | null | undefined,
   empty?: EmptyLabel,
 ): string {
-  const labels = emptyLabels(empty);
-  if (value == null || value === '') return labels.display;
-  const ms = toMs(value);
-  if (ms == null) return labels.unknown;
-  return sessionTime.format.pattern(ms, 'MMM d');
+  return session.formatMonthDay(value, toEmptyLabels(empty));
 }
 
-export { sessionTime as productCalendar, resolveEmptyLabel };
+export { resolveEmptyLabel };
 export type { TimeEmptyKind };
-// Re-export calendar helpers bound to session
-export const startOfDayMs = (ms: number) => sessionTime.calendar.startOfDay(ms);
-export const endOfDayMs = (ms: number) => sessionTime.calendar.endOfDay(ms);
-export const isSameDayMs = (a: number, b: number) => sessionTime.calendar.isSameDay(a, b);
-export const isTodayMs = (ms: number) => sessionTime.calendar.isToday(ms);
+// Calendar helpers bound to the session
+export const startOfDayMs = (ms: number) => session.startOfDayMs(ms);
+export const endOfDayMs = (ms: number) => session.endOfDayMs(ms);
+export const isSameDayMs = (a: number, b: number) => session.isSameDayMs(a, b);
+export const isTodayMs = (ms: number) => session.isTodayMs(ms);

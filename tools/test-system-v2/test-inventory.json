@@ -11296,6 +11296,14 @@
       "measurementCollectors": []
     },
     {
+      "path": "packages/time/src/__tests__/product-time-session.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/time/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "packages/time/src/__tests__/recurrence.conformance.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -13143,7 +13151,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 9
+      "fileCount": 10
     },
     {
       "id": "packages/transport-contracts/vitest.config.ts",
@@ -13781,7 +13789,7 @@
   "duplicate": [],
   "unexpected": [],
   "counts": {
-    "unit": 1133,
+    "unit": 1134,
     "integration": 58,
     "smoke": 3,
     "boundary-ipc": 6,
