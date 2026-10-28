@@ -133,7 +133,7 @@
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.1",
     "crypto-browserify": "3.12.1",
-    "electron": "44.4.5",
+    "electron": "44.10.0",
     "electron-builder": "26.16.1",
     "electron-builder-squirrel-windows": "26.16.1",
     "electron-log": "^5.4.4",

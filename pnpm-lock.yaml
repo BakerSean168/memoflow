@@ -213,8 +213,8 @@ importers:
         specifier: 24.7.0
         version: 24.7.0(@swc/core@1.16.2(@swc/helpers@0.5.23))(@types/node@24.13.3)(@typescript/typescript6@6.0.2)(supports-color@10.2.2)
       electron:
-        specifier: 44.4.5
-        version: 44.4.5(supports-color@8.1.1)
+        specifier: 44.10.0
+        version: 44.10.0(supports-color@10.2.2)
       esbuild-plugin-vue:
         specifier: 0.2.4
         version: 0.2.4(esbuild@0.28.1)
@@ -917,8 +917,8 @@ importers:
         specifier: 3.12.1
         version: 3.12.1
       electron:
-        specifier: 44.4.5
-        version: 44.4.5(supports-color@10.2.2)
+        specifier: 44.10.0
+        version: 44.10.0(supports-color@10.2.2)
       electron-builder:
         specifier: 26.16.1
         version: 26.16.1(electron-builder-squirrel-windows@26.16.1)(supports-color@10.2.2)
@@ -11827,8 +11827,8 @@ packages:
     resolution: {integrity: sha512-bO3y10YikuUwUuDUQRM4KfwNkKhnpVO7IPdbsrejwN9/AABJzzTQ4GeHwyzNSrVO+tEH3/Np255a3sVZpZDjvg==}
     engines: {node: '>=8.0.0'}
 
-  electron@44.4.5:
-    resolution: {integrity: sha512-SjgoaeYsSWZfJzubgQU7juvuXMTvn6/e1gAHdGFA/yuMbpF+I+skYqIJ6DdXBXHeWbkbpNpmwZCTpiivtlWZSw==}
+  electron@44.10.0:
+    resolution: {integrity: sha512-ss4pCfrQKV4TWkuVYtWB4HmeysPZgB96cSYNKYZv1UVCRP4vQMGNW5oopFbvx6Bbfce1XtP5pm5RDuKehp0svQ==}
     engines: {node: '>= 22.12.0'}
     hasBin: true
 
@@ -19759,20 +19759,7 @@ snapshots:
       semver: 7.8.5
       sumchecker: 3.0.1(supports-color@10.2.2)
     optionalDependencies:
-      undici: 7.28.0
-    transitivePeerDependencies:
-      - supports-color
-
-  '@electron/get@5.0.0(supports-color@8.1.1)':
-    dependencies:
-      debug: 4.4.3(supports-color@8.1.1)
-      env-paths: 3.0.0
-      graceful-fs: 4.2.11
-      progress: 2.0.3
-      semver: 7.8.5
-      sumchecker: 3.0.1(supports-color@8.1.1)
-    optionalDependencies:
-      undici: 7.28.0
+      undici: 7.29.0
     transitivePeerDependencies:
       - supports-color
 
@@ -27786,18 +27773,10 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  electron@44.4.5(supports-color@10.2.2):
+  electron@44.10.0(supports-color@10.2.2):
     dependencies:
       '@electron-internal/extract-zip': 1.0.4
       '@electron/get': 5.0.0(supports-color@10.2.2)
-      '@types/node': 24.13.3
-    transitivePeerDependencies:
-      - supports-color
-
-  electron@44.4.5(supports-color@8.1.1):
-    dependencies:
-      '@electron-internal/extract-zip': 1.0.4
-      '@electron/get': 5.0.0(supports-color@8.1.1)
       '@types/node': 24.13.3
     transitivePeerDependencies:
       - supports-color
@@ -34425,12 +34404,6 @@ snapshots:
   sumchecker@3.0.1(supports-color@10.2.2):
     dependencies:
       debug: 4.4.3(supports-color@10.2.2)
-    transitivePeerDependencies:
-      - supports-color
-
-  sumchecker@3.0.1(supports-color@8.1.1):
-    dependencies:
-      debug: 4.4.3(supports-color@8.1.1)
     transitivePeerDependencies:
       - supports-color
 
