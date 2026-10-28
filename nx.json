@@ -3,6 +3,7 @@
   "parallel": 2,
   "namedInputs": {
     "default": [
+      { "env": "NX_ULTRACACHE_RECORDING_SEED" },
       "{projectRoot}/**/*",
       "sharedGlobals",
       "!{projectRoot}/.tmp-*",

@@ -1,5 +1,6 @@
 import { createRequire } from 'node:module';
 import { digest } from './contracts.mjs';
+import { initializeSelectionContext } from '../initialize-ultracache-selection.mjs';
 
 const require = createRequire(import.meta.url);
 process.env.NX_DAEMON ??= 'false';
@@ -35,10 +36,27 @@ export async function loadAffectedRunnerInputs(
   return {
     selectivelyHashTsConfig,
     ultracacheConfigurations: configurationsOf(ultracacheConfigurationOutcome),
+    ultracache:
+      ultracacheConfigurationOutcome?.status === 'skipped'
+        ? { status: 'skipped', reason: ultracacheConfigurationOutcome.reason }
+        : ultracacheConfigurationOutcome
+          ? {
+              status: ultracacheConfigurationOutcome.status,
+              ...ultracacheConfigurationOutcome.configurations.resolution,
+            }
+          : { status: 'disabled' },
   };
 }
 
-export async function selectCiTasks({ files, base, head, full }) {
+async function loadCiRunnerInputs(nxJson) {
+  await initializeSelectionContext(nxJson);
+  return loadAffectedRunnerInputs(nxJson);
+}
+
+export async function selectCiTasks(
+  { files, base, head, full },
+  { loadRunnerInputs = loadCiRunnerInputs } = {},
+) {
   const { createProjectGraphAsync } = require('nx/src/project-graph/project-graph');
   const { selectAffectedTasks } = require('nx/src/project-graph/affected/affected-tasks');
   const { createTaskPlanningContext } = require('nx/src/hasher/task-planning-context');
@@ -56,6 +74,16 @@ export async function selectCiTasks({ files, base, head, full }) {
   );
   let targets = all;
   let fallback = null;
+  let ultracache = { status: 'not-requested', reason: full ? 'full-scope' : 'not-initialized' };
+  if (full) {
+    try {
+      // Main intentionally keeps the complete task set. Register its checkout
+      // too, so downstream normal runners can resolve recorded hash inputs.
+      await initializeSelectionContext(nxJson);
+    } catch (error) {
+      fallback = `Nx Cloud selection context failed: ${error.message}`;
+    }
+  }
   if (!full) {
     try {
       // Removed/unregistered projects disappear from the current graph. Nx
@@ -74,7 +102,8 @@ export async function selectCiTasks({ files, base, head, full }) {
       // Nx's own affected CLI calls runnerInputsForSelection() before planning.
       // Pass that same context to our selector; otherwise Nx Cloud's recorded
       // file reads never reach the planner and PR CI remains project-grained.
-      const runnerInputs = await loadAffectedRunnerInputs(nxJson);
+      const runnerInputs = await loadRunnerInputs(nxJson);
+      ultracache = runnerInputs.ultracache;
       const result = await selectAffectedTasks(
         graph,
         nxJson,
@@ -96,6 +125,15 @@ export async function selectCiTasks({ files, base, head, full }) {
           ultracacheConfigurations: runnerInputs.ultracacheConfigurations,
         },
       );
+      if (runnerInputs.ultracacheConfigurations) {
+        const { buildUltracacheOverrides } = require('nx/src/ultracache/overrides');
+        const report = buildUltracacheOverrides(
+          graph,
+          result.taskGraph,
+          runnerInputs.ultracacheConfigurations,
+        );
+        ultracache = { ...ultracache, used: report.used, diagnostics: report.diagnostics };
+      }
       const selected = [...result.taskSelection.initiatingTaskIds].map(
         (id) => result.taskGraph.tasks[id].target,
       );
@@ -118,6 +156,7 @@ export async function selectCiTasks({ files, base, head, full }) {
   return {
     targets,
     fallback,
+    ultracache,
     noopTasks,
     unitContractAliases: targets.test.filter(
       (project) =>

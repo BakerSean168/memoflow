@@ -389,6 +389,18 @@ PR 的 `Changes` 仍由 `tools/ci-cd-platform/lib/task-selection.mjs` 统一生�
 
 - `nx.json` 的 `nxCloudId` 连接远程缓存。常规 PR/main CI 不调用
   `nx-cloud start-workers`，仍在现有 GitHub Actions Runner 上运行任务。
+  独立规划前，`initialize-ultracache-selection.mjs` 用当前 Cloud 客户端的
+  `run-groups/v1/configure` 接口注册 checkout SHA 和直接父提交，并明确关闭分布式。
+  普通任务运行没有发送父提交，单跑 Schema 也不能让后续提交继承已录制配置。
+  此适配器只补充 Nx Cloud 的提交关系，不启动工作流、Worker 或写入 DTE marker。
+  配置请求失败由选择器扩展到全部已知任务，保留原有安全回退。
+  当前 Hobby 服务对 `start-ci-run --no-distribution` 仍返回手动分布式执行的
+  Enterprise 限制，因此此处不使用该初始化命令。
+  configure 接口要求 `distribute-on`，即使 `enabled-by-default: false`；此处使用
+  不指定任何 Worker 模板的 `manual`，且不调用启动工作流接口。该内部接口与 Nx 24
+  选择器一起受回归测试覆盖，升级 Cloud 客户端时须重新在线验收。
+  `scope.selection.ultracache` 保留加载状态、配置提交/数量，以及各任务实际使用或
+  回退的诊断；`fetched` 但 `tasks: 0` 不能作为优化生效的证据。
 - Ultracache **只在有有效文件读取记录时**缩小 Affected；没有记录、Cloud 不可用或显式
   `NX_NO_CLOUD=true` 时，Nx 回到原始 `inputs` 和 `^production`，
   不以空任务清单代替缺失证据。升级 Nx 时必须回归内部适配接口。
@@ -398,12 +410,24 @@ PR 的 `Changes` 仍由 `tools/ci-cd-platform/lib/task-selection.mjs` 统一生�
   Nx 缓存）并设置 40 分钟超时；其他单测/契约任务和 Changes 继续使用 Cloud。
   后续跟踪 [#687](https://github.com/BakerSean168/memoflow/issues/687)。
   这是一个待单独修复的兼容性问题，不等于构建已经获得远程缓存提速。
-- Workers 只用于按需采集记录：从 main 手动触发
+- Workers 只用于按需采集记录：手动选择可信分支触发
   `.github/workflows/nx-ultracache-recording.yml`，使用 3 个
-  `linux-medium-js` Worker，执行 4 个领域 Contract 的 `test:contract`
-  及其真实前置 Build。绝不作为日常 PR 质量门禁或自动定时任务。
+  `linux-medium-js` Worker，执行 4 个领域 Contract 的 `test:contract`、等价的
+  `test` 别名及其真实前置 Build，共 16 个任务。两种测试目标都录制，避免
+  Contract 被排除后同一测试因未录制的 Unit 别名又回到 Unit 分片。
+  绝不作为日常 PR 质量门禁或自动定时任务。
   **不要加 `--skip-nx-cache`**：跳过 Nx 缓存同时会跳过 Cloud 记录。
-  如果全命中缓存，需要在真实输入变化后的运行中重新采集；不人为制造漏算输入。
+  `default` 输入包含可选环境输入 `NX_ULTRACACHE_RECORDING_SEED`。
+  只有录制 Job 设置每个 Run/Attempt 唯一的值，Workers 自动收到同一 `NX_*` 值，
+  从而隔离本次录制的缓存哈希，完整执行同一测试集和前置 Build；远程缓存仍正常读写。
+  正常 CI 和验收 Job 不设置该值，使用稳定的空值；不更改业务代码或断言。
+  只让测试 Cache Miss 不够：未录制的 Build 仍按默认输入匹配，再经产物依赖边
+  传播回测试，因此录制必须覆盖这些前置任务。
+  录制门禁要求真实 Cache Miss、执行任务的 Worker、`processed > 0`、零拒绝和
+  配置生成；全命中缓存会失败。日志作为 Actions artifact 保存。
+  随后的独立 CI 上下文加载发布后的配置，对比原生 Nx 与正式 Manifest/Dispatch
+  在无关文件和 Task Workspace 契约变化下的任务集合；缺少配置或没有减少任务会失败。
+  关闭手动输入 `record` 可只验证已有配置在后续提交的复用，不启动 Workers。
 - Cloud Workers 的最小数量为 3；`NX_CLOUD_AUTO_TASK_PACKING=false`
   避免 Hobby 环境的 Valkey / continuous assignment 限制。即使录制成功，
   是否节省端到端 CI 时间仍须用同一任务集合和完整墙钟时间验证。

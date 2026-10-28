@@ -4,6 +4,11 @@ name: Nx Ultracache recording (manual)
 # runs on PRs, pushes, or a schedule; normal CI stays on GitHub-hosted runners.
 on:
   workflow_dispatch:
+    inputs:
+      record:
+        description: Record fresh file reads (disable to verify published inputs without Workers)
+        type: boolean
+        default: true
 
 permissions:
   contents: read
@@ -23,7 +28,11 @@ env:
 
 jobs:
   record-contracts:
-    if: github.ref == 'refs/heads/main'
+    if: inputs.record
+    env:
+      # A declared optional hash input isolates this attempt's cache namespace,
+      # including prerequisite Builds. NX_* values are forwarded to Workers.
+      NX_ULTRACACHE_RECORDING_SEED: '${{ github.run_id }}-${{ github.run_attempt }}'
     name: Record contract inputs on Cloud Workers
     runs-on: ubuntu-latest
     timeout-minutes: 20
@@ -42,9 +51,54 @@ jobs:
         run: pnpm install --frozen-lockfile --reporter=append-only
       - name: Record real file reads for contract tasks
         run: |
-          pnpm exec nx run-many -t test:contract \
+          set -euo pipefail
+          mkdir -p reports/ultracache
+          # Cache normally under this attempt's explicit recording input.
+          # Include prerequisite Builds: their output edges can affect tests.
+          pnpm exec nx run-many -t test:contract,test \
             --projects=goal-contracts,task-contracts,goal-workspace-contracts,task-workspace-contracts \
-            --outputStyle=static
+            --outputStyle=static 2>&1 | tee reports/ultracache/recording.log
+          node tools/ci-cd-platform/verify-ultracache-recording.mjs reports/ultracache/recording.log
       - name: Stop Cloud Workers
         if: always()
         run: pnpm dlx nx-cloud stop-all-workers || true
+      - uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        if: always()
+        with:
+          name: ultracache-recording
+          path: reports/ultracache/
+          if-no-files-found: warn
+          retention-days: 14
+
+  verify-affected:
+    needs: record-contracts
+    if: ${{ !cancelled() && (needs.record-contracts.result == 'success' || needs.record-contracts.result == 'skipped') }}
+    name: Verify recorded inputs in production dispatch
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      # The recording execution pinned its inputs before it recorded them.
+      # Resolve the published configurations in a new CI execution context.
+      NX_CI_EXECUTION_ID: '${{ github.run_id }}-${{ github.run_attempt }}-acceptance'
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version: '24'
+      - name: Install dependencies
+        run: |
+          corepack enable
+          pnpm install --frozen-lockfile --reporter=append-only
+      - name: Register checkout ancestry without Workers
+        run: node tools/ci-cd-platform/initialize-ultracache-selection.mjs
+      - name: Compare native selection and production delivery dispatch
+        run: node tools/ci-cd-platform/verify-ultracache-affected.mjs
+      - uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        if: always()
+        with:
+          name: ultracache-affected-acceptance
+          path: reports/ultracache/
+          if-no-files-found: warn
+          retention-days: 14

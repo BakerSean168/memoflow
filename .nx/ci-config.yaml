@@ -5,4 +5,5 @@ dte:
 
 lifecycle:
   stop-after:
+    - test
     - test:contract
