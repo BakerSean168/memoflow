@@ -201,16 +201,16 @@ describe('PanelErrorBoundary (V2 S5 cleanup)', () => {
     await nextTick();
 
     expect(wrapper.find('[data-testid="panel-error-fallback"]').exists()).toBe(false);
-    expect(wrapper.get('[data-testid="panel-error-content"]').attributes('style') ?? '').not.toContain(
-      'display: none',
-    );
+    expect(
+      wrapper.get('[data-testid="panel-error-content"]').attributes('style') ?? '',
+    ).not.toContain('display: none');
     expect(harness.instanceId.value).toBe(instanceBefore);
     expect(harness.mountIds).toEqual([instanceBefore]);
     expect(harness.unmountIds).toEqual([]);
     expect(harness.readDraft()).toBe('half-written memo');
-    expect(
-      (wrapper.get('[data-testid="draft-input"]').element as HTMLTextAreaElement).value,
-    ).toBe('half-written memo');
+    expect((wrapper.get('[data-testid="draft-input"]').element as HTMLTextAreaElement).value).toBe(
+      'half-written memo',
+    );
     wrapper.unmount();
   });
 
@@ -254,14 +254,14 @@ describe('PanelErrorBoundary (V2 S5 cleanup)', () => {
     await nextTick();
 
     expect(failingBoundary.find('[data-testid="panel-error-fallback"]').exists()).toBe(true);
-    expect(failingBoundary.get('[data-testid="panel-error-content"]').attributes('style')).toContain(
-      'display: none',
-    );
+    expect(
+      failingBoundary.get('[data-testid="panel-error-content"]').attributes('style'),
+    ).toContain('display: none');
 
     expect(siblingBoundary.find('[data-testid="panel-error-fallback"]').exists()).toBe(false);
-    expect(siblingBoundary.get('[data-testid="panel-error-content"]').attributes('style') ?? '').not.toContain(
-      'display: none',
-    );
+    expect(
+      siblingBoundary.get('[data-testid="panel-error-content"]').attributes('style') ?? '',
+    ).not.toContain('display: none');
     expect(siblingBoundary.get('[data-testid="draft-panel"]').isVisible()).toBe(true);
     expect(sibling.instanceId.value).toBe(siblingInstance);
     expect(sibling.mountIds).toEqual([siblingInstance]);
@@ -356,9 +356,9 @@ describe('PanelErrorBoundary (V2 S5 cleanup)', () => {
     await nextTick();
 
     expect(wrapper.find('[data-testid="panel-error-fallback"]').exists()).toBe(false);
-    expect(wrapper.get('[data-testid="panel-error-content"]').attributes('style') ?? '').not.toContain(
-      'display: none',
-    );
+    expect(
+      wrapper.get('[data-testid="panel-error-content"]').attributes('style') ?? '',
+    ).not.toContain('display: none');
 
     const secondInstance = harness.instanceId.value;
     expect(secondInstance).not.toBeNull();
