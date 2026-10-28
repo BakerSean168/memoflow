@@ -8,6 +8,7 @@
 export const WEB_AUDIT_SPECS = Object.freeze([
   'account/account-management.spec.ts',
   'account/account-profile.spec.ts',
+  'fixtures/worker-session.spec.ts',
   'performance/ai-workspace-performance.spec.ts',
   'setting/setting-appearance.spec.ts',
   'ux/command-palette.spec.ts',
