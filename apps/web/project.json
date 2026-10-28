@@ -79,6 +79,7 @@
     "e2e:audit": {
       "executor": "nx:run-commands",
       "cache": false,
+      "dependsOn": ["^build"],
       "outputs": [
         "{workspaceRoot}/apps/web/test-results",
         "{workspaceRoot}/apps/web/playwright-audit-report"
@@ -194,6 +195,7 @@
     "e2e:ai-provider": {
       "executor": "nx:run-commands",
       "cache": false,
+      "dependsOn": ["^build"],
       "outputs": [
         "{workspaceRoot}/apps/web/test-results/ai-provider",
         "{workspaceRoot}/apps/web/playwright-ai-provider-report"
