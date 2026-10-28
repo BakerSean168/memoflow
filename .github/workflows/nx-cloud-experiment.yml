@@ -69,7 +69,7 @@ jobs:
           retention-days: 7
 
   cloud-workers:
-    name: Trial - 2 Nx Cloud Workers
+    name: Trial - 3 Nx Cloud Workers
     runs-on: ubuntu-latest
     timeout-minutes: 25
     env:
@@ -83,7 +83,7 @@ jobs:
           node-version: '24'
       - name: Prepare package manager
         run: corepack enable
-      - name: Start 2 Nx Cloud Workers
+      - name: Start 3 Nx Cloud Workers
         run: pnpm dlx nx-cloud start-workers
       - name: Install dependencies
         run: pnpm install --frozen-lockfile --reporter=append-only
@@ -107,7 +107,7 @@ jobs:
           set -e
           elapsed=$((SECONDS-start))
           printf '{"mode":"workers","elapsed_seconds":%s,"exit_code":%s}\n' "$elapsed" "$result" > reports/nx-cloud-experiment/cloud-result.json
-          printf '2-worker contract task graph: %s seconds, exit %s\n' "$elapsed" "$result" >> "$GITHUB_STEP_SUMMARY"
+          printf '3-worker contract task graph: %s seconds, exit %s\n' "$elapsed" "$result" >> "$GITHUB_STEP_SUMMARY"
           exit "$result"
       - name: Stop experiment Workers
         if: always()
