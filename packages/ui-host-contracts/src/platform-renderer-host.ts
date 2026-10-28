@@ -27,10 +27,7 @@ import type {
 import type { QueryClient } from '@tanstack/vue-query';
 import type { TimeFacade } from '@memoflow/time';
 import type { LabelClientDTO } from '@memoflow/label-contracts';
-import type {
-  ResultErrorTranslateFn,
-  TranslateResultErrorOptions,
-} from '@memoflow/http-client';
+import type { ResultErrorTranslateFn, TranslateResultErrorOptions } from '@memoflow/http-client';
 
 /** Explicit transition status a business surface publishes to the shell. */
 export type PanelSurfaceStatus = 'clean' | 'dirty' | 'busy';
