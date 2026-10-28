@@ -2,9 +2,24 @@ import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import test from 'node:test';
 import nightly from '../lib/nightly-eligibility.cjs';
+import {
+  createAncestry,
+  installCompareRoutes,
+  compareUrl,
+  httpError,
+} from './helpers/octokit-routes.mjs';
 
 const SHA_MAIN = 'a'.repeat(40);
 const SHA_PREVIOUS = 'b'.repeat(40);
+const SHA_ROOT = 'e'.repeat(40);
+const SHA_NEXT = 'c'.repeat(40);
+const SHA_SIDE = 'f'.repeat(40);
+// main: SHA_ROOT -> SHA_PREVIOUS -> SHA_MAIN -> SHA_NEXT; a sibling branch
+// leaves the root at SHA_ROOT so SHA_SIDE diverges from main.
+const CHAINS = [
+  [SHA_ROOT, SHA_PREVIOUS, SHA_MAIN, SHA_NEXT],
+  [SHA_ROOT, SHA_SIDE],
+];
 const NOW = '2026-10-25T18:00:00.000Z';
 const CHECKED_CI = {
   id: 1234,
@@ -47,8 +62,9 @@ function githubFixture(overrides = {}) {
     ciRuns: [CHECKED_CI],
     jobs: [{ name: 'CI Check', status: 'completed', conclusion: 'success' }],
     releases: [],
-    comparison: AHEAD,
     tagSha: SHA_PREVIOUS,
+    chains: CHAINS,
+    compareErrors: {},
     version: '0.22.1',
     rootVersion: '0.22.1',
     manifestVersion: '0.22.1',
@@ -56,6 +72,7 @@ function githubFixture(overrides = {}) {
     ...overrides,
   };
   const calls = [];
+  const compareCalls = [];
   let branchReads = 0;
   const github = {
     rest: {
@@ -78,11 +95,13 @@ function githubFixture(overrides = {}) {
             },
           };
         },
-        compareCommits: async () => ({ data: values.comparison }),
       },
       actions: { listWorkflowRuns: () => {}, listJobsForWorkflowRun: () => {} },
       git: {
-        getRef: async () => ({ data: { object: { type: 'commit', sha: values.tagSha } } }),
+        getRef: async () => {
+          if (!values.tagSha) throw httpError(404, 'Not Found');
+          return { data: { object: { type: 'commit', sha: values.tagSha } } };
+        },
         getTag: async () => {
           throw new Error('unexpected annotated tag resolution');
         },
@@ -96,7 +115,19 @@ function githubFixture(overrides = {}) {
       throw new Error('unexpected pagination');
     },
   };
-  return { github, calls };
+  // Every published Nightly tag resolves to the same source commit; drafts are
+  // not tags yet and are excluded, matching the real repository state.
+  const refs = { [RELEASE.tag]: values.tagSha };
+  for (const release of values.releases) {
+    if (release?.tag_name && release.draft !== true) refs[release.tag_name] = values.tagSha;
+  }
+  const ancestry = createAncestry({ chains: values.chains, refs });
+  installCompareRoutes(github.rest.repos, {
+    ancestry,
+    errors: values.compareErrors,
+    calls: compareCalls,
+  });
+  return { github, calls, compareCalls };
 }
 async function resolve(overrides = {}) {
   const fixture = githubFixture(overrides);
@@ -107,6 +138,17 @@ async function resolve(overrides = {}) {
     now: NOW,
     runNumber: 198,
   });
+}
+async function resolveWith(overrides = {}) {
+  const fixture = githubFixture(overrides);
+  const outcome = await nightly.resolveNightlyEligibility({
+    github: fixture.github,
+    owner: 'BakerSean168',
+    repo: 'memoflow',
+    now: NOW,
+    runNumber: 198,
+  });
+  return { outcome, fixture };
 }
 
 test('Nightly requires successful exact SHA main push CI and the CI Check gate', () => {
@@ -264,9 +306,71 @@ test('HTTP adapter does not authorize old SHA, identical SHA, no minimum interva
     'minimum_nightly_gap',
   );
   assert.equal(
-    (await resolve({ releases: [rawRelease()], comparison: { status: 'diverged', ahead_by: 1 } }))
-      .reason,
+    (await resolve({ releases: [rawRelease()], tagSha: SHA_SIDE })).reason,
     'nightly_not_ancestor_of_main',
+  );
+});
+
+test('ancestry request uses GET /repos/{owner}/{repo}/compare/{base}...{head} with the tag as base', async () => {
+  const { outcome, fixture } = await resolveWith({ releases: [rawRelease()] });
+  assert.equal(outcome.eligible, true);
+  assert.equal(outcome.reason, 'new_verified_main_commits');
+  assert.equal(fixture.compareCalls.length, 1);
+  const [call] = fixture.compareCalls;
+  assert.equal(call.adapter, 'compareCommitsWithBasehead');
+  assert.equal(call.method, 'GET');
+  assert.deepEqual(call.missing, []);
+  assert.equal(call.url, compareUrl('BakerSean168', 'memoflow', RELEASE.tag, SHA_MAIN));
+  assert.equal(call.params.basehead, RELEASE.tag + '...' + SHA_MAIN);
+});
+
+test('ancestry matrix: identical, ahead, behind and diverged keep the ancestry gate intact', async () => {
+  // Identical cannot reach the endpoint: the same-SHA short circuit fires first
+  // and must not issue a comparison at all.
+  const same = await resolveWith({ releases: [rawRelease()], tagSha: SHA_MAIN });
+  assert.equal(same.outcome.reason, 'already_published_this_sha');
+  assert.equal(same.fixture.compareCalls.length, 0);
+
+  const ahead = await resolveWith({ releases: [rawRelease()] });
+  assert.equal(ahead.outcome.eligible, true);
+
+  for (const [name, tagSha] of [
+    ['behind', SHA_NEXT],
+    ['diverged', SHA_SIDE],
+  ]) {
+    const { outcome, fixture } = await resolveWith({ releases: [rawRelease()], tagSha });
+    assert.equal(outcome.reason, 'nightly_not_ancestor_of_main', name);
+    assert.equal(
+      fixture.compareCalls[0].url,
+      compareUrl('BakerSean168', 'memoflow', RELEASE.tag, SHA_MAIN),
+      name,
+    );
+  }
+});
+
+test('ancestry transport failures (404, 403, 429) and missing tags abort instead of authorizing', async () => {
+  await assert.rejects(() => resolve({ releases: [rawRelease()], tagSha: '9'.repeat(40) }), {
+    status: 404,
+  });
+  for (const status of [403, 429]) {
+    await assert.rejects(
+      () =>
+        resolve({
+          releases: [rawRelease()],
+          compareErrors: { compareCommitsWithBasehead: httpError(status) },
+        }),
+      { status },
+    );
+  }
+  await assert.rejects(() => resolve({ releases: [rawRelease()], tagSha: null }), { status: 404 });
+  await assert.rejects(() => resolve({ releases: [rawRelease()], tagSha: 'oops' }), /Git SHA/u);
+});
+
+test('ancestry is computed against the main SHA observed before the comparison', async () => {
+  const { fixture } = await resolveWith({ releases: [rawRelease()], finalMainSha: SHA_NEXT });
+  assert.equal(
+    fixture.compareCalls[0].url,
+    compareUrl('BakerSean168', 'memoflow', RELEASE.tag, SHA_MAIN),
   );
 });
 

@@ -106,7 +106,7 @@ async function verifyMainCi(github, coordinates, sha, suppliedRunId) {
   const main = (await github.rest.repos.getBranch({ ...coordinates, branch: 'main' })).data.commit
     .sha;
   const comparison = (
-    await github.rest.repos.compareCommits({
+    await github.rest.repos.compareCommitsWithBasehead({
       ...coordinates,
       basehead: sha + '...' + requireSha(main),
     })
