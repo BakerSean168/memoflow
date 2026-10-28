@@ -181,6 +181,44 @@ describe('web Vite development configuration', () => {
     }
   });
 
+  it('resolves Repository and Schedule UI from source on the cold E2E lane', async () => {
+    expect(typeof viteConfig).toBe('function');
+    if (typeof viteConfig !== 'function') return;
+
+    const previousNodeEnv = process.env.NODE_ENV;
+    process.env.NODE_ENV = 'test';
+    try {
+      const config = await viteConfig({
+        command: 'serve',
+        mode: 'development',
+        isSsrBuild: false,
+        isPreview: false,
+      });
+
+      const aliases = (config.resolve?.alias ?? []) as Array<{
+        find: string | RegExp;
+        replacement: string;
+      }>;
+
+      // #598: the nightly audit runs on a cold checkout with no packages/*/dist.
+      // Every UI package the app shell imports must resolve to source, including
+      // each exported subpath, or the shell never loads and every spec times out.
+      for (const [specifier, sourcePath] of [
+        ['@memoflow/repository-ui', 'packages/repository-ui/src/index.ts'],
+        ['@memoflow/repository-ui/host', 'packages/repository-ui/src/repository-ui-host.ts'],
+        ['@memoflow/schedule-ui', 'packages/schedule-ui/src/index.ts'],
+        ['@memoflow/schedule-ui/host', 'packages/schedule-ui/src/schedule-ui-host.ts'],
+      ] as const) {
+        const alias = aliases.find((entry) => entry.find === specifier);
+        expect(alias, specifier).toBeDefined();
+        expect(String(alias?.replacement).replace(/\\/g, '/')).toContain(`/${sourcePath}`);
+      }
+    } finally {
+      if (previousNodeEnv === undefined) delete process.env.NODE_ENV;
+      else process.env.NODE_ENV = previousNodeEnv;
+    }
+  });
+
   it('freezes the module graph for E2E lanes: no HMR full-reloads, no dist watching', async () => {
     expect(typeof viteConfig).toBe('function');
     if (typeof viteConfig !== 'function') return;
