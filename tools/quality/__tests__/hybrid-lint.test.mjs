@@ -6,6 +6,7 @@ import test from 'node:test';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { isResidual, listResidualFiles } from '../eslint-residual.mjs';
 import { assertBoundaryPolicyMatches } from '../oxlint-policy.mjs';
+import { runHybridLint } from '../lint-hybrid.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../../..');
 const oxlint = path.join(root, 'node_modules', '.bin', 'oxlint');
@@ -13,6 +14,43 @@ const eslint = path.join(root, 'node_modules', 'eslint', 'bin', 'eslint.js');
 const runOx = (file) => spawnSync(oxlint, ['--quiet', file], { cwd: root, encoding: 'utf8' });
 const runEs = (file) =>
   spawnSync(process.execPath, [eslint, file], { cwd: root, encoding: 'utf8' });
+
+test('hybrid lint waits for the project graph before starting either lint engine', async () => {
+  let ready;
+  const graph = new Promise((resolve) => {
+    ready = resolve;
+  });
+  const calls = [];
+  const pending = runHybridLint({
+    prepareGraph: () => graph,
+    execute: async (label) => {
+      calls.push(label);
+      return { code: 0 };
+    },
+  });
+  await Promise.resolve();
+  assert.deepEqual(calls, [], 'lint started while the graph was still unavailable');
+  ready();
+  await pending;
+  assert.deepEqual(calls, ['Oxlint', 'ESLint residual']);
+});
+
+test('graph initialization errors fail lint before either engine can skip boundary rules', async () => {
+  let started = false;
+  await assert.rejects(
+    runHybridLint({
+      prepareGraph: async () => {
+        throw new Error('graph unavailable');
+      },
+      execute: async () => {
+        started = true;
+        return { code: 0 };
+      },
+    }),
+    /graph unavailable/u,
+  );
+  assert.equal(started, false);
+});
 
 async function probe(file, content, execute) {
   const destination = path.join(root, file);
