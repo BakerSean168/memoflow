@@ -56,6 +56,8 @@ export default defineConfig({
         ['@memoflow/task-ui/host', 'packages/task-ui/src/task-ui-host.ts'],
         ['@memoflow/task-ui', 'packages/task-ui/src'],
         ['@memoflow/schedule-ui', 'packages/schedule-ui/src'],
+        ['@memoflow/repository-ui/host', 'packages/repository-ui/src/repository-ui-host.ts'],
+        ['@memoflow/repository-ui', 'packages/repository-ui/src/index.ts'],
         ['@memoflow/schedule-contracts', 'packages/schedule-contracts/src/index.ts'],
         ['@memoflow/schedule-client', 'packages/schedule-client/src/index.ts'],
         ['@memoflow/goal-contracts', 'packages/goal-contracts/src/index.ts'],
