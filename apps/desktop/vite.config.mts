@@ -20,6 +20,7 @@ import {
   createUiVueSourceAliasEntries,
   createWorkspaceSourceAliasEntries,
 } from '../../vite.workspace-aliases.ts';
+import { nxReadySignal } from '@nx/vite/plugins/nx-ready-signal.plugin';
 
 const desktopRendererDevWorkspaceEntries = [
   ['@memoflow/account-client', 'packages/account-client/src/index.ts'],
@@ -313,6 +314,7 @@ export default defineConfig(({ command, mode }) => {
         },
         renderer: process.env.NODE_ENV === 'test' ? undefined : {},
       }),
+      nxReadySignal(),
     ],
   };
 });

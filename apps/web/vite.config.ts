@@ -3,6 +3,7 @@ import { defineConfig, loadEnv, type HotUpdateOptions, type Plugin, type ProxyOp
 import vue from '@vitejs/plugin-vue';
 import tailwindcss from '@tailwindcss/vite';
 import path from 'node:path';
+import { nxReadySignal } from '@nx/vite/plugins/nx-ready-signal.plugin';
 import {
   createAppVueSourceAliasEntries,
   createAssetsAliasEntries,
@@ -322,6 +323,7 @@ export default defineConfig(({ mode, command }) => {
       // Tailwind CSS 4 plugin — handles CSS-first configuration. The small
       // adapter above is bundled-dev-only and leaves classic dev/build untouched.
       ...createTailwindPlugins(useBundledDev),
+      nxReadySignal(),
     ].filter(Boolean),
     server: {
       port: Number(env.VITE_DEV_PORT) || 5173,
