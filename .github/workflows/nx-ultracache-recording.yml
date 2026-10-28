@@ -4,6 +4,11 @@ name: Nx Ultracache recording (manual)
 # runs on PRs, pushes, or a schedule; normal CI stays on GitHub-hosted runners.
 on:
   workflow_dispatch:
+    inputs:
+      record:
+        description: Record fresh file reads (disable to verify published inputs without Workers)
+        type: boolean
+        default: true
 
 permissions:
   contents: read
@@ -23,6 +28,7 @@ env:
 
 jobs:
   record-contracts:
+    if: inputs.record
     name: Record contract inputs on Cloud Workers
     runs-on: ubuntu-latest
     timeout-minutes: 20
@@ -63,6 +69,7 @@ jobs:
 
   verify-affected:
     needs: record-contracts
+    if: ${{ !cancelled() && (needs.record-contracts.result == 'success' || needs.record-contracts.result == 'skipped') }}
     name: Verify recorded inputs in production dispatch
     runs-on: ubuntu-latest
     timeout-minutes: 15
@@ -81,8 +88,8 @@ jobs:
         run: |
           corepack enable
           pnpm install --frozen-lockfile --reporter=append-only
-      - name: Initialize Cloud context without Workers
-        run: pnpm exec nx-cloud start-ci-run --no-distribution
+      - name: Validate schemas and initialize Cloud context without Workers
+        run: pnpm exec nx run ci-cd-platform:schema --outputStyle=static
       - name: Compare native selection and production delivery dispatch
         run: node tools/ci-cd-platform/verify-ultracache-affected.mjs
       - uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6

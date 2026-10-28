@@ -77,7 +77,8 @@ test('Cloud Workers record traces only in an explicit manual workflow', async ()
   const regularCi = await readFile('.github/workflows/ci.yml', 'utf8');
 
   assert.deepEqual(Object.keys(workflow.on), ['workflow_dispatch']);
-  assert.equal(workflow.jobs['record-contracts'].if, undefined);
+  assert.equal(workflow.jobs['record-contracts'].if, 'inputs.record');
+  assert.equal(workflow.on.workflow_dispatch.inputs.record.default, true);
   assert.equal(workflow.env.NX_CLOUD_AUTO_TASK_PACKING, 'false');
   assert.equal(config.dte['distribute-on'], '3 linux-medium-js');
   assert.deepEqual(config.lifecycle['stop-after'], ['test:contract']);
@@ -97,7 +98,7 @@ test('Cloud Workers record traces only in an explicit manual workflow', async ()
   assert.equal(workflow.jobs['verify-affected'].needs, 'record-contracts');
   assert.ok(
     workflow.jobs['verify-affected'].steps.some((step) =>
-      step.run?.includes('start-ci-run --no-distribution'),
+      step.run?.includes('nx run ci-cd-platform:schema'),
     ),
   );
   assert.doesNotMatch(regularCi, /nx-cloud start-workers/u);

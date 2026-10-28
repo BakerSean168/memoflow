@@ -389,8 +389,10 @@ PR 的 `Changes` 仍由 `tools/ci-cd-platform/lib/task-selection.mjs` 统一生�
 
 - `nx.json` 的 `nxCloudId` 连接远程缓存。常规 PR/main CI 不调用
   `nx-cloud start-workers`，仍在现有 GitHub Actions Runner 上运行任务。
-  Changes 在独立规划前以 `nx-cloud start-ci-run --no-distribution` 注册当前
-  checkout 的 CI 上下文，供配置读取使用；该命令不启动 Workers。
+  Changes 在独立规划前运行已有的轻量 `ci-cd-platform:schema`，建立当前
+  checkout 的普通 Cloud 任务上下文，供配置读取使用；该命令不启动 Workers。
+  当前 Hobby 服务对 `start-ci-run --no-distribution` 仍返回手动分布式执行的
+  Enterprise 限制，因此此处不使用该初始化命令。
   `scope.selection.ultracache` 保留加载状态、配置提交/数量，以及各任务实际使用或
   回退的诊断；`fetched` 但 `tasks: 0` 不能作为优化生效的证据。
 - Ultracache **只在有有效文件读取记录时**缩小 Affected；没有记录、Cloud 不可用或显式
@@ -414,6 +416,7 @@ PR 的 `Changes` 仍由 `tools/ci-cd-platform/lib/task-selection.mjs` 统一生�
   配置生成；全命中缓存会失败。日志作为 Actions artifact 保存。
   随后的独立 CI 上下文加载发布后的配置，对比原生 Nx 与正式 Manifest/Dispatch
   在无关文件和 Task Workspace 契约变化下的任务集合；缺少配置或没有减少任务会失败。
+  关闭手动输入 `record` 可只验证已有配置在后续提交的复用，不启动 Workers。
 - Cloud Workers 的最小数量为 3；`NX_CLOUD_AUTO_TASK_PACKING=false`
   避免 Hobby 环境的 Valkey / continuous assignment 限制。即使录制成功，
   是否节省端到端 CI 时间仍须用同一任务集合和完整墙钟时间验证。
