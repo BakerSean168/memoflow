@@ -9,7 +9,13 @@ import { installScheduleUiHost } from './di/schedule-ui-host';
 
 installScheduleUiHost();
 
-import './di/setting-ui-host';
+// Setting surfaces are hosted by this composition root (Issue #630 §4.9).
+// Same explicit-install contract as Schedule: importing the DI module does not
+// bind, so the renderer must call the installer before any Setting surface or
+// theme helper reads `settingUiHost`.
+import { installSettingUiHost } from './di/setting-ui-host';
+
+installSettingUiHost();
 
 // ── DI ──
 export {
