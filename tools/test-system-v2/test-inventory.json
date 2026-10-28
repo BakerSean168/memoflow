@@ -2430,6 +2430,14 @@
       "measurementCollectors": []
     },
     {
+      "path": "apps/web/src/platform/di-auth.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "apps/web/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "apps/web/src/platform/lazy-service.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -12742,7 +12750,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 19
+      "fileCount": 20
     },
     {
       "id": "packages/account-client/vitest.config.ts",
@@ -13828,7 +13836,7 @@
   "duplicate": [],
   "unexpected": [],
   "counts": {
-    "unit": 1135,
+    "unit": 1136,
     "integration": 58,
     "smoke": 3,
     "boundary-ipc": 6,

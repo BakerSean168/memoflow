@@ -165,6 +165,8 @@ const config: StorybookConfig = {
             ['@memoflow/setting-ui', 'packages/setting-ui/src/index.ts'],
             ['@memoflow/repository-ui/host', 'packages/repository-ui/src/repository-ui-host.ts'],
             ['@memoflow/repository-ui', 'packages/repository-ui/src/index.ts'],
+            ['@memoflow/schedule-ui/host', 'packages/schedule-ui/src/schedule-ui-host.ts'],
+            ['@memoflow/schedule-ui', 'packages/schedule-ui/src/index.ts'],
             ['@memoflow/task-ui/host', 'packages/task-ui/src/task-ui-host.ts'],
             ['@memoflow/task-ui', 'packages/task-ui/src'],
             ['@memoflow/goal-ui', 'packages/goal-ui/src/index.ts'],
