@@ -21,7 +21,27 @@ export async function openAccountSettings(
     landingPath: '/settings?tab=account',
   });
 
-  await expect(page).toHaveURL(/\/settings\?tab=account(?:&|$)/);
+  await expectAccountSettings(page);
+  return { email, password };
+}
+
+/**
+ * Landing for specs that already hold an authenticated worker session from
+ * `helpers/fixtures`. Registration is intentionally skipped; the assertions on
+ * the settings surface are identical.
+ */
+export async function openAccountSettingsForSession(page: Page): Promise<void> {
+  await page.goto('/settings?tab=account', {
+    waitUntil: 'domcontentloaded',
+    timeout: TIMEOUT_CONFIG.NAVIGATION,
+  });
+  await expectAccountSettings(page);
+}
+
+async function expectAccountSettings(page: Page): Promise<void> {
+  await expect(page).toHaveURL(/\/settings\?tab=account(?:&|$)/, {
+    timeout: TIMEOUT_CONFIG.NAVIGATION,
+  });
   await expect(page.getByTestId('user-settings-view')).toBeVisible({
     timeout: TIMEOUT_CONFIG.NAVIGATION,
   });
@@ -32,8 +52,6 @@ export async function openAccountSettings(
   await expect(page.getByTestId('account-profile-nickname')).toBeVisible({
     timeout: TIMEOUT_CONFIG.ELEMENT_WAIT,
   });
-
-  return { email, password };
 }
 
 export async function confirmGlobalDialog(page: Page): Promise<void> {

@@ -39,6 +39,8 @@ export type TestDataNamespace = {
   readGoal(goalId: string): Promise<{ name?: string; deletedAt?: unknown } | null>;
   /** Restore the shared worker account's presentation/regional preferences to defaults. */
   resetPreferences(): Promise<void>;
+  /** Clear the shared worker account's editable profile fields (fresh-account baseline). */
+  resetAccountProfile(): Promise<void>;
   /** Register an extra idempotent cleanup step; runs in reverse registration order. */
   onCleanup(label: string, run: () => Promise<void>): void;
   /** Run pending cleanups immediately (tests may assert cleanup explicitly). */
@@ -251,6 +253,17 @@ export const test = base.extend<TestFixtures, WorkerFixtures>({
         if (!response.ok()) {
           throw new Error(
             `Preference reset failed with HTTP ${response.status()}: ${await response.text()}`,
+          );
+        }
+      },
+      async resetAccountProfile() {
+        const response = await context.request.put('/api/v1/accounts/me', {
+          data: { avatar: null, bio: null },
+          failOnStatusCode: false,
+        });
+        if (!response.ok()) {
+          throw new Error(
+            `Account profile reset failed with HTTP ${response.status()}: ${await response.text()}`,
           );
         }
       },

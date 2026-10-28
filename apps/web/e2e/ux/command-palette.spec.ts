@@ -1,17 +1,17 @@
-import { expect, test } from '@playwright/test';
+import { expect, test } from '../helpers/fixtures';
 import { TIMEOUT_CONFIG } from '../config';
-import { registerAndLogin } from '../helpers/auth-api';
-
-function createCommandPaletteAuditEmail(): string {
-  return `e2e-command-palette-${Date.now()}-${Math.random().toString(36).slice(2, 8)}@test.com`;
-}
 
 test.describe('Global command palette', () => {
   test.beforeEach(async ({ page }) => {
-    await registerAndLogin(page, {
-      email: createCommandPaletteAuditEmail(),
-      password: 'Test123456!',
-      landingPath: '/',
+    // The worker session is already authenticated; only the shell landing that
+    // the old registration flow performed remains.
+    await page.goto('/', {
+      waitUntil: 'domcontentloaded',
+      timeout: TIMEOUT_CONFIG.NAVIGATION,
+    });
+    await page.getByTestId('app-shell').waitFor({
+      state: 'visible',
+      timeout: TIMEOUT_CONFIG.NAVIGATION,
     });
   });
 

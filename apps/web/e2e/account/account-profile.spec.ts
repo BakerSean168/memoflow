@@ -1,13 +1,18 @@
-import { test, expect } from '@playwright/test';
+import { expect, test } from '../helpers/fixtures';
 import { TIMEOUT_CONFIG } from '../config';
-import { createAccountAuditEmail, openAccountSettings } from './account-settings.helpers';
+import { openAccountSettingsForSession } from './account-settings.helpers';
 
 test.describe('Account profile canonical surface', () => {
+  test.beforeEach(async ({ page, testData }) => {
+    // Profile fields are account-level state. Restore the empty profile a new
+    // registration used to provide before every case reuses the worker session.
+    await testData.resetAccountProfile();
+    await openAccountSettingsForSession(page);
+  });
+
   test('[P0] redirects the legacy account-center deep link into Account & Privacy settings', async ({
     page,
   }) => {
-    await openAccountSettings(page);
-
     await page.goto('/account/center', {
       waitUntil: 'domcontentloaded',
       timeout: TIMEOUT_CONFIG.NAVIGATION,
@@ -23,8 +28,6 @@ test.describe('Account profile canonical surface', () => {
   test('[P0] persists profile avatar URL and bio on the canonical account owner', async ({
     page,
   }) => {
-    await openAccountSettings(page);
-
     const avatar = 'https://example.com/audit-avatar.png';
     const bio = `Nightly audit bio ${Date.now()}`;
     await page.locator('#avatar').fill(avatar);
@@ -48,13 +51,11 @@ test.describe('Account profile canonical surface', () => {
 
   test('[P1] keeps the cloud identity email visible but outside the editable profile fields', async ({
     page,
+    workerAccount,
   }) => {
-    const email = createAccountAuditEmail('e2e-account-identity');
-    await openAccountSettings(page, { email });
-
-    await expect(page.getByTestId('account-center-view')).toContainText(email);
+    await expect(page.getByTestId('account-center-view')).toContainText(workerAccount.email);
     await expect(page.locator('input[type="email"]')).toHaveCount(1);
-    await expect(page.getByTestId('cloud-password-forgot-email')).toHaveValue(email);
+    await expect(page.getByTestId('cloud-password-forgot-email')).toHaveValue(workerAccount.email);
     await expect(page.locator('#nickname')).toBeEditable();
     await expect(page.locator('#avatar')).toBeEditable();
     await expect(page.locator('#bio')).toBeEditable();
