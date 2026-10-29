@@ -119,7 +119,7 @@ updated: 2026-10-29T00:00:00+08:00
 ### WEB-DESKTOP-SYNC → Nightly Audit `Specialized E2E (Web/Desktop Sync)`
 
 - Workflow：`.github/workflows/nightly-audit.yml`，job `sync-e2e`，`ubuntu-24.04`，cron `0 2 * * *` 与 `workflow_dispatch`
-- 环境：`docker compose --profile test --profile sync-test up -d --wait postgres-test powersync-test`；`database:prisma-push`；`playwright install chromium`；`apps/web/scripts/run-linux-sync-e2e-with-keyring.sh`
+- 环境：`docker compose --profile test --profile sync-test up -d --wait postgres-test powersync-test`；`database:prisma-push`；`playwright install chromium`；`apps/web/scripts/run-linux-sync-e2e-with-keyring.sh web:e2e:sync`
 - Keyring：该 lane 会启动真实 Electron，`apps/web/e2e/sync/helpers/desktop.ts` 在 `safeStorage` 为 `basic_text`/`unknown` 时抛错，因此 job 装 `dbus-x11 gnome-keyring libsecret-tools libglib2.0-bin`，由包装脚本在 Xvfb 内起 `dbus-run-session` + `gnome-keyring-daemon`（login/start 生命周期 + sentinel 读写自检）。keyring 通过 `XDG_DATA_HOME` 隔离而**不**改 `HOME`：Playwright 的浏览器缓存按 `HOME` 解析，且该 collector 的 `webServer` 会调用 `corepack pnpm`
 - Electron 测试开关：Playwright 的 Electron 启动器会自带 `--password-store=basic` / `--use-mock-keychain`；collector 在 `MEMOFLOW_E2E_USE_GNOME_KEYRING=1` 时把桌面车道已有的 `real-keyring-playwright-loader.cjs` 传给 Electron 仅移除这两个测试默认值，helper 的 `backend` 断言保持原样
 - 准入：PowerSync 签名键取自仓库内 `.env.development`（已跟踪），不新增 Secret；缺失时 collector 抛错

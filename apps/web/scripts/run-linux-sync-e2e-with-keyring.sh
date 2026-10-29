@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
-# Runs the Web/Desktop sync suite with a real Linux Secret Service.
+# Runs one Nx target inside a real Linux Secret Service session.
 #
 # The collector launches a real Electron process, and its helper fails closed
 # when safeStorage reports basic_text, so the lane needs an actual keyring
 # rather than plain Xvfb. The session mirrors
 # apps/desktop/scripts/run-linux-electron-e2e-with-keyring.sh: one D-Bus
 # session, gnome-keyring started through the login lifecycle, and a sentinel
-# store/lookup roundtrip before the suite starts.
+# store/lookup roundtrip before the target starts.
 #
 # Unlike the desktop wrapper this keeps HOME untouched and isolates the keyring
 # through XDG_DATA_HOME. Playwright resolves its browser cache from HOME, and
@@ -22,6 +22,12 @@ for command in dbus-run-session gnome-keyring-daemon gdbus secret-tool timeout x
   command -v "$command" >/dev/null 2>&1 || { echo "Missing required Linux sync E2E dependency: $command" >&2; exit 2; }
 done
 
+target="${1:-}"
+if [[ -z "$target" ]]; then
+  echo "usage: run-linux-sync-e2e-with-keyring.sh <nx target>" >&2
+  exit 2
+fi
+
 workspace_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../.." && pwd)"
 test -f "$workspace_root/nx.json" || { echo "Invalid workspace root: $workspace_root" >&2; exit 2; }
 
@@ -34,6 +40,7 @@ trap cleanup EXIT
 export MEMOFLOW_SYNC_E2E_KEYRING_DATA="$keyring_root/data"
 export MEMOFLOW_SYNC_E2E_KEYRING_RUNTIME="$keyring_root/runtime"
 export MEMOFLOW_SYNC_E2E_WORKSPACE_ROOT="$workspace_root"
+export MEMOFLOW_SYNC_E2E_TARGET="$target"
 
 # The collector strips Playwright's Electron test-only --password-store=basic
 # switch only when this flag is set; without it the helper sees basic_text and
@@ -106,5 +113,5 @@ timeout --signal=TERM --kill-after=15s "${sync_timeout_seconds}s" \
   unset sentinel_key sentinel_value resolved_value
 
   cd "$MEMOFLOW_SYNC_E2E_WORKSPACE_ROOT"
-  exec pnpm exec nx run web:e2e:sync --outputStyle=static
+  exec pnpm exec nx run "$MEMOFLOW_SYNC_E2E_TARGET" --outputStyle=static
 '

@@ -264,7 +264,7 @@ jobs:
         # PowerSync signing keys come from the tracked .env.development; the
         # collector throws instead of skipping when they are absent. The wrapper
         # owns the Xvfb/D-Bus/gnome-keyring session the Electron side requires.
-        run: node ./tools/test-system-v2/run-command.mjs -- apps/web/scripts/run-linux-sync-e2e-with-keyring.sh
+        run: node ./tools/test-system-v2/run-command.mjs -- apps/web/scripts/run-linux-sync-e2e-with-keyring.sh web:e2e:sync
       - name: Upload sync evidence
         if: always()
         uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
