@@ -6,6 +6,7 @@ import { PowerSyncDatabase } from '@powersync/node';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { SubjectRefSchema } from '@memoflow/relation-contracts';
 import type { AddRelationInput } from '../../domain/relation-repository';
+import { PowerSyncGoalRelationCleanupCapability } from './powersync-goal-relation-cleanup';
 import { PowerSyncRelationRepository } from './powersync-relation.repository';
 
 let db: PowerSyncDatabase;
@@ -116,5 +117,51 @@ describe('relation deletes on real PowerSync views (#709)', () => {
     const result = await repository.deleteAllForEntity('identity', entity);
     expect(await rows()).toEqual(before);
     expect(result).toBe(0);
+  });
+});
+
+describe('#24 transaction-scoped Goal cleanup on real PowerSync', () => {
+  it('counts both directions once and isolates identity and entity type', async () => {
+    await seed('subject');
+    await seed('object', { ...input, subject: note, object: entity });
+    await seed('both', { ...input, object: entity });
+    await seed('foreign', { ...input, identityId: 'foreign' });
+    await seed('unrelated', { ...input, subject: note });
+    await db.execute(
+      "INSERT INTO relations (id, identity_id, subject_type, subject_id, object_type, object_id) VALUES ('wrong-type', 'identity', 'note', ?, 'note', ?)",
+      [entity.id, entity.id],
+    );
+    const preserved = await db.getAll(
+      "SELECT * FROM relations WHERE id IN ('foreign', 'unrelated', 'wrong-type') ORDER BY id",
+    );
+    const result = await db.writeTransaction((tx) =>
+      new PowerSyncGoalRelationCleanupCapability(tx).unlinkAllForGoal('identity', entity.id),
+    );
+    expect(await rows()).toEqual(preserved);
+    expect(result).toBe(3);
+  });
+  it('returns zero for no matches inside the caller transaction', async () => {
+    await seed('foreign', { ...input, identityId: 'foreign' });
+    const before = await rows();
+    expect(
+      await db.writeTransaction((tx) =>
+        new PowerSyncGoalRelationCleanupCapability(tx).unlinkAllForGoal('identity', entity.id),
+      ),
+    ).toBe(0);
+    expect(await rows()).toEqual(before);
+  });
+  it('shares the caller rollback boundary', async () => {
+    await seed();
+    const before = await rows();
+    await expect(
+      db.writeTransaction(async (tx) => {
+        await new PowerSyncGoalRelationCleanupCapability(tx).unlinkAllForGoal(
+          'identity',
+          entity.id,
+        );
+        throw new Error('caller rollback');
+      }),
+    ).rejects.toThrow('caller rollback');
+    expect(await rows()).toEqual(before);
   });
 });
