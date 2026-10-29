@@ -47,8 +47,9 @@ function document(revision = 1): UserPreferenceDocument {
 
 class FakeDb implements IElectronDatabaseTransaction {
   rows = new Map<string, PowerSyncUserPreferenceRow>();
-  updateRowsAffected: number | null = null;
+  matchingCount: number | null = null;
   insertError: unknown = null;
+  insertWinner: PowerSyncUserPreferenceRow | null = null;
   executeCalls: Array<{ sql: string; parameters?: unknown[] }> = [];
 
   private key(identityId: string, namespace: string): string {
@@ -58,7 +59,15 @@ class FakeDb implements IElectronDatabaseTransaction {
   async execute(sql: string, parameters?: unknown[]): Promise<IElectronDatabaseQueryResult> {
     this.executeCalls.push({ sql, parameters });
     if (sql.includes('INSERT INTO user_preference_records')) {
-      if (this.insertError) throw this.insertError;
+      if (this.insertError) {
+        if (this.insertWinner) {
+          this.rows.set(
+            this.key(this.insertWinner.identity_id, this.insertWinner.namespace),
+            this.insertWinner,
+          );
+        }
+        throw this.insertError;
+      }
       const [id, identityId, namespace, payload, revision, createdAt, updatedAt] = parameters ?? [];
       this.rows.set(this.key(String(identityId), String(namespace)), {
         id: String(id),
@@ -72,21 +81,19 @@ class FakeDb implements IElectronDatabaseTransaction {
       return { rowsAffected: 1 };
     }
     if (sql.includes('UPDATE user_preference_records')) {
-      const affected = this.updateRowsAffected ?? 1;
-      if (affected === 1) {
-        const [payload, revision, updatedAt, identityId, namespace] = parameters ?? [];
-        const key = this.key(String(identityId), String(namespace));
-        const current = this.rows.get(key);
-        if (current) {
-          this.rows.set(key, {
-            ...current,
-            payload: String(payload),
-            revision: Number(revision),
-            updated_at: String(updatedAt),
-          });
-        }
+      const [payload, revision, updatedAt, identityId, namespace, expectedRevision] =
+        parameters ?? [];
+      const key = this.key(String(identityId), String(namespace));
+      const current = this.rows.get(key);
+      if (current?.revision === expectedRevision) {
+        this.rows.set(key, {
+          ...current,
+          payload: String(payload),
+          revision: Number(revision),
+          updated_at: String(updatedAt),
+        });
       }
-      return { rowsAffected: affected };
+      return { rowsAffected: 0 };
     }
     return { rowsAffected: 0 };
   }
@@ -104,6 +111,11 @@ class FakeDb implements IElectronDatabaseTransaction {
   }
 
   async get<T>(sql: string, parameters?: unknown[]): Promise<T> {
+    if (sql.includes('SELECT COUNT(*) AS count')) {
+      const [identityId, namespace, revision] = parameters ?? [];
+      const current = this.rows.get(this.key(String(identityId), String(namespace)));
+      return { count: this.matchingCount ?? (current?.revision === revision ? 1 : 0) } as T;
+    }
     const value = await this.getOptional<T>(sql, parameters);
     if (value == null) throw new Error('row not found');
     return value;
@@ -159,10 +171,9 @@ describe('UserPreferencePowerSyncRepository', () => {
     expect(update?.parameters?.at(-1)).toBe(1);
   });
 
-  it('re-reads the latest row when rowsAffected is zero', async () => {
+  it('re-reads the latest row when the revision guard does not match', async () => {
     const db = new FakeDb();
     db.rows.set('identity-1:regional', row({ revision: 3 }));
-    db.updateRowsAffected = 0;
     const repository = new UserPreferencePowerSyncRepository(db);
     await expect(repository.compareAndSwap(document(2), 1)).resolves.toMatchObject({
       kind: 'conflict',
@@ -172,13 +183,22 @@ describe('UserPreferencePowerSyncRepository', () => {
 
   it('recovers an insert race only when the canonical winner can be re-read', async () => {
     const db = new FakeDb();
-    db.rows.set('identity-1:regional', row({ id: 'winner' }));
+    db.insertWinner = row({ id: 'winner' });
     db.insertError = new Error('UNIQUE constraint failed');
     const repository = new UserPreferencePowerSyncRepository(db);
     await expect(repository.create(document())).resolves.toMatchObject({
       kind: 'exists',
       document: { id: 'winner', revision: 1 },
     });
+  });
+
+  it('preserves the unique-key anomaly error before writing', async () => {
+    const db = new FakeDb();
+    db.matchingCount = 2;
+    await expect(
+      new UserPreferencePowerSyncRepository(db).compareAndSwap(document(2), 1),
+    ).rejects.toThrow('Preference CAS updated 2 rows for a unique namespace key');
+    expect(db.executeCalls).toHaveLength(0);
   });
 
   it('rejects creation at any revision other than 1', async () => {
