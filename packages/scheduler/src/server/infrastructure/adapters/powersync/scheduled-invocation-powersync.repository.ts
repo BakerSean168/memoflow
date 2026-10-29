@@ -89,7 +89,11 @@ export class PowerSyncScheduledInvocationRepository implements IScheduledInvocat
     return rows.map(PowerSyncScheduledInvocationMapper.toDomain);
   }
   async listOwnersByType(ownerType: string): Promise<SchedulingOwner[]> {
-    const rows = await this.q.getAll<{ identity_id: string; owner_type: string; owner_id: string }>(
+    const rows = await this.q.getAll<{
+      identity_id: string;
+      owner_type: string;
+      owner_id: string;
+    }>(
       "SELECT DISTINCT identity_id, owner_type, owner_id FROM scheduled_invocations WHERE owner_type = ? AND status != 'superseded' ORDER BY identity_id ASC, owner_id ASC",
       [ownerType],
     );
@@ -191,7 +195,18 @@ export class PowerSyncScheduledInvocationRepository implements IScheduledInvocat
     now: number;
     workerId?: string | null;
   }): Promise<ScheduledInvocationClaim | null> {
-    const result = await this.q.execute(
+    if (!this.transaction) return this.withTransaction((repo) => repo.claimAndStart(input));
+    const eligible = await this.q.getOptional<{ id: string }>(
+      `SELECT id FROM scheduled_invocations WHERE id = ? AND identity_id = ? AND ((status = 'pending' AND run_at <= ?) OR (status = 'retry_wait' AND next_attempt_at <= ?))`,
+      [
+        input.invocationId,
+        input.identityId,
+        new Date(input.now).toISOString(),
+        new Date(input.now).toISOString(),
+      ],
+    );
+    if (!eligible) return null;
+    await this.q.execute(
       `UPDATE scheduled_invocations SET status = 'running', attempt_count = attempt_count + 1, next_attempt_at = NULL, claim_token = ?, claim_expires_at = ?, fencing_token = fencing_token + 1 WHERE id = ? AND identity_id = ? AND ((status = 'pending' AND run_at <= ?) OR (status = 'retry_wait' AND next_attempt_at <= ?))`,
       [
         input.claimToken,
@@ -202,7 +217,6 @@ export class PowerSyncScheduledInvocationRepository implements IScheduledInvocat
         new Date(input.now).toISOString(),
       ],
     );
-    if (result.rowsAffected !== 1) return null;
     const row = await this.q.get<PowerSyncScheduledInvocationRow>(
       'SELECT * FROM scheduled_invocations WHERE id = ?',
       [input.invocationId],
@@ -244,7 +258,19 @@ export class PowerSyncScheduledInvocationRepository implements IScheduledInvocat
     };
   }
   async completeAttempt(input: ScheduledInvocationCompleteInput): Promise<boolean> {
-    const result = await this.q.execute(
+    if (!this.transaction) return this.withTransaction((repo) => repo.completeAttempt(input));
+    const invocation = await this.q.getOptional<{ id: string }>(
+      'SELECT id FROM scheduled_invocations WHERE id = ? AND identity_id = ? AND status = ? AND claim_token = ? AND fencing_token = ?',
+      [input.invocationId, input.identityId, 'running', input.claimToken, input.fencingToken],
+    );
+    if (!invocation) return false;
+    const attempt = await this.q.get<{ count: number }>(
+      'SELECT COUNT(*) AS count FROM invocation_attempts WHERE invocation_id = ? AND attempt_number = ? AND claim_token = ? AND fencing_token = ? AND finished_at IS NULL',
+      [input.invocationId, input.attemptNumber, input.claimToken, input.fencingToken],
+    );
+    if (attempt.count !== 1)
+      throw new Error('Invocation attempt completion failed after state CAS.');
+    await this.q.execute(
       'UPDATE scheduled_invocations SET status = ?, next_attempt_at = ?, claim_token = NULL, claim_expires_at = NULL WHERE id = ? AND identity_id = ? AND status = ? AND claim_token = ? AND fencing_token = ?',
       [
         input.status,
@@ -256,8 +282,7 @@ export class PowerSyncScheduledInvocationRepository implements IScheduledInvocat
         input.fencingToken,
       ],
     );
-    if (result.rowsAffected !== 1) return false;
-    const attempt = await this.q.execute(
+    await this.q.execute(
       'UPDATE invocation_attempts SET finished_at = ?, outcome = ?, result = ?, failure_code = ?, failure_message = ?, failure_retryable = ? WHERE invocation_id = ? AND attempt_number = ? AND claim_token = ? AND fencing_token = ? AND finished_at IS NULL',
       [
         new Date(input.finishedAt).toISOString(),
@@ -276,18 +301,20 @@ export class PowerSyncScheduledInvocationRepository implements IScheduledInvocat
         input.fencingToken,
       ],
     );
-    if (attempt.rowsAffected !== 1)
-      throw new Error('Invocation attempt completion failed after state CAS.');
     return true;
   }
   async recoverExpiredClaims(now: number, limit?: number): Promise<number> {
-    const result = await this.q.execute(
+    if (!this.transaction)
+      return this.withTransaction((repo) => repo.recoverExpiredClaims(now, limit));
+    const eligible = await this.q.get<{ count: number }>(
+      `SELECT COUNT(*) AS count FROM (SELECT id FROM scheduled_invocations WHERE status = 'running' AND claim_expires_at < ?${limit === undefined ? '' : ' LIMIT ' + Math.max(1, Math.floor(limit))})`,
+      [new Date(now).toISOString()],
+    );
+    await this.q.execute(
       `UPDATE scheduled_invocations SET status = CASE WHEN retry_enabled = 1 AND attempt_count <= max_retries THEN 'retry_wait' ELSE 'dead_letter' END, next_attempt_at = CASE WHEN retry_enabled = 1 AND attempt_count <= max_retries THEN ? ELSE NULL END, claim_token = NULL, claim_expires_at = NULL WHERE status = 'running' AND claim_expires_at < ?${limit === undefined ? '' : ' LIMIT ' + Math.max(1, Math.floor(limit))}`,
       [new Date(now).toISOString(), new Date(now).toISOString()],
     );
-    if (result.rowsAffected === undefined)
-      throw new Error('Expired claim recovery did not report affected rows.');
-    return result.rowsAffected;
+    return eligible.count;
   }
   async appendSchedulingReconcileReceipt(receipt: SchedulingReconcileReceipt): Promise<void> {
     await this.q.execute(
