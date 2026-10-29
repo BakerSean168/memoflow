@@ -31,6 +31,17 @@ pnpm nx run web:e2e:report
 
 AI Goal Workflow 旅程拆分在 `ai/goal-workflow/*.spec.ts`，共享路由 mock 与会话引导位于 `ai/goal-workflow/goal-workflow.fixture.ts`；每个测试都自注册用户，彼此独立。
 
+## 已登录业务 spec 的会话与数据
+
+普通业务 spec 从 [`helpers/fixtures.ts`](./helpers/fixtures.ts) 导入 `test`，不要在每个 `beforeEach` 里重新走注册 UI：
+
+- `workerAccount`：每个 Playwright worker 通过 `helpers/auth-api.ts` 的 API 路径建一个已邮箱验证的账号，storageState 写在仓库外的 runner 临时目录（`os.tmpdir()/memoflow-e2e-auth/run-<runner pid>/worker-<n>.json`，`0600`）。该文件含凭据，因此不能放进 `test-results/`（Nightly 会整目录上传失败证据），更不能进 Git。
+- `context`/`page`：仍由 Playwright 创建，每个用例一个独立 BrowserContext，只是 `storageState` 指向上面的 worker 文件。
+- `testData`：每个用例一个随机 `key`；`name()` 生成带 key 的记录名，`seedGoal`/`seedTaskPlan` 建的数据在 fixture teardown（含用例失败）按逆序删除；`resetPreferences`/`resetAccountProfile` 把共享账号的账户级可变状态还原成新注册账号的默认值。
+- `authSession`：用例开始时探测 `/api/auth/get-session`，失效则经 API 重新登录一次并重写状态文件；运行中出现 API 401 时同样只修复一次。
+
+以下场景不要使用该 fixture，必须保留真实认证路径或多身份/多 Context：`e2e/authentication/**`、跨身份 Owner/权限拒绝、双会话同步、注销/PIN 切换、密码重置，以及 local-docker 与 desktop（Cookie 域不同，不能复用 Web storageState）。
+
 ## 配置入口
 
 - 常规 Web E2E：[`apps/web/playwright.config.ts`](../playwright.config.ts)

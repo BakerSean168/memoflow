@@ -65,9 +65,10 @@ export async function isAuthenticated(request: APIRequestContext): Promise<boole
     timeout: TIMEOUT_CONFIG.API_REQUEST,
   });
   if (!response.ok()) return false;
-  const body = (await response.json().catch(() => null)) as
-    | { session?: unknown; user?: unknown }
-    | null;
+  const body = (await response.json().catch(() => null)) as {
+    session?: unknown;
+    user?: unknown;
+  } | null;
   return Boolean(body?.session ?? body?.user);
 }
 

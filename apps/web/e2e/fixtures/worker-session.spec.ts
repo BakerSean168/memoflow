@@ -1,5 +1,6 @@
 import { statSync } from 'node:fs';
 import os from 'node:os';
+import type { APIRequestContext } from '@playwright/test';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { expect, test } from '../helpers/fixtures';
@@ -20,7 +21,7 @@ const workspaceRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)),
 const seededGoalIds: string[] = [];
 
 async function readGoal(
-  request: { get: (url: string, options?: object) => Promise<{ status: () => number; ok: () => boolean; json: () => Promise<unknown> }> },
+  request: APIRequestContext,
   goalId: string,
 ): Promise<{ name?: string; deletedAt?: unknown } | null> {
   const response = await request.get(`/api/v1/goals/${goalId}`, { failOnStatusCode: false });
@@ -41,7 +42,10 @@ test.describe('worker auth fixture', () => {
       for (const goalId of seededGoalIds) {
         const goal = await readGoal(request, goalId);
         expect(goal, `goal ${goalId} should still be readable after teardown`).not.toBeNull();
-        expect(goal?.deletedAt, `goal ${goalId} should be deleted by fixture teardown`).not.toBeNull();
+        expect(
+          goal?.deletedAt,
+          `goal ${goalId} should be deleted by fixture teardown`,
+        ).not.toBeNull();
       }
     } finally {
       await request.dispose();

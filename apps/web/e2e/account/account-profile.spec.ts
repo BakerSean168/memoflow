@@ -43,6 +43,11 @@ test.describe('Account profile canonical surface', () => {
     expect((await updateResponse).ok()).toBe(true);
 
     await page.reload({ waitUntil: 'domcontentloaded' });
+    // Page-load readiness after a reload is not the persisted-value assertion;
+    // give the cold settings graph the navigation budget, then assert values.
+    await expect(page.getByTestId('account-profile-nickname')).toBeVisible({
+      timeout: TIMEOUT_CONFIG.NAVIGATION,
+    });
     await expect(page.locator('#avatar')).toHaveValue(avatar, {
       timeout: TIMEOUT_CONFIG.ELEMENT_WAIT,
     });

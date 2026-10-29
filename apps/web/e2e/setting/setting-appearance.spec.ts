@@ -66,8 +66,10 @@ test.describe('Canonical appearance and locale settings', () => {
       .toBe(true);
 
     await page.reload({ waitUntil: 'domcontentloaded', timeout: TIMEOUT_CONFIG.NAVIGATION });
+    // Reload readiness uses the navigation budget; the theme assertion below
+    // stays on the interaction budget.
     await expect(page.getByTestId('appearance-settings-card')).toBeVisible({
-      timeout: TIMEOUT_CONFIG.ELEMENT_WAIT,
+      timeout: TIMEOUT_CONFIG.NAVIGATION,
     });
     await expect
       .poll(async () => page.evaluate(() => document.documentElement.dataset.theme))
@@ -94,6 +96,9 @@ test.describe('Canonical appearance and locale settings', () => {
       .toMatch(/^en/i);
 
     await page.reload({ waitUntil: 'domcontentloaded', timeout: TIMEOUT_CONFIG.NAVIGATION });
+    await expect(page.getByTestId('appearance-settings-card')).toBeVisible({
+      timeout: TIMEOUT_CONFIG.NAVIGATION,
+    });
     await expect
       .poll(async () => page.evaluate(() => document.documentElement.lang), {
         timeout: TIMEOUT_CONFIG.ELEMENT_WAIT,

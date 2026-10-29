@@ -191,13 +191,17 @@ export const test = base.extend<TestFixtures, WorkerFixtures>({
       key,
       name: (label: string) => `${label} [${key}]`,
       async seedGoal(input = {}) {
-        const receipt = await apiJson<{ goalId: string; goalVersion: number }>(context, '/api/v1/goals', {
-          method: 'POST',
-          data: {
-            name: namespace.name(input.name ?? 'Goal'),
-            summary: input.summary ?? `Seeded by ${key}`,
+        const receipt = await apiJson<{ goalId: string; goalVersion: number }>(
+          context,
+          '/api/v1/goals',
+          {
+            method: 'POST',
+            data: {
+              name: namespace.name(input.name ?? 'Goal'),
+              summary: input.summary ?? `Seeded by ${key}`,
+            },
           },
-        });
+        );
         namespace.onCleanup(`goal:${receipt.goalId}`, async () => {
           await context.request.delete(
             `/api/v1/goals/${receipt.goalId}?expectedVersion=${receipt.goalVersion}`,
@@ -246,10 +250,10 @@ export const test = base.extend<TestFixtures, WorkerFixtures>({
       async resetPreferences() {
         // Account-level preference rows survive the test, so a shared worker
         // identity must be restored to the defaults a new account has.
-        const response = await context.request.post(
-          '/api/v1/settings/preferences/reset-all',
-          { data: {}, failOnStatusCode: false },
-        );
+        const response = await context.request.post('/api/v1/settings/preferences/reset-all', {
+          data: {},
+          failOnStatusCode: false,
+        });
         if (!response.ok()) {
           throw new Error(
             `Preference reset failed with HTTP ${response.status()}: ${await response.text()}`,
@@ -274,7 +278,9 @@ export const test = base.extend<TestFixtures, WorkerFixtures>({
           try {
             await entry.run();
           } catch (error) {
-            cleanupFailures.push(`${entry.label}: ${error instanceof Error ? error.message : String(error)}`);
+            cleanupFailures.push(
+              `${entry.label}: ${error instanceof Error ? error.message : String(error)}`,
+            );
           }
         }
       },
@@ -299,7 +305,9 @@ export const test = base.extend<TestFixtures, WorkerFixtures>({
       console.warn(`[e2e-data] cleanup failures for ${key}: ${cleanupFailures.join('; ')}`);
     }
     if (cleanupCount > 0) {
-      console.log(`[e2e-data] namespace ${key}: ${cleanupCount} cleanup step(s), ${cleanupFailures.length} failure(s)`);
+      console.log(
+        `[e2e-data] namespace ${key}: ${cleanupCount} cleanup step(s), ${cleanupFailures.length} failure(s)`,
+      );
     }
   },
 });
