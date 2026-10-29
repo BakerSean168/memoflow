@@ -3,7 +3,9 @@ import { expect, type Locator, type Page } from '@playwright/test';
 export type GoalSurface = 'web' | 'desktop';
 
 function goalCard(page: Page, goalName: string): Locator {
-  return page.getByTestId('goal-card').filter({ hasText: goalName }).first();
+  // The list renders one row per goal (goal-card was retired with the list
+  // redesign); the title lives inside the row.
+  return page.getByTestId('goal-progress-row').filter({ hasText: goalName }).first();
 }
 
 async function openContextMenuAction(
@@ -97,15 +99,11 @@ async function refreshWebGoalList(page: Page, surface: GoalSurface): Promise<voi
     return;
   }
 
-  const goalsResponse = page.waitForResponse(
-    (response) =>
-      response.request().method() === 'GET' &&
-      new URL(response.url()).pathname === '/api/v1/goals' &&
-      response.ok(),
-    { timeout: 15_000 },
-  );
-  await page.getByTestId('goal-refresh-entry').click();
-  await goalsResponse;
+  // The Web goal list has no refresh control (GOAL-5101 removed it) and no
+  // realtime invalidation, so the server list can only be re-read by reloading
+  // the route. Desktop refreshes itself through the PowerSync change broadcast.
+  await page.reload({ waitUntil: 'domcontentloaded' });
+  await expect(page.getByTestId('goal-list-view')).toBeVisible();
   await expect(page.getByTestId('goal-list-skeleton')).toBeHidden({ timeout: 15_000 });
 }
 

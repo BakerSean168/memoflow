@@ -69,7 +69,14 @@
       "execution": {
         "kind": "nx",
         "target": "web:e2e:sync"
-      }
+      },
+      "automation": [
+        {
+          "kind": "github-workflow",
+          "workflow": ".github/workflows/nightly-audit.yml",
+          "target": "web:e2e:sync"
+        }
+      ]
     },
     "apps/web/playwright.task-visual-grammar.config.ts": {
       "lane": "reference",

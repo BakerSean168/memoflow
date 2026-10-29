@@ -1,9 +1,8 @@
-import { existsSync, mkdirSync } from 'node:fs';
+import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { expect, type Page } from '@playwright/test';
+import { expect, type Locator, type Page } from '@playwright/test';
 import { _electron as electron, type ElectronApplication } from 'playwright';
-import type { SyncCredentials } from './credentials';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const workspaceRoot = path.resolve(__dirname, '..', '..', '..', '..', '..');
@@ -14,76 +13,28 @@ const desktopMainEntrypoint = path.join(
   'dist-electron',
   'main.cjs',
 );
+// better-auth renders the device user code as two groups of four characters.
+const DEVICE_USER_CODE_PATTERN = /[A-Z0-9]{4}-?[A-Z0-9]{4}/;
 
-async function clickIfVisible(page: Page, selector: string): Promise<boolean> {
-  const locator = page.locator(selector);
-  if (
-    (await locator.count()) > 0 &&
-    (await locator.first().isVisible()) &&
-    (await locator.first().isEnabled())
-  ) {
-    await locator.first().click();
-    return true;
-  }
-
-  return false;
+interface ProfileRegistrySnapshot {
+  activeProfileId: string | null;
+  profiles: Array<{
+    profileId: string;
+    profileKind: 'guest' | 'registered';
+    cloudBinding: { cloudAccountId: string } | null;
+  }>;
 }
 
-async function fillLoginForm(page: Page, credentials: SyncCredentials): Promise<void> {
-  await clickIfVisible(page, '[data-testid="login-tab"]');
-
-  const quickLoginButton = page.getByTestId('desktop-quick-login-submit-button');
-  const emailField = page.getByTestId('desktop-login-email');
-  const passwordField = page.getByTestId('desktop-login-password');
-
-  await expect
-    .poll(
-      async () => {
-        if (page.isClosed()) return 'closed';
-        if ((await quickLoginButton.count()) > 0 && (await quickLoginButton.first().isVisible())) {
-          return 'quick-login';
-        }
-        if ((await passwordField.count()) > 0 && (await passwordField.first().isVisible())) {
-          return 'password-login';
-        }
-        return 'waiting';
-      },
-      { timeout: 10_000, message: 'Timed out waiting for a Desktop authentication scene.' },
-    )
-    .not.toBe('waiting');
-
-  if (page.isClosed()) {
-    return;
+async function readDeviceUserCode(pending: Locator): Promise<string> {
+  const text = await pending.innerText();
+  const match = text.match(DEVICE_USER_CODE_PATTERN);
+  if (!match) {
+    throw new Error(
+      `Desktop device authorization dialog did not expose a user code: ${JSON.stringify(text)}`,
+    );
   }
 
-  if (await clickIfVisible(page, '[data-testid="desktop-quick-login-submit-button"]')) {
-    const outcome = await Promise.race([
-      passwordField
-        .first()
-        .waitFor({ state: 'visible', timeout: 10_000 })
-        .then(() => 'password'),
-      page.waitForEvent('close', { timeout: 10_000 }).then(() => 'closed'),
-    ]).catch(() => 'waiting');
-
-    if (outcome === 'closed' || page.isClosed()) {
-      return;
-    }
-
-    if (outcome !== 'password') {
-      throw new Error('Desktop quick login did not transition to password login or main window.');
-    }
-  }
-
-  if ((await emailField.count()) > 0 && (await emailField.first().isVisible())) {
-    await emailField.first().fill(credentials.email);
-  }
-  if ((await passwordField.count()) === 0 || !(await passwordField.first().isVisible())) {
-    return;
-  }
-
-  await passwordField.first().fill(credentials.password);
-
-  await page.getByTestId('login-submit-button').click();
+  return match[0];
 }
 
 export class DesktopAppController {
@@ -104,7 +55,7 @@ export class DesktopAppController {
   }
 
   async launch(): Promise<Page> {
-    if (!existsSync(desktopMainEntrypoint)) {
+    if (!fs.existsSync(desktopMainEntrypoint)) {
       throw new Error(
         `Desktop entrypoint not found at ${desktopMainEntrypoint}. The sync global setup must build desktop first.`,
       );
@@ -112,10 +63,29 @@ export class DesktopAppController {
 
     // Each run gets an isolated user-data directory so sync assertions are not
     // polluted by a developer's local desktop session.
-    mkdirSync(this.userDataDir, { recursive: true });
+    fs.mkdirSync(this.userDataDir, { recursive: true });
+
+    // Playwright's Electron launcher installs --password-store=basic, which the
+    // keyring check below rejects on Linux. The desktop authentication lane
+    // strips those test-only switches through this loader; the collector asks
+    // for it the same way it asks for the real Secret Service.
+    const launchArgs = [desktopMainEntrypoint];
+    if (process.platform === 'linux' && process.env.MEMOFLOW_E2E_USE_GNOME_KEYRING === '1') {
+      launchArgs.unshift(
+        '-r',
+        path.join(
+          workspaceRoot,
+          'apps',
+          'desktop',
+          'e2e',
+          'support',
+          'real-keyring-playwright-loader.cjs',
+        ),
+      );
+    }
 
     this.electronApp = await electron.launch({
-      args: [desktopMainEntrypoint],
+      args: launchArgs,
       env: {
         ...process.env,
         MEMOFLOW_API_URL: this.apiBaseUrl,
@@ -146,31 +116,99 @@ export class DesktopAppController {
     return this.currentWindow;
   }
 
-  async ensureAuthenticated(credentials: SyncCredentials): Promise<Page> {
-    if (!this.electronApp) {
+  /**
+   * Connects the desktop to the E2E cloud account through the product's own
+   * device-authorization flow.
+   *
+   * The desktop deliberately boots into a guest Profile, and guest Profiles
+   * never attach a PowerSync connector, so the lane has to create a registered
+   * Profile the same way a user does: ask the desktop for a device code and
+   * approve it in the already signed-in Web session.
+   */
+  async connectCloudProfile(approvalPage: Page): Promise<Page> {
+    const app = this.electronApp;
+    if (!app) {
       throw new Error('Electron app has not been launched.');
     }
 
-    // Reuse the existing non-auth window when possible so restart logic and
-    // repeated assertions do not re-submit the login form unnecessarily.
-    const existingMainWindow = await this.findMainWindow();
-    if (existingMainWindow) {
-      this.currentWindow = existingMainWindow;
-      return existingMainWindow;
+    // The verification URL would otherwise be handed to the system browser,
+    // which has no session and no display in the headless lane.
+    await app.evaluate(({ shell }) => {
+      Object.defineProperty(shell, 'openExternal', {
+        configurable: true,
+        value: async () => undefined,
+      });
+    });
+
+    const guestWindow = await this.waitForMainWindow();
+    await guestWindow.getByTestId('shell-account-menu').click();
+    await guestWindow.getByTestId('shell-switch-account').click();
+    await guestWindow.getByTestId('shell-manage-profiles').click();
+    await expect(guestWindow.getByTestId('manage-accounts-dialog')).toBeVisible();
+
+    await guestWindow.getByTestId('shell-add-account').click();
+    await guestWindow.getByTestId('cloud-connection-continue').click();
+
+    const pending = guestWindow.getByTestId('cloud-connection-pending');
+    await expect(pending).toBeVisible({ timeout: 30_000 });
+    const userCode = await readDeviceUserCode(pending);
+
+    const approval = await approvalPage.context().newPage();
+    try {
+      const approvalOrigin = new URL(approvalPage.url()).origin;
+      await approval.goto(
+        `${approvalOrigin}/auth/device?user_code=${encodeURIComponent(userCode)}`,
+        { waitUntil: 'domcontentloaded' },
+      );
+      await expect(approval.getByTestId('device-auth-approval')).toBeVisible({ timeout: 30_000 });
+      await approval.getByTestId('device-auth-approve').click();
+      await expect(approval.getByTestId('device-auth-approved')).toBeVisible({ timeout: 30_000 });
+    } finally {
+      await approval.close();
     }
 
-    const loginWindow = this.currentWindow ?? (await this.electronApp.firstWindow());
-    await fillLoginForm(loginWindow, credentials);
+    // Approving creates a separate registered Profile, so the Shell swaps the
+    // guest window for a fresh one bound to the cloud account.
+    const cloudWindow = await app.waitForEvent('window', {
+      predicate: async (page) => {
+        try {
+          await page.getByTestId('app-shell').waitFor({ state: 'visible', timeout: 45_000 });
+          return true;
+        } catch {
+          return false;
+        }
+      },
+      timeout: 60_000,
+    });
+    await cloudWindow.waitForLoadState('domcontentloaded');
+    this.currentWindow = cloudWindow;
+
+    await expect
+      .poll(() => this.activeProfileIsCloudBound(), {
+        timeout: 30_000,
+        message: 'Desktop never activated a cloud-bound Profile after device authorization.',
+      })
+      .toBe(true);
+
+    return cloudWindow;
+  }
+
+  /** Relaunches the desktop and waits for the restored cloud-bound Profile. */
+  async restart(): Promise<Page> {
+    await this.close();
+    await this.launch();
 
     const mainWindow = await this.waitForMainWindow();
     this.currentWindow = mainWindow;
-    return mainWindow;
-  }
 
-  async restart(credentials: SyncCredentials): Promise<Page> {
-    await this.close();
-    await this.launch();
-    return this.ensureAuthenticated(credentials);
+    await expect
+      .poll(() => this.activeProfileIsCloudBound(), {
+        timeout: 30_000,
+        message: 'Desktop did not restore a cloud-bound Profile after restart.',
+      })
+      .toBe(true);
+
+    return mainWindow;
   }
 
   async setWindowSize(width: number, height: number): Promise<{ width: number; height: number }> {
@@ -212,6 +250,31 @@ export class DesktopAppController {
     this.currentWindow = null;
   }
 
+  private activeProfileIsCloudBound(): boolean {
+    const registry = this.readProfileRegistry();
+    if (!registry) {
+      return false;
+    }
+
+    const active = registry.profiles.find(
+      (profile) => profile.profileId === registry.activeProfileId,
+    );
+    return Boolean(active?.cloudBinding);
+  }
+
+  private readProfileRegistry(): ProfileRegistrySnapshot | null {
+    const registryPath = path.join(this.userDataDir, 'data', 'shared', 'profiles', 'registry.json');
+    if (!fs.existsSync(registryPath)) {
+      return null;
+    }
+
+    try {
+      return JSON.parse(fs.readFileSync(registryPath, 'utf8')) as ProfileRegistrySnapshot;
+    } catch {
+      return null;
+    }
+  }
+
   private async waitForMainWindow(): Promise<Page> {
     await expect
       .poll(
@@ -238,7 +301,10 @@ export class DesktopAppController {
     }
 
     for (const page of this.electronApp.windows()) {
-      if (!(await this.isLoginWindow(page))) {
+      if (page.isClosed()) {
+        continue;
+      }
+      if (await this.isWorkspaceWindow(page)) {
         return page;
       }
     }
@@ -246,11 +312,11 @@ export class DesktopAppController {
     return null;
   }
 
-  private async isLoginWindow(page: Page): Promise<boolean> {
-    if (page.url().includes('#/auth')) {
-      return true;
-    }
-
-    return (await page.getByTestId('login-submit-button').count()) > 0;
+  /** The Shell's Profile Access window is a picker, not a workspace. */
+  private async isWorkspaceWindow(page: Page): Promise<boolean> {
+    return page
+      .getByTestId('app-shell')
+      .isVisible()
+      .catch(() => false);
   }
 }

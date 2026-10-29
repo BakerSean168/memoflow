@@ -65,7 +65,6 @@ test.describe('desktop/web goal sync regression', () => {
   });
 
   test('keeps synced goals after restarting desktop', async ({
-    credentials,
     desktop,
     trackGoal,
     webPage,
@@ -78,7 +77,7 @@ test.describe('desktop/web goal sync regression', () => {
     });
     await waitForGoalVisible(webPage, 'web', goalName);
 
-    await desktop.restart(credentials);
+    await desktop.restart();
     await openGoalList(desktop.page, 'desktop');
     await waitForGoalVisible(desktop.page, 'desktop', goalName);
   });

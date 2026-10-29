@@ -59,14 +59,16 @@ export const test = base.extend<SyncFixtures>({
     { scope: 'worker' },
   ],
 
-  desktop: async ({ credentials, request }, use, testInfo) => {
+  desktop: async ({ credentials, request, webPage }, use, testInfo) => {
     await ensureE2EAccount(request, credentials);
 
     const userDataDir = testInfo.outputPath('desktop-user-data');
     const desktop = new DesktopAppController(userDataDir, credentials.apiBaseUrl);
 
     await desktop.launch();
-    await desktop.ensureAuthenticated(credentials);
+    // A fresh Desktop starts as a guest Profile, which never syncs. Connect the
+    // real cloud account before the specs assert propagation.
+    await desktop.connectCloudProfile(webPage);
     await use(desktop);
     await desktop.close();
     if (testInfo.status === testInfo.expectedStatus) {

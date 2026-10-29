@@ -24,7 +24,11 @@ export MEMOFLOW_E2E_KEYRING_HOME="$ephemeral_home"
 export MEMOFLOW_E2E_WORKSPACE_ROOT="$workspace_root"
 export MEMOFLOW_E2E_USE_GNOME_KEYRING=1
 
-timeout --signal=TERM --kill-after=15s 210s \
+# Multi-spec suites (for example the whole authentication directory) need a
+# larger budget than a single grep; the default keeps the historical bound.
+e2e_timeout_seconds="${MEMOFLOW_E2E_TIMEOUT_SECONDS:-210}"
+
+timeout --signal=TERM --kill-after=15s "${e2e_timeout_seconds}s" \
   xvfb-run -a dbus-run-session -- bash -lc '
   set -euo pipefail
   export HOME="$MEMOFLOW_E2E_KEYRING_HOME"

@@ -7,6 +7,7 @@ Choose tests by the boundary the change touches; the default local loop is the s
 - [Test configurations and helpers](./configuration.md)
 - [Web contract tests](./contract-tests.md)
 - [CI evidence and required checks](./ci-validation.md)
+- [Critical E2E gates and evidence matrix](./e2e-gate-evidence.md)
 - [Storybook browser-mode responsibilities](./test-architecture-storybook-browser.md)
 - [Local commands](../../operations/testing.md)
 
