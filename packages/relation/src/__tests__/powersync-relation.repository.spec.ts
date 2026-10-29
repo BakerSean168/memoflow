@@ -42,7 +42,7 @@ function createDb(existing: boolean) {
     execute,
     getOptional,
     getAll,
-    get: vi.fn(),
+    get: vi.fn(async () => ({ count: 0 })),
   } as unknown as IElectronDatabaseTransaction;
   const db = {
     execute,

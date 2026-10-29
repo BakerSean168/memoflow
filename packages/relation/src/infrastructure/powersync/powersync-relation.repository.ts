@@ -59,31 +59,55 @@ export class PowerSyncRelationRepository implements RelationRepository {
   }
 
   async deleteById(identityId: string, relationId: string): Promise<boolean> {
-    const result = await this.db.execute('DELETE FROM relations WHERE id = ? AND identity_id = ?', [
-      relationId,
-      identityId,
-    ]);
-    return Number(result.rowsAffected ?? 0) > 0;
+    return this.db.writeTransaction(async (tx) => {
+      const existing = await tx.getOptional(
+        'SELECT 1 FROM relations WHERE id = ? AND identity_id = ?',
+        [relationId, identityId],
+      );
+      if (!existing) return false;
+      await tx.execute('DELETE FROM relations WHERE id = ? AND identity_id = ?', [
+        relationId,
+        identityId,
+      ]);
+      return true;
+    });
   }
 
   async deleteExact(input: AddRelationInput): Promise<boolean> {
-    const result = await this.db.execute(
-      `DELETE FROM relations
+    return this.db.writeTransaction(async (tx) => {
+      const existing = await tx.getOptional(
+        `SELECT 1 FROM relations
        WHERE identity_id = ? AND subject_type = ? AND subject_id = ?
          AND relation_type = ? AND object_type = ? AND object_id = ?`,
-      relationParams(input),
-    );
-    return Number(result.rowsAffected ?? 0) > 0;
+        relationParams(input),
+      );
+      if (!existing) return false;
+      await tx.execute(
+        `DELETE FROM relations
+       WHERE identity_id = ? AND subject_type = ? AND subject_id = ?
+         AND relation_type = ? AND object_type = ? AND object_id = ?`,
+        relationParams(input),
+      );
+      return true;
+    });
   }
 
   async deleteAllForEntity(identityId: string, entity: SubjectRef): Promise<number> {
-    const result = await this.db.execute(
-      `DELETE FROM relations
+    return this.db.writeTransaction(async (tx) => {
+      const { count } = await tx.get<{ count: number }>(
+        `SELECT COUNT(*) as count FROM relations
        WHERE identity_id = ?
          AND ((subject_type = ? AND subject_id = ?) OR (object_type = ? AND object_id = ?))`,
-      [identityId, entity.type, entity.id, entity.type, entity.id],
-    );
-    return Number(result.rowsAffected ?? 0);
+        [identityId, entity.type, entity.id, entity.type, entity.id],
+      );
+      await tx.execute(
+        `DELETE FROM relations
+       WHERE identity_id = ?
+         AND ((subject_type = ? AND subject_id = ?) OR (object_type = ? AND object_id = ?))`,
+        [identityId, entity.type, entity.id, entity.type, entity.id],
+      );
+      return Number(count);
+    });
   }
 
   async findBySubject(identityId: string, subject: SubjectRef): Promise<RelationDTO[]> {
