@@ -25,19 +25,19 @@ updated: 2026-10-29T00:00:00+08:00
 
 ## 矩阵
 
-| 风险 ID                | 负责 Workflow / Runner                                                                     | 触发阶段           | 平台                      | 外部 DB / Provider 准入                                                     | 目标 SHA + 最近成功 Run                                                                        | 等级                                    |
-| ---------------------- | ------------------------------------------------------------------------------------------ | ------------------ | ------------------------- | --------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------- | --------------------------------------- |
-| `WEB-DESKTOP-SYNC`     | `nightly-audit.yml` / Specialized E2E（`web:e2e:sync`）                                    | Nightly            | Linux + xvfb              | Docker: postgres-test + powersync-test；签名键来自仓库内 `.env.development` | 接线后待取证                                                                                   | `gate-only`                             |
-| `DESKTOP-UPDATE`       | `release-assets.yml`；`desktop-update-e2e.yml`                                             | Release / 手动     | Linux、Windows            | 无（真实打包安装态）                                                        | `9934705d5` → [39088705384](https://github.com/BakerSean168/memoflow/actions/runs/39088705384) | `verified-run`                          |
-| `DESKTOP-IPC`          | `desktop-update-e2e.yml`（Windows 安装态套件）                                             | Release / 手动     | Windows                   | 无（真实安装态）                                                            | `c2d92705e` → [39783670101](https://github.com/BakerSean168/memoflow/actions/runs/39783670101) | `verified-run`                          |
-| `AUTH-LOGIN`           | `desktop-update-e2e.yml` / Desktop auth job（`desktop:e2e`）；Web 认证组件/单元在 `ci.yml` | Release / 手动；PR | Linux + xvfb；Linux       | 无外部凭据（spec 自带本地 auth server）                                     | 接线后待取证                                                                                   | `gate-only`                             |
-| `GOAL-DRAFT`           | `ci.yml`（component）；`playwright.goal-reference` 手动                                    | PR                 | Linux                     | 无                                                                          | `8fcdb1eea` → [40731442600](https://github.com/BakerSean168/memoflow/actions/runs/40731442600) | `verified-run`                          |
-| `TASK-RECURRENCE-A11Y` | `ci.yml`（component a11y）；reference collector 手动                                       | PR                 | Linux                     | 无                                                                          | `9a97c9130` → [40804738576](https://github.com/BakerSean168/memoflow/actions/runs/40804738576) | `verified-run`                          |
-| `AI-APPROVAL`          | `ci.yml`（Test Server Unit / shards）                                                      | PR                 | Linux                     | 无（确定性 fake）                                                           | `9a97c9130` → [40804738576](https://github.com/BakerSean168/memoflow/actions/runs/40804738576) | `verified-run`                          |
-| `AI-EVAL-QUALITY`      | `nightly-audit.yml`（`web:e2e:ai-provider`）                                               | Nightly            | Linux                     | Recorded Replay 确定性；Live Provider 仅 opt-in                             | `2e7484026` → [40285774452](https://github.com/BakerSean168/memoflow/actions/runs/40285774452) | `verified-run`（replay）/ 缺口（live）  |
-| `OWNER-ISOLATION`      | `nightly-audit.yml`（`web:e2e:ai-provider` P0 跨 owner 用例）                              | Nightly            | Linux                     | 真实 Postgres + 本地 API                                                    | `2e7484026` → [40285774452](https://github.com/BakerSean168/memoflow/actions/runs/40285774452) | `verified-run`                          |
-| `DATA-MIGRATION`       | `ci.yml`（DB 集成 shard）                                                                  | PR                 | Linux                     | 真实 PostgreSQL 容器                                                        | `9a97c9130` → [40804738576](https://github.com/BakerSean168/memoflow/actions/runs/40804738576) | `verified-run`（集成）/ 缺口（cutover） |
-| `VISUAL-LAYOUT`        | `ci.yml`（Test Web Visual）                                                                | PR / Main          | Linux（Noble + CJK 字体） | 无                                                                          | `9a97c9130` → [40804738576](https://github.com/BakerSean168/memoflow/actions/runs/40804738576) | `verified-run`                          |
+| 风险 ID                | 负责 Workflow / Runner                                                                     | 触发阶段           | 平台                          | 外部 DB / Provider 准入                                                     | 目标 SHA + 最近成功 Run                                                                        | 等级                                    |
+| ---------------------- | ------------------------------------------------------------------------------------------ | ------------------ | ----------------------------- | --------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------- | --------------------------------------- |
+| `WEB-DESKTOP-SYNC`     | `nightly-audit.yml` / Specialized E2E（`web:e2e:sync`）                                    | Nightly            | Linux + xvfb + Secret Service | Docker: postgres-test + powersync-test；签名键来自仓库内 `.env.development` | 接线后待取证                                                                                   | `gate-only`                             |
+| `DESKTOP-UPDATE`       | `release-assets.yml`；`desktop-update-e2e.yml`                                             | Release / 手动     | Linux、Windows                | 无（真实打包安装态）                                                        | `9934705d5` → [39088705384](https://github.com/BakerSean168/memoflow/actions/runs/39088705384) | `verified-run`                          |
+| `DESKTOP-IPC`          | `desktop-update-e2e.yml`（Windows 安装态套件）                                             | Release / 手动     | Windows                       | 无（真实安装态）                                                            | `c2d92705e` → [39783670101](https://github.com/BakerSean168/memoflow/actions/runs/39783670101) | `verified-run`                          |
+| `AUTH-LOGIN`           | `desktop-update-e2e.yml` / Desktop auth job（`desktop:e2e`）；Web 认证组件/单元在 `ci.yml` | Release / 手动；PR | Linux + xvfb；Linux           | 无外部凭据（spec 自带本地 auth server）                                     | 接线后待取证                                                                                   | `gate-only`                             |
+| `GOAL-DRAFT`           | `ci.yml`（component）；`playwright.goal-reference` 手动                                    | PR                 | Linux                         | 无                                                                          | `8fcdb1eea` → [40731442600](https://github.com/BakerSean168/memoflow/actions/runs/40731442600) | `verified-run`                          |
+| `TASK-RECURRENCE-A11Y` | `ci.yml`（component a11y）；reference collector 手动                                       | PR                 | Linux                         | 无                                                                          | `9a97c9130` → [40804738576](https://github.com/BakerSean168/memoflow/actions/runs/40804738576) | `verified-run`                          |
+| `AI-APPROVAL`          | `ci.yml`（Test Server Unit / shards）                                                      | PR                 | Linux                         | 无（确定性 fake）                                                           | `9a97c9130` → [40804738576](https://github.com/BakerSean168/memoflow/actions/runs/40804738576) | `verified-run`                          |
+| `AI-EVAL-QUALITY`      | `nightly-audit.yml`（`web:e2e:ai-provider`）                                               | Nightly            | Linux                         | Recorded Replay 确定性；Live Provider 仅 opt-in                             | `2e7484026` → [40285774452](https://github.com/BakerSean168/memoflow/actions/runs/40285774452) | `verified-run`（replay）/ 缺口（live）  |
+| `OWNER-ISOLATION`      | `nightly-audit.yml`（`web:e2e:ai-provider` P0 跨 owner 用例）                              | Nightly            | Linux                         | 真实 Postgres + 本地 API                                                    | `2e7484026` → [40285774452](https://github.com/BakerSean168/memoflow/actions/runs/40285774452) | `verified-run`                          |
+| `DATA-MIGRATION`       | `ci.yml`（DB 集成 shard）                                                                  | PR                 | Linux                         | 真实 PostgreSQL 容器                                                        | `9a97c9130` → [40804738576](https://github.com/BakerSean168/memoflow/actions/runs/40804738576) | `verified-run`（集成）/ 缺口（cutover） |
+| `VISUAL-LAYOUT`        | `ci.yml`（Test Web Visual）                                                                | PR / Main          | Linux（Noble + CJK 字体）     | 无                                                                          | `9a97c9130` → [40804738576](https://github.com/BakerSean168/memoflow/actions/runs/40804738576) | `verified-run`                          |
 
 ## 逐项记录
 
@@ -45,7 +45,7 @@ updated: 2026-10-29T00:00:00+08:00
 
 - Spec：`apps/web/e2e/sync/goal-sync-regression.spec.ts`（3 个用例：desktop→web、web→desktop、重启后保留）
 - Collector / target：`apps/web/playwright.sync.config.ts` / `web:e2e:sync`
-- 前置：`configurePowerSyncTestEnv()` 在缺少 `POWERSYNC_*` 签名键时 **throw**（fail-closed，不会静默跳过）；`start-powersync-test-service.ts` 自行 `docker compose --profile test --profile sync-test up`；global setup 构建桌面应用；Electron 在 headless Linux 需 xvfb
+- 前置：`configurePowerSyncTestEnv()` 在缺少 `POWERSYNC_*` 签名键时 **throw**（fail-closed，不会静默跳过）；`start-powersync-test-service.ts` 自行 `docker compose --profile test --profile sync-test up`；global setup 构建桌面应用；Electron 在 headless Linux 需 xvfb **与真实 Secret Service**
 - 修复前：ownership 中该 collector 无 `automation`，target 无 `dependsOn`，任何 Workflow 都不执行 → 真实缺口
 - 现状：已接入 `nightly-audit.yml` 的 Specialized E2E job（见下文「接线」），`automation` 元数据同步登记
 
@@ -68,6 +68,7 @@ updated: 2026-10-29T00:00:00+08:00
 - 真实 Electron Profile + 认证流：`apps/desktop/e2e/authentication/desktop-auth-flow.spec.mts`（5 个用例，自带本地 auth HTTP server，无外部凭据、无条件 skip）
 - 修复前：`desktop:e2e` 未被任何 Workflow 引用 → `no-gate`
 - 现状：已接入 `desktop-update-e2e.yml` 的 Desktop auth job（Linux + xvfb + 真实 keyring），见「接线」
+- `lastActiveAt` 的断言口径：该字段只由 `ProfileRegistry.touch` 写入，唯一调用点是 `activatePreparedProfile`（打开/切换 Profile 时），因此「重新激活过的 Profile」其值必然前进。`a second guest …` 用例自身会在中途切回第一个 guest，故该用例按「其余字段严格相等 + `lastActiveAt` 为合法数值且不早于快照」比较，而不是钉死整个快照
 - Web 侧认证组件/单元断言仍在 `ci.yml` 的 PR lane 内
 
 ### GOAL-DRAFT
@@ -118,11 +119,13 @@ updated: 2026-10-29T00:00:00+08:00
 ### WEB-DESKTOP-SYNC → Nightly Audit `Specialized E2E (Web/Desktop Sync)`
 
 - Workflow：`.github/workflows/nightly-audit.yml`，job `sync-e2e`，`ubuntu-24.04`，cron `0 2 * * *` 与 `workflow_dispatch`
-- 环境：`docker compose --profile test --profile sync-test up -d --wait postgres-test powersync-test`；`database:prisma-push`；`playwright install chromium`；`xvfb-run -a`
+- 环境：`docker compose --profile test --profile sync-test up -d --wait postgres-test powersync-test`；`database:prisma-push`；`playwright install chromium`；`apps/web/scripts/run-linux-sync-e2e-with-keyring.sh`
+- Keyring：该 lane 会启动真实 Electron，`apps/web/e2e/sync/helpers/desktop.ts` 在 `safeStorage` 为 `basic_text`/`unknown` 时抛错，因此 job 装 `dbus-x11 gnome-keyring libsecret-tools libglib2.0-bin`，由包装脚本在 Xvfb 内起 `dbus-run-session` + `gnome-keyring-daemon`（login/start 生命周期 + sentinel 读写自检）。keyring 通过 `XDG_DATA_HOME` 隔离而**不**改 `HOME`：Playwright 的浏览器缓存按 `HOME` 解析，且该 collector 的 `webServer` 会调用 `corepack pnpm`
+- Electron 测试开关：Playwright 的 Electron 启动器会自带 `--password-store=basic` / `--use-mock-keychain`；collector 在 `MEMOFLOW_E2E_USE_GNOME_KEYRING=1` 时把桌面车道已有的 `real-keyring-playwright-loader.cjs` 传给 Electron 仅移除这两个测试默认值，helper 的 `backend` 断言保持原样
 - 准入：PowerSync 签名键取自仓库内 `.env.development`（已跟踪），不新增 Secret；缺失时 collector 抛错
-- Target 闭包：`web:e2e:sync` 现在声明 `cache: false` 与 `dependsOn: ["^build"]`，由 `tools/nx-test-system` 的 `sync-test-targets` 生成器维护（`e2e:sync` 不在 `CI_TARGETS` 内，因此不会把 `app-vue:build` / `desktop:build` 拉进 test-only PR，符合 #700 的图层口径）
+- Target 闭包：`web:e2e:sync` 现在声明 `cache: false` 与 `dependsOn: ["^build"]`，由 `tools/nx-test-system` 的 `sync-test-targets` 生成器维护（`e2e:sync` 不在 `CI_TARGETS` 内，因此不会把 `app-vue:build` / `desktop:build` 拉进 test-only PR，符合 #700 的图层口径）。该 target 由生成器拥有，`apps/web/project.json` 必须与 `nx sync` 输出一致，否则 Lint 车道的 `nx sync:check` 失败
 - 归属：`e2e-ownership.json` 中该 collector 的 `automation` 指向该 workflow 与 `web:e2e:sync`
-- 取证状态：**待触发**（本分支尚未合并到默认分支，`workflow_dispatch` 只认默认分支上的 workflow 定义）
+- 取证状态：**待触发**（本分支尚未合并到默认分支，`workflow_dispatch` 只认默认分支上的 workflow 定义）。首次接线后的 [run 40811627810](https://github.com/BakerSean168/memoflow/actions/runs/40811627810) 三个 spec 均死于缺少 Secret Service（`backend=basic_text`），本分支已补齐 keyring 会话，需合并后重新 dispatch 取证
 
 ### AUTH-LOGIN → Desktop Update Installed E2E `Desktop Auth Flow`
 
@@ -144,9 +147,10 @@ updated: 2026-10-29T00:00:00+08:00
 
 ## Fail-closed 决策
 
-| 场景                        | 条件不满足时的行为                                                                                                 |
-| --------------------------- | ------------------------------------------------------------------------------------------------------------------ |
-| `WEB-DESKTOP-SYNC`          | 缺 `POWERSYNC_*` 签名键或容器未就绪 → target 抛错、job 失败，不降级为 skip                                         |
-| `AI-EVAL-QUALITY`（live）   | 缺 `E2E_MODEL_SERVICE_*` → `test.skip`；Job 仍是绿色，故**不得**据此宣称真实 Provider 已验证，只能引用 replay 结论 |
-| `DESKTOP-*`                 | 打包/安装失败 → job 失败；不允许用未打包 smoke 替代                                                                |
-| `DATA-MIGRATION`（cutover） | 无环境 → 保持缺口，不以单元测试替代                                                                                |
+| 场景                          | 条件不满足时的行为                                                                                                        |
+| ----------------------------- | ------------------------------------------------------------------------------------------------------------------------- |
+| `WEB-DESKTOP-SYNC`            | 缺 `POWERSYNC_*` 签名键或容器未就绪 → target 抛错、job 失败，不降级为 skip                                                |
+| `WEB-DESKTOP-SYNC`（keyring） | 无 Secret Service（`safeStorage` 报 `basic_text`/`unknown`）→ 包装脚本在 sentinel 自检或 helper 断言处失败，不降级为 skip |
+| `AI-EVAL-QUALITY`（live）     | 缺 `E2E_MODEL_SERVICE_*` → `test.skip`；Job 仍是绿色，故**不得**据此宣称真实 Provider 已验证，只能引用 replay 结论        |
+| `DESKTOP-*`                   | 打包/安装失败 → job 失败；不允许用未打包 smoke 替代                                                                       |
+| `DATA-MIGRATION`（cutover）   | 无环境 → 保持缺口，不以单元测试替代                                                                                       |
