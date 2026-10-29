@@ -9968,6 +9968,16 @@
       ]
     },
     {
+      "path": "packages/setting/src/server/infrastructure/adapters/powersync/user-preference-powersync-rows-affected.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/setting/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "packages/setting/vitest.config.ts"
+      ]
+    },
+    {
       "path": "packages/setting/src/server/infrastructure/adapters/powersync/user-preference-powersync.repository.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -12458,7 +12468,7 @@
       "type": "measurement",
       "suite": "coverage",
       "runner": "vitest",
-      "fileCount": 11
+      "fileCount": 12
     },
     {
       "id": "packages/task/vitest.config.ts",
@@ -13223,7 +13233,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 11
+      "fileCount": 12
     },
     {
       "id": "packages/shared-primitives/vitest.config.ts",
@@ -13829,6 +13839,7 @@
       "packages/setting/src/server/application/use-cases/queries/__tests__/export-settings.test.ts",
       "packages/setting/src/server/infrastructure/__tests__/setting-module-partial-start.spec.ts",
       "packages/setting/src/server/infrastructure/__tests__/setting-repositories.surface.spec.ts",
+      "packages/setting/src/server/infrastructure/adapters/powersync/user-preference-powersync-rows-affected.spec.ts",
       "packages/setting/src/server/infrastructure/adapters/powersync/user-preference-powersync.repository.spec.ts",
       "packages/setting/src/server/infrastructure/adapters/prisma/user-preference-prisma.repository.spec.ts",
       "packages/setting/src/server/preferences/preference-portability.spec.ts",

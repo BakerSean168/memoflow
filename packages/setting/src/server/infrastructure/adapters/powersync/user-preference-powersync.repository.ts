@@ -1,4 +1,4 @@
-import type { IElectronDatabaseTransaction } from '@memoflow/desktop-contracts';
+import type { IElectronDatabase, IElectronDatabaseTransaction } from '@memoflow/desktop-contracts';
 import type { PreferenceNamespace } from '@memoflow/setting-contracts';
 import type {
   IUserPreferenceRepository,
@@ -62,9 +62,22 @@ export class UserPreferencePowerSyncRepository implements IUserPreferenceReposit
 
   async create(document: UserPreferenceDocument): Promise<PreferenceCreateResult> {
     assertCreateRevision(document);
+    if ('writeTransaction' in this.db) {
+      return (this.db as IElectronDatabase).writeTransaction((tx) =>
+        new UserPreferencePowerSyncRepository(tx).createInTransaction(document),
+      );
+    }
+    return this.createInTransaction(document);
+  }
+
+  private async createInTransaction(
+    document: UserPreferenceDocument,
+  ): Promise<PreferenceCreateResult> {
     const data = PowerSyncUserPreferenceMapper.toPersistence(document);
+    const existing = await this.find(data.identityId, data.namespace);
+    if (existing) return { kind: 'exists', document: existing };
     try {
-      const result = await this.db.execute(
+      await this.db.execute(
         `INSERT INTO user_preference_records
            (id, identity_id, namespace, payload, revision, created_at, updated_at)
          VALUES (?, ?, ?, ?, ?, ?, ?)`,
@@ -78,11 +91,6 @@ export class UserPreferencePowerSyncRepository implements IUserPreferenceReposit
           data.updatedAt,
         ],
       );
-      if (result.rowsAffected !== 1) {
-        throw new Error(
-          `Preference insert affected ${String(result.rowsAffected)} rows instead of exactly one`,
-        );
-      }
       return { kind: 'created', document };
     } catch (error) {
       // PowerSync/SQLite wrappers do not expose one stable unique-error class.
@@ -99,8 +107,36 @@ export class UserPreferencePowerSyncRepository implements IUserPreferenceReposit
     expectedRevision: number,
   ): Promise<PreferenceCompareAndSwapResult> {
     assertCasRevision(document, expectedRevision);
+    if ('writeTransaction' in this.db) {
+      return (this.db as IElectronDatabase).writeTransaction((tx) =>
+        new UserPreferencePowerSyncRepository(tx).compareAndSwapInTransaction(
+          document,
+          expectedRevision,
+        ),
+      );
+    }
+    return this.compareAndSwapInTransaction(document, expectedRevision);
+  }
+
+  private async compareAndSwapInTransaction(
+    document: UserPreferenceDocument,
+    expectedRevision: number,
+  ): Promise<PreferenceCompareAndSwapResult> {
     const data = PowerSyncUserPreferenceMapper.toPersistence(document);
-    const result = await this.db.execute(
+    // PowerSync view writes report zero rowsAffected even when the CAS succeeds.
+    const { count } = await this.db.get<{ count: number }>(
+      `SELECT COUNT(*) AS count FROM user_preference_records
+       WHERE identity_id = ? AND namespace = ? AND revision = ?`,
+      [data.identityId, data.namespace, expectedRevision],
+    );
+    if (count > 1) {
+      throw new Error(`Preference CAS updated ${String(count)} rows for a unique namespace key`);
+    }
+    if (count === 0) {
+      const latest = await this.find(data.identityId, data.namespace);
+      return latest ? { kind: 'conflict', latest } : { kind: 'missing' };
+    }
+    await this.db.execute(
       `UPDATE user_preference_records
        SET payload = ?, revision = ?, updated_at = ?
        WHERE identity_id = ? AND namespace = ? AND revision = ?`,
@@ -114,16 +150,6 @@ export class UserPreferencePowerSyncRepository implements IUserPreferenceReposit
       ],
     );
 
-    if (result.rowsAffected === 1) {
-      return { kind: 'updated', document };
-    }
-    if ((result.rowsAffected ?? 0) > 1) {
-      throw new Error(
-        `Preference CAS updated ${String(result.rowsAffected)} rows for a unique namespace key`,
-      );
-    }
-
-    const latest = await this.find(data.identityId, data.namespace);
-    return latest ? { kind: 'conflict', latest } : { kind: 'missing' };
+    return { kind: 'updated', document };
   }
 }
