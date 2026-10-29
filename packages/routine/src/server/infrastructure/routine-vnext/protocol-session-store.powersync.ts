@@ -1,4 +1,5 @@
-import type { IElectronDatabase } from '@memoflow/desktop-contracts';
+import { withRoutineWriteTransaction } from './powersync-write-transaction';
+import type { IElectronDatabaseTransaction } from '@memoflow/desktop-contracts';
 import {
   deserializeProtocolSession,
   protocolSessionToPowerSync,
@@ -25,33 +26,38 @@ function receipt(
 }
 
 export class PowerSyncProtocolSessionStore implements ProtocolSessionStore {
-  constructor(private readonly db: IElectronDatabase) {}
+  constructor(private readonly db: IElectronDatabaseTransaction) {}
 
   async create(session: ProtocolSession): Promise<ProtocolSessionPersistenceReceipt> {
-    const row = protocolSessionToPowerSync(session);
-    const result = await this.db.execute(
-      `INSERT INTO routine_protocol_sessions (
+    return withRoutineWriteTransaction(this.db, async (tx) => {
+      const row = protocolSessionToPowerSync(session);
+      const existing = await tx.getOptional<{ id: string }>(
+        'SELECT id FROM routine_protocol_sessions WHERE id = ? LIMIT 1',
+        [row.id],
+      );
+      if (existing)
+        throw new Error(`ProtocolSession '${session.id}' insert did not affect exactly one row`);
+      await tx.execute(
+        `INSERT INTO routine_protocol_sessions (
         id, identity_id, protocol_id, protocol_version, status, snapshot_json,
         termination_reason, ended_at, version, created_at, updated_at
       ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-      [
-        row.id,
-        row.identity_id,
-        row.protocol_id,
-        row.protocol_version,
-        row.status,
-        row.snapshot_json,
-        row.termination_reason,
-        row.ended_at,
-        row.version,
-        row.created_at,
-        row.updated_at,
-      ],
-    );
-    if (result.rowsAffected !== 1) {
-      throw new Error(`ProtocolSession '${session.id}' insert did not affect exactly one row`);
-    }
-    return receipt(session, null);
+        [
+          row.id,
+          row.identity_id,
+          row.protocol_id,
+          row.protocol_version,
+          row.status,
+          row.snapshot_json,
+          row.termination_reason,
+          row.ended_at,
+          row.version,
+          row.created_at,
+          row.updated_at,
+        ],
+      );
+      return receipt(session, null);
+    });
   }
 
   async findById(input: {
@@ -85,43 +91,50 @@ export class PowerSyncProtocolSessionStore implements ProtocolSessionStore {
     session: ProtocolSession,
     expectedVersion: number,
   ): Promise<ProtocolSessionPersistenceReceipt> {
-    if (session.version <= expectedVersion) {
-      throw new TypeError('ProtocolSession save requires a version-advancing transition');
-    }
-    const row = protocolSessionToPowerSync(session);
-    const result = await this.db.execute(
-      `UPDATE routine_protocol_sessions
+    return withRoutineWriteTransaction(this.db, async (tx) => {
+      if (session.version <= expectedVersion) {
+        throw new TypeError('ProtocolSession save requires a version-advancing transition');
+      }
+      const row = protocolSessionToPowerSync(session);
+      const { count } = await tx.get<{ count: number }>(
+        `SELECT COUNT(*) AS count FROM routine_protocol_sessions WHERE id = ? AND identity_id = ? AND version = ?`,
+        [row.id, row.identity_id, expectedVersion],
+      );
+      if (count !== 1) {
+        const current = await tx.getOptional<{ version: number }>(
+          `SELECT version FROM routine_protocol_sessions
+       WHERE id = ? AND identity_id = ? LIMIT 1`,
+          [row.id, row.identity_id],
+        );
+        if (!current) {
+          throw new ProtocolSessionNotFoundError(session.identityId, session.id);
+        }
+        throw new ProtocolSessionVersionConflictError(
+          session.identityId,
+          session.id,
+          expectedVersion,
+          Number(current.version),
+        );
+      }
+      await tx.execute(
+        `UPDATE routine_protocol_sessions
        SET protocol_version = ?, status = ?, snapshot_json = ?, termination_reason = ?,
            ended_at = ?, version = ?, updated_at = ?
        WHERE id = ? AND identity_id = ? AND version = ?`,
-      [
-        row.protocol_version,
-        row.status,
-        row.snapshot_json,
-        row.termination_reason,
-        row.ended_at,
-        row.version,
-        row.updated_at,
-        row.id,
-        row.identity_id,
-        expectedVersion,
-      ],
-    );
-    if (result.rowsAffected === 1) return receipt(session, expectedVersion);
-
-    const current = await this.db.getOptional<{ version: number }>(
-      `SELECT version FROM routine_protocol_sessions
-       WHERE id = ? AND identity_id = ? LIMIT 1`,
-      [row.id, row.identity_id],
-    );
-    if (!current) {
-      throw new ProtocolSessionNotFoundError(session.identityId, session.id);
-    }
-    throw new ProtocolSessionVersionConflictError(
-      session.identityId,
-      session.id,
-      expectedVersion,
-      Number(current.version),
-    );
+        [
+          row.protocol_version,
+          row.status,
+          row.snapshot_json,
+          row.termination_reason,
+          row.ended_at,
+          row.version,
+          row.updated_at,
+          row.id,
+          row.identity_id,
+          expectedVersion,
+        ],
+      );
+      return receipt(session, expectedVersion);
+    });
   }
 }

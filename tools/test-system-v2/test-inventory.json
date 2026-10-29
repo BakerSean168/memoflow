@@ -9034,6 +9034,16 @@
       ]
     },
     {
+      "path": "packages/routine/src/server/infrastructure/routine-vnext/routine-powersync-rows-affected.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/routine/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "packages/routine/vitest.config.ts"
+      ]
+    },
+    {
       "path": "packages/routine/src/server/infrastructure/routine-vnext/routine-preferences-store.powersync.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -12433,7 +12443,7 @@
       "type": "measurement",
       "suite": "coverage",
       "runner": "vitest",
-      "fileCount": 31
+      "fileCount": 32
     },
     {
       "id": "packages/schedule/vitest.config.ts",
@@ -13163,7 +13173,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 31
+      "fileCount": 32
     },
     {
       "id": "packages/schedule-client/vitest.config.ts",
@@ -13785,6 +13795,7 @@
       "packages/routine/src/server/infrastructure/routine-vnext/protocol-session-store.powersync.spec.ts",
       "packages/routine/src/server/infrastructure/routine-vnext/routine-local-registrations.powersync.spec.ts",
       "packages/routine/src/server/infrastructure/routine-vnext/routine-occurrence-truth-store.powersync.spec.ts",
+      "packages/routine/src/server/infrastructure/routine-vnext/routine-powersync-rows-affected.spec.ts",
       "packages/routine/src/server/infrastructure/routine-vnext/routine-preferences-store.powersync.spec.ts",
       "packages/routine/src/server/infrastructure/routine-vnext/routine-preferences-store.prisma.spec.ts",
       "packages/routine/src/server/infrastructure/routine-vnext/routine-profile-store.powersync.spec.ts",
@@ -13934,7 +13945,7 @@
   "duplicate": [],
   "unexpected": [],
   "counts": {
-    "unit": 1142,
+    "unit": 1144,
     "integration": 58,
     "smoke": 3,
     "boundary-ipc": 6,

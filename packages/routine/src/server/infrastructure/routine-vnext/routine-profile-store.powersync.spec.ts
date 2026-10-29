@@ -42,6 +42,7 @@ function createDb(failMembershipInsert = false): IElectronDatabase & { close(): 
     );
     CREATE UNIQUE INDEX routine_profiles_owner ON routine_profiles(identity_id, id);
     CREATE TABLE routine_profile_memberships (
+      id TEXT,
       identity_id TEXT NOT NULL,
       profile_id TEXT NOT NULL,
       routine_id TEXT NOT NULL,

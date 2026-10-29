@@ -1,4 +1,6 @@
-import type { IElectronDatabase, IElectronDatabaseTransaction } from '@memoflow/desktop-contracts';
+import { randomUUID } from 'node:crypto';
+import { withRoutineWriteTransaction } from './powersync-write-transaction';
+import type { IElectronDatabaseTransaction } from '@memoflow/desktop-contracts';
 import type { RoutineProfileStore } from '../../domain/ports';
 import { ProfileMembership, RoutineDefinition, RoutineProfile } from '../../domain/routine';
 import {
@@ -12,11 +14,11 @@ import {
 import { deserializeRoutineTrigger } from './trigger-persistence-parity';
 
 export class PowerSyncRoutineProfileStore implements RoutineProfileStore {
-  constructor(private readonly db: IElectronDatabase) {}
+  constructor(private readonly db: IElectronDatabaseTransaction) {}
 
   async upsertDefinition(definition: RoutineDefinition): Promise<void> {
     const row = routineDefinitionToPowerSync(definition.snapshot());
-    await this.db.writeTransaction((tx) => upsertDefinition(tx, row));
+    await withRoutineWriteTransaction(this.db, (tx) => upsertDefinition(tx, row));
   }
 
   async createDefinitionWithMemberships(input: {
@@ -28,11 +30,13 @@ export class PowerSyncRoutineProfileStore implements RoutineProfileStore {
     const membershipRows = input.memberships.map((membership) =>
       profileMembershipToPowerSync(membership.snapshot()),
     );
-    await this.db.writeTransaction(async (tx) => {
-      const existingDefinition = await tx.getOptional<{ id: string; identity_id: string }>(
-        'SELECT id, identity_id FROM routine_definitions WHERE id = ? LIMIT 1',
-        [definitionRow.id],
-      );
+    await withRoutineWriteTransaction(this.db, async (tx) => {
+      const existingDefinition = await tx.getOptional<{
+        id: string;
+        identity_id: string;
+      }>('SELECT id, identity_id FROM routine_definitions WHERE id = ? LIMIT 1', [
+        definitionRow.id,
+      ]);
       if (existingDefinition) {
         throw new TypeError(
           existingDefinition.identity_id === definitionRow.identity_id
@@ -89,25 +93,31 @@ export class PowerSyncRoutineProfileStore implements RoutineProfileStore {
     readonly definition: RoutineDefinition;
     readonly expectedVersion: number;
   }): Promise<void> {
-    const row = routineDefinitionToPowerSync(input.definition.snapshot());
-    const result = await this.db.execute(
-      `UPDATE routine_definitions
+    return withRoutineWriteTransaction(this.db, async (tx) => {
+      const row = routineDefinitionToPowerSync(input.definition.snapshot());
+      const { count } = await tx.get<{ count: number }>(
+        `SELECT COUNT(*) AS count FROM routine_definitions WHERE id = ? AND identity_id = ? AND version = ?`,
+        [row.id, row.identity_id, input.expectedVersion],
+      );
+      if (count !== 1) throw new Error(`Routine '${row.id}' version conflict`);
+      await tx.execute(
+        `UPDATE routine_definitions
        SET name = ?, description = ?, enabled = ?, trigger_json = ?, activated_at = ?, version = ?, updated_at = ?
        WHERE id = ? AND identity_id = ? AND version = ?`,
-      [
-        row.name,
-        row.description,
-        row.enabled,
-        row.trigger_json,
-        row.activated_at,
-        row.version,
-        row.updated_at,
-        row.id,
-        row.identity_id,
-        input.expectedVersion,
-      ],
-    );
-    if (result.rowsAffected !== 1) throw new Error(`Routine '${row.id}' version conflict`);
+        [
+          row.name,
+          row.description,
+          row.enabled,
+          row.trigger_json,
+          row.activated_at,
+          row.version,
+          row.updated_at,
+          row.id,
+          row.identity_id,
+          input.expectedVersion,
+        ],
+      );
+    });
   }
 
   async deleteDefinition(input: {
@@ -115,20 +125,28 @@ export class PowerSyncRoutineProfileStore implements RoutineProfileStore {
     readonly routineId: string;
     readonly expectedVersion?: number;
   }): Promise<void> {
-    const result = await this.db.execute(
-      `DELETE FROM routine_definitions WHERE id = ? AND identity_id = ?${input.expectedVersion === undefined ? '' : ' AND version = ?'}`,
-      input.expectedVersion === undefined
-        ? [input.routineId, input.identityId]
-        : [input.routineId, input.identityId, input.expectedVersion],
-    );
-    if (input.expectedVersion !== undefined && result.rowsAffected !== 1) {
-      throw new Error(`Routine '${input.routineId}' version conflict`);
-    }
+    return withRoutineWriteTransaction(this.db, async (tx) => {
+      const { count } = await tx.get<{ count: number }>(
+        `SELECT COUNT(*) AS count FROM routine_definitions WHERE id = ? AND identity_id = ?${input.expectedVersion === undefined ? '' : ' AND version = ?'}`,
+        input.expectedVersion === undefined
+          ? [input.routineId, input.identityId]
+          : [input.routineId, input.identityId, input.expectedVersion],
+      );
+      if (input.expectedVersion !== undefined && count !== 1) {
+        throw new Error(`Routine '${input.routineId}' version conflict`);
+      }
+      await tx.execute(
+        `DELETE FROM routine_definitions WHERE id = ? AND identity_id = ?${input.expectedVersion === undefined ? '' : ' AND version = ?'}`,
+        input.expectedVersion === undefined
+          ? [input.routineId, input.identityId]
+          : [input.routineId, input.identityId, input.expectedVersion],
+      );
+    });
   }
 
   async upsertProfile(profile: RoutineProfile): Promise<void> {
     const row = routineProfileToPowerSync(profile.snapshot());
-    await this.db.writeTransaction((tx) => upsertProfile(tx, row));
+    await withRoutineWriteTransaction(this.db, (tx) => upsertProfile(tx, row));
   }
 
   async findProfile(input: {
@@ -172,23 +190,29 @@ export class PowerSyncRoutineProfileStore implements RoutineProfileStore {
     readonly profile: RoutineProfile;
     readonly expectedVersion: number;
   }): Promise<void> {
-    const row = routineProfileToPowerSync(input.profile.snapshot());
-    const result = await this.db.execute(
-      `UPDATE routine_profiles
+    return withRoutineWriteTransaction(this.db, async (tx) => {
+      const row = routineProfileToPowerSync(input.profile.snapshot());
+      const { count } = await tx.get<{ count: number }>(
+        `SELECT COUNT(*) AS count FROM routine_profiles WHERE id = ? AND identity_id = ? AND version = ?`,
+        [row.id, row.identity_id, input.expectedVersion],
+      );
+      if (count !== 1) throw new Error(`Profile '${row.id}' version conflict`);
+      await tx.execute(
+        `UPDATE routine_profiles
        SET name = ?, description = ?, enabled = ?, version = ?, updated_at = ?
        WHERE id = ? AND identity_id = ? AND version = ?`,
-      [
-        row.name,
-        row.description,
-        row.enabled,
-        row.version,
-        row.updated_at,
-        row.id,
-        row.identity_id,
-        input.expectedVersion,
-      ],
-    );
-    if (result.rowsAffected !== 1) throw new Error(`Profile '${row.id}' version conflict`);
+        [
+          row.name,
+          row.description,
+          row.enabled,
+          row.version,
+          row.updated_at,
+          row.id,
+          row.identity_id,
+          input.expectedVersion,
+        ],
+      );
+    });
   }
 
   async deleteProfile(input: {
@@ -196,38 +220,52 @@ export class PowerSyncRoutineProfileStore implements RoutineProfileStore {
     readonly profileId: string;
     readonly expectedVersion?: number;
   }): Promise<void> {
-    const result = await this.db.execute(
-      `DELETE FROM routine_profiles WHERE id = ? AND identity_id = ?${input.expectedVersion === undefined ? '' : ' AND version = ?'}`,
-      input.expectedVersion === undefined
-        ? [input.profileId, input.identityId]
-        : [input.profileId, input.identityId, input.expectedVersion],
-    );
-    if (input.expectedVersion !== undefined && result.rowsAffected !== 1) {
-      throw new Error(`Profile '${input.profileId}' version conflict`);
-    }
+    return withRoutineWriteTransaction(this.db, async (tx) => {
+      const { count } = await tx.get<{ count: number }>(
+        `SELECT COUNT(*) AS count FROM routine_profiles WHERE id = ? AND identity_id = ?${input.expectedVersion === undefined ? '' : ' AND version = ?'}`,
+        input.expectedVersion === undefined
+          ? [input.profileId, input.identityId]
+          : [input.profileId, input.identityId, input.expectedVersion],
+      );
+      if (input.expectedVersion !== undefined && count !== 1) {
+        throw new Error(`Profile '${input.profileId}' version conflict`);
+      }
+      await tx.execute(
+        `DELETE FROM routine_profiles WHERE id = ? AND identity_id = ?${input.expectedVersion === undefined ? '' : ' AND version = ?'}`,
+        input.expectedVersion === undefined
+          ? [input.profileId, input.identityId]
+          : [input.profileId, input.identityId, input.expectedVersion],
+      );
+    });
   }
 
   async upsertMembership(membership: ProfileMembership, expectedVersion?: number): Promise<void> {
-    const row = profileMembershipToPowerSync(membership.snapshot());
-    if (expectedVersion !== undefined) {
-      const result = await this.db.execute(
-        `UPDATE routine_profile_memberships
+    return withRoutineWriteTransaction(this.db, async (tx) => {
+      const row = profileMembershipToPowerSync(membership.snapshot());
+      if (expectedVersion !== undefined) {
+        const { count } = await tx.get<{ count: number }>(
+          `SELECT COUNT(*) AS count FROM routine_profile_memberships WHERE identity_id = ? AND profile_id = ? AND routine_id = ? AND version = ?`,
+          [row.identity_id, row.profile_id, row.routine_id, expectedVersion],
+        );
+        if (count !== 1) throw new Error('Routine membership version conflict');
+        await tx.execute(
+          `UPDATE routine_profile_memberships
          SET enabled = ?, version = ?, updated_at = ?
          WHERE identity_id = ? AND profile_id = ? AND routine_id = ? AND version = ?`,
-        [
-          row.enabled,
-          row.version,
-          row.updated_at,
-          row.identity_id,
-          row.profile_id,
-          row.routine_id,
-          expectedVersion,
-        ],
-      );
-      if (result.rowsAffected !== 1) throw new Error('Routine membership version conflict');
-      return;
-    }
-    await this.db.writeTransaction((tx) => upsertMembership(tx, row));
+          [
+            row.enabled,
+            row.version,
+            row.updated_at,
+            row.identity_id,
+            row.profile_id,
+            row.routine_id,
+            expectedVersion,
+          ],
+        );
+        return;
+      }
+      await upsertMembership(tx, row);
+    });
   }
 
   async listMembershipsForRoutine(input: {
@@ -280,16 +318,24 @@ export class PowerSyncRoutineProfileStore implements RoutineProfileStore {
     readonly routineId: string;
     readonly expectedVersion?: number;
   }): Promise<void> {
-    const result = await this.db.execute(
-      `DELETE FROM routine_profile_memberships
+    return withRoutineWriteTransaction(this.db, async (tx) => {
+      const { count } = await tx.get<{ count: number }>(
+        `SELECT COUNT(*) AS count FROM routine_profile_memberships WHERE identity_id = ? AND profile_id = ? AND routine_id = ?${input.expectedVersion === undefined ? '' : ' AND version = ?'}`,
+        input.expectedVersion === undefined
+          ? [input.identityId, input.profileId, input.routineId]
+          : [input.identityId, input.profileId, input.routineId, input.expectedVersion],
+      );
+      if (input.expectedVersion !== undefined && count !== 1) {
+        throw new Error('Routine membership version conflict');
+      }
+      await tx.execute(
+        `DELETE FROM routine_profile_memberships
        WHERE identity_id = ? AND profile_id = ? AND routine_id = ?${input.expectedVersion === undefined ? '' : ' AND version = ?'}`,
-      input.expectedVersion === undefined
-        ? [input.identityId, input.profileId, input.routineId]
-        : [input.identityId, input.profileId, input.routineId, input.expectedVersion],
-    );
-    if (input.expectedVersion !== undefined && result.rowsAffected !== 1) {
-      throw new Error('Routine membership version conflict');
-    }
+        input.expectedVersion === undefined
+          ? [input.identityId, input.profileId, input.routineId]
+          : [input.identityId, input.profileId, input.routineId, input.expectedVersion],
+      );
+    });
   }
 
   async replaceRoutineMemberships(input: {
@@ -299,16 +345,19 @@ export class PowerSyncRoutineProfileStore implements RoutineProfileStore {
     readonly expectedVersion?: number;
   }): Promise<void> {
     assertMembershipSet(input);
-    await this.db.writeTransaction(async (tx) => {
+    await withRoutineWriteTransaction(this.db, async (tx) => {
       if (input.expectedVersion !== undefined) {
-        const result = await tx.execute(
+        const { count } = await tx.get<{ count: number }>(
+          `SELECT COUNT(*) AS count FROM routine_definitions WHERE id = ? AND identity_id = ? AND version = ?`,
+          [input.routineId, input.identityId, input.expectedVersion],
+        );
+        if (count !== 1) throw new Error(`Routine '${input.routineId}' version conflict`);
+        await tx.execute(
           `UPDATE routine_definitions
            SET version = version + 1
            WHERE id = ? AND identity_id = ? AND version = ?`,
           [input.routineId, input.identityId, input.expectedVersion],
         );
-        if (result.rowsAffected !== 1)
-          throw new Error(`Routine '${input.routineId}' version conflict`);
       }
       await tx.execute(
         'DELETE FROM routine_profile_memberships WHERE identity_id = ? AND routine_id = ?',
@@ -459,8 +508,8 @@ async function insertMembership(
 ): Promise<void> {
   await tx.execute(
     `INSERT INTO routine_profile_memberships
-      (identity_id, profile_id, routine_id, enabled, version, created_at, updated_at)
-     VALUES (?, ?, ?, ?, ?, ?, ?)`,
+      (identity_id, profile_id, routine_id, enabled, version, created_at, updated_at, id)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
     [
       row.identity_id,
       row.profile_id,
@@ -469,6 +518,7 @@ async function insertMembership(
       row.version,
       row.created_at,
       row.updated_at,
+      `RoutineMembership_${randomUUID()}`,
     ],
   );
 }

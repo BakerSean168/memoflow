@@ -46,6 +46,7 @@ function createDb(): IElectronDatabase & { close(): void; exec(sql: string): voi
       UNIQUE(identity_id, routine_id, occurrence_key)
     );
     CREATE TABLE routine_temporary_overrides (
+      id TEXT,
       identity_id TEXT NOT NULL,
       routine_id TEXT NOT NULL,
       override_json TEXT NOT NULL,
