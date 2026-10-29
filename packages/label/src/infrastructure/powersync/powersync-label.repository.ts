@@ -61,11 +61,18 @@ export class PowerSyncLabelRepository implements LabelRepository {
   }
 
   async delete(identityId: string, labelId: string): Promise<boolean> {
-    const result = await this.db.execute('DELETE FROM labels WHERE id = ? AND identity_id = ?', [
-      labelId,
-      identityId,
-    ]);
-    return Number(result.rowsAffected ?? 0) > 0;
+    return this.db.writeTransaction(async (tx) => {
+      const existing = await tx.getOptional(
+        'SELECT 1 FROM labels WHERE id = ? AND identity_id = ?',
+        [labelId, identityId],
+      );
+      if (!existing) return false;
+      await tx.execute('DELETE FROM labels WHERE id = ? AND identity_id = ?', [
+        labelId,
+        identityId,
+      ]);
+      return true;
+    });
   }
 
   async findById(identityId: string, labelId: string): Promise<LabelRecord | null> {
