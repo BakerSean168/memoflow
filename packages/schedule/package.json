@@ -40,6 +40,7 @@
     "@memoflow/desktop-contracts": "workspace:*"
   },
   "devDependencies": {
+    "@powersync/node": "1.1.0",
     "@memoflow/test-utils": "workspace:*",
     "@types/express": "^5.0.0",
     "@memoflow/scheduler": "workspace:*"
