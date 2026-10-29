@@ -24,8 +24,16 @@ class FakeDb implements IElectronDatabase {
     return this.row as T | null;
   }
 
-  async get<T>(): Promise<T> {
-    throw new Error('not used');
+  async get<T>(sql: string, parameters?: unknown[]): Promise<T> {
+    if (sql.includes('COUNT(*)')) {
+      return {
+        count:
+          this.row?.identity_id === parameters?.[0] && this.row?.version === parameters?.[1]
+            ? 1
+            : 0,
+      } as T;
+    }
+    throw new Error('Unexpected query: ' + sql);
   }
 
   async execute(sql: string, parameters?: unknown[]): Promise<IElectronDatabaseQueryResult> {

@@ -1,3 +1,4 @@
+import { withRoutineWriteTransaction } from './powersync-write-transaction';
 import {
   ROUTINE_INTERACTION_ACTIONS,
   ROUTINE_OCCURRENCE_RESOLUTION_KINDS,
@@ -5,7 +6,7 @@ import {
   ROUTINE_OCCURRENCE_TRIGGER_KINDS,
 } from '@memoflow/routine-contracts';
 import { randomUUID } from 'node:crypto';
-import type { IElectronDatabase, IElectronDatabaseTransaction } from '@memoflow/desktop-contracts';
+import type { IElectronDatabaseTransaction } from '@memoflow/desktop-contracts';
 import { buildIdempotencyKeyString } from '@memoflow/reliable-messaging-contracts';
 import { asInstant } from '@memoflow/time';
 import type {
@@ -177,7 +178,19 @@ async function resolveOnDb(
     if (state === input.state && current.resolution_kind === input.resolutionKind) return current;
     throw new Error(`Routine occurrence '${input.occurrenceKey}' is already resolved as ${state}`);
   }
-  const result = await db.execute(
+  const matching = await db.getOptional<{ id: string }>(
+    `SELECT id FROM routine_occurrences
+     WHERE identity_id = ? AND routine_id = ? AND occurrence_key = ?
+       AND id = ? AND resolution_state = 'Open'`,
+    [input.identityId, input.routineId, input.occurrenceKey, current.id],
+  );
+  if (!matching) {
+    const raced = await requireOccurrenceRow(db, input);
+    if (raced.resolution_state === input.state && raced.resolution_kind === input.resolutionKind)
+      return raced;
+    throw new Error(`Routine occurrence '${input.occurrenceKey}' resolution conflict`);
+  }
+  await db.execute(
     `UPDATE routine_occurrences
         SET resolution_state = ?, resolved_at = ?, resolution_kind = ?, resolution_reason = ?, updated_at = ?
       WHERE id = ? AND identity_id = ? AND routine_id = ? AND resolution_state = 'Open'`,
@@ -192,12 +205,6 @@ async function resolveOnDb(
       input.routineId,
     ],
   );
-  if (result.rowsAffected !== 1) {
-    const raced = await requireOccurrenceRow(db, input);
-    if (raced.resolution_state === input.state && raced.resolution_kind === input.resolutionKind)
-      return raced;
-    throw new Error(`Routine occurrence '${input.occurrenceKey}' resolution conflict`);
-  }
   return requireOccurrenceRow(db, input);
 }
 
@@ -237,14 +244,18 @@ function normalizeOptionalNumber(
 
 /** PowerSync/local counterpart of PrismaRoutineOccurrenceTruthStore. */
 export class PowerSyncRoutineOccurrenceTruthStore implements RoutineOccurrenceTruthStore {
-  constructor(private readonly db: IElectronDatabase) {}
+  constructor(private readonly db: IElectronDatabaseTransaction) {}
 
   async ensureOpenOccurrence(input: EnsureRoutineOccurrenceInput): Promise<RoutineOccurrenceFact> {
-    return this.db.writeTransaction(async (tx) => {
+    return withRoutineWriteTransaction(this.db, async (tx) => {
       const identityId = nonEmpty(input.identityId, 'identityId');
       const routineId = nonEmpty(input.routineId, 'routineId');
       const occurrenceKey = nonEmpty(input.occurrenceKey, 'occurrenceKey');
-      const existing = await findOccurrenceRow(tx, { identityId, routineId, occurrenceKey });
+      const existing = await findOccurrenceRow(tx, {
+        identityId,
+        routineId,
+        occurrenceKey,
+      });
       if (existing) {
         const fact = mapOccurrence(existing);
         if (fact.triggerKind !== input.triggerKind) {
@@ -265,7 +276,7 @@ export class PowerSyncRoutineOccurrenceTruthStore implements RoutineOccurrenceTr
       }
       const id = `RoutineOccurrence_${randomUUID()}`;
       const timestamp = dueAt.toISOString();
-      const result = await tx.execute(
+      await tx.execute(
         `INSERT INTO routine_occurrences (
            id, identity_id, routine_id, source, occurrence_key, scheduled_for,
            source_revision, idempotency_key, status, trigger_kind, became_due_at,
@@ -311,11 +322,9 @@ export class PowerSyncRoutineOccurrenceTruthStore implements RoutineOccurrenceTr
           timestamp,
         ],
       );
-      if (result.rowsAffected !== 1)
-        throw new Error(`Routine occurrence '${occurrenceKey}' insert failed`);
-      return mapOccurrence(
-        await requireOccurrenceRow(tx, { identityId, routineId, occurrenceKey }),
-      );
+      const inserted = await findOccurrenceRow(tx, { identityId, routineId, occurrenceKey });
+      if (!inserted) throw new Error(`Routine occurrence '${occurrenceKey}' insert failed`);
+      return mapOccurrence(inserted);
     });
   }
 
@@ -342,7 +351,9 @@ export class PowerSyncRoutineOccurrenceTruthStore implements RoutineOccurrenceTr
   }
 
   async resolveOccurrence(input: ResolveRoutineOccurrenceInput): Promise<RoutineOccurrenceFact> {
-    return this.db.writeTransaction(async (tx) => mapOccurrence(await resolveOnDb(tx, input)));
+    return withRoutineWriteTransaction(this.db, async (tx) =>
+      mapOccurrence(await resolveOnDb(tx, input)),
+    );
   }
 
   async applyInteraction(
@@ -375,7 +386,7 @@ export class PowerSyncRoutineOccurrenceTruthStore implements RoutineOccurrenceTr
     }
     const temporaryOverrideJson = serializeRoutineTemporaryOverride(temporaryOverride);
 
-    return this.db.writeTransaction(async (tx) => {
+    return withRoutineWriteTransaction(this.db, async (tx) => {
       const replay = await tx.getOptional<RoutineInteractionRow>(
         `SELECT id, idempotency_key, identity_id, routine_id, occurrence_key, action,
                 acted_at, response_latency_ms, snooze_duration_ms, metadata_json
@@ -403,30 +414,42 @@ export class PowerSyncRoutineOccurrenceTruthStore implements RoutineOccurrenceTr
         );
         const timestamp = new Date(Number(input.actedAt)).toISOString();
         if (existingOverride) {
-          const updated = await tx.execute(
+          const { count } = await tx.get<{ count: number }>(
+            `SELECT COUNT(*) AS count FROM routine_temporary_overrides WHERE identity_id = ? AND routine_id = ?`,
+            [input.identityId, input.routineId],
+          );
+          if (count !== 1) throw new Error(`Routine override '${input.routineId}' update failed`);
+          await tx.execute(
             `UPDATE routine_temporary_overrides
                 SET override_json = ?, version = version + 1, updated_at = ?
               WHERE identity_id = ? AND routine_id = ?`,
             [temporaryOverrideJson, timestamp, input.identityId, input.routineId],
           );
-          if (updated.rowsAffected !== 1) {
-            throw new Error(`Routine override '${input.routineId}' update failed`);
-          }
         } else {
-          const inserted = await tx.execute(
+          await tx.execute(
             `INSERT INTO routine_temporary_overrides
-              (identity_id, routine_id, override_json, version, created_at, updated_at)
-             VALUES (?, ?, ?, ?, ?, ?)`,
-            [input.identityId, input.routineId, temporaryOverrideJson, 1, timestamp, timestamp],
+              (identity_id, routine_id, override_json, version, created_at, updated_at, id)
+             VALUES (?, ?, ?, ?, ?, ?, ?)`,
+            [
+              input.identityId,
+              input.routineId,
+              temporaryOverrideJson,
+              1,
+              timestamp,
+              timestamp,
+              `RoutineOverride_${randomUUID()}`,
+            ],
           );
-          if (inserted.rowsAffected !== 1) {
-            throw new Error(`Routine override '${input.routineId}' insert failed`);
-          }
+          const inserted = await tx.getOptional<{ routine_id: string }>(
+            'SELECT routine_id FROM routine_temporary_overrides WHERE identity_id = ? AND routine_id = ? LIMIT 1',
+            [input.identityId, input.routineId],
+          );
+          if (!inserted) throw new Error(`Routine override '${input.routineId}' insert failed`);
         }
       }
 
       const id = `RoutineInteraction_${randomUUID()}`;
-      const result = await tx.execute(
+      await tx.execute(
         `INSERT INTO routine_interactions (
            id, idempotency_key, identity_id, routine_id, occurrence_key, action,
            acted_at, response_latency_ms, snooze_duration_ms, metadata_json, created_at
@@ -445,14 +468,13 @@ export class PowerSyncRoutineOccurrenceTruthStore implements RoutineOccurrenceTr
           new Date(Number(input.actedAt)).toISOString(),
         ],
       );
-      if (result.rowsAffected !== 1)
-        throw new Error(`Routine interaction '${idempotencyKey}' insert failed`);
-      const interaction = await tx.get<RoutineInteractionRow>(
+      const interaction = await tx.getOptional<RoutineInteractionRow>(
         `SELECT id, idempotency_key, identity_id, routine_id, occurrence_key, action,
                 acted_at, response_latency_ms, snooze_duration_ms, metadata_json
            FROM routine_interactions WHERE id = ?`,
         [id],
       );
+      if (!interaction) throw new Error(`Routine interaction '${idempotencyKey}' insert failed`);
       return {
         interaction: mapInteraction(interaction),
         occurrence: mapOccurrence(occurrence),

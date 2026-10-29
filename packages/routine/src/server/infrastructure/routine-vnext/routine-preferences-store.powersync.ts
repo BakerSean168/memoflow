@@ -1,4 +1,5 @@
-import type { IElectronDatabase } from '@memoflow/desktop-contracts';
+import { withRoutineWriteTransaction } from './powersync-write-transaction';
+import type { IElectronDatabaseTransaction } from '@memoflow/desktop-contracts';
 import type { RoutinePreferencesStore } from '../../domain/ports';
 import { RoutinePreferences } from '../../domain/routine';
 
@@ -12,7 +13,7 @@ interface RoutinePreferencesPowerSyncRow {
 }
 
 export class PowerSyncRoutinePreferencesStore implements RoutinePreferencesStore {
-  constructor(private readonly db: IElectronDatabase) {}
+  constructor(private readonly db: IElectronDatabaseTransaction) {}
 
   async find(input: { readonly identityId: string }): Promise<RoutinePreferences | null> {
     const row = await this.db.getOptional<RoutinePreferencesPowerSyncRow>(
@@ -55,21 +56,27 @@ export class PowerSyncRoutinePreferencesStore implements RoutinePreferencesStore
     readonly preferences: RoutinePreferences;
     readonly expectedVersion: number;
   }): Promise<void> {
-    const state = input.preferences.snapshot();
-    const result = await this.db.execute(
-      `UPDATE routine_preferences
+    return withRoutineWriteTransaction(this.db, async (tx) => {
+      const state = input.preferences.snapshot();
+      const { count } = await tx.get<{ count: number }>(
+        `SELECT COUNT(*) AS count FROM routine_preferences WHERE identity_id = ? AND version = ?`,
+        [state.identityId, input.expectedVersion],
+      );
+      if (count !== 1) {
+        throw new Error('Routine preferences version conflict');
+      }
+      await tx.execute(
+        `UPDATE routine_preferences
        SET global_enabled = ?, version = ?, updated_at = ?
        WHERE identity_id = ? AND version = ?`,
-      [
-        state.globalEnabled ? 1 : 0,
-        state.version,
-        state.updatedAt.toISOString(),
-        state.identityId,
-        input.expectedVersion,
-      ],
-    );
-    if (result.rowsAffected !== 1) {
-      throw new Error('Routine preferences version conflict');
-    }
+        [
+          state.globalEnabled ? 1 : 0,
+          state.version,
+          state.updatedAt.toISOString(),
+          state.identityId,
+          input.expectedVersion,
+        ],
+      );
+    });
   }
 }
