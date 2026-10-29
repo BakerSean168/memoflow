@@ -403,8 +403,20 @@ export class PowerSyncNotificationReliableAdapter implements NotificationReliabl
       const newClaimId = randomUUID();
       const newLeaseExpiresAtIso = new Date(now.getTime() + leaseDurationMs).toISOString();
 
-      const result = await this.db.execute(
-        `UPDATE notification_dispatch_outbox
+      const updated = await this.db.writeTransaction(async (tx) => {
+        const eligible = await tx.getOptional(
+          `SELECT id FROM notification_dispatch_outbox WHERE id = ?
+            AND fencing_token = ?
+            AND (
+              status = 'pending'
+              OR (status = 'retryable' AND (next_retry_at IS NULL OR next_retry_at <= ?))
+              OR (status = 'running' AND lease_expires_at IS NOT NULL AND lease_expires_at < ?)
+            )`,
+          [candidate.id, candidate.fencing_token, nowIso, nowIso],
+        );
+        if (!eligible) return null;
+        await tx.execute(
+          `UPDATE notification_dispatch_outbox
             SET owner_token = ?,
                 claim_id = ?,
                 fencing_token = ?,
@@ -422,26 +434,28 @@ export class PowerSyncNotificationReliableAdapter implements NotificationReliabl
               OR (status = 'retryable' AND (next_retry_at IS NULL OR next_retry_at <= ?))
               OR (status = 'running' AND lease_expires_at IS NOT NULL AND lease_expires_at < ?)
             )`,
-        [
-          input.ownerToken,
-          newClaimId,
-          newFencingToken,
-          newLeaseExpiresAtIso,
-          nowIso,
-          Math.max(1, Math.floor(leaseDurationMs / 3)),
-          nowIso,
-          candidate.id,
-          candidate.fencing_token,
-          nowIso,
-          nowIso,
-        ],
-      );
+          [
+            input.ownerToken,
+            newClaimId,
+            newFencingToken,
+            newLeaseExpiresAtIso,
+            nowIso,
+            Math.max(1, Math.floor(leaseDurationMs / 3)),
+            nowIso,
+            candidate.id,
+            candidate.fencing_token,
+            nowIso,
+            nowIso,
+          ],
+        );
 
-      if (result.rowsAffected === 1) {
-        const updated = await this.db.get<PowerSyncOutboxRow>(
+        return tx.get<PowerSyncOutboxRow>(
           `SELECT * FROM notification_dispatch_outbox WHERE id = ? LIMIT 1`,
           [candidate.id],
         );
+      });
+
+      if (updated) {
         const receipt = mapPowerSyncOutboxToReceipt(updated);
         results.push({
           claimed: true,
@@ -473,8 +487,19 @@ export class PowerSyncNotificationReliableAdapter implements NotificationReliabl
     const leaseDurationMs = input.leaseDurationMs || 30000;
     const newLeaseExpiresAtIso = new Date(now.getTime() + leaseDurationMs).toISOString();
 
-    const result = await this.db.execute(
-      `UPDATE notification_dispatch_outbox
+    return this.db.writeTransaction(async (tx) => {
+      const eligible = await tx.getOptional(
+        `SELECT id FROM notification_dispatch_outbox
+          WHERE (claim_id = ? OR id = ?)
+            AND owner_token = ?
+            AND fencing_token = ?
+            AND status = 'running'
+            AND lease_expires_at > ?`,
+        [input.claimId, input.claimId, input.ownerToken, input.fencingToken, nowIso],
+      );
+      if (eligible) {
+        await tx.execute(
+          `UPDATE notification_dispatch_outbox
           SET last_heartbeat_at = ?,
               lease_expires_at = ?,
               updated_at = ?
@@ -483,57 +508,57 @@ export class PowerSyncNotificationReliableAdapter implements NotificationReliabl
           AND fencing_token = ?
           AND status = 'running'
           AND lease_expires_at > ?`,
-      [
-        nowIso,
-        newLeaseExpiresAtIso,
-        nowIso,
-        input.claimId,
-        input.claimId,
-        input.ownerToken,
-        input.fencingToken,
-        nowIso,
-      ],
-    );
+          [
+            nowIso,
+            newLeaseExpiresAtIso,
+            nowIso,
+            input.claimId,
+            input.claimId,
+            input.ownerToken,
+            input.fencingToken,
+            nowIso,
+          ],
+        );
 
-    if (result.rowsAffected === 1) {
-      const updated = await this.db.get<PowerSyncOutboxRow>(
+        const updated = await tx.get<PowerSyncOutboxRow>(
+          `SELECT * FROM notification_dispatch_outbox WHERE claim_id = ? OR id = ? LIMIT 1`,
+          [input.claimId, input.claimId],
+        );
+        const receipt = mapPowerSyncOutboxToReceipt(updated);
+        return { renewed: true, lease: receipt.lease, receipt };
+      }
+
+      const existing = await tx.getOptional<PowerSyncOutboxRow>(
         `SELECT * FROM notification_dispatch_outbox WHERE claim_id = ? OR id = ? LIMIT 1`,
         [input.claimId, input.claimId],
       );
-      const receipt = mapPowerSyncOutboxToReceipt(updated);
-      return { renewed: true, lease: receipt.lease, receipt };
-    }
 
-    const existing = await this.db.getOptional<PowerSyncOutboxRow>(
-      `SELECT * FROM notification_dispatch_outbox WHERE claim_id = ? OR id = ? LIMIT 1`,
-      [input.claimId, input.claimId],
-    );
+      if (!existing) {
+        throw new LeaseFencingException(
+          formatResourceKey(input.notificationId, input.occurrenceKey),
+          `Dispatch Outbox '${input.claimId}' not found.`,
+        );
+      }
 
-    if (!existing) {
-      throw new LeaseFencingException(
-        formatResourceKey(input.notificationId, input.occurrenceKey),
-        `Dispatch Outbox '${input.claimId}' not found.`,
-      );
-    }
+      if (existing.fencing_token !== input.fencingToken) {
+        throw new LeaseFencingException(
+          formatResourceKey(input.notificationId, input.occurrenceKey),
+          `Stale fencing token: expected ${input.fencingToken}, active is ${existing.fencing_token}`,
+          existing.fencing_token,
+          input.fencingToken,
+        );
+      }
 
-    if (existing.fencing_token !== input.fencingToken) {
-      throw new LeaseFencingException(
-        formatResourceKey(input.notificationId, input.occurrenceKey),
-        `Stale fencing token: expected ${input.fencingToken}, active is ${existing.fencing_token}`,
-        existing.fencing_token,
-        input.fencingToken,
-      );
-    }
+      if (existing.owner_token !== input.ownerToken) {
+        throw new LeaseFencingException(
+          formatResourceKey(input.notificationId, input.occurrenceKey),
+          `Owner token mismatch: active owner is '${existing.owner_token}', incoming is '${input.ownerToken}'`,
+        );
+      }
 
-    if (existing.owner_token !== input.ownerToken) {
-      throw new LeaseFencingException(
-        formatResourceKey(input.notificationId, input.occurrenceKey),
-        `Owner token mismatch: active owner is '${existing.owner_token}', incoming is '${input.ownerToken}'`,
-      );
-    }
-
-    const receipt = mapPowerSyncOutboxToReceipt(existing);
-    return { renewed: false, lease: null, receipt };
+      const receipt = mapPowerSyncOutboxToReceipt(existing);
+      return { renewed: false, lease: null, receipt };
+    });
   }
 
   async recordDeliveryReceipt(
@@ -606,33 +631,39 @@ export class PowerSyncNotificationReliableAdapter implements NotificationReliabl
       ...params,
     ];
 
-    const result = await this.db.execute(
-      `UPDATE notification_dispatch_outbox SET ${setClauses.join(', ')} WHERE ${whereClauses.join(' AND ')}`,
-      updateParams,
-    );
+    return this.db.writeTransaction(async (tx) => {
+      const eligible = await tx.getOptional(
+        `SELECT id FROM notification_dispatch_outbox WHERE ${whereClauses.join(' AND ')}`,
+        params,
+      );
+      if (eligible) {
+        await tx.execute(
+          `UPDATE notification_dispatch_outbox SET ${setClauses.join(', ')} WHERE ${whereClauses.join(' AND ')}`,
+          updateParams,
+        );
 
-    if (result.rowsAffected === 1) {
-      const updated = await this.db.get<PowerSyncOutboxRow>(
+        const updated = await tx.get<PowerSyncOutboxRow>(
+          `SELECT * FROM notification_dispatch_outbox WHERE idempotency_key = ? OR id = ? LIMIT 1`,
+          [validatedReceipt.idempotencyKey, validatedReceipt.operationId],
+        );
+        const ret = mapPowerSyncOutboxToReceipt(updated);
+        (ret as unknown as Record<string, unknown>).applied = true;
+        return ret;
+      }
+
+      const existing = await tx.getOptional<PowerSyncOutboxRow>(
         `SELECT * FROM notification_dispatch_outbox WHERE idempotency_key = ? OR id = ? LIMIT 1`,
         [validatedReceipt.idempotencyKey, validatedReceipt.operationId],
       );
-      const ret = mapPowerSyncOutboxToReceipt(updated);
-      (ret as unknown as Record<string, unknown>).applied = true;
-      return ret;
-    }
-
-    const existing = await this.db.getOptional<PowerSyncOutboxRow>(
-      `SELECT * FROM notification_dispatch_outbox WHERE idempotency_key = ? OR id = ? LIMIT 1`,
-      [validatedReceipt.idempotencyKey, validatedReceipt.operationId],
-    );
-    if (!existing) {
-      const ret = { ...validatedReceipt };
+      if (!existing) {
+        const ret = { ...validatedReceipt };
+        (ret as unknown as Record<string, unknown>).applied = false;
+        return ret;
+      }
+      const ret = mapPowerSyncOutboxToReceipt(existing);
       (ret as unknown as Record<string, unknown>).applied = false;
       return ret;
-    }
-    const ret = mapPowerSyncOutboxToReceipt(existing);
-    (ret as unknown as Record<string, unknown>).applied = false;
-    return ret;
+    });
   }
 
   async queryReceipts(
@@ -700,21 +731,31 @@ export class PowerSyncNotificationReliableAdapter implements NotificationReliabl
     const now = new Date();
     const nowIso = now.toISOString();
 
-    const existing = await this.db.getOptional<PowerSyncOutboxRow>(
-      `SELECT * FROM notification_dispatch_outbox WHERE id = ? AND identity_id = ? AND status = 'dead_letter' LIMIT 1`,
-      [operationId, identityId],
-    );
-
-    if (!existing) {
-      throw new Error(
-        `Dead letter notification outbox not found for operationId '${operationId}' and identityId '${identityId}'`,
+    return this.db.writeTransaction(async (tx) => {
+      const existing = await tx.getOptional<PowerSyncOutboxRow>(
+        `SELECT * FROM notification_dispatch_outbox WHERE id = ? AND identity_id = ? AND status = 'dead_letter' LIMIT 1`,
+        [operationId, identityId],
       );
-    }
 
-    const nextRetryIso = new Date(now.getTime() - 1000).toISOString();
+      if (!existing) {
+        throw new Error(
+          `Dead letter notification outbox not found for operationId '${operationId}' and identityId '${identityId}'`,
+        );
+      }
 
-    const updateResult = await this.db.execute(
-      `UPDATE notification_dispatch_outbox
+      const nextRetryIso = new Date(now.getTime() - 1000).toISOString();
+
+      const eligible = await tx.getOptional(
+        `SELECT id FROM notification_dispatch_outbox
+        WHERE id = ?
+          AND identity_id = ?
+          AND status = 'dead_letter'
+          AND (lease_expires_at IS NULL OR lease_expires_at < ?)`,
+        [existing.id, identityId, nowIso],
+      );
+      if (eligible) {
+        await tx.execute(
+          `UPDATE notification_dispatch_outbox
           SET status = 'retryable',
               next_retry_at = ?,
               dead_letter_at = NULL,
@@ -727,25 +768,25 @@ export class PowerSyncNotificationReliableAdapter implements NotificationReliabl
           AND identity_id = ?
           AND status = 'dead_letter'
           AND (lease_expires_at IS NULL OR lease_expires_at < ?)`,
-      [nextRetryIso, nowIso, existing.id, identityId, nowIso],
-    );
+          [nextRetryIso, nowIso, existing.id, identityId, nowIso],
+        );
+      } else {
+        const current = await tx.getOptional<PowerSyncOutboxRow>(
+          `SELECT * FROM notification_dispatch_outbox WHERE id = ? LIMIT 1`,
+          [existing.id],
+        );
+        if (current) {
+          return mapPowerSyncOutboxToReceipt(current);
+        }
+        throw new Error(`Replay dead letter failed for operationId '${operationId}'`);
+      }
 
-    if (updateResult.rowsAffected !== 1) {
-      const current = await this.db.getOptional<PowerSyncOutboxRow>(
+      const updated = await tx.get<PowerSyncOutboxRow>(
         `SELECT * FROM notification_dispatch_outbox WHERE id = ? LIMIT 1`,
         [existing.id],
       );
-      if (current) {
-        return mapPowerSyncOutboxToReceipt(current);
-      }
-      throw new Error(`Replay dead letter failed for operationId '${operationId}'`);
-    }
-
-    const updated = await this.db.get<PowerSyncOutboxRow>(
-      `SELECT * FROM notification_dispatch_outbox WHERE id = ? LIMIT 1`,
-      [existing.id],
-    );
-    return mapPowerSyncOutboxToReceipt(updated);
+      return mapPowerSyncOutboxToReceipt(updated);
+    });
   }
 
   /**

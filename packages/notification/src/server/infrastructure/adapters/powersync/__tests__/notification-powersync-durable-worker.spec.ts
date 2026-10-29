@@ -110,7 +110,8 @@ function initializeSchema(sqlite: Database.Database): void {
       finished_at TEXT
     );
     CREATE TABLE desktop_delivery_acks (
-      idempotency_key TEXT PRIMARY KEY,
+      id TEXT PRIMARY KEY,
+      idempotency_key TEXT NOT NULL UNIQUE,
       status TEXT NOT NULL,
       ack_id TEXT,
       payload_json TEXT,

@@ -549,24 +549,34 @@ export class PowerSyncNotificationRepository implements INotificationRepository 
   }
 
   async archive(identityId: string, id: string, archivedAt: Date): Promise<void> {
-    const result = await this.db.execute(
-      `UPDATE notifications SET archived_at = ?, updated_at = ?
-        WHERE id = ? AND identity_id = ? AND deleted_at IS NULL`,
-      [archivedAt.toISOString(), archivedAt.toISOString(), id, identityId],
-    );
-    if (result.rowsAffected !== 1)
-      throw new Error('Notification not found for the current identity.');
+    await this.db.writeTransaction(async (tx) => {
+      const existing = await tx.getOptional(
+        `SELECT id FROM notifications WHERE id = ? AND identity_id = ? AND deleted_at IS NULL`,
+        [id, identityId],
+      );
+      if (!existing) throw new Error('Notification not found for the current identity.');
+      await tx.execute(
+        `UPDATE notifications SET archived_at = ?, updated_at = ?
+          WHERE id = ? AND identity_id = ? AND deleted_at IS NULL`,
+        [archivedAt.toISOString(), archivedAt.toISOString(), id, identityId],
+      );
+    });
   }
 
   async restore(identityId: string, id: string): Promise<void> {
     const now = new Date().toISOString();
-    const result = await this.db.execute(
-      `UPDATE notifications SET archived_at = NULL, updated_at = ?
-        WHERE id = ? AND identity_id = ? AND deleted_at IS NULL`,
-      [now, id, identityId],
-    );
-    if (result.rowsAffected !== 1)
-      throw new Error('Notification not found for the current identity.');
+    await this.db.writeTransaction(async (tx) => {
+      const existing = await tx.getOptional(
+        `SELECT id FROM notifications WHERE id = ? AND identity_id = ? AND deleted_at IS NULL`,
+        [id, identityId],
+      );
+      if (!existing) throw new Error('Notification not found for the current identity.');
+      await tx.execute(
+        `UPDATE notifications SET archived_at = NULL, updated_at = ?
+          WHERE id = ? AND identity_id = ? AND deleted_at IS NULL`,
+        [now, id, identityId],
+      );
+    });
   }
 
   async exists(identityId: string, id: string): Promise<boolean> {
@@ -644,23 +654,33 @@ export class PowerSyncNotificationRepository implements INotificationRepository 
 
   async cleanupExpired(beforeTimestamp: number): Promise<number> {
     const before = new Date(beforeTimestamp).toISOString();
-    const result = await this.db.execute(
-      `DELETE FROM notifications WHERE deleted_at IS NULL AND expires_at IS NOT NULL AND expires_at < ?`,
-      [before],
-    );
-    if (result.rowsAffected === undefined)
-      throw new Error('Expired notification cleanup did not report affected rows.');
-    return result.rowsAffected;
+    return this.db.writeTransaction(async (tx) => {
+      // PowerSync view triggers do not contribute to SQLite rowsAffected.
+      const row = await tx.get<{ count: number }>(
+        `SELECT COUNT(*) as count FROM notifications WHERE deleted_at IS NULL AND expires_at IS NOT NULL AND expires_at < ?`,
+        [before],
+      );
+      await tx.execute(
+        `DELETE FROM notifications WHERE deleted_at IS NULL AND expires_at IS NOT NULL AND expires_at < ?`,
+        [before],
+      );
+      return Number(row.count);
+    });
   }
 
   async cleanupDeleted(beforeTimestamp: number): Promise<number> {
     const before = new Date(beforeTimestamp).toISOString();
-    const result = await this.db.execute(
-      `DELETE FROM notifications WHERE deleted_at IS NOT NULL AND deleted_at < ?`,
-      [before],
-    );
-    if (result.rowsAffected === undefined)
-      throw new Error('Deleted notification cleanup did not report affected rows.');
-    return result.rowsAffected;
+    return this.db.writeTransaction(async (tx) => {
+      // PowerSync view triggers do not contribute to SQLite rowsAffected.
+      const row = await tx.get<{ count: number }>(
+        `SELECT COUNT(*) as count FROM notifications WHERE deleted_at IS NOT NULL AND deleted_at < ?`,
+        [before],
+      );
+      await tx.execute(
+        `DELETE FROM notifications WHERE deleted_at IS NOT NULL AND deleted_at < ?`,
+        [before],
+      );
+      return Number(row.count);
+    });
   }
 }

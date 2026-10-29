@@ -4,7 +4,6 @@ import path from 'node:path';
 import { randomUUID } from 'node:crypto';
 import { PowerSyncDatabase } from '@powersync/node';
 import { buildIdempotencyKeyString } from '@memoflow/reliable-messaging-contracts';
-import { PowerSyncAppSchema } from '@memoflow/powersync-schema';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { PowerSyncNotificationRepository } from '../notification-powersync.repository';
 import { PowerSyncNotificationReliableAdapter } from '../power-sync-notification-reliable.adapter';
@@ -19,6 +18,7 @@ const identityId = 'IdentityId_notification-regression';
 const now = '2026-10-29T00:00:00.000Z';
 
 beforeEach(async () => {
+  const { PowerSyncAppSchema } = await import('@memoflow/powersync-schema');
   dbPath = path.join(os.tmpdir(), `memoflow-notification-${randomUUID()}.db`);
   db = new PowerSyncDatabase({ schema: PowerSyncAppSchema, database: { dbFilename: dbPath } });
   await db.waitForReady();

@@ -139,7 +139,8 @@ export class PowerSyncDesktopTransportAckStore implements DesktopTransportAckSto
     try {
       await this.db.execute(`
         CREATE TABLE IF NOT EXISTS desktop_delivery_acks (
-          idempotency_key TEXT PRIMARY KEY,
+          id TEXT PRIMARY KEY,
+          idempotency_key TEXT NOT NULL UNIQUE,
           status TEXT NOT NULL,
           ack_id TEXT,
           payload_json TEXT,
@@ -202,36 +203,57 @@ export class PowerSyncDesktopTransportAckStore implements DesktopTransportAckSto
   }
 
   async saveAck(idempotencyKey: string, record: DesktopTransportAckRecord): Promise<void> {
-    this.memoryStore.saveAck(idempotencyKey, record);
-
     await this.ensureTable();
 
     const nowIso = new Date().toISOString();
-    const result = await this.db.execute(
-      `INSERT INTO desktop_delivery_acks (idempotency_key, status, ack_id, payload_json, error, created_at, updated_at)
-       VALUES (?, ?, ?, ?, ?, ?, ?)
-       ON CONFLICT(idempotency_key) DO UPDATE SET
-         status = excluded.status,
-         ack_id = excluded.ack_id,
-         payload_json = COALESCE(excluded.payload_json, desktop_delivery_acks.payload_json),
-         error = excluded.error,
-         updated_at = excluded.updated_at`,
-      [
-        idempotencyKey,
-        record.status,
-        record.ackId ?? null,
-        record.payloadJson ?? null,
-        record.error ?? null,
-        nowIso,
-        nowIso,
-      ],
-    );
-
-    if (result.rowsAffected !== 1) {
-      throw new Error(
-        `Failed to save desktop delivery ack for idempotencyKey '${idempotencyKey}': expected one row affected`,
+    await this.db.writeTransaction(async (tx) => {
+      const existing = await tx.getOptional(
+        `SELECT id FROM desktop_delivery_acks WHERE idempotency_key = ? LIMIT 1`,
+        [idempotencyKey],
       );
-    }
+      if (existing) {
+        await tx.execute(
+          `UPDATE desktop_delivery_acks SET
+             status = ?, ack_id = ?, payload_json = COALESCE(?, payload_json),
+             error = ?, updated_at = ?
+           WHERE idempotency_key = ?`,
+          [
+            record.status,
+            record.ackId ?? null,
+            record.payloadJson ?? null,
+            record.error ?? null,
+            nowIso,
+            idempotencyKey,
+          ],
+        );
+      } else {
+        await tx.execute(
+          `INSERT INTO desktop_delivery_acks
+             (id, idempotency_key, status, ack_id, payload_json, error, created_at, updated_at)
+           VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+          [
+            idempotencyKey,
+            idempotencyKey,
+            record.status,
+            record.ackId ?? null,
+            record.payloadJson ?? null,
+            record.error ?? null,
+            nowIso,
+            nowIso,
+          ],
+        );
+      }
+      const saved = await tx.getOptional<{ status: string; ack_id: string | null }>(
+        `SELECT status, ack_id FROM desktop_delivery_acks WHERE idempotency_key = ? LIMIT 1`,
+        [idempotencyKey],
+      );
+      if (!saved || saved.status !== record.status || saved.ack_id !== (record.ackId ?? null)) {
+        throw new Error(
+          `Failed to save desktop delivery ack for idempotencyKey '${idempotencyKey}': expected one row affected`,
+        );
+      }
+    });
+    this.memoryStore.saveAck(idempotencyKey, record);
   }
 }
 
