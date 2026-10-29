@@ -206,6 +206,61 @@ jobs:
           if-no-files-found: ignore
           retention-days: 7
 
+  sync-e2e:
+    name: Specialized E2E (Web/Desktop Sync)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    env:
+      # The collector starts its own API/Web servers against this database and
+      # drives the real desktop build, so the lane owns both halves of sync.
+      DATABASE_URL: postgresql://test_user:test_pass@127.0.0.1:5433/memoflow_test
+      TEST_DB_PORT: '5433'
+      TEST_POWERSYNC_PORT: '58082'
+      JWT_SECRET: test-jwt-secret-for-e2e-testing-purposes
+      TZ: UTC
+      NX_TUI: 'false'
+      NX_DEFAULT_OUTPUT_STYLE: stream
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          fetch-depth: 2
+      - uses: ./.github/actions/setup-nx-affected-job
+        with:
+          node-version: '24'
+          setup-python: 'false'
+          setup-uv: 'false'
+          capabilities: node,pnpm,playwright
+      - name: Install Linux Electron runtime dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y xvfb libgtk-3-0t64 libnss3 libasound2t64 libgbm1
+      - name: Install Chromium
+        run: pnpm exec playwright install chromium
+      - name: Start isolated Postgres and PowerSync services
+        # Same composition the collector asserts in start-powersync-test-service.ts;
+        # starting it here makes container failure visible before the suite.
+        run: docker compose --profile test --profile sync-test up -d --wait postgres-test powersync-test
+      - name: Prepare database schema
+        run: pnpm exec nx run database:prisma-push
+      - name: Run Web/Desktop sync regression under Xvfb
+        env:
+          NODE_OPTIONS: --require=${{ github.workspace }}/tools/ci/node-process-bootstrap.cjs
+          TEST_REPORT_NAME: sync-e2e
+        # PowerSync signing keys come from the tracked .env.development; the
+        # collector throws instead of skipping when they are absent.
+        run: node ./tools/test-system-v2/run-command.mjs -- xvfb-run -a pnpm exec nx run web:e2e:sync
+      - name: Upload sync evidence
+        if: always()
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        with:
+          name: web-desktop-sync-${{ github.run_id }}
+          path: |
+            apps/web/test-results
+            apps/web/playwright-sync-report
+            reports/test-system-v2
+          if-no-files-found: warn
+          retention-days: 14
+
   notify-failure:
     name: Report nightly audit failure
     needs: audit

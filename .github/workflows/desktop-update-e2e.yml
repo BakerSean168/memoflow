@@ -586,3 +586,62 @@ jobs:
           path: apps/desktop/update-e2e-evidence
           if-no-files-found: warn
           retention-days: 14
+
+  desktop-auth-flow:
+    name: Desktop Auth Flow (real Electron profile)
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout exact source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          ref: ${{ inputs.ref || github.sha }}
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          package-manager-cache: false
+
+      - name: Setup pnpm
+        run: corepack enable
+
+      - name: Setup Python
+        uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
+        with:
+          python-version-file: apps/desktop/.python-version
+
+      - name: Install Linux runtime dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y xvfb dbus-x11 gnome-keyring libsecret-tools libglib2.0-bin libgtk-3-0t64 libnss3 libasound2t64
+
+      - name: Install dependencies
+        env:
+          PYTHON: ${{ env.pythonLocation }}/python
+          npm_config_python: ${{ env.pythonLocation }}/python
+        run: pnpm install --frozen-lockfile --reporter=append-only
+
+      # The suite requires a real Secret Service backend: the spec throws instead
+      # of skipping when Electron falls back to basic_text, so this lane proves
+      # the profile store rather than a mocked one.
+      - name: Run desktop authentication flow
+        env:
+          PYTHON: ${{ env.pythonLocation }}/python
+          npm_config_python: ${{ env.pythonLocation }}/python
+          MEMOFLOW_E2E_TIMEOUT_SECONDS: '1200'
+          NX_TUI: 'false'
+          NX_DEFAULT_OUTPUT_STYLE: stream
+        run: apps/desktop/scripts/run-linux-electron-e2e-with-keyring.sh e2e/authentication/desktop-auth-flow.spec.mts
+
+      - name: Upload desktop auth evidence
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        with:
+          name: desktop-auth-flow-${{ github.run_id }}
+          path: |
+            apps/desktop/test-results
+            apps/desktop/playwright-report
+          if-no-files-found: warn
+          retention-days: 14

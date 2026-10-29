@@ -212,6 +212,10 @@ function createBoundaryTargetPlans(projectName) {
       },
       'e2e:sync': {
         executor: 'nx:run-commands',
+        cache: false,
+        // The collector boots the Vite dev server, which resolves non-aliased
+        // workspace packages from packages/*/dist on a fresh runner.
+        dependsOn: ['^build'],
         outputs: [
           '{workspaceRoot}/apps/web/test-results',
           '{workspaceRoot}/apps/web/playwright-sync-report',
