@@ -3,9 +3,9 @@
     "type": "git",
     "url": "git+https://github.com/BakerSean168/memoflow.git"
   },
-  "version": "0.22.1",
+  "version": "0.23.0",
   "type": "commonjs",
-  "description": "\u77e5\u884c (MemoFlow) desktop application",
+  "description": "知行 (MemoFlow) desktop application",
   "dependencies": {
     "file-uri-to-path": "2.0.0",
     "@prisma/adapter-pg": "7.10.0",
