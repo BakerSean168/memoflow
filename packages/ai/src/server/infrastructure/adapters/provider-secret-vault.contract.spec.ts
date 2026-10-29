@@ -148,10 +148,23 @@ function createDesktopFixture(): VaultFixture {
       }
       throw new Error(`Unexpected SQL in vault contract fixture: ${sql}`);
     }),
-    getOptional: vi.fn(async (_sql: string, parameters: unknown[] = []) => {
-      const [id, identityId] = parameters as [string, string];
+    getOptional: vi.fn(async (sql: string, parameters: unknown[] = []) => {
+      const [id, identityId, now] = parameters as [string, string, number?];
       const row = rows.get(id);
-      return row?.identity_id === identityId ? row : null;
+      if (!row || row.identity_id !== identityId) return null;
+      if (sql.includes('revoked_at IS NULL') && row.revoked_at !== null) return null;
+      if (
+        sql.includes('expires_at > ?') &&
+        row.expires_at !== null &&
+        now !== undefined &&
+        row.expires_at <= now
+      ) {
+        return null;
+      }
+      return row;
+    }),
+    writeTransaction: vi.fn(async (callback: (tx: unknown) => Promise<unknown>) => {
+      return callback(db);
     }),
   } as unknown as IElectronDatabase;
   return {

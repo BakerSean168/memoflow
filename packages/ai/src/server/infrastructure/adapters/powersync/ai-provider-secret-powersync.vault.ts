@@ -71,36 +71,52 @@ export class PowerSyncAIProviderSecretVault implements IAIProviderSecretVault {
   async replace(input: ReplaceAIProviderCredentialInput): Promise<void> {
     assertCredential(input.value);
     const now = input.now ?? Date.now();
-    const updated = await this.db.execute(
-      `UPDATE ai_provider_secrets
+    await this.db.writeTransaction(async (tx) => {
+      const existing = await tx.getOptional<{ id: string }>(
+        `SELECT id FROM ai_provider_secrets
+         WHERE id = ? AND identity_id = ? AND revoked_at IS NULL
+           AND (expires_at IS NULL OR expires_at > ?)`,
+        [String(input.credentialRef), input.identityId, now],
+      );
+      if (!existing) throw new Error('AI provider credential is unavailable');
+      await tx.execute(
+        `UPDATE ai_provider_secrets
        SET encrypted_value = ?, updated_at = ?
        WHERE id = ? AND identity_id = ? AND revoked_at IS NULL
          AND (expires_at IS NULL OR expires_at > ?)`,
-      [
-        this.secretCipher.encrypt(input.value),
-        now,
-        String(input.credentialRef),
-        input.identityId,
-        now,
-      ],
-    );
-    if (updated.rowsAffected !== 1) throw new Error('AI provider credential is unavailable');
+        [
+          this.secretCipher.encrypt(input.value),
+          now,
+          String(input.credentialRef),
+          input.identityId,
+          now,
+        ],
+      );
+    });
   }
 
   async revoke(input: ResolveAIProviderCredentialInput): Promise<void> {
     const now = input.now ?? Date.now();
-    const updated = await this.db.execute(
-      `UPDATE ai_provider_secrets SET revoked_at = ?, updated_at = ?
-       WHERE id = ? AND identity_id = ? AND revoked_at IS NULL`,
-      [now, now, String(input.credentialRef), input.identityId],
-    );
-    if (updated.rowsAffected === 1) return;
-
-    const existing = await this.db.getOptional<{ id: string }>(
-      `SELECT id FROM ai_provider_secrets WHERE id = ? AND identity_id = ? LIMIT 1`,
-      [String(input.credentialRef), input.identityId],
-    );
-    if (!existing) throw new Error('AI provider credential is unavailable');
+    await this.db.writeTransaction(async (tx) => {
+      const usable = await tx.getOptional<{ id: string }>(
+        `SELECT id FROM ai_provider_secrets
+         WHERE id = ? AND identity_id = ? AND revoked_at IS NULL`,
+        [String(input.credentialRef), input.identityId],
+      );
+      if (usable) {
+        await tx.execute(
+          `UPDATE ai_provider_secrets SET revoked_at = ?, updated_at = ?
+         WHERE id = ? AND identity_id = ? AND revoked_at IS NULL`,
+          [now, now, String(input.credentialRef), input.identityId],
+        );
+        return;
+      }
+      const existing = await tx.getOptional<{ id: string }>(
+        `SELECT id FROM ai_provider_secrets WHERE id = ? AND identity_id = ? LIMIT 1`,
+        [String(input.credentialRef), input.identityId],
+      );
+      if (!existing) throw new Error('AI provider credential is unavailable');
+    });
   }
 }
 

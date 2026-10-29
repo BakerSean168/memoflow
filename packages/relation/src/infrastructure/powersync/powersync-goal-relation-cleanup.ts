@@ -6,12 +6,18 @@ export class PowerSyncGoalRelationCleanupCapability implements GoalRelationClean
   constructor(private readonly db: IElectronDatabaseTransaction) {}
 
   async unlinkAllForGoal(identityId: string, goalId: string): Promise<number> {
-    const result = await this.db.execute(
+    const matching = await this.db.get<{ count: number }>(
+      `SELECT COUNT(*) AS count FROM relations
+       WHERE identity_id = ?
+         AND ((subject_type = 'goal' AND subject_id = ?) OR (object_type = 'goal' AND object_id = ?))`,
+      [identityId, goalId, goalId],
+    );
+    await this.db.execute(
       `DELETE FROM relations
        WHERE identity_id = ?
          AND ((subject_type = 'goal' AND subject_id = ?) OR (object_type = 'goal' AND object_id = ?))`,
       [identityId, goalId, goalId],
     );
-    return Number(result.rowsAffected ?? 0);
+    return Number(matching.count);
   }
 }

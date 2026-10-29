@@ -2,7 +2,6 @@ import { mkdtemp, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { PowerSyncDatabase } from '@powersync/node';
-import { PowerSyncAppSchema } from '@memoflow/powersync-schema';
 import { expect, it } from 'vitest';
 import type { WorkflowRunState } from '@mastra/core/workflows';
 import { createMastraStorage } from '../mastra/runtime/storage';
@@ -15,6 +14,7 @@ import { PowerSyncAIConversationRepository } from '../infrastructure/adapters/po
 import { AIConversation } from '../domain/aggregates/ai-conversation';
 
 it('resumes all three committed owners from one cursor across distinct real databases', async () => {
+  const { PowerSyncAppSchema } = await import('@memoflow/powersync-schema');
   const root = await mkdtemp(path.join(tmpdir(), 'workspace-owners-'));
   const db = new PowerSyncDatabase({
     schema: PowerSyncAppSchema,

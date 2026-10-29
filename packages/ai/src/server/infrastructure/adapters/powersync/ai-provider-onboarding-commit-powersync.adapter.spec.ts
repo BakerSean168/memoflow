@@ -54,7 +54,10 @@ function createFixture(
   const events: string[] = [];
   let optionalCall = 0;
   const tx: IElectronDatabaseTransaction = {
-    getOptional: vi.fn(async () => {
+    getOptional: vi.fn(async (sql: string) => {
+      if (sql.includes('FROM ai_provider_secrets')) {
+        return options.credential === false ? null : { id: 'credential' };
+      }
       optionalCall += 1;
       if (optionalCall === 1) {
         events.push('read-session');
@@ -115,7 +118,13 @@ function replacementFixture(
   const events: string[] = [];
   let optionalCall = 0;
   const tx: IElectronDatabaseTransaction = {
-    getOptional: vi.fn(async () => {
+    getOptional: vi.fn(async (sql: string) => {
+      if (sql.includes('FROM ai_provider_secrets')) {
+        return options.credential === false ? null : { id: 'credential' };
+      }
+      if (sql.includes('AND version = ?')) {
+        return options.updateRows === 0 ? null : { id: 'provider-1' };
+      }
       optionalCall += 1;
       if (optionalCall === 1) {
         events.push('read-session');
@@ -274,7 +283,6 @@ describe('PowerSyncAIProviderOnboardingCommitAdapter create', () => {
       'check-duplicate',
       'consume-session',
       'clear-default',
-      'activate-credential',
       'tx-rollback',
     ]);
   });
@@ -375,7 +383,6 @@ describe('PowerSyncAIProviderOnboardingCommitAdapter replacement', () => {
       'read-session',
       'read-provider',
       'consume-session',
-      'replace-provider',
       'tx-rollback',
     ]);
   });
@@ -401,7 +408,6 @@ describe('PowerSyncAIProviderOnboardingCommitAdapter replacement', () => {
       'read-provider',
       'consume-session',
       'replace-provider',
-      'activate-new-credential',
       'tx-rollback',
     ]);
   });

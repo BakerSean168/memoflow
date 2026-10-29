@@ -2,13 +2,13 @@ import { mkdtemp, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { PowerSyncDatabase } from '@powersync/node';
-import { PowerSyncAppSchema } from '@memoflow/powersync-schema';
 import { expect, it, vi } from 'vitest';
 import { AttentionEventsPowerSync } from './attention-events.powersync';
 import { ConversationAttentionPowerSyncAdapter } from './ai-conversation-attention-powersync.adapter';
 import { ASSISTANT_ATTENTION_LEASE_MS } from '../../../application/ports/conversation-attention.port';
 
 it('commits native Attention and replay together, retaining business revision across acknowledgement and restart', async () => {
+  const { PowerSyncAppSchema } = await import('@memoflow/powersync-schema');
   const root = await mkdtemp(path.join(tmpdir(), 'attention-events-'));
   const db = new PowerSyncDatabase({
     schema: PowerSyncAppSchema,
@@ -89,6 +89,7 @@ it('commits native Attention and replay together, retaining business revision ac
 });
 
 it('reacts to hydration and lease expiry without modifying the native execution state', async () => {
+  const { PowerSyncAppSchema } = await import('@memoflow/powersync-schema');
   const root = await mkdtemp(path.join(tmpdir(), 'attention-expiry-'));
   const db = new PowerSyncDatabase({
     schema: PowerSyncAppSchema,
