@@ -41,7 +41,9 @@ afterEach(async () => {
   }
 });
 
-async function loadGoal(): Promise<NonNullable<Awaited<ReturnType<GoalPowerSyncRepository['findByIdForIdentity']>>>> {
+async function loadGoal(): Promise<
+  NonNullable<Awaited<ReturnType<GoalPowerSyncRepository['findByIdForIdentity']>>>
+> {
   const repository = new GoalPowerSyncRepository(db);
   const goal = await repository.findByIdForIdentity(identityId, goalId, {
     includeChildren: false,
@@ -71,7 +73,11 @@ describe('GoalPowerSyncRepository optimistic locking (real PowerSync view)', () 
 
     for (const expectedVersion of [1, 2]) {
       const goal = await loadGoal();
-      goal.updateBasicInfo({ name: `Goal CAS v${expectedVersion + 1}`, summary: null, description: null });
+      goal.updateBasicInfo({
+        name: `Goal CAS v${expectedVersion + 1}`,
+        summary: null,
+        description: null,
+      });
       goal.advanceVersion();
       await expect(
         repository.saveRootWithExpectedVersion(goal, expectedVersion),
@@ -124,8 +130,6 @@ describe('GoalPowerSyncRepository optimistic locking (real PowerSync view)', () 
 
   it('does not treat a foreign identity as a matching goal', async () => {
     const repository = new GoalPowerSyncRepository(db);
-    const goal = await loadGoal();
-    goal.advanceVersion();
 
     await expect(
       repository.deleteWithExpectedVersion(`IdentityId_${randomUUID()}`, goalId, 1),
