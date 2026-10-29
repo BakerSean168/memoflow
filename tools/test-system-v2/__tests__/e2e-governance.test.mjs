@@ -43,7 +43,7 @@ test('repository E2E ownership is execution-aware and complete', () => {
   assert.equal(inventory.version, 3);
   assert.deepEqual(inventory.e2eGovernance.issues, []);
   assert.equal(inventory.e2eGovernance.countsByLane.required, undefined);
-  assert.equal(inventory.e2eGovernance.countsByLane.nightly, 6);
+  assert.equal(inventory.e2eGovernance.countsByLane.nightly, 7);
   assert.equal(inventory.e2eGovernance.countsByLane.debug, undefined);
   assert.equal(inventory.e2eGovernance.countsByRole.canonical, 4);
   assert.equal(inventory.e2eGovernance.countsByRole.diagnostic, undefined);
