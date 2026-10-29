@@ -2672,6 +2672,9 @@ importers:
       '@memoflow/scheduler':
         specifier: workspace:*
         version: link:../scheduler
+      '@powersync/node':
+        specifier: 1.1.0
+        version: 1.1.0(better-sqlite3@13.0.3)
       '@types/express':
         specifier: ^5.0.0
         version: 5.0.6
