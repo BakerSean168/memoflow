@@ -48,6 +48,9 @@ updated: 2026-10-29T00:00:00+08:00
 - 前置：`configurePowerSyncTestEnv()` 在缺少 `POWERSYNC_*` 签名键时 **throw**（fail-closed，不会静默跳过）；`start-powersync-test-service.ts` 自行 `docker compose --profile test --profile sync-test up`；global setup 构建桌面应用；Electron 在 headless Linux 需 xvfb **与真实 Secret Service**
 - 修复前：ownership 中该 collector 无 `automation`，target 无 `dependsOn`，任何 Workflow 都不执行 → 真实缺口
 - 现状：已接入 `nightly-audit.yml` 的 Specialized E2E job（见下文「接线」），`automation` 元数据同步登记
+- 第三层修复（本分支，测试契约）：Web 断言依赖的两个 DOM 契约都已失效——`goal-refresh-entry` 随 GOAL-5101 从工具栏移除（`GoalPageToolbar.spec.ts` 断言其不存在），列表行也早已由 `goal-card` 改为 `goal-progress-row`，因此 `waitForGoalVisible` 在数据已经出现时仍必然超时。刷新改为路由 reload（Web 列表没有实时失效通道，服务端才是权威），行定位改为 `goal-progress-row`
+- 第三层修复（本分支，桌面认证）：桌面启动后是 guest Profile，guest 从不挂 PowerSync connector（`fetchCredentials` 直接抛「guest/offline profiles stay local」），而原 helper 依赖的 `desktop-login-*` / `desktop-quick-login-*` testid 在产品中已不存在，`findMainWindow` 又把 guest 主窗口当成已登录窗口，于是「认证」实际是空操作。现改为走产品自身的 device authorization：guest Shell 添加账号 → 读设备码 → 在已登录的 Web 会话批准 → 等待 registered Profile 窗口，并断言当前 Profile 已绑定云端
+- 剩余阻塞（产品缺陷，非本车道可修）：桌面 `goal:update` / `goal:delete` 对本地 PowerSync 视图（`goals` 为 `ps_data__goals` 的生成视图，写入由 INSTEAD OF 触发器完成）做 `WHERE … version = ?` 的 CAS，实测 `expectedVersion` 取 1/2/3 全部返回 `CONFLICT: Goal has been modified by another client`，而 `goal:get`、`goal:list` 与本地行三者版本一致（均为 1），失败后本地行未变更但本地 CRUD 队列已入队。guest Profile（无云端、无同步）同样复现，故与同步集成无关，属桌面本地写适配器（`GoalPowerSyncRepository.saveRootWithExpectedVersion` / `deleteWithExpectedVersion` 的 `rowsAffected !== 1` 判定）缺陷
 
 ### DESKTOP-UPDATE
 
@@ -125,7 +128,7 @@ updated: 2026-10-29T00:00:00+08:00
 - 准入：PowerSync 签名键取自仓库内 `.env.development`（已跟踪），不新增 Secret；缺失时 collector 抛错
 - Target 闭包：`web:e2e:sync` 现在声明 `cache: false` 与 `dependsOn: ["^build"]`，由 `tools/nx-test-system` 的 `sync-test-targets` 生成器维护（`e2e:sync` 不在 `CI_TARGETS` 内，因此不会把 `app-vue:build` / `desktop:build` 拉进 test-only PR，符合 #700 的图层口径）。该 target 由生成器拥有，`apps/web/project.json` 必须与 `nx sync` 输出一致，否则 Lint 车道的 `nx sync:check` 失败
 - 归属：`e2e-ownership.json` 中该 collector 的 `automation` 指向该 workflow 与 `web:e2e:sync`
-- 取证状态：**待触发**（本分支尚未合并到默认分支，`workflow_dispatch` 只认默认分支上的 workflow 定义）。首次接线后的 [run 40811627810](https://github.com/BakerSean168/memoflow/actions/runs/40811627810) 三个 spec 均死于缺少 Secret Service（`backend=basic_text`），本分支已补齐 keyring 会话，需合并后重新 dispatch 取证
+- 取证状态：**待触发**（本分支尚未合并到默认分支，`workflow_dispatch` 只认默认分支上的 workflow 定义）。首次接线后的 [run 40811627810](https://github.com/BakerSean168/memoflow/actions/runs/40811627810) 三个 spec 均死于缺少 Secret Service（`backend=basic_text`）；补齐 keyring 后的 [run 40816393435](https://github.com/BakerSean168/memoflow/actions/runs/40816393435) 三个 spec 全部死于数据不传播（桌面为 guest Profile、未连接云端）。本地以与 CI 相同的方式（compose + keyring 包装脚本 + `web:e2e:sync`）复跑：web→desktop、重启保持两个 spec 通过，desktop→web 停在上面的桌面 CAS 产品缺陷上，因此**尚未**再次 dispatch 取证
 
 ### AUTH-LOGIN → Desktop Update Installed E2E `Desktop Auth Flow`
 
