@@ -14,6 +14,17 @@ const OCI_DIGEST = /^sha256:[0-9a-f]{64}$/u;
 
 const sha256 = (value) => `sha256:${contentDigest(value)}`;
 
+// The candidate set is the digest-bearing identity document consumed by Nightly
+// finalization, which compares ciRunId strictly against the numeric CI run id.
+// Emit a JSON number like the docker manifest and the embedded ciEvidence.
+function numericCiRunId(value) {
+  const id = typeof value === 'number' ? value : Number(value);
+  if (!Number.isSafeInteger(id) || id <= 0) {
+    throw new Error(`ciRunId must be a positive integer: ${String(value)}`);
+  }
+  return id;
+}
+
 export function candidateSetDigest(candidate) {
   const { digest: _digest, generatedAt: _generatedAt, ...identity } = candidate;
   return sha256(identity);
@@ -67,6 +78,8 @@ export function validateCandidateSet(candidate) {
     errors.push(`schema must be ${CANDIDATE_SET_SCHEMA}`);
   }
   if (!FULL_SHA.test(candidate.gitSha ?? '')) errors.push('gitSha must be a full Git SHA');
+  // Readers stay tolerant of a digit string so candidate sets published before the numeric
+  // contract remain validatable; the producer always writes a JSON number.
   if (!/^\d+$/u.test(String(candidate.ciRunId ?? ''))) errors.push('ciRunId must be numeric');
   if (candidate.candidateTag !== `sha-${candidate.gitSha}`) {
     errors.push('candidateTag must equal sha-<full gitSha>');
@@ -109,7 +122,7 @@ export function createCandidateSet(input) {
   const candidate = {
     schema: CANDIDATE_SET_SCHEMA,
     gitSha: input.gitSha,
-    ciRunId: String(input.ciRunId),
+    ciRunId: numericCiRunId(input.ciRunId),
     candidateTag: `sha-${input.gitSha}`,
     deliveryManifestDigest: input.deliveryManifestDigest,
     ciEvidence: structuredClone(input.ciEvidence),

@@ -64,6 +64,26 @@ test('candidate-set/v1 binds one exact revision and dual-registry digest parity'
   assert.match(candidate.digest, /^sha256:[0-9a-f]{64}$/u);
 });
 
+test('candidate-set records ciRunId as a JSON number, never a numeric string', () => {
+  const candidate = createCandidateSet(input());
+  assert.equal(typeof candidate.ciRunId, 'number');
+  const serialized = JSON.parse(`${JSON.stringify(candidate, null, 2)}\n`);
+  assert.equal(typeof serialized.ciRunId, 'number');
+  assert.equal(serialized.ciRunId, 123456);
+});
+
+test('candidate-set producer normalizes numeric input and rejects non-numeric run ids', () => {
+  assert.equal(createCandidateSet({ ...input(), ciRunId: 123456 }).ciRunId, 123456);
+  assert.throws(() => createCandidateSet({ ...input(), ciRunId: 'run-42' }), /ciRunId/u);
+});
+
+test('candidate-set validation still reads a digit-string ciRunId from pre-fix evidence', () => {
+  const candidate = createCandidateSet(input());
+  candidate.ciRunId = '123456';
+  candidate.digest = candidateSetDigest(candidate);
+  assert.deepEqual(validateCandidateSet(candidate), []);
+});
+
 test('candidate-set self digest is deterministic and ignores generatedAt', () => {
   const first = createCandidateSet(input());
   const second = createCandidateSet({ ...input(), generatedAt: '2026-09-06T00:00:00.000Z' });

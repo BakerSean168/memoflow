@@ -172,7 +172,7 @@ Physical jobs may be consolidated after shadow comparison. A consolidated qualit
 {
   "schema": "memoflow.candidate-set/v1",
   "gitSha": "<full SHA>",
-  "ciRunId": "<successful main CI run>",
+  "ciRunId": 40785628159,
   "deliveryManifestDigest": "sha256:...",
   "images": {
     "web": { "digest": "sha256:..." },
