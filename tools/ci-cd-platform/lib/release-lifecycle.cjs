@@ -178,12 +178,17 @@ function validateNightlyEvidence({ nightly, release, candidate, desktop, docker,
     'invalid Nightly release postflight',
   );
   const acceptance = release.qualityReceipt;
+  // Same provenance rule as finalization: the receipt must come from this exact
+  // publication run and source, but an earlier attempt of that run is the normal
+  // outcome of recovering a failed lane with "rerun failed jobs".
   assert(
     acceptance?.kind === 'release-quality-receipt' &&
       acceptance.schemaVersion === 1 &&
       acceptance.gitSha === sha &&
       acceptance.runId === nightly.runId &&
-      acceptance.runAttempt === nightly.runAttempt &&
+      Number.isSafeInteger(acceptance.runAttempt) &&
+      acceptance.runAttempt > 0 &&
+      acceptance.runAttempt <= nightly.runAttempt &&
       acceptance.status === 'passed' &&
       acceptance.web === 'passed' &&
       acceptance.provider === 'passed',

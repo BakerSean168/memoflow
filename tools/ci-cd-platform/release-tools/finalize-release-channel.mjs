@@ -27,6 +27,11 @@ export async function finalizeReleaseChannel({
   );
   const qualityBytes = await readFile(path.join(evidenceRoot, 'release-quality-receipt.json'));
   const quality = JSON.parse(qualityBytes.toString('utf8'));
+  // GitHub keeps a run's named artifacts across attempts, so a rerun legitimately
+  // finalizes an acceptance receipt produced by an earlier attempt of this same
+  // run. The receipt's identity is the publication run plus the immutable source
+  // (runId + gitSha); runAttempt is provenance that must belong to that run and
+  // cannot come from the future, but it must not gate same-run recovery.
   assert(
     quality.kind === 'release-quality-receipt' &&
       quality.schemaVersion === 1 &&
@@ -35,7 +40,9 @@ export async function finalizeReleaseChannel({
       quality.web === 'passed' &&
       quality.provider === 'passed' &&
       quality.runId === Number(runId) &&
-      quality.runAttempt === Number(runAttempt),
+      Number.isSafeInteger(quality.runAttempt) &&
+      quality.runAttempt > 0 &&
+      quality.runAttempt <= Number(runAttempt),
     'release acceptance receipt identity mismatch',
   );
   release.qualityReceipt = quality;
