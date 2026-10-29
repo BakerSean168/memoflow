@@ -9512,6 +9512,16 @@
       ]
     },
     {
+      "path": "packages/schedule/src/server/infrastructure/adapters/powersync/__tests__/schedule-powersync-rows-affected.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/schedule/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "packages/schedule/vitest.config.ts"
+      ]
+    },
+    {
       "path": "packages/schedule/src/server/infrastructure/adapters/powersync/mappers/powersync-schedule.mapper.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -12400,7 +12410,7 @@
       "type": "measurement",
       "suite": "coverage",
       "runner": "vitest",
-      "fileCount": 20
+      "fileCount": 21
     },
     {
       "id": "packages/schedule/vitest.mappers.config.ts",
@@ -13158,7 +13168,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 20
+      "fileCount": 21
     },
     {
       "id": "packages/scheduler/vitest.config.ts",
@@ -13772,6 +13782,7 @@
       "packages/schedule/src/server/domain/aggregates/__tests__/calendar-entry.spec.ts",
       "packages/schedule/src/server/domain/value-objects/conflict-value-objects.spec.ts",
       "packages/schedule/src/server/infrastructure/__tests__/schedule-repositories.surface.spec.ts",
+      "packages/schedule/src/server/infrastructure/adapters/powersync/__tests__/schedule-powersync-rows-affected.spec.ts",
       "packages/schedule/src/server/infrastructure/adapters/powersync/mappers/powersync-schedule.mapper.spec.ts",
       "packages/schedule/src/server/infrastructure/adapters/prisma/__tests__/schedule-event-ownership.surface.spec.ts",
       "packages/schedule/src/server/infrastructure/adapters/prisma/mappers/prisma-schedule-mapper.spec.ts",
@@ -13890,7 +13901,7 @@
   "duplicate": [],
   "unexpected": [],
   "counts": {
-    "unit": 1139,
+    "unit": 1140,
     "integration": 58,
     "smoke": 3,
     "boundary-ipc": 6,
