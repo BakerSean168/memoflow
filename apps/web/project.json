@@ -101,8 +101,6 @@
     },
     "e2e:sync": {
       "executor": "nx:run-commands",
-      "cache": false,
-      "dependsOn": ["^build"],
       "outputs": [
         "{workspaceRoot}/apps/web/test-results",
         "{workspaceRoot}/apps/web/playwright-sync-report"

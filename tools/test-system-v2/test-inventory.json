@@ -12551,7 +12551,14 @@
         "execution": {
           "kind": "nx",
           "target": "web:e2e:sync"
-        }
+        },
+        "automation": [
+          {
+            "kind": "github-workflow",
+            "workflow": ".github/workflows/nightly-audit.yml",
+            "target": "web:e2e:sync"
+          }
+        ]
       }
     },
     {
@@ -13877,8 +13884,8 @@
       "reference": 6,
       "supplemental": 28
     },
-    "automatedCollectorCount": 2,
-    "automationBindingCount": 3
+    "automatedCollectorCount": 3,
+    "automationBindingCount": 4
   },
   "e2eRetirement": {
     "version": 1,
