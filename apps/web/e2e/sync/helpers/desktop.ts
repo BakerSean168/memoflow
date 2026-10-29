@@ -263,13 +263,7 @@ export class DesktopAppController {
   }
 
   private readProfileRegistry(): ProfileRegistrySnapshot | null {
-    const registryPath = path.join(
-      this.userDataDir,
-      'data',
-      'shared',
-      'profiles',
-      'registry.json',
-    );
+    const registryPath = path.join(this.userDataDir, 'data', 'shared', 'profiles', 'registry.json');
     if (!fs.existsSync(registryPath)) {
       return null;
     }
