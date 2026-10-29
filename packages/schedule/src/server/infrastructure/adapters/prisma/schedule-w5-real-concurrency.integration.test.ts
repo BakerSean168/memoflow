@@ -16,7 +16,11 @@ import { PrismaClient } from '@memoflow/database';
 import { PrismaPg } from '@prisma/adapter-pg';
 import type { IEventBus } from '@memoflow/patterns';
 import { createEventBusAdapter } from '@memoflow/patterns';
-import type { IElectronDatabase, IElectronDatabaseQueryResult } from '@memoflow/desktop-contracts';
+import type {
+  IElectronDatabase,
+  IElectronDatabaseQueryResult,
+  IElectronDatabaseTransaction,
+} from '@memoflow/desktop-contracts';
 import { CrossPlatformEventBus, eventBus } from '@memoflow/utils/domain';
 import { ScheduleEventDeliveryLogConsumer } from '../../consumers/schedule-event-delivery-log.consumer';
 import { createUnifiedOperationMetricsRecorder } from '@memoflow/patterns/operations';
@@ -78,7 +82,9 @@ function createRealSqlitePowerSyncDb(): IElectronDatabase {
     ): Promise<T> {
       sqlite.exec('BEGIN');
       try {
-        const result = await callback(wrapper as IElectronDatabaseTransaction);
+        // Match PowerSync's transaction context: it exposes queries, not another transaction opener.
+        const { execute, getAll, getOptional, get } = wrapper;
+        const result = await callback({ execute, getAll, getOptional, get });
         sqlite.exec('COMMIT');
         return result;
       } catch (err) {
