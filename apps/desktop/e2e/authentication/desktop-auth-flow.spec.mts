@@ -69,6 +69,7 @@ interface ProfileRegistryFile {
     profileKind: 'guest' | 'registered';
     localOwnerId: string;
     cloudBinding: { cloudAccountId: string } | null;
+    lastActiveAt: number;
   }>;
 }
 
@@ -561,9 +562,20 @@ test('a second guest keeps an independent Account and its PIN selection across r
     const unlocked = await unlockedPromise;
     await expect(unlocked.getByTestId('shell-account-name')).toHaveText('Work');
     expect(readRegistry(userData).activeProfileId).toBe(second.profileId);
-    expect(
-      readRegistry(userData).profiles.find((profile) => profile.profileId === first.profileId),
-    ).toMatchObject(first);
+    const firstAfterRestart = readRegistry(userData).profiles.find(
+      (profile) => profile.profileId === first.profileId,
+    )!;
+    // Opening a Profile is the only thing that writes lastActiveAt
+    // (ProfileRegistry.touch via activatePreparedProfile), and this test
+    // switches back to the first guest at line 531, so its recency value moves
+    // by design. Every other field must survive the second guest's session,
+    // PIN and restart untouched.
+    const { lastActiveAt: firstSnapshotLastActiveAt, ...firstStableFields } = first;
+    const { lastActiveAt: firstLastActiveAtAfterRestart, ...firstStableFieldsAfterRestart } =
+      firstAfterRestart;
+    expect(firstStableFieldsAfterRestart).toEqual(firstStableFields);
+    expect(Number.isFinite(firstLastActiveAtAfterRestart)).toBe(true);
+    expect(firstLastActiveAtAfterRestart).toBeGreaterThanOrEqual(firstSnapshotLastActiveAt);
   } finally {
     await app?.close();
     fs.rmSync(root, { recursive: true, force: true });
