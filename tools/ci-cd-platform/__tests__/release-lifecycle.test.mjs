@@ -729,7 +729,9 @@ test('Nightly finalization accepts the producer candidate set and keeps a strict
     await writeFile(path.join(root, 'release-quality-receipt.json'), encode(quality));
     await writeFile(
       path.join(root, 'github-release.json'),
-      encode({ assets: [{ name: 'desktop-update-feed.tar.gz', digest: digestFor('a'), size: 300 }] }),
+      encode({
+        assets: [{ name: 'desktop-update-feed.tar.gz', digest: digestFor('a'), size: 300 }],
+      }),
     );
   };
   const finalize = () =>
