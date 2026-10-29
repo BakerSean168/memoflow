@@ -54,6 +54,7 @@
     "@memoflow/desktop-contracts": "workspace:*"
   },
   "devDependencies": {
+    "@powersync/node": "1.1.0",
     "@memoflow/test-utils": "workspace:*"
   }
 }
