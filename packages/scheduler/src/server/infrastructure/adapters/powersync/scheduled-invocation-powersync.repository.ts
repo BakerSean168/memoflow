@@ -162,7 +162,7 @@ export class PowerSyncScheduledInvocationRepository implements IScheduledInvocat
       );
     else
       await this.q.execute(
-        `INSERT INTO scheduled_invocations (id, identity_id, owner_type, owner_id, scheduling_key, handler_key, payload_version, payload, run_at, source_revision, retry_enabled, max_retries, initial_delay_ms, max_delay_ms, backoff_multiplier, priority, timeout_ms, status, attempt_count, next_attempt_at, claim_token, claim_expires_at, fencing_token, name, tags, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        `INSERT INTO scheduled_invocations (id, identity_id, owner_type, owner_id, scheduling_key, handler_key, payload_version, payload, run_at, source_revision, retry_enabled, max_retries, initial_delay_ms, max_delay_ms, backoff_multiplier, priority, timeout_ms, status, attempt_count, next_attempt_at, claim_token, claim_expires_at, fencing_token, name, tags, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
         [row.id, ...values.slice(0, 24), row.created_at, row.updated_at],
       );
   }
