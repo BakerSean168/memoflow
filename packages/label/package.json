@@ -28,6 +28,7 @@
     "@memoflow/shared-primitives": "workspace:*"
   },
   "devDependencies": {
+    "@powersync/node": "1.1.0",
     "@memoflow/test-utils": "workspace:*",
     "tsup": "^8.5.1",
     "typescript": "npm:@typescript/typescript6@6.0.2",

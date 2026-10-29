@@ -2590,6 +2590,9 @@ importers:
         specifier: workspace:*
         version: link:../transport-contracts
     devDependencies:
+      '@powersync/node':
+        specifier: 1.1.0
+        version: 1.1.0(better-sqlite3@13.0.3)
       '@memoflow/test-utils':
         specifier: workspace:*
         version: link:../test-utils
