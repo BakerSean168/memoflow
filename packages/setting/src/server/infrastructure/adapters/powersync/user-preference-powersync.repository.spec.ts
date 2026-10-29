@@ -156,6 +156,34 @@ describe('PowerSyncUserPreferenceMapper', () => {
 });
 
 describe('UserPreferencePowerSyncRepository', () => {
+  it('opens only one transaction when the adapter passes itself as the context', async () => {
+    class SelfContextDb extends FakeDb {
+      transactionOpen = false;
+      transactions = 0;
+      async writeTransaction<T>(
+        callback: (tx: IElectronDatabaseTransaction) => Promise<T>,
+      ): Promise<T> {
+        if (this.transactionOpen)
+          throw new Error('cannot start a transaction within a transaction');
+        this.transactionOpen = true;
+        this.transactions += 1;
+        try {
+          return await callback(this);
+        } finally {
+          this.transactionOpen = false;
+        }
+      }
+    }
+    const db = new SelfContextDb();
+    const repository = new UserPreferencePowerSyncRepository(db);
+    await expect(repository.create(document())).resolves.toMatchObject({ kind: 'created' });
+    await expect(repository.compareAndSwap(document(2), 1)).resolves.toMatchObject({
+      kind: 'updated',
+    });
+    expect(db.transactions).toBe(2);
+    expect(db.rows.get('identity-1:regional')?.revision).toBe(2);
+  });
+
   it('uses revision in the SQLite CAS predicate', async () => {
     const db = new FakeDb();
     db.rows.set('identity-1:regional', row());

@@ -64,9 +64,15 @@ export class UserPreferencePowerSyncRepository implements IUserPreferenceReposit
     assertCreateRevision(document);
     if ('writeTransaction' in this.db) {
       return (this.db as IElectronDatabase).writeTransaction((tx) =>
-        new UserPreferencePowerSyncRepository(tx).create(document),
+        new UserPreferencePowerSyncRepository(tx).createInTransaction(document),
       );
     }
+    return this.createInTransaction(document);
+  }
+
+  private async createInTransaction(
+    document: UserPreferenceDocument,
+  ): Promise<PreferenceCreateResult> {
     const data = PowerSyncUserPreferenceMapper.toPersistence(document);
     const existing = await this.find(data.identityId, data.namespace);
     if (existing) return { kind: 'exists', document: existing };
@@ -103,9 +109,19 @@ export class UserPreferencePowerSyncRepository implements IUserPreferenceReposit
     assertCasRevision(document, expectedRevision);
     if ('writeTransaction' in this.db) {
       return (this.db as IElectronDatabase).writeTransaction((tx) =>
-        new UserPreferencePowerSyncRepository(tx).compareAndSwap(document, expectedRevision),
+        new UserPreferencePowerSyncRepository(tx).compareAndSwapInTransaction(
+          document,
+          expectedRevision,
+        ),
       );
     }
+    return this.compareAndSwapInTransaction(document, expectedRevision);
+  }
+
+  private async compareAndSwapInTransaction(
+    document: UserPreferenceDocument,
+    expectedRevision: number,
+  ): Promise<PreferenceCompareAndSwapResult> {
     const data = PowerSyncUserPreferenceMapper.toPersistence(document);
     // PowerSync view writes report zero rowsAffected even when the CAS succeeds.
     const { count } = await this.db.get<{ count: number }>(
