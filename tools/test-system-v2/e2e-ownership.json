@@ -204,6 +204,12 @@
       "lifecycle": "active",
       "primaryCollector": "apps/web/playwright.sync.config.ts"
     },
+    "apps/web/e2e/fixtures/worker-session.spec.ts": {
+      "surface": "test-harness",
+      "role": "supplemental",
+      "lifecycle": "active",
+      "primaryCollector": "apps/web/playwright.config.ts"
+    },
     "apps/web/e2e/goal/reference/goal-business-panel.spec.ts": {
       "surface": "goal",
       "role": "reference",

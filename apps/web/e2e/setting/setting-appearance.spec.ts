@@ -1,21 +1,20 @@
-import { expect, test, type Page } from '@playwright/test';
+import type { Page } from '@playwright/test';
+import { expect, test } from '../helpers/fixtures';
 import { TIMEOUT_CONFIG } from '../config';
-import { registerAndLogin } from '../helpers/auth-api';
-
-const PASSWORD = 'Test123456!';
-
-function createAppearanceAuditEmail(): string {
-  return `e2e-settings-appearance-${Date.now()}-${Math.random().toString(36).slice(2, 8)}@test.com`;
-}
 
 async function openAppearanceSettings(page: Page): Promise<void> {
-  await registerAndLogin(page, {
-    email: createAppearanceAuditEmail(),
-    password: PASSWORD,
-    landingPath: '/settings?tab=appearance',
+  await page.goto('/settings?tab=appearance', {
+    waitUntil: 'domcontentloaded',
+    timeout: TIMEOUT_CONFIG.NAVIGATION,
   });
 
   await expect(page).toHaveURL(/\/settings\?tab=appearance(?:&|$)/, {
+    timeout: TIMEOUT_CONFIG.NAVIGATION,
+  });
+  // Same landing contract as the previous API-registration flow: the cold Vite
+  // graph mounts the authenticated shell before the settings section exists.
+  await page.getByTestId('app-shell').waitFor({
+    state: 'visible',
     timeout: TIMEOUT_CONFIG.NAVIGATION,
   });
   await expect(page.getByTestId('user-preference-settings-section')).toBeVisible({
@@ -41,7 +40,11 @@ async function selectTheme(page: Page, theme: 'light' | 'dark'): Promise<void> {
 }
 
 test.describe('Canonical appearance and locale settings', () => {
-  test.beforeEach(async ({ page }) => {
+  test.beforeEach(async ({ page, testData }) => {
+    // The worker identity is shared for authentication only; its persisted
+    // preferences are reset per test so each case starts from the defaults a
+    // freshly registered account used to provide.
+    await testData.resetPreferences();
     await openAppearanceSettings(page);
   });
 
@@ -63,8 +66,10 @@ test.describe('Canonical appearance and locale settings', () => {
       .toBe(true);
 
     await page.reload({ waitUntil: 'domcontentloaded', timeout: TIMEOUT_CONFIG.NAVIGATION });
+    // Reload readiness uses the navigation budget; the theme assertion below
+    // stays on the interaction budget.
     await expect(page.getByTestId('appearance-settings-card')).toBeVisible({
-      timeout: TIMEOUT_CONFIG.ELEMENT_WAIT,
+      timeout: TIMEOUT_CONFIG.NAVIGATION,
     });
     await expect
       .poll(async () => page.evaluate(() => document.documentElement.dataset.theme))
@@ -91,6 +96,9 @@ test.describe('Canonical appearance and locale settings', () => {
       .toMatch(/^en/i);
 
     await page.reload({ waitUntil: 'domcontentloaded', timeout: TIMEOUT_CONFIG.NAVIGATION });
+    await expect(page.getByTestId('appearance-settings-card')).toBeVisible({
+      timeout: TIMEOUT_CONFIG.NAVIGATION,
+    });
     await expect
       .poll(async () => page.evaluate(() => document.documentElement.lang), {
         timeout: TIMEOUT_CONFIG.ELEMENT_WAIT,

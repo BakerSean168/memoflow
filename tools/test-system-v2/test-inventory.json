@@ -2016,6 +2016,20 @@
       }
     },
     {
+      "path": "apps/web/e2e/fixtures/worker-session.spec.ts",
+      "primarySuite": "e2e",
+      "collectors": [
+        "apps/web/playwright.config.ts"
+      ],
+      "measurementCollectors": [],
+      "e2eOwnership": {
+        "surface": "test-harness",
+        "role": "supplemental",
+        "lifecycle": "active",
+        "primaryCollector": "apps/web/playwright.config.ts"
+      }
+    },
+    {
       "path": "apps/web/e2e/goal/reference/goal-business-panel.spec.ts",
       "primarySuite": "e2e",
       "collectors": [
@@ -12441,7 +12455,7 @@
       "type": "primary",
       "suite": "e2e",
       "runner": "playwright",
-      "fileCount": 6,
+      "fileCount": 7,
       "e2eOwnership": {
         "lane": "nightly",
         "lifecycle": "active",
@@ -13841,7 +13855,7 @@
     "smoke": 3,
     "boundary-ipc": 6,
     "boundary-main": 12,
-    "e2e": 40,
+    "e2e": 41,
     "perf": 2,
     "governance": 89
   },
@@ -13851,7 +13865,7 @@
     "countsByLane": {
       "desktop": 13,
       "local-validation": 6,
-      "nightly": 6,
+      "nightly": 7,
       "reference": 6,
       "secure-acceptance": 1,
       "specialized": 5,
@@ -13861,7 +13875,7 @@
       "artifact": 3,
       "canonical": 4,
       "reference": 6,
-      "supplemental": 27
+      "supplemental": 28
     },
     "automatedCollectorCount": 2,
     "automationBindingCount": 3
