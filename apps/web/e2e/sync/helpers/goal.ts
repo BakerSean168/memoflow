@@ -97,15 +97,11 @@ async function refreshWebGoalList(page: Page, surface: GoalSurface): Promise<voi
     return;
   }
 
-  const goalsResponse = page.waitForResponse(
-    (response) =>
-      response.request().method() === 'GET' &&
-      new URL(response.url()).pathname === '/api/v1/goals' &&
-      response.ok(),
-    { timeout: 15_000 },
-  );
-  await page.getByTestId('goal-refresh-entry').click();
-  await goalsResponse;
+  // The Web goal list has no refresh control (GOAL-5101 removed it) and no
+  // realtime invalidation, so the server list can only be re-read by reloading
+  // the route. Desktop refreshes itself through the PowerSync change broadcast.
+  await page.reload({ waitUntil: 'domcontentloaded' });
+  await expect(page.getByTestId('goal-list-view')).toBeVisible();
   await expect(page.getByTestId('goal-list-skeleton')).toBeHidden({ timeout: 15_000 });
 }
 
