@@ -65,6 +65,7 @@
   },
   "devDependencies": {
     "@memoflow/test-utils": "workspace:*",
+    "@powersync/node": "1.1.0",
     "@types/express": "^5.0.0"
   }
 }

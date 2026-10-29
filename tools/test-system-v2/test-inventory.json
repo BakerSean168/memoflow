@@ -7145,6 +7145,16 @@
       ]
     },
     {
+      "path": "packages/goal/src/server/infrastructure/adapters/powersync/__tests__/goal-powersync-version-cas.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/goal/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "packages/goal/vitest.config.ts"
+      ]
+    },
+    {
       "path": "packages/goal/src/server/infrastructure/adapters/powersync/__tests__/powersync-goal-reliable-operation.adapter.test.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -12335,7 +12345,7 @@
       "type": "measurement",
       "suite": "coverage",
       "runner": "vitest",
-      "fileCount": 98
+      "fileCount": 99
     },
     {
       "id": "packages/goal/vitest.mappers.config.ts",
@@ -12932,7 +12942,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 98
+      "fileCount": 99
     },
     {
       "id": "packages/host-runtime/vitest.config.ts",
@@ -13631,6 +13641,7 @@
       "packages/goal/src/server/infrastructure/adapters/goal-write-buffered-event-bus.spec.ts",
       "packages/goal/src/server/infrastructure/adapters/powersync/__tests__/goal-powersync-label-assignment.spec.ts",
       "packages/goal/src/server/infrastructure/adapters/powersync/__tests__/goal-powersync-schedule-projection.spec.ts",
+      "packages/goal/src/server/infrastructure/adapters/powersync/__tests__/goal-powersync-version-cas.spec.ts",
       "packages/goal/src/server/infrastructure/adapters/powersync/__tests__/powersync-goal-reliable-operation.adapter.test.ts",
       "packages/goal/src/server/infrastructure/adapters/powersync/goal-agent-mutations.spec.ts",
       "packages/goal/src/server/infrastructure/adapters/powersync/goal-page-reader.spec.ts",
@@ -13857,7 +13868,7 @@
   "duplicate": [],
   "unexpected": [],
   "counts": {
-    "unit": 1136,
+    "unit": 1137,
     "integration": 58,
     "smoke": 3,
     "boundary-ipc": 6,
