@@ -9,10 +9,10 @@ export class PowerSyncAIProviderConfigRepository implements IAIProviderConfigRep
   async save(config: AIProviderConfigServerDTO) {
     const d = PowerSyncAIProviderConfigMapper.toPersistence(config);
     return this.db.writeTransaction(async (tx) => {
-      const existing = await tx.getOptional<{ id: string; identity_id: string }>(
-        `SELECT id, identity_id FROM ai_provider_configs WHERE id = ? LIMIT 1`,
-        [d.id],
-      );
+      const existing = await tx.getOptional<{
+        id: string;
+        identity_id: string;
+      }>(`SELECT id, identity_id FROM ai_provider_configs WHERE id = ? LIMIT 1`, [d.id]);
       if (existing && existing.identity_id !== d.identity_id) {
         throw new Error('Provider config not found for the current identity.');
       }
@@ -147,13 +147,13 @@ export class PowerSyncAIProviderConfigRepository implements IAIProviderConfigRep
          WHERE identity_id = ? AND id <> ? AND deleted_at IS NULL`,
         [now, identityId, id],
       );
-      const updated = await tx.execute(
+      await tx.execute(
         `UPDATE ai_provider_configs
          SET is_default = 1, version = version + 1, updated_at = ?
          WHERE id = ? AND identity_id = ? AND is_active = 1 AND deleted_at IS NULL`,
         [now, id, identityId],
       );
-      return updated.rowsAffected === 1 ? ('SET' as const) : ('CONFLICT' as const);
+      return 'SET' as const;
     });
   }
 }

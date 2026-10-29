@@ -85,13 +85,12 @@ export class PowerSyncAIProviderOnboardingSessionRepository implements IAIProvid
       const verified = Array.from(
         new Set([...parseStringArray(row.verified_model_ids_json), input.modelId]),
       );
-      const updated = await tx.execute(
+      await tx.execute(
         `UPDATE ai_provider_onboarding_sessions
          SET credential_status = 'valid', verified_model_ids_json = ?, updated_at = ?
          WHERE id = ? AND identity_id = ? AND expires_at > ? AND consumed_at IS NULL`,
         [JSON.stringify(verified), input.now, input.onboardingId, input.identityId, input.now],
       );
-      if (updated.rowsAffected !== 1) return null;
       return this.toRecord({
         ...row,
         credential_status: 'valid',
@@ -106,13 +105,21 @@ export class PowerSyncAIProviderOnboardingSessionRepository implements IAIProvid
     onboardingId: string;
     now: number;
   }): Promise<boolean> {
-    const updated = await this.db.execute(
-      `UPDATE ai_provider_onboarding_sessions
-       SET consumed_at = ?, updated_at = ?
-       WHERE id = ? AND identity_id = ? AND expires_at > ? AND consumed_at IS NULL`,
-      [input.now, input.now, input.onboardingId, input.identityId, input.now],
-    );
-    return updated.rowsAffected === 1;
+    return this.db.writeTransaction(async (tx) => {
+      const existing = await tx.getOptional<{ id: string }>(
+        `SELECT id FROM ai_provider_onboarding_sessions
+         WHERE id = ? AND identity_id = ? AND expires_at > ? AND consumed_at IS NULL`,
+        [input.onboardingId, input.identityId, input.now],
+      );
+      if (!existing) return false;
+      await tx.execute(
+        `UPDATE ai_provider_onboarding_sessions
+         SET consumed_at = ?, updated_at = ?
+         WHERE id = ? AND identity_id = ? AND expires_at > ? AND consumed_at IS NULL`,
+        [input.now, input.now, input.onboardingId, input.identityId, input.now],
+      );
+      return true;
+    });
   }
 
   private toRecord(row: PowerSyncProviderOnboardingRow): AIProviderOnboardingSessionRecord {
