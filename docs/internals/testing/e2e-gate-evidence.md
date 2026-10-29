@@ -114,7 +114,33 @@ updated: 2026-10-29T00:00:00+08:00
 
 ## 接线
 
-待完成：`web:e2e:sync` 的 Nightly job、`desktop:e2e`（auth spec）的 Desktop 车道 job，以及 `e2e-ownership.json` 的 `automation` 登记。
+### WEB-DESKTOP-SYNC → Nightly Audit `Specialized E2E (Web/Desktop Sync)`
+
+- Workflow：`.github/workflows/nightly-audit.yml`，job `sync-e2e`，`ubuntu-24.04`，cron `0 2 * * *` 与 `workflow_dispatch`
+- 环境：`docker compose --profile test --profile sync-test up -d --wait postgres-test powersync-test`；`database:prisma-push`；`playwright install chromium`；`xvfb-run -a`
+- 准入：PowerSync 签名键取自仓库内 `.env.development`（已跟踪），不新增 Secret；缺失时 collector 抛错
+- Target 闭包：`web:e2e:sync` 现在声明 `cache: false` 与 `dependsOn: ["^build"]`，由 `tools/nx-test-system` 的 `sync-test-targets` 生成器维护（`e2e:sync` 不在 `CI_TARGETS` 内，因此不会把 `app-vue:build` / `desktop:build` 拉进 test-only PR，符合 #700 的图层口径）
+- 归属：`e2e-ownership.json` 中该 collector 的 `automation` 指向该 workflow 与 `web:e2e:sync`
+- 取证状态：**待触发**（本分支尚未合并到默认分支，`workflow_dispatch` 只认默认分支上的 workflow 定义）
+
+### AUTH-LOGIN → Desktop Update Installed E2E `Desktop Auth Flow`
+
+- Workflow：`.github/workflows/desktop-update-e2e.yml`，job `desktop-auth-flow`，`ubuntu-latest`
+- 触发：`workflow_dispatch` 与 `workflow_call`（由 `release-assets.yml` 在 release 阶段调用），即 desktop/release 车道
+- 执行：`apps/desktop/scripts/run-linux-electron-e2e-with-keyring.sh e2e/authentication/desktop-auth-flow.spec.mts`，在 Xvfb + 真实 Secret Service（gnome-keyring）下启动真实 Electron 与真实 profile 目录
+- 准入：spec 自带本地 auth HTTP server，无外部云凭据；`safeStorage` 后端为 `basic_text`/`unknown` 时 spec 直接抛错
+- 归属：**不**在 `e2e-ownership.json` 声明 collector 级 `automation` —— 该 collector 只有这一个 spec 在此车道执行，声明整组会自动会夸大覆盖
+- 取证状态：**待触发**（同上）
+
+## 已知缺口与下一步
+
+| 缺口                                          | 原因                                                                 | 下一步                                                                 |
+| --------------------------------------------- | -------------------------------------------------------------------- | ---------------------------------------------------------------------- |
+| 两条新门禁无 Run 收据                          | 分支未合并，`workflow_dispatch` 需要默认分支上的 workflow 定义        | 合并后在默认分支 dispatch 一次 `Nightly Audit` 与 `Desktop Update Installed E2E`，回填 Run URL + SHA |
+| 真实 Provider 评测无门禁                       | `[opt-in]` 用例需要 `E2E_MODEL_SERVICE_BASE_URL` / `_API_KEY`，仓库无此 Secret | 决定是否引入受控 Secret 与独立 job；在此之前只声明 replay 结论         |
+| 旧版 Schema Cutover / 恢复演练无门禁           | 无演练脚本与环境契约                                                  | 另开任务定义演练镜像、数据夹具与验收判据                               |
+| `TASK-RECURRENCE-A11Y` 的真实 Chromium 验收     | reference collector 属 manual lane                                    | 若要提级，需在 Nightly 增加该 collector 的 job 并补 `automation`       |
+
 
 ## Fail-closed 决策
 
