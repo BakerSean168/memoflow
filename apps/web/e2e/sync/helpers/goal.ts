@@ -3,7 +3,9 @@ import { expect, type Locator, type Page } from '@playwright/test';
 export type GoalSurface = 'web' | 'desktop';
 
 function goalCard(page: Page, goalName: string): Locator {
-  return page.getByTestId('goal-card').filter({ hasText: goalName }).first();
+  // The list renders one row per goal (goal-card was retired with the list
+  // redesign); the title lives inside the row.
+  return page.getByTestId('goal-progress-row').filter({ hasText: goalName }).first();
 }
 
 async function openContextMenuAction(
