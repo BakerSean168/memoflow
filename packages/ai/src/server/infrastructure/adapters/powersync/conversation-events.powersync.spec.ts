@@ -2,13 +2,13 @@ import { mkdtemp, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { PowerSyncDatabase } from '@powersync/node';
-import { PowerSyncAppSchema } from '@memoflow/powersync-schema';
 import { expect, it } from 'vitest';
 import { ConversationEventsPowerSync } from './conversation-events.powersync';
 import { PowerSyncAIConversationRepository } from './ai-conversation-powersync.repository';
 import { AIConversation } from '../../../domain/aggregates/ai-conversation';
 
 it('records native create, rename, activity and deletion atomically with monotonic server versions', async () => {
+  const { PowerSyncAppSchema } = await import('@memoflow/powersync-schema');
   const root = await mkdtemp(path.join(tmpdir(), 'conversation-events-'));
   const db = new PowerSyncDatabase({
     schema: PowerSyncAppSchema,
