@@ -50,7 +50,17 @@ export class PowerSyncTaskGoalOutboxDispatchStore implements TaskGoalOutboxDispa
       const claimed: PendingTaskGoalOutboxEvent[] = [];
 
       for (const candidate of candidates) {
-        const result = await tx.execute(
+        // Guard the original CAS inside the same serial write transaction.
+        const matching = await tx.getOptional<{ id: string }>(
+          `SELECT id FROM task_goal_outbox
+            WHERE available_at <= ?
+              AND status IN ('PENDING', 'PROCESSING')
+              AND id = ?`,
+          [nowIso, candidate.id],
+        );
+        if (!matching) continue;
+
+        await tx.execute(
           `UPDATE task_goal_outbox
               SET status = 'PROCESSING', updated_at = ?, available_at = ?
             WHERE available_at <= ?
@@ -58,7 +68,6 @@ export class PowerSyncTaskGoalOutboxDispatchStore implements TaskGoalOutboxDispa
               AND id = ?`,
           [nowIso, leaseUntilIso, nowIso, candidate.id],
         );
-        if (result.rowsAffected !== 1) continue;
 
         claimed.push({
           eventId: candidate.id,
@@ -117,14 +126,22 @@ export class PowerSyncTaskGoalOutboxDispatchStore implements TaskGoalOutboxDispa
 
   async replayDeadLetter(eventId: string): Promise<boolean> {
     const nowIso = this.options.now().toISOString();
-    const result = await this.db.execute(
-      `UPDATE task_goal_outbox
+    return this.db.writeTransaction(async (tx) => {
+      const matching = await tx.getOptional<{ id: string }>(
+        `SELECT id FROM task_goal_outbox WHERE status = 'DEAD_LETTER' AND id = ?`,
+        [eventId],
+      );
+      if (!matching) return false;
+
+      await tx.execute(
+        `UPDATE task_goal_outbox
           SET status = 'PENDING', attempts = 0, available_at = ?,
               last_error = NULL, dispatched_at = NULL, updated_at = ?
         WHERE status = 'DEAD_LETTER'
           AND id = ?`,
-      [nowIso, nowIso, eventId],
-    );
-    return result.rowsAffected === 1;
+        [nowIso, nowIso, eventId],
+      );
+      return true;
+    });
   }
 }

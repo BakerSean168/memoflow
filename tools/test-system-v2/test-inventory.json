@@ -10983,6 +10983,16 @@
       ]
     },
     {
+      "path": "packages/task/src/server/infrastructure/adapters/powersync/__tests__/task-powersync-rows-affected.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/task/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "packages/task/vitest.config.ts"
+      ]
+    },
+    {
       "path": "packages/task/src/server/infrastructure/adapters/powersync/powersync-task-binding-read-port.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -12425,7 +12435,7 @@
       "type": "measurement",
       "suite": "coverage",
       "runner": "vitest",
-      "fileCount": 82
+      "fileCount": 83
     },
     {
       "id": "packages/task/vitest.mappers.config.ts",
@@ -13225,7 +13235,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 82
+      "fileCount": 83
     },
     {
       "id": "packages/time/vitest.config.ts",
@@ -13844,6 +13854,7 @@
       "packages/task/src/server/infrastructure/__tests__/task-module-partial-start.spec.ts",
       "packages/task/src/server/infrastructure/__tests__/task-reminder-fire.handler.spec.ts",
       "packages/task/src/server/infrastructure/__tests__/task-repositories.surface.spec.ts",
+      "packages/task/src/server/infrastructure/adapters/powersync/__tests__/task-powersync-rows-affected.spec.ts",
       "packages/task/src/server/infrastructure/adapters/powersync/powersync-task-binding-read-port.spec.ts",
       "packages/task/src/server/infrastructure/adapters/powersync/powersync-task-goal-outbox-dispatch-store.test.ts",
       "packages/task/src/server/infrastructure/adapters/powersync/powersync-task-write-transaction-runner.test.ts",
@@ -13879,7 +13890,7 @@
   "duplicate": [],
   "unexpected": [],
   "counts": {
-    "unit": 1138,
+    "unit": 1139,
     "integration": 58,
     "smoke": 3,
     "boundary-ipc": 6,

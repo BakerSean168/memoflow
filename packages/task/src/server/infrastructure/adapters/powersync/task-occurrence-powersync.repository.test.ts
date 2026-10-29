@@ -109,7 +109,10 @@ describe('PowerSyncTaskOccurrenceRepository canonical persistence', () => {
   });
 
   it('fences updates by identity + expected version while writing canonical columns', async () => {
-    const getOptional = vi.fn().mockResolvedValueOnce({ id: 'occurrence-1', version: 1 });
+    const getOptional = vi
+      .fn()
+      .mockResolvedValueOnce({ id: 'occurrence-1', version: 1 })
+      .mockResolvedValueOnce({ version: 1 });
     const execute = vi.fn().mockResolvedValue({ rowsAffected: 1 });
     const repository = new PowerSyncTaskOccurrenceRepository({
       getOptional,
@@ -132,6 +135,7 @@ describe('PowerSyncTaskOccurrenceRepository canonical persistence', () => {
     const getOptional = vi
       .fn()
       .mockResolvedValueOnce({ id: 'occurrence-1', version: 2 })
+      .mockResolvedValueOnce(null)
       .mockResolvedValueOnce({ version: 2 });
     const execute = vi.fn().mockResolvedValue({ rowsAffected: 0 });
     const repository = new PowerSyncTaskOccurrenceRepository({

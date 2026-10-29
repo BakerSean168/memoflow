@@ -1,5 +1,5 @@
 import type { Ymd } from '@memoflow/shared-primitives';
-import type { IElectronDatabaseTransaction } from '@memoflow/desktop-contracts';
+import type { IElectronDatabase, IElectronDatabaseTransaction } from '@memoflow/desktop-contracts';
 import type { TaskOccurrenceStatus } from '@memoflow/task-contracts';
 import { AggregateRepositoryBase, createEventBusAdapter, type IEventBus } from '@memoflow/patterns';
 import { eventBus } from '@memoflow/utils/domain';
@@ -30,6 +30,13 @@ export class PowerSyncTaskOccurrenceRepository
   }
 
   protected async persist(occurrence: TaskOccurrence): Promise<void> {
+    if ('writeTransaction' in this.db) {
+      await (this.db as IElectronDatabase).writeTransaction((tx) =>
+        new PowerSyncTaskOccurrenceRepository(tx, this.eventBus).persist(occurrence),
+      );
+      return;
+    }
+
     const data = PowerSyncTaskOccurrenceMapper.toPersistence(occurrence);
     const existing = await this.db.getOptional<{ id: string; version: number }>(
       'SELECT id, version FROM task_occurrences WHERE id = ? LIMIT 1',
@@ -46,7 +53,24 @@ export class PowerSyncTaskOccurrenceRepository
 
     if (existing) {
       const expectedVersion = data.version - 1;
-      const updated = await this.db.execute(
+      // PowerSync view writes report zero rowsAffected even when the CAS succeeds.
+      const matching = await this.db.getOptional<{ version: number }>(
+        'SELECT version FROM task_occurrences WHERE id = ? AND identity_id = ? AND version = ? LIMIT 1',
+        [data.id, data.identityId, expectedVersion],
+      );
+      if (!matching) {
+        const current = await this.db.getOptional<{ version: number }>(
+          'SELECT version FROM task_occurrences WHERE id = ? AND identity_id = ? LIMIT 1',
+          [data.id, data.identityId],
+        );
+        throw new OptimisticConcurrencyError(
+          'TaskOccurrence',
+          data.id,
+          expectedVersion,
+          current?.version ?? existing.version,
+        );
+      }
+      await this.db.execute(
         `UPDATE task_occurrences
          SET plan_id = ?,
              identity_id = ?,
@@ -81,18 +105,6 @@ export class PowerSyncTaskOccurrenceRepository
           expectedVersion,
         ],
       );
-      if (updated.rowsAffected !== 1) {
-        const current = await this.db.getOptional<{ version: number }>(
-          'SELECT version FROM task_occurrences WHERE id = ? AND identity_id = ? LIMIT 1',
-          [data.id, data.identityId],
-        );
-        throw new OptimisticConcurrencyError(
-          'TaskOccurrence',
-          data.id,
-          expectedVersion,
-          current?.version ?? existing.version,
-        );
-      }
       return;
     }
 
