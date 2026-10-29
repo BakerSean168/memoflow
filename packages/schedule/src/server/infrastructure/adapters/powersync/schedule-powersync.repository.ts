@@ -127,6 +127,12 @@ export class PowerSyncScheduleRepository implements IScheduleRepository {
   }
 
   async save(schedule: CalendarEntry, expectedVersion?: number): Promise<void> {
+    if (this.db.writeTransaction) {
+      await this.db.writeTransaction((tx) =>
+        new PowerSyncScheduleRepository(tx).save(schedule, expectedVersion),
+      );
+      return;
+    }
     await this.flushDomainEvents(schedule);
     const data = PowerSyncScheduleMapper.toPersistence(schedule);
     const existing = await this.db.getOptional<{ id: string; version: number }>(
@@ -164,9 +170,14 @@ export class PowerSyncScheduleRepository implements IScheduleRepository {
         data.identityId,
       ];
       if (expectedVersion !== undefined) args.push(expectedVersion);
-      const res = await this.db.execute(sql, args);
-
-      if (expectedVersion !== undefined && res.rowsAffected !== 1) {
+      // PowerSync view writes report zero rowsAffected even when they succeed.
+      const matching =
+        expectedVersion === undefined ||
+        (await this.db.getOptional<{ version: number }>(
+          'SELECT version FROM schedules WHERE id = ? AND identity_id = ? AND version = ? LIMIT 1',
+          [data.id, data.identityId, expectedVersion],
+        ));
+      if (!matching) {
         const current = await this.db.getOptional<{ version: number }>(
           'SELECT version FROM schedules WHERE id = ? AND identity_id = ? LIMIT 1',
           [data.id, data.identityId],
@@ -186,6 +197,7 @@ export class PowerSyncScheduleRepository implements IScheduleRepository {
           409,
         );
       }
+      await this.db.execute(sql, args);
       return;
     }
 
@@ -230,11 +242,17 @@ export class PowerSyncScheduleRepository implements IScheduleRepository {
   }
 
   async deleteById(identityId: string, id: string, expectedVersion: number): Promise<void> {
-    const res = await this.db.execute(
-      'DELETE FROM schedules WHERE id = ? AND identity_id = ? AND version = ?',
+    if (this.db.writeTransaction) {
+      await this.db.writeTransaction((tx) =>
+        new PowerSyncScheduleRepository(tx).deleteById(identityId, id, expectedVersion),
+      );
+      return;
+    }
+    const matching = await this.db.getOptional<{ version: number }>(
+      'SELECT version FROM schedules WHERE id = ? AND identity_id = ? AND version = ? LIMIT 1',
       [id, identityId, expectedVersion],
     );
-    if (res.rowsAffected !== 1) {
+    if (!matching) {
       const current = await this.db.getOptional<{ version: number }>(
         'SELECT version FROM schedules WHERE id = ? AND identity_id = ? LIMIT 1',
         [id, identityId],
@@ -254,6 +272,10 @@ export class PowerSyncScheduleRepository implements IScheduleRepository {
         409,
       );
     }
+    await this.db.execute(
+      'DELETE FROM schedules WHERE id = ? AND identity_id = ? AND version = ?',
+      [id, identityId, expectedVersion],
+    );
   }
 
   async deleteAggregate(entry: CalendarEntry, expectedVersion: number): Promise<void> {
@@ -653,10 +675,26 @@ export class PowerSyncScheduleRepository implements IScheduleRepository {
     error?: string,
     maxAttempts = 5,
   ): Promise<void> {
+    if (this.db.writeTransaction) {
+      await this.db.writeTransaction((tx) =>
+        new PowerSyncScheduleRepository(tx).markDomainEventOutboxProcessed(
+          id,
+          claimToken,
+          error,
+          maxAttempts,
+        ),
+      );
+      return;
+    }
     await this.ensureOutboxTable();
     const nowIso = new Date().toISOString();
-    const existing = await this.db.getOptional<{ attempts: number }>(
-      'SELECT attempts FROM schedule_domain_event_outbox WHERE id = ? AND claim_token = ? AND status = ? LIMIT 1',
+    // The ownership guard and state transition share the serial write transaction.
+    const existing = await this.db.getOptional<{
+      attempts: number;
+      status: string;
+      claim_token: string;
+    }>(
+      'SELECT attempts, status, claim_token FROM schedule_domain_event_outbox WHERE id = ? AND claim_token = ? AND status = ? LIMIT 1',
       [id, claimToken, 'processing'],
     );
     if (!existing) {
@@ -666,47 +704,32 @@ export class PowerSyncScheduleRepository implements IScheduleRepository {
     }
 
     if (!error) {
-      const res = await this.db.execute(
+      await this.db.execute(
         `UPDATE schedule_domain_event_outbox
          SET status = 'completed', published_at = ?, claim_token = NULL, last_error = NULL, updated_at = ?
          WHERE id = ? AND claim_token = ? AND status = 'processing'`,
         [nowIso, nowIso, id, claimToken],
       );
-      if (res.rowsAffected !== 1) {
-        throw new LeaseLostError(
-          `Domain event outbox item ${id} is no longer owned by this claim token (lease lost)`,
-        );
-      }
       return;
     }
 
     const nextAttempts = Number(existing.attempts) + 1;
     if (nextAttempts >= maxAttempts) {
-      const res = await this.db.execute(
+      await this.db.execute(
         `UPDATE schedule_domain_event_outbox
          SET status = 'failed', attempts = ?, last_error = ?, claim_token = NULL, updated_at = ?
          WHERE id = ? AND claim_token = ? AND status = 'processing'`,
         [nextAttempts, error, nowIso, id, claimToken],
       );
-      if (res.rowsAffected !== 1) {
-        throw new LeaseLostError(
-          `Domain event outbox item ${id} is no longer owned by this claim token (lease lost)`,
-        );
-      }
     } else {
       const backoffMs = Math.pow(2, nextAttempts) * 1000;
       const nextAttemptIso = new Date(Date.now() + backoffMs).toISOString();
-      const res = await this.db.execute(
+      await this.db.execute(
         `UPDATE schedule_domain_event_outbox
          SET status = 'retry', attempts = ?, next_attempt_at = ?, last_error = ?, claim_token = NULL, updated_at = ?
          WHERE id = ? AND claim_token = ? AND status = 'processing'`,
         [nextAttempts, nextAttemptIso, error, nowIso, id, claimToken],
       );
-      if (res.rowsAffected !== 1) {
-        throw new LeaseLostError(
-          `Domain event outbox item ${id} is no longer owned by this claim token (lease lost)`,
-        );
-      }
     }
   }
 
