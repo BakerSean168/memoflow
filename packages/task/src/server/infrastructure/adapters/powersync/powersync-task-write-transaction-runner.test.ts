@@ -319,6 +319,11 @@ class FakePowerSyncTaskDb implements IElectronDatabase {
       const identityId = String(parameters?.[1]);
       const row = state.occurrences.get(id);
       if (row && (row as { identity_id?: string }).identity_id === identityId) {
+        if (
+          sql.includes('AND version = ?') &&
+          (row as { version?: number }).version !== Number(parameters?.[2])
+        )
+          return null;
         return row as unknown as T;
       }
       return null;

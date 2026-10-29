@@ -58,6 +58,21 @@ class FakeOutboxDatabase implements IElectronDatabase {
   async getOptional<T>(sql: string, parameters: unknown[] = []): Promise<T | null> {
     if (!sql.includes('FROM task_goal_outbox')) return null;
     expect(sql).not.toContain('event_id');
+    if (sql.includes('WHERE available_at <= ?')) {
+      const row = this.rows.find((candidate) => candidate.id === String(parameters[1]));
+      return (
+        row &&
+        ['PENDING', 'PROCESSING'].includes(row.status) &&
+        row.available_at <= String(parameters[0])
+          ? row
+          : null
+      ) as T | null;
+    }
+    if (sql.includes("WHERE status = 'DEAD_LETTER'")) {
+      return (this.rows.find(
+        (candidate) => candidate.id === String(parameters[0]) && candidate.status === 'DEAD_LETTER',
+      ) ?? null) as T | null;
+    }
     expect(sql).toContain('WHERE id = ?');
     const row = this.rows.find((candidate) => candidate.id === String(parameters[0]));
     return (row ?? null) as T | null;
