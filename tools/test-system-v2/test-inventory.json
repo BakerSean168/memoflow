@@ -8296,6 +8296,14 @@
       "measurementCollectors": []
     },
     {
+      "path": "packages/relation/src/infrastructure/powersync/powersync-relation-rows-affected.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/relation/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "packages/reliable-messaging-contracts/src/reliable-messaging-contracts.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -13110,7 +13118,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 5
+      "fileCount": 6
     },
     {
       "id": "packages/reliable-messaging-contracts/vitest.config.ts",
@@ -13945,7 +13953,7 @@
   "duplicate": [],
   "unexpected": [],
   "counts": {
-    "unit": 1144,
+    "unit": 1145,
     "integration": 58,
     "smoke": 3,
     "boundary-ipc": 6,
