@@ -1,4 +1,4 @@
-import type { IElectronDatabase } from '@memoflow/desktop-contracts';
+import type { IElectronDatabase, IElectronDatabaseTransaction } from '@memoflow/desktop-contracts';
 import { describe, expect, it, vi } from 'vitest';
 import { PowerSyncLabelRepository } from '../infrastructure/powersync/powersync-label.repository';
 
@@ -40,9 +40,9 @@ function createDb(
     getOptional: vi.fn(
       async (sql: string, parameters?: unknown[]) => options.getOptional?.(sql, parameters) ?? null,
     ),
-    writeTransaction: vi.fn(async () => {
-      throw new Error('Label registry must not open owner-assignment transactions');
-    }),
+    writeTransaction: vi.fn(async (work: (tx: IElectronDatabaseTransaction) => Promise<unknown>) =>
+      work(db),
+    ),
   } as unknown as IElectronDatabase;
   return { db, executed };
 }
