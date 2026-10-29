@@ -336,6 +336,15 @@ test('published Nightly verifies source, native platforms, OCI parity, API hashe
   assert.equal(result.version, '1.4.2');
   assert.match(result.manifestDigest, /^sha256:/u);
 });
+test('published Nightly accepts an acceptance receipt recorded by an earlier attempt of its publication run', async () => {
+  const f = fixture((s) => {
+    s.nightly.runAttempt = 2;
+    s.release.qualityReceipt.runAttempt = 1;
+  });
+  const result = await verify(f);
+  assert.equal(result.nightly.runAttempt, 2);
+  assert.equal(result.nightly.quality.acceptance, 'passed');
+});
 for (const [name, mutate, pattern] of [
   [
     'draft',
@@ -425,6 +434,13 @@ for (const [name, mutate, pattern] of [
     'foreign acceptance run',
     (s) => {
       s.release.qualityReceipt.runId = 19;
+    },
+    /acceptance receipt/u,
+  ],
+  [
+    'acceptance from a future attempt',
+    (s) => {
+      s.release.qualityReceipt.runAttempt = 2;
     },
     /acceptance receipt/u,
   ],
@@ -644,6 +660,63 @@ test('finalization binds native and image evidence to this run and its acceptanc
         }),
       /acceptance receipt identity/u,
     );
+  } finally {
+    await rm(root, { recursive: true, force: true });
+  }
+});
+
+test('finalization binds the acceptance receipt to the publication run and source, not to the attempt', async () => {
+  const f = fixture();
+  const root = await mkdtemp(path.join(tmpdir(), 'release-attempt-'));
+  const manifestPath = path.join(root, 'release-manifest.json');
+  const receiptPath = path.join(root, 'release-quality-receipt.json');
+  const receipt = {
+    kind: 'release-quality-receipt',
+    schemaVersion: 1,
+    gitSha: SHA,
+    status: 'passed',
+    web: 'passed',
+    provider: 'passed',
+    runId: 9,
+    runAttempt: 1,
+  };
+  const reset = async (quality) => {
+    for (const [name, value] of Object.entries(f.data))
+      await writeFile(path.join(root, name), encode(value));
+    await writeFile(path.join(root, 'github-release.json'), encode(f.metadata));
+    await writeFile(receiptPath, encode(quality));
+  };
+  const finalize = (runId = 9, runAttempt = 2) =>
+    finalizeReleaseChannel({
+      manifestPath,
+      evidenceRoot: root,
+      channel: 'nightly',
+      runId,
+      runAttempt,
+      runtimeDigest: 'sha256:' + 'e'.repeat(64),
+    });
+  try {
+    // (a) attempt 1 receipt + attempt 2 finalize of the same run is a legitimate recovery.
+    await reset(receipt);
+    const nightly = await finalize(9, 2);
+    assert.equal(nightly.runId, 9);
+    assert.equal(nightly.runAttempt, 2);
+    const published = JSON.parse(await readFile(manifestPath, 'utf8'));
+    assert.equal(published.publication.runId, 9);
+    assert.equal(published.publication.runAttempt, 2);
+    assert.equal(published.qualityReceipt.runAttempt, 1);
+    // (b) a receipt from another run stays foreign even at the same source.
+    await reset({ ...receipt, runId: 8 });
+    await assert.rejects(() => finalize(9, 2), /acceptance receipt identity/u);
+    // (c) the same run id at another source is still rejected.
+    await reset({ ...receipt, gitSha: OTHER });
+    await assert.rejects(() => finalize(9, 2), /acceptance receipt identity/u);
+    // (d) a failed acceptance can never finalize.
+    await reset({ ...receipt, status: 'failed' });
+    await assert.rejects(() => finalize(9, 2), /acceptance receipt identity/u);
+    // (e) provenance cannot claim an attempt this run has not reached.
+    await reset({ ...receipt, runAttempt: 3 });
+    await assert.rejects(() => finalize(9, 2), /acceptance receipt identity/u);
   } finally {
     await rm(root, { recursive: true, force: true });
   }
