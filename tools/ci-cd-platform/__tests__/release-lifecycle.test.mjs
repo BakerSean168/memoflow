@@ -7,6 +7,7 @@ import YAML from 'yaml';
 import lifecycle from '../lib/release-lifecycle.cjs';
 import { prepareReleaseSource } from '../release-tools/prepare-release-source.mjs';
 import { finalizeReleaseChannel } from '../release-tools/finalize-release-channel.mjs';
+import { createCandidateSet, candidateSetDigest } from '../candidate-manifest.mjs';
 import {
   createAncestry,
   installCompareRoutes,
@@ -643,6 +644,118 @@ test('finalization binds native and image evidence to this run and its acceptanc
         }),
       /acceptance receipt identity/u,
     );
+  } finally {
+    await rm(root, { recursive: true, force: true });
+  }
+});
+
+test('Nightly finalization accepts the producer candidate set and keeps a strict numeric CI identity', async () => {
+  const root = await mkdtemp(path.join(tmpdir(), 'release-numeric-ci-'));
+  const digestFor = (char) => `sha256:${char.repeat(64)}`;
+  const image = (component, char) => ({
+    tag: `sha-${SHA}`,
+    revision: SHA,
+    digest: digestFor(char),
+    distributions: {
+      china: {
+        repository: `registry.test/memoflow-${component}`,
+        tag: `sha-${SHA}`,
+        digest: digestFor(char),
+      },
+      global: {
+        repository: `ghcr.io/owner/memoflow-${component}`,
+        tag: `sha-${SHA}`,
+        digest: digestFor(char),
+      },
+    },
+  });
+  // candidate-publish.yml hands the run id to the producer as a `jq --arg` string.
+  const candidate = createCandidateSet({
+    gitSha: SHA,
+    ciRunId: '5',
+    deliveryManifestDigest: digestFor('d'),
+    ciEvidence: {
+      kind: 'ci-chain-v1',
+      commit: SHA,
+      tree: 'e'.repeat(40),
+      ciRunId: 5,
+      deliveryManifestDigest: 'd'.repeat(64),
+      testEvidence: { testRunId: 5, testedCommit: SHA, testedTree: 'e'.repeat(40) },
+      buildArtifactId: 123,
+      buildArtifactDigest: digestFor('f'),
+    },
+    images: { web: image('web', '1'), api: image('api', '2'), migrator: image('migrator', '3') },
+    generatedAt: '2026-10-29T00:00:00.000Z',
+  });
+  assert.equal(typeof candidate.ciRunId, 'number');
+  const release = () => ({
+    schemaVersion: 2,
+    kind: 'memoflow-release',
+    version: '1.4.2',
+    tag: TAG,
+    gitSha: SHA,
+    ciRunId: 5,
+    deliveryManifestDigest: candidate.deliveryManifestDigest,
+    candidateSet: { digest: candidate.digest },
+    postflight: { status: 'passed' },
+  });
+  const desktop = {
+    kind: 'desktop-release',
+    tag: TAG,
+    gitSha: SHA,
+    platforms: Object.fromEntries(
+      ['windows-x64', 'linux-x64', 'macos-x64', 'macos-arm64'].map((p) => [
+        p,
+        { runtimeValidation: { status: 'passed' } },
+      ]),
+    ),
+  };
+  const docker = { kind: 'docker-release', tag: TAG, gitSha: SHA, images: candidate.images };
+  const quality = {
+    kind: 'release-quality-receipt',
+    schemaVersion: 1,
+    gitSha: SHA,
+    status: 'passed',
+    web: 'passed',
+    provider: 'passed',
+    runId: 9,
+    runAttempt: 1,
+  };
+  const writeEvidence = async (candidateState, releaseState) => {
+    await writeFile(path.join(root, 'release-manifest.json'), encode(releaseState));
+    await writeFile(path.join(root, 'candidate-set-v1.json'), encode(candidateState));
+    await writeFile(path.join(root, 'desktop-release-manifest.json'), encode(desktop));
+    await writeFile(path.join(root, 'docker-release-manifest.json'), encode(docker));
+    await writeFile(path.join(root, 'release-quality-receipt.json'), encode(quality));
+    await writeFile(
+      path.join(root, 'github-release.json'),
+      encode({
+        assets: [{ name: 'desktop-update-feed.tar.gz', digest: digestFor('a'), size: 300 }],
+      }),
+    );
+  };
+  const finalize = () =>
+    finalizeReleaseChannel({
+      manifestPath: path.join(root, 'release-manifest.json'),
+      evidenceRoot: root,
+      channel: 'nightly',
+      runId: '9',
+      runAttempt: '1',
+      runtimeDigest: digestFor('e'),
+    });
+  try {
+    await writeEvidence(candidate, release());
+    const nightly = await finalize();
+    assert.equal(nightly.ciRunId, 5);
+    assert.equal(typeof nightly.ciRunId, 'number');
+    assert.match(await readFile(path.join(root, 'nightly-manifest.json'), 'utf8'), /"ciRunId": 5/u);
+
+    // A digit-string ciRunId is read by validation but must never satisfy the
+    // Nightly identity gate: only the numeric producer output may finalize.
+    const drifted = { ...candidate, ciRunId: '5' };
+    drifted.digest = candidateSetDigest(drifted);
+    await writeEvidence(drifted, { ...release(), candidateSet: { digest: drifted.digest } });
+    await assert.rejects(finalize, /candidate source mismatch/u);
   } finally {
     await rm(root, { recursive: true, force: true });
   }
