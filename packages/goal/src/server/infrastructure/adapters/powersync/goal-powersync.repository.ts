@@ -334,7 +334,18 @@ export class GoalPowerSyncRepository
     const dto = goal.toServerDTO(false);
     const start = encodeGoalStartTimeframe(dto.start);
     const target = encodeGoalTimeframe(dto.target);
-    const result = await this.db.execute(
+    // `goals` is a PowerSync view over `ps_data__goals`: the write is applied by
+    // INSTEAD OF triggers, so the statement reports zero affected rows even when
+    // it lands. Read the stored version in the same write transaction instead of
+    // inferring the CAS outcome from the affected-row count.
+    const current = await this.db.getOptional<{ version: number }>(
+      `SELECT version FROM goals WHERE id = ? AND identity_id = ? LIMIT 1`,
+      [dto.id, dto.identityId],
+    );
+    if (!current || Number(current.version) !== expectedVersion) {
+      throw new GoalVersionConflictError();
+    }
+    await this.db.execute(
       `UPDATE goals SET name = ?, summary = ?, description = ?, status = ?, start_kind = ?, start_date = ?, target_kind = ?, target_end_date = ?, completed_at = ?, archived_at = ?,
        reminder_config = ?, version = ?, updated_at = ?, deleted_at = ?
        WHERE id = ? AND identity_id = ? AND version = ?`,
@@ -358,7 +369,6 @@ export class GoalPowerSyncRepository
         expectedVersion,
       ],
     );
-    if (result.rowsAffected !== 1) throw new GoalVersionConflictError();
     await this.persist(goal);
   }
 
@@ -386,6 +396,16 @@ export class GoalPowerSyncRepository
     expectedVersion: number,
   ): Promise<void> {
     await (this.db as GoalPowerSyncDatabase).writeTransaction(async (tx) => {
+      // Same view/trigger semantics as persistWithExpectedVersion: the version
+      // gate must be read inside the write transaction, not counted from the
+      // affected rows of the DELETE.
+      const current = await tx.getOptional<{ version: number }>(
+        `SELECT version FROM goals WHERE id = ? AND identity_id = ? LIMIT 1`,
+        [id, identityId],
+      );
+      if (!current || Number(current.version) !== expectedVersion) {
+        throw new GoalVersionConflictError();
+      }
       await tx.execute(`DELETE FROM goal_reviews WHERE goal_id = ?`, [id]);
       await tx.execute(
         `DELETE FROM goal_records
@@ -394,11 +414,11 @@ export class GoalPowerSyncRepository
       );
       await tx.execute(`DELETE FROM key_results WHERE goal_id = ?`, [id]);
       await tx.execute(`DELETE FROM key_result_weight_snapshots WHERE goal_id = ?`, [id]);
-      const deleted = await tx.execute(
-        `DELETE FROM goals WHERE id = ? AND identity_id = ? AND version = ?`,
-        [id, identityId, expectedVersion],
-      );
-      if (deleted.rowsAffected !== 1) throw new GoalVersionConflictError();
+      await tx.execute(`DELETE FROM goals WHERE id = ? AND identity_id = ? AND version = ?`, [
+        id,
+        identityId,
+        expectedVersion,
+      ]);
     });
   }
 
