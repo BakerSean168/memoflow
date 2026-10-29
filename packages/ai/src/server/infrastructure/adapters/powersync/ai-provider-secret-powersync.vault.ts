@@ -98,17 +98,24 @@ export class PowerSyncAIProviderSecretVault implements IAIProviderSecretVault {
   async revoke(input: ResolveAIProviderCredentialInput): Promise<void> {
     const now = input.now ?? Date.now();
     await this.db.writeTransaction(async (tx) => {
-      const existing = await tx.getOptional<SecretRow>(
-        `SELECT id, revoked_at FROM ai_provider_secrets WHERE id = ? AND identity_id = ? LIMIT 1`,
+      const usable = await tx.getOptional<{ id: string }>(
+        `SELECT id FROM ai_provider_secrets
+         WHERE id = ? AND identity_id = ? AND revoked_at IS NULL`,
+        [String(input.credentialRef), input.identityId],
+      );
+      if (usable) {
+        await tx.execute(
+          `UPDATE ai_provider_secrets SET revoked_at = ?, updated_at = ?
+         WHERE id = ? AND identity_id = ? AND revoked_at IS NULL`,
+          [now, now, String(input.credentialRef), input.identityId],
+        );
+        return;
+      }
+      const existing = await tx.getOptional<{ id: string }>(
+        `SELECT id FROM ai_provider_secrets WHERE id = ? AND identity_id = ? LIMIT 1`,
         [String(input.credentialRef), input.identityId],
       );
       if (!existing) throw new Error('AI provider credential is unavailable');
-      if (existing.revoked_at !== null) return;
-      await tx.execute(
-        `UPDATE ai_provider_secrets SET revoked_at = ?, updated_at = ?
-         WHERE id = ? AND identity_id = ? AND revoked_at IS NULL`,
-        [now, now, String(input.credentialRef), input.identityId],
-      );
     });
   }
 }

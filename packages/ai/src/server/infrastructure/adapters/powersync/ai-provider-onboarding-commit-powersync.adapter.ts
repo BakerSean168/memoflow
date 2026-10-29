@@ -80,14 +80,13 @@ export class PowerSyncAIProviderOnboardingCommitAdapter implements IAIProviderOn
         );
         if (duplicate) return 'CONFLICT' as const;
 
-        const consumed = await tx.execute(
+        await tx.execute(
           `UPDATE ai_provider_onboarding_sessions
            SET consumed_at = ?, updated_at = ?
            WHERE id = ? AND identity_id = ? AND target_provider_id IS NULL
              AND expires_at > ? AND consumed_at IS NULL`,
           [input.now, input.now, input.onboardingId, input.identityId, input.now],
         );
-        if (consumed.rowsAffected !== 1) return 'SESSION_UNAVAILABLE' as const;
 
         if (row.is_default) {
           await tx.execute(
@@ -97,12 +96,17 @@ export class PowerSyncAIProviderOnboardingCommitAdapter implements IAIProviderOn
           );
         }
 
-        const credential = await tx.execute(
+        const credential = await tx.getOptional<{ id: string }>(
+          `SELECT id FROM ai_provider_secrets
+           WHERE id = ? AND identity_id = ? AND revoked_at IS NULL`,
+          [row.credential_ref, input.identityId],
+        );
+        if (!credential) throw new Error('AI provider credential is unavailable');
+        await tx.execute(
           `UPDATE ai_provider_secrets SET expires_at = NULL, updated_at = ?
            WHERE id = ? AND identity_id = ? AND revoked_at IS NULL`,
           [input.now, row.credential_ref, input.identityId],
         );
-        if (credential.rowsAffected !== 1) throw new Error('AI provider credential is unavailable');
 
         await tx.execute(
           `INSERT INTO ai_provider_configs (
@@ -184,7 +188,7 @@ export class PowerSyncAIProviderOnboardingCommitAdapter implements IAIProviderOn
         if (!current) return 'PROVIDER_NOT_FOUND' as const;
         if (current.version !== input.expectedVersion) return 'CONFLICT' as const;
 
-        const consumed = await tx.execute(
+        await tx.execute(
           `UPDATE ai_provider_onboarding_sessions
            SET consumed_at = ?, updated_at = ?
            WHERE id = ? AND identity_id = ? AND target_provider_id = ?
@@ -198,9 +202,14 @@ export class PowerSyncAIProviderOnboardingCommitAdapter implements IAIProviderOn
             input.now,
           ],
         );
-        if (consumed.rowsAffected !== 1) return 'SESSION_UNAVAILABLE' as const;
 
-        const updated = await tx.execute(
+        const matchingProvider = await tx.getOptional<{ id: string }>(
+          `SELECT id FROM ai_provider_configs
+           WHERE id = ? AND identity_id = ? AND version = ? AND deleted_at IS NULL`,
+          [input.targetProviderId, input.identityId, input.expectedVersion],
+        );
+        if (!matchingProvider) throw new ReplacementRollback('CONFLICT');
+        await tx.execute(
           `UPDATE ai_provider_configs
            SET base_url = ?, credential_ref = ?, default_model = ?, version = ?, updated_at = ?
            WHERE id = ? AND identity_id = ? AND version = ? AND deleted_at IS NULL`,
@@ -215,22 +224,29 @@ export class PowerSyncAIProviderOnboardingCommitAdapter implements IAIProviderOn
             input.expectedVersion,
           ],
         );
-        if (updated.rowsAffected !== 1) {
-          throw new ReplacementRollback('CONFLICT');
-        }
-        const credential = await tx.execute(
+        const credential = await tx.getOptional<{ id: string }>(
+          `SELECT id FROM ai_provider_secrets
+           WHERE id = ? AND identity_id = ? AND revoked_at IS NULL`,
+          [input.replacement.credentialRef, input.identityId],
+        );
+        if (!credential) throw new Error('AI provider credential is unavailable');
+        await tx.execute(
           `UPDATE ai_provider_secrets SET expires_at = NULL, updated_at = ?
            WHERE id = ? AND identity_id = ? AND revoked_at IS NULL`,
           [input.now, input.replacement.credentialRef, input.identityId],
         );
-        if (credential.rowsAffected !== 1) throw new Error('AI provider credential is unavailable');
 
-        const revoked = await tx.execute(
+        const previousCredential = await tx.getOptional<{ id: string }>(
+          `SELECT id FROM ai_provider_secrets
+           WHERE id = ? AND identity_id = ? AND revoked_at IS NULL`,
+          [input.previousCredentialRef, input.identityId],
+        );
+        if (!previousCredential) throw new Error('AI provider credential is unavailable');
+        await tx.execute(
           `UPDATE ai_provider_secrets SET revoked_at = ?, updated_at = ?
            WHERE id = ? AND identity_id = ? AND revoked_at IS NULL`,
           [input.now, input.now, input.previousCredentialRef, input.identityId],
         );
-        if (revoked.rowsAffected !== 1) throw new Error('AI provider credential is unavailable');
 
         return 'REPLACED' as const;
       });
