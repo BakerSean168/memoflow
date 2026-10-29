@@ -233,7 +233,10 @@ jobs:
       - name: Install Linux Electron runtime dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y xvfb libgtk-3-0t64 libnss3 libasound2t64 libgbm1
+          # The collector launches a real Electron process whose helper fails
+          # closed without a Secret Service, so the lane owns a keyring session.
+          sudo apt-get install -y xvfb dbus-x11 gnome-keyring libsecret-tools libglib2.0-bin \
+            libgtk-3-0t64 libnss3 libasound2t64 libgbm1
           # Electron's sandbox needs unprivileged user namespaces, which Ubuntu
           # runners restrict through AppArmor.
           if sysctl -n kernel.apparmor_restrict_unprivileged_userns >/dev/null 2>&1; then
@@ -254,13 +257,14 @@ jobs:
         run: docker compose --profile test --profile sync-test up -d --wait postgres-test powersync-test
       - name: Prepare database schema
         run: pnpm exec nx run database:prisma-push
-      - name: Run Web/Desktop sync regression under Xvfb
+      - name: Run Web/Desktop sync regression under Xvfb with a real keyring
         env:
           NODE_OPTIONS: --require=${{ github.workspace }}/tools/ci/node-process-bootstrap.cjs
           TEST_REPORT_NAME: sync-e2e
         # PowerSync signing keys come from the tracked .env.development; the
-        # collector throws instead of skipping when they are absent.
-        run: node ./tools/test-system-v2/run-command.mjs -- xvfb-run -a pnpm exec nx run web:e2e:sync
+        # collector throws instead of skipping when they are absent. The wrapper
+        # owns the Xvfb/D-Bus/gnome-keyring session the Electron side requires.
+        run: node ./tools/test-system-v2/run-command.mjs -- apps/web/scripts/run-linux-sync-e2e-with-keyring.sh
       - name: Upload sync evidence
         if: always()
         uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6

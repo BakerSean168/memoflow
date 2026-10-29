@@ -114,8 +114,27 @@ export class DesktopAppController {
     // polluted by a developer's local desktop session.
     mkdirSync(this.userDataDir, { recursive: true });
 
+    // Playwright's Electron launcher installs --password-store=basic, which the
+    // keyring check below rejects on Linux. The desktop authentication lane
+    // strips those test-only switches through this loader; the collector asks
+    // for it the same way it asks for the real Secret Service.
+    const launchArgs = [desktopMainEntrypoint];
+    if (process.platform === 'linux' && process.env.MEMOFLOW_E2E_USE_GNOME_KEYRING === '1') {
+      launchArgs.unshift(
+        '-r',
+        path.join(
+          workspaceRoot,
+          'apps',
+          'desktop',
+          'e2e',
+          'support',
+          'real-keyring-playwright-loader.cjs',
+        ),
+      );
+    }
+
     this.electronApp = await electron.launch({
-      args: [desktopMainEntrypoint],
+      args: launchArgs,
       env: {
         ...process.env,
         MEMOFLOW_API_URL: this.apiBaseUrl,
