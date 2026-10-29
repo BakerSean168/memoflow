@@ -57,6 +57,7 @@
   "devDependencies": {
     "@memoflow/powersync-schema": "workspace:*",
     "@memoflow/scheduler": "workspace:*",
-    "@types/express": "^5.0.0"
+    "@types/express": "^5.0.0",
+    "@powersync/node": "1.1.0"
   }
 }

@@ -8024,6 +8024,16 @@
       ]
     },
     {
+      "path": "packages/notification/src/server/infrastructure/adapters/powersync/__tests__/notification-powersync-rows-affected.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/notification/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "packages/notification/vitest.config.ts"
+      ]
+    },
+    {
       "path": "packages/notification/src/server/infrastructure/adapters/powersync/__tests__/notification-powersync.closure-checker.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -12366,7 +12376,7 @@
       "type": "measurement",
       "suite": "coverage",
       "runner": "vitest",
-      "fileCount": 39
+      "fileCount": 40
     },
     {
       "id": "packages/routine/vitest.config.ts",
@@ -13005,7 +13015,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 39
+      "fileCount": 40
     },
     {
       "id": "packages/operations-contracts/vitest.config.ts",
@@ -13692,6 +13702,7 @@
       "packages/notification/src/server/infrastructure/__tests__/notification-module-partial-start.spec.ts",
       "packages/notification/src/server/infrastructure/__tests__/notification-repositories.surface.spec.ts",
       "packages/notification/src/server/infrastructure/adapters/powersync/__tests__/notification-powersync-durable-worker.spec.ts",
+      "packages/notification/src/server/infrastructure/adapters/powersync/__tests__/notification-powersync-rows-affected.spec.ts",
       "packages/notification/src/server/infrastructure/adapters/powersync/__tests__/notification-powersync.closure-checker.spec.ts",
       "packages/notification/src/server/infrastructure/adapters/powersync/__tests__/notification-requested-writer.powersync.spec.ts",
       "packages/notification/src/server/infrastructure/adapters/powersync/power-sync-notification-reliable.adapter.test.ts",
@@ -13868,7 +13879,7 @@
   "duplicate": [],
   "unexpected": [],
   "counts": {
-    "unit": 1137,
+    "unit": 1138,
     "integration": 58,
     "smoke": 3,
     "boundary-ipc": 6,
