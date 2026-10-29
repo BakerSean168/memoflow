@@ -67,6 +67,7 @@
     "@memoflow/test-utils": "workspace:*",
     "@types/express": "^5.0.0",
     "@types/jsonwebtoken": "^9.0.10",
-    "jsonwebtoken": "^9.0.3"
+    "jsonwebtoken": "^9.0.3",
+    "@powersync/node": "1.1.0"
   }
 }
