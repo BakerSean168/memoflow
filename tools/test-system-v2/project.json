@@ -59,10 +59,13 @@
         "{workspaceRoot}/apps/**/*",
         "{workspaceRoot}/packages/**/*",
         "{workspaceRoot}/tools/test-system-v2/**/*",
-        "{workspaceRoot}/tools/test/test-target-governance.mjs"
+        "{workspaceRoot}/tools/test/test-target-governance.mjs",
+        "{workspaceRoot}/.github/workflows/nightly-audit.yml",
+        "{workspaceRoot}/.github/workflows/release-assets.yml",
+        "{workspaceRoot}/.github/workflows/desktop-update-e2e.yml"
       ],
       "options": {
-        "command": "node ./tools/test-system-v2/inventory.mjs --check && node ./tools/test/test-target-governance.mjs --check"
+        "command": "node ./tools/test-system-v2/inventory.mjs --check && node ./tools/test-system-v2/architecture.mjs --check && node ./tools/test/test-target-governance.mjs --check"
       }
     },
     "scope": {
