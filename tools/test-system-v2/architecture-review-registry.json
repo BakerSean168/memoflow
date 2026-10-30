@@ -17,9 +17,7 @@
         "reuses only the exact owner, revision and native OAuth identity without new ACP calls"
       ],
       "reason": "readFile 读取运行期 model-catalog，不是源码；原 Structural 错分",
-      "confirmedDependencies": [
-        "database"
-      ],
+      "confirmedDependencies": ["database"],
       "replacement": {
         "status": "none-verified",
         "testFiles": []
@@ -35,9 +33,7 @@
       },
       "decision": "retain",
       "behavior": "带远端 fetch Stub 的 ProfileSnapshotService 恢复/校验和异常处理",
-      "assertionEvidence": [
-        "hydrates a new profile database from a remote snapshot"
-      ],
+      "assertionEvidence": ["hydrates a new profile database from a remote snapshot"],
       "reason": "临时快照读写是行为断言，不是源码静态约束",
       "replacement": {
         "status": "none-verified",
@@ -112,9 +108,7 @@
       },
       "decision": "retain",
       "behavior": "Migrator URL 合成、SQL 目录探测、命令顺序",
-      "assertionEvidence": [
-        "keeps schema reconciliation and smoke verification ordered"
-      ],
+      "assertionEvidence": ["keeps schema reconciliation and smoke verification ordered"],
       "reason": "没有执行真实 SQL migration，不能代替数据库迁移 E2E",
       "replacement": {
         "status": "none-verified",
@@ -131,13 +125,9 @@
       },
       "decision": "retain",
       "behavior": "真实 pg Client/临时 PostgreSQL，旧表迁移、数据保留、幂等、回滚",
-      "assertionEvidence": [
-        "fails closed and rolls back unknown account lifecycle values"
-      ],
+      "assertionEvidence": ["fails closed and rolls back unknown account lifecycle values"],
       "reason": "T1 风险矩阵漏记了这项真实 PostgreSQL 迁移集成测试",
-      "confirmedDependencies": [
-        "database"
-      ],
+      "confirmedDependencies": ["database"],
       "replacement": {
         "status": "none-verified",
         "testFiles": []
@@ -153,9 +143,7 @@
       },
       "decision": "retain",
       "behavior": "迁移前的 label 规范化和畸形输入拒绝纯逻辑",
-      "assertionEvidence": [
-        "fails closed on malformed or non-string legacy tag payloads"
-      ],
+      "assertionEvidence": ["fails closed on malformed or non-string legacy tag payloads"],
       "reason": "使用 JSON fixture，不执行 SQL",
       "replacement": {
         "status": "none-verified",
@@ -172,9 +160,7 @@
       },
       "decision": "supplement",
       "behavior": "多视口/语言/主题的 Screenshot 与 Escape 焦点恢复",
-      "assertionEvidence": [
-        "toHaveScreenshot"
-      ],
+      "assertionEvidence": ["toHaveScreenshot"],
       "reason": "属于 reference lane，不能当作 PR 必跑的视觉测试",
       "replacement": {
         "status": "none-verified",
@@ -191,9 +177,7 @@
       },
       "decision": "retain",
       "behavior": "浏览器几何、ARIA、焦点回归",
-      "assertionEvidence": [
-        "boundingBox"
-      ],
+      "assertionEvidence": ["boundingBox"],
       "reason": "布局几何不是像素对比；与 screenshot 互补",
       "replacement": {
         "status": "none-verified",
@@ -458,9 +442,7 @@
       },
       "decision": "retain",
       "behavior": "API server composes Account and rejects Legacy* module names",
-      "assertionEvidence": [
-        "server.ts uses composeAccount with clock and no LegacyAccountModule"
-      ],
+      "assertionEvidence": ["server.ts uses composeAccount with clock and no LegacyAccountModule"],
       "reason": "PR #602 single-file assertion review: requires architecture registration guard or equivalent server composition test. Never retire before equivalent replacement and target CI evidence.",
       "replacement": {
         "status": "none-verified",
@@ -572,9 +554,7 @@
       },
       "decision": "retain",
       "behavior": "Cloud Auth browser barrel never imports server",
-      "assertionEvidence": [
-        "index.ts exports client and does not export server/index.js"
-      ],
+      "assertionEvidence": ["index.ts exports client and does not export server/index.js"],
       "reason": "PR #602 single-file assertion review: needs browser bundle or import graph boundary gate. Never retire before equivalent replacement and target CI evidence.",
       "replacement": {
         "status": "none-verified",
@@ -876,9 +856,7 @@
       },
       "decision": "supplement",
       "behavior": "已打包 Electron 真正冷启动、设置页面及 Profile/快捷键重启持久化，检查 CSS/窗口/安装包资源",
-      "assertionEvidence": [
-        "MEMOFLOW_PACKAGED_EXECUTABLE"
-      ],
+      "assertionEvidence": ["MEMOFLOW_PACKAGED_EXECUTABLE"],
       "reason": "必须由已构建/安装产物运行；当前未核实 CI SHA 回执，不应列为常规单元或无门禁。 仅做源码/断言阅读，未运行真实浏览器或 Electron。",
       "replacement": {
         "status": "none-verified",
@@ -895,9 +873,7 @@
       },
       "decision": "retain",
       "behavior": "云端账号资料修改、密码变更、注销并清除 Better Auth 会话",
-      "assertionEvidence": [
-        "account-logout-button"
-      ],
+      "assertionEvidence": ["account-logout-button"],
       "reason": "每测试通过 openAccountSettings 间接 UI 注册；仅密码/注销专项保留独立账号，资料类可迁移 API 前置。 仅做源码/断言阅读，未运行真实浏览器或 Electron。",
       "replacement": {
         "status": "none-verified",
@@ -914,9 +890,7 @@
       },
       "decision": "supplement",
       "behavior": "真实 GitHub OAuth 授权 Popup、跨站 Cookie Session 与不泄露令牌到 localStorage",
-      "assertionEvidence": [
-        "10 * 60 * 1000"
-      ],
+      "assertionEvidence": ["10 * 60 * 1000"],
       "reason": "有 10 分钟人工交互前置，必须 Headed 专项，不可自动算作已在常规 PR/CI 完成。 仅做源码/断言阅读，未运行真实浏览器或 Electron。",
       "replacement": {
         "status": "none-verified",
@@ -933,9 +907,7 @@
       },
       "decision": "retain",
       "behavior": "真实 Electron 工作区 1024/1200/1280/1440 宽度和 125%/150% Zoom 的面板几何与截图",
-      "assertionEvidence": [
-        "geometry.panelVisible"
-      ],
+      "assertionEvidence": ["geometry.panelVisible"],
       "reason": "含布局行为断言和截图，不是纯资料截图；依赖 Electron Fixture 和 Desktop build。 仅做源码/断言阅读，未运行真实浏览器或 Electron。",
       "replacement": {
         "status": "none-verified",
@@ -952,9 +924,7 @@
       },
       "decision": "retain",
       "behavior": "Goal 多语言/主题/宽度 Visual Snapshot、KR/记录/Review 的确定性参考组件流程",
-      "assertionEvidence": [
-        "goalReferenceEvidence"
-      ],
+      "assertionEvidence": ["goalReferenceEvidence"],
       "reason": "Reference 应用模拟 Owner 和日期；Browser Component/Visual Verification，不是生产后端完整 E2E。 仅做源码/断言阅读，未运行真实浏览器或 Electron。",
       "replacement": {
         "status": "none-verified",
@@ -971,9 +941,7 @@
       },
       "decision": "retain",
       "behavior": "Local Docker Goal/KR 与 Task 联动贡献的真实 API 与 UI 闭环，完成/撤销/重放不重复进度",
-      "assertionEvidence": [
-        "EachCompletion"
-      ],
+      "assertionEvidence": ["EachCompletion"],
       "reason": "每个大场景确需独立 owner 数据，但 UI 注册应由 API 测试预备替代；不要复用有状态的业务记录。 仅做源码/断言阅读，未运行真实浏览器或 Electron。",
       "replacement": {
         "status": "none-verified",
@@ -990,9 +958,7 @@
       },
       "decision": "retain",
       "behavior": "Local Docker Home/Panel/Focus 的偏好持久化、原生未保存草稿确认与导航一致性",
-      "assertionEvidence": [
-        "business-panel-focus-toggle"
-      ],
+      "assertionEvidence": ["business-panel-focus-toggle"],
       "reason": "UI 布局与确认弹层是被测业务交互；每场景的 UI 注册并非验证目标。 仅做源码/断言阅读，未运行真实浏览器或 Electron。",
       "replacement": {
         "status": "none-verified",
@@ -1009,9 +975,7 @@
       },
       "decision": "retain",
       "behavior": "Local Docker Goal/KR/Task 真实键盘操作、焦点归还、嵌套弹层和 axe A11y",
-      "assertionEvidence": [
-        "expectNoSeriousAxeViolations"
-      ],
+      "assertionEvidence": ["expectNoSeriousAxeViolations"],
       "reason": "提供先前 T3 组件浏览器补测的部分现有证据，重用前须区分综合 E2E 与独立组件交互；UI 注册可抽离。 仅做源码/断言阅读，未运行真实浏览器或 Electron。",
       "replacement": {
         "status": "none-verified",
@@ -1028,9 +992,7 @@
       },
       "decision": "retain",
       "behavior": "键盘 Capsule 预览、输入保护、Goal 跳转与可自定义快捷键重启后持久化",
-      "assertionEvidence": [
-        "shortcut-module.goal.activate"
-      ],
+      "assertionEvidence": ["shortcut-module.goal.activate"],
       "reason": "Web 本地 Docker 真 UI，UI 注册是前置成本；与 Desktop Guest 的 Profile 隔离键盘用例互补。 仅做源码/断言阅读，未运行真实浏览器或 Electron。",
       "replacement": {
         "status": "none-verified",
@@ -1047,9 +1009,7 @@
       },
       "decision": "retain",
       "behavior": "Browser Reference 日历 Task 冲突/CalendarEntry 乐观锁、重读策略、截图对比",
-      "assertionEvidence": [
-        "scheduleCollisionEvidence"
-      ],
+      "assertionEvidence": ["scheduleCollisionEvidence"],
       "reason": "Reference 采用确定性 Service Doubles，`surface=collision` 并未验证真实 Schedule 数据库冲突。 仅做源码/断言阅读，未运行真实浏览器或 Electron。",
       "replacement": {
         "status": "none-verified",
@@ -1066,9 +1026,7 @@
       },
       "decision": "retain",
       "behavior": "Browser Reference Schedule/Task/Goal/Routine 来源身份、颜色 Token、Tooltip、布局截图",
-      "assertionEvidence": [
-        "sourceIdentity"
-      ],
+      "assertionEvidence": ["sourceIdentity"],
       "reason": "真实浏览器生产组件+确定性服务替身，无活日历后端，测试类型是组件/视觉，不是完整 E2E。 仅做源码/断言阅读，未运行真实浏览器或 Electron。",
       "replacement": {
         "status": "none-verified",
@@ -1085,9 +1043,7 @@
       },
       "decision": "retain",
       "behavior": "Browser Reference Task 完成/撤销/跳过/错过、Checklist 及测量对话框状态与命令序列",
-      "assertionEvidence": [
-        "scheduleCrudEvidence"
-      ],
+      "assertionEvidence": ["scheduleCrudEvidence"],
       "reason": "`surface=task-quick` 证实组件交互并断言录制命令；不是通过真实后端 Task 仓储。 仅做源码/断言阅读，未运行真实浏览器或 Electron。",
       "replacement": {
         "status": "none-verified",
@@ -1104,9 +1060,7 @@
       },
       "decision": "retain",
       "behavior": "Desktop Guest Renderer 的 Capsule/快捷键/自定义映射在 reload 之后保持",
-      "assertionEvidence": [
-        "DesktopGuestShellController"
-      ],
+      "assertionEvidence": ["DesktopGuestShellController"],
       "reason": "本地 Electron Guest 与 Web 账号不同，无需云端注册；涉及真实 Profile-scoped 快捷键存储。 仅做源码/断言阅读，未运行真实浏览器或 Electron。",
       "replacement": {
         "status": "none-verified",
@@ -1123,9 +1077,7 @@
       },
       "decision": "retain",
       "behavior": "Guest Electron 面板宽度阈值、AI Composer 溢出、设置独立场景、DOM identity、键盘与交互",
-      "assertionEvidence": [
-        "computePanelGeometry"
-      ],
+      "assertionEvidence": ["computePanelGeometry"],
       "reason": "真实本地 Electron App 而非 Playwright 网页主机；不需要 cloud login，需构建后的 Renderer 验收。 仅做源码/断言阅读，未运行真实浏览器或 Electron。",
       "replacement": {
         "status": "none-verified",
@@ -1142,13 +1094,9 @@
       },
       "decision": "retain",
       "behavior": "真实 Prisma Agent Instance Registry CAS、持久化重启、默认选择及删除保护",
-      "assertionEvidence": [
-        "TEST_DATABASE_URL"
-      ],
+      "assertionEvidence": ["TEST_DATABASE_URL"],
       "reason": "明确要求 TEST_DATABASE_URL，具真实 Postgres/Prisma Adapter；本轮未运行外部 DB。 本轮只检查源码和代表性断言，未执行依赖 PostgreSQL/Redis 的测试。",
-      "confirmedDependencies": [
-        "database"
-      ],
+      "confirmedDependencies": ["database"],
       "replacement": {
         "status": "none-verified",
         "testFiles": []
@@ -1164,13 +1112,9 @@
       },
       "decision": "retain",
       "behavior": "Label 重命名后 Goal/Task join 保持，删除 Label 仅清 join 不删业务聚合",
-      "assertionEvidence": [
-        "prisma.goalLabel.findUniqueOrThrow"
-      ],
+      "assertionEvidence": ["prisma.goalLabel.findUniqueOrThrow"],
       "reason": "使用共享真实 Prisma Integration Helpers；Owner FK/Join 维护不同于 Label 单元测试。 本轮只检查源码和代表性断言，未执行依赖 PostgreSQL/Redis 的测试。",
-      "confirmedDependencies": [
-        "database"
-      ],
+      "confirmedDependencies": ["database"],
       "replacement": {
         "status": "none-verified",
         "testFiles": []
@@ -1186,9 +1130,7 @@
       },
       "decision": "retain",
       "behavior": "Task Occurrence HTTP 401/过滤/CRUD 路由状态码与 Repository 适配契约",
-      "assertionEvidence": [
-        "createSmokeApp"
-      ],
+      "assertionEvidence": ["createSmokeApp"],
       "reason": "Supertest + mocked Task Repo/Usecase，覆盖 HTTP 层但不能证明真实 Prisma/Owner 隔离。 本轮只检查源码和代表性断言，未执行依赖 PostgreSQL/Redis 的测试。",
       "confirmedDependencies": [],
       "replacement": {
@@ -1206,9 +1148,7 @@
       },
       "decision": "retain",
       "behavior": "Task Plan HTTP 401/验证/CRUD 路由请求响应契约",
-      "assertionEvidence": [
-        "createSmokeApp"
-      ],
+      "assertionEvidence": ["createSmokeApp"],
       "reason": "Supertest + 模拟 Repository；属于路由集成 Smoke，数据库依赖须标为无。 本轮只检查源码和代表性断言，未执行依赖 PostgreSQL/Redis 的测试。",
       "confirmedDependencies": [],
       "replacement": {
@@ -1226,13 +1166,9 @@
       },
       "decision": "retain",
       "behavior": "两个独立 API 连接共享 Redis IP/Owner Pilot 限额并原子去重",
-      "assertionEvidence": [
-        "consumeOwner"
-      ],
+      "assertionEvidence": ["consumeOwner"],
       "reason": "需要外部 Redis 或会调用 docker run 拉 redis:8.10.2-alpine；不能默认作为零外部依赖的 PR 快速测试。 本轮只检查源码和代表性断言，未执行依赖 PostgreSQL/Redis 的测试。",
-      "confirmedDependencies": [
-        "external-service"
-      ],
+      "confirmedDependencies": ["external-service"],
       "replacement": {
         "status": "none-verified",
         "testFiles": []
@@ -1248,13 +1184,9 @@
       },
       "decision": "retain",
       "behavior": "真实 Postgres PowerSync 偏好上传的重复 INSERT、Canonical ID 重放与事务冲突回滚",
-      "assertionEvidence": [
-        "TEST_DATABASE_URL"
-      ],
+      "assertionEvidence": ["TEST_DATABASE_URL"],
       "reason": "PrismaPg+pg Client 多连接验证，显式数据库依赖。 本轮只检查源码和代表性断言，未执行依赖 PostgreSQL/Redis 的测试。",
-      "confirmedDependencies": [
-        "database"
-      ],
+      "confirmedDependencies": ["database"],
       "replacement": {
         "status": "none-verified",
         "testFiles": []
@@ -1270,13 +1202,9 @@
       },
       "decision": "retain",
       "behavior": "Profile Import 已提交响应查找、请求幂等、二连接写栅栏、并发相同请求与 Crash-Recovery",
-      "assertionEvidence": [
-        "DATABASE_URL"
-      ],
+      "assertionEvidence": ["DATABASE_URL"],
       "reason": "使用真实 DB/独立客户端测试写入并发，必须保留；T2 不保证本地 DB 已运行。 本轮只检查源码和代表性断言，未执行依赖 PostgreSQL/Redis 的测试。",
-      "confirmedDependencies": [
-        "database"
-      ],
+      "confirmedDependencies": ["database"],
       "replacement": {
         "status": "none-verified",
         "testFiles": []
@@ -1292,13 +1220,9 @@
       },
       "decision": "retain",
       "behavior": "Account DB 删除 auth-email shadow 字段且 Cloud Auth 保留 email Owner",
-      "assertionEvidence": [
-        "column_name"
-      ],
+      "assertionEvidence": ["column_name"],
       "reason": "通过真实 Postgres information_schema 检查物理表，不能由 TS 源码字符串锁替代。 本轮只检查源码和代表性断言，未执行依赖 PostgreSQL/Redis 的测试。",
-      "confirmedDependencies": [
-        "database"
-      ],
+      "confirmedDependencies": ["database"],
       "replacement": {
         "status": "none-verified",
         "testFiles": []
@@ -1314,13 +1238,9 @@
       },
       "decision": "retain",
       "behavior": "Account DB 实际不存在已废弃 Phone 各列",
-      "assertionEvidence": [
-        "column_name"
-      ],
+      "assertionEvidence": ["column_name"],
       "reason": "information_schema 直接检查真实数据库结构，对 Source-only 保护有互补价值。 本轮只检查源码和代表性断言，未执行依赖 PostgreSQL/Redis 的测试。",
-      "confirmedDependencies": [
-        "database"
-      ],
+      "confirmedDependencies": ["database"],
       "replacement": {
         "status": "none-verified",
         "testFiles": []
@@ -1336,13 +1256,9 @@
       },
       "decision": "retain",
       "behavior": "Account 聚合 version 列退休而 Closure Operation 仍有独立 Version",
-      "assertionEvidence": [
-        "column_name"
-      ],
+      "assertionEvidence": ["column_name"],
       "reason": "数据库真实表物理 Schema 不变量，删掉会减少 Release Migration 覆盖。 本轮只检查源码和代表性断言，未执行依赖 PostgreSQL/Redis 的测试。",
-      "confirmedDependencies": [
-        "database"
-      ],
+      "confirmedDependencies": ["database"],
       "replacement": {
         "status": "none-verified",
         "testFiles": []
@@ -1358,13 +1274,9 @@
       },
       "decision": "retain",
       "behavior": "Mastra History PostgreSQL 跨重启消息顺序、同毫秒 Timestamp/Clock Regression、竞争者原子写和工具失败持久化",
-      "assertionEvidence": [
-        "assistant-history"
-      ],
+      "assertionEvidence": ["assistant-history"],
       "reason": "实际 Postgres 存储与 workflow 事件时序；不能将本地 LibSQL 测试作为等价替代。 本轮只检查源码和代表性断言，未执行依赖 PostgreSQL/Redis 的测试。",
-      "confirmedDependencies": [
-        "database"
-      ],
+      "confirmedDependencies": ["database"],
       "replacement": {
         "status": "none-verified",
         "testFiles": []
@@ -1380,13 +1292,9 @@
       },
       "decision": "retain",
       "behavior": "Agent Registry 旧 Schema 迁移/backfill 重放、跨身份约束与 Additive Rollback",
-      "assertionEvidence": [
-        "current_database()"
-      ],
+      "assertionEvidence": ["current_database()"],
       "reason": "直接 SQL 对 PostgreSQL 迁移进行非破坏性 schema fixture 验证，属于迁移集成。 本轮只检查源码和代表性断言，未执行依赖 PostgreSQL/Redis 的测试。",
-      "confirmedDependencies": [
-        "database"
-      ],
+      "confirmedDependencies": ["database"],
       "replacement": {
         "status": "none-verified",
         "testFiles": []
@@ -1402,13 +1310,9 @@
       },
       "decision": "retain",
       "behavior": "Goal 软删及 Relation Unlink 一次事务提交，Relation 清理失败时整体回滚",
-      "assertionEvidence": [
-        "relationCount"
-      ],
+      "assertionEvidence": ["relationCount"],
       "reason": "真实多实体事务和补偿边界，针对 DB，不可仅凭 Usecase Mock 覆盖。 本轮只检查源码和代表性断言，未执行依赖 PostgreSQL/Redis 的测试。",
-      "confirmedDependencies": [
-        "database"
-      ],
+      "confirmedDependencies": ["database"],
       "replacement": {
         "status": "none-verified",
         "testFiles": []
@@ -1424,13 +1328,9 @@
       },
       "decision": "retain",
       "behavior": "Label 数据库 CRUD/大小写规范化搜索、名字唯一约束与 identity 隔离",
-      "assertionEvidence": [
-        "batch-load"
-      ],
+      "assertionEvidence": ["batch-load"],
       "reason": "Label 关系和数据库 unique constraint 真实语义，不能仅以静态模型代码证明。 本轮只检查源码和代表性断言，未执行依赖 PostgreSQL/Redis 的测试。",
-      "confirmedDependencies": [
-        "database"
-      ],
+      "confirmedDependencies": ["database"],
       "replacement": {
         "status": "none-verified",
         "testFiles": []
@@ -1446,13 +1346,9 @@
       },
       "decision": "retain",
       "behavior": "Schedule Outbox 投递 Log Consumer 成功/同步抛错/异步拒绝的事务 Ack 与重试",
-      "assertionEvidence": [
-        "publishedCount"
-      ],
+      "assertionEvidence": ["publishedCount"],
       "reason": "真实事务+消费幂等，需要 Postgres 双写边界。 本轮只检查源码和代表性断言，未执行依赖 PostgreSQL/Redis 的测试。",
-      "confirmedDependencies": [
-        "database"
-      ],
+      "confirmedDependencies": ["database"],
       "replacement": {
         "status": "none-verified",
         "testFiles": []
@@ -1468,13 +1364,9 @@
       },
       "decision": "retain",
       "behavior": "ScheduledInvocation Owner Reconcile 原子 Receipt、故障回滚及 Worker 租约过期后的恢复",
-      "assertionEvidence": [
-        "withTransaction"
-      ],
+      "assertionEvidence": ["withTransaction"],
       "reason": "Prisma Scheduler 交易与 Lease，需真实数据库隔离。 本轮只检查源码和代表性断言，未执行依赖 PostgreSQL/Redis 的测试。",
-      "confirmedDependencies": [
-        "database"
-      ],
+      "confirmedDependencies": ["database"],
       "replacement": {
         "status": "none-verified",
         "testFiles": []
@@ -1490,13 +1382,9 @@
       },
       "decision": "retain",
       "behavior": "TaskGoalOutbox Claim、Lease Expiry、指数退避与最终 DeadLetter",
-      "assertionEvidence": [
-        "claimPending(10)"
-      ],
+      "assertionEvidence": ["claimPending(10)"],
       "reason": "出队并发租约与幂等处理是数据库实际交互，不能删除。 本轮只检查源码和代表性断言，未执行依赖 PostgreSQL/Redis 的测试。",
-      "confirmedDependencies": [
-        "database"
-      ],
+      "confirmedDependencies": ["database"],
       "replacement": {
         "status": "none-verified",
         "testFiles": []
@@ -1512,9 +1400,7 @@
       },
       "decision": "retain",
       "behavior": "环境 Schema 本地开关显式 opt-in、Production Provider Secret Key 缺失即阻断",
-      "assertionEvidence": [
-        "LOCAL_VALIDATION"
-      ],
+      "assertionEvidence": ["LOCAL_VALIDATION"],
       "reason": "运行 envSchema.parse 条件与边界，不是真实生产配置开机验收。 代表性源码/断言已审，不代表运行依赖已验证。",
       "replacement": {
         "status": "none-verified",
@@ -1531,9 +1417,7 @@
       },
       "decision": "retain",
       "behavior": "Intervention Window 命令只允许 complete/snooze 等，Snooze 毫秒校验",
-      "assertionEvidence": [
-        "InterventionWindowCommandSchema.parse"
-      ],
+      "assertionEvidence": ["InterventionWindowCommandSchema.parse"],
       "reason": "IPC Payload Schema，不验证 Electron 命令效果。 代表性源码/断言已审，不代表运行依赖已验证。",
       "replacement": {
         "status": "none-verified",
@@ -1550,9 +1434,7 @@
       },
       "decision": "retain",
       "behavior": "AccountChannels 不再暴露旧双轨 list/get/current 通道，保留消费端使用的闭户通道",
-      "assertionEvidence": [
-        "AccountChannels"
-      ],
+      "assertionEvidence": ["AccountChannels"],
       "reason": "测试枚举公开通道，属于 IPC ABI 合同，改名应校验调用端。 代表性源码/断言已审，不代表运行依赖已验证。",
       "replacement": {
         "status": "none-verified",
@@ -1569,9 +1451,7 @@
       },
       "decision": "retain",
       "behavior": "Goal 计划/放弃等 IPC Action 清单拒绝旧文件夹、Focus、自动过期",
-      "assertionEvidence": [
-        "GoalChannels.PLAN"
-      ],
+      "assertionEvidence": ["GoalChannels.PLAN"],
       "reason": "公开 IPC ABI 映射，不能据此证明 IPC 已注册执行。 代表性源码/断言已审，不代表运行依赖已验证。",
       "replacement": {
         "status": "none-verified",
@@ -1588,9 +1468,7 @@
       },
       "decision": "retain",
       "behavior": "ScheduleCalendar IPC 和 Scheduler 只读诊断分离，禁止旧 Worker 修改通道",
-      "assertionEvidence": [
-        "ScheduleChannels.LIST"
-      ],
+      "assertionEvidence": ["ScheduleChannels.LIST"],
       "reason": "与 Schedule Electron Handler 行为测试互补。 代表性源码/断言已审，不代表运行依赖已验证。",
       "replacement": {
         "status": "none-verified",
@@ -1607,9 +1485,7 @@
       },
       "decision": "retain",
       "behavior": "System 共享 IPC 辅助通道与设备通知偏好通道保持稳定",
-      "assertionEvidence": [
-        "SystemChannels"
-      ],
+      "assertionEvidence": ["SystemChannels"],
       "reason": "维护通道公开枚举和禁用旧 Lazy Module Diagnostics 通道。 代表性源码/断言已审，不代表运行依赖已验证。",
       "replacement": {
         "status": "none-verified",
@@ -1626,9 +1502,7 @@
       },
       "decision": "retain",
       "behavior": "Task Plan/Occurrence 活跃通道保留，废弃 Dependency/不支持更新通道缺席",
-      "assertionEvidence": [
-        "TaskChannels"
-      ],
+      "assertionEvidence": ["TaskChannels"],
       "reason": "是静态常量公开协议验收，不是业务 CRUD 集成。 代表性源码/断言已审，不代表运行依赖已验证。",
       "replacement": {
         "status": "none-verified",
@@ -1645,9 +1519,7 @@
       },
       "decision": "retain",
       "behavior": "Cloud Auth 身份与 Account Profile Owner 合同分离，允许本地纯 Account 视图",
-      "assertionEvidence": [
-        "AccountViewSchema.parse"
-      ],
+      "assertionEvidence": ["AccountViewSchema.parse"],
       "reason": "Zod 输入/空 Cloud Identity/非法登录数据直接验证，覆盖安全边界。 代表性源码/断言已审，不代表运行依赖已验证。",
       "replacement": {
         "status": "none-verified",
@@ -1664,9 +1536,7 @@
       },
       "decision": "retain",
       "behavior": "Portable Account Avatar 接受合法 URL/null，拒绝任意字符串",
-      "assertionEvidence": [
-        "PortableAccountProfileV3Schema.parse"
-      ],
+      "assertionEvidence": ["PortableAccountProfileV3Schema.parse"],
       "reason": "V3 Schema 解析契约，不执行实际备份导出。 代表性源码/断言已审，不代表运行依赖已验证。",
       "replacement": {
         "status": "none-verified",
@@ -1683,9 +1553,7 @@
       },
       "decision": "retain",
       "behavior": "AI Runtime Mode 只接受 Mastra 并要求产品能力位显式存在",
-      "assertionEvidence": [
-        "AIRuntimeModeSchema.parse"
-      ],
+      "assertionEvidence": ["AIRuntimeModeSchema.parse"],
       "reason": "能力 Schema 不能直接证明后端 Provider ready。 代表性源码/断言已审，不代表运行依赖已验证。",
       "replacement": {
         "status": "none-verified",
@@ -1702,9 +1570,7 @@
       },
       "decision": "retain",
       "behavior": "外部研究 Evidence URL 来源必须 HTTP(S) 并拒绝携凭据/脚本 URL",
-      "assertionEvidence": [
-        "GoalResearchSourceSchema.safeParse"
-      ],
+      "assertionEvidence": ["GoalResearchSourceSchema.safeParse"],
       "reason": "避免注入恶意 URI，仍不涉及外部搜索真实质量。 代表性源码/断言已审，不代表运行依赖已验证。",
       "replacement": {
         "status": "none-verified",
@@ -1721,9 +1587,7 @@
       },
       "decision": "retain",
       "behavior": "Goal Panel 快照、命令 discriminated union 与 IPC 请求/响应外形严格",
-      "assertionEvidence": [
-        "GoalPanelCommandSchema.safeParse"
-      ],
+      "assertionEvidence": ["GoalPanelCommandSchema.safeParse"],
       "reason": "抽象面板协议验证，不是 UI DOM 可访问性测试。 代表性源码/断言已审，不代表运行依赖已验证。",
       "replacement": {
         "status": "none-verified",
@@ -1740,9 +1604,7 @@
       },
       "decision": "retain",
       "behavior": "Goal 内嵌 Shared Label 颜色标准化与 Timestamp 合法性",
-      "assertionEvidence": [
-        "GoalLabelProjectionSchema.parse"
-      ],
+      "assertionEvidence": ["GoalLabelProjectionSchema.parse"],
       "reason": "显示投影一致性，不涉及数据库 join 性能。 代表性源码/断言已审，不代表运行依赖已验证。",
       "replacement": {
         "status": "none-verified",
@@ -1759,9 +1621,7 @@
       },
       "decision": "retain",
       "behavior": "Goal 显式 4 态 Lifecycle，禁止退役 Active，Name/Summary 长度固定",
-      "assertionEvidence": [
-        "ListGoalFiltersSchema.safeParse"
-      ],
+      "assertionEvidence": ["ListGoalFiltersSchema.safeParse"],
       "reason": "领域状态迁移与 DTO 限制是 Owner 传输层合同。 代表性源码/断言已审，不代表运行依赖已验证。",
       "replacement": {
         "status": "none-verified",
@@ -1778,9 +1638,7 @@
       },
       "decision": "retain",
       "behavior": "Goal Review Signal 旧记录默认空数组、新系统 Signal enum 及禁止伪造原因信息",
-      "assertionEvidence": [
-        "GoalReviewSystemContextSchema.parse"
-      ],
+      "assertionEvidence": ["GoalReviewSystemContextSchema.parse"],
       "reason": "兼容历史 Review Data 并拒绝无效外部推断。 代表性源码/断言已审，不代表运行依赖已验证。",
       "replacement": {
         "status": "none-verified",
@@ -1797,9 +1655,7 @@
       },
       "decision": "retain",
       "behavior": "Goal Review Window OpenAPI 参数需要 JSON 字符串但省略仍触发 Owner 默认窗口",
-      "assertionEvidence": [
-        "CreateGoalReviewSchema.parse"
-      ],
+      "assertionEvidence": ["CreateGoalReviewSchema.parse"],
       "reason": "覆盖 Transport 参数边界，不是实际 DB 默认审计。 代表性源码/断言已审，不代表运行依赖已验证。",
       "replacement": {
         "status": "none-verified",
@@ -1816,9 +1672,7 @@
       },
       "decision": "retain",
       "behavior": "Goal Workspace 首页/完整页分页预算及稳定 KnowledgeDocumentRef 显示",
-      "assertionEvidence": [
-        "GoalWorkspacePageRequestSchema.parse"
-      ],
+      "assertionEvidence": ["GoalWorkspacePageRequestSchema.parse"],
       "reason": "Owner Workspace 返回分页合同，降低前端大数据请求风险。 代表性源码/断言已审，不代表运行依赖已验证。",
       "replacement": {
         "status": "none-verified",
@@ -1835,9 +1689,7 @@
       },
       "decision": "retain",
       "behavior": "KR 创建与 Update 文本长度上限与边界值一致",
-      "assertionEvidence": [
-        "KeyResultInputSchema.safeParse"
-      ],
+      "assertionEvidence": ["KeyResultInputSchema.safeParse"],
       "reason": "输入字段长度限制应保持跨端一致。 代表性源码/断言已审，不代表运行依赖已验证。",
       "replacement": {
         "status": "none-verified",
@@ -1854,9 +1706,7 @@
       },
       "decision": "retain",
       "behavior": "Goal V3 导入支持同标签多目标、历史日期起点和 KR 引用关系",
-      "assertionEvidence": [
-        "goal"
-      ],
+      "assertionEvidence": ["goal"],
       "reason": "V3 Cross-Account 逻辑约束仅由 Schema 验证，实际数据导入另有 Postgres 集成。 代表性源码/断言已审，不代表运行依赖已验证。",
       "replacement": {
         "status": "none-verified",
@@ -1873,9 +1723,7 @@
       },
       "decision": "retain",
       "behavior": "Notification V3 导出用户选择与 Fact/Interaction，严格排除设备投递字段",
-      "assertionEvidence": [
-        "NotificationDeliveryPreferencePortablePayloadV3Schema.safeParse"
-      ],
+      "assertionEvidence": ["NotificationDeliveryPreferencePortablePayloadV3Schema.safeParse"],
       "reason": "User Owned Facts 可以跨设备迁移但 Delivery Device 细节不能泄露。 代表性源码/断言已审，不代表运行依赖已验证。",
       "replacement": {
         "status": "none-verified",
@@ -1892,9 +1740,7 @@
       },
       "decision": "retain",
       "behavior": "Knowledge Relation Note 只允许稳定 kdoc UUID，不可使用 path/projection id",
-      "assertionEvidence": [
-        "SubjectRefSchema.parse"
-      ],
+      "assertionEvidence": ["SubjectRefSchema.parse"],
       "reason": "Relation Contract 不代替真实跨租户 Relations DB 查询。 代表性源码/断言已审，不代表运行依赖已验证。",
       "replacement": {
         "status": "none-verified",
@@ -1911,9 +1757,7 @@
       },
       "decision": "retain",
       "behavior": "KnowledgeDocumentId 必须以文档携带稳定 kdoc_uuid 形式提供，拒绝 path/id hash 伪装",
-      "assertionEvidence": [
-        "KnowledgeDocumentIdSchema.parse"
-      ],
+      "assertionEvidence": ["KnowledgeDocumentIdSchema.parse"],
       "reason": "稳定 identity 为持久合同，配合 API/Desktop 双端真实写回测试。 代表性源码/断言已审，不代表运行依赖已验证。",
       "replacement": {
         "status": "none-verified",
@@ -1930,9 +1774,7 @@
       },
       "decision": "retain",
       "behavior": "Knowledge Note 轻量列表、树父节点、隐藏目录与 DeepLink 查询边界",
-      "assertionEvidence": [
-        "parsed.notes[0]"
-      ],
+      "assertionEvidence": ["parsed.notes[0]"],
       "reason": "Reference/View DTO Schema，不能证明实际投影读取性能。 代表性源码/断言已审，不代表运行依赖已验证。",
       "replacement": {
         "status": "none-verified",
@@ -1949,9 +1791,7 @@
       },
       "decision": "retain",
       "behavior": "CalendarEntry Time Range 只接受正向 Timed Instant 与合法 AllDay 日期区间",
-      "assertionEvidence": [
-        "CalendarEntryRangeSchema.parse"
-      ],
+      "assertionEvidence": ["CalendarEntryRangeSchema.parse"],
       "reason": "Zod TimeRange/Actual Calendar 截止语义需要保留边界数据。 代表性源码/断言已审，不代表运行依赖已验证。",
       "replacement": {
         "status": "none-verified",
@@ -1968,9 +1808,7 @@
       },
       "decision": "retain",
       "behavior": "Schedule V3 Timer/AllDay 数据包和重复 Reference 拒绝",
-      "assertionEvidence": [
-        "SchedulePortablePayloadV3Schema.parse"
-      ],
+      "assertionEvidence": ["SchedulePortablePayloadV3Schema.parse"],
       "reason": "可携带日程 DTO，非真实 Scheduler Worker。 代表性源码/断言已审，不代表运行依赖已验证。",
       "replacement": {
         "status": "none-verified",
@@ -1987,9 +1825,7 @@
       },
       "decision": "retain",
       "behavior": "Setting Preference Namespace/Key 注册表封闭与 IANA 时区校验",
-      "assertionEvidence": [
-        "PREFERENCE_NAMESPACE_REGISTRY"
-      ],
+      "assertionEvidence": ["PREFERENCE_NAMESPACE_REGISTRY"],
       "reason": "用户偏好协议可扩展受控，不等于 UI 保存回环。 代表性源码/断言已审，不代表运行依赖已验证。",
       "replacement": {
         "status": "none-verified",
@@ -2006,9 +1842,7 @@
       },
       "decision": "retain",
       "behavior": "Setting V3 仅 Presentation/Regional 状态携带且禁止来源 Identity 注入",
-      "assertionEvidence": [
-        "PreferencePortablePayloadV3Schema.safeParse"
-      ],
+      "assertionEvidence": ["PreferencePortablePayloadV3Schema.safeParse"],
       "reason": "Portable Profile Owner 范围清晰，需与 Import Transaction 配合。 代表性源码/断言已审，不代表运行依赖已验证。",
       "replacement": {
         "status": "none-verified",
@@ -2025,9 +1859,7 @@
       },
       "decision": "retain",
       "behavior": "Task 完成 Goal Measurement Note 长度限制与可空参数",
-      "assertionEvidence": [
-        "CompleteTaskOccurrenceSchema.parse"
-      ],
+      "assertionEvidence": ["CompleteTaskOccurrenceSchema.parse"],
       "reason": "单业务命令 schema 允许无备注但拒绝超长文本。 代表性源码/断言已审，不代表运行依赖已验证。",
       "replacement": {
         "status": "none-verified",
@@ -2044,9 +1876,7 @@
       },
       "decision": "retain",
       "behavior": "Task Goal Context 分页默认值、Goal-only 不编造 Key Result、summary 严格",
-      "assertionEvidence": [
-        "TaskGoalContextPageRequestSchema.parse"
-      ],
+      "assertionEvidence": ["TaskGoalContextPageRequestSchema.parse"],
       "reason": "与真实 DB TaskBindingReadPort 配合，不重复。 代表性源码/断言已审，不代表运行依赖已验证。",
       "replacement": {
         "status": "none-verified",
@@ -2063,9 +1893,7 @@
       },
       "decision": "retain",
       "behavior": "TaskGoal Outbox Events 区分补正 Source 与普通完成触发事件",
-      "assertionEvidence": [
-        "event.sources"
-      ],
+      "assertionEvidence": ["event.sources"],
       "reason": "测试 Domain Event 共享 Message Shape 不能证明被 Worker 成功处理。 代表性源码/断言已审，不代表运行依赖已验证。",
       "replacement": {
         "status": "none-verified",
@@ -2082,9 +1910,7 @@
       },
       "decision": "retain",
       "behavior": "Task V3 终态必须与 Completed/Missed/Skipped Result 一致",
-      "assertionEvidence": [
-        "TaskPortablePayloadV3Schema.safeParse"
-      ],
+      "assertionEvidence": ["TaskPortablePayloadV3Schema.safeParse"],
       "reason": "跨设备导入不能构造自相矛盾 Task Occurrence。 代表性源码/断言已审，不代表运行依赖已验证。",
       "replacement": {
         "status": "none-verified",
@@ -2101,9 +1927,7 @@
       },
       "decision": "retain",
       "behavior": "Checklist Definition ID 不重复且 100 项上限",
-      "assertionEvidence": [
-        "TaskPlanChecklistSchema.safeParse"
-      ],
+      "assertionEvidence": ["TaskPlanChecklistSchema.safeParse"],
       "reason": "字段级数组唯一与上限合同，UI 不提供证明。 代表性源码/断言已审，不代表运行依赖已验证。",
       "replacement": {
         "status": "none-verified",
@@ -2120,9 +1944,7 @@
       },
       "decision": "retain",
       "behavior": "Task Goal Binding LinkOnly/Fixed 自动贡献和无 KR Goal-only 关系",
-      "assertionEvidence": [
-        "TaskGoalLinkSchema.parse"
-      ],
+      "assertionEvidence": ["TaskGoalLinkSchema.parse"],
       "reason": "领域合约检查而非真实进度入库，用 Fixture B Integration 执行验证。 代表性源码/断言已审，不代表运行依赖已验证。",
       "replacement": {
         "status": "none-verified",
@@ -2139,9 +1961,7 @@
       },
       "decision": "retain",
       "behavior": "Task Completed/Missed/Skipped terminal Result 必须不同结构",
-      "assertionEvidence": [
-        "TaskOccurrenceResultSchema.parse"
-      ],
+      "assertionEvidence": ["TaskOccurrenceResultSchema.parse"],
       "reason": "禁止错配历史 Result 枚举，保持跨端解码兼容。 代表性源码/断言已审，不代表运行依赖已验证。",
       "replacement": {
         "status": "none-verified",
@@ -2158,9 +1978,7 @@
       },
       "decision": "retain",
       "behavior": "Task 一次性/重复性日程代数与结束条件严格",
-      "assertionEvidence": [
-        "TaskPlanScheduleSchema.parse"
-      ],
+      "assertionEvidence": ["TaskPlanScheduleSchema.parse"],
       "reason": "保留 Calendar-native 调度语言，杜绝旧 recurrence sidetrack。 代表性源码/断言已审，不代表运行依赖已验证。",
       "replacement": {
         "status": "none-verified",
@@ -2177,9 +1995,7 @@
       },
       "decision": "retain",
       "behavior": "Command Envelope 生成独立 correlation/request ID、继承父级 Correlation Chain 和流程所有权快照",
-      "assertionEvidence": [
-        "correlation"
-      ],
+      "assertionEvidence": ["correlation"],
       "reason": "真实 Command 工厂对象行为，但只在进程内执行，不是队列消费者交付或数据库保证。 代表性源码/断言已审，不代表运行依赖已验证。",
       "replacement": {
         "status": "none-verified",
@@ -2196,9 +2012,7 @@
       },
       "decision": "retain",
       "behavior": "IANA 时区白名单与非标准本地时区拒绝",
-      "assertionEvidence": [
-        "Asia/Tokyo"
-      ],
+      "assertionEvidence": ["Asia/Tokyo"],
       "reason": "时区值对象/校验函数合同，不验证宿主 TZ 环境的真实 DST 改变。 代表性源码/断言已审，不代表运行依赖已验证。",
       "replacement": {
         "status": "none-verified",
@@ -2215,9 +2029,7 @@
       },
       "decision": "retain",
       "behavior": "YMD 日期字面量只允许有效日历日与闰年范围",
-      "assertionEvidence": [
-        "Ymd"
-      ],
+      "assertionEvidence": ["Ymd"],
       "reason": "可解析日期 Schema/函数不依赖数据库或真实浏览器。 代表性源码/断言已审，不代表运行依赖已验证。",
       "replacement": {
         "status": "none-verified",
@@ -2234,9 +2046,7 @@
       },
       "decision": "retain",
       "behavior": "Retry Policy 对 Idempotency Key、取消、最大尝试次数、Provider Retry-After 与指数退避的决定",
-      "assertionEvidence": [
-        "decideOperationRetry"
-      ],
+      "assertionEvidence": ["decideOperationRetry"],
       "reason": "纯 Retry 策略合同；不能等同于真正网络超时、Worker 失败重试已经执行。 代表性源码/断言已审，不代表运行依赖已验证。",
       "replacement": {
         "status": "none-verified",
@@ -2253,9 +2063,7 @@
       },
       "decision": "retain",
       "behavior": "IPC Result Envelope 必须具有 data/error 外壳，不接受 raw payload 和裸 Domain OK",
-      "assertionEvidence": [
-        "isIpcResultEnvelope"
-      ],
+      "assertionEvidence": ["isIpcResultEnvelope"],
       "reason": "实际调用 toIpcResult/isIpcResultEnvelope，不能当纯字符串源码锁。 代表性源码/断言已审，不代表运行依赖已验证。",
       "replacement": {
         "status": "none-verified",
@@ -2272,9 +2080,7 @@
       },
       "decision": "retain",
       "behavior": "Public Failure Schema 拒绝 Provider 私有 Code/未知字段和 secret-like details，保持错误报告最小暴露",
-      "assertionEvidence": [
-        "AuthFailureSchema.parse"
-      ],
+      "assertionEvidence": ["AuthFailureSchema.parse"],
       "reason": "数据安全 Contract 通过 Schema 校验，不是实际 API 端到端脱敏回执。 代表性源码/断言已审，不代表运行依赖已验证。",
       "replacement": {
         "status": "none-verified",
@@ -2291,9 +2097,7 @@
       },
       "decision": "retain",
       "behavior": "HTTP/IPC Result Transport 转换保留错误上下文并移除 undefined 属性，正确转换 void success",
-      "assertionEvidence": [
-        "fromHttpResponse"
-      ],
+      "assertionEvidence": ["fromHttpResponse"],
       "reason": "进程内协议边界，实际 Electron/HTTP 序列化另有集成验收。 代表性源码/断言已审，不代表运行依赖已验证。",
       "replacement": {
         "status": "none-verified",
@@ -2310,9 +2114,7 @@
       },
       "decision": "retain",
       "behavior": "AI Provider 默认模型 partial unique index 构建前验证每身份仅一个 live default",
-      "assertionEvidence": [
-        "prepareAIProviderDefaultInvariant"
-      ],
+      "assertionEvidence": ["prepareAIProviderDefaultInvariant"],
       "reason": "SQL Query Client 使用 mock；仅检测迁移准备函数发出的 SQL/异常，不等于真实 PostgreSQL Index 已建立。 代表性源码/断言已审，不代表运行依赖已验证。",
       "replacement": {
         "status": "none-verified",
@@ -2329,9 +2131,7 @@
       },
       "decision": "retain",
       "behavior": "Goal Record Source Correlation 迁移先增列再检查旧记录，Index 再次运行幂等",
-      "assertionEvidence": [
-        "prepareGoalRecordSourceCorrelation"
-      ],
+      "assertionEvidence": ["prepareGoalRecordSourceCorrelation"],
       "reason": "SQL 预处理器被伪装 query 端口调用，只是 Migration SQL 生成逻辑单元验证。 代表性源码/断言已审，不代表运行依赖已验证。",
       "replacement": {
         "status": "none-verified",
@@ -2348,9 +2148,7 @@
       },
       "decision": "retain",
       "behavior": "Goal StartTimeframe 迁移把旧精确时刻回填到 day 精度，且拒绝半迁移状态",
-      "assertionEvidence": [
-        "prepareGoalStartTimeframeSemantics"
-      ],
+      "assertionEvidence": ["prepareGoalStartTimeframeSemantics"],
       "reason": "Fake Query Client 收集/拦截 SQL 和 Report，不是真正物理表迁移执行。 代表性源码/断言已审，不代表运行依赖已验证。",
       "replacement": {
         "status": "none-verified",
@@ -2367,9 +2165,7 @@
       },
       "decision": "retain",
       "behavior": "Notification 旧 Global OR 到新 Category/Workflow Override 的转换保持用户禁用意图",
-      "assertionEvidence": [
-        "workflowOverrides"
-      ],
+      "assertionEvidence": ["workflowOverrides"],
       "reason": "内存中的 Hierarchy 迁移算法测试，不需要真实数据库。 代表性源码/断言已审，不代表运行依赖已验证。",
       "replacement": {
         "status": "none-verified",
@@ -2386,9 +2182,7 @@
       },
       "decision": "retain",
       "behavior": "TaskPlan Prisma Schema 不再含扁平 recurrence/reminder 字段，Schedule/Reminder JSON 为单一事实真源",
-      "assertionEvidence": [
-        "readFileSync"
-      ],
+      "assertionEvidence": ["readFileSync"],
       "reason": "仅对 schema 源码内容做结构约束，没有执行迁移或 Zod 解析。应保持 Source-constraint 角色，不混入 contract 覆盖。 代表性源码/断言已审，不代表运行依赖已验证。",
       "replacement": {
         "status": "none-verified",
@@ -2405,9 +2199,7 @@
       },
       "decision": "retain",
       "behavior": "Unique Constraint Preparers 只有消除重复记录后才创建索引，非空表缺失键列时必须 fail closed",
-      "assertionEvidence": [
-        "prepareVnextUniqueConstraints"
-      ],
+      "assertionEvidence": ["prepareVnextUniqueConstraints"],
       "reason": "通过 Fake Query Client 断言 SQL 顺序和异常；不证明生产数据库唯一索引成功。 代表性源码/断言已审，不代表运行依赖已验证。",
       "replacement": {
         "status": "none-verified",
@@ -2424,9 +2216,7 @@
       },
       "decision": "retain",
       "behavior": "PowerSync 同步 Schema 仅同步用户业务数据，Local Agent 配置/设备状态保持 localOnly",
-      "assertionEvidence": [
-        "localOnly"
-      ],
+      "assertionEvidence": ["localOnly"],
       "reason": "实际 Schema 元对象检查，但不验证真实 PowerSync Server 是否按策略同步。 代表性源码/断言已审，不代表运行依赖已验证。",
       "replacement": {
         "status": "none-verified",
@@ -2443,9 +2233,7 @@
       },
       "decision": "retain",
       "behavior": "桌面模块 Bootstrapper 注册顺序与 shared DB/auth 传递、逆序销毁",
-      "assertionEvidence": [
-        "getModuleNames"
-      ],
+      "assertionEvidence": ["getModuleNames"],
       "reason": "使用假模块验证进程内生命周期控制，未启动真实 Electron Shell。 本次仅核对断言及边界，未实际启动 Desktop GUI。",
       "replacement": {
         "status": "none-verified",
@@ -2462,9 +2250,7 @@
       },
       "decision": "retain",
       "behavior": "PowerSync SDK CRUD Transaction JSON 可序列化并拒绝非法原始结构",
-      "assertionEvidence": [
-        "serializeCrudTransaction"
-      ],
+      "assertionEvidence": ["serializeCrudTransaction"],
       "reason": "只有序列化器逻辑，无实际 SQLite/PowerSync HTTP；应归为 Unit。 本次仅核对断言及边界，未实际启动 Desktop GUI。",
       "replacement": {
         "status": "none-verified",
@@ -2481,9 +2267,7 @@
       },
       "decision": "retain",
       "behavior": "PowerSync 离线偏好 ID 迁移对 CRUD 队列、row/receipt 一次修改与中断回滚",
-      "assertionEvidence": [
-        "ps_crud"
-      ],
+      "assertionEvidence": ["ps_crud"],
       "reason": "模拟下载和本地数据库队列边界，不可用在线云端数据同步 E2E 混淆。 本次仅核对断言及边界，未实际启动 Desktop GUI。",
       "replacement": {
         "status": "none-verified",
@@ -2500,9 +2284,7 @@
       },
       "decision": "retain",
       "behavior": "PowerSync Public Module 在 Profile 切换前关闭 Worker，只导出 Profile Runtime 精简入口",
-      "assertionEvidence": [
-        "getPowerSyncDatabase"
-      ],
+      "assertionEvidence": ["getPowerSyncDatabase"],
       "reason": "Mock Worker handles 检查 Close + 公开 API，不是 Electron 真运行中断。 本次仅核对断言及边界，未实际启动 Desktop GUI。",
       "replacement": {
         "status": "none-verified",
@@ -2519,9 +2301,7 @@
       },
       "decision": "retain",
       "behavior": "PowerSync Change Table 清单覆盖共享 Schema 所有本地表名和 PhysicalName 归一化",
-      "assertionEvidence": [
-        "POWER_SYNC_CHANGE_TABLES"
-      ],
+      "assertionEvidence": ["POWER_SYNC_CHANGE_TABLES"],
       "reason": "使用真实共享 Schema 元数据但纯函数执行，无 PowerSync SDK 订阅。 本次仅核对断言及边界，未实际启动 Desktop GUI。",
       "replacement": {
         "status": "none-verified",
@@ -2538,9 +2318,7 @@
       },
       "decision": "retain",
       "behavior": "PowerSync 首次 Download Snapshot 恢复 Routine/ScheduledInvocation、断线重启保留 Sync checkpoint",
-      "assertionEvidence": [
-        "hasSynced"
-      ],
+      "assertionEvidence": ["hasSynced"],
       "reason": "有边界模拟 HTTP Transport 和 Local Database，验证首次恢复，不证明真实云端 Sync 服务可用。 本次仅核对断言及边界，未实际启动 Desktop GUI。",
       "replacement": {
         "status": "none-verified",
@@ -2557,9 +2335,7 @@
       },
       "decision": "retain",
       "behavior": "PowerSync Health 状态机区别 attached/connecting 与 first downloaded，并对错误文本安全净化",
-      "assertionEvidence": [
-        "describePowerSyncStatus"
-      ],
+      "assertionEvidence": ["describePowerSyncStatus"],
       "reason": "纯状态格式化与数据安全合同，无真实网络连接；归 Unit。 本次仅核对断言及边界，未实际启动 Desktop GUI。",
       "replacement": {
         "status": "none-verified",
@@ -2576,9 +2352,7 @@
       },
       "decision": "retain",
       "behavior": "Native Undici fetch 在 native fetch 失败时仍保留 Streaming Authorization，Profile 关闭后 dispatcher 可重建",
-      "assertionEvidence": [
-        "receivedAuthorization"
-      ],
+      "assertionEvidence": ["receivedAuthorization"],
       "reason": "Node 本地 HTTP 服务的传输边界，不等于真实 PowerSync 中继公网网络测试。 本次仅核对断言及边界，未实际启动 Desktop GUI。",
       "replacement": {
         "status": "none-verified",
@@ -2595,9 +2369,7 @@
       },
       "decision": "retain",
       "behavior": "正常 Quit 等 Cleanup 完结、Desktop Update Install 抢占 Quit 与异常后终结策略",
-      "assertionEvidence": [
-        "preventDefault"
-      ],
+      "assertionEvidence": ["preventDefault"],
       "reason": "Mock Electron app 生命周期调度器，是关键 Main 进程边界。 本次仅核对断言及边界，未实际启动 Desktop GUI。",
       "replacement": {
         "status": "none-verified",
@@ -2614,9 +2386,7 @@
       },
       "decision": "retain",
       "behavior": "单次清理、并发 SingleFlight、重复 re-enter、超时取消/失败退出的协调器纯行为",
-      "assertionEvidence": [
-        "cleanup"
-      ],
+      "assertionEvidence": ["cleanup"],
       "reason": "协调器使用注入函数，并未操作真实 Electron app；更准确为 Unit 而非 Main Boundary。 本次仅核对断言及边界，未实际启动 Desktop GUI。",
       "replacement": {
         "status": "none-verified",
@@ -2633,9 +2403,7 @@
       },
       "decision": "retain",
       "behavior": "PowerSync 用户偏好字段映射的运行时归一化以及旧 Stream Table 负向约束",
-      "assertionEvidence": [
-        "normalizeCrudData('user_preference_records'"
-      ],
+      "assertionEvidence": ["normalizeCrudData('user_preference_records'"],
       "reason": "实际调用 normalizeCrudData/getPrismaDelegate，但数据库未连通；混合静态 Source Rule 与函数行为，归 Unit。 源码/代表性断言审查；不宣称实际数据库、外部服务或桌面运行凭证。",
       "replacement": {
         "status": "none-verified",
@@ -2652,9 +2420,7 @@
       },
       "decision": "retain",
       "behavior": "DataPortability V3 Composer 注册 Capabilities/HTTP Router，确保 Start/Dispose 生命周期",
-      "assertionEvidence": [
-        "composeDataPortability({ db: fakeDb"
-      ],
+      "assertionEvidence": ["composeDataPortability({ db: fakeDb"],
       "reason": "假 PrismaClient 与 vi.mock 包装真实 module 工厂，验证多端口组合，不是真实数据库导入。 源码/代表性断言审查；不宣称实际数据库、外部服务或桌面运行凭证。",
       "replacement": {
         "status": "none-verified",
@@ -2672,9 +2438,7 @@
       },
       "decision": "retain",
       "behavior": "Trusted Web Origin URL、CORS 去重和 LOCAL_VALIDATION COOP Security Flag 规则",
-      "assertionEvidence": [
-        "deriveWebOrigin('http://oracle"
-      ],
+      "assertionEvidence": ["deriveWebOrigin('http://oracle"],
       "reason": "多数测试直接调用纯函数，其余检查部署 YAML 来源；不是全文件源码文本测试。 源码/代表性断言审查；不宣称实际数据库、外部服务或桌面运行凭证。",
       "replacement": {
         "status": "none-verified",
@@ -2691,9 +2455,7 @@
       },
       "decision": "retain",
       "behavior": "Prisma API 与 Desktop PowerSync AccountRepositorySet 的端口能力/装配差异和 Lifecycle",
-      "assertionEvidence": [
-        "createAccountPrismaRepositories({ db: fakePrisma"
-      ],
+      "assertionEvidence": ["createAccountPrismaRepositories({ db: fakePrisma"],
       "reason": "以假 DB 构造真实 Repository Factory + Module，检查 Port Shape/启动销毁接口，不是实际 Postgres Integration。 源码/代表性断言审查；不宣称实际数据库、外部服务或桌面运行凭证。",
       "replacement": {
         "status": "none-verified",
@@ -2711,9 +2473,7 @@
       },
       "decision": "retain",
       "behavior": "Account findById PK 与 Usecase ctx identityId 的 Owner 读取约束",
-      "assertionEvidence": [
-        "identityId"
-      ],
+      "assertionEvidence": ["identityId"],
       "reason": "只扫描 Prisma/PowerSync 和 Port/Usecase 源码，属多租户负向源码锁。 源码/代表性断言审查；不宣称实际数据库、外部服务或桌面运行凭证。",
       "replacement": {
         "status": "none-verified",
@@ -2730,9 +2490,7 @@
       },
       "decision": "retain",
       "behavior": "AI Evaluation Report 只写到 Mastra 原生目录且 Wire Format 统一",
-      "assertionEvidence": [
-        "report"
-      ],
+      "assertionEvidence": ["report"],
       "reason": "只对 adapter 源代码验证路径/格式，没有产出并回读评测 Report。 源码/代表性断言审查；不宣称实际数据库、外部服务或桌面运行凭证。",
       "replacement": {
         "status": "none-verified",
@@ -2749,9 +2507,7 @@
       },
       "decision": "retain",
       "behavior": "Provider Config 读写必须按 identityId 过滤，Root Port 不得重新暴露 findById",
-      "assertionEvidence": [
-        "findByIdForIdentity"
-      ],
+      "assertionEvidence": ["findByIdForIdentity"],
       "reason": "所有断言基于源码扫描，Owner 真实数据库约束需由集成测试验证。 源码/代表性断言审查；不宣称实际数据库、外部服务或桌面运行凭证。",
       "replacement": {
         "status": "none-verified",
@@ -2768,9 +2524,7 @@
       },
       "decision": "retain",
       "behavior": "Notification RPC Map 只能引用 api Schema 响应，拒绝随意更新 Fact 的 RPC",
-      "assertionEvidence": [
-        "mapBody"
-      ],
+      "assertionEvidence": ["mapBody"],
       "reason": "使用静态 import/AST-ish 文本约束，非真实 RPC 请求执行。 源码/代表性断言审查；不宣称实际数据库、外部服务或桌面运行凭证。",
       "replacement": {
         "status": "none-verified",
@@ -2787,9 +2541,7 @@
       },
       "decision": "retain",
       "behavior": "Task RPC Map 每个 Type/RequestSchema 单 Owner、无 inline 复制和死 import",
-      "assertionEvidence": [
-        "mapBody"
-      ],
+      "assertionEvidence": ["mapBody"],
       "reason": "文本扫描 RPC 矩阵 Import 和 API schema 声明，不能当实际 Task RPC E2E。 源码/代表性断言审查；不宣称实际数据库、外部服务或桌面运行凭证。",
       "replacement": {
         "status": "none-verified",
@@ -2806,9 +2558,7 @@
       },
       "decision": "retain",
       "behavior": "Goal/KR Record 使用 findByIdForIdentity，查询与 Mutation 不能使用裸主键",
-      "assertionEvidence": [
-        "findByIdForIdentity"
-      ],
+      "assertionEvidence": ["findByIdForIdentity"],
       "reason": "遍历 Port/Prisma/Usecase/API 源码，未实际创建多用户数据库。 源码/代表性断言审查；不宣称实际数据库、外部服务或桌面运行凭证。",
       "replacement": {
         "status": "none-verified",
@@ -2825,9 +2575,7 @@
       },
       "decision": "retain",
       "behavior": "Notification Fact 真实 Owner 只准 identity scoped Read/MarkRead/Delete，不能裸 ID 访问",
-      "assertionEvidence": [
-        "findByIdForIdentity"
-      ],
+      "assertionEvidence": ["findByIdForIdentity"],
       "reason": "源码多模块负向检查，和数据库 Notification Owner 集成测试互补；静态源码锁仍有效。 源码/代表性断言审查；不宣称实际数据库、外部服务或桌面运行凭证。",
       "replacement": {
         "status": "none-verified",
@@ -2844,9 +2592,7 @@
       },
       "decision": "retain",
       "behavior": "EventBus Adapter 统一在 Patterns，Goal 只有 Re-export，无本地双份 Dispatcher",
-      "assertionEvidence": [
-        "createEventBusAdapter"
-      ],
+      "assertionEvidence": ["createEventBusAdapter"],
       "reason": "以源代码内容验证工厂唯一所有者/dispatcher；实际事件测试可能由别的 Behavioral Tests 覆盖。 源码/代表性断言审查；不宣称实际数据库、外部服务或桌面运行凭证。",
       "replacement": {
         "status": "none-verified",
@@ -2863,9 +2609,7 @@
       },
       "decision": "retain",
       "behavior": "Repository Prisma Factory 与 GithubApp可选 Runtime 组合、ClosureChecker fail-closed及 API 生命周期",
-      "assertionEvidence": [
-        "createRepositoryPrismaRepositories"
-      ],
+      "assertionEvidence": ["createRepositoryPrismaRepositories"],
       "reason": "Fake DB/Port 装配验证，真实 GithubApp/Persistence 由 Ledger Integration 覆盖。 源码/代表性断言审查；不宣称实际数据库、外部服务或桌面运行凭证。",
       "replacement": {
         "status": "none-verified",
@@ -2883,9 +2627,7 @@
       },
       "decision": "retain",
       "behavior": "GitHub Webhook Status Update 要求 ConnectionId，防仓库跨 Binding 更新",
-      "assertionEvidence": [
-        "connectionId"
-      ],
+      "assertionEvidence": ["connectionId"],
       "reason": "Port/Prisma/Consumer 源码搜索 Owner Fence，不是 HMAC Webhook 的真实投递测试。 源码/代表性断言审查；不宣称实际数据库、外部服务或桌面运行凭证。",
       "replacement": {
         "status": "none-verified",
@@ -2902,9 +2644,7 @@
       },
       "decision": "retain",
       "behavior": "Remote Knowledge Binding 读/断开按 identityId 过滤，保存时禁止身份重赋值",
-      "assertionEvidence": [
-        "identityId"
-      ],
+      "assertionEvidence": ["identityId"],
       "reason": "静态跨 Owner 访问约束，与知识仓库 Prisma Integration 不重复。 源码/代表性断言审查；不宣称实际数据库、外部服务或桌面运行凭证。",
       "replacement": {
         "status": "none-verified",
@@ -2921,9 +2661,7 @@
       },
       "decision": "retain",
       "behavior": "知识写 Ledger 状态更新都要求 identityId，Commit Service 不允许裸主键改状态",
-      "assertionEvidence": [
-        "identityId"
-      ],
+      "assertionEvidence": ["identityId"],
       "reason": "静态 Port/Prisma/Service 所有者检查，实际事务回放另有 Test。 源码/代表性断言审查；不宣称实际数据库、外部服务或桌面运行凭证。",
       "replacement": {
         "status": "none-verified",
@@ -2940,9 +2678,7 @@
       },
       "decision": "retain",
       "behavior": "Scheduled Intent Key 使用长度前缀避免碰撞并验证 Owner/Handler 的严格身份和时间",
-      "assertionEvidence": [
-        "buildSchedulingKey"
-      ],
+      "assertionEvidence": ["buildSchedulingKey"],
       "reason": "运行真实 Key Builder/Owner Validator；虽含源码导入扫描，但首要是 Canonical Scheduling Contract。 源码/代表性断言审查；不宣称实际数据库、外部服务或桌面运行凭证。",
       "replacement": {
         "status": "none-verified",
@@ -2959,9 +2695,7 @@
       },
       "decision": "retain",
       "behavior": "Task Runtime Contributions 缺省/单实例/数组输入归一化并保持独立宿主 Composition",
-      "assertionEvidence": [
-        "normalizeRuntimeContributions"
-      ],
+      "assertionEvidence": ["normalizeRuntimeContributions"],
       "reason": "直接调用归一化函数，之外的源码唯一性断言不应遮蔽真实 Unit 测试。 源码/代表性断言审查；不宣称实际数据库、外部服务或桌面运行凭证。",
       "replacement": {
         "status": "none-verified",
@@ -2978,9 +2712,7 @@
       },
       "decision": "retain",
       "behavior": "Time FixedClock、Transfer↔Instant Codec、IANA Zone 及错误日期转换必须 Fail-Closed",
-      "assertionEvidence": [
-        "time.now()"
-      ],
+      "assertionEvidence": ["time.now()"],
       "reason": "主要直接调用 Time Facade/Format/Codec 函数，多项行为断言；不是源文扫描套件。 源码/代表性断言审查；不宣称实际数据库、外部服务或桌面运行凭证。",
       "replacement": {
         "status": "none-verified",
@@ -2997,9 +2729,7 @@
       },
       "decision": "retain",
       "behavior": "TimeContext Region/Presentation Source 分离且 withContext/withPresentation 保留绑定",
-      "assertionEvidence": [
-        "time.context"
-      ],
+      "assertionEvidence": ["time.context"],
       "reason": "真实 Time Facade 函数与少数 Root Barrel 源码检查混合，首要为 Unit。 源码/代表性断言审查；不宣称实际数据库、外部服务或桌面运行凭证。",
       "replacement": {
         "status": "none-verified",
@@ -3016,9 +2746,7 @@
       },
       "decision": "retain",
       "behavior": "图标菜单 Button 的 aria-label、type=button、结构尺寸",
-      "assertionEvidence": [
-        "aria-label"
-      ],
+      "assertionEvidence": ["aria-label"],
       "reason": "渲染组件 DOM 标签与类，非完整屏幕阅读器可访问性评估。 本轮为代表性源码与断言审查；没有声称单个 case 的运行成功或替代等价。",
       "replacement": {
         "status": "none-verified",
@@ -3035,9 +2763,7 @@
       },
       "decision": "retain",
       "behavior": "ModuleHeader entity/collection 家族 data-attr、插槽、父传入属性保持",
-      "assertionEvidence": [
-        "data-surface-header-family"
-      ],
+      "assertionEvidence": ["data-surface-header-family"],
       "reason": "基本渲染和属性透传，不需要完整业务应用 E2E。 本轮为代表性源码与断言审查；没有声称单个 case 的运行成功或替代等价。",
       "replacement": {
         "status": "none-verified",
@@ -3054,9 +2780,7 @@
       },
       "decision": "retain",
       "behavior": "设置章节/Property Row 的位置、Loading/Error 状态以及 Object Card/Danger Zone 样式基元",
-      "assertionEvidence": [
-        "data-testid"
-      ],
+      "assertionEvidence": ["data-testid"],
       "reason": "只是展示层组件 render/mount，业务提交与数据加载不在测试内。 本轮为代表性源码与断言审查；没有声称单个 case 的运行成功或替代等价。",
       "replacement": {
         "status": "none-verified",
@@ -3073,9 +2797,7 @@
       },
       "decision": "retain",
       "behavior": "BusinessPanel 8 Tab 压缩与容器布局、Home 挂载保持及左右键/Delete 导航",
-      "assertionEvidence": [
-        "resolveBusinessTabDensity"
-      ],
+      "assertionEvidence": ["resolveBusinessTabDensity"],
       "reason": "Happy DOM 中触发 Keyboard Event/测 classes，非真实浏览器 Resizer/焦点完整证据；与 Local Docker Keyboard E2E 互补。 本轮为代表性源码与断言审查；没有声称单个 case 的运行成功或替代等价。",
       "replacement": {
         "status": "none-verified",
@@ -3092,9 +2814,7 @@
       },
       "decision": "retain",
       "behavior": "会话状态提示、搜索过滤、Account Profile Flyout/多账号排序、键盘焦点恢复和通知操作路由",
-      "assertionEvidence": [
-        "conversation-search-input"
-      ],
+      "assertionEvidence": ["conversation-search-input"],
       "reason": "单组件 Happy DOM，键盘事件合成无法代替真浏览器原生 FocusTrap/Menu RovingTabindex。 本轮为代表性源码与断言审查；没有声称单个 case 的运行成功或替代等价。",
       "replacement": {
         "status": "none-verified",
@@ -3111,9 +2831,7 @@
       },
       "decision": "retain",
       "behavior": "WindowHeader 独立 Draggable/Interactive 区域、Settings 复用、侧栏切换和 Module Capsules Slots",
-      "assertionEvidence": [
-        "window-header-drag-surface"
-      ],
+      "assertionEvidence": ["window-header-drag-surface"],
       "reason": "验证 CSS class/Data Attr/emit；未证实真实 Windows/Linux 的窗口拖拽。 本轮为代表性源码与断言审查；没有声称单个 case 的运行成功或替代等价。",
       "replacement": {
         "status": "none-verified",
@@ -3130,9 +2848,7 @@
       },
       "decision": "retain",
       "behavior": "Shell 的 PanelWidth 上下文 Default、阈值、响应式 Wide/Narrow 重新计算",
-      "assertionEvidence": [
-        "data-tier"
-      ],
+      "assertionEvidence": ["data-tier"],
       "reason": "带 Mount 的响应式 Injection 测试；窗口真实宽度与物理缩放因子须用 Browser 矩阵。 本轮为代表性源码与断言审查；没有声称单个 case 的运行成功或替代等价。",
       "replacement": {
         "status": "none-verified",
@@ -3149,9 +2865,7 @@
       },
       "decision": "retain",
       "behavior": "Shell Router Map 的业务路径独占、重定向/Focus 协商、并发导航后的面板选择正确",
-      "assertionEvidence": [
-        "moduleForPath('/goals')"
-      ],
+      "assertionEvidence": ["moduleForPath('/goals')"],
       "reason": "使用真实 Vue Router 的 MemoryHistory 和 Mount Host，层级定位 Component/Hook；浏览器 URL History/Popstate 仍待专用 E2E。 本轮为代表性源码与断言审查；没有声称单个 case 的运行成功或替代等价。",
       "replacement": {
         "status": "none-verified",
@@ -3168,9 +2882,7 @@
       },
       "decision": "retain",
       "behavior": "文件目录的搜索清除、单选列表操作、Header 属性及 Loading/Error/Empty 状态",
-      "assertionEvidence": [
-        "catalog-search-clear"
-      ],
+      "assertionEvidence": ["catalog-search-clear"],
       "reason": "只是渲染语义与组件 emit，未要求真实滚动/物理键盘导航。 Next phase: no-immediate-change. T2 keeps this test; no deletion or Browser Mode migration was performed.",
       "replacement": {
         "status": "none-verified",
@@ -3187,9 +2899,7 @@
       },
       "decision": "retain",
       "behavior": "键盘帮助弹窗使用有效绑定，实时更新命令列表，Escape 关闭及跳设置",
-      "assertionEvidence": [
-        "keyboard-help"
-      ],
+      "assertionEvidence": ["keyboard-help"],
       "reason": "语义属性和事件分发可以在组件级验证，真实 Dialog Focus 共用 T3 浏览器代表性流程。 Next phase: no-immediate-change. T2 keeps this test; no deletion or Browser Mode migration was performed.",
       "replacement": {
         "status": "none-verified",
@@ -3206,9 +2916,7 @@
       },
       "decision": "browser-candidate",
       "behavior": "初始焦点、Escape 关闭、返回 opener 及 interactOutside 对话框行为",
-      "assertionEvidence": [
-        "document.activeElement"
-      ],
+      "assertionEvidence": ["document.activeElement"],
       "reason": "Dialog/Portal FocusTrap 与真实鼠标/键盘及层叠行为不同于 Happy DOM；T3 共享 Dialog Browser 验证。 Next phase: T3-browser. T2 keeps this test; no deletion or Browser Mode migration was performed.",
       "replacement": {
         "status": "none-verified",
@@ -3225,9 +2933,7 @@
       },
       "decision": "browser-candidate",
       "behavior": "Dialog/Pane 双呈现的 focus restore、inert 与嵌套 Picker 关闭策略",
-      "assertionEvidence": [
-        "document.activeElement"
-      ],
+      "assertionEvidence": ["document.activeElement"],
       "reason": "inert 对真实键盘导航与 Portal 事件隔离具有浏览器语义；与 DialogShell 合并为一个 Browser 代表性试点。 Next phase: T3-browser. T2 keeps this test; no deletion or Browser Mode migration was performed.",
       "replacement": {
         "status": "none-verified",
@@ -3244,9 +2950,7 @@
       },
       "decision": "retain",
       "behavior": "PropertyChip 语义 Button 使用原生 Enter/Space 激活，不拦截全局快捷键",
-      "assertionEvidence": [
-        "aria-pressed"
-      ],
+      "assertionEvidence": ["aria-pressed"],
       "reason": "普通原生 button 行为无需专门 Browser 复制全部用例；共享 Reka 浏览器事件验证即可。 Next phase: no-immediate-change. T2 keeps this test; no deletion or Browser Mode migration was performed.",
       "replacement": {
         "status": "none-verified",
@@ -3263,9 +2967,7 @@
       },
       "decision": "browser-candidate",
       "behavior": "Dropdown 退出时模拟 DOM 节点延迟夺焦与已关闭面板 Focus 恢复",
-      "assertionEvidence": [
-        "data-reka-menu-content"
-      ],
+      "assertionEvidence": ["data-reka-menu-content"],
       "reason": "测试手动构造退出节点与时钟；真实 Portal teardown/Focus 顺序应由单个 Browser 下拉菜单实验验证。 Next phase: T3-browser. T2 keeps this test; no deletion or Browser Mode migration was performed.",
       "replacement": {
         "status": "none-verified",
@@ -3282,9 +2984,7 @@
       },
       "decision": "retain",
       "behavior": "Timeframe 日/季/年边界校验与空值/精度转换保持",
-      "assertionEvidence": [
-        "target-picker"
-      ],
+      "assertionEvidence": ["target-picker"],
       "reason": "日期数学与 modelValue 更新是逻辑测试，非必须的完整浏览器滚动交互。 Next phase: no-immediate-change. T2 keeps this test; no deletion or Browser Mode migration was performed.",
       "replacement": {
         "status": "none-verified",
@@ -3301,9 +3001,7 @@
       },
       "decision": "retain",
       "behavior": "时间输入 Hour/Minute 的 ArrowUp/ArrowDown wrap、非法值回滚与禁用态",
-      "assertionEvidence": [
-        "ArrowUp"
-      ],
+      "assertionEvidence": ["ArrowUp"],
       "reason": "JS 处理键盘命令的值变换可以用 trigger 精确测试；真实 Tab 归共享 DateTime Picker 抽测。 Next phase: no-immediate-change. T2 keeps this test; no deletion or Browser Mode migration was performed.",
       "replacement": {
         "status": "none-verified",
@@ -3320,9 +3018,7 @@
       },
       "decision": "retain",
       "behavior": "全局快捷键的输入保护、IME/Recorder 隔离、Dialog 优先级与卸载后监听停止",
-      "assertionEvidence": [
-        "_getCommandPaletteState().open"
-      ],
+      "assertionEvidence": ["_getCommandPaletteState().open"],
       "reason": "模拟事件足以验证 Runtime 路由与派发逻辑；真浏览器默认焦点/快捷键冲突由少量 Browser Smoke。 Next phase: no-immediate-change. T2 keeps this test; no deletion or Browser Mode migration was performed.",
       "replacement": {
         "status": "none-verified",
@@ -3339,9 +3035,7 @@
       },
       "decision": "browser-candidate",
       "behavior": "Reka Dialog/Dropdown/Popover/Tabs/Sheet 通过合成键盘触发和控制态监听",
-      "assertionEvidence": [
-        "document.activeElement"
-      ],
+      "assertionEvidence": ["document.activeElement"],
       "reason": "共享 Overlay 的 Portal、FocusTrap、Tab/ESC 应有一个跨组件真实 Chromium Keyboard Smoke，测试原结构全部保留。 Next phase: T3-browser. T2 keeps this test; no deletion or Browser Mode migration was performed.",
       "replacement": {
         "status": "none-verified",
