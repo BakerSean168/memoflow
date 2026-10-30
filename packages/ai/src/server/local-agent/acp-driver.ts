@@ -199,6 +199,12 @@ function modelsFromOptions(raw: unknown): {
 }
 
 /** Shared ACP lifecycle. Each official Agent owns inference, routes and native sessions. */
+const TOOL_IDENTIFIER = /^[a-z][a-z0-9]*(?:[_.:-][a-z0-9]+)*$/u;
+
+function safeToolIdentifier(title: string | undefined): string | undefined {
+  return title && title.length <= 64 && TOOL_IDENTIFIER.test(title) ? title : undefined;
+}
+
 export class AcpDriver {
   private transport?: NativeRpcTransport;
   private readonly queue = new NativeEventQueue();
@@ -520,9 +526,11 @@ export class AcpDriver {
           status: z.string().optional(),
         })
         .parse(update);
-      // ACP titles can contain raw shell arguments/secrets. Persist only the safe kind.
-      if (frame.kind) this.toolNames.set(frame.toolCallId, frame.kind);
-      const label = frame.kind ?? this.toolNames.get(frame.toolCallId) ?? 'ACP tool';
+      // ACP titles can contain raw shell arguments/secrets. Persist the safe kind, or a
+      // title only when it is a bare tool identifier such as an MCP tool name.
+      const safeLabel = frame.kind ?? safeToolIdentifier(frame.title);
+      if (safeLabel) this.toolNames.set(frame.toolCallId, safeLabel);
+      const label = safeLabel ?? this.toolNames.get(frame.toolCallId) ?? 'ACP tool';
       if (['completed', 'failed', 'denied'].includes(frame.status ?? ''))
         this.toolNames.delete(frame.toolCallId);
       this.queue.push({
