@@ -59,6 +59,13 @@ export default {
     confirmDelete: 'Permanently delete this conversation and its messages? This cannot be undone.',
     previousPage: 'Previous page',
     nextPage: 'Next page',
+    select: 'Select conversations',
+    cancelSelect: 'Cancel selection',
+    selectAll: 'Select all',
+    clearSelection: 'Clear selection',
+    archiveSelected: 'Archive selected',
+    restoreSelected: 'Restore selected',
+    deleteSelected: 'Delete selected',
 
     today: 'Today',
     last7Days: 'Last 7 days',
