@@ -1,6 +1,6 @@
 # Third-Party Notices
 
-MemoFlow is currently a private, unlicensed repository. This file records third-party software and brand assets adopted or studied by MemoFlow.
+MemoFlow is open source under the [MIT License](LICENSE). This file records third-party software and brand assets adopted or studied by MemoFlow. Third-party components retain their upstream licenses, and brand marks remain trademarks of their respective owners.
 
 ## Better Auth
 

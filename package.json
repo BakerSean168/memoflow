@@ -1,6 +1,7 @@
 {
   "name": "memoflow",
   "private": true,
+  "license": "MIT",
   "author": {
     "name": "bakersean",
     "email": "lulouhao@stu.sicau.edu.cn"

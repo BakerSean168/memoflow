@@ -185,6 +185,6 @@ GitHub Pages 有意只承担公开的 **项目介绍页**。真实产品继续�
 - [`docs/internals/testing/README.md`](../internals/testing/README.md) —— 测试系统。
 - [`docs/operations/deployment.md`](../operations/deployment.md) —— 生产拓扑与运维。
 
-## 仓库状态与许可
+## 开源许可证
 
-MemoFlow 是一个 **公开源码仓库**，但当前 **没有附带开源许可证**。仅公开可见并不代表授予复制、修改或再分发代码的许可；除非未来明确加入许可证，否则版权仍由仓库所有者保留。
+MemoFlow 采用 [MIT License](../../LICENSE) 开源，允许使用、修改、再分发及商业使用，但须保留版权与许可声明。第三方组件和品牌素材仍须遵守各自的许可证及商标权利要求，详见 [第三方声明](../../THIRD_PARTY_NOTICES.md)。
