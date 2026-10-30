@@ -110,7 +110,7 @@ function createAdapter(root: HTMLElement, options: KeyboardListOptions): ListNav
       return selection?.hasSelection() ?? model.selected.size > 0;
     },
     focusItem(id) {
-      if (model.activeId !== id) selection?.focus(id);
+      selection?.focus(id);
       model.focus(id);
     },
     get selectable() {

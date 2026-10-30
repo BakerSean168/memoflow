@@ -70,7 +70,7 @@ export function createConversationSelectionStore() {
   function focus(id: string) {
     if (!state.order.includes(id)) return;
     const key = selectionKey(state.profileId, id);
-    if (state.activeKey === key) return;
+    if (state.activeKey === key && state.anchorKey) return;
     state.anchorKey = key;
     state.activeKey = key;
     state.extending = false;

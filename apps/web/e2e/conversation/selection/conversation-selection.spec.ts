@@ -18,9 +18,11 @@ test('mouse range, disjoint and cross-group selection; context counts and keyboa
   await expect(page.getByTestId('conversation-context-status')).toHaveText('Archive (2)');
   await expect(page.getByTestId('conversation-context-delete')).toHaveText('Delete (2)');
   await page.keyboard.press('Escape');
+  await expect(page.getByRole('menu')).toHaveCount(0);
   await row('c').click({ button: 'right' });
   await expect(page.getByTestId('conversation-context-status')).toHaveText('Archive (1)');
   await page.keyboard.press('Escape');
+  await expect(row('c')).toBeFocused();
   await row('b').focus();
   await page.keyboard.press('Escape');
   await row('b').focus();
@@ -38,6 +40,11 @@ test('mouse range, disjoint and cross-group selection; context counts and keyboa
   await expect(row('a')).toHaveAttribute('aria-selected', 'true');
   await expect(row('d')).toHaveAttribute('aria-selected', 'true');
   await expect(page.getByTestId('opened')).toHaveText('b');
+  await page.getByTestId('conversation-select-toggle').click();
+  await row('d').focus();
+  await page.keyboard.press('Shift+K');
+  await expect(row('d')).toHaveAttribute('aria-selected', 'true');
+  await expect(row('a')).toHaveAttribute('aria-selected', 'true');
   await page.keyboard.press('Escape');
   await page.keyboard.press('Control+k');
   await expect(page.getByTestId('palette')).toHaveText('true');

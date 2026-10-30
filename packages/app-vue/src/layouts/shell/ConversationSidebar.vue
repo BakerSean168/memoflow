@@ -226,11 +226,21 @@ function handleContextKey(event: KeyboardEvent, id: string) {
   openContext(id);
 }
 async function restoreContextFocus(event: Event) {
+  const id = contextRow.value;
   event.preventDefault();
   await nextTick();
+  if (contextOpen.value || contextRow.value !== id) return;
+  const active = document.activeElement;
+  if (
+    active instanceof HTMLElement &&
+    active !== document.body &&
+    active.isConnected &&
+    !active.closest('[role="menu"]')
+  )
+    return;
   const row = [
     ...(sidebarRoot.value?.querySelectorAll<HTMLElement>('[data-keyboard-item]') ?? []),
-  ].find((item) => item.dataset.keyboardItem === contextRow.value);
+  ].find((item) => item.dataset.keyboardItem === id);
   row?.focus({ preventScroll: true });
 }
 async function emitBulk(action: 'archive' | 'restore' | 'delete', ids = [...selectedIds.value]) {

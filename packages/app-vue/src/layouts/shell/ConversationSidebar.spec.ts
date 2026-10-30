@@ -242,6 +242,13 @@ describe('ConversationSidebar mouse and batch selection', () => {
       expect(wrapper.get('[data-keyboard-item="b"]').attributes('aria-selected')).toBe('true');
       expect(wrapper.get('[data-keyboard-item="c"]').attributes('aria-selected')).toBe('true');
       expect(document.activeElement).toBe(wrapper.get('[data-keyboard-item="c"]').element);
+      await wrapper
+        .get('[data-testid="conversation-sidebar"]')
+        .trigger('keydown', { key: 'Escape' });
+      const afterClear = listAdapterFor(wrapper.get('[data-keyboard-item="c"]').element)!;
+      afterClear.moveSelection(-1, true);
+      await flushPromises();
+      expect(wrapper.get('[data-keyboard-item="c"]').attributes('aria-selected')).toBe('true');
     } finally {
       wrapper.unmount();
     }

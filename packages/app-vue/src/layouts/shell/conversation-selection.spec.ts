@@ -31,6 +31,18 @@ describe('sidebar Profile-scoped selection', () => {
     expect(store.state.anchorKey).toBeNull();
   });
 
+  it('reanchors keyboard focus after the previous anchor completes and shrinks the next range', () => {
+    const store = createConversationSelectionStore();
+    store.reconcile(['a', 'b', 'c'], 'one');
+    store.click('a');
+    store.rangeTo('c');
+    store.complete(['a', 'b']);
+    store.focus('c');
+    store.rangeTo('b');
+    store.rangeTo('c');
+    expect(store.selectedIds.value).toEqual(['c']);
+  });
+
   it('keeps failures selected and blocks rapid operations; old Profile completions cannot own the new state', () => {
     const store = createConversationSelectionStore();
     store.reconcile(['a', 'b'], 'one');
