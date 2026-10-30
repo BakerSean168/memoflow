@@ -1,5 +1,8 @@
 export default {
   inspect: {
+    goalNotFound: 'Goal not found.',
+    goalForbidden: 'You do not have access to this goal. Check your current identity.',
+    goalLoadFailed: 'Failed to load the goal. Please retry.',
     description: 'Key result inspection',
     goalUnavailable: 'Goal not found or unavailable.',
     krUnavailable: 'Key result not found.',

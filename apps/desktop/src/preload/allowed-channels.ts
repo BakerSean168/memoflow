@@ -9,6 +9,7 @@ import {
   DesktopFeatureChannels,
   DesktopUpdateChannels,
   GoalChannels,
+  GoalWorkspaceChannels,
   KeyboardChannels,
   NotificationChannels,
   RendererEventChannels,
@@ -51,6 +52,7 @@ export const SUPPORTED_REPOSITORY_CHANNELS = [
 export const ALLOWED_CHANNELS = [
   ...Object.values(SystemChannels),
   ...Object.values(GoalChannels),
+  ...Object.values(GoalWorkspaceChannels),
   ...Object.values(TaskChannels),
   ...Object.values(TaskWorkspaceChannels),
   ...Object.values(ScheduleChannels),

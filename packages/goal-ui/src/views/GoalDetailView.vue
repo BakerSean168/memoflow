@@ -24,14 +24,15 @@
       data-testid="goal-not-found"
       class="m-4 rounded-md border border-destructive/30 bg-destructive/5 p-4 text-sm text-destructive"
     >
-      {{ t('goal.inspect.goalUnavailable') }}
+      {{ t(workspaceErrorKey) }}
+      <Button variant="ghost" @click="refresh()">{{ t('goal.inspect.retry') }}</Button>
       <Button v-if="hasGoalOverlayRoute" variant="ghost" @click="closeGoalOverlay">{{
         t('common.close')
       }}</Button>
     </div>
 
     <div v-else-if="!goal" role="alert" data-testid="goal-not-found" class="m-4 p-4 text-sm">
-      {{ t('goal.inspect.goalUnavailable') }}
+      {{ t('goal.inspect.goalNotFound') }}
       <Button v-if="hasGoalOverlayRoute" variant="ghost" @click="closeGoalOverlay">{{
         t('common.close')
       }}</Button>
@@ -41,6 +42,12 @@
       class="min-h-0 flex-1 overflow-auto scrollbar-gutter-stable px-3 py-3 @md/panel:px-5 @md/panel:py-4"
     >
       <div class="mx-auto max-w-5xl space-y-6">
+        <div v-if="error" role="alert" class="rounded-md border p-3 text-sm text-destructive">
+          {{ t(workspaceErrorKey) }}
+          <Button variant="ghost" :disabled="isLoading" @click="refresh()">{{
+            t('goal.inspect.retry')
+          }}</Button>
+        </div>
         <article
           class="space-y-4 border-b border-[hsl(var(--border-subtle))] pb-5"
           data-testid="goal-workspace-header"
@@ -836,7 +843,14 @@ async function handleRecordSaved(): Promise<void> {
   recordRevision.value += 1;
   await refresh();
 }
-const { workspace, isLoading, error, refresh } = useGoalWorkspace(goalId);
+const { workspace, isLoading, error, errorKind, refresh } = useGoalWorkspace(goalId);
+const workspaceErrorKey = computed(() =>
+  errorKind.value === 'not-found'
+    ? 'goal.inspect.goalNotFound'
+    : errorKind.value === 'forbidden'
+      ? 'goal.inspect.goalForbidden'
+      : 'goal.inspect.goalLoadFailed',
+);
 const goal = computed(() => workspace.value?.goal ?? null);
 const keyResults = computed(() => goal.value?.keyResults ?? []);
 const krDialog = ref<InstanceType<typeof KeyResultDialog> | null>(null);
