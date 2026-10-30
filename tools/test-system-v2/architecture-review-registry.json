@@ -2813,14 +2813,19 @@
         "testRole": "behavior"
       },
       "decision": "retain",
-      "behavior": "会话状态提示、搜索过滤、Account Profile Flyout/多账号排序、键盘焦点恢复和通知操作路由",
-      "assertionEvidence": ["conversation-search-input"],
+      "behavior": "会话状态、搜索、Profile 菜单与焦点恢复，以及跨组选择、逐项反馈、失败项保留和旧 Profile 结果隔离",
+      "assertionEvidence": [
+        "conversation-search-input",
+        "aria-selected",
+        "conversation-bulk-results",
+        "bulkAction"
+      ],
       "reason": "单组件 Happy DOM，键盘事件合成无法代替真浏览器原生 FocusTrap/Menu RovingTabindex。 本轮为代表性源码与断言审查；没有声称单个 case 的运行成功或替代等价。",
       "replacement": {
         "status": "none-verified",
         "testFiles": []
       },
-      "sourceSha256": "2fe1a63474340068a942668a09ef0bc7baec68224793178863e2cfe48677d86e"
+      "sourceSha256": "b94b0ce7a35b51ceb628c8b58dbf9876e6625cd0b93c07e201a0cf36f9070874"
     },
     {
       "path": "packages/app-vue/src/layouts/shell/WindowHeader.spec.ts",
@@ -3017,14 +3022,14 @@
         "testRole": "behavior"
       },
       "decision": "retain",
-      "behavior": "全局快捷键的输入保护、IME/Recorder 隔离、Dialog 优先级与卸载后监听停止",
+      "behavior": "全局快捷键输入/IME/Recorder/Dialog 隔离、显式侧栏 listbox 的选择与 Ctrl+K 共存、卸载停止监听",
       "assertionEvidence": ["_getCommandPaletteState().open"],
       "reason": "模拟事件足以验证 Runtime 路由与派发逻辑；真浏览器默认焦点/快捷键冲突由少量 Browser Smoke。 Next phase: no-immediate-change. T2 keeps this test; no deletion or Browser Mode migration was performed.",
       "replacement": {
         "status": "none-verified",
         "testFiles": []
       },
-      "sourceSha256": "d0eb52b008d835b9f7ef24b2120d9d1f3faf051f5c85c2f3505b1163f77a835e"
+      "sourceSha256": "db0c366b0ba3874a875156d620ac7e0bcd030ab1fceae4e27e1ad12fb39a9a7d"
     },
     {
       "path": "packages/app-vue/src/shared/reka-primitives.contract.spec.ts",
@@ -3042,6 +3047,49 @@
         "testFiles": []
       },
       "sourceSha256": "28712ea84d0c1d39a2ee4b910312d0478809ed44fceb1b7214228dc9a1965bde"
+    },
+    {
+      "path": "packages/app-vue/src/layouts/shell/conversation-selection.spec.ts",
+      "reviewScope": "representative-assertions",
+      "classification": {
+        "testType": "unit",
+        "testRole": "behavior"
+      },
+      "decision": "retain",
+      "behavior": "Profile 作用域选择、范围锚点、过滤/删除/重排收敛、成功项收敛与操作代次隔离",
+      "assertionEvidence": [
+        "selectedIds.value",
+        "isOperationCurrent(operation)",
+        "startOperation()"
+      ],
+      "reason": "直接调用侧栏 UI store；不替代真实鼠标、菜单和焦点测试。",
+      "replacement": {
+        "status": "none-verified",
+        "testFiles": []
+      },
+      "sourceSha256": "9173b1f10af0962eb87a9ac53f2949cbda991339dac8619a1c0be6cedac832bd"
+    },
+    {
+      "path": "apps/web/e2e/conversation/selection/conversation-selection.spec.ts",
+      "reviewScope": "representative-assertions",
+      "classification": {
+        "testType": "e2e",
+        "testRole": "behavior"
+      },
+      "decision": "retain",
+      "behavior": "真实鼠标和键盘的跨组/非连续选择、菜单数量、部分失败 Undo、Profile 卸载、窄栏和危险删除确认",
+      "assertionEvidence": [
+        "aria-selected",
+        "conversation-context-status",
+        "Control+z",
+        "width.scroll"
+      ],
+      "reason": "Reference lane 隔离页面挂载生产侧栏、键盘运行时和会话 Owner；服务为内存 doubles，不声称验证 Windows 安装版。",
+      "replacement": {
+        "status": "none-verified",
+        "testFiles": []
+      },
+      "sourceSha256": "7278955202e88831f61e753e8b948ecbeea1542c115cf0ce3e9e06185df46c9b"
     }
   ],
   "storyReviews": [],

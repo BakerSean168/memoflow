@@ -100,6 +100,14 @@
           "target": "web:e2e:visual-regression"
         }
       ]
+    },
+    "apps/web/playwright.conversation-selection.config.ts": {
+      "lane": "reference",
+      "lifecycle": "active",
+      "execution": {
+        "kind": "manual",
+        "command": "pnpm exec playwright test --config apps/web/playwright.conversation-selection.config.ts"
+      }
     }
   },
   "specs": {
@@ -348,6 +356,12 @@
       "role": "supplemental",
       "lifecycle": "active",
       "primaryCollector": "apps/desktop/playwright.config.ts"
+    },
+    "apps/web/e2e/conversation/selection/conversation-selection.spec.ts": {
+      "surface": "ai-workspace",
+      "role": "reference",
+      "lifecycle": "active",
+      "primaryCollector": "apps/web/playwright.conversation-selection.config.ts"
     }
   }
 }

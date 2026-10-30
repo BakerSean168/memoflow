@@ -3,6 +3,12 @@ import { createListNavigation } from './list-navigation';
 
 interface KeyboardListOptions {
   selectable?: boolean;
+  selection?: {
+    hasSelection(): boolean;
+    toggle(id: string): void;
+    rangeTo(id: string): void;
+    clear(): void;
+  };
   virtual?: {
     getIds(): readonly string[];
     reveal(id: string): Promise<void>;
@@ -38,6 +44,7 @@ const adapters = new WeakMap<HTMLElement, ListNavigationAdapter>();
 function createAdapter(root: HTMLElement, options: KeyboardListOptions): ListNavigationAdapter {
   let selectable = options.selectable ?? false;
   let virtual = options.virtual;
+  let selection = options.selection;
   let disposed = false;
   const model = createListNavigation();
   function visibleItems() {
@@ -52,7 +59,8 @@ function createAdapter(root: HTMLElement, options: KeyboardListOptions): ListNav
     for (const item of root.querySelectorAll<HTMLElement>('[data-keyboard-item]')) {
       item.dataset.keyboardActive = String(item.dataset.keyboardItem === model.activeId);
       item.dataset.keyboardSelected = String(model.selected.has(item.dataset.keyboardItem!));
-      if (selectable) item.setAttribute('aria-pressed', item.dataset.keyboardSelected);
+      if (selectable && !selection)
+        item.setAttribute('aria-pressed', item.dataset.keyboardSelected);
     }
   }
   function reconcile() {
@@ -98,7 +106,7 @@ function createAdapter(root: HTMLElement, options: KeyboardListOptions): ListNav
       return model.activeId;
     },
     get hasSelection() {
-      return model.selected.size > 0;
+      return selection?.hasSelection() ?? model.selected.size > 0;
     },
     focusItem: model.focus,
     get selectable() {
@@ -110,6 +118,7 @@ function createAdapter(root: HTMLElement, options: KeyboardListOptions): ListNav
     configure(next) {
       selectable = next.selectable ?? false;
       virtual = next.virtual;
+      selection = next.selection;
     },
     dispose() {
       disposed = true;
@@ -118,7 +127,8 @@ function createAdapter(root: HTMLElement, options: KeyboardListOptions): ListNav
     reconcile,
     moveSelection(direction, extend = false) {
       reconcile();
-      model.move(direction, selectable && extend);
+      model.move(direction, selectable && extend && !selection);
+      if (extend && model.activeId) selection?.rangeTo(model.activeId);
       paint();
       revealActive(focusRenderedItem);
     },
@@ -133,12 +143,14 @@ function createAdapter(root: HTMLElement, options: KeyboardListOptions): ListNav
     },
     toggleSelection() {
       if (selectable) {
-        model.toggle();
+        if (selection && model.activeId) selection.toggle(model.activeId);
+        else model.toggle();
         paint();
       }
     },
     clear() {
       model.clear();
+      selection?.clear();
       paint();
     },
     tree(direction) {

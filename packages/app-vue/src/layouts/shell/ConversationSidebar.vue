@@ -8,7 +8,11 @@
  * 账户入口（诊断修订 §9）：头像打开账户菜单，不再直达 Settings。
  */
 import { vKeyboardList } from '../../shared/keyboard/list-adapter';
-import { computed, nextTick, ref } from 'vue';
+import { computed, inject, nextTick, ref, watch } from 'vue';
+import {
+  ConversationSelectionKey,
+  createConversationSelectionStore,
+} from './conversation-selection';
 import { useI18n } from 'vue-i18n';
 import {
   MoreHorizontal,
@@ -28,6 +32,10 @@ import {
   ListChecks,
 } from '@lucide/vue';
 import {
+  ContextMenu,
+  ContextMenuTrigger,
+  ContextMenuContent,
+  ContextMenuItem,
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
@@ -59,6 +67,10 @@ interface ConversationGroup {
 }
 
 const props = defineProps<{
+  bulkAction?: (
+    action: 'archive' | 'restore' | 'delete',
+    ids: string[],
+  ) => Promise<{ id: string; success: boolean }[]>;
   profiles?: ProfileSummary[];
   activeProfileId?: string;
   cloudState?: ProfileCloudState;
@@ -85,9 +97,6 @@ const emit = defineEmits<{
   (e: 'delete-conversation', id: string): void;
   (e: 'archive-conversation', id: string): void;
   (e: 'restore-conversation', id: string): void;
-  (e: 'archive-conversations', ids: string[]): void;
-  (e: 'restore-conversations', ids: string[]): void;
-  (e: 'delete-conversations', ids: string[]): void;
   (e: 'change-archive-page', direction: number): void;
   (e: 'refresh-conversations'): void;
   (e: 'open-settings'): void;
@@ -133,13 +142,28 @@ const searchOpen = ref(false);
 const searchQuery = ref('');
 const searchInput = ref<HTMLInputElement | null>(null);
 const searchToggle = ref<HTMLButtonElement | null>(null);
-const selecting = ref(false);
-const selectedIds = ref<string[]>([]);
+const selection = inject(ConversationSelectionKey, null) ?? createConversationSelectionStore();
+const { selectedIds } = selection;
+const selecting = computed({
+  get: () => selection.state.selectionMode || selectedIds.value.length > 0,
+  set: (value: boolean) => {
+    selection.state.selectionMode = value;
+  },
+});
+const contextIds = ref<string[]>([]);
+const contextOpen = ref(false);
+const contextRow = ref<string | null>(null);
+const sidebarRoot = ref<HTMLElement | null>(null);
 
 const normalizedSearchQuery = computed(() => searchQuery.value.trim().toLocaleLowerCase());
 const filteredGroups = computed(() => {
   const groups = showingArchive.value
-    ? [{ labelKey: 'shell.conversation.archived', items: props.archivedConversations ?? [] }]
+    ? [
+        {
+          labelKey: 'shell.conversation.archived',
+          items: props.archivedConversations ?? [],
+        },
+      ]
     : props.groups;
   if (!normalizedSearchQuery.value) return groups;
   return groups
@@ -158,27 +182,93 @@ const allVisibleSelected = computed(
   () =>
     visibleIds.value.length > 0 && visibleIds.value.every((id) => selectedIds.value.includes(id)),
 );
-function toggleSelected(id: string) {
-  selectedIds.value = selectedIds.value.includes(id)
-    ? selectedIds.value.filter((item) => item !== id)
-    : [...selectedIds.value, id];
-}
+watch(
+  [visibleIds, () => props.activeProfileId],
+  ([ids, profileId]) => {
+    selection.reconcile(ids, profileId ?? '');
+    contextOpen.value = false;
+  },
+  { immediate: true, flush: 'sync' },
+);
+const keyboardSelection = {
+  hasSelection: () => selectedIds.value.length > 0,
+  toggle: selection.toggle,
+  rangeTo: selection.rangeTo,
+  clear: selection.clear,
+};
 function toggleSelectAll() {
-  selectedIds.value = allVisibleSelected.value
-    ? selectedIds.value.filter((id) => !visibleIds.value.includes(id))
-    : [...new Set([...selectedIds.value, ...visibleIds.value])];
+  selection.toggleAll();
 }
 function exitSelection() {
-  selecting.value = false;
-  selectedIds.value = [];
+  selection.clear();
 }
-function emitBulk(action: 'archive' | 'restore' | 'delete') {
-  const ids = [...selectedIds.value];
-  if (!ids.length) return;
-  if (action === 'archive') emit('archive-conversations', ids);
-  if (action === 'restore') emit('restore-conversations', ids);
-  if (action === 'delete') emit('delete-conversations', ids);
-  exitSelection();
+function selectRow(id: string, event: MouseEvent) {
+  if (selection.state.busy) return;
+  const multi = event.ctrlKey || event.metaKey || event.shiftKey || selection.state.selectionMode;
+  selection.click(id, {
+    toggle: event.ctrlKey || event.metaKey,
+    range: event.shiftKey,
+  });
+  if (!multi) {
+    if (showingArchive.value) emit('restore-conversation', id);
+    else emit('select-conversation', id);
+  }
+}
+function openContext(id: string) {
+  contextRow.value = id;
+  contextIds.value = selection.isSelected(id) ? [...selectedIds.value] : [id];
+  contextOpen.value = true;
+}
+function handleContextKey(event: KeyboardEvent, id: string) {
+  if (event.key !== 'ContextMenu' && !(event.shiftKey && event.key === 'F10')) return;
+  event.preventDefault();
+  openContext(id);
+}
+async function restoreContextFocus(event: Event) {
+  event.preventDefault();
+  await nextTick();
+  const row = [
+    ...(sidebarRoot.value?.querySelectorAll<HTMLElement>('[data-keyboard-item]') ?? []),
+  ].find((item) => item.dataset.keyboardItem === contextRow.value);
+  row?.focus({ preventScroll: true });
+}
+async function emitBulk(action: 'archive' | 'restore' | 'delete', ids = [...selectedIds.value]) {
+  if (!ids.length || selection.state.busy) return;
+  contextOpen.value = false;
+  if (!props.bulkAction) return;
+  const operation = selection.startOperation();
+  if (!operation) return;
+  const titles = new Map(
+    filteredGroups.value.flatMap((group) => group.items.map((item) => [item.id, item.title])),
+  );
+  try {
+    const results = await props.bulkAction(action, ids);
+    if (!selection.isOperationCurrent(operation)) return;
+    selection.state.results = results.map((result) => ({
+      ...result,
+      title: titles.get(result.id) ?? result.id,
+      action,
+    }));
+    selection.complete(results.filter((item) => item.success).map((item) => item.id));
+    for (const item of results.filter((item) => !item.success)) {
+      if (visibleIds.value.includes(item.id) && !selection.isSelected(item.id))
+        selection.toggle(item.id);
+    }
+  } catch {
+    if (selection.isOperationCurrent(operation)) {
+      selection.state.results = ids.map((id) => ({
+        id,
+        title: titles.get(id) ?? id,
+        success: false,
+        action,
+      }));
+      for (const id of ids) {
+        if (visibleIds.value.includes(id) && !selection.isSelected(id)) selection.toggle(id);
+      }
+    }
+  } finally {
+    selection.finishOperation(operation);
+  }
 }
 
 async function toggleSearch() {
@@ -232,8 +322,10 @@ const identityLabel = () => {
 
 <template>
   <aside
+    ref="sidebarRoot"
     data-testid="conversation-sidebar"
-    class="conversation-sidebar relative flex h-full flex-col bg-transparent text-sidebar-foreground"
+    class="conversation-sidebar relative flex h-full min-w-0 flex-col bg-transparent text-sidebar-foreground"
+    @keydown.escape="exitSelection"
   >
     <!-- 搜索与新会话保持同一工具行，搜索展开时高度不变 -->
     <div class="flex h-11 shrink-0 items-center gap-1.5 px-2" data-testid="conversation-toolbar">
@@ -320,7 +412,7 @@ const identityLabel = () => {
     </button>
     <div
       v-if="selecting"
-      class="flex items-center gap-1 px-2 py-1"
+      class="flex flex-wrap items-center gap-1 px-2 py-1"
       data-testid="conversation-selection-toolbar"
     >
       <button
@@ -341,7 +433,7 @@ const identityLabel = () => {
         v-if="selectedIds.length"
         type="button"
         class="rounded-md p-1.5 hover:bg-muted disabled:opacity-40"
-        :disabled="loading"
+        :disabled="loading || selection.state.busy"
         :aria-label="
           t(
             showingArchive
@@ -360,6 +452,7 @@ const identityLabel = () => {
         class="rounded-md p-1.5 text-destructive hover:bg-muted"
         :aria-label="t('shell.conversation.deleteSelected')"
         data-testid="conversation-bulk-delete"
+        :disabled="selection.state.busy"
         @click="emitBulk('delete')"
       >
         <Trash2 class="h-3.5 w-3.5" />
@@ -370,8 +463,40 @@ const identityLabel = () => {
         >{{ selectedIds.length }}</span
       >
     </div>
+    <ul
+      v-if="selection.state.results.length"
+      class="max-h-28 overflow-y-auto break-words px-3 text-xs"
+      aria-live="polite"
+      data-testid="conversation-bulk-results"
+    >
+      <li
+        v-for="result in selection.state.results"
+        :key="result.id"
+        :class="result.success ? '' : 'text-destructive'"
+      >
+        {{ result.title }} · {{ t(`shell.conversation.${result.action}`) }} ·
+        {{
+          t(
+            result.success
+              ? 'shell.conversation.operationSucceeded'
+              : 'shell.conversation.operationFailed',
+          )
+        }}
+      </li>
+    </ul>
     <!-- 会话列表（按时间分组） -->
-    <nav v-keyboard-list class="flex-1 overflow-y-auto px-2 pb-3 pt-1">
+    <nav
+      v-keyboard-list="{ selectable: true, selection: keyboardSelection }"
+      class="flex-1 overflow-y-auto px-2 pb-3 pt-1"
+      role="listbox"
+      aria-multiselectable="true"
+      :aria-label="t('shell.conversation.select')"
+      @click="
+        (event) => {
+          if (!(event.target as HTMLElement).closest('button')) exitSelection();
+        }
+      "
+    >
       <p v-if="loading && groups.length === 0" class="px-3 py-2 text-xs text-muted-foreground/60">
         {{ t('common.loading') }}
       </p>
@@ -388,104 +513,141 @@ const identityLabel = () => {
         >
           {{ t(group.labelKey) }}
         </p>
-        <div
+        <ContextMenu
           v-for="item in group.items"
           :key="item.id"
-          class="group/item relative flex w-full items-center rounded-md transition-colors"
-          :class="
-            activeConversationId === item.id
-              ? 'bg-[hsl(var(--selected)/0.82)] text-foreground shadow-[inset_0_0_0_1px_hsl(var(--border-subtle)/0.46)]'
-              : 'text-[hsl(var(--foreground-muted))] hover:bg-[hsl(var(--hover))] hover:text-foreground'
+          :open="contextOpen && contextRow === item.id"
+          @update:open="
+            (open) => {
+              if (!open) contextOpen = false;
+            }
           "
         >
-          <button
-            type="button"
-            class="min-w-0 w-full flex-1 px-2 py-1.5 pr-24 text-left text-[12.5px] leading-5"
-            :data-keyboard-item="item.id"
-            :aria-pressed="selecting ? selectedIds.includes(item.id) : undefined"
-            @click="
-              selecting
-                ? toggleSelected(item.id)
-                : showingArchive
-                  ? emit('restore-conversation', item.id)
-                  : emit('select-conversation', item.id)
-            "
+          <ContextMenuTrigger
+            as-child
+            @contextmenu.capture="openContext(item.id)"
+            @keydown="handleContextKey($event, item.id)"
           >
-            <span
-              v-if="selecting"
-              class="mr-1.5 inline-flex h-3.5 w-3.5 items-center justify-center rounded border border-muted-foreground/50 align-[-2px]"
-              :class="selectedIds.includes(item.id) ? 'bg-primary text-primary-foreground' : ''"
-              aria-hidden="true"
+            <div
+              class="group/item relative flex w-full items-center rounded-md transition-colors"
+              :class="
+                selection.isSelected(item.id) || activeConversationId === item.id
+                  ? 'bg-[hsl(var(--selected)/0.82)] text-foreground shadow-[inset_0_0_0_1px_hsl(var(--border-subtle)/0.46)]'
+                  : 'text-[hsl(var(--foreground-muted))] hover:bg-[hsl(var(--hover))] hover:text-foreground'
+              "
             >
-              <Check v-if="selectedIds.includes(item.id)" class="h-3 w-3" />
-            </span>
-            <span class="block min-w-0 truncate whitespace-nowrap">{{ item.title }}</span>
-          </button>
-          <TooltipProvider v-if="stateOf(item.id)">
-            <Tooltip>
-              <TooltipTrigger as-child>
-                <button
-                  type="button"
-                  class="absolute right-1 top-1/2 flex h-6 w-6 -translate-y-1/2 items-center justify-center rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                  :aria-label="t(`aiAssistant.chatPage.sidebar.attention.${stateOf(item.id)}`)"
-                  data-testid="shell-conversation-status"
-                  @click.stop="emit('select-conversation', item.id)"
-                >
-                  <component
-                    :is="stateIcons[stateOf(item.id)!]"
-                    class="h-4 w-4 shrink-0"
-                    :class="stateColors[stateOf(item.id)!]"
-                    aria-hidden="true"
-                  />
-                </button>
-              </TooltipTrigger>
-              <TooltipContent side="right" class="text-xs">
-                {{ t(`aiAssistant.chatPage.sidebar.attention.${stateOf(item.id)}`) }}
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
-          <button
-            type="button"
-            :data-testid="showingArchive ? 'conversation-restore' : 'conversation-archive'"
-            class="absolute right-14 top-1/2 flex h-6 w-6 -translate-y-1/2 items-center justify-center rounded-md text-muted-foreground hover:bg-muted hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-40"
-            :aria-label="
-              t(showingArchive ? 'shell.conversation.restore' : 'shell.conversation.archive')
-            "
-            :title="t(showingArchive ? 'shell.conversation.restore' : 'shell.conversation.archive')"
-            :disabled="
-              !showingArchive && ['working', 'input', 'approval'].includes(stateOf(item.id) ?? '')
-            "
-            @click.stop="
-              showingArchive
-                ? emit('restore-conversation', item.id)
-                : emit('archive-conversation', item.id)
-            "
-          >
-            <component :is="showingArchive ? ArchiveRestore : Archive" class="h-3.5 w-3.5" />
-          </button>
-          <DropdownMenu>
-            <DropdownMenuTrigger as-child>
               <button
                 type="button"
-                class="absolute top-1/2 flex h-6 w-6 -translate-y-1/2 items-center justify-center rounded-md text-[hsl(var(--foreground-subtle))] opacity-0 transition-[opacity,background-color,color] hover:bg-[hsl(var(--hover))] hover:text-foreground focus-visible:opacity-100 group-hover/item:opacity-100"
-                :class="stateOf(item.id) ? 'right-8' : 'right-0.5'"
-                :aria-label="t('common.more')"
-                @click.stop
+                class="min-w-0 w-full flex-1 px-2 py-1.5 pr-24 text-left text-[12.5px] leading-5"
+                :data-keyboard-item="item.id"
+                role="option"
+                :aria-selected="selection.isSelected(item.id)"
+                :aria-pressed="selecting ? selection.isSelected(item.id) : undefined"
+                @click="selectRow(item.id, $event)"
               >
-                <MoreHorizontal class="h-3.5 w-3.5" />
+                <span
+                  v-if="selecting"
+                  class="mr-1.5 inline-flex h-3.5 w-3.5 items-center justify-center rounded border border-muted-foreground/50 align-[-2px]"
+                  :class="selectedIds.includes(item.id) ? 'bg-primary text-primary-foreground' : ''"
+                  aria-hidden="true"
+                >
+                  <Check v-if="selectedIds.includes(item.id)" class="h-3 w-3" />
+                </span>
+                <span class="block min-w-0 truncate whitespace-nowrap">{{ item.title }}</span>
               </button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" side="right" class="w-36">
-              <DropdownMenuItem
-                class="text-destructive focus:text-destructive"
-                @click="emit('delete-conversation', item.id)"
+              <TooltipProvider v-if="stateOf(item.id)">
+                <Tooltip>
+                  <TooltipTrigger as-child>
+                    <button
+                      type="button"
+                      class="absolute right-1 top-1/2 flex h-6 w-6 -translate-y-1/2 items-center justify-center rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                      :aria-label="t(`aiAssistant.chatPage.sidebar.attention.${stateOf(item.id)}`)"
+                      data-testid="shell-conversation-status"
+                      @click.stop="emit('select-conversation', item.id)"
+                    >
+                      <component
+                        :is="stateIcons[stateOf(item.id)!]"
+                        class="h-4 w-4 shrink-0"
+                        :class="stateColors[stateOf(item.id)!]"
+                        aria-hidden="true"
+                      />
+                    </button>
+                  </TooltipTrigger>
+                  <TooltipContent side="right" class="text-xs">
+                    {{ t(`aiAssistant.chatPage.sidebar.attention.${stateOf(item.id)}`) }}
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+              <button
+                type="button"
+                :data-testid="showingArchive ? 'conversation-restore' : 'conversation-archive'"
+                class="absolute right-14 top-1/2 flex h-6 w-6 -translate-y-1/2 items-center justify-center rounded-md text-muted-foreground hover:bg-muted hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-40"
+                :aria-label="
+                  t(showingArchive ? 'shell.conversation.restore' : 'shell.conversation.archive')
+                "
+                :title="
+                  t(showingArchive ? 'shell.conversation.restore' : 'shell.conversation.archive')
+                "
+                :disabled="
+                  selection.state.busy ||
+                  (!showingArchive &&
+                    ['working', 'input', 'approval'].includes(stateOf(item.id) ?? ''))
+                "
+                @click.stop="
+                  showingArchive
+                    ? emit('restore-conversation', item.id)
+                    : emit('archive-conversation', item.id)
+                "
               >
-                <Trash2 class="mr-2 h-3.5 w-3.5" />
-                {{ t('common.delete') }}
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
+                <component :is="showingArchive ? ArchiveRestore : Archive" class="h-3.5 w-3.5" />
+              </button>
+              <DropdownMenu>
+                <DropdownMenuTrigger as-child>
+                  <button
+                    type="button"
+                    class="absolute top-1/2 flex h-6 w-6 -translate-y-1/2 items-center justify-center rounded-md text-[hsl(var(--foreground-subtle))] opacity-0 transition-[opacity,background-color,color] hover:bg-[hsl(var(--hover))] hover:text-foreground focus-visible:opacity-100 group-hover/item:opacity-100"
+                    :class="stateOf(item.id) ? 'right-8' : 'right-0.5'"
+                    :aria-label="t('common.more')"
+                    @click.stop
+                  >
+                    <MoreHorizontal class="h-3.5 w-3.5" />
+                  </button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" side="right" class="w-36">
+                  <DropdownMenuItem
+                    class="text-destructive focus:text-destructive"
+                    :disabled="selection.state.busy"
+                    @click="emit('delete-conversation', item.id)"
+                  >
+                    <Trash2 class="mr-2 h-3.5 w-3.5" />
+                    {{ t('common.delete') }}
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+          </ContextMenuTrigger>
+          <ContextMenuContent class="w-44" @close-auto-focus="restoreContextFocus">
+            <ContextMenuItem
+              :disabled="selection.state.busy"
+              data-testid="conversation-context-status"
+              @select="emitBulk(showingArchive ? 'restore' : 'archive', contextIds)"
+            >
+              {{ t(showingArchive ? 'shell.conversation.restore' : 'shell.conversation.archive') }}
+              ({{ contextIds.length }})
+            </ContextMenuItem>
+            <ContextMenuItem
+              :disabled="selection.state.busy"
+              class="text-destructive"
+              data-testid="conversation-context-delete"
+              @select="emitBulk('delete', contextIds)"
+            >
+              {{ t('common.delete') }} ({{ contextIds.length }})
+            </ContextMenuItem>
+            <ContextMenuItem @select="exitSelection">{{
+              t('shell.conversation.cancelSelect')
+            }}</ContextMenuItem>
+          </ContextMenuContent>
+        </ContextMenu>
       </div>
       <div v-if="showingArchive" class="flex items-center justify-between gap-2 px-2 py-2 text-xs">
         <button

@@ -2401,6 +2401,33 @@ describe('conversation archive and undo', () => {
     );
     return { service, runtime, session };
   }
+  it('archives a batch through the same Owner and undo restores only successes once', async () => {
+    const { service, session } = setup();
+    for (const id of ['conv-2', 'conv-3'])
+      session.syncConversationSummary({ ...createConversationDTO(id), status: 'Active' } as never);
+    service.updateConversation.mockImplementation(async (id: string, patch: { status: string }) => {
+      if (id === 'conv-2') throw new Error('offline');
+      return ok({ ...createConversationDTO(id), ...patch });
+    });
+    const pending = session.archiveConversations(['conv-1', 'conv-2', 'conv-3']);
+    expect(await session.archiveConversations(['conv-1'])).toEqual([]);
+    expect(await pending).toEqual([
+      { id: 'conv-1', success: true },
+      { id: 'conv-2', success: false },
+      { id: 'conv-3', success: true },
+    ]);
+    const undo = new KeyboardEvent('keydown', { key: 'z', ctrlKey: true, cancelable: true });
+    window.dispatchEvent(undo);
+    await nextTick();
+    expect(undo.defaultPrevented).toBe(true);
+    expect(
+      service.updateConversation.mock.calls
+        .filter(([, patch]) => patch.status === 'Active')
+        .map(([id]) => id),
+    ).toEqual(['conv-1', 'conv-3']);
+    window.dispatchEvent(new KeyboardEvent('keydown', { key: 'z', ctrlKey: true }));
+    expect(service.updateConversation).toHaveBeenCalledTimes(5);
+  });
   it('archives optimistically, survives a stale snapshot, and preserves canonical history', async () => {
     const { service, runtime, session } = setup();
     let commit!: (value: unknown) => void;
