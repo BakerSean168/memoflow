@@ -48,7 +48,6 @@ function usage() {
     '  node tools/test-system-v2/architecture.mjs --phase nightly --phase-status not-confirmed',
     '  node tools/test-system-v2/architecture.mjs --risk WEB-DESKTOP-SYNC',
     '  node tools/test-system-v2/architecture.mjs --reviews --limit 50  # 人类可读 Markdown',
-    '  node tools/test-system-v2/batch-audit.mjs --write-report  # 1336 文件全量扫描报告',
     '  node tools/test-system-v2/architecture.mjs --review-queue --type component',
     '  node tools/test-system-v2/architecture.mjs --overlaps',
     '  node tools/test-system-v2/architecture.mjs --stories --domain task',

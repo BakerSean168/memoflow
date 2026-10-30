@@ -101,7 +101,7 @@
         }
       ],
       "knownGaps": [
-        "该跨端 E2E primaryCollector 为 specialized lane，未声明 GitHub workflow 自动归属；不能当作常规 PR required E2E 证据。"
+        "该跨端 E2E primaryCollector 为 specialized lane，仅在 nightly-audit 声明自动归属；不能当作常规 PR required E2E 证据。"
       ],
       "expectedDimensions": ["functional", "reliability"],
       "expectedEnvironments": ["real-browser", "node"],
@@ -123,7 +123,7 @@
         }
       ],
       "knownGaps": [
-        "Agent 写路径和 fixture 审批 UI 分别有验证；尚未证明真实 Provider/Approval Tool 权限回执从客户端到服务端的完整跨边界链路。"
+        "Agent 写路径有验证；fixture 审批 UI 样本随 #630 重构移除，尚未证明真实 Provider/Approval Tool 权限回执从客户端到服务端的完整跨边界链路。"
       ],
       "expectedDimensions": ["functional", "security"],
       "expectedEnvironments": ["node", "real-browser"],
