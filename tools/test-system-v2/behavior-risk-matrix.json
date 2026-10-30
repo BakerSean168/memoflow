@@ -1,0 +1,323 @@
+{
+  "version": 2,
+  "description": "T1 orthogonal taxonomy and curated behavior/risk evidence samples. Desired environments/phases are requirements, not confirmed execution. Candidate signals never certify coverage.",
+  "scenarios": [
+    {
+      "id": "AUTH-LOGIN",
+      "severity": "P0",
+      "domain": "authentication",
+      "behavior": "有效凭证建立会话，错误凭证不进入受保护界面。",
+      "failureImpact": "错误放行或无法登录造成账号隔离与基本可用性风险。",
+      "expectedTypes": ["e2e", "component", "unit"],
+      "evidence": [
+        {
+          "path": "packages/app-vue/src/views/AuthPlatformEntry.spec.ts",
+          "review": "assertion-reviewed",
+          "behaviorClaim": "认证入口重定向与加载状态；不是登录表单验证。"
+        },
+        {
+          "path": "apps/api/src/shared/infrastructure/http/middlewares/authMiddleware.spec.ts",
+          "review": "assertion-reviewed",
+          "behaviorClaim": "真实 createAuthMiddleware 调用 Stub CloudSession，校验 401、Closed Account 拒绝及 principal 注入，不等于 HTTP/DB 真实集成。",
+          "verifiedDimensions": ["security", "functional"]
+        }
+      ],
+      "knownGaps": ["现有样本未证明登录表单组件行为与 API 权限拒绝分支完整对应。"],
+      "expectedDimensions": ["functional", "security"],
+      "expectedEnvironments": ["real-browser"],
+      "desiredPhases": ["pr"]
+    },
+    {
+      "id": "GOAL-DRAFT",
+      "severity": "P0",
+      "domain": "goal",
+      "behavior": "GoalDialog 创建／恢复草稿时保持用户输入与创建 ID；保存端到端可用。",
+      "failureImpact": "丢失草稿、重复目标或保存流程中断。",
+      "expectedTypes": ["component", "e2e"],
+      "evidence": [
+        {
+          "path": "packages/goal-ui/src/components/dialogs/GoalDialog.spec.ts",
+          "review": "candidate",
+          "behaviorClaim": "GoalDialog 挂载测试有 durable create ID 与手工草稿恢复场景；完整断言需 T2 审查。"
+        }
+      ],
+      "knownGaps": ["端到端草稿重启与持久 ID 一致性尚无经过本矩阵人工审定的证据。"],
+      "expectedDimensions": ["functional", "reliability"],
+      "expectedEnvironments": ["simulated-dom", "real-browser"],
+      "desiredPhases": ["pr"],
+      "relatedStories": [
+        {
+          "path": "packages/goal-ui/src/components/dialogs/GoalDialog.stories.ts",
+          "review": "assertion-reviewed",
+          "behaviorClaim": "Browser interaction 测试校验 panel 交互、校验错误和保存失败后草稿保留；使用 Mock GoalService。"
+        }
+      ]
+    },
+    {
+      "id": "TASK-RECURRENCE-A11Y",
+      "severity": "P1",
+      "domain": "task",
+      "behavior": "周期选项保留语义按钮与选中状态，同时不破坏任务计划保存。",
+      "failureImpact": "键盘和辅助技术用户无法正确编辑周期任务。",
+      "expectedTypes": ["component", "e2e"],
+      "evidence": [
+        {
+          "path": "packages/task-ui/src/components/TaskPlanForm/widgets/selectors-accessibility.spec.ts",
+          "review": "assertion-reviewed",
+          "behaviorClaim": "周几、每月日期使用 button 和 aria-pressed 对应选中值。",
+          "verifiedDimensions": ["accessibility"]
+        }
+      ],
+      "knownGaps": ["样本证明了语义属性，但未证明完整键盘操作路径。"],
+      "expectedDimensions": ["functional", "accessibility"],
+      "expectedEnvironments": ["simulated-dom", "real-browser"],
+      "desiredPhases": ["pr"],
+      "relatedStories": [
+        {
+          "path": "packages/task-ui/src/components/TaskPlanForm/TaskPlanForm.stories.ts",
+          "review": "assertion-reviewed",
+          "behaviorClaim": "Task 表单的 Escape 焦点恢复与只读空态；未覆盖 Weekday/MonthDay 键盘编辑。"
+        }
+      ]
+    },
+    {
+      "id": "WEB-DESKTOP-SYNC",
+      "severity": "P0",
+      "domain": "sync",
+      "behavior": "目标在桌面与 Web 间双向增删改同步，并在桌面重启后保持。",
+      "failureImpact": "跨端数据不一致或数据丢失。",
+      "expectedTypes": ["e2e", "boundary"],
+      "evidence": [
+        {
+          "path": "apps/web/e2e/sync/goal-sync-regression.spec.ts",
+          "review": "assertion-reviewed",
+          "behaviorClaim": "双向 create/edit/delete，以及桌面重启后的同步持久性。",
+          "verifiedDimensions": ["functional", "reliability"]
+        },
+        {
+          "path": "apps/desktop/src/main/database/__tests__/powersync-lifecycle.spec.ts",
+          "review": "candidate",
+          "behaviorClaim": "候选：桌面同步生命周期与数据库状态测试。"
+        }
+      ],
+      "knownGaps": [
+        "该跨端 E2E primaryCollector 为 specialized lane，仅在 nightly-audit 声明自动归属；不能当作常规 PR required E2E 证据。"
+      ],
+      "expectedDimensions": ["functional", "reliability"],
+      "expectedEnvironments": ["real-browser", "node"],
+      "desiredPhases": ["nightly"]
+    },
+    {
+      "id": "AI-APPROVAL",
+      "severity": "P0",
+      "domain": "ai",
+      "behavior": "Agent 工具写入操作需经过审批并保持隔离与确认语义。",
+      "failureImpact": "未经授权的写入、审批绕过或工作流状态错乱。",
+      "expectedTypes": ["integration", "e2e"],
+      "evidence": [
+        {
+          "path": "apps/api/src/__tests__/integration/agent-gateway-write.integration.test.ts",
+          "review": "assertion-reviewed",
+          "behaviorClaim": "Agent Gateway 的真实 DB mutation receipt/幂等与跨 identity 修改拒绝；不直接证明所有 Agent Approval 分支。",
+          "verifiedDimensions": ["functional", "security"]
+        }
+      ],
+      "knownGaps": [
+        "Agent 写路径有验证；fixture 审批 UI 样本随 #630 重构移除，尚未证明真实 Provider/Approval Tool 权限回执从客户端到服务端的完整跨边界链路。"
+      ],
+      "expectedDimensions": ["functional", "security"],
+      "expectedEnvironments": ["node", "real-browser"],
+      "desiredPhases": ["pr"]
+    },
+    {
+      "id": "DESKTOP-IPC",
+      "severity": "P0",
+      "domain": "desktop",
+      "behavior": "Desktop IPC 系统 handler 与工作区端到端调用遵循通道/权限边界。",
+      "failureImpact": "Renderer 越权、协议漂移或本地能力不可用。",
+      "expectedTypes": ["boundary", "e2e", "contract"],
+      "evidence": [
+        {
+          "path": "apps/desktop/src/main/ipc/__tests__/system-handlers.spec.ts",
+          "review": "assertion-reviewed",
+          "behaviorClaim": "Stub Electron ipcMain，验证注册的 system channels 与本地保存/取消操作；非真实 preload/renderer 调用。",
+          "verifiedDimensions": ["functional"]
+        },
+        {
+          "path": "apps/desktop/e2e/workspace-ipc.spec.mts",
+          "review": "assertion-reviewed",
+          "behaviorClaim": "真实 Windows Electron Workspace IPC 生命周期；非 Windows 运行器会 skip。",
+          "verifiedDimensions": ["functional"]
+        },
+        {
+          "path": "packages/transport-contracts/src/result/ipc-envelope.surface.spec.ts",
+          "review": "assertion-reviewed",
+          "behaviorClaim": "IPC envelope 对成功、失败、非法载荷的识别。",
+          "verifiedDimensions": ["functional"]
+        }
+      ],
+      "knownGaps": [
+        "已证实 Release Assets 调用 Windows Installed E2E，测试命令包含 workspace-ipc.spec.mts；仅为 conditional 配置证据，仍需对应 release SHA 的 GitHub Run receipt。",
+        "尚未逐项审查所有 IPC 通道授权矩阵、Preload 暴露面；PR 中的边界测试不能替代 Windows 安装包验收。"
+      ],
+      "expectedDimensions": ["functional", "security"],
+      "expectedEnvironments": ["node", "electron"],
+      "desiredPhases": ["pr", "release"]
+    },
+    {
+      "id": "DESKTOP-UPDATE",
+      "severity": "P0",
+      "domain": "desktop-update",
+      "behavior": "检查更新、下载、安装决策及回滚状态必须一致。",
+      "failureImpact": "错误升级、不可安装或启动失败。",
+      "expectedTypes": ["unit", "boundary"],
+      "evidence": [
+        {
+          "path": "apps/desktop/src/main/modules/desktop-update/infrastructure/electron-updater.adapter.spec.ts",
+          "review": "assertion-reviewed",
+          "behaviorClaim": "electron-updater 默认行为被产品政策覆盖；可用/不可用更新映射。"
+        },
+        {
+          "path": "apps/desktop/src/main/modules/desktop-update/runtime/desktop-update-ipc.spec.ts",
+          "review": "candidate",
+          "behaviorClaim": "候选：更新操作 IPC 边界。"
+        },
+        {
+          "path": "tools/ci-cd-platform/__tests__/desktop-update-rollout.test.mjs",
+          "review": "candidate",
+          "behaviorClaim": "候选：发布侧更新 rollout 规则。"
+        }
+      ],
+      "knownGaps": ["安装包真实安装/升级/回滚验收不由当前所列单元、IPC、治理测试直接证明。"],
+      "expectedDimensions": ["functional", "reliability"],
+      "expectedEnvironments": ["node"],
+      "expectedRoles": ["governance"],
+      "desiredPhases": ["pr", "release"]
+    },
+    {
+      "id": "DATA-MIGRATION",
+      "severity": "P0",
+      "domain": "database",
+      "behavior": "数据升级迁移能保留用户记录、幂等且失败可恢复。",
+      "failureImpact": "升级导致数据库或本地知识丢失。",
+      "expectedTypes": ["unit", "integration"],
+      "evidence": [
+        {
+          "path": "apps/migrator/src/main.test.ts",
+          "review": "candidate",
+          "behaviorClaim": "候选：migrator 主入口验证。"
+        },
+        {
+          "path": "packages/database/src/schema/task-shared-label-migration.spec.ts",
+          "review": "candidate",
+          "behaviorClaim": "候选：task-label schema migration 规则。"
+        },
+        {
+          "path": "packages/database/src/schema/account-setting-cutover.integration.test.ts",
+          "review": "assertion-reviewed",
+          "verifiedDimensions": ["functional", "reliability"],
+          "behaviorClaim": "使用 pg Client 在临时 PostgreSQL 中创建 legacy tables，验证 Account/Setting 迁移保留账号、幂等和未知状态/锁等待失败回滚。"
+        }
+      ],
+      "knownGaps": [
+        "已有真实 PostgreSQL Account/Setting Cutover Integration；尚未证明从完整旧版生产数据库到当前版本的全链路 schema 升级、恢复演练与发布阶段自动运行。"
+      ],
+      "expectedDimensions": ["functional", "reliability"],
+      "expectedEnvironments": ["node", "database"],
+      "desiredPhases": ["pr", "release"]
+    },
+    {
+      "id": "OWNER-ISOLATION",
+      "severity": "P0",
+      "domain": "account",
+      "behavior": "账户关闭及账号间数据隔离不产生越权访问或遗留消费。",
+      "failureImpact": "跨租户访问或账户关闭后仍可读取私人数据。",
+      "expectedTypes": ["integration", "e2e"],
+      "evidence": [
+        {
+          "path": "apps/api/src/__tests__/integration/account-closure-consumers.integration.test.ts",
+          "review": "candidate",
+          "behaviorClaim": "候选：账户关闭对多消费者的集成验证。"
+        },
+        {
+          "path": "apps/web/e2e/account/account-profile.spec.ts",
+          "review": "candidate",
+          "behaviorClaim": "候选：账户信息流程；是否包括跨身份越权待确认。"
+        },
+        {
+          "path": "apps/api/src/__tests__/integration/agent-gateway-write.integration.test.ts",
+          "review": "assertion-reviewed",
+          "verifiedDimensions": ["security", "functional"],
+          "behaviorClaim": "真实 PostgreSQL 写路径对另一个 identityId 修改 Goal 返回 NOT_FOUND，同时验证错误幂等数据冲突。"
+        },
+        {
+          "path": "apps/api/src/__tests__/integration/express-auth-closure.integration.test.ts",
+          "review": "assertion-reviewed",
+          "verifiedDimensions": ["security", "functional"],
+          "behaviorClaim": "Supertest+Express 对关闭账号 raw sign-in/session 返回 403，但使用假 DB 不能当作 PostgreSQL 端到端。"
+        }
+      ],
+      "knownGaps": [
+        "已有真实 DB Agent write 跨身份拒绝，但不代表全模块/全表双身份 Owner 隔离。闭户 HTTP 403 使用 Stub 数据库；需扩展多身份覆盖矩阵。"
+      ],
+      "expectedDimensions": ["functional", "security"],
+      "expectedEnvironments": ["node", "real-browser"],
+      "desiredPhases": ["pr"]
+    },
+    {
+      "id": "VISUAL-LAYOUT",
+      "severity": "P1",
+      "domain": "task",
+      "behavior": "任务 UI 在多视口/主题下保持布局稳定、交互可访问。",
+      "failureImpact": "视觉回归导致编辑器溢出、不可见按钮或焦点丢失。",
+      "expectedTypes": ["e2e"],
+      "expectedDimensions": ["functional", "visual", "accessibility"],
+      "expectedEnvironments": ["real-browser"],
+      "desiredPhases": ["pr", "nightly"],
+      "evidence": [
+        {
+          "path": "apps/web/e2e/task/visual-grammar/task-visual-grammar.spec.ts",
+          "review": "assertion-reviewed",
+          "verifiedDimensions": ["visual", "accessibility"],
+          "behaviorClaim": "Playwright 截图比较基线，并检查焦点恢复和键盘操作。"
+        },
+        {
+          "path": "apps/web/e2e/visual-regression/matrix.spec.ts",
+          "review": "assertion-reviewed",
+          "verifiedDimensions": ["visual", "accessibility"],
+          "behaviorClaim": "布局 boundingBox 几何断言，以及 aria、焦点、键盘断言；这不是像素截图断言。"
+        }
+      ],
+      "knownGaps": [
+        "现有样本未证明全部视觉基线都在 PR 执行，需与 CI visual representative/full 审计关联核对。"
+      ]
+    },
+    {
+      "id": "AI-EVAL-QUALITY",
+      "severity": "P0",
+      "domain": "ai",
+      "behavior": "AI 回答、目标规划和知识问答质量回归可量化比较，不只测试 Agent 函数正常运行。",
+      "failureImpact": "模型或 Prompt 变更导致质量下降、秘密泄露或成本/时延退化而未被发现。",
+      "expectedTypes": ["unit"],
+      "expectedDimensions": ["functional", "ai-evaluation"],
+      "expectedEnvironments": ["node", "external-service"],
+      "desiredPhases": ["pr", "nightly"],
+      "evidence": [
+        {
+          "path": "packages/ai/src/evals/eval-runner.spec.ts",
+          "review": "assertion-reviewed",
+          "verifiedDimensions": ["ai-evaluation", "functional"],
+          "behaviorClaim": "数据集+RecordedReplayAIEvalExecutor 覆盖报告质量门禁、成本/p95 比较、回退失败；仅证明离线回放评测框架。"
+        },
+        {
+          "path": "packages/ai/src/server/infrastructure/adapters/fs/__tests__/ai-evaluation-report-file.adapter.test.ts",
+          "review": "candidate",
+          "behaviorClaim": "评测报告存储适配器候选契约，不是模型质量评测本身。"
+        }
+      ],
+      "knownGaps": [
+        "当前审核样本属于 recorded replay；真实模型/外部 Provider 评测与其执行阶段尚未证实。"
+      ]
+    }
+  ]
+}
