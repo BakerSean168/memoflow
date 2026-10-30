@@ -94,31 +94,33 @@ Release 不能由 Release Workflow 存在就自动推断每一个测试已参与
 例如跨端同步的 goal-sync-regression.spec.ts 主归属是 specialized E2E，PR 与 Nightly 均未在该元数据中
 确认自动绑定，不能当作普通 PR 的 required Web Flow 证据。
 
-## 3. 初始统计（2026-10-24，语义均为自动候选）
+## 3. 初始统计（2026-10-30 于本分支实测，语义均为自动候选）
 
-Primary Suite **完全未变**：unit 1115、integration 53、smoke 3、
-boundary 18、e2e 69、perf 2、governance 76；总计 **1336** 个文件。
+基线：main@30618e2db。运行 `node tools/test-system-v2/architecture.mjs --summary` 得到。
+
+Primary Suite **完全未变**：unit 1147、integration 58、smoke 3、
+boundary 18、e2e 41、perf 2、governance 89；总计 **1358** 个文件。
 
 | 语义 Test Type               |   文件数 |
 | ---------------------------- | -------: |
-| Unit                         |      734 |
-| Component                    |      167 |
-| Contract                     |       85 |
-| Integration（含 Smoke）      |       56 |
-| Boundary                     |       18 |
-| E2E                          |       69 |
+| Unit                         |      795 |
+| Component                    |      171 |
+| Contract                     |       68 |
+| Integration（含 Smoke）      |       65 |
+| Boundary                     |       14 |
+| E2E                          |       37 |
 | Performance                  |        2 |
-| **有主语义类型的小计**       | **1131** |
-| 辅助 Role：Governance        |       76 |
-| 辅助 Role：Source-constraint |      129 |
-| **Primary Files 总计**       | **1336** |
+| **有主语义类型的小计**       | **1152** |
+| 辅助 Role：Governance        |       89 |
+| 辅助 Role：Source-constraint |      117 |
+| **Primary Files 总计**       | **1358** |
 
 Verification Dimensions 可重叠，数量不可求和：
-Functional 1131、Accessibility 66、Visual 15、Security 121、Reliability 251、AI Evaluation 1。
+Functional 1152、Accessibility 57、Visual 9、Security 131、Reliability 250、AI Evaluation 1。
 后五项为静态候选，不能将其计为已人工验证的测试覆盖。
 
-Storybook 另外有 69 个 Stories，2 个文件检测到 play 函数。
-Stories 单独索引，不包含在 1336 个 Primary Files，也不自动算作 PR 成功的组件测试。
+Storybook 另外有 71 个 Stories，4 个文件检测到 play 函数。
+Stories 单独索引，不包含在 1358 个 Primary Files，也不自动算作 PR 成功的组件测试。
 
 ## 4. 行为风险矩阵与治理契约
 
@@ -155,7 +157,7 @@ Desktop IPC、桌面更新、数据库迁移、Owner 隔离、视觉布局、AI 
     node tools/test-system-v2/inventory.mjs --check
 
 查询实时读取 Inventory、测试源文件、Vitest 配置、CI/Nightly Workflow 和风险矩阵，
-不长期持有独立的 1336 行影子数据副本。
+不长期持有独立的 1358 行影子数据副本。
 architecture --check 检查元数据、分类、风险路径与一致性，明确保留 open risk gaps，
 **不会把缺口评为通过的业务质量**。原 Inventory V3 继续核实 primary ownership 和 E2E ownership。
 二者接入原 test-system-v2:test:governance；未变更 GitHub Actions。
