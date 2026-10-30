@@ -3047,6 +3047,16 @@
   "storyReviews": [],
   "overlapGroups": [
     {
+      "id": "SYNC-MOCK-REAL",
+      "paths": [
+        "apps/desktop/src/main/database/__tests__/powersync-lifecycle.spec.ts",
+        "apps/web/e2e/sync/goal-sync-regression.spec.ts"
+      ],
+      "assessment": "complementary",
+      "reason": "模拟 PowerSync shutdown 不证明桌面/Web 一致性；跨端 E2E 不替代 Main 进程清理。",
+      "retirementDecision": "blocked-no-equivalent-replacement"
+    },
+    {
       "id": "MIGRATION-BOUNDARIES",
       "paths": [
         "apps/migrator/src/main.test.ts",

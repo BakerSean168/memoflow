@@ -398,7 +398,7 @@ test('T2 sampled review corrects false structural and contract classification wi
     REVIEWED_FILE_SAMPLE_COUNT,
   );
   assert.equal(repositoryArchitecture.summary.review.reviewedStoryFiles, 0);
-  assert.equal(repositoryArchitecture.summary.review.overlapGroups, 2);
+  assert.equal(repositoryArchitecture.summary.review.overlapGroups, 3);
   assert.equal(repositoryArchitecture.summary.review.retirementApproved, 0);
   assert.equal(repositoryArchitecture.summary.review.warnings, 0);
   const byPath = (path) => repositoryArchitecture.entries.find((entry) => entry.path === path);
@@ -488,7 +488,7 @@ test('T2 distinguishes integration database requirements from Redis and fake mod
 });
 
 test('T2 Storybook scenarios and overlap relationships are tracked separately', () => {
-  assert.equal(repositoryArchitecture.overlapGroups.length, 2);
+  assert.equal(repositoryArchitecture.overlapGroups.length, 3);
   assert.ok(
     repositoryArchitecture.overlapGroups.every(
       (group) => group.retirementDecision === 'blocked-no-equivalent-replacement',
