@@ -59,6 +59,30 @@ interface ActiveRun {
   driver?: Driver;
   grant?: LocalAgentToolGrant;
   abort: AbortController;
+  permissions: NativePermissionLedger;
+}
+/**
+ * Per-run memory of native (Provider-side) permission requests. Native permission
+ * prompts are a separate authority from MemoFlow business write scopes: this ledger
+ * only deduplicates identical prompts and remembers a decline for the rest of the run,
+ * so a rejected capability is not asked for again in a loop.
+ */
+interface NativePermissionLedger {
+  readonly declined: Set<string>;
+  readonly pending: Map<string, { primaryRequestId: string; duplicateRequestIds: string[] }>;
+  readonly keyByRequestId: Map<string, string>;
+  readonly suppressed: Set<string>;
+}
+function createNativePermissionLedger(): NativePermissionLedger {
+  return {
+    declined: new Set(),
+    pending: new Map(),
+    keyByRequestId: new Map(),
+    suppressed: new Set(),
+  };
+}
+function nativePermissionKey(request: { title: string; scope?: string }): string {
+  return `${request.title.trim().toLowerCase()}\u0000${(request.scope ?? '').trim().toLowerCase()}`;
 }
 export interface LocalAgentRuntimeOptions {
   store: LocalAgentRepository;
@@ -83,6 +107,8 @@ type ConversationInput = { identityId: string; conversationId: string };
 // T3-inspired Provider snapshot: only public model metadata is persisted in
 // this Desktop Profile's storage. Authentication and execution are ALWAYS native.
 const CATALOG_OBSERVATION_MAX_AGE_MS = 24 * 60 * 60_000;
+export const MEMOFLOW_NATIVE_TOOL_ROUTING_INSTRUCTIONS =
+  'MemoFlow business tool policy: use only the MemoFlow MCP tools for MemoFlow Goals, Tasks, and Knowledge. Never use shell, filesystem, browser, or Chrome DevTools tools to inspect or operate MemoFlow. When the user asks to create or edit a Goal in the right-side native form, call goal_panel_open first, then use goal_panel_snapshot/patch/add_key_result/remove_key_result/focus and finish with goal_panel_submit; do not use goal_create for that flow. Use goal_create or goal_update only when the user explicitly requests a direct background Goal write. If a required MemoFlow tool is missing or access is denied, report the specific failure and stop without retrying or switching paths.';
 interface ObservedNativeCatalog {
   revision: number;
   visibilityContext: string;
@@ -566,6 +592,7 @@ export class LocalAgentRuntime {
       ...input,
       runId: randomUUID(),
       abort: new AbortController(),
+      permissions: createNativePermissionLedger(),
     };
     this.runs.set(run.runId, run);
     const onAbort = () => this.cancel(run);
@@ -649,7 +676,8 @@ export class LocalAgentRuntime {
         yield { ...envelope(), type: 'assistant.run.cancelled', data: {} };
         return;
       }
-      const content = `${input.content}\n\nMemoFlow reference format: cite Goal and TaskPlan results using Markdown links [name](/goals/ID) and [title](/tasks/ID), with IDs returned by MemoFlow tools. Cite Knowledge notes using [title](url) with the exact url returned by knowledge_search/knowledge_get.${input.selectedEntities?.length ? `\nUser-selected MemoFlow references (look up using MemoFlow tools):\n${JSON.stringify(input.selectedEntities)}` : ''}`;
+      const toolRouting = run.grant ? `\n\n${MEMOFLOW_NATIVE_TOOL_ROUTING_INSTRUCTIONS}` : '';
+      const content = `${input.content}${toolRouting}\n\nMemoFlow reference format: cite Goal and TaskPlan results using Markdown links [name](/goals/ID) and [title](/tasks/ID), with IDs returned by MemoFlow tools. Cite Knowledge notes using [title](url) with the exact url returned by knowledge_search/knowledge_get.${input.selectedEntities?.length ? `\nUser-selected MemoFlow references (look up using MemoFlow tools):\n${JSON.stringify(input.selectedEntities)}` : ''}`;
       for await (const event of run.driver.run({
         nativeSessionId: conversation.nativeSessionId,
         accountFingerprint: conversation.accountFingerprint,
@@ -733,10 +761,62 @@ export class LocalAgentRuntime {
               type: 'assistant.request.resolved',
               data: { requestId: event.request.requestId, resolution: 'answered' },
             };
+          } else if (event.request.type === 'permission') {
+            const ledger = run.permissions;
+            const key = nativePermissionKey(event.request);
+            const requestId = event.request.requestId;
+            ledger.keyByRequestId.set(requestId, key);
+            if (ledger.declined.has(key)) {
+              // Declined earlier in this run: answer for the user instead of prompting
+              // again, and surface a readable denial instead of a retry loop.
+              ledger.suppressed.add(requestId);
+              run.driver.respond(requestId, { type: 'permission', decision: 'decline' });
+              yield {
+                ...envelope(),
+                type: 'assistant.activity',
+                data: {
+                  activityType: 'native_tool',
+                  toolCallId: `permission:${requestId}`,
+                  label: event.request.title.slice(0, 240) || 'permission',
+                  state: 'denied',
+                },
+              };
+            } else {
+              const pending = ledger.pending.get(key);
+              if (pending) {
+                // Same capability is already waiting for the user: one card answers both.
+                ledger.suppressed.add(requestId);
+                pending.duplicateRequestIds.push(requestId);
+              } else {
+                ledger.pending.set(key, { primaryRequestId: requestId, duplicateRequestIds: [] });
+                yield {
+                  ...envelope(),
+                  type: 'assistant.request.required',
+                  data: event.request,
+                };
+              }
+            }
           } else {
-            yield { ...envelope(), type: 'assistant.request.required', data: event.request };
+            yield {
+              ...envelope(),
+              type: 'assistant.request.required',
+              data: event.request,
+            };
           }
         } else if (event.type === 'request_resolved') {
+          const ledger = run.permissions;
+          const key = ledger.keyByRequestId.get(event.requestId);
+          if (ledger.suppressed.has(event.requestId)) continue;
+          const pending = key === undefined ? undefined : ledger.pending.get(key);
+          if (key !== undefined && pending?.primaryRequestId === event.requestId) {
+            const next = pending.duplicateRequestIds.shift();
+            if (next === undefined) ledger.pending.delete(key);
+            else {
+              // The Provider withdrew the visible prompt; promote the next identical one.
+              pending.primaryRequestId = next;
+              ledger.suppressed.delete(next);
+            }
+          }
           yield {
             ...envelope(),
             type: 'assistant.request.resolved',
@@ -752,7 +832,10 @@ export class LocalAgentRuntime {
           yield {
             ...envelope(),
             type: 'assistant.run.completed',
-            data: { content: assistant.content, assistantMessageId: assistant.id },
+            data: {
+              content: assistant.content,
+              assistantMessageId: assistant.id,
+            },
           };
           return;
         } else {
@@ -789,7 +872,11 @@ export class LocalAgentRuntime {
           this.executionFailures.delete(key);
           this.executionFailures.set(key, {
             context: run.accountContext,
-            failure: { code: failure.code, modelId: run.modelId, occurredAt: Date.now() },
+            failure: {
+              code: failure.code,
+              modelId: run.modelId,
+              occurredAt: Date.now(),
+            },
           });
         } else if (this.executionFailures.get(key)?.context === run.accountContext) {
           this.executionFailures.delete(key);
@@ -817,13 +904,26 @@ export class LocalAgentRuntime {
   respond(identityId: string, input: LocalAgentRequestResponse): boolean {
     this.assertActive();
     const run = this.runs.get(input.runId);
-    return Boolean(
-      run &&
-      run.identityId === identityId &&
-      run.conversationId === input.conversationId &&
-      !run.abort.signal.aborted &&
-      run.driver?.respond(input.requestId, input.response),
-    );
+    if (
+      !run ||
+      run.identityId !== identityId ||
+      run.conversationId !== input.conversationId ||
+      run.abort.signal.aborted ||
+      !run.driver?.respond(input.requestId, input.response)
+    )
+      return false;
+    if (input.response.type === 'permission') {
+      const ledger = run.permissions;
+      const key = ledger.keyByRequestId.get(input.requestId);
+      const pending = key === undefined ? undefined : ledger.pending.get(key);
+      if (key !== undefined && pending?.primaryRequestId === input.requestId) {
+        ledger.pending.delete(key);
+        for (const duplicate of pending.duplicateRequestIds)
+          run.driver.respond(duplicate, input.response);
+      }
+      if (key !== undefined && input.response.decision === 'decline') ledger.declined.add(key);
+    }
+    return true;
   }
   cancelRun(input: { identityId: string; runId: string }): boolean {
     const run = this.runs.get(input.runId);

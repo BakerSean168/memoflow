@@ -452,6 +452,8 @@ export class CodexDriver {
           value.data.reason ??
           value.data.grantRoot ??
           'Allow this native Agent operation once?',
+        ...(value.data.command && value.data.reason ? { reason: value.data.reason } : {}),
+        ...(value.data.grantRoot ? { scope: value.data.grantRoot } : {}),
       };
     } else if (wire.method === 'item/tool/requestUserInput') {
       const value = z
