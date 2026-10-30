@@ -57,16 +57,16 @@ function createHarness(initial = snapshot(), locale = 'en-US') {
   };
   const getDiagnostics = vi.fn(async () => ok(diagnostics));
   const getSnapshot = vi.fn(async () => ok(initial));
-  const check = vi.fn(async () =>
-    ok(
-      snapshot({
-        type: 'idle',
-        currentVersion: '1.2.0',
-        lastCheckedAt: '2026-09-30T12:00:00.000Z',
-        lastOutcome: 'up-to-date',
-      }),
-    ),
-  );
+  const check = vi.fn(async () => {
+    const checked = snapshot({
+      type: 'idle',
+      currentVersion: '1.2.0',
+      lastCheckedAt: '2026-09-30T12:00:00.000Z',
+      lastOutcome: 'up-to-date',
+    });
+    checked.channel = initial.channel;
+    return ok(checked);
+  });
   const restartAndInstall = vi.fn(async () =>
     ok(
       snapshot({
@@ -191,6 +191,45 @@ function createHarness(initial = snapshot(), locale = 'en-US') {
 }
 
 describe('DesktopUpdateSettingsSection', () => {
+  it.each([
+    { locale: 'en-US', setting: enSetting, channel: 'stable', label: 'Stable' },
+    { locale: 'en-US', setting: enSetting, channel: 'beta', label: 'Beta' },
+    { locale: 'en-US', setting: enSetting, channel: 'canary', label: 'Canary' },
+    { locale: 'en-US', setting: enSetting, channel: 'nightly', label: 'Nightly' },
+    { locale: 'zh-CN', setting: zhSetting, channel: 'stable', label: '稳定版' },
+    { locale: 'zh-CN', setting: zhSetting, channel: 'beta', label: 'Beta' },
+    { locale: 'zh-CN', setting: zhSetting, channel: 'canary', label: 'Canary' },
+    { locale: 'zh-CN', setting: zhSetting, channel: 'nightly', label: '每夜构建版' },
+  ] as const)(
+    'renders the $channel channel and accurate idle copy in $locale',
+    async ({ locale, setting, channel, label }) => {
+      const current = snapshot();
+      current.channel = channel;
+      const harness = createHarness(current, locale);
+      await flushPromises();
+
+      expect(harness.wrapper.text()).toContain(label);
+      expect(harness.wrapper.text()).toContain(setting.updates.description.readyToCheck);
+      expect(harness.wrapper.text()).not.toMatch(/setting\.updates\.[\w.]+/);
+
+      const upToDate = snapshot({
+        type: 'idle',
+        currentVersion: '1.2.0',
+        lastCheckedAt: '2026-09-30T12:00:00.000Z',
+        lastOutcome: 'up-to-date',
+      });
+      upToDate.channel = channel;
+      harness.emit(upToDate);
+      await nextTick();
+      await harness.wrapper.get('[data-testid="desktop-update-primary-action"]').trigger('click');
+      await flushPromises();
+
+      expect(harness.wrapper.text()).toContain(setting.updates.description.upToDate);
+      expect(harness.wrapper.text()).not.toMatch(/setting\.updates\.[\w.]+/);
+      harness.wrapper.unmount();
+    },
+  );
+
   it('renders GitHub HTML notes as rich text and keeps the full content', async () => {
     const fullText = 'Complete release detail. '.repeat(120) + 'END OF NOTES';
     const harness = createHarness(

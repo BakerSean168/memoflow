@@ -154,6 +154,7 @@ export default {
       stable: 'Stable',
       beta: 'Beta',
       canary: 'Canary',
+      nightly: 'Nightly',
     },
     owner: {
       'memoflow-direct': 'MemoFlow',
@@ -178,8 +179,9 @@ export default {
     },
     description: {
       loading: 'Reading version and update capabilities from the Desktop runtime.',
-      readyToCheck: 'MemoFlow checks the stable channel in the background. You can also check now.',
-      upToDate: 'This installation is already on the latest version in the stable channel.',
+      readyToCheck:
+        'MemoFlow checks the current release channel in the background. You can also check now.',
+      upToDate: 'This installation is already on the latest version in its release channel.',
       checking: 'Connecting to the update source and validating the latest release metadata.',
       available: "A new version is available and will follow this installation's download policy.",
       availablePackageManager:
