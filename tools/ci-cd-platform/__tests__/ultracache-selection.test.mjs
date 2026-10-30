@@ -5,7 +5,12 @@ import path from 'node:path';
 import { createRequire } from 'node:module';
 import test from 'node:test';
 import YAML from 'yaml';
-import { CI_TARGETS, loadAffectedRunnerInputs, selectCiTasks } from '../lib/task-selection.mjs';
+import {
+  CI_TARGETS,
+  loadAffectedRunnerInputs,
+  loadCiRunnerInputs,
+  selectCiTasks,
+} from '../lib/task-selection.mjs';
 import { verifyRecording } from '../verify-ultracache-recording.mjs';
 import {
   initializeSelectionContext,
@@ -49,6 +54,43 @@ test('missing Cloud recording keeps native Nx task inputs, never an empty select
     ultracacheConfigurations: undefined,
     ultracache: { status: 'skipped', reason: 'offline' },
   });
+});
+
+test('rejected Nx Cloud selection context keeps declared Nx inputs instead of a full fallback', async () => {
+  const nxJson = { nxCloudId: 'workspace' };
+  const recorded = { native: 'stale recording' };
+  const loadInputs = async () => ({
+    selectivelyHashTsConfig: true,
+    ultracacheConfigurations: recorded,
+    ultracache: { status: 'cached' },
+  });
+  assert.deepEqual(
+    await loadCiRunnerInputs(nxJson, {
+      initialize: async () => {
+        throw new Error('Nx Cloud selection context returned HTTP 401');
+      },
+      loadInputs,
+    }),
+    {
+      selectivelyHashTsConfig: true,
+      ultracacheConfigurations: undefined,
+      ultracache: {
+        status: 'unavailable',
+        reason: 'Nx Cloud selection context failed: Nx Cloud selection context returned HTTP 401',
+      },
+    },
+  );
+  const registered = await loadCiRunnerInputs(nxJson, { initialize: async () => {}, loadInputs });
+  assert.equal(registered.ultracacheConfigurations, recorded);
+  await assert.rejects(
+    loadCiRunnerInputs(nxJson, {
+      initialize: async () => {},
+      loadInputs: async () => {
+        throw new Error('planner unavailable');
+      },
+    }),
+    /planner unavailable/u,
+  );
 });
 
 test('Nx 24 exposes the same Ultracache loader used by its affected CLI', () => {
