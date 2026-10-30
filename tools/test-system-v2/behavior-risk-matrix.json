@@ -11,12 +11,6 @@
       "expectedTypes": ["e2e", "component", "unit"],
       "evidence": [
         {
-          "path": "apps/web/e2e/authentication/auth-login.spec.ts",
-          "review": "assertion-reviewed",
-          "behaviorClaim": "注册后登出再登录、错误密码提示和登录状态。",
-          "verifiedDimensions": ["functional", "security"]
-        },
-        {
           "path": "packages/app-vue/src/views/AuthPlatformEntry.spec.ts",
           "review": "assertion-reviewed",
           "behaviorClaim": "认证入口重定向与加载状态；不是登录表单验证。"
@@ -42,14 +36,9 @@
       "expectedTypes": ["component", "e2e"],
       "evidence": [
         {
-          "path": "packages/app-vue/src/modules/goal/components/dialogs/GoalDialog.spec.ts",
+          "path": "packages/goal-ui/src/components/dialogs/GoalDialog.spec.ts",
           "review": "candidate",
           "behaviorClaim": "GoalDialog 挂载测试有 durable create ID 与手工草稿恢复场景；完整断言需 T2 审查。"
-        },
-        {
-          "path": "apps/web/e2e/goal/goal-crud.spec.ts",
-          "review": "candidate",
-          "behaviorClaim": "候选：Web Goal CRUD 完整流程；与 durable draft 行为是否对应未确认。"
         }
       ],
       "knownGaps": ["端到端草稿重启与持久 ID 一致性尚无经过本矩阵人工审定的证据。"],
@@ -58,7 +47,7 @@
       "desiredPhases": ["pr"],
       "relatedStories": [
         {
-          "path": "packages/app-vue/src/modules/goal/components/dialogs/GoalDialog.stories.ts",
+          "path": "packages/goal-ui/src/components/dialogs/GoalDialog.stories.ts",
           "review": "assertion-reviewed",
           "behaviorClaim": "Browser interaction 测试校验 panel 交互、校验错误和保存失败后草稿保留；使用 Mock GoalService。"
         }
@@ -73,15 +62,10 @@
       "expectedTypes": ["component", "e2e"],
       "evidence": [
         {
-          "path": "packages/app-vue/src/modules/task/components/TaskPlanForm/widgets/selectors-accessibility.spec.ts",
+          "path": "packages/task-ui/src/components/TaskPlanForm/widgets/selectors-accessibility.spec.ts",
           "review": "assertion-reviewed",
           "behaviorClaim": "周几、每月日期使用 button 和 aria-pressed 对应选中值。",
           "verifiedDimensions": ["accessibility"]
-        },
-        {
-          "path": "apps/web/e2e/task/task-plan-crud.spec.ts",
-          "review": "candidate",
-          "behaviorClaim": "候选：Task Plan 完整 CRUD，周期设置交互断言未逐项审查。"
         }
       ],
       "knownGaps": ["样本证明了语义属性，但未证明完整键盘操作路径。"],
@@ -90,7 +74,7 @@
       "desiredPhases": ["pr"],
       "relatedStories": [
         {
-          "path": "packages/app-vue/src/modules/task/components/TaskPlanForm/TaskPlanForm.stories.ts",
+          "path": "packages/task-ui/src/components/TaskPlanForm/TaskPlanForm.stories.ts",
           "review": "assertion-reviewed",
           "behaviorClaim": "Task 表单的 Escape 焦点恢复与只读空态；未覆盖 Weekday/MonthDay 键盘编辑。"
         }
@@ -136,12 +120,6 @@
           "review": "assertion-reviewed",
           "behaviorClaim": "Agent Gateway 的真实 DB mutation receipt/幂等与跨 identity 修改拒绝；不直接证明所有 Agent Approval 分支。",
           "verifiedDimensions": ["functional", "security"]
-        },
-        {
-          "path": "apps/web/e2e/ai/goal-workflow/goal-agent-approval.spec.ts",
-          "review": "assertion-reviewed",
-          "behaviorClaim": "Fixture 注入的 Goal Agent UI approval、失败重试和重载恢复；不是 live Provider 执行。",
-          "verifiedDimensions": ["functional"]
         }
       ],
       "knownGaps": [
@@ -172,7 +150,7 @@
           "verifiedDimensions": ["functional"]
         },
         {
-          "path": "packages/contracts/src/result/ipc-envelope.surface.spec.ts",
+          "path": "packages/transport-contracts/src/result/ipc-envelope.surface.spec.ts",
           "review": "assertion-reviewed",
           "behaviorClaim": "IPC envelope 对成功、失败、非法载荷的识别。",
           "verifiedDimensions": ["functional"]
