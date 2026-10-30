@@ -1,6 +1,15 @@
 import { expect, test } from '@playwright/test';
+import { dumpScrollProbeOnFailure, installScrollProbe } from './scroll-probe';
 
 // Real native owner components, deterministic service doubles; not AI-provider or database E2E evidence.
+test.beforeEach(async ({ page }) => {
+  await installScrollProbe(page);
+});
+
+test.afterEach(async ({ page }, testInfo) => {
+  await dumpScrollProbeOnFailure(page, testInfo);
+});
+
 test('large Goal editor holds panel-relative dimensions while a key result expands and only its body scrolls', async ({
   page,
 }) => {
