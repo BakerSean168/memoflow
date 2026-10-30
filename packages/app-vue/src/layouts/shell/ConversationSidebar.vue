@@ -501,6 +501,7 @@ const identityLabel = () => {
       class="flex-1 overflow-y-auto px-2 pb-3 pt-1"
       role="listbox"
       aria-multiselectable="true"
+      :aria-busy="selection.state.busy ? true : undefined"
       :aria-label="t('shell.conversation.select')"
       @click="
         (event) => {

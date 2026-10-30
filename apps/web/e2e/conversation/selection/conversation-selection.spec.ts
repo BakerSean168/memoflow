@@ -127,6 +127,7 @@ test('narrow sidebar preserves search, blank clearing, recovery and separate des
   await page.getByTestId('conversation-context-status').click();
   await expect(page.getByTestId('calls')).toContainText('a:Active');
   await page.getByTestId('conversation-archive-toggle').click();
+  await expect(page.getByRole('listbox')).not.toHaveAttribute('aria-busy', 'true');
   await page.locator('[data-keyboard-item="a"]').click({ modifiers: ['Control'] });
   page.once('dialog', async (dialog) => {
     expect(dialog.message()).toContain('cannot be undone');
