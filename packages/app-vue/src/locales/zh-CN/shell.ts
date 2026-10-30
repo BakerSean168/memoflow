@@ -59,6 +59,13 @@ export default {
     confirmDelete: '删除此会话及其消息？此操作无法撤销。',
     previousPage: '上一页',
     nextPage: '下一页',
+    select: '选择会话',
+    cancelSelect: '取消选择',
+    selectAll: '全选',
+    clearSelection: '清除选择',
+    archiveSelected: '归档所选',
+    restoreSelected: '恢复所选',
+    deleteSelected: '删除所选',
 
     today: '今天',
     last7Days: '近 7 天',

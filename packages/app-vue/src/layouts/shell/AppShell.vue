@@ -363,11 +363,20 @@ function handleArchiveConversation(id: string) {
 function handleRestoreConversation(id: string) {
   void aiRef.value?.restoreConversation(id);
 }
+function handleArchiveConversations(ids: string[]) {
+  void Promise.all(ids.map((id) => aiRef.value?.archiveConversation(id)));
+}
+function handleRestoreConversations(ids: string[]) {
+  void Promise.all(ids.map((id) => aiRef.value?.restoreConversation(id)));
+}
 function handleChangeArchivePage(direction: number) {
   void aiRef.value?.changeArchivePage(direction);
 }
 function handleDeleteConversation(id: string) {
   void aiRef.value?.deleteConversation(id);
+}
+function handleDeleteConversations(ids: string[]) {
+  void Promise.all(ids.map((id) => aiRef.value?.deleteConversation(id)));
 }
 
 /** 会话生命周期只更新 AI 区域，保留业务工作区与草稿。 */
@@ -1131,6 +1140,9 @@ onBeforeUnmount(() => {
               :archive-has-more="aiRef?.archiveHasMore ?? false"
               @archive-conversation="handleArchiveConversation"
               @restore-conversation="handleRestoreConversation"
+              @archive-conversations="handleArchiveConversations"
+              @restore-conversations="handleRestoreConversations"
+              @delete-conversations="handleDeleteConversations"
               @change-archive-page="handleChangeArchivePage"
               @refresh-conversations="aiRef?.loadConversationList()"
               :conversation-statuses="conversationStatuses"
@@ -1315,6 +1327,9 @@ onBeforeUnmount(() => {
             :archive-has-more="aiRef?.archiveHasMore ?? false"
             @archive-conversation="handleArchiveConversation"
             @restore-conversation="handleRestoreConversation"
+            @archive-conversations="handleArchiveConversations"
+            @restore-conversations="handleRestoreConversations"
+            @delete-conversations="handleDeleteConversations"
             @change-archive-page="handleChangeArchivePage"
             @refresh-conversations="aiRef?.loadConversationList()"
             :conversation-statuses="conversationStatuses"
