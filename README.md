@@ -181,6 +181,6 @@ See [`docs/operations/deployment.md`](./docs/operations/deployment.md) and [`doc
 - [Operations](./docs/operations/README.md) — development, testing, release and deployment.
 - [Agent instructions](./AGENTS.md) — repository-wide collaboration rules.
 
-## Repository status & license
+## License
 
-MemoFlow is a **public source repository**, but it currently does **not** include an open-source license. Public visibility alone does not grant permission to copy, modify, or redistribute the code; copyright remains with the repository owner unless a license is added later.
+MemoFlow is open source under the [MIT License](./LICENSE). You may use, modify, redistribute, and use the software commercially, provided the copyright and license notices are retained. Third-party components and brand assets remain subject to their own licenses and trademark rights; see [Third-Party Notices](./THIRD_PARTY_NOTICES.md).
