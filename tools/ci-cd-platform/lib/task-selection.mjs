@@ -48,9 +48,31 @@ export async function loadAffectedRunnerInputs(
   };
 }
 
-async function loadCiRunnerInputs(nxJson) {
-  await initializeSelectionContext(nxJson);
-  return loadAffectedRunnerInputs(nxJson);
+// Ultracache only narrows the declared Nx inputs; it never adds tasks. When Nx
+// Cloud rejects the selection context (outage, revoked token, disabled
+// organization), recorded reads cannot be trusted for this commit, so drop them
+// and keep the declared inputs: the same conservative plan Nx uses without a
+// recording. A failure of the local Nx planner itself still expands to all tasks.
+export async function loadCiRunnerInputs(
+  nxJson,
+  { initialize = initializeSelectionContext, loadInputs = loadAffectedRunnerInputs } = {},
+) {
+  let contextError = null;
+  try {
+    await initialize(nxJson);
+  } catch (error) {
+    contextError = error;
+  }
+  const runnerInputs = await loadInputs(nxJson);
+  if (!contextError) return runnerInputs;
+  return {
+    selectivelyHashTsConfig: runnerInputs.selectivelyHashTsConfig,
+    ultracacheConfigurations: undefined,
+    ultracache: {
+      status: 'unavailable',
+      reason: `Nx Cloud selection context failed: ${contextError.message}`,
+    },
+  };
 }
 
 export async function selectCiTasks(
