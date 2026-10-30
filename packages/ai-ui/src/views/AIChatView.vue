@@ -7,6 +7,11 @@
     <AIConversationSidebar
       v-if="!hideConversationSidebar && !composerOnly"
       :conversations="conversationList"
+      :archive-page="archivePage"
+      :archive-has-more="archiveHasMore"
+      @archive="archiveConversation"
+      @restore="restoreConversation"
+      @change-archive-page="changeArchivePage"
       :conversation-statuses="conversationStatuses"
       :recent-goals="recentGoalList"
       :recent-knowledge-notes="recentKnowledgeNoteList"
@@ -42,6 +47,11 @@
           variant="mobile"
           show-close
           :conversations="conversationList"
+          :archive-page="archivePage"
+          :archive-has-more="archiveHasMore"
+          @archive="archiveConversation"
+          @restore="restoreConversation"
+          @change-archive-page="changeArchivePage"
           :conversation-statuses="conversationStatuses"
           :recent-goals="recentGoalList"
           :recent-knowledge-notes="recentKnowledgeNoteList"
@@ -444,7 +454,12 @@ const {
   selectConversation: selectConversationBase,
   openRecentGoal,
   openRecentKnowledgeNote,
-  deleteConversation,
+  deleteConversation: deleteConversationBase,
+  archiveConversation,
+  restoreConversation,
+  archivePage,
+  archiveHasMore,
+  changeArchivePage,
   loadConversationList,
   startNewConversation: startNewConversationBase,
   prepareWorkflowTurn,
@@ -747,6 +762,9 @@ function openAISettings() {
 function openGoalWithoutAI() {
   void router.push('/goals?dialog=goal');
 }
+function deleteConversation(id: string) {
+  if (window.confirm(t('shell.conversation.confirmDelete'))) return deleteConversationBase(id);
+}
 function openQuickTaskWithoutAI() {
   void router.push('/tasks?dialog=quick-task');
 }
@@ -763,6 +781,11 @@ defineExpose({
   chatConversationId,
   selectConversation,
   deleteConversation,
+  archiveConversation,
+  restoreConversation,
+  archivePage,
+  archiveHasMore,
+  changeArchivePage,
   startNewConversation,
   loadConversationList,
 });

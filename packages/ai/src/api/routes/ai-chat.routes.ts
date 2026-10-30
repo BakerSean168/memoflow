@@ -8,6 +8,8 @@ import {
 } from '@memoflow/utils/result';
 import {
   ConversationNameSchema,
+  ConversationUpdateSchema,
+  ListConversationsSchema,
   AIConversationClientDTOSchema,
   ConversationListResSchema,
 } from '@memoflow/ai-contracts';
@@ -59,7 +61,7 @@ export function registerAIChatRoutes(
       path: '/conversations',
       summary: '获取 AI 对话列表',
       request: {
-        query: z.object({ page: z.string().optional(), pageSize: z.string().optional() }),
+        query: ListConversationsSchema,
       },
       responses: { 200: successResponse(ConversationListResSchema, '获取成功') },
     },
@@ -69,6 +71,7 @@ export function registerAIChatRoutes(
         ctx,
         Number(req.query?.page ?? 1),
         Number(req.query?.pageSize ?? 20),
+        ListConversationsSchema.parse(req.query ?? {}).status,
       ),
   );
 
@@ -94,7 +97,7 @@ export function registerAIChatRoutes(
       summary: '更新 AI 对话',
       request: {
         params: z.object({ id: brandedId<AiConversationId>() }),
-        body: { content: { 'application/json': { schema: ConversationNameSchema } } },
+        body: { content: { 'application/json': { schema: ConversationUpdateSchema } } },
       },
       responses: {
         200: successResponse(AIConversationClientDTOSchema, '更新成功'),

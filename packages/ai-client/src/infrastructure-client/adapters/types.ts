@@ -56,6 +56,7 @@ export interface IAIConversationApiClient {
   getConversations(params?: {
     page?: number;
     pageSize?: number;
+    status?: 'Active' | 'Archived';
   }): Promise<Result<ConversationListRes>>;
   getConversationById(id: string): Promise<Result<AIConversationClientDTO>>;
   deleteConversation(id: string): Promise<Result<void>>;

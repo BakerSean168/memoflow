@@ -57,11 +57,22 @@
       </div>
     </div>
 
+    <Button
+      variant="ghost"
+      class="mx-2"
+      :aria-pressed="showingArchive"
+      @click="
+        showingArchive = !showingArchive;
+        $emit('refresh');
+      "
+    >
+      {{ t(showingArchive ? 'shell.conversation.active' : 'shell.conversation.archived') }}
+    </Button>
     <div class="min-h-0 flex-1 overflow-y-auto p-2">
       <!-- 固定状态图标位于标题行末端；已查看的普通成功会话不渲染状态。 -->
       <TooltipProvider>
         <div
-          v-for="item in conversations"
+          v-for="item in visibleConversations"
           :key="item.id"
           class="group relative mb-1 flex min-h-9 items-center rounded-lg text-sm transition-colors"
           :class="
@@ -73,9 +84,9 @@
         >
           <button
             type="button"
-            class="flex h-9 min-w-0 w-full items-center rounded-lg py-2 pl-3 pr-16 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            class="flex h-9 min-w-0 w-full items-center rounded-lg py-2 pl-3 pr-24 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
             :aria-label="item.name || t('common.untitled')"
-            @click="$emit('select', item)"
+            @click="showingArchive ? $emit('restore', item.id) : $emit('select', item)"
           >
             <span class="block min-w-0 flex-1 truncate whitespace-nowrap">
               {{ item.name || t('common.untitled') }}
@@ -111,22 +122,58 @@
           <Button
             variant="ghost"
             size="icon"
-            :aria-label="t('common.delete')"
-            class="absolute right-9 top-1/2 h-7 w-7 -translate-y-1/2 opacity-0 transition-opacity focus-visible:opacity-100 group-hover:opacity-100"
-            @click.stop="$emit('delete', item.id)"
+            :aria-label="
+              t(showingArchive ? 'shell.conversation.restore' : 'shell.conversation.archive')
+            "
+            class="absolute right-16 top-1/2 h-7 w-7 -translate-y-1/2 opacity-0 transition-opacity focus-visible:opacity-100 group-hover:opacity-100"
+            :disabled="
+              !showingArchive &&
+              ['working', 'input', 'approval'].includes(conversationStatuses[item.id] ?? '')
+            "
+            @click.stop="showingArchive ? $emit('restore', item.id) : $emit('archive', item.id)"
           >
-            <Trash2 class="h-4 w-4" />
+            <component :is="showingArchive ? ArchiveRestore : Archive" class="h-4 w-4" />
           </Button>
+          <DropdownMenu>
+            <DropdownMenuTrigger as-child>
+              <Button
+                variant="ghost"
+                size="icon"
+                :aria-label="t('common.more')"
+                class="absolute right-9 top-1/2 h-7 w-7 -translate-y-1/2"
+                ><MoreHorizontal class="h-4 w-4"
+              /></Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent
+              ><DropdownMenuItem class="text-destructive" @select="$emit('delete', item.id)">
+                <Trash2 class="mr-2 h-4 w-4" />{{ t('common.delete') }}
+              </DropdownMenuItem></DropdownMenuContent
+            >
+          </DropdownMenu>
         </div>
       </TooltipProvider>
 
       <div
-        v-if="!conversations.length && !loading"
+        v-if="!visibleConversations.length && !loading"
         class="rounded-lg px-3 py-4 text-sm text-muted-foreground"
       >
         {{ t('aiAssistant.dialogs.chat.noSavedConversations') }}
       </div>
 
+      <div v-if="showingArchive" class="flex justify-between px-2 text-xs">
+        <Button
+          variant="ghost"
+          :disabled="(archivePage ?? 1) <= 1 || loading"
+          @click="$emit('change-archive-page', -1)"
+          >{{ t('shell.conversation.previousPage') }}</Button
+        >
+        <Button
+          variant="ghost"
+          :disabled="!archiveHasMore || loading"
+          @click="$emit('change-archive-page', 1)"
+          >{{ t('shell.conversation.nextPage') }}</Button
+        >
+      </div>
       <!-- Recent Goal / Knowledge shortcuts; runtime runs are Mastra-owned and are not listed here. -->
       <Collapsible v-model:open="recentGoalsOpen" class="mt-1">
         <CollapsibleTrigger
@@ -225,7 +272,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, type Component } from 'vue';
+import { computed, ref, type Component } from 'vue';
 import { aiUiHost } from '../ai-ui-host';
 import MemoFlowAiIcon from './MemoFlowAiIcon.vue';
 import {
@@ -242,6 +289,8 @@ import {
   Settings2,
   Target,
   Trash2,
+  Archive,
+  ArchiveRestore,
   X,
 } from '@lucide/vue';
 import { useI18n } from 'vue-i18n';
@@ -272,6 +321,8 @@ import type {
 const props = withDefaults(
   defineProps<{
     conversations: ConversationSummary[];
+    archivePage?: number;
+    archiveHasMore?: boolean;
     conversationStatuses?: ConversationAttentionMap;
     recentGoals: AIWorkspaceRecentGoal[];
     recentKnowledgeNotes: AIWorkspaceRecentKnowledgeNote[];
@@ -302,9 +353,16 @@ defineEmits<{
   'select-goal': [id: string];
   'select-knowledge-note': [id: string];
   delete: [id: string];
+  archive: [id: string];
+  restore: [id: string];
+  'change-archive-page': [direction: number];
 }>();
 
 const { t } = useI18n();
+const showingArchive = ref(false);
+const visibleConversations = computed(() =>
+  props.conversations.filter((item) => (item.status === 'Archived') === showingArchive.value),
+);
 
 const attentionIcon = {
   failed: CircleAlert,

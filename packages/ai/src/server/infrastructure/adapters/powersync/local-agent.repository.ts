@@ -407,6 +407,23 @@ export class LocalAgentRepository {
       };
     });
   }
+  async setConversationStatus(owner: string, id: string, status: 'Active' | 'Archived') {
+    return this.db.writeTransaction(async (tx) => {
+      const conversation = await this.read(
+        'ai_local_conversations',
+        owner,
+        id,
+        StoredConversationSchema,
+        tx,
+      );
+      const next = StoredConversationSchema.parse({ ...conversation, status });
+      await tx.execute(
+        'UPDATE ai_local_conversations SET record_json = ? WHERE id = ? AND identity_id = ?',
+        [JSON.stringify(next), id, owner],
+      );
+      return LocalAgentConversationSchema.strip().parse(next);
+    });
+  }
   async deleteConversation(owner: string, id: string): Promise<boolean> {
     return this.db.writeTransaction(async (tx) => {
       const row = await tx.getOptional(

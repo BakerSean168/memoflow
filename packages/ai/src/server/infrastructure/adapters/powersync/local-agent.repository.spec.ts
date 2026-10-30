@@ -21,6 +21,43 @@ describe('local Agent persistence with real SQLite', () => {
     enabled: true,
     writeScopes: [],
   };
+  it('persists reversible archive across repository restart without touching messages or native binding', async () => {
+    const db = database();
+    const store = new LocalAgentRepository(db);
+    const connection = await store.createConnection('owner', input);
+    const conversation = await store.createConversation('owner', {
+      connectionId: connection.id,
+      modelId: 'model',
+      name: 'Keep',
+    });
+    await store.bindSession('owner', conversation.id, 'native-session', 'account');
+    await store.saveMessage(
+      'owner',
+      {
+        id: 'message',
+        conversationId: conversation.id,
+        role: 'user',
+        content: 'history',
+        createdAt: 10,
+      },
+      true,
+    );
+    const before = await store.getConversation('owner', conversation.id);
+    const history = await store.listMessages('owner', conversation.id);
+    await store.setConversationStatus('owner', conversation.id, 'Archived');
+    const restarted = new LocalAgentRepository(db);
+    expect((await restarted.listConversations('owner'))[0]?.status).toBe('Archived');
+    await expect(
+      restarted.setConversationStatus('foreign', conversation.id, 'Active'),
+    ).rejects.toMatchObject({ code: 'NOT_FOUND' });
+    await restarted.setConversationStatus('owner', conversation.id, 'Active');
+    expect(await restarted.getConversation('owner', conversation.id)).toEqual({
+      ...before,
+      status: 'Active',
+    });
+    expect(await restarted.listMessages('owner', conversation.id)).toEqual(history);
+  });
+
   it('keeps insertion order and the latest 500 items with a frozen or regressing clock after reopening', async () => {
     const db = database();
     let store = new LocalAgentRepository(db);

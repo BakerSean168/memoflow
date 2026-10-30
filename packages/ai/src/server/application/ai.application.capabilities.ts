@@ -95,6 +95,7 @@ export interface AssistantConversationPort {
     cx: ExecutionContext,
     page?: number,
     pageSize?: number,
+    status?: 'Active' | 'Archived',
   ): Promise<Result<ConversationListRes>>;
   getConversation(
     id: string,

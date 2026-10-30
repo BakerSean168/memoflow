@@ -1050,6 +1050,26 @@ export function useAIChatView(options: UseAIChatViewOptions) {
     }
   }
 
+  async function restoreArchivedConversation(id: string) {
+    const activeBefore = chatSession.chatConversationId.value;
+    const item = chatSession.conversationList.value.find((entry) => entry.id === id);
+    if (!(await chatSession.restoreConversation(id)) || !item) return;
+    // Recovery can target history outside the active discovery page. Open it
+    // without requiring a new list rank, while retaining any current draft/run.
+    if (
+      chatSession.chatConversationId.value === activeBefore &&
+      !chatSession.chatLoading.value &&
+      !workflowSelectionLocked.value &&
+      !['working', 'input', 'approval'].includes(
+        chatSession.conversationStatuses.value[chatSession.chatConversationId.value] ?? '',
+      ) &&
+      !chatSession.chatMessage.value.length &&
+      !chatSession.composerAttachments.value.length &&
+      !chatSession.composerContextEntities.value.some((entry) => entry.origin === 'explicit')
+    )
+      await selectConversation({ ...item, status: 'Active' });
+  }
+
   async function openRecentGoal(goalId: string) {
     if (goalId) await router.push(`/goals/${goalId}`);
   }
@@ -1183,6 +1203,11 @@ export function useAIChatView(options: UseAIChatViewOptions) {
       selectConversation,
       openRecentGoal,
       openRecentKnowledgeNote,
+      archiveConversation: chatSession.archiveConversation,
+      restoreConversation: restoreArchivedConversation,
+      archivePage: chatSession.archivePage,
+      archiveHasMore: chatSession.archiveHasMore,
+      changeArchivePage: chatSession.changeArchivePage,
       deleteConversation: (id: string) =>
         chatSession.deleteConversation(
           id,

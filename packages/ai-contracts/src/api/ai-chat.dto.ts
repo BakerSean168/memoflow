@@ -9,12 +9,18 @@ export const ConversationNameSchema = z.object({
 export type CreateConversationReq = z.infer<typeof ConversationNameSchema>;
 export type CreateConversationRes = AIConversationClientDTO;
 
-export type UpdateConversationReq = z.infer<typeof ConversationNameSchema>;
+export const ConversationUpdateSchema = ConversationNameSchema.partial()
+  .extend({
+    status: z.enum(['Active', 'Archived']).optional(),
+  })
+  .refine((value) => value.name !== undefined || value.status !== undefined, 'Empty update');
+export type UpdateConversationReq = z.infer<typeof ConversationUpdateSchema>;
 export type UpdateConversationRes = AIConversationClientDTO;
 
 const positiveIntFromQuery = z.coerce.number().int().min(1);
 
 export const ListConversationsSchema = z.object({
+  status: z.enum(['Active', 'Archived']).optional(),
   page: positiveIntFromQuery.optional().default(1),
   pageSize: positiveIntFromQuery.max(100).optional().default(20),
 });

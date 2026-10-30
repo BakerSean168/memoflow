@@ -15,11 +15,13 @@ export class UpdateConversationUseCase {
       identityId,
       conversationId,
     );
-    if (!conversation) {
+    if (!conversation || conversation.deletedAt) {
       return error('NOT_FOUND', 'Conversation not found');
     }
 
-    conversation.rename(request.name);
+    if (request.name !== undefined && request.name !== conversation.name)
+      conversation.rename(request.name);
+    if (request.status !== undefined) conversation.updateStatus(request.status);
     await this.conversationRepository.save(conversation);
     const snapshots = await this.conversationRepository.events?.snapshot(identityId, [
       String(conversation.id),

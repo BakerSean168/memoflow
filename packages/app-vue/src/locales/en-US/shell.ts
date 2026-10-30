@@ -52,6 +52,14 @@ export default {
     moreCount: '+{count} more',
   },
   conversation: {
+    archive: 'Archive',
+    restore: 'Restore',
+    archived: 'Archived',
+    active: 'Active conversations',
+    confirmDelete: 'Permanently delete this conversation and its messages? This cannot be undone.',
+    previousPage: 'Previous page',
+    nextPage: 'Next page',
+
     today: 'Today',
     last7Days: 'Last 7 days',
     earlier: 'Earlier',

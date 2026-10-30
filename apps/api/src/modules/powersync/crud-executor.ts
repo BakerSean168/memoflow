@@ -148,6 +148,27 @@ export async function executeCrudBatch(
             if (IDENTITY_ID_TABLES.has(tableName)) {
               patchData.identityId = identityId;
             }
+            if (
+              tableName === 'ai_conversations' &&
+              patchData.status !== undefined &&
+              patchData.name === undefined &&
+              patchData.deletedAt === undefined &&
+              patchData.updatedAt === undefined
+            ) {
+              // PowerSync uploads only changed columns. A state-only patch must
+              // not let Prisma's @updatedAt reorder history or revive a deletion.
+              if (!delegate.findFirst) throw new Error('Conversation lookup unavailable');
+              const current = await delegate.findFirst({
+                where: { id, identityId, deletedAt: null },
+                select: { updatedAt: true },
+              });
+              if (!current) break;
+              await delegate.update({
+                where: { id, identityId, deletedAt: null },
+                data: { ...patchData, updatedAt: current.updatedAt },
+              });
+              break;
+            }
             await delegate.update({
               where: { id },
               data: patchData,

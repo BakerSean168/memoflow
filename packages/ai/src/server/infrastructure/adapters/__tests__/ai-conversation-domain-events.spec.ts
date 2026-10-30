@@ -1,3 +1,5 @@
+import { UpdateConversationUseCase } from '../../../application/use-cases/commands/update-conversation.use-case';
+import { ListConversationsUseCase } from '../../../application/use-cases/commands/list-conversations.use-case';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import type { PrismaClient } from '@memoflow/database';
 import type { IElectronDatabase, IElectronDatabaseTransaction } from '@memoflow/desktop-contracts';
@@ -10,6 +12,45 @@ import { PowerSyncAIConversationRepository } from '../powersync/ai-conversation-
 import { createLocalAgentSqlite } from '../../../../testing/local-agent-sqlite';
 
 describe('conversation activity with real SQLite', () => {
+  it('round-trips archive through the owner, separates legacy deletion, and filters before pagination', async () => {
+    const db = createLocalAgentSqlite();
+    try {
+      await db.execute(
+        'CREATE TABLE ai_conversations (id TEXT PRIMARY KEY, identity_id TEXT, name TEXT, status TEXT, version INTEGER, created_at TEXT, updated_at TEXT, deleted_at TEXT)',
+      );
+      const repository = new PowerSyncAIConversationRepository(db);
+      const update = new UpdateConversationUseCase(repository);
+      const list = new ListConversationsUseCase(repository);
+      const conversation = AIConversation.create({ identityId: 'owner', name: 'Keep history' });
+      const active = AIConversation.create({ identityId: 'owner', name: 'Active' });
+      const deleted = AIConversation.create({ identityId: 'owner', name: 'Legacy deleted' });
+      deleted.softDelete();
+      for (const item of [conversation, active, deleted]) await repository.save(item);
+      const before = conversation.toClientDTO();
+      const id = String(conversation.id);
+      expect(await update.execute('foreign', id, { status: 'Archived' })).toMatchObject({
+        ok: false,
+      });
+      expect(await update.execute('owner', id, { status: 'Archived' })).toMatchObject({
+        ok: true,
+        data: { status: 'Archived', deletedAt: null },
+      });
+      expect(await list.execute({ identityId: 'owner' } as never, 1, 1, 'Active')).toMatchObject({
+        ok: true,
+        data: { total: 1, data: [{ name: 'Active' }] },
+      });
+      expect(
+        await list.execute({ identityId: 'owner' } as never, 1, 100, 'Archived'),
+      ).toMatchObject({ ok: true, data: { total: 1, data: [{ id, name: 'Keep history' }] } });
+      const restored = await update.execute('owner', id, { status: 'Active' });
+      expect(restored).toMatchObject({ ok: true, data: before });
+      expect(await update.execute('owner', String(deleted.id), { status: 'Active' })).toMatchObject(
+        { ok: false },
+      );
+    } finally {
+      db.close();
+    }
+  });
   it('keeps title and ownership intact, rejects older activity, and does not revive deleted shells', async () => {
     const db = createLocalAgentSqlite();
     try {

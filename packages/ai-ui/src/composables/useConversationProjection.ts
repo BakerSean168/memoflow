@@ -15,6 +15,7 @@ import type { AIChatService, ChatItem, ConversationSummary } from './types';
 import type { UseAIChatSessionOptions } from './useAIChatSession';
 const LAST_CONVERSATION_STORAGE_KEY = 'ai:last-conversation-id';
 const LIST_LIMIT = 24;
+const ARCHIVE_PAGE_SIZE = 100;
 const MAX_TRACKED_CONVERSATIONS = 512;
 type DeleteConversationId = Parameters<AIChatService['deleteConversation']>[0];
 export function useConversationProjection(input: {
@@ -42,12 +43,16 @@ export function useConversationProjection(input: {
   const conversationTitle = ref('');
   const conversationListLoading = ref(false);
   const conversationList = ref<ConversationSummary[]>([]);
+  const archivePage = ref(1);
+  const archiveHasMore = ref(false);
+  const statusMutations = new Set<string>();
   /**
    * True once a snapshot started after the live stream watermark (stream.ready
    * or reset) has been applied. Deltas after this point are folded in without
    * list refetches; it is the observable "projection is live" boundary.
    */
   const conversationProjectionLive = ref(false);
+  let alive = true;
   let listGeneration = 0;
   let mutationRevision = 0;
   const versions = new Map<string, number>();
@@ -64,9 +69,11 @@ export function useConversationProjection(input: {
   >();
 
   function sortConversations(items: ConversationSummary[]): ConversationSummary[] {
-    return items
-      .sort((a, b) => Number(b.updatedAt ?? 0) - Number(a.updatedAt ?? 0))
-      .slice(0, LIST_LIMIT);
+    const sorted = items.sort((a, b) => Number(b.updatedAt ?? 0) - Number(a.updatedAt ?? 0));
+    return [
+      ...sorted.filter((item) => item.status !== 'Archived').slice(0, LIST_LIMIT),
+      ...sorted.filter((item) => item.status === 'Archived'),
+    ];
   }
 
   function upsertConversation(item: ConversationSummary): void {
@@ -104,7 +111,11 @@ export function useConversationProjection(input: {
       );
   }
 
+  const refreshOnFocus = () => {
+    void loadConversationList(options.service);
+  };
   onMounted(() => {
+    window.addEventListener('focus', refreshOnFocus);
     if (!options.workspaceRuntime?.streamWorkspaceEvents) return;
     void aiUiHost
       .subscribeWorkspaceEvents(options.workspaceRuntime, {
@@ -136,7 +147,8 @@ export function useConversationProjection(input: {
             await loadConversationList(options.service, true, beforeCalibration);
             // Completed mutations now belong to this post-watermark snapshot.
             for (const [id, change] of pendingListChanges) {
-              if (change.revision <= beforeCalibration) pendingListChanges.delete(id);
+              if (change.revision <= beforeCalibration && !statusMutations.has(id))
+                pendingListChanges.delete(id);
             }
             versions.clear();
             for (const item of conversationList.value) {
@@ -175,6 +187,8 @@ export function useConversationProjection(input: {
       });
   });
   onUnmounted(() => {
+    alive = false;
+    window.removeEventListener('focus', refreshOnFocus);
     streamController.abort();
     listGeneration++;
     invalidateRuntimeHistory();
@@ -305,7 +319,24 @@ export function useConversationProjection(input: {
     conversationListLoading.value = true;
     try {
       const [builtin, local] = await Promise.allSettled([
-        loadService.listConversations({ page: 1, pageSize: LIST_LIMIT }).then(unwrap),
+        Promise.all([
+          loadService
+            .listConversations({ page: 1, pageSize: LIST_LIMIT, status: 'Active' })
+            .then(unwrap),
+          loadService
+            .listConversations({
+              page: archivePage.value,
+              pageSize: ARCHIVE_PAGE_SIZE,
+              status: 'Archived',
+            })
+            .then(unwrap),
+        ]).then(([active, archived]) => {
+          if (generation === listGeneration)
+            archiveHasMore.value = archived.total > archivePage.value * ARCHIVE_PAGE_SIZE;
+          return {
+            data: [...active.data, ...archived.data.filter((item) => item.status === 'Archived')],
+          };
+        }),
         options.localAgent?.listConversations() ?? Promise.resolve([]),
       ]);
       if (generation !== listGeneration) return false;
@@ -320,6 +351,10 @@ export function useConversationProjection(input: {
         ].map((item) => [item.id, item]),
       );
       for (const [id, change] of pendingListChanges) {
+        if (statusMutations.has(id) && change.item) {
+          merged.set(id, change.item);
+          continue;
+        }
         const authoritative = merged.get(id);
         const sourceSucceeded =
           change.runtimeKind === 'local_agent'
@@ -494,6 +529,41 @@ export function useConversationProjection(input: {
     }
   }
 
+  async function setConversationStatus(
+    id: string,
+    status: 'Active' | 'Archived',
+  ): Promise<boolean> {
+    if (!alive || statusMutations.has(id)) return false;
+    const before = conversationList.value.find((item) => item.id === id);
+    if (!before || before.status === status) return false;
+    statusMutations.add(id);
+    const optimistic = { ...before, status };
+    upsertConversation(optimistic);
+    try {
+      const item =
+        before.runtimeKind === 'local_agent'
+          ? await options.localAgent!.setConversationStatus(id, status)
+          : unwrap(
+              await options.service.updateConversation(id as DeleteConversationId, { status }),
+            );
+      if (!alive) return false;
+      upsertConversation(item);
+      return true;
+    } catch (error) {
+      if (!alive) return false;
+      upsertConversation(before);
+      toast.error(getAIErrorMessage(error, t, 'aiAssistant.dialogs.chat.archiveFailed'));
+      return false;
+    } finally {
+      statusMutations.delete(id);
+    }
+  }
+
+  async function changeArchivePage(direction: number) {
+    archivePage.value = Math.max(1, archivePage.value + direction);
+    await loadConversationList(options.service);
+  }
+
   async function deleteConversation(
     id: string,
     loadService: AIChatService,
@@ -534,7 +604,15 @@ export function useConversationProjection(input: {
     signal?: AbortSignal,
   ) {
     signal?.throwIfAborted();
-    if (chatConversationId.value) return chatConversationId.value;
+    if (chatConversationId.value) {
+      if (
+        conversationList.value.some(
+          (item) => item.id === chatConversationId.value && item.status === 'Archived',
+        )
+      )
+        throw new Error(t('aiAssistant.dialogs.chat.restoreBeforeSending'));
+      return chatConversationId.value;
+    }
     const choice = runtimeChoice.value;
     if (choice.runtimeKind === 'local_agent') {
       if (!options.localAgent) throw new Error('Local Agents require Desktop');
@@ -587,6 +665,10 @@ export function useConversationProjection(input: {
     refreshRuntimeUsage,
     selectConversation,
     deleteConversation,
+    setConversationStatus,
+    archivePage,
+    archiveHasMore,
+    changeArchivePage,
     ensureConversationCreated,
     normalizeChatItem,
   };
