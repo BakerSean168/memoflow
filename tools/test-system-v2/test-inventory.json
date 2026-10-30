@@ -1828,6 +1828,14 @@
       "measurementCollectors": []
     },
     {
+      "path": "apps/desktop/src/preload/goal-workspace-bridge.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "apps/desktop/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "apps/desktop/src/preload/keyboard-bridge.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -7195,6 +7203,16 @@
       ]
     },
     {
+      "path": "packages/goal/src/server/infrastructure/adapters/powersync/goal-workspace-persistence.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/goal/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "packages/goal/vitest.config.ts"
+      ]
+    },
+    {
       "path": "packages/goal/src/server/infrastructure/adapters/powersync/powersync-goal-native-lease.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -12441,7 +12459,7 @@
       "type": "measurement",
       "suite": "coverage",
       "runner": "vitest",
-      "fileCount": 99
+      "fileCount": 100
     },
     {
       "id": "packages/goal/vitest.mappers.config.ts",
@@ -12863,7 +12881,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 98
+      "fileCount": 99
     },
     {
       "id": "apps/migrator/vitest.config.ts",
@@ -13038,7 +13056,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 99
+      "fileCount": 100
     },
     {
       "id": "packages/host-runtime/vitest.config.ts",
@@ -13742,6 +13760,7 @@
       "packages/goal/src/server/infrastructure/adapters/powersync/__tests__/powersync-goal-reliable-operation.adapter.test.ts",
       "packages/goal/src/server/infrastructure/adapters/powersync/goal-agent-mutations.spec.ts",
       "packages/goal/src/server/infrastructure/adapters/powersync/goal-page-reader.spec.ts",
+      "packages/goal/src/server/infrastructure/adapters/powersync/goal-workspace-persistence.spec.ts",
       "packages/goal/src/server/infrastructure/adapters/powersync/powersync-goal-native-lease.spec.ts",
       "packages/goal/src/server/infrastructure/adapters/prisma/__tests__/goal-ownership.surface.spec.ts",
       "packages/goal/src/server/infrastructure/adapters/prisma/__tests__/goal-page.spec.ts",
@@ -13972,7 +13991,7 @@
   "duplicate": [],
   "unexpected": [],
   "counts": {
-    "unit": 1147,
+    "unit": 1149,
     "integration": 58,
     "smoke": 3,
     "boundary-ipc": 6,
