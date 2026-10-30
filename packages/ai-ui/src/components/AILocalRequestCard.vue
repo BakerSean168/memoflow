@@ -1,5 +1,12 @@
 <template>
   <section class="mb-3 space-y-2 rounded-xl border p-3" data-testid="ai-native-request">
+    <p
+      v-if="request.request.type === 'permission'"
+      class="text-xs text-muted-foreground"
+      data-testid="ai-native-permission-kind"
+    >
+      {{ t('aiAssistant.local.nativePermission') }}
+    </p>
     <p class="text-sm font-medium">
       {{
         request.request.type === 'permission'
@@ -7,6 +14,22 @@
           : t('aiAssistant.local.question')
       }}
     </p>
+    <template v-if="request.request.type === 'permission'">
+      <p
+        v-if="request.request.reason"
+        class="text-xs break-words"
+        data-testid="ai-native-permission-reason"
+      >
+        {{ t('aiAssistant.local.permissionReason', { reason: request.request.reason }) }}
+      </p>
+      <p
+        v-if="request.request.scope"
+        class="text-xs break-words"
+        data-testid="ai-native-permission-scope"
+      >
+        {{ t('aiAssistant.local.permissionScope', { scope: request.request.scope }) }}
+      </p>
+    </template>
     <p class="text-xs text-muted-foreground" role="status">
       {{ t(`aiAssistant.local.${request.status}`) }}
     </p>

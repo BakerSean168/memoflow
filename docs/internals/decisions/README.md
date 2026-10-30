@@ -139,6 +139,7 @@ updated: 2026-10-07T00:00:00Z
 
 | [ADR-120](./ADR-120-selectable-assistant-runtimes-and-builtin-mastra.md) | 可选助手运行时与保留 Mastra 内置助手 | 已采纳（实施中） | 2026-10-09 |
 | [ADR-121](./ADR-121-desktop-local-agent-host-and-tool-bridge.md) | Desktop 本地 Agent 宿主与业务工具通道 | 已采纳（实施中） | 2026-10-09 |
+| [ADR-122](./ADR-122-routine-offline-scheduler-host-ownership.md) | Routine Offline Scheduler Host Ownership | 已采纳并部分实施（#737） | 2026-10-30 |
 
 ## 维护规则
 

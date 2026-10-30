@@ -37,6 +37,7 @@ import {
   createRoutineCoachCommandService,
   createRoutineConfigurationQueryService,
   createRoutineOverrideChangedNotifier,
+  createRoutineScheduleChangedNotifier,
   createInMemoryRoutineRuntimeContextStore,
   type RoutineCoachCommandPort,
   type RoutineConfigurationQueryPort,
@@ -143,6 +144,7 @@ export function composeRoutine(
     occurrenceTruthStore: repositories.routineOccurrenceTruthStore,
     protocolSessionStore: repositories.protocolSessionStore,
     onOverrideChanged: createRoutineOverrideChangedNotifier(),
+    onScheduleChanged: createRoutineScheduleChangedNotifier(),
     onProfileActiveChanged: async ({ identityId }) => {
       if (identityId === dependencies.identityId) await refreshLocalRoutineRegistrations();
     },

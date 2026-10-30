@@ -82,7 +82,12 @@ class FakeAcp {
         method: 'session/request_permission',
         params: {
           sessionId: 'dsh-native-1',
-          toolCall: { toolCallId: 'call-1', title: 'goal_search' },
+          toolCall: {
+            toolCallId: 'call-1',
+            title: 'goal_search',
+            kind: 'fetch',
+            locations: [{ path: '/repo' }],
+          },
           options: [
             { optionId: 'allow-once', name: 'Allow once', kind: 'allow_once' },
             { optionId: 'reject-once', name: 'Reject', kind: 'reject_once' },
@@ -184,6 +189,7 @@ it('sends a per-run MCP grant and can resume the same native DSH session', async
       }
       if (event.type === 'request') {
         expect(event.request.title).toBe('goal_search');
+        expect(event.request).toMatchObject({ scope: 'fetch · /repo' });
         expect(
           driver.respond(event.request.requestId, { type: 'permission', decision: 'approve_once' }),
         ).toBe(true);

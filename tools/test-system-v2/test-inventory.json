@@ -3182,6 +3182,14 @@
       "measurementCollectors": []
     },
     {
+      "path": "packages/ai-ui/src/components/AILocalRequestCard.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/ai-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "packages/ai-ui/src/components/AIMessageContent.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -9026,6 +9034,16 @@
       ]
     },
     {
+      "path": "packages/routine/src/server/infrastructure/routine-schedule/routine-powersync-schedule.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/routine/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "packages/routine/vitest.config.ts"
+      ]
+    },
+    {
       "path": "packages/routine/src/server/infrastructure/routine-schedule/routine-temporary-override-store.powersync.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -12503,7 +12521,7 @@
       "type": "measurement",
       "suite": "coverage",
       "runner": "vitest",
-      "fileCount": 32
+      "fileCount": 33
     },
     {
       "id": "packages/schedule/vitest.config.ts",
@@ -12967,7 +12985,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 39
+      "fileCount": 40
     },
     {
       "id": "packages/ai/vitest.config.ts",
@@ -13233,7 +13251,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 32
+      "fileCount": 33
     },
     {
       "id": "packages/schedule-client/vitest.config.ts",
@@ -13851,6 +13869,7 @@
       "packages/routine/src/server/infrastructure/routine-schedule/__tests__/routine-schedule-projection-source.spec.ts",
       "packages/routine/src/server/infrastructure/routine-schedule/__tests__/routine-wall-clock-scheduled-handler.spec.ts",
       "packages/routine/src/server/infrastructure/routine-schedule/routine-occurrence-notification-writer.spec.ts",
+      "packages/routine/src/server/infrastructure/routine-schedule/routine-powersync-schedule.spec.ts",
       "packages/routine/src/server/infrastructure/routine-schedule/routine-temporary-override-store.powersync.spec.ts",
       "packages/routine/src/server/infrastructure/routine-vnext/profile-persistence-parity.spec.ts",
       "packages/routine/src/server/infrastructure/routine-vnext/protocol-persistence-parity.spec.ts",
@@ -14007,7 +14026,7 @@
   "duplicate": [],
   "unexpected": [],
   "counts": {
-    "unit": 1151,
+    "unit": 1153,
     "integration": 58,
     "smoke": 3,
     "boundary-ipc": 6,

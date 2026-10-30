@@ -275,11 +275,18 @@ export async function verifyLocalAgentMcpConnectivity(
       )
       .filter((name): name is string => typeof name === 'string');
     if (options?.requiredWriteScopes?.includes('goals:write')) {
-      if (!tools.includes('goal_panel_open')) {
+      const requiredGoalPanelTools = [
+        'goal_panel_open',
+        'goal_panel_snapshot',
+        'goal_panel_patch',
+        'goal_panel_submit',
+      ];
+      const missing = requiredGoalPanelTools.filter((name) => !tools.includes(name));
+      if (missing.length) {
         return {
           ok: false,
           tools,
-          error: 'Business tools missing: goal_panel_open not discovered',
+          error: `Business tools missing: ${missing.join(', ')} not discovered`,
         };
       }
     }
