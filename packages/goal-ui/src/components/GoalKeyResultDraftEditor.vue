@@ -95,7 +95,7 @@
       </Button>
     </div>
 
-    <Transition name="kr-editor-reveal" @after-enter="ensureEditorFullyVisible">
+    <Transition name="kr-editor-reveal" @after-enter="scheduleEditorVisibilityCheck">
       <div v-if="editorOpen" class="grid grid-rows-[1fr]" data-testid="key-result-draft-form">
         <div class="min-h-0 overflow-hidden">
           <div
@@ -141,7 +141,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, nextTick, reactive, ref, watch } from 'vue';
+import { computed, nextTick, onBeforeUnmount, reactive, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { CalendarDays, Plus, X } from '@lucide/vue';
 import {
@@ -207,11 +207,23 @@ const currentValueModel = computed({
   },
 });
 
+// #609: the reveal triggers used to run once while the panel could still be
+// settling into its final overflowing layout, so no scroll was ever issued.
+// While an editor-open session is active, keep re-checking once per frame for
+// at most this window (measured from the session's first attempt), stopping as
+// soon as a scroll is issued, the editor closes, or the component unmounts.
+const VISIBILITY_ATTEMPT_WINDOW_MS = 3000;
+let visibilitySessionActive = false;
+let visibilityScrollIssued = false;
+let visibilitySessionStartedAt = 0;
+let visibilityFrame: number | null = null;
+
 watch(
   editorOpen,
   (open) => {
     emit('editing-change', open);
-    if (open) scheduleEditorVisibilityCheck();
+    if (open) beginEditorVisibilitySession();
+    else stopEditorVisibilitySession();
   },
   { immediate: true },
 );
@@ -237,34 +249,90 @@ function resetForm(): void {
   currentFollowsInitial.value = true;
 }
 
+function beginEditorVisibilitySession(): void {
+  stopEditorVisibilitySession();
+  visibilitySessionActive = true;
+  visibilityScrollIssued = false;
+  visibilitySessionStartedAt = 0;
+  scheduleEditorVisibilityCheck();
+}
+
+function stopEditorVisibilitySession(): void {
+  visibilitySessionActive = false;
+  visibilityScrollIssued = false;
+  if (visibilityFrame !== null) {
+    cancelAnimationFrame(visibilityFrame);
+    visibilityFrame = null;
+  }
+}
+
 function scheduleEditorVisibilityCheck(): void {
   void nextTick(() => {
-    requestAnimationFrame(() => ensureEditorFullyVisible());
+    requestEditorVisibilityAttempt();
   });
 }
 
-function ensureEditorFullyVisible(): void {
+function requestEditorVisibilityAttempt(): void {
+  if (!visibilitySessionActive || visibilityScrollIssued || visibilityFrame !== null) return;
+  let insideRequest = true;
+  let invokedSynchronously = false;
+  const frame = requestAnimationFrame(() => {
+    invokedSynchronously = insideRequest;
+    visibilityFrame = null;
+    runEditorVisibilityAttempt(invokedSynchronously);
+  });
+  insideRequest = false;
+  // A synchronous rAF callback (test doubles) must not recurse; it gets its one
+  // attempt and the next trigger picks the session up again.
+  if (!invokedSynchronously) visibilityFrame = frame;
+}
+
+function runEditorVisibilityAttempt(invokedSynchronously: boolean): void {
+  if (!visibilitySessionActive || visibilityScrollIssued) return;
+
+  const now = performance.now();
+  if (!visibilitySessionStartedAt) visibilitySessionStartedAt = now;
+  if (now - visibilitySessionStartedAt > VISIBILITY_ATTEMPT_WINDOW_MS) {
+    stopEditorVisibilitySession();
+    return;
+  }
+
+  if (ensureEditorFullyVisible()) {
+    visibilityScrollIssued = true;
+    visibilitySessionActive = false;
+    return;
+  }
+
+  if (!invokedSynchronously) requestEditorVisibilityAttempt();
+}
+
+function ensureEditorFullyVisible(): boolean {
   const panel = editorPanelRef.value;
-  if (!panel) return;
+  if (!panel) return false;
 
   const scrollContainer = panel.closest<HTMLElement>(
     '[data-scroll-host="pane-dialog"], [data-testid="product-dialog-body"]',
   );
-  if (!scrollContainer) return;
+  if (!scrollContainer) return false;
 
-  if (scrollContainer.scrollHeight <= scrollContainer.clientHeight + 1) return;
+  if (scrollContainer.scrollHeight <= scrollContainer.clientHeight + 1) return false;
 
   const maxScrollTop = Math.max(0, scrollContainer.scrollHeight - scrollContainer.clientHeight);
   const prefersReducedMotion =
     typeof window !== 'undefined' &&
     window.matchMedia?.('(prefers-reduced-motion: reduce)').matches === true;
 
-  if (typeof scrollContainer.scrollTo !== 'function') return;
+  if (typeof scrollContainer.scrollTo !== 'function') return false;
   scrollContainer.scrollTo({
     top: maxScrollTop,
     behavior: prefersReducedMotion ? 'auto' : 'smooth',
   });
+  return true;
 }
+
+onBeforeUnmount(() => {
+  stopEditorVisibilitySession();
+});
 
 function openAddKeyResult(): void {
   if (props.disabled || editorOpen.value) return;
