@@ -36,6 +36,19 @@ const i18n = createI18n({
           searchPlaceholder: 'Search conversations…',
           noMatches: 'No matching conversations',
           clearSearch: 'Clear conversation search',
+          archived: 'Archived',
+          active: 'Active',
+          archive: 'Archive',
+          restore: 'Restore',
+          previousPage: 'Previous page',
+          nextPage: 'Next page',
+          select: 'Select conversations',
+          cancelSelect: 'Cancel selection',
+          selectAll: 'Select all',
+          clearSelection: 'Clear selection',
+          archiveSelected: 'Archive selected',
+          restoreSelected: 'Restore selected',
+          deleteSelected: 'Delete selected',
         },
         account: {
           menu: 'Account menu',
@@ -193,6 +206,20 @@ describe('ConversationSidebar search', () => {
   });
 });
 describe('ConversationSidebar compact toolbar', () => {
+  it('selects visible conversations and emits one bulk action', async () => {
+    const wrapper = mount(ConversationSidebar, {
+      props: { groups, activeConversationId: null },
+      global: { plugins: [i18n] },
+    });
+    await wrapper.get('[data-testid="conversation-select-toggle"]').trigger('click');
+    await wrapper.get('[data-testid="conversation-select-all"]').trigger('click');
+    expect(wrapper.get('[data-testid="conversation-selection-count"]').text()).toBe('3');
+    await wrapper.get('[data-testid="conversation-bulk-status"]').trigger('click');
+    expect(wrapper.emitted('archive-conversations')).toEqual([[['a', 'b', 'c']]]);
+    expect(wrapper.find('[data-testid="conversation-selection-toolbar"]').exists()).toBe(false);
+    wrapper.unmount();
+  });
+
   it('keeps searchable conversations and new chat in a single 44px row', async () => {
     const wrapper = mount(ConversationSidebar, {
       props: { groups, activeConversationId: 'a' },

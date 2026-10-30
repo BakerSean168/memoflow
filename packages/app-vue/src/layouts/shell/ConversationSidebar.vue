@@ -25,6 +25,7 @@ import {
   MessageCircleQuestion,
   ShieldAlert,
   LoaderCircle,
+  ListChecks,
 } from '@lucide/vue';
 import {
   DropdownMenu,
@@ -84,6 +85,9 @@ const emit = defineEmits<{
   (e: 'delete-conversation', id: string): void;
   (e: 'archive-conversation', id: string): void;
   (e: 'restore-conversation', id: string): void;
+  (e: 'archive-conversations', ids: string[]): void;
+  (e: 'restore-conversations', ids: string[]): void;
+  (e: 'delete-conversations', ids: string[]): void;
   (e: 'change-archive-page', direction: number): void;
   (e: 'refresh-conversations'): void;
   (e: 'open-settings'): void;
@@ -129,6 +133,8 @@ const searchOpen = ref(false);
 const searchQuery = ref('');
 const searchInput = ref<HTMLInputElement | null>(null);
 const searchToggle = ref<HTMLButtonElement | null>(null);
+const selecting = ref(false);
+const selectedIds = ref<string[]>([]);
 
 const normalizedSearchQuery = computed(() => searchQuery.value.trim().toLocaleLowerCase());
 const filteredGroups = computed(() => {
@@ -145,6 +151,35 @@ const filteredGroups = computed(() => {
     }))
     .filter((group) => group.items.length > 0);
 });
+const visibleIds = computed(() =>
+  filteredGroups.value.flatMap((group) => group.items.map((item) => item.id)),
+);
+const allVisibleSelected = computed(
+  () =>
+    visibleIds.value.length > 0 && visibleIds.value.every((id) => selectedIds.value.includes(id)),
+);
+function toggleSelected(id: string) {
+  selectedIds.value = selectedIds.value.includes(id)
+    ? selectedIds.value.filter((item) => item !== id)
+    : [...selectedIds.value, id];
+}
+function toggleSelectAll() {
+  selectedIds.value = allVisibleSelected.value
+    ? selectedIds.value.filter((id) => !visibleIds.value.includes(id))
+    : [...new Set([...selectedIds.value, ...visibleIds.value])];
+}
+function exitSelection() {
+  selecting.value = false;
+  selectedIds.value = [];
+}
+function emitBulk(action: 'archive' | 'restore' | 'delete') {
+  const ids = [...selectedIds.value];
+  if (!ids.length) return;
+  if (action === 'archive') emit('archive-conversations', ids);
+  if (action === 'restore') emit('restore-conversations', ids);
+  if (action === 'delete') emit('delete-conversations', ids);
+  exitSelection();
+}
 
 async function toggleSearch() {
   searchOpen.value = !searchOpen.value;
@@ -266,12 +301,75 @@ const identityLabel = () => {
       :aria-pressed="showingArchive"
       @click="
         showingArchive = !showingArchive;
+        exitSelection();
         emit('refresh-conversations');
       "
     >
       <Archive class="h-3.5 w-3.5" />
       {{ t(showingArchive ? 'shell.conversation.active' : 'shell.conversation.archived') }}
     </button>
+    <button
+      type="button"
+      class="mx-2 flex items-center gap-2 rounded-md px-2 py-1.5 text-xs text-muted-foreground hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring"
+      :aria-pressed="selecting"
+      data-testid="conversation-select-toggle"
+      @click="selecting ? exitSelection() : (selecting = true)"
+    >
+      <ListChecks class="h-3.5 w-3.5" />
+      {{ t(selecting ? 'shell.conversation.cancelSelect' : 'shell.conversation.select') }}
+    </button>
+    <div
+      v-if="selecting"
+      class="flex items-center gap-1 px-2 py-1"
+      data-testid="conversation-selection-toolbar"
+    >
+      <button
+        type="button"
+        class="flex-1 rounded-md px-2 py-1 text-left text-xs hover:bg-muted"
+        data-testid="conversation-select-all"
+        @click="toggleSelectAll"
+      >
+        {{
+          t(
+            allVisibleSelected
+              ? 'shell.conversation.clearSelection'
+              : 'shell.conversation.selectAll',
+          )
+        }}
+      </button>
+      <button
+        v-if="selectedIds.length"
+        type="button"
+        class="rounded-md p-1.5 hover:bg-muted disabled:opacity-40"
+        :disabled="loading"
+        :aria-label="
+          t(
+            showingArchive
+              ? 'shell.conversation.restoreSelected'
+              : 'shell.conversation.archiveSelected',
+          )
+        "
+        data-testid="conversation-bulk-status"
+        @click="emitBulk(showingArchive ? 'restore' : 'archive')"
+      >
+        <component :is="showingArchive ? ArchiveRestore : Archive" class="h-3.5 w-3.5" />
+      </button>
+      <button
+        v-if="selectedIds.length"
+        type="button"
+        class="rounded-md p-1.5 text-destructive hover:bg-muted"
+        :aria-label="t('shell.conversation.deleteSelected')"
+        data-testid="conversation-bulk-delete"
+        @click="emitBulk('delete')"
+      >
+        <Trash2 class="h-3.5 w-3.5" />
+      </button>
+      <span
+        class="px-1 text-[11px] text-muted-foreground"
+        data-testid="conversation-selection-count"
+        >{{ selectedIds.length }}</span
+      >
+    </div>
     <!-- 会话列表（按时间分组） -->
     <nav v-keyboard-list class="flex-1 overflow-y-auto px-2 pb-3 pt-1">
       <p v-if="loading && groups.length === 0" class="px-3 py-2 text-xs text-muted-foreground/60">
@@ -304,12 +402,23 @@ const identityLabel = () => {
             type="button"
             class="min-w-0 w-full flex-1 px-2 py-1.5 pr-24 text-left text-[12.5px] leading-5"
             :data-keyboard-item="item.id"
+            :aria-pressed="selecting ? selectedIds.includes(item.id) : undefined"
             @click="
-              showingArchive
-                ? emit('restore-conversation', item.id)
-                : emit('select-conversation', item.id)
+              selecting
+                ? toggleSelected(item.id)
+                : showingArchive
+                  ? emit('restore-conversation', item.id)
+                  : emit('select-conversation', item.id)
             "
           >
+            <span
+              v-if="selecting"
+              class="mr-1.5 inline-flex h-3.5 w-3.5 items-center justify-center rounded border border-muted-foreground/50 align-[-2px]"
+              :class="selectedIds.includes(item.id) ? 'bg-primary text-primary-foreground' : ''"
+              aria-hidden="true"
+            >
+              <Check v-if="selectedIds.includes(item.id)" class="h-3 w-3" />
+            </span>
             <span class="block min-w-0 truncate whitespace-nowrap">{{ item.title }}</span>
           </button>
           <TooltipProvider v-if="stateOf(item.id)">
