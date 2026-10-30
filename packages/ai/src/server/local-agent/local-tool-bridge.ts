@@ -127,10 +127,7 @@ export class LocalAgentToolBridge implements LocalAgentToolBridgePort {
           };
           const handler = createMcpHandler(
             () => {
-              const mcp = new McpServer({
-                name: 'memoflow-local',
-                version: '1',
-              });
+              const mcp = new McpServer({ name: 'memoflow-local', version: '1' });
               const requestId = randomUUID();
               this.options.registerTools(mcp, {
                 ...grant.input,
@@ -269,11 +266,7 @@ export async function verifyLocalAgentMcpConnectivity(
     const dataLine = raw.split('\n').find((l) => l.startsWith('data: '));
     const data = dataLine ? JSON.parse(dataLine.slice(6)) : JSON.parse(raw);
     if (data.error) {
-      return {
-        ok: false,
-        tools: [],
-        error: data.error.message || 'JSON-RPC error',
-      };
+      return { ok: false, tools: [], error: data.error.message || 'JSON-RPC error' };
     }
     const discoveredTools: unknown[] = Array.isArray(data?.result?.tools) ? data.result.tools : [];
     const tools = discoveredTools

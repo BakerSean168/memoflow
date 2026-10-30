@@ -67,6 +67,11 @@ const permissionPayload = z.object({
   toolCall: z.object({
     toolCallId: z.string().min(1).max(512),
     title: z.string().max(4000).optional(),
+    kind: z.string().max(80).nullish(),
+    locations: z
+      .array(z.object({ path: z.string().max(1000) }).passthrough())
+      .max(50)
+      .nullish(),
   }),
   options: z
     .array(
@@ -78,6 +83,18 @@ const permissionPayload = z.object({
     )
     .max(20),
 });
+
+/** ACP tool kind and touched paths, shown as the scope a native approval would cover. */
+function acpPermissionScope(toolCall: {
+  kind?: string | null;
+  locations?: readonly { path: string }[] | null;
+}): { scope?: string } {
+  const parts = [
+    toolCall.kind?.trim(),
+    ...(toolCall.locations ?? []).map((location) => location.path.trim()),
+  ].filter((part): part is string => Boolean(part));
+  return parts.length ? { scope: parts.join(' · ').slice(0, 500) } : {};
+}
 
 type Model = {
   id: string;
@@ -554,7 +571,12 @@ export class AcpDriver {
             },
           ],
         }
-      : { type: 'permission', requestId, title };
+      : {
+          type: 'permission',
+          requestId,
+          title,
+          ...acpPermissionScope(parsed.data.toolCall),
+        };
     this.requests.set(requestId, {
       wireId: request.id,
       request: event,

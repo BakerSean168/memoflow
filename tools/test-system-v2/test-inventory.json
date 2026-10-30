@@ -3174,6 +3174,14 @@
       "measurementCollectors": []
     },
     {
+      "path": "packages/ai-ui/src/components/AILocalRequestCard.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/ai-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "packages/ai-ui/src/components/AIMessageContent.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -12951,7 +12959,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 37
+      "fileCount": 38
     },
     {
       "id": "packages/ai/vitest.config.ts",
@@ -13991,7 +13999,7 @@
   "duplicate": [],
   "unexpected": [],
   "counts": {
-    "unit": 1149,
+    "unit": 1150,
     "integration": 58,
     "smoke": 3,
     "boundary-ipc": 6,
