@@ -70,7 +70,7 @@ describe('AIConversationSidebar attention icons', () => {
     const row = wrapper.find('[data-testid="ai-sidebar-conversation-row"]');
     expect(row.exists()).toBe(true);
     expect(row.find('span.truncate').exists()).toBe(true);
-    expect(row.find('button.pr-16').exists()).toBe(true);
+    expect(row.find('button.pr-24').exists()).toBe(true);
     const status = row.find('[data-testid="ai-sidebar-conversation-status"]');
     expect(status.exists()).toBe(true);
     expect(status.attributes('aria-label')).toBe('等待审批');

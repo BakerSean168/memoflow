@@ -2,6 +2,7 @@ import { fail, ok, type Result } from '@memoflow/transport-contracts/result';
 import type { ExecutionContext } from '@memoflow/transport-contracts';
 import {
   ConversationNameSchema,
+  ConversationUpdateSchema,
   type CreateConversationRes,
   type ConversationListRes,
   type GetConversationRes,
@@ -16,6 +17,7 @@ interface AIConversationControllerService {
     cx: ExecutionContext,
     page?: number,
     pageSize?: number,
+    status?: 'Active' | 'Archived',
   ): Promise<Result<ConversationListRes>>;
   getConversation(id: string, cx: ExecutionContext): Promise<Result<GetConversationRes | null>>;
   updateConversation(
@@ -54,8 +56,9 @@ export class AIChatController {
     cx: ExecutionContext,
     page = 1,
     pageSize = 20,
+    status?: 'Active' | 'Archived',
   ): Promise<Result<ConversationListRes>> {
-    return this.conversationService.listConversations(cx, page, pageSize);
+    return this.conversationService.listConversations(cx, page, pageSize, status);
   }
 
   async getConversation(id: string, cx: ExecutionContext): Promise<Result<GetConversationRes>> {
@@ -70,7 +73,7 @@ export class AIChatController {
     input: unknown,
     cx: ExecutionContext,
   ): Promise<Result<UpdateConversationRes>> {
-    const parsed = ConversationNameSchema.safeParse(input);
+    const parsed = ConversationUpdateSchema.safeParse(input);
     if (!parsed.success) {
       return fail({
         code: 'VALIDATION_ERROR',

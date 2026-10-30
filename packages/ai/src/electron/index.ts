@@ -94,6 +94,8 @@ import {
   AIWorkflowRunViewSchema,
   AIWorkflowStartClientRequestSchema,
   LocalAgentClientCommandSchema,
+  ConversationUpdateSchema,
+  ListConversationsSchema,
   WorkspaceStreamRequestSchema,
   WorkspaceStreamAckSchema,
   WorkspaceStreamStopSchema,
@@ -444,9 +446,7 @@ export function createAIElectronModule(options: AIElectronModuleOptions): AIElec
           withAuthenticatedValue(ctx, async (requestContext) =>
             assistantConversation.updateConversation(
               String(dto.id),
-              {
-                name: String(dto.name),
-              },
+              ConversationUpdateSchema.parse(dto),
               requestContext,
             ),
           ),
@@ -458,6 +458,7 @@ export function createAIElectronModule(options: AIElectronModuleOptions): AIElec
               requestContext,
               Number(dto?.page ?? 1),
               Number(dto?.pageSize ?? 20),
+              ListConversationsSchema.parse(dto ?? {}).status,
             ),
           ),
         );
@@ -540,6 +541,8 @@ export function createAIElectronModule(options: AIElectronModuleOptions): AIElec
                   return ok(await runtime.probeDefaultDriver(owner, input.driver));
                 case 'list_conversations':
                   return ok(await runtime.listConversations(owner));
+                case 'set_conversation_status':
+                  return ok(await runtime.setConversationStatus(owner, input.id, input.status));
                 case 'create_conversation':
                   return ok(await runtime.createConversation(owner, input.conversation));
                 case 'respond':

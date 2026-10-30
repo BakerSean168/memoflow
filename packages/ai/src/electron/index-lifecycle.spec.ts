@@ -280,6 +280,27 @@ describe('createAIElectronModule lifecycle', () => {
     expect(result).toEqual(ok({ accepted: true }));
   });
 
+  it('passes validated archive updates and archive discovery through Desktop IPC', async () => {
+    await moduleDef.register(createFakeContext());
+    const update = mocks.handlers.get(AIChannels.CONVERSATION_UPDATE)!;
+    expect(await update(undefined, { id: 'conversation-1', status: 'Archived' })).toMatchObject({
+      ok: true,
+    });
+    expect(fake.assistantConversation.updateConversation).toHaveBeenCalledWith(
+      'conversation-1',
+      { status: 'Archived' },
+      expect.objectContaining({ identityId: 'identity-1' }),
+    );
+    const list = mocks.handlers.get(AIChannels.CONVERSATION_LIST)!;
+    await list(undefined, { status: 'Archived', page: 2, pageSize: 100 });
+    expect(fake.assistantConversation.listConversations).toHaveBeenCalledWith(
+      expect.objectContaining({ identityId: 'identity-1' }),
+      2,
+      100,
+      'Archived',
+    );
+  });
+
   it('routes product IPC through the matching capability port', async () => {
     await moduleDef.register(createFakeContext());
     const handler = mocks.handlers.get(AIChannels.PROVIDER_LIST)!;

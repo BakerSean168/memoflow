@@ -52,6 +52,14 @@ export default {
     moreCount: '另有 {count} 项',
   },
   conversation: {
+    archive: '归档',
+    restore: '恢复',
+    archived: '已归档',
+    active: '活跃会话',
+    confirmDelete: '删除此会话及其消息？此操作无法撤销。',
+    previousPage: '上一页',
+    nextPage: '下一页',
+
     today: '今天',
     last7Days: '近 7 天',
     earlier: '更早',

@@ -3,7 +3,7 @@ installAiUiHost();
 import { defineComponent, h, nextTick } from 'vue';
 import { mount } from '@vue/test-utils';
 import { createI18n } from 'vue-i18n';
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, onTestFinished, vi } from 'vitest';
 import { ok, ResultErrorException } from '@memoflow/transport-contracts/result';
 import type { AssistantRuntimeEvent } from '@memoflow/ai-contracts';
 import type {
@@ -19,7 +19,8 @@ import zhErrors from '@ai-ui-test-host/locales/zh-CN/errors';
 import { subscribeWorkspaceEvents } from '@ai-ui-test-host/shared/services/workspace-event-subscription';
 
 const toastMocks = vi.hoisted(() => ({
-  success: vi.fn(),
+  success: vi.fn(() => 1),
+  dismiss: vi.fn(),
   error: vi.fn(),
 }));
 
@@ -93,9 +94,9 @@ type ServiceStub = {
 function createServiceStub(): ServiceStub {
   return {
     createConversation: vi.fn(async () => ok(createConversationDTO('conv-1'))),
-    listConversations: vi.fn(async () =>
+    listConversations: vi.fn(async (params?: { status?: string }) =>
       ok({
-        data: [{ id: 'conv-1', name: 'New chat' }],
+        data: params?.status === 'Archived' ? [] : [{ id: 'conv-1', name: 'New chat' }],
         total: 1,
         page: 1,
         pageSize: 24,
@@ -194,7 +195,7 @@ function mountComposable(
     getDefaultConversationName: () => 'New chat',
     ...extra,
   };
-  mount(
+  const wrapper = mount(
     defineComponent({
       setup() {
         composable = useAIChatSession(options);
@@ -203,6 +204,7 @@ function mountComposable(
     }),
     { global: { plugins: [i18n] } },
   );
+  onTestFinished(() => wrapper.unmount());
   return composable;
 }
 
@@ -850,7 +852,7 @@ describe('useAIChatSession Mastra-native open chat', () => {
     );
     const old = session.loadConversationList(service as never);
     const overlapping = session.loadConversationList(service as never);
-    expect(service.listConversations).toHaveBeenCalledOnce();
+    expect(service.listConversations).toHaveBeenCalledTimes(2);
     resolveOld(ok({ data: [], total: 0, page: 1, pageSize: 24 }));
     await Promise.all([old, overlapping]);
     service.listConversations.mockResolvedValueOnce(
@@ -2383,4 +2385,148 @@ it('preserves a new draft typed while a native conversation is being created', a
   await sending;
   expect(session.chatMessage.value).toBe('Next prompt typed during creation');
   expect(runtime.streamMessage).toHaveBeenCalledOnce();
+});
+
+describe('conversation archive and undo', () => {
+  function setup() {
+    const service = createServiceStub();
+    const runtime = createRuntimeStub();
+    const session = mountComposable(service, runtime);
+    session.syncConversationSummary({
+      ...createConversationDTO('conv-1'),
+      status: 'Active',
+    } as never);
+    service.updateConversation.mockImplementation(async (id: string, patch: { status: string }) =>
+      ok({ ...createConversationDTO(id), ...patch }),
+    );
+    return { service, runtime, session };
+  }
+  it('archives optimistically, survives a stale snapshot, and preserves canonical history', async () => {
+    const { service, runtime, session } = setup();
+    let commit!: (value: unknown) => void;
+    service.updateConversation.mockImplementationOnce(
+      () =>
+        new Promise((resolve) => {
+          commit = resolve;
+        }),
+    );
+    const archiving = session.archiveConversation('conv-1');
+    await nextTick();
+    expect(session.conversationList.value[0]?.status).toBe('Archived');
+    await session.loadConversationList(service as never);
+    expect(session.conversationList.value[0]?.status).toBe('Archived');
+    commit(ok({ ...createConversationDTO('conv-1'), status: 'Archived' }));
+    await archiving;
+    expect(service.deleteConversation).not.toHaveBeenCalled();
+    expect(runtime.deleteConversation).not.toHaveBeenCalled();
+    expect(runtime.cancelRun).not.toHaveBeenCalled();
+    expect(session.conversationList.value[0]?.updatedAt).toBe(2);
+  });
+  it('leaves text undo to inputs and restores only once with the global shortcut', async () => {
+    const { service, session } = setup();
+    await session.archiveConversation('conv-1');
+    const input = document.createElement('textarea');
+    document.body.append(input);
+    onTestFinished(() => input.remove());
+    const textUndo = new KeyboardEvent('keydown', {
+      key: 'z',
+      ctrlKey: true,
+      bubbles: true,
+      cancelable: true,
+    });
+    input.dispatchEvent(textUndo);
+    expect(textUndo.defaultPrevented).toBe(false);
+    expect(service.updateConversation).toHaveBeenCalledTimes(1);
+    const undo = new KeyboardEvent('keydown', { key: 'z', metaKey: true, cancelable: true });
+    window.dispatchEvent(undo);
+    window.dispatchEvent(new KeyboardEvent('keydown', { key: 'z', ctrlKey: true }));
+    await nextTick();
+    expect(undo.defaultPrevented).toBe(true);
+    expect(service.updateConversation).toHaveBeenCalledTimes(2);
+    expect(session.conversationList.value[0]).toMatchObject({
+      id: 'conv-1',
+      status: 'Active',
+      updatedAt: 2,
+    });
+  });
+  it('expires shortcut undo after five seconds while retaining history recovery', async () => {
+    const { service, session } = setup();
+    const clock = vi.spyOn(Date, 'now').mockReturnValue(1000);
+    onTestFinished(() => clock.mockRestore());
+    await session.archiveConversation('conv-1');
+    clock.mockReturnValue(6000);
+    window.dispatchEvent(new KeyboardEvent('keydown', { key: 'z', ctrlKey: true }));
+    expect(service.updateConversation).toHaveBeenCalledTimes(1);
+    await session.restoreConversation('conv-1');
+    expect(session.conversationList.value[0]?.status).toBe('Active');
+  });
+  it('rolls back failed archive and restore writes without duplicating entries', async () => {
+    const { service, session } = setup();
+    service.updateConversation.mockRejectedValueOnce(new Error('offline'));
+    await session.archiveConversation('conv-1');
+    expect(session.conversationList.value).toMatchObject([{ id: 'conv-1', status: 'Active' }]);
+    await session.archiveConversation('conv-1');
+    service.updateConversation.mockRejectedValueOnce(new Error('offline'));
+    await session.restoreConversation('conv-1');
+    expect(session.conversationList.value).toMatchObject([{ id: 'conv-1', status: 'Archived' }]);
+    expect(toastMocks.error).toHaveBeenCalled();
+  });
+  it('protects drafts and active/pending turns without cancelling execution', async () => {
+    const { service, runtime, session } = setup();
+    session.chatConversationId.value = 'conv-1';
+    session.chatMessage.value = 'draft';
+    await session.archiveConversation('conv-1');
+    session.chatMessage.value = '';
+    session.chatLoading.value = true;
+    await session.archiveConversation('conv-1');
+    session.chatLoading.value = false;
+    runtime.listAttention = vi.fn(async () => [{ state: 'approval' }] as never);
+    await session.archiveConversation('conv-1');
+    expect(service.updateConversation).not.toHaveBeenCalled();
+    expect(runtime.cancelRun).not.toHaveBeenCalled();
+  });
+  it('preserves a draft entered while archive persistence is pending', async () => {
+    const { service, session } = setup();
+    session.chatConversationId.value = 'conv-1';
+    let commit!: (value: unknown) => void;
+    service.updateConversation.mockImplementationOnce(
+      () =>
+        new Promise((resolve) => {
+          commit = resolve;
+        }),
+    );
+    const archiving = session.archiveConversation('conv-1');
+    await nextTick();
+    session.chatMessage.value = 'new draft';
+    commit(ok({ ...createConversationDTO('conv-1'), status: 'Archived' }));
+    await archiving;
+    expect(session.chatMessage.value).toBe('new draft');
+    expect(session.chatConversationId.value).toBe('conv-1');
+  });
+  it('keeps only the latest archive undo and routes native writes to their owner', async () => {
+    const service = createServiceStub();
+    const setConversationStatus = vi.fn(async (id, status) => ({
+      id,
+      status,
+      runtimeKind: 'local_agent',
+      name: id,
+      updatedAt: 2,
+    }));
+    const session = mountComposable(service, createRuntimeStub(), 'desktop', undefined, {
+      localAgent: { setConversationStatus } as never,
+    });
+    for (const id of ['native-1', 'native-2']) {
+      session.syncConversationSummary({ id, runtimeKind: 'local_agent', name: id } as never);
+      await session.archiveConversation(id);
+    }
+    window.dispatchEvent(new KeyboardEvent('keydown', { key: 'z', ctrlKey: true }));
+    await nextTick();
+    expect(setConversationStatus.mock.calls).toEqual([
+      ['native-1', 'Archived'],
+      ['native-2', 'Archived'],
+      ['native-2', 'Active'],
+    ]);
+    expect(service.updateConversation).not.toHaveBeenCalled();
+    expect(toastMocks.dismiss).toHaveBeenCalled();
+  });
 });

@@ -5,7 +5,7 @@ import type {
   LocalAgentClient,
 } from '@memoflow/ai-client';
 import type { AIRuntimeSurface, AIChatPermissionMode } from '@memoflow/ai-contracts';
-import { nextTick, ref } from 'vue';
+import { nextTick, ref, onMounted, onUnmounted } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { toast } from 'vue-sonner';
 import { getAIErrorMessage } from './error';
@@ -13,7 +13,10 @@ import type { AIChatService } from './types';
 import { useAIComposerContext } from './useAIComposerContext';
 import { useAssistantStream } from './useAssistantStream';
 import { useConversationProjection } from './useConversationProjection';
-import { useConversationAttention } from './useConversationAttention';
+import {
+  useConversationAttention,
+  type ConversationAttentionStatus,
+} from './useConversationAttention';
 import { useDurableConversationAttention } from './useDurableConversationAttention';
 
 const STREAM_AUTO_FOLLOW_THRESHOLD_PX = 96;
@@ -128,6 +131,106 @@ export function useAIChatSession(options: UseAIChatSessionOptions) {
       attention.clear(id);
     }
   }
+
+  let sessionAlive = true;
+  let undoArchive: { id: string; expiresAt: number; toastId: string | number } | null = null;
+  let undoArchiveTimer: ReturnType<typeof setTimeout> | undefined;
+  function clearArchiveUndo() {
+    clearTimeout(undoArchiveTimer);
+    undoArchiveTimer = undefined;
+    if (undoArchive) toast.dismiss(undoArchive.toastId);
+    undoArchive = null;
+  }
+  async function restoreConversation(id: string) {
+    if (undoArchive?.id === id) clearArchiveUndo();
+    return conversation.setConversationStatus(id, 'Active');
+  }
+  function undoLastArchive() {
+    if (!undoArchive || Date.now() >= undoArchive.expiresAt) {
+      clearArchiveUndo();
+      return;
+    }
+    return restoreConversation(undoArchive.id);
+  }
+  async function archiveConversation(id: string) {
+    let state: ConversationAttentionStatus | undefined = durableAttention.statuses.value[id];
+    try {
+      const item = conversationList.value.find((entry) => entry.id === id);
+      const fresh = await options.runtime.listAttention?.(
+        [id],
+        item?.runtimeKind === 'local_agent' ? 'local_agent' : 'builtin',
+      );
+      if (!sessionAlive) return;
+      state = fresh?.[0]?.state === 'normal' ? undefined : (fresh?.[0]?.state ?? state);
+    } catch (error) {
+      if (!sessionAlive) return;
+      toast.error(getAIErrorMessage(error, t, 'aiAssistant.dialogs.chat.archiveFailed'));
+      return;
+    }
+    if (
+      state === 'working' ||
+      state === 'input' ||
+      state === 'approval' ||
+      (id === chatConversationId.value &&
+        (chatLoading.value ||
+          chatMessage.value.length ||
+          composerAttachments.value.length ||
+          composerContextEntities.value.some((item) => item.origin === 'explicit')))
+    ) {
+      toast.error(t('aiAssistant.dialogs.chat.archiveBlocked'));
+      return;
+    }
+    if (!(await conversation.setConversationStatus(id, 'Archived'))) return;
+    // The user may have typed or started a turn while persistence was in flight.
+    if (
+      id === chatConversationId.value &&
+      !chatLoading.value &&
+      !chatMessage.value.length &&
+      !composerAttachments.value.length &&
+      !composerContextEntities.value.some((item) => item.origin === 'explicit')
+    )
+      startNewConversation();
+    clearArchiveUndo();
+    const toastId = toast.success(t('aiAssistant.dialogs.chat.archived'), {
+      duration: 5000,
+      position: 'bottom-center',
+      action: {
+        label: t('aiAssistant.dialogs.chat.undoArchive'),
+        onClick: () => {
+          if (undoArchive?.id === id) void undoLastArchive();
+        },
+      },
+    });
+    undoArchive = { id, expiresAt: Date.now() + 5000, toastId };
+    undoArchiveTimer = setTimeout(clearArchiveUndo, 5000);
+  }
+  function handleArchiveUndo(event: KeyboardEvent) {
+    if (
+      event.defaultPrevented ||
+      !(event.ctrlKey || event.metaKey) ||
+      event.shiftKey ||
+      event.altKey ||
+      event.key.toLowerCase() !== 'z' ||
+      !undoArchive ||
+      Date.now() >= undoArchive.expiresAt
+    )
+      return;
+    const target = event.target;
+    if (
+      target instanceof HTMLElement &&
+      (target.isContentEditable ||
+        target.closest('input, textarea, [contenteditable="true"], [role="textbox"]'))
+    )
+      return;
+    event.preventDefault();
+    void undoLastArchive();
+  }
+  onMounted(() => window.addEventListener('keydown', handleArchiveUndo));
+  onUnmounted(() => {
+    sessionAlive = false;
+    window.removeEventListener('keydown', handleArchiveUndo);
+    clearArchiveUndo();
+  });
 
   function buildConversationTranscript() {
     const transcript = chatTimeline.value
@@ -254,6 +357,11 @@ export function useAIChatSession(options: UseAIChatSessionOptions) {
     refreshRuntimeUsage,
     selectConversation: selectConversationWithAttention,
     deleteConversation: deleteConversationWithAttention,
+    archiveConversation,
+    restoreConversation,
+    archivePage: conversation.archivePage,
+    archiveHasMore: conversation.archiveHasMore,
+    changeArchivePage: conversation.changeArchivePage,
     ensureConversationCreated,
     prepareWorkflowTurn,
     resetChatSession,

@@ -230,6 +230,24 @@ describe('ai chat route contracts', () => {
     expect(createSchema.safeParse({ name: '' }).success).toBe(false);
   });
 
+  it('validates archive patches separately from required creation names', () => {
+    const registry = new TestOpenApiRegistry();
+    registerAIChatRoutes(
+      createAIChatControllerStub(),
+      { auth: authMiddleware, requireRole: vi.fn(() => authMiddleware) },
+      registry,
+    );
+    const patch = getJsonBodySchema(
+      getRegisteredRoute(registry, 'patch', `${BASE}/conversations/{id}`),
+    );
+    expect(patch.safeParse({ status: 'Archived' }).success).toBe(true);
+    expect(patch.safeParse({ status: 'Active' }).success).toBe(true);
+    expect(patch.safeParse({}).success).toBe(false);
+    expect(patch.safeParse({ status: 'Deleted' }).success).toBe(false);
+    const create = getJsonBodySchema(getRegisteredRoute(registry, 'post', `${BASE}/conversations`));
+    expect(create.safeParse({ status: 'Archived' }).success).toBe(false);
+  });
+
   it('delete conversation response uses z.null() (no ActionSuccess dual-track)', () => {
     const registry = new TestOpenApiRegistry();
 

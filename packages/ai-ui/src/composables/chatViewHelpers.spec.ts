@@ -8,6 +8,7 @@ import type { AIWorkflowRunView } from '@memoflow/ai-contracts';
 import type { IWorkflowRuntimeService } from '@ai-ui-test-host/di/types';
 import { AIWorkflowRestoreError, loadAuthoritativeWorkflowRun } from './chatViewHelpers';
 import { canLeaveAIWorkflowReview } from './chatViewHelpers';
+import { initializeChatView } from './chatViewHelpers';
 import { maybeRenameConversation } from './chatViewHelpers';
 import { ok, error } from '@memoflow/transport-contracts/result';
 
@@ -175,4 +176,40 @@ describe('loadAuthoritativeWorkflowRun', () => {
       loadAuthoritativeWorkflowRun(runtime(get), 'conversation-1', 'run-1'),
     ).resolves.toBe(authoritative);
   });
+});
+
+describe('conversation archive startup', () => {
+  it.each([false, true])(
+    'never reopens an archived last-active conversation (active available: %s)',
+    async (hasActive) => {
+      localStorage.setItem('ai:last-conversation-id', 'archived');
+      const selectConversation = vi.fn(async () => {});
+      try {
+        await initializeChatView({
+          initRepository: vi.fn(),
+          loadProviders: vi.fn(async () => {}),
+          loadConversationList: vi.fn(async () => {}),
+          syncSelectedModel: vi.fn(),
+          getPersistedModelKey: () => undefined,
+          selectConversation,
+          lastActiveConversationId: { value: '' },
+          conversationList: {
+            value: [
+              { id: 'archived', status: 'Archived' },
+              ...(hasActive ? [{ id: 'active', status: 'Active' as const }] : []),
+            ],
+          },
+          adjustComposerHeight: vi.fn(),
+          toastError: vi.fn(),
+          translate: (key) => key,
+          nextTick: async () => {},
+        });
+        if (hasActive)
+          expect(selectConversation).toHaveBeenCalledWith({ id: 'active', status: 'Active' });
+        else expect(selectConversation).not.toHaveBeenCalled();
+      } finally {
+        localStorage.removeItem('ai:last-conversation-id');
+      }
+    },
+  );
 });

@@ -446,11 +446,24 @@ export class LocalAgentRuntime {
           connectionId: value.connectionId,
           modelId: value.modelId,
           name: value.name,
+          status: value.status,
           driver: value.driver,
           createdAt: value.createdAt,
           updatedAt: value.updatedAt,
         }),
     );
+  }
+  async setConversationStatus(identityId: string, id: string, status: 'Active' | 'Archived') {
+    this.assertActive();
+    // A live run can be waiting for user input; never cancel it as an archive side effect.
+    if (
+      status === 'Archived' &&
+      [...this.runs.values()].some(
+        (run) => run.identityId === identityId && run.conversationId === id,
+      )
+    )
+      throw new LocalAgentError('CONFLICT');
+    return this.persist(() => this.options.store.setConversationStatus(identityId, id, status));
   }
   async createConversation(identityId: string, input: LocalAgentConversationCreate) {
     const connection = await this.persist(() =>

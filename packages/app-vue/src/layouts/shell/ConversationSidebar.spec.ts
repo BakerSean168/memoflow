@@ -72,6 +72,35 @@ const groups = [
 ];
 
 describe('ConversationSidebar attention', () => {
+  it('archives without confirmation and exposes searchable recovery with guarded pending rows', async () => {
+    const originalConfirm = window.confirm;
+    const confirm = vi.fn();
+    window.confirm = confirm;
+    const wrapper = mount(ConversationSidebar, {
+      props: {
+        groups,
+        activeConversationId: 'b',
+        conversationStatuses: { a: 'working' },
+        archivedConversations: [{ id: 'old', title: 'Archived history' }],
+      },
+      global: { plugins: [i18n] },
+    });
+    try {
+      const archive = wrapper.findAll('[data-testid="conversation-archive"]');
+      expect(archive[0]!.attributes('disabled')).toBeDefined();
+      await archive[1]!.trigger('click');
+      expect(wrapper.emitted('archive-conversation')).toEqual([['b']]);
+      expect(confirm).not.toHaveBeenCalled();
+      await wrapper.get('[data-testid="conversation-archive-toggle"]').trigger('click');
+      expect(wrapper.text()).toContain('Archived history');
+      expect(wrapper.text()).not.toContain('Training plan');
+      await wrapper.get('[data-testid="conversation-restore"]').trigger('click');
+      expect(wrapper.emitted('restore-conversation')).toEqual([['old']]);
+    } finally {
+      window.confirm = originalConfirm;
+      wrapper.unmount();
+    }
+  });
   it('displays semantic status icons and preserves conversation navigation', async () => {
     const wrapper = mount(ConversationSidebar, {
       props: {
@@ -90,10 +119,10 @@ describe('ConversationSidebar attention', () => {
     const firstRow = wrapper
       .findAll('nav button')
       .find((item) => item.text() === 'Personal systems architecture');
-    expect(firstRow?.classes()).toContain('pr-16');
+    expect(firstRow?.classes()).toContain('pr-24');
     expect(firstRow?.find('span').classes()).toContain('truncate');
     const normalRow = wrapper.findAll('nav button').find((item) => item.text() === 'Training plan');
-    expect(normalRow?.classes()).toContain('pr-9');
+    expect(normalRow?.classes()).toContain('pr-24');
     await icons[0]!.trigger('click');
     expect(wrapper.emitted('select-conversation')).toEqual([['a']]);
     wrapper.unmount();

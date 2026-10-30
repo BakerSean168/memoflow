@@ -78,7 +78,7 @@ export class AIConversation extends AggregateRoot<AiConversationId> {
     if (this._props.status === status) return;
     const oldStatus = this._props.status;
     this._props.status = status;
-    this._props.updatedAt = new Date();
+    // Archive/restore preserve activity order; deletion remains a separate operation.
     this.addDomainEvent<AIEventMap['ai:conversation-status-changed']>(
       'ai:conversation-status-changed',
       {

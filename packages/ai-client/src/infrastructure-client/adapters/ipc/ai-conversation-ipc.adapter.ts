@@ -34,6 +34,7 @@ export class AIConversationIpcAdapter implements IAIConversationApiClient {
   async getConversations(params?: {
     page?: number;
     pageSize?: number;
+    status?: 'Active' | 'Archived';
   }): Promise<Result<ConversationListRes>> {
     return this.ipcClient.invoke<ConversationListRes>(AIChannels.CONVERSATION_LIST, params);
   }

@@ -39,6 +39,7 @@ export interface LocalAgentClient {
   /** Read-only, unsaved default driver check; available only on Desktop. */
   probeDefaultDriver(driver: LocalAgentDriver): Promise<LocalAgentStatus>;
   listConversations(): Promise<LocalAgentConversation[]>;
+  setConversationStatus(id: string, status: 'Active' | 'Archived'): Promise<LocalAgentConversation>;
   createConversation(conversation: LocalAgentConversationCreate): Promise<LocalAgentConversation>;
   respond(response: LocalAgentRequestResponse): Promise<boolean>;
   /** Explicit Google sign-in for one saved Antigravity instance. */
@@ -83,6 +84,8 @@ export function createLocalAgentIpcClient(ipc: IResultIpcClient): LocalAgentClie
       invoke({ action: 'probe_default', driver }, LocalAgentStatusSchema),
     listConversations: () =>
       invoke({ action: 'list_conversations' }, z.array(LocalAgentConversationSchema).max(1000)),
+    setConversationStatus: (id, status) =>
+      invoke({ action: 'set_conversation_status', id, status }, LocalAgentConversationSchema),
     createConversation: (conversation) =>
       invoke({ action: 'create_conversation', conversation }, LocalAgentConversationSchema),
     async respond(response) {

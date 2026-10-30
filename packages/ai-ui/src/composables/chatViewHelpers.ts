@@ -91,7 +91,7 @@ export interface ChatViewInitContext {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   selectConversation: (item: any) => Promise<void>;
   lastActiveConversationId: { value: string };
-  conversationList: { value: Array<{ id: string }> };
+  conversationList: { value: Array<{ id: string; status?: 'Active' | 'Archived' }> };
   adjustComposerHeight: () => void;
   toastError: (msg: string) => void;
   translate: (key: string) => string;
@@ -188,9 +188,12 @@ export async function initializeChatView(ctx: ChatViewInitContext): Promise<void
     ctx.syncSelectedModel(ctx.getPersistedModelKey());
     await ctx.loadConversationList();
 
+    const activeConversations = ctx.conversationList.value.filter(
+      (item) => item.status !== 'Archived',
+    );
     const preferredConversation =
-      ctx.conversationList.value.find((item) => item.id === ctx.lastActiveConversationId.value) ||
-      ctx.conversationList.value[0] ||
+      activeConversations.find((item) => item.id === ctx.lastActiveConversationId.value) ||
+      activeConversations[0] ||
       null;
 
     if (preferredConversation) {

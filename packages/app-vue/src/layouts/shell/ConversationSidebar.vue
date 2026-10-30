@@ -12,6 +12,8 @@ import { computed, nextTick, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import {
   MoreHorizontal,
+  Archive,
+  ArchiveRestore,
   Search,
   SquarePen,
   Trash2,
@@ -60,6 +62,9 @@ const props = defineProps<{
   activeProfileId?: string;
   cloudState?: ProfileCloudState;
   groups: ConversationGroup[];
+  archivedConversations?: ConversationEntry[];
+  archivePage?: number;
+  archiveHasMore?: boolean;
   conversationStatuses?: ConversationAttentionMap;
   activeConversationId: string | null;
   userName?: string;
@@ -77,6 +82,10 @@ const emit = defineEmits<{
   (e: 'new-conversation'): void;
   (e: 'select-conversation', id: string): void;
   (e: 'delete-conversation', id: string): void;
+  (e: 'archive-conversation', id: string): void;
+  (e: 'restore-conversation', id: string): void;
+  (e: 'change-archive-page', direction: number): void;
+  (e: 'refresh-conversations'): void;
   (e: 'open-settings'): void;
   (e: 'open-cloud-connection'): void;
   (e: 'logout'): void;
@@ -115,6 +124,7 @@ async function restoreAccountMenuFocus(event: Event): Promise<void> {
   accountMenuTrigger.value?.focus({ preventScroll: true });
 }
 
+const showingArchive = ref(false);
 const searchOpen = ref(false);
 const searchQuery = ref('');
 const searchInput = ref<HTMLInputElement | null>(null);
@@ -122,8 +132,11 @@ const searchToggle = ref<HTMLButtonElement | null>(null);
 
 const normalizedSearchQuery = computed(() => searchQuery.value.trim().toLocaleLowerCase());
 const filteredGroups = computed(() => {
-  if (!normalizedSearchQuery.value) return props.groups;
-  return props.groups
+  const groups = showingArchive.value
+    ? [{ labelKey: 'shell.conversation.archived', items: props.archivedConversations ?? [] }]
+    : props.groups;
+  if (!normalizedSearchQuery.value) return groups;
+  return groups
     .map((group) => ({
       ...group,
       items: group.items.filter((item) =>
@@ -246,6 +259,19 @@ const identityLabel = () => {
       </button>
     </div>
 
+    <button
+      type="button"
+      data-testid="conversation-archive-toggle"
+      class="mx-2 flex items-center gap-2 rounded-md px-2 py-1.5 text-xs text-muted-foreground hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring"
+      :aria-pressed="showingArchive"
+      @click="
+        showingArchive = !showingArchive;
+        emit('refresh-conversations');
+      "
+    >
+      <Archive class="h-3.5 w-3.5" />
+      {{ t(showingArchive ? 'shell.conversation.active' : 'shell.conversation.archived') }}
+    </button>
     <!-- 会话列表（按时间分组） -->
     <nav v-keyboard-list class="flex-1 overflow-y-auto px-2 pb-3 pt-1">
       <p v-if="loading && groups.length === 0" class="px-3 py-2 text-xs text-muted-foreground/60">
@@ -276,10 +302,13 @@ const identityLabel = () => {
         >
           <button
             type="button"
-            class="min-w-0 w-full flex-1 px-2 py-1.5 text-left text-[12.5px] leading-5"
-            :class="stateOf(item.id) ? 'pr-16' : 'pr-9'"
+            class="min-w-0 w-full flex-1 px-2 py-1.5 pr-24 text-left text-[12.5px] leading-5"
             :data-keyboard-item="item.id"
-            @click="emit('select-conversation', item.id)"
+            @click="
+              showingArchive
+                ? emit('restore-conversation', item.id)
+                : emit('select-conversation', item.id)
+            "
           >
             <span class="block min-w-0 truncate whitespace-nowrap">{{ item.title }}</span>
           </button>
@@ -306,6 +335,25 @@ const identityLabel = () => {
               </TooltipContent>
             </Tooltip>
           </TooltipProvider>
+          <button
+            type="button"
+            :data-testid="showingArchive ? 'conversation-restore' : 'conversation-archive'"
+            class="absolute right-14 top-1/2 flex h-6 w-6 -translate-y-1/2 items-center justify-center rounded-md text-muted-foreground hover:bg-muted hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-40"
+            :aria-label="
+              t(showingArchive ? 'shell.conversation.restore' : 'shell.conversation.archive')
+            "
+            :title="t(showingArchive ? 'shell.conversation.restore' : 'shell.conversation.archive')"
+            :disabled="
+              !showingArchive && ['working', 'input', 'approval'].includes(stateOf(item.id) ?? '')
+            "
+            @click.stop="
+              showingArchive
+                ? emit('restore-conversation', item.id)
+                : emit('archive-conversation', item.id)
+            "
+          >
+            <component :is="showingArchive ? ArchiveRestore : Archive" class="h-3.5 w-3.5" />
+          </button>
           <DropdownMenu>
             <DropdownMenuTrigger as-child>
               <button
@@ -329,6 +377,22 @@ const identityLabel = () => {
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
+      </div>
+      <div v-if="showingArchive" class="flex items-center justify-between gap-2 px-2 py-2 text-xs">
+        <button
+          type="button"
+          :disabled="(archivePage ?? 1) <= 1 || loading"
+          @click="emit('change-archive-page', -1)"
+        >
+          {{ t('shell.conversation.previousPage') }}
+        </button>
+        <button
+          type="button"
+          :disabled="!archiveHasMore || loading"
+          @click="emit('change-archive-page', 1)"
+        >
+          {{ t('shell.conversation.nextPage') }}
+        </button>
       </div>
     </nav>
 

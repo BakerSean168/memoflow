@@ -273,7 +273,7 @@ import { describe, expect, it } from 'vitest';
         'export type CreateConversationReq = z.infer<typeof ConversationNameSchema>',
       );
       expect(dto).toContain(
-        'export type UpdateConversationReq = z.infer<typeof ConversationNameSchema>',
+        'export type UpdateConversationReq = z.infer<typeof ConversationUpdateSchema>',
       );
       expect(dto).not.toMatch(/export const CreateConversationSchema\b/);
       expect(dto).not.toMatch(/export const UpdateConversationSchema\b/);
@@ -287,9 +287,11 @@ import { describe, expect, it } from 'vitest';
       expect(controller).not.toContain('CreateConversationSchema');
       expect(controller).not.toContain('UpdateConversationSchema');
       const routeHits = routes.split('schema: ConversationNameSchema').length - 1;
-      expect(routeHits).toBeGreaterThanOrEqual(2);
+      expect(routeHits).toBeGreaterThanOrEqual(1);
+      expect(routes).toContain('schema: ConversationUpdateSchema');
       const parseHits = controller.split('ConversationNameSchema.safeParse').length - 1;
-      expect(parseHits).toBeGreaterThanOrEqual(2);
+      expect(parseHits).toBeGreaterThanOrEqual(1);
+      expect(controller).toContain('ConversationUpdateSchema.safeParse');
     });
   });
 }

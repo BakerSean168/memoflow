@@ -1,4 +1,5 @@
-import { describe, expect, it } from 'vitest';
+import { executeCrudBatch } from './crud-executor.js';
+import { describe, expect, it, vi } from 'vitest';
 import { normalizeCrudData } from './crud-normalization';
 
 describe('normalizeCrudData', () => {
@@ -70,5 +71,55 @@ describe('normalizeCrudData', () => {
     expect(normalizeCrudData('goals', { tags: '[invalid]' })).toEqual({
       tags: '[invalid]',
     });
+  });
+});
+
+describe('AI conversation archive state upload', () => {
+  it.each(['Archived', 'Active'])(
+    'preserves activity order and ownership for a changed-column %s patch',
+    async (status) => {
+      const updatedAt = new Date('2026-10-01T00:00:00Z');
+      const delegate = {
+        upsert: vi.fn(),
+        deleteMany: vi.fn(),
+        update: vi.fn(),
+        findFirst: vi.fn(async () => ({ updatedAt })),
+      };
+      const db = {
+        $transaction: async <T>(work: (tx: { aiConversation: typeof delegate }) => Promise<T>) =>
+          work({ aiConversation: delegate }),
+      };
+      await executeCrudBatch(db, 'owner', [
+        { ops: [{ op: 'PATCH', type: 'ai_conversations', id: 'conversation', data: { status } }] },
+      ]);
+      expect(delegate.findFirst).toHaveBeenCalledWith({
+        where: { id: 'conversation', identityId: 'owner', deletedAt: null },
+        select: { updatedAt: true },
+      });
+      expect(delegate.update).toHaveBeenCalledWith({
+        where: { id: 'conversation', identityId: 'owner', deletedAt: null },
+        data: { status, identityId: 'owner', updatedAt },
+      });
+      expect(delegate.upsert).not.toHaveBeenCalled();
+    },
+  );
+  it('acknowledges a stale archive for a deleted/foreign conversation without recreating it', async () => {
+    const delegate = {
+      upsert: vi.fn(),
+      deleteMany: vi.fn(),
+      update: vi.fn(),
+      findFirst: vi.fn(async () => null),
+    };
+    const db = {
+      $transaction: async <T>(work: (tx: { aiConversation: typeof delegate }) => Promise<T>) =>
+        work({ aiConversation: delegate }),
+    };
+    await executeCrudBatch(db, 'owner', [
+      {
+        ops: [{ op: 'PATCH', type: 'ai_conversations', id: 'deleted', data: { status: 'Active' } }],
+      },
+    ]);
+    expect(delegate.update).not.toHaveBeenCalled();
+    expect(delegate.upsert).not.toHaveBeenCalled();
   });
 });

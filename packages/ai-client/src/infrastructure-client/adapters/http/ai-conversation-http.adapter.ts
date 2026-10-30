@@ -32,6 +32,7 @@ export class AIConversationHttpAdapter implements IAIConversationApiClient {
   async getConversations(params?: {
     page?: number;
     pageSize?: number;
+    status?: 'Active' | 'Archived';
   }): Promise<Result<ConversationListRes>> {
     return this.httpClient.get<ConversationListRes>(this.baseUrl, { params });
   }

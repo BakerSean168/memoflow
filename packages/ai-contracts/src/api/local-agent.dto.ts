@@ -19,6 +19,7 @@ export const AssistantRuntimeChoiceSchema = z.discriminatedUnion('runtimeKind', 
   z
     .object({
       runtimeKind: z.literal('local_agent'),
+      status: z.enum(['Active', 'Archived']).optional(),
       connectionId: id,
       modelId: id,
     })
@@ -94,6 +95,7 @@ export type LocalAgentConversationCreate = z.infer<typeof LocalAgentConversation
 export const LocalAgentConversationSchema = LocalAgentConversationCreateSchema.extend({
   id,
   runtimeKind: z.literal('local_agent'),
+  status: z.enum(['Active', 'Archived']).optional(),
   driver: LocalAgentDriverSchema,
   createdAt: z.number().int().nonnegative(),
   updatedAt: z.number().int().nonnegative(),
@@ -368,6 +370,13 @@ export const LocalAgentClientCommandSchema = z.discriminatedUnion('action', [
     })
     .strict(),
   z.object({ action: z.literal('list_conversations') }).strict(),
+  z
+    .object({
+      action: z.literal('set_conversation_status'),
+      id,
+      status: z.enum(['Active', 'Archived']),
+    })
+    .strict(),
   z
     .object({
       action: z.literal('create_conversation'),

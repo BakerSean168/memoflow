@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import { ConversationStatus } from '@memoflow/ai-contracts';
 import { AIConversation } from '../ai-conversation';
 
@@ -27,6 +27,18 @@ describe('AIConversation product shell', () => {
       'ai:conversation-updated',
       'ai:conversation-status-changed',
     ]);
+  });
+
+  it('archives and restores without changing identity, history order or deletion state', () => {
+    vi.useFakeTimers();
+    const conversation = AIConversation.create({ identityId: 'identity-1', name: 'Keep history' });
+    vi.advanceTimersByTime(1000);
+    const before = conversation.toClientDTO();
+    conversation.updateStatus(ConversationStatus.Archived);
+    expect(conversation.deletedAt).toBeNull();
+    conversation.updateStatus(ConversationStatus.Active);
+    expect(conversation.toClientDTO()).toEqual(before);
+    vi.useRealTimers();
   });
 
   it('soft deletes the shell without creating transcript state', () => {

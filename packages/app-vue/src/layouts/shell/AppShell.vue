@@ -304,7 +304,7 @@ const conversationGroups = computed(() => {
     last7Days: [],
     earlier: [],
   };
-  for (const item of conversations.value) {
+  for (const item of conversations.value.filter((item) => item.status !== 'Archived')) {
     const ts = conversationTimestamp(item);
     const entry = {
       id: String(item.id),
@@ -352,6 +352,20 @@ async function handleSelectConversation(id: string) {
   await aiRef.value?.selectConversation(summary);
 }
 
+const archivedConversations = computed(() =>
+  conversations.value
+    .filter((item) => item.status === 'Archived')
+    .map((item) => ({ id: item.id, title: item.name })),
+);
+function handleArchiveConversation(id: string) {
+  void aiRef.value?.archiveConversation(id);
+}
+function handleRestoreConversation(id: string) {
+  void aiRef.value?.restoreConversation(id);
+}
+function handleChangeArchivePage(direction: number) {
+  void aiRef.value?.changeArchivePage(direction);
+}
 function handleDeleteConversation(id: string) {
   void aiRef.value?.deleteConversation(id);
 }
@@ -1112,6 +1126,13 @@ onBeforeUnmount(() => {
             <ConversationSidebar
               class="h-full w-full"
               :groups="conversationGroups"
+              :archived-conversations="archivedConversations"
+              :archive-page="aiRef?.archivePage ?? 1"
+              :archive-has-more="aiRef?.archiveHasMore ?? false"
+              @archive-conversation="handleArchiveConversation"
+              @restore-conversation="handleRestoreConversation"
+              @change-archive-page="handleChangeArchivePage"
+              @refresh-conversations="aiRef?.loadConversationList()"
               :conversation-statuses="conversationStatuses"
               :profiles="desktopProfiles"
               :active-profile-id="desktopAccess?.profile?.profileId"
@@ -1289,6 +1310,13 @@ onBeforeUnmount(() => {
           <ConversationSidebar
             class="h-full w-full"
             :groups="conversationGroups"
+            :archived-conversations="archivedConversations"
+            :archive-page="aiRef?.archivePage ?? 1"
+            :archive-has-more="aiRef?.archiveHasMore ?? false"
+            @archive-conversation="handleArchiveConversation"
+            @restore-conversation="handleRestoreConversation"
+            @change-archive-page="handleChangeArchivePage"
+            @refresh-conversations="aiRef?.loadConversationList()"
             :conversation-statuses="conversationStatuses"
             :profiles="desktopProfiles"
             :active-profile-id="desktopAccess?.profile?.profileId"

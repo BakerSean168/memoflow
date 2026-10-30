@@ -17,9 +17,12 @@ export class ListConversationsUseCase {
     cx: ExecutionContext,
     page: number = 1,
     limit: number = 20,
+    status?: 'Active' | 'Archived',
   ): Promise<Result<ConversationListRes>> {
     try {
-      const allConversations = await this.conversationRepository.findByIdentityId(cx.identityId);
+      const allConversations = (
+        await this.conversationRepository.findByIdentityId(cx.identityId)
+      ).filter((item) => !item.deletedAt && (!status || item.status === status));
       const total = allConversations.length;
 
       const offset = (page - 1) * limit;

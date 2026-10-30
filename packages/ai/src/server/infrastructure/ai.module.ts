@@ -805,8 +805,8 @@ export function createAIModule(dependencies: AIModuleDependencies): AIModuleInst
       services.conversationServices.createConversation.execute(cx, name),
     updateConversation: (id, req, cx) =>
       services.conversationServices.updateConversation.execute(cx.identityId, id, req),
-    listConversations: (cx, page, pageSize) =>
-      services.conversationServices.listConversations.execute(cx, page, pageSize),
+    listConversations: (cx, page, pageSize, status) =>
+      services.conversationServices.listConversations.execute(cx, page, pageSize, status),
     getConversation: async (id, cx) => {
       const result = await services.conversationServices.getConversation.execute(cx.identityId, id);
       if (!result.ok) return result;
