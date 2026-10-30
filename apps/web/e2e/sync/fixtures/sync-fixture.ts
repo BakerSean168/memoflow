@@ -33,6 +33,8 @@ async function submitWebLogin(page: Page, credentials: SyncCredentials): Promise
   const passwordField = page
     .locator('#password')
     .or(page.getByTestId('login-password-input').locator('input'));
+  // Cold Vite startup can outlast the per-action timeout before auth mounts.
+  await emailField.waitFor({ state: 'visible', timeout: 120_000 });
   await emailField.fill(credentials.email);
   await passwordField.fill(credentials.password);
   await page.getByTestId('login-submit-button').click();

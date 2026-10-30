@@ -41,7 +41,8 @@ export async function openGoalList(page: Page, surface: GoalSurface): Promise<vo
     await page.goto(`${baseUrl}#/goals`, { waitUntil: 'domcontentloaded' });
   }
 
-  await expect(page.getByTestId('goal-list-view')).toBeVisible();
+  // A fresh renderer may still be compiling/loading the application shell.
+  await expect(page.getByTestId('goal-list-view')).toBeVisible({ timeout: 120_000 });
   await expect(page.getByTestId('create-goal-entry')).toBeVisible();
 }
 

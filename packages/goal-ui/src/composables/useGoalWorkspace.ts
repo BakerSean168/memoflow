@@ -8,7 +8,7 @@ import type {
   GoalWorkspaceTaskPage,
   GoalWorkspaceTaskPageRequest,
 } from '@memoflow/goal-workspace-contracts';
-import { presentErrorMessage } from '@memoflow/http-client';
+import { normalizeResultError, presentErrorMessage } from '@memoflow/http-client';
 
 /**
  * Read-only Goal Workspace adapter for Vue surfaces.
@@ -23,6 +23,21 @@ export function useGoalWorkspace(goalId: MaybeRefOrGetter<string | null>) {
   const isLoading = ref(false);
   const error = ref<string | null>(null);
 
+  const errorKind = ref<'not-found' | 'forbidden' | 'temporary' | null>(null);
+
+  function reportWorkspaceFailure(cause: unknown) {
+    const code = normalizeResultError(cause)?.code;
+    errorKind.value =
+      code === 'NOT_FOUND'
+        ? 'not-found'
+        : code === 'FORBIDDEN' || code === 'UNAUTHORIZED'
+          ? 'forbidden'
+          : 'temporary';
+    // Retain a previously loaded read model only for recoverable read failures.
+    if (errorKind.value !== 'temporary') workspace.value = null;
+    error.value = presentErrorMessage(cause);
+  }
+
   let workspaceRequest = 0;
 
   async function loadWorkspace(request?: GetGoalWorkspaceReq) {
@@ -35,20 +50,19 @@ export function useGoalWorkspace(goalId: MaybeRefOrGetter<string | null>) {
     }
     isLoading.value = true;
     error.value = null;
+    errorKind.value = null;
     try {
       const result = await service.getGoalWorkspace(id, request);
       if (requestId !== workspaceRequest || id !== toValue(goalId)) return null;
       if (!result.ok) {
-        workspace.value = null;
-        error.value = presentErrorMessage(result.error);
+        reportWorkspaceFailure(result.error);
         return null;
       }
       workspace.value = result.data;
       return result.data;
     } catch (cause) {
       if (requestId === workspaceRequest && id === toValue(goalId)) {
-        workspace.value = null;
-        error.value = presentErrorMessage(cause);
+        reportWorkspaceFailure(cause);
       }
       return null;
     } finally {
@@ -92,6 +106,7 @@ export function useGoalWorkspace(goalId: MaybeRefOrGetter<string | null>) {
     () => toValue(goalId),
     (id) => {
       workspace.value = null;
+      errorKind.value = null;
       taskPage.value = null;
       knowledgePage.value = null;
       if (!id) {
@@ -112,6 +127,7 @@ export function useGoalWorkspace(goalId: MaybeRefOrGetter<string | null>) {
     knowledgePage,
     isLoading,
     error,
+    errorKind,
     refresh: loadWorkspace,
     loadTaskPage,
     loadKnowledgePage,

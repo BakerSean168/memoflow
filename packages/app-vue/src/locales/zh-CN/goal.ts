@@ -1,5 +1,8 @@
 export default {
   inspect: {
+    goalNotFound: '目标不存在。',
+    goalForbidden: '暂无权限读取此目标，请检查当前身份。',
+    goalLoadFailed: '目标暂时加载失败，请重试。',
     description: '关键结果查看',
     goalUnavailable: '目标不存在或暂时不可用。',
     krUnavailable: '关键结果不存在。',

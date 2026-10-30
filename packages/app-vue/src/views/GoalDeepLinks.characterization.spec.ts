@@ -294,10 +294,8 @@ describe('Goal deep links — PVC-BASE-002', () => {
       const { router, wrapper } = await load(`/goals/${goalId}/key-results/missing-kr`);
       expect(router.currentRoute.value.name).toBe('key-result-detail');
       if (missing === 'missing-goal') {
-        expect(wrapper.get('[data-testid="goal-not-found"]').text()).toContain(
-          'Goal not found or unavailable.',
-        );
-        await wrapper.get('[data-testid="goal-not-found"] button').trigger('click');
+        expect(wrapper.get('[data-testid="goal-not-found"]').text()).toContain('Goal not found.');
+        await wrapper.findAll('[data-testid="goal-not-found"] button').at(-1)!.trigger('click');
       } else {
         const dialog = document.querySelector('[data-testid="goal-kr-inspect"]')!;
         expect(dialog.querySelector('[data-testid="goal-kr-not-found"]')?.textContent).toBe(
@@ -669,6 +667,28 @@ describe('Goal deep links — PVC-BASE-002', () => {
     expect(inspectDialog().text()).toContain(older.reflection);
   });
 
+  it.each([
+    ['NOT_FOUND', 'Goal not found.'],
+    ['FORBIDDEN', 'You do not have access to this goal.'],
+    ['SERVICE_UNAVAILABLE', 'Failed to load the goal.'],
+  ])(
+    'shows distinct %s feedback and retries the read without creating again',
+    async (code, message) => {
+      calls.getGoalWorkspace.mockResolvedValueOnce({
+        ok: false,
+        error: { code, message: 'read failed' },
+      });
+      const { wrapper } = await load('/goals/goal-1');
+      const alert = wrapper.get('[data-testid="goal-not-found"]');
+      expect(alert.text()).toContain(message);
+      await alert.get('button').trigger('click');
+      await flushPromises();
+      expect(calls.getGoalWorkspace).toHaveBeenCalledTimes(2);
+      expect(wrapper.find('[data-testid="goal-not-found"]').exists()).toBe(false);
+      expect(wrapper.find('[data-testid="goal-workspace-header"]').exists()).toBe(true);
+    },
+  );
+
   it.each(['missing-review', 'failed-review', 'missing-goal-create', 'missing-goal-detail'])(
     'shows deterministic closable %s feedback',
     async (missing) => {
@@ -687,10 +707,8 @@ describe('Goal deep links — PVC-BASE-002', () => {
         `/goals/goal-1/review/${suffix}?filter=active#context`,
       );
       if (missing.startsWith('missing-goal')) {
-        expect(wrapper.get('[data-testid="goal-not-found"]').text()).toContain(
-          'Goal not found or unavailable.',
-        );
-        await wrapper.get('[data-testid="goal-not-found"] button').trigger('click');
+        expect(wrapper.get('[data-testid="goal-not-found"]').text()).toContain('Goal not found.');
+        await wrapper.findAll('[data-testid="goal-not-found"] button').at(-1)!.trigger('click');
       } else {
         expect(inspectDialog().get('[role="alert"]').text()).toContain(
           missing === 'missing-review' ? 'Review not found.' : 'Failed to load',

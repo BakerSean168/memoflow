@@ -1,3 +1,4 @@
+import { expect } from '@playwright/test';
 import { test } from './fixtures/sync-fixture';
 import {
   createGoal,
@@ -76,9 +77,17 @@ test.describe('desktop/web goal sync regression', () => {
       description: 'used to verify desktop persistence after restart',
     });
     await waitForGoalVisible(webPage, 'web', goalName);
+    await webPage.getByTestId('goal-progress-row').filter({ hasText: goalName }).click();
+    await expect(webPage.getByTestId('goal-detail-title')).toHaveValue(goalName);
+    await openGoalList(webPage, 'web');
 
+    await desktop.page.getByTestId('goal-progress-row').filter({ hasText: goalName }).click();
+    await expect(desktop.page.getByTestId('goal-detail-title')).toHaveValue(goalName);
     await desktop.restart();
     await openGoalList(desktop.page, 'desktop');
     await waitForGoalVisible(desktop.page, 'desktop', goalName);
+    await desktop.page.getByTestId('goal-progress-row').filter({ hasText: goalName }).click();
+    await expect(desktop.page.getByTestId('goal-detail-title')).toHaveValue(goalName);
+    await openGoalList(desktop.page, 'desktop');
   });
 });

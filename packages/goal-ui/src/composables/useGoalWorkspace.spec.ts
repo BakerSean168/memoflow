@@ -77,3 +77,53 @@ it('does not publish a pending workspace when the owner is cleared', async () =>
 });
 
 installGoalUiHost();
+
+it.each([
+  ['NOT_FOUND', 'not-found'],
+  ['FORBIDDEN', 'forbidden'],
+  ['UNAUTHORIZED', 'forbidden'],
+  ['SERVICE_UNAVAILABLE', 'temporary'],
+])('classifies %s workspace failures without assuming deletion', async (code, kind) => {
+  service.getGoalWorkspace.mockResolvedValueOnce({
+    ok: false,
+    error: { code, message: 'failure' },
+  });
+  const scope = effectScope();
+  const state = scope.run(() => useGoalWorkspace('goal-1'))!;
+  await flushPromises();
+  expect(state.errorKind.value).toBe(kind);
+  scope.stop();
+});
+it('keeps an already loaded Goal during a transient refresh failure and clears feedback on retry', async () => {
+  service.getGoalWorkspace
+    .mockResolvedValueOnce(response('goal-1'))
+    .mockRejectedValueOnce(new Error('Offline'))
+    .mockResolvedValueOnce(response('goal-1'));
+  const scope = effectScope();
+  const state = scope.run(() => useGoalWorkspace('goal-1'))!;
+  await flushPromises();
+  await state.refresh();
+  expect(state.workspace.value?.goal.id).toBe('goal-1');
+  expect(state.errorKind.value).toBe('temporary');
+  await state.refresh();
+  expect(state.error.value).toBeNull();
+  expect(state.errorKind.value).toBeNull();
+  scope.stop();
+});
+
+it.each(['NOT_FOUND', 'FORBIDDEN'])(
+  'clears cached Goal content when a refresh returns %s',
+  async (code) => {
+    service.getGoalWorkspace.mockResolvedValueOnce(response('goal-1')).mockResolvedValueOnce({
+      ok: false,
+      error: { code, message: 'no access' },
+    });
+    const scope = effectScope();
+    const state = scope.run(() => useGoalWorkspace('goal-1'))!;
+    await flushPromises();
+    expect(state.workspace.value?.goal.id).toBe('goal-1');
+    await state.refresh();
+    expect(state.workspace.value).toBeNull();
+    scope.stop();
+  },
+);
