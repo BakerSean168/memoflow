@@ -13,6 +13,10 @@
   <a href="../internals/README.md"><strong>系统架构</strong></a>
 </p>
 
+<p align="center">
+  <img src="../../showcase/assets/shots/home-light-zh.webp" alt="MemoFlow 工作台：AI 对话与今日概览、例程和目标进度并排" width="100%" />
+</p>
+
 MemoFlow 是一个面向个人长期使用的 AI 效能工作区。它不是把 Chatbot 放到传统 Todo 应用旁边，而是让 AI 对话与 Goal、Task、Note、Schedule、Reminder、Notification 等业务对象共享同一套产品上下文：用户可以从对话中形成意图，再进入结构化工作区确认和编辑，通过产品契约执行，最后沉淀为可追踪结果。
 
 当前仓库同时包含 Web、Electron Desktop、API、共享领域包、契约、AI 运行时、同步与发布基础设施，是一个完整的多端产品工程，而不只是前端演示。

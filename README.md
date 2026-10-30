@@ -13,6 +13,10 @@
   <a href="./docs/internals/README.md"><strong>Architecture</strong></a>
 </p>
 
+<p align="center">
+  <img src="showcase/assets/shots/home-light-en.webp" alt="MemoFlow workspace: an AI conversation beside today’s overview, routines and goal progress" width="100%" />
+</p>
+
 MemoFlow is an AI-first productivity workspace designed for long-term personal use. It does not place a chatbot next to a traditional todo application. Instead, AI conversations and business objects such as Goal, Task, Note, Schedule, Reminder, and Notification share the same product context: an intention can begin in conversation, move into a structured workspace for confirmation and editing, execute through product contracts, and return as a traceable outcome.
 
 The repository contains the Web client, Electron Desktop client, API, shared domain packages, contracts, AI runtime, synchronization, and delivery infrastructure. It is a complete multi-surface product system rather than a frontend demo.
