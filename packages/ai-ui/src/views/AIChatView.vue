@@ -762,8 +762,10 @@ function openAISettings() {
 function openGoalWithoutAI() {
   void router.push('/goals?dialog=goal');
 }
-function deleteConversation(id: string) {
-  if (window.confirm(t('shell.conversation.confirmDelete'))) return deleteConversationBase(id);
+function deleteConversation(id: string): void {
+  if (window.confirm(t('shell.conversation.confirmDelete'))) {
+    void deleteConversationBase(id);
+  }
 }
 function openQuickTaskWithoutAI() {
   void router.push('/tasks?dialog=quick-task');
