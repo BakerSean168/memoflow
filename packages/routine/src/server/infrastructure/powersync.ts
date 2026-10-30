@@ -12,6 +12,9 @@ import type {
   RoutineTemporaryOverrideStore,
 } from '../domain/ports';
 
+export { createRoutinePowerSyncScheduleProjectionSource } from './routine-schedule/routine-schedule-projection-source.powersync';
+export { createRoutinePowerSyncScheduleExecutionDeps } from './routine-schedule/routine-schedule-execution-source.powersync';
+
 type Queryable = IElectronDatabase;
 
 /**

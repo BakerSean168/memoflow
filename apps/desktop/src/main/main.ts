@@ -39,6 +39,8 @@ import {
 } from '@memoflow/goal';
 import { createTaskReminderScheduledHandlerRegistration } from '@memoflow/task/schedule-execution';
 import { createTaskPowerSyncScheduleProjectionSource } from '@memoflow/task/schedule-projection';
+import { createRoutinePowerSyncScheduleProjectionSource } from '@memoflow/routine/schedule-projection/routine';
+import { createRoutinePowerSyncScheduleExecutionDeps } from '@memoflow/routine/schedule-execution/routine';
 import { createScheduleOrchestrationModule } from '@memoflow/schedule-orchestration';
 import { createGoalPowerSyncReminderFireHandler } from '@memoflow/goal/schedule-execution';
 import { createGoalPowerSyncScheduleProjectionSource } from '@memoflow/goal/schedule-projection';
@@ -354,6 +356,9 @@ async function registerBusinessModules(
   //    schedule 编排使用同一个 schedule-task 仓储，随后进行两阶段 schedule 组装。
   //    runtime controller 是桌面 lane 中 schedule 启停的唯一所有者（取代已退役的
   //    schedule runtime 包级全局）。
+  const routineScheduleExecutionDeps = createRoutinePowerSyncScheduleExecutionDeps(db, {
+    notificationRequestedWriter: notificationComposed.requestedWriter,
+  });
   const scheduleOrchestrationModule = createScheduleOrchestrationModule({
     scheduler: {
       invocationRepository: schedulerRepositorySet.scheduledInvocationRepository,
@@ -370,7 +375,9 @@ async function registerBusinessModules(
         settingElectronModule.userTimeContextPort,
       ),
     },
-    execution: {},
+    routineProjection: { source: createRoutinePowerSyncScheduleProjectionSource(db) },
+    routineOverrideStore: routineScheduleExecutionDeps.temporaryOverrideStore,
+    execution: { routineSource: routineScheduleExecutionDeps },
   });
   scheduleOrchestrationModule.handlerRegistry.register(
     createGoalPowerSyncReminderFireHandler(db, notificationComposed.requestedWriter),

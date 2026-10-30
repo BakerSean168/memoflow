@@ -41,6 +41,10 @@ export {
 } from './routine-schedule/routine-schedule-execution-source';
 export { createRoutineWallClockScheduledHandler } from './routine-schedule/routine-wall-clock-scheduled-handler';
 export { createRoutineElapsedScheduledHandler } from './routine-schedule/routine-elapsed-scheduled-handler';
+export { createRoutinePowerSyncScheduleProjectionSource } from './routine-schedule/routine-schedule-projection-source.powersync';
+export { createPowerSyncRoutineScheduleStateReader } from './routine-schedule/routine-schedule-state-reader.powersync';
+export { PowerSyncRoutineOccurrenceStore } from './routine-schedule/routine-occurrence-store.powersync';
+export { createRoutinePowerSyncScheduleExecutionDeps } from './routine-schedule/routine-schedule-execution-source.powersync';
 export { createInMemoryRoutineOccurrenceStore } from './routine-schedule/routine-occurrence-store.in-memory';
 export {
   createInMemoryRoutineNotificationWriter,
