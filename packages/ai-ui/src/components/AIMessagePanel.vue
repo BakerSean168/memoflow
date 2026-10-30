@@ -49,7 +49,7 @@
               :class="aiUiHost.semanticElevationClass('inset')"
               aria-hidden="true"
             >
-              <MemoFlowAiIcon class="h-3.5 w-3.5" />
+              <MemoFlowAiIcon class="h-5 w-5" :active="isAgentActive(item)" />
             </div>
             <div class="group/message min-w-0 flex-1 pt-0.5">
               <p
@@ -59,26 +59,7 @@
               >
                 {{ item.localAgentSource.modelId }}
               </p>
-              <p
-                v-if="item.toolActivity"
-                role="status"
-                class="mb-2 text-xs text-muted-foreground"
-                data-testid="ai-tool-activity"
-              >
-                {{ t(`aiAssistant.chatPage.tools.capabilities.${item.toolActivity.toolName}`) }}
-              </p>
-              <p
-                v-for="activity in item.toolActivities?.filter(
-                  (call) => call.state !== 'running',
-                ) ?? []"
-                :key="activity.toolCallId"
-                class="mb-2 text-xs text-muted-foreground"
-                data-testid="ai-tool-history"
-              >
-                {{ t(`aiAssistant.chatPage.tools.capabilities.${activity.toolName}`) }}
-                ·
-                {{ t(`aiAssistant.chatPage.tools.execution.${activity.state}`) }}
-              </p>
+              <AIActivityTimeline :item="item" />
               <section
                 v-for="approval in item.approvals ?? []"
                 :key="`${approval.runId}:${approval.toolCallId}`"
@@ -126,13 +107,6 @@
                   </button>
                 </div>
               </section>
-              <p
-                v-if="item.nativeActivity"
-                role="status"
-                class="mb-2 text-xs text-muted-foreground"
-              >
-                {{ item.nativeActivity.label }}
-              </p>
               <AILocalRequestCard
                 v-for="request in item.nativeRequests ?? []"
                 :key="request.request.requestId"
@@ -224,19 +198,6 @@
                   </button>
                 </form>
               </section>
-              <details
-                v-if="item.nativeActivities?.length"
-                class="mb-2 text-xs text-muted-foreground"
-              >
-                <summary class="cursor-pointer">
-                  {{ t('aiAssistant.local.toolHistory') }}
-                </summary>
-                <ul class="mt-1 space-y-1">
-                  <li v-for="activity in item.nativeActivities" :key="activity.toolCallId">
-                    {{ activity.label }}
-                  </li>
-                </ul>
-              </details>
               <AIMessageContent
                 v-if="item.content.trim()"
                 :content="
@@ -255,12 +216,6 @@
                 "
                 :generating="item.status === 'generating'"
               />
-              <p
-                v-else-if="item.status === 'generating'"
-                class="text-sm leading-7 text-muted-foreground"
-              >
-                {{ typingPlaceholder(item) }}
-              </p>
               <p
                 v-if="item.status === 'aborted' || item.status === 'error'"
                 class="mt-2 text-xs"
@@ -477,6 +432,8 @@ import { useI18n } from 'vue-i18n';
 import type { LocalAgentRequestResponse } from '@memoflow/ai-contracts';
 import AILocalRequestCard from './AILocalRequestCard.vue';
 import AIMessageContent from './AIMessageContent.vue';
+import AIActivityTimeline from './AIActivityTimeline.vue';
+import { isAgentActive } from '../composables/agentActivity';
 import MemoFlowAiIcon from './MemoFlowAiIcon.vue';
 import {
   getToolLocaleKey,
@@ -561,7 +518,7 @@ defineExpose({ viewport });
 
 const askUserAnswers = reactive<Record<string, string | string[]>>({});
 const { t } = useI18n();
-const { typingPlaceholder, getMessageStatusLabel } = useAIFormatters();
+const { getMessageStatusLabel } = useAIFormatters();
 const visibleTimeline = computed(() =>
   props.timeline.filter(
     (item) =>

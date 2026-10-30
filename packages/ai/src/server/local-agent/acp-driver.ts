@@ -485,16 +485,29 @@ export class AcpDriver {
         .object({
           toolCallId: z.string().min(1),
           title: z.string().optional(),
+          kind: z
+            .enum([
+              'read',
+              'edit',
+              'delete',
+              'move',
+              'search',
+              'execute',
+              'think',
+              'fetch',
+              'switch_mode',
+              'other',
+            ])
+            .optional()
+            .catch(undefined),
           status: z.string().optional(),
         })
         .parse(update);
-      if (update.sessionUpdate === 'tool_call' && frame.title)
-        this.toolNames.set(frame.toolCallId, frame.title);
-      const label = (frame.title ?? this.toolNames.get(frame.toolCallId) ?? 'ACP tool').slice(
-        0,
-        240,
-      );
-      if (update.sessionUpdate === 'tool_call_update') this.toolNames.delete(frame.toolCallId);
+      // ACP titles can contain raw shell arguments/secrets. Persist only the safe kind.
+      if (frame.kind) this.toolNames.set(frame.toolCallId, frame.kind);
+      const label = frame.kind ?? this.toolNames.get(frame.toolCallId) ?? 'ACP tool';
+      if (['completed', 'failed', 'denied'].includes(frame.status ?? ''))
+        this.toolNames.delete(frame.toolCallId);
       this.queue.push({
         type: 'activity',
         toolCallId: frame.toolCallId,

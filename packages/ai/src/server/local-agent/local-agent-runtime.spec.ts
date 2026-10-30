@@ -867,3 +867,57 @@ it('fails with LOCAL_AGENT_TOOLS_UNAVAILABLE when business tools are missing on 
   expect(failed.data.code).toBe('LOCAL_AGENT_TOOLS_UNAVAILABLE');
   await runtime.dispose();
 });
+
+describe('Native activity terminal replay', () => {
+  it.each(['failed', 'cancelled'] as const)(
+    'persists the %s run outcome beside tool history',
+    async (outcome) => {
+      const { store, conversation } = await setup();
+      const cwd = await mkdtemp(join(tmpdir(), 'mf-activity-replay-'));
+      ephemeralHomes.push(cwd);
+      const runtime = new LocalAgentRuntime({
+        store,
+        cwd,
+        createDriver: () => ({
+          async *run(): AsyncGenerator<NativeAgentEvent> {
+            yield {
+              type: 'activity',
+              toolCallId: 'tool-1',
+              label: 'commandExecution',
+              state: 'running',
+            };
+            if (outcome === 'failed') throw new LocalAgentError('LOCAL_AGENT_UNAVAILABLE');
+            yield { type: 'cancelled' };
+          },
+          respond: () => false,
+          cancel() {},
+          async close() {},
+          async probe() {
+            return { status: 'ready' as const, models: [{ id: 'model', name: 'Model' }] };
+          },
+        }),
+      });
+      try {
+        const events = [];
+        for await (const event of runtime.dispatchMessage({
+          identityId: 'owner',
+          conversationId: conversation.id,
+          content: 'Run',
+        }))
+          events.push(event);
+        const terminal = events.at(-1)!;
+        expect(terminal.type).toBe(`assistant.run.${outcome}`);
+        const history = await runtime.listMessages({
+          identityId: 'owner',
+          conversationId: conversation.id,
+        });
+        expect(history.messages.at(-1)).toMatchObject({
+          runOutcome: { runId: terminal.runId, status: outcome },
+          nativeActivities: [{ toolCallId: 'tool-1', label: 'commandExecution', state: 'running' }],
+        });
+      } finally {
+        await runtime.dispose();
+      }
+    },
+  );
+});

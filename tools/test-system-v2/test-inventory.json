@@ -3126,6 +3126,14 @@
       "measurementCollectors": []
     },
     {
+      "path": "packages/ai-ui/src/components/AIActivityTimeline.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/ai-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "packages/ai-ui/src/components/AIComposerControls.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -3215,6 +3223,14 @@
     },
     {
       "path": "packages/ai-ui/src/components/MemoFlowAiIcon.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/ai-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/ai-ui/src/composables/agentActivity.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/ai-ui/vitest.config.ts"
@@ -12951,7 +12967,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 37
+      "fileCount": 39
     },
     {
       "id": "packages/ai/vitest.config.ts",
@@ -13991,7 +14007,7 @@
   "duplicate": [],
   "unexpected": [],
   "counts": {
-    "unit": 1149,
+    "unit": 1151,
     "integration": 58,
     "smoke": 3,
     "boundary-ipc": 6,

@@ -14,6 +14,7 @@ const i18n = createI18n({
   messages: {
     'en-US': {
       aiAssistant: {
+        activity: enAI.activity,
         dialogs: {
           chat: {
             you: 'You',
@@ -411,7 +412,8 @@ describe('Assistant inline tool decisions', () => {
       },
       global: { plugins: [i18n] },
     });
-    expect(wrapper.get('[data-testid="ai-tool-activity"]').attributes('role')).toBe('status');
+    expect(wrapper.get('[data-testid="ai-agent-phase"]').attributes('role')).toBe('status');
+    expect(wrapper.get('[data-testid="ai-agent-phase"]').text()).toContain('Waiting');
     const approve = wrapper.get('[data-testid="ai-tool-approve"]');
     expect(approve.element.tagName).toBe('BUTTON');
     expect(approve.classes().join(' ')).toContain('focus-visible:');
