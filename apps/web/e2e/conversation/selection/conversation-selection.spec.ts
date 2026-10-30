@@ -30,6 +30,15 @@ test('mouse range, disjoint and cross-group selection; context counts and keyboa
   await expect(row('a')).toBeFocused();
   await page.keyboard.press('Escape');
   await expect(page.locator('[aria-selected="true"]')).toHaveCount(0);
+  await row('b').click();
+  await page.keyboard.press('ArrowDown');
+  await expect(row('a')).toBeFocused();
+  await page.keyboard.press('Shift+J');
+  await expect(row('b')).toHaveAttribute('aria-selected', 'false');
+  await expect(row('a')).toHaveAttribute('aria-selected', 'true');
+  await expect(row('d')).toHaveAttribute('aria-selected', 'true');
+  await expect(page.getByTestId('opened')).toHaveText('b');
+  await page.keyboard.press('Escape');
   await page.keyboard.press('Control+k');
   await expect(page.getByTestId('palette')).toHaveText('true');
   await page.keyboard.press('Control+k');

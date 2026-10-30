@@ -193,6 +193,7 @@ watch(
 const keyboardSelection = {
   hasSelection: () => selectedIds.value.length > 0,
   toggle: selection.toggle,
+  focus: selection.focus,
   rangeTo: selection.rangeTo,
   clear: selection.clear,
 };

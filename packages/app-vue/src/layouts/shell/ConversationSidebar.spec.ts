@@ -2,6 +2,7 @@ import { describe, expect, it, vi } from 'vitest';
 import { flushPromises, mount } from '@vue/test-utils';
 import { createI18n } from 'vue-i18n';
 import ConversationSidebar from './ConversationSidebar.vue';
+import { listAdapterFor } from '../../shared/keyboard/list-adapter';
 import auth from '../../locales/en-US/auth';
 
 const i18n = createI18n({
@@ -224,6 +225,26 @@ describe('ConversationSidebar mouse and batch selection', () => {
     await wrapper.setProps({ activeProfileId: 'two' });
     expect(row('c').attributes('aria-selected')).toBe('false');
     wrapper.unmount();
+  });
+  it('anchors keyboard range selection at the row reached by focus navigation', async () => {
+    const wrapper = mount(ConversationSidebar, {
+      attachTo: document.body,
+      props: { groups, activeConversationId: null },
+      global: { plugins: [i18n] },
+    });
+    try {
+      await wrapper.get('[data-keyboard-item="a"]').trigger('click');
+      const adapter = listAdapterFor(wrapper.get('[data-keyboard-item="a"]').element)!;
+      adapter.moveSelection(1);
+      adapter.moveSelection(1, true);
+      await flushPromises();
+      expect(wrapper.get('[data-keyboard-item="a"]').attributes('aria-selected')).toBe('false');
+      expect(wrapper.get('[data-keyboard-item="b"]').attributes('aria-selected')).toBe('true');
+      expect(wrapper.get('[data-keyboard-item="c"]').attributes('aria-selected')).toBe('true');
+      expect(document.activeElement).toBe(wrapper.get('[data-keyboard-item="c"]').element);
+    } finally {
+      wrapper.unmount();
+    }
   });
   it('reports each result, retains failed selection, and ignores stale Profile completions', async () => {
     let finish!: (value: { id: string; success: boolean }[]) => void;

@@ -67,6 +67,15 @@ export function createConversationSelectionStore() {
     if (state.activeKey && !visible.has(state.activeKey)) state.activeKey = null;
   }
 
+  function focus(id: string) {
+    if (!state.order.includes(id)) return;
+    const key = selectionKey(state.profileId, id);
+    if (state.activeKey === key) return;
+    state.anchorKey = key;
+    state.activeKey = key;
+    state.extending = false;
+  }
+
   function toggle(id: string) {
     const key = selectionKey(state.profileId, id);
     const next = new Set(state.selectedKeys);
@@ -161,6 +170,7 @@ export function createConversationSelectionStore() {
     clear,
     reconcile,
     click,
+    focus,
     toggle,
     rangeTo,
     toggleAll,

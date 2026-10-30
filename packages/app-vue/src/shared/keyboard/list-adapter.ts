@@ -6,6 +6,7 @@ interface KeyboardListOptions {
   selection?: {
     hasSelection(): boolean;
     toggle(id: string): void;
+    focus(id: string): void;
     rangeTo(id: string): void;
     clear(): void;
   };
@@ -108,7 +109,10 @@ function createAdapter(root: HTMLElement, options: KeyboardListOptions): ListNav
     get hasSelection() {
       return selection?.hasSelection() ?? model.selected.size > 0;
     },
-    focusItem: model.focus,
+    focusItem(id) {
+      if (model.activeId !== id) selection?.focus(id);
+      model.focus(id);
+    },
     get selectable() {
       return selectable;
     },
@@ -128,7 +132,10 @@ function createAdapter(root: HTMLElement, options: KeyboardListOptions): ListNav
     moveSelection(direction, extend = false) {
       reconcile();
       model.move(direction, selectable && extend && !selection);
-      if (extend && model.activeId) selection?.rangeTo(model.activeId);
+      if (model.activeId) {
+        if (extend) selection?.rangeTo(model.activeId);
+        else selection?.focus(model.activeId);
+      }
       paint();
       revealActive(focusRenderedItem);
     },
