@@ -207,6 +207,26 @@ describe('presentDesktopUpdateSettings', () => {
     expect(presentDesktopUpdateSettings(current, true).kind).toBe('up-to-date');
   });
 
+  it.each(['stable', 'beta', 'canary', 'nightly'] as const)(
+    'uses channel-neutral idle descriptions for the %s release channel',
+    (channel) => {
+      const current = snapshot({
+        type: 'idle',
+        currentVersion: '1.2.0',
+        lastCheckedAt: null,
+        lastOutcome: 'up-to-date',
+      });
+      current.channel = channel;
+
+      expect(presentDesktopUpdateSettings(current).descriptionKey).toBe(
+        'setting.updates.description.readyToCheck',
+      );
+      expect(presentDesktopUpdateSettings(current, true).descriptionKey).toBe(
+        'setting.updates.description.upToDate',
+      );
+    },
+  );
+
   it.each([
     {
       recoverableTo: 'available',

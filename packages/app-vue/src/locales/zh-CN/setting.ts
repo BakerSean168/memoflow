@@ -143,6 +143,7 @@ export default {
       stable: '稳定版',
       beta: 'Beta',
       canary: 'Canary',
+      nightly: '每夜构建版',
     },
     owner: {
       'memoflow-direct': 'MemoFlow',
@@ -167,8 +168,8 @@ export default {
     },
     description: {
       loading: '正在从桌面运行时读取版本与更新能力。',
-      readyToCheck: 'MemoFlow 会在后台检查稳定版更新，你也可以立即手动检查。',
-      upToDate: '当前安装已经是稳定通道中的最新版本。',
+      readyToCheck: 'MemoFlow 会在后台检查当前更新通道，你也可以立即手动检查。',
+      upToDate: '当前安装已经是所选更新通道中的最新版本。',
       checking: '正在连接更新源并验证最新版本信息。',
       available: '新版本可用，下载会按照当前安装策略继续。',
       availablePackageManager:
