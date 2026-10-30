@@ -127,7 +127,10 @@ export class LocalAgentToolBridge implements LocalAgentToolBridgePort {
           };
           const handler = createMcpHandler(
             () => {
-              const mcp = new McpServer({ name: 'memoflow-local', version: '1' });
+              const mcp = new McpServer({
+                name: 'memoflow-local',
+                version: '1',
+              });
               const requestId = randomUUID();
               this.options.registerTools(mcp, {
                 ...grant.input,
@@ -266,7 +269,11 @@ export async function verifyLocalAgentMcpConnectivity(
     const dataLine = raw.split('\n').find((l) => l.startsWith('data: '));
     const data = dataLine ? JSON.parse(dataLine.slice(6)) : JSON.parse(raw);
     if (data.error) {
-      return { ok: false, tools: [], error: data.error.message || 'JSON-RPC error' };
+      return {
+        ok: false,
+        tools: [],
+        error: data.error.message || 'JSON-RPC error',
+      };
     }
     const discoveredTools: unknown[] = Array.isArray(data?.result?.tools) ? data.result.tools : [];
     const tools = discoveredTools
@@ -275,11 +282,18 @@ export async function verifyLocalAgentMcpConnectivity(
       )
       .filter((name): name is string => typeof name === 'string');
     if (options?.requiredWriteScopes?.includes('goals:write')) {
-      if (!tools.includes('goal_panel_open')) {
+      const requiredGoalPanelTools = [
+        'goal_panel_open',
+        'goal_panel_snapshot',
+        'goal_panel_patch',
+        'goal_panel_submit',
+      ];
+      const missing = requiredGoalPanelTools.filter((name) => !tools.includes(name));
+      if (missing.length) {
         return {
           ok: false,
           tools,
-          error: 'Business tools missing: goal_panel_open not discovered',
+          error: `Business tools missing: ${missing.join(', ')} not discovered`,
         };
       }
     }

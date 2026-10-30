@@ -4,7 +4,10 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { createLocalAgentSqlite } from '../../testing/local-agent-sqlite';
 import { LocalAgentRepository } from '../infrastructure/adapters/powersync/local-agent.repository';
-import { LocalAgentRuntime } from './local-agent-runtime';
+import {
+  LocalAgentRuntime,
+  MEMOFLOW_NATIVE_TOOL_ROUTING_INSTRUCTIONS,
+} from './local-agent-runtime';
 import { LocalAgentError } from '../../shared/local-agent-error';
 import { nativeIdentity, nativeModelVisibilityContext } from './native-identity';
 import type { NativeAgentEvent, NativeAgentRunInput } from './codex-driver';
@@ -36,6 +39,14 @@ async function setup() {
   });
   return { store, conversation };
 }
+
+it('defines a bounded native MemoFlow tool route without granting alternate automation paths', () => {
+  expect(MEMOFLOW_NATIVE_TOOL_ROUTING_INSTRUCTIONS).toContain('goal_panel_open');
+  expect(MEMOFLOW_NATIVE_TOOL_ROUTING_INSTRUCTIONS).toContain('goal_panel_submit');
+  expect(MEMOFLOW_NATIVE_TOOL_ROUTING_INSTRUCTIONS).toContain('do not use goal_create');
+  expect(MEMOFLOW_NATIVE_TOOL_ROUTING_INSTRUCTIONS).toContain('Never use shell');
+  expect(MEMOFLOW_NATIVE_TOOL_ROUTING_INSTRUCTIONS).toContain('stop without retrying');
+});
 
 describe('AGY verified catalog reuse between Settings and Workspace', () => {
   it('reuses only the exact owner, revision and native OAuth identity without new ACP calls', async () => {
@@ -90,7 +101,10 @@ describe('AGY verified catalog reuse between Settings and Workspace', () => {
     });
     expect(await runtime.cachedCatalogConnection('owner', connection.id)).toBeNull();
     const live = await runtime.probeConnection('owner', connection.id);
-    expect(live).toMatchObject({ status: 'ready', models: [{ id: 'gemini-3.8-flash' }] });
+    expect(live).toMatchObject({
+      status: 'ready',
+      models: [{ id: 'gemini-3.8-flash' }],
+    });
     expect(probes).toBe(1);
     expect(await runtime.cachedCatalogConnection('owner', connection.id)).toEqual(live);
     expect(await runtime.cachedCatalogConnection('different-owner', connection.id)).toBeNull();
@@ -118,7 +132,10 @@ describe('AGY verified catalog reuse between Settings and Workspace', () => {
       name: 'Hello',
     });
     expect(conversation.modelId).toBe('gemini-3.8-flash');
-    await restarted.deleteConversation({ identityId: 'owner', conversationId: conversation.id });
+    await restarted.deleteConversation({
+      identityId: 'owner',
+      conversationId: conversation.id,
+    });
     await restarted.dispose();
     expect(probes).toBe(1);
 
@@ -169,14 +186,24 @@ describe('local Agent conversation execution', () => {
           async *run(): AsyncGenerator<NativeAgentEvent> {
             yield {
               type: 'request',
-              request: { type: 'permission', requestId: 'permission-1', title: 'Run command' },
+              request: {
+                type: 'permission',
+                requestId: 'permission-1',
+                title: 'Run command',
+              },
             };
             yield {
               type: 'request',
               request: {
                 type: 'user_input',
                 requestId: 'question-1',
-                questions: [{ id: 'q', prompt: 'Which branch?', options: ['main', 'dev'] }],
+                questions: [
+                  {
+                    id: 'q',
+                    prompt: 'Which branch?',
+                    options: ['main', 'dev'],
+                  },
+                ],
               },
             };
             yield { type: 'completed' };
@@ -290,7 +317,10 @@ describe('local Agent conversation execution', () => {
     })) {
     }
     expect(runs).toHaveLength(1);
-    expect(runs[0]?.modelOptions).toEqual({ reasoningEffort: 'high', serviceTier: 'priority' });
+    expect(runs[0]?.modelOptions).toEqual({
+      reasoningEffort: 'high',
+      serviceTier: 'priority',
+    });
     await runtime.dispose();
   });
 
@@ -374,10 +404,14 @@ describe('local Agent conversation execution', () => {
       content: 'Hello',
     });
     const started = await stream.next();
-    expect((await stream.next()).value).toMatchObject({ type: 'assistant.message.delta' });
+    expect((await stream.next()).value).toMatchObject({
+      type: 'assistant.message.delta',
+    });
     if (!started.value) throw new Error('Missing run');
     runtime.cancelRun({ identityId: 'owner', runId: started.value.runId });
-    expect((await stream.next()).value).toMatchObject({ type: 'assistant.run.cancelled' });
+    expect((await stream.next()).value).toMatchObject({
+      type: 'assistant.run.cancelled',
+    });
     await stream.return();
     const history = await store.listMessages('owner', conversation.id);
     expect(history.incomplete).toBe(true);
@@ -396,7 +430,9 @@ describe('local Agent conversation execution', () => {
     });
     const runtime = new LocalAgentRuntime({ store, cwd: '/tmp' });
     const read = runtime.listConnections('owner');
-    const rejected = expect(read).rejects.toMatchObject({ code: 'LOCAL_AGENT_PERMISSION_DENIED' });
+    const rejected = expect(read).rejects.toMatchObject({
+      code: 'LOCAL_AGENT_PERMISSION_DENIED',
+    });
     let disposed = false;
     const disposal = runtime.dispose().then(() => {
       disposed = true;
@@ -453,7 +489,11 @@ describe('local Agent conversation execution', () => {
     const store = new LocalAgentRepository(db);
     const getConnection = vi.spyOn(store, 'getConnection');
     const createConnection = vi.spyOn(store, 'createConnection');
-    const observed: { driver: string; executablePath: string; writeScopes: string[] }[] = [];
+    const observed: {
+      driver: string;
+      executablePath: string;
+      writeScopes: string[];
+    }[] = [];
     const close = vi.fn(async () => {});
     const runtime = new LocalAgentRuntime({
       store,
@@ -462,7 +502,10 @@ describe('local Agent conversation execution', () => {
         observed.push(connection);
         return {
           async probe() {
-            return { status: 'ready' as const, models: [{ id: 'model', name: 'Model' }] };
+            return {
+              status: 'ready' as const,
+              models: [{ id: 'model', name: 'Model' }],
+            };
           },
           async *run(): AsyncGenerator<NativeAgentEvent> {
             throw new Error('Probe must not run native inference');
@@ -581,7 +624,11 @@ describe('local Agent conversation execution', () => {
       cwd: '/tmp',
       createDriver: () => ({
         async *run(): AsyncGenerator<NativeAgentEvent> {
-          yield { type: 'session', nativeSessionId: 'native', accountFingerprint: 'account' };
+          yield {
+            type: 'session',
+            nativeSessionId: 'native',
+            accountFingerprint: 'account',
+          };
           yield {
             type: 'activity',
             toolCallId: 'goal-read',
@@ -601,7 +648,10 @@ describe('local Agent conversation execution', () => {
         cancel() {},
         async close() {},
         async probe() {
-          return { status: 'ready' as const, models: [{ id: 'model', name: 'Model' }] };
+          return {
+            status: 'ready' as const,
+            models: [{ id: 'model', name: 'Model' }],
+          };
         },
       }),
     });
@@ -629,14 +679,20 @@ describe('local Agent conversation execution', () => {
     expect((await store.getConversation('owner', conversation.id)).nativeSessionId).toBe('native');
     expect(
       (
-        await runtime.listMessages({ identityId: 'owner', conversationId: conversation.id })
+        await runtime.listMessages({
+          identityId: 'owner',
+          conversationId: conversation.id,
+        })
       ).messages.map((item) => item.content),
     ).toEqual(['Hello', 'Answer']);
     expect((await store.listMessages('owner', conversation.id)).messages[1]).toMatchObject({
       nativeActivities: [{ toolCallId: 'goal-read', label: 'goal_search', state: 'completed' }],
     });
     await expect(
-      runtime.listMessages({ identityId: 'other', conversationId: conversation.id }),
+      runtime.listMessages({
+        identityId: 'other',
+        conversationId: conversation.id,
+      }),
     ).rejects.toMatchObject({ code: 'NOT_FOUND' });
     await runtime.dispose();
   });
@@ -667,11 +723,17 @@ describe('local Agent conversation execution', () => {
         },
       }),
     });
-    const input = { identityId: 'owner', conversationId: conversation.id, content: 'Hello' };
+    const input = {
+      identityId: 'owner',
+      conversationId: conversation.id,
+      content: 'Hello',
+    };
     const first = runtime.dispatchMessage(input);
     const started = await first.next();
     expect(started.value).toMatchObject({ type: 'assistant.run.started' });
-    await expect(runtime.dispatchMessage(input).next()).rejects.toMatchObject({ code: 'CONFLICT' });
+    await expect(runtime.dispatchMessage(input).next()).rejects.toMatchObject({
+      code: 'CONFLICT',
+    });
     const drain = (async () => {
       for await (const _event of first) {
         /* consume terminal */
@@ -681,7 +743,10 @@ describe('local Agent conversation execution', () => {
     await runtime.dispose();
     await drain;
     await expect(
-      runtime.listMessages({ identityId: 'owner', conversationId: conversation.id }),
+      runtime.listMessages({
+        identityId: 'owner',
+        conversationId: conversation.id,
+      }),
     ).rejects.toMatchObject({ code: 'LOCAL_AGENT_PERMISSION_DENIED' });
     expect((await store.listMessages('owner', conversation.id)).incomplete).toBe(true);
   });
@@ -729,12 +794,19 @@ it.each(['LOCAL_AGENT_RATE_LIMITED', 'LOCAL_AGENT_QUOTA_EXHAUSTED'] as const)(
       content: 'Keep my prompt',
     }))
       events.push(event);
-    expect(events.at(-1)).toMatchObject({ type: 'assistant.run.failed', data: { code } });
+    expect(events.at(-1)).toMatchObject({
+      type: 'assistant.run.failed',
+      data: { code },
+    });
     const status = await runtime.probeConnection('owner', connection.id);
     expect(status).toMatchObject({
       status: 'ready',
       models: [{ id: 'model' }],
-      lastExecutionFailure: { code, modelId: 'model', occurredAt: expect.any(Number) },
+      lastExecutionFailure: {
+        code,
+        modelId: 'model',
+        occurredAt: expect.any(Number),
+      },
     });
     // Another connection, even with the same native Home/account, owns its own request result.
     const other = await store.createConnection('owner', {
@@ -842,7 +914,10 @@ it('fails with LOCAL_AGENT_TOOLS_UNAVAILABLE when business tools are missing on 
       cancel() {},
       async close() {},
       async probe() {
-        return { status: 'ready' as const, models: [{ id: 'model', name: 'Model' }] };
+        return {
+          status: 'ready' as const,
+          models: [{ id: 'model', name: 'Model' }],
+        };
       },
     }),
   });

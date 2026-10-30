@@ -83,6 +83,8 @@ type ConversationInput = { identityId: string; conversationId: string };
 // T3-inspired Provider snapshot: only public model metadata is persisted in
 // this Desktop Profile's storage. Authentication and execution are ALWAYS native.
 const CATALOG_OBSERVATION_MAX_AGE_MS = 24 * 60 * 60_000;
+export const MEMOFLOW_NATIVE_TOOL_ROUTING_INSTRUCTIONS =
+  'MemoFlow business tool policy: use only the MemoFlow MCP tools for MemoFlow Goals, Tasks, and Knowledge. Never use shell, filesystem, browser, or Chrome DevTools tools to inspect or operate MemoFlow. When the user asks to create or edit a Goal in the right-side native form, call goal_panel_open first, then use goal_panel_snapshot/patch/add_key_result/remove_key_result/focus and finish with goal_panel_submit; do not use goal_create for that flow. Use goal_create or goal_update only when the user explicitly requests a direct background Goal write. If a required MemoFlow tool is missing or access is denied, report the specific failure and stop without retrying or switching paths.';
 interface ObservedNativeCatalog {
   revision: number;
   visibilityContext: string;
@@ -155,7 +157,10 @@ export class LocalAgentRuntime {
     const filename = this.catalogFile(identityId, connectionId);
     const temporary = filename + '.' + randomUUID() + '.tmp';
     try {
-      await mkdir(join(this.options.cwd, 'model-catalog'), { recursive: true, mode: 0o700 });
+      await mkdir(join(this.options.cwd, 'model-catalog'), {
+        recursive: true,
+        mode: 0o700,
+      });
       // Do not persist account labels, emails, token data or prior execution errors.
       await writeFile(
         temporary,
@@ -604,7 +609,11 @@ export class LocalAgentRuntime {
         role: 'assistant',
         content: '',
         attachments: [],
-        localAgentSource: { connectionId: connection.id, modelId, runId: run.runId },
+        localAgentSource: {
+          connectionId: connection.id,
+          modelId,
+          runId: run.runId,
+        },
         createdAt: now,
       };
       await this.persist(() => this.options.store.saveMessage(input.identityId, assistant!, false));
@@ -636,7 +645,8 @@ export class LocalAgentRuntime {
         yield { ...envelope(), type: 'assistant.run.cancelled', data: {} };
         return;
       }
-      const content = `${input.content}\n\nMemoFlow reference format: cite Goal and TaskPlan results using Markdown links [name](/goals/ID) and [title](/tasks/ID), with IDs returned by MemoFlow tools. Cite Knowledge notes using [title](url) with the exact url returned by knowledge_search/knowledge_get.${input.selectedEntities?.length ? `\nUser-selected MemoFlow references (look up using MemoFlow tools):\n${JSON.stringify(input.selectedEntities)}` : ''}`;
+      const toolRouting = run.grant ? `\n\n${MEMOFLOW_NATIVE_TOOL_ROUTING_INSTRUCTIONS}` : '';
+      const content = `${input.content}${toolRouting}\n\nMemoFlow reference format: cite Goal and TaskPlan results using Markdown links [name](/goals/ID) and [title](/tasks/ID), with IDs returned by MemoFlow tools. Cite Knowledge notes using [title](url) with the exact url returned by knowledge_search/knowledge_get.${input.selectedEntities?.length ? `\nUser-selected MemoFlow references (look up using MemoFlow tools):\n${JSON.stringify(input.selectedEntities)}` : ''}`;
       for await (const event of run.driver.run({
         nativeSessionId: conversation.nativeSessionId,
         accountFingerprint: conversation.accountFingerprint,
@@ -718,10 +728,17 @@ export class LocalAgentRuntime {
             yield {
               ...envelope(),
               type: 'assistant.request.resolved',
-              data: { requestId: event.request.requestId, resolution: 'answered' },
+              data: {
+                requestId: event.request.requestId,
+                resolution: 'answered',
+              },
             };
           } else {
-            yield { ...envelope(), type: 'assistant.request.required', data: event.request };
+            yield {
+              ...envelope(),
+              type: 'assistant.request.required',
+              data: event.request,
+            };
           }
         } else if (event.type === 'request_resolved') {
           yield {
@@ -739,7 +756,10 @@ export class LocalAgentRuntime {
           yield {
             ...envelope(),
             type: 'assistant.run.completed',
-            data: { content: assistant.content, assistantMessageId: assistant.id },
+            data: {
+              content: assistant.content,
+              assistantMessageId: assistant.id,
+            },
           };
           return;
         } else {
@@ -776,7 +796,11 @@ export class LocalAgentRuntime {
           this.executionFailures.delete(key);
           this.executionFailures.set(key, {
             context: run.accountContext,
-            failure: { code: failure.code, modelId: run.modelId, occurredAt: Date.now() },
+            failure: {
+              code: failure.code,
+              modelId: run.modelId,
+              occurredAt: Date.now(),
+            },
           });
         } else if (this.executionFailures.get(key)?.context === run.accountContext) {
           this.executionFailures.delete(key);
