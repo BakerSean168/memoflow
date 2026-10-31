@@ -158,8 +158,10 @@ export interface NotificationPort {
   disableDNDSchedule(): void;
   getDNDConfig(): DndConfig;
 
-  /** Show a notification, returning whether one was rendered. */
-  show(config: NotificationConfig): boolean;
+  /** Wait for device presentation or an explicit suppression outcome. */
+  show(
+    config: NotificationConfig,
+  ): Promise<import('@memoflow/notification-contracts').DesktopPresentationResult>;
 
   /** Typed helpers for domain notification types. */
   showSchedule(config: { id: string; name: string; description?: string }): boolean;
