@@ -55,7 +55,9 @@ export class CustomNotificationManager {
   private readyTimer: ReturnType<typeof setTimeout> | null = null;
   private disposed = false;
 
-  constructor(private readonly windowManager: Pick<WindowManager, 'getMainWindow'>) {
+  constructor(
+    private readonly windowManager: Pick<WindowManager, 'getMainWindow' | 'focusMainWindow'>,
+  ) {
     this.registerIpcHandlers();
   }
 
@@ -349,13 +351,7 @@ export class CustomNotificationManager {
 
       const mainWin = this.windowManager.getMainWindow();
 
-      if (mainWin) {
-        if (mainWin.isMinimized()) {
-          mainWin.restore();
-        }
-        mainWin.show();
-        mainWin.focus();
-
+      if (mainWin && this.windowManager.focusMainWindow()) {
         if (data) {
           mainWin.webContents.send(RendererEventChannels.NOTIFICATION_CLICKED, data);
         }

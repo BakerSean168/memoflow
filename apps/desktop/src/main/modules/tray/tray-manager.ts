@@ -7,7 +7,9 @@
  */
 
 import { Tray, Menu, app, type BrowserWindow, type NativeImage } from 'electron';
+import { RendererEventChannels } from '@memoflow/desktop-contracts';
 import { APP_DISPLAY_NAME } from '@memoflow/assets';
+import type { DesktopLifecyclePreference } from '../../lifecycle/desktop-lifecycle-preference';
 import { resolveTrayIcon } from '../../utils/app-icon';
 
 /**
@@ -27,7 +29,14 @@ export class TrayManager {
    *
    * @param {BrowserWindow} mainWindow - The main application window.
    */
-  constructor(private mainWindow: BrowserWindow) {
+  constructor(
+    private mainWindow: BrowserWindow,
+    private readonly options: {
+      restore?: () => void;
+      canNavigate?: () => boolean;
+      preference?: DesktopLifecyclePreference;
+    } = {},
+  ) {
     const trayIcon = resolveTrayIcon();
     this.iconImage = trayIcon.image;
     this.trayGuid = trayIcon.guid;
@@ -53,14 +62,16 @@ export class TrayManager {
       this.tray = this.trayGuid
         ? new Tray(this.iconImage, this.trayGuid)
         : new Tray(this.iconImage);
-      this.tray.setToolTip(APP_DISPLAY_NAME);
+      this.tray.setToolTip(`${APP_DISPLAY_NAME} — ${this.labels.background}`);
       this.updateContextMenu();
 
       this.tray.on('click', () => {
-        this.toggleWindow();
+        this.showWindow();
       });
+      this.tray.on('double-click', () => this.showWindow());
     } catch (error) {
-      console.error('Failed to create tray icon:', error);
+      this.destroy();
+      throw error;
     }
   }
 
@@ -73,19 +84,43 @@ export class TrayManager {
 
     const contextMenu = Menu.buildFromTemplate([
       {
-        label: 'Show App',
-        click: () => this.mainWindow.show(),
+        label: this.labels.open,
+        click: () => this.showWindow(),
       },
       {
-        label: 'Settings',
+        label: this.labels.settings,
         click: () => {
-          this.mainWindow.show();
-          this.mainWindow.webContents.send('navigate', '/settings');
+          this.showWindow();
+          if (!this.mainWindow.isDestroyed() && (this.options.canNavigate?.() ?? true))
+            this.mainWindow.webContents.send(RendererEventChannels.TRAY_ACTION, 'settings');
         },
       },
+      ...(this.options.preference
+        ? [
+            {
+              label: this.labels.behavior,
+              submenu: [
+                {
+                  label: this.labels.closeToTray,
+                  type: 'checkbox' as const,
+                  checked: this.options.preference.closeToTray,
+                  click: (item: { checked: boolean }) =>
+                    this.updatePreference('closeToTray', item.checked),
+                },
+                {
+                  label: this.labels.startHidden,
+                  type: 'checkbox' as const,
+                  checked: this.options.preference.startHidden,
+                  click: (item: { checked: boolean }) =>
+                    this.updatePreference('startHidden', item.checked),
+                },
+              ],
+            },
+          ]
+        : []),
       { type: 'separator' },
       {
-        label: 'Quit',
+        label: this.labels.quit,
         click: () => {
           app.quit();
         },
@@ -96,16 +131,49 @@ export class TrayManager {
   }
 
   /**
-   * @method toggleWindow
-   * @description Toggles the main window visibility.
+   * @method showWindow
+   * @description Restores the active window through the Profile gate.
    */
-  private toggleWindow(): void {
-    if (this.mainWindow.isVisible()) {
-      this.mainWindow.hide();
-    } else {
-      this.mainWindow.show();
-      this.mainWindow.focus();
+  private showWindow(): void {
+    if (this.options.restore) {
+      this.options.restore();
+      return;
     }
+    if (this.mainWindow.isDestroyed()) return;
+    if (this.mainWindow.isMinimized()) this.mainWindow.restore();
+    this.mainWindow.show();
+    this.mainWindow.focus();
+  }
+
+  private updatePreference(key: 'closeToTray' | 'startHidden', value: boolean): void {
+    try {
+      this.options.preference?.update(key, value);
+    } catch (error) {
+      console.error('Could not save desktop lifecycle preference', error);
+    }
+    this.updateContextMenu();
+  }
+
+  private get labels() {
+    return app.getLocale().startsWith('zh')
+      ? {
+          open: '打开 MemoFlow',
+          settings: '设置',
+          quit: '退出 MemoFlow',
+          background: '后台运行',
+          behavior: '窗口与启动设置',
+          closeToTray: '关闭到托盘（取消则关闭即退出）',
+          startHidden: '开机自启时启动到托盘（不启用自启）',
+        }
+      : {
+          open: 'Open MemoFlow',
+          settings: 'Settings',
+          quit: 'Quit MemoFlow',
+          background: 'Running in background',
+          behavior: 'Window and startup settings',
+          closeToTray: 'Close to tray (otherwise quit)',
+          startHidden: 'Start in tray at login (does not enable auto-start)',
+        };
   }
 
   /**

@@ -8,6 +8,7 @@ import { CustomNotificationManager } from './custom-notification.manager';
 describe('CustomNotificationManager lifecycle', () => {
   let manager: CustomNotificationManager;
   let main: BrowserWindow;
+  let unlocked: boolean;
   type Handler = (...args: unknown[]) => unknown;
   const handlers = new Map<string, Handler>();
   const window = () => BrowserWindow.getAllWindows().find((win) => win !== main)!;
@@ -20,7 +21,17 @@ describe('CustomNotificationManager lifecycle', () => {
       handlers.set(channel, handler as Handler);
     });
     main = new BrowserWindow({});
-    manager = new CustomNotificationManager({ getMainWindow: () => main });
+    unlocked = true;
+    manager = new CustomNotificationManager({
+      getMainWindow: () => main,
+      focusMainWindow: () => {
+        if (!unlocked) return false;
+        if (main.isMinimized()) main.restore();
+        main.show();
+        main.focus();
+        return true;
+      },
+    });
   });
   afterEach(() => {
     manager.destroy?.();
@@ -184,12 +195,26 @@ describe('CustomNotificationManager lifecycle', () => {
     expect(vi.getTimerCount()).toBe(0);
   });
 
+  it('does not restore or navigate an outgoing locked Profile from a stale notification', () => {
+    manager.dispatch({ title: 'Before lock', body: '', data: { notificationId: 'old' } });
+    const toast = window();
+    handlers.get(NotificationChannels.CUSTOM_RENDERER_READY)!({ sender: toast.webContents });
+    const payload = vi.mocked(toast.webContents.send).mock.calls[0]![1];
+    main.hide();
+    unlocked = false;
+    handlers.get(NotificationChannels.CUSTOM_CLICK)!({ sender: toast.webContents }, payload.id);
+    expect(main.isVisible()).toBe(false);
+    expect(main.webContents.send).not.toHaveBeenCalled();
+  });
+
   it('ignores foreign senders and uses the host-owned payload for clicks', () => {
     manager.dispatch({
       title: 'Trusted',
       body: '',
       data: { notificationId: 'n-1', target: 'trusted' },
     });
+    main.hide();
+    main.minimize();
     const toast = window();
     handlers.get(NotificationChannels.CUSTOM_RENDERER_READY)!({
       sender: main.webContents,
@@ -202,6 +227,8 @@ describe('CustomNotificationManager lifecycle', () => {
     handlers.get(NotificationChannels.CUSTOM_CLICK)!({ sender: toast.webContents }, payload.id, {
       target: 'untrusted',
     });
+    expect(main.isVisible()).toBe(true);
+    expect(main.isMinimized()).toBe(false);
     expect(main.webContents.send).toHaveBeenCalledWith(RendererEventChannels.NOTIFICATION_CLICKED, {
       notificationId: 'n-1',
       target: 'trusted',

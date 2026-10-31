@@ -33,6 +33,7 @@ import { getDesktopDevServerUrlOrDefault, usesDesktopViteDevServer } from '../ut
 import { WindowStateManager } from '../modules/window';
 import { getSharedPathResolver } from '../runtime-init';
 import type { DesktopProfileRuntimeManager } from '../profile';
+import type { DesktopLifecyclePreference } from './desktop-lifecycle-preference';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -78,6 +79,14 @@ export class WindowManager {
   private mainWindowStateManager: WindowStateManager | null = null;
   private runtimeManager: DesktopProfileRuntimeManager | null = null;
   private desktopFeaturesRuntime: DesktopFeaturesRuntime | null = null;
+  private startupHidden = false;
+  setStartupHidden(hidden: boolean): void {
+    this.startupHidden = hidden;
+  }
+
+  private allowProcessExit = () => false;
+  private cleaningUp = false;
+  private lifecyclePreference: DesktopLifecyclePreference | null = null;
   private scheduleRuntimeController: ScheduleRuntimeController | null = null;
 
   constructor(config: WindowManagerConfig = {}) {
@@ -128,6 +137,36 @@ export class WindowManager {
    */
   setScheduleRuntimeController(controller: ScheduleRuntimeController | null): void {
     this.scheduleRuntimeController = controller;
+  }
+
+  configureCloseBehavior(
+    preference: DesktopLifecyclePreference,
+    allowProcessExit: () => boolean,
+  ): void {
+    this.lifecyclePreference = preference;
+    this.allowProcessExit = allowProcessExit;
+  }
+
+  canNavigateToMainWindow(): boolean {
+    return (
+      !this.isTransitioning &&
+      !!this.mainWindow &&
+      !this.mainWindow.isDestroyed() &&
+      this.runtimeManager?.getActiveProfileId() === this.activeMainProfileId
+    );
+  }
+
+  /** Restore only the current gate/window; never a renderer from an outgoing Profile. */
+  focusActiveWindow(): boolean {
+    if (this.isTransitioning) return false;
+    const window = this.getActiveWindow();
+    if (!window || window.isDestroyed()) return false;
+    if (this.mainWindow && this.runtimeManager?.getActiveProfileId() !== this.activeMainProfileId)
+      return false;
+    if (window.isMinimized()) window.restore();
+    window.show();
+    window.focus();
+    return true;
   }
 
   // ============ Window Creation ============
@@ -184,9 +223,11 @@ export class WindowManager {
     this.attachWindowControlStateSync(this.profileAccessWindow);
     this.profileAccessWindowStateManager.manage(this.profileAccessWindow);
 
+    // Capture startup intent: capability initialization can finish before this renderer is ready.
+    const showProfileAccessOnReady = !this.startupHidden;
     // 准备好后显示
     this.profileAccessWindow.once('ready-to-show', () => {
-      this.profileAccessWindow?.show();
+      if (showProfileAccessOnReady) this.profileAccessWindow?.show();
       logger.info('Profile Access window shown');
     });
 
@@ -261,7 +302,7 @@ export class WindowManager {
 
     // 准备好后显示
     this.mainWindow.once('ready-to-show', () => {
-      this.mainWindow?.show();
+      if (!this.startupHidden) this.mainWindow?.show();
       logger.info('Main window shown');
     });
 
@@ -272,6 +313,25 @@ export class WindowManager {
     if (this.config.isDev) {
       this.mainWindow.webContents.openDevTools({ mode: 'detach' });
     }
+
+    this.mainWindow.on('close', (event) => {
+      if (process.platform !== 'win32' || this.cleaningUp || this.allowProcessExit()) return;
+      event.preventDefault();
+      if (
+        !this.isTransitioning &&
+        this.lifecyclePreference?.closeToTray &&
+        this.desktopFeaturesRuntime?.tray
+      ) {
+        this.mainWindow?.hide();
+      } else {
+        // Quit through the shared cleanup owner even when auxiliary windows remain open.
+        app.quit();
+      }
+    });
+    this.mainWindow.on('query-session-end', (event) => {
+      event.preventDefault();
+      app.quit();
+    });
 
     // 窗口关闭事件
     this.mainWindow.on('closed', () => {
@@ -312,7 +372,7 @@ export class WindowManager {
       });
 
       // 3. 显示主窗口
-      mainWin.show();
+      if (!this.startupHidden) mainWin.show();
       this.desktopFeaturesRuntime?.bindWindow(mainWin);
       await this.scheduleRuntimeController?.start();
 
@@ -342,6 +402,7 @@ export class WindowManager {
     logger.info('Transitioning from main to Profile Access window');
 
     try {
+      this.mainWindow?.hide();
       await this.scheduleRuntimeController?.stop();
       const profileAccessWindow = this.createProfileAccessWindow(targetProfileId, interactive);
       // Destroy the old renderer before Profile Access can select a different runtime.
@@ -357,7 +418,7 @@ export class WindowManager {
       });
 
       // 3. 显示 Profile Access 窗口
-      profileAccessWindow.show();
+      if (!this.startupHidden) profileAccessWindow.show();
       this.desktopFeaturesRuntime?.bindWindow(profileAccessWindow);
 
       logger.info('Transition complete');
@@ -390,7 +451,7 @@ export class WindowManager {
   }
 
   focusMainWindow(): boolean {
-    if (!this.mainWindow || this.mainWindow.isDestroyed()) {
+    if (!this.canNavigateToMainWindow() || !this.mainWindow) {
       return false;
     }
 
@@ -649,6 +710,7 @@ export class WindowManager {
    */
   cleanup(): void {
     logger.info('Cleaning up WindowManager');
+    this.cleaningUp = true;
 
     if (this.profileAccessWindow && !this.profileAccessWindow.isDestroyed()) {
       this.profileAccessWindow.close();

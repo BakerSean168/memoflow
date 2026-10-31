@@ -56,6 +56,14 @@ describe('ShortcutManager', () => {
     expect(window.isVisible()).toBe(false);
   });
 
+  it('routes restoration through the active Profile gate instead of a stale bound window', () => {
+    const restore = vi.fn();
+    const manager = new ShortcutManager(window, restore);
+    manager.getShortcuts()[0].action();
+    expect(restore).toHaveBeenCalledTimes(1);
+    expect(window.isVisible()).toBe(false);
+  });
+
   it('rejects a duplicate accelerator registration', () => {
     const manager = new ShortcutManager(window);
     const result = manager.register({

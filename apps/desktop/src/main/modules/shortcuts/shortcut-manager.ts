@@ -24,7 +24,10 @@ export class ShortcutManager {
    *
    * @param {BrowserWindow} mainWindow - The main application window.
    */
-  constructor(private mainWindow: BrowserWindow) {
+  constructor(
+    private mainWindow: BrowserWindow,
+    private readonly restore?: () => void,
+  ) {
     this.registerDefaultShortcuts();
   }
 
@@ -44,6 +47,10 @@ export class ShortcutManager {
       global: true,
       enabled: true,
       action: () => {
+        if (this.restore) {
+          this.restore();
+          return;
+        }
         if (this.mainWindow.isVisible()) {
           this.mainWindow.hide();
         } else {
