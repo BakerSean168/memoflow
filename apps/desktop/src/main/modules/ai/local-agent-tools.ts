@@ -182,8 +182,9 @@ export function createDesktopLocalAgentTools(
             }),
         );
       }
-      async function write(work: () => Promise<Record<string, unknown>>) {
+      async function write(toolName: string, work: () => Promise<Record<string, unknown>>) {
         try {
+          await context.requestApproval(toolName);
           const receipt = await context.track(work);
           return {
             content: [{ type: 'text' as const, text: JSON.stringify(receipt) }],
@@ -191,19 +192,24 @@ export function createDesktopLocalAgentTools(
           };
         } catch (error) {
           const failure = z
-            .object({ code: z.literal('LOCAL_AGENT_PERMISSION_DENIED') })
+            .object({ code: z.enum(['LOCAL_AGENT_PERMISSION_DENIED', 'PERMISSION_DENIED']) })
             .safeParse(error);
           const code =
             error instanceof GoalAgentMutationError || error instanceof TaskAgentMutationError
               ? error.code
               : failure.success
-                ? 'FORBIDDEN'
+                ? failure.data.code === 'PERMISSION_DENIED'
+                  ? 'PERMISSION_DENIED'
+                  : 'FORBIDDEN'
                 : error instanceof z.ZodError
                   ? 'VALIDATION_ERROR'
                   : error instanceof GoalIntentCommitBlockedError
                     ? error.code
                     : 'INTERNAL_ERROR';
-          return { isError: true, content: [{ type: 'text' as const, text: code }] };
+          return {
+            isError: true,
+            content: [{ type: 'text' as const, text: code }],
+          };
         }
       }
       if (context.writeScopes.includes('tasks:write')) {
@@ -225,7 +231,7 @@ export function createDesktopLocalAgentTools(
             inputSchema: TaskAgentCreateSchema,
             annotations,
           },
-          (input) => write(() => taskWrites.create(input, context, authority)),
+          (input) => write('task_plan_create', () => taskWrites.create(input, context, authority)),
         );
         server.registerTool(
           'task_plan_update',
@@ -235,7 +241,7 @@ export function createDesktopLocalAgentTools(
             inputSchema: TaskAgentUpdateSchema,
             annotations,
           },
-          (input) => write(() => taskWrites.update(input, context, authority)),
+          (input) => write('task_plan_update', () => taskWrites.update(input, context, authority)),
         );
         server.registerTool(
           'task_occurrence_complete',
@@ -245,7 +251,8 @@ export function createDesktopLocalAgentTools(
             inputSchema: TaskAgentCompleteSchema,
             annotations,
           },
-          (input) => write(() => taskWrites.complete(input, context, authority)),
+          (input) =>
+            write('task_occurrence_complete', () => taskWrites.complete(input, context, authority)),
         );
       }
       if (context.writeScopes.includes('goals:write')) {
@@ -268,7 +275,7 @@ export function createDesktopLocalAgentTools(
             },
           },
           (input) =>
-            write(() => {
+            write('goal_create', () => {
               // The run's user message cannot change mid-run, so one check before the owner write is enough.
               assertGoalIntentCanCommit(context.goalIntent ?? JSON.stringify(input.goal));
               // With the visible form available, a hidden write would leave the user nothing to review.
@@ -289,7 +296,7 @@ export function createDesktopLocalAgentTools(
               openWorldHint: false,
             },
           },
-          (input) => write(() => goalWrites.update(input, context, authority)),
+          (input) => write('goal_update', () => goalWrites.update(input, context, authority)),
         );
       }
       if (panelBridge) {
@@ -298,6 +305,10 @@ export function createDesktopLocalAgentTools(
             if (command.action === 'submit') assertGoalIntentCanCommit(context.goalIntent ?? '');
             const scope = command.action === 'snapshot' ? 'read' : 'goals:write';
             await context.authorize(scope);
+            if (command.action === 'submit') {
+              await context.requestApproval('goal_panel_submit');
+              await context.authorize(scope);
+            }
             const response = await context.track(() =>
               panelBridge!.executeCommand(context, command),
             );

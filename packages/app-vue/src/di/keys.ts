@@ -38,6 +38,7 @@ import type {
   IRuntimeUsageService,
   IWorkflowRuntimeService,
   DesktopUpdateService,
+  DesktopStartupService,
   ModuleCapsule,
 } from './types';
 
@@ -131,3 +132,6 @@ export const SHELL_COMPOSER_DENSITY_KEY: InjectionKey<Ref<'comfortable' | 'compa
  * command 上，使 Host Turn Engine 观察到真实调用 surface。
  */
 export const ASSISTANT_SURFACE_KEY: InjectionKey<AIRuntimeSurface> = Symbol('AIRuntimeSurface');
+
+export const DESKTOP_STARTUP_SERVICE_KEY: InjectionKey<DesktopStartupService> =
+  Symbol('DesktopStartupService');

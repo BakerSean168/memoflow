@@ -6,10 +6,11 @@
  * @module modules/tray/trayManager
  */
 
-import { Tray, Menu, app, type BrowserWindow, type NativeImage } from 'electron';
-import { RendererEventChannels } from '@memoflow/desktop-contracts';
+import { Tray, Menu, app, dialog, type BrowserWindow, type NativeImage } from 'electron';
+import { RendererEventChannels, type DesktopStartupPatch } from '@memoflow/desktop-contracts';
 import { APP_DISPLAY_NAME } from '@memoflow/assets';
 import type { DesktopLifecyclePreference } from '../../lifecycle/desktop-lifecycle-preference';
+import type { DesktopStartupSettingsService } from '../../lifecycle/desktop-startup-settings-service';
 import { resolveTrayIcon } from '../../utils/app-icon';
 
 /**
@@ -18,6 +19,8 @@ import { resolveTrayIcon } from '../../utils/app-icon';
  */
 export class TrayManager {
   private tray: Tray | null = null;
+  private unsubscribe?: () => void;
+  private pending = false;
   private flashTimer: NodeJS.Timeout | null = null;
   private isFlashing = false;
   private readonly iconImage: NativeImage | string;
@@ -35,12 +38,14 @@ export class TrayManager {
       restore?: () => void;
       canNavigate?: () => boolean;
       preference?: DesktopLifecyclePreference;
+      startup?: DesktopStartupSettingsService;
     } = {},
   ) {
     const trayIcon = resolveTrayIcon();
     this.iconImage = trayIcon.image;
     this.trayGuid = trayIcon.guid;
     this.init();
+    this.unsubscribe = options.startup?.subscribe(() => this.updateContextMenu());
   }
 
   setMainWindow(mainWindow: BrowserWindow): void {
@@ -48,6 +53,7 @@ export class TrayManager {
   }
 
   destroy(): void {
+    this.unsubscribe?.();
     this.stopFlashing();
     this.tray?.destroy();
     this.tray = null;
@@ -100,17 +106,39 @@ export class TrayManager {
             {
               label: this.labels.behavior,
               submenu: [
+                ...(this.options.startup?.snapshot.autoLaunch.available
+                  ? [
+                      {
+                        label: this.labels.autoLaunch,
+                        type: 'checkbox' as const,
+                        checked: this.options.startup.snapshot.autoLaunch.enabled,
+                        enabled: !this.pending,
+                        click: (item: { checked: boolean }) =>
+                          this.updateStartup({ autoLaunch: item.checked }),
+                      },
+                    ]
+                  : []),
                 {
                   label: this.labels.closeToTray,
                   type: 'checkbox' as const,
-                  checked: this.options.preference.closeToTray,
+                  checked:
+                    this.options.startup?.snapshot.closeToTray ??
+                    this.options.preference.closeToTray,
+                  enabled: !this.pending,
                   click: (item: { checked: boolean }) =>
                     this.updatePreference('closeToTray', item.checked),
                 },
                 {
                   label: this.labels.startHidden,
                   type: 'checkbox' as const,
-                  checked: this.options.preference.startHidden,
+                  checked:
+                    this.options.startup?.snapshot.startHidden ??
+                    this.options.preference.startHidden,
+                  enabled:
+                    !this.pending &&
+                    (!this.options.startup ||
+                      (this.options.startup.snapshot.autoLaunch.available &&
+                        this.options.startup.snapshot.autoLaunch.enabled)),
                   click: (item: { checked: boolean }) =>
                     this.updatePreference('startHidden', item.checked),
                 },
@@ -146,12 +174,29 @@ export class TrayManager {
   }
 
   private updatePreference(key: 'closeToTray' | 'startHidden', value: boolean): void {
+    if (this.options.startup) {
+      void this.updateStartup({ [key]: value });
+      return;
+    }
     try {
       this.options.preference?.update(key, value);
     } catch (error) {
       console.error('Could not save desktop lifecycle preference', error);
     }
     this.updateContextMenu();
+  }
+
+  private async updateStartup(patch: DesktopStartupPatch): Promise<void> {
+    if (this.pending || !this.options.startup) return;
+    this.pending = true;
+    this.updateContextMenu();
+    try {
+      const result = await this.options.startup.update(patch);
+      if (!result.success) dialog.showErrorBox(this.labels.behavior, this.labels.failure);
+    } finally {
+      this.pending = false;
+      this.updateContextMenu();
+    }
   }
 
   private get labels() {
@@ -163,7 +208,9 @@ export class TrayManager {
           background: '后台运行',
           behavior: '窗口与启动设置',
           closeToTray: '关闭到托盘（取消则关闭即退出）',
-          startHidden: '开机自启时启动到托盘（不启用自启）',
+          startHidden: '开机启动时只在托盘运行',
+          autoLaunch: '开机自动启动',
+          failure: '无法保存启动设置，已恢复为实际状态。',
         }
       : {
           open: 'Open MemoFlow',
@@ -172,7 +219,9 @@ export class TrayManager {
           background: 'Running in background',
           behavior: 'Window and startup settings',
           closeToTray: 'Close to tray (otherwise quit)',
-          startHidden: 'Start in tray at login (does not enable auto-start)',
+          startHidden: 'Start in tray at login',
+          autoLaunch: 'Launch at login',
+          failure: 'Could not save startup settings. The actual state has been restored.',
         };
   }
 

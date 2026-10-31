@@ -11,7 +11,7 @@
  * - 通知（NotificationPort）
  */
 
-import { app, type BrowserWindow } from 'electron';
+import { app, BrowserWindow } from 'electron';
 import {
   CapabilityRegistry,
   createElectronAutoLaunchPort,
@@ -29,6 +29,8 @@ import type {
   ShortcutPort,
   TrayPort,
 } from '../capabilities/ports';
+import { DesktopStartupSettingsService } from '../lifecycle/desktop-startup-settings-service';
+import { DesktopStartupChannels } from '@memoflow/desktop-contracts';
 import type { DesktopLifecyclePreference } from '../lifecycle/desktop-lifecycle-preference';
 import type { WindowManager } from '../lifecycle/window-manager';
 
@@ -51,7 +53,10 @@ export interface DesktopFeaturesOptions {
  * capability surfaces as `null` (degraded) instead of aborting startup.
  */
 export class DesktopFeaturesRuntime {
-  constructor(private readonly registry: CapabilityRegistry) {}
+  constructor(
+    private readonly registry: CapabilityRegistry,
+    readonly startup?: DesktopStartupSettingsService,
+  ) {}
 
   /** The tray capability port (null when degraded/unavailable). */
   get tray(): TrayPort | null {
@@ -107,6 +112,14 @@ export async function initializeDesktopFeatures(
   console.log('[Desktop Features] Initializing via CapabilityRegistry...');
 
   const registry = new CapabilityRegistry();
+  const startup = options.lifecyclePreference
+    ? new DesktopStartupSettingsService(options.lifecyclePreference, () => registry.getAutoLaunch())
+    : undefined;
+  startup?.subscribe((snapshot) => {
+    for (const window of BrowserWindow.getAllWindows()) {
+      if (!window.isDestroyed()) window.webContents.send(DesktopStartupChannels.CHANGED, snapshot);
+    }
+  });
   const restoreWindow = () => {
     if (!windowManager.focusActiveWindow()) app.emit('activate');
   };
@@ -118,6 +131,7 @@ export async function initializeDesktopFeatures(
         restore: restoreWindow,
         canNavigate: () => windowManager.canNavigateToMainWindow(),
         preference: options.lifecyclePreference,
+        startup,
       }),
     (port) => port.destroy(),
   );
@@ -136,6 +150,7 @@ export async function initializeDesktopFeatures(
     await port.init();
     return port;
   });
+  await startup?.refresh();
   await registry.register('notification', () =>
     createElectronNotificationPort({
       mainWindow,
@@ -146,5 +161,5 @@ export async function initializeDesktopFeatures(
   await registry.register('external-editor', () => createElectronExternalEditorPort());
 
   console.log('[Desktop Features] Capability registry initialized');
-  return new DesktopFeaturesRuntime(registry);
+  return new DesktopFeaturesRuntime(registry, startup);
 }

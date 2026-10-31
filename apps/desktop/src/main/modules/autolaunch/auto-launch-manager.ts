@@ -75,8 +75,7 @@ export class AutoLaunchManager {
         AutoLaunchClass = autoLaunchModule.default ?? autoLaunchModule;
       } catch (error) {
         console.warn('[AutoLaunchManager] auto-launch module not available:', error);
-        this.initialized = true;
-        return;
+        throw error;
       }
     }
 
@@ -89,7 +88,7 @@ export class AutoLaunchManager {
       this.initialized = true;
     } catch (error) {
       console.warn('[AutoLaunchManager] Failed to create AutoLaunch instance:', error);
-      this.initialized = true;
+      throw error;
     }
   }
 
@@ -112,7 +111,7 @@ export class AutoLaunchManager {
       return await this.autoLauncher.isEnabled();
     } catch (error) {
       console.error('[AutoLaunchManager] Error checking status:', error);
-      return false;
+      throw error;
     }
   }
 

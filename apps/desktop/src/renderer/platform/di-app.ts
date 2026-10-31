@@ -61,6 +61,7 @@ import {
   DESKTOP_BRIDGE_KEY,
   DESKTOP_NOTIFICATION_DEVICE_PREFERENCE_KEY,
   DESKTOP_UPDATE_SERVICE_KEY,
+  DESKTOP_STARTUP_SERVICE_KEY,
   MODULE_CAPSULES_KEY,
   LOGOUT_HANDLER_KEY,
   PROFILE_LOCK_HANDLER_KEY,
@@ -74,6 +75,7 @@ import { readDesktopAccessSnapshot } from '@memoflow/app-vue/desktop';
 // Residual 941: host bridge via requireElectronBridge sole helper.
 import { requireElectronBridge } from './electron-bridge';
 import { clearDesktopServerStateIdentity } from './server-state';
+import { createDesktopStartupService } from './desktop-startup-service';
 import { createDesktopUpdateService } from './desktop-update-service';
 import {
   ProfileAccessChannels,
@@ -150,6 +152,7 @@ export function installDesktopAppServices(
   // Generic desktop bridge used by business IPC recovery and window controls.
   app.provide(DESKTOP_AUTH_API_KEY, bridge);
   app.provide(DESKTOP_BRIDGE_KEY, bridge);
+  app.provide(DESKTOP_STARTUP_SERVICE_KEY, createDesktopStartupService(resultIpcClient, bridge));
   app.provide(DESKTOP_UPDATE_SERVICE_KEY, createDesktopUpdateService(resultIpcClient, bridge));
   const desktopAccessSnapshot = ref<DesktopAccessSnapshot | null>(initialSnapshot);
   let snapshotGeneration = 0;

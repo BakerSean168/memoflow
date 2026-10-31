@@ -6,7 +6,7 @@
  * assert what the implementation does today for the Electron test stub.
  */
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { Tray, Menu, app, BrowserWindow } from 'electron';
+import { Tray, Menu, app, BrowserWindow, dialog } from 'electron';
 import { mkdtempSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
@@ -21,6 +21,7 @@ vi.mock('../../utils/app-icon', () => ({
   resolveTrayIcon: vi.fn(() => ({ image: 'test-tray-icon' })),
 }));
 
+import { DesktopStartupSettingsService } from '../../lifecycle/desktop-startup-settings-service';
 import { TrayManager } from './tray-manager';
 
 type TrayLike = Tray & {
@@ -152,6 +153,42 @@ describe('TrayManager', () => {
         closeToTray: false,
         startHidden: false,
       });
+      expect(app.setLoginItemSettings).not.toHaveBeenCalled();
+    } finally {
+      manager.destroy();
+      rmSync(root, { recursive: true, force: true });
+    }
+  });
+
+  it('synchronizes verified startup state, rolls back failed clicks, and never enables at startup', async () => {
+    const root = mkdtempSync(path.join(tmpdir(), 'mf-startup-tray-'));
+    const preference = new DesktopLifecyclePreference(path.join(root, 'preferences.json'));
+    let enabled = false;
+    const port = {
+      init: vi.fn(async () => {}),
+      isEnabled: vi.fn(async () => enabled),
+      enable: vi.fn(async () => {
+        enabled = true;
+        return true;
+      }),
+      disable: vi.fn(async () => false),
+    };
+    const startup = new DesktopStartupSettingsService(preference, () => port);
+    const manager = new TrayManager(window, { preference, startup });
+    const menu = () =>
+      vi.mocked(Menu.buildFromTemplate).mock.calls.at(-1)![0][2]
+        .submenu as Electron.MenuItemConstructorOptions[];
+    try {
+      await startup.refresh();
+      expect(menu()[0]).toMatchObject({ label: 'Launch at login', checked: false });
+      expect(port.enable).not.toHaveBeenCalled();
+      await (menu()[0].click as (item: { checked: boolean }) => Promise<void>)({ checked: true });
+      expect(menu()[0].checked).toBe(true);
+      await (menu()[0].click as (item: { checked: boolean }) => Promise<void>)({ checked: false });
+      expect(menu()[0].checked).toBe(true);
+      expect(dialog.showErrorBox).toHaveBeenCalled();
+      await startup.update({ closeToTray: false });
+      expect(menu()[1].checked).toBe(false);
       expect(app.setLoginItemSettings).not.toHaveBeenCalled();
     } finally {
       manager.destroy();
