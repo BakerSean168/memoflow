@@ -2825,7 +2825,7 @@
         "status": "none-verified",
         "testFiles": []
       },
-      "sourceSha256": "c76b608764bfabb9665005287a0218f03c6cf7d0d4913accb69914a562f7aa71"
+      "sourceSha256": "7567387bcec6a42c30240ce8d8c4a30cee4de8f1d9b5ef7c1d2fa4b13a8becd8"
     },
     {
       "path": "packages/app-vue/src/layouts/shell/WindowHeader.spec.ts",
@@ -3089,7 +3089,7 @@
         "status": "none-verified",
         "testFiles": []
       },
-      "sourceSha256": "b6cabba3b8f7ae54f4799548ba0c177ea78c8c3c141b56da0be53be306a7a69d"
+      "sourceSha256": "07f471d44b7232a13bcde3350d4dc2478083b68688872be4f698efa8dcfbe7be"
     }
   ],
   "storyReviews": [],
