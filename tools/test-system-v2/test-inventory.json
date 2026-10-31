@@ -302,6 +302,16 @@
       ]
     },
     {
+      "path": "apps/api/src/modules/powersync/permission-audit-crud.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "apps/api/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "apps/api/vitest.config.ts"
+      ]
+    },
+    {
       "path": "apps/api/src/modules/powersync/powersync-schema-result-envelope.surface.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -4659,6 +4669,46 @@
     },
     {
       "path": "packages/ai/src/server/mastra/workflows/task-create.workflow.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/ai/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "packages/ai/vitest.config.ts"
+      ]
+    },
+    {
+      "path": "packages/ai/src/server/permissions/authorize.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/ai/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "packages/ai/vitest.config.ts"
+      ]
+    },
+    {
+      "path": "packages/ai/src/server/permissions/permission-migration.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/ai/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "packages/ai/vitest.config.ts"
+      ]
+    },
+    {
+      "path": "packages/ai/src/server/permissions/permission-policy.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/ai/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "packages/ai/vitest.config.ts"
+      ]
+    },
+    {
+      "path": "packages/ai/src/server/permissions/permission-powersync.repository.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/ai/vitest.config.ts"
@@ -12608,7 +12658,7 @@
       "type": "measurement",
       "suite": "coverage",
       "runner": "vitest",
-      "fileCount": 62
+      "fileCount": 63
     },
     {
       "id": "packages/account/vitest.config.ts",
@@ -12622,7 +12672,7 @@
       "type": "measurement",
       "suite": "coverage",
       "runner": "vitest",
-      "fileCount": 116
+      "fileCount": 120
     },
     {
       "id": "packages/app-vue/vitest.store-coverage.config.ts",
@@ -13073,7 +13123,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 62
+      "fileCount": 63
     },
     {
       "id": "apps/desktop/vitest.config.ts",
@@ -13157,7 +13207,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 116
+      "fileCount": 120
     },
     {
       "id": "packages/app-vue/vitest.config.ts",
@@ -13593,6 +13643,7 @@
       "apps/api/src/modules/powersync/crud-normalization.spec.ts",
       "apps/api/src/modules/powersync/module.spec.ts",
       "apps/api/src/modules/powersync/parse-json-like-string-keep-boundary.surface.spec.ts",
+      "apps/api/src/modules/powersync/permission-audit-crud.spec.ts",
       "apps/api/src/modules/powersync/powersync-schema-result-envelope.surface.spec.ts",
       "apps/api/src/modules/powersync/relation-crud-executor.spec.ts",
       "apps/api/src/modules/powersync/routine-compound-crud-executor.spec.ts",
@@ -13774,6 +13825,10 @@
       "packages/ai/src/server/mastra/workflows/goal-create.workflow.spec.ts",
       "packages/ai/src/server/mastra/workflows/knowledge-capture-persistence.adapter.spec.ts",
       "packages/ai/src/server/mastra/workflows/task-create.workflow.spec.ts",
+      "packages/ai/src/server/permissions/authorize.spec.ts",
+      "packages/ai/src/server/permissions/permission-migration.spec.ts",
+      "packages/ai/src/server/permissions/permission-policy.spec.ts",
+      "packages/ai/src/server/permissions/permission-powersync.repository.spec.ts",
       "packages/ai/src/server/shared/__tests__/assemble-capabilities.spec.ts",
       "packages/ai/src/server/transport/ai-controller-errors.spec.ts",
       "packages/ai/src/server/transport/ai-provider-config.controller.onboarding-v2.spec.ts",
@@ -14195,7 +14250,7 @@
   "duplicate": [],
   "unexpected": [],
   "counts": {
-    "unit": 1164,
+    "unit": 1169,
     "integration": 58,
     "smoke": 3,
     "boundary-ipc": 6,

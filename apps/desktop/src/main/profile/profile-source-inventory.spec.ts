@@ -62,6 +62,28 @@ it('allows an empty Mastra runtime database but retains any persisted user facts
   }
 });
 
+it('treats local AI permission policy and audit tables as technical profile data', async () => {
+  const dir = mkdtempSync(path.join(tmpdir(), 'profile-permission-inventory-'));
+  mkdirSync(path.join(dir, 'db'));
+  const filename = path.join(dir, 'db/powersync.sqlite');
+  const writer = new Database(filename);
+  try {
+    writer.exec(`
+      CREATE TABLE ai_permission_settings_local (id TEXT PRIMARY KEY, record_json TEXT);
+      CREATE TABLE ai_permission_rules_local (id TEXT PRIMARY KEY, record_json TEXT);
+      CREATE TABLE ai_permission_audit_local (id TEXT PRIMARY KEY, record_json TEXT);
+      INSERT INTO ai_permission_settings_local VALUES ('settings', '{"preset":"on_demand"}');
+      INSERT INTO ai_permission_rules_local VALUES ('rule', '{"effect":"allow"}');
+      INSERT INTO ai_permission_audit_local VALUES ('audit', '{"decision":"allow"}');
+    `);
+    const result = await readProfileSqliteSnapshot(filename, (db) => inspectProfileSource(db, dir));
+    expect(result.blockers).toEqual([]);
+  } finally {
+    writer.close();
+    rmSync(dir, { recursive: true, force: true });
+  }
+});
+
 it('retains symbolic links without following external directories or cycles', async () => {
   const dir = mkdtempSync(path.join(tmpdir(), 'profile-link-inventory-'));
   mkdirSync(path.join(dir, 'db'));

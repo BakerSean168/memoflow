@@ -38,6 +38,9 @@ export const IDENTITY_ID_TABLES = new Set([
   'notification_interactions',
   'ai_conversations',
   'ai_execution_records',
+  'ai_permission_settings',
+  'ai_permission_rules',
+  'ai_permission_audit',
   'task_goal_outbox',
 ]);
 
@@ -66,6 +69,9 @@ const TABLE_TO_MODEL: Record<string, string> = {
   notification_interactions: 'notificationInteraction',
   ai_conversations: 'aiConversation',
   ai_execution_records: 'aiExecutionRecord',
+  ai_permission_settings: 'aiPermissionSetting',
+  ai_permission_rules: 'aiPermissionRule',
+  ai_permission_audit: 'aiPermissionAudit',
   task_goal_outbox: 'taskGoalOutbox',
 };
 

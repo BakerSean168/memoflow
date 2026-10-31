@@ -1,6 +1,6 @@
 import { expect, it } from 'vitest';
 import { createPowerSyncSqliteFixture } from '@memoflow/test-utils/helpers/powersync-sqlite';
-import { LocalAgentRepository } from '@memoflow/ai';
+import { LocalAgentRepository, PermissionLocalRepository } from '@memoflow/ai';
 import { createTimeContext } from '@memoflow/time';
 import { createDesktopLocalAgentTools } from './local-agent-tools';
 
@@ -38,6 +38,10 @@ it('advertises only authorized writes, commits through owners and refuses revoke
       conversationId: 'test',
       runId: 'read',
     });
+    const permissionSettings = f.sql
+      .prepare('SELECT record_json FROM ai_permission_settings_local WHERE identity_id = ?')
+      .get(identityId) as { record_json: string };
+    expect(JSON.parse(permissionSettings.record_json)).toMatchObject({ preset: 'on_demand' });
     const discovery = await (await call(readGrant, 'tools/list')).text();
     expect(discovery).toContain('goal_search');
     expect(discovery).not.toContain('goal_create');
@@ -59,6 +63,15 @@ it('advertises only authorized writes, commits through owners and refuses revoke
       arguments: { idempotencyKey: 'goal', goal: { name: 'Through MCP' } },
     };
     const first = await (await call(grant, 'tools/call', params)).text();
+    const permissionAudit = f.sql
+      .prepare(
+        'SELECT record_json FROM ai_permission_audit_local ORDER BY occurred_at DESC LIMIT 1',
+      )
+      .get() as { record_json: string };
+    expect(JSON.parse(permissionAudit.record_json)).toMatchObject({
+      operationId: 'goal.create',
+      decision: 'allow',
+    });
     expect(first).toContain('receiptId');
     expect(await (await call(grant, 'tools/call', params)).text()).toBe(first);
     expect(f.sql.prepare('SELECT COUNT(*) AS n FROM goals').get()).toMatchObject({ n: 1 });
@@ -151,6 +164,14 @@ it('requires business approval for direct Goal and Task writes without inserting
         executablePath: 'codex',
         enabled: true,
         writeScopes: ['goals:write', 'tasks:write'],
+      },
+    );
+    await new PermissionLocalRepository(f.db).saveSettings(
+      'IdentityId_00000000-0000-4000-8000-000000000001',
+      {
+        preset: 'confirm_each',
+        agentPresets: { [connection.id]: 'confirm_each' },
+        revision: 1,
       },
     );
     const grant = await bridge.open({

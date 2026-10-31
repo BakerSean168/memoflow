@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 import { createPowerSyncSqliteFixture } from '@memoflow/test-utils/helpers/powersync-sqlite';
-import { LocalAgentRepository } from '@memoflow/ai';
+import { LocalAgentRepository, PermissionLocalRepository } from '@memoflow/ai';
 import { createTimeContext } from '@memoflow/time';
 import { createDesktopLocalAgentTools } from './local-agent-tools';
 import type { IDesktopNativePanelBridge } from './desktop-native-panel-bridge';
@@ -247,6 +247,13 @@ it.each(['approve', 'decline', 'abort', 'auto-approve'] as const)(
         enabled: true,
         writeScopes: ['goals:write'],
       });
+      await new PermissionLocalRepository(f.db).saveSettings('owner', {
+        preset: decision === 'auto-approve' ? 'on_demand' : 'confirm_each',
+        agentPresets: {
+          [connection.id]: decision === 'auto-approve' ? 'on_demand' : 'confirm_each',
+        },
+        revision: 1,
+      });
       const grant = await bridge.open({
         identityId: 'owner',
         connectionId: connection.id,
@@ -280,17 +287,22 @@ it.each(['approve', 'decline', 'abort', 'auto-approve'] as const)(
       if (decision !== 'auto-approve') {
         await requested;
         expect(requestApproval).toHaveBeenCalledWith('goal_panel_submit', expect.any(AbortSignal));
-        expect(executeCommand).not.toHaveBeenCalled();
+        expect(executeCommand.mock.calls.some(([, command]) => command.action === 'submit')).toBe(
+          false,
+        );
         if (decision === 'abort') grant.revoke();
         else answer(decision === 'approve');
       }
       const result = await saving;
       if (decision === 'approve' || decision === 'auto-approve') {
         expect(result).not.toContain('PERMISSION_DENIED');
-        expect(executeCommand).toHaveBeenCalledOnce();
-        expect(executeCommand.mock.calls[0]?.[1]).toMatchObject({ action: 'submit' });
+        expect(
+          executeCommand.mock.calls.filter(([, command]) => command.action === 'submit'),
+        ).toHaveLength(1);
       } else {
-        expect(executeCommand).not.toHaveBeenCalled();
+        expect(executeCommand.mock.calls.some(([, command]) => command.action === 'submit')).toBe(
+          false,
+        );
         if (decision === 'decline') expect(result).toContain('PERMISSION_DENIED');
       }
       if (decision === 'auto-approve') expect(requestApproval).not.toHaveBeenCalled();

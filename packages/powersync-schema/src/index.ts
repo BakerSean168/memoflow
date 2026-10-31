@@ -872,7 +872,11 @@ const ai_agent_model_service_migrations = new Table(
 
 // Immutable UUID-to-instance mapping only; native config remains in LocalAgentRepository.
 const ai_agent_native_mappings = new Table(
-  { identity_id: column.text, connection_id: column.text, instance_id: column.text },
+  {
+    identity_id: column.text,
+    connection_id: column.text,
+    instance_id: column.text,
+  },
   { localOnly: true },
 );
 

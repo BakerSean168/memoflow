@@ -1,4 +1,5 @@
 import { sanitizeConversationTitle } from '@memoflow/ai-contracts';
+import { createHash } from 'node:crypto';
 /**
  * PowerSync CRUD batch executor
  *
@@ -123,6 +124,97 @@ export async function executeCrudBatch(
           await executeRoutineCompoundCrudOperation(tx as never, identityId, op);
           continue;
         }
+        if (tableName === 'ai_permission_settings' || tableName === 'ai_permission_rules') {
+          const ownerKey = createHash('sha256').update(identityId).digest('hex');
+          const validId =
+            tableName === 'ai_permission_settings'
+              ? id === `${ownerKey}:settings`
+              : id.startsWith(`${ownerKey}:rule:`);
+          if (!validId) throw new Error('Permission record id is not owner scoped');
+          const model = (
+            tableName === 'ai_permission_settings' ? tx.aiPermissionSetting : tx.aiPermissionRule
+          ) as
+            | {
+                createMany(args: {
+                  data: Record<string, unknown>;
+                  skipDuplicates: true;
+                }): Promise<unknown>;
+                updateMany(args: {
+                  where: { id: string; identityId: string };
+                  data: Record<string, unknown>;
+                }): Promise<unknown>;
+                deleteMany(args: { where: { id: string; identityId: string } }): Promise<unknown>;
+              }
+            | undefined;
+          if (!model) throw new Error('Permission storage unavailable');
+          const record = normalizeCrudData(tableName, data);
+          const ownerRecord = { ...record };
+          delete ownerRecord.id;
+          delete ownerRecord.identityId;
+          if (opType === 'PUT') {
+            const ownedData = { ...record, id, identityId };
+            await model.createMany({ data: ownedData, skipDuplicates: true });
+            await model.updateMany({
+              where: { id, identityId },
+              data: ownedData,
+            });
+          } else if (opType === 'PATCH') {
+            await model.updateMany({
+              where: { id, identityId },
+              data: ownerRecord,
+            });
+          } else if (opType === 'DELETE') {
+            await model.deleteMany({ where: { id, identityId } });
+          }
+          continue;
+        }
+        if (tableName === 'ai_permission_audit') {
+          const ownerKey = createHash('sha256').update(identityId).digest('hex');
+          if (!id.startsWith(`${ownerKey}:audit:`))
+            throw new Error('Permission audit id is not owner scoped');
+          const auditDelegate = getPrismaDelegate(tx, tableName);
+          if (!auditDelegate) throw new Error('Permission audit storage unavailable');
+          if (opType === 'PUT') {
+            await auditDelegate.upsert({
+              where: { id },
+              create: { ...normalizeCrudData(tableName, data), id, identityId },
+              update: {},
+            });
+            continue;
+          }
+          if (opType !== 'PATCH' || typeof data?.record_json !== 'string')
+            throw new Error('Permission audit records are append-only');
+          const auditModel = tx.aiPermissionAudit as {
+            findFirst(args: {
+              where: { id: string; identityId: string };
+              select: { recordJson: true };
+            }): Promise<{ recordJson: string } | null>;
+            updateMany(args: {
+              where: { id: string; identityId: string; recordJson: string };
+              data: { recordJson: string };
+            }): Promise<unknown>;
+          };
+          const current = await auditModel.findFirst({
+            where: { id, identityId },
+            select: { recordJson: true },
+          });
+          if (!current) throw new Error('Permission audit record not found');
+          const before = JSON.parse(current.recordJson) as Record<string, unknown>;
+          const after = JSON.parse(data.record_json) as Record<string, unknown>;
+          const immutableBefore = { ...before, execution: 'not_started' };
+          const immutableAfter = { ...after, execution: 'not_started' };
+          if (
+            before.execution !== 'not_started' ||
+            !['succeeded', 'failed'].includes(String(after.execution)) ||
+            JSON.stringify(immutableBefore) !== JSON.stringify(immutableAfter)
+          )
+            throw new Error('Permission audit execution transition is invalid');
+          await auditModel.updateMany({
+            where: { id, identityId, recordJson: current.recordJson },
+            data: { recordJson: data.record_json },
+          });
+          continue;
+        }
         const delegate = getPrismaDelegate(tx, tableName);
 
         if (!delegate) {
@@ -185,7 +277,10 @@ export async function executeCrudBatch(
 
         switch (opType) {
           case 'PUT': {
-            const record: Record<string, unknown> = { ...normalizeCrudData(tableName, data), id };
+            const record: Record<string, unknown> = {
+              ...normalizeCrudData(tableName, data),
+              id,
+            };
             if (IDENTITY_ID_TABLES.has(tableName)) {
               record.identityId = identityId;
             }

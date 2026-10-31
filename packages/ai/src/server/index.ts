@@ -9,5 +9,6 @@ export {
   createAIConversationPortableCapability,
 } from './application';
 export * from './domain';
+export * from './permissions';
 
 export * from './mastra';

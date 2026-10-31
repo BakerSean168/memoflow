@@ -1,7 +1,9 @@
 import { DatabaseSync, type SQLInputValue } from 'node:sqlite';
 import type { IElectronDatabase } from '@memoflow/desktop-contracts';
 
-export function createLocalAgentSqlite(): IElectronDatabase & { close(): void } {
+export function createLocalAgentSqlite(): IElectronDatabase & {
+  close(): void;
+} {
   const sql = new DatabaseSync(':memory:');
   sql.exec(`
     CREATE TABLE ai_agent_native_mappings (id TEXT PRIMARY KEY, identity_id TEXT NOT NULL, connection_id TEXT NOT NULL, instance_id TEXT NOT NULL);
@@ -13,6 +15,9 @@ export function createLocalAgentSqlite(): IElectronDatabase & { close(): void } 
     CREATE TABLE ai_local_agent_connections (id TEXT PRIMARY KEY, identity_id TEXT, record_json TEXT);
     CREATE TABLE ai_local_conversations (id TEXT PRIMARY KEY, identity_id TEXT, record_json TEXT);
     CREATE TABLE ai_local_conversation_items (id TEXT PRIMARY KEY, identity_id TEXT, conversation_id TEXT, created_at INTEGER, record_json TEXT);
+    CREATE TABLE ai_permission_settings (id TEXT PRIMARY KEY, identity_id TEXT, revision INTEGER, record_json TEXT, updated_at INTEGER);
+    CREATE TABLE ai_permission_rules (id TEXT PRIMARY KEY, identity_id TEXT, agent_id TEXT, record_json TEXT, updated_at INTEGER);
+    CREATE TABLE ai_permission_audit (id TEXT PRIMARY KEY, identity_id TEXT, occurred_at INTEGER, record_json TEXT);
   `);
   const parameters = (values: unknown[] = []): SQLInputValue[] =>
     values.map((value) => {
@@ -22,7 +27,9 @@ export function createLocalAgentSqlite(): IElectronDatabase & { close(): void } 
   let writeQueue: Promise<void> = Promise.resolve();
   const db: IElectronDatabase = {
     async execute(query, values) {
-      return { rowsAffected: Number(sql.prepare(query).run(...parameters(values)).changes) };
+      return {
+        rowsAffected: Number(sql.prepare(query).run(...parameters(values)).changes),
+      };
     },
     async getAll<T>(query: string, values?: unknown[]) {
       return sql.prepare(query).all(...parameters(values)) as T[];
