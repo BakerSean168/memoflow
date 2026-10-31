@@ -6,7 +6,9 @@ import { ConversationListResSchema } from './response-schemas';
 export function sanitizeConversationTitle(value: string, limit = 80): string {
   return Array.from(
     value
-      .replace(/[\p{Cc}\p{Cf}<>`*_#]/gu, ' ')
+      .replace(/[\p{Cc}\p{Cf}<>`]/gu, ' ')
+      .replace(/\*\*|__/gu, '')
+      .replace(/^\s*#{1,6}\s+/u, '')
       .replace(/\s+/gu, ' ')
       .trim(),
   )

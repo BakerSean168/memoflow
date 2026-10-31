@@ -160,8 +160,8 @@
                     ><MoreHorizontal class="h-4 w-4"
                   /></Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent @close-auto-focus="editingId && $event.preventDefault()">
-                  <DropdownMenuItem @select="editTitle(item)">{{
+                <DropdownMenuContent @close-auto-focus="focusTitleInput">
+                  <DropdownMenuItem @select="editTitle(item, true)">{{
                     t('shell.conversation.rename')
                   }}</DropdownMenuItem>
                   <DropdownMenuItem
@@ -183,8 +183,8 @@
               </DropdownMenu>
             </div>
           </ContextMenuTrigger>
-          <ContextMenuContent @close-auto-focus="editingId && $event.preventDefault()">
-            <ContextMenuItem @select="editTitle(item)">{{
+          <ContextMenuContent @close-auto-focus="focusTitleInput">
+            <ContextMenuItem @select="editTitle(item, true)">{{
               t('shell.conversation.rename')
             }}</ContextMenuItem>
             <ContextMenuItem
@@ -419,9 +419,18 @@ const { t } = useI18n();
 const editingId = ref<string | null>(null);
 const titleDraft = ref('');
 const titleInput = ref<HTMLInputElement | null>(null);
-async function editTitle(item: ConversationSummary) {
+async function editTitle(item: ConversationSummary, fromMenu = false) {
   editingId.value = item.id;
   titleDraft.value = item.name;
+  if (fromMenu) return;
+  await nextTick();
+  titleInput.value?.focus();
+  titleInput.value?.select();
+}
+async function focusTitleInput(event: Event) {
+  if (!editingId.value) return;
+  event.preventDefault();
+  // Reka's modal focus trap has unmounted at close-auto-focus, so the editor can receive focus.
   await nextTick();
   titleInput.value?.focus();
   titleInput.value?.select();

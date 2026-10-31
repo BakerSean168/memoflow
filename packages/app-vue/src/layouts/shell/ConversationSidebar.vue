@@ -114,9 +114,18 @@ const { t } = useI18n();
 const editingId = ref<string | null>(null);
 const titleDraft = ref('');
 const titleInput = ref<HTMLInputElement | null>(null);
-async function editTitle(item: ConversationEntry) {
+async function editTitle(item: ConversationEntry, fromMenu = false) {
   editingId.value = item.id;
   titleDraft.value = item.title;
+  if (fromMenu) return;
+  await nextTick();
+  titleInput.value?.focus();
+  titleInput.value?.select();
+}
+async function focusTitleInput(event: Event) {
+  if (!editingId.value) return;
+  event.preventDefault();
+  // Reka's modal focus trap has unmounted at close-auto-focus, so the editor can receive focus.
   await nextTick();
   titleInput.value?.focus();
   titleInput.value?.select();
@@ -253,7 +262,7 @@ function handleContextKey(event: KeyboardEvent, id: string) {
 }
 async function restoreContextFocus(event: Event) {
   if (editingId.value) {
-    event.preventDefault();
+    await focusTitleInput(event);
     return;
   }
   const id = contextRow.value;
@@ -683,11 +692,13 @@ const identityLabel = () => {
                   align="end"
                   side="right"
                   class="w-36"
-                  @close-auto-focus="editingId && $event.preventDefault()"
+                  @close-auto-focus="focusTitleInput"
                 >
-                  <DropdownMenuItem :disabled="selection.state.busy" @select="editTitle(item)">{{
-                    t('shell.conversation.rename')
-                  }}</DropdownMenuItem>
+                  <DropdownMenuItem
+                    :disabled="selection.state.busy"
+                    @select="editTitle(item, true)"
+                    >{{ t('shell.conversation.rename') }}</DropdownMenuItem
+                  >
                   <DropdownMenuItem
                     :disabled="selection.state.busy || titleBusy?.[item.id]"
                     @select="emit('regenerate-title', item.id)"
@@ -716,7 +727,7 @@ const identityLabel = () => {
             <ContextMenuItem
               v-if="contextIds.length === 1"
               :disabled="selection.state.busy"
-              @select="editTitle(item)"
+              @select="editTitle(item, true)"
               >{{ t('shell.conversation.rename') }}</ContextMenuItem
             >
             <ContextMenuItem

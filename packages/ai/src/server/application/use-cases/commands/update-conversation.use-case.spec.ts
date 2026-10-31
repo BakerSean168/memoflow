@@ -1,3 +1,4 @@
+import { sanitizeConversationTitle, fallbackConversationTitle } from '@memoflow/ai-contracts';
 import { describe, expect, it } from 'vitest';
 import { AIConversation } from '../../../domain/aggregates/ai-conversation';
 import { AIConversationMemoryRepository } from '../../../infrastructure/adapters/memory/ai-conversation-memory.repository';
@@ -140,4 +141,10 @@ it('gives explicit edits priority if the first automatic title committed before 
   expect(
     await update.execute('owner', id, { name: 'Manual topic', expectedVersion: 1 }),
   ).toMatchObject({ ok: true, data: { name: 'Manual topic', version: 3 } });
+});
+
+it('sanitizes controls and markup while preserving meaningful C# punctuation and Unicode title bounds', () => {
+  expect(sanitizeConversationTitle(' # **C# basics**\u202E\n <notes> ')).toBe('C# basics notes');
+  expect(Array.from(sanitizeConversationTitle('学'.repeat(100)))).toHaveLength(80);
+  expect(Array.from(fallbackConversationTitle('🙂'.repeat(100)))).toHaveLength(48);
 });
