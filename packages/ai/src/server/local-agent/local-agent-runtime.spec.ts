@@ -44,6 +44,11 @@ it('defines a bounded native MemoFlow tool route without granting alternate auto
   expect(MEMOFLOW_NATIVE_TOOL_ROUTING_INSTRUCTIONS).toContain('goal_panel_open');
   expect(MEMOFLOW_NATIVE_TOOL_ROUTING_INSTRUCTIONS).toContain('goal_panel_submit');
   expect(MEMOFLOW_NATIVE_TOOL_ROUTING_INSTRUCTIONS).toContain('do not use goal_create');
+  expect(MEMOFLOW_NATIVE_TOOL_ROUTING_INSTRUCTIONS).toContain(
+    'even when the user does not mention the form',
+  );
+  expect(MEMOFLOW_NATIVE_TOOL_ROUTING_INSTRUCTIONS).toContain('GOAL_PANEL_REQUIRED');
+  expect(MEMOFLOW_NATIVE_TOOL_ROUTING_INSTRUCTIONS).toContain('returned its Goal id');
   expect(MEMOFLOW_NATIVE_TOOL_ROUTING_INSTRUCTIONS).toContain('Never use shell');
   expect(MEMOFLOW_NATIVE_TOOL_ROUTING_INSTRUCTIONS).toContain('stop without retrying');
 });
