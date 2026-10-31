@@ -203,6 +203,33 @@ describe('Codex native driver', () => {
     });
   });
 
+  it('labels Codex MCP tool activity with the bare tool name and never with its arguments', async () => {
+    const native = driver(`if(frame.method === 'turn/start') {
+      reply({turn:{id:'turn-1'}});
+      send({method:'turn/started',params:{threadId:'native-1',turn:{id:'turn-1'}}});
+      send({method:'item/started',params:{threadId:'native-1',turnId:'turn-1',item:{id:'mcp-1',type:'mcpToolCall',server:'memoflow',tool:'goal_search',status:'inProgress',arguments:{query:'secret'}}}});
+      send({method:'item/completed',params:{threadId:'native-1',turnId:'turn-1',item:{id:'mcp-1',type:'mcpToolCall',server:'memoflow',tool:'goal_search',status:'completed'}}});
+      send({method:'item/started',params:{threadId:'native-1',turnId:'turn-1',item:{id:'mcp-2',type:'mcpToolCall',server:'memoflow',tool:'search for my secret plan',status:'inProgress'}}});
+      send({method:'item/started',params:{threadId:'native-1',turnId:'turn-1',item:{id:'cmd-1',type:'commandExecution',command:'cat secret.txt',status:'inProgress'}}});
+      send({method:'turn/completed',params:{threadId:'native-1',turn:{id:'turn-1',status:'completed'}}});
+      return;
+    }`);
+    const events = [];
+    for await (const event of native.run({
+      modelId: 'model',
+      content: 'Hi',
+      mcp: { url: 'http://127.0.0.1/mcp', token: 'fixture' },
+    }))
+      events.push(event);
+    expect(events.filter((event) => event.type === 'activity')).toEqual([
+      { type: 'activity', toolCallId: 'mcp-1', label: 'goal_search', state: 'running' },
+      { type: 'activity', toolCallId: 'mcp-1', label: 'goal_search', state: 'completed' },
+      { type: 'activity', toolCallId: 'mcp-2', label: 'mcpToolCall', state: 'running' },
+      { type: 'activity', toolCallId: 'cmd-1', label: 'commandExecution', state: 'running' },
+    ]);
+    expect(JSON.stringify(events)).not.toContain('secret');
+  });
+
   it('forwards only explicitly selected native traits to Codex turn/start', async () => {
     const native = driver(`if(frame.method === 'turn/start') {
       if(frame.params.effort !== 'super-high' || frame.params.serviceTierForTurn !== 'priority') process.exit(8);
