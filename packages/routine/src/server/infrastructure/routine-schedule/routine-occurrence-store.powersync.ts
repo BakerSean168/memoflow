@@ -119,39 +119,45 @@ export class PowerSyncRoutineOccurrenceStore implements RoutineOccurrenceStore {
     options?: { readonly transaction?: RoutineOccurrenceTransactionHandle },
   ): Promise<BusinessOperationReceipt> {
     const tx = transactionClient(options?.transaction) ?? this.db;
-    const now = new Date(input.history.triggeredAt).toISOString();
-    const result = await tx.execute(
-      `UPDATE routine_occurrences
-          SET status = ?, owner_token = NULL, claim_id = NULL, lease_expires_at = NULL,
-              last_error = NULL, history_json = ?,
-              next_occurrence_at = ?, attempt = attempt + 1, finished_at = ?, updated_at = ?
-        WHERE id = ? AND status = 'running' AND owner_token = ? AND fencing_token = ?
-          AND (lease_expires_at IS NULL OR lease_expires_at >= ?)`,
-      [
-        input.status,
-        JSON.stringify([input.history]),
-        input.nextOccurrenceAt == null ? null : new Date(input.nextOccurrenceAt).toISOString(),
-        now,
-        now,
-        input.occurrenceId,
-        input.ownerToken,
-        input.fencingToken,
-        now,
-      ],
-    );
-    const updated = await tx.getOptional<OccurrenceRow>(
-      `SELECT * FROM routine_occurrences WHERE id = ?`,
-      [input.occurrenceId],
-    );
-    if (result.rowsAffected === 0 || !updated || updated.status !== input.status) {
-      throw new LeaseFencingException(
-        `routine:occurrence:${input.occurrenceId}`,
-        'Routine occurrence claim is no longer current.',
-        updated?.fencing_token,
-        input.fencingToken,
+    // #731: routine_occurrences is a PowerSync view; its INSTEAD OF trigger never reports
+    // rowsAffected. Check the claim in the same transaction instead of trusting changes().
+    return withRoutineWriteTransaction(tx, async (client) => {
+      const now = new Date(input.history.triggeredAt).toISOString();
+      const current = await client.getOptional<OccurrenceRow>(
+        `SELECT * FROM routine_occurrences WHERE id = ?`,
+        [input.occurrenceId],
       );
-    }
-    return toReceipt(updated);
+      if (!current || !claimIsCurrent(current, input, now)) {
+        throw staleClaim(input, current?.fencing_token);
+      }
+      await client.execute(
+        `UPDATE routine_occurrences
+            SET status = ?, owner_token = NULL, claim_id = NULL, lease_expires_at = NULL,
+                last_error = NULL, history_json = ?,
+                next_occurrence_at = ?, attempt = attempt + 1, finished_at = ?, updated_at = ?
+          WHERE id = ? AND status = 'running' AND owner_token = ? AND fencing_token = ?
+            AND (lease_expires_at IS NULL OR lease_expires_at >= ?)`,
+        [
+          input.status,
+          JSON.stringify([input.history]),
+          input.nextOccurrenceAt == null ? null : new Date(input.nextOccurrenceAt).toISOString(),
+          now,
+          now,
+          input.occurrenceId,
+          input.ownerToken,
+          input.fencingToken,
+          now,
+        ],
+      );
+      const updated = await client.getOptional<OccurrenceRow>(
+        `SELECT * FROM routine_occurrences WHERE id = ?`,
+        [input.occurrenceId],
+      );
+      if (!updated || updated.status !== input.status || updated.finished_at !== now) {
+        throw staleClaim(input, updated?.fencing_token);
+      }
+      return toReceipt(updated);
+    });
   }
 
   async withOccurrenceTransaction<T>(
@@ -177,6 +183,31 @@ function transactionClient(
     throw new TypeError('Routine occurrence transaction must contain a PowerSync transaction.');
   }
   return client as IElectronDatabaseTransaction;
+}
+
+function claimIsCurrent(
+  row: OccurrenceRow,
+  input: RoutineOccurrenceCommitInput,
+  now: string,
+): boolean {
+  return (
+    row.status === 'running' &&
+    row.owner_token === input.ownerToken &&
+    Number(row.fencing_token) === input.fencingToken &&
+    (row.lease_expires_at == null || row.lease_expires_at >= now)
+  );
+}
+
+function staleClaim(
+  input: RoutineOccurrenceCommitInput,
+  actualFencingToken: number | undefined,
+): LeaseFencingException {
+  return new LeaseFencingException(
+    `routine:occurrence:${input.occurrenceId}`,
+    'Routine occurrence claim is no longer current.',
+    actualFencingToken,
+    input.fencingToken,
+  );
 }
 
 function idempotencyKey(identityId: string, occurrenceKey: string): string {
