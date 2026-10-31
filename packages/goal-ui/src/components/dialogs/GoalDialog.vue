@@ -29,6 +29,7 @@
       class="flex min-h-full flex-col gap-6"
       @submit.prevent="save"
     >
+      <div id="goal-ai-permission-notice" data-testid="goal-ai-permission-notice" />
       <section
         class="space-y-4 border-b border-[hsl(var(--border-subtle))] pb-5"
         data-testid="goal-identity-section"

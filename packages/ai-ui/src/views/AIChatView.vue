@@ -327,6 +327,15 @@
           @remove-context-entity="removeContextEntity"
         >
           <template #provider-options>
+            <AIBusinessPermissionSelector
+              :conversation-id="chatConversationId"
+              :agent-id="
+                runtimeChoice.runtimeKind === 'local_agent'
+                  ? runtimeChoice.connectionId
+                  : selectedComposerAgent
+              "
+              :disabled="chatLoading"
+            />
             <AIComposerControls
               ref="composerControlsRef"
               :agents="composerAgents"
@@ -334,14 +343,12 @@
               :models="composerModels"
               :catalog="composerCatalog"
               :selected-model-key="composerModelKey"
-              :permission-mode="permissionMode"
               :native-model-options="currentNativeModelOptions"
               :native="runtimeChoice.runtimeKind === 'local_agent'"
               :disabled="chatLoading"
               :loading="composerLoading"
               @refresh="refreshComposerCatalog"
               @select-model="selectComposerModel"
-              @permission="selectPermission"
               @model-option="selectNativeModelOption"
               @settings="openAISettings"
             />
@@ -361,6 +368,7 @@ import { Button } from '@memoflow/ui-vue-shadcn';
 import AIConversationSidebar from '../components/AIConversationSidebar.vue';
 import AIMessagePanel from '../components/AIMessagePanel.vue';
 import AIComposerControls from '../components/AIComposerControls.vue';
+import AIBusinessPermissionSelector from '../components/AIBusinessPermissionSelector.vue';
 import AIFooterComposer from '../components/AIFooterComposer.vue';
 import AIGoalWorkflowPanel from '../components/AIGoalWorkflowPanel.vue';
 import AITaskWorkflowPanel from '../components/AITaskWorkflowPanel.vue';
@@ -495,7 +503,6 @@ const {
   composerCatalog,
   refreshComposerCatalog,
   selectComposerModel,
-  selectPermission,
 } = model;
 
 const {

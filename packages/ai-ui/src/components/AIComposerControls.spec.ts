@@ -87,7 +87,6 @@ function setup(overrides: Record<string, unknown> = {}, identityScope = 'profile
       selectedAgentId: 'agent:mastra',
       models,
       selectedModelKey: models[0]!.key,
-      permissionMode: 'supervised',
       native: false,
       disabled: false,
       ...overrides,
@@ -118,12 +117,12 @@ const openModels = async (wrapper: ReturnType<typeof setup>) => {
 describe('T3 model picker / conditional traits / enforced permissions', () => {
   beforeEach(() => localStorage.clear());
 
-  it('hides inert model options for Mastra while retaining model and permission controls', () => {
+  it('hides inert model options and keeps native permission switching out of the composer', () => {
     const wrapper = setup();
     expect(wrapper.find('[data-testid="ai-chat-agent-selector"]').exists()).toBe(false);
     expect(wrapper.find('[data-testid="ai-chat-model-selector"]').exists()).toBe(true);
     expect(wrapper.find('[data-testid="ai-chat-traits-selector"]').exists()).toBe(false);
-    expect(wrapper.find('[data-testid="ai-chat-permission-selector"]').exists()).toBe(true);
+    expect(wrapper.find('[data-testid="ai-chat-permission-selector"]').exists()).toBe(false);
     expect(wrapper.get('[data-testid="ai-chat-model-selector"]').text()).toContain('Model Alpha');
     expect(wrapper.find('[data-testid="ai-model-traits-menu"]').exists()).toBe(false);
     wrapper.unmount();
@@ -538,26 +537,16 @@ describe('T3 model picker / conditional traits / enforced permissions', () => {
     loading.unmount();
   });
 
-  it('offers only permission modes implemented by the selected runtime', async () => {
-    const mastra = setup();
-    const native = setup({ native: true });
-    expect((mastra.vm as unknown as { permissionModes: string[] }).permissionModes).toEqual([
-      'supervised',
-      'read-only',
-    ]);
-    expect((native.vm as unknown as { permissionModes: string[] }).permissionModes).toEqual([
-      'supervised',
-      'auto-approve',
-    ]);
-    expect(mastra.get('[data-testid="ai-permission-picker"]').text()).not.toContain('Full access');
-    await mastra.get('[data-testid="ai-permission-option-read-only"]').trigger('click');
-    expect(mastra.emitted('permission')).toEqual([['read-only']]);
-    mastra.unmount();
-    native.unmount();
+  it('does not offer Agent command and file permissions in either runtime composer', () => {
+    for (const native of [true, false]) {
+      const wrapper = setup({ native });
+      expect(wrapper.find('[data-testid="ai-chat-permission-selector"]').exists()).toBe(false);
+      wrapper.unmount();
+    }
   });
 
   it('hides permission switching when the runtime only offers one mode', () => {
-    const wrapper = setup({ supportedPermissionModes: ['supervised'] });
+    const wrapper = setup();
     expect(wrapper.find('[data-testid="ai-chat-permission-selector"]').exists()).toBe(false);
     wrapper.unmount();
   });
@@ -578,7 +567,7 @@ describe('T3 model picker / conditional traits / enforced permissions', () => {
     });
     expect(wrapper.find('[data-testid="ai-chat-traits-selector"]').exists()).toBe(false);
     expect(wrapper.find('[data-testid="ai-chat-model-selector"]').exists()).toBe(true);
-    expect(wrapper.find('[data-testid="ai-chat-permission-selector"]').exists()).toBe(true);
+    expect(wrapper.find('[data-testid="ai-chat-permission-selector"]').exists()).toBe(false);
     wrapper.unmount();
   });
 
@@ -629,11 +618,7 @@ describe('T3 model picker / conditional traits / enforced permissions', () => {
       selectedAgentId: 'local:codex',
       selectedModelKey: 'model',
     });
-    for (const id of [
-      'ai-chat-model-selector',
-      'ai-chat-traits-selector',
-      'ai-chat-permission-selector',
-    ]) {
+    for (const id of ['ai-chat-model-selector', 'ai-chat-traits-selector']) {
       expect(wrapper.get('[data-testid="' + id + '"]').attributes('disabled')).toBeDefined();
     }
     wrapper.unmount();

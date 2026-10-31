@@ -80,7 +80,7 @@ const nativeInput = computed(() =>
       (driver.value === 'mastra' ? '' : LOCAL_AGENT_DEFAULT_EXECUTABLES[driver.value]),
     homePath: homePath.value.trim() || undefined,
     enabled: true,
-    writeScopes: [],
+    writeScopes: ['goals:write', 'tasks:write'],
   }),
 );
 function defaultSlug(id: AgentDriverKind) {

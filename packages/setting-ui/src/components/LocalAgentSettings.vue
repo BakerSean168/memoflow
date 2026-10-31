@@ -64,7 +64,6 @@ const names = {
   dsh: 'DSH',
   antigravity: 'Antigravity (AGY)',
 };
-const scopes = ['goals:write', 'tasks:write'] as const;
 const form = reactive<LocalAgentConnectionInput>({
   driver: props.driver,
   name: '',
@@ -72,6 +71,7 @@ const form = reactive<LocalAgentConnectionInput>({
   homePath: '',
   enabled: true,
   writeScopes: [],
+  nativePermissionMode: 'supervised',
 });
 watch(
   () => [props.connection?.id, props.connection?.revision, props.driver, props.enabled],
@@ -85,7 +85,8 @@ watch(
       executablePath: current?.executablePath ?? LOCAL_AGENT_DEFAULT_EXECUTABLES[props.driver],
       homePath: current?.homePath ?? '',
       enabled: props.enabled ?? current?.enabled ?? true,
-      writeScopes: [...(current?.writeScopes ?? [])],
+      nativePermissionMode: current?.nativePermissionMode ?? 'supervised',
+      writeScopes: [...(current?.writeScopes ?? ['goals:write', 'tasks:write'])],
     });
   },
   { immediate: true },
@@ -128,7 +129,9 @@ const statusLabel = computed(() => {
   if (props.status?.status === 'ready')
     return (
       settingUiHost.getNativeAgentExecutionFailureMessage(props.status.lastExecutionFailure, t) ||
-      t('setting.agentInstances.discoveredModels', { count: props.status.models.length })
+      t('setting.agentInstances.discoveredModels', {
+        count: props.status.models.length,
+      })
     );
   if (props.driver === 'antigravity') {
     if (props.status?.status === 'login_required')
@@ -241,7 +244,9 @@ async function openAuthorization(url: string) {
     return;
   }
   try {
-    const result = await bridge.invoke(SystemChannels.OPEN_EXTERNAL_URL, { url });
+    const result = await bridge.invoke(SystemChannels.OPEN_EXTERNAL_URL, {
+      url,
+    });
     openFailed.value = !(
       result &&
       typeof result === 'object' &&
@@ -698,33 +703,24 @@ onBeforeUnmount(stopPolling);
         /></SettingsPropertyRow>
       </div>
     </section>
-    <section class="space-y-3">
-      <h4 class="px-3 text-xs font-medium text-muted-foreground">
-        {{ t('aiAssistant.local.writeScopes') }}
-      </h4>
-      <div class="rounded-xl border border-[hsl(var(--border-subtle))] bg-muted/10 px-4 py-4">
-        <p class="mb-3 text-xs leading-5 text-muted-foreground">
-          {{ t('setting.agentInstances.nativePermissionHint') }}
-        </p>
-        <fieldset class="flex flex-wrap gap-x-5 gap-y-3">
-          <legend class="sr-only">{{ t('aiAssistant.local.writeScopes') }}</legend>
-          <label v-for="scope in scopes" :key="scope" class="flex items-center gap-2 text-xs"
-            ><input
-              v-model="form.writeScopes"
-              type="checkbox"
-              :value="scope"
-              :disabled="busy"
-              class="accent-primary"
-            />{{
-              t(
-                scope === 'goals:write'
-                  ? 'aiAssistant.local.goalWrites'
-                  : 'aiAssistant.local.taskWrites',
-              )
-            }}</label
-          >
-        </fieldset>
-      </div>
+    <section class="space-y-3 rounded-xl border p-4">
+      <h4 class="text-sm font-medium">{{ t('setting.permissions.native') }}</h4>
+      <p class="text-xs text-muted-foreground">
+        {{ t('setting.permissions.nativeHint') }}
+      </p>
+      <select
+        v-model="form.nativePermissionMode"
+        :disabled="busy"
+        class="rounded border bg-background p-2"
+        data-testid="ai-agent-native-permission"
+      >
+        <option value="supervised">
+          {{ t('setting.permissions.nativeConfirm') }}
+        </option>
+        <option value="auto-approve">
+          {{ t('setting.permissions.nativeAuto') }}
+        </option>
+      </select>
     </section>
     <section class="space-y-3">
       <div class="flex items-center justify-between px-3">

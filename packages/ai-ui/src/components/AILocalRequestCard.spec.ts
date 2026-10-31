@@ -3,7 +3,7 @@ installAiUiHost();
 /** @vitest-environment jsdom */
 import { mount } from '@vue/test-utils';
 import { createI18n } from 'vue-i18n';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import { productionLocaleMessages } from '@ai-ui-test-host/locales/production-messages';
 import AILocalRequestCard from './AILocalRequestCard.vue';
 import type { ChatNativeRequest } from '../composables/types';
@@ -52,4 +52,59 @@ describe('AILocalRequestCard', () => {
     });
     expect(question.find('[data-testid="ai-native-permission-kind"]').exists()).toBe(false);
   });
+});
+
+it.each([
+  ['ai-permission-allow-once', 'approve_once'],
+  ['ai-permission-allow-conversation', 'approve_conversation'],
+  ['ai-permission-allow-always', 'approve_always'],
+  ['ai-permission-deny', 'decline'],
+] as const)('business card %s sends the scoped decision %s', async (testId, decision) => {
+  const wrapper = mountCard({
+    type: 'permission',
+    requestId: 'business',
+    title: 'MemoFlow: goal_panel_submit',
+    business: {
+      agentId: 'Codex',
+      object: 'goal',
+      action: 'create',
+      expiresAt: Date.now() + 25_000,
+    },
+  });
+  expect(wrapper.get('[data-testid="ai-business-permission-scope"]').text()).toContain(
+    'Codex 新增目标',
+  );
+  expect(wrapper.get('[data-testid="ai-business-permission-scope"]').text()).toContain(
+    '设置 → AI 权限 撤销',
+  );
+  expect(wrapper.get('[data-testid="ai-business-permission-countdown"]').text()).toContain('25');
+  await wrapper.get(`[data-testid="${testId}"]`).trigger('click');
+  expect(wrapper.emitted('respond')?.[0]).toEqual([{ type: 'permission', decision }]);
+  wrapper.unmount();
+});
+
+it('mirrors the scope in an open Goal form and disables approvals when its deadline expires', async () => {
+  vi.useFakeTimers();
+  const target = document.createElement('div');
+  target.id = 'goal-ai-permission-notice';
+  document.body.append(target);
+  const wrapper = mountCard({
+    type: 'permission',
+    requestId: 'deadline',
+    title: 'MemoFlow save',
+    business: { agentId: 'Codex', object: 'goal', action: 'create', expiresAt: Date.now() + 1000 },
+  });
+  try {
+    await import('vue').then(({ nextTick }) => nextTick());
+    expect(target.textContent).toContain('设置 → AI 权限 撤销');
+    await vi.advanceTimersByTimeAsync(1000);
+    expect(wrapper.get('[data-testid="ai-business-permission-countdown"]').text()).toContain('0');
+    expect(
+      wrapper.get('[data-testid="ai-permission-allow-always"]').attributes('disabled'),
+    ).toBeDefined();
+  } finally {
+    wrapper.unmount();
+    target.remove();
+    vi.useRealTimers();
+  }
 });

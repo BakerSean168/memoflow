@@ -1,4 +1,87 @@
 export default {
+  permissions: {
+    unknownTime: 'Time unavailable for older records',
+    title: 'AI permissions',
+    description:
+      'Control AI access to MemoFlow data. Configure command and file permissions separately in each Agent’s settings.',
+    unavailable: 'Permission management is not available on this device.',
+    error: 'Could not load or save permissions. Please retry.',
+    refresh: 'Refresh',
+    current: 'Current level',
+    object: 'Object',
+    agents: 'Agent overrides',
+    inherit: 'Use global default',
+    grants: 'Grants and rules',
+    activity: 'Activity (latest 100)',
+    empty: 'No records',
+    global: 'All Agents',
+    revoke: 'Revoke',
+    limits:
+      'High-risk operations require confirmation in Confirm each and On demand. AI cannot change permissions; explicit deny rules always apply.',
+    presets: {
+      read_only: 'Read only',
+      confirm_each: 'Confirm each',
+      on_demand: 'On demand',
+      full_auto: 'Fully automatic',
+      custom: 'Custom',
+    },
+    hints: {
+      read_only: 'Read data only',
+      confirm_each: 'Ask before every write',
+      on_demand: 'Read and create automatically; ask to update or delete',
+      full_auto: 'Automatically execute registered operations',
+    },
+    objects: {
+      goal: 'Goals',
+      key_result: 'Key results',
+      task: 'Tasks',
+      routine: 'Routines',
+      knowledge: 'Knowledge',
+      notification: 'Notifications',
+      ai_permission: 'AI permissions',
+    },
+    actions: {
+      read: 'Read',
+      create: 'Create',
+      update: 'Update',
+      delete: 'Delete',
+    },
+    effects: {
+      allow: 'Allow',
+      ask: 'Ask',
+      deny: 'Deny',
+    },
+    sources: {
+      user: 'User grant',
+      migration: 'Migrated from previous settings',
+    },
+    executions: {
+      not_started: 'Not started',
+      succeeded: 'Succeeded',
+      failed: 'Failed',
+    },
+    decidedBy: {
+      rule: 'Rule',
+      user: 'User confirmation',
+      timeout: 'Timed out',
+      preset: 'Preset',
+      system: 'System',
+    },
+    once: 'Allow once',
+    conversation: 'Allow for this conversation',
+    always: 'Always allow',
+    decline: 'Deny',
+    scope:
+      'Allow {agent} to {action} {object} without asking again. Revoke in Settings → AI permissions.',
+    countdown: '{seconds} seconds remaining; automatically denied on timeout.',
+    temporary:
+      'Applies only to this conversation; resets when it ends or you switch. Explicit deny rules still apply.',
+    native: 'Agent native permissions (commands and files)',
+    nativeHint:
+      'Controls command execution and file changes, separately from MemoFlow data permissions.',
+    nativeConfirm: 'Ask for confirmation',
+    nativeAuto: 'Automatically approve',
+  },
   startup: {
     title: 'Startup & window',
     autoLaunch: 'Launch at login',

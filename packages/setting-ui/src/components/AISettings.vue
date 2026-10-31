@@ -70,7 +70,9 @@ function statusLabel(instance: AgentInstance) {
   if (status?.status === 'ready')
     return (
       settingUiHost.getNativeAgentExecutionFailureMessage(status.lastExecutionFailure, t) ||
-      t('setting.agentInstances.discoveredModels', { count: status.models.length })
+      t('setting.agentInstances.discoveredModels', {
+        count: status.models.length,
+      })
     );
   if (instance.driver === 'antigravity') {
     if (status?.status === 'login_required')
@@ -170,6 +172,7 @@ async function createNative(input: LocalAgentConnectionInput) {
             executablePath: input.executablePath,
             homePath: input.homePath,
             writeScopes: input.writeScopes,
+            nativePermissionMode: input.nativePermissionMode,
           },
         },
       }),
@@ -207,6 +210,7 @@ async function saveNative(input: LocalAgentConnectionInput) {
           executablePath: input.executablePath,
           homePath: input.homePath,
           writeScopes: input.writeScopes,
+          nativePermissionMode: input.nativePermissionMode,
         },
       },
     }),

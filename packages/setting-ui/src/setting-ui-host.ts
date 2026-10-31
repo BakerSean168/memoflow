@@ -13,6 +13,8 @@
  */
 import type { Component, InjectionKey, Ref } from 'vue';
 import type {
+  PermissionCommand,
+  PermissionSnapshot,
   AgentConversationSelection,
   AgentInstance,
   AgentRegistryCommand,
@@ -118,6 +120,7 @@ export interface SettingKeyboardRuntime {
 
 /** Native (non-Mastra) agent transport consumed by the AI settings surfaces. */
 export interface SettingLocalAgentPort {
+  permissions(command: PermissionCommand): Promise<PermissionSnapshot>;
   listConnections(): Promise<LocalAgentConnection[]>;
   probeConnection(id: string): Promise<LocalAgentStatus>;
   cachedCatalogConnection(id: string): Promise<LocalAgentStatus | null>;
