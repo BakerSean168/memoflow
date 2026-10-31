@@ -1,6 +1,6 @@
-import { describe, expect, it, vi } from "vitest";
-import { createHash } from "node:crypto";
-import { executeCrudBatch } from "./crud-executor.js";
+import { describe, expect, it, vi } from 'vitest';
+import { createHash } from 'node:crypto';
+import { executeCrudBatch } from './crud-executor.js';
 
 function database() {
   const aiPermissionRule = {
@@ -17,9 +17,9 @@ function database() {
     deleteMany: vi.fn().mockResolvedValue(undefined),
     findFirst: vi.fn().mockResolvedValue({
       recordJson: JSON.stringify({
-        id: "event",
-        decision: "allow",
-        execution: "not_started",
+        id: 'event',
+        decision: 'allow',
+        execution: 'not_started',
       }),
     }),
     updateMany: vi.fn().mockResolvedValue({ count: 1 }),
@@ -44,24 +44,24 @@ function database() {
   };
 }
 
-const auditId = `${createHash("sha256").update("owner").digest("hex")}:audit:event`;
+const auditId = `${createHash('sha256').update('owner').digest('hex')}:audit:event`;
 
-describe("permission audit PowerSync writes", () => {
-  it("creates immutable events and only permits the execution result transition", async () => {
+describe('permission audit PowerSync writes', () => {
+  it('creates immutable events and only permits the execution result transition', async () => {
     const db = database();
-    await executeCrudBatch(db, "owner", [
+    await executeCrudBatch(db, 'owner', [
       {
         ops: [
           {
-            op: "PUT",
-            type: "ai_permission_audit",
+            op: 'PUT',
+            type: 'ai_permission_audit',
             id: auditId,
             data: {
-              occurred_at: "2026-10-31T00:00:00.000Z",
+              occurred_at: '2026-10-31T00:00:00.000Z',
               record_json: JSON.stringify({
-                id: "event",
-                decision: "allow",
-                execution: "not_started",
+                id: 'event',
+                decision: 'allow',
+                execution: 'not_started',
               }),
             },
           },
@@ -70,22 +70,22 @@ describe("permission audit PowerSync writes", () => {
     ]);
     expect(db.aiPermissionAudit.upsert).toHaveBeenCalledWith({
       where: { id: auditId },
-      create: expect.objectContaining({ id: auditId, identityId: "owner" }),
+      create: expect.objectContaining({ id: auditId, identityId: 'owner' }),
       update: {},
     });
 
-    await executeCrudBatch(db, "owner", [
+    await executeCrudBatch(db, 'owner', [
       {
         ops: [
           {
-            op: "PATCH",
-            type: "ai_permission_audit",
+            op: 'PATCH',
+            type: 'ai_permission_audit',
             id: auditId,
             data: {
               record_json: JSON.stringify({
-                id: "event",
-                decision: "allow",
-                execution: "succeeded",
+                id: 'event',
+                decision: 'allow',
+                execution: 'succeeded',
               }),
             },
           },
@@ -95,38 +95,38 @@ describe("permission audit PowerSync writes", () => {
     expect(db.aiPermissionAudit.updateMany).toHaveBeenCalledWith({
       where: {
         id: auditId,
-        identityId: "owner",
+        identityId: 'owner',
         recordJson: JSON.stringify({
-          id: "event",
-          decision: "allow",
-          execution: "not_started",
+          id: 'event',
+          decision: 'allow',
+          execution: 'not_started',
         }),
       },
       data: {
         recordJson: JSON.stringify({
-          id: "event",
-          decision: "allow",
-          execution: "succeeded",
+          id: 'event',
+          decision: 'allow',
+          execution: 'succeeded',
         }),
       },
     });
   });
 
-  it("rejects attempts to alter an authorization decision or delete its audit row", async () => {
+  it('rejects attempts to alter an authorization decision or delete its audit row', async () => {
     const db = database();
     await expect(
-      executeCrudBatch(db, "owner", [
+      executeCrudBatch(db, 'owner', [
         {
           ops: [
             {
-              op: "PATCH",
-              type: "ai_permission_audit",
+              op: 'PATCH',
+              type: 'ai_permission_audit',
               id: auditId,
               data: {
                 record_json: JSON.stringify({
-                  id: "event",
-                  decision: "deny",
-                  execution: "succeeded",
+                  id: 'event',
+                  decision: 'deny',
+                  execution: 'succeeded',
                 }),
               },
             },
@@ -135,23 +135,23 @@ describe("permission audit PowerSync writes", () => {
       ]),
     ).rejects.toThrow(/execution transition is invalid/);
     await expect(
-      executeCrudBatch(db, "owner", [
-        { ops: [{ op: "DELETE", type: "ai_permission_audit", id: auditId }] },
+      executeCrudBatch(db, 'owner', [
+        { ops: [{ op: 'DELETE', type: 'ai_permission_audit', id: auditId }] },
       ]),
     ).rejects.toThrow(/append-only/);
   });
 
-  it("rejects cross-owner rule ids before touching storage", async () => {
+  it('rejects cross-owner rule ids before touching storage', async () => {
     const db = database();
     await expect(
-      executeCrudBatch(db, "owner", [
+      executeCrudBatch(db, 'owner', [
         {
           ops: [
             {
-              op: "PUT",
-              type: "ai_permission_rules",
-              id: "foreign:rule:deny",
-              data: { record_json: "{}" },
+              op: 'PUT',
+              type: 'ai_permission_rules',
+              id: 'foreign:rule:deny',
+              data: { record_json: '{}' },
             },
           ],
         },
@@ -159,15 +159,15 @@ describe("permission audit PowerSync writes", () => {
     ).rejects.toThrow(/not owner scoped/);
   });
 
-  it("writes only owner-keyed rule and settings rows with the authenticated identity", async () => {
+  it('writes only owner-keyed rule and settings rows with the authenticated identity', async () => {
     const db = database();
-    const ownerKey = createHash("sha256").update("owner").digest("hex");
-    await executeCrudBatch(db, "owner", [
+    const ownerKey = createHash('sha256').update('owner').digest('hex');
+    await executeCrudBatch(db, 'owner', [
       {
         ops: [
           {
-            op: "PUT",
-            type: "ai_permission_rules",
+            op: 'PUT',
+            type: 'ai_permission_rules',
             id: `${ownerKey}:rule:task-deny`,
             data: {
               agent_id: null,
@@ -182,34 +182,34 @@ describe("permission audit PowerSync writes", () => {
         id: `${ownerKey}:rule:task-deny`,
         agentId: null,
         recordJson: '{"id":"task-deny"}',
-        identityId: "owner",
+        identityId: 'owner',
       },
       skipDuplicates: true,
     });
     expect(db.aiPermissionRule.updateMany).toHaveBeenCalledWith({
-      where: { id: `${ownerKey}:rule:task-deny`, identityId: "owner" },
+      where: { id: `${ownerKey}:rule:task-deny`, identityId: 'owner' },
       data: {
         id: `${ownerKey}:rule:task-deny`,
         agentId: null,
         recordJson: '{"id":"task-deny"}',
-        identityId: "owner",
+        identityId: 'owner',
       },
     });
   });
 
-  it("keeps identity and row ID out of owner scoped patches", async () => {
+  it('keeps identity and row ID out of owner scoped patches', async () => {
     const db = database();
-    const ownerKey = createHash("sha256").update("owner").digest("hex");
-    await executeCrudBatch(db, "owner", [
+    const ownerKey = createHash('sha256').update('owner').digest('hex');
+    await executeCrudBatch(db, 'owner', [
       {
         ops: [
           {
-            op: "PATCH",
-            type: "ai_permission_rules",
+            op: 'PATCH',
+            type: 'ai_permission_rules',
             id: `${ownerKey}:rule:task-deny`,
             data: {
-              id: "foreign-row",
-              identity_id: "foreign-owner",
+              id: 'foreign-row',
+              identity_id: 'foreign-owner',
               record_json: '{"id":"task-deny","effect":"deny"}',
             },
           },
@@ -217,7 +217,7 @@ describe("permission audit PowerSync writes", () => {
       },
     ]);
     expect(db.aiPermissionRule.updateMany).toHaveBeenCalledWith({
-      where: { id: `${ownerKey}:rule:task-deny`, identityId: "owner" },
+      where: { id: `${ownerKey}:rule:task-deny`, identityId: 'owner' },
       data: { recordJson: '{"id":"task-deny","effect":"deny"}' },
     });
   });

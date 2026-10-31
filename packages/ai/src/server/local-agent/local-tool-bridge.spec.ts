@@ -4,6 +4,7 @@ import { z } from 'zod';
 import { LocalAgentToolBridge } from './local-tool-bridge';
 import { LocalAgentRepository } from '../infrastructure/adapters/powersync/local-agent.repository';
 import { createLocalAgentSqlite } from '../../testing/local-agent-sqlite';
+import { PermissionLocalRepository } from '../permissions/permission-powersync.repository';
 
 it('drains a tool already using the Profile database before disposal returns', async () => {
   const db = createLocalAgentSqlite();
@@ -24,6 +25,7 @@ it('drains a tool already using the Profile database before disposal returns', a
   });
   const bridge = new LocalAgentToolBridge({
     store,
+    permissions: new PermissionLocalRepository(db),
     isActive: () => true,
     registerTools(server, context) {
       server.registerTool('read', { inputSchema: z.object({}) }, async () => {
@@ -91,6 +93,7 @@ it('authenticates every native MCP call and revokes old Profile capabilities', a
   let active = true;
   const bridge = new LocalAgentToolBridge({
     store,
+    permissions: new PermissionLocalRepository(db),
     isActive: () => active,
     registerTools(server, context) {
       server.registerTool('owned_read', { inputSchema: z.object({}).strict() }, async () => {
@@ -189,16 +192,20 @@ it.each(['timeout', 'missing-handler'] as const)(
       enabled: true,
       writeScopes: ['goals:write'],
     });
+    await new Promise((resolve) => setTimeout(resolve, 2));
     let writes = 0;
     const bridge = new LocalAgentToolBridge({
       store,
+      permissions: new PermissionLocalRepository(db),
       isActive: () => true,
       approvalTimeoutMs: 10,
       registerTools(server, context) {
         server.registerTool('goal_panel_submit', { inputSchema: z.object({}) }, async () => {
           try {
-            await context.requestApproval('goal_panel_submit');
-            writes++;
+            await context.executeAuthorized('goal.create', 'goal_panel_submit', async () => {
+              writes++;
+              return 'saved';
+            });
             return { content: [{ type: 'text', text: 'saved' }] };
           } catch (error) {
             return { isError: true, content: [{ type: 'text', text: (error as Error).message }] };

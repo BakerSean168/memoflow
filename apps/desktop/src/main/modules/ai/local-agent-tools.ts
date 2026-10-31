@@ -1,6 +1,13 @@
 import { z } from 'zod';
 import { randomBytes } from 'node:crypto';
-import { LocalAgentToolBridge, LocalAgentRepository, type LocalToolContext } from '@memoflow/ai';
+import {
+  LocalAgentToolBridge,
+  LocalAgentRepository,
+  PermissionLocalRepository,
+  permissionOperationForTool,
+  goalPanelSubmitOperationId,
+  type LocalToolContext,
+} from '@memoflow/ai';
 import type { IKnowledgeSourcePort, KnowledgeSourceNote } from '@memoflow/ai/ports';
 import {
   KnowledgeDocumentIdSchema,
@@ -21,21 +28,15 @@ import {
 import { GatewayReadError } from '@memoflow/agent-gateway';
 import { registerReadTools } from '@memoflow/agent-gateway/server';
 import { GatewayFailureCodeSchema } from '@memoflow/agent-gateway';
-import {
-  GoalAgentCreateSchema,
-  GoalAgentUpdateSchema,
-  GoalAgentReceiptSchema,
-} from '@memoflow/goal-contracts';
+import { GoalAgentCreateSchema, GoalAgentUpdateSchema } from '@memoflow/goal-contracts';
 import {
   TaskAgentCreateSchema,
   TaskAgentUpdateSchema,
   TaskAgentCompleteSchema,
-  TaskAgentReceiptSchema,
 } from '@memoflow/task-contracts';
 import type { Result } from '@memoflow/transport-contracts/result';
 import type { IElectronDatabase, IElectronDatabaseTransaction } from '@memoflow/desktop-contracts';
 import {
-  GoalPanelSnapshotSchema,
   assertGoalDirectWriteAllowed,
   assertGoalIntentCanCommit,
   GoalIntentCommitBlockedError,
@@ -44,7 +45,6 @@ import {
   GoalPanelRemoveKeyResultCommandSchema,
   GoalPanelFocusCommandSchema,
   GoalPanelSubmitCommandSchema,
-  GoalPanelSubmitResultSchema,
   type GoalPanelCommand,
 } from '@memoflow/ai-contracts';
 import type { IDesktopNativePanelBridge } from './desktop-native-panel-bridge';
@@ -74,6 +74,7 @@ export function createDesktopLocalAgentTools(
   const cursorSecret = randomBytes(32).toString('base64url');
   return new LocalAgentToolBridge({
     store,
+    permissions: new PermissionLocalRepository(db),
     isActive,
     onRevokeGrant(grantInput) {
       panelBridge?.releaseAllForRun?.(grantInput.conversationId, grantInput.runId);
@@ -101,13 +102,17 @@ export function createDesktopLocalAgentTools(
             contentHash: note.sourceContentHash,
           });
         }
-        async function read(work: () => Promise<Record<string, unknown>>) {
+        async function read(toolName: string, work: () => Promise<Record<string, unknown>>) {
           try {
-            await context.authorize('knowledge:read');
-            const result = await context.track(work);
-            await context.authorize('knowledge:read');
-            if (Buffer.byteLength(JSON.stringify(result)) > 120 * 1024)
-              throw new GatewayReadError('RESPONSE_TOO_LARGE');
+            const operationId = permissionOperationForTool(toolName)?.id ?? toolName;
+            const result = await context.executeAuthorized(operationId, toolName, async () => {
+              await context.authorize('knowledge:read');
+              const value = await context.track(work);
+              await context.authorize('knowledge:read');
+              if (Buffer.byteLength(JSON.stringify(value)) > 120 * 1024)
+                throw new GatewayReadError('RESPONSE_TOO_LARGE');
+              return value;
+            });
             return {
               content: [{ type: 'text' as const, text: JSON.stringify(result) }],
               structuredContent: result,
@@ -118,7 +123,12 @@ export function createDesktopLocalAgentTools(
               content: [
                 {
                   type: 'text' as const,
-                  text: error instanceof GatewayReadError ? error.code : 'UNAVAILABLE',
+                  text:
+                    error instanceof GatewayReadError
+                      ? error.code
+                      : error instanceof Error && 'code' in error
+                        ? String(error.code)
+                        : 'UNAVAILABLE',
                 },
               ],
             };
@@ -145,7 +155,7 @@ export function createDesktopLocalAgentTools(
             annotations,
           },
           (input) =>
-            read(async () => ({
+            read('knowledge_search', async () => ({
               items: (
                 await knowledge.listRelevantNotes(context.identityId, input.query, input.limit)
               )
@@ -169,7 +179,7 @@ export function createDesktopLocalAgentTools(
             annotations,
           },
           (input) =>
-            read(async () => {
+            read('knowledge_get', async () => {
               const note = await knowledge.getNoteById(
                 context.identityId,
                 KnowledgeDocumentIdSchema.parse(input.documentId),
@@ -184,8 +194,10 @@ export function createDesktopLocalAgentTools(
       }
       async function write(toolName: string, work: () => Promise<Record<string, unknown>>) {
         try {
-          await context.requestApproval(toolName);
-          const receipt = await context.track(work);
+          const operationId = permissionOperationForTool(toolName)?.id ?? toolName;
+          const receipt = await context.executeAuthorized(operationId, toolName, () =>
+            context.track(work),
+          );
           return {
             content: [{ type: 'text' as const, text: JSON.stringify(receipt) }],
             structuredContent: receipt,
@@ -305,13 +317,21 @@ export function createDesktopLocalAgentTools(
             if (command.action === 'submit') assertGoalIntentCanCommit(context.goalIntent ?? '');
             const scope = command.action === 'snapshot' ? 'read' : 'goals:write';
             await context.authorize(scope);
+            let response;
             if (command.action === 'submit') {
-              await context.requestApproval('goal_panel_submit');
-              await context.authorize(scope);
+              const snapshot = await panelBridge!.executeCommand(context, { action: 'snapshot' });
+              const operationId = goalPanelSubmitOperationId(snapshot.snapshot?.mode === 'edit');
+              response = await context.executeAuthorized(
+                operationId,
+                'goal_panel_submit',
+                async () => {
+                  await context.authorize(scope);
+                  return context.track(() => panelBridge!.executeCommand(context, command));
+                },
+              );
+            } else {
+              response = await context.track(() => panelBridge!.executeCommand(context, command));
             }
-            const response = await context.track(() =>
-              panelBridge!.executeCommand(context, command),
-            );
             if (!response.ok) {
               return {
                 isError: true,
@@ -506,13 +526,17 @@ export function createDesktopLocalAgentTools(
         context,
         { deadlineAt: context.deadlineAt, signal: context.signal },
         ['goals:read', 'tasks:read'],
-        async (_name, scope, work) => {
+        async (toolName, scope, work) => {
           try {
-            await context.authorize(scope);
-            const result = await context.track(work);
-            await context.authorize(scope);
-            if (Buffer.byteLength(JSON.stringify(result)) > 120 * 1024)
-              throw new GatewayReadError('RESPONSE_TOO_LARGE');
+            const operationId = permissionOperationForTool(toolName)?.id ?? toolName;
+            const result = await context.executeAuthorized(operationId, toolName, async () => {
+              await context.authorize(scope);
+              const value = await context.track(work);
+              await context.authorize(scope);
+              if (Buffer.byteLength(JSON.stringify(value)) > 120 * 1024)
+                throw new GatewayReadError('RESPONSE_TOO_LARGE');
+              return value;
+            });
             return {
               content: [{ type: 'text', text: JSON.stringify(result) }],
               structuredContent: result as Record<string, unknown>,

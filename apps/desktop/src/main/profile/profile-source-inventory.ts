@@ -54,6 +54,9 @@ const technicalTables = new Set([
   'ai_attention_event_heads',
   'ai_attention_event_states',
   'ai_attention_event_log',
+  'ai_permission_settings_local',
+  'ai_permission_rules_local',
+  'ai_permission_audit_local',
 ]);
 const powerSyncInternalTables = new Set([
   'ps_buckets',

@@ -2,7 +2,7 @@ import type {
   PermissionAuditRecord,
   PermissionRule,
   PermissionSettings,
-} from "@memoflow/ai-contracts";
+} from '@memoflow/ai-contracts';
 
 export interface PermissionRepository {
   getSettings(owner: string): Promise<PermissionSettings | null>;
@@ -14,7 +14,7 @@ export interface PermissionRepository {
   updateAuditExecution(
     owner: string,
     auditId: string,
-    execution: PermissionAuditRecord["execution"],
+    execution: PermissionAuditRecord['execution'],
   ): Promise<void>;
   listAudit(owner: string, limit?: number): Promise<PermissionAuditRecord[]>;
 }

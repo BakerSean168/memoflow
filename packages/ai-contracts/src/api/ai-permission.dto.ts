@@ -1,27 +1,22 @@
-import { z } from "zod";
+import { z } from 'zod';
 
 export const PermissionObjectSchema = z.enum([
-  "goal",
-  "key_result",
-  "task",
-  "routine",
-  "knowledge",
-  "notification",
-  "ai_permission",
+  'goal',
+  'key_result',
+  'task',
+  'routine',
+  'knowledge',
+  'notification',
+  'ai_permission',
 ]);
-export const PermissionActionSchema = z.enum([
-  "read",
-  "create",
-  "update",
-  "delete",
-]);
-export const PermissionEffectSchema = z.enum(["allow", "ask", "deny"]);
+export const PermissionActionSchema = z.enum(['read', 'create', 'update', 'delete']);
+export const PermissionEffectSchema = z.enum(['allow', 'ask', 'deny']);
 export const PermissionPresetSchema = z.enum([
-  "read_only",
-  "confirm_each",
-  "on_demand",
-  "full_auto",
-  "custom",
+  'read_only',
+  'confirm_each',
+  'on_demand',
+  'full_auto',
+  'custom',
 ]);
 export const PermissionRuleSchema = z
   .object({
@@ -30,19 +25,16 @@ export const PermissionRuleSchema = z
     object: PermissionObjectSchema,
     action: PermissionActionSchema,
     effect: PermissionEffectSchema,
-    source: z.enum(["user", "migration"]),
+    source: z.enum(['user', 'migration']),
     expiresAt: z.number().int().nonnegative().optional(),
   })
   .strict();
 export const PermissionSettingsSchema = z
   .object({
-    preset: PermissionPresetSchema.default("on_demand"),
+    preset: PermissionPresetSchema.default('on_demand'),
     agentPresets: z.record(z.string(), PermissionPresetSchema).default({}),
     customMatrix: z
-      .record(
-        PermissionObjectSchema,
-        z.record(PermissionActionSchema, PermissionEffectSchema),
-      )
+      .record(PermissionObjectSchema, z.record(PermissionActionSchema, PermissionEffectSchema))
       .optional(),
     revision: z.number().int().positive().default(1),
     migratedFrom: z.string().optional(),
@@ -58,11 +50,9 @@ export const PermissionAuditRecordSchema = z
     object: PermissionObjectSchema.nullable(),
     action: PermissionActionSchema.nullable(),
     decision: PermissionEffectSchema,
-    decidedBy: z.enum(["rule", "user", "timeout", "preset", "system"]),
+    decidedBy: z.enum(['rule', 'user', 'timeout', 'preset', 'system']),
     ruleId: z.string().nullable(),
-    execution: z
-      .enum(["not_started", "succeeded", "failed"])
-      .default("not_started"),
+    execution: z.enum(['not_started', 'succeeded', 'failed']).default('not_started'),
   })
   .strict();
 

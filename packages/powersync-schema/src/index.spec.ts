@@ -54,6 +54,12 @@ describe('PowerSyncAppSchema', () => {
     expect(PowerSyncAppSchema.tables).toHaveLength(Object.keys(PowerSyncAppSchema.props).length);
   });
 
+  it('keeps permission policy data out of the PowerSync upload schema', () => {
+    for (const name of ['ai_permission_settings', 'ai_permission_rules', 'ai_permission_audit']) {
+      expect(PowerSyncAppSchema.props).not.toHaveProperty(name);
+    }
+  });
+
   it('syncs the Routine durable activation boundary with definition state', () => {
     expect(getColumnType('routine_definitions', 'identity_id')).toBe('TEXT');
     expect(getColumnType('routine_definitions', 'trigger_json')).toBe('TEXT');

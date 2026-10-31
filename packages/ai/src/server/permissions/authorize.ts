@@ -1,10 +1,11 @@
-import { randomUUID } from "node:crypto";
+import { randomUUID } from 'node:crypto';
 import type {
   PermissionAuditRecord,
   PermissionPreset,
-} from "@memoflow/ai-contracts";
-import { evaluatePermission, type PermissionRule } from "./permission-policy";
-import type { PermissionRepository } from "./permission.repository";
+  PermissionSettings,
+} from '@memoflow/ai-contracts';
+import { evaluatePermission, type PermissionRule } from './permission-policy';
+import type { PermissionRepository } from './permission.repository';
 
 export interface AuthorizeInput {
   owner: string;
@@ -13,20 +14,38 @@ export interface AuthorizeInput {
   operationId: string;
   conversationRules?: readonly PermissionRule[];
   now?: number;
-  ask?: (auditId: string) => Promise<"allow" | "deny" | "timeout">;
+  ask?: (auditId: string) => Promise<'allow' | 'deny' | 'timeout'>;
+}
+
+function isPermissionTableUnavailable(error: unknown): boolean {
+  if (!error || typeof error !== 'object') return false;
+  const value = error as { code?: unknown; message?: unknown; cause?: unknown };
+  if (value.code === 'P2021') return true;
+  const message = typeof value.message === 'string' ? value.message : '';
+  return /(?:no such table|does not exist|undefined table).*ai_permission|ai_permission.*(?:no such table|does not exist|undefined table)/iu.test(
+    message,
+  );
 }
 
 export async function authorize(
   repository: PermissionRepository,
   input: AuthorizeInput,
 ): Promise<PermissionAuditRecord> {
-  const [settings, rules] = await Promise.all([
-    repository.getSettings(input.owner),
-    repository.listRules(input.owner),
-  ]);
+  let settings: PermissionSettings | null = null;
+  let rules: PermissionRule[] = [];
+  let storageUnavailable = false;
+  try {
+    [settings, rules] = await Promise.all([
+      repository.getSettings(input.owner),
+      repository.listRules(input.owner),
+    ]);
+  } catch (error) {
+    if (!isPermissionTableUnavailable(error)) throw error;
+    storageUnavailable = true;
+  }
   const preset = (settings?.agentPresets[input.agentId] ??
     settings?.preset ??
-    "on_demand") as PermissionPreset;
+    'on_demand') as PermissionPreset;
   const result = evaluatePermission({
     agentId: input.agentId,
     operationId: input.operationId,
@@ -39,17 +58,16 @@ export async function authorize(
   });
   const auditId = randomUUID();
   let decision = result.decision;
-  let decidedBy: PermissionAuditRecord["decidedBy"] =
-    result.reason === "preset"
-      ? "preset"
-      : result.reason === "permission_settings_locked" ||
-          result.reason === "unregistered"
-        ? "system"
-        : "rule";
-  if (decision === "ask" && input.ask) {
+  let decidedBy: PermissionAuditRecord['decidedBy'] =
+    result.reason === 'preset'
+      ? 'preset'
+      : result.reason === 'permission_settings_locked' || result.reason === 'unregistered'
+        ? 'system'
+        : 'rule';
+  if (decision === 'ask' && input.ask) {
     const response = await input.ask(auditId);
-    decision = response === "allow" ? "allow" : "deny";
-    decidedBy = response === "timeout" ? "timeout" : "user";
+    decision = response === 'allow' ? 'allow' : 'deny';
+    decidedBy = response === 'timeout' ? 'timeout' : 'user';
   }
   const record = {
     id: auditId,
@@ -62,9 +80,13 @@ export async function authorize(
     decision,
     decidedBy,
     ruleId: result.ruleId ?? null,
-    execution: "not_started" as const,
+    execution: 'not_started' as const,
   } satisfies PermissionAuditRecord;
-  await repository.appendAudit(input.owner, record);
+  try {
+    await repository.appendAudit(input.owner, record);
+  } catch (error) {
+    if (!storageUnavailable && !isPermissionTableUnavailable(error)) throw error;
+  }
   return record;
 }
 
@@ -74,23 +96,30 @@ export async function executeAuthorized<T>(
   work: () => Promise<T>,
 ): Promise<T> {
   const audit = await authorize(repository, input);
-  if (audit.decision !== "allow")
-    throw new PermissionDeniedError(audit.decision, audit.id);
+  if (audit.decision !== 'allow') throw new PermissionDeniedError(audit.decision, audit.id);
   try {
     const result = await work();
-    await repository.updateAuditExecution(input.owner, audit.id, "succeeded");
+    try {
+      await repository.updateAuditExecution(input.owner, audit.id, 'succeeded');
+    } catch (error) {
+      if (!isPermissionTableUnavailable(error)) throw error;
+    }
     return result;
   } catch (error) {
-    await repository.updateAuditExecution(input.owner, audit.id, "failed");
+    try {
+      await repository.updateAuditExecution(input.owner, audit.id, 'failed');
+    } catch (auditError) {
+      if (!isPermissionTableUnavailable(auditError)) throw auditError;
+    }
     throw error;
   }
 }
 
 export class PermissionDeniedError extends Error {
   constructor(
-    readonly decision: "ask" | "deny",
+    readonly decision: 'ask' | 'deny',
     readonly auditId: string,
   ) {
-    super("Agent operation is not authorized");
+    super('Agent operation is not authorized');
   }
 }

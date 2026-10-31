@@ -7,6 +7,9 @@ import type { IElectronDatabaseTransaction } from '@memoflow/desktop-contracts';
 import type { LocalAgentRepository } from '../infrastructure/adapters/powersync/local-agent.repository';
 import type { LocalAgentToolBridgePort, LocalAgentToolGrant } from './local-agent-runtime';
 import { LocalAgentError } from '../../shared/local-agent-error';
+import type { PermissionRepository } from '../permissions/permission.repository';
+import { executeAuthorized, PermissionDeniedError } from '../permissions/authorize';
+import { migrateLegacyPermissions } from '../permissions/permission-migration';
 
 type GrantInput = Parameters<LocalAgentToolBridgePort['open']>[0];
 export interface LocalToolContext extends ExecutionContext {
@@ -20,7 +23,7 @@ export interface LocalToolContext extends ExecutionContext {
   readonly grantSignal: AbortSignal;
   readonly deadlineAt: number;
   readonly writeScopes: readonly string[];
-  requestApproval(toolName: string): Promise<void>;
+  executeAuthorized<T>(operationId: string, toolName: string, work: () => Promise<T>): Promise<T>;
   authorize(scope: string, tx?: IElectronDatabaseTransaction): Promise<void>;
   track<T>(work: () => Promise<T>): Promise<T>;
 }
@@ -33,6 +36,7 @@ interface Grant {
 }
 interface Options {
   store: LocalAgentRepository;
+  permissions: PermissionRepository;
   isActive: () => boolean;
   registerTools(server: McpServer, context: LocalToolContext): void;
   approvalTimeoutMs?: number;
@@ -46,6 +50,8 @@ export class LocalAgentToolBridge implements LocalAgentToolBridgePort {
   private stopped = false;
   private pending = 0;
   private readonly inFlight = new Set<Promise<unknown>>();
+  private readonly permissionMigrations = new Map<string, Promise<void>>();
+  private readonly startedAt = Date.now();
   constructor(private readonly options: Options) {}
   private track<T>(work: () => Promise<T>): Promise<T> {
     if (this.stopped) return Promise.reject(new LocalAgentError('LOCAL_AGENT_PERMISSION_DENIED'));
@@ -61,6 +67,31 @@ export class LocalAgentToolBridge implements LocalAgentToolBridgePort {
       !grant.controller.signal.aborted &&
       Date.now() < grant.expiresAt
     );
+  }
+  private migratePermissions(owner: string, mode?: GrantInput['permissionMode']): Promise<void> {
+    let migration = this.permissionMigrations.get(owner);
+    if (!migration) {
+      migration = (async () => {
+        const connections = await this.options.store.listConnections(owner);
+        const legacyConnections = connections.filter(
+          (connection) => connection.createdAt < this.startedAt,
+        );
+        await migrateLegacyPermissions(
+          this.options.permissions,
+          owner,
+          legacyConnections.map((connection) => ({
+            agentId: connection.id,
+            writeScopes: connection.writeScopes,
+            mode: mode === 'read-only' ? 'read-only' : mode === 'auto-approve' ? 'auto' : 'confirm',
+          })),
+        );
+      })().catch((error: unknown) => {
+        this.permissionMigrations.delete(owner);
+        throw error;
+      });
+      this.permissionMigrations.set(owner, migration);
+    }
+    return migration;
   }
   private listen(): Promise<string> {
     this.listening ??= new Promise((resolve, reject) => {
@@ -144,35 +175,52 @@ export class LocalAgentToolBridge implements LocalAgentToolBridgePort {
                 signal,
                 grantSignal: grant.controller.signal,
                 authorize,
-                requestApproval: async (toolName) => {
-                  if (grant.input.permissionMode === 'auto-approve') return;
-                  const approvalSignal = AbortSignal.any([
-                    signal,
-                    AbortSignal.timeout(this.options.approvalTimeoutMs ?? 25_000),
-                  ]);
-                  const approved = await new Promise<boolean>((resolve) => {
-                    const onAbort = () => resolve(false);
-                    approvalSignal.addEventListener('abort', onAbort, {
-                      once: true,
-                    });
-                    Promise.resolve()
-                      .then(() =>
-                        approvalSignal.aborted
-                          ? false
-                          : (grant.input.requestApproval?.(toolName, approvalSignal) ?? false),
-                      )
-                      .then(
-                        (value) => resolve(value),
-                        () => resolve(false),
-                      )
-                      .finally(() => approvalSignal.removeEventListener('abort', onAbort));
-                  });
-                  if (!approved || approvalSignal.aborted)
-                    throw Object.assign(new Error('PERMISSION_DENIED'), {
-                      code: 'PERMISSION_DENIED',
-                    });
-                  await authorize('read');
-                },
+                executeAuthorized: <T>(
+                  operationId: string,
+                  toolName: string,
+                  work: () => Promise<T>,
+                ) =>
+                  executeAuthorized(
+                    this.options.permissions,
+                    {
+                      owner: grant.input.identityId,
+                      agentId: grant.input.connectionId,
+                      conversationId: grant.input.conversationId,
+                      operationId,
+                      ask: async () => {
+                        if (!grant.input.requestApproval) return 'timeout';
+                        const timeout = AbortSignal.timeout(
+                          this.options.approvalTimeoutMs ?? 25_000,
+                        );
+                        const approvalSignal = AbortSignal.any([signal, timeout]);
+                        return new Promise<'allow' | 'deny' | 'timeout'>((resolve) => {
+                          const onAbort = () => resolve(timeout.aborted ? 'timeout' : 'deny');
+                          if (approvalSignal.aborted) {
+                            onAbort();
+                            return;
+                          }
+                          approvalSignal.addEventListener('abort', onAbort, { once: true });
+                          Promise.resolve(grant.input.requestApproval!(toolName, approvalSignal))
+                            .then((approved) =>
+                              resolve(approved && !approvalSignal.aborted ? 'allow' : 'deny'),
+                            )
+                            .catch(() => resolve('deny'))
+                            .finally(() => approvalSignal.removeEventListener('abort', onAbort));
+                        });
+                      },
+                    },
+                    async () => {
+                      if (!this.live(token, grant) || signal.aborted)
+                        throw new LocalAgentError('LOCAL_AGENT_PERMISSION_DENIED');
+                      return work();
+                    },
+                  ).catch((error: unknown) => {
+                    if (error instanceof PermissionDeniedError)
+                      throw Object.assign(new Error('PERMISSION_DENIED'), {
+                        code: 'PERMISSION_DENIED',
+                      });
+                    throw error;
+                  }),
                 track: <T>(work: () => Promise<T>) => this.track(work),
               });
               return mcp;
@@ -231,6 +279,7 @@ export class LocalAgentToolBridge implements LocalAgentToolBridgePort {
     if (this.stopped || !this.options.isActive())
       throw new LocalAgentError('LOCAL_AGENT_PERMISSION_DENIED');
     if (!connection.enabled) throw new LocalAgentError('LOCAL_AGENT_PERMISSION_DENIED');
+    await this.migratePermissions(input.identityId, input.permissionMode);
     const url = await this.listen();
     if (this.stopped || !this.options.isActive())
       throw new LocalAgentError('LOCAL_AGENT_PERMISSION_DENIED');

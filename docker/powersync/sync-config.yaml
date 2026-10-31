@@ -42,6 +42,3 @@ streams:
       - SELECT * FROM notification_preferences WHERE identity_id = auth.user_id()
       - SELECT * FROM ai_conversations WHERE identity_id = auth.user_id()
       - SELECT * FROM ai_execution_records WHERE identity_id = auth.user_id()
-      - SELECT * FROM ai_permission_settings WHERE identity_id = auth.user_id()
-      - SELECT * FROM ai_permission_rules WHERE identity_id = auth.user_id()
-      - SELECT * FROM ai_permission_audit WHERE identity_id = auth.user_id()
