@@ -168,6 +168,18 @@ export async function executeCrudBatch(
               ...(record.updatedAt ? { updatedAt: record.updatedAt } : {}),
             },
           });
+          if (opType === 'PATCH' && record.status !== undefined) {
+            if (!delegate.findFirst) throw new Error('Conversation lookup unavailable');
+            const current = await delegate.findFirst({
+              where: { id, identityId, deletedAt: null },
+              select: { updatedAt: true },
+            });
+            if (current)
+              await delegate.update({
+                where: { id, identityId, deletedAt: null },
+                data: { status: record.status, updatedAt: current.updatedAt },
+              });
+          }
           continue;
         }
 

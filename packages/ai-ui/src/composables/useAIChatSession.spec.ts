@@ -226,6 +226,56 @@ async function send(
 }
 
 describe('useAIChatSession Mastra-native open chat', () => {
+  it.each(['codex', 'antigravity'] as const)(
+    '%s titles use the local owner without another Agent run or builtin model',
+    async (driver) => {
+      const service = createServiceStub();
+      const runtime = createRuntimeStub();
+      const native = {
+        id: 'native-1',
+        runtimeKind: 'local_agent',
+        connectionId: 'native',
+        modelId: 'native-model',
+        driver,
+        name: '快速对话',
+        version: 1,
+        createdAt: 1,
+        updatedAt: 2,
+      };
+      const localAgent = {
+        createConversation: vi.fn(async () => native),
+        listConversations: vi.fn(async () => [native]),
+        renameConversation: vi.fn(async (_id, name) => ({ ...native, name, version: 2 })),
+      };
+      const session = mountComposable(service, runtime, 'desktop', createUsageRuntimeStub(), {
+        localAgent: localAgent as never,
+      });
+      session.runtimeChoice.value = {
+        runtimeKind: 'local_agent',
+        connectionId: 'native',
+        modelId: 'native-model',
+      };
+      runtime.streamMessage.mockImplementation(async (_command, handlers) => {
+        handlers.onEvent?.({
+          ...event(1, 'assistant.run.started', {}),
+          conversationId: 'native-1',
+        });
+      });
+      session.chatMessage.value = '帮我制定学习计划';
+      await session.handleSendChat(service as never, null, '快速对话', () => {});
+      await flushTitleWork();
+      expect(localAgent.renameConversation).toHaveBeenCalledExactlyOnceWith(
+        'native-1',
+        '帮我制定学习计划',
+        1,
+        true,
+      );
+      expect(service.updateConversation).not.toHaveBeenCalled();
+      expect(runtime.streamMessage).toHaveBeenCalledTimes(1);
+      expect(session.conversationTitle.value).toBe('帮我制定学习计划');
+    },
+  );
+
   it('generates once after an accepted first message and synchronizes list/header without delaying chat', async () => {
     const service = createServiceStub();
     const runtime = createRuntimeStub();
@@ -2542,6 +2592,33 @@ describe('conversation archive and undo', () => {
     );
     return { service, runtime, session };
   }
+  it('archives a batch through the same Owner and undo restores only successes once', async () => {
+    const { service, session } = setup();
+    for (const id of ['conv-2', 'conv-3'])
+      session.syncConversationSummary({ ...createConversationDTO(id), status: 'Active' } as never);
+    service.updateConversation.mockImplementation(async (id: string, patch: { status: string }) => {
+      if (id === 'conv-2') throw new Error('offline');
+      return ok({ ...createConversationDTO(id), ...patch });
+    });
+    const pending = session.archiveConversations(['conv-1', 'conv-2', 'conv-3']);
+    expect(await session.archiveConversations(['conv-1'])).toEqual([]);
+    expect(await pending).toEqual([
+      { id: 'conv-1', success: true },
+      { id: 'conv-2', success: false },
+      { id: 'conv-3', success: true },
+    ]);
+    const undo = new KeyboardEvent('keydown', { key: 'z', ctrlKey: true, cancelable: true });
+    window.dispatchEvent(undo);
+    await nextTick();
+    expect(undo.defaultPrevented).toBe(true);
+    expect(
+      service.updateConversation.mock.calls
+        .filter(([, patch]) => patch.status === 'Active')
+        .map(([id]) => id),
+    ).toEqual(['conv-1', 'conv-3']);
+    window.dispatchEvent(new KeyboardEvent('keydown', { key: 'z', ctrlKey: true }));
+    expect(service.updateConversation).toHaveBeenCalledTimes(5);
+  });
   it('archives optimistically, survives a stale snapshot, and preserves canonical history', async () => {
     const { service, runtime, session } = setup();
     let commit!: (value: unknown) => void;

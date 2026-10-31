@@ -84,7 +84,7 @@
             >
               <input
                 v-if="editingId === item.id"
-                ref="titleInput"
+                :ref="(element) => (titleInput = element as HTMLInputElement | null)"
                 v-model="titleDraft"
                 maxlength="80"
                 class="m-1 min-w-0 flex-1 rounded border bg-background px-2 py-1 text-sm"
@@ -418,13 +418,13 @@ const emit = defineEmits<{
 const { t } = useI18n();
 const editingId = ref<string | null>(null);
 const titleDraft = ref('');
-const titleInput = ref<HTMLInputElement[] | null>(null);
+const titleInput = ref<HTMLInputElement | null>(null);
 async function editTitle(item: ConversationSummary) {
   editingId.value = item.id;
   titleDraft.value = item.name;
   await nextTick();
-  titleInput.value?.[0]?.focus();
-  titleInput.value?.[0]?.select();
+  titleInput.value?.focus();
+  titleInput.value?.select();
 }
 function saveTitle() {
   if (!editingId.value || !titleDraft.value.trim()) return;

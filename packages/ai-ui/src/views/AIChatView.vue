@@ -353,7 +353,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, inject, onMounted, ref, watch } from 'vue';
+import { computed, inject, onMounted, onUnmounted, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import { Menu, Plus } from '@lucide/vue';
@@ -465,6 +465,8 @@ const {
   renameConversation,
   regenerateConversationTitle,
   titleBusy,
+  archiveConversations,
+  restoreConversations,
   restoreConversation,
   archivePage,
   archiveHasMore,
@@ -776,6 +778,20 @@ function deleteConversation(id: string): void {
     void deleteConversationBase(id);
   }
 }
+let bulkDeleteAlive = true;
+onUnmounted(() => {
+  bulkDeleteAlive = false;
+});
+async function deleteConversations(ids: string[]) {
+  if (!window.confirm(t('shell.conversation.confirmDeleteSelected', { count: ids.length })))
+    return [];
+  const results: { id: string; success: boolean }[] = [];
+  for (const id of new Set(ids)) {
+    if (!bulkDeleteAlive) break;
+    results.push({ id, success: Boolean(await deleteConversationBase(id)) });
+  }
+  return results;
+}
 function openQuickTaskWithoutAI() {
   void router.push('/tasks?dialog=quick-task');
 }
@@ -792,10 +808,13 @@ defineExpose({
   chatConversationId,
   selectConversation,
   deleteConversation,
+  deleteConversations,
   archiveConversation,
   renameConversation,
   regenerateConversationTitle,
   titleBusy,
+  archiveConversations,
+  restoreConversations,
   restoreConversation,
   archivePage,
   archiveHasMore,

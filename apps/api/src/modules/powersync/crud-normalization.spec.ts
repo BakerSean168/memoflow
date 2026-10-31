@@ -181,3 +181,34 @@ describe('conversation title upload ordering', () => {
     },
   );
 });
+
+it('preserves an archive coalesced with a title patch without carrying the stale name into the status write', async () => {
+  const updatedAt = new Date('2026-10-31T00:00:00Z');
+  const delegate = {
+    upsert: vi.fn(),
+    update: vi.fn(),
+    deleteMany: vi.fn(),
+    updateMany: vi.fn(),
+    findFirst: vi.fn(async () => ({ updatedAt })),
+  };
+  const db = {
+    $transaction: async <T>(work: (tx: { aiConversation: typeof delegate }) => Promise<T>) =>
+      work({ aiConversation: delegate }),
+  };
+  await executeCrudBatch(db, 'owner', [
+    {
+      ops: [
+        {
+          op: 'PATCH',
+          type: 'ai_conversations',
+          id: 'conversation',
+          data: { name: 'old auto', version: 2, status: 'Archived' },
+        },
+      ],
+    },
+  ]);
+  expect(delegate.update).toHaveBeenCalledWith({
+    where: { id: 'conversation', identityId: 'owner', deletedAt: null },
+    data: { status: 'Archived', updatedAt },
+  });
+});

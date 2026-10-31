@@ -152,6 +152,15 @@ describe('one keyboard runtime', () => {
     press(document.activeElement!, 'Enter');
     expect(open).toHaveBeenCalledTimes(1);
   });
+  it('keeps explicit sidebar listboxes selectable without blocking palette or editor shortcuts', () => {
+    const { wrapper } = host(
+      '<div><input /><nav v-keyboard-list="{ selectable: true }" role="listbox"><button role="option" data-keyboard-item="a">A</button></nav></div>',
+    );
+    press(wrapper.get('button').element, 'x');
+    expect(wrapper.get('button').attributes('aria-pressed')).toBe('true');
+    press(wrapper.get('input').element, 'k', { ctrlKey: true });
+    expect(_getCommandPaletteState().open).toBe(true);
+  });
   it('leaves open select listboxes in control of their typeahead keys', () => {
     const create = vi.fn();
     disposers.push(keyboard.register('conversation.new', create));

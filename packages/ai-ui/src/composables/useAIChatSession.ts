@@ -126,15 +126,16 @@ export function useAIChatSession(options: UseAIChatSessionOptions) {
   async function deleteConversationWithAttention(...args: Parameters<typeof deleteConversation>) {
     const id = args[0];
     const wasListed = conversationList.value.some((item) => item.id === id);
-    await deleteConversation(...args);
+    const success = await deleteConversation(...args);
     if (wasListed && !conversationList.value.some((item) => item.id === id)) {
       attention.clear(id);
     }
+    return success;
   }
 
   let sessionAlive = true;
   let undoArchive: {
-    id: string;
+    ids: string[];
     expiresAt: number;
     toastId: string | number;
   } | null = null;
@@ -146,7 +147,10 @@ export function useAIChatSession(options: UseAIChatSessionOptions) {
     undoArchive = null;
   }
   async function restoreConversation(id: string) {
-    if (undoArchive?.id === id) clearArchiveUndo();
+    if (undoArchive?.ids.includes(id)) {
+      undoArchive.ids = undoArchive.ids.filter((item) => item !== id);
+      if (!undoArchive.ids.length) clearArchiveUndo();
+    }
     return conversation.setConversationStatus(id, 'Active');
   }
   function undoLastArchive() {
@@ -154,9 +158,12 @@ export function useAIChatSession(options: UseAIChatSessionOptions) {
       clearArchiveUndo();
       return;
     }
-    return restoreConversation(undoArchive.id);
+    const ids = [...undoArchive.ids];
+    clearArchiveUndo();
+    return Promise.all(ids.map(restoreConversation));
   }
-  async function archiveConversation(id: string) {
+  async function archiveConversation(id: string, recordUndo = true): Promise<boolean> {
+    if (recordUndo && bulkBusy) return false;
     let state: ConversationAttentionStatus | undefined = durableAttention.statuses.value[id];
     try {
       const item = conversationList.value.find((entry) => entry.id === id);
@@ -164,12 +171,12 @@ export function useAIChatSession(options: UseAIChatSessionOptions) {
         [id],
         item?.runtimeKind === 'local_agent' ? 'local_agent' : 'builtin',
       );
-      if (!sessionAlive) return;
+      if (!sessionAlive) return false;
       state = fresh?.[0]?.state === 'normal' ? undefined : (fresh?.[0]?.state ?? state);
     } catch (error) {
-      if (!sessionAlive) return;
+      if (!sessionAlive) return false;
       toast.error(getAIErrorMessage(error, t, 'aiAssistant.dialogs.chat.archiveFailed'));
-      return;
+      return false;
     }
     if (
       state === 'working' ||
@@ -182,9 +189,9 @@ export function useAIChatSession(options: UseAIChatSessionOptions) {
           composerContextEntities.value.some((item) => item.origin === 'explicit')))
     ) {
       toast.error(t('aiAssistant.dialogs.chat.archiveBlocked'));
-      return;
+      return false;
     }
-    if (!(await conversation.setConversationStatus(id, 'Archived'))) return;
+    if (!(await conversation.setConversationStatus(id, 'Archived')) || !sessionAlive) return false;
     // The user may have typed or started a turn while persistence was in flight.
     if (
       id === chatConversationId.value &&
@@ -194,19 +201,54 @@ export function useAIChatSession(options: UseAIChatSessionOptions) {
       !composerContextEntities.value.some((item) => item.origin === 'explicit')
     )
       startNewConversation();
+    if (recordUndo) recordArchiveUndo([id]);
+    return true;
+  }
+  function recordArchiveUndo(ids: string[]) {
     clearArchiveUndo();
+    if (!sessionAlive || !ids.length) return;
     const toastId = toast.success(t('aiAssistant.dialogs.chat.archived'), {
       duration: 5000,
       position: 'bottom-center',
       action: {
         label: t('aiAssistant.dialogs.chat.undoArchive'),
         onClick: () => {
-          if (undoArchive?.id === id) void undoLastArchive();
+          if (undoArchive?.toastId === toastId) void undoLastArchive();
         },
       },
     });
-    undoArchive = { id, expiresAt: Date.now() + 5000, toastId };
+    undoArchive = { ids, expiresAt: Date.now() + 5000, toastId };
     undoArchiveTimer = setTimeout(clearArchiveUndo, 5000);
+  }
+  let bulkBusy = false;
+  async function changeConversations(action: 'archive' | 'restore', ids: string[]) {
+    if (bulkBusy) return [];
+    bulkBusy = true;
+    clearArchiveUndo();
+    const results: { id: string; success: boolean }[] = [];
+    try {
+      for (const id of new Set(ids)) {
+        if (!sessionAlive) break;
+        results.push({
+          id,
+          success:
+            action === 'archive'
+              ? await archiveConversation(id, false)
+              : await restoreConversation(id),
+        });
+      }
+      if (action === 'archive')
+        recordArchiveUndo(results.filter((item) => item.success).map((item) => item.id));
+      return results;
+    } finally {
+      bulkBusy = false;
+    }
+  }
+  function archiveConversations(ids: string[]) {
+    return changeConversations('archive', ids);
+  }
+  function restoreConversations(ids: string[]) {
+    return changeConversations('restore', ids);
   }
   function handleArchiveUndo(event: KeyboardEvent) {
     if (
@@ -365,6 +407,8 @@ export function useAIChatSession(options: UseAIChatSessionOptions) {
     renameConversation: conversation.renameConversation,
     generateConversationTitle: conversation.generateConversationTitle,
     titleBusy: conversation.titleBusy,
+    archiveConversations,
+    restoreConversations,
     restoreConversation,
     archivePage: conversation.archivePage,
     archiveHasMore: conversation.archiveHasMore,

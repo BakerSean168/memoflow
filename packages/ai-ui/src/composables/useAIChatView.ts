@@ -1186,6 +1186,8 @@ export function useAIChatView(options: UseAIChatViewOptions) {
           model:
             id === chatSession.chatConversationId.value ? modelSelection.selectedModel.value : null,
         }),
+      archiveConversations: chatSession.archiveConversations,
+      restoreConversations: chatSession.restoreConversations,
       restoreConversation: restoreArchivedConversation,
       archivePage: chatSession.archivePage,
       archiveHasMore: chatSession.archiveHasMore,
