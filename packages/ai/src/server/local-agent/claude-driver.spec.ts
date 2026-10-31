@@ -214,7 +214,7 @@ it('resumes the SDK session, injects MCP, answers native permission and streams 
   expect(initializationCalls).toEqual([undefined, 'native']);
   expect(driver.respond('stale', { type: 'permission', decision: 'approve_once' })).toBe(false);
 });
-it('gates MemoFlow MCP tool calls before SDK allow rules and requires approval for writes', async () => {
+it('allows only bridge-registered MemoFlow tools, including every Goal panel tool', async () => {
   const requests: string[] = [];
   const decisions: string[] = [];
   const factory: ClaudeQueryFactory = ({ prompt, options }) => ({
@@ -253,6 +253,20 @@ it('gates MemoFlow MCP tool calls before SDK allow rules and requires approval f
           hookSpecificOutput: { permissionDecision: 'deny' },
         });
         expect(await check('Bash')).toEqual({});
+        for (const name of [
+          'goal_panel_open',
+          'goal_panel_patch',
+          'goal_panel_add_key_result',
+          'goal_panel_remove_key_result',
+          'goal_panel_focus',
+          'goal_panel_snapshot',
+          'goal_panel_release',
+          'goal_panel_submit',
+        ]) {
+          expect(await check(`mcp__memoflow__${name}`)).toMatchObject({
+            hookSpecificOutput: { permissionDecision: 'allow' },
+          });
+        }
         const allowed = await check('mcp__memoflow__goal_create');
         decisions.push(
           (allowed.hookSpecificOutput as { permissionDecision?: string })?.permissionDecision ?? '',
@@ -270,7 +284,24 @@ it('gates MemoFlow MCP tool calls before SDK allow rules and requires approval f
   for await (const event of driver.run({
     modelId: 'sonnet',
     content: 'Hello',
-    mcp: { url: 'http://127.0.0.1/mcp', token: 'token' },
+    mcp: {
+      url: 'http://127.0.0.1/mcp',
+      token: 'token',
+      toolNames: [
+        'goal_search',
+        'task_plan_get',
+        'goal_create',
+        'goal_update',
+        'goal_panel_open',
+        'goal_panel_patch',
+        'goal_panel_add_key_result',
+        'goal_panel_remove_key_result',
+        'goal_panel_focus',
+        'goal_panel_snapshot',
+        'goal_panel_release',
+        'goal_panel_submit',
+      ],
+    },
   })) {
     if (event.type === 'request') {
       expect(event.request.type).toBe('permission');
@@ -283,10 +314,8 @@ it('gates MemoFlow MCP tool calls before SDK allow rules and requires approval f
       ).toBe(true);
     }
   }
-  expect(requests).toHaveLength(2);
-  expect(requests[0]).toContain('mcp__memoflow__goal_create');
-  expect(requests[1]).toContain('mcp__memoflow__goal_update');
-  expect(decisions).toEqual(['allow', 'deny']);
+  expect(requests).toHaveLength(0);
+  expect(decisions).toEqual(['allow', 'allow']);
 });
 
 it('retires a permission card when the native request signal expires', async () => {

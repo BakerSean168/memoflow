@@ -17,25 +17,6 @@ import { nativeFailure } from './native-failure';
 import { nativeIdentity, nativeModelVisibilityContext } from './native-identity';
 const logger = createLogger('ClaudeLocalDriver');
 
-// Each MemoFlow MCP call is classified here rather than relying on Claude's
-// allowedTools wildcard: that wildcard auto-approves tools before canUseTool.
-const memoFlowReadTools = new Set([
-  'goal_get',
-  'goal_search',
-  'task_plan_get',
-  'task_plan_search',
-  'task_occurrence_get',
-  'task_occurrence_list',
-  'knowledge_get',
-  'knowledge_search',
-]);
-const memoFlowWriteTools = new Set([
-  'goal_create',
-  'goal_update',
-  'task_plan_create',
-  'task_plan_update',
-  'task_occurrence_complete',
-]);
 const memoFlowToolPrefix = 'mcp__memoflow__';
 
 interface ClaudeQuery extends AsyncIterable<unknown> {
@@ -169,47 +150,22 @@ export class ClaudeDriver {
               PreToolUse: [
                 {
                   hooks: [
-                    async (event, _toolUseId, { signal: permissionSignal }) => {
+                    async (event) => {
                       if (
                         event.hook_event_name !== 'PreToolUse' ||
                         !event.tool_name.startsWith(memoFlowToolPrefix)
                       )
                         return {};
                       const name = event.tool_name.slice(memoFlowToolPrefix.length);
-                      if (memoFlowReadTools.has(name))
-                        return {
-                          hookSpecificOutput: {
-                            hookEventName: 'PreToolUse',
-                            permissionDecision: 'allow',
-                          },
-                        };
-                      if (!memoFlowWriteTools.has(name))
-                        return {
-                          hookSpecificOutput: {
-                            hookEventName: 'PreToolUse',
-                            permissionDecision: 'deny',
-                            permissionDecisionReason: 'Unrecognized MemoFlow tool',
-                          },
-                        };
-                      const args =
-                        event.tool_input &&
-                        typeof event.tool_input === 'object' &&
-                        !Array.isArray(event.tool_input)
-                          ? (event.tool_input as Record<string, unknown>)
-                          : {};
-                      const decision = await this.permission(
-                        event.tool_name,
-                        args,
-                        permissionSignal,
-                      );
+                      // Names come from the authenticated bridge's actual tools/list registry.
+                      // Business writes are approved by the bridge, not twice by the Provider.
                       return {
                         hookSpecificOutput: {
                           hookEventName: 'PreToolUse',
-                          permissionDecision: decision.behavior === 'allow' ? 'allow' : 'deny',
-                          permissionDecisionReason:
-                            decision.behavior === 'allow'
-                              ? 'MemoFlow approved this operation'
-                              : 'MemoFlow did not approve this operation',
+                          permissionDecision: input.mcp?.toolNames?.includes(name)
+                            ? 'allow'
+                            : 'deny',
+                          permissionDecisionReason: 'MemoFlow bridge authorizes registered tools',
                         },
                       };
                     },

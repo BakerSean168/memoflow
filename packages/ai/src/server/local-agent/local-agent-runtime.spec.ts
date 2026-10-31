@@ -1218,3 +1218,61 @@ describe('Goal clarification before native tools', () => {
     },
   );
 });
+
+it.each(['approve_once', 'decline'] as const)(
+  'routes MemoFlow business approval through the existing session card: %s',
+  async (decision) => {
+    const { store, conversation } = await setup();
+    let requestApproval!: (name: string, signal: AbortSignal) => Promise<boolean>;
+    let approved: boolean | undefined;
+    const nativeRespond = vi.fn(() => false);
+    const runtime = new LocalAgentRuntime({
+      store,
+      cwd: '/tmp',
+      bridge: {
+        async open(input) {
+          expect(input.permissionMode).toBe('supervised');
+          requestApproval = input.requestApproval!;
+          return { url: 'test:bridge', token: 'test', revoke() {} };
+        },
+        async dispose() {},
+      },
+      createDriver: () => ({
+        async *run() {
+          approved = await requestApproval('goal_panel_submit', new AbortController().signal);
+          yield { type: 'completed' as const };
+        },
+        respond: nativeRespond,
+        cancel() {},
+        async close() {},
+        async probe() {
+          return { status: 'ready' as const, models: [] };
+        },
+      }),
+    });
+    let cards = 0;
+    for await (const event of runtime.dispatchMessage({
+      identityId: 'owner',
+      conversationId: conversation.id,
+      content: 'Proceed',
+    })) {
+      if (event.type === 'assistant.request.required') {
+        cards++;
+        expect(approved).toBeUndefined();
+        expect(event.data).toMatchObject({ type: 'permission', scope: 'goal_panel_submit' });
+        const response = {
+          conversationId: conversation.id,
+          runId: event.runId,
+          requestId: event.data.requestId,
+          response: { type: 'permission' as const, decision },
+        };
+        expect(runtime.respond('other-owner', response)).toBe(false);
+        expect(runtime.respond('owner', response)).toBe(true);
+        expect(runtime.respond('owner', response)).toBe(false);
+      }
+    }
+    expect(cards).toBe(1);
+    expect(approved).toBe(decision === 'approve_once');
+    await runtime.dispose();
+  },
+);

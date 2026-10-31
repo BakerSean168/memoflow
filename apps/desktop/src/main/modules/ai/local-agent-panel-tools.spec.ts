@@ -75,6 +75,7 @@ describe('Desktop Local Agent Goal Panel Tools', () => {
     try {
       const connection = await store.createConnection(identityId, config);
       const grant = await bridge.open({
+        permissionMode: 'auto-approve',
         identityId,
         connectionId: connection.id,
         conversationId: 'conv-test',
@@ -160,6 +161,7 @@ describe('Desktop Local Agent Goal Panel Tools', () => {
         writeScopes: ['goals:write'],
       });
       const grant = await bridge.open({
+        permissionMode: 'auto-approve',
         identityId,
         connectionId: connection.id,
         conversationId: 'conv-route',
@@ -207,3 +209,94 @@ describe('Desktop Local Agent Goal Panel Tools', () => {
     }
   });
 });
+
+it.each(['approve', 'decline', 'abort', 'auto-approve'] as const)(
+  'gates Codex panel persistence with the session decision: %s',
+  async (decision) => {
+    const f = createPowerSyncSqliteFixture();
+    const store = new LocalAgentRepository(f.db);
+    const executeCommand = vi.fn<IDesktopNativePanelBridge['executeCommand']>(async () => ({
+      requestId: 'panel',
+      ok: true,
+    }));
+    const bridge = createDesktopLocalAgentTools(
+      f.db,
+      store,
+      () => true,
+      { getUserTimeContext: async () => createTimeContext({ timeZone: 'UTC', weekStartsOn: 1 }) },
+      undefined,
+      { executeCommand, releaseAllForRun: vi.fn() },
+    );
+    let answer!: (approved: boolean) => void;
+    let entered!: () => void;
+    const requested = new Promise<void>((resolve) => {
+      entered = resolve;
+    });
+    const requestApproval = vi.fn((_name: string, signal: AbortSignal) => {
+      entered();
+      return new Promise<boolean>((resolve) => {
+        answer = resolve;
+        signal.addEventListener('abort', () => resolve(false), { once: true });
+      });
+    });
+    try {
+      const connection = await store.createConnection('owner', {
+        driver: 'codex',
+        name: 'Codex',
+        executablePath: 'codex',
+        enabled: true,
+        writeScopes: ['goals:write'],
+      });
+      const grant = await bridge.open({
+        identityId: 'owner',
+        connectionId: connection.id,
+        conversationId: 'chat',
+        runId: 'run',
+        goalIntent: 'Create a goal to learn French',
+        permissionMode: decision === 'auto-approve' ? 'auto-approve' : 'supervised',
+        requestApproval,
+      });
+      const call = (name: string) =>
+        fetch(grant.url, {
+          method: 'POST',
+          headers: {
+            authorization: `Bearer ${grant.token}`,
+            accept: 'application/json, text/event-stream',
+            'content-type': 'application/json',
+          },
+          body: JSON.stringify({
+            jsonrpc: '2.0',
+            id: 1,
+            method: 'tools/call',
+            params: { name, arguments: {} },
+          }),
+        })
+          .then((res) => res.text())
+          .catch(() => 'transport closed');
+      await call('goal_panel_open');
+      expect(requestApproval).not.toHaveBeenCalled();
+      executeCommand.mockClear();
+      const saving = call('goal_panel_submit');
+      if (decision !== 'auto-approve') {
+        await requested;
+        expect(requestApproval).toHaveBeenCalledWith('goal_panel_submit', expect.any(AbortSignal));
+        expect(executeCommand).not.toHaveBeenCalled();
+        if (decision === 'abort') grant.revoke();
+        else answer(decision === 'approve');
+      }
+      const result = await saving;
+      if (decision === 'approve' || decision === 'auto-approve') {
+        expect(result).not.toContain('PERMISSION_DENIED');
+        expect(executeCommand).toHaveBeenCalledOnce();
+        expect(executeCommand.mock.calls[0]?.[1]).toMatchObject({ action: 'submit' });
+      } else {
+        expect(executeCommand).not.toHaveBeenCalled();
+        if (decision === 'decline') expect(result).toContain('PERMISSION_DENIED');
+      }
+      if (decision === 'auto-approve') expect(requestApproval).not.toHaveBeenCalled();
+    } finally {
+      await bridge.dispose();
+      f.close();
+    }
+  },
+);

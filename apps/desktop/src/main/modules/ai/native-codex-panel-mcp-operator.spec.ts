@@ -83,6 +83,7 @@ describe('Windows native Codex -> actual MemoFlow panel MCP grant (#570)', () =>
           writeScopes: ['goals:write'],
         });
         const grant = await bridge.open({
+          permissionMode: 'auto-approve',
           identityId,
           connectionId: connection.id,
           conversationId: 'operator-qa-570',

@@ -20,6 +20,7 @@ export interface LocalToolContext extends ExecutionContext {
   readonly grantSignal: AbortSignal;
   readonly deadlineAt: number;
   readonly writeScopes: readonly string[];
+  requestApproval(toolName: string): Promise<void>;
   authorize(scope: string, tx?: IElectronDatabaseTransaction): Promise<void>;
   track<T>(work: () => Promise<T>): Promise<T>;
 }
@@ -34,6 +35,7 @@ interface Options {
   store: LocalAgentRepository;
   isActive: () => boolean;
   registerTools(server: McpServer, context: LocalToolContext): void;
+  approvalTimeoutMs?: number;
   onRevokeGrant?(input: GrantInput): void;
 }
 /** A loopback transport for native session tools, owned by the existing Profile lifecycle. */
@@ -142,6 +144,35 @@ export class LocalAgentToolBridge implements LocalAgentToolBridgePort {
                 signal,
                 grantSignal: grant.controller.signal,
                 authorize,
+                requestApproval: async (toolName) => {
+                  if (grant.input.permissionMode === 'auto-approve') return;
+                  const approvalSignal = AbortSignal.any([
+                    signal,
+                    AbortSignal.timeout(this.options.approvalTimeoutMs ?? 25_000),
+                  ]);
+                  const approved = await new Promise<boolean>((resolve) => {
+                    const onAbort = () => resolve(false);
+                    approvalSignal.addEventListener('abort', onAbort, {
+                      once: true,
+                    });
+                    Promise.resolve()
+                      .then(() =>
+                        approvalSignal.aborted
+                          ? false
+                          : (grant.input.requestApproval?.(toolName, approvalSignal) ?? false),
+                      )
+                      .then(
+                        (value) => resolve(value),
+                        () => resolve(false),
+                      )
+                      .finally(() => approvalSignal.removeEventListener('abort', onAbort));
+                  });
+                  if (!approved || approvalSignal.aborted)
+                    throw Object.assign(new Error('PERMISSION_DENIED'), {
+                      code: 'PERMISSION_DENIED',
+                    });
+                  await authorize('read');
+                },
                 track: <T>(work: () => Promise<T>) => this.track(work),
               });
               return mcp;
