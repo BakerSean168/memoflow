@@ -424,10 +424,9 @@ export function useConversationProjection(input: {
     // message before pausing, so a reload does not strand the pending answer.
     // Pending approvals are a separate runtime projection. A transient failure
     // must not discard successfully loaded canonical conversation history.
-    const pendingAskUser =
-      kind === 'local_agent'
-        ? []
-        : await options.runtime.listAskUserSuspensions(conversationId).catch(() => null);
+    const pendingAskUser = await options.runtime
+      .listAskUserSuspensions(conversationId, kind)
+      .catch(() => null);
     if (
       generation !== historyGeneration ||
       runtimeChoice.value.runtimeKind !== kind ||

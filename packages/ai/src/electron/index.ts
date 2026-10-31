@@ -692,10 +692,16 @@ export function createAIElectronModule(options: AIElectronModuleOptions): AIElec
               return fail({ code: 'VALIDATION_ERROR', message: 'Invalid ask-user response' });
             return ok(
               AssistantRuntimeToolAnswerResultSchema.parse({
-                accepted: await aiModule.mastraRuntime.answerToolSuspension({
-                  context: requestContext,
-                  command: parsed.data,
-                }),
+                accepted:
+                  parsed.data.runtimeKind === 'local_agent'
+                    ? ((await aiModule.localAgentRuntime?.answerToolSuspension({
+                        identityId: requestContext.identityId,
+                        command: parsed.data,
+                      })) ?? false)
+                    : await aiModule.mastraRuntime.answerToolSuspension({
+                        context: requestContext,
+                        command: parsed.data,
+                      }),
               }),
             );
           }),
@@ -709,10 +715,15 @@ export function createAIElectronModule(options: AIElectronModuleOptions): AIElec
             if (!parsed.success)
               return fail({ code: 'VALIDATION_ERROR', message: 'Invalid conversation reference' });
             return ok(
-              await aiModule.mastraRuntime.listAskUserSuspensions({
-                identityId: requestContext.identityId,
-                conversationId: parsed.data.conversationId,
-              }),
+              parsed.data.runtimeKind === 'local_agent'
+                ? ((await aiModule.localAgentRuntime?.listAskUserSuspensions({
+                    identityId: requestContext.identityId,
+                    conversationId: parsed.data.conversationId,
+                  })) ?? [])
+                : await aiModule.mastraRuntime.listAskUserSuspensions({
+                    identityId: requestContext.identityId,
+                    conversationId: parsed.data.conversationId,
+                  }),
             );
           }),
         );

@@ -19,6 +19,9 @@ import type {
 } from '@memoflow/ai-contracts';
 import {
   LocalAgentConversationSchema,
+  inspectGoalIntent,
+  resolveGoalIntent,
+  type AssistantRuntimeToolAnswerCommand,
   LocalAgentStatusSchema,
   LocalAgentActivitySchema,
   LOCAL_AGENT_DEFAULT_EXECUTABLES,
@@ -46,6 +49,7 @@ export interface LocalAgentToolBridgePort {
     connectionId: string;
     conversationId: string;
     runId: string;
+    goalIntent?: string;
   }): Promise<LocalAgentToolGrant>;
   dispose(): Promise<void>;
 }
@@ -548,6 +552,7 @@ export class LocalAgentRuntime {
 
   async *dispatchMessage(input: MessageInput): AsyncGenerator<AssistantRuntimeEvent> {
     this.assertActive();
+    if ((await this.listAskUserSuspensions(input)).length) throw new LocalAgentError('CONFLICT');
     if (input.permissionMode && !['supervised', 'auto-approve'].includes(input.permissionMode))
       throw new LocalAgentError('LOCAL_AGENT_PERMISSION_DENIED');
     if (input.attachments?.length) throw new LocalAgentError('LOCAL_AGENT_UNSUPPORTED_INPUT');
@@ -649,11 +654,43 @@ export class LocalAgentRuntime {
       };
       await this.persist(() => this.options.store.saveMessage(input.identityId, assistant!, false));
       this.assertActive();
+      const question = inspectGoalIntent(input.content);
+      if (question) {
+        assistant.goalClarification = {
+          draftId: assistant.id,
+          runId: run.runId,
+          connectionId: connection.id,
+          source: input.content,
+          question,
+          status: 'pending',
+        };
+        await this.persist(() =>
+          this.options.store.saveMessage(input.identityId, assistant!, true),
+        );
+        yield {
+          ...envelope(),
+          type: 'assistant.run.started',
+          data: { modelId, providerId: connection.id },
+        };
+        yield {
+          ...envelope(),
+          type: 'assistant.ask_user.required',
+          data: {
+            toolCallId: assistant.id,
+            question: question.question,
+            ...(question.options.length
+              ? { options: question.options, selectionMode: 'single_select' as const }
+              : {}),
+          },
+        };
+        return;
+      }
       run.grant = await this.options.bridge?.open({
         identityId: input.identityId,
         connectionId: connection.id,
         conversationId: conversation.id,
         runId: run.runId,
+        goalIntent: input.content,
       });
       started = true;
       yield {
@@ -903,6 +940,73 @@ export class LocalAgentRuntime {
       }
     }
   }
+  async listAskUserSuspensions(input: ConversationInput) {
+    const history = await this.listMessages(input);
+    return history.messages.flatMap((message) => {
+      const pending = message.goalClarification;
+      if (!pending || pending.status !== 'pending') return [];
+      return [
+        {
+          runId: pending.runId,
+          toolCallId: pending.draftId,
+          question: pending.question.question,
+          ...(pending.question.options.length
+            ? { options: pending.question.options, selectionMode: 'single_select' as const }
+            : {}),
+        },
+      ];
+    });
+  }
+
+  /** Product-controlled fallback uses the existing ask-user response contract, never native permission approval. */
+  async answerToolSuspension(input: {
+    identityId: string;
+    command: AssistantRuntimeToolAnswerCommand;
+  }): Promise<boolean> {
+    this.assertActive();
+    const command = input.command;
+    const history = await this.listMessages({
+      identityId: input.identityId,
+      conversationId: command.conversationId,
+    });
+    const message = history.messages.find((item) => item.id === command.toolCallId);
+    const pending = message?.goalClarification;
+    if (!pending || pending.runId !== command.runId || pending.status !== 'pending') return false;
+    const { connection } = await this.persist(() =>
+      this.options.store.resolveConversation(input.identityId, command.conversationId),
+    );
+    if (connection.id !== pending.connectionId) return false;
+    const answer = typeof command.answer === 'string' ? command.answer.trim() : '';
+    const resolution =
+      command.action === 'cancel' ? null : resolveGoalIntent(pending.question, answer);
+    if (command.action !== 'cancel' && !resolution && answer !== '我还不确定') return false;
+    const claimed = await this.persist(() =>
+      this.options.store.settleGoalClarification(
+        input.identityId,
+        command.conversationId,
+        command.toolCallId,
+        command.runId,
+        resolution,
+      ),
+    );
+    if (!claimed) return false;
+    if (resolution) {
+      // The trusted stored source and validated answer determine the continuation.
+      // Await its persistence so the existing history refresh observes the result.
+      for await (const _event of this.dispatchMessage({
+        identityId: input.identityId,
+        conversationId: command.conversationId,
+        content:
+          pending.question.field === 'exam_year_meaning'
+            ? `${pending.source}\n用户已澄清：${resolution}。Goal target 使用初试年份的 year 精度；保留入学年份，不猜测考试日。`
+            : `${pending.source.replace(/(?:截止|最晚|不晚于|deadline)\s*20\d{2}[-/]\d{1,2}[-/]\d{1,2}/gi, '')}\n用户已澄清：${resolution}`,
+      })) {
+        /* dispatchMessage persists every accepted result in the same Profile. */
+      }
+    }
+    return true;
+  }
+
   respond(identityId: string, input: LocalAgentRequestResponse): boolean {
     this.assertActive();
     const run = this.runs.get(input.runId);

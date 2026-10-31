@@ -69,6 +69,7 @@ export interface AssistantRuntimeClient {
   answerToolSuspension(command: AssistantRuntimeToolAnswerCommand): Promise<boolean>;
   listAskUserSuspensions(
     conversationId: string,
+    runtimeKind?: AssistantRuntimeKind,
   ): Promise<readonly import('@memoflow/ai-contracts').AssistantRuntimeAskUserSuspension[]>;
   decideToolApproval(command: AssistantRuntimeApprovalCommand): Promise<boolean>;
 }
@@ -311,9 +312,10 @@ export class AssistantRuntimeHttpClient implements AssistantRuntimeClient {
 export class AssistantRuntimeIpcClient implements AssistantRuntimeClient {
   constructor(private readonly ipcClient: IResultIpcClient) {}
 
-  async listAskUserSuspensions(conversationId: string) {
+  async listAskUserSuspensions(conversationId: string, runtimeKind?: AssistantRuntimeKind) {
     const request = AssistantRuntimeHistoryClientRequestSchema.parse({
       conversationId,
+      ...(runtimeKind ? { runtimeKind } : {}),
     });
     const result = await this.ipcClient.invoke<unknown>(
       AIChannels.RUNTIME_ASSISTANT_ASK_USER_PENDING,

@@ -1,3 +1,4 @@
+import { GoalIntentClarificationSchema } from './goal-intent-clarification';
 import { z } from 'zod';
 import {
   AssistantRuntimeKindSchema,
@@ -150,6 +151,7 @@ export type AssistantRuntimeToolAnswerResult = z.infer<
 export const AssistantRuntimeToolAnswerCommandSchema = z
   .object({
     type: z.literal('tool_answer'),
+    runtimeKind: AssistantRuntimeKindSchema.optional(),
     action: z.enum(['answer', 'cancel']).default('answer'),
     conversationId: z.string().min(1).max(512),
     runId: z.string().min(1).max(512),
@@ -296,6 +298,7 @@ export const AssistantRuntimeMessageViewSchema = z
     runOutcome: AssistantRunOutcomeSchema.optional(),
     toolActivities: z.array(AssistantToolActivityViewSchema).max(256).optional(),
     nativeActivities: z.array(LocalAgentActivitySchema).max(256).optional(),
+    goalClarification: GoalIntentClarificationSchema.optional(),
     localAgentSource: z
       .object({
         connectionId: z.string().min(1).max(512),

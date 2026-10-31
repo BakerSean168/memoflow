@@ -224,6 +224,9 @@ export function useAssistantStream(input: {
     try {
       const accepted = await options.runtime.answerToolSuspension({
         type: 'tool_answer',
+        ...(runtimeChoice.value.runtimeKind === 'local_agent'
+          ? { runtimeKind: 'local_agent' as const }
+          : {}),
         action: 'answer',
         conversationId: request.conversationId,
         runId: request.runId,
@@ -254,6 +257,9 @@ export function useAssistantStream(input: {
     try {
       const accepted = await options.runtime.answerToolSuspension({
         type: 'tool_answer',
+        ...(runtimeChoice.value.runtimeKind === 'local_agent'
+          ? { runtimeKind: 'local_agent' as const }
+          : {}),
         action: 'cancel',
         conversationId: request.conversationId,
         runId: request.runId,
@@ -358,7 +364,10 @@ export function useAssistantStream(input: {
     if (event.type === 'assistant.run.started' && event.runId && chatConversationId.value) {
       void (async () => {
         try {
-          const pending = await options.runtime.listAskUserSuspensions(chatConversationId.value);
+          const pending = await options.runtime.listAskUserSuspensions(
+            chatConversationId.value,
+            runtimeChoice.value.runtimeKind,
+          );
           for (const suspended of pending) {
             if (suspended.runId !== event.runId || suspended.approval) continue;
             item.askUserRequests ??= [];

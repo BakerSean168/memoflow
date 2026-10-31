@@ -36,6 +36,7 @@ import type { Result } from '@memoflow/transport-contracts/result';
 import type { IElectronDatabase, IElectronDatabaseTransaction } from '@memoflow/desktop-contracts';
 import {
   GoalPanelSnapshotSchema,
+  assertGoalIntentCanCommit,
   GoalPanelPatchCommandSchema,
   GoalPanelAddKeyResultCommandSchema,
   GoalPanelRemoveKeyResultCommandSchema,
@@ -197,7 +198,10 @@ export function createDesktopLocalAgentTools(
                 ? 'FORBIDDEN'
                 : error instanceof z.ZodError
                   ? 'VALIDATION_ERROR'
-                  : 'INTERNAL_ERROR';
+                  : error instanceof Error &&
+                      /^GOAL_(?:CLARIFICATION_REQUIRED|DISCUSSION_ONLY)$/.test(error.message)
+                    ? error.message
+                    : 'INTERNAL_ERROR';
           return { isError: true, content: [{ type: 'text' as const, text: code }] };
         }
       }
@@ -261,7 +265,12 @@ export function createDesktopLocalAgentTools(
               openWorldHint: false,
             },
           },
-          (input) => write(() => goalWrites.create(input, context, authority)),
+          (input) =>
+            write(() => {
+              // The run's user message cannot change mid-run, so one check before the owner write is enough.
+              assertGoalIntentCanCommit(context.goalIntent ?? JSON.stringify(input.goal));
+              return goalWrites.create(input, context, authority);
+            }),
         );
         server.registerTool(
           'goal_update',
@@ -282,6 +291,7 @@ export function createDesktopLocalAgentTools(
       if (panelBridge) {
         async function runPanelAction(command: GoalPanelCommand) {
           try {
+            if (command.action === 'submit') assertGoalIntentCanCommit(context.goalIntent ?? '');
             const scope = command.action === 'snapshot' ? 'read' : 'goals:write';
             await context.authorize(scope);
             const response = await context.track(() =>

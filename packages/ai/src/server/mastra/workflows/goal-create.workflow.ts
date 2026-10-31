@@ -5,6 +5,10 @@ import { createStep, createWorkflow } from '@mastra/core/workflows';
 import { z } from 'zod';
 import {
   AIWorkflowResumeCommandSchema,
+  GoalIntentQuestionSchema,
+  inspectGoalIntent,
+  resolveGoalIntent,
+  isGoalDiscussionOnly,
   AIWorkflowSuspensionSchema,
   GoalClarificationStateSchema,
   GoalCreateWorkflowInputSchema,
@@ -37,6 +41,8 @@ const MAX_CLARIFICATION_ROUNDS = 3;
 
 export const GoalCreateWorkflowStateSchema = z
   .object({
+    criticalQuestion: GoalIntentQuestionSchema.optional(),
+    criticalResolution: z.string().optional(),
     phase: z.enum(['planning', 'clarification', 'review', 'recovery', 'completed', 'cancelled']),
     input: GoalCreateWorkflowInputSchema,
     clarification: GoalClarificationStateSchema,
@@ -182,6 +188,26 @@ export function createGoalCreateWorkflow(input: {
       };
 
       const suspendReview = async (draft: GoalPlanDraft) => {
+        if (current.criticalQuestion && !current.criticalResolution)
+          throw new Error('GOAL_CLARIFICATION_REQUIRED');
+        if (current.criticalResolution) {
+          const year = Number(current.criticalResolution.match(/^(20\d{2}) 年参加初试/)?.[1]);
+          const date = current.criticalResolution.match(/目标截止日期：(20\d{2}-\d{2}-\d{2})/)?.[1];
+          draft = GoalPlanDraftSchema.parse({
+            ...draft,
+            goal: {
+              ...draft.goal,
+              ...(year
+                ? { target: { kind: 'year', year } }
+                : date
+                  ? { target: { kind: 'day', date } }
+                  : {}),
+              description: [draft.goal.description, current.criticalResolution]
+                .filter(Boolean)
+                .join('\n'),
+            },
+          });
+        }
         await persist({
           ...current,
           phase: 'review',
@@ -321,7 +347,12 @@ export function createGoalCreateWorkflow(input: {
         try {
           const decision = await input.planner.plan(
             {
-              input: current.input,
+              input: current.criticalResolution
+                ? {
+                    ...current.input,
+                    idea: `${current.input.idea}\n用户已澄清：${current.criticalResolution}`,
+                  }
+                : current.input,
               clarification: current.clarification,
               mode: options.mode,
               currentDraft: current.draft,
@@ -386,6 +417,29 @@ export function createGoalCreateWorkflow(input: {
         if (current.phase !== 'planning') {
           throw new Error(`goal.create cannot start lifecycle from phase ${current.phase}`);
         }
+        if (isGoalDiscussionOnly(current.input.idea)) {
+          await persist({ ...current, phase: 'cancelled' });
+          return GoalCreateWorkflowOutputSchema.parse({ outcome: 'cancelled' });
+        }
+        const criticalQuestion = inspectGoalIntent(current.input.idea);
+        if (criticalQuestion) {
+          await persist({
+            ...current,
+            phase: 'clarification',
+            criticalQuestion,
+            pendingQuestions: [criticalQuestion.question],
+          });
+          return await suspend({
+            type: 'clarification_required' as const,
+            questions: [
+              criticalQuestion.question +
+                (criticalQuestion.options.length
+                  ? '\n' + criticalQuestion.options.map(({ label }) => label).join('\n')
+                  : ''),
+            ],
+            round: 1,
+          });
+        }
         return planAndSuspend({
           mode: current.planningMode,
           targetRevision: current.targetRevision,
@@ -427,6 +481,21 @@ export function createGoalCreateWorkflow(input: {
           );
         }
         const response = resumeData.answers.join('\n').trim();
+        if (current.criticalQuestion && !current.criticalResolution) {
+          const resolution = resolveGoalIntent(current.criticalQuestion, response);
+          if (!resolution) {
+            return await suspend({
+              type: 'clarification_required' as const,
+              questions: [
+                current.criticalQuestion.question +
+                  '\n' +
+                  current.criticalQuestion.options.map(({ label }) => label).join('\n'),
+              ],
+              round: current.clarification.rounds.length + 1,
+            });
+          }
+          await persist({ ...current, criticalResolution: resolution });
+        }
         const nextClarification = GoalClarificationStateSchema.parse({
           rounds: [
             ...current.clarification.rounds,

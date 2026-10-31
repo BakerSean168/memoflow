@@ -13,6 +13,8 @@ export interface LocalToolContext extends ExecutionContext {
   readonly connectionId: string;
   readonly conversationId: string;
   readonly runId: string;
+  /** The user message that opened this run; Goal commits re-check it for unresolved ambiguity. */
+  readonly goalIntent?: string;
   readonly signal: AbortSignal;
   /** Stable for the grant; request signal above is recreated for every HTTP call. */
   readonly grantSignal: AbortSignal;
