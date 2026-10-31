@@ -65,6 +65,11 @@ export default {
     clearSelection: 'Clear selection',
     archiveSelected: 'Archive selected',
     restoreSelected: 'Restore selected',
+    confirmDeleteSelected:
+      'Permanently delete {count} conversations and their messages? This cannot be undone.',
+    operationSucceeded: 'Succeeded',
+    operationFailed: 'Failed — retry available',
+    delete: 'Delete',
     deleteSelected: 'Delete selected',
 
     today: 'Today',

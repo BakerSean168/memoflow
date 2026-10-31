@@ -65,6 +65,10 @@ export default {
     clearSelection: '清除选择',
     archiveSelected: '归档所选',
     restoreSelected: '恢复所选',
+    confirmDeleteSelected: '永久删除 {count} 个会话及其消息？此操作无法撤销。',
+    operationSucceeded: '成功',
+    operationFailed: '失败，可重试',
+    delete: '删除',
     deleteSelected: '删除所选',
 
     today: '今天',

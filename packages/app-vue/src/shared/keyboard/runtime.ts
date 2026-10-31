@@ -158,7 +158,10 @@ export const keyboard = (() => {
         '[role="dialog"], [role="alertdialog"], [role="menu"], [role="listbox"], [data-keyboard-modal]',
       ),
     ].filter(
-      (node) => !node.hasAttribute('data-capsule-preview-content') && isKeyboardVisible(node),
+      (node) =>
+        !node.hasAttribute('data-capsule-preview-content') &&
+        !node.matches('[role="listbox"][data-keyboard-list]') &&
+        isKeyboardVisible(node),
     );
     const topModal = modals[modals.length - 1];
     const modalList = topModal?.contains(target) ? listAdapterFor(target) : null;
