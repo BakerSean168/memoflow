@@ -177,6 +177,10 @@ vi.mock('../platform/electron-bridge', () => ({
   requireElectronBridge: mocks.requireElectronBridge,
 }));
 
+vi.mock('../platform/tray-navigation', () => ({
+  registerTrayNavigation: vi.fn(() => () => undefined),
+}));
+
 vi.mock('./route-entry', () => ({
   shouldRedirectAuthenticatedDesktopEntry: mocks.shouldRedirectAuthenticatedDesktopEntry,
 }));

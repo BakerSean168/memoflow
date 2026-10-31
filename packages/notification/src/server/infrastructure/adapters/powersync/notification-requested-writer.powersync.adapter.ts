@@ -22,12 +22,12 @@ import {
   type NotificationRequestedWriterPort,
   NOTIFICATION_REQUESTED_MESSAGE_TYPE,
 } from '@memoflow/notification-contracts';
-import type { BusinessOperationReceipt } from '@memoflow/reliable-messaging-contracts';
-import { mapPrismaSharedOutboxToReceipt } from '../prisma/notification-requested-writer.prisma.adapter';
 import {
-  mapPowerSyncSharedOutboxToOutboxMessage,
-  type PowerSyncSharedOutboxRow,
-} from './power-sync-notification-reliable.adapter';
+  assertValidBusinessOperationReceipt,
+  parseIdempotencyKeyString,
+  type BusinessOperationReceipt,
+} from '@memoflow/reliable-messaging-contracts';
+import { type PowerSyncSharedOutboxRow } from './power-sync-notification-reliable.adapter';
 
 export class NotificationRequestedPowerSyncWriterAdapter implements NotificationRequestedWriterPort {
   private tableInitialized = false;
@@ -93,7 +93,48 @@ export class NotificationRequestedPowerSyncWriterAdapter implements Notification
   }
 
   private mapToReceipt(row: PowerSyncSharedOutboxRow): BusinessOperationReceipt {
-    return mapPrismaSharedOutboxToReceipt(mapPowerSyncSharedOutboxToOutboxMessage(row));
+    // SQLite's worker stores W0 statuses directly (succeeded/running/retryable),
+    // unlike Prisma's legacy dispatched/failed/dead shared-outbox vocabulary.
+    const key = parseIdempotencyKeyString(row.idempotency_key ?? '');
+    const status = row.status;
+    const terminal = ['succeeded', 'skipped', 'failed', 'cancelled'].includes(status);
+    return assertValidBusinessOperationReceipt({
+      schemaVersion: 1,
+      operationId: row.id,
+      identityId: row.identity_id ?? key?.identityId,
+      source: key?.source ?? 'notification',
+      occurrenceKey: key?.occurrenceKey ?? row.id,
+      idempotencyKey: row.idempotency_key,
+      status,
+      attempt: Number(row.attempts ?? 0),
+      lease:
+        status === 'running' && row.owner_token && row.claim_id && row.lease_expires_at
+          ? {
+              schemaVersion: 1,
+              resourceKey: `${key?.source ?? 'notification'}:${row.identity_id}:${key?.occurrenceKey ?? row.id}`,
+              ownerToken: row.owner_token,
+              claimId: row.claim_id,
+              fencingToken: Number(row.fencing_token ?? 0),
+              expiresAt: new Date(row.lease_expires_at).toISOString(),
+              lastHeartbeatAt: row.last_heartbeat_at
+                ? new Date(row.last_heartbeat_at).toISOString()
+                : null,
+              heartbeatIntervalMs: null,
+            }
+          : null,
+      lastError: ['succeeded', 'skipped'].includes(status) ? null : (row.last_error ?? null),
+      nextRetryAt:
+        status === 'retryable' && row.next_retry_at
+          ? new Date(row.next_retry_at).toISOString()
+          : null,
+      deadLetterAt: status === 'dead_letter' ? new Date(row.updated_at).toISOString() : null,
+      correlationId: row.correlation_id ?? null,
+      causationId: row.causation_id ?? null,
+      attemptsHistory: [],
+      createdAt: new Date(row.created_at).toISOString(),
+      updatedAt: new Date(row.updated_at).toISOString(),
+      finishedAt: terminal ? new Date(row.dispatched_at ?? row.updated_at).toISOString() : null,
+    });
   }
 
   async enqueueNotificationRequested(

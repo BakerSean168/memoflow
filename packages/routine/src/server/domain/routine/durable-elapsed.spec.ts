@@ -5,6 +5,50 @@ import { computeDurableElapsedNextOccurrence } from './durable-elapsed';
 describe('computeDurableElapsedNextOccurrence', () => {
   const activatedAt = Date.parse('2026-09-28T00:00:00.000Z');
 
+  it('runs three one-minute last-satisfied cycles only after each user completion', () => {
+    const trigger = createElapsedTrigger({
+      durationMs: 60_000,
+      anchor: 'last-satisfied',
+    });
+    if (trigger.timingOwner !== 'scheduler') throw new Error('expected scheduler trigger');
+    const occurrences: Array<{
+      occurrenceKey: string;
+      sourceRevision: string;
+      resolutionState: 'Open' | 'Satisfied';
+      resolvedAt: number | null;
+    }> = [];
+    const dueTimes = [activatedAt + 60_000, activatedAt + 125_000, activatedAt + 190_000];
+    for (const dueAt of dueTimes) {
+      const next = computeDurableElapsedNextOccurrence({
+        routineId: 'minute',
+        trigger,
+        activatedAt,
+        occurrences,
+      });
+      expect(next?.dueAt).toBe(dueAt);
+      occurrences.push({
+        occurrenceKey: next!.occurrenceKey,
+        sourceRevision: '1',
+        resolutionState: 'Open',
+        resolvedAt: null,
+      });
+      expect(
+        computeDurableElapsedNextOccurrence({
+          routineId: 'minute',
+          trigger,
+          activatedAt,
+          occurrences,
+        }),
+      ).toBeNull();
+      occurrences[occurrences.length - 1] = {
+        ...occurrences.at(-1)!,
+        resolutionState: 'Satisfied',
+        resolvedAt: dueAt + 5_000,
+      };
+    }
+    expect(new Set(occurrences.map((occurrence) => occurrence.occurrenceKey)).size).toBe(3);
+  });
+
   it('uses activation as the cold-start anchor for last-satisfied', () => {
     const trigger = createElapsedTrigger({
       durationMs: 50 * 60_000,

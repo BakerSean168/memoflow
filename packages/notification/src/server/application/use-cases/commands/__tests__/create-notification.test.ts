@@ -17,7 +17,10 @@ import { SystemDeliveryGuard } from '../../../../domain/services/system-delivery
 import { CreateNotificationUseCase } from '../create-notification.use-case';
 import { asHm, createTimeContext, requireTimeZoneId } from '@memoflow/time';
 
-const TEST_TIME_CONTEXT = createTimeContext({ timeZone: 'UTC', weekStartsOn: 1 });
+const TEST_TIME_CONTEXT = createTimeContext({
+  timeZone: 'UTC',
+  weekStartsOn: 1,
+});
 const userTimeContextPort = {
   getUserTimeContext: vi.fn().mockResolvedValue(TEST_TIME_CONTEXT),
 };
@@ -59,6 +62,36 @@ describe('CreateNotificationUseCase Fact / DeliveryPolicy', () => {
     );
   });
 
+  it('keeps the InApp Fact while cloud marks an unhosted Desktop channel unsupported', async () => {
+    const cloud = new CreateNotificationUseCase(
+      notificationRepo,
+      preferenceRepo,
+      async () => false,
+      userTimeContextPort,
+      undefined,
+      undefined,
+      undefined,
+      [NotificationChannelType.InApp],
+    );
+    await cloud.execute({
+      identityId: anIdentityId(),
+      workflowKey: 'routine.intervention',
+      title: 'Routine',
+      content: 'Due',
+      channels: ['InApp', 'Desktop'],
+    });
+    const [fact, outbox, decisions] = vi.mocked(notificationRepo.save).mock.calls[0];
+    expect(fact).toBeInstanceOf(Notification);
+    expect(outbox?.map((row) => row.channel)).toEqual(['InApp']);
+    expect(decisions).toContainEqual(
+      expect.objectContaining({
+        channel: 'Desktop',
+        outcome: 'unsupported',
+        reason: 'unsupported_channel',
+      }),
+    );
+  });
+
   it('creates an unread Fact without root delivery execution state', async () => {
     const result = await useCase.execute({
       identityId: anIdentityId(),
@@ -90,7 +123,10 @@ describe('CreateNotificationUseCase Fact / DeliveryPolicy', () => {
       type: NotificationType.Warning,
       category: NotificationCategory.Task,
     });
-    expect(result).toMatchObject({ ok: false, error: { code: 'VALIDATION_ERROR' } });
+    expect(result).toMatchObject({
+      ok: false,
+      error: { code: 'VALIDATION_ERROR' },
+    });
     expect(notificationRepo.save).not.toHaveBeenCalled();
   });
 
@@ -210,11 +246,16 @@ describe('CreateNotificationUseCase Fact / DeliveryPolicy', () => {
     });
     const [, outbox, decisions] = vi.mocked(notificationRepo.save).mock.calls[0];
     expect(outbox?.[0].deferUntil?.toISOString()).toBe('2026-08-26T08:00:00.000Z');
-    expect(decisions?.[0]).toMatchObject({ outcome: NotificationDeliveryPlanOutcome.Deferred });
+    expect(decisions?.[0]).toMatchObject({
+      outcome: NotificationDeliveryPlanOutcome.Deferred,
+    });
   });
 
   it('applies SystemDeliveryGuard independently from user preferences', async () => {
-    vi.mocked(notificationRepo.getDeliveryUsage).mockResolvedValue({ hourCount: 1, dayCount: 3 });
+    vi.mocked(notificationRepo.getDeliveryUsage).mockResolvedValue({
+      hourCount: 1,
+      dayCount: 3,
+    });
     const guarded = new CreateNotificationUseCase(
       notificationRepo,
       preferenceRepo,

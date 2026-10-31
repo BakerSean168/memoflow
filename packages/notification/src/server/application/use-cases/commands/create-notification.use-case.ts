@@ -11,6 +11,7 @@ import type {
 import {
   NotificationChannelType as ChannelType,
   NotificationDeliveryPlanOutcome,
+  NotificationDeliveryReason,
 } from '@memoflow/notification-contracts';
 import type { IdentityId } from '@memoflow/shared-primitives';
 import type { ImportanceLevel, UrgencyLevel } from '@memoflow/shared-primitives';
@@ -46,6 +47,7 @@ export class CreateNotificationUseCase {
     private readonly clock: () => Date = () => new Date(),
     private readonly workflowCatalog: NotificationWorkflowCatalog = new NotificationWorkflowCatalog(),
     private readonly systemDeliveryGuard: SystemDeliveryGuardPort = new SystemDeliveryGuard(),
+    private readonly hostChannels?: readonly NotificationChannelType[],
   ) {
     if (!closureChecker) {
       throw new Error('[FAIL-CLOSED] CreateNotificationUseCase requires closureChecker');
@@ -160,6 +162,13 @@ export class CreateNotificationUseCase {
         }
       }
 
+      if (this.hostChannels && !this.hostChannels.includes(channelType)) {
+        decision = {
+          channel: channelType,
+          outcome: NotificationDeliveryPlanOutcome.Unsupported,
+          reason: NotificationDeliveryReason.UnsupportedChannel,
+        };
+      }
       deliveryDecisions.push(decision);
 
       if (

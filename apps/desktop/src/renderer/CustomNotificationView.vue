@@ -166,7 +166,18 @@ async function updateWindowBounds() {
         notificationCount: notifications.value.length,
         height,
       });
-      void bridge.invoke(NotificationChannels.CUSTOM_RESIZE, height).catch(console.warn);
+      const ids = notifications.value.map((notification) => notification.id);
+      void bridge
+        .invoke(NotificationChannels.CUSTOM_RESIZE, height)
+        .then(async () => {
+          if (disposed || height <= 0) return;
+          for (const id of ids) {
+            if (notifications.value.some((notification) => notification.id === id)) {
+              await bridge.invoke(NotificationChannels.CUSTOM_PRESENTED, id);
+            }
+          }
+        })
+        .catch(console.warn);
     }
   }, 50);
 }
@@ -250,13 +261,16 @@ onUnmounted(() => {
       <div
         v-for="notification in notifications"
         :key="notification.id"
+        @click="bridge.invoke(NotificationChannels.CUSTOM_CLICK, notification.id)"
         class="pointer-events-auto relative overflow-hidden rounded-[22px] border border-white/15 bg-slate-950/92 p-5 text-white shadow-[0_20px_60px_rgba(15,23,42,0.45)] backdrop-blur-xl"
         @mouseenter="handleMouseEnter"
         @mouseleave="handleMouseLeave"
       >
         <div
           class="absolute inset-x-0 top-0 h-1 origin-left bg-gradient-to-r from-amber-400 via-orange-400 to-rose-500 transition-transform duration-250 ease-linear"
-          :style="{ transform: `scaleX(${notificationProgress[notification.id] ?? 0})` }"
+          :style="{
+            transform: `scaleX(${notificationProgress[notification.id] ?? 0})`,
+          }"
         />
 
         <div class="flex items-start gap-4">
@@ -309,7 +323,7 @@ onUnmounted(() => {
               <button
                 type="button"
                 class="inline-flex min-w-[92px] items-center justify-center rounded-xl bg-amber-400 px-4 py-2 text-sm font-medium text-slate-950 transition-colors hover:bg-amber-300"
-                @click="void acknowledgeNotification(notification, 'button')"
+                @click.stop="void acknowledgeNotification(notification, 'button')"
               >
                 收到
               </button>

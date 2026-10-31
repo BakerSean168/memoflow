@@ -86,6 +86,7 @@ export class BrowserWindow extends EventEmitter {
 
   readonly loadURL = vi.fn(async (_url: string) => undefined);
   readonly loadFile = vi.fn(async (_path: string, _options?: Record<string, unknown>) => undefined);
+  readonly setEnabled = vi.fn();
   readonly setMenuBarVisibility = vi.fn();
   readonly removeMenu = vi.fn();
   readonly setTitleBarOverlay = vi.fn();
@@ -148,7 +149,11 @@ export class BrowserWindow extends EventEmitter {
   }
 
   destroy(): void {
-    this.close();
+    if (this.destroyed) return;
+    this.visible = false;
+    this.destroyed = true;
+    this.focused = false;
+    this.emit('closed');
   }
 
   minimize(): void {
@@ -229,6 +234,7 @@ export const app = createEmitterApi({
   setAppLogsPath: vi.fn(),
   isReady: vi.fn(() => false),
   getVersion: vi.fn(() => '1.0.0-test'),
+  getLocale: vi.fn(() => 'en-US'),
   getName: vi.fn(() => 'MemoFlow-Test'),
   getAppPath: vi.fn(() => electronTestRoot),
   quit: vi.fn(),

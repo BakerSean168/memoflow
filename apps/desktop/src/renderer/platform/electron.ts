@@ -23,19 +23,9 @@ export function initElectronFeatures(app: App): void {
 
   if (!api) return;
 
-  setupTraySync();
   setupShortcuts();
   setupOnlineStatus();
   setupDbChangeListener();
-}
-
-function setupTraySync(): void {
-  api?.on(RendererEventChannels.TRAY_ACTION, (...args: unknown[]) => {
-    const action = args[1] as string | undefined;
-    if (action) {
-      console.log('[Electron] Tray action:', action);
-    }
-  });
 }
 
 function setupShortcuts(): void {

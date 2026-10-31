@@ -93,8 +93,16 @@ describe('NotificationService routing', () => {
 
   it('forces native silence when device sound is disabled', () => {
     const { service } = createService();
-    service.updateDevicePreference({ presentationMode: 'native', soundEnabled: false });
-    service.showNotification({ title: 'Silent', body: 'Body', sound: true, silent: false });
+    service.updateDevicePreference({
+      presentationMode: 'native',
+      soundEnabled: false,
+    });
+    service.showNotification({
+      title: 'Silent',
+      body: 'Body',
+      sound: true,
+      silent: false,
+    });
     expect(Notification.lastInstance()?.options.silent).toBe(true);
   });
 
@@ -116,19 +124,47 @@ describe('NotificationService routing', () => {
     expect(Notification.lastInstance()).toBeTruthy();
   });
 
-  it('canonical delivery bypasses legacy renderer DND because policy was already evaluated upstream', () => {
+  it('waits for custom presentation before acknowledging canonical delivery', async () => {
     const { service, dispatch } = createService();
-    service.setMainWindow(window);
-    service.enableDND();
-
-    const rendered = service.showCanonicalDelivery({ title: 'Canonical', body: 'Delivered once' });
-
-    expect(rendered).toBe(true);
-    expect(dispatch).toHaveBeenCalledOnce();
-    expect(window.webContents.send).not.toHaveBeenCalledWith(
-      'notification:suppressed',
-      expect.anything(),
+    let complete!: (shown: boolean) => void;
+    dispatch.mockReturnValue(
+      new Promise<boolean>((resolve) => {
+        complete = resolve;
+      }),
     );
+    let settled = false;
+    const delivery = Promise.resolve(
+      service.showCanonicalDelivery({ title: 'Due', body: '' }),
+    ).then((value) => {
+      settled = true;
+      return value;
+    });
+    await Promise.resolve();
+    expect(settled).toBe(false);
+    complete(true);
+    await expect(delivery).resolves.toBe(true);
+  });
+
+  it('records canonical device DND as suppressed without dispatching', async () => {
+    const { service, dispatch } = createService();
+    service.enableDND();
+    await expect(service.showCanonicalDelivery({ title: 'Due', body: '' })).resolves.toEqual({
+      status: 'suppressed',
+      reason: 'device-dnd',
+    });
+    expect(dispatch).not.toHaveBeenCalled();
+  });
+
+  it('records unavailable native permission/capability as suppressed', async () => {
+    const { service, dispatch } = createService();
+    service.updateDevicePreference({ presentationMode: 'native' });
+    vi.mocked(Notification.isSupported).mockReturnValueOnce(false);
+    await expect(service.showCanonicalDelivery({ title: 'Due', body: '' })).resolves.toEqual({
+      status: 'suppressed',
+      reason: 'native-unavailable',
+    });
+    expect(dispatch).not.toHaveBeenCalled();
+    expect(Notification.lastInstance()).toBeNull();
   });
 
   it('suppresses native notifications when Do Not Disturb is manually enabled', () => {

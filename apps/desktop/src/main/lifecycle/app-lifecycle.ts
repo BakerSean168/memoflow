@@ -15,7 +15,11 @@
  * @module lifecycle/app-lifecycle
  */
 
-import { app, BrowserWindow } from 'electron';
+import { app, dialog } from 'electron';
+import path from 'node:path';
+import { getSharedPathResolver } from '../runtime-init';
+import { DesktopLifecyclePreference } from './desktop-lifecycle-preference';
+import { claimWindowsInstance } from './windows-instance';
 import { initializeDesktopFeatures } from '../desktop-features';
 import { registerKeyboardHandlers } from '../ipc/keyboard-handlers';
 import { registerSystemIpcHandlers } from '../ipc/system-handlers';
@@ -42,6 +46,7 @@ async function handleAppReady(
   initializeApp: () => Promise<void>,
   getMainRuntime: () => DesktopMainRuntime,
   windowManager: WindowManager,
+  lifecyclePreference: DesktopLifecyclePreference,
 ): Promise<void> {
   // Application core initialization
   await initializeApp();
@@ -74,6 +79,7 @@ async function handleAppReady(
     const desktopFeaturesRuntime = await initializeDesktopFeatures({
       mainWindow: win,
       windowManager,
+      lifecyclePreference,
       resolveDeviceNotificationPreferencePath: () =>
         runtimeManager.getActiveProfileResolver()?.desktopNotificationPreferencePath ?? null,
     });
@@ -84,6 +90,26 @@ async function handleAppReady(
     console.log('[Lifecycle] Notification capability initialized');
 
     windowManager.setDesktopFeaturesRuntime(desktopFeaturesRuntime);
+    windowManager.setStartupHidden(false);
+    if (!desktopFeaturesRuntime.tray) {
+      windowManager.focusActiveWindow();
+      if (process.platform === 'win32') {
+        void dialog.showMessageBox(win, {
+          type: 'warning',
+          message: app.getLocale().startsWith('zh')
+            ? '系统托盘不可用。关闭窗口将退出 MemoFlow，后台提醒将停止。'
+            : 'System tray unavailable. Closing MemoFlow will quit and stop background reminders.',
+        });
+      }
+    } else if (
+      !(
+        process.platform === 'win32' &&
+        process.argv.includes('--hidden') &&
+        lifecyclePreference.startHidden
+      )
+    ) {
+      windowManager.focusActiveWindow();
+    }
 
     registerSystemIpcHandlers(
       desktopFeaturesRuntime.tray,
@@ -112,11 +138,16 @@ async function handleAppReady(
     });
   }
 
-  // macOS: Re-create window when dock icon is clicked
+  // Restore through the local gate even if a notification/auxiliary window survives.
+  let restoringWindow = false;
   app.on('activate', async () => {
-    if (BrowserWindow.getAllWindows().length === 0) {
+    if (windowManager.focusActiveWindow() || windowManager.getActiveWindow() || restoringWindow)
+      return;
+    restoringWindow = true;
+    try {
       const candidate = await runtimeManager.getStartupProfile();
       if (await runtimeManager.hasPin(candidate.profileId)) {
+        await runtimeManager.deactivateProfile({ preserveSelection: true });
         windowManager.createProfileAccessWindow();
       } else {
         const startupProfile = await runtimeManager.activateStartupProfile();
@@ -125,6 +156,11 @@ async function handleAppReady(
           startupProfile.profileResolver.mainWindowStatePath,
         );
       }
+    } catch (error) {
+      logger.error('Could not restore Desktop Profile gate', error);
+      windowManager.createProfileAccessWindow();
+    } finally {
+      restoringWindow = false;
     }
   });
 }
@@ -169,12 +205,42 @@ export function registerAppLifecycleHandlers(
   windowManager: WindowManager,
   shutdownCoordinator: DesktopShutdownCoordinator,
 ): void {
+  let startupComplete = false;
+  let activationPending = false;
+  const restore = () => {
+    if (!startupComplete) {
+      activationPending = true;
+      return;
+    }
+    if (!windowManager.focusActiveWindow()) app.emit('activate');
+  };
+  if (!claimWindowsInstance(app, restore)) return;
+  const preference = new DesktopLifecyclePreference(
+    path.join(getSharedPathResolver().configDir, 'desktop-lifecycle.json'),
+  );
+  windowManager.configureCloseBehavior(
+    preference,
+    () => shutdownCoordinator.shouldAllowProcessExit,
+  );
+  windowManager.setStartupHidden(
+    process.platform === 'win32' && process.argv.includes('--hidden') && preference.startHidden,
+  );
+
   // Create window when application is ready
   app
     .whenReady()
     .then(() =>
-      handleAppReady(initializeApp, getMainRuntime as () => DesktopMainRuntime, windowManager),
+      handleAppReady(
+        initializeApp,
+        getMainRuntime as () => DesktopMainRuntime,
+        windowManager,
+        preference,
+      ),
     )
+    .then(() => {
+      startupComplete = true;
+      if (activationPending) restore();
+    })
     .catch((error) => {
       logger.error('App ready sequence failed', error);
       app.quit();
