@@ -2215,9 +2215,12 @@
         "testRole": "behavior"
       },
       "decision": "retain",
-      "behavior": "PowerSync 同步 Schema 仅同步用户业务数据，Local Agent 配置/设备状态保持 localOnly",
-      "assertionEvidence": ["localOnly"],
-      "reason": "实际 Schema 元对象检查，但不验证真实 PowerSync Server 是否按策略同步。 代表性源码/断言已审，不代表运行依赖已验证。",
+      "behavior": "PowerSync Schema 排除桌面 Agent 状态和权限策略，避免上传本地数据",
+      "assertionEvidence": [
+        "localOnly",
+        "keeps permission policy data out of the PowerSync upload schema"
+      ],
+      "reason": "实际检查 Schema 元对象中的 localOnly 标记和权限表缺席，但不验证真实 PowerSync Server 的同步行为。 代表性源码/断言已审，不代表运行依赖已验证。",
       "replacement": {
         "status": "none-verified",
         "testFiles": []
