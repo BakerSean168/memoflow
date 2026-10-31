@@ -1,7 +1,6 @@
 import { installAiUiHost } from '@ai-ui-test-host/di/ai-ui-host';
 installAiUiHost();
 // Test-only cross-layer journey, using an in-memory database and loopback MCP.
-// eslint-disable-next-line @nx/enforce-module-boundaries
 import { createPermissionFlowFixture } from '@memoflow/ai/testing';
 import { flushPromises, mount, type VueWrapper } from '@vue/test-utils';
 import { createI18n } from 'vue-i18n';

@@ -3238,6 +3238,22 @@
       "measurementCollectors": []
     },
     {
+      "path": "packages/ai-ui/src/components/AIBusinessPermissionFlow.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/ai-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/ai-ui/src/components/AIBusinessPermissionSelector.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/ai-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "packages/ai-ui/src/components/AIComposerControls.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -10050,6 +10066,14 @@
       "measurementCollectors": []
     },
     {
+      "path": "packages/setting-ui/src/components/AIPermissionSettings.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/setting-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "packages/setting-ui/src/components/AISettings.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -13200,7 +13224,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 40
+      "fileCount": 42
     },
     {
       "id": "packages/ai/vitest.config.ts",
@@ -13529,7 +13553,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 17
+      "fileCount": 18
     },
     {
       "id": "packages/setting/vitest.config.ts",
@@ -14250,7 +14274,7 @@
   "duplicate": [],
   "unexpected": [],
   "counts": {
-    "unit": 1169,
+    "unit": 1172,
     "integration": 58,
     "smoke": 3,
     "boundary-ipc": 6,

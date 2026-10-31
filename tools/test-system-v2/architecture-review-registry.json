@@ -22,7 +22,7 @@
         "status": "none-verified",
         "testFiles": []
       },
-      "sourceSha256": "8e3f58df6271f8e48143b162b7459a3eed7d0296c48c7f8a8a2fee2e86114aca"
+      "sourceSha256": "421119331cb52c4b386c5ee60ca645154224b40484827796d9485082caf687fa"
     },
     {
       "path": "apps/desktop/src/main/profile/ProfileSnapshotService.spec.ts",
@@ -2222,7 +2222,7 @@
         "status": "none-verified",
         "testFiles": []
       },
-      "sourceSha256": "8cdce902afdea2b766ea187bae18e001d805fe45b0e32eb5c7080a6dc36c5453"
+      "sourceSha256": "bc4604caf927259e5e897370fd22761a05fff81cd55f1e517b97d145976356be"
     },
     {
       "path": "apps/desktop/src/main/__tests__/bootstrap.spec.ts",

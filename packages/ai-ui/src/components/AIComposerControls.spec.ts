@@ -1,7 +1,7 @@
 import { installAiUiHost } from '@ai-ui-test-host/di/ai-ui-host';
 installAiUiHost();
 /** @vitest-environment jsdom */
-import { h, defineComponent, nextTick } from 'vue';
+import { nextTick } from 'vue';
 import { mount } from '@vue/test-utils';
 import { createI18n } from 'vue-i18n';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
