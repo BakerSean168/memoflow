@@ -19,9 +19,10 @@ export interface PermissionRepository {
   listAudit(owner: string, limit?: number): Promise<PermissionAuditRecord[]>;
 }
 
-/** Infrastructure could not find the deployed permission tables. Other failures must propagate. */
+/** The permission schema is not available on this server deployment yet. */
 export class PermissionStorageUnavailableError extends Error {
   constructor() {
-    super('Permission policy storage is not deployed');
+    super('Permission storage is unavailable');
+    this.name = 'PermissionStorageUnavailableError';
   }
 }

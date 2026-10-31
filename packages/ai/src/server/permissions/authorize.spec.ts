@@ -104,3 +104,28 @@ it('uses the default preset without blocking when permission tables are not depl
   );
   expect(result).toBe('created');
 });
+
+it('does not suppress an unrelated audit failure after falling back from missing policy tables', async () => {
+  const repository = {
+    getSettings: async () => {
+      throw new PermissionStorageUnavailableError();
+    },
+    listRules: async () => [],
+    appendAudit: async () => {
+      throw new Error('audit connection failed');
+    },
+  } as unknown as PermissionRepository;
+  const work = vi.fn(async () => 'created');
+  await expect(
+    executeAuthorized(
+      repository,
+      {
+        owner: 'owner',
+        agentId: 'builtin-mastra',
+        operationId: 'goal.create',
+      },
+      work,
+    ),
+  ).rejects.toThrow('audit connection failed');
+  expect(work).not.toHaveBeenCalled();
+});
