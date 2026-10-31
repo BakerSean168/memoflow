@@ -454,7 +454,10 @@ describe('T3-style Agent settings and direct endpoint configuration', () => {
       instance: expect.objectContaining({
         driver: 'codex',
         instanceId: 'codex-work',
-        nativeConfig: expect.objectContaining({ homePath: '/work/account', writeScopes: [] }),
+        nativeConfig: expect.objectContaining({
+          homePath: '/work/account',
+          writeScopes: ['goals:write', 'tasks:write'],
+        }),
       }),
     });
     expect(wrapper.find('[data-testid="ai-provider-select-agent:codex"]').exists()).toBe(true);
@@ -655,7 +658,7 @@ describe('T3-style Agent settings and direct endpoint configuration', () => {
     );
   });
 
-  it('rejects an empty native name, preserves write scopes and current native identity during save', async () => {
+  it('rejects an empty native name and saves native permissions independently of business scopes', async () => {
     const { wrapper, registry } = await setup({ native: true });
     await wrapper.get('[data-testid="ai-provider-select-agent:claude"]').trigger('click');
     await wrapper.get('[data-testid="ai-native-name"]').setValue('  ');
@@ -670,7 +673,11 @@ describe('T3-style Agent settings and direct endpoint configuration', () => {
       expectedRevision: 0,
       patch: expect.objectContaining({
         name: 'My Claude',
-        nativeConfig: expect.objectContaining({ writeScopes: [], homePath: '/account/work' }),
+        nativeConfig: expect.objectContaining({
+          writeScopes: ['goals:write', 'tasks:write'],
+          nativePermissionMode: 'supervised',
+          homePath: '/account/work',
+        }),
       }),
     });
   });
@@ -1111,7 +1118,7 @@ it('configures AGY as an official native ACP Agent rather than a model API servi
       nativeConfig: expect.objectContaining({
         executablePath: 'agy_acp_server',
         homePath: '/native/agy-profile',
-        writeScopes: [],
+        writeScopes: ['goals:write', 'tasks:write'],
       }),
     }),
   });

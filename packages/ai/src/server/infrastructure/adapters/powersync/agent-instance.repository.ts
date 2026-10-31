@@ -48,6 +48,7 @@ function fromLegacy(connection: LocalAgentConnection): AgentInstance {
       executablePath: connection.executablePath,
       ...(connection.homePath ? { homePath: connection.homePath } : {}),
       writeScopes: connection.writeScopes,
+      nativePermissionMode: connection.nativePermissionMode,
     },
     legacyConnectionId: connection.id,
     revision: connection.revision,
@@ -80,7 +81,10 @@ export class AgentInstancePowerSyncRepository implements IAgentInstanceRepositor
     // default later must never change another connection's published identity.
     if (legacy.length) {
       await this.db.writeTransaction(async (tx) => {
-        const mappings = await tx.getAll<{ connection_id: string; instance_id: string }>(
+        const mappings = await tx.getAll<{
+          connection_id: string;
+          instance_id: string;
+        }>(
           'SELECT connection_id, instance_id FROM ai_agent_native_mappings WHERE identity_id = ?',
           [owner],
         );
@@ -210,6 +214,7 @@ export class AgentInstancePowerSyncRepository implements IAgentInstanceRepositor
         executablePath:
           record.nativeConfig?.executablePath ?? LOCAL_AGENT_DEFAULT_EXECUTABLES[record.driver],
         homePath: record.nativeConfig?.homePath,
+        nativePermissionMode: record.nativeConfig?.nativePermissionMode ?? 'supervised',
         writeScopes: record.nativeConfig?.writeScopes ?? [],
       });
       return fromLegacy(native);
@@ -246,6 +251,7 @@ export class AgentInstancePowerSyncRepository implements IAgentInstanceRepositor
         enabled: record.enabled,
         executablePath: record.nativeConfig?.executablePath ?? prior.executablePath,
         homePath: record.nativeConfig ? record.nativeConfig.homePath : prior.homePath,
+        nativePermissionMode: record.nativeConfig?.nativePermissionMode ?? 'supervised',
         writeScopes: record.nativeConfig?.writeScopes ?? prior.writeScopes,
         instanceSlug: prior.instanceSlug,
         accentColor: record.accentColor,
@@ -282,6 +288,7 @@ export class AgentInstancePowerSyncRepository implements IAgentInstanceRepositor
           executablePath:
             record.nativeConfig?.executablePath ?? LOCAL_AGENT_DEFAULT_EXECUTABLES[driver],
           homePath: record.nativeConfig?.homePath,
+          nativePermissionMode: record.nativeConfig?.nativePermissionMode ?? 'supervised',
           writeScopes: record.nativeConfig?.writeScopes ?? [],
           revision: record.revision,
           createdAt: record.createdAt,

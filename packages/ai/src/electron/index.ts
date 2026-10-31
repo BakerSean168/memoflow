@@ -514,6 +514,8 @@ export function createAIElectronModule(options: AIElectronModuleOptions): AIElec
             const owner = requestContext.identityId;
             try {
               switch (input.action) {
+                case 'permissions':
+                  return ok(await runtime.permissions(owner, input.command));
                 case 'list_connections':
                   return ok(await runtime.listConnections(owner));
                 case 'get_default':

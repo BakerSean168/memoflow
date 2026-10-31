@@ -11,6 +11,7 @@ export const AgentNativeConfigSchema = LocalAgentConnectionInputSchema.pick({
   executablePath: true,
   homePath: true,
   writeScopes: true,
+  nativePermissionMode: true,
 })
   .partial()
   .strict();
