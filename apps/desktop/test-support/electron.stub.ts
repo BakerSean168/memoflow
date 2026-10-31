@@ -304,6 +304,7 @@ export class Notification extends EventEmitter {
 }
 
 export const dialog = {
+  showErrorBox: vi.fn(),
   showOpenDialog: vi.fn(async () => ({ canceled: false, filePaths: [] })),
   showSaveDialog: vi.fn(async () => ({ canceled: false, filePath: undefined })),
   showMessageBox: vi.fn(async () => ({ response: 0 })),

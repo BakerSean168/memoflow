@@ -15,12 +15,14 @@ import { AutoLaunchManager } from './auto-launch-manager';
 // emulate both the available and the degraded provider.
 const harness = {
   forceFail: false,
+  readFail: false,
   instances: [] as Array<{
     config: { name: string; path: string; isHidden?: boolean };
     on: boolean;
   }>,
   reset(): void {
     this.forceFail = false;
+    this.readFail = false;
     this.instances.length = 0;
   },
 };
@@ -35,6 +37,7 @@ vi.mock('auto-launch', () => {
     }
 
     isEnabled(): Promise<boolean> {
+      if (harness.readFail) return Promise.reject(new Error('status unreadable'));
       return Promise.resolve(harness.instances.at(-1)!.on);
     }
 
@@ -101,10 +104,17 @@ describe('AutoLaunchManager (non-macOS auto-launch provider)', () => {
     expect(harness.instances.at(-1)!.on).toBe(false);
   });
 
+  it('propagates status read errors instead of reporting a disabled startup item', async () => {
+    const manager = new AutoLaunchManager();
+    await manager.init();
+    harness.readFail = true;
+    await expect(manager.isEnabled()).rejects.toThrow('status unreadable');
+  });
+
   it('gracefully degrades when the auto-launch provider cannot be constructed', async () => {
     harness.forceFail = true;
     const manager = new AutoLaunchManager();
-    await expect(manager.init()).resolves.toBeUndefined();
+    await expect(manager.init()).rejects.toThrow('auto-launch unavailable');
     expect(await manager.isEnabled()).toBe(false);
     expect(await manager.enable()).toBe(false);
     expect(await manager.disable()).toBe(false);

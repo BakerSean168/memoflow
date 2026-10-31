@@ -146,3 +146,5 @@ export {
   type DeviceKeymap,
 } from './keyboard-keymap';
 export * from './profile-import';
+
+export * from './desktop-startup';

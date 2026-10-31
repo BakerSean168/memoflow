@@ -1,4 +1,12 @@
 export default {
+  startup: {
+    title: 'Startup & window',
+    autoLaunch: 'Launch at login',
+    startHidden: 'Start in tray at login',
+    closeToTray: 'Keep running in tray when closing the window',
+    failure: 'Could not save startup settings. The actual state has been restored.',
+    unavailable: 'Auto-launch is unavailable on this device.',
+  },
   agentInstances: {
     antigravityDownloadTitle: 'Official Antigravity ACP Server',
     antigravityDownloadHint:
@@ -124,6 +132,7 @@ export default {
   title: 'App Settings',
   userSettings: 'User Settings',
   groups: {
+    startup: 'Startup & window',
     shortcuts: 'Keyboard shortcuts',
     appearance: 'Appearance & Language',
     repository: 'Knowledge Repository',
