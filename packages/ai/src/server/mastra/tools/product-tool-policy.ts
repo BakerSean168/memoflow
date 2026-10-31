@@ -83,7 +83,9 @@ function authorizationInput(name: string, context: RequestContext) {
     agentId: typeof agent === 'string' ? agent : 'builtin-mastra',
     conversationId: typeof conversation === 'string' ? conversation : null,
     operationId: permissionOperationForTool(name)?.id ?? name,
-    preset: assistantPermissionPreset(context.getRaw('permissionMode') as AIChatPermissionMode),
+    conversationPreset: assistantPermissionPreset(
+      context.getRaw('permissionMode') as AIChatPermissionMode,
+    ),
   };
 }
 

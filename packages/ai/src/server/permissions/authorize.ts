@@ -15,10 +15,9 @@ export interface AuthorizeInput {
   agentId: string;
   conversationId?: string | null;
   operationId: string;
+  conversationPreset?: PermissionPreset;
   conversationRules?: readonly PermissionRule[];
   now?: number;
-  /** Host-owned conversation override; explicit user deny rules still take precedence. */
-  preset?: PermissionPreset;
   ask?: (auditId: string) => Promise<'allow' | 'deny' | 'timeout'>;
 }
 
@@ -28,6 +27,7 @@ export async function authorize(
 ): Promise<PermissionAuditRecord> {
   let settings: PermissionSettings | null = null;
   let rules: PermissionRule[] = [];
+  let storageUnavailable = false;
   try {
     [settings, rules] = await Promise.all([
       repository.getSettings(input.owner),
@@ -35,8 +35,9 @@ export async function authorize(
     ]);
   } catch (error) {
     if (!(error instanceof PermissionStorageUnavailableError)) throw error;
+    storageUnavailable = true;
   }
-  const preset = (input.preset ??
+  const preset = (input.conversationPreset ??
     settings?.agentPresets[input.agentId] ??
     settings?.preset ??
     'on_demand') as PermissionPreset;
@@ -79,7 +80,7 @@ export async function authorize(
   try {
     await repository.appendAudit(input.owner, record);
   } catch (error) {
-    if (!(error instanceof PermissionStorageUnavailableError)) throw error;
+    if (!storageUnavailable && !(error instanceof PermissionStorageUnavailableError)) throw error;
   }
   return record;
 }
