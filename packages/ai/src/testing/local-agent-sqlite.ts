@@ -19,6 +19,7 @@ export function createLocalAgentSqlite(): IElectronDatabase & { close(): void } 
       if (value === null || typeof value === 'string' || typeof value === 'number') return value;
       throw new Error('Unsupported SQLite fixture parameter');
     });
+  let writeQueue: Promise<void> = Promise.resolve();
   const db: IElectronDatabase = {
     async execute(query, values) {
       return { rowsAffected: Number(sql.prepare(query).run(...parameters(values)).changes) };
@@ -34,16 +35,24 @@ export function createLocalAgentSqlite(): IElectronDatabase & { close(): void } 
       if (!result) throw new Error('Row not found');
       return result;
     },
-    async writeTransaction(work) {
-      sql.exec('BEGIN');
-      try {
-        const result = await work(db);
-        sql.exec('COMMIT');
-        return result;
-      } catch (error) {
-        sql.exec('ROLLBACK');
-        throw error;
-      }
+    // PowerSync holds one write lock per database; queue transactions the same way.
+    writeTransaction(work) {
+      const run = writeQueue.then(async () => {
+        sql.exec('BEGIN');
+        try {
+          const result = await work(db);
+          sql.exec('COMMIT');
+          return result;
+        } catch (error) {
+          sql.exec('ROLLBACK');
+          throw error;
+        }
+      });
+      writeQueue = run.then(
+        () => undefined,
+        () => undefined,
+      );
+      return run;
     },
   };
   return Object.assign(db, { close: () => sql.close() });

@@ -311,6 +311,64 @@ function stepSuspendPayload(result: unknown): unknown {
 }
 
 describe('ADR-052 goal.create durable Workflow', () => {
+  it('blocks model planning and ownerCreate until an ambiguous exam year is answered after restore', async () => {
+    const planner: GoalPlannerPort = {
+      plan: vi.fn(async () => ({
+        status: 'draft_ready',
+        reason: 'ready',
+        candidateDraft: draftContent,
+      })),
+    };
+    const { buildWorkflow, mutations } = await harness(planner);
+    const input = { ...workflowInput, idea: '备战 2027 年考研，目标北京大学' };
+    const runId = 'critical-exam-year';
+    const run = await buildWorkflow().createRun({ runId, resourceId: input.identityId });
+    const first = await run.start({
+      inputData: input,
+      initialState: initialGoalCreateWorkflowState(input),
+      requestContext: mastraRequestContext('critical-start'),
+    });
+    expect(stepSuspendPayload(first)).toMatchObject({ type: 'clarification_required' });
+    expect(stepSuspendPayload(first)).not.toHaveProperty('ownerCreate');
+    expect(planner.plan).not.toHaveBeenCalled();
+    const restored = await buildWorkflow().createRun({ runId, resourceId: input.identityId });
+    const unknown = await restored.resume({
+      step: GOAL_CREATE_LIFECYCLE_STEP_ID,
+      resumeData: { type: 'answer', answers: ['我还不确定'] },
+      requestContext: mastraRequestContext('critical-unsure'),
+    });
+    expect(stepSuspendPayload(unknown)).toMatchObject({ type: 'clarification_required' });
+    expect(planner.plan).not.toHaveBeenCalled();
+    const next = await restored.resume({
+      step: GOAL_CREATE_LIFECYCLE_STEP_ID,
+      resumeData: { type: 'answer', answers: ['2026 年参加初试，2027 年入学'] },
+      requestContext: mastraRequestContext('critical-answer'),
+    });
+    expect(stepSuspendPayload(next)).toMatchObject({
+      type: 'goal_draft_review',
+      draft: { goal: { target: { kind: 'year', year: 2026 } } },
+    });
+    expect(planner.plan).toHaveBeenCalledTimes(1);
+    expect(mutations.createGoal).not.toHaveBeenCalled();
+  });
+
+  it('never produces an owner-create form for discussion-only input', async () => {
+    const planner: GoalPlannerPort = { plan: vi.fn() };
+    const { buildWorkflow } = await harness(planner);
+    const input = { ...workflowInput, idea: '先讨论不创建：备战 2027 年考研' };
+    const run = await buildWorkflow().createRun({
+      runId: 'discussion-only',
+      resourceId: input.identityId,
+    });
+    const result = await run.start({
+      inputData: input,
+      initialState: initialGoalCreateWorkflowState(input),
+      requestContext: mastraRequestContext('discuss'),
+    });
+    expect(result.status).toBe('success');
+    expect(planner.plan).not.toHaveBeenCalled();
+  });
+
   it('rejects cross-owner and no-longer-running live publication without altering the snapshot', async () => {
     const planner: GoalPlannerPort = {
       plan: vi.fn(async () => ({

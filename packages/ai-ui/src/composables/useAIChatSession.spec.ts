@@ -1903,7 +1903,7 @@ describe('useAIChatSession Mastra-native open chat', () => {
       () => MODEL.key,
     );
 
-    expect(runtime.listAskUserSuspensions).toHaveBeenCalledWith('conv-1');
+    expect(runtime.listAskUserSuspensions).toHaveBeenCalledWith('conv-1', 'builtin');
     expect(composable.chatTimeline.value[0]?.role).toBe('user');
     expect(composable.chatTimeline.value[1]).toMatchObject({
       role: 'assistant',

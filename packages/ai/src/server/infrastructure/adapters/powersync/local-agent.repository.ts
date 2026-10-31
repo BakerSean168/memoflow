@@ -408,6 +408,44 @@ export class LocalAgentRepository {
       };
     });
   }
+  /** Claim the answer in the same Profile transaction as its pending-state check. */
+  async settleGoalClarification(
+    owner: string,
+    conversationId: string,
+    draftId: string,
+    runId: string,
+    answer: string | null,
+  ): Promise<AssistantRuntimeMessageView | null> {
+    return this.db.writeTransaction(async (tx) => {
+      const row = await tx.getOptional<unknown>(
+        'SELECT record_json FROM ai_local_conversation_items WHERE id = ? AND identity_id = ? AND conversation_id = ?',
+        [draftId, owner, conversationId],
+      );
+      if (!row) return null;
+      const message = decode(row, StoredMessageSchema);
+      const pending = message.goalClarification;
+      if (
+        !pending ||
+        pending.runId !== runId ||
+        pending.draftId !== draftId ||
+        pending.status !== 'pending'
+      )
+        return null;
+      const next = StoredMessageSchema.parse({
+        ...message,
+        goalClarification: {
+          ...pending,
+          status: answer === null ? 'cancelled' : 'answered',
+          ...(answer === null ? {} : { answer }),
+        },
+      });
+      await tx.execute(
+        'UPDATE ai_local_conversation_items SET record_json = ? WHERE id = ? AND identity_id = ? AND conversation_id = ?',
+        [JSON.stringify(next), draftId, owner, conversationId],
+      );
+      return next;
+    });
+  }
   async renameConversation(
     owner: string,
     id: string,

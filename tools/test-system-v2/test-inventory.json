@@ -3140,6 +3140,14 @@
       "measurementCollectors": []
     },
     {
+      "path": "packages/ai-contracts/src/api/goal-intent-clarification.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/ai-contracts/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "packages/ai-contracts/src/api/goal-panel.dto.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -13077,7 +13085,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 15
+      "fileCount": 16
     },
     {
       "id": "packages/ai-ui/vitest.config.ts",
@@ -14128,7 +14136,7 @@
   "duplicate": [],
   "unexpected": [],
   "counts": {
-    "unit": 1157,
+    "unit": 1158,
     "integration": 58,
     "smoke": 3,
     "boundary-ipc": 6,

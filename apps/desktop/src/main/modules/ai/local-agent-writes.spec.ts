@@ -79,6 +79,36 @@ it('advertises only authorized writes, commits through owners and refuses revoke
     ).text();
     expect(plan).toContain('receiptId');
     expect(f.sql.prepare('SELECT COUNT(*) AS n FROM task_plans').get()).toMatchObject({ n: 1 });
+    const ambiguous = await bridge.open({
+      identityId,
+      connectionId: connection.id,
+      conversationId: 'test',
+      runId: 'ambiguous',
+      goalIntent: '帮我备战 2027 年考研，目标北京大学',
+    });
+    const rejected = await (
+      await call(ambiguous, 'tools/call', {
+        name: 'goal_create',
+        arguments: { idempotencyKey: 'ambiguous-goal', goal: { name: '2027 考研' } },
+      })
+    ).text();
+    expect(rejected).toContain('GOAL_CLARIFICATION_REQUIRED');
+    const discussOnly = await bridge.open({
+      identityId,
+      connectionId: connection.id,
+      conversationId: 'test',
+      runId: 'discuss-only',
+      goalIntent: '先讨论一下考研规划，不要创建',
+    });
+    expect(
+      await (
+        await call(discussOnly, 'tools/call', {
+          name: 'goal_create',
+          arguments: { idempotencyKey: 'discuss-goal', goal: { name: '考研规划' } },
+        })
+      ).text(),
+    ).toContain('GOAL_DISCUSSION_ONLY');
+    expect(f.sql.prepare('SELECT COUNT(*) AS n FROM goals').get()).toMatchObject({ n: 1 });
     await store.updateConnection(identityId, connection.id, enabled.revision, {
       ...config,
       writeScopes: [],

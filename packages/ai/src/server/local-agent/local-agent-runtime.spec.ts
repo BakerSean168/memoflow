@@ -1101,3 +1101,115 @@ it('sends the tool route only to the Provider and revokes the per-run MCP grant 
   expect(revoked).toContain('token-2');
   await runtime.dispose();
 });
+
+describe('Goal clarification before native tools', () => {
+  it('parks a durable ask-user card before granting tools, restores it and accepts an answer only once', async () => {
+    const { store, conversation } = await setup();
+    const open = vi.fn(async () => ({ url: 'fake://mcp', token: 'test', revoke: vi.fn() }));
+    const prompts: string[] = [];
+    const createDriver = vi.fn(() => ({
+      probe: vi.fn(),
+      respond: vi.fn(),
+      cancel: vi.fn(),
+      close: vi.fn(),
+      async *run(input: NativeAgentRunInput): AsyncGenerator<NativeAgentEvent> {
+        prompts.push(input.content);
+        yield { type: 'delta', content: '已准备草稿' };
+        yield { type: 'completed' };
+      },
+    }));
+    const options = { store, cwd: tmpdir(), createDriver, bridge: { open, dispose: vi.fn() } };
+    const first = new LocalAgentRuntime(options);
+    const events = [];
+    for await (const event of first.dispatchMessage({
+      identityId: 'owner',
+      conversationId: conversation.id,
+      content: '备战 2027 年考研，目标北京大学',
+    }))
+      events.push(event);
+    expect(open).not.toHaveBeenCalled();
+    expect(prompts).toEqual([]);
+    const card = events.find((event) => event.type === 'assistant.ask_user.required');
+    expect(card?.type).toBe('assistant.ask_user.required');
+    await first.dispose();
+    const restarted = new LocalAgentRuntime(options);
+    const [pending] = await restarted.listAskUserSuspensions({
+      identityId: 'owner',
+      conversationId: conversation.id,
+    });
+    expect(pending.options?.map(({ label }) => label)).toContain('我还不确定');
+    const command = {
+      type: 'tool_answer' as const,
+      runtimeKind: 'local_agent' as const,
+      action: 'answer' as const,
+      conversationId: conversation.id,
+      runId: pending.runId,
+      toolCallId: pending.toolCallId,
+      answer: '2026 年参加初试，2027 年入学',
+    };
+    expect(
+      await restarted.answerToolSuspension({
+        identityId: 'owner',
+        command: { ...command, runId: 'foreign' },
+      }),
+    ).toBe(false);
+    const results = await Promise.all([
+      restarted.answerToolSuspension({ identityId: 'owner', command }),
+      restarted.answerToolSuspension({ identityId: 'owner', command }),
+    ]);
+    expect(results.filter(Boolean)).toHaveLength(1);
+    expect(open).toHaveBeenCalledTimes(1);
+    expect(prompts).toHaveLength(1);
+    expect(prompts[0]).toContain('2026 年参加初试，2027 年入学');
+    expect(
+      await restarted.listAskUserSuspensions({
+        identityId: 'owner',
+        conversationId: conversation.id,
+      }),
+    ).toEqual([]);
+    await restarted.dispose();
+  });
+
+  it.each(['cancel', 'unsure'] as const)(
+    'does not grant a business tool after %s or a stale retry',
+    async (action) => {
+      const { store, conversation } = await setup();
+      const open = vi.fn();
+      const runtime = new LocalAgentRuntime({
+        store,
+        cwd: tmpdir(),
+        bridge: { open, dispose: vi.fn() },
+        createDriver: () => ({
+          probe: vi.fn(),
+          run: vi.fn(),
+          respond: vi.fn(),
+          cancel: vi.fn(),
+          close: vi.fn(),
+        }),
+      });
+      for await (const _event of runtime.dispatchMessage({
+        identityId: 'owner',
+        conversationId: conversation.id,
+        content: '备战 2027 年考研',
+      })) {
+        /* park */
+      }
+      const [pending] = await runtime.listAskUserSuspensions({
+        identityId: 'owner',
+        conversationId: conversation.id,
+      });
+      const command = {
+        type: 'tool_answer' as const,
+        action: action === 'cancel' ? ('cancel' as const) : ('answer' as const),
+        conversationId: conversation.id,
+        runId: pending.runId,
+        toolCallId: pending.toolCallId,
+        answer: '我还不确定',
+      };
+      expect(await runtime.answerToolSuspension({ identityId: 'owner', command })).toBe(true);
+      expect(await runtime.answerToolSuspension({ identityId: 'owner', command })).toBe(false);
+      expect(open).not.toHaveBeenCalled();
+      await runtime.dispose();
+    },
+  );
+});
