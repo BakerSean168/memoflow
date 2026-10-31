@@ -1,8 +1,10 @@
 import { describe, expect, it } from 'vitest';
 import {
+  assertGoalDirectWriteAllowed,
   assertGoalIntentCanCommit,
   GoalIntentCommitBlockedError,
   inspectGoalIntent,
+  isGoalDirectWriteRequested,
   resolveGoalIntent,
 } from './goal-intent-clarification';
 
@@ -44,5 +46,26 @@ describe('Goal critical intent clarification', () => {
     expect(blocked('先讨论一下考研规划，不要创建')).toBe('GOAL_DISCUSSION_ONLY');
     expect(blocked('帮我备战 2027 年考研')).toBe('GOAL_CLARIFICATION_REQUIRED');
     expect(blocked('每天阅读半小时')).toBeNull();
+  });
+
+  it('treats only an explicit background request as permission to skip the Goal form', () => {
+    for (const text of [
+      '不用打开表单，后台直接创建：三个月读完 6 本书',
+      '跳过表单，直接写入这个目标',
+      '后台创建一个目标就行',
+      'Create the goal without opening the form',
+      'background write is fine, skip the panel',
+    ])
+      expect(isGoalDirectWriteRequested(text), text).toBe(true);
+    for (const text of [
+      '帮我创建一个目标：三个月内读完 6 本书',
+      '直接帮我创建这个目标',
+      '在右侧表单里帮我建一个目标',
+      'Create a goal to read 6 books',
+    ])
+      expect(isGoalDirectWriteRequested(text), text).toBe(false);
+    expect(() => assertGoalDirectWriteAllowed(undefined)).toThrow(GoalIntentCommitBlockedError);
+    expect(() => assertGoalDirectWriteAllowed('帮我创建一个目标')).toThrow('GOAL_PANEL_REQUIRED');
+    expect(() => assertGoalDirectWriteAllowed('后台直接写入，不要打开表单')).not.toThrow();
   });
 });

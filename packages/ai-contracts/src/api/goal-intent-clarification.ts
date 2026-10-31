@@ -90,6 +90,7 @@ export function resolveGoalIntent(question: GoalIntentQuestion, answer: string):
 export const GoalIntentCommitBlockCodeSchema = z.enum([
   'GOAL_CLARIFICATION_REQUIRED',
   'GOAL_DISCUSSION_ONLY',
+  'GOAL_PANEL_REQUIRED',
 ]);
 export type GoalIntentCommitBlockCode = z.infer<typeof GoalIntentCommitBlockCodeSchema>;
 
@@ -106,4 +107,23 @@ export function assertGoalIntentCanCommit(source: string): void {
   if (isGoalDiscussionOnly(source)) throw new GoalIntentCommitBlockedError('GOAL_DISCUSSION_ONLY');
   if (inspectGoalIntent(source))
     throw new GoalIntentCommitBlockedError('GOAL_CLARIFICATION_REQUIRED');
+}
+
+/**
+ * True only when the user explicitly asked for a background Goal write that skips the visible form.
+ * "直接创建" alone is not enough: it means "just do it", and the default remains the native form.
+ */
+export function isGoalDirectWriteRequested(text: string): boolean {
+  return /后台.{0,4}(?:创建|写入|保存|新建)|(?:不要|不用|无需|不需要|别|跳过).{0,4}(?:打开|弹出|使用|用|走|显示)?.{0,4}表单|直接写入|\bbackground (?:write|create|save)\b|\bwithout (?:opening |showing |using )?(?:the |a )?(?:goal )?(?:form|panel)\b|\bskip(?:ping)? (?:the )?(?:goal )?(?:form|panel)\b|\bwrite (?:it )?directly\b/i.test(
+    text,
+  );
+}
+
+/**
+ * When the visible Goal form is available, creation goes through it unless the user explicitly
+ * asked for a background write; throws {@link GoalIntentCommitBlockedError} `GOAL_PANEL_REQUIRED`.
+ */
+export function assertGoalDirectWriteAllowed(source: string | null | undefined): void {
+  if (!source || !isGoalDirectWriteRequested(source))
+    throw new GoalIntentCommitBlockedError('GOAL_PANEL_REQUIRED');
 }

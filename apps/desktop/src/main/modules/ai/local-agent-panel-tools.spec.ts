@@ -132,4 +132,78 @@ describe('Desktop Local Agent Goal Panel Tools', () => {
       f.close();
     }
   });
+
+  it('routes Goal creation to the visible form unless the user explicitly asked for a background write', async () => {
+    const f = createPowerSyncSqliteFixture();
+    const store = new LocalAgentRepository(f.db);
+    const mockBridge: IDesktopNativePanelBridge = {
+      executeCommand: vi.fn(),
+      releaseAllForRun: vi.fn(),
+    };
+    const bridge = createDesktopLocalAgentTools(
+      f.db,
+      store,
+      () => true,
+      {
+        getUserTimeContext: async () => createTimeContext({ timeZone: 'UTC', weekStartsOn: 1 }),
+      },
+      undefined,
+      mockBridge,
+    );
+    const identityId = 'IdentityId_00000000-0000-4000-8000-000000000002';
+    async function createGoal(goalIntent: string, idempotencyKey: string) {
+      const connection = await store.createConnection(identityId, {
+        driver: 'codex' as const,
+        name: `Route ${idempotencyKey}`,
+        executablePath: 'codex',
+        enabled: true,
+        writeScopes: ['goals:write'],
+      });
+      const grant = await bridge.open({
+        identityId,
+        connectionId: connection.id,
+        conversationId: 'conv-route',
+        runId: `run-${idempotencyKey}`,
+        goalIntent,
+      });
+      const response = await fetch(grant.url, {
+        method: 'POST',
+        headers: {
+          authorization: `Bearer ${grant.token}`,
+          accept: 'application/json, text/event-stream',
+          'content-type': 'application/json',
+        },
+        body: JSON.stringify({
+          jsonrpc: '2.0',
+          id: 1,
+          method: 'tools/call',
+          params: {
+            name: 'goal_create',
+            arguments: { idempotencyKey, goal: { name: '三个月读完 6 本书' } },
+          },
+        }),
+      });
+      return response.text();
+    }
+    const goalCount = () => f.sql.prepare('SELECT COUNT(*) AS n FROM goals').get();
+
+    try {
+      // The screenshot request: a plain "help me create a goal" must not become a hidden write.
+      expect(await createGoal('帮我创建一个目标：三个月内读完 6 本书', 'plain')).toContain(
+        'GOAL_PANEL_REQUIRED',
+      );
+      expect(await createGoal('直接帮我创建这个目标', 'just-do-it')).toContain(
+        'GOAL_PANEL_REQUIRED',
+      );
+      expect(goalCount()).toMatchObject({ n: 0 });
+      expect(mockBridge.executeCommand).not.toHaveBeenCalled();
+
+      const direct = await createGoal('不用打开表单，后台直接创建：三个月读完 6 本书', 'direct');
+      expect(direct).toContain('receiptId');
+      expect(goalCount()).toMatchObject({ n: 1 });
+    } finally {
+      await bridge.dispose();
+      f.close();
+    }
+  });
 });

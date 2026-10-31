@@ -36,6 +36,7 @@ import type { Result } from '@memoflow/transport-contracts/result';
 import type { IElectronDatabase, IElectronDatabaseTransaction } from '@memoflow/desktop-contracts';
 import {
   GoalPanelSnapshotSchema,
+  assertGoalDirectWriteAllowed,
   assertGoalIntentCanCommit,
   GoalIntentCommitBlockedError,
   GoalPanelPatchCommandSchema,
@@ -255,8 +256,9 @@ export function createDesktopLocalAgentTools(
         server.registerTool(
           'goal_create',
           {
-            description:
-              'Create an owned Goal atomically. A stable idempotencyKey is required for all retries.',
+            description: panelBridge
+              ? 'Background Goal write that skips the visible form. Only for a user who explicitly asked to write the Goal directly without the form; otherwise it returns GOAL_PANEL_REQUIRED and writes nothing, and the Goal must be created with goal_panel_open. A stable idempotencyKey is required for all retries.'
+              : 'Create an owned Goal atomically. A stable idempotencyKey is required for all retries.',
             inputSchema: GoalAgentCreateSchema,
             annotations: {
               readOnlyHint: false,
@@ -269,6 +271,8 @@ export function createDesktopLocalAgentTools(
             write(() => {
               // The run's user message cannot change mid-run, so one check before the owner write is enough.
               assertGoalIntentCanCommit(context.goalIntent ?? JSON.stringify(input.goal));
+              // With the visible form available, a hidden write would leave the user nothing to review.
+              if (panelBridge) assertGoalDirectWriteAllowed(context.goalIntent);
               return goalWrites.create(input, context, authority);
             }),
         );
