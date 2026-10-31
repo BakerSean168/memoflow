@@ -1,3 +1,4 @@
+import { sanitizeConversationTitle } from '@memoflow/ai-contracts';
 /**
  * PowerSync CRUD batch executor
  *
@@ -126,6 +127,59 @@ export async function executeCrudBatch(
 
         if (!delegate) {
           logger.warn(`Unknown table in CRUD operation: ${tableName}`);
+          continue;
+        }
+
+        if (
+          tableName === 'ai_conversations' &&
+          (opType === 'PUT' || opType === 'PATCH') &&
+          data?.name !== undefined
+        ) {
+          const record = normalizeCrudData(tableName, data);
+          const version =
+            typeof record.version === 'number' &&
+            Number.isSafeInteger(record.version) &&
+            record.version > 0
+              ? record.version
+              : 3;
+          const name =
+            typeof record.name === 'string' ? sanitizeConversationTitle(record.name) : '';
+          if (!name) throw new Error('Invalid conversation title');
+          if (!delegate.updateMany) throw new Error('Conversation conditional update unavailable');
+          if (opType === 'PUT') {
+            // Create once; a replay must never replace a newer title or resurrect a tombstone.
+            await delegate.upsert({
+              where: { id },
+              create: { ...record, id, identityId, name, version },
+              update: {},
+            });
+          }
+          // Title patches are independent of status/activity and only advance the authoritative revision.
+          await delegate.updateMany({
+            where: {
+              id,
+              identityId,
+              deletedAt: null,
+              version: { lt: version },
+            },
+            data: {
+              name,
+              version,
+              ...(record.updatedAt ? { updatedAt: record.updatedAt } : {}),
+            },
+          });
+          if (opType === 'PATCH' && record.status !== undefined) {
+            if (!delegate.findFirst) throw new Error('Conversation lookup unavailable');
+            const current = await delegate.findFirst({
+              where: { id, identityId, deletedAt: null },
+              select: { updatedAt: true },
+            });
+            if (current)
+              await delegate.update({
+                where: { id, identityId, deletedAt: null },
+                data: { status: record.status, updatedAt: current.updatedAt },
+              });
+          }
           continue;
         }
 

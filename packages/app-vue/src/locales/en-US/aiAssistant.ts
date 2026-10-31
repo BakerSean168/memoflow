@@ -640,6 +640,12 @@ export default {
       loadFailed: 'Failed to load conversation',
       archived: 'Conversation archived',
       undoArchive: 'Undo',
+      titleSaved: 'Title saved',
+      titleFallback:
+        'Title updated from your first message; model title generation was unavailable.',
+      titleGenerated: 'Title updated',
+      titleFailed: 'Could not update title. Refresh and try again.',
+      titleNoMessage: 'Send a text message before generating a title.',
       archiveFailed: 'Could not update conversation archive',
       archiveBlocked: 'Finish the active turn or save your draft before archiving.',
       restoreBeforeSending: 'Restore this archived conversation before sending.',

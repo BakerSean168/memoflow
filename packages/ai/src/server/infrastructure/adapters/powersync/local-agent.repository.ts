@@ -1,3 +1,4 @@
+import { sanitizeConversationTitle, nextConversationTitleVersion } from '@memoflow/ai-contracts';
 import { createHash, randomUUID } from 'node:crypto';
 import { z } from 'zod';
 import type { IElectronDatabase, IElectronDatabaseTransaction } from '@memoflow/desktop-contracts';
@@ -405,6 +406,39 @@ export class LocalAgentRepository {
         messages: items.map(({ complete: _complete, ...message }) => message),
         incomplete: rows.length === 500 || items.some((item) => !item.complete),
       };
+    });
+  }
+  async renameConversation(
+    owner: string,
+    id: string,
+    name: string,
+    expectedVersion: number,
+    automatic = false,
+  ) {
+    const title = sanitizeConversationTitle(name);
+    if (!title) throw new LocalAgentError('LOCAL_AGENT_UNSUPPORTED_INPUT');
+    return this.db.writeTransaction(async (tx) => {
+      const conversation = await this.read(
+        'ai_local_conversations',
+        owner,
+        id,
+        StoredConversationSchema,
+        tx,
+      );
+      if (!automatic && expectedVersion === 1 && conversation.version === 2) expectedVersion = 2;
+      if ((conversation.version ?? 1) !== expectedVersion || (automatic && expectedVersion !== 1))
+        throw new LocalAgentError('CONFLICT');
+      const next = StoredConversationSchema.parse({
+        ...conversation,
+        name: title,
+        version: nextConversationTitleVersion(expectedVersion, automatic),
+        updatedAt: Date.now(),
+      });
+      await tx.execute(
+        'UPDATE ai_local_conversations SET record_json = ? WHERE id = ? AND identity_id = ?',
+        [JSON.stringify(next), id, owner],
+      );
+      return LocalAgentConversationSchema.strip().parse(next);
     });
   }
   async setConversationStatus(owner: string, id: string, status: 'Active' | 'Archived') {

@@ -3800,6 +3800,16 @@
       ]
     },
     {
+      "path": "packages/ai/src/server/application/use-cases/commands/update-conversation.use-case.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/ai/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "packages/ai/vitest.config.ts"
+      ]
+    },
+    {
       "path": "packages/ai/src/server/domain/aggregates/__tests__/ai-conversation.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -4479,6 +4489,16 @@
     },
     {
       "path": "packages/ai/src/server/mastra/runtime/assistant-observability.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/ai/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "packages/ai/vitest.config.ts"
+      ]
+    },
+    {
+      "path": "packages/ai/src/server/mastra/runtime/conversation-title.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/ai/vitest.config.ts"
@@ -12536,7 +12556,7 @@
       "type": "measurement",
       "suite": "coverage",
       "runner": "vitest",
-      "fileCount": 114
+      "fileCount": 116
     },
     {
       "id": "packages/app-vue/vitest.store-coverage.config.ts",
@@ -13071,7 +13091,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 114
+      "fileCount": 116
     },
     {
       "id": "packages/app-vue/vitest.config.ts",
@@ -13606,6 +13626,7 @@
       "packages/ai/src/server/application/use-cases/commands/probe-ai-provider-replacement.use-case.spec.ts",
       "packages/ai/src/server/application/use-cases/commands/refresh-ai-provider-models.use-case.spec.ts",
       "packages/ai/src/server/application/use-cases/commands/test-ai-provider-onboarding-model.use-case.spec.ts",
+      "packages/ai/src/server/application/use-cases/commands/update-conversation.use-case.spec.ts",
       "packages/ai/src/server/domain/aggregates/__tests__/ai-conversation.spec.ts",
       "packages/ai/src/server/domain/aggregates/__tests__/ai-provider-config.spec.ts",
       "packages/ai/src/server/domain/services/__tests__/knowledge-series.validation.test.ts",
@@ -13674,6 +13695,7 @@
       "packages/ai/src/server/mastra/runtime/assistant-history.persistence.spec.ts",
       "packages/ai/src/server/mastra/runtime/assistant-history.service.spec.ts",
       "packages/ai/src/server/mastra/runtime/assistant-observability.spec.ts",
+      "packages/ai/src/server/mastra/runtime/conversation-title.spec.ts",
       "packages/ai/src/server/mastra/runtime/goal-workflow-events.persistence.spec.ts",
       "packages/ai/src/server/mastra/runtime/goal-workflow-events.postgres.spec.ts",
       "packages/ai/src/server/mastra/runtime/mastra-goal-surface-lease.runtime.spec.ts",
@@ -14106,7 +14128,7 @@
   "duplicate": [],
   "unexpected": [],
   "counts": {
-    "unit": 1155,
+    "unit": 1157,
     "integration": 58,
     "smoke": 3,
     "boundary-ipc": 6,

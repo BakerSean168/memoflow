@@ -9,6 +9,9 @@
       :conversations="conversationList"
       :archive-page="archivePage"
       :archive-has-more="archiveHasMore"
+      @rename="renameConversation"
+      @regenerate-title="regenerateConversationTitle"
+      :title-busy="titleBusy"
       @archive="archiveConversation"
       @restore="restoreConversation"
       @change-archive-page="changeArchivePage"
@@ -49,6 +52,9 @@
           :conversations="conversationList"
           :archive-page="archivePage"
           :archive-has-more="archiveHasMore"
+          @rename="renameConversation"
+          @regenerate-title="regenerateConversationTitle"
+          :title-busy="titleBusy"
           @archive="archiveConversation"
           @restore="restoreConversation"
           @change-archive-page="changeArchivePage"
@@ -456,6 +462,9 @@ const {
   openRecentKnowledgeNote,
   deleteConversation: deleteConversationBase,
   archiveConversation,
+  renameConversation,
+  regenerateConversationTitle,
+  titleBusy,
   archiveConversations,
   restoreConversations,
   restoreConversation,
@@ -801,6 +810,9 @@ defineExpose({
   deleteConversation,
   deleteConversations,
   archiveConversation,
+  renameConversation,
+  regenerateConversationTitle,
+  titleBusy,
   archiveConversations,
   restoreConversations,
   restoreConversation,

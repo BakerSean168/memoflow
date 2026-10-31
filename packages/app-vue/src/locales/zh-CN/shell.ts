@@ -52,6 +52,9 @@ export default {
     moreCount: '另有 {count} 项',
   },
   conversation: {
+    rename: '重命名',
+    regenerateTitle: '重新生成标题',
+    generatingTitle: '正在生成标题…',
     archive: '归档',
     restore: '恢复',
     archived: '已归档',

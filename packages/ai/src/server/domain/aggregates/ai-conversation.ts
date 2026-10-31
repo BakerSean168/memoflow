@@ -1,6 +1,10 @@
 import { AggregateRoot } from '@memoflow/utils/domain';
 import type { AIConversationClientDTO, AIConversationServerDTO } from '@memoflow/ai-contracts';
-import { ConversationStatus } from '@memoflow/ai-contracts';
+import {
+  ConversationStatus,
+  sanitizeConversationTitle,
+  nextConversationTitleVersion,
+} from '@memoflow/ai-contracts';
 import type { AIEventMap } from '@memoflow/ai-contracts';
 import type { IdentityId as IIdentityId } from '@memoflow/shared-primitives';
 import { AiConversationId } from '../value-objects/ai-conversation-id';
@@ -90,10 +94,11 @@ export class AIConversation extends AggregateRoot<AiConversationId> {
     );
   }
 
-  public rename(name: string): void {
-    const trimmed = name.trim();
+  public rename(name: string, automatic = false): void {
+    const trimmed = sanitizeConversationTitle(name);
     if (!trimmed) throw new Error('Conversation name cannot be empty');
     this._props.name = trimmed;
+    this._props.version = nextConversationTitleVersion(this._props.version, automatic);
     this._props.updatedAt = new Date();
     this.addDomainEvent<AIEventMap['ai:conversation-updated']>('ai:conversation-updated', {
       identityId: this._props.identityId,

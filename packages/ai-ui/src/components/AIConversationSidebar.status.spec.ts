@@ -20,6 +20,11 @@ vi.mock('@memoflow/ui-vue-shadcn', async () => {
   return {
     Button: pass('Button', 'button'),
     Collapsible: pass('Collapsible'),
+    ContextMenu: pass('ContextMenu'),
+    ContextMenuContent: pass('ContextMenuContent'),
+    ContextMenuItem: pass('ContextMenuItem'),
+    ContextMenuSeparator: pass('ContextMenuSeparator'),
+    ContextMenuTrigger: pass('ContextMenuTrigger'),
     CollapsibleContent: pass('CollapsibleContent'),
     CollapsibleTrigger: pass('CollapsibleTrigger', 'button'),
     DropdownMenu: pass('DropdownMenu'),

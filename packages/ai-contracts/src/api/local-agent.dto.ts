@@ -1,3 +1,4 @@
+import { ConversationNameSchema } from './ai-chat.dto';
 import { z } from 'zod';
 
 const id = z.string().trim().min(1).max(512);
@@ -95,6 +96,7 @@ export type LocalAgentConversationCreate = z.infer<typeof LocalAgentConversation
 export const LocalAgentConversationSchema = LocalAgentConversationCreateSchema.extend({
   id,
   runtimeKind: z.literal('local_agent'),
+  version: z.number().int().positive().optional(),
   status: z.enum(['Active', 'Archived']).optional(),
   driver: LocalAgentDriverSchema,
   createdAt: z.number().int().nonnegative(),
@@ -374,6 +376,15 @@ export const LocalAgentClientCommandSchema = z.discriminatedUnion('action', [
     })
     .strict(),
   z.object({ action: z.literal('list_conversations') }).strict(),
+  z
+    .object({
+      action: z.literal('rename_conversation'),
+      id,
+      name: ConversationNameSchema.shape.name,
+      expectedVersion: z.number().int().positive(),
+      automatic: z.boolean().optional(),
+    })
+    .strict(),
   z
     .object({
       action: z.literal('set_conversation_status'),
