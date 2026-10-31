@@ -116,6 +116,7 @@ export interface ExternalAgentClientPort {
 export const GatewayFailureCodeSchema = z.enum([
   'NOT_FOUND',
   'FORBIDDEN',
+  'PERMISSION_DENIED',
   'INVALID_CURSOR',
   'TIMEOUT',
   'REQUEST_TOO_LARGE',

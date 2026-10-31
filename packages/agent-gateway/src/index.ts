@@ -8,7 +8,7 @@ export type {
   GatewayDiagnostic,
 } from './ports';
 
-export { GatewayReadError } from './ports';
+export { GatewayReadError, GatewayPermissionDeniedError } from './ports';
 
 export { readToolDescriptors, type GatewayReadToolName } from './read-tool-descriptors';
 
@@ -18,3 +18,4 @@ export { writeToolDescriptors, type GatewayWriteToolName } from './write-tool-de
 export type { GatewayAssistedPort } from './ports';
 export { assistedToolDescriptors } from './assisted-tool-descriptors';
 export type { GatewayAssistedToolName } from './assisted-tool-descriptors';
+export type { GatewayPrincipal, GatewayToolCheckpoint } from './ports';

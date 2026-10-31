@@ -138,7 +138,10 @@ const dependencies = {
   goalKnowledgeService,
   knowledgeDocumentRefResolver,
   mastraStorage,
-  localAgent: { cwd: '/profiles/profile-1/storage/local-agents', isActive: () => true },
+  localAgent: {
+    cwd: '/profiles/profile-1/storage/local-agents',
+    isActive: () => true,
+  },
 };
 
 beforeEach(() => {
@@ -183,7 +186,11 @@ describe('Desktop composeAI Mastra-only ownership', () => {
       repositorySet.providerConfigRepository,
       repositorySet.providerSecretVault,
       undefined,
-      { agentRegistry: expect.objectContaining({ assertTurnSelection: expect.any(Function) }) },
+      {
+        agentRegistry: expect.objectContaining({
+          assertTurnSelection: expect.any(Function),
+        }),
+      },
     );
     expect(ProviderWebResearchAdapter).toHaveBeenCalledWith(
       repositorySet.providerConfigRepository,
@@ -214,7 +221,10 @@ describe('Desktop composeAI Mastra-only ownership', () => {
 
     expect(MastraAIRuntime).toHaveBeenCalledTimes(1);
     expect(MastraAIRuntime).toHaveBeenCalledWith({
-      agentRegistry: expect.objectContaining({ assertTurnSelection: expect.any(Function) }),
+      permissions: expect.any(Object),
+      agentRegistry: expect.objectContaining({
+        assertTurnSelection: expect.any(Function),
+      }),
       storage: vi.mocked(createMastraStorage).mock.results[0].value,
       modelResolver: vi.mocked(MastraModelResolver).mock.results[0].value,
       conversationShellSource: vi.mocked(ConversationShellSource).mock.results[0].value,

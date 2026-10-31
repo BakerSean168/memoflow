@@ -17,7 +17,8 @@ import {
 import type { ExecutionContext } from '@memoflow/transport-contracts';
 import type { ResolvedAIModel } from '../models';
 import type { IAIExecutionRecordPort } from '../../application/ports';
-import { memoFlowToolPolicy } from '../tools/product-tool-policy';
+import type { PermissionRepository } from '../../permissions';
+import { memoFlowToolPolicy, recordMemoFlowToolDecision } from '../tools/product-tool-policy';
 import type { AssistantHistoryService } from './assistant-history.service';
 import { AsyncEventQueue } from './async-event-queue';
 import { projectAssistantUsage, type AssistantUsageSnapshot } from './assistant-observability';
@@ -41,7 +42,10 @@ function messageText(event: Extract<AgentControllerEvent, { type: 'message_start
     .join('');
 }
 
-function publicRuntimeError(error?: unknown): { code: string; message: string } {
+function publicRuntimeError(error?: unknown): {
+  code: string;
+  message: string;
+} {
   const failure = toAIPublicFailure(error, {
     fallbackCode: 'AI_RUNTIME_TRANSPORT_ERROR',
     fallbackMessage: 'AI runtime request failed',
@@ -83,6 +87,7 @@ export type AssistantTurnInput = {
 export class AssistantTurnSession {
   constructor(
     private readonly deps: {
+      permissions: PermissionRepository;
       session: Awaited<ReturnType<AgentController['createSession']>>;
       activeRuns: Map<string, ActiveAssistantTurn>;
       requestContext: RequestContext;
@@ -127,7 +132,10 @@ export class AssistantTurnSession {
     const suspensions = new Set<string>();
     const questions = new Map<
       string,
-      { options?: { label: string }[]; selectionMode?: 'single_select' | 'multi_select' }
+      {
+        options?: { label: string }[];
+        selectionMode?: 'single_select' | 'multi_select';
+      }
     >();
     const ownsTurn = () =>
       !settled &&
@@ -222,7 +230,10 @@ export class AssistantTurnSession {
       if (!ownsTurn() || stopping || (runId && !ownsNativeRun())) return false;
       stopping = true;
       for (const toolCallId of pending)
-        emit('assistant.approval.resolved', { toolCallId, resolution: 'cancelled' });
+        emit('assistant.approval.resolved', {
+          toolCallId,
+          resolution: 'cancelled',
+        });
       pending.clear();
       // Native startup can clear an earlier abort and assign its id before agent_start.
       // Keep the reservation and replay Stop only once that run is bound.
@@ -280,7 +291,15 @@ export class AssistantTurnSession {
         toolCallId: command.toolCallId,
         resolution: command.decision === 'approve' ? 'approved' : 'declined',
       });
-      await approvalHistory;
+      await Promise.all([
+        approvalHistory,
+        recordMemoFlowToolDecision(
+          this.deps.permissions,
+          tool.toolName,
+          decisionContext,
+          command.decision,
+        ),
+      ]);
       return true;
     };
     const answer = (
@@ -295,7 +314,9 @@ export class AssistantTurnSession {
         !suspensions.has(command.toolCallId)
       )
         return false;
-      const suspension = session.suspensions.get({ toolCallId: command.toolCallId });
+      const suspension = session.suspensions.get({
+        toolCallId: command.toolCallId,
+      });
       const question = questions.get(command.toolCallId);
       if (
         !suspension ||
@@ -393,7 +414,9 @@ export class AssistantTurnSession {
           abort();
           return;
         }
-        const suspension = session.suspensions.get({ toolCallId: event.toolCallId });
+        const suspension = session.suspensions.get({
+          toolCallId: event.toolCallId,
+        });
         const raw = event.suspendPayload;
         if (
           !suspension ||
@@ -440,7 +463,9 @@ export class AssistantTurnSession {
         questions.set(event.toolCallId, {
           ...(options ? { options: options.map(({ label }) => ({ label })) } : {}),
           ...(payload.selectionMode
-            ? { selectionMode: payload.selectionMode as 'single_select' | 'multi_select' }
+            ? {
+                selectionMode: payload.selectionMode as 'single_select' | 'multi_select',
+              }
             : {}),
         });
         suspensions.add(event.toolCallId);
@@ -449,7 +474,9 @@ export class AssistantTurnSession {
           question: payload.question.trim(),
           ...(options ? { options } : {}),
           ...(payload.selectionMode
-            ? { selectionMode: payload.selectionMode as 'single_select' | 'multi_select' }
+            ? {
+                selectionMode: payload.selectionMode as 'single_select' | 'multi_select',
+              }
             : {}),
         });
         return;
@@ -483,7 +510,7 @@ export class AssistantTurnSession {
         };
         tools.set(event.toolCallId, tool);
         if (event.type === 'tool_approval_required') {
-          if (!policy.requireApproval || stopping) {
+          if (stopping) {
             abort();
             return;
           }
@@ -492,7 +519,11 @@ export class AssistantTurnSession {
           emit('assistant.approval.required', tool);
         } else {
           telemetry.toolStarted(event.toolCallId, now);
-          emit('assistant.activity', { activityType: 'tool', ...tool, state: 'running' });
+          emit('assistant.activity', {
+            activityType: 'tool',
+            ...tool,
+            state: 'running',
+          });
         }
         return;
       }

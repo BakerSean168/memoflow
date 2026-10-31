@@ -1,5 +1,8 @@
+import { PermissionLocalRepository } from '../../permissions';
+import { createLocalAgentSqlite } from '../../../testing/local-agent-sqlite';
 import {
   applyMemoFlowSessionToolPolicy,
+  checkMemoFlowToolPermission,
   MEMOFLOW_PRODUCT_TOOL_POLICY,
 } from '../tools/product-tool-policy';
 import { RequestContext } from '@mastra/core/request-context';
@@ -163,12 +166,26 @@ async function createRuntime(
     estimatedCost: 0.000075,
   }));
   const createRoutine = vi.fn(async () => ({ routineId: 'created-routine' }));
+  const setProfileActive = vi.fn(async () => ({ profileId: 'p', active: true }));
   const modelResolver = new MastraModelResolver(
     {} as never,
     createAIProviderSecretVaultStub(),
     vi.fn() as unknown as typeof fetch,
   );
+  const permissionDb = createLocalAgentSqlite();
+  const permissions = new PermissionLocalRepository(permissionDb);
+  await permissions.saveSettings('identity-a', {
+    preset: 'confirm_each',
+    agentPresets: {},
+    revision: 1,
+  });
+  await permissions.saveSettings('identity-1', {
+    preset: 'confirm_each',
+    agentPresets: {},
+    revision: 1,
+  });
   const runtime = new MastraAIRuntime({
+    permissions,
     agentRegistry,
     storage,
     modelResolver,
@@ -190,7 +207,7 @@ async function createRuntime(
     },
     usageReadPort: { summarizeUsage },
     executionRecordPort: { record: recordExecution },
-    routineCommandPort: { createRoutine } as never,
+    routineCommandPort: { createRoutine, setProfileActive } as never,
     plannerReadPort: {} as never,
     notificationReadPort: {} as never,
     selectedEntityContextReadPort: {
@@ -214,6 +231,11 @@ async function createRuntime(
     reason: 'The knowledge request is concrete enough to review.',
     candidateDraft: knowledgeDraft,
   });
+  const dispose = runtime.dispose.bind(runtime);
+  runtime.dispose = async () => {
+    await dispose();
+    permissionDb.close();
+  };
   resources.push({ runtime, file });
   return {
     runtime,
@@ -226,12 +248,14 @@ async function createRuntime(
     recordActivity,
     modelResolver,
     createRoutine,
+    setProfileActive,
+    permissions,
   };
 }
 
 describe('MastraAIRuntime Assistant approval protocol', () => {
   async function parkedTurn() {
-    const { runtime, modelResolver } = await createRuntime();
+    const { runtime, modelResolver, permissions } = await createRuntime();
     vi.spyOn(runtime.history, 'ensureConversation').mockResolvedValue();
     vi.spyOn(modelResolver, 'resolve').mockResolvedValue({
       providerId: 'p',
@@ -254,7 +278,8 @@ describe('MastraAIRuntime Assistant approval protocol', () => {
     session.subscribe((event) => {
       nativeEvents.push(event.type);
     });
-    vi.spyOn(session, 'sendMessage').mockImplementation(async () => {
+    vi.spyOn(session, 'sendMessage').mockImplementation(async ({ requestContext }) => {
+      await checkMemoFlowToolPermission(permissions, 'routine_create', requestContext!);
       session.run.setRunId({ runId: 'native-turn' });
       const fullStream = (async function* () {
         yield {
@@ -293,10 +318,32 @@ describe('MastraAIRuntime Assistant approval protocol', () => {
     return { runtime, session, approve, decline, events, finished, command, nativeEvents };
   }
 
-  it.each(['approve', 'decline', 'cancel', 'read'] as const)(
+  it.each([
+    'approve',
+    'decline',
+    'cancel',
+    'read',
+    'on-demand',
+    'on-demand-update',
+    'auto',
+    'deny',
+  ] as const)(
     'runs actual AgentController + Agent tool approval %s lifecycle',
     async (decision) => {
-      const { runtime, modelResolver, createRoutine, recordExecution } = await createRuntime();
+      const {
+        runtime,
+        modelResolver,
+        createRoutine,
+        setProfileActive,
+        recordExecution,
+        permissions,
+      } = await createRuntime();
+      if (decision === 'on-demand' || decision === 'on-demand-update')
+        await permissions.saveSettings('identity-a', {
+          preset: 'on_demand',
+          agentPresets: {},
+          revision: 2,
+        });
       vi.spyOn(runtime.history, 'ensureConversation').mockResolvedValue();
       let calls = 0;
       const model = {
@@ -312,18 +359,25 @@ describe('MastraAIRuntime Assistant approval protocol', () => {
                   {
                     type: 'tool-call',
                     toolCallId: 'real-call',
-                    toolName: decision === 'read' ? 'knowledge_search' : 'routine_create',
+                    toolName:
+                      decision === 'read'
+                        ? 'knowledge_search'
+                        : decision === 'on-demand-update'
+                          ? 'routine_set_profile_active'
+                          : 'routine_create',
                     input: JSON.stringify(
                       decision === 'read'
                         ? { query: 'PRIVATE_QUERY' }
-                        : {
-                            name: 'Private routine',
-                            trigger: {
-                              type: 'Elapsed',
-                              timingOwner: 'local-runtime',
-                              durationMs: 60000,
+                        : decision === 'on-demand-update'
+                          ? { profileId: 'p', active: true }
+                          : {
+                              name: 'Private routine',
+                              trigger: {
+                                type: 'Elapsed',
+                                timingOwner: 'local-runtime',
+                                durationMs: 60000,
+                              },
                             },
-                          },
                     ),
                   },
                   {
@@ -367,11 +421,20 @@ describe('MastraAIRuntime Assistant approval protocol', () => {
         for await (const event of runtime.dispatchMessage({
           identityId: 'identity-a',
           conversationId: `real-${decision}`,
+          permissionMode:
+            decision === 'auto' ? 'auto-approve' : decision === 'deny' ? 'read-only' : undefined,
           content: 'create',
           context: turnContext,
         }))
           events.push(event);
       })();
+      if (decision === 'auto' || decision === 'on-demand' || decision === 'deny') {
+        await finished;
+        expect(events.some((event) => event.type === 'assistant.approval.required')).toBe(false);
+        expect(createRoutine).toHaveBeenCalledTimes(decision === 'deny' ? 0 : 1);
+        expect(events.at(-1)?.type).toBe('assistant.run.completed');
+        return;
+      }
       if (decision === 'read') {
         await finished;
         expect(events.some((event) => event.type === 'assistant.approval.required')).toBe(false);
@@ -415,6 +478,8 @@ describe('MastraAIRuntime Assistant approval protocol', () => {
       );
       const required = events.find((event) => event.type === 'assistant.approval.required')!;
       expect(createRoutine).not.toHaveBeenCalled();
+      expect(setProfileActive).not.toHaveBeenCalled();
+      const response = decision === 'on-demand-update' ? 'approve' : decision;
       if (decision === 'cancel')
         expect(runtime.cancelRun({ identityId: 'identity-a', runId: required.runId })).toBe(true);
       else
@@ -426,12 +491,13 @@ describe('MastraAIRuntime Assistant approval protocol', () => {
               conversationId: required.conversationId,
               runId: required.runId,
               toolCallId: 'real-call',
-              decision,
+              decision: decision === 'on-demand-update' ? 'approve' : decision,
             },
           }),
         ).toBe(true);
       await finished;
       expect(createRoutine).toHaveBeenCalledTimes(decision === 'approve' ? 1 : 0);
+      expect(setProfileActive).toHaveBeenCalledTimes(decision === 'on-demand-update' ? 1 : 0);
       const persisted = await runtime.history.listMessages({
         identityId: turnContext.identityId,
         conversationId: required.conversationId,
@@ -444,7 +510,7 @@ describe('MastraAIRuntime Assistant approval protocol', () => {
         expect(
           persisted.messages.some(
             (message) =>
-              message.approvalReceipt?.decision === decision &&
+              message.approvalReceipt?.decision === response &&
               message.approvalReceipt.toolCallId === 'real-call',
           ),
         ).toBe(true);
@@ -463,8 +529,7 @@ describe('MastraAIRuntime Assistant approval protocol', () => {
         (record) => record.operation === 'assistant.phase.approval_wait',
       );
       expect(approvalRecord).toMatchObject({
-        outcome:
-          decision === 'approve' ? 'succeeded' : decision === 'decline' ? 'cancelled' : 'cancelled',
+        outcome: response === 'approve' ? 'succeeded' : 'cancelled',
         ...(decision === 'cancel' ? { errorCategory: 'aborted' } : {}),
       });
       expect(records.find((record) => record.operation === 'assistant.turn')).toMatchObject({
@@ -1700,18 +1765,18 @@ describe('MastraAIRuntime Assistant tool policy', () => {
       'planner_conflicts',
       'planner_upcoming_tasks',
       'notification_unread_summary',
-      'routine_pause_protocol',
-      'routine_resume_protocol',
-      'routine_end_protocol',
+      'routine_create',
+      'routine_start_protocol',
     ]) {
       expect(session.resolveToolApproval(name)).toBe('allow');
     }
     for (const name of [
-      'routine_create',
+      'routine_pause_protocol',
+      'routine_resume_protocol',
+      'routine_end_protocol',
       'routine_set_profile_active',
       'routine_set_temporary_override',
       'routine_clear_temporary_override',
-      'routine_start_protocol',
       'notification_execute_action',
     ]) {
       expect(session.resolveToolApproval(name)).toBe('ask');

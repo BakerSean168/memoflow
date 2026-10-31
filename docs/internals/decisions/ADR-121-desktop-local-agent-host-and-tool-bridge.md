@@ -12,6 +12,8 @@ updated: 2026-10-09T00:00:00Z
 **依赖：** [ADR-120](./ADR-120-selectable-assistant-runtimes-and-builtin-mastra.md)  
 **关联：** ADR-004、ADR-006、ADR-045、ADR-049、ADR-058、ADR-105、ADR-116～118；与已实施的 ADR-119 对齐 Profile 生命周期，但不依赖其导入功能。
 
+> 逐次业务审批部分由 [ADR-123](./ADR-123-unified-agent-business-permission-checkpoint.md) 替换；凭据、owner、幂等和事务边界继续有效。
+
 ## 背景与复用基线
 
 T3 上游固定提交为 `ec80933ac8cd02fec5c97b342462ccc9567cdb1e`。其 Codex、Claude、Pi 分别使用 app-server、Agent SDK、RPC，并非同一个通用模型 API。完整适配器还包含 Git、回滚、子 Agent 和后台编排；直接引入全部 private workspace 包会带来不需要的服务图。[源码与固定链接](https://github.com/BakerSean168/memoflow/blob/7a45112e1840950ead1ba98b748fc70fa1b38344/docs/analysis/2026-10-09-local-byoa-t3-source-study.md)

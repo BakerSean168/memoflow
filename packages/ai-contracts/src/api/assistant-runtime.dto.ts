@@ -15,7 +15,13 @@ import {
  */
 
 /** Permission choices are per turn and are enforced by each runtime, never by prompt text. */
-export const AIChatPermissionModeSchema = z.enum(['supervised', 'read-only', 'auto-approve']);
+export const AIChatPermissionModeSchema = z.enum([
+  'supervised',
+  'read-only',
+  'auto-approve',
+  'on-demand',
+  'confirm-each',
+]);
 export type AIChatPermissionMode = z.infer<typeof AIChatPermissionModeSchema>;
 
 export const AIRuntimeSurfaceSchema = z.enum(['web', 'desktop', 'mobile', 'server']);

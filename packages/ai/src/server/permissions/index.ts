@@ -4,3 +4,4 @@ export * from './permission.repository';
 export * from './permission-powersync.repository';
 export * from './authorize';
 export * from './permission-migration';
+export * from './permission-prisma.repository';

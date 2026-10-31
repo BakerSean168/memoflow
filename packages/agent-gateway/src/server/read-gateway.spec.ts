@@ -1,3 +1,4 @@
+import type { GatewayToolCheckpoint } from '../ports';
 import { describe, expect, it, vi } from 'vitest';
 import type { GatewayWriteAuthority } from '../ports';
 import type { ExecutionContext } from '@memoflow/transport-contracts';
@@ -50,6 +51,7 @@ function fixture() {
   const options = {
     consumeOwnerQuota: vi.fn().mockResolvedValue(true),
     enabled: true,
+    toolCheckpoint: (async (_principal, _tool, work) => work()) satisfies GatewayToolCheckpoint,
     audience: 'https://api.memo.test/mcp',
     trustedOrigins: ['https://memo.test'],
     cursorSecret: 'test-only-secret-'.repeat(3),

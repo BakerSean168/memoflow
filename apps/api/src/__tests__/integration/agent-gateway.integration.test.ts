@@ -1,3 +1,4 @@
+import type { GatewayToolCheckpoint } from '@memoflow/agent-gateway';
 import { createSettingPrismaTimeQuery } from '@memoflow/setting';
 import { createTaskPrismaModule, createTaskPrismaReadQueries } from '@memoflow/task';
 import { requireYmd } from '@memoflow/shared-primitives';
@@ -89,6 +90,7 @@ describe('PAT → hosted MCP → real Goal application → PostgreSQL', () => {
         consumeOwner: async () => true,
       },
       enabled: true,
+      toolCheckpoint: (async (_principal, _tool, work) => work()) satisfies GatewayToolCheckpoint,
       audience,
       cursorSecret: 'test-only-secret-'.repeat(3),
       trustedOrigins: [],
@@ -218,6 +220,7 @@ it('serves all six reads through the official SDK with separate Task scopes and 
   const pb = await pats.create(String(b), { name: 'Task only', scopes: ['tasks:read'] });
   const module = composeAgentGatewayModule({
     enabled: true,
+    toolCheckpoint: (async (_principal, _tool, work) => work()) satisfies GatewayToolCheckpoint,
     audience,
     cursorSecret: 'test-only-secret-'.repeat(3),
     trustedOrigins: [],

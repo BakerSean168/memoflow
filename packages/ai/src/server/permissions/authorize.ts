@@ -15,6 +15,7 @@ export interface AuthorizeInput {
   agentId: string;
   conversationId?: string | null;
   operationId: string;
+  conversationPreset?: PermissionPreset;
   conversationRules?: readonly PermissionRule[];
   now?: number;
   ask?: (auditId: string) => Promise<'allow' | 'deny' | 'timeout'>;
@@ -36,7 +37,8 @@ export async function authorize(
     if (!(error instanceof PermissionStorageUnavailableError)) throw error;
     storageUnavailable = true;
   }
-  const preset = (settings?.agentPresets[input.agentId] ??
+  const preset = (input.conversationPreset ??
+    settings?.agentPresets[input.agentId] ??
     settings?.preset ??
     'on_demand') as PermissionPreset;
   const result = evaluatePermission({

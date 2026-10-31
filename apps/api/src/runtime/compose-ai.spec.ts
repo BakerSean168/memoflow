@@ -117,9 +117,15 @@ import { SelectedEntityContextAIReadAdapter } from '../modules/ai/selected-entit
 import { composeAI } from './compose-ai';
 
 const fakeDb = { tag: 'fake-db' } as unknown as PrismaClient;
-const repositoryApiPort = { tag: 'repository-port' } as unknown as RepositoryApplicationPort;
-const goalApplicationPort = { tag: 'goal-port' } as unknown as GoalApplicationPort;
-const taskApplicationPort = { tag: 'task-port' } as unknown as TaskApplicationPort;
+const repositoryApiPort = {
+  tag: 'repository-port',
+} as unknown as RepositoryApplicationPort;
+const goalApplicationPort = {
+  tag: 'goal-port',
+} as unknown as GoalApplicationPort;
+const taskApplicationPort = {
+  tag: 'task-port',
+} as unknown as TaskApplicationPort;
 const taskDashboardReadPort = { tag: 'task-dashboard-read-port' } as never;
 const routineCommandPort = { tag: 'routine-command-port' } as never;
 const scheduleRepository = { tag: 'schedule-repository' } as never;
@@ -193,7 +199,11 @@ describe('API composeAI Mastra-only ownership', () => {
       repositories.providerConfigRepository,
       repositories.providerSecretVault,
       undefined,
-      { agentRegistry: expect.objectContaining({ assertTurnSelection: expect.any(Function) }) },
+      {
+        agentRegistry: expect.objectContaining({
+          assertTurnSelection: expect.any(Function),
+        }),
+      },
     );
     expect(ProviderWebResearchAdapter).toHaveBeenCalledWith(
       repositories.providerConfigRepository,
@@ -226,7 +236,10 @@ describe('API composeAI Mastra-only ownership', () => {
 
     expect(MastraAIRuntime).toHaveBeenCalledTimes(1);
     expect(MastraAIRuntime).toHaveBeenCalledWith({
-      agentRegistry: expect.objectContaining({ assertTurnSelection: expect.any(Function) }),
+      permissions: expect.any(Object),
+      agentRegistry: expect.objectContaining({
+        assertTurnSelection: expect.any(Function),
+      }),
       storage: vi.mocked(createMastraStorage).mock.results[0].value,
       modelResolver: vi.mocked(MastraModelResolver).mock.results[0].value,
       conversationShellSource: vi.mocked(ConversationShellSource).mock.results[0].value,

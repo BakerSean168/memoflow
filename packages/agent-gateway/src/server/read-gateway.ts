@@ -13,6 +13,7 @@ import { z } from 'zod';
 import type { ExecutionContext, RequestContext } from '@memoflow/transport-contracts';
 import {
   GatewayReadError,
+  GatewayPermissionDeniedError,
   type GatewayAuditEvent,
   type GatewayDiagnostic,
   type GatewayCredentialPort,
@@ -22,6 +23,7 @@ import {
 
 interface Options {
   readonly enabled: boolean;
+  readonly toolCheckpoint: import('../ports').GatewayToolCheckpoint;
   readonly writes?: GatewayWritePort;
   readonly assisted?: GatewayAssistedPort;
   readonly audience: string;
@@ -195,7 +197,10 @@ export function createReadGateway(options: Options) {
         let invocation = false;
         try {
           const probe = z
-            .object({ method: z.literal('tools/call'), params: z.object({ name: z.string() }) })
+            .object({
+              method: z.literal('tools/call'),
+              params: z.object({ name: z.string() }),
+            })
             .safeParse(JSON.parse(body));
           if (probe.success) {
             invocation = true;
@@ -236,7 +241,10 @@ export function createReadGateway(options: Options) {
           /* The SDK owns malformed protocol input. */
         }
 
-        const context: ExecutionContext = { ...requestContext, identityId: principal.identityId };
+        const context: ExecutionContext = {
+          ...requestContext,
+          identityId: principal.identityId,
+        };
         async function call<T>(
           name: ToolName,
           requiredScope:
@@ -267,7 +275,10 @@ export function createReadGateway(options: Options) {
                 throw new ControlledError('FORBIDDEN');
               }
             }
-            const result = await within(operation, signal);
+            const result = await within(
+              () => options.toolCheckpoint(principal!, name, operation),
+              signal,
+            );
             const serialized = JSON.stringify(result);
             if (Buffer.byteLength(serialized) > MAX_BYTES)
               throw new ControlledError('RESPONSE_TOO_LARGE');
@@ -292,7 +303,18 @@ export function createReadGateway(options: Options) {
             if (outcome === 'FORBIDDEN' || outcome === 'INSUFFICIENT_SCOPE')
               scopeDecision = 'denied';
             if (!(error instanceof GatewayReadError)) diagnose(error);
-            return { isError: true, content: [{ type: 'text' as const, text: outcome }] };
+            return {
+              isError: true,
+              content: [
+                {
+                  type: 'text' as const,
+                  text:
+                    outcome === 'PERMISSION_DENIED'
+                      ? `PERMISSION_DENIED: ${error instanceof GatewayPermissionDeniedError && error.decision === 'ask' ? '此操作需要批准 / This operation requires approval.' : '此操作已被禁止 / This operation is prohibited.'} 请在 MemoFlow 设置 → AI 权限里授权。Authorize this operation in MemoFlow Settings → AI Permissions.`
+                      : outcome,
+                },
+              ],
+            };
           }
         }
         const handler = createMcpHandler(
