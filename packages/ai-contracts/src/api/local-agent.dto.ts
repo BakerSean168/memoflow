@@ -1,3 +1,4 @@
+import { BusinessApprovalSchema, PermissionCommandSchema } from './ai-permission.dto';
 import { ConversationNameSchema } from './ai-chat.dto';
 import { z } from 'zod';
 
@@ -72,6 +73,7 @@ export const LocalAgentConnectionInputSchema = z
     executablePath: nativePath,
     homePath: nativePath.optional(),
     enabled: z.boolean(),
+    nativePermissionMode: z.enum(['supervised', 'auto-approve']).optional(),
     writeScopes: z.array(LocalAgentWriteScopeSchema).max(3).default([]),
   })
   .strict();
@@ -293,6 +295,7 @@ export const LocalAgentRequestSchema = z.discriminatedUnion('type', [
       reason: z.string().max(500).optional(),
       /** What the approval would cover (tool kind, paths, cwd), as reported by the Provider. */
       scope: z.string().max(500).optional(),
+      business: BusinessApprovalSchema.optional(),
     })
     .strict(),
   z
@@ -324,7 +327,7 @@ export const LocalAgentRequestResponseSchema = z
       z
         .object({
           type: z.literal('permission'),
-          decision: z.enum(['approve_once', 'decline']),
+          decision: z.enum(['approve_once', 'approve_conversation', 'approve_always', 'decline']),
         })
         .strict(),
       z
@@ -348,6 +351,12 @@ export const LocalAgentRequestResponseSchema = z
 export type LocalAgentRequestResponse = z.infer<typeof LocalAgentRequestResponseSchema>;
 
 export const LocalAgentClientCommandSchema = z.discriminatedUnion('action', [
+  z
+    .object({
+      action: z.literal('permissions'),
+      command: PermissionCommandSchema,
+    })
+    .strict(),
   z.object({ action: z.literal('get_default') }).strict(),
   z
     .object({

@@ -280,6 +280,28 @@ describe('createAIElectronModule lifecycle', () => {
     expect(result).toEqual(ok({ accepted: true }));
   });
 
+  it('routes permission settings through authenticated IPC and rejects owner injection', async () => {
+    const permissions = vi.fn(async () => ({
+      settings: { preset: 'on_demand', agentPresets: {}, revision: 1 },
+      rules: [],
+      audit: [],
+    }));
+    Object.assign(fake.instance, { localAgentRuntime: { permissions } });
+    await moduleDef.register(createFakeContext());
+    const handler = mocks.handlers.get(AIChannels.LOCAL_AGENT)!;
+    expect(
+      await handler(undefined, { action: 'permissions', command: { action: 'snapshot' } }),
+    ).toMatchObject({ ok: true });
+    expect(permissions).toHaveBeenCalledExactlyOnceWith('identity-1', { action: 'snapshot' });
+    expect(
+      await handler(undefined, {
+        action: 'permissions',
+        command: { action: 'snapshot', owner: 'foreign' },
+      }),
+    ).toMatchObject({ ok: false, error: { code: 'VALIDATION_ERROR' } });
+    expect(permissions).toHaveBeenCalledTimes(1);
+  });
+
   it('routes native title CAS through authenticated IPC and rejects identity injection', async () => {
     const renameConversation = vi.fn(async () => ({
       id: 'conversation-1',

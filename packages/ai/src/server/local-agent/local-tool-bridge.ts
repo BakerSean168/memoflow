@@ -1,3 +1,12 @@
+import {
+  PermissionCommandSchema,
+  type PermissionCommand,
+  type PermissionSnapshot,
+  type PermissionPreset,
+  type PermissionRule,
+} from '@memoflow/ai-contracts';
+import { getPermissionOperation } from '../permissions/operation-catalog';
+import { PERMISSION_PRESETS } from '../permissions/permission-policy';
 import { randomBytes, randomUUID } from 'node:crypto';
 import { createServer, type Server } from 'node:http';
 import { createMcpHandler, McpServer } from '@modelcontextprotocol/server';
@@ -44,6 +53,100 @@ interface Options {
 }
 /** A loopback transport for native session tools, owned by the existing Profile lifecycle. */
 export class LocalAgentToolBridge implements LocalAgentToolBridgePort {
+  private readonly conversations = new Map<
+    string,
+    { preset?: PermissionPreset; rules: PermissionRule[] }
+  >();
+  private conversation(owner: string, id: string) {
+    const key = JSON.stringify([owner, id]);
+    let state = this.conversations.get(key);
+    if (!state) {
+      state = { rules: [] };
+      this.conversations.set(key, state);
+    }
+    return state;
+  }
+  async permissions(owner: string, raw: PermissionCommand): Promise<PermissionSnapshot> {
+    const command = PermissionCommandSchema.parse(raw);
+    if (!this.options.isActive() || this.stopped)
+      throw new LocalAgentError('LOCAL_AGENT_PERMISSION_DENIED');
+    await this.migratePermissions(owner);
+    const repository = this.options.permissions;
+    if (command.action === 'settings') {
+      const previous = await repository.getSettings(owner);
+      // Matrix denials are explicit user rules, so a raised session preset
+      // cannot bypass them. Other matrix cells remain preset defaults.
+      if (command.settings.preset === 'custom' && command.settings.customMatrix) {
+        for (const [object, cells] of Object.entries(command.settings.customMatrix)) {
+          if (object === 'ai_permission') continue;
+          for (const [action, effect] of Object.entries(cells)) {
+            const id = `matrix:${object}:${action}`;
+            if (effect === 'deny')
+              await repository.saveRule(owner, {
+                id,
+                agentId: null,
+                object: object as PermissionRule['object'],
+                action: action as PermissionRule['action'],
+                effect: 'deny',
+                source: 'user',
+                createdAt: Date.now(),
+              });
+            else await repository.removeRule(owner, id);
+          }
+        }
+      }
+      await repository.saveSettings(owner, {
+        ...command.settings,
+        revision: (previous?.revision ?? 0) + 1,
+      });
+    }
+    if (command.action === 'revoke') {
+      const rule = (await repository.listRules(owner)).find((rule) => rule.id === command.ruleId);
+      await repository.removeRule(owner, command.ruleId);
+      const settings = await repository.getSettings(owner);
+      if (rule && rule.id === `matrix:${rule.object}:${rule.action}` && settings?.customMatrix) {
+        settings.customMatrix[rule.object][rule.action] = PERMISSION_PRESETS.on_demand[rule.action];
+        await repository.saveSettings(owner, { ...settings, revision: settings.revision + 1 });
+      }
+    }
+    if (command.action === 'settings' || command.action === 'revoke') {
+      // Old transport scopes have already been imported as business rules.
+      // Explicit settings/revocation must also make formerly hidden tools
+      // available; their execution still passes the unified checkpoint.
+      for (const connection of await this.options.store.listConnections(owner)) {
+        if (
+          connection.writeScopes.includes('goals:write') &&
+          connection.writeScopes.includes('tasks:write')
+        )
+          continue;
+        await this.options.store.updateConnection(owner, connection.id, connection.revision, {
+          driver: connection.driver,
+          name: connection.name,
+          executablePath: connection.executablePath,
+          homePath: connection.homePath,
+          enabled: connection.enabled,
+          instanceSlug: connection.instanceSlug,
+          accentColor: connection.accentColor,
+          nativePermissionMode: connection.nativePermissionMode,
+          writeScopes: ['goals:write', 'tasks:write'],
+        });
+      }
+    }
+    if (command.action === 'conversation') {
+      if (command.preset === null)
+        this.conversations.delete(JSON.stringify([owner, command.conversationId]));
+      else this.conversation(owner, command.conversationId).preset = command.preset;
+    }
+    return {
+      settings: (await repository.getSettings(owner)) ?? {
+        preset: 'on_demand',
+        agentPresets: {},
+        revision: 1,
+      },
+      rules: await repository.listRules(owner),
+      audit: await repository.listAudit(owner, 100),
+    };
+  }
   private readonly grants = new Map<string, Grant>();
   private server?: Server;
   private listening?: Promise<string>;
@@ -162,7 +265,10 @@ export class LocalAgentToolBridge implements LocalAgentToolBridgePort {
           };
           const handler = createMcpHandler(
             () => {
-              const mcp = new McpServer({ name: 'memoflow-local', version: '1' });
+              const mcp = new McpServer({
+                name: 'memoflow-local',
+                version: '1',
+              });
               const requestId = randomUUID();
               this.options.registerTools(mcp, {
                 ...grant.input,
@@ -186,6 +292,14 @@ export class LocalAgentToolBridge implements LocalAgentToolBridgePort {
                       owner: grant.input.identityId,
                       agentId: grant.input.connectionId,
                       conversationId: grant.input.conversationId,
+                      conversationPreset: this.conversation(
+                        grant.input.identityId,
+                        grant.input.conversationId,
+                      ).preset,
+                      conversationRules: this.conversation(
+                        grant.input.identityId,
+                        grant.input.conversationId,
+                      ).rules.filter((rule) => rule.agentId === grant.input.connectionId),
                       operationId,
                       ask: async () => {
                         if (!grant.input.requestApproval) return 'timeout';
@@ -199,11 +313,54 @@ export class LocalAgentToolBridge implements LocalAgentToolBridgePort {
                             onAbort();
                             return;
                           }
-                          approvalSignal.addEventListener('abort', onAbort, { once: true });
-                          Promise.resolve(grant.input.requestApproval!(toolName, approvalSignal))
-                            .then((approved) =>
-                              resolve(approved && !approvalSignal.aborted ? 'allow' : 'deny'),
-                            )
+                          approvalSignal.addEventListener('abort', onAbort, {
+                            once: true,
+                          });
+                          Promise.resolve(
+                            grant.input.requestApproval!(
+                              toolName,
+                              approvalSignal,
+                              (() => {
+                                const operation = getPermissionOperation(operationId)!;
+                                return {
+                                  agentId: grant.input.connectionId,
+                                  object: operation.object,
+                                  action: operation.action,
+                                  expiresAt:
+                                    Date.now() + (this.options.approvalTimeoutMs ?? 25_000),
+                                };
+                              })(),
+                            ),
+                          )
+                            .then(async (approved) => {
+                              if (
+                                approvalSignal.aborted ||
+                                approved === false ||
+                                approved === 'decline'
+                              )
+                                return resolve('deny');
+                              const operation = getPermissionOperation(operationId)!;
+                              const rule: PermissionRule = {
+                                id: randomUUID(),
+                                agentId: grant.input.connectionId,
+                                object: operation.object,
+                                action: operation.action,
+                                effect: 'allow',
+                                source: 'user',
+                                createdAt: Date.now(),
+                              };
+                              if (approved === 'approve_always')
+                                await this.options.permissions.saveRule(
+                                  grant.input.identityId,
+                                  rule,
+                                );
+                              if (approved === 'approve_conversation')
+                                this.conversation(
+                                  grant.input.identityId,
+                                  grant.input.conversationId,
+                                ).rules.push(rule);
+                              resolve(approvalSignal.aborted ? 'deny' : 'allow');
+                            })
                             .catch(() => resolve('deny'))
                             .finally(() => approvalSignal.removeEventListener('abort', onAbort));
                         });
@@ -306,6 +463,7 @@ export class LocalAgentToolBridge implements LocalAgentToolBridgePort {
     };
   }
   async dispose(): Promise<void> {
+    this.conversations.clear();
     this.stopped = true;
     for (const grant of this.grants.values()) {
       grant.controller.abort();
@@ -348,7 +506,11 @@ export async function verifyLocalAgentMcpConnectivity(
     const dataLine = raw.split('\n').find((l) => l.startsWith('data: '));
     const data = dataLine ? JSON.parse(dataLine.slice(6)) : JSON.parse(raw);
     if (data.error) {
-      return { ok: false, tools: [], error: data.error.message || 'JSON-RPC error' };
+      return {
+        ok: false,
+        tools: [],
+        error: data.error.message || 'JSON-RPC error',
+      };
     }
     const discoveredTools: unknown[] = Array.isArray(data?.result?.tools) ? data.result.tools : [];
     const tools = discoveredTools

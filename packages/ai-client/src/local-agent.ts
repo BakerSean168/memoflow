@@ -1,6 +1,9 @@
 import { z } from 'zod';
 import {
   LocalAgentClientCommandSchema,
+  PermissionSnapshotSchema,
+  type PermissionCommand,
+  type PermissionSnapshot,
   LocalAgentConnectionSchema,
   LocalAgentConversationSchema,
   LocalAgentStatusSchema,
@@ -24,6 +27,7 @@ import type { IResultIpcClient } from '@memoflow/ipc-client';
 
 /** Optional Desktop capability. Web hosts do not provide a local Agent client. */
 export interface LocalAgentClient {
+  permissions(command: PermissionCommand): Promise<PermissionSnapshot>;
   getDefaultChoice(): Promise<AssistantRuntimeChoice>;
   setDefaultChoice(choice: AssistantRuntimeChoice): Promise<void>;
   listConnections(): Promise<LocalAgentConnection[]>;
@@ -69,6 +73,7 @@ export function createLocalAgentIpcClient(ipc: IResultIpcClient): LocalAgentClie
     return schema.parse(unwrapOrThrowError(result));
   }
   return {
+    permissions: (command) => invoke({ action: 'permissions', command }, PermissionSnapshotSchema),
     getDefaultChoice: () => invoke({ action: 'get_default' }, AssistantRuntimeChoiceSchema),
     async setDefaultChoice(choice) {
       await invoke({ action: 'set_default', choice }, z.null());

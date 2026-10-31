@@ -101,3 +101,41 @@ it('uses the default preset without blocking when permission tables are not depl
   );
   expect(result).toBe('created');
 });
+
+it('allows a conversation to raise the preset while keeping explicit user denies and settings locked', async () => {
+  const db = createLocalAgentSqlite();
+  const repository = new PermissionPowerSyncRepository(db);
+  try {
+    await repository.saveSettings('owner', { preset: 'read_only', agentPresets: {}, revision: 1 });
+    const input = {
+      owner: 'owner',
+      agentId: 'codex',
+      operationId: 'goal.create',
+      conversationPreset: 'full_auto' as const,
+    };
+    expect((await authorize(repository, input)).decision).toBe('allow');
+    await repository.saveRule('owner', {
+      id: 'deny',
+      agentId: null,
+      object: 'goal',
+      action: 'create',
+      effect: 'deny',
+      source: 'user',
+    });
+    expect((await authorize(repository, input)).decision).toBe('deny');
+    expect(
+      (await authorize(repository, { ...input, operationId: 'ai_permission.update' })).decision,
+    ).toBe('deny');
+    expect(
+      (
+        await authorize(repository, {
+          owner: 'owner',
+          agentId: 'codex',
+          operationId: 'goal.update',
+        })
+      ).decision,
+    ).toBe('deny');
+  } finally {
+    db.close();
+  }
+});
