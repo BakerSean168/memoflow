@@ -196,4 +196,29 @@ describe("permission audit PowerSync writes", () => {
       },
     });
   });
+
+  it("keeps identity and row ID out of owner scoped patches", async () => {
+    const db = database();
+    const ownerKey = createHash("sha256").update("owner").digest("hex");
+    await executeCrudBatch(db, "owner", [
+      {
+        ops: [
+          {
+            op: "PATCH",
+            type: "ai_permission_rules",
+            id: `${ownerKey}:rule:task-deny`,
+            data: {
+              id: "foreign-row",
+              identity_id: "foreign-owner",
+              record_json: '{"id":"task-deny","effect":"deny"}',
+            },
+          },
+        ],
+      },
+    ]);
+    expect(db.aiPermissionRule.updateMany).toHaveBeenCalledWith({
+      where: { id: `${ownerKey}:rule:task-deny`, identityId: "owner" },
+      data: { recordJson: '{"id":"task-deny","effect":"deny"}' },
+    });
+  });
 });

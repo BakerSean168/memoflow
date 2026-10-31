@@ -168,6 +168,9 @@ export async function executeCrudBatch(
             | undefined;
           if (!model) throw new Error("Permission storage unavailable");
           const record = normalizeCrudData(tableName, data);
+          const ownerRecord = { ...record };
+          delete ownerRecord.id;
+          delete ownerRecord.identityId;
           if (opType === "PUT") {
             const ownedData = { ...record, id, identityId };
             await model.createMany({ data: ownedData, skipDuplicates: true });
@@ -176,7 +179,10 @@ export async function executeCrudBatch(
               data: ownedData,
             });
           } else if (opType === "PATCH") {
-            await model.updateMany({ where: { id, identityId }, data: record });
+            await model.updateMany({
+              where: { id, identityId },
+              data: ownerRecord,
+            });
           } else if (opType === "DELETE") {
             await model.deleteMany({ where: { id, identityId } });
           }
