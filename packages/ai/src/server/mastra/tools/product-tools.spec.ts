@@ -1,12 +1,28 @@
 import { describe, expect, it, vi } from 'vitest';
 import type { ExecutionContext } from '@memoflow/transport-contracts';
 import { RequestContext } from '@mastra/core/request-context';
-import { createMemoFlowProductTools, RoutineTriggerSchema } from './product-tools';
+import {
+  createMemoFlowProductTools,
+  RoutineTriggerSchema,
+  type MemoFlowProductToolDependencies,
+} from './product-tools';
 import {
   MEMOFLOW_PRODUCT_TOOL_POLICY,
   assertMemoFlowToolClassification,
   applyMemoFlowSessionToolPolicy,
 } from './product-tool-policy';
+
+function createTools(deps: Omit<MemoFlowProductToolDependencies, 'permissions'>) {
+  return createMemoFlowProductTools({
+    ...deps,
+    permissions: {
+      getSettings: async () => ({ preset: 'full_auto', agentPresets: {}, revision: 1 }),
+      listRules: async () => [],
+      appendAudit: async () => {},
+      updateAuditExecution: async () => {},
+    } as unknown as import('../../permissions').PermissionRepository,
+  });
+}
 
 function context() {
   const requestContext = new RequestContext();
@@ -31,7 +47,7 @@ const elapsedTrigger = {
 
 describe('MemoFlow AI owner tools (AI-9609)', () => {
   it('requires approval for high-impact Routine and Notification mutations', () => {
-    const tools = createMemoFlowProductTools({});
+    const tools = createTools({});
     for (const name of [
       'routine_create',
       'routine_set_profile_active',
@@ -42,16 +58,14 @@ describe('MemoFlow AI owner tools (AI-9609)', () => {
     ] as const) {
       expect(tools[name].requireApproval).toBe(true);
     }
-    expect(tools.routine_pause_protocol.requireApproval).not.toBe(true);
-    expect(tools.routine_resume_protocol.requireApproval).not.toBe(true);
-    expect(tools.routine_end_protocol.requireApproval).not.toBe(true);
+    for (const tool of Object.values(tools)) expect(tool.needsApprovalFn).toBeTypeOf('function');
   });
 
   it('classifies every registered tool and derives its explicit approval setting', () => {
-    const tools = createMemoFlowProductTools({});
+    const tools = createTools({});
     expect(Object.keys(tools).sort()).toEqual(Object.keys(MEMOFLOW_PRODUCT_TOOL_POLICY).sort());
-    for (const [name, rule] of Object.entries(MEMOFLOW_PRODUCT_TOOL_POLICY)) {
-      expect(tools[name as keyof typeof tools].requireApproval).toBe(rule.requireApproval);
+    for (const name of Object.keys(MEMOFLOW_PRODUCT_TOOL_POLICY)) {
+      expect(tools[name as keyof typeof tools].needsApprovalFn).toBeTypeOf('function');
     }
     expect(() => assertMemoFlowToolClassification({ unknown: { id: 'unknown' } })).toThrow(
       'Unclassified',
@@ -82,7 +96,7 @@ describe('MemoFlow AI owner tools (AI-9609)', () => {
       expect(session.resolveToolApproval(name)).toBe(policy.category === 'read' ? 'allow' : 'deny');
     expect(session.resolveToolApproval('unclassified')).toBe('deny');
     const executeAction = vi.fn();
-    const tools = createMemoFlowProductTools({ notificationReadPort: { executeAction } as never });
+    const tools = createTools({ notificationReadPort: { executeAction } as never });
     const requestContext = context();
     requestContext.setRaw('permissionMode', 'read-only');
     await expect(
@@ -90,13 +104,12 @@ describe('MemoFlow AI owner tools (AI-9609)', () => {
         { notificationId: 'n', actionKey: 'archive' },
         { requestContext, observe: {} as never },
       ),
-    ).rejects.toThrow('Read-only');
+    ).rejects.toThrow('not authorized');
     expect(executeAction).not.toHaveBeenCalled();
     await applyMemoFlowSessionToolPolicy(session, 'supervised');
     expect(session.resolveToolApproval('notification_execute_action')).toBe('ask');
-    await expect(applyMemoFlowSessionToolPolicy(session, 'auto-approve' as never)).rejects.toThrow(
-      'Unsupported',
-    );
+    await applyMemoFlowSessionToolPolicy(session, 'auto-approve');
+    expect(session.resolveToolApproval('notification_execute_action')).toBe('allow');
   });
 
   it('exposes a strict canonical Routine trigger union', () => {
@@ -134,7 +147,7 @@ describe('MemoFlow AI owner tools (AI-9609)', () => {
   });
 
   it('publishes structured schemas for knowledge, workspace, Planner and Notification tools', () => {
-    const tools = createMemoFlowProductTools({});
+    const tools = createTools({});
     expect(tools.knowledge_search.inputSchema.safeParse({ query: 'release notes' }).success).toBe(
       true,
     );
@@ -182,7 +195,7 @@ describe('MemoFlow AI owner tools (AI-9609)', () => {
         content: 'x'.repeat(4_100),
       },
     ]);
-    const tools = createMemoFlowProductTools({
+    const tools = createTools({
       knowledgeSourcePort: { listRelevantNotes } as never,
     });
 
@@ -211,7 +224,7 @@ describe('MemoFlow AI owner tools (AI-9609)', () => {
     const createRoutine = vi.fn(
       async () => ({ kind: 'routine', id: 'r-1', status: 'created' }) as const,
     );
-    const tools = createMemoFlowProductTools({
+    const tools = createTools({
       routineCommandPort: { createRoutine } as never,
     });
     await tools.routine_create.execute?.(
@@ -253,7 +266,7 @@ describe('MemoFlow AI owner tools (AI-9609)', () => {
       outcome: 'accepted' as const,
       commandReceiptId: null,
     }));
-    const tools = createMemoFlowProductTools({
+    const tools = createTools({
       analyticsReadPort: { buildContext } as never,
       plannerReadPort: { getWindowSummary } as never,
       notificationReadPort: { getUnreadSummary, executeAction } as never,

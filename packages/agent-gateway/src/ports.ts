@@ -30,6 +30,13 @@ export class GatewayReadError extends Error {
   }
 }
 
+/** Public business-policy refusal; contains no rule ids or tool arguments. */
+export class GatewayPermissionDeniedError extends GatewayReadError {
+  constructor(readonly decision: 'ask' | 'deny') {
+    super('PERMISSION_DENIED');
+  }
+}
+
 /** Gateway-owned read seam; the API host binds it to Goal's application operations. */
 export interface GoalReadPort {
   getGoal(
@@ -148,3 +155,10 @@ export interface GatewayAssistedPort {
   resume: WriteCall<import('@memoflow/agent-gateway').AssistedView>;
   cancel: WriteCall<import('@memoflow/agent-gateway').AssistedView>;
 }
+
+/** Host binds the common AI permission checkpoint without a Gateway → AI dependency. */
+export type GatewayToolCheckpoint = <T>(
+  principal: GatewayPrincipal,
+  tool: string,
+  work: () => Promise<T>,
+) => Promise<T>;

@@ -1,3 +1,5 @@
+import { AIChatPermissionModeSchema, type AIChatPermissionMode } from '@memoflow/ai-contracts';
+import type { PermissionRepository } from '../../permissions';
 import { Agent } from '@mastra/core/agent';
 import type { ConversationTitleGeneration } from '@memoflow/ai-contracts';
 import type { ExternalWorkflowInvocation } from './workflow-runtime.port';
@@ -5,6 +7,8 @@ import { AgentRegistryError } from '../../application/agent-instance/agent-insta
 import { MastraDurableWorkflowRuntime } from './mastra-durable-workflow.runtime';
 import {
   applyMemoFlowSessionToolPolicy,
+  checkMemoFlowToolPermission,
+  recordMemoFlowToolDecision,
   memoFlowToolCategory,
   memoFlowToolPolicy,
 } from '../tools/product-tool-policy';
@@ -88,6 +92,7 @@ import { createLogger } from '@memoflow/utils/logger';
 const logger = createLogger('MastraAIRuntime');
 
 export interface MastraAIRuntimeDependencies {
+  readonly permissions: PermissionRepository;
   readonly storage: MastraCompositeStore;
   readonly modelResolver: MastraModelResolver;
   /** Host-authoritative last accepted selection; compatible Mastra instances share the thread. */
@@ -146,7 +151,7 @@ export class MastraAIRuntime implements AIWorkflowRuntimePort {
     string,
     { session: Session; done: Promise<boolean> }
   >();
-  private readonly sessionModes = new WeakMap<Session, 'supervised' | 'read-only'>();
+  private readonly sessionModes = new WeakMap<Session, AIChatPermissionMode>();
   private readonly selectedContextHydrator: AssistantSelectedContextHydrator;
 
   /** A bounded, tool-free call using only the explicitly selected model. No memory/context hydration. */
@@ -193,6 +198,7 @@ export class MastraAIRuntime implements AIWorkflowRuntimePort {
       memory: this.memory,
     });
     const productTools = createMemoFlowProductTools({
+      permissions: deps.permissions,
       routineCommandPort: deps.routineCommandPort,
       plannerReadPort: deps.plannerReadPort,
       notificationReadPort: deps.notificationReadPort,
@@ -335,7 +341,10 @@ export class MastraAIRuntime implements AIWorkflowRuntimePort {
       await this.deps.conversationActivity?.recordActivity(identityId, conversationId, Date.now());
     } catch {
       // Sidebar metadata must not turn an otherwise valid reply into a failed turn.
-      logger.warn('Conversation activity projection failed', { conversationId, requestId });
+      logger.warn('Conversation activity projection failed', {
+        conversationId,
+        requestId,
+      });
     }
   }
 
@@ -473,9 +482,10 @@ export class MastraAIRuntime implements AIWorkflowRuntimePort {
 
   private async applySessionPolicy(
     session: Session,
-    mode: 'supervised' | 'read-only' = 'supervised',
+    mode: AIChatPermissionMode = 'supervised',
+    requestContext?: RequestContext,
   ) {
-    await applyMemoFlowSessionToolPolicy(session, mode);
+    await applyMemoFlowSessionToolPolicy(session, mode, requestContext);
     this.sessionModes.set(session, mode);
   }
 
@@ -491,18 +501,29 @@ export class MastraAIRuntime implements AIWorkflowRuntimePort {
     // for that durable boundary before reading policy or retiring cancellation;
     // otherwise a late publisher can resurrect the run after it was deleted.
     const deadline = Date.now() + 10000;
-    let snapshot = await workflows.loadWorkflowSnapshot({ workflowName: 'agentic-loop', runId });
+    let snapshot = await workflows.loadWorkflowSnapshot({
+      workflowName: 'agentic-loop',
+      runId,
+    });
     while (snapshot?.status !== 'suspended') {
       if (Date.now() >= deadline) throw new Error('Suspension was not persisted');
       await new Promise((resolve) => setTimeout(resolve, 25));
-      snapshot = await workflows.loadWorkflowSnapshot({ workflowName: 'agentic-loop', runId });
+      snapshot = await workflows.loadWorkflowSnapshot({
+        workflowName: 'agentic-loop',
+        runId,
+      });
     }
     // Resume the run's durable policy, never a process-local default. Missing
     // policy (including older snapshots) cannot grant write/execute authority.
-    const mode =
-      snapshot?.requestContext?.permissionMode === 'supervised' ? 'supervised' : 'read-only';
+    const mode = AIChatPermissionModeSchema.safeParse(snapshot?.requestContext?.permissionMode)
+      .success
+      ? AIChatPermissionModeSchema.parse(snapshot?.requestContext?.permissionMode)
+      : 'read-only';
     const requestContext = new RequestContext();
     requestContext.setRaw('permissionMode', mode);
+    const agentInstanceId = snapshot?.requestContext?.agentInstanceId;
+    if (typeof agentInstanceId === 'string')
+      requestContext.setRaw('agentInstanceId', agentInstanceId);
     requestContext.setRaw('identityId', context.identityId);
     requestContext.setRaw('executionContext', context);
     requestContext.setRaw(MASTRA_RESOURCE_ID_KEY, context.identityId);
@@ -518,7 +539,11 @@ export class MastraAIRuntime implements AIWorkflowRuntimePort {
       domainFacts: [],
       knowledgeEvidence: [],
       selectedEntities: [
-        { entityType: 'conversation', id: conversationId, source: 'assistant.session' },
+        {
+          entityType: 'conversation',
+          id: conversationId,
+          source: 'assistant.session',
+        },
       ],
     });
     setAIContextRequestContext(requestContext, envelope);
@@ -532,6 +557,7 @@ export class MastraAIRuntime implements AIWorkflowRuntimePort {
     await this.applySessionPolicy(
       session,
       this.sessionModes.get(session) === 'read-only' ? 'read-only' : mode,
+      requestContext,
     );
     return { session, requestContext };
   }
@@ -651,7 +677,14 @@ export class MastraAIRuntime implements AIWorkflowRuntimePort {
           this.history.appendRuntimeRecord({
             identityId: input.identityId,
             conversationId: input.conversationId,
-            approvalReceipt: { runId, toolCallId, toolName, decision, category, risk: 'high' },
+            approvalReceipt: {
+              runId,
+              toolCallId,
+              toolName,
+              decision,
+              category,
+              risk: 'high',
+            },
             toolActivities: [
               {
                 toolCallId,
@@ -758,7 +791,7 @@ export class MastraAIRuntime implements AIWorkflowRuntimePort {
           const policy = memoFlowToolPolicy(call.toolName);
           const toolName = AssistantToolNameSchema.safeParse(call.toolName);
           if (
-            policy?.requireApproval &&
+            policy &&
             toolName.success &&
             call.toolCallId &&
             (policy.category === 'edit' ||
@@ -770,7 +803,11 @@ export class MastraAIRuntime implements AIWorkflowRuntimePort {
                 runId: run.runId,
                 toolCallId: call.toolCallId,
                 question: call.toolName,
-                approval: { toolName: toolName.data, category: policy.category, risk: 'high' },
+                approval: {
+                  toolName: toolName.data,
+                  category: policy.category,
+                  risk: 'high',
+                },
               },
             ];
           }
@@ -876,7 +913,10 @@ export class MastraAIRuntime implements AIWorkflowRuntimePort {
         // separate storage and must be retired after native denial persistence.
         const workflows = await this.deps.storage.getStore('workflows');
         if (!workflows) throw new Error('Suspension storage unavailable');
-        await workflows.deleteWorkflowRunById({ runId: run.runId, workflowName: 'agentic-loop' });
+        await workflows.deleteWorkflowRunById({
+          runId: run.runId,
+          workflowName: 'agentic-loop',
+        });
         await workflows.deleteWorkflowRunById({
           runId: run.runId,
           workflowName: 'executionWorkflow',
@@ -1038,7 +1078,7 @@ export class MastraAIRuntime implements AIWorkflowRuntimePort {
         (call) =>
           call.toolCallId === input.command.toolCallId &&
           call.toolName &&
-          memoFlowToolPolicy(call.toolName)?.requireApproval,
+          memoFlowToolPolicy(call.toolName),
       ) ||
       this.resumedRuns.has(run.runId)
     )
@@ -1061,11 +1101,24 @@ export class MastraAIRuntime implements AIWorkflowRuntimePort {
         input.command.conversationId,
         run.runId,
       );
+      if (
+        (await checkMemoFlowToolPermission(this.deps.permissions, toolName, requestContext)) ===
+          'deny' &&
+        input.command.decision === 'approve'
+      )
+        return false;
+      await recordMemoFlowToolDecision(
+        this.deps.permissions,
+        toolName,
+        requestContext,
+        input.command.decision,
+      );
       if (!session.approval.isArmed()) {
         const call = run.toolCalls.find((call) => call.toolCallId === input.command.toolCallId);
         if (
           !call?.toolName ||
-          session.resolveToolApproval(call.toolName) === 'deny' ||
+          (session.resolveToolApproval(call.toolName) === 'deny' &&
+            input.command.decision === 'approve') ||
           session.run.isRunning()
         )
           return false;
@@ -1074,7 +1127,10 @@ export class MastraAIRuntime implements AIWorkflowRuntimePort {
         await session.thread.ensureCurrentSubscription();
         session.run.setRunId({ runId: run.runId });
         return await this.driveApprovalResume(session, receiptInput, async () => {
-          const response = { toolCallId: input.command.toolCallId, requestContext };
+          const response = {
+            toolCallId: input.command.toolCallId,
+            requestContext,
+          };
           if (input.command.decision === 'decline') await session.declineToolCall(response);
           else await session.approveToolCall(response);
           return true;
@@ -1117,7 +1173,7 @@ export class MastraAIRuntime implements AIWorkflowRuntimePort {
   private async *dispatchReservedMessage(
     input: AssistantTurnInput,
   ): AsyncGenerator<AssistantRuntimeEvent, void, void> {
-    if (input.permissionMode && !['supervised', 'read-only'].includes(input.permissionMode))
+    if (input.permissionMode && !AIChatPermissionModeSchema.safeParse(input.permissionMode).success)
       throw new AIExecutionError('configuration_required', 'Unsupported Mastra permission mode');
     await this.init();
     await this.history.ensureConversation({
@@ -1209,10 +1265,7 @@ export class MastraAIRuntime implements AIWorkflowRuntimePort {
     if (conversationBusy() || session.run.isRunning())
       throw new Error('Assistant conversation already has an active turn');
     // Reapply on cached/reconnected sessions; setup failure must prevent the turn.
-    await this.applySessionPolicy(
-      session,
-      input.permissionMode === 'read-only' ? 'read-only' : 'supervised',
-    );
+    await this.applySessionPolicy(session, input.permissionMode ?? 'supervised', requestContext);
     if (conversationBusy() || session.run.isRunning())
       throw new Error('Assistant conversation already has an active turn');
     if (this.deps.agentRegistry) {
@@ -1240,6 +1293,7 @@ export class MastraAIRuntime implements AIWorkflowRuntimePort {
       input.context?.requestId,
     );
     yield* new AssistantTurnSession({
+      permissions: this.deps.permissions,
       session,
       activeRuns: this.activeRuns,
       requestContext,

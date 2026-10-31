@@ -1,3 +1,4 @@
+import type { GatewayToolCheckpoint } from '@memoflow/agent-gateway';
 import { afterAll, beforeEach, expect, it } from 'vitest';
 import { prisma } from '@memoflow/database';
 import { IdentityId } from '@memoflow/utils/domain';
@@ -369,6 +370,7 @@ async function gatewayFixture() {
   const audit: unknown[] = [];
   const options = {
     enabled: true,
+    toolCheckpoint: (async (_principal, _tool, work) => work()) satisfies GatewayToolCheckpoint,
     audience,
     trustedOrigins: [],
     cursorSecret: 'test-only-secret-'.repeat(3),

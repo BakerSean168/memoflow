@@ -1,3 +1,4 @@
+import type { GatewayToolCheckpoint } from '@memoflow/agent-gateway';
 import { afterAll, beforeEach, expect, it, vi } from 'vitest';
 import { prisma, type Prisma } from '@memoflow/database';
 import { createGoalPrismaAgentMutations } from '@memoflow/goal';
@@ -100,6 +101,7 @@ async function fixture() {
   const audit: unknown[] = [];
   const options = {
     enabled: true,
+    toolCheckpoint: (async (_principal, _tool, work) => work()) satisfies GatewayToolCheckpoint,
     audience,
     trustedOrigins: [],
     cursorSecret: 'test-only-secret-'.repeat(3),

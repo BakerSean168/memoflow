@@ -11,6 +11,8 @@ updated: 2026-10-19T00:00:00Z
 **日期：** 2026-10-07
 **关联：** ADR-038、ADR-042、ADR-049、ADR-071、ADR-073、ADR-099、ADR-112、ADR-116、ADR-117
 
+> 逐次业务审批部分由 [ADR-123](./ADR-123-unified-agent-business-permission-checkpoint.md) 替换；凭据、owner、幂等和事务边界继续有效。
+
 ## Context
 
 MCP 客户端可能超时、重试、断开或并发调用。既有 deterministic entity ID 和部分 operation receipts 是可复用基础，但不等于已经提供所有外部写入的 request-body 幂等保证。先调用 owner 再写 Gateway receipt 会留下“业务成功、回执丢失、重试重复写”的窗口。

@@ -144,6 +144,7 @@ export {
 } from './server/local-agent/local-tool-bridge';
 export {
   PermissionLocalRepository,
+  PermissionPrismaRepository,
   PermissionPowerSyncRepository,
   permissionOperationForTool,
   goalPanelSubmitOperationId,

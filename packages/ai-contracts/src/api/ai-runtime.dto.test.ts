@@ -21,7 +21,13 @@ describe('AI vNext runtime contracts', () => {
       content: 'Read this',
       surface: 'web',
     };
-    for (const permissionMode of ['supervised', 'read-only', 'auto-approve'])
+    for (const permissionMode of [
+      'supervised',
+      'read-only',
+      'auto-approve',
+      'on-demand',
+      'confirm-each',
+    ])
       expect(
         AssistantRuntimeClientCommandSchema.safeParse({
           ...input,

@@ -141,6 +141,8 @@ updated: 2026-10-07T00:00:00Z
 | [ADR-121](./ADR-121-desktop-local-agent-host-and-tool-bridge.md) | Desktop 本地 Agent 宿主与业务工具通道 | 已采纳（实施中） | 2026-10-09 |
 | [ADR-122](./ADR-122-routine-offline-scheduler-host-ownership.md) | Routine Offline Scheduler Host Ownership | 已采纳并部分实施（#737） | 2026-10-30 |
 
+| [ADR-123](./ADR-123-unified-agent-business-permission-checkpoint.md) | Agent 统一业务权限检查点、四档预设与 Mastra/MCP 接入 | 已采纳（#757/#761） | 2026-10-31 |
+
 ## 维护规则
 
 - 规则类 ADR 与实施类 ADR 统一收录在这里，不再使用 `003b`、`007b` 这类旁支编号。
