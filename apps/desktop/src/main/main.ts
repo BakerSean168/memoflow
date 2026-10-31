@@ -230,15 +230,23 @@ async function registerBusinessModules(
   const notificationComposed = composeNotification({
     db,
     userTimeContextPort: settingElectronModule.userTimeContextPort,
-    desktopRenderer: (dto) => {
+    desktopRenderer: (dto, context) => {
       const renderer = mainRuntime?.notification;
       if (!renderer) return false;
       const payload = dto as Record<string, unknown>;
+      const delivery = context as { identityId?: string; deliveryId?: string } | undefined;
+      if (
+        !delivery?.identityId ||
+        delivery.identityId !== mainRuntime?.profileRuntimeManager.getCurrentIdentityId()
+      ) {
+        return false;
+      }
       return renderer.show({
         title: String(payload.title ?? 'Notification'),
         body: String(payload.content ?? ''),
         data: {
           notificationId: payload.id,
+          deliveryId: delivery?.deliveryId,
           identityId: payload.identityId,
           notificationType: payload.type,
           notificationCategory: payload.category,

@@ -95,7 +95,9 @@ export class RealDesktopChannelDeliverer implements NotificationChannelDeliverer
     }
     const store =
       typeof t.getAckStore === 'function'
-        ? (t.getAckStore() as { getAck?: (key: string) => Promise<unknown> | unknown })
+        ? (t.getAckStore() as {
+            getAck?: (key: string) => Promise<unknown> | unknown;
+          })
         : null;
     if (store && typeof store.getAck === 'function') {
       const ack = await store.getAck(idempotencyKey);
@@ -108,7 +110,7 @@ export class RealDesktopChannelDeliverer implements NotificationChannelDeliverer
     notification: Notification,
     _target: NotificationDeliveryTarget,
     context: NotificationDeliveryContext,
-  ): Promise<void> {
+  ): Promise<void | { status: 'suppressed'; reason: string }> {
     const transportDeliver = getTransportDeliverFn(this.transport);
     if (!transportDeliver) {
       throw new Error(
@@ -123,6 +125,18 @@ export class RealDesktopChannelDeliverer implements NotificationChannelDeliverer
       : (notification as unknown as TargetObject);
 
     const rawAck = await transportDeliver(dto, context);
+    if (
+      rawAck &&
+      typeof rawAck === 'object' &&
+      (rawAck as TargetObject).status === 'suppressed' &&
+      typeof (rawAck as TargetObject).ackId === 'string' &&
+      (rawAck as TargetObject).ackId
+    ) {
+      return {
+        status: 'suppressed',
+        reason: String((rawAck as TargetObject).error ?? 'device-policy'),
+      };
+    }
     if (!isDeliveredAck(rawAck)) {
       throw new Error(
         `transport did not return a valid delivery ack (non-empty ackId and status 'delivered' required); got: ${describeAck(rawAck)}`,

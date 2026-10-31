@@ -220,6 +220,42 @@ describe('NotificationRequestedPowerSyncWriterAdapter (NOTIF-3301 desktop lane)'
     expect(claimedRow?.leaseExpiresAt).toBeTruthy();
   });
 
+  it.each(['succeeded', 'retryable', 'dead_letter'] as const)(
+    'returns the native %s receipt when the same business request is replayed',
+    async (status) => {
+      const input = { operationId: randomUUID(), envelope: buildEnvelope() };
+      await writer.enqueueNotificationRequested(input);
+      const adapter = new PowerSyncNotificationReliableAdapter(db);
+      const [claim] = await adapter.claimSharedOutboxIntents({
+        ownerToken: 'replay-worker',
+        limit: 1,
+      });
+      await expect(writer.enqueueNotificationRequested(input)).resolves.toMatchObject({
+        status: 'running',
+        lease: { ownerToken: 'replay-worker', claimId: claim.claimId },
+      });
+      const retryAt = new Date(Date.now() + 60_000);
+      await adapter.updateSharedOutboxStatus(
+        claim.id,
+        status,
+        status === 'succeeded' ? null : 'renderer unavailable',
+        status === 'retryable' ? retryAt : null,
+        {
+          ownerToken: claim.ownerToken!,
+          claimId: claim.claimId!,
+          fencingToken: claim.fencingToken!,
+        },
+      );
+      await expect(writer.enqueueNotificationRequested(input)).resolves.toMatchObject({
+        operationId: input.operationId,
+        status,
+        lease: null,
+        nextRetryAt: status === 'retryable' ? retryAt.toISOString() : null,
+      });
+      expect(rows(input.envelope.idempotencyKey)).toHaveLength(1);
+    },
+  );
+
   it('6. UNIQUE idempotency_key makes business idempotency durable under concurrent writers', async () => {
     const opId = randomUUID();
     const envelope = buildEnvelope();

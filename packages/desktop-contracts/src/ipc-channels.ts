@@ -211,6 +211,7 @@ export const NotificationChannels = {
   CUSTOM_MOUSE_ENTER: 'notification:custom:mouse-enter',
   CUSTOM_MOUSE_LEAVE: 'notification:custom:mouse-leave',
   CUSTOM_RENDERER_READY: 'notification:custom:renderer-ready',
+  CUSTOM_PRESENTED: 'notification:custom:presented',
 } as const;
 
 export const RepositoryChannels = {

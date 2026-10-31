@@ -9,6 +9,11 @@ import type {
 import { NotificationChannelType } from '@memoflow/notification-contracts';
 import { buildIdempotencyKeyString } from '@memoflow/reliable-messaging-contracts';
 import { asHm, createTimeContext, requireTimeZoneId } from '@memoflow/time';
+// Cross-module acceptance seam: Routine's public durable envelope, no production dependency.
+// eslint-disable-next-line @nx/enforce-module-boundaries
+import { buildRoutineNotificationRequestedOutboxInput } from '@memoflow/routine/schedule-execution/routine';
+import { createNotificationDurableRuntime } from '../../../runtime/notification.runtime';
+import { NotificationRequestedPowerSyncWriterAdapter } from '../notification-requested-writer.powersync.adapter';
 import { PowerSyncNotificationReliableAdapter } from '../power-sync-notification-reliable.adapter';
 import { PowerSyncNotificationRepository } from '../notification-powersync.repository';
 import { PowerSyncNotificationPreferenceRepository } from '../notification-preference-powersync.repository';
@@ -17,12 +22,16 @@ import {
   createNotificationPowerSyncModule,
 } from '../../../powersync';
 import { CreateNotificationUseCase } from '../../../../application/use-cases/commands/create-notification.use-case';
+import { NotificationMetricsService } from '../../../../domain/services/notification-metrics-service';
 import { Notification } from '../../../../domain/aggregates/notification';
 import { NotificationPreference } from '../../../../domain/aggregates/notification-preference';
 import { QuietHours } from '../../../../domain/value-objects/quiet-hours';
 import { RealDesktopChannelDeliverer } from '../../deliverers/real-channel-deliverers';
 
-const TEST_TIME_CONTEXT = createTimeContext({ timeZone: 'UTC', weekStartsOn: 1 });
+const TEST_TIME_CONTEXT = createTimeContext({
+  timeZone: 'UTC',
+  weekStartsOn: 1,
+});
 const TEST_USER_TIME_CONTEXT_PORT = {
   getUserTimeContext: vi.fn().mockResolvedValue(TEST_TIME_CONTEXT),
 };
@@ -284,7 +293,9 @@ describe('PowerSync Notification delivery execution', () => {
       status: 'delivered',
       timestamp: 123456789,
     });
-    const deliverer = new RealDesktopChannelDeliverer({ deliver: transportDeliver });
+    const deliverer = new RealDesktopChannelDeliverer({
+      deliver: transportDeliver,
+    });
     const notification = fact('user-1', 'desktop-ack');
     const idempotencyKey = buildIdempotencyKeyString({
       source: 'notification',
@@ -303,11 +314,188 @@ describe('PowerSync Notification delivery execution', () => {
     expect(notification.toServerDTO()).not.toHaveProperty('notificationChannels');
   });
 
+  it.each(['desktop', 'cloud'] as const)(
+    'materializes three Routine occurrences on %s without duplicate Facts or unhosted deliveries',
+    async (host) => {
+      const { db, sqlite } = createTestDb();
+      try {
+        const repository = new PowerSyncNotificationRepository(db);
+        const writer = new NotificationRequestedPowerSyncWriterAdapter(db);
+        const renderer = vi.fn().mockResolvedValue(true);
+        const runtime = createNotificationDurableRuntime({
+          notificationRepository: repository,
+          preferenceRepository: new PowerSyncNotificationPreferenceRepository(db),
+          reliableAdapter: new PowerSyncNotificationReliableAdapter(db),
+          closureChecker: async () => false,
+          userTimeContextPort: TEST_USER_TIME_CONTEXT_PORT,
+          channelCapabilities:
+            host === 'desktop'
+              ? [
+                  { channelType: 'InApp', status: 'available' },
+                  { channelType: 'Desktop', status: 'available' },
+                ]
+              : [{ channelType: 'InApp', status: 'available' }],
+          transport:
+            host === 'desktop'
+              ? createDefaultElectronDesktopTransport({ db, renderer })
+              : undefined,
+        });
+        for (let cycle = 1; cycle <= 3; cycle++) {
+          const input = buildRoutineNotificationRequestedOutboxInput({
+            identityId: 'routine-user',
+            routineId: 'minute-routine',
+            occurrenceKey: `satisfied-cycle-${cycle}`,
+            scheduledFor: cycle * 60_000,
+            sourceRevision: 1,
+            title: 'Routine',
+            content: 'Due',
+          });
+          await writer.enqueueNotificationRequested(input);
+          await runtime.tick(); // NotificationRequested -> Fact + delivery decisions
+          await runtime.tick(); // dispatch -> ACK + receipt
+          await writer.enqueueNotificationRequested(input); // crash/replay of canonical occurrence
+          await runtime.tick();
+        }
+        expect(await db.getAll('SELECT id FROM notifications')).toHaveLength(3);
+        const receipts = await new PowerSyncNotificationReliableAdapter(db).queryReceipts(
+          'routine-user',
+        );
+        expect(receipts).toHaveLength(host === 'desktop' ? 6 : 3);
+        expect(receipts.every((receipt) => receipt.status === 'succeeded')).toBe(true);
+        expect(renderer).toHaveBeenCalledTimes(host === 'desktop' ? 3 : 0);
+        const decisions = await db.getAll<{ outcome: string }>(
+          "SELECT outcome FROM notification_delivery_decisions WHERE channel = 'Desktop'",
+        );
+        expect(decisions.map((row) => row.outcome)).toEqual(
+          Array(3).fill(host === 'desktop' ? 'enqueued' : 'unsupported'),
+        );
+        runtime.stop();
+      } finally {
+        sqlite.close();
+      }
+    },
+  );
+
+  it('retries a failed renderer then reuses the persisted ACK after transport restart', async () => {
+    const { db, sqlite } = createTestDb();
+    try {
+      const renderer = vi.fn().mockResolvedValueOnce(false).mockResolvedValue(true);
+      const transport = createDefaultElectronDesktopTransport({
+        db,
+        renderer,
+      }) as {
+        deliver: (dto: unknown, context: unknown) => Promise<{ ackId: string; status: string }>;
+      };
+      const context = { idempotencyKey: 'retry-after-failure' };
+      await expect(transport.deliver({}, context)).resolves.toMatchObject({
+        status: 'failed',
+      });
+      const success = await transport.deliver({}, context);
+      expect(success.status).toBe('delivered');
+      const restarted = createDefaultElectronDesktopTransport({
+        db,
+        renderer,
+      }) as typeof transport;
+      await expect(restarted.deliver({}, context)).resolves.toMatchObject({
+        ackId: success.ackId,
+        status: 'delivered',
+      });
+      expect(renderer).toHaveBeenCalledTimes(2);
+    } finally {
+      sqlite.close();
+    }
+  });
+
+  it('persists device suppression as skipped, never delivered, and does not retry after restart', async () => {
+    const { db, sqlite } = createTestDb();
+    try {
+      const renderer = vi.fn().mockResolvedValue({ status: 'suppressed', reason: 'device-dnd' });
+      const transport = createDefaultElectronDesktopTransport({ db, renderer });
+      const instance = createNotificationPowerSyncModule(db, {
+        userTimeContextPort: TEST_USER_TIME_CONTEXT_PORT,
+        transport,
+        metricsService: new NotificationMetricsService(),
+      });
+      const useCase = new CreateNotificationUseCase(
+        instance.notificationRepository,
+        instance.preferenceRepository,
+        async () => false,
+        TEST_USER_TIME_CONTEXT_PORT,
+      );
+      const result = await useCase.execute({
+        identityId: 'suppressed-user',
+        workflowKey: 'routine.intervention',
+        title: 'Due',
+        content: '',
+        channels: ['Desktop'],
+      });
+      expect(result.ok).toBe(true);
+      await instance.durableRuntime.tick();
+      const [receipt] = await new PowerSyncNotificationReliableAdapter(db).queryReceipts(
+        'suppressed-user',
+      );
+      expect(receipt.status).toBe('skipped');
+      expect(instance.durableRuntime.getMetrics()).toMatchObject({
+        deliveredTotal: 0,
+      });
+      const restarted = createDefaultElectronDesktopTransport({
+        db,
+        renderer,
+      }) as {
+        deliver: (dto: unknown, context: unknown) => Promise<{ status: string; error?: string }>;
+      };
+      await expect(
+        restarted.deliver({}, { idempotencyKey: receipt.idempotencyKey }),
+      ).resolves.toMatchObject({ status: 'suppressed', error: 'device-dnd' });
+      await instance.durableRuntime.tick();
+      expect(renderer).toHaveBeenCalledTimes(1);
+      instance.dispose();
+    } finally {
+      sqlite.close();
+    }
+  });
+
+  it('coalesces concurrent deliveries and persists only confirmed presentation', async () => {
+    const { db, sqlite } = createTestDb();
+    try {
+      let complete!: (shown: boolean) => void;
+      const renderer = vi.fn(
+        () =>
+          new Promise<boolean>((resolve) => {
+            complete = resolve;
+          }),
+      );
+      const transport = createDefaultElectronDesktopTransport({
+        db,
+        renderer,
+      }) as {
+        deliver: (dto: unknown, context: unknown) => Promise<{ ackId: string; status: string }>;
+        getAck: (key: string) => Promise<{ status: string } | null>;
+      };
+      const context = { idempotencyKey: 'concurrent-desktop' };
+      const first = transport.deliver({}, context);
+      const second = transport.deliver({}, context);
+      await vi.waitFor(() => expect(renderer).toHaveBeenCalled());
+      expect(await transport.getAck(context.idempotencyKey)).toMatchObject({
+        status: 'delivering',
+      });
+      complete(true);
+      const acks = await Promise.all([first, second]);
+      expect(acks[0]).toEqual(acks[1]);
+      expect(renderer).toHaveBeenCalledTimes(1);
+    } finally {
+      sqlite.close();
+    }
+  });
+
   it('keeps renderer delivery idempotent through the durable ack store', async () => {
     const { db, sqlite } = createTestDb();
     try {
       const renderer = vi.fn().mockReturnValue(true);
-      const transport = createDefaultElectronDesktopTransport({ db, renderer }) as {
+      const transport = createDefaultElectronDesktopTransport({
+        db,
+        renderer,
+      }) as {
         deliver: (dto: unknown, context: unknown) => Promise<{ ackId: string; status: string }>;
       };
       const context = {
@@ -329,7 +517,10 @@ describe('PowerSync Notification delivery execution', () => {
     const transport = createDefaultElectronDesktopTransport() as {
       deliver: (dto: unknown, context?: unknown) => Promise<{ ackId: string; status: string }>;
     };
-    const result = await transport.deliver({ title: 'Unavailable', content: 'Body' });
+    const result = await transport.deliver({
+      title: 'Unavailable',
+      content: 'Body',
+    });
     expect(result.status).toBe('failed');
     expect(result.ackId).toBeDefined();
   });
@@ -338,7 +529,9 @@ describe('PowerSync Notification delivery execution', () => {
     const { db, sqlite } = createTestDb();
     try {
       const repository = new PowerSyncNotificationPreferenceRepository(db);
-      const preference = NotificationPreference.create({ identityId: 'user-policy-pref' as never });
+      const preference = NotificationPreference.create({
+        identityId: 'user-policy-pref' as never,
+      });
       preference.setGlobalChannel(NotificationChannelType.InApp, true);
       preference.setQuietHours(
         QuietHours.create({
@@ -424,7 +617,9 @@ describe('PowerSync Notification delivery execution', () => {
             source: 'notification',
             occurrenceKey,
             channel: NotificationChannelType.InApp,
-            payloadJson: JSON.stringify({ notificationId: String(notification.id) }),
+            payloadJson: JSON.stringify({
+              notificationId: String(notification.id),
+            }),
             idempotencyKey,
             deferUntil: retryAt,
           },
@@ -447,7 +642,10 @@ describe('PowerSync Notification delivery execution', () => {
       ).toEqual({ outcome: 'deferred', retry_at: retryAt.toISOString() });
       const adapter = new PowerSyncNotificationReliableAdapter(db);
       expect(
-        await adapter.claimOutboxDispatch({ ownerToken: 'before-retry', limit: 1 }),
+        await adapter.claimOutboxDispatch({
+          ownerToken: 'before-retry',
+          limit: 1,
+        }),
       ).toHaveLength(0);
     } finally {
       sqlite.close();

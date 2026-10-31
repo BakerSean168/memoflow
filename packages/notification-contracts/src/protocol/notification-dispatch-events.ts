@@ -31,3 +31,6 @@ export interface NotificationDispatchDesktopEvent extends NotificationDispatchBa
 export interface NotificationDispatchInAppEvent extends NotificationDispatchBase {
   durationMs?: number | null;
 }
+
+/** Device presentation outcome: suppression is terminal and never a delivered ACK. */
+export type DesktopPresentationResult = boolean | { status: 'suppressed'; reason: string };
