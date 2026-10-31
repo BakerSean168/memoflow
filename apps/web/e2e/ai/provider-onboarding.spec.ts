@@ -285,14 +285,18 @@ test('[P0] T3 Agent wizard and inline Endpoint/Key configure the persistent comp
         .first(),
     ).toBeVisible();
     await expect(
-      page.getByText('E2E provider connection OK (e2e-model-beta)', { exact: true }),
+      page
+        .getByTestId('ai-message-markdown')
+        .getByText('E2E provider connection OK (e2e-model-beta)', { exact: true }),
     ).toHaveCount(0);
     await page.screenshot({ path: testInfo.outputPath('conversation-created-before-reply.png') });
   } finally {
     releaseFirstTurn();
   }
   await expect(
-    page.getByText('E2E provider connection OK (e2e-model-beta)', { exact: true }),
+    page
+      .getByTestId('ai-message-markdown')
+      .getByText('E2E provider connection OK (e2e-model-beta)', { exact: true }),
   ).toBeVisible();
   await expect(page.getByTestId('ai-chat-send-message')).toBeVisible();
   const firstActivity = (await (await page.request.get('/api/v1/ai/chat/conversations')).json())
@@ -301,7 +305,9 @@ test('[P0] T3 Agent wizard and inline Endpoint/Key configure the persistent comp
   await page.getByTestId('ai-model-picker-agent-agent:mastra').click();
   await page.getByTestId('ai-model-picker-option').filter({ hasText: 'E2E Model Alpha' }).click();
   await expect(
-    page.getByText('E2E provider connection OK (e2e-model-beta)', { exact: true }),
+    page
+      .getByTestId('ai-message-markdown')
+      .getByText('E2E provider connection OK (e2e-model-beta)', { exact: true }),
   ).toBeVisible();
   const secondTurn = page.waitForRequest(
     (request) => request.method() === 'POST' && request.url().endsWith('/ai/runtime/assistant/sse'),
@@ -314,7 +320,9 @@ test('[P0] T3 Agent wizard and inline Endpoint/Key configure the persistent comp
     modelId: 'e2e-model-alpha',
   });
   await expect(
-    page.getByText('E2E provider connection OK (e2e-model-alpha)', { exact: true }),
+    page
+      .getByTestId('ai-message-markdown')
+      .getByText('E2E provider connection OK (e2e-model-alpha)', { exact: true }),
   ).toBeVisible();
   const latestSelection = await page.request.post('/api/v1/ai/agent-instances', {
     data: { action: 'conversation_selection', conversationId },
