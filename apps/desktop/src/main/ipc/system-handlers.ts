@@ -27,6 +27,8 @@ import {
 } from '../paths/native-file-dialogs';
 import { DesktopFeatureChannels, SystemChannels } from '@memoflow/desktop-contracts';
 import { DesktopNotificationPreferencePatchSchema } from '@memoflow/desktop-contracts';
+import { DesktopStartupChannels, DesktopStartupPatchSchema } from '@memoflow/desktop-contracts';
+import type { DesktopStartupSettingsService } from '../lifecycle/desktop-startup-settings-service';
 import { fail, ok } from '@memoflow/transport-contracts/result';
 
 /**
@@ -136,7 +138,30 @@ function registerDesktopFeaturesHandlers(
   shortcutPort: ShortcutPort | null,
   autoLaunchPort: AutoLaunchPort | null,
   notificationPort: NotificationPort | null,
+  startup?: DesktopStartupSettingsService,
 ): void {
+  ipcMain.handle(DesktopStartupChannels.GET, async () =>
+    startup
+      ? ok(await startup.refresh())
+      : fail({
+          code: 'SERVICE_UNAVAILABLE',
+          message: 'Desktop startup settings unavailable',
+        }),
+  );
+  ipcMain.handle(DesktopStartupChannels.UPDATE, async (_, patch: unknown) => {
+    const parsed = DesktopStartupPatchSchema.safeParse(patch);
+    if (!parsed.success)
+      return fail({
+        code: 'VALIDATION_ERROR',
+        message: 'Invalid desktop startup patch',
+      });
+    if (!startup)
+      return fail({
+        code: 'SERVICE_UNAVAILABLE',
+        message: 'Desktop startup settings unavailable',
+      });
+    return ok(await startup.update(parsed.data));
+  });
   // ========== Auto Launch ==========
   /**
    * @description 检查自动启动状态
@@ -157,7 +182,11 @@ function registerDesktopFeaturesHandlers(
    * Security: None
    */
   ipcMain.handle(DesktopFeatureChannels.AUTO_LAUNCH_ENABLE, async () => {
-    return ok((await autoLaunchPort?.enable()) ?? false);
+    return ok(
+      startup
+        ? (await startup.update({ autoLaunch: true })).success
+        : ((await autoLaunchPort?.enable()) ?? false),
+    );
   });
 
   /**
@@ -168,7 +197,11 @@ function registerDesktopFeaturesHandlers(
    * Security: None
    */
   ipcMain.handle(DesktopFeatureChannels.AUTO_LAUNCH_DISABLE, async () => {
-    return ok((await autoLaunchPort?.disable()) ?? false);
+    return ok(
+      startup
+        ? (await startup.update({ autoLaunch: false })).success
+        : ((await autoLaunchPort?.disable()) ?? false),
+    );
   });
 
   // Shortcuts
@@ -290,6 +323,7 @@ export function registerSystemIpcHandlers(
   shortcutPort: ShortcutPort | null,
   autoLaunchPort: AutoLaunchPort | null,
   notificationPort: NotificationPort | null = null,
+  startup?: DesktopStartupSettingsService,
 ): void {
   // Prevent duplicate registration
   if (systemHandlersRegistered) {
@@ -302,5 +336,11 @@ export function registerSystemIpcHandlers(
   registerSystemHandlers();
 
   // ========== Desktop Features Channels ==========
-  registerDesktopFeaturesHandlers(trayPort, shortcutPort, autoLaunchPort, notificationPort);
+  registerDesktopFeaturesHandlers(
+    trayPort,
+    shortcutPort,
+    autoLaunchPort,
+    notificationPort,
+    startup,
+  );
 }

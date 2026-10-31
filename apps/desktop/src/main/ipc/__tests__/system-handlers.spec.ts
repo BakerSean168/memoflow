@@ -2,7 +2,11 @@ import fs from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { DesktopFeatureChannels, SystemChannels } from '@memoflow/desktop-contracts';
+import {
+  DesktopFeatureChannels,
+  DesktopStartupChannels,
+  SystemChannels,
+} from '@memoflow/desktop-contracts';
 
 const mocks = vi.hoisted(() => ({
   ipcHandle: vi.fn(),
@@ -72,6 +76,51 @@ describe('registerSystemIpcHandlers', () => {
     });
     mocks.shellOpenPath.mockResolvedValue('');
     mocks.shellOpenExternal.mockResolvedValue(undefined);
+  });
+
+  it('validates startup patches and returns verified failure snapshots', async () => {
+    const { registerSystemIpcHandlers } = await import('../system-handlers');
+    const snapshot = {
+      autoLaunch: { available: true, enabled: false },
+      closeToTray: true,
+      startHidden: true,
+    };
+    const startup = {
+      refresh: vi.fn(async () => snapshot),
+      update: vi.fn(async () => ({ success: false, snapshot })),
+    };
+    registerSystemIpcHandlers(
+      null,
+      null,
+      null,
+      null,
+      startup as unknown as import('../../lifecycle/desktop-startup-settings-service').DesktopStartupSettingsService,
+    );
+    expect(await getRegisteredHandler(DesktopStartupChannels.GET)({})).toEqual({
+      ok: true,
+      data: snapshot,
+    });
+    const update = getRegisteredHandler(DesktopStartupChannels.UPDATE);
+    for (const patch of [{}, { autoLaunch: 'yes' }, { surprise: true }, null]) {
+      expect(await update({}, patch)).toMatchObject({
+        ok: false,
+        error: { code: 'VALIDATION_ERROR' },
+      });
+    }
+    expect(startup.update).not.toHaveBeenCalled();
+    expect(await update({}, { autoLaunch: true })).toEqual({
+      ok: true,
+      data: { success: false, snapshot },
+    });
+    expect(startup.update).toHaveBeenCalledExactlyOnceWith({ autoLaunch: true });
+  });
+  it('reports unavailable startup settings', async () => {
+    const { registerSystemIpcHandlers } = await import('../system-handlers');
+    registerSystemIpcHandlers(null, null, null);
+    expect(await getRegisteredHandler(DesktopStartupChannels.GET)({})).toMatchObject({
+      ok: false,
+      error: { code: 'SERVICE_UNAVAILABLE' },
+    });
   });
 
   it.each([true, false])(
@@ -150,7 +199,12 @@ describe('registerSystemIpcHandlers', () => {
     const channels = new Set(mocks.ipcHandle.mock.calls.map(([channel]) => channel as string));
 
     expect(channels).toEqual(
-      new Set([...Object.values(SystemChannels), ...Object.values(DesktopFeatureChannels)]),
+      new Set([
+        ...Object.values(SystemChannels),
+        ...Object.values(DesktopFeatureChannels),
+        DesktopStartupChannels.GET,
+        DesktopStartupChannels.UPDATE,
+      ]),
     );
   });
 
@@ -161,7 +215,7 @@ describe('registerSystemIpcHandlers', () => {
     registerSystemIpcHandlers(null, null, null);
 
     expect(mocks.ipcHandle).toHaveBeenCalledTimes(
-      Object.keys(SystemChannels).length + Object.keys(DesktopFeatureChannels).length,
+      Object.keys(SystemChannels).length + Object.keys(DesktopFeatureChannels).length + 2,
     );
   });
 

@@ -30,6 +30,9 @@ import type { SettingClientPort } from '@memoflow/setting-client';
 import type { TaskClientPort } from '@memoflow/task-client';
 import type { DataPortabilityClientPort } from '@memoflow/data-portability/client';
 import type {
+  DesktopStartupPatch,
+  DesktopStartupSnapshot,
+  DesktopStartupUpdate,
   DesktopUpdateDiagnosticsDTO,
   DesktopUpdateSnapshotDTO,
 } from '@memoflow/desktop-contracts';
@@ -104,4 +107,11 @@ export interface ModuleCapsule {
    * no badge. S1 wires only the notification unread source.
    */
   badgeSource?: string;
+}
+
+/** Device-local startup and window settings capability. */
+export interface DesktopStartupService {
+  get(): Promise<Result<DesktopStartupSnapshot>>;
+  update(patch: DesktopStartupPatch): Promise<Result<DesktopStartupUpdate>>;
+  subscribe(listener: (snapshot: DesktopStartupSnapshot) => void): () => void;
 }

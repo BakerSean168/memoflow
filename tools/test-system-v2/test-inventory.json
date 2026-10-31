@@ -1148,6 +1148,14 @@
       "measurementCollectors": []
     },
     {
+      "path": "apps/desktop/src/main/lifecycle/desktop-startup-settings-service.spec.ts",
+      "primarySuite": "boundary-main",
+      "collectors": [
+        "apps/desktop/vitest.main.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "apps/desktop/src/main/lifecycle/window-manager.spec.ts",
       "primarySuite": "boundary-main",
       "collectors": [
@@ -1860,6 +1868,14 @@
       "measurementCollectors": []
     },
     {
+      "path": "apps/desktop/src/preload/allowed-channels.desktop-startup.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "apps/desktop/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "apps/desktop/src/preload/allowed-channels.desktop-update.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -1933,6 +1949,14 @@
     },
     {
       "path": "apps/desktop/src/renderer/intervention-window/InterventionWindowApp.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "apps/desktop/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "apps/desktop/src/renderer/platform/desktop-startup-service.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "apps/desktop/vitest.config.ts"
@@ -10000,6 +10024,22 @@
       "measurementCollectors": []
     },
     {
+      "path": "packages/setting-ui/src/components/DesktopStartupNavigation.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/setting-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/setting-ui/src/components/DesktopStartupSettingsSection.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/setting-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "packages/setting-ui/src/components/DesktopUpdateSettingsSection.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -12701,7 +12741,7 @@
       "type": "primary",
       "suite": "boundary-main",
       "runner": "vitest",
-      "fileCount": 16
+      "fileCount": 17
     },
     {
       "id": "apps/desktop/playwright.config.ts",
@@ -13040,7 +13080,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 101
+      "fileCount": 103
     },
     {
       "id": "apps/migrator/vitest.config.ts",
@@ -13439,7 +13479,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 15
+      "fileCount": 17
     },
     {
       "id": "packages/setting/vitest.config.ts",
@@ -14155,11 +14195,11 @@
   "duplicate": [],
   "unexpected": [],
   "counts": {
-    "unit": 1160,
+    "unit": 1164,
     "integration": 58,
     "smoke": 3,
     "boundary-ipc": 6,
-    "boundary-main": 16,
+    "boundary-main": 17,
     "e2e": 42,
     "perf": 2,
     "governance": 89

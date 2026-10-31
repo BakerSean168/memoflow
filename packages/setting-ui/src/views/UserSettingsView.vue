@@ -39,6 +39,9 @@ const AccountSettingsSection = defineAsyncComponent(
 const DataSettingsSection = defineAsyncComponent(
   () => import('../components/DataSettingsSection.vue'),
 );
+const DesktopStartupSettingsSection = defineAsyncComponent(
+  () => import('../components/DesktopStartupSettingsSection.vue'),
+);
 const DesktopUpdateSettingsSection = defineAsyncComponent(
   () => import('../components/DesktopUpdateSettingsSection.vue'),
 );
@@ -47,6 +50,7 @@ const { t } = useI18n();
 const route = useRoute();
 const router = useRouter();
 const shellStore = settingUiHost.useAppShellStore();
+const desktopStartupService = inject(settingUiHost.DESKTOP_STARTUP_SERVICE_KEY, null);
 const desktopUpdateService = inject(settingUiHost.DESKTOP_UPDATE_SERVICE_KEY, null);
 const SETTINGS_NARROW_VIEWPORT = 1024;
 const contentWidth = ref(
@@ -64,9 +68,13 @@ type SettingsGroup =
   | 'notifications'
   | 'account'
   | 'data'
+  | 'startup'
   | 'updates';
 
-const GROUP_DEFINITIONS: ReadonlyArray<{ value: SettingsGroup; labelKey: string }> = [
+const GROUP_DEFINITIONS: ReadonlyArray<{
+  value: SettingsGroup;
+  labelKey: string;
+}> = [
   { value: 'shortcuts', labelKey: 'setting.groups.shortcuts' },
   { value: 'appearance', labelKey: 'setting.groups.appearance' },
   { value: 'repository', labelKey: 'setting.groups.repository' },
@@ -74,11 +82,13 @@ const GROUP_DEFINITIONS: ReadonlyArray<{ value: SettingsGroup; labelKey: string 
   { value: 'notifications', labelKey: 'setting.groups.notifications' },
   { value: 'account', labelKey: 'setting.groups.account' },
   { value: 'data', labelKey: 'setting.groups.data' },
+  { value: 'startup', labelKey: 'setting.groups.startup' },
   { value: 'updates', labelKey: 'setting.groups.updates' },
 ];
 const GROUP_VALUES: SettingsGroup[] = GROUP_DEFINITIONS.map((group) => group.value);
 
 function isGroupAvailable(group: SettingsGroup): boolean {
+  if (group === 'startup') return desktopStartupService !== null;
   return group !== 'updates' || desktopUpdateService !== null;
 }
 
@@ -116,7 +126,9 @@ function returnToApp(): void {
   void settingUiHost.returnFromSettingsScene(router, shellStore, route.fullPath);
 }
 
-watch(isNarrow, (narrow) => shellStore.setSettingsNavigationOpen(!narrow), { immediate: true });
+watch(isNarrow, (narrow) => shellStore.setSettingsNavigationOpen(!narrow), {
+  immediate: true,
+});
 
 onMounted(() => {
   if (typeof ResizeObserver !== 'undefined' && settingsContentRef.value) {
@@ -183,6 +195,7 @@ onBeforeUnmount(() => {
             <NotificationSettings v-else-if="activeTab === 'notifications'" />
             <AccountSettingsSection v-else-if="activeTab === 'account'" />
             <DataSettingsSection v-else-if="activeTab === 'data'" />
+            <DesktopStartupSettingsSection v-else-if="activeTab === 'startup'" />
             <DesktopUpdateSettingsSection v-else-if="activeTab === 'updates'" />
           </div>
         </div>

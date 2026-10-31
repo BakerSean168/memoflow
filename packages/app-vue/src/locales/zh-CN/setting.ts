@@ -1,4 +1,12 @@
 export default {
+  startup: {
+    title: '启动与窗口',
+    autoLaunch: '开机自动启动',
+    startHidden: '开机启动时只在托盘运行',
+    closeToTray: '关闭窗口时留在托盘',
+    failure: '无法保存启动设置，已恢复为实际状态。',
+    unavailable: '此设备暂不支持开机自启。',
+  },
   agentInstances: {
     antigravityDownloadTitle: '官方 Antigravity ACP Server',
     antigravityDownloadHint:
@@ -114,6 +122,7 @@ export default {
   title: '设置',
   userSettings: '用户设置',
   groups: {
+    startup: '启动与窗口',
     shortcuts: '快捷键',
     appearance: '外观与语言',
     repository: '知识仓库',

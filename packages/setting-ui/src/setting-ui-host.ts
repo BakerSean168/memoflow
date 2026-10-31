@@ -35,6 +35,9 @@ import type {
   DesktopAccessSnapshot,
   DesktopNotificationPreference,
   DesktopNotificationPreferencePatch,
+  DesktopStartupPatch,
+  DesktopStartupSnapshot,
+  DesktopStartupUpdate,
   DesktopUpdateDiagnosticsDTO,
   DesktopUpdateSnapshotDTO,
 } from '@memoflow/desktop-contracts';
@@ -202,7 +205,10 @@ export interface SettingDataPortabilityPort {
     Result<{
       fileName: string;
       content: string;
-      summary: { entityCounts: Record<string, number>; cachedAttachmentBytes: number };
+      summary: {
+        entityCounts: Record<string, number>;
+        cachedAttachmentBytes: number;
+      };
     }>
   >;
   dryRunPortableDataV3(payload: { content: string }): Promise<Result<unknown>>;
@@ -312,6 +318,7 @@ export interface SettingUiHost extends PlatformRendererHost {
   DESKTOP_BRIDGE_KEY: InjectionKey<SettingDesktopBridge>;
   DESKTOP_ACCESS_SNAPSHOT_KEY: InjectionKey<Ref<DesktopAccessSnapshot | null>>;
   DESKTOP_NOTIFICATION_DEVICE_PREFERENCE_KEY: InjectionKey<SettingNotificationDevicePreferencePort>;
+  DESKTOP_STARTUP_SERVICE_KEY: InjectionKey<SettingDesktopStartupService>;
   DESKTOP_UPDATE_SERVICE_KEY: InjectionKey<SettingDesktopUpdateService>;
   AI_AGENT_REGISTRY_KEY: InjectionKey<SettingAgentRegistryPort>;
   AI_LOCAL_AGENT_KEY: InjectionKey<SettingLocalAgentPort>;
@@ -403,4 +410,11 @@ export interface SettingExternalAgentService {
 export let settingUiHost: SettingUiHost;
 export function bindSettingUiHost(host: SettingUiHost): void {
   settingUiHost = host;
+}
+
+/** Device-local startup and window settings capability. */
+export interface SettingDesktopStartupService {
+  get(): Promise<Result<DesktopStartupSnapshot>>;
+  update(patch: DesktopStartupPatch): Promise<Result<DesktopStartupUpdate>>;
+  subscribe(listener: (snapshot: DesktopStartupSnapshot) => void): () => void;
 }
