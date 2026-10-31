@@ -9134,6 +9134,16 @@
       ]
     },
     {
+      "path": "packages/routine/src/server/infrastructure/routine-schedule/routine-occurrence-store.powersync.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/routine/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "packages/routine/vitest.config.ts"
+      ]
+    },
+    {
       "path": "packages/routine/src/server/infrastructure/routine-schedule/routine-powersync-schedule.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -12621,7 +12631,7 @@
       "type": "measurement",
       "suite": "coverage",
       "runner": "vitest",
-      "fileCount": 33
+      "fileCount": 34
     },
     {
       "id": "packages/schedule/vitest.config.ts",
@@ -13366,7 +13376,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 33
+      "fileCount": 34
     },
     {
       "id": "packages/schedule-client/vitest.config.ts",
@@ -13987,6 +13997,7 @@
       "packages/routine/src/server/infrastructure/routine-schedule/__tests__/routine-schedule-projection-source.spec.ts",
       "packages/routine/src/server/infrastructure/routine-schedule/__tests__/routine-wall-clock-scheduled-handler.spec.ts",
       "packages/routine/src/server/infrastructure/routine-schedule/routine-occurrence-notification-writer.spec.ts",
+      "packages/routine/src/server/infrastructure/routine-schedule/routine-occurrence-store.powersync.spec.ts",
       "packages/routine/src/server/infrastructure/routine-schedule/routine-powersync-schedule.spec.ts",
       "packages/routine/src/server/infrastructure/routine-schedule/routine-temporary-override-store.powersync.spec.ts",
       "packages/routine/src/server/infrastructure/routine-vnext/profile-persistence-parity.spec.ts",
@@ -14144,7 +14155,7 @@
   "duplicate": [],
   "unexpected": [],
   "counts": {
-    "unit": 1159,
+    "unit": 1160,
     "integration": 58,
     "smoke": 3,
     "boundary-ipc": 6,
