@@ -249,13 +249,16 @@ export function useConversationProjection(input: {
     const toolActivities = AssistantRuntimeMessageViewSchema.shape.toolActivities.safeParse(
       item.toolActivities,
     ).data;
+    const nativeActivities = LocalAgentActivitySchema.array()
+      .max(256)
+      .safeParse(item.nativeActivities).data;
+    const activities = [...(toolActivities ?? []), ...(nativeActivities ?? [])];
     return {
       id: item.id ? String(item.id) : `message-${index}`,
       role: normalizeChatRole(item.role),
       content: typeof item.content === 'string' ? item.content : '',
       ...(attachments.length ? { attachments } : {}),
-      nativeActivities: LocalAgentActivitySchema.array().max(256).safeParse(item.nativeActivities)
-        .data,
+      nativeActivities,
       localAgentSource: AssistantRuntimeMessageViewSchema.shape.localAgentSource.safeParse(
         item.localAgentSource,
       ).data,
@@ -284,10 +287,11 @@ export function useConversationProjection(input: {
       status:
         runOutcome?.status === 'cancelled'
           ? 'aborted'
-          : runOutcome?.status === 'failed' ||
-              toolActivities?.some((call) => call.state === 'failed')
+          : runOutcome?.status === 'failed' || activities.some((call) => call.state === 'failed')
             ? 'error'
-            : 'success',
+            : activities.some((call) => call.state === 'running')
+              ? 'interrupted'
+              : 'success',
     };
   }
 

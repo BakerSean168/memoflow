@@ -93,6 +93,25 @@ export default {
   },
   agentSwitchNewConversation:
     'Started a new conversation for the selected Agent. Your previous conversation keeps its original Agent.',
+  activity: {
+    preparing: 'Preparing',
+    processing: 'Processing',
+    waiting: 'Waiting for you',
+    completed: 'Completed',
+    cancelled: 'Cancelled',
+    error: 'Failed',
+    interrupted: 'Interrupted',
+    running: 'Running',
+    failed: 'Failed',
+    denied: 'Denied',
+    tool: 'Agent tool',
+    history: 'Tool activity',
+    respond: 'Use the response or approval controls below to continue.',
+    recovery:
+      'Review the tool result and error below. Check the connection or permissions, then send a new message to retry.',
+    silent: 'No new events for 30 seconds; still waiting for the Agent.',
+    silentLong: 'No new events for 2 minutes. You can stop this run and check the connection.',
+  },
   local: {
     lastRequestFailed: 'Last request ({model}):',
     toolHistory: 'Agent tool activity',

@@ -6,6 +6,7 @@ import { createI18n } from 'vue-i18n';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { AssistantRuntimeEvent } from '@memoflow/ai-contracts';
 import { useAssistantStream } from './useAssistantStream';
+import { projectAgentActivity } from './agentActivity';
 import type { ChatModelOption, ChatAskUserRequest, ChatItem } from './types';
 
 const toastMocks = vi.hoisted(() => ({ success: vi.fn(), error: vi.fn() }));
@@ -141,6 +142,105 @@ function pendingRequest(timeline: Ref<ChatItem[]>): ChatAskUserRequest | undefin
 
 describe('useAssistantStream ask_user lifecycle', () => {
   beforeEach(() => vi.clearAllMocks());
+
+  it('settles an unexpectedly closed stream without leaving an active animation', async () => {
+    const { timeline, runtime, stream } = createHarness();
+    runtime.streamMessage.mockImplementation(async (_command, handlers) => {
+      handlers.onEvent?.(assistantRunStarted());
+    });
+    await stream.handleSendChat({} as never, MODEL, 'New chat', () => undefined);
+    expect(timeline.value.find((item) => item.role === 'assistant')?.status).toBe('interrupted');
+  });
+
+  it('projects native tool updates immediately and stops activity on cancellation', async () => {
+    const { timeline, runtime, stream } = createHarness();
+    runtime.streamMessage.mockImplementation(async (_command, handlers) => {
+      handlers.onEvent?.(assistantRunStarted());
+      for (const state of ['running', 'completed'] as const) {
+        handlers.onEvent?.({
+          ...assistantRunStarted(),
+          type: 'assistant.activity',
+          data: {
+            activityType: 'native_tool',
+            toolCallId: 'native-1',
+            label: 'commandExecution',
+            state,
+          },
+        });
+        const assistant = timeline.value.find((item) => item.role === 'assistant')!;
+        expect(assistant.activityUpdatedAt).toEqual(expect.any(Number));
+        expect(projectAgentActivity(assistant).records[0]).toMatchObject({
+          name: 'commandExecution',
+          state,
+        });
+      }
+      handlers.onEvent?.({ ...assistantRunStarted(), type: 'assistant.run.cancelled', data: {} });
+      const assistant = timeline.value.find((item) => item.role === 'assistant')!;
+      expect(projectAgentActivity(assistant)).toMatchObject({ active: false, phase: 'cancelled' });
+    });
+    await stream.handleSendChat({} as never, MODEL, 'New chat', () => undefined);
+    expect(timeline.value.find((item) => item.role === 'assistant')?.nativeActivities).toEqual([
+      {
+        activityType: 'native_tool',
+        toolCallId: 'native-1',
+        label: 'commandExecution',
+        state: 'completed',
+      },
+    ]);
+  });
+
+  it('retains the latest tools when a long run reaches the bounded history limit', async () => {
+    const { timeline, runtime, stream } = createHarness();
+    runtime.streamMessage.mockImplementation(async (_command, handlers) => {
+      handlers.onEvent?.(assistantRunStarted());
+      for (let index = 0; index < 257; index++) {
+        handlers.onEvent?.({
+          ...assistantRunStarted(),
+          type: 'assistant.activity',
+          data: {
+            activityType: 'tool',
+            toolCallId: `call-${index}`,
+            toolName: 'knowledge_search',
+            category: 'read',
+            risk: 'low',
+            state: 'completed',
+          },
+        });
+      }
+    });
+    await stream.handleSendChat({} as never, MODEL, 'New chat', () => undefined);
+    const records = timeline.value.find((item) => item.role === 'assistant')!.toolActivities!;
+    expect(records).toHaveLength(256);
+    expect(records.at(-1)?.toolCallId).toBe('call-256');
+  });
+
+  it('keeps cancellation terminal when late deltas and activity arrive', async () => {
+    const { timeline, runtime, stream } = createHarness();
+    runtime.streamMessage.mockImplementation(async (_command, handlers) => {
+      handlers.onEvent?.(assistantRunStarted());
+      handlers.onEvent?.({ ...assistantRunStarted(), type: 'assistant.run.cancelled', data: {} });
+      handlers.onEvent?.({
+        ...assistantRunStarted(),
+        type: 'assistant.message.delta',
+        data: { content: 'late output' },
+      });
+      handlers.onEvent?.({
+        ...assistantRunStarted(),
+        type: 'assistant.activity',
+        data: {
+          activityType: 'native_tool',
+          toolCallId: 'late',
+          label: 'execute',
+          state: 'running',
+        },
+      });
+    });
+    await stream.handleSendChat({} as never, MODEL, 'New chat', () => undefined);
+    expect(timeline.value.find((item) => item.role === 'assistant')).toMatchObject({
+      status: 'aborted',
+      content: '',
+    });
+  });
 
   it('keeps completed tool activity after the live turn releases', async () => {
     const { timeline, runtime, stream } = createHarness();

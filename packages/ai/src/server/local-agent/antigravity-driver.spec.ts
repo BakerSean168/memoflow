@@ -548,3 +548,59 @@ it('directs expired Google credentials during a turn to the explicit sign-in act
       'Google sign-in is required. Open Settings → AI → Providers → Antigravity and select “Sign in with Google”.',
   });
 });
+
+it('projects safe ACP tool kinds and retains them through running updates until the terminal result', async () => {
+  const fixture = await setup((transport) => {
+    const request = transport.request.bind(transport);
+    transport.request = async (method, params) => {
+      if (method === 'session/prompt') {
+        for (const update of [
+          {
+            sessionUpdate: 'tool_call',
+            toolCallId: 'tool-1',
+            kind: 'execute',
+            title: 'curl --token PRIVATE_ARGUMENT',
+            status: 'pending',
+          },
+          {
+            sessionUpdate: 'tool_call_update',
+            toolCallId: 'tool-1',
+            status: 'in_progress',
+          },
+          {
+            sessionUpdate: 'tool_call_update',
+            toolCallId: 'tool-1',
+            status: 'failed',
+          },
+        ])
+          transport.onNotification?.('session/update', {
+            sessionId: 'agy-session',
+            update,
+          });
+      }
+      return request(method, params);
+    };
+  });
+  const events = await collect(fixture.make());
+  expect(events.filter((event) => event.type === 'activity')).toEqual([
+    {
+      type: 'activity',
+      toolCallId: 'tool-1',
+      label: 'execute',
+      state: 'running',
+    },
+    {
+      type: 'activity',
+      toolCallId: 'tool-1',
+      label: 'execute',
+      state: 'running',
+    },
+    {
+      type: 'activity',
+      toolCallId: 'tool-1',
+      label: 'execute',
+      state: 'failed',
+    },
+  ]);
+  expect(JSON.stringify(events)).not.toContain('PRIVATE_ARGUMENT');
+});

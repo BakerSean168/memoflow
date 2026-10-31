@@ -839,6 +839,7 @@ export class LocalAgentRuntime {
           };
           return;
         } else {
+          assistant.runOutcome = { runId: run.runId, status: 'cancelled' };
           await this.persist(() =>
             this.options.store.saveMessage(input.identityId, assistant!, false),
           );
@@ -850,6 +851,7 @@ export class LocalAgentRuntime {
     } catch (error) {
       if (!started) throw error;
       if (assistant && !this.stopped && this.options.isActive?.() !== false) {
+        assistant.runOutcome = { runId: run.runId, status: 'failed' };
         await this.persist(() =>
           this.options.store.saveMessage(input.identityId, assistant!, false),
         ).catch(() => undefined);

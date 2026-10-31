@@ -150,6 +150,8 @@ export type ChatItem = {
     revision: number;
     operation: 'goal.patch' | GoalWorkflowLiveAction['operation'];
   };
+  /** Local observation time; not persisted or interpreted as a provider heartbeat. */
+  activityUpdatedAt?: number;
   toolActivity?: Extract<
     Extract<AssistantRuntimeEvent, { type: 'assistant.activity' }>['data'],
     { activityType: 'tool' }
