@@ -1132,7 +1132,39 @@
       "measurementCollectors": []
     },
     {
+      "path": "apps/desktop/src/main/lifecycle/desktop-lifecycle-preference.spec.ts",
+      "primarySuite": "boundary-main",
+      "collectors": [
+        "apps/desktop/vitest.main.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "apps/desktop/src/main/lifecycle/desktop-shutdown-coordinator.spec.ts",
+      "primarySuite": "boundary-main",
+      "collectors": [
+        "apps/desktop/vitest.main.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "apps/desktop/src/main/lifecycle/window-manager.spec.ts",
+      "primarySuite": "boundary-main",
+      "collectors": [
+        "apps/desktop/vitest.main.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "apps/desktop/src/main/lifecycle/windows-instance.spec.ts",
+      "primarySuite": "boundary-main",
+      "collectors": [
+        "apps/desktop/vitest.main.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "apps/desktop/src/main/lifecycle/windows-lifecycle.spec.ts",
       "primarySuite": "boundary-main",
       "collectors": [
         "apps/desktop/vitest.main.config.ts"
@@ -1917,6 +1949,14 @@
     },
     {
       "path": "apps/desktop/src/renderer/platform/server-state.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "apps/desktop/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "apps/desktop/src/renderer/platform/tray-navigation.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "apps/desktop/vitest.config.ts"
@@ -12615,7 +12655,7 @@
       "type": "primary",
       "suite": "boundary-main",
       "runner": "vitest",
-      "fileCount": 12
+      "fileCount": 16
     },
     {
       "id": "apps/desktop/playwright.config.ts",
@@ -12954,7 +12994,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 99
+      "fileCount": 100
     },
     {
       "id": "apps/migrator/vitest.config.ts",
@@ -14066,11 +14106,11 @@
   "duplicate": [],
   "unexpected": [],
   "counts": {
-    "unit": 1154,
+    "unit": 1155,
     "integration": 58,
     "smoke": 3,
     "boundary-ipc": 6,
-    "boundary-main": 12,
+    "boundary-main": 16,
     "e2e": 42,
     "perf": 2,
     "governance": 89

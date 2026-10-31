@@ -19,6 +19,7 @@ import { useAccountStore, useAuthenticationStore } from '@memoflow/account-ui';
 import { progressStart, progressDone } from '@memoflow/ui-vue-shadcn/composables/useProgressBar';
 
 import App from '../App.vue';
+import { registerTrayNavigation } from '../platform/tray-navigation';
 import { installDesktopAppServices } from '../platform/di-app';
 // Residual 941: host bridge via getElectronBridge sole helper.
 import { requireElectronBridge } from '../platform/electron-bridge';
@@ -89,6 +90,13 @@ export async function bootstrapMainApp() {
   app.use(installDesktopAppServices, desktopAccessSnapshot);
   initElectronFeatures(app);
   app.mount('#app');
+  registerDesktopServerStateSource({
+    stop: registerTrayNavigation(
+      bridge,
+      router,
+      () => desktopAccessSnapshot?.unlockState === 'UNLOCKED' && !isDesktopServerStateDisposed(),
+    ),
+  });
 
   const runStartupPhase = () => {
     if (isDesktopServerStateDisposed()) return;

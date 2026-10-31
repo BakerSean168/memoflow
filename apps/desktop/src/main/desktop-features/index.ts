@@ -11,7 +11,7 @@
  * - 通知（NotificationPort）
  */
 
-import type { BrowserWindow } from 'electron';
+import { app, type BrowserWindow } from 'electron';
 import {
   CapabilityRegistry,
   createElectronAutoLaunchPort,
@@ -29,6 +29,7 @@ import type {
   ShortcutPort,
   TrayPort,
 } from '../capabilities/ports';
+import type { DesktopLifecyclePreference } from '../lifecycle/desktop-lifecycle-preference';
 import type { WindowManager } from '../lifecycle/window-manager';
 
 /** Runtime options accepted by {@link initializeDesktopFeatures}. */
@@ -41,6 +42,7 @@ export interface DesktopFeaturesOptions {
   resolveDeviceNotificationPreferencePath: () => string | null;
   /** Auto-launch provider configuration. */
   autoLaunch?: AutoLaunchPortOptions;
+  lifecyclePreference?: DesktopLifecyclePreference;
 }
 
 /**
@@ -105,15 +107,28 @@ export async function initializeDesktopFeatures(
   console.log('[Desktop Features] Initializing via CapabilityRegistry...');
 
   const registry = new CapabilityRegistry();
+  const restoreWindow = () => {
+    if (!windowManager.focusActiveWindow()) app.emit('activate');
+  };
 
   await registry.register(
     'tray',
-    () => createElectronTrayPort(mainWindow),
+    () =>
+      createElectronTrayPort(mainWindow, {
+        restore: restoreWindow,
+        canNavigate: () => windowManager.canNavigateToMainWindow(),
+        preference: options.lifecyclePreference,
+      }),
     (port) => port.destroy(),
   );
   await registry.register(
     'shortcut',
-    () => createElectronShortcutPort(mainWindow),
+    () =>
+      createElectronShortcutPort(mainWindow, () => {
+        const window = windowManager.getActiveWindow();
+        if (window?.isVisible()) window.hide();
+        else restoreWindow();
+      }),
     (port) => port.destroy(),
   );
   await registry.register('autolaunch', async () => {
