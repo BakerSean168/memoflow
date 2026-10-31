@@ -21,6 +21,58 @@ describe('local Agent persistence with real SQLite', () => {
     enabled: true,
     writeScopes: [],
   };
+  it.each(['codex', 'antigravity'] as const)(
+    '%s titles survive restart, remain owner-scoped and reject stale automatic writes',
+    async (driver) => {
+      const db = database();
+      const store = new LocalAgentRepository(db);
+      const connection = await store.createConnection('owner', {
+        ...input,
+        driver,
+      });
+      const conversation = await store.createConversation('owner', {
+        connectionId: connection.id,
+        modelId: 'model',
+        name: '快速对话',
+      });
+      await store.bindSession('owner', conversation.id, 'native-session', 'account');
+      await store.saveMessage(
+        'owner',
+        {
+          id: 'first',
+          conversationId: conversation.id,
+          role: 'user',
+          content: '学习计划',
+          createdAt: 1,
+        },
+        true,
+      );
+      await store.renameConversation('owner', conversation.id, '学习计划', 1, true);
+      await store.renameConversation('owner', conversation.id, '人工标题', 2);
+      const restarted = new LocalAgentRepository(db);
+      await expect(
+        restarted.renameConversation('owner', conversation.id, '迟到的自动标题', 1, true),
+      ).rejects.toMatchObject({ code: 'CONFLICT' });
+      await expect(
+        restarted.renameConversation('foreign', conversation.id, '外部', 3),
+      ).rejects.toMatchObject({ code: 'NOT_FOUND' });
+      expect(await restarted.getConversation('owner', conversation.id)).toMatchObject({
+        name: '人工标题',
+        version: 3,
+        nativeSessionId: 'native-session',
+        accountFingerprint: 'account',
+      });
+      expect((await restarted.listMessages('owner', conversation.id)).messages[0]?.content).toBe(
+        '学习计划',
+      );
+      await restarted.renameConversation('owner', conversation.id, '重新生成', 3);
+      expect((await restarted.listConversations('owner'))[0]).toMatchObject({
+        name: '重新生成',
+        version: 4,
+      });
+    },
+  );
+
   it('persists reversible archive across repository restart without touching messages or native binding', async () => {
     const db = database();
     const store = new LocalAgentRepository(db);

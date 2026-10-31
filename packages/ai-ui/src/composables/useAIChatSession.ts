@@ -133,7 +133,11 @@ export function useAIChatSession(options: UseAIChatSessionOptions) {
   }
 
   let sessionAlive = true;
-  let undoArchive: { id: string; expiresAt: number; toastId: string | number } | null = null;
+  let undoArchive: {
+    id: string;
+    expiresAt: number;
+    toastId: string | number;
+  } | null = null;
   let undoArchiveTimer: ReturnType<typeof setTimeout> | undefined;
   function clearArchiveUndo() {
     clearTimeout(undoArchiveTimer);
@@ -358,6 +362,9 @@ export function useAIChatSession(options: UseAIChatSessionOptions) {
     selectConversation: selectConversationWithAttention,
     deleteConversation: deleteConversationWithAttention,
     archiveConversation,
+    renameConversation: conversation.renameConversation,
+    generateConversationTitle: conversation.generateConversationTitle,
+    titleBusy: conversation.titleBusy,
     restoreConversation,
     archivePage: conversation.archivePage,
     archiveHasMore: conversation.archiveHasMore,

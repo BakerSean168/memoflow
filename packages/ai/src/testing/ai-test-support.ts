@@ -13,6 +13,8 @@ export function createAIConversationRepositoryStub(
   overrides: Partial<IAIConversationRepository> = {},
 ): IAIConversationRepository {
   return {
+    saveStatus: async () => true,
+    saveTitle: async () => true,
     save: async () => {},
     findByIdForIdentity: async () => null,
     findByIdentityId: async () => [],
@@ -41,7 +43,12 @@ export function createAIProviderSecretVaultStub(
 ): IAIProviderSecretVault {
   const values = new Map<
     string,
-    { identityId: string; value: string; expiresAt: number | null; revoked: boolean }
+    {
+      identityId: string;
+      value: string;
+      expiresAt: number | null;
+      revoked: boolean;
+    }
   >(
     Object.entries(initial).map(([ref, value]) => [
       ref,

@@ -5,7 +5,7 @@
  */
 
 import type { IAIConversationRepository } from '../../../domain';
-import type { AIConversation } from '../../../domain/aggregates/ai-conversation';
+import { AIConversation } from '../../../domain/aggregates/ai-conversation';
 
 /**
  * AIConversation Memory Repository
@@ -14,6 +14,30 @@ import type { AIConversation } from '../../../domain/aggregates/ai-conversation'
  */
 export class AIConversationMemoryRepository implements IAIConversationRepository {
   private conversations = new Map<string, AIConversation>();
+
+  async saveStatus(conversation: AIConversation): Promise<boolean> {
+    const current = this.conversations.get(String(conversation.id));
+    if (
+      !current ||
+      current.deletedAt ||
+      String(current.identityId) !== String(conversation.identityId)
+    )
+      return false;
+    current.updateStatus(conversation.status);
+    return true;
+  }
+  async saveTitle(conversation: AIConversation, expectedVersion: number): Promise<boolean> {
+    const current = this.conversations.get(String(conversation.id));
+    if (
+      !current ||
+      current.deletedAt ||
+      current.version !== expectedVersion ||
+      String(current.identityId) !== String(conversation.identityId)
+    )
+      return false;
+    this.conversations.set(String(conversation.id), conversation);
+    return true;
+  }
 
   async save(conversation: AIConversation): Promise<void> {
     const existing = this.conversations.get(String(conversation.id));
@@ -26,7 +50,14 @@ export class AIConversationMemoryRepository implements IAIConversationRepository
   async findByIdForIdentity(identityId: string, id: string): Promise<AIConversation | null> {
     const conversation = this.conversations.get(id) ?? null;
     if (!conversation || String(conversation.identityId) !== identityId) return null;
-    return conversation;
+    return AIConversation.load({
+      ...conversation.toServerDTO(),
+      id: conversation.id,
+      identityId: conversation.identityId,
+      createdAt: conversation.createdAt,
+      updatedAt: conversation.updatedAt,
+      deletedAt: conversation.deletedAt,
+    });
   }
 
   async findByIdentityId(identityId: string): Promise<AIConversation[]> {
@@ -45,8 +76,9 @@ export class AIConversationMemoryRepository implements IAIConversationRepository
 
   // Test helpers
   async recordActivity(identityId: string, id: string, at: number): Promise<void> {
-    const conversation = await this.findByIdForIdentity(identityId, id);
-    conversation?.recordActivity(at);
+    const conversation = this.conversations.get(id);
+    if (conversation && String(conversation.identityId) === identityId)
+      conversation.recordActivity(at);
   }
 
   clear(): void {

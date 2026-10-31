@@ -29,6 +29,7 @@ export const AIConversationClientDTOSchema = z.object({
   name: z.string(),
   status: z.enum(Object.values(ConversationStatus)),
   version: z.number(),
+  titleGenerationOutcome: z.enum(['model', 'fallback']).optional(),
   /** Server event ordering; independent of client clocks and the aggregate's legacy version. */
   resourceVersion: z.number().int().positive().optional(),
   createdAt: z.number(),

@@ -1,5 +1,7 @@
 import {
   LocalAgentActivitySchema,
+  sanitizeConversationTitle,
+  fallbackConversationTitle,
   AssistantRuntimeMessageViewSchema,
   type AIRuntimeUsage,
   type AssistantRuntimeChoice,
@@ -10,7 +12,7 @@ import { aiUiHost } from '../ai-ui-host';
 import { useI18n } from 'vue-i18n';
 import { toast } from 'vue-sonner';
 import { getAIErrorMessage } from './error';
-import type { AIChatService, ChatItem, ConversationSummary } from './types';
+import type { AIChatService, ChatItem, ConversationSummary, ChatModelOption } from './types';
 
 import type { UseAIChatSessionOptions } from './useAIChatSession';
 const LAST_CONVERSATION_STORAGE_KEY = 'ai:last-conversation-id';
@@ -46,6 +48,11 @@ export function useConversationProjection(input: {
   const archivePage = ref(1);
   const archiveHasMore = ref(false);
   const statusMutations = new Set<string>();
+  const titleBusy = ref<Record<string, boolean>>({});
+  const manualTitleMutations = new Set<string>();
+  const titleRevisions = new Map<string, number>();
+  // Only conversations created here qualify. Restoring legacy conversations never spends inference.
+  const initialTitles = new Set<string>();
   /**
    * True once a snapshot started after the live stream watermark (stream.ready
    * or reset) has been applied. Deltas after this point are folded in without
@@ -77,6 +84,8 @@ export function useConversationProjection(input: {
   }
 
   function upsertConversation(item: ConversationSummary): void {
+    const current = conversationList.value.find((entry) => entry.id === item.id);
+    if ((item.version ?? 1) < (current?.version ?? 1)) return;
     if (item.runtimeKind !== 'local_agent') {
       const version = item.resourceVersion;
       if (version !== undefined && version < (versions.get(item.id) ?? 0)) return;
@@ -84,6 +93,7 @@ export function useConversationProjection(input: {
       if (pending?.item === null && (version ?? 0) <= (versions.get(item.id) ?? 0)) return;
       if (version !== undefined) versions.set(item.id, version);
     }
+    if (chatConversationId.value === item.id) conversationTitle.value = item.name;
     pendingListChanges.set(item.id, {
       revision: ++mutationRevision,
       item,
@@ -165,8 +175,6 @@ export function useConversationProjection(input: {
             if (event.resourceVersion <= (versions.get(id) ?? 0)) return;
             if (event.data.conversation) {
               upsertConversation(event.data.conversation);
-              if (chatConversationId.value === id)
-                conversationTitle.value = event.data.conversation.name;
             } else {
               versions.set(id, event.resourceVersion);
               pendingListChanges.set(id, {
@@ -392,6 +400,8 @@ export function useConversationProjection(input: {
         } else if (item.resourceVersion !== undefined) versions.set(id, item.resourceVersion);
       }
       conversationList.value = sortConversations([...merged.values()]);
+      const current = conversationList.value.find((item) => item.id === chatConversationId.value);
+      if (current) conversationTitle.value = current.name;
       if (builtin.status === 'rejected' || local.status === 'rejected')
         toast.error(t('aiAssistant.dialogs.chat.loadFailed'));
 
@@ -533,6 +543,119 @@ export function useConversationProjection(input: {
     }
   }
 
+  async function renameConversation(id: string, value: string): Promise<boolean> {
+    const name = sanitizeConversationTitle(value);
+    const before = conversationList.value.find((item) => item.id === id);
+    if (!alive || !before || manualTitleMutations.has(id)) return false;
+    if (!name) {
+      toast.error(t('aiAssistant.dialogs.chat.titleFailed'));
+      return false;
+    }
+    manualTitleMutations.add(id);
+    titleRevisions.set(id, (titleRevisions.get(id) ?? 0) + 1);
+    initialTitles.delete(id);
+    try {
+      const item =
+        before.runtimeKind === 'local_agent'
+          ? await options.localAgent!.renameConversation(id, name, before.version ?? 1)
+          : unwrap(
+              await options.service.updateConversation(id as DeleteConversationId, {
+                name,
+                expectedVersion: before.version,
+              }),
+            );
+      if (!alive) return false;
+      upsertConversation(item);
+      toast.success(t('aiAssistant.dialogs.chat.titleSaved'));
+      return true;
+    } catch (error) {
+      if (alive) {
+        toast.error(getAIErrorMessage(error, t, 'aiAssistant.dialogs.chat.titleFailed'));
+        void loadConversationList(options.service);
+      }
+      return false;
+    } finally {
+      manualTitleMutations.delete(id);
+    }
+  }
+
+  async function generateConversationTitle(
+    id: string,
+    input?: {
+      content?: string;
+      model?: ChatModelOption | null;
+      automatic?: boolean;
+    },
+  ): Promise<boolean> {
+    const before = conversationList.value.find((item) => item.id === id);
+    if (!alive || !before || titleBusy.value[id] || manualTitleMutations.has(id)) return false;
+    if (input?.automatic && (!initialTitles.delete(id) || (before.version ?? 1) !== 1))
+      return false;
+    const revision = titleRevisions.get(id) ?? 0;
+    titleBusy.value = { ...titleBusy.value, [id]: true };
+    try {
+      const kind = before.runtimeKind === 'local_agent' ? 'local_agent' : 'builtin';
+      const content =
+        input?.content ??
+        (await options.runtime.listMessages(id, kind)).messages.find(
+          (item) => item.role === 'user' && item.content.trim(),
+        )?.content;
+      if (!alive || revision !== (titleRevisions.get(id) ?? 0)) return false;
+      const text = content?.trim().slice(0, 2000) ?? '';
+      if (!fallbackConversationTitle(text))
+        throw new Error(t('aiAssistant.dialogs.chat.titleNoMessage'));
+      const model = input?.model;
+      const item =
+        before.runtimeKind === 'local_agent'
+          ? await options.localAgent!.renameConversation(
+              id,
+              fallbackConversationTitle(text),
+              before.version ?? 1,
+              input?.automatic,
+            )
+          : unwrap(
+              await options.service.updateConversation(id as DeleteConversationId, {
+                expectedVersion: before.version,
+                generateTitle: {
+                  content: text,
+                  automatic: Boolean(input?.automatic),
+                  ...(model
+                    ? {
+                        providerId: model.providerId,
+                        modelId: model.modelId,
+                        agentInstanceId: model.agentInstanceId,
+                      }
+                    : {}),
+                },
+              }),
+            );
+      if (!alive || revision !== (titleRevisions.get(id) ?? 0)) return false;
+      upsertConversation(item);
+      if (!input?.automatic)
+        toast.success(
+          t(
+            before.runtimeKind === 'local_agent' ||
+              ('titleGenerationOutcome' in item && item.titleGenerationOutcome === 'fallback')
+              ? 'aiAssistant.dialogs.chat.titleFallback'
+              : 'aiAssistant.dialogs.chat.titleGenerated',
+          ),
+        );
+      return true;
+    } catch (error) {
+      if (alive && !input?.automatic) {
+        toast.error(getAIErrorMessage(error, t, 'aiAssistant.dialogs.chat.titleFailed'));
+        void loadConversationList(options.service);
+      }
+      return false;
+    } finally {
+      if (alive) {
+        const busy = { ...titleBusy.value };
+        delete busy[id];
+        titleBusy.value = busy;
+      }
+    }
+  }
+
   async function setConversationStatus(
     id: string,
     status: 'Active' | 'Archived',
@@ -626,6 +749,7 @@ export function useConversationProjection(input: {
         name: conversationName,
       });
       upsertConversation(conversation);
+      initialTitles.add(conversation.id);
       signal?.throwIfAborted();
       chatConversationId.value = conversation.id;
       conversationTitle.value = conversation.name;
@@ -638,6 +762,7 @@ export function useConversationProjection(input: {
       }),
     );
     upsertConversation(conversation);
+    initialTitles.add(String(conversation.id));
     signal?.throwIfAborted();
     chatConversationId.value = String(conversation.id);
     conversationTitle.value = conversation.name;
@@ -670,6 +795,9 @@ export function useConversationProjection(input: {
     selectConversation,
     deleteConversation,
     setConversationStatus,
+    titleBusy,
+    renameConversation,
+    generateConversationTitle,
     archivePage,
     archiveHasMore,
     changeArchivePage,

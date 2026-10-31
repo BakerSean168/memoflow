@@ -123,3 +123,61 @@ describe('AI conversation archive state upload', () => {
     expect(delegate.upsert).not.toHaveBeenCalled();
   });
 });
+
+describe('conversation title upload ordering', () => {
+  it.each([
+    ['automatic', 'manual'],
+    ['manual', 'automatic'],
+  ] as const)(
+    'keeps manual titles across offline uploads in order %s then %s',
+    async (first, second) => {
+      const current = {
+        name: '快速对话',
+        version: 1,
+        identityId: 'owner',
+        deletedAt: null as Date | null,
+      };
+      const delegate = {
+        upsert: vi.fn(),
+        update: vi.fn(),
+        deleteMany: vi.fn(),
+        updateMany: vi.fn(async ({ where, data }) => {
+          if (
+            where.identityId === current.identityId &&
+            !current.deletedAt &&
+            current.version < where.version.lt
+          )
+            Object.assign(current, data);
+        }),
+      };
+      const db = {
+        $transaction: async <T>(work: (tx: { aiConversation: typeof delegate }) => Promise<T>) =>
+          work({ aiConversation: delegate }),
+      };
+      const upload = (kind: string, owner = 'owner') =>
+        executeCrudBatch(db, owner, [
+          {
+            ops: [
+              {
+                op: 'PATCH',
+                type: 'ai_conversations',
+                id: 'conversation',
+                data:
+                  kind === 'manual'
+                    ? { name: '人工标题', version: 3 }
+                    : { name: '自动标题', version: 2 },
+              },
+            ],
+          },
+        ]);
+      await upload(first);
+      await upload(second);
+      await upload('automatic');
+      expect(current.name).toBe('人工标题');
+      expect(current.version).toBe(3);
+      await upload('manual', 'foreign');
+      expect(current.identityId).toBe('owner');
+      expect(delegate.update).not.toHaveBeenCalled();
+    },
+  );
+});

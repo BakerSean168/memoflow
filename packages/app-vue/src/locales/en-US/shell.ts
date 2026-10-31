@@ -52,6 +52,9 @@ export default {
     moreCount: '+{count} more',
   },
   conversation: {
+    rename: 'Rename',
+    regenerateTitle: 'Regenerate title',
+    generatingTitle: 'Generating title…',
     archive: 'Archive',
     restore: 'Restore',
     archived: 'Archived',

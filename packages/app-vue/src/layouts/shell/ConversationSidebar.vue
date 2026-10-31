@@ -8,7 +8,7 @@
  * 账户入口（诊断修订 §9）：头像打开账户菜单，不再直达 Settings。
  */
 import { vKeyboardList } from '../../shared/keyboard/list-adapter';
-import { computed, nextTick, ref } from 'vue';
+import { computed, nextTick, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import {
   MoreHorizontal,
@@ -28,6 +28,10 @@ import {
   ListChecks,
 } from '@lucide/vue';
 import {
+  ContextMenu,
+  ContextMenuTrigger,
+  ContextMenuContent,
+  ContextMenuItem,
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
@@ -67,6 +71,7 @@ const props = defineProps<{
   archivePage?: number;
   archiveHasMore?: boolean;
   conversationStatuses?: ConversationAttentionMap;
+  titleBusy?: Record<string, boolean>;
   activeConversationId: string | null;
   userName?: string;
   /** 当前壳层展示的是哪一种身份，而不是含混的“是否登录”。 */
@@ -80,6 +85,8 @@ const props = defineProps<{
 }>();
 
 const emit = defineEmits<{
+  (e: 'rename-conversation', id: string, name: string): void;
+  (e: 'regenerate-title', id: string): void;
   (e: 'new-conversation'): void;
   (e: 'select-conversation', id: string): void;
   (e: 'delete-conversation', id: string): void;
@@ -99,6 +106,29 @@ const emit = defineEmits<{
 }>();
 
 const { t } = useI18n();
+const editingId = ref<string | null>(null);
+const titleDraft = ref('');
+const titleInput = ref<HTMLInputElement[] | null>(null);
+async function editTitle(item: ConversationEntry) {
+  editingId.value = item.id;
+  titleDraft.value = item.title;
+  await nextTick();
+  titleInput.value?.[0]?.focus();
+  titleInput.value?.[0]?.select();
+}
+function saveTitle() {
+  const id = editingId.value;
+  const name = titleDraft.value.trim();
+  if (!id || !name) return;
+  editingId.value = null;
+  emit('rename-conversation', id, name);
+}
+watch(
+  () => props.activeProfileId,
+  () => {
+    editingId.value = null;
+  },
+);
 
 const stateIcons = {
   failed: CircleAlert,
@@ -388,104 +418,164 @@ const identityLabel = () => {
         >
           {{ t(group.labelKey) }}
         </p>
-        <div
-          v-for="item in group.items"
-          :key="item.id"
-          class="group/item relative flex w-full items-center rounded-md transition-colors"
-          :class="
-            activeConversationId === item.id
-              ? 'bg-[hsl(var(--selected)/0.82)] text-foreground shadow-[inset_0_0_0_1px_hsl(var(--border-subtle)/0.46)]'
-              : 'text-[hsl(var(--foreground-muted))] hover:bg-[hsl(var(--hover))] hover:text-foreground'
-          "
-        >
-          <button
-            type="button"
-            class="min-w-0 w-full flex-1 px-2 py-1.5 pr-24 text-left text-[12.5px] leading-5"
-            :data-keyboard-item="item.id"
-            :aria-pressed="selecting ? selectedIds.includes(item.id) : undefined"
-            @click="
-              selecting
-                ? toggleSelected(item.id)
-                : showingArchive
-                  ? emit('restore-conversation', item.id)
-                  : emit('select-conversation', item.id)
-            "
-          >
-            <span
-              v-if="selecting"
-              class="mr-1.5 inline-flex h-3.5 w-3.5 items-center justify-center rounded border border-muted-foreground/50 align-[-2px]"
-              :class="selectedIds.includes(item.id) ? 'bg-primary text-primary-foreground' : ''"
-              aria-hidden="true"
+        <ContextMenu v-for="item in group.items" :key="item.id">
+          <ContextMenuTrigger as-child>
+            <div
+              class="group/item relative flex w-full items-center rounded-md transition-colors"
+              :class="
+                activeConversationId === item.id
+                  ? 'bg-[hsl(var(--selected)/0.82)] text-foreground shadow-[inset_0_0_0_1px_hsl(var(--border-subtle)/0.46)]'
+                  : 'text-[hsl(var(--foreground-muted))] hover:bg-[hsl(var(--hover))] hover:text-foreground'
+              "
             >
-              <Check v-if="selectedIds.includes(item.id)" class="h-3 w-3" />
-            </span>
-            <span class="block min-w-0 truncate whitespace-nowrap">{{ item.title }}</span>
-          </button>
-          <TooltipProvider v-if="stateOf(item.id)">
-            <Tooltip>
-              <TooltipTrigger as-child>
-                <button
-                  type="button"
-                  class="absolute right-1 top-1/2 flex h-6 w-6 -translate-y-1/2 items-center justify-center rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                  :aria-label="t(`aiAssistant.chatPage.sidebar.attention.${stateOf(item.id)}`)"
-                  data-testid="shell-conversation-status"
-                  @click.stop="emit('select-conversation', item.id)"
+              <input
+                v-if="editingId === item.id"
+                ref="titleInput"
+                v-model="titleDraft"
+                class="m-1 min-w-0 flex-1 rounded border bg-background px-1.5 py-1 text-xs"
+                data-testid="conversation-title-input"
+                maxlength="80"
+                :aria-label="t('shell.conversation.rename')"
+                @keydown.enter.prevent="saveTitle"
+                @keydown.esc.prevent="editingId = null"
+                @blur="editingId = null"
+                @click.stop
+              />
+              <button
+                v-else
+                type="button"
+                @dblclick.stop="editTitle(item)"
+                class="min-w-0 w-full flex-1 px-2 py-1.5 pr-24 text-left text-[12.5px] leading-5"
+                :data-keyboard-item="item.id"
+                :aria-pressed="selecting ? selectedIds.includes(item.id) : undefined"
+                @click="
+                  selecting
+                    ? toggleSelected(item.id)
+                    : showingArchive
+                      ? emit('restore-conversation', item.id)
+                      : emit('select-conversation', item.id)
+                "
+              >
+                <span
+                  v-if="selecting"
+                  class="mr-1.5 inline-flex h-3.5 w-3.5 items-center justify-center rounded border border-muted-foreground/50 align-[-2px]"
+                  :class="selectedIds.includes(item.id) ? 'bg-primary text-primary-foreground' : ''"
+                  aria-hidden="true"
                 >
-                  <component
-                    :is="stateIcons[stateOf(item.id)!]"
-                    class="h-4 w-4 shrink-0"
-                    :class="stateColors[stateOf(item.id)!]"
-                    aria-hidden="true"
-                  />
-                </button>
-              </TooltipTrigger>
-              <TooltipContent side="right" class="text-xs">
-                {{ t(`aiAssistant.chatPage.sidebar.attention.${stateOf(item.id)}`) }}
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
-          <button
-            type="button"
-            :data-testid="showingArchive ? 'conversation-restore' : 'conversation-archive'"
-            class="absolute right-14 top-1/2 flex h-6 w-6 -translate-y-1/2 items-center justify-center rounded-md text-muted-foreground hover:bg-muted hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-40"
-            :aria-label="
-              t(showingArchive ? 'shell.conversation.restore' : 'shell.conversation.archive')
-            "
-            :title="t(showingArchive ? 'shell.conversation.restore' : 'shell.conversation.archive')"
-            :disabled="
-              !showingArchive && ['working', 'input', 'approval'].includes(stateOf(item.id) ?? '')
-            "
-            @click.stop="
-              showingArchive
-                ? emit('restore-conversation', item.id)
-                : emit('archive-conversation', item.id)
-            "
-          >
-            <component :is="showingArchive ? ArchiveRestore : Archive" class="h-3.5 w-3.5" />
-          </button>
-          <DropdownMenu>
-            <DropdownMenuTrigger as-child>
+                  <Check v-if="selectedIds.includes(item.id)" class="h-3 w-3" />
+                </span>
+                <span class="block min-w-0 truncate whitespace-nowrap">{{ item.title }}</span>
+                <span v-if="titleBusy?.[item.id]" class="sr-only" role="status">{{
+                  t('shell.conversation.generatingTitle')
+                }}</span>
+              </button>
+              <TooltipProvider v-if="stateOf(item.id)">
+                <Tooltip>
+                  <TooltipTrigger as-child>
+                    <button
+                      type="button"
+                      class="absolute right-1 top-1/2 flex h-6 w-6 -translate-y-1/2 items-center justify-center rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                      :aria-label="t(`aiAssistant.chatPage.sidebar.attention.${stateOf(item.id)}`)"
+                      data-testid="shell-conversation-status"
+                      @click.stop="emit('select-conversation', item.id)"
+                    >
+                      <component
+                        :is="stateIcons[stateOf(item.id)!]"
+                        class="h-4 w-4 shrink-0"
+                        :class="stateColors[stateOf(item.id)!]"
+                        aria-hidden="true"
+                      />
+                    </button>
+                  </TooltipTrigger>
+                  <TooltipContent side="right" class="text-xs">
+                    {{ t(`aiAssistant.chatPage.sidebar.attention.${stateOf(item.id)}`) }}
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
               <button
                 type="button"
-                class="absolute top-1/2 flex h-6 w-6 -translate-y-1/2 items-center justify-center rounded-md text-[hsl(var(--foreground-subtle))] opacity-0 transition-[opacity,background-color,color] hover:bg-[hsl(var(--hover))] hover:text-foreground focus-visible:opacity-100 group-hover/item:opacity-100"
-                :class="stateOf(item.id) ? 'right-8' : 'right-0.5'"
-                :aria-label="t('common.more')"
-                @click.stop
+                :data-testid="showingArchive ? 'conversation-restore' : 'conversation-archive'"
+                class="absolute right-14 top-1/2 flex h-6 w-6 -translate-y-1/2 items-center justify-center rounded-md text-muted-foreground hover:bg-muted hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-40"
+                :aria-label="
+                  t(showingArchive ? 'shell.conversation.restore' : 'shell.conversation.archive')
+                "
+                :title="
+                  t(showingArchive ? 'shell.conversation.restore' : 'shell.conversation.archive')
+                "
+                :disabled="
+                  !showingArchive &&
+                  ['working', 'input', 'approval'].includes(stateOf(item.id) ?? '')
+                "
+                @click.stop="
+                  showingArchive
+                    ? emit('restore-conversation', item.id)
+                    : emit('archive-conversation', item.id)
+                "
               >
-                <MoreHorizontal class="h-3.5 w-3.5" />
+                <component :is="showingArchive ? ArchiveRestore : Archive" class="h-3.5 w-3.5" />
               </button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" side="right" class="w-36">
-              <DropdownMenuItem
-                class="text-destructive focus:text-destructive"
-                @click="emit('delete-conversation', item.id)"
-              >
-                <Trash2 class="mr-2 h-3.5 w-3.5" />
-                {{ t('common.delete') }}
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
+              <DropdownMenu>
+                <DropdownMenuTrigger as-child>
+                  <button
+                    type="button"
+                    class="absolute top-1/2 flex h-6 w-6 -translate-y-1/2 items-center justify-center rounded-md text-[hsl(var(--foreground-subtle))] opacity-0 transition-[opacity,background-color,color] hover:bg-[hsl(var(--hover))] hover:text-foreground focus-visible:opacity-100 group-hover/item:opacity-100"
+                    :class="stateOf(item.id) ? 'right-8' : 'right-0.5'"
+                    :aria-label="t('common.more')"
+                    @click.stop
+                  >
+                    <MoreHorizontal class="h-3.5 w-3.5" />
+                  </button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent
+                  align="end"
+                  side="right"
+                  class="w-36"
+                  @close-auto-focus="editingId && $event.preventDefault()"
+                >
+                  <DropdownMenuItem @select="editTitle(item)">{{
+                    t('shell.conversation.rename')
+                  }}</DropdownMenuItem>
+                  <DropdownMenuItem
+                    :disabled="titleBusy?.[item.id]"
+                    @select="emit('regenerate-title', item.id)"
+                  >
+                    {{
+                      t(
+                        titleBusy?.[item.id]
+                          ? 'shell.conversation.generatingTitle'
+                          : 'shell.conversation.regenerateTitle',
+                      )
+                    }}
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    class="text-destructive focus:text-destructive"
+                    @click="emit('delete-conversation', item.id)"
+                  >
+                    <Trash2 class="mr-2 h-3.5 w-3.5" />
+                    {{ t('common.delete') }}
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+          </ContextMenuTrigger>
+          <ContextMenuContent @close-auto-focus="editingId && $event.preventDefault()">
+            <ContextMenuItem @select="editTitle(item)">{{
+              t('shell.conversation.rename')
+            }}</ContextMenuItem>
+            <ContextMenuItem
+              :disabled="titleBusy?.[item.id]"
+              @select="emit('regenerate-title', item.id)"
+            >
+              {{
+                t(
+                  titleBusy?.[item.id]
+                    ? 'shell.conversation.generatingTitle'
+                    : 'shell.conversation.regenerateTitle',
+                )
+              }}
+            </ContextMenuItem>
+          </ContextMenuContent>
+        </ContextMenu>
       </div>
       <div v-if="showingArchive" class="flex items-center justify-between gap-2 px-2 py-2 text-xs">
         <button

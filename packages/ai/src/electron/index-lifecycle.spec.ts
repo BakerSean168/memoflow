@@ -280,6 +280,36 @@ describe('createAIElectronModule lifecycle', () => {
     expect(result).toEqual(ok({ accepted: true }));
   });
 
+  it('routes native title CAS through authenticated IPC and rejects identity injection', async () => {
+    const renameConversation = vi.fn(async () => ({
+      id: 'conversation-1',
+      name: 'Title',
+      version: 3,
+    }));
+    Object.assign(fake.instance, { localAgentRuntime: { renameConversation } });
+    await moduleDef.register(createFakeContext());
+    const handler = mocks.handlers.get(AIChannels.LOCAL_AGENT)!;
+    const request = {
+      action: 'rename_conversation',
+      id: 'conversation-1',
+      name: ' <Title> ',
+      expectedVersion: 1,
+    };
+    expect(await handler(undefined, request)).toMatchObject({ ok: true });
+    expect(renameConversation).toHaveBeenCalledExactlyOnceWith(
+      'identity-1',
+      'conversation-1',
+      'Title',
+      1,
+      undefined,
+    );
+    expect(await handler(undefined, { ...request, identityId: 'foreign' })).toMatchObject({
+      ok: false,
+      error: { code: 'VALIDATION_ERROR' },
+    });
+    expect(renameConversation).toHaveBeenCalledTimes(1);
+  });
+
   it('passes validated archive updates and archive discovery through Desktop IPC', async () => {
     await moduleDef.register(createFakeContext());
     const update = mocks.handlers.get(AIChannels.CONVERSATION_UPDATE)!;
