@@ -84,7 +84,11 @@ export interface NotificationReliableOperationPort {
     status: 'succeeded' | 'retryable' | 'dead_letter',
     errorMsg?: string | null,
     nextAvailableAt?: Date | null,
-    lease?: { ownerToken: string; claimId: string; fencingToken: number } | null,
+    lease?: {
+      ownerToken: string;
+      claimId: string;
+      fencingToken: number;
+    } | null,
   ): Promise<'ok' | 'conflict'>;
   recordDeliveryReceipt(
     receipt: BusinessOperationReceipt,
@@ -92,7 +96,14 @@ export interface NotificationReliableOperationPort {
   ): Promise<BusinessOperationReceipt>;
   queryReceipts(
     identityId: string,
-    options?: number | { limit?: number; lastCursor?: string; since?: string; status?: string },
+    options?:
+      | number
+      | {
+          limit?: number;
+          lastCursor?: string;
+          since?: string;
+          status?: string;
+        },
   ): Promise<BusinessOperationReceipt[]>;
   queryDeadLetters(identityId: string): Promise<BusinessOperationReceipt[]>;
   replayDeadLetter(params: {
@@ -144,7 +155,7 @@ export interface NotificationChannelDeliverer {
     notification: Notification,
     target: NotificationDeliveryTarget,
     context: NotificationDeliveryContext,
-  ): Promise<void>;
+  ): Promise<void | { status: 'suppressed'; reason: string }>;
 }
 
 export interface ChannelCapabilitySpec {
@@ -193,7 +204,14 @@ export interface NotificationDurableRuntimePort extends NotificationModuleRuntim
   ): Promise<BusinessOperationReceipt>;
   queryReceipts(
     identityId: string,
-    options?: number | { limit?: number; lastCursor?: string; since?: string; status?: string },
+    options?:
+      | number
+      | {
+          limit?: number;
+          lastCursor?: string;
+          since?: string;
+          status?: string;
+        },
   ): Promise<BusinessOperationReceipt[]>;
   getSseAdapter(): NotificationSseAdapter;
 }
@@ -262,6 +280,15 @@ export function createNotificationRuntimeContribution(
         preferenceRepository as INotificationPreferenceRepository,
         closureChecker,
         deps.userTimeContextPort,
+        undefined,
+        undefined,
+        undefined,
+        Object.values(ChannelTypeEnum).filter(
+          (channel) =>
+            (!deps.channelCapabilities ||
+              deps.channelCapabilities.some((cap) => cap.channelType === channel)) &&
+            hasDelivererForChannel(channel),
+        ),
       );
     }
     return createNotificationUseCase;
@@ -404,11 +431,12 @@ export function createNotificationRuntimeContribution(
         channelType: outbox.channel,
         recipient: outbox.identityId,
       };
+      let deliveryResult: void | { status: 'suppressed'; reason: string };
       if (notification) {
-        await deliverer.deliver(notification, deliveryTarget, deliveryContext);
+        deliveryResult = await deliverer.deliver(notification, deliveryTarget, deliveryContext);
       } else {
         // No persisted Fact is required to execute a durable dispatch.
-        await deliverer.deliver(
+        deliveryResult = await deliverer.deliver(
           {
             id: outbox.notificationId,
             identityId: outbox.identityId,
@@ -419,6 +447,39 @@ export function createNotificationRuntimeContribution(
           } as never,
           deliveryTarget,
           deliveryContext,
+        );
+      }
+
+      if (deliveryResult?.status === 'suppressed') {
+        logger.info('[NotificationRuntime] Desktop delivery suppressed', {
+          operationId: outbox.id,
+          channel: outbox.channel,
+          reason: deliveryResult.reason,
+        });
+        return reliableAdapter.recordDeliveryReceipt(
+          {
+            ...receipt,
+            status: 'skipped',
+            lease: null,
+            lastError: null,
+            nextRetryAt: null,
+            deadLetterAt: null,
+            finishedAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+            attemptsHistory: [
+              ...(receipt.attemptsHistory ?? []),
+              {
+                schemaVersion: 1,
+                attempt: receipt.attempt,
+                attemptedAt: new Date().toISOString(),
+                result: 'skipped',
+                error: null,
+                durationMs: null,
+                channel: outbox.channel,
+              },
+            ],
+          },
+          claimContext,
         );
       }
 
@@ -845,7 +906,14 @@ export function createNotificationRuntimeContribution(
 
     async queryReceipts(
       identityId: string,
-      options?: number | { limit?: number; lastCursor?: string; since?: string; status?: string },
+      options?:
+        | number
+        | {
+            limit?: number;
+            lastCursor?: string;
+            since?: string;
+            status?: string;
+          },
     ): Promise<BusinessOperationReceipt[]> {
       if (!deps?.reliableAdapter) {
         throw new Error('Reliable adapter is required to query delivery receipts.');

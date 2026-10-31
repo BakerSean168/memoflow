@@ -7,6 +7,11 @@
  */
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { Tray, Menu, app, BrowserWindow } from 'electron';
+import { mkdtempSync, rmSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import path from 'node:path';
+import { DesktopLifecyclePreference } from '../../lifecycle/desktop-lifecycle-preference';
+import { RendererEventChannels } from '@memoflow/desktop-contracts';
 import { APP_DISPLAY_NAME } from '@memoflow/assets';
 
 // The tray icon resolver depends on packaged asset paths that are not present
@@ -43,7 +48,7 @@ describe('TrayManager', () => {
     const manager = new TrayManager(window);
     const tray = Tray.lastInstance() as TrayLike | null;
     expect(tray).not.toBeNull();
-    expect(tray!.setToolTip).toHaveBeenCalledWith(APP_DISPLAY_NAME);
+    expect(tray!.setToolTip).toHaveBeenCalledWith(`${APP_DISPLAY_NAME} — Running in background`);
     expect(tray!.setContextMenu).toHaveBeenCalled();
     manager.destroy();
   });
@@ -56,10 +61,10 @@ describe('TrayManager', () => {
     }>;
     expect(template).toBeDefined();
     expect(template.map((entry) => entry.label ?? entry.type)).toEqual([
-      'Show App',
+      'Open MemoFlow',
       'Settings',
       'separator',
-      'Quit',
+      'Quit MemoFlow',
     ]);
     manager.destroy();
   });
@@ -73,13 +78,13 @@ describe('TrayManager', () => {
     manager.destroy();
   });
 
-  it('hides the main window when the tray is clicked while visible', () => {
+  it('keeps the main window visible on repeated tray clicks', () => {
     const manager = new TrayManager(window);
     window.show();
     expect(window.isVisible()).toBe(true);
     const tray = Tray.lastInstance() as Tray | null;
     tray!.emit('click');
-    expect(window.isVisible()).toBe(false);
+    expect(window.isVisible()).toBe(true);
     manager.destroy();
   });
 
@@ -94,7 +99,10 @@ describe('TrayManager', () => {
     expect(settings).toBeDefined();
     settings!.click!();
     expect(window.isVisible()).toBe(true);
-    expect(window.webContents.send).toHaveBeenCalledWith('navigate', '/settings');
+    expect(window.webContents.send).toHaveBeenCalledWith(
+      RendererEventChannels.TRAY_ACTION,
+      'settings',
+    );
     manager.destroy();
   });
 
@@ -105,10 +113,72 @@ describe('TrayManager', () => {
       label?: string;
       click?: () => void;
     }>;
-    const quit = template.find((entry) => entry.label === 'Quit');
+    const quit = template.find((entry) => entry.label === 'Quit MemoFlow');
     expect(quit).toBeDefined();
     quit!.click!();
     expect(app.quit).toHaveBeenCalled();
+    manager.destroy();
+  });
+
+  it('restores minimized windows on double click', () => {
+    const manager = new TrayManager(window);
+    window.minimize();
+    Tray.lastInstance()!.emit('double-click');
+    expect(window.isMinimized()).toBe(false);
+    expect(window.isVisible()).toBe(true);
+    manager.destroy();
+  });
+
+  it('uses the live Profile gate and does not navigate a locked renderer', () => {
+    const restore = vi.fn();
+    const manager = new TrayManager(window, { restore, canNavigate: () => false });
+    const template = vi.mocked(Menu.buildFromTemplate).mock.calls.at(-1)![0];
+    (template[1].click as () => void)();
+    expect(restore).toHaveBeenCalled();
+    expect(window.webContents.send).not.toHaveBeenCalled();
+    manager.destroy();
+  });
+
+  it('persists close/startup choices from the tray settings submenu', () => {
+    const root = mkdtempSync(path.join(tmpdir(), 'mf-tray-'));
+    const file = path.join(root, 'preferences.json');
+    const manager = new TrayManager(window, { preference: new DesktopLifecyclePreference(file) });
+    try {
+      const template = vi.mocked(Menu.buildFromTemplate).mock.calls.at(-1)![0];
+      const submenu = template[2].submenu as Electron.MenuItemConstructorOptions[];
+      (submenu[0].click as (item: { checked: boolean }) => void)({ checked: false });
+      (submenu[1].click as (item: { checked: boolean }) => void)({ checked: false });
+      expect(new DesktopLifecyclePreference(file)).toMatchObject({
+        closeToTray: false,
+        startHidden: false,
+      });
+      expect(app.setLoginItemSettings).not.toHaveBeenCalled();
+    } finally {
+      manager.destroy();
+      rmSync(root, { recursive: true, force: true });
+    }
+  });
+
+  it('propagates tray construction failure for capability degradation and releases the partial icon', () => {
+    vi.mocked(Menu.buildFromTemplate).mockImplementationOnce(() => {
+      throw new Error('tray unavailable');
+    });
+    expect(() => new TrayManager(window)).toThrow('tray unavailable');
+    expect(Tray.lastInstance()!.destroy).toHaveBeenCalled();
+    vi.restoreAllMocks();
+  });
+
+  it('localizes the tray menu in Chinese', () => {
+    vi.mocked(app.getLocale).mockReturnValue('zh-CN');
+    const manager = new TrayManager(window);
+    const template = vi.mocked(Menu.buildFromTemplate).mock.calls.at(-1)![0];
+    expect(template.map((item) => item.label ?? item.type)).toEqual([
+      '打开 MemoFlow',
+      '设置',
+      'separator',
+      '退出 MemoFlow',
+    ]);
+    vi.mocked(app.getLocale).mockReturnValue('en-US');
     manager.destroy();
   });
 

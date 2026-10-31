@@ -49,8 +49,11 @@ export type AutoLaunchPortOptions = Partial<AutoLaunchConfig>;
  * lifecycle, flash signalling, and window toggle). A host-provided window is
  * required at construction because the tray drives that window's visibility.
  */
-export function createElectronTrayPort(mainWindow: BrowserWindow): TrayPort {
-  const manager = new TrayManager(mainWindow);
+export function createElectronTrayPort(
+  mainWindow: BrowserWindow,
+  options?: ConstructorParameters<typeof TrayManager>[1],
+): TrayPort {
+  const manager = new TrayManager(mainWindow, options);
   return {
     // The narrow port window is host-provided by the caller; in the Electron
     // process it is the real BrowserWindow, so the adapter narrows the cast
@@ -68,8 +71,11 @@ export function createElectronTrayPort(mainWindow: BrowserWindow): TrayPort {
  * `ShortcutManager` satisfies {@link ShortcutPort} except for `destroy`, which
  * this adapter supplies by unregistering every shortcut the manager owns.
  */
-export function createElectronShortcutPort(mainWindow: BrowserWindow): ShortcutPort {
-  const manager = new ShortcutManager(mainWindow);
+export function createElectronShortcutPort(
+  mainWindow: BrowserWindow,
+  restore?: () => void,
+): ShortcutPort {
+  const manager = new ShortcutManager(mainWindow, restore);
   return {
     setWindow: (window) => manager.setMainWindow(window as BrowserWindow),
     getShortcuts: () => manager.getShortcuts(),
