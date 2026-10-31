@@ -8,6 +8,7 @@
  * @module services/notification
  */
 
+import type { DesktopPresentationResult } from '@memoflow/notification-contracts';
 import { Notification, nativeImage, BrowserWindow } from 'electron';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -252,31 +253,35 @@ export class NotificationService {
     return this.renderNotification(options).notification;
   }
 
-  /**
-   * Render a delivery that has already passed canonical Notification policy.
-   * DND/QuietHours MUST NOT be re-evaluated here; this method owns device
-   * presentation only (MemoFlow custom window vs OS-native notification).
-   */
-  showCanonicalDelivery(options: NotificationOptions): boolean {
+  /** Canonical policy runs upstream; device DND and native permission remain local. */
+  async showCanonicalDelivery(options: NotificationOptions): Promise<DesktopPresentationResult> {
+    if (this.isInDNDPeriod()) return { status: 'suppressed', reason: 'device-dnd' };
+    if (
+      this.devicePreferenceStore.get().presentationMode === 'native' &&
+      !Notification.isSupported()
+    ) {
+      return { status: 'suppressed', reason: 'native-unavailable' };
+    }
     return this.renderNotification(options).rendered;
   }
 
   private renderNotification(options: NotificationOptions): {
-    rendered: boolean;
+    rendered: boolean | Promise<boolean>;
     notification: Notification | null;
   } {
     // Device presentation is intentionally separate from Notification policy.
-    // The durable Notification runtime has already evaluated QuietHours/DND.
+    // The durable Notification runtime evaluates Product-Time QuietHours;
+    // showCanonicalDelivery also applies current device DND.
     const preference = this.devicePreferenceStore.get();
     if (preference.presentationMode === 'custom') {
       logger.info('[Desktop][NotificationFlow] Routing notification to custom manager', {
         title: options.title,
       });
-      this.customNotificationManager.dispatch({
+      const rendered = this.customNotificationManager.dispatch({
         ...options,
         sound: preference.soundEnabled && options.sound === true,
       });
-      return { rendered: true, notification: null };
+      return { rendered, notification: null };
     }
 
     logger.info(

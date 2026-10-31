@@ -70,7 +70,7 @@ export function buildRoutineNotificationRequestedOutboxInput(
         type: NotificationType.Reminder,
         category: NotificationCategory.Reminder,
       },
-      suggestedChannels: [NotificationChannelType.InApp],
+      suggestedChannels: [NotificationChannelType.InApp, NotificationChannelType.Desktop],
       actions: [
         {
           kind: 'owner-command',

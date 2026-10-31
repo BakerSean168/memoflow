@@ -36,6 +36,7 @@
  */
 
 import type { IElectronDatabase } from '@memoflow/desktop-contracts';
+import type { DesktopPresentationResult } from '@memoflow/notification-contracts';
 import type { UserTimeContextPort } from '@memoflow/time';
 import {
   createDefaultElectronDesktopTransport,
@@ -68,7 +69,10 @@ export interface ComposeNotificationDesktopDependencies {
   /** Native Electron desktop transport (acks + native Notification side effect). 原生 Electron desktop transport（ack + 原生 Notification 副作用）。 */
   readonly desktopTransport?: unknown;
   /** Late-bound device renderer used by the durable Desktop transport. */
-  readonly desktopRenderer?: (dto: unknown, context?: unknown) => boolean | Promise<boolean>;
+  readonly desktopRenderer?: (
+    dto: unknown,
+    context?: unknown,
+  ) => DesktopPresentationResult | Promise<DesktopPresentationResult>;
 }
 
 /**

@@ -49,7 +49,7 @@ describe('Routine occurrence notification adapter', () => {
           source: 'routine',
           occurrenceKey: 'occurrence-1',
           workflowKey: 'routine.intervention',
-          suggestedChannels: ['InApp'],
+          suggestedChannels: ['InApp', 'Desktop'],
           content: {
             title: '例行提醒：Stand & Move',
             content: '已到「Stand & Move」的执行时间。',

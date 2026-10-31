@@ -36,7 +36,10 @@ import type {
   INotificationRepository,
   INotificationPreferenceRepository,
 } from '../domain/repositories';
-import type { NotificationRequestedWriterPort } from '@memoflow/notification-contracts';
+import type {
+  DesktopPresentationResult,
+  NotificationRequestedWriterPort,
+} from '@memoflow/notification-contracts';
 
 export interface CreateNotificationPowerSyncModuleOptions {
   readonly userTimeContextPort: UserTimeContextPort;
@@ -103,7 +106,7 @@ export function createNotificationPowerSyncRepositories(
 
 export interface DesktopTransportAckRecord {
   readonly ackId: string;
-  readonly status: 'delivering' | 'delivered' | 'failed';
+  readonly status: 'delivering' | 'delivered' | 'failed' | 'suppressed';
   readonly timestamp: number;
   readonly error?: string;
   readonly payloadJson?: string;
@@ -187,7 +190,9 @@ export class PowerSyncDesktopTransportAckStore implements DesktopTransportAckSto
               ? 'delivering'
               : statusStr === 'delivered'
                 ? 'delivered'
-                : 'failed',
+                : statusStr === 'suppressed'
+                  ? 'suppressed'
+                  : 'failed',
           timestamp: row.updated_at ? new Date(row.updated_at).getTime() : Date.now(),
           error: row.error ?? undefined,
           payloadJson: row.payload_json ?? undefined,
@@ -243,10 +248,12 @@ export class PowerSyncDesktopTransportAckStore implements DesktopTransportAckSto
           ],
         );
       }
-      const saved = await tx.getOptional<{ status: string; ack_id: string | null }>(
-        `SELECT status, ack_id FROM desktop_delivery_acks WHERE idempotency_key = ? LIMIT 1`,
-        [idempotencyKey],
-      );
+      const saved = await tx.getOptional<{
+        status: string;
+        ack_id: string | null;
+      }>(`SELECT status, ack_id FROM desktop_delivery_acks WHERE idempotency_key = ? LIMIT 1`, [
+        idempotencyKey,
+      ]);
       if (!saved || saved.status !== record.status || saved.ack_id !== (record.ackId ?? null)) {
         throw new Error(
           `Failed to save desktop delivery ack for idempotencyKey '${idempotencyKey}': expected one row affected`,
@@ -269,11 +276,19 @@ export class PowerSyncDesktopTransportAckStore implements DesktopTransportAckSto
  */
 export function createDefaultElectronDesktopTransport(optionsOrDb?: unknown): unknown {
   let ackStore: DesktopTransportAckStore;
-  let renderer: ((dto: unknown, context?: unknown) => boolean | Promise<boolean>) | null = null;
+  let renderer:
+    | ((
+        dto: unknown,
+        context?: unknown,
+      ) => DesktopPresentationResult | Promise<DesktopPresentationResult>)
+    | null = null;
   if (optionsOrDb && typeof optionsOrDb === 'object') {
     const opts = optionsOrDb as Record<string, unknown>;
     if (typeof opts.renderer === 'function') {
-      renderer = opts.renderer as (dto: unknown, context?: unknown) => boolean | Promise<boolean>;
+      renderer = opts.renderer as (
+        dto: unknown,
+        context?: unknown,
+      ) => DesktopPresentationResult | Promise<DesktopPresentationResult>;
     }
     if ('getAck' in opts && 'saveAck' in opts) {
       ackStore = opts as unknown as DesktopTransportAckStore;
@@ -290,6 +305,118 @@ export function createDefaultElectronDesktopTransport(optionsOrDb?: unknown): un
     ackStore = new MemoryDesktopTransportAckStore();
   }
 
+  const inFlight = new Map<string, Promise<DesktopTransportAckRecord>>();
+  const deliver = async (dto: unknown, context?: unknown): Promise<DesktopTransportAckRecord> => {
+    const deliveryCtx = context as
+      | { idempotencyKey?: string; deliveryId?: string; identityId?: string }
+      | undefined;
+    const idempotencyKey = deliveryCtx?.idempotencyKey;
+
+    if (idempotencyKey) {
+      const existing = await ackStore.getAck(idempotencyKey);
+      if (existing?.status === 'delivered' || existing?.status === 'suppressed') {
+        return {
+          ackId: existing.ackId,
+          status: existing.status,
+          timestamp: existing.timestamp,
+          error: existing.error,
+        };
+      }
+    }
+
+    const ackId = randomUUID();
+    const timestamp = Date.now();
+
+    if (idempotencyKey) {
+      await ackStore.saveAck(idempotencyKey, {
+        ackId,
+        status: 'delivering',
+        timestamp,
+      });
+    }
+
+    try {
+      if (renderer) {
+        const rendered = await renderer(dto, context);
+        if (typeof rendered === 'object' && rendered.status === 'suppressed') {
+          const suppressedAck: DesktopTransportAckRecord = {
+            ackId,
+            status: 'suppressed',
+            timestamp: Date.now(),
+            error: rendered.reason,
+          };
+          if (idempotencyKey) await ackStore.saveAck(idempotencyKey, suppressedAck);
+          return suppressedAck;
+        }
+        if (rendered !== true) {
+          throw new Error('Desktop notification renderer is unavailable or declined delivery');
+        }
+        const deliveredAck = {
+          ackId,
+          status: 'delivered' as const,
+          timestamp: Date.now(),
+        };
+        if (idempotencyKey) {
+          await ackStore.saveAck(idempotencyKey, deliveredAck);
+        }
+        return deliveredAck;
+      }
+
+      // Fallback for Electron main-process hosts without an injected renderer.
+      // Plain Node/Vitest processes must fail closed without loading the Electron package:
+      // requiring it outside a real Electron runtime can trigger binary resolution/download.
+      if (!process.versions.electron) {
+        throw new Error('Electron native Notification unavailable outside Electron runtime');
+      }
+      const electron = require('electron');
+      if (
+        electron &&
+        electron.Notification &&
+        typeof electron.Notification.isSupported === 'function' &&
+        electron.Notification.isSupported()
+      ) {
+        const data = dto as Record<string, unknown>;
+        const notif = new electron.Notification({
+          title: String(data.title ?? 'Notification'),
+          body: String(data.content ?? ''),
+        });
+        notif.show();
+        const deliveredAck = {
+          ackId,
+          status: 'delivered' as const,
+          timestamp: Date.now(),
+        };
+        if (idempotencyKey) {
+          await ackStore.saveAck(idempotencyKey, deliveredAck);
+        }
+        return deliveredAck;
+      }
+      const failedAck = {
+        ackId,
+        status: 'failed' as const,
+        timestamp,
+        error:
+          'Electron native Notification unavailable (electron module missing or Notification.isSupported() is false)',
+      };
+      if (idempotencyKey) {
+        await ackStore.saveAck(idempotencyKey, failedAck);
+      }
+      return failedAck;
+    } catch (err) {
+      const errorMsg = err instanceof Error ? err.message : String(err);
+      const failedAck = {
+        ackId,
+        status: 'failed' as const,
+        timestamp,
+        error: errorMsg,
+      };
+      if (idempotencyKey) {
+        await ackStore.saveAck(idempotencyKey, failedAck);
+      }
+      return failedAck;
+    }
+  };
+
   return {
     getAckStore() {
       return ackStore;
@@ -297,104 +424,14 @@ export function createDefaultElectronDesktopTransport(optionsOrDb?: unknown): un
     async getAck(idempotencyKey: string) {
       return ackStore.getAck(idempotencyKey);
     },
-    async deliver(dto: unknown, context?: unknown) {
-      const deliveryCtx = context as
-        | { idempotencyKey?: string; deliveryId?: string; identityId?: string }
-        | undefined;
-      const idempotencyKey = deliveryCtx?.idempotencyKey;
-
-      if (idempotencyKey) {
-        const existing = await ackStore.getAck(idempotencyKey);
-        if (existing?.status === 'delivered') {
-          return {
-            ackId: existing.ackId,
-            status: 'delivered',
-            timestamp: existing.timestamp,
-          };
-        }
-      }
-
-      const ackId = randomUUID();
-      const timestamp = Date.now();
-
-      if (idempotencyKey) {
-        await ackStore.saveAck(idempotencyKey, {
-          ackId,
-          status: 'delivering',
-          timestamp,
-        });
-      }
-
-      try {
-        if (renderer) {
-          const rendered = await renderer(dto, context);
-          if (!rendered) {
-            throw new Error('Desktop notification renderer is unavailable or declined delivery');
-          }
-          const deliveredAck = {
-            ackId,
-            status: 'delivered' as const,
-            timestamp,
-          };
-          if (idempotencyKey) {
-            await ackStore.saveAck(idempotencyKey, deliveredAck);
-          }
-          return deliveredAck;
-        }
-
-        // Fallback for Electron main-process hosts without an injected renderer.
-        // Plain Node/Vitest processes must fail closed without loading the Electron package:
-        // requiring it outside a real Electron runtime can trigger binary resolution/download.
-        if (!process.versions.electron) {
-          throw new Error('Electron native Notification unavailable outside Electron runtime');
-        }
-        const electron = require('electron');
-        if (
-          electron &&
-          electron.Notification &&
-          typeof electron.Notification.isSupported === 'function' &&
-          electron.Notification.isSupported()
-        ) {
-          const data = dto as Record<string, unknown>;
-          const notif = new electron.Notification({
-            title: String(data.title ?? 'Notification'),
-            body: String(data.content ?? ''),
-          });
-          notif.show();
-          const deliveredAck = {
-            ackId,
-            status: 'delivered' as const,
-            timestamp,
-          };
-          if (idempotencyKey) {
-            await ackStore.saveAck(idempotencyKey, deliveredAck);
-          }
-          return deliveredAck;
-        }
-        const failedAck = {
-          ackId,
-          status: 'failed' as const,
-          timestamp,
-          error:
-            'Electron native Notification unavailable (electron module missing or Notification.isSupported() is false)',
-        };
-        if (idempotencyKey) {
-          await ackStore.saveAck(idempotencyKey, failedAck);
-        }
-        return failedAck;
-      } catch (err) {
-        const errorMsg = err instanceof Error ? err.message : String(err);
-        const failedAck = {
-          ackId,
-          status: 'failed' as const,
-          timestamp,
-          error: errorMsg,
-        };
-        if (idempotencyKey) {
-          await ackStore.saveAck(idempotencyKey, failedAck);
-        }
-        return failedAck;
-      }
+    deliver(dto: unknown, context?: unknown) {
+      const key = (context as { idempotencyKey?: string } | undefined)?.idempotencyKey;
+      if (!key) return deliver(dto, context);
+      const existing = inFlight.get(key);
+      if (existing) return existing;
+      const pending = deliver(dto, context).finally(() => inFlight.delete(key));
+      inFlight.set(key, pending);
+      return pending;
     },
   };
 }
