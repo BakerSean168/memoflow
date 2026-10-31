@@ -2,6 +2,7 @@ import { describe, expect, it, vi } from 'vitest';
 import { flushPromises, mount } from '@vue/test-utils';
 import { createI18n } from 'vue-i18n';
 import ConversationSidebar from './ConversationSidebar.vue';
+import { listAdapterFor } from '../../shared/keyboard/list-adapter';
 import auth from '../../locales/en-US/auth';
 
 const i18n = createI18n({
@@ -205,17 +206,103 @@ describe('ConversationSidebar search', () => {
     expect(wrapper.text()).toContain('Infrastructure migration');
   });
 });
-describe('ConversationSidebar compact toolbar', () => {
-  it('selects visible conversations and emits one bulk action', async () => {
+describe('ConversationSidebar mouse and batch selection', () => {
+  it('selects contiguous and disjoint rows without opening, prunes filters, and resets Profile', async () => {
     const wrapper = mount(ConversationSidebar, {
+      props: { groups, activeConversationId: null, activeProfileId: 'one' },
+      global: { plugins: [i18n] },
+    });
+    const row = (id: string) => wrapper.get(`[data-keyboard-item="${id}"]`);
+    await row('a').trigger('click');
+    await row('c').trigger('click', { shiftKey: true });
+    expect(wrapper.findAll('[aria-selected="true"]')).toHaveLength(3);
+    expect(wrapper.emitted('select-conversation')).toEqual([['a']]);
+    await row('b').trigger('click', { ctrlKey: true });
+    expect(row('b').attributes('aria-selected')).toBe('false');
+    await wrapper.get('[data-testid="conversation-search-toggle"]').trigger('click');
+    await wrapper.get('[data-testid="conversation-search-input"]').setValue('Infrastructure');
+    expect(wrapper.get('[data-testid="conversation-selection-count"]').text()).toBe('1');
+    await wrapper.setProps({ activeProfileId: 'two' });
+    expect(row('c').attributes('aria-selected')).toBe('false');
+    wrapper.unmount();
+  });
+  it('anchors keyboard range selection at the row reached by focus navigation', async () => {
+    const wrapper = mount(ConversationSidebar, {
+      attachTo: document.body,
       props: { groups, activeConversationId: null },
+      global: { plugins: [i18n] },
+    });
+    try {
+      await wrapper.get('[data-keyboard-item="a"]').trigger('click');
+      const adapter = listAdapterFor(wrapper.get('[data-keyboard-item="a"]').element)!;
+      adapter.moveSelection(1);
+      adapter.moveSelection(1, true);
+      await flushPromises();
+      expect(wrapper.get('[data-keyboard-item="a"]').attributes('aria-selected')).toBe('false');
+      expect(wrapper.get('[data-keyboard-item="b"]').attributes('aria-selected')).toBe('true');
+      expect(wrapper.get('[data-keyboard-item="c"]').attributes('aria-selected')).toBe('true');
+      expect(document.activeElement).toBe(wrapper.get('[data-keyboard-item="c"]').element);
+      await wrapper
+        .get('[data-testid="conversation-sidebar"]')
+        .trigger('keydown', { key: 'Escape' });
+      const afterClear = listAdapterFor(wrapper.get('[data-keyboard-item="c"]').element)!;
+      afterClear.moveSelection(-1, true);
+      await flushPromises();
+      expect(wrapper.get('[data-keyboard-item="c"]').attributes('aria-selected')).toBe('true');
+    } finally {
+      wrapper.unmount();
+    }
+  });
+  it('reports each result, retains failed selection, and ignores stale Profile completions', async () => {
+    let finish!: (value: { id: string; success: boolean }[]) => void;
+    const bulkAction = vi.fn(
+      () =>
+        new Promise<{ id: string; success: boolean }[]>((resolve) => {
+          finish = resolve;
+        }),
+    );
+    const wrapper = mount(ConversationSidebar, {
+      props: { groups, activeConversationId: null, activeProfileId: 'one', bulkAction },
+      global: { plugins: [i18n] },
+    });
+    await wrapper.get('[data-testid="conversation-select-toggle"]').trigger('click');
+    await wrapper.get('[data-testid="conversation-select-all"]').trigger('click');
+    const action = wrapper.get('[data-testid="conversation-bulk-status"]');
+    await action.trigger('click');
+    await action.trigger('click');
+    expect(bulkAction).toHaveBeenCalledTimes(1);
+    finish([
+      { id: 'a', success: true },
+      { id: 'b', success: false },
+      { id: 'c', success: true },
+    ]);
+    await flushPromises();
+    expect(wrapper.get('[data-testid="conversation-selection-count"]').text()).toBe('1');
+    expect(wrapper.get('[data-testid="conversation-bulk-results"]').findAll('li')).toHaveLength(3);
+    await action.trigger('click');
+    await wrapper.setProps({ activeProfileId: 'two' });
+    finish([{ id: 'b', success: false }]);
+    await flushPromises();
+    expect(wrapper.find('[data-testid="conversation-bulk-results"]').exists()).toBe(false);
+    expect(wrapper.findAll('[aria-selected="true"]')).toHaveLength(0);
+    wrapper.unmount();
+  });
+});
+describe('ConversationSidebar compact toolbar', () => {
+  it('selects visible conversations and clears only acknowledged bulk successes', async () => {
+    const bulkAction = vi.fn(async (_action: string, ids: string[]) =>
+      ids.map((id) => ({ id, success: true })),
+    );
+    const wrapper = mount(ConversationSidebar, {
+      props: { groups, activeConversationId: null, bulkAction },
       global: { plugins: [i18n] },
     });
     await wrapper.get('[data-testid="conversation-select-toggle"]').trigger('click');
     await wrapper.get('[data-testid="conversation-select-all"]').trigger('click');
     expect(wrapper.get('[data-testid="conversation-selection-count"]').text()).toBe('3');
     await wrapper.get('[data-testid="conversation-bulk-status"]').trigger('click');
-    expect(wrapper.emitted('archive-conversations')).toEqual([[['a', 'b', 'c']]]);
+    await flushPromises();
+    expect(bulkAction).toHaveBeenCalledWith('archive', ['a', 'b', 'c']);
     expect(wrapper.find('[data-testid="conversation-selection-toolbar"]').exists()).toBe(false);
     wrapper.unmount();
   });

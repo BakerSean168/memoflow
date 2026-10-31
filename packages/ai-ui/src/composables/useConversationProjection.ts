@@ -325,7 +325,11 @@ export function useConversationProjection(input: {
       const [builtin, local] = await Promise.allSettled([
         Promise.all([
           loadService
-            .listConversations({ page: 1, pageSize: LIST_LIMIT, status: 'Active' })
+            .listConversations({
+              page: 1,
+              pageSize: LIST_LIMIT,
+              status: 'Active',
+            })
             .then(unwrap),
           loadService
             .listConversations({
@@ -597,8 +601,10 @@ export function useConversationProjection(input: {
       if (chatConversationId.value === id) startNewConversation();
       if (lastActiveConversationId.value === id) clearLastActiveConversation();
       toast.success(t('aiAssistant.dialogs.chat.deleted'));
+      return true;
     } catch (error) {
       toast.error(getAIErrorMessage(error, t, 'aiAssistant.dialogs.chat.deleteFailed'));
+      return false;
     }
   }
 

@@ -1204,6 +1204,8 @@ export function useAIChatView(options: UseAIChatViewOptions) {
       openRecentGoal,
       openRecentKnowledgeNote,
       archiveConversation: chatSession.archiveConversation,
+      archiveConversations: chatSession.archiveConversations,
+      restoreConversations: chatSession.restoreConversations,
       restoreConversation: restoreArchivedConversation,
       archivePage: chatSession.archivePage,
       archiveHasMore: chatSession.archiveHasMore,

@@ -37,6 +37,10 @@ import { useDesktopWindowControls } from '../../shared/composables/useDesktopWin
 import { hasDesktopAuthApi } from '../../shared/utils/desktop-auth-recovery';
 import { useNotificationUnreadQuery } from '@memoflow/notification-ui';
 import { useAccountStore, useAuthenticationStore } from '@memoflow/account-ui';
+import {
+  ConversationSelectionKey,
+  createConversationSelectionStore,
+} from './conversation-selection';
 import AIChatView from '@memoflow/ai-ui/views/AIChatView.vue';
 import type { ConversationSummary } from '@memoflow/ai-ui/composables/types';
 import WindowHeader, { type WindowHeaderCapsule } from './WindowHeader.vue';
@@ -228,6 +232,7 @@ const effectiveSidebarWidth = computed(() => {
   return Math.min(sidebarWidth.value, dynamicMax);
 });
 // ── AI 常驻层（单实例；会话侧栏数据经 defineExpose 上浮） ──
+provide(ConversationSelectionKey, createConversationSelectionStore());
 const aiRef = ref<InstanceType<typeof AIChatView> | null>(null);
 
 // ── Global Composer host (§8)：壳拥有布局，AIChatView Teleport 真实输入 ──
@@ -363,20 +368,21 @@ function handleArchiveConversation(id: string) {
 function handleRestoreConversation(id: string) {
   void aiRef.value?.restoreConversation(id);
 }
-function handleArchiveConversations(ids: string[]) {
-  void Promise.all(ids.map((id) => aiRef.value?.archiveConversation(id)));
-}
-function handleRestoreConversations(ids: string[]) {
-  void Promise.all(ids.map((id) => aiRef.value?.restoreConversation(id)));
+async function handleBulkConversationAction(
+  action: 'archive' | 'restore' | 'delete',
+  ids: string[],
+) {
+  const view = aiRef.value;
+  if (!view) return ids.map((id) => ({ id, success: false }));
+  if (action === 'archive') return view.archiveConversations(ids);
+  if (action === 'delete') return view.deleteConversations(ids);
+  return view.restoreConversations(ids);
 }
 function handleChangeArchivePage(direction: number) {
   void aiRef.value?.changeArchivePage(direction);
 }
 function handleDeleteConversation(id: string) {
   void aiRef.value?.deleteConversation(id);
-}
-function handleDeleteConversations(ids: string[]) {
-  void Promise.all(ids.map((id) => aiRef.value?.deleteConversation(id)));
 }
 
 /** 会话生命周期只更新 AI 区域，保留业务工作区与草稿。 */
@@ -1138,11 +1144,9 @@ onBeforeUnmount(() => {
               :archived-conversations="archivedConversations"
               :archive-page="aiRef?.archivePage ?? 1"
               :archive-has-more="aiRef?.archiveHasMore ?? false"
+              :bulk-action="handleBulkConversationAction"
               @archive-conversation="handleArchiveConversation"
               @restore-conversation="handleRestoreConversation"
-              @archive-conversations="handleArchiveConversations"
-              @restore-conversations="handleRestoreConversations"
-              @delete-conversations="handleDeleteConversations"
               @change-archive-page="handleChangeArchivePage"
               @refresh-conversations="aiRef?.loadConversationList()"
               :conversation-statuses="conversationStatuses"
@@ -1325,11 +1329,9 @@ onBeforeUnmount(() => {
             :archived-conversations="archivedConversations"
             :archive-page="aiRef?.archivePage ?? 1"
             :archive-has-more="aiRef?.archiveHasMore ?? false"
+            :bulk-action="handleBulkConversationAction"
             @archive-conversation="handleArchiveConversation"
             @restore-conversation="handleRestoreConversation"
-            @archive-conversations="handleArchiveConversations"
-            @restore-conversations="handleRestoreConversations"
-            @delete-conversations="handleDeleteConversations"
             @change-archive-page="handleChangeArchivePage"
             @refresh-conversations="aiRef?.loadConversationList()"
             :conversation-statuses="conversationStatuses"

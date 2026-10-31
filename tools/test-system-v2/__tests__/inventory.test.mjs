@@ -24,7 +24,7 @@ const repositoryArchitecture = await buildTestArchitecture(repositoryRoot, {
   inventory: repositoryInventory,
 });
 // One monotonic review-registry checkpoint, rather than six scattered magic counts.
-const REVIEWED_FILE_SAMPLE_COUNT = 172;
+const REVIEWED_FILE_SAMPLE_COUNT = 174;
 
 test('classifies explicit boundary and measurement file names', () => {
   assert.equal(classifyTest('apps/desktop/src/main/ipc/system-handlers.spec.ts'), 'boundary-ipc');
