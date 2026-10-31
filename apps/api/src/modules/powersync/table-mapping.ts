@@ -13,60 +13,66 @@
  * NOTE: `accounts` is NOT included — its `id` IS the identity, not a foreign key.
  */
 export const IDENTITY_ID_TABLES = new Set([
-  'user_preference_records',
-  'goals',
-  'key_results',
-  'goal_records',
-  'goal_reviews',
-  'key_result_weight_snapshots',
-  'relations',
-  'task_plans',
-  'task_occurrences',
-  'task_plan_history',
-  'schedules',
-  'scheduled_invocations',
-  'invocation_attempts',
-  'routine_definitions',
-  'routine_preferences',
-  'routine_profiles',
-  'routine_profile_memberships',
-  'routine_interactions',
-  'routine_temporary_overrides',
-  'routine_occurrences',
-  'notifications',
-  'notification_preferences',
-  'notification_interactions',
-  'ai_conversations',
-  'ai_execution_records',
-  'task_goal_outbox',
+  "user_preference_records",
+  "goals",
+  "key_results",
+  "goal_records",
+  "goal_reviews",
+  "key_result_weight_snapshots",
+  "relations",
+  "task_plans",
+  "task_occurrences",
+  "task_plan_history",
+  "schedules",
+  "scheduled_invocations",
+  "invocation_attempts",
+  "routine_definitions",
+  "routine_preferences",
+  "routine_profiles",
+  "routine_profile_memberships",
+  "routine_interactions",
+  "routine_temporary_overrides",
+  "routine_occurrences",
+  "notifications",
+  "notification_preferences",
+  "notification_interactions",
+  "ai_conversations",
+  "ai_execution_records",
+  "ai_permission_settings",
+  "ai_permission_rules",
+  "ai_permission_audit",
+  "task_goal_outbox",
 ]);
 
 const TABLE_TO_MODEL: Record<string, string> = {
-  accounts: 'account',
-  user_preference_records: 'userPreferenceRecord',
-  goals: 'goal',
-  key_results: 'keyResult',
-  goal_records: 'goalRecord',
-  goal_reviews: 'goalReview',
-  key_result_weight_snapshots: 'keyResultWeightSnapshot',
-  relations: 'relation',
-  task_plans: 'taskPlan',
-  task_occurrences: 'taskOccurrence',
-  task_plan_history: 'taskPlanHistory',
-  schedules: 'schedule',
-  scheduled_invocations: 'scheduledInvocation',
-  invocation_attempts: 'invocationAttempt',
-  routine_definitions: 'routineDefinition',
-  routine_preferences: 'routinePreference',
-  routine_profiles: 'routineProfile',
-  routine_occurrences: 'routineOccurrence',
-  routine_interactions: 'routineInteraction',
-  notifications: 'notification',
-  notification_preferences: 'notificationPreference',
-  notification_interactions: 'notificationInteraction',
-  ai_conversations: 'aiConversation',
-  ai_execution_records: 'aiExecutionRecord',
-  task_goal_outbox: 'taskGoalOutbox',
+  accounts: "account",
+  user_preference_records: "userPreferenceRecord",
+  goals: "goal",
+  key_results: "keyResult",
+  goal_records: "goalRecord",
+  goal_reviews: "goalReview",
+  key_result_weight_snapshots: "keyResultWeightSnapshot",
+  relations: "relation",
+  task_plans: "taskPlan",
+  task_occurrences: "taskOccurrence",
+  task_plan_history: "taskPlanHistory",
+  schedules: "schedule",
+  scheduled_invocations: "scheduledInvocation",
+  invocation_attempts: "invocationAttempt",
+  routine_definitions: "routineDefinition",
+  routine_preferences: "routinePreference",
+  routine_profiles: "routineProfile",
+  routine_occurrences: "routineOccurrence",
+  routine_interactions: "routineInteraction",
+  notifications: "notification",
+  notification_preferences: "notificationPreference",
+  notification_interactions: "notificationInteraction",
+  ai_conversations: "aiConversation",
+  ai_execution_records: "aiExecutionRecord",
+  ai_permission_settings: "aiPermissionSetting",
+  ai_permission_rules: "aiPermissionRule",
+  ai_permission_audit: "aiPermissionAudit",
+  task_goal_outbox: "taskGoalOutbox",
 };
 
 export interface CrudDelegate {
@@ -101,11 +107,11 @@ export interface CrudDelegateContainer {
 
 function isCrudDelegate(value: unknown): value is CrudDelegate {
   return (
-    typeof value === 'object' &&
+    typeof value === "object" &&
     value !== null &&
-    'upsert' in value &&
-    'update' in value &&
-    'deleteMany' in value
+    "upsert" in value &&
+    "update" in value &&
+    "deleteMany" in value
   );
 }
 

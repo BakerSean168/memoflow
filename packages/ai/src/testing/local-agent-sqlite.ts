@@ -1,8 +1,10 @@
-import { DatabaseSync, type SQLInputValue } from 'node:sqlite';
-import type { IElectronDatabase } from '@memoflow/desktop-contracts';
+import { DatabaseSync, type SQLInputValue } from "node:sqlite";
+import type { IElectronDatabase } from "@memoflow/desktop-contracts";
 
-export function createLocalAgentSqlite(): IElectronDatabase & { close(): void } {
-  const sql = new DatabaseSync(':memory:');
+export function createLocalAgentSqlite(): IElectronDatabase & {
+  close(): void;
+} {
+  const sql = new DatabaseSync(":memory:");
   sql.exec(`
     CREATE TABLE ai_agent_native_mappings (id TEXT PRIMARY KEY, identity_id TEXT NOT NULL, connection_id TEXT NOT NULL, instance_id TEXT NOT NULL);
     CREATE TABLE ai_agent_model_service_migrations (id TEXT PRIMARY KEY, identity_id TEXT NOT NULL, connection_id TEXT NOT NULL);
@@ -13,38 +15,51 @@ export function createLocalAgentSqlite(): IElectronDatabase & { close(): void } 
     CREATE TABLE ai_local_agent_connections (id TEXT PRIMARY KEY, identity_id TEXT, record_json TEXT);
     CREATE TABLE ai_local_conversations (id TEXT PRIMARY KEY, identity_id TEXT, record_json TEXT);
     CREATE TABLE ai_local_conversation_items (id TEXT PRIMARY KEY, identity_id TEXT, conversation_id TEXT, created_at INTEGER, record_json TEXT);
+    CREATE TABLE ai_permission_settings (id TEXT PRIMARY KEY, identity_id TEXT, revision INTEGER, record_json TEXT, updated_at INTEGER);
+    CREATE TABLE ai_permission_rules (id TEXT PRIMARY KEY, identity_id TEXT, agent_id TEXT, record_json TEXT, updated_at INTEGER);
+    CREATE TABLE ai_permission_audit (id TEXT PRIMARY KEY, identity_id TEXT, occurred_at INTEGER, record_json TEXT);
   `);
   const parameters = (values: unknown[] = []): SQLInputValue[] =>
     values.map((value) => {
-      if (value === null || typeof value === 'string' || typeof value === 'number') return value;
-      throw new Error('Unsupported SQLite fixture parameter');
+      if (
+        value === null ||
+        typeof value === "string" ||
+        typeof value === "number"
+      )
+        return value;
+      throw new Error("Unsupported SQLite fixture parameter");
     });
   let writeQueue: Promise<void> = Promise.resolve();
   const db: IElectronDatabase = {
     async execute(query, values) {
-      return { rowsAffected: Number(sql.prepare(query).run(...parameters(values)).changes) };
+      return {
+        rowsAffected: Number(
+          sql.prepare(query).run(...parameters(values)).changes,
+        ),
+      };
     },
     async getAll<T>(query: string, values?: unknown[]) {
       return sql.prepare(query).all(...parameters(values)) as T[];
     },
     async getOptional<T>(query: string, values?: unknown[]) {
-      return (sql.prepare(query).get(...parameters(values)) ?? null) as T | null;
+      return (sql.prepare(query).get(...parameters(values)) ??
+        null) as T | null;
     },
     async get<T>(query: string, values?: unknown[]) {
       const result = await db.getOptional<T>(query, values);
-      if (!result) throw new Error('Row not found');
+      if (!result) throw new Error("Row not found");
       return result;
     },
     // PowerSync holds one write lock per database; queue transactions the same way.
     writeTransaction(work) {
       const run = writeQueue.then(async () => {
-        sql.exec('BEGIN');
+        sql.exec("BEGIN");
         try {
           const result = await work(db);
-          sql.exec('COMMIT');
+          sql.exec("COMMIT");
           return result;
         } catch (error) {
-          sql.exec('ROLLBACK');
+          sql.exec("ROLLBACK");
           throw error;
         }
       });

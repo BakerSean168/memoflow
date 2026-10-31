@@ -186,6 +186,29 @@ exports.Prisma.AiExecutionRecordScalarFieldEnum = {
   completedAt: 'completedAt'
 };
 
+exports.Prisma.AiPermissionSettingScalarFieldEnum = {
+  id: 'id',
+  identityId: 'identityId',
+  revision: 'revision',
+  recordJson: 'recordJson',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.AiPermissionRuleScalarFieldEnum = {
+  id: 'id',
+  identityId: 'identityId',
+  agentId: 'agentId',
+  recordJson: 'recordJson',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.AiPermissionAuditScalarFieldEnum = {
+  id: 'id',
+  identityId: 'identityId',
+  occurredAt: 'occurredAt',
+  recordJson: 'recordJson'
+};
+
 exports.Prisma.AiProviderConfigScalarFieldEnum = {
   id: 'id',
   identityId: 'identityId',
@@ -1455,6 +1478,9 @@ exports.Prisma.ModelName = {
   AiGoalSurfaceLease: 'AiGoalSurfaceLease',
   AiConversationAttention: 'AiConversationAttention',
   AiExecutionRecord: 'AiExecutionRecord',
+  AiPermissionSetting: 'AiPermissionSetting',
+  AiPermissionRule: 'AiPermissionRule',
+  AiPermissionAudit: 'AiPermissionAudit',
   AiProviderConfig: 'AiProviderConfig',
   AiAgentInstance: 'AiAgentInstance',
   AiAgentInstanceBinding: 'AiAgentInstanceBinding',

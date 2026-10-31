@@ -1,4 +1,5 @@
-import { sanitizeConversationTitle } from '@memoflow/ai-contracts';
+import { sanitizeConversationTitle } from "@memoflow/ai-contracts";
+import { createHash } from "node:crypto";
 /**
  * PowerSync CRUD batch executor
  *
@@ -6,21 +7,21 @@ import { sanitizeConversationTitle } from '@memoflow/ai-contracts';
  * them to Postgres via Prisma inside a transaction.
  */
 
-import { createLogger } from '@memoflow/utils/logger';
-import { normalizeCrudData } from './crud-normalization.js';
-import { executeUserPreferenceCrudOperation } from './user-preference-crud-executor.js';
-import { executeRelationCrudOperation } from './relation-crud-executor.js';
+import { createLogger } from "@memoflow/utils/logger";
+import { normalizeCrudData } from "./crud-normalization.js";
+import { executeUserPreferenceCrudOperation } from "./user-preference-crud-executor.js";
+import { executeRelationCrudOperation } from "./relation-crud-executor.js";
 import {
   executeRoutineCompoundCrudOperation,
   isRoutineCompoundCrudTable,
-} from './routine-compound-crud-executor.js';
+} from "./routine-compound-crud-executor.js";
 import {
   IDENTITY_ID_TABLES,
   getPrismaDelegate,
   type CrudDelegateContainer,
-} from './table-mapping.js';
+} from "./table-mapping.js";
 
-const logger = createLogger('PowerSyncCrudExecutor');
+const logger = createLogger("PowerSyncCrudExecutor");
 
 export interface CrudTransaction {
   ops?: CrudOperation[];
@@ -28,7 +29,7 @@ export interface CrudTransaction {
 }
 
 export interface CrudOperation {
-  op: 'PUT' | 'PATCH' | 'DELETE';
+  op: "PUT" | "PATCH" | "DELETE";
   type: string;
   id: string;
   data?: Record<string, unknown>;
@@ -41,7 +42,9 @@ export interface CrudBatchResult {
 }
 
 interface CrudTransactionDatabase {
-  $transaction<T>(callback: (tx: CrudDelegateContainer) => Promise<T>): Promise<T>;
+  $transaction<T>(
+    callback: (tx: CrudDelegateContainer) => Promise<T>,
+  ): Promise<T>;
   routineProfileMembership?: {
     findMany(args: {
       where: { identityId: string; profileId: { in: string[] } };
@@ -84,8 +87,12 @@ export async function executeCrudBatch(
 
   for (const transaction of transactions) {
     for (const operation of transaction.ops || transaction.crud || []) {
-      if (operation.type === 'routine_preferences') dirtyAllRoutines = true;
-      collectRoutineScheduleDirtyOwner(operation, dirtyRoutineIds, dirtyProfileIds);
+      if (operation.type === "routine_preferences") dirtyAllRoutines = true;
+      collectRoutineScheduleDirtyOwner(
+        operation,
+        dirtyRoutineIds,
+        dirtyProfileIds,
+      );
     }
   }
 
@@ -99,7 +106,7 @@ export async function executeCrudBatch(
     for (const row of rows) dirtyRoutineIds.add(row.routineId);
   }
 
-  logger.info('PowerSync CRUD batch received', {
+  logger.info("PowerSync CRUD batch received", {
     identityId,
     transactionCount: txCount,
     operationCount: opCount,
@@ -111,16 +118,121 @@ export async function executeCrudBatch(
 
       for (const op of ops) {
         const { op: opType, type: tableName, id, data } = op;
-        if (tableName === 'user_preference_records') {
+        if (tableName === "user_preference_records") {
           await executeUserPreferenceCrudOperation(tx, identityId, op);
           continue;
         }
-        if (tableName === 'relations') {
+        if (tableName === "relations") {
           await executeRelationCrudOperation(tx as never, identityId, op);
           continue;
         }
         if (isRoutineCompoundCrudTable(tableName)) {
-          await executeRoutineCompoundCrudOperation(tx as never, identityId, op);
+          await executeRoutineCompoundCrudOperation(
+            tx as never,
+            identityId,
+            op,
+          );
+          continue;
+        }
+        if (
+          tableName === "ai_permission_settings" ||
+          tableName === "ai_permission_rules"
+        ) {
+          const ownerKey = createHash("sha256")
+            .update(identityId)
+            .digest("hex");
+          const validId =
+            tableName === "ai_permission_settings"
+              ? id === `${ownerKey}:settings`
+              : id.startsWith(`${ownerKey}:rule:`);
+          if (!validId)
+            throw new Error("Permission record id is not owner scoped");
+          const model = (
+            tableName === "ai_permission_settings"
+              ? tx.aiPermissionSetting
+              : tx.aiPermissionRule
+          ) as
+            | {
+                createMany(args: {
+                  data: Record<string, unknown>;
+                  skipDuplicates: true;
+                }): Promise<unknown>;
+                updateMany(args: {
+                  where: { id: string; identityId: string };
+                  data: Record<string, unknown>;
+                }): Promise<unknown>;
+                deleteMany(args: {
+                  where: { id: string; identityId: string };
+                }): Promise<unknown>;
+              }
+            | undefined;
+          if (!model) throw new Error("Permission storage unavailable");
+          const record = normalizeCrudData(tableName, data);
+          if (opType === "PUT") {
+            const ownedData = { ...record, id, identityId };
+            await model.createMany({ data: ownedData, skipDuplicates: true });
+            await model.updateMany({
+              where: { id, identityId },
+              data: ownedData,
+            });
+          } else if (opType === "PATCH") {
+            await model.updateMany({ where: { id, identityId }, data: record });
+          } else if (opType === "DELETE") {
+            await model.deleteMany({ where: { id, identityId } });
+          }
+          continue;
+        }
+        if (tableName === "ai_permission_audit") {
+          const ownerKey = createHash("sha256")
+            .update(identityId)
+            .digest("hex");
+          if (!id.startsWith(`${ownerKey}:audit:`))
+            throw new Error("Permission audit id is not owner scoped");
+          const auditDelegate = getPrismaDelegate(tx, tableName);
+          if (!auditDelegate)
+            throw new Error("Permission audit storage unavailable");
+          if (opType === "PUT") {
+            await auditDelegate.upsert({
+              where: { id },
+              create: { ...normalizeCrudData(tableName, data), id, identityId },
+              update: {},
+            });
+            continue;
+          }
+          if (opType !== "PATCH" || typeof data?.record_json !== "string")
+            throw new Error("Permission audit records are append-only");
+          const auditModel = tx.aiPermissionAudit as {
+            findFirst(args: {
+              where: { id: string; identityId: string };
+              select: { recordJson: true };
+            }): Promise<{ recordJson: string } | null>;
+            updateMany(args: {
+              where: { id: string; identityId: string; recordJson: string };
+              data: { recordJson: string };
+            }): Promise<unknown>;
+          };
+          const current = await auditModel.findFirst({
+            where: { id, identityId },
+            select: { recordJson: true },
+          });
+          if (!current) throw new Error("Permission audit record not found");
+          const before = JSON.parse(current.recordJson) as Record<
+            string,
+            unknown
+          >;
+          const after = JSON.parse(data.record_json) as Record<string, unknown>;
+          const immutableBefore = { ...before, execution: "not_started" };
+          const immutableAfter = { ...after, execution: "not_started" };
+          if (
+            before.execution !== "not_started" ||
+            !["succeeded", "failed"].includes(String(after.execution)) ||
+            JSON.stringify(immutableBefore) !== JSON.stringify(immutableAfter)
+          )
+            throw new Error("Permission audit execution transition is invalid");
+          await auditModel.updateMany({
+            where: { id, identityId, recordJson: current.recordJson },
+            data: { recordJson: data.record_json },
+          });
           continue;
         }
         const delegate = getPrismaDelegate(tx, tableName);
@@ -131,22 +243,25 @@ export async function executeCrudBatch(
         }
 
         if (
-          tableName === 'ai_conversations' &&
-          (opType === 'PUT' || opType === 'PATCH') &&
+          tableName === "ai_conversations" &&
+          (opType === "PUT" || opType === "PATCH") &&
           data?.name !== undefined
         ) {
           const record = normalizeCrudData(tableName, data);
           const version =
-            typeof record.version === 'number' &&
+            typeof record.version === "number" &&
             Number.isSafeInteger(record.version) &&
             record.version > 0
               ? record.version
               : 3;
           const name =
-            typeof record.name === 'string' ? sanitizeConversationTitle(record.name) : '';
-          if (!name) throw new Error('Invalid conversation title');
-          if (!delegate.updateMany) throw new Error('Conversation conditional update unavailable');
-          if (opType === 'PUT') {
+            typeof record.name === "string"
+              ? sanitizeConversationTitle(record.name)
+              : "";
+          if (!name) throw new Error("Invalid conversation title");
+          if (!delegate.updateMany)
+            throw new Error("Conversation conditional update unavailable");
+          if (opType === "PUT") {
             // Create once; a replay must never replace a newer title or resurrect a tombstone.
             await delegate.upsert({
               where: { id },
@@ -168,8 +283,9 @@ export async function executeCrudBatch(
               ...(record.updatedAt ? { updatedAt: record.updatedAt } : {}),
             },
           });
-          if (opType === 'PATCH' && record.status !== undefined) {
-            if (!delegate.findFirst) throw new Error('Conversation lookup unavailable');
+          if (opType === "PATCH" && record.status !== undefined) {
+            if (!delegate.findFirst)
+              throw new Error("Conversation lookup unavailable");
             const current = await delegate.findFirst({
               where: { id, identityId, deletedAt: null },
               select: { updatedAt: true },
@@ -184,8 +300,11 @@ export async function executeCrudBatch(
         }
 
         switch (opType) {
-          case 'PUT': {
-            const record: Record<string, unknown> = { ...normalizeCrudData(tableName, data), id };
+          case "PUT": {
+            const record: Record<string, unknown> = {
+              ...normalizeCrudData(tableName, data),
+              id,
+            };
             if (IDENTITY_ID_TABLES.has(tableName)) {
               record.identityId = identityId;
             }
@@ -197,13 +316,13 @@ export async function executeCrudBatch(
             break;
           }
 
-          case 'PATCH': {
+          case "PATCH": {
             const patchData = normalizeCrudData(tableName, data);
             if (IDENTITY_ID_TABLES.has(tableName)) {
               patchData.identityId = identityId;
             }
             if (
-              tableName === 'ai_conversations' &&
+              tableName === "ai_conversations" &&
               patchData.status !== undefined &&
               patchData.name === undefined &&
               patchData.deletedAt === undefined &&
@@ -211,7 +330,8 @@ export async function executeCrudBatch(
             ) {
               // PowerSync uploads only changed columns. A state-only patch must
               // not let Prisma's @updatedAt reorder history or revive a deletion.
-              if (!delegate.findFirst) throw new Error('Conversation lookup unavailable');
+              if (!delegate.findFirst)
+                throw new Error("Conversation lookup unavailable");
               const current = await delegate.findFirst({
                 where: { id, identityId, deletedAt: null },
                 select: { updatedAt: true },
@@ -230,7 +350,7 @@ export async function executeCrudBatch(
             break;
           }
 
-          case 'DELETE': {
+          case "DELETE": {
             await delegate.deleteMany({
               where: { id },
             });
@@ -266,17 +386,17 @@ function collectRoutineScheduleDirtyOwner(
   routineIds: Set<string>,
   profileIds: Set<string>,
 ): void {
-  if (operation.type === 'routine_definitions') {
+  if (operation.type === "routine_definitions") {
     routineIds.add(operation.id);
     return;
   }
-  if (operation.type === 'routine_profiles') {
+  if (operation.type === "routine_profiles") {
     profileIds.add(operation.id);
     return;
   }
   if (
-    operation.type !== 'routine_profile_memberships' &&
-    operation.type !== 'routine_temporary_overrides'
+    operation.type !== "routine_profile_memberships" &&
+    operation.type !== "routine_temporary_overrides"
   ) {
     return;
   }
@@ -284,5 +404,6 @@ function collectRoutineScheduleDirtyOwner(
   const data = normalizeCrudData(operation.type, operation.data);
   const old = normalizeCrudData(operation.type, operation.old);
   const routineId = old.routineId ?? data.routineId;
-  if (typeof routineId === 'string' && routineId.trim()) routineIds.add(routineId);
+  if (typeof routineId === "string" && routineId.trim())
+    routineIds.add(routineId);
 }

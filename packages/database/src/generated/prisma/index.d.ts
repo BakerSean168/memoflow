@@ -40,6 +40,21 @@ export type AiConversationAttention = $Result.DefaultSelection<Prisma.$AiConvers
  */
 export type AiExecutionRecord = $Result.DefaultSelection<Prisma.$AiExecutionRecordPayload>
 /**
+ * Model AiPermissionSetting
+ *
+ */
+export type AiPermissionSetting = $Result.DefaultSelection<Prisma.$AiPermissionSettingPayload>
+/**
+ * Model AiPermissionRule
+ *
+ */
+export type AiPermissionRule = $Result.DefaultSelection<Prisma.$AiPermissionRulePayload>
+/**
+ * Model AiPermissionAudit
+ *
+ */
+export type AiPermissionAudit = $Result.DefaultSelection<Prisma.$AiPermissionAuditPayload>
+/**
  * Model AiProviderConfig
  *
  */
@@ -678,6 +693,36 @@ export class PrismaClient<
     * ```
     */
   get aiExecutionRecord(): Prisma.AiExecutionRecordDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.aiPermissionSetting`: Exposes CRUD operations for the **AiPermissionSetting** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more AiPermissionSettings
+    * const aiPermissionSettings = await prisma.aiPermissionSetting.findMany()
+    * ```
+    */
+  get aiPermissionSetting(): Prisma.AiPermissionSettingDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.aiPermissionRule`: Exposes CRUD operations for the **AiPermissionRule** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more AiPermissionRules
+    * const aiPermissionRules = await prisma.aiPermissionRule.findMany()
+    * ```
+    */
+  get aiPermissionRule(): Prisma.AiPermissionRuleDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.aiPermissionAudit`: Exposes CRUD operations for the **AiPermissionAudit** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more AiPermissionAudits
+    * const aiPermissionAudits = await prisma.aiPermissionAudit.findMany()
+    * ```
+    */
+  get aiPermissionAudit(): Prisma.AiPermissionAuditDelegate<ExtArgs, ClientOptions>;
 
   /**
    * `prisma.aiProviderConfig`: Exposes CRUD operations for the **AiProviderConfig** model.
@@ -2000,6 +2045,9 @@ export namespace Prisma {
     AiGoalSurfaceLease: 'AiGoalSurfaceLease',
     AiConversationAttention: 'AiConversationAttention',
     AiExecutionRecord: 'AiExecutionRecord',
+    AiPermissionSetting: 'AiPermissionSetting',
+    AiPermissionRule: 'AiPermissionRule',
+    AiPermissionAudit: 'AiPermissionAudit',
     AiProviderConfig: 'AiProviderConfig',
     AiAgentInstance: 'AiAgentInstance',
     AiAgentInstanceBinding: 'AiAgentInstanceBinding',
@@ -2102,7 +2150,7 @@ export namespace Prisma {
       omit: GlobalOmitOptions
     }
     meta: {
-      modelProps: "account" | "aiConversation" | "aiGoalSurfaceLease" | "aiConversationAttention" | "aiExecutionRecord" | "aiProviderConfig" | "aiAgentInstance" | "aiAgentInstanceBinding" | "aiAgentConversationBinding" | "aiProviderOnboardingSession" | "aiProviderSecret" | "aiKnowledgeIndexEntry" | "aiAgentRegistryMigration" | "aiAssistedWorkflow" | "cloudAuthUser" | "cloudAuthSession" | "cloudAuthProviderAccount" | "cloudAuthVerification" | "cloudAuthDeviceCode" | "externalAgentPat" | "externalAgentConnection" | "goal" | "keyResult" | "goalRecord" | "goalReview" | "keyResultWeightSnapshot" | "habit" | "habitOccurrence" | "habitCheckIn" | "habitStreakProjection" | "label" | "goalLabel" | "taskLabel" | "notification" | "notificationInteraction" | "notificationDeliveryDecisionRecord" | "notificationPreference" | "notificationDispatchOutbox" | "jwks" | "oauthClient" | "oauthResource" | "oauthClientResource" | "oauthRefreshToken" | "oauthAccessToken" | "oauthConsent" | "oauthClientAssertion" | "profileImportOperation" | "relation" | "outboxMessage" | "inboxReceipt" | "projectionCursor" | "accountClosureOperation" | "operationAuditLog" | "externalMutationReceipt" | "routineDefinition" | "routinePreference" | "routineProfile" | "routineProfileMembership" | "routineProtocolDefinition" | "routineProtocolSession" | "routineOccurrence" | "routineInteraction" | "routineTemporaryOverride" | "knowledgeRepositoryInstallationIntent" | "knowledgeSpace" | "knowledgeDocumentIdentity" | "knowledgeRemoteBinding" | "remoteRepositoryObservation" | "remoteHistoryFence" | "knowledgeProjectionCheckpoint" | "githubWebhookDelivery" | "knowledgeNoteProjection" | "knowledgeAttachmentProjection" | "knowledgeAttachmentContentCache" | "knowledgeWriteRequest" | "knowledgeRepositoryLease" | "schedule" | "scheduledInvocation" | "invocationAttempt" | "schedulingReconcileOperation" | "scheduleLease" | "scheduleRebuildOutbox" | "scheduleDomainEventOutbox" | "scheduleEventConsumerReceipt" | "scheduleEventDeliveryLog" | "userPreferenceRecord" | "taskPlan" | "taskOccurrence" | "taskGoalOutbox" | "taskPlanHistory" | "walletAccount" | "walletTransaction"
+      modelProps: "account" | "aiConversation" | "aiGoalSurfaceLease" | "aiConversationAttention" | "aiExecutionRecord" | "aiPermissionSetting" | "aiPermissionRule" | "aiPermissionAudit" | "aiProviderConfig" | "aiAgentInstance" | "aiAgentInstanceBinding" | "aiAgentConversationBinding" | "aiProviderOnboardingSession" | "aiProviderSecret" | "aiKnowledgeIndexEntry" | "aiAgentRegistryMigration" | "aiAssistedWorkflow" | "cloudAuthUser" | "cloudAuthSession" | "cloudAuthProviderAccount" | "cloudAuthVerification" | "cloudAuthDeviceCode" | "externalAgentPat" | "externalAgentConnection" | "goal" | "keyResult" | "goalRecord" | "goalReview" | "keyResultWeightSnapshot" | "habit" | "habitOccurrence" | "habitCheckIn" | "habitStreakProjection" | "label" | "goalLabel" | "taskLabel" | "notification" | "notificationInteraction" | "notificationDeliveryDecisionRecord" | "notificationPreference" | "notificationDispatchOutbox" | "jwks" | "oauthClient" | "oauthResource" | "oauthClientResource" | "oauthRefreshToken" | "oauthAccessToken" | "oauthConsent" | "oauthClientAssertion" | "profileImportOperation" | "relation" | "outboxMessage" | "inboxReceipt" | "projectionCursor" | "accountClosureOperation" | "operationAuditLog" | "externalMutationReceipt" | "routineDefinition" | "routinePreference" | "routineProfile" | "routineProfileMembership" | "routineProtocolDefinition" | "routineProtocolSession" | "routineOccurrence" | "routineInteraction" | "routineTemporaryOverride" | "knowledgeRepositoryInstallationIntent" | "knowledgeSpace" | "knowledgeDocumentIdentity" | "knowledgeRemoteBinding" | "remoteRepositoryObservation" | "remoteHistoryFence" | "knowledgeProjectionCheckpoint" | "githubWebhookDelivery" | "knowledgeNoteProjection" | "knowledgeAttachmentProjection" | "knowledgeAttachmentContentCache" | "knowledgeWriteRequest" | "knowledgeRepositoryLease" | "schedule" | "scheduledInvocation" | "invocationAttempt" | "schedulingReconcileOperation" | "scheduleLease" | "scheduleRebuildOutbox" | "scheduleDomainEventOutbox" | "scheduleEventConsumerReceipt" | "scheduleEventDeliveryLog" | "userPreferenceRecord" | "taskPlan" | "taskOccurrence" | "taskGoalOutbox" | "taskPlanHistory" | "walletAccount" | "walletTransaction"
       txIsolationLevel: Prisma.TransactionIsolationLevel
     }
     model: {
@@ -2473,6 +2521,228 @@ export namespace Prisma {
           count: {
             args: Prisma.AiExecutionRecordCountArgs<ExtArgs>
             result: $Utils.Optional<AiExecutionRecordCountAggregateOutputType> | number
+          }
+        }
+      }
+      AiPermissionSetting: {
+        payload: Prisma.$AiPermissionSettingPayload<ExtArgs>
+        fields: Prisma.AiPermissionSettingFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.AiPermissionSettingFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AiPermissionSettingPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.AiPermissionSettingFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AiPermissionSettingPayload>
+          }
+          findFirst: {
+            args: Prisma.AiPermissionSettingFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AiPermissionSettingPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.AiPermissionSettingFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AiPermissionSettingPayload>
+          }
+          findMany: {
+            args: Prisma.AiPermissionSettingFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AiPermissionSettingPayload>[]
+          }
+          create: {
+            args: Prisma.AiPermissionSettingCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AiPermissionSettingPayload>
+          }
+          createMany: {
+            args: Prisma.AiPermissionSettingCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.AiPermissionSettingCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AiPermissionSettingPayload>[]
+          }
+          delete: {
+            args: Prisma.AiPermissionSettingDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AiPermissionSettingPayload>
+          }
+          update: {
+            args: Prisma.AiPermissionSettingUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AiPermissionSettingPayload>
+          }
+          deleteMany: {
+            args: Prisma.AiPermissionSettingDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.AiPermissionSettingUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.AiPermissionSettingUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AiPermissionSettingPayload>[]
+          }
+          upsert: {
+            args: Prisma.AiPermissionSettingUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AiPermissionSettingPayload>
+          }
+          aggregate: {
+            args: Prisma.AiPermissionSettingAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateAiPermissionSetting>
+          }
+          groupBy: {
+            args: Prisma.AiPermissionSettingGroupByArgs<ExtArgs>
+            result: $Utils.Optional<AiPermissionSettingGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.AiPermissionSettingCountArgs<ExtArgs>
+            result: $Utils.Optional<AiPermissionSettingCountAggregateOutputType> | number
+          }
+        }
+      }
+      AiPermissionRule: {
+        payload: Prisma.$AiPermissionRulePayload<ExtArgs>
+        fields: Prisma.AiPermissionRuleFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.AiPermissionRuleFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AiPermissionRulePayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.AiPermissionRuleFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AiPermissionRulePayload>
+          }
+          findFirst: {
+            args: Prisma.AiPermissionRuleFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AiPermissionRulePayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.AiPermissionRuleFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AiPermissionRulePayload>
+          }
+          findMany: {
+            args: Prisma.AiPermissionRuleFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AiPermissionRulePayload>[]
+          }
+          create: {
+            args: Prisma.AiPermissionRuleCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AiPermissionRulePayload>
+          }
+          createMany: {
+            args: Prisma.AiPermissionRuleCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.AiPermissionRuleCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AiPermissionRulePayload>[]
+          }
+          delete: {
+            args: Prisma.AiPermissionRuleDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AiPermissionRulePayload>
+          }
+          update: {
+            args: Prisma.AiPermissionRuleUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AiPermissionRulePayload>
+          }
+          deleteMany: {
+            args: Prisma.AiPermissionRuleDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.AiPermissionRuleUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.AiPermissionRuleUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AiPermissionRulePayload>[]
+          }
+          upsert: {
+            args: Prisma.AiPermissionRuleUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AiPermissionRulePayload>
+          }
+          aggregate: {
+            args: Prisma.AiPermissionRuleAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateAiPermissionRule>
+          }
+          groupBy: {
+            args: Prisma.AiPermissionRuleGroupByArgs<ExtArgs>
+            result: $Utils.Optional<AiPermissionRuleGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.AiPermissionRuleCountArgs<ExtArgs>
+            result: $Utils.Optional<AiPermissionRuleCountAggregateOutputType> | number
+          }
+        }
+      }
+      AiPermissionAudit: {
+        payload: Prisma.$AiPermissionAuditPayload<ExtArgs>
+        fields: Prisma.AiPermissionAuditFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.AiPermissionAuditFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AiPermissionAuditPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.AiPermissionAuditFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AiPermissionAuditPayload>
+          }
+          findFirst: {
+            args: Prisma.AiPermissionAuditFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AiPermissionAuditPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.AiPermissionAuditFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AiPermissionAuditPayload>
+          }
+          findMany: {
+            args: Prisma.AiPermissionAuditFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AiPermissionAuditPayload>[]
+          }
+          create: {
+            args: Prisma.AiPermissionAuditCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AiPermissionAuditPayload>
+          }
+          createMany: {
+            args: Prisma.AiPermissionAuditCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.AiPermissionAuditCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AiPermissionAuditPayload>[]
+          }
+          delete: {
+            args: Prisma.AiPermissionAuditDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AiPermissionAuditPayload>
+          }
+          update: {
+            args: Prisma.AiPermissionAuditUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AiPermissionAuditPayload>
+          }
+          deleteMany: {
+            args: Prisma.AiPermissionAuditDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.AiPermissionAuditUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.AiPermissionAuditUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AiPermissionAuditPayload>[]
+          }
+          upsert: {
+            args: Prisma.AiPermissionAuditUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AiPermissionAuditPayload>
+          }
+          aggregate: {
+            args: Prisma.AiPermissionAuditAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateAiPermissionAudit>
+          }
+          groupBy: {
+            args: Prisma.AiPermissionAuditGroupByArgs<ExtArgs>
+            result: $Utils.Optional<AiPermissionAuditGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.AiPermissionAuditCountArgs<ExtArgs>
+            result: $Utils.Optional<AiPermissionAuditCountAggregateOutputType> | number
           }
         }
       }
@@ -9042,6 +9312,9 @@ export namespace Prisma {
     aiGoalSurfaceLease?: AiGoalSurfaceLeaseOmit
     aiConversationAttention?: AiConversationAttentionOmit
     aiExecutionRecord?: AiExecutionRecordOmit
+    aiPermissionSetting?: AiPermissionSettingOmit
+    aiPermissionRule?: AiPermissionRuleOmit
+    aiPermissionAudit?: AiPermissionAuditOmit
     aiProviderConfig?: AiProviderConfigOmit
     aiAgentInstance?: AiAgentInstanceOmit
     aiAgentInstanceBinding?: AiAgentInstanceBindingOmit
@@ -9236,6 +9509,9 @@ export namespace Prisma {
     notifications: number
     aiConversations: number
     aiExecutionRecords: number
+    aiPermissionSettings: number
+    aiPermissionRules: number
+    aiPermissionAudits: number
     aiGoalSurfaceLeases: number
     aiConversationAttention: number
     aiKnowledgeIndexEntries: number
@@ -9282,6 +9558,9 @@ export namespace Prisma {
     notifications?: boolean | AccountCountOutputTypeCountNotificationsArgs
     aiConversations?: boolean | AccountCountOutputTypeCountAiConversationsArgs
     aiExecutionRecords?: boolean | AccountCountOutputTypeCountAiExecutionRecordsArgs
+    aiPermissionSettings?: boolean | AccountCountOutputTypeCountAiPermissionSettingsArgs
+    aiPermissionRules?: boolean | AccountCountOutputTypeCountAiPermissionRulesArgs
+    aiPermissionAudits?: boolean | AccountCountOutputTypeCountAiPermissionAuditsArgs
     aiGoalSurfaceLeases?: boolean | AccountCountOutputTypeCountAiGoalSurfaceLeasesArgs
     aiConversationAttention?: boolean | AccountCountOutputTypeCountAiConversationAttentionArgs
     aiKnowledgeIndexEntries?: boolean | AccountCountOutputTypeCountAiKnowledgeIndexEntriesArgs
@@ -9498,6 +9777,27 @@ export namespace Prisma {
    */
   export type AccountCountOutputTypeCountAiExecutionRecordsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: AiExecutionRecordWhereInput
+  }
+
+  /**
+   * AccountCountOutputType without action
+   */
+  export type AccountCountOutputTypeCountAiPermissionSettingsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: AiPermissionSettingWhereInput
+  }
+
+  /**
+   * AccountCountOutputType without action
+   */
+  export type AccountCountOutputTypeCountAiPermissionRulesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: AiPermissionRuleWhereInput
+  }
+
+  /**
+   * AccountCountOutputType without action
+   */
+  export type AccountCountOutputTypeCountAiPermissionAuditsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: AiPermissionAuditWhereInput
   }
 
   /**
@@ -10766,6 +11066,9 @@ export namespace Prisma {
     notifications?: boolean | Account$notificationsArgs<ExtArgs>
     aiConversations?: boolean | Account$aiConversationsArgs<ExtArgs>
     aiExecutionRecords?: boolean | Account$aiExecutionRecordsArgs<ExtArgs>
+    aiPermissionSettings?: boolean | Account$aiPermissionSettingsArgs<ExtArgs>
+    aiPermissionRules?: boolean | Account$aiPermissionRulesArgs<ExtArgs>
+    aiPermissionAudits?: boolean | Account$aiPermissionAuditsArgs<ExtArgs>
     aiGoalSurfaceLeases?: boolean | Account$aiGoalSurfaceLeasesArgs<ExtArgs>
     aiConversationAttention?: boolean | Account$aiConversationAttentionArgs<ExtArgs>
     aiKnowledgeIndexEntries?: boolean | Account$aiKnowledgeIndexEntriesArgs<ExtArgs>
@@ -10845,6 +11148,9 @@ export namespace Prisma {
     notifications?: boolean | Account$notificationsArgs<ExtArgs>
     aiConversations?: boolean | Account$aiConversationsArgs<ExtArgs>
     aiExecutionRecords?: boolean | Account$aiExecutionRecordsArgs<ExtArgs>
+    aiPermissionSettings?: boolean | Account$aiPermissionSettingsArgs<ExtArgs>
+    aiPermissionRules?: boolean | Account$aiPermissionRulesArgs<ExtArgs>
+    aiPermissionAudits?: boolean | Account$aiPermissionAuditsArgs<ExtArgs>
     aiGoalSurfaceLeases?: boolean | Account$aiGoalSurfaceLeasesArgs<ExtArgs>
     aiConversationAttention?: boolean | Account$aiConversationAttentionArgs<ExtArgs>
     aiKnowledgeIndexEntries?: boolean | Account$aiKnowledgeIndexEntriesArgs<ExtArgs>
@@ -10902,6 +11208,9 @@ export namespace Prisma {
       notifications: Prisma.$NotificationPayload<ExtArgs>[]
       aiConversations: Prisma.$AiConversationPayload<ExtArgs>[]
       aiExecutionRecords: Prisma.$AiExecutionRecordPayload<ExtArgs>[]
+      aiPermissionSettings: Prisma.$AiPermissionSettingPayload<ExtArgs>[]
+      aiPermissionRules: Prisma.$AiPermissionRulePayload<ExtArgs>[]
+      aiPermissionAudits: Prisma.$AiPermissionAuditPayload<ExtArgs>[]
       aiGoalSurfaceLeases: Prisma.$AiGoalSurfaceLeasePayload<ExtArgs>[]
       aiConversationAttention: Prisma.$AiConversationAttentionPayload<ExtArgs>[]
       aiKnowledgeIndexEntries: Prisma.$AiKnowledgeIndexEntryPayload<ExtArgs>[]
@@ -11349,6 +11658,9 @@ export namespace Prisma {
     notifications<T extends Account$notificationsArgs<ExtArgs> = {}>(args?: Subset<T, Account$notificationsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$NotificationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     aiConversations<T extends Account$aiConversationsArgs<ExtArgs> = {}>(args?: Subset<T, Account$aiConversationsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$AiConversationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     aiExecutionRecords<T extends Account$aiExecutionRecordsArgs<ExtArgs> = {}>(args?: Subset<T, Account$aiExecutionRecordsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$AiExecutionRecordPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    aiPermissionSettings<T extends Account$aiPermissionSettingsArgs<ExtArgs> = {}>(args?: Subset<T, Account$aiPermissionSettingsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$AiPermissionSettingPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    aiPermissionRules<T extends Account$aiPermissionRulesArgs<ExtArgs> = {}>(args?: Subset<T, Account$aiPermissionRulesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$AiPermissionRulePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    aiPermissionAudits<T extends Account$aiPermissionAuditsArgs<ExtArgs> = {}>(args?: Subset<T, Account$aiPermissionAuditsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$AiPermissionAuditPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     aiGoalSurfaceLeases<T extends Account$aiGoalSurfaceLeasesArgs<ExtArgs> = {}>(args?: Subset<T, Account$aiGoalSurfaceLeasesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$AiGoalSurfaceLeasePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     aiConversationAttention<T extends Account$aiConversationAttentionArgs<ExtArgs> = {}>(args?: Subset<T, Account$aiConversationAttentionArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$AiConversationAttentionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     aiKnowledgeIndexEntries<T extends Account$aiKnowledgeIndexEntriesArgs<ExtArgs> = {}>(args?: Subset<T, Account$aiKnowledgeIndexEntriesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$AiKnowledgeIndexEntryPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
@@ -12465,6 +12777,78 @@ export namespace Prisma {
     take?: number
     skip?: number
     distinct?: AiExecutionRecordScalarFieldEnum | AiExecutionRecordScalarFieldEnum[]
+  }
+
+  /**
+   * Account.aiPermissionSettings
+   */
+  export type Account$aiPermissionSettingsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AiPermissionSetting
+     */
+    select?: AiPermissionSettingSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AiPermissionSetting
+     */
+    omit?: AiPermissionSettingOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AiPermissionSettingInclude<ExtArgs> | null
+    where?: AiPermissionSettingWhereInput
+    orderBy?: AiPermissionSettingOrderByWithRelationInput | AiPermissionSettingOrderByWithRelationInput[]
+    cursor?: AiPermissionSettingWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: AiPermissionSettingScalarFieldEnum | AiPermissionSettingScalarFieldEnum[]
+  }
+
+  /**
+   * Account.aiPermissionRules
+   */
+  export type Account$aiPermissionRulesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AiPermissionRule
+     */
+    select?: AiPermissionRuleSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AiPermissionRule
+     */
+    omit?: AiPermissionRuleOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AiPermissionRuleInclude<ExtArgs> | null
+    where?: AiPermissionRuleWhereInput
+    orderBy?: AiPermissionRuleOrderByWithRelationInput | AiPermissionRuleOrderByWithRelationInput[]
+    cursor?: AiPermissionRuleWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: AiPermissionRuleScalarFieldEnum | AiPermissionRuleScalarFieldEnum[]
+  }
+
+  /**
+   * Account.aiPermissionAudits
+   */
+  export type Account$aiPermissionAuditsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AiPermissionAudit
+     */
+    select?: AiPermissionAuditSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AiPermissionAudit
+     */
+    omit?: AiPermissionAuditOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AiPermissionAuditInclude<ExtArgs> | null
+    where?: AiPermissionAuditWhereInput
+    orderBy?: AiPermissionAuditOrderByWithRelationInput | AiPermissionAuditOrderByWithRelationInput[]
+    cursor?: AiPermissionAuditWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: AiPermissionAuditScalarFieldEnum | AiPermissionAuditScalarFieldEnum[]
   }
 
   /**
@@ -17615,6 +17999,3216 @@ export namespace Prisma {
      * Choose, which related nodes to fetch as well
      */
     include?: AiExecutionRecordInclude<ExtArgs> | null
+  }
+
+
+  /**
+   * Model AiPermissionSetting
+   */
+
+  export type AggregateAiPermissionSetting = {
+    _count: AiPermissionSettingCountAggregateOutputType | null
+    _avg: AiPermissionSettingAvgAggregateOutputType | null
+    _sum: AiPermissionSettingSumAggregateOutputType | null
+    _min: AiPermissionSettingMinAggregateOutputType | null
+    _max: AiPermissionSettingMaxAggregateOutputType | null
+  }
+
+  export type AiPermissionSettingAvgAggregateOutputType = {
+    revision: number | null
+  }
+
+  export type AiPermissionSettingSumAggregateOutputType = {
+    revision: number | null
+  }
+
+  export type AiPermissionSettingMinAggregateOutputType = {
+    id: string | null
+    identityId: string | null
+    revision: number | null
+    recordJson: string | null
+    updatedAt: Date | null
+  }
+
+  export type AiPermissionSettingMaxAggregateOutputType = {
+    id: string | null
+    identityId: string | null
+    revision: number | null
+    recordJson: string | null
+    updatedAt: Date | null
+  }
+
+  export type AiPermissionSettingCountAggregateOutputType = {
+    id: number
+    identityId: number
+    revision: number
+    recordJson: number
+    updatedAt: number
+    _all: number
+  }
+
+
+  export type AiPermissionSettingAvgAggregateInputType = {
+    revision?: true
+  }
+
+  export type AiPermissionSettingSumAggregateInputType = {
+    revision?: true
+  }
+
+  export type AiPermissionSettingMinAggregateInputType = {
+    id?: true
+    identityId?: true
+    revision?: true
+    recordJson?: true
+    updatedAt?: true
+  }
+
+  export type AiPermissionSettingMaxAggregateInputType = {
+    id?: true
+    identityId?: true
+    revision?: true
+    recordJson?: true
+    updatedAt?: true
+  }
+
+  export type AiPermissionSettingCountAggregateInputType = {
+    id?: true
+    identityId?: true
+    revision?: true
+    recordJson?: true
+    updatedAt?: true
+    _all?: true
+  }
+
+  export type AiPermissionSettingAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which AiPermissionSetting to aggregate.
+     */
+    where?: AiPermissionSettingWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     *
+     * Determine the order of AiPermissionSettings to fetch.
+     */
+    orderBy?: AiPermissionSettingOrderByWithRelationInput | AiPermissionSettingOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     *
+     * Sets the start position
+     */
+    cursor?: AiPermissionSettingWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     *
+     * Take `±n` AiPermissionSettings from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     *
+     * Skip the first `n` AiPermissionSettings.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     *
+     * Count returned AiPermissionSettings
+    **/
+    _count?: true | AiPermissionSettingCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     *
+     * Select which fields to average
+    **/
+    _avg?: AiPermissionSettingAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     *
+     * Select which fields to sum
+    **/
+    _sum?: AiPermissionSettingSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     *
+     * Select which fields to find the minimum value
+    **/
+    _min?: AiPermissionSettingMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     *
+     * Select which fields to find the maximum value
+    **/
+    _max?: AiPermissionSettingMaxAggregateInputType
+  }
+
+  export type GetAiPermissionSettingAggregateType<T extends AiPermissionSettingAggregateArgs> = {
+        [P in keyof T & keyof AggregateAiPermissionSetting]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateAiPermissionSetting[P]>
+      : GetScalarType<T[P], AggregateAiPermissionSetting[P]>
+  }
+
+
+
+
+  export type AiPermissionSettingGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: AiPermissionSettingWhereInput
+    orderBy?: AiPermissionSettingOrderByWithAggregationInput | AiPermissionSettingOrderByWithAggregationInput[]
+    by: AiPermissionSettingScalarFieldEnum[] | AiPermissionSettingScalarFieldEnum
+    having?: AiPermissionSettingScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: AiPermissionSettingCountAggregateInputType | true
+    _avg?: AiPermissionSettingAvgAggregateInputType
+    _sum?: AiPermissionSettingSumAggregateInputType
+    _min?: AiPermissionSettingMinAggregateInputType
+    _max?: AiPermissionSettingMaxAggregateInputType
+  }
+
+  export type AiPermissionSettingGroupByOutputType = {
+    id: string
+    identityId: string
+    revision: number
+    recordJson: string
+    updatedAt: Date
+    _count: AiPermissionSettingCountAggregateOutputType | null
+    _avg: AiPermissionSettingAvgAggregateOutputType | null
+    _sum: AiPermissionSettingSumAggregateOutputType | null
+    _min: AiPermissionSettingMinAggregateOutputType | null
+    _max: AiPermissionSettingMaxAggregateOutputType | null
+  }
+
+  type GetAiPermissionSettingGroupByPayload<T extends AiPermissionSettingGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<AiPermissionSettingGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof AiPermissionSettingGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], AiPermissionSettingGroupByOutputType[P]>
+            : GetScalarType<T[P], AiPermissionSettingGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type AiPermissionSettingSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    identityId?: boolean
+    revision?: boolean
+    recordJson?: boolean
+    updatedAt?: boolean
+    account?: boolean | AccountDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["aiPermissionSetting"]>
+
+  export type AiPermissionSettingSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    identityId?: boolean
+    revision?: boolean
+    recordJson?: boolean
+    updatedAt?: boolean
+    account?: boolean | AccountDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["aiPermissionSetting"]>
+
+  export type AiPermissionSettingSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    identityId?: boolean
+    revision?: boolean
+    recordJson?: boolean
+    updatedAt?: boolean
+    account?: boolean | AccountDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["aiPermissionSetting"]>
+
+  export type AiPermissionSettingSelectScalar = {
+    id?: boolean
+    identityId?: boolean
+    revision?: boolean
+    recordJson?: boolean
+    updatedAt?: boolean
+  }
+
+  export type AiPermissionSettingOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "identityId" | "revision" | "recordJson" | "updatedAt", ExtArgs["result"]["aiPermissionSetting"]>
+  export type AiPermissionSettingInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    account?: boolean | AccountDefaultArgs<ExtArgs>
+  }
+  export type AiPermissionSettingIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    account?: boolean | AccountDefaultArgs<ExtArgs>
+  }
+  export type AiPermissionSettingIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    account?: boolean | AccountDefaultArgs<ExtArgs>
+  }
+
+  export type $AiPermissionSettingPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "AiPermissionSetting"
+    objects: {
+      account: Prisma.$AccountPayload<ExtArgs>
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      identityId: string
+      revision: number
+      recordJson: string
+      updatedAt: Date
+    }, ExtArgs["result"]["aiPermissionSetting"]>
+    composites: {}
+  }
+
+  type AiPermissionSettingGetPayload<S extends boolean | null | undefined | AiPermissionSettingDefaultArgs> = $Result.GetResult<Prisma.$AiPermissionSettingPayload, S>
+
+  type AiPermissionSettingCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<AiPermissionSettingFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: AiPermissionSettingCountAggregateInputType | true
+    }
+
+  export interface AiPermissionSettingDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['AiPermissionSetting'], meta: { name: 'AiPermissionSetting' } }
+    /**
+     * Find zero or one AiPermissionSetting that matches the filter.
+     * @param {AiPermissionSettingFindUniqueArgs} args - Arguments to find a AiPermissionSetting
+     * @example
+     * // Get one AiPermissionSetting
+     * const aiPermissionSetting = await prisma.aiPermissionSetting.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends AiPermissionSettingFindUniqueArgs>(args: SelectSubset<T, AiPermissionSettingFindUniqueArgs<ExtArgs>>): Prisma__AiPermissionSettingClient<$Result.GetResult<Prisma.$AiPermissionSettingPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one AiPermissionSetting that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {AiPermissionSettingFindUniqueOrThrowArgs} args - Arguments to find a AiPermissionSetting
+     * @example
+     * // Get one AiPermissionSetting
+     * const aiPermissionSetting = await prisma.aiPermissionSetting.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends AiPermissionSettingFindUniqueOrThrowArgs>(args: SelectSubset<T, AiPermissionSettingFindUniqueOrThrowArgs<ExtArgs>>): Prisma__AiPermissionSettingClient<$Result.GetResult<Prisma.$AiPermissionSettingPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first AiPermissionSetting that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AiPermissionSettingFindFirstArgs} args - Arguments to find a AiPermissionSetting
+     * @example
+     * // Get one AiPermissionSetting
+     * const aiPermissionSetting = await prisma.aiPermissionSetting.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends AiPermissionSettingFindFirstArgs>(args?: SelectSubset<T, AiPermissionSettingFindFirstArgs<ExtArgs>>): Prisma__AiPermissionSettingClient<$Result.GetResult<Prisma.$AiPermissionSettingPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first AiPermissionSetting that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AiPermissionSettingFindFirstOrThrowArgs} args - Arguments to find a AiPermissionSetting
+     * @example
+     * // Get one AiPermissionSetting
+     * const aiPermissionSetting = await prisma.aiPermissionSetting.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends AiPermissionSettingFindFirstOrThrowArgs>(args?: SelectSubset<T, AiPermissionSettingFindFirstOrThrowArgs<ExtArgs>>): Prisma__AiPermissionSettingClient<$Result.GetResult<Prisma.$AiPermissionSettingPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more AiPermissionSettings that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AiPermissionSettingFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all AiPermissionSettings
+     * const aiPermissionSettings = await prisma.aiPermissionSetting.findMany()
+     *
+     * // Get first 10 AiPermissionSettings
+     * const aiPermissionSettings = await prisma.aiPermissionSetting.findMany({ take: 10 })
+     *
+     * // Only select the `id`
+     * const aiPermissionSettingWithIdOnly = await prisma.aiPermissionSetting.findMany({ select: { id: true } })
+     *
+     */
+    findMany<T extends AiPermissionSettingFindManyArgs>(args?: SelectSubset<T, AiPermissionSettingFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$AiPermissionSettingPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a AiPermissionSetting.
+     * @param {AiPermissionSettingCreateArgs} args - Arguments to create a AiPermissionSetting.
+     * @example
+     * // Create one AiPermissionSetting
+     * const AiPermissionSetting = await prisma.aiPermissionSetting.create({
+     *   data: {
+     *     // ... data to create a AiPermissionSetting
+     *   }
+     * })
+     *
+     */
+    create<T extends AiPermissionSettingCreateArgs>(args: SelectSubset<T, AiPermissionSettingCreateArgs<ExtArgs>>): Prisma__AiPermissionSettingClient<$Result.GetResult<Prisma.$AiPermissionSettingPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many AiPermissionSettings.
+     * @param {AiPermissionSettingCreateManyArgs} args - Arguments to create many AiPermissionSettings.
+     * @example
+     * // Create many AiPermissionSettings
+     * const aiPermissionSetting = await prisma.aiPermissionSetting.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *
+     */
+    createMany<T extends AiPermissionSettingCreateManyArgs>(args?: SelectSubset<T, AiPermissionSettingCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many AiPermissionSettings and returns the data saved in the database.
+     * @param {AiPermissionSettingCreateManyAndReturnArgs} args - Arguments to create many AiPermissionSettings.
+     * @example
+     * // Create many AiPermissionSettings
+     * const aiPermissionSetting = await prisma.aiPermissionSetting.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *
+     * // Create many AiPermissionSettings and only return the `id`
+     * const aiPermissionSettingWithIdOnly = await prisma.aiPermissionSetting.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     *
+     */
+    createManyAndReturn<T extends AiPermissionSettingCreateManyAndReturnArgs>(args?: SelectSubset<T, AiPermissionSettingCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$AiPermissionSettingPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a AiPermissionSetting.
+     * @param {AiPermissionSettingDeleteArgs} args - Arguments to delete one AiPermissionSetting.
+     * @example
+     * // Delete one AiPermissionSetting
+     * const AiPermissionSetting = await prisma.aiPermissionSetting.delete({
+     *   where: {
+     *     // ... filter to delete one AiPermissionSetting
+     *   }
+     * })
+     *
+     */
+    delete<T extends AiPermissionSettingDeleteArgs>(args: SelectSubset<T, AiPermissionSettingDeleteArgs<ExtArgs>>): Prisma__AiPermissionSettingClient<$Result.GetResult<Prisma.$AiPermissionSettingPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one AiPermissionSetting.
+     * @param {AiPermissionSettingUpdateArgs} args - Arguments to update one AiPermissionSetting.
+     * @example
+     * // Update one AiPermissionSetting
+     * const aiPermissionSetting = await prisma.aiPermissionSetting.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     *
+     */
+    update<T extends AiPermissionSettingUpdateArgs>(args: SelectSubset<T, AiPermissionSettingUpdateArgs<ExtArgs>>): Prisma__AiPermissionSettingClient<$Result.GetResult<Prisma.$AiPermissionSettingPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more AiPermissionSettings.
+     * @param {AiPermissionSettingDeleteManyArgs} args - Arguments to filter AiPermissionSettings to delete.
+     * @example
+     * // Delete a few AiPermissionSettings
+     * const { count } = await prisma.aiPermissionSetting.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     *
+     */
+    deleteMany<T extends AiPermissionSettingDeleteManyArgs>(args?: SelectSubset<T, AiPermissionSettingDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more AiPermissionSettings.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AiPermissionSettingUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many AiPermissionSettings
+     * const aiPermissionSetting = await prisma.aiPermissionSetting.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     *
+     */
+    updateMany<T extends AiPermissionSettingUpdateManyArgs>(args: SelectSubset<T, AiPermissionSettingUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more AiPermissionSettings and returns the data updated in the database.
+     * @param {AiPermissionSettingUpdateManyAndReturnArgs} args - Arguments to update many AiPermissionSettings.
+     * @example
+     * // Update many AiPermissionSettings
+     * const aiPermissionSetting = await prisma.aiPermissionSetting.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *
+     * // Update zero or more AiPermissionSettings and only return the `id`
+     * const aiPermissionSettingWithIdOnly = await prisma.aiPermissionSetting.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     *
+     */
+    updateManyAndReturn<T extends AiPermissionSettingUpdateManyAndReturnArgs>(args: SelectSubset<T, AiPermissionSettingUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$AiPermissionSettingPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one AiPermissionSetting.
+     * @param {AiPermissionSettingUpsertArgs} args - Arguments to update or create a AiPermissionSetting.
+     * @example
+     * // Update or create a AiPermissionSetting
+     * const aiPermissionSetting = await prisma.aiPermissionSetting.upsert({
+     *   create: {
+     *     // ... data to create a AiPermissionSetting
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the AiPermissionSetting we want to update
+     *   }
+     * })
+     */
+    upsert<T extends AiPermissionSettingUpsertArgs>(args: SelectSubset<T, AiPermissionSettingUpsertArgs<ExtArgs>>): Prisma__AiPermissionSettingClient<$Result.GetResult<Prisma.$AiPermissionSettingPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of AiPermissionSettings.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AiPermissionSettingCountArgs} args - Arguments to filter AiPermissionSettings to count.
+     * @example
+     * // Count the number of AiPermissionSettings
+     * const count = await prisma.aiPermissionSetting.count({
+     *   where: {
+     *     // ... the filter for the AiPermissionSettings we want to count
+     *   }
+     * })
+    **/
+    count<T extends AiPermissionSettingCountArgs>(
+      args?: Subset<T, AiPermissionSettingCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], AiPermissionSettingCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a AiPermissionSetting.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AiPermissionSettingAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends AiPermissionSettingAggregateArgs>(args: Subset<T, AiPermissionSettingAggregateArgs>): Prisma.PrismaPromise<GetAiPermissionSettingAggregateType<T>>
+
+    /**
+     * Group by AiPermissionSetting.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AiPermissionSettingGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     *
+    **/
+    groupBy<
+      T extends AiPermissionSettingGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: AiPermissionSettingGroupByArgs['orderBy'] }
+        : { orderBy?: AiPermissionSettingGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, AiPermissionSettingGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetAiPermissionSettingGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the AiPermissionSetting model
+   */
+  readonly fields: AiPermissionSettingFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for AiPermissionSetting.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__AiPermissionSettingClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    account<T extends AccountDefaultArgs<ExtArgs> = {}>(args?: Subset<T, AccountDefaultArgs<ExtArgs>>): Prisma__AccountClient<$Result.GetResult<Prisma.$AccountPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the AiPermissionSetting model
+   */
+  interface AiPermissionSettingFieldRefs {
+    readonly id: FieldRef<"AiPermissionSetting", 'String'>
+    readonly identityId: FieldRef<"AiPermissionSetting", 'String'>
+    readonly revision: FieldRef<"AiPermissionSetting", 'Int'>
+    readonly recordJson: FieldRef<"AiPermissionSetting", 'String'>
+    readonly updatedAt: FieldRef<"AiPermissionSetting", 'DateTime'>
+  }
+
+
+  // Custom InputTypes
+  /**
+   * AiPermissionSetting findUnique
+   */
+  export type AiPermissionSettingFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AiPermissionSetting
+     */
+    select?: AiPermissionSettingSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AiPermissionSetting
+     */
+    omit?: AiPermissionSettingOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AiPermissionSettingInclude<ExtArgs> | null
+    /**
+     * Filter, which AiPermissionSetting to fetch.
+     */
+    where: AiPermissionSettingWhereUniqueInput
+  }
+
+  /**
+   * AiPermissionSetting findUniqueOrThrow
+   */
+  export type AiPermissionSettingFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AiPermissionSetting
+     */
+    select?: AiPermissionSettingSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AiPermissionSetting
+     */
+    omit?: AiPermissionSettingOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AiPermissionSettingInclude<ExtArgs> | null
+    /**
+     * Filter, which AiPermissionSetting to fetch.
+     */
+    where: AiPermissionSettingWhereUniqueInput
+  }
+
+  /**
+   * AiPermissionSetting findFirst
+   */
+  export type AiPermissionSettingFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AiPermissionSetting
+     */
+    select?: AiPermissionSettingSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AiPermissionSetting
+     */
+    omit?: AiPermissionSettingOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AiPermissionSettingInclude<ExtArgs> | null
+    /**
+     * Filter, which AiPermissionSetting to fetch.
+     */
+    where?: AiPermissionSettingWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     *
+     * Determine the order of AiPermissionSettings to fetch.
+     */
+    orderBy?: AiPermissionSettingOrderByWithRelationInput | AiPermissionSettingOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     *
+     * Sets the position for searching for AiPermissionSettings.
+     */
+    cursor?: AiPermissionSettingWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     *
+     * Take `±n` AiPermissionSettings from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     *
+     * Skip the first `n` AiPermissionSettings.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     *
+     * Filter by unique combinations of AiPermissionSettings.
+     */
+    distinct?: AiPermissionSettingScalarFieldEnum | AiPermissionSettingScalarFieldEnum[]
+  }
+
+  /**
+   * AiPermissionSetting findFirstOrThrow
+   */
+  export type AiPermissionSettingFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AiPermissionSetting
+     */
+    select?: AiPermissionSettingSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AiPermissionSetting
+     */
+    omit?: AiPermissionSettingOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AiPermissionSettingInclude<ExtArgs> | null
+    /**
+     * Filter, which AiPermissionSetting to fetch.
+     */
+    where?: AiPermissionSettingWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     *
+     * Determine the order of AiPermissionSettings to fetch.
+     */
+    orderBy?: AiPermissionSettingOrderByWithRelationInput | AiPermissionSettingOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     *
+     * Sets the position for searching for AiPermissionSettings.
+     */
+    cursor?: AiPermissionSettingWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     *
+     * Take `±n` AiPermissionSettings from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     *
+     * Skip the first `n` AiPermissionSettings.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     *
+     * Filter by unique combinations of AiPermissionSettings.
+     */
+    distinct?: AiPermissionSettingScalarFieldEnum | AiPermissionSettingScalarFieldEnum[]
+  }
+
+  /**
+   * AiPermissionSetting findMany
+   */
+  export type AiPermissionSettingFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AiPermissionSetting
+     */
+    select?: AiPermissionSettingSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AiPermissionSetting
+     */
+    omit?: AiPermissionSettingOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AiPermissionSettingInclude<ExtArgs> | null
+    /**
+     * Filter, which AiPermissionSettings to fetch.
+     */
+    where?: AiPermissionSettingWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     *
+     * Determine the order of AiPermissionSettings to fetch.
+     */
+    orderBy?: AiPermissionSettingOrderByWithRelationInput | AiPermissionSettingOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     *
+     * Sets the position for listing AiPermissionSettings.
+     */
+    cursor?: AiPermissionSettingWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     *
+     * Take `±n` AiPermissionSettings from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     *
+     * Skip the first `n` AiPermissionSettings.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     *
+     * Filter by unique combinations of AiPermissionSettings.
+     */
+    distinct?: AiPermissionSettingScalarFieldEnum | AiPermissionSettingScalarFieldEnum[]
+  }
+
+  /**
+   * AiPermissionSetting create
+   */
+  export type AiPermissionSettingCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AiPermissionSetting
+     */
+    select?: AiPermissionSettingSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AiPermissionSetting
+     */
+    omit?: AiPermissionSettingOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AiPermissionSettingInclude<ExtArgs> | null
+    /**
+     * The data needed to create a AiPermissionSetting.
+     */
+    data: XOR<AiPermissionSettingCreateInput, AiPermissionSettingUncheckedCreateInput>
+  }
+
+  /**
+   * AiPermissionSetting createMany
+   */
+  export type AiPermissionSettingCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many AiPermissionSettings.
+     */
+    data: AiPermissionSettingCreateManyInput | AiPermissionSettingCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * AiPermissionSetting createManyAndReturn
+   */
+  export type AiPermissionSettingCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AiPermissionSetting
+     */
+    select?: AiPermissionSettingSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the AiPermissionSetting
+     */
+    omit?: AiPermissionSettingOmit<ExtArgs> | null
+    /**
+     * The data used to create many AiPermissionSettings.
+     */
+    data: AiPermissionSettingCreateManyInput | AiPermissionSettingCreateManyInput[]
+    skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AiPermissionSettingIncludeCreateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * AiPermissionSetting update
+   */
+  export type AiPermissionSettingUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AiPermissionSetting
+     */
+    select?: AiPermissionSettingSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AiPermissionSetting
+     */
+    omit?: AiPermissionSettingOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AiPermissionSettingInclude<ExtArgs> | null
+    /**
+     * The data needed to update a AiPermissionSetting.
+     */
+    data: XOR<AiPermissionSettingUpdateInput, AiPermissionSettingUncheckedUpdateInput>
+    /**
+     * Choose, which AiPermissionSetting to update.
+     */
+    where: AiPermissionSettingWhereUniqueInput
+  }
+
+  /**
+   * AiPermissionSetting updateMany
+   */
+  export type AiPermissionSettingUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update AiPermissionSettings.
+     */
+    data: XOR<AiPermissionSettingUpdateManyMutationInput, AiPermissionSettingUncheckedUpdateManyInput>
+    /**
+     * Filter which AiPermissionSettings to update
+     */
+    where?: AiPermissionSettingWhereInput
+    /**
+     * Limit how many AiPermissionSettings to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * AiPermissionSetting updateManyAndReturn
+   */
+  export type AiPermissionSettingUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AiPermissionSetting
+     */
+    select?: AiPermissionSettingSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the AiPermissionSetting
+     */
+    omit?: AiPermissionSettingOmit<ExtArgs> | null
+    /**
+     * The data used to update AiPermissionSettings.
+     */
+    data: XOR<AiPermissionSettingUpdateManyMutationInput, AiPermissionSettingUncheckedUpdateManyInput>
+    /**
+     * Filter which AiPermissionSettings to update
+     */
+    where?: AiPermissionSettingWhereInput
+    /**
+     * Limit how many AiPermissionSettings to update.
+     */
+    limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AiPermissionSettingIncludeUpdateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * AiPermissionSetting upsert
+   */
+  export type AiPermissionSettingUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AiPermissionSetting
+     */
+    select?: AiPermissionSettingSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AiPermissionSetting
+     */
+    omit?: AiPermissionSettingOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AiPermissionSettingInclude<ExtArgs> | null
+    /**
+     * The filter to search for the AiPermissionSetting to update in case it exists.
+     */
+    where: AiPermissionSettingWhereUniqueInput
+    /**
+     * In case the AiPermissionSetting found by the `where` argument doesn't exist, create a new AiPermissionSetting with this data.
+     */
+    create: XOR<AiPermissionSettingCreateInput, AiPermissionSettingUncheckedCreateInput>
+    /**
+     * In case the AiPermissionSetting was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<AiPermissionSettingUpdateInput, AiPermissionSettingUncheckedUpdateInput>
+  }
+
+  /**
+   * AiPermissionSetting delete
+   */
+  export type AiPermissionSettingDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AiPermissionSetting
+     */
+    select?: AiPermissionSettingSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AiPermissionSetting
+     */
+    omit?: AiPermissionSettingOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AiPermissionSettingInclude<ExtArgs> | null
+    /**
+     * Filter which AiPermissionSetting to delete.
+     */
+    where: AiPermissionSettingWhereUniqueInput
+  }
+
+  /**
+   * AiPermissionSetting deleteMany
+   */
+  export type AiPermissionSettingDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which AiPermissionSettings to delete
+     */
+    where?: AiPermissionSettingWhereInput
+    /**
+     * Limit how many AiPermissionSettings to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * AiPermissionSetting without action
+   */
+  export type AiPermissionSettingDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AiPermissionSetting
+     */
+    select?: AiPermissionSettingSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AiPermissionSetting
+     */
+    omit?: AiPermissionSettingOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AiPermissionSettingInclude<ExtArgs> | null
+  }
+
+
+  /**
+   * Model AiPermissionRule
+   */
+
+  export type AggregateAiPermissionRule = {
+    _count: AiPermissionRuleCountAggregateOutputType | null
+    _min: AiPermissionRuleMinAggregateOutputType | null
+    _max: AiPermissionRuleMaxAggregateOutputType | null
+  }
+
+  export type AiPermissionRuleMinAggregateOutputType = {
+    id: string | null
+    identityId: string | null
+    agentId: string | null
+    recordJson: string | null
+    updatedAt: Date | null
+  }
+
+  export type AiPermissionRuleMaxAggregateOutputType = {
+    id: string | null
+    identityId: string | null
+    agentId: string | null
+    recordJson: string | null
+    updatedAt: Date | null
+  }
+
+  export type AiPermissionRuleCountAggregateOutputType = {
+    id: number
+    identityId: number
+    agentId: number
+    recordJson: number
+    updatedAt: number
+    _all: number
+  }
+
+
+  export type AiPermissionRuleMinAggregateInputType = {
+    id?: true
+    identityId?: true
+    agentId?: true
+    recordJson?: true
+    updatedAt?: true
+  }
+
+  export type AiPermissionRuleMaxAggregateInputType = {
+    id?: true
+    identityId?: true
+    agentId?: true
+    recordJson?: true
+    updatedAt?: true
+  }
+
+  export type AiPermissionRuleCountAggregateInputType = {
+    id?: true
+    identityId?: true
+    agentId?: true
+    recordJson?: true
+    updatedAt?: true
+    _all?: true
+  }
+
+  export type AiPermissionRuleAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which AiPermissionRule to aggregate.
+     */
+    where?: AiPermissionRuleWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     *
+     * Determine the order of AiPermissionRules to fetch.
+     */
+    orderBy?: AiPermissionRuleOrderByWithRelationInput | AiPermissionRuleOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     *
+     * Sets the start position
+     */
+    cursor?: AiPermissionRuleWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     *
+     * Take `±n` AiPermissionRules from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     *
+     * Skip the first `n` AiPermissionRules.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     *
+     * Count returned AiPermissionRules
+    **/
+    _count?: true | AiPermissionRuleCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     *
+     * Select which fields to find the minimum value
+    **/
+    _min?: AiPermissionRuleMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     *
+     * Select which fields to find the maximum value
+    **/
+    _max?: AiPermissionRuleMaxAggregateInputType
+  }
+
+  export type GetAiPermissionRuleAggregateType<T extends AiPermissionRuleAggregateArgs> = {
+        [P in keyof T & keyof AggregateAiPermissionRule]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateAiPermissionRule[P]>
+      : GetScalarType<T[P], AggregateAiPermissionRule[P]>
+  }
+
+
+
+
+  export type AiPermissionRuleGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: AiPermissionRuleWhereInput
+    orderBy?: AiPermissionRuleOrderByWithAggregationInput | AiPermissionRuleOrderByWithAggregationInput[]
+    by: AiPermissionRuleScalarFieldEnum[] | AiPermissionRuleScalarFieldEnum
+    having?: AiPermissionRuleScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: AiPermissionRuleCountAggregateInputType | true
+    _min?: AiPermissionRuleMinAggregateInputType
+    _max?: AiPermissionRuleMaxAggregateInputType
+  }
+
+  export type AiPermissionRuleGroupByOutputType = {
+    id: string
+    identityId: string
+    agentId: string | null
+    recordJson: string
+    updatedAt: Date
+    _count: AiPermissionRuleCountAggregateOutputType | null
+    _min: AiPermissionRuleMinAggregateOutputType | null
+    _max: AiPermissionRuleMaxAggregateOutputType | null
+  }
+
+  type GetAiPermissionRuleGroupByPayload<T extends AiPermissionRuleGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<AiPermissionRuleGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof AiPermissionRuleGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], AiPermissionRuleGroupByOutputType[P]>
+            : GetScalarType<T[P], AiPermissionRuleGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type AiPermissionRuleSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    identityId?: boolean
+    agentId?: boolean
+    recordJson?: boolean
+    updatedAt?: boolean
+    account?: boolean | AccountDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["aiPermissionRule"]>
+
+  export type AiPermissionRuleSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    identityId?: boolean
+    agentId?: boolean
+    recordJson?: boolean
+    updatedAt?: boolean
+    account?: boolean | AccountDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["aiPermissionRule"]>
+
+  export type AiPermissionRuleSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    identityId?: boolean
+    agentId?: boolean
+    recordJson?: boolean
+    updatedAt?: boolean
+    account?: boolean | AccountDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["aiPermissionRule"]>
+
+  export type AiPermissionRuleSelectScalar = {
+    id?: boolean
+    identityId?: boolean
+    agentId?: boolean
+    recordJson?: boolean
+    updatedAt?: boolean
+  }
+
+  export type AiPermissionRuleOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "identityId" | "agentId" | "recordJson" | "updatedAt", ExtArgs["result"]["aiPermissionRule"]>
+  export type AiPermissionRuleInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    account?: boolean | AccountDefaultArgs<ExtArgs>
+  }
+  export type AiPermissionRuleIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    account?: boolean | AccountDefaultArgs<ExtArgs>
+  }
+  export type AiPermissionRuleIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    account?: boolean | AccountDefaultArgs<ExtArgs>
+  }
+
+  export type $AiPermissionRulePayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "AiPermissionRule"
+    objects: {
+      account: Prisma.$AccountPayload<ExtArgs>
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      identityId: string
+      agentId: string | null
+      recordJson: string
+      updatedAt: Date
+    }, ExtArgs["result"]["aiPermissionRule"]>
+    composites: {}
+  }
+
+  type AiPermissionRuleGetPayload<S extends boolean | null | undefined | AiPermissionRuleDefaultArgs> = $Result.GetResult<Prisma.$AiPermissionRulePayload, S>
+
+  type AiPermissionRuleCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<AiPermissionRuleFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: AiPermissionRuleCountAggregateInputType | true
+    }
+
+  export interface AiPermissionRuleDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['AiPermissionRule'], meta: { name: 'AiPermissionRule' } }
+    /**
+     * Find zero or one AiPermissionRule that matches the filter.
+     * @param {AiPermissionRuleFindUniqueArgs} args - Arguments to find a AiPermissionRule
+     * @example
+     * // Get one AiPermissionRule
+     * const aiPermissionRule = await prisma.aiPermissionRule.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends AiPermissionRuleFindUniqueArgs>(args: SelectSubset<T, AiPermissionRuleFindUniqueArgs<ExtArgs>>): Prisma__AiPermissionRuleClient<$Result.GetResult<Prisma.$AiPermissionRulePayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one AiPermissionRule that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {AiPermissionRuleFindUniqueOrThrowArgs} args - Arguments to find a AiPermissionRule
+     * @example
+     * // Get one AiPermissionRule
+     * const aiPermissionRule = await prisma.aiPermissionRule.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends AiPermissionRuleFindUniqueOrThrowArgs>(args: SelectSubset<T, AiPermissionRuleFindUniqueOrThrowArgs<ExtArgs>>): Prisma__AiPermissionRuleClient<$Result.GetResult<Prisma.$AiPermissionRulePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first AiPermissionRule that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AiPermissionRuleFindFirstArgs} args - Arguments to find a AiPermissionRule
+     * @example
+     * // Get one AiPermissionRule
+     * const aiPermissionRule = await prisma.aiPermissionRule.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends AiPermissionRuleFindFirstArgs>(args?: SelectSubset<T, AiPermissionRuleFindFirstArgs<ExtArgs>>): Prisma__AiPermissionRuleClient<$Result.GetResult<Prisma.$AiPermissionRulePayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first AiPermissionRule that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AiPermissionRuleFindFirstOrThrowArgs} args - Arguments to find a AiPermissionRule
+     * @example
+     * // Get one AiPermissionRule
+     * const aiPermissionRule = await prisma.aiPermissionRule.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends AiPermissionRuleFindFirstOrThrowArgs>(args?: SelectSubset<T, AiPermissionRuleFindFirstOrThrowArgs<ExtArgs>>): Prisma__AiPermissionRuleClient<$Result.GetResult<Prisma.$AiPermissionRulePayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more AiPermissionRules that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AiPermissionRuleFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all AiPermissionRules
+     * const aiPermissionRules = await prisma.aiPermissionRule.findMany()
+     *
+     * // Get first 10 AiPermissionRules
+     * const aiPermissionRules = await prisma.aiPermissionRule.findMany({ take: 10 })
+     *
+     * // Only select the `id`
+     * const aiPermissionRuleWithIdOnly = await prisma.aiPermissionRule.findMany({ select: { id: true } })
+     *
+     */
+    findMany<T extends AiPermissionRuleFindManyArgs>(args?: SelectSubset<T, AiPermissionRuleFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$AiPermissionRulePayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a AiPermissionRule.
+     * @param {AiPermissionRuleCreateArgs} args - Arguments to create a AiPermissionRule.
+     * @example
+     * // Create one AiPermissionRule
+     * const AiPermissionRule = await prisma.aiPermissionRule.create({
+     *   data: {
+     *     // ... data to create a AiPermissionRule
+     *   }
+     * })
+     *
+     */
+    create<T extends AiPermissionRuleCreateArgs>(args: SelectSubset<T, AiPermissionRuleCreateArgs<ExtArgs>>): Prisma__AiPermissionRuleClient<$Result.GetResult<Prisma.$AiPermissionRulePayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many AiPermissionRules.
+     * @param {AiPermissionRuleCreateManyArgs} args - Arguments to create many AiPermissionRules.
+     * @example
+     * // Create many AiPermissionRules
+     * const aiPermissionRule = await prisma.aiPermissionRule.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *
+     */
+    createMany<T extends AiPermissionRuleCreateManyArgs>(args?: SelectSubset<T, AiPermissionRuleCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many AiPermissionRules and returns the data saved in the database.
+     * @param {AiPermissionRuleCreateManyAndReturnArgs} args - Arguments to create many AiPermissionRules.
+     * @example
+     * // Create many AiPermissionRules
+     * const aiPermissionRule = await prisma.aiPermissionRule.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *
+     * // Create many AiPermissionRules and only return the `id`
+     * const aiPermissionRuleWithIdOnly = await prisma.aiPermissionRule.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     *
+     */
+    createManyAndReturn<T extends AiPermissionRuleCreateManyAndReturnArgs>(args?: SelectSubset<T, AiPermissionRuleCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$AiPermissionRulePayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a AiPermissionRule.
+     * @param {AiPermissionRuleDeleteArgs} args - Arguments to delete one AiPermissionRule.
+     * @example
+     * // Delete one AiPermissionRule
+     * const AiPermissionRule = await prisma.aiPermissionRule.delete({
+     *   where: {
+     *     // ... filter to delete one AiPermissionRule
+     *   }
+     * })
+     *
+     */
+    delete<T extends AiPermissionRuleDeleteArgs>(args: SelectSubset<T, AiPermissionRuleDeleteArgs<ExtArgs>>): Prisma__AiPermissionRuleClient<$Result.GetResult<Prisma.$AiPermissionRulePayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one AiPermissionRule.
+     * @param {AiPermissionRuleUpdateArgs} args - Arguments to update one AiPermissionRule.
+     * @example
+     * // Update one AiPermissionRule
+     * const aiPermissionRule = await prisma.aiPermissionRule.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     *
+     */
+    update<T extends AiPermissionRuleUpdateArgs>(args: SelectSubset<T, AiPermissionRuleUpdateArgs<ExtArgs>>): Prisma__AiPermissionRuleClient<$Result.GetResult<Prisma.$AiPermissionRulePayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more AiPermissionRules.
+     * @param {AiPermissionRuleDeleteManyArgs} args - Arguments to filter AiPermissionRules to delete.
+     * @example
+     * // Delete a few AiPermissionRules
+     * const { count } = await prisma.aiPermissionRule.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     *
+     */
+    deleteMany<T extends AiPermissionRuleDeleteManyArgs>(args?: SelectSubset<T, AiPermissionRuleDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more AiPermissionRules.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AiPermissionRuleUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many AiPermissionRules
+     * const aiPermissionRule = await prisma.aiPermissionRule.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     *
+     */
+    updateMany<T extends AiPermissionRuleUpdateManyArgs>(args: SelectSubset<T, AiPermissionRuleUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more AiPermissionRules and returns the data updated in the database.
+     * @param {AiPermissionRuleUpdateManyAndReturnArgs} args - Arguments to update many AiPermissionRules.
+     * @example
+     * // Update many AiPermissionRules
+     * const aiPermissionRule = await prisma.aiPermissionRule.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *
+     * // Update zero or more AiPermissionRules and only return the `id`
+     * const aiPermissionRuleWithIdOnly = await prisma.aiPermissionRule.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     *
+     */
+    updateManyAndReturn<T extends AiPermissionRuleUpdateManyAndReturnArgs>(args: SelectSubset<T, AiPermissionRuleUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$AiPermissionRulePayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one AiPermissionRule.
+     * @param {AiPermissionRuleUpsertArgs} args - Arguments to update or create a AiPermissionRule.
+     * @example
+     * // Update or create a AiPermissionRule
+     * const aiPermissionRule = await prisma.aiPermissionRule.upsert({
+     *   create: {
+     *     // ... data to create a AiPermissionRule
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the AiPermissionRule we want to update
+     *   }
+     * })
+     */
+    upsert<T extends AiPermissionRuleUpsertArgs>(args: SelectSubset<T, AiPermissionRuleUpsertArgs<ExtArgs>>): Prisma__AiPermissionRuleClient<$Result.GetResult<Prisma.$AiPermissionRulePayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of AiPermissionRules.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AiPermissionRuleCountArgs} args - Arguments to filter AiPermissionRules to count.
+     * @example
+     * // Count the number of AiPermissionRules
+     * const count = await prisma.aiPermissionRule.count({
+     *   where: {
+     *     // ... the filter for the AiPermissionRules we want to count
+     *   }
+     * })
+    **/
+    count<T extends AiPermissionRuleCountArgs>(
+      args?: Subset<T, AiPermissionRuleCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], AiPermissionRuleCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a AiPermissionRule.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AiPermissionRuleAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends AiPermissionRuleAggregateArgs>(args: Subset<T, AiPermissionRuleAggregateArgs>): Prisma.PrismaPromise<GetAiPermissionRuleAggregateType<T>>
+
+    /**
+     * Group by AiPermissionRule.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AiPermissionRuleGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     *
+    **/
+    groupBy<
+      T extends AiPermissionRuleGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: AiPermissionRuleGroupByArgs['orderBy'] }
+        : { orderBy?: AiPermissionRuleGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, AiPermissionRuleGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetAiPermissionRuleGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the AiPermissionRule model
+   */
+  readonly fields: AiPermissionRuleFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for AiPermissionRule.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__AiPermissionRuleClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    account<T extends AccountDefaultArgs<ExtArgs> = {}>(args?: Subset<T, AccountDefaultArgs<ExtArgs>>): Prisma__AccountClient<$Result.GetResult<Prisma.$AccountPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the AiPermissionRule model
+   */
+  interface AiPermissionRuleFieldRefs {
+    readonly id: FieldRef<"AiPermissionRule", 'String'>
+    readonly identityId: FieldRef<"AiPermissionRule", 'String'>
+    readonly agentId: FieldRef<"AiPermissionRule", 'String'>
+    readonly recordJson: FieldRef<"AiPermissionRule", 'String'>
+    readonly updatedAt: FieldRef<"AiPermissionRule", 'DateTime'>
+  }
+
+
+  // Custom InputTypes
+  /**
+   * AiPermissionRule findUnique
+   */
+  export type AiPermissionRuleFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AiPermissionRule
+     */
+    select?: AiPermissionRuleSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AiPermissionRule
+     */
+    omit?: AiPermissionRuleOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AiPermissionRuleInclude<ExtArgs> | null
+    /**
+     * Filter, which AiPermissionRule to fetch.
+     */
+    where: AiPermissionRuleWhereUniqueInput
+  }
+
+  /**
+   * AiPermissionRule findUniqueOrThrow
+   */
+  export type AiPermissionRuleFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AiPermissionRule
+     */
+    select?: AiPermissionRuleSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AiPermissionRule
+     */
+    omit?: AiPermissionRuleOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AiPermissionRuleInclude<ExtArgs> | null
+    /**
+     * Filter, which AiPermissionRule to fetch.
+     */
+    where: AiPermissionRuleWhereUniqueInput
+  }
+
+  /**
+   * AiPermissionRule findFirst
+   */
+  export type AiPermissionRuleFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AiPermissionRule
+     */
+    select?: AiPermissionRuleSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AiPermissionRule
+     */
+    omit?: AiPermissionRuleOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AiPermissionRuleInclude<ExtArgs> | null
+    /**
+     * Filter, which AiPermissionRule to fetch.
+     */
+    where?: AiPermissionRuleWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     *
+     * Determine the order of AiPermissionRules to fetch.
+     */
+    orderBy?: AiPermissionRuleOrderByWithRelationInput | AiPermissionRuleOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     *
+     * Sets the position for searching for AiPermissionRules.
+     */
+    cursor?: AiPermissionRuleWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     *
+     * Take `±n` AiPermissionRules from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     *
+     * Skip the first `n` AiPermissionRules.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     *
+     * Filter by unique combinations of AiPermissionRules.
+     */
+    distinct?: AiPermissionRuleScalarFieldEnum | AiPermissionRuleScalarFieldEnum[]
+  }
+
+  /**
+   * AiPermissionRule findFirstOrThrow
+   */
+  export type AiPermissionRuleFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AiPermissionRule
+     */
+    select?: AiPermissionRuleSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AiPermissionRule
+     */
+    omit?: AiPermissionRuleOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AiPermissionRuleInclude<ExtArgs> | null
+    /**
+     * Filter, which AiPermissionRule to fetch.
+     */
+    where?: AiPermissionRuleWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     *
+     * Determine the order of AiPermissionRules to fetch.
+     */
+    orderBy?: AiPermissionRuleOrderByWithRelationInput | AiPermissionRuleOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     *
+     * Sets the position for searching for AiPermissionRules.
+     */
+    cursor?: AiPermissionRuleWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     *
+     * Take `±n` AiPermissionRules from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     *
+     * Skip the first `n` AiPermissionRules.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     *
+     * Filter by unique combinations of AiPermissionRules.
+     */
+    distinct?: AiPermissionRuleScalarFieldEnum | AiPermissionRuleScalarFieldEnum[]
+  }
+
+  /**
+   * AiPermissionRule findMany
+   */
+  export type AiPermissionRuleFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AiPermissionRule
+     */
+    select?: AiPermissionRuleSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AiPermissionRule
+     */
+    omit?: AiPermissionRuleOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AiPermissionRuleInclude<ExtArgs> | null
+    /**
+     * Filter, which AiPermissionRules to fetch.
+     */
+    where?: AiPermissionRuleWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     *
+     * Determine the order of AiPermissionRules to fetch.
+     */
+    orderBy?: AiPermissionRuleOrderByWithRelationInput | AiPermissionRuleOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     *
+     * Sets the position for listing AiPermissionRules.
+     */
+    cursor?: AiPermissionRuleWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     *
+     * Take `±n` AiPermissionRules from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     *
+     * Skip the first `n` AiPermissionRules.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     *
+     * Filter by unique combinations of AiPermissionRules.
+     */
+    distinct?: AiPermissionRuleScalarFieldEnum | AiPermissionRuleScalarFieldEnum[]
+  }
+
+  /**
+   * AiPermissionRule create
+   */
+  export type AiPermissionRuleCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AiPermissionRule
+     */
+    select?: AiPermissionRuleSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AiPermissionRule
+     */
+    omit?: AiPermissionRuleOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AiPermissionRuleInclude<ExtArgs> | null
+    /**
+     * The data needed to create a AiPermissionRule.
+     */
+    data: XOR<AiPermissionRuleCreateInput, AiPermissionRuleUncheckedCreateInput>
+  }
+
+  /**
+   * AiPermissionRule createMany
+   */
+  export type AiPermissionRuleCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many AiPermissionRules.
+     */
+    data: AiPermissionRuleCreateManyInput | AiPermissionRuleCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * AiPermissionRule createManyAndReturn
+   */
+  export type AiPermissionRuleCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AiPermissionRule
+     */
+    select?: AiPermissionRuleSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the AiPermissionRule
+     */
+    omit?: AiPermissionRuleOmit<ExtArgs> | null
+    /**
+     * The data used to create many AiPermissionRules.
+     */
+    data: AiPermissionRuleCreateManyInput | AiPermissionRuleCreateManyInput[]
+    skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AiPermissionRuleIncludeCreateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * AiPermissionRule update
+   */
+  export type AiPermissionRuleUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AiPermissionRule
+     */
+    select?: AiPermissionRuleSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AiPermissionRule
+     */
+    omit?: AiPermissionRuleOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AiPermissionRuleInclude<ExtArgs> | null
+    /**
+     * The data needed to update a AiPermissionRule.
+     */
+    data: XOR<AiPermissionRuleUpdateInput, AiPermissionRuleUncheckedUpdateInput>
+    /**
+     * Choose, which AiPermissionRule to update.
+     */
+    where: AiPermissionRuleWhereUniqueInput
+  }
+
+  /**
+   * AiPermissionRule updateMany
+   */
+  export type AiPermissionRuleUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update AiPermissionRules.
+     */
+    data: XOR<AiPermissionRuleUpdateManyMutationInput, AiPermissionRuleUncheckedUpdateManyInput>
+    /**
+     * Filter which AiPermissionRules to update
+     */
+    where?: AiPermissionRuleWhereInput
+    /**
+     * Limit how many AiPermissionRules to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * AiPermissionRule updateManyAndReturn
+   */
+  export type AiPermissionRuleUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AiPermissionRule
+     */
+    select?: AiPermissionRuleSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the AiPermissionRule
+     */
+    omit?: AiPermissionRuleOmit<ExtArgs> | null
+    /**
+     * The data used to update AiPermissionRules.
+     */
+    data: XOR<AiPermissionRuleUpdateManyMutationInput, AiPermissionRuleUncheckedUpdateManyInput>
+    /**
+     * Filter which AiPermissionRules to update
+     */
+    where?: AiPermissionRuleWhereInput
+    /**
+     * Limit how many AiPermissionRules to update.
+     */
+    limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AiPermissionRuleIncludeUpdateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * AiPermissionRule upsert
+   */
+  export type AiPermissionRuleUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AiPermissionRule
+     */
+    select?: AiPermissionRuleSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AiPermissionRule
+     */
+    omit?: AiPermissionRuleOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AiPermissionRuleInclude<ExtArgs> | null
+    /**
+     * The filter to search for the AiPermissionRule to update in case it exists.
+     */
+    where: AiPermissionRuleWhereUniqueInput
+    /**
+     * In case the AiPermissionRule found by the `where` argument doesn't exist, create a new AiPermissionRule with this data.
+     */
+    create: XOR<AiPermissionRuleCreateInput, AiPermissionRuleUncheckedCreateInput>
+    /**
+     * In case the AiPermissionRule was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<AiPermissionRuleUpdateInput, AiPermissionRuleUncheckedUpdateInput>
+  }
+
+  /**
+   * AiPermissionRule delete
+   */
+  export type AiPermissionRuleDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AiPermissionRule
+     */
+    select?: AiPermissionRuleSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AiPermissionRule
+     */
+    omit?: AiPermissionRuleOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AiPermissionRuleInclude<ExtArgs> | null
+    /**
+     * Filter which AiPermissionRule to delete.
+     */
+    where: AiPermissionRuleWhereUniqueInput
+  }
+
+  /**
+   * AiPermissionRule deleteMany
+   */
+  export type AiPermissionRuleDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which AiPermissionRules to delete
+     */
+    where?: AiPermissionRuleWhereInput
+    /**
+     * Limit how many AiPermissionRules to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * AiPermissionRule without action
+   */
+  export type AiPermissionRuleDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AiPermissionRule
+     */
+    select?: AiPermissionRuleSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AiPermissionRule
+     */
+    omit?: AiPermissionRuleOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AiPermissionRuleInclude<ExtArgs> | null
+  }
+
+
+  /**
+   * Model AiPermissionAudit
+   */
+
+  export type AggregateAiPermissionAudit = {
+    _count: AiPermissionAuditCountAggregateOutputType | null
+    _min: AiPermissionAuditMinAggregateOutputType | null
+    _max: AiPermissionAuditMaxAggregateOutputType | null
+  }
+
+  export type AiPermissionAuditMinAggregateOutputType = {
+    id: string | null
+    identityId: string | null
+    occurredAt: Date | null
+    recordJson: string | null
+  }
+
+  export type AiPermissionAuditMaxAggregateOutputType = {
+    id: string | null
+    identityId: string | null
+    occurredAt: Date | null
+    recordJson: string | null
+  }
+
+  export type AiPermissionAuditCountAggregateOutputType = {
+    id: number
+    identityId: number
+    occurredAt: number
+    recordJson: number
+    _all: number
+  }
+
+
+  export type AiPermissionAuditMinAggregateInputType = {
+    id?: true
+    identityId?: true
+    occurredAt?: true
+    recordJson?: true
+  }
+
+  export type AiPermissionAuditMaxAggregateInputType = {
+    id?: true
+    identityId?: true
+    occurredAt?: true
+    recordJson?: true
+  }
+
+  export type AiPermissionAuditCountAggregateInputType = {
+    id?: true
+    identityId?: true
+    occurredAt?: true
+    recordJson?: true
+    _all?: true
+  }
+
+  export type AiPermissionAuditAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which AiPermissionAudit to aggregate.
+     */
+    where?: AiPermissionAuditWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     *
+     * Determine the order of AiPermissionAudits to fetch.
+     */
+    orderBy?: AiPermissionAuditOrderByWithRelationInput | AiPermissionAuditOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     *
+     * Sets the start position
+     */
+    cursor?: AiPermissionAuditWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     *
+     * Take `±n` AiPermissionAudits from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     *
+     * Skip the first `n` AiPermissionAudits.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     *
+     * Count returned AiPermissionAudits
+    **/
+    _count?: true | AiPermissionAuditCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     *
+     * Select which fields to find the minimum value
+    **/
+    _min?: AiPermissionAuditMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     *
+     * Select which fields to find the maximum value
+    **/
+    _max?: AiPermissionAuditMaxAggregateInputType
+  }
+
+  export type GetAiPermissionAuditAggregateType<T extends AiPermissionAuditAggregateArgs> = {
+        [P in keyof T & keyof AggregateAiPermissionAudit]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateAiPermissionAudit[P]>
+      : GetScalarType<T[P], AggregateAiPermissionAudit[P]>
+  }
+
+
+
+
+  export type AiPermissionAuditGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: AiPermissionAuditWhereInput
+    orderBy?: AiPermissionAuditOrderByWithAggregationInput | AiPermissionAuditOrderByWithAggregationInput[]
+    by: AiPermissionAuditScalarFieldEnum[] | AiPermissionAuditScalarFieldEnum
+    having?: AiPermissionAuditScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: AiPermissionAuditCountAggregateInputType | true
+    _min?: AiPermissionAuditMinAggregateInputType
+    _max?: AiPermissionAuditMaxAggregateInputType
+  }
+
+  export type AiPermissionAuditGroupByOutputType = {
+    id: string
+    identityId: string
+    occurredAt: Date
+    recordJson: string
+    _count: AiPermissionAuditCountAggregateOutputType | null
+    _min: AiPermissionAuditMinAggregateOutputType | null
+    _max: AiPermissionAuditMaxAggregateOutputType | null
+  }
+
+  type GetAiPermissionAuditGroupByPayload<T extends AiPermissionAuditGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<AiPermissionAuditGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof AiPermissionAuditGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], AiPermissionAuditGroupByOutputType[P]>
+            : GetScalarType<T[P], AiPermissionAuditGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type AiPermissionAuditSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    identityId?: boolean
+    occurredAt?: boolean
+    recordJson?: boolean
+    account?: boolean | AccountDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["aiPermissionAudit"]>
+
+  export type AiPermissionAuditSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    identityId?: boolean
+    occurredAt?: boolean
+    recordJson?: boolean
+    account?: boolean | AccountDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["aiPermissionAudit"]>
+
+  export type AiPermissionAuditSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    identityId?: boolean
+    occurredAt?: boolean
+    recordJson?: boolean
+    account?: boolean | AccountDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["aiPermissionAudit"]>
+
+  export type AiPermissionAuditSelectScalar = {
+    id?: boolean
+    identityId?: boolean
+    occurredAt?: boolean
+    recordJson?: boolean
+  }
+
+  export type AiPermissionAuditOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "identityId" | "occurredAt" | "recordJson", ExtArgs["result"]["aiPermissionAudit"]>
+  export type AiPermissionAuditInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    account?: boolean | AccountDefaultArgs<ExtArgs>
+  }
+  export type AiPermissionAuditIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    account?: boolean | AccountDefaultArgs<ExtArgs>
+  }
+  export type AiPermissionAuditIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    account?: boolean | AccountDefaultArgs<ExtArgs>
+  }
+
+  export type $AiPermissionAuditPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "AiPermissionAudit"
+    objects: {
+      account: Prisma.$AccountPayload<ExtArgs>
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      identityId: string
+      occurredAt: Date
+      recordJson: string
+    }, ExtArgs["result"]["aiPermissionAudit"]>
+    composites: {}
+  }
+
+  type AiPermissionAuditGetPayload<S extends boolean | null | undefined | AiPermissionAuditDefaultArgs> = $Result.GetResult<Prisma.$AiPermissionAuditPayload, S>
+
+  type AiPermissionAuditCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<AiPermissionAuditFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: AiPermissionAuditCountAggregateInputType | true
+    }
+
+  export interface AiPermissionAuditDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['AiPermissionAudit'], meta: { name: 'AiPermissionAudit' } }
+    /**
+     * Find zero or one AiPermissionAudit that matches the filter.
+     * @param {AiPermissionAuditFindUniqueArgs} args - Arguments to find a AiPermissionAudit
+     * @example
+     * // Get one AiPermissionAudit
+     * const aiPermissionAudit = await prisma.aiPermissionAudit.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends AiPermissionAuditFindUniqueArgs>(args: SelectSubset<T, AiPermissionAuditFindUniqueArgs<ExtArgs>>): Prisma__AiPermissionAuditClient<$Result.GetResult<Prisma.$AiPermissionAuditPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one AiPermissionAudit that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {AiPermissionAuditFindUniqueOrThrowArgs} args - Arguments to find a AiPermissionAudit
+     * @example
+     * // Get one AiPermissionAudit
+     * const aiPermissionAudit = await prisma.aiPermissionAudit.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends AiPermissionAuditFindUniqueOrThrowArgs>(args: SelectSubset<T, AiPermissionAuditFindUniqueOrThrowArgs<ExtArgs>>): Prisma__AiPermissionAuditClient<$Result.GetResult<Prisma.$AiPermissionAuditPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first AiPermissionAudit that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AiPermissionAuditFindFirstArgs} args - Arguments to find a AiPermissionAudit
+     * @example
+     * // Get one AiPermissionAudit
+     * const aiPermissionAudit = await prisma.aiPermissionAudit.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends AiPermissionAuditFindFirstArgs>(args?: SelectSubset<T, AiPermissionAuditFindFirstArgs<ExtArgs>>): Prisma__AiPermissionAuditClient<$Result.GetResult<Prisma.$AiPermissionAuditPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first AiPermissionAudit that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AiPermissionAuditFindFirstOrThrowArgs} args - Arguments to find a AiPermissionAudit
+     * @example
+     * // Get one AiPermissionAudit
+     * const aiPermissionAudit = await prisma.aiPermissionAudit.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends AiPermissionAuditFindFirstOrThrowArgs>(args?: SelectSubset<T, AiPermissionAuditFindFirstOrThrowArgs<ExtArgs>>): Prisma__AiPermissionAuditClient<$Result.GetResult<Prisma.$AiPermissionAuditPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more AiPermissionAudits that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AiPermissionAuditFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all AiPermissionAudits
+     * const aiPermissionAudits = await prisma.aiPermissionAudit.findMany()
+     *
+     * // Get first 10 AiPermissionAudits
+     * const aiPermissionAudits = await prisma.aiPermissionAudit.findMany({ take: 10 })
+     *
+     * // Only select the `id`
+     * const aiPermissionAuditWithIdOnly = await prisma.aiPermissionAudit.findMany({ select: { id: true } })
+     *
+     */
+    findMany<T extends AiPermissionAuditFindManyArgs>(args?: SelectSubset<T, AiPermissionAuditFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$AiPermissionAuditPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a AiPermissionAudit.
+     * @param {AiPermissionAuditCreateArgs} args - Arguments to create a AiPermissionAudit.
+     * @example
+     * // Create one AiPermissionAudit
+     * const AiPermissionAudit = await prisma.aiPermissionAudit.create({
+     *   data: {
+     *     // ... data to create a AiPermissionAudit
+     *   }
+     * })
+     *
+     */
+    create<T extends AiPermissionAuditCreateArgs>(args: SelectSubset<T, AiPermissionAuditCreateArgs<ExtArgs>>): Prisma__AiPermissionAuditClient<$Result.GetResult<Prisma.$AiPermissionAuditPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many AiPermissionAudits.
+     * @param {AiPermissionAuditCreateManyArgs} args - Arguments to create many AiPermissionAudits.
+     * @example
+     * // Create many AiPermissionAudits
+     * const aiPermissionAudit = await prisma.aiPermissionAudit.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *
+     */
+    createMany<T extends AiPermissionAuditCreateManyArgs>(args?: SelectSubset<T, AiPermissionAuditCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many AiPermissionAudits and returns the data saved in the database.
+     * @param {AiPermissionAuditCreateManyAndReturnArgs} args - Arguments to create many AiPermissionAudits.
+     * @example
+     * // Create many AiPermissionAudits
+     * const aiPermissionAudit = await prisma.aiPermissionAudit.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *
+     * // Create many AiPermissionAudits and only return the `id`
+     * const aiPermissionAuditWithIdOnly = await prisma.aiPermissionAudit.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     *
+     */
+    createManyAndReturn<T extends AiPermissionAuditCreateManyAndReturnArgs>(args?: SelectSubset<T, AiPermissionAuditCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$AiPermissionAuditPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a AiPermissionAudit.
+     * @param {AiPermissionAuditDeleteArgs} args - Arguments to delete one AiPermissionAudit.
+     * @example
+     * // Delete one AiPermissionAudit
+     * const AiPermissionAudit = await prisma.aiPermissionAudit.delete({
+     *   where: {
+     *     // ... filter to delete one AiPermissionAudit
+     *   }
+     * })
+     *
+     */
+    delete<T extends AiPermissionAuditDeleteArgs>(args: SelectSubset<T, AiPermissionAuditDeleteArgs<ExtArgs>>): Prisma__AiPermissionAuditClient<$Result.GetResult<Prisma.$AiPermissionAuditPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one AiPermissionAudit.
+     * @param {AiPermissionAuditUpdateArgs} args - Arguments to update one AiPermissionAudit.
+     * @example
+     * // Update one AiPermissionAudit
+     * const aiPermissionAudit = await prisma.aiPermissionAudit.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     *
+     */
+    update<T extends AiPermissionAuditUpdateArgs>(args: SelectSubset<T, AiPermissionAuditUpdateArgs<ExtArgs>>): Prisma__AiPermissionAuditClient<$Result.GetResult<Prisma.$AiPermissionAuditPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more AiPermissionAudits.
+     * @param {AiPermissionAuditDeleteManyArgs} args - Arguments to filter AiPermissionAudits to delete.
+     * @example
+     * // Delete a few AiPermissionAudits
+     * const { count } = await prisma.aiPermissionAudit.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     *
+     */
+    deleteMany<T extends AiPermissionAuditDeleteManyArgs>(args?: SelectSubset<T, AiPermissionAuditDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more AiPermissionAudits.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AiPermissionAuditUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many AiPermissionAudits
+     * const aiPermissionAudit = await prisma.aiPermissionAudit.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     *
+     */
+    updateMany<T extends AiPermissionAuditUpdateManyArgs>(args: SelectSubset<T, AiPermissionAuditUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more AiPermissionAudits and returns the data updated in the database.
+     * @param {AiPermissionAuditUpdateManyAndReturnArgs} args - Arguments to update many AiPermissionAudits.
+     * @example
+     * // Update many AiPermissionAudits
+     * const aiPermissionAudit = await prisma.aiPermissionAudit.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *
+     * // Update zero or more AiPermissionAudits and only return the `id`
+     * const aiPermissionAuditWithIdOnly = await prisma.aiPermissionAudit.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     *
+     */
+    updateManyAndReturn<T extends AiPermissionAuditUpdateManyAndReturnArgs>(args: SelectSubset<T, AiPermissionAuditUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$AiPermissionAuditPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one AiPermissionAudit.
+     * @param {AiPermissionAuditUpsertArgs} args - Arguments to update or create a AiPermissionAudit.
+     * @example
+     * // Update or create a AiPermissionAudit
+     * const aiPermissionAudit = await prisma.aiPermissionAudit.upsert({
+     *   create: {
+     *     // ... data to create a AiPermissionAudit
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the AiPermissionAudit we want to update
+     *   }
+     * })
+     */
+    upsert<T extends AiPermissionAuditUpsertArgs>(args: SelectSubset<T, AiPermissionAuditUpsertArgs<ExtArgs>>): Prisma__AiPermissionAuditClient<$Result.GetResult<Prisma.$AiPermissionAuditPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of AiPermissionAudits.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AiPermissionAuditCountArgs} args - Arguments to filter AiPermissionAudits to count.
+     * @example
+     * // Count the number of AiPermissionAudits
+     * const count = await prisma.aiPermissionAudit.count({
+     *   where: {
+     *     // ... the filter for the AiPermissionAudits we want to count
+     *   }
+     * })
+    **/
+    count<T extends AiPermissionAuditCountArgs>(
+      args?: Subset<T, AiPermissionAuditCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], AiPermissionAuditCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a AiPermissionAudit.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AiPermissionAuditAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends AiPermissionAuditAggregateArgs>(args: Subset<T, AiPermissionAuditAggregateArgs>): Prisma.PrismaPromise<GetAiPermissionAuditAggregateType<T>>
+
+    /**
+     * Group by AiPermissionAudit.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AiPermissionAuditGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     *
+    **/
+    groupBy<
+      T extends AiPermissionAuditGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: AiPermissionAuditGroupByArgs['orderBy'] }
+        : { orderBy?: AiPermissionAuditGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, AiPermissionAuditGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetAiPermissionAuditGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the AiPermissionAudit model
+   */
+  readonly fields: AiPermissionAuditFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for AiPermissionAudit.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__AiPermissionAuditClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    account<T extends AccountDefaultArgs<ExtArgs> = {}>(args?: Subset<T, AccountDefaultArgs<ExtArgs>>): Prisma__AccountClient<$Result.GetResult<Prisma.$AccountPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the AiPermissionAudit model
+   */
+  interface AiPermissionAuditFieldRefs {
+    readonly id: FieldRef<"AiPermissionAudit", 'String'>
+    readonly identityId: FieldRef<"AiPermissionAudit", 'String'>
+    readonly occurredAt: FieldRef<"AiPermissionAudit", 'DateTime'>
+    readonly recordJson: FieldRef<"AiPermissionAudit", 'String'>
+  }
+
+
+  // Custom InputTypes
+  /**
+   * AiPermissionAudit findUnique
+   */
+  export type AiPermissionAuditFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AiPermissionAudit
+     */
+    select?: AiPermissionAuditSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AiPermissionAudit
+     */
+    omit?: AiPermissionAuditOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AiPermissionAuditInclude<ExtArgs> | null
+    /**
+     * Filter, which AiPermissionAudit to fetch.
+     */
+    where: AiPermissionAuditWhereUniqueInput
+  }
+
+  /**
+   * AiPermissionAudit findUniqueOrThrow
+   */
+  export type AiPermissionAuditFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AiPermissionAudit
+     */
+    select?: AiPermissionAuditSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AiPermissionAudit
+     */
+    omit?: AiPermissionAuditOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AiPermissionAuditInclude<ExtArgs> | null
+    /**
+     * Filter, which AiPermissionAudit to fetch.
+     */
+    where: AiPermissionAuditWhereUniqueInput
+  }
+
+  /**
+   * AiPermissionAudit findFirst
+   */
+  export type AiPermissionAuditFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AiPermissionAudit
+     */
+    select?: AiPermissionAuditSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AiPermissionAudit
+     */
+    omit?: AiPermissionAuditOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AiPermissionAuditInclude<ExtArgs> | null
+    /**
+     * Filter, which AiPermissionAudit to fetch.
+     */
+    where?: AiPermissionAuditWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     *
+     * Determine the order of AiPermissionAudits to fetch.
+     */
+    orderBy?: AiPermissionAuditOrderByWithRelationInput | AiPermissionAuditOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     *
+     * Sets the position for searching for AiPermissionAudits.
+     */
+    cursor?: AiPermissionAuditWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     *
+     * Take `±n` AiPermissionAudits from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     *
+     * Skip the first `n` AiPermissionAudits.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     *
+     * Filter by unique combinations of AiPermissionAudits.
+     */
+    distinct?: AiPermissionAuditScalarFieldEnum | AiPermissionAuditScalarFieldEnum[]
+  }
+
+  /**
+   * AiPermissionAudit findFirstOrThrow
+   */
+  export type AiPermissionAuditFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AiPermissionAudit
+     */
+    select?: AiPermissionAuditSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AiPermissionAudit
+     */
+    omit?: AiPermissionAuditOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AiPermissionAuditInclude<ExtArgs> | null
+    /**
+     * Filter, which AiPermissionAudit to fetch.
+     */
+    where?: AiPermissionAuditWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     *
+     * Determine the order of AiPermissionAudits to fetch.
+     */
+    orderBy?: AiPermissionAuditOrderByWithRelationInput | AiPermissionAuditOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     *
+     * Sets the position for searching for AiPermissionAudits.
+     */
+    cursor?: AiPermissionAuditWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     *
+     * Take `±n` AiPermissionAudits from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     *
+     * Skip the first `n` AiPermissionAudits.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     *
+     * Filter by unique combinations of AiPermissionAudits.
+     */
+    distinct?: AiPermissionAuditScalarFieldEnum | AiPermissionAuditScalarFieldEnum[]
+  }
+
+  /**
+   * AiPermissionAudit findMany
+   */
+  export type AiPermissionAuditFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AiPermissionAudit
+     */
+    select?: AiPermissionAuditSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AiPermissionAudit
+     */
+    omit?: AiPermissionAuditOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AiPermissionAuditInclude<ExtArgs> | null
+    /**
+     * Filter, which AiPermissionAudits to fetch.
+     */
+    where?: AiPermissionAuditWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     *
+     * Determine the order of AiPermissionAudits to fetch.
+     */
+    orderBy?: AiPermissionAuditOrderByWithRelationInput | AiPermissionAuditOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     *
+     * Sets the position for listing AiPermissionAudits.
+     */
+    cursor?: AiPermissionAuditWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     *
+     * Take `±n` AiPermissionAudits from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     *
+     * Skip the first `n` AiPermissionAudits.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     *
+     * Filter by unique combinations of AiPermissionAudits.
+     */
+    distinct?: AiPermissionAuditScalarFieldEnum | AiPermissionAuditScalarFieldEnum[]
+  }
+
+  /**
+   * AiPermissionAudit create
+   */
+  export type AiPermissionAuditCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AiPermissionAudit
+     */
+    select?: AiPermissionAuditSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AiPermissionAudit
+     */
+    omit?: AiPermissionAuditOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AiPermissionAuditInclude<ExtArgs> | null
+    /**
+     * The data needed to create a AiPermissionAudit.
+     */
+    data: XOR<AiPermissionAuditCreateInput, AiPermissionAuditUncheckedCreateInput>
+  }
+
+  /**
+   * AiPermissionAudit createMany
+   */
+  export type AiPermissionAuditCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many AiPermissionAudits.
+     */
+    data: AiPermissionAuditCreateManyInput | AiPermissionAuditCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * AiPermissionAudit createManyAndReturn
+   */
+  export type AiPermissionAuditCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AiPermissionAudit
+     */
+    select?: AiPermissionAuditSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the AiPermissionAudit
+     */
+    omit?: AiPermissionAuditOmit<ExtArgs> | null
+    /**
+     * The data used to create many AiPermissionAudits.
+     */
+    data: AiPermissionAuditCreateManyInput | AiPermissionAuditCreateManyInput[]
+    skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AiPermissionAuditIncludeCreateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * AiPermissionAudit update
+   */
+  export type AiPermissionAuditUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AiPermissionAudit
+     */
+    select?: AiPermissionAuditSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AiPermissionAudit
+     */
+    omit?: AiPermissionAuditOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AiPermissionAuditInclude<ExtArgs> | null
+    /**
+     * The data needed to update a AiPermissionAudit.
+     */
+    data: XOR<AiPermissionAuditUpdateInput, AiPermissionAuditUncheckedUpdateInput>
+    /**
+     * Choose, which AiPermissionAudit to update.
+     */
+    where: AiPermissionAuditWhereUniqueInput
+  }
+
+  /**
+   * AiPermissionAudit updateMany
+   */
+  export type AiPermissionAuditUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update AiPermissionAudits.
+     */
+    data: XOR<AiPermissionAuditUpdateManyMutationInput, AiPermissionAuditUncheckedUpdateManyInput>
+    /**
+     * Filter which AiPermissionAudits to update
+     */
+    where?: AiPermissionAuditWhereInput
+    /**
+     * Limit how many AiPermissionAudits to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * AiPermissionAudit updateManyAndReturn
+   */
+  export type AiPermissionAuditUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AiPermissionAudit
+     */
+    select?: AiPermissionAuditSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the AiPermissionAudit
+     */
+    omit?: AiPermissionAuditOmit<ExtArgs> | null
+    /**
+     * The data used to update AiPermissionAudits.
+     */
+    data: XOR<AiPermissionAuditUpdateManyMutationInput, AiPermissionAuditUncheckedUpdateManyInput>
+    /**
+     * Filter which AiPermissionAudits to update
+     */
+    where?: AiPermissionAuditWhereInput
+    /**
+     * Limit how many AiPermissionAudits to update.
+     */
+    limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AiPermissionAuditIncludeUpdateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * AiPermissionAudit upsert
+   */
+  export type AiPermissionAuditUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AiPermissionAudit
+     */
+    select?: AiPermissionAuditSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AiPermissionAudit
+     */
+    omit?: AiPermissionAuditOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AiPermissionAuditInclude<ExtArgs> | null
+    /**
+     * The filter to search for the AiPermissionAudit to update in case it exists.
+     */
+    where: AiPermissionAuditWhereUniqueInput
+    /**
+     * In case the AiPermissionAudit found by the `where` argument doesn't exist, create a new AiPermissionAudit with this data.
+     */
+    create: XOR<AiPermissionAuditCreateInput, AiPermissionAuditUncheckedCreateInput>
+    /**
+     * In case the AiPermissionAudit was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<AiPermissionAuditUpdateInput, AiPermissionAuditUncheckedUpdateInput>
+  }
+
+  /**
+   * AiPermissionAudit delete
+   */
+  export type AiPermissionAuditDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AiPermissionAudit
+     */
+    select?: AiPermissionAuditSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AiPermissionAudit
+     */
+    omit?: AiPermissionAuditOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AiPermissionAuditInclude<ExtArgs> | null
+    /**
+     * Filter which AiPermissionAudit to delete.
+     */
+    where: AiPermissionAuditWhereUniqueInput
+  }
+
+  /**
+   * AiPermissionAudit deleteMany
+   */
+  export type AiPermissionAuditDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which AiPermissionAudits to delete
+     */
+    where?: AiPermissionAuditWhereInput
+    /**
+     * Limit how many AiPermissionAudits to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * AiPermissionAudit without action
+   */
+  export type AiPermissionAuditDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AiPermissionAudit
+     */
+    select?: AiPermissionAuditSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AiPermissionAudit
+     */
+    omit?: AiPermissionAuditOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AiPermissionAuditInclude<ExtArgs> | null
   }
 
 
@@ -119656,6 +123250,38 @@ export namespace Prisma {
   export type AiExecutionRecordScalarFieldEnum = (typeof AiExecutionRecordScalarFieldEnum)[keyof typeof AiExecutionRecordScalarFieldEnum]
 
 
+  export const AiPermissionSettingScalarFieldEnum: {
+    id: 'id',
+    identityId: 'identityId',
+    revision: 'revision',
+    recordJson: 'recordJson',
+    updatedAt: 'updatedAt'
+  };
+
+  export type AiPermissionSettingScalarFieldEnum = (typeof AiPermissionSettingScalarFieldEnum)[keyof typeof AiPermissionSettingScalarFieldEnum]
+
+
+  export const AiPermissionRuleScalarFieldEnum: {
+    id: 'id',
+    identityId: 'identityId',
+    agentId: 'agentId',
+    recordJson: 'recordJson',
+    updatedAt: 'updatedAt'
+  };
+
+  export type AiPermissionRuleScalarFieldEnum = (typeof AiPermissionRuleScalarFieldEnum)[keyof typeof AiPermissionRuleScalarFieldEnum]
+
+
+  export const AiPermissionAuditScalarFieldEnum: {
+    id: 'id',
+    identityId: 'identityId',
+    occurredAt: 'occurredAt',
+    recordJson: 'recordJson'
+  };
+
+  export type AiPermissionAuditScalarFieldEnum = (typeof AiPermissionAuditScalarFieldEnum)[keyof typeof AiPermissionAuditScalarFieldEnum]
+
+
   export const AiProviderConfigScalarFieldEnum: {
     id: 'id',
     identityId: 'identityId',
@@ -121349,6 +124975,9 @@ export namespace Prisma {
     notifications?: NotificationListRelationFilter
     aiConversations?: AiConversationListRelationFilter
     aiExecutionRecords?: AiExecutionRecordListRelationFilter
+    aiPermissionSettings?: AiPermissionSettingListRelationFilter
+    aiPermissionRules?: AiPermissionRuleListRelationFilter
+    aiPermissionAudits?: AiPermissionAuditListRelationFilter
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseListRelationFilter
     aiConversationAttention?: AiConversationAttentionListRelationFilter
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryListRelationFilter
@@ -121403,6 +125032,9 @@ export namespace Prisma {
     notifications?: NotificationOrderByRelationAggregateInput
     aiConversations?: AiConversationOrderByRelationAggregateInput
     aiExecutionRecords?: AiExecutionRecordOrderByRelationAggregateInput
+    aiPermissionSettings?: AiPermissionSettingOrderByRelationAggregateInput
+    aiPermissionRules?: AiPermissionRuleOrderByRelationAggregateInput
+    aiPermissionAudits?: AiPermissionAuditOrderByRelationAggregateInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseOrderByRelationAggregateInput
     aiConversationAttention?: AiConversationAttentionOrderByRelationAggregateInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryOrderByRelationAggregateInput
@@ -121460,6 +125092,9 @@ export namespace Prisma {
     notifications?: NotificationListRelationFilter
     aiConversations?: AiConversationListRelationFilter
     aiExecutionRecords?: AiExecutionRecordListRelationFilter
+    aiPermissionSettings?: AiPermissionSettingListRelationFilter
+    aiPermissionRules?: AiPermissionRuleListRelationFilter
+    aiPermissionAudits?: AiPermissionAuditListRelationFilter
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseListRelationFilter
     aiConversationAttention?: AiConversationAttentionListRelationFilter
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryListRelationFilter
@@ -121859,6 +125494,168 @@ export namespace Prisma {
     latencyMs?: IntNullableWithAggregatesFilter<"AiExecutionRecord"> | number | null
     createdAt?: DateTimeWithAggregatesFilter<"AiExecutionRecord"> | Date | string
     completedAt?: DateTimeWithAggregatesFilter<"AiExecutionRecord"> | Date | string
+  }
+
+  export type AiPermissionSettingWhereInput = {
+    AND?: AiPermissionSettingWhereInput | AiPermissionSettingWhereInput[]
+    OR?: AiPermissionSettingWhereInput[]
+    NOT?: AiPermissionSettingWhereInput | AiPermissionSettingWhereInput[]
+    id?: StringFilter<"AiPermissionSetting"> | string
+    identityId?: StringFilter<"AiPermissionSetting"> | string
+    revision?: IntFilter<"AiPermissionSetting"> | number
+    recordJson?: StringFilter<"AiPermissionSetting"> | string
+    updatedAt?: DateTimeFilter<"AiPermissionSetting"> | Date | string
+    account?: XOR<AccountScalarRelationFilter, AccountWhereInput>
+  }
+
+  export type AiPermissionSettingOrderByWithRelationInput = {
+    id?: SortOrder
+    identityId?: SortOrder
+    revision?: SortOrder
+    recordJson?: SortOrder
+    updatedAt?: SortOrder
+    account?: AccountOrderByWithRelationInput
+  }
+
+  export type AiPermissionSettingWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    AND?: AiPermissionSettingWhereInput | AiPermissionSettingWhereInput[]
+    OR?: AiPermissionSettingWhereInput[]
+    NOT?: AiPermissionSettingWhereInput | AiPermissionSettingWhereInput[]
+    identityId?: StringFilter<"AiPermissionSetting"> | string
+    revision?: IntFilter<"AiPermissionSetting"> | number
+    recordJson?: StringFilter<"AiPermissionSetting"> | string
+    updatedAt?: DateTimeFilter<"AiPermissionSetting"> | Date | string
+    account?: XOR<AccountScalarRelationFilter, AccountWhereInput>
+  }, "id">
+
+  export type AiPermissionSettingOrderByWithAggregationInput = {
+    id?: SortOrder
+    identityId?: SortOrder
+    revision?: SortOrder
+    recordJson?: SortOrder
+    updatedAt?: SortOrder
+    _count?: AiPermissionSettingCountOrderByAggregateInput
+    _avg?: AiPermissionSettingAvgOrderByAggregateInput
+    _max?: AiPermissionSettingMaxOrderByAggregateInput
+    _min?: AiPermissionSettingMinOrderByAggregateInput
+    _sum?: AiPermissionSettingSumOrderByAggregateInput
+  }
+
+  export type AiPermissionSettingScalarWhereWithAggregatesInput = {
+    AND?: AiPermissionSettingScalarWhereWithAggregatesInput | AiPermissionSettingScalarWhereWithAggregatesInput[]
+    OR?: AiPermissionSettingScalarWhereWithAggregatesInput[]
+    NOT?: AiPermissionSettingScalarWhereWithAggregatesInput | AiPermissionSettingScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"AiPermissionSetting"> | string
+    identityId?: StringWithAggregatesFilter<"AiPermissionSetting"> | string
+    revision?: IntWithAggregatesFilter<"AiPermissionSetting"> | number
+    recordJson?: StringWithAggregatesFilter<"AiPermissionSetting"> | string
+    updatedAt?: DateTimeWithAggregatesFilter<"AiPermissionSetting"> | Date | string
+  }
+
+  export type AiPermissionRuleWhereInput = {
+    AND?: AiPermissionRuleWhereInput | AiPermissionRuleWhereInput[]
+    OR?: AiPermissionRuleWhereInput[]
+    NOT?: AiPermissionRuleWhereInput | AiPermissionRuleWhereInput[]
+    id?: StringFilter<"AiPermissionRule"> | string
+    identityId?: StringFilter<"AiPermissionRule"> | string
+    agentId?: StringNullableFilter<"AiPermissionRule"> | string | null
+    recordJson?: StringFilter<"AiPermissionRule"> | string
+    updatedAt?: DateTimeFilter<"AiPermissionRule"> | Date | string
+    account?: XOR<AccountScalarRelationFilter, AccountWhereInput>
+  }
+
+  export type AiPermissionRuleOrderByWithRelationInput = {
+    id?: SortOrder
+    identityId?: SortOrder
+    agentId?: SortOrderInput | SortOrder
+    recordJson?: SortOrder
+    updatedAt?: SortOrder
+    account?: AccountOrderByWithRelationInput
+  }
+
+  export type AiPermissionRuleWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    AND?: AiPermissionRuleWhereInput | AiPermissionRuleWhereInput[]
+    OR?: AiPermissionRuleWhereInput[]
+    NOT?: AiPermissionRuleWhereInput | AiPermissionRuleWhereInput[]
+    identityId?: StringFilter<"AiPermissionRule"> | string
+    agentId?: StringNullableFilter<"AiPermissionRule"> | string | null
+    recordJson?: StringFilter<"AiPermissionRule"> | string
+    updatedAt?: DateTimeFilter<"AiPermissionRule"> | Date | string
+    account?: XOR<AccountScalarRelationFilter, AccountWhereInput>
+  }, "id">
+
+  export type AiPermissionRuleOrderByWithAggregationInput = {
+    id?: SortOrder
+    identityId?: SortOrder
+    agentId?: SortOrderInput | SortOrder
+    recordJson?: SortOrder
+    updatedAt?: SortOrder
+    _count?: AiPermissionRuleCountOrderByAggregateInput
+    _max?: AiPermissionRuleMaxOrderByAggregateInput
+    _min?: AiPermissionRuleMinOrderByAggregateInput
+  }
+
+  export type AiPermissionRuleScalarWhereWithAggregatesInput = {
+    AND?: AiPermissionRuleScalarWhereWithAggregatesInput | AiPermissionRuleScalarWhereWithAggregatesInput[]
+    OR?: AiPermissionRuleScalarWhereWithAggregatesInput[]
+    NOT?: AiPermissionRuleScalarWhereWithAggregatesInput | AiPermissionRuleScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"AiPermissionRule"> | string
+    identityId?: StringWithAggregatesFilter<"AiPermissionRule"> | string
+    agentId?: StringNullableWithAggregatesFilter<"AiPermissionRule"> | string | null
+    recordJson?: StringWithAggregatesFilter<"AiPermissionRule"> | string
+    updatedAt?: DateTimeWithAggregatesFilter<"AiPermissionRule"> | Date | string
+  }
+
+  export type AiPermissionAuditWhereInput = {
+    AND?: AiPermissionAuditWhereInput | AiPermissionAuditWhereInput[]
+    OR?: AiPermissionAuditWhereInput[]
+    NOT?: AiPermissionAuditWhereInput | AiPermissionAuditWhereInput[]
+    id?: StringFilter<"AiPermissionAudit"> | string
+    identityId?: StringFilter<"AiPermissionAudit"> | string
+    occurredAt?: DateTimeFilter<"AiPermissionAudit"> | Date | string
+    recordJson?: StringFilter<"AiPermissionAudit"> | string
+    account?: XOR<AccountScalarRelationFilter, AccountWhereInput>
+  }
+
+  export type AiPermissionAuditOrderByWithRelationInput = {
+    id?: SortOrder
+    identityId?: SortOrder
+    occurredAt?: SortOrder
+    recordJson?: SortOrder
+    account?: AccountOrderByWithRelationInput
+  }
+
+  export type AiPermissionAuditWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    AND?: AiPermissionAuditWhereInput | AiPermissionAuditWhereInput[]
+    OR?: AiPermissionAuditWhereInput[]
+    NOT?: AiPermissionAuditWhereInput | AiPermissionAuditWhereInput[]
+    identityId?: StringFilter<"AiPermissionAudit"> | string
+    occurredAt?: DateTimeFilter<"AiPermissionAudit"> | Date | string
+    recordJson?: StringFilter<"AiPermissionAudit"> | string
+    account?: XOR<AccountScalarRelationFilter, AccountWhereInput>
+  }, "id">
+
+  export type AiPermissionAuditOrderByWithAggregationInput = {
+    id?: SortOrder
+    identityId?: SortOrder
+    occurredAt?: SortOrder
+    recordJson?: SortOrder
+    _count?: AiPermissionAuditCountOrderByAggregateInput
+    _max?: AiPermissionAuditMaxOrderByAggregateInput
+    _min?: AiPermissionAuditMinOrderByAggregateInput
+  }
+
+  export type AiPermissionAuditScalarWhereWithAggregatesInput = {
+    AND?: AiPermissionAuditScalarWhereWithAggregatesInput | AiPermissionAuditScalarWhereWithAggregatesInput[]
+    OR?: AiPermissionAuditScalarWhereWithAggregatesInput[]
+    NOT?: AiPermissionAuditScalarWhereWithAggregatesInput | AiPermissionAuditScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"AiPermissionAudit"> | string
+    identityId?: StringWithAggregatesFilter<"AiPermissionAudit"> | string
+    occurredAt?: DateTimeWithAggregatesFilter<"AiPermissionAudit"> | Date | string
+    recordJson?: StringWithAggregatesFilter<"AiPermissionAudit"> | string
   }
 
   export type AiProviderConfigWhereInput = {
@@ -129700,6 +133497,9 @@ export namespace Prisma {
     notifications?: NotificationCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationCreateNestedManyWithoutAccountInput
     aiExecutionRecords?: AiExecutionRecordCreateNestedManyWithoutAccountInput
+    aiPermissionSettings?: AiPermissionSettingCreateNestedManyWithoutAccountInput
+    aiPermissionRules?: AiPermissionRuleCreateNestedManyWithoutAccountInput
+    aiPermissionAudits?: AiPermissionAuditCreateNestedManyWithoutAccountInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseCreateNestedManyWithoutAccountInput
     aiConversationAttention?: AiConversationAttentionCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryCreateNestedManyWithoutAccountInput
@@ -129753,6 +133553,9 @@ export namespace Prisma {
     notifications?: NotificationUncheckedCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationUncheckedCreateNestedManyWithoutAccountInput
     aiExecutionRecords?: AiExecutionRecordUncheckedCreateNestedManyWithoutAccountInput
+    aiPermissionSettings?: AiPermissionSettingUncheckedCreateNestedManyWithoutAccountInput
+    aiPermissionRules?: AiPermissionRuleUncheckedCreateNestedManyWithoutAccountInput
+    aiPermissionAudits?: AiPermissionAuditUncheckedCreateNestedManyWithoutAccountInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseUncheckedCreateNestedManyWithoutAccountInput
     aiConversationAttention?: AiConversationAttentionUncheckedCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedCreateNestedManyWithoutAccountInput
@@ -129806,6 +133609,9 @@ export namespace Prisma {
     notifications?: NotificationUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUpdateManyWithoutAccountNestedInput
     aiExecutionRecords?: AiExecutionRecordUpdateManyWithoutAccountNestedInput
+    aiPermissionSettings?: AiPermissionSettingUpdateManyWithoutAccountNestedInput
+    aiPermissionRules?: AiPermissionRuleUpdateManyWithoutAccountNestedInput
+    aiPermissionAudits?: AiPermissionAuditUpdateManyWithoutAccountNestedInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseUpdateManyWithoutAccountNestedInput
     aiConversationAttention?: AiConversationAttentionUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUpdateManyWithoutAccountNestedInput
@@ -129859,6 +133665,9 @@ export namespace Prisma {
     notifications?: NotificationUncheckedUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUncheckedUpdateManyWithoutAccountNestedInput
     aiExecutionRecords?: AiExecutionRecordUncheckedUpdateManyWithoutAccountNestedInput
+    aiPermissionSettings?: AiPermissionSettingUncheckedUpdateManyWithoutAccountNestedInput
+    aiPermissionRules?: AiPermissionRuleUncheckedUpdateManyWithoutAccountNestedInput
+    aiPermissionAudits?: AiPermissionAuditUncheckedUpdateManyWithoutAccountNestedInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseUncheckedUpdateManyWithoutAccountNestedInput
     aiConversationAttention?: AiConversationAttentionUncheckedUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedUpdateManyWithoutAccountNestedInput
@@ -130300,6 +134109,164 @@ export namespace Prisma {
     latencyMs?: NullableIntFieldUpdateOperationsInput | number | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     completedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type AiPermissionSettingCreateInput = {
+    id: string
+    revision?: number
+    recordJson: string
+    updatedAt?: Date | string
+    account: AccountCreateNestedOneWithoutAiPermissionSettingsInput
+  }
+
+  export type AiPermissionSettingUncheckedCreateInput = {
+    id: string
+    identityId: string
+    revision?: number
+    recordJson: string
+    updatedAt?: Date | string
+  }
+
+  export type AiPermissionSettingUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    revision?: IntFieldUpdateOperationsInput | number
+    recordJson?: StringFieldUpdateOperationsInput | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    account?: AccountUpdateOneRequiredWithoutAiPermissionSettingsNestedInput
+  }
+
+  export type AiPermissionSettingUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    identityId?: StringFieldUpdateOperationsInput | string
+    revision?: IntFieldUpdateOperationsInput | number
+    recordJson?: StringFieldUpdateOperationsInput | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type AiPermissionSettingCreateManyInput = {
+    id: string
+    identityId: string
+    revision?: number
+    recordJson: string
+    updatedAt?: Date | string
+  }
+
+  export type AiPermissionSettingUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    revision?: IntFieldUpdateOperationsInput | number
+    recordJson?: StringFieldUpdateOperationsInput | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type AiPermissionSettingUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    identityId?: StringFieldUpdateOperationsInput | string
+    revision?: IntFieldUpdateOperationsInput | number
+    recordJson?: StringFieldUpdateOperationsInput | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type AiPermissionRuleCreateInput = {
+    id: string
+    agentId?: string | null
+    recordJson: string
+    updatedAt?: Date | string
+    account: AccountCreateNestedOneWithoutAiPermissionRulesInput
+  }
+
+  export type AiPermissionRuleUncheckedCreateInput = {
+    id: string
+    identityId: string
+    agentId?: string | null
+    recordJson: string
+    updatedAt?: Date | string
+  }
+
+  export type AiPermissionRuleUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    agentId?: NullableStringFieldUpdateOperationsInput | string | null
+    recordJson?: StringFieldUpdateOperationsInput | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    account?: AccountUpdateOneRequiredWithoutAiPermissionRulesNestedInput
+  }
+
+  export type AiPermissionRuleUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    identityId?: StringFieldUpdateOperationsInput | string
+    agentId?: NullableStringFieldUpdateOperationsInput | string | null
+    recordJson?: StringFieldUpdateOperationsInput | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type AiPermissionRuleCreateManyInput = {
+    id: string
+    identityId: string
+    agentId?: string | null
+    recordJson: string
+    updatedAt?: Date | string
+  }
+
+  export type AiPermissionRuleUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    agentId?: NullableStringFieldUpdateOperationsInput | string | null
+    recordJson?: StringFieldUpdateOperationsInput | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type AiPermissionRuleUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    identityId?: StringFieldUpdateOperationsInput | string
+    agentId?: NullableStringFieldUpdateOperationsInput | string | null
+    recordJson?: StringFieldUpdateOperationsInput | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type AiPermissionAuditCreateInput = {
+    id: string
+    occurredAt: Date | string
+    recordJson: string
+    account: AccountCreateNestedOneWithoutAiPermissionAuditsInput
+  }
+
+  export type AiPermissionAuditUncheckedCreateInput = {
+    id: string
+    identityId: string
+    occurredAt: Date | string
+    recordJson: string
+  }
+
+  export type AiPermissionAuditUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    occurredAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    recordJson?: StringFieldUpdateOperationsInput | string
+    account?: AccountUpdateOneRequiredWithoutAiPermissionAuditsNestedInput
+  }
+
+  export type AiPermissionAuditUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    identityId?: StringFieldUpdateOperationsInput | string
+    occurredAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    recordJson?: StringFieldUpdateOperationsInput | string
+  }
+
+  export type AiPermissionAuditCreateManyInput = {
+    id: string
+    identityId: string
+    occurredAt: Date | string
+    recordJson: string
+  }
+
+  export type AiPermissionAuditUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    occurredAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    recordJson?: StringFieldUpdateOperationsInput | string
+  }
+
+  export type AiPermissionAuditUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    identityId?: StringFieldUpdateOperationsInput | string
+    occurredAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    recordJson?: StringFieldUpdateOperationsInput | string
   }
 
   export type AiProviderConfigCreateInput = {
@@ -139276,6 +143243,24 @@ export namespace Prisma {
     none?: AiExecutionRecordWhereInput
   }
 
+  export type AiPermissionSettingListRelationFilter = {
+    every?: AiPermissionSettingWhereInput
+    some?: AiPermissionSettingWhereInput
+    none?: AiPermissionSettingWhereInput
+  }
+
+  export type AiPermissionRuleListRelationFilter = {
+    every?: AiPermissionRuleWhereInput
+    some?: AiPermissionRuleWhereInput
+    none?: AiPermissionRuleWhereInput
+  }
+
+  export type AiPermissionAuditListRelationFilter = {
+    every?: AiPermissionAuditWhereInput
+    some?: AiPermissionAuditWhereInput
+    none?: AiPermissionAuditWhereInput
+  }
+
   export type AiGoalSurfaceLeaseListRelationFilter = {
     every?: AiGoalSurfaceLeaseWhereInput
     some?: AiGoalSurfaceLeaseWhereInput
@@ -139482,6 +143467,18 @@ export namespace Prisma {
   }
 
   export type AiExecutionRecordOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
+  export type AiPermissionSettingOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
+  export type AiPermissionRuleOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
+  export type AiPermissionAuditOrderByRelationAggregateInput = {
     _count?: SortOrder
   }
 
@@ -139993,6 +143990,83 @@ export namespace Prisma {
     _sum?: NestedIntNullableFilter<$PrismaModel>
     _min?: NestedIntNullableFilter<$PrismaModel>
     _max?: NestedIntNullableFilter<$PrismaModel>
+  }
+
+  export type AiPermissionSettingCountOrderByAggregateInput = {
+    id?: SortOrder
+    identityId?: SortOrder
+    revision?: SortOrder
+    recordJson?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type AiPermissionSettingAvgOrderByAggregateInput = {
+    revision?: SortOrder
+  }
+
+  export type AiPermissionSettingMaxOrderByAggregateInput = {
+    id?: SortOrder
+    identityId?: SortOrder
+    revision?: SortOrder
+    recordJson?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type AiPermissionSettingMinOrderByAggregateInput = {
+    id?: SortOrder
+    identityId?: SortOrder
+    revision?: SortOrder
+    recordJson?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type AiPermissionSettingSumOrderByAggregateInput = {
+    revision?: SortOrder
+  }
+
+  export type AiPermissionRuleCountOrderByAggregateInput = {
+    id?: SortOrder
+    identityId?: SortOrder
+    agentId?: SortOrder
+    recordJson?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type AiPermissionRuleMaxOrderByAggregateInput = {
+    id?: SortOrder
+    identityId?: SortOrder
+    agentId?: SortOrder
+    recordJson?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type AiPermissionRuleMinOrderByAggregateInput = {
+    id?: SortOrder
+    identityId?: SortOrder
+    agentId?: SortOrder
+    recordJson?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type AiPermissionAuditCountOrderByAggregateInput = {
+    id?: SortOrder
+    identityId?: SortOrder
+    occurredAt?: SortOrder
+    recordJson?: SortOrder
+  }
+
+  export type AiPermissionAuditMaxOrderByAggregateInput = {
+    id?: SortOrder
+    identityId?: SortOrder
+    occurredAt?: SortOrder
+    recordJson?: SortOrder
+  }
+
+  export type AiPermissionAuditMinOrderByAggregateInput = {
+    id?: SortOrder
+    identityId?: SortOrder
+    occurredAt?: SortOrder
+    recordJson?: SortOrder
   }
 
   export type BoolFilter<$PrismaModel = never> = {
@@ -145013,6 +149087,27 @@ export namespace Prisma {
     connect?: AiExecutionRecordWhereUniqueInput | AiExecutionRecordWhereUniqueInput[]
   }
 
+  export type AiPermissionSettingCreateNestedManyWithoutAccountInput = {
+    create?: XOR<AiPermissionSettingCreateWithoutAccountInput, AiPermissionSettingUncheckedCreateWithoutAccountInput> | AiPermissionSettingCreateWithoutAccountInput[] | AiPermissionSettingUncheckedCreateWithoutAccountInput[]
+    connectOrCreate?: AiPermissionSettingCreateOrConnectWithoutAccountInput | AiPermissionSettingCreateOrConnectWithoutAccountInput[]
+    createMany?: AiPermissionSettingCreateManyAccountInputEnvelope
+    connect?: AiPermissionSettingWhereUniqueInput | AiPermissionSettingWhereUniqueInput[]
+  }
+
+  export type AiPermissionRuleCreateNestedManyWithoutAccountInput = {
+    create?: XOR<AiPermissionRuleCreateWithoutAccountInput, AiPermissionRuleUncheckedCreateWithoutAccountInput> | AiPermissionRuleCreateWithoutAccountInput[] | AiPermissionRuleUncheckedCreateWithoutAccountInput[]
+    connectOrCreate?: AiPermissionRuleCreateOrConnectWithoutAccountInput | AiPermissionRuleCreateOrConnectWithoutAccountInput[]
+    createMany?: AiPermissionRuleCreateManyAccountInputEnvelope
+    connect?: AiPermissionRuleWhereUniqueInput | AiPermissionRuleWhereUniqueInput[]
+  }
+
+  export type AiPermissionAuditCreateNestedManyWithoutAccountInput = {
+    create?: XOR<AiPermissionAuditCreateWithoutAccountInput, AiPermissionAuditUncheckedCreateWithoutAccountInput> | AiPermissionAuditCreateWithoutAccountInput[] | AiPermissionAuditUncheckedCreateWithoutAccountInput[]
+    connectOrCreate?: AiPermissionAuditCreateOrConnectWithoutAccountInput | AiPermissionAuditCreateOrConnectWithoutAccountInput[]
+    createMany?: AiPermissionAuditCreateManyAccountInputEnvelope
+    connect?: AiPermissionAuditWhereUniqueInput | AiPermissionAuditWhereUniqueInput[]
+  }
+
   export type AiGoalSurfaceLeaseCreateNestedManyWithoutAccountInput = {
     create?: XOR<AiGoalSurfaceLeaseCreateWithoutAccountInput, AiGoalSurfaceLeaseUncheckedCreateWithoutAccountInput> | AiGoalSurfaceLeaseCreateWithoutAccountInput[] | AiGoalSurfaceLeaseUncheckedCreateWithoutAccountInput[]
     connectOrCreate?: AiGoalSurfaceLeaseCreateOrConnectWithoutAccountInput | AiGoalSurfaceLeaseCreateOrConnectWithoutAccountInput[]
@@ -145318,6 +149413,27 @@ export namespace Prisma {
     connectOrCreate?: AiExecutionRecordCreateOrConnectWithoutAccountInput | AiExecutionRecordCreateOrConnectWithoutAccountInput[]
     createMany?: AiExecutionRecordCreateManyAccountInputEnvelope
     connect?: AiExecutionRecordWhereUniqueInput | AiExecutionRecordWhereUniqueInput[]
+  }
+
+  export type AiPermissionSettingUncheckedCreateNestedManyWithoutAccountInput = {
+    create?: XOR<AiPermissionSettingCreateWithoutAccountInput, AiPermissionSettingUncheckedCreateWithoutAccountInput> | AiPermissionSettingCreateWithoutAccountInput[] | AiPermissionSettingUncheckedCreateWithoutAccountInput[]
+    connectOrCreate?: AiPermissionSettingCreateOrConnectWithoutAccountInput | AiPermissionSettingCreateOrConnectWithoutAccountInput[]
+    createMany?: AiPermissionSettingCreateManyAccountInputEnvelope
+    connect?: AiPermissionSettingWhereUniqueInput | AiPermissionSettingWhereUniqueInput[]
+  }
+
+  export type AiPermissionRuleUncheckedCreateNestedManyWithoutAccountInput = {
+    create?: XOR<AiPermissionRuleCreateWithoutAccountInput, AiPermissionRuleUncheckedCreateWithoutAccountInput> | AiPermissionRuleCreateWithoutAccountInput[] | AiPermissionRuleUncheckedCreateWithoutAccountInput[]
+    connectOrCreate?: AiPermissionRuleCreateOrConnectWithoutAccountInput | AiPermissionRuleCreateOrConnectWithoutAccountInput[]
+    createMany?: AiPermissionRuleCreateManyAccountInputEnvelope
+    connect?: AiPermissionRuleWhereUniqueInput | AiPermissionRuleWhereUniqueInput[]
+  }
+
+  export type AiPermissionAuditUncheckedCreateNestedManyWithoutAccountInput = {
+    create?: XOR<AiPermissionAuditCreateWithoutAccountInput, AiPermissionAuditUncheckedCreateWithoutAccountInput> | AiPermissionAuditCreateWithoutAccountInput[] | AiPermissionAuditUncheckedCreateWithoutAccountInput[]
+    connectOrCreate?: AiPermissionAuditCreateOrConnectWithoutAccountInput | AiPermissionAuditCreateOrConnectWithoutAccountInput[]
+    createMany?: AiPermissionAuditCreateManyAccountInputEnvelope
+    connect?: AiPermissionAuditWhereUniqueInput | AiPermissionAuditWhereUniqueInput[]
   }
 
   export type AiGoalSurfaceLeaseUncheckedCreateNestedManyWithoutAccountInput = {
@@ -145838,6 +149954,48 @@ export namespace Prisma {
     update?: AiExecutionRecordUpdateWithWhereUniqueWithoutAccountInput | AiExecutionRecordUpdateWithWhereUniqueWithoutAccountInput[]
     updateMany?: AiExecutionRecordUpdateManyWithWhereWithoutAccountInput | AiExecutionRecordUpdateManyWithWhereWithoutAccountInput[]
     deleteMany?: AiExecutionRecordScalarWhereInput | AiExecutionRecordScalarWhereInput[]
+  }
+
+  export type AiPermissionSettingUpdateManyWithoutAccountNestedInput = {
+    create?: XOR<AiPermissionSettingCreateWithoutAccountInput, AiPermissionSettingUncheckedCreateWithoutAccountInput> | AiPermissionSettingCreateWithoutAccountInput[] | AiPermissionSettingUncheckedCreateWithoutAccountInput[]
+    connectOrCreate?: AiPermissionSettingCreateOrConnectWithoutAccountInput | AiPermissionSettingCreateOrConnectWithoutAccountInput[]
+    upsert?: AiPermissionSettingUpsertWithWhereUniqueWithoutAccountInput | AiPermissionSettingUpsertWithWhereUniqueWithoutAccountInput[]
+    createMany?: AiPermissionSettingCreateManyAccountInputEnvelope
+    set?: AiPermissionSettingWhereUniqueInput | AiPermissionSettingWhereUniqueInput[]
+    disconnect?: AiPermissionSettingWhereUniqueInput | AiPermissionSettingWhereUniqueInput[]
+    delete?: AiPermissionSettingWhereUniqueInput | AiPermissionSettingWhereUniqueInput[]
+    connect?: AiPermissionSettingWhereUniqueInput | AiPermissionSettingWhereUniqueInput[]
+    update?: AiPermissionSettingUpdateWithWhereUniqueWithoutAccountInput | AiPermissionSettingUpdateWithWhereUniqueWithoutAccountInput[]
+    updateMany?: AiPermissionSettingUpdateManyWithWhereWithoutAccountInput | AiPermissionSettingUpdateManyWithWhereWithoutAccountInput[]
+    deleteMany?: AiPermissionSettingScalarWhereInput | AiPermissionSettingScalarWhereInput[]
+  }
+
+  export type AiPermissionRuleUpdateManyWithoutAccountNestedInput = {
+    create?: XOR<AiPermissionRuleCreateWithoutAccountInput, AiPermissionRuleUncheckedCreateWithoutAccountInput> | AiPermissionRuleCreateWithoutAccountInput[] | AiPermissionRuleUncheckedCreateWithoutAccountInput[]
+    connectOrCreate?: AiPermissionRuleCreateOrConnectWithoutAccountInput | AiPermissionRuleCreateOrConnectWithoutAccountInput[]
+    upsert?: AiPermissionRuleUpsertWithWhereUniqueWithoutAccountInput | AiPermissionRuleUpsertWithWhereUniqueWithoutAccountInput[]
+    createMany?: AiPermissionRuleCreateManyAccountInputEnvelope
+    set?: AiPermissionRuleWhereUniqueInput | AiPermissionRuleWhereUniqueInput[]
+    disconnect?: AiPermissionRuleWhereUniqueInput | AiPermissionRuleWhereUniqueInput[]
+    delete?: AiPermissionRuleWhereUniqueInput | AiPermissionRuleWhereUniqueInput[]
+    connect?: AiPermissionRuleWhereUniqueInput | AiPermissionRuleWhereUniqueInput[]
+    update?: AiPermissionRuleUpdateWithWhereUniqueWithoutAccountInput | AiPermissionRuleUpdateWithWhereUniqueWithoutAccountInput[]
+    updateMany?: AiPermissionRuleUpdateManyWithWhereWithoutAccountInput | AiPermissionRuleUpdateManyWithWhereWithoutAccountInput[]
+    deleteMany?: AiPermissionRuleScalarWhereInput | AiPermissionRuleScalarWhereInput[]
+  }
+
+  export type AiPermissionAuditUpdateManyWithoutAccountNestedInput = {
+    create?: XOR<AiPermissionAuditCreateWithoutAccountInput, AiPermissionAuditUncheckedCreateWithoutAccountInput> | AiPermissionAuditCreateWithoutAccountInput[] | AiPermissionAuditUncheckedCreateWithoutAccountInput[]
+    connectOrCreate?: AiPermissionAuditCreateOrConnectWithoutAccountInput | AiPermissionAuditCreateOrConnectWithoutAccountInput[]
+    upsert?: AiPermissionAuditUpsertWithWhereUniqueWithoutAccountInput | AiPermissionAuditUpsertWithWhereUniqueWithoutAccountInput[]
+    createMany?: AiPermissionAuditCreateManyAccountInputEnvelope
+    set?: AiPermissionAuditWhereUniqueInput | AiPermissionAuditWhereUniqueInput[]
+    disconnect?: AiPermissionAuditWhereUniqueInput | AiPermissionAuditWhereUniqueInput[]
+    delete?: AiPermissionAuditWhereUniqueInput | AiPermissionAuditWhereUniqueInput[]
+    connect?: AiPermissionAuditWhereUniqueInput | AiPermissionAuditWhereUniqueInput[]
+    update?: AiPermissionAuditUpdateWithWhereUniqueWithoutAccountInput | AiPermissionAuditUpdateWithWhereUniqueWithoutAccountInput[]
+    updateMany?: AiPermissionAuditUpdateManyWithWhereWithoutAccountInput | AiPermissionAuditUpdateManyWithWhereWithoutAccountInput[]
+    deleteMany?: AiPermissionAuditScalarWhereInput | AiPermissionAuditScalarWhereInput[]
   }
 
   export type AiGoalSurfaceLeaseUpdateManyWithoutAccountNestedInput = {
@@ -146452,6 +150610,48 @@ export namespace Prisma {
     deleteMany?: AiExecutionRecordScalarWhereInput | AiExecutionRecordScalarWhereInput[]
   }
 
+  export type AiPermissionSettingUncheckedUpdateManyWithoutAccountNestedInput = {
+    create?: XOR<AiPermissionSettingCreateWithoutAccountInput, AiPermissionSettingUncheckedCreateWithoutAccountInput> | AiPermissionSettingCreateWithoutAccountInput[] | AiPermissionSettingUncheckedCreateWithoutAccountInput[]
+    connectOrCreate?: AiPermissionSettingCreateOrConnectWithoutAccountInput | AiPermissionSettingCreateOrConnectWithoutAccountInput[]
+    upsert?: AiPermissionSettingUpsertWithWhereUniqueWithoutAccountInput | AiPermissionSettingUpsertWithWhereUniqueWithoutAccountInput[]
+    createMany?: AiPermissionSettingCreateManyAccountInputEnvelope
+    set?: AiPermissionSettingWhereUniqueInput | AiPermissionSettingWhereUniqueInput[]
+    disconnect?: AiPermissionSettingWhereUniqueInput | AiPermissionSettingWhereUniqueInput[]
+    delete?: AiPermissionSettingWhereUniqueInput | AiPermissionSettingWhereUniqueInput[]
+    connect?: AiPermissionSettingWhereUniqueInput | AiPermissionSettingWhereUniqueInput[]
+    update?: AiPermissionSettingUpdateWithWhereUniqueWithoutAccountInput | AiPermissionSettingUpdateWithWhereUniqueWithoutAccountInput[]
+    updateMany?: AiPermissionSettingUpdateManyWithWhereWithoutAccountInput | AiPermissionSettingUpdateManyWithWhereWithoutAccountInput[]
+    deleteMany?: AiPermissionSettingScalarWhereInput | AiPermissionSettingScalarWhereInput[]
+  }
+
+  export type AiPermissionRuleUncheckedUpdateManyWithoutAccountNestedInput = {
+    create?: XOR<AiPermissionRuleCreateWithoutAccountInput, AiPermissionRuleUncheckedCreateWithoutAccountInput> | AiPermissionRuleCreateWithoutAccountInput[] | AiPermissionRuleUncheckedCreateWithoutAccountInput[]
+    connectOrCreate?: AiPermissionRuleCreateOrConnectWithoutAccountInput | AiPermissionRuleCreateOrConnectWithoutAccountInput[]
+    upsert?: AiPermissionRuleUpsertWithWhereUniqueWithoutAccountInput | AiPermissionRuleUpsertWithWhereUniqueWithoutAccountInput[]
+    createMany?: AiPermissionRuleCreateManyAccountInputEnvelope
+    set?: AiPermissionRuleWhereUniqueInput | AiPermissionRuleWhereUniqueInput[]
+    disconnect?: AiPermissionRuleWhereUniqueInput | AiPermissionRuleWhereUniqueInput[]
+    delete?: AiPermissionRuleWhereUniqueInput | AiPermissionRuleWhereUniqueInput[]
+    connect?: AiPermissionRuleWhereUniqueInput | AiPermissionRuleWhereUniqueInput[]
+    update?: AiPermissionRuleUpdateWithWhereUniqueWithoutAccountInput | AiPermissionRuleUpdateWithWhereUniqueWithoutAccountInput[]
+    updateMany?: AiPermissionRuleUpdateManyWithWhereWithoutAccountInput | AiPermissionRuleUpdateManyWithWhereWithoutAccountInput[]
+    deleteMany?: AiPermissionRuleScalarWhereInput | AiPermissionRuleScalarWhereInput[]
+  }
+
+  export type AiPermissionAuditUncheckedUpdateManyWithoutAccountNestedInput = {
+    create?: XOR<AiPermissionAuditCreateWithoutAccountInput, AiPermissionAuditUncheckedCreateWithoutAccountInput> | AiPermissionAuditCreateWithoutAccountInput[] | AiPermissionAuditUncheckedCreateWithoutAccountInput[]
+    connectOrCreate?: AiPermissionAuditCreateOrConnectWithoutAccountInput | AiPermissionAuditCreateOrConnectWithoutAccountInput[]
+    upsert?: AiPermissionAuditUpsertWithWhereUniqueWithoutAccountInput | AiPermissionAuditUpsertWithWhereUniqueWithoutAccountInput[]
+    createMany?: AiPermissionAuditCreateManyAccountInputEnvelope
+    set?: AiPermissionAuditWhereUniqueInput | AiPermissionAuditWhereUniqueInput[]
+    disconnect?: AiPermissionAuditWhereUniqueInput | AiPermissionAuditWhereUniqueInput[]
+    delete?: AiPermissionAuditWhereUniqueInput | AiPermissionAuditWhereUniqueInput[]
+    connect?: AiPermissionAuditWhereUniqueInput | AiPermissionAuditWhereUniqueInput[]
+    update?: AiPermissionAuditUpdateWithWhereUniqueWithoutAccountInput | AiPermissionAuditUpdateWithWhereUniqueWithoutAccountInput[]
+    updateMany?: AiPermissionAuditUpdateManyWithWhereWithoutAccountInput | AiPermissionAuditUpdateManyWithWhereWithoutAccountInput[]
+    deleteMany?: AiPermissionAuditScalarWhereInput | AiPermissionAuditScalarWhereInput[]
+  }
+
   export type AiGoalSurfaceLeaseUncheckedUpdateManyWithoutAccountNestedInput = {
     create?: XOR<AiGoalSurfaceLeaseCreateWithoutAccountInput, AiGoalSurfaceLeaseUncheckedCreateWithoutAccountInput> | AiGoalSurfaceLeaseCreateWithoutAccountInput[] | AiGoalSurfaceLeaseUncheckedCreateWithoutAccountInput[]
     connectOrCreate?: AiGoalSurfaceLeaseCreateOrConnectWithoutAccountInput | AiGoalSurfaceLeaseCreateOrConnectWithoutAccountInput[]
@@ -146790,6 +150990,48 @@ export namespace Prisma {
     upsert?: AccountUpsertWithoutAiExecutionRecordsInput
     connect?: AccountWhereUniqueInput
     update?: XOR<XOR<AccountUpdateToOneWithWhereWithoutAiExecutionRecordsInput, AccountUpdateWithoutAiExecutionRecordsInput>, AccountUncheckedUpdateWithoutAiExecutionRecordsInput>
+  }
+
+  export type AccountCreateNestedOneWithoutAiPermissionSettingsInput = {
+    create?: XOR<AccountCreateWithoutAiPermissionSettingsInput, AccountUncheckedCreateWithoutAiPermissionSettingsInput>
+    connectOrCreate?: AccountCreateOrConnectWithoutAiPermissionSettingsInput
+    connect?: AccountWhereUniqueInput
+  }
+
+  export type AccountUpdateOneRequiredWithoutAiPermissionSettingsNestedInput = {
+    create?: XOR<AccountCreateWithoutAiPermissionSettingsInput, AccountUncheckedCreateWithoutAiPermissionSettingsInput>
+    connectOrCreate?: AccountCreateOrConnectWithoutAiPermissionSettingsInput
+    upsert?: AccountUpsertWithoutAiPermissionSettingsInput
+    connect?: AccountWhereUniqueInput
+    update?: XOR<XOR<AccountUpdateToOneWithWhereWithoutAiPermissionSettingsInput, AccountUpdateWithoutAiPermissionSettingsInput>, AccountUncheckedUpdateWithoutAiPermissionSettingsInput>
+  }
+
+  export type AccountCreateNestedOneWithoutAiPermissionRulesInput = {
+    create?: XOR<AccountCreateWithoutAiPermissionRulesInput, AccountUncheckedCreateWithoutAiPermissionRulesInput>
+    connectOrCreate?: AccountCreateOrConnectWithoutAiPermissionRulesInput
+    connect?: AccountWhereUniqueInput
+  }
+
+  export type AccountUpdateOneRequiredWithoutAiPermissionRulesNestedInput = {
+    create?: XOR<AccountCreateWithoutAiPermissionRulesInput, AccountUncheckedCreateWithoutAiPermissionRulesInput>
+    connectOrCreate?: AccountCreateOrConnectWithoutAiPermissionRulesInput
+    upsert?: AccountUpsertWithoutAiPermissionRulesInput
+    connect?: AccountWhereUniqueInput
+    update?: XOR<XOR<AccountUpdateToOneWithWhereWithoutAiPermissionRulesInput, AccountUpdateWithoutAiPermissionRulesInput>, AccountUncheckedUpdateWithoutAiPermissionRulesInput>
+  }
+
+  export type AccountCreateNestedOneWithoutAiPermissionAuditsInput = {
+    create?: XOR<AccountCreateWithoutAiPermissionAuditsInput, AccountUncheckedCreateWithoutAiPermissionAuditsInput>
+    connectOrCreate?: AccountCreateOrConnectWithoutAiPermissionAuditsInput
+    connect?: AccountWhereUniqueInput
+  }
+
+  export type AccountUpdateOneRequiredWithoutAiPermissionAuditsNestedInput = {
+    create?: XOR<AccountCreateWithoutAiPermissionAuditsInput, AccountUncheckedCreateWithoutAiPermissionAuditsInput>
+    connectOrCreate?: AccountCreateOrConnectWithoutAiPermissionAuditsInput
+    upsert?: AccountUpsertWithoutAiPermissionAuditsInput
+    connect?: AccountWhereUniqueInput
+    update?: XOR<XOR<AccountUpdateToOneWithWhereWithoutAiPermissionAuditsInput, AccountUpdateWithoutAiPermissionAuditsInput>, AccountUncheckedUpdateWithoutAiPermissionAuditsInput>
   }
 
   export type AccountCreateNestedOneWithoutAiProviderConfigsInput = {
@@ -152211,6 +156453,76 @@ export namespace Prisma {
     skipDuplicates?: boolean
   }
 
+  export type AiPermissionSettingCreateWithoutAccountInput = {
+    id: string
+    revision?: number
+    recordJson: string
+    updatedAt?: Date | string
+  }
+
+  export type AiPermissionSettingUncheckedCreateWithoutAccountInput = {
+    id: string
+    revision?: number
+    recordJson: string
+    updatedAt?: Date | string
+  }
+
+  export type AiPermissionSettingCreateOrConnectWithoutAccountInput = {
+    where: AiPermissionSettingWhereUniqueInput
+    create: XOR<AiPermissionSettingCreateWithoutAccountInput, AiPermissionSettingUncheckedCreateWithoutAccountInput>
+  }
+
+  export type AiPermissionSettingCreateManyAccountInputEnvelope = {
+    data: AiPermissionSettingCreateManyAccountInput | AiPermissionSettingCreateManyAccountInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type AiPermissionRuleCreateWithoutAccountInput = {
+    id: string
+    agentId?: string | null
+    recordJson: string
+    updatedAt?: Date | string
+  }
+
+  export type AiPermissionRuleUncheckedCreateWithoutAccountInput = {
+    id: string
+    agentId?: string | null
+    recordJson: string
+    updatedAt?: Date | string
+  }
+
+  export type AiPermissionRuleCreateOrConnectWithoutAccountInput = {
+    where: AiPermissionRuleWhereUniqueInput
+    create: XOR<AiPermissionRuleCreateWithoutAccountInput, AiPermissionRuleUncheckedCreateWithoutAccountInput>
+  }
+
+  export type AiPermissionRuleCreateManyAccountInputEnvelope = {
+    data: AiPermissionRuleCreateManyAccountInput | AiPermissionRuleCreateManyAccountInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type AiPermissionAuditCreateWithoutAccountInput = {
+    id: string
+    occurredAt: Date | string
+    recordJson: string
+  }
+
+  export type AiPermissionAuditUncheckedCreateWithoutAccountInput = {
+    id: string
+    occurredAt: Date | string
+    recordJson: string
+  }
+
+  export type AiPermissionAuditCreateOrConnectWithoutAccountInput = {
+    where: AiPermissionAuditWhereUniqueInput
+    create: XOR<AiPermissionAuditCreateWithoutAccountInput, AiPermissionAuditUncheckedCreateWithoutAccountInput>
+  }
+
+  export type AiPermissionAuditCreateManyAccountInputEnvelope = {
+    data: AiPermissionAuditCreateManyAccountInput | AiPermissionAuditCreateManyAccountInput[]
+    skipDuplicates?: boolean
+  }
+
   export type AiGoalSurfaceLeaseCreateWithoutAccountInput = {
     id?: string
     runId: string
@@ -153898,6 +158210,86 @@ export namespace Prisma {
     completedAt?: DateTimeFilter<"AiExecutionRecord"> | Date | string
   }
 
+  export type AiPermissionSettingUpsertWithWhereUniqueWithoutAccountInput = {
+    where: AiPermissionSettingWhereUniqueInput
+    update: XOR<AiPermissionSettingUpdateWithoutAccountInput, AiPermissionSettingUncheckedUpdateWithoutAccountInput>
+    create: XOR<AiPermissionSettingCreateWithoutAccountInput, AiPermissionSettingUncheckedCreateWithoutAccountInput>
+  }
+
+  export type AiPermissionSettingUpdateWithWhereUniqueWithoutAccountInput = {
+    where: AiPermissionSettingWhereUniqueInput
+    data: XOR<AiPermissionSettingUpdateWithoutAccountInput, AiPermissionSettingUncheckedUpdateWithoutAccountInput>
+  }
+
+  export type AiPermissionSettingUpdateManyWithWhereWithoutAccountInput = {
+    where: AiPermissionSettingScalarWhereInput
+    data: XOR<AiPermissionSettingUpdateManyMutationInput, AiPermissionSettingUncheckedUpdateManyWithoutAccountInput>
+  }
+
+  export type AiPermissionSettingScalarWhereInput = {
+    AND?: AiPermissionSettingScalarWhereInput | AiPermissionSettingScalarWhereInput[]
+    OR?: AiPermissionSettingScalarWhereInput[]
+    NOT?: AiPermissionSettingScalarWhereInput | AiPermissionSettingScalarWhereInput[]
+    id?: StringFilter<"AiPermissionSetting"> | string
+    identityId?: StringFilter<"AiPermissionSetting"> | string
+    revision?: IntFilter<"AiPermissionSetting"> | number
+    recordJson?: StringFilter<"AiPermissionSetting"> | string
+    updatedAt?: DateTimeFilter<"AiPermissionSetting"> | Date | string
+  }
+
+  export type AiPermissionRuleUpsertWithWhereUniqueWithoutAccountInput = {
+    where: AiPermissionRuleWhereUniqueInput
+    update: XOR<AiPermissionRuleUpdateWithoutAccountInput, AiPermissionRuleUncheckedUpdateWithoutAccountInput>
+    create: XOR<AiPermissionRuleCreateWithoutAccountInput, AiPermissionRuleUncheckedCreateWithoutAccountInput>
+  }
+
+  export type AiPermissionRuleUpdateWithWhereUniqueWithoutAccountInput = {
+    where: AiPermissionRuleWhereUniqueInput
+    data: XOR<AiPermissionRuleUpdateWithoutAccountInput, AiPermissionRuleUncheckedUpdateWithoutAccountInput>
+  }
+
+  export type AiPermissionRuleUpdateManyWithWhereWithoutAccountInput = {
+    where: AiPermissionRuleScalarWhereInput
+    data: XOR<AiPermissionRuleUpdateManyMutationInput, AiPermissionRuleUncheckedUpdateManyWithoutAccountInput>
+  }
+
+  export type AiPermissionRuleScalarWhereInput = {
+    AND?: AiPermissionRuleScalarWhereInput | AiPermissionRuleScalarWhereInput[]
+    OR?: AiPermissionRuleScalarWhereInput[]
+    NOT?: AiPermissionRuleScalarWhereInput | AiPermissionRuleScalarWhereInput[]
+    id?: StringFilter<"AiPermissionRule"> | string
+    identityId?: StringFilter<"AiPermissionRule"> | string
+    agentId?: StringNullableFilter<"AiPermissionRule"> | string | null
+    recordJson?: StringFilter<"AiPermissionRule"> | string
+    updatedAt?: DateTimeFilter<"AiPermissionRule"> | Date | string
+  }
+
+  export type AiPermissionAuditUpsertWithWhereUniqueWithoutAccountInput = {
+    where: AiPermissionAuditWhereUniqueInput
+    update: XOR<AiPermissionAuditUpdateWithoutAccountInput, AiPermissionAuditUncheckedUpdateWithoutAccountInput>
+    create: XOR<AiPermissionAuditCreateWithoutAccountInput, AiPermissionAuditUncheckedCreateWithoutAccountInput>
+  }
+
+  export type AiPermissionAuditUpdateWithWhereUniqueWithoutAccountInput = {
+    where: AiPermissionAuditWhereUniqueInput
+    data: XOR<AiPermissionAuditUpdateWithoutAccountInput, AiPermissionAuditUncheckedUpdateWithoutAccountInput>
+  }
+
+  export type AiPermissionAuditUpdateManyWithWhereWithoutAccountInput = {
+    where: AiPermissionAuditScalarWhereInput
+    data: XOR<AiPermissionAuditUpdateManyMutationInput, AiPermissionAuditUncheckedUpdateManyWithoutAccountInput>
+  }
+
+  export type AiPermissionAuditScalarWhereInput = {
+    AND?: AiPermissionAuditScalarWhereInput | AiPermissionAuditScalarWhereInput[]
+    OR?: AiPermissionAuditScalarWhereInput[]
+    NOT?: AiPermissionAuditScalarWhereInput | AiPermissionAuditScalarWhereInput[]
+    id?: StringFilter<"AiPermissionAudit"> | string
+    identityId?: StringFilter<"AiPermissionAudit"> | string
+    occurredAt?: DateTimeFilter<"AiPermissionAudit"> | Date | string
+    recordJson?: StringFilter<"AiPermissionAudit"> | string
+  }
+
   export type AiGoalSurfaceLeaseUpsertWithWhereUniqueWithoutAccountInput = {
     where: AiGoalSurfaceLeaseWhereUniqueInput
     update: XOR<AiGoalSurfaceLeaseUpdateWithoutAccountInput, AiGoalSurfaceLeaseUncheckedUpdateWithoutAccountInput>
@@ -154508,6 +158900,9 @@ export namespace Prisma {
     userPreferenceRecords?: UserPreferenceRecordCreateNestedManyWithoutAccountInput
     notifications?: NotificationCreateNestedManyWithoutAccountInput
     aiExecutionRecords?: AiExecutionRecordCreateNestedManyWithoutAccountInput
+    aiPermissionSettings?: AiPermissionSettingCreateNestedManyWithoutAccountInput
+    aiPermissionRules?: AiPermissionRuleCreateNestedManyWithoutAccountInput
+    aiPermissionAudits?: AiPermissionAuditCreateNestedManyWithoutAccountInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseCreateNestedManyWithoutAccountInput
     aiConversationAttention?: AiConversationAttentionCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryCreateNestedManyWithoutAccountInput
@@ -154560,6 +158955,9 @@ export namespace Prisma {
     userPreferenceRecords?: UserPreferenceRecordUncheckedCreateNestedManyWithoutAccountInput
     notifications?: NotificationUncheckedCreateNestedManyWithoutAccountInput
     aiExecutionRecords?: AiExecutionRecordUncheckedCreateNestedManyWithoutAccountInput
+    aiPermissionSettings?: AiPermissionSettingUncheckedCreateNestedManyWithoutAccountInput
+    aiPermissionRules?: AiPermissionRuleUncheckedCreateNestedManyWithoutAccountInput
+    aiPermissionAudits?: AiPermissionAuditUncheckedCreateNestedManyWithoutAccountInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseUncheckedCreateNestedManyWithoutAccountInput
     aiConversationAttention?: AiConversationAttentionUncheckedCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedCreateNestedManyWithoutAccountInput
@@ -154647,6 +159045,9 @@ export namespace Prisma {
     userPreferenceRecords?: UserPreferenceRecordUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUpdateManyWithoutAccountNestedInput
     aiExecutionRecords?: AiExecutionRecordUpdateManyWithoutAccountNestedInput
+    aiPermissionSettings?: AiPermissionSettingUpdateManyWithoutAccountNestedInput
+    aiPermissionRules?: AiPermissionRuleUpdateManyWithoutAccountNestedInput
+    aiPermissionAudits?: AiPermissionAuditUpdateManyWithoutAccountNestedInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseUpdateManyWithoutAccountNestedInput
     aiConversationAttention?: AiConversationAttentionUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUpdateManyWithoutAccountNestedInput
@@ -154699,6 +159100,9 @@ export namespace Prisma {
     userPreferenceRecords?: UserPreferenceRecordUncheckedUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUncheckedUpdateManyWithoutAccountNestedInput
     aiExecutionRecords?: AiExecutionRecordUncheckedUpdateManyWithoutAccountNestedInput
+    aiPermissionSettings?: AiPermissionSettingUncheckedUpdateManyWithoutAccountNestedInput
+    aiPermissionRules?: AiPermissionRuleUncheckedUpdateManyWithoutAccountNestedInput
+    aiPermissionAudits?: AiPermissionAuditUncheckedUpdateManyWithoutAccountNestedInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseUncheckedUpdateManyWithoutAccountNestedInput
     aiConversationAttention?: AiConversationAttentionUncheckedUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedUpdateManyWithoutAccountNestedInput
@@ -154777,6 +159181,9 @@ export namespace Prisma {
     notifications?: NotificationCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationCreateNestedManyWithoutAccountInput
     aiExecutionRecords?: AiExecutionRecordCreateNestedManyWithoutAccountInput
+    aiPermissionSettings?: AiPermissionSettingCreateNestedManyWithoutAccountInput
+    aiPermissionRules?: AiPermissionRuleCreateNestedManyWithoutAccountInput
+    aiPermissionAudits?: AiPermissionAuditCreateNestedManyWithoutAccountInput
     aiConversationAttention?: AiConversationAttentionCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryCreateNestedManyWithoutAccountInput
     aiProviderConfigs?: AiProviderConfigCreateNestedManyWithoutAccountInput
@@ -154829,6 +159236,9 @@ export namespace Prisma {
     notifications?: NotificationUncheckedCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationUncheckedCreateNestedManyWithoutAccountInput
     aiExecutionRecords?: AiExecutionRecordUncheckedCreateNestedManyWithoutAccountInput
+    aiPermissionSettings?: AiPermissionSettingUncheckedCreateNestedManyWithoutAccountInput
+    aiPermissionRules?: AiPermissionRuleUncheckedCreateNestedManyWithoutAccountInput
+    aiPermissionAudits?: AiPermissionAuditUncheckedCreateNestedManyWithoutAccountInput
     aiConversationAttention?: AiConversationAttentionUncheckedCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedCreateNestedManyWithoutAccountInput
     aiProviderConfigs?: AiProviderConfigUncheckedCreateNestedManyWithoutAccountInput
@@ -154897,6 +159307,9 @@ export namespace Prisma {
     notifications?: NotificationUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUpdateManyWithoutAccountNestedInput
     aiExecutionRecords?: AiExecutionRecordUpdateManyWithoutAccountNestedInput
+    aiPermissionSettings?: AiPermissionSettingUpdateManyWithoutAccountNestedInput
+    aiPermissionRules?: AiPermissionRuleUpdateManyWithoutAccountNestedInput
+    aiPermissionAudits?: AiPermissionAuditUpdateManyWithoutAccountNestedInput
     aiConversationAttention?: AiConversationAttentionUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUpdateManyWithoutAccountNestedInput
     aiProviderConfigs?: AiProviderConfigUpdateManyWithoutAccountNestedInput
@@ -154949,6 +159362,9 @@ export namespace Prisma {
     notifications?: NotificationUncheckedUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUncheckedUpdateManyWithoutAccountNestedInput
     aiExecutionRecords?: AiExecutionRecordUncheckedUpdateManyWithoutAccountNestedInput
+    aiPermissionSettings?: AiPermissionSettingUncheckedUpdateManyWithoutAccountNestedInput
+    aiPermissionRules?: AiPermissionRuleUncheckedUpdateManyWithoutAccountNestedInput
+    aiPermissionAudits?: AiPermissionAuditUncheckedUpdateManyWithoutAccountNestedInput
     aiConversationAttention?: AiConversationAttentionUncheckedUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedUpdateManyWithoutAccountNestedInput
     aiProviderConfigs?: AiProviderConfigUncheckedUpdateManyWithoutAccountNestedInput
@@ -155001,6 +159417,9 @@ export namespace Prisma {
     notifications?: NotificationCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationCreateNestedManyWithoutAccountInput
     aiExecutionRecords?: AiExecutionRecordCreateNestedManyWithoutAccountInput
+    aiPermissionSettings?: AiPermissionSettingCreateNestedManyWithoutAccountInput
+    aiPermissionRules?: AiPermissionRuleCreateNestedManyWithoutAccountInput
+    aiPermissionAudits?: AiPermissionAuditCreateNestedManyWithoutAccountInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryCreateNestedManyWithoutAccountInput
     aiProviderConfigs?: AiProviderConfigCreateNestedManyWithoutAccountInput
@@ -155053,6 +159472,9 @@ export namespace Prisma {
     notifications?: NotificationUncheckedCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationUncheckedCreateNestedManyWithoutAccountInput
     aiExecutionRecords?: AiExecutionRecordUncheckedCreateNestedManyWithoutAccountInput
+    aiPermissionSettings?: AiPermissionSettingUncheckedCreateNestedManyWithoutAccountInput
+    aiPermissionRules?: AiPermissionRuleUncheckedCreateNestedManyWithoutAccountInput
+    aiPermissionAudits?: AiPermissionAuditUncheckedCreateNestedManyWithoutAccountInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseUncheckedCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedCreateNestedManyWithoutAccountInput
     aiProviderConfigs?: AiProviderConfigUncheckedCreateNestedManyWithoutAccountInput
@@ -155121,6 +159543,9 @@ export namespace Prisma {
     notifications?: NotificationUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUpdateManyWithoutAccountNestedInput
     aiExecutionRecords?: AiExecutionRecordUpdateManyWithoutAccountNestedInput
+    aiPermissionSettings?: AiPermissionSettingUpdateManyWithoutAccountNestedInput
+    aiPermissionRules?: AiPermissionRuleUpdateManyWithoutAccountNestedInput
+    aiPermissionAudits?: AiPermissionAuditUpdateManyWithoutAccountNestedInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUpdateManyWithoutAccountNestedInput
     aiProviderConfigs?: AiProviderConfigUpdateManyWithoutAccountNestedInput
@@ -155173,6 +159598,9 @@ export namespace Prisma {
     notifications?: NotificationUncheckedUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUncheckedUpdateManyWithoutAccountNestedInput
     aiExecutionRecords?: AiExecutionRecordUncheckedUpdateManyWithoutAccountNestedInput
+    aiPermissionSettings?: AiPermissionSettingUncheckedUpdateManyWithoutAccountNestedInput
+    aiPermissionRules?: AiPermissionRuleUncheckedUpdateManyWithoutAccountNestedInput
+    aiPermissionAudits?: AiPermissionAuditUncheckedUpdateManyWithoutAccountNestedInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseUncheckedUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedUpdateManyWithoutAccountNestedInput
     aiProviderConfigs?: AiProviderConfigUncheckedUpdateManyWithoutAccountNestedInput
@@ -155224,6 +159652,9 @@ export namespace Prisma {
     userPreferenceRecords?: UserPreferenceRecordCreateNestedManyWithoutAccountInput
     notifications?: NotificationCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationCreateNestedManyWithoutAccountInput
+    aiPermissionSettings?: AiPermissionSettingCreateNestedManyWithoutAccountInput
+    aiPermissionRules?: AiPermissionRuleCreateNestedManyWithoutAccountInput
+    aiPermissionAudits?: AiPermissionAuditCreateNestedManyWithoutAccountInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseCreateNestedManyWithoutAccountInput
     aiConversationAttention?: AiConversationAttentionCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryCreateNestedManyWithoutAccountInput
@@ -155276,6 +159707,9 @@ export namespace Prisma {
     userPreferenceRecords?: UserPreferenceRecordUncheckedCreateNestedManyWithoutAccountInput
     notifications?: NotificationUncheckedCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationUncheckedCreateNestedManyWithoutAccountInput
+    aiPermissionSettings?: AiPermissionSettingUncheckedCreateNestedManyWithoutAccountInput
+    aiPermissionRules?: AiPermissionRuleUncheckedCreateNestedManyWithoutAccountInput
+    aiPermissionAudits?: AiPermissionAuditUncheckedCreateNestedManyWithoutAccountInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseUncheckedCreateNestedManyWithoutAccountInput
     aiConversationAttention?: AiConversationAttentionUncheckedCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedCreateNestedManyWithoutAccountInput
@@ -155344,6 +159778,9 @@ export namespace Prisma {
     userPreferenceRecords?: UserPreferenceRecordUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUpdateManyWithoutAccountNestedInput
+    aiPermissionSettings?: AiPermissionSettingUpdateManyWithoutAccountNestedInput
+    aiPermissionRules?: AiPermissionRuleUpdateManyWithoutAccountNestedInput
+    aiPermissionAudits?: AiPermissionAuditUpdateManyWithoutAccountNestedInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseUpdateManyWithoutAccountNestedInput
     aiConversationAttention?: AiConversationAttentionUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUpdateManyWithoutAccountNestedInput
@@ -155396,6 +159833,717 @@ export namespace Prisma {
     userPreferenceRecords?: UserPreferenceRecordUncheckedUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUncheckedUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUncheckedUpdateManyWithoutAccountNestedInput
+    aiPermissionSettings?: AiPermissionSettingUncheckedUpdateManyWithoutAccountNestedInput
+    aiPermissionRules?: AiPermissionRuleUncheckedUpdateManyWithoutAccountNestedInput
+    aiPermissionAudits?: AiPermissionAuditUncheckedUpdateManyWithoutAccountNestedInput
+    aiGoalSurfaceLeases?: AiGoalSurfaceLeaseUncheckedUpdateManyWithoutAccountNestedInput
+    aiConversationAttention?: AiConversationAttentionUncheckedUpdateManyWithoutAccountNestedInput
+    aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedUpdateManyWithoutAccountNestedInput
+    aiProviderConfigs?: AiProviderConfigUncheckedUpdateManyWithoutAccountNestedInput
+    aiAgentInstances?: AiAgentInstanceUncheckedUpdateManyWithoutAccountNestedInput
+    aiAgentInstanceBindings?: AiAgentInstanceBindingUncheckedUpdateManyWithoutAccountNestedInput
+    aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedUpdateManyWithoutAccountNestedInput
+    aiProviderSecrets?: AiProviderSecretUncheckedUpdateManyWithoutAccountNestedInput
+    taskPlanHistory?: TaskPlanHistoryUncheckedUpdateManyWithoutIdentityNestedInput
+    routineOccurrences?: RoutineOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
+    routineInteractions?: RoutineInteractionUncheckedUpdateManyWithoutAccountNestedInput
+    notificationInteractions?: NotificationInteractionUncheckedUpdateManyWithoutIdentityNestedInput
+    notificationDispatchOutboxes?: NotificationDispatchOutboxUncheckedUpdateManyWithoutAccountNestedInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingUncheckedUpdateManyWithoutAccountNestedInput
+    knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentUncheckedUpdateManyWithoutAccountNestedInput
+    knowledgeWriteRequests?: KnowledgeWriteRequestUncheckedUpdateManyWithoutAccountNestedInput
+  }
+
+  export type AccountCreateWithoutAiPermissionSettingsInput = {
+    status?: string
+    profile: JsonNullValueInput | InputJsonValue
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    closedAt?: Date | string | null
+    assistedWorkflows?: AiAssistedWorkflowCreateNestedManyWithoutAccountInput
+    cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
+    externalMutationReceipts?: ExternalMutationReceiptCreateNestedManyWithoutAccountInput
+    goals?: GoalCreateNestedManyWithoutAccountInput
+    profileImportOperations?: ProfileImportOperationCreateNestedManyWithoutAccountInput
+    labels?: LabelCreateNestedManyWithoutAccountInput
+    goalLabels?: GoalLabelCreateNestedManyWithoutAccountInput
+    taskLabels?: TaskLabelCreateNestedManyWithoutAccountInput
+    routineDefinitions?: RoutineDefinitionCreateNestedManyWithoutAccountInput
+    routinePreference?: RoutinePreferenceCreateNestedOneWithoutAccountInput
+    routineTemporaryOverrides?: RoutineTemporaryOverrideCreateNestedManyWithoutAccountInput
+    routineProfiles?: RoutineProfileCreateNestedManyWithoutAccountInput
+    routineProfileMemberships?: RoutineProfileMembershipCreateNestedManyWithoutAccountInput
+    routineProtocolDefinitions?: RoutineProtocolDefinitionCreateNestedManyWithoutAccountInput
+    routineProtocolSessions?: RoutineProtocolSessionCreateNestedManyWithoutAccountInput
+    schedules?: ScheduleCreateNestedManyWithoutAccountInput
+    schedulingReconcileOperations?: SchedulingReconcileOperationCreateNestedManyWithoutAccountInput
+    scheduledInvocations?: ScheduledInvocationCreateNestedManyWithoutAccountInput
+    invocationAttempts?: InvocationAttemptCreateNestedManyWithoutAccountInput
+    habits?: HabitCreateNestedManyWithoutAccountInput
+    relations?: RelationCreateNestedManyWithoutAccountInput
+    walletAccounts?: WalletAccountCreateNestedManyWithoutAccountInput
+    walletTransactions?: WalletTransactionCreateNestedManyWithoutAccount_identityInput
+    taskPlans?: TaskPlanCreateNestedManyWithoutAccountInput
+    taskOccurrences?: TaskOccurrenceCreateNestedManyWithoutAccountInput
+    userPreferenceRecords?: UserPreferenceRecordCreateNestedManyWithoutAccountInput
+    notifications?: NotificationCreateNestedManyWithoutAccountInput
+    aiConversations?: AiConversationCreateNestedManyWithoutAccountInput
+    aiExecutionRecords?: AiExecutionRecordCreateNestedManyWithoutAccountInput
+    aiPermissionRules?: AiPermissionRuleCreateNestedManyWithoutAccountInput
+    aiPermissionAudits?: AiPermissionAuditCreateNestedManyWithoutAccountInput
+    aiGoalSurfaceLeases?: AiGoalSurfaceLeaseCreateNestedManyWithoutAccountInput
+    aiConversationAttention?: AiConversationAttentionCreateNestedManyWithoutAccountInput
+    aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryCreateNestedManyWithoutAccountInput
+    aiProviderConfigs?: AiProviderConfigCreateNestedManyWithoutAccountInput
+    aiAgentInstances?: AiAgentInstanceCreateNestedManyWithoutAccountInput
+    aiAgentInstanceBindings?: AiAgentInstanceBindingCreateNestedManyWithoutAccountInput
+    aiProviderOnboardingSessions?: AiProviderOnboardingSessionCreateNestedManyWithoutAccountInput
+    aiProviderSecrets?: AiProviderSecretCreateNestedManyWithoutAccountInput
+    taskPlanHistory?: TaskPlanHistoryCreateNestedManyWithoutIdentityInput
+    routineOccurrences?: RoutineOccurrenceCreateNestedManyWithoutAccountInput
+    routineInteractions?: RoutineInteractionCreateNestedManyWithoutAccountInput
+    notificationInteractions?: NotificationInteractionCreateNestedManyWithoutIdentityInput
+    notificationDispatchOutboxes?: NotificationDispatchOutboxCreateNestedManyWithoutAccountInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingCreateNestedManyWithoutAccountInput
+    knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentCreateNestedManyWithoutAccountInput
+    knowledgeWriteRequests?: KnowledgeWriteRequestCreateNestedManyWithoutAccountInput
+  }
+
+  export type AccountUncheckedCreateWithoutAiPermissionSettingsInput = {
+    id: string
+    status?: string
+    profile: JsonNullValueInput | InputJsonValue
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    closedAt?: Date | string | null
+    assistedWorkflows?: AiAssistedWorkflowUncheckedCreateNestedManyWithoutAccountInput
+    externalMutationReceipts?: ExternalMutationReceiptUncheckedCreateNestedManyWithoutAccountInput
+    goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
+    profileImportOperations?: ProfileImportOperationUncheckedCreateNestedManyWithoutAccountInput
+    labels?: LabelUncheckedCreateNestedManyWithoutAccountInput
+    goalLabels?: GoalLabelUncheckedCreateNestedManyWithoutAccountInput
+    taskLabels?: TaskLabelUncheckedCreateNestedManyWithoutAccountInput
+    routineDefinitions?: RoutineDefinitionUncheckedCreateNestedManyWithoutAccountInput
+    routinePreference?: RoutinePreferenceUncheckedCreateNestedOneWithoutAccountInput
+    routineTemporaryOverrides?: RoutineTemporaryOverrideUncheckedCreateNestedManyWithoutAccountInput
+    routineProfiles?: RoutineProfileUncheckedCreateNestedManyWithoutAccountInput
+    routineProfileMemberships?: RoutineProfileMembershipUncheckedCreateNestedManyWithoutAccountInput
+    routineProtocolDefinitions?: RoutineProtocolDefinitionUncheckedCreateNestedManyWithoutAccountInput
+    routineProtocolSessions?: RoutineProtocolSessionUncheckedCreateNestedManyWithoutAccountInput
+    schedules?: ScheduleUncheckedCreateNestedManyWithoutAccountInput
+    schedulingReconcileOperations?: SchedulingReconcileOperationUncheckedCreateNestedManyWithoutAccountInput
+    scheduledInvocations?: ScheduledInvocationUncheckedCreateNestedManyWithoutAccountInput
+    invocationAttempts?: InvocationAttemptUncheckedCreateNestedManyWithoutAccountInput
+    habits?: HabitUncheckedCreateNestedManyWithoutAccountInput
+    relations?: RelationUncheckedCreateNestedManyWithoutAccountInput
+    walletAccounts?: WalletAccountUncheckedCreateNestedManyWithoutAccountInput
+    walletTransactions?: WalletTransactionUncheckedCreateNestedManyWithoutAccount_identityInput
+    taskPlans?: TaskPlanUncheckedCreateNestedManyWithoutAccountInput
+    taskOccurrences?: TaskOccurrenceUncheckedCreateNestedManyWithoutAccountInput
+    userPreferenceRecords?: UserPreferenceRecordUncheckedCreateNestedManyWithoutAccountInput
+    notifications?: NotificationUncheckedCreateNestedManyWithoutAccountInput
+    aiConversations?: AiConversationUncheckedCreateNestedManyWithoutAccountInput
+    aiExecutionRecords?: AiExecutionRecordUncheckedCreateNestedManyWithoutAccountInput
+    aiPermissionRules?: AiPermissionRuleUncheckedCreateNestedManyWithoutAccountInput
+    aiPermissionAudits?: AiPermissionAuditUncheckedCreateNestedManyWithoutAccountInput
+    aiGoalSurfaceLeases?: AiGoalSurfaceLeaseUncheckedCreateNestedManyWithoutAccountInput
+    aiConversationAttention?: AiConversationAttentionUncheckedCreateNestedManyWithoutAccountInput
+    aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedCreateNestedManyWithoutAccountInput
+    aiProviderConfigs?: AiProviderConfigUncheckedCreateNestedManyWithoutAccountInput
+    aiAgentInstances?: AiAgentInstanceUncheckedCreateNestedManyWithoutAccountInput
+    aiAgentInstanceBindings?: AiAgentInstanceBindingUncheckedCreateNestedManyWithoutAccountInput
+    aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedCreateNestedManyWithoutAccountInput
+    aiProviderSecrets?: AiProviderSecretUncheckedCreateNestedManyWithoutAccountInput
+    taskPlanHistory?: TaskPlanHistoryUncheckedCreateNestedManyWithoutIdentityInput
+    routineOccurrences?: RoutineOccurrenceUncheckedCreateNestedManyWithoutAccountInput
+    routineInteractions?: RoutineInteractionUncheckedCreateNestedManyWithoutAccountInput
+    notificationInteractions?: NotificationInteractionUncheckedCreateNestedManyWithoutIdentityInput
+    notificationDispatchOutboxes?: NotificationDispatchOutboxUncheckedCreateNestedManyWithoutAccountInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingUncheckedCreateNestedManyWithoutAccountInput
+    knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentUncheckedCreateNestedManyWithoutAccountInput
+    knowledgeWriteRequests?: KnowledgeWriteRequestUncheckedCreateNestedManyWithoutAccountInput
+  }
+
+  export type AccountCreateOrConnectWithoutAiPermissionSettingsInput = {
+    where: AccountWhereUniqueInput
+    create: XOR<AccountCreateWithoutAiPermissionSettingsInput, AccountUncheckedCreateWithoutAiPermissionSettingsInput>
+  }
+
+  export type AccountUpsertWithoutAiPermissionSettingsInput = {
+    update: XOR<AccountUpdateWithoutAiPermissionSettingsInput, AccountUncheckedUpdateWithoutAiPermissionSettingsInput>
+    create: XOR<AccountCreateWithoutAiPermissionSettingsInput, AccountUncheckedCreateWithoutAiPermissionSettingsInput>
+    where?: AccountWhereInput
+  }
+
+  export type AccountUpdateToOneWithWhereWithoutAiPermissionSettingsInput = {
+    where?: AccountWhereInput
+    data: XOR<AccountUpdateWithoutAiPermissionSettingsInput, AccountUncheckedUpdateWithoutAiPermissionSettingsInput>
+  }
+
+  export type AccountUpdateWithoutAiPermissionSettingsInput = {
+    status?: StringFieldUpdateOperationsInput | string
+    profile?: JsonNullValueInput | InputJsonValue
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    assistedWorkflows?: AiAssistedWorkflowUpdateManyWithoutAccountNestedInput
+    cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
+    externalMutationReceipts?: ExternalMutationReceiptUpdateManyWithoutAccountNestedInput
+    goals?: GoalUpdateManyWithoutAccountNestedInput
+    profileImportOperations?: ProfileImportOperationUpdateManyWithoutAccountNestedInput
+    labels?: LabelUpdateManyWithoutAccountNestedInput
+    goalLabels?: GoalLabelUpdateManyWithoutAccountNestedInput
+    taskLabels?: TaskLabelUpdateManyWithoutAccountNestedInput
+    routineDefinitions?: RoutineDefinitionUpdateManyWithoutAccountNestedInput
+    routinePreference?: RoutinePreferenceUpdateOneWithoutAccountNestedInput
+    routineTemporaryOverrides?: RoutineTemporaryOverrideUpdateManyWithoutAccountNestedInput
+    routineProfiles?: RoutineProfileUpdateManyWithoutAccountNestedInput
+    routineProfileMemberships?: RoutineProfileMembershipUpdateManyWithoutAccountNestedInput
+    routineProtocolDefinitions?: RoutineProtocolDefinitionUpdateManyWithoutAccountNestedInput
+    routineProtocolSessions?: RoutineProtocolSessionUpdateManyWithoutAccountNestedInput
+    schedules?: ScheduleUpdateManyWithoutAccountNestedInput
+    schedulingReconcileOperations?: SchedulingReconcileOperationUpdateManyWithoutAccountNestedInput
+    scheduledInvocations?: ScheduledInvocationUpdateManyWithoutAccountNestedInput
+    invocationAttempts?: InvocationAttemptUpdateManyWithoutAccountNestedInput
+    habits?: HabitUpdateManyWithoutAccountNestedInput
+    relations?: RelationUpdateManyWithoutAccountNestedInput
+    walletAccounts?: WalletAccountUpdateManyWithoutAccountNestedInput
+    walletTransactions?: WalletTransactionUpdateManyWithoutAccount_identityNestedInput
+    taskPlans?: TaskPlanUpdateManyWithoutAccountNestedInput
+    taskOccurrences?: TaskOccurrenceUpdateManyWithoutAccountNestedInput
+    userPreferenceRecords?: UserPreferenceRecordUpdateManyWithoutAccountNestedInput
+    notifications?: NotificationUpdateManyWithoutAccountNestedInput
+    aiConversations?: AiConversationUpdateManyWithoutAccountNestedInput
+    aiExecutionRecords?: AiExecutionRecordUpdateManyWithoutAccountNestedInput
+    aiPermissionRules?: AiPermissionRuleUpdateManyWithoutAccountNestedInput
+    aiPermissionAudits?: AiPermissionAuditUpdateManyWithoutAccountNestedInput
+    aiGoalSurfaceLeases?: AiGoalSurfaceLeaseUpdateManyWithoutAccountNestedInput
+    aiConversationAttention?: AiConversationAttentionUpdateManyWithoutAccountNestedInput
+    aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUpdateManyWithoutAccountNestedInput
+    aiProviderConfigs?: AiProviderConfigUpdateManyWithoutAccountNestedInput
+    aiAgentInstances?: AiAgentInstanceUpdateManyWithoutAccountNestedInput
+    aiAgentInstanceBindings?: AiAgentInstanceBindingUpdateManyWithoutAccountNestedInput
+    aiProviderOnboardingSessions?: AiProviderOnboardingSessionUpdateManyWithoutAccountNestedInput
+    aiProviderSecrets?: AiProviderSecretUpdateManyWithoutAccountNestedInput
+    taskPlanHistory?: TaskPlanHistoryUpdateManyWithoutIdentityNestedInput
+    routineOccurrences?: RoutineOccurrenceUpdateManyWithoutAccountNestedInput
+    routineInteractions?: RoutineInteractionUpdateManyWithoutAccountNestedInput
+    notificationInteractions?: NotificationInteractionUpdateManyWithoutIdentityNestedInput
+    notificationDispatchOutboxes?: NotificationDispatchOutboxUpdateManyWithoutAccountNestedInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingUpdateManyWithoutAccountNestedInput
+    knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentUpdateManyWithoutAccountNestedInput
+    knowledgeWriteRequests?: KnowledgeWriteRequestUpdateManyWithoutAccountNestedInput
+  }
+
+  export type AccountUncheckedUpdateWithoutAiPermissionSettingsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    status?: StringFieldUpdateOperationsInput | string
+    profile?: JsonNullValueInput | InputJsonValue
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    assistedWorkflows?: AiAssistedWorkflowUncheckedUpdateManyWithoutAccountNestedInput
+    externalMutationReceipts?: ExternalMutationReceiptUncheckedUpdateManyWithoutAccountNestedInput
+    goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
+    profileImportOperations?: ProfileImportOperationUncheckedUpdateManyWithoutAccountNestedInput
+    labels?: LabelUncheckedUpdateManyWithoutAccountNestedInput
+    goalLabels?: GoalLabelUncheckedUpdateManyWithoutAccountNestedInput
+    taskLabels?: TaskLabelUncheckedUpdateManyWithoutAccountNestedInput
+    routineDefinitions?: RoutineDefinitionUncheckedUpdateManyWithoutAccountNestedInput
+    routinePreference?: RoutinePreferenceUncheckedUpdateOneWithoutAccountNestedInput
+    routineTemporaryOverrides?: RoutineTemporaryOverrideUncheckedUpdateManyWithoutAccountNestedInput
+    routineProfiles?: RoutineProfileUncheckedUpdateManyWithoutAccountNestedInput
+    routineProfileMemberships?: RoutineProfileMembershipUncheckedUpdateManyWithoutAccountNestedInput
+    routineProtocolDefinitions?: RoutineProtocolDefinitionUncheckedUpdateManyWithoutAccountNestedInput
+    routineProtocolSessions?: RoutineProtocolSessionUncheckedUpdateManyWithoutAccountNestedInput
+    schedules?: ScheduleUncheckedUpdateManyWithoutAccountNestedInput
+    schedulingReconcileOperations?: SchedulingReconcileOperationUncheckedUpdateManyWithoutAccountNestedInput
+    scheduledInvocations?: ScheduledInvocationUncheckedUpdateManyWithoutAccountNestedInput
+    invocationAttempts?: InvocationAttemptUncheckedUpdateManyWithoutAccountNestedInput
+    habits?: HabitUncheckedUpdateManyWithoutAccountNestedInput
+    relations?: RelationUncheckedUpdateManyWithoutAccountNestedInput
+    walletAccounts?: WalletAccountUncheckedUpdateManyWithoutAccountNestedInput
+    walletTransactions?: WalletTransactionUncheckedUpdateManyWithoutAccount_identityNestedInput
+    taskPlans?: TaskPlanUncheckedUpdateManyWithoutAccountNestedInput
+    taskOccurrences?: TaskOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
+    userPreferenceRecords?: UserPreferenceRecordUncheckedUpdateManyWithoutAccountNestedInput
+    notifications?: NotificationUncheckedUpdateManyWithoutAccountNestedInput
+    aiConversations?: AiConversationUncheckedUpdateManyWithoutAccountNestedInput
+    aiExecutionRecords?: AiExecutionRecordUncheckedUpdateManyWithoutAccountNestedInput
+    aiPermissionRules?: AiPermissionRuleUncheckedUpdateManyWithoutAccountNestedInput
+    aiPermissionAudits?: AiPermissionAuditUncheckedUpdateManyWithoutAccountNestedInput
+    aiGoalSurfaceLeases?: AiGoalSurfaceLeaseUncheckedUpdateManyWithoutAccountNestedInput
+    aiConversationAttention?: AiConversationAttentionUncheckedUpdateManyWithoutAccountNestedInput
+    aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedUpdateManyWithoutAccountNestedInput
+    aiProviderConfigs?: AiProviderConfigUncheckedUpdateManyWithoutAccountNestedInput
+    aiAgentInstances?: AiAgentInstanceUncheckedUpdateManyWithoutAccountNestedInput
+    aiAgentInstanceBindings?: AiAgentInstanceBindingUncheckedUpdateManyWithoutAccountNestedInput
+    aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedUpdateManyWithoutAccountNestedInput
+    aiProviderSecrets?: AiProviderSecretUncheckedUpdateManyWithoutAccountNestedInput
+    taskPlanHistory?: TaskPlanHistoryUncheckedUpdateManyWithoutIdentityNestedInput
+    routineOccurrences?: RoutineOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
+    routineInteractions?: RoutineInteractionUncheckedUpdateManyWithoutAccountNestedInput
+    notificationInteractions?: NotificationInteractionUncheckedUpdateManyWithoutIdentityNestedInput
+    notificationDispatchOutboxes?: NotificationDispatchOutboxUncheckedUpdateManyWithoutAccountNestedInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingUncheckedUpdateManyWithoutAccountNestedInput
+    knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentUncheckedUpdateManyWithoutAccountNestedInput
+    knowledgeWriteRequests?: KnowledgeWriteRequestUncheckedUpdateManyWithoutAccountNestedInput
+  }
+
+  export type AccountCreateWithoutAiPermissionRulesInput = {
+    status?: string
+    profile: JsonNullValueInput | InputJsonValue
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    closedAt?: Date | string | null
+    assistedWorkflows?: AiAssistedWorkflowCreateNestedManyWithoutAccountInput
+    cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
+    externalMutationReceipts?: ExternalMutationReceiptCreateNestedManyWithoutAccountInput
+    goals?: GoalCreateNestedManyWithoutAccountInput
+    profileImportOperations?: ProfileImportOperationCreateNestedManyWithoutAccountInput
+    labels?: LabelCreateNestedManyWithoutAccountInput
+    goalLabels?: GoalLabelCreateNestedManyWithoutAccountInput
+    taskLabels?: TaskLabelCreateNestedManyWithoutAccountInput
+    routineDefinitions?: RoutineDefinitionCreateNestedManyWithoutAccountInput
+    routinePreference?: RoutinePreferenceCreateNestedOneWithoutAccountInput
+    routineTemporaryOverrides?: RoutineTemporaryOverrideCreateNestedManyWithoutAccountInput
+    routineProfiles?: RoutineProfileCreateNestedManyWithoutAccountInput
+    routineProfileMemberships?: RoutineProfileMembershipCreateNestedManyWithoutAccountInput
+    routineProtocolDefinitions?: RoutineProtocolDefinitionCreateNestedManyWithoutAccountInput
+    routineProtocolSessions?: RoutineProtocolSessionCreateNestedManyWithoutAccountInput
+    schedules?: ScheduleCreateNestedManyWithoutAccountInput
+    schedulingReconcileOperations?: SchedulingReconcileOperationCreateNestedManyWithoutAccountInput
+    scheduledInvocations?: ScheduledInvocationCreateNestedManyWithoutAccountInput
+    invocationAttempts?: InvocationAttemptCreateNestedManyWithoutAccountInput
+    habits?: HabitCreateNestedManyWithoutAccountInput
+    relations?: RelationCreateNestedManyWithoutAccountInput
+    walletAccounts?: WalletAccountCreateNestedManyWithoutAccountInput
+    walletTransactions?: WalletTransactionCreateNestedManyWithoutAccount_identityInput
+    taskPlans?: TaskPlanCreateNestedManyWithoutAccountInput
+    taskOccurrences?: TaskOccurrenceCreateNestedManyWithoutAccountInput
+    userPreferenceRecords?: UserPreferenceRecordCreateNestedManyWithoutAccountInput
+    notifications?: NotificationCreateNestedManyWithoutAccountInput
+    aiConversations?: AiConversationCreateNestedManyWithoutAccountInput
+    aiExecutionRecords?: AiExecutionRecordCreateNestedManyWithoutAccountInput
+    aiPermissionSettings?: AiPermissionSettingCreateNestedManyWithoutAccountInput
+    aiPermissionAudits?: AiPermissionAuditCreateNestedManyWithoutAccountInput
+    aiGoalSurfaceLeases?: AiGoalSurfaceLeaseCreateNestedManyWithoutAccountInput
+    aiConversationAttention?: AiConversationAttentionCreateNestedManyWithoutAccountInput
+    aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryCreateNestedManyWithoutAccountInput
+    aiProviderConfigs?: AiProviderConfigCreateNestedManyWithoutAccountInput
+    aiAgentInstances?: AiAgentInstanceCreateNestedManyWithoutAccountInput
+    aiAgentInstanceBindings?: AiAgentInstanceBindingCreateNestedManyWithoutAccountInput
+    aiProviderOnboardingSessions?: AiProviderOnboardingSessionCreateNestedManyWithoutAccountInput
+    aiProviderSecrets?: AiProviderSecretCreateNestedManyWithoutAccountInput
+    taskPlanHistory?: TaskPlanHistoryCreateNestedManyWithoutIdentityInput
+    routineOccurrences?: RoutineOccurrenceCreateNestedManyWithoutAccountInput
+    routineInteractions?: RoutineInteractionCreateNestedManyWithoutAccountInput
+    notificationInteractions?: NotificationInteractionCreateNestedManyWithoutIdentityInput
+    notificationDispatchOutboxes?: NotificationDispatchOutboxCreateNestedManyWithoutAccountInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingCreateNestedManyWithoutAccountInput
+    knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentCreateNestedManyWithoutAccountInput
+    knowledgeWriteRequests?: KnowledgeWriteRequestCreateNestedManyWithoutAccountInput
+  }
+
+  export type AccountUncheckedCreateWithoutAiPermissionRulesInput = {
+    id: string
+    status?: string
+    profile: JsonNullValueInput | InputJsonValue
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    closedAt?: Date | string | null
+    assistedWorkflows?: AiAssistedWorkflowUncheckedCreateNestedManyWithoutAccountInput
+    externalMutationReceipts?: ExternalMutationReceiptUncheckedCreateNestedManyWithoutAccountInput
+    goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
+    profileImportOperations?: ProfileImportOperationUncheckedCreateNestedManyWithoutAccountInput
+    labels?: LabelUncheckedCreateNestedManyWithoutAccountInput
+    goalLabels?: GoalLabelUncheckedCreateNestedManyWithoutAccountInput
+    taskLabels?: TaskLabelUncheckedCreateNestedManyWithoutAccountInput
+    routineDefinitions?: RoutineDefinitionUncheckedCreateNestedManyWithoutAccountInput
+    routinePreference?: RoutinePreferenceUncheckedCreateNestedOneWithoutAccountInput
+    routineTemporaryOverrides?: RoutineTemporaryOverrideUncheckedCreateNestedManyWithoutAccountInput
+    routineProfiles?: RoutineProfileUncheckedCreateNestedManyWithoutAccountInput
+    routineProfileMemberships?: RoutineProfileMembershipUncheckedCreateNestedManyWithoutAccountInput
+    routineProtocolDefinitions?: RoutineProtocolDefinitionUncheckedCreateNestedManyWithoutAccountInput
+    routineProtocolSessions?: RoutineProtocolSessionUncheckedCreateNestedManyWithoutAccountInput
+    schedules?: ScheduleUncheckedCreateNestedManyWithoutAccountInput
+    schedulingReconcileOperations?: SchedulingReconcileOperationUncheckedCreateNestedManyWithoutAccountInput
+    scheduledInvocations?: ScheduledInvocationUncheckedCreateNestedManyWithoutAccountInput
+    invocationAttempts?: InvocationAttemptUncheckedCreateNestedManyWithoutAccountInput
+    habits?: HabitUncheckedCreateNestedManyWithoutAccountInput
+    relations?: RelationUncheckedCreateNestedManyWithoutAccountInput
+    walletAccounts?: WalletAccountUncheckedCreateNestedManyWithoutAccountInput
+    walletTransactions?: WalletTransactionUncheckedCreateNestedManyWithoutAccount_identityInput
+    taskPlans?: TaskPlanUncheckedCreateNestedManyWithoutAccountInput
+    taskOccurrences?: TaskOccurrenceUncheckedCreateNestedManyWithoutAccountInput
+    userPreferenceRecords?: UserPreferenceRecordUncheckedCreateNestedManyWithoutAccountInput
+    notifications?: NotificationUncheckedCreateNestedManyWithoutAccountInput
+    aiConversations?: AiConversationUncheckedCreateNestedManyWithoutAccountInput
+    aiExecutionRecords?: AiExecutionRecordUncheckedCreateNestedManyWithoutAccountInput
+    aiPermissionSettings?: AiPermissionSettingUncheckedCreateNestedManyWithoutAccountInput
+    aiPermissionAudits?: AiPermissionAuditUncheckedCreateNestedManyWithoutAccountInput
+    aiGoalSurfaceLeases?: AiGoalSurfaceLeaseUncheckedCreateNestedManyWithoutAccountInput
+    aiConversationAttention?: AiConversationAttentionUncheckedCreateNestedManyWithoutAccountInput
+    aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedCreateNestedManyWithoutAccountInput
+    aiProviderConfigs?: AiProviderConfigUncheckedCreateNestedManyWithoutAccountInput
+    aiAgentInstances?: AiAgentInstanceUncheckedCreateNestedManyWithoutAccountInput
+    aiAgentInstanceBindings?: AiAgentInstanceBindingUncheckedCreateNestedManyWithoutAccountInput
+    aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedCreateNestedManyWithoutAccountInput
+    aiProviderSecrets?: AiProviderSecretUncheckedCreateNestedManyWithoutAccountInput
+    taskPlanHistory?: TaskPlanHistoryUncheckedCreateNestedManyWithoutIdentityInput
+    routineOccurrences?: RoutineOccurrenceUncheckedCreateNestedManyWithoutAccountInput
+    routineInteractions?: RoutineInteractionUncheckedCreateNestedManyWithoutAccountInput
+    notificationInteractions?: NotificationInteractionUncheckedCreateNestedManyWithoutIdentityInput
+    notificationDispatchOutboxes?: NotificationDispatchOutboxUncheckedCreateNestedManyWithoutAccountInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingUncheckedCreateNestedManyWithoutAccountInput
+    knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentUncheckedCreateNestedManyWithoutAccountInput
+    knowledgeWriteRequests?: KnowledgeWriteRequestUncheckedCreateNestedManyWithoutAccountInput
+  }
+
+  export type AccountCreateOrConnectWithoutAiPermissionRulesInput = {
+    where: AccountWhereUniqueInput
+    create: XOR<AccountCreateWithoutAiPermissionRulesInput, AccountUncheckedCreateWithoutAiPermissionRulesInput>
+  }
+
+  export type AccountUpsertWithoutAiPermissionRulesInput = {
+    update: XOR<AccountUpdateWithoutAiPermissionRulesInput, AccountUncheckedUpdateWithoutAiPermissionRulesInput>
+    create: XOR<AccountCreateWithoutAiPermissionRulesInput, AccountUncheckedCreateWithoutAiPermissionRulesInput>
+    where?: AccountWhereInput
+  }
+
+  export type AccountUpdateToOneWithWhereWithoutAiPermissionRulesInput = {
+    where?: AccountWhereInput
+    data: XOR<AccountUpdateWithoutAiPermissionRulesInput, AccountUncheckedUpdateWithoutAiPermissionRulesInput>
+  }
+
+  export type AccountUpdateWithoutAiPermissionRulesInput = {
+    status?: StringFieldUpdateOperationsInput | string
+    profile?: JsonNullValueInput | InputJsonValue
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    assistedWorkflows?: AiAssistedWorkflowUpdateManyWithoutAccountNestedInput
+    cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
+    externalMutationReceipts?: ExternalMutationReceiptUpdateManyWithoutAccountNestedInput
+    goals?: GoalUpdateManyWithoutAccountNestedInput
+    profileImportOperations?: ProfileImportOperationUpdateManyWithoutAccountNestedInput
+    labels?: LabelUpdateManyWithoutAccountNestedInput
+    goalLabels?: GoalLabelUpdateManyWithoutAccountNestedInput
+    taskLabels?: TaskLabelUpdateManyWithoutAccountNestedInput
+    routineDefinitions?: RoutineDefinitionUpdateManyWithoutAccountNestedInput
+    routinePreference?: RoutinePreferenceUpdateOneWithoutAccountNestedInput
+    routineTemporaryOverrides?: RoutineTemporaryOverrideUpdateManyWithoutAccountNestedInput
+    routineProfiles?: RoutineProfileUpdateManyWithoutAccountNestedInput
+    routineProfileMemberships?: RoutineProfileMembershipUpdateManyWithoutAccountNestedInput
+    routineProtocolDefinitions?: RoutineProtocolDefinitionUpdateManyWithoutAccountNestedInput
+    routineProtocolSessions?: RoutineProtocolSessionUpdateManyWithoutAccountNestedInput
+    schedules?: ScheduleUpdateManyWithoutAccountNestedInput
+    schedulingReconcileOperations?: SchedulingReconcileOperationUpdateManyWithoutAccountNestedInput
+    scheduledInvocations?: ScheduledInvocationUpdateManyWithoutAccountNestedInput
+    invocationAttempts?: InvocationAttemptUpdateManyWithoutAccountNestedInput
+    habits?: HabitUpdateManyWithoutAccountNestedInput
+    relations?: RelationUpdateManyWithoutAccountNestedInput
+    walletAccounts?: WalletAccountUpdateManyWithoutAccountNestedInput
+    walletTransactions?: WalletTransactionUpdateManyWithoutAccount_identityNestedInput
+    taskPlans?: TaskPlanUpdateManyWithoutAccountNestedInput
+    taskOccurrences?: TaskOccurrenceUpdateManyWithoutAccountNestedInput
+    userPreferenceRecords?: UserPreferenceRecordUpdateManyWithoutAccountNestedInput
+    notifications?: NotificationUpdateManyWithoutAccountNestedInput
+    aiConversations?: AiConversationUpdateManyWithoutAccountNestedInput
+    aiExecutionRecords?: AiExecutionRecordUpdateManyWithoutAccountNestedInput
+    aiPermissionSettings?: AiPermissionSettingUpdateManyWithoutAccountNestedInput
+    aiPermissionAudits?: AiPermissionAuditUpdateManyWithoutAccountNestedInput
+    aiGoalSurfaceLeases?: AiGoalSurfaceLeaseUpdateManyWithoutAccountNestedInput
+    aiConversationAttention?: AiConversationAttentionUpdateManyWithoutAccountNestedInput
+    aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUpdateManyWithoutAccountNestedInput
+    aiProviderConfigs?: AiProviderConfigUpdateManyWithoutAccountNestedInput
+    aiAgentInstances?: AiAgentInstanceUpdateManyWithoutAccountNestedInput
+    aiAgentInstanceBindings?: AiAgentInstanceBindingUpdateManyWithoutAccountNestedInput
+    aiProviderOnboardingSessions?: AiProviderOnboardingSessionUpdateManyWithoutAccountNestedInput
+    aiProviderSecrets?: AiProviderSecretUpdateManyWithoutAccountNestedInput
+    taskPlanHistory?: TaskPlanHistoryUpdateManyWithoutIdentityNestedInput
+    routineOccurrences?: RoutineOccurrenceUpdateManyWithoutAccountNestedInput
+    routineInteractions?: RoutineInteractionUpdateManyWithoutAccountNestedInput
+    notificationInteractions?: NotificationInteractionUpdateManyWithoutIdentityNestedInput
+    notificationDispatchOutboxes?: NotificationDispatchOutboxUpdateManyWithoutAccountNestedInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingUpdateManyWithoutAccountNestedInput
+    knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentUpdateManyWithoutAccountNestedInput
+    knowledgeWriteRequests?: KnowledgeWriteRequestUpdateManyWithoutAccountNestedInput
+  }
+
+  export type AccountUncheckedUpdateWithoutAiPermissionRulesInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    status?: StringFieldUpdateOperationsInput | string
+    profile?: JsonNullValueInput | InputJsonValue
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    assistedWorkflows?: AiAssistedWorkflowUncheckedUpdateManyWithoutAccountNestedInput
+    externalMutationReceipts?: ExternalMutationReceiptUncheckedUpdateManyWithoutAccountNestedInput
+    goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
+    profileImportOperations?: ProfileImportOperationUncheckedUpdateManyWithoutAccountNestedInput
+    labels?: LabelUncheckedUpdateManyWithoutAccountNestedInput
+    goalLabels?: GoalLabelUncheckedUpdateManyWithoutAccountNestedInput
+    taskLabels?: TaskLabelUncheckedUpdateManyWithoutAccountNestedInput
+    routineDefinitions?: RoutineDefinitionUncheckedUpdateManyWithoutAccountNestedInput
+    routinePreference?: RoutinePreferenceUncheckedUpdateOneWithoutAccountNestedInput
+    routineTemporaryOverrides?: RoutineTemporaryOverrideUncheckedUpdateManyWithoutAccountNestedInput
+    routineProfiles?: RoutineProfileUncheckedUpdateManyWithoutAccountNestedInput
+    routineProfileMemberships?: RoutineProfileMembershipUncheckedUpdateManyWithoutAccountNestedInput
+    routineProtocolDefinitions?: RoutineProtocolDefinitionUncheckedUpdateManyWithoutAccountNestedInput
+    routineProtocolSessions?: RoutineProtocolSessionUncheckedUpdateManyWithoutAccountNestedInput
+    schedules?: ScheduleUncheckedUpdateManyWithoutAccountNestedInput
+    schedulingReconcileOperations?: SchedulingReconcileOperationUncheckedUpdateManyWithoutAccountNestedInput
+    scheduledInvocations?: ScheduledInvocationUncheckedUpdateManyWithoutAccountNestedInput
+    invocationAttempts?: InvocationAttemptUncheckedUpdateManyWithoutAccountNestedInput
+    habits?: HabitUncheckedUpdateManyWithoutAccountNestedInput
+    relations?: RelationUncheckedUpdateManyWithoutAccountNestedInput
+    walletAccounts?: WalletAccountUncheckedUpdateManyWithoutAccountNestedInput
+    walletTransactions?: WalletTransactionUncheckedUpdateManyWithoutAccount_identityNestedInput
+    taskPlans?: TaskPlanUncheckedUpdateManyWithoutAccountNestedInput
+    taskOccurrences?: TaskOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
+    userPreferenceRecords?: UserPreferenceRecordUncheckedUpdateManyWithoutAccountNestedInput
+    notifications?: NotificationUncheckedUpdateManyWithoutAccountNestedInput
+    aiConversations?: AiConversationUncheckedUpdateManyWithoutAccountNestedInput
+    aiExecutionRecords?: AiExecutionRecordUncheckedUpdateManyWithoutAccountNestedInput
+    aiPermissionSettings?: AiPermissionSettingUncheckedUpdateManyWithoutAccountNestedInput
+    aiPermissionAudits?: AiPermissionAuditUncheckedUpdateManyWithoutAccountNestedInput
+    aiGoalSurfaceLeases?: AiGoalSurfaceLeaseUncheckedUpdateManyWithoutAccountNestedInput
+    aiConversationAttention?: AiConversationAttentionUncheckedUpdateManyWithoutAccountNestedInput
+    aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedUpdateManyWithoutAccountNestedInput
+    aiProviderConfigs?: AiProviderConfigUncheckedUpdateManyWithoutAccountNestedInput
+    aiAgentInstances?: AiAgentInstanceUncheckedUpdateManyWithoutAccountNestedInput
+    aiAgentInstanceBindings?: AiAgentInstanceBindingUncheckedUpdateManyWithoutAccountNestedInput
+    aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedUpdateManyWithoutAccountNestedInput
+    aiProviderSecrets?: AiProviderSecretUncheckedUpdateManyWithoutAccountNestedInput
+    taskPlanHistory?: TaskPlanHistoryUncheckedUpdateManyWithoutIdentityNestedInput
+    routineOccurrences?: RoutineOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
+    routineInteractions?: RoutineInteractionUncheckedUpdateManyWithoutAccountNestedInput
+    notificationInteractions?: NotificationInteractionUncheckedUpdateManyWithoutIdentityNestedInput
+    notificationDispatchOutboxes?: NotificationDispatchOutboxUncheckedUpdateManyWithoutAccountNestedInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingUncheckedUpdateManyWithoutAccountNestedInput
+    knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentUncheckedUpdateManyWithoutAccountNestedInput
+    knowledgeWriteRequests?: KnowledgeWriteRequestUncheckedUpdateManyWithoutAccountNestedInput
+  }
+
+  export type AccountCreateWithoutAiPermissionAuditsInput = {
+    status?: string
+    profile: JsonNullValueInput | InputJsonValue
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    closedAt?: Date | string | null
+    assistedWorkflows?: AiAssistedWorkflowCreateNestedManyWithoutAccountInput
+    cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
+    externalMutationReceipts?: ExternalMutationReceiptCreateNestedManyWithoutAccountInput
+    goals?: GoalCreateNestedManyWithoutAccountInput
+    profileImportOperations?: ProfileImportOperationCreateNestedManyWithoutAccountInput
+    labels?: LabelCreateNestedManyWithoutAccountInput
+    goalLabels?: GoalLabelCreateNestedManyWithoutAccountInput
+    taskLabels?: TaskLabelCreateNestedManyWithoutAccountInput
+    routineDefinitions?: RoutineDefinitionCreateNestedManyWithoutAccountInput
+    routinePreference?: RoutinePreferenceCreateNestedOneWithoutAccountInput
+    routineTemporaryOverrides?: RoutineTemporaryOverrideCreateNestedManyWithoutAccountInput
+    routineProfiles?: RoutineProfileCreateNestedManyWithoutAccountInput
+    routineProfileMemberships?: RoutineProfileMembershipCreateNestedManyWithoutAccountInput
+    routineProtocolDefinitions?: RoutineProtocolDefinitionCreateNestedManyWithoutAccountInput
+    routineProtocolSessions?: RoutineProtocolSessionCreateNestedManyWithoutAccountInput
+    schedules?: ScheduleCreateNestedManyWithoutAccountInput
+    schedulingReconcileOperations?: SchedulingReconcileOperationCreateNestedManyWithoutAccountInput
+    scheduledInvocations?: ScheduledInvocationCreateNestedManyWithoutAccountInput
+    invocationAttempts?: InvocationAttemptCreateNestedManyWithoutAccountInput
+    habits?: HabitCreateNestedManyWithoutAccountInput
+    relations?: RelationCreateNestedManyWithoutAccountInput
+    walletAccounts?: WalletAccountCreateNestedManyWithoutAccountInput
+    walletTransactions?: WalletTransactionCreateNestedManyWithoutAccount_identityInput
+    taskPlans?: TaskPlanCreateNestedManyWithoutAccountInput
+    taskOccurrences?: TaskOccurrenceCreateNestedManyWithoutAccountInput
+    userPreferenceRecords?: UserPreferenceRecordCreateNestedManyWithoutAccountInput
+    notifications?: NotificationCreateNestedManyWithoutAccountInput
+    aiConversations?: AiConversationCreateNestedManyWithoutAccountInput
+    aiExecutionRecords?: AiExecutionRecordCreateNestedManyWithoutAccountInput
+    aiPermissionSettings?: AiPermissionSettingCreateNestedManyWithoutAccountInput
+    aiPermissionRules?: AiPermissionRuleCreateNestedManyWithoutAccountInput
+    aiGoalSurfaceLeases?: AiGoalSurfaceLeaseCreateNestedManyWithoutAccountInput
+    aiConversationAttention?: AiConversationAttentionCreateNestedManyWithoutAccountInput
+    aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryCreateNestedManyWithoutAccountInput
+    aiProviderConfigs?: AiProviderConfigCreateNestedManyWithoutAccountInput
+    aiAgentInstances?: AiAgentInstanceCreateNestedManyWithoutAccountInput
+    aiAgentInstanceBindings?: AiAgentInstanceBindingCreateNestedManyWithoutAccountInput
+    aiProviderOnboardingSessions?: AiProviderOnboardingSessionCreateNestedManyWithoutAccountInput
+    aiProviderSecrets?: AiProviderSecretCreateNestedManyWithoutAccountInput
+    taskPlanHistory?: TaskPlanHistoryCreateNestedManyWithoutIdentityInput
+    routineOccurrences?: RoutineOccurrenceCreateNestedManyWithoutAccountInput
+    routineInteractions?: RoutineInteractionCreateNestedManyWithoutAccountInput
+    notificationInteractions?: NotificationInteractionCreateNestedManyWithoutIdentityInput
+    notificationDispatchOutboxes?: NotificationDispatchOutboxCreateNestedManyWithoutAccountInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingCreateNestedManyWithoutAccountInput
+    knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentCreateNestedManyWithoutAccountInput
+    knowledgeWriteRequests?: KnowledgeWriteRequestCreateNestedManyWithoutAccountInput
+  }
+
+  export type AccountUncheckedCreateWithoutAiPermissionAuditsInput = {
+    id: string
+    status?: string
+    profile: JsonNullValueInput | InputJsonValue
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    closedAt?: Date | string | null
+    assistedWorkflows?: AiAssistedWorkflowUncheckedCreateNestedManyWithoutAccountInput
+    externalMutationReceipts?: ExternalMutationReceiptUncheckedCreateNestedManyWithoutAccountInput
+    goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
+    profileImportOperations?: ProfileImportOperationUncheckedCreateNestedManyWithoutAccountInput
+    labels?: LabelUncheckedCreateNestedManyWithoutAccountInput
+    goalLabels?: GoalLabelUncheckedCreateNestedManyWithoutAccountInput
+    taskLabels?: TaskLabelUncheckedCreateNestedManyWithoutAccountInput
+    routineDefinitions?: RoutineDefinitionUncheckedCreateNestedManyWithoutAccountInput
+    routinePreference?: RoutinePreferenceUncheckedCreateNestedOneWithoutAccountInput
+    routineTemporaryOverrides?: RoutineTemporaryOverrideUncheckedCreateNestedManyWithoutAccountInput
+    routineProfiles?: RoutineProfileUncheckedCreateNestedManyWithoutAccountInput
+    routineProfileMemberships?: RoutineProfileMembershipUncheckedCreateNestedManyWithoutAccountInput
+    routineProtocolDefinitions?: RoutineProtocolDefinitionUncheckedCreateNestedManyWithoutAccountInput
+    routineProtocolSessions?: RoutineProtocolSessionUncheckedCreateNestedManyWithoutAccountInput
+    schedules?: ScheduleUncheckedCreateNestedManyWithoutAccountInput
+    schedulingReconcileOperations?: SchedulingReconcileOperationUncheckedCreateNestedManyWithoutAccountInput
+    scheduledInvocations?: ScheduledInvocationUncheckedCreateNestedManyWithoutAccountInput
+    invocationAttempts?: InvocationAttemptUncheckedCreateNestedManyWithoutAccountInput
+    habits?: HabitUncheckedCreateNestedManyWithoutAccountInput
+    relations?: RelationUncheckedCreateNestedManyWithoutAccountInput
+    walletAccounts?: WalletAccountUncheckedCreateNestedManyWithoutAccountInput
+    walletTransactions?: WalletTransactionUncheckedCreateNestedManyWithoutAccount_identityInput
+    taskPlans?: TaskPlanUncheckedCreateNestedManyWithoutAccountInput
+    taskOccurrences?: TaskOccurrenceUncheckedCreateNestedManyWithoutAccountInput
+    userPreferenceRecords?: UserPreferenceRecordUncheckedCreateNestedManyWithoutAccountInput
+    notifications?: NotificationUncheckedCreateNestedManyWithoutAccountInput
+    aiConversations?: AiConversationUncheckedCreateNestedManyWithoutAccountInput
+    aiExecutionRecords?: AiExecutionRecordUncheckedCreateNestedManyWithoutAccountInput
+    aiPermissionSettings?: AiPermissionSettingUncheckedCreateNestedManyWithoutAccountInput
+    aiPermissionRules?: AiPermissionRuleUncheckedCreateNestedManyWithoutAccountInput
+    aiGoalSurfaceLeases?: AiGoalSurfaceLeaseUncheckedCreateNestedManyWithoutAccountInput
+    aiConversationAttention?: AiConversationAttentionUncheckedCreateNestedManyWithoutAccountInput
+    aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedCreateNestedManyWithoutAccountInput
+    aiProviderConfigs?: AiProviderConfigUncheckedCreateNestedManyWithoutAccountInput
+    aiAgentInstances?: AiAgentInstanceUncheckedCreateNestedManyWithoutAccountInput
+    aiAgentInstanceBindings?: AiAgentInstanceBindingUncheckedCreateNestedManyWithoutAccountInput
+    aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedCreateNestedManyWithoutAccountInput
+    aiProviderSecrets?: AiProviderSecretUncheckedCreateNestedManyWithoutAccountInput
+    taskPlanHistory?: TaskPlanHistoryUncheckedCreateNestedManyWithoutIdentityInput
+    routineOccurrences?: RoutineOccurrenceUncheckedCreateNestedManyWithoutAccountInput
+    routineInteractions?: RoutineInteractionUncheckedCreateNestedManyWithoutAccountInput
+    notificationInteractions?: NotificationInteractionUncheckedCreateNestedManyWithoutIdentityInput
+    notificationDispatchOutboxes?: NotificationDispatchOutboxUncheckedCreateNestedManyWithoutAccountInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingUncheckedCreateNestedManyWithoutAccountInput
+    knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentUncheckedCreateNestedManyWithoutAccountInput
+    knowledgeWriteRequests?: KnowledgeWriteRequestUncheckedCreateNestedManyWithoutAccountInput
+  }
+
+  export type AccountCreateOrConnectWithoutAiPermissionAuditsInput = {
+    where: AccountWhereUniqueInput
+    create: XOR<AccountCreateWithoutAiPermissionAuditsInput, AccountUncheckedCreateWithoutAiPermissionAuditsInput>
+  }
+
+  export type AccountUpsertWithoutAiPermissionAuditsInput = {
+    update: XOR<AccountUpdateWithoutAiPermissionAuditsInput, AccountUncheckedUpdateWithoutAiPermissionAuditsInput>
+    create: XOR<AccountCreateWithoutAiPermissionAuditsInput, AccountUncheckedCreateWithoutAiPermissionAuditsInput>
+    where?: AccountWhereInput
+  }
+
+  export type AccountUpdateToOneWithWhereWithoutAiPermissionAuditsInput = {
+    where?: AccountWhereInput
+    data: XOR<AccountUpdateWithoutAiPermissionAuditsInput, AccountUncheckedUpdateWithoutAiPermissionAuditsInput>
+  }
+
+  export type AccountUpdateWithoutAiPermissionAuditsInput = {
+    status?: StringFieldUpdateOperationsInput | string
+    profile?: JsonNullValueInput | InputJsonValue
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    assistedWorkflows?: AiAssistedWorkflowUpdateManyWithoutAccountNestedInput
+    cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
+    externalMutationReceipts?: ExternalMutationReceiptUpdateManyWithoutAccountNestedInput
+    goals?: GoalUpdateManyWithoutAccountNestedInput
+    profileImportOperations?: ProfileImportOperationUpdateManyWithoutAccountNestedInput
+    labels?: LabelUpdateManyWithoutAccountNestedInput
+    goalLabels?: GoalLabelUpdateManyWithoutAccountNestedInput
+    taskLabels?: TaskLabelUpdateManyWithoutAccountNestedInput
+    routineDefinitions?: RoutineDefinitionUpdateManyWithoutAccountNestedInput
+    routinePreference?: RoutinePreferenceUpdateOneWithoutAccountNestedInput
+    routineTemporaryOverrides?: RoutineTemporaryOverrideUpdateManyWithoutAccountNestedInput
+    routineProfiles?: RoutineProfileUpdateManyWithoutAccountNestedInput
+    routineProfileMemberships?: RoutineProfileMembershipUpdateManyWithoutAccountNestedInput
+    routineProtocolDefinitions?: RoutineProtocolDefinitionUpdateManyWithoutAccountNestedInput
+    routineProtocolSessions?: RoutineProtocolSessionUpdateManyWithoutAccountNestedInput
+    schedules?: ScheduleUpdateManyWithoutAccountNestedInput
+    schedulingReconcileOperations?: SchedulingReconcileOperationUpdateManyWithoutAccountNestedInput
+    scheduledInvocations?: ScheduledInvocationUpdateManyWithoutAccountNestedInput
+    invocationAttempts?: InvocationAttemptUpdateManyWithoutAccountNestedInput
+    habits?: HabitUpdateManyWithoutAccountNestedInput
+    relations?: RelationUpdateManyWithoutAccountNestedInput
+    walletAccounts?: WalletAccountUpdateManyWithoutAccountNestedInput
+    walletTransactions?: WalletTransactionUpdateManyWithoutAccount_identityNestedInput
+    taskPlans?: TaskPlanUpdateManyWithoutAccountNestedInput
+    taskOccurrences?: TaskOccurrenceUpdateManyWithoutAccountNestedInput
+    userPreferenceRecords?: UserPreferenceRecordUpdateManyWithoutAccountNestedInput
+    notifications?: NotificationUpdateManyWithoutAccountNestedInput
+    aiConversations?: AiConversationUpdateManyWithoutAccountNestedInput
+    aiExecutionRecords?: AiExecutionRecordUpdateManyWithoutAccountNestedInput
+    aiPermissionSettings?: AiPermissionSettingUpdateManyWithoutAccountNestedInput
+    aiPermissionRules?: AiPermissionRuleUpdateManyWithoutAccountNestedInput
+    aiGoalSurfaceLeases?: AiGoalSurfaceLeaseUpdateManyWithoutAccountNestedInput
+    aiConversationAttention?: AiConversationAttentionUpdateManyWithoutAccountNestedInput
+    aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUpdateManyWithoutAccountNestedInput
+    aiProviderConfigs?: AiProviderConfigUpdateManyWithoutAccountNestedInput
+    aiAgentInstances?: AiAgentInstanceUpdateManyWithoutAccountNestedInput
+    aiAgentInstanceBindings?: AiAgentInstanceBindingUpdateManyWithoutAccountNestedInput
+    aiProviderOnboardingSessions?: AiProviderOnboardingSessionUpdateManyWithoutAccountNestedInput
+    aiProviderSecrets?: AiProviderSecretUpdateManyWithoutAccountNestedInput
+    taskPlanHistory?: TaskPlanHistoryUpdateManyWithoutIdentityNestedInput
+    routineOccurrences?: RoutineOccurrenceUpdateManyWithoutAccountNestedInput
+    routineInteractions?: RoutineInteractionUpdateManyWithoutAccountNestedInput
+    notificationInteractions?: NotificationInteractionUpdateManyWithoutIdentityNestedInput
+    notificationDispatchOutboxes?: NotificationDispatchOutboxUpdateManyWithoutAccountNestedInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingUpdateManyWithoutAccountNestedInput
+    knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentUpdateManyWithoutAccountNestedInput
+    knowledgeWriteRequests?: KnowledgeWriteRequestUpdateManyWithoutAccountNestedInput
+  }
+
+  export type AccountUncheckedUpdateWithoutAiPermissionAuditsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    status?: StringFieldUpdateOperationsInput | string
+    profile?: JsonNullValueInput | InputJsonValue
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    assistedWorkflows?: AiAssistedWorkflowUncheckedUpdateManyWithoutAccountNestedInput
+    externalMutationReceipts?: ExternalMutationReceiptUncheckedUpdateManyWithoutAccountNestedInput
+    goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
+    profileImportOperations?: ProfileImportOperationUncheckedUpdateManyWithoutAccountNestedInput
+    labels?: LabelUncheckedUpdateManyWithoutAccountNestedInput
+    goalLabels?: GoalLabelUncheckedUpdateManyWithoutAccountNestedInput
+    taskLabels?: TaskLabelUncheckedUpdateManyWithoutAccountNestedInput
+    routineDefinitions?: RoutineDefinitionUncheckedUpdateManyWithoutAccountNestedInput
+    routinePreference?: RoutinePreferenceUncheckedUpdateOneWithoutAccountNestedInput
+    routineTemporaryOverrides?: RoutineTemporaryOverrideUncheckedUpdateManyWithoutAccountNestedInput
+    routineProfiles?: RoutineProfileUncheckedUpdateManyWithoutAccountNestedInput
+    routineProfileMemberships?: RoutineProfileMembershipUncheckedUpdateManyWithoutAccountNestedInput
+    routineProtocolDefinitions?: RoutineProtocolDefinitionUncheckedUpdateManyWithoutAccountNestedInput
+    routineProtocolSessions?: RoutineProtocolSessionUncheckedUpdateManyWithoutAccountNestedInput
+    schedules?: ScheduleUncheckedUpdateManyWithoutAccountNestedInput
+    schedulingReconcileOperations?: SchedulingReconcileOperationUncheckedUpdateManyWithoutAccountNestedInput
+    scheduledInvocations?: ScheduledInvocationUncheckedUpdateManyWithoutAccountNestedInput
+    invocationAttempts?: InvocationAttemptUncheckedUpdateManyWithoutAccountNestedInput
+    habits?: HabitUncheckedUpdateManyWithoutAccountNestedInput
+    relations?: RelationUncheckedUpdateManyWithoutAccountNestedInput
+    walletAccounts?: WalletAccountUncheckedUpdateManyWithoutAccountNestedInput
+    walletTransactions?: WalletTransactionUncheckedUpdateManyWithoutAccount_identityNestedInput
+    taskPlans?: TaskPlanUncheckedUpdateManyWithoutAccountNestedInput
+    taskOccurrences?: TaskOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
+    userPreferenceRecords?: UserPreferenceRecordUncheckedUpdateManyWithoutAccountNestedInput
+    notifications?: NotificationUncheckedUpdateManyWithoutAccountNestedInput
+    aiConversations?: AiConversationUncheckedUpdateManyWithoutAccountNestedInput
+    aiExecutionRecords?: AiExecutionRecordUncheckedUpdateManyWithoutAccountNestedInput
+    aiPermissionSettings?: AiPermissionSettingUncheckedUpdateManyWithoutAccountNestedInput
+    aiPermissionRules?: AiPermissionRuleUncheckedUpdateManyWithoutAccountNestedInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseUncheckedUpdateManyWithoutAccountNestedInput
     aiConversationAttention?: AiConversationAttentionUncheckedUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedUpdateManyWithoutAccountNestedInput
@@ -155449,6 +160597,9 @@ export namespace Prisma {
     notifications?: NotificationCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationCreateNestedManyWithoutAccountInput
     aiExecutionRecords?: AiExecutionRecordCreateNestedManyWithoutAccountInput
+    aiPermissionSettings?: AiPermissionSettingCreateNestedManyWithoutAccountInput
+    aiPermissionRules?: AiPermissionRuleCreateNestedManyWithoutAccountInput
+    aiPermissionAudits?: AiPermissionAuditCreateNestedManyWithoutAccountInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseCreateNestedManyWithoutAccountInput
     aiConversationAttention?: AiConversationAttentionCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryCreateNestedManyWithoutAccountInput
@@ -155501,6 +160652,9 @@ export namespace Prisma {
     notifications?: NotificationUncheckedCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationUncheckedCreateNestedManyWithoutAccountInput
     aiExecutionRecords?: AiExecutionRecordUncheckedCreateNestedManyWithoutAccountInput
+    aiPermissionSettings?: AiPermissionSettingUncheckedCreateNestedManyWithoutAccountInput
+    aiPermissionRules?: AiPermissionRuleUncheckedCreateNestedManyWithoutAccountInput
+    aiPermissionAudits?: AiPermissionAuditUncheckedCreateNestedManyWithoutAccountInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseUncheckedCreateNestedManyWithoutAccountInput
     aiConversationAttention?: AiConversationAttentionUncheckedCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedCreateNestedManyWithoutAccountInput
@@ -155592,6 +160746,9 @@ export namespace Prisma {
     notifications?: NotificationUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUpdateManyWithoutAccountNestedInput
     aiExecutionRecords?: AiExecutionRecordUpdateManyWithoutAccountNestedInput
+    aiPermissionSettings?: AiPermissionSettingUpdateManyWithoutAccountNestedInput
+    aiPermissionRules?: AiPermissionRuleUpdateManyWithoutAccountNestedInput
+    aiPermissionAudits?: AiPermissionAuditUpdateManyWithoutAccountNestedInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseUpdateManyWithoutAccountNestedInput
     aiConversationAttention?: AiConversationAttentionUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUpdateManyWithoutAccountNestedInput
@@ -155644,6 +160801,9 @@ export namespace Prisma {
     notifications?: NotificationUncheckedUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUncheckedUpdateManyWithoutAccountNestedInput
     aiExecutionRecords?: AiExecutionRecordUncheckedUpdateManyWithoutAccountNestedInput
+    aiPermissionSettings?: AiPermissionSettingUncheckedUpdateManyWithoutAccountNestedInput
+    aiPermissionRules?: AiPermissionRuleUncheckedUpdateManyWithoutAccountNestedInput
+    aiPermissionAudits?: AiPermissionAuditUncheckedUpdateManyWithoutAccountNestedInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseUncheckedUpdateManyWithoutAccountNestedInput
     aiConversationAttention?: AiConversationAttentionUncheckedUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedUpdateManyWithoutAccountNestedInput
@@ -155712,6 +160872,9 @@ export namespace Prisma {
     notifications?: NotificationCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationCreateNestedManyWithoutAccountInput
     aiExecutionRecords?: AiExecutionRecordCreateNestedManyWithoutAccountInput
+    aiPermissionSettings?: AiPermissionSettingCreateNestedManyWithoutAccountInput
+    aiPermissionRules?: AiPermissionRuleCreateNestedManyWithoutAccountInput
+    aiPermissionAudits?: AiPermissionAuditCreateNestedManyWithoutAccountInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseCreateNestedManyWithoutAccountInput
     aiConversationAttention?: AiConversationAttentionCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryCreateNestedManyWithoutAccountInput
@@ -155764,6 +160927,9 @@ export namespace Prisma {
     notifications?: NotificationUncheckedCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationUncheckedCreateNestedManyWithoutAccountInput
     aiExecutionRecords?: AiExecutionRecordUncheckedCreateNestedManyWithoutAccountInput
+    aiPermissionSettings?: AiPermissionSettingUncheckedCreateNestedManyWithoutAccountInput
+    aiPermissionRules?: AiPermissionRuleUncheckedCreateNestedManyWithoutAccountInput
+    aiPermissionAudits?: AiPermissionAuditUncheckedCreateNestedManyWithoutAccountInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseUncheckedCreateNestedManyWithoutAccountInput
     aiConversationAttention?: AiConversationAttentionUncheckedCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedCreateNestedManyWithoutAccountInput
@@ -155879,6 +161045,9 @@ export namespace Prisma {
     notifications?: NotificationUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUpdateManyWithoutAccountNestedInput
     aiExecutionRecords?: AiExecutionRecordUpdateManyWithoutAccountNestedInput
+    aiPermissionSettings?: AiPermissionSettingUpdateManyWithoutAccountNestedInput
+    aiPermissionRules?: AiPermissionRuleUpdateManyWithoutAccountNestedInput
+    aiPermissionAudits?: AiPermissionAuditUpdateManyWithoutAccountNestedInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseUpdateManyWithoutAccountNestedInput
     aiConversationAttention?: AiConversationAttentionUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUpdateManyWithoutAccountNestedInput
@@ -155931,6 +161100,9 @@ export namespace Prisma {
     notifications?: NotificationUncheckedUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUncheckedUpdateManyWithoutAccountNestedInput
     aiExecutionRecords?: AiExecutionRecordUncheckedUpdateManyWithoutAccountNestedInput
+    aiPermissionSettings?: AiPermissionSettingUncheckedUpdateManyWithoutAccountNestedInput
+    aiPermissionRules?: AiPermissionRuleUncheckedUpdateManyWithoutAccountNestedInput
+    aiPermissionAudits?: AiPermissionAuditUncheckedUpdateManyWithoutAccountNestedInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseUncheckedUpdateManyWithoutAccountNestedInput
     aiConversationAttention?: AiConversationAttentionUncheckedUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedUpdateManyWithoutAccountNestedInput
@@ -156027,6 +161199,9 @@ export namespace Prisma {
     notifications?: NotificationCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationCreateNestedManyWithoutAccountInput
     aiExecutionRecords?: AiExecutionRecordCreateNestedManyWithoutAccountInput
+    aiPermissionSettings?: AiPermissionSettingCreateNestedManyWithoutAccountInput
+    aiPermissionRules?: AiPermissionRuleCreateNestedManyWithoutAccountInput
+    aiPermissionAudits?: AiPermissionAuditCreateNestedManyWithoutAccountInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseCreateNestedManyWithoutAccountInput
     aiConversationAttention?: AiConversationAttentionCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryCreateNestedManyWithoutAccountInput
@@ -156079,6 +161254,9 @@ export namespace Prisma {
     notifications?: NotificationUncheckedCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationUncheckedCreateNestedManyWithoutAccountInput
     aiExecutionRecords?: AiExecutionRecordUncheckedCreateNestedManyWithoutAccountInput
+    aiPermissionSettings?: AiPermissionSettingUncheckedCreateNestedManyWithoutAccountInput
+    aiPermissionRules?: AiPermissionRuleUncheckedCreateNestedManyWithoutAccountInput
+    aiPermissionAudits?: AiPermissionAuditUncheckedCreateNestedManyWithoutAccountInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseUncheckedCreateNestedManyWithoutAccountInput
     aiConversationAttention?: AiConversationAttentionUncheckedCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedCreateNestedManyWithoutAccountInput
@@ -156225,6 +161403,9 @@ export namespace Prisma {
     notifications?: NotificationUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUpdateManyWithoutAccountNestedInput
     aiExecutionRecords?: AiExecutionRecordUpdateManyWithoutAccountNestedInput
+    aiPermissionSettings?: AiPermissionSettingUpdateManyWithoutAccountNestedInput
+    aiPermissionRules?: AiPermissionRuleUpdateManyWithoutAccountNestedInput
+    aiPermissionAudits?: AiPermissionAuditUpdateManyWithoutAccountNestedInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseUpdateManyWithoutAccountNestedInput
     aiConversationAttention?: AiConversationAttentionUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUpdateManyWithoutAccountNestedInput
@@ -156277,6 +161458,9 @@ export namespace Prisma {
     notifications?: NotificationUncheckedUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUncheckedUpdateManyWithoutAccountNestedInput
     aiExecutionRecords?: AiExecutionRecordUncheckedUpdateManyWithoutAccountNestedInput
+    aiPermissionSettings?: AiPermissionSettingUncheckedUpdateManyWithoutAccountNestedInput
+    aiPermissionRules?: AiPermissionRuleUncheckedUpdateManyWithoutAccountNestedInput
+    aiPermissionAudits?: AiPermissionAuditUncheckedUpdateManyWithoutAccountNestedInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseUncheckedUpdateManyWithoutAccountNestedInput
     aiConversationAttention?: AiConversationAttentionUncheckedUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedUpdateManyWithoutAccountNestedInput
@@ -156559,6 +161743,9 @@ export namespace Prisma {
     notifications?: NotificationCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationCreateNestedManyWithoutAccountInput
     aiExecutionRecords?: AiExecutionRecordCreateNestedManyWithoutAccountInput
+    aiPermissionSettings?: AiPermissionSettingCreateNestedManyWithoutAccountInput
+    aiPermissionRules?: AiPermissionRuleCreateNestedManyWithoutAccountInput
+    aiPermissionAudits?: AiPermissionAuditCreateNestedManyWithoutAccountInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseCreateNestedManyWithoutAccountInput
     aiConversationAttention?: AiConversationAttentionCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryCreateNestedManyWithoutAccountInput
@@ -156611,6 +161798,9 @@ export namespace Prisma {
     notifications?: NotificationUncheckedCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationUncheckedCreateNestedManyWithoutAccountInput
     aiExecutionRecords?: AiExecutionRecordUncheckedCreateNestedManyWithoutAccountInput
+    aiPermissionSettings?: AiPermissionSettingUncheckedCreateNestedManyWithoutAccountInput
+    aiPermissionRules?: AiPermissionRuleUncheckedCreateNestedManyWithoutAccountInput
+    aiPermissionAudits?: AiPermissionAuditUncheckedCreateNestedManyWithoutAccountInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseUncheckedCreateNestedManyWithoutAccountInput
     aiConversationAttention?: AiConversationAttentionUncheckedCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedCreateNestedManyWithoutAccountInput
@@ -156679,6 +161869,9 @@ export namespace Prisma {
     notifications?: NotificationUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUpdateManyWithoutAccountNestedInput
     aiExecutionRecords?: AiExecutionRecordUpdateManyWithoutAccountNestedInput
+    aiPermissionSettings?: AiPermissionSettingUpdateManyWithoutAccountNestedInput
+    aiPermissionRules?: AiPermissionRuleUpdateManyWithoutAccountNestedInput
+    aiPermissionAudits?: AiPermissionAuditUpdateManyWithoutAccountNestedInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseUpdateManyWithoutAccountNestedInput
     aiConversationAttention?: AiConversationAttentionUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUpdateManyWithoutAccountNestedInput
@@ -156731,6 +161924,9 @@ export namespace Prisma {
     notifications?: NotificationUncheckedUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUncheckedUpdateManyWithoutAccountNestedInput
     aiExecutionRecords?: AiExecutionRecordUncheckedUpdateManyWithoutAccountNestedInput
+    aiPermissionSettings?: AiPermissionSettingUncheckedUpdateManyWithoutAccountNestedInput
+    aiPermissionRules?: AiPermissionRuleUncheckedUpdateManyWithoutAccountNestedInput
+    aiPermissionAudits?: AiPermissionAuditUncheckedUpdateManyWithoutAccountNestedInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseUncheckedUpdateManyWithoutAccountNestedInput
     aiConversationAttention?: AiConversationAttentionUncheckedUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedUpdateManyWithoutAccountNestedInput
@@ -156783,6 +161979,9 @@ export namespace Prisma {
     notifications?: NotificationCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationCreateNestedManyWithoutAccountInput
     aiExecutionRecords?: AiExecutionRecordCreateNestedManyWithoutAccountInput
+    aiPermissionSettings?: AiPermissionSettingCreateNestedManyWithoutAccountInput
+    aiPermissionRules?: AiPermissionRuleCreateNestedManyWithoutAccountInput
+    aiPermissionAudits?: AiPermissionAuditCreateNestedManyWithoutAccountInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseCreateNestedManyWithoutAccountInput
     aiConversationAttention?: AiConversationAttentionCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryCreateNestedManyWithoutAccountInput
@@ -156835,6 +162034,9 @@ export namespace Prisma {
     notifications?: NotificationUncheckedCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationUncheckedCreateNestedManyWithoutAccountInput
     aiExecutionRecords?: AiExecutionRecordUncheckedCreateNestedManyWithoutAccountInput
+    aiPermissionSettings?: AiPermissionSettingUncheckedCreateNestedManyWithoutAccountInput
+    aiPermissionRules?: AiPermissionRuleUncheckedCreateNestedManyWithoutAccountInput
+    aiPermissionAudits?: AiPermissionAuditUncheckedCreateNestedManyWithoutAccountInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseUncheckedCreateNestedManyWithoutAccountInput
     aiConversationAttention?: AiConversationAttentionUncheckedCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedCreateNestedManyWithoutAccountInput
@@ -156903,6 +162105,9 @@ export namespace Prisma {
     notifications?: NotificationUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUpdateManyWithoutAccountNestedInput
     aiExecutionRecords?: AiExecutionRecordUpdateManyWithoutAccountNestedInput
+    aiPermissionSettings?: AiPermissionSettingUpdateManyWithoutAccountNestedInput
+    aiPermissionRules?: AiPermissionRuleUpdateManyWithoutAccountNestedInput
+    aiPermissionAudits?: AiPermissionAuditUpdateManyWithoutAccountNestedInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseUpdateManyWithoutAccountNestedInput
     aiConversationAttention?: AiConversationAttentionUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUpdateManyWithoutAccountNestedInput
@@ -156955,6 +162160,9 @@ export namespace Prisma {
     notifications?: NotificationUncheckedUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUncheckedUpdateManyWithoutAccountNestedInput
     aiExecutionRecords?: AiExecutionRecordUncheckedUpdateManyWithoutAccountNestedInput
+    aiPermissionSettings?: AiPermissionSettingUncheckedUpdateManyWithoutAccountNestedInput
+    aiPermissionRules?: AiPermissionRuleUncheckedUpdateManyWithoutAccountNestedInput
+    aiPermissionAudits?: AiPermissionAuditUncheckedUpdateManyWithoutAccountNestedInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseUncheckedUpdateManyWithoutAccountNestedInput
     aiConversationAttention?: AiConversationAttentionUncheckedUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedUpdateManyWithoutAccountNestedInput
@@ -157007,6 +162215,9 @@ export namespace Prisma {
     notifications?: NotificationCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationCreateNestedManyWithoutAccountInput
     aiExecutionRecords?: AiExecutionRecordCreateNestedManyWithoutAccountInput
+    aiPermissionSettings?: AiPermissionSettingCreateNestedManyWithoutAccountInput
+    aiPermissionRules?: AiPermissionRuleCreateNestedManyWithoutAccountInput
+    aiPermissionAudits?: AiPermissionAuditCreateNestedManyWithoutAccountInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseCreateNestedManyWithoutAccountInput
     aiConversationAttention?: AiConversationAttentionCreateNestedManyWithoutAccountInput
     aiProviderConfigs?: AiProviderConfigCreateNestedManyWithoutAccountInput
@@ -157059,6 +162270,9 @@ export namespace Prisma {
     notifications?: NotificationUncheckedCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationUncheckedCreateNestedManyWithoutAccountInput
     aiExecutionRecords?: AiExecutionRecordUncheckedCreateNestedManyWithoutAccountInput
+    aiPermissionSettings?: AiPermissionSettingUncheckedCreateNestedManyWithoutAccountInput
+    aiPermissionRules?: AiPermissionRuleUncheckedCreateNestedManyWithoutAccountInput
+    aiPermissionAudits?: AiPermissionAuditUncheckedCreateNestedManyWithoutAccountInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseUncheckedCreateNestedManyWithoutAccountInput
     aiConversationAttention?: AiConversationAttentionUncheckedCreateNestedManyWithoutAccountInput
     aiProviderConfigs?: AiProviderConfigUncheckedCreateNestedManyWithoutAccountInput
@@ -157127,6 +162341,9 @@ export namespace Prisma {
     notifications?: NotificationUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUpdateManyWithoutAccountNestedInput
     aiExecutionRecords?: AiExecutionRecordUpdateManyWithoutAccountNestedInput
+    aiPermissionSettings?: AiPermissionSettingUpdateManyWithoutAccountNestedInput
+    aiPermissionRules?: AiPermissionRuleUpdateManyWithoutAccountNestedInput
+    aiPermissionAudits?: AiPermissionAuditUpdateManyWithoutAccountNestedInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseUpdateManyWithoutAccountNestedInput
     aiConversationAttention?: AiConversationAttentionUpdateManyWithoutAccountNestedInput
     aiProviderConfigs?: AiProviderConfigUpdateManyWithoutAccountNestedInput
@@ -157179,6 +162396,9 @@ export namespace Prisma {
     notifications?: NotificationUncheckedUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUncheckedUpdateManyWithoutAccountNestedInput
     aiExecutionRecords?: AiExecutionRecordUncheckedUpdateManyWithoutAccountNestedInput
+    aiPermissionSettings?: AiPermissionSettingUncheckedUpdateManyWithoutAccountNestedInput
+    aiPermissionRules?: AiPermissionRuleUncheckedUpdateManyWithoutAccountNestedInput
+    aiPermissionAudits?: AiPermissionAuditUncheckedUpdateManyWithoutAccountNestedInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseUncheckedUpdateManyWithoutAccountNestedInput
     aiConversationAttention?: AiConversationAttentionUncheckedUpdateManyWithoutAccountNestedInput
     aiProviderConfigs?: AiProviderConfigUncheckedUpdateManyWithoutAccountNestedInput
@@ -157230,6 +162450,9 @@ export namespace Prisma {
     notifications?: NotificationCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationCreateNestedManyWithoutAccountInput
     aiExecutionRecords?: AiExecutionRecordCreateNestedManyWithoutAccountInput
+    aiPermissionSettings?: AiPermissionSettingCreateNestedManyWithoutAccountInput
+    aiPermissionRules?: AiPermissionRuleCreateNestedManyWithoutAccountInput
+    aiPermissionAudits?: AiPermissionAuditCreateNestedManyWithoutAccountInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseCreateNestedManyWithoutAccountInput
     aiConversationAttention?: AiConversationAttentionCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryCreateNestedManyWithoutAccountInput
@@ -157282,6 +162505,9 @@ export namespace Prisma {
     notifications?: NotificationUncheckedCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationUncheckedCreateNestedManyWithoutAccountInput
     aiExecutionRecords?: AiExecutionRecordUncheckedCreateNestedManyWithoutAccountInput
+    aiPermissionSettings?: AiPermissionSettingUncheckedCreateNestedManyWithoutAccountInput
+    aiPermissionRules?: AiPermissionRuleUncheckedCreateNestedManyWithoutAccountInput
+    aiPermissionAudits?: AiPermissionAuditUncheckedCreateNestedManyWithoutAccountInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseUncheckedCreateNestedManyWithoutAccountInput
     aiConversationAttention?: AiConversationAttentionUncheckedCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedCreateNestedManyWithoutAccountInput
@@ -157350,6 +162576,9 @@ export namespace Prisma {
     notifications?: NotificationUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUpdateManyWithoutAccountNestedInput
     aiExecutionRecords?: AiExecutionRecordUpdateManyWithoutAccountNestedInput
+    aiPermissionSettings?: AiPermissionSettingUpdateManyWithoutAccountNestedInput
+    aiPermissionRules?: AiPermissionRuleUpdateManyWithoutAccountNestedInput
+    aiPermissionAudits?: AiPermissionAuditUpdateManyWithoutAccountNestedInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseUpdateManyWithoutAccountNestedInput
     aiConversationAttention?: AiConversationAttentionUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUpdateManyWithoutAccountNestedInput
@@ -157402,6 +162631,9 @@ export namespace Prisma {
     notifications?: NotificationUncheckedUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUncheckedUpdateManyWithoutAccountNestedInput
     aiExecutionRecords?: AiExecutionRecordUncheckedUpdateManyWithoutAccountNestedInput
+    aiPermissionSettings?: AiPermissionSettingUncheckedUpdateManyWithoutAccountNestedInput
+    aiPermissionRules?: AiPermissionRuleUncheckedUpdateManyWithoutAccountNestedInput
+    aiPermissionAudits?: AiPermissionAuditUncheckedUpdateManyWithoutAccountNestedInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseUncheckedUpdateManyWithoutAccountNestedInput
     aiConversationAttention?: AiConversationAttentionUncheckedUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedUpdateManyWithoutAccountNestedInput
@@ -157856,6 +163088,9 @@ export namespace Prisma {
     notifications?: NotificationCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationCreateNestedManyWithoutAccountInput
     aiExecutionRecords?: AiExecutionRecordCreateNestedManyWithoutAccountInput
+    aiPermissionSettings?: AiPermissionSettingCreateNestedManyWithoutAccountInput
+    aiPermissionRules?: AiPermissionRuleCreateNestedManyWithoutAccountInput
+    aiPermissionAudits?: AiPermissionAuditCreateNestedManyWithoutAccountInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseCreateNestedManyWithoutAccountInput
     aiConversationAttention?: AiConversationAttentionCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryCreateNestedManyWithoutAccountInput
@@ -157908,6 +163143,9 @@ export namespace Prisma {
     notifications?: NotificationUncheckedCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationUncheckedCreateNestedManyWithoutAccountInput
     aiExecutionRecords?: AiExecutionRecordUncheckedCreateNestedManyWithoutAccountInput
+    aiPermissionSettings?: AiPermissionSettingUncheckedCreateNestedManyWithoutAccountInput
+    aiPermissionRules?: AiPermissionRuleUncheckedCreateNestedManyWithoutAccountInput
+    aiPermissionAudits?: AiPermissionAuditUncheckedCreateNestedManyWithoutAccountInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseUncheckedCreateNestedManyWithoutAccountInput
     aiConversationAttention?: AiConversationAttentionUncheckedCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedCreateNestedManyWithoutAccountInput
@@ -158305,6 +163543,9 @@ export namespace Prisma {
     notifications?: NotificationUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUpdateManyWithoutAccountNestedInput
     aiExecutionRecords?: AiExecutionRecordUpdateManyWithoutAccountNestedInput
+    aiPermissionSettings?: AiPermissionSettingUpdateManyWithoutAccountNestedInput
+    aiPermissionRules?: AiPermissionRuleUpdateManyWithoutAccountNestedInput
+    aiPermissionAudits?: AiPermissionAuditUpdateManyWithoutAccountNestedInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseUpdateManyWithoutAccountNestedInput
     aiConversationAttention?: AiConversationAttentionUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUpdateManyWithoutAccountNestedInput
@@ -158357,6 +163598,9 @@ export namespace Prisma {
     notifications?: NotificationUncheckedUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUncheckedUpdateManyWithoutAccountNestedInput
     aiExecutionRecords?: AiExecutionRecordUncheckedUpdateManyWithoutAccountNestedInput
+    aiPermissionSettings?: AiPermissionSettingUncheckedUpdateManyWithoutAccountNestedInput
+    aiPermissionRules?: AiPermissionRuleUncheckedUpdateManyWithoutAccountNestedInput
+    aiPermissionAudits?: AiPermissionAuditUncheckedUpdateManyWithoutAccountNestedInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseUncheckedUpdateManyWithoutAccountNestedInput
     aiConversationAttention?: AiConversationAttentionUncheckedUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedUpdateManyWithoutAccountNestedInput
@@ -159017,6 +164261,9 @@ export namespace Prisma {
     notifications?: NotificationCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationCreateNestedManyWithoutAccountInput
     aiExecutionRecords?: AiExecutionRecordCreateNestedManyWithoutAccountInput
+    aiPermissionSettings?: AiPermissionSettingCreateNestedManyWithoutAccountInput
+    aiPermissionRules?: AiPermissionRuleCreateNestedManyWithoutAccountInput
+    aiPermissionAudits?: AiPermissionAuditCreateNestedManyWithoutAccountInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseCreateNestedManyWithoutAccountInput
     aiConversationAttention?: AiConversationAttentionCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryCreateNestedManyWithoutAccountInput
@@ -159069,6 +164316,9 @@ export namespace Prisma {
     notifications?: NotificationUncheckedCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationUncheckedCreateNestedManyWithoutAccountInput
     aiExecutionRecords?: AiExecutionRecordUncheckedCreateNestedManyWithoutAccountInput
+    aiPermissionSettings?: AiPermissionSettingUncheckedCreateNestedManyWithoutAccountInput
+    aiPermissionRules?: AiPermissionRuleUncheckedCreateNestedManyWithoutAccountInput
+    aiPermissionAudits?: AiPermissionAuditUncheckedCreateNestedManyWithoutAccountInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseUncheckedCreateNestedManyWithoutAccountInput
     aiConversationAttention?: AiConversationAttentionUncheckedCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedCreateNestedManyWithoutAccountInput
@@ -159276,6 +164526,9 @@ export namespace Prisma {
     notifications?: NotificationUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUpdateManyWithoutAccountNestedInput
     aiExecutionRecords?: AiExecutionRecordUpdateManyWithoutAccountNestedInput
+    aiPermissionSettings?: AiPermissionSettingUpdateManyWithoutAccountNestedInput
+    aiPermissionRules?: AiPermissionRuleUpdateManyWithoutAccountNestedInput
+    aiPermissionAudits?: AiPermissionAuditUpdateManyWithoutAccountNestedInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseUpdateManyWithoutAccountNestedInput
     aiConversationAttention?: AiConversationAttentionUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUpdateManyWithoutAccountNestedInput
@@ -159328,6 +164581,9 @@ export namespace Prisma {
     notifications?: NotificationUncheckedUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUncheckedUpdateManyWithoutAccountNestedInput
     aiExecutionRecords?: AiExecutionRecordUncheckedUpdateManyWithoutAccountNestedInput
+    aiPermissionSettings?: AiPermissionSettingUncheckedUpdateManyWithoutAccountNestedInput
+    aiPermissionRules?: AiPermissionRuleUncheckedUpdateManyWithoutAccountNestedInput
+    aiPermissionAudits?: AiPermissionAuditUncheckedUpdateManyWithoutAccountNestedInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseUncheckedUpdateManyWithoutAccountNestedInput
     aiConversationAttention?: AiConversationAttentionUncheckedUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedUpdateManyWithoutAccountNestedInput
@@ -160240,6 +165496,9 @@ export namespace Prisma {
     notifications?: NotificationCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationCreateNestedManyWithoutAccountInput
     aiExecutionRecords?: AiExecutionRecordCreateNestedManyWithoutAccountInput
+    aiPermissionSettings?: AiPermissionSettingCreateNestedManyWithoutAccountInput
+    aiPermissionRules?: AiPermissionRuleCreateNestedManyWithoutAccountInput
+    aiPermissionAudits?: AiPermissionAuditCreateNestedManyWithoutAccountInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseCreateNestedManyWithoutAccountInput
     aiConversationAttention?: AiConversationAttentionCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryCreateNestedManyWithoutAccountInput
@@ -160292,6 +165551,9 @@ export namespace Prisma {
     notifications?: NotificationUncheckedCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationUncheckedCreateNestedManyWithoutAccountInput
     aiExecutionRecords?: AiExecutionRecordUncheckedCreateNestedManyWithoutAccountInput
+    aiPermissionSettings?: AiPermissionSettingUncheckedCreateNestedManyWithoutAccountInput
+    aiPermissionRules?: AiPermissionRuleUncheckedCreateNestedManyWithoutAccountInput
+    aiPermissionAudits?: AiPermissionAuditUncheckedCreateNestedManyWithoutAccountInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseUncheckedCreateNestedManyWithoutAccountInput
     aiConversationAttention?: AiConversationAttentionUncheckedCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedCreateNestedManyWithoutAccountInput
@@ -160409,6 +165671,9 @@ export namespace Prisma {
     notifications?: NotificationUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUpdateManyWithoutAccountNestedInput
     aiExecutionRecords?: AiExecutionRecordUpdateManyWithoutAccountNestedInput
+    aiPermissionSettings?: AiPermissionSettingUpdateManyWithoutAccountNestedInput
+    aiPermissionRules?: AiPermissionRuleUpdateManyWithoutAccountNestedInput
+    aiPermissionAudits?: AiPermissionAuditUpdateManyWithoutAccountNestedInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseUpdateManyWithoutAccountNestedInput
     aiConversationAttention?: AiConversationAttentionUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUpdateManyWithoutAccountNestedInput
@@ -160461,6 +165726,9 @@ export namespace Prisma {
     notifications?: NotificationUncheckedUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUncheckedUpdateManyWithoutAccountNestedInput
     aiExecutionRecords?: AiExecutionRecordUncheckedUpdateManyWithoutAccountNestedInput
+    aiPermissionSettings?: AiPermissionSettingUncheckedUpdateManyWithoutAccountNestedInput
+    aiPermissionRules?: AiPermissionRuleUncheckedUpdateManyWithoutAccountNestedInput
+    aiPermissionAudits?: AiPermissionAuditUncheckedUpdateManyWithoutAccountNestedInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseUncheckedUpdateManyWithoutAccountNestedInput
     aiConversationAttention?: AiConversationAttentionUncheckedUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedUpdateManyWithoutAccountNestedInput
@@ -160815,6 +166083,9 @@ export namespace Prisma {
     notifications?: NotificationCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationCreateNestedManyWithoutAccountInput
     aiExecutionRecords?: AiExecutionRecordCreateNestedManyWithoutAccountInput
+    aiPermissionSettings?: AiPermissionSettingCreateNestedManyWithoutAccountInput
+    aiPermissionRules?: AiPermissionRuleCreateNestedManyWithoutAccountInput
+    aiPermissionAudits?: AiPermissionAuditCreateNestedManyWithoutAccountInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseCreateNestedManyWithoutAccountInput
     aiConversationAttention?: AiConversationAttentionCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryCreateNestedManyWithoutAccountInput
@@ -160867,6 +166138,9 @@ export namespace Prisma {
     notifications?: NotificationUncheckedCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationUncheckedCreateNestedManyWithoutAccountInput
     aiExecutionRecords?: AiExecutionRecordUncheckedCreateNestedManyWithoutAccountInput
+    aiPermissionSettings?: AiPermissionSettingUncheckedCreateNestedManyWithoutAccountInput
+    aiPermissionRules?: AiPermissionRuleUncheckedCreateNestedManyWithoutAccountInput
+    aiPermissionAudits?: AiPermissionAuditUncheckedCreateNestedManyWithoutAccountInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseUncheckedCreateNestedManyWithoutAccountInput
     aiConversationAttention?: AiConversationAttentionUncheckedCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedCreateNestedManyWithoutAccountInput
@@ -160973,6 +166247,9 @@ export namespace Prisma {
     notifications?: NotificationUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUpdateManyWithoutAccountNestedInput
     aiExecutionRecords?: AiExecutionRecordUpdateManyWithoutAccountNestedInput
+    aiPermissionSettings?: AiPermissionSettingUpdateManyWithoutAccountNestedInput
+    aiPermissionRules?: AiPermissionRuleUpdateManyWithoutAccountNestedInput
+    aiPermissionAudits?: AiPermissionAuditUpdateManyWithoutAccountNestedInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseUpdateManyWithoutAccountNestedInput
     aiConversationAttention?: AiConversationAttentionUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUpdateManyWithoutAccountNestedInput
@@ -161025,6 +166302,9 @@ export namespace Prisma {
     notifications?: NotificationUncheckedUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUncheckedUpdateManyWithoutAccountNestedInput
     aiExecutionRecords?: AiExecutionRecordUncheckedUpdateManyWithoutAccountNestedInput
+    aiPermissionSettings?: AiPermissionSettingUncheckedUpdateManyWithoutAccountNestedInput
+    aiPermissionRules?: AiPermissionRuleUncheckedUpdateManyWithoutAccountNestedInput
+    aiPermissionAudits?: AiPermissionAuditUncheckedUpdateManyWithoutAccountNestedInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseUncheckedUpdateManyWithoutAccountNestedInput
     aiConversationAttention?: AiConversationAttentionUncheckedUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedUpdateManyWithoutAccountNestedInput
@@ -161109,6 +166389,9 @@ export namespace Prisma {
     notifications?: NotificationCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationCreateNestedManyWithoutAccountInput
     aiExecutionRecords?: AiExecutionRecordCreateNestedManyWithoutAccountInput
+    aiPermissionSettings?: AiPermissionSettingCreateNestedManyWithoutAccountInput
+    aiPermissionRules?: AiPermissionRuleCreateNestedManyWithoutAccountInput
+    aiPermissionAudits?: AiPermissionAuditCreateNestedManyWithoutAccountInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseCreateNestedManyWithoutAccountInput
     aiConversationAttention?: AiConversationAttentionCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryCreateNestedManyWithoutAccountInput
@@ -161161,6 +166444,9 @@ export namespace Prisma {
     notifications?: NotificationUncheckedCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationUncheckedCreateNestedManyWithoutAccountInput
     aiExecutionRecords?: AiExecutionRecordUncheckedCreateNestedManyWithoutAccountInput
+    aiPermissionSettings?: AiPermissionSettingUncheckedCreateNestedManyWithoutAccountInput
+    aiPermissionRules?: AiPermissionRuleUncheckedCreateNestedManyWithoutAccountInput
+    aiPermissionAudits?: AiPermissionAuditUncheckedCreateNestedManyWithoutAccountInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseUncheckedCreateNestedManyWithoutAccountInput
     aiConversationAttention?: AiConversationAttentionUncheckedCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedCreateNestedManyWithoutAccountInput
@@ -161309,6 +166595,9 @@ export namespace Prisma {
     notifications?: NotificationUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUpdateManyWithoutAccountNestedInput
     aiExecutionRecords?: AiExecutionRecordUpdateManyWithoutAccountNestedInput
+    aiPermissionSettings?: AiPermissionSettingUpdateManyWithoutAccountNestedInput
+    aiPermissionRules?: AiPermissionRuleUpdateManyWithoutAccountNestedInput
+    aiPermissionAudits?: AiPermissionAuditUpdateManyWithoutAccountNestedInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseUpdateManyWithoutAccountNestedInput
     aiConversationAttention?: AiConversationAttentionUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUpdateManyWithoutAccountNestedInput
@@ -161361,6 +166650,9 @@ export namespace Prisma {
     notifications?: NotificationUncheckedUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUncheckedUpdateManyWithoutAccountNestedInput
     aiExecutionRecords?: AiExecutionRecordUncheckedUpdateManyWithoutAccountNestedInput
+    aiPermissionSettings?: AiPermissionSettingUncheckedUpdateManyWithoutAccountNestedInput
+    aiPermissionRules?: AiPermissionRuleUncheckedUpdateManyWithoutAccountNestedInput
+    aiPermissionAudits?: AiPermissionAuditUncheckedUpdateManyWithoutAccountNestedInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseUncheckedUpdateManyWithoutAccountNestedInput
     aiConversationAttention?: AiConversationAttentionUncheckedUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedUpdateManyWithoutAccountNestedInput
@@ -161505,6 +166797,9 @@ export namespace Prisma {
     notifications?: NotificationCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationCreateNestedManyWithoutAccountInput
     aiExecutionRecords?: AiExecutionRecordCreateNestedManyWithoutAccountInput
+    aiPermissionSettings?: AiPermissionSettingCreateNestedManyWithoutAccountInput
+    aiPermissionRules?: AiPermissionRuleCreateNestedManyWithoutAccountInput
+    aiPermissionAudits?: AiPermissionAuditCreateNestedManyWithoutAccountInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseCreateNestedManyWithoutAccountInput
     aiConversationAttention?: AiConversationAttentionCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryCreateNestedManyWithoutAccountInput
@@ -161557,6 +166852,9 @@ export namespace Prisma {
     notifications?: NotificationUncheckedCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationUncheckedCreateNestedManyWithoutAccountInput
     aiExecutionRecords?: AiExecutionRecordUncheckedCreateNestedManyWithoutAccountInput
+    aiPermissionSettings?: AiPermissionSettingUncheckedCreateNestedManyWithoutAccountInput
+    aiPermissionRules?: AiPermissionRuleUncheckedCreateNestedManyWithoutAccountInput
+    aiPermissionAudits?: AiPermissionAuditUncheckedCreateNestedManyWithoutAccountInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseUncheckedCreateNestedManyWithoutAccountInput
     aiConversationAttention?: AiConversationAttentionUncheckedCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedCreateNestedManyWithoutAccountInput
@@ -161714,6 +167012,9 @@ export namespace Prisma {
     notifications?: NotificationUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUpdateManyWithoutAccountNestedInput
     aiExecutionRecords?: AiExecutionRecordUpdateManyWithoutAccountNestedInput
+    aiPermissionSettings?: AiPermissionSettingUpdateManyWithoutAccountNestedInput
+    aiPermissionRules?: AiPermissionRuleUpdateManyWithoutAccountNestedInput
+    aiPermissionAudits?: AiPermissionAuditUpdateManyWithoutAccountNestedInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseUpdateManyWithoutAccountNestedInput
     aiConversationAttention?: AiConversationAttentionUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUpdateManyWithoutAccountNestedInput
@@ -161766,6 +167067,9 @@ export namespace Prisma {
     notifications?: NotificationUncheckedUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUncheckedUpdateManyWithoutAccountNestedInput
     aiExecutionRecords?: AiExecutionRecordUncheckedUpdateManyWithoutAccountNestedInput
+    aiPermissionSettings?: AiPermissionSettingUncheckedUpdateManyWithoutAccountNestedInput
+    aiPermissionRules?: AiPermissionRuleUncheckedUpdateManyWithoutAccountNestedInput
+    aiPermissionAudits?: AiPermissionAuditUncheckedUpdateManyWithoutAccountNestedInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseUncheckedUpdateManyWithoutAccountNestedInput
     aiConversationAttention?: AiConversationAttentionUncheckedUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedUpdateManyWithoutAccountNestedInput
@@ -162053,6 +167357,9 @@ export namespace Prisma {
     userPreferenceRecords?: UserPreferenceRecordCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationCreateNestedManyWithoutAccountInput
     aiExecutionRecords?: AiExecutionRecordCreateNestedManyWithoutAccountInput
+    aiPermissionSettings?: AiPermissionSettingCreateNestedManyWithoutAccountInput
+    aiPermissionRules?: AiPermissionRuleCreateNestedManyWithoutAccountInput
+    aiPermissionAudits?: AiPermissionAuditCreateNestedManyWithoutAccountInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseCreateNestedManyWithoutAccountInput
     aiConversationAttention?: AiConversationAttentionCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryCreateNestedManyWithoutAccountInput
@@ -162105,6 +167412,9 @@ export namespace Prisma {
     userPreferenceRecords?: UserPreferenceRecordUncheckedCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationUncheckedCreateNestedManyWithoutAccountInput
     aiExecutionRecords?: AiExecutionRecordUncheckedCreateNestedManyWithoutAccountInput
+    aiPermissionSettings?: AiPermissionSettingUncheckedCreateNestedManyWithoutAccountInput
+    aiPermissionRules?: AiPermissionRuleUncheckedCreateNestedManyWithoutAccountInput
+    aiPermissionAudits?: AiPermissionAuditUncheckedCreateNestedManyWithoutAccountInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseUncheckedCreateNestedManyWithoutAccountInput
     aiConversationAttention?: AiConversationAttentionUncheckedCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedCreateNestedManyWithoutAccountInput
@@ -162237,6 +167547,9 @@ export namespace Prisma {
     userPreferenceRecords?: UserPreferenceRecordUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUpdateManyWithoutAccountNestedInput
     aiExecutionRecords?: AiExecutionRecordUpdateManyWithoutAccountNestedInput
+    aiPermissionSettings?: AiPermissionSettingUpdateManyWithoutAccountNestedInput
+    aiPermissionRules?: AiPermissionRuleUpdateManyWithoutAccountNestedInput
+    aiPermissionAudits?: AiPermissionAuditUpdateManyWithoutAccountNestedInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseUpdateManyWithoutAccountNestedInput
     aiConversationAttention?: AiConversationAttentionUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUpdateManyWithoutAccountNestedInput
@@ -162289,6 +167602,9 @@ export namespace Prisma {
     userPreferenceRecords?: UserPreferenceRecordUncheckedUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUncheckedUpdateManyWithoutAccountNestedInput
     aiExecutionRecords?: AiExecutionRecordUncheckedUpdateManyWithoutAccountNestedInput
+    aiPermissionSettings?: AiPermissionSettingUncheckedUpdateManyWithoutAccountNestedInput
+    aiPermissionRules?: AiPermissionRuleUncheckedUpdateManyWithoutAccountNestedInput
+    aiPermissionAudits?: AiPermissionAuditUncheckedUpdateManyWithoutAccountNestedInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseUncheckedUpdateManyWithoutAccountNestedInput
     aiConversationAttention?: AiConversationAttentionUncheckedUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedUpdateManyWithoutAccountNestedInput
@@ -162342,6 +167658,9 @@ export namespace Prisma {
     notifications?: NotificationCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationCreateNestedManyWithoutAccountInput
     aiExecutionRecords?: AiExecutionRecordCreateNestedManyWithoutAccountInput
+    aiPermissionSettings?: AiPermissionSettingCreateNestedManyWithoutAccountInput
+    aiPermissionRules?: AiPermissionRuleCreateNestedManyWithoutAccountInput
+    aiPermissionAudits?: AiPermissionAuditCreateNestedManyWithoutAccountInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseCreateNestedManyWithoutAccountInput
     aiConversationAttention?: AiConversationAttentionCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryCreateNestedManyWithoutAccountInput
@@ -162394,6 +167713,9 @@ export namespace Prisma {
     notifications?: NotificationUncheckedCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationUncheckedCreateNestedManyWithoutAccountInput
     aiExecutionRecords?: AiExecutionRecordUncheckedCreateNestedManyWithoutAccountInput
+    aiPermissionSettings?: AiPermissionSettingUncheckedCreateNestedManyWithoutAccountInput
+    aiPermissionRules?: AiPermissionRuleUncheckedCreateNestedManyWithoutAccountInput
+    aiPermissionAudits?: AiPermissionAuditUncheckedCreateNestedManyWithoutAccountInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseUncheckedCreateNestedManyWithoutAccountInput
     aiConversationAttention?: AiConversationAttentionUncheckedCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedCreateNestedManyWithoutAccountInput
@@ -162529,6 +167851,9 @@ export namespace Prisma {
     notifications?: NotificationUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUpdateManyWithoutAccountNestedInput
     aiExecutionRecords?: AiExecutionRecordUpdateManyWithoutAccountNestedInput
+    aiPermissionSettings?: AiPermissionSettingUpdateManyWithoutAccountNestedInput
+    aiPermissionRules?: AiPermissionRuleUpdateManyWithoutAccountNestedInput
+    aiPermissionAudits?: AiPermissionAuditUpdateManyWithoutAccountNestedInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseUpdateManyWithoutAccountNestedInput
     aiConversationAttention?: AiConversationAttentionUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUpdateManyWithoutAccountNestedInput
@@ -162581,6 +167906,9 @@ export namespace Prisma {
     notifications?: NotificationUncheckedUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUncheckedUpdateManyWithoutAccountNestedInput
     aiExecutionRecords?: AiExecutionRecordUncheckedUpdateManyWithoutAccountNestedInput
+    aiPermissionSettings?: AiPermissionSettingUncheckedUpdateManyWithoutAccountNestedInput
+    aiPermissionRules?: AiPermissionRuleUncheckedUpdateManyWithoutAccountNestedInput
+    aiPermissionAudits?: AiPermissionAuditUncheckedUpdateManyWithoutAccountNestedInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseUncheckedUpdateManyWithoutAccountNestedInput
     aiConversationAttention?: AiConversationAttentionUncheckedUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedUpdateManyWithoutAccountNestedInput
@@ -162913,6 +168241,9 @@ export namespace Prisma {
     notifications?: NotificationCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationCreateNestedManyWithoutAccountInput
     aiExecutionRecords?: AiExecutionRecordCreateNestedManyWithoutAccountInput
+    aiPermissionSettings?: AiPermissionSettingCreateNestedManyWithoutAccountInput
+    aiPermissionRules?: AiPermissionRuleCreateNestedManyWithoutAccountInput
+    aiPermissionAudits?: AiPermissionAuditCreateNestedManyWithoutAccountInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseCreateNestedManyWithoutAccountInput
     aiConversationAttention?: AiConversationAttentionCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryCreateNestedManyWithoutAccountInput
@@ -162965,6 +168296,9 @@ export namespace Prisma {
     notifications?: NotificationUncheckedCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationUncheckedCreateNestedManyWithoutAccountInput
     aiExecutionRecords?: AiExecutionRecordUncheckedCreateNestedManyWithoutAccountInput
+    aiPermissionSettings?: AiPermissionSettingUncheckedCreateNestedManyWithoutAccountInput
+    aiPermissionRules?: AiPermissionRuleUncheckedCreateNestedManyWithoutAccountInput
+    aiPermissionAudits?: AiPermissionAuditUncheckedCreateNestedManyWithoutAccountInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseUncheckedCreateNestedManyWithoutAccountInput
     aiConversationAttention?: AiConversationAttentionUncheckedCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedCreateNestedManyWithoutAccountInput
@@ -163106,6 +168440,9 @@ export namespace Prisma {
     notifications?: NotificationUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUpdateManyWithoutAccountNestedInput
     aiExecutionRecords?: AiExecutionRecordUpdateManyWithoutAccountNestedInput
+    aiPermissionSettings?: AiPermissionSettingUpdateManyWithoutAccountNestedInput
+    aiPermissionRules?: AiPermissionRuleUpdateManyWithoutAccountNestedInput
+    aiPermissionAudits?: AiPermissionAuditUpdateManyWithoutAccountNestedInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseUpdateManyWithoutAccountNestedInput
     aiConversationAttention?: AiConversationAttentionUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUpdateManyWithoutAccountNestedInput
@@ -163158,6 +168495,9 @@ export namespace Prisma {
     notifications?: NotificationUncheckedUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUncheckedUpdateManyWithoutAccountNestedInput
     aiExecutionRecords?: AiExecutionRecordUncheckedUpdateManyWithoutAccountNestedInput
+    aiPermissionSettings?: AiPermissionSettingUncheckedUpdateManyWithoutAccountNestedInput
+    aiPermissionRules?: AiPermissionRuleUncheckedUpdateManyWithoutAccountNestedInput
+    aiPermissionAudits?: AiPermissionAuditUncheckedUpdateManyWithoutAccountNestedInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseUncheckedUpdateManyWithoutAccountNestedInput
     aiConversationAttention?: AiConversationAttentionUncheckedUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedUpdateManyWithoutAccountNestedInput
@@ -164972,6 +170312,9 @@ export namespace Prisma {
     notifications?: NotificationCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationCreateNestedManyWithoutAccountInput
     aiExecutionRecords?: AiExecutionRecordCreateNestedManyWithoutAccountInput
+    aiPermissionSettings?: AiPermissionSettingCreateNestedManyWithoutAccountInput
+    aiPermissionRules?: AiPermissionRuleCreateNestedManyWithoutAccountInput
+    aiPermissionAudits?: AiPermissionAuditCreateNestedManyWithoutAccountInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseCreateNestedManyWithoutAccountInput
     aiConversationAttention?: AiConversationAttentionCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryCreateNestedManyWithoutAccountInput
@@ -165024,6 +170367,9 @@ export namespace Prisma {
     notifications?: NotificationUncheckedCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationUncheckedCreateNestedManyWithoutAccountInput
     aiExecutionRecords?: AiExecutionRecordUncheckedCreateNestedManyWithoutAccountInput
+    aiPermissionSettings?: AiPermissionSettingUncheckedCreateNestedManyWithoutAccountInput
+    aiPermissionRules?: AiPermissionRuleUncheckedCreateNestedManyWithoutAccountInput
+    aiPermissionAudits?: AiPermissionAuditUncheckedCreateNestedManyWithoutAccountInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseUncheckedCreateNestedManyWithoutAccountInput
     aiConversationAttention?: AiConversationAttentionUncheckedCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedCreateNestedManyWithoutAccountInput
@@ -165092,6 +170438,9 @@ export namespace Prisma {
     notifications?: NotificationUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUpdateManyWithoutAccountNestedInput
     aiExecutionRecords?: AiExecutionRecordUpdateManyWithoutAccountNestedInput
+    aiPermissionSettings?: AiPermissionSettingUpdateManyWithoutAccountNestedInput
+    aiPermissionRules?: AiPermissionRuleUpdateManyWithoutAccountNestedInput
+    aiPermissionAudits?: AiPermissionAuditUpdateManyWithoutAccountNestedInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseUpdateManyWithoutAccountNestedInput
     aiConversationAttention?: AiConversationAttentionUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUpdateManyWithoutAccountNestedInput
@@ -165144,6 +170493,9 @@ export namespace Prisma {
     notifications?: NotificationUncheckedUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUncheckedUpdateManyWithoutAccountNestedInput
     aiExecutionRecords?: AiExecutionRecordUncheckedUpdateManyWithoutAccountNestedInput
+    aiPermissionSettings?: AiPermissionSettingUncheckedUpdateManyWithoutAccountNestedInput
+    aiPermissionRules?: AiPermissionRuleUncheckedUpdateManyWithoutAccountNestedInput
+    aiPermissionAudits?: AiPermissionAuditUncheckedUpdateManyWithoutAccountNestedInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseUncheckedUpdateManyWithoutAccountNestedInput
     aiConversationAttention?: AiConversationAttentionUncheckedUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedUpdateManyWithoutAccountNestedInput
@@ -165196,6 +170548,9 @@ export namespace Prisma {
     notifications?: NotificationCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationCreateNestedManyWithoutAccountInput
     aiExecutionRecords?: AiExecutionRecordCreateNestedManyWithoutAccountInput
+    aiPermissionSettings?: AiPermissionSettingCreateNestedManyWithoutAccountInput
+    aiPermissionRules?: AiPermissionRuleCreateNestedManyWithoutAccountInput
+    aiPermissionAudits?: AiPermissionAuditCreateNestedManyWithoutAccountInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseCreateNestedManyWithoutAccountInput
     aiConversationAttention?: AiConversationAttentionCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryCreateNestedManyWithoutAccountInput
@@ -165248,6 +170603,9 @@ export namespace Prisma {
     notifications?: NotificationUncheckedCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationUncheckedCreateNestedManyWithoutAccountInput
     aiExecutionRecords?: AiExecutionRecordUncheckedCreateNestedManyWithoutAccountInput
+    aiPermissionSettings?: AiPermissionSettingUncheckedCreateNestedManyWithoutAccountInput
+    aiPermissionRules?: AiPermissionRuleUncheckedCreateNestedManyWithoutAccountInput
+    aiPermissionAudits?: AiPermissionAuditUncheckedCreateNestedManyWithoutAccountInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseUncheckedCreateNestedManyWithoutAccountInput
     aiConversationAttention?: AiConversationAttentionUncheckedCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedCreateNestedManyWithoutAccountInput
@@ -165316,6 +170674,9 @@ export namespace Prisma {
     notifications?: NotificationUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUpdateManyWithoutAccountNestedInput
     aiExecutionRecords?: AiExecutionRecordUpdateManyWithoutAccountNestedInput
+    aiPermissionSettings?: AiPermissionSettingUpdateManyWithoutAccountNestedInput
+    aiPermissionRules?: AiPermissionRuleUpdateManyWithoutAccountNestedInput
+    aiPermissionAudits?: AiPermissionAuditUpdateManyWithoutAccountNestedInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseUpdateManyWithoutAccountNestedInput
     aiConversationAttention?: AiConversationAttentionUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUpdateManyWithoutAccountNestedInput
@@ -165368,6 +170729,9 @@ export namespace Prisma {
     notifications?: NotificationUncheckedUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUncheckedUpdateManyWithoutAccountNestedInput
     aiExecutionRecords?: AiExecutionRecordUncheckedUpdateManyWithoutAccountNestedInput
+    aiPermissionSettings?: AiPermissionSettingUncheckedUpdateManyWithoutAccountNestedInput
+    aiPermissionRules?: AiPermissionRuleUncheckedUpdateManyWithoutAccountNestedInput
+    aiPermissionAudits?: AiPermissionAuditUncheckedUpdateManyWithoutAccountNestedInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseUncheckedUpdateManyWithoutAccountNestedInput
     aiConversationAttention?: AiConversationAttentionUncheckedUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedUpdateManyWithoutAccountNestedInput
@@ -165420,6 +170784,9 @@ export namespace Prisma {
     notifications?: NotificationCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationCreateNestedManyWithoutAccountInput
     aiExecutionRecords?: AiExecutionRecordCreateNestedManyWithoutAccountInput
+    aiPermissionSettings?: AiPermissionSettingCreateNestedManyWithoutAccountInput
+    aiPermissionRules?: AiPermissionRuleCreateNestedManyWithoutAccountInput
+    aiPermissionAudits?: AiPermissionAuditCreateNestedManyWithoutAccountInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseCreateNestedManyWithoutAccountInput
     aiConversationAttention?: AiConversationAttentionCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryCreateNestedManyWithoutAccountInput
@@ -165472,6 +170839,9 @@ export namespace Prisma {
     notifications?: NotificationUncheckedCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationUncheckedCreateNestedManyWithoutAccountInput
     aiExecutionRecords?: AiExecutionRecordUncheckedCreateNestedManyWithoutAccountInput
+    aiPermissionSettings?: AiPermissionSettingUncheckedCreateNestedManyWithoutAccountInput
+    aiPermissionRules?: AiPermissionRuleUncheckedCreateNestedManyWithoutAccountInput
+    aiPermissionAudits?: AiPermissionAuditUncheckedCreateNestedManyWithoutAccountInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseUncheckedCreateNestedManyWithoutAccountInput
     aiConversationAttention?: AiConversationAttentionUncheckedCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedCreateNestedManyWithoutAccountInput
@@ -165540,6 +170910,9 @@ export namespace Prisma {
     notifications?: NotificationUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUpdateManyWithoutAccountNestedInput
     aiExecutionRecords?: AiExecutionRecordUpdateManyWithoutAccountNestedInput
+    aiPermissionSettings?: AiPermissionSettingUpdateManyWithoutAccountNestedInput
+    aiPermissionRules?: AiPermissionRuleUpdateManyWithoutAccountNestedInput
+    aiPermissionAudits?: AiPermissionAuditUpdateManyWithoutAccountNestedInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseUpdateManyWithoutAccountNestedInput
     aiConversationAttention?: AiConversationAttentionUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUpdateManyWithoutAccountNestedInput
@@ -165592,6 +170965,9 @@ export namespace Prisma {
     notifications?: NotificationUncheckedUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUncheckedUpdateManyWithoutAccountNestedInput
     aiExecutionRecords?: AiExecutionRecordUncheckedUpdateManyWithoutAccountNestedInput
+    aiPermissionSettings?: AiPermissionSettingUncheckedUpdateManyWithoutAccountNestedInput
+    aiPermissionRules?: AiPermissionRuleUncheckedUpdateManyWithoutAccountNestedInput
+    aiPermissionAudits?: AiPermissionAuditUncheckedUpdateManyWithoutAccountNestedInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseUncheckedUpdateManyWithoutAccountNestedInput
     aiConversationAttention?: AiConversationAttentionUncheckedUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedUpdateManyWithoutAccountNestedInput
@@ -165644,6 +171020,9 @@ export namespace Prisma {
     notifications?: NotificationCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationCreateNestedManyWithoutAccountInput
     aiExecutionRecords?: AiExecutionRecordCreateNestedManyWithoutAccountInput
+    aiPermissionSettings?: AiPermissionSettingCreateNestedManyWithoutAccountInput
+    aiPermissionRules?: AiPermissionRuleCreateNestedManyWithoutAccountInput
+    aiPermissionAudits?: AiPermissionAuditCreateNestedManyWithoutAccountInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseCreateNestedManyWithoutAccountInput
     aiConversationAttention?: AiConversationAttentionCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryCreateNestedManyWithoutAccountInput
@@ -165696,6 +171075,9 @@ export namespace Prisma {
     notifications?: NotificationUncheckedCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationUncheckedCreateNestedManyWithoutAccountInput
     aiExecutionRecords?: AiExecutionRecordUncheckedCreateNestedManyWithoutAccountInput
+    aiPermissionSettings?: AiPermissionSettingUncheckedCreateNestedManyWithoutAccountInput
+    aiPermissionRules?: AiPermissionRuleUncheckedCreateNestedManyWithoutAccountInput
+    aiPermissionAudits?: AiPermissionAuditUncheckedCreateNestedManyWithoutAccountInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseUncheckedCreateNestedManyWithoutAccountInput
     aiConversationAttention?: AiConversationAttentionUncheckedCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedCreateNestedManyWithoutAccountInput
@@ -165921,6 +171303,9 @@ export namespace Prisma {
     notifications?: NotificationUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUpdateManyWithoutAccountNestedInput
     aiExecutionRecords?: AiExecutionRecordUpdateManyWithoutAccountNestedInput
+    aiPermissionSettings?: AiPermissionSettingUpdateManyWithoutAccountNestedInput
+    aiPermissionRules?: AiPermissionRuleUpdateManyWithoutAccountNestedInput
+    aiPermissionAudits?: AiPermissionAuditUpdateManyWithoutAccountNestedInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseUpdateManyWithoutAccountNestedInput
     aiConversationAttention?: AiConversationAttentionUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUpdateManyWithoutAccountNestedInput
@@ -165973,6 +171358,9 @@ export namespace Prisma {
     notifications?: NotificationUncheckedUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUncheckedUpdateManyWithoutAccountNestedInput
     aiExecutionRecords?: AiExecutionRecordUncheckedUpdateManyWithoutAccountNestedInput
+    aiPermissionSettings?: AiPermissionSettingUncheckedUpdateManyWithoutAccountNestedInput
+    aiPermissionRules?: AiPermissionRuleUncheckedUpdateManyWithoutAccountNestedInput
+    aiPermissionAudits?: AiPermissionAuditUncheckedUpdateManyWithoutAccountNestedInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseUncheckedUpdateManyWithoutAccountNestedInput
     aiConversationAttention?: AiConversationAttentionUncheckedUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedUpdateManyWithoutAccountNestedInput
@@ -166099,6 +171487,9 @@ export namespace Prisma {
     notifications?: NotificationCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationCreateNestedManyWithoutAccountInput
     aiExecutionRecords?: AiExecutionRecordCreateNestedManyWithoutAccountInput
+    aiPermissionSettings?: AiPermissionSettingCreateNestedManyWithoutAccountInput
+    aiPermissionRules?: AiPermissionRuleCreateNestedManyWithoutAccountInput
+    aiPermissionAudits?: AiPermissionAuditCreateNestedManyWithoutAccountInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseCreateNestedManyWithoutAccountInput
     aiConversationAttention?: AiConversationAttentionCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryCreateNestedManyWithoutAccountInput
@@ -166151,6 +171542,9 @@ export namespace Prisma {
     notifications?: NotificationUncheckedCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationUncheckedCreateNestedManyWithoutAccountInput
     aiExecutionRecords?: AiExecutionRecordUncheckedCreateNestedManyWithoutAccountInput
+    aiPermissionSettings?: AiPermissionSettingUncheckedCreateNestedManyWithoutAccountInput
+    aiPermissionRules?: AiPermissionRuleUncheckedCreateNestedManyWithoutAccountInput
+    aiPermissionAudits?: AiPermissionAuditUncheckedCreateNestedManyWithoutAccountInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseUncheckedCreateNestedManyWithoutAccountInput
     aiConversationAttention?: AiConversationAttentionUncheckedCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedCreateNestedManyWithoutAccountInput
@@ -166219,6 +171613,9 @@ export namespace Prisma {
     notifications?: NotificationUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUpdateManyWithoutAccountNestedInput
     aiExecutionRecords?: AiExecutionRecordUpdateManyWithoutAccountNestedInput
+    aiPermissionSettings?: AiPermissionSettingUpdateManyWithoutAccountNestedInput
+    aiPermissionRules?: AiPermissionRuleUpdateManyWithoutAccountNestedInput
+    aiPermissionAudits?: AiPermissionAuditUpdateManyWithoutAccountNestedInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseUpdateManyWithoutAccountNestedInput
     aiConversationAttention?: AiConversationAttentionUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUpdateManyWithoutAccountNestedInput
@@ -166271,6 +171668,9 @@ export namespace Prisma {
     notifications?: NotificationUncheckedUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUncheckedUpdateManyWithoutAccountNestedInput
     aiExecutionRecords?: AiExecutionRecordUncheckedUpdateManyWithoutAccountNestedInput
+    aiPermissionSettings?: AiPermissionSettingUncheckedUpdateManyWithoutAccountNestedInput
+    aiPermissionRules?: AiPermissionRuleUncheckedUpdateManyWithoutAccountNestedInput
+    aiPermissionAudits?: AiPermissionAuditUncheckedUpdateManyWithoutAccountNestedInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseUncheckedUpdateManyWithoutAccountNestedInput
     aiConversationAttention?: AiConversationAttentionUncheckedUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedUpdateManyWithoutAccountNestedInput
@@ -166323,6 +171723,9 @@ export namespace Prisma {
     notifications?: NotificationCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationCreateNestedManyWithoutAccountInput
     aiExecutionRecords?: AiExecutionRecordCreateNestedManyWithoutAccountInput
+    aiPermissionSettings?: AiPermissionSettingCreateNestedManyWithoutAccountInput
+    aiPermissionRules?: AiPermissionRuleCreateNestedManyWithoutAccountInput
+    aiPermissionAudits?: AiPermissionAuditCreateNestedManyWithoutAccountInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseCreateNestedManyWithoutAccountInput
     aiConversationAttention?: AiConversationAttentionCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryCreateNestedManyWithoutAccountInput
@@ -166375,6 +171778,9 @@ export namespace Prisma {
     notifications?: NotificationUncheckedCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationUncheckedCreateNestedManyWithoutAccountInput
     aiExecutionRecords?: AiExecutionRecordUncheckedCreateNestedManyWithoutAccountInput
+    aiPermissionSettings?: AiPermissionSettingUncheckedCreateNestedManyWithoutAccountInput
+    aiPermissionRules?: AiPermissionRuleUncheckedCreateNestedManyWithoutAccountInput
+    aiPermissionAudits?: AiPermissionAuditUncheckedCreateNestedManyWithoutAccountInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseUncheckedCreateNestedManyWithoutAccountInput
     aiConversationAttention?: AiConversationAttentionUncheckedCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedCreateNestedManyWithoutAccountInput
@@ -166470,6 +171876,9 @@ export namespace Prisma {
     notifications?: NotificationUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUpdateManyWithoutAccountNestedInput
     aiExecutionRecords?: AiExecutionRecordUpdateManyWithoutAccountNestedInput
+    aiPermissionSettings?: AiPermissionSettingUpdateManyWithoutAccountNestedInput
+    aiPermissionRules?: AiPermissionRuleUpdateManyWithoutAccountNestedInput
+    aiPermissionAudits?: AiPermissionAuditUpdateManyWithoutAccountNestedInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseUpdateManyWithoutAccountNestedInput
     aiConversationAttention?: AiConversationAttentionUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUpdateManyWithoutAccountNestedInput
@@ -166522,6 +171931,9 @@ export namespace Prisma {
     notifications?: NotificationUncheckedUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUncheckedUpdateManyWithoutAccountNestedInput
     aiExecutionRecords?: AiExecutionRecordUncheckedUpdateManyWithoutAccountNestedInput
+    aiPermissionSettings?: AiPermissionSettingUncheckedUpdateManyWithoutAccountNestedInput
+    aiPermissionRules?: AiPermissionRuleUncheckedUpdateManyWithoutAccountNestedInput
+    aiPermissionAudits?: AiPermissionAuditUncheckedUpdateManyWithoutAccountNestedInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseUncheckedUpdateManyWithoutAccountNestedInput
     aiConversationAttention?: AiConversationAttentionUncheckedUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedUpdateManyWithoutAccountNestedInput
@@ -166590,6 +172002,9 @@ export namespace Prisma {
     notifications?: NotificationCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationCreateNestedManyWithoutAccountInput
     aiExecutionRecords?: AiExecutionRecordCreateNestedManyWithoutAccountInput
+    aiPermissionSettings?: AiPermissionSettingCreateNestedManyWithoutAccountInput
+    aiPermissionRules?: AiPermissionRuleCreateNestedManyWithoutAccountInput
+    aiPermissionAudits?: AiPermissionAuditCreateNestedManyWithoutAccountInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseCreateNestedManyWithoutAccountInput
     aiConversationAttention?: AiConversationAttentionCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryCreateNestedManyWithoutAccountInput
@@ -166642,6 +172057,9 @@ export namespace Prisma {
     notifications?: NotificationUncheckedCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationUncheckedCreateNestedManyWithoutAccountInput
     aiExecutionRecords?: AiExecutionRecordUncheckedCreateNestedManyWithoutAccountInput
+    aiPermissionSettings?: AiPermissionSettingUncheckedCreateNestedManyWithoutAccountInput
+    aiPermissionRules?: AiPermissionRuleUncheckedCreateNestedManyWithoutAccountInput
+    aiPermissionAudits?: AiPermissionAuditUncheckedCreateNestedManyWithoutAccountInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseUncheckedCreateNestedManyWithoutAccountInput
     aiConversationAttention?: AiConversationAttentionUncheckedCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedCreateNestedManyWithoutAccountInput
@@ -166774,6 +172192,9 @@ export namespace Prisma {
     notifications?: NotificationUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUpdateManyWithoutAccountNestedInput
     aiExecutionRecords?: AiExecutionRecordUpdateManyWithoutAccountNestedInput
+    aiPermissionSettings?: AiPermissionSettingUpdateManyWithoutAccountNestedInput
+    aiPermissionRules?: AiPermissionRuleUpdateManyWithoutAccountNestedInput
+    aiPermissionAudits?: AiPermissionAuditUpdateManyWithoutAccountNestedInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseUpdateManyWithoutAccountNestedInput
     aiConversationAttention?: AiConversationAttentionUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUpdateManyWithoutAccountNestedInput
@@ -166826,6 +172247,9 @@ export namespace Prisma {
     notifications?: NotificationUncheckedUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUncheckedUpdateManyWithoutAccountNestedInput
     aiExecutionRecords?: AiExecutionRecordUncheckedUpdateManyWithoutAccountNestedInput
+    aiPermissionSettings?: AiPermissionSettingUncheckedUpdateManyWithoutAccountNestedInput
+    aiPermissionRules?: AiPermissionRuleUncheckedUpdateManyWithoutAccountNestedInput
+    aiPermissionAudits?: AiPermissionAuditUncheckedUpdateManyWithoutAccountNestedInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseUncheckedUpdateManyWithoutAccountNestedInput
     aiConversationAttention?: AiConversationAttentionUncheckedUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedUpdateManyWithoutAccountNestedInput
@@ -166954,6 +172378,9 @@ export namespace Prisma {
     notifications?: NotificationCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationCreateNestedManyWithoutAccountInput
     aiExecutionRecords?: AiExecutionRecordCreateNestedManyWithoutAccountInput
+    aiPermissionSettings?: AiPermissionSettingCreateNestedManyWithoutAccountInput
+    aiPermissionRules?: AiPermissionRuleCreateNestedManyWithoutAccountInput
+    aiPermissionAudits?: AiPermissionAuditCreateNestedManyWithoutAccountInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseCreateNestedManyWithoutAccountInput
     aiConversationAttention?: AiConversationAttentionCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryCreateNestedManyWithoutAccountInput
@@ -167006,6 +172433,9 @@ export namespace Prisma {
     notifications?: NotificationUncheckedCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationUncheckedCreateNestedManyWithoutAccountInput
     aiExecutionRecords?: AiExecutionRecordUncheckedCreateNestedManyWithoutAccountInput
+    aiPermissionSettings?: AiPermissionSettingUncheckedCreateNestedManyWithoutAccountInput
+    aiPermissionRules?: AiPermissionRuleUncheckedCreateNestedManyWithoutAccountInput
+    aiPermissionAudits?: AiPermissionAuditUncheckedCreateNestedManyWithoutAccountInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseUncheckedCreateNestedManyWithoutAccountInput
     aiConversationAttention?: AiConversationAttentionUncheckedCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedCreateNestedManyWithoutAccountInput
@@ -167109,6 +172539,9 @@ export namespace Prisma {
     notifications?: NotificationUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUpdateManyWithoutAccountNestedInput
     aiExecutionRecords?: AiExecutionRecordUpdateManyWithoutAccountNestedInput
+    aiPermissionSettings?: AiPermissionSettingUpdateManyWithoutAccountNestedInput
+    aiPermissionRules?: AiPermissionRuleUpdateManyWithoutAccountNestedInput
+    aiPermissionAudits?: AiPermissionAuditUpdateManyWithoutAccountNestedInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseUpdateManyWithoutAccountNestedInput
     aiConversationAttention?: AiConversationAttentionUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUpdateManyWithoutAccountNestedInput
@@ -167161,6 +172594,9 @@ export namespace Prisma {
     notifications?: NotificationUncheckedUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUncheckedUpdateManyWithoutAccountNestedInput
     aiExecutionRecords?: AiExecutionRecordUncheckedUpdateManyWithoutAccountNestedInput
+    aiPermissionSettings?: AiPermissionSettingUncheckedUpdateManyWithoutAccountNestedInput
+    aiPermissionRules?: AiPermissionRuleUncheckedUpdateManyWithoutAccountNestedInput
+    aiPermissionAudits?: AiPermissionAuditUncheckedUpdateManyWithoutAccountNestedInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseUncheckedUpdateManyWithoutAccountNestedInput
     aiConversationAttention?: AiConversationAttentionUncheckedUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedUpdateManyWithoutAccountNestedInput
@@ -167229,6 +172665,9 @@ export namespace Prisma {
     notifications?: NotificationCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationCreateNestedManyWithoutAccountInput
     aiExecutionRecords?: AiExecutionRecordCreateNestedManyWithoutAccountInput
+    aiPermissionSettings?: AiPermissionSettingCreateNestedManyWithoutAccountInput
+    aiPermissionRules?: AiPermissionRuleCreateNestedManyWithoutAccountInput
+    aiPermissionAudits?: AiPermissionAuditCreateNestedManyWithoutAccountInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseCreateNestedManyWithoutAccountInput
     aiConversationAttention?: AiConversationAttentionCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryCreateNestedManyWithoutAccountInput
@@ -167281,6 +172720,9 @@ export namespace Prisma {
     notifications?: NotificationUncheckedCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationUncheckedCreateNestedManyWithoutAccountInput
     aiExecutionRecords?: AiExecutionRecordUncheckedCreateNestedManyWithoutAccountInput
+    aiPermissionSettings?: AiPermissionSettingUncheckedCreateNestedManyWithoutAccountInput
+    aiPermissionRules?: AiPermissionRuleUncheckedCreateNestedManyWithoutAccountInput
+    aiPermissionAudits?: AiPermissionAuditUncheckedCreateNestedManyWithoutAccountInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseUncheckedCreateNestedManyWithoutAccountInput
     aiConversationAttention?: AiConversationAttentionUncheckedCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedCreateNestedManyWithoutAccountInput
@@ -167374,6 +172816,9 @@ export namespace Prisma {
     notifications?: NotificationUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUpdateManyWithoutAccountNestedInput
     aiExecutionRecords?: AiExecutionRecordUpdateManyWithoutAccountNestedInput
+    aiPermissionSettings?: AiPermissionSettingUpdateManyWithoutAccountNestedInput
+    aiPermissionRules?: AiPermissionRuleUpdateManyWithoutAccountNestedInput
+    aiPermissionAudits?: AiPermissionAuditUpdateManyWithoutAccountNestedInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseUpdateManyWithoutAccountNestedInput
     aiConversationAttention?: AiConversationAttentionUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUpdateManyWithoutAccountNestedInput
@@ -167426,6 +172871,9 @@ export namespace Prisma {
     notifications?: NotificationUncheckedUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUncheckedUpdateManyWithoutAccountNestedInput
     aiExecutionRecords?: AiExecutionRecordUncheckedUpdateManyWithoutAccountNestedInput
+    aiPermissionSettings?: AiPermissionSettingUncheckedUpdateManyWithoutAccountNestedInput
+    aiPermissionRules?: AiPermissionRuleUncheckedUpdateManyWithoutAccountNestedInput
+    aiPermissionAudits?: AiPermissionAuditUncheckedUpdateManyWithoutAccountNestedInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseUncheckedUpdateManyWithoutAccountNestedInput
     aiConversationAttention?: AiConversationAttentionUncheckedUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedUpdateManyWithoutAccountNestedInput
@@ -167547,6 +172995,9 @@ export namespace Prisma {
     notifications?: NotificationCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationCreateNestedManyWithoutAccountInput
     aiExecutionRecords?: AiExecutionRecordCreateNestedManyWithoutAccountInput
+    aiPermissionSettings?: AiPermissionSettingCreateNestedManyWithoutAccountInput
+    aiPermissionRules?: AiPermissionRuleCreateNestedManyWithoutAccountInput
+    aiPermissionAudits?: AiPermissionAuditCreateNestedManyWithoutAccountInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseCreateNestedManyWithoutAccountInput
     aiConversationAttention?: AiConversationAttentionCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryCreateNestedManyWithoutAccountInput
@@ -167599,6 +173050,9 @@ export namespace Prisma {
     notifications?: NotificationUncheckedCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationUncheckedCreateNestedManyWithoutAccountInput
     aiExecutionRecords?: AiExecutionRecordUncheckedCreateNestedManyWithoutAccountInput
+    aiPermissionSettings?: AiPermissionSettingUncheckedCreateNestedManyWithoutAccountInput
+    aiPermissionRules?: AiPermissionRuleUncheckedCreateNestedManyWithoutAccountInput
+    aiPermissionAudits?: AiPermissionAuditUncheckedCreateNestedManyWithoutAccountInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseUncheckedCreateNestedManyWithoutAccountInput
     aiConversationAttention?: AiConversationAttentionUncheckedCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedCreateNestedManyWithoutAccountInput
@@ -167744,6 +173198,9 @@ export namespace Prisma {
     notifications?: NotificationUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUpdateManyWithoutAccountNestedInput
     aiExecutionRecords?: AiExecutionRecordUpdateManyWithoutAccountNestedInput
+    aiPermissionSettings?: AiPermissionSettingUpdateManyWithoutAccountNestedInput
+    aiPermissionRules?: AiPermissionRuleUpdateManyWithoutAccountNestedInput
+    aiPermissionAudits?: AiPermissionAuditUpdateManyWithoutAccountNestedInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseUpdateManyWithoutAccountNestedInput
     aiConversationAttention?: AiConversationAttentionUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUpdateManyWithoutAccountNestedInput
@@ -167796,6 +173253,9 @@ export namespace Prisma {
     notifications?: NotificationUncheckedUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUncheckedUpdateManyWithoutAccountNestedInput
     aiExecutionRecords?: AiExecutionRecordUncheckedUpdateManyWithoutAccountNestedInput
+    aiPermissionSettings?: AiPermissionSettingUncheckedUpdateManyWithoutAccountNestedInput
+    aiPermissionRules?: AiPermissionRuleUncheckedUpdateManyWithoutAccountNestedInput
+    aiPermissionAudits?: AiPermissionAuditUncheckedUpdateManyWithoutAccountNestedInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseUncheckedUpdateManyWithoutAccountNestedInput
     aiConversationAttention?: AiConversationAttentionUncheckedUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedUpdateManyWithoutAccountNestedInput
@@ -167864,6 +173324,9 @@ export namespace Prisma {
     notifications?: NotificationCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationCreateNestedManyWithoutAccountInput
     aiExecutionRecords?: AiExecutionRecordCreateNestedManyWithoutAccountInput
+    aiPermissionSettings?: AiPermissionSettingCreateNestedManyWithoutAccountInput
+    aiPermissionRules?: AiPermissionRuleCreateNestedManyWithoutAccountInput
+    aiPermissionAudits?: AiPermissionAuditCreateNestedManyWithoutAccountInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseCreateNestedManyWithoutAccountInput
     aiConversationAttention?: AiConversationAttentionCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryCreateNestedManyWithoutAccountInput
@@ -167916,6 +173379,9 @@ export namespace Prisma {
     notifications?: NotificationUncheckedCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationUncheckedCreateNestedManyWithoutAccountInput
     aiExecutionRecords?: AiExecutionRecordUncheckedCreateNestedManyWithoutAccountInput
+    aiPermissionSettings?: AiPermissionSettingUncheckedCreateNestedManyWithoutAccountInput
+    aiPermissionRules?: AiPermissionRuleUncheckedCreateNestedManyWithoutAccountInput
+    aiPermissionAudits?: AiPermissionAuditUncheckedCreateNestedManyWithoutAccountInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseUncheckedCreateNestedManyWithoutAccountInput
     aiConversationAttention?: AiConversationAttentionUncheckedCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedCreateNestedManyWithoutAccountInput
@@ -168092,6 +173558,9 @@ export namespace Prisma {
     notifications?: NotificationUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUpdateManyWithoutAccountNestedInput
     aiExecutionRecords?: AiExecutionRecordUpdateManyWithoutAccountNestedInput
+    aiPermissionSettings?: AiPermissionSettingUpdateManyWithoutAccountNestedInput
+    aiPermissionRules?: AiPermissionRuleUpdateManyWithoutAccountNestedInput
+    aiPermissionAudits?: AiPermissionAuditUpdateManyWithoutAccountNestedInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseUpdateManyWithoutAccountNestedInput
     aiConversationAttention?: AiConversationAttentionUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUpdateManyWithoutAccountNestedInput
@@ -168144,6 +173613,9 @@ export namespace Prisma {
     notifications?: NotificationUncheckedUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUncheckedUpdateManyWithoutAccountNestedInput
     aiExecutionRecords?: AiExecutionRecordUncheckedUpdateManyWithoutAccountNestedInput
+    aiPermissionSettings?: AiPermissionSettingUncheckedUpdateManyWithoutAccountNestedInput
+    aiPermissionRules?: AiPermissionRuleUncheckedUpdateManyWithoutAccountNestedInput
+    aiPermissionAudits?: AiPermissionAuditUncheckedUpdateManyWithoutAccountNestedInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseUncheckedUpdateManyWithoutAccountNestedInput
     aiConversationAttention?: AiConversationAttentionUncheckedUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedUpdateManyWithoutAccountNestedInput
@@ -168352,6 +173824,9 @@ export namespace Prisma {
     notifications?: NotificationCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationCreateNestedManyWithoutAccountInput
     aiExecutionRecords?: AiExecutionRecordCreateNestedManyWithoutAccountInput
+    aiPermissionSettings?: AiPermissionSettingCreateNestedManyWithoutAccountInput
+    aiPermissionRules?: AiPermissionRuleCreateNestedManyWithoutAccountInput
+    aiPermissionAudits?: AiPermissionAuditCreateNestedManyWithoutAccountInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseCreateNestedManyWithoutAccountInput
     aiConversationAttention?: AiConversationAttentionCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryCreateNestedManyWithoutAccountInput
@@ -168404,6 +173879,9 @@ export namespace Prisma {
     notifications?: NotificationUncheckedCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationUncheckedCreateNestedManyWithoutAccountInput
     aiExecutionRecords?: AiExecutionRecordUncheckedCreateNestedManyWithoutAccountInput
+    aiPermissionSettings?: AiPermissionSettingUncheckedCreateNestedManyWithoutAccountInput
+    aiPermissionRules?: AiPermissionRuleUncheckedCreateNestedManyWithoutAccountInput
+    aiPermissionAudits?: AiPermissionAuditUncheckedCreateNestedManyWithoutAccountInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseUncheckedCreateNestedManyWithoutAccountInput
     aiConversationAttention?: AiConversationAttentionUncheckedCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedCreateNestedManyWithoutAccountInput
@@ -168515,6 +173993,9 @@ export namespace Prisma {
     notifications?: NotificationUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUpdateManyWithoutAccountNestedInput
     aiExecutionRecords?: AiExecutionRecordUpdateManyWithoutAccountNestedInput
+    aiPermissionSettings?: AiPermissionSettingUpdateManyWithoutAccountNestedInput
+    aiPermissionRules?: AiPermissionRuleUpdateManyWithoutAccountNestedInput
+    aiPermissionAudits?: AiPermissionAuditUpdateManyWithoutAccountNestedInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseUpdateManyWithoutAccountNestedInput
     aiConversationAttention?: AiConversationAttentionUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUpdateManyWithoutAccountNestedInput
@@ -168567,6 +174048,9 @@ export namespace Prisma {
     notifications?: NotificationUncheckedUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUncheckedUpdateManyWithoutAccountNestedInput
     aiExecutionRecords?: AiExecutionRecordUncheckedUpdateManyWithoutAccountNestedInput
+    aiPermissionSettings?: AiPermissionSettingUncheckedUpdateManyWithoutAccountNestedInput
+    aiPermissionRules?: AiPermissionRuleUncheckedUpdateManyWithoutAccountNestedInput
+    aiPermissionAudits?: AiPermissionAuditUncheckedUpdateManyWithoutAccountNestedInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseUncheckedUpdateManyWithoutAccountNestedInput
     aiConversationAttention?: AiConversationAttentionUncheckedUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedUpdateManyWithoutAccountNestedInput
@@ -168620,6 +174104,9 @@ export namespace Prisma {
     notifications?: NotificationCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationCreateNestedManyWithoutAccountInput
     aiExecutionRecords?: AiExecutionRecordCreateNestedManyWithoutAccountInput
+    aiPermissionSettings?: AiPermissionSettingCreateNestedManyWithoutAccountInput
+    aiPermissionRules?: AiPermissionRuleCreateNestedManyWithoutAccountInput
+    aiPermissionAudits?: AiPermissionAuditCreateNestedManyWithoutAccountInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseCreateNestedManyWithoutAccountInput
     aiConversationAttention?: AiConversationAttentionCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryCreateNestedManyWithoutAccountInput
@@ -168672,6 +174159,9 @@ export namespace Prisma {
     notifications?: NotificationUncheckedCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationUncheckedCreateNestedManyWithoutAccountInput
     aiExecutionRecords?: AiExecutionRecordUncheckedCreateNestedManyWithoutAccountInput
+    aiPermissionSettings?: AiPermissionSettingUncheckedCreateNestedManyWithoutAccountInput
+    aiPermissionRules?: AiPermissionRuleUncheckedCreateNestedManyWithoutAccountInput
+    aiPermissionAudits?: AiPermissionAuditUncheckedCreateNestedManyWithoutAccountInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseUncheckedCreateNestedManyWithoutAccountInput
     aiConversationAttention?: AiConversationAttentionUncheckedCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedCreateNestedManyWithoutAccountInput
@@ -168740,6 +174230,9 @@ export namespace Prisma {
     notifications?: NotificationUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUpdateManyWithoutAccountNestedInput
     aiExecutionRecords?: AiExecutionRecordUpdateManyWithoutAccountNestedInput
+    aiPermissionSettings?: AiPermissionSettingUpdateManyWithoutAccountNestedInput
+    aiPermissionRules?: AiPermissionRuleUpdateManyWithoutAccountNestedInput
+    aiPermissionAudits?: AiPermissionAuditUpdateManyWithoutAccountNestedInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseUpdateManyWithoutAccountNestedInput
     aiConversationAttention?: AiConversationAttentionUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUpdateManyWithoutAccountNestedInput
@@ -168792,6 +174285,9 @@ export namespace Prisma {
     notifications?: NotificationUncheckedUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUncheckedUpdateManyWithoutAccountNestedInput
     aiExecutionRecords?: AiExecutionRecordUncheckedUpdateManyWithoutAccountNestedInput
+    aiPermissionSettings?: AiPermissionSettingUncheckedUpdateManyWithoutAccountNestedInput
+    aiPermissionRules?: AiPermissionRuleUncheckedUpdateManyWithoutAccountNestedInput
+    aiPermissionAudits?: AiPermissionAuditUncheckedUpdateManyWithoutAccountNestedInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseUncheckedUpdateManyWithoutAccountNestedInput
     aiConversationAttention?: AiConversationAttentionUncheckedUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedUpdateManyWithoutAccountNestedInput
@@ -169030,6 +174526,9 @@ export namespace Prisma {
     notifications?: NotificationCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationCreateNestedManyWithoutAccountInput
     aiExecutionRecords?: AiExecutionRecordCreateNestedManyWithoutAccountInput
+    aiPermissionSettings?: AiPermissionSettingCreateNestedManyWithoutAccountInput
+    aiPermissionRules?: AiPermissionRuleCreateNestedManyWithoutAccountInput
+    aiPermissionAudits?: AiPermissionAuditCreateNestedManyWithoutAccountInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseCreateNestedManyWithoutAccountInput
     aiConversationAttention?: AiConversationAttentionCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryCreateNestedManyWithoutAccountInput
@@ -169082,6 +174581,9 @@ export namespace Prisma {
     notifications?: NotificationUncheckedCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationUncheckedCreateNestedManyWithoutAccountInput
     aiExecutionRecords?: AiExecutionRecordUncheckedCreateNestedManyWithoutAccountInput
+    aiPermissionSettings?: AiPermissionSettingUncheckedCreateNestedManyWithoutAccountInput
+    aiPermissionRules?: AiPermissionRuleUncheckedCreateNestedManyWithoutAccountInput
+    aiPermissionAudits?: AiPermissionAuditUncheckedCreateNestedManyWithoutAccountInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseUncheckedCreateNestedManyWithoutAccountInput
     aiConversationAttention?: AiConversationAttentionUncheckedCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedCreateNestedManyWithoutAccountInput
@@ -169440,6 +174942,9 @@ export namespace Prisma {
     notifications?: NotificationUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUpdateManyWithoutAccountNestedInput
     aiExecutionRecords?: AiExecutionRecordUpdateManyWithoutAccountNestedInput
+    aiPermissionSettings?: AiPermissionSettingUpdateManyWithoutAccountNestedInput
+    aiPermissionRules?: AiPermissionRuleUpdateManyWithoutAccountNestedInput
+    aiPermissionAudits?: AiPermissionAuditUpdateManyWithoutAccountNestedInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseUpdateManyWithoutAccountNestedInput
     aiConversationAttention?: AiConversationAttentionUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUpdateManyWithoutAccountNestedInput
@@ -169492,6 +174997,9 @@ export namespace Prisma {
     notifications?: NotificationUncheckedUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUncheckedUpdateManyWithoutAccountNestedInput
     aiExecutionRecords?: AiExecutionRecordUncheckedUpdateManyWithoutAccountNestedInput
+    aiPermissionSettings?: AiPermissionSettingUncheckedUpdateManyWithoutAccountNestedInput
+    aiPermissionRules?: AiPermissionRuleUncheckedUpdateManyWithoutAccountNestedInput
+    aiPermissionAudits?: AiPermissionAuditUncheckedUpdateManyWithoutAccountNestedInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseUncheckedUpdateManyWithoutAccountNestedInput
     aiConversationAttention?: AiConversationAttentionUncheckedUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedUpdateManyWithoutAccountNestedInput
@@ -170452,6 +175960,9 @@ export namespace Prisma {
     notifications?: NotificationCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationCreateNestedManyWithoutAccountInput
     aiExecutionRecords?: AiExecutionRecordCreateNestedManyWithoutAccountInput
+    aiPermissionSettings?: AiPermissionSettingCreateNestedManyWithoutAccountInput
+    aiPermissionRules?: AiPermissionRuleCreateNestedManyWithoutAccountInput
+    aiPermissionAudits?: AiPermissionAuditCreateNestedManyWithoutAccountInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseCreateNestedManyWithoutAccountInput
     aiConversationAttention?: AiConversationAttentionCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryCreateNestedManyWithoutAccountInput
@@ -170504,6 +176015,9 @@ export namespace Prisma {
     notifications?: NotificationUncheckedCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationUncheckedCreateNestedManyWithoutAccountInput
     aiExecutionRecords?: AiExecutionRecordUncheckedCreateNestedManyWithoutAccountInput
+    aiPermissionSettings?: AiPermissionSettingUncheckedCreateNestedManyWithoutAccountInput
+    aiPermissionRules?: AiPermissionRuleUncheckedCreateNestedManyWithoutAccountInput
+    aiPermissionAudits?: AiPermissionAuditUncheckedCreateNestedManyWithoutAccountInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseUncheckedCreateNestedManyWithoutAccountInput
     aiConversationAttention?: AiConversationAttentionUncheckedCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedCreateNestedManyWithoutAccountInput
@@ -170617,6 +176131,9 @@ export namespace Prisma {
     notifications?: NotificationUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUpdateManyWithoutAccountNestedInput
     aiExecutionRecords?: AiExecutionRecordUpdateManyWithoutAccountNestedInput
+    aiPermissionSettings?: AiPermissionSettingUpdateManyWithoutAccountNestedInput
+    aiPermissionRules?: AiPermissionRuleUpdateManyWithoutAccountNestedInput
+    aiPermissionAudits?: AiPermissionAuditUpdateManyWithoutAccountNestedInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseUpdateManyWithoutAccountNestedInput
     aiConversationAttention?: AiConversationAttentionUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUpdateManyWithoutAccountNestedInput
@@ -170669,6 +176186,9 @@ export namespace Prisma {
     notifications?: NotificationUncheckedUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUncheckedUpdateManyWithoutAccountNestedInput
     aiExecutionRecords?: AiExecutionRecordUncheckedUpdateManyWithoutAccountNestedInput
+    aiPermissionSettings?: AiPermissionSettingUncheckedUpdateManyWithoutAccountNestedInput
+    aiPermissionRules?: AiPermissionRuleUncheckedUpdateManyWithoutAccountNestedInput
+    aiPermissionAudits?: AiPermissionAuditUncheckedUpdateManyWithoutAccountNestedInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseUncheckedUpdateManyWithoutAccountNestedInput
     aiConversationAttention?: AiConversationAttentionUncheckedUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedUpdateManyWithoutAccountNestedInput
@@ -170771,6 +176291,9 @@ export namespace Prisma {
     notifications?: NotificationCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationCreateNestedManyWithoutAccountInput
     aiExecutionRecords?: AiExecutionRecordCreateNestedManyWithoutAccountInput
+    aiPermissionSettings?: AiPermissionSettingCreateNestedManyWithoutAccountInput
+    aiPermissionRules?: AiPermissionRuleCreateNestedManyWithoutAccountInput
+    aiPermissionAudits?: AiPermissionAuditCreateNestedManyWithoutAccountInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseCreateNestedManyWithoutAccountInput
     aiConversationAttention?: AiConversationAttentionCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryCreateNestedManyWithoutAccountInput
@@ -170823,6 +176346,9 @@ export namespace Prisma {
     notifications?: NotificationUncheckedCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationUncheckedCreateNestedManyWithoutAccountInput
     aiExecutionRecords?: AiExecutionRecordUncheckedCreateNestedManyWithoutAccountInput
+    aiPermissionSettings?: AiPermissionSettingUncheckedCreateNestedManyWithoutAccountInput
+    aiPermissionRules?: AiPermissionRuleUncheckedCreateNestedManyWithoutAccountInput
+    aiPermissionAudits?: AiPermissionAuditUncheckedCreateNestedManyWithoutAccountInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseUncheckedCreateNestedManyWithoutAccountInput
     aiConversationAttention?: AiConversationAttentionUncheckedCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedCreateNestedManyWithoutAccountInput
@@ -170891,6 +176417,9 @@ export namespace Prisma {
     notifications?: NotificationUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUpdateManyWithoutAccountNestedInput
     aiExecutionRecords?: AiExecutionRecordUpdateManyWithoutAccountNestedInput
+    aiPermissionSettings?: AiPermissionSettingUpdateManyWithoutAccountNestedInput
+    aiPermissionRules?: AiPermissionRuleUpdateManyWithoutAccountNestedInput
+    aiPermissionAudits?: AiPermissionAuditUpdateManyWithoutAccountNestedInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseUpdateManyWithoutAccountNestedInput
     aiConversationAttention?: AiConversationAttentionUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUpdateManyWithoutAccountNestedInput
@@ -170943,6 +176472,9 @@ export namespace Prisma {
     notifications?: NotificationUncheckedUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUncheckedUpdateManyWithoutAccountNestedInput
     aiExecutionRecords?: AiExecutionRecordUncheckedUpdateManyWithoutAccountNestedInput
+    aiPermissionSettings?: AiPermissionSettingUncheckedUpdateManyWithoutAccountNestedInput
+    aiPermissionRules?: AiPermissionRuleUncheckedUpdateManyWithoutAccountNestedInput
+    aiPermissionAudits?: AiPermissionAuditUncheckedUpdateManyWithoutAccountNestedInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseUncheckedUpdateManyWithoutAccountNestedInput
     aiConversationAttention?: AiConversationAttentionUncheckedUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedUpdateManyWithoutAccountNestedInput
@@ -170995,6 +176527,9 @@ export namespace Prisma {
     notifications?: NotificationCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationCreateNestedManyWithoutAccountInput
     aiExecutionRecords?: AiExecutionRecordCreateNestedManyWithoutAccountInput
+    aiPermissionSettings?: AiPermissionSettingCreateNestedManyWithoutAccountInput
+    aiPermissionRules?: AiPermissionRuleCreateNestedManyWithoutAccountInput
+    aiPermissionAudits?: AiPermissionAuditCreateNestedManyWithoutAccountInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseCreateNestedManyWithoutAccountInput
     aiConversationAttention?: AiConversationAttentionCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryCreateNestedManyWithoutAccountInput
@@ -171047,6 +176582,9 @@ export namespace Prisma {
     notifications?: NotificationUncheckedCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationUncheckedCreateNestedManyWithoutAccountInput
     aiExecutionRecords?: AiExecutionRecordUncheckedCreateNestedManyWithoutAccountInput
+    aiPermissionSettings?: AiPermissionSettingUncheckedCreateNestedManyWithoutAccountInput
+    aiPermissionRules?: AiPermissionRuleUncheckedCreateNestedManyWithoutAccountInput
+    aiPermissionAudits?: AiPermissionAuditUncheckedCreateNestedManyWithoutAccountInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseUncheckedCreateNestedManyWithoutAccountInput
     aiConversationAttention?: AiConversationAttentionUncheckedCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedCreateNestedManyWithoutAccountInput
@@ -171159,6 +176697,9 @@ export namespace Prisma {
     notifications?: NotificationUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUpdateManyWithoutAccountNestedInput
     aiExecutionRecords?: AiExecutionRecordUpdateManyWithoutAccountNestedInput
+    aiPermissionSettings?: AiPermissionSettingUpdateManyWithoutAccountNestedInput
+    aiPermissionRules?: AiPermissionRuleUpdateManyWithoutAccountNestedInput
+    aiPermissionAudits?: AiPermissionAuditUpdateManyWithoutAccountNestedInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseUpdateManyWithoutAccountNestedInput
     aiConversationAttention?: AiConversationAttentionUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUpdateManyWithoutAccountNestedInput
@@ -171211,6 +176752,9 @@ export namespace Prisma {
     notifications?: NotificationUncheckedUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUncheckedUpdateManyWithoutAccountNestedInput
     aiExecutionRecords?: AiExecutionRecordUncheckedUpdateManyWithoutAccountNestedInput
+    aiPermissionSettings?: AiPermissionSettingUncheckedUpdateManyWithoutAccountNestedInput
+    aiPermissionRules?: AiPermissionRuleUncheckedUpdateManyWithoutAccountNestedInput
+    aiPermissionAudits?: AiPermissionAuditUncheckedUpdateManyWithoutAccountNestedInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseUncheckedUpdateManyWithoutAccountNestedInput
     aiConversationAttention?: AiConversationAttentionUncheckedUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedUpdateManyWithoutAccountNestedInput
@@ -171279,6 +176823,9 @@ export namespace Prisma {
     notifications?: NotificationCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationCreateNestedManyWithoutAccountInput
     aiExecutionRecords?: AiExecutionRecordCreateNestedManyWithoutAccountInput
+    aiPermissionSettings?: AiPermissionSettingCreateNestedManyWithoutAccountInput
+    aiPermissionRules?: AiPermissionRuleCreateNestedManyWithoutAccountInput
+    aiPermissionAudits?: AiPermissionAuditCreateNestedManyWithoutAccountInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseCreateNestedManyWithoutAccountInput
     aiConversationAttention?: AiConversationAttentionCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryCreateNestedManyWithoutAccountInput
@@ -171331,6 +176878,9 @@ export namespace Prisma {
     notifications?: NotificationUncheckedCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationUncheckedCreateNestedManyWithoutAccountInput
     aiExecutionRecords?: AiExecutionRecordUncheckedCreateNestedManyWithoutAccountInput
+    aiPermissionSettings?: AiPermissionSettingUncheckedCreateNestedManyWithoutAccountInput
+    aiPermissionRules?: AiPermissionRuleUncheckedCreateNestedManyWithoutAccountInput
+    aiPermissionAudits?: AiPermissionAuditUncheckedCreateNestedManyWithoutAccountInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseUncheckedCreateNestedManyWithoutAccountInput
     aiConversationAttention?: AiConversationAttentionUncheckedCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedCreateNestedManyWithoutAccountInput
@@ -171464,6 +177014,9 @@ export namespace Prisma {
     notifications?: NotificationUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUpdateManyWithoutAccountNestedInput
     aiExecutionRecords?: AiExecutionRecordUpdateManyWithoutAccountNestedInput
+    aiPermissionSettings?: AiPermissionSettingUpdateManyWithoutAccountNestedInput
+    aiPermissionRules?: AiPermissionRuleUpdateManyWithoutAccountNestedInput
+    aiPermissionAudits?: AiPermissionAuditUpdateManyWithoutAccountNestedInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseUpdateManyWithoutAccountNestedInput
     aiConversationAttention?: AiConversationAttentionUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUpdateManyWithoutAccountNestedInput
@@ -171516,6 +177069,9 @@ export namespace Prisma {
     notifications?: NotificationUncheckedUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUncheckedUpdateManyWithoutAccountNestedInput
     aiExecutionRecords?: AiExecutionRecordUncheckedUpdateManyWithoutAccountNestedInput
+    aiPermissionSettings?: AiPermissionSettingUncheckedUpdateManyWithoutAccountNestedInput
+    aiPermissionRules?: AiPermissionRuleUncheckedUpdateManyWithoutAccountNestedInput
+    aiPermissionAudits?: AiPermissionAuditUncheckedUpdateManyWithoutAccountNestedInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseUncheckedUpdateManyWithoutAccountNestedInput
     aiConversationAttention?: AiConversationAttentionUncheckedUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedUpdateManyWithoutAccountNestedInput
@@ -171639,6 +177195,9 @@ export namespace Prisma {
     notifications?: NotificationCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationCreateNestedManyWithoutAccountInput
     aiExecutionRecords?: AiExecutionRecordCreateNestedManyWithoutAccountInput
+    aiPermissionSettings?: AiPermissionSettingCreateNestedManyWithoutAccountInput
+    aiPermissionRules?: AiPermissionRuleCreateNestedManyWithoutAccountInput
+    aiPermissionAudits?: AiPermissionAuditCreateNestedManyWithoutAccountInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseCreateNestedManyWithoutAccountInput
     aiConversationAttention?: AiConversationAttentionCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryCreateNestedManyWithoutAccountInput
@@ -171691,6 +177250,9 @@ export namespace Prisma {
     notifications?: NotificationUncheckedCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationUncheckedCreateNestedManyWithoutAccountInput
     aiExecutionRecords?: AiExecutionRecordUncheckedCreateNestedManyWithoutAccountInput
+    aiPermissionSettings?: AiPermissionSettingUncheckedCreateNestedManyWithoutAccountInput
+    aiPermissionRules?: AiPermissionRuleUncheckedCreateNestedManyWithoutAccountInput
+    aiPermissionAudits?: AiPermissionAuditUncheckedCreateNestedManyWithoutAccountInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseUncheckedCreateNestedManyWithoutAccountInput
     aiConversationAttention?: AiConversationAttentionUncheckedCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedCreateNestedManyWithoutAccountInput
@@ -171759,6 +177321,9 @@ export namespace Prisma {
     notifications?: NotificationUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUpdateManyWithoutAccountNestedInput
     aiExecutionRecords?: AiExecutionRecordUpdateManyWithoutAccountNestedInput
+    aiPermissionSettings?: AiPermissionSettingUpdateManyWithoutAccountNestedInput
+    aiPermissionRules?: AiPermissionRuleUpdateManyWithoutAccountNestedInput
+    aiPermissionAudits?: AiPermissionAuditUpdateManyWithoutAccountNestedInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseUpdateManyWithoutAccountNestedInput
     aiConversationAttention?: AiConversationAttentionUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUpdateManyWithoutAccountNestedInput
@@ -171811,6 +177376,9 @@ export namespace Prisma {
     notifications?: NotificationUncheckedUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUncheckedUpdateManyWithoutAccountNestedInput
     aiExecutionRecords?: AiExecutionRecordUncheckedUpdateManyWithoutAccountNestedInput
+    aiPermissionSettings?: AiPermissionSettingUncheckedUpdateManyWithoutAccountNestedInput
+    aiPermissionRules?: AiPermissionRuleUncheckedUpdateManyWithoutAccountNestedInput
+    aiPermissionAudits?: AiPermissionAuditUncheckedUpdateManyWithoutAccountNestedInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseUncheckedUpdateManyWithoutAccountNestedInput
     aiConversationAttention?: AiConversationAttentionUncheckedUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedUpdateManyWithoutAccountNestedInput
@@ -171863,6 +177431,9 @@ export namespace Prisma {
     notifications?: NotificationCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationCreateNestedManyWithoutAccountInput
     aiExecutionRecords?: AiExecutionRecordCreateNestedManyWithoutAccountInput
+    aiPermissionSettings?: AiPermissionSettingCreateNestedManyWithoutAccountInput
+    aiPermissionRules?: AiPermissionRuleCreateNestedManyWithoutAccountInput
+    aiPermissionAudits?: AiPermissionAuditCreateNestedManyWithoutAccountInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseCreateNestedManyWithoutAccountInput
     aiConversationAttention?: AiConversationAttentionCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryCreateNestedManyWithoutAccountInput
@@ -171915,6 +177486,9 @@ export namespace Prisma {
     notifications?: NotificationUncheckedCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationUncheckedCreateNestedManyWithoutAccountInput
     aiExecutionRecords?: AiExecutionRecordUncheckedCreateNestedManyWithoutAccountInput
+    aiPermissionSettings?: AiPermissionSettingUncheckedCreateNestedManyWithoutAccountInput
+    aiPermissionRules?: AiPermissionRuleUncheckedCreateNestedManyWithoutAccountInput
+    aiPermissionAudits?: AiPermissionAuditUncheckedCreateNestedManyWithoutAccountInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseUncheckedCreateNestedManyWithoutAccountInput
     aiConversationAttention?: AiConversationAttentionUncheckedCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedCreateNestedManyWithoutAccountInput
@@ -171983,6 +177557,9 @@ export namespace Prisma {
     notifications?: NotificationUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUpdateManyWithoutAccountNestedInput
     aiExecutionRecords?: AiExecutionRecordUpdateManyWithoutAccountNestedInput
+    aiPermissionSettings?: AiPermissionSettingUpdateManyWithoutAccountNestedInput
+    aiPermissionRules?: AiPermissionRuleUpdateManyWithoutAccountNestedInput
+    aiPermissionAudits?: AiPermissionAuditUpdateManyWithoutAccountNestedInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseUpdateManyWithoutAccountNestedInput
     aiConversationAttention?: AiConversationAttentionUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUpdateManyWithoutAccountNestedInput
@@ -172035,6 +177612,9 @@ export namespace Prisma {
     notifications?: NotificationUncheckedUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUncheckedUpdateManyWithoutAccountNestedInput
     aiExecutionRecords?: AiExecutionRecordUncheckedUpdateManyWithoutAccountNestedInput
+    aiPermissionSettings?: AiPermissionSettingUncheckedUpdateManyWithoutAccountNestedInput
+    aiPermissionRules?: AiPermissionRuleUncheckedUpdateManyWithoutAccountNestedInput
+    aiPermissionAudits?: AiPermissionAuditUncheckedUpdateManyWithoutAccountNestedInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseUncheckedUpdateManyWithoutAccountNestedInput
     aiConversationAttention?: AiConversationAttentionUncheckedUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedUpdateManyWithoutAccountNestedInput
@@ -172087,6 +177667,9 @@ export namespace Prisma {
     notifications?: NotificationCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationCreateNestedManyWithoutAccountInput
     aiExecutionRecords?: AiExecutionRecordCreateNestedManyWithoutAccountInput
+    aiPermissionSettings?: AiPermissionSettingCreateNestedManyWithoutAccountInput
+    aiPermissionRules?: AiPermissionRuleCreateNestedManyWithoutAccountInput
+    aiPermissionAudits?: AiPermissionAuditCreateNestedManyWithoutAccountInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseCreateNestedManyWithoutAccountInput
     aiConversationAttention?: AiConversationAttentionCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryCreateNestedManyWithoutAccountInput
@@ -172139,6 +177722,9 @@ export namespace Prisma {
     notifications?: NotificationUncheckedCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationUncheckedCreateNestedManyWithoutAccountInput
     aiExecutionRecords?: AiExecutionRecordUncheckedCreateNestedManyWithoutAccountInput
+    aiPermissionSettings?: AiPermissionSettingUncheckedCreateNestedManyWithoutAccountInput
+    aiPermissionRules?: AiPermissionRuleUncheckedCreateNestedManyWithoutAccountInput
+    aiPermissionAudits?: AiPermissionAuditUncheckedCreateNestedManyWithoutAccountInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseUncheckedCreateNestedManyWithoutAccountInput
     aiConversationAttention?: AiConversationAttentionUncheckedCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedCreateNestedManyWithoutAccountInput
@@ -172344,6 +177930,9 @@ export namespace Prisma {
     notifications?: NotificationUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUpdateManyWithoutAccountNestedInput
     aiExecutionRecords?: AiExecutionRecordUpdateManyWithoutAccountNestedInput
+    aiPermissionSettings?: AiPermissionSettingUpdateManyWithoutAccountNestedInput
+    aiPermissionRules?: AiPermissionRuleUpdateManyWithoutAccountNestedInput
+    aiPermissionAudits?: AiPermissionAuditUpdateManyWithoutAccountNestedInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseUpdateManyWithoutAccountNestedInput
     aiConversationAttention?: AiConversationAttentionUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUpdateManyWithoutAccountNestedInput
@@ -172396,6 +177985,9 @@ export namespace Prisma {
     notifications?: NotificationUncheckedUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUncheckedUpdateManyWithoutAccountNestedInput
     aiExecutionRecords?: AiExecutionRecordUncheckedUpdateManyWithoutAccountNestedInput
+    aiPermissionSettings?: AiPermissionSettingUncheckedUpdateManyWithoutAccountNestedInput
+    aiPermissionRules?: AiPermissionRuleUncheckedUpdateManyWithoutAccountNestedInput
+    aiPermissionAudits?: AiPermissionAuditUncheckedUpdateManyWithoutAccountNestedInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseUncheckedUpdateManyWithoutAccountNestedInput
     aiConversationAttention?: AiConversationAttentionUncheckedUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedUpdateManyWithoutAccountNestedInput
@@ -172550,6 +178142,9 @@ export namespace Prisma {
     notifications?: NotificationCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationCreateNestedManyWithoutAccountInput
     aiExecutionRecords?: AiExecutionRecordCreateNestedManyWithoutAccountInput
+    aiPermissionSettings?: AiPermissionSettingCreateNestedManyWithoutAccountInput
+    aiPermissionRules?: AiPermissionRuleCreateNestedManyWithoutAccountInput
+    aiPermissionAudits?: AiPermissionAuditCreateNestedManyWithoutAccountInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseCreateNestedManyWithoutAccountInput
     aiConversationAttention?: AiConversationAttentionCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryCreateNestedManyWithoutAccountInput
@@ -172602,6 +178197,9 @@ export namespace Prisma {
     notifications?: NotificationUncheckedCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationUncheckedCreateNestedManyWithoutAccountInput
     aiExecutionRecords?: AiExecutionRecordUncheckedCreateNestedManyWithoutAccountInput
+    aiPermissionSettings?: AiPermissionSettingUncheckedCreateNestedManyWithoutAccountInput
+    aiPermissionRules?: AiPermissionRuleUncheckedCreateNestedManyWithoutAccountInput
+    aiPermissionAudits?: AiPermissionAuditUncheckedCreateNestedManyWithoutAccountInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseUncheckedCreateNestedManyWithoutAccountInput
     aiConversationAttention?: AiConversationAttentionUncheckedCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedCreateNestedManyWithoutAccountInput
@@ -172732,6 +178330,9 @@ export namespace Prisma {
     notifications?: NotificationUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUpdateManyWithoutAccountNestedInput
     aiExecutionRecords?: AiExecutionRecordUpdateManyWithoutAccountNestedInput
+    aiPermissionSettings?: AiPermissionSettingUpdateManyWithoutAccountNestedInput
+    aiPermissionRules?: AiPermissionRuleUpdateManyWithoutAccountNestedInput
+    aiPermissionAudits?: AiPermissionAuditUpdateManyWithoutAccountNestedInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseUpdateManyWithoutAccountNestedInput
     aiConversationAttention?: AiConversationAttentionUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUpdateManyWithoutAccountNestedInput
@@ -172784,6 +178385,9 @@ export namespace Prisma {
     notifications?: NotificationUncheckedUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUncheckedUpdateManyWithoutAccountNestedInput
     aiExecutionRecords?: AiExecutionRecordUncheckedUpdateManyWithoutAccountNestedInput
+    aiPermissionSettings?: AiPermissionSettingUncheckedUpdateManyWithoutAccountNestedInput
+    aiPermissionRules?: AiPermissionRuleUncheckedUpdateManyWithoutAccountNestedInput
+    aiPermissionAudits?: AiPermissionAuditUncheckedUpdateManyWithoutAccountNestedInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseUncheckedUpdateManyWithoutAccountNestedInput
     aiConversationAttention?: AiConversationAttentionUncheckedUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedUpdateManyWithoutAccountNestedInput
@@ -172905,6 +178509,9 @@ export namespace Prisma {
     notifications?: NotificationCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationCreateNestedManyWithoutAccountInput
     aiExecutionRecords?: AiExecutionRecordCreateNestedManyWithoutAccountInput
+    aiPermissionSettings?: AiPermissionSettingCreateNestedManyWithoutAccountInput
+    aiPermissionRules?: AiPermissionRuleCreateNestedManyWithoutAccountInput
+    aiPermissionAudits?: AiPermissionAuditCreateNestedManyWithoutAccountInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseCreateNestedManyWithoutAccountInput
     aiConversationAttention?: AiConversationAttentionCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryCreateNestedManyWithoutAccountInput
@@ -172957,6 +178564,9 @@ export namespace Prisma {
     notifications?: NotificationUncheckedCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationUncheckedCreateNestedManyWithoutAccountInput
     aiExecutionRecords?: AiExecutionRecordUncheckedCreateNestedManyWithoutAccountInput
+    aiPermissionSettings?: AiPermissionSettingUncheckedCreateNestedManyWithoutAccountInput
+    aiPermissionRules?: AiPermissionRuleUncheckedCreateNestedManyWithoutAccountInput
+    aiPermissionAudits?: AiPermissionAuditUncheckedCreateNestedManyWithoutAccountInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseUncheckedCreateNestedManyWithoutAccountInput
     aiConversationAttention?: AiConversationAttentionUncheckedCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedCreateNestedManyWithoutAccountInput
@@ -173087,6 +178697,9 @@ export namespace Prisma {
     notifications?: NotificationUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUpdateManyWithoutAccountNestedInput
     aiExecutionRecords?: AiExecutionRecordUpdateManyWithoutAccountNestedInput
+    aiPermissionSettings?: AiPermissionSettingUpdateManyWithoutAccountNestedInput
+    aiPermissionRules?: AiPermissionRuleUpdateManyWithoutAccountNestedInput
+    aiPermissionAudits?: AiPermissionAuditUpdateManyWithoutAccountNestedInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseUpdateManyWithoutAccountNestedInput
     aiConversationAttention?: AiConversationAttentionUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUpdateManyWithoutAccountNestedInput
@@ -173139,6 +178752,9 @@ export namespace Prisma {
     notifications?: NotificationUncheckedUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUncheckedUpdateManyWithoutAccountNestedInput
     aiExecutionRecords?: AiExecutionRecordUncheckedUpdateManyWithoutAccountNestedInput
+    aiPermissionSettings?: AiPermissionSettingUncheckedUpdateManyWithoutAccountNestedInput
+    aiPermissionRules?: AiPermissionRuleUncheckedUpdateManyWithoutAccountNestedInput
+    aiPermissionAudits?: AiPermissionAuditUncheckedUpdateManyWithoutAccountNestedInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseUncheckedUpdateManyWithoutAccountNestedInput
     aiConversationAttention?: AiConversationAttentionUncheckedUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedUpdateManyWithoutAccountNestedInput
@@ -173258,6 +178874,9 @@ export namespace Prisma {
     notifications?: NotificationCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationCreateNestedManyWithoutAccountInput
     aiExecutionRecords?: AiExecutionRecordCreateNestedManyWithoutAccountInput
+    aiPermissionSettings?: AiPermissionSettingCreateNestedManyWithoutAccountInput
+    aiPermissionRules?: AiPermissionRuleCreateNestedManyWithoutAccountInput
+    aiPermissionAudits?: AiPermissionAuditCreateNestedManyWithoutAccountInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseCreateNestedManyWithoutAccountInput
     aiConversationAttention?: AiConversationAttentionCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryCreateNestedManyWithoutAccountInput
@@ -173310,6 +178929,9 @@ export namespace Prisma {
     notifications?: NotificationUncheckedCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationUncheckedCreateNestedManyWithoutAccountInput
     aiExecutionRecords?: AiExecutionRecordUncheckedCreateNestedManyWithoutAccountInput
+    aiPermissionSettings?: AiPermissionSettingUncheckedCreateNestedManyWithoutAccountInput
+    aiPermissionRules?: AiPermissionRuleUncheckedCreateNestedManyWithoutAccountInput
+    aiPermissionAudits?: AiPermissionAuditUncheckedCreateNestedManyWithoutAccountInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseUncheckedCreateNestedManyWithoutAccountInput
     aiConversationAttention?: AiConversationAttentionUncheckedCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedCreateNestedManyWithoutAccountInput
@@ -173412,6 +179034,9 @@ export namespace Prisma {
     notifications?: NotificationUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUpdateManyWithoutAccountNestedInput
     aiExecutionRecords?: AiExecutionRecordUpdateManyWithoutAccountNestedInput
+    aiPermissionSettings?: AiPermissionSettingUpdateManyWithoutAccountNestedInput
+    aiPermissionRules?: AiPermissionRuleUpdateManyWithoutAccountNestedInput
+    aiPermissionAudits?: AiPermissionAuditUpdateManyWithoutAccountNestedInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseUpdateManyWithoutAccountNestedInput
     aiConversationAttention?: AiConversationAttentionUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUpdateManyWithoutAccountNestedInput
@@ -173464,6 +179089,9 @@ export namespace Prisma {
     notifications?: NotificationUncheckedUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUncheckedUpdateManyWithoutAccountNestedInput
     aiExecutionRecords?: AiExecutionRecordUncheckedUpdateManyWithoutAccountNestedInput
+    aiPermissionSettings?: AiPermissionSettingUncheckedUpdateManyWithoutAccountNestedInput
+    aiPermissionRules?: AiPermissionRuleUncheckedUpdateManyWithoutAccountNestedInput
+    aiPermissionAudits?: AiPermissionAuditUncheckedUpdateManyWithoutAccountNestedInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseUncheckedUpdateManyWithoutAccountNestedInput
     aiConversationAttention?: AiConversationAttentionUncheckedUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedUpdateManyWithoutAccountNestedInput
@@ -173557,6 +179185,9 @@ export namespace Prisma {
     notifications?: NotificationCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationCreateNestedManyWithoutAccountInput
     aiExecutionRecords?: AiExecutionRecordCreateNestedManyWithoutAccountInput
+    aiPermissionSettings?: AiPermissionSettingCreateNestedManyWithoutAccountInput
+    aiPermissionRules?: AiPermissionRuleCreateNestedManyWithoutAccountInput
+    aiPermissionAudits?: AiPermissionAuditCreateNestedManyWithoutAccountInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseCreateNestedManyWithoutAccountInput
     aiConversationAttention?: AiConversationAttentionCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryCreateNestedManyWithoutAccountInput
@@ -173609,6 +179240,9 @@ export namespace Prisma {
     notifications?: NotificationUncheckedCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationUncheckedCreateNestedManyWithoutAccountInput
     aiExecutionRecords?: AiExecutionRecordUncheckedCreateNestedManyWithoutAccountInput
+    aiPermissionSettings?: AiPermissionSettingUncheckedCreateNestedManyWithoutAccountInput
+    aiPermissionRules?: AiPermissionRuleUncheckedCreateNestedManyWithoutAccountInput
+    aiPermissionAudits?: AiPermissionAuditUncheckedCreateNestedManyWithoutAccountInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseUncheckedCreateNestedManyWithoutAccountInput
     aiConversationAttention?: AiConversationAttentionUncheckedCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedCreateNestedManyWithoutAccountInput
@@ -173708,6 +179342,9 @@ export namespace Prisma {
     notifications?: NotificationUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUpdateManyWithoutAccountNestedInput
     aiExecutionRecords?: AiExecutionRecordUpdateManyWithoutAccountNestedInput
+    aiPermissionSettings?: AiPermissionSettingUpdateManyWithoutAccountNestedInput
+    aiPermissionRules?: AiPermissionRuleUpdateManyWithoutAccountNestedInput
+    aiPermissionAudits?: AiPermissionAuditUpdateManyWithoutAccountNestedInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseUpdateManyWithoutAccountNestedInput
     aiConversationAttention?: AiConversationAttentionUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUpdateManyWithoutAccountNestedInput
@@ -173760,6 +179397,9 @@ export namespace Prisma {
     notifications?: NotificationUncheckedUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUncheckedUpdateManyWithoutAccountNestedInput
     aiExecutionRecords?: AiExecutionRecordUncheckedUpdateManyWithoutAccountNestedInput
+    aiPermissionSettings?: AiPermissionSettingUncheckedUpdateManyWithoutAccountNestedInput
+    aiPermissionRules?: AiPermissionRuleUncheckedUpdateManyWithoutAccountNestedInput
+    aiPermissionAudits?: AiPermissionAuditUncheckedUpdateManyWithoutAccountNestedInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseUncheckedUpdateManyWithoutAccountNestedInput
     aiConversationAttention?: AiConversationAttentionUncheckedUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedUpdateManyWithoutAccountNestedInput
@@ -174149,6 +179789,26 @@ export namespace Prisma {
     latencyMs?: number | null
     createdAt?: Date | string
     completedAt?: Date | string
+  }
+
+  export type AiPermissionSettingCreateManyAccountInput = {
+    id: string
+    revision?: number
+    recordJson: string
+    updatedAt?: Date | string
+  }
+
+  export type AiPermissionRuleCreateManyAccountInput = {
+    id: string
+    agentId?: string | null
+    recordJson: string
+    updatedAt?: Date | string
+  }
+
+  export type AiPermissionAuditCreateManyAccountInput = {
+    id: string
+    occurredAt: Date | string
+    recordJson: string
   }
 
   export type AiGoalSurfaceLeaseCreateManyAccountInput = {
@@ -175569,6 +181229,66 @@ export namespace Prisma {
     latencyMs?: NullableIntFieldUpdateOperationsInput | number | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     completedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type AiPermissionSettingUpdateWithoutAccountInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    revision?: IntFieldUpdateOperationsInput | number
+    recordJson?: StringFieldUpdateOperationsInput | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type AiPermissionSettingUncheckedUpdateWithoutAccountInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    revision?: IntFieldUpdateOperationsInput | number
+    recordJson?: StringFieldUpdateOperationsInput | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type AiPermissionSettingUncheckedUpdateManyWithoutAccountInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    revision?: IntFieldUpdateOperationsInput | number
+    recordJson?: StringFieldUpdateOperationsInput | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type AiPermissionRuleUpdateWithoutAccountInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    agentId?: NullableStringFieldUpdateOperationsInput | string | null
+    recordJson?: StringFieldUpdateOperationsInput | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type AiPermissionRuleUncheckedUpdateWithoutAccountInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    agentId?: NullableStringFieldUpdateOperationsInput | string | null
+    recordJson?: StringFieldUpdateOperationsInput | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type AiPermissionRuleUncheckedUpdateManyWithoutAccountInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    agentId?: NullableStringFieldUpdateOperationsInput | string | null
+    recordJson?: StringFieldUpdateOperationsInput | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type AiPermissionAuditUpdateWithoutAccountInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    occurredAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    recordJson?: StringFieldUpdateOperationsInput | string
+  }
+
+  export type AiPermissionAuditUncheckedUpdateWithoutAccountInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    occurredAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    recordJson?: StringFieldUpdateOperationsInput | string
+  }
+
+  export type AiPermissionAuditUncheckedUpdateManyWithoutAccountInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    occurredAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    recordJson?: StringFieldUpdateOperationsInput | string
   }
 
   export type AiGoalSurfaceLeaseUpdateWithoutAccountInput = {

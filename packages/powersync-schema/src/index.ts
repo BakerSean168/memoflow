@@ -18,7 +18,7 @@
  *   - `@@map` names are used as table keys (snake_case SQL names).
  */
 
-import { column, Schema, Table } from '@powersync/common';
+import { column, Schema, Table } from "@powersync/common";
 
 // ──────────────────────────────────────────────
 // Account
@@ -400,7 +400,7 @@ const routine_profile_memberships = new Table(
     created_at: column.text,
     updated_at: column.text,
   },
-  { trackPrevious: { columns: ['profile_id', 'routine_id'] } },
+  { trackPrevious: { columns: ["profile_id", "routine_id"] } },
 );
 
 const routine_occurrences = new Table({
@@ -457,7 +457,7 @@ const routine_temporary_overrides = new Table(
     created_at: column.text,
     updated_at: column.text,
   },
-  { trackPrevious: { columns: ['routine_id'] } },
+  { trackPrevious: { columns: ["routine_id"] } },
 );
 
 const routine_protocol_definitions = new Table({
@@ -641,7 +641,10 @@ const ai_conversation_attention = new Table({
 });
 
 // Profile-local committed Attention projection and replay log; never sync transport cursors.
-const ai_conversation_event_metadata = new Table({ epoch: column.text }, { localOnly: true });
+const ai_conversation_event_metadata = new Table(
+  { epoch: column.text },
+  { localOnly: true },
+);
 const ai_conversation_event_heads = new Table(
   {
     identity_id: column.text,
@@ -674,7 +677,10 @@ const ai_conversation_event_log = new Table(
   { localOnly: true },
 );
 
-const ai_attention_event_metadata = new Table({ epoch: column.text }, { localOnly: true });
+const ai_attention_event_metadata = new Table(
+  { epoch: column.text },
+  { localOnly: true },
+);
 const ai_attention_event_heads = new Table(
   {
     identity_id: column.text,
@@ -733,6 +739,24 @@ const ai_execution_records = new Table({
   latency_ms: column.integer,
   created_at: column.text,
   completed_at: column.text,
+});
+
+const ai_permission_settings = new Table({
+  identity_id: column.text,
+  revision: column.integer,
+  record_json: column.text,
+  updated_at: column.text,
+});
+const ai_permission_rules = new Table({
+  identity_id: column.text,
+  agent_id: column.text,
+  record_json: column.text,
+  updated_at: column.text,
+});
+const ai_permission_audit = new Table({
+  identity_id: column.text,
+  occurred_at: column.text,
+  record_json: column.text,
 });
 
 /**
@@ -872,7 +896,11 @@ const ai_agent_model_service_migrations = new Table(
 
 // Immutable UUID-to-instance mapping only; native config remains in LocalAgentRepository.
 const ai_agent_native_mappings = new Table(
-  { identity_id: column.text, connection_id: column.text, instance_id: column.text },
+  {
+    identity_id: column.text,
+    connection_id: column.text,
+    instance_id: column.text,
+  },
   { localOnly: true },
 );
 
@@ -985,6 +1013,9 @@ export const PowerSyncAppSchema = new Schema({
   ai_attention_event_states,
   ai_attention_event_log,
   ai_execution_records,
+  ai_permission_settings,
+  ai_permission_rules,
+  ai_permission_audit,
   ai_provider_configs,
   ai_provider_onboarding_sessions,
   ai_provider_secrets,
