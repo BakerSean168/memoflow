@@ -86,7 +86,24 @@ export function resolveGoalIntent(question: GoalIntentQuestion, answer: string):
     : null;
 }
 
+/** Stable codes returned to agents when a Goal commit must wait for the user. */
+export const GoalIntentCommitBlockCodeSchema = z.enum([
+  'GOAL_CLARIFICATION_REQUIRED',
+  'GOAL_DISCUSSION_ONLY',
+]);
+export type GoalIntentCommitBlockCode = z.infer<typeof GoalIntentCommitBlockCodeSchema>;
+
+/** Typed refusal so callers branch on `code`, never on the error message. */
+export class GoalIntentCommitBlockedError extends Error {
+  constructor(readonly code: GoalIntentCommitBlockCode) {
+    super(code);
+    this.name = 'GoalIntentCommitBlockedError';
+  }
+}
+
+/** Throws {@link GoalIntentCommitBlockedError} while the request is discussion-only or ambiguous. */
 export function assertGoalIntentCanCommit(source: string): void {
-  if (isGoalDiscussionOnly(source)) throw new Error('GOAL_DISCUSSION_ONLY');
-  if (inspectGoalIntent(source)) throw new Error('GOAL_CLARIFICATION_REQUIRED');
+  if (isGoalDiscussionOnly(source)) throw new GoalIntentCommitBlockedError('GOAL_DISCUSSION_ONLY');
+  if (inspectGoalIntent(source))
+    throw new GoalIntentCommitBlockedError('GOAL_CLARIFICATION_REQUIRED');
 }

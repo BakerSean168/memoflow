@@ -37,6 +37,7 @@ import type { IElectronDatabase, IElectronDatabaseTransaction } from '@memoflow/
 import {
   GoalPanelSnapshotSchema,
   assertGoalIntentCanCommit,
+  GoalIntentCommitBlockedError,
   GoalPanelPatchCommandSchema,
   GoalPanelAddKeyResultCommandSchema,
   GoalPanelRemoveKeyResultCommandSchema,
@@ -198,9 +199,8 @@ export function createDesktopLocalAgentTools(
                 ? 'FORBIDDEN'
                 : error instanceof z.ZodError
                   ? 'VALIDATION_ERROR'
-                  : error instanceof Error &&
-                      /^GOAL_(?:CLARIFICATION_REQUIRED|DISCUSSION_ONLY)$/.test(error.message)
-                    ? error.message
+                  : error instanceof GoalIntentCommitBlockedError
+                    ? error.code
                     : 'INTERNAL_ERROR';
           return { isError: true, content: [{ type: 'text' as const, text: code }] };
         }

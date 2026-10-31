@@ -1,5 +1,10 @@
 import { describe, expect, it } from 'vitest';
-import { inspectGoalIntent, resolveGoalIntent } from './goal-intent-clarification';
+import {
+  assertGoalIntentCanCommit,
+  GoalIntentCommitBlockedError,
+  inspectGoalIntent,
+  resolveGoalIntent,
+} from './goal-intent-clarification';
 
 describe('Goal critical intent clarification', () => {
   it('requires the exam-year meaning before accepting model-generated dates', () => {
@@ -26,5 +31,18 @@ describe('Goal critical intent clarification', () => {
     expect(inspectGoalIntent('创建目标：最晚 2027-01-01 完成，但截止 2027-02-01')).toMatchObject({
       field: 'deadline_conflict',
     });
+  });
+  it('blocks commits with a typed code instead of a message string', () => {
+    const blocked = (source: string) => {
+      try {
+        assertGoalIntentCanCommit(source);
+        return null;
+      } catch (error) {
+        return error instanceof GoalIntentCommitBlockedError ? error.code : 'untyped';
+      }
+    };
+    expect(blocked('先讨论一下考研规划，不要创建')).toBe('GOAL_DISCUSSION_ONLY');
+    expect(blocked('帮我备战 2027 年考研')).toBe('GOAL_CLARIFICATION_REQUIRED');
+    expect(blocked('每天阅读半小时')).toBeNull();
   });
 });
