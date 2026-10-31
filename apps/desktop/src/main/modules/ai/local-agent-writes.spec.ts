@@ -32,6 +32,7 @@ it('advertises only authorized writes, commits through owners and refuses revoke
   try {
     const connection = await store.createConnection(identityId, config);
     const readGrant = await bridge.open({
+      permissionMode: 'auto-approve',
       identityId,
       connectionId: connection.id,
       conversationId: 'test',
@@ -47,6 +48,7 @@ it('advertises only authorized writes, commits through owners and refuses revoke
       writeScopes: ['goals:write', 'tasks:write'],
     });
     const grant = await bridge.open({
+      permissionMode: 'auto-approve',
       identityId,
       connectionId: connection.id,
       conversationId: 'test',
@@ -80,6 +82,7 @@ it('advertises only authorized writes, commits through owners and refuses revoke
     expect(plan).toContain('receiptId');
     expect(f.sql.prepare('SELECT COUNT(*) AS n FROM task_plans').get()).toMatchObject({ n: 1 });
     const ambiguous = await bridge.open({
+      permissionMode: 'auto-approve',
       identityId,
       connectionId: connection.id,
       conversationId: 'test',
@@ -94,6 +97,7 @@ it('advertises only authorized writes, commits through owners and refuses revoke
     ).text();
     expect(rejected).toContain('GOAL_CLARIFICATION_REQUIRED');
     const discussOnly = await bridge.open({
+      permissionMode: 'auto-approve',
       identityId,
       connectionId: connection.id,
       conversationId: 'test',
@@ -115,6 +119,7 @@ it('advertises only authorized writes, commits through owners and refuses revoke
     });
     expect((await call(grant, 'tools/call', params)).status).toBe(403);
     const afterRevocation = await bridge.open({
+      permissionMode: 'auto-approve',
       identityId,
       connectionId: connection.id,
       conversationId: 'test',
@@ -124,6 +129,74 @@ it('advertises only authorized writes, commits through owners and refuses revoke
     expect(f.sql.prepare('SELECT COUNT(*) AS n FROM goal_operation_receipts').get()).toMatchObject({
       n: 1,
     });
+  } finally {
+    await bridge.dispose();
+    f.close();
+  }
+});
+
+it('requires business approval for direct Goal and Task writes without inserting data on denial', async () => {
+  const f = createPowerSyncSqliteFixture();
+  const store = new LocalAgentRepository(f.db);
+  const bridge = createDesktopLocalAgentTools(f.db, store, () => true, {
+    getUserTimeContext: async () => createTimeContext({ timeZone: 'UTC', weekStartsOn: 1 }),
+  });
+  const requested: string[] = [];
+  try {
+    const connection = await store.createConnection(
+      'IdentityId_00000000-0000-4000-8000-000000000001',
+      {
+        driver: 'codex',
+        name: 'Codex',
+        executablePath: 'codex',
+        enabled: true,
+        writeScopes: ['goals:write', 'tasks:write'],
+      },
+    );
+    const grant = await bridge.open({
+      identityId: 'IdentityId_00000000-0000-4000-8000-000000000001',
+      connectionId: connection.id,
+      conversationId: 'chat',
+      runId: 'run',
+      permissionMode: 'supervised',
+      requestApproval: async (name) => {
+        requested.push(name);
+        return false;
+      },
+    });
+    for (const [name, args] of [
+      ['goal_create', { idempotencyKey: 'goal', goal: { name: 'Denied Goal' } }],
+      [
+        'task_plan_create',
+        {
+          idempotencyKey: 'task',
+          plan: {
+            name: 'Denied Task',
+            importance: 'Moderate',
+            schedule: { kind: 'OneTime', date: '2026-11-01', timing: { kind: 'AllDay' } },
+          },
+        },
+      ],
+    ] as const) {
+      const result = await fetch(grant.url, {
+        method: 'POST',
+        headers: {
+          authorization: `Bearer ${grant.token}`,
+          accept: 'application/json, text/event-stream',
+          'content-type': 'application/json',
+        },
+        body: JSON.stringify({
+          jsonrpc: '2.0',
+          id: 1,
+          method: 'tools/call',
+          params: { name, arguments: args },
+        }),
+      });
+      expect(await result.text()).toContain('PERMISSION_DENIED');
+    }
+    expect(requested).toEqual(['goal_create', 'task_plan_create']);
+    expect(f.sql.prepare('SELECT COUNT(*) AS n FROM goals').get()).toMatchObject({ n: 0 });
+    expect(f.sql.prepare('SELECT COUNT(*) AS n FROM task_plans').get()).toMatchObject({ n: 0 });
   } finally {
     await bridge.dispose();
     f.close();

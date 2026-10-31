@@ -41,7 +41,7 @@ export interface NativeAgentRunInput {
   modelId: string;
   modelOptions?: LocalAgentModelOptions;
   content: string;
-  mcp?: { url: string; token: string };
+  mcp?: { url: string; token: string; toolNames?: readonly string[] };
   signal?: AbortSignal;
 }
 type NativeResponse = LocalAgentRequestResponse['response'];

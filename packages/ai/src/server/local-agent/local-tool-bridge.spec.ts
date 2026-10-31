@@ -176,3 +176,68 @@ it('authenticates every native MCP call and revokes old Profile capabilities', a
     db.close();
   }
 });
+
+it.each(['timeout', 'missing-handler'] as const)(
+  'denies %s business approval before executing a write',
+  async (reason) => {
+    const db = createLocalAgentSqlite();
+    const store = new LocalAgentRepository(db);
+    const connection = await store.createConnection('owner', {
+      driver: 'codex',
+      name: 'Codex',
+      executablePath: 'codex',
+      enabled: true,
+      writeScopes: ['goals:write'],
+    });
+    let writes = 0;
+    const bridge = new LocalAgentToolBridge({
+      store,
+      isActive: () => true,
+      approvalTimeoutMs: 10,
+      registerTools(server, context) {
+        server.registerTool('goal_panel_submit', { inputSchema: z.object({}) }, async () => {
+          try {
+            await context.requestApproval('goal_panel_submit');
+            writes++;
+            return { content: [{ type: 'text', text: 'saved' }] };
+          } catch (error) {
+            return { isError: true, content: [{ type: 'text', text: (error as Error).message }] };
+          }
+        });
+      },
+    });
+    try {
+      const grant = await bridge.open({
+        identityId: 'owner',
+        connectionId: connection.id,
+        conversationId: 'chat',
+        runId: 'run',
+        ...(reason === 'timeout'
+          ? {
+              permissionMode: 'supervised' as const,
+              requestApproval: () => new Promise<boolean>(() => {}),
+            }
+          : {}),
+      });
+      const result = await fetch(grant.url, {
+        method: 'POST',
+        headers: {
+          authorization: `Bearer ${grant.token}`,
+          accept: 'application/json, text/event-stream',
+          'content-type': 'application/json',
+        },
+        body: JSON.stringify({
+          jsonrpc: '2.0',
+          id: 1,
+          method: 'tools/call',
+          params: { name: 'goal_panel_submit', arguments: {} },
+        }),
+      });
+      expect(await result.text()).toContain('PERMISSION_DENIED');
+      expect(writes).toBe(0);
+    } finally {
+      await bridge.dispose();
+      db.close();
+    }
+  },
+);

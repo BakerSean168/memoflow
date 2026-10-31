@@ -26,7 +26,7 @@ import {
   LocalAgentActivitySchema,
   LOCAL_AGENT_DEFAULT_EXECUTABLES,
 } from '@memoflow/ai-contracts';
-import { CodexDriver } from './codex-driver';
+import { CodexDriver, type NativeAgentEvent } from './codex-driver';
 import { ClaudeDriver } from './claude-driver';
 import { PiDriver } from './pi-driver';
 import { AcpDriver } from './acp-driver';
@@ -36,11 +36,35 @@ import { nativeIdentity, nativeModelVisibilityContext } from './native-identity'
 import { antigravityHasCachedAuth } from './antigravity-native';
 import type { LocalAgentRepository } from '../infrastructure/adapters/powersync/local-agent.repository';
 import { verifyLocalAgentMcpConnectivity } from './local-tool-bridge';
+import { NativeEventQueue } from './native-event-queue';
+
+/** Keep Provider backpressure while accepting MCP requests during a pending native next(). */
+async function* mergeRunEvents(
+  native: AsyncIterable<NativeAgentEvent>,
+  business: AsyncIterable<NativeAgentEvent>,
+): AsyncGenerator<NativeAgentEvent> {
+  const provider = native[Symbol.asyncIterator]();
+  const approvals = business[Symbol.asyncIterator]();
+  const nextProvider = () =>
+    provider.next().then((result) => ({ source: 'provider' as const, result }));
+  const nextApproval = () =>
+    approvals.next().then((result) => ({ source: 'approval' as const, result }));
+  let providerEvent = nextProvider();
+  let approvalEvent = nextApproval();
+  for (;;) {
+    const { source, result } = await Promise.race([providerEvent, approvalEvent]);
+    if (result.done) return;
+    yield result.value;
+    if (source === 'provider') providerEvent = nextProvider();
+    else approvalEvent = nextApproval();
+  }
+}
 
 type Driver = Pick<CodexDriver, 'probe' | 'run' | 'respond' | 'cancel' | 'close'>;
 export interface LocalAgentToolGrant {
   url: string;
   token: string;
+  toolNames?: readonly string[];
   revoke(): void;
 }
 export interface LocalAgentToolBridgePort {
@@ -50,6 +74,8 @@ export interface LocalAgentToolBridgePort {
     conversationId: string;
     runId: string;
     goalIntent?: string;
+    permissionMode?: AIChatPermissionMode;
+    requestApproval?: (toolName: string, signal: AbortSignal) => Promise<boolean>;
   }): Promise<LocalAgentToolGrant>;
   dispose(): Promise<void>;
 }
@@ -64,6 +90,7 @@ interface ActiveRun {
   grant?: LocalAgentToolGrant;
   abort: AbortController;
   permissions: NativePermissionLedger;
+  businessApprovals?: Map<string, (approved: boolean) => void>;
 }
 /**
  * Per-run memory of native (Provider-side) permission requests. Native permission
@@ -698,12 +725,46 @@ export class LocalAgentRuntime {
         };
         return;
       }
+      const events = new NativeEventQueue();
+      run.businessApprovals = new Map();
       run.grant = await this.options.bridge?.open({
         identityId: input.identityId,
         connectionId: connection.id,
         conversationId: conversation.id,
         runId: run.runId,
         goalIntent: input.content,
+        permissionMode: input.permissionMode ?? 'supervised',
+        requestApproval: (toolName, signal) =>
+          new Promise<boolean>((resolve) => {
+            const requestId = randomUUID();
+            const finish = (
+              approved: boolean,
+              resolution: 'answered' | 'cancelled' = 'answered',
+            ) => {
+              signal.removeEventListener('abort', onAbort);
+              run.businessApprovals?.delete(requestId);
+              events.push({
+                type: 'request_resolved',
+                requestId,
+                resolution,
+              });
+              resolve(approved);
+            };
+            const onAbort = () => finish(false, 'cancelled');
+            if (signal.aborted) return resolve(false);
+            run.businessApprovals!.set(requestId, finish);
+            signal.addEventListener('abort', onAbort, { once: true });
+            events.push({
+              type: 'request',
+              request: {
+                type: 'permission',
+                requestId,
+                title: `MemoFlow: ${toolName}`,
+                reason: '确认写入 MemoFlow 数据 / Confirm writing MemoFlow data',
+                scope: toolName,
+              },
+            });
+          }),
       });
       started = true;
       yield {
@@ -721,6 +782,7 @@ export class LocalAgentRuntime {
         if (!check.ok) {
           throw new LocalAgentError('LOCAL_AGENT_TOOLS_UNAVAILABLE');
         }
+        run.grant.toolNames = check.tools;
       }
       if (this.stopped || run.abort.signal.aborted || this.options.isActive?.() === false) {
         yield { ...envelope(), type: 'assistant.run.cancelled', data: {} };
@@ -728,7 +790,7 @@ export class LocalAgentRuntime {
       }
       const toolRouting = run.grant ? `\n\n${MEMOFLOW_NATIVE_TOOL_ROUTING_INSTRUCTIONS}` : '';
       const content = `${input.content}${toolRouting}\n\nMemoFlow reference format: cite Goal and TaskPlan results using Markdown links [name](/goals/ID) and [title](/tasks/ID), with IDs returned by MemoFlow tools. Cite Knowledge notes using [title](url) with the exact url returned by knowledge_search/knowledge_get.${input.selectedEntities?.length ? `\nUser-selected MemoFlow references (look up using MemoFlow tools):\n${JSON.stringify(input.selectedEntities)}` : ''}`;
-      for await (const event of run.driver.run({
+      const nativeEvents = run.driver.run({
         nativeSessionId: conversation.nativeSessionId,
         accountFingerprint: conversation.accountFingerprint,
         modelId,
@@ -736,7 +798,9 @@ export class LocalAgentRuntime {
         content,
         mcp: run.grant,
         signal: run.abort.signal,
-      })) {
+      });
+      // MCP callbacks reuse the existing conversation request channel.
+      for await (const event of mergeRunEvents(nativeEvents, events)) {
         if (run.abort.signal.aborted || this.stopped || this.options.isActive?.() === false) {
           if (!this.stopped && this.options.isActive?.() !== false)
             await this.persist(() =>
@@ -798,7 +862,16 @@ export class LocalAgentRuntime {
         } else if (event.type === 'request') {
           // Only native permission requests may be explicitly auto-approved for
           // this turn. User questions, sandbox and scoped MCP grants are untouched.
-          if (input.permissionMode === 'auto-approve' && event.request.type === 'permission') {
+          if (run.businessApprovals?.has(event.request.requestId)) {
+            yield {
+              ...envelope(),
+              type: 'assistant.request.required',
+              data: event.request,
+            };
+          } else if (
+            input.permissionMode === 'auto-approve' &&
+            event.request.type === 'permission'
+          ) {
             if (
               !run.driver.respond(event.request.requestId, {
                 type: 'permission',
@@ -1023,6 +1096,19 @@ export class LocalAgentRuntime {
   respond(identityId: string, input: LocalAgentRequestResponse): boolean {
     this.assertActive();
     const run = this.runs.get(input.runId);
+    if (
+      run &&
+      run.identityId === identityId &&
+      run.conversationId === input.conversationId &&
+      !run.abort.signal.aborted &&
+      input.response.type === 'permission'
+    ) {
+      const approval = run.businessApprovals?.get(input.requestId);
+      if (approval) {
+        approval(input.response.decision === 'approve_once');
+        return true;
+      }
+    }
     if (
       !run ||
       run.identityId !== identityId ||
