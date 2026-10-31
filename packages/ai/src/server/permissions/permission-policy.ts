@@ -34,7 +34,6 @@ export function inferCustomPreset(
 }
 
 export function migrateLegacyPermissionSettings(input: {
-  mode?: 'read-only' | 'confirm' | 'auto' | 'read_only' | 'confirm_each' | 'auto_approve';
   writeScopes?: readonly string[];
   agentId: string;
 }): {
@@ -42,8 +41,6 @@ export function migrateLegacyPermissionSettings(input: {
   rules: PermissionRule[];
   migratedFrom: string;
 } {
-  const preset: PermissionPreset =
-    input.mode === 'read-only' || input.mode === 'read_only' ? 'read_only' : 'confirm_each';
   const rules: PermissionRule[] = [];
   const scopedObjects: readonly [string, PermissionObject][] = [
     ['goals:write', 'goal'],
@@ -64,7 +61,7 @@ export function migrateLegacyPermissionSettings(input: {
       }
     }
   }
-  return { preset, rules, migratedFrom: input.mode ?? 'missing' };
+  return { preset: 'on_demand', rules, migratedFrom: 'legacy-write-scopes-v2' };
 }
 
 export interface PermissionContext {
