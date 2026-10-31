@@ -135,14 +135,15 @@ describe('evaluatePermission', () => {
     expect(goalPanelSubmitOperationId(true)).toBe('goal.update');
   });
 
-  it('migrates old session modes conservatively and preserves missing write scopes as denies', () => {
+  it('migrates missing write scopes as denies without importing a session preset', () => {
     const migration = migrateLegacyPermissionSettings({
-      mode: 'auto_approve',
       writeScopes: ['goals:write'],
       agentId: 'codex',
     });
-    expect(migration.preset).toBe('confirm_each');
+    expect(migration.preset).toBe('on_demand');
+    expect(migration.migratedFrom).toBe('legacy-write-scopes-v2');
     expect(migration.rules).toHaveLength(6);
+    expect(migration.rules.every((rule) => rule.agentId === 'codex')).toBe(true);
     expect(
       evaluatePermission({
         agentId: 'codex',
@@ -151,9 +152,12 @@ describe('evaluatePermission', () => {
         agentRules: migration.rules,
       }),
     ).toMatchObject({ decision: 'deny', reason: 'user_deny' });
-    expect(migrateLegacyPermissionSettings({ mode: 'read-only', agentId: 'codex' }).preset).toBe(
-      'read_only',
-    );
+    const scoped = migrateLegacyPermissionSettings({
+      agentId: 'codex',
+      writeScopes: ['goals:write', 'tasks:write', 'routines:write'],
+    });
+    expect(scoped.preset).toBe('on_demand');
+    expect(scoped.rules).toEqual([]);
   });
 
   it.each([

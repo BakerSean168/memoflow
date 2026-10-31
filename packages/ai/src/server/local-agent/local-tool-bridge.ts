@@ -171,7 +171,7 @@ export class LocalAgentToolBridge implements LocalAgentToolBridgePort {
       Date.now() < grant.expiresAt
     );
   }
-  private migratePermissions(owner: string, mode?: GrantInput['permissionMode']): Promise<void> {
+  private migratePermissions(owner: string): Promise<void> {
     let migration = this.permissionMigrations.get(owner);
     if (!migration) {
       migration = (async () => {
@@ -185,7 +185,6 @@ export class LocalAgentToolBridge implements LocalAgentToolBridgePort {
           legacyConnections.map((connection) => ({
             agentId: connection.id,
             writeScopes: connection.writeScopes,
-            mode: mode === 'read-only' ? 'read-only' : mode === 'auto-approve' ? 'auto' : 'confirm',
           })),
         );
       })().catch((error: unknown) => {
@@ -436,7 +435,7 @@ export class LocalAgentToolBridge implements LocalAgentToolBridgePort {
     if (this.stopped || !this.options.isActive())
       throw new LocalAgentError('LOCAL_AGENT_PERMISSION_DENIED');
     if (!connection.enabled) throw new LocalAgentError('LOCAL_AGENT_PERMISSION_DENIED');
-    await this.migratePermissions(input.identityId, input.permissionMode);
+    await this.migratePermissions(input.identityId);
     const url = await this.listen();
     if (this.stopped || !this.options.isActive())
       throw new LocalAgentError('LOCAL_AGENT_PERMISSION_DENIED');

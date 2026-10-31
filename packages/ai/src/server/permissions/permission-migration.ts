@@ -5,7 +5,6 @@ import { migrateLegacyPermissionSettings } from './permission-policy';
 export interface LegacyPermissionAgent {
   agentId: string;
   writeScopes: readonly string[];
-  mode?: 'read-only' | 'confirm' | 'auto';
 }
 
 /** Idempotently imports native connection scopes before the first permission check. */
@@ -17,30 +16,18 @@ export async function migrateLegacyPermissions(
   if (await repository.getSettings(owner)) return;
   const migratedAgents = agents.map((agent) => ({
     agent,
-    migrated: migrateLegacyPermissionSettings({
-      agentId: agent.agentId,
-      writeScopes: agent.writeScopes,
-      mode:
-        agent.mode === 'read-only'
-          ? 'read_only'
-          : agent.mode === 'auto'
-            ? 'auto_approve'
-            : 'confirm_each',
-    }),
+    migrated: migrateLegacyPermissionSettings(agent),
   }));
   for (const { migrated } of migratedAgents) {
     for (const rule of migrated.rules) await repository.saveRule(owner, rule);
   }
-  const agentPresets = Object.fromEntries(
-    migratedAgents.map(({ agent, migrated }) => [agent.agentId, migrated.preset]),
-  );
   await repository.saveSettings(
     owner,
     PermissionSettingsSchema.parse({
-      preset: agents.length ? 'confirm_each' : 'on_demand',
-      agentPresets,
+      preset: 'on_demand',
+      agentPresets: {},
       revision: 1,
-      migratedFrom: agents.length ? 'legacy-write-scopes-v1' : 'new-default-v1',
+      migratedFrom: agents.length ? 'legacy-write-scopes-v2' : 'new-default-v1',
     }),
   );
 }

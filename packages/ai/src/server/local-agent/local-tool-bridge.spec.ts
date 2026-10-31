@@ -193,11 +193,16 @@ it.each(['timeout', 'missing-handler'] as const)(
       enabled: true,
       writeScopes: ['goals:write'],
     });
-    await new Promise((resolve) => setTimeout(resolve, 2));
+    const permissions = new PermissionLocalRepository(db);
+    await permissions.saveSettings('owner', {
+      preset: 'confirm_each',
+      agentPresets: {},
+      revision: 1,
+    });
     let writes = 0;
     const bridge = new LocalAgentToolBridge({
       store,
-      permissions: new PermissionLocalRepository(db),
+      permissions,
       isActive: () => true,
       approvalTimeoutMs: 10,
       registerTools(server, context) {

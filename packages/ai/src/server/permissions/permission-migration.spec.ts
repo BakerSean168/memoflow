@@ -11,21 +11,32 @@ it('imports legacy scopes once, keeps missing write scopes denied and defaults n
       {
         agentId: 'codex',
         writeScopes: ['goals:write'] as const,
-        mode: 'auto' as const,
       },
     ];
     await migrateLegacyPermissions(repository, 'owner', agents);
     expect(await repository.getSettings('owner')).toMatchObject({
-      preset: 'confirm_each',
-      agentPresets: { codex: 'confirm_each' },
-      migratedFrom: 'legacy-write-scopes-v1',
+      preset: 'on_demand',
+      agentPresets: {},
+      migratedFrom: 'legacy-write-scopes-v2',
     });
     expect(await repository.listRules('owner')).toHaveLength(6);
+    expect(await repository.listRules('owner')).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          id: 'legacy:codex:task:create',
+          agentId: 'codex',
+          object: 'task',
+          action: 'create',
+          effect: 'deny',
+        }),
+      ]),
+    );
     await migrateLegacyPermissions(repository, 'owner', [{ agentId: 'new', writeScopes: [] }]);
     expect(await repository.listRules('owner')).toHaveLength(6);
     await migrateLegacyPermissions(repository, 'new-owner', []);
     expect(await repository.getSettings('new-owner')).toMatchObject({
       preset: 'on_demand',
+      agentPresets: {},
       migratedFrom: 'new-default-v1',
     });
   } finally {
