@@ -91,6 +91,12 @@ const turnSchema = z.object({ turn: z.object({ id: z.string().min(1) }) });
 const scopedSchema = z.object({ threadId: z.string(), turnId: z.string() });
 
 /** Native Codex execution only. MemoFlow does not reconstruct or rerun native tool calls. */
+const TOOL_IDENTIFIER = /^[a-z][a-z0-9]*(?:[_.:-][a-z0-9]+)*$/u;
+
+function safeToolIdentifier(name: string | undefined): string | undefined {
+  return name && name.length <= 64 && TOOL_IDENTIFIER.test(name) ? name : undefined;
+}
+
 export class CodexDriver {
   private transport?: NativeRpcTransport;
   private version?: string;
@@ -380,7 +386,12 @@ export class CodexDriver {
     } else if (method === 'item/started' || method === 'item/completed') {
       const value = scopedSchema
         .extend({
-          item: z.object({ id: z.string(), type: z.string(), status: z.string().optional() }),
+          item: z.object({
+            id: z.string(),
+            type: z.string(),
+            status: z.string().optional(),
+            tool: z.string().optional(),
+          }),
         })
         .parse(params);
       if (value.threadId !== this.threadId || (this.turnId && value.turnId !== this.turnId)) return;
@@ -388,7 +399,8 @@ export class CodexDriver {
       emit({
         type: 'activity',
         toolCallId: value.item.id,
-        label: value.item.type,
+        // MCP and dynamic tool items carry a bare tool name; show it instead of the item kind.
+        label: safeToolIdentifier(value.item.tool) ?? value.item.type,
         state:
           method === 'item/started'
             ? 'running'
