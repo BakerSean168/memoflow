@@ -85,6 +85,19 @@ const TOOL_OPERATIONS: Readonly<Record<string, string>> = {
   knowledge_search: 'knowledge.search',
   knowledge_get: 'knowledge.get',
   routine_create: 'routine.create',
+  routine_set_profile_active: 'routine.update',
+  routine_set_temporary_override: 'routine.update',
+  routine_clear_temporary_override: 'routine.update',
+  routine_start_protocol: 'routine.create',
+  routine_pause_protocol: 'routine.update',
+  routine_resume_protocol: 'routine.update',
+  routine_end_protocol: 'routine.update',
+  workspace_overview: 'goal.read',
+  planner_today_summary: 'task.read',
+  planner_conflicts: 'task.read',
+  planner_upcoming_tasks: 'task.read',
+  notification_unread_summary: 'notification.read',
+  notification_execute_action: 'notification.execute_action',
 };
 
 export function getPermissionOperation(id: string): PermissionOperation | undefined {

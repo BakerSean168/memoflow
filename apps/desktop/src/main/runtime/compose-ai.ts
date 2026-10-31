@@ -33,6 +33,7 @@ import {
   ConversationShellSource,
   KnowledgeCapturePersistenceAdapter,
   MastraAIRuntime,
+  PermissionLocalRepository,
   AiGoalSurfaceLeasePowerSyncRepository,
   LocalAgentRuntime,
   LocalAgentRepository,
@@ -114,6 +115,7 @@ export function composeAI(dependencies: ComposeAIElectronDependencies): Composed
   let mastraRuntime: MastraAIRuntime | undefined;
   try {
     mastraRuntime = new MastraAIRuntime({
+      permissions: new PermissionLocalRepository(dependencies.db),
       storage: createMastraStorage(dependencies.mastraStorage),
       agentRegistry,
       modelResolver: new MastraModelResolver(

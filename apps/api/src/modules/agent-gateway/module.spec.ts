@@ -1,3 +1,4 @@
+import type { GatewayToolCheckpoint } from '@memoflow/agent-gateway';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import express from 'express';
 import { once } from 'node:events';
@@ -47,6 +48,7 @@ async function fixture(oauthEnabled = false, trustProxyHops = 0) {
       consumeOwner: async () => true,
     },
     enabled: true,
+    toolCheckpoint: (async (_principal, _tool, work) => work()) satisfies GatewayToolCheckpoint,
     audience: `${base}/mcp`,
     cursorSecret: 'test-only-secret-'.repeat(3),
     trustedOrigins: ['https://memo.test'],

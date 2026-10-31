@@ -26,6 +26,7 @@ import {
   ConversationShellSource,
   KnowledgeCapturePersistenceAdapter,
   MastraAIRuntime,
+  PermissionPrismaRepository,
   AiGoalSurfaceLeasePrismaRepository,
   MastraModelResolver,
   AgentInstanceRegistry,
@@ -104,7 +105,10 @@ export interface ComposeAIDependencies {
   /** Host-selected persistent Mastra storage; API uses PostgreSQL. */
   readonly mastraStorage: MastraStorageConfig;
   /** Primary business database used for atomic Conversation/Attention change capture. */
-  readonly workspaceEventsDatabase?: { connectionString: string; businessSchema?: string };
+  readonly workspaceEventsDatabase?: {
+    connectionString: string;
+    businessSchema?: string;
+  };
 }
 
 /**
@@ -173,6 +177,7 @@ export function composeAI(dependencies: ComposeAIDependencies): ComposedAI {
   );
   const agentRegistry = new AgentInstanceRegistry(repositorySet.agentInstanceRepository, 'web');
   const mastraRuntime = new MastraAIRuntime({
+    permissions: new PermissionPrismaRepository(dependencies.db),
     storage: createMastraStorage(dependencies.mastraStorage),
     agentRegistry,
     modelResolver: new MastraModelResolver(

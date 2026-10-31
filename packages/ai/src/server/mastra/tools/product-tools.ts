@@ -1,3 +1,4 @@
+import { RequestContext } from '@mastra/core/request-context';
 import { createTool } from '@mastra/core/tools';
 import { z } from 'zod';
 import type {
@@ -12,10 +13,15 @@ import { RoutineTriggerSchema, windowSchema } from './product-tool-inputs';
 import {
   MEMOFLOW_PRODUCT_TOOL_POLICY,
   assertMemoFlowToolClassification,
+  checkMemoFlowToolPermission,
+  executeMemoFlowTool,
 } from './product-tool-policy';
 export { RoutineTriggerSchema } from './product-tool-inputs';
 
+import type { PermissionRepository } from '../../permissions';
+
 export interface MemoFlowProductToolDependencies {
+  readonly permissions: PermissionRepository;
   readonly routineCommandPort?: IAIRoutineCommandPort;
   readonly plannerReadPort?: IAIPlannerReadPort;
   readonly notificationReadPort?: IAINotificationReadPort;
@@ -32,7 +38,7 @@ export function createMemoFlowProductTools(deps: MemoFlowProductToolDependencies
   const routineCreate = createTool({
     id: 'routine_create',
     description:
-      'Create a MemoFlow Routine configuration from one canonical WallClock, Elapsed, or ActiveUsage trigger. Persistent configuration change: explicit user approval is required. Protocol sessions must use routine_start_protocol instead.',
+      'Create a MemoFlow Routine configuration from one canonical WallClock, Elapsed, or ActiveUsage trigger. Authorization follows the user’s MemoFlow AI permissions. Protocol sessions must use routine_start_protocol instead.',
     requireApproval: MEMOFLOW_PRODUCT_TOOL_POLICY.routine_create.requireApproval,
     inputSchema: z.strictObject({
       name: z.string().trim().min(1).max(200),
@@ -51,7 +57,7 @@ export function createMemoFlowProductTools(deps: MemoFlowProductToolDependencies
   const routineProfile = createTool({
     id: 'routine_set_profile_active',
     description:
-      'Activate or deactivate a Routine Profile gate without rewriting the member routines. Persistent profile configuration change: explicit user approval is required.',
+      'Activate or deactivate a Routine Profile gate without rewriting the member routines. Authorization follows the user’s MemoFlow AI permissions.',
     requireApproval: MEMOFLOW_PRODUCT_TOOL_POLICY.routine_set_profile_active.requireApproval,
     inputSchema: z.strictObject({
       profileId: z.string().min(1),
@@ -67,7 +73,7 @@ export function createMemoFlowProductTools(deps: MemoFlowProductToolDependencies
   const routineOverride = createTool({
     id: 'routine_set_temporary_override',
     description:
-      'Set temporary Routine runtime state (snooze/suppress/temporary interval) without rewriting long-lived trigger configuration. Explicit user approval is required.',
+      'Set temporary Routine runtime state (snooze/suppress/temporary interval) without rewriting long-lived trigger configuration. Authorization follows the user’s MemoFlow AI permissions.',
     requireApproval: MEMOFLOW_PRODUCT_TOOL_POLICY.routine_set_temporary_override.requireApproval,
     inputSchema: z.strictObject({
       routineId: z.string().min(1),
@@ -87,7 +93,7 @@ export function createMemoFlowProductTools(deps: MemoFlowProductToolDependencies
   const routineOverrideClear = createTool({
     id: 'routine_clear_temporary_override',
     description:
-      'Clear a Routine temporary override and restore canonical trigger behavior. Explicit user approval is required.',
+      'Clear a Routine temporary override and restore canonical trigger behavior. Authorization follows the user’s MemoFlow AI permissions.',
     requireApproval: MEMOFLOW_PRODUCT_TOOL_POLICY.routine_clear_temporary_override.requireApproval,
     inputSchema: z.object({ routineId: z.string().min(1) }),
     execute: async (input, { requestContext }) =>
@@ -100,7 +106,7 @@ export function createMemoFlowProductTools(deps: MemoFlowProductToolDependencies
   const routineStartProtocol = createTool({
     id: 'routine_start_protocol',
     description:
-      'Start a deterministic 50/10 or Pomodoro ProtocolSession. Explicit approval is required before starting a new persistent session; the model never owns timer truth.',
+      'Start a deterministic 50/10 or Pomodoro ProtocolSession. Authorization follows the user’s MemoFlow AI permissions; the model never owns timer truth.',
     requireApproval: MEMOFLOW_PRODUCT_TOOL_POLICY.routine_start_protocol.requireApproval,
     inputSchema: z.strictObject({
       methodId: z.enum(['50-10-protocol', 'pomodoro']),
@@ -201,7 +207,9 @@ export function createMemoFlowProductTools(deps: MemoFlowProductToolDependencies
   const plannerUpcomingTasks = createTool({
     id: 'planner_upcoming_tasks',
     description: 'Read upcoming Task owner projections in a requested Planner range. Read-only.',
-    inputSchema: windowSchema.extend({ limit: z.number().int().min(1).max(100).optional() }),
+    inputSchema: windowSchema.extend({
+      limit: z.number().int().min(1).max(100).optional(),
+    }),
     execute: async (input, { requestContext }) =>
       requirePort(deps.plannerReadPort, 'Planner read capability').getUpcomingTasks({
         ...input,
@@ -213,7 +221,9 @@ export function createMemoFlowProductTools(deps: MemoFlowProductToolDependencies
     id: 'notification_unread_summary',
     description:
       'Read the current unread Notification Facts, including a bounded recent-item summary. Read-only; does not expose delivery worker internals.',
-    inputSchema: z.strictObject({ limit: z.number().int().min(1).max(50).default(10) }),
+    inputSchema: z.strictObject({
+      limit: z.number().int().min(1).max(50).default(10),
+    }),
     execute: async (input, { requestContext }) =>
       requirePort(deps.notificationReadPort, 'Notification read capability').getUnreadSummary({
         ...input,
@@ -256,10 +266,26 @@ export function createMemoFlowProductTools(deps: MemoFlowProductToolDependencies
   };
   assertMemoFlowToolClassification(tools);
   for (const [name, tool] of Object.entries(tools)) {
-    tool.requireApproval =
-      MEMOFLOW_PRODUCT_TOOL_POLICY[
-        name as keyof typeof MEMOFLOW_PRODUCT_TOOL_POLICY
-      ].requireApproval;
+    const repository = deps.permissions;
+    tool.requireApproval = true;
+    tool.needsApprovalFn = async (_input, context) => {
+      if (!context?.requestContext) throw new Error('Missing MemoFlow permission context');
+      return (
+        (await checkMemoFlowToolPermission(
+          repository,
+          name,
+          new RequestContext(Object.entries(context.requestContext)),
+        )) !== 'allow'
+      );
+    };
+    const execute = tool.execute!;
+    // All product tools have compatible native execution context; preserve each input schema.
+    tool.execute = (async (input: unknown, context: Parameters<typeof execute>[1]) => {
+      if (!context.requestContext) throw new Error('Missing MemoFlow permission context');
+      return executeMemoFlowTool(repository, name, context.requestContext, () =>
+        execute(input as never, context),
+      );
+    }) as typeof tool.execute;
   }
   return tools;
 }

@@ -1,3 +1,4 @@
+import type { GatewayToolCheckpoint } from '@memoflow/agent-gateway';
 import { z } from 'zod';
 import { CreateScopedPatSchema } from '@memoflow/agent-gateway';
 import type { PilotAdmission } from './pilot-admission';
@@ -17,6 +18,7 @@ import type { RequestContextCarrierRequest } from '../../shared/infrastructure/h
 
 interface Options {
   readonly enabled: boolean;
+  readonly toolCheckpoint: GatewayToolCheckpoint;
   readonly writes?: GatewayWritePort;
   readonly assisted?: GatewayAssistedPort;
   readonly admission: PilotAdmission;
@@ -111,11 +113,9 @@ export function composeAgentGatewayModule(options: Options): IApiModule {
           return;
         }
         res.locals.externalAgentAuditHandled = true;
-        await toNodeHandler({ fetch: (request) => gateway.fetch(request, context) })(
-          req,
-          res,
-          req.body,
-        );
+        await toNodeHandler({
+          fetch: (request) => gateway.fetch(request, context),
+        })(req, res, req.body);
       });
       const path = '/agent-connections/pats';
       router.use(

@@ -1,3 +1,7 @@
+import {
+  createGatewayPermissionCheckpoint,
+  PermissionPrismaRepository,
+} from '@memoflow/ai/agent-gateway';
 /**
  * API Server Runtime
  * API 服务运行时
@@ -391,7 +395,9 @@ async function bootstrap(): Promise<void> {
               'task.plan.create.v1',
               row.stepKey,
             );
-            const receipt = await prisma.externalMutationReceipt.findUnique({ where: { id } });
+            const receipt = await prisma.externalMutationReceipt.findUnique({
+              where: { id },
+            });
             return receipt
               ? GatewayTaskReceiptSchema.parse({
                   ...JSON.parse(receipt.resultJson),
@@ -430,7 +436,9 @@ async function bootstrap(): Promise<void> {
     onRoutineScheduleChanged: createRoutineScheduleChangedNotifier(),
   });
   const labelApiModule = composeLabelApiModule({ service: labelService });
+  // oxfmt-ignore: ownership governance audit requires this canonical composition token.
   const goalKnowledgeApiModule = composeGoalKnowledgeApiModule({ service: goalKnowledgeService });
+  // oxfmt-ignore: ownership governance audit requires this canonical composition token.
   const goalWorkspaceApiModule = composeGoalWorkspaceApiModule({ port: goalWorkspaceService });
   const taskWorkspaceService = new TaskWorkspaceQueryService({
     taskPlanRepository: taskComposed.taskPlanRepository,
@@ -455,6 +463,7 @@ async function bootstrap(): Promise<void> {
   const taskWorkspaceApiModule = composeTaskWorkspaceApiModule(taskWorkspaceService);
   const goalPageQuery = createGoalPrismaPageQuery(prisma);
   const agentGatewayModule = composeAgentGatewayModule({
+    toolCheckpoint: createGatewayPermissionCheckpoint(new PermissionPrismaRepository(prisma)),
     admission: createPilotAdmission(createApiRedisClient({ fresh: true, commandTimeout: 5000 })),
     enabled: env.EAG_READ_PILOT_ENABLED,
     writes: env.EAG_WRITE_ENABLED

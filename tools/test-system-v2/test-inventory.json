@@ -4618,6 +4618,16 @@
       ]
     },
     {
+      "path": "packages/ai/src/server/mastra/tools/product-tool-checkpoint.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/ai/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "packages/ai/vitest.config.ts"
+      ]
+    },
+    {
       "path": "packages/ai/src/server/mastra/tools/product-tools.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -4688,6 +4698,16 @@
       ]
     },
     {
+      "path": "packages/ai/src/server/permissions/gateway-permission-checkpoint.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/ai/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "packages/ai/vitest.config.ts"
+      ]
+    },
+    {
       "path": "packages/ai/src/server/permissions/permission-migration.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -4709,6 +4729,16 @@
     },
     {
       "path": "packages/ai/src/server/permissions/permission-powersync.repository.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/ai/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "packages/ai/vitest.config.ts"
+      ]
+    },
+    {
+      "path": "packages/ai/src/server/permissions/permission-prisma.repository.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/ai/vitest.config.ts"
@@ -12672,7 +12702,7 @@
       "type": "measurement",
       "suite": "coverage",
       "runner": "vitest",
-      "fileCount": 120
+      "fileCount": 123
     },
     {
       "id": "packages/app-vue/vitest.store-coverage.config.ts",
@@ -13207,7 +13237,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 120
+      "fileCount": 123
     },
     {
       "id": "packages/app-vue/vitest.config.ts",
@@ -13819,6 +13849,7 @@
       "packages/ai/src/server/mastra/runtime/mastra-workflow.runtime.spec.ts",
       "packages/ai/src/server/mastra/runtime/ordered-memory.shared.spec.ts",
       "packages/ai/src/server/mastra/runtime/workflow-run-projection.spec.ts",
+      "packages/ai/src/server/mastra/tools/product-tool-checkpoint.spec.ts",
       "packages/ai/src/server/mastra/tools/product-tools.spec.ts",
       "packages/ai/src/server/mastra/workflows/apply-goal-plan.service.spec.ts",
       "packages/ai/src/server/mastra/workflows/deterministic-entity-id.spec.ts",
@@ -13826,9 +13857,11 @@
       "packages/ai/src/server/mastra/workflows/knowledge-capture-persistence.adapter.spec.ts",
       "packages/ai/src/server/mastra/workflows/task-create.workflow.spec.ts",
       "packages/ai/src/server/permissions/authorize.spec.ts",
+      "packages/ai/src/server/permissions/gateway-permission-checkpoint.spec.ts",
       "packages/ai/src/server/permissions/permission-migration.spec.ts",
       "packages/ai/src/server/permissions/permission-policy.spec.ts",
       "packages/ai/src/server/permissions/permission-powersync.repository.spec.ts",
+      "packages/ai/src/server/permissions/permission-prisma.repository.spec.ts",
       "packages/ai/src/server/shared/__tests__/assemble-capabilities.spec.ts",
       "packages/ai/src/server/transport/ai-controller-errors.spec.ts",
       "packages/ai/src/server/transport/ai-provider-config.controller.onboarding-v2.spec.ts",
@@ -14250,7 +14283,7 @@
   "duplicate": [],
   "unexpected": [],
   "counts": {
-    "unit": 1169,
+    "unit": 1172,
     "integration": 58,
     "smoke": 3,
     "boundary-ipc": 6,

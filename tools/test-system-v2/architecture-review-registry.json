@@ -2222,7 +2222,7 @@
         "status": "none-verified",
         "testFiles": []
       },
-      "sourceSha256": "8cdce902afdea2b766ea187bae18e001d805fe45b0e32eb5c7080a6dc36c5453"
+      "sourceSha256": "bc4604caf927259e5e897370fd22761a05fff81cd55f1e517b97d145976356be"
     },
     {
       "path": "apps/desktop/src/main/__tests__/bootstrap.spec.ts",

@@ -18,3 +18,10 @@ export interface PermissionRepository {
   ): Promise<void>;
   listAudit(owner: string, limit?: number): Promise<PermissionAuditRecord[]>;
 }
+
+/** Infrastructure could not find the deployed permission tables. Other failures must propagate. */
+export class PermissionStorageUnavailableError extends Error {
+  constructor() {
+    super('Permission policy storage is not deployed');
+  }
+}
