@@ -189,5 +189,18 @@ describe("evaluatePermission", () => {
       destructiveHint: true,
     });
     expect(permissionOperationMcpHints("unregistered")).toBeUndefined();
+    expect(permissionOperationMcpHints("task_plan_create")).toEqual({
+      readOnlyHint: false,
+      destructiveHint: false,
+    });
+    expect(permissionOperationMcpHints("knowledge_search")).toEqual({
+      readOnlyHint: true,
+      destructiveHint: false,
+    });
+    expect(
+      permissionOperationMcpHints("goal_panel_submit", {
+        isGoalPanelEdit: true,
+      }),
+    ).toEqual({ readOnlyHint: false, destructiveHint: true });
   });
 });

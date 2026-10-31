@@ -39,6 +39,18 @@ export const PERMISSION_OPERATIONS: readonly PermissionOperation[] = [
   ...BUSINESS_OBJECTS.flatMap((object) =>
     CRUD.map(([action]) => ({ id: `${object}.${action}`, object, action })),
   ),
+  { id: "task.plan.create", object: "task", action: "create" },
+  { id: "task.plan.update", object: "task", action: "update" },
+  { id: "task.occurrence.complete", object: "task", action: "update" },
+  { id: "knowledge.search", object: "knowledge", action: "read" },
+  { id: "knowledge.get", object: "knowledge", action: "read" },
+  { id: "knowledge.note.create", object: "knowledge", action: "create" },
+  { id: "knowledge.note.update", object: "knowledge", action: "update" },
+  {
+    id: "notification.execute_action",
+    object: "notification",
+    action: "update",
+  },
   {
     id: "goal.delete_permanent",
     object: "goal",
@@ -58,6 +70,14 @@ export const PERMISSION_OPERATIONS: readonly PermissionOperation[] = [
 const byId = new Map(
   PERMISSION_OPERATIONS.map((operation) => [operation.id, operation]),
 );
+const TOOL_OPERATIONS: Readonly<Record<string, string>> = {
+  goal_create: "goal.create",
+  goal_update: "goal.update",
+  task_plan_create: "task.plan.create",
+  task_plan_update: "task.plan.update",
+  task_occurrence_complete: "task.occurrence.complete",
+  knowledge_search: "knowledge.search",
+};
 
 export function getPermissionOperation(
   id: string,
@@ -74,8 +94,13 @@ export function permissionOperationsFor(
 }
 
 export function permissionOperationMcpHints(
-  id: string,
+  toolName: string,
+  options: { isGoalPanelEdit?: boolean } = {},
 ): { readOnlyHint: boolean; destructiveHint: boolean } | undefined {
+  const id =
+    toolName === "goal_panel_submit"
+      ? goalPanelSubmitOperationId(options.isGoalPanelEdit ?? false)
+      : (TOOL_OPERATIONS[toolName] ?? toolName);
   const operation = getPermissionOperation(id);
   if (!operation) return undefined;
   return {
@@ -85,4 +110,15 @@ export function permissionOperationMcpHints(
       operation.action === "delete" ||
       Boolean(operation.risks?.length),
   };
+}
+
+export function permissionOperationForTool(
+  toolName: string,
+  options: { isGoalPanelEdit?: boolean } = {},
+): PermissionOperation | undefined {
+  const id =
+    toolName === "goal_panel_submit"
+      ? goalPanelSubmitOperationId(options.isGoalPanelEdit ?? false)
+      : (TOOL_OPERATIONS[toolName] ?? toolName);
+  return getPermissionOperation(id);
 }
