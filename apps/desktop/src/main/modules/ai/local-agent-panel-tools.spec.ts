@@ -286,7 +286,11 @@ it.each(['approve', 'decline', 'abort', 'auto-approve'] as const)(
       const saving = call('goal_panel_submit');
       if (decision !== 'auto-approve') {
         await requested;
-        expect(requestApproval).toHaveBeenCalledWith('goal_panel_submit', expect.any(AbortSignal));
+        expect(requestApproval).toHaveBeenCalledWith(
+          'goal_panel_submit',
+          expect.any(AbortSignal),
+          expect.objectContaining({ action: 'create', object: 'goal' }),
+        );
         expect(executeCommand.mock.calls.some(([, command]) => command.action === 'submit')).toBe(
           false,
         );
