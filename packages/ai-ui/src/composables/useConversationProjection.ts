@@ -386,8 +386,8 @@ export function useConversationProjection(input: {
           (change.item === null
             ? !authoritative
             : authoritative &&
-              ((change.runtimeKind === 'local_agent' &&
-                (authoritative.version ?? 1) >= (change.item.version ?? 1)) ||
+              (authoritative.version ?? 1) >= (change.item.version ?? 1) &&
+              (change.runtimeKind === 'local_agent' ||
                 (authoritative.runtimeKind !== 'local_agent' &&
                   (authoritative.resourceVersion ?? 0) >= (change.resourceVersion ?? 0))))
         ) {

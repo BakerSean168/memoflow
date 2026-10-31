@@ -375,6 +375,7 @@ describe('useAIChatSession Mastra-native open chat', () => {
     expect(session.conversationTitle.value).toBe('Manual');
     service.updateConversation.mockRejectedValueOnce(new Error('offline'));
     expect(await session.renameConversation('conv-1', 'Offline edit')).toBe(false);
+    await flushTitleWork();
     expect(session.conversationTitle.value).toBe('Manual');
     expect(toastMocks.error).toHaveBeenCalled();
   });
