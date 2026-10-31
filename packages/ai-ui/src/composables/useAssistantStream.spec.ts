@@ -98,6 +98,7 @@ function createHarness() {
     refreshRuntimeHistory: vi.fn(async () => undefined),
     invalidateRuntimeHistory: vi.fn(),
     markConversationActivity: vi.fn(),
+    generateConversationTitle: vi.fn(async () => undefined),
     loadConversationList: vi.fn(async () => undefined),
   } satisfies Parameters<typeof useAssistantStream>[0]['conversation'];
   const composer = {
