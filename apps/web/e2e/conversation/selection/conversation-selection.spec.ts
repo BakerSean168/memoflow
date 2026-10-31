@@ -146,3 +146,43 @@ test('narrow sidebar preserves search, blank clearing, recovery and separate des
     .evaluate((el) => ({ client: el.clientWidth, scroll: el.scrollWidth }));
   expect(width.scroll).toBeLessThanOrEqual(width.client);
 });
+
+test('single-conversation title menu preserves editor focus, Enter saves and Escape cancels', async ({
+  page,
+}) => {
+  await page.goto('/');
+  const row = page.locator('[data-keyboard-item="a"]');
+  await row.click({ button: 'right' });
+  await page.getByRole('menuitem', { name: 'Rename', exact: true }).click();
+  const input = page.getByTestId('conversation-title-input');
+  await expect(input).toBeFocused();
+  await input.fill('My manual title');
+  await input.press('Enter');
+  await expect(row).toHaveText('My manual title');
+  await row.dblclick();
+  await expect(input).toBeFocused();
+  await input.fill('Discard this');
+  await input.press('Escape');
+  await expect(row).toHaveText('My manual title');
+  await row.click({ button: 'right' });
+  await page.getByRole('menuitem', { name: 'Regenerate title', exact: true }).click();
+  await expect(row).toHaveText('Readable topic from first message');
+  await expect(page.locator('[data-keyboard-item="b"]')).toHaveText('Conversation B');
+});
+
+test('pending regeneration disables repeats while manual title input remains available', async ({
+  page,
+}) => {
+  await page.goto('/?hold=1');
+  const row = page.locator('[data-keyboard-item="a"]');
+  await row.click({ button: 'right' });
+  await page.getByRole('menuitem', { name: 'Regenerate title', exact: true }).click();
+  await row.click({ button: 'right' });
+  await expect(
+    page.getByRole('menuitem', { name: 'Generating title…', exact: true }),
+  ).toBeDisabled();
+  await page.keyboard.press('Escape');
+  await page.getByTestId('release-write').click();
+  await expect(row).toHaveText('Readable topic from first message');
+  await expect(page.getByTestId('calls')).toHaveText('a:GenerateTitle');
+});

@@ -12,6 +12,36 @@ import { PowerSyncAIConversationRepository } from '../powersync/ai-conversation-
 import { createLocalAgentSqlite } from '../../../../testing/local-agent-sqlite';
 
 describe('conversation activity with real SQLite', () => {
+  it('persists a manual title across restart and rejects stale title CAS without a status write rolling it back', async () => {
+    const db = createLocalAgentSqlite();
+    try {
+      await db.execute(
+        'CREATE TABLE ai_conversations (id TEXT PRIMARY KEY, identity_id TEXT, name TEXT, status TEXT, version INTEGER, created_at TEXT, updated_at TEXT, deleted_at TEXT)',
+      );
+      const repo = new PowerSyncAIConversationRepository(db);
+      const conversation = AIConversation.create({ identityId: 'owner', name: '快速对话' });
+      await repo.save(conversation);
+      const id = String(conversation.id);
+      const manual = (await repo.findByIdForIdentity('owner', id))!;
+      const automatic = (await repo.findByIdForIdentity('owner', id))!;
+      manual.rename('人工标题');
+      automatic.rename('迟到的自动标题', true);
+      expect(await repo.saveTitle(manual, 1)).toBe(true);
+      expect(await repo.saveTitle(automatic, 1)).toBe(false);
+      automatic.updateStatus(ConversationStatus.Archived);
+      expect(await repo.saveStatus(automatic)).toBe(true);
+      const restarted = new PowerSyncAIConversationRepository(db);
+      expect((await restarted.findByIdForIdentity('owner', id))?.toClientDTO()).toMatchObject({
+        name: '人工标题',
+        version: 3,
+        status: 'Archived',
+      });
+      expect(await restarted.findByIdForIdentity('foreign', id)).toBeNull();
+    } finally {
+      db.close();
+    }
+  });
+
   it('round-trips archive through the owner, separates legacy deletion, and filters before pagination', async () => {
     const db = createLocalAgentSqlite();
     try {

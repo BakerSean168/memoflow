@@ -83,6 +83,15 @@ export interface CrudDelegate {
     where: { id: string; identityId?: string; deletedAt?: null };
     data: Record<string, unknown>;
   }): Promise<unknown>;
+  updateMany?(args: {
+    where: {
+      id: string;
+      identityId: string;
+      deletedAt: null;
+      version: { lt: number };
+    };
+    data: Record<string, unknown>;
+  }): Promise<unknown>;
   deleteMany(args: { where: { id: string } }): Promise<unknown>;
 }
 

@@ -79,6 +79,7 @@ const props = defineProps<{
   archivePage?: number;
   archiveHasMore?: boolean;
   conversationStatuses?: ConversationAttentionMap;
+  titleBusy?: Record<string, boolean>;
   activeConversationId: string | null;
   userName?: string;
   /** 当前壳层展示的是哪一种身份，而不是含混的“是否登录”。 */
@@ -92,6 +93,8 @@ const props = defineProps<{
 }>();
 
 const emit = defineEmits<{
+  (e: 'rename-conversation', id: string, name: string): void;
+  (e: 'regenerate-title', id: string): void;
   (e: 'new-conversation'): void;
   (e: 'select-conversation', id: string): void;
   (e: 'delete-conversation', id: string): void;
@@ -108,6 +111,38 @@ const emit = defineEmits<{
 }>();
 
 const { t } = useI18n();
+const editingId = ref<string | null>(null);
+const titleDraft = ref('');
+const titleInput = ref<HTMLInputElement | null>(null);
+async function editTitle(item: ConversationEntry, fromMenu = false) {
+  editingId.value = item.id;
+  titleDraft.value = item.title;
+  if (fromMenu) return;
+  await nextTick();
+  titleInput.value?.focus();
+  titleInput.value?.select();
+}
+async function focusTitleInput(event: Event) {
+  if (!editingId.value) return;
+  event.preventDefault();
+  // Reka's modal focus trap has unmounted at close-auto-focus, so the editor can receive focus.
+  await nextTick();
+  titleInput.value?.focus();
+  titleInput.value?.select();
+}
+function saveTitle() {
+  const id = editingId.value;
+  const name = titleDraft.value.trim();
+  if (!id || !name) return;
+  editingId.value = null;
+  emit('rename-conversation', id, name);
+}
+watch(
+  () => props.activeProfileId,
+  () => {
+    editingId.value = null;
+  },
+);
 
 const stateIcons = {
   failed: CircleAlert,
@@ -226,6 +261,10 @@ function handleContextKey(event: KeyboardEvent, id: string) {
   openContext(id);
 }
 async function restoreContextFocus(event: Event) {
+  if (editingId.value) {
+    await focusTitleInput(event);
+    return;
+  }
   const id = contextRow.value;
   event.preventDefault();
   await nextTick();
@@ -548,8 +587,23 @@ const identityLabel = () => {
                   : 'text-[hsl(var(--foreground-muted))] hover:bg-[hsl(var(--hover))] hover:text-foreground'
               "
             >
+              <input
+                v-if="editingId === item.id"
+                :ref="(element) => (titleInput = element as HTMLInputElement | null)"
+                v-model="titleDraft"
+                class="m-1 min-w-0 flex-1 rounded border bg-background px-1.5 py-1 text-xs"
+                data-testid="conversation-title-input"
+                maxlength="80"
+                :aria-label="t('shell.conversation.rename')"
+                @keydown.enter.prevent="saveTitle"
+                @keydown.esc.prevent="editingId = null"
+                @blur="editingId = null"
+                @click.stop
+              />
               <button
+                v-else
                 type="button"
+                @dblclick.stop="!selection.state.busy && editTitle(item)"
                 class="min-w-0 w-full flex-1 px-2 py-1.5 pr-24 text-left text-[12.5px] leading-5"
                 :data-keyboard-item="item.id"
                 role="option"
@@ -565,7 +619,16 @@ const identityLabel = () => {
                 >
                   <Check v-if="selectedIds.includes(item.id)" class="h-3 w-3" />
                 </span>
-                <span class="block min-w-0 truncate whitespace-nowrap">{{ item.title }}</span>
+                <span class="block min-w-0 truncate whitespace-nowrap"
+                  ><LoaderCircle
+                    v-if="titleBusy?.[item.id]"
+                    class="mr-1 inline h-3 w-3 animate-spin"
+                    aria-hidden="true"
+                  />{{ item.title }}</span
+                >
+                <span v-if="titleBusy?.[item.id]" class="sr-only" role="status">{{
+                  t('shell.conversation.generatingTitle')
+                }}</span>
               </button>
               <TooltipProvider v-if="stateOf(item.id)">
                 <Tooltip>
@@ -625,7 +688,29 @@ const identityLabel = () => {
                     <MoreHorizontal class="h-3.5 w-3.5" />
                   </button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" side="right" class="w-36">
+                <DropdownMenuContent
+                  align="end"
+                  side="right"
+                  class="w-36"
+                  @close-auto-focus="focusTitleInput"
+                >
+                  <DropdownMenuItem
+                    :disabled="selection.state.busy"
+                    @select="editTitle(item, true)"
+                    >{{ t('shell.conversation.rename') }}</DropdownMenuItem
+                  >
+                  <DropdownMenuItem
+                    :disabled="selection.state.busy || titleBusy?.[item.id]"
+                    @select="emit('regenerate-title', item.id)"
+                  >
+                    {{
+                      t(
+                        titleBusy?.[item.id]
+                          ? 'shell.conversation.generatingTitle'
+                          : 'shell.conversation.regenerateTitle',
+                      )
+                    }}
+                  </DropdownMenuItem>
                   <DropdownMenuItem
                     class="text-destructive focus:text-destructive"
                     :disabled="selection.state.busy"
@@ -639,6 +724,25 @@ const identityLabel = () => {
             </div>
           </ContextMenuTrigger>
           <ContextMenuContent class="w-44" @close-auto-focus="restoreContextFocus">
+            <ContextMenuItem
+              v-if="contextIds.length === 1"
+              :disabled="selection.state.busy"
+              @select="editTitle(item, true)"
+              >{{ t('shell.conversation.rename') }}</ContextMenuItem
+            >
+            <ContextMenuItem
+              v-if="contextIds.length === 1"
+              :disabled="selection.state.busy || titleBusy?.[item.id]"
+              @select="emit('regenerate-title', item.id)"
+            >
+              {{
+                t(
+                  titleBusy?.[item.id]
+                    ? 'shell.conversation.generatingTitle'
+                    : 'shell.conversation.regenerateTitle',
+                )
+              }}
+            </ContextMenuItem>
             <ContextMenuItem
               :disabled="selection.state.busy"
               data-testid="conversation-context-status"

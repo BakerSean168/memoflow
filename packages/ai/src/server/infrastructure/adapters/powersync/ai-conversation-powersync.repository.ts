@@ -14,14 +14,44 @@ export class PowerSyncAIConversationRepository implements IAIConversationReposit
     readonly events?: ConversationEventsPowerSync,
   ) {}
 
+  async saveStatus(conversation: AIConversation): Promise<boolean> {
+    await this.events?.init();
+    const saved = await this.db.writeTransaction(async (tx) => {
+      const result = await tx.execute(
+        'UPDATE ai_conversations SET status = ? WHERE id = ? AND identity_id = ? AND deleted_at IS NULL',
+        [conversation.status, String(conversation.id), String(conversation.identityId)],
+      );
+      if (result.rowsAffected !== 1) return false;
+      await this.events?.capture(tx, String(conversation.identityId), String(conversation.id));
+      return true;
+    });
+    if (saved) flushDomainEvents(aiEventPublisher, conversation);
+    return saved;
+  }
+  async saveTitle(conversation: AIConversation, expectedVersion: number): Promise<boolean> {
+    await this.events?.init();
+    const row = PowerSyncAIConversationMapper.toPersistence(conversation);
+    const saved = await this.db.writeTransaction(async (tx) => {
+      const result = await tx.execute(
+        'UPDATE ai_conversations SET name = ?, version = ?, updated_at = ? WHERE id = ? AND identity_id = ? AND version = ? AND deleted_at IS NULL',
+        [row.name, row.version, row.updated_at, row.id, row.identity_id, expectedVersion],
+      );
+      if (result.rowsAffected !== 1) return false;
+      await this.events?.capture(tx, row.identity_id, row.id);
+      return true;
+    });
+    if (saved) flushDomainEvents(aiEventPublisher, conversation);
+    return saved;
+  }
+
   async save(conversation: AIConversation): Promise<void> {
     await this.events?.init();
     const persisted = PowerSyncAIConversationMapper.toPersistence(conversation);
     await this.db.writeTransaction(async (tx) => {
-      const existing = await tx.getOptional<{ id: string; identity_id: string }>(
-        `SELECT id, identity_id FROM ai_conversations WHERE id = ? LIMIT 1`,
-        [persisted.id],
-      );
+      const existing = await tx.getOptional<{
+        id: string;
+        identity_id: string;
+      }>(`SELECT id, identity_id FROM ai_conversations WHERE id = ? LIMIT 1`, [persisted.id]);
       if (existing && existing.identity_id !== persisted.identity_id)
         throw new Error('Conversation not found for the current identity.');
       if (existing) {

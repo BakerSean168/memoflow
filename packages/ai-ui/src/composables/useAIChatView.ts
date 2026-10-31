@@ -45,7 +45,6 @@ import {
   initializeChatView,
   AIWorkflowRestoreError,
   loadAuthoritativeWorkflowRun,
-  maybeRenameConversation,
 } from './chatViewHelpers';
 import {
   AI_ASSISTANT_RUNTIME_KEY,
@@ -667,35 +666,11 @@ export function useAIChatView(options: UseAIChatViewOptions) {
   }
 
   async function maybeRenameCurrentConversation(name: string) {
-    const nextName = name.trim();
-    const currentTitle = chatSession.conversationTitle.value;
-    if (!nextName || nextName === currentTitle) return;
-    const conversationId = chatSession.chatConversationId.value;
-    const before = chatSession.conversationList.value.find((item) => item.id === conversationId);
-    const versionBefore =
-      before?.runtimeKind === 'local_agent' ? undefined : before?.resourceVersion;
-    chatSession.conversationTitle.value = nextName;
-    const renamed = await maybeRenameConversation(
-      nextName,
-      currentTitle,
-      conversationId,
-      service,
-      async (conversation) => {
-        chatSession.syncConversationSummary(conversation);
-      },
-    );
-    if (
-      !renamed &&
-      chatSession.chatConversationId.value === conversationId &&
-      chatSession.conversationTitle.value === nextName &&
-      !chatSession.conversationList.value.some(
-        (item) =>
-          item.id === conversationId &&
-          item.runtimeKind !== 'local_agent' &&
-          (item.resourceVersion ?? 0) > (versionBefore ?? 0),
-      )
-    )
-      chatSession.conversationTitle.value = currentTitle;
+    const id = chatSession.chatConversationId.value;
+    const item = chatSession.conversationList.value.find((entry) => entry.id === id);
+    // Workflow suggestions must also respect any previous automatic/manual title write.
+    if (!item || (item.version ?? 1) !== 1) return;
+    await chatSession.renameConversation(id, name);
   }
 
   const goalWorkflow = useAIGoalWorkflow({
@@ -1204,6 +1179,13 @@ export function useAIChatView(options: UseAIChatViewOptions) {
       openRecentGoal,
       openRecentKnowledgeNote,
       archiveConversation: chatSession.archiveConversation,
+      renameConversation: chatSession.renameConversation,
+      titleBusy: chatSession.titleBusy,
+      regenerateConversationTitle: (id: string) =>
+        chatSession.generateConversationTitle(id, {
+          model:
+            id === chatSession.chatConversationId.value ? modelSelection.selectedModel.value : null,
+        }),
       archiveConversations: chatSession.archiveConversations,
       restoreConversations: chatSession.restoreConversations,
       restoreConversation: restoreArchivedConversation,

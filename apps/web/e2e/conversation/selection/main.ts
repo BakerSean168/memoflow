@@ -1,6 +1,11 @@
 import { installAiUiHost } from '@memoflow/app-vue/di/ai-ui-host';
 import { createApp, defineComponent, h, ref } from 'vue';
 import { createI18n } from 'vue-i18n';
+import {
+  fallbackConversationTitle,
+  nextConversationTitleVersion,
+  type UpdateConversationReq,
+} from '@memoflow/ai-contracts';
 import { ok } from '@memoflow/transport-contracts/result';
 import { _getCommandPaletteState } from '@memoflow/ui-vue-shadcn';
 import { Toaster } from 'vue-sonner';
@@ -24,14 +29,17 @@ const seeds = ['a', 'b', 'c', 'd'].map((id, i) => ({
   name: `Conversation ${id.toUpperCase()}`,
   identityId: 'test',
   status: 'Active' as const,
+  version: 1,
   createdAt: i,
   updatedAt: i,
   messageCount: 0,
   lastMessageAt: null,
 }));
 const service = {
-  updateConversation: async (id: string, patch: { status: string }) => {
-    calls.value.push(`${id}:${patch.status}`);
+  updateConversation: async (id: string, patch: UpdateConversationReq) => {
+    calls.value.push(
+      `${id}:${patch.generateTitle ? 'GenerateTitle' : patch.name !== undefined ? 'Rename' : patch.status}`,
+    );
     if (params.has('hold') && calls.value.length === 1)
       await new Promise<void>((resolve) => {
         releaseWrite = resolve;
@@ -39,7 +47,23 @@ const service = {
     else await new Promise((resolve) => setTimeout(resolve, 160));
     settledWrites.value++;
     if (fail && id === 'b') throw new Error('Simulated offline write');
-    return ok({ ...seeds.find((item) => item.id === id)!, ...patch });
+    const before = seeds.find((item) => item.id === id)!;
+    const title = patch.generateTitle
+      ? fallbackConversationTitle(patch.generateTitle.content)
+      : patch.name;
+    return ok({
+      ...before,
+      ...patch,
+      ...(title !== undefined
+        ? {
+            name: title,
+            version: nextConversationTitleVersion(
+              patch.expectedVersion ?? 1,
+              patch.generateTitle?.automatic,
+            ),
+          }
+        : {}),
+    });
   },
   deleteConversation: async (id: string) => {
     calls.value.push(`${id}:Deleted`);
@@ -50,7 +74,14 @@ const Session = defineComponent({
   setup() {
     const session = useAIChatSession({
       service: service as never,
-      runtime: { listAttention: async () => [], deleteConversation: async () => true } as never,
+      runtime: {
+        listAttention: async () => [],
+        deleteConversation: async () => true,
+        listMessages: async (id: string) => ({
+          conversationId: id,
+          messages: [{ role: 'user', content: 'Readable topic from first message' }],
+        }),
+      } as never,
       usageRuntime: {} as never,
       surface: 'web',
       getDefaultConversationName: () => 'New chat',
@@ -59,6 +90,9 @@ const Session = defineComponent({
     return () =>
       h(ConversationSidebar, {
         activeProfileId: profile.value,
+        titleBusy: session.titleBusy.value,
+        onRenameConversation: (id: string, name: string) => session.renameConversation(id, name),
+        onRegenerateTitle: (id: string) => session.generateConversationTitle(id),
         activeConversationId: opened.value,
         groups: [
           {

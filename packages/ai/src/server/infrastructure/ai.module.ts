@@ -543,7 +543,13 @@ export function createAIModule(dependencies: AIModuleDependencies): AIModuleInst
     getConversation: new GetConversationUseCase(conversationRepository),
     listConversations: new ListConversationsUseCase(conversationRepository),
     deleteConversation: new DeleteConversationUseCase(conversationRepository),
-    updateConversation: new UpdateConversationUseCase(conversationRepository),
+    updateConversation: new UpdateConversationUseCase(
+      conversationRepository,
+      dependencies.mastraRuntime
+        ? (identityId, input) =>
+            dependencies.mastraRuntime!.generateConversationTitle(identityId, input)
+        : undefined,
+    ),
   };
 
   const knowledgeIngestionPort =

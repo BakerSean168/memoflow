@@ -1,7 +1,11 @@
 import { installAiUiHost } from '@ai-ui-test-host/di/ai-ui-host';
 installAiUiHost();
 import { defineComponent, h, nextTick } from 'vue';
-import { mount } from '@vue/test-utils';
+import { mount, flushPromises } from '@vue/test-utils';
+async function flushTitleWork() {
+  await flushPromises();
+  await nextTick();
+}
 import { createI18n } from 'vue-i18n';
 import { afterEach, beforeEach, describe, expect, it, onTestFinished, vi } from 'vitest';
 import { ok, ResultErrorException } from '@memoflow/transport-contracts/result';
@@ -222,6 +226,160 @@ async function send(
 }
 
 describe('useAIChatSession Mastra-native open chat', () => {
+  it.each(['codex', 'antigravity'] as const)(
+    '%s titles use the local owner without another Agent run or builtin model',
+    async (driver) => {
+      const service = createServiceStub();
+      const runtime = createRuntimeStub();
+      const native = {
+        id: 'native-1',
+        runtimeKind: 'local_agent',
+        connectionId: 'native',
+        modelId: 'native-model',
+        driver,
+        name: '快速对话',
+        version: 1,
+        createdAt: 1,
+        updatedAt: 2,
+      };
+      const localAgent = {
+        createConversation: vi.fn(async () => native),
+        listConversations: vi.fn(async () => [native]),
+        renameConversation: vi.fn(async (_id, name) => ({ ...native, name, version: 2 })),
+      };
+      const session = mountComposable(service, runtime, 'desktop', createUsageRuntimeStub(), {
+        localAgent: localAgent as never,
+      });
+      session.runtimeChoice.value = {
+        runtimeKind: 'local_agent',
+        connectionId: 'native',
+        modelId: 'native-model',
+      };
+      runtime.streamMessage.mockImplementation(async (_command, handlers) => {
+        handlers.onEvent?.({
+          ...event(1, 'assistant.run.started', {}),
+          conversationId: 'native-1',
+        });
+      });
+      session.chatMessage.value = '帮我制定学习计划';
+      await session.handleSendChat(service as never, null, '快速对话', () => {});
+      await flushTitleWork();
+      expect(localAgent.renameConversation).toHaveBeenCalledExactlyOnceWith(
+        'native-1',
+        '帮我制定学习计划',
+        1,
+        true,
+      );
+      expect(service.updateConversation).not.toHaveBeenCalled();
+      expect(runtime.streamMessage).toHaveBeenCalledTimes(1);
+      expect(session.conversationTitle.value).toBe('帮我制定学习计划');
+    },
+  );
+
+  it('generates once after an accepted first message and synchronizes list/header without delaying chat', async () => {
+    const service = createServiceStub();
+    const runtime = createRuntimeStub();
+    let finish!: (value: unknown) => void;
+    service.updateConversation.mockImplementation(
+      () =>
+        new Promise((done) => {
+          finish = done;
+        }),
+    );
+    const session = mountComposable(service, runtime);
+    await send(session, service, runtime, [
+      event(1, 'assistant.run.started', {
+        providerId: MODEL.providerId,
+        modelId: MODEL.modelId,
+      }),
+    ]);
+    expect(session.chatLoading.value).toBe(false);
+    expect(session.titleBusy.value['conv-1']).toBe(true);
+    expect(service.updateConversation).toHaveBeenCalledWith(
+      'conv-1',
+      expect.objectContaining({
+        generateTitle: expect.objectContaining({
+          content: 'hello',
+          automatic: true,
+          modelId: MODEL.modelId,
+        }),
+      }),
+    );
+    finish(
+      ok({
+        ...createConversationDTO('conv-1'),
+        name: 'Readable topic',
+        version: 2,
+      }),
+    );
+    await flushTitleWork();
+    expect(session.conversationTitle.value).toBe('Readable topic');
+    expect(session.conversationList.value[0]?.name).toBe('Readable topic');
+    await send(session, service, runtime, [event(2, 'assistant.run.started', {})]);
+    expect(service.updateConversation).toHaveBeenCalledTimes(1);
+  });
+
+  it('keeps legacy conversations idle and targets captured history while another conversation is selected', async () => {
+    const service = createServiceStub();
+    const runtime = createRuntimeStub();
+    const session = mountComposable(service, runtime);
+    session.conversationList.value = [
+      { ...createConversationDTO('legacy'), version: 1 },
+      { ...createConversationDTO('other'), name: 'Other', version: 3 },
+    ] as never;
+    session.chatConversationId.value = 'other';
+    session.conversationTitle.value = 'Other';
+    expect(service.updateConversation).not.toHaveBeenCalled();
+    service.updateConversation.mockResolvedValue(
+      ok({
+        ...createConversationDTO('legacy'),
+        name: 'History topic',
+        version: 3,
+      }),
+    );
+    expect(await session.generateConversationTitle('legacy')).toBe(true);
+    expect(runtime.listMessages).toHaveBeenCalledWith('legacy', 'builtin');
+    expect(session.conversationTitle.value).toBe('Other');
+    expect(session.conversationList.value.find((item) => item.id === 'legacy')?.name).toBe(
+      'History topic',
+    );
+  });
+
+  it('ignores a late title response after manual editing and reports offline failures', async () => {
+    const service = createServiceStub();
+    const runtime = createRuntimeStub();
+    const session = mountComposable(service, runtime);
+    session.conversationList.value = [{ ...createConversationDTO('conv-1'), version: 1 }] as never;
+    session.chatConversationId.value = 'conv-1';
+    let finish!: (value: unknown) => void;
+    service.updateConversation.mockImplementationOnce(
+      () =>
+        new Promise((done) => {
+          finish = done;
+        }),
+    );
+    const pending = session.generateConversationTitle('conv-1', {
+      content: 'topic',
+    });
+    expect(
+      await session.generateConversationTitle('conv-1', {
+        content: 'duplicate',
+      }),
+    ).toBe(false);
+    service.updateConversation.mockResolvedValueOnce(
+      ok({ ...createConversationDTO('conv-1'), name: 'Manual', version: 3 }),
+    );
+    expect(await session.renameConversation('conv-1', 'Manual')).toBe(true);
+    finish(ok({ ...createConversationDTO('conv-1'), name: 'Stale', version: 2 }));
+    expect(await pending).toBe(false);
+    expect(session.conversationTitle.value).toBe('Manual');
+    service.updateConversation.mockRejectedValueOnce(new Error('offline'));
+    expect(await session.renameConversation('conv-1', 'Offline edit')).toBe(false);
+    await flushTitleWork();
+    expect(session.conversationTitle.value).toBe('Manual');
+    expect(toastMocks.error).toHaveBeenCalled();
+  });
+
   it('does not revive old pending summaries after another consumer resets the shared connection', async () => {
     const transports: WorkspaceEventStreamOptions[] = [];
     const workspaceRuntime: WorkflowRuntimeClient = {

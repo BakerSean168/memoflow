@@ -476,11 +476,24 @@ export class LocalAgentRuntime {
           connectionId: value.connectionId,
           modelId: value.modelId,
           name: value.name,
+          version: value.version ?? 1,
           status: value.status,
           driver: value.driver,
           createdAt: value.createdAt,
           updatedAt: value.updatedAt,
         }),
+    );
+  }
+  async renameConversation(
+    identityId: string,
+    id: string,
+    name: string,
+    expectedVersion: number,
+    automatic = false,
+  ) {
+    this.assertActive();
+    return this.persist(() =>
+      this.options.store.renameConversation(identityId, id, name, expectedVersion, automatic),
     );
   }
   async setConversationStatus(identityId: string, id: string, status: 'Active' | 'Archived') {

@@ -39,6 +39,12 @@ export interface LocalAgentClient {
   /** Read-only, unsaved default driver check; available only on Desktop. */
   probeDefaultDriver(driver: LocalAgentDriver): Promise<LocalAgentStatus>;
   listConversations(): Promise<LocalAgentConversation[]>;
+  renameConversation(
+    id: string,
+    name: string,
+    expectedVersion: number,
+    automatic?: boolean,
+  ): Promise<LocalAgentConversation>;
   setConversationStatus(id: string, status: 'Active' | 'Archived'): Promise<LocalAgentConversation>;
   createConversation(conversation: LocalAgentConversationCreate): Promise<LocalAgentConversation>;
   respond(response: LocalAgentRequestResponse): Promise<boolean>;
@@ -84,6 +90,11 @@ export function createLocalAgentIpcClient(ipc: IResultIpcClient): LocalAgentClie
       invoke({ action: 'probe_default', driver }, LocalAgentStatusSchema),
     listConversations: () =>
       invoke({ action: 'list_conversations' }, z.array(LocalAgentConversationSchema).max(1000)),
+    renameConversation: (id, name, expectedVersion, automatic) =>
+      invoke(
+        { action: 'rename_conversation', id, name, expectedVersion, automatic },
+        LocalAgentConversationSchema,
+      ),
     setConversationStatus: (id, status) =>
       invoke({ action: 'set_conversation_status', id, status }, LocalAgentConversationSchema),
     createConversation: (conversation) =>

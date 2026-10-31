@@ -129,6 +129,23 @@ ConversationListItem
 
 这些字段是 read model，可重建，不要求双写进 shell row。
 
+### 4.1 标题生命周期与兼容恢复
+
+标题仍属于 product shell；本地 Agent 标题属于当前 Profile/Identity 的 conversation metadata，
+不修改 Provider 的原生 session。首条文字消息被运行时接受后仅尝试一次自动标题；旧会话恢复、
+列表刷新和重启均不触发补偿生成。旧“快速对话”保留原名，用户可主动重生成，无需批量迁移。
+
+标题使用已有 `version` 条件写入：1 表示尚未写入新标题，2 保留给首次自动生成，人工重命名及
+显式重生成从至少 3 开始、以后单调递增。本地旧 metadata 未带 version 时按 1 读取，下一次标题
+写入随 record JSON 持久化，无额外迁移。PowerSync 上传仅接受更高标题版本；这样无论离线首次
+自动标题与人工标题以何种顺序到达，自动标题都不能覆盖人工标题。同版本并发人工编辑由先到的
+权威写入保留；CAS 冲突要求刷新后重试。归档和 activity 写入不携带旧标题。
+
+内置助手仅使用显式选定的可用模型，最多一步、80 个输出 token、8 秒超时、不重试，不挂载工具、
+记忆或业务上下文。没有模型、模型失败及无独立安全标题 API 的本地 Agent 均使用首条文字的
+48 字符截断回退，并在主动重生成时反馈回退结果；不为标题启动完整原生 Agent 或换用其他 Provider。
+标题统一消毒控制/方向字符和标记符，最长 80 个 Unicode 字符；手动标题不会被后续自动建议改写。
+
 ## 5. Status simplification
 
 当前 `ConversationStatus.Closed` 缺少稳定产品 journey 证据。

@@ -16,6 +16,48 @@ export class AIConversationPrismaRepository implements IAIConversationRepository
     readonly events?: ConversationEventSource,
   ) {}
 
+  async saveStatus(conversation: AIConversation): Promise<boolean> {
+    await this.events?.init();
+    const current = await this.findByIdForIdentity(
+      String(conversation.identityId),
+      String(conversation.id),
+    );
+    if (!current) return false;
+    const result = await this.prisma.aiConversation.updateMany({
+      where: {
+        id: String(current.id),
+        identityId: String(current.identityId),
+        deletedAt: null,
+        version: current.version,
+        updatedAt: current.updatedAt,
+      },
+      data: { status: conversation.status, updatedAt: current.updatedAt },
+    });
+    if (result.count !== 1) return false;
+    flushDomainEvents(aiEventPublisher, conversation);
+    return true;
+  }
+  async saveTitle(conversation: AIConversation, expectedVersion: number): Promise<boolean> {
+    await this.events?.init();
+    const dto = conversation.toServerDTO();
+    const result = await this.prisma.aiConversation.updateMany({
+      where: {
+        id: String(dto.id),
+        identityId: String(dto.identityId),
+        deletedAt: null,
+        version: expectedVersion,
+      },
+      data: {
+        name: dto.name,
+        version: dto.version,
+        updatedAt: new Date(dto.updatedAt),
+      },
+    });
+    if (result.count !== 1) return false;
+    flushDomainEvents(aiEventPublisher, conversation);
+    return true;
+  }
+
   async save(conversation: AIConversation): Promise<void> {
     await this.events?.init();
     const dto = conversation.toServerDTO();

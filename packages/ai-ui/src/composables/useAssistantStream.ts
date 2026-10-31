@@ -34,6 +34,7 @@ export function useAssistantStream(input: {
     | 'refreshRuntimeUsage'
     | 'refreshRuntimeHistory'
     | 'invalidateRuntimeHistory'
+    | 'generateConversationTitle'
     | 'markConversationActivity'
     | 'loadConversationList'
   >;
@@ -700,6 +701,16 @@ export function useAssistantStream(input: {
               !streamController?.signal.aborted
             ) {
               applyRuntimeEvent(event, assistantDraftId);
+              if (
+                event.type === 'assistant.run.started' &&
+                event.conversationId === conversationId &&
+                pendingUserMessage
+              )
+                void input.conversation.generateConversationTitle(conversationId, {
+                  content: pendingUserMessage,
+                  automatic: true,
+                  model: choice.runtimeKind === 'builtin' ? selectedModel : null,
+                });
               if (event.type === 'assistant.run.failed') nativeLimitCode = event.data.code;
               if (
                 event.type === 'assistant.run.failed' ||

@@ -541,6 +541,16 @@ export function createAIElectronModule(options: AIElectronModuleOptions): AIElec
                   return ok(await runtime.probeDefaultDriver(owner, input.driver));
                 case 'list_conversations':
                   return ok(await runtime.listConversations(owner));
+                case 'rename_conversation':
+                  return ok(
+                    await runtime.renameConversation(
+                      owner,
+                      input.id,
+                      input.name,
+                      input.expectedVersion,
+                      input.automatic,
+                    ),
+                  );
                 case 'set_conversation_status':
                   return ok(await runtime.setConversationStatus(owner, input.id, input.status));
                 case 'create_conversation':

@@ -446,3 +446,26 @@ describe('ConversationSidebar account menu', () => {
     }
   });
 });
+
+describe('conversation title editing', () => {
+  it('supports double-click, Enter save, Escape cancel and pending regeneration controls', async () => {
+    const wrapper = mount(ConversationSidebar, {
+      props: { groups, activeConversationId: 'a', titleBusy: { a: true } },
+      global: { plugins: [i18n] },
+    });
+    await wrapper.get('[data-keyboard-item="a"]').trigger('dblclick');
+    const input = wrapper.get('[data-testid="conversation-title-input"]');
+    await input.setValue('Edited title');
+    await input.trigger('keydown', { key: 'Enter' });
+    expect(wrapper.emitted('rename-conversation')).toEqual([['a', 'Edited title']]);
+    await wrapper.get('[data-keyboard-item="b"]').trigger('dblclick');
+    await wrapper.get('[data-testid="conversation-title-input"]').setValue('Cancelled');
+    await wrapper
+      .get('[data-testid="conversation-title-input"]')
+      .trigger('keydown', { key: 'Escape' });
+    expect(wrapper.find('[data-testid="conversation-title-input"]').exists()).toBe(false);
+    expect(wrapper.emitted('rename-conversation')).toHaveLength(1);
+    expect(wrapper.find('[role="status"]').exists()).toBe(true);
+    wrapper.unmount();
+  });
+});
