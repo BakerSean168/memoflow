@@ -43,7 +43,7 @@ function driver(extra = '', config: LocalAgentConnection = connection) {
         reply({turn:{id:'turn-1'}});
         send({method:'turn/started',params:{threadId:'native-1',turn:{id:'turn-1'}}});
         send({method:'item/agentMessage/delta',params:{threadId:'native-1',turnId:'turn-1',itemId:'msg',delta:'Hello'}});
-        send({id:900,method:'item/commandExecution/requestApproval',params:{threadId:'native-1',turnId:'turn-1',itemId:'cmd',command:'pwd'}});
+        send({id:900,method:'item/commandExecution/requestApproval',params:{threadId:'native-1',turnId:'turn-1',itemId:'cmd',command:'pwd',reason:'Inspect cwd',grantRoot:'/repo'}});
       }
       else if (frame.id === 900 && frame.result) {
         send({method:'serverRequest/resolved',params:{threadId:'native-1',requestId:900}});
@@ -231,10 +231,16 @@ describe('Codex native driver', () => {
       mcp: { url: 'http://127.0.0.1:12345/mcp', token: 'fixture' },
     })) {
       events.push(event);
-      if (event.type === 'request')
+      if (event.type === 'request') {
+        expect(event.request).toMatchObject({
+          title: 'pwd',
+          reason: 'Inspect cwd',
+          scope: '/repo',
+        });
         expect(
           native.respond(event.request.requestId, { type: 'permission', decision: 'approve_once' }),
         ).toBe(true);
+      }
     }
     expect(events).toContainEqual(
       expect.objectContaining({ type: 'session', nativeSessionId: 'native-1' }),

@@ -67,6 +67,11 @@ const permissionPayload = z.object({
   toolCall: z.object({
     toolCallId: z.string().min(1).max(512),
     title: z.string().max(4000).optional(),
+    kind: z.string().max(80).nullish(),
+    locations: z
+      .array(z.object({ path: z.string().max(1000) }).passthrough())
+      .max(50)
+      .nullish(),
   }),
   options: z
     .array(
@@ -78,6 +83,18 @@ const permissionPayload = z.object({
     )
     .max(20),
 });
+
+/** ACP tool kind and touched paths, shown as the scope a native approval would cover. */
+function acpPermissionScope(toolCall: {
+  kind?: string | null;
+  locations?: readonly { path: string }[] | null;
+}): { scope?: string } {
+  const parts = [
+    toolCall.kind?.trim(),
+    ...(toolCall.locations ?? []).map((location) => location.path.trim()),
+  ].filter((part): part is string => Boolean(part));
+  return parts.length ? { scope: parts.join(' · ').slice(0, 500) } : {};
+}
 
 type Model = {
   id: string;
@@ -182,6 +199,12 @@ function modelsFromOptions(raw: unknown): {
 }
 
 /** Shared ACP lifecycle. Each official Agent owns inference, routes and native sessions. */
+const TOOL_IDENTIFIER = /^[a-z][a-z0-9]*(?:[_.:-][a-z0-9]+)*$/u;
+
+function safeToolIdentifier(title: string | undefined): string | undefined {
+  return title && title.length <= 64 && TOOL_IDENTIFIER.test(title) ? title : undefined;
+}
+
 export class AcpDriver {
   private transport?: NativeRpcTransport;
   private readonly queue = new NativeEventQueue();
@@ -485,16 +508,31 @@ export class AcpDriver {
         .object({
           toolCallId: z.string().min(1),
           title: z.string().optional(),
+          kind: z
+            .enum([
+              'read',
+              'edit',
+              'delete',
+              'move',
+              'search',
+              'execute',
+              'think',
+              'fetch',
+              'switch_mode',
+              'other',
+            ])
+            .optional()
+            .catch(undefined),
           status: z.string().optional(),
         })
         .parse(update);
-      if (update.sessionUpdate === 'tool_call' && frame.title)
-        this.toolNames.set(frame.toolCallId, frame.title);
-      const label = (frame.title ?? this.toolNames.get(frame.toolCallId) ?? 'ACP tool').slice(
-        0,
-        240,
-      );
-      if (update.sessionUpdate === 'tool_call_update') this.toolNames.delete(frame.toolCallId);
+      // ACP titles can contain raw shell arguments/secrets. Persist the safe kind, or a
+      // title only when it is a bare tool identifier such as an MCP tool name.
+      const safeLabel = frame.kind ?? safeToolIdentifier(frame.title);
+      if (safeLabel) this.toolNames.set(frame.toolCallId, safeLabel);
+      const label = safeLabel ?? this.toolNames.get(frame.toolCallId) ?? 'ACP tool';
+      if (['completed', 'failed', 'denied'].includes(frame.status ?? ''))
+        this.toolNames.delete(frame.toolCallId);
       this.queue.push({
         type: 'activity',
         toolCallId: frame.toolCallId,
@@ -554,7 +592,12 @@ export class AcpDriver {
             },
           ],
         }
-      : { type: 'permission', requestId, title };
+      : {
+          type: 'permission',
+          requestId,
+          title,
+          ...acpPermissionScope(parsed.data.toolCall),
+        };
     this.requests.set(requestId, {
       wireId: request.id,
       request: event,

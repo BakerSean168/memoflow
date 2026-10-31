@@ -18,13 +18,41 @@ interface CompoundCrudDelegate {
   deleteMany(args: { where: Record<string, unknown> }): Promise<CountResult>;
 }
 
+interface RoutineOccurrenceCrudDelegate {
+  findUnique(args: {
+    where: { idempotencyKey: string };
+    select: { id: true; identityId: true; routineId: true; occurrenceKey: true; status: true };
+  }): Promise<{
+    id: string;
+    identityId: string;
+    routineId: string;
+    occurrenceKey: string;
+    status: string;
+  } | null>;
+  upsert(args: {
+    where: { idempotencyKey: string };
+    create: Record<string, unknown>;
+    update: Record<string, unknown>;
+  }): Promise<unknown>;
+  updateMany(args: {
+    where: Record<string, unknown>;
+    data: Record<string, unknown>;
+  }): Promise<CountResult>;
+  deleteMany(args: { where: Record<string, unknown> }): Promise<CountResult>;
+}
+
 export interface RoutineCompoundCrudDatabase {
   readonly routineProfileMembership?: CompoundCrudDelegate;
   readonly routineTemporaryOverride?: CompoundCrudDelegate;
+  readonly routineOccurrence?: RoutineOccurrenceCrudDelegate;
 }
 
 export function isRoutineCompoundCrudTable(tableName: string): boolean {
-  return tableName === 'routine_profile_memberships' || tableName === 'routine_temporary_overrides';
+  return (
+    tableName === 'routine_profile_memberships' ||
+    tableName === 'routine_temporary_overrides' ||
+    tableName === 'routine_occurrences'
+  );
 }
 
 /**
@@ -50,7 +78,106 @@ export async function executeRoutineCompoundCrudOperation(
     return;
   }
 
+  if (operation.type === 'routine_occurrences') {
+    const delegate = db.routineOccurrence;
+    if (!delegate) throw new Error('RoutineOccurrence Prisma delegate is unavailable');
+    await executeOccurrence(delegate, identityId, operation);
+    return;
+  }
+
   throw new Error(`Unsupported Routine compound CRUD table: ${operation.type}`);
+}
+
+async function executeOccurrence(
+  delegate: RoutineOccurrenceCrudDelegate,
+  identityId: string,
+  operation: CrudOperation,
+): Promise<void> {
+  const data = normalizeCrudData(operation.type, operation.data);
+  const old = normalizeCrudData(operation.type, operation.old);
+  const idempotencyKey = requiredString(
+    data.idempotencyKey ?? old.idempotencyKey,
+    'idempotencyKey',
+  );
+  assertKeyNotMutated('idempotencyKey', idempotencyKey, data.idempotencyKey);
+  const stableWhere = { identityId, idempotencyKey };
+
+  if (operation.op === 'PUT') {
+    const existing = await delegate.findUnique({
+      where: { idempotencyKey },
+      select: { id: true, identityId: true, routineId: true, occurrenceKey: true, status: true },
+    });
+    if (existing && existing.identityId !== identityId) {
+      throw new TypeError('Routine occurrence is unavailable for this identity');
+    }
+    if (existing && existing.id !== operation.id) {
+      assertOccurrenceKeysMatch(existing, data);
+    }
+    const create = { ...data, id: operation.id, identityId };
+    const mutable = withoutKeys(data, [
+      'id',
+      'identityId',
+      'routineId',
+      'occurrenceKey',
+      'idempotencyKey',
+      'createdAt',
+    ]);
+    if (!existing) {
+      await delegate.upsert({ where: { idempotencyKey }, create, update: {} });
+    } else if (existing.status === 'running' && isTerminalOccurrenceStatus(data.status)) {
+      await delegate.updateMany({ where: { ...stableWhere, status: 'running' }, data: mutable });
+    }
+    return;
+  }
+
+  const existing = await delegate.findUnique({
+    where: { idempotencyKey },
+    select: { id: true, identityId: true, routineId: true, occurrenceKey: true, status: true },
+  });
+  if (existing && existing.identityId !== identityId) {
+    throw new TypeError('Routine occurrence is unavailable for this identity');
+  }
+  if (!existing) {
+    if (operation.op === 'DELETE') return;
+    const mutable = withoutKeys(data, [
+      'id',
+      'identityId',
+      'routineId',
+      'occurrenceKey',
+      'idempotencyKey',
+      'createdAt',
+    ]);
+    await delegate.updateMany({ where: { id: operation.id, identityId }, data: mutable });
+    return;
+  }
+
+  if (operation.op === 'DELETE') {
+    await delegate.deleteMany({ where: stableWhere });
+    return;
+  }
+  if (existing.id !== operation.id) assertOccurrenceKeysMatch(existing, data);
+  if (existing.status !== 'running' && data.status === 'running') return;
+  const mutable = withoutKeys(data, [
+    'id',
+    'identityId',
+    'routineId',
+    'occurrenceKey',
+    'idempotencyKey',
+    'createdAt',
+  ]);
+  await delegate.updateMany({ where: stableWhere, data: mutable });
+}
+
+function isTerminalOccurrenceStatus(value: unknown): boolean {
+  return value === 'succeeded' || value === 'skipped';
+}
+
+function assertOccurrenceKeysMatch(
+  existing: { routineId: string; occurrenceKey: string },
+  data: Record<string, unknown>,
+): void {
+  assertKeyNotMutated('routineId', existing.routineId, data.routineId);
+  assertKeyNotMutated('occurrenceKey', existing.occurrenceKey, data.occurrenceKey);
 }
 
 async function executeMembership(

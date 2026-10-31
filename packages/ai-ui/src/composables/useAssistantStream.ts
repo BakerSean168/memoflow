@@ -98,6 +98,7 @@ export function useAssistantStream(input: {
       ? chatTimeline.value.filter((item) => item.id === scope.assistantDraftId)
       : chatTimeline.value;
     for (const item of items) {
+      delete item.activityUpdatedAt;
       if (item.toolActivity) delete item.toolActivity;
       delete item.nativeActivity;
       for (const request of item.nativeRequests ?? [])
@@ -352,7 +353,8 @@ export function useAssistantStream(input: {
     if (event.conversationId !== chatConversationId.value) return;
     if (activeRuntimeRunId.value && event.runId !== activeRuntimeRunId.value) return;
     const item = chatTimeline.value.find((candidate) => candidate.id === assistantDraftId);
-    if (!item) return;
+    if (!item || item.status !== 'generating') return;
+    item.activityUpdatedAt = Date.now();
     if (event.type === 'assistant.run.started' && event.runId && chatConversationId.value) {
       void (async () => {
         try {
@@ -428,7 +430,10 @@ export function useAssistantStream(input: {
           (value) => value.toolCallId === activity.toolCallId,
         );
         if (existing >= 0) item.nativeActivities[existing] = activity;
-        else if (item.nativeActivities.length < 256) item.nativeActivities.push(activity);
+        else {
+          if (item.nativeActivities.length >= 256) item.nativeActivities.shift();
+          item.nativeActivities.push(activity);
+        }
         if (event.data.state === 'running') item.nativeActivity = event.data;
         else if (item.nativeActivity?.toolCallId === event.data.toolCallId)
           delete item.nativeActivity;
@@ -439,7 +444,10 @@ export function useAssistantStream(input: {
         const existing = item.toolActivities.findIndex((call) => call.toolCallId === toolCallId);
         const activity = { toolCallId, toolName, state };
         if (existing >= 0) item.toolActivities[existing] = activity;
-        else if (item.toolActivities.length < 256) item.toolActivities.push(activity);
+        else {
+          if (item.toolActivities.length >= 256) item.toolActivities.shift();
+          item.toolActivities.push(activity);
+        }
         if (event.data.state === 'running') item.toolActivity = event.data;
         else if (item.toolActivity?.toolCallId === event.data.toolCallId) delete item.toolActivity;
       }
@@ -727,6 +735,16 @@ export function useAssistantStream(input: {
       stopWatchingDraft?.();
       if (conversationId) void loadConversationList(loadService);
       if (assistantDraftId) flushPendingStreamDelta(assistantDraftId);
+      const unfinished = chatTimeline.value.find((item) => item.id === assistantDraftId);
+      if (unfinished?.status === 'generating') {
+        unfinished.status = unfinished.askUserRequests?.some(
+          (request) =>
+            request.runId === suspendedAskUserRunId.value &&
+            (request.status === 'pending' || request.status === 'sending'),
+        )
+          ? 'success'
+          : 'interrupted';
+      }
       if (assistantDraftId)
         settleVisibleApprovals(streamController?.signal.aborted ? 'cancelled' : 'failed', {
           conversationId,

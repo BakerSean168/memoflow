@@ -4,7 +4,10 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { createLocalAgentSqlite } from '../../testing/local-agent-sqlite';
 import { LocalAgentRepository } from '../infrastructure/adapters/powersync/local-agent.repository';
-import { LocalAgentRuntime } from './local-agent-runtime';
+import {
+  LocalAgentRuntime,
+  MEMOFLOW_NATIVE_TOOL_ROUTING_INSTRUCTIONS,
+} from './local-agent-runtime';
 import { LocalAgentError } from '../../shared/local-agent-error';
 import { nativeIdentity, nativeModelVisibilityContext } from './native-identity';
 import type { NativeAgentEvent, NativeAgentRunInput } from './codex-driver';
@@ -36,6 +39,14 @@ async function setup() {
   });
   return { store, conversation };
 }
+
+it('defines a bounded native MemoFlow tool route without granting alternate automation paths', () => {
+  expect(MEMOFLOW_NATIVE_TOOL_ROUTING_INSTRUCTIONS).toContain('goal_panel_open');
+  expect(MEMOFLOW_NATIVE_TOOL_ROUTING_INSTRUCTIONS).toContain('goal_panel_submit');
+  expect(MEMOFLOW_NATIVE_TOOL_ROUTING_INSTRUCTIONS).toContain('do not use goal_create');
+  expect(MEMOFLOW_NATIVE_TOOL_ROUTING_INSTRUCTIONS).toContain('Never use shell');
+  expect(MEMOFLOW_NATIVE_TOOL_ROUTING_INSTRUCTIONS).toContain('stop without retrying');
+});
 
 describe('AGY verified catalog reuse between Settings and Workspace', () => {
   it('reuses only the exact owner, revision and native OAuth identity without new ACP calls', async () => {
@@ -865,5 +876,228 @@ it('fails with LOCAL_AGENT_TOOLS_UNAVAILABLE when business tools are missing on 
   const failed = events.find((e) => e.type === 'assistant.run.failed');
   expect(failed).toBeDefined();
   expect(failed.data.code).toBe('LOCAL_AGENT_TOOLS_UNAVAILABLE');
+  await runtime.dispose();
+});
+
+describe('Native activity terminal replay', () => {
+  it.each(['failed', 'cancelled'] as const)(
+    'persists the %s run outcome beside tool history',
+    async (outcome) => {
+      const { store, conversation } = await setup();
+      const cwd = await mkdtemp(join(tmpdir(), 'mf-activity-replay-'));
+      ephemeralHomes.push(cwd);
+      const runtime = new LocalAgentRuntime({
+        store,
+        cwd,
+        createDriver: () => ({
+          async *run(): AsyncGenerator<NativeAgentEvent> {
+            yield {
+              type: 'activity',
+              toolCallId: 'tool-1',
+              label: 'commandExecution',
+              state: 'running',
+            };
+            if (outcome === 'failed') throw new LocalAgentError('LOCAL_AGENT_UNAVAILABLE');
+            yield { type: 'cancelled' };
+          },
+          respond: () => false,
+          cancel() {},
+          async close() {},
+          async probe() {
+            return { status: 'ready' as const, models: [{ id: 'model', name: 'Model' }] };
+          },
+        }),
+      });
+      try {
+        const events = [];
+        for await (const event of runtime.dispatchMessage({
+          identityId: 'owner',
+          conversationId: conversation.id,
+          content: 'Run',
+        }))
+          events.push(event);
+        const terminal = events.at(-1)!;
+        expect(terminal.type).toBe(`assistant.run.${outcome}`);
+        const history = await runtime.listMessages({
+          identityId: 'owner',
+          conversationId: conversation.id,
+        });
+        expect(history.messages.at(-1)).toMatchObject({
+          runOutcome: { runId: terminal.runId, status: outcome },
+          nativeActivities: [{ toolCallId: 'tool-1', label: 'commandExecution', state: 'running' }],
+        });
+      } finally {
+        await runtime.dispose();
+      }
+    },
+  );
+});
+
+it('deduplicates identical native permission prompts and does not re-ask a declined capability in the same run', async () => {
+  const { store, conversation } = await setup();
+  const respond = vi.fn((requestId: string) => {
+    if (requestId === 'permission-1') releaseFirst();
+    return true;
+  });
+  let releaseFirst: () => void = () => {};
+  const firstAnswered = new Promise<void>((resolve) => {
+    releaseFirst = resolve;
+  });
+  const runtime = new LocalAgentRuntime({
+    store,
+    cwd: '/tmp',
+    createDriver: () => ({
+      async *run(): AsyncGenerator<NativeAgentEvent> {
+        const permission = (requestId: string, title: string) => ({
+          type: 'request' as const,
+          request: {
+            type: 'permission' as const,
+            requestId,
+            title,
+            reason: 'The Agent wants to run tests',
+            scope: 'execute · /repo',
+          },
+        });
+        yield permission('permission-1', 'Run npm test');
+        // Provider repeats the same capability before the user answered.
+        yield permission('permission-2', 'Run npm test');
+        await firstAnswered;
+        yield { type: 'request_resolved', requestId: 'permission-1', resolution: 'answered' };
+        yield { type: 'request_resolved', requestId: 'permission-2', resolution: 'answered' };
+        // And asks for it again after the decline: no new card, a readable denial instead.
+        yield permission('permission-3', 'Run npm test');
+        // A different capability is still asked normally.
+        yield permission('permission-4', 'Write README.md');
+        yield { type: 'completed' };
+      },
+      respond,
+      cancel() {},
+      async close() {},
+      async probe() {
+        return { status: 'ready' as const, models: [{ id: 'model', name: 'Model' }] };
+      },
+    }),
+  });
+  const events: any[] = [];
+  for await (const event of runtime.dispatchMessage({
+    identityId: 'owner',
+    conversationId: conversation.id,
+    content: 'Run the tests',
+  })) {
+    events.push(event);
+    if (event.type === 'assistant.request.required' && event.data.requestId === 'permission-1') {
+      expect(event.data).toMatchObject({
+        reason: 'The Agent wants to run tests',
+        scope: 'execute · /repo',
+      });
+      expect(
+        runtime.respond('owner', {
+          conversationId: conversation.id,
+          runId: event.runId,
+          requestId: 'permission-1',
+          response: { type: 'permission', decision: 'decline' },
+        }),
+      ).toBe(true);
+    }
+  }
+  const prompted = events
+    .filter((event) => event.type === 'assistant.request.required')
+    .map((event) => event.data.requestId);
+  expect(prompted).toEqual(['permission-1', 'permission-4']);
+  expect(respond.mock.calls).toEqual([
+    ['permission-1', { type: 'permission', decision: 'decline' }],
+    ['permission-2', { type: 'permission', decision: 'decline' }],
+    ['permission-3', { type: 'permission', decision: 'decline' }],
+  ]);
+  expect(
+    events
+      .filter((event) => event.type === 'assistant.request.resolved')
+      .map((event) => event.data.requestId),
+  ).toEqual(['permission-1']);
+  expect(events).toContainEqual(
+    expect.objectContaining({
+      type: 'assistant.activity',
+      data: expect.objectContaining({
+        toolCallId: 'permission:permission-3',
+        label: 'Run npm test',
+        state: 'denied',
+      }),
+    }),
+  );
+  await runtime.dispose();
+});
+
+it('sends the tool route only to the Provider and revokes the per-run MCP grant on completion and cancel', async () => {
+  const { store } = await setup();
+  const connection = await store.createConnection('owner', {
+    driver: 'codex',
+    name: 'Codex',
+    executablePath: '/fake/codex',
+    enabled: true,
+    writeScopes: [],
+  });
+  const revoked: string[] = [];
+  let opened = 0;
+  let cancelTurn: (() => void) | undefined;
+  const providerContents: string[] = [];
+  const runtime = new LocalAgentRuntime({
+    store,
+    cwd: '/tmp',
+    bridge: {
+      async open() {
+        const token = `token-${++opened}`;
+        // Non-HTTP test transport: skips the live MCP connectivity probe.
+        return { url: 'memoflow-test://mcp', token, revoke: () => revoked.push(token) };
+      },
+      async dispose() {},
+    },
+    createDriver: () => ({
+      async *run(input: NativeAgentRunInput): AsyncGenerator<NativeAgentEvent> {
+        providerContents.push(input.content);
+        if (input.content.includes('slow')) {
+          await new Promise<void>((resolve) => {
+            cancelTurn = resolve;
+          });
+          return;
+        }
+        yield { type: 'completed' };
+      },
+      respond: () => false,
+      cancel() {
+        cancelTurn?.();
+      },
+      async close() {},
+      async probe() {
+        return { status: 'ready' as const, models: [{ id: 'model', name: 'Model' }] };
+      },
+    }),
+  });
+  const conversation = await runtime.createConversation('owner', {
+    connectionId: connection.id,
+    modelId: 'model',
+    name: 'Chat',
+  });
+  for await (const _event of runtime.dispatchMessage({
+    identityId: 'owner',
+    conversationId: conversation.id,
+    content: 'Hello',
+  }));
+  expect(revoked).toContain('token-1');
+  expect(providerContents[0]).toContain(MEMOFLOW_NATIVE_TOOL_ROUTING_INSTRUCTIONS);
+  const history = await store.listMessages('owner', conversation.id);
+  expect(history.messages[0]).toMatchObject({ role: 'user', content: 'Hello' });
+
+  const slow = runtime.dispatchMessage({
+    identityId: 'owner',
+    conversationId: conversation.id,
+    content: 'slow',
+  });
+  const started = await slow.next();
+  expect(started.value).toMatchObject({ type: 'assistant.run.started' });
+  expect(
+    runtime.cancelRun({ identityId: 'owner', runId: (started.value as { runId: string }).runId }),
+  ).toBe(true);
+  for await (const _event of slow);
+  expect(revoked).toContain('token-2');
   await runtime.dispose();
 });

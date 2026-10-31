@@ -1886,6 +1886,40 @@ describe('useAIChatSession Mastra-native open chat', () => {
     expect(runtime.answerToolSuspension).toHaveBeenCalledTimes(1);
   });
 
+  it.each([
+    ['running', 'interrupted'],
+    ['failed', 'error'],
+    ['completed', 'success'],
+  ] as const)(
+    'restores native %s tools with an honest %s message status',
+    async (state, status) => {
+      const service = createServiceStub();
+      const runtime = createRuntimeStub();
+      runtime.listMessages.mockResolvedValueOnce({
+        conversationId: 'conv-1',
+        messages: [
+          {
+            id: 'native-history',
+            role: 'assistant',
+            content: 'Retained output',
+            nativeActivities: [{ toolCallId: 'native-1', label: 'commandExecution', state }],
+          },
+        ],
+      });
+      const session = mountComposable(service, runtime);
+      await session.selectConversation(
+        { id: 'conv-1', name: 'Existing' } as never,
+        service as never,
+        vi.fn(),
+        () => MODEL.key,
+      );
+      expect(session.chatTimeline.value[0]).toMatchObject({
+        status,
+        nativeActivities: [{ state }],
+      });
+    },
+  );
+
   it('loads conversation history and durable usage from their canonical runtime clients', async () => {
     const service = createServiceStub();
     const runtime = createRuntimeStub();

@@ -22,7 +22,7 @@
         "status": "none-verified",
         "testFiles": []
       },
-      "sourceSha256": "7c204837aa1709f137798d9198b23d69929557d1e77564cd6edf3e3fcd348b72"
+      "sourceSha256": "5c730a81c3dc3a33e2eae34d26aca46e0303d2617193aad9b07ecaa3487eeb80"
     },
     {
       "path": "apps/desktop/src/main/profile/ProfileSnapshotService.spec.ts",
@@ -2825,7 +2825,7 @@
         "status": "none-verified",
         "testFiles": []
       },
-      "sourceSha256": "5de0436dd6b03870335d3895efeb6c09e8739e039efc8af82e63c6c196f7bd9c"
+      "sourceSha256": "c76b608764bfabb9665005287a0218f03c6cf7d0d4913accb69914a562f7aa71"
     },
     {
       "path": "packages/app-vue/src/layouts/shell/WindowHeader.spec.ts",
@@ -3067,7 +3067,7 @@
         "status": "none-verified",
         "testFiles": []
       },
-      "sourceSha256": "9173b1f10af0962eb87a9ac53f2949cbda991339dac8619a1c0be6cedac832bd"
+      "sourceSha256": "27fc55531cb25f40a7610f6501d7f7b005878d6cc59db0f48a7c33e9c3522588"
     },
     {
       "path": "apps/web/e2e/conversation/selection/conversation-selection.spec.ts",
@@ -3089,7 +3089,7 @@
         "status": "none-verified",
         "testFiles": []
       },
-      "sourceSha256": "46e5813881aa09553440050a051c83258e71607daa609dd5c0e64fa3a0489937"
+      "sourceSha256": "b6cabba3b8f7ae54f4799548ba0c177ea78c8c3c141b56da0be53be306a7a69d"
     }
   ],
   "storyReviews": [],

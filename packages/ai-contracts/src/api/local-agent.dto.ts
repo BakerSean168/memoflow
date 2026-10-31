@@ -287,6 +287,10 @@ export const LocalAgentRequestSchema = z.discriminatedUnion('type', [
       type: z.literal('permission'),
       requestId: id,
       title: z.string().max(500),
+      /** Why the native Agent asks, as reported by the Provider. */
+      reason: z.string().max(500).optional(),
+      /** What the approval would cover (tool kind, paths, cwd), as reported by the Provider. */
+      scope: z.string().max(500).optional(),
     })
     .strict(),
   z
