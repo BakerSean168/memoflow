@@ -5,7 +5,10 @@ import type {
   PermissionSettings,
 } from '@memoflow/ai-contracts';
 import { evaluatePermission, type PermissionRule } from './permission-policy';
-import type { PermissionRepository } from './permission.repository';
+import {
+  PermissionStorageUnavailableError,
+  type PermissionRepository,
+} from './permission.repository';
 
 export interface AuthorizeInput {
   owner: string;
@@ -15,16 +18,6 @@ export interface AuthorizeInput {
   conversationRules?: readonly PermissionRule[];
   now?: number;
   ask?: (auditId: string) => Promise<'allow' | 'deny' | 'timeout'>;
-}
-
-function isPermissionTableUnavailable(error: unknown): boolean {
-  if (!error || typeof error !== 'object') return false;
-  const value = error as { code?: unknown; message?: unknown; cause?: unknown };
-  if (value.code === 'P2021') return true;
-  const message = typeof value.message === 'string' ? value.message : '';
-  return /(?:no such table|does not exist|undefined table).*ai_permission|ai_permission.*(?:no such table|does not exist|undefined table)/iu.test(
-    message,
-  );
 }
 
 export async function authorize(
@@ -40,7 +33,7 @@ export async function authorize(
       repository.listRules(input.owner),
     ]);
   } catch (error) {
-    if (!isPermissionTableUnavailable(error)) throw error;
+    if (!(error instanceof PermissionStorageUnavailableError)) throw error;
     storageUnavailable = true;
   }
   const preset = (settings?.agentPresets[input.agentId] ??
@@ -85,7 +78,7 @@ export async function authorize(
   try {
     await repository.appendAudit(input.owner, record);
   } catch (error) {
-    if (!storageUnavailable && !isPermissionTableUnavailable(error)) throw error;
+    if (!storageUnavailable && !(error instanceof PermissionStorageUnavailableError)) throw error;
   }
   return record;
 }
@@ -102,14 +95,14 @@ export async function executeAuthorized<T>(
     try {
       await repository.updateAuditExecution(input.owner, audit.id, 'succeeded');
     } catch (error) {
-      if (!isPermissionTableUnavailable(error)) throw error;
+      if (!(error instanceof PermissionStorageUnavailableError)) throw error;
     }
     return result;
   } catch (error) {
     try {
       await repository.updateAuditExecution(input.owner, audit.id, 'failed');
     } catch (auditError) {
-      if (!isPermissionTableUnavailable(auditError)) throw auditError;
+      if (!(auditError instanceof PermissionStorageUnavailableError)) throw auditError;
     }
     throw error;
   }

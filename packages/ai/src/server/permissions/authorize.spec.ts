@@ -2,7 +2,10 @@ import { expect, it, vi } from 'vitest';
 import { createLocalAgentSqlite } from '../../testing/local-agent-sqlite';
 import { authorize, executeAuthorized, PermissionDeniedError } from './authorize';
 import { PermissionPowerSyncRepository } from './permission-powersync.repository';
-import type { PermissionRepository } from './permission.repository';
+import {
+  PermissionStorageUnavailableError,
+  type PermissionRepository,
+} from './permission.repository';
 
 it('audits preset decisions, confirmation outcomes and execution results', async () => {
   const db = createLocalAgentSqlite();
@@ -74,7 +77,7 @@ it('audits preset decisions, confirmation outcomes and execution results', async
 });
 
 it('uses the default preset without blocking when permission tables are not deployed', async () => {
-  const unavailable = new Error('no such table: ai_permission_settings');
+  const unavailable = new PermissionStorageUnavailableError();
   const repository = {
     getSettings: async () => {
       throw unavailable;
@@ -83,10 +86,10 @@ it('uses the default preset without blocking when permission tables are not depl
       throw unavailable;
     },
     appendAudit: async () => {
-      throw new Error('no such table: ai_permission_audit');
+      throw new PermissionStorageUnavailableError();
     },
     updateAuditExecution: async () => {
-      throw new Error('no such table: ai_permission_audit');
+      throw new PermissionStorageUnavailableError();
     },
   } as PermissionRepository;
 

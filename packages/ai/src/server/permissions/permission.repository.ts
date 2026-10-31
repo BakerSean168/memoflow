@@ -18,3 +18,11 @@ export interface PermissionRepository {
   ): Promise<void>;
   listAudit(owner: string, limit?: number): Promise<PermissionAuditRecord[]>;
 }
+
+/** The permission schema is not available on this server deployment yet. */
+export class PermissionStorageUnavailableError extends Error {
+  constructor() {
+    super('Permission storage is unavailable');
+    this.name = 'PermissionStorageUnavailableError';
+  }
+}
