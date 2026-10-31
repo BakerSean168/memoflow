@@ -1,24 +1,9 @@
 <script setup lang="ts">
 import { computed, nextTick, ref, watch } from 'vue';
-import {
-  Brain,
-  CircleAlert,
-  Check,
-  ChevronDown,
-  Eye,
-  LockKeyhole,
-  Search,
-  ShieldCheck,
-  Star,
-  Zap,
-} from '@lucide/vue';
+import { Brain, CircleAlert, Check, ChevronDown, LockKeyhole, Search, Star } from '@lucide/vue';
 import { useI18n } from 'vue-i18n';
 import { Popover, PopoverContent, PopoverTrigger } from '@memoflow/ui-vue-shadcn';
-import type {
-  AgentDriverKind,
-  AIChatPermissionMode,
-  LocalAgentModelOptions,
-} from '@memoflow/ai-contracts';
+import type { AgentDriverKind, LocalAgentModelOptions } from '@memoflow/ai-contracts';
 import type { ComposerModel, ModelCatalog } from '../composables/useAIModelCatalog';
 import { aiUiHost } from '../ai-ui-host';
 import AgentDriverIcon from './AgentDriverIcon.vue';
@@ -39,17 +24,14 @@ const props = defineProps<{
   models: ComposerModel[];
   catalog?: ModelCatalog;
   selectedModelKey: string;
-  permissionMode: AIChatPermissionMode;
   nativeModelOptions?: LocalAgentModelOptions;
   native: boolean;
   disabled: boolean;
   loading?: boolean;
-  supportedPermissionModes?: AIChatPermissionMode[];
 }>();
 const emit = defineEmits<{
   refresh: [];
   selectModel: [modelKey: string, agentId: string];
-  permission: [mode: AIChatPermissionMode];
   modelOption: [kind: keyof LocalAgentModelOptions, value?: string];
   settings: [];
 }>();
@@ -59,7 +41,7 @@ const favoritesStorageKey = computed(() => {
   const identity = resolveIdentityScope();
   return identity ? `${FAVORITES_KEY}:${identity}` : '';
 });
-const openMenu = ref<'models' | 'traits' | 'permissions' | null>(null);
+const openMenu = ref<'models' | 'traits' | null>(null);
 const search = ref('');
 const activeSection = ref('favorites');
 const favorites = ref<string[]>([]);
@@ -138,21 +120,6 @@ function chooseTrait(kind: keyof LocalAgentModelOptions, value?: string) {
   emit('modelOption', kind, value);
   openMenu.value = null;
 }
-const permissionModes = computed<AIChatPermissionMode[]>(() =>
-  providerUnavailable.value || !currentAgent.value?.enabled || !selectedModel.value
-    ? []
-    : (props.supportedPermissionModes ??
-      (props.native ? ['supervised', 'auto-approve'] : ['supervised', 'read-only'])),
-);
-const permissionHint = (mode: AIChatPermissionMode) =>
-  t(
-    'aiAssistant.composer.' +
-      (mode === 'read-only'
-        ? 'readOnlyHint'
-        : mode === 'auto-approve'
-          ? 'autoApproveHint'
-          : 'supervisedHint'),
-  );
 const instanceName = (agent: ComposerAgentOption) => {
   const duplicates = props.agents.filter((item) => item.name === agent.name).length;
   return duplicates > 1 ? agent.name + ' · ' + agent.id.replace(/^(agent|local):/, '') : agent.name;
@@ -216,7 +183,7 @@ function browseAgent(agent: ComposerAgentOption) {
   activeSection.value = agent.id;
   search.value = '';
 }
-function setMenu(menu: 'models' | 'traits' | 'permissions', opened: boolean) {
+function setMenu(menu: 'models' | 'traits', opened: boolean) {
   if (opened && props.disabled) return;
   openMenu.value = opened ? menu : null;
   if (opened && menu === 'models') {
@@ -274,20 +241,9 @@ watch(enabledAgents, (agents) => {
     activeSection.value = 'favorites';
 });
 watch(
-  () =>
-    [
-      props.disabled,
-      hasModelTraits.value,
-      providerUnavailable.value,
-      permissionModes.value.length,
-    ] as const,
-  ([disabled, available, unavailable, modes]) => {
-    if (
-      disabled ||
-      unavailable ||
-      (!available && openMenu.value === 'traits') ||
-      (modes < 2 && openMenu.value === 'permissions')
-    )
+  () => [props.disabled, hasModelTraits.value, providerUnavailable.value] as const,
+  ([disabled, available, unavailable]) => {
+    if (disabled || unavailable || (!available && openMenu.value === 'traits'))
       openMenu.value = null;
   },
 );
@@ -645,60 +601,6 @@ watch(
             <Check v-if="selectedServiceTier === tier.id" class="size-3.5 text-primary" />
           </button>
         </template>
-      </PopoverContent>
-    </Popover>
-
-    <Popover
-      v-if="permissionModes.length > 1"
-      :open="openMenu === 'permissions'"
-      @update:open="setMenu('permissions', $event)"
-    >
-      <PopoverTrigger as-child>
-        <button
-          type="button"
-          class="flex h-7 min-w-0 max-w-[8.75rem] shrink-0 items-center gap-1.5 rounded-md px-1.5 text-xs text-muted-foreground hover:bg-muted/70 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary disabled:opacity-45"
-          :disabled="disabled"
-          :aria-label="t('aiAssistant.composer.permissions')"
-          :title="permissionHint(permissionMode)"
-          data-testid="ai-chat-permission-selector"
-        >
-          <Eye v-if="permissionMode === 'read-only'" class="size-3.5 shrink-0" />
-          <Zap v-else-if="permissionMode === 'auto-approve'" class="size-3.5 shrink-0" />
-          <ShieldCheck v-else class="size-3.5 shrink-0" />
-          <span class="min-w-0 truncate">{{ t('aiAssistant.composer.' + permissionMode) }}</span>
-          <ChevronDown class="size-3 shrink-0 opacity-70" />
-        </button>
-      </PopoverTrigger>
-      <PopoverContent
-        side="top"
-        align="start"
-        :side-offset="7"
-        :collision-padding="12"
-        class="w-[min(16.5rem,calc(100vw-1.5rem))] space-y-0.5 p-1"
-        data-testid="ai-permission-picker"
-      >
-        <button
-          v-for="mode in permissionModes"
-          :key="mode"
-          type="button"
-          class="flex w-full items-start gap-2 rounded-md px-2 py-2 text-left hover:bg-muted/70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
-          :data-testid="'ai-permission-option-' + mode"
-          @click="
-            emit('permission', mode);
-            openMenu = null;
-          "
-        >
-          <ShieldCheck v-if="mode === 'supervised'" class="mt-0.5 size-3.5 shrink-0" />
-          <Eye v-else-if="mode === 'read-only'" class="mt-0.5 size-3.5 shrink-0" />
-          <Zap v-else class="mt-0.5 size-3.5 shrink-0" />
-          <span class="min-w-0 flex-1">
-            <span class="block text-xs font-medium">{{ t('aiAssistant.composer.' + mode) }}</span>
-            <span class="mt-0.5 block text-[11px] leading-4 text-muted-foreground">{{
-              permissionHint(mode)
-            }}</span>
-          </span>
-          <Check v-if="permissionMode === mode" class="mt-0.5 size-3.5 shrink-0 text-primary" />
-        </button>
       </PopoverContent>
     </Popover>
   </div>

@@ -1,3 +1,4 @@
+import type { BusinessApprovalDecision } from '@memoflow/ai-contracts';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { mkdir, mkdtemp, readFile, readdir, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
@@ -5,6 +6,7 @@ import { join } from 'node:path';
 import { createLocalAgentSqlite } from '../../testing/local-agent-sqlite';
 import { LocalAgentRepository } from '../infrastructure/adapters/powersync/local-agent.repository';
 import {
+  type LocalAgentToolBridgePort,
   LocalAgentRuntime,
   MEMOFLOW_NATIVE_TOOL_ROUTING_INSTRUCTIONS,
 } from './local-agent-runtime';
@@ -174,9 +176,18 @@ describe('AGY verified catalog reuse between Settings and Workspace', () => {
 
 describe('local Agent conversation execution', () => {
   it.each(['supervised', 'auto-approve'] as const)(
-    'enforces per-turn %s native permission choices without granting new write scopes',
+    'enforces saved %s native permissions independently of per-turn business choices',
     async (permissionMode) => {
       const { store, conversation } = await setup();
+      const saved = await store.getConnection('owner', conversation.connectionId);
+      await store.updateConnection('owner', saved.id, saved.revision, {
+        driver: saved.driver,
+        name: saved.name,
+        executablePath: saved.executablePath,
+        enabled: saved.enabled,
+        writeScopes: saved.writeScopes,
+        nativePermissionMode: permissionMode,
+      });
       const respond = vi.fn(() => true);
       const runtime = new LocalAgentRuntime({
         store,
@@ -210,7 +221,7 @@ describe('local Agent conversation execution', () => {
         identityId: 'owner',
         conversationId: conversation.id,
         content: 'Proceed',
-        permissionMode,
+        permissionMode: permissionMode === 'supervised' ? 'auto-approve' : 'supervised',
       }))
         events.push(event);
       if (permissionMode === 'auto-approve') {
@@ -1223,8 +1234,10 @@ it.each(['approve_once', 'decline'] as const)(
   'routes MemoFlow business approval through the existing session card: %s',
   async (decision) => {
     const { store, conversation } = await setup();
-    let requestApproval!: (name: string, signal: AbortSignal) => Promise<boolean>;
-    let approved: boolean | undefined;
+    let requestApproval!: NonNullable<
+      Parameters<LocalAgentToolBridgePort['open']>[0]['requestApproval']
+    >;
+    let approved: boolean | BusinessApprovalDecision | undefined;
     const nativeRespond = vi.fn(() => false);
     const runtime = new LocalAgentRuntime({
       store,
@@ -1272,7 +1285,7 @@ it.each(['approve_once', 'decline'] as const)(
       }
     }
     expect(cards).toBe(1);
-    expect(approved).toBe(decision === 'approve_once');
+    expect(approved).toBe(decision);
     await runtime.dispose();
   },
 );

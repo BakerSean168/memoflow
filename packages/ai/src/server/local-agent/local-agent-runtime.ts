@@ -3,6 +3,10 @@ import { mkdir, readFile, rename, rm, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { z } from 'zod';
 import type {
+  BusinessApproval,
+  BusinessApprovalDecision,
+  PermissionCommand,
+  PermissionSnapshot,
   AssistantRuntimeEvent,
   AIChatPermissionMode,
   AssistantRuntimeMessageView,
@@ -75,8 +79,13 @@ export interface LocalAgentToolBridgePort {
     runId: string;
     goalIntent?: string;
     permissionMode?: AIChatPermissionMode;
-    requestApproval?: (toolName: string, signal: AbortSignal) => Promise<boolean>;
+    requestApproval?: (
+      toolName: string,
+      signal: AbortSignal,
+      business?: BusinessApproval,
+    ) => Promise<boolean | BusinessApprovalDecision>;
   }): Promise<LocalAgentToolGrant>;
+  permissions?(owner: string, command: PermissionCommand): Promise<PermissionSnapshot>;
   dispose(): Promise<void>;
 }
 interface ActiveRun {
@@ -90,7 +99,7 @@ interface ActiveRun {
   grant?: LocalAgentToolGrant;
   abort: AbortController;
   permissions: NativePermissionLedger;
-  businessApprovals?: Map<string, (approved: boolean) => void>;
+  businessApprovals?: Map<string, (approved: BusinessApprovalDecision) => void>;
 }
 /**
  * Per-run memory of native (Provider-side) permission requests. Native permission
@@ -212,7 +221,10 @@ export class LocalAgentRuntime {
     const filename = this.catalogFile(identityId, connectionId);
     const temporary = filename + '.' + randomUUID() + '.tmp';
     try {
-      await mkdir(join(this.options.cwd, 'model-catalog'), { recursive: true, mode: 0o700 });
+      await mkdir(join(this.options.cwd, 'model-catalog'), {
+        recursive: true,
+        mode: 0o700,
+      });
       // Do not persist account labels, emails, token data or prior execution errors.
       await writeFile(
         temporary,
@@ -689,7 +701,11 @@ export class LocalAgentRuntime {
         role: 'assistant',
         content: '',
         attachments: [],
-        localAgentSource: { connectionId: connection.id, modelId, runId: run.runId },
+        localAgentSource: {
+          connectionId: connection.id,
+          modelId,
+          runId: run.runId,
+        },
         createdAt: now,
       };
       await this.persist(() => this.options.store.saveMessage(input.identityId, assistant!, false));
@@ -719,7 +735,10 @@ export class LocalAgentRuntime {
             toolCallId: assistant.id,
             question: question.question,
             ...(question.options.length
-              ? { options: question.options, selectionMode: 'single_select' as const }
+              ? {
+                  options: question.options,
+                  selectionMode: 'single_select' as const,
+                }
               : {}),
           },
         };
@@ -734,11 +753,11 @@ export class LocalAgentRuntime {
         runId: run.runId,
         goalIntent: input.content,
         permissionMode: input.permissionMode ?? 'supervised',
-        requestApproval: (toolName, signal) =>
-          new Promise<boolean>((resolve) => {
+        requestApproval: (toolName, signal, business) =>
+          new Promise<boolean | BusinessApprovalDecision>((resolve) => {
             const requestId = randomUUID();
             const finish = (
-              approved: boolean,
+              approved: BusinessApprovalDecision,
               resolution: 'answered' | 'cancelled' = 'answered',
             ) => {
               signal.removeEventListener('abort', onAbort);
@@ -750,7 +769,7 @@ export class LocalAgentRuntime {
               });
               resolve(approved);
             };
-            const onAbort = () => finish(false, 'cancelled');
+            const onAbort = () => finish('decline', 'cancelled');
             if (signal.aborted) return resolve(false);
             run.businessApprovals!.set(requestId, finish);
             signal.addEventListener('abort', onAbort, { once: true });
@@ -762,6 +781,7 @@ export class LocalAgentRuntime {
                 title: `MemoFlow: ${toolName}`,
                 reason: '确认写入 MemoFlow 数据 / Confirm writing MemoFlow data',
                 scope: toolName,
+                ...(business ? { business: { ...business, agentName: connection.name } } : {}),
               },
             });
           }),
@@ -869,7 +889,7 @@ export class LocalAgentRuntime {
               data: event.request,
             };
           } else if (
-            input.permissionMode === 'auto-approve' &&
+            connection.nativePermissionMode === 'auto-approve' &&
             event.request.type === 'permission'
           ) {
             if (
@@ -882,7 +902,10 @@ export class LocalAgentRuntime {
             yield {
               ...envelope(),
               type: 'assistant.request.resolved',
-              data: { requestId: event.request.requestId, resolution: 'answered' },
+              data: {
+                requestId: event.request.requestId,
+                resolution: 'answered',
+              },
             };
           } else if (event.request.type === 'permission') {
             const ledger = run.permissions;
@@ -893,7 +916,10 @@ export class LocalAgentRuntime {
               // Declined earlier in this run: answer for the user instead of prompting
               // again, and surface a readable denial instead of a retry loop.
               ledger.suppressed.add(requestId);
-              run.driver.respond(requestId, { type: 'permission', decision: 'decline' });
+              run.driver.respond(requestId, {
+                type: 'permission',
+                decision: 'decline',
+              });
               yield {
                 ...envelope(),
                 type: 'assistant.activity',
@@ -911,7 +937,10 @@ export class LocalAgentRuntime {
                 ledger.suppressed.add(requestId);
                 pending.duplicateRequestIds.push(requestId);
               } else {
-                ledger.pending.set(key, { primaryRequestId: requestId, duplicateRequestIds: [] });
+                ledger.pending.set(key, {
+                  primaryRequestId: requestId,
+                  duplicateRequestIds: [],
+                });
                 yield {
                   ...envelope(),
                   type: 'assistant.request.required',
@@ -1037,7 +1066,10 @@ export class LocalAgentRuntime {
           toolCallId: pending.draftId,
           question: pending.question.question,
           ...(pending.question.options.length
-            ? { options: pending.question.options, selectionMode: 'single_select' as const }
+            ? {
+                options: pending.question.options,
+                selectionMode: 'single_select' as const,
+              }
             : {}),
         },
       ];
@@ -1093,6 +1125,12 @@ export class LocalAgentRuntime {
     return true;
   }
 
+  async permissions(owner: string, command: PermissionCommand): Promise<PermissionSnapshot> {
+    this.assertActive();
+    if (!this.options.bridge?.permissions) throw new LocalAgentError('LOCAL_AGENT_UNAVAILABLE');
+    return this.options.bridge.permissions(owner, command);
+  }
+
   respond(identityId: string, input: LocalAgentRequestResponse): boolean {
     this.assertActive();
     const run = this.runs.get(input.runId);
@@ -1105,7 +1143,7 @@ export class LocalAgentRuntime {
     ) {
       const approval = run.businessApprovals?.get(input.requestId);
       if (approval) {
-        approval(input.response.decision === 'approve_once');
+        approval(input.response.decision);
         return true;
       }
     }
@@ -1114,6 +1152,8 @@ export class LocalAgentRuntime {
       run.identityId !== identityId ||
       run.conversationId !== input.conversationId ||
       run.abort.signal.aborted ||
+      (input.response.type === 'permission' &&
+        !['approve_once', 'decline'].includes(input.response.decision)) ||
       !run.driver?.respond(input.requestId, input.response)
     )
       return false;

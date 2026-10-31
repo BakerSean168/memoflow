@@ -26,6 +26,7 @@ export const PermissionRuleSchema = z
     action: PermissionActionSchema,
     effect: PermissionEffectSchema,
     source: z.enum(['user', 'migration']),
+    createdAt: z.number().int().nonnegative().optional(),
     expiresAt: z.number().int().nonnegative().optional(),
   })
   .strict();
@@ -63,3 +64,44 @@ export type PermissionPreset = z.infer<typeof PermissionPresetSchema>;
 export type PermissionRule = z.infer<typeof PermissionRuleSchema>;
 export type PermissionSettings = z.infer<typeof PermissionSettingsSchema>;
 export type PermissionAuditRecord = z.infer<typeof PermissionAuditRecordSchema>;
+
+/** User-only management commands; owner identity is supplied by authenticated transport. */
+export const PermissionCommandSchema = z.discriminatedUnion('action', [
+  z.object({ action: z.literal('snapshot') }).strict(),
+  z
+    .object({
+      action: z.literal('settings'),
+      settings: PermissionSettingsSchema,
+    })
+    .strict(),
+  z.object({ action: z.literal('revoke'), ruleId: z.string().min(1) }).strict(),
+  z
+    .object({
+      action: z.literal('conversation'),
+      conversationId: z.string().min(1),
+      preset: PermissionPresetSchema.nullable(),
+    })
+    .strict(),
+]);
+export const PermissionSnapshotSchema = z.object({
+  settings: PermissionSettingsSchema,
+  rules: z.array(PermissionRuleSchema),
+  audit: z.array(PermissionAuditRecordSchema),
+});
+export type PermissionCommand = z.infer<typeof PermissionCommandSchema>;
+export type PermissionSnapshot = z.infer<typeof PermissionSnapshotSchema>;
+export const BusinessApprovalSchema = z
+  .object({
+    agentId: z.string().min(1),
+    agentName: z.string().min(1).optional(),
+    object: PermissionObjectSchema,
+    action: PermissionActionSchema,
+    expiresAt: z.number().int().nonnegative(),
+  })
+  .strict();
+export type BusinessApproval = z.infer<typeof BusinessApprovalSchema>;
+export type BusinessApprovalDecision =
+  | 'approve_once'
+  | 'approve_conversation'
+  | 'approve_always'
+  | 'decline';
