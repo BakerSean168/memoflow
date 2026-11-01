@@ -249,14 +249,13 @@ export function useDesktopProfiles(options: { accessWindow?: boolean } = {}) {
   }
 
   function resetSignInState(): void {
-    stopGithubPolling();
+    // Leaving the sign-in state abandons a pending GitHub attempt: it must not
+    // adopt a session for a window that no longer shows it.
+    void cancelGithubSignIn();
     loginEmail.value = '';
     loginPassword.value = '';
     loginRemember.value = true;
     signInBusy.value = false;
-    githubPending.value = false;
-    githubUserCode.value = '';
-    githubAttemptId.value = null;
   }
 
   function resetRegisterState(): void {

@@ -343,6 +343,26 @@ describe('DesktopProfileAccessView', () => {
     expect(element('desktop-profile-github-waiting')).toBeNull();
   });
 
+  it('cancels a pending GitHub attempt when leaving the sign-in state', async () => {
+    const { wrapper, invoke } = mountView({ attachTo: document.body });
+    cleanups.push(() => wrapper.unmount());
+    await flushPromises();
+
+    element('desktop-profile-create-local')!.click();
+    await flushPromises();
+    element('desktop-profile-github-signin')!.click();
+    await flushPromises();
+    expect(element('desktop-profile-github-waiting')).not.toBeNull();
+
+    element('desktop-profile-back-to-select')!.click();
+    await flushPromises();
+
+    expect(invoke).toHaveBeenCalledWith(CloudAuthChannels.CLOUD_CONNECTION_CANCEL, {
+      attemptId: '11111111-1111-4111-8111-111111111111',
+    });
+    expect(element('desktop-profile-access')).not.toBeNull();
+  });
+
   it('blocks mismatched confirmation passwords before any registration request', async () => {
     const { wrapper, invoke } = mountView({ attachTo: document.body });
     cleanups.push(() => wrapper.unmount());
