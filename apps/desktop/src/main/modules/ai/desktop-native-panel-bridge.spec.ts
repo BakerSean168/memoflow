@@ -50,6 +50,7 @@ describe('DesktopNativePanelBridge', () => {
       webContents: {
         on: vi.fn(),
         removeListener: vi.fn(),
+        isDestroyed: () => false,
         send: vi.fn((channel, req) => {
           if (channel === AIChannels.LOCAL_AGENT_PANEL_COMMAND) {
             capturedRequest = req;
@@ -112,7 +113,12 @@ describe('DesktopNativePanelBridge', () => {
 
     const firstWindow = {
       isDestroyed: () => false,
-      webContents: { on: vi.fn(), removeListener: vi.fn(), send: vi.fn() },
+      webContents: {
+        on: vi.fn(),
+        removeListener: vi.fn(),
+        send: vi.fn(),
+        isDestroyed: () => false,
+      },
     };
     const first = new DesktopNativePanelBridge({
       getMainWindow: () => firstWindow as any,
@@ -122,7 +128,12 @@ describe('DesktopNativePanelBridge', () => {
     const firstPending = first.executeCommand(createMockContext(), { action: 'snapshot' });
     const secondWindow = {
       isDestroyed: () => false,
-      webContents: { on: vi.fn(), removeListener: vi.fn(), send: vi.fn() },
+      webContents: {
+        on: vi.fn(),
+        removeListener: vi.fn(),
+        send: vi.fn(),
+        isDestroyed: () => false,
+      },
     };
     const second = new DesktopNativePanelBridge({
       getMainWindow: () => secondWindow as any,
@@ -150,7 +161,7 @@ describe('DesktopNativePanelBridge', () => {
   it('binds reattachment to Profile generation, renderer, connection and conversation, independently of run', async () => {
     let window = {
       isDestroyed: () => false,
-      webContents: Object.assign(new EventEmitter(), { send: vi.fn() }),
+      webContents: Object.assign(new EventEmitter(), { send: vi.fn(), isDestroyed: () => false }),
     };
     let bridge = new DesktopNativePanelBridge({
       getMainWindow: () => window as any,
@@ -196,7 +207,7 @@ describe('DesktopNativePanelBridge', () => {
       ).not.toBe(first.sessionBinding);
       window = {
         isDestroyed: () => false,
-        webContents: Object.assign(new EventEmitter(), { send: vi.fn() }),
+        webContents: Object.assign(new EventEmitter(), { send: vi.fn(), isDestroyed: () => false }),
       };
       expect(
         (await send({ ...context, grantSignal: new AbortController().signal })).sessionBinding,
@@ -239,7 +250,12 @@ describe('DesktopNativePanelBridge', () => {
   it('rejects an already-aborted run before sending any panel command', async () => {
     const controller = new AbortController();
     controller.abort();
-    const webContents = { on: vi.fn(), removeListener: vi.fn(), send: vi.fn() };
+    const webContents = {
+      on: vi.fn(),
+      removeListener: vi.fn(),
+      send: vi.fn(),
+      isDestroyed: () => false,
+    };
     const bridge = new DesktopNativePanelBridge({
       getMainWindow: () => ({ isDestroyed: () => false, webContents }) as any,
       isActive: () => true,
@@ -258,7 +274,12 @@ describe('DesktopNativePanelBridge', () => {
   it('removes a settled request abort listener instead of retaining stale callbacks', async () => {
     const controller = new AbortController();
     const remove = vi.spyOn(controller.signal, 'removeEventListener');
-    const webContents = { on: vi.fn(), removeListener: vi.fn(), send: vi.fn() };
+    const webContents = {
+      on: vi.fn(),
+      removeListener: vi.fn(),
+      send: vi.fn(),
+      isDestroyed: () => false,
+    };
     const bridge = new DesktopNativePanelBridge({
       getMainWindow: () => ({ isDestroyed: () => false, webContents }) as any,
       isActive: () => true,
@@ -282,7 +303,10 @@ describe('DesktopNativePanelBridge', () => {
   it.each(['destroyed', 'render-process-gone', 'did-start-navigation'])(
     'rejects pending commands on %s and removes window event listeners',
     async (event) => {
-      const webContents = Object.assign(new EventEmitter(), { send: vi.fn() });
+      const webContents = Object.assign(new EventEmitter(), {
+        send: vi.fn(),
+        isDestroyed: () => false,
+      });
       const window = { isDestroyed: () => false, webContents };
       const bridge = new DesktopNativePanelBridge({
         getMainWindow: () => window as any,
@@ -303,7 +327,10 @@ describe('DesktopNativePanelBridge', () => {
   );
 
   it('keeps a panel request alive for in-page navigation and iframe navigation', async () => {
-    const webContents = Object.assign(new EventEmitter(), { send: vi.fn() });
+    const webContents = Object.assign(new EventEmitter(), {
+      send: vi.fn(),
+      isDestroyed: () => false,
+    });
     const window = { isDestroyed: () => false, webContents };
     const bridge = new DesktopNativePanelBridge({
       getMainWindow: () => window as any,
@@ -327,7 +354,10 @@ describe('DesktopNativePanelBridge', () => {
   });
 
   it('rejects a previous run after a full renderer reload even when no request was pending', async () => {
-    const webContents = Object.assign(new EventEmitter(), { send: vi.fn() });
+    const webContents = Object.assign(new EventEmitter(), {
+      send: vi.fn(),
+      isDestroyed: () => false,
+    });
     const window = { isDestroyed: () => false, webContents };
     const bridge = new DesktopNativePanelBridge({
       getMainWindow: () => window as any,
@@ -365,6 +395,7 @@ describe('DesktopNativePanelBridge', () => {
         on: vi.fn(),
         removeListener: vi.fn(),
         send: vi.fn(),
+        isDestroyed: () => false,
       },
     };
 
@@ -379,5 +410,78 @@ describe('DesktopNativePanelBridge', () => {
     controller.abort();
 
     await expect(promise).rejects.toThrow('Panel command was aborted');
+  });
+
+  // Regression for #776: a Profile switch destroys the outgoing main window,
+  // then the next Profile's composeAI constructs a bridge. Disposing the old
+  // bridge must not dereference the destroyed window/webContents, otherwise
+  // composition aborts with Electron's "Object has been destroyed".
+  it('composes the next bridge after the observed window was destroyed (#776)', () => {
+    const window: any = new EventEmitter();
+    const contents = Object.assign(new EventEmitter(), {
+      isDestroyed: () => false,
+      send: vi.fn(),
+    });
+    window.isDestroyed = () => false;
+    window.webContents = contents;
+
+    const previous = new DesktopNativePanelBridge({
+      getMainWindow: () => window,
+      isActive: () => true,
+    });
+    // Same call executeCommand() makes when a panel command observes the window.
+    (previous as unknown as { observeWindow(w: unknown): void }).observeWindow(window);
+
+    window.isDestroyed = () => true;
+    Object.defineProperty(window, 'webContents', {
+      configurable: true,
+      get() {
+        throw new TypeError('Object has been destroyed');
+      },
+    });
+
+    expect(
+      () =>
+        new DesktopNativePanelBridge({
+          getMainWindow: () => null,
+          isActive: () => false,
+        }),
+    ).not.toThrow();
+  });
+
+  it('releases the active bridge even when listener removal throws (#776)', () => {
+    const window: any = new EventEmitter();
+    const contents = Object.assign(new EventEmitter(), {
+      isDestroyed: () => false,
+      send: vi.fn(),
+      removeListener: vi.fn(() => {
+        throw new TypeError('Object has been destroyed');
+      }),
+    });
+    window.isDestroyed = () => false;
+    window.webContents = contents;
+
+    const previous = new DesktopNativePanelBridge({
+      getMainWindow: () => window,
+      isActive: () => true,
+    });
+    (previous as unknown as { observeWindow(w: unknown): void }).observeWindow(window);
+
+    expect(
+      () =>
+        new DesktopNativePanelBridge({
+          getMainWindow: () => null,
+          isActive: () => false,
+        }),
+    ).not.toThrow();
+    // If activeBridge had been left pointing at the poisoned instance, this
+    // second construction would retry the failing dispose and throw again.
+    expect(
+      () =>
+        new DesktopNativePanelBridge({
+          getMainWindow: () => null,
+          isActive: () => false,
+        }),
+    ).not.toThrow();
   });
 });
