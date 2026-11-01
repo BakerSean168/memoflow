@@ -39,6 +39,13 @@ export interface WindowStateManagerOptions {
   defaultHeight: number;
   /** Explicit path for the persisted window state file. */
   stateFilePath: string;
+  /**
+   * Lower bounds applied to a persisted state. A window whose layout was
+   * redesigned keeps a stale, smaller saved size otherwise; clamping brings
+   * existing installs onto the new layout without a separate migration file.
+   */
+  minimumWidth?: number;
+  minimumHeight?: number;
 }
 
 /**
@@ -213,7 +220,7 @@ export class WindowStateManager {
         const data = fs.readFileSync(this.configPath, 'utf8');
         const state = JSON.parse(data);
         if (this.validateState(state)) {
-          return state;
+          return this.clampState(state);
         }
       }
     } catch (_error) {
@@ -225,6 +232,20 @@ export class WindowStateManager {
       height: this.options.defaultHeight,
       isMaximized: false,
     };
+  }
+
+  /**
+   * @method clampState
+   * @description Raises a persisted size to the configured lower bounds so a
+   * window whose layout grew does not keep the retired dimensions.
+   *
+   * @param {WindowState} state - The loaded state.
+   * @returns {WindowState} The state with the lower bounds applied.
+   */
+  private clampState(state: WindowState): WindowState {
+    const width = Math.max(state.width, this.options.minimumWidth ?? 0);
+    const height = Math.max(state.height, this.options.minimumHeight ?? 0);
+    return width === state.width && height === state.height ? state : { ...state, width, height };
   }
 
   /**

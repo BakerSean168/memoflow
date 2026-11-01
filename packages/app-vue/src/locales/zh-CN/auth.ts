@@ -52,8 +52,13 @@ export default {
     linkInstruction: '请打开邮件中的验证链接。完成后即可关闭此页面。',
   },
   profileAccess: {
+    selectTitle: '选择账号',
     name: '昵称',
     create: '新建本地账户',
+    cloudSignIn: '登录云账户',
+    cloudGuidance: '云账户在进入工作区后连接：先用这个本地账户进入，再在应用内连接云账户。',
+    cloudNeedsLocal: '还没有本地账户。先新建一个本地账户进入，再在应用内连接云账户。',
+    cloudContinue: '使用“{name}”进入',
     rename: '重命名',
     save: '保存',
 

@@ -181,8 +181,12 @@ export class WindowManager {
 
     logger.info('Creating Profile Access window');
     this.profileAccessWindowStateManager = new WindowStateManager('profile-access', {
-      defaultWidth: 420,
-      defaultHeight: 580,
+      defaultWidth: 1024,
+      defaultHeight: 640,
+      // Pre-#785 installs persisted the old 420×580 gate; clamp it up so an
+      // upgrade lands on the v3 skeleton instead of the retired one.
+      minimumWidth: 1024,
+      minimumHeight: 640,
       stateFilePath: getSharedPathResolver().profileAccessWindowStatePath,
     });
 

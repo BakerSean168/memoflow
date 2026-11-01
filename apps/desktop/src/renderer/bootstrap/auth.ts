@@ -13,6 +13,12 @@ import { requireElectronBridge } from '../platform/electron-bridge';
 import { registerSystemNotice } from '../platform/system-notice';
 
 export async function bootstrapAuthApp() {
+  // The identity window is fixed dark whatever the workspace theme is: the
+  // class applies the shared dark tokens to the window and its teleported
+  // overlays (confirm dialog, toasts).
+  document.documentElement.classList.add('dark');
+  document.documentElement.dataset.theme = 'dark';
+
   const app = createApp(DesktopAuthApp);
 
   app.use(createPinia());

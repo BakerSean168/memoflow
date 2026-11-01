@@ -141,6 +141,8 @@ describe('DesktopProfileAccessView', () => {
 
     element('desktop-profile-create-local')!.click();
     await flushPromises();
+    element('desktop-profile-add-local')!.click();
+    await flushPromises();
     const form = element('desktop-profile-create-form')!;
     const [name, password, confirmation] = form.querySelectorAll('input');
     name!.value = 'New local';
@@ -237,6 +239,40 @@ describe('DesktopProfileAccessView', () => {
 
     expect(element('desktop-profile-password-state')).toBeNull();
     expect(element('desktop-profile-access')).not.toBeNull();
+    expect(invoke).not.toHaveBeenCalledWith(ProfileAccessChannels.SELECT, expect.anything());
+  });
+
+  it('offers the two "+" entries: a new local account and the cloud sign-in relay', async () => {
+    const { wrapper } = mountView({ attachTo: document.body });
+    cleanups.push(() => wrapper.unmount());
+    await flushPromises();
+
+    element('desktop-profile-create-local')!.click();
+    await flushPromises();
+
+    expect(element('desktop-profile-add-local')!.textContent).toContain('New local account');
+    expect(element('desktop-profile-add-cloud')!.textContent).toContain(
+      'Sign in to a cloud account',
+    );
+  });
+
+  it('routes the cloud entry through an existing local account instead of a dead button', async () => {
+    const { wrapper, invoke } = mountView({ hasCredential: true, attachTo: document.body });
+    cleanups.push(() => wrapper.unmount());
+    await flushPromises();
+
+    element('desktop-profile-create-local')!.click();
+    await flushPromises();
+    element('desktop-profile-add-cloud')!.click();
+    await flushPromises();
+
+    const entry = element('desktop-profile-cloud-entry')!;
+    expect(entry.textContent).toContain('inside the workspace');
+    element('desktop-profile-cloud-continue')!.click();
+    await flushPromises();
+
+    // The local account is not remembered, so entering it asks for its password.
+    expect(element('desktop-profile-password-state')).not.toBeNull();
     expect(invoke).not.toHaveBeenCalledWith(ProfileAccessChannels.SELECT, expect.anything());
   });
 

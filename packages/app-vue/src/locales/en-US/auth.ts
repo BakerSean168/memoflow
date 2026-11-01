@@ -52,8 +52,15 @@ export default {
     linkInstruction: 'Open the verification link in your email. You can close this page afterward.',
   },
   profileAccess: {
+    selectTitle: 'Choose an account',
     name: 'Nickname',
     create: 'New local account',
+    cloudSignIn: 'Sign in to a cloud account',
+    cloudGuidance:
+      'Cloud accounts connect from inside the workspace: enter with this local account first, then connect the cloud account in the app.',
+    cloudNeedsLocal:
+      'There is no local account yet. Create one to enter, then connect the cloud account in the app.',
+    cloudContinue: 'Continue with {name}',
     rename: 'Rename',
     save: 'Save',
 
