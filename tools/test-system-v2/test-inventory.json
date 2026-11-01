@@ -1598,6 +1598,14 @@
       "measurementCollectors": []
     },
     {
+      "path": "apps/desktop/src/main/modules/window/window-state-manager.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "apps/desktop/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "apps/desktop/src/main/paths/clear-storage-cache.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -13242,7 +13250,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 105
+      "fileCount": 106
     },
     {
       "id": "apps/migrator/vitest.config.ts",
@@ -14370,7 +14378,7 @@
   "duplicate": [],
   "unexpected": [],
   "counts": {
-    "unit": 1181,
+    "unit": 1182,
     "integration": 58,
     "smoke": 3,
     "boundary-ipc": 6,
