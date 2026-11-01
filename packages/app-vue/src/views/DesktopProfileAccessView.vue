@@ -40,7 +40,6 @@ const {
   enterRegisterState,
   enterPasswordState,
   backToSelect,
-  selectProfile,
   submitPassword,
   signInWithPassword,
   signInWithGithub,
