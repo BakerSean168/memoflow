@@ -6,7 +6,7 @@ import { PowerSyncAppSchema } from '@memoflow/powersync-schema';
 import type { ScheduledIntent, SchedulingOwner } from '@memoflow/schedule-contracts';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { buildSchedulingKey } from '../../../../../scheduling';
-import { createScheduledInvocationSchedulingPort } from '../../../../scheduling/scheduled-invocation-scheduling.adapter';
+import { createScheduledInvocationSchedulingPort } from '../../../scheduling/scheduled-invocation-scheduling.adapter';
 import { PowerSyncScheduledInvocationRepository } from '../scheduled-invocation-powersync.repository';
 
 let db: PowerSyncDatabase;

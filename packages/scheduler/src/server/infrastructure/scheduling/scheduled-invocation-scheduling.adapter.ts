@@ -82,7 +82,9 @@ function fingerprint(intent: ScheduledIntent): string {
         runAt: intent.runAt,
         payloadVersion: intent.payloadVersion,
         payload: intent.payload,
-        sourceRevision: intent.sourceRevision ?? null,
+        // 持久化层把 source_revision 存成字符串，意图侧通常是数字版本号；
+        // 统一成字符串再哈希，避免 "1" 与 1 被误判为语义变更。
+        sourceRevision: intent.sourceRevision == null ? null : String(intent.sourceRevision),
         retryPolicy: normalizedRetryPolicy(intent),
         priority: intent.priority ?? 'normal',
         timeoutMs: intent.timeoutMs ?? null,
