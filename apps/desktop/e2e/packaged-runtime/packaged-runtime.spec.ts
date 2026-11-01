@@ -242,10 +242,13 @@ test('packaged MemoFlow boots through renderer readiness', async ({}, testInfo) 
         .getByRole('listitem')
         .filter({ hasText: `Packaged unavailable ${driver}` });
       await expect(row).toBeVisible();
-      await expect(localSettings.getByLabel('创建和修改目标', { exact: true })).not.toBeChecked();
-      await expect(
-        localSettings.getByLabel('创建、修改和完成任务', { exact: true }),
-      ).not.toBeChecked();
+      // Business writes are governed by the central permission policy (#757);
+      // per-agent write checkboxes are gone and the native mode defaults to
+      // asking before the Agent runs commands or edits files.
+      await expect(localSettings.getByLabel('创建和修改目标', { exact: true })).toHaveCount(0);
+      await expect(localSettings.getByTestId('ai-agent-native-permission')).toHaveValue(
+        'supervised',
+      );
       await localSettings.getByRole('button', { name: '检查登录与模型', exact: true }).click();
       // The AGY detail renders both a native status and a Google sign-in
       // status. Target the connection status only, and verify the native
