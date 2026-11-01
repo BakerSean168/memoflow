@@ -137,7 +137,9 @@ export function useNativeBusinessPanelBridge(
   }
 
   async function handleCommand(request: NativePanelIpcRequest): Promise<NativePanelIpcResponse> {
-    const ownerId = `local-agent:${request.conversationId}:${request.runId}`;
+    const ownerId = request.sessionBinding
+      ? `local-agent:${JSON.stringify([request.sessionBinding, request.conversationId, request.runId])}`
+      : `local-agent:${request.conversationId}:${request.runId}`;
     const cmd = request.command;
 
     try {
@@ -163,7 +165,11 @@ export function useNativeBusinessPanelBridge(
           const opening = { cancelled: false };
           pendingOpens.set(ownerId, opening);
           try {
-            await goalSurface.openControlled(ownerId, { mode: cmd.mode, goalId: cmd.goalId });
+            await goalSurface.openControlled(ownerId, {
+              mode: cmd.mode,
+              goalId: cmd.goalId,
+              sessionBinding: request.sessionBinding,
+            });
             if (opening.cancelled) {
               goalSurface.releaseControlledSession(ownerId);
               return {

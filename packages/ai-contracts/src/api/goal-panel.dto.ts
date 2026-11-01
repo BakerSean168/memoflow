@@ -167,6 +167,8 @@ export const NativePanelIpcRequestSchema = z
     identityId: z.string().min(1),
     conversationId: z.string().min(1),
     runId: z.string().min(1),
+    // Issued by the Desktop host, never accepted from MCP tool arguments.
+    sessionBinding: z.string().min(1).optional(),
     command: GoalPanelCommandSchema,
   })
   .strict();

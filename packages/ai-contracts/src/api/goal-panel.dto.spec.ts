@@ -98,6 +98,12 @@ describe('GoalPanel DTO and IPC schemas', () => {
       command: { action: 'snapshot' },
     };
     expect(NativePanelIpcRequestSchema.safeParse(request).success).toBe(true);
+    expect(
+      NativePanelIpcRequestSchema.safeParse({ ...request, sessionBinding: 'host-issued' }).success,
+    ).toBe(true);
+    expect(
+      GoalPanelCommandSchema.safeParse({ action: 'open', sessionBinding: 'forged' }).success,
+    ).toBe(false);
 
     const response = {
       requestId: 'req-1',

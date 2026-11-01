@@ -1,4 +1,4 @@
-import { randomUUID } from 'node:crypto';
+import { createHash, randomUUID } from 'node:crypto';
 import type { BrowserWindow } from 'electron';
 import { ipcMain } from 'electron';
 import { AIChannels } from '@memoflow/desktop-contracts';
@@ -31,6 +31,16 @@ export class DesktopNativePanelBridge implements IDesktopNativePanelBridge {
   // creates a new bridge; a stale Profile must never consume its responses.
   private static activeBridge: DesktopNativePanelBridge | null = null;
   private rendererGeneration = 0;
+  private readonly profileGeneration = randomUUID();
+  private readonly runRequests = new Map<
+    string,
+    {
+      identityId: string;
+      sessionBinding: string;
+      window: BrowserWindow;
+      generation: number;
+    }
+  >();
   private observedWindow: BrowserWindow | null = null;
   private stopObservingWindow: (() => void) | null = null;
   private readonly runBindings = new WeakMap<
@@ -132,6 +142,25 @@ export class DesktopNativePanelBridge implements IDesktopNativePanelBridge {
         });
     }
 
+    // Profile bridge lifetime + renderer lifetime + authenticated grant ownership.
+    // A new run in the same conversation gets the same binding, but a new lease.
+    const sessionBinding = createHash('sha256')
+      .update(
+        JSON.stringify([
+          this.profileGeneration,
+          this.rendererGeneration,
+          context.identityId,
+          context.connectionId,
+          context.conversationId,
+        ]),
+      )
+      .digest('hex');
+    this.runRequests.set(JSON.stringify([context.conversationId, context.runId]), {
+      identityId: context.identityId,
+      sessionBinding,
+      window: win,
+      generation: this.rendererGeneration,
+    });
     const requestId = randomUUID();
     const timeoutMs = this.options.commandTimeoutMs ?? 15000;
 
@@ -177,6 +206,7 @@ export class DesktopNativePanelBridge implements IDesktopNativePanelBridge {
       const request: NativePanelIpcRequest = {
         requestId,
         identityId: context.identityId,
+        sessionBinding,
         conversationId: context.conversationId,
         runId: context.runId,
         command,
@@ -193,8 +223,14 @@ export class DesktopNativePanelBridge implements IDesktopNativePanelBridge {
   }
 
   async releaseAllForRun(conversationId: string, runId: string): Promise<void> {
+    const runKey = JSON.stringify([conversationId, runId]);
+    const binding = this.runRequests.get(runKey);
+    this.runRequests.delete(runKey);
     const win = this.options.getMainWindow();
     if (
+      !binding ||
+      binding.window !== win ||
+      binding.generation !== this.rendererGeneration ||
       !win ||
       win.isDestroyed() ||
       !this.options.isActive() ||
@@ -206,7 +242,8 @@ export class DesktopNativePanelBridge implements IDesktopNativePanelBridge {
       const requestId = randomUUID();
       const request: NativePanelIpcRequest = {
         requestId,
-        identityId: 'system',
+        identityId: binding.identityId,
+        sessionBinding: binding.sessionBinding,
         conversationId,
         runId,
         command: { action: 'release' },
@@ -231,5 +268,6 @@ export class DesktopNativePanelBridge implements IDesktopNativePanelBridge {
       req.reject(new Error('DesktopNativePanelBridge was disposed'));
     }
     this.pendingRequests.clear();
+    this.runRequests.clear();
   }
 }

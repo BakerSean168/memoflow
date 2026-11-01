@@ -147,6 +147,71 @@ describe('DesktopNativePanelBridge', () => {
     expect(handlers.has(AIChannels.LOCAL_AGENT_PANEL_RESPONSE)).toBe(false);
   });
 
+  it('binds reattachment to Profile generation, renderer, connection and conversation, independently of run', async () => {
+    let window = {
+      isDestroyed: () => false,
+      webContents: Object.assign(new EventEmitter(), { send: vi.fn() }),
+    };
+    let bridge = new DesktopNativePanelBridge({
+      getMainWindow: () => window as any,
+      isActive: () => true,
+    });
+    const context = createMockContext();
+    async function send(cx = context) {
+      const pending = bridge.executeCommand(cx, { action: 'open' });
+      const request = window.webContents.send.mock.calls.at(-1)![1];
+      electronMock.handle.mock.calls.at(-1)![1](
+        { sender: window.webContents },
+        { requestId: request.requestId, ok: true },
+      );
+      await pending;
+      return request;
+    }
+    try {
+      const first = await send();
+      expect(first.sessionBinding).toBeTruthy();
+      const nextRun = await send({
+        ...context,
+        runId: 'second',
+        grantSignal: new AbortController().signal,
+      });
+      expect(nextRun.sessionBinding).toBe(first.sessionBinding);
+      await bridge.releaseAllForRun(context.conversationId, 'second');
+      expect(window.webContents.send.mock.calls.at(-1)![1]).toMatchObject({
+        sessionBinding: first.sessionBinding,
+        command: { action: 'release' },
+        runId: 'second',
+      });
+      for (const changed of [
+        { connectionId: 'foreign-connection' },
+        { conversationId: 'foreign-chat' },
+        { identityId: 'foreign-identity' },
+      ])
+        expect((await send({ ...context, ...changed })).sessionBinding).not.toBe(
+          first.sessionBinding,
+        );
+      window.webContents.emit('did-start-navigation', { isMainFrame: true, isSameDocument: false });
+      expect(
+        (await send({ ...context, grantSignal: new AbortController().signal })).sessionBinding,
+      ).not.toBe(first.sessionBinding);
+      window = {
+        isDestroyed: () => false,
+        webContents: Object.assign(new EventEmitter(), { send: vi.fn() }),
+      };
+      expect(
+        (await send({ ...context, grantSignal: new AbortController().signal })).sessionBinding,
+      ).not.toBe(first.sessionBinding);
+      bridge.dispose();
+      bridge = new DesktopNativePanelBridge({
+        getMainWindow: () => window as any,
+        isActive: () => true,
+      });
+      expect((await send()).sessionBinding).not.toBe(first.sessionBinding);
+    } finally {
+      bridge.dispose();
+    }
+  });
+
   it('rejects when active check fails', async () => {
     const bridge = new DesktopNativePanelBridge({
       getMainWindow: () => ({}) as any,
@@ -280,6 +345,8 @@ describe('DesktopNativePanelBridge', () => {
       await initial;
       webContents.emit('did-start-navigation', { isMainFrame: true, isSameDocument: false });
       webContents.send.mockClear();
+      await bridge.releaseAllForRun(context.conversationId, context.runId);
+      expect(webContents.send).not.toHaveBeenCalled();
       const nextHttpRequest = { ...context, signal: new AbortController().signal };
       await expect(bridge.executeCommand(nextHttpRequest, { action: 'open' })).rejects.toThrow(
         'closed renderer',
