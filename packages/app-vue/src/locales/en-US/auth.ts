@@ -66,6 +66,7 @@ export default {
     pinPlaceholder: 'Enter local PIN',
     pinRequired: 'Enter your local PIN',
     remove: 'Delete local Profile',
+    removeConfirmTitle: 'Delete local Profile?',
     removeConfirm:
       'Remove {name} and its local data from this device? Unsynced data will be permanently lost. This does not close the cloud account.',
     removed: 'Local Profile deleted',

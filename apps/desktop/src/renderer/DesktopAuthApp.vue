@@ -1,7 +1,13 @@
 <script setup lang="ts">
+import { defineAsyncComponent } from 'vue';
 import { Toaster } from '@memoflow/ui-vue-shadcn/components/ui/sonner';
 import { GlobalErrorBoundary } from '@memoflow/app-vue';
 import { DesktopProfileAccessView } from '@memoflow/app-vue/desktop';
+
+// Same lightweight host as GlobalOverlays, without booting the main-window shell.
+const GlobalConfirmDialog = defineAsyncComponent(
+  () => import('@memoflow/app-vue/shared/components/GlobalConfirmDialog.vue'),
+);
 </script>
 
 <template>
@@ -10,6 +16,8 @@ import { DesktopProfileAccessView } from '@memoflow/app-vue/desktop';
       <DesktopProfileAccessView />
     </GlobalErrorBoundary>
   </div>
+
+  <GlobalConfirmDialog />
 
   <Toaster
     class="desktop-auth-toaster"

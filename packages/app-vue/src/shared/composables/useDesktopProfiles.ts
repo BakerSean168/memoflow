@@ -7,6 +7,7 @@ import {
   WindowChannels,
   type ProfileSummary,
 } from '@memoflow/desktop-contracts';
+import { useConfirm } from '@memoflow/ui-vue-shadcn';
 import { DESKTOP_BRIDGE_KEY } from '../../di/keys';
 import { translateResultError } from '../utils/translate-result-error';
 
@@ -170,8 +171,14 @@ export function useDesktopProfiles(options: { accessWindow?: boolean } = {}) {
 
   async function removeProfile(profile: ProfileSummary): Promise<void> {
     if (busyProfileId.value || snapshot.value?.profile?.profileId === profile.profileId) return;
-    if (!window.confirm(t('auth.profileAccess.removeConfirm', { name: profile.displayName })))
-      return;
+    const confirmed = await useConfirm({
+      title: t('auth.profileAccess.removeConfirmTitle'),
+      description: t('auth.profileAccess.removeConfirm', { name: profile.displayName }),
+      confirmText: t('common.delete'),
+      cancelText: t('common.cancel'),
+      variant: 'destructive',
+    });
+    if (!confirmed) return;
     busyProfileId.value = profile.profileId;
     try {
       if (
