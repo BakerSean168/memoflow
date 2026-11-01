@@ -57,15 +57,15 @@ export default {
     rename: 'Rename',
     save: 'Save',
 
-    title: 'Open a local Profile',
-    description: 'Choose the local profile and data you want to continue using.',
     guest: 'Guest Profile',
     registered: 'Cloud connected',
     open: 'Open',
     unlock: 'Unlock',
     pinPlaceholder: 'Enter local PIN',
+    pinPrompt: 'Enter the local PIN for {name}',
     pinRequired: 'Enter your local PIN',
     remove: 'Delete local Profile',
+    removeConfirmTitle: 'Delete local Profile?',
     removeConfirm:
       'Remove {name} and its local data from this device? Unsynced data will be permanently lost. This does not close the cloud account.',
     removed: 'Local Profile deleted',

@@ -1,6 +1,6 @@
 import { defineComponent, ref } from 'vue';
 import { flushPromises, mount } from '@vue/test-utils';
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { createI18n } from 'vue-i18n';
 import { ok } from '@memoflow/transport-contracts/result';
 import {
@@ -15,7 +15,17 @@ import ManageAccountsDialog from './ManageAccountsDialog.vue';
 import shell from '../../locales/en-US/shell';
 import auth from '../../locales/en-US/auth';
 
+const confirmMock = vi.hoisted(() => vi.fn(async () => true));
+vi.mock('@memoflow/ui-vue-shadcn', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@memoflow/ui-vue-shadcn')>();
+  return { ...actual, useConfirm: confirmMock };
+});
 vi.mock('vue-sonner', () => ({ toast: { error: vi.fn(), success: vi.fn() } }));
+
+beforeEach(() => {
+  confirmMock.mockReset();
+  confirmMock.mockResolvedValue(true);
+});
 
 const profile = (id: string, registered = false): ProfileSummary => ({
   profileId: id,
@@ -72,7 +82,13 @@ async function setup(registered = false) {
         createI18n({
           legacy: false,
           locale: 'en-US',
-          messages: { 'en-US': { shell, auth, common: { close: 'Close', cancel: 'Cancel' } } },
+          messages: {
+            'en-US': {
+              shell,
+              auth,
+              common: { close: 'Close', cancel: 'Cancel', delete: 'Delete' },
+            },
+          },
         }),
       ],
       provide: { [DESKTOP_BRIDGE_KEY as symbol]: { invoke } },
@@ -125,6 +141,8 @@ describe('ManageAccountsDialog', () => {
   });
 
   it('renames the exact ID and requires separate confirmation before removing from the device', async () => {
+    const nativeConfirm = vi.fn(() => true);
+    vi.stubGlobal('confirm', nativeConfirm);
     const { invoke } = await setup();
     element('desktop-profile-rename-other').click();
     await flushPromises();
@@ -140,16 +158,24 @@ describe('ManageAccountsDialog', () => {
       profileId: 'other',
       displayName: 'Personal',
     });
-    const confirm = vi.fn(() => false);
-    vi.stubGlobal('confirm', confirm);
+
+    confirmMock.mockResolvedValueOnce(false);
     element('desktop-profile-remove-other').click();
     await flushPromises();
+    expect(confirmMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        title: auth.profileAccess.removeConfirmTitle,
+        variant: 'destructive',
+      }),
+    );
     expect(invoke).not.toHaveBeenCalledWith(ProfileAccessChannels.REMOVE, expect.anything());
-    confirm.mockReturnValue(true);
+
+    confirmMock.mockResolvedValueOnce(true);
     element('desktop-profile-remove-other').click();
     await flushPromises();
     expect(invoke).toHaveBeenCalledWith(ProfileAccessChannels.REMOVE, { profileId: 'other' });
     expect(invoke).not.toHaveBeenCalledWith(ProfileAccessChannels.LOCK);
+    expect(nativeConfirm).not.toHaveBeenCalled();
   });
 
   it('guards double guest creation and uses the host window lifecycle for the created ID', async () => {
