@@ -17,9 +17,9 @@ onMounted(async () => {
 
 <template>
   <main
-    class="flex min-h-screen w-full items-center justify-center bg-background px-5 py-8 text-foreground"
+    class="flex min-h-screen w-full items-center justify-center bg-background px-4 py-6 text-foreground"
   >
-    <div class="w-full max-w-md space-y-6" data-testid="desktop-profile-access">
+    <div class="w-full max-w-sm" data-testid="desktop-profile-access">
       <DesktopProfileList :presenter="presenter" />
     </div>
   </main>
