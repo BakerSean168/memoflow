@@ -2828,7 +2828,7 @@
         "status": "none-verified",
         "testFiles": []
       },
-      "sourceSha256": "8b35d314fd3923409b5d6bca4940a68a78f5a70d2df3aecdb3e2dd8c8af4f83a"
+      "sourceSha256": "6fe7f998951b1f634a9e0eefd32ccaac331032dc8116fb28a32df6448848d8e4"
     },
     {
       "path": "packages/app-vue/src/layouts/shell/WindowHeader.spec.ts",
