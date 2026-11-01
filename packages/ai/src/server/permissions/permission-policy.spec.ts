@@ -90,7 +90,7 @@ describe('evaluatePermission', () => {
     ).toMatchObject({ decision: 'ask', reason: 'ask_rule' });
   });
 
-  it('supports conversation scoped temporary rules without mutating the preset', () => {
+  it('never lets temporary grants override the global read-only preset', () => {
     const result = evaluatePermission({
       agentId: 'codex',
       operationId: 'goal.update',
@@ -108,7 +108,7 @@ describe('evaluatePermission', () => {
         },
       ],
     });
-    expect(result).toMatchObject({ decision: 'allow', ruleId: 'temporary' });
+    expect(result).toMatchObject({ decision: 'deny', reason: 'preset' });
     expect(
       evaluatePermission({
         agentId: 'codex',
@@ -140,7 +140,7 @@ describe('evaluatePermission', () => {
       writeScopes: ['goals:write'],
       agentId: 'codex',
     });
-    expect(migration.preset).toBe('on_demand');
+    expect(migration.preset).toBe('confirm_each');
     expect(migration.migratedFrom).toBe('legacy-write-scopes-v2');
     expect(migration.rules).toHaveLength(6);
     expect(migration.rules.every((rule) => rule.agentId === 'codex')).toBe(true);
@@ -156,7 +156,7 @@ describe('evaluatePermission', () => {
       agentId: 'codex',
       writeScopes: ['goals:write', 'tasks:write', 'routines:write'],
     });
-    expect(scoped.preset).toBe('on_demand');
+    expect(scoped.preset).toBe('confirm_each');
     expect(scoped.rules).toEqual([]);
   });
 

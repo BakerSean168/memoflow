@@ -3,7 +3,15 @@ export default {
     unknownTime: 'Time unavailable for older records',
     title: 'AI permissions',
     description:
-      'Control AI access to MemoFlow data. Configure command and file permissions separately in each Agent’s settings.',
+      'Set one read/write policy for all AI tools. Command and file permissions remain in each native Agent.',
+    write: 'Write',
+    byObject: 'Exceptions by data type',
+    byObjectHint:
+      'Data types inherit the selected mode. Change a row only when you need a different rule.',
+    legacyMixed: 'Legacy detailed rule',
+    varies: 'By data type',
+    existingRules: '{count} additional permission rules',
+    legacyAgentRule: 'Legacy agent grant',
     unavailable: 'Permission management is not available on this device.',
     error: 'Could not load or save permissions. Please retry.',
     refresh: 'Refresh',
@@ -17,19 +25,19 @@ export default {
     global: 'All Agents',
     revoke: 'Revoke',
     limits:
-      'High-risk operations require confirmation in Confirm each and On demand. AI cannot change permissions; explicit deny rules always apply.',
+      'AI cannot change permissions. Explicit deny rules and independent safety checks still apply.',
     presets: {
       read_only: 'Read only',
-      confirm_each: 'Confirm each',
+      confirm_each: 'Ask before writing',
       on_demand: 'On demand',
-      full_auto: 'Fully automatic',
+      full_auto: 'Automatic',
       custom: 'Custom',
     },
     hints: {
       read_only: 'Read data only',
-      confirm_each: 'Ask before every write',
+      confirm_each: 'Read automatically and confirm writes',
       on_demand: 'Read and create automatically; ask to update or delete',
-      full_auto: 'Automatically execute registered operations',
+      full_auto: 'Read and write without repeated prompts',
     },
     objects: {
       goal: 'Goals',
@@ -72,7 +80,7 @@ export default {
     always: 'Always allow',
     decline: 'Deny',
     scope:
-      'Allow {agent} to {action} {object} without asking again. Revoke in Settings → AI permissions.',
+      'Current request: {agent} wants to {action} {object}. Always allow grants every AI write access to this data type. Revoke under Settings → AI Provider → Permissions.',
     countdown: '{seconds} seconds remaining; automatically denied on timeout.',
     temporary:
       'Applies only to this conversation; resets when it ends or you switch. Explicit deny rules still apply.',

@@ -2,7 +2,15 @@ export default {
   permissions: {
     unknownTime: '旧记录未保留时间',
     title: 'AI 权限',
-    description: '控制 AI 对 MemoFlow 业务数据的操作。命令和文件操作请在各 Agent 设置中单独配置。',
+    description:
+      '统一控制所有 AI 对 MemoFlow 数据的读写操作，与各 Agent 的命令、文件权限分开管理。',
+    write: '写入',
+    byObject: '按业务类型设置例外',
+    byObjectHint: '默认沿用上面的权限模式。只有希望某一类数据采用不同规则时才需要修改。',
+    legacyMixed: '原有细分规则',
+    varies: '按对象分别设置',
+    existingRules: '已有 {count} 条额外权限规则',
+    legacyAgentRule: '历史独立授权',
     unavailable: '此设备暂不提供权限管理。',
     error: '无法保存或读取权限，请重试。',
     refresh: '刷新',
@@ -15,20 +23,19 @@ export default {
     empty: '暂无记录',
     global: '所有 Agent',
     revoke: '撤销',
-    limits:
-      '高风险操作在“每次确认”和“按需授权”下均需询问。AI 永远不能修改权限；明确禁止的规则始终有效。',
+    limits: 'AI 无法修改权限设置；明确禁止的规则始终有效。高风险操作仍受额外安全校验限制。',
     presets: {
       read_only: '只读',
-      confirm_each: '每次确认',
+      confirm_each: '需要确认',
       on_demand: '按需授权',
-      full_auto: '完全自动',
+      full_auto: '自动执行',
       custom: '自定义',
     },
     hints: {
       read_only: '只允许读取',
-      confirm_each: '写入前逐次询问',
+      confirm_each: '读取自动允许，写入时确认',
       on_demand: '读取和新增自动，修改和删除询问',
-      full_auto: '所有已登记操作自动执行',
+      full_auto: '读取和写入均自动执行',
     },
     objects: {
       goal: '目标',
@@ -70,7 +77,8 @@ export default {
     conversation: '本次对话都允许',
     always: '以后都允许',
     decline: '拒绝',
-    scope: '以后 {agent} {action}{object}不再询问，可在 设置 → AI 权限 撤销。',
+    scope:
+      '本次操作：{agent} {action}{object}。若选择“以后允许”，则所有 AI 均可写入此类数据，随时可在 设置 → AI Provider → Permissions 撤销。',
     countdown: '剩余 {seconds} 秒，超时自动拒绝。',
     temporary: '仅本次对话有效；结束或切换对话后恢复。明确禁止仍然有效。',
     native: 'Agent 原生权限（命令、文件）',

@@ -6,19 +6,20 @@ import { settingUiHost } from '../setting-ui-host';
 import { productionLocaleMessages } from '@setting-ui-test-host/locales/production-messages';
 import AIPermissionSettings from './AIPermissionSettings.vue';
 
-function setup() {
+function setup(extraRules: PermissionSnapshot['rules'] = []) {
   let state: PermissionSnapshot = {
-    settings: { preset: 'on_demand', agentPresets: {}, revision: 1 },
+    settings: { preset: 'confirm_each', agentPresets: {}, revision: 1 },
     rules: [
       {
-        id: 'grant',
+        id: 'legacy-denial',
         agentId: 'codex',
         object: 'goal',
-        action: 'create',
-        effect: 'allow',
-        source: 'user',
+        action: 'update',
+        effect: 'deny',
+        source: 'migration',
         createdAt: 1000,
       },
+      ...extraRules,
     ],
     audit: [],
   };
@@ -33,61 +34,95 @@ function setup() {
       plugins: [createI18n({ legacy: false, locale: 'zh-CN', messages: productionLocaleMessages })],
       provide: {
         [settingUiHost.AI_LOCAL_AGENT_KEY as symbol]: { permissions },
-        [settingUiHost.AI_AGENT_REGISTRY_KEY as symbol]: {
-          list: async () => ({ instances: [{ instanceId: 'codex', name: 'Codex' }] }),
-        },
       },
     },
   });
   return { wrapper, permissions };
 }
-describe('AI permission settings', () => {
-  it('switches presets, edits a matrix cell as custom and keeps the AI settings row locked', async () => {
+describe('AI permissions integrated under AI Provider settings', () => {
+  it('shows three modes with a single, clear global read/write summary', async () => {
     const { wrapper, permissions } = setup();
     await flushPromises();
-    await wrapper.get('[data-testid="ai-permission-preset-confirm_each"]').trigger('click');
+    expect(wrapper.findAll('[data-testid^="ai-permission-preset-"]')).toHaveLength(3);
+    expect(wrapper.get('[data-testid="ai-permission-current-preset"]').text()).toContain(
+      '需要确认',
+    );
+    expect(wrapper.find('[data-testid="ai-permission-agent-codex"]').exists()).toBe(false);
+    await wrapper.get('[data-testid="ai-permission-preset-full_auto"]').trigger('click');
     await flushPromises();
     expect(permissions).toHaveBeenLastCalledWith(
       expect.objectContaining({
         action: 'settings',
-        settings: expect.objectContaining({ preset: 'confirm_each' }),
+        settings: expect.objectContaining({ preset: 'full_auto', agentPresets: {} }),
       }),
     );
-    await wrapper.get('[data-testid="ai-permission-cell-goal-create"]').setValue('deny');
+    wrapper.unmount();
+  });
+
+  it('maps one object write exception to create, update and delete without exposing CRUD', async () => {
+    const { wrapper, permissions } = setup();
+    await flushPromises();
+    expect(wrapper.findAll('[data-testid^="ai-permission-cell-"]')).toHaveLength(12);
+    await wrapper.get('[data-testid="ai-permission-cell-goal-write"]').setValue('deny');
     await flushPromises();
     expect(permissions).toHaveBeenLastCalledWith(
       expect.objectContaining({
+        action: 'settings',
         settings: expect.objectContaining({
           preset: 'custom',
           customMatrix: expect.objectContaining({
-            goal: expect.objectContaining({ create: 'deny' }),
+            goal: { read: 'allow', create: 'deny', update: 'deny', delete: 'deny' },
           }),
         }),
       }),
     );
-    expect(
-      wrapper.get('[data-testid="ai-permission-cell-ai_permission-update"]').attributes('disabled'),
-    ).toBeDefined();
+    expect(wrapper.find('[data-testid="ai-permission-cell-ai_permission-write"]').exists()).toBe(
+      false,
+    );
     wrapper.unmount();
   });
-  it('revokes the exact grant and supports inherited or separate Agent presets', async () => {
+
+  it('preserves but lets users revoke migrated deny rules without agent-level configuration', async () => {
     const { wrapper, permissions } = setup();
     await flushPromises();
-    await wrapper.get('[data-testid="ai-permission-revoke-grant"]').trigger('click');
-    await flushPromises();
-    expect(permissions).toHaveBeenLastCalledWith({ action: 'revoke', ruleId: 'grant' });
-    expect(wrapper.find('[data-testid="ai-permission-revoke-grant"]').exists()).toBe(false);
-    await wrapper.get('[data-testid="ai-permission-agent-codex"]').setValue('full_auto');
-    await flushPromises();
-    expect(permissions).toHaveBeenLastCalledWith(
-      expect.objectContaining({
-        settings: expect.objectContaining({ agentPresets: { codex: 'full_auto' } }),
-      }),
+    expect(wrapper.get('[data-testid="ai-permission-revoke-legacy-denial"]').text()).toContain(
+      '撤销',
     );
-    await wrapper.get('[data-testid="ai-permission-agent-codex"]').setValue('inherit');
+    await wrapper.get('[data-testid="ai-permission-revoke-legacy-denial"]').trigger('click');
     await flushPromises();
-    expect(permissions).toHaveBeenLastCalledWith(
-      expect.objectContaining({ settings: expect.objectContaining({ agentPresets: {} }) }),
+    expect(permissions).toHaveBeenLastCalledWith({
+      action: 'revoke',
+      ruleId: 'legacy-denial',
+    });
+    expect(wrapper.find('[data-testid="ai-permission-revoke-legacy-denial"]').exists()).toBe(false);
+    wrapper.unmount();
+  });
+
+  it('shows one revocable global write grant instead of three CRUD entries', async () => {
+    const actions = ['create', 'update', 'delete'] as const;
+    const { wrapper, permissions } = setup(
+      actions.map((action) => ({
+        id: `grant:goal:${action}`,
+        agentId: null,
+        object: 'goal',
+        action,
+        effect: 'allow',
+        source: 'user',
+      })),
+    );
+    await flushPromises();
+    expect(wrapper.findAll('[data-testid^="ai-permission-revoke-"]')).toHaveLength(2);
+    expect(wrapper.get('[data-testid="ai-permission-grants"]').text()).toContain('写入');
+    await wrapper.get('[data-testid="ai-permission-revoke-grant:goal:create"]').trigger('click');
+    await flushPromises();
+    const revoked = permissions.mock.calls
+      .map(([command]) => command)
+      .filter((command) => command.action === 'revoke');
+    expect(revoked).toEqual(
+      actions.map((action) => ({
+        action: 'revoke',
+        ruleId: `grant:goal:${action}`,
+      })),
     );
     wrapper.unmount();
   });

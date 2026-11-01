@@ -37,10 +37,8 @@ export async function authorize(
     if (!(error instanceof PermissionStorageUnavailableError)) throw error;
     storageUnavailable = true;
   }
-  const preset = (input.conversationPreset ??
-    settings?.agentPresets[input.agentId] ??
-    settings?.preset ??
-    'on_demand') as PermissionPreset;
+  // One MemoFlow business policy for every Agent. Native permission modes stay provider-owned.
+  const preset = (settings?.preset ?? 'confirm_each') as PermissionPreset;
   const result = evaluatePermission({
     agentId: input.agentId,
     operationId: input.operationId,
@@ -52,13 +50,16 @@ export async function authorize(
     now: input.now,
   });
   const auditId = randomUUID();
-  let decision = result.decision;
+  // Missing policy storage can never grant a data mutation, even a create.
+  let decision =
+    storageUnavailable && result.operation?.action !== 'read' ? 'deny' : result.decision;
   let decidedBy: PermissionAuditRecord['decidedBy'] =
     result.reason === 'preset'
       ? 'preset'
       : result.reason === 'permission_settings_locked' || result.reason === 'unregistered'
         ? 'system'
         : 'rule';
+  if (storageUnavailable && result.operation?.action !== 'read') decidedBy = 'system';
   if (decision === 'ask' && input.ask) {
     const response = await input.ask(auditId);
     decision = response === 'allow' ? 'allow' : 'deny';

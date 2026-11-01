@@ -137,6 +137,23 @@ function mountComposer(
 }
 
 describe('AIFooterComposer (Global Composer input)', () => {
+  it('places attachments at the left and model choice beside the right-hand send action', () => {
+    const wrapper = mountComposer({ modelValue: 'hello' });
+    const attachments = wrapper.get('[data-testid="ai-composer-attachments"]');
+    const actions = wrapper.get('[data-testid="ai-composer-actions"]');
+    const model = actions.get('[data-testid="ai-chat-model-selector"]');
+    const send = actions.get('[data-testid="ai-chat-send-message"]');
+    expect(attachments.get('[data-testid="ai-chat-add-context"]').exists()).toBe(true);
+    expect(
+      attachments.element.compareDocumentPosition(actions.element) &
+        Node.DOCUMENT_POSITION_FOLLOWING,
+    ).toBeTruthy();
+    expect(
+      model.element.compareDocumentPosition(send.element) & Node.DOCUMENT_POSITION_FOLLOWING,
+    ).toBeTruthy();
+    wrapper.unmount();
+  });
+
   afterEach(() => {
     vi.restoreAllMocks();
   });

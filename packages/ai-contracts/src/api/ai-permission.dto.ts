@@ -32,7 +32,7 @@ export const PermissionRuleSchema = z
   .strict();
 export const PermissionSettingsSchema = z
   .object({
-    preset: PermissionPresetSchema.default('on_demand'),
+    preset: PermissionPresetSchema.default('confirm_each'),
     agentPresets: z.record(z.string(), PermissionPresetSchema).default({}),
     customMatrix: z
       .record(PermissionObjectSchema, z.record(PermissionActionSchema, PermissionEffectSchema))

@@ -61,7 +61,7 @@ export function migrateLegacyPermissionSettings(input: {
       }
     }
   }
-  return { preset: 'on_demand', rules, migratedFrom: 'legacy-write-scopes-v2' };
+  return { preset: 'confirm_each', rules, migratedFrom: 'legacy-write-scopes-v2' };
 }
 
 export interface PermissionContext {
@@ -103,7 +103,8 @@ export const PERMISSION_PRESETS: Readonly<
 > = {
   read_only: { read: 'allow', create: 'deny', update: 'deny', delete: 'deny' },
   confirm_each: { read: 'allow', create: 'ask', update: 'ask', delete: 'ask' },
-  on_demand: { read: 'allow', create: 'allow', update: 'ask', delete: 'ask' },
+  // Legacy preset: now aliases the common read/write confirmation mode.
+  on_demand: { read: 'allow', create: 'ask', update: 'ask', delete: 'ask' },
   full_auto: {
     read: 'allow',
     create: 'allow',
@@ -141,6 +142,13 @@ export function evaluatePermission(context: PermissionContext): PermissionEvalua
       operation: operationView,
       ruleId: deny.id,
     };
+  // A global read-only selection cannot be silently raised by an earlier grant.
+  if (context.preset === 'read_only' && operation.action !== 'read')
+    return { decision: 'deny', reason: 'preset', operation: operationView };
+  // Elevated-risk operations require a fresh decision except in full-auto mode.
+  // Object-level grants never accidentally authorize bulk or permanent deletion.
+  if (operationView.risks.length && context.preset !== 'full_auto')
+    return { decision: 'ask', reason: 'preset', operation: operationView };
   const ask = [...rules].reverse().find((rule) => rule.effect === 'ask');
   if (ask)
     return {

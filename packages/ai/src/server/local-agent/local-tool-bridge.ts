@@ -95,6 +95,12 @@ export class LocalAgentToolBridge implements LocalAgentToolBridgePort {
           }
         }
       }
+      if (command.settings.preset !== 'custom') {
+        // A preset replaces the previous per-object matrix, including its persisted deny rules.
+        for (const rule of await repository.listRules(owner)) {
+          if (rule.id.startsWith('matrix:')) await repository.removeRule(owner, rule.id);
+        }
+      }
       await repository.saveSettings(owner, {
         ...command.settings,
         revision: (previous?.revision ?? 0) + 1,
@@ -139,7 +145,7 @@ export class LocalAgentToolBridge implements LocalAgentToolBridgePort {
     }
     return {
       settings: (await repository.getSettings(owner)) ?? {
-        preset: 'on_demand',
+        preset: 'confirm_each',
         agentPresets: {},
         revision: 1,
       },
@@ -348,11 +354,21 @@ export class LocalAgentToolBridge implements LocalAgentToolBridgePort {
                                 source: 'user',
                                 createdAt: Date.now(),
                               };
-                              if (approved === 'approve_always')
-                                await this.options.permissions.saveRule(
-                                  grant.input.identityId,
-                                  rule,
-                                );
+                              if (approved === 'approve_always') {
+                                // Business grants apply to all AI integrations, not to a
+                                // specific native Agent. A write grant covers this object.
+                                const actions =
+                                  operation.action === 'read'
+                                    ? (['read'] as const)
+                                    : (['create', 'update', 'delete'] as const);
+                                for (const action of actions)
+                                  await this.options.permissions.saveRule(grant.input.identityId, {
+                                    ...rule,
+                                    id: `grant:${operation.object}:${action}`,
+                                    agentId: null,
+                                    action,
+                                  });
+                              }
                               if (approved === 'approve_conversation')
                                 this.conversation(
                                   grant.input.identityId,
