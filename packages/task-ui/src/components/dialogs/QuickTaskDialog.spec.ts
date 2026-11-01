@@ -103,6 +103,10 @@ describe('QuickTaskDialog', () => {
   it('keeps capture title-only with a fixed Today / All day default', () => {
     const wrapper = mountDialog();
     expect(wrapper.findAll('input')).toHaveLength(1);
+    expect(wrapper.get('[data-testid="quick-task-title-input"]').classes()).toContain('border-0');
+    expect(wrapper.get('[data-testid="quick-task-title-input"]').classes()).toContain(
+      'focus-visible:ring-0',
+    );
     expect(wrapper.find('textarea, select').exists()).toBe(false);
     expect(wrapper.text()).toContain('Today · All day');
     expect(wrapper.findComponent({ name: 'TaskPlanForm' }).exists()).toBe(false);

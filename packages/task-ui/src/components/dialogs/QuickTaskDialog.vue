@@ -22,6 +22,7 @@
         <Input
           id="quick-task-title"
           v-model="title"
+          class="h-10 rounded-sm border-0 bg-transparent px-0 text-xl font-semibold shadow-none focus-visible:bg-[hsl(var(--surface-raised)/0.22)] focus-visible:ring-0"
           data-testid="quick-task-title-input"
           :placeholder="t('task.quickTask.placeholder')"
           :disabled="saving"
