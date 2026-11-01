@@ -15,16 +15,16 @@ const emit = defineEmits<{
   (event: 'update:open', value: boolean): void;
   (event: 'add-account'): void;
   (event: 'import-profile'): void;
-  (event: 'pin-settings'): void;
+  (event: 'password-settings'): void;
 }>();
 const { t } = useI18n();
-const { snapshot, busyProfileId, pin, selectedProfileId, editingProfileId } = props.presenter;
+const { snapshot, busyProfileId, password, selectedProfileId, editingProfileId } = props.presenter;
 watch(
   () => props.open,
   async (open) => {
     if (open) await props.presenter.refreshProfiles();
     else {
-      pin.value = '';
+      password.value = '';
       selectedProfileId.value = null;
       editingProfileId.value = null;
     }
@@ -66,7 +66,11 @@ async function restoreFocus(event: Event): Promise<void> {
           >{{ t('shell.profileImport.title') }}</Button
         >
       </div>
-      <DesktopProfileList :presenter="presenter" management @pin-settings="emit('pin-settings')" />
+      <DesktopProfileList
+        :presenter="presenter"
+        management
+        @password-settings="emit('password-settings')"
+      />
       <template #footer>
         <Button variant="outline" @click="emit('update:open', false)">{{
           t('common.close')

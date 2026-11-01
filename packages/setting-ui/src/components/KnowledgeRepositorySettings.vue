@@ -351,8 +351,8 @@
           kind="info"
           :title="t('setting.knowledgeRepository.notConnected')"
           :description="
-            isGuest
-              ? t('setting.knowledgeRepository.guestCloudBlocked')
+            isLocalAccount
+              ? t('setting.knowledgeRepository.localCloudBlocked')
               : !canUseCloudKnowledgeRepo
                 ? t('setting.knowledgeRepository.offlineCloudBlocked')
                 : desktopBridge
@@ -525,7 +525,7 @@ const canUseCloudKnowledgeRepo = computed(
     desktopApi === undefined ||
     (desktopAccessLoaded.value && desktopAccess.value?.capabilities.repositoryConnection === true),
 );
-const isGuest = computed(() => desktopAccess.value?.profile?.profileKind === 'guest');
+const isLocalAccount = computed(() => desktopAccess.value?.profile?.profileKind === 'local');
 if (sharedDesktopAccess) {
   watch(
     () => sharedDesktopAccess.value?.capabilities.repositoryConnection,
@@ -740,8 +740,8 @@ async function beginInstallation(
   recoverOnly = false,
 ): Promise<void> {
   if (!canUseCloudKnowledgeRepo.value) {
-    errorMessage.value = isGuest.value
-      ? t('setting.knowledgeRepository.guestCloudBlocked')
+    errorMessage.value = isLocalAccount.value
+      ? t('setting.knowledgeRepository.localCloudBlocked')
       : t('setting.knowledgeRepository.offlineCloudBlocked');
     return;
   }
@@ -917,8 +917,8 @@ async function pollDesktopInstallationIntent(intentId: string, expiresAt: number
 
 async function createPrivateRepository(): Promise<void> {
   if (!canUseCloudKnowledgeRepo.value) {
-    errorMessage.value = isGuest.value
-      ? t('setting.knowledgeRepository.guestCloudBlocked')
+    errorMessage.value = isLocalAccount.value
+      ? t('setting.knowledgeRepository.localCloudBlocked')
       : t('setting.knowledgeRepository.offlineCloudBlocked');
     return;
   }
@@ -986,8 +986,8 @@ async function completeInstallationFromQuery(): Promise<void> {
   const setupAction = queryValue(route.query.setup_action);
   if (!intentId && (!state || !installationId)) return;
   if (!canUseCloudKnowledgeRepo.value) {
-    errorMessage.value = isGuest.value
-      ? t('setting.knowledgeRepository.guestCloudBlocked')
+    errorMessage.value = isLocalAccount.value
+      ? t('setting.knowledgeRepository.localCloudBlocked')
       : t('setting.knowledgeRepository.offlineCloudBlocked');
     return;
   }
@@ -1057,8 +1057,8 @@ function canConnect(repository: GitHubInstallationRepositoryDTO): boolean {
 async function connectRepository(repository: GitHubInstallationRepositoryDTO): Promise<void> {
   if (!pendingInstallationId.value || !canConnect(repository)) return;
   if (!canUseCloudKnowledgeRepo.value) {
-    errorMessage.value = isGuest.value
-      ? t('setting.knowledgeRepository.guestCloudBlocked')
+    errorMessage.value = isLocalAccount.value
+      ? t('setting.knowledgeRepository.localCloudBlocked')
       : t('setting.knowledgeRepository.offlineCloudBlocked');
     return;
   }

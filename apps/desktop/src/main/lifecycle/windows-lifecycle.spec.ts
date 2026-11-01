@@ -48,8 +48,7 @@ describe('Windows shell lifecycle', () => {
   };
   const runtime = {
     profileRuntimeManager: {
-      getStartupProfile: vi.fn(async () => ({ profileId: 'a' })),
-      hasPin: vi.fn(async () => false),
+      getStartupProfile: vi.fn(async () => ({ profileId: 'a', profileKind: 'registered' })),
       activateStartupProfile: vi.fn(async () => ({
         descriptor: { profileId: 'a' },
         profileResolver: { mainWindowStatePath: '/unused' },
@@ -66,7 +65,10 @@ describe('Windows shell lifecycle', () => {
     vi.clearAllMocks();
     state.tray = {};
     manager.focusActiveWindow.mockReturnValue(true);
-    runtime.profileRuntimeManager.hasPin.mockResolvedValue(false);
+    runtime.profileRuntimeManager.getStartupProfile.mockResolvedValue({
+      profileId: 'a',
+      profileKind: 'registered',
+    });
     state.configDir = mkdtempSync(path.join(tmpdir(), 'mf-windows-lifecycle-'));
     state.initFeatures.mockImplementation(async () => ({ tray: state.tray, notification: {} }));
     platformSpy = vi.spyOn(process, 'platform', 'get').mockReturnValue('win32');
@@ -213,11 +215,14 @@ describe('Windows shell lifecycle', () => {
     await ready;
     await vi.waitFor(() => expect(manager.focusActiveWindow).toHaveBeenCalledTimes(1));
   });
-  it('recreates a destroyed window through the PIN gate even when a notification window survives', async () => {
+  it('recreates a destroyed window through the password gate even when a notification window survives', async () => {
     await register();
     new BrowserWindow({});
     manager.focusActiveWindow.mockReturnValue(false);
-    runtime.profileRuntimeManager.hasPin.mockResolvedValue(true);
+    runtime.profileRuntimeManager.getStartupProfile.mockResolvedValue({
+      profileId: 'a',
+      profileKind: 'local',
+    });
     app.emit('activate');
     app.emit('activate');
     await vi.waitFor(() => expect(manager.createProfileAccessWindow).toHaveBeenCalledTimes(1));
@@ -225,6 +230,15 @@ describe('Windows shell lifecycle', () => {
     expect(runtime.profileRuntimeManager.deactivateProfile).toHaveBeenCalledWith({
       preserveSelection: true,
     });
+  });
+
+  it('opens the empty account list instead of minting an identity when no Profile exists', async () => {
+    runtime.profileRuntimeManager.getStartupProfile.mockResolvedValue(null);
+    await register();
+
+    expect(manager.createProfileAccessWindow).toHaveBeenCalledTimes(1);
+    expect(runtime.profileRuntimeManager.activateStartupProfile).not.toHaveBeenCalled();
+    expect(manager.transitionToMainWindow).not.toHaveBeenCalled();
   });
 
   it('last-window destruction quits instead of retaining a headless process', async () => {

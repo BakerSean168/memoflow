@@ -1,6 +1,7 @@
 import { ipcMain } from 'electron';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { ProfileAccessChannels } from '@memoflow/desktop-contracts';
+import { ResultErrorException } from '@memoflow/transport-contracts/result';
 import { registerProfileAccessIpc } from './profile-access-ipc';
 
 const accessLogs = vi.hoisted(() => ({ info: vi.fn(), warn: vi.fn(), error: vi.fn() }));
@@ -23,7 +24,7 @@ describe('registerProfileAccessIpc', () => {
     };
     const runtime = {
       getActiveProfileDescriptorSync: vi.fn(() => profile),
-      hasPin: vi.fn(async () => false),
+      hasCredential: vi.fn(async () => false),
     };
     const cloud = {
       getState: vi.fn(async () => 'CHECKING'),
@@ -48,7 +49,7 @@ describe('registerProfileAccessIpc', () => {
     });
     const runtime = {
       getActiveProfileDescriptorSync: vi.fn().mockReturnValue({ profileId: 'old-profile' }),
-      hasPin: vi.fn(async () => false),
+      hasCredential: vi.fn(async () => false),
     };
     const cloud = {
       getState: vi.fn(async () => {
@@ -67,7 +68,7 @@ describe('registerProfileAccessIpc', () => {
     });
   });
 
-  it.each([null, '../outside', { profileId: '../outside' }, { profileId: 'valid', pin: 'x' }])(
+  it.each([null, '../outside', { profileId: '../outside' }, { profileId: 'valid', password: 'x' }])(
     'rejects malformed selection %j before lifecycle access',
     async (input) => {
       const handlers = new Map<string, Handler>();
@@ -84,7 +85,7 @@ describe('registerProfileAccessIpc', () => {
     },
   );
 
-  it('passes the exact selected guest and PIN to the serialized lifecycle', async () => {
+  it('passes the exact selected local account and password to the serialized lifecycle', async () => {
     const handlers = new Map<string, Handler>();
     vi.mocked(ipcMain.handle).mockImplementation((channel, handler) => {
       handlers.set(channel, handler as Handler);
@@ -97,10 +98,10 @@ describe('registerProfileAccessIpc', () => {
     expect(
       await handlers.get(ProfileAccessChannels.SELECT)?.(
         {},
-        { profileId: 'second-guest', pin: '123456' },
+        { profileId: 'second-local', password: 'account-password' },
       ),
     ).toMatchObject({ ok: true });
-    expect(runtime.openProfile).toHaveBeenCalledWith('second-guest', '123456');
+    expect(runtime.openProfile).toHaveBeenCalledWith('second-local', 'account-password');
     expect(accessLogs.warn).not.toHaveBeenCalled();
   });
 
@@ -111,7 +112,7 @@ describe('registerProfileAccessIpc', () => {
     });
     const failure = new Error('Object has been destroyed');
     const registry = {
-      list: vi.fn(async () => [{ profileId: 'guest-2', displayName: 'Guest Two' }]),
+      list: vi.fn(async () => [{ profileId: 'local-2', displayName: 'Local Two' }]),
     };
     const runtime = {
       getActiveProfileId: () => null,
@@ -120,12 +121,12 @@ describe('registerProfileAccessIpc', () => {
     registerProfileAccessIpc(registry as never, runtime as never, {} as never);
 
     expect(
-      await handlers.get(ProfileAccessChannels.SELECT)?.({}, { profileId: 'guest-2' }),
+      await handlers.get(ProfileAccessChannels.SELECT)?.({}, { profileId: 'local-2' }),
     ).toMatchObject({ ok: false, error: { code: 'PROFILE_OPEN_FAILED' } });
     expect(accessLogs.warn).toHaveBeenCalledTimes(1);
     expect(accessLogs.warn).toHaveBeenCalledWith('Selected Profile could not be opened', {
-      profileId: 'guest-2',
-      profileName: 'Guest Two',
+      profileId: 'local-2',
+      profileName: 'Local Two',
       error: failure,
     });
   });
@@ -147,12 +148,87 @@ describe('registerProfileAccessIpc', () => {
     registerProfileAccessIpc(registry as never, runtime as never, {} as never);
 
     expect(
-      await handlers.get(ProfileAccessChannels.SELECT)?.({}, { profileId: 'guest-3' }),
+      await handlers.get(ProfileAccessChannels.SELECT)?.({}, { profileId: 'local-3' }),
     ).toMatchObject({ ok: false, error: { code: 'PROFILE_OPEN_FAILED' } });
     expect(accessLogs.warn).toHaveBeenCalledWith(
       'Selected Profile could not be opened',
-      expect.objectContaining({ profileId: 'guest-3', profileName: undefined }),
+      expect.objectContaining({ profileId: 'local-3', profileName: undefined }),
     );
+  });
+
+  it('creates a local account with a nickname and password', async () => {
+    const handlers = new Map<string, Handler>();
+    vi.mocked(ipcMain.handle).mockImplementation((channel, handler) => {
+      handlers.set(channel, handler as Handler);
+    });
+    const runtime = {
+      createLocalAccount: vi.fn(async () => ({
+        profileId: 'p_aaaaaaaaaaaaaaaaaaaaaaaa',
+        profileKind: 'local',
+        displayName: 'Local',
+        avatarSeed: 'seed',
+        identifier: null,
+        cloudBinding: null,
+        lastActiveAt: 1,
+        hasSnapshot: false,
+      })),
+      hasCredential: vi.fn(async () => true),
+    };
+    registerProfileAccessIpc({} as never, runtime as never, {} as never);
+
+    expect(
+      await handlers.get(ProfileAccessChannels.CREATE_LOCAL_ACCOUNT)?.(
+        {},
+        { displayName: '  Local  ', password: 'account-password' },
+      ),
+    ).toMatchObject({ ok: true, data: { profileKind: 'local', hasCredential: true } });
+    expect(runtime.createLocalAccount).toHaveBeenCalledWith('Local', 'account-password');
+  });
+
+  it.each([
+    { displayName: 'Local' },
+    { displayName: 'Local', password: 'short' },
+    { displayName: '', password: 'account-password' },
+  ])('rejects an invalid local account creation %j', async (input) => {
+    const handlers = new Map<string, Handler>();
+    vi.mocked(ipcMain.handle).mockImplementation((channel, handler) => {
+      handlers.set(channel, handler as Handler);
+    });
+    const runtime = { createLocalAccount: vi.fn() };
+    registerProfileAccessIpc({} as never, runtime as never, {} as never);
+
+    expect(
+      await handlers.get(ProfileAccessChannels.CREATE_LOCAL_ACCOUNT)?.({}, input),
+    ).toMatchObject({ ok: false, error: { code: 'INVALID_REQUEST' } });
+    expect(runtime.createLocalAccount).not.toHaveBeenCalled();
+  });
+
+  it('changes the active local account password and refuses registered Profiles', async () => {
+    const handlers = new Map<string, Handler>();
+    vi.mocked(ipcMain.handle).mockImplementation((channel, handler) => {
+      handlers.set(channel, handler as Handler);
+    });
+    const runtime = {
+      setCurrentProfilePassword: vi
+        .fn()
+        .mockResolvedValueOnce(undefined)
+        .mockRejectedValueOnce(
+          new ResultErrorException('只有本地账户可以设置密码', 'PROFILE_NOT_LOCAL_ACCOUNT'),
+        ),
+    };
+    registerProfileAccessIpc({} as never, runtime as never, {} as never);
+
+    expect(
+      await handlers.get(ProfileAccessChannels.PASSWORD_SET)?.({}, 'account-password'),
+    ).toMatchObject({ ok: true });
+    expect(runtime.setCurrentProfilePassword).toHaveBeenCalledWith('account-password');
+    expect(
+      await handlers.get(ProfileAccessChannels.PASSWORD_SET)?.({}, 'account-password'),
+    ).toMatchObject({ ok: false, error: { code: 'PROFILE_NOT_LOCAL_ACCOUNT' } });
+    expect(await handlers.get(ProfileAccessChannels.PASSWORD_SET)?.({}, 'short')).toMatchObject({
+      ok: false,
+      error: { code: 'INVALID_REQUEST' },
+    });
   });
 
   it('refuses to remove the active Profile', async () => {

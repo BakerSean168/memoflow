@@ -18,13 +18,13 @@ const PassThrough = defineComponent({
 });
 const source: ProfileSummary = {
   profileId: 'p_111111111111111111111111',
-  profileKind: 'guest',
+  profileKind: 'local',
   displayName: 'Local notes',
   avatarSeed: 'a',
   identifierHint: null,
   cloudAccountId: null,
   lastActiveAt: 0,
-  hasPin: false,
+  hasCredential: false,
 };
 const target: ProfileSummary = {
   ...source,

@@ -22,7 +22,6 @@ import {
   AvatarFallback,
   AvatarImage,
   Separator,
-  Switch,
   useConfirm,
 } from '@memoflow/ui-vue-shadcn';
 import { accountUiHost } from '../../account-ui-host';
@@ -39,10 +38,9 @@ const lockProfile = inject(accountUiHost.PROFILE_LOCK_HANDLER_KEY, null);
 const desktopBridge = inject(accountUiHost.DESKTOP_BRIDGE_KEY, null);
 const desktopAccess = inject(accountUiHost.DESKTOP_ACCESS_SNAPSHOT_KEY, ref(null));
 const authStore = useAuthenticationStore();
-const pinSetupOpen = ref(false);
-const localPin = ref('');
-const localPinConfirmation = ref('');
-const pinBusy = ref(false);
+const localPassword = ref('');
+const localPasswordConfirmation = ref('');
+const localPasswordBusy = ref(false);
 
 const {
   currentAccount,
@@ -63,8 +61,9 @@ const form = reactive({
 
 const hasAccount = computed(() => currentAccount.value !== null);
 const initials = computed(() => (form.nickname || 'DU').slice(0, 2).toUpperCase());
-const hasLocalPin = computed(() => desktopAccess.value?.profile?.hasPin === true);
-const canConfigureLocalPin = computed(() => Boolean(desktopBridge && desktopAccess.value?.profile));
+const isLocalAccount = computed(
+  () => desktopAccess.value?.profile?.profileKind === 'local' && Boolean(desktopBridge),
+);
 
 watch(
   currentAccount,
@@ -124,72 +123,32 @@ async function handleLockProfile() {
   await lockProfile();
 }
 
-function updateLocalPinSnapshot(hasPin: boolean): void {
-  const current = desktopAccess.value;
-  if (!current?.profile) return;
-  desktopAccess.value = {
-    ...current,
-    profile: { ...current.profile, hasPin },
-  };
-}
-
-async function enableLocalPin(): Promise<void> {
+async function changeLocalPassword(): Promise<void> {
   if (!desktopBridge) return;
-  if (!/^\d{6,12}$/.test(localPin.value)) {
-    toast.error(t('account.localProtection.invalidPin'));
+  if (localPassword.value.length < 8) {
+    toast.error(t('account.localPassword.tooShort'));
     return;
   }
-  if (localPin.value !== localPinConfirmation.value) {
-    toast.error(t('account.localProtection.pinMismatch'));
+  if (localPassword.value !== localPasswordConfirmation.value) {
+    toast.error(t('account.localPassword.mismatch'));
     return;
   }
-  pinBusy.value = true;
-  const result = (await desktopBridge.invoke(ProfileAccessChannels.PIN_SET, localPin.value)) as {
+  localPasswordBusy.value = true;
+  const result = (await desktopBridge.invoke(
+    ProfileAccessChannels.PASSWORD_SET,
+    localPassword.value,
+  )) as {
     ok?: boolean;
     error?: { message?: string };
   };
-  pinBusy.value = false;
+  localPasswordBusy.value = false;
   if (!result.ok) {
-    toast.error(result.error?.message ?? t('account.localProtection.enableFailed'));
+    toast.error(result.error?.message ?? t('account.localPassword.failed'));
     return;
   }
-  updateLocalPinSnapshot(true);
-  pinSetupOpen.value = false;
-  localPin.value = '';
-  localPinConfirmation.value = '';
-  toast.success(t('account.localProtection.enabled'));
-}
-
-async function removeLocalPin(): Promise<void> {
-  if (!desktopBridge) return;
-  const confirmed = await useConfirm({
-    title: t('account.localProtection.removeTitle'),
-    description: t('account.localProtection.removeDescription'),
-    confirmText: t('account.localProtection.removeConfirm'),
-    cancelText: t('common.cancel'),
-    variant: 'destructive',
-  });
-  if (!confirmed) return;
-  pinBusy.value = true;
-  const result = (await desktopBridge.invoke(ProfileAccessChannels.PIN_REMOVE)) as {
-    ok?: boolean;
-    error?: { message?: string };
-  };
-  pinBusy.value = false;
-  if (!result.ok) {
-    toast.error(result.error?.message ?? t('account.localProtection.removeFailed'));
-    return;
-  }
-  updateLocalPinSnapshot(false);
-  toast.success(t('account.localProtection.removed'));
-}
-
-function handleLocalProtectionToggle(enabled: boolean): void {
-  if (enabled) {
-    pinSetupOpen.value = true;
-    return;
-  }
-  void removeLocalPin();
+  localPassword.value = '';
+  localPasswordConfirmation.value = '';
+  toast.success(t('account.localPassword.saved'));
 }
 
 onMounted(() => {
@@ -314,66 +273,51 @@ onMounted(() => {
       </template>
     </SettingsSection>
 
-    <Card v-if="canConfigureLocalPin" class="border-border/70">
+    <Card v-if="isLocalAccount" class="border-border/70">
       <CardHeader>
         <CardTitle class="flex items-center gap-2">
           <LockKeyhole class="h-4 w-4" />
-          {{ t('account.localProtection.title') }}
+          {{ t('account.localPassword.title') }}
         </CardTitle>
-        <CardDescription>{{ t('account.localProtection.description') }}</CardDescription>
+        <CardDescription>{{ t('account.localPassword.description') }}</CardDescription>
       </CardHeader>
-      <CardContent class="space-y-4">
-        <div class="flex items-center justify-between gap-4">
-          <div class="space-y-1">
-            <Label for="local-profile-pin-toggle">{{ t('account.localProtection.toggle') }}</Label>
-            <p class="text-sm text-muted-foreground">{{ t('account.localProtection.hint') }}</p>
-          </div>
-          <Switch
-            id="local-profile-pin-toggle"
-            data-testid="account-local-pin-toggle"
-            :model-value="hasLocalPin"
-            :disabled="pinBusy"
-            @update:model-value="handleLocalProtectionToggle"
-          />
-        </div>
-
+      <CardContent>
         <form
-          v-if="pinSetupOpen && !hasLocalPin"
-          class="grid gap-3 border-t pt-4 sm:grid-cols-2"
-          @submit.prevent="enableLocalPin"
+          class="grid gap-3 sm:grid-cols-2"
+          data-testid="account-local-password"
+          @submit.prevent="changeLocalPassword"
         >
           <div class="space-y-2">
-            <Label for="local-profile-pin">{{ t('account.localProtection.pin') }}</Label>
+            <Label for="local-profile-password">{{ t('account.localPassword.newPassword') }}</Label>
             <Input
-              id="local-profile-pin"
-              v-model="localPin"
-              data-testid="account-local-pin"
+              id="local-profile-password"
+              v-model="localPassword"
+              data-testid="account-local-password-new"
               type="password"
-              inputmode="numeric"
               autocomplete="new-password"
-              :placeholder="t('account.localProtection.pinPlaceholder')"
+              :placeholder="t('account.localPassword.placeholder')"
             />
           </div>
           <div class="space-y-2">
-            <Label for="local-profile-pin-confirmation">{{
-              t('account.localProtection.confirmPin')
+            <Label for="local-profile-password-confirmation">{{
+              t('account.localPassword.confirmPassword')
             }}</Label>
             <Input
-              id="local-profile-pin-confirmation"
-              v-model="localPinConfirmation"
-              data-testid="account-local-pin-confirmation"
+              id="local-profile-password-confirmation"
+              v-model="localPasswordConfirmation"
+              data-testid="account-local-password-confirmation"
               type="password"
-              inputmode="numeric"
               autocomplete="new-password"
-              :placeholder="t('account.localProtection.confirmPin')"
+              :placeholder="t('account.localPassword.confirmPassword')"
             />
           </div>
-          <div class="flex justify-end gap-2 sm:col-span-2">
-            <Button type="button" variant="outline" @click="pinSetupOpen = false">
-              {{ t('common.cancel') }}
-            </Button>
-            <Button type="submit" data-testid="account-local-pin-save" :disabled="pinBusy">
-              {{ t('account.localProtection.enable') }}
+          <div class="flex justify-end sm:col-span-2">
+            <Button
+              type="submit"
+              data-testid="account-local-password-save"
+              :disabled="localPasswordBusy || !localPassword"
+            >
+              {{ t('account.localPassword.save') }}
             </Button>
           </div>
         </form>

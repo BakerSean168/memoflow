@@ -37,7 +37,7 @@ AIChatView → AssistantRuntimeIpcClient
 
 `LocalAgentToolBridge` 按运行签发 loopback MCP 凭据。Goal/Task 读取复用 Gateway descriptors 和 owner queries；写入经 owner use case、外层事务、expectedVersion、持久 receipt 与事务内授权。Knowledge 读取现有 Vault source port；保存通过用户确认的 Repository 编辑面，不开放任意文件写入。
 
-Profile teardown 先撤销工具权限、关闭原生资源，再等待正在使用 owner DB 的调用完成。删除 MemoFlow 关联不会清理原生 home。原生历史恢复不进入 Mastra hydration，不上传或 V3 导出；Profile guest copy 遇到未支持的本地记录会阻止源清理。
+Profile teardown 先撤销工具权限、关闭原生资源，再等待正在使用 owner DB 的调用完成。删除 MemoFlow 关联不会清理原生 home。原生历史恢复不进入 Mastra hydration，不上传或 V3 导出；Profile 本地账户复制遇到未支持的本地记录会阻止源清理。
 
 模型由各 Agent 原生目录提供，不通过推理探活。每轮使用的模型保存为展示快照；原生用量缺失显示未知。仅在用户选择本地连接时启动 driver。账号、原生目录或关键配置变化导致旧绑定失效，不自动换账号恢复。
 

@@ -66,31 +66,46 @@ function sharedResolver(rootDir: string): SharedPathResolver {
   );
 }
 
+const LOCAL_PASSWORD = 'local-account-password';
+
 describe('DesktopProfileRuntimeManager', () => {
   let rootDir: string;
   let registry: ProfileRegistry;
   let runtime: DesktopProfileRuntimeManager;
 
-  it('requires the source PIN before invoking an inactive guest reader and leaves the target active', async () => {
-    const source = await registry.createGuest('11111111-1111-4111-8111-111111111111');
-    const target = await registry.createGuest('22222222-2222-4222-8222-222222222222');
-    await runtime.openProfile(source.profileId);
-    await runtime.setCurrentProfilePin('123456');
-    await runtime.openProfile(target.profileId);
+  /** A cloud-bound Profile keeps its safeStorage key copy and needs no password. */
+  const seedRegistered = (id = 'IdentityId_seed') => registry.register(id, 'Seed');
+
+  const createLocal = (displayName: string) =>
+    runtime.createLocalAccount(displayName, LOCAL_PASSWORD);
+
+  it('requires the source password before invoking an inactive local reader and leaves the target active', async () => {
+    const source = await createLocal('Source');
+    const target = await createLocal('Target');
+    await runtime.openProfile(source.profileId, LOCAL_PASSWORD);
+    await runtime.openProfile(target.profileId, LOCAL_PASSWORD);
     const read = vi.fn(async () => 'read');
     await expect(
-      runtime.runExclusive(() => runtime.withInactiveGuest(source.profileId, undefined, read)),
-    ).rejects.toThrow('SOURCE_PIN_REQUIRED');
+      runtime.runExclusive(() =>
+        runtime.withInactiveLocalAccount(source.profileId, undefined, read),
+      ),
+    ).rejects.toThrow('SOURCE_PASSWORD_REQUIRED');
     await expect(
-      runtime.runExclusive(() => runtime.withInactiveGuest(source.profileId, '999999', read)),
+      runtime.runExclusive(() =>
+        runtime.withInactiveLocalAccount(source.profileId, 'wrong-password', read),
+      ),
     ).rejects.toThrow();
     expect(read).not.toHaveBeenCalled();
     expect(
-      await runtime.runExclusive(() => runtime.withInactiveGuest(source.profileId, '123456', read)),
+      await runtime.runExclusive(() =>
+        runtime.withInactiveLocalAccount(source.profileId, LOCAL_PASSWORD, read),
+      ),
     ).toBe('read');
     expect(runtime.getActiveProfileId()).toBe(target.profileId);
     await expect(
-      runtime.runExclusive(() => runtime.withInactiveGuest(target.profileId, undefined, read)),
+      runtime.runExclusive(() =>
+        runtime.withInactiveLocalAccount(target.profileId, undefined, read),
+      ),
     ).rejects.toThrow('SOURCE_PROFILE_ACTIVE');
   }, 15_000);
 
@@ -119,43 +134,40 @@ describe('DesktopProfileRuntimeManager', () => {
 
   afterEach(async () => fs.promises.rm(rootDir, { recursive: true, force: true }));
 
-  it('opens the selected guest, preserves its PIN unlock across switching, and restores it at startup', async () => {
-    const first = await registry.ensureGuest();
-    const second = await registry.createGuest('second', 'Work');
-    await runtime.openProfile(second.profileId);
-    await runtime.setCurrentProfilePin('123456');
-    await runtime.openProfile(first.profileId);
-    await expect(runtime.openProfile(second.profileId, '000000')).rejects.toThrow();
+  it('opens local accounts only with their password and cannot restart one without it', async () => {
+    const first = await createLocal('First');
+    const second = await createLocal('Work');
+    await runtime.openProfile(second.profileId, LOCAL_PASSWORD);
+    await runtime.openProfile(first.profileId, LOCAL_PASSWORD);
+    await expect(runtime.openProfile(second.profileId, 'wrong-password')).rejects.toThrow();
     expect(runtime.getActiveProfileId()).toBe(first.profileId);
-    await runtime.openProfile(second.profileId, '123456');
+    await runtime.openProfile(second.profileId, LOCAL_PASSWORD);
     expect(runtime.getActiveProfileId()).toBe(second.profileId);
-    await runtime.openProfile(second.profileId);
     await runtime.deactivateProfile({ preserveSelection: true });
-    expect((await runtime.getStartupProfile()).profileId).toBe(second.profileId);
-    await expect(runtime.activateStartupProfile()).rejects.toThrow('PIN');
-    await runtime.openProfile(second.profileId, '123456');
+    expect((await runtime.getStartupProfile())?.profileId).toBe(second.profileId);
+    await expect(runtime.activateStartupProfile()).rejects.toThrow('密码');
+    await runtime.openProfile(second.profileId, LOCAL_PASSWORD);
     expect(runtime.getActiveProfileId()).toBe(second.profileId);
   }, 15_000);
 
-  it('never opens or reads a PIN target database on missing or incorrect PIN', async () => {
-    const source = await registry.ensureGuest();
-    const target = await registry.createGuest('protected', 'Same name');
-    await runtime.openProfile(target.profileId);
-    await runtime.setCurrentProfilePin('123456');
-    await runtime.openProfile(source.profileId);
+  it('never opens or reads a target database on a missing or incorrect password', async () => {
+    const source = await createLocal('Source');
+    const target = await createLocal('Same name');
+    await runtime.openProfile(target.profileId, LOCAL_PASSWORD);
+    await runtime.openProfile(source.profileId, LOCAL_PASSWORD);
     vi.clearAllMocks();
-    await expect(runtime.openProfile(target.profileId)).rejects.toThrow('PIN');
-    await expect(runtime.openProfile(target.profileId, '000000')).rejects.toThrow('PIN');
+    await expect(runtime.openProfile(target.profileId)).rejects.toThrow('密码');
+    await expect(runtime.openProfile(target.profileId, 'wrong-password')).rejects.toThrow('密码');
     expect(openPowerSyncLocalOnly).not.toHaveBeenCalled();
     expect(mocks.getOptional).not.toHaveBeenCalled();
     expect(mocks.bootstrapDestroy).not.toHaveBeenCalled();
     expect(runtime.getActiveProfileId()).toBe(source.profileId);
   }, 15_000);
 
-  it('isolates two guests and two cloud owners while retiring each previous runtime', async () => {
+  it('isolates two local accounts and two cloud owners while retiring each previous runtime', async () => {
     const profiles = [
-      await registry.createGuest('guest-a', 'Same name'),
-      await registry.createGuest('guest-b', 'Same name'),
+      await createLocal('Same name'),
+      await createLocal('Same name'),
       await registry.register('IdentityId_cloud_a', 'Same name', 'a@example.com'),
       await registry.register('IdentityId_cloud_b', 'Same name', 'b@example.com'),
     ];
@@ -196,7 +208,10 @@ describe('DesktopProfileRuntimeManager', () => {
     const retiredCredentials: Array<{ getAccessToken: () => Promise<string | null> }> = [];
     const paths = new Set<string>();
     for (const [index, profile] of profiles.entries()) {
-      const prepared = await runtime.openProfile(profile.profileId);
+      const prepared = await runtime.openProfile(
+        profile.profileId,
+        profile.profileKind === 'local' ? LOCAL_PASSWORD : undefined,
+      );
       expect(runtime.getCurrentIdentityId()).toBe(profile.localOwnerId);
       expect(prepared.profileResolver.dbPath).toContain(profile.profileId);
       expect(mocks.bootstrapDestroy).toHaveBeenCalledTimes(index);
@@ -220,7 +235,7 @@ describe('DesktopProfileRuntimeManager', () => {
       contexts.add(runtime.getActiveProfileAccessContext());
       paths.add(prepared.profileResolver.dbPath);
     }
-    await runtime.openProfile(profiles[0]!.profileId);
+    await runtime.openProfile(profiles[0]!.profileId, LOCAL_PASSWORD);
     for (const credentials of retiredCredentials)
       expect(await credentials.getAccessToken()).toBeNull();
     for (const profile of profiles.filter((item) => item.cloudBinding)) {
@@ -231,10 +246,19 @@ describe('DesktopProfileRuntimeManager', () => {
     expect(new Set(profiles.map((profile) => profile.localOwnerId)).size).toBe(4);
   });
 
-  it('creates and activates a persistent local guest Profile without cloud auth', async () => {
-    const prepared = await runtime.activateStartupProfile();
+  it('creates a local account that opens only with its password and never writes safeStorage keys', async () => {
+    const created = await createLocal('Local');
+    expect(created.profileKind).toBe('local');
+    expect(await runtime.hasCredential(created.profileId)).toBe(true);
+    expect(
+      fs.existsSync(
+        path.join(rootDir, 'data', 'shared', 'secure', 'profile-keys', `${created.profileId}.bin`),
+      ),
+    ).toBe(false);
 
-    expect(prepared.descriptor.profileKind).toBe('guest');
+    const prepared = await runtime.openProfile(created.profileId, LOCAL_PASSWORD);
+
+    expect(prepared.descriptor.profileKind).toBe('local');
     expect(prepared.descriptor.localOwnerId).toMatch(/^IdentityId_/);
     expect(mocks.execute).toHaveBeenCalledWith(
       expect.stringContaining('INSERT INTO accounts'),
@@ -251,6 +275,7 @@ describe('DesktopProfileRuntimeManager', () => {
   });
 
   it('locks the Profile without deleting its directory or registry entry', async () => {
+    await seedRegistered();
     const prepared = await runtime.activateStartupProfile();
     await runtime.deactivateProfile();
 
@@ -262,6 +287,7 @@ describe('DesktopProfileRuntimeManager', () => {
   });
 
   it('preserves the selected Profile when releasing runtime resources for shutdown', async () => {
+    await seedRegistered();
     const prepared = await runtime.activateStartupProfile();
 
     await runtime.deactivateProfile({ preserveSelection: true });
@@ -272,6 +298,7 @@ describe('DesktopProfileRuntimeManager', () => {
   });
 
   it('withdraws local access after teardown even if the database close fails, and retries the close', async () => {
+    await seedRegistered();
     await runtime.activateStartupProfile();
     mocks.shutdownPowerSync.mockRejectedValueOnce(new Error('database close failed'));
     await expect(runtime.deactivateProfile()).rejects.toThrow('database close failed');
@@ -283,23 +310,28 @@ describe('DesktopProfileRuntimeManager', () => {
   });
 
   it('retires a failed prepared database before retrying the same Profile', async () => {
-    const profile = await registry.ensureGuest();
+    const profile = await createLocal('Local');
     mocks.getOptional.mockRejectedValueOnce(new Error('account read failed'));
     mocks.shutdownPowerSync.mockRejectedValueOnce(new Error('database close failed'));
-    await expect(runtime.openProfile(profile.profileId)).rejects.toThrow('database close failed');
+    await expect(runtime.openProfile(profile.profileId, LOCAL_PASSWORD)).rejects.toThrow(
+      'database close failed',
+    );
     expect(runtime.getCurrentIdentityId()).toBeNull();
-    const replacement = await runtime.openProfile(profile.profileId);
+    const replacement = await runtime.openProfile(profile.profileId, LOCAL_PASSWORD);
     expect(replacement.descriptor.profileId).toBe(profile.profileId);
     expect(mocks.shutdownPowerSync).toHaveBeenCalledTimes(2);
     expect(mocks.bootstrapInit).toHaveBeenCalledOnce();
   });
 
   it('closes a database when preparation fails before publishing its runtime', async () => {
+    const profile = await createLocal('Local');
     mocks.getOptional.mockRejectedValueOnce(new Error('adoption recovery failed'));
-    await expect(runtime.activateStartupProfile()).rejects.toThrow('adoption recovery failed');
+    await expect(runtime.openProfile(profile.profileId, LOCAL_PASSWORD)).rejects.toThrow(
+      'adoption recovery failed',
+    );
     expect(runtime.getCurrentIdentityId()).toBeNull();
     expect(mocks.shutdownPowerSync).toHaveBeenCalledOnce();
-    await runtime.activateStartupProfile();
+    await runtime.openProfile(profile.profileId, LOCAL_PASSWORD);
     expect(runtime.getActiveProfileId()).not.toBeNull();
   });
 
@@ -311,6 +343,7 @@ describe('DesktopProfileRuntimeManager', () => {
           finishInit = resolve;
         }),
     );
+    await seedRegistered();
     const activation = runtime.activateStartupProfile();
     await vi.waitFor(() => expect(mocks.bootstrapInit).toHaveBeenCalledOnce());
     let locked = false;
@@ -340,6 +373,7 @@ describe('DesktopProfileRuntimeManager', () => {
           finishOpen = () => resolve(database as never);
         }),
     );
+    await seedRegistered();
     const selection = runtime.activateStartupProfile();
     await vi.waitFor(() => expect(openPowerSyncLocalOnly).toHaveBeenCalledOnce());
     let locked = false;
@@ -388,6 +422,7 @@ describe('DesktopProfileRuntimeManager', () => {
     mocks.shutdownPowerSync.mockImplementation(async () => {
       closedDuringBootstrap ||= !bootstrapFinished;
     });
+    await seedRegistered();
     const firstSelection = runtime.activateStartupProfile();
     await vi.waitFor(() => expect(openPowerSyncLocalOnly).toHaveBeenCalledOnce());
     const secondProfile = await registry.register('IdentityId_other', 'Other');
@@ -404,6 +439,7 @@ describe('DesktopProfileRuntimeManager', () => {
     const beforeDeactivation = vi.fn();
     runtime.setBeforeDeactivation(beforeDeactivation);
 
+    await seedRegistered();
     await runtime.activateStartupProfile();
     await runtime.deactivateProfile();
 
@@ -419,6 +455,7 @@ describe('DesktopProfileRuntimeManager', () => {
     });
     runtime.setBeforeDeactivation(beforeDeactivation);
 
+    await seedRegistered();
     const prepared = await runtime.activateStartupProfile();
 
     await expect(runtime.deactivateProfile()).rejects.toThrow('routine occurrence flush failed');
@@ -433,6 +470,7 @@ describe('DesktopProfileRuntimeManager', () => {
     const beforeDeactivation = vi.fn();
     runtime.setBeforeDeactivation(beforeDeactivation);
     mocks.bootstrapInit.mockRejectedValueOnce(new Error('init failed'));
+    await seedRegistered();
 
     await expect(runtime.activateStartupProfile()).rejects.toThrow('init failed');
 
@@ -446,13 +484,14 @@ describe('DesktopProfileRuntimeManager', () => {
     runtime.setAfterActivation(async () => {
       throw new Error('offline');
     });
+    await seedRegistered();
     const prepared = await runtime.activateStartupProfile();
     expect(runtime.getActiveProfileId()).toBe(prepared.descriptor.profileId);
   });
 
   it('serializes concurrent switches and lock without leaving an active runtime', async () => {
-    const first = await registry.ensureGuest();
-    const second = await registry.createGuest('second');
+    const first = await registry.register('IdentityId_first', 'First');
+    const second = await registry.register('IdentityId_second', 'Second');
     await Promise.all([
       runtime.openProfile(first.profileId),
       runtime.openProfile(second.profileId),
@@ -465,8 +504,8 @@ describe('DesktopProfileRuntimeManager', () => {
   });
 
   it('locks on a database-close failure and retries cleanup before the next open', async () => {
-    const first = await registry.ensureGuest();
-    const second = await registry.createGuest('second');
+    const first = await registry.register('IdentityId_first', 'First');
+    const second = await registry.register('IdentityId_second', 'Second');
     await runtime.openProfile(first.profileId);
     mocks.shutdownPowerSync.mockRejectedValueOnce(new Error('close failed'));
     await expect(runtime.openProfile(second.profileId)).rejects.toThrow('close failed');
@@ -488,12 +527,12 @@ describe('DesktopProfileRuntimeManager', () => {
       'profile-keys',
       `${descriptor.profileId}.bin`,
     );
-    const pinPath = path.join(
+    const passwordPath = path.join(
       rootDir,
       'data',
       'shared',
       'secure',
-      'profile-pins',
+      'profile-passwords',
       `${descriptor.profileId}.json`,
     );
     const sessionPath = path.join(
@@ -507,12 +546,12 @@ describe('DesktopProfileRuntimeManager', () => {
     await Promise.all([
       fs.promises.mkdir(profileDir, { recursive: true }),
       fs.promises.mkdir(path.dirname(keyPath), { recursive: true }),
-      fs.promises.mkdir(path.dirname(pinPath), { recursive: true }),
+      fs.promises.mkdir(path.dirname(passwordPath), { recursive: true }),
       fs.promises.mkdir(path.dirname(sessionPath), { recursive: true }),
     ]);
     await Promise.all([
       fs.promises.writeFile(keyPath, 'key'),
-      fs.promises.writeFile(pinPath, '{}'),
+      fs.promises.writeFile(passwordPath, '{}'),
       fs.promises.writeFile(sessionPath, 'session'),
     ]);
 
@@ -531,7 +570,7 @@ describe('DesktopProfileRuntimeManager', () => {
     expect(await registry.findByCloudAccountId('cloud-1')).toBeNull();
     expect(fs.existsSync(profileDir)).toBe(false);
     expect(fs.existsSync(keyPath)).toBe(false);
-    expect(fs.existsSync(pinPath)).toBe(false);
+    expect(fs.existsSync(passwordPath)).toBe(false);
     expect(fs.existsSync(sessionPath)).toBe(false);
     const readded = await registry.register('cloud-1', 'Cloud User', 'user@example.com');
     expect(readded.profileId).toBe(descriptor.profileId);

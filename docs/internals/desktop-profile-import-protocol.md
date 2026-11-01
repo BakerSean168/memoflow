@@ -1,6 +1,6 @@
 ---
 tags: [architecture, desktop, profile, data-portability, protocol]
-description: 已实现的访客复制导入、持久恢复、内容核验与本地清理协议
+description: 已实现的本地账户复制导入、持久恢复、内容核验与本地清理协议
 created: 2026-10-09T00:00:00Z
 updated: 2026-10-09T00:00:00Z
 ---
@@ -11,18 +11,18 @@ updated: 2026-10-09T00:00:00Z
 
 ## 1. 责任与身份边界
 
-| Owner                    | 负责                                                                   |
-| ------------------------ | ---------------------------------------------------------------------- |
-| Cloud Auth / Better Auth | 认证 principal、session、provider binding 和撤销                       |
-| Desktop Profile host     | Profile 选择/PIN、源只读快照、加密 journal、目标本地核验和本机资源清理 |
-| Data Portability         | V3 解析、依赖排序、持久 operation、有效计划和 manifest 编排            |
-| 真实业务 owner           | 空数据判定、payload 语义、事务写入、稳定引用映射和内容 readback        |
-| API host                 | middleware principal、Prisma 事务和 owner composition                  |
-| PowerSync                | 将服务端已提交事实下载到目标 Profile                                   |
+| Owner                    | 负责                                                                            |
+| ------------------------ | ------------------------------------------------------------------------------- |
+| Cloud Auth / Better Auth | 认证 principal、session、provider binding 和撤销                                |
+| Desktop Profile host     | Profile 选择/本地账户密码、源只读快照、加密 journal、目标本地核验和本机资源清理 |
+| Data Portability         | V3 解析、依赖排序、持久 operation、有效计划和 manifest 编排                     |
+| 真实业务 owner           | 空数据判定、payload 语义、事务写入、稳定引用映射和内容 readback                 |
+| API host                 | middleware principal、Prisma 事务和 owner composition                           |
+| PowerSync                | 将服务端已提交事实下载到目标 Profile                                            |
 
-进程只有一个活动业务 runtime。源导出不启动第二个 PowerSync、scheduler 或 IPC runtime。认证按云端 user ID 选择独立 Profile；不按邮箱/昵称合并，不修改 guest identity，不执行 tenant adoption。目标 session 原子保存是认证提交点；保存前取消撤销未采用 token，保存后 UI 切换失败仍保留 session。连接结果为 `active | pending | pin_required | sync_pending`，请求意图为 `add_account | reauthenticate`。重新认证必须匹配原 binding。
+进程只有一个活动业务 runtime。源导出不启动第二个 PowerSync、scheduler 或 IPC runtime。认证按云端 user ID 选择独立 Profile；不按邮箱/昵称合并，不修改本地账户 identity，不执行 tenant adoption。目标 session 原子保存是认证提交点；保存前取消撤销未采用 token，保存后 UI 切换失败仍保留 session。连接结果为 `active | pending | password_required | sync_pending`，请求意图为 `add_account | reauthenticate`。重新认证必须匹配原 binding。
 
-生命周期队列串行处理切换、PIN、移除、认证提交和导入步骤；请求排队前捕获 generation，轮到执行时再次检查。跨 Profile 切换销毁旧 renderer 并关闭旧数据库；目标有 PIN 时先解锁，再打开。
+生命周期队列串行处理切换、密码设置、移除、认证提交和导入步骤；请求排队前捕获 generation，轮到执行时再次检查。跨 Profile 切换销毁旧 renderer 并关闭旧数据库；目标是本地账户时先校验密码，再打开。
 
 ## 2. 云端摘要和一次性提示
 
@@ -32,11 +32,11 @@ updated: 2026-10-09T00:00:00Z
 
 新建本机云端 Profile 的 `add_account` 成功后写入一次性机会记录。已有 Profile 和重新认证不创建机会。消费时先持久化 `consumed=true`，然后读取云端摘要；失败或非空不提示，也不影响登录。
 
-自动候选最多检查前 20 个 guest，跳过 PIN 保护或无法只读访问的源；只做 owner export，不扫描附件。没有业务候选不提示，一个候选可预选，多个候选不预选。只含 Account/默认偏好不触发提示。手动入口仍可选择其他 guest，包括输入 PIN 后复制自定义资料/偏好。
+自动候选最多检查前 20 个本地账户，跳过需要密码或无法只读访问的源；只做 owner export，不扫描附件。没有业务候选不提示，一个候选可预选，多个候选不预选。只含 Account/默认偏好不触发提示。手动入口仍可选择其他本地账户，包括输入密码后复制自定义资料/偏好。
 
 ## 3. 源快照和资料覆盖
 
-源必须是 registry 中存在的非活动 guest，且不在 pending cleanup。主进程先验证 PIN，再用 `better-sqlite3` readonly、`query_only=ON` 和读取事务打开真实 PowerSync SQLite；读视图包含 WAL。adapter 拒绝 execute/writeTransaction。十 owner 的 repository-only composition 导出 V3，不初始化默认值或后台任务。
+源必须是 registry 中存在的非活动本地账户，且不在 pending cleanup。主进程先校验密码，再用 `better-sqlite3` readonly、`query_only=ON` 和读取事务打开真实 PowerSync SQLite；读视图包含 WAL。adapter 拒绝 execute/writeTransaction。十 owner 的 repository-only composition 导出 V3，不初始化默认值或后台任务。
 
 快照包含源 envelope、固定 exportedAt、source digest、源 lastActiveAt 和 inventory digest。源 inventory 对表内容与文件内容取 hash；不依靠大小/mtime。PowerSync 已知内部表明确列入白名单；底层 `ps_data__*` 由 logical view 检查，未知非空表和 `ps_untyped` 不被当作缓存跳过。
 
@@ -53,7 +53,7 @@ updated: 2026-10-09T00:00:00Z
 
 当前没有已持久化的昵称默认值来源证据，因此目标非空昵称一律保留；与源昵称不同会形成保留差异并阻止自动清理。
 
-原始内容以 AES-256-GCM 加密存到 `shared/profiles/imports/<targetProfileId>/<requestId>.bin`，使用已解锁目标的 key。AAD 绑定目标 Profile/identity、源 Profile、requestId 和 source digest。JSON journal 只存状态、digest、bindings、manifest 和 blocker，不存 PIN/token/正文。确认服务端 committed 并持久化回执后删除 `.bin`；后续核验无需保留源正文快照。
+原始内容以 AES-256-GCM 加密存到 `shared/profiles/imports/<targetProfileId>/<requestId>.bin`，使用已解锁目标的 key。AAD 绑定目标 Profile/identity、源 Profile、requestId 和 source digest。JSON journal 只存状态、digest、bindings、manifest 和 blocker，不存密码/token/正文。确认服务端 committed 并持久化回执后删除 `.bin`；后续核验无需保留源正文快照。
 
 ## 4. HTTP 合约和有效计划
 
@@ -106,7 +106,7 @@ prepared → preflight → committing → committed → verified
 1. 此 operation 的明确删除勾选已持久化（默认 false）。
 2. 服务端回执与目标身份/原 source digest 对应，且当前 serverVerified 为 true。
 3. 实际目标本地 owner manifest 匹配，localVerified 为 true。
-4. 源仍是可访问的 inactive guest，PIN 校验通过。
+4. 源仍是可访问的 inactive 本地账户，密码校验通过。
 5. 重新读取的 source digest、inventory digest、lastActiveAt 均与快照一致；源重新打开过也阻止清理。
 6. 源和计划 blocker 均为零；删除前再次 GET 服务端核验通过。
 
@@ -116,8 +116,8 @@ prepared → preflight → committing → committed → verified
 
 1. 持久化 `shared/profiles/cleanup/<profileId>.json` tombstone（文件 fsync、rename、目录 fsync；Windows 不做目录 fsync）。Runtime 拒绝打开 tombstone 对应的 Profile。
 2. 同盘原子 rename 到 `profiles/.deleting-<profileId>`，删除该受管理目录。不会沿符号链接递归外部 Vault，不执行云端业务 DELETE。
-3. 目录删除成功后清理属于该目标 Profile 的导入 journal/快照及提示记录，再按 session → PIN → key → registry 顺序清理保护材料，最后移除 tombstone。
-4. 启动恢复 pending tombstone；某个清理失败不妨碍其他 Profile 启动。导入 journal 为 cleanup_pending 但 tombstone 尚未创建时，必须重做源/PIN/服务端/本机核验，不能直接删除。
+3. 目录删除成功后清理属于该目标 Profile 的导入 journal/快照及提示记录，再按 session → password → key → registry 顺序清理保护材料，最后移除 tombstone。
+4. 启动恢复 pending tombstone；某个清理失败不妨碍其他 Profile 启动。导入 journal 为 cleanup_pending 但 tombstone 尚未创建时，必须重做源密码/服务端/本机核验，不能直接删除。
 
 Profile ID 严格为 `p_` 加 24 位小写十六进制；IPC 不接受路径。物理删除开始后不承诺还原源。崩溃后按 tombstone/目录存在性继续，不能重建空源或先丢失唯一密钥。
 

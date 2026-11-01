@@ -18,12 +18,12 @@ vi.mock('vue-sonner', () => ({ toast: { error: vi.fn(), success: vi.fn() } }));
 
 const profile = (id: string, overrides: Partial<ProfileSummary> = {}): ProfileSummary => ({
   profileId: id,
-  profileKind: 'guest',
+  profileKind: 'local',
   displayName: `Profile ${id}`,
   avatarSeed: id,
   identifierHint: null,
   cloudAccountId: null,
-  hasPin: false,
+  hasCredential: false,
   lastActiveAt: 1,
   ...overrides,
 });
@@ -74,6 +74,53 @@ afterEach(() => {
 beforeEach(() => {
   confirmMock.mockReset();
   confirmMock.mockResolvedValue(true);
+});
+
+describe('useDesktopProfiles creation', () => {
+  it('creates a local account with a nickname and password, then opens it with that password', async () => {
+    const { wrapper, presenter, invoke } = setup();
+    cleanups.push(() => wrapper.unmount());
+    presenter.newName.value = 'Local one';
+    presenter.newPassword.value = 'account-password';
+    invoke.mockImplementation(async (channel: string) => {
+      if (channel === ProfileAccessChannels.CREATE_LOCAL_ACCOUNT)
+        return ok(profile('created', { displayName: 'Local one', hasCredential: true }));
+      if (channel === ProfileAccessChannels.LIST) return ok([profile('created')]);
+      if (channel === ProfileAccessChannels.GET_SNAPSHOT)
+        return ok({
+          profile: null,
+          unlockState: 'LOCKED',
+          cloudState: 'UNBOUND',
+          capabilities: { local: false, sync: false, cloudAi: false, repositoryConnection: false },
+        });
+      return ok(null);
+    });
+
+    await presenter.createLocalAccount();
+    await flushPromises();
+
+    expect(invoke).toHaveBeenCalledWith(ProfileAccessChannels.CREATE_LOCAL_ACCOUNT, {
+      displayName: 'Local one',
+      password: 'account-password',
+    });
+    expect(presenter.newName.value).toBe('');
+    expect(presenter.newPassword.value).toBe('');
+  });
+
+  it('refuses to create a local account without a nickname or a password of at least 8 characters', async () => {
+    const { wrapper, presenter, invoke } = setup();
+    cleanups.push(() => wrapper.unmount());
+    presenter.newName.value = 'Local one';
+    presenter.newPassword.value = 'short';
+
+    await presenter.createLocalAccount();
+    await flushPromises();
+
+    expect(invoke).not.toHaveBeenCalledWith(
+      ProfileAccessChannels.CREATE_LOCAL_ACCOUNT,
+      expect.anything(),
+    );
+  });
 });
 
 describe('useDesktopProfiles removal', () => {

@@ -91,7 +91,7 @@ const props = defineProps<{
   activeConversationId: string | null;
   userName?: string;
   /** 当前壳层展示的是哪一种身份，而不是含混的“是否登录”。 */
-  identityKind?: 'guest' | 'registered-local' | 'cloud';
+  identityKind?: 'local' | 'registered-local' | 'cloud';
   /** 云端会话是否可用；只影响同步账号动作，不影响本地身份。 */
   cloudConnected?: boolean;
   /** 会话列表加载中。 */
@@ -384,11 +384,11 @@ function profileLabel(profile: ProfileSummary): string {
     profile.displayName,
     profile.identifierHint || profile.profileId,
     t(
-      profile.profileKind === 'guest'
-        ? 'auth.profileAccess.guest'
+      profile.profileKind === 'local'
+        ? 'auth.profileAccess.local'
         : 'auth.profileAccess.registered',
     ),
-    profile.hasPin ? t('auth.profileAccess.unlock') : '',
+    profile.hasCredential ? t('auth.profileAccess.unlock') : '',
     profile.profileId === props.activeProfileId ? t('shell.account.currentProfile') : '',
   ]
     .filter(Boolean)
@@ -398,7 +398,7 @@ function profileLabel(profile: ProfileSummary): string {
 const identityLabel = () => {
   if (props.identityKind === 'cloud') return t('shell.account.signedIn');
   if (props.identityKind === 'registered-local') return t('shell.account.localProfile');
-  return t('shell.account.guestIdentity');
+  return t('shell.account.localIdentity');
 };
 </script>
 
@@ -838,8 +838,8 @@ const identityLabel = () => {
                     }}</span>
                     <small class="block truncate text-muted-foreground">
                       {{
-                        profile.profileKind === 'guest'
-                          ? t('auth.profileAccess.guest')
+                        profile.profileKind === 'local'
+                          ? t('auth.profileAccess.local')
                           : t('auth.profileAccess.registered')
                       }}
                       · {{ profile.identifierHint || profile.profileId }} ·
@@ -851,7 +851,7 @@ const identityLabel = () => {
                     </small>
                   </span>
                   <LockKeyhole
-                    v-if="profile.hasPin"
+                    v-if="profile.hasCredential"
                     class="ml-1 h-3 w-3 shrink-0"
                     :aria-label="t('auth.profileAccess.unlock')"
                   />

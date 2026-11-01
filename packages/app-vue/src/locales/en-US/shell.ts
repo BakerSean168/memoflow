@@ -1,7 +1,7 @@
 export default {
   newChat: 'New Chat',
   search: 'Search',
-  guest: 'Guest',
+  guest: 'Local account',
   back: 'Back',
   forward: 'Forward',
   showSidePanel: 'Show side panel',
@@ -130,7 +130,7 @@ export default {
     sceneTitle: 'Settings',
   },
   account: {
-    openForPin: 'Open to manage PIN',
+    openForPassword: 'Open to manage password',
     connection: {
       UNBOUND: 'Local only',
       CHECKING: 'Checking connection',
@@ -140,8 +140,8 @@ export default {
       unknown: 'Not checked',
     },
     manageDescription:
-      'Profiles keep separate local data. Removing one from this device does not close its cloud account. Manage PIN in Settings → Account & privacy after opening the Profile.',
-    pinSettings: 'PIN settings',
+      'Profiles keep separate local data. Removing one from this device does not close its cloud account. Change the local account password in Settings → Account & privacy after opening the Profile.',
+    passwordSettings: 'Password settings',
     switchAccount: 'Switch account',
     createProfile: 'Create local Profile',
     currentProfile: 'Current Profile',
@@ -151,7 +151,7 @@ export default {
 
     menu: 'Account menu',
     signedIn: 'Signed in',
-    guestIdentity: 'Guest',
+    localIdentity: 'Local account',
     localProfile: 'Local Profile (sync paused)',
     accountAndPrivacy: 'Account & privacy',
     settings: 'Settings',
@@ -165,9 +165,9 @@ export default {
   },
   profileImport: {
     title: 'Import local Profile',
-    description: 'Copy guest data into “{target}”. The two spaces remain independent.',
+    description: 'Copy local account data into “{target}”. The two spaces remain independent.',
     source: 'Source Profile',
-    noSources: 'No guest Profiles are available.',
+    noSources: 'No local accounts are available.',
     unavailable: 'Desktop import is unavailable.',
     failed: 'This step did not finish. Retry from import history.',
     removedSource: 'Removed source Profile',
@@ -178,8 +178,8 @@ export default {
     passed: 'Passed',
     waiting: 'Awaiting sync or content review',
     deleteSource:
-      'Permanently delete the source guest Profile only after all content checks pass and the source is unchanged.',
-    pin: 'Source Profile local PIN',
+      'Permanently delete the source local account only after all content checks pass and the source is unchanged.',
+    password: 'Source local account password',
     history: 'Import history and recovery',
     close: 'Close',
     preview: 'Preview import',
@@ -218,7 +218,8 @@ export default {
         'The target already contains business data and cannot receive an empty-account import.',
       TARGET_UNKNOWN: 'The target could not be checked. Try again later.',
       TARGET_CHANGED: 'The target changed. Run preflight again.',
-      SOURCE_PIN_REQUIRED: 'Enter the source Profile local PIN.',
+      SOURCE_PASSWORD_REQUIRED: 'Enter the source local account password.',
+      SOURCE_NOT_LOCAL_ACCOUNT: 'The source Profile is not a local account.',
       IMPORT_REAUTH_REQUIRED: 'Reauthenticate the current cloud account first.',
       SOURCE_PROFILE_ACTIVE: 'Close the source Profile and import from the target cloud Profile.',
       PROFILE_CHANGED: 'The Profile changed. Retry in the target Profile.',

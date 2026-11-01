@@ -86,7 +86,7 @@ export class DesktopCloudConnectionService {
         auth.account.email,
       );
       targetProfileId = target.profileId;
-      const pinRequired = await this.runtime.hasPin(targetProfileId);
+      const passwordRequired = await this.runtime.hasCredential(targetProfileId);
       this.assertOrigin(originProfileId, generation, signal);
       // This atomic save is the commit point. A cancellation after it must not revoke the adopted session.
       await this.sessions.save(targetProfileId, {
@@ -101,10 +101,10 @@ export class DesktopCloudConnectionService {
           await markProfileImportOpportunity(
             this.runtime.getSharedResolver().roots.dataRoot,
             targetProfileId,
-            origin?.profileKind === 'guest' ? originProfileId : null,
+            origin?.profileKind === 'local' ? originProfileId : null,
           );
         } catch {
-          /* Optional prompt never changes a committed login or its PIN gate. */
+          /* Optional prompt never changes a committed login or its password gate. */
         }
       }
       signal.throwIfAborted();
@@ -120,7 +120,10 @@ export class DesktopCloudConnectionService {
         return ok({ targetProfileId, activation: 'active' });
       }
       // The window transition disposes the old renderer before opening the target.
-      return ok({ targetProfileId, activation: pinRequired ? 'pin_required' : 'pending' });
+      return ok({
+        targetProfileId,
+        activation: passwordRequired ? 'password_required' : 'pending',
+      });
     } catch (error) {
       logger.warn('Cloud Profile connection failed', {
         originProfileId,

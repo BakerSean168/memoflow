@@ -603,8 +603,14 @@ export class WindowManager {
         return fail({ code: 'WINDOW_TRANSITION_PENDING', message: 'Profile 切换正在进行' });
       this.profileNavigationPending = true;
       try {
-        const autoOpen =
-          parsed.data && this.runtimeManager && !(await this.runtimeManager.hasPin(parsed.data));
+        const target = parsed.data
+          ? (await this.runtimeManager?.listProfiles())?.find(
+              (profile) => profile.profileId === parsed.data,
+            )
+          : undefined;
+        const autoOpen = Boolean(
+          parsed.data && this.runtimeManager && target?.profileKind === 'registered',
+        );
         await this.transitionToProfileAccessWindow(parsed.data, !autoOpen);
         if (autoOpen && parsed.data && this.runtimeManager) {
           try {

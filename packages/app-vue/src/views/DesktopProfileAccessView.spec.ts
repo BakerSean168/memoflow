@@ -29,22 +29,26 @@ const i18n = createI18n({
 function profile(overrides: Partial<ProfileSummary> = {}): ProfileSummary {
   return {
     profileId: 'profile-1',
-    profileKind: 'guest',
-    displayName: '访客 4827',
+    profileKind: 'local',
+    displayName: 'Local 4827',
     avatarSeed: 'seed',
     identifierHint: null,
     cloudAccountId: null,
     lastActiveAt: 1,
-    hasPin: false,
+    hasCredential: false,
     ...overrides,
   };
 }
 
 function mountView(
-  options: { hasPin?: boolean; activeProfileId?: string | null; attachTo?: HTMLElement } = {},
+  options: {
+    hasCredential?: boolean;
+    activeProfileId?: string | null;
+    attachTo?: HTMLElement;
+  } = {},
 ) {
   const profiles: ProfileSummary[] = [
-    profile({ hasPin: options.hasPin ?? false }),
+    profile({ hasCredential: options.hasCredential ?? false }),
     profile({
       profileId: 'profile-2',
       profileKind: 'registered',
@@ -55,8 +59,12 @@ function mountView(
     }),
   ];
   const invoke = vi.fn(async (channel: string, payload?: unknown) => {
-    if (channel === ProfileAccessChannels.CREATE_GUEST) {
-      const created = profile({ profileId: 'profile-3', displayName: 'New guest' });
+    if (channel === ProfileAccessChannels.CREATE_LOCAL_ACCOUNT) {
+      const created = profile({
+        profileId: 'profile-3',
+        displayName: (payload as { displayName: string }).displayName,
+        hasCredential: true,
+      });
       profiles.push(created);
       return ok(created);
     }
@@ -105,36 +113,48 @@ beforeEach(() => {
 });
 
 describe('DesktopProfileAccessView', () => {
-  it('preselects and focuses a PIN target passed by the host without opening its data', async () => {
+  it('preselects and focuses a password target passed by the host without opening its data', async () => {
     const previousHash = window.location.hash;
     window.location.hash = '#/profile-access?profileId=profile-1';
-    const { wrapper, invoke } = mountView({ hasPin: true, attachTo: document.body });
+    const { wrapper, invoke } = mountView({ hasCredential: true, attachTo: document.body });
     cleanups.push(() => wrapper.unmount());
     try {
       await flushPromises();
-      const pinInput = element('desktop-profile-pin-profile-1');
-      expect(pinInput).not.toBeNull();
-      expect(document.activeElement).toBe(pinInput);
+      const passwordInput = element('desktop-profile-password-profile-1');
+      expect(passwordInput).not.toBeNull();
+      expect(document.activeElement).toBe(passwordInput);
       expect(invoke).not.toHaveBeenCalledWith(ProfileAccessChannels.SELECT, expect.anything());
     } finally {
       window.location.hash = previousHash;
     }
   });
 
-  it('creates and opens an independent guest from the plus tile', async () => {
+  it('creates and opens an independent local account from the plus tile', async () => {
     const { wrapper, invoke } = mountView({ attachTo: document.body });
     cleanups.push(() => wrapper.unmount());
     await flushPromises();
 
-    element('desktop-profile-create-guest')!.click();
+    element('desktop-profile-create-local')!.click();
+    await flushPromises();
+    const form = element('desktop-profile-create-form')!;
+    const [name, password] = form.querySelectorAll('input');
+    name!.value = 'New local';
+    name!.dispatchEvent(new Event('input', { bubbles: true }));
+    password!.value = 'account-password';
+    password!.dispatchEvent(new Event('input', { bubbles: true }));
+    await flushPromises();
+    form.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
     await flushPromises();
 
-    expect(invoke).toHaveBeenCalledWith(ProfileAccessChannels.CREATE_GUEST, {
-      requestId: expect.any(String),
-      displayName: undefined,
+    expect(invoke).toHaveBeenCalledWith(ProfileAccessChannels.CREATE_LOCAL_ACCOUNT, {
+      displayName: 'New local',
+      password: 'account-password',
     });
-    expect(element('desktop-profile-open-profile-3')!.textContent).toContain('New guest');
-    expect(invoke).toHaveBeenCalledWith(ProfileAccessChannels.SELECT, { profileId: 'profile-3' });
+    expect(element('desktop-profile-open-profile-3')!.textContent).toContain('New local');
+    expect(invoke).toHaveBeenCalledWith(ProfileAccessChannels.SELECT, {
+      profileId: 'profile-3',
+      password: 'account-password',
+    });
     expect(invoke).toHaveBeenCalledWith(WindowChannels.TRANSITION_TO_MAIN);
   });
 
@@ -152,25 +172,25 @@ describe('DesktopProfileAccessView', () => {
     expect(element('cloud-connection-dialog')).toBeNull();
   });
 
-  it('shows the PIN input only after selecting a protected Profile', async () => {
-    const { wrapper, invoke } = mountView({ hasPin: true, attachTo: document.body });
+  it('shows the password input only after selecting a protected local account', async () => {
+    const { wrapper, invoke } = mountView({ hasCredential: true, attachTo: document.body });
     cleanups.push(() => wrapper.unmount());
     await flushPromises();
 
     element('desktop-profile-open-profile-1')!.click();
     await flushPromises();
-    expect(element('desktop-profile-pin-profile-1')).not.toBeNull();
+    expect(element('desktop-profile-password-profile-1')).not.toBeNull();
     expect(invoke).not.toHaveBeenCalledWith(ProfileAccessChannels.SELECT, expect.anything());
 
-    const input = element('desktop-profile-pin-profile-1') as HTMLInputElement;
-    input.value = '482700';
+    const input = element('desktop-profile-password-profile-1') as HTMLInputElement;
+    input.value = 'account-password';
     input.dispatchEvent(new Event('input', { bubbles: true }));
     await flushPromises();
     input.closest('form')!.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
     await flushPromises();
     expect(invoke).toHaveBeenCalledWith(ProfileAccessChannels.SELECT, {
       profileId: 'profile-1',
-      pin: '482700',
+      password: 'account-password',
     });
   });
 
@@ -180,15 +200,15 @@ describe('DesktopProfileAccessView', () => {
     await flushPromises();
 
     const tile = element('desktop-profile-open-profile-1')!;
-    expect(tile.textContent).toContain('访客 4827');
+    expect(tile.textContent).toContain('Local 4827');
     expect(tile.textContent).not.toContain('profile-1');
     expect(wrapper.text()).not.toContain('profile-1');
     expect(wrapper.text()).not.toContain('work@example.com');
-    expect(wrapper.text()).not.toContain('Guest Profile');
+    expect(wrapper.text()).not.toContain('Local account');
     expect(wrapper.find('[data-testid^="desktop-profile-rename-"]').exists()).toBe(false);
     expect(wrapper.find('[data-testid="desktop-profile-create"]').exists()).toBe(false);
     expect(wrapper.find('input').exists()).toBe(false);
-    expect(wrapper.find('[data-testid="desktop-profile-create-guest"]').exists()).toBe(true);
+    expect(wrapper.find('[data-testid="desktop-profile-create-local"]').exists()).toBe(true);
   });
 
   it('reveals metadata and the delete action on hover after a dwell', async () => {
