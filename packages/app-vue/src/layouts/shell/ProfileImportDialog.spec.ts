@@ -25,6 +25,7 @@ const source: ProfileSummary = {
   cloudAccountId: null,
   lastActiveAt: 0,
   hasCredential: false,
+  remembered: false,
 };
 const target: ProfileSummary = {
   ...source,

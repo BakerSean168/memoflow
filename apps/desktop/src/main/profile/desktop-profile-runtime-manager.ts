@@ -48,6 +48,11 @@ interface PrepareProfileOptions {
   snapshotAccessToken?: string | null;
 }
 
+/** Open intent for a local account; `remember` is the Steam-style "remember me". */
+export interface OpenProfileOptions {
+  remember?: boolean;
+}
+
 interface ActiveProfileRuntime extends PreparedProfileRuntime {
   bootstrapper: ElectronBootstrapper;
 }
@@ -73,6 +78,7 @@ export class DesktopProfileRuntimeManager {
   private beforeDeactivation: ProfileDeactivationHook | null = null;
   private scheduleRuntimeController: ScheduleRuntimeController | null = null;
   private readonly keyStore: ElectronProfileKeyStore;
+  private readonly rememberedKeyStore: ElectronProfileKeyStore;
   private readonly passwordStore: ProfilePasswordStore;
   private readonly cloudSessionStore: CloudSessionStore;
   private preparedUnlockKey: Buffer | null = null;
@@ -90,6 +96,10 @@ export class DesktopProfileRuntimeManager {
       session.fromPartition(partition),
     );
     this.keyStore = new ElectronProfileKeyStore(sharedResolver.roots.dataRoot);
+    this.rememberedKeyStore = new ElectronProfileKeyStore(
+      sharedResolver.roots.dataRoot,
+      'remembered',
+    );
     this.passwordStore = new ProfilePasswordStore(sharedResolver.roots.dataRoot);
     this.cloudSessionStore = new CloudSessionStore(sharedResolver.roots.dataRoot);
   }
@@ -223,15 +233,44 @@ export class DesktopProfileRuntimeManager {
     return this.profileRegistry.register(cloudAccountId, displayName, identifier);
   }
 
-  openProfile(profileId: string, password?: string): Promise<PreparedProfileRuntime> {
-    return this.runExclusive(() => this.openProfileInTransition(profileId, password));
+  openProfile(
+    profileId: string,
+    password?: string,
+    options?: OpenProfileOptions,
+  ): Promise<PreparedProfileRuntime> {
+    return this.runExclusive(() => this.openProfileInTransition(profileId, password, options));
+  }
+
+  /** True when a safeStorage copy of this local account's data key exists. */
+  async hasRememberedKey(profileId: string): Promise<boolean> {
+    return this.rememberedKeyStore.has(profileId);
+  }
+
+  /**
+   * Read a remembered (safeStorage) data-key copy. A missing or unreadable copy
+   * yields null so the caller falls back to the password state; the copy is
+   * never deleted on failure.
+   *
+   * 记住钥缺失或解封失败时返回 null，交由调用方回落到密码态，且不静默删钥。
+   */
+  private async readRememberedKey(profileId: string): Promise<Buffer | null> {
+    if (!(await this.rememberedKeyStore.has(profileId))) return null;
+    try {
+      return await this.rememberedKeyStore.unlock(profileId);
+    } catch (error) {
+      logger.warn('Remembered local-account key is unavailable; password is required', {
+        profileId,
+        reason: error instanceof Error ? error.message : 'unknown',
+      });
+      return null;
+    }
   }
 
   /** Called only while holding the lifecycle queue. */
   private async openProfileInTransition(
     profileId: string,
     password?: string,
-    options?: PrepareProfileOptions,
+    options?: PrepareProfileOptions & OpenProfileOptions,
   ): Promise<PreparedProfileRuntime> {
     LocalProfileIdSchema.parse(profileId);
     if (await this.cleanup.isPending(profileId))
@@ -244,10 +283,20 @@ export class DesktopProfileRuntimeManager {
     // A local account is always password-protected; a registered Profile keeps
     // its safeStorage key copy and needs no password to open.
     const needsPassword = descriptor.profileKind === 'local';
-    if (needsPassword && !password) throw new Error('此本地账户需要密码解锁');
+    // Routing for a local account: an explicit password wins; otherwise a
+    // remembered safeStorage copy opens directly; without one the caller must
+    // present the password state.
+    let key: Buffer | null = null;
+    if (needsPassword) {
+      if (password) key = await this.passwordStore.unlock(profileId, password);
+      else {
+        key = await this.readRememberedKey(profileId);
+        if (!key)
+          throw new ResultErrorException('此本地账户需要密码解锁', 'PROFILE_PASSWORD_REQUIRED');
+      }
+    }
     // Keep the verified target key outside old runtime teardown, and never open
     // its DB before password verification.
-    let key = needsPassword ? await this.passwordStore.unlock(profileId, password!) : null;
     try {
       await this.deactivateProfileNow();
       await this.disposePreparedRuntime();
@@ -256,11 +305,29 @@ export class DesktopProfileRuntimeManager {
       key = null;
       const prepared = await this.prepareDescriptor(descriptor, options);
       await this.activatePreparedProfile();
+      if (needsPassword && options?.remember) await this.rememberProfileKey(profileId);
       return prepared;
     } catch (error) {
       key?.fill(0);
       await this.disposePreparedRuntime();
       throw error;
+    }
+  }
+
+  /**
+   * Persist the unlocked data key for "remember me". Failure (safeStorage
+   * unavailable) never blocks the already-successful open: the account simply
+   * asks for its password again next time.
+   */
+  private async rememberProfileKey(profileId: string): Promise<void> {
+    if (!this.activeProfileKey) return;
+    try {
+      await this.rememberedKeyStore.save(profileId, this.activeProfileKey);
+    } catch (error) {
+      logger.warn('Could not remember local-account key; password stays required', {
+        profileId,
+        reason: error instanceof Error ? error.message : 'unknown',
+      });
     }
   }
 
@@ -311,20 +378,13 @@ export class DesktopProfileRuntimeManager {
     return this.profileRegistry.findByIdentifier(identifier);
   }
 
-  async activateStartupProfile(): Promise<PreparedProfileRuntime> {
-    return this.runExclusive(async () => {
-      const descriptor = await this.getStartupProfile();
-      if (!descriptor) throw new Error('本机还没有本地账户');
-      return this.openProfileInTransition(descriptor.profileId);
-    });
-  }
-
   /**
    * Startup candidate. Never creates an identity: an empty registry yields
    * null so the shell presents the empty account list instead of silently
-   * minting an account with no password.
+   * minting an account with no password. The shell only uses it for diagnostics;
+   * it never opens the returned Profile on its own.
    *
-   * 启动不再静默创建身份：注册表为空时返回 null。
+   * 启动不再静默创建身份：注册表为空时返回 null；调用方不得据此自动打开 Profile。
    */
   async getStartupProfile(): Promise<ProfileDescriptor | null> {
     for (const profileId of await this.cleanup.pending()) {
@@ -485,6 +545,7 @@ export class DesktopProfileRuntimeManager {
       await this.cloudSessionStore.remove(profileId);
       await this.passwordStore.remove(profileId);
       await this.keyStore.remove(profileId);
+      await this.rememberedKeyStore.remove(profileId);
       await this.profileRegistry.remove(profileId);
     });
   }
@@ -509,11 +570,18 @@ export class DesktopProfileRuntimeManager {
     if (!profile || profile.profileKind !== 'local')
       throw new ResultErrorException('SOURCE_NOT_LOCAL_ACCOUNT', 'SOURCE_NOT_LOCAL_ACCOUNT');
     const passwordProtected = await this.passwordStore.hasCredential(profileId);
-    if (passwordProtected && !password)
-      throw new ResultErrorException('SOURCE_PASSWORD_REQUIRED', 'SOURCE_PASSWORD_REQUIRED');
-    const key = passwordProtected
-      ? await this.passwordStore.unlock(profileId, password!)
-      : await this.keyStore.unlock(profileId);
+    let key: Buffer;
+    if (passwordProtected) {
+      if (password) key = await this.passwordStore.unlock(profileId, password);
+      else {
+        const remembered = await this.readRememberedKey(profileId);
+        if (!remembered)
+          throw new ResultErrorException('SOURCE_PASSWORD_REQUIRED', 'SOURCE_PASSWORD_REQUIRED');
+        key = remembered;
+      }
+    } else {
+      key = await this.keyStore.unlock(profileId);
+    }
     try {
       const paths = createProfilePathResolver(this.sharedResolver.roots, profileId);
       if ((await fs.promises.lstat(paths.profileDir)).isSymbolicLink())

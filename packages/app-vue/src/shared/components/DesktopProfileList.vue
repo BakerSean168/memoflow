@@ -23,7 +23,7 @@ const props = defineProps<{
   presenter: ReturnType<typeof useDesktopProfiles>;
   management?: boolean;
 }>();
-const emit = defineEmits<{ (event: 'password-settings'): void }>();
+const emit = defineEmits<{ (event: 'password-settings'): void; (event: 'add'): void }>();
 const { t } = useI18n();
 const {
   profiles,
@@ -38,6 +38,7 @@ const {
   createLocalAccount,
   renameProfile,
   openProfile,
+  selectProfile,
   removeProfile,
 } = props.presenter;
 function initials(name: string): string {
@@ -46,20 +47,11 @@ function initials(name: string): string {
 const vFocusPassword = { mounted: (element: HTMLElement) => element.focus() };
 
 const activeProfileId = computed(() => snapshot.value?.profile?.profileId ?? null);
-const passwordProfile = computed(
-  () =>
-    profiles.value.find(
-      (profile) => profile.profileId === selectedProfileId.value && profile.hasCredential,
-    ) ?? null,
-);
 
 // Access mode exposes one detail card per tile. Hover reveals it after a short
 // dwell so sweeping the pointer across the row cannot open a card by accident;
 // keyboard focus reveals it immediately.
 const openTileId = ref<string | null>(null);
-// The "+" tile opens the same nickname+password form the management list uses;
-// the dedicated sign-in window is a later #785 step, not this one.
-const creatingLocalAccount = ref(false);
 // Escape closes the card while the tile keeps focus; suppress the focus reveal
 // until the tile loses focus or the user explicitly asks for the card again.
 const suppressedTileId = ref<string | null>(null);
@@ -156,16 +148,7 @@ function requestRemoval(profile: ProfileSummary): void {
 
 function openFromTile(profile: ProfileSummary): void {
   dismissTile();
-  void openProfile(profile);
-}
-
-async function submitPassword(): Promise<void> {
-  if (passwordProfile.value) await openProfile(passwordProfile.value);
-}
-
-async function submitCreate(): Promise<void> {
-  await createLocalAccount();
-  creatingLocalAccount.value = false;
+  void selectProfile(profile);
 }
 
 onBeforeUnmount(() => {
@@ -342,7 +325,7 @@ onBeforeUnmount(() => {
               class="group flex w-full flex-col items-center gap-2 rounded-2xl px-1 py-2 text-center transition-colors hover:bg-muted/40 focus-visible:bg-muted/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50"
               :aria-current="activeProfileId === profile.profileId ? 'true' : undefined"
               :disabled="busyProfileId !== null"
-              @click="openProfile(profile)"
+              @click="selectProfile(profile)"
               @focus="revealTile(profile.profileId)"
               @blur="handleTileBlur(profile.profileId)"
               @mouseenter="scheduleReveal(profile.profileId)"
@@ -436,71 +419,16 @@ onBeforeUnmount(() => {
         type="button"
         data-testid="desktop-profile-create-local"
         class="group flex w-[5.5rem] flex-col items-center gap-2 rounded-2xl px-1 py-2 text-center transition-colors hover:bg-muted/40 focus-visible:bg-muted/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50"
+        :aria-label="t('auth.profileAccess.create')"
         :disabled="busyProfileId !== null"
-        @click="creatingLocalAccount = true"
+        @click="emit('add')"
       >
         <span
           class="flex h-16 w-16 items-center justify-center rounded-full border border-dashed border-border text-muted-foreground transition-colors group-hover:border-foreground/30 group-hover:text-foreground"
         >
           <Plus class="h-6 w-6" aria-hidden="true" />
         </span>
-        <span class="w-full truncate text-xs font-medium text-muted-foreground">{{
-          t('auth.profileAccess.create')
-        }}</span>
       </button>
     </div>
-
-    <form
-      v-if="creatingLocalAccount"
-      class="grid w-full gap-2 rounded-xl border bg-card p-3 sm:grid-cols-2"
-      data-testid="desktop-profile-create-form"
-      @submit.prevent="submitCreate"
-    >
-      <Input
-        v-model="newName"
-        maxlength="80"
-        :aria-label="t('auth.profileAccess.name')"
-        :placeholder="t('auth.profileAccess.name')"
-      />
-      <Input
-        v-model="newPassword"
-        type="password"
-        autocomplete="new-password"
-        :aria-label="t('auth.profileAccess.password')"
-        :placeholder="t('auth.profileAccess.password')"
-      />
-      <div class="flex justify-end gap-2 sm:col-span-2">
-        <Button type="button" variant="outline" @click="creatingLocalAccount = false">{{
-          t('common.cancel')
-        }}</Button>
-        <Button type="submit" :disabled="busyProfileId !== null">{{
-          t('auth.profileAccess.create')
-        }}</Button>
-      </div>
-    </form>
-
-    <form
-      v-if="passwordProfile"
-      class="w-full space-y-2 rounded-xl border bg-card p-3"
-      @submit.prevent="submitPassword"
-    >
-      <p class="text-xs text-muted-foreground">
-        {{ t('auth.profileAccess.passwordPrompt', { name: passwordProfile.displayName }) }}
-      </p>
-      <div class="flex gap-2">
-        <Input
-          v-focus-password
-          v-model="password"
-          :data-testid="`desktop-profile-password-${passwordProfile.profileId}`"
-          type="password"
-          autocomplete="current-password"
-          :placeholder="t('auth.profileAccess.passwordPlaceholder')"
-          autofocus
-        />
-        <Button type="submit" :disabled="!password || busyProfileId !== null">
-          {{ t('auth.profileAccess.unlock') }}
-        </Button>
-      </div>
-    </form>
   </div>
 </template>

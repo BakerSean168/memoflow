@@ -52,8 +52,15 @@ export default {
     linkInstruction: 'Open the verification link in your email. You can close this page afterward.',
   },
   profileAccess: {
+    selectTitle: 'Choose an account',
     name: 'Nickname',
     create: 'New local account',
+    cloudSignIn: 'Sign in to a cloud account',
+    cloudGuidance:
+      'Cloud accounts connect from inside the workspace: enter with this local account first, then connect the cloud account in the app.',
+    cloudNeedsLocal:
+      'There is no local account yet. Create one to enter, then connect the cloud account in the app.',
+    cloudContinue: 'Continue with {name}',
     rename: 'Rename',
     save: 'Save',
 
@@ -63,8 +70,10 @@ export default {
     unlock: 'Unlock',
     password: 'Password',
     passwordPlaceholder: 'Enter the local account password',
-    passwordPrompt: 'Enter the password for {name}',
     passwordRequired: 'Enter a password of at least 8 characters',
+    passwordMismatch: 'The two passwords do not match',
+    rememberMe: 'Remember me',
+    enter: 'Enter',
     createInvalid: 'Enter a nickname and a password of at least 8 characters',
     remove: 'Delete local Profile',
     removeConfirmTitle: 'Delete local Profile?',

@@ -35,6 +35,7 @@ const profile = (id: string, registered = false): ProfileSummary => ({
   identifierHint: registered ? `${id}@example.com` : null,
   cloudAccountId: registered ? `cloud-${id}` : null,
   hasCredential: id === 'protected',
+  remembered: false,
   lastActiveAt: 1,
 });
 
