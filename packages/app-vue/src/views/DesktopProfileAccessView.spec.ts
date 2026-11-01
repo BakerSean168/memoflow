@@ -3,6 +3,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { createI18n } from 'vue-i18n';
 import { ok } from '@memoflow/transport-contracts/result';
 import {
+  CloudAuthChannels,
   ProfileAccessChannels,
   WindowChannels,
   type ProfileSummary,
@@ -89,6 +90,17 @@ function mountView(
       );
       if (index >= 0) profiles.splice(index, 1);
     }
+    if (channel === CloudAuthChannels.SIGN_IN || channel === CloudAuthChannels.SIGN_UP)
+      return ok({ profileId: 'profile-2' });
+    if (channel === CloudAuthChannels.GITHUB_SIGN_IN_BEGIN)
+      return ok({
+        attemptId: '11111111-1111-4111-8111-111111111111',
+        status: 'awaiting_authorization',
+        result: null,
+        userCode: 'ABCD-1234',
+        verificationUrl: 'https://memo.example/auth/device?user_code=ABCD-1234',
+        error: null,
+      });
     return ok(undefined);
   });
   const wrapper = mount(DesktopProfileAccessView, {
@@ -134,16 +146,18 @@ describe('DesktopProfileAccessView', () => {
     }
   });
 
-  it('creates and opens an independent local account from the plus tile', async () => {
+  it('registers a local account from the registration state and enters', async () => {
     const { wrapper, invoke } = mountView({ attachTo: document.body });
     cleanups.push(() => wrapper.unmount());
     await flushPromises();
 
     element('desktop-profile-create-local')!.click();
     await flushPromises();
-    element('desktop-profile-add-local')!.click();
+    element('desktop-profile-go-register')!.click();
     await flushPromises();
-    const form = element('desktop-profile-create-form')!;
+    element('desktop-profile-register-mode-local')!.click();
+    await flushPromises();
+    const form = element('desktop-profile-register-local-form')!;
     const [name, password, confirmation] = form.querySelectorAll('input');
     name!.value = 'New local';
     name!.dispatchEvent(new Event('input', { bubbles: true }));
@@ -159,7 +173,6 @@ describe('DesktopProfileAccessView', () => {
       displayName: 'New local',
       password: 'account-password',
     });
-    expect(element('desktop-profile-open-profile-3')!.textContent).toContain('New local');
     expect(invoke).toHaveBeenCalledWith(ProfileAccessChannels.SELECT, {
       profileId: 'profile-3',
       password: 'account-password',
@@ -242,38 +255,203 @@ describe('DesktopProfileAccessView', () => {
     expect(invoke).not.toHaveBeenCalledWith(ProfileAccessChannels.SELECT, expect.anything());
   });
 
-  it('offers the two "+" entries: a new local account and the cloud sign-in relay', async () => {
+  it('opens the sign-in state from the plus tile and loops to registration and back', async () => {
     const { wrapper } = mountView({ attachTo: document.body });
     cleanups.push(() => wrapper.unmount());
     await flushPromises();
 
     element('desktop-profile-create-local')!.click();
     await flushPromises();
+    expect(element('desktop-profile-login-state')).not.toBeNull();
+    expect(element('desktop-profile-add-menu')).toBeNull();
+    expect(element('desktop-profile-create-form')).toBeNull();
+    expect(element('desktop-profile-cloud-entry')).toBeNull();
 
-    expect(element('desktop-profile-add-local')!.textContent).toContain('New local account');
-    expect(element('desktop-profile-add-cloud')!.textContent).toContain(
-      'Sign in to a cloud account',
-    );
+    element('desktop-profile-go-register')!.click();
+    await flushPromises();
+    expect(element('desktop-profile-register-state')).not.toBeNull();
+
+    element('desktop-profile-go-login')!.click();
+    await flushPromises();
+    expect(element('desktop-profile-login-state')).not.toBeNull();
+
+    element('desktop-profile-back-to-select')!.click();
+    await flushPromises();
+    expect(element('desktop-profile-access')).not.toBeNull();
   });
 
-  it('routes the cloud entry through an existing local account instead of a dead button', async () => {
-    const { wrapper, invoke } = mountView({ hasCredential: true, attachTo: document.body });
+  it('signs in with the cloud account and password and enters the opened Profile', async () => {
+    const { wrapper, invoke } = mountView({ attachTo: document.body });
     cleanups.push(() => wrapper.unmount());
     await flushPromises();
 
     element('desktop-profile-create-local')!.click();
     await flushPromises();
-    element('desktop-profile-add-cloud')!.click();
+    const form = element('desktop-profile-login-form')!;
+    const [email, password] = form.querySelectorAll('input');
+    email!.value = 'person@example.com';
+    email!.dispatchEvent(new Event('input', { bubbles: true }));
+    password!.value = 'cloud-password';
+    password!.dispatchEvent(new Event('input', { bubbles: true }));
+    await flushPromises();
+    form.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
     await flushPromises();
 
-    const entry = element('desktop-profile-cloud-entry')!;
-    expect(entry.textContent).toContain('inside the workspace');
-    element('desktop-profile-cloud-continue')!.click();
+    expect(invoke).toHaveBeenCalledWith(CloudAuthChannels.SIGN_IN, {
+      email: 'person@example.com',
+      password: 'cloud-password',
+      remember: true,
+    });
+    expect(invoke).toHaveBeenCalledWith(WindowChannels.TRANSITION_TO_MAIN);
+    // The password never survives the request.
+    expect((form.querySelectorAll('input')[1] as HTMLInputElement).value).toBe('');
+  });
+
+  it('opens the password recovery page from the sign-in state', async () => {
+    const { wrapper, invoke } = mountView({ attachTo: document.body });
+    cleanups.push(() => wrapper.unmount());
     await flushPromises();
 
-    // The local account is not remembered, so entering it asks for its password.
-    expect(element('desktop-profile-password-state')).not.toBeNull();
-    expect(invoke).not.toHaveBeenCalledWith(ProfileAccessChannels.SELECT, expect.anything());
+    element('desktop-profile-create-local')!.click();
+    await flushPromises();
+    element('desktop-profile-forgot-password')!.click();
+    await flushPromises();
+
+    expect(invoke).toHaveBeenCalledWith(CloudAuthChannels.FORGOT_PASSWORD);
+  });
+
+  it('shows the GitHub waiting state and cancels the attempt', async () => {
+    const { wrapper, invoke } = mountView({ attachTo: document.body });
+    cleanups.push(() => wrapper.unmount());
+    await flushPromises();
+
+    element('desktop-profile-create-local')!.click();
+    await flushPromises();
+    element('desktop-profile-github-signin')!.click();
+    await flushPromises();
+
+    expect(invoke).toHaveBeenCalledWith(CloudAuthChannels.GITHUB_SIGN_IN_BEGIN, {
+      remember: true,
+    });
+    expect(element('desktop-profile-github-waiting')!.textContent).toContain('ABCD-1234');
+
+    element('desktop-profile-github-cancel')!.click();
+    await flushPromises();
+    expect(invoke).toHaveBeenCalledWith(CloudAuthChannels.CLOUD_CONNECTION_CANCEL, {
+      attemptId: '11111111-1111-4111-8111-111111111111',
+    });
+    expect(element('desktop-profile-github-waiting')).toBeNull();
+  });
+
+  it('cancels a pending GitHub attempt when leaving the sign-in state', async () => {
+    const { wrapper, invoke } = mountView({ attachTo: document.body });
+    cleanups.push(() => wrapper.unmount());
+    await flushPromises();
+
+    element('desktop-profile-create-local')!.click();
+    await flushPromises();
+    element('desktop-profile-github-signin')!.click();
+    await flushPromises();
+    expect(element('desktop-profile-github-waiting')).not.toBeNull();
+
+    element('desktop-profile-back-to-select')!.click();
+    await flushPromises();
+
+    expect(invoke).toHaveBeenCalledWith(CloudAuthChannels.CLOUD_CONNECTION_CANCEL, {
+      attemptId: '11111111-1111-4111-8111-111111111111',
+    });
+    expect(element('desktop-profile-access')).not.toBeNull();
+  });
+
+  it('blocks mismatched confirmation passwords before any registration request', async () => {
+    const { wrapper, invoke } = mountView({ attachTo: document.body });
+    cleanups.push(() => wrapper.unmount());
+    await flushPromises();
+
+    element('desktop-profile-create-local')!.click();
+    await flushPromises();
+    element('desktop-profile-go-register')!.click();
+    await flushPromises();
+    const cloudForm = element('desktop-profile-register-cloud-form')!;
+    const [email, password, confirmation] = cloudForm.querySelectorAll('input');
+    email!.value = 'person@example.com';
+    email!.dispatchEvent(new Event('input', { bubbles: true }));
+    password!.value = 'cloud-password';
+    password!.dispatchEvent(new Event('input', { bubbles: true }));
+    confirmation!.value = 'other-password';
+    confirmation!.dispatchEvent(new Event('input', { bubbles: true }));
+    await flushPromises();
+    cloudForm.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
+    await flushPromises();
+    expect(invoke).not.toHaveBeenCalledWith(CloudAuthChannels.SIGN_UP, expect.anything());
+
+    element('desktop-profile-register-mode-local')!.click();
+    await flushPromises();
+    const localForm = element('desktop-profile-register-local-form')!;
+    const [name, localPassword, localConfirmation] = localForm.querySelectorAll('input');
+    name!.value = 'Local two';
+    name!.dispatchEvent(new Event('input', { bubbles: true }));
+    localPassword!.value = 'local-password';
+    localPassword!.dispatchEvent(new Event('input', { bubbles: true }));
+    localConfirmation!.value = 'other-password';
+    localConfirmation!.dispatchEvent(new Event('input', { bubbles: true }));
+    await flushPromises();
+    localForm.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
+    await flushPromises();
+    expect(invoke).not.toHaveBeenCalledWith(
+      ProfileAccessChannels.CREATE_LOCAL_ACCOUNT,
+      expect.anything(),
+    );
+  });
+
+  it('registers a cloud account, enters directly and keeps the server error surface', async () => {
+    const { wrapper, invoke } = mountView({ attachTo: document.body });
+    cleanups.push(() => wrapper.unmount());
+    await flushPromises();
+
+    element('desktop-profile-create-local')!.click();
+    await flushPromises();
+    element('desktop-profile-go-register')!.click();
+    await flushPromises();
+    const form = element('desktop-profile-register-cloud-form')!;
+    const [email, password, confirmation] = form.querySelectorAll('input');
+    email!.value = 'person@example.com';
+    email!.dispatchEvent(new Event('input', { bubbles: true }));
+    password!.value = 'cloud-password';
+    password!.dispatchEvent(new Event('input', { bubbles: true }));
+    confirmation!.value = 'cloud-password';
+    confirmation!.dispatchEvent(new Event('input', { bubbles: true }));
+    await flushPromises();
+    form.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
+    await flushPromises();
+
+    expect(invoke).toHaveBeenCalledWith(CloudAuthChannels.SIGN_UP, {
+      email: 'person@example.com',
+      password: 'cloud-password',
+      name: undefined,
+      remember: true,
+    });
+    expect(invoke).toHaveBeenCalledWith(WindowChannels.TRANSITION_TO_MAIN);
+  });
+
+  it('asks the host for the taller registration height and restores the base height', async () => {
+    const { wrapper, invoke } = mountView({ attachTo: document.body });
+    cleanups.push(() => wrapper.unmount());
+    await flushPromises();
+
+    expect(invoke).toHaveBeenCalledWith(WindowChannels.SET_PROFILE_ACCESS_HEIGHT, { height: 640 });
+    invoke.mockClear();
+
+    element('desktop-profile-create-local')!.click();
+    await flushPromises();
+    element('desktop-profile-go-register')!.click();
+    await flushPromises();
+    expect(invoke).toHaveBeenCalledWith(WindowChannels.SET_PROFILE_ACCESS_HEIGHT, { height: 780 });
+
+    invoke.mockClear();
+    element('desktop-profile-back-to-select')!.click();
+    await flushPromises();
+    expect(invoke).toHaveBeenCalledWith(WindowChannels.SET_PROFILE_ACCESS_HEIGHT, { height: 640 });
   });
 
   it('renders avatar tiles with only the display name and no inline editing', async () => {

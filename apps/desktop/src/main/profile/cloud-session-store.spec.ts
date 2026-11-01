@@ -70,4 +70,42 @@ describe('CloudSessionStore', () => {
     await expect(store.load('profile-1')).resolves.toMatchObject({ sessionId: 'expired-session' });
     await expect(store.getValidToken('profile-1')).resolves.toBeNull();
   });
+
+  it('keeps a non-remembered session in memory only and writes nothing to disk', async () => {
+    const store = new CloudSessionStore(rootDir);
+    await store.save(
+      'profile-1',
+      {
+        token: 'memory-token',
+        sessionId: 'memory-session',
+        account: { id: 'account-1', email: 'user@example.com', name: 'User', emailVerified: true },
+        expiresAt: '2030-01-01T00:00:00.000Z',
+      },
+      { persist: false },
+    );
+
+    await expect(store.load('profile-1')).resolves.toMatchObject({ token: 'memory-token' });
+    await expect(store.getValidToken('profile-1')).resolves.toBe('memory-token');
+    expect(
+      fs.existsSync(path.join(rootDir, 'shared', 'secure', 'cloud-sessions', 'profile-1.bin')),
+    ).toBe(false);
+
+    // A fresh store models the next process launch: the session is gone.
+    await expect(new CloudSessionStore(rootDir).load('profile-1')).resolves.toBeNull();
+  });
+
+  it('drops an older persisted copy when the same Profile signs in without remember', async () => {
+    const store = new CloudSessionStore(rootDir);
+    const persisted = {
+      token: 'persisted-token',
+      sessionId: 'persisted-session',
+      account: { id: 'account-1', email: 'user@example.com', name: 'User', emailVerified: true },
+      expiresAt: '2030-01-01T00:00:00.000Z',
+    };
+    await store.save('profile-1', persisted);
+    await store.save('profile-1', { ...persisted, token: 'memory-token' }, { persist: false });
+
+    await expect(new CloudSessionStore(rootDir).load('profile-1')).resolves.toBeNull();
+    await expect(store.load('profile-1')).resolves.toMatchObject({ token: 'memory-token' });
+  });
 });

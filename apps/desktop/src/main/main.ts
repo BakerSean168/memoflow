@@ -122,6 +122,7 @@ import { registerCloudAuthIpc } from './profile/cloud-auth-ipc';
 import { CloudSessionStore } from './profile/cloud-session-store';
 import { DesktopCloudConnectionManager } from './profile/desktop-cloud-connection-manager';
 import { DesktopCloudConnectionService } from './profile/desktop-cloud-connection-service';
+import { DesktopCloudSignInService } from './profile/desktop-cloud-sign-in-service';
 import { DeviceAuthCoordinator } from './profile/device-auth-coordinator';
 import type { PowerSyncDatabase } from '@powersync/node';
 import { KnowledgeRepositoryRemoteGateway } from './modules/repository/knowledge-repository-remote.gateway';
@@ -802,9 +803,16 @@ async function initializeShellRuntime(): Promise<void> {
     cloudSessionStore,
     cloudConnectionManager,
   );
+  // Sign-in from the identity window runs before any Profile is active; it
+  // registers or finds the cloud Profile and opens it itself.
+  const cloudSignInService = new DesktopCloudSignInService(
+    profileRuntimeManager,
+    cloudSessionStore,
+  );
   const deviceAuthCoordinator = new DeviceAuthCoordinator(
     profileRuntimeManager,
     cloudConnectionService,
+    { signIn: cloudSignInService },
   );
 
   // Desktop Update is a process/Shell capability. Compose it before any
@@ -888,6 +896,7 @@ async function initializeShellRuntime(): Promise<void> {
     cloudSessionStore,
     cloudConnectionManager,
     deviceAuthCoordinator,
+    cloudSignInService,
   );
 
   // Set up module registration — this closure captures the business module

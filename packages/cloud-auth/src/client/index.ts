@@ -19,6 +19,8 @@ import type { IResultHttpClient } from '@memoflow/http-client';
 import type { IResultIpcClient } from '@memoflow/ipc-client';
 import { mapBetterAuthFailure } from './adapters/better-auth-error-mapper.js';
 
+export { mapBetterAuthFailure } from './adapters/better-auth-error-mapper.js';
+
 interface BetterAuthUser {
   id: string;
   email: string;

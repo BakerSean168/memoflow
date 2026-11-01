@@ -43,6 +43,21 @@ export const CreateLocalAccountRequestSchema = z
 export const RenameProfileRequestSchema = z
   .object({ profileId: ProfileIdSchema, displayName: ProfileDisplayNameSchema })
   .strict();
+/**
+ * The identity window's two layout heights. Only the registration state is
+ * taller; the persisted window state keeps the base height.
+ */
+export const PROFILE_ACCESS_BASE_HEIGHT = 640;
+export const PROFILE_ACCESS_REGISTER_HEIGHT = 780;
+export const ProfileAccessHeightSchema = z
+  .object({
+    height: z.union([
+      z.literal(PROFILE_ACCESS_BASE_HEIGHT),
+      z.literal(PROFILE_ACCESS_REGISTER_HEIGHT),
+    ]),
+  })
+  .strict();
+export type ProfileAccessHeight = z.infer<typeof ProfileAccessHeightSchema>;
 export type SelectProfileRequest = z.infer<typeof SelectProfileRequestSchema>;
 export type RemoveProfileRequest = z.infer<typeof RemoveProfileRequestSchema>;
 export type CreateLocalAccountRequest = z.infer<typeof CreateLocalAccountRequestSchema>;

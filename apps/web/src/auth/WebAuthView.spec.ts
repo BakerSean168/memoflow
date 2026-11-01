@@ -246,6 +246,18 @@ describe('WebAuthView three-login surface contract', () => {
     wrapper.unmount();
   });
 
+  it('opens the recovery form directly when the desktop links to scene=forgot', async () => {
+    window.history.replaceState({}, '', '/auth?scene=forgot');
+    const wrapper = mountView();
+    await flushPromises();
+    await nextTick();
+
+    expect(wrapper.text()).toContain('Reset your password');
+    expect(wrapper.find('#forgot-email').exists()).toBe(true);
+
+    wrapper.unmount();
+  });
+
   it('honors the shell guard redirect parameter as a safe post-login return path', async () => {
     window.history.replaceState({}, '', '/auth?redirect=%2Frepository%3Ftab%3Dknowledge');
     const wrapper = mountView();

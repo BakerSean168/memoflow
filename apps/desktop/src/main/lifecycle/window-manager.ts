@@ -18,6 +18,8 @@ import {
   RendererEventChannels,
   WindowChannels,
   ProfileIdSchema,
+  ProfileAccessHeightSchema,
+  PROFILE_ACCESS_BASE_HEIGHT,
 } from '@memoflow/desktop-contracts';
 import { fail, ok } from '@memoflow/transport-contracts/result';
 import { createLogger } from '@memoflow/utils/logger';
@@ -224,6 +226,9 @@ export class WindowManager {
     this.attachWindowDiagnostics(this.profileAccessWindow, 'profile-access');
     this.attachWindowControlStateSync(this.profileAccessWindow);
     this.profileAccessWindowStateManager.manage(this.profileAccessWindow);
+    // The registration state grows the window; that height is layout, never the
+    // persisted one, so the next launch opens on the base skeleton.
+    this.profileAccessWindowStateManager.pinHeight(PROFILE_ACCESS_BASE_HEIGHT);
 
     // Capture startup intent: capability initialization can finish before this renderer is ready.
     const showProfileAccessOnReady = !this.startupHidden;
@@ -632,6 +637,28 @@ export class WindowManager {
       } finally {
         this.profileNavigationPending = false;
       }
+    });
+
+    // The identity window's registration state is taller than the base
+    // skeleton. Only the two known heights are accepted, and the window is not
+    // resizable, so this never becomes a user-driven size.
+    ipcMain.handle(WindowChannels.SET_PROFILE_ACCESS_HEIGHT, (event, input: unknown) => {
+      const parsed = ProfileAccessHeightSchema.safeParse(input);
+      if (!parsed.success)
+        return fail({ code: 'INVALID_REQUEST', message: 'Invalid window height' });
+      const window = BrowserWindow.fromWebContents(event.sender);
+      if (!window || window.isDestroyed() || window !== this.profileAccessWindow)
+        return fail({ code: 'UNAVAILABLE', message: 'Window is not available' });
+      const bounds = window.getBounds();
+      if (bounds.height !== parsed.data.height) {
+        window.setBounds({
+          x: bounds.x,
+          y: bounds.y,
+          width: bounds.width,
+          height: parsed.data.height,
+        });
+      }
+      return ok(null);
     });
 
     // 获取当前窗口类型

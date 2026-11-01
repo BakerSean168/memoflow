@@ -438,4 +438,65 @@ describe('DeviceAuthCoordinator', () => {
     expect(JSON.stringify(status)).not.toContain('secret-bearer-token');
     expect(JSON.stringify(status)).not.toContain('secret-device-code');
   });
+
+  it('keeps reauthenticate anchored: without an active Profile it is refused', async () => {
+    const runtime = { getProfileGeneration: () => 0, getActiveProfileId: () => null };
+    const coordinator = new DeviceAuthCoordinator(runtime as never, {} as never, {
+      fetchImpl: vi.fn(),
+      openExternal: vi.fn().mockResolvedValue(undefined),
+      signIn: { adopt: vi.fn() },
+    });
+
+    const begun = await coordinator.begin({ intent: 'reauthenticate' });
+
+    expect(begun).toMatchObject({ ok: false, error: { code: 'PROFILE_LOCKED' } });
+  });
+
+  it('adopts the session of a source-less attempt and opens the registered Profile', async () => {
+    const runtime = { getProfileGeneration: () => 0, getActiveProfileId: () => null };
+    const adopt = vi.fn().mockResolvedValue(ok({ profileId: 'profile-cloud' }));
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValueOnce(json(deviceCode))
+      .mockResolvedValueOnce(
+        json({
+          access_token: 'github-bearer-token',
+          token_type: 'Bearer',
+          expires_in: 604800,
+        }),
+      )
+      .mockResolvedValueOnce(
+        json({
+          user: { id: 'account-1', email: 'user@example.com', name: 'User', emailVerified: true },
+          session: { id: 'session-1', expiresAt: '2030-01-01T00:00:00.000Z' },
+        }),
+      );
+    const coordinator = new DeviceAuthCoordinator(runtime as never, {} as never, {
+      fetchImpl: fetchMock,
+      openExternal: vi.fn().mockResolvedValue(undefined),
+      sleep: vi.fn().mockResolvedValue(undefined),
+      signIn: { adopt },
+    });
+
+    const begun = await coordinator.beginWithoutProfile({ remember: false });
+    if (!begun.ok) throw new Error('begin failed');
+    expect(begun.data.originProfileId).toBeNull();
+
+    await waitFor(() => adopt.mock.calls.length === 1);
+    expect(adopt).toHaveBeenCalledWith(
+      expect.objectContaining({
+        account: expect.objectContaining({ id: 'account-1' }),
+        session: expect.objectContaining({ id: 'session-1' }),
+      }),
+      'github-bearer-token',
+      false,
+    );
+    expect(coordinator.getStatus(begun.data.attemptId)).toMatchObject({
+      ok: true,
+      data: {
+        status: 'connected',
+        result: { targetProfileId: 'profile-cloud', activation: 'active' },
+      },
+    });
+  });
 });

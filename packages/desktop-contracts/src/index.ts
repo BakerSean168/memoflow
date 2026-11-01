@@ -140,8 +140,15 @@ export {
   RemoveProfileRequestSchema,
   CreateLocalAccountRequestSchema,
   RenameProfileRequestSchema,
+  ProfileAccessHeightSchema,
+  PROFILE_ACCESS_BASE_HEIGHT,
+  PROFILE_ACCESS_REGISTER_HEIGHT,
 } from './profile-access';
-export type { CreateLocalAccountRequest, RenameProfileRequest } from './profile-access';
+export type {
+  CreateLocalAccountRequest,
+  RenameProfileRequest,
+  ProfileAccessHeight,
+} from './profile-access';
 
 // Device-local keyboard bindings (Issue #630 §4.9 / Q5). Owner: desktop platform
 // contracts — the setting surfaces only consume and persist them.

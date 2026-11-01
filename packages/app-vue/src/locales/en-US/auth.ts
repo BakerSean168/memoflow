@@ -55,12 +55,22 @@ export default {
     selectTitle: 'Choose an account',
     name: 'Nickname',
     create: 'New local account',
-    cloudSignIn: 'Sign in to a cloud account',
-    cloudGuidance:
-      'Cloud accounts connect from inside the workspace: enter with this local account first, then connect the cloud account in the app.',
-    cloudNeedsLocal:
-      'There is no local account yet. Create one to enter, then connect the cloud account in the app.',
-    cloudContinue: 'Continue with {name}',
+    signInTitle: 'Sign in',
+    signInAction: 'Sign in',
+    forgotPassword: 'Forgot password?',
+    githubSignIn: 'Continue with GitHub',
+    githubWaiting:
+      'Complete the GitHub authorization in your browser; this window continues automatically.',
+    githubFailed: 'GitHub sign-in failed. Please try again.',
+    backToSelect: 'Back to account selection',
+    noAccount: 'No account yet?',
+    haveAccount: 'Already have an account?',
+    registerTitle: 'Create account',
+    registerAction: 'Create account',
+    registerMode: {
+      cloud: 'Cloud account',
+      local: 'Local account',
+    },
     rename: 'Rename',
     save: 'Save',
 
