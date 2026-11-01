@@ -4,3 +4,4 @@
  */
 
 export { useAccount } from './useAccount';
+export { useAccountSignOut } from './useAccountSignOut';

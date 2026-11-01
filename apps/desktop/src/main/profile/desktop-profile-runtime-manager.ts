@@ -528,6 +528,38 @@ export class DesktopProfileRuntimeManager {
     return this.runExclusive(() => this.removeProfileNow(profileId));
   }
 
+  /**
+   * "退出账号" for the active Profile, in one lifecycle-exclusive step.
+   *
+   * The caller owns the cloud-session hand-off because it must run while the
+   * session file still exists; everything after it reuses the existing paths:
+   * deactivate (the same routine the old LOCK channel used) and the unified
+   * `finishCleanup` removal the chooser's delete already goes through. No
+   * second deletion path is introduced here.
+   *
+   * A removal failure after deactivation is reported as `SIGN_OUT_PARTIAL` so
+   * the renderer can leave the now-dead workspace instead of stranding it.
+   */
+  signOutActiveProfile(
+    invalidateCloudSession: (descriptor: ProfileDescriptor) => Promise<void>,
+  ): Promise<void> {
+    return this.runExclusive(async () => {
+      const descriptor = this.activeRuntime?.descriptor;
+      if (!descriptor)
+        throw new ResultErrorException('PROFILE_NOT_ACTIVE', '当前没有已登录的账号');
+      await invalidateCloudSession(descriptor);
+      await this.deactivateProfileNow();
+      try {
+        await this.removeProfileNow(descriptor.profileId);
+      } catch (error) {
+        throw new ResultErrorException(
+          'SIGN_OUT_PARTIAL',
+          error instanceof Error ? error.message : 'SIGN_OUT_PARTIAL',
+        );
+      }
+    });
+  }
+
   private async removeProfileNow(profileId: string): Promise<void> {
     const descriptor = (await this.profileRegistry.list()).find(
       (profile) => profile.profileId === profileId,
