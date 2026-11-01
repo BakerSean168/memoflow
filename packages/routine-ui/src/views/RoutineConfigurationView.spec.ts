@@ -1,12 +1,29 @@
 import { flushPromises, shallowMount } from '@vue/test-utils';
 import { createI18n } from 'vue-i18n';
 import { createMemoryHistory, createRouter } from 'vue-router';
-import { describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { RoutineClientPort } from '@memoflow/routine-client';
 import { ROUTINE_SERVICE_KEY } from '@routine-ui-test-host/di/keys';
 import { ProductSingleSelectFilter } from '@routine-ui-test-host/shared/components';
 import { productionLocaleMessages } from '@routine-ui-test-host/locales/production-messages';
+
+const confirmMock = vi.hoisted(() => vi.fn(async () => true));
+vi.mock('@memoflow/ui-vue-shadcn', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@memoflow/ui-vue-shadcn')>();
+  return { ...actual, useConfirm: confirmMock };
+});
+
 import RoutineConfigurationView from './RoutineConfigurationView.vue';
+
+beforeEach(() => {
+  confirmMock.mockReset();
+  confirmMock.mockResolvedValue(true);
+});
+
+afterEach(() => {
+  vi.unstubAllGlobals();
+  vi.restoreAllMocks();
+});
 
 const snapshot = {
   definitions: [
@@ -302,5 +319,73 @@ describe('RoutineConfigurationView', () => {
     await flushPromises();
 
     expect(router.currentRoute.value.query.routine).toBeUndefined();
+  });
+
+  it('deletes a routine only after the shared confirm dialog approves, never through window.confirm', async () => {
+    const windowConfirm = vi.fn(() => false);
+    vi.stubGlobal('confirm', windowConfirm);
+    const client = createRoutineClient();
+    const { wrapper } = await mountRoutineView(client);
+
+    await flushPromises();
+
+    confirmMock.mockResolvedValueOnce(false);
+    await wrapper.find('[data-testid="routine-delete-routine-1"]').trigger('click');
+    await flushPromises();
+
+    expect(confirmMock).toHaveBeenLastCalledWith({
+      title: 'Delete routine',
+      description: 'Delete this routine?',
+      confirmText: 'Delete',
+      cancelText: 'Cancel',
+      variant: 'destructive',
+    });
+    expect(client.deleteRoutine).not.toHaveBeenCalled();
+
+    confirmMock.mockResolvedValueOnce(true);
+    await wrapper.find('[data-testid="routine-delete-routine-1"]').trigger('click');
+    await flushPromises();
+
+    expect(client.deleteRoutine).toHaveBeenCalledTimes(1);
+    expect(client.deleteRoutine).toHaveBeenCalledWith('routine-1', { expectedVersion: 1 });
+    expect(windowConfirm).not.toHaveBeenCalled();
+  });
+
+  it('deletes a routine profile only after the shared confirm dialog approves, never through window.confirm', async () => {
+    const windowConfirm = vi.fn(() => false);
+    vi.stubGlobal('confirm', windowConfirm);
+    const client = createRoutineClient();
+    vi.mocked(client.getConfigurationSnapshot).mockResolvedValue(
+      ok({
+        ...snapshot,
+        memberships: [],
+      } as never),
+    );
+    const { wrapper } = await mountRoutineView(client);
+
+    await flushPromises();
+    await wrapper.find('[data-testid="routine-profile-profile-1"]').trigger('click');
+    await flushPromises();
+
+    confirmMock.mockResolvedValueOnce(false);
+    await wrapper.find('[data-testid="routine-profile-delete-profile-1"]').trigger('click');
+    await flushPromises();
+
+    expect(confirmMock).toHaveBeenLastCalledWith({
+      title: 'Delete context',
+      description: 'Delete this context?',
+      confirmText: 'Delete',
+      cancelText: 'Cancel',
+      variant: 'destructive',
+    });
+    expect(client.deleteProfile).not.toHaveBeenCalled();
+
+    confirmMock.mockResolvedValueOnce(true);
+    await wrapper.find('[data-testid="routine-profile-delete-profile-1"]').trigger('click');
+    await flushPromises();
+
+    expect(client.deleteProfile).toHaveBeenCalledTimes(1);
+    expect(client.deleteProfile).toHaveBeenCalledWith('profile-1', { expectedVersion: 1 });
+    expect(windowConfirm).not.toHaveBeenCalled();
   });
 });

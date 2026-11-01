@@ -179,7 +179,9 @@ export default {
     desktopRuntime: 'Executed on desktop',
     schedulerRuntime: 'Executed by scheduler',
   },
+  confirmDeleteTitle: 'Delete routine',
   confirmDelete: 'Delete this routine?',
+  confirmDeleteProfileTitle: 'Delete context',
   confirmDeleteProfile: 'Delete this context?',
   toast: {
     created: 'Routine created',

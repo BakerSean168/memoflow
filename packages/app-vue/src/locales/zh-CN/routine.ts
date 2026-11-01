@@ -179,7 +179,9 @@ export default {
     desktopRuntime: '由桌面端执行',
     schedulerRuntime: '由调度器执行',
   },
+  confirmDeleteTitle: '确认删除例程',
   confirmDelete: '确定删除这个例程？',
+  confirmDeleteProfileTitle: '确认删除场景',
   confirmDeleteProfile: '确定删除这个场景？',
   toast: {
     created: '例程已创建',

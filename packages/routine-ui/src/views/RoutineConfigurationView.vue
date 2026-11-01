@@ -463,6 +463,7 @@ import {
   DropdownMenuTrigger,
   Skeleton,
   Switch,
+  useConfirm,
 } from '@memoflow/ui-vue-shadcn';
 import type {
   RoutineDefinitionDto,
@@ -890,7 +891,14 @@ async function clearOverride(routine: RoutineDefinitionDto): Promise<void> {
 }
 
 async function removeRoutine(routine: RoutineDefinitionDto): Promise<void> {
-  if (typeof window !== 'undefined' && !window.confirm(t('routine.confirmDelete'))) return;
+  const confirmed = await useConfirm({
+    title: t('routine.confirmDeleteTitle'),
+    description: t('routine.confirmDelete'),
+    confirmText: t('common.delete'),
+    cancelText: t('common.cancel'),
+    variant: 'destructive',
+  });
+  if (!confirmed) return;
   try {
     await deleteRoutine(routine.id, { expectedVersion: routine.version });
     toast.success(t('routine.toast.deleted'));
@@ -901,7 +909,14 @@ async function removeRoutine(routine: RoutineDefinitionDto): Promise<void> {
 
 async function removeProfile(profile: RoutineProfileDto): Promise<void> {
   if (routineCountForProfile(profile.id) > 0) return;
-  if (typeof window !== 'undefined' && !window.confirm(t('routine.confirmDeleteProfile'))) return;
+  const confirmed = await useConfirm({
+    title: t('routine.confirmDeleteProfileTitle'),
+    description: t('routine.confirmDeleteProfile'),
+    confirmText: t('common.delete'),
+    cancelText: t('common.cancel'),
+    variant: 'destructive',
+  });
+  if (!confirmed) return;
 
   try {
     await deleteProfile(profile.id, { expectedVersion: profile.version });
