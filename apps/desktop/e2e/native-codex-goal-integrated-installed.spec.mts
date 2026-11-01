@@ -341,6 +341,8 @@ test('real Windows Codex invokes MemoFlow MCP to fill and save the installed Goa
     expect(proof.goalId).toBeTruthy();
     expect(proof.goalName).toBe(NAME);
     expect(proof.modelTurns).toBe(0);
+    // Every submit is preceded by one internal snapshot: the permission gate (#757)
+    // reads the panel mode to authorize goal.create versus goal.update.
     expect(observedCommands).toEqual([
       'snapshot',
       'open',
@@ -349,7 +351,9 @@ test('real Windows Codex invokes MemoFlow MCP to fill and save the installed Goa
       'add_key_result',
       'add_key_result',
       'snapshot',
+      'snapshot',
       'submit',
+      'snapshot',
       'submit',
     ]);
     await expect(page.getByTestId('goal-panel-form')).toBeHidden();
