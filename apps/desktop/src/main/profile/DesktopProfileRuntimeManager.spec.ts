@@ -152,6 +152,65 @@ describe('DesktopProfileRuntimeManager', () => {
     expect(runtime.getActiveProfileId()).toBe(second.profileId);
   }, 15_000);
 
+  it('opens a remembered local account without its password and asks again without a copy', async () => {
+    const remembered = await createLocal('Remembered');
+    const notRemembered = await createLocal('Not remembered');
+
+    await runtime.openProfile(remembered.profileId, LOCAL_PASSWORD, { remember: true });
+    await runtime.deactivateProfile({ preserveSelection: true });
+    await expect(runtime.openProfile(notRemembered.profileId)).rejects.toMatchObject({
+      code: 'PROFILE_PASSWORD_REQUIRED',
+    });
+    const reopened = await runtime.openProfile(remembered.profileId);
+    expect(reopened.descriptor.profileId).toBe(remembered.profileId);
+    await runtime.openProfile(notRemembered.profileId, LOCAL_PASSWORD);
+    expect(
+      await runtime.runExclusive(() =>
+        runtime.withInactiveLocalAccount(remembered.profileId, undefined, async () => 'read'),
+      ),
+    ).toBe('read');
+  });
+
+  it('never stores the password in the remembered key copy', async () => {
+    const account = await createLocal('Remembered');
+    await runtime.openProfile(account.profileId, LOCAL_PASSWORD, { remember: true });
+
+    const copyPath = path.join(
+      runtime.getSharedResolver().roots.dataRoot,
+      'shared',
+      'secure',
+      'profile-keys',
+      'remembered',
+      `${account.profileId}.bin`,
+    );
+    const raw = await fs.promises.readFile(copyPath);
+    expect(raw.includes(Buffer.from(LOCAL_PASSWORD, 'utf8'))).toBe(false);
+    expect(raw.includes(Buffer.from(account.profileId, 'utf8'))).toBe(false);
+  });
+
+  it('falls back to the password state when the remembered copy cannot be unsealed', async () => {
+    const account = await createLocal('Broken remember');
+    await runtime.openProfile(account.profileId, LOCAL_PASSWORD, { remember: true });
+    await runtime.deactivateProfile({ preserveSelection: true });
+    const copyPath = path.join(
+      runtime.getSharedResolver().roots.dataRoot,
+      'shared',
+      'secure',
+      'profile-keys',
+      'remembered',
+      `${account.profileId}.bin`,
+    );
+    await fs.promises.writeFile(copyPath, Buffer.from('not an envelope'));
+
+    await expect(runtime.openProfile(account.profileId)).rejects.toMatchObject({
+      code: 'PROFILE_PASSWORD_REQUIRED',
+    });
+    // The unreadable copy is kept: no silent deletion of the user's choice.
+    await expect(fs.promises.readFile(copyPath)).resolves.toBeTruthy();
+    const reopened = await runtime.openProfile(account.profileId, LOCAL_PASSWORD);
+    expect(reopened.descriptor.profileId).toBe(account.profileId);
+  });
+
   it('never opens or reads a target database on a missing or incorrect password', async () => {
     const source = await createLocal('Source');
     const target = await createLocal('Same name');

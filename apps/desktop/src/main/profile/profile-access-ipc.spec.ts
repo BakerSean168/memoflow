@@ -98,10 +98,33 @@ describe('registerProfileAccessIpc', () => {
     expect(
       await handlers.get(ProfileAccessChannels.SELECT)?.(
         {},
-        { profileId: 'second-local', password: 'account-password' },
+        { profileId: 'second-local', password: 'account-password', remember: true },
       ),
     ).toMatchObject({ ok: true });
-    expect(runtime.openProfile).toHaveBeenCalledWith('second-local', 'account-password');
+    expect(runtime.openProfile).toHaveBeenCalledWith('second-local', 'account-password', {
+      remember: true,
+    });
+    expect(accessLogs.warn).not.toHaveBeenCalled();
+  });
+
+  it('reports the password-required routing result without logging it as a defect', async () => {
+    const handlers = new Map<string, Handler>();
+    vi.mocked(ipcMain.handle).mockImplementation((channel, handler) => {
+      handlers.set(channel, handler as Handler);
+    });
+    const runtime = {
+      getActiveProfileId: () => null,
+      openProfile: vi
+        .fn()
+        .mockRejectedValue(
+          new ResultErrorException('此本地账户需要密码解锁', 'PROFILE_PASSWORD_REQUIRED'),
+        ),
+    };
+    registerProfileAccessIpc({} as never, runtime as never, {} as never);
+
+    expect(
+      await handlers.get(ProfileAccessChannels.SELECT)?.({}, { profileId: 'local-2' }),
+    ).toMatchObject({ ok: false, error: { code: 'PROFILE_PASSWORD_REQUIRED' } });
     expect(accessLogs.warn).not.toHaveBeenCalled();
   });
 

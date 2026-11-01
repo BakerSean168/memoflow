@@ -24,7 +24,12 @@ export const ProfileDisplayNameSchema = z.string().trim().min(1).max(80);
 /** Local-account password: length is the only rule; no composition requirement. */
 export const ProfilePasswordSchema = z.string().min(8).max(100);
 export const SelectProfileRequestSchema = z
-  .object({ profileId: ProfileIdSchema, password: ProfilePasswordSchema.optional() })
+  .object({
+    profileId: ProfileIdSchema,
+    password: ProfilePasswordSchema.optional(),
+    /** Stores a safeStorage copy of the unlocked data key (never the password). */
+    remember: z.boolean().optional(),
+  })
   .strict();
 export const RemoveProfileRequestSchema = z.object({ profileId: ProfileIdSchema }).strict();
 export const CreateLocalAccountRequestSchema = z

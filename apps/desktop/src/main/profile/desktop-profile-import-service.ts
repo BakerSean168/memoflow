@@ -339,7 +339,18 @@ export class DesktopProfileImportService {
         );
         const available: string[] = [];
         for (const candidate of candidates.slice(0, 20)) {
-          if (await this.runtime.hasCredential(candidate.profileId)) continue;
+          // A password-protected local account is still readable when its data
+          // key was handed to safeStorage by "remember me"; without such a copy
+          // the summary cannot be produced without asking the user, so the
+          // candidate stays manual-only.
+          //
+          // 本地账户只有在「记住」留下 safeStorage 数据钥副本时才可无人值守读取摘要；
+          // 否则保持跳过，仅手动选择时再索要密码。
+          if (
+            (await this.runtime.hasCredential(candidate.profileId)) &&
+            !(await this.runtime.hasRememberedKey(candidate.profileId))
+          )
+            continue;
           try {
             const exported = await this.runtime.withInactiveLocalAccount(
               candidate.profileId,

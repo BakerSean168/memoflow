@@ -133,6 +133,7 @@ async function fixture() {
     getSharedResolver: () => ({ roots }),
     listProfiles: async () => [descriptor, sourceDescriptor],
     hasCredential: async () => false,
+    hasRememberedKey: async (_id?: string) => false,
     isProfileCleanupPending: async () => false,
     withActiveProfileKey: <T>(_id: string, work: (key: Buffer) => Promise<T>) =>
       work(Buffer.alloc(32, 1)),
@@ -384,6 +385,27 @@ it('requires selection when multiple local accounts contain business data and sk
     await markProfileImportOpportunity(f.root, targetId, sourceId);
     expect(await f.service().consumePrompt(targetId)).toEqual({ sourceProfileId: sourceId });
     f.runtime.hasCredential = async () => true;
+    await markProfileImportOpportunity(f.root, targetId, sourceId);
+    expect(await f.service().consumePrompt(targetId)).toBeNull();
+  } finally {
+    await f.dispose();
+  }
+});
+
+it('invites remembered password-protected sources and skips unreadable remembered copies', async () => {
+  const f = await fixture();
+  try {
+    f.runtime.hasCredential = async () => true;
+    await markProfileImportOpportunity(f.root, targetId, sourceId);
+    expect(await f.service().consumePrompt(targetId)).toBeNull();
+
+    f.runtime.hasRememberedKey = async () => true;
+    await markProfileImportOpportunity(f.root, targetId, sourceId);
+    expect(await f.service().consumePrompt(targetId)).toEqual({ sourceProfileId: sourceId });
+
+    f.runtime.withInactiveLocalAccount = async () => {
+      throw new Error('SOURCE_PASSWORD_REQUIRED');
+    };
     await markProfileImportOpportunity(f.root, targetId, sourceId);
     expect(await f.service().consumePrompt(targetId)).toBeNull();
   } finally {

@@ -120,7 +120,9 @@ export function registerProfileAccessIpc(
     const activeProfileId = runtime.getActiveProfileId();
     if (activeProfileId) deviceAuth?.cancelForProfile(activeProfileId);
     try {
-      await runtime.openProfile(parsed.data.profileId, parsed.data.password);
+      await runtime.openProfile(parsed.data.profileId, parsed.data.password, {
+        remember: parsed.data.remember,
+      });
       return ok(null);
     } catch (error) {
       // Direct open from the Profile Access window has no other main-process
@@ -128,13 +130,19 @@ export function registerProfileAccessIpc(
       // does not go through it.
       // Profile Access 窗口直接打开没有其它主进程记录：WindowManager 的自动
       // 打开路径会自己打 warn，但这条路径不经过它。
-      logger.warn('Selected Profile could not be opened', {
-        profileId: parsed.data.profileId,
-        profileName: await findTargetProfileName(registry, parsed.data.profileId),
-        error,
-      });
+      // "Password required" is a normal routing result, not a failure to log as a
+      // defect: the window switches to the in-place password state.
+      const passwordRequired =
+        error instanceof ResultErrorException && error.code === 'PROFILE_PASSWORD_REQUIRED';
+      if (!passwordRequired) {
+        logger.warn('Selected Profile could not be opened', {
+          profileId: parsed.data.profileId,
+          profileName: await findTargetProfileName(registry, parsed.data.profileId),
+          error,
+        });
+      }
       return fail({
-        code: 'PROFILE_OPEN_FAILED',
+        code: passwordRequired ? 'PROFILE_PASSWORD_REQUIRED' : 'PROFILE_OPEN_FAILED',
         message: error instanceof Error ? error.message : '无法打开 Profile',
       });
     }
