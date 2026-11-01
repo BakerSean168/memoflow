@@ -8,7 +8,7 @@ import { execFileSync } from 'node:child_process';
 import { pathToFileURL } from 'node:url';
 
 export const ORACLE_PROJECT = 'memoflow-oracle2';
-export const ORACLE_EDGE = 'cpa-caddy';
+export const ORACLE_EDGE = 'public-gateway-caddy';
 const SERVICES = Object.freeze(['api', 'web', 'powersync', 'postgres', 'redis']);
 const REQUIRED = Object.freeze([...SERVICES, 'migrator']);
 const PUBLISHED = Object.freeze({
@@ -197,10 +197,10 @@ export function validateOracle2Topology({ compose, containers, caddy, arch = 'ar
     edgeLabels['com.docker.compose.project'] === ORACLE_PROJECT ||
     !(caddy.Mounts ?? []).some(
       (mount) =>
-        mount.Destination === '/etc/caddy/Caddyfile' && mount.Source === '/opt/cpa/Caddyfile',
+        mount.Destination === '/etc/caddy/Caddyfile' && mount.Source === '/opt/public-gateway/Caddyfile',
     )
   ) {
-    errors.push('Shared CPA Caddy must be running outside the MemoFlow Compose project');
+    errors.push('Shared public Caddy must be running outside the MemoFlow Compose project');
   }
   const edgePorts = caddy?.HostConfig?.PortBindings ?? {};
   if (
@@ -208,7 +208,7 @@ export function validateOracle2Topology({ compose, containers, caddy, arch = 'ar
       (edgePorts[port] ?? []).some((binding) => binding.HostPort === port.split('/')[0]),
     )
   ) {
-    errors.push('Shared CPA Caddy must retain public HTTP and HTTPS bindings');
+    errors.push('Shared public Caddy must retain public HTTP and HTTPS bindings');
   }
   return errors;
 }

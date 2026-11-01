@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
+import fs from 'node:fs';
 import {
   sha256,
   verifyControlArtifact,
@@ -229,4 +230,16 @@ test('image mismatch, missing health and modified production env fail closed', (
 test('errors are bounded to a single safe line', () => {
   assert.equal(redactMessage(new Error('bad\nstate\r\ncannot continue')), 'bad');
   assert.equal(redactMessage('a'.repeat(400)).length, 250);
+});
+
+test('unchanged selected release preserves immutable identities without executing retired artifact edge preflight', () => {
+  const source = fs.readFileSync(new URL('./watch.mjs', import.meta.url), 'utf8');
+  const stateGate = source.indexOf('if (old) assertCurrentState(old, current, snapshot);');
+  const noChange = source.indexOf('if (old && old.productionSetDigest === selectedSha) {');
+  const unchangedReturn = source.indexOf("console.log('ORACLE2_WATCH=NO_CHANGE", noChange);
+  const rolloutPreflight = source.indexOf('verifyTopologicalSafety(stage);', noChange);
+  assert.ok(stateGate >= 0 && stateGate < noChange, 'deployed state must be checked before no-op');
+  assert.ok(noChange < unchangedReturn && unchangedReturn < rolloutPreflight, 'new releases still require candidate preflight');
+  assert.match(source, /docker\('inspect', 'public-gateway-caddy'\)/u);
+  assert.doesNotMatch(source, /docker\('inspect', 'cpa-caddy'\)/u);
 });
