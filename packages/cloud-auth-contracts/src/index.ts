@@ -100,9 +100,7 @@ export type DesktopCloudGithubSignIn = z.infer<typeof DesktopCloudGithubSignInSc
  * The Profile the main process registered or found and opened for the new
  * session.
  */
-export const DesktopCloudSignInResultSchema = z
-  .object({ profileId: z.string().min(1) })
-  .strict();
+export const DesktopCloudSignInResultSchema = z.object({ profileId: z.string().min(1) }).strict();
 export type DesktopCloudSignInResult = z.infer<typeof DesktopCloudSignInResultSchema>;
 
 export interface DesktopCloudConnectionResult {

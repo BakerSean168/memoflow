@@ -662,7 +662,8 @@ export class WindowManager {
     });
 
     // 获取当前窗口类型
-    ipcMain.handle(WindowChannels.GET_TYPE, (event) => {      const webContents = event.sender;
+    ipcMain.handle(WindowChannels.GET_TYPE, (event) => {
+      const webContents = event.sender;
       if (this.profileAccessWindow?.webContents === webContents) {
         return ok('profile-access' as const);
       }

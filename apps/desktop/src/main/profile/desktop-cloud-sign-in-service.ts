@@ -198,7 +198,9 @@ export class DesktopCloudSignInService {
 
   private async readSession(
     token: string,
-  ): Promise<Result<{ account: StoredCloudSession['account']; session: { id: string; expiresAt: string } }>> {
+  ): Promise<
+    Result<{ account: StoredCloudSession['account']; session: { id: string; expiresAt: string } }>
+  > {
     let response: Response;
     try {
       response = await this.fetchImpl(`${authOrigin()}/api/auth/get-session`, {

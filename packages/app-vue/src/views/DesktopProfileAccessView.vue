@@ -12,7 +12,10 @@ import {
   ToggleGroupItem,
 } from '@memoflow/ui-vue-shadcn';
 import { ArrowLeft } from '@lucide/vue';
-import { useDesktopProfiles, type DesktopRegisterMode } from '../shared/composables/useDesktopProfiles';
+import {
+  useDesktopProfiles,
+  type DesktopRegisterMode,
+} from '../shared/composables/useDesktopProfiles';
 import DesktopProfileList from '../shared/components/DesktopProfileList.vue';
 
 const { t } = useI18n();
@@ -112,7 +115,11 @@ watch(
         {{ t('auth.profileAccess.signInTitle') }}
       </h1>
 
-      <form class="space-y-3" data-testid="desktop-profile-login-form" @submit.prevent="signInWithPassword">
+      <form
+        class="space-y-3"
+        data-testid="desktop-profile-login-form"
+        @submit.prevent="signInWithPassword"
+      >
         <Input
           v-focus-login
           v-model="loginEmail"
@@ -161,7 +168,11 @@ watch(
 
       <Separator class="bg-white/10" />
 
-      <div v-if="githubPending" class="space-y-2 text-center" data-testid="desktop-profile-github-waiting">
+      <div
+        v-if="githubPending"
+        class="space-y-2 text-center"
+        data-testid="desktop-profile-github-waiting"
+      >
         <p class="text-xs leading-relaxed text-foreground/70">
           {{ t('auth.profileAccess.githubWaiting') }}
         </p>

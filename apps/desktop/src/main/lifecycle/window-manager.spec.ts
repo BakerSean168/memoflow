@@ -24,6 +24,7 @@ vi.mock('../modules/window', () => ({
     height = 800;
     manage() {}
     unmanage() {}
+    pinHeight() {}
   },
 }));
 

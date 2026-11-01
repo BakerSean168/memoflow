@@ -259,10 +259,7 @@ export class DeviceAuthCoordinator {
   }
 
   /** A source-less attempt has no origin Profile to fall out of. */
-  private originStillValid(
-    profileId: string | null,
-    profileGeneration: number | null,
-  ): boolean {
+  private originStillValid(profileId: string | null, profileGeneration: number | null): boolean {
     if (profileId === null) return true;
     return (
       this.runtime.getActiveProfileId() === profileId &&

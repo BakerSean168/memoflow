@@ -455,11 +455,10 @@ export function useDesktopProfiles(options: { accessWindow?: boolean } = {}) {
     registerBusy.value = true;
     const createdPassword = registerPassword.value;
     try {
-      const created = await invoke(
-        ProfileAccessChannels.CREATE_LOCAL_ACCOUNT,
-        profileSchema,
-        { displayName, password: createdPassword },
-      );
+      const created = await invoke(ProfileAccessChannels.CREATE_LOCAL_ACCOUNT, profileSchema, {
+        displayName,
+        password: createdPassword,
+      });
       registerPassword.value = '';
       registerPasswordConfirm.value = '';
       if (!created) return;
