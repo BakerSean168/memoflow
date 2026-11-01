@@ -2,14 +2,12 @@
  * Window Manager - 窗口管理器
  *
  * 管理 Desktop 应用的多窗口系统：
- * - Profile Access 窗口（小窗口）
+ * - Profile Access 身份窗口
  * - 主窗口（完整应用）
  *
- * 启动流程：
- * 1. 读取最近使用的本地 Profile
- * 2. 无 PIN 时直接打开本地主窗口
- * 3. 有 PIN 时显示 Profile 解锁窗口
- * 4. 云端 session 在本地 Profile 打开后独立恢复
+ * 启动先进入 Profile Access，用户选择并解锁账户后才打开主窗口。
+ * 云端 session 在 Profile 打开后独立恢复；工作区内显式切换 registered
+ * Profile 仍复用现有切换路径，不属于启动自动直入。
  */
 
 import { getProfilePartition } from '../profile/profile-partition';
