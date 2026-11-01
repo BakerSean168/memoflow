@@ -19,6 +19,33 @@ import { MAX_BUSINESS_TABS, useAppShellStore } from './useAppShellStore';
 
 const originalInnerWidth = window.innerWidth;
 
+const confirmState = vi.hoisted(() => {
+  let answer = false;
+  const calls: unknown[] = [];
+  return {
+    calls,
+    setAnswer(value: boolean) {
+      answer = value;
+    },
+    reset() {
+      answer = false;
+      calls.length = 0;
+    },
+    call(options: unknown): Promise<boolean> {
+      calls.push(options);
+      return Promise.resolve(answer);
+    },
+  };
+});
+
+vi.mock('@memoflow/ui-vue-shadcn', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@memoflow/ui-vue-shadcn')>();
+  return {
+    ...actual,
+    useConfirm: (options: unknown) => confirmState.call(options),
+  };
+});
+
 afterEach(() => {
   Object.defineProperty(window, 'innerWidth', {
     configurable: true,
@@ -114,10 +141,15 @@ const i18n = createI18n({
   messages: {
     'en-US': {
       nav: { capsule: { goal: 'Goals' } },
+      common: { confirm: 'Confirm', cancel: 'Cancel' },
       shell: {
         panel: {
           dirtyTransitionConfirm: 'Continue with unsaved changes?',
+          dirtyTransitionConfirmTitle: 'Leave this form?',
           busyTransitionHint: 'Please wait',
+          tabLimitConfirm: 'Close "{title}" to open this?',
+          tabLimitConfirmTitle: 'Tab limit reached',
+          tabLimitDeniedHint: 'Tab limit reached — close a tab first.',
         },
       },
     },
@@ -236,12 +268,15 @@ describe('useShellRouterSync startup restoration', () => {
     });
     const wrapper = fixture.mount();
     fixture.store.setSurfaceStatus('dirty');
-    const confirm = vi.fn(() => true);
-    Object.defineProperty(window, 'confirm', { configurable: true, value: confirm });
+    confirmState.reset();
+    const nativeConfirm = vi.fn(() => false);
+    Object.defineProperty(window, 'confirm', { configurable: true, value: nativeConfirm });
+    confirmState.setAnswer(true);
 
     await fixture.actions().closePanel();
 
-    expect(confirm).toHaveBeenCalledOnce();
+    expect(confirmState.calls).toHaveLength(1);
+    expect(nativeConfirm).not.toHaveBeenCalled();
     expect(fixture.store.rightPanelOpen).toBe(false);
     expect(fixture.store.surfaceStatus).toBe('dirty');
     wrapper.unmount();
@@ -408,7 +443,45 @@ describe('useShellRouterSync Phase 1 landing / deep-link semantics', () => {
     wrapper.unmount();
   });
 
+  it('closes the candidate and retries the open after the tab-limit confirm', async () => {
+    confirmState.reset();
+    const fixture = await mountRouterSync('/goals');
+    const wrapper = fixture.mount();
+    for (let i = 0; i < MAX_BUSINESS_TABS - 1; i += 1) {
+      fixture.store.openTab({
+        module: 'note',
+        route: `/repository?note=${i}`,
+        title: `N${i}`,
+        intent: 'deeplink',
+      });
+    }
+    expect(fixture.store.tabs).toHaveLength(MAX_BUSINESS_TABS);
+
+    const nativeConfirm = vi.fn(() => false);
+    Object.defineProperty(window, 'confirm', { configurable: true, value: nativeConfirm });
+    confirmState.setAnswer(true);
+    await fixture.router.push('/goals/g-2');
+    await flushPromises();
+    await nextTick();
+
+    expect(confirmState.calls).toHaveLength(1);
+    expect(confirmState.calls[0]).toMatchObject({
+      title: 'Tab limit reached',
+      description: 'Close "Goals" to open this?',
+      confirmText: 'Confirm',
+      cancelText: 'Cancel',
+      variant: 'default',
+    });
+    expect(fixture.store.tabs).toHaveLength(MAX_BUSINESS_TABS);
+    expect(fixture.store.tabs.some((tab) => tab.route === '/goals')).toBe(false);
+    expect(fixture.store.activeTab?.route).toBe('/goals/g-2');
+    expect(fixture.router.currentRoute.value.fullPath).toBe('/goals/g-2');
+    expect(nativeConfirm).not.toHaveBeenCalled();
+    wrapper.unmount();
+  });
+
   it('rolls the URL back when the tab-limit confirm is cancelled (review P1)', async () => {
+    confirmState.reset();
     const fixture = await mountRouterSync('/goals');
     const wrapper = fixture.mount();
     // 初始 startup 已有 1 个 goal Tab；再开满至 MAX_BUSINESS_TABS。
@@ -422,8 +495,9 @@ describe('useShellRouterSync Phase 1 landing / deep-link semantics', () => {
     }
     expect(fixture.store.tabs).toHaveLength(MAX_BUSINESS_TABS);
 
-    const denyConfirm = vi.fn(() => false);
-    Object.defineProperty(window, 'confirm', { configurable: true, value: denyConfirm });
+    const nativeConfirm = vi.fn(() => false);
+    Object.defineProperty(window, 'confirm', { configurable: true, value: nativeConfirm });
+    confirmState.setAnswer(false);
     await fixture.router.push('/goals/g-2');
     // afterEach 内的回滚 replace 是异步发起的，等待其导航完成。
     await flushPromises();
@@ -431,8 +505,10 @@ describe('useShellRouterSync Phase 1 landing / deep-link semantics', () => {
     await flushPromises();
 
     // 取消：不创建 Tab，URL 回滚到进入前 → URL/Tab/对象保持一致。
+    expect(confirmState.calls).toHaveLength(1);
     expect(fixture.store.tabs).toHaveLength(MAX_BUSINESS_TABS);
     expect(fixture.router.currentRoute.value.fullPath).toBe('/goals');
+    expect(nativeConfirm).not.toHaveBeenCalled();
     wrapper.unmount();
   });
 

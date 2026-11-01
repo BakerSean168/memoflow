@@ -99,6 +99,7 @@ export default {
     enterFocus: '专注工作区',
     exitFocus: '退出专注工作区',
     tabLimitConfirm: '标签数已达上限——关闭最久未用的「{title}」以打开新内容？',
+    tabLimitConfirmTitle: '标签数已达上限',
     tabLimitDeniedHint: '标签数已达上限，请先关闭部分标签。',
     contentErrorTitle: '面板内容出错了',
     contentErrorDescription: '此业务面板暂时无法显示。可重试，或关闭面板继续使用 AI 工作区。',

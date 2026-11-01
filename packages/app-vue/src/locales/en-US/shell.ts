@@ -101,6 +101,7 @@ export default {
     enterFocus: 'Focus workspace',
     exitFocus: 'Exit workspace focus',
     tabLimitConfirm: 'Tab limit reached — close "{title}" (least recently used) to open this?',
+    tabLimitConfirmTitle: 'Tab limit reached',
     tabLimitDeniedHint: 'Tab limit reached — close a tab first.',
     contentErrorTitle: 'This panel ran into a problem',
     contentErrorDescription:
