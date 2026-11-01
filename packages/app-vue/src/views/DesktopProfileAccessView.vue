@@ -216,7 +216,11 @@ onMounted(async () => {
           autofocus
         />
         <label class="flex w-fit items-center gap-2 text-xs text-foreground/65">
-          <Checkbox v-model="remember" data-testid="desktop-profile-remember" />
+          <Checkbox
+            v-model="remember"
+            :aria-label="t('auth.profileAccess.rememberMe')"
+            data-testid="desktop-profile-remember"
+          />
           {{ t('auth.profileAccess.rememberMe') }}
         </label>
         <div class="flex gap-2">
