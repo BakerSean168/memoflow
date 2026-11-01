@@ -68,9 +68,11 @@ const fixture = await vi.hoisted(async () => {
       session.conversationTitle.value = getDefaultName(mode);
     }),
     loadConversationList: vi.fn(),
+    deleteConversation: vi.fn(async () => true),
   };
   return {
     realSession: false,
+    confirm: vi.fn<(options: Record<string, unknown>) => Promise<boolean>>(),
     service: {} as import('./types').AIChatService,
     nativeRunSettled: vi.fn<(connectionId: string) => void>(),
     getRun: vi.fn(),
@@ -189,6 +191,13 @@ vi.mock('@ai-ui-test-host/shared/utils/useStrictInject', async (original) => {
   return {
     useStrictInject: (...args: Parameters<typeof actual.useStrictInject>) =>
       fixture.realSession ? actual.useStrictInject(...args) : { get: fixture.getRun },
+  };
+});
+vi.mock('@memoflow/ui-vue-shadcn', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@memoflow/ui-vue-shadcn')>();
+  return {
+    ...actual,
+    useConfirm: (options: Record<string, unknown>) => fixture.confirm(options),
   };
 });
 vi.mock('./useAIChatSession', async (original) => {
@@ -1202,3 +1211,55 @@ it.each(['implicit default', 'saved instance'])(
   // with real storage and many vi.waitFor polls; on a loaded host it exceeds the 5s default.
   30_000,
 );
+
+describe('conversation deletion confirmation', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    fixture.realSession = false;
+    fixture.confirm.mockReset();
+    fixture.session.deleteConversation.mockReset();
+    fixture.session.deleteConversation.mockResolvedValue(true);
+  });
+
+  it('confirms a single deletion through the shared destructive dialog, not the native one', async () => {
+    const { wrapper } = await mountView();
+    const nativeConfirm = vi.fn(() => true);
+    window.confirm = nativeConfirm;
+
+    fixture.confirm.mockResolvedValue(false);
+    await wrapper.vm.deleteConversation('conversation-a');
+    expect(fixture.confirm).toHaveBeenCalledWith(
+      expect.objectContaining({ variant: 'destructive' }),
+    );
+    expect(fixture.session.deleteConversation).not.toHaveBeenCalled();
+
+    fixture.confirm.mockResolvedValue(true);
+    await wrapper.vm.deleteConversation('conversation-a');
+    expect(fixture.session.deleteConversation).toHaveBeenCalledWith(
+      'conversation-a',
+      expect.anything(),
+      expect.any(Function),
+      expect.any(Function),
+    );
+    expect(nativeConfirm).not.toHaveBeenCalled();
+  });
+
+  it('keeps bulk cancellation and per-item results behind the shared dialog', async () => {
+    const { wrapper } = await mountView();
+    const nativeConfirm = vi.fn(() => true);
+    window.confirm = nativeConfirm;
+
+    fixture.confirm.mockResolvedValue(false);
+    await expect(wrapper.vm.deleteConversations(['a', 'b'])).resolves.toEqual([]);
+    expect(fixture.session.deleteConversation).not.toHaveBeenCalled();
+
+    fixture.confirm.mockResolvedValue(true);
+    fixture.session.deleteConversation.mockResolvedValueOnce(true).mockResolvedValueOnce(false);
+    await expect(wrapper.vm.deleteConversations(['a', 'a', 'b'])).resolves.toEqual([
+      { id: 'a', success: true },
+      { id: 'b', success: false },
+    ]);
+    expect(fixture.session.deleteConversation).toHaveBeenCalledTimes(2);
+    expect(nativeConfirm).not.toHaveBeenCalled();
+  });
+});

@@ -364,7 +364,7 @@ import { computed, inject, onMounted, onUnmounted, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import { Menu, Plus } from '@lucide/vue';
-import { Button } from '@memoflow/ui-vue-shadcn';
+import { Button, useConfirm } from '@memoflow/ui-vue-shadcn';
 import AIConversationSidebar from '../components/AIConversationSidebar.vue';
 import AIMessagePanel from '../components/AIMessagePanel.vue';
 import AIComposerControls from '../components/AIComposerControls.vue';
@@ -780,18 +780,30 @@ function openAISettings() {
 function openGoalWithoutAI() {
   void router.push('/goals?dialog=goal');
 }
-function deleteConversation(id: string): void {
-  if (window.confirm(t('shell.conversation.confirmDelete'))) {
-    void deleteConversationBase(id);
-  }
+async function deleteConversation(id: string): Promise<void> {
+  const confirmed = await useConfirm({
+    title: t('shell.conversation.confirmDeleteTitle'),
+    description: t('shell.conversation.confirmDelete'),
+    confirmText: t('common.delete'),
+    cancelText: t('common.cancel'),
+    variant: 'destructive',
+  });
+  if (!confirmed) return;
+  void deleteConversationBase(id);
 }
 let bulkDeleteAlive = true;
 onUnmounted(() => {
   bulkDeleteAlive = false;
 });
 async function deleteConversations(ids: string[]) {
-  if (!window.confirm(t('shell.conversation.confirmDeleteSelected', { count: ids.length })))
-    return [];
+  const confirmed = await useConfirm({
+    title: t('shell.conversation.confirmDeleteSelectedTitle', { count: ids.length }),
+    description: t('shell.conversation.confirmDeleteSelected', { count: ids.length }),
+    confirmText: t('common.delete'),
+    cancelText: t('common.cancel'),
+    variant: 'destructive',
+  });
+  if (!confirmed) return [];
   const results: { id: string; success: boolean }[] = [];
   for (const id of new Set(ids)) {
     if (!bulkDeleteAlive) break;
