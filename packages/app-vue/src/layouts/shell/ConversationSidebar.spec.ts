@@ -44,12 +44,10 @@ const i18n = createI18n({
           previousPage: 'Previous page',
           nextPage: 'Next page',
           select: 'Select conversations',
-          cancelSelect: 'Cancel selection',
-          selectAll: 'Select all',
-          clearSelection: 'Clear selection',
-          archiveSelected: 'Archive selected',
-          restoreSelected: 'Restore selected',
-          deleteSelected: 'Delete selected',
+          selectedCount: '{count} selected',
+          rename: 'Rename',
+          regenerateTitle: 'Regenerate title',
+          generatingTitle: 'Generating title…',
         },
         account: {
           menu: 'Account menu',
@@ -85,6 +83,21 @@ const groups = [
   },
 ];
 
+/** 右键菜单内容渲染在 body 的 portal 里（reka ContextMenu）。 */
+async function openRowMenu(wrapper: ReturnType<typeof mount>, id: string) {
+  await wrapper.get(`[data-keyboard-item="${id}"]`).trigger('contextmenu');
+  await flushPromises();
+}
+function menuItem(testId: string): HTMLElement | null {
+  return document.body.querySelector<HTMLElement>(`[data-testid="${testId}"]`);
+}
+async function selectMenuItem(testId: string) {
+  const item = menuItem(testId);
+  if (!item) throw new Error(`menu item ${testId} not rendered`);
+  item.click();
+  await flushPromises();
+}
+
 describe('ConversationSidebar attention', () => {
   it('archives without confirmation and exposes searchable recovery with guarded pending rows', async () => {
     const originalConfirm = window.confirm;
@@ -100,10 +113,24 @@ describe('ConversationSidebar attention', () => {
       global: { plugins: [i18n] },
     });
     try {
-      const archive = wrapper.findAll('[data-testid="conversation-archive"]');
-      expect(archive[0]!.attributes('disabled')).toBeDefined();
-      await archive[1]!.trigger('click');
+      const rows = wrapper.findAll('[data-testid="conversation-row"]');
+      // 运行中的会话不出现归档主操作，保留状态图标（T3 同款单槽位）。
+      expect(rows[0]!.find('[data-testid="conversation-archive"]').exists()).toBe(false);
+      expect(rows[0]!.find('[data-testid="shell-conversation-status"]').exists()).toBe(true);
+      const archive = rows[1]!.get('[data-testid="conversation-archive"]');
+      expect(archive.classes()).toEqual(
+        expect.arrayContaining([
+          'opacity-0',
+          'pointer-events-none',
+          'group-any-hover/item:opacity-100',
+          'group-any-hover/item:pointer-events-auto',
+          'focus-visible:opacity-100',
+        ]),
+      );
+      expect(archive.attributes('aria-label')).toBe('Archive');
+      await archive.trigger('click');
       expect(wrapper.emitted('archive-conversation')).toEqual([['b']]);
+      expect(wrapper.emitted('select-conversation')).toBeUndefined();
       expect(confirm).not.toHaveBeenCalled();
       await wrapper.get('[data-testid="conversation-archive-toggle"]').trigger('click');
       expect(wrapper.text()).toContain('Archived history');
@@ -133,10 +160,10 @@ describe('ConversationSidebar attention', () => {
     const firstRow = wrapper
       .findAll('nav button')
       .find((item) => item.text() === 'Personal systems architecture');
-    expect(firstRow?.classes()).toContain('pr-24');
+    expect(firstRow?.classes()).toContain('pr-9');
     expect(firstRow?.find('span').classes()).toContain('truncate');
     const normalRow = wrapper.findAll('nav button').find((item) => item.text() === 'Training plan');
-    expect(normalRow?.classes()).toContain('pr-24');
+    expect(normalRow?.classes()).toContain('pr-9');
     await icons[0]!.trigger('click');
     expect(wrapper.emitted('select-conversation')).toEqual([['a']]);
     wrapper.unmount();
@@ -221,7 +248,7 @@ describe('ConversationSidebar mouse and batch selection', () => {
     expect(row('b').attributes('aria-selected')).toBe('false');
     await wrapper.get('[data-testid="conversation-search-toggle"]').trigger('click');
     await wrapper.get('[data-testid="conversation-search-input"]').setValue('Infrastructure');
-    expect(wrapper.get('[data-testid="conversation-selection-count"]').text()).toBe('1');
+    expect(wrapper.get('[data-testid="conversation-selection-count"]').text()).toBe('1 selected');
     await wrapper.setProps({ activeProfileId: 'two' });
     expect(row('c').attributes('aria-selected')).toBe('false');
     wrapper.unmount();
@@ -262,14 +289,19 @@ describe('ConversationSidebar mouse and batch selection', () => {
         }),
     );
     const wrapper = mount(ConversationSidebar, {
+      attachTo: document.body,
       props: { groups, activeConversationId: null, activeProfileId: 'one', bulkAction },
       global: { plugins: [i18n] },
     });
-    await wrapper.get('[data-testid="conversation-select-toggle"]').trigger('click');
-    await wrapper.get('[data-testid="conversation-select-all"]').trigger('click');
-    const action = wrapper.get('[data-testid="conversation-bulk-status"]');
-    await action.trigger('click');
-    await action.trigger('click');
+    await wrapper.get('[data-keyboard-item="a"]').trigger('click', { ctrlKey: true });
+    await wrapper.get('[data-keyboard-item="c"]').trigger('click', { shiftKey: true });
+    await openRowMenu(wrapper, 'b');
+    expect(menuItem('conversation-context-status')?.textContent).toContain('Archive (3)');
+    await selectMenuItem('conversation-context-status');
+    await openRowMenu(wrapper, 'b');
+    expect(menuItem('conversation-context-status')?.hasAttribute('data-disabled')).toBe(true);
+    menuItem('conversation-context-status')?.click();
+    await flushPromises();
     expect(bulkAction).toHaveBeenCalledTimes(1);
     finish([
       { id: 'a', success: true },
@@ -277,9 +309,12 @@ describe('ConversationSidebar mouse and batch selection', () => {
       { id: 'c', success: true },
     ]);
     await flushPromises();
-    expect(wrapper.get('[data-testid="conversation-selection-count"]').text()).toBe('1');
+    expect(wrapper.get('[data-testid="conversation-selection-count"]').text()).toBe('1 selected');
     expect(wrapper.get('[data-testid="conversation-bulk-results"]').findAll('li')).toHaveLength(3);
-    await action.trigger('click');
+    await document.body.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }));
+    await flushPromises();
+    await openRowMenu(wrapper, 'b');
+    await selectMenuItem('conversation-context-status');
     await wrapper.setProps({ activeProfileId: 'two' });
     finish([{ id: 'b', success: false }]);
     await flushPromises();
@@ -294,17 +329,28 @@ describe('ConversationSidebar compact toolbar', () => {
       ids.map((id) => ({ id, success: true })),
     );
     const wrapper = mount(ConversationSidebar, {
+      attachTo: document.body,
       props: { groups, activeConversationId: null, bulkAction },
       global: { plugins: [i18n] },
     });
-    await wrapper.get('[data-testid="conversation-select-toggle"]').trigger('click');
-    await wrapper.get('[data-testid="conversation-select-all"]').trigger('click');
-    expect(wrapper.get('[data-testid="conversation-selection-count"]').text()).toBe('3');
-    await wrapper.get('[data-testid="conversation-bulk-status"]').trigger('click');
-    await flushPromises();
-    expect(bulkAction).toHaveBeenCalledWith('archive', ['a', 'b', 'c']);
-    expect(wrapper.find('[data-testid="conversation-selection-toolbar"]').exists()).toBe(false);
-    wrapper.unmount();
+    try {
+      // 没有“选择模式”入口、复选框和常驻批量工具栏（T3 Code 同款）。
+      expect(wrapper.find('[data-testid="conversation-select-toggle"]').exists()).toBe(false);
+      expect(wrapper.find('input[type="checkbox"]').exists()).toBe(false);
+      await wrapper.get('[data-keyboard-item="a"]').trigger('click', { metaKey: true });
+      await wrapper.get('[data-keyboard-item="c"]').trigger('click', { shiftKey: true });
+      expect(wrapper.get('[data-testid="conversation-selection-count"]').text()).toBe('3 selected');
+      expect(wrapper.emitted('select-conversation')).toBeUndefined();
+      await openRowMenu(wrapper, 'a');
+      expect(menuItem('conversation-context-rename')).toBeNull();
+      expect(menuItem('conversation-context-delete')?.textContent).toContain('Delete (3)');
+      await selectMenuItem('conversation-context-status');
+      expect(bulkAction).toHaveBeenCalledWith('archive', ['a', 'b', 'c']);
+      expect(wrapper.findAll('[aria-selected="true"]')).toHaveLength(0);
+      expect(wrapper.find('[data-testid="conversation-selection-toolbar"]').exists()).toBe(false);
+    } finally {
+      wrapper.unmount();
+    }
   });
 
   it('keeps searchable conversations and new chat in a single 44px row', async () => {
@@ -466,6 +512,83 @@ describe('conversation title editing', () => {
     expect(wrapper.find('[data-testid="conversation-title-input"]').exists()).toBe(false);
     expect(wrapper.emitted('rename-conversation')).toHaveLength(1);
     expect(wrapper.find('[role="status"]').exists()).toBe(true);
+    wrapper.unmount();
+  });
+});
+
+describe('ConversationSidebar T3 Code row interactions', () => {
+  it('opens a single-row context menu without counts and archives through the bulk path', async () => {
+    const bulkAction = vi.fn(async (_action: string, ids: string[]) =>
+      ids.map((id) => ({ id, success: true })),
+    );
+    const wrapper = mount(ConversationSidebar, {
+      attachTo: document.body,
+      props: {
+        groups,
+        activeConversationId: 'b',
+        conversationStatuses: { a: 'working' },
+        bulkAction,
+      },
+      global: { plugins: [i18n] },
+    });
+    try {
+      await openRowMenu(wrapper, 'b');
+      expect(menuItem('conversation-context-rename')?.textContent).toContain('Rename');
+      expect(menuItem('conversation-context-regenerate')).not.toBeNull();
+      expect(menuItem('conversation-context-status')?.textContent?.trim()).toBe('Archive');
+      await selectMenuItem('conversation-context-status');
+      expect(bulkAction).toHaveBeenCalledWith('archive', ['b']);
+      await openRowMenu(wrapper, 'a');
+      expect(menuItem('conversation-context-status')?.hasAttribute('data-disabled')).toBe(true);
+    } finally {
+      wrapper.unmount();
+    }
+  });
+
+  it('renames with F2 and opens the menu from the ContextMenu key', async () => {
+    const wrapper = mount(ConversationSidebar, {
+      attachTo: document.body,
+      props: { groups, activeConversationId: 'a' },
+      global: { plugins: [i18n] },
+    });
+    try {
+      await wrapper.get('[data-keyboard-item="b"]').trigger('keydown', { key: 'F2' });
+      await flushPromises();
+      expect(wrapper.find('[data-testid="conversation-title-input"]').exists()).toBe(true);
+      await wrapper
+        .get('[data-testid="conversation-title-input"]')
+        .trigger('keydown', { key: 'Escape' });
+      // 浏览器在 ContextMenu 键 / Shift+F10 后会在聚焦元素上派发原生 contextmenu。
+      const row = wrapper.get('[data-keyboard-item="c"]');
+      await row.trigger('keydown', { key: 'F10', shiftKey: true });
+      await row.trigger('contextmenu');
+      await flushPromises();
+      expect(menuItem('conversation-context-status')).not.toBeNull();
+    } finally {
+      wrapper.unmount();
+    }
+  });
+
+  it('keeps the archived view behind a toolbar icon and restores from the row slot', async () => {
+    const wrapper = mount(ConversationSidebar, {
+      props: {
+        groups,
+        activeConversationId: null,
+        archivedConversations: [{ id: 'old', title: 'Old' }],
+      },
+      global: { plugins: [i18n] },
+    });
+    const toggle = wrapper
+      .get('[data-testid="conversation-toolbar"]')
+      .get('[data-testid="conversation-archive-toggle"]');
+    expect(toggle.attributes('aria-pressed')).toBe('false');
+    expect(toggle.text()).toBe('');
+    await toggle.trigger('click');
+    expect(toggle.attributes('aria-pressed')).toBe('true');
+    const restore = wrapper.get('[data-testid="conversation-restore"]');
+    expect(restore.classes()).toContain('opacity-0');
+    await restore.trigger('click');
+    expect(wrapper.emitted('restore-conversation')).toEqual([['old']]);
     wrapper.unmount();
   });
 });

@@ -2816,7 +2816,7 @@
         "testRole": "behavior"
       },
       "decision": "retain",
-      "behavior": "会话状态、搜索、Profile 菜单与焦点恢复，以及跨组选择、逐项反馈、失败项保留和旧 Profile 结果隔离",
+      "behavior": "会话状态、搜索、Profile 菜单与焦点恢复，跨组选择、逐项反馈、失败项保留和旧 Profile 结果隔离，以及 T3 Code 单槽位行操作、单项/批量右键菜单、F2 重命名和已归档入口",
       "assertionEvidence": [
         "conversation-search-input",
         "aria-selected",
@@ -2828,7 +2828,7 @@
         "status": "none-verified",
         "testFiles": []
       },
-      "sourceSha256": "7567387bcec6a42c30240ce8d8c4a30cee4de8f1d9b5ef7c1d2fa4b13a8becd8"
+      "sourceSha256": "96b8f1efa3e64eca60f3b0ea08a565480314ac4cf2bac4ea89c53f4c5c2b0de1"
     },
     {
       "path": "packages/app-vue/src/layouts/shell/WindowHeader.spec.ts",
@@ -3080,7 +3080,7 @@
         "testRole": "behavior"
       },
       "decision": "retain",
-      "behavior": "真实鼠标和键盘的跨组/非连续选择、菜单数量、部分失败 Undo、Profile 卸载、窄栏和危险删除确认",
+      "behavior": "真实鼠标和键盘的跨组/非连续选择、右键菜单数量、部分失败 Undo、Profile 卸载、窄栏、危险删除确认，以及行操作平时隐藏、悬浮或键盘聚焦才出现（T3 Code 单槽位）",
       "assertionEvidence": [
         "aria-selected",
         "conversation-context-status",
@@ -3092,7 +3092,7 @@
         "status": "none-verified",
         "testFiles": []
       },
-      "sourceSha256": "07f471d44b7232a13bcde3350d4dc2478083b68688872be4f698efa8dcfbe7be"
+      "sourceSha256": "dce4e60931d7ffbcdcc9c2236a390b5965095da88d01dbc5dc3adbd69f65e10d"
     }
   ],
   "storyReviews": [],

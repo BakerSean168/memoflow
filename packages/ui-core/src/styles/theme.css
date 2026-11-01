@@ -3,6 +3,18 @@
 /* 👇 加上这一行，否则手动切换暗黑模式可能会失效 */
 @custom-variant dark (&:is(.dark *));
 
+/*
+ * 只在存在可悬浮指针时生效的 hover（参考 T3 Code apps/web/src/index.css）。
+ * 触屏为主的设备不会把悬浮操作“粘”在行上；用法：group-any-hover/item:opacity-100。
+ */
+@custom-variant any-hover {
+  @media (any-hover: hover) {
+    &:hover {
+      @slot;
+    }
+  }
+}
+
 @theme {
   --font-sans: Inter, ui-sans-serif, system-ui, sans-serif;
   --tracking-normal: -0.01em;

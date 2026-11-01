@@ -20,7 +20,8 @@ test('mouse range, disjoint and cross-group selection; context counts and keyboa
   await page.keyboard.press('Escape');
   await expect(page.getByRole('menu')).toHaveCount(0);
   await row('c').click({ button: 'right' });
-  await expect(page.getByTestId('conversation-context-status')).toHaveText('Archive (1)');
+  // 单个会话的右键菜单不带数量（T3 Code 同款），多选时才显示数量。
+  await expect(page.getByTestId('conversation-context-status')).toHaveText('Archive');
   await page.keyboard.press('Escape');
   await expect(row('c')).toBeFocused();
   await row('b').focus();
@@ -40,12 +41,8 @@ test('mouse range, disjoint and cross-group selection; context counts and keyboa
   await expect(row('a')).toHaveAttribute('aria-selected', 'true');
   await expect(row('d')).toHaveAttribute('aria-selected', 'true');
   await expect(page.getByTestId('opened')).toHaveText('b');
-  await page.getByTestId('conversation-select-toggle').click();
-  await row('d').focus();
-  await page.keyboard.press('Shift+K');
-  await expect(row('d')).toHaveAttribute('aria-selected', 'true');
-  await expect(row('a')).toHaveAttribute('aria-selected', 'true');
   await page.keyboard.press('Escape');
+  await expect(page.locator('[aria-selected="true"]')).toHaveCount(0);
   await page.keyboard.press('Control+k');
   await expect(page.getByTestId('palette')).toHaveText('true');
   await page.keyboard.press('Control+k');
@@ -56,11 +53,13 @@ test('partial failures remain selected, rapid actions serialize, and Ctrl+Z only
   page,
 }) => {
   await page.goto('/?fail=1');
-  await page.getByTestId('conversation-select-toggle').click();
-  await page.getByTestId('conversation-select-all').click();
-  await page.getByTestId('conversation-bulk-status').dblclick({ delay: 20 });
+  const row = (id: string) => page.locator(`[data-keyboard-item="${id}"]`);
+  for (const id of ['a', 'b', 'c', 'd']) await row(id).click({ modifiers: ['Control'] });
+  await row('b').click({ button: 'right' });
+  await expect(page.getByTestId('conversation-context-status')).toHaveText('Archive (4)');
+  await page.getByTestId('conversation-context-status').click();
   await expect(page.getByTestId('conversation-bulk-results').locator('li')).toHaveCount(4);
-  await expect(page.getByTestId('conversation-selection-count')).toHaveText('1');
+  await expect(page.getByTestId('conversation-selection-count')).toHaveText('1 selected');
   await expect(page.locator('[data-keyboard-item="b"]')).toHaveAttribute('aria-selected', 'true');
   await expect(page.getByTestId('conversation-bulk-results')).toContainText(
     'Conversation B · Archive · Failed',
@@ -93,9 +92,11 @@ test('Profile switch drops old batch feedback and prevents subsequent writes and
   page,
 }) => {
   await page.goto('/?hold=1');
-  await page.getByTestId('conversation-select-toggle').click();
-  await page.getByTestId('conversation-select-all').click();
-  await page.getByTestId('conversation-bulk-status').click();
+  const row = (id: string) => page.locator(`[data-keyboard-item="${id}"]`);
+  for (const id of ['a', 'b', 'c', 'd']) await row(id).click({ modifiers: ['Control'] });
+  await row('b').click({ button: 'right' });
+  await expect(page.getByTestId('conversation-context-status')).toHaveText('Archive (4)');
+  await page.getByTestId('conversation-context-status').click();
   await page.getByTestId('switch-profile').click();
   await expect(page.locator('[aria-selected="true"]')).toHaveCount(0);
   await expect(page.getByTestId('conversation-bulk-results')).toHaveCount(0);
@@ -119,11 +120,12 @@ test('narrow sidebar preserves search, blank clearing, recovery and separate des
   await nav.click({ position: { x: 100, y: navBox.height - 12 } });
   await expect(page.locator('[aria-selected="true"]')).toHaveCount(0);
   await page.locator('[data-keyboard-item="a"]').click({ modifiers: ['Control'] });
-  await page.getByTestId('conversation-bulk-status').click();
+  await page.locator('[data-keyboard-item="a"]').click({ button: 'right' });
+  await page.getByTestId('conversation-context-status').click();
   await expect(page.getByTestId('conversation-bulk-results')).toContainText('Succeeded');
   await page.getByTestId('conversation-archive-toggle').click();
   await page.locator('[data-keyboard-item="a"]').click({ button: 'right' });
-  await expect(page.getByTestId('conversation-context-status')).toHaveText('Restore (1)');
+  await expect(page.getByTestId('conversation-context-status')).toHaveText('Restore');
   await page.getByTestId('conversation-context-status').click();
   await expect(page.getByTestId('calls')).toContainText('a:Active');
   await page.getByTestId('conversation-archive-toggle').click();
@@ -133,13 +135,15 @@ test('narrow sidebar preserves search, blank clearing, recovery and separate des
     expect(dialog.message()).toContain('cannot be undone');
     await dialog.dismiss();
   });
-  await page.getByTestId('conversation-bulk-delete').click();
+  await page.locator('[data-keyboard-item="a"]').click({ button: 'right' });
+  await page.getByTestId('conversation-context-delete').click();
   await expect(page.getByTestId('calls')).not.toContainText(':Deleted');
   await expect(page.locator('[data-keyboard-item="a"]')).toHaveAttribute('aria-selected', 'true');
   page.once('dialog', async (dialog) => {
     await dialog.accept();
   });
-  await page.getByTestId('conversation-bulk-delete').click();
+  await page.locator('[data-keyboard-item="a"]').click({ button: 'right' });
+  await page.getByTestId('conversation-context-delete').click();
   await expect(page.getByTestId('calls')).toContainText('a:Deleted');
   const width = await page
     .getByTestId('conversation-sidebar')
@@ -185,4 +189,27 @@ test('pending regeneration disables repeats while manual title input remains ava
   await page.getByTestId('release-write').click();
   await expect(row).toHaveText('Readable topic from first message');
   await expect(page.getByTestId('calls')).toHaveText('a:GenerateTitle');
+});
+
+test('row actions stay hidden until hover or keyboard focus (T3 Code single slot)', async ({
+  page,
+}) => {
+  await page.goto('/');
+  const rowEl = page.getByTestId('conversation-row').filter({
+    has: page.locator('[data-keyboard-item="b"]'),
+  });
+  const archive = rowEl.getByTestId('conversation-archive');
+  await page.mouse.move(0, 0);
+  await expect(archive).toHaveCSS('opacity', '0');
+  await expect(archive).toHaveCSS('pointer-events', 'none');
+  await expect(page.getByTestId('conversation-select-toggle')).toHaveCount(0);
+  await rowEl.hover();
+  await expect(archive).toHaveCSS('opacity', '1');
+  await expect(archive).toHaveCSS('pointer-events', 'auto');
+  await page.mouse.move(0, 0);
+  await expect(archive).toHaveCSS('opacity', '0');
+  await page.locator('[data-keyboard-item="b"]').focus();
+  await page.keyboard.press('ArrowDown');
+  await page.keyboard.press('ArrowUp');
+  await expect(archive).toHaveCSS('opacity', '1');
 });
