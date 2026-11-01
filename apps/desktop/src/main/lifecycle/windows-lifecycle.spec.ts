@@ -39,7 +39,7 @@ describe('Windows shell lifecycle', () => {
     configureCloseBehavior: vi.fn(),
     setStartupHidden: vi.fn(),
     transitionToMainWindow: vi.fn(async () => {}),
-    createProfileAccessWindow: vi.fn(),
+    createProfileAccessWindow: vi.fn(() => window),
     getActiveWindow: vi.fn(() => null),
     getMainWindow: vi.fn(() => window),
     getProfileAccessWindow: vi.fn(),
@@ -49,10 +49,6 @@ describe('Windows shell lifecycle', () => {
   const runtime = {
     profileRuntimeManager: {
       getStartupProfile: vi.fn(async () => ({ profileId: 'a', profileKind: 'registered' })),
-      activateStartupProfile: vi.fn(async () => ({
-        descriptor: { profileId: 'a' },
-        profileResolver: { mainWindowStatePath: '/unused' },
-      })),
       getActiveProfileResolver: vi.fn(),
       deactivateProfile: vi.fn(async () => {}),
     },
@@ -215,21 +211,33 @@ describe('Windows shell lifecycle', () => {
     await ready;
     await vi.waitFor(() => expect(manager.focusActiveWindow).toHaveBeenCalledTimes(1));
   });
-  it('recreates a destroyed window through the password gate even when a notification window survives', async () => {
+  it('recreates a destroyed window through the identity gate and drops the stale runtime', async () => {
     await register();
     new BrowserWindow({});
     manager.focusActiveWindow.mockReturnValue(false);
     runtime.profileRuntimeManager.getStartupProfile.mockResolvedValue({
       profileId: 'a',
-      profileKind: 'local',
+      profileKind: 'registered',
     });
     app.emit('activate');
     app.emit('activate');
     await vi.waitFor(() => expect(manager.createProfileAccessWindow).toHaveBeenCalledTimes(1));
-    expect(runtime.profileRuntimeManager.activateStartupProfile).toHaveBeenCalledTimes(1);
     expect(runtime.profileRuntimeManager.deactivateProfile).toHaveBeenCalledWith({
       preserveSelection: true,
     });
+    expect(manager.transitionToMainWindow).not.toHaveBeenCalled();
+  });
+
+  it('starts on the identity gate even when a registered Profile is the startup candidate', async () => {
+    runtime.profileRuntimeManager.getStartupProfile.mockResolvedValue({
+      profileId: 'a',
+      profileKind: 'registered',
+    });
+    await register();
+
+    expect(manager.createProfileAccessWindow).toHaveBeenCalledTimes(1);
+    expect(manager.transitionToMainWindow).not.toHaveBeenCalled();
+    expect(runtime.profileRuntimeManager.getStartupProfile).not.toHaveBeenCalled();
   });
 
   it('opens the empty account list instead of minting an identity when no Profile exists', async () => {
@@ -237,7 +245,6 @@ describe('Windows shell lifecycle', () => {
     await register();
 
     expect(manager.createProfileAccessWindow).toHaveBeenCalledTimes(1);
-    expect(runtime.profileRuntimeManager.activateStartupProfile).not.toHaveBeenCalled();
     expect(manager.transitionToMainWindow).not.toHaveBeenCalled();
   });
 

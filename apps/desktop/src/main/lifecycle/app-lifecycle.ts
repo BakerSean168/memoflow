@@ -9,8 +9,10 @@
  *
  * Desktop Profile 启动流程：
  * 1. 读取持久化 Profile 注册表（注册表为空时不创建任何身份）
- * 2. 本地账户一律先进入 Profile Access 输入密码；registered 直接打开
- * 3. Profile 打开后独立恢复云端连接，不以 cloud session 控制本地准入
+ * 2. 每次启动、macOS 恢复与第二实例恢复都先进入 Profile Access（快速登录窗）；
+ *    没有任何 Profile 会被自动打开，registered 亦不例外
+ * 3. 用户在身份窗内选择/解锁后才打开主窗口；Profile 打开后独立恢复云端连接，
+ *    不以 cloud session 控制本地准入
  *
  * @module lifecycle/app-lifecycle
  */
@@ -57,20 +59,15 @@ async function handleAppReady(
   const runtimeManager = mainRuntime.profileRuntimeManager;
   registerKeyboardHandlers(() => runtimeManager.getActiveProfileResolver());
 
-  // Local Profile is the desktop access gate. Cloud authentication is optional
-  // and must never decide whether local data can be opened.
+  // Profile Access is the startup gate. Local Profile access is the desktop
+  // access gate; cloud authentication is optional and must never decide whether
+  // local data can be opened. No Profile — registered included — is opened before
+  // the user passes the identity window.
+  //
+  // Profile Access 是唯一启动正门：包括 registered 在内，没有任何 Profile 会在
+  // 用户通过身份窗之前被自动打开。
   windowManager.setRuntimeManager(runtimeManager);
-  const startupProfile = await runtimeManager.getStartupProfile();
-  if (!startupProfile || startupProfile.profileKind === 'local') {
-    windowManager.createProfileAccessWindow();
-  } else {
-    const startup = await runtimeManager.activateStartupProfile();
-    await windowManager.transitionToMainWindow(
-      startup.descriptor.profileId,
-      startup.profileResolver.mainWindowStatePath,
-    );
-  }
-  const win = windowManager.getMainWindow() ?? windowManager.getProfileAccessWindow();
+  const win = windowManager.createProfileAccessWindow();
   console.log('[Lifecycle] Desktop Profile access initialized');
 
   // Initialize desktop capabilities via the CapabilityRegistry (degradation-gated).
@@ -138,24 +135,18 @@ async function handleAppReady(
     });
   }
 
-  // Restore through the local gate even if a notification/auxiliary window survives.
+  // Restore through the identity gate even if a notification/auxiliary window
+  // survives: reactivation never re-enters a Profile directly.
   let restoringWindow = false;
   app.on('activate', async () => {
     if (windowManager.focusActiveWindow() || windowManager.getActiveWindow() || restoringWindow)
       return;
     restoringWindow = true;
     try {
-      const candidate = await runtimeManager.getStartupProfile();
-      if (!candidate || candidate.profileKind === 'local') {
-        await runtimeManager.deactivateProfile({ preserveSelection: true });
-        windowManager.createProfileAccessWindow();
-      } else {
-        const startupProfile = await runtimeManager.activateStartupProfile();
-        await windowManager.transitionToMainWindow(
-          startupProfile.descriptor.profileId,
-          startupProfile.profileResolver.mainWindowStatePath,
-        );
-      }
+      // Drop any in-memory Profile runtime so the gate is a real gate again:
+      // selecting the same account must pass the gate before any data opens.
+      await runtimeManager.deactivateProfile({ preserveSelection: true });
+      windowManager.createProfileAccessWindow();
     } catch (error) {
       logger.error('Could not restore Desktop Profile gate', error);
       windowManager.createProfileAccessWindow();

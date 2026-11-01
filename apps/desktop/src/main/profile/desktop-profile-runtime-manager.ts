@@ -311,20 +311,13 @@ export class DesktopProfileRuntimeManager {
     return this.profileRegistry.findByIdentifier(identifier);
   }
 
-  async activateStartupProfile(): Promise<PreparedProfileRuntime> {
-    return this.runExclusive(async () => {
-      const descriptor = await this.getStartupProfile();
-      if (!descriptor) throw new Error('本机还没有本地账户');
-      return this.openProfileInTransition(descriptor.profileId);
-    });
-  }
-
   /**
    * Startup candidate. Never creates an identity: an empty registry yields
    * null so the shell presents the empty account list instead of silently
-   * minting an account with no password.
+   * minting an account with no password. The shell only uses it for diagnostics;
+   * it never opens the returned Profile on its own.
    *
-   * 启动不再静默创建身份：注册表为空时返回 null。
+   * 启动不再静默创建身份：注册表为空时返回 null；调用方不得据此自动打开 Profile。
    */
   async getStartupProfile(): Promise<ProfileDescriptor | null> {
     for (const profileId of await this.cleanup.pending()) {

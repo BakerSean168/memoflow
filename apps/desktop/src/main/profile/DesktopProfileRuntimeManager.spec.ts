@@ -75,6 +75,8 @@ describe('DesktopProfileRuntimeManager', () => {
 
   /** A cloud-bound Profile keeps its safeStorage key copy and needs no password. */
   const seedRegistered = (id = 'IdentityId_seed') => registry.register(id, 'Seed');
+  const openSeeded = async (id = 'IdentityId_seed') =>
+    runtime.openProfile((await seedRegistered(id)).profileId);
 
   const createLocal = (displayName: string) =>
     runtime.createLocalAccount(displayName, LOCAL_PASSWORD);
@@ -145,7 +147,7 @@ describe('DesktopProfileRuntimeManager', () => {
     expect(runtime.getActiveProfileId()).toBe(second.profileId);
     await runtime.deactivateProfile({ preserveSelection: true });
     expect((await runtime.getStartupProfile())?.profileId).toBe(second.profileId);
-    await expect(runtime.activateStartupProfile()).rejects.toThrow('密码');
+    await expect(runtime.openProfile(second.profileId)).rejects.toThrow('密码');
     await runtime.openProfile(second.profileId, LOCAL_PASSWORD);
     expect(runtime.getActiveProfileId()).toBe(second.profileId);
   }, 15_000);
@@ -275,8 +277,7 @@ describe('DesktopProfileRuntimeManager', () => {
   });
 
   it('locks the Profile without deleting its directory or registry entry', async () => {
-    await seedRegistered();
-    const prepared = await runtime.activateStartupProfile();
+    const prepared = await openSeeded();
     await runtime.deactivateProfile();
 
     expect(runtime.getActiveProfileId()).toBeNull();
@@ -287,8 +288,7 @@ describe('DesktopProfileRuntimeManager', () => {
   });
 
   it('preserves the selected Profile when releasing runtime resources for shutdown', async () => {
-    await seedRegistered();
-    const prepared = await runtime.activateStartupProfile();
+    const prepared = await openSeeded();
 
     await runtime.deactivateProfile({ preserveSelection: true });
 
@@ -298,8 +298,7 @@ describe('DesktopProfileRuntimeManager', () => {
   });
 
   it('withdraws local access after teardown even if the database close fails, and retries the close', async () => {
-    await seedRegistered();
-    await runtime.activateStartupProfile();
+    await openSeeded();
     mocks.shutdownPowerSync.mockRejectedValueOnce(new Error('database close failed'));
     await expect(runtime.deactivateProfile()).rejects.toThrow('database close failed');
     expect(runtime.getActiveProfileId()).toBeNull();
@@ -343,8 +342,7 @@ describe('DesktopProfileRuntimeManager', () => {
           finishInit = resolve;
         }),
     );
-    await seedRegistered();
-    const activation = runtime.activateStartupProfile();
+    const activation = openSeeded();
     await vi.waitFor(() => expect(mocks.bootstrapInit).toHaveBeenCalledOnce());
     let locked = false;
     const locking = runtime.deactivateProfile().then(() => {
@@ -373,8 +371,7 @@ describe('DesktopProfileRuntimeManager', () => {
           finishOpen = () => resolve(database as never);
         }),
     );
-    await seedRegistered();
-    const selection = runtime.activateStartupProfile();
+    const selection = openSeeded();
     await vi.waitFor(() => expect(openPowerSyncLocalOnly).toHaveBeenCalledOnce());
     let locked = false;
     const locking = runtime.deactivateProfile().then(() => {
@@ -422,8 +419,7 @@ describe('DesktopProfileRuntimeManager', () => {
     mocks.shutdownPowerSync.mockImplementation(async () => {
       closedDuringBootstrap ||= !bootstrapFinished;
     });
-    await seedRegistered();
-    const firstSelection = runtime.activateStartupProfile();
+    const firstSelection = openSeeded();
     await vi.waitFor(() => expect(openPowerSyncLocalOnly).toHaveBeenCalledOnce());
     const secondProfile = await registry.register('IdentityId_other', 'Other');
     const secondPreparation = runtime.openProfile(secondProfile.profileId);
@@ -439,8 +435,7 @@ describe('DesktopProfileRuntimeManager', () => {
     const beforeDeactivation = vi.fn();
     runtime.setBeforeDeactivation(beforeDeactivation);
 
-    await seedRegistered();
-    await runtime.activateStartupProfile();
+    await openSeeded();
     await runtime.deactivateProfile();
 
     expect(beforeDeactivation).toHaveBeenCalledOnce();
@@ -455,8 +450,7 @@ describe('DesktopProfileRuntimeManager', () => {
     });
     runtime.setBeforeDeactivation(beforeDeactivation);
 
-    await seedRegistered();
-    const prepared = await runtime.activateStartupProfile();
+    const prepared = await openSeeded();
 
     await expect(runtime.deactivateProfile()).rejects.toThrow('routine occurrence flush failed');
 
@@ -470,9 +464,7 @@ describe('DesktopProfileRuntimeManager', () => {
     const beforeDeactivation = vi.fn();
     runtime.setBeforeDeactivation(beforeDeactivation);
     mocks.bootstrapInit.mockRejectedValueOnce(new Error('init failed'));
-    await seedRegistered();
-
-    await expect(runtime.activateStartupProfile()).rejects.toThrow('init failed');
+    await expect(openSeeded()).rejects.toThrow('init failed');
 
     expect(beforeDeactivation).toHaveBeenCalledOnce();
     expect(beforeDeactivation.mock.invocationCallOrder[0]).toBeLessThan(
@@ -484,8 +476,7 @@ describe('DesktopProfileRuntimeManager', () => {
     runtime.setAfterActivation(async () => {
       throw new Error('offline');
     });
-    await seedRegistered();
-    const prepared = await runtime.activateStartupProfile();
+    const prepared = await openSeeded();
     expect(runtime.getActiveProfileId()).toBe(prepared.descriptor.profileId);
   });
 
