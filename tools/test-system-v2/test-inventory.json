@@ -5252,6 +5252,16 @@
       ]
     },
     {
+      "path": "packages/app-vue/src/shared/components/DesktopProfileList.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/app-vue/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "packages/app-vue/vitest.store-coverage.config.ts"
+      ]
+    },
+    {
       "path": "packages/app-vue/src/shared/components/KeyboardHelp.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -5463,6 +5473,16 @@
     },
     {
       "path": "packages/app-vue/src/shared/components/ResponsiveSegmentedFilter.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/app-vue/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "packages/app-vue/vitest.store-coverage.config.ts"
+      ]
+    },
+    {
+      "path": "packages/app-vue/src/shared/composables/useDesktopProfiles.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/app-vue/vitest.config.ts"
@@ -12761,7 +12781,7 @@
       "type": "measurement",
       "suite": "coverage",
       "runner": "vitest",
-      "fileCount": 90
+      "fileCount": 92
     },
     {
       "id": "packages/data-portability/vitest.config.ts",
@@ -13296,7 +13316,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 90
+      "fileCount": 92
     },
     {
       "id": "packages/assets/vitest.config.ts",
@@ -13962,6 +13982,7 @@
       "packages/app-vue/src/router/guards.spec.ts",
       "packages/app-vue/src/router/index.spec.ts",
       "packages/app-vue/src/shared/components/CapsulePreviewShell.spec.ts",
+      "packages/app-vue/src/shared/components/DesktopProfileList.spec.ts",
       "packages/app-vue/src/shared/components/KeyboardHelp.spec.ts",
       "packages/app-vue/src/shared/components/LabelCommandPanel.spec.ts",
       "packages/app-vue/src/shared/components/LabelFilterPopover.spec.ts",
@@ -13984,6 +14005,7 @@
       "packages/app-vue/src/shared/components/ReleaseNotes.spec.ts",
       "packages/app-vue/src/shared/components/ResponsivePrimaryAction.spec.ts",
       "packages/app-vue/src/shared/components/ResponsiveSegmentedFilter.spec.ts",
+      "packages/app-vue/src/shared/composables/useDesktopProfiles.spec.ts",
       "packages/app-vue/src/shared/composables/useLabelCatalog.spec.ts",
       "packages/app-vue/src/shared/composables/useRouteDialogState.spec.ts",
       "packages/app-vue/src/shared/dialog-content-forwarding.spec.ts",
@@ -14337,7 +14359,7 @@
   "duplicate": [],
   "unexpected": [],
   "counts": {
-    "unit": 1178,
+    "unit": 1180,
     "integration": 58,
     "smoke": 3,
     "boundary-ipc": 6,
