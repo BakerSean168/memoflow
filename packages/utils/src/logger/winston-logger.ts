@@ -13,10 +13,14 @@
  *
  * Error entries always use the same structured `{ error: { name, message,
  * stack } }` shape regardless of whether the logger is a root or a child, so
- * log pipelines can rely on one schema.
+ * log pipelines can rely on one schema. The same shape applies to any `Error`
+ * nested anywhere in meta on any level, because winston's `JSON` format would
+ * otherwise serialize it as `{}`.
  *
  * error 条目统一使用 `{ error: { name, message, stack } }` 结构，无论 logger
- * 是根实例还是 child 实例，日志管线只依赖同一 schema。
+ * 是根实例还是 child 实例，日志管线只依赖同一 schema。任意级别 meta 中任意
+ * 层嵌套的 `Error` 也使用同一结构，否则 winston 的 `JSON` 格式会把它序列化成
+ * `{}`。
  */
 
 import * as winston from 'winston';
@@ -118,6 +122,85 @@ function createRootWinstonLogger(context: string, options?: winston.LoggerOption
 }
 
 /**
+ * Maximum object depth walked when normalizing meta. Deeper values are passed
+ * through untouched, so a pathological payload cannot cost unbounded work.
+ *
+ * 规范化 meta 时遍历的最大对象深度；更深的值原样透传，避免异常负载带来无界开销。
+ */
+const MAX_META_DEPTH = 6;
+
+/**
+ * Replaces every `Error` reachable from `value` with the structured
+ * `{ name, message, stack }` shape.
+ *
+ * Only plain objects and arrays are copied; any other value (Date, Buffer, class
+ * instance, primitive) is returned by identity so untouched payloads keep their
+ * exact pre-existing shape. A value with no nested Error is also returned by
+ * identity. Cycles resolve to the already-visited value, so traversal always
+ * terminates.
+ *
+ * 把 `value` 可达的每个 `Error` 替换为结构化 `{ name, message, stack }`。
+ *
+ * 只复制普通对象与数组；其他值（Date、Buffer、类实例、原始值）原样返回，
+ * 未被改动的负载保持与改动前完全一致的形状。不含 Error 的值同样原样返回。
+ * 循环引用解析为已访问值，遍历必然终止。
+ *
+ * @param value - Meta value to normalize.
+ * @param depth - Current traversal depth.
+ * @param seen - Objects on the current traversal path, used to break cycles.
+ * @returns The normalized value, or `value` itself when nothing was replaced.
+ */
+function normalizeMetaErrors(value: unknown, depth = 0, seen = new WeakSet<object>()): unknown {
+  if (value instanceof Error) {
+    return { name: value.name, message: value.message, stack: value.stack };
+  }
+  if (depth >= MAX_META_DEPTH || typeof value !== 'object' || value === null) return value;
+
+  const isArray = Array.isArray(value);
+  if (!isArray) {
+    const prototype = Object.getPrototypeOf(value);
+    if (prototype !== Object.prototype && prototype !== null) return value;
+  }
+  if (seen.has(value)) return value;
+  seen.add(value);
+
+  let changed = false;
+  let normalized: unknown;
+  if (isArray) {
+    const items = (value as unknown[]).map((item) => {
+      const nextItem = normalizeMetaErrors(item, depth + 1, seen);
+      if (nextItem !== item) changed = true;
+      return nextItem;
+    });
+    normalized = changed ? items : value;
+  } else {
+    const source = value as Record<string, unknown>;
+    const next: Record<string, unknown> = {};
+    for (const key of Object.keys(source)) {
+      const item = source[key];
+      const nextItem = normalizeMetaErrors(item, depth + 1, seen);
+      if (nextItem !== item) changed = true;
+      next[key] = nextItem;
+    }
+    normalized = changed ? next : value;
+  }
+
+  seen.delete(value);
+  return normalized;
+}
+
+/**
+ * Normalizes every meta argument of a log call.
+ * 规范化一次日志调用中的全部 meta 参数。
+ *
+ * @param meta - Raw meta arguments passed to a logger method.
+ * @returns Meta arguments with nested Errors replaced.
+ */
+function normalizeMetaArgs(meta: unknown[]): unknown[] {
+  return meta.map((entry) => normalizeMetaErrors(entry));
+}
+
+/**
  * Winston-backed `ILogger` implementation.
  * 基于 Winston 的 `ILogger` 实现。
  *
@@ -154,27 +237,27 @@ export class WinstonLogger implements ILogger {
   }
 
   debug(message: string, ...meta: unknown[]): void {
-    this.logger.debug(message, ...meta);
+    this.logger.debug(message, ...normalizeMetaArgs(meta));
   }
 
   info(message: string, ...meta: unknown[]): void {
-    this.logger.info(message, ...meta);
+    this.logger.info(message, ...normalizeMetaArgs(meta));
   }
 
   http(message: string, ...meta: unknown[]): void {
-    this.logger.http(message, ...meta);
+    this.logger.http(message, ...normalizeMetaArgs(meta));
   }
 
   warn(message: string, ...meta: unknown[]): void {
-    this.logger.warn(message, ...meta);
+    this.logger.warn(message, ...normalizeMetaArgs(meta));
   }
 
   error(message: string, error?: unknown, ...meta: unknown[]): void {
     const structuredError =
       error instanceof Error
         ? { message: error.message, stack: error.stack, name: error.name }
-        : error;
-    this.logger.error(message, { ...meta, error: structuredError });
+        : normalizeMetaErrors(error);
+    this.logger.error(message, { ...normalizeMetaArgs(meta), error: structuredError });
   }
 
   /**

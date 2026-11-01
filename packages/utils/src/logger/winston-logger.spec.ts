@@ -165,6 +165,107 @@ describe('WinstonLogger (RefArch Phase 6)', () => {
     expect(entry.error).toMatchObject({ name: 'Error', message: 'nested' });
   });
 
+  it('normalizes an Error passed as warn() meta under the error key', () => {
+    const collecting = new CollectingTransport();
+    const logger = createTestLogger('API', collecting);
+    const failure = new Error('disk full');
+
+    logger.warn('profile switch failed', { error: failure });
+
+    const entry = collecting.entries[0]!;
+    expect(JSON.stringify(entry.error)).not.toBe('{}');
+    expect(entry.error).not.toBeInstanceOf(Error);
+    expect(entry.error).toMatchObject({ name: 'Error', message: 'disk full' });
+    expect((entry.error as { stack?: string }).stack).toBeTruthy();
+    expect(entry.message).toBe('profile switch failed');
+  });
+
+  it('normalizes an Error nested two levels deep in info() meta', () => {
+    const collecting = new CollectingTransport();
+    const logger = createTestLogger('API', collecting);
+    const failure = new Error('inner cause');
+
+    logger.info('nested meta', { error: { error: failure } });
+
+    const entry = collecting.entries[0]!;
+    const inner = (entry.error as { error: Record<string, unknown> }).error;
+    expect(JSON.stringify(inner)).not.toBe('{}');
+    expect(inner).not.toBeInstanceOf(Error);
+    expect(inner).toMatchObject({ name: 'Error', message: 'inner cause' });
+    expect(inner.stack).toBeTruthy();
+  });
+
+  it('leaves non-Error meta structurally identical to the raw values', () => {
+    const collecting = new CollectingTransport();
+    const logger = createTestLogger('API', collecting);
+    const at = new Date('2026-01-02T03:04:05.000Z');
+    const meta = {
+      requestId: 'r-2',
+      attempt: 0,
+      enabled: false,
+      missing: null,
+      at,
+      nested: { list: [1, 'two', { deep: true }] },
+    };
+
+    logger.warn('plain meta', meta);
+
+    const entry = collecting.entries[0]!;
+    expect(entry.requestId).toBe('r-2');
+    expect(entry.attempt).toBe(0);
+    expect(entry.enabled).toBe(false);
+    expect(entry.missing).toBeNull();
+    expect(entry.at).toEqual(at);
+    expect(entry).toMatchObject({ nested: { list: [1, 'two', { deep: true }] } });
+    expect(entry.message).toBe('plain meta');
+  });
+
+  it('keeps the dedicated error(message, error) shape unchanged', () => {
+    const collecting = new CollectingTransport();
+    const logger = createTestLogger('API', collecting);
+
+    logger.error('boom', new Error('kaboom'));
+
+    const entry = collecting.entries[0]!;
+    expect(Object.keys(entry.error as object)).toEqual(['message', 'stack', 'name']);
+    expect(entry.error).toMatchObject({ name: 'Error', message: 'kaboom' });
+  });
+
+  it('does not throw when meta contains a circular reference', () => {
+    const collecting = new CollectingTransport();
+    const logger = createTestLogger('API', collecting);
+    const cyclic: Record<string, unknown> = { stage: 'compose' };
+    cyclic.self = cyclic;
+
+    expect(() => logger.warn('cyclic meta', cyclic)).not.toThrow();
+    expect(collecting.entries[0]!.message).toBe('cyclic meta');
+  });
+
+  it('serializes a warn meta Error as JSON on the production console', () => {
+    vi.stubEnv('NODE_ENV', 'production');
+    stubTempLogDir();
+
+    const writeSpy = spyConsoleWrite();
+    try {
+      const root = new WinstonLogger('API', { level: 'info' });
+      openLoggers.push(root);
+      root.warn('json console warn', { profileId: 'guest-1', error: new Error('destroyed') });
+
+      const output = writeSpy.mock.calls.map((call) => String(call[0])).join('');
+      const parsedLines = output
+        .split('\n')
+        .filter((line) => line.trim().length > 0)
+        .map((line) => JSON.parse(line));
+      const entry = parsedLines.find((line) => line.message === 'json console warn');
+
+      expect(entry?.profileId).toBe('guest-1');
+      expect(entry?.error).toMatchObject({ name: 'Error', message: 'destroyed' });
+      expect((entry?.error as { stack?: string }).stack).toBeTruthy();
+    } finally {
+      writeSpy.mockRestore();
+    }
+  });
+
   it('root context logs are machine-parseable JSON on the console in production', () => {
     vi.stubEnv('NODE_ENV', 'production');
     stubTempLogDir();

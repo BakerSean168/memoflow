@@ -3,6 +3,9 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { ProfileAccessChannels } from '@memoflow/desktop-contracts';
 import { registerProfileAccessIpc } from './profile-access-ipc';
 
+const accessLogs = vi.hoisted(() => ({ info: vi.fn(), warn: vi.fn(), error: vi.fn() }));
+vi.mock('@memoflow/utils/logger', () => ({ createLogger: () => accessLogs }));
+
 type Handler = (_event: unknown, input?: unknown) => Promise<unknown>;
 
 describe('registerProfileAccessIpc', () => {
@@ -98,6 +101,58 @@ describe('registerProfileAccessIpc', () => {
       ),
     ).toMatchObject({ ok: true });
     expect(runtime.openProfile).toHaveBeenCalledWith('second-guest', '123456');
+    expect(accessLogs.warn).not.toHaveBeenCalled();
+  });
+
+  it('logs the target Profile and the error when a direct selection fails', async () => {
+    const handlers = new Map<string, Handler>();
+    vi.mocked(ipcMain.handle).mockImplementation((channel, handler) => {
+      handlers.set(channel, handler as Handler);
+    });
+    const failure = new Error('Object has been destroyed');
+    const registry = {
+      list: vi.fn(async () => [{ profileId: 'guest-2', displayName: 'Guest Two' }]),
+    };
+    const runtime = {
+      getActiveProfileId: () => null,
+      openProfile: vi.fn().mockRejectedValue(failure),
+    };
+    registerProfileAccessIpc(registry as never, runtime as never, {} as never);
+
+    expect(
+      await handlers.get(ProfileAccessChannels.SELECT)?.({}, { profileId: 'guest-2' }),
+    ).toMatchObject({ ok: false, error: { code: 'PROFILE_OPEN_FAILED' } });
+    expect(accessLogs.warn).toHaveBeenCalledTimes(1);
+    expect(accessLogs.warn).toHaveBeenCalledWith('Selected Profile could not be opened', {
+      profileId: 'guest-2',
+      profileName: 'Guest Two',
+      error: failure,
+    });
+  });
+
+  it('still reports the failure when the Profile name lookup throws', async () => {
+    const handlers = new Map<string, Handler>();
+    vi.mocked(ipcMain.handle).mockImplementation((channel, handler) => {
+      handlers.set(channel, handler as Handler);
+    });
+    const registry = {
+      list: vi.fn(async () => {
+        throw new Error('registry unreadable');
+      }),
+    };
+    const runtime = {
+      getActiveProfileId: () => null,
+      openProfile: vi.fn().mockRejectedValue(new Error('Object has been destroyed')),
+    };
+    registerProfileAccessIpc(registry as never, runtime as never, {} as never);
+
+    expect(
+      await handlers.get(ProfileAccessChannels.SELECT)?.({}, { profileId: 'guest-3' }),
+    ).toMatchObject({ ok: false, error: { code: 'PROFILE_OPEN_FAILED' } });
+    expect(accessLogs.warn).toHaveBeenCalledWith(
+      'Selected Profile could not be opened',
+      expect.objectContaining({ profileId: 'guest-3', profileName: undefined }),
+    );
   });
 
   it('refuses to remove the active Profile', async () => {
