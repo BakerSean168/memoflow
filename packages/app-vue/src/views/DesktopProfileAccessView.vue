@@ -86,7 +86,7 @@ onMounted(async () => {
 <template>
   <main class="flex h-full w-full items-center justify-center text-foreground">
     <section
-      v-if="accessView === 'select'"
+      v-if="accessView === 'select' || !passwordTarget"
       class="flex w-full max-w-xl flex-col items-center gap-6"
       data-testid="desktop-profile-access"
     >
@@ -193,7 +193,7 @@ onMounted(async () => {
     </section>
 
     <section
-      v-else-if="passwordTarget"
+      v-else
       class="flex w-full max-w-xs flex-col items-center gap-4"
       data-testid="desktop-profile-password-state"
     >
