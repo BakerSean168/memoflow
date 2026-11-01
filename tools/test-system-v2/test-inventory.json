@@ -9977,6 +9977,26 @@
       ]
     },
     {
+      "path": "packages/scheduler/src/server/infrastructure/adapters/powersync/__tests__/powersync-scheduled-invocation.mapper.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/scheduler/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "packages/scheduler/vitest.config.ts"
+      ]
+    },
+    {
+      "path": "packages/scheduler/src/server/infrastructure/adapters/powersync/__tests__/scheduled-invocation-reconcile.powersync.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/scheduler/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "packages/scheduler/vitest.config.ts"
+      ]
+    },
+    {
       "path": "packages/scheduler/src/server/infrastructure/adapters/powersync/__tests__/scheduled-invocation-save.powersync.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -12796,7 +12816,7 @@
       "type": "measurement",
       "suite": "coverage",
       "runner": "vitest",
-      "fileCount": 16
+      "fileCount": 18
     },
     {
       "id": "packages/scheduler/vitest.mappers.config.ts",
@@ -13562,7 +13582,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 16
+      "fileCount": 18
     },
     {
       "id": "packages/setting-client/vitest.config.ts",
@@ -14198,6 +14218,8 @@
       "packages/scheduler/src/server/domain/entities/__tests__/invocation-attempt.spec.ts",
       "packages/scheduler/src/server/domain/entities/__tests__/scheduled-invocation.spec.ts",
       "packages/scheduler/src/server/infrastructure/__tests__/scheduler-repositories.surface.spec.ts",
+      "packages/scheduler/src/server/infrastructure/adapters/powersync/__tests__/powersync-scheduled-invocation.mapper.spec.ts",
+      "packages/scheduler/src/server/infrastructure/adapters/powersync/__tests__/scheduled-invocation-reconcile.powersync.spec.ts",
       "packages/scheduler/src/server/infrastructure/adapters/powersync/__tests__/scheduled-invocation-save.powersync.spec.ts",
       "packages/scheduler/src/server/infrastructure/adapters/powersync/__tests__/scheduler-powersync-rows-affected.spec.ts",
       "packages/scheduler/src/server/infrastructure/adapters/prisma/mappers/prisma-scheduled-invocation.mapper.spec.ts",
@@ -14307,7 +14329,7 @@
   "duplicate": [],
   "unexpected": [],
   "counts": {
-    "unit": 1175,
+    "unit": 1177,
     "integration": 58,
     "smoke": 3,
     "boundary-ipc": 6,

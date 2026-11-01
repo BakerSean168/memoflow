@@ -185,6 +185,27 @@ describe('ScheduledInvocationSchedulingAdapter', () => {
     });
   });
 
+  it('treats a persisted string revision that equals the desired number as unchanged', async () => {
+    const owner = { identityId: 'identity-1', type: 'routine.routine', id: 'routine-1' };
+    const stored = makeIntent(owner, { sourceRevision: '1' });
+    const fixture = createRepository([materialize(owner, stored, 'dead_letter')]);
+    const port = createScheduledInvocationSchedulingPort(fixture.repository, {
+      now: () => 1_800_000_004_000,
+      operationIdFactory: () => 'operation:terminal-serialized-revision',
+    });
+
+    const receipt = await port.reconcile(owner, [makeIntent(owner)]);
+
+    expect(receipt).toMatchObject({
+      status: 'succeeded',
+      createdCount: 0,
+      updatedCount: 0,
+      deletedCount: 0,
+      unchangedCount: 1,
+    });
+    expect(fixture.current()[0]?.status).toBe('dead_letter');
+  });
+
   it('still rejects reuse of an execution-terminal stable scheduling identity with changed semantics', async () => {
     const owner = { identityId: 'identity-1', type: 'routine.routine', id: 'routine-1' };
     const original = makeIntent(owner);
@@ -193,6 +214,26 @@ describe('ScheduledInvocationSchedulingAdapter', () => {
     const port = createScheduledInvocationSchedulingPort(fixture.repository, {
       now: () => 1_800_000_003_000,
       operationIdFactory: () => 'operation:terminal-collision',
+    });
+
+    await expect(port.reconcile(owner, [changed])).rejects.toMatchObject({
+      name: SchedulingReconcileError.name,
+      receipt: {
+        status: 'failed',
+        failure: { code: 'PERSISTED_KEY_COLLISION', retryable: false },
+      },
+    });
+    expect(fixture.current()[0]?.status).toBe('succeeded');
+  });
+
+  it('still rejects a real revision change when the persisted revision is a string', async () => {
+    const owner = { identityId: 'identity-1', type: 'routine.routine', id: 'routine-1' };
+    const stored = makeIntent(owner, { sourceRevision: '1' });
+    const changed = makeIntent(owner, { sourceRevision: 2 });
+    const fixture = createRepository([materialize(owner, stored, 'succeeded')]);
+    const port = createScheduledInvocationSchedulingPort(fixture.repository, {
+      now: () => 1_800_000_005_000,
+      operationIdFactory: () => 'operation:terminal-serialized-revision-changed',
     });
 
     await expect(port.reconcile(owner, [changed])).rejects.toMatchObject({

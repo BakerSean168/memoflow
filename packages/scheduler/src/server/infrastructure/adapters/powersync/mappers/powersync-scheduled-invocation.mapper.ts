@@ -61,6 +61,20 @@ function bool(value: number | boolean): boolean {
   return value === true || value === 1;
 }
 
+const TIME_ZONE_SUFFIX = /(?:[zZ]|[+-]\d{2}:?\d{2})$/;
+
+/**
+ * 云端同步下来的时间列是 PostgreSQL 风格的朴素 UTC 串（如 `2026-10-25T12:00:00.000000`），
+ * 缺少时区后缀时会被 `new Date()` 按主机本地时间解析，非 UTC 主机会整体漂移。
+ * 本地写入的行带 `Z` 后缀，不受影响，这里只补齐缺失的 UTC 标记。
+ */
+function parseTimestamp(value: string | null): number {
+  // 旧行为下 `new Date(null)` 得到 epoch 0；列缺失时保持该结果，不抛错。
+  if (value === null) return 0;
+  const text = value.trim();
+  return new Date(TIME_ZONE_SUFFIX.test(text) ? text : `${text}Z`).getTime();
+}
+
 export class PowerSyncScheduledInvocationMapper {
   static toDomain(row: PowerSyncScheduledInvocationRow): ScheduledInvocation {
     const tags = parseJson(row.tags, []);
@@ -73,7 +87,7 @@ export class PowerSyncScheduledInvocationMapper {
       handlerKey: row.handler_key,
       payloadVersion: row.payload_version,
       payload: parseJson(row.payload, null),
-      runAt: new Date(row.run_at).getTime(),
+      runAt: parseTimestamp(row.run_at),
       sourceRevision: row.source_revision,
       retryPolicy: {
         enabled: bool(row.retry_enabled),
@@ -86,13 +100,13 @@ export class PowerSyncScheduledInvocationMapper {
       timeoutMs: row.timeout_ms,
       status: row.status as ScheduledInvocation['status'],
       attemptCount: row.attempt_count,
-      nextAttemptAt: row.next_attempt_at ? new Date(row.next_attempt_at).getTime() : null,
+      nextAttemptAt: row.next_attempt_at ? parseTimestamp(row.next_attempt_at) : null,
       claimToken: row.claim_token,
-      claimExpiresAt: row.claim_expires_at ? new Date(row.claim_expires_at).getTime() : null,
+      claimExpiresAt: row.claim_expires_at ? parseTimestamp(row.claim_expires_at) : null,
       fencingToken: row.fencing_token,
       observability: { name: row.name, tags: Array.isArray(tags) ? tags.map(String) : [] },
-      createdAt: new Date(row.created_at).getTime(),
-      updatedAt: new Date(row.updated_at).getTime(),
+      createdAt: parseTimestamp(row.created_at),
+      updatedAt: parseTimestamp(row.updated_at),
     };
   }
 
@@ -142,8 +156,8 @@ export class PowerSyncInvocationAttemptMapper {
       identityId: row.identity_id,
       invocationId: row.invocation_id,
       attemptNumber: row.attempt_number,
-      startedAt: new Date(row.started_at).getTime(),
-      finishedAt: row.finished_at ? new Date(row.finished_at).getTime() : null,
+      startedAt: parseTimestamp(row.started_at),
+      finishedAt: row.finished_at ? parseTimestamp(row.finished_at) : null,
       outcome: row.outcome as InvocationAttempt['outcome'],
       result:
         result && typeof result === 'object' && !Array.isArray(result)
@@ -155,7 +169,7 @@ export class PowerSyncInvocationAttemptMapper {
       workerId: row.worker_id,
       claimToken: row.claim_token,
       fencingToken: row.fencing_token,
-      createdAt: new Date(row.created_at).getTime(),
+      createdAt: parseTimestamp(row.created_at),
     };
   }
 
