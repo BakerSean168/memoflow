@@ -61,20 +61,21 @@ export function useGoalSurfaceStatus(status: Ref<GoalSurfaceStatus>): void {
 }
 
 /**
- * Host leave protocol for the current business surface: returns true when the
+ * Host leave protocol for the current business surface: resolves true when the
  * navigation may proceed; false when it was declined (busy hint or the user
- * cancelled the dirty confirmation).
+ * cancelled the dirty confirmation). Async because the host confirms through
+ * the shared in-app dialog.
  */
 export type GoalSurfaceLeaveGuard = (
   t?: (key: string) => string,
   to?: RouteLocationNormalized,
-) => boolean;
+) => Promise<boolean>;
 
 export const GoalSurfaceLeaveGuardKey: InjectionKey<GoalSurfaceLeaveGuard> =
   Symbol('GoalSurfaceLeaveGuard');
 
 export function useGoalSurfaceLeaveGuard(): GoalSurfaceLeaveGuard {
-  return inject(GoalSurfaceLeaveGuardKey, () => true);
+  return inject(GoalSurfaceLeaveGuardKey, async () => true);
 }
 
 export interface GoalAIEditSurface {

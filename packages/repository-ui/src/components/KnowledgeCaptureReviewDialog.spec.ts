@@ -7,6 +7,7 @@ import { KeepAlive, defineComponent, h, ref } from 'vue';
 import { mount, flushPromises } from '@vue/test-utils';
 import { createI18n } from 'vue-i18n';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { _getConfirmState, _resolveConfirm } from '@memoflow/ui-vue-shadcn';
 import { KnowledgeDraftSchema } from '@memoflow/ai-contracts';
 import type {
   KnowledgeCaptureSourceOption,
@@ -15,6 +16,7 @@ import type {
 import KnowledgeCaptureReviewDialog from './KnowledgeCaptureReviewDialog.vue';
 
 const host = vi.hoisted(() => ({ register: vi.fn(), unregister: vi.fn() }));
+
 vi.mock('@repository-ui-test-host/layouts/shell/useKnowledgeNativeSurface', () => ({
   useKnowledgeNativeSurfaceRegistration: () => host,
 }));
@@ -59,6 +61,7 @@ function setup(options: KnowledgeCaptureSourceOption[] = [option], pinia: Pinia 
 }
 beforeEach(() => {
   vi.clearAllMocks();
+  _resolveConfirm(false);
   host.register.mockReturnValue(host.unregister);
 });
 installRepositoryUiHost();
@@ -80,8 +83,8 @@ describe('Repository native Knowledge review', () => {
     expect(shell.surfaceStatus).toBe('dirty');
     const before = session.readDraftState().draft;
     const originalConfirm = window.confirm;
-    const confirm = vi.fn(() => false);
-    window.confirm = confirm;
+    const nativeConfirm = vi.fn(() => false);
+    window.confirm = nativeConfirm;
     const leave = () =>
       canLeaveAIWorkflowReview(
         'knowledge-capture',
@@ -89,14 +92,27 @@ describe('Repository native Knowledge review', () => {
         () => canLeaveBusinessSurface((key) => key),
         vi.fn(),
       );
-    expect(leave()).toBe(false);
+    const pending = leave();
+    // The shared dialog opens synchronously before the first await; this spec
+    // resolves it through the real singleton because app-vue's host modules pull
+    // the protocol in at setup time, before vi.mock could substitute useConfirm.
+    expect(_getConfirmState()).toMatchObject({
+      open: true,
+      title: 'shell.panel.dirtyTransitionConfirmTitle',
+      description: 'shell.panel.dirtyTransitionConfirm',
+      confirmText: 'common.confirm',
+      cancelText: 'common.cancel',
+      variant: 'destructive',
+    });
+    _resolveConfirm(false);
+    await expect(pending).resolves.toBe(false);
     expect(session.readDraftState().draft).toEqual(before);
     expect(wrapper.emitted('update:open')).toBeUndefined();
     session.setEditingBlocked(true);
     await flushPromises();
     expect(shell.surfaceStatus).toBe('busy');
-    expect(leave()).toBe(false);
-    expect(confirm).toHaveBeenCalledTimes(1);
+    await expect(leave()).resolves.toBe(false);
+    expect(nativeConfirm).not.toHaveBeenCalled();
     expect(session.readDraftState().draft).toEqual(before);
     window.confirm = originalConfirm;
     wrapper.unmount();

@@ -94,6 +94,7 @@ export default {
     closeTab: '关闭标签',
     resize: '调整业务面板宽度',
     dirtyTransitionConfirm: '当前表单还有未保存内容，仍要切换吗？草稿会在当前弹窗生命周期内保留。',
+    dirtyTransitionConfirmTitle: '仍要离开当前表单？',
     busyTransitionHint: '当前操作正在处理中，完成后即可切换。',
     enterFocus: '专注工作区',
     exitFocus: '退出专注工作区',

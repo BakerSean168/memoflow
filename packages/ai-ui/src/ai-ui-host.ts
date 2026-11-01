@@ -148,7 +148,10 @@ export interface AiUiHost extends PlatformRendererHost {
       | undefined;
     openTab(input: { module: 'goal'; route: string; title: string; intent: 'deeplink' }): unknown;
   };
-  canLeaveBusinessSurface(t?: (key: string) => string, to?: RouteLocationNormalized): boolean;
+  canLeaveBusinessSurface(
+    t?: (key: string) => string,
+    to?: RouteLocationNormalized,
+  ): Promise<boolean>;
   renderSafeMarkdown(source: string): string;
   semanticElevationClass(value: 'inset' | 'raised' | 'floating' | 'floating-interactive'): string;
   semanticToneStatusClass(

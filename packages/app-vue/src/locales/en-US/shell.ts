@@ -96,6 +96,7 @@ export default {
     resize: 'Resize business panel',
     dirtyTransitionConfirm:
       'This form has unsaved changes. Switch anyway? The draft remains available while the dialog stays open.',
+    dirtyTransitionConfirmTitle: 'Leave this form anyway?',
     busyTransitionHint: 'This operation is still in progress. Try again when it finishes.',
     enterFocus: 'Focus workspace',
     exitFocus: 'Exit workspace focus',

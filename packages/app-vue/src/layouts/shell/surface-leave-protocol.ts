@@ -20,6 +20,7 @@ import type {
 } from 'vue-router';
 import { getActivePinia } from 'pinia';
 import { toast } from 'vue-sonner';
+import { useConfirm } from '@memoflow/ui-vue-shadcn';
 import { getI18nGlobal } from '../../plugins/i18n';
 import { useAppShellStore } from './useAppShellStore';
 import { isStandaloneSettingsPath } from './shell-scene';
@@ -31,6 +32,12 @@ type ShellStore = ReturnType<typeof useAppShellStore>;
 const approvedNavigations = new WeakMap<RouteLocationNormalized, ShellStore>();
 const shellNavigations = new WeakMap<ShellStore, { fullPath: string }>();
 
+// useConfirm is a process-wide singleton: a second call replaces the first
+// resolver, leaving the first Promise pending forever. Only one dirty
+// confirmation may be in flight; concurrent departures are declined until it
+// settles (see the guard below).
+let pendingDirtyConfirm: Promise<boolean> | null = null;
+
 /**
  * 检查当前业务 surface 是否允许离开。
  * 返回 true 表示可以离开；false 表示已拒绝（busy toast 或 dirty confirm 取消）。
@@ -39,7 +46,10 @@ const shellNavigations = new WeakMap<ShellStore, { fullPath: string }>();
  * 未显式传入 `t` 时使用全局 i18n 插件实例（场景守卫路径）；组件上下文
  * （useShellRouterSync）可传入 useI18n() 的 t，避免测试环境强制装插件。
  */
-export function canLeaveBusinessSurface(t?: Translate, to?: RouteLocationNormalized): boolean {
+export async function canLeaveBusinessSurface(
+  t?: Translate,
+  to?: RouteLocationNormalized,
+): Promise<boolean> {
   const store = getActivePinia() ? useAppShellStore() : null;
   if (!store) return true;
   if (store.panelSurface !== 'business') return true;
@@ -58,7 +68,23 @@ export function canLeaveBusinessSurface(t?: Translate, to?: RouteLocationNormali
     return true;
   }
   if (typeof window === 'undefined') return false;
-  const approved = window.confirm(translate('shell.panel.dirtyTransitionConfirm'));
+  // A confirmation is already on screen. Decline instead of stacking a second
+  // dialog or replacing the pending resolver; the caller can retry afterwards.
+  if (pendingDirtyConfirm) return false;
+
+  pendingDirtyConfirm = useConfirm({
+    title: translate('shell.panel.dirtyTransitionConfirmTitle'),
+    description: translate('shell.panel.dirtyTransitionConfirm'),
+    confirmText: translate('common.confirm'),
+    cancelText: translate('common.cancel'),
+    variant: 'destructive',
+  });
+  let approved = false;
+  try {
+    approved = Boolean(await pendingDirtyConfirm);
+  } finally {
+    pendingDirtyConfirm = null;
+  }
   if (approved && to) approvedNavigations.set(to, store);
   return approved;
 }
@@ -70,7 +96,7 @@ export async function navigateBusinessSurface(
   t: Translate,
   replace = false,
 ): Promise<boolean> {
-  if (!canLeaveBusinessSurface(t)) return false;
+  if (!(await canLeaveBusinessSurface(t))) return false;
   const store = getActivePinia() ? useAppShellStore() : null;
   const navigation = { fullPath: router.resolve(target).fullPath };
   if (store) shellNavigations.set(store, navigation);

@@ -12,6 +12,33 @@ import { initializeChatView } from './chatViewHelpers';
 import { maybeRenameConversation } from './chatViewHelpers';
 import { ok, error } from '@memoflow/transport-contracts/result';
 
+const confirmState = vi.hoisted(() => {
+  let answer = false;
+  const calls: unknown[] = [];
+  return {
+    calls,
+    setAnswer(value: boolean) {
+      answer = value;
+    },
+    reset() {
+      answer = false;
+      calls.length = 0;
+    },
+    call(options: unknown): Promise<boolean> {
+      calls.push(options);
+      return Promise.resolve(answer);
+    },
+  };
+});
+
+vi.mock('@memoflow/ui-vue-shadcn', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@memoflow/ui-vue-shadcn')>();
+  return {
+    ...actual,
+    useConfirm: (options: unknown) => confirmState.call(options),
+  };
+});
+
 describe('conversation title synchronization', () => {
   it('passes the saved title DTO to the sidebar rather than requiring a list round-trip', async () => {
     const conversation = { id: 'conv-1', name: 'Renamed', updatedAt: 20 };
@@ -52,14 +79,15 @@ describe('workflow conversation departure', () => {
     },
   ] as const)(
     'integrates $mode with the real shell dirty/busy protocol',
-    ({ mode, module, route }) => {
+    async ({ mode, module, route }) => {
+      confirmState.reset();
       setActivePinia(createPinia());
       const shell = useAppShellStore();
       shell.openTab({ module, route, title: 'Review', intent: 'deeplink' });
       const tabId = shell.activeTabId;
       const originalConfirm = window.confirm;
-      const confirm = vi.fn(() => false);
-      window.confirm = confirm;
+      const nativeConfirm = vi.fn(() => false);
+      window.confirm = nativeConfirm;
       const activity = { goal: false, task: false, knowledge: false };
       const leave = () =>
         canLeaveAIWorkflowReview(
@@ -69,16 +97,18 @@ describe('workflow conversation departure', () => {
           vi.fn(),
         );
       shell.setSurfaceStatus('dirty');
-      expect(leave()).toBe(false);
-      expect(confirm).toHaveBeenCalledOnce();
+      confirmState.setAnswer(false);
+      await expect(leave()).resolves.toBe(false);
+      expect(confirmState.calls).toHaveLength(1);
       expect(shell.activeTabId).toBe(tabId);
       expect(shell.surfaceStatus).toBe('dirty');
-      confirm.mockReturnValue(true);
-      expect(leave()).toBe(true);
+      confirmState.setAnswer(true);
+      await expect(leave()).resolves.toBe(true);
       // Approval permits only this departure; the owner's draft remains dirty.
       expect(shell.surfaceStatus).toBe('dirty');
       shell.setSurfaceStatus('busy');
-      expect(leave()).toBe(false);
+      await expect(leave()).resolves.toBe(false);
+      expect(nativeConfirm).not.toHaveBeenCalled();
       expect(shell.activeTabId).toBe(tabId);
       window.confirm = originalConfirm;
     },
@@ -86,21 +116,27 @@ describe('workflow conversation departure', () => {
 
   it.each(['goal-create', 'task-create', 'knowledge-capture'] as const)(
     'protects %s busy and dirty native review',
-    (mode) => {
-      const leaveSurface = vi.fn().mockReturnValue(false);
+    async (mode) => {
+      const leaveSurface = vi.fn().mockResolvedValue(false);
       const notifyBusy = vi.fn();
       const activity = { goal: false, task: false, knowledge: false };
-      expect(canLeaveAIWorkflowReview(mode, activity, leaveSurface, notifyBusy)).toBe(false);
+      await expect(
+        canLeaveAIWorkflowReview(mode, activity, leaveSurface, notifyBusy),
+      ).resolves.toBe(false);
       expect(leaveSurface).toHaveBeenCalledOnce();
       leaveSurface.mockClear();
       activity[mode === 'goal-create' ? 'goal' : mode === 'task-create' ? 'task' : 'knowledge'] =
         true;
-      expect(canLeaveAIWorkflowReview(mode, activity, leaveSurface, notifyBusy)).toBe(false);
+      await expect(
+        canLeaveAIWorkflowReview(mode, activity, leaveSurface, notifyBusy),
+      ).resolves.toBe(false);
       expect(notifyBusy).toHaveBeenCalledOnce();
       expect(leaveSurface).not.toHaveBeenCalled();
       activity.goal = activity.task = activity.knowledge = false;
-      leaveSurface.mockReturnValue(true);
-      expect(canLeaveAIWorkflowReview(mode, activity, leaveSurface, notifyBusy)).toBe(true);
+      leaveSurface.mockResolvedValue(true);
+      await expect(
+        canLeaveAIWorkflowReview(mode, activity, leaveSurface, notifyBusy),
+      ).resolves.toBe(true);
     },
   );
 });

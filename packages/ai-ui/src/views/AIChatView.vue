@@ -591,7 +591,7 @@ watch(
   () => route.query.workflow,
   (workflow) => {
     if (workflow !== 'goal-create') return;
-    startNewConversation('goal-create');
+    void startNewConversation('goal-create');
     const query = { ...route.query };
     delete query.workflow;
     void router.replace({ path: route.path, query });
@@ -625,7 +625,7 @@ watch([goalWorkflowRun, automatedGoalId, toolMode], (_current, [previousRun]) =>
   void router.push(`/goals/${automatedGoalId.value}`);
 });
 
-function handleWelcomeShortcut(mode: WorkflowMode) {
+async function handleWelcomeShortcut(mode: WorkflowMode) {
   const prefillKey = {
     chat: 'aiAssistant.chatPage.shortcuts.chat.prefill',
     'goal-create': 'aiAssistant.chatPage.shortcuts.goalCreate.prefill',
@@ -633,7 +633,7 @@ function handleWelcomeShortcut(mode: WorkflowMode) {
     'knowledge-capture': 'aiAssistant.chatPage.shortcuts.knowledgeGenerate.prefill',
     'knowledge-qa': 'aiAssistant.chatPage.shortcuts.knowledgeQa.prefill',
   }[mode];
-  startNewConversation('chat');
+  await startNewConversation('chat');
   if (prefillKey) chatMessage.value = t(prefillKey);
 }
 
@@ -676,7 +676,7 @@ async function handleComposerSend() {
       );
 
   if (!workflowInProgress.value && inferredMode !== toolMode.value) {
-    if (toolMode.value !== 'chat') exitToolMode();
+    if (toolMode.value !== 'chat') await exitToolMode();
     toolMode.value = inferredMode;
   }
 
@@ -747,13 +747,13 @@ function closeMobileSidebar() {
   mobileSidebarOpen.value = false;
 }
 
-function startNewConversation(mode: WorkflowMode | string = 'chat') {
+async function startNewConversation(mode: WorkflowMode | string = 'chat') {
   lastOpenedGoalId.value = null;
-  startNewConversationBase(mode);
+  await startNewConversationBase(mode);
 }
-function startNewConversationFromMobile() {
+async function startNewConversationFromMobile() {
   closeMobileSidebar();
-  startNewConversation();
+  await startNewConversation();
 }
 async function selectConversation(item: ConversationSummary) {
   await selectConversationBase(item);

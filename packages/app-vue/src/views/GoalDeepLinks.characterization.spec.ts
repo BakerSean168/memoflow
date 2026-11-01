@@ -32,6 +32,33 @@ const calls = vi.hoisted(() => ({
   getGoalReviews: vi.fn(),
   getGoalReviewContext: vi.fn(),
 }));
+
+const confirmState = vi.hoisted(() => {
+  let answer = false;
+  const calls: unknown[] = [];
+  return {
+    calls,
+    setAnswer(value: boolean) {
+      answer = value;
+    },
+    reset() {
+      answer = false;
+      calls.length = 0;
+    },
+    call(options: unknown): Promise<boolean> {
+      calls.push(options);
+      return Promise.resolve(answer);
+    },
+  };
+});
+
+vi.mock('@memoflow/ui-vue-shadcn', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@memoflow/ui-vue-shadcn')>();
+  return {
+    ...actual,
+    useConfirm: (options: unknown) => confirmState.call(options),
+  };
+});
 const kr = {
   id: 'kr-1',
   title: 'Distance',
@@ -85,6 +112,7 @@ vi.mock('../shared/composables/useLabelCatalog', () => ({
 enableAutoUnmount(afterEach);
 beforeEach(() => {
   vi.clearAllMocks();
+  confirmState.reset();
   keyResults.value = [];
   goalReviews.value = [];
   calls.getGoalAggregateView.mockImplementation(async () => {
@@ -404,12 +432,12 @@ describe('Goal deep links — PVC-BASE-002', () => {
     expect(router.currentRoute.value.name).toBe('goal-review-create');
     expect(createDialog().get('textarea').element.value).toBe('Keep draft');
     expect(store.surfaceStatus).toBe('dirty');
-    expect(window.confirm).toHaveBeenCalledTimes(1);
-    vi.mocked(window.confirm).mockReturnValue(true);
+    expect(confirmState.calls).toHaveLength(1);
+    confirmState.setAnswer(true);
     await router.push(target);
     await flushPromises();
     expect(router.currentRoute.value.fullPath).toBe(target);
-    expect(window.confirm).toHaveBeenCalledTimes(2);
+    expect(confirmState.calls).toHaveLength(2);
   });
 
   it('preserves the same draft across unrelated query/hash updates', async () => {
@@ -428,10 +456,10 @@ describe('Goal deep links — PVC-BASE-002', () => {
     await createDialog().get('textarea').setValue('Keep draft');
     await createDialog().get('[data-testid="goal-review-cancel"]').trigger('click');
     await flushPromises();
-    expect(window.confirm).toHaveBeenCalledTimes(1);
+    expect(confirmState.calls).toHaveLength(1);
     document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
     await flushPromises();
-    expect(window.confirm).toHaveBeenCalledTimes(2);
+    expect(confirmState.calls).toHaveLength(2);
     expect(router.currentRoute.value.name).toBe('goal-review-create');
     expect(createDialog().get('textarea').element.value).toBe('Keep draft');
   });
@@ -442,11 +470,11 @@ describe('Goal deep links — PVC-BASE-002', () => {
     await flushPromises();
     await createDialog().get('textarea').setValue('Keep draft');
     router.back();
-    await vi.waitFor(() => expect(window.confirm).toHaveBeenCalledTimes(1));
+    await vi.waitFor(() => expect(confirmState.calls).toHaveLength(1));
     await flushPromises();
     expect(router.currentRoute.value.name).toBe('goal-review-create');
     expect(createDialog().get('textarea').element.value).toBe('Keep draft');
-    vi.mocked(window.confirm).mockReturnValue(true);
+    confirmState.setAnswer(true);
     router.back();
     await vi.waitFor(() => expect(router.currentRoute.value.name).toBe('goal-detail'));
     router.forward();
@@ -458,9 +486,9 @@ describe('Goal deep links — PVC-BASE-002', () => {
     await vi.waitFor(() => expect(router.currentRoute.value.name).toBe('goal-review-create'));
     await flushPromises();
     await createDialog().get('textarea').setValue('Forward draft');
-    vi.mocked(window.confirm).mockReturnValue(false);
+    confirmState.setAnswer(false);
     router.forward();
-    await vi.waitFor(() => expect(window.confirm).toHaveBeenCalledTimes(3));
+    await vi.waitFor(() => expect(confirmState.calls).toHaveLength(3));
     await flushPromises();
     expect(createDialog().get('textarea').element.value).toBe('Forward draft');
     expect(calls.getGoalWorkspace).toHaveBeenCalledTimes(1);
@@ -493,11 +521,11 @@ describe('Goal deep links — PVC-BASE-002', () => {
       expect(router.currentRoute.value.name).toBe('goal-review-create');
       expect(store.activeTabId).toBe(goalTabId);
       expect(store.surfaceStatus).toBe('dirty');
-      vi.mocked(window.confirm).mockReturnValue(true);
+      confirmState.setAnswer(true);
       await navigate();
       await flushPromises();
       expect(router.currentRoute.value.name).not.toBe('goal-review-create');
-      expect(window.confirm).toHaveBeenCalledTimes(2);
+      expect(confirmState.calls).toHaveLength(2);
     },
   );
 
@@ -505,14 +533,14 @@ describe('Goal deep links — PVC-BASE-002', () => {
     const { router, shell, store } = await load('/goals/goal-1/review/create');
     await createDialog().get('textarea').setValue('Keep draft');
     const stop = router.beforeResolve(() => false);
-    vi.mocked(window.confirm).mockReturnValue(true);
+    confirmState.setAnswer(true);
     await shell.goHome();
     expect(store.surfaceStatus).toBe('dirty');
     expect(createDialog().get('textarea').element.value).toBe('Keep draft');
     stop();
-    vi.mocked(window.confirm).mockReturnValue(false);
+    confirmState.setAnswer(false);
     await shell.goHome();
-    expect(window.confirm).toHaveBeenCalledTimes(2);
+    expect(confirmState.calls).toHaveLength(2);
     expect(router.currentRoute.value.name).toBe('goal-review-create');
   });
 

@@ -11,12 +11,12 @@ import { unwrap } from '@memoflow/transport-contracts/result';
 import { aiUiHost } from '../ai-ui-host';
 
 /** In-flight owner work blocks departure before consulting the native dirty guard. */
-export function canLeaveAIWorkflowReview(
+export async function canLeaveAIWorkflowReview(
   mode: string,
   activity: { goal: boolean; task: boolean; knowledge: boolean },
-  leaveSurface: () => boolean,
+  leaveSurface: () => boolean | Promise<boolean>,
   notifyBusy: () => void,
-): boolean {
+): Promise<boolean> {
   const busy =
     mode === 'goal-create'
       ? activity.goal
@@ -29,7 +29,7 @@ export function canLeaveAIWorkflowReview(
     notifyBusy();
     return false;
   }
-  return leaveSurface();
+  return Boolean(await leaveSurface());
 }
 
 export type AIWorkflowRestoreErrorCode =

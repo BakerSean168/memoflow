@@ -166,7 +166,7 @@ export function useShellRouterSync() {
   }
 
   /** 统一离开协议（Phase 0）：busy 拦截 / dirty 确认 / clean 放行。 */
-  function canLeaveSurface(): boolean {
+  async function canLeaveSurface(): Promise<boolean> {
     return canLeaveBusinessSurface(t);
   }
 
@@ -282,7 +282,7 @@ export function useShellRouterSync() {
 
   /** 面板头 ✕ / 顶栏 Toggle：隐藏面板但保留 Tab、路由和草稿。 */
   async function closePanel(): Promise<void> {
-    if (!canLeaveSurface()) return;
+    if (!(await canLeaveSurface())) return;
     store.closeRightPanel();
   }
 
@@ -348,7 +348,7 @@ export function useShellRouterSync() {
     if (route.path !== '/') {
       await navigateBusinessSurface(router, '/', t);
     } else {
-      if (!canLeaveSurface()) return;
+      if (!(await canLeaveSurface())) return;
       store.showHome();
       maybeAutoFocus();
     }
