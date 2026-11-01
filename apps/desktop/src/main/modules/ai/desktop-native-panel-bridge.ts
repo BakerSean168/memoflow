@@ -59,13 +59,22 @@ export class DesktopNativePanelBridge implements IDesktopNativePanelBridge {
     const onNavigation = (details: { isMainFrame: boolean; isSameDocument: boolean }) => {
       if (details.isMainFrame && !details.isSameDocument) invalidate();
     };
-    window.webContents.on('destroyed', invalidate);
-    window.webContents.on('render-process-gone', invalidate);
-    window.webContents.on('did-start-navigation', onNavigation);
+    const contents = window.webContents;
+    contents.on('destroyed', invalidate);
+    contents.on('render-process-gone', invalidate);
+    contents.on('did-start-navigation', onNavigation);
     this.stopObservingWindow = () => {
-      window.webContents.removeListener('destroyed', invalidate);
-      window.webContents.removeListener('render-process-gone', invalidate);
-      window.webContents.removeListener('did-start-navigation', onNavigation);
+      // The observed window belongs to the outgoing Profile. A Profile switch
+      // destroys it (main window transition) before the next Profile composes a
+      // bridge, so listener removal must tolerate an already-destroyed window or
+      // it throws Electron's "Object has been destroyed" and aborts composition.
+      // 被观察的窗口属于上一个 Profile。切换时它会在下一个 Profile 组合桥之前被销毁，
+      // 因此移除监听必须容忍已销毁窗口，否则会抛 Electron "Object has been destroyed"
+      // 并中断组合。
+      if (window.isDestroyed() || contents.isDestroyed()) return;
+      contents.removeListener('destroyed', invalidate);
+      contents.removeListener('render-process-gone', invalidate);
+      contents.removeListener('did-start-navigation', onNavigation);
     };
   }
 
@@ -187,6 +196,9 @@ export class DesktopNativePanelBridge implements IDesktopNativePanelBridge {
       const cleanup = () => {
         clearTimeout(timer);
         context.signal?.removeEventListener('abort', onAbort);
+        // The window may already be destroyed when disposal runs; accessing its
+        // webContents then throws "Object has been destroyed".
+        if (win.isDestroyed() || win.webContents.isDestroyed()) return;
         win.webContents.removeListener('destroyed', onRendererGone);
         win.webContents.removeListener('render-process-gone', onRendererGone);
         win.webContents.removeListener('did-start-navigation', onNavigation);
@@ -233,6 +245,7 @@ export class DesktopNativePanelBridge implements IDesktopNativePanelBridge {
       binding.generation !== this.rendererGeneration ||
       !win ||
       win.isDestroyed() ||
+      win.webContents.isDestroyed() ||
       !this.options.isActive() ||
       DesktopNativePanelBridge.activeBridge !== this
     )
@@ -255,19 +268,31 @@ export class DesktopNativePanelBridge implements IDesktopNativePanelBridge {
   }
 
   dispose() {
-    this.stopObservingWindow?.();
-    this.stopObservingWindow = null;
-    this.observedWindow = null;
-    this.rendererGeneration++;
-    if (DesktopNativePanelBridge.activeBridge === this) {
-      ipcMain.removeHandler(AIChannels.LOCAL_AGENT_PANEL_RESPONSE);
-      DesktopNativePanelBridge.activeBridge = null;
+    try {
+      this.stopObservingWindow?.();
+    } catch {
+      // Defensive: an already-destroyed observed window must never abort the
+      // next Profile's bridge construction. Ownership still moves to the new
+      // bridge below.
+      // 防御：已销毁的被观察窗口不得中断下一个 Profile 的桥构造；所有权仍按下方迁移。
+    } finally {
+      this.stopObservingWindow = null;
+      this.observedWindow = null;
+      this.rendererGeneration++;
+      if (DesktopNativePanelBridge.activeBridge === this) {
+        ipcMain.removeHandler(AIChannels.LOCAL_AGENT_PANEL_RESPONSE);
+        DesktopNativePanelBridge.activeBridge = null;
+      }
+      for (const [, req] of this.pendingRequests) {
+        try {
+          req.cleanup();
+        } catch {
+          // Best-effort: the request's window may already be gone.
+        }
+        req.reject(new Error('DesktopNativePanelBridge was disposed'));
+      }
+      this.pendingRequests.clear();
+      this.runRequests.clear();
     }
-    for (const [, req] of this.pendingRequests) {
-      req.cleanup();
-      req.reject(new Error('DesktopNativePanelBridge was disposed'));
-    }
-    this.pendingRequests.clear();
-    this.runRequests.clear();
   }
 }
