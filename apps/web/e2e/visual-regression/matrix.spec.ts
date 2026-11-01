@@ -222,11 +222,11 @@ for (const theme of ['light', 'dark'] as const) {
       await page.keyboard.press('Tab');
       await expect(title).toHaveAttribute('aria-invalid', 'true');
       await title.fill('Quick task from Home');
-      page.once('dialog', (dialog) => dialog.dismiss());
       await page.getByTestId('business-panel-home').click();
+      await page.getByTestId('global-confirm-cancel').click();
       await expect(title).toHaveValue('Quick task from Home');
-      page.once('dialog', (dialog) => dialog.accept());
       await page.getByTestId('business-panel-home').click();
+      await page.getByTestId('global-confirm-confirm').click();
       await expect(page.getByTestId('today-overview-panel')).toBeVisible();
       await page.locator('[data-business-tab-id]').first().click();
       await expect(title).toHaveValue('Quick task from Home');
@@ -247,11 +247,11 @@ for (const theme of ['light', 'dark'] as const) {
       await page.keyboard.press('Tab');
       await expect(name).toHaveAttribute('aria-invalid', 'true');
       await name.fill('Profile from business pane');
-      page.once('dialog', (dialog) => dialog.dismiss());
       await page.getByTestId('business-panel-home').click();
+      await page.getByTestId('global-confirm-cancel').click();
       await expect(name).toHaveValue('Profile from business pane');
-      page.once('dialog', (dialog) => dialog.accept());
       await page.getByTestId('business-panel-home').click();
+      await page.getByTestId('global-confirm-confirm').click();
       await expect(page.getByTestId('today-overview-panel')).toBeVisible();
       await page
         .getByTestId('business-panel-tab-list')
@@ -319,11 +319,11 @@ for (const theme of ['light', 'dark'] as const) {
     await expect(page.getByTestId('app-shell')).toHaveAttribute('data-shell-state', 'focus');
     await expect(title).toHaveValue('Draft survives workspace actions');
     await page.getByTestId('business-panel-focus-toggle').click();
-    page.once('dialog', (dialog) => dialog.dismiss());
     await page.getByTestId('business-panel-home').click();
+    await page.getByTestId('global-confirm-cancel').click();
     await expect(title).toHaveValue('Draft survives workspace actions');
-    page.once('dialog', (dialog) => dialog.accept());
     await page.getByTestId('business-panel-home').click();
+    await page.getByTestId('global-confirm-confirm').click();
     await expect(page.getByTestId('today-overview-panel')).toBeVisible();
     // The upper header owns the create actions; the Goal widget has no duplicate CTA.
     await expect(
@@ -335,8 +335,8 @@ for (const theme of ['light', 'dark'] as const) {
     const account = sidebar.getByTestId('shell-account-menu');
     const accountBox = (await account.boundingBox())!;
     await account.click();
-    page.once('dialog', (dialog) => dialog.accept());
     await page.getByTestId('shell-open-settings').click();
+    await page.getByTestId('global-confirm-confirm').click();
     await expect(page.getByTestId('settings-navigation-footer')).toBeVisible();
     const footer = (await page.getByTestId('settings-navigation-footer').boundingBox())!;
     expect(footer.height).toBe(44);

@@ -74,6 +74,7 @@ const mocks = vi.hoisted(() => {
     isDesktopServerStateDisposed: vi.fn(() => false),
     registerDesktopServerStateStartupCancel: vi.fn(),
     initElectronFeatures: vi.fn(),
+    registerSystemNotice: vi.fn(() => () => undefined),
     shouldRedirectAuthenticatedDesktopEntry: vi.fn(() => true),
     progressStart: vi.fn(),
     progressDone: vi.fn(),
@@ -181,6 +182,10 @@ vi.mock('../platform/tray-navigation', () => ({
   registerTrayNavigation: vi.fn(() => () => undefined),
 }));
 
+vi.mock('../platform/system-notice', () => ({
+  registerSystemNotice: mocks.registerSystemNotice,
+}));
+
 vi.mock('./route-entry', () => ({
   shouldRedirectAuthenticatedDesktopEntry: mocks.shouldRedirectAuthenticatedDesktopEntry,
 }));
@@ -238,6 +243,10 @@ describe('desktop bootstrapMainApp', () => {
     expect(mocks.createAppRouter).toHaveBeenCalledTimes(1);
     expect(mocks.initElectronFeatures).toHaveBeenCalledWith(mocks.app);
     expect(mocks.app.mount).toHaveBeenCalledWith('#app');
+    expect(mocks.registerSystemNotice).toHaveBeenCalledWith(
+      mocks.bridge,
+      mocks.translateMessageKey,
+    );
     expect(mocks.notificationHook.start).toHaveBeenCalledTimes(1);
     expect(mocks.router.replace).toHaveBeenCalledWith('/');
     // Server-state runtime installed before mount (plan §3.1).
