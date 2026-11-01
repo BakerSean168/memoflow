@@ -1,3 +1,6 @@
+import { createPowerSyncSqliteFixture } from '@memoflow/test-utils/helpers/powersync-sqlite';
+import { createGoalPowerSyncModule } from '@memoflow/goal';
+import { createTimeContext } from '@memoflow/time';
 import { installGoalUiHost } from '../di/goal-ui-host';
 import { flushPromises, mount } from '@vue/test-utils';
 import { createI18n } from 'vue-i18n';
@@ -664,6 +667,220 @@ describe('Goal native surface host (PVC-AI-8001)', () => {
       expect(inputs.every((input) => !(input.element as HTMLInputElement).disabled)).toBe(true);
     } finally {
       wrapper.unmount();
+    }
+  });
+
+  it.each([
+    'foreign-session',
+    'missing-binding',
+    'user-edit',
+    'user-edit-reverted',
+    'closed-owner',
+    'host-disposed',
+  ])('refuses retained draft reattachment after %s (#736)', async (change) => {
+    const { wrapper, host, disposeHost } = await mountNativeHost('/tasks', true);
+    const bridge = useNativeBusinessPanelBridge(host);
+    const request = {
+      requestId: 'negative',
+      identityId: 'owner',
+      conversationId: 'chat',
+      runId: 'first',
+      sessionBinding: 'profile-window-connection-chat',
+    };
+    try {
+      expect((await bridge.handleCommand({ ...request, command: { action: 'open' } })).ok).toBe(
+        true,
+      );
+      expect(
+        (await bridge.handleCommand({ ...request, command: { action: 'patch', name: 'Retained' } }))
+          .ok,
+      ).toBe(true);
+      const stale = host.getControlledSession(useAppShellStore().businessControl!.ownerId)!;
+      await bridge.handleCommand({ ...request, command: { action: 'release' } });
+      const owner = host.locate()!;
+      if (change.startsWith('user-edit')) owner.patch({ name: 'User edit' });
+      if (change === 'user-edit-reverted') owner.patch({ name: 'Retained' });
+      if (change === 'closed-owner') {
+        owner.requestCancel();
+        await flushPromises();
+        await host.openCreate();
+        host.locate()!.patch({ name: 'New manual draft' });
+      }
+      if (change === 'host-disposed') disposeHost();
+      const result = await bridge.handleCommand({
+        ...request,
+        runId: 'second',
+        sessionBinding:
+          change === 'foreign-session'
+            ? 'other-binding'
+            : change === 'missing-binding'
+              ? undefined
+              : request.sessionBinding,
+        command: { action: 'open' },
+      });
+      expect(result.error?.code).toBe('BUSINESS_SURFACE_CONFLICT');
+      expect(() => stale.patch({ name: 'Late overwrite' })).toThrow('closed');
+      expect(useAppShellStore().businessControl).toBeNull();
+    } finally {
+      wrapper.unmount();
+    }
+  });
+
+  it('reattaches the retained BYOA draft in a second turn before owner submit (#736)', async () => {
+    const saved = createMockGoal({ name: 'Two-turn Goal', keyResults: [] });
+    const fixture = createPowerSyncSqliteFixture();
+    const identityId = 'IdentityId_00000000-0000-4000-8000-000000000736';
+    const owner = createGoalPowerSyncModule(fixture.db, {
+      taskBindingReadPort: {
+        checkActiveTaskBindings: async () => ({ hasActiveBindings: false, activeCount: 0 }),
+      },
+      userTimeContextPort: {
+        getUserTimeContext: async () => createTimeContext({ timeZone: 'UTC', weekStartsOn: 1 }),
+      },
+      relationCleanupFactory: () => ({ unlinkAllForGoal: async () => 0 }),
+    });
+    goalMocks.createGoal.mockImplementationOnce(async (input) => {
+      const result = await owner.api.createGoal(input, {
+        identityId,
+        requestId: 'owner-save',
+        traceId: 'two-turn',
+        source: 'ipc',
+        startedAt: Date.now(),
+      });
+      if (!result.ok) throw new Error(result.error.message);
+      return result.data.readModel;
+    });
+    const { wrapper, host } = await mountNativeHost('/tasks', true);
+    const bridge = useNativeBusinessPanelBridge(host);
+    const request = {
+      sessionBinding: 'profile-window-connection-conversation',
+      requestId: 'two-turn',
+      identityId,
+      conversationId: 'same-conversation',
+      runId: 'fill-run',
+    };
+    try {
+      expect(
+        (
+          await bridge.handleCommand({
+            ...request,
+            command: { action: 'open' },
+          })
+        ).ok,
+      ).toBe(true);
+      expect(
+        (
+          await bridge.handleCommand({
+            ...request,
+            command: {
+              action: 'patch',
+              name: saved.name,
+              start: { kind: 'day', date: '2026-11-01' },
+              target: { kind: 'day', date: '2026-11-30' },
+            },
+          })
+        ).ok,
+      ).toBe(true);
+      expect(
+        (
+          await bridge.handleCommand({
+            ...request,
+            command: {
+              action: 'add_key_result',
+              keyResult: {
+                title: 'Finish exercises',
+                calculationMethod: 'Sum',
+                initialValue: 0,
+                targetValue: 10,
+                weight: 1,
+              },
+            },
+          })
+        ).ok,
+      ).toBe(true);
+      const oldHandle = host.getControlledSession(useAppShellStore().businessControl!.ownerId)!;
+      const draft = host.locate()!.readDraftState().draft;
+      await bridge.handleCommand({
+        ...request,
+        command: { action: 'release' },
+      });
+      await flushPromises();
+      expect(useAppShellStore().businessControl).toBeNull();
+      expect(host.locate()!.readDraftState().draft).toEqual(draft);
+      expect(goalMocks.createGoal).not.toHaveBeenCalled();
+      const confirmation = { ...request, runId: 'confirm-run' };
+      const reopened = await bridge.handleCommand({
+        ...confirmation,
+        command: { action: 'open' },
+      });
+      expect(reopened.error).toBeUndefined();
+      expect(reopened.ok).toBe(true);
+      expect(() => oldHandle.patch({ name: 'Stale capability' })).toThrow('closed');
+      // Old run commands and cleanup cannot reach or release the new lease.
+      expect(
+        (await bridge.handleCommand({ ...request, command: { action: 'patch', name: 'Late' } }))
+          .error?.code,
+      ).toBe('PANEL_NOT_CONTROLLED');
+      await bridge.handleCommand({ ...request, command: { action: 'release' } });
+      expect(useAppShellStore().businessControl).not.toBeNull();
+      expect(
+        (
+          await bridge.handleCommand({
+            ...confirmation,
+            command: { action: 'submit', expectedRevision: 0 },
+          })
+        ).error?.code,
+      ).toBe('REVISION_CONFLICT');
+      expect(
+        (
+          await bridge.handleCommand({
+            ...confirmation,
+            sessionBinding: 'foreign',
+            command: { action: 'open' },
+          })
+        ).error?.code,
+      ).toBe('BUSINESS_SURFACE_CONFLICT');
+      expect(() => host.locate()!.patch({ name: 'User overwrite' })).toThrow('controlled');
+      const submitted = await bridge.handleCommand({
+        ...confirmation,
+        command: {
+          action: 'submit',
+          expectedRevision: reopened.snapshot!.revision,
+        },
+      });
+      expect(submitted.ok).toBe(true);
+      expect(submitted.submitResult?.goalId).toBeTruthy();
+      const persisted = await owner.api.getGoal(submitted.submitResult!.goalId, identityId, true);
+      expect(persisted.ok).toBe(true);
+      if (!persisted.ok) throw new Error(persisted.error.message);
+      expect(persisted.data).toMatchObject({
+        name: draft.name,
+        start: draft.start,
+        target: draft.target,
+        keyResults: [{ title: draft.keyResults[0].title, progress: { targetValue: 10 } }],
+      });
+      // Stable native owner create ID remains the existing idempotency seam.
+      const input = goalMocks.createGoal.mock.calls[0][0];
+      const replay = await owner.api.createGoal(
+        { ...input, id: persisted.data.id },
+        {
+          identityId,
+          requestId: 'verify-replay',
+          traceId: 'two-turn',
+          source: 'ipc',
+          startedAt: Date.now(),
+        },
+      );
+      expect(replay.ok).toBe(true);
+      expect(fixture.sql.prepare('SELECT COUNT(*) AS n FROM goals').get()).toMatchObject({ n: 1 });
+      expect(goalMocks.createGoal).toHaveBeenCalledOnce();
+      expect(goalMocks.createGoal.mock.calls[0][0]).toMatchObject({
+        name: draft.name,
+      });
+    } finally {
+      wrapper.unmount();
+      owner.dispose();
+      fixture.close();
     }
   });
 

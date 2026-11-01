@@ -1,7 +1,7 @@
 import { nextTick, onScopeDispose, provide, shallowRef, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
-import type { GoalNativeEditSession } from '@memoflow/goal-client';
+import type { GoalNativeDraftState, GoalNativeEditSession } from '@memoflow/goal-client';
 import { GoalNativeSurfaceKey, type GoalNativeSurfaceHost } from '@memoflow/goal-ui';
 import { navigateBusinessSurface } from './surface-leave-protocol';
 import { useAppShellStore } from './useAppShellStore';
@@ -22,6 +22,12 @@ export function provideGoalNativeSurface(): GoalNativeSurfaceHost {
   let releaseControl: (() => void) | null = null;
   let activeControlledSession: GoalNativeEditSession | null = null;
   let activeControlledOwnerId: string | null = null;
+  let activeSessionBinding: string | undefined;
+  let retained: {
+    binding: string;
+    session: GoalNativeEditSession;
+    snapshot: GoalNativeDraftState;
+  } | null = null;
   const removeGuard = router.beforeEach(
     (to) => !store.businessControl || to.fullPath === store.businessControl.route,
   );
@@ -41,6 +47,7 @@ export function provideGoalNativeSurface(): GoalNativeSurfaceHost {
   onScopeDispose(() => {
     releaseHostControl();
     removeGuard();
+    retained = null;
     disposed.value = true;
     live.value = null;
   });
@@ -157,7 +164,10 @@ export function provideGoalNativeSurface(): GoalNativeSurfaceHost {
         /* Owner may already have closed the handle. */
       }
       store.releaseBusinessControl(ownerId, version);
-      if (releaseControl === release) releaseControl = null;
+      if (releaseControl === release) {
+        releaseControl = null;
+        activeSessionBinding = undefined;
+      }
       if (activeControlledSession === wrapped) activeControlledSession = null;
       if (activeControlledOwnerId === ownerId) activeControlledOwnerId = null;
     };
@@ -224,11 +234,33 @@ export function provideGoalNativeSurface(): GoalNativeSurfaceHost {
           return activeControlledSession;
         }
       }
+      // Reclaim only our unchanged, still-mounted owner draft; absence of a controller is insufficient.
+      if (retained && options?.sessionBinding === retained.binding && !store.businessControl) {
+        const { session, snapshot } = retained;
+        const current = session.readDraftState();
+        if (
+          locate() === session &&
+          !disposed.value &&
+          !current.busy &&
+          current.mode === mode &&
+          (!goalId || current.goalId === goalId) &&
+          current.revision === snapshot.revision &&
+          JSON.stringify(current.draft) === JSON.stringify(snapshot.draft)
+        ) {
+          const controlled = claimSession(ownerId, session, true);
+          activeSessionBinding = options.sessionBinding;
+          retained = null;
+          return controlled;
+        }
+      }
       if (!isAvailable()) throw new Error('Business surface conflict');
       const session = await open(mode === 'edit' ? goalId : undefined, true);
       const state = session.readDraftState();
       if (state.dirty || state.busy) throw new Error('Business surface changed while opening');
-      return claimSession(ownerId, session);
+      const controlled = claimSession(ownerId, session);
+      activeSessionBinding = options?.sessionBinding;
+      retained = null;
+      return controlled;
     },
     getControlledSession(ownerId) {
       if (activeControlledOwnerId === ownerId && activeControlledSession) {
@@ -239,8 +271,14 @@ export function provideGoalNativeSurface(): GoalNativeSurfaceHost {
     releaseControlledSession(ownerId) {
       if (activeControlledOwnerId === ownerId && activeControlledSession) {
         try {
+          const binding = activeSessionBinding;
+          const session = locate();
           // A finished BYOA run must not leave durable workflow ownership on its draft.
           activeControlledSession.detachWorkflow();
+          const snapshot = session?.readDraftState();
+          if (binding && session && snapshot && !snapshot.busy) {
+            retained = { binding, session, snapshot };
+          }
         } catch {
           /* ignore */
         }
@@ -253,6 +291,7 @@ export function provideGoalNativeSurface(): GoalNativeSurfaceHost {
       return () => {
         if (live.value === entry) {
           releaseHostControl();
+          retained = null;
           live.value = null;
         }
       };

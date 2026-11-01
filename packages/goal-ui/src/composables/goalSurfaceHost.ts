@@ -91,7 +91,7 @@ export interface GoalAIEditSurface {
   ): GoalNativeEditSession;
   openControlled(
     ownerId: string,
-    options?: { mode?: 'create' | 'edit'; goalId?: string },
+    options?: { mode?: 'create' | 'edit'; goalId?: string; sessionBinding?: string },
   ): Promise<GoalNativeEditSession>;
   getControlledSession(ownerId: string): GoalNativeEditSession | null;
   releaseControlledSession(ownerId: string): void;
