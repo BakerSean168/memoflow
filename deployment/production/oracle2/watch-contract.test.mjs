@@ -239,7 +239,10 @@ test('unchanged selected release preserves immutable identities without executin
   const unchangedReturn = source.indexOf("console.log('ORACLE2_WATCH=NO_CHANGE", noChange);
   const rolloutPreflight = source.indexOf('verifyTopologicalSafety(stage);', noChange);
   assert.ok(stateGate >= 0 && stateGate < noChange, 'deployed state must be checked before no-op');
-  assert.ok(noChange < unchangedReturn && unchangedReturn < rolloutPreflight, 'new releases still require candidate preflight');
+  assert.ok(
+    noChange < unchangedReturn && unchangedReturn < rolloutPreflight,
+    'new releases still require candidate preflight',
+  );
   assert.match(source, /docker\('inspect', 'public-gateway-caddy'\)/u);
   assert.doesNotMatch(source, /docker\('inspect', 'cpa-caddy'\)/u);
 });

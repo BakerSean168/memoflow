@@ -197,7 +197,8 @@ export function validateOracle2Topology({ compose, containers, caddy, arch = 'ar
     edgeLabels['com.docker.compose.project'] === ORACLE_PROJECT ||
     !(caddy.Mounts ?? []).some(
       (mount) =>
-        mount.Destination === '/etc/caddy/Caddyfile' && mount.Source === '/opt/public-gateway/Caddyfile',
+        mount.Destination === '/etc/caddy/Caddyfile' &&
+        mount.Source === '/opt/public-gateway/Caddyfile',
     )
   ) {
     errors.push('Shared public Caddy must be running outside the MemoFlow Compose project');
