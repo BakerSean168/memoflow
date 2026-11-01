@@ -110,11 +110,29 @@ export async function checkMemoFlowToolPermission(
       authorize(repository, { ...authorizationInput(name, context), operationId }),
     ),
   );
-  const decision = records.some((record) => record.decision === 'deny')
-    ? 'deny'
-    : records.some((record) => record.decision === 'ask')
-      ? 'ask'
-      : 'allow';
+  // Native Agent modes are a ceiling, never a substitute for the user's
+  // global MemoFlow business policy. A native read-only session cannot write
+  // even when business permissions are automatic, and native auto-approve
+  // cannot waive a business confirmation.
+  const nativePreset = assistantPermissionPreset(
+    context.getRaw('permissionMode') as AIChatPermissionMode,
+  );
+  const nativeDecisions = nativePreset
+    ? operationIds(name).map(
+        (operationId) =>
+          evaluatePermission({
+            agentId: 'builtin-mastra',
+            operationId,
+            preset: nativePreset,
+          }).decision,
+      )
+    : [];
+  const decision =
+    records.some((record) => record.decision === 'deny') || nativeDecisions.includes('deny')
+      ? 'deny'
+      : records.some((record) => record.decision === 'ask') || nativeDecisions.includes('ask')
+        ? 'ask'
+        : 'allow';
   current[name] = decision;
   return decision;
 }

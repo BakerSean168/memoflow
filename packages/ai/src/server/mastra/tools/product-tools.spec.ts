@@ -104,7 +104,7 @@ describe('MemoFlow AI owner tools (AI-9609)', () => {
         { notificationId: 'n', actionKey: 'archive' },
         { requestContext, observe: {} as never },
       ),
-    ).rejects.toThrow('not authorized');
+    ).rejects.toThrow('Read-only Assistant');
     expect(executeAction).not.toHaveBeenCalled();
     await applyMemoFlowSessionToolPolicy(session, 'supervised');
     expect(session.resolveToolApproval('notification_execute_action')).toBe('ask');

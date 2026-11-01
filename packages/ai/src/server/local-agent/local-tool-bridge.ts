@@ -114,8 +114,14 @@ export class LocalAgentToolBridge implements LocalAgentToolBridgePort {
       const rule = (await repository.listRules(owner)).find((rule) => rule.id === command.ruleId);
       await repository.removeRule(owner, command.ruleId);
       const settings = await repository.getSettings(owner);
-      if (rule && rule.id === `matrix:${rule.object}:${rule.action}` && settings?.customMatrix) {
-        settings.customMatrix[rule.object][rule.action] = PERMISSION_PRESETS.on_demand[rule.action];
+      const objectOverrides = rule ? settings?.customMatrix?.[rule.object] : undefined;
+      if (
+        settings &&
+        rule &&
+        rule.id === `matrix:${rule.object}:${rule.action}` &&
+        objectOverrides
+      ) {
+        objectOverrides[rule.action] = PERMISSION_PRESETS.confirm_each[rule.action];
         await repository.saveSettings(owner, { ...settings, revision: settings.revision + 1 });
       }
     }

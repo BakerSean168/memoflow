@@ -25,7 +25,12 @@ it('queries only the authenticated owner and persists validated records with own
   );
   await executeAuthorized(
     repository,
-    { owner: 'owner-a', agentId: 'external-mcp:pat', operationId: 'goal.create' },
+    {
+      owner: 'owner-a',
+      agentId: 'external-mcp:pat',
+      operationId: 'goal.create',
+      ask: async () => 'allow',
+    },
     async () => 'created',
   );
   expect(db.aiPermissionSetting.findFirst).toHaveBeenCalledWith({
@@ -55,11 +60,11 @@ it('falls back on Prisma missing-table errors, while ordinary DB failures block 
   db.aiPermissionSetting.findFirst.mockRejectedValue({ code: 'P2021' });
   db.aiPermissionAudit.create.mockRejectedValue({ code: 'P2021' });
   const input = { owner: 'owner-a', agentId: 'external-mcp:pat', operationId: 'goal.create' };
-  await expect(executeAuthorized(repository, input, async () => 'created')).resolves.toBe(
-    'created',
+  await expect(executeAuthorized(repository, input, async () => 'created')).rejects.toThrow(
+    'not authorized',
   );
   expect(await authorize(repository, { ...input, operationId: 'goal.update' })).toMatchObject({
-    decision: 'ask',
+    decision: 'deny',
   });
   db.aiPermissionSetting.findFirst.mockRejectedValue(new Error('connection failed'));
   const work = vi.fn();
