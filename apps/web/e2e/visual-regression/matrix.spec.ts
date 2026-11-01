@@ -93,14 +93,30 @@ for (const theme of ['light', 'dark'] as const) {
         ).toBe('auto');
         await expect(input).not.toHaveAttribute('aria-invalid', 'true');
         await page.keyboard.press('Tab');
-        await expect(input).toHaveAttribute('aria-invalid', 'true');
-        await expect(editor.getByRole('alert').first()).toBeVisible();
+        if (owner === 'task') {
+          // The required placeholder is enough; no duplicated blur-time message.
+          await expect(input).not.toHaveAttribute('aria-invalid', 'true');
+          await expect(editor.getByRole('alert')).toHaveCount(0);
+        } else {
+          await expect(input).toHaveAttribute('aria-invalid', 'true');
+          await expect(editor.getByRole('alert').first()).toBeVisible();
+        }
         expect(await geometry(editor)).toEqual(before);
         expect(await geometry(footer)).toEqual(footerBefore);
         expect(await geometry(input)).toEqual(inputBefore);
         await page.keyboard.press('Shift+Tab');
         await expect(input).toBeFocused();
-        expect(await input.evaluate((el) => getComputedStyle(el).boxShadow)).not.toBe('none');
+        // Tailwind ring-0 still emits zero-width shadow layers in computed style.
+        // Reject visible (>0px) shadow borders while preserving subtle focus fill.
+        const focusedStyle = await input.evaluate((el) => {
+          const style = getComputedStyle(el);
+          return { boxShadow: style.boxShadow, backgroundColor: style.backgroundColor };
+        });
+        expect(focusedStyle.boxShadow).not.toMatch(/\s[1-9]\d*px\b/);
+        if (owner !== 'schedule') {
+          // ProductAutoTextarea has a faint fill; native Schedule inputs use a caret.
+          expect(focusedStyle.backgroundColor).not.toBe('rgba(0, 0, 0, 0)');
+        }
         const draft = `验收 ${owner} ${width}`;
         await input.fill(draft);
         await expect(input).not.toHaveAttribute('aria-invalid', 'true');
