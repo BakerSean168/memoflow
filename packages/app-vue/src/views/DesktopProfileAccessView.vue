@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onBeforeUnmount, onMounted } from 'vue';
+import { computed, onBeforeUnmount, onMounted, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import {
   Avatar,
@@ -49,6 +49,7 @@ const {
   submitCloudRegistration,
   submitLocalRegistration,
   refreshProfiles,
+  setAccessWindowHeight,
   disposeAuth,
 } = presenter;
 
@@ -75,6 +76,16 @@ onMounted(async () => {
 });
 
 onBeforeUnmount(disposeAuth);
+
+// Only the registration state is taller (1024×780); every other state keeps the
+// 1024×640 skeleton.
+watch(
+  accessView,
+  (view) => {
+    void setAccessWindowHeight(view === 'register' ? 780 : 640);
+  },
+  { immediate: true },
+);
 </script>
 
 <template>

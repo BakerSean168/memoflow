@@ -4,6 +4,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { createI18n } from 'vue-i18n';
 import { ok } from '@memoflow/transport-contracts/result';
 import {
+  CloudAuthChannels,
   ProfileAccessChannels,
   WindowChannels,
   type ProfileSummary,
@@ -125,6 +126,129 @@ describe('useDesktopProfiles creation', () => {
       ProfileAccessChannels.CREATE_LOCAL_ACCOUNT,
       expect.anything(),
     );
+  });
+});
+
+describe('useDesktopProfiles sign-in and registration states', () => {
+  const emptySnapshot = {
+    profile: null,
+    unlockState: 'LOCKED' as const,
+    cloudState: 'UNBOUND' as const,
+    capabilities: { local: false, sync: false, cloudAi: false, repositoryConnection: false },
+  };
+
+  function accessWindow(invokeImpl: (channel: string, payload?: unknown) => unknown) {
+    const harness = setup(null, { accessWindow: true });
+    cleanups.push(() => harness.wrapper.unmount());
+    harness.invoke.mockImplementation(async (channel: string, payload?: unknown) => {
+      if (channel === ProfileAccessChannels.LIST) return ok([]);
+      if (channel === ProfileAccessChannels.GET_SNAPSHOT) return ok(emptySnapshot);
+      return invokeImpl(channel, payload);
+    });
+    return harness;
+  }
+
+  it('moves between select, login and register and clears the forms on the way out', async () => {
+    const { presenter } = accessWindow(() => ok(null));
+
+    presenter.enterLoginState();
+    expect(presenter.accessView.value).toBe('login');
+    presenter.loginEmail.value = 'person@example.com';
+    presenter.loginPassword.value = 'cloud-password';
+
+    presenter.enterRegisterState('local');
+    expect(presenter.accessView.value).toBe('register');
+    expect(presenter.registerMode.value).toBe('local');
+
+    presenter.backToSelect();
+    expect(presenter.accessView.value).toBe('select');
+    expect(presenter.loginEmail.value).toBe('');
+    expect(presenter.loginPassword.value).toBe('');
+    expect(presenter.registerEmail.value).toBe('');
+    expect(presenter.registerPassword.value).toBe('');
+  });
+
+  it('asks the host for the registration height and the base height', async () => {
+    const { presenter, invoke } = accessWindow(() => ok(null));
+
+    await presenter.setAccessWindowHeight(780);
+    expect(invoke).toHaveBeenCalledWith(WindowChannels.SET_PROFILE_ACCESS_HEIGHT, { height: 780 });
+
+    await presenter.setAccessWindowHeight(640);
+    expect(invoke).toHaveBeenCalledWith(WindowChannels.SET_PROFILE_ACCESS_HEIGHT, { height: 640 });
+  });
+
+  it('does not enter when the cloud sign-in is rejected', async () => {
+    const { presenter, invoke } = accessWindow((channel) =>
+      channel === CloudAuthChannels.SIGN_IN
+        ? { ok: false, error: { code: 'UNAUTHORIZED', message: 'Invalid credentials' } }
+        : ok(null),
+    );
+    presenter.enterLoginState();
+    presenter.loginEmail.value = 'person@example.com';
+    presenter.loginPassword.value = 'wrong-password';
+
+    await presenter.signInWithPassword();
+
+    expect(invoke).toHaveBeenCalledWith(CloudAuthChannels.SIGN_IN, {
+      email: 'person@example.com',
+      password: 'wrong-password',
+      remember: true,
+    });
+    expect(invoke).not.toHaveBeenCalledWith(WindowChannels.TRANSITION_TO_MAIN);
+    expect(presenter.accessView.value).toBe('login');
+    expect(presenter.loginPassword.value).toBe('');
+  });
+
+  it('intercepts a mismatched cloud confirmation before any sign-up request', async () => {
+    const { presenter, invoke } = accessWindow(() => ok(null));
+    presenter.enterRegisterState('cloud');
+    presenter.registerEmail.value = 'person@example.com';
+    presenter.registerPassword.value = 'cloud-password';
+    presenter.registerPasswordConfirm.value = 'other-password';
+
+    await presenter.submitCloudRegistration();
+
+    expect(invoke).not.toHaveBeenCalledWith(CloudAuthChannels.SIGN_UP, expect.anything());
+    expect(presenter.accessView.value).toBe('register');
+  });
+
+  it('intercepts a mismatched local confirmation before any create request', async () => {
+    const { presenter, invoke } = accessWindow(() => ok(null));
+    presenter.enterRegisterState('local');
+    presenter.registerName.value = 'Local two';
+    presenter.registerPassword.value = 'local-password';
+    presenter.registerPasswordConfirm.value = 'other-password';
+
+    await presenter.submitLocalRegistration();
+
+    expect(invoke).not.toHaveBeenCalledWith(
+      ProfileAccessChannels.CREATE_LOCAL_ACCOUNT,
+      expect.anything(),
+    );
+  });
+
+  it('registers a cloud account and enters without a second sign-in', async () => {
+    const { presenter, invoke } = accessWindow((channel) =>
+      channel === CloudAuthChannels.SIGN_UP ? ok({ profileId: 'cloud-profile' }) : ok(null),
+    );
+    presenter.enterRegisterState('cloud');
+    presenter.registerEmail.value = 'person@example.com';
+    presenter.registerPassword.value = 'cloud-password';
+    presenter.registerPasswordConfirm.value = 'cloud-password';
+
+    await presenter.submitCloudRegistration();
+
+    expect(invoke).toHaveBeenCalledWith(CloudAuthChannels.SIGN_UP, {
+      email: 'person@example.com',
+      password: 'cloud-password',
+      name: undefined,
+      remember: true,
+    });
+    expect(invoke).not.toHaveBeenCalledWith(CloudAuthChannels.SIGN_IN, expect.anything());
+    expect(invoke).toHaveBeenCalledWith(WindowChannels.TRANSITION_TO_MAIN);
+    expect(presenter.registerPassword.value).toBe('');
+    expect(presenter.registerPasswordConfirm.value).toBe('');
   });
 });
 

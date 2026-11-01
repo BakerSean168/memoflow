@@ -2,6 +2,9 @@ import { ipcMain } from 'electron';
 import {
   DesktopCloudConnectionRequestSchema,
   DesktopCloudAttemptRequestSchema,
+  DesktopCloudCredentialSignInSchema,
+  DesktopCloudGithubSignInSchema,
+  DesktopCloudRegistrationSchema,
   type CloudSessionState,
 } from '@memoflow/cloud-auth-contracts';
 import { CloudAuthChannels } from '@memoflow/desktop-contracts';
@@ -12,6 +15,7 @@ import type { DeviceAuthCoordinator } from './device-auth-coordinator';
 import type { ProfileRegistry } from './profile-registry';
 import type { DesktopCloudConnectionManager } from './desktop-cloud-connection-manager';
 import type { CloudSessionStore } from './cloud-session-store';
+import type { DesktopCloudSignInService } from './desktop-cloud-sign-in-service';
 
 function authOrigin(): string {
   return new URL(getApiBaseUrl()).origin;
@@ -23,6 +27,7 @@ export function registerCloudAuthIpc(
   sessions: CloudSessionStore,
   cloudChecks: Pick<DesktopCloudConnectionManager, 'clearSession'>,
   cloudConnection?: DeviceAuthCoordinator,
+  signIn?: DesktopCloudSignInService,
 ): void {
   ipcMain.handle(CloudAuthChannels.SESSION, async () => {
     const origin = runtime.getActiveProfileDescriptorSync()?.profileId;
@@ -65,6 +70,36 @@ export function registerCloudAuthIpc(
       }
       return ok(undefined);
     });
+  });
+
+  ipcMain.handle(CloudAuthChannels.SIGN_IN, async (_event, input: unknown) => {
+    const parsed = DesktopCloudCredentialSignInSchema.safeParse(input);
+    if (!parsed.success) return fail({ code: 'INVALID_REQUEST', message: '登录信息无效' });
+    return signIn
+      ? signIn.signIn(parsed.data)
+      : fail({ code: 'CLOUD_AUTH_UNAVAILABLE', message: '云端登录尚未初始化' });
+  });
+
+  ipcMain.handle(CloudAuthChannels.SIGN_UP, async (_event, input: unknown) => {
+    const parsed = DesktopCloudRegistrationSchema.safeParse(input);
+    if (!parsed.success) return fail({ code: 'INVALID_REQUEST', message: '注册信息无效' });
+    return signIn
+      ? signIn.signUp(parsed.data)
+      : fail({ code: 'CLOUD_AUTH_UNAVAILABLE', message: '云端登录尚未初始化' });
+  });
+
+  ipcMain.handle(CloudAuthChannels.FORGOT_PASSWORD, async () =>
+    signIn
+      ? signIn.openPasswordRecovery()
+      : fail({ code: 'CLOUD_AUTH_UNAVAILABLE', message: '云端登录尚未初始化' }),
+  );
+
+  ipcMain.handle(CloudAuthChannels.GITHUB_SIGN_IN_BEGIN, async (_event, input: unknown) => {
+    const parsed = DesktopCloudGithubSignInSchema.safeParse(input);
+    if (!parsed.success) return fail({ code: 'INVALID_REQUEST', message: '登录信息无效' });
+    return cloudConnection
+      ? cloudConnection.beginWithoutProfile(parsed.data)
+      : fail({ code: 'CLOUD_CONNECTION_UNAVAILABLE', message: '云端连接尚未初始化' });
   });
 
   ipcMain.handle(CloudAuthChannels.CLOUD_CONNECTION_BEGIN, async (_event, input: unknown) => {

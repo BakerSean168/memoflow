@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it } from 'vitest';
-import { mkdtempSync, rmSync, writeFileSync } from 'node:fs';
+import { mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { WindowStateManager } from './window-state-manager';
@@ -55,5 +55,33 @@ describe('WindowStateManager', () => {
 
     expect(manager.width).toBe(1180);
     expect(manager.height).toBe(700);
+  });
+
+  it('persists the pinned height while the window shows a taller layout state', () => {
+    const file = statePath();
+    const manager = new WindowStateManager('profile-access', {
+      defaultWidth: 1024,
+      defaultHeight: 640,
+      minimumWidth: 1024,
+      minimumHeight: 640,
+      stateFilePath: file,
+    });
+    const listeners = new Map<string, () => void>();
+    const window = {
+      getBounds: () => ({ x: 10, y: 20, width: 1024, height: 780 }),
+      isMaximized: () => false,
+      on: (event: string, handler: () => void) => {
+        listeners.set(event, handler);
+      },
+      maximize: () => undefined,
+    };
+
+    manager.pinHeight(640);
+    manager.manage(window as never);
+    listeners.get('close')!();
+
+    const saved = JSON.parse(readFileSync(file, 'utf8')) as { width: number; height: number };
+    expect(saved.width).toBe(1024);
+    expect(saved.height).toBe(640);
   });
 });

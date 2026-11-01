@@ -332,6 +332,12 @@ export const DataPortabilityChannels = {
 export const WindowChannels = {
   TRANSITION_TO_MAIN: 'window:transition-to-main',
   TRANSITION_TO_PROFILE_ACCESS: 'window:transition-to-profile-access',
+  /**
+   * Layout-only height for the identity window. The registration state is
+   * taller than the selection/login states; the persisted window height stays
+   * the base height so the next launch does not open in the taller state.
+   */
+  SET_PROFILE_ACCESS_HEIGHT: 'window:set-profile-access-height',
   GET_TYPE: 'window:get-type',
   SYNC_CHROME_THEME: 'window:sync-chrome-theme',
   MINIMIZE: 'window:minimize',

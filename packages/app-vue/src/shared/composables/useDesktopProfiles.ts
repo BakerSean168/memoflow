@@ -276,6 +276,21 @@ export function useDesktopProfiles(options: { accessWindow?: boolean } = {}) {
     return !!(await invoke(WindowChannels.TRANSITION_TO_MAIN, z.unknown()));
   }
 
+  /**
+   * The registration state is taller than the rest of the identity window.
+   * The main process applies it as a layout-only height and keeps persisting
+   * the base height, so the next launch does not open in the taller state.
+   */
+  async function setAccessWindowHeight(height: 640 | 780): Promise<void> {
+    if (!options.accessWindow) return;
+    await invokeScoped(
+      WindowChannels.SET_PROFILE_ACCESS_HEIGHT,
+      z.unknown(),
+      { silent: true },
+      { height },
+    );
+  }
+
   async function signInWithPassword(): Promise<void> {
     if (signInBusy.value) return;
     const email = loginEmail.value.trim();
@@ -300,7 +315,7 @@ export function useDesktopProfiles(options: { accessWindow?: boolean } = {}) {
   }
 
   async function forgotPassword(): Promise<void> {
-    await invokeScoped(CloudAuthChannels.FORGOT_PASSWORD, z.unknown(), { scope: 'auth' }, {});
+    await invokeScoped(CloudAuthChannels.FORGOT_PASSWORD, z.unknown(), { scope: 'auth' });
   }
 
   /**
@@ -591,6 +606,7 @@ export function useDesktopProfiles(options: { accessWindow?: boolean } = {}) {
     backToSelect,
     submitPassword,
     switchProfile,
+    setAccessWindowHeight,
     signInWithPassword,
     signInWithGithub,
     cancelGithubSignIn,

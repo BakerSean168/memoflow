@@ -32,10 +32,18 @@ function registerFixture() {
   };
   const cloudConnection = {
     begin: vi.fn().mockResolvedValue(ok({ attemptId: '8c7e083e-1b4c-42e6-901f-979d9a7b8b32' })),
+    beginWithoutProfile: vi
+      .fn()
+      .mockResolvedValue(ok({ attemptId: '8c7e083e-1b4c-42e6-901f-979d9a7b8b32' })),
     getCurrent: vi.fn().mockReturnValue(ok(null)),
     getStatus: vi.fn().mockReturnValue(ok({ attemptId: '8c7e083e-1b4c-42e6-901f-979d9a7b8b32' })),
     cancel: vi.fn().mockReturnValue(ok(undefined)),
     clearForProfile: vi.fn(),
+  };
+  const signIn = {
+    signIn: vi.fn().mockResolvedValue(ok({ profileId: 'profile-cloud' })),
+    signUp: vi.fn().mockResolvedValue(ok({ profileId: 'profile-cloud' })),
+    openPasswordRecovery: vi.fn().mockResolvedValue(ok(undefined)),
   };
   registerCloudAuthIpc(
     registry as never,
@@ -50,8 +58,9 @@ function registerFixture() {
       },
     },
     cloudConnection as never,
+    signIn as never,
   );
-  return { handlers, runtime, sessions, cloudConnection };
+  return { handlers, runtime, sessions, cloudConnection, signIn };
 }
 
 describe('registerCloudAuthIpc', () => {
@@ -67,11 +76,51 @@ describe('registerCloudAuthIpc', () => {
     expect(Object.keys(CloudAuthChannels)).toEqual([
       'SIGN_OUT',
       'SESSION',
+      'SIGN_IN',
+      'SIGN_UP',
+      'FORGOT_PASSWORD',
+      'GITHUB_SIGN_IN_BEGIN',
       'CLOUD_CONNECTION_BEGIN',
       'CLOUD_CONNECTION_CURRENT',
       'CLOUD_CONNECTION_STATUS',
       'CLOUD_CONNECTION_CANCEL',
     ]);
+  });
+
+  it('forwards a valid sign-in to the cloud sign-in service and rejects malformed input', async () => {
+    const { handlers, signIn } = registerFixture();
+
+    expect(
+      await handlers.get(CloudAuthChannels.SIGN_IN)?.({}, {
+        email: 'person@example.com',
+        password: 'cloud-password',
+        remember: true,
+      } as never),
+    ).toEqual({ ok: true, data: { profileId: 'profile-cloud' } });
+    expect(signIn.signIn).toHaveBeenCalledWith({
+      email: 'person@example.com',
+      password: 'cloud-password',
+      remember: true,
+    });
+
+    expect(
+      await handlers.get(CloudAuthChannels.SIGN_IN)?.({}, {
+        email: 'not-an-email',
+        password: '',
+        remember: true,
+      } as never),
+    ).toMatchObject({ ok: false, error: { code: 'INVALID_REQUEST' } });
+    expect(signIn.signIn).toHaveBeenCalledTimes(1);
+  });
+
+  it('starts the GitHub attempt without an origin Profile and opens the recovery page', async () => {
+    const { handlers, cloudConnection, signIn } = registerFixture();
+
+    await handlers.get(CloudAuthChannels.GITHUB_SIGN_IN_BEGIN)?.({}, { remember: false } as never);
+    expect(cloudConnection.beginWithoutProfile).toHaveBeenCalledWith({ remember: false });
+
+    await handlers.get(CloudAuthChannels.FORGOT_PASSWORD)?.({});
+    expect(signIn.openPasswordRecovery).toHaveBeenCalled();
   });
 
   it('never returns a remembered session while the local runtime is locked', async () => {
