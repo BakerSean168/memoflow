@@ -1,6 +1,8 @@
 <template>
   <Dialog :open="open && mountedActive" @update:open="handleOpenChange">
     <ProductDialogShell
+      @request-close="requestClose()"
+      :close-disabled="busy"
       :open="open && mountedActive"
       size="lg"
       test-id="knowledge-capture-native-dialog"
@@ -99,14 +101,6 @@
       </div>
 
       <template #footer>
-        <Button
-          variant="ghost"
-          :disabled="busy"
-          data-testid="knowledge-capture-native-cancel"
-          @click="handleCancel"
-        >
-          {{ t('common.cancel') }}
-        </Button>
         <Button
           :disabled="busy || !submitCoordinator || sourceOptions.length === 0"
           data-testid="knowledge-capture-native-confirm"

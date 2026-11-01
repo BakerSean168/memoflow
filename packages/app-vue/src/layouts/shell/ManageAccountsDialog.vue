@@ -42,6 +42,7 @@ async function restoreFocus(event: Event): Promise<void> {
 <template>
   <Dialog :open="open" @update:open="emit('update:open', $event)">
     <ProductDialogShell
+      @request-close="emit('update:open', false)"
       :open="open"
       test-id="manage-accounts-dialog"
       recipe="config"

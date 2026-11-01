@@ -41,9 +41,6 @@
     </form>
 
     <template #footer>
-      <Button type="button" variant="ghost" :disabled="saving" @click="handleCancel">
-        {{ t('common.cancel') }}
-      </Button>
       <Button
         type="submit"
         form="quick-task-form"

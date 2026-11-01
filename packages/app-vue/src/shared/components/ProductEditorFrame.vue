@@ -95,6 +95,7 @@ watch(
     :test-id="testId"
     :title-id="titleId"
     :close-disabled="closeDisabled"
+    :close-test-id="`${testId}-close`"
     :inert="inert"
     :size="paneSize"
     :height-mode="paneHeightMode"
@@ -111,6 +112,8 @@ watch(
     <ProductDialogShell
       :open="open"
       :test-id="testId"
+      :close-disabled="closeDisabled"
+      @request-close="emit('update:open', false)"
       :recipe="recipe"
       :body-class="bodyClass"
       :content-class="contentClass"

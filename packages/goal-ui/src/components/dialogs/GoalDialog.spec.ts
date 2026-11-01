@@ -877,7 +877,7 @@ describe('GoalDialog vNext surface (GOAL-5101)', () => {
     expect(summary.attributes('aria-describedby')).toBe('goal-summary-limit-feedback');
     expect(summary.attributes('aria-invalid')).toBe('true');
     expect(dom('goal-summary-limit-error').attributes('role')).toBe('alert');
-    expect(summary.classes()).toContain('focus-visible:ring-2');
+    expect(summary.classes()).toContain('focus-visible:ring-0');
 
     const description = dom('goal-description-input');
     expect(description.attributes('aria-describedby')).toBeUndefined();
@@ -888,11 +888,11 @@ describe('GoalDialog vNext surface (GOAL-5101)', () => {
     expect(description.attributes('aria-describedby')).toBe('goal-description-limit-feedback');
     expect(description.attributes('aria-invalid')).toBe('true');
     expect(dom('goal-description-limit-error').attributes('role')).toBe('alert');
-    expect(description.classes()).toContain('focus-visible:ring-2');
+    expect(description.classes()).toContain('focus-visible:ring-0');
 
     expect(name.classes()).toContain('resize-none');
     expect(name.classes()).toContain('border-0');
-    expect(name.classes()).toContain('focus-visible:ring-2');
+    expect(name.classes()).toContain('focus-visible:ring-0');
     wrapper.unmount();
   });
 
@@ -1210,6 +1210,16 @@ describe('GoalDialog vNext surface (GOAL-5101)', () => {
     await nextTick();
 
     const editor = dom('goal-key-results-editor');
+    const properties = dom('goal-property-chips');
+    const description = dom('goal-description-section');
+    expect(
+      properties.element.compareDocumentPosition(editor.element) & Node.DOCUMENT_POSITION_FOLLOWING,
+    ).toBeTruthy();
+    expect(
+      editor.element.compareDocumentPosition(description.element) &
+        Node.DOCUMENT_POSITION_FOLLOWING,
+    ).toBeTruthy();
+    expect(editor.classes()).not.toContain('mt-auto');
     expect(editor.classes()).toContain('bg-[hsl(var(--surface-raised)/0.24)]');
     expect(editor.classes()).toContain('shadow-[inset_0_0_0_1px_hsl(var(--border-subtle)/0.48)]');
     expect(document.querySelector('[data-testid="goal-key-results-empty"]')).toBeNull();

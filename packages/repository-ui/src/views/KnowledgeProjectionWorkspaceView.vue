@@ -311,6 +311,8 @@
     <Dialog v-model:open="adoptionDialogOpen">
       <ProductDialogShell
         :open="adoptionDialogOpen"
+        :close-disabled="adopting"
+        @request-close="closeAdoptionDialog"
         test-id="knowledge-projection-adopt-dialog"
         size="sm"
       >

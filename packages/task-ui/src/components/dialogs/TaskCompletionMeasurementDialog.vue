@@ -60,7 +60,9 @@ async function complete(intent?: { value: number; note: string }) {
     "
   >
     <ProductDialogShell
+      @request-close="requestClose()"
       :open="true"
+      :close-disabled="busy"
       test-id="task-completion-measurement-dialog"
       size="sm"
       initial-focus-selector="#change-amount"
@@ -85,9 +87,6 @@ async function complete(intent?: { value: number; note: string }) {
         {{ t('task.measurement.failed') }}
       </p>
       <template #footer>
-        <Button type="button" variant="ghost" :disabled="busy" @click="requestClose()">{{
-          t('common.cancel')
-        }}</Button>
         <Button
           type="button"
           variant="outline"

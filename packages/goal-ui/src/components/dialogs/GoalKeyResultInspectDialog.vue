@@ -8,6 +8,7 @@
     "
   >
     <ProductDialogShell
+      @request-close="emit('close')"
       :open="true"
       test-id="goal-kr-inspect"
       recipe="inspect"

@@ -178,6 +178,7 @@ onBeforeUnmount(stopPolling);
 <template>
   <Dialog :open="open" @update:open="emit('update:open', $event)">
     <ProductDialogShell
+      @request-close="emit('update:open', false)"
       :open="open"
       test-id="cloud-connection-dialog"
       size="sm"
@@ -282,9 +283,6 @@ onBeforeUnmount(stopPolling);
       <p v-if="message" class="text-sm text-destructive" role="alert">{{ message }}</p>
 
       <template #footer>
-        <Button variant="outline" @click="emit('update:open', false)">
-          {{ t('common.close') }}
-        </Button>
         <Button
           v-if="!attempt || canRetry || isConnected"
           data-testid="cloud-connection-continue"

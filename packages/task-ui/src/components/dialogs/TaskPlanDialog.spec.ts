@@ -261,11 +261,11 @@ describe('Task full-create native session', () => {
     const cancel = vi.fn(async () => {});
     session.coordinateSubmit(vi.fn(), cancel);
     await flushPromises();
-    const button = [...document.querySelectorAll('button')].find(
-      (item) => item.textContent === 'Cancel',
+    const close = document.querySelector<HTMLButtonElement>(
+      '[data-testid="task-plan-dialog-close"]',
     );
-    if (!button) throw new Error('Missing cancel');
-    button.click();
+    if (!close) throw new Error('Missing header close');
+    close.click();
     await flushPromises();
     expect(cancel).toHaveBeenCalledOnce();
     wrapper.unmount();
