@@ -23,18 +23,19 @@ const props = defineProps<{
   presenter: ReturnType<typeof useDesktopProfiles>;
   management?: boolean;
 }>();
-const emit = defineEmits<{ (event: 'pin-settings'): void }>();
+const emit = defineEmits<{ (event: 'password-settings'): void }>();
 const { t } = useI18n();
 const {
   profiles,
   snapshot,
   selectedProfileId,
-  pin,
+  password,
   busyProfileId,
   newName,
+  newPassword,
   editingProfileId,
   editName,
-  createGuest,
+  createLocalAccount,
   renameProfile,
   openProfile,
   removeProfile,
@@ -42,13 +43,13 @@ const {
 function initials(name: string): string {
   return name.trim().slice(0, 2).toUpperCase() || 'MF';
 }
-const vFocusPin = { mounted: (element: HTMLElement) => element.focus() };
+const vFocusPassword = { mounted: (element: HTMLElement) => element.focus() };
 
 const activeProfileId = computed(() => snapshot.value?.profile?.profileId ?? null);
-const pinProfile = computed(
+const passwordProfile = computed(
   () =>
     profiles.value.find(
-      (profile) => profile.profileId === selectedProfileId.value && profile.hasPin,
+      (profile) => profile.profileId === selectedProfileId.value && profile.hasCredential,
     ) ?? null,
 );
 
@@ -56,6 +57,9 @@ const pinProfile = computed(
 // dwell so sweeping the pointer across the row cannot open a card by accident;
 // keyboard focus reveals it immediately.
 const openTileId = ref<string | null>(null);
+// The "+" tile opens the same nickname+password form the management list uses;
+// the dedicated sign-in window is a later #785 step, not this one.
+const creatingLocalAccount = ref(false);
 // Escape closes the card while the tile keeps focus; suppress the focus reveal
 // until the tile loses focus or the user explicitly asks for the card again.
 const suppressedTileId = ref<string | null>(null);
@@ -155,8 +159,13 @@ function openFromTile(profile: ProfileSummary): void {
   void openProfile(profile);
 }
 
-async function submitPin(): Promise<void> {
-  if (pinProfile.value) await openProfile(pinProfile.value);
+async function submitPassword(): Promise<void> {
+  if (passwordProfile.value) await openProfile(passwordProfile.value);
+}
+
+async function submitCreate(): Promise<void> {
+  await createLocalAccount();
+  creatingLocalAccount.value = false;
 }
 
 onBeforeUnmount(() => {
@@ -166,12 +175,23 @@ onBeforeUnmount(() => {
 </script>
 <template>
   <div v-if="management" class="space-y-3">
-    <form class="flex gap-2" data-testid="desktop-profile-create" @submit.prevent="createGuest">
+    <form
+      class="flex gap-2"
+      data-testid="desktop-profile-create"
+      @submit.prevent="createLocalAccount"
+    >
       <Input
         v-model="newName"
         maxlength="80"
         :aria-label="t('auth.profileAccess.name')"
         :placeholder="t('auth.profileAccess.name')"
+      />
+      <Input
+        v-model="newPassword"
+        type="password"
+        autocomplete="new-password"
+        :aria-label="t('auth.profileAccess.password')"
+        :placeholder="t('auth.profileAccess.password')"
       />
       <Button data-testid="shell-create-profile" type="submit" :disabled="busyProfileId !== null">{{
         t('auth.profileAccess.create')
@@ -201,8 +221,8 @@ onBeforeUnmount(() => {
               <strong class="block truncate text-sm font-medium">{{ profile.displayName }}</strong>
               <small class="text-xs text-muted-foreground">
                 {{
-                  profile.profileKind === 'guest'
-                    ? t('auth.profileAccess.guest')
+                  profile.profileKind === 'local'
+                    ? t('auth.profileAccess.local')
                     : t('auth.profileAccess.registered')
                 }}
                 · {{ profile.identifierHint || profile.profileId }}
@@ -212,8 +232,12 @@ onBeforeUnmount(() => {
               </small>
             </span>
             <span class="flex shrink-0 items-center gap-1 text-xs text-primary">
-              <LockKeyhole v-if="profile.hasPin" class="h-3.5 w-3.5" />
-              {{ profile.hasPin ? t('auth.profileAccess.unlock') : t('auth.profileAccess.open') }}
+              <LockKeyhole v-if="profile.hasCredential" class="h-3.5 w-3.5" />
+              {{
+                profile.hasCredential
+                  ? t('auth.profileAccess.unlock')
+                  : t('auth.profileAccess.open')
+              }}
             </span>
           </button>
 
@@ -221,14 +245,16 @@ onBeforeUnmount(() => {
             variant="ghost"
             size="sm"
             :disabled="busyProfileId !== null"
-            :data-testid="`desktop-profile-pin-settings-${profile.profileId}`"
+            :data-testid="`desktop-profile-password-settings-${profile.profileId}`"
             @click="
-              activeProfileId === profile.profileId ? emit('pin-settings') : openProfile(profile)
+              activeProfileId === profile.profileId
+                ? emit('password-settings')
+                : openProfile(profile)
             "
             >{{
               activeProfileId === profile.profileId
-                ? t('shell.account.pinSettings')
-                : t('shell.account.openForPin')
+                ? t('shell.account.passwordSettings')
+                : t('shell.account.openForPassword')
             }}</Button
           >
           <Button
@@ -277,21 +303,20 @@ onBeforeUnmount(() => {
           }}</Button>
         </form>
         <form
-          v-if="selectedProfileId === profile.profileId && profile.hasPin"
+          v-if="selectedProfileId === profile.profileId && profile.hasCredential"
           class="flex gap-2 border-t bg-muted/20 p-3"
           @submit.prevent="openProfile(profile)"
         >
           <Input
-            v-focus-pin
-            v-model="pin"
-            :data-testid="`desktop-profile-pin-${profile.profileId}`"
-            inputmode="numeric"
+            v-focus-password
+            v-model="password"
+            :data-testid="`desktop-profile-password-${profile.profileId}`"
             type="password"
             autocomplete="current-password"
-            :placeholder="t('auth.profileAccess.pinPlaceholder')"
+            :placeholder="t('auth.profileAccess.passwordPlaceholder')"
             autofocus
           />
-          <Button type="submit" :disabled="!pin || busyProfileId !== null">
+          <Button type="submit" :disabled="!password || busyProfileId !== null">
             {{ t('auth.profileAccess.unlock') }}
           </Button>
         </form>
@@ -357,10 +382,10 @@ onBeforeUnmount(() => {
             <div class="space-y-1 px-3 pb-2 pt-3">
               <p class="truncate text-sm font-medium">{{ profile.displayName }}</p>
               <p class="flex items-center gap-1 text-xs text-muted-foreground">
-                <LockKeyhole v-if="profile.hasPin" class="h-3 w-3" aria-hidden="true" />
+                <LockKeyhole v-if="profile.hasCredential" class="h-3 w-3" aria-hidden="true" />
                 {{
-                  profile.profileKind === 'guest'
-                    ? t('auth.profileAccess.guest')
+                  profile.profileKind === 'local'
+                    ? t('auth.profileAccess.local')
                     : t('auth.profileAccess.registered')
                 }}
                 <template v-if="activeProfileId === profile.profileId">
@@ -384,7 +409,11 @@ onBeforeUnmount(() => {
                 :disabled="busyProfileId !== null"
                 @click="openFromTile(profile)"
               >
-                {{ profile.hasPin ? t('auth.profileAccess.unlock') : t('auth.profileAccess.open') }}
+                {{
+                  profile.hasCredential
+                    ? t('auth.profileAccess.unlock')
+                    : t('auth.profileAccess.open')
+                }}
               </Button>
               <Button
                 v-if="activeProfileId !== profile.profileId"
@@ -405,10 +434,10 @@ onBeforeUnmount(() => {
 
       <button
         type="button"
-        data-testid="desktop-profile-create-guest"
+        data-testid="desktop-profile-create-local"
         class="group flex w-[5.5rem] flex-col items-center gap-2 rounded-2xl px-1 py-2 text-center transition-colors hover:bg-muted/40 focus-visible:bg-muted/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50"
         :disabled="busyProfileId !== null"
-        @click="createGuest"
+        @click="creatingLocalAccount = true"
       >
         <span
           class="flex h-16 w-16 items-center justify-center rounded-full border border-dashed border-border text-muted-foreground transition-colors group-hover:border-foreground/30 group-hover:text-foreground"
@@ -422,25 +451,53 @@ onBeforeUnmount(() => {
     </div>
 
     <form
-      v-if="pinProfile"
+      v-if="creatingLocalAccount"
+      class="grid w-full gap-2 rounded-xl border bg-card p-3 sm:grid-cols-2"
+      data-testid="desktop-profile-create-form"
+      @submit.prevent="submitCreate"
+    >
+      <Input
+        v-model="newName"
+        maxlength="80"
+        :aria-label="t('auth.profileAccess.name')"
+        :placeholder="t('auth.profileAccess.name')"
+      />
+      <Input
+        v-model="newPassword"
+        type="password"
+        autocomplete="new-password"
+        :aria-label="t('auth.profileAccess.password')"
+        :placeholder="t('auth.profileAccess.password')"
+      />
+      <div class="flex justify-end gap-2 sm:col-span-2">
+        <Button type="button" variant="outline" @click="creatingLocalAccount = false">{{
+          t('common.cancel')
+        }}</Button>
+        <Button type="submit" :disabled="busyProfileId !== null">{{
+          t('auth.profileAccess.create')
+        }}</Button>
+      </div>
+    </form>
+
+    <form
+      v-if="passwordProfile"
       class="w-full space-y-2 rounded-xl border bg-card p-3"
-      @submit.prevent="submitPin"
+      @submit.prevent="submitPassword"
     >
       <p class="text-xs text-muted-foreground">
-        {{ t('auth.profileAccess.pinPrompt', { name: pinProfile.displayName }) }}
+        {{ t('auth.profileAccess.passwordPrompt', { name: passwordProfile.displayName }) }}
       </p>
       <div class="flex gap-2">
         <Input
-          v-focus-pin
-          v-model="pin"
-          :data-testid="`desktop-profile-pin-${pinProfile.profileId}`"
-          inputmode="numeric"
+          v-focus-password
+          v-model="password"
+          :data-testid="`desktop-profile-password-${passwordProfile.profileId}`"
           type="password"
           autocomplete="current-password"
-          :placeholder="t('auth.profileAccess.pinPlaceholder')"
+          :placeholder="t('auth.profileAccess.passwordPlaceholder')"
           autofocus
         />
-        <Button type="submit" :disabled="!pin || busyProfileId !== null">
+        <Button type="submit" :disabled="!password || busyProfileId !== null">
           {{ t('auth.profileAccess.unlock') }}
         </Button>
       </div>

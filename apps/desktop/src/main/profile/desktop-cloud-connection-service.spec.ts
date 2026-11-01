@@ -16,7 +16,7 @@ function fixture() {
     getActiveProfileDescriptorSync: vi.fn(() => ({ profileId: 'guest-1', cloudBinding: null })),
     disableCloudSync: vi.fn().mockResolvedValue(undefined),
     registerCloudProfile: vi.fn().mockResolvedValue({ profileId: 'cloud-1' }),
-    hasPin: vi.fn().mockResolvedValue(false),
+    hasCredential: vi.fn().mockResolvedValue(false),
     enableCloudSync: vi.fn().mockResolvedValue(undefined),
   };
   const sessions = {
@@ -153,12 +153,12 @@ describe('independent cloud Profile commit', () => {
     expect(sessions.remove).not.toHaveBeenCalled();
     expect(fetchImpl).toHaveBeenCalledOnce();
   });
-  it('commits authentication but defers opening a protected target to local PIN entry', async () => {
+  it('commits authentication but defers opening a protected target to local password entry', async () => {
     const { service, runtime } = fixture();
-    runtime.hasPin.mockResolvedValue(true);
+    runtime.hasCredential.mockResolvedValue(true);
     expect(
       await service.connect('guest-1', auth, 'token', { intent: 'add_account' }),
-    ).toMatchObject({ ok: true, data: { activation: 'pin_required' } });
+    ).toMatchObject({ ok: true, data: { activation: 'password_required' } });
   });
   it('revokes an unadopted token if cancellation happens before commit', async () => {
     const { service, sessions, runtime } = fixture();

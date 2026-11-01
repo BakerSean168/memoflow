@@ -53,7 +53,7 @@ const i18n = createI18n({
           menu: 'Account menu',
           signedIn: 'Signed in',
           localProfile: 'Local Profile',
-          guestIdentity: 'Guest',
+          localIdentity: 'Local account',
           accountAndPrivacy: 'Account & privacy',
           settings: 'Settings',
           logout: 'Sign out',
@@ -397,7 +397,7 @@ describe('ConversationSidebar account menu', () => {
 
   it.each([
     ['cloud', true, 'shell-logout', 'Sign out'],
-    ['guest', false, 'shell-open-cloud-connection', 'Connect cloud'],
+    ['local', false, 'shell-open-cloud-connection', 'Connect cloud'],
     ['registered-local', false, 'shell-open-cloud-connection', 'Sign in again'],
   ] as const)(
     'shows the conditional action for %s and hides desktop actions on web',
@@ -423,11 +423,11 @@ describe('ConversationSidebar account menu', () => {
     const profiles = Array.from({ length: 30 }, (_, index) => ({
       profileId: `id-${index}`,
       displayName: 'Same very long name '.repeat(4),
-      profileKind: index % 2 ? ('registered' as const) : ('guest' as const),
+      profileKind: index % 2 ? ('registered' as const) : ('local' as const),
       avatarSeed: `${index}`,
       identifierHint: index % 2 ? `user-${index}@example.com` : null,
       cloudAccountId: index % 2 ? `cloud-${index}` : null,
-      hasPin: index === 1,
+      hasCredential: index === 1,
       lastActiveAt: index,
     }));
     const wrapper = await openMenu({ isDesktop: true, profiles, activeProfileId: 'id-2' });
@@ -442,7 +442,7 @@ describe('ConversationSidebar account menu', () => {
       expect(rows[0]?.getAttribute('data-testid')).toBe('shell-switch-profile-id-2');
       expect(rows[1]?.getAttribute('data-testid')).toBe('shell-switch-profile-id-29');
       expect(rows[0]?.getAttribute('aria-current')).toBe('true');
-      expect(rows[0]?.getAttribute('aria-label')).toContain('Guest Profile');
+      expect(rows[0]?.getAttribute('aria-label')).toContain('Local account');
       expect(rows[0]?.getAttribute('aria-label')).toContain('Current Profile');
       expect(item('shell-switch-profile-id-1').getAttribute('aria-label')).toContain(
         'Cloud connected',

@@ -1718,6 +1718,14 @@
       "measurementCollectors": []
     },
     {
+      "path": "apps/desktop/src/main/profile/identity-reset.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "apps/desktop/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "apps/desktop/src/main/profile/profile-access-context.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -1750,7 +1758,7 @@
       "measurementCollectors": []
     },
     {
-      "path": "apps/desktop/src/main/profile/profile-pin-store.spec.ts",
+      "path": "apps/desktop/src/main/profile/profile-password-store.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "apps/desktop/vitest.config.ts"
@@ -13234,7 +13242,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 104
+      "fileCount": 105
     },
     {
       "id": "apps/migrator/vitest.config.ts",
@@ -14362,7 +14370,7 @@
   "duplicate": [],
   "unexpected": [],
   "counts": {
-    "unit": 1180,
+    "unit": 1181,
     "integration": 58,
     "smoke": 3,
     "boundary-ipc": 6,

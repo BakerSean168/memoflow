@@ -22,14 +22,14 @@ const emit = defineEmits<{ (event: 'update:open', value: boolean): void }>();
 const bridge = inject(DESKTOP_BRIDGE_KEY, null);
 const { t } = useI18n();
 const sourceId = ref('');
-const pin = ref('');
+const password = ref('');
 const requestId = ref(crypto.randomUUID());
 const selected = ref<DesktopProfileImportView | null>(null);
 const records = ref<DesktopProfileImportView[]>([]);
 const deleteSource = ref(false);
 const busy = ref(false);
 const error = ref('');
-const sources = computed(() => props.profiles.filter((profile) => profile.profileKind === 'guest'));
+const sources = computed(() => props.profiles.filter((profile) => profile.profileKind === 'local'));
 const source = computed(() =>
   sources.value.find(
     (profile) => profile.profileId === (selected.value?.sourceProfileId ?? sourceId.value),
@@ -93,11 +93,11 @@ async function action(kind: 'prepare' | 'commit' | 'recover') {
         ? {
             requestId: requestId.value,
             sourceProfileId: sourceId.value,
-            ...(pin.value ? { pin: pin.value } : {}),
+            ...(password.value ? { password: password.value } : {}),
           }
         : {
             requestId: selected.value!.requestId,
-            ...(pin.value ? { pin: pin.value } : {}),
+            ...(password.value ? { password: password.value } : {}),
             ...(kind === 'commit' ? { deleteSource: deleteSource.value } : {}),
           };
     selected.value = await invoke(channel, DesktopProfileImportViewSchema, input);
@@ -106,27 +106,27 @@ async function action(kind: 'prepare' | 'commit' | 'recover') {
     error.value = cause instanceof Error ? cause.message : t('shell.profileImport.failed');
     await refresh().catch(() => undefined);
   } finally {
-    pin.value = '';
+    password.value = '';
     busy.value = false;
   }
 }
 function selectRecord(record: DesktopProfileImportView) {
   selected.value = record;
   deleteSource.value = record.deleteSource;
-  pin.value = '';
+  password.value = '';
 }
 function newCopy() {
   selected.value = null;
   requestId.value = crypto.randomUUID();
   deleteSource.value = false;
   error.value = '';
-  pin.value = '';
+  password.value = '';
 }
 watch(
   () => props.open,
   async (open) => {
     if (!open) {
-      pin.value = '';
+      password.value = '';
       return;
     }
     newCopy();
@@ -237,14 +237,12 @@ watch(
         </label>
       </template>
       <Input
-        v-if="source?.hasPin && (!selected || canCommit || selected.deleteSource)"
-        v-model="pin"
+        v-if="source?.hasCredential && (!selected || canCommit || selected.deleteSource)"
+        v-model="password"
         type="password"
-        inputmode="numeric"
-        maxlength="12"
-        autocomplete="off"
-        :aria-label="t('shell.profileImport.pin')"
-        :placeholder="t('shell.profileImport.pin')"
+        autocomplete="current-password"
+        :aria-label="t('shell.profileImport.password')"
+        :placeholder="t('shell.profileImport.password')"
         :disabled="busy"
       />
       <details v-if="records.length" class="text-sm" :open="!!error">

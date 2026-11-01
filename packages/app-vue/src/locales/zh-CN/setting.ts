@@ -326,7 +326,7 @@ export default {
     createPrivate: '新建私有仓库',
     createOpenFailed: '无法打开 GitHub 新建仓库页面，请检查浏览器弹窗拦截设置。',
     notConnected: '尚未连接知识仓库',
-    guestCloudBlocked: '游客模式无法使用云端知识仓库，请登录后再试。',
+    localCloudBlocked: '本地账户无法使用云端知识仓库，请登录后再试。',
     offlineCloudBlocked: '离线账户无法使用云端知识仓库。',
     desktopConnectHint: '点击下方按钮开始连接 GitHub 仓库。',
     webConnectHint: '点击下方按钮，在独立授权窗口中完成 GitHub App 连接。',

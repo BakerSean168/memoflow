@@ -51,23 +51,17 @@ const i18n = createI18n({
         status: { loading: 'Loading profile...' },
         actions: { saveProfile: 'Save', logout: 'Log out', lockProfile: 'Lock Profile' },
         lockProfileHint: 'Lock local data.',
-        localProtection: {
-          title: 'Local Profile protection',
-          description: 'Device protection',
-          toggle: 'Use a local PIN',
-          hint: 'Off by default',
-          pin: 'Local PIN',
-          confirmPin: 'Confirm local PIN',
-          pinPlaceholder: '6 to 12 digits',
-          enable: 'Enable PIN',
-          enabled: 'PIN enabled',
-          invalidPin: 'Invalid PIN',
-          pinMismatch: 'PIN mismatch',
-          enableFailed: 'Enable failed',
-          removeTitle: 'Remove?',
-          removeDescription: 'Remove PIN',
-          removeConfirm: 'Remove',
-          removeFailed: 'Remove failed',
+        localPassword: {
+          title: 'Local account password',
+          description: 'Local protection',
+          newPassword: 'New password',
+          confirmPassword: 'Confirm new password',
+          placeholder: 'At least 8 characters',
+          save: 'Change password',
+          saved: 'Password updated',
+          failed: 'Change failed',
+          mismatch: 'Passwords do not match',
+          tooShort: 'Too short',
           removed: 'PIN removed',
         },
         profile: { nickname: 'Nickname', avatarUrl: 'Avatar', bio: 'Bio' },
@@ -184,7 +178,11 @@ function mountSection(
   accountService: AccountClientPort,
   lockProfile?: () => Promise<void>,
   cloudConnected = false,
-  desktop?: { invoke: ReturnType<typeof vi.fn>; hasPin?: boolean },
+  desktop?: {
+    invoke: ReturnType<typeof vi.fn>;
+    hasCredential?: boolean;
+    profileKind?: 'local' | 'registered';
+  },
 ) {
   const pinia = createPinia();
   const authStore = useAuthenticationStore(pinia);
@@ -225,13 +223,13 @@ function mountSection(
               [DESKTOP_ACCESS_SNAPSHOT_KEY as symbol]: ref({
                 profile: {
                   profileId: 'profile-1',
-                  profileKind: 'guest',
-                  displayName: 'Guest',
+                  profileKind: desktop.profileKind ?? 'local',
+                  displayName: 'Local',
                   avatarSeed: 'seed',
                   identifierHint: null,
                   cloudAccountId: null,
                   lastActiveAt: 1,
-                  hasPin: desktop.hasPin === true,
+                  hasCredential: desktop.hasCredential === true,
                 },
                 unlockState: 'UNLOCKED',
                 cloudState: 'UNBOUND',
@@ -374,7 +372,7 @@ describe('AccountProfileSection', () => {
     expect(wrapper.find('[data-testid="account-lock-profile-button"]').exists()).toBe(true);
   });
 
-  it('keeps local PIN off by default and enables it only after confirmation', async () => {
+  it('changes the local account password only when both entries match', async () => {
     const invoke = vi.fn().mockResolvedValue({ ok: true, data: null });
     const dto = {
       id: 'guest_1',
@@ -402,22 +400,58 @@ describe('AccountProfileSection', () => {
     const wrapper = mountSection(accountService, undefined, false, { invoke });
     await flushPromises();
 
-    expect(wrapper.get('[data-testid="account-local-pin-toggle"]').attributes('aria-checked')).toBe(
-      'false',
-    );
-    expect(wrapper.find('[data-testid="account-local-pin"]').exists()).toBe(false);
-    await wrapper.get('[data-testid="account-local-pin-toggle"]').trigger('click');
-    await wrapper.get('[data-testid="account-local-pin"]').setValue('482700');
-    await wrapper.get('[data-testid="account-local-pin-confirmation"]').setValue('482700');
+    const form = wrapper.get('[data-testid="account-local-password"]');
+    await wrapper.get('[data-testid="account-local-password-new"]').setValue('account-password');
     await wrapper
-      .get('[data-testid="account-local-pin-save"]')
-      .element.closest('form')
-      ?.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
+      .get('[data-testid="account-local-password-confirmation"]')
+      .setValue('other-password');
+    form.element.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
+    await flushPromises();
+    expect(invoke).not.toHaveBeenCalledWith(ProfileAccessChannels.PASSWORD_SET, expect.anything());
+
+    await wrapper
+      .get('[data-testid="account-local-password-confirmation"]')
+      .setValue('account-password');
+    form.element.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
     await flushPromises();
 
-    expect(invoke).toHaveBeenCalledWith(ProfileAccessChannels.PIN_SET, '482700');
-    expect(wrapper.get('[data-testid="account-local-pin-toggle"]').attributes('aria-checked')).toBe(
-      'true',
-    );
+    expect(invoke).toHaveBeenCalledWith(ProfileAccessChannels.PASSWORD_SET, 'account-password');
+    expect(
+      (wrapper.get('[data-testid="account-local-password-new"]').element as HTMLInputElement).value,
+    ).toBe('');
+  });
+
+  it('hides the local password card for a registered Profile', async () => {
+    const dto = {
+      id: 'cloud-1',
+      status: 'Active',
+      profile: {
+        nickname: 'Cloud',
+        realName: null,
+        avatarUrl: null,
+        bio: null,
+        gender: 'Unspecified',
+        birthday: null,
+      },
+      version: 1,
+      createdAt: 1,
+      updatedAt: 1,
+      closedAt: null,
+    } as const;
+    const accountService = {
+      getMyProfile: vi.fn().mockResolvedValue({
+        ok: true,
+        data: { account: dto, cloudIdentity: null },
+      }),
+      updateMyProfile: vi.fn(),
+    } as unknown as AccountClientPort;
+    const invoke = vi.fn();
+    const wrapper = mountSection(accountService, undefined, false, {
+      invoke,
+      profileKind: 'registered',
+    });
+    await flushPromises();
+
+    expect(wrapper.find('[data-testid="account-local-password"]').exists()).toBe(false);
   });
 });

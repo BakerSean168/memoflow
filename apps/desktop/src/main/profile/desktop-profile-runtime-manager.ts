@@ -1,7 +1,7 @@
 import { session } from 'electron';
 import { ResultErrorException } from '@memoflow/transport-contracts/result';
 import { ProfileCleanup, LocalProfileIdSchema } from './profile-cleanup';
-import { randomUUID } from 'node:crypto';
+import { randomBytes } from 'node:crypto';
 import type { Clock } from '@memoflow/time';
 import fs from 'node:fs';
 import type { PowerSyncDatabase } from '@powersync/node';
@@ -23,7 +23,7 @@ import type { WindowManager } from '../lifecycle/window-manager';
 import { Account } from '@memoflow/account/electron';
 import type { AccountClientDTO } from '@memoflow/account-contracts';
 import { ElectronProfileKeyStore } from './profile-key-store';
-import { ProfilePinStore } from './profile-pin-store';
+import { ProfilePasswordStore } from './profile-password-store';
 import { CloudSessionStore } from './cloud-session-store';
 import {
   type CloudCredentialProvider,
@@ -73,7 +73,7 @@ export class DesktopProfileRuntimeManager {
   private beforeDeactivation: ProfileDeactivationHook | null = null;
   private scheduleRuntimeController: ScheduleRuntimeController | null = null;
   private readonly keyStore: ElectronProfileKeyStore;
-  private readonly pinStore: ProfilePinStore;
+  private readonly passwordStore: ProfilePasswordStore;
   private readonly cloudSessionStore: CloudSessionStore;
   private preparedUnlockKey: Buffer | null = null;
   private preparedUnlockProfileId: string | null = null;
@@ -90,7 +90,7 @@ export class DesktopProfileRuntimeManager {
       session.fromPartition(partition),
     );
     this.keyStore = new ElectronProfileKeyStore(sharedResolver.roots.dataRoot);
-    this.pinStore = new ProfilePinStore(sharedResolver.roots.dataRoot);
+    this.passwordStore = new ProfilePasswordStore(sharedResolver.roots.dataRoot);
     this.cloudSessionStore = new CloudSessionStore(sharedResolver.roots.dataRoot);
   }
 
@@ -175,8 +175,8 @@ export class DesktopProfileRuntimeManager {
     }
   }
 
-  async hasPin(profileId: string): Promise<boolean> {
-    return this.pinStore.hasPin(profileId);
+  async hasCredential(profileId: string): Promise<boolean> {
+    return this.passwordStore.hasCredential(profileId);
   }
 
   /** All callers that combine session changes with lifecycle work share this queue.
@@ -191,8 +191,28 @@ export class DesktopProfileRuntimeManager {
     return result;
   }
 
-  createGuestProfile(requestId: string, displayName?: string): Promise<ProfileDescriptor> {
-    return this.runExclusive(() => this.profileRegistry.createGuest(requestId, displayName));
+  /**
+   * Create a local account and wrap its freshly generated data key with the
+   * account password. No safeStorage copy is written: the password is the only
+   * way to obtain this key until a later credential-remember feature exists.
+   *
+   * 本地账户创建：生成 32B 数据钥，仅用密码包裹，不写 safeStorage 副本。
+   */
+  createLocalAccount(displayName: string, password: string): Promise<ProfileDescriptor> {
+    return this.runExclusive(async () => {
+      const profile = await this.profileRegistry.createLocalAccount(displayName);
+      const profileKey = randomBytes(32);
+      try {
+        await this.passwordStore.setCredential(profile.profileId, password, profileKey);
+      } catch (error) {
+        // A local account without a credential can never be unlocked again.
+        await this.profileRegistry.remove(profile.profileId).catch(() => undefined);
+        throw error;
+      } finally {
+        profileKey.fill(0);
+      }
+      return profile;
+    });
   }
 
   registerCloudProfile(
@@ -203,14 +223,14 @@ export class DesktopProfileRuntimeManager {
     return this.profileRegistry.register(cloudAccountId, displayName, identifier);
   }
 
-  openProfile(profileId: string, pin?: string): Promise<PreparedProfileRuntime> {
-    return this.runExclusive(() => this.openProfileInTransition(profileId, pin));
+  openProfile(profileId: string, password?: string): Promise<PreparedProfileRuntime> {
+    return this.runExclusive(() => this.openProfileInTransition(profileId, password));
   }
 
   /** Called only while holding the lifecycle queue. */
   private async openProfileInTransition(
     profileId: string,
-    pin?: string,
+    password?: string,
     options?: PrepareProfileOptions,
   ): Promise<PreparedProfileRuntime> {
     LocalProfileIdSchema.parse(profileId);
@@ -221,10 +241,13 @@ export class DesktopProfileRuntimeManager {
       (profile) => profile.profileId === profileId,
     );
     if (!descriptor) throw new Error('Profile not found');
-    const protectedProfile = await this.pinStore.hasPin(profileId);
-    if (protectedProfile && !pin) throw new Error('此 Profile 需要本地 PIN 解锁');
-    // Keep the verified target key outside old runtime teardown, and never open its DB before PIN verification.
-    let key = protectedProfile ? await this.pinStore.unlock(profileId, pin!) : null;
+    // A local account is always password-protected; a registered Profile keeps
+    // its safeStorage key copy and needs no password to open.
+    const needsPassword = descriptor.profileKind === 'local';
+    if (needsPassword && !password) throw new Error('此本地账户需要密码解锁');
+    // Keep the verified target key outside old runtime teardown, and never open
+    // its DB before password verification.
+    let key = needsPassword ? await this.passwordStore.unlock(profileId, password!) : null;
     try {
       await this.deactivateProfileNow();
       await this.disposePreparedRuntime();
@@ -241,32 +264,22 @@ export class DesktopProfileRuntimeManager {
     }
   }
 
-  setCurrentProfilePin(pin: string): Promise<void> {
+  /** Change the password of the active local account; re-wraps the same data key. */
+  setCurrentProfilePassword(password: string): Promise<void> {
     const expectedProfileId = this.getActiveProfileId();
     return this.runExclusive(async () => {
       if (this.getActiveProfileId() !== expectedProfileId) throw new Error('Profile 已切换');
-      await this.setCurrentProfilePinNow(pin);
+      await this.setCurrentProfilePasswordNow(password);
     });
   }
 
-  private async setCurrentProfilePinNow(pin: string): Promise<void> {
-    const profileId = this.getActiveProfileId();
-    if (!profileId || !this.activeProfileKey) throw new Error('必须先解锁 Profile');
-    await this.pinStore.setPin(profileId, pin, this.activeProfileKey);
-  }
-
-  removeCurrentProfilePin(): Promise<void> {
-    const expectedProfileId = this.getActiveProfileId();
-    return this.runExclusive(async () => {
-      if (this.getActiveProfileId() !== expectedProfileId) throw new Error('Profile 已切换');
-      await this.removeCurrentProfilePinNow();
-    });
-  }
-
-  private async removeCurrentProfilePinNow(): Promise<void> {
-    const profileId = this.getActiveProfileId();
-    if (!profileId || !this.activeProfileKey) throw new Error('必须先解锁 Profile');
-    await this.pinStore.remove(profileId);
+  private async setCurrentProfilePasswordNow(password: string): Promise<void> {
+    const descriptor = this.activeRuntime?.descriptor;
+    if (!descriptor || !this.activeProfileKey) throw new Error('必须先解锁 Profile');
+    if (descriptor.profileKind !== 'local') {
+      throw new ResultErrorException('只有本地账户可以设置密码', 'PROFILE_NOT_LOCAL_ACCOUNT');
+    }
+    await this.passwordStore.setCredential(descriptor.profileId, password, this.activeProfileKey);
   }
 
   async enableCloudSync(credentialProvider: CloudCredentialProvider): Promise<void> {
@@ -301,11 +314,19 @@ export class DesktopProfileRuntimeManager {
   async activateStartupProfile(): Promise<PreparedProfileRuntime> {
     return this.runExclusive(async () => {
       const descriptor = await this.getStartupProfile();
+      if (!descriptor) throw new Error('本机还没有本地账户');
       return this.openProfileInTransition(descriptor.profileId);
     });
   }
 
-  async getStartupProfile(): Promise<ProfileDescriptor> {
+  /**
+   * Startup candidate. Never creates an identity: an empty registry yields
+   * null so the shell presents the empty account list instead of silently
+   * minting an account with no password.
+   *
+   * 启动不再静默创建身份：注册表为空时返回 null。
+   */
+  async getStartupProfile(): Promise<ProfileDescriptor | null> {
     for (const profileId of await this.cleanup.pending()) {
       try {
         await this.finishCleanup(profileId);
@@ -316,11 +337,10 @@ export class DesktopProfileRuntimeManager {
     const pending = new Set(await this.cleanup.pending());
     const selected = await this.profileRegistry.getActiveProfile();
     if (selected && !pending.has(selected.profileId)) return selected;
-    if (pending.size === 0) return this.profileRegistry.ensureGuest();
     const available = (await this.profileRegistry.list()).find(
       (profile) => !pending.has(profile.profileId),
     );
-    return available ?? this.profileRegistry.createGuest(randomUUID());
+    return available ?? null;
   }
 
   private async activatePreparedProfile(): Promise<void> {
@@ -329,13 +349,15 @@ export class DesktopProfileRuntimeManager {
     let bootstrapper: ElectronBootstrapper | null = null;
     try {
       const prepared = this.preparedRuntime!;
-      await this.keyStore.ensure(prepared.descriptor.profileId);
-      const pinRequired = await this.pinStore.hasPin(prepared.descriptor.profileId);
-      if (pinRequired && this.preparedUnlockProfileId !== prepared.descriptor.profileId) {
-        throw new Error('此 Profile 需要本地 PIN 解锁');
+      let profileKey = this.preparedUnlockKey;
+      if (!profileKey) {
+        if (prepared.descriptor.profileKind === 'local') {
+          throw new Error('此本地账户需要密码解锁');
+        }
+        await this.keyStore.ensure(prepared.descriptor.profileId);
+        profileKey = await this.keyStore.unlock(prepared.descriptor.profileId);
       }
-      this.activeProfileKey =
-        this.preparedUnlockKey ?? (await this.keyStore.unlock(prepared.descriptor.profileId));
+      this.activeProfileKey = profileKey;
       this.preparedUnlockKey = null;
       this.preparedUnlockProfileId = null;
       bootstrapper = new ElectronBootstrapper(prepared.db);
@@ -461,16 +483,16 @@ export class DesktopProfileRuntimeManager {
   private async finishCleanup(profileId: string): Promise<void> {
     await this.cleanup.remove(profileId, async () => {
       await this.cloudSessionStore.remove(profileId);
-      await this.pinStore.remove(profileId);
+      await this.passwordStore.remove(profileId);
       await this.keyStore.remove(profileId);
       await this.profileRegistry.remove(profileId);
     });
   }
 
   /** These composition callbacks are used only inside runExclusive, never exposed over IPC. */
-  async withInactiveGuest<T>(
+  async withInactiveLocalAccount<T>(
     profileId: string,
-    pin: string | undefined,
+    password: string | undefined,
     read: (descriptor: ProfileDescriptor, paths: ProfilePathResolver) => Promise<T>,
   ): Promise<T> {
     LocalProfileIdSchema.parse(profileId);
@@ -484,13 +506,13 @@ export class DesktopProfileRuntimeManager {
     const profile = (await this.profileRegistry.list()).find(
       (item) => item.profileId === profileId,
     );
-    if (!profile || profile.profileKind !== 'guest')
-      throw new ResultErrorException('SOURCE_NOT_GUEST', 'SOURCE_NOT_GUEST');
-    const protectedProfile = await this.pinStore.hasPin(profileId);
-    if (protectedProfile && !pin)
-      throw new ResultErrorException('SOURCE_PIN_REQUIRED', 'SOURCE_PIN_REQUIRED');
-    const key = protectedProfile
-      ? await this.pinStore.unlock(profileId, pin!)
+    if (!profile || profile.profileKind !== 'local')
+      throw new ResultErrorException('SOURCE_NOT_LOCAL_ACCOUNT', 'SOURCE_NOT_LOCAL_ACCOUNT');
+    const passwordProtected = await this.passwordStore.hasCredential(profileId);
+    if (passwordProtected && !password)
+      throw new ResultErrorException('SOURCE_PASSWORD_REQUIRED', 'SOURCE_PASSWORD_REQUIRED');
+    const key = passwordProtected
+      ? await this.passwordStore.unlock(profileId, password!)
       : await this.keyStore.unlock(profileId);
     try {
       const paths = createProfilePathResolver(this.sharedResolver.roots, profileId);
@@ -514,12 +536,12 @@ export class DesktopProfileRuntimeManager {
   }
 
   /** Cleanup caller already holds the lifecycle queue and has proved copy verification. */
-  async removeImportedGuest(profileId: string): Promise<void> {
+  async removeImportedLocalAccount(profileId: string): Promise<void> {
     const descriptor = (await this.profileRegistry.list()).find(
       (item) => item.profileId === profileId,
     );
-    if (descriptor?.profileKind !== 'guest')
-      throw new ResultErrorException('SOURCE_NOT_GUEST', 'SOURCE_NOT_GUEST');
+    if (descriptor?.profileKind !== 'local')
+      throw new ResultErrorException('SOURCE_NOT_LOCAL_ACCOUNT', 'SOURCE_NOT_LOCAL_ACCOUNT');
     await this.removeProfileNow(profileId);
   }
 

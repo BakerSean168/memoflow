@@ -61,7 +61,7 @@ const messages = {
       createPrivate: 'Create private repository',
       createOpenFailed: 'Create repository page failed',
       notConnected: 'Not connected',
-      guestCloudBlocked: 'Guest mode is local-only.',
+      localCloudBlocked: 'A local account cannot use the cloud knowledge repository.',
       offlineCloudBlocked: 'Sign in online first.',
       webConnectHint: 'Web connect hint',
       desktopConnectHint: 'Desktop connect hint',
@@ -290,7 +290,7 @@ function mountSettings(
       identifierHint: 'user@example.com',
       cloudAccountId: 'account-1',
       lastActiveAt: 1,
-      hasPin: false,
+      hasCredential: false,
     },
     unlockState: 'UNLOCKED',
     cloudState: 'ONLINE',
@@ -1309,19 +1309,19 @@ describe('KnowledgeRepositorySettings', () => {
     );
     expect(wrapper.text()).not.toContain('Sync now');
   });
-  it('hides GitHub connect actions and skips cloud listing for guest profiles', async () => {
+  it('hides GitHub connect actions and skips cloud listing for local accounts', async () => {
     const service = createService();
     const wrapper = mountSettings(service, undefined, {
       desktopAccess: {
         profile: {
           profileId: 'guest-profile',
-          profileKind: 'guest',
+          profileKind: 'local',
           displayName: 'Guest 4827',
           avatarSeed: 'guest-seed',
           identifierHint: null,
           cloudAccountId: null,
           lastActiveAt: 1,
-          hasPin: false,
+          hasCredential: false,
         },
         unlockState: 'UNLOCKED',
         cloudState: 'UNBOUND',
@@ -1331,7 +1331,7 @@ describe('KnowledgeRepositorySettings', () => {
     await flushPromises();
 
     expect(service.listKnowledgeRepositoryConnections).not.toHaveBeenCalled();
-    expect(wrapper.text()).toContain('Guest mode is local-only.');
+    expect(wrapper.text()).toContain('A local account cannot use the cloud knowledge repository.');
     expect(wrapper.find('[data-testid="github-repository-connect"]').exists()).toBe(false);
     expect(wrapper.find('[data-testid="github-repository-create"]').exists()).toBe(false);
   });
@@ -1373,7 +1373,7 @@ describe('KnowledgeRepositorySettings', () => {
           identifierHint: 'user@example.com',
           cloudAccountId: 'account-1',
           lastActiveAt: 1,
-          hasPin: false,
+          hasCredential: false,
         },
         unlockState: 'UNLOCKED',
         cloudState: 'REAUTH_REQUIRED',

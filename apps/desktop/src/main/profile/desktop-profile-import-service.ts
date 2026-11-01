@@ -75,8 +75,8 @@ export class DesktopProfileImportService {
       return (await journal.list()).map(view);
     });
   }
-  private readSource(sourceProfileId: string, pin: string | undefined, exportedAt: string) {
-    return this.runtime.withInactiveGuest(sourceProfileId, pin, (profile, paths) =>
+  private readSource(sourceProfileId: string, password: string | undefined, exportedAt: string) {
+    return this.runtime.withInactiveLocalAccount(sourceProfileId, password, (profile, paths) =>
       readProfileSqliteSnapshot(paths.dbPath, async (db) => {
         const exported = await composeProfilePortability(db, exportedAt).export(
           profile.localOwnerId,
@@ -104,7 +104,7 @@ export class DesktopProfileImportService {
         return view(previous);
       }
       const exportedAt = new Date().toISOString();
-      const source = await this.readSource(input.sourceProfileId, input.pin, exportedAt);
+      const source = await this.readSource(input.sourceProfileId, input.password, exportedAt);
       ProfileImportRequestSchema.parse({ requestId: input.requestId, content: source.content });
       const entry: ProfileImportJournalEntry = {
         schemaVersion: 1,
@@ -155,7 +155,7 @@ export class DesktopProfileImportService {
         await target.journal.save(entry);
       } else if (entry.phase === 'prepared')
         throw new ResultErrorException('IMPORT_PREFLIGHT_REQUIRED', 'IMPORT_PREFLIGHT_REQUIRED');
-      return this.recoverNow(entry, target.token, target.journal, input.pin);
+      return this.recoverNow(entry, target.token, target.journal, input.password);
     });
   }
   recover(input: DesktopProfileImportOperationRequest) {
@@ -166,7 +166,7 @@ export class DesktopProfileImportService {
         input.requestId,
         target.profile.localOwnerId,
       );
-      return this.recoverNow(entry, target.token, target.journal, input.pin);
+      return this.recoverNow(entry, target.token, target.journal, input.password);
     });
   }
   private async requireEntry(journal: ProfileImportJournal, requestId: string, identityId: string) {
@@ -187,7 +187,7 @@ export class DesktopProfileImportService {
     entry: ProfileImportJournalEntry,
     token: string,
     journal: ProfileImportJournal,
-    pin?: string,
+    password?: string,
   ) {
     if (entry.phase === 'completed') {
       await journal.discardSnapshot(entry.requestId);
@@ -199,7 +199,7 @@ export class DesktopProfileImportService {
         (profile) => profile.profileId === entry.sourceProfileId,
       );
       if (!sourceExists || (await this.runtime.isProfileCleanupPending(entry.sourceProfileId))) {
-        if (sourceExists) await this.runtime.removeImportedGuest(entry.sourceProfileId);
+        if (sourceExists) await this.runtime.removeImportedLocalAccount(entry.sourceProfileId);
         entry.phase = 'completed';
         await journal.save(entry);
         await journal.discardSnapshot(entry.requestId);
@@ -274,7 +274,7 @@ export class DesktopProfileImportService {
     if (entry.localVerified && entry.serverVerified) entry.phase = 'verified';
     await journal.save(entry);
     if (entry.phase === 'verified' && entry.deleteSource && entry.blockers.length === 0) {
-      const source = await this.readSource(entry.sourceProfileId, pin, entry.exportedAt);
+      const source = await this.readSource(entry.sourceProfileId, password, entry.exportedAt);
       entry.sourceUnchanged =
         source.sourceLastActiveAt === entry.sourceLastActiveAt &&
         source.sourceDigest === entry.sourceDigest &&
@@ -296,7 +296,7 @@ export class DesktopProfileImportService {
         }
         entry.phase = 'cleanup_pending';
         await journal.save(entry);
-        await this.runtime.removeImportedGuest(entry.sourceProfileId);
+        await this.runtime.removeImportedLocalAccount(entry.sourceProfileId);
         entry.phase = 'completed';
         await journal.save(entry);
         await journal.discardSnapshot(entry.requestId);
@@ -335,13 +335,13 @@ export class DesktopProfileImportService {
         );
         if (summary.state !== 'empty') return null;
         const candidates = (await this.runtime.listProfiles()).filter(
-          (candidate) => candidate.profileKind === 'guest',
+          (candidate) => candidate.profileKind === 'local',
         );
         const available: string[] = [];
         for (const candidate of candidates.slice(0, 20)) {
-          if (await this.runtime.hasPin(candidate.profileId)) continue;
+          if (await this.runtime.hasCredential(candidate.profileId)) continue;
           try {
-            const exported = await this.runtime.withInactiveGuest(
+            const exported = await this.runtime.withInactiveLocalAccount(
               candidate.profileId,
               undefined,
               (source, paths) =>

@@ -72,7 +72,7 @@ export const DesktopCloudAttemptRequestSchema = z.object({ attemptId: z.string()
 
 export interface DesktopCloudConnectionResult {
   targetProfileId: string;
-  activation: 'active' | 'pending' | 'pin_required' | 'sync_pending';
+  activation: 'active' | 'pending' | 'password_required' | 'sync_pending';
 }
 
 export interface DesktopCloudConnectionAttempt {

@@ -8,8 +8,8 @@
  * - app.on('before-quit') - Cleanup before exit
  *
  * Desktop Profile 启动流程：
- * 1. 读取或创建持久化本地 Profile
- * 2. 依据本地 PIN policy 决定直接打开或进入解锁窗口
+ * 1. 读取持久化 Profile 注册表（注册表为空时不创建任何身份）
+ * 2. 本地账户一律先进入 Profile Access 输入密码；registered 直接打开
  * 3. Profile 打开后独立恢复云端连接，不以 cloud session 控制本地准入
  *
  * @module lifecycle/app-lifecycle
@@ -61,7 +61,7 @@ async function handleAppReady(
   // and must never decide whether local data can be opened.
   windowManager.setRuntimeManager(runtimeManager);
   const startupProfile = await runtimeManager.getStartupProfile();
-  if (await runtimeManager.hasPin(startupProfile.profileId)) {
+  if (!startupProfile || startupProfile.profileKind === 'local') {
     windowManager.createProfileAccessWindow();
   } else {
     const startup = await runtimeManager.activateStartupProfile();
@@ -146,7 +146,7 @@ async function handleAppReady(
     restoringWindow = true;
     try {
       const candidate = await runtimeManager.getStartupProfile();
-      if (await runtimeManager.hasPin(candidate.profileId)) {
+      if (!candidate || candidate.profileKind === 'local') {
         await runtimeManager.deactivateProfile({ preserveSelection: true });
         windowManager.createProfileAccessWindow();
       } else {

@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { ProfilePinSchema } from './profile-access';
+import { ProfilePasswordSchema } from './profile-access';
 import {
   ProfileImportBlockerSchema,
   ProfileImportPlanSchema,
@@ -13,11 +13,11 @@ export const DesktopProfileImportTargetSchema = z
 export const DesktopProfileImportPrepareSchema = DesktopProfileImportTargetSchema.extend({
   requestId: ProfileImportRequestSchema.shape.requestId,
   sourceProfileId: LocalProfileId,
-  pin: ProfilePinSchema.optional(),
+  password: ProfilePasswordSchema.optional(),
 });
 export const DesktopProfileImportOperationRequestSchema = DesktopProfileImportTargetSchema.extend({
   requestId: ProfileImportRequestSchema.shape.requestId,
-  pin: ProfilePinSchema.optional(),
+  password: ProfilePasswordSchema.optional(),
 });
 export const DesktopProfileImportCommitSchema = DesktopProfileImportOperationRequestSchema.extend({
   deleteSource: z.boolean(),

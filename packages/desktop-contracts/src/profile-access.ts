@@ -1,5 +1,5 @@
 import { z } from 'zod';
-export type ProfileKind = 'guest' | 'registered';
+export type ProfileKind = 'local' | 'registered';
 export type ProfileUnlockState = 'LOCKED' | 'UNLOCKED';
 export type ProfileCloudState = 'UNBOUND' | 'CHECKING' | 'ONLINE' | 'OFFLINE' | 'REAUTH_REQUIRED';
 
@@ -11,7 +11,8 @@ export interface ProfileSummary {
   identifierHint: string | null;
   cloudAccountId: string | null;
   lastActiveAt: number;
-  hasPin: boolean;
+  /** True when this account's data key is wrapped by a local password. */
+  hasCredential: boolean;
 }
 
 export const ProfileIdSchema = z
@@ -20,20 +21,21 @@ export const ProfileIdSchema = z
   .max(128)
   .regex(/^[a-zA-Z0-9_-]+$/);
 export const ProfileDisplayNameSchema = z.string().trim().min(1).max(80);
-export const ProfilePinSchema = z.string().regex(/^\d{6,12}$/);
+/** Local-account password: length is the only rule; no composition requirement. */
+export const ProfilePasswordSchema = z.string().min(8).max(100);
 export const SelectProfileRequestSchema = z
-  .object({ profileId: ProfileIdSchema, pin: ProfilePinSchema.optional() })
+  .object({ profileId: ProfileIdSchema, password: ProfilePasswordSchema.optional() })
   .strict();
 export const RemoveProfileRequestSchema = z.object({ profileId: ProfileIdSchema }).strict();
-export const CreateGuestProfileRequestSchema = z
-  .object({ requestId: z.string().uuid(), displayName: ProfileDisplayNameSchema.optional() })
+export const CreateLocalAccountRequestSchema = z
+  .object({ displayName: ProfileDisplayNameSchema, password: ProfilePasswordSchema })
   .strict();
 export const RenameProfileRequestSchema = z
   .object({ profileId: ProfileIdSchema, displayName: ProfileDisplayNameSchema })
   .strict();
 export type SelectProfileRequest = z.infer<typeof SelectProfileRequestSchema>;
 export type RemoveProfileRequest = z.infer<typeof RemoveProfileRequestSchema>;
-export type CreateGuestProfileRequest = z.infer<typeof CreateGuestProfileRequestSchema>;
+export type CreateLocalAccountRequest = z.infer<typeof CreateLocalAccountRequestSchema>;
 export type RenameProfileRequest = z.infer<typeof RenameProfileRequestSchema>;
 
 export interface DesktopAccessSnapshot {

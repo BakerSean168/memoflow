@@ -20,7 +20,7 @@ interface ProfileRegistrySnapshot {
   activeProfileId: string | null;
   profiles: Array<{
     profileId: string;
-    profileKind: 'guest' | 'registered';
+    profileKind: 'local' | 'registered';
     cloudBinding: { cloudAccountId: string } | null;
   }>;
 }

@@ -28,24 +28,59 @@ describe('ProfileRegistry', () => {
     await fs.promises.rm(rootDir, { recursive: true, force: true });
   });
 
-  it('creates independent guests and replays the same creation request without a duplicate', async () => {
+  it('creates independent local accounts with no cloud binding', async () => {
     const registry = new ProfileRegistry(createSharedResolver(rootDir));
-    const first = await registry.ensureGuest();
-    const second = await registry.createGuest('create-second', 'Work');
-    const replay = await registry.createGuest('create-second', 'Work');
+    const first = await registry.createLocalAccount('Local A');
+    const second = await registry.createLocalAccount('Work');
 
     expect(second.profileId).not.toBe(first.profileId);
     expect(second.localOwnerId).not.toBe(first.localOwnerId);
     expect(second.keyEnvelopeId).not.toBe(first.keyEnvelopeId);
+    expect(second.profileKind).toBe('local');
     expect(second.cloudBinding).toBeNull();
-    expect(replay.profileId).toBe(second.profileId);
-    expect((await registry.ensureGuest()).profileId).toBe(first.profileId);
+    expect(second.identifier).toBeNull();
+    expect(second.profileId).toMatch(/^p_[a-f0-9]{24}$/);
+    expect(first.profileId).not.toContain('Local');
     expect(await new ProfileRegistry(createSharedResolver(rootDir)).list()).toHaveLength(2);
+  });
+
+  it('rejects a local descriptor that carries a cloud binding', async () => {
+    const resolver = createSharedResolver(rootDir);
+    await fs.promises.mkdir(resolver.profilesRegistryDir, { recursive: true });
+    await fs.promises.writeFile(
+      resolver.registryPath,
+      JSON.stringify({
+        version: 2,
+        activeProfileId: null,
+        profiles: [
+          {
+            profileId: 'p_aaaaaaaaaaaaaaaaaaaaaaaa',
+            profileKind: 'local',
+            localOwnerId: 'owner',
+            displayName: 'Local',
+            avatarSeed: 'seed',
+            keyEnvelopeId: 'key',
+            identifier: null,
+            cloudBinding: { cloudAccountId: 'cloud', boundAt: 1, lastValidatedAt: null },
+            lastActiveAt: 1,
+            createdAt: 1,
+            hasSnapshot: false,
+            lastSnapshotVersion: null,
+            lastSnapshotHydratedAt: null,
+            status: 'ready',
+          },
+        ],
+      }),
+    );
+
+    await expect(new ProfileRegistry(resolver).list()).rejects.toThrow(
+      'Local Profile cannot have a cloud binding',
+    );
   });
 
   it('does not publish failed writes and accepts a retry after persistence recovers', async () => {
     const registry = new ProfileRegistry(createSharedResolver(rootDir));
-    const first = await registry.ensureGuest();
+    const first = await registry.createLocalAccount('Local A');
     const rename = vi.spyOn(fs.promises, 'rename').mockRejectedValueOnce(new Error('disk full'));
     await expect(
       registry.updateProfileMetadata(first.profileId, { displayName: 'Lost' }),
@@ -228,32 +263,29 @@ describe('ProfileRegistry', () => {
     expect(updated.identifier).toBe('alice@new.com');
   });
 
-  it('persists concurrent creates without lost updates or duplicate requests', async () => {
+  it('persists concurrent creates without lost updates or duplicates', async () => {
     const registry = new ProfileRegistry(createSharedResolver(rootDir));
     const results = await Promise.all([
-      registry.createGuest('one'),
-      registry.createGuest('two'),
-      registry.createGuest('one'),
+      registry.createLocalAccount('One'),
+      registry.createLocalAccount('Two'),
+      registry.createLocalAccount('Three'),
     ]);
-    expect(results[0].profileId).toBe(results[2].profileId);
-    expect(await registry.list()).toHaveLength(2);
+    expect(new Set(results.map((profile) => profile.profileId)).size).toBe(3);
+    expect(await registry.list()).toHaveLength(3);
   });
 
-  it('creates one persistent random guest profile and reuses it after reload', async () => {
+  it('creates a local account that survives a reload with its derived identity', async () => {
     const resolver = createSharedResolver(rootDir);
-    const firstRegistry = new ProfileRegistry(resolver);
-    const first = await firstRegistry.ensureGuest();
+    const first = await new ProfileRegistry(resolver).createLocalAccount('Persisted');
 
-    const secondRegistry = new ProfileRegistry(resolver);
-    const second = await secondRegistry.ensureGuest();
+    const reloaded = await new ProfileRegistry(resolver).findByOwnerId(first.localOwnerId);
 
-    expect(first.profileId).toBe(second.profileId);
-    expect(first.localOwnerId).toBe(second.localOwnerId);
-    expect(first.localOwnerId).toMatch(/^IdentityId_/);
-    expect(first.avatarSeed).toBe(second.avatarSeed);
-    expect(first.profileKind).toBe('guest');
-    expect(first.cloudBinding).toBeNull();
-    expect(first.displayName).toMatch(/^访客 \d{4}$/);
+    expect(reloaded?.profileId).toBe(first.profileId);
+    expect(reloaded?.localOwnerId).toMatch(/^IdentityId_/);
+    expect(reloaded?.avatarSeed).toBe(first.avatarSeed);
+    expect(reloaded?.profileKind).toBe('local');
+    expect(reloaded?.cloudBinding).toBeNull();
+    expect(reloaded?.displayName).toBe('Persisted');
   });
 
   it('rejects legacy registry versions instead of silently migrating them', async () => {

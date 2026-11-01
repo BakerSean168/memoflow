@@ -9,7 +9,7 @@ const logger = createLogger('ProfileRegistry');
 
 export interface ProfileDescriptor {
   profileId: string;
-  profileKind: 'guest' | 'registered';
+  profileKind: 'local' | 'registered';
   localOwnerId: string;
   displayName: string;
   avatarSeed: string;
@@ -55,11 +55,11 @@ function assertProfileDescriptor(value: unknown): asserts value is ProfileDescri
   if (requiredStrings.some((key) => typeof profile[key] !== 'string' || profile[key] === '')) {
     throw new Error('Invalid Profile descriptor');
   }
-  if (profile.profileKind !== 'guest' && profile.profileKind !== 'registered') {
+  if (profile.profileKind !== 'local' && profile.profileKind !== 'registered') {
     throw new Error('Invalid Profile kind');
   }
-  if (profile.profileKind === 'guest' && profile.cloudBinding !== null) {
-    throw new Error('Guest Profile cannot have a cloud binding');
+  if (profile.profileKind === 'local' && profile.cloudBinding !== null) {
+    throw new Error('Local Profile cannot have a cloud binding');
   }
   if (
     profile.profileKind === 'registered' &&
@@ -251,37 +251,31 @@ export class ProfileRegistry {
     });
   }
 
-  /** Explicit creation is idempotent per request, separate from startup fallback. */
-  async createGuest(requestId: string, displayName?: string): Promise<ProfileDescriptor> {
-    if (!requestId.trim()) throw new Error('Profile creation request ID is required');
-    const profileId = computeProfileId(`guest:${requestId}`);
+  /**
+   * Create a local account. The identity is device-local and carries no cloud
+   * binding; its profileId derives from an opaque random token so it never
+   * exposes a nickname and never collides with a cloud-derived profileId.
+   *
+   * 本地账户：纯本机身份，profileId 由无语义随机量派生。
+   */
+  async createLocalAccount(displayName: string): Promise<ProfileDescriptor> {
     return this.mutate((data) => {
-      const existing = data.profiles.find((profile) => profile.profileId === profileId);
-      if (existing) {
-        if (existing.profileKind !== 'guest') throw new Error('Profile identity conflict');
-        return existing;
-      }
-      return this.addGuest(data, profileId, displayName);
+      const profileId = computeProfileId(`local:${crypto.randomUUID()}`);
+      return this.addLocalAccount(data, profileId, displayName);
     });
   }
 
-  /** Startup fallback; explicit creation must use createGuest. */
-  async ensureGuest(): Promise<ProfileDescriptor> {
-    return this.mutate((data) => {
-      const existing = data.profiles.find((profile) => profile.profileKind === 'guest');
-      return existing ?? this.addGuest(data, `p_${crypto.randomBytes(12).toString('hex')}`);
-    });
-  }
-
-  private addGuest(data: RegistryFile, profileId: string, displayName?: string): ProfileDescriptor {
+  private addLocalAccount(
+    data: RegistryFile,
+    profileId: string,
+    displayName: string,
+  ): ProfileDescriptor {
     const now = Date.now();
-    const suffix = String(Math.floor(1000 + Math.random() * 9000));
-    const localOwnerId = IdentityId.generate();
     const descriptor: ProfileDescriptor = {
       profileId,
-      profileKind: 'guest',
-      localOwnerId,
-      displayName: displayName?.trim() || `访客 ${suffix}`,
+      profileKind: 'local',
+      localOwnerId: IdentityId.generate(),
+      displayName,
       avatarSeed: crypto.randomUUID(),
       keyEnvelopeId: `key_${crypto.randomUUID().replace(/-/g, '')}`,
       identifier: null,
@@ -294,6 +288,7 @@ export class ProfileRegistry {
       status: 'pending',
     };
     data.profiles.push(descriptor);
+    logger.info('Local account created', { profileId });
     return descriptor;
   }
 

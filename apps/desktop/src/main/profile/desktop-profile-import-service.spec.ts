@@ -121,7 +121,7 @@ async function fixture() {
   const sourceDescriptor = {
     lastActiveAt: 1,
     profileId: sourceId,
-    profileKind: 'guest',
+    profileKind: 'local',
     localOwnerId: 'IdentityId_11111111-1111-4111-8111-111111111111',
   };
   const remove = vi.fn(async () => undefined);
@@ -132,16 +132,16 @@ async function fixture() {
     getActiveProfileResolver: () => target,
     getSharedResolver: () => ({ roots }),
     listProfiles: async () => [descriptor, sourceDescriptor],
-    hasPin: async () => false,
+    hasCredential: async () => false,
     isProfileCleanupPending: async () => false,
     withActiveProfileKey: <T>(_id: string, work: (key: Buffer) => Promise<T>) =>
       work(Buffer.alloc(32, 1)),
-    withInactiveGuest: <T>(
+    withInactiveLocalAccount: <T>(
       _id: string,
-      _pin: string | undefined,
+      _password: string | undefined,
       work: (profile: typeof sourceDescriptor, paths: typeof source) => Promise<T>,
     ) => work(sourceDescriptor, source),
-    removeImportedGuest: remove,
+    removeImportedLocalAccount: remove,
   };
   const sessions = {
     load: async () => ({
@@ -369,7 +369,7 @@ it('consumes a new-account invitation once, before displaying it', async () => {
   }
 });
 
-it('requires selection when multiple guests contain business data and skips PIN-locked candidates', async () => {
+it('requires selection when multiple local accounts contain business data and skips password-locked candidates', async () => {
   const f = await fixture();
   try {
     const secondId = 'p_333333333333333333333333';
@@ -380,10 +380,10 @@ it('requires selection when multiple guests contain business data and skips PIN-
     ];
     await markProfileImportOpportunity(f.root, targetId, sourceId);
     expect(await f.service().consumePrompt(targetId)).toEqual({ sourceProfileId: null });
-    f.runtime.hasPin = async (id?: string) => id === secondId;
+    f.runtime.hasCredential = async (id?: string) => id === secondId;
     await markProfileImportOpportunity(f.root, targetId, sourceId);
     expect(await f.service().consumePrompt(targetId)).toEqual({ sourceProfileId: sourceId });
-    f.runtime.hasPin = async () => true;
+    f.runtime.hasCredential = async () => true;
     await markProfileImportOpportunity(f.root, targetId, sourceId);
     expect(await f.service().consumePrompt(targetId)).toBeNull();
   } finally {

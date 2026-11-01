@@ -414,7 +414,7 @@ async function manageProfiles(trigger: HTMLButtonElement | null) {
 function closeManagement() {
   manageAccountsOpen.value = false;
 }
-function managePinSettings() {
+function managePasswordSettings() {
   closeManagement();
   openAccount();
 }
@@ -471,12 +471,12 @@ const shellCloudConnected = computed(
       (desktopAccess.value?.profile?.profileKind === 'registered' &&
         desktopAccess.value.cloudState !== 'REAUTH_REQUIRED')),
 );
-const shellIdentityKind = computed<'guest' | 'registered-local' | 'cloud'>(() => {
+const shellIdentityKind = computed<'local' | 'registered-local' | 'cloud'>(() => {
   if (shellCloudConnected.value) return 'cloud';
   if (desktopAccess.value?.profile) {
-    return desktopAccess.value.profile.profileKind === 'guest' ? 'guest' : 'registered-local';
+    return desktopAccess.value.profile.profileKind === 'local' ? 'local' : 'registered-local';
   }
-  return accountStore.currentAccount ? 'registered-local' : 'guest';
+  return accountStore.currentAccount ? 'registered-local' : 'local';
 });
 
 const needsEmailVerification = computed(
@@ -1374,7 +1374,7 @@ onBeforeUnmount(() => {
       closeManagement();
       profileImportOpen = true;
     "
-    @pin-settings="managePinSettings"
+    @password-settings="managePasswordSettings"
   />
   <ProfileImportDialog
     v-if="desktopAccess?.profile?.profileKind === 'registered'"

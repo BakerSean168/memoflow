@@ -12,12 +12,12 @@ import common from '../../locales/en-US/common';
 const profiles: ProfileSummary[] = [
   {
     profileId: 'profile-1',
-    profileKind: 'guest',
-    displayName: '访客 4827',
+    profileKind: 'local',
+    displayName: 'Local 4827',
     avatarSeed: 'seed',
     identifierHint: null,
     cloudAccountId: null,
-    hasPin: false,
+    hasCredential: false,
     lastActiveAt: 1,
   },
   {
@@ -27,7 +27,7 @@ const profiles: ProfileSummary[] = [
     avatarSeed: 'seed-2',
     identifierHint: 'work@example.com',
     cloudAccountId: 'cloud-1',
-    hasPin: false,
+    hasCredential: false,
     lastActiveAt: 2,
   },
 ];
@@ -39,14 +39,15 @@ function presenter() {
     snapshot: ref(null),
     busyProfileId: ref<string | null>(null),
     selectedProfileId: ref<string | null>(null),
-    pin: ref(''),
+    password: ref(''),
     newName: ref(''),
+    newPassword: ref(''),
     editingProfileId: ref<string | null>(null),
     editName: ref(''),
     refreshProfiles: vi.fn(async () => {}),
     openProfile: vi.fn(async () => {}),
     switchProfile: vi.fn(async () => {}),
-    createGuest: vi.fn(async () => {}),
+    createLocalAccount: vi.fn(async () => {}),
     renameProfile: vi.fn(async () => {}),
     removeProfile: vi.fn(async () => {}),
   };
@@ -89,9 +90,9 @@ describe('DesktopProfileList', () => {
     cleanups.push(() => wrapper.unmount());
 
     const tile = element('desktop-profile-open-profile-1')!;
-    expect(tile.textContent).toContain('访客 4827');
+    expect(tile.textContent).toContain('Local 4827');
     expect(tile.textContent).not.toContain('profile-1');
-    expect(element('desktop-profile-create-guest')).not.toBeNull();
+    expect(element('desktop-profile-create-local')).not.toBeNull();
     expect(element('desktop-profile-create')).toBeNull();
     expect(element('desktop-profile-rename-profile-1')).toBeNull();
     expect(wrapper.find('input').exists()).toBe(false);
@@ -110,15 +111,25 @@ describe('DesktopProfileList', () => {
     expect(fake.removeProfile).toHaveBeenCalledWith(profiles[1]);
   });
 
+  it('asks for a nickname and password in management-mode creation', () => {
+    const { wrapper, presenter: fake } = mountList({ management: true });
+    cleanups.push(() => wrapper.unmount());
+
+    const form = element('desktop-profile-create')!;
+    expect(form.querySelectorAll('input')).toHaveLength(2);
+    form.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
+    expect(fake.createLocalAccount).toHaveBeenCalled();
+  });
+
   it('keeps management-mode creation, inline rename and metadata intact', async () => {
     const { wrapper, presenter: fake } = mountList({ management: true });
     cleanups.push(() => wrapper.unmount());
 
     expect(element('desktop-profile-create')).not.toBeNull();
-    expect(element('desktop-profile-create-guest')).toBeNull();
+    expect(element('desktop-profile-create-local')).toBeNull();
     expect(element('desktop-profile-open-profile-2')!.textContent).toContain('work@example.com');
     expect(element('desktop-profile-rename-profile-2')).not.toBeNull();
-    expect(element('desktop-profile-pin-settings-profile-2')).not.toBeNull();
+    expect(element('desktop-profile-password-settings-profile-2')).not.toBeNull();
 
     element('desktop-profile-rename-profile-2')!.click();
     await flushPromises();

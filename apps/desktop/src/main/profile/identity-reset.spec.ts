@@ -53,9 +53,9 @@ describe('runIdentityResetOnce', () => {
         profiles: [
           {
             profileId: 'p_aaaaaaaaaaaaaaaaaaaaaaaa',
-            profileKind: 'guest',
+            profileKind: 'local',
             localOwnerId: 'owner',
-            displayName: '访客 1234',
+            displayName: '本地账户 1234',
             avatarSeed: 'seed',
             keyEnvelopeId: 'key',
             identifier: null,

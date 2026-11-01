@@ -1,5 +1,5 @@
 import { ipcMain } from 'electron';
-import { ok, fail } from '@memoflow/transport-contracts/result';
+import { ok, fail, ResultErrorException } from '@memoflow/transport-contracts/result';
 import { createLogger } from '@memoflow/utils/logger';
 import {
   ProfileAccessChannels,
@@ -7,9 +7,9 @@ import {
   type ProfileSummary,
   SelectProfileRequestSchema,
   RemoveProfileRequestSchema,
-  CreateGuestProfileRequestSchema,
+  CreateLocalAccountRequestSchema,
   RenameProfileRequestSchema,
-  ProfilePinSchema,
+  ProfilePasswordSchema,
 } from '@memoflow/desktop-contracts';
 import type { ProfileRegistry } from './profile-registry';
 import type { DesktopProfileRuntimeManager } from './desktop-profile-runtime-manager';
@@ -50,7 +50,7 @@ async function toSummary(
     identifierHint: profile.identifier,
     cloudAccountId: profile.cloudBinding?.cloudAccountId ?? null,
     lastActiveAt: profile.lastActiveAt,
-    hasPin: await runtime.hasPin(profile.profileId),
+    hasCredential: await runtime.hasCredential(profile.profileId),
   };
 }
 
@@ -94,16 +94,13 @@ export function registerProfileAccessIpc(
     ok(await Promise.all((await registry.list()).map((profile) => toSummary(profile, runtime)))),
   );
 
-  ipcMain.handle(ProfileAccessChannels.CREATE_GUEST, async (_event, input: unknown) => {
-    const parsed = CreateGuestProfileRequestSchema.safeParse(input);
+  ipcMain.handle(ProfileAccessChannels.CREATE_LOCAL_ACCOUNT, async (_event, input: unknown) => {
+    const parsed = CreateLocalAccountRequestSchema.safeParse(input);
     if (!parsed.success)
-      return fail({
-        code: 'INVALID_REQUEST',
-        message: '请输入 1–80 字的 Profile 名称和有效请求 ID',
-      });
-    const profile = await runtime.createGuestProfile(
-      parsed.data.requestId,
-      parsed.data.displayName,
+      return fail({ code: 'INVALID_REQUEST', message: '请输入 1–80 字的昵称和至少 8 位密码' });
+    const profile = await runtime.createLocalAccount(
+      parsed.data.displayName.trim(),
+      parsed.data.password,
     );
     return ok(await toSummary(profile, runtime));
   });
@@ -119,11 +116,11 @@ export function registerProfileAccessIpc(
   ipcMain.handle(ProfileAccessChannels.SELECT, async (_event, input: unknown) => {
     const parsed = SelectProfileRequestSchema.safeParse(input);
     if (!parsed.success)
-      return fail({ code: 'INVALID_REQUEST', message: 'Profile 或 PIN 格式无效' });
+      return fail({ code: 'INVALID_REQUEST', message: 'Profile 或密码格式无效' });
     const activeProfileId = runtime.getActiveProfileId();
     if (activeProfileId) deviceAuth?.cancelForProfile(activeProfileId);
     try {
-      await runtime.openProfile(parsed.data.profileId, parsed.data.pin);
+      await runtime.openProfile(parsed.data.profileId, parsed.data.password);
       return ok(null);
     } catch (error) {
       // Direct open from the Profile Access window has no other main-process
@@ -163,16 +160,17 @@ export function registerProfileAccessIpc(
     return ok(null);
   });
 
-  ipcMain.handle(ProfileAccessChannels.PIN_SET, async (_event, pin: unknown) => {
-    const parsed = ProfilePinSchema.safeParse(pin);
-    if (!parsed.success)
-      return fail({ code: 'INVALID_REQUEST', message: '请输入 6 至 12 位数字 PIN' });
-    await runtime.setCurrentProfilePin(parsed.data);
-    return ok(null);
-  });
-
-  ipcMain.handle(ProfileAccessChannels.PIN_REMOVE, async () => {
-    await runtime.removeCurrentProfilePin();
-    return ok(null);
+  ipcMain.handle(ProfileAccessChannels.PASSWORD_SET, async (_event, password: unknown) => {
+    const parsed = ProfilePasswordSchema.safeParse(password);
+    if (!parsed.success) return fail({ code: 'INVALID_REQUEST', message: '密码长度需为 8–100 位' });
+    try {
+      await runtime.setCurrentProfilePassword(parsed.data);
+      return ok(null);
+    } catch (error) {
+      return fail({
+        code: error instanceof ResultErrorException ? error.code : 'PASSWORD_SET_FAILED',
+        message: error instanceof Error ? error.message : '无法修改密码',
+      });
+    }
   });
 }

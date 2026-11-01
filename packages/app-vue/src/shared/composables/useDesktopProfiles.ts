@@ -13,13 +13,13 @@ import { translateResultError } from '../utils/translate-result-error';
 
 const profileSchema = z.object({
   profileId: z.string(),
-  profileKind: z.enum(['guest', 'registered']),
+  profileKind: z.enum(['local', 'registered']),
   displayName: z.string(),
   avatarSeed: z.string(),
   identifierHint: z.string().nullable(),
   cloudAccountId: z.string().nullable(),
   lastActiveAt: z.number(),
-  hasPin: z.boolean(),
+  hasCredential: z.boolean(),
 }) satisfies z.ZodType<ProfileSummary>;
 const snapshotSchema = z.object({
   profile: profileSchema.nullable(),
@@ -41,9 +41,9 @@ export function useDesktopProfiles(options: { accessWindow?: boolean } = {}) {
   const snapshot = ref<z.infer<typeof snapshotSchema> | null>(null);
   const busyProfileId = ref<string | null>(null);
   const selectedProfileId = ref<string | null>(null);
-  const pin = ref('');
+  const password = ref('');
   const newName = ref('');
-  const createRequestId = ref(crypto.randomUUID());
+  const newPassword = ref('');
   const editingProfileId = ref<string | null>(null);
   const editName = ref('');
   const sortedProfiles = computed(() =>
@@ -98,8 +98,8 @@ export function useDesktopProfiles(options: { accessWindow?: boolean } = {}) {
     const opened = await invoke(
       ProfileAccessChannels.SELECT,
       z.unknown(),
-      profile.hasPin
-        ? { profileId: profile.profileId, pin: pin.value }
+      profile.hasCredential
+        ? { profileId: profile.profileId, password: password.value }
         : { profileId: profile.profileId },
     );
     return !!opened && !!(await invoke(WindowChannels.TRANSITION_TO_MAIN, z.unknown()));
@@ -111,20 +111,24 @@ export function useDesktopProfiles(options: { accessWindow?: boolean } = {}) {
       (!options.accessWindow && snapshot.value?.profile?.profileId === profile.profileId)
     )
       return;
-    if (options.accessWindow && profile.hasPin && selectedProfileId.value !== profile.profileId) {
+    if (
+      options.accessWindow &&
+      profile.hasCredential &&
+      selectedProfileId.value !== profile.profileId
+    ) {
       selectedProfileId.value = profile.profileId;
-      pin.value = '';
+      password.value = '';
       return;
     }
-    if (options.accessWindow && profile.hasPin && !pin.value) {
-      toast.error(t('auth.profileAccess.pinRequired'));
+    if (options.accessWindow && profile.hasCredential && password.value.length < 8) {
+      toast.error(t('auth.profileAccess.passwordRequired'));
       return;
     }
     busyProfileId.value = profile.profileId;
     try {
       if (!(await navigate(profile))) busyProfileId.value = null;
     } finally {
-      pin.value = '';
+      password.value = '';
     }
   }
 
@@ -133,20 +137,26 @@ export function useDesktopProfiles(options: { accessWindow?: boolean } = {}) {
     if (profile) await openProfile(profile);
   }
 
-  async function createGuest(): Promise<void> {
+  async function createLocalAccount(): Promise<void> {
     if (busyProfileId.value) return;
+    if (!newName.value.trim() || newPassword.value.length < 8) {
+      toast.error(t('auth.profileAccess.createInvalid'));
+      return;
+    }
     busyProfileId.value = 'creating';
     try {
-      const created = await invoke(ProfileAccessChannels.CREATE_GUEST, profileSchema, {
-        requestId: createRequestId.value,
-        displayName: newName.value.trim() || undefined,
+      const created = await invoke(ProfileAccessChannels.CREATE_LOCAL_ACCOUNT, profileSchema, {
+        displayName: newName.value.trim(),
+        password: newPassword.value,
       });
       if (!created) return;
-      createRequestId.value = crypto.randomUUID();
       newName.value = '';
+      password.value = newPassword.value;
+      newPassword.value = '';
       await refreshProfiles();
       if (await navigate(created.data)) busyProfileId.value = created.data.profileId;
     } finally {
+      password.value = '';
       if (busyProfileId.value === 'creating') busyProfileId.value = null;
     }
   }
@@ -197,14 +207,15 @@ export function useDesktopProfiles(options: { accessWindow?: boolean } = {}) {
     snapshot,
     busyProfileId,
     selectedProfileId,
-    pin,
+    password,
     newName,
+    newPassword,
     editingProfileId,
     editName,
     refreshProfiles,
     openProfile,
     switchProfile,
-    createGuest,
+    createLocalAccount,
     renameProfile,
     removeProfile,
   };

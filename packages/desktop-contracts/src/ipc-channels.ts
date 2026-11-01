@@ -110,12 +110,11 @@ export const ProfileAccessChannels = {
   REFRESH_CLOUD_STATE: 'profile-access:refresh-cloud-state',
   LIST: 'profile-access:list',
   SELECT: 'profile-access:select',
-  CREATE_GUEST: 'profile-access:create-guest',
+  CREATE_LOCAL_ACCOUNT: 'profile-access:create-local-account',
   RENAME: 'profile-access:rename',
   REMOVE: 'profile-access:remove',
   LOCK: 'profile-access:lock',
-  PIN_SET: 'profile-access:pin-set',
-  PIN_REMOVE: 'profile-access:pin-remove',
+  PASSWORD_SET: 'profile-access:password-set',
 } as const;
 
 export const CloudAuthChannels = {

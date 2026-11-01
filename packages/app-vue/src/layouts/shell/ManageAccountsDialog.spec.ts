@@ -29,12 +29,12 @@ beforeEach(() => {
 
 const profile = (id: string, registered = false): ProfileSummary => ({
   profileId: id,
-  profileKind: registered ? 'registered' : 'guest',
+  profileKind: registered ? 'registered' : 'local',
   displayName: 'Same name',
   avatarSeed: id,
   identifierHint: registered ? `${id}@example.com` : null,
   cloudAccountId: registered ? `cloud-${id}` : null,
-  hasPin: id === 'protected',
+  hasCredential: id === 'protected',
   lastActiveAt: 1,
 });
 
@@ -56,7 +56,7 @@ async function setup(registered = false) {
         cloudState: registered ? 'REAUTH_REQUIRED' : 'UNBOUND',
         capabilities: { local: true, sync: false, cloudAi: false, repositoryConnection: false },
       });
-    if (channel === ProfileAccessChannels.CREATE_GUEST) return ok(profile('created'));
+    if (channel === ProfileAccessChannels.CREATE_LOCAL_ACCOUNT) return ok(profile('created'));
     if (channel === ProfileAccessChannels.RENAME) {
       const request = RenameProfileRequestSchema.parse(input);
       profiles.find((item) => item.profileId === request.profileId)!.displayName =
@@ -178,20 +178,28 @@ describe('ManageAccountsDialog', () => {
     expect(nativeConfirm).not.toHaveBeenCalled();
   });
 
-  it('guards double guest creation and uses the host window lifecycle for the created ID', async () => {
+  it('guards double local account creation and uses the host window lifecycle for the created ID', async () => {
     const { invoke } = await setup();
     const form = element('desktop-profile-create');
+    const [name, password] = form.querySelectorAll('input');
+    name!.value = 'Local';
+    name!.dispatchEvent(new Event('input', { bubbles: true }));
+    password!.value = 'account-password';
+    password!.dispatchEvent(new Event('input', { bubbles: true }));
+    await flushPromises();
     form.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
     form.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
     await flushPromises();
     expect(
-      invoke.mock.calls.filter(([channel]) => channel === ProfileAccessChannels.CREATE_GUEST),
+      invoke.mock.calls.filter(
+        ([channel]) => channel === ProfileAccessChannels.CREATE_LOCAL_ACCOUNT,
+      ),
     ).toHaveLength(1);
     expect(invoke).toHaveBeenCalledWith(WindowChannels.TRANSITION_TO_PROFILE_ACCESS, 'created');
     expect(invoke).not.toHaveBeenCalledWith(ProfileAccessChannels.SELECT, expect.anything());
   });
 
-  it('hands off a PIN target preselected without submitting a PIN or reading target contents', async () => {
+  it('hands off a password-protected target preselected without reading its contents', async () => {
     const { invoke } = await setup();
     element('desktop-profile-open-protected').click();
     await flushPromises();
@@ -199,26 +207,29 @@ describe('ManageAccountsDialog', () => {
     expect(invoke).not.toHaveBeenCalledWith(ProfileAccessChannels.SELECT, expect.anything());
   });
 
-  it('keeps the workspace after a failed create and retries with the same idempotency key', async () => {
+  it('keeps the workspace after a failed create and allows a retry', async () => {
     const { invoke } = await setup();
+    const form = element('desktop-profile-create');
+    const [name, password] = form.querySelectorAll('input');
+    name!.value = 'Local';
+    name!.dispatchEvent(new Event('input', { bubbles: true }));
+    password!.value = 'account-password';
+    password!.dispatchEvent(new Event('input', { bubbles: true }));
+    await flushPromises();
     invoke.mockRejectedValueOnce(new Error('Host unavailable'));
-    element('desktop-profile-create').dispatchEvent(
-      new Event('submit', { bubbles: true, cancelable: true }),
-    );
+    form.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
     await flushPromises();
     expect(invoke).not.toHaveBeenCalledWith(
       WindowChannels.TRANSITION_TO_PROFILE_ACCESS,
       expect.anything(),
     );
-    element('desktop-profile-create').dispatchEvent(
-      new Event('submit', { bubbles: true, cancelable: true }),
-    );
+    form.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
     await flushPromises();
     const requests = invoke.mock.calls.filter(
-      ([channel]) => channel === ProfileAccessChannels.CREATE_GUEST,
+      ([channel]) => channel === ProfileAccessChannels.CREATE_LOCAL_ACCOUNT,
     );
     expect(requests).toHaveLength(2);
-    expect(requests[0]?.[1]).toEqual(requests[1]?.[1]);
+    expect(requests[1]?.[1]).toEqual({ displayName: 'Local', password: 'account-password' });
     expect(invoke).toHaveBeenCalledWith(WindowChannels.TRANSITION_TO_PROFILE_ACCESS, 'created');
   });
 });
