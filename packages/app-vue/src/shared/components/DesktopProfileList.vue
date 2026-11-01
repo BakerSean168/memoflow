@@ -300,8 +300,8 @@ onBeforeUnmount(() => {
   </div>
 
   <div v-else class="flex flex-col items-center gap-6" data-testid="desktop-profile-tiles">
-    <div class="flex flex-wrap items-start justify-center gap-x-1 gap-y-4">
-      <div v-for="profile in profiles" :key="profile.profileId" class="w-24">
+    <div class="flex flex-wrap items-start justify-center gap-x-2 gap-y-4">
+      <div v-for="profile in profiles" :key="profile.profileId" class="w-[5.5rem]">
         <Popover
           :open="openTileId === profile.profileId"
           @update:open="
@@ -406,7 +406,7 @@ onBeforeUnmount(() => {
       <button
         type="button"
         data-testid="desktop-profile-create-guest"
-        class="group flex w-24 flex-col items-center gap-2 rounded-2xl px-1 py-2 text-center transition-colors hover:bg-muted/40 focus-visible:bg-muted/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50"
+        class="group flex w-[5.5rem] flex-col items-center gap-2 rounded-2xl px-1 py-2 text-center transition-colors hover:bg-muted/40 focus-visible:bg-muted/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50"
         :disabled="busyProfileId !== null"
         @click="createGuest"
       >

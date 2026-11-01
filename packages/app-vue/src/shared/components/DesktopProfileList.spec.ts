@@ -62,7 +62,11 @@ function mountList(options: { management?: boolean } = {}) {
     },
     global: {
       plugins: [
-        createI18n({ legacy: false, locale: 'en-US', messages: { 'en-US': { auth, shell, common } } }),
+        createI18n({
+          legacy: false,
+          locale: 'en-US',
+          messages: { 'en-US': { auth, shell, common } },
+        }),
       ],
     },
   });
@@ -120,9 +124,7 @@ describe('DesktopProfileList', () => {
     await flushPromises();
     const forms = wrapper.findAll('form');
     expect(forms).toHaveLength(2);
-    forms[1]!.element.dispatchEvent(
-      new Event('submit', { bubbles: true, cancelable: true }),
-    );
+    forms[1]!.element.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
     expect(fake.renameProfile).toHaveBeenCalledWith(profiles[1]);
   });
 });
