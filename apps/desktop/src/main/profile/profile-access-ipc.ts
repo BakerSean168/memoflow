@@ -1,5 +1,6 @@
 import { ipcMain } from 'electron';
 import { ok, fail } from '@memoflow/transport-contracts/result';
+import { createLogger } from '@memoflow/utils/logger';
 import {
   ProfileAccessChannels,
   type DesktopAccessSnapshot,
@@ -14,6 +15,28 @@ import type { ProfileRegistry } from './profile-registry';
 import type { DesktopProfileRuntimeManager } from './desktop-profile-runtime-manager';
 import type { DesktopCloudConnectionManager } from './desktop-cloud-connection-manager';
 import type { DeviceAuthCoordinator } from './device-auth-coordinator';
+
+const logger = createLogger('ProfileAccessIpc');
+
+/**
+ * Resolves the display name of the Profile a failed selection targeted so the
+ * log record can name it. A registry read failure is non-fatal: the caller still
+ * logs the id, and the IPC result is unaffected either way.
+ *
+ * 查询打开失败时所选 Profile 的显示名，便于日志记录具体目标。注册表读取失败
+ * 不影响主流程：调用方仍会记录 id，IPC 结果也不受影响。
+ */
+async function findTargetProfileName(
+  registry: ProfileRegistry,
+  profileId: string,
+): Promise<string | undefined> {
+  try {
+    const profiles = await registry.list();
+    return profiles.find((profile) => profile.profileId === profileId)?.displayName;
+  } catch {
+    return undefined;
+  }
+}
 
 async function toSummary(
   profile: Awaited<ReturnType<ProfileRegistry['list']>>[number],
@@ -103,6 +126,16 @@ export function registerProfileAccessIpc(
       await runtime.openProfile(parsed.data.profileId, parsed.data.pin);
       return ok(null);
     } catch (error) {
+      // Direct open from the Profile Access window has no other main-process
+      // record: the WindowManager auto-open path logs its own warn, this one
+      // does not go through it.
+      // Profile Access 窗口直接打开没有其它主进程记录：WindowManager 的自动
+      // 打开路径会自己打 warn，但这条路径不经过它。
+      logger.warn('Selected Profile could not be opened', {
+        profileId: parsed.data.profileId,
+        profileName: await findTargetProfileName(registry, parsed.data.profileId),
+        error,
+      });
       return fail({
         code: 'PROFILE_OPEN_FAILED',
         message: error instanceof Error ? error.message : '无法打开 Profile',
