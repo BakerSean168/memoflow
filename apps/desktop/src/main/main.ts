@@ -20,6 +20,7 @@ import path from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { app, powerMonitor, session, BrowserWindow } from 'electron';
 import { clearDesktopStorageCache } from './paths/clear-storage-cache';
+import { runIdentityResetOnce } from './profile/identity-reset';
 import { initMemoryMonitorForDev, registerCacheIpcHandlers } from './utils';
 import { registerAppLifecycleHandlers } from './lifecycle';
 import { DesktopShutdownCoordinator } from './lifecycle/desktop-shutdown-coordinator';
@@ -762,6 +763,16 @@ async function initializeShellRuntime(): Promise<void> {
 
   const sharedResolver = getSharedPathResolver();
   console.log(`[Shell] Root path: ${sharedResolver.roots.dataRoot}`);
+
+  // #785 account-model change: the previous identity tree (guest Profiles, PIN
+  // envelopes, cloud sessions, per-Profile data) is disposable by decision and
+  // must be gone before the registry or any Profile runtime is composed.
+  const identityReset = await runIdentityResetOnce(sharedResolver.roots);
+  if (identityReset.executed) {
+    logger.info('One-shot identity reset applied', {
+      removedCount: identityReset.removedPaths.length,
+    });
+  }
 
   // Verify a pending update receipt before any Profile is opened. Update
   // verification is device-local shell state and must never depend on a
