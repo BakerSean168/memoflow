@@ -12,7 +12,11 @@ import { PowerSyncScheduledInvocationRepository } from '../scheduled-invocation-
 let db: PowerSyncDatabase;
 let directory: string;
 
-const owner: SchedulingOwner = { identityId: 'identity-1', type: 'routine.routine', id: 'routine-1' };
+const owner: SchedulingOwner = {
+  identityId: 'identity-1',
+  type: 'routine.routine',
+  id: 'routine-1',
+};
 const schedulingKey = buildSchedulingKey(owner.type, owner.id, 'occurrence-1');
 const runAt = Date.parse('2026-10-25T12:00:00.000Z');
 
@@ -124,8 +128,9 @@ describe('scheduling reconcile over cloud-synced PowerSync rows (#731)', () => {
       deletedCount: 0,
       unchangedCount: 1,
     });
-    expect(await db.get('SELECT status FROM scheduled_invocations WHERE id = ?', ['invocation-1']))
-      .toEqual({ status: 'dead_letter' });
+    expect(
+      await db.get('SELECT status FROM scheduled_invocations WHERE id = ?', ['invocation-1']),
+    ).toEqual({ status: 'dead_letter' });
   });
 
   it('leaves a locally written Z-suffixed terminal row unchanged', async () => {
