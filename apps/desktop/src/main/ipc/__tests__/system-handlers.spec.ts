@@ -197,10 +197,16 @@ describe('registerSystemIpcHandlers', () => {
     registerSystemIpcHandlers(null, null, null);
 
     const channels = new Set(mocks.ipcHandle.mock.calls.map(([channel]) => channel as string));
+    // The startup notice readiness channel belongs to SystemNoticeBridge in the
+    // lifecycle layer (it must exist before desktop features initialize), so it is
+    // deliberately not part of the shared system handler registration.
+    const sharedSystemChannels = Object.values(SystemChannels).filter(
+      (channel) => channel !== SystemChannels.SYSTEM_NOTICE_READY,
+    );
 
     expect(channels).toEqual(
       new Set([
-        ...Object.values(SystemChannels),
+        ...sharedSystemChannels,
         ...Object.values(DesktopFeatureChannels),
         DesktopStartupChannels.GET,
         DesktopStartupChannels.UPDATE,
@@ -215,7 +221,7 @@ describe('registerSystemIpcHandlers', () => {
     registerSystemIpcHandlers(null, null, null);
 
     expect(mocks.ipcHandle).toHaveBeenCalledTimes(
-      Object.keys(SystemChannels).length + Object.keys(DesktopFeatureChannels).length + 2,
+      Object.keys(SystemChannels).length - 1 + Object.keys(DesktopFeatureChannels).length + 2,
     );
   });
 

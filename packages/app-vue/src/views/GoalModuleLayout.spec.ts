@@ -41,6 +41,33 @@ import { useAppShellStore, MAX_BUSINESS_TABS } from '../layouts/shell/useAppShel
 import { canLeaveBusinessSurface } from '../layouts/shell/surface-leave-protocol';
 import { canLeaveAIWorkflowReview } from '@memoflow/ai-ui/composables/chatViewHelpers';
 
+const confirmState = vi.hoisted(() => {
+  let answer = false;
+  const calls: unknown[] = [];
+  return {
+    calls,
+    setAnswer(value: boolean) {
+      answer = value;
+    },
+    reset() {
+      answer = false;
+      calls.length = 0;
+    },
+    call(options: unknown): Promise<boolean> {
+      calls.push(options);
+      return Promise.resolve(answer);
+    },
+  };
+});
+
+vi.mock('@memoflow/ui-vue-shadcn', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@memoflow/ui-vue-shadcn')>();
+  return {
+    ...actual,
+    useConfirm: (options: unknown) => confirmState.call(options),
+  };
+});
+
 const goalMocks = vi.hoisted(() => ({
   createGoal: vi.fn(),
   updateGoal: vi.fn(),
@@ -80,6 +107,17 @@ const i18n = createI18n({
   locale: 'en-US',
   messages: {
     'en-US': {
+      common: { confirm: 'Confirm', cancel: 'Cancel' },
+      shell: {
+        panel: {
+          dirtyTransitionConfirm: 'Continue with unsaved changes?',
+          dirtyTransitionConfirmTitle: 'Leave this form?',
+          busyTransitionHint: 'Please wait',
+          tabLimitConfirm: 'Close "{title}" to open this?',
+          tabLimitConfirmTitle: 'Tab limit reached',
+          tabLimitDeniedHint: 'Tab limit reached — close a tab first.',
+        },
+      },
       goal: {
         systemFolders: {
           active: 'Active',
@@ -153,6 +191,7 @@ describe('GoalModuleLayout', () => {
     setActivePinia(createPinia());
     routeMountCount = 0;
     vi.clearAllMocks();
+    confirmState.reset();
   });
 
   it('coalesces database changes while cached and refreshes once when activated', async () => {
@@ -379,8 +418,8 @@ describe('GoalModuleLayout', () => {
       intent: 'deeplink',
     });
     const originalConfirm = window.confirm;
-    const confirm = vi.fn(() => false);
-    window.confirm = confirm;
+    const nativeConfirm = vi.fn(() => false);
+    window.confirm = nativeConfirm;
     const leave = () =>
       canLeaveAIWorkflowReview(
         'goal-create',
@@ -389,8 +428,9 @@ describe('GoalModuleLayout', () => {
         vi.fn(),
       );
     const reviewRoute = router.currentRoute.value.fullPath;
-    expect(leave()).toBe(false);
-    expect(confirm).toHaveBeenCalledOnce();
+    confirmState.setAnswer(false);
+    await expect(leave()).resolves.toBe(false);
+    expect(confirmState.calls).toHaveLength(1);
     expect(router.currentRoute.value.fullPath).toBe(reviewRoute);
     expect(wrapper.findComponent(GoalDialogStub).props('open')).toBe(true);
 
@@ -400,8 +440,9 @@ describe('GoalModuleLayout', () => {
     wrapper.findComponent(GoalDialogStub).vm.$emit('busy-change', true);
     await nextTick();
     expect(shell.surfaceStatus).toBe('busy');
-    expect(leave()).toBe(false);
-    expect(confirm).toHaveBeenCalledOnce();
+    await expect(leave()).resolves.toBe(false);
+    expect(confirmState.calls).toHaveLength(1);
+    expect(nativeConfirm).not.toHaveBeenCalled();
     expect(router.currentRoute.value.fullPath).toBe(reviewRoute);
     expect(wrapper.findComponent(GoalDialogStub).props('open')).toBe(true);
     window.confirm = originalConfirm;
@@ -969,6 +1010,7 @@ describe('Goal native surface host (PVC-AI-8001)', () => {
   beforeEach(() => {
     setActivePinia(createPinia());
     vi.clearAllMocks();
+    confirmState.reset();
     goalMocks.getGoalAggregateView.mockReset();
     goalMocks.getGoalAggregateView.mockResolvedValue(null);
     useGoal().isSaving.value = false;
@@ -1359,8 +1401,8 @@ describe('Goal native surface host (PVC-AI-8001)', () => {
     await expect(host.openCreate()).rejects.toThrow('declined');
     expect(router.currentRoute.value.path).toBe('/tasks');
     shell.setSurfaceStatus('dirty');
-    const confirm = vi.fn(() => false);
-    Object.defineProperty(window, 'confirm', { configurable: true, value: confirm });
+    const nativeConfirm = vi.fn(() => false);
+    Object.defineProperty(window, 'confirm', { configurable: true, value: nativeConfirm });
     await expect(host.openCreate()).rejects.toThrow('declined');
     expect(router.currentRoute.value.path).toBe('/tasks');
     shell.setSurfaceStatus('clean');
@@ -1373,7 +1415,11 @@ describe('Goal native surface host (PVC-AI-8001)', () => {
     await expect(host.openCreate()).rejects.toThrow('not active');
     await flushPromises();
     expect(router.currentRoute.value.path).toBe('/tasks');
-    expect(confirm).toHaveBeenCalled();
+    expect(confirmState.calls.at(-1)).toMatchObject({
+      title: 'Tab limit reached',
+      variant: 'default',
+    });
+    expect(nativeConfirm).not.toHaveBeenCalled();
     wrapper.unmount();
   });
 

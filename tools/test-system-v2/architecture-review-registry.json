@@ -183,7 +183,7 @@
         "status": "none-verified",
         "testFiles": []
       },
-      "sourceSha256": "97543a33ad0ad962b2fac389bcc8f5df54dbb191528227577dc4039ba872d77d"
+      "sourceSha256": "0162ecaf9e939210856dc93776ef24debd7ae3aabb6b404ec29df88451d73822"
     },
     {
       "path": "apps/api/src/shared/infrastructure/middleware/error-result-envelope.surface.spec.ts",
@@ -2879,7 +2879,7 @@
         "status": "none-verified",
         "testFiles": []
       },
-      "sourceSha256": "8b4b997f73c00b7e70fac9ee164dc104e1e41076672f656ccf8b29da40a1cfe7"
+      "sourceSha256": "9823147745ac275f066e9e9d56f1509c68d15cbfd1631e850e0bb74e510d4989"
     },
     {
       "path": "packages/repository-ui/src/components/DocumentPresentationPrimitives.spec.ts",

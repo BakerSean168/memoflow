@@ -1,5 +1,10 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { app, dialog, BrowserWindow } from 'electron';
+import { app, dialog, ipcMain, BrowserWindow } from 'electron';
+import {
+  RendererEventChannels,
+  SystemChannels,
+  type SystemNotice,
+} from '@memoflow/desktop-contracts';
 import { mkdtempSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
@@ -25,7 +30,10 @@ vi.mock('../modules/desktop-update/runtime/desktop-update-e2e-harness', () => ({
 }));
 
 describe('Windows shell lifecycle', () => {
-  const window = {};
+  const window = {
+    isDestroyed: () => false,
+    webContents: { id: 501, send: vi.fn(), isDestroyed: () => false },
+  } as unknown as BrowserWindow;
   const manager = {
     setRuntimeManager: vi.fn(),
     configureCloseBehavior: vi.fn(),
@@ -53,6 +61,7 @@ describe('Windows shell lifecycle', () => {
     setNotification: vi.fn(),
   };
   let originalArgv: string[];
+  let platformSpy: ReturnType<typeof vi.spyOn>;
   beforeEach(() => {
     vi.clearAllMocks();
     state.tray = {};
@@ -60,7 +69,7 @@ describe('Windows shell lifecycle', () => {
     runtime.profileRuntimeManager.hasPin.mockResolvedValue(false);
     state.configDir = mkdtempSync(path.join(tmpdir(), 'mf-windows-lifecycle-'));
     state.initFeatures.mockImplementation(async () => ({ tray: state.tray, notification: {} }));
-    vi.spyOn(process, 'platform', 'get').mockReturnValue('win32');
+    platformSpy = vi.spyOn(process, 'platform', 'get').mockReturnValue('win32');
     originalArgv = process.argv;
     process.argv = ['MemoFlow.exe', '--hidden'];
     Object.defineProperty(app, 'isPackaged', { configurable: true, value: true });
@@ -127,14 +136,67 @@ describe('Windows shell lifecycle', () => {
     expect(app.exit).toHaveBeenCalledWith(0);
   });
 
-  it('shows a visible warning and window when tray capability is degraded', async () => {
+  function systemNoticeHandler() {
+    const call = vi
+      .mocked(ipcMain.handle)
+      .mock.calls.filter(([channel]) => channel === SystemChannels.SYSTEM_NOTICE_READY)
+      .at(-1);
+    if (!call) throw new Error('system notice ready handler was not registered');
+    return call[1] as unknown as (event: { sender: typeof window.webContents }) => unknown;
+  }
+
+  async function reportRendererReady(): Promise<void> {
+    systemNoticeHandler()({ sender: window.webContents });
+    await Promise.resolve();
+  }
+
+  it('delivers the tray warning as a queued in-app notice instead of a native dialog', async () => {
     state.tray = null;
     await register();
     expect(manager.focusActiveWindow).toHaveBeenCalled();
-    expect(dialog.showMessageBox).toHaveBeenCalledWith(
-      window,
-      expect.objectContaining({ type: 'warning' }),
+    expect(dialog.showMessageBox).not.toHaveBeenCalled();
+    // The renderer has not reported readiness yet, so nothing may be pushed.
+    expect(window.webContents.send).not.toHaveBeenCalledWith(
+      RendererEventChannels.SYSTEM_NOTICE,
+      expect.anything(),
     );
+
+    await reportRendererReady();
+    expect(window.webContents.send).toHaveBeenCalledExactlyOnceWith(
+      RendererEventChannels.SYSTEM_NOTICE,
+      { id: 'tray-unavailable' } satisfies SystemNotice,
+    );
+    expect(dialog.showMessageBox).not.toHaveBeenCalled();
+
+    // A repeated readiness signal must not replay the already delivered notice.
+    await reportRendererReady();
+    expect(window.webContents.send).toHaveBeenCalledTimes(1);
+  });
+
+  it('does not publish the tray warning when the tray capability is available', async () => {
+    await register();
+    expect(window.webContents.send).not.toHaveBeenCalledWith(
+      RendererEventChannels.SYSTEM_NOTICE,
+      expect.anything(),
+    );
+    await reportRendererReady();
+    expect(window.webContents.send).not.toHaveBeenCalledWith(
+      RendererEventChannels.SYSTEM_NOTICE,
+      expect.anything(),
+    );
+    expect(dialog.showMessageBox).not.toHaveBeenCalled();
+  });
+
+  it('does not publish the tray warning outside win32', async () => {
+    platformSpy.mockReturnValue('darwin');
+    state.tray = null;
+    await register();
+    await reportRendererReady();
+    expect(window.webContents.send).not.toHaveBeenCalledWith(
+      RendererEventChannels.SYSTEM_NOTICE,
+      expect.anything(),
+    );
+    expect(dialog.showMessageBox).not.toHaveBeenCalled();
   });
   it('defers a second launch until the Profile gate has initialized', async () => {
     let release!: () => void;

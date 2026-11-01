@@ -1998,6 +1998,14 @@
       "measurementCollectors": []
     },
     {
+      "path": "apps/desktop/src/renderer/platform/system-notice.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "apps/desktop/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "apps/desktop/src/renderer/platform/tray-navigation.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -13204,7 +13212,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 103
+      "fileCount": 104
     },
     {
       "id": "apps/migrator/vitest.config.ts",
@@ -14329,7 +14337,7 @@
   "duplicate": [],
   "unexpected": [],
   "counts": {
-    "unit": 1177,
+    "unit": 1178,
     "integration": 58,
     "smoke": 3,
     "boundary-ipc": 6,

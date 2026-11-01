@@ -94,10 +94,12 @@ export default {
     closeTab: '关闭标签',
     resize: '调整业务面板宽度',
     dirtyTransitionConfirm: '当前表单还有未保存内容，仍要切换吗？草稿会在当前弹窗生命周期内保留。',
+    dirtyTransitionConfirmTitle: '仍要离开当前表单？',
     busyTransitionHint: '当前操作正在处理中，完成后即可切换。',
     enterFocus: '专注工作区',
     exitFocus: '退出专注工作区',
     tabLimitConfirm: '标签数已达上限——关闭最久未用的「{title}」以打开新内容？',
+    tabLimitConfirmTitle: '标签数已达上限',
     tabLimitDeniedHint: '标签数已达上限，请先关闭部分标签。',
     contentErrorTitle: '面板内容出错了',
     contentErrorDescription: '此业务面板暂时无法显示。可重试，或关闭面板继续使用 AI 工作区。',
@@ -111,6 +113,9 @@ export default {
     ready: '更新 {version} 已准备好',
     attention: '更新需要处理',
     openSettings: '打开更新设置',
+  },
+  systemNotice: {
+    trayUnavailable: '系统托盘不可用。关闭窗口将退出 MemoFlow，后台提醒将停止。',
   },
   composer: {
     placeholder: '给知行 AI 发消息…',

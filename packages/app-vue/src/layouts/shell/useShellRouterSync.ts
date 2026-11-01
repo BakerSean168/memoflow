@@ -19,6 +19,7 @@ import { onMounted, onUnmounted } from 'vue';
 import { useRoute, useRouter, type Router } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import { toast } from 'vue-sonner';
+import { useConfirm } from '@memoflow/ui-vue-shadcn';
 import type { RouteLocationNormalizedGeneric } from 'vue-router';
 import { useAppShellStore, type ShellLayoutReason, type ShellModule } from './useAppShellStore';
 import { canLeaveBusinessSurface, navigateBusinessSurface } from './surface-leave-protocol';
@@ -166,7 +167,7 @@ export function useShellRouterSync() {
   }
 
   /** 统一离开协议（Phase 0）：busy 拦截 / dirty 确认 / clean 放行。 */
-  function canLeaveSurface(): boolean {
+  async function canLeaveSurface(): Promise<boolean> {
     return canLeaveBusinessSurface(t);
   }
 
@@ -208,27 +209,57 @@ export function useShellRouterSync() {
     // Phase 1：超限时 openTab 不创建，返回候选——UI 明确确认（关闭最久未用）
     // 后重试；取消则保持现状（tabs ≤ MAX_BUSINESS_TABS = KeepAlive max，
     // 杜绝缓存静默驱逐）。
-    let opened = store.openTab({
+    const opened = store.openTab({
       module,
       route: to.fullPath,
       title: titleFor(module),
       intent: 'deeplink',
     });
     if (opened.evictionCandidateId && !opened.tabId) {
-      const candidate = store.tabs.find((tab) => tab.id === opened.evictionCandidateId);
-      const confirmed =
-        typeof window === 'undefined'
-          ? false
-          : window.confirm(t('shell.panel.tabLimitConfirm', { title: candidate?.title ?? '' }));
-      if (confirmed && candidate) {
-        store.closeTab(candidate.id);
-        opened = store.openTab({
-          module,
-          route: to.fullPath,
-          title: titleFor(module),
-          intent: 'deeplink',
-        });
-      } else {
+      // 确认已改为应用内异步对话框；syncRouteToStore 仍保持同步契约（启动首帧
+      // 建 Tab 依赖它），超限分支交给独立的异步流程处理。
+      void resolveTabLimit(opened.evictionCandidateId, module, to, from);
+      return;
+    }
+    if (opened.tabId) {
+      maybeAutoFocus();
+    }
+  }
+
+  // 页签上限确认的在途守卫：useConfirm 是进程级单例，确认未决时新的超限事件
+  // 直接忽略（不重复弹框、不重复回滚），由当前这次确认收口。
+  let tabLimitConfirmInFlight = false;
+
+  /**
+   * 超限时确认关闭最久未用的 Tab 并重试。
+   * 确认：close 候选 → 重试 openTab；取消：toast + 回滚 URL 到进入前，
+   * 保持 URL/Tab/对象一致。
+   */
+  async function resolveTabLimit(
+    candidateId: string,
+    module: ShellModule,
+    to: Pick<RouteLocationNormalizedGeneric, 'path' | 'fullPath' | 'meta'>,
+    from?: Pick<RouteLocationNormalizedGeneric, 'fullPath'>,
+  ): Promise<void> {
+    if (tabLimitConfirmInFlight) return;
+    const candidate = store.tabs.find((tab) => tab.id === candidateId);
+    if (!candidate) {
+      toast.info(t('shell.panel.tabLimitDeniedHint'));
+      if (from && from.fullPath !== to.fullPath) {
+        void router.replace(from.fullPath).catch(() => {});
+      }
+      return;
+    }
+    tabLimitConfirmInFlight = true;
+    try {
+      const confirmed = await useConfirm({
+        title: t('shell.panel.tabLimitConfirmTitle'),
+        description: t('shell.panel.tabLimitConfirm', { title: candidate.title }),
+        confirmText: t('common.confirm'),
+        cancelText: t('common.cancel'),
+        variant: 'default',
+      });
+      if (!confirmed) {
         toast.info(t('shell.panel.tabLimitDeniedHint'));
         // 导航已成功但 Tab 未创建：回滚 URL 到进入前，保持 URL/Tab/对象一致。
         if (from && from.fullPath !== to.fullPath) {
@@ -236,9 +267,16 @@ export function useShellRouterSync() {
         }
         return;
       }
-    }
-    if (opened.tabId) {
-      maybeAutoFocus();
+      store.closeTab(candidate.id);
+      const retried = store.openTab({
+        module,
+        route: to.fullPath,
+        title: titleFor(module),
+        intent: 'deeplink',
+      });
+      if (retried.tabId) maybeAutoFocus();
+    } finally {
+      tabLimitConfirmInFlight = false;
     }
   }
 
@@ -282,7 +320,7 @@ export function useShellRouterSync() {
 
   /** 面板头 ✕ / 顶栏 Toggle：隐藏面板但保留 Tab、路由和草稿。 */
   async function closePanel(): Promise<void> {
-    if (!canLeaveSurface()) return;
+    if (!(await canLeaveSurface())) return;
     store.closeRightPanel();
   }
 
@@ -348,7 +386,7 @@ export function useShellRouterSync() {
     if (route.path !== '/') {
       await navigateBusinessSurface(router, '/', t);
     } else {
-      if (!canLeaveSurface()) return;
+      if (!(await canLeaveSurface())) return;
       store.showHome();
       maybeAutoFocus();
     }

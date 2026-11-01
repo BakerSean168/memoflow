@@ -96,10 +96,12 @@ export default {
     resize: 'Resize business panel',
     dirtyTransitionConfirm:
       'This form has unsaved changes. Switch anyway? The draft remains available while the dialog stays open.',
+    dirtyTransitionConfirmTitle: 'Leave this form anyway?',
     busyTransitionHint: 'This operation is still in progress. Try again when it finishes.',
     enterFocus: 'Focus workspace',
     exitFocus: 'Exit workspace focus',
     tabLimitConfirm: 'Tab limit reached — close "{title}" (least recently used) to open this?',
+    tabLimitConfirmTitle: 'Tab limit reached',
     tabLimitDeniedHint: 'Tab limit reached — close a tab first.',
     contentErrorTitle: 'This panel ran into a problem',
     contentErrorDescription:
@@ -114,6 +116,10 @@ export default {
     ready: 'Update {version} ready',
     attention: 'Update needs attention',
     openSettings: 'Open update settings',
+  },
+  systemNotice: {
+    trayUnavailable:
+      'System tray unavailable. Closing MemoFlow will quit and stop background reminders.',
   },
   composer: {
     placeholder: 'Message Zhixing AI…',

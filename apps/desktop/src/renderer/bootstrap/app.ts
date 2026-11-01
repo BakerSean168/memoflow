@@ -20,6 +20,7 @@ import { progressStart, progressDone } from '@memoflow/ui-vue-shadcn/composables
 
 import App from '../App.vue';
 import { registerTrayNavigation } from '../platform/tray-navigation';
+import { registerSystemNotice } from '../platform/system-notice';
 import { installDesktopAppServices } from '../platform/di-app';
 // Residual 941: host bridge via getElectronBridge sole helper.
 import { requireElectronBridge } from '../platform/electron-bridge';
@@ -90,6 +91,8 @@ export async function bootstrapMainApp() {
   app.use(installDesktopAppServices, desktopAccessSnapshot);
   initElectronFeatures(app);
   app.mount('#app');
+  // Flush startup notices (queued before this renderer was ready) into the toast host.
+  registerSystemNotice(bridge, translateMessageKey);
   registerDesktopServerStateSource({
     stop: registerTrayNavigation(
       bridge,

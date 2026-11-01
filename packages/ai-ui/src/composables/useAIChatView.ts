@@ -978,7 +978,7 @@ export function useAIChatView(options: UseAIChatViewOptions) {
               ),
             ))),
   );
-  function canLeaveWorkflowReview(): boolean {
+  async function canLeaveWorkflowReview(): Promise<boolean> {
     // The handed-off native draft still coordinates deterministic workflow Save.
     // Do not reset that coordinator while the user is editing it.
     if (goalWorkflow.goalManualHandoff.value) {
@@ -1006,7 +1006,7 @@ export function useAIChatView(options: UseAIChatViewOptions) {
   }
 
   async function selectConversation(item: ConversationSummary) {
-    if (!canLeaveWorkflowReview()) return;
+    if (!(await canLeaveWorkflowReview())) return;
     persistence.suspendWorkflowPersistence.value = true;
     try {
       await chatSession.selectConversation(
@@ -1055,8 +1055,8 @@ export function useAIChatView(options: UseAIChatViewOptions) {
     await requestOpenKnowledgeNote(resourceId);
   }
 
-  function startNewConversation(mode: WorkflowMode | string = 'chat') {
-    if (!canLeaveWorkflowReview()) return;
+  async function startNewConversation(mode: WorkflowMode | string = 'chat') {
+    if (!(await canLeaveWorkflowReview())) return;
     ++newThreadSelectionEpoch;
     const normalizedMode = normalizeWorkflowMode(mode);
     chatSession.startNewConversation(normalizedMode);
@@ -1065,8 +1065,8 @@ export function useAIChatView(options: UseAIChatViewOptions) {
     syncSurfaceContext();
   }
 
-  function exitToolMode() {
-    if (!canLeaveWorkflowReview()) return;
+  async function exitToolMode() {
+    if (!(await canLeaveWorkflowReview())) return;
     resetWorkflowArtifacts();
     toolMode.value = 'chat';
     if (!chatSession.chatConversationId.value && !chatSession.chatTimeline.value.length) {

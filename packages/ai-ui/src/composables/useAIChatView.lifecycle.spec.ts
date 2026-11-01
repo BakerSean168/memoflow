@@ -281,6 +281,7 @@ async function mountView(extraProvide: Record<symbol, unknown> = {}) {
 describe('AI conversation restoration and business navigation', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    fixture.confirm.mockReset();
     fixture.realSession = false;
     fixture.goal.goalWorkflowRun.value = null;
     fixture.task.taskWorkflowRun.value = null;
@@ -845,7 +846,7 @@ describe('AI conversation restoration and business navigation', () => {
     'allows $mode conversation $action beside an unsaved business form',
     async ({ action, mode }) => {
       const { wrapper, shell } = await mountView();
-      wrapper.vm.startNewConversation(mode);
+      await wrapper.vm.startNewConversation(mode);
       fixture.session.startNewConversation.mockClear();
       shell.setSurfaceStatus('dirty');
       const before = JSON.stringify(shell.$state);
@@ -853,8 +854,9 @@ describe('AI conversation restoration and business navigation', () => {
       const confirm = vi.fn(() => false);
       window.confirm = confirm;
       if (action === 'select') await wrapper.vm.selectConversation({ id: 'chat-b', name: 'B' });
-      else wrapper.vm.startNewConversation();
+      else await wrapper.vm.startNewConversation();
       expect(confirm).not.toHaveBeenCalled();
+      expect(fixture.confirm).not.toHaveBeenCalled();
       if (action === 'select') expect(fixture.session.chatConversationId.value).toBe('chat-b');
       else expect(fixture.session.startNewConversation).toHaveBeenCalled();
       expect(JSON.stringify(shell.$state)).toBe(before);
@@ -884,10 +886,12 @@ describe('AI conversation restoration and business navigation', () => {
     shell.setSurfaceStatus('dirty');
     const confirm = vi.fn(() => false);
     window.confirm = confirm;
+    fixture.confirm.mockResolvedValue(false);
     await wrapper.vm.selectConversation({ id: 'chat-b', name: 'B' });
     expect(fixture.session.chatConversationId.value).toBe('review-conversation');
-    expect(confirm).toHaveBeenCalledOnce();
-    wrapper.vm.startNewConversation();
+    expect(fixture.confirm).toHaveBeenCalledOnce();
+    expect(confirm).not.toHaveBeenCalled();
+    await wrapper.vm.startNewConversation();
     expect(fixture.session.startNewConversation).not.toHaveBeenCalled();
     expect(shell.surfaceStatus).toBe('dirty');
     wrapper.unmount();

@@ -261,6 +261,8 @@ export const SystemChannels = {
   OPEN_EXTERNAL_URL: 'system:openExternalUrl',
   USER_FILES_SAVE_TEXT: 'system:userFiles:saveText',
   USER_FILES_OPEN_TEXT: 'system:userFiles:openText',
+  /** Renderer → main readiness signal; main flushes queued in-app notices. */
+  SYSTEM_NOTICE_READY: 'system:notice:ready',
 } as const;
 
 export const DesktopFeatureChannels = {
@@ -288,6 +290,8 @@ export const RendererEventChannels = {
   DB_CHANGED: 'db:changed',
   WINDOW_STATE_CHANGED: 'window-state:changed',
   NOTIFICATION_CLICKED: 'notification:clicked',
+  /** Main → renderer in-app notice, delivered after the renderer reports readiness. */
+  SYSTEM_NOTICE: 'system:notice',
 } as const;
 
 export const CacheChannels = {
