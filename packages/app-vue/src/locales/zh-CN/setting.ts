@@ -78,7 +78,7 @@ export default {
     always: '以后都允许',
     decline: '拒绝',
     scope:
-      '本次操作：{agent} {action}{object}。若选择“以后允许”，则所有 AI 均可写入此类数据，随时可在 设置 → AI Provider → Permissions 撤销。',
+      '本次操作：{agent} {action}{object}。若选择“以后允许”，则所有 AI 均可写入此类数据，随时可在 设置 → AI Provider → Permissions 调整。',
     countdown: '剩余 {seconds} 秒，超时自动拒绝。',
     temporary: '仅本次对话有效；结束或切换对话后恢复。明确禁止仍然有效。',
     native: 'Agent 原生权限（命令、文件）',

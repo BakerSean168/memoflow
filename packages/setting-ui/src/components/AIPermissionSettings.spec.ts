@@ -97,33 +97,4 @@ describe('AI permissions integrated under AI Provider settings', () => {
     expect(wrapper.find('[data-testid="ai-permission-revoke-legacy-denial"]').exists()).toBe(false);
     wrapper.unmount();
   });
-
-  it('shows one revocable global write grant instead of three CRUD entries', async () => {
-    const actions = ['create', 'update', 'delete'] as const;
-    const { wrapper, permissions } = setup(
-      actions.map((action) => ({
-        id: `grant:goal:${action}`,
-        agentId: null,
-        object: 'goal',
-        action,
-        effect: 'allow',
-        source: 'user',
-      })),
-    );
-    await flushPromises();
-    expect(wrapper.findAll('[data-testid^="ai-permission-revoke-"]')).toHaveLength(2);
-    expect(wrapper.get('[data-testid="ai-permission-grants"]').text()).toContain('写入');
-    await wrapper.get('[data-testid="ai-permission-revoke-grant:goal:create"]').trigger('click');
-    await flushPromises();
-    const revoked = permissions.mock.calls
-      .map(([command]) => command)
-      .filter((command) => command.action === 'revoke');
-    expect(revoked).toEqual(
-      actions.map((action) => ({
-        action: 'revoke',
-        ruleId: `grant:goal:${action}`,
-      })),
-    );
-    wrapper.unmount();
-  });
 });

@@ -80,7 +80,7 @@ export default {
     always: 'Always allow',
     decline: 'Deny',
     scope:
-      'Current request: {agent} wants to {action} {object}. Always allow grants every AI write access to this data type. Revoke under Settings → AI Provider → Permissions.',
+      'Current request: {agent} wants to {action} {object}. Always allow grants every AI write access to this data type. Change it under Settings → AI Provider → Permissions.',
     countdown: '{seconds} seconds remaining; automatically denied on timeout.',
     temporary:
       'Applies only to this conversation; resets when it ends or you switch. Explicit deny rules still apply.',

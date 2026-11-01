@@ -74,7 +74,7 @@ it.each([
     'Codex 新增目标',
   );
   expect(wrapper.get('[data-testid="ai-business-permission-scope"]').text()).toContain(
-    'AI Provider → Permissions 撤销',
+    'AI Provider → Permissions 调整',
   );
   expect(wrapper.get('[data-testid="ai-business-permission-countdown"]').text()).toContain('25');
   await wrapper.get(`[data-testid="${testId}"]`).trigger('click');
@@ -95,7 +95,7 @@ it('mirrors the scope in an open Goal form and disables approvals when its deadl
   });
   try {
     await import('vue').then(({ nextTick }) => nextTick());
-    expect(target.textContent).toContain('AI Provider → Permissions 撤销');
+    expect(target.textContent).toContain('AI Provider → Permissions 调整');
     await vi.advanceTimersByTimeAsync(1000);
     expect(wrapper.get('[data-testid="ai-business-permission-countdown"]').text()).toContain('0');
     expect(

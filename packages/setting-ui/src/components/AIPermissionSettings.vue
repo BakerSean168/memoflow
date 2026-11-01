@@ -41,36 +41,6 @@ const selectedPreset = computed(() =>
   settings.value?.preset === 'on_demand' ? 'confirm_each' : settings.value?.preset,
 );
 const hasOverrides = computed(() => settings.value?.preset === 'custom');
-const displayRules = computed(() => {
-  const groups = new Map<
-    string,
-    {
-      key: string;
-      object: PermissionObject;
-      action: 'read' | 'create' | 'update' | 'delete' | 'write';
-      effect: PermissionEffect;
-      agentId: string | null;
-      ids: string[];
-    }
-  >();
-  for (const rule of snapshot.value?.rules ?? []) {
-    const groupWrite =
-      rule.id.startsWith('grant:') && rule.agentId === null && rule.action !== 'read';
-    const key = groupWrite ? `grant:${rule.object}:${rule.effect}` : rule.id;
-    const existing = groups.get(key);
-    if (existing) existing.ids.push(rule.id);
-    else
-      groups.set(key, {
-        key,
-        object: rule.object,
-        action: groupWrite ? 'write' : rule.action,
-        effect: rule.effect,
-        agentId: rule.agentId,
-        ids: [rule.id],
-      });
-  }
-  return [...groups.values()];
-});
 const presetSummary = computed(() => {
   const preset = selectedPreset.value;
   return preset && preset !== 'custom' ? defaults[preset] : defaults.confirm_each;
@@ -116,21 +86,6 @@ async function execute(command: Parameters<NonNullable<typeof local>['permission
   error.value = '';
   try {
     snapshot.value = await local.permissions(command);
-  } catch {
-    error.value = t('setting.permissions.error');
-  } finally {
-    busy.value = false;
-  }
-}
-
-async function revokeRuleGroup(ruleIds: readonly string[]) {
-  if (!local || busy.value) return;
-  busy.value = true;
-  error.value = '';
-  try {
-    for (const ruleId of ruleIds) {
-      snapshot.value = await local.permissions({ action: 'revoke', ruleId });
-    }
   } catch {
     error.value = t('setting.permissions.error');
   } finally {
@@ -247,7 +202,7 @@ onMounted(() => {
           {{ t('setting.permissions.write') }} · {{ summaryLabel(permissionsSummary.write) }}
         </span>
         <span v-if="snapshot?.rules.length" class="text-muted-foreground">
-          {{ t('setting.permissions.existingRules', { count: displayRules.length }) }}
+          {{ t('setting.permissions.existingRules', { count: snapshot.rules.length }) }}
         </span>
       </div>
 
@@ -311,31 +266,27 @@ onMounted(() => {
       </div>
 
       <details
-        v-if="displayRules.length"
+        v-if="snapshot?.rules.length"
         class="group rounded-lg border border-border/70"
         data-testid="ai-permission-grants"
       >
         <summary
           class="flex cursor-pointer list-none items-center justify-between gap-2 px-3 py-2.5 text-sm [&::-webkit-details-marker]:hidden"
         >
-          <span>{{ t('setting.permissions.grants') }} ({{ displayRules.length }})</span>
+          <span>{{ t('setting.permissions.grants') }} ({{ snapshot?.rules.length }})</span>
           <ChevronDown
             class="size-4 text-muted-foreground transition-transform group-open:rotate-180"
           />
         </summary>
         <div class="space-y-2 border-t border-border/60 p-3">
           <div
-            v-for="rule in displayRules"
-            :key="rule.key"
+            v-for="rule in snapshot?.rules"
+            :key="rule.id"
             class="flex items-center justify-between gap-3 text-xs"
           >
             <span class="min-w-0">
               {{ t(`setting.permissions.objects.${rule.object}`) }} ·
-              {{
-                rule.action === 'write'
-                  ? t('setting.permissions.write')
-                  : t(`setting.permissions.actions.${rule.action}`)
-              }}
+              {{ t(`setting.permissions.actions.${rule.action}`) }}
               ·
               {{ effectLabel(rule.effect) }}
               <span v-if="rule.agentId" class="text-muted-foreground">
@@ -347,8 +298,8 @@ onMounted(() => {
               size="sm"
               class="h-7 shrink-0 text-xs"
               :disabled="busy"
-              :data-testid="`ai-permission-revoke-${rule.ids[0]}`"
-              @click="revokeRuleGroup(rule.ids)"
+              :data-testid="`ai-permission-revoke-${rule.id}`"
+              @click="execute({ action: 'revoke', ruleId: rule.id })"
               >{{ t('setting.permissions.revoke') }}</Button
             >
           </div>

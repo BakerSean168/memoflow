@@ -337,19 +337,27 @@ it.each(['approve_once', 'approve_conversation', 'approve_always', 'decline'] as
       expect(requests).toBe(['approve_conversation', 'approve_always'].includes(decision) ? 1 : 2);
       const snapshot = await bridge.permissions('owner', { action: 'snapshot' });
       expect(snapshot.audit).toHaveLength(2);
-      snapshot.rules = snapshot.rules.filter((rule) => rule.source === 'user');
-      expect(snapshot.rules).toHaveLength(decision === 'approve_always' ? 3 : 0);
+      expect(snapshot.rules.filter((rule) => rule.source === 'user')).toHaveLength(0);
       if (decision === 'approve_always') {
-        expect(snapshot.rules[0]).toMatchObject({
-          agentId: null,
-          object: 'goal',
-          action: 'create',
-          effect: 'allow',
-          source: 'user',
-          createdAt: expect.any(Number),
+        // Persistent approval now appears as the same per-object write exception
+        // the user can inspect and change in Settings -> AI Provider.
+        expect(snapshot.settings.preset).toBe('custom');
+        expect(snapshot.settings.customMatrix?.goal).toMatchObject({
+          read: 'allow',
+          create: 'allow',
+          update: 'allow',
+          delete: 'allow',
         });
-        for (const rule of snapshot.rules)
-          await bridge.permissions('owner', { action: 'revoke', ruleId: rule.id });
+        expect(snapshot.settings.customMatrix?.task).toMatchObject({
+          read: 'allow',
+          create: 'ask',
+          update: 'ask',
+          delete: 'ask',
+        });
+        await bridge.permissions('owner', {
+          action: 'settings',
+          settings: { ...snapshot.settings, preset: 'confirm_each', customMatrix: undefined },
+        });
         await call(grant);
         expect(requests).toBe(2);
       }

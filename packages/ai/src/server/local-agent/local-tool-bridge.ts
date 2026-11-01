@@ -4,6 +4,7 @@ import {
   type PermissionSnapshot,
   type PermissionPreset,
   type PermissionRule,
+  type PermissionSettings,
 } from '@memoflow/ai-contracts';
 import { getPermissionOperation } from '../permissions/operation-catalog';
 import { PERMISSION_PRESETS } from '../permissions/permission-policy';
@@ -19,6 +20,7 @@ import { LocalAgentError } from '../../shared/local-agent-error';
 import type { PermissionRepository } from '../permissions/permission.repository';
 import { executeAuthorized, PermissionDeniedError } from '../permissions/authorize';
 import { migrateLegacyPermissions } from '../permissions/permission-migration';
+import { withAllowedBusinessAccess } from '../permissions/permission-grants';
 
 type GrantInput = Parameters<LocalAgentToolBridgePort['open']>[0];
 export interface LocalToolContext extends ExecutionContext {
@@ -66,46 +68,48 @@ export class LocalAgentToolBridge implements LocalAgentToolBridgePort {
     }
     return state;
   }
+  private async saveBusinessSettings(owner: string, settings: PermissionSettings): Promise<void> {
+    const repository = this.options.permissions;
+    const previous = await repository.getSettings(owner);
+    // Matrix denials are explicit user rules, so a raised session preset
+    // cannot bypass them. Other matrix cells remain preset defaults.
+    if (settings.preset === 'custom' && settings.customMatrix) {
+      for (const [object, cells] of Object.entries(settings.customMatrix)) {
+        if (object === 'ai_permission') continue;
+        for (const [action, effect] of Object.entries(cells)) {
+          const id = `matrix:${object}:${action}`;
+          if (effect === 'deny')
+            await repository.saveRule(owner, {
+              id,
+              agentId: null,
+              object: object as PermissionRule['object'],
+              action: action as PermissionRule['action'],
+              effect: 'deny',
+              source: 'user',
+              createdAt: Date.now(),
+            });
+          else await repository.removeRule(owner, id);
+        }
+      }
+    }
+    if (settings.preset !== 'custom') {
+      // A preset replaces the previous per-object matrix, including its persisted deny rules.
+      for (const rule of await repository.listRules(owner)) {
+        if (rule.id.startsWith('matrix:')) await repository.removeRule(owner, rule.id);
+      }
+    }
+    await repository.saveSettings(owner, {
+      ...settings,
+      revision: (previous?.revision ?? 0) + 1,
+    });
+  }
   async permissions(owner: string, raw: PermissionCommand): Promise<PermissionSnapshot> {
     const command = PermissionCommandSchema.parse(raw);
     if (!this.options.isActive() || this.stopped)
       throw new LocalAgentError('LOCAL_AGENT_PERMISSION_DENIED');
     await this.migratePermissions(owner);
     const repository = this.options.permissions;
-    if (command.action === 'settings') {
-      const previous = await repository.getSettings(owner);
-      // Matrix denials are explicit user rules, so a raised session preset
-      // cannot bypass them. Other matrix cells remain preset defaults.
-      if (command.settings.preset === 'custom' && command.settings.customMatrix) {
-        for (const [object, cells] of Object.entries(command.settings.customMatrix)) {
-          if (object === 'ai_permission') continue;
-          for (const [action, effect] of Object.entries(cells)) {
-            const id = `matrix:${object}:${action}`;
-            if (effect === 'deny')
-              await repository.saveRule(owner, {
-                id,
-                agentId: null,
-                object: object as PermissionRule['object'],
-                action: action as PermissionRule['action'],
-                effect: 'deny',
-                source: 'user',
-                createdAt: Date.now(),
-              });
-            else await repository.removeRule(owner, id);
-          }
-        }
-      }
-      if (command.settings.preset !== 'custom') {
-        // A preset replaces the previous per-object matrix, including its persisted deny rules.
-        for (const rule of await repository.listRules(owner)) {
-          if (rule.id.startsWith('matrix:')) await repository.removeRule(owner, rule.id);
-        }
-      }
-      await repository.saveSettings(owner, {
-        ...command.settings,
-        revision: (previous?.revision ?? 0) + 1,
-      });
-    }
+    if (command.action === 'settings') await this.saveBusinessSettings(owner, command.settings);
     if (command.action === 'revoke') {
       const rule = (await repository.listRules(owner)).find((rule) => rule.id === command.ruleId);
       await repository.removeRule(owner, command.ruleId);
@@ -308,6 +312,9 @@ export class LocalAgentToolBridge implements LocalAgentToolBridgePort {
                       operationId,
                       ask: async () => {
                         if (!grant.input.requestApproval) return 'timeout';
+                        const settingsAtRequest = await this.options.permissions.getSettings(
+                          grant.input.identityId,
+                        );
                         const timeout = AbortSignal.timeout(
                           this.options.approvalTimeoutMs ?? 25_000,
                         );
@@ -344,6 +351,16 @@ export class LocalAgentToolBridge implements LocalAgentToolBridgePort {
                                 approved === 'decline'
                               )
                                 return resolve('deny');
+                              // Reject a stale approval if the user changed the policy
+                              // while the Agent was awaiting an answer.
+                              const settingsNow = await this.options.permissions.getSettings(
+                                grant.input.identityId,
+                              );
+                              if (
+                                !settingsNow ||
+                                settingsNow.revision !== settingsAtRequest?.revision
+                              )
+                                return resolve('deny');
                               const operation = getPermissionOperation(operationId)!;
                               const rule: PermissionRule = {
                                 id: randomUUID(),
@@ -355,19 +372,16 @@ export class LocalAgentToolBridge implements LocalAgentToolBridgePort {
                                 createdAt: Date.now(),
                               };
                               if (approved === 'approve_always') {
-                                // Business grants apply to all AI integrations, not to a
-                                // specific native Agent. A write grant covers this object.
-                                const actions =
-                                  operation.action === 'read'
-                                    ? (['read'] as const)
-                                    : (['create', 'update', 'delete'] as const);
-                                for (const action of actions)
-                                  await this.options.permissions.saveRule(grant.input.identityId, {
-                                    ...rule,
-                                    id: `grant:${operation.object}:${action}`,
-                                    agentId: null,
-                                    action,
-                                  });
+                                // Persist the visible setting without reconciling native
+                                // connection scopes mid-call; doing so would revoke this MCP grant.
+                                await this.saveBusinessSettings(
+                                  grant.input.identityId,
+                                  withAllowedBusinessAccess(
+                                    settingsNow,
+                                    operation.object,
+                                    operation.action,
+                                  ),
+                                );
                               }
                               if (approved === 'approve_conversation')
                                 this.conversation(
