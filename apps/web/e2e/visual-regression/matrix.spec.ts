@@ -336,7 +336,6 @@ for (const theme of ['light', 'dark'] as const) {
     const accountBox = (await account.boundingBox())!;
     await account.click();
     await page.getByTestId('shell-open-settings').click();
-    await page.getByTestId('global-confirm-confirm').click();
     await expect(page.getByTestId('settings-navigation-footer')).toBeVisible();
     const footer = (await page.getByTestId('settings-navigation-footer').boundingBox())!;
     expect(footer.height).toBe(44);
