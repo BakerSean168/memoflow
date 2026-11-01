@@ -3,7 +3,7 @@ import { createLocalAgentSqlite } from '../../testing/local-agent-sqlite';
 import { PermissionPowerSyncRepository } from './permission-powersync.repository';
 import { migrateLegacyPermissions } from './permission-migration';
 
-it('imports legacy scopes once, keeps missing write scopes denied and defaults new owners to on demand', async () => {
+it('imports legacy scopes once, keeps missing write scopes denied and defaults new owners to ask before writing', async () => {
   const db = createLocalAgentSqlite();
   const repository = new PermissionPowerSyncRepository(db);
   try {
@@ -15,7 +15,7 @@ it('imports legacy scopes once, keeps missing write scopes denied and defaults n
     ];
     await migrateLegacyPermissions(repository, 'owner', agents);
     expect(await repository.getSettings('owner')).toMatchObject({
-      preset: 'on_demand',
+      preset: 'confirm_each',
       agentPresets: {},
       migratedFrom: 'legacy-write-scopes-v2',
     });
@@ -35,7 +35,7 @@ it('imports legacy scopes once, keeps missing write scopes denied and defaults n
     expect(await repository.listRules('owner')).toHaveLength(6);
     await migrateLegacyPermissions(repository, 'new-owner', []);
     expect(await repository.getSettings('new-owner')).toMatchObject({
-      preset: 'on_demand',
+      preset: 'confirm_each',
       agentPresets: {},
       migratedFrom: 'new-default-v1',
     });

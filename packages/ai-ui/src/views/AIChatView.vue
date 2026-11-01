@@ -327,15 +327,6 @@
           @remove-context-entity="removeContextEntity"
         >
           <template #provider-options>
-            <AIBusinessPermissionSelector
-              :conversation-id="chatConversationId"
-              :agent-id="
-                runtimeChoice.runtimeKind === 'local_agent'
-                  ? runtimeChoice.connectionId
-                  : selectedComposerAgent
-              "
-              :disabled="chatLoading"
-            />
             <AIComposerControls
               ref="composerControlsRef"
               :agents="composerAgents"
@@ -368,7 +359,6 @@ import { Button, useConfirm } from '@memoflow/ui-vue-shadcn';
 import AIConversationSidebar from '../components/AIConversationSidebar.vue';
 import AIMessagePanel from '../components/AIMessagePanel.vue';
 import AIComposerControls from '../components/AIComposerControls.vue';
-import AIBusinessPermissionSelector from '../components/AIBusinessPermissionSelector.vue';
 import AIFooterComposer from '../components/AIFooterComposer.vue';
 import AIGoalWorkflowPanel from '../components/AIGoalWorkflowPanel.vue';
 import AITaskWorkflowPanel from '../components/AITaskWorkflowPanel.vue';

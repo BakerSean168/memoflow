@@ -148,51 +148,8 @@
           @compositionend="handleCompositionEnd"
         />
 
-        <div class="mt-3 flex items-center gap-2">
-          <div
-            class="flex min-w-0 flex-1 flex-wrap items-center gap-2"
-            data-testid="ai-composer-options"
-          >
-            <slot name="provider-options">
-              <div v-if="!localAgent && modelGroups.length" class="min-w-0">
-                <Select
-                  :model-value="selectedModelKey"
-                  @update:model-value="$emit('select-model', String($event))"
-                >
-                  <SelectTrigger
-                    class="h-7 w-auto min-w-0 max-w-[15rem] rounded-md border-0 bg-transparent px-2 text-xs text-[hsl(var(--foreground-subtle))] shadow-none hover:bg-[hsl(var(--hover))] hover:text-foreground focus:ring-0 focus:ring-offset-0"
-                    :aria-label="t('aiAssistant.chatPage.modelSelectorLabel')"
-                    data-testid="ai-chat-model-selector"
-                  >
-                    <Bot class="mr-1.5 size-4 shrink-0" aria-hidden="true" />
-                    <SelectValue :placeholder="t('aiAssistant.chatPage.emptyModels')" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectGroup v-for="group in modelGroups" :key="group.providerId">
-                      <SelectLabel>{{ group.providerName }}</SelectLabel>
-                      <SelectItem v-for="model in group.models" :key="model.key" :value="model.key">
-                        {{ model.modelName }}
-                      </SelectItem>
-                    </SelectGroup>
-                  </SelectContent>
-                </Select>
-              </div>
-              <Button
-                v-else-if="!localAgent"
-                variant="ghost"
-                class="h-7 shrink-0 rounded-md px-2 text-[hsl(var(--foreground-subtle))] hover:bg-[hsl(var(--hover))] hover:text-foreground"
-                data-testid="ai-chat-empty-models"
-                :title="t('aiAssistant.chatPage.emptyModelsHint')"
-                @click="$emit('open-settings')"
-              >
-                <Settings2 class="h-4 w-4" :class="density === 'icon' ? '' : 'mr-1.5'" />
-                <span v-if="density !== 'icon'" class="text-xs">
-                  {{ t('aiAssistant.chatPage.emptyModelsInline') }}
-                </span>
-              </Button>
-            </slot>
-          </div>
-          <div class="flex shrink-0 items-center gap-2" data-testid="ai-composer-actions">
+        <div class="mt-3 flex min-w-0 items-center gap-2" data-testid="ai-composer-footer-controls">
+          <div class="flex min-w-0 flex-1 items-center" data-testid="ai-composer-attachments">
             <DropdownMenu :modal="false">
               <DropdownMenuTrigger as-child>
                 <Button
@@ -314,7 +271,52 @@
                 </DropdownMenuSub>
               </DropdownMenuContent>
             </DropdownMenu>
-
+          </div>
+          <div class="flex min-w-0 shrink items-center gap-1.5" data-testid="ai-composer-actions">
+            <div class="flex min-w-0 items-center gap-1" data-testid="ai-composer-options">
+              <slot name="provider-options">
+                <div v-if="!localAgent && modelGroups.length" class="min-w-0">
+                  <Select
+                    :model-value="selectedModelKey"
+                    @update:model-value="$emit('select-model', String($event))"
+                  >
+                    <SelectTrigger
+                      class="h-7 w-auto min-w-0 max-w-[15rem] rounded-md border-0 bg-transparent px-2 text-xs text-[hsl(var(--foreground-subtle))] shadow-none hover:bg-[hsl(var(--hover))] hover:text-foreground focus:ring-0 focus:ring-offset-0"
+                      :aria-label="t('aiAssistant.chatPage.modelSelectorLabel')"
+                      data-testid="ai-chat-model-selector"
+                    >
+                      <Bot class="mr-1.5 size-4 shrink-0" aria-hidden="true" />
+                      <SelectValue :placeholder="t('aiAssistant.chatPage.emptyModels')" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectGroup v-for="group in modelGroups" :key="group.providerId">
+                        <SelectLabel>{{ group.providerName }}</SelectLabel>
+                        <SelectItem
+                          v-for="model in group.models"
+                          :key="model.key"
+                          :value="model.key"
+                        >
+                          {{ model.modelName }}
+                        </SelectItem>
+                      </SelectGroup>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <Button
+                  v-else-if="!localAgent"
+                  variant="ghost"
+                  class="h-7 shrink-0 rounded-md px-2 text-[hsl(var(--foreground-subtle))] hover:bg-[hsl(var(--hover))] hover:text-foreground"
+                  data-testid="ai-chat-empty-models"
+                  :title="t('aiAssistant.chatPage.emptyModelsHint')"
+                  @click="$emit('open-settings')"
+                >
+                  <Settings2 class="h-4 w-4" :class="density === 'icon' ? '' : 'mr-1.5'" />
+                  <span v-if="density !== 'icon'" class="text-xs">
+                    {{ t('aiAssistant.chatPage.emptyModelsInline') }}
+                  </span>
+                </Button>
+              </slot>
+            </div>
             <Button
               v-if="loading"
               variant="outline"

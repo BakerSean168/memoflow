@@ -106,20 +106,6 @@
           size="sm"
           variant="outline"
           :disabled="request.status !== 'pending' || seconds === 0"
-          data-testid="ai-permission-allow-conversation"
-          @click="
-            emit('respond', {
-              type: 'permission',
-              decision: 'approve_conversation',
-            })
-          "
-          >{{ t('setting.permissions.conversation') }}</Button
-        >
-        <Button
-          v-if="request.request.business"
-          size="sm"
-          variant="outline"
-          :disabled="request.status !== 'pending' || seconds === 0"
           data-testid="ai-permission-allow-always"
           @click="emit('respond', { type: 'permission', decision: 'approve_always' })"
           >{{ t('setting.permissions.always') }}</Button

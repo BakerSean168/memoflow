@@ -337,18 +337,27 @@ it.each(['approve_once', 'approve_conversation', 'approve_always', 'decline'] as
       expect(requests).toBe(['approve_conversation', 'approve_always'].includes(decision) ? 1 : 2);
       const snapshot = await bridge.permissions('owner', { action: 'snapshot' });
       expect(snapshot.audit).toHaveLength(2);
-      snapshot.rules = snapshot.rules.filter((rule) => rule.source === 'user');
-      expect(snapshot.rules).toHaveLength(decision === 'approve_always' ? 1 : 0);
+      expect(snapshot.rules.filter((rule) => rule.source === 'user')).toHaveLength(0);
       if (decision === 'approve_always') {
-        expect(snapshot.rules[0]).toMatchObject({
-          agentId: connection.id,
-          object: 'goal',
-          action: 'create',
-          effect: 'allow',
-          source: 'user',
-          createdAt: expect.any(Number),
+        // Persistent approval now appears as the same per-object write exception
+        // the user can inspect and change in Settings -> AI Provider.
+        expect(snapshot.settings.preset).toBe('custom');
+        expect(snapshot.settings.customMatrix?.goal).toMatchObject({
+          read: 'allow',
+          create: 'allow',
+          update: 'allow',
+          delete: 'allow',
         });
-        await bridge.permissions('owner', { action: 'revoke', ruleId: snapshot.rules[0]!.id });
+        expect(snapshot.settings.customMatrix?.task).toMatchObject({
+          read: 'allow',
+          create: 'ask',
+          update: 'ask',
+          delete: 'ask',
+        });
+        await bridge.permissions('owner', {
+          action: 'settings',
+          settings: { ...snapshot.settings, preset: 'confirm_each', customMatrix: undefined },
+        });
         await call(grant);
         expect(requests).toBe(2);
       }
@@ -412,7 +421,7 @@ it('keeps temporary raised presets out of persisted global settings', async () =
   }
 });
 
-it('stores matrix prohibitions as explicit rules that survive raised presets and can be revoked', async () => {
+it('replaces old matrix prohibitions when the user selects a new global preset', async () => {
   const db = createLocalAgentSqlite();
   const store = new LocalAgentRepository(db);
   const repository = new PermissionLocalRepository(db);
@@ -447,13 +456,8 @@ it('stores matrix prohibitions as explicit rules that survive raised presets and
       action: 'settings',
       settings: { ...first.settings, preset: 'full_auto' },
     });
-    expect(raised.rules).toHaveLength(6);
-    const revoked = await bridge.permissions('owner', {
-      action: 'revoke',
-      ruleId: 'matrix:goal:create',
-    });
-    expect(revoked.rules.some((rule) => rule.id === 'matrix:goal:create')).toBe(false);
-    expect(revoked.settings.customMatrix!.goal.create).toBe('allow');
+    expect(raised.rules.some((rule) => rule.id.startsWith('matrix:'))).toBe(false);
+    expect(raised.settings.preset).toBe('full_auto');
   } finally {
     await bridge.dispose();
     db.close();

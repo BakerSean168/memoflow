@@ -338,9 +338,11 @@ describe('MastraAIRuntime Assistant approval protocol', () => {
         recordExecution,
         permissions,
       } = await createRuntime();
-      if (decision === 'on-demand' || decision === 'on-demand-update')
+      // Native modes never elevate business permissions. Both automatic
+      // lifecycles need an explicit owner-wide business setting.
+      if (decision === 'auto' || decision === 'on-demand')
         await permissions.saveSettings('identity-a', {
-          preset: 'on_demand',
+          preset: 'full_auto',
           agentPresets: {},
           revision: 2,
         });
@@ -1765,12 +1767,12 @@ describe('MastraAIRuntime Assistant tool policy', () => {
       'planner_conflicts',
       'planner_upcoming_tasks',
       'notification_unread_summary',
-      'routine_create',
-      'routine_start_protocol',
     ]) {
       expect(session.resolveToolApproval(name)).toBe('allow');
     }
     for (const name of [
+      'routine_create',
+      'routine_start_protocol',
       'routine_pause_protocol',
       'routine_resume_protocol',
       'routine_end_protocol',

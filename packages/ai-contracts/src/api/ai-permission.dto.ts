@@ -32,10 +32,14 @@ export const PermissionRuleSchema = z
   .strict();
 export const PermissionSettingsSchema = z
   .object({
-    preset: PermissionPresetSchema.default('on_demand'),
+    preset: PermissionPresetSchema.default('confirm_each'),
     agentPresets: z.record(z.string(), PermissionPresetSchema).default({}),
+    // Not every business object needs an override. Protected AI settings are never configurable.
     customMatrix: z
-      .record(PermissionObjectSchema, z.record(PermissionActionSchema, PermissionEffectSchema))
+      .partialRecord(
+        PermissionObjectSchema,
+        z.partialRecord(PermissionActionSchema, PermissionEffectSchema),
+      )
       .optional(),
     revision: z.number().int().positive().default(1),
     migratedFrom: z.string().optional(),

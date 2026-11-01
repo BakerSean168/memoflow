@@ -98,6 +98,15 @@ const updateInput = {
 
 it('allows scoped creates, denies asks with bilingual settings guidance, and preserves the scope ceiling', async () => {
   const f = fixture();
+  // Scope is only the ceiling; MemoFlow still needs a business grant.
+  await f.repository.saveRule('owner', {
+    id: 'create-allowed',
+    agentId: null,
+    object: 'goal',
+    action: 'create',
+    effect: 'allow',
+    source: 'user',
+  });
   const created = await f.fetch('goal_create', createInput);
   expect(await created.text()).not.toContain('PERMISSION_DENIED');
   expect(f.create).toHaveBeenCalledOnce();
@@ -144,15 +153,15 @@ it('honors per-connection user allows and explicit denies even in full auto', as
   expect(f.update).toHaveBeenCalledOnce();
 });
 
-it('uses on-demand when cloud tables have not been deployed, but propagates real storage failures', async () => {
+it('fails closed on cloud writes when permission tables are absent and propagates real failures', async () => {
   const f = fixture();
   for (const method of ['getSettings', 'listRules', 'appendAudit', 'updateAuditExecution'] as const)
     vi.spyOn(f.repository, method).mockRejectedValue(new PermissionStorageUnavailableError());
-  await f.fetch('goal_create', createInput);
-  expect(f.create).toHaveBeenCalledOnce();
+  expect(await (await f.fetch('goal_create', createInput)).text()).toContain('PERMISSION_DENIED');
+  expect(f.create).not.toHaveBeenCalled();
   expect(await (await f.fetch('goal_update', updateInput)).text()).toContain('PERMISSION_DENIED');
   expect(f.update).not.toHaveBeenCalled();
   vi.spyOn(f.repository, 'getSettings').mockRejectedValue(new Error('offline'));
   expect(await (await f.fetch('goal_create', createInput)).text()).toContain('INTERNAL_ERROR');
-  expect(f.create).toHaveBeenCalledOnce();
+  expect(f.create).not.toHaveBeenCalled();
 });

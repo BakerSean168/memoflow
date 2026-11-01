@@ -1,12 +1,13 @@
 <script setup lang="ts">
 import { computed, nextTick, ref, watch } from 'vue';
-import { Brain, CircleAlert, Check, ChevronDown, LockKeyhole, Search, Star } from '@lucide/vue';
+import { CircleAlert, Check, ChevronDown, LockKeyhole, Search, Star } from '@lucide/vue';
 import { useI18n } from 'vue-i18n';
 import { Popover, PopoverContent, PopoverTrigger } from '@memoflow/ui-vue-shadcn';
 import type { AgentDriverKind, LocalAgentModelOptions } from '@memoflow/ai-contracts';
 import type { ComposerModel, ModelCatalog } from '../composables/useAIModelCatalog';
 import { aiUiHost } from '../ai-ui-host';
 import AgentDriverIcon from './AgentDriverIcon.vue';
+import AIModelTraitsPanel from './AIModelTraitsPanel.vue';
 
 interface ComposerAgentOption {
   id: string;
@@ -41,7 +42,7 @@ const favoritesStorageKey = computed(() => {
   const identity = resolveIdentityScope();
   return identity ? `${FAVORITES_KEY}:${identity}` : '';
 });
-const openMenu = ref<'models' | 'traits' | null>(null);
+const openMenu = ref<'models' | null>(null);
 const search = ref('');
 const activeSection = ref('favorites');
 const favorites = ref<string[]>([]);
@@ -118,7 +119,6 @@ const traitsLabel = computed(
 function chooseTrait(kind: keyof LocalAgentModelOptions, value?: string) {
   if (props.disabled || !hasModelTraits.value) return;
   emit('modelOption', kind, value);
-  openMenu.value = null;
 }
 const instanceName = (agent: ComposerAgentOption) => {
   const duplicates = props.agents.filter((item) => item.name === agent.name).length;
@@ -183,7 +183,7 @@ function browseAgent(agent: ComposerAgentOption) {
   activeSection.value = agent.id;
   search.value = '';
 }
-function setMenu(menu: 'models' | 'traits', opened: boolean) {
+function setMenu(menu: 'models', opened: boolean) {
   if (opened && props.disabled) return;
   openMenu.value = opened ? menu : null;
   if (opened && menu === 'models') {
@@ -198,7 +198,11 @@ function setMenu(menu: 'models' | 'traits', opened: boolean) {
 function selectModel(model: ComposerModel) {
   if (!canChooseModel(model)) return;
   emit('selectModel', model.key, model.agentKey);
-  openMenu.value = null;
+  openMenu.value =
+    props.native &&
+    ((model.reasoningEfforts?.length ?? 0) > 1 || Boolean(model.serviceTiers?.length))
+      ? 'models'
+      : null;
 }
 function storeFavorites() {
   // Favorites are per cloud identity or desktop Profile, never shared by
@@ -241,10 +245,9 @@ watch(enabledAgents, (agents) => {
     activeSection.value = 'favorites';
 });
 watch(
-  () => [props.disabled, hasModelTraits.value, providerUnavailable.value] as const,
-  ([disabled, available, unavailable]) => {
-    if (disabled || unavailable || (!available && openMenu.value === 'traits'))
-      openMenu.value = null;
+  () => [props.disabled, providerUnavailable.value] as const,
+  ([disabled, unavailable]) => {
+    if (disabled || unavailable) openMenu.value = null;
   },
 );
 watch(
@@ -285,7 +288,7 @@ watch(
       <PopoverTrigger as-child>
         <button
           type="button"
-          class="flex h-7 min-w-0 max-w-[clamp(6.5rem,40cqw,12.5rem)] items-center gap-1.5 rounded-md px-1.5 text-xs text-muted-foreground transition-colors hover:bg-muted/70 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary disabled:opacity-45"
+          class="flex h-7 min-w-0 max-w-[clamp(7rem,42cqw,15rem)] items-center gap-1.5 rounded-md px-1.5 text-xs text-muted-foreground transition-colors hover:bg-muted/70 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary disabled:opacity-45"
           :disabled="disabled"
           :title="
             blockedMessage(currentAgent) ||
@@ -306,15 +309,21 @@ watch(
           <span class="min-w-0 truncate font-medium">
             {{ selectedModel?.modelName ?? t('aiAssistant.composer.chooseModel') }}
           </span>
+          <span
+            v-if="hasModelTraits"
+            class="max-w-12 shrink-0 truncate text-[10px] font-normal opacity-70"
+            data-testid="ai-chat-model-effort-label"
+            >{{ traitsLabel }}</span
+          >
           <ChevronDown class="size-3 shrink-0 opacity-70" />
         </button>
       </PopoverTrigger>
       <PopoverContent
         side="top"
-        align="start"
+        align="end"
         :side-offset="7"
         :collision-padding="12"
-        class="w-[min(360px,calc(100vw-24px))] max-w-[calc(100vw-1.5rem)] overflow-hidden rounded-xl p-0"
+        class="w-[min(35rem,calc(100vw-1.5rem))] max-w-[calc(100vw-1.5rem)] overflow-hidden rounded-xl p-0"
         data-testid="ai-model-picker"
       >
         <div class="flex h-[min(346px,calc(100dvh-80px))] min-h-0" @keydown="keyboardNavigation">
@@ -519,88 +528,16 @@ watch(
               </div>
             </div>
           </div>
+          <AIModelTraitsPanel
+            v-if="hasModelTraits"
+            :reasoning-efforts="selectedModel?.reasoningEfforts"
+            :service-tiers="selectedModel?.serviceTiers"
+            :selected-effort="selectedEffort"
+            :selected-service-tier="selectedServiceTier"
+            :disabled="disabled"
+            @model-option="chooseTrait"
+          />
         </div>
-      </PopoverContent>
-    </Popover>
-
-    <!-- T3 parity: show Traits ONLY when a native model actually advertises
-         executable options; Web Mastra / Pi / DSH remain two-control layouts. -->
-    <Popover
-      v-if="hasModelTraits"
-      :open="openMenu === 'traits'"
-      @update:open="setMenu('traits', $event)"
-    >
-      <PopoverTrigger as-child>
-        <button
-          type="button"
-          class="flex h-7 max-w-[8.5rem] shrink-0 items-center gap-1 rounded-md px-1.5 text-xs text-muted-foreground hover:bg-muted/70 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary disabled:opacity-45"
-          :disabled="disabled"
-          :aria-label="t('aiAssistant.composer.modelOptions')"
-          data-testid="ai-chat-traits-selector"
-        >
-          <Brain class="size-3.5 shrink-0" />
-          <span class="max-w-[6rem] truncate">{{ traitsLabel }}</span>
-          <ChevronDown class="size-3 shrink-0 opacity-70" />
-        </button>
-      </PopoverTrigger>
-      <PopoverContent
-        side="top"
-        align="start"
-        :side-offset="7"
-        :collision-padding="12"
-        class="w-[min(16.5rem,calc(100vw-1.5rem))] max-h-[min(21rem,calc(100dvh-5rem))] overflow-y-auto p-1"
-        data-testid="ai-model-traits-menu"
-      >
-        <template v-if="hasReasoningChoices">
-          <p class="px-2 pb-1 pt-2 text-[11px] font-medium text-muted-foreground">
-            {{ t('aiAssistant.composer.reasoningEffort') }}
-          </p>
-          <button
-            v-for="effort in selectedModel?.reasoningEfforts"
-            :key="effort"
-            type="button"
-            class="flex w-full items-center justify-between rounded-md px-2 py-1.5 text-left text-xs hover:bg-muted/70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
-            :data-testid="'ai-traits-effort-' + effort"
-            @click="chooseTrait('reasoningEffort', effort)"
-          >
-            <span>{{
-              effort === 'xhigh'
-                ? 'Extra High'
-                : effort === 'super-high'
-                  ? 'Super High'
-                  : effort === 'ultra'
-                    ? 'Ultra'
-                    : effort.charAt(0).toUpperCase() + effort.slice(1)
-            }}</span>
-            <Check v-if="selectedEffort === effort" class="size-3.5 text-primary" />
-          </button>
-        </template>
-        <template v-if="selectedModel?.serviceTiers?.length">
-          <div v-if="hasReasoningChoices" class="my-1 h-px bg-border/60" />
-          <p class="px-2 pb-1 pt-2 text-[11px] font-medium text-muted-foreground">
-            {{ t('aiAssistant.composer.serviceTier') }}
-          </p>
-          <button
-            type="button"
-            class="flex w-full items-center justify-between rounded-md px-2 py-1.5 text-left text-xs hover:bg-muted/70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
-            data-testid="ai-traits-tier-default"
-            @click="chooseTrait('serviceTier', 'default')"
-          >
-            <span>{{ t('aiAssistant.composer.defaultOptions') }}</span>
-            <Check v-if="selectedServiceTier === 'default'" class="size-3.5 text-primary" />
-          </button>
-          <button
-            v-for="tier in selectedModel.serviceTiers"
-            :key="tier.id"
-            type="button"
-            class="flex w-full items-center justify-between rounded-md px-2 py-1.5 text-left text-xs hover:bg-muted/70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
-            :data-testid="'ai-traits-tier-' + tier.id"
-            @click="chooseTrait('serviceTier', tier.id)"
-          >
-            <span>{{ tier.name }}</span>
-            <Check v-if="selectedServiceTier === tier.id" class="size-3.5 text-primary" />
-          </button>
-        </template>
       </PopoverContent>
     </Popover>
   </div>

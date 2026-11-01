@@ -24,6 +24,7 @@ const { SettingsStatusBlock, AgentDriverIcon } = settingUiHost.components;
 import AgentInstanceWizard from './AgentInstanceWizard.vue';
 import LocalAgentSettings from './LocalAgentSettings.vue';
 import MastraAgentSettings from './MastraAgentSettings.vue';
+import AIPermissionSettings from './AIPermissionSettings.vue';
 
 const { t } = useI18n();
 const registry = inject(settingUiHost.AI_AGENT_REGISTRY_KEY, undefined);
@@ -476,6 +477,7 @@ onBeforeUnmount(() => {
       :title="t('aiAssistant.local.checking')"
       test-id="ai-provider-loading"
     />
+    <AIPermissionSettings v-if="local" />
     <AgentInstanceWizard
       :open="wizardOpen"
       :native="Boolean(local)"

@@ -24,7 +24,7 @@ export async function migrateLegacyPermissions(
   await repository.saveSettings(
     owner,
     PermissionSettingsSchema.parse({
-      preset: 'on_demand',
+      preset: 'confirm_each',
       agentPresets: {},
       revision: 1,
       migratedFrom: agents.length ? 'legacy-write-scopes-v2' : 'new-default-v1',

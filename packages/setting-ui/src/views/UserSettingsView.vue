@@ -26,9 +26,6 @@ import { settingUiHost } from '../setting-ui-host';
 const { ProductSurfaceHeader } = settingUiHost.components;
 
 const KeyboardSettings = defineAsyncComponent(() => import('../components/KeyboardSettings.vue'));
-const AIPermissionSettings = defineAsyncComponent(
-  () => import('../components/AIPermissionSettings.vue'),
-);
 const AISettings = defineAsyncComponent(() => import('../components/AISettings.vue'));
 const KnowledgeRepositorySettings = defineAsyncComponent(
   () => import('../components/KnowledgeRepositorySettings.vue'),
@@ -67,7 +64,6 @@ type SettingsGroup =
   | 'shortcuts'
   | 'appearance'
   | 'repository'
-  | 'ai-permissions'
   | 'ai'
   | 'notifications'
   | 'account'
@@ -83,7 +79,6 @@ const GROUP_DEFINITIONS: ReadonlyArray<{
   { value: 'appearance', labelKey: 'setting.groups.appearance' },
   { value: 'repository', labelKey: 'setting.groups.repository' },
   { value: 'ai', labelKey: 'setting.groups.ai' },
-  { value: 'ai-permissions', labelKey: 'setting.permissions.title' },
   { value: 'notifications', labelKey: 'setting.groups.notifications' },
   { value: 'account', labelKey: 'setting.groups.account' },
   { value: 'data', labelKey: 'setting.groups.data' },
@@ -98,6 +93,8 @@ function isGroupAvailable(group: SettingsGroup): boolean {
 }
 
 function normalizeGroup(value: unknown): SettingsGroup {
+  // Keep old Settings -> AI permissions deep links landing on the merged section.
+  if (value === 'ai-permissions') return 'ai';
   const candidate = value as SettingsGroup;
   return GROUP_VALUES.includes(candidate) && isGroupAvailable(candidate) ? candidate : 'appearance';
 }
@@ -196,7 +193,6 @@ onBeforeUnmount(() => {
             <UserPreferenceSettingsSection v-if="activeTab === 'appearance'" />
             <KeyboardSettings v-else-if="activeTab === 'shortcuts'" />
             <AISettings v-else-if="activeTab === 'ai'" />
-            <AIPermissionSettings v-else-if="activeTab === 'ai-permissions'" />
             <KnowledgeRepositorySettings v-else-if="activeTab === 'repository'" />
             <NotificationSettings v-else-if="activeTab === 'notifications'" />
             <AccountSettingsSection v-else-if="activeTab === 'account'" />

@@ -189,6 +189,13 @@ describe('Desktop Local Agent Goal Panel Tools', () => {
     }
     const goalCount = () => f.sql.prepare('SELECT COUNT(*) AS n FROM goals').get();
 
+    // Isolate routing behavior from business confirmation: this test covers
+    // which goal intents require a panel, not the separate authorization UI.
+    await new PermissionLocalRepository(f.db).saveSettings(identityId, {
+      preset: 'full_auto',
+      agentPresets: {},
+      revision: 1,
+    });
     try {
       // The screenshot request: a plain "help me create a goal" must not become a hidden write.
       expect(await createGoal('帮我创建一个目标：三个月内读完 6 本书', 'plain')).toContain(
@@ -248,10 +255,8 @@ it.each(['approve', 'decline', 'abort', 'auto-approve'] as const)(
         writeScopes: ['goals:write'],
       });
       await new PermissionLocalRepository(f.db).saveSettings('owner', {
-        preset: decision === 'auto-approve' ? 'on_demand' : 'confirm_each',
-        agentPresets: {
-          [connection.id]: decision === 'auto-approve' ? 'on_demand' : 'confirm_each',
-        },
+        preset: 'confirm_each',
+        agentPresets: {},
         revision: 1,
       });
       const grant = await bridge.open({
@@ -284,19 +289,17 @@ it.each(['approve', 'decline', 'abort', 'auto-approve'] as const)(
       expect(requestApproval).not.toHaveBeenCalled();
       executeCommand.mockClear();
       const saving = call('goal_panel_submit');
-      if (decision !== 'auto-approve') {
-        await requested;
-        expect(requestApproval).toHaveBeenCalledWith(
-          'goal_panel_submit',
-          expect.any(AbortSignal),
-          expect.objectContaining({ action: 'create', object: 'goal' }),
-        );
-        expect(executeCommand.mock.calls.some(([, command]) => command.action === 'submit')).toBe(
-          false,
-        );
-        if (decision === 'abort') grant.revoke();
-        else answer(decision === 'approve');
-      }
+      await requested;
+      expect(requestApproval).toHaveBeenCalledWith(
+        'goal_panel_submit',
+        expect.any(AbortSignal),
+        expect.objectContaining({ action: 'create', object: 'goal' }),
+      );
+      expect(executeCommand.mock.calls.some(([, command]) => command.action === 'submit')).toBe(
+        false,
+      );
+      if (decision === 'abort') grant.revoke();
+      else answer(decision === 'approve' || decision === 'auto-approve');
       const result = await saving;
       if (decision === 'approve' || decision === 'auto-approve') {
         expect(result).not.toContain('PERMISSION_DENIED');
@@ -309,7 +312,7 @@ it.each(['approve', 'decline', 'abort', 'auto-approve'] as const)(
         );
         if (decision === 'decline') expect(result).toContain('PERMISSION_DENIED');
       }
-      if (decision === 'auto-approve') expect(requestApproval).not.toHaveBeenCalled();
+      if (decision === 'auto-approve') expect(requestApproval).toHaveBeenCalledTimes(1);
     } finally {
       await bridge.dispose();
       f.close();

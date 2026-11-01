@@ -41,12 +41,19 @@ it('advertises only authorized writes, commits through owners and refuses revoke
     const permissionSettings = f.sql
       .prepare('SELECT record_json FROM ai_permission_settings_local WHERE identity_id = ?')
       .get(identityId) as { record_json: string };
-    expect(JSON.parse(permissionSettings.record_json)).toMatchObject({ preset: 'on_demand' });
+    expect(JSON.parse(permissionSettings.record_json)).toMatchObject({ preset: 'confirm_each' });
     const discovery = await (await call(readGrant, 'tools/list')).text();
     expect(discovery).toContain('goal_search');
     expect(discovery).not.toContain('goal_create');
     expect(discovery).not.toContain('task_plan_create');
     readGrant.revoke();
+    // This owner explicitly selected automatic business writes. Native Agent
+    // auto-approve alone no longer changes MemoFlow business permissions.
+    await new PermissionLocalRepository(f.db).saveSettings(identityId, {
+      preset: 'full_auto',
+      agentPresets: {},
+      revision: 2,
+    });
     const enabled = await store.updateConnection(identityId, connection.id, connection.revision, {
       ...config,
       writeScopes: ['goals:write', 'tasks:write'],

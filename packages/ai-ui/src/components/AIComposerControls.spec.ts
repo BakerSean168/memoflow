@@ -239,7 +239,8 @@ describe('T3 model picker / conditional traits / enforced permissions', () => {
     expect(wrapper.get('[data-testid="ai-chat-model-selector"]').text()).toContain(
       'Gemini 3.8 Flash',
     );
-    expect(wrapper.get('[data-testid="ai-chat-traits-selector"]').text()).toContain('medium');
+    expect(wrapper.get('[data-testid="ai-chat-model-effort-label"]').text()).toContain('medium');
+    expect(wrapper.get('[data-testid="ai-model-picker-options"]').exists()).toBe(true);
     expect(wrapper.findAll('[data-testid^="ai-traits-effort-"]')).toHaveLength(3);
     await wrapper.get('[data-testid="ai-traits-effort-high"]').trigger('click');
     expect(wrapper.emitted('modelOption')).toEqual([['reasoningEffort', 'high']]);
@@ -468,7 +469,7 @@ describe('T3 model picker / conditional traits / enforced permissions', () => {
     await openModels(wrapper);
     const picker = wrapper.get('[data-testid="ai-model-picker"]');
     const frame = picker.get('div');
-    expect(picker.classes()).toContain('w-[min(360px,calc(100vw-24px))]');
+    expect(picker.classes()).toContain('w-[min(35rem,calc(100vw-1.5rem))]');
     expect(frame.classes()).toContain('h-[min(346px,calc(100dvh-80px))]');
 
     await wrapper.get('[data-testid="ai-model-picker-agent-local:codex"]').trigger('click');
@@ -589,7 +590,8 @@ describe('T3 model picker / conditional traits / enforced permissions', () => {
       selectedModelKey: nativeModel.key,
       models: [nativeModel],
     });
-    expect(wrapper.get('[data-testid="ai-chat-traits-selector"]').text()).toContain('medium');
+    expect(wrapper.get('[data-testid="ai-chat-model-effort-label"]').text()).toContain('medium');
+    expect(wrapper.get('[data-testid="ai-model-picker-options"]').exists()).toBe(true);
     expect(wrapper.findAll('[data-testid^="ai-traits-effort-"]')).toHaveLength(3);
     await wrapper.get('[data-testid="ai-traits-effort-super-high"]').trigger('click');
     expect(wrapper.emitted('modelOption')).toEqual([['reasoningEffort', 'super-high']]);
@@ -601,7 +603,7 @@ describe('T3 model picker / conditional traits / enforced permissions', () => {
     wrapper.unmount();
   });
 
-  it('disables all three controls while a run is active', () => {
+  it('disables model switching while a run is active', () => {
     const nativeModel = {
       key: 'model',
       agentKey: 'local:codex',
@@ -618,7 +620,7 @@ describe('T3 model picker / conditional traits / enforced permissions', () => {
       selectedAgentId: 'local:codex',
       selectedModelKey: 'model',
     });
-    for (const id of ['ai-chat-model-selector', 'ai-chat-traits-selector']) {
+    for (const id of ['ai-chat-model-selector']) {
       expect(wrapper.get('[data-testid="' + id + '"]').attributes('disabled')).toBeDefined();
     }
     wrapper.unmount();

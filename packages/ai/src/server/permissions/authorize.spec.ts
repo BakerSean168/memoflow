@@ -76,7 +76,7 @@ it('audits preset decisions, confirmation outcomes and execution results', async
   }
 });
 
-it('uses the default preset without blocking when permission tables are not deployed', async () => {
+it('fails closed for writes if the permission storage is unavailable', async () => {
   const unavailable = new PermissionStorageUnavailableError();
   const repository = {
     getSettings: async () => {
@@ -93,19 +93,20 @@ it('uses the default preset without blocking when permission tables are not depl
     },
   } as PermissionRepository;
 
-  const result = await executeAuthorized(
-    repository,
-    {
-      owner: 'owner',
-      agentId: 'codex',
-      operationId: 'goal.create',
-    },
-    async () => 'created',
-  );
-  expect(result).toBe('created');
+  await expect(
+    executeAuthorized(
+      repository,
+      {
+        owner: 'owner',
+        agentId: 'codex',
+        operationId: 'goal.create',
+      },
+      async () => 'created',
+    ),
+  ).rejects.toBeInstanceOf(PermissionDeniedError);
 });
 
-it('allows a conversation to raise the preset while keeping explicit user denies and settings locked', async () => {
+it('does not allow native conversation modes to raise global business permissions', async () => {
   const db = createLocalAgentSqlite();
   const repository = new PermissionPowerSyncRepository(db);
   try {
@@ -116,7 +117,7 @@ it('allows a conversation to raise the preset while keeping explicit user denies
       operationId: 'goal.create',
       conversationPreset: 'full_auto' as const,
     };
-    expect((await authorize(repository, input)).decision).toBe('allow');
+    expect((await authorize(repository, input)).decision).toBe('deny');
     await repository.saveRule('owner', {
       id: 'deny',
       agentId: null,
