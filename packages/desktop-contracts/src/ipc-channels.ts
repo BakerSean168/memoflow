@@ -120,6 +120,14 @@ export const ProfileAccessChannels = {
 export const CloudAuthChannels = {
   SIGN_OUT: 'cloud-auth:sign-out',
   SESSION: 'cloud-auth:session',
+  /** Email/password sign-in from the identity window (no active Profile yet). */
+  SIGN_IN: 'cloud-auth:sign-in',
+  /** Cloud account registration from the identity window. */
+  SIGN_UP: 'cloud-auth:sign-up',
+  /** Opens the Web password-recovery page in the system browser. */
+  FORGOT_PASSWORD: 'cloud-auth:forgot-password',
+  /** GitHub sign-in through the device authorization page, without a Profile. */
+  GITHUB_SIGN_IN_BEGIN: 'cloud-auth:github-sign-in:begin',
   CLOUD_CONNECTION_BEGIN: 'cloud-auth:connection:begin',
   CLOUD_CONNECTION_CURRENT: 'cloud-auth:connection:current',
   CLOUD_CONNECTION_STATUS: 'cloud-auth:connection:status',

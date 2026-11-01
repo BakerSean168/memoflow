@@ -3,6 +3,7 @@ import { useI18n } from 'vue-i18n';
 import { toast } from 'vue-sonner';
 import { z } from 'zod';
 import {
+  CloudAuthChannels,
   ProfileAccessChannels,
   WindowChannels,
   type ProfileSummary,
@@ -21,7 +22,7 @@ const profileSchema = z.object({
   lastActiveAt: z.number(),
   hasCredential: z.boolean(),
   remembered: z.boolean(),
-}) satisfies z.ZodType<ProfileSummary>;
+});
 const snapshotSchema = z.object({
   profile: profileSchema.nullable(),
   unlockState: z.enum(['LOCKED', 'UNLOCKED']),
@@ -33,6 +34,40 @@ const snapshotSchema = z.object({
     repositoryConnection: z.boolean(),
   }),
 });
+/** The signed-in Profile the main process opened for the identity window. */
+const openedProfileSchema = z.object({ profileId: z.string().min(1) });
+/**
+ * The device-authorization attempt snapshot. Only the fields the identity
+ * window reacts to are read; the rest of the shape belongs to the workspace
+ * cloud-connection dialog.
+ */
+const signInAttemptSchema = z.object({
+  attemptId: z.string(),
+  status: z.enum([
+    'requesting_code',
+    'awaiting_authorization',
+    'connecting_profile',
+    'connected',
+    'denied',
+    'expired',
+    'cancelled',
+    'failed',
+  ]),
+  result: z.object({ targetProfileId: z.string(), activation: z.string() }).nullable(),
+  userCode: z.string(),
+  verificationUrl: z.string(),
+  error: z.object({ code: z.string(), message: z.string() }).nullable(),
+});
+
+/**
+ * States the identity window swaps inside one window. `login` and `register`
+ * are the formal sign-in/registration surfaces; `password` is the per-tile
+ * unlock state of a local account.
+ */
+export type DesktopAccessView = 'select' | 'password' | 'login' | 'register';
+export type DesktopRegisterMode = 'cloud' | 'local';
+
+const GITHUB_POLL_INTERVAL_MS = 1_500;
 
 /** Registry metadata and operations shared by the access window and workspace management. */
 export function useDesktopProfiles(options: { accessWindow?: boolean } = {}) {
@@ -46,14 +81,28 @@ export function useDesktopProfiles(options: { accessWindow?: boolean } = {}) {
   const remember = ref(false);
   const newName = ref('');
   const newPassword = ref('');
-  const newPasswordConfirm = ref('');
   const editingProfileId = ref<string | null>(null);
   const editName = ref('');
-  /**
-   * The access window swaps states inside one window: the account tiles, or the
-   * password state of the tile that could not open directly.
-   */
-  const accessView = ref<'select' | 'password'>('select');
+  const accessView = ref<DesktopAccessView>('select');
+
+  // Sign-in state: cloud email/password, and the GitHub device attempt.
+  const loginEmail = ref('');
+  const loginPassword = ref('');
+  const loginRemember = ref(true);
+  const signInBusy = ref(false);
+  const githubPending = ref(false);
+  const githubUserCode = ref('');
+  const githubAttemptId = ref<string | null>(null);
+  let githubPollTimer: ReturnType<typeof setTimeout> | null = null;
+
+  // Registration state: one form shape, two backends (cloud / local account).
+  const registerMode = ref<DesktopRegisterMode>('cloud');
+  const registerEmail = ref('');
+  const registerName = ref('');
+  const registerPassword = ref('');
+  const registerPasswordConfirm = ref('');
+  const registerBusy = ref(false);
+
   const passwordTarget = computed(
     () => profiles.value.find((profile) => profile.profileId === selectedProfileId.value) ?? null,
   );
@@ -72,6 +121,15 @@ export function useDesktopProfiles(options: { accessWindow?: boolean } = {}) {
     schema: z.ZodType<T>,
     ...args: unknown[]
   ): Promise<{ data: T } | null> {
+    return invokeScoped(channel, schema, {}, ...args);
+  }
+
+  async function invokeScoped<T>(
+    channel: string,
+    schema: z.ZodType<T>,
+    options: { scope?: string; silent?: boolean },
+    ...args: unknown[]
+  ): Promise<{ data: T } | null> {
     if (!bridge) return null;
     try {
       const result = z
@@ -84,7 +142,13 @@ export function useDesktopProfiles(options: { accessWindow?: boolean } = {}) {
       if (!result.ok) throw result.error ?? new Error(t('common.operationFailed'));
       return { data: schema.parse(result.data) };
     } catch (error) {
-      toast.error(translateResultError(error, t, { fallbackKey: 'common.operationFailed' }));
+      if (!options.silent)
+        toast.error(
+          translateResultError(error, t, {
+            scope: options.scope,
+            fallbackKey: 'common.operationFailed',
+          }),
+        );
       return null;
     }
   }
@@ -163,11 +227,234 @@ export function useDesktopProfiles(options: { accessWindow?: boolean } = {}) {
     accessView.value = 'password';
   }
 
+  /** The "+" tile: the formal sign-in surface, not an inline account form. */
+  function enterLoginState(): void {
+    resetSignInState();
+    accessView.value = 'login';
+  }
+
+  function enterRegisterState(mode: DesktopRegisterMode = 'cloud'): void {
+    resetRegisterState();
+    registerMode.value = mode;
+    accessView.value = 'register';
+  }
+
   function backToSelect(): void {
+    resetSignInState();
+    resetRegisterState();
     accessView.value = 'select';
     selectedProfileId.value = null;
     password.value = '';
     remember.value = false;
+  }
+
+  function resetSignInState(): void {
+    stopGithubPolling();
+    loginEmail.value = '';
+    loginPassword.value = '';
+    loginRemember.value = true;
+    signInBusy.value = false;
+    githubPending.value = false;
+    githubUserCode.value = '';
+    githubAttemptId.value = null;
+  }
+
+  function resetRegisterState(): void {
+    registerEmail.value = '';
+    registerName.value = '';
+    registerPassword.value = '';
+    registerPasswordConfirm.value = '';
+    registerBusy.value = false;
+  }
+
+  /**
+   * The main process registers or finds the Profile for the signed-in cloud
+   * account, adopts the session and opens the Profile; the window only asks for
+   * the transition once that commit succeeded.
+   */
+  async function enterOpenedProfile(): Promise<boolean> {
+    return !!(await invoke(WindowChannels.TRANSITION_TO_MAIN, z.unknown()));
+  }
+
+  async function signInWithPassword(): Promise<void> {
+    if (signInBusy.value) return;
+    const email = loginEmail.value.trim();
+    if (!email || !loginPassword.value) {
+      toast.error(t('auth.validation.passwordRequired'));
+      return;
+    }
+    signInBusy.value = true;
+    try {
+      const result = await invokeScoped(
+        CloudAuthChannels.SIGN_IN,
+        openedProfileSchema,
+        { scope: 'auth' },
+        { email, password: loginPassword.value, remember: loginRemember.value },
+      );
+      // The password never outlives the request, on success or failure.
+      loginPassword.value = '';
+      if (result) await enterOpenedProfile();
+    } finally {
+      signInBusy.value = false;
+    }
+  }
+
+  async function forgotPassword(): Promise<void> {
+    await invokeScoped(CloudAuthChannels.FORGOT_PASSWORD, z.unknown(), { scope: 'auth' }, {});
+  }
+
+  /**
+   * GitHub sign-in reuses the device-authorization page, which already offers
+   * GitHub. The main process starts an attempt without an origin Profile and
+   * commits the same register-and-open path the password form uses.
+   */
+  async function signInWithGithub(): Promise<void> {
+    if (githubPending.value || signInBusy.value) return;
+    const started = await invokeScoped(
+      CloudAuthChannels.GITHUB_SIGN_IN_BEGIN,
+      signInAttemptSchema,
+      { scope: 'auth' },
+      { remember: loginRemember.value },
+    );
+    if (!started) return;
+    githubAttemptId.value = started.data.attemptId;
+    githubUserCode.value = started.data.userCode;
+    githubPending.value = true;
+    scheduleGithubPoll();
+  }
+
+  function scheduleGithubPoll(): void {
+    stopGithubPolling();
+    githubPollTimer = setTimeout(() => {
+      void pollGithubAttempt();
+    }, GITHUB_POLL_INTERVAL_MS);
+  }
+
+  async function pollGithubAttempt(): Promise<void> {
+    const attemptId = githubAttemptId.value;
+    if (!attemptId || !githubPending.value) return;
+    const status = await invokeScoped(
+      CloudAuthChannels.CLOUD_CONNECTION_STATUS,
+      signInAttemptSchema,
+      { scope: 'auth', silent: true },
+      { attemptId },
+    );
+    if (!githubPending.value || githubAttemptId.value !== attemptId) return;
+    if (!status) {
+      // A transport hiccup is not a verdict: keep the waiting state and retry.
+      scheduleGithubPoll();
+      return;
+    }
+    const attempt = status.data;
+    if (attempt.status === 'connected' && attempt.result) {
+      githubPending.value = false;
+      githubAttemptId.value = null;
+      await enterOpenedProfile();
+      return;
+    }
+    if (['denied', 'expired', 'cancelled', 'failed'].includes(attempt.status)) {
+      githubPending.value = false;
+      githubAttemptId.value = null;
+      toast.error(
+        attempt.error?.code
+          ? translateResultError(attempt.error, t, { scope: 'auth' })
+          : t('auth.profileAccess.githubFailed'),
+      );
+      return;
+    }
+    scheduleGithubPoll();
+  }
+
+  async function cancelGithubSignIn(): Promise<void> {
+    const attemptId = githubAttemptId.value;
+    stopGithubPolling();
+    githubPending.value = false;
+    githubUserCode.value = '';
+    githubAttemptId.value = null;
+    if (attemptId)
+      await invokeScoped(
+        CloudAuthChannels.CLOUD_CONNECTION_CANCEL,
+        z.unknown(),
+        { scope: 'auth', silent: true },
+        { attemptId },
+      );
+  }
+
+  function stopGithubPolling(): void {
+    if (githubPollTimer) {
+      clearTimeout(githubPollTimer);
+      githubPollTimer = null;
+    }
+  }
+
+  /**
+   * Cloud registration signs up, adopts the session and enters; the user never
+   * has to sign in again. Server-side password rules are echoed verbatim.
+   */
+  async function submitCloudRegistration(): Promise<void> {
+    if (registerBusy.value) return;
+    const email = registerEmail.value.trim();
+    if (!email || !registerPassword.value) {
+      toast.error(t('auth.validation.passwordRequired'));
+      return;
+    }
+    if (registerPassword.value !== registerPasswordConfirm.value) {
+      toast.error(t('auth.profileAccess.passwordMismatch'));
+      return;
+    }
+    registerBusy.value = true;
+    try {
+      const result = await invokeScoped(
+        CloudAuthChannels.SIGN_UP,
+        openedProfileSchema,
+        { scope: 'auth' },
+        {
+          email,
+          password: registerPassword.value,
+          name: registerName.value.trim() || undefined,
+          remember: loginRemember.value,
+        },
+      );
+      registerPassword.value = '';
+      registerPasswordConfirm.value = '';
+      if (result) await enterOpenedProfile();
+    } finally {
+      registerBusy.value = false;
+    }
+  }
+
+  /**
+   * Local registration creates the first-segment local account and enters.
+   * The password rule is length 8–100 only, as decided for local accounts.
+   */
+  async function submitLocalRegistration(): Promise<void> {
+    if (registerBusy.value) return;
+    const displayName = registerName.value.trim();
+    if (!displayName || registerPassword.value.length < 8) {
+      toast.error(t('auth.profileAccess.createInvalid'));
+      return;
+    }
+    if (registerPassword.value !== registerPasswordConfirm.value) {
+      toast.error(t('auth.profileAccess.passwordMismatch'));
+      return;
+    }
+    registerBusy.value = true;
+    const createdPassword = registerPassword.value;
+    try {
+      const created = await invoke(
+        ProfileAccessChannels.CREATE_LOCAL_ACCOUNT,
+        profileSchema,
+        { displayName, password: createdPassword },
+      );
+      registerPassword.value = '';
+      registerPasswordConfirm.value = '';
+      if (!created) return;
+      registerName.value = '';
+      await refreshProfiles();
+      await selectAndEnter(created.data, { password: createdPassword });
+    } finally {
+      registerBusy.value = false;
+    }
   }
 
   async function submitPassword(): Promise<void> {
@@ -202,16 +489,11 @@ export function useDesktopProfiles(options: { accessWindow?: boolean } = {}) {
     if (profile) await openProfile(profile);
   }
 
+  /** Workspace account management keeps its single-password create row. */
   async function createLocalAccount(): Promise<void> {
     if (busyProfileId.value) return;
     if (!newName.value.trim() || newPassword.value.length < 8) {
       toast.error(t('auth.profileAccess.createInvalid'));
-      return;
-    }
-    // The access window's create state asks for the password twice; the
-    // management list keeps its single-password row.
-    if (options.accessWindow && newPasswordConfirm.value !== newPassword.value) {
-      toast.error(t('auth.profileAccess.passwordMismatch'));
       return;
     }
     const createdPassword = newPassword.value;
@@ -224,7 +506,6 @@ export function useDesktopProfiles(options: { accessWindow?: boolean } = {}) {
       if (!created) return;
       newName.value = '';
       newPassword.value = '';
-      newPasswordConfirm.value = '';
       await refreshProfiles();
       const entered = options.accessWindow
         ? await selectAndEnter(created.data, { password: createdPassword })
@@ -287,18 +568,38 @@ export function useDesktopProfiles(options: { accessWindow?: boolean } = {}) {
     remember,
     newName,
     newPassword,
-    newPasswordConfirm,
     editingProfileId,
     editName,
+    loginEmail,
+    loginPassword,
+    loginRemember,
+    signInBusy,
+    githubPending,
+    githubUserCode,
+    registerMode,
+    registerEmail,
+    registerName,
+    registerPassword,
+    registerPasswordConfirm,
+    registerBusy,
     refreshProfiles,
     openProfile,
     selectProfile,
     enterPasswordState,
+    enterLoginState,
+    enterRegisterState,
     backToSelect,
     submitPassword,
     switchProfile,
+    signInWithPassword,
+    signInWithGithub,
+    cancelGithubSignIn,
+    forgotPassword,
+    submitCloudRegistration,
+    submitLocalRegistration,
     createLocalAccount,
     renameProfile,
     removeProfile,
+    disposeAuth: stopGithubPolling,
   };
 }
