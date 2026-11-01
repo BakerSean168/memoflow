@@ -1,0 +1,51 @@
+{
+  "name": "MemoFlow - Codespaces Full",
+  "image": "mcr.microsoft.com/devcontainers/base:debian-12",
+  "features": {
+    "ghcr.io/devcontainers/features/node:2": {
+      "version": "22.20.0",
+      "pnpmVersion": "11.20.0",
+      "nodeGypDependencies": true
+    },
+    "ghcr.io/devcontainers/features/docker-in-docker:2": {
+      "version": "latest",
+      "dockerDashComposeVersion": "v2"
+    },
+    "ghcr.io/devcontainers/features/github-cli:1": {},
+    "ghcr.io/devcontainers/features/sshd:1": {}
+  },
+  "remoteUser": "vscode",
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "vue.volar",
+        "oxc.oxc-vscode",
+        "nrwl.angular-console",
+        "github.copilot",
+        "github.copilot-chat",
+        "github.vscode-github-actions",
+        "github.vscode-pull-request-github"
+      ],
+      "settings": {
+        "files.eol": "\n",
+        "editor.formatOnSave": true
+      }
+    }
+  },
+  "forwardPorts": [3000, 3001, 5173],
+  "portsAttributes": {
+    "3001": {
+      "label": "MemoFlow API Dev",
+      "onAutoForward": "notify"
+    },
+    "5173": {
+      "label": "MemoFlow Web",
+      "onAutoForward": "notify"
+    },
+    "5432": {
+      "label": "Local PostgreSQL",
+      "onAutoForward": "ignore"
+    }
+  },
+  "postCreateCommand": "bash .devcontainer/post-create.sh"
+}

@@ -1,88 +1,40 @@
 {
-  "name": "MemoFlow Development Environment",
-  "image": "mcr.microsoft.com/devcontainers/typescript-node:1-22-bookworm",
-  "runArgs": ["--cpus=2", "--memory=8g"],
-
+  "name": "MemoFlow - Codespaces Lite",
+  "image": "mcr.microsoft.com/devcontainers/base:debian-12",
   "features": {
-    "ghcr.io/devcontainers/features/node:1": {
+    "ghcr.io/devcontainers/features/node:2": {
       "version": "22.20.0",
-      "nodeGypDependencies": true,
-      "nvmVersion": "latest"
+      "pnpmVersion": "11.20.0",
+      "nodeGypDependencies": false
     },
-    "ghcr.io/devcontainers/features/docker-in-docker:2": {
-      "version": "latest",
-      "dockerDashComposeVersion": "v2"
-    },
-    "ghcr.io/devcontainers/features/git:1": {
-      "version": "latest",
-      "ppa": true
-    },
-    "ghcr.io/devcontainers/features/github-cli:1": {
-      "version": "latest"
-    }
+    "ghcr.io/devcontainers/features/github-cli:1": {},
+    "ghcr.io/devcontainers/features/sshd:1": {}
   },
-
+  "remoteUser": "vscode",
   "customizations": {
     "vscode": {
       "extensions": [
-        "github.copilot",
-        "github.copilot-chat",
-        "automatalabs.copilot-mcp",
-        "nrwl.angular-console",
         "vue.volar",
         "oxc.oxc-vscode",
-        "ms-ceintl.vscode-language-pack-zh-hans",
-        "github.vscode-github-actions",
-        "github.vscode-pull-request-github"
+        "nrwl.angular-console",
+        "github.vscode-github-actions"
       ],
       "settings": {
-        "terminal.integrated.defaultProfile.linux": "bash",
-        "terminal.integrated.profiles.linux": {
-          "bash": {
-            "path": "/bin/bash"
-          }
-        },
         "files.eol": "\n",
-        "editor.formatOnSave": true,
-        "editor.defaultFormatter": "oxc.oxc-vscode",
-        "[typescript]": {
-          "editor.defaultFormatter": "oxc.oxc-vscode"
-        },
-        "[vue]": {
-          "editor.defaultFormatter": "oxc.oxc-vscode"
-        }
+        "editor.formatOnSave": true
       }
     }
   },
-
-  "forwardPorts": [3888, 5173, 5432],
-
+  "forwardPorts": [3001, 5173],
   "portsAttributes": {
-    "3000": {
-      "label": "API Server",
-      "onAutoForward": "notify"
-    },
     "3001": {
-      "label": "API Dev",
+      "label": "MemoFlow API Dev",
       "onAutoForward": "notify"
     },
     "5173": {
-      "label": "Web Frontend",
+      "label": "MemoFlow Web",
       "onAutoForward": "notify"
-    },
-    "5432": {
-      "label": "PostgreSQL",
-      "onAutoForward": "silent"
     }
   },
-
-  "postCreateCommand": "bash .devcontainer/post-create.sh",
-
-  "postStartCommand": "git config --global --add safe.directory ${containerWorkspaceFolder}",
-
-  "remoteUser": "node",
-
-  "mounts": [
-    "source=${localWorkspaceFolder}/.devcontainer/mcp-config.json,target=/home/node/.config/Code/User/globalStorage/automatalabs.copilot-mcp/config.json,type=bind"
-  ]
+  "postCreateCommand": "bash .devcontainer/post-create.sh"
 }
