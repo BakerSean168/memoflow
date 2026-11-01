@@ -230,6 +230,7 @@ function mountSection(
                   cloudAccountId: null,
                   lastActiveAt: 1,
                   hasCredential: desktop.hasCredential === true,
+                  remembered: false,
                 },
                 unlockState: 'UNLOCKED',
                 cloudState: 'UNBOUND',

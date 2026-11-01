@@ -13,6 +13,11 @@ export interface ProfileSummary {
   lastActiveAt: number;
   /** True when this account's data key is wrapped by a local password. */
   hasCredential: boolean;
+  /**
+   * True when a safeStorage copy of this local account's data key exists, so a
+   * tile selection can open it without asking for the password.
+   */
+  remembered: boolean;
 }
 
 export const ProfileIdSchema = z

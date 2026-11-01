@@ -20,6 +20,7 @@ const profileSchema = z.object({
   cloudAccountId: z.string().nullable(),
   lastActiveAt: z.number(),
   hasCredential: z.boolean(),
+  remembered: z.boolean(),
 }) satisfies z.ZodType<ProfileSummary>;
 const snapshotSchema = z.object({
   profile: profileSchema.nullable(),
@@ -42,10 +43,20 @@ export function useDesktopProfiles(options: { accessWindow?: boolean } = {}) {
   const busyProfileId = ref<string | null>(null);
   const selectedProfileId = ref<string | null>(null);
   const password = ref('');
+  const remember = ref(false);
   const newName = ref('');
   const newPassword = ref('');
+  const newPasswordConfirm = ref('');
   const editingProfileId = ref<string | null>(null);
   const editName = ref('');
+  /**
+   * The access window swaps states inside one window: the account tiles, or the
+   * password state of the tile that could not open directly.
+   */
+  const accessView = ref<'select' | 'password'>('select');
+  const passwordTarget = computed(
+    () => profiles.value.find((profile) => profile.profileId === selectedProfileId.value) ?? null,
+  );
   const sortedProfiles = computed(() =>
     [...profiles.value].sort((a, b) => {
       const active = snapshot.value?.profile?.profileId;
@@ -95,14 +106,81 @@ export function useDesktopProfiles(options: { accessWindow?: boolean } = {}) {
         profile.profileId,
       ));
     }
+    return selectAndEnter(profile);
+  }
+
+  /**
+   * Select a Profile and, when the main process accepts it, enter the workspace.
+   * `password` is only sent when the caller verified it; a local account without
+   * one relies on the remembered safeStorage key copy held by the main process.
+   */
+  async function selectAndEnter(
+    profile: ProfileSummary,
+    credentials: { password?: string } = {},
+  ): Promise<boolean> {
     const opened = await invoke(
       ProfileAccessChannels.SELECT,
       z.unknown(),
-      profile.hasCredential
-        ? { profileId: profile.profileId, password: password.value }
-        : { profileId: profile.profileId },
+      credentials.password === undefined
+        ? { profileId: profile.profileId }
+        : {
+            profileId: profile.profileId,
+            password: credentials.password,
+            remember: remember.value,
+          },
     );
-    return !!opened && !!(await invoke(WindowChannels.TRANSITION_TO_MAIN, z.unknown()));
+    if (!opened) return false;
+    return !!(await invoke(WindowChannels.TRANSITION_TO_MAIN, z.unknown()));
+  }
+
+  /**
+   * Tile routing for the access window. A registered Profile and a local account
+   * whose data key is still remembered open directly; every other local account
+   * asks for its password inside the window.
+   */
+  async function selectProfile(profile: ProfileSummary): Promise<void> {
+    if (busyProfileId.value) return;
+    if (!options.accessWindow) {
+      await openProfile(profile);
+      return;
+    }
+    if (profile.profileKind === 'registered' || profile.remembered) {
+      busyProfileId.value = profile.profileId;
+      if (await selectAndEnter(profile)) return;
+      busyProfileId.value = null;
+      // A registered Profile keeps its existing re-authentication presentation in
+      // the workspace. A remembered key that safeStorage can no longer unseal
+      // falls through to the password state; the copy is never deleted here.
+      if (profile.profileKind === 'registered') return;
+    }
+    enterPasswordState(profile);
+  }
+
+  function enterPasswordState(profile: ProfileSummary): void {
+    selectedProfileId.value = profile.profileId;
+    password.value = '';
+    remember.value = false;
+    accessView.value = 'password';
+  }
+
+  function backToSelect(): void {
+    accessView.value = 'select';
+    selectedProfileId.value = null;
+    password.value = '';
+    remember.value = false;
+  }
+
+  async function submitPassword(): Promise<void> {
+    const profile = passwordTarget.value;
+    if (!profile || busyProfileId.value) return;
+    if (password.value.length < 8) {
+      toast.error(t('auth.profileAccess.passwordRequired'));
+      return;
+    }
+    busyProfileId.value = profile.profileId;
+    const entered = await selectAndEnter(profile, { password: password.value });
+    if (!entered) busyProfileId.value = null;
+    password.value = '';
   }
 
   async function openProfile(profile: ProfileSummary): Promise<void> {
@@ -111,19 +189,6 @@ export function useDesktopProfiles(options: { accessWindow?: boolean } = {}) {
       (!options.accessWindow && snapshot.value?.profile?.profileId === profile.profileId)
     )
       return;
-    if (
-      options.accessWindow &&
-      profile.hasCredential &&
-      selectedProfileId.value !== profile.profileId
-    ) {
-      selectedProfileId.value = profile.profileId;
-      password.value = '';
-      return;
-    }
-    if (options.accessWindow && profile.hasCredential && password.value.length < 8) {
-      toast.error(t('auth.profileAccess.passwordRequired'));
-      return;
-    }
     busyProfileId.value = profile.profileId;
     try {
       if (!(await navigate(profile))) busyProfileId.value = null;
@@ -143,20 +208,29 @@ export function useDesktopProfiles(options: { accessWindow?: boolean } = {}) {
       toast.error(t('auth.profileAccess.createInvalid'));
       return;
     }
+    // The access window's create state asks for the password twice; the
+    // management list keeps its single-password row.
+    if (options.accessWindow && newPasswordConfirm.value !== newPassword.value) {
+      toast.error(t('auth.profileAccess.passwordMismatch'));
+      return;
+    }
+    const createdPassword = newPassword.value;
     busyProfileId.value = 'creating';
     try {
       const created = await invoke(ProfileAccessChannels.CREATE_LOCAL_ACCOUNT, profileSchema, {
         displayName: newName.value.trim(),
-        password: newPassword.value,
+        password: createdPassword,
       });
       if (!created) return;
       newName.value = '';
-      password.value = newPassword.value;
       newPassword.value = '';
+      newPasswordConfirm.value = '';
       await refreshProfiles();
-      if (await navigate(created.data)) busyProfileId.value = created.data.profileId;
+      const entered = options.accessWindow
+        ? await selectAndEnter(created.data, { password: createdPassword })
+        : await navigate(created.data);
+      if (entered) busyProfileId.value = created.data.profileId;
     } finally {
-      password.value = '';
       if (busyProfileId.value === 'creating') busyProfileId.value = null;
     }
   }
@@ -207,13 +281,21 @@ export function useDesktopProfiles(options: { accessWindow?: boolean } = {}) {
     snapshot,
     busyProfileId,
     selectedProfileId,
+    passwordTarget,
+    accessView,
     password,
+    remember,
     newName,
     newPassword,
+    newPasswordConfirm,
     editingProfileId,
     editName,
     refreshProfiles,
     openProfile,
+    selectProfile,
+    enterPasswordState,
+    backToSelect,
+    submitPassword,
     switchProfile,
     createLocalAccount,
     renameProfile,

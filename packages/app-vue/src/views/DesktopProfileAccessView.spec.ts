@@ -36,6 +36,7 @@ function profile(overrides: Partial<ProfileSummary> = {}): ProfileSummary {
     cloudAccountId: null,
     lastActiveAt: 1,
     hasCredential: false,
+    remembered: false,
     ...overrides,
   };
 }
@@ -43,12 +44,16 @@ function profile(overrides: Partial<ProfileSummary> = {}): ProfileSummary {
 function mountView(
   options: {
     hasCredential?: boolean;
+    remembered?: boolean;
     activeProfileId?: string | null;
     attachTo?: HTMLElement;
   } = {},
 ) {
   const profiles: ProfileSummary[] = [
-    profile({ hasCredential: options.hasCredential ?? false }),
+    profile({
+      hasCredential: options.hasCredential ?? false,
+      remembered: options.remembered ?? false,
+    }),
     profile({
       profileId: 'profile-2',
       profileKind: 'registered',
@@ -137,11 +142,13 @@ describe('DesktopProfileAccessView', () => {
     element('desktop-profile-create-local')!.click();
     await flushPromises();
     const form = element('desktop-profile-create-form')!;
-    const [name, password] = form.querySelectorAll('input');
+    const [name, password, confirmation] = form.querySelectorAll('input');
     name!.value = 'New local';
     name!.dispatchEvent(new Event('input', { bubbles: true }));
     password!.value = 'account-password';
     password!.dispatchEvent(new Event('input', { bubbles: true }));
+    confirmation!.value = 'account-password';
+    confirmation!.dispatchEvent(new Event('input', { bubbles: true }));
     await flushPromises();
     form.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
     await flushPromises();
@@ -154,12 +161,32 @@ describe('DesktopProfileAccessView', () => {
     expect(invoke).toHaveBeenCalledWith(ProfileAccessChannels.SELECT, {
       profileId: 'profile-3',
       password: 'account-password',
+      remember: false,
     });
     expect(invoke).toHaveBeenCalledWith(WindowChannels.TRANSITION_TO_MAIN);
   });
 
-  it('opens an unprotected local Profile without cloud authentication', async () => {
+  it('opens a registered Profile directly without cloud authentication', async () => {
     const { wrapper, invoke } = mountView({ attachTo: document.body });
+    cleanups.push(() => wrapper.unmount());
+    await flushPromises();
+
+    element('desktop-profile-open-profile-2')!.click();
+    await flushPromises();
+
+    expect(invoke).toHaveBeenCalledWith(ProfileAccessChannels.SELECT, { profileId: 'profile-2' });
+    expect(invoke).toHaveBeenCalledWith(WindowChannels.TRANSITION_TO_MAIN);
+    expect(element('desktop-profile-password-state')).toBeNull();
+    expect(document.querySelector('input[type="email"]')).toBeNull();
+    expect(element('cloud-connection-dialog')).toBeNull();
+  });
+
+  it('opens a remembered local account directly without the password state', async () => {
+    const { wrapper, invoke } = mountView({
+      hasCredential: true,
+      remembered: true,
+      attachTo: document.body,
+    });
     cleanups.push(() => wrapper.unmount());
     await flushPromises();
 
@@ -167,18 +194,19 @@ describe('DesktopProfileAccessView', () => {
     await flushPromises();
 
     expect(invoke).toHaveBeenCalledWith(ProfileAccessChannels.SELECT, { profileId: 'profile-1' });
+    expect(element('desktop-profile-password-state')).toBeNull();
     expect(invoke).toHaveBeenCalledWith(WindowChannels.TRANSITION_TO_MAIN);
-    expect(document.querySelector('input[type="email"]')).toBeNull();
-    expect(element('cloud-connection-dialog')).toBeNull();
   });
 
-  it('shows the password input only after selecting a protected local account', async () => {
+  it('switches to the password state and sends the remember choice with the password', async () => {
     const { wrapper, invoke } = mountView({ hasCredential: true, attachTo: document.body });
     cleanups.push(() => wrapper.unmount());
     await flushPromises();
 
     element('desktop-profile-open-profile-1')!.click();
     await flushPromises();
+    expect(element('desktop-profile-password-state')).not.toBeNull();
+    expect(element('desktop-profile-access')).toBeNull();
     expect(element('desktop-profile-password-profile-1')).not.toBeNull();
     expect(invoke).not.toHaveBeenCalledWith(ProfileAccessChannels.SELECT, expect.anything());
 
@@ -186,12 +214,30 @@ describe('DesktopProfileAccessView', () => {
     input.value = 'account-password';
     input.dispatchEvent(new Event('input', { bubbles: true }));
     await flushPromises();
+    element('desktop-profile-remember')!.click();
+    await flushPromises();
     input.closest('form')!.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
     await flushPromises();
     expect(invoke).toHaveBeenCalledWith(ProfileAccessChannels.SELECT, {
       profileId: 'profile-1',
       password: 'account-password',
+      remember: true,
     });
+  });
+
+  it('returns to the account list from the password state without selecting anything', async () => {
+    const { wrapper, invoke } = mountView({ hasCredential: true, attachTo: document.body });
+    cleanups.push(() => wrapper.unmount());
+    await flushPromises();
+
+    element('desktop-profile-open-profile-1')!.click();
+    await flushPromises();
+    element('desktop-profile-back')!.click();
+    await flushPromises();
+
+    expect(element('desktop-profile-password-state')).toBeNull();
+    expect(element('desktop-profile-access')).not.toBeNull();
+    expect(invoke).not.toHaveBeenCalledWith(ProfileAccessChannels.SELECT, expect.anything());
   });
 
   it('renders avatar tiles with only the display name and no inline editing', async () => {

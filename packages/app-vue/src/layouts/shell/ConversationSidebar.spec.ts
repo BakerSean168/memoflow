@@ -428,6 +428,7 @@ describe('ConversationSidebar account menu', () => {
       identifierHint: index % 2 ? `user-${index}@example.com` : null,
       cloudAccountId: index % 2 ? `cloud-${index}` : null,
       hasCredential: index === 1,
+      remembered: false,
       lastActiveAt: index,
     }));
     const wrapper = await openMenu({ isDesktop: true, profiles, activeProfileId: 'id-2' });

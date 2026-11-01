@@ -51,6 +51,10 @@ async function toSummary(
     cloudAccountId: profile.cloudBinding?.cloudAccountId ?? null,
     lastActiveAt: profile.lastActiveAt,
     hasCredential: await runtime.hasCredential(profile.profileId),
+    // Registered Profiles keep their own safeStorage key and never use the
+    // remembered local-account copy, so the flag is local-account only.
+    remembered:
+      profile.profileKind === 'local' && (await runtime.hasRememberedKey(profile.profileId)),
   };
 }
 
