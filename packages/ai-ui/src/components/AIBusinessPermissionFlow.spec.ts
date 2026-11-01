@@ -35,9 +35,16 @@ it('confirm each → business card → always allow → same operation executes 
     await wrapper!.get('[data-testid="ai-permission-allow-always"]').trigger('click');
     expect(await first).toContain('saved');
     await flushPromises();
-    expect((await fixture.snapshot()).rules.filter((rule) => rule.source === 'user')).toHaveLength(
-      1,
-    );
+    // Persisted approvals now appear as visible per-object write exceptions,
+    // rather than hidden Agent-specific rules.
+    const snapshot = await fixture.snapshot();
+    expect(snapshot.settings).toMatchObject({
+      preset: 'custom',
+      customMatrix: {
+        goal: { read: 'allow', create: 'allow', update: 'allow', delete: 'allow' },
+      },
+    });
+    expect(snapshot.rules.filter((rule) => rule.source === 'user')).toHaveLength(0);
     expect(await fixture.call()).toContain('saved');
     expect(fixture.writes).toBe(2);
     expect(cards).toBe(1);
