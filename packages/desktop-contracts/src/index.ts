@@ -39,6 +39,14 @@ export type {
 } from './profile-access';
 export { ElectronAuthResolutionError, isElectronAuthResolutionError } from './auth-context';
 export * from './ipc-channels';
+export {
+  SystemNoticeSchema,
+  SystemNoticeIdSchema,
+  SystemNoticeReadyResultSchema,
+  type SystemNotice,
+  type SystemNoticeId,
+  type SystemNoticeReadyResult,
+} from './system-notice';
 export type {
   DesktopNotificationPreference,
   DesktopNotificationPreferencePatch,

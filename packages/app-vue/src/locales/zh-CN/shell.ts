@@ -114,6 +114,9 @@ export default {
     attention: '更新需要处理',
     openSettings: '打开更新设置',
   },
+  systemNotice: {
+    trayUnavailable: '系统托盘不可用。关闭窗口将退出 MemoFlow，后台提醒将停止。',
+  },
   composer: {
     placeholder: '给知行 AI 发消息…',
     send: '发送',

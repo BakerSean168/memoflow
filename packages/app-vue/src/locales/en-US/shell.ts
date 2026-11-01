@@ -117,6 +117,10 @@ export default {
     attention: 'Update needs attention',
     openSettings: 'Open update settings',
   },
+  systemNotice: {
+    trayUnavailable:
+      'System tray unavailable. Closing MemoFlow will quit and stop background reminders.',
+  },
   composer: {
     placeholder: 'Message Zhixing AI…',
     send: 'Send',

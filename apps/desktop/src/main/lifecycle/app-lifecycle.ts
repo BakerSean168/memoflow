@@ -15,11 +15,12 @@
  * @module lifecycle/app-lifecycle
  */
 
-import { app, dialog } from 'electron';
+import { app } from 'electron';
 import path from 'node:path';
 import { getSharedPathResolver } from '../runtime-init';
 import { DesktopLifecyclePreference } from './desktop-lifecycle-preference';
 import { claimWindowsInstance } from './windows-instance';
+import { SystemNoticeBridge } from './system-notice-bridge';
 import { initializeDesktopFeatures } from '../desktop-features';
 import { registerKeyboardHandlers } from '../ipc/keyboard-handlers';
 import { registerSystemIpcHandlers } from '../ipc/system-handlers';
@@ -47,6 +48,7 @@ async function handleAppReady(
   getMainRuntime: () => DesktopMainRuntime,
   windowManager: WindowManager,
   lifecyclePreference: DesktopLifecyclePreference,
+  systemNotices: SystemNoticeBridge,
 ): Promise<void> {
   // Application core initialization
   await initializeApp();
@@ -93,13 +95,10 @@ async function handleAppReady(
     windowManager.setStartupHidden(false);
     if (!desktopFeaturesRuntime.tray) {
       windowManager.focusActiveWindow();
+      // No native warning: the shell renders this through its own toast host.
+      // main sends only the notice id, the renderer owns the localized text.
       if (process.platform === 'win32') {
-        void dialog.showMessageBox(win, {
-          type: 'warning',
-          message: app.getLocale().startsWith('zh')
-            ? '系统托盘不可用。关闭窗口将退出 MemoFlow，后台提醒将停止。'
-            : 'System tray unavailable. Closing MemoFlow will quit and stop background reminders.',
-        });
+        systemNotices.publish(win, { id: 'tray-unavailable' });
       }
     } else if (
       !(
@@ -216,6 +215,8 @@ export function registerAppLifecycleHandlers(
     if (!windowManager.focusActiveWindow()) app.emit('activate');
   };
   if (!claimWindowsInstance(app, restore)) return;
+  const systemNotices = new SystemNoticeBridge();
+  systemNotices.register();
   const preference = new DesktopLifecyclePreference(
     path.join(getSharedPathResolver().configDir, 'desktop-lifecycle.json'),
   );
@@ -236,6 +237,7 @@ export function registerAppLifecycleHandlers(
         getMainRuntime as () => DesktopMainRuntime,
         windowManager,
         preference,
+        systemNotices,
       ),
     )
     .then(() => {
