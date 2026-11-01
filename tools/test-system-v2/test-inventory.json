@@ -3246,14 +3246,6 @@
       "measurementCollectors": []
     },
     {
-      "path": "packages/ai-ui/src/components/AIBusinessPermissionSelector.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/ai-ui/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
       "path": "packages/ai-ui/src/components/AIComposerControls.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -4715,6 +4707,16 @@
     },
     {
       "path": "packages/ai/src/server/permissions/gateway-permission-checkpoint.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/ai/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "packages/ai/vitest.config.ts"
+      ]
+    },
+    {
+      "path": "packages/ai/src/server/permissions/permission-grants.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/ai/vitest.config.ts"
@@ -12746,7 +12748,7 @@
       "type": "measurement",
       "suite": "coverage",
       "runner": "vitest",
-      "fileCount": 123
+      "fileCount": 124
     },
     {
       "id": "packages/app-vue/vitest.store-coverage.config.ts",
@@ -13274,14 +13276,14 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 42
+      "fileCount": 41
     },
     {
       "id": "packages/ai/vitest.config.ts",
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 123
+      "fileCount": 124
     },
     {
       "id": "packages/app-vue/vitest.config.ts",
@@ -13902,6 +13904,7 @@
       "packages/ai/src/server/mastra/workflows/task-create.workflow.spec.ts",
       "packages/ai/src/server/permissions/authorize.spec.ts",
       "packages/ai/src/server/permissions/gateway-permission-checkpoint.spec.ts",
+      "packages/ai/src/server/permissions/permission-grants.spec.ts",
       "packages/ai/src/server/permissions/permission-migration.spec.ts",
       "packages/ai/src/server/permissions/permission-policy.spec.ts",
       "packages/ai/src/server/permissions/permission-powersync.repository.spec.ts",
