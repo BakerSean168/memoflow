@@ -626,3 +626,66 @@ describe('T3 model picker / conditional traits / enforced permissions', () => {
     wrapper.unmount();
   });
 });
+
+describe('integrated picker configuration', () => {
+  it('selects the numbered filtered model only while open and respects blocked models', async () => {
+    const wrapper = setup();
+    const input = wrapper.get('[data-testid="ai-model-picker-search"]');
+    await input.trigger('keydown', { key: '2', ctrlKey: true });
+    expect(wrapper.emitted('selectModel')).toBeUndefined();
+    await openModels(wrapper);
+    await input.trigger('keydown', { key: '2', ctrlKey: true });
+    expect(wrapper.emitted('selectModel')).toEqual([[models[1]!.key, 'agent:mastra']]);
+    await input.setValue('Gemini');
+    await input.trigger('keydown', { key: '1', ctrlKey: true });
+    expect(wrapper.emitted('selectModel')?.at(-1)).toEqual([models[1]!.key, 'agent:mastra']);
+    await wrapper.setProps({ disabled: true });
+    await input.trigger('keydown', { key: '1', ctrlKey: true });
+    expect(wrapper.emitted('selectModel')).toHaveLength(2);
+    wrapper.unmount();
+  });
+
+  it('uses the existing permission event for built-in access and highlights the current value', async () => {
+    const wrapper = setup({ permissionMode: 'read-only' });
+    expect(
+      wrapper.get('[data-testid="ai-model-picker-access-read-only"]').attributes('aria-pressed'),
+    ).toBe('true');
+    await wrapper.get('[data-testid="ai-model-picker-access-supervised"]').trigger('click');
+    expect(wrapper.emitted('permission')).toEqual([['supervised']]);
+    wrapper.unmount();
+  });
+
+  it('reports actual instance access without offering an ineffective native override', () => {
+    const wrapper = setup({
+      native: true,
+      agents: [{ ...agents[0], nativePermissionMode: 'auto-approve' }],
+    });
+    expect(wrapper.get('[data-testid="ai-model-picker-native-access"]').text()).toBe('自动批准');
+    expect(wrapper.find('[data-testid="ai-model-picker-access-supervised"]').exists()).toBe(false);
+    expect(wrapper.emitted('permission')).toBeUndefined();
+    wrapper.unmount();
+  });
+
+  it('uses the discovered default service tier and saved overrides without fabricating Fast', async () => {
+    const wrapper = setup({
+      native: true,
+      models: [
+        {
+          ...models[0],
+          serviceTiers: [{ id: 'priority', name: 'Fast' }],
+          defaultServiceTier: 'priority',
+        },
+      ],
+    });
+    expect(wrapper.get('[data-testid="ai-traits-tier-priority"]').attributes('aria-pressed')).toBe(
+      'true',
+    );
+    await wrapper.setProps({ nativeModelOptions: { serviceTier: 'default' } });
+    expect(wrapper.get('[data-testid="ai-traits-tier-default"]').attributes('aria-pressed')).toBe(
+      'true',
+    );
+    await wrapper.get('[data-testid="ai-traits-tier-priority"]').trigger('click');
+    expect(wrapper.emitted('modelOption')).toEqual([['serviceTier', 'priority']]);
+    wrapper.unmount();
+  });
+});
