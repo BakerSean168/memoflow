@@ -4,12 +4,12 @@ import { createI18n } from 'vue-i18n';
 import { createPinia } from 'pinia';
 import { describe, expect, it, vi } from 'vitest';
 import { fail } from '@memoflow/transport-contracts/result';
+import { _getConfirmState, _resolveConfirm } from '@memoflow/ui-vue-shadcn';
 import type { AccountClientPort } from '@memoflow/account-client';
 import {
   ACCOUNT_SERVICE_KEY,
   AUTH_SERVICE_KEY,
   LOGOUT_HANDLER_KEY,
-  PROFILE_LOCK_HANDLER_KEY,
   DESKTOP_ACCESS_SNAPSHOT_KEY,
   DESKTOP_BRIDGE_KEY,
 } from '@account-ui-test-host/di/keys';
@@ -49,8 +49,7 @@ const i18n = createI18n({
         emailVerified: 'Login email verified',
         emailUnverified: 'Login email not verified',
         status: { loading: 'Loading profile...' },
-        actions: { saveProfile: 'Save', logout: 'Log out', lockProfile: 'Lock Profile' },
-        lockProfileHint: 'Lock local data.',
+        actions: { saveProfile: 'Save', logout: 'Log out' },
         localPassword: {
           title: 'Local account password',
           description: 'Local protection',
@@ -73,6 +72,17 @@ const i18n = createI18n({
           description: 'Confirm logout.',
           confirmText: 'Log out',
           cancelText: 'Cancel',
+        },
+        signOut: {
+          action: 'Sign out',
+          hint: 'Remove this account from this device.',
+          confirm: {
+            local: { title: 'Delete local account?', description: 'Everything is deleted.' },
+            registered: {
+              title: 'Delete this device data?',
+              description: 'Unsynced changes are lost; the cloud account remains.',
+            },
+          },
         },
         oauth: {
           title: 'Sign-in methods',
@@ -174,16 +184,18 @@ const SwitchStub = defineComponent({
   },
 });
 
-function mountSection(
-  accountService: AccountClientPort,
-  lockProfile?: () => Promise<void>,
-  cloudConnected = false,
+interface MountOptions {
+  cloudConnected?: boolean;
+  logout?: () => Promise<void>;
   desktop?: {
     invoke: ReturnType<typeof vi.fn>;
     hasCredential?: boolean;
     profileKind?: 'local' | 'registered';
-  },
-) {
+  };
+}
+
+function mountSection(accountService: AccountClientPort, options: MountOptions = {}) {
+  const { cloudConnected = false, logout = vi.fn(), desktop } = options;
   const pinia = createPinia();
   const authStore = useAuthenticationStore(pinia);
   if (cloudConnected) {
@@ -215,8 +227,7 @@ function mountSection(
           bindOAuth: vi.fn(),
           unbindOAuth: vi.fn(),
         },
-        [LOGOUT_HANDLER_KEY as symbol]: vi.fn(),
-        ...(lockProfile ? { [PROFILE_LOCK_HANDLER_KEY as symbol]: lockProfile } : {}),
+        [LOGOUT_HANDLER_KEY as symbol]: logout,
         ...(desktop
           ? {
               [DESKTOP_BRIDGE_KEY as symbol]: { invoke: desktop.invoke },
@@ -267,6 +278,23 @@ function mountSection(
   });
 }
 
+const guestDto = {
+  id: 'guest_1',
+  status: 'Active',
+  profile: {
+    nickname: 'Guest 4827',
+    realName: null,
+    avatarUrl: null,
+    bio: null,
+    gender: 'Unspecified',
+    birthday: null,
+  },
+  version: 1,
+  createdAt: 1,
+  updatedAt: 1,
+  closedAt: null,
+} as const;
+
 describe('AccountProfileSection', () => {
   it('shows a retryable error instead of an endless loading state', async () => {
     const getMyProfile = vi
@@ -294,36 +322,19 @@ describe('AccountProfileSection', () => {
     expect(getMyProfile).toHaveBeenCalledTimes(2);
   });
 
-  it('lets a guest edit local Profile data and lock it without showing cloud logout', async () => {
-    const lockProfile = vi.fn().mockResolvedValue(undefined);
-    const dto = {
-      id: 'guest_1',
-      status: 'Active',
-      profile: {
-        nickname: 'Guest 4827',
-        realName: null,
-        avatarUrl: null,
-        bio: null,
-        gender: 'Unspecified',
-        birthday: null,
-      },
-      version: 1,
-      createdAt: 1,
-      updatedAt: 1,
-      closedAt: null,
-    } as const;
+  it('lets a guest edit local Profile data without showing a sign-out action', async () => {
     const accountService = {
       getMyProfile: vi.fn().mockResolvedValue({
         ok: true,
-        data: { account: dto, cloudIdentity: null },
+        data: { account: guestDto, cloudIdentity: null },
       }),
       updateMyProfile: vi.fn().mockResolvedValue({
         ok: true,
-        data: { account: dto, cloudIdentity: null },
+        data: { account: guestDto, cloudIdentity: null },
       }),
     } as unknown as AccountClientPort;
 
-    const wrapper = mountSection(accountService, lockProfile);
+    const wrapper = mountSection(accountService);
     await flushPromises();
 
     expect(wrapper.get('#nickname').attributes('disabled')).not.toBe('true');
@@ -331,74 +342,109 @@ describe('AccountProfileSection', () => {
     expect(wrapper.get('#bio').attributes('disabled')).not.toBe('true');
     expect(wrapper.text()).toContain('Local guest');
     expect(wrapper.find('[data-testid="account-logout-button"]').exists()).toBe(false);
-    await wrapper.get('[data-testid="account-lock-profile-button"]').trigger('click');
-    expect(lockProfile).toHaveBeenCalledOnce();
   });
 
-  it('keeps cloud sign-out distinct from local Profile lock for a connected account', async () => {
-    const lockProfile = vi.fn().mockResolvedValue(undefined);
-    const dto = {
-      id: 'cloud-1',
-      status: 'Active',
-      profile: {
-        nickname: 'User',
-        realName: null,
-        avatarUrl: null,
-        bio: null,
-        gender: 'Unspecified',
-        birthday: null,
-      },
-      version: 1,
-      createdAt: 1,
-      updatedAt: 1,
-      closedAt: null,
-    } as const;
+  it('asks the local-account confirmation and signs out once confirmed', async () => {
+    const logout = vi.fn().mockResolvedValue(undefined);
     const accountService = {
       getMyProfile: vi.fn().mockResolvedValue({
         ok: true,
-        data: { account: dto, cloudIdentity: null },
+        data: { account: guestDto, cloudIdentity: null },
       }),
-      updateMyProfile: vi.fn().mockResolvedValue({
-        ok: true,
-        data: { account: dto, cloudIdentity: null },
-      }),
+      updateMyProfile: vi.fn(),
     } as unknown as AccountClientPort;
 
-    const wrapper = mountSection(accountService, lockProfile, true);
+    const wrapper = mountSection(accountService, {
+      logout,
+      desktop: { invoke: vi.fn().mockResolvedValue({ ok: true, data: null }) },
+    });
+    await flushPromises();
+
+    await wrapper.get('[data-testid="account-logout-button"]').trigger('click');
+    await flushPromises();
+
+    expect(_getConfirmState().title).toBe('Delete local account?');
+    expect(_getConfirmState().description).toBe('Everything is deleted.');
+    expect(logout).not.toHaveBeenCalled();
+
+    _resolveConfirm(true);
+    await flushPromises();
+
+    expect(logout).toHaveBeenCalledOnce();
+  });
+
+  it('asks the cloud-account confirmation for a registered Profile', async () => {
+    const logout = vi.fn().mockResolvedValue(undefined);
+    const accountService = {
+      getMyProfile: vi.fn().mockResolvedValue({
+        ok: true,
+        data: { account: guestDto, cloudIdentity: null },
+      }),
+      updateMyProfile: vi.fn(),
+    } as unknown as AccountClientPort;
+
+    const wrapper = mountSection(accountService, {
+      logout,
+      desktop: {
+        invoke: vi.fn().mockResolvedValue({ ok: true, data: null }),
+        profileKind: 'registered',
+      },
+    });
+    await flushPromises();
+
+    await wrapper.get('[data-testid="account-logout-button"]').trigger('click');
+    await flushPromises();
+
+    expect(_getConfirmState().title).toBe('Delete this device data?');
+    expect(_getConfirmState().description).toBe(
+      'Unsynced changes are lost; the cloud account remains.',
+    );
+
+    _resolveConfirm(false);
+    await flushPromises();
+
+    expect(logout).not.toHaveBeenCalled();
+  });
+
+  it('keeps the cloud logout wording on the web surface', async () => {
+    const logout = vi.fn().mockResolvedValue(undefined);
+    const accountService = {
+      getMyProfile: vi.fn().mockResolvedValue({
+        ok: true,
+        data: { account: guestDto, cloudIdentity: null },
+      }),
+      updateMyProfile: vi.fn(),
+    } as unknown as AccountClientPort;
+
+    const wrapper = mountSection(accountService, { logout, cloudConnected: true });
     await flushPromises();
 
     expect(wrapper.text()).toContain('user@example.com');
     expect(wrapper.text()).toContain('Login email verified');
-    expect(wrapper.find('[data-testid="account-logout-button"]').exists()).toBe(true);
-    expect(wrapper.find('[data-testid="account-lock-profile-button"]').exists()).toBe(true);
+    expect(wrapper.get('[data-testid="account-logout-button"]').text()).toContain('Log out');
+
+    await wrapper.get('[data-testid="account-logout-button"]').trigger('click');
+    await flushPromises();
+
+    expect(_getConfirmState().title).toBe('Log out');
+    expect(_getConfirmState().description).toBe('Confirm logout.');
+
+    _resolveConfirm(true);
+    await flushPromises();
+
+    expect(logout).toHaveBeenCalledOnce();
   });
 
   it('changes the local account password only when both entries match', async () => {
     const invoke = vi.fn().mockResolvedValue({ ok: true, data: null });
-    const dto = {
-      id: 'guest_1',
-      status: 'Active',
-      profile: {
-        nickname: 'Guest',
-        realName: null,
-        avatarUrl: null,
-        bio: null,
-        gender: 'Unspecified',
-        birthday: null,
-      },
-      version: 1,
-      createdAt: 1,
-      updatedAt: 1,
-      closedAt: null,
-    } as const;
     const accountService = {
       getMyProfile: vi.fn().mockResolvedValue({
         ok: true,
-        data: { account: dto, cloudIdentity: null },
+        data: { account: guestDto, cloudIdentity: null },
       }),
       updateMyProfile: vi.fn(),
     } as unknown as AccountClientPort;
-    const wrapper = mountSection(accountService, undefined, false, { invoke });
+    const wrapper = mountSection(accountService, { desktop: { invoke } });
     await flushPromises();
 
     const form = wrapper.get('[data-testid="account-local-password"]');
@@ -423,33 +469,16 @@ describe('AccountProfileSection', () => {
   });
 
   it('hides the local password card for a registered Profile', async () => {
-    const dto = {
-      id: 'cloud-1',
-      status: 'Active',
-      profile: {
-        nickname: 'Cloud',
-        realName: null,
-        avatarUrl: null,
-        bio: null,
-        gender: 'Unspecified',
-        birthday: null,
-      },
-      version: 1,
-      createdAt: 1,
-      updatedAt: 1,
-      closedAt: null,
-    } as const;
     const accountService = {
       getMyProfile: vi.fn().mockResolvedValue({
         ok: true,
-        data: { account: dto, cloudIdentity: null },
+        data: { account: guestDto, cloudIdentity: null },
       }),
       updateMyProfile: vi.fn(),
     } as unknown as AccountClientPort;
     const invoke = vi.fn();
-    const wrapper = mountSection(accountService, undefined, false, {
-      invoke,
-      profileKind: 'registered',
+    const wrapper = mountSection(accountService, {
+      desktop: { invoke, profileKind: 'registered' },
     });
     await flushPromises();
 

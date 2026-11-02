@@ -49,11 +49,8 @@ export default {
   logoutHandlerUnavailable: 'The logout handler is currently unavailable',
   actions: {
     logout: 'Log out',
-    lockProfile: 'Lock local Profile',
     saveProfile: 'Save Profile',
   },
-  lockProfileHint:
-    'Close the current local data runtime and return to Profile unlock. The cloud account binding remains intact.',
   localPassword: {
     title: 'Local account password',
     description:

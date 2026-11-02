@@ -46,10 +46,8 @@ export default {
   logoutHandlerUnavailable: '退出登录服务当前不可用',
   actions: {
     logout: '退出登录',
-    lockProfile: '锁定本地 Profile',
     saveProfile: '保存资料',
   },
-  lockProfileHint: '关闭当前本地数据运行时并返回 Profile 解锁页。云端账号绑定不会被移除。',
   localPassword: {
     title: '本地账户密码',
     description: '本地账户密码是解开本机数据的唯一凭据，与 MemoFlow 云端密码相互独立。',
