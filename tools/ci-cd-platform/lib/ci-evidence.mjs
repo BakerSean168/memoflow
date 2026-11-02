@@ -8,6 +8,13 @@ export function requireProof(condition, reason) {
   if (!condition) throw new Error(reason);
 }
 
+/** Select from the exact-SHA push run list; callers still authenticate the selected run. */
+export function selectPromotionRun(runs) {
+  return runs
+    .filter((run) => run.status === 'completed' && run.conclusion === 'success')
+    .sort((a, b) => b.id - a.id)[0];
+}
+
 // Deliberately conservative: executable tooling and configuration must earn a new full audit.
 export function isCiInput(file) {
   return (

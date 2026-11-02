@@ -1,7 +1,7 @@
 import { UNIT_JOB_IDS, unitJobName, unitJobEnabled } from '../lib/unit-shards.mjs';
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { resolvePrEvidence } from '../lib/ci-evidence.mjs';
+import { resolvePrEvidence, selectPromotionRun } from '../lib/ci-evidence.mjs';
 
 test('an API failure requires the full suite', async () => {
   const result = await resolvePrEvidence({
@@ -702,3 +702,44 @@ for (const status of ['missing', 'failure', 'cancelled', 'skipped', 'duplicate']
     );
   });
 }
+
+for (const status of ['in_progress', 'queued', 'failure', 'cancelled']) {
+  test(`promotion selects older success over newer ${status} run`, () => {
+    const success = { id: 1, status: 'completed', conclusion: 'success' };
+    const newer = {
+      id: 2,
+      status: ['in_progress', 'queued'].includes(status) ? status : 'completed',
+      conclusion: ['in_progress', 'queued'].includes(status) ? null : status,
+    };
+    assert.equal(selectPromotionRun([newer, success]), success);
+  });
+}
+
+test('promotion has no selection without a completed successful run', () => {
+  assert.equal(
+    selectPromotionRun([
+      { id: 1, status: 'in_progress', conclusion: null },
+      { id: 2, status: 'completed', conclusion: 'failure' },
+      { id: 3, status: 'completed', conclusion: 'cancelled' },
+    ]),
+    undefined,
+  );
+  assert.equal(selectPromotionRun([]), undefined);
+});
+
+test('promotion selects a single successful run', () => {
+  const success = { id: 1, status: 'completed', conclusion: 'success' };
+  assert.equal(selectPromotionRun([success]), success);
+});
+
+test('promotion selects the highest successful run ID without mutating the list', () => {
+  const newest = { id: 3, status: 'completed', conclusion: 'success' };
+  const runs = [
+    { id: 2, status: 'completed', conclusion: 'success' },
+    newest,
+    { id: 1, status: 'completed', conclusion: 'success' },
+  ];
+  const original = [...runs];
+  assert.equal(selectPromotionRun(runs), newest);
+  assert.deepEqual(runs, original);
+});
