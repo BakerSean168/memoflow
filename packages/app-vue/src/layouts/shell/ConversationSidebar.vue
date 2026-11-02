@@ -16,13 +16,13 @@
  *   右键得到带数量的批量菜单。参考 Sidebar.tsx handleThreadClick /
  *   handleMultiSelectContextMenu 与 threadSelectionStore.ts。
  */
-import { vKeyboardList } from '../../shared/keyboard/list-adapter';
-import { computed, inject, nextTick, ref, watch } from 'vue';
+import { vKeyboardList } from "../../shared/keyboard/list-adapter";
+import { computed, inject, nextTick, ref, watch } from "vue";
 import {
   ConversationSelectionKey,
   createConversationSelectionStore,
-} from './conversation-selection';
-import { useI18n } from 'vue-i18n';
+} from "./conversation-selection";
+import { useI18n } from "vue-i18n";
 import {
   Archive,
   ArchiveRestore,
@@ -37,7 +37,7 @@ import {
   MessageCircleQuestion,
   ShieldAlert,
   LoaderCircle,
-} from '@lucide/vue';
+} from "@lucide/vue";
 import {
   ContextMenu,
   ContextMenuTrigger,
@@ -56,12 +56,15 @@ import {
   TooltipTrigger,
   TooltipContent,
   TooltipProvider,
-} from '@memoflow/ui-vue-shadcn';
-import type { ProfileSummary, ProfileCloudState } from '@memoflow/desktop-contracts';
+} from "@memoflow/ui-vue-shadcn";
+import type {
+  ProfileSummary,
+  ProfileCloudState,
+} from "@memoflow/desktop-contracts";
 import type {
   ConversationAttentionStatus,
   ConversationAttentionMap,
-} from '@memoflow/ai-ui/composables/useConversationAttention';
+} from "@memoflow/ai-ui/composables/useConversationAttention";
 
 interface ConversationEntry {
   id: string;
@@ -76,7 +79,7 @@ interface ConversationGroup {
 
 const props = defineProps<{
   bulkAction?: (
-    action: 'archive' | 'restore' | 'delete',
+    action: "archive" | "restore" | "delete",
     ids: string[],
   ) => Promise<{ id: string; success: boolean }[]>;
   profiles?: ProfileSummary[];
@@ -91,7 +94,7 @@ const props = defineProps<{
   activeConversationId: string | null;
   userName?: string;
   /** 当前壳层展示的是哪一种身份，而不是含混的“是否登录”。 */
-  identityKind?: 'local' | 'registered-local' | 'cloud';
+  identityKind?: "local" | "registered-local" | "cloud";
   /** 云端会话是否可用；只影响同步账号动作，不影响本地身份。 */
   cloudConnected?: boolean;
   /** 会话列表加载中。 */
@@ -101,26 +104,26 @@ const props = defineProps<{
 }>();
 
 const emit = defineEmits<{
-  (e: 'rename-conversation', id: string, name: string): void;
-  (e: 'regenerate-title', id: string): void;
-  (e: 'new-conversation'): void;
-  (e: 'select-conversation', id: string): void;
-  (e: 'delete-conversation', id: string): void;
-  (e: 'archive-conversation', id: string): void;
-  (e: 'restore-conversation', id: string): void;
-  (e: 'change-archive-page', direction: number): void;
-  (e: 'refresh-conversations'): void;
-  (e: 'open-settings'): void;
-  (e: 'open-cloud-connection'): void;
-  (e: 'logout'): void;
-  (e: 'manage-profiles', trigger: HTMLButtonElement | null): void;
-  (e: 'switch-profile', profileId: string): void;
-  (e: 'refresh-profiles'): void;
+  (e: "rename-conversation", id: string, name: string): void;
+  (e: "regenerate-title", id: string): void;
+  (e: "new-conversation"): void;
+  (e: "select-conversation", id: string): void;
+  (e: "delete-conversation", id: string): void;
+  (e: "archive-conversation", id: string): void;
+  (e: "restore-conversation", id: string): void;
+  (e: "change-archive-page", direction: number): void;
+  (e: "refresh-conversations"): void;
+  (e: "open-settings"): void;
+  (e: "open-cloud-connection"): void;
+  (e: "logout"): void;
+  (e: "add-account"): void;
+  (e: "switch-profile", profileId: string): void;
+  (e: "refresh-profiles"): void;
 }>();
 
 const { t } = useI18n();
 const editingId = ref<string | null>(null);
-const titleDraft = ref('');
+const titleDraft = ref("");
 const titleInput = ref<HTMLInputElement | null>(null);
 async function editTitle(item: ConversationEntry, fromMenu = false) {
   editingId.value = item.id;
@@ -143,7 +146,7 @@ function saveTitle() {
   const name = titleDraft.value.trim();
   if (!id || !name) return;
   editingId.value = null;
-  emit('rename-conversation', id, name);
+  emit("rename-conversation", id, name);
 }
 watch(
   () => props.activeProfileId,
@@ -160,11 +163,11 @@ const stateIcons = {
   done: CircleCheck,
 } as const;
 const stateColors: Record<ConversationAttentionStatus, string> = {
-  failed: 'text-[#F87171]',
-  input: 'text-[#A5B4FC]',
-  approval: 'text-[#FBBF24]',
-  working: 'text-[#7DD3FC]',
-  done: 'text-[#6EE7B7]',
+  failed: "text-[#F87171]",
+  input: "text-[#A5B4FC]",
+  approval: "text-[#FBBF24]",
+  working: "text-[#7DD3FC]",
+  done: "text-[#6EE7B7]",
 };
 function stateOf(id: string): ConversationAttentionStatus | undefined {
   return props.conversationStatuses?.[id];
@@ -182,22 +185,25 @@ async function restoreAccountMenuFocus(event: Event): Promise<void> {
 
 const showingArchive = ref(false);
 const searchOpen = ref(false);
-const searchQuery = ref('');
+const searchQuery = ref("");
 const searchInput = ref<HTMLInputElement | null>(null);
 const searchToggle = ref<HTMLButtonElement | null>(null);
-const selection = inject(ConversationSelectionKey, null) ?? createConversationSelectionStore();
+const selection =
+  inject(ConversationSelectionKey, null) ?? createConversationSelectionStore();
 const { selectedIds } = selection;
 const contextIds = ref<string[]>([]);
 const contextOpen = ref(false);
 const contextRow = ref<string | null>(null);
 const sidebarRoot = ref<HTMLElement | null>(null);
 
-const normalizedSearchQuery = computed(() => searchQuery.value.trim().toLocaleLowerCase());
+const normalizedSearchQuery = computed(() =>
+  searchQuery.value.trim().toLocaleLowerCase(),
+);
 const filteredGroups = computed(() => {
   const groups = showingArchive.value
     ? [
         {
-          labelKey: 'shell.conversation.archived',
+          labelKey: "shell.conversation.archived",
           items: props.archivedConversations ?? [],
         },
       ]
@@ -218,10 +224,10 @@ const visibleIds = computed(() =>
 watch(
   [visibleIds, () => props.activeProfileId],
   ([ids, profileId]) => {
-    selection.reconcile(ids, profileId ?? '');
+    selection.reconcile(ids, profileId ?? "");
     contextOpen.value = false;
   },
-  { immediate: true, flush: 'sync' },
+  { immediate: true, flush: "sync" },
 );
 const keyboardSelection = {
   hasSelection: () => selectedIds.value.length > 0,
@@ -235,7 +241,7 @@ function exitSelection() {
 }
 /** 运行中 / 等待输入 / 等待审批的会话不能归档（与 useAIChatSession 的阻断规则一致）。 */
 function archiveBlocked(id: string): boolean {
-  return ['working', 'input', 'approval'].includes(stateOf(id) ?? '');
+  return ["working", "input", "approval"].includes(stateOf(id) ?? "");
 }
 /** 行尾槽位的唯一主操作：活跃视图归档，归档视图恢复；被阻断时不出现，保留状态图标。 */
 function hasRowAction(id: string): boolean {
@@ -243,8 +249,8 @@ function hasRowAction(id: string): boolean {
 }
 function runRowAction(id: string) {
   if (selection.state.busy) return;
-  if (showingArchive.value) emit('restore-conversation', id);
-  else if (!archiveBlocked(id)) emit('archive-conversation', id);
+  if (showingArchive.value) emit("restore-conversation", id);
+  else if (!archiveBlocked(id)) emit("archive-conversation", id);
 }
 function selectRow(id: string, event: MouseEvent) {
   if (selection.state.busy) return;
@@ -254,8 +260,8 @@ function selectRow(id: string, event: MouseEvent) {
     range: event.shiftKey,
   });
   if (!multi) {
-    if (showingArchive.value) emit('restore-conversation', id);
-    else emit('select-conversation', id);
+    if (showingArchive.value) emit("restore-conversation", id);
+    else emit("select-conversation", id);
   }
 }
 function openContext(id: string) {
@@ -265,13 +271,14 @@ function openContext(id: string) {
 }
 function handleContextKey(event: KeyboardEvent, item: ConversationEntry) {
   if (editingId.value === item.id) return;
-  if (event.key === 'F2' && !event.ctrlKey && !event.metaKey && !event.altKey) {
+  if (event.key === "F2" && !event.ctrlKey && !event.metaKey && !event.altKey) {
     if (selection.state.busy) return;
     event.preventDefault();
     void editTitle(item);
     return;
   }
-  if (event.key !== 'ContextMenu' && !(event.shiftKey && event.key === 'F10')) return;
+  if (event.key !== "ContextMenu" && !(event.shiftKey && event.key === "F10"))
+    return;
   event.preventDefault();
   openContext(item.id);
 }
@@ -280,10 +287,12 @@ function handleContextKey(event: KeyboardEvent, item: ConversationEntry) {
  * 单个会话时菜单不显示数量（T3 Code buildThreadActionMenuItems 同款），多选时显示。
  */
 function contextStatusAction() {
-  void emitBulk(showingArchive.value ? 'restore' : 'archive', [...contextIds.value]);
+  void emitBulk(showingArchive.value ? "restore" : "archive", [
+    ...contextIds.value,
+  ]);
 }
 function contextDeleteAction() {
-  void emitBulk('delete', [...contextIds.value]);
+  void emitBulk("delete", [...contextIds.value]);
 }
 const contextStatusDisabled = computed(
   () =>
@@ -310,18 +319,25 @@ async function restoreContextFocus(event: Event) {
   )
     return;
   const row = [
-    ...(sidebarRoot.value?.querySelectorAll<HTMLElement>('[data-keyboard-item]') ?? []),
+    ...(sidebarRoot.value?.querySelectorAll<HTMLElement>(
+      "[data-keyboard-item]",
+    ) ?? []),
   ].find((item) => item.dataset.keyboardItem === id);
   row?.focus({ preventScroll: true });
 }
-async function emitBulk(action: 'archive' | 'restore' | 'delete', ids = [...selectedIds.value]) {
+async function emitBulk(
+  action: "archive" | "restore" | "delete",
+  ids = [...selectedIds.value],
+) {
   if (!ids.length || selection.state.busy) return;
   contextOpen.value = false;
   if (!props.bulkAction) return;
   const operation = selection.startOperation();
   if (!operation) return;
   const titles = new Map(
-    filteredGroups.value.flatMap((group) => group.items.map((item) => [item.id, item.title])),
+    filteredGroups.value.flatMap((group) =>
+      group.items.map((item) => [item.id, item.title]),
+    ),
   );
   try {
     const results = await props.bulkAction(action, ids);
@@ -331,7 +347,9 @@ async function emitBulk(action: 'archive' | 'restore' | 'delete', ids = [...sele
       title: titles.get(result.id) ?? result.id,
       action,
     }));
-    selection.complete(results.filter((item) => item.success).map((item) => item.id));
+    selection.complete(
+      results.filter((item) => item.success).map((item) => item.id),
+    );
     for (const item of results.filter((item) => !item.success)) {
       if (visibleIds.value.includes(item.id) && !selection.isSelected(item.id))
         selection.toggle(item.id);
@@ -345,7 +363,8 @@ async function emitBulk(action: 'archive' | 'restore' | 'delete', ids = [...sele
         action,
       }));
       for (const id of ids) {
-        if (visibleIds.value.includes(id) && !selection.isSelected(id)) selection.toggle(id);
+        if (visibleIds.value.includes(id) && !selection.isSelected(id))
+          selection.toggle(id);
       }
     }
   } finally {
@@ -356,7 +375,7 @@ async function emitBulk(action: 'archive' | 'restore' | 'delete', ids = [...sele
 async function toggleSearch() {
   searchOpen.value = !searchOpen.value;
   if (!searchOpen.value) {
-    searchQuery.value = '';
+    searchQuery.value = "";
     return;
   }
   await nextTick();
@@ -365,7 +384,7 @@ async function toggleSearch() {
 
 async function closeSearch() {
   searchOpen.value = false;
-  searchQuery.value = '';
+  searchQuery.value = "";
   await nextTick();
   searchToggle.value?.focus();
 }
@@ -374,31 +393,35 @@ const orderedProfiles = computed(() =>
   [...(props.profiles ?? [])].sort(
     (a, b) =>
       Number(b.profileId === props.activeProfileId) -
-        Number(a.profileId === props.activeProfileId) || b.lastActiveAt - a.lastActiveAt,
+        Number(a.profileId === props.activeProfileId) ||
+      b.lastActiveAt - a.lastActiveAt,
   ),
 );
-const displayName = () => props.userName || t('shell.guest');
+const displayName = () => props.userName || t("shell.guest");
 
 function profileLabel(profile: ProfileSummary): string {
   return [
     profile.displayName,
     profile.identifierHint || profile.profileId,
     t(
-      profile.profileKind === 'local'
-        ? 'auth.profileAccess.local'
-        : 'auth.profileAccess.registered',
+      profile.profileKind === "local"
+        ? "auth.profileAccess.local"
+        : "auth.profileAccess.registered",
     ),
-    profile.hasCredential ? t('auth.profileAccess.unlock') : '',
-    profile.profileId === props.activeProfileId ? t('shell.account.currentProfile') : '',
+    profile.hasCredential ? t("auth.profileAccess.unlock") : "",
+    profile.profileId === props.activeProfileId
+      ? t("shell.account.currentProfile")
+      : "",
   ]
     .filter(Boolean)
-    .join(' · ');
+    .join(" · ");
 }
 
 const identityLabel = () => {
-  if (props.identityKind === 'cloud') return t('shell.account.signedIn');
-  if (props.identityKind === 'registered-local') return t('shell.account.localProfile');
-  return t('shell.account.localIdentity');
+  if (props.identityKind === "cloud") return t("shell.account.signedIn");
+  if (props.identityKind === "registered-local")
+    return t("shell.account.localProfile");
+  return t("shell.account.localIdentity");
 };
 </script>
 
@@ -410,7 +433,10 @@ const identityLabel = () => {
     @keydown.escape="exitSelection"
   >
     <!-- 搜索与新会话保持同一工具行，搜索展开时高度不变 -->
-    <div class="flex h-11 shrink-0 items-center gap-1.5 px-2" data-testid="conversation-toolbar">
+    <div
+      class="flex h-11 shrink-0 items-center gap-1.5 px-2"
+      data-testid="conversation-toolbar"
+    >
       <div
         class="flex h-8 min-w-0 flex-1 items-center rounded-md bg-[hsl(var(--surface-raised)/0.35)] transition-colors hover:bg-[hsl(var(--hover))]"
         data-testid="conversation-search"
@@ -419,7 +445,9 @@ const identityLabel = () => {
           ref="searchToggle"
           type="button"
           class="flex h-8 min-w-0 items-center gap-2 rounded-md px-2 text-left text-[12px] text-[hsl(var(--foreground-subtle))] transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-          :class="searchOpen ? 'w-8 shrink-0 justify-center p-0' : 'w-full flex-1'"
+          :class="
+            searchOpen ? 'w-8 shrink-0 justify-center p-0' : 'w-full flex-1'
+          "
           :title="t('shell.search')"
           :aria-label="t('shell.search')"
           :aria-pressed="searchOpen"
@@ -428,7 +456,7 @@ const identityLabel = () => {
         >
           <Search class="h-4 w-4 shrink-0" />
           <span v-if="!searchOpen" class="min-w-0 truncate">{{
-            t('shell.conversation.searchPlaceholder')
+            t("shell.conversation.searchPlaceholder")
           }}</span>
         </button>
         <template v-if="searchOpen">
@@ -466,7 +494,13 @@ const identityLabel = () => {
             : 'text-[hsl(var(--foreground-subtle))]'
         "
         :aria-label="t('shell.conversation.archived')"
-        :title="t(showingArchive ? 'shell.conversation.active' : 'shell.conversation.archived')"
+        :title="
+          t(
+            showingArchive
+              ? 'shell.conversation.active'
+              : 'shell.conversation.archived',
+          )
+        "
         :aria-pressed="showingArchive"
         @click="
           showingArchive = !showingArchive;
@@ -489,9 +523,16 @@ const identityLabel = () => {
     </div>
 
     <!-- 多选没有常驻工具栏（T3 Code 同款）：数量只给读屏播报，操作在右键菜单里。 -->
-    <span class="sr-only" aria-live="polite" data-testid="conversation-selection-count">{{
-      selectedIds.length ? t('shell.conversation.selectedCount', { count: selectedIds.length }) : ''
-    }}</span>
+    <span
+      class="sr-only"
+      aria-live="polite"
+      data-testid="conversation-selection-count"
+      >{{
+        selectedIds.length
+          ? t("shell.conversation.selectedCount", { count: selectedIds.length })
+          : ""
+      }}</span
+    >
     <ul
       v-if="selection.state.results.length"
       class="max-h-28 overflow-y-auto break-words px-3 text-xs"
@@ -507,8 +548,8 @@ const identityLabel = () => {
         {{
           t(
             result.success
-              ? 'shell.conversation.operationSucceeded'
-              : 'shell.conversation.operationFailed',
+              ? "shell.conversation.operationSucceeded"
+              : "shell.conversation.operationFailed",
           )
         }}
       </li>
@@ -527,15 +568,20 @@ const identityLabel = () => {
         }
       "
     >
-      <p v-if="loading && groups.length === 0" class="px-3 py-2 text-xs text-muted-foreground/60">
-        {{ t('common.loading') }}
+      <p
+        v-if="loading && groups.length === 0"
+        class="px-3 py-2 text-xs text-muted-foreground/60"
+      >
+        {{ t("common.loading") }}
       </p>
       <p
-        v-if="searchOpen && normalizedSearchQuery && filteredGroups.length === 0"
+        v-if="
+          searchOpen && normalizedSearchQuery && filteredGroups.length === 0
+        "
         class="px-2.5 py-6 text-center text-xs leading-5 text-muted-foreground/65"
         data-testid="conversation-search-empty"
       >
-        {{ t('shell.conversation.noMatches') }}
+        {{ t("shell.conversation.noMatches") }}
       </p>
       <div v-for="group in filteredGroups" :key="group.labelKey" class="mb-2.5">
         <p
@@ -567,14 +613,17 @@ const identityLabel = () => {
               :data-testid="'conversation-row'"
               :data-has-action="hasRowAction(item.id) ? 'true' : undefined"
               :class="
-                selection.isSelected(item.id) || activeConversationId === item.id
+                selection.isSelected(item.id) ||
+                activeConversationId === item.id
                   ? 'bg-[hsl(var(--selected)/0.82)] text-foreground shadow-[inset_0_0_0_1px_hsl(var(--border-subtle)/0.46)]'
                   : 'text-[hsl(var(--foreground-muted))] hover:bg-[hsl(var(--hover))] hover:text-foreground'
               "
             >
               <input
                 v-if="editingId === item.id"
-                :ref="(element) => (titleInput = element as HTMLInputElement | null)"
+                :ref="
+                  (element) => (titleInput = element as HTMLInputElement | null)
+                "
                 v-model="titleDraft"
                 class="m-1 min-w-0 flex-1 rounded border bg-background px-1.5 py-1 text-xs"
                 data-testid="conversation-title-input"
@@ -590,7 +639,9 @@ const identityLabel = () => {
                 type="button"
                 @dblclick.stop="!selection.state.busy && editTitle(item)"
                 class="min-w-0 w-full flex-1 px-2 py-1.5 text-left text-[12.5px] leading-5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring"
-                :class="stateOf(item.id) || hasRowAction(item.id) ? 'pr-9' : 'pr-2'"
+                :class="
+                  stateOf(item.id) || hasRowAction(item.id) ? 'pr-9' : 'pr-2'
+                "
                 :data-keyboard-item="item.id"
                 role="option"
                 :aria-selected="selection.isSelected(item.id)"
@@ -603,12 +654,18 @@ const identityLabel = () => {
                     aria-hidden="true"
                   />{{ item.title }}</span
                 >
-                <span v-if="titleBusy?.[item.id]" class="sr-only" role="status">{{
-                  t('shell.conversation.generatingTitle')
-                }}</span>
+                <span
+                  v-if="titleBusy?.[item.id]"
+                  class="sr-only"
+                  role="status"
+                  >{{ t("shell.conversation.generatingTitle") }}</span
+                >
               </button>
               <div
-                v-if="editingId !== item.id && (stateOf(item.id) || hasRowAction(item.id))"
+                v-if="
+                  editingId !== item.id &&
+                  (stateOf(item.id) || hasRowAction(item.id))
+                "
                 class="absolute right-1 top-1/2 h-6 w-6 -translate-y-1/2"
                 data-testid="conversation-row-slot"
               >
@@ -624,7 +681,9 @@ const identityLabel = () => {
                             : ''
                         "
                         :aria-label="
-                          t(`aiAssistant.chatPage.sidebar.attention.${stateOf(item.id)}`)
+                          t(
+                            `aiAssistant.chatPage.sidebar.attention.${stateOf(item.id)}`,
+                          )
                         "
                         data-testid="shell-conversation-status"
                         @click.stop="emit('select-conversation', item.id)"
@@ -638,7 +697,11 @@ const identityLabel = () => {
                       </button>
                     </TooltipTrigger>
                     <TooltipContent side="right" class="text-xs">
-                      {{ t(`aiAssistant.chatPage.sidebar.attention.${stateOf(item.id)}`) }}
+                      {{
+                        t(
+                          `aiAssistant.chatPage.sidebar.attention.${stateOf(item.id)}`,
+                        )
+                      }}
                     </TooltipContent>
                   </Tooltip>
                 </TooltipProvider>
@@ -648,7 +711,9 @@ const identityLabel = () => {
                       <button
                         type="button"
                         :data-testid="
-                          showingArchive ? 'conversation-restore' : 'conversation-archive'
+                          showingArchive
+                            ? 'conversation-restore'
+                            : 'conversation-archive'
                         "
                         class="pointer-events-none absolute inset-0 flex h-6 w-6 items-center justify-center rounded-md text-[hsl(var(--foreground-subtle))] opacity-0 transition-opacity duration-150 hover:bg-[hsl(var(--hover))] hover:text-foreground focus-visible:pointer-events-auto focus-visible:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring group-any-hover/item:pointer-events-auto group-any-hover/item:opacity-100 group-has-[:focus-visible]/item:pointer-events-auto group-has-[:focus-visible]/item:opacity-100 disabled:opacity-40"
                         :aria-label="
@@ -671,8 +736,8 @@ const identityLabel = () => {
                       {{
                         t(
                           showingArchive
-                            ? 'shell.conversation.restore'
-                            : 'shell.conversation.archive',
+                            ? "shell.conversation.restore"
+                            : "shell.conversation.archive",
                         )
                       }}
                     </TooltipContent>
@@ -681,15 +746,20 @@ const identityLabel = () => {
               </div>
             </div>
           </ContextMenuTrigger>
-          <ContextMenuContent class="w-44" @close-auto-focus="restoreContextFocus">
+          <ContextMenuContent
+            class="w-44"
+            @close-auto-focus="restoreContextFocus"
+          >
             <template v-if="contextIds.length === 1">
               <ContextMenuItem
                 data-testid="conversation-context-rename"
                 :disabled="selection.state.busy"
                 @select="editTitle(item, true)"
               >
-                {{ t('shell.conversation.rename') }}
-                <span class="ml-auto pl-3 text-[11px] text-muted-foreground" aria-hidden="true"
+                {{ t("shell.conversation.rename") }}
+                <span
+                  class="ml-auto pl-3 text-[11px] text-muted-foreground"
+                  aria-hidden="true"
                   >F2</span
                 >
               </ContextMenuItem>
@@ -701,8 +771,8 @@ const identityLabel = () => {
                 {{
                   t(
                     titleBusy?.[item.id]
-                      ? 'shell.conversation.generatingTitle'
-                      : 'shell.conversation.regenerateTitle',
+                      ? "shell.conversation.generatingTitle"
+                      : "shell.conversation.regenerateTitle",
                   )
                 }}
               </ContextMenuItem>
@@ -718,8 +788,15 @@ const identityLabel = () => {
                 class="mr-2 h-3.5 w-3.5"
                 aria-hidden="true"
               />
-              {{ t(showingArchive ? 'shell.conversation.restore' : 'shell.conversation.archive')
-              }}<template v-if="contextIds.length > 1"> ({{ contextIds.length }})</template>
+              {{
+                t(
+                  showingArchive
+                    ? "shell.conversation.restore"
+                    : "shell.conversation.archive",
+                )
+              }}<template v-if="contextIds.length > 1">
+                ({{ contextIds.length }})</template
+              >
             </ContextMenuItem>
             <ContextMenuItem
               :disabled="selection.state.busy"
@@ -728,32 +805,39 @@ const identityLabel = () => {
               @select="contextDeleteAction"
             >
               <Trash2 class="mr-2 h-3.5 w-3.5" aria-hidden="true" />
-              {{ t('common.delete')
-              }}<template v-if="contextIds.length > 1"> ({{ contextIds.length }})</template>
+              {{ t("common.delete")
+              }}<template v-if="contextIds.length > 1">
+                ({{ contextIds.length }})</template
+              >
             </ContextMenuItem>
           </ContextMenuContent>
         </ContextMenu>
       </div>
-      <div v-if="showingArchive" class="flex items-center justify-between gap-2 px-2 py-2 text-xs">
+      <div
+        v-if="showingArchive"
+        class="flex items-center justify-between gap-2 px-2 py-2 text-xs"
+      >
         <button
           type="button"
           :disabled="(archivePage ?? 1) <= 1 || loading"
           @click="emit('change-archive-page', -1)"
         >
-          {{ t('shell.conversation.previousPage') }}
+          {{ t("shell.conversation.previousPage") }}
         </button>
         <button
           type="button"
           :disabled="!archiveHasMore || loading"
           @click="emit('change-archive-page', 1)"
         >
-          {{ t('shell.conversation.nextPage') }}
+          {{ t("shell.conversation.nextPage") }}
         </button>
       </div>
     </nav>
 
     <!-- 底：账户菜单 -->
-    <div class="flex h-11 shrink-0 items-center border-t border-[hsl(var(--border-subtle))] px-2.5">
+    <div
+      class="flex h-11 shrink-0 items-center border-t border-[hsl(var(--border-subtle))] px-2.5"
+    >
       <DropdownMenu
         @update:open="
           (open) => {
@@ -787,7 +871,10 @@ const identityLabel = () => {
           class="w-52"
           @close-auto-focus="restoreAccountMenuFocus"
         >
-          <div class="flex items-center gap-2 px-2 py-1.5" data-testid="shell-account-identity">
+          <div
+            class="flex items-center gap-2 px-2 py-1.5"
+            data-testid="shell-account-identity"
+          >
             <span
               class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary text-xs text-primary-foreground"
               aria-hidden="true"
@@ -801,12 +888,15 @@ const identityLabel = () => {
             </div>
           </div>
           <DropdownMenuSeparator />
-          <DropdownMenuItem data-testid="shell-open-settings" @select="emit('open-settings')">
-            {{ t('shell.account.settings') }}
+          <DropdownMenuItem
+            data-testid="shell-open-settings"
+            @select="emit('open-settings')"
+          >
+            {{ t("shell.account.settings") }}
           </DropdownMenuItem>
           <DropdownMenuSub v-if="isDesktop">
             <DropdownMenuSubTrigger data-testid="shell-switch-account">
-              {{ t('shell.account.switchAccount') }}
+              {{ t("shell.account.switchAccount") }}
             </DropdownMenuSubTrigger>
             <DropdownMenuSubContent
               data-testid="shell-profile-switcher"
@@ -814,13 +904,18 @@ const identityLabel = () => {
               :collision-padding="8"
               :avoid-collisions="true"
             >
-              <div class="max-h-[min(60vh,24rem)] overflow-y-auto" data-testid="shell-profile-list">
+              <div
+                class="max-h-[min(60vh,24rem)] overflow-y-auto"
+                data-testid="shell-profile-list"
+              >
                 <DropdownMenuItem
                   v-for="profile in orderedProfiles"
                   :key="profile.profileId"
                   :data-testid="`shell-switch-profile-${profile.profileId}`"
                   :aria-label="profileLabel(profile)"
-                  :aria-current="profile.profileId === activeProfileId ? 'true' : undefined"
+                  :aria-current="
+                    profile.profileId === activeProfileId ? 'true' : undefined
+                  "
                   @select="
                     profile.profileId !== activeProfileId &&
                     emit('switch-profile', profile.profileId)
@@ -838,15 +933,15 @@ const identityLabel = () => {
                     }}</span>
                     <small class="block truncate text-muted-foreground">
                       {{
-                        profile.profileKind === 'local'
-                          ? t('auth.profileAccess.local')
-                          : t('auth.profileAccess.registered')
+                        profile.profileKind === "local"
+                          ? t("auth.profileAccess.local")
+                          : t("auth.profileAccess.registered")
                       }}
                       · {{ profile.identifierHint || profile.profileId }} ·
                       {{
                         profile.profileId === activeProfileId && cloudState
-                          ? t('shell.account.connection.' + cloudState)
-                          : t('shell.account.connection.unknown')
+                          ? t("shell.account.connection." + cloudState)
+                          : t("shell.account.connection.unknown")
                       }}
                     </small>
                   </span>
@@ -864,21 +959,21 @@ const identityLabel = () => {
               </div>
               <DropdownMenuSeparator />
               <DropdownMenuItem
-                data-testid="shell-manage-profiles"
-                @select="emit('manage-profiles', accountMenuTrigger)"
+                data-testid="shell-add-account"
+                @select="emit('add-account')"
               >
-                {{ t('shell.account.manageProfiles') }}
+                {{ t("shell.account.menuAddAccount") }}
               </DropdownMenuItem>
             </DropdownMenuSubContent>
           </DropdownMenuSub>
           <DropdownMenuSeparator />
           <DropdownMenuItem
-            v-if="cloudConnected"
+            v-if="isDesktop || cloudConnected"
             data-testid="shell-logout"
             class="text-destructive focus:text-destructive"
             @click="emit('logout')"
           >
-            {{ t('shell.account.logout') }}
+            {{ t("shell.account.logout") }}
           </DropdownMenuItem>
           <DropdownMenuItem
             v-else
@@ -886,9 +981,9 @@ const identityLabel = () => {
             @click="emit('open-cloud-connection')"
           >
             {{
-              identityKind === 'registered-local'
-                ? t('shell.account.reauthenticate')
-                : t('shell.account.connectCloud')
+              identityKind === "registered-local"
+                ? t("shell.account.reauthenticate")
+                : t("shell.account.connectCloud")
             }}
           </DropdownMenuItem>
         </DropdownMenuContent>

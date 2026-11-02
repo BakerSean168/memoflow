@@ -10,35 +10,45 @@
  * Profile 仍复用现有切换路径，不属于启动自动直入。
  */
 
-import { getProfilePartition } from '../profile/profile-partition';
-import { BrowserWindow, ipcMain, app } from 'electron';
-import path from 'path';
-import { fileURLToPath } from 'url';
+import { getProfilePartition } from "../profile/profile-partition";
+import { BrowserWindow, ipcMain, app } from "electron";
+import path from "path";
+import { z } from "zod";
+import { fileURLToPath } from "url";
 import {
   RendererEventChannels,
   WindowChannels,
   ProfileIdSchema,
   ProfileAccessHeightSchema,
   PROFILE_ACCESS_BASE_HEIGHT,
-} from '@memoflow/desktop-contracts';
-import { fail, ok } from '@memoflow/transport-contracts/result';
-import { createLogger } from '@memoflow/utils/logger';
-import type { ScheduleRuntimeController } from '../runtime/compose-schedule';
-import { applyWindowChromeTheme, createNativeWindowChromeOptions } from './desktop-chrome';
-import type { DesktopChromeTheme } from './desktop-chrome';
-import { hasResolvedPreload, resolvePreloadPath } from '../utils/resolve-preload-path';
-import { resolveWindowIconPath } from '../utils/app-icon';
-import type { DesktopFeaturesRuntime } from '../desktop-features';
-import { getDesktopDevServerUrlOrDefault, usesDesktopViteDevServer } from '../utils';
-import { WindowStateManager } from '../modules/window';
-import { getSharedPathResolver } from '../runtime-init';
-import type { DesktopProfileRuntimeManager } from '../profile';
-import type { DesktopLifecyclePreference } from './desktop-lifecycle-preference';
+} from "@memoflow/desktop-contracts";
+import { fail, ok } from "@memoflow/transport-contracts/result";
+import { createLogger } from "@memoflow/utils/logger";
+import type { ScheduleRuntimeController } from "../runtime/compose-schedule";
+import {
+  applyWindowChromeTheme,
+  createNativeWindowChromeOptions,
+} from "./desktop-chrome";
+import type { DesktopChromeTheme } from "./desktop-chrome";
+import {
+  hasResolvedPreload,
+  resolvePreloadPath,
+} from "../utils/resolve-preload-path";
+import { resolveWindowIconPath } from "../utils/app-icon";
+import type { DesktopFeaturesRuntime } from "../desktop-features";
+import {
+  getDesktopDevServerUrlOrDefault,
+  usesDesktopViteDevServer,
+} from "../utils";
+import { WindowStateManager } from "../modules/window";
+import { getSharedPathResolver } from "../runtime-init";
+import type { DesktopProfileRuntimeManager } from "../profile";
+import type { DesktopLifecyclePreference } from "./desktop-lifecycle-preference";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const logger = createLogger('WindowManager');
+const logger = createLogger("WindowManager");
 
 // ============ Types ============
 
@@ -51,7 +61,7 @@ export interface WindowManagerConfig {
   isDev?: boolean;
 }
 
-export type WindowType = 'profile-access' | 'main';
+export type WindowType = "profile-access" | "main";
 
 interface WindowControlsState {
   isMaximized: boolean;
@@ -99,12 +109,14 @@ export class WindowManager {
     };
 
     if (!hasResolvedPreload(__dirname)) {
-      logger.error('Resolved preload script does not exist', {
+      logger.error("Resolved preload script does not exist", {
         preloadPath: this.config.preloadPath,
         currentDir: __dirname,
       });
     } else {
-      logger.info('Resolved preload script', { preloadPath: this.config.preloadPath });
+      logger.info("Resolved preload script", {
+        preloadPath: this.config.preloadPath,
+      });
     }
 
     this.registerIpcHandlers();
@@ -135,7 +147,9 @@ export class WindowManager {
    * profile 拆除前清除）。保留延迟启停时序：主窗口切换时启动 runtime，profile-access
    * 切换与 profile 停用时停止它。
    */
-  setScheduleRuntimeController(controller: ScheduleRuntimeController | null): void {
+  setScheduleRuntimeController(
+    controller: ScheduleRuntimeController | null,
+  ): void {
     this.scheduleRuntimeController = controller;
   }
 
@@ -161,7 +175,10 @@ export class WindowManager {
     if (this.isTransitioning) return false;
     const window = this.getActiveWindow();
     if (!window || window.isDestroyed()) return false;
-    if (this.mainWindow && this.runtimeManager?.getActiveProfileId() !== this.activeMainProfileId)
+    if (
+      this.mainWindow &&
+      this.runtimeManager?.getActiveProfileId() !== this.activeMainProfileId
+    )
       return false;
     if (window.isMinimized()) window.restore();
     window.show();
@@ -174,23 +191,30 @@ export class WindowManager {
   /**
    * 创建 Profile Access 窗口
    */
-  createProfileAccessWindow(targetProfileId?: string, interactive = true): BrowserWindow {
+  createProfileAccessWindow(
+    targetProfileId?: string,
+    interactive = true,
+    view?: "login",
+  ): BrowserWindow {
     if (this.profileAccessWindow && !this.profileAccessWindow.isDestroyed()) {
       this.profileAccessWindow.setEnabled(interactive);
       this.profileAccessWindow.focus();
       return this.profileAccessWindow;
     }
 
-    logger.info('Creating Profile Access window');
-    this.profileAccessWindowStateManager = new WindowStateManager('profile-access', {
-      defaultWidth: 1024,
-      defaultHeight: 640,
-      // Pre-#785 installs persisted the old 420×580 gate; clamp it up so an
-      // upgrade lands on the v3 skeleton instead of the retired one.
-      minimumWidth: 1024,
-      minimumHeight: 640,
-      stateFilePath: getSharedPathResolver().profileAccessWindowStatePath,
-    });
+    logger.info("Creating Profile Access window");
+    this.profileAccessWindowStateManager = new WindowStateManager(
+      "profile-access",
+      {
+        defaultWidth: 1024,
+        defaultHeight: 640,
+        // Pre-#785 installs persisted the old 420×580 gate; clamp it up so an
+        // upgrade lands on the v3 skeleton instead of the retired one.
+        minimumWidth: 1024,
+        minimumHeight: 640,
+        stateFilePath: getSharedPathResolver().profileAccessWindowStatePath,
+      },
+    );
 
     const profileAccessState = this.profileAccessWindowStateManager;
 
@@ -204,10 +228,10 @@ export class WindowManager {
       minimizable: true,
       fullscreenable: false,
       autoHideMenuBar: true,
-      title: '',
+      title: "",
       frame: false,
       transparent: true,
-      backgroundColor: '#00000000',
+      backgroundColor: "#00000000",
       webPreferences: {
         preload: this.config.preloadPath,
         contextIsolation: true,
@@ -223,7 +247,7 @@ export class WindowManager {
     this.profileAccessWindow.setMenuBarVisibility(false);
     this.profileAccessWindow.removeMenu();
 
-    this.attachWindowDiagnostics(this.profileAccessWindow, 'profile-access');
+    this.attachWindowDiagnostics(this.profileAccessWindow, "profile-access");
     this.attachWindowControlStateSync(this.profileAccessWindow);
     this.profileAccessWindowStateManager.manage(this.profileAccessWindow);
     // The registration state grows the window; that height is layout, never the
@@ -233,24 +257,26 @@ export class WindowManager {
     // Capture startup intent: capability initialization can finish before this renderer is ready.
     const showProfileAccessOnReady = !this.startupHidden;
     // 准备好后显示
-    this.profileAccessWindow.once('ready-to-show', () => {
+    this.profileAccessWindow.once("ready-to-show", () => {
       if (showProfileAccessOnReady) this.profileAccessWindow?.show();
-      logger.info('Profile Access window shown');
+      logger.info("Profile Access window shown");
     });
 
     this.loadWindowContent(
       this.profileAccessWindow,
       targetProfileId
         ? `/profile-access?profileId=${encodeURIComponent(targetProfileId)}`
-        : '/profile-access',
+        : view === "login"
+          ? "/profile-access?view=login"
+          : "/profile-access",
     );
 
     if (this.config.isDev) {
-      this.profileAccessWindow.webContents.openDevTools({ mode: 'detach' });
+      this.profileAccessWindow.webContents.openDevTools({ mode: "detach" });
     }
 
     // 窗口关闭事件
-    this.profileAccessWindow.on('closed', () => {
+    this.profileAccessWindow.on("closed", () => {
       this.profileAccessWindowStateManager?.unmanage();
       this.profileAccessWindowStateManager = null;
       this.profileAccessWindow = null;
@@ -272,9 +298,9 @@ export class WindowManager {
       return this.mainWindow;
     }
 
-    logger.info('Creating main window');
+    logger.info("Creating main window");
     this.activeMainProfileId = profileId;
-    this.mainWindowStateManager = new WindowStateManager('main', {
+    this.mainWindowStateManager = new WindowStateManager("main", {
       defaultWidth: 1200,
       defaultHeight: 800,
       stateFilePath,
@@ -303,26 +329,31 @@ export class WindowManager {
     this.mainWindow.setMenuBarVisibility(false);
     this.mainWindow.removeMenu();
 
-    this.attachWindowDiagnostics(this.mainWindow, 'main');
+    this.attachWindowDiagnostics(this.mainWindow, "main");
     this.attachWindowControlStateSync(this.mainWindow);
     this.mainWindowStateManager.manage(this.mainWindow);
 
     // 准备好后显示
-    this.mainWindow.once('ready-to-show', () => {
+    this.mainWindow.once("ready-to-show", () => {
       if (!this.startupHidden) this.mainWindow?.show();
-      logger.info('Main window shown');
+      logger.info("Main window shown");
     });
 
     // 加载主页面
-    this.loadWindowContent(this.mainWindow, '/');
+    this.loadWindowContent(this.mainWindow, "/");
 
     // 开发模式打开 DevTools
     if (this.config.isDev) {
-      this.mainWindow.webContents.openDevTools({ mode: 'detach' });
+      this.mainWindow.webContents.openDevTools({ mode: "detach" });
     }
 
-    this.mainWindow.on('close', (event) => {
-      if (process.platform !== 'win32' || this.cleaningUp || this.allowProcessExit()) return;
+    this.mainWindow.on("close", (event) => {
+      if (
+        process.platform !== "win32" ||
+        this.cleaningUp ||
+        this.allowProcessExit()
+      )
+        return;
       event.preventDefault();
       if (
         !this.isTransitioning &&
@@ -335,13 +366,13 @@ export class WindowManager {
         app.quit();
       }
     });
-    this.mainWindow.on('query-session-end', (event) => {
+    this.mainWindow.on("query-session-end", (event) => {
       event.preventDefault();
       app.quit();
     });
 
     // 窗口关闭事件
-    this.mainWindow.on('closed', () => {
+    this.mainWindow.on("closed", () => {
       this.mainWindowStateManager?.unmanage();
       this.mainWindowStateManager = null;
       this.mainWindow = null;
@@ -356,14 +387,17 @@ export class WindowManager {
   /**
    * 本地 Profile 打开后切换到主窗口
    */
-  async transitionToMainWindow(profileId: string, stateFilePath: string): Promise<void> {
+  async transitionToMainWindow(
+    profileId: string,
+    stateFilePath: string,
+  ): Promise<void> {
     if (this.isTransitioning) {
-      logger.warn('Already transitioning');
+      logger.warn("Already transitioning");
       return;
     }
 
     this.isTransitioning = true;
-    logger.info('Transitioning from Profile Access to main window');
+    logger.info("Transitioning from Profile Access to main window");
 
     try {
       // 1. 创建主窗口（先不显示）
@@ -374,7 +408,7 @@ export class WindowManager {
         if (mainWin.isVisible()) {
           resolve();
         } else {
-          mainWin.once('ready-to-show', () => resolve());
+          mainWin.once("ready-to-show", () => resolve());
         }
       });
 
@@ -387,7 +421,7 @@ export class WindowManager {
       if (this.profileAccessWindow && !this.profileAccessWindow.isDestroyed())
         this.profileAccessWindow.close();
 
-      logger.info('Transition complete');
+      logger.info("Transition complete");
     } finally {
       this.isTransitioning = false;
     }
@@ -399,19 +433,24 @@ export class WindowManager {
   async transitionToProfileAccessWindow(
     targetProfileId?: string,
     interactive = true,
+    view?: "login",
   ): Promise<void> {
     if (this.isTransitioning) {
-      logger.warn('Already transitioning');
+      logger.warn("Already transitioning");
       return;
     }
 
     this.isTransitioning = true;
-    logger.info('Transitioning from main to Profile Access window');
+    logger.info("Transitioning from main to Profile Access window");
 
     try {
       this.mainWindow?.hide();
       await this.scheduleRuntimeController?.stop();
-      const profileAccessWindow = this.createProfileAccessWindow(targetProfileId, interactive);
+      const profileAccessWindow = this.createProfileAccessWindow(
+        targetProfileId,
+        interactive,
+        view,
+      );
       // Destroy the old renderer before Profile Access can select a different runtime.
       this.mainWindow?.destroy();
 
@@ -420,7 +459,7 @@ export class WindowManager {
         if (profileAccessWindow.isVisible()) {
           resolve();
         } else {
-          profileAccessWindow.once('ready-to-show', () => resolve());
+          profileAccessWindow.once("ready-to-show", () => resolve());
         }
       });
 
@@ -428,7 +467,7 @@ export class WindowManager {
       if (!this.startupHidden) profileAccessWindow.show();
       this.desktopFeaturesRuntime?.bindWindow(profileAccessWindow);
 
-      logger.info('Transition complete');
+      logger.info("Transition complete");
     } finally {
       this.isTransitioning = false;
     }
@@ -480,23 +519,27 @@ export class WindowManager {
     if (this.config.isDev) {
       // 开发模式：加载 Vite dev server
       // 注意：HashRouter 使用 #/path 格式
-      const hash = route === '/' ? '' : `#${route}`;
+      const hash = route === "/" ? "" : `#${route}`;
       const url = `${this.config.devServerUrl}${hash}`;
-      logger.debug('Loading dev URL', { url, route });
+      logger.debug("Loading dev URL", { url, route });
       void window.loadURL(url).catch((error) => {
-        logger.error('Failed to load dev URL', { route, url, error });
+        logger.error("Failed to load dev URL", { route, url, error });
       });
     } else {
       // 生产模式：加载打包的 HTML
-      const htmlPath = path.join(__dirname, '../dist-renderer/index.html');
-      if (route === '/') {
+      const htmlPath = path.join(__dirname, "../dist-renderer/index.html");
+      if (route === "/") {
         void window.loadFile(htmlPath).catch((error) => {
-          logger.error('Failed to load renderer HTML file', { route, htmlPath, error });
+          logger.error("Failed to load renderer HTML file", {
+            route,
+            htmlPath,
+            error,
+          });
         });
       } else {
         // 注意：hash 参数会自动添加 #
         void window.loadFile(htmlPath, { hash: route }).catch((error) => {
-          logger.error('Failed to load renderer HTML file with route', {
+          logger.error("Failed to load renderer HTML file with route", {
             route,
             htmlPath,
             error,
@@ -506,37 +549,46 @@ export class WindowManager {
     }
   }
 
-  private attachWindowDiagnostics(window: BrowserWindow, windowType: WindowType): void {
-    window.webContents.on('did-fail-load', (_event, errorCode, errorDescription, validatedURL) => {
-      logger.error('Window failed to load content', {
-        windowType,
-        errorCode,
-        errorDescription,
-        validatedURL,
-      });
-    });
+  private attachWindowDiagnostics(
+    window: BrowserWindow,
+    windowType: WindowType,
+  ): void {
+    window.webContents.on(
+      "did-fail-load",
+      (_event, errorCode, errorDescription, validatedURL) => {
+        logger.error("Window failed to load content", {
+          windowType,
+          errorCode,
+          errorDescription,
+          validatedURL,
+        });
+      },
+    );
 
-    window.webContents.on('render-process-gone', (_event, details) => {
-      logger.error('Renderer process exited unexpectedly', {
+    window.webContents.on("render-process-gone", (_event, details) => {
+      logger.error("Renderer process exited unexpectedly", {
         windowType,
         reason: details.reason,
         exitCode: details.exitCode,
       });
     });
 
-    window.webContents.on('console-message', (_event, level, message, line, sourceId) => {
-      logger.info('Renderer console message', {
-        windowType,
-        level,
-        message,
-        line,
-        sourceId,
-      });
-    });
+    window.webContents.on(
+      "console-message",
+      (_event, level, message, line, sourceId) => {
+        logger.info("Renderer console message", {
+          windowType,
+          level,
+          message,
+          line,
+          sourceId,
+        });
+      },
+    );
   }
 
   private getWindowForSender(webContentsId?: number): BrowserWindow | null {
-    if (typeof webContentsId === 'number') {
+    if (typeof webContentsId === "number") {
       const senderWindow = BrowserWindow.getAllWindows().find(
         (window) => window.webContents.id === webContentsId,
       );
@@ -557,7 +609,9 @@ export class WindowManager {
     };
   }
 
-  private emitWindowControlsState(window: BrowserWindow): WindowControlsState | null {
+  private emitWindowControlsState(
+    window: BrowserWindow,
+  ): WindowControlsState | null {
     if (window.isDestroyed()) {
       return null;
     }
@@ -572,13 +626,13 @@ export class WindowManager {
       this.emitWindowControlsState(window);
     };
 
-    window.on('maximize', emitState);
-    window.on('unmaximize', emitState);
-    window.on('enter-full-screen', emitState);
-    window.on('leave-full-screen', emitState);
-    window.on('restore', emitState);
-    window.once('ready-to-show', emitState);
-    window.webContents.on('did-finish-load', emitState);
+    window.on("maximize", emitState);
+    window.on("unmaximize", emitState);
+    window.on("enter-full-screen", emitState);
+    window.on("leave-full-screen", emitState);
+    window.on("restore", emitState);
+    window.once("ready-to-show", emitState);
+    window.webContents.on("did-finish-load", emitState);
   }
 
   /**
@@ -588,111 +642,176 @@ export class WindowManager {
     // 登录成功 → 切换到主窗口
     ipcMain.handle(WindowChannels.TRANSITION_TO_MAIN, async () => {
       if (this.isTransitioning)
-        return fail({ code: 'WINDOW_TRANSITION_PENDING', message: 'Profile 切换正在进行' });
-      logger.info('IPC window:transition-to-main received');
+        return fail({
+          code: "WINDOW_TRANSITION_PENDING",
+          message: "Profile 切换正在进行",
+        });
+      logger.info("IPC window:transition-to-main received");
       if (!this.runtimeManager) {
-        throw new Error('WindowManager: runtimeManager not set before TRANSITION_TO_MAIN');
+        throw new Error(
+          "WindowManager: runtimeManager not set before TRANSITION_TO_MAIN",
+        );
       }
       const profileId = this.runtimeManager.getActiveProfileId();
       const profileResolver = this.runtimeManager.getActiveProfileResolver();
       if (!profileId || !profileResolver) {
-        throw new Error('No active profile available for main window transition');
+        throw new Error(
+          "No active profile available for main window transition",
+        );
       }
-      await this.transitionToMainWindow(profileId, profileResolver.mainWindowStatePath);
+      await this.transitionToMainWindow(
+        profileId,
+        profileResolver.mainWindowStatePath,
+      );
       return ok(null);
     });
 
-    ipcMain.handle(WindowChannels.TRANSITION_TO_PROFILE_ACCESS, async (_event, input: unknown) => {
-      const parsed = ProfileIdSchema.optional().safeParse(input);
-      if (!parsed.success) return fail({ code: 'INVALID_REQUEST', message: 'Invalid Profile ID' });
-      if (parsed.data && parsed.data === this.runtimeManager?.getActiveProfileId()) return ok(null);
-      if (this.profileNavigationPending || this.isTransitioning)
-        return fail({ code: 'WINDOW_TRANSITION_PENDING', message: 'Profile 切换正在进行' });
-      this.profileNavigationPending = true;
-      try {
-        const target = parsed.data
-          ? (await this.runtimeManager?.listProfiles())?.find(
-              (profile) => profile.profileId === parsed.data,
-            )
-          : undefined;
-        const autoOpen = Boolean(
-          parsed.data && this.runtimeManager && target?.profileKind === 'registered',
-        );
-        await this.transitionToProfileAccessWindow(parsed.data, !autoOpen);
-        if (autoOpen && parsed.data && this.runtimeManager) {
-          try {
-            const prepared = await this.runtimeManager.openProfile(parsed.data);
-            await this.transitionToMainWindow(
-              parsed.data,
-              prepared.profileResolver.mainWindowStatePath,
-            );
-          } catch (error) {
-            this.profileAccessWindow?.setEnabled(true);
-            logger.warn('Target Profile could not open; Profile Access remains available', {
-              error,
-            });
+    ipcMain.handle(
+      WindowChannels.TRANSITION_TO_PROFILE_ACCESS,
+      async (_event, input: unknown) => {
+        const parsed = z
+          .union([ProfileIdSchema, z.object({ view: z.literal("login") })])
+          .optional()
+          .safeParse(input);
+        if (!parsed.success)
+          return fail({
+            code: "INVALID_REQUEST",
+            message: "Invalid Profile ID",
+          });
+        const targetProfileId =
+          typeof parsed.data === "string" ? parsed.data : undefined;
+        const view =
+          typeof parsed.data === "object" ? parsed.data.view : undefined;
+        if (
+          targetProfileId &&
+          targetProfileId === this.runtimeManager?.getActiveProfileId()
+        )
+          return ok(null);
+        if (this.profileNavigationPending || this.isTransitioning)
+          return fail({
+            code: "WINDOW_TRANSITION_PENDING",
+            message: "Profile 切换正在进行",
+          });
+        this.profileNavigationPending = true;
+        try {
+          const target = targetProfileId
+            ? (await this.runtimeManager?.listProfiles())?.find(
+                (profile) => profile.profileId === targetProfileId,
+              )
+            : undefined;
+          const autoOpen = Boolean(
+            targetProfileId &&
+            this.runtimeManager &&
+            target?.profileKind === "registered",
+          );
+          await this.transitionToProfileAccessWindow(
+            targetProfileId,
+            !autoOpen,
+            view,
+          );
+          if (autoOpen && targetProfileId && this.runtimeManager) {
+            try {
+              const prepared =
+                await this.runtimeManager.openProfile(targetProfileId);
+              await this.transitionToMainWindow(
+                targetProfileId,
+                prepared.profileResolver.mainWindowStatePath,
+              );
+            } catch (error) {
+              this.profileAccessWindow?.setEnabled(true);
+              logger.warn(
+                "Target Profile could not open; Profile Access remains available",
+                {
+                  error,
+                },
+              );
+            }
           }
+          return ok(null);
+        } finally {
+          this.profileNavigationPending = false;
         }
-        return ok(null);
-      } finally {
-        this.profileNavigationPending = false;
-      }
-    });
+      },
+    );
 
     // The identity window's registration state is taller than the base
     // skeleton. Only the two known heights are accepted, and the window is not
     // resizable, so this never becomes a user-driven size.
-    ipcMain.handle(WindowChannels.SET_PROFILE_ACCESS_HEIGHT, (event, input: unknown) => {
-      const parsed = ProfileAccessHeightSchema.safeParse(input);
-      if (!parsed.success)
-        return fail({ code: 'INVALID_REQUEST', message: 'Invalid window height' });
-      const window = BrowserWindow.fromWebContents(event.sender);
-      if (!window || window.isDestroyed() || window !== this.profileAccessWindow)
-        return fail({ code: 'UNAVAILABLE', message: 'Window is not available' });
-      const bounds = window.getBounds();
-      if (bounds.height !== parsed.data.height) {
-        window.setBounds({
-          x: bounds.x,
-          y: bounds.y,
-          width: bounds.width,
-          height: parsed.data.height,
-        });
-      }
-      return ok(null);
-    });
+    ipcMain.handle(
+      WindowChannels.SET_PROFILE_ACCESS_HEIGHT,
+      (event, input: unknown) => {
+        const parsed = ProfileAccessHeightSchema.safeParse(input);
+        if (!parsed.success)
+          return fail({
+            code: "INVALID_REQUEST",
+            message: "Invalid window height",
+          });
+        const window = BrowserWindow.fromWebContents(event.sender);
+        if (
+          !window ||
+          window.isDestroyed() ||
+          window !== this.profileAccessWindow
+        )
+          return fail({
+            code: "UNAVAILABLE",
+            message: "Window is not available",
+          });
+        const bounds = window.getBounds();
+        if (bounds.height !== parsed.data.height) {
+          window.setBounds({
+            x: bounds.x,
+            y: bounds.y,
+            width: bounds.width,
+            height: parsed.data.height,
+          });
+        }
+        return ok(null);
+      },
+    );
 
     // 获取当前窗口类型
     ipcMain.handle(WindowChannels.GET_TYPE, (event) => {
       const webContents = event.sender;
       if (this.profileAccessWindow?.webContents === webContents) {
-        return ok('profile-access' as const);
+        return ok("profile-access" as const);
       }
       if (this.mainWindow?.webContents === webContents) {
-        return ok('main' as const);
+        return ok("main" as const);
       }
-      return ok('unknown' as const);
+      return ok("unknown" as const);
     });
 
-    ipcMain.handle(WindowChannels.FOCUS_MAIN_WINDOW, async () => ok(this.focusMainWindow()));
+    ipcMain.handle(WindowChannels.FOCUS_MAIN_WINDOW, async () =>
+      ok(this.focusMainWindow()),
+    );
 
-    ipcMain.handle(WindowChannels.SYNC_CHROME_THEME, (event, theme: DesktopChromeTheme) => {
-      if (theme !== 'light' && theme !== 'dark') {
-        throw new Error(`Invalid chrome theme: ${String(theme)}`);
-      }
+    ipcMain.handle(
+      WindowChannels.SYNC_CHROME_THEME,
+      (event, theme: DesktopChromeTheme) => {
+        if (theme !== "light" && theme !== "dark") {
+          throw new Error(`Invalid chrome theme: ${String(theme)}`);
+        }
 
-      const window = BrowserWindow.fromWebContents(event.sender);
-      if (!window || window.isDestroyed()) {
-        return fail({ code: 'UNAVAILABLE', message: 'Window is not available' });
-      }
+        const window = BrowserWindow.fromWebContents(event.sender);
+        if (!window || window.isDestroyed()) {
+          return fail({
+            code: "UNAVAILABLE",
+            message: "Window is not available",
+          });
+        }
 
-      applyWindowChromeTheme(window, theme);
-      return ok(null);
-    });
+        applyWindowChromeTheme(window, theme);
+        return ok(null);
+      },
+    );
 
     ipcMain.handle(WindowChannels.MINIMIZE, (event) => {
       const window = this.getWindowForSender(event.sender.id);
       if (!window || window.isDestroyed() || !window.isMinimizable()) {
-        return fail({ code: 'UNAVAILABLE', message: 'Window cannot be minimized' });
+        return fail({
+          code: "UNAVAILABLE",
+          message: "Window cannot be minimized",
+        });
       }
 
       window.minimize();
@@ -723,7 +842,10 @@ export class WindowManager {
     ipcMain.handle(WindowChannels.CLOSE, (event) => {
       const window = this.getWindowForSender(event.sender.id);
       if (!window || window.isDestroyed() || !window.isClosable()) {
-        return fail({ code: 'UNAVAILABLE', message: 'Window cannot be closed' });
+        return fail({
+          code: "UNAVAILABLE",
+          message: "Window cannot be closed",
+        });
       }
 
       window.close();
@@ -744,7 +866,7 @@ export class WindowManager {
    * 清理资源
    */
   cleanup(): void {
-    logger.info('Cleaning up WindowManager');
+    logger.info("Cleaning up WindowManager");
     this.cleaningUp = true;
 
     if (this.profileAccessWindow && !this.profileAccessWindow.isDestroyed()) {
@@ -760,6 +882,6 @@ export class WindowManager {
   }
 
   private getShellPartition(): string {
-    return 'persist:desktop-shell';
+    return "persist:desktop-shell";
   }
 }
