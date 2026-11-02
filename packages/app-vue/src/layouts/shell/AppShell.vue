@@ -1119,16 +1119,20 @@ onBeforeUnmount(() => {
          业务 default view 为空；WorkspaceSceneHost 用 v-show 常驻——KeepAlive 实例、
          AIChatView 流式回复、Teleport 宿主都不随设置导航销毁（Phase 0 / UI-001）。 -->
     <StandaloneSettingsLayout v-if="isSettingsScene" class="min-h-0 flex-1">
-      <button
-        v-if="isDesktop && route.query.tab === 'account'"
-        type="button"
-        data-testid="shell-manage-profiles"
-        class="m-4 rounded-md border px-3 py-2 text-sm hover:bg-muted"
-        @click="manageProfiles($event.currentTarget as HTMLButtonElement)"
-      >
-        {{ t('shell.account.manageProfiles') }}
-      </button>
-      <router-view name="settings" />
+      <div class="flex h-full min-h-0 flex-col">
+        <button
+          v-if="isDesktop && route.query.tab === 'account'"
+          type="button"
+          data-testid="shell-manage-profiles"
+          class="m-4 self-start rounded-md border px-3 py-2 text-sm hover:bg-muted"
+          @click="manageProfiles($event.currentTarget as HTMLButtonElement)"
+        >
+          {{ t('shell.account.manageProfiles') }}
+        </button>
+        <div class="min-h-0 flex-1">
+          <router-view name="settings" />
+        </div>
+      </div>
     </StandaloneSettingsLayout>
 
     <!-- 主工作区（STATE A/B/C）：Hybrid Workspace。
