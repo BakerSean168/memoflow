@@ -7,7 +7,7 @@
 
 import { TaskPlan, TaskOccurrence } from '../aggregates';
 import * as occurrenceGeneration from '../aggregates/occurrence-generation.policy';
-import { TASK_OCCURRENCE_GENERATION_CONFIG } from '@memoflow/task-contracts';
+import { TASK_OCCURRENCE_GENERATION_CONFIG, TaskPlanScheduleKind } from '@memoflow/task-contracts';
 import { createTimeFacade, type TimeContext } from '@memoflow/time';
 
 const { TARGET_GENERATE_AHEAD_DAYS } = TASK_OCCURRENCE_GENERATION_CONFIG;
@@ -57,9 +57,13 @@ export class TaskOccurrenceGenerationService {
   /**
    * Idempotently materialize occurrences for a bounded window.
    *
-   * The default window is `now -> now + TARGET_GENERATE_AHEAD_DAYS`. Re-enumerating
-   * that window is deliberate: the existing occurrence keys are the durable truth,
-   * so a missing date anywhere inside the window can be repaired without a cursor.
+   * The default window is `now -> now + TARGET_GENERATE_AHEAD_DAYS` for recurring
+   * plans. A OneTime plan has one canonical date instead of a rolling window, so
+   * its default window starts at that date: creating a plan after its date must
+   * still materialize the occurrence rather than persist a plan with no fact.
+   * Re-enumerating that window is deliberate: the existing occurrence keys are the
+   * durable truth, so a missing date anywhere inside the window can be repaired
+   * without a cursor.
    */
   generateOccurrences(
     plan: TaskPlan,
@@ -75,7 +79,11 @@ export class TaskOccurrenceGenerationService {
   ): TaskOccurrence[] {
     const now = options.now ?? Date.now();
     const taskTime = createTimeFacade({ context: timeContext });
-    const fromDate = options.fromDate ?? now;
+    const fromDate =
+      options.fromDate ??
+      (plan.schedule.kind === TaskPlanScheduleKind.OneTime
+        ? Number(taskTime.codec.startOfYmd(plan.schedule.calendarDate))
+        : now);
     const toDate = options.targetDate ?? taskTime.calendar.addDays(now, TARGET_GENERATE_AHEAD_DAYS);
 
     if (fromDate > toDate) return [];
