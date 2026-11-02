@@ -97,7 +97,9 @@ export async function waitForChatBodyToSettle(page: Page) {
       { timeout: 5_000, intervals: [50, 100, 100, 200] },
     )
     .toBe(true);
-  await panel.evaluate((element) => element.scrollTo({ top: element.scrollHeight, behavior: 'auto' }));
+  await panel.evaluate((element) =>
+    element.scrollTo({ top: element.scrollHeight, behavior: 'auto' }),
+  );
   let last = await sample();
   await expect
     .poll(
