@@ -53,7 +53,7 @@ jobs:
     name: Windows NSIS N to N+1
     if: inputs.recovery_platform != 'linux'
     runs-on: windows-latest
-    timeout-minutes: 30
+    timeout-minutes: 45
 
     steps:
       - name: Checkout exact update source
@@ -241,6 +241,9 @@ jobs:
             'apps/desktop/e2e/workspace-attention.spec.mts'
             'apps/desktop/e2e/antigravity-composer.spec.mts'
             'apps/desktop/e2e/native-codex-unconfigured-installed.spec.mts'
+            'apps/desktop/e2e/native-goal-panel-installed.spec.mts'
+            'apps/desktop/e2e/native-codex-goal-integrated-installed.spec.mts'
+            'apps/desktop/e2e/support/profile-access.ts'
             'apps/desktop/e2e/support/installed-native-provenance.ts'
           )
           foreach ($relativePath in $qaFiles) {

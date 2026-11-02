@@ -1,3 +1,4 @@
+import { enterLocalWorkspace, LOCAL_PASSWORD, unlockLocalProfile } from './support/profile-access';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
@@ -15,7 +16,11 @@ type WorkspaceQaEnvelope = {
     eventId?: string;
     resourceVersion?: number;
     reason?: string;
-    data?: { conversation?: { name: string } | null; runId?: string; status?: string };
+    data?: {
+      conversation?: { name: string } | null;
+      runId?: string;
+      status?: string;
+    };
   };
 };
 
@@ -57,7 +62,7 @@ test('real Windows Electron Workspace IPC authenticates start, ack, stop, cursor
         ELECTRON_DISABLE_SECURITY_WARNINGS: 'true',
       },
     });
-    const main = await app.firstWindow({ timeout: 30000 });
+    const main = await enterLocalWorkspace(app);
     await expect(main.getByTestId('app-shell')).toBeVisible({ timeout: 30000 });
     let preload = path.resolve('dist-electron/preload.cjs');
     if (installedExecutable) {
@@ -431,20 +436,18 @@ test('real Windows Electron Workspace IPC authenticates start, ack, stop, cursor
     await main
       .getByTestId('desktop-profile-create')
       .locator('input')
+      .first()
       .fill('QA Workspace other owner');
-    const secondWindowPromise = app.waitForEvent('window', {
-      predicate: async (page) => {
-        try {
-          await page.getByTestId('app-shell').waitFor({ state: 'visible', timeout: 18000 });
-          return true;
-        } catch {
-          return false;
-        }
-      },
-    });
+    await main
+      .getByTestId('desktop-profile-create')
+      .locator('input[type="password"]')
+      .fill(LOCAL_PASSWORD);
+    const secondGatePromise = app.waitForEvent('window');
     await main.getByTestId('desktop-profile-create').getByRole('button').click();
-    const secondMain = await secondWindowPromise;
-    await expect(secondMain.getByTestId('app-shell')).toBeVisible({ timeout: 18000 });
+    const secondMain = await unlockLocalProfile(app, await secondGatePromise);
+    await expect(secondMain.getByTestId('app-shell')).toBeVisible({
+      timeout: 18000,
+    });
     // Old cursor belongs to Guest A. Guest B must fail closed with reset_required invalid.
     await expect
       .poll(

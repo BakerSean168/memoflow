@@ -82,3 +82,22 @@ export async function switchToProfileGate(
   await expect(gate.getByTestId(`desktop-profile-password-${profileId}`)).toBeVisible();
   return gate;
 }
+
+/** Enter isolated acceptance sessions through the real identity UI, including restarts. */
+export async function enterLocalWorkspace(app: ElectronApplication): Promise<Page> {
+  const first = await app.firstWindow({ timeout: 45_000 });
+  await expect(
+    first
+      .getByTestId('app-shell')
+      .or(first.getByTestId('desktop-profile-access'))
+      .or(first.getByTestId('desktop-profile-password-state')),
+  ).toBeVisible();
+  if (await first.getByTestId('app-shell').isVisible()) return first;
+  if (await first.getByTestId('desktop-profile-password-state').isVisible()) {
+    return unlockLocalProfile(app, first);
+  }
+  if (await first.locator('[data-testid^="desktop-profile-open-"]').count()) {
+    return unlockLocalProfile(app, first);
+  }
+  return registerLocalProfile(app, first);
+}
