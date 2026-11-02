@@ -21,7 +21,9 @@
       :recent-knowledge-notes-email-verification-required="
         recentKnowledgeNotesEmailVerificationRequired
       "
-      :recent-knowledge-notes-error-message-key="recentKnowledgeNotesErrorMessageKey"
+      :recent-knowledge-notes-error-message-key="
+        recentKnowledgeNotesErrorMessageKey
+      "
       :active-conversation-id="chatConversationId"
       :loading="conversationListLoading"
       @new-conversation="startNewConversation()"
@@ -45,7 +47,9 @@
         data-testid="ai-mobile-sidebar-backdrop"
         @click="closeMobileSidebar"
       />
-      <div class="relative h-full w-[min(22rem,calc(100vw-3rem))] border-r bg-sidebar shadow-xl">
+      <div
+        class="relative h-full w-[min(22rem,calc(100vw-3rem))] border-r bg-sidebar shadow-xl"
+      >
         <AIConversationSidebar
           variant="mobile"
           show-close
@@ -64,7 +68,9 @@
           :recent-knowledge-notes-email-verification-required="
             recentKnowledgeNotesEmailVerificationRequired
           "
-          :recent-knowledge-notes-error-message-key="recentKnowledgeNotesErrorMessageKey"
+          :recent-knowledge-notes-error-message-key="
+            recentKnowledgeNotesErrorMessageKey
+          "
           :active-conversation-id="chatConversationId"
           :loading="conversationListLoading"
           @new-conversation="startNewConversationFromMobile"
@@ -87,7 +93,9 @@
       >
         <div class="flex w-full items-center justify-between gap-3">
           <div class="flex min-w-0 items-center gap-2">
-            <h1 class="truncate text-[13px] font-semibold tracking-[-0.01em] text-foreground">
+            <h1
+              class="truncate text-[13px] font-semibold tracking-[-0.01em] text-foreground"
+            >
               {{ currentConversationLabel }}
             </h1>
             <span
@@ -127,8 +135,12 @@
         </div>
       </header>
 
-      <p v-if="historyIncomplete" role="status" class="px-4 text-xs text-muted-foreground">
-        {{ t('aiAssistant.local.incompleteHistory') }}
+      <p
+        v-if="historyIncomplete"
+        role="status"
+        class="px-4 text-xs text-muted-foreground"
+      >
+        {{ t("aiAssistant.local.incompleteHistory") }}
       </p>
       <AIMessagePanel
         v-show="!composerOnly"
@@ -139,9 +151,12 @@
           (goalSurfaceConflict || goalSurfaceReady || goalPlanningInterrupted)
         "
         :tool-mode="toolMode"
-        :has-models="modelGroups.length > 0 || runtimeChoice.runtimeKind === 'local_agent'"
+        :has-models="
+          modelGroups.length > 0 || runtimeChoice.runtimeKind === 'local_agent'
+        "
         :can-save-local-note="
-          runtimeChoice.runtimeKind === 'local_agent' && localAssistant.canSaveNote
+          runtimeChoice.runtimeKind === 'local_agent' &&
+          localAssistant.canSaveNote
         "
         @select-shortcut="handleWelcomeShortcut"
         @configure-ai="openAISettings"
@@ -159,21 +174,24 @@
             class="flex flex-wrap gap-2"
             data-testid="ai-goal-interruption-actions"
           >
-            <Button variant="outline" :disabled="!canRunGoalAgent" @click="startGoalAgentRun()">{{
-              t('aiAssistant.businessSurface.retryPlanning')
-            }}</Button>
+            <Button
+              variant="outline"
+              :disabled="!canRunGoalAgent"
+              @click="startGoalAgentRun()"
+              >{{ t("aiAssistant.businessSurface.retryPlanning") }}</Button
+            >
             <Button
               variant="ghost"
               :disabled="goalRestartPending"
               @click="composerControlsRef?.openModelPicker()"
-              >{{ t('aiAssistant.businessSurface.switchModel') }}</Button
+              >{{ t("aiAssistant.businessSurface.switchModel") }}</Button
             >
             <Button
               v-if="goalDraftPreserved"
               variant="ghost"
               :disabled="goalRestartPending"
               @click="focusPreservedGoal"
-              >{{ t('aiAssistant.businessSurface.continueEditing') }}</Button
+              >{{ t("aiAssistant.businessSurface.continueEditing") }}</Button
             >
           </section>
           <section
@@ -185,8 +203,8 @@
               {{
                 t(
                   goalSurfaceControlLost
-                    ? 'aiAssistant.businessSurface.controlLost'
-                    : 'aiAssistant.businessSurface.conflict',
+                    ? "aiAssistant.businessSurface.controlLost"
+                    : "aiAssistant.businessSurface.conflict",
                 )
               }}
             </p>
@@ -197,18 +215,25 @@
                 >{{
                   t(
                     goalSurfaceControlLost
-                      ? 'aiAssistant.businessSurface.controlRetry'
-                      : 'aiAssistant.businessSurface.continue',
+                      ? "aiAssistant.businessSurface.controlRetry"
+                      : "aiAssistant.businessSurface.continue",
                   )
                 }}</Button
               >
-              <Button variant="outline" :disabled="goalAgentResuming" @click="cancelGoalAgentRun">{{
-                t('aiAssistant.businessSurface.pause')
-              }}</Button>
+              <Button
+                variant="outline"
+                :disabled="goalAgentResuming"
+                @click="cancelGoalAgentRun"
+                >{{ t("aiAssistant.businessSurface.pause") }}</Button
+              >
             </div>
           </section>
           <section
-            v-else-if="goalSurfaceReady && goalAgentWaitingForApproval && !goalOwnerSubmitted"
+            v-else-if="
+              goalSurfaceReady &&
+              goalAgentWaitingForApproval &&
+              !goalOwnerSubmitted
+            "
             class="space-y-3 rounded-lg border p-3"
             data-testid="ai-goal-save-question"
           >
@@ -216,8 +241,8 @@
               {{
                 t(
                   goalManualHandoff
-                    ? 'aiAssistant.businessSurface.handedOff'
-                    : 'aiAssistant.businessSurface.saveQuestion',
+                    ? "aiAssistant.businessSurface.handedOff"
+                    : "aiAssistant.businessSurface.saveQuestion",
                 )
               }}
             </p>
@@ -226,18 +251,21 @@
                 :disabled="goalAgentResuming"
                 data-testid="ai-goal-save"
                 @click="confirmGoalAgentRun()"
-                >{{ t('aiAssistant.businessSurface.save') }}</Button
+                >{{ t("aiAssistant.businessSurface.save") }}</Button
               >
               <Button
                 variant="outline"
                 :disabled="goalAgentResuming"
                 data-testid="ai-goal-handoff"
                 @click="handoffGoalNativeReview"
-                >{{ t('aiAssistant.businessSurface.handoff') }}</Button
+                >{{ t("aiAssistant.businessSurface.handoff") }}</Button
               >
-              <Button variant="ghost" :disabled="goalAgentResuming" @click="cancelGoalAgentRun">{{
-                t('common.cancel')
-              }}</Button>
+              <Button
+                variant="ghost"
+                :disabled="goalAgentResuming"
+                @click="cancelGoalAgentRun"
+                >{{ t("common.cancel") }}</Button
+              >
             </div>
           </section>
         </template>
@@ -284,7 +312,9 @@
             :knowledge-capture-run="knowledgeCaptureRun"
             :busy="knowledgeCaptureResuming"
             :can-retry-execution="canRetryKnowledgeCaptureExecution"
-            :can-cancel-remaining-execution="canCancelRemainingKnowledgeCaptureExecution"
+            :can-cancel-remaining-execution="
+              canCancelRemainingKnowledgeCaptureExecution
+            "
             @cancel="cancelKnowledgeCaptureRun"
             @retry="retryKnowledgeCaptureExecution"
             @cancel-remaining="cancelRemainingKnowledgeCaptureExecution"
@@ -302,7 +332,10 @@
       >
         {{ localAssistant.executionFailureMessage.value }}
       </p>
-      <Teleport :to="shellComposerMount ?? 'body'" :disabled="!shellComposerMount">
+      <Teleport
+        :to="shellComposerMount ?? 'body'"
+        :disabled="!shellComposerMount"
+      >
         <AIFooterComposer
           ref="composerRef"
           v-model="chatMessage"
@@ -335,12 +368,14 @@
               :catalog="composerCatalog"
               :selected-model-key="composerModelKey"
               :native-model-options="currentNativeModelOptions"
+              :permission-mode="permissionMode"
               :native="runtimeChoice.runtimeKind === 'local_agent'"
               :disabled="chatLoading"
               :loading="composerLoading"
               @refresh="refreshComposerCatalog"
               @select-model="selectComposerModel"
               @model-option="selectNativeModelOption"
+              @permission="selectPermission"
               @settings="openAISettings"
             />
           </template>
@@ -351,25 +386,28 @@
 </template>
 
 <script setup lang="ts">
-import { computed, inject, onMounted, onUnmounted, ref, watch } from 'vue';
-import { useRoute, useRouter } from 'vue-router';
-import { useI18n } from 'vue-i18n';
-import { Menu, Plus } from '@lucide/vue';
-import { Button, useConfirm } from '@memoflow/ui-vue-shadcn';
-import AIConversationSidebar from '../components/AIConversationSidebar.vue';
-import AIMessagePanel from '../components/AIMessagePanel.vue';
-import AIComposerControls from '../components/AIComposerControls.vue';
-import AIFooterComposer from '../components/AIFooterComposer.vue';
-import AIGoalWorkflowPanel from '../components/AIGoalWorkflowPanel.vue';
-import AITaskWorkflowPanel from '../components/AITaskWorkflowPanel.vue';
-import AIKnowledgeCapturePanel from '../components/AIKnowledgeCapturePanel.vue';
-import AIRuntimeUsageBadge from '../components/AIRuntimeUsageBadge.vue';
-import { aiUiHost } from '../ai-ui-host';
-import { SHELL_COMPOSER_DENSITY_KEY, SHELL_COMPOSER_MOUNT_KEY } from '../ai-ui-host';
-import { type ComposerDensity } from '../ai-ui-host';
-import { useAIChatView } from '../composables/useAIChatView';
-import { inferWorkflowMode } from '../composables/workflowIntent';
-import type { ConversationSummary, WorkflowMode } from '../composables/types';
+import { computed, inject, onMounted, onUnmounted, ref, watch } from "vue";
+import { useRoute, useRouter } from "vue-router";
+import { useI18n } from "vue-i18n";
+import { Menu, Plus } from "@lucide/vue";
+import { Button, useConfirm } from "@memoflow/ui-vue-shadcn";
+import AIConversationSidebar from "../components/AIConversationSidebar.vue";
+import AIMessagePanel from "../components/AIMessagePanel.vue";
+import AIComposerControls from "../components/AIComposerControls.vue";
+import AIFooterComposer from "../components/AIFooterComposer.vue";
+import AIGoalWorkflowPanel from "../components/AIGoalWorkflowPanel.vue";
+import AITaskWorkflowPanel from "../components/AITaskWorkflowPanel.vue";
+import AIKnowledgeCapturePanel from "../components/AIKnowledgeCapturePanel.vue";
+import AIRuntimeUsageBadge from "../components/AIRuntimeUsageBadge.vue";
+import { aiUiHost } from "../ai-ui-host";
+import {
+  SHELL_COMPOSER_DENSITY_KEY,
+  SHELL_COMPOSER_MOUNT_KEY,
+} from "../ai-ui-host";
+import { type ComposerDensity } from "../ai-ui-host";
+import { useAIChatView } from "../composables/useAIChatView";
+import { inferWorkflowMode } from "../composables/workflowIntent";
+import type { ConversationSummary, WorkflowMode } from "../composables/types";
 
 const { t } = useI18n();
 const route = useRoute();
@@ -388,7 +426,7 @@ const shellComposerDensityRef = inject(SHELL_COMPOSER_DENSITY_KEY, null);
 const shellComposerMount = computed(() => shellComposerMountRef?.value ?? null);
 const shellStore = shellComposerMountRef ? aiUiHost.useAppShellStore() : null;
 const composerDensity = computed<ComposerDensity>(
-  () => shellComposerDensityRef?.value ?? 'comfortable',
+  () => shellComposerDensityRef?.value ?? "comfortable",
 );
 
 const messagePanelRef = ref<{ viewport?: HTMLElement | null } | null>(null);
@@ -413,7 +451,7 @@ const {
     if (
       !shellStore ||
       !shellStore.rightPanelOpen ||
-      shellStore.panelSurface !== 'business' ||
+      shellStore.panelSurface !== "business" ||
       !shellStore.activeTab
     ) {
       return null;
@@ -488,6 +526,7 @@ const {
   composerModelKey,
   composerLoading,
   permissionMode,
+  selectPermission,
   currentNativeModelOptions,
   selectNativeModelOption,
   composerCatalog,
@@ -572,7 +611,13 @@ const {
 } = knowledgeCaptureWorkflow;
 
 const { formatExecutionOutcome } = formatters;
-const { toolMode, currentConversationLabel, currentToolLabel, exitToolMode, openSettings } = common;
+const {
+  toolMode,
+  currentConversationLabel,
+  currentToolLabel,
+  exitToolMode,
+  openSettings,
+} = common;
 
 const mobileSidebarOpen = ref(false);
 const lastOpenedGoalId = ref<string | null>(null);
@@ -580,8 +625,8 @@ const lastOpenedGoalId = ref<string | null>(null);
 watch(
   () => route.query.workflow,
   (workflow) => {
-    if (workflow !== 'goal-create') return;
-    void startNewConversation('goal-create');
+    if (workflow !== "goal-create") return;
+    void startNewConversation("goal-create");
     const query = { ...route.query };
     delete query.workflow;
     void router.replace({ path: route.path, query });
@@ -589,72 +634,86 @@ watch(
   { immediate: true },
 );
 
-watch([goalWorkflowRun, automatedGoalId, toolMode], (_current, [previousRun]) => {
-  if (
-    toolMode.value !== 'goal-create' ||
-    goalWorkflowRun.value?.status !== 'completed' ||
-    // A restored completed run is history; only a live run transition opens business output.
-    previousRun?.runId !== goalWorkflowRun.value.runId ||
-    previousRun.status === 'completed' ||
-    !automatedGoalId.value ||
-    lastOpenedGoalId.value === automatedGoalId.value
-  ) {
-    return;
-  }
-  lastOpenedGoalId.value = automatedGoalId.value;
-  try {
-    shellStore?.openTab({
-      module: 'goal',
-      route: `/goals/${automatedGoalId.value}`,
-      title: t('nav.capsule.goal'),
-      intent: 'deeplink',
-    });
-  } catch {
-    // Isolated component tests may not have a Pinia shell.
-  }
-  void router.push(`/goals/${automatedGoalId.value}`);
-});
+watch(
+  [goalWorkflowRun, automatedGoalId, toolMode],
+  (_current, [previousRun]) => {
+    if (
+      toolMode.value !== "goal-create" ||
+      goalWorkflowRun.value?.status !== "completed" ||
+      // A restored completed run is history; only a live run transition opens business output.
+      previousRun?.runId !== goalWorkflowRun.value.runId ||
+      previousRun.status === "completed" ||
+      !automatedGoalId.value ||
+      lastOpenedGoalId.value === automatedGoalId.value
+    ) {
+      return;
+    }
+    lastOpenedGoalId.value = automatedGoalId.value;
+    try {
+      shellStore?.openTab({
+        module: "goal",
+        route: `/goals/${automatedGoalId.value}`,
+        title: t("nav.capsule.goal"),
+        intent: "deeplink",
+      });
+    } catch {
+      // Isolated component tests may not have a Pinia shell.
+    }
+    void router.push(`/goals/${automatedGoalId.value}`);
+  },
+);
 
 async function handleWelcomeShortcut(mode: WorkflowMode) {
   const prefillKey = {
-    chat: 'aiAssistant.chatPage.shortcuts.chat.prefill',
-    'goal-create': 'aiAssistant.chatPage.shortcuts.goalCreate.prefill',
-    'task-create': 'aiAssistant.chatPage.shortcuts.taskCreate.prefill',
-    'knowledge-capture': 'aiAssistant.chatPage.shortcuts.knowledgeGenerate.prefill',
-    'knowledge-qa': 'aiAssistant.chatPage.shortcuts.knowledgeQa.prefill',
+    chat: "aiAssistant.chatPage.shortcuts.chat.prefill",
+    "goal-create": "aiAssistant.chatPage.shortcuts.goalCreate.prefill",
+    "task-create": "aiAssistant.chatPage.shortcuts.taskCreate.prefill",
+    "knowledge-capture":
+      "aiAssistant.chatPage.shortcuts.knowledgeGenerate.prefill",
+    "knowledge-qa": "aiAssistant.chatPage.shortcuts.knowledgeQa.prefill",
   }[mode];
-  await startNewConversation('chat');
+  await startNewConversation("chat");
   if (prefillKey) chatMessage.value = t(prefillKey);
 }
 
 const workflowInProgress = computed(() => {
   const active =
-    toolMode.value === 'goal-create'
+    toolMode.value === "goal-create"
       ? goalWorkflowRun.value
-      : toolMode.value === 'task-create'
+      : toolMode.value === "task-create"
         ? taskWorkflowRun.value
-        : toolMode.value === 'knowledge-capture'
+        : toolMode.value === "knowledge-capture"
           ? knowledgeCaptureRun.value
           : null;
-  return Boolean(active && !['completed', 'failed', 'cancelled'].includes(active.status));
+  return Boolean(
+    active && !["completed", "failed", "cancelled"].includes(active.status),
+  );
 });
 
 let composerWorkflowEpoch = 0;
 function stopGenerating() {
   composerWorkflowEpoch++;
-  if (toolMode.value === 'goal-create') void cancelGoalAgentRun();
+  if (toolMode.value === "goal-create") void cancelGoalAgentRun();
   else stopGeneratingBase();
 }
 
 async function handleComposerSend() {
-  if (chatLoading.value || goalAgentLoading.value || goalAgentResuming.value) return;
+  if (chatLoading.value || goalAgentLoading.value || goalAgentResuming.value)
+    return;
   // Hidden native models retain their historical identity, but cannot launch a
   // new inference turn, including through keyboard/programmatic submission.
-  if (runtimeChoice.value.runtimeKind === 'local_agent' && !localAssistant.canSend.value) return;
+  if (
+    runtimeChoice.value.runtimeKind === "local_agent" &&
+    !localAssistant.canSend.value
+  )
+    return;
   // Native execution stays native; read-only chats never launch write workflows.
-  if (runtimeChoice.value.runtimeKind === 'local_agent' || permissionMode.value === 'read-only') {
+  if (
+    runtimeChoice.value.runtimeKind === "local_agent" ||
+    permissionMode.value === "read-only"
+  ) {
     if (workflowInProgress.value) return;
-    toolMode.value = 'chat';
+    toolMode.value = "chat";
     await handleSendChatBase();
     return;
   }
@@ -662,11 +721,11 @@ async function handleComposerSend() {
     ? toolMode.value
     : inferWorkflowMode(
         chatMessage.value,
-        chatTimeline.value[chatTimeline.value.length - 1]?.content ?? '',
+        chatTimeline.value[chatTimeline.value.length - 1]?.content ?? "",
       );
 
   if (!workflowInProgress.value && inferredMode !== toolMode.value) {
-    if (toolMode.value !== 'chat') await exitToolMode();
+    if (toolMode.value !== "chat") await exitToolMode();
     toolMode.value = inferredMode;
   }
 
@@ -674,7 +733,7 @@ async function handleComposerSend() {
     const prepared = await prepareWorkflowTurn();
     if (!prepared) return;
     const resumed = await submitGoalClarificationResponse(prepared.content);
-    if (!resumed) toolMode.value = 'chat';
+    if (!resumed) toolMode.value = "chat";
     return;
   }
 
@@ -682,7 +741,7 @@ async function handleComposerSend() {
     const prepared = await prepareWorkflowTurn();
     if (!prepared) return;
     const resumed = await submitGoalRevisionResponse(prepared.content);
-    if (!resumed) toolMode.value = 'chat';
+    if (!resumed) toolMode.value = "chat";
     return;
   }
 
@@ -690,44 +749,47 @@ async function handleComposerSend() {
     const prepared = await prepareWorkflowTurn();
     if (!prepared) return;
     const resumed = await submitTaskClarificationResponse(prepared.content);
-    if (!resumed) toolMode.value = 'chat';
+    if (!resumed) toolMode.value = "chat";
     return;
   }
 
   if (knowledgeCaptureWaitingForClarification.value) {
     const prepared = await prepareWorkflowTurn();
     if (!prepared) return;
-    const resumed = await submitKnowledgeClarificationResponse(prepared.content);
-    if (!resumed) toolMode.value = 'chat';
+    const resumed = await submitKnowledgeClarificationResponse(
+      prepared.content,
+    );
+    if (!resumed) toolMode.value = "chat";
     return;
   }
 
-  if (inferredMode === 'task-create') {
+  if (inferredMode === "task-create") {
     const selectedGoal = composerContextEntities.value.find(
-      (entity) => entity.entityType === 'goal',
+      (entity) => entity.entityType === "goal",
     );
     setLinkedGoalId(selectedGoal?.id ?? null);
   }
 
-  if (!workflowInProgress.value && inferredMode === 'goal-create') {
+  if (!workflowInProgress.value && inferredMode === "goal-create") {
     const epoch = ++composerWorkflowEpoch;
     const workflowTurn = await prepareWorkflowTurn();
     if (!workflowTurn || epoch !== composerWorkflowEpoch) return;
     const started = await startGoalAgentRun(workflowTurn.content);
-    if (started === false) toolMode.value = 'chat';
+    if (started === false) toolMode.value = "chat";
     return;
   }
 
   await handleSendChatBase();
 
-  if (inferredMode === 'goal-create') await startGoalAgentRun();
-  if (inferredMode === 'task-create') {
+  if (inferredMode === "goal-create") await startGoalAgentRun();
+  if (inferredMode === "task-create") {
     const started = await startTaskAgentRun();
-    if (!started) toolMode.value = 'chat';
-  } else if (inferredMode === 'knowledge-capture') {
+    if (!started) toolMode.value = "chat";
+  } else if (inferredMode === "knowledge-capture") {
     const started = await startKnowledgeCaptureRun();
-    if (!started) toolMode.value = 'chat';
-  } else if (inferredMode === 'knowledge-qa') await askKnowledgeFromConversation();
+    if (!started) toolMode.value = "chat";
+  } else if (inferredMode === "knowledge-qa")
+    await askKnowledgeFromConversation();
 }
 
 function openMobileSidebar() {
@@ -737,7 +799,7 @@ function closeMobileSidebar() {
   mobileSidebarOpen.value = false;
 }
 
-async function startNewConversation(mode: WorkflowMode | string = 'chat') {
+async function startNewConversation(mode: WorkflowMode | string = "chat") {
   lastOpenedGoalId.value = null;
   await startNewConversationBase(mode);
 }
@@ -765,18 +827,18 @@ function openSettingsFromMobile() {
   openSettings();
 }
 function openAISettings() {
-  void router.push('/settings?tab=ai');
+  void router.push("/settings?tab=ai");
 }
 function openGoalWithoutAI() {
-  void router.push('/goals?dialog=goal');
+  void router.push("/goals?dialog=goal");
 }
 async function deleteConversation(id: string): Promise<void> {
   const confirmed = await useConfirm({
-    title: t('shell.conversation.confirmDeleteTitle'),
-    description: t('shell.conversation.confirmDelete'),
-    confirmText: t('common.delete'),
-    cancelText: t('common.cancel'),
-    variant: 'destructive',
+    title: t("shell.conversation.confirmDeleteTitle"),
+    description: t("shell.conversation.confirmDelete"),
+    confirmText: t("common.delete"),
+    cancelText: t("common.cancel"),
+    variant: "destructive",
   });
   if (!confirmed) return;
   void deleteConversationBase(id);
@@ -787,11 +849,15 @@ onUnmounted(() => {
 });
 async function deleteConversations(ids: string[]) {
   const confirmed = await useConfirm({
-    title: t('shell.conversation.confirmDeleteSelectedTitle', { count: ids.length }),
-    description: t('shell.conversation.confirmDeleteSelected', { count: ids.length }),
-    confirmText: t('common.delete'),
-    cancelText: t('common.cancel'),
-    variant: 'destructive',
+    title: t("shell.conversation.confirmDeleteSelectedTitle", {
+      count: ids.length,
+    }),
+    description: t("shell.conversation.confirmDeleteSelected", {
+      count: ids.length,
+    }),
+    confirmText: t("common.delete"),
+    cancelText: t("common.cancel"),
+    variant: "destructive",
   });
   if (!confirmed) return [];
   const results: { id: string; success: boolean }[] = [];
@@ -802,7 +868,7 @@ async function deleteConversations(ids: string[]) {
   return results;
 }
 function openQuickTaskWithoutAI() {
-  void router.push('/tasks?dialog=quick-task');
+  void router.push("/tasks?dialog=quick-task");
 }
 onMounted(() => {
   const viewport = messagePanelRef.value?.viewport;
