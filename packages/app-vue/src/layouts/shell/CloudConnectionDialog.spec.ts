@@ -130,6 +130,17 @@ describe('CloudConnectionDialog', () => {
     wrapper.unmount();
   });
 
+  it('closes from the footer like the other management dialogs', async () => {
+    const { wrapper } = mountDialog(null);
+    await flushPromises();
+    const close = wrapper.findAll('button').find((button) => button.text() === 'Close');
+    expect(close).toBeDefined();
+    expect(close!.attributes('disabled')).toBeUndefined();
+    await close!.trigger('click');
+    expect(wrapper.emitted('update:open')).toEqual([[false]]);
+    wrapper.unmount();
+  });
+
   it('hydrates the cloud session after connection without navigating', async () => {
     vi.useFakeTimers();
     const { wrapper, service, pinia } = mountDialog(null);
