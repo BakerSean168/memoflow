@@ -256,6 +256,8 @@ New-Item -ItemType Directory -Force -Path (Split-Path -Parent $sentinelPath) | O
 "memoflow-update-e2e-preserve" | Set-Content -LiteralPath $sentinelPath -Encoding utf8
 
 $registryBefore = $null
+$identityResetMarker = Join-Path $userDataPath 'identity-reset-v1.json'
+$identityResetBefore = $null
 $sentinelBefore = Get-Sha256 $sentinelPath
 
 $listener = [System.Net.Sockets.TcpListener]::new([System.Net.IPAddress]::Loopback, 0)
@@ -328,6 +330,7 @@ try {
       Write-Host "[update-e2e] phase=$($status.phase) current=$($status.currentVersion) expected=$($status.expectedVersion)"
       if ($null -eq $registryBefore -and (Test-Path -LiteralPath $registryPath)) {
         $registryBefore = Get-RegistrySemanticFingerprint $registryPath
+        $identityResetBefore = Test-Path -LiteralPath $identityResetMarker
         Write-Host "[update-e2e] captured base Profile registry semantic fingerprint=$registryBefore"
       }
       if ($status.phase -eq 'failed') {
@@ -425,8 +428,22 @@ try {
 
   $registryAfter = Get-RegistrySemanticFingerprint $registryPath
   $sentinelAfter = Get-Sha256 $sentinelPath
-  if ($registryAfter -ne $registryBefore) {
-    throw 'Profile registry semantic identity changed across installed update'
+  if (-not $identityResetBefore) {
+    # #785 deliberately discards pre-password identities once. The update must
+    # still preserve global data and finish receipt/version verification.
+    if (-not (Test-Path -LiteralPath $identityResetMarker)) {
+      throw 'candidate did not record the required one-shot identity reset'
+    }
+    $resetMarker = Get-Content -LiteralPath $identityResetMarker -Raw | ConvertFrom-Json
+    $registry = Get-Content -LiteralPath $registryPath -Raw | ConvertFrom-Json
+    if ($resetMarker.version -ne 1 -or $registry.version -ne 2 -or
+        $null -ne $registry.activeProfileId -or @($registry.profiles).Count -ne 0) {
+      throw 'legacy identity upgrade must land at the empty identity gate'
+    }
+    Write-Host '[update-e2e] verified #785 one-shot reset to the empty identity gate'
+  }
+  elseif ($registryAfter -ne $registryBefore) {
+    throw 'Profile registry semantic identity changed after the one-shot reset was already complete'
   }
   if ($sentinelAfter -ne $sentinelBefore) {
     throw 'userData preservation sentinel changed across installed update'
@@ -451,6 +468,8 @@ try {
     installedExecutable = $installedExecutable
     installedExecutableSha256 = Get-Sha256 $installedExecutable
     manualRelaunchCount = $manualRelaunchCount
+    identityResetCompletedBeforeUpdate = $identityResetBefore
+    identityResetCompletedAfterUpdate = (Test-Path -LiteralPath $identityResetMarker)
     profileRegistrySemanticSha256Before = $registryBefore
     profileRegistrySemanticSha256After = $registryAfter
     preservationSentinelSha256Before = $sentinelBefore
