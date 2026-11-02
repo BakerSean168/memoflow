@@ -106,7 +106,7 @@ test('Profile switch drops old batch feedback and prevents subsequent writes and
   await expect(page.getByTestId('calls')).toHaveText('b:Archived');
 });
 
-test('narrow sidebar preserves search, blank clearing, recovery and separate destructive confirmation', async ({
+test('narrow sidebar preserves search, blank clearing, archive bulk result and separate destructive confirmation', async ({
   page,
 }) => {
   await page.goto('/?narrow=1');
@@ -123,28 +123,25 @@ test('narrow sidebar preserves search, blank clearing, recovery and separate des
   await page.locator('[data-keyboard-item="a"]').click({ button: 'right' });
   await page.getByTestId('conversation-context-status').click();
   await expect(page.getByTestId('conversation-bulk-results')).toContainText('Succeeded');
-  await page.getByTestId('conversation-archive-toggle').click();
-  await page.locator('[data-keyboard-item="a"]').click({ button: 'right' });
-  await expect(page.getByTestId('conversation-context-status')).toHaveText('Restore');
-  await page.getByTestId('conversation-context-status').click();
-  await expect(page.getByTestId('calls')).toContainText('a:Active');
-  await page.getByTestId('conversation-archive-toggle').click();
   await expect(page.getByRole('listbox')).not.toHaveAttribute('aria-busy', 'true');
-  await page.locator('[data-keyboard-item="a"]').click({ modifiers: ['Control'] });
+  // 归档后会话离开侧栏（归档列表与恢复入口在「设置 → AI」，不属本侧栏夹具），
+  // 因此危险删除确认沿用仍可见的会话 b，断言强度与原来一致。
+  await expect(page.locator('[data-keyboard-item="a"]')).toHaveCount(0);
+  await page.locator('[data-keyboard-item="b"]').click({ modifiers: ['Control'] });
   page.once('dialog', async (dialog) => {
     expect(dialog.message()).toContain('cannot be undone');
     await dialog.dismiss();
   });
-  await page.locator('[data-keyboard-item="a"]').click({ button: 'right' });
+  await page.locator('[data-keyboard-item="b"]').click({ button: 'right' });
   await page.getByTestId('conversation-context-delete').click();
   await expect(page.getByTestId('calls')).not.toContainText(':Deleted');
-  await expect(page.locator('[data-keyboard-item="a"]')).toHaveAttribute('aria-selected', 'true');
+  await expect(page.locator('[data-keyboard-item="b"]')).toHaveAttribute('aria-selected', 'true');
   page.once('dialog', async (dialog) => {
     await dialog.accept();
   });
-  await page.locator('[data-keyboard-item="a"]').click({ button: 'right' });
+  await page.locator('[data-keyboard-item="b"]').click({ button: 'right' });
   await page.getByTestId('conversation-context-delete').click();
-  await expect(page.getByTestId('calls')).toContainText('a:Deleted');
+  await expect(page.getByTestId('calls')).toContainText('b:Deleted');
   const width = await page
     .getByTestId('conversation-sidebar')
     .evaluate((el) => ({ client: el.clientWidth, scroll: el.scrollWidth }));

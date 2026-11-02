@@ -259,6 +259,9 @@ watch(
         </ul>
       </details>
       <template #footer>
+        <Button variant="ghost" :disabled="busy" @click="emit('update:open', false)">{{
+          t('shell.profileImport.close')
+        }}</Button>
         <Button v-if="!selected" :disabled="busy || !sourceId" @click="action('prepare')">{{
           t('shell.profileImport.preview')
         }}</Button>

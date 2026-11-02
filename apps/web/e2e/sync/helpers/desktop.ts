@@ -141,8 +141,14 @@ export class DesktopAppController {
     });
 
     const guestWindow = await this.waitForMainWindow();
+    // #801 moved "Manage accounts" out of the account menu and into
+    // Settings -> Account & privacy; the sidebar only links to Settings now.
+    if (await guestWindow.getByTestId('settings-return-to-app').isVisible()) {
+      await guestWindow.getByTestId('settings-return-to-app').click();
+    }
     await guestWindow.getByTestId('shell-account-menu').click();
-    await guestWindow.getByTestId('shell-switch-account').click();
+    await guestWindow.getByTestId('shell-open-settings').click();
+    await guestWindow.getByTestId('settings-tab-account').click();
     await guestWindow.getByTestId('shell-manage-profiles').click();
     await expect(guestWindow.getByTestId('manage-accounts-dialog')).toBeVisible();
 
