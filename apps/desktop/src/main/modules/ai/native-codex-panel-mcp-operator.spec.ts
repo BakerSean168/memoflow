@@ -1,6 +1,9 @@
-import { execFile, execFileSync } from 'node:child_process';
+import { execFile, execFileSync, spawn } from 'node:child_process';
 import { randomUUID } from 'node:crypto';
-import fs, { mkdtemp, copyFile, rm } from 'node:fs/promises';
+import { existsSync, readdirSync, rmSync, statSync } from 'node:fs';
+import fs, { copyFile, mkdir, mkdtemp, rm, writeFile } from 'node:fs/promises';
+import { createRequire } from 'node:module';
+import os from 'node:os';
 import path from 'node:path';
 import { promisify } from 'node:util';
 import { describe, expect, it, vi } from 'vitest';
@@ -12,6 +15,53 @@ import type { IDesktopNativePanelBridge } from './desktop-native-panel-bridge';
 import { createDesktopLocalAgentTools } from './local-agent-tools';
 
 const execFileAsync = promisify(execFile);
+
+type OperatorFs = {
+  existsSync: (target: string) => boolean;
+  rmSync: (target: string, options: object) => void;
+  readdirSync: (target: string, options: object) => unknown;
+  statSync: (target: string) => { size: number };
+};
+
+type OperatorCleanupResult = {
+  removed: boolean;
+  attempts: number;
+  residual: string[];
+  lastError: Error | null;
+};
+
+type OperatorModule = {
+  removeEphemeralHome(
+    root: string | undefined,
+    options?: {
+      fsImpl?: OperatorFs;
+      sleepImpl?: (ms: number) => Promise<void>;
+      maxAttempts?: number;
+      baseDelayMs?: number;
+      maxDelayMs?: number;
+      deadlineMs?: number;
+    },
+  ): Promise<OperatorCleanupResult>;
+  killProcessTree(
+    pid: number,
+    options?: {
+      platform?: string;
+      detached?: boolean;
+      spawnSyncImpl?: (
+        command: string,
+        args: string[],
+        options?: object,
+      ) => { status?: number | null };
+    },
+  ): boolean;
+  waitForChildExit(target: unknown, timeoutMs: number): Promise<boolean>;
+};
+
+// Load the operator as plain CommonJS: its top-level entrypoint is guarded by
+// `require.main === module`, so requiring it only exposes the cleanup helpers.
+const operator = createRequire(import.meta.url)(
+  path.resolve(import.meta.dirname, '../../../../test-support/windows-codex-mcp-operator.cjs'),
+) as OperatorModule;
 
 /**
  * #570 real Windows Codex App Server -> actual local MCP grant -> Desktop tool
@@ -155,4 +205,145 @@ describe('Windows native Codex -> actual MemoFlow panel MCP grant (#570)', () =>
     },
     65_000,
   );
+});
+
+/**
+ * Nightly regression: Windows released the ephemeral CODEX_HOME handles after
+ * the old 6 x 350ms cleanup budget, so `EPHEMERAL_CODEX_HOME_REMOVED` was
+ * false while the product path itself passed. Cleanup must kill the whole
+ * process tree, retry until `existsSync` proves the path is gone, and report
+ * the surviving paths instead of a bare boolean.
+ */
+describe('ephemeral Windows Codex home cleanup', () => {
+  it('removes the ephemeral home and only reports true once the path is gone', async () => {
+    const root = await mkdtemp(path.join(os.tmpdir(), 'mf570-cleanup-'));
+    await mkdir(path.join(root, 'empty-codex-home', 'log'), {
+      recursive: true,
+    });
+    await writeFile(path.join(root, 'empty-codex-home', 'log', 'codex-tui.log'), 'x'.repeat(64));
+
+    const result = await operator.removeEphemeralHome(root);
+
+    expect(result.removed).toBe(true);
+    expect(result.attempts).toBe(1);
+    expect(result.residual).toEqual([]);
+    expect(existsSync(root)).toBe(false);
+  });
+
+  it('keeps retrying a transient lock past the old six-attempt budget', async () => {
+    const root = await mkdtemp(path.join(os.tmpdir(), 'mf570-cleanup-lock-'));
+    await writeFile(path.join(root, 'codex-tui.log'), 'held by another handle');
+    const lockFailures = 9;
+    let failures = 0;
+    const delays: number[] = [];
+    const lockedFs: OperatorFs = {
+      existsSync: (target) => existsSync(target),
+      readdirSync: (target, options) => readdirSync(target, options as { withFileTypes: true }),
+      statSync: (target) => statSync(target),
+      rmSync: (target, options) => {
+        if (failures < lockFailures) {
+          failures += 1;
+          const error = new Error('EBUSY: resource busy or locked') as Error & {
+            code: string;
+          };
+          error.code = 'EBUSY';
+          throw error;
+        }
+        rmSync(target, options as { recursive: true; force: true });
+      },
+    };
+
+    try {
+      const result = await operator.removeEphemeralHome(root, {
+        fsImpl: lockedFs,
+        sleepImpl: async (ms) => {
+          delays.push(ms);
+        },
+      });
+
+      expect(result.removed).toBe(true);
+      // Nine EBUSY attempts would have exhausted the old six-attempt loop.
+      expect(result.attempts).toBe(lockFailures + 1);
+      expect(result.attempts).toBeGreaterThan(6);
+      expect(result.residual).toEqual([]);
+      expect(existsSync(root)).toBe(false);
+      // Backoff grows well past the old fixed 350ms pause.
+      expect(delays[delays.length - 1]).toBe(2_000);
+      expect(delays[delays.length - 1]).toBeGreaterThan(350);
+    } finally {
+      await rm(root, { recursive: true, force: true });
+    }
+  });
+
+  it('reports false and lists residual paths when rmSync leaves the directory behind', async () => {
+    const root = await mkdtemp(path.join(os.tmpdir(), 'mf570-cleanup-residual-'));
+    await writeFile(path.join(root, 'stuck.log'), 'still-here');
+    const stubbornFs: OperatorFs = {
+      // rmSync "succeeds" but the path never disappears, which is exactly why a
+      // non-throwing rmSync must not be treated as proof of removal.
+      existsSync: () => true,
+      readdirSync: (target, options) => readdirSync(target, options as { withFileTypes: true }),
+      statSync: (target) => statSync(target),
+      rmSync: () => {},
+    };
+
+    try {
+      const result = await operator.removeEphemeralHome(root, {
+        fsImpl: stubbornFs,
+        sleepImpl: async () => {},
+        maxAttempts: 3,
+      });
+
+      expect(result.removed).toBe(false);
+      expect(result.attempts).toBe(3);
+      expect(result.residual).toContain('stuck.log (10 bytes)');
+    } finally {
+      await rm(root, { recursive: true, force: true });
+    }
+  });
+
+  it('terminates the whole process tree on Windows instead of only the direct child', () => {
+    const invocations: Array<{ command: string; args: string[] }> = [];
+    const killed = operator.killProcessTree(4321, {
+      platform: 'win32',
+      spawnSyncImpl: (command, args) => {
+        invocations.push({ command, args });
+        return { status: 0 };
+      },
+    });
+
+    expect(killed).toBe(true);
+    expect(invocations).toEqual([{ command: 'taskkill', args: ['/PID', '4321', '/T', '/F'] }]);
+  });
+
+  it('waits for a slow-exiting child before deleting its working directory', async () => {
+    const root = await mkdtemp(path.join(os.tmpdir(), 'mf570-cleanup-slow-'));
+    const child = spawn(
+      process.execPath,
+      [
+        '-e',
+        'process.on("SIGTERM", () => setTimeout(() => process.exit(0), 500)); setInterval(() => {}, 1000);',
+      ],
+      { cwd: root, stdio: 'ignore', windowsHide: true },
+    );
+
+    try {
+      await new Promise((resolve) => setTimeout(resolve, 250));
+      const startedAt = Date.now();
+      child.kill('SIGTERM');
+      expect(await operator.waitForChildExit(child, 5_000)).toBe(true);
+      // SIGTERM is not catchable on Windows, so only assert the delay on POSIX.
+      if (process.platform !== 'win32') {
+        expect(Date.now() - startedAt).toBeGreaterThanOrEqual(400);
+      }
+
+      const result = await operator.removeEphemeralHome(root);
+
+      expect(result.removed).toBe(true);
+      expect(existsSync(root)).toBe(false);
+    } finally {
+      if (child.exitCode === null && child.signalCode === null) child.kill('SIGKILL');
+      await rm(root, { recursive: true, force: true });
+    }
+  });
 });
