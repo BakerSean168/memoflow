@@ -1,4 +1,5 @@
 import { installRoutineUiHost } from '../../di/routine-ui-host';
+import { installAccountUiHost } from '../../di/account-ui-host';
 /** @vitest-environment happy-dom */
 
 import { flushPromises, mount } from '@vue/test-utils';
@@ -20,6 +21,7 @@ import { installNotificationUiHost } from '../../di/notification-ui-host';
 
 installShellTestCleanup();
 installNotificationUiHost();
+installAccountUiHost();
 
 vi.mock('@memoflow/notification-ui', async (importOriginal) => {
   const { ref: vueRef } = await import('vue');

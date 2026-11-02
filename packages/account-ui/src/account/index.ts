@@ -1,4 +1,4 @@
-export { useAccount } from './composables';
+export { useAccount, useAccountSignOut } from './composables';
 export { useAccountStore } from './stores/account-store';
 export type { AccountState } from './stores/account-store';
 export { accountRoutes } from './router';

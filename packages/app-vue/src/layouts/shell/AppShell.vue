@@ -36,7 +36,7 @@ import { useShellRouterSync, AUTO_FOCUS_VIEWPORT, moduleForPath } from './useShe
 import { useDesktopWindowControls } from '../../shared/composables/useDesktopWindowControls';
 import { hasDesktopAuthApi } from '../../shared/utils/desktop-auth-recovery';
 import { useNotificationUnreadQuery } from '@memoflow/notification-ui';
-import { useAccountStore, useAuthenticationStore } from '@memoflow/account-ui';
+import { useAccountSignOut, useAccountStore, useAuthenticationStore } from '@memoflow/account-ui';
 import {
   ConversationSelectionKey,
   createConversationSelectionStore,
@@ -85,7 +85,6 @@ import {
   SHELL_COMPOSER_DENSITY_KEY,
   SHELL_COMPOSER_MOUNT_KEY,
   DESKTOP_ACCESS_SNAPSHOT_KEY,
-  LOGOUT_HANDLER_KEY,
   MODULE_CAPSULES_KEY,
 } from '../../di/keys';
 import { useDeviceKeymap } from '../../shared/keyboard/device-keymap';
@@ -395,7 +394,7 @@ function handleNewConversation() {
 const authStore = useAuthenticationStore();
 const accountStore = useAccountStore();
 const { isAuthenticated } = storeToRefs(authStore);
-const logout = inject(LOGOUT_HANDLER_KEY, null);
+const { isDesktopSignOut, confirmSignOut, executeSignOut } = useAccountSignOut();
 const desktopAccess = inject(DESKTOP_ACCESS_SNAPSHOT_KEY, ref(null));
 useDeviceKeymap(() => authStore.getIdentityId, desktopAccess);
 const cloudConnectionOpen = ref(false);
@@ -912,7 +911,10 @@ function openCloudConnection() {
 
 async function handleLogout() {
   closeOverlaySidebar();
-  await logout?.();
+  // The account menu never confirmed before; only the desktop "退出账号" adds
+  // the dialog, and it is the same one the Settings section uses.
+  if (isDesktopSignOut.value && !(await confirmSignOut())) return;
+  await executeSignOut().catch(() => undefined);
 }
 
 /**

@@ -13,7 +13,6 @@ import {
 import type { App } from 'vue';
 import { ref } from 'vue';
 import { createResultIpcClient } from '@memoflow/ipc-client';
-import { toast } from 'vue-sonner';
 import { getI18nGlobal } from '@memoflow/app-vue/plugins/i18n';
 import { createAccountIpcClient } from '@memoflow/account-client';
 import { createCloudAuthIpcClient } from '@memoflow/cloud-auth';
@@ -64,7 +63,6 @@ import {
   DESKTOP_STARTUP_SERVICE_KEY,
   MODULE_CAPSULES_KEY,
   LOGOUT_HANDLER_KEY,
-  PROFILE_LOCK_HANDLER_KEY,
   DESKTOP_ACCESS_SNAPSHOT_KEY,
   ASSISTANT_SURFACE_KEY,
   defaultModuleCapsules,
@@ -78,7 +76,7 @@ import { clearDesktopServerStateIdentity } from './server-state';
 import { createDesktopStartupService } from './desktop-startup-service';
 import { createDesktopUpdateService } from './desktop-update-service';
 import {
-  ProfileAccessChannels,
+  CloudAuthChannels,
   WindowChannels,
   type DesktopNotificationPreferencePatch,
   type DesktopAccessSnapshot,
@@ -177,37 +175,28 @@ export function installDesktopAppServices(
     .catch((error) => {
       console.warn('[Desktop] Cloud state refresh failed; local access remains available', error);
     });
-  app.provide(PROFILE_LOCK_HANDLER_KEY, async () => {
-    snapshotGeneration++;
-    // 锁定/切换 profile：先清空当前 identity 的 query cache，避免下一 profile 数据闪现。
-    clearDesktopServerStateIdentity(useAccountStore().getCurrentAccountId ?? '');
-    const lockResult = fromIpcResult(
-      (await bridge.invoke(ProfileAccessChannels.LOCK)) as IpcResult<null>,
-    );
-    if (!isOk(lockResult)) throw new Error(getAppT()('common.operationFailed'));
-    const transitionResult = fromIpcResult(
-      (await bridge.invoke(WindowChannels.TRANSITION_TO_PROFILE_ACCESS)) as IpcResult<null>,
-    );
-    if (!isOk(transitionResult)) throw new Error(getAppT()('common.operationFailed'));
-  });
   app.provide(LOGOUT_HANDLER_KEY, async () => {
     snapshotGeneration++;
-    console.info('[Desktop Logout] Handler invoked');
-    // 登出：先清空当前 identity 的 query cache（§3.1）。
+    // 退出账号：先清空当前 identity 的 query cache（§3.1），再由主进程在同一
+    // 生命周期队列里完成云端会话失效 → deactivate → 统一移除。
     clearDesktopServerStateIdentity(useAccountStore().getCurrentAccountId ?? '');
-    try {
-      await bridge.invoke('cloud-auth:sign-out');
-      desktopAccessSnapshot.value = await readDesktopAccessSnapshot(bridge);
-
-      const authStore = useAuthenticationStore();
-      console.info('[Desktop Logout] Resetting auth store');
-      authStore.reset();
-    } catch (error) {
-      console.error('[Desktop Logout] Failed to disconnect cloud account', error);
-      toast.error('退出登录失败', {
-        description: getAppT()('common.operationFailed'),
-      });
-      throw error;
+    const result = fromIpcResult(
+      (await bridge.invoke(CloudAuthChannels.SIGN_OUT_ACCOUNT)) as IpcResult<null>,
+    );
+    if (isOk(result)) {
+      useAuthenticationStore().reset();
+      const transitionResult = fromIpcResult(
+        (await bridge.invoke(WindowChannels.TRANSITION_TO_PROFILE_ACCESS)) as IpcResult<null>,
+      );
+      if (!isOk(transitionResult)) throw new Error(getAppT()('common.operationFailed'));
+      return;
     }
+    // The Profile runtime is already gone; leaving the dead workspace open would
+    // strand the user, so hand them back to the account chooser where the tile
+    // still exists for a retry.
+    if (result.error.code === 'SIGN_OUT_PARTIAL') {
+      await bridge.invoke(WindowChannels.TRANSITION_TO_PROFILE_ACCESS);
+    }
+    throw new Error(getAppT()('common.operationFailed'));
   });
 }

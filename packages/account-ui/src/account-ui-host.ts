@@ -20,8 +20,11 @@ export interface AccountUiHost extends PlatformRendererHost {
   EXTERNAL_AGENT_SERVICE_KEY: InjectionKey<ExternalAgentClientPort>;
   DESKTOP_ACCESS_SNAPSHOT_KEY: InjectionKey<Ref<DesktopAccessSnapshot | null>>;
   DESKTOP_BRIDGE_KEY: InjectionKey<ElectronBridge>;
-  LOGOUT_HANDLER_KEY: InjectionKey<() => void>;
-  PROFILE_LOCK_HANDLER_KEY: InjectionKey<() => Promise<void>>;
+  /**
+   * Execution-only sign-out handler: the host performs the platform sign-out.
+   * Confirmation belongs to {@link useAccountSignOut} so both entries ask once.
+   */
+  LOGOUT_HANDLER_KEY: InjectionKey<() => Promise<void>>;
 
   components: Record<'SettingsSection' | 'SettingsDangerZone', Component>;
 }

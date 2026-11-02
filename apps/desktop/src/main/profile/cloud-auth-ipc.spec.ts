@@ -1,7 +1,7 @@
 import { ipcMain } from 'electron';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { CloudAuthChannels } from '@memoflow/desktop-contracts';
-import { ok } from '@memoflow/transport-contracts/result';
+import { ok, ResultErrorException } from '@memoflow/transport-contracts/result';
 import { registerCloudAuthIpc } from './cloud-auth-ipc';
 
 vi.mock('../utils/api-config', () => ({
@@ -25,6 +25,13 @@ function registerFixture() {
       profileId: 'profile-1',
       cloudBinding: { cloudAccountId: 'account-1' },
     })),
+    signOutActiveProfile: vi.fn(
+      async (
+        invalidate: (descriptor: { profileId: string; profileKind: string }) => Promise<void>,
+      ) => {
+        await invalidate({ profileId: 'profile-1', profileKind: 'registered' });
+      },
+    ),
   };
   const sessions = {
     load: vi.fn(),
@@ -39,6 +46,7 @@ function registerFixture() {
     getStatus: vi.fn().mockReturnValue(ok({ attemptId: '8c7e083e-1b4c-42e6-901f-979d9a7b8b32' })),
     cancel: vi.fn().mockReturnValue(ok(undefined)),
     clearForProfile: vi.fn(),
+    cancelForProfile: vi.fn(),
   };
   const signIn = {
     signIn: vi.fn().mockResolvedValue(ok({ profileId: 'profile-cloud' })),
@@ -75,6 +83,7 @@ describe('registerCloudAuthIpc', () => {
     expect([...handlers.keys()].sort()).toEqual([...Object.values(CloudAuthChannels)].sort());
     expect(Object.keys(CloudAuthChannels)).toEqual([
       'SIGN_OUT',
+      'SIGN_OUT_ACCOUNT',
       'SESSION',
       'SIGN_IN',
       'SIGN_UP',
@@ -201,5 +210,71 @@ describe('registerCloudAuthIpc', () => {
     await vi.waitFor(() => expect(finished).toBe(true), { timeout: 200 });
     expect(sessions.remove).toHaveBeenCalledWith('profile-1');
     expect(runtime.disableCloudSync).toHaveBeenCalledOnce();
+  });
+
+  it('signs out the active account through the runtime and invalidates its cloud session first', async () => {
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue(new Response(null, { status: 200 })));
+    const { handlers, runtime, sessions, cloudConnection } = registerFixture();
+    sessions.load.mockResolvedValue({ token: 'token-1' });
+
+    expect(await handlers.get(CloudAuthChannels.SIGN_OUT_ACCOUNT)?.({})).toEqual({
+      ok: true,
+      data: null,
+    });
+
+    expect(runtime.signOutActiveProfile).toHaveBeenCalledOnce();
+    expect(cloudConnection.cancelForProfile).toHaveBeenCalledWith('profile-1');
+    expect(cloudConnection.clearForProfile).toHaveBeenCalledWith('profile-1');
+    expect(sessions.remove).toHaveBeenCalledWith('profile-1');
+    expect(fetch).toHaveBeenCalledWith(
+      'https://api.memo.test/api/auth/sign-out',
+      expect.objectContaining({
+        headers: expect.objectContaining({ authorization: 'Bearer token-1' }),
+      }),
+    );
+  });
+
+  it('never touches a cloud session when signing out a local account', async () => {
+    const { handlers, runtime, sessions, cloudConnection } = registerFixture();
+    runtime.signOutActiveProfile.mockImplementation(
+      async (
+        invalidate: (descriptor: { profileId: string; profileKind: string }) => Promise<void>,
+      ) => {
+        await invalidate({ profileId: 'profile-1', profileKind: 'local' });
+      },
+    );
+
+    expect(await handlers.get(CloudAuthChannels.SIGN_OUT_ACCOUNT)?.({})).toEqual({
+      ok: true,
+      data: null,
+    });
+
+    expect(cloudConnection.cancelForProfile).toHaveBeenCalledWith('profile-1');
+    expect(sessions.load).not.toHaveBeenCalled();
+    expect(sessions.remove).not.toHaveBeenCalled();
+  });
+
+  it('surfaces a partial removal so the renderer can leave the dead workspace', async () => {
+    const { handlers, runtime } = registerFixture();
+    runtime.signOutActiveProfile.mockRejectedValue(
+      new ResultErrorException('无法删除本地数据', 'SIGN_OUT_PARTIAL'),
+    );
+
+    expect(await handlers.get(CloudAuthChannels.SIGN_OUT_ACCOUNT)?.({})).toEqual({
+      ok: false,
+      error: { code: 'SIGN_OUT_PARTIAL', message: '无法删除本地数据' },
+    });
+  });
+
+  it('reports PROFILE_NOT_ACTIVE when no account is signed in', async () => {
+    const { handlers, runtime } = registerFixture();
+    runtime.signOutActiveProfile.mockRejectedValue(
+      new ResultErrorException('当前没有已登录的账号', 'PROFILE_NOT_ACTIVE'),
+    );
+
+    expect(await handlers.get(CloudAuthChannels.SIGN_OUT_ACCOUNT)?.({})).toMatchObject({
+      ok: false,
+      error: { code: 'PROFILE_NOT_ACTIVE' },
+    });
   });
 });

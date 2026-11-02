@@ -163,7 +163,7 @@
         {
           "runner": "desktop-e2e",
           "file": "apps/desktop/e2e/authentication/desktop-auth-flow.spec.mts",
-          "title": "persistent guest works offline, survives lock, and reopens with edited profile data"
+          "title": "persistent guest keeps edited profile data across restart and signs out to the chooser"
         }
       ]
     },

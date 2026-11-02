@@ -46,10 +46,8 @@ export default {
   logoutHandlerUnavailable: '退出登录服务当前不可用',
   actions: {
     logout: '退出登录',
-    lockProfile: '锁定本地 Profile',
     saveProfile: '保存资料',
   },
-  lockProfileHint: '关闭当前本地数据运行时并返回 Profile 解锁页。云端账号绑定不会被移除。',
   localPassword: {
     title: '本地账户密码',
     description: '本地账户密码是解开本机数据的唯一凭据，与 MemoFlow 云端密码相互独立。',
@@ -127,5 +125,20 @@ export default {
     description: '退出后云端同步会暂停；本地数据不会被锁定或删除。',
     confirmText: '退出登录',
     cancelText: '取消',
+  },
+  signOut: {
+    action: '退出账号',
+    hint: '退出当前账号并从这台设备移除。',
+    confirm: {
+      local: {
+        title: '退出并注销本地账户？',
+        description: '本地账户只存在于这台设备。退出即注销：全部信息将被删除，无法恢复。',
+      },
+      registered: {
+        title: '退出并删除本机账号数据？',
+        description:
+          '将删除这台设备上的相关数据，包括尚未同步的本地修改，删除后无法恢复。账号仍保留在云端，重新登录后可同步回来。',
+      },
+    },
   },
 } as const;

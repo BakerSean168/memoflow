@@ -8,7 +8,7 @@ import {
   type CloudSessionState,
 } from '@memoflow/cloud-auth-contracts';
 import { CloudAuthChannels } from '@memoflow/desktop-contracts';
-import { fail, ok } from '@memoflow/transport-contracts/result';
+import { fail, ok, ResultErrorException } from '@memoflow/transport-contracts/result';
 import { getApiBaseUrl } from '../utils/api-config';
 import type { DesktopProfileRuntimeManager } from './desktop-profile-runtime-manager';
 import type { DeviceAuthCoordinator } from './device-auth-coordinator';
@@ -47,29 +47,53 @@ export function registerCloudAuthIpc(
     });
   });
 
+  /**
+   * Invalidate the cloud side of one Profile and drop the local session file.
+   *
+   * The bearer call is deliberately fire-and-forget with a 10s ceiling: a
+   * network failure must never block the local sign-out that follows.
+   */
+  const disconnectCloudSession = async (profileId: string): Promise<void> => {
+    cloudConnection?.clearForProfile(profileId);
+    const stored = await cloudChecks.clearSession(profileId);
+    if (!stored) return;
+    void fetch(`${authOrigin()}/api/auth/sign-out`, {
+      method: 'POST',
+      headers: {
+        'content-type': 'application/json',
+        authorization: `Bearer ${stored.token}`,
+      },
+      body: '{}',
+      signal: AbortSignal.timeout(10_000),
+    }).catch(() => undefined);
+  };
+
   ipcMain.handle(CloudAuthChannels.SIGN_OUT, async () => {
     const origin = runtime.getActiveProfileDescriptorSync()?.profileId;
     return runtime.runExclusive(async () => {
       const profile = runtime.getActiveProfileDescriptorSync();
       if (profile?.profileId !== origin)
         return fail({ code: 'PROFILE_CHANGED', message: 'Profile 已切换，请在当前 Profile 重试' });
-      if (profile) {
-        cloudConnection?.clearForProfile(profile.profileId);
-        const stored = await cloudChecks.clearSession(profile.profileId);
-        if (stored) {
-          void fetch(`${authOrigin()}/api/auth/sign-out`, {
-            method: 'POST',
-            headers: {
-              'content-type': 'application/json',
-              authorization: `Bearer ${stored.token}`,
-            },
-            body: '{}',
-            signal: AbortSignal.timeout(10_000),
-          }).catch(() => undefined);
-        }
-      }
+      if (profile) await disconnectCloudSession(profile.profileId);
       return ok(undefined);
     });
+  });
+
+  ipcMain.handle(CloudAuthChannels.SIGN_OUT_ACCOUNT, async () => {
+    try {
+      await runtime.signOutActiveProfile(async (descriptor) => {
+        // A pending device-code attempt belongs to the account being removed.
+        cloudConnection?.cancelForProfile(descriptor.profileId);
+        if (descriptor.profileKind === 'registered')
+          await disconnectCloudSession(descriptor.profileId);
+      });
+      return ok(null);
+    } catch (error) {
+      return fail({
+        code: error instanceof ResultErrorException ? error.code : 'SIGN_OUT_FAILED',
+        message: error instanceof Error ? error.message : '退出账号失败',
+      });
+    }
   });
 
   ipcMain.handle(CloudAuthChannels.SIGN_IN, async (_event, input: unknown) => {

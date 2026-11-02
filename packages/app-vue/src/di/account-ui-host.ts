@@ -8,7 +8,6 @@ import {
   DESKTOP_BRIDGE_KEY,
   EXTERNAL_AGENT_SERVICE_KEY,
   LOGOUT_HANDLER_KEY,
-  PROFILE_LOCK_HANDLER_KEY,
 } from './keys';
 import { installPlatformRendererHost } from './platform-ui-host';
 
@@ -22,7 +21,6 @@ export function installAccountUiHost(): void {
     DESKTOP_ACCESS_SNAPSHOT_KEY,
     DESKTOP_BRIDGE_KEY,
     LOGOUT_HANDLER_KEY,
-    PROFILE_LOCK_HANDLER_KEY,
     components: {
       SettingsDangerZone,
       SettingsSection,

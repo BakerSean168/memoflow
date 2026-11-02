@@ -627,4 +627,45 @@ describe('DesktopProfileRuntimeManager', () => {
     expect(fs.existsSync(staging)).toBe(false);
     expect(fs.existsSync(profileDir)).toBe(false);
   });
+
+  it('refuses to sign out when no Profile is active', async () => {
+    const invalidate = vi.fn(async () => undefined);
+
+    await expect(runtime.signOutActiveProfile(invalidate)).rejects.toMatchObject({
+      code: 'PROFILE_NOT_ACTIVE',
+    });
+    expect(invalidate).not.toHaveBeenCalled();
+  });
+
+  it('invalidates the cloud session before deactivating, then removes the Profile like the chooser', async () => {
+    const descriptor = await seedRegistered('cloud-sign-out');
+    await runtime.openProfile(descriptor.profileId);
+    const profileDir = path.join(rootDir, 'data', 'profiles', descriptor.profileId);
+    const observed: Array<{ activeId: string | null; stillRegistered: boolean }> = [];
+
+    await runtime.signOutActiveProfile(async (active) => {
+      observed.push({
+        activeId: runtime.getActiveProfileId(),
+        stillRegistered: (await registry.list()).some(
+          (profile) => profile.profileId === active.profileId,
+        ),
+      });
+    });
+
+    expect(observed).toEqual([{ activeId: descriptor.profileId, stillRegistered: true }]);
+    expect(runtime.getActiveProfileId()).toBeNull();
+    expect(await registry.findByCloudAccountId('cloud-sign-out')).toBeNull();
+    expect(fs.existsSync(profileDir)).toBe(false);
+  });
+
+  it('reports SIGN_OUT_PARTIAL when the deactivated Profile cannot be removed', async () => {
+    await openSeeded('cloud-partial');
+    vi.spyOn(registry, 'remove').mockRejectedValueOnce(new Error('disk full'));
+
+    await expect(runtime.signOutActiveProfile(async () => undefined)).rejects.toMatchObject({
+      code: 'SIGN_OUT_PARTIAL',
+      message: 'disk full',
+    });
+    expect(runtime.getActiveProfileId()).toBeNull();
+  });
 });

@@ -90,9 +90,7 @@ export const AI_WORKFLOW_RUNTIME_KEY: InjectionKey<IWorkflowRuntimeService> =
  */
 export const MODULE_CAPSULES_KEY: InjectionKey<ModuleCapsule[]> = Symbol('ModuleCapsules');
 export const USER_NAME_KEY: InjectionKey<string> = Symbol('UserName');
-export const LOGOUT_HANDLER_KEY: InjectionKey<() => void> = Symbol('LogoutHandler');
-export const PROFILE_LOCK_HANDLER_KEY: InjectionKey<() => Promise<void>> =
-  Symbol('ProfileLockHandler');
+export const LOGOUT_HANDLER_KEY: InjectionKey<() => Promise<void>> = Symbol('LogoutHandler');
 export const DESKTOP_ACCESS_SNAPSHOT_KEY: InjectionKey<Ref<DesktopAccessSnapshot | null>> =
   Symbol('DesktopAccessSnapshot');
 

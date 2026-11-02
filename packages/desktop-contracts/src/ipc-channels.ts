@@ -119,6 +119,11 @@ export const ProfileAccessChannels = {
 
 export const CloudAuthChannels = {
   SIGN_OUT: 'cloud-auth:sign-out',
+  /**
+   * "退出账号": the in-app action that ends the active account. It reuses the
+   * SIGN_OUT cloud hand-off, then deactivates and removes the active Profile.
+   */
+  SIGN_OUT_ACCOUNT: 'cloud-auth:sign-out-account',
   SESSION: 'cloud-auth:session',
   /** Email/password sign-in from the identity window (no active Profile yet). */
   SIGN_IN: 'cloud-auth:sign-in',

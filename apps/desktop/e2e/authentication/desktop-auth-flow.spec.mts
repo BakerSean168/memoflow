@@ -281,7 +281,7 @@ test('native Goal checkpoint survives an Electron restart and saves once through
   }
 });
 
-test('persistent guest works offline, survives lock, and reopens with edited profile data', async () => {
+test('persistent guest keeps edited profile data across restart and signs out to the chooser', async () => {
   const runtimeRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'memoflow-desktop-e2e-'));
   const userDataPath = path.join(runtimeRoot, 'user-data');
   let electronApp: ElectronApplication | null = null;
@@ -303,10 +303,31 @@ test('persistent guest works offline, survives lock, and reopens with edited pro
     await expect(mainWindow.getByText('个人资料已更新', { exact: true })).toBeVisible();
     await mainWindow.getByTestId('settings-return-to-app').click();
     await expect(mainWindow.getByTestId('shell-account-name')).toHaveText(localProfileName);
-    await mainWindow.getByTestId('shell-account-menu').click();
-    await mainWindow.getByTestId('shell-open-settings').click();
-    await mainWindow.getByTestId('settings-tab-account').click();
-    await expect(mainWindow.getByTestId('account-lock-profile-button')).toBeVisible();
+    const profileDirectories = fs
+      .readdirSync(path.join(userDataPath, 'data', 'profiles'), {
+        withFileTypes: true,
+      })
+      .filter((entry) => entry.isDirectory() && entry.name.startsWith('p_'));
+    expect(profileDirectories).toHaveLength(1);
+
+    // A restart alone proves persistence: there is no lock/unlock step any more.
+    await electronApp.close();
+    electronApp = await launchDesktop(userDataPath);
+    const restartedMainWindow = await electronApp.firstWindow();
+    captureRendererConsole(restartedMainWindow);
+    await expect(restartedMainWindow.getByTestId('app-shell')).toBeVisible();
+    await expect(restartedMainWindow.getByTestId('shell-account-name')).toHaveText(
+      localProfileName,
+    );
+
+    // "退出账号" is the only account exit: it removes the last Profile and lands
+    // the user on the chooser's empty state.
+    const removedProfileId = readRegistry(userDataPath).activeProfileId;
+    expect(removedProfileId).not.toBeNull();
+    await restartedMainWindow.getByTestId('shell-account-menu').click();
+    await restartedMainWindow.getByTestId('shell-open-settings').click();
+    await restartedMainWindow.getByTestId('settings-tab-account').click();
+    await expect(restartedMainWindow.getByTestId('account-logout-button')).toBeVisible();
 
     const profilePickerPromise = electronApp.waitForEvent('window', {
       predicate: async (window) => {
@@ -322,42 +343,21 @@ test('persistent guest works offline, survives lock, and reopens with edited pro
       },
       timeout: 60_000,
     });
-    await mainWindow.getByTestId('account-lock-profile-button').click();
+    await restartedMainWindow.getByTestId('account-logout-button').click();
+    await expect(restartedMainWindow.getByTestId('global-confirm-dialog')).toContainText(
+      '退出并注销本地账户？',
+    );
+    await restartedMainWindow.getByTestId('global-confirm-confirm').click();
 
     const profilePicker = await profilePickerPromise;
     captureRendererConsole(profilePicker);
-    const profileButton = profilePicker.locator('[data-testid^="desktop-profile-open-"]');
-    await expect(profileButton).toContainText(localProfileName);
-
-    const reopenedMainWindowPromise = electronApp.waitForEvent('window', {
-      predicate: async (window) => {
-        try {
-          await window.getByTestId('app-shell').waitFor({ state: 'visible', timeout: 45_000 });
-          return true;
-        } catch {
-          return false;
-        }
-      },
-      timeout: 60_000,
-    });
-    await profileButton.click();
-    const reopenedMainWindow = await reopenedMainWindowPromise;
-    await expect(reopenedMainWindow.getByTestId('shell-account-name')).toHaveText(localProfileName);
-    const profileDirectories = fs
-      .readdirSync(path.join(userDataPath, 'data', 'profiles'), {
-        withFileTypes: true,
-      })
-      .filter((entry) => entry.isDirectory() && entry.name.startsWith('p_'));
-    expect(profileDirectories).toHaveLength(1);
-
-    await electronApp.close();
-    electronApp = await launchDesktop(userDataPath);
-    const restartedMainWindow = await electronApp.firstWindow();
-    captureRendererConsole(restartedMainWindow);
-    await expect(restartedMainWindow.getByTestId('app-shell')).toBeVisible();
-    await expect(restartedMainWindow.getByTestId('shell-account-name')).toHaveText(
-      localProfileName,
-    );
+    await expect(profilePicker.getByTestId('desktop-profile-access')).toBeVisible();
+    await expect(profilePicker.getByTestId('desktop-profile-create')).toBeVisible();
+    await expect(profilePicker.locator('[data-testid^="desktop-profile-open-"]')).toHaveCount(0);
+    await expect.poll(() => readRegistry(userDataPath).profiles).toHaveLength(0);
+    expect(
+      fs.existsSync(path.join(userDataPath, 'data', 'profiles', removedProfileId as string)),
+    ).toBe(false);
   } finally {
     await electronApp?.close();
     fs.rmSync(runtimeRoot, { recursive: true, force: true });
