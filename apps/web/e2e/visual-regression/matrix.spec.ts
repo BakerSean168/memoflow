@@ -106,17 +106,18 @@ for (const theme of ['light', 'dark'] as const) {
         expect(await geometry(input)).toEqual(inputBefore);
         await page.keyboard.press('Shift+Tab');
         await expect(input).toBeFocused();
-        // Tailwind ring-0 still emits zero-width shadow layers in computed style.
-        // Reject visible (>0px) shadow borders while preserving subtle focus fill.
-        const focusedStyle = await input.evaluate((el) => {
-          const style = getComputedStyle(el);
-          return { boxShadow: style.boxShadow, backgroundColor: style.backgroundColor };
-        });
-        expect(focusedStyle.boxShadow).not.toMatch(/\s[1-9]\d*px\b/);
+        // :focus-visible matching commits in a later rendering lifecycle update, so a single
+        // computed-style read right after focus can still report the unfocused style.
         if (owner !== 'schedule') {
           // ProductAutoTextarea has a faint fill; native Schedule inputs use a caret.
-          expect(focusedStyle.backgroundColor).not.toBe('rgba(0, 0, 0, 0)');
+          await expect
+            .poll(() => input.evaluate((el) => getComputedStyle(el).backgroundColor))
+            .not.toBe('rgba(0, 0, 0, 0)');
         }
+        // Tailwind ring-0 still emits zero-width shadow layers in computed style.
+        // Reject visible (>0px) shadow borders while preserving subtle focus fill.
+        const focusedShadow = await input.evaluate((el) => getComputedStyle(el).boxShadow);
+        expect(focusedShadow).not.toMatch(/\s[1-9]\d*px\b/);
         const draft = `验收 ${owner} ${width}`;
         await input.fill(draft);
         await expect(input).not.toHaveAttribute('aria-invalid', 'true');
