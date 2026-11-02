@@ -303,7 +303,7 @@ test('release Windows updater uses selected immutable source tests while standal
   assert.match(workflow, /ref: \$\{\{ inputs\.ref \|\| github\.sha \}\}/u);
   assert.doesNotMatch(workflow, /path: release-qa-harness/u);
   assert.match(workflow, /git fetch --no-tags origin \$env:QA_OVERLAY_SHA/u);
-  assert.match(workflow, /windows-installed-update:[\s\S]*?timeout-minutes: 45/u);
+  assert.match(workflow, /windows-installed-update:[\s\S]*?timeout-minutes: 50/u);
   const overlay = workflowStep(workflow, 'Overlay only acceptance scripts from newer QA tooling');
   assert.match(overlay, /git diff --name-only \$env:RELEASE_SOURCE_SHA \$env:QA_OVERLAY_SHA/u);
   assert.match(overlay, /git show \$revisionPath/u);
