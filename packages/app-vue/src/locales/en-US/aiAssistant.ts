@@ -336,7 +336,6 @@ export default {
       },
       goalCreate: {
         title: 'Plan a goal',
-        description: 'Clarify scope, success criteria, and timing, then draft a structured goal.',
         prefill: 'Help me plan a goal:',
       },
       knowledgeGenerate: {
@@ -346,18 +345,14 @@ export default {
       },
       knowledgeCapture: {
         title: 'Capture knowledge',
-        description: 'Review a durable note draft from the conversation before saving.',
         prefill: 'Capture the following as knowledge:',
       },
       knowledgeQa: {
         title: 'Ask knowledge base',
-        description: 'Ask from indexed notes; grounded answers include citations.',
         prefill: 'Using my knowledge base, answer:',
       },
       taskCreate: {
         title: 'Create a task',
-        description:
-          'Draft a task with an optional goal link, then review and confirm the durable workflow.',
         prefill: 'Help me create a task:',
       },
     },

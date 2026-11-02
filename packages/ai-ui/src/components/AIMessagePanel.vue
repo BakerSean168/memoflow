@@ -376,7 +376,6 @@
               :key="entry.mode"
               type="button"
               class="group flex items-start gap-2.5 rounded-xl bg-[hsl(var(--surface-raised)/0.28)] px-3 py-2.5 text-left text-[13px] text-[hsl(var(--foreground-muted))] shadow-[inset_0_0_0_1px_hsl(var(--border-subtle)/0.32)] transition-[background-color,box-shadow,color,transform] duration-150 hover:-translate-y-px hover:bg-[hsl(var(--surface-raised)/0.72)] hover:text-foreground hover:shadow-[inset_0_0_0_1px_hsl(var(--border-subtle)/0.72),0_6px_18px_-14px_rgba(0,0,0,0.55)]"
-              :title="t(`aiAssistant.chatPage.shortcuts.${entry.localeKey}.description`)"
               :data-testid="`ai-welcome-entry-${entry.mode}`"
               @click="$emit('select-shortcut', entry.mode)"
             >
@@ -388,11 +387,6 @@
               <span class="min-w-0 flex-1">
                 <span class="block truncate font-medium text-foreground">
                   {{ t(`aiAssistant.chatPage.shortcuts.${entry.localeKey}.title`) }}
-                </span>
-                <span
-                  class="mt-0.5 block truncate text-[11px] leading-4 text-[hsl(var(--foreground-subtle))]"
-                >
-                  {{ t(`aiAssistant.chatPage.shortcuts.${entry.localeKey}.description`) }}
                 </span>
               </span>
             </button>
