@@ -703,7 +703,18 @@ test('local account copy preview persists across restart and waits for local con
         value: async () => undefined,
       }),
     );
-    const guest = await registerLocalProfile(app, await app.firstWindow());
+    await registerLocalProfile(app, await app.firstWindow());
+    // Automatic copy invitations may inspect only sources whose keys the user
+    // explicitly remembered. Exercise that permission through the password UI.
+    await app.close();
+    app = await launchDesktop(userData, cloud.origin);
+    await app.evaluate(({ shell }) =>
+      Object.defineProperty(shell, 'openExternal', {
+        configurable: true,
+        value: async () => undefined,
+      }),
+    );
+    const guest = await unlockLocalProfile(app, await app.firstWindow(), undefined, true);
     await expect(guest.getByTestId('app-shell')).toBeVisible();
     const source = readRegistry(userData).profiles[0]!;
     const seeded = await guest.evaluate(async () => {
