@@ -333,7 +333,7 @@ watch(
             {{ selectedModel?.modelName ?? t('aiAssistant.composer.chooseModel') }}
           </span>
           <span
-            v-if="selectedModel"
+            v-if="hasModelTraits"
             class="max-w-12 shrink-0 truncate text-[10px] font-normal opacity-70"
             data-testid="ai-chat-model-effort-label"
             >{{ traitsLabel }}</span
@@ -560,7 +560,7 @@ watch(
             :service-tiers="hasModelTraits ? selectedModel?.serviceTiers : undefined"
             :selected-effort="selectedEffort"
             :selected-service-tier="selectedServiceTier"
-            :disabled="disabled || loading"
+            :disabled="disabled || Boolean(loading)"
             :permission-mode="
               native
                 ? (currentAgent?.nativePermissionMode ?? 'supervised')
