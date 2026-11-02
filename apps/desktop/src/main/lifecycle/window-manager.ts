@@ -85,6 +85,12 @@ export class WindowManager {
     this.startupHidden = hidden;
   }
 
+  /**
+   * True while the login gate was opened from a live session ("Add account").
+   * That session window is kept hidden so closing the gate returns to it.
+   */
+  private returnToActiveSessionOnGateClose = false;
+
   private allowProcessExit = () => false;
   private cleaningUp = false;
   private lifecyclePreference: DesktopLifecyclePreference | null = null;
@@ -261,6 +267,21 @@ export class WindowManager {
       this.profileAccessWindowStateManager?.unmanage();
       this.profileAccessWindowStateManager = null;
       this.profileAccessWindow = null;
+
+      const returnToSession = this.returnToActiveSessionOnGateClose;
+      this.returnToActiveSessionOnGateClose = false;
+
+      // Cancelling "Add account" returns to the session that opened the gate:
+      // that window was hidden, never destroyed, and its scheduler never stopped.
+      if (returnToSession && !this.cleaningUp) {
+        const mainWindow = this.mainWindow;
+        if (mainWindow && !mainWindow.isDestroyed()) {
+          this.desktopFeaturesRuntime?.bindWindow(mainWindow);
+          this.focusMainWindow();
+          return;
+        }
+      }
+
       // 如果没有主窗口且不是在切换过程中，退出应用
       if (!this.mainWindow && !this.isTransitioning) {
         app.quit();
@@ -373,6 +394,17 @@ export class WindowManager {
     logger.info('Transitioning from Profile Access to main window');
 
     try {
+      // A window kept for a cancelled "Add account" gate belongs to the outgoing
+      // Profile; a newly opened Profile must never adopt that renderer.
+      if (this.returnToActiveSessionOnGateClose) {
+        const preserved = this.mainWindow;
+        if (preserved && !preserved.isDestroyed()) {
+          await this.scheduleRuntimeController?.stop();
+          preserved.destroy();
+        }
+        this.returnToActiveSessionOnGateClose = false;
+      }
+
       // 1. 创建主窗口（先不显示）
       const mainWin = this.createMainWindow(profileId, stateFilePath);
 
@@ -416,16 +448,23 @@ export class WindowManager {
     this.isTransitioning = true;
     logger.info('Transitioning from main to Profile Access window');
 
+    // "Add account" opens the login gate over a live session. Cancelling that gate
+    // must return to the session window, so it is hidden but kept — together with
+    // its running scheduler. The lock/sign-out transitions still tear the session
+    // down and keep the existing quit-on-close behavior.
+    const preserveActiveSession = view === 'login' && !targetProfileId && this.hasActiveSession();
+
     try {
       this.mainWindow?.hide();
-      await this.scheduleRuntimeController?.stop();
+      if (!preserveActiveSession) await this.scheduleRuntimeController?.stop();
+      this.returnToActiveSessionOnGateClose = preserveActiveSession;
       const profileAccessWindow = this.createProfileAccessWindow(
         targetProfileId,
         interactive,
         view,
       );
       // Destroy the old renderer before Profile Access can select a different runtime.
-      this.mainWindow?.destroy();
+      if (!preserveActiveSession) this.mainWindow?.destroy();
 
       // 2. 等待 Profile Access 窗口准备好
       await new Promise<void>((resolve) => {
@@ -466,7 +505,9 @@ export class WindowManager {
    * 获取当前活动窗口
    */
   getActiveWindow(): BrowserWindow | null {
-    return this.mainWindow || this.profileAccessWindow;
+    // The identity gate owns the foreground while it is open; a session window
+    // kept for a cancelled "Add account" gate is never revealed underneath it.
+    return this.profileAccessWindow || this.mainWindow;
   }
 
   focusMainWindow(): boolean {
@@ -484,6 +525,16 @@ export class WindowManager {
   }
 
   // ============ Private Methods ============
+
+  /** A live Profile session owns the main window and is still the active runtime. */
+  private hasActiveSession(): boolean {
+    return Boolean(
+      this.mainWindow &&
+      !this.mainWindow.isDestroyed() &&
+      this.activeMainProfileId !== null &&
+      this.runtimeManager?.getActiveProfileId() === this.activeMainProfileId,
+    );
+  }
 
   /**
    * 加载窗口内容
