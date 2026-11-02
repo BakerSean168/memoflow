@@ -567,6 +567,133 @@ describe('RoutineCoachCommandService', () => {
     expect(scheduleChanged).toHaveBeenCalledWith({ identityId: 'i-1', routineId: 'r-1' });
   });
 
+  it('reports an explicit completion to the local runtime before schedule reconciliation', async () => {
+    const truth = occurrenceTruthStore();
+    const occurrence = {
+      id: 'o-elapsed-complete-1',
+      identityId: 'i-1',
+      routineId: 'r-1',
+      occurrenceKey: 'routine:r-1:elapsed:profile-1000:1',
+      triggerKind: 'Elapsed' as const,
+      scheduledFor: null,
+      becameDueAt: 61_000 as never,
+      sourceRevision: 'profile-1000',
+      resolutionState: 'Open' as const,
+      resolvedAt: null,
+      resolutionKind: null,
+      resolutionReason: null,
+    };
+    vi.mocked(truth.findOccurrence).mockResolvedValue(occurrence);
+    vi.mocked(truth.applyInteraction).mockResolvedValue({
+      interaction: {
+        id: 'interaction-elapsed-complete-1',
+        idempotencyKey: 'command-elapsed-complete-1',
+        identityId: 'i-1',
+        routineId: 'r-1',
+        occurrenceKey: occurrence.occurrenceKey,
+        action: 'Completed',
+        actedAt: 70_000 as never,
+        responseLatencyMs: 9_000,
+        snoozeDurationMs: null,
+        metadata: null,
+      },
+      occurrence: {
+        ...occurrence,
+        resolutionState: 'Satisfied',
+        resolvedAt: 70_000 as never,
+        resolutionKind: 'ExplicitComplete',
+      },
+      replayed: false,
+    });
+    const order: string[] = [];
+    const service = createRoutineCoachCommandService({
+      routineProfileStore: profileStore(),
+      runtimeContextStore: createInMemoryRoutineRuntimeContextStore(),
+      temporaryOverrideStore: overrideStore(),
+      occurrenceTruthStore: truth,
+      protocolSessionStore: createInMemoryProtocolSessionStore(),
+      onOccurrenceCompleted: (event) => {
+        order.push('completed');
+        expect(event).toEqual({
+          identityId: 'i-1',
+          routineId: 'r-1',
+          occurrenceKey: occurrence.occurrenceKey,
+          triggerKind: 'Elapsed',
+          at: 70_000,
+        });
+      },
+      onScheduleChanged: () => {
+        order.push('schedule');
+      },
+      now: () => 70_000,
+    });
+
+    await service.respondToOccurrence({
+      commandId: 'command-elapsed-complete-1',
+      identityId: 'i-1',
+      routineId: 'r-1',
+      occurrenceKey: occurrence.occurrenceKey,
+      action: 'complete',
+    });
+
+    expect(order).toEqual(['completed', 'schedule']);
+  });
+
+  it('does not replay runtime completion feedback for an idempotent duplicate', async () => {
+    const truth = occurrenceTruthStore();
+    const occurrence = {
+      id: 'o-elapsed-replay-1',
+      identityId: 'i-1',
+      routineId: 'r-1',
+      occurrenceKey: 'routine:r-1:elapsed:profile-1000:1',
+      triggerKind: 'Elapsed' as const,
+      scheduledFor: null,
+      becameDueAt: 61_000 as never,
+      sourceRevision: 'profile-1000',
+      resolutionState: 'Satisfied' as const,
+      resolvedAt: 70_000 as never,
+      resolutionKind: 'ExplicitComplete' as const,
+      resolutionReason: null,
+    };
+    vi.mocked(truth.findOccurrence).mockResolvedValue(occurrence);
+    vi.mocked(truth.applyInteraction).mockResolvedValue({
+      interaction: {
+        id: 'interaction-elapsed-replay-1',
+        idempotencyKey: 'command-elapsed-replay-1',
+        identityId: 'i-1',
+        routineId: 'r-1',
+        occurrenceKey: occurrence.occurrenceKey,
+        action: 'Completed',
+        actedAt: 70_000 as never,
+        responseLatencyMs: 9_000,
+        snoozeDurationMs: null,
+        metadata: null,
+      },
+      occurrence,
+      replayed: true,
+    });
+    const completed = vi.fn();
+    const service = createRoutineCoachCommandService({
+      routineProfileStore: profileStore(),
+      runtimeContextStore: createInMemoryRoutineRuntimeContextStore(),
+      temporaryOverrideStore: overrideStore(),
+      occurrenceTruthStore: truth,
+      protocolSessionStore: createInMemoryProtocolSessionStore(),
+      onOccurrenceCompleted: completed,
+      now: () => 70_000,
+    });
+
+    await service.respondToOccurrence({
+      commandId: 'command-elapsed-replay-1',
+      identityId: 'i-1',
+      routineId: 'r-1',
+      occurrenceKey: occurrence.occurrenceKey,
+      action: 'complete',
+    });
+
+    expect(completed).not.toHaveBeenCalled();
+  });
+
   it('starts a Pomodoro through the deterministic ProtocolSession runtime', async () => {
     const sessions = createInMemoryProtocolSessionStore();
     const service = createRoutineCoachCommandService({

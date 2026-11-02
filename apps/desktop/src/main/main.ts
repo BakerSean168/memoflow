@@ -304,7 +304,7 @@ async function registerBusinessModules(
     runtime: routineComposed.interventionRuntime,
     host: interventionWindowHost,
     onCommand: async ({ commandId, snapshot, command, at }) => {
-      const receipt = await routineComposed.routineCommandPort.respondToOccurrence({
+      await routineComposed.routineCommandPort.respondToOccurrence({
         commandId,
         identityId: snapshot.identityId,
         routineId: snapshot.routineId,
@@ -314,22 +314,9 @@ async function registerBusinessModules(
         metadata: { surface: 'InterventionWindow' },
         at,
       });
-
-      if (command.action === 'complete') {
-        if (receipt.occurrence.triggerKind === 'ActiveUsage') {
-          routineComposed.activeUsageRuntime.markSatisfied({
-            identityId: snapshot.identityId,
-            routineId: snapshot.routineId,
-            at,
-          });
-        } else if (receipt.occurrence.triggerKind === 'Elapsed') {
-          routineComposed.elapsedRuntime.markSatisfied({
-            identityId: snapshot.identityId,
-            routineId: snapshot.routineId,
-            at,
-          });
-        }
-      }
+      // Elapsed/ActiveUsage lane re-arming is owned by the Routine command
+      // seam (onOccurrenceCompleted), shared with the desktop popup and in-app
+      // notification paths. Do not mark satisfied a second time here.
       if (command.action === 'snooze') {
         // Reload the durable override into runtime gates. The composer preserves
         // the current accumulator snapshot across this refresh.

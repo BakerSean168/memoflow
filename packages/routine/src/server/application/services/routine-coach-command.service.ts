@@ -26,6 +26,7 @@ import type {
   RoutineRuntimeContextStore,
   RoutineTemporaryOverrideStore,
   RoutineOccurrenceTruthStore,
+  RoutineOccurrenceFact,
   RoutineInteractionApplyReceipt,
 } from '../../domain/ports';
 import {
@@ -238,6 +239,19 @@ export interface CreateRoutineCoachCommandServiceOptions {
   readonly temporaryOverrideStore: RoutineTemporaryOverrideStore;
   readonly occurrenceTruthStore: RoutineOccurrenceTruthStore;
   readonly protocolSessionStore: ProtocolSessionStore;
+  /**
+   * Signals that an occurrence was explicitly completed so a host-owned local
+   * runtime (Elapsed/ActiveUsage) can re-arm its lane. Notification, desktop
+   * InterventionWindow and AI all enter through respondToOccurrence, so the
+   * feedback belongs to this command seam rather than to one transport.
+   */
+  readonly onOccurrenceCompleted?: (input: {
+    readonly identityId: string;
+    readonly routineId: string;
+    readonly occurrenceKey: string;
+    readonly triggerKind: RoutineOccurrenceFact['triggerKind'];
+    readonly at: number;
+  }) => void | Promise<void>;
   readonly onOverrideChanged?: (input: {
     readonly identityId: string;
     readonly routineId: string;
@@ -742,6 +756,18 @@ export function createRoutineCoachCommandService(
       });
       if (input.action === 'snooze') {
         await notifyOverrideChanged(input.identityId, input.routineId);
+      }
+      // Completion must reach the local runtime BEFORE any schedule
+      // reconciliation: a refresh triggered below snapshots the lane, and a
+      // stale thresholdSignaled=true would keep it silent until restart.
+      if (input.action === 'complete' && !receipt.replayed) {
+        await options.onOccurrenceCompleted?.({
+          identityId: input.identityId,
+          routineId: input.routineId,
+          occurrenceKey: input.occurrenceKey,
+          triggerKind: receipt.occurrence.triggerKind,
+          at: actedAt,
+        });
       }
       if (input.action === 'complete' || input.action === 'skip') {
         // Durable Elapsed ownership depends on business resolution truth. A
