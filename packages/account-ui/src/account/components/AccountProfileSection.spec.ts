@@ -42,6 +42,7 @@ const i18n = createI18n({
     'en-US': {
       common: { retry: 'Retry', cancel: 'Cancel' },
       errors: { NOT_FOUND: 'Account not found' },
+      auth: { toast: { loggedOut: 'Logged out' } },
       account: {
         center: 'Account',
         description: 'Manage your account.',

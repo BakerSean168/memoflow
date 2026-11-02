@@ -638,7 +638,8 @@ describe('DesktopProfileRuntimeManager', () => {
   });
 
   it('invalidates the cloud session before deactivating, then removes the Profile like the chooser', async () => {
-    const descriptor = await openSeeded('cloud-sign-out');
+    const descriptor = await seedRegistered('cloud-sign-out');
+    await runtime.openProfile(descriptor.profileId);
     const profileDir = path.join(rootDir, 'data', 'profiles', descriptor.profileId);
     const observed: Array<{ activeId: string | null; stillRegistered: boolean }> = [];
 
