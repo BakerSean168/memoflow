@@ -45,3 +45,14 @@ export async function unlockLocalProfile(
   await gate.getByTestId('desktop-profile-remember').setChecked(remember);
   return workspaceAfter(app, () => gate.getByTestId('desktop-profile-enter').click());
 }
+
+export async function selectRememberedProfile(
+  app: ElectronApplication,
+  gate: Page,
+  profileId?: string,
+): Promise<Page> {
+  await expect(gate.getByTestId('desktop-profile-access')).toBeVisible();
+  return workspaceAfter(app, () => profileId
+    ? gate.getByTestId(`desktop-profile-open-${profileId}`).click()
+    : gate.locator('[data-testid^="desktop-profile-open-"]').first().click());
+}
