@@ -5,6 +5,9 @@ export type PermissionPreset = 'read_only' | 'confirm_each' | 'on_demand' | 'ful
 export type PermissionDecision = 'allow' | 'ask' | 'deny';
 export type PermissionRuleEffect = PermissionDecision;
 
+/** Issue #762 default: a call affecting more than this many objects is bulk. */
+export const DEFAULT_BULK_THRESHOLD = 10;
+
 export interface PermissionRule {
   id: string;
   agentId: string | null;
@@ -75,6 +78,10 @@ export interface PermissionContext {
     Record<PermissionObject, Partial<Record<PermissionAction, PermissionDecision>>>
   >;
   now?: number;
+  /** How many objects this single call affects; enables dynamic bulk risk. */
+  itemCount?: number;
+  /** Per-evaluation override for {@link DEFAULT_BULK_THRESHOLD}. */
+  bulkThreshold?: number;
 }
 
 export interface PermissionEvaluation {
@@ -121,6 +128,16 @@ export function evaluatePermission(context: PermissionContext): PermissionEvalua
   const operation = getPermissionOperation(context.operationId);
   if (!operation) return { decision: 'deny', reason: 'unregistered' };
   const operationView = { ...operation, risks: operation.risks ?? [] };
+  // Issue #762: one call affecting more objects than the threshold is bulk by
+  // nature, even when the operation itself is statically unremarkable. Reads are
+  // exempt because they consume no data. Only the strict greater-than boundary
+  // escalates, so `itemCount === threshold` stays an ordinary call.
+  const bulk =
+    context.itemCount !== undefined &&
+    context.itemCount > (context.bulkThreshold ?? DEFAULT_BULK_THRESHOLD) &&
+    operation.action !== 'read';
+  if (bulk && !operationView.risks.includes('bulk'))
+    operationView.risks = [...operationView.risks, 'bulk'];
   if (operation.object === 'ai_permission')
     return {
       decision: 'deny',
