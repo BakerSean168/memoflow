@@ -14,11 +14,7 @@
 
 import { z } from 'zod';
 import type { RequestHandler } from 'express';
-import {
-  type RouteRegistrar,
-  successResponse,
-  errorResponse,
-} from '@memoflow/utils/result';
+import { type RouteRegistrar, successResponse, errorResponse } from '@memoflow/utils/result';
 // Residual 989: sole parseString/parseNumber (local dual retired).
 // Residual 1021: sole parseBoolean (local dual retired).
 import { parseBoolean, parseNumber, parseString } from '@memoflow/utils/shared';
