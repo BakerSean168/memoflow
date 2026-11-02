@@ -100,7 +100,7 @@ async function selectMenuItem(testId: string) {
 }
 
 describe('ConversationSidebar attention', () => {
-  it('archives without confirmation and exposes searchable recovery with guarded pending rows', async () => {
+  it('archives without confirmation and guards pending rows', async () => {
     const originalConfirm = window.confirm;
     const confirm = vi.fn();
     window.confirm = confirm;
@@ -109,7 +109,6 @@ describe('ConversationSidebar attention', () => {
         groups,
         activeConversationId: 'b',
         conversationStatuses: { a: 'working' },
-        archivedConversations: [{ id: 'old', title: 'Archived history' }],
       },
       global: { plugins: [i18n] },
     });
@@ -133,11 +132,7 @@ describe('ConversationSidebar attention', () => {
       expect(wrapper.emitted('archive-conversation')).toEqual([['b']]);
       expect(wrapper.emitted('select-conversation')).toBeUndefined();
       expect(confirm).not.toHaveBeenCalled();
-      await wrapper.get('[data-testid="conversation-archive-toggle"]').trigger('click');
-      expect(wrapper.text()).toContain('Archived history');
-      expect(wrapper.text()).not.toContain('Training plan');
-      await wrapper.get('[data-testid="conversation-restore"]').trigger('click');
-      expect(wrapper.emitted('restore-conversation')).toEqual([['old']]);
+      expect(wrapper.find('[data-testid="conversation-archive-toggle"]').exists()).toBe(false);
     } finally {
       window.confirm = originalConfirm;
       wrapper.unmount();
@@ -281,6 +276,37 @@ describe('ConversationSidebar mouse and batch selection', () => {
       wrapper.unmount();
     }
   });
+  it.each([{ ids: ['a'] }, { ids: ['a', 'b'] }])(
+    'removes deleted rows without persistent success residue ($ids)',
+    async ({ ids }) => {
+      const bulkAction = vi.fn(async (_action: string, selected: string[]) => {
+        await wrapper.setProps({
+          groups: groups.map((group) => ({
+            ...group,
+            items: group.items.filter((item) => !selected.includes(item.id)),
+          })),
+        });
+        return selected.map((id) => ({ id, success: true }));
+      });
+      const wrapper = mount(ConversationSidebar, {
+        attachTo: document.body,
+        props: { groups, activeConversationId: null, bulkAction },
+        global: { plugins: [i18n] },
+      });
+      try {
+        for (const id of ids)
+          await wrapper.get(`[data-keyboard-item="${id}"]`).trigger('click', { ctrlKey: true });
+        await openRowMenu(wrapper, ids[0]!);
+        await selectMenuItem('conversation-context-delete');
+        expect(bulkAction).toHaveBeenCalledWith('delete', ids);
+        for (const id of ids)
+          expect(wrapper.find(`[data-keyboard-item="${id}"]`).exists()).toBe(false);
+        expect(wrapper.find('[data-testid="conversation-bulk-results"]').exists()).toBe(false);
+      } finally {
+        wrapper.unmount();
+      }
+    },
+  );
   it('reports each result, retains failed selection, and ignores stale Profile completions', async () => {
     let finish!: (value: { id: string; success: boolean }[]) => void;
     const bulkAction = vi.fn(
@@ -291,7 +317,12 @@ describe('ConversationSidebar mouse and batch selection', () => {
     );
     const wrapper = mount(ConversationSidebar, {
       attachTo: document.body,
-      props: { groups, activeConversationId: null, activeProfileId: 'one', bulkAction },
+      props: {
+        groups,
+        activeConversationId: null,
+        activeProfileId: 'one',
+        bulkAction,
+      },
       global: { plugins: [i18n] },
     });
     await wrapper.get('[data-keyboard-item="a"]').trigger('click', { ctrlKey: true });
@@ -383,7 +414,12 @@ describe('ConversationSidebar account menu', () => {
   async function openMenu(props = {}) {
     const wrapper = mount(ConversationSidebar, {
       attachTo: document.body,
-      props: { groups: [], activeConversationId: null, userName: 'Alice', ...props },
+      props: {
+        groups: [],
+        activeConversationId: null,
+        userName: 'Alice',
+        ...props,
+      },
       global: { plugins: [i18n] },
     });
     await wrapper.get('[data-testid="shell-account-menu"]').trigger('keydown', { key: 'Enter' });
@@ -403,7 +439,11 @@ describe('ConversationSidebar account menu', () => {
   ] as const)(
     'shows the conditional action for %s and hides desktop actions on web',
     async (identityKind, cloudConnected, action, label) => {
-      const wrapper = await openMenu({ identityKind, cloudConnected, isDesktop: false });
+      const wrapper = await openMenu({
+        identityKind,
+        cloudConnected,
+        isDesktop: false,
+      });
       try {
         expect(item('shell-account-identity').textContent?.match(/Alice/g)).toHaveLength(1);
         expect(item('shell-open-settings')).toBeTruthy();
@@ -465,7 +505,11 @@ describe('ConversationSidebar account menu', () => {
       remembered: false,
       lastActiveAt: index,
     }));
-    const wrapper = await openMenu({ isDesktop: true, profiles, activeProfileId: 'id-2' });
+    const wrapper = await openMenu({
+      isDesktop: true,
+      profiles,
+      activeProfileId: 'id-2',
+    });
     try {
       item('shell-switch-account').focus();
       item('shell-switch-account').dispatchEvent(
@@ -603,28 +647,5 @@ describe('ConversationSidebar T3 Code row interactions', () => {
     } finally {
       wrapper.unmount();
     }
-  });
-
-  it('keeps the archived view behind a toolbar icon and restores from the row slot', async () => {
-    const wrapper = mount(ConversationSidebar, {
-      props: {
-        groups,
-        activeConversationId: null,
-        archivedConversations: [{ id: 'old', title: 'Old' }],
-      },
-      global: { plugins: [i18n] },
-    });
-    const toggle = wrapper
-      .get('[data-testid="conversation-toolbar"]')
-      .get('[data-testid="conversation-archive-toggle"]');
-    expect(toggle.attributes('aria-pressed')).toBe('false');
-    expect(toggle.text()).toBe('');
-    await toggle.trigger('click');
-    expect(toggle.attributes('aria-pressed')).toBe('true');
-    const restore = wrapper.get('[data-testid="conversation-restore"]');
-    expect(restore.classes()).toContain('opacity-0');
-    await restore.trigger('click');
-    expect(wrapper.emitted('restore-conversation')).toEqual([['old']]);
-    wrapper.unmount();
   });
 });

@@ -6,7 +6,7 @@ import { flushPromises, mount } from '@vue/test-utils';
 import { createPinia, setActivePinia } from 'pinia';
 import { createI18n } from 'vue-i18n';
 import { createMemoryHistory, createRouter } from 'vue-router';
-import { defineComponent, h, nextTick, onMounted, ref } from 'vue';
+import { defineComponent, h, nextTick, onMounted, reactive, ref } from 'vue';
 import { beforeEach, describe, expect, it, onTestFinished, vi } from 'vitest';
 import { DESKTOP_UPDATE_SERVICE_KEY } from '../../di/keys';
 import type { DesktopUpdateService } from '../../di/types';
@@ -68,10 +68,17 @@ const passThrough = (name: string) =>
   });
 
 const activeChatConversationId = ref<string | null>(null);
-const conversationList = [
-  { id: 'conversation-a', title: 'A' },
-  { id: 'conversation-b', title: 'B' },
-];
+const conversationList = reactive<{ id: string; title?: string; name?: string; status?: string }[]>(
+  [
+    { id: 'conversation-a', title: 'A' },
+    { id: 'conversation-b', title: 'B' },
+  ],
+);
+const restoreConversation = vi.fn(async (id: string) => {
+  const item = conversationList.find((item) => item.id === id);
+  if (item) item.status = 'Active';
+  return true;
+});
 const selectConversation = vi.fn(async (summary: { id: string }) => {
   activeChatConversationId.value = summary.id;
 });
@@ -92,6 +99,7 @@ const AIChatViewStub = defineComponent({
       selectConversation,
       startNewConversation,
       deleteConversation,
+      restoreConversation,
     });
 
     return () => h('div', { 'data-testid': 'ai-chat-view' });
@@ -209,7 +217,12 @@ async function mountShell(
       { path: '/goals', component: GoalRouteProbe },
       {
         path: '/settings',
-        components: { settings: { template: '<div data-testid="settings-view" />' } },
+        components: {
+          settings: {
+            template:
+              '<div data-testid="settings-view"><slot name="archived-conversations" /></div>',
+          },
+        },
         meta: { shellScene: 'settings' },
       },
     ],
@@ -757,6 +770,27 @@ describe('AppShell right-panel integration', () => {
     expect(store.activeTab?.route).toBe('/goals');
     expect(goalRouteMountCount).toBe(1);
     wrapper.unmount();
+  });
+
+  it('shows archived conversations in settings and restores through the existing session', async () => {
+    conversationList.push({ id: 'archived-test', name: 'Archived test', status: 'Archived' });
+    const { wrapper, router } = await mountShell('/goals');
+    try {
+      await router.push('/settings?tab=ai');
+      await flushPromises();
+      const section = wrapper.get('[data-testid="settings-archived-conversations"]');
+      expect(section.text()).toContain('Archived test');
+      await section.get('[data-testid="settings-restore-conversation"]').trigger('click');
+      await flushPromises();
+      expect(restoreConversation).toHaveBeenCalledWith('archived-test');
+      expect(section.text()).not.toContain('Archived test');
+    } finally {
+      wrapper.unmount();
+      conversationList.splice(
+        conversationList.findIndex((item) => item.id === 'archived-test'),
+        1,
+      );
+    }
   });
 
   it('keeps the workspace and AI instance mounted while the settings scene is active', async () => {

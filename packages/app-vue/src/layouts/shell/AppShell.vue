@@ -1130,7 +1130,52 @@ onBeforeUnmount(() => {
           {{ t('shell.account.manageProfiles') }}
         </button>
         <div class="min-h-0 flex-1">
-          <router-view name="settings" />
+          <router-view name="settings" v-slot="{ Component }">
+            <component :is="Component">
+              <template #archived-conversations>
+                <section class="space-y-3" data-testid="settings-archived-conversations">
+                  <h2 class="text-lg font-semibold">{{ t('shell.conversation.archived') }}</h2>
+                  <p v-if="!archivedConversations.length" class="text-sm text-muted-foreground">
+                    {{ t('aiAssistant.dialogs.chat.noSavedConversations') }}
+                  </p>
+                  <ul class="space-y-2">
+                    <li
+                      v-for="item in archivedConversations"
+                      :key="item.id"
+                      class="flex items-center gap-3"
+                    >
+                      <span class="min-w-0 flex-1 truncate">{{ item.title }}</span>
+                      <button
+                        type="button"
+                        class="rounded border px-3 py-1 text-sm focus-visible:ring-2 focus-visible:ring-ring"
+                        :disabled="aiRef?.conversationListLoading"
+                        data-testid="settings-restore-conversation"
+                        @click="handleRestoreConversation(item.id)"
+                      >
+                        {{ t('shell.conversation.restore') }}
+                      </button>
+                    </li>
+                  </ul>
+                  <div class="flex justify-between text-sm">
+                    <button
+                      type="button"
+                      :disabled="(aiRef?.archivePage ?? 1) <= 1 || aiRef?.conversationListLoading"
+                      @click="handleChangeArchivePage(-1)"
+                    >
+                      {{ t('shell.conversation.previousPage') }}
+                    </button>
+                    <button
+                      type="button"
+                      :disabled="!aiRef?.archiveHasMore || aiRef?.conversationListLoading"
+                      @click="handleChangeArchivePage(1)"
+                    >
+                      {{ t('shell.conversation.nextPage') }}
+                    </button>
+                  </div>
+                </section>
+              </template>
+            </component>
+          </router-view>
         </div>
       </div>
     </StandaloneSettingsLayout>
@@ -1162,16 +1207,11 @@ onBeforeUnmount(() => {
             <ConversationSidebar
               class="h-full w-full"
               :groups="conversationGroups"
-              :archived-conversations="archivedConversations"
-              :archive-page="aiRef?.archivePage ?? 1"
-              :archive-has-more="aiRef?.archiveHasMore ?? false"
               @rename-conversation="(id, name) => aiRef?.renameConversation(id, name)"
               @regenerate-title="(id) => aiRef?.regenerateConversationTitle(id)"
               :title-busy="aiRef?.titleBusy"
               :bulk-action="handleBulkConversationAction"
               @archive-conversation="handleArchiveConversation"
-              @restore-conversation="handleRestoreConversation"
-              @change-archive-page="handleChangeArchivePage"
               @refresh-conversations="aiRef?.loadConversationList()"
               :conversation-statuses="conversationStatuses"
               :profiles="desktopProfiles"
@@ -1350,16 +1390,11 @@ onBeforeUnmount(() => {
           <ConversationSidebar
             class="h-full w-full"
             :groups="conversationGroups"
-            :archived-conversations="archivedConversations"
-            :archive-page="aiRef?.archivePage ?? 1"
-            :archive-has-more="aiRef?.archiveHasMore ?? false"
             @rename-conversation="(id, name) => aiRef?.renameConversation(id, name)"
             @regenerate-title="(id) => aiRef?.regenerateConversationTitle(id)"
             :title-busy="aiRef?.titleBusy"
             :bulk-action="handleBulkConversationAction"
             @archive-conversation="handleArchiveConversation"
-            @restore-conversation="handleRestoreConversation"
-            @change-archive-page="handleChangeArchivePage"
             @refresh-conversations="aiRef?.loadConversationList()"
             :conversation-statuses="conversationStatuses"
             :profiles="desktopProfiles"

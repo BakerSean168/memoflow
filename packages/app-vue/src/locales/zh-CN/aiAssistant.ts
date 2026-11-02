@@ -308,7 +308,6 @@ export default {
       },
       goalCreate: {
         title: '规划一个目标',
-        description: '用对话澄清范围、成功标准与时间，再生成结构化草稿。',
         prefill: '帮我规划一个目标：',
       },
       knowledgeGenerate: {
@@ -318,17 +317,14 @@ export default {
       },
       knowledgeCapture: {
         title: '捕获知识',
-        description: '从对话中审阅一篇持久化笔记草稿后再保存。',
         prefill: '帮我把下面内容捕获为知识：',
       },
       knowledgeQa: {
         title: '问知识库',
-        description: '基于已索引笔记提问，有证据时会带引用。',
         prefill: '基于我的知识库，回答：',
       },
       taskCreate: {
         title: '创建一个任务',
-        description: '起草任务并可关联目标，经持久化工作流确认后创建。',
         prefill: '帮我创建一个任务：',
       },
     },
