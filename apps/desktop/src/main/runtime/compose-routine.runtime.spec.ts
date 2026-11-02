@@ -6,7 +6,12 @@ import type {
   IElectronDatabaseTransaction,
 } from '@memoflow/desktop-contracts';
 import type { NotificationRequestedWriterPort } from '@memoflow/notification';
-import { createActiveUsageTrigger, createElapsedTrigger } from '@memoflow/routine/server';
+import {
+  createActiveUsageTrigger,
+  createElapsedTrigger,
+  registerRoutineNotificationOwnerCommands,
+  type RoutineNotificationOwnerCommandRegistry,
+} from '@memoflow/routine/server';
 import type {
   IdleSensorPort,
   ProtocolBreakCompletionFact,
@@ -319,6 +324,47 @@ class ControlledIdleSensor implements IdleSensorPort {
   }
 }
 
+interface OwnerCommandInvocation {
+  identityId: string;
+  notificationId: string;
+  workflowKey: string;
+  actionKey: string;
+  owner: { type: string; id: string };
+  commandKey: string;
+  input: unknown;
+  idempotencyKey: string;
+}
+
+/**
+ * Minimal owner-command registry mirroring the Notification action seam: the
+ * desktop popup executes exactly this registered handler through
+ * ExecuteNotificationActionUseCase.
+ */
+class RecordingOwnerCommandRegistry {
+  private readonly handlers = new Map<
+    string,
+    (invocation: OwnerCommandInvocation) => Promise<{ outcome: 'accepted' | 'rejected' }>
+  >();
+
+  register(registration: {
+    workflowKey: string;
+    ownerType: string;
+    commandKey: string;
+    execute: (invocation: OwnerCommandInvocation) => Promise<{ outcome: 'accepted' | 'rejected' }>;
+  }): () => void {
+    this.handlers.set(registration.commandKey, registration.execute);
+    return () => {
+      this.handlers.delete(registration.commandKey);
+    };
+  }
+
+  async run(invocation: OwnerCommandInvocation): Promise<{ outcome: 'accepted' | 'rejected' }> {
+    const handler = this.handlers.get(invocation.commandKey);
+    if (!handler) throw new Error(`No owner command registered for '${invocation.commandKey}'`);
+    return handler(invocation);
+  }
+}
+
 const notificationWriter = {
   enqueueNotificationRequested: vi.fn(),
 } as unknown as NotificationRequestedWriterPort;
@@ -584,6 +630,84 @@ describe('composeRoutine local Routine vertical slice', () => {
         resolution_state: 'Open',
       });
       expect(notificationWriter.enqueueNotificationRequested).toHaveBeenCalledTimes(1);
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it('re-arms profile-activation Elapsed after a desktop notification completion', async () => {
+    const t0 = Date.parse('2026-09-17T06:00:00.000Z');
+    vi.useFakeTimers({ toFake: ['Date'] });
+    vi.setSystemTime(t0);
+    try {
+      const elapsedTrigger = createElapsedTrigger({
+        durationMs: 1_000,
+        anchor: 'profile-activation',
+      });
+      const { composed, db } = createComposition(
+        new ControlledIdleSensor(),
+        elapsedTrigger,
+        new Date(t0).toISOString(),
+      );
+      await composed.routineCommandPort.setProfileActive({
+        identityId: 'identity-1',
+        profileId: 'profile-1',
+        active: true,
+        at: t0,
+      });
+
+      composed.elapsedRuntime.advance(asInstant(t0 + 1_000));
+      await composed.flushRoutineOccurrencePersistence();
+      expect(notificationWriter.enqueueNotificationRequested).toHaveBeenCalledTimes(1);
+      const firstOccurrenceKey = `routine:routine-opaque:elapsed:profile-${t0}:1`;
+
+      // Desktop custom-notification "complete" -> EXECUTE_ACTION -> owner command.
+      const registry = new RecordingOwnerCommandRegistry();
+      registerRoutineNotificationOwnerCommands(
+        registry as unknown as RoutineNotificationOwnerCommandRegistry,
+        composed.routineCommandPort,
+      );
+      vi.setSystemTime(t0 + 1_500);
+      await expect(
+        registry.run({
+          identityId: 'identity-1',
+          notificationId: 'notification-1',
+          workflowKey: 'routine.intervention',
+          actionKey: 'complete',
+          owner: { type: 'routine-occurrence', id: firstOccurrenceKey },
+          commandKey: 'routine.complete',
+          input: { routineId: 'routine-opaque', occurrenceKey: firstOccurrenceKey },
+          idempotencyKey: 'notification:notification-1:action:complete',
+        }),
+      ).resolves.toMatchObject({ outcome: 'accepted' });
+
+      expect(composed.elapsedRuntime.getSnapshot('identity-1', 'routine-opaque')).toMatchObject({
+        generation: 2,
+        thresholdSignaled: false,
+      });
+
+      // Re-registration restores the live (re-armed) snapshot, not the fired flag.
+      await composed.refreshLocalRoutineRegistrations();
+      expect(composed.elapsedRuntime.getSnapshot('identity-1', 'routine-opaque')).toMatchObject({
+        generation: 2,
+        thresholdSignaled: false,
+      });
+
+      composed.elapsedRuntime.advance(asInstant(t0 + 2_000));
+      await composed.flushRoutineOccurrencePersistence();
+
+      const secondOccurrenceKey = `routine:routine-opaque:elapsed:profile-${t0}:2`;
+      expect(composed.interventionRuntime.getSnapshot(secondOccurrenceKey)).toMatchObject({
+        identityId: 'identity-1',
+        routineId: 'routine-opaque',
+        state: 'Due',
+        dueAt: t0 + 2_000,
+      });
+      expect(db.occurrence(secondOccurrenceKey)).toMatchObject({
+        trigger_kind: 'Elapsed',
+        resolution_state: 'Open',
+      });
+      expect(notificationWriter.enqueueNotificationRequested).toHaveBeenCalledTimes(2);
     } finally {
       vi.useRealTimers();
     }

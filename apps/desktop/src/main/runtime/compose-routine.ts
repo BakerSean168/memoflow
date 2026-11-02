@@ -136,23 +136,6 @@ export function composeRoutine(
     }
   };
 
-  const routineCommandPort = createRoutineCoachCommandService({
-    routineProfileStore: repositories.routineProfileStore,
-    routinePreferencesStore: repositories.routinePreferencesStore,
-    runtimeContextStore,
-    temporaryOverrideStore: repositories.routineTemporaryOverrideStore,
-    occurrenceTruthStore: repositories.routineOccurrenceTruthStore,
-    protocolSessionStore: repositories.protocolSessionStore,
-    onOverrideChanged: createRoutineOverrideChangedNotifier(),
-    onScheduleChanged: createRoutineScheduleChangedNotifier(),
-    onProfileActiveChanged: async ({ identityId }) => {
-      if (identityId === dependencies.identityId) await refreshLocalRoutineRegistrations();
-    },
-    onGlobalEnabledChanged: async ({ identityId }) => {
-      if (identityId === dependencies.identityId) await refreshLocalRoutineRegistrations();
-    },
-  });
-
   const routineQueryPort = createRoutineConfigurationQueryService({
     occurrenceTruthStore: repositories.routineOccurrenceTruthStore,
     routineProfileStore: repositories.routineProfileStore,
@@ -286,6 +269,32 @@ export function composeRoutine(
         },
         () => elapsedRuntime.rearmOccurrence(event.identityId, event.routineId),
       );
+    },
+  });
+  // Completion feedback is part of the command seam so every response surface
+  // (desktop popup, in-app notification, InterventionWindow, AI) re-arms the
+  // same local lane through respondToOccurrence instead of re-implementing it.
+  const routineCommandPort = createRoutineCoachCommandService({
+    routineProfileStore: repositories.routineProfileStore,
+    routinePreferencesStore: repositories.routinePreferencesStore,
+    runtimeContextStore,
+    temporaryOverrideStore: repositories.routineTemporaryOverrideStore,
+    occurrenceTruthStore: repositories.routineOccurrenceTruthStore,
+    protocolSessionStore: repositories.protocolSessionStore,
+    onOverrideChanged: createRoutineOverrideChangedNotifier(),
+    onScheduleChanged: createRoutineScheduleChangedNotifier(),
+    onOccurrenceCompleted: ({ identityId, routineId, triggerKind, at }) => {
+      if (triggerKind === 'ActiveUsage') {
+        activeUsageRuntime.markSatisfied({ identityId, routineId, at });
+      } else if (triggerKind === 'Elapsed') {
+        elapsedRuntime.markSatisfied({ identityId, routineId, at });
+      }
+    },
+    onProfileActiveChanged: async ({ identityId }) => {
+      if (identityId === dependencies.identityId) await refreshLocalRoutineRegistrations();
+    },
+    onGlobalEnabledChanged: async ({ identityId }) => {
+      if (identityId === dependencies.identityId) await refreshLocalRoutineRegistrations();
     },
   });
   const protocolBreakCreditRuntime =
