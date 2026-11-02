@@ -36,7 +36,9 @@ export async function unlockLocalProfile(
   profileId?: string,
   remember = false,
 ): Promise<Page> {
-  if (profileId) await gate.getByTestId(`desktop-profile-open-${profileId}`).click();
+  if (await gate.getByTestId('desktop-profile-password-state').isVisible()) {
+    // Host transitions may preselect the protected target.
+  } else if (profileId) await gate.getByTestId(`desktop-profile-open-${profileId}`).click();
   else await gate.locator('[data-testid^="desktop-profile-open-"]').first().click();
   await expect(gate.getByTestId('desktop-profile-password-state')).toBeVisible();
   await gate.locator('input[type="password"]').fill(LOCAL_PASSWORD);

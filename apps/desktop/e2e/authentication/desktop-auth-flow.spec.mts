@@ -67,7 +67,7 @@ interface ProfileRegistryFile {
   activeProfileId: string | null;
   profiles: Array<{
     profileId: string;
-    profileKind: 'guest' | 'registered';
+    profileKind: 'local' | 'registered';
     localOwnerId: string;
     cloudBinding: { cloudAccountId: string } | null;
     lastActiveAt: number;
@@ -205,19 +205,6 @@ async function openManageAccounts(page: Page): Promise<void> {
   await expect(page.getByTestId('app-shell')).toBeVisible();
 }
 
-async function nextWorkspace(app: ElectronApplication): Promise<Page> {
-  return app.waitForEvent('window', {
-    predicate: async (page) => {
-      try {
-        await page.getByTestId('app-shell').waitFor({ state: 'visible' });
-        return true;
-      } catch {
-        return false;
-      }
-    },
-  });
-}
-
 function captureRendererConsole(page: Page): void {
   page.on('console', (message) => {
     console.log(`[electron-renderer:${message.type()}] ${message.text()}`);
@@ -282,28 +269,26 @@ test('native Goal checkpoint survives an Electron restart and saves once through
   }
 });
 
-test('persistent guest keeps edited profile data across restart and signs out to the chooser', async () => {
+test('local account works offline, keeps its renamed profile across restart and signs out to the chooser', async () => {
   const runtimeRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'memoflow-desktop-e2e-'));
   const userDataPath = path.join(runtimeRoot, 'user-data');
   let electronApp: ElectronApplication | null = null;
 
   try {
     electronApp = await launchDesktop(userDataPath);
-    const mainWindow = await electronApp.firstWindow();
+    const mainWindow = await registerLocalProfile(electronApp, await electronApp.firstWindow());
     captureRendererConsole(mainWindow);
     await expect(mainWindow.getByTestId('app-shell')).toBeVisible();
     const localProfileName = await mainWindow.getByTestId('shell-account-name').innerText();
-    expect(localProfileName).toMatch(/^访客 \d{4}$/);
+    expect(localProfileName).toBe('Nightly Local');
 
-    await mainWindow.getByTestId('shell-account-menu').click();
-    await mainWindow.getByTestId('shell-open-settings').click();
-    await mainWindow.getByTestId('settings-tab-account').click();
-    await expect(mainWindow.getByTestId('account-center-view')).toBeVisible();
-    await mainWindow.getByTestId('account-profile-nickname').fill('离线旅程用户');
-    await mainWindow.getByTestId('account-profile-save').click();
-    await expect(mainWindow.getByText('个人资料已更新', { exact: true })).toBeVisible();
-    await mainWindow.getByTestId('settings-return-to-app').click();
-    await expect(mainWindow.getByTestId('shell-account-name')).toHaveText(localProfileName);
+    await openManageAccounts(mainWindow);
+    const localId = readRegistry(userDataPath).activeProfileId!;
+    await mainWindow.getByTestId(`desktop-profile-rename-${localId}`).click();
+    const rename = mainWindow.getByTestId(`desktop-profile-rename-${localId}`).locator('../..').locator('form').first();
+    await rename.locator('input').fill('离线旅程用户');
+    await rename.locator('button[type="submit"]').click();
+    await expect(mainWindow.getByTestId('shell-account-name')).toHaveText('离线旅程用户');
     const profileDirectories = fs
       .readdirSync(path.join(userDataPath, 'data', 'profiles'), {
         withFileTypes: true,
@@ -311,16 +296,23 @@ test('persistent guest keeps edited profile data across restart and signs out to
       .filter((entry) => entry.isDirectory() && entry.name.startsWith('p_'));
     expect(profileDirectories).toHaveLength(1);
 
-    // A restart alone proves persistence: there is no lock/unlock step any more.
+    // Unremembered local accounts must pass the password gate after restart.
     await electronApp.close();
     electronApp = await launchDesktop(userDataPath);
-    const restartedMainWindow = await electronApp.firstWindow();
+    let restartedMainWindow = await unlockLocalProfile(electronApp, await electronApp.firstWindow(), undefined, true);
     captureRendererConsole(restartedMainWindow);
     await expect(restartedMainWindow.getByTestId('app-shell')).toBeVisible();
     await expect(restartedMainWindow.getByTestId('shell-account-name')).toHaveText(
-      localProfileName,
+      '离线旅程用户',
     );
 
+    await electronApp.close();
+    electronApp = await launchDesktop(userDataPath);
+    const rememberedWindow = await electronApp.firstWindow();
+    await expect(rememberedWindow.getByTestId('app-shell')).toBeVisible();
+    await expect(rememberedWindow.getByTestId('shell-account-name')).toHaveText('离线旅程用户');
+
+    restartedMainWindow = rememberedWindow;
     // "退出账号" is the only account exit: it removes the last Profile and lands
     // the user on the chooser's empty state.
     const removedProfileId = readRegistry(userDataPath).activeProfileId;
@@ -353,7 +345,7 @@ test('persistent guest keeps edited profile data across restart and signs out to
     const profilePicker = await profilePickerPromise;
     captureRendererConsole(profilePicker);
     await expect(profilePicker.getByTestId('desktop-profile-access')).toBeVisible();
-    await expect(profilePicker.getByTestId('desktop-profile-create')).toBeVisible();
+    await expect(profilePicker.getByTestId('desktop-profile-create-local')).toBeVisible();
     await expect(profilePicker.locator('[data-testid^="desktop-profile-open-"]')).toHaveCount(0);
     await expect.poll(() => readRegistry(userDataPath).profiles).toHaveLength(0);
     expect(
@@ -365,7 +357,7 @@ test('persistent guest keeps edited profile data across restart and signs out to
   }
 });
 
-test('device authorization opens an independent cloud Profile and preserves the source guest', async () => {
+test('device authorization opens an independent cloud Profile and preserves the source local account', async () => {
   const runtimeRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'memoflow-profiles-e2e-'));
   const userDataPath = path.join(runtimeRoot, 'user-data');
   const cloud = await startCloudAuthFixture();
@@ -378,8 +370,7 @@ test('device authorization opens an independent cloud Profile and preserves the 
         value: async () => undefined,
       });
     });
-    const mainWindow = await electronApp.firstWindow();
-    await expect(mainWindow.getByTestId('app-shell')).toBeVisible();
+    const mainWindow = await registerLocalProfile(electronApp, await electronApp.firstWindow());
     const before = readRegistry(userDataPath);
     const source = before.profiles.find((profile) => profile.profileId === before.activeProfileId)!;
     const marker = path.join(
@@ -390,9 +381,15 @@ test('device authorization opens an independent cloud Profile and preserves the 
       'source-marker.txt',
     );
     fs.writeFileSync(marker, 'source remains independent');
-    await openManageAccounts(mainWindow);
-    await mainWindow.getByTestId('shell-add-account').click();
-    await mainWindow.getByTestId('cloud-connection-continue').click();
+    await electronApp.close();
+    electronApp = await launchDesktop(userDataPath, cloud.origin);
+    await electronApp.evaluate(({ shell }) => {
+      Object.defineProperty(shell, 'openExternal', { configurable: true, value: async () => undefined });
+    });
+    const loginGate = await electronApp.firstWindow();
+    await expect(loginGate.getByTestId('desktop-profile-access')).toBeVisible();
+    await loginGate.getByTestId('desktop-profile-create-local').click();
+    await loginGate.getByTestId('desktop-profile-github-signin').click();
     await expect.poll(() => readRegistry(userDataPath).profiles.length).toBe(2);
     const target = readRegistry(userDataPath).profiles.find(
       (profile) => profile.profileKind === 'registered',
@@ -449,9 +446,14 @@ test('device authorization opens an independent cloud Profile and preserves the 
     const cloudWindow = appMainWindow(electronApp);
     await expect(cloudWindow.getByTestId('app-shell')).toBeVisible();
     cloud.setIdentity('IdentityId_00000000-0000-4000-8000-0000000000e3');
-    await openManageAccounts(cloudWindow);
-    await cloudWindow.getByTestId('shell-add-account').click();
-    await cloudWindow.getByTestId('cloud-connection-continue').click();
+    await cloudWindow.getByTestId('shell-account-menu').click();
+    await cloudWindow.getByTestId('shell-switch-account').click();
+    const anotherGatePromise = electronApp.waitForEvent('window');
+    await cloudWindow.getByTestId(`shell-switch-profile-${source.profileId}`).click();
+    const anotherGate = await anotherGatePromise;
+    await anotherGate.getByTestId('desktop-profile-back').click();
+    await anotherGate.getByTestId('desktop-profile-create-local').click();
+    await anotherGate.getByTestId('desktop-profile-github-signin').click();
     await expect.poll(() => readRegistry(userDataPath).profiles.length).toBe(3);
     const another = readRegistry(userDataPath).profiles.find(
       (profile) => profile.profileId !== source.profileId && profile.profileId !== target.profileId,
@@ -497,13 +499,13 @@ test('device authorization opens an independent cloud Profile and preserves the 
   }
 });
 
-test('a second guest keeps an independent Account and its PIN selection across restart', async () => {
+test('a second local account keeps independent data and its password selection across restart', async () => {
   const root = fs.mkdtempSync(path.join(os.tmpdir(), 'memoflow-multi-guest-e2e-'));
   const userData = path.join(root, 'user-data');
   let app: ElectronApplication | null = null;
   try {
     app = await launchDesktop(userData);
-    const firstWindow = await app.firstWindow();
+    const firstWindow = await registerLocalProfile(app, await app.firstWindow());
     await expect(firstWindow.getByTestId('app-shell')).toBeVisible();
     const first = readRegistry(userData).profiles[0]!;
     await openManageAccounts(firstWindow);
@@ -517,50 +519,40 @@ test('a second guest keeps an independent Account and its PIN selection across r
     expect(app.windows().length).toBe(windowsBefore);
     expect(readRegistry(userData).activeProfileId).toBe(first.profileId);
     await openManageAccounts(firstWindow);
-    await firstWindow.getByTestId('desktop-profile-create').locator('input').fill('Work');
-    const secondWindowPromise = nextWorkspace(app);
+    await firstWindow.getByTestId('desktop-profile-create').locator('input').first().fill('Work');
+    await firstWindow.getByTestId('desktop-profile-create').locator('input[type="password"]').fill(LOCAL_PASSWORD);
+    const secondGatePromise = app.waitForEvent('window');
     await firstWindow.getByTestId('desktop-profile-create').getByRole('button').click();
     await expect.poll(() => readRegistry(userData).profiles.length).toBe(2);
     const second = readRegistry(userData).profiles.find(
       (profile) => profile.profileId !== first.profileId,
     )!;
     expect(second.localOwnerId).not.toBe(first.localOwnerId);
-    const secondWindow = await secondWindowPromise;
+    const secondWindow = await unlockLocalProfile(app, await secondGatePromise);
     await expect(secondWindow.getByTestId('shell-account-name')).toHaveText('Work');
     await secondWindow.getByTestId('shell-account-menu').click();
     await secondWindow.getByTestId('shell-switch-account').click();
-    const firstAgainPromise = nextWorkspace(app);
+    const firstAgainPromise = app.waitForEvent('window');
     await secondWindow.getByTestId(`shell-switch-profile-${first.profileId}`).click();
-    const firstAgain = await firstAgainPromise;
+    const firstAgain = await unlockLocalProfile(app, await firstAgainPromise);
     await expect.poll(() => readRegistry(userData).activeProfileId).toBe(first.profileId);
     await firstAgain.getByTestId('shell-account-menu').click();
     await firstAgain.getByTestId('shell-switch-account').click();
-    const workAgainPromise = nextWorkspace(app);
+    const workAgainPromise = app.waitForEvent('window');
     await firstAgain.getByTestId(`shell-switch-profile-${second.profileId}`).click();
-    const workAgain = await workAgainPromise;
+    const workAgain = await unlockLocalProfile(app, await workAgainPromise);
     await expect(workAgain.getByTestId('shell-account-name')).toHaveText('Work');
-    const pinResult = await workAgain.evaluate(async () => {
-      const bridge = (
-        window as Window & {
-          electronAPI: { invoke(channel: string, ...args: unknown[]): Promise<unknown> };
-        }
-      ).electronAPI;
-      return bridge.invoke('profile-access:pin-set', '123456');
-    });
-    expect(pinResult).toMatchObject({ ok: true });
     await app.close();
     app = await launchDesktop(userData);
     const locked = await app.firstWindow();
     await expect(locked.getByTestId('desktop-profile-access')).toBeVisible();
     await locked.getByTestId(`desktop-profile-open-${second.profileId}`).click();
-    const pin = locked.getByTestId(`desktop-profile-pin-${second.profileId}`);
-    await pin.fill('000000');
-    await pin.locator('..').getByRole('button').click();
-    await expect(locked.getByText('PIN 不正确或解锁凭据已损坏', { exact: true })).toBeVisible();
-    await pin.fill('123456');
-    const unlockedPromise = app.waitForEvent('window');
-    await pin.locator('..').getByRole('button').click();
-    const unlocked = await unlockedPromise;
+    const password = locked.getByTestId(`desktop-profile-password-${second.profileId}`);
+    await password.fill('wrong-password');
+    await locked.getByTestId('desktop-profile-enter').click();
+    await expect(locked.getByTestId('desktop-profile-password-state')).toBeVisible();
+    await expect(locked.getByTestId('desktop-profile-enter')).toBeDisabled();
+    const unlocked = await unlockLocalProfile(app, locked, second.profileId);
     await expect(unlocked.getByTestId('shell-account-name')).toHaveText('Work');
     expect(readRegistry(userData).activeProfileId).toBe(second.profileId);
     const firstAfterRestart = readRegistry(userData).profiles.find(
@@ -568,9 +560,9 @@ test('a second guest keeps an independent Account and its PIN selection across r
     )!;
     // Opening a Profile is the only thing that writes lastActiveAt
     // (ProfileRegistry.touch via activatePreparedProfile), and this test
-    // switches back to the first guest at line 531, so its recency value moves
-    // by design. Every other field must survive the second guest's session,
-    // PIN and restart untouched.
+    // switches back to the first local account, so its recency value moves
+    // by design. Every other field must survive the second local account's session,
+    // password and restart untouched.
     const { lastActiveAt: firstSnapshotLastActiveAt, ...firstStableFields } = first;
     const { lastActiveAt: firstLastActiveAtAfterRestart, ...firstStableFieldsAfterRestart } =
       firstAfterRestart;
@@ -583,7 +575,7 @@ test('a second guest keeps an independent Account and its PIN selection across r
   }
 });
 
-test('guest copy preview persists across restart and waits for local content without repeating the cloud commit', async () => {
+test('local account copy preview persists across restart and waits for local content without repeating the cloud commit', async () => {
   // Inventory lists this suite before runtime libraries are built. Load the
   // fixture helper only when the E2E runs, after desktop:e2e builds its closure.
   const portabilityPackage = '@memoflow/data-portability';
@@ -678,7 +670,7 @@ test('guest copy preview persists across restart and waits for local content wit
         value: async () => undefined,
       }),
     );
-    const guest = await app.firstWindow();
+    const guest = await registerLocalProfile(app, await app.firstWindow());
     await expect(guest.getByTestId('app-shell')).toBeVisible();
     const source = readRegistry(userData).profiles[0]!;
     const seeded = await guest.evaluate(async () => {
@@ -717,7 +709,11 @@ test('guest copy preview persists across restart and waits for local content wit
       },
       timeout: 60_000,
     });
+    const copyGatePromise = app.waitForEvent('window');
     await guest.getByTestId('cloud-connection-continue').click();
+    const copyGate = await copyGatePromise;
+    await expect(copyGate.getByTestId('desktop-profile-access')).toBeVisible();
+    await copyGate.locator('[data-testid^="desktop-profile-open-"]').filter({ hasNotText: 'Nightly Local' }).click();
     await expect.poll(() => readRegistry(userData).profiles.length).toBe(2);
     await expect.poll(() => guest.isClosed()).toBe(true);
     const targetWindow = await targetWindowPromise;

@@ -1,3 +1,4 @@
+import { registerLocalProfile, unlockLocalProfile } from '../support/profile-access';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
@@ -112,7 +113,7 @@ test('packaged MemoFlow boots through renderer readiness', async ({}, testInfo) 
       .process()
       .stderr?.on('data', (chunk) => appendLog(logs, 'stderr', chunk.toString()));
 
-    const mainWindow = await electronApp.firstWindow({ timeout: 45_000 });
+    const mainWindow = await registerLocalProfile(electronApp, await electronApp.firstWindow({ timeout: 45_000 }));
     mainWindow.on('console', (message) =>
       appendLog(logs, `renderer:${message.type()}`, message.text()),
     );
@@ -291,7 +292,7 @@ test('packaged MemoFlow boots through renderer readiness', async ({}, testInfo) 
     if (restartCloseFailure) throw restartCloseFailure;
     electronApp = null;
     electronApp = await electron.launch(launchOptions);
-    const restartedWindow = await electronApp.firstWindow({ timeout: 45_000 });
+    const restartedWindow = await unlockLocalProfile(electronApp, await electronApp.firstWindow({ timeout: 45_000 }));
     await expect(restartedWindow.getByTestId('app-shell')).toBeVisible({ timeout: 45_000 });
     await restartedWindow.evaluate(() => {
       window.location.hash = '#/settings?tab=ai';
