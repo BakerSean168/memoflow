@@ -2,6 +2,7 @@ import {
   registerLocalProfile,
   unlockLocalProfile,
   selectRememberedProfile,
+  switchToProfileGate,
   LOCAL_PASSWORD,
 } from '../support/profile-access';
 import {
@@ -466,9 +467,7 @@ test('device authorization opens an independent cloud Profile and preserves the 
     cloud.setIdentity('IdentityId_00000000-0000-4000-8000-0000000000e3');
     await cloudWindow.getByTestId('shell-account-menu').click();
     await cloudWindow.getByTestId('shell-switch-account').click();
-    const anotherGatePromise = electronApp.waitForEvent('window');
-    await cloudWindow.getByTestId(`shell-switch-profile-${source.profileId}`).click();
-    const anotherGate = await anotherGatePromise;
+    const anotherGate = await switchToProfileGate(electronApp, cloudWindow, source.profileId);
     await anotherGate.getByTestId('desktop-profile-back').click();
     await anotherGate.getByTestId('desktop-profile-create-local').click();
     await anotherGate.getByTestId('desktop-profile-github-signin').click();
@@ -562,15 +561,17 @@ test('a second local account keeps independent data and its password selection a
     await expect(secondWindow.getByTestId('shell-account-name')).toHaveText('Work');
     await secondWindow.getByTestId('shell-account-menu').click();
     await secondWindow.getByTestId('shell-switch-account').click();
-    const firstAgainPromise = app.waitForEvent('window');
-    await secondWindow.getByTestId(`shell-switch-profile-${first.profileId}`).click();
-    const firstAgain = await unlockLocalProfile(app, await firstAgainPromise);
+    const firstAgain = await unlockLocalProfile(
+      app,
+      await switchToProfileGate(app, secondWindow, first.profileId),
+    );
     await expect.poll(() => readRegistry(userData).activeProfileId).toBe(first.profileId);
     await firstAgain.getByTestId('shell-account-menu').click();
     await firstAgain.getByTestId('shell-switch-account').click();
-    const workAgainPromise = app.waitForEvent('window');
-    await firstAgain.getByTestId(`shell-switch-profile-${second.profileId}`).click();
-    const workAgain = await unlockLocalProfile(app, await workAgainPromise);
+    const workAgain = await unlockLocalProfile(
+      app,
+      await switchToProfileGate(app, firstAgain, second.profileId),
+    );
     await expect(workAgain.getByTestId('shell-account-name')).toHaveText('Work');
     await app.close();
     app = await launchDesktop(userData);

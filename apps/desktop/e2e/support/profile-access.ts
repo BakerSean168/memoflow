@@ -63,3 +63,22 @@ export async function selectRememberedProfile(
       : gate.locator('[data-testid^="desktop-profile-open-"]').first().click(),
   );
 }
+
+export async function switchToProfileGate(
+  app: ElectronApplication,
+  workspace: Page,
+  profileId: string,
+): Promise<Page> {
+  const next = app.waitForEvent('window');
+  try {
+    await workspace.getByTestId(`shell-switch-profile-${profileId}`).click();
+  } catch (error) {
+    // The host deliberately destroys the outgoing renderer during this click.
+    // Only accept that teardown when the replacement password gate really opens.
+    if (!workspace.isClosed()) throw error;
+  }
+  const gate = await next;
+  await expect(gate.getByTestId('desktop-profile-password-state')).toBeVisible();
+  await expect(gate.getByTestId(`desktop-profile-password-${profileId}`)).toBeVisible();
+  return gate;
+}
