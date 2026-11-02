@@ -18,22 +18,14 @@ import {
 import { useRoute, useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import { ArrowLeft } from '@lucide/vue';
-import {
-  Button,
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetTitle,
-} from '@memoflow/ui-vue-shadcn';
+import { Button, Sheet, SheetContent, SheetDescription, SheetTitle } from '@memoflow/ui-vue-shadcn';
 import UserPreferenceSettingsSection from '../components/UserPreferenceSettingsSection.vue';
 import SettingsNavigation from '../components/SettingsNavigation.vue';
 import { settingUiHost } from '../setting-ui-host';
 
 const { ProductSurfaceHeader } = settingUiHost.components;
 
-const KeyboardSettings = defineAsyncComponent(
-  () => import('../components/KeyboardSettings.vue'),
-);
+const KeyboardSettings = defineAsyncComponent(() => import('../components/KeyboardSettings.vue'));
 const AISettings = defineAsyncComponent(() => import('../components/AISettings.vue'));
 const KnowledgeRepositorySettings = defineAsyncComponent(
   () => import('../components/KnowledgeRepositorySettings.vue'),
@@ -104,9 +96,7 @@ function normalizeGroup(value: unknown): SettingsGroup {
   // Keep old Settings -> AI permissions deep links landing on the merged section.
   if (value === 'ai-permissions') return 'ai';
   const candidate = value as SettingsGroup;
-  return GROUP_VALUES.includes(candidate) && isGroupAvailable(candidate)
-    ? candidate
-    : 'appearance';
+  return GROUP_VALUES.includes(candidate) && isGroupAvailable(candidate) ? candidate : 'appearance';
 }
 
 const activeTab = ref<SettingsGroup>(normalizeGroup(route.query.tab));
@@ -177,11 +167,7 @@ onBeforeUnmount(() => {
     </aside>
 
     <div class="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
-      <ProductSurfaceHeader
-        v-if="isNarrow"
-        family="settings"
-        data-testid="settings-compact-header"
-      >
+      <ProductSurfaceHeader v-if="isNarrow" family="settings" data-testid="settings-compact-header">
         <Button
           type="button"
           variant="ghost"

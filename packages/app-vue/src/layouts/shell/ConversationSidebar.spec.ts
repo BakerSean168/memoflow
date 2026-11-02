@@ -157,9 +157,7 @@ describe('ConversationSidebar attention', () => {
       .find((item) => item.text() === 'Personal systems architecture');
     expect(firstRow?.classes()).toContain('pr-9');
     expect(firstRow?.find('span').classes()).toContain('truncate');
-    const normalRow = wrapper
-      .findAll('nav button')
-      .find((item) => item.text() === 'Training plan');
+    const normalRow = wrapper.findAll('nav button').find((item) => item.text() === 'Training plan');
     expect(normalRow?.classes()).toContain('pr-9');
     await icons[0]!.trigger('click');
     expect(wrapper.emitted('select-conversation')).toEqual([['a']]);
@@ -245,9 +243,7 @@ describe('ConversationSidebar mouse and batch selection', () => {
     expect(row('b').attributes('aria-selected')).toBe('false');
     await wrapper.get('[data-testid="conversation-search-toggle"]').trigger('click');
     await wrapper.get('[data-testid="conversation-search-input"]').setValue('Infrastructure');
-    expect(wrapper.get('[data-testid="conversation-selection-count"]').text()).toBe(
-      '1 selected',
-    );
+    expect(wrapper.get('[data-testid="conversation-selection-count"]').text()).toBe('1 selected');
     await wrapper.setProps({ activeProfileId: 'two' });
     expect(row('c').attributes('aria-selected')).toBe('false');
     wrapper.unmount();
@@ -279,9 +275,9 @@ describe('ConversationSidebar mouse and batch selection', () => {
       wrapper.unmount();
     }
   });
-  it.each([['a'], ['a', 'b']])(
-    'removes deleted rows without persistent success residue (%j)',
-    async (...ids) => {
+  it.each([{ ids: ['a'] }, { ids: ['a', 'b'] }])(
+    'removes deleted rows without persistent success residue ($ids)',
+    async ({ ids }) => {
       const bulkAction = vi.fn(async (_action: string, selected: string[]) => {
         await wrapper.setProps({
           groups: groups.map((group) => ({
@@ -344,12 +340,8 @@ describe('ConversationSidebar mouse and batch selection', () => {
       { id: 'c', success: true },
     ]);
     await flushPromises();
-    expect(wrapper.get('[data-testid="conversation-selection-count"]').text()).toBe(
-      '1 selected',
-    );
-    expect(wrapper.get('[data-testid="conversation-bulk-results"]').findAll('li')).toHaveLength(
-      3,
-    );
+    expect(wrapper.get('[data-testid="conversation-selection-count"]').text()).toBe('1 selected');
+    expect(wrapper.get('[data-testid="conversation-bulk-results"]').findAll('li')).toHaveLength(3);
     await document.body.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }));
     await flushPromises();
     await openRowMenu(wrapper, 'b');
@@ -378,9 +370,7 @@ describe('ConversationSidebar compact toolbar', () => {
       expect(wrapper.find('input[type="checkbox"]').exists()).toBe(false);
       await wrapper.get('[data-keyboard-item="a"]').trigger('click', { metaKey: true });
       await wrapper.get('[data-keyboard-item="c"]').trigger('click', { shiftKey: true });
-      expect(wrapper.get('[data-testid="conversation-selection-count"]').text()).toBe(
-        '3 selected',
-      );
+      expect(wrapper.get('[data-testid="conversation-selection-count"]').text()).toBe('3 selected');
       expect(wrapper.emitted('select-conversation')).toBeUndefined();
       await openRowMenu(wrapper, 'a');
       expect(menuItem('conversation-context-rename')).toBeNull();
@@ -388,9 +378,7 @@ describe('ConversationSidebar compact toolbar', () => {
       await selectMenuItem('conversation-context-status');
       expect(bulkAction).toHaveBeenCalledWith('archive', ['a', 'b', 'c']);
       expect(wrapper.findAll('[aria-selected="true"]')).toHaveLength(0);
-      expect(wrapper.find('[data-testid="conversation-selection-toolbar"]').exists()).toBe(
-        false,
-      );
+      expect(wrapper.find('[data-testid="conversation-selection-toolbar"]').exists()).toBe(false);
     } finally {
       wrapper.unmount();
     }
@@ -433,9 +421,7 @@ describe('ConversationSidebar account menu', () => {
       },
       global: { plugins: [i18n] },
     });
-    await wrapper
-      .get('[data-testid="shell-account-menu"]')
-      .trigger('keydown', { key: 'Enter' });
+    await wrapper.get('[data-testid="shell-account-menu"]').trigger('keydown', { key: 'Enter' });
     await flushPromises();
     return wrapper;
   }

@@ -271,8 +271,7 @@ function contextDeleteAction() {
 }
 const contextStatusDisabled = computed(
   () =>
-    selection.state.busy ||
-    (contextIds.value.length === 1 && archiveBlocked(contextIds.value[0]!)),
+    selection.state.busy || (contextIds.value.length === 1 && archiveBlocked(contextIds.value[0]!)),
 );
 async function restoreContextFocus(event: Event) {
   if (editingId.value) {
@@ -296,10 +295,7 @@ async function restoreContextFocus(event: Event) {
   ].find((item) => item.dataset.keyboardItem === id);
   row?.focus({ preventScroll: true });
 }
-async function emitBulk(
-  action: 'archive' | 'restore' | 'delete',
-  ids = [...selectedIds.value],
-) {
+async function emitBulk(action: 'archive' | 'restore' | 'delete', ids = [...selectedIds.value]) {
   if (!ids.length || selection.state.busy) return;
   contextOpen.value = false;
   if (!props.bulkAction) return;
@@ -398,10 +394,7 @@ const identityLabel = () => {
     @keydown.escape="exitSelection"
   >
     <!-- 搜索与新会话保持同一工具行，搜索展开时高度不变 -->
-    <div
-      class="flex h-11 shrink-0 items-center gap-1.5 px-2"
-      data-testid="conversation-toolbar"
-    >
+    <div class="flex h-11 shrink-0 items-center gap-1.5 px-2" data-testid="conversation-toolbar">
       <div
         class="flex h-8 min-w-0 flex-1 items-center rounded-md bg-[hsl(var(--surface-raised)/0.35)] transition-colors hover:bg-[hsl(var(--hover))]"
         data-testid="conversation-search"
@@ -461,9 +454,7 @@ const identityLabel = () => {
 
     <!-- 多选没有常驻工具栏（T3 Code 同款）：数量只给读屏播报，操作在右键菜单里。 -->
     <span class="sr-only" aria-live="polite" data-testid="conversation-selection-count">{{
-      selectedIds.length
-        ? t('shell.conversation.selectedCount', { count: selectedIds.length })
-        : ''
+      selectedIds.length ? t('shell.conversation.selectedCount', { count: selectedIds.length }) : ''
     }}</span>
     <ul
       v-if="selection.state.results.length"
@@ -500,10 +491,7 @@ const identityLabel = () => {
         }
       "
     >
-      <p
-        v-if="loading && groups.length === 0"
-        class="px-3 py-2 text-xs text-muted-foreground/60"
-      >
+      <p v-if="loading && groups.length === 0" class="px-3 py-2 text-xs text-muted-foreground/60">
         {{ t('common.loading') }}
       </p>
       <p
@@ -692,9 +680,7 @@ const identityLabel = () => {
     </nav>
 
     <!-- 底：账户菜单 -->
-    <div
-      class="flex h-11 shrink-0 items-center border-t border-[hsl(var(--border-subtle))] px-2.5"
-    >
+    <div class="flex h-11 shrink-0 items-center border-t border-[hsl(var(--border-subtle))] px-2.5">
       <DropdownMenu
         @update:open="
           (open) => {
@@ -755,10 +741,7 @@ const identityLabel = () => {
               :collision-padding="8"
               :avoid-collisions="true"
             >
-              <div
-                class="max-h-[min(60vh,24rem)] overflow-y-auto"
-                data-testid="shell-profile-list"
-              >
+              <div class="max-h-[min(60vh,24rem)] overflow-y-auto" data-testid="shell-profile-list">
                 <DropdownMenuItem
                   v-for="profile in orderedProfiles"
                   :key="profile.profileId"

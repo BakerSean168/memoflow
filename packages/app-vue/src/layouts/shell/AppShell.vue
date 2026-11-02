@@ -20,16 +20,7 @@
 import { DesktopProfileImportChannels } from '@memoflow/desktop-contracts';
 import { DESKTOP_BRIDGE_KEY } from '../../di/keys';
 import { toast } from 'vue-sonner';
-import {
-  computed,
-  inject,
-  onBeforeUnmount,
-  onMounted,
-  provide,
-  ref,
-  shallowRef,
-  watch,
-} from 'vue';
+import { computed, inject, onBeforeUnmount, onMounted, provide, ref, shallowRef, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import { storeToRefs } from 'pinia';
@@ -45,11 +36,7 @@ import { useShellRouterSync, AUTO_FOCUS_VIEWPORT, moduleForPath } from './useShe
 import { useDesktopWindowControls } from '../../shared/composables/useDesktopWindowControls';
 import { hasDesktopAuthApi } from '../../shared/utils/desktop-auth-recovery';
 import { useNotificationUnreadQuery } from '@memoflow/notification-ui';
-import {
-  useAccountSignOut,
-  useAccountStore,
-  useAuthenticationStore,
-} from '@memoflow/account-ui';
+import { useAccountSignOut, useAccountStore, useAuthenticationStore } from '@memoflow/account-ui';
 import {
   ConversationSelectionKey,
   createConversationSelectionStore,
@@ -240,10 +227,7 @@ const effectiveSidebarWidth = computed(() => {
     ? BUSINESS_HARD_MIN + (layout.value === 'split' ? AI_HARD_MIN : 0)
     : AI_HARD_MIN;
   const chrome = workspaceChromeBudget(effectiveViewportWidth.value);
-  const dynamicMax = Math.max(
-    SIDEBAR_HARD_MIN,
-    effectiveViewportWidth.value - reserved - chrome,
-  );
+  const dynamicMax = Math.max(SIDEBAR_HARD_MIN, effectiveViewportWidth.value - reserved - chrome);
   return Math.min(sidebarWidth.value, dynamicMax);
 });
 // ── AI 常驻层（单实例；会话侧栏数据经 defineExpose 上浮） ──
@@ -305,9 +289,7 @@ const conversations = computed<ConversationSummary[]>(
 
 function conversationTimestamp(item: ConversationSummary): number {
   const raw =
-    (item as { updatedAt?: unknown }).updatedAt ??
-    (item as { createdAt?: unknown }).createdAt ??
-    0;
+    (item as { updatedAt?: unknown }).updatedAt ?? (item as { createdAt?: unknown }).createdAt ?? 0;
   const value = Number(raw);
   return Number.isFinite(value) ? value : 0;
 }
@@ -441,11 +423,7 @@ const profileImportSource = ref<string>();
 watch(
   () => desktopAccess.value?.profile?.profileId,
   async (profileId) => {
-    if (
-      !profileId ||
-      !desktopBridge ||
-      desktopAccess.value?.profile?.profileKind !== 'registered'
-    )
+    if (!profileId || !desktopBridge || desktopAccess.value?.profile?.profileKind !== 'registered')
       return;
     try {
       const result = z
@@ -1070,9 +1048,7 @@ onBeforeUnmount(() => {
     <!-- 顶部窗口栏：工作区 launcher + 日程入口 + 窗控 -->
     <WindowHeader
       :mode="isSettingsScene ? 'settings' : 'workspace'"
-      :sidebar-collapsed="
-        isSettingsScene ? !store.settingsNavigationOpen : headerSidebarCollapsed
-      "
+      :sidebar-collapsed="isSettingsScene ? !store.settingsNavigationOpen : headerSidebarCollapsed"
       :right-panel-open="rightPanelOpen"
       :is-desktop="isDesktop"
       :is-mac="isMac"
@@ -1104,25 +1080,19 @@ onBeforeUnmount(() => {
       </template>
       <template #capsule-preview-routine="{ closePreview }">
         <RoutineCapsulePreview
-          @view-all="
-            openHeaderPreviewModule(closePreview, { id: 'routine', route: '/routines' })
-          "
+          @view-all="openHeaderPreviewModule(closePreview, { id: 'routine', route: '/routines' })"
           @select="openHeaderRoutinePreview(closePreview, $event)"
         />
       </template>
       <template #capsule-preview-note="{ closePreview }">
         <NoteCapsulePreview
-          @view-all="
-            openHeaderPreviewModule(closePreview, { id: 'note', route: '/repository' })
-          "
+          @view-all="openHeaderPreviewModule(closePreview, { id: 'note', route: '/repository' })"
           @select="openHeaderNotePreview(closePreview, $event)"
         />
       </template>
       <template #capsule-preview-schedule="{ closePreview }">
         <ScheduleCapsulePreview
-          @view-all="
-            openHeaderPreviewModule(closePreview, { id: 'schedule', route: '/schedule' })
-          "
+          @view-all="openHeaderPreviewModule(closePreview, { id: 'schedule', route: '/schedule' })"
           @select="openHeaderScheduleItem(closePreview, $event)"
         />
       </template>
@@ -1208,9 +1178,7 @@ onBeforeUnmount(() => {
           :class="isSidebarResizing ? 'transition-none' : ''"
           :style="{ width: effectiveSidebarWidth + 'px' }"
           data-sidebar-presentation="docked"
-          :data-conversation-projection="
-            aiRef?.conversationProjectionLive ? 'live' : 'calibrating'
-          "
+          :data-conversation-projection="aiRef?.conversationProjectionLive ? 'live' : 'calibrating'"
           data-testid="shell-sidebar-pane-host"
         >
           <div
@@ -1389,9 +1357,7 @@ onBeforeUnmount(() => {
           maxWidth: 'calc(100vw - 48px)',
         }"
         data-sidebar-presentation="overlay"
-        :data-conversation-projection="
-          aiRef?.conversationProjectionLive ? 'live' : 'calibrating'
-        "
+        :data-conversation-projection="aiRef?.conversationProjectionLive ? 'live' : 'calibrating'"
         data-testid="shell-sidebar-pane-host"
       >
         <SheetTitle class="sr-only">{{ t('shell.conversation.navigation') }}</SheetTitle>

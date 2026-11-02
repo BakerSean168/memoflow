@@ -68,12 +68,12 @@ const passThrough = (name: string) =>
   });
 
 const activeChatConversationId = ref<string | null>(null);
-const conversationList = reactive<
-  { id: string; title?: string; name?: string; status?: string }[]
->([
-  { id: 'conversation-a', title: 'A' },
-  { id: 'conversation-b', title: 'B' },
-]);
+const conversationList = reactive<{ id: string; title?: string; name?: string; status?: string }[]>(
+  [
+    { id: 'conversation-a', title: 'A' },
+    { id: 'conversation-b', title: 'B' },
+  ],
+);
 const restoreConversation = vi.fn(async (id: string) => {
   const item = conversationList.find((item) => item.id === id);
   if (item) item.status = 'Active';
@@ -327,44 +327,41 @@ describe('AppShell right-panel integration', () => {
     },
   );
 
-  it.each(['frame', 'guard'] as const)(
-    'cancels the resize focus %s on unmount',
-    async (stage) => {
-      const host = document.createElement('div');
-      document.body.appendChild(host);
-      onTestFinished(() => host.remove());
-      const { wrapper } = await mountShell('/goals', host);
-      const input = wrapper.get('[data-testid="shell-resize-focus-probe"]')
-        .element as HTMLInputElement;
-      input.focus();
-      vi.useFakeTimers();
-      const frames: FrameRequestCallback[] = [];
-      vi.spyOn(window, 'requestAnimationFrame').mockImplementation((callback) => {
-        frames.push(callback);
-        return 73;
-      });
-      const cancelFrame = vi.spyOn(window, 'cancelAnimationFrame');
-      await wrapper
-        .get('[data-testid="business-panel-resizer"]')
-        .trigger('pointerdown', { pointerId: 32, clientX: 700 });
-      window.dispatchEvent(new PointerEvent('pointerup', { pointerId: 32 }));
-      expect(frames).toHaveLength(1);
-      if (stage === 'guard') {
-        frames[0](performance.now());
-        expect(vi.getTimerCount()).toBeGreaterThan(0);
-      }
+  it.each(['frame', 'guard'] as const)('cancels the resize focus %s on unmount', async (stage) => {
+    const host = document.createElement('div');
+    document.body.appendChild(host);
+    onTestFinished(() => host.remove());
+    const { wrapper } = await mountShell('/goals', host);
+    const input = wrapper.get('[data-testid="shell-resize-focus-probe"]')
+      .element as HTMLInputElement;
+    input.focus();
+    vi.useFakeTimers();
+    const frames: FrameRequestCallback[] = [];
+    vi.spyOn(window, 'requestAnimationFrame').mockImplementation((callback) => {
+      frames.push(callback);
+      return 73;
+    });
+    const cancelFrame = vi.spyOn(window, 'cancelAnimationFrame');
+    await wrapper
+      .get('[data-testid="business-panel-resizer"]')
+      .trigger('pointerdown', { pointerId: 32, clientX: 700 });
+    window.dispatchEvent(new PointerEvent('pointerup', { pointerId: 32 }));
+    expect(frames).toHaveLength(1);
+    if (stage === 'guard') {
+      frames[0](performance.now());
+      expect(vi.getTimerCount()).toBeGreaterThan(0);
+    }
 
-      wrapper.unmount();
-      if (stage === 'frame') expect(cancelFrame).toHaveBeenCalledWith(73);
-      expect(vi.getTimerCount()).toBe(0);
-      // A stale focus guard would focus a replacement matching the old input.
-      const replacement = document.createElement('input');
-      replacement.dataset.testid = 'shell-resize-focus-probe';
-      host.appendChild(replacement);
-      document.body.dispatchEvent(new FocusEvent('focusin', { bubbles: true }));
-      expect(document.activeElement).not.toBe(replacement);
-    },
-  );
+    wrapper.unmount();
+    if (stage === 'frame') expect(cancelFrame).toHaveBeenCalledWith(73);
+    expect(vi.getTimerCount()).toBe(0);
+    // A stale focus guard would focus a replacement matching the old input.
+    const replacement = document.createElement('input');
+    replacement.dataset.testid = 'shell-resize-focus-probe';
+    host.appendChild(replacement);
+    document.body.dispatchEvent(new FocusEvent('focusin', { bubbles: true }));
+    expect(document.activeElement).not.toBe(replacement);
+  });
 
   it('releases its preview-entry callback on unmount', async () => {
     const { wrapper } = await mountShell('/goals');
@@ -486,9 +483,9 @@ describe('AppShell right-panel integration', () => {
 
     expect(store.sidebarCollapsed).toBe(false);
     expect(wrapper.find('[data-testid="shell-sidebar-pane-host"]').exists()).toBe(false);
-    expect(
-      wrapper.get('[data-testid="shell-sidebar-toggle"]').attributes('aria-expanded'),
-    ).toBe('false');
+    expect(wrapper.get('[data-testid="shell-sidebar-toggle"]').attributes('aria-expanded')).toBe(
+      'false',
+    );
 
     await wrapper.get('[data-testid="shell-sidebar-toggle"]').trigger('click');
     await nextTick();
@@ -564,9 +561,7 @@ describe('AppShell right-panel integration', () => {
     store.toggleFocus();
     await nextTick();
     expect(wrapper.get('[data-testid="conversation-sidebar"]').exists()).toBe(true);
-    expect(wrapper.get('[data-testid="app-shell"]').attributes('data-shell-state')).toBe(
-      'focus',
-    );
+    expect(wrapper.get('[data-testid="app-shell"]').attributes('data-shell-state')).toBe('focus');
     wrapper.unmount();
   });
 
@@ -584,9 +579,7 @@ describe('AppShell right-panel integration', () => {
 
     expect(store.layout).toBe('focus');
     expect(store.layoutReason).toBe('viewport');
-    expect(wrapper.get('[data-testid="app-shell"]').attributes('data-shell-state')).toBe(
-      'focus',
-    );
+    expect(wrapper.get('[data-testid="app-shell"]').attributes('data-shell-state')).toBe('focus');
     wrapper.unmount();
   });
 
@@ -711,8 +704,7 @@ describe('AppShell right-panel integration', () => {
       await nextTick();
       const input = wrapper.get('[data-testid="shell-resize-focus-probe"]');
       await input.setValue('Unsaved goal draft');
-      const businessView = wrapper.get('[data-testid="goal-draft-probe"]')
-        .element as HTMLElement;
+      const businessView = wrapper.get('[data-testid="goal-draft-probe"]').element as HTMLElement;
       businessView.scrollTop = 120;
       const before = JSON.stringify(store.$state);
       const originalConfirm = window.confirm;
@@ -729,9 +721,7 @@ describe('AppShell right-panel integration', () => {
       if (action === 'delete') sidebar.vm.$emit('delete-conversation', 'conversation-a');
       await flushPromises();
 
-      expect(activeChatConversationId.value).toBe(
-        action === 'select' ? 'conversation-b' : null,
-      );
+      expect(activeChatConversationId.value).toBe(action === 'select' ? 'conversation-b' : null);
       expect(JSON.stringify(store.$state)).toBe(before);
       expect(router.currentRoute.value.fullPath).toBe('/goals');
       expect(wrapper.get('[data-testid="goal-draft-probe"]').element).toBe(businessView);
@@ -742,8 +732,7 @@ describe('AppShell right-panel integration', () => {
       expect(navigation).not.toHaveBeenCalled();
       if (action === 'new' || action === 'keyboard-new')
         expect(startNewConversation).toHaveBeenCalledWith('chat');
-      if (action === 'delete')
-        expect(deleteConversation).toHaveBeenCalledWith('conversation-a');
+      if (action === 'delete') expect(deleteConversation).toHaveBeenCalledWith('conversation-a');
       window.confirm = originalConfirm;
       removeGuard();
       wrapper.unmount();
