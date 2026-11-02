@@ -55,12 +55,13 @@
           <span
             class="w-11 shrink-0 pt-0.5 font-mono text-[10px] font-medium tabular-nums text-foreground"
           >
-            {{ formatProductHm(occurrence.occurrenceAt) }}
+            {{ occurrence.timingStatus === 'awaiting-completion' ? t('routine.home.awaitingCompletion') : occurrence.timingStatus === 'local-runtime' ? t('routine.home.localRuntime') : formatProductHm(occurrence.occurrenceAt) }}
           </span>
 
           <span class="min-w-0 flex-1">
             <span class="block truncate text-xs font-medium text-foreground">
               {{ occurrence.title }}
+              <span v-if="occurrence.intervalMs" class="text-muted-foreground"> · {{ t('routine.home.everyMinutes', { minutes: occurrence.intervalMs / 60_000 }) }}</span>
             </span>
             <span
               v-if="occurrence.description"
@@ -137,11 +138,11 @@ const error = ref<string | null>(null);
 const mutatingRoutineId = ref<string | null>(null);
 
 function todayRange(now = Date.now()) {
-  return { start: startOfDayMs(now), end: endOfDayMs(now), limit: 500 };
+  return { start: startOfDayMs(now), end: endOfDayMs(now), includeElapsed: true, limit: 500 };
 }
 
 function applyUpcoming(source: RoutineUpcomingOccurrence[], now = Date.now()): void {
-  occurrences.value = source.filter((occurrence) => occurrence.occurrenceAt >= now);
+  occurrences.value = source.filter((occurrence) => occurrence.intervalMs != null || occurrence.occurrenceAt >= now);
 }
 
 async function load(force = false): Promise<void> {

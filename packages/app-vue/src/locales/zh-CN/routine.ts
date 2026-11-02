@@ -11,7 +11,10 @@ export default {
   home: {
     title: '今日例程',
     viewAll: '查看全部',
-    empty: '今天没有剩余的固定时间例程',
+    empty: '今天没有剩余的例程',
+    awaitingCompletion: '待完成',
+    localRuntime: '桌面计时',
+    everyMinutes: '每 {minutes} 分钟',
   },
   filter: {
     status: '例程状态',

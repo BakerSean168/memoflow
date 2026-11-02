@@ -11,7 +11,10 @@ export default {
   home: {
     title: 'Today routines',
     viewAll: 'View all',
-    empty: 'No remaining fixed-time routines today',
+    empty: 'No remaining routines today',
+    awaitingCompletion: 'Pending',
+    localRuntime: 'Desktop timer',
+    everyMinutes: 'Every {minutes} min',
   },
   filter: {
     status: 'Routine status',
