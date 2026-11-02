@@ -36,6 +36,11 @@ export async function unlockLocalProfile(
   profileId?: string,
   remember = false,
 ): Promise<Page> {
+  await expect(
+    gate
+      .getByTestId('desktop-profile-access')
+      .or(gate.getByTestId('desktop-profile-password-state')),
+  ).toBeVisible();
   if (await gate.getByTestId('desktop-profile-password-state').isVisible()) {
     // Host transitions may preselect the protected target.
   } else if (profileId) await gate.getByTestId(`desktop-profile-open-${profileId}`).click();
@@ -52,7 +57,9 @@ export async function selectRememberedProfile(
   profileId?: string,
 ): Promise<Page> {
   await expect(gate.getByTestId('desktop-profile-access')).toBeVisible();
-  return workspaceAfter(app, () => profileId
-    ? gate.getByTestId(`desktop-profile-open-${profileId}`).click()
-    : gate.locator('[data-testid^="desktop-profile-open-"]').first().click());
+  return workspaceAfter(app, () =>
+    profileId
+      ? gate.getByTestId(`desktop-profile-open-${profileId}`).click()
+      : gate.locator('[data-testid^="desktop-profile-open-"]').first().click(),
+  );
 }

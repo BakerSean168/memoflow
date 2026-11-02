@@ -1,4 +1,9 @@
-import { registerLocalProfile, unlockLocalProfile, selectRememberedProfile, LOCAL_PASSWORD } from '../support/profile-access';
+import {
+  registerLocalProfile,
+  unlockLocalProfile,
+  selectRememberedProfile,
+  LOCAL_PASSWORD,
+} from '../support/profile-access';
 import {
   ProfileImportRequestSchema,
   type ProfileImportPlan,
@@ -285,7 +290,11 @@ test('local account works offline, keeps its renamed profile across restart and 
     await openManageAccounts(mainWindow);
     const localId = readRegistry(userDataPath).activeProfileId!;
     await mainWindow.getByTestId(`desktop-profile-rename-${localId}`).click();
-    const rename = mainWindow.getByTestId(`desktop-profile-rename-${localId}`).locator('../..').locator('form').first();
+    const rename = mainWindow
+      .getByTestId(`desktop-profile-rename-${localId}`)
+      .locator('../..')
+      .locator('form')
+      .first();
     await rename.locator('input').fill('离线旅程用户');
     await rename.locator('button[type="submit"]').click();
     await expect(mainWindow.getByTestId('shell-account-name')).toHaveText('离线旅程用户');
@@ -299,16 +308,22 @@ test('local account works offline, keeps its renamed profile across restart and 
     // Unremembered local accounts must pass the password gate after restart.
     await electronApp.close();
     electronApp = await launchDesktop(userDataPath);
-    let restartedMainWindow = await unlockLocalProfile(electronApp, await electronApp.firstWindow(), undefined, true);
+    let restartedMainWindow = await unlockLocalProfile(
+      electronApp,
+      await electronApp.firstWindow(),
+      undefined,
+      true,
+    );
     captureRendererConsole(restartedMainWindow);
     await expect(restartedMainWindow.getByTestId('app-shell')).toBeVisible();
-    await expect(restartedMainWindow.getByTestId('shell-account-name')).toHaveText(
-      '离线旅程用户',
-    );
+    await expect(restartedMainWindow.getByTestId('shell-account-name')).toHaveText('离线旅程用户');
 
     await electronApp.close();
     electronApp = await launchDesktop(userDataPath);
-    const rememberedWindow = await selectRememberedProfile(electronApp, await electronApp.firstWindow());
+    const rememberedWindow = await selectRememberedProfile(
+      electronApp,
+      await electronApp.firstWindow(),
+    );
     await expect(rememberedWindow.getByTestId('app-shell')).toBeVisible();
     await expect(rememberedWindow.getByTestId('shell-account-name')).toHaveText('离线旅程用户');
 
@@ -384,7 +399,10 @@ test('device authorization opens an independent cloud Profile and preserves the 
     await electronApp.close();
     electronApp = await launchDesktop(userDataPath, cloud.origin);
     await electronApp.evaluate(({ shell }) => {
-      Object.defineProperty(shell, 'openExternal', { configurable: true, value: async () => undefined });
+      Object.defineProperty(shell, 'openExternal', {
+        configurable: true,
+        value: async () => undefined,
+      });
     });
     const loginGate = await electronApp.firstWindow();
     await expect(loginGate.getByTestId('desktop-profile-access')).toBeVisible();
@@ -488,7 +506,11 @@ test('device authorization opens an independent cloud Profile and preserves the 
     electronApp = null;
     await cloud.close();
     electronApp = await launchDesktop(userDataPath, cloud.origin);
-    const offlineWindow = await selectRememberedProfile(electronApp, await electronApp.firstWindow(), another.profileId);
+    const offlineWindow = await selectRememberedProfile(
+      electronApp,
+      await electronApp.firstWindow(),
+      another.profileId,
+    );
     await expect(offlineWindow.getByTestId('app-shell')).toBeVisible();
     expect(readRegistry(userDataPath).activeProfileId).toBe(another.profileId);
     expect(fs.readFileSync(marker, 'utf8')).toBe('source remains independent');
@@ -522,7 +544,10 @@ test('a second local account keeps independent data and its password selection a
     expect(readRegistry(userData).activeProfileId).toBe(first.profileId);
     await openManageAccounts(firstWindow);
     await firstWindow.getByTestId('desktop-profile-create').locator('input').first().fill('Work');
-    await firstWindow.getByTestId('desktop-profile-create').locator('input[type="password"]').fill(LOCAL_PASSWORD);
+    await firstWindow
+      .getByTestId('desktop-profile-create')
+      .locator('input[type="password"]')
+      .fill(LOCAL_PASSWORD);
     const secondGatePromise = app.waitForEvent('window');
     await firstWindow.getByTestId('desktop-profile-create').getByRole('button').click();
     await expect.poll(() => readRegistry(userData).profiles.length).toBe(2);
@@ -530,7 +555,9 @@ test('a second local account keeps independent data and its password selection a
       (profile) => profile.profileId !== first.profileId,
     )!;
     expect(second.localOwnerId).not.toBe(first.localOwnerId);
-    expect(fs.existsSync(path.join(userData, 'data', 'profiles', second.profileId, 'independent.txt'))).toBe(false);
+    expect(
+      fs.existsSync(path.join(userData, 'data', 'profiles', second.profileId, 'independent.txt')),
+    ).toBe(false);
     const secondWindow = await unlockLocalProfile(app, await secondGatePromise);
     await expect(secondWindow.getByTestId('shell-account-name')).toHaveText('Work');
     await secondWindow.getByTestId('shell-account-menu').click();
@@ -554,7 +581,8 @@ test('a second local account keeps independent data and its password selection a
     await password.fill('wrong-password');
     await locked.getByTestId('desktop-profile-enter').click();
     await expect(locked.getByTestId('desktop-profile-password-state')).toBeVisible();
-    await expect(locked.getByTestId('desktop-profile-enter')).toBeDisabled();
+    await expect(locked.getByText('密码不正确或解锁凭据已损坏', { exact: true })).toBeVisible();
+    await expect(locked.getByTestId('app-shell')).toHaveCount(0);
     const unlocked = await unlockLocalProfile(app, locked, second.profileId);
     await expect(unlocked.getByTestId('shell-account-name')).toHaveText('Work');
     expect(readRegistry(userData).activeProfileId).toBe(second.profileId);
@@ -717,7 +745,10 @@ test('local account copy preview persists across restart and waits for local con
     await guest.getByTestId('cloud-connection-continue').click();
     const copyGate = await copyGatePromise;
     await expect(copyGate.getByTestId('desktop-profile-access')).toBeVisible();
-    await copyGate.locator('[data-testid^="desktop-profile-open-"]').filter({ hasNotText: 'Nightly Local' }).click();
+    await copyGate
+      .locator('[data-testid^="desktop-profile-open-"]')
+      .filter({ hasNotText: 'Nightly Local' })
+      .click();
     await expect.poll(() => readRegistry(userData).profiles.length).toBe(2);
     await expect.poll(() => guest.isClosed()).toBe(true);
     const targetWindow = await targetWindowPromise;
