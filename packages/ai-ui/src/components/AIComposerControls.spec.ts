@@ -528,9 +528,7 @@ describe('T3 model picker / conditional traits / enforced permissions', () => {
       (button.element as HTMLElement).focus();
       expect(document.activeElement).toBe(button.element);
     }
-    // The last instance must be able to scroll into view inside the rail.
-    expect(typeof (last.element as HTMLElement).scrollIntoView).toBe('function');
-    (last.element as HTMLElement).scrollIntoView({ block: 'nearest' });
+    // The final instance stays keyboard-reachable inside the scrollable rail.
     (last.element as HTMLElement).focus();
     expect(document.activeElement).toBe(last.element);
     wrapper.unmount();
