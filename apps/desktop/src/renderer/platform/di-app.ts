@@ -197,6 +197,6 @@ export function installDesktopAppServices(
     if (result.error.code === 'SIGN_OUT_PARTIAL') {
       await bridge.invoke(WindowChannels.TRANSITION_TO_PROFILE_ACCESS);
     }
-    throw new Error(result.error.message || getAppT()('common.operationFailed'));
+    throw new Error(getAppT()('common.operationFailed'));
   });
 }
