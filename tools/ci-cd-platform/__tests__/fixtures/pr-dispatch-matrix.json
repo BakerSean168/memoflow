@@ -871,7 +871,12 @@
     },
     {
       "id": "workflow",
-      "files": [".github/workflows/ci.yml"],
+      "files": [
+        ".github/workflows/ci.yml",
+        ".github/workflows/desktop-update-e2e.yml",
+        "apps/desktop/e2e/support/profile-access.ts",
+        "apps/desktop/e2e/authentication/desktop-auth-flow.spec.mts"
+      ],
       "expected": {
         "full": true,
         "targets": {

@@ -1,4 +1,5 @@
 import {
+  enterLocalWorkspace,
   registerLocalProfile,
   unlockLocalProfile,
   selectRememberedProfile,
@@ -223,7 +224,7 @@ test('native Goal checkpoint survives an Electron restart and saves once through
   try {
     const launch = () => launchDesktop(path.join(root, 'user-data'));
     app = await launch();
-    let page = await registerLocalProfile(app, await app.firstWindow());
+    let page = await enterLocalWorkspace(app);
     const openDraft = async () => {
       await expect(page.getByTestId('app-shell')).toBeVisible();
       await page.evaluate(() => {
@@ -254,7 +255,7 @@ test('native Goal checkpoint survives an Electron restart and saves once through
     expect((await goals()).pagination.total).toBe(0);
     await app.close();
     app = await launch();
-    page = await unlockLocalProfile(app, await app.firstWindow());
+    page = await enterLocalWorkspace(app);
     await openDraft();
     await expect(page.getByTestId('goal-name-input')).toHaveValue('Electron checkpoint draft');
     await expect(page.getByTestId('goal-description-input')).toHaveValue(

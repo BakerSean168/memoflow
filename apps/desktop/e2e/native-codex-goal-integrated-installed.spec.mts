@@ -1,3 +1,4 @@
+import { enterLocalWorkspace } from './support/profile-access';
 import { execFile } from 'node:child_process';
 import { randomUUID } from 'node:crypto';
 import fs from 'node:fs';
@@ -76,7 +77,10 @@ test('real Windows Codex invokes MemoFlow MCP to fill and save the installed Goa
                 params: object,
               ): Promise<{
                 ok: boolean;
-                data?: { pagination: { total: number }; data: Array<{ id: string; name: string }> };
+                data?: {
+                  pagination: { total: number };
+                  data: Array<{ id: string; name: string }>;
+                };
               }>;
             };
           }
@@ -111,7 +115,10 @@ test('real Windows Codex invokes MemoFlow MCP to fill and save the installed Goa
 
   async function installTestOnlyResponseRelay(instance: ElectronApplication) {
     await instance.evaluate(({ ipcMain, BrowserWindow }, channel) => {
-      type Pending = { sender: Electron.WebContents; finish: (response: unknown) => void };
+      type Pending = {
+        sender: Electron.WebContents;
+        finish: (response: unknown) => void;
+      };
       const state = globalThis as typeof globalThis & {
         __mf570IntegratedPending?: Map<string, Pending>;
       };
@@ -153,7 +160,10 @@ test('real Windows Codex invokes MemoFlow MCP to fill and save the installed Goa
         const state = globalThis as typeof globalThis & {
           __mf570IntegratedPending?: Map<
             string,
-            { sender: Electron.WebContents; finish: (response: unknown) => void }
+            {
+              sender: Electron.WebContents;
+              finish: (response: unknown) => void;
+            }
           >;
         };
         const target = BrowserWindow.getAllWindows().find(
@@ -267,8 +277,10 @@ test('real Windows Codex invokes MemoFlow MCP to fill and save the installed Goa
     const store = new LocalAgentRepository(fixture.db);
 
     app = await launch();
-    let page = await app.firstWindow({ timeout: 45_000 });
-    await expect(page.getByTestId('app-shell')).toBeVisible({ timeout: 45_000 });
+    let page = await enterLocalWorkspace(app);
+    await expect(page.getByTestId('app-shell')).toBeVisible({
+      timeout: 45_000,
+    });
     const provenance = await verifyInstalledNativeBinary(
       app,
       executable!,
@@ -385,8 +397,10 @@ test('real Windows Codex invokes MemoFlow MCP to fill and save the installed Goa
     await app.close();
     app = null;
     app = await launch();
-    page = await app.firstWindow({ timeout: 45_000 });
-    await expect(page.getByTestId('app-shell')).toBeVisible({ timeout: 45_000 });
+    page = await enterLocalWorkspace(app);
+    await expect(page.getByTestId('app-shell')).toBeVisible({
+      timeout: 45_000,
+    });
     goals = await readGoals(page);
     expect(goals.pagination.total).toBe(1);
     expect(goals.data.some((goal) => goal.id === proof.goalId && goal.name === NAME)).toBe(true);
