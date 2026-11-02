@@ -10,18 +10,10 @@
 const fs = require('node:fs');
 const os = require('node:os');
 const path = require('node:path');
-const { spawn } = require('node:child_process');
+const { spawn, spawnSync } = require('node:child_process');
 const { createInterface } = require('node:readline');
 
-const url = process.env.MF570_MCP_URL;
-const token = process.env.MF570_MCP_TOKEN;
-const codex = process.env.MF570_CODEX_WIN_EXE;
-const runIntegratedOwner = process.env.MF570_INTEGRATED_GOAL === 'CONFIRM_REAL_RENDERER_NO_TURN';
-// The temporary grant is scoped to the injected thread; do not propagate it as
-// an ambient environment variable to the native Codex child process.
-delete process.env.MF570_MCP_URL;
-delete process.env.MF570_MCP_TOKEN;
-const expected = [
+const EXPECTED_TOOLS = [
   'goal_panel_snapshot',
   'goal_panel_open',
   'goal_panel_patch',
@@ -31,11 +23,166 @@ const expected = [
   'goal_panel_submit',
   'goal_panel_release',
 ];
+
+// Windows releases the CODEX_HOME file handles asynchronously after the process
+// tree is gone, and Defender/AV scans can extend that. The old fixed 6 x 350ms
+// window (~2.1s) was too short; this budget backs off for up to 15s.
+const CLEANUP_MAX_ATTEMPTS = 30;
+const CLEANUP_BASE_DELAY_MS = 250;
+const CLEANUP_MAX_DELAY_MS = 2_000;
+const CLEANUP_DEADLINE_MS = 15_000;
+const CLEANUP_RESIDUAL_LIMIT = 20;
+const GRACEFUL_EXIT_MS = 3_000;
+const FORCED_EXIT_MS = 5_000;
+
 let child;
+let childDetached = false;
 let homeRoot;
+
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
+/**
+ * Kill the whole process tree, not only the direct child. On Windows the Codex
+ * App Server can leave descendants behind; `taskkill /T` terminates the subtree
+ * while `child.kill()` only signals the direct process.
+ */
+function killProcessTree(pid, options = {}) {
+  const platform = options.platform ?? process.platform;
+  if (!Number.isInteger(pid) || pid <= 0) return false;
+  if (platform === 'win32') {
+    const run = options.spawnSyncImpl ?? spawnSync;
+    const result = run('taskkill', ['/PID', String(pid), '/T', '/F'], {
+      stdio: 'ignore',
+      windowsHide: true,
+      timeout: 15_000,
+    });
+    return result?.status === 0;
+  }
+  let killed = false;
+  // A detached child owns its process group, so the negative PID reaches every
+  // descendant. Never do this for a non-detached child: -pid would be our own
+  // process group.
+  if (options.detached) {
+    try {
+      process.kill(-pid, 'SIGKILL');
+      killed = true;
+    } catch {}
+  }
+  try {
+    process.kill(pid, 'SIGKILL');
+    killed = true;
+  } catch {}
+  return killed;
+}
+
+/** Resolve true when the direct child has exited, false when the timeout wins. */
+function waitForChildExit(target, timeoutMs) {
+  if (!target) return Promise.resolve(true);
+  if (target.exitCode !== null || target.signalCode !== null) return Promise.resolve(true);
+  return new Promise((resolve) => {
+    let settled = false;
+    const finish = (value) => {
+      if (settled) return;
+      settled = true;
+      clearTimeout(timer);
+      target.removeListener('exit', onExit);
+      target.removeListener('close', onExit);
+      resolve(value);
+    };
+    const onExit = () => finish(true);
+    const timer = setTimeout(() => finish(false), timeoutMs);
+    timer.unref?.();
+    target.once('exit', onExit);
+    target.once('close', onExit);
+  });
+}
+
+/** Relative path + size of whatever still blocks deletion, for failure reports. */
+function listResidualEntries(root, fsImpl = fs, limit = CLEANUP_RESIDUAL_LIMIT) {
+  const entries = [];
+  const walk = (dir, prefix) => {
+    if (entries.length >= limit) return;
+    let dirents;
+    try {
+      dirents = fsImpl.readdirSync(dir, { withFileTypes: true });
+    } catch {
+      return;
+    }
+    for (const dirent of dirents) {
+      if (entries.length >= limit) return;
+      const relative = prefix ? prefix + '/' + dirent.name : dirent.name;
+      const absolute = path.join(dir, dirent.name);
+      if (dirent.isDirectory()) {
+        entries.push(relative + '/');
+        walk(absolute, relative);
+      } else {
+        let size = 'unknown';
+        try {
+          size = String(fsImpl.statSync(absolute).size);
+        } catch {}
+        entries.push(relative + ' (' + size + ' bytes)');
+      }
+    }
+  };
+  walk(root, '');
+  if (entries.length >= limit) entries.push('... (truncated)');
+  return entries;
+}
+
+/**
+ * Delete the ephemeral CODEX_HOME until `existsSync` proves the path is gone.
+ * A successful `rmSync` is not proof on Windows: a locked handle can leave the
+ * directory behind, so only the existence check may report success.
+ */
+async function removeEphemeralHome(root, options = {}) {
+  const fsImpl = options.fsImpl ?? fs;
+  const sleepImpl = options.sleepImpl ?? sleep;
+  const maxAttempts = options.maxAttempts ?? CLEANUP_MAX_ATTEMPTS;
+  const baseDelayMs = options.baseDelayMs ?? CLEANUP_BASE_DELAY_MS;
+  const maxDelayMs = options.maxDelayMs ?? CLEANUP_MAX_DELAY_MS;
+  const deadlineMs = options.deadlineMs ?? CLEANUP_DEADLINE_MS;
+  const startedAt = Date.now();
+  let attempts = 0;
+  let lastError = null;
+  if (!root) return { removed: true, attempts, residual: [], lastError };
+
+  for (let attempt = 0; attempt < maxAttempts; attempt++) {
+    if (!fsImpl.existsSync(root)) return { removed: true, attempts, residual: [], lastError };
+    attempts += 1;
+    try {
+      fsImpl.rmSync(root, {
+        recursive: true,
+        force: true,
+        maxRetries: 2,
+        retryDelay: 100,
+      });
+    } catch (error) {
+      lastError = error;
+    }
+    if (!fsImpl.existsSync(root)) return { removed: true, attempts, residual: [], lastError };
+    if (Date.now() - startedAt >= deadlineMs) break;
+    await sleepImpl(Math.min(baseDelayMs * attempts, maxDelayMs));
+  }
+
+  return {
+    removed: false,
+    attempts,
+    residual: listResidualEntries(root, fsImpl),
+    lastError,
+  };
+}
+
 async function main() {
+  const url = process.env.MF570_MCP_URL;
+  const token = process.env.MF570_MCP_TOKEN;
+  const codex = process.env.MF570_CODEX_WIN_EXE;
+  const runIntegratedOwner = process.env.MF570_INTEGRATED_GOAL === 'CONFIRM_REAL_RENDERER_NO_TURN';
+  // The temporary grant is scoped to the injected thread; do not propagate it as
+  // an ambient environment variable to the native Codex child process.
+  delete process.env.MF570_MCP_URL;
+  delete process.env.MF570_MCP_TOKEN;
+  const expected = EXPECTED_TOOLS;
+
   if (
     !/^http:\/\/127\.0\.0\.1:\d+\/mcp$/.test(url || '') ||
     !/^[A-Za-z0-9_-]{43}$/.test(token || '') ||
@@ -46,9 +193,11 @@ async function main() {
   homeRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'mf570-codex-mcp-'));
   const home = path.join(homeRoot, 'empty-codex-home');
   fs.mkdirSync(home, { recursive: true });
+  childDetached = process.platform !== 'win32';
   child = spawn(codex, ['app-server', '--listen', 'stdio://'], {
     cwd: homeRoot,
     windowsHide: true,
+    detached: childDetached,
     stdio: ['pipe', 'pipe', 'pipe'],
     env: { ...process.env, CODEX_HOME: home },
   });
@@ -241,10 +390,10 @@ async function main() {
   console.log('WIN_REAL_CODEX_MEMOFLOW_MCP=PASS');
 }
 
-(async () => {
+async function run() {
   const watchdog = setTimeout(() => {
     console.log('QA_TIMED_OUT=true');
-    child?.kill();
+    if (child?.pid) killProcessTree(child.pid, { detached: childDetached });
     process.exitCode = 2;
   }, 55_000);
   watchdog.unref();
@@ -258,23 +407,44 @@ async function main() {
     process.exitCode = 1;
   } finally {
     clearTimeout(watchdog);
-    if (child && child.exitCode === null) {
-      child.kill();
-      await Promise.race([new Promise((resolve) => child.once('close', resolve)), sleep(2000)]);
-    }
-    let removed = false;
-    for (let attempt = 0; attempt < 6; attempt++) {
+    if (child && child.exitCode === null && child.signalCode === null) {
+      // Closing stdio asks the App Server to shut down cleanly and release its
+      // CODEX_HOME handles before we resort to killing the tree.
       try {
-        if (homeRoot)
-          fs.rmSync(homeRoot, { recursive: true, force: true, maxRetries: 2, retryDelay: 100 });
-        removed = true;
-        break;
-      } catch {
-        await sleep(350);
+        child.stdin.end();
+      } catch {}
+      const graceful = await waitForChildExit(child, GRACEFUL_EXIT_MS);
+      if (!graceful && child.pid) {
+        killProcessTree(child.pid, { detached: childDetached });
+        await waitForChildExit(child, FORCED_EXIT_MS);
       }
     }
-    console.log('EPHEMERAL_CODEX_HOME_REMOVED=' + removed);
+    const cleanup = await removeEphemeralHome(homeRoot);
+    console.log('EPHEMERAL_CODEX_HOME_REMOVED=' + cleanup.removed);
+    console.log('EPHEMERAL_CODEX_HOME_REMOVE_ATTEMPTS=' + cleanup.attempts);
+    if (!cleanup.removed) {
+      const reason = String(cleanup.lastError?.code || cleanup.lastError?.message || 'UNKNOWN');
+      console.log('EPHEMERAL_CODEX_HOME_LAST_ERROR=' + reason.slice(0, 96));
+      console.log('EPHEMERAL_CODEX_HOME_RESIDUAL_COUNT=' + cleanup.residual.length);
+      for (const entry of cleanup.residual) {
+        console.log('EPHEMERAL_CODEX_HOME_RESIDUAL=' + entry);
+      }
+      // The spec asserts the removal line is `true`; a non-zero exit surfaces the
+      // attached operator stdout instead of a bare assertion diff.
+      if (!process.exitCode) process.exitCode = 1;
+    }
   }
-})().catch(() => {
-  process.exitCode = 1;
-});
+}
+
+if (require.main === module) {
+  run().catch(() => {
+    process.exitCode = 1;
+  });
+}
+
+module.exports = {
+  killProcessTree,
+  listResidualEntries,
+  removeEphemeralHome,
+  waitForChildExit,
+};
