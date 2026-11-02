@@ -130,7 +130,11 @@ describe.each(['en-US', 'zh-CN'])('KR Inspect in %s', (locale) => {
         readonly: true,
         size: 'inspect',
       });
-      expect(surface.querySelector('svg')?.getAttribute('class')).toContain('h-40');
+      // The shell close affordance renders the first svg in the surface, so the
+      // trajectory assertion scopes to the plot it is about.
+      expect(
+        surface.querySelector('[data-testid="kr-trajectory-summary"] svg')?.getAttribute('class'),
+      ).toContain('h-40');
       expect(surface.textContent).not.toMatch(/goal\.(inspect|dialog)\./);
     },
   );
