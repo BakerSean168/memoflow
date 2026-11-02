@@ -175,6 +175,101 @@ describe('evaluatePermission', () => {
     ).toMatchObject({ decision, reason: 'preset' });
   });
 
+  describe('dynamic bulk risk (#762)', () => {
+    const updateAllowRule = {
+      id: 'allow-task-update',
+      agentId: null,
+      object: 'task' as const,
+      action: 'update' as const,
+      effect: 'allow' as const,
+      source: 'user' as const,
+    };
+
+    it('keeps the default threshold boundary exclusive', () => {
+      expect(
+        evaluatePermission({
+          agentId: 'codex',
+          operationId: 'task.update',
+          preset: 'confirm_each',
+          itemCount: 10,
+          globalRules: [updateAllowRule],
+        }),
+      ).toMatchObject({ decision: 'allow', reason: 'allow_rule', operation: { risks: [] } });
+    });
+
+    it('escalates an over-threshold update even when an object grant exists', () => {
+      expect(
+        evaluatePermission({
+          agentId: 'codex',
+          operationId: 'task.update',
+          preset: 'confirm_each',
+          itemCount: 11,
+          globalRules: [updateAllowRule],
+        }),
+      ).toMatchObject({ decision: 'ask', reason: 'preset', operation: { risks: ['bulk'] } });
+    });
+
+    it('keeps user denies and the read-only preset above dynamic bulk risk', () => {
+      expect(
+        evaluatePermission({
+          agentId: 'codex',
+          operationId: 'task.update',
+          preset: 'confirm_each',
+          itemCount: 11,
+          agentRules: [{ ...updateAllowRule, id: 'deny', agentId: 'codex', effect: 'deny' }],
+        }),
+      ).toMatchObject({ decision: 'deny', reason: 'user_deny', ruleId: 'deny' });
+      expect(
+        evaluatePermission({
+          agentId: 'codex',
+          operationId: 'task.update',
+          preset: 'read_only',
+          itemCount: 11,
+          globalRules: [updateAllowRule],
+        }),
+      ).toMatchObject({ decision: 'deny', reason: 'preset', operation: { risks: ['bulk'] } });
+    });
+
+    it('still allows dynamic bulk in full auto and never escalates reads', () => {
+      expect(
+        evaluatePermission({
+          agentId: 'codex',
+          operationId: 'task.update',
+          preset: 'full_auto',
+          itemCount: 11,
+          globalRules: [updateAllowRule],
+        }),
+      ).toMatchObject({ decision: 'allow', reason: 'allow_rule' });
+      expect(
+        evaluatePermission({
+          agentId: 'codex',
+          operationId: 'task.read',
+          preset: 'confirm_each',
+          itemCount: 500,
+        }),
+      ).toMatchObject({ decision: 'allow', reason: 'preset', operation: { risks: [] } });
+    });
+
+    it('honors a per-call threshold override', () => {
+      const context = {
+        agentId: 'codex',
+        operationId: 'task.update',
+        preset: 'confirm_each' as const,
+        bulkThreshold: 3,
+        globalRules: [updateAllowRule],
+      };
+      expect(evaluatePermission({ ...context, itemCount: 4 })).toMatchObject({
+        decision: 'ask',
+        operation: { risks: ['bulk'] },
+      });
+      expect(evaluatePermission({ ...context, itemCount: 3 })).toMatchObject({
+        decision: 'allow',
+        reason: 'allow_rule',
+        operation: { risks: [] },
+      });
+    });
+  });
+
   it('uses custom matrix cells and derives MCP hint metadata from the operation catalog', () => {
     expect(
       evaluatePermission({
