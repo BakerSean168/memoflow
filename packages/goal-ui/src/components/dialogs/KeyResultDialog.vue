@@ -1,7 +1,9 @@
 <template>
   <Dialog :open="open" @update:open="setOpen">
     <ProductDialogShell
+      @request-close="setOpen(false)"
       :open="open"
+      :close-disabled="isSubmitting"
       test-id="key-result-dialog"
       size="lg"
       initial-focus-selector="[data-testid='draft-kr-title-input']"
@@ -33,9 +35,6 @@
       </form>
 
       <template #footer>
-        <Button variant="ghost" :disabled="isSubmitting" @click="setOpen(false)">
-          {{ t('common.cancel') }}
-        </Button>
         <Button
           type="submit"
           form="kr-form"

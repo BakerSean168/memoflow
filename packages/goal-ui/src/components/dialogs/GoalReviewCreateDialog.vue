@@ -8,7 +8,9 @@
     "
   >
     <ProductDialogShell
+      @request-close="!saving && emit('close')"
       :open="open"
+      :close-disabled="saving"
       test-id="goal-review-create-dialog"
       size="lg"
       height-mode="workspace"
@@ -64,15 +66,6 @@
       <p v-if="submitError" role="alert" class="text-sm text-destructive">{{ submitError }}</p>
 
       <template #footer>
-        <Button
-          type="button"
-          variant="ghost"
-          data-testid="goal-review-cancel"
-          :disabled="saving"
-          @click="emit('close')"
-        >
-          {{ t('common.cancel') }}
-        </Button>
         <Button
           type="button"
           data-testid="goal-review-save"

@@ -244,7 +244,18 @@ describe('TaskPlanForm', () => {
     expect(wrapper.get('[data-testid="task-importance-chip"]').exists()).toBe(true);
     expect(wrapper.get('[data-testid="label-picker-stub"]').exists()).toBe(true);
     expect(wrapper.get('[data-testid="task-description-section"]').exists()).toBe(true);
-    expect(wrapper.get('[data-stub="ChecklistSection"]').exists()).toBe(true);
+    const checklist = wrapper.get('[data-stub="ChecklistSection"]');
+    const description = wrapper.get('[data-testid="task-description-section"]');
+    const properties = wrapper.get('[data-testid="task-plan-property-chips"]');
+    expect(
+      properties.element.compareDocumentPosition(checklist.element) &
+        Node.DOCUMENT_POSITION_FOLLOWING,
+    ).toBeTruthy();
+    expect(
+      checklist.element.compareDocumentPosition(description.element) &
+        Node.DOCUMENT_POSITION_FOLLOWING,
+    ).toBeTruthy();
+    expect(checklist.classes()).not.toContain('mt-auto');
     expect(wrapper.find('[data-testid="task-plan-property-editor"]').exists()).toBe(false);
     expect(wrapper.find('[data-testid="task-checklist-chip"]').exists()).toBe(false);
   });

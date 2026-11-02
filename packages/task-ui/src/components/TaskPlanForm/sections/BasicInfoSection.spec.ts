@@ -54,77 +54,47 @@ const wrappers: VueWrapper[] = [];
 afterEach(() => wrappers.splice(0).forEach((wrapper) => wrapper.unmount()));
 
 describe('BasicInfoSection title feedback', () => {
-  it('reserves a single line before blur, shows an associated error, and clears it after correction', async () => {
+  it('does not duplicate the required placeholder with a visible error label', async () => {
     const wrapper = mountSection();
     const input = wrapper.get('textarea');
-    const slot = wrapper.get('[aria-live="polite"]');
-    const slotElement = slot.element;
 
-    expect(slot.classes()).toContain('min-h-4');
-    expect(wrapper.find('[role="alert"]').exists()).toBe(false);
-    expect(input.attributes('aria-invalid')).toBeUndefined();
-    expect(input.attributes('aria-describedby')).toBeUndefined();
+    expect(input.attributes('placeholder')).toContain('必填');
+    expect(input.attributes('aria-required')).toBe('true');
     expect(wrapper.emitted('update:validation')).toEqual([[false]]);
-
+    expect(wrapper.find('[role="alert"]').exists()).toBe(false);
     await input.trigger('blur');
-
-    const error = wrapper.get('[data-testid="task-title-validation-error"]');
-    expect(error.text()).toBe(task.basicInfo.titleRequired);
-    expect(error.attributes('title')).toBe(task.basicInfo.titleRequired);
-    expect(error.classes()).toEqual(expect.arrayContaining(['truncate', 'leading-4']));
-    expect(input.attributes('aria-invalid')).toBe('true');
-    expect(input.attributes('aria-describedby')).toBe(error.attributes('id'));
-    expect(error.attributes('id')).toBeTruthy();
-    expect(slot.element).toBe(slotElement);
-    expect(slot.classes()).toContain('min-h-4');
-
-    await input.setValue('整理本周计划');
-
     expect(wrapper.find('[role="alert"]').exists()).toBe(false);
-    expect(input.attributes('aria-invalid')).toBeUndefined();
-    expect(input.attributes('aria-describedby')).toBeUndefined();
-    expect(wrapper.get('[aria-live="polite"]').element).toBe(slotElement);
-    expect(slot.classes()).toContain('min-h-4');
-    expect(wrapper.emitted('update:modelValue')).toEqual([[plan('整理本周计划')]]);
-    expect(wrapper.emitted('update:validation')).toEqual([[false], [true]]);
-  });
-
-  it('keeps whitespace invalid without exposing an error until blur, including after switching plans', async () => {
-    const wrapper = mountSection();
-    const input = wrapper.get('textarea');
-
-    await input.setValue('   ');
-    expect(wrapper.find('[role="alert"]').exists()).toBe(false);
-    expect(input.attributes('aria-describedby')).toBeUndefined();
+    expect(wrapper.find('[data-testid="task-title-validation-error"]').exists()).toBe(false);
     expect(wrapper.emitted('update:validation')?.at(-1)).toEqual([false]);
 
-    await input.trigger('blur');
-    expect(wrapper.get('[role="alert"]').text()).toBe(task.basicInfo.titleRequired);
-
-    await wrapper.setProps({ modelValue: { ...plan(), id: 'plan-2' } });
-    expect(wrapper.find('[role="alert"]').exists()).toBe(false);
-    expect(input.attributes('aria-invalid')).toBeUndefined();
-    expect(input.attributes('aria-describedby')).toBeUndefined();
-
-    await input.trigger('blur');
-    expect(wrapper.get('[role="alert"]').text()).toBe(task.basicInfo.titleRequired);
+    await input.setValue('整理本周计划');
+    expect(wrapper.emitted('update:modelValue')).toEqual([[plan('整理本周计划')]]);
+    expect(wrapper.emitted('update:validation')?.at(-1)).toEqual([true]);
   });
 
-  it('opts the actual textarea into focus-visible feedback without reporting untouched errors on focus', async () => {
+  it('keeps whitespace invalid and clears it when corrected without an extra hint row', async () => {
     const wrapper = mountSection();
     const input = wrapper.get('textarea');
+    await input.setValue('   ');
+    await input.trigger('blur');
+    expect(wrapper.emitted('update:validation')?.at(-1)).toEqual([false]);
+    expect(wrapper.find('[role="alert"]').exists()).toBe(false);
+    await wrapper.setProps({ modelValue: { ...plan(), id: 'plan-2' } });
+    expect(wrapper.emitted('update:validation')?.at(-1)).toEqual([false]);
+    expect(wrapper.find('[role="alert"]').exists()).toBe(false);
+  });
 
-    // happy-dom verifies focusability and the CSS contract, not browser Tab navigation or paint.
+  it('uses a subtle borderless keyboard focus state on the title', async () => {
+    const wrapper = mountSection();
+    const input = wrapper.get('textarea');
     input.element.focus();
     await nextTick();
 
     expect(document.activeElement).toBe(input.element);
     expect(wrapper.get('label').attributes('for')).toBe(input.attributes('id'));
-    expect(input.classes()).toEqual(
-      expect.arrayContaining(['focus-visible:ring-2', 'focus-visible:ring-ring']),
-    );
-    expect(input.classes()).not.toContain('focus-visible:ring-0');
-    expect(input.attributes('aria-invalid')).toBeUndefined();
+    expect(input.classes()).toContain('focus-visible:ring-0');
+    expect(input.classes()).not.toContain('focus-visible:ring-2');
+    expect(input.classes().some((name) => name.includes('focus-visible:bg-'))).toBe(true);
     expect(wrapper.find('[role="alert"]').exists()).toBe(false);
     expect(wrapper.emitted('update:modelValue')).toBeUndefined();
   });
@@ -199,6 +169,6 @@ describe('BasicInfoSection title feedback', () => {
     await input.setValue('');
     expect(wrapper.vm.validate()).toBe(false);
     expect(wrapper.emitted('update:validation')?.at(-1)).toEqual([{ isValid: false }]);
-    expect(wrapper.get('[role="alert"]').text()).toBe(task.basicInfo.titleRequired);
+    expect(wrapper.find('[role="alert"]').exists()).toBe(false);
   });
 });

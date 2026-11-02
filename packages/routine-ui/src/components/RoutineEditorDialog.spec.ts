@@ -125,7 +125,7 @@ describe('RoutineEditorDialog Product controls', () => {
     expect(testId('routine-name-limit-error').text()).toBe('Enter a routine name');
     await name.setValue('Keep my draft');
     expect(document.querySelector('[data-testid="routine-name-limit-error"]')).toBeNull();
-    expect(name.classes()).toContain('focus-visible:ring-2');
+    expect(name.classes()).toContain('focus-visible:ring-0');
     await wrapper.setProps({ submitError: 'Offline: try again' });
     expect(testId('routine-submit-error').attributes('title')).toBe('Offline: try again');
     expect((name.element as HTMLTextAreaElement).value).toBe('Keep my draft');
@@ -146,7 +146,7 @@ describe('RoutineEditorDialog Product controls', () => {
     expect(name.attributes('aria-describedby')).toBe('routine-name-limit-feedback');
     expect(testId('routine-name-limit-error').attributes('role')).toBe('alert');
     expect(testId('routine-name-limit-error').classes()).toContain('truncate');
-    expect(name.classes()).toContain('focus-visible:ring-2');
+    expect(name.classes()).toContain('focus-visible:ring-0');
 
     const description = testId('routine-description-input');
     expect(description.element.nextElementSibling?.classList.contains('min-h-4')).toBe(true);
@@ -156,7 +156,7 @@ describe('RoutineEditorDialog Product controls', () => {
     expect((description.element as HTMLTextAreaElement).value).toHaveLength(2000);
     expect(description.attributes('aria-describedby')).toBe('routine-description-limit-feedback');
     expect(testId('routine-description-limit-error').attributes('role')).toBe('alert');
-    expect(description.classes()).toContain('focus-visible:ring-2');
+    expect(description.classes()).toContain('focus-visible:ring-0');
   });
 
   it('defaults a new WallClock to Product zone and Product today', async () => {
@@ -325,7 +325,7 @@ describe('RoutineEditorDialog Product controls', () => {
   it('guards dirty cancellation from the canonical opening snapshot', async () => {
     const wrapper = await openEditor(wallClock);
 
-    await testId('routine-editor-cancel').trigger('click');
+    await testId('routine-editor-dialog-close').trigger('click');
     await flushPromises();
     expect(confirmMock).not.toHaveBeenCalled();
     expect(wrapper.emitted('update:open')).toEqual([[false]]);
@@ -333,7 +333,7 @@ describe('RoutineEditorDialog Product controls', () => {
     await wrapper.setProps({ open: true });
     await flushPromises();
     await testId('routine-name-input').setValue('Changed morning');
-    await testId('routine-editor-cancel').trigger('click');
+    await testId('routine-editor-dialog-close').trigger('click');
     await flushPromises();
 
     expect(confirmMock).toHaveBeenCalledOnce();
@@ -344,7 +344,7 @@ describe('RoutineEditorDialog Product controls', () => {
     confirmMock.mockResolvedValueOnce(false);
     const wrapper = await openEditor(wallClock);
     await testId('routine-description-input').setValue('Keep this draft');
-    await testId('routine-editor-cancel').trigger('click');
+    await testId('routine-editor-dialog-close').trigger('click');
     await flushPromises();
 
     expect(confirmMock).toHaveBeenCalledOnce();

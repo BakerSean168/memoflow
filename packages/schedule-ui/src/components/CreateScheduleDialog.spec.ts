@@ -232,11 +232,11 @@ describe('CreateScheduleDialog submission lifecycle', () => {
     });
     await nextTick();
 
-    const cancel = [...document.querySelectorAll<HTMLButtonElement>('button')].find(
-      (button) => button.textContent?.trim() === 'Cancel',
+    const close = document.querySelector<HTMLButtonElement>(
+      '[data-testid="schedule-dialog-close"]',
     );
-    expect(cancel).toBeDefined();
-    await new DOMWrapper(cancel!).trigger('click');
+    expect(close).not.toBeNull();
+    await new DOMWrapper(close!).trigger('click');
     await flushPromises();
 
     expect(confirmMock).not.toHaveBeenCalled();
@@ -255,10 +255,10 @@ describe('CreateScheduleDialog submission lifecycle', () => {
     await new DOMWrapper(
       document.querySelector<HTMLInputElement>('[data-testid="schedule-title-input"]')!,
     ).setValue('Unsaved schedule');
-    const cancel = [...document.querySelectorAll<HTMLButtonElement>('button')].find(
-      (button) => button.textContent?.trim() === 'Cancel',
+    const close = document.querySelector<HTMLButtonElement>(
+      '[data-testid="schedule-dialog-close"]',
     );
-    await new DOMWrapper(cancel!).trigger('click');
+    await new DOMWrapper(close!).trigger('click');
     await flushPromises();
 
     expect(confirmMock).toHaveBeenCalledOnce();
@@ -296,10 +296,10 @@ describe('CreateScheduleDialog submission lifecycle', () => {
       document.querySelector<HTMLInputElement>('[data-testid="schedule-title-input"]')!,
     );
     await title.setValue('Keep this schedule');
-    const cancel = [...document.querySelectorAll<HTMLButtonElement>('button')].find(
-      (button) => button.textContent?.trim() === 'Cancel',
+    const close = document.querySelector<HTMLButtonElement>(
+      '[data-testid="schedule-dialog-close"]',
     );
-    await new DOMWrapper(cancel!).trigger('click');
+    await new DOMWrapper(close!).trigger('click');
     await flushPromises();
 
     expect(confirmMock).toHaveBeenCalledOnce();

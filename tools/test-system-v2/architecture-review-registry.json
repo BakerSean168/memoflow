@@ -183,7 +183,7 @@
         "status": "none-verified",
         "testFiles": []
       },
-      "sourceSha256": "0162ecaf9e939210856dc93776ef24debd7ae3aabb6b404ec29df88451d73822"
+      "sourceSha256": "89ec0dba08aa00857cd73cb19b1dc7b308a4a7eb59534f65e90ea4e5bf7fbfe2"
     },
     {
       "path": "apps/api/src/shared/infrastructure/middleware/error-result-envelope.surface.spec.ts",
@@ -2933,7 +2933,7 @@
         "status": "none-verified",
         "testFiles": []
       },
-      "sourceSha256": "b1b172840e4eaaac354c7df0fa7f991accd095999ea64b0142e1fcaf8ab61f65"
+      "sourceSha256": "8371952f89d5d87fd27caf2230fab73709c4dd687454a7bdde134956539f2880"
     },
     {
       "path": "packages/app-vue/src/shared/components/ProductEditorFrame.spec.ts",

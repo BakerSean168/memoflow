@@ -32,7 +32,6 @@
             :placeholder="t('routine.form.namePlaceholder')"
             :aria-label="t('routine.form.name')"
             :aria-describedby="nameError ? 'routine-name-limit-feedback' : undefined"
-            focus-ring
             :aria-invalid="Boolean(nameError)"
             :disabled="saving"
             @blur="nameTouched = true"
@@ -61,7 +60,6 @@
                 : undefined
             "
             :aria-invalid="descriptionLimitFeedback.visible.value"
-            :focus-ring="true"
             :disabled="saving"
             @limit-exceeded="descriptionLimitFeedback.show()"
           />
@@ -158,15 +156,6 @@
     </form>
 
     <template #footer>
-      <Button
-        type="button"
-        variant="ghost"
-        data-testid="routine-editor-cancel"
-        :disabled="saving"
-        @click="requestClose()"
-      >
-        {{ t('routine.form.cancel') }}
-      </Button>
       <Button
         type="submit"
         form="routine-editor-form"

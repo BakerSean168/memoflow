@@ -27,7 +27,6 @@
             class="min-h-10 text-xl font-semibold leading-tight text-foreground"
             :placeholder="t('routine.profile.namePlaceholder')"
             :aria-label="t('routine.profile.name')"
-            focus-ring
             :aria-invalid="Boolean(nameError)"
             :aria-describedby="nameError ? 'routine-profile-name-feedback' : undefined"
             :disabled="saving"
@@ -50,7 +49,6 @@
             class="min-h-8 text-sm leading-5 text-muted-foreground"
             :placeholder="t('routine.profile.descriptionPlaceholder')"
             :aria-label="t('routine.profile.description')"
-            focus-ring
             :aria-invalid="descriptionLimitFeedback.visible.value"
             :aria-describedby="
               descriptionLimitFeedback.visible.value
@@ -75,9 +73,6 @@
     </form>
 
     <template #footer>
-      <Button type="button" variant="ghost" :disabled="saving" @click="requestClose()">
-        {{ t('routine.form.cancel') }}
-      </Button>
       <Button
         type="submit"
         form="routine-profile-form"

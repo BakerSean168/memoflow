@@ -1,6 +1,7 @@
 <template>
   <Dialog :open="modelValue" @update:open="(v) => emit('update:modelValue', v)">
     <ProductDialogShell
+      @request-close="emit('cancel')"
       :open="modelValue"
       test-id="template-selection-dialog"
       size="lg"
@@ -45,9 +46,6 @@
       </div>
 
       <template #footer>
-        <Button variant="ghost" @click="emit('cancel')">{{
-          t('task.templateSelection.cancel')
-        }}</Button>
         <Button :disabled="!selectedId" @click="confirmSelection">
           {{ t('task.templateSelection.useTemplate') }}
         </Button>

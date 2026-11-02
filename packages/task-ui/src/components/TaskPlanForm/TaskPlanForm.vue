@@ -213,6 +213,13 @@
         </p>
       </section>
 
+      <ChecklistSection
+        :model-value="taskPlanBeingEdited"
+        :disabled="props.readonly"
+        @update:validation="updateMetadataValidation"
+        @update:model-value="handlePlanUpdate"
+      />
+
       <section class="space-y-2" data-testid="task-description-section">
         <Label for="task-plan-description" class="sr-only">{{
           t('task.basicInfo.description')
@@ -228,14 +235,6 @@
           @update:model-value="updateDescription"
         />
       </section>
-
-      <ChecklistSection
-        class="mt-auto shrink-0"
-        :model-value="taskPlanBeingEdited"
-        :disabled="props.readonly"
-        @update:validation="updateMetadataValidation"
-        @update:model-value="handlePlanUpdate"
-      />
     </form>
   </div>
 </template>

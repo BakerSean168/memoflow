@@ -5,6 +5,41 @@ import { Dialog as AppDialog, DialogContent } from '@memoflow/ui-vue-shadcn';
 import ProductDialogShell from './ProductDialogShell.vue';
 
 describe('ProductDialogShell', () => {
+  it('provides an accessible header close routed through owner approval and disables it when busy', async () => {
+    const Host = defineComponent({
+      components: { AppDialog, ProductDialogShell },
+      setup() {
+        return { busy: ref(false), close: ref(0) };
+      },
+      template: `
+        <AppDialog :open="true">
+          <ProductDialogShell :open="true" test-id="shell-close-test" :close-disabled="busy"
+            @request-close="close++">
+            <template #title>Create</template>
+            <div>Draft</div>
+            <template #footer><button type="button">Save</button></template>
+          </ProductDialogShell>
+        </AppDialog>
+      `,
+    });
+    const wrapper = mount(Host, { attachTo: document.body });
+    await flushPromises();
+    const dialog = document.querySelector<HTMLElement>('[data-testid="shell-close-test"]')!;
+    const close = dialog.querySelector<HTMLButtonElement>(
+      '[data-testid="shell-close-test-close"]',
+    )!;
+    expect(close.getAttribute('aria-label')).toBe('Close');
+    expect(dialog.querySelectorAll('[data-testid="product-dialog-footer"] button')).toHaveLength(1);
+    close.click();
+    expect(wrapper.vm.close).toBe(1);
+    wrapper.vm.busy = true;
+    await flushPromises();
+    expect(close.disabled).toBe(true);
+    close.click();
+    expect(wrapper.vm.close).toBe(1);
+    wrapper.unmount();
+  });
+
   it('moves initial focus to the declared form control', async () => {
     const Host = defineComponent({
       components: { AppDialog, ProductDialogShell },

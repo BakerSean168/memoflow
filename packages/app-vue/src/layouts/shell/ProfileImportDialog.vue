@@ -143,8 +143,10 @@ watch(
 </script>
 
 <template>
-  <Dialog :open="open" @update:open="emit('update:open', $event)">
+  <Dialog :open="open" @update:open="!busy && emit('update:open', $event)">
     <ProductDialogShell
+      @request-close="!busy && emit('update:open', false)"
+      :close-disabled="busy"
       :open="open"
       test-id="profile-import-dialog"
       size="md"
@@ -257,9 +259,6 @@ watch(
         </ul>
       </details>
       <template #footer>
-        <Button variant="ghost" @click="emit('update:open', false)">{{
-          t('shell.profileImport.close')
-        }}</Button>
         <Button v-if="!selected" :disabled="busy || !sourceId" @click="action('prepare')">{{
           t('shell.profileImport.preview')
         }}</Button>

@@ -59,9 +59,6 @@
     />
 
     <template #footer>
-      <Button variant="ghost" :disabled="saving" @click="handleCancel">{{
-        t('task.templateDialog.cancel')
-      }}</Button>
       <Button
         data-testid="task-dialog-save-button"
         :disabled="!canSave"
