@@ -205,6 +205,9 @@ function appMainWindow(app: ElectronApplication): Page {
 }
 
 async function openManageAccounts(page: Page): Promise<void> {
+  if (await page.getByTestId('settings-return-to-app').isVisible()) {
+    await page.getByTestId('settings-return-to-app').click();
+  }
   await page.getByTestId('shell-account-menu').click();
   await page.getByTestId('shell-open-settings').click();
   await page.getByTestId('settings-tab-account').click();
@@ -275,6 +278,36 @@ test('native Goal checkpoint survives an Electron restart and saves once through
     expect((await goals()).pagination.total).toBe(1);
   } finally {
     if (app) await app.close();
+    fs.rmSync(root, { recursive: true, force: true });
+  }
+});
+
+test('account menu add account opens the identity login surface without removing the local account', async () => {
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), 'memoflow-menu-login-e2e-'));
+  const userDataPath = path.join(root, 'user-data');
+  let app: ElectronApplication | null = null;
+  try {
+    app = await launchDesktop(userDataPath);
+    const main = await registerLocalProfile(app, await app.firstWindow());
+    const profileId = readRegistry(userDataPath).activeProfileId;
+    await main.getByTestId('shell-account-menu').click();
+    await expect(main.getByTestId('shell-open-cloud-connection')).toHaveCount(0);
+    await expect(main.getByTestId('shell-logout')).toBeVisible();
+    await main.getByTestId('shell-switch-account').click();
+    await expect(main.getByTestId('shell-manage-profiles')).toHaveCount(0);
+    const gatePromise = app.waitForEvent('window');
+    await main.getByTestId('shell-add-account').click();
+    const gate = await gatePromise;
+    await expect(gate.getByTestId('desktop-profile-login-state')).toBeVisible();
+    await expect(gate.getByTestId('desktop-profile-login-email')).toBeVisible();
+    await expect(gate.getByTestId('desktop-profile-login-password')).toBeVisible();
+    await expect(gate.getByTestId('desktop-profile-github-signin')).toBeVisible();
+    await expect(gate.getByTestId('desktop-profile-go-register')).toBeVisible();
+    expect(readRegistry(userDataPath).profiles.map((profile) => profile.profileId)).toContain(
+      profileId,
+    );
+  } finally {
+    await app?.close();
     fs.rmSync(root, { recursive: true, force: true });
   }
 });
@@ -541,7 +574,7 @@ test('a second local account keeps independent data and its password selection a
       .getByRole('button', { name: '关闭', exact: true })
       .click();
     await expect(firstWindow.getByTestId('manage-accounts-dialog')).toBeHidden();
-    await expect(firstWindow.getByTestId('shell-account-menu')).toBeFocused();
+    await expect(firstWindow.getByTestId('shell-manage-profiles')).toBeFocused();
     expect(app.windows().length).toBe(windowsBefore);
     expect(readRegistry(userData).activeProfileId).toBe(first.profileId);
     await openManageAccounts(firstWindow);
