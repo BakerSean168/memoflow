@@ -128,4 +128,19 @@ export default {
     confirmText: '退出登录',
     cancelText: '取消',
   },
+  signOut: {
+    action: '退出账号',
+    hint: '退出当前账号并从这台设备移除。',
+    confirm: {
+      local: {
+        title: '退出并注销本地账户？',
+        description: '本地账户只存在于这台设备。退出即注销：全部信息将被删除，无法恢复。',
+      },
+      registered: {
+        title: '退出并删除本机账号数据？',
+        description:
+          '将删除这台设备上的相关数据，包括尚未同步的本地修改，删除后无法恢复。账号仍保留在云端，重新登录后可同步回来。',
+      },
+    },
+  },
 } as const;

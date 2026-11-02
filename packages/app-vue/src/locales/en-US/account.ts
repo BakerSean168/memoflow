@@ -134,4 +134,20 @@ export default {
     confirmText: 'Log out',
     cancelText: 'Cancel',
   },
+  signOut: {
+    action: 'Sign out',
+    hint: 'Sign out of this account and remove it from this device.',
+    confirm: {
+      local: {
+        title: 'Sign out and delete this local account?',
+        description:
+          'A local account exists only on this device. Signing out deletes everything permanently; it cannot be recovered.',
+      },
+      registered: {
+        title: 'Sign out and delete this device’s account data?',
+        description:
+          'Data on this device, including local changes that have not synced yet, will be deleted permanently. The account stays in the cloud and syncs back when you sign in again.',
+      },
+    },
+  },
 } as const;
