@@ -1,26 +1,24 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { app, BrowserWindow } from "electron";
-import { mkdtempSync, rmSync } from "node:fs";
-import { tmpdir } from "node:os";
-import path from "node:path";
-import { WindowManager } from "./window-manager";
-import { DesktopLifecyclePreference } from "./desktop-lifecycle-preference";
-import type { DesktopFeaturesRuntime } from "../desktop-features";
-import type { DesktopProfileRuntimeManager } from "../profile";
-import { DesktopShutdownCoordinator } from "./desktop-shutdown-coordinator";
-import { createBeforeQuitHandler } from "./before-quit-handler";
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { app, BrowserWindow } from 'electron';
+import { mkdtempSync, rmSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import path from 'node:path';
+import { WindowManager } from './window-manager';
+import { DesktopLifecyclePreference } from './desktop-lifecycle-preference';
+import type { DesktopFeaturesRuntime } from '../desktop-features';
+import type { DesktopProfileRuntimeManager } from '../profile';
+import { DesktopShutdownCoordinator } from './desktop-shutdown-coordinator';
+import { createBeforeQuitHandler } from './before-quit-handler';
 
-vi.mock("../utils/app-icon", () => ({
-  resolveWindowIconPath: () => "test-icon",
-}));
-vi.mock("../utils/resolve-preload-path", () => ({
-  resolvePreloadPath: () => "preload.cjs",
+vi.mock('../utils/app-icon', () => ({ resolveWindowIconPath: () => 'test-icon' }));
+vi.mock('../utils/resolve-preload-path', () => ({
+  resolvePreloadPath: () => 'preload.cjs',
   hasResolvedPreload: () => true,
 }));
-vi.mock("../runtime-init", () => ({
-  getSharedPathResolver: () => ({ profileAccessWindowStatePath: "/unused" }),
+vi.mock('../runtime-init', () => ({
+  getSharedPathResolver: () => ({ profileAccessWindowStatePath: '/unused' }),
 }));
-vi.mock("../modules/window", () => ({
+vi.mock('../modules/window', () => ({
   WindowStateManager: class {
     width = 1200;
     height = 800;
@@ -30,7 +28,7 @@ vi.mock("../modules/window", () => ({
   },
 }));
 
-describe("Windows main-window close lifecycle", () => {
+describe('Windows main-window close lifecycle', () => {
   let manager: WindowManager;
   let preference: DesktopLifecyclePreference;
   let root: string;
@@ -38,15 +36,13 @@ describe("Windows main-window close lifecycle", () => {
   const stop = vi.fn(async () => {});
   beforeEach(() => {
     vi.clearAllMocks();
-    vi.spyOn(process, "platform", "get").mockReturnValue("win32");
-    root = mkdtempSync(path.join(tmpdir(), "mf-close-"));
-    preference = new DesktopLifecyclePreference(
-      path.join(root, "lifecycle.json"),
-    );
+    vi.spyOn(process, 'platform', 'get').mockReturnValue('win32');
+    root = mkdtempSync(path.join(tmpdir(), 'mf-close-'));
+    preference = new DesktopLifecyclePreference(path.join(root, 'lifecycle.json'));
     manager = new WindowManager({ isDev: false });
     manager.configureCloseBehavior(preference, () => false);
     manager.setRuntimeManager({
-      getActiveProfileId: () => "profile-a",
+      getActiveProfileId: () => 'profile-a',
     } as DesktopProfileRuntimeManager);
     manager.setScheduleRuntimeController({ start, stop });
     manager.setDesktopFeaturesRuntime({
@@ -61,16 +57,13 @@ describe("Windows main-window close lifecycle", () => {
     vi.restoreAllMocks();
   });
   async function open() {
-    const transition = manager.transitionToMainWindow(
-      "profile-a",
-      path.join(root, "window.json"),
-    );
-    manager.getMainWindow()!.emit("ready-to-show");
+    const transition = manager.transitionToMainWindow('profile-a', path.join(root, 'window.json'));
+    manager.getMainWindow()!.emit('ready-to-show');
     await transition;
     return manager.getMainWindow()!;
   }
 
-  it("close hides the same renderer without stopping the Profile scheduler; restore preserves it", async () => {
+  it('close hides the same renderer without stopping the Profile scheduler; restore preserves it', async () => {
     const main = await open();
     const send = main.webContents.send;
     main.close();
@@ -87,28 +80,25 @@ describe("Windows main-window close lifecycle", () => {
     expect(main.webContents.send).toBe(send);
   });
 
-  it.each(["disabled", "unavailable"] as const)(
-    "%s tray closes through coordinated app.quit",
+  it.each(['disabled', 'unavailable'] as const)(
+    '%s tray closes through coordinated app.quit',
     async (mode) => {
       const main = await open();
-      if (mode === "disabled") preference.update("closeToTray", false);
+      if (mode === 'disabled') preference.update('closeToTray', false);
       else manager.setDesktopFeaturesRuntime(null);
       main.close();
       expect(app.quit).toHaveBeenCalledTimes(1);
     },
   );
 
-  it.each(["normal-quit", "update-install"] as const)(
-    "allows terminal close after %s cleanup settles",
+  it.each(['normal-quit', 'update-install'] as const)(
+    'allows terminal close after %s cleanup settles',
     async (reason) => {
       const main = await open();
       const cleanup = vi.fn(async () => {});
       const coordinator = new DesktopShutdownCoordinator({ cleanup });
-      manager.configureCloseBehavior(
-        preference,
-        () => coordinator.shouldAllowProcessExit,
-      );
-      if (reason === "normal-quit") {
+      manager.configureCloseBehavior(preference, () => coordinator.shouldAllowProcessExit);
+      if (reason === 'normal-quit') {
         await createBeforeQuitHandler(coordinator, () => main.close())({
           preventDefault: vi.fn(),
         } as unknown as Electron.Event);
@@ -122,29 +112,25 @@ describe("Windows main-window close lifecycle", () => {
     },
   );
 
-  it("routes add account through the existing identity window transition with a login intent", async () => {
+  it('routes add account through the existing identity window transition with a login intent', async () => {
     const main = await open();
-    const transition = manager.transitionToProfileAccessWindow(
-      undefined,
-      true,
-      "login",
-    );
+    const transition = manager.transitionToProfileAccessWindow(undefined, true, 'login');
     await Promise.resolve();
     const gate = manager.getProfileAccessWindow()!;
-    gate.emit("ready-to-show");
+    gate.emit('ready-to-show');
     await transition;
     expect(main.isDestroyed()).toBe(true);
     expect(gate.loadFile).toHaveBeenCalledWith(expect.any(String), {
-      hash: "/profile-access?view=login",
+      hash: '/profile-access?view=login',
     });
   });
 
-  it("lock stops scheduling and destroys the old renderer; restore opens only Profile Access", async () => {
+  it('lock stops scheduling and destroys the old renderer; restore opens only Profile Access', async () => {
     const main = await open();
     main.close();
     const transition = manager.transitionToProfileAccessWindow();
     await Promise.resolve();
-    manager.getProfileAccessWindow()!.emit("ready-to-show");
+    manager.getProfileAccessWindow()!.emit('ready-to-show');
     await transition;
     expect(stop).toHaveBeenCalledTimes(1);
     expect(main.isDestroyed()).toBe(true);
@@ -155,7 +141,7 @@ describe("Windows main-window close lifecycle", () => {
     expect(manager.getMainWindow()).toBeNull();
   });
 
-  it("does not expose an outgoing renderer while profile teardown awaits", async () => {
+  it('does not expose an outgoing renderer while profile teardown awaits', async () => {
     const main = await open();
     let finish!: () => void;
     stop.mockImplementationOnce(
@@ -170,30 +156,30 @@ describe("Windows main-window close lifecycle", () => {
     expect(main.isVisible()).toBe(false);
     finish();
     await Promise.resolve();
-    manager.getProfileAccessWindow()!.emit("ready-to-show");
+    manager.getProfileAccessWindow()!.emit('ready-to-show');
     await transition;
   });
 
-  it("hidden startup still starts scheduling without showing the main window", async () => {
+  it('hidden startup still starts scheduling without showing the main window', async () => {
     manager.setStartupHidden(true);
     const main = await open();
     expect(start).toHaveBeenCalledTimes(1);
     expect(main.isVisible()).toBe(false);
   });
 
-  it("a late ready event cannot expose a hidden PIN gate after startup finishes", () => {
+  it('a late ready event cannot expose a hidden PIN gate after startup finishes', () => {
     manager.setStartupHidden(true);
     const gate = manager.createProfileAccessWindow();
     manager.setStartupHidden(false);
-    gate.emit("ready-to-show");
+    gate.emit('ready-to-show');
     expect(gate.isVisible()).toBe(false);
     expect(manager.focusActiveWindow()).toBe(true);
   });
 
-  it("OS session termination requests coordinated quit", async () => {
+  it('OS session termination requests coordinated quit', async () => {
     const main = await open();
     const event = { preventDefault: vi.fn() };
-    main.emit("query-session-end", event);
+    main.emit('query-session-end', event);
     expect(event.preventDefault).toHaveBeenCalled();
     expect(app.quit).toHaveBeenCalled();
   });

@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { computed, onBeforeUnmount, onMounted, watch } from "vue";
-import { useI18n } from "vue-i18n";
+import { computed, onBeforeUnmount, onMounted, watch } from 'vue';
+import { useI18n } from 'vue-i18n';
 import {
   Avatar,
   AvatarFallback,
@@ -10,13 +10,13 @@ import {
   Separator,
   ToggleGroup,
   ToggleGroupItem,
-} from "@memoflow/ui-vue-shadcn";
-import { ArrowLeft } from "@lucide/vue";
+} from '@memoflow/ui-vue-shadcn';
+import { ArrowLeft } from '@lucide/vue';
 import {
   useDesktopProfiles,
   type DesktopRegisterMode,
-} from "../shared/composables/useDesktopProfiles";
-import DesktopProfileList from "../shared/components/DesktopProfileList.vue";
+} from '../shared/composables/useDesktopProfiles';
+import DesktopProfileList from '../shared/components/DesktopProfileList.vue';
 
 const { t } = useI18n();
 const presenter = useDesktopProfiles({ accessWindow: true });
@@ -56,29 +56,27 @@ const {
 } = presenter;
 
 const passwordInitials = computed(() => {
-  const name = passwordTarget.value?.displayName ?? "";
-  return name.trim().slice(0, 2).toUpperCase() || "MF";
+  const name = passwordTarget.value?.displayName ?? '';
+  return name.trim().slice(0, 2).toUpperCase() || 'MF';
 });
 const vFocusPassword = { mounted: (element: HTMLElement) => element.focus() };
 const vFocusLogin = { mounted: (element: HTMLElement) => element.focus() };
-const registerModes: readonly DesktopRegisterMode[] = ["cloud", "local"];
+const registerModes: readonly DesktopRegisterMode[] = ['cloud', 'local'];
 
 function switchRegisterMode(value: unknown): void {
-  if (value === "cloud" || value === "local") registerMode.value = value;
+  if (value === 'cloud' || value === 'local') registerMode.value = value;
 }
 
 onMounted(async () => {
   await refreshProfiles();
-  const query = window.location.hash.split("?")[1];
+  const query = window.location.hash.split('?')[1];
   const params = new URLSearchParams(query);
-  if (params.get("view") === "login") {
+  if (params.get('view') === 'login') {
     enterLoginState();
     return;
   }
-  const targetId = params.get("profileId");
-  const target = profiles.value.find(
-    (profile) => profile.profileId === targetId,
-  );
+  const targetId = params.get('profileId');
+  const target = profiles.value.find((profile) => profile.profileId === targetId);
   // A host-supplied target arrives preselected, never opened: only a target that
   // actually has a password has a state to show.
   if (target?.hasCredential) enterPasswordState(target);
@@ -91,7 +89,7 @@ onBeforeUnmount(disposeAuth);
 watch(
   accessView,
   (view) => {
-    void setAccessWindowHeight(view === "register" ? 780 : 640);
+    void setAccessWindowHeight(view === 'register' ? 780 : 640);
   },
   { immediate: true },
 );
@@ -106,7 +104,7 @@ watch(
       data-testid="desktop-profile-access"
     >
       <h1 class="text-sm font-medium tracking-[0.02em] text-foreground/85">
-        {{ t("auth.profileAccess.selectTitle") }}
+        {{ t('auth.profileAccess.selectTitle') }}
       </h1>
 
       <DesktopProfileList :presenter="presenter" @add="enterLoginState" />
@@ -118,10 +116,8 @@ watch(
       class="flex w-full max-w-xs flex-col gap-5"
       data-testid="desktop-profile-login-state"
     >
-      <h1
-        class="text-center text-sm font-medium tracking-[0.02em] text-foreground/85"
-      >
-        {{ t("auth.profileAccess.signInTitle") }}
+      <h1 class="text-center text-sm font-medium tracking-[0.02em] text-foreground/85">
+        {{ t('auth.profileAccess.signInTitle') }}
       </h1>
 
       <form
@@ -148,16 +144,14 @@ watch(
         />
 
         <div class="flex items-center justify-between">
-          <label
-            class="flex w-fit items-center gap-2 text-xs text-foreground/65"
-          >
+          <label class="flex w-fit items-center gap-2 text-xs text-foreground/65">
             <Checkbox
               v-model="loginRemember"
               class="border-white/25 data-[state=checked]:border-brand-gold-via data-[state=checked]:bg-brand-gold-via data-[state=checked]:text-brand-gold-foreground"
               :aria-label="t('auth.profileAccess.rememberMe')"
               data-testid="desktop-profile-login-remember"
             />
-            {{ t("auth.profileAccess.rememberMe") }}
+            {{ t('auth.profileAccess.rememberMe') }}
           </label>
           <button
             type="button"
@@ -165,7 +159,7 @@ watch(
             data-testid="desktop-profile-forgot-password"
             @click="forgotPassword"
           >
-            {{ t("auth.profileAccess.forgotPassword") }}
+            {{ t('auth.profileAccess.forgotPassword') }}
           </button>
         </div>
 
@@ -174,7 +168,7 @@ watch(
           class="w-full bg-linear-to-r from-brand-gold-from via-brand-gold-via to-brand-gold-to text-brand-gold-foreground hover:brightness-105"
           data-testid="desktop-profile-login-submit"
           :disabled="signInBusy || !loginEmail || !loginPassword"
-          >{{ t("auth.profileAccess.signInAction") }}</Button
+          >{{ t('auth.profileAccess.signInAction') }}</Button
         >
       </form>
 
@@ -186,12 +180,9 @@ watch(
         data-testid="desktop-profile-github-waiting"
       >
         <p class="text-xs leading-relaxed text-foreground/70">
-          {{ t("auth.profileAccess.githubWaiting") }}
+          {{ t('auth.profileAccess.githubWaiting') }}
         </p>
-        <p
-          v-if="githubUserCode"
-          class="font-mono text-sm tracking-[0.2em] text-foreground/90"
-        >
+        <p v-if="githubUserCode" class="font-mono text-sm tracking-[0.2em] text-foreground/90">
           {{ githubUserCode }}
         </p>
         <Button
@@ -200,7 +191,7 @@ watch(
           class="w-full"
           data-testid="desktop-profile-github-cancel"
           @click="cancelGithubSignIn"
-          >{{ t("common.cancel") }}</Button
+          >{{ t('common.cancel') }}</Button
         >
       </div>
       <Button
@@ -224,7 +215,7 @@ watch(
             d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27s1.36.09 2 .27c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8z"
           />
         </svg>
-        {{ t("auth.profileAccess.githubSignIn") }}
+        {{ t('auth.profileAccess.githubSignIn') }}
       </Button>
 
       <div class="flex items-center justify-between text-xs text-foreground/60">
@@ -235,7 +226,7 @@ watch(
           @click="backToSelect"
         >
           <ArrowLeft class="h-3.5 w-3.5" aria-hidden="true" />
-          {{ t("auth.profileAccess.backToSelect") }}
+          {{ t('auth.profileAccess.backToSelect') }}
         </button>
         <button
           type="button"
@@ -243,10 +234,8 @@ watch(
           data-testid="desktop-profile-go-register"
           @click="enterRegisterState('cloud')"
         >
-          {{ t("auth.profileAccess.noAccount") }}
-          <span class="text-brand-gold-via">{{
-            t("auth.profileAccess.registerAction")
-          }}</span>
+          {{ t('auth.profileAccess.noAccount') }}
+          <span class="text-brand-gold-via">{{ t('auth.profileAccess.registerAction') }}</span>
         </button>
       </div>
     </section>
@@ -257,10 +246,8 @@ watch(
       class="flex w-full max-w-xs flex-col gap-5"
       data-testid="desktop-profile-register-state"
     >
-      <h1
-        class="text-center text-sm font-medium tracking-[0.02em] text-foreground/85"
-      >
-        {{ t("auth.profileAccess.registerTitle") }}
+      <h1 class="text-center text-sm font-medium tracking-[0.02em] text-foreground/85">
+        {{ t('auth.profileAccess.registerTitle') }}
       </h1>
 
       <ToggleGroup
@@ -315,7 +302,7 @@ watch(
           class="w-full bg-linear-to-r from-brand-gold-from via-brand-gold-via to-brand-gold-to text-brand-gold-foreground hover:brightness-105"
           data-testid="desktop-profile-register-submit"
           :disabled="registerBusy"
-          >{{ t("auth.profileAccess.registerAction") }}</Button
+          >{{ t('auth.profileAccess.registerAction') }}</Button
         >
       </form>
 
@@ -353,7 +340,7 @@ watch(
           class="w-full bg-linear-to-r from-brand-gold-from via-brand-gold-via to-brand-gold-to text-brand-gold-foreground hover:brightness-105"
           data-testid="desktop-profile-register-submit"
           :disabled="registerBusy"
-          >{{ t("auth.profileAccess.registerAction") }}</Button
+          >{{ t('auth.profileAccess.registerAction') }}</Button
         >
       </form>
 
@@ -365,7 +352,7 @@ watch(
           @click="backToSelect"
         >
           <ArrowLeft class="h-3.5 w-3.5" aria-hidden="true" />
-          {{ t("auth.profileAccess.backToSelect") }}
+          {{ t('auth.profileAccess.backToSelect') }}
         </button>
         <button
           type="button"
@@ -373,10 +360,8 @@ watch(
           data-testid="desktop-profile-go-login"
           @click="enterLoginState"
         >
-          {{ t("auth.profileAccess.haveAccount") }}
-          <span class="text-brand-gold-via">{{
-            t("auth.profileAccess.signInAction")
-          }}</span>
+          {{ t('auth.profileAccess.haveAccount') }}
+          <span class="text-brand-gold-via">{{ t('auth.profileAccess.signInAction') }}</span>
         </button>
       </div>
     </section>
@@ -392,9 +377,7 @@ watch(
           passwordInitials
         }}</AvatarFallback>
       </Avatar>
-      <p
-        class="w-full truncate text-center text-sm font-medium text-foreground/90"
-      >
+      <p class="w-full truncate text-center text-sm font-medium text-foreground/90">
         {{ passwordTarget?.displayName }}
       </p>
       <form class="w-full space-y-3" @submit.prevent="submitPassword">
@@ -414,7 +397,7 @@ watch(
             :aria-label="t('auth.profileAccess.rememberMe')"
             data-testid="desktop-profile-remember"
           />
-          {{ t("auth.profileAccess.rememberMe") }}
+          {{ t('auth.profileAccess.rememberMe') }}
         </label>
         <div class="flex gap-2">
           <Button
@@ -423,14 +406,14 @@ watch(
             class="flex-1"
             data-testid="desktop-profile-back"
             @click="backToSelect"
-            >{{ t("common.back") }}</Button
+            >{{ t('common.back') }}</Button
           >
           <Button
             type="submit"
             class="flex-1 bg-linear-to-r from-brand-gold-from via-brand-gold-via to-brand-gold-to text-brand-gold-foreground hover:brightness-105"
             data-testid="desktop-profile-enter"
             :disabled="!password || busyProfileId !== null"
-            >{{ t("auth.profileAccess.enter") }}</Button
+            >{{ t('auth.profileAccess.enter') }}</Button
           >
         </div>
       </form>
