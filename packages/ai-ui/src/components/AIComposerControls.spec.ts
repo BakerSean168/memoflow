@@ -484,6 +484,58 @@ describe('T3 model picker / conditional traits / enforced permissions', () => {
     wrapper.unmount();
   });
 
+  it('keeps every provider instance reachable when the sidebar overflows the panel height', async () => {
+    // happy-dom applies no Tailwind cascade, so resolve the vertical overflow
+    // utilities the same way Tailwind emits them: exactly one utility must be
+    // present and it must map to a scrollable `overflow-y`.
+    const verticalOverflow: Record<string, string> = {
+      'overflow-auto': 'auto',
+      'overflow-y-auto': 'auto',
+      'overflow-scroll': 'scroll',
+      'overflow-y-scroll': 'scroll',
+      'overflow-hidden': 'hidden',
+      'overflow-y-hidden': 'hidden',
+      'overflow-visible': 'visible',
+      'overflow-y-visible': 'visible',
+      'overflow-clip': 'clip',
+      'overflow-y-clip': 'clip',
+    };
+    const effectiveOverflowY = (element: Element) =>
+      Array.from(element.classList)
+        .filter((className) => className in verticalOverflow)
+        .map((className) => verticalOverflow[className]);
+
+    const manyAgents = Array.from({ length: 10 }, (_, index) => ({
+      id: 'provider-' + (index + 1),
+      name: 'Agent ' + (index + 1),
+      driver: 'mastra' as const,
+      enabled: true,
+      configured: true,
+    }));
+    const wrapper = setup({ agents: manyAgents, selectedAgentId: manyAgents[0]!.id });
+    document.body.appendChild(wrapper.element);
+    await openModels(wrapper);
+
+    const sidebar = wrapper.get('[data-testid="ai-model-picker-sidebar"]');
+    const buttons = wrapper.findAll('[data-testid^="ai-model-picker-agent-"]');
+    expect(buttons).toHaveLength(manyAgents.length);
+    for (const button of buttons) expect(document.body.contains(button.element)).toBe(true);
+    expect(effectiveOverflowY(sidebar.element)).toEqual(['auto']);
+
+    const last = buttons.at(-1)!;
+    expect(last.attributes('disabled')).toBeUndefined();
+    for (const button of buttons) {
+      (button.element as HTMLElement).focus();
+      expect(document.activeElement).toBe(button.element);
+    }
+    // The last instance must be able to scroll into view inside the rail.
+    expect(typeof (last.element as HTMLElement).scrollIntoView).toBe('function');
+    (last.element as HTMLElement).scrollIntoView({ block: 'nearest' });
+    (last.element as HTMLElement).focus();
+    expect(document.activeElement).toBe(last.element);
+    wrapper.unmount();
+  });
+
   it('highlights the browsed sidebar item with a right-hand rail, not an active-model dot', async () => {
     const wrapper = setup();
     await openModels(wrapper);
