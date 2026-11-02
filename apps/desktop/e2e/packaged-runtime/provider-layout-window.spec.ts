@@ -1,3 +1,4 @@
+import { registerLocalProfile } from '../support/profile-access';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
@@ -26,7 +27,7 @@ test('packaged Windows Providers maintain 80px rows and responsive details at 84
         ELECTRON_DISABLE_SECURITY_WARNINGS: 'true',
       },
     });
-    const page = await app.firstWindow({ timeout: 45_000 });
+    const page = await registerLocalProfile(app, await app.firstWindow({ timeout: 45_000 }));
     await expect(page.getByTestId('app-shell')).toBeVisible({ timeout: 45_000 });
     await page.evaluate(() => {
       window.location.hash = '#/settings?tab=ai';

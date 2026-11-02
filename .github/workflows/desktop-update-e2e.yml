@@ -312,7 +312,19 @@ jobs:
           if ((Get-FileHash -LiteralPath $report.installedExecutable -Algorithm SHA256).Hash.ToLowerInvariant() -ne $report.installedExecutableSha256) {
             throw 'Installed executable hash differs from the completed update proof'
           }
-          if ($report.profileRegistrySemanticSha256Before -ne $report.profileRegistrySemanticSha256After) {
+          if ($report.identityResetCompletedBeforeUpdate -isnot [bool]) {
+            throw 'Missing one-shot identity reset evidence'
+          }
+          if (-not $report.identityResetCompletedBeforeUpdate) {
+            if (-not $report.identityResetCompletedAfterUpdate -or
+                $report.identityResetVersionAfterUpdate -ne 1 -or
+                $report.profileRegistryAfterUpdate.version -ne 2 -or
+                $null -ne $report.profileRegistryAfterUpdate.activeProfileId -or
+                @($report.profileRegistryAfterUpdate.profiles).Count -ne 0) {
+              throw 'Legacy identity upgrade did not prove a reset to the empty identity gate'
+            }
+          }
+          elseif ($report.profileRegistrySemanticSha256Before -ne $report.profileRegistrySemanticSha256After) {
             throw "Profile registry semantic identity drifted across update"
           }
           if ($report.preservationSentinelSha256Before -ne $report.preservationSentinelSha256After) {
