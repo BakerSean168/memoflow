@@ -124,6 +124,8 @@ test('Windows AGY Composer selects, sends, persists and restores its native conn
     const picker = page.getByTestId('ai-chat-model-selector');
     await picker.click();
     await page.getByTestId(`ai-model-picker-agent-local:${connectionId}`).click();
+    // Installed-state async model discovery can lag; wait for the catalog before asserting the option.
+    await expect(page.getByTestId('ai-model-picker-option').first()).toBeVisible();
     await page
       .getByTestId('ai-model-picker-option')
       .filter({ hasText: 'Offline Attention Fixture' })
