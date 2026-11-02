@@ -283,6 +283,9 @@ onBeforeUnmount(stopPolling);
       <p v-if="message" class="text-sm text-destructive" role="alert">{{ message }}</p>
 
       <template #footer>
+        <Button variant="outline" @click="emit('update:open', false)">
+          {{ t('common.close') }}
+        </Button>
         <Button
           v-if="!attempt || canRetry || isConnected"
           data-testid="cloud-connection-continue"
