@@ -430,7 +430,8 @@ test('real Windows Electron Workspace IPC authenticates start, ack, stop, cursor
 
     // The same Electron instance switches to a new isolated Guest, without copying any app data.
     await main.getByTestId('shell-account-menu').click();
-    await main.getByTestId('shell-switch-account').click();
+    await main.getByTestId('shell-open-settings').click();
+    await main.getByTestId('settings-tab-account').click();
     await main.getByTestId('shell-manage-profiles').click();
     await expect(main.getByTestId('manage-accounts-dialog')).toBeVisible({ timeout: 12000 });
     await main

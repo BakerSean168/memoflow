@@ -13,6 +13,7 @@
 import { getProfilePartition } from '../profile/profile-partition';
 import { BrowserWindow, ipcMain, app } from 'electron';
 import path from 'path';
+import { z } from 'zod';
 import { fileURLToPath } from 'url';
 import {
   RendererEventChannels,
@@ -174,7 +175,11 @@ export class WindowManager {
   /**
    * 创建 Profile Access 窗口
    */
-  createProfileAccessWindow(targetProfileId?: string, interactive = true): BrowserWindow {
+  createProfileAccessWindow(
+    targetProfileId?: string,
+    interactive = true,
+    view?: 'login',
+  ): BrowserWindow {
     if (this.profileAccessWindow && !this.profileAccessWindow.isDestroyed()) {
       this.profileAccessWindow.setEnabled(interactive);
       this.profileAccessWindow.focus();
@@ -242,7 +247,9 @@ export class WindowManager {
       this.profileAccessWindow,
       targetProfileId
         ? `/profile-access?profileId=${encodeURIComponent(targetProfileId)}`
-        : '/profile-access',
+        : view === 'login'
+          ? '/profile-access?view=login'
+          : '/profile-access',
     );
 
     if (this.config.isDev) {
@@ -399,6 +406,7 @@ export class WindowManager {
   async transitionToProfileAccessWindow(
     targetProfileId?: string,
     interactive = true,
+    view?: 'login',
   ): Promise<void> {
     if (this.isTransitioning) {
       logger.warn('Already transitioning');
@@ -411,7 +419,11 @@ export class WindowManager {
     try {
       this.mainWindow?.hide();
       await this.scheduleRuntimeController?.stop();
-      const profileAccessWindow = this.createProfileAccessWindow(targetProfileId, interactive);
+      const profileAccessWindow = this.createProfileAccessWindow(
+        targetProfileId,
+        interactive,
+        view,
+      );
       // Destroy the old renderer before Profile Access can select a different runtime.
       this.mainWindow?.destroy();
 
@@ -603,27 +615,37 @@ export class WindowManager {
     });
 
     ipcMain.handle(WindowChannels.TRANSITION_TO_PROFILE_ACCESS, async (_event, input: unknown) => {
-      const parsed = ProfileIdSchema.optional().safeParse(input);
-      if (!parsed.success) return fail({ code: 'INVALID_REQUEST', message: 'Invalid Profile ID' });
-      if (parsed.data && parsed.data === this.runtimeManager?.getActiveProfileId()) return ok(null);
+      const parsed = z
+        .union([ProfileIdSchema, z.object({ view: z.literal('login') })])
+        .optional()
+        .safeParse(input);
+      if (!parsed.success)
+        return fail({
+          code: 'INVALID_REQUEST',
+          message: 'Invalid Profile ID',
+        });
+      const targetProfileId = typeof parsed.data === 'string' ? parsed.data : undefined;
+      const view = typeof parsed.data === 'object' ? parsed.data.view : undefined;
+      if (targetProfileId && targetProfileId === this.runtimeManager?.getActiveProfileId())
+        return ok(null);
       if (this.profileNavigationPending || this.isTransitioning)
         return fail({ code: 'WINDOW_TRANSITION_PENDING', message: 'Profile 切换正在进行' });
       this.profileNavigationPending = true;
       try {
-        const target = parsed.data
+        const target = targetProfileId
           ? (await this.runtimeManager?.listProfiles())?.find(
-              (profile) => profile.profileId === parsed.data,
+              (profile) => profile.profileId === targetProfileId,
             )
           : undefined;
         const autoOpen = Boolean(
-          parsed.data && this.runtimeManager && target?.profileKind === 'registered',
+          targetProfileId && this.runtimeManager && target?.profileKind === 'registered',
         );
-        await this.transitionToProfileAccessWindow(parsed.data, !autoOpen);
-        if (autoOpen && parsed.data && this.runtimeManager) {
+        await this.transitionToProfileAccessWindow(targetProfileId, !autoOpen, view);
+        if (autoOpen && targetProfileId && this.runtimeManager) {
           try {
-            const prepared = await this.runtimeManager.openProfile(parsed.data);
+            const prepared = await this.runtimeManager.openProfile(targetProfileId);
             await this.transitionToMainWindow(
-              parsed.data,
+              targetProfileId,
               prepared.profileResolver.mainWindowStatePath,
             );
           } catch (error) {

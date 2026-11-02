@@ -113,7 +113,7 @@ const emit = defineEmits<{
   (e: 'open-settings'): void;
   (e: 'open-cloud-connection'): void;
   (e: 'logout'): void;
-  (e: 'manage-profiles', trigger: HTMLButtonElement | null): void;
+  (e: 'add-account'): void;
   (e: 'switch-profile', profileId: string): void;
   (e: 'refresh-profiles'): void;
 }>();
@@ -863,17 +863,14 @@ const identityLabel = () => {
                 </DropdownMenuItem>
               </div>
               <DropdownMenuSeparator />
-              <DropdownMenuItem
-                data-testid="shell-manage-profiles"
-                @select="emit('manage-profiles', accountMenuTrigger)"
-              >
-                {{ t('shell.account.manageProfiles') }}
+              <DropdownMenuItem data-testid="shell-add-account" @select="emit('add-account')">
+                {{ t('shell.account.menuAddAccount') }}
               </DropdownMenuItem>
             </DropdownMenuSubContent>
           </DropdownMenuSub>
           <DropdownMenuSeparator />
           <DropdownMenuItem
-            v-if="cloudConnected"
+            v-if="isDesktop || cloudConnected"
             data-testid="shell-logout"
             class="text-destructive focus:text-destructive"
             @click="emit('logout')"

@@ -112,6 +112,19 @@ describe('Windows main-window close lifecycle', () => {
     },
   );
 
+  it('routes add account through the existing identity window transition with a login intent', async () => {
+    const main = await open();
+    const transition = manager.transitionToProfileAccessWindow(undefined, true, 'login');
+    await Promise.resolve();
+    const gate = manager.getProfileAccessWindow()!;
+    gate.emit('ready-to-show');
+    await transition;
+    expect(main.isDestroyed()).toBe(true);
+    expect(gate.loadFile).toHaveBeenCalledWith(expect.any(String), {
+      hash: '/profile-access?view=login',
+    });
+  });
+
   it('lock stops scheduling and destroys the old renderer; restore opens only Profile Access', async () => {
     const main = await open();
     main.close();

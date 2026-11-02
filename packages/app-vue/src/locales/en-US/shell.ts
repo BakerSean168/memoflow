@@ -146,6 +146,7 @@ export default {
     createProfile: 'Create local Profile',
     currentProfile: 'Current Profile',
     manageProfiles: 'Manage accounts',
+    menuAddAccount: 'Add account',
     addAccount: 'Add another account',
     reauthenticate: 'Reauthenticate this account',
 
