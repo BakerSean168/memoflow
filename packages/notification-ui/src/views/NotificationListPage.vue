@@ -193,7 +193,7 @@ async function handleMarkAllRead() {
   toast.success(t('notification.toast.allMarkedRead'));
 }
 
-async function handleExecuteAction(input: { notificationId: string; actionKey: string }) {
+async function handleExecuteAction(input: { notificationId: string; actionKey: string; snoozeDurationMs?: number }) {
   try {
     const result = await executeAction.mutateAsync(input);
     if (result.interaction.outcome !== 'accepted') {

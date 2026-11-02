@@ -97,7 +97,7 @@ export function useNotificationMutations() {
   });
 
   const executeAction = useMutation({
-    mutationFn: async (input: { notificationId: string; actionKey: string }) =>
+    mutationFn: async (input: { notificationId: string; actionKey: string; snoozeDurationMs?: number }) =>
       unwrap(await service.executeAction(input)),
     onMutate: () => ({ identityScope: resolveIdentityScope() }),
     onSettled: (_data, error, input, context) => {

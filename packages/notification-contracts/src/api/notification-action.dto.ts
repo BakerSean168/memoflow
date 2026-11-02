@@ -36,6 +36,7 @@ export const NotificationActionIntentSchema = z.discriminatedUnion('kind', [
 ]) satisfies z.ZodType<NotificationActionIntent>;
 
 export const ExecuteNotificationActionSchema = z.object({
+  snoozeDurationMs: z.number().int().positive().max(31_536_000_000).optional(),
   notificationId: z.string().min(1),
   actionKey: z.string().trim().min(1).max(200),
 });

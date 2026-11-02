@@ -6,6 +6,7 @@
     more-button-position="top-right"
     :more-button-label="t('notification.action.more')"
   >
+    <div class="relative flex items-center">
     <button
       type="button"
       :data-keyboard-item="String(notification.id)"
@@ -15,7 +16,8 @@
       :data-notification-type="notification.type"
       data-density="compact"
       :class="[
-        'group relative flex w-full gap-3 px-4 py-3 text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring',
+        'group relative flex w-full gap-3 px-4 py-2.5 text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring',
+        quickActions.length ? 'pr-28' : '',
         notification.isRead
           ? 'bg-transparent text-[hsl(var(--foreground-muted))] hover:bg-[hsl(var(--hover)/0.42)]'
           : 'bg-[hsl(var(--surface-raised)/0.38)] text-foreground hover:bg-[hsl(var(--hover)/0.62)]',
@@ -108,7 +110,7 @@
 
     <div
       v-if="quickActions.length > 0"
-      class="flex flex-wrap items-center gap-1.5 px-4 pb-3 pl-16"
+      class="absolute right-3 top-1/2 flex -translate-y-1/2 items-center gap-1"
       data-testid="notification-quick-actions"
     >
       <Button
@@ -117,7 +119,9 @@
         type="button"
         variant="outline"
         size="sm"
-        class="h-7 rounded-md px-2.5 text-xs font-normal"
+        class="relative h-8 w-8 rounded-md p-0"
+        :aria-label="actionLabel(action)"
+        :title="actionLabel(action)"
         :data-testid="`notification-action-${action.actionKey}`"
         @click.stop="
           emit('execute-action', {
@@ -126,16 +130,48 @@
           })
         "
       >
-        {{ actionLabel(action) }}
+        <Check v-if="action.actionKey === 'complete'" class="h-4 w-4" aria-hidden="true" />
+        <template v-else-if="action.actionKey.startsWith('snooze')">
+          <Clock3 class="h-4 w-4" aria-hidden="true" />
+          <span class="absolute bottom-0 right-0 rounded bg-background px-0.5 text-[8px] leading-3" aria-hidden="true">10</span>
+        </template>
+        <span v-else>{{ actionLabel(action) }}</span>
+      </Button>
+      <DropdownMenu v-if="snoozeAction" :modal="false">
+        <DropdownMenuTrigger as-child>
+          <Button type="button" variant="ghost" size="icon" class="h-6 w-6"
+            :aria-label="t('notification.action.snoozeMore')" :title="t('notification.action.snoozeMore')">
+            <ChevronDown class="h-3 w-3" aria-hidden="true" />
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end">
+          <DropdownMenuItem v-for="option in snoozeOptions" :key="option.minutes"
+            :data-testid="`notification-snooze-${option.minutes}`" @select="snooze(option.minutes)">
+            {{ t(option.label) }}
+          </DropdownMenuItem>
+          <DropdownMenuItem data-testid="notification-snooze-custom" @select="customSnoozeOpen = true">
+            {{ t('notification.action.snoozeCustom') }}
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+    </div>
+    </div>
+    <div v-if="customSnoozeOpen" class="flex items-center gap-2 px-4 pb-2">
+      <input v-model.number="customMinutes" type="number" min="1" max="525600"
+        class="w-24 rounded border bg-background px-2 py-1 text-xs"
+        :aria-label="t('notification.action.snoozeMinutes')" />
+      <Button size="sm" :disabled="!Number.isInteger(customMinutes) || customMinutes < 1 || customMinutes > 525600"
+        data-testid="notification-snooze-apply" @click="snooze(customMinutes); customSnoozeOpen = false">
+        {{ t('notification.action.snoozeApply') }}
       </Button>
     </div>
   </ActionableWrapper>
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue';
+import { computed, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { Badge, Button } from '@memoflow/ui-vue-shadcn';
+import { Badge, Button, DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@memoflow/ui-vue-shadcn';
 import {
   Info,
   CheckCircle2,
@@ -144,6 +180,8 @@ import {
   CalendarClock,
   Bell,
   Check,
+  Clock3,
+  ChevronDown,
   Trash2,
   ArrowUpRight,
   Archive,
@@ -183,7 +221,7 @@ const hasExternalDestination = computed(() =>
 const emit = defineEmits<{
   click: [notification: NotificationClientDTO];
   'mark-read': [id: string];
-  'execute-action': [input: { notificationId: string; actionKey: string }];
+  'execute-action': [input: { notificationId: string; actionKey: string; snoozeDurationMs?: number }];
   delete: [id: string];
 }>();
 
@@ -195,6 +233,21 @@ const quickActions = computed(() =>
     )
     .slice(0, 2),
 );
+
+const snoozeAction = computed(() => quickActions.value.find((action) => action.commandKey === 'routine.snooze'));
+const customSnoozeOpen = ref(false);
+const customMinutes = ref(10);
+const snoozeOptions = [
+  { minutes: 60, label: 'notification.action.snooze1h' },
+  { minutes: 180, label: 'notification.action.snooze3h' },
+  { minutes: 1440, label: 'notification.action.snoozeTomorrow' },
+  { minutes: 10080, label: 'notification.action.snoozeNextWeek' },
+];
+function snooze(minutes: number) {
+  if (!snoozeAction.value || !Number.isInteger(minutes) || minutes < 1 || minutes > 525600) return;
+  emit('execute-action', { notificationId: props.notification.id,
+    actionKey: snoozeAction.value.actionKey, snoozeDurationMs: minutes * 60_000 });
+}
 
 const archiveAction = computed(() =>
   (props.notification.actions ?? []).find(

@@ -275,7 +275,7 @@ export function registerNotificationRoutes(
       validation: { schema: ExecuteNotificationActionSchema },
     },
     [auth],
-    (data, ctx) => controller.executeAction(data.notificationId, data.actionKey, ctx),
+    (data, ctx) => controller.executeAction(data.notificationId, data.actionKey, ctx, data.snoozeDurationMs),
   );
 
   // GET /dead-letters — operations-only identity-scoped query
