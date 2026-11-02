@@ -57,6 +57,8 @@ export const PermissionAuditRecordSchema = z
     decision: PermissionEffectSchema,
     decidedBy: z.enum(['rule', 'user', 'timeout', 'preset', 'system']),
     ruleId: z.string().nullable(),
+    /** Objects the single call affected, when the caller declared a count (#762). */
+    itemCount: z.number().int().nonnegative().optional(),
     execution: z.enum(['not_started', 'succeeded', 'failed']).default('not_started'),
   })
   .strict();

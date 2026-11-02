@@ -18,6 +18,10 @@ export interface AuthorizeInput {
   conversationPreset?: PermissionPreset;
   conversationRules?: readonly PermissionRule[];
   now?: number;
+  /** Objects this single call affects; forwarded to the dynamic bulk-risk check. */
+  itemCount?: number;
+  /** Per-call bulk threshold override; defaults to the policy default. */
+  bulkThreshold?: number;
   ask?: (auditId: string) => Promise<'allow' | 'deny' | 'timeout'>;
 }
 
@@ -48,6 +52,8 @@ export async function authorize(
     conversationRules: input.conversationRules,
     customMatrix: settings?.customMatrix,
     now: input.now,
+    itemCount: input.itemCount,
+    bulkThreshold: input.bulkThreshold,
   });
   const auditId = randomUUID();
   // Missing policy storage can never grant a data mutation, even a create.
@@ -77,6 +83,7 @@ export async function authorize(
     decidedBy,
     ruleId: result.ruleId ?? null,
     execution: 'not_started' as const,
+    ...(input.itemCount === undefined ? {} : { itemCount: input.itemCount }),
   } satisfies PermissionAuditRecord;
   try {
     await repository.appendAudit(input.owner, record);

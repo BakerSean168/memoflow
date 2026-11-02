@@ -76,6 +76,61 @@ it('audits preset decisions, confirmation outcomes and execution results', async
   }
 });
 
+it('escalates over-threshold calls to a fresh confirmation and records the item count', async () => {
+  const db = createLocalAgentSqlite();
+  const repository = new PermissionPowerSyncRepository(db);
+  try {
+    await repository.saveSettings('owner', {
+      preset: 'confirm_each',
+      agentPresets: {},
+      revision: 1,
+    });
+    await repository.saveRule('owner', {
+      id: 'allow-task-update',
+      agentId: null,
+      object: 'task',
+      action: 'update',
+      effect: 'allow',
+      source: 'user',
+    });
+    const ask = vi.fn().mockResolvedValue('allow');
+    const bulk = await authorize(repository, {
+      owner: 'owner',
+      agentId: 'codex',
+      operationId: 'task.update',
+      itemCount: 11,
+      ask,
+    });
+    expect(ask).toHaveBeenCalledOnce();
+    expect(bulk).toMatchObject({ decision: 'allow', decidedBy: 'user', itemCount: 11 });
+
+    const boundaryAsk = vi.fn().mockResolvedValue('deny');
+    const boundary = await authorize(repository, {
+      owner: 'owner',
+      agentId: 'codex',
+      operationId: 'task.update',
+      itemCount: 10,
+      ask: boundaryAsk,
+    });
+    expect(boundaryAsk).not.toHaveBeenCalled();
+    expect(boundary).toMatchObject({ decision: 'allow', decidedBy: 'rule', itemCount: 10 });
+
+    const plain = await authorize(repository, {
+      owner: 'owner',
+      agentId: 'codex',
+      operationId: 'task.update',
+    });
+    expect(plain).toMatchObject({ decision: 'allow', decidedBy: 'rule' });
+    expect(plain).not.toHaveProperty('itemCount');
+    // The count survives the JSON audit round-trip and stays absent when undeclared.
+    const persisted = (await repository.listAudit('owner')).map((record) => record.itemCount);
+    expect(persisted).toHaveLength(3);
+    expect(persisted.filter((count) => count !== undefined).sort()).toEqual([10, 11]);
+  } finally {
+    db.close();
+  }
+});
+
 it('fails closed for writes if the permission storage is unavailable', async () => {
   const unavailable = new PermissionStorageUnavailableError();
   const repository = {
