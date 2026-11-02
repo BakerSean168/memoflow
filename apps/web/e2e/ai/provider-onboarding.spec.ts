@@ -407,12 +407,24 @@ test('[P0] T3 Agent wizard and inline Endpoint/Key configure the persistent comp
     await page.getByTestId('ai-chat-model-selector').click();
     const picker = page.getByTestId('ai-model-picker');
     await expect(picker).toBeVisible();
-    // Popover enters with a zoom animation. Measure after it settles instead
-    // of treating an in-flight transform as a change in the fixed dimensions.
-    await expect
-      .poll(async () => (await picker.boundingBox())?.width ?? 0)
-      .toBeGreaterThanOrEqual(359);
-    const pickerBox = await picker.boundingBox();
+    // Width alone can pass during zoom-in: the picker now uses 35rem, not
+    // 360px. Capture the box that passes both dimensions with no transform.
+    const measureSettledPicker = async () => {
+      const sample = () =>
+        picker.evaluate((element) => {
+          const { x, y, width, height } = element.getBoundingClientRect();
+          return { x, y, width, height, settled: getComputedStyle(element).transform === 'none' };
+        });
+      let box = await sample();
+      await expect
+        .poll(async () => {
+          box = await sample();
+          return box.settled && box.width >= 359 && box.height >= 346;
+        })
+        .toBe(true);
+      return box;
+    };
+    const pickerBox = await measureSettledPicker();
     expect(pickerBox).not.toBeNull();
     expect(pickerBox!.x).toBeGreaterThanOrEqual(-1);
     expect(pickerBox!.y).toBeGreaterThanOrEqual(-1);
@@ -430,12 +442,15 @@ test('[P0] T3 Agent wizard and inline Endpoint/Key configure the persistent comp
     ).toBe(true);
     await page.getByTestId('ai-model-picker-search').fill('model-does-not-exist-999');
     await expect(page.getByTestId('ai-model-picker-empty')).toBeVisible();
-    const emptyPickerBox = await picker.boundingBox();
+    const emptyPickerBox = await measureSettledPicker();
     expect(emptyPickerBox).not.toBeNull();
     expect(Math.abs(emptyPickerBox!.width - pickerBox!.width)).toBeLessThanOrEqual(1);
     expect(Math.abs(emptyPickerBox!.height - pickerBox!.height)).toBeLessThanOrEqual(1);
     await page.getByTestId('ai-model-picker-search').fill('');
     await expect(page.getByTestId('ai-model-picker-option')).toHaveCount(2);
+    const filledPickerBox = await measureSettledPicker();
+    expect(Math.abs(filledPickerBox.width - pickerBox!.width)).toBeLessThanOrEqual(1);
+    expect(Math.abs(filledPickerBox.height - pickerBox!.height)).toBeLessThanOrEqual(1);
     if (width <= 530) {
       await picker.screenshot({
         path: testInfo.outputPath('model-picker-' + width + '.png'),
