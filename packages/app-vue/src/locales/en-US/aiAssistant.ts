@@ -69,6 +69,8 @@ export default {
     },
     modelOptions: 'Model options',
     reasoningEffort: 'Reasoning',
+    standardMode: 'Standard',
+    instanceManagedAccess: 'Managed by the Agent instance; session overrides are not supported.',
     serviceTier: 'Service tier',
     defaultOptions: 'Default',
     noExecutableTraits:

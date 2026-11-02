@@ -372,6 +372,7 @@ export function useAIChatView(options: UseAIChatViewOptions) {
       driver: instance.driver,
       enabled: instance.enabled,
       accentColor: instance.accentColor,
+      nativePermissionMode: instance.nativeConfig?.nativePermissionMode ?? 'supervised',
       switchBlockedReason: composerSwitchBlockedReason(
         instance.driver === 'mastra'
           ? `agent:${instance.instanceId}`

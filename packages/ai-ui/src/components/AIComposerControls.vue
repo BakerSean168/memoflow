@@ -3,7 +3,11 @@ import { computed, nextTick, ref, watch } from 'vue';
 import { CircleAlert, Check, ChevronDown, LockKeyhole, Search, Star } from '@lucide/vue';
 import { useI18n } from 'vue-i18n';
 import { Popover, PopoverContent, PopoverTrigger } from '@memoflow/ui-vue-shadcn';
-import type { AgentDriverKind, LocalAgentModelOptions } from '@memoflow/ai-contracts';
+import type {
+  AIChatPermissionMode,
+  AgentDriverKind,
+  LocalAgentModelOptions,
+} from '@memoflow/ai-contracts';
 import type { ComposerModel, ModelCatalog } from '../composables/useAIModelCatalog';
 import { aiUiHost } from '../ai-ui-host';
 import AgentDriverIcon from './AgentDriverIcon.vue';
@@ -16,6 +20,7 @@ interface ComposerAgentOption {
   enabled: boolean;
   configured: boolean;
   accentColor?: string;
+  nativePermissionMode?: 'supervised' | 'auto-approve';
   switchBlockedReason?: 'incompatible' | 'busy' | 'loading';
 }
 const FAVORITES_KEY = 'ai:composer:model-favorites:v1';
@@ -27,6 +32,7 @@ const props = defineProps<{
   selectedModelKey: string;
   nativeModelOptions?: LocalAgentModelOptions;
   native: boolean;
+  permissionMode?: AIChatPermissionMode;
   disabled: boolean;
   loading?: boolean;
 }>();
@@ -35,6 +41,7 @@ const emit = defineEmits<{
   selectModel: [modelKey: string, agentId: string];
   modelOption: [kind: keyof LocalAgentModelOptions, value?: string];
   settings: [];
+  permission: [mode: AIChatPermissionMode];
 }>();
 const { t } = useI18n();
 const resolveIdentityScope = aiUiHost.useServerStateIdentityScope();
@@ -108,7 +115,10 @@ const selectedEffort = computed(
   () =>
     props.nativeModelOptions?.reasoningEffort ?? selectedModel.value?.defaultReasoningEffort ?? '',
 );
-const selectedServiceTier = computed(() => props.nativeModelOptions?.serviceTier ?? 'default');
+const selectedServiceTier = computed(
+  () =>
+    props.nativeModelOptions?.serviceTier ?? selectedModel.value?.defaultServiceTier ?? 'default',
+);
 const traitsLabel = computed(
   () =>
     (hasReasoningChoices.value ? selectedEffort.value : '') ||
@@ -198,11 +208,8 @@ function setMenu(menu: 'models', opened: boolean) {
 function selectModel(model: ComposerModel) {
   if (!canChooseModel(model)) return;
   emit('selectModel', model.key, model.agentKey);
-  openMenu.value =
-    props.native &&
-    ((model.reasoningEfforts?.length ?? 0) > 1 || Boolean(model.serviceTiers?.length))
-      ? 'models'
-      : null;
+  // Keep the picker open so the committed model's configuration can be chosen next.
+  openMenu.value = 'models';
 }
 function storeFavorites() {
   // Favorites are per cloud identity or desktop Profile, never shared by
@@ -222,6 +229,22 @@ function toggleFavorite(model: ComposerModel) {
   storeFavorites();
 }
 function keyboardNavigation(event: KeyboardEvent) {
+  if (event.isComposing || event.repeat) return;
+  if (
+    openMenu.value === 'models' &&
+    event.ctrlKey &&
+    !event.altKey &&
+    !event.metaKey &&
+    !event.shiftKey &&
+    /^[1-9]$/.test(event.key)
+  ) {
+    event.preventDefault();
+    event.stopPropagation();
+    const model = visibleModels.value[Number(event.key) - 1];
+    if (model) selectModel(model);
+    return;
+  }
+  if (event.ctrlKey || event.metaKey || event.altKey || event.shiftKey) return;
   if (event.key !== 'ArrowDown' && event.key !== 'ArrowUp') return;
   const rows = Array.from(
     modelList.value?.querySelectorAll<HTMLButtonElement>(
@@ -328,7 +351,7 @@ watch(
       >
         <div class="flex h-[min(346px,calc(100dvh-80px))] min-h-0" @keydown="keyboardNavigation">
           <nav
-            class="composer-agent-sidebar flex w-12 shrink-0 flex-col items-center gap-1 overflow-y-auto border-r border-border/60 bg-muted/25 px-1 py-2"
+            class="composer-agent-sidebar flex h-full min-h-0 w-12 shrink-0 flex-col items-center gap-1 overflow-hidden border-r border-border/60 bg-muted/25 px-1 py-2"
             :aria-label="t('aiAssistant.composer.agents')"
             data-testid="ai-model-picker-sidebar"
           >
@@ -393,7 +416,7 @@ watch(
               />
             </button>
           </nav>
-          <div class="flex min-w-0 flex-1 flex-col">
+          <div class="flex min-h-0 min-w-0 flex-1 flex-col">
             <label class="flex h-11 shrink-0 items-center gap-2 border-b border-border/65 px-3">
               <Search class="size-3.5 shrink-0 text-muted-foreground" />
               <input
@@ -413,7 +436,7 @@ watch(
             >
               <template v-if="visibleModels.length">
                 <div
-                  v-for="model in visibleModels"
+                  v-for="(model, index) in visibleModels"
                   :key="modelIdentity(model)"
                   class="group flex min-w-0 items-center gap-0.5 rounded-lg"
                   :class="canChooseModel(model) ? 'hover:bg-muted/60' : ''"
@@ -463,6 +486,9 @@ watch(
                         {{ model.providerName }}
                       </span>
                     </span>
+                    <kbd v-if="index < 9" class="mt-0.5 shrink-0 text-[9px] text-muted-foreground"
+                      >Ctrl+{{ index + 1 }}</kbd
+                    >
                     <Check
                       v-if="selectedAgentId === model.agentKey && selectedModelKey === model.key"
                       class="mt-0.5 size-3.5 shrink-0 text-primary"
@@ -529,12 +555,19 @@ watch(
             </div>
           </div>
           <AIModelTraitsPanel
-            v-if="hasModelTraits"
-            :reasoning-efforts="selectedModel?.reasoningEfforts"
-            :service-tiers="selectedModel?.serviceTiers"
+            v-if="selectedModel"
+            :reasoning-efforts="hasModelTraits ? selectedModel?.reasoningEfforts : undefined"
+            :service-tiers="hasModelTraits ? selectedModel?.serviceTiers : undefined"
             :selected-effort="selectedEffort"
             :selected-service-tier="selectedServiceTier"
-            :disabled="disabled"
+            :disabled="disabled || Boolean(loading)"
+            :permission-mode="
+              native
+                ? (currentAgent?.nativePermissionMode ?? 'supervised')
+                : (permissionMode ?? 'supervised')
+            "
+            :native="native"
+            @permission="emit('permission', $event)"
             @model-option="chooseTrait"
           />
         </div>

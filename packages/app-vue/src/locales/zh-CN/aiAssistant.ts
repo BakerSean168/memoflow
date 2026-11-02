@@ -59,6 +59,8 @@ export default {
     },
     modelOptions: '模型选项',
     reasoningEffort: '推理强度',
+    standardMode: '标准',
+    instanceManagedAccess: '由 Agent 实例管理，不支持会话内覆盖。',
     serviceTier: '服务等级',
     defaultOptions: '默认',
     noExecutableTraits:
