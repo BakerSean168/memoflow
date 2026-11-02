@@ -328,7 +328,7 @@ watch(
       >
         <div class="flex h-[min(346px,calc(100dvh-80px))] min-h-0" @keydown="keyboardNavigation">
           <nav
-            class="composer-agent-sidebar flex w-12 shrink-0 flex-col items-center gap-1 overflow-y-auto border-r border-border/60 bg-muted/25 px-1 py-2"
+            class="composer-agent-sidebar flex h-full min-h-0 w-12 shrink-0 flex-col items-center gap-1 overflow-hidden border-r border-border/60 bg-muted/25 px-1 py-2"
             :aria-label="t('aiAssistant.composer.agents')"
             data-testid="ai-model-picker-sidebar"
           >
@@ -393,7 +393,7 @@ watch(
               />
             </button>
           </nav>
-          <div class="flex min-w-0 flex-1 flex-col">
+          <div class="flex min-h-0 min-w-0 flex-1 flex-col">
             <label class="flex h-11 shrink-0 items-center gap-2 border-b border-border/65 px-3">
               <Search class="size-3.5 shrink-0 text-muted-foreground" />
               <input
