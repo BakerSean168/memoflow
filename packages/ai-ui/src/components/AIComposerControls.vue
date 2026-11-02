@@ -351,7 +351,7 @@ watch(
       >
         <div class="flex h-[min(346px,calc(100dvh-80px))] min-h-0" @keydown="keyboardNavigation">
           <nav
-            class="composer-agent-sidebar flex h-full min-h-0 w-12 shrink-0 flex-col items-center gap-1 overflow-hidden border-r border-border/60 bg-muted/25 px-1 py-2"
+            class="composer-agent-sidebar flex h-full min-h-0 w-12 shrink-0 flex-col items-center gap-1 overflow-y-auto border-r border-border/60 bg-muted/25 px-1 py-2"
             :aria-label="t('aiAssistant.composer.agents')"
             data-testid="ai-model-picker-sidebar"
           >
