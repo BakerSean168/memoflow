@@ -282,6 +282,7 @@ test('real Windows Codex invokes MemoFlow MCP to fill and save the installed Goa
     ) => Promise<TestModule>;
     const {
       LocalAgentRepository,
+      PermissionLocalRepository,
       createDesktopLocalAgentTools,
       createTimeContext,
       createPowerSyncSqliteFixture,
@@ -323,6 +324,12 @@ test('real Windows Codex invokes MemoFlow MCP to fill and save the installed Goa
       enabled: true,
       writeScopes: ['goals:write'],
     });
+    // Keep the real confirm-each gate and its stale-policy revision check active.
+    await new PermissionLocalRepository(fixture.db).saveSettings(identityId, {
+      preset: 'confirm_each',
+      agentPresets: {},
+      revision: 1,
+    });
     const grant = await bridge.open({
       identityId,
       connectionId: connection.id,
@@ -330,7 +337,7 @@ test('real Windows Codex invokes MemoFlow MCP to fill and save the installed Goa
       runId: 'native-codex-goal-write',
       requestApproval: async (toolName, _signal, details) => {
         approvalRequests.push({ toolName, details });
-        return 'allow';
+        return true;
       },
     });
 
@@ -363,7 +370,6 @@ test('real Windows Codex invokes MemoFlow MCP to fill and save the installed Goa
       });
       throw new Error(
         `${failure.message}\nOperator stdout:\n${stdout}\nOperator stderr:\n${stderr}`,
-        { cause: error },
       );
     });
     expect(stdout).toContain('DISCOVERED_GOAL_PANEL_TOOLS=8');
