@@ -115,14 +115,16 @@ describe('notification preference ownership and product/operations split', () =>
     expect(routes).toContain("path: '/preferences'");
     expect(routes).toContain("path: '/actions'");
     expect(routes).toContain('controller.getPreferences(ctx)');
-    expect(routes).toContain('controller.executeAction(data.notificationId, data.actionKey, ctx)');
+    expect(routes).toContain(
+      'controller.executeAction(data.notificationId, data.actionKey, ctx, data.snoozeDurationMs)',
+    );
     expect(controller).toContain('return this.inbox.updatePreferences(input, ctx.identityId)');
     expect(controller).toContain(
-      'return this.inbox.executeAction(notificationId, actionKey, ctx.identityId)',
+      'return this.inbox.executeAction(notificationId, actionKey, ctx.identityId, snoozeDurationMs)',
     );
     expect(electron).toContain('NotificationChannels.EXECUTE_ACTION');
     expect(electron).toContain(
-      'controller.executeAction(data.notificationId, data.actionKey, requestContext)',
+      'controller.executeAction(\n              data.notificationId,\n              data.actionKey,\n              requestContext,\n              data.snoozeDurationMs,\n            )',
     );
   });
 
