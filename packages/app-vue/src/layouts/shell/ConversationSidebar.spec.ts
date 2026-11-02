@@ -61,6 +61,7 @@ const i18n = createI18n({
           reauthenticate: 'Sign in again',
           switchAccount: 'Switch account',
           manageProfiles: 'Manage accounts',
+          menuAddAccount: 'Add account',
           currentProfile: 'Current Profile',
           connection: { unknown: 'Not checked' },
         },
@@ -419,6 +420,39 @@ describe('ConversationSidebar account menu', () => {
     },
   );
 
+  it.each([
+    ['local', false],
+    ['registered-local', false],
+    ['cloud', true],
+  ] as const)(
+    'offers desktop sign out and login entry for %s',
+    async (identityKind, cloudConnected) => {
+      const wrapper = await openMenu({
+        isDesktop: true,
+        identityKind,
+        cloudConnected,
+      });
+      try {
+        expect(document.querySelector('[data-testid="shell-open-cloud-connection"]')).toBeNull();
+        item('shell-logout').click();
+        await flushPromises();
+        expect(wrapper.emitted('logout')).toEqual([[]]);
+        await wrapper
+          .get('[data-testid="shell-account-menu"]')
+          .trigger('keydown', { key: 'Enter' });
+        await flushPromises();
+        item('shell-switch-account').click();
+        await flushPromises();
+        expect(document.querySelector('[data-testid="shell-manage-profiles"]')).toBeNull();
+        item('shell-add-account').click();
+        await flushPromises();
+        expect(wrapper.emitted('add-account')).toEqual([[]]);
+      } finally {
+        wrapper.unmount();
+      }
+    },
+  );
+
   it('opens the flyout by keyboard, sorts exact IDs, bounds many profiles, and switches only on selection', async () => {
     const profiles = Array.from({ length: 30 }, (_, index) => ({
       profileId: `id-${index}`,
@@ -452,7 +486,8 @@ describe('ConversationSidebar account menu', () => {
       expect(item('shell-profile-list').classList.contains('overflow-y-auto')).toBe(true);
       expect(item('shell-switch-profile-id-1').querySelector('svg')).toBeTruthy();
       expect(wrapper.emitted('switch-profile')).toBeUndefined();
-      expect(document.querySelector('[data-testid="shell-add-account"]')).toBeNull();
+      expect(item('shell-add-account').textContent).toContain('Add account');
+      expect(document.querySelector('[data-testid="shell-manage-profiles"]')).toBeNull();
       item('shell-profile-switcher').dispatchEvent(
         new KeyboardEvent('keydown', { key: 'ArrowLeft', bubbles: true }),
       );
@@ -475,8 +510,8 @@ describe('ConversationSidebar account menu', () => {
     try {
       item('shell-switch-account').click();
       await flushPromises();
-      expect(item('shell-manage-profiles')).toBeTruthy();
-      item('shell-manage-profiles').dispatchEvent(
+      expect(item('shell-add-account')).toBeTruthy();
+      item('shell-add-account').dispatchEvent(
         new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }),
       );
       await flushPromises();
