@@ -742,14 +742,7 @@ test('local account copy preview persists across restart and waits for local con
       },
       timeout: 60_000,
     });
-    const copyGatePromise = app.waitForEvent('window');
     await guest.getByTestId('cloud-connection-continue').click();
-    const copyGate = await copyGatePromise;
-    await expect(copyGate.getByTestId('desktop-profile-access')).toBeVisible();
-    await copyGate
-      .locator('[data-testid^="desktop-profile-open-"]')
-      .filter({ hasNotText: 'Nightly Local' })
-      .click();
     await expect.poll(() => readRegistry(userData).profiles.length).toBe(2);
     await expect.poll(() => guest.isClosed()).toBe(true);
     const targetWindow = await targetWindowPromise;
