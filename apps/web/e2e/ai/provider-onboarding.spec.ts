@@ -178,10 +178,11 @@ test('[P0] T3 Agent wizard and inline Endpoint/Key configure the persistent comp
   await expect(
     page.getByTestId('ai-model-picker-option').filter({ hasText: 'E2E Model Beta' }),
   ).toBeVisible();
+  // #781 combines model selection and traits in the fixed 35rem picker.
   // Measure after the opening zoom animation; retain strict geometry assertions.
   await expect
     .poll(async () => (await page.getByTestId('ai-model-picker').boundingBox())?.width ?? 0)
-    .toBeCloseTo(360, 1);
+    .toBeCloseTo(560, 1);
   const filledBox = await page.getByTestId('ai-model-picker').boundingBox();
   await page.getByTestId('ai-model-picker-agent-agent:mastra').click();
   await expect(page.getByTestId('ai-model-picker-empty')).toContainText(
