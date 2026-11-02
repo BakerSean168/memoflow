@@ -9150,6 +9150,14 @@
       "measurementCollectors": []
     },
     {
+      "path": "packages/routine-ui/src/composables/routineUpcomingCache.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/routine-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "packages/routine-ui/src/views/RoutineConfigurationView.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -13595,7 +13603,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 5
+      "fileCount": 6
     },
     {
       "id": "packages/routine/vitest.config.ts",
@@ -14394,7 +14402,7 @@
   "duplicate": [],
   "unexpected": [],
   "counts": {
-    "unit": 1184,
+    "unit": 1185,
     "integration": 58,
     "smoke": 3,
     "boundary-ipc": 6,

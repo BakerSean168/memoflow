@@ -11,6 +11,7 @@ export interface FetchRoutineUpcomingCachedInput {
   end: number;
   limit?: number;
   force?: boolean;
+  includeElapsed?: boolean;
 }
 
 /**
@@ -22,18 +23,22 @@ export async function fetchRoutineUpcomingCached(
 ): Promise<RoutineUpcomingOccurrence[]> {
   const limit = input.limit ?? 500;
   return input.queryClient.fetchQuery<RoutineUpcomingOccurrence[]>({
-    queryKey: routineUiHost.routineUpcomingQueryKeys.range(
-      input.identityScope,
-      input.start,
-      input.end,
-      limit,
-    ),
+    queryKey: [
+      ...routineUiHost.routineUpcomingQueryKeys.range(
+        input.identityScope,
+        input.start,
+        input.end,
+        limit,
+      ),
+      ...(input.includeElapsed ? ['elapsed'] : []),
+    ],
     staleTime: input.force ? 0 : routineUiHost.ROUTINE_UPCOMING_STALE_TIME_MS,
     queryFn: async () => {
       const result = await input.service.getUpcomingOccurrences({
         start: input.start,
         end: input.end,
         limit,
+        ...(input.includeElapsed ? { includeElapsed: true } : {}),
       });
       if (!result.ok) throw result.error;
       return result.data.occurrences;

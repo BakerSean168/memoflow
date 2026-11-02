@@ -53,13 +53,16 @@
       <li
         v-for="item in recentItems"
         :key="item.id"
-        class="rounded-lg"
+        class="relative rounded-lg"
         :data-testid="`notification-capsule-item-${item.id}`"
         :data-read-state="item.isRead ? 'read' : 'unread'"
       >
         <button
           type="button"
           class="flex w-full items-start gap-1.5 rounded-lg px-2 py-1.5 text-left transition-colors hover:bg-[hsl(var(--hover))] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          :class="
+            (item.actions ?? []).some((action) => action.kind === 'owner-command') ? 'pr-28' : ''
+          "
           :aria-label="item.title"
           :data-keyboard-item="String(item.id)"
           @click="handleItemClick(item)"
@@ -87,24 +90,12 @@
           </div>
         </button>
 
-        <div
-          v-if="ownerActions(item).length > 0"
-          class="flex flex-wrap items-center gap-1 px-2 pb-1.5 pl-5"
-          :data-testid="`notification-capsule-actions-${item.id}`"
-        >
-          <Button
-            v-for="action in ownerActions(item)"
-            :key="action.actionKey"
-            type="button"
-            variant="ghost"
-            size="sm"
-            class="h-6 rounded-md px-2 text-[10px] font-normal text-muted-foreground hover:text-foreground"
-            :data-testid="`notification-capsule-action-${item.id}-${action.actionKey}`"
-            @click.stop="handleExecuteAction(item, action.actionKey)"
-          >
-            {{ actionLabel(action) }}
-          </Button>
-        </div>
+        <NotificationQuickActions
+          :notification="item"
+          :test-id-prefix="`notification-capsule-action-${item.id}`"
+          :actions-test-id="`notification-capsule-actions-${item.id}`"
+          @execute-action="handleExecuteAction(item, $event.actionKey, $event.snoozeDurationMs)"
+        />
       </li>
     </ul>
 
@@ -131,6 +122,7 @@
  * 不再覆盖共享 list；unread 与 Shell/页面共享同一 key。组件不做 imperative mount refresh，
  * mutation 成功后由 invalidation 收敛。
  */
+import NotificationQuickActions from './NotificationQuickActions.vue';
 import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { toast } from 'vue-sonner';
@@ -141,10 +133,7 @@ import { resolveNotificationDestination } from '../notification-destination';
 import { useNotificationListQuery } from '../composables/useNotificationListQuery';
 import { useNotificationUnreadQuery } from '../composables/useNotificationUnreadQuery';
 import { useNotificationMutations } from '../composables/useNotificationMutations';
-import type {
-  NotificationActionIntent,
-  NotificationClientDTO,
-} from '@memoflow/notification-contracts';
+import type { NotificationClientDTO } from '@memoflow/notification-contracts';
 
 const RECENT_LIMIT = 5;
 
@@ -160,7 +149,7 @@ const emit = defineEmits<{
   navigate: [destination: { path: string; query?: Record<string, string> }];
 }>();
 
-const { t, te } = useI18n();
+const { t } = useI18n();
 const { notifications, isLoading } = useNotificationListQuery({
   page: 1,
   limit: RECENT_LIMIT * 2,
@@ -185,30 +174,16 @@ async function handleMarkAllRead() {
   toast.success(t('notification.toast.allMarkedRead'));
 }
 
-type OwnerCommandAction = Extract<NotificationActionIntent, { kind: 'owner-command' }>;
-
-function ownerActions(item: NotificationClientDTO): OwnerCommandAction[] {
-  return (item.actions ?? [])
-    .filter(
-      (action): action is OwnerCommandAction =>
-        action.kind === 'owner-command' &&
-        (action.actionKey === 'complete' || action.actionKey.startsWith('snooze')),
-    )
-    .slice(0, 2);
-}
-
-function actionLabel(action: OwnerCommandAction): string {
-  if (te(action.labelKey)) return t(action.labelKey);
-  if (action.actionKey === 'complete') return t('notification.action.complete');
-  if (action.actionKey.startsWith('snooze')) return t('notification.action.snooze10m');
-  return action.actionKey;
-}
-
-async function handleExecuteAction(item: NotificationClientDTO, actionKey: string) {
+async function handleExecuteAction(
+  item: NotificationClientDTO,
+  actionKey: string,
+  snoozeDurationMs?: number,
+) {
   try {
     const result = await executeAction.mutateAsync({
       notificationId: item.id,
       actionKey,
+      ...(snoozeDurationMs == null ? {} : { snoozeDurationMs }),
     });
     if (result.interaction.outcome !== 'accepted') {
       toast.error(t('notification.toast.actionRejected'));

@@ -22,7 +22,13 @@ const i18n = createI18n({
       common: { retry: 'Retry' },
       routine: {
         title: 'Routine',
-        home: { title: 'Next up', empty: 'Nothing else today', viewAll: 'View all' },
+        home: {
+          title: 'Next up',
+          empty: 'Nothing else today',
+          viewAll: 'View all',
+          everyMinutes: 'Every {minutes} min',
+          awaitingCompletion: 'Pending',
+        },
         card: { snooze30: 'Snooze 30m' },
       },
     },
@@ -129,6 +135,41 @@ describe('RoutineCapsulePreview quick workspace', () => {
     await flushPromises();
     expect(getUpcomingOccurrences).toHaveBeenCalledTimes(1);
     reopened.unmount();
+  });
+
+  it('requests interval summaries and retains an overdue unresolved Elapsed row', async () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2026-09-28T09:00:00Z'));
+    getUpcomingOccurrences.mockResolvedValue({
+      ok: true,
+      data: {
+        occurrences: [
+          {
+            identityId: 'identity-1',
+            routineId: 'elapsed',
+            occurrenceKey: 'elapsed:1',
+            title: 'Every minute',
+            description: null,
+            occurrenceAt: Date.parse('2026-09-28T08:59:00Z'),
+            intervalMs: 60_000,
+            timingStatus: 'awaiting-completion',
+            endAt: null,
+            revision: 1,
+            editable: false,
+          },
+        ],
+      },
+    });
+    const wrapper = mountPreview();
+    await flushPromises();
+    expect(getUpcomingOccurrences).toHaveBeenCalledWith(
+      expect.objectContaining({ includeElapsed: true }),
+    );
+    expect(wrapper.findAll('[data-testid="routine-capsule-occurrence"]')).toHaveLength(1);
+    expect(wrapper.text()).toContain('Every minute');
+    expect(wrapper.text()).toContain('Every 1 min');
+    expect(wrapper.text()).toContain('Pending');
+    wrapper.unmount();
   });
 
   it('snoozes a Routine directly for 30 minutes and refreshes the quick workspace', async () => {

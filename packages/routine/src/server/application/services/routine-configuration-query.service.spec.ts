@@ -151,6 +151,79 @@ describe('RoutineConfigurationQueryService', () => {
       `routine:routine-wall-clock:oc:${Date.parse('2026-09-21T01:30:00.000Z')}`,
     );
   });
+  it('mixes WallClock with one canonical Elapsed next occurrence and retains an open overdue reminder', async () => {
+    const now = new Date('2026-09-21T00:00:00Z');
+    const elapsed = RoutineDefinition.create({
+      id: 'elapsed',
+      identityId: 'identity-1',
+      name: 'Stand',
+      trigger: createElapsedTrigger({ durationMs: 60_000, anchor: 'last-satisfied' }),
+      now,
+    });
+    const wall = RoutineDefinition.create({
+      id: 'wall',
+      identityId: 'identity-1',
+      name: 'Water',
+      now,
+      trigger: createWallClockTrigger({
+        localTime: '09:30',
+        timeZone: 'UTC',
+        recurrence: { startDate: '2026-09-21', frequency: 'daily' },
+      }),
+    });
+    const listOccurrences = vi.fn().mockResolvedValue([]);
+    const query = createRoutineConfigurationQueryService({
+      routineProfileStore: {
+        listDefinitions: vi.fn().mockResolvedValue([wall, elapsed]),
+        listMembershipsForRoutines: vi.fn().mockResolvedValue([]),
+        findProfilesByIds: vi.fn().mockResolvedValue([]),
+      } as unknown as RoutineProfileStore,
+      runtimeContextStore: { get: vi.fn() } as unknown as RoutineRuntimeContextStore,
+      temporaryOverrideStore: {
+        findRoutineTemporaryOverride: vi.fn().mockResolvedValue(null),
+      } as unknown as RoutineTemporaryOverrideStore,
+      occurrenceTruthStore: {
+        listOccurrences,
+      } as unknown as import('../../domain/ports').RoutineOccurrenceTruthStore,
+    });
+    const range = {
+      start: now.getTime(),
+      end: now.getTime() + 86_400_000 - 1,
+      limit: 100,
+      includeElapsed: true,
+    };
+    const result = await query.getUpcomingOccurrences('identity-1', range);
+    expect(result.occurrences.map((item) => item.routineId)).toEqual(['elapsed', 'wall']);
+    expect(result.occurrences[0]).toMatchObject({
+      intervalMs: 60_000,
+      occurrenceAt: now.getTime() + 60_000,
+      timingStatus: 'scheduled',
+    });
+    const key = result.occurrences[0]!.occurrenceKey;
+    listOccurrences.mockResolvedValue([
+      {
+        routineId: 'elapsed',
+        occurrenceKey: key,
+        resolutionState: 'Open',
+        scheduledFor: now.getTime() + 60_000,
+        becameDueAt: now.getTime() + 60_000,
+      },
+    ]);
+    const overdue = await query.getUpcomingOccurrences('identity-1', {
+      ...range,
+      start: now.getTime() + 120_000,
+    });
+    expect(overdue.occurrences[0]).toMatchObject({
+      occurrenceKey: key,
+      timingStatus: 'awaiting-completion',
+    });
+    const planner = await query.getUpcomingOccurrences('identity-1', {
+      ...range,
+      includeElapsed: false,
+    });
+    expect(planner.occurrences.map((item) => item.routineId)).toEqual(['wall']);
+  });
+
   it('returns no upcoming occurrences when the global Routine gate is disabled', async () => {
     const routineProfileStore = {
       listDefinitions: vi.fn(),

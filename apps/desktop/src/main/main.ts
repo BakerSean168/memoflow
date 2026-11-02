@@ -253,6 +253,7 @@ async function registerBusinessModules(
           notificationType: payload.type,
           notificationCategory: payload.category,
           navigationIntent: payload.navigationIntent,
+          actions: payload.actions,
         },
       });
     },

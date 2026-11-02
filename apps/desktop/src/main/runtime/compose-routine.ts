@@ -154,6 +154,7 @@ export function composeRoutine(
   });
 
   const routineQueryPort = createRoutineConfigurationQueryService({
+    occurrenceTruthStore: repositories.routineOccurrenceTruthStore,
     routineProfileStore: repositories.routineProfileStore,
     routinePreferencesStore: repositories.routinePreferencesStore,
     runtimeContextStore,

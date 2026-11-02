@@ -122,7 +122,8 @@ export class NotificationController {
     notificationId: string,
     actionKey: string,
     ctx: Context,
+    snoozeDurationMs?: number,
   ): Promise<Result<ExecuteNotificationActionRes>> {
-    return this.inbox.executeAction(notificationId, actionKey, ctx.identityId);
+    return this.inbox.executeAction(notificationId, actionKey, ctx.identityId, snoozeDurationMs);
   }
 }

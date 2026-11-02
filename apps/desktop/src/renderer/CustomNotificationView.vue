@@ -1,6 +1,11 @@
 <script setup lang="ts">
 import { computed, ref, onMounted, onUnmounted, nextTick, watch } from 'vue';
 import { notificationSound } from '@memoflow/assets/audio';
+import type { Result } from '@memoflow/transport-contracts/result';
+import type {
+  NotificationActionIntent,
+  ExecuteNotificationActionRes,
+} from '@memoflow/notification-contracts';
 import { NotificationChannels } from '@memoflow/desktop-contracts';
 // Residual 911: local ElectronBridge dual retired — sole body from @memoflow/ipc-client.
 // Residual 941: local getElectronBridge dual retired — sole host helper in platform/electron-bridge.
@@ -27,6 +32,40 @@ let activeAudio: HTMLAudioElement | null = null;
 let disposed = false;
 const bridge = getElectronBridge();
 if (!bridge) throw new Error('Custom notification requires the preload bridge');
+
+const actionPending = ref<string | null>(null);
+const actionError = ref<string | null>(null);
+
+function ownerActions(notification: CustomNotification) {
+  const actions = notification.data?.actions;
+  return Array.isArray(actions)
+    ? (actions as NotificationActionIntent[]).filter(
+        (action) =>
+          action.kind === 'owner-command' &&
+          (action.actionKey === 'complete' || action.actionKey === 'snooze-10m'),
+      )
+    : [];
+}
+
+async function executeAction(notification: CustomNotification, actionKey: string) {
+  if (actionPending.value) return;
+  actionPending.value = notification.id;
+  actionError.value = null;
+  try {
+    const result = (await bridge.invoke(NotificationChannels.EXECUTE_ACTION, {
+      notificationId: notification.data?.notificationId,
+      actionKey,
+    })) as Result<ExecuteNotificationActionRes>;
+    if (!result?.ok || result.data.interaction.outcome !== 'accepted')
+      throw new Error('Action rejected');
+    removeNotification(notification.id);
+    await bridge.invoke(NotificationChannels.CUSTOM_CLOSE, notification.id);
+  } catch {
+    actionError.value = notification.id;
+  } finally {
+    actionPending.value = null;
+  }
+}
 
 const AUTO_DISMISS_MS = 30_000;
 const MAX_VISIBLE_NOTIFICATIONS = 5;
@@ -315,12 +354,32 @@ onUnmounted(() => {
               提醒已触发，请确认已收到。
             </div>
 
+            <p
+              v-if="actionError === notification.id"
+              role="alert"
+              class="mt-2 text-sm text-rose-300"
+            >
+              操作失败，请重试
+            </p>
             <div class="mt-4 flex items-center justify-between gap-3">
               <div class="text-xs text-slate-500">
                 {{ notificationRemainingSeconds[notification.id] ?? 0 }}s
               </div>
 
+              <div v-if="ownerActions(notification).length" class="flex gap-2">
+                <button
+                  v-for="action in ownerActions(notification)"
+                  :key="action.actionKey"
+                  type="button"
+                  :disabled="actionPending === notification.id"
+                  class="rounded-lg bg-amber-400 px-3 py-2 text-sm text-slate-950 disabled:opacity-50"
+                  @click.stop="executeAction(notification, action.actionKey)"
+                >
+                  {{ action.actionKey === 'complete' ? '完成' : '10 分钟后提醒' }}
+                </button>
+              </div>
               <button
+                v-else
                 type="button"
                 class="inline-flex min-w-[92px] items-center justify-center rounded-xl bg-amber-400 px-4 py-2 text-sm font-medium text-slate-950 transition-colors hover:bg-amber-300"
                 @click.stop="void acknowledgeNotification(notification, 'button')"
