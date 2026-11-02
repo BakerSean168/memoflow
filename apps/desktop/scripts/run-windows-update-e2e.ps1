@@ -443,7 +443,7 @@ try {
     Write-Host '[update-e2e] verified #785 one-shot reset to the empty identity gate'
   }
   elseif ($registryAfter -ne $registryBefore) {
-    throw 'Profile registry semantic identity changed after the one-shot reset was already complete'
+    throw 'Profile registry semantic identity changed across installed update after the one-shot reset was already complete'
   }
   if ($sentinelAfter -ne $sentinelBefore) {
     throw 'userData preservation sentinel changed across installed update'
