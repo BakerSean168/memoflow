@@ -557,7 +557,9 @@ test('a second local account keeps independent data and its password selection a
     expect(
       fs.existsSync(path.join(userData, 'data', 'profiles', second.profileId, 'independent.txt')),
     ).toBe(false);
-    const secondWindow = await unlockLocalProfile(app, await secondGatePromise);
+    const secondGate = await secondGatePromise;
+    await expect(secondGate.getByTestId(`desktop-profile-password-${second.profileId}`)).toBeVisible();
+    const secondWindow = await unlockLocalProfile(app, secondGate);
     await expect(secondWindow.getByTestId('shell-account-name')).toHaveText('Work');
     await secondWindow.getByTestId('shell-account-menu').click();
     await secondWindow.getByTestId('shell-switch-account').click();
