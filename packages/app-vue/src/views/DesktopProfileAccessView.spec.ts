@@ -130,6 +130,22 @@ beforeEach(() => {
 });
 
 describe('DesktopProfileAccessView', () => {
+  it('opens the same login state as the plus tile for the host login intent', async () => {
+    const previousHash = window.location.hash;
+    window.location.hash = '#/profile-access?view=login';
+    const { wrapper, invoke } = mountView({ attachTo: document.body });
+    try {
+      await flushPromises();
+      expect(element('desktop-profile-login-state')).not.toBeNull();
+      expect(element('desktop-profile-login-email')).not.toBeNull();
+      expect(element('desktop-profile-login-password')).not.toBeNull();
+      expect(invoke).not.toHaveBeenCalledWith(ProfileAccessChannels.SELECT, expect.anything());
+    } finally {
+      wrapper.unmount();
+      window.location.hash = previousHash;
+    }
+  });
+
   it('preselects and focuses a password target passed by the host without opening its data', async () => {
     const previousHash = window.location.hash;
     window.location.hash = '#/profile-access?profileId=profile-1';

@@ -142,6 +142,7 @@ export default {
     createProfile: '创建本地 Profile',
     currentProfile: '当前 Profile',
     manageProfiles: '管理账号',
+    menuAddAccount: '添加账号',
     addAccount: '添加其他账号',
     reauthenticate: '重新认证此账号',
 

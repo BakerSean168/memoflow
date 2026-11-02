@@ -17,7 +17,7 @@
  * - 会话侧栏消费 AIChatView defineExpose 的会话状态（单一 chat session）；
  * - 桌面窗控走 useDesktopWindowControls（Web 端不渲染，V2 决策 #6）。
  */
-import { DesktopProfileImportChannels } from '@memoflow/desktop-contracts';
+import { WindowChannels, DesktopProfileImportChannels } from '@memoflow/desktop-contracts';
 import { DESKTOP_BRIDGE_KEY } from '../../di/keys';
 import { toast } from 'vue-sonner';
 import { computed, inject, onBeforeUnmount, onMounted, provide, ref, shallowRef, watch } from 'vue';
@@ -449,6 +449,12 @@ watch(
 onMounted(() => {
   if (desktopBridge) void refreshProfiles();
 });
+async function addMenuAccount() {
+  closeOverlaySidebar();
+  await desktopBridge?.invoke(WindowChannels.TRANSITION_TO_PROFILE_ACCESS, {
+    view: 'login',
+  });
+}
 function addAccount() {
   closeManagement();
   cloudConnectionIntent.value = 'add_account';
@@ -1113,52 +1119,65 @@ onBeforeUnmount(() => {
          业务 default view 为空；WorkspaceSceneHost 用 v-show 常驻——KeepAlive 实例、
          AIChatView 流式回复、Teleport 宿主都不随设置导航销毁（Phase 0 / UI-001）。 -->
     <StandaloneSettingsLayout v-if="isSettingsScene" class="min-h-0 flex-1">
-      <router-view name="settings" v-slot="{ Component }">
-        <component :is="Component">
-          <template #archived-conversations>
-            <section class="space-y-3" data-testid="settings-archived-conversations">
-              <h2 class="text-lg font-semibold">{{ t('shell.conversation.archived') }}</h2>
-              <p v-if="!archivedConversations.length" class="text-sm text-muted-foreground">
-                {{ t('aiAssistant.dialogs.chat.noSavedConversations') }}
-              </p>
-              <ul class="space-y-2">
-                <li
-                  v-for="item in archivedConversations"
-                  :key="item.id"
-                  class="flex items-center gap-3"
-                >
-                  <span class="min-w-0 flex-1 truncate">{{ item.title }}</span>
-                  <button
-                    type="button"
-                    class="rounded border px-3 py-1 text-sm focus-visible:ring-2 focus-visible:ring-ring"
-                    :disabled="aiRef?.conversationListLoading"
-                    data-testid="settings-restore-conversation"
-                    @click="handleRestoreConversation(item.id)"
-                  >
-                    {{ t('shell.conversation.restore') }}
-                  </button>
-                </li>
-              </ul>
-              <div class="flex justify-between text-sm">
-                <button
-                  type="button"
-                  :disabled="(aiRef?.archivePage ?? 1) <= 1 || aiRef?.conversationListLoading"
-                  @click="handleChangeArchivePage(-1)"
-                >
-                  {{ t('shell.conversation.previousPage') }}
-                </button>
-                <button
-                  type="button"
-                  :disabled="!aiRef?.archiveHasMore || aiRef?.conversationListLoading"
-                  @click="handleChangeArchivePage(1)"
-                >
-                  {{ t('shell.conversation.nextPage') }}
-                </button>
-              </div>
-            </section>
-          </template>
-        </component>
-      </router-view>
+      <div class="flex h-full min-h-0 flex-col">
+        <button
+          v-if="isDesktop && route.query.tab === 'account'"
+          type="button"
+          data-testid="shell-manage-profiles"
+          class="m-4 self-start rounded-md border px-3 py-2 text-sm hover:bg-muted"
+          @click="manageProfiles($event.currentTarget as HTMLButtonElement)"
+        >
+          {{ t('shell.account.manageProfiles') }}
+        </button>
+        <div class="min-h-0 flex-1">
+          <router-view name="settings" v-slot="{ Component }">
+            <component :is="Component">
+              <template #archived-conversations>
+                <section class="space-y-3" data-testid="settings-archived-conversations">
+                  <h2 class="text-lg font-semibold">{{ t('shell.conversation.archived') }}</h2>
+                  <p v-if="!archivedConversations.length" class="text-sm text-muted-foreground">
+                    {{ t('aiAssistant.dialogs.chat.noSavedConversations') }}
+                  </p>
+                  <ul class="space-y-2">
+                    <li
+                      v-for="item in archivedConversations"
+                      :key="item.id"
+                      class="flex items-center gap-3"
+                    >
+                      <span class="min-w-0 flex-1 truncate">{{ item.title }}</span>
+                      <button
+                        type="button"
+                        class="rounded border px-3 py-1 text-sm focus-visible:ring-2 focus-visible:ring-ring"
+                        :disabled="aiRef?.conversationListLoading"
+                        data-testid="settings-restore-conversation"
+                        @click="handleRestoreConversation(item.id)"
+                      >
+                        {{ t('shell.conversation.restore') }}
+                      </button>
+                    </li>
+                  </ul>
+                  <div class="flex justify-between text-sm">
+                    <button
+                      type="button"
+                      :disabled="(aiRef?.archivePage ?? 1) <= 1 || aiRef?.conversationListLoading"
+                      @click="handleChangeArchivePage(-1)"
+                    >
+                      {{ t('shell.conversation.previousPage') }}
+                    </button>
+                    <button
+                      type="button"
+                      :disabled="!aiRef?.archiveHasMore || aiRef?.conversationListLoading"
+                      @click="handleChangeArchivePage(1)"
+                    >
+                      {{ t('shell.conversation.nextPage') }}
+                    </button>
+                  </div>
+                </section>
+              </template>
+            </component>
+          </router-view>
+        </div>
+      </div>
     </StandaloneSettingsLayout>
 
     <!-- 主工作区（STATE A/B/C）：Hybrid Workspace。
@@ -1209,7 +1228,7 @@ onBeforeUnmount(() => {
               @delete-conversation="handleDeleteConversation"
               @open-settings="openSettings"
               @open-cloud-connection="openCloudConnection"
-              @manage-profiles="manageProfiles"
+              @add-account="addMenuAccount"
               @switch-profile="switchProfile"
               @refresh-profiles="refreshProfiles"
               @logout="() => void handleLogout()"
@@ -1392,7 +1411,7 @@ onBeforeUnmount(() => {
             @delete-conversation="handleDeleteConversation"
             @open-settings="openSettings"
             @open-cloud-connection="openCloudConnection"
-            @manage-profiles="manageProfiles"
+            @add-account="addMenuAccount"
             @switch-profile="switchProfile"
             @refresh-profiles="refreshProfiles"
             @logout="() => void handleLogout()"

@@ -70,7 +70,12 @@ function switchRegisterMode(value: unknown): void {
 onMounted(async () => {
   await refreshProfiles();
   const query = window.location.hash.split('?')[1];
-  const targetId = new URLSearchParams(query).get('profileId');
+  const params = new URLSearchParams(query);
+  if (params.get('view') === 'login') {
+    enterLoginState();
+    return;
+  }
+  const targetId = params.get('profileId');
   const target = profiles.value.find((profile) => profile.profileId === targetId);
   // A host-supplied target arrives preselected, never opened: only a target that
   // actually has a password has a state to show.

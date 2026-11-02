@@ -2816,19 +2816,22 @@
         "testRole": "behavior"
       },
       "decision": "retain",
-      "behavior": "会话状态、搜索、Profile 菜单与焦点恢复，跨组选择、逐项失败反馈、失败项保留和旧 Profile 结果隔离，以及 T3 Code 单槽位行操作、单项/批量右键菜单、F2 重命名、成功删除不残留摘要和顶栏无归档筛选",
+      "behavior": "会话状态、搜索、Profile 菜单与焦点恢复，本地及云账户菜单添加账号/退出登录事件与旧入口移除，跨组选择、逐项失败反馈、失败项保留和旧 Profile 结果隔离，以及 T3 Code 单槽位行操作、单项/批量右键菜单、F2 重命名、成功删除不残留摘要和顶栏无归档筛选",
+
       "assertionEvidence": [
         "conversation-search-input",
         "aria-selected",
         "conversation-bulk-results",
-        "bulkAction"
+        "bulkAction",
+        "shell-add-account",
+        "shell-logout"
       ],
       "reason": "单组件 Happy DOM，键盘事件合成无法代替真浏览器原生 FocusTrap/Menu RovingTabindex。 本轮为代表性源码与断言审查；没有声称单个 case 的运行成功或替代等价。",
       "replacement": {
         "status": "none-verified",
         "testFiles": []
       },
-      "sourceSha256": "1b2eba6f4f77dc60f1d66e865fe85a41cf1c23834ac2da08cbfe9ebfe2e52017"
+      "sourceSha256": "ef9159431e728165422739dd2548d5a524371c29d2bd2f611bc50f77682cdf9e"
     },
     {
       "path": "packages/app-vue/src/layouts/shell/WindowHeader.spec.ts",
