@@ -1,4 +1,4 @@
-import { readFileSync } from 'node:fs';
+import { readdirSync, readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
 
@@ -39,7 +39,15 @@ describe('notification ownership surface', () => {
     ),
     'utf8',
   );
-  const routes = readFileSync(resolve(__dirname, '../../../../../api/routes.ts'), 'utf8');
+  // B1-2: route definitions live in `api/routes.ts` (aggregate) plus
+  // `api/routes/*.routes.ts`; the surface assertions read the union.
+  const routesPath = resolve(__dirname, '../../../../../api/routes');
+  const routes = [
+    readFileSync(`${routesPath}.ts`, 'utf8'),
+    ...readdirSync(routesPath)
+      .filter((file) => file.endsWith('.ts'))
+      .map((file) => readFileSync(resolve(routesPath, file), 'utf8')),
+  ].join('\n');
   const electron = readFileSync(resolve(__dirname, '../../../../../electron/index.ts'), 'utf8');
   const module = readFileSync(resolve(__dirname, '../../../notification.module.ts'), 'utf8');
   it('uses the application use case/repository fence after retiring the legacy domain-service authority', () => {

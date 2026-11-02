@@ -1,4 +1,4 @@
-import { readFileSync } from 'node:fs';
+import { readdirSync, readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
 
@@ -31,7 +31,15 @@ describe('notification preference ownership and product/operations split', () =>
     'utf8',
   );
   const moduleSource = readFileSync(resolve(__dirname, '../../../notification.module.ts'), 'utf8');
-  const routes = readFileSync(resolve(__dirname, '../../../../../api/routes.ts'), 'utf8');
+  // B1-2: route definitions live in `api/routes.ts` (aggregate) plus
+  // `api/routes/*.routes.ts`; the surface assertions read the union.
+  const routesPath = resolve(__dirname, '../../../../../api/routes');
+  const routes = [
+    readFileSync(`${routesPath}.ts`, 'utf8'),
+    ...readdirSync(routesPath)
+      .filter((file) => file.endsWith('.ts'))
+      .map((file) => readFileSync(resolve(routesPath, file), 'utf8')),
+  ].join('\n');
   const controller = readFileSync(
     resolve(__dirname, '../../../../transport/notification.controller.ts'),
     'utf8',
