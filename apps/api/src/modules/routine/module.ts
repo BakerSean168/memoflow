@@ -122,6 +122,9 @@ export function composeRoutineApiModule(options: ComposeRoutineApiModuleOptions)
         const auth = authIdentity(request, res);
         if (!auth) return;
         const parsed = RoutineUpcomingQuerySchema.safeParse({
+          ...(req.query.includeElapsed == null
+            ? {}
+            : { includeElapsed: req.query.includeElapsed === 'true' }),
           start: Number(req.query.start),
           end: Number(req.query.end),
           limit: req.query.limit == null ? undefined : Number(req.query.limit),

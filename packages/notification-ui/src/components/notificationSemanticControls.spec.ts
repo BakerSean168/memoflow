@@ -269,18 +269,42 @@ describe('notification semantic controls', () => {
 describe('Routine notification icon actions', () => {
   function routineItem() {
     return mount(NotificationItem, {
-      props: { notification: createNotification({ actions: [
-        { kind: 'owner-command', actionKey: 'complete', labelKey: 'routine.action.complete',
-          owner: { type: 'routine-occurrence', id: 'occ-1' }, commandKey: 'routine.complete' },
-        { kind: 'owner-command', actionKey: 'snooze-10m', labelKey: 'routine.action.snooze10m',
-          owner: { type: 'routine-occurrence', id: 'occ-1' }, commandKey: 'routine.snooze' },
-      ] }) },
-      global: { plugins: [i18n], stubs: {
-        DropdownMenu: { template: '<div><slot /></div>' },
-        DropdownMenuTrigger: { template: '<div><slot /></div>' },
-        DropdownMenuContent: { template: '<div><slot /></div>' },
-        DropdownMenuItem: { emits: ['select'], template: '<button @click="$emit(\'select\')"><slot /></button>' },
-      } },
+      props: {
+        notification: createNotification({
+          actions: [
+            {
+              kind: 'owner-command',
+              actionKey: 'complete',
+              labelKey: 'routine.action.complete',
+              owner: { type: 'routine-occurrence', id: 'occ-1' },
+              commandKey: 'routine.complete',
+            },
+            {
+              kind: 'owner-command',
+              actionKey: 'snooze-10m',
+              labelKey: 'routine.action.snooze10m',
+              owner: { type: 'routine-occurrence', id: 'occ-1' },
+              commandKey: 'routine.snooze',
+            },
+          ],
+        }),
+      },
+      global: {
+        plugins: [i18n],
+        stubs: {
+          Dialog: { props: ['open'], template: '<div v-if="open"><slot /></div>' },
+          DialogContent: { template: '<div><slot /></div>' },
+          DialogHeader: { template: '<div><slot /></div>' },
+          DialogTitle: { template: '<h2><slot /></h2>' },
+          DropdownMenu: { template: '<div><slot /></div>' },
+          DropdownMenuTrigger: { template: '<div><slot /></div>' },
+          DropdownMenuContent: { template: '<div><slot /></div>' },
+          DropdownMenuItem: {
+            emits: ['select'],
+            template: '<button @click="$emit(\'select\')"><slot /></button>',
+          },
+        },
+      },
     });
   }
 
@@ -292,10 +316,14 @@ describe('Routine notification icon actions', () => {
     expect(complete.attributes('aria-label')).toBe('Complete');
     expect(complete.attributes('title')).toBe('Complete');
     expect(snooze.find('svg').exists()).toBe(true);
-    expect(snooze.text()).toBe('10');
+    expect(snooze.get('[data-testid="notification-snooze-badge"]').classes()).toContain(
+      "after:content-['10']",
+    );
     expect(snooze.attributes('aria-label')).toBe('Remind in 10 min');
     expect(complete.element.closest('[data-testid="notification-item"]')).toBeNull();
-    expect(wrapper.get('[data-testid="notification-quick-actions"]').classes()).toContain('right-3');
+    expect(wrapper.get('[data-testid="notification-quick-actions"]').classes()).toContain(
+      'right-3',
+    );
     await complete.trigger('click');
     await snooze.trigger('click');
     expect(wrapper.emitted('execute-action')).toEqual([
@@ -308,9 +336,15 @@ describe('Routine notification icon actions', () => {
   it.each([60, 180, 1440, 10080])('selects the %s minute menu option', async (minutes) => {
     const wrapper = routineItem();
     await wrapper.get(`[data-testid="notification-snooze-${minutes}"]`).trigger('click');
-    expect(wrapper.emitted('execute-action')).toEqual([[{
-      notificationId: 'notification-1', actionKey: 'snooze-10m', snoozeDurationMs: minutes * 60_000,
-    }]]);
+    expect(wrapper.emitted('execute-action')).toEqual([
+      [
+        {
+          notificationId: 'notification-1',
+          actionKey: 'snooze-10m',
+          snoozeDurationMs: minutes * 60_000,
+        },
+      ],
+    ]);
     wrapper.unmount();
   });
 
@@ -319,9 +353,15 @@ describe('Routine notification icon actions', () => {
     await wrapper.get('[data-testid="notification-snooze-custom"]').trigger('click');
     await wrapper.get('input[type="number"]').setValue(25);
     await wrapper.get('[data-testid="notification-snooze-apply"]').trigger('click');
-    expect(wrapper.emitted('execute-action')).toEqual([[{
-      notificationId: 'notification-1', actionKey: 'snooze-10m', snoozeDurationMs: 1_500_000,
-    }]]);
+    expect(wrapper.emitted('execute-action')).toEqual([
+      [
+        {
+          notificationId: 'notification-1',
+          actionKey: 'snooze-10m',
+          snoozeDurationMs: 1_500_000,
+        },
+      ],
+    ]);
     wrapper.unmount();
   });
 });

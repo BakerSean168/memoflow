@@ -166,13 +166,17 @@ export function createRoutineConfigurationQueryService(
       }
       const occurrences: RoutineUpcomingResponse['occurrences'] = [];
 
-      const facts = query.includeElapsed && options.occurrenceTruthStore
-        ? await options.occurrenceTruthStore.listOccurrences({ identityId })
-        : [];
+      const facts =
+        query.includeElapsed && options.occurrenceTruthStore
+          ? await options.occurrenceTruthStore.listOccurrences({ identityId })
+          : [];
       for (const definition of definitions) {
         if (!definition.enabled || !definition.trigger) continue;
-        if (definition.trigger.type !== 'WallClock' &&
-          !(query.includeElapsed && definition.trigger.type === 'Elapsed')) continue;
+        if (
+          definition.trigger.type !== 'WallClock' &&
+          !(query.includeElapsed && definition.trigger.type === 'Elapsed')
+        )
+          continue;
         const paths = membershipsByRoutine.get(definition.id) ?? [];
         const durableProfileGateOpen =
           paths.length === 0 ||
@@ -190,25 +194,37 @@ export function createRoutineConfigurationQueryService(
         if (definition.trigger.type === 'Elapsed') {
           const history = facts.filter((fact) => fact.routineId === definition.id);
           const open = history.find((fact) => fact.resolutionState === 'Open');
-          const next = definition.trigger.timingOwner === 'scheduler'
-            ? computeDurableElapsedNextOccurrence({
-                routineId: definition.id,
-                trigger: definition.trigger,
-                activatedAt: definition.activatedAt,
-                occurrences: history,
-                temporaryOverride,
-              })
-            : null;
-          const occurrenceAt = open ? Number(open.scheduledFor ?? open.becameDueAt)
-            : next ? Number(next.runAt) : query.start;
+          const next =
+            definition.trigger.timingOwner === 'scheduler'
+              ? computeDurableElapsedNextOccurrence({
+                  routineId: definition.id,
+                  trigger: definition.trigger,
+                  activatedAt: definition.activatedAt,
+                  occurrences: history,
+                  temporaryOverride,
+                })
+              : null;
+          const occurrenceAt = open
+            ? Number(open.scheduledFor ?? open.becameDueAt)
+            : next
+              ? Number(next.runAt)
+              : query.start;
           if (occurrenceAt > query.end) continue;
           occurrences.push({
-            identityId, routineId: definition.id,
-            occurrenceKey: open?.occurrenceKey ?? next?.occurrenceKey ?? `routine:${definition.id}:local-runtime`,
-            title: definition.name, description: definition.description,
-            occurrenceAt, intervalMs: definition.trigger.durationMs,
+            identityId,
+            routineId: definition.id,
+            occurrenceKey:
+              open?.occurrenceKey ??
+              next?.occurrenceKey ??
+              `routine:${definition.id}:local-runtime`,
+            title: definition.name,
+            description: definition.description,
+            occurrenceAt,
+            intervalMs: definition.trigger.durationMs,
             timingStatus: open ? 'awaiting-completion' : next ? 'scheduled' : 'local-runtime',
-            endAt: null, revision: definition.version, editable: false,
+            endAt: null,
+            revision: definition.version,
+            editable: false,
           });
           continue;
         }

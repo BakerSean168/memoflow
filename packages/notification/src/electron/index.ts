@@ -374,7 +374,12 @@ export function createNotificationElectronModule(
           NotificationChannels.EXECUTE_ACTION,
           ExecuteNotificationActionSchema,
           (data, requestContext) =>
-            controller.executeAction(data.notificationId, data.actionKey, requestContext, data.snoozeDurationMs),
+            controller.executeAction(
+              data.notificationId,
+              data.actionKey,
+              requestContext,
+              data.snoozeDurationMs,
+            ),
           (args) => args,
         );
         installed.push(NotificationChannels.EXECUTE_ACTION);

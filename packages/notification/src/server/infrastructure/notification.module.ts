@@ -219,7 +219,12 @@ export function createNotificationModule(
         dto as Parameters<UpdateNotificationPreferenceUseCase['execute']>[1],
       ),
     executeAction: async (notificationId, actionKey, identityId, snoozeDurationMs) =>
-      useCases.executeNotificationAction.execute({ identityId, notificationId, actionKey, snoozeDurationMs }),
+      useCases.executeNotificationAction.execute({
+        identityId,
+        notificationId,
+        actionKey,
+        snoozeDurationMs,
+      }),
     subscribeSseEvents: (handler: (payload: NotificationSseDeliveryEvent) => void) =>
       durableRuntime.getSseAdapter().subscribe(handler),
   };

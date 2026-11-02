@@ -102,11 +102,24 @@ watch(
           data-testid="routine-upcoming-item"
         >
           <span class="w-12 shrink-0 font-mono text-xs font-medium text-foreground">
-            {{ occurrence.timingStatus === 'awaiting-completion' ? t('routine.home.awaitingCompletion') : occurrence.timingStatus === 'local-runtime' ? t('routine.home.localRuntime') : formatProductHm(occurrence.occurrenceAt) }}
+            {{
+              occurrence.timingStatus === 'awaiting-completion'
+                ? t('routine.home.awaitingCompletion')
+                : occurrence.timingStatus === 'local-runtime'
+                  ? t('routine.home.localRuntime')
+                  : formatProductHm(occurrence.occurrenceAt)
+            }}
           </span>
           <div class="min-w-0 flex-1">
-            <p class="truncate text-xs font-medium text-foreground">{{ occurrence.title }}
-              <span v-if="occurrence.intervalMs" class="text-muted-foreground"> · {{ t('routine.home.everyMinutes', { minutes: occurrence.intervalMs / 60_000 }) }}</span></p>
+            <p class="truncate text-xs font-medium text-foreground">
+              {{ occurrence.title }}
+              <span v-if="occurrence.intervalMs" class="text-muted-foreground">
+                ·
+                {{
+                  t('routine.home.everyMinutes', { minutes: occurrence.intervalMs / 60_000 })
+                }}</span
+              >
+            </p>
             <p v-if="occurrence.description" class="truncate text-[11px] text-muted-foreground">
               {{ occurrence.description }}
             </p>

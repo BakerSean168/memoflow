@@ -85,31 +85,72 @@ describe('ExecuteNotificationActionUseCase', () => {
     registry = new NotificationOwnerCommandRegistry();
   });
 
-  it.each([3_600_000, 10_800_000, 86_400_000, 604_800_000, 1_500_000])('delegates a selected snooze duration %s without changing owner identity', async (durationMs) => {
-    notification = Notification.create({ identityId: identityId as never,
-      workflowKey: 'routine.intervention', topic: 'routine.intervention', idempotencyKey: 'snooze-fact',
-      title: 'Stand', content: 'Move', type: NotificationType.Reminder, category: NotificationCategory.Reminder,
-      actions: [{ kind: 'owner-command', actionKey: 'snooze-10m', labelKey: 'routine.action.snooze10m',
-        owner: { type: 'routine-occurrence', id: 'occ-1' }, commandKey: 'routine.snooze',
-        input: { routineId: 'routine-1', occurrenceKey: 'occ-1', durationMs: 600_000 } }],
-    });
-    const execute = vi.fn(async () => ({ outcome: 'accepted' as const }));
-    registry.register({ workflowKey: 'routine.intervention', ownerType: 'routine-occurrence', commandKey: 'routine.snooze', execute });
-    const useCase = new ExecuteNotificationActionUseCase(notificationRepository, interactionRepository, registry);
-    const request = { identityId, notificationId: String(notification.id), actionKey: 'snooze-10m', snoozeDurationMs: durationMs };
-    expect((await useCase.execute(request)).ok).toBe(true);
-    expect(execute).toHaveBeenCalledWith(expect.objectContaining({
-      owner: { type: 'routine-occurrence', id: 'occ-1' },
-      input: { routineId: 'routine-1', occurrenceKey: 'occ-1', durationMs },
-    }));
-    await useCase.execute(request);
-    expect(execute).toHaveBeenCalledTimes(1);
-  });
+  it.each([3_600_000, 10_800_000, 86_400_000, 604_800_000, 1_500_000])(
+    'delegates a selected snooze duration %s without changing owner identity',
+    async (durationMs) => {
+      notification = Notification.create({
+        identityId: identityId as never,
+        workflowKey: 'routine.intervention',
+        topic: 'routine.intervention',
+        idempotencyKey: 'snooze-fact',
+        title: 'Stand',
+        content: 'Move',
+        type: NotificationType.Reminder,
+        category: NotificationCategory.Reminder,
+        actions: [
+          {
+            kind: 'owner-command',
+            actionKey: 'snooze-10m',
+            labelKey: 'routine.action.snooze10m',
+            owner: { type: 'routine-occurrence', id: 'occ-1' },
+            commandKey: 'routine.snooze',
+            input: { routineId: 'routine-1', occurrenceKey: 'occ-1', durationMs: 600_000 },
+          },
+        ],
+      });
+      const execute = vi.fn(async () => ({ outcome: 'accepted' as const }));
+      registry.register({
+        workflowKey: 'routine.intervention',
+        ownerType: 'routine-occurrence',
+        commandKey: 'routine.snooze',
+        execute,
+      });
+      const useCase = new ExecuteNotificationActionUseCase(
+        notificationRepository,
+        interactionRepository,
+        registry,
+      );
+      const request = {
+        identityId,
+        notificationId: String(notification.id),
+        actionKey: 'snooze-10m',
+        snoozeDurationMs: durationMs,
+      };
+      expect((await useCase.execute(request)).ok).toBe(true);
+      expect(execute).toHaveBeenCalledWith(
+        expect.objectContaining({
+          owner: { type: 'routine-occurrence', id: 'occ-1' },
+          input: { routineId: 'routine-1', occurrenceKey: 'occ-1', durationMs },
+        }),
+      );
+      await useCase.execute(request);
+      expect(execute).toHaveBeenCalledTimes(1);
+    },
+  );
 
   it('rejects snooze duration overrides on completion and invalid durations', async () => {
-    const useCase = new ExecuteNotificationActionUseCase(notificationRepository, interactionRepository, registry);
+    const useCase = new ExecuteNotificationActionUseCase(
+      notificationRepository,
+      interactionRepository,
+      registry,
+    );
     for (const snoozeDurationMs of [-1, 0, NaN, 1.5, 60_000]) {
-      const result = await useCase.execute({ identityId, notificationId: String(notification.id), actionKey: 'complete', snoozeDurationMs });
+      const result = await useCase.execute({
+        identityId,
+        notificationId: String(notification.id),
+        actionKey: 'complete',
+        snoozeDurationMs,
+      });
       expect(result.ok).toBe(false);
     }
     expect(interactionRepository.record).not.toHaveBeenCalled();

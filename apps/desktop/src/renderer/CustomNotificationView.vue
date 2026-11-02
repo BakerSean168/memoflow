@@ -1,7 +1,11 @@
 <script setup lang="ts">
 import { computed, ref, onMounted, onUnmounted, nextTick, watch } from 'vue';
 import { notificationSound } from '@memoflow/assets/audio';
-import type { NotificationActionIntent } from '@memoflow/notification-contracts';
+import type { Result } from '@memoflow/transport-contracts/result';
+import type {
+  NotificationActionIntent,
+  ExecuteNotificationActionRes,
+} from '@memoflow/notification-contracts';
 import { NotificationChannels } from '@memoflow/desktop-contracts';
 // Residual 911: local ElectronBridge dual retired — sole body from @memoflow/ipc-client.
 // Residual 941: local getElectronBridge dual retired — sole host helper in platform/electron-bridge.
@@ -35,7 +39,11 @@ const actionError = ref<string | null>(null);
 function ownerActions(notification: CustomNotification) {
   const actions = notification.data?.actions;
   return Array.isArray(actions)
-    ? (actions as NotificationActionIntent[]).filter((action) => action.kind === 'owner-command')
+    ? (actions as NotificationActionIntent[]).filter(
+        (action) =>
+          action.kind === 'owner-command' &&
+          (action.actionKey === 'complete' || action.actionKey === 'snooze-10m'),
+      )
     : [];
 }
 
@@ -44,11 +52,12 @@ async function executeAction(notification: CustomNotification, actionKey: string
   actionPending.value = notification.id;
   actionError.value = null;
   try {
-    const result = await bridge.invoke(NotificationChannels.EXECUTE_ACTION, {
+    const result = (await bridge.invoke(NotificationChannels.EXECUTE_ACTION, {
       notificationId: notification.data?.notificationId,
       actionKey,
-    });
-    if (!result?.ok || result.data.interaction.outcome !== 'accepted') throw new Error('Action rejected');
+    })) as Result<ExecuteNotificationActionRes>;
+    if (!result?.ok || result.data.interaction.outcome !== 'accepted')
+      throw new Error('Action rejected');
     removeNotification(notification.id);
     await bridge.invoke(NotificationChannels.CUSTOM_CLOSE, notification.id);
   } catch {
@@ -345,7 +354,11 @@ onUnmounted(() => {
               提醒已触发，请确认已收到。
             </div>
 
-            <p v-if="actionError === notification.id" role="alert" class="mt-2 text-sm text-rose-300">
+            <p
+              v-if="actionError === notification.id"
+              role="alert"
+              class="mt-2 text-sm text-rose-300"
+            >
               操作失败，请重试
             </p>
             <div class="mt-4 flex items-center justify-between gap-3">

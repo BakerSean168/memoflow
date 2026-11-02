@@ -45,17 +45,28 @@ export class ExecuteNotificationActionUseCase {
     if (!action) return error('NOT_FOUND', 'Notification action not found');
 
     if (input.snoozeDurationMs != null) {
-      if (!Number.isSafeInteger(input.snoozeDurationMs) || input.snoozeDurationMs <= 0 ||
-        input.snoozeDurationMs > 31_536_000_000 || notification.workflowKey !== 'routine.intervention' ||
-        action.kind !== 'owner-command' || action.commandKey !== 'routine.snooze' ||
-        action.owner.type !== 'routine-occurrence' || !action.input ||
-        typeof action.input !== 'object' || Array.isArray(action.input)) {
+      if (
+        !Number.isSafeInteger(input.snoozeDurationMs) ||
+        input.snoozeDurationMs <= 0 ||
+        input.snoozeDurationMs > 31_536_000_000 ||
+        notification.workflowKey !== 'routine.intervention' ||
+        action.kind !== 'owner-command' ||
+        action.commandKey !== 'routine.snooze' ||
+        action.owner.type !== 'routine-occurrence' ||
+        !action.input ||
+        typeof action.input !== 'object' ||
+        Array.isArray(action.input)
+      ) {
         return error('VALIDATION_ERROR', 'Only Routine snooze accepts a positive duration');
       }
       action = { ...action, input: { ...action.input, durationMs: input.snoozeDurationMs } };
     }
-    const idempotencyKey = interactionKey(input.notificationId,
-      input.snoozeDurationMs == null ? input.actionKey : `${input.actionKey}:${input.snoozeDurationMs}`);
+    const idempotencyKey = interactionKey(
+      input.notificationId,
+      input.snoozeDurationMs == null
+        ? input.actionKey
+        : `${input.actionKey}:${input.snoozeDurationMs}`,
+    );
     const existing = await this.interactionRepository.findByIdempotencyKey(
       input.identityId,
       idempotencyKey,

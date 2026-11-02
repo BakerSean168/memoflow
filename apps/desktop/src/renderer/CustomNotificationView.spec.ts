@@ -23,26 +23,69 @@ describe('custom notification presentation lifecycle', () => {
     vi.restoreAllMocks();
   });
 
-  it.each(['complete', 'snooze-10m'])('executes the canonical %s action before closing the card', async (actionKey) => {
-    bridge.invoke.mockResolvedValue({ ok: true, data: { interaction: { outcome: 'accepted' } } });
+  it.each(['complete', 'snooze-10m'])(
+    'executes the canonical %s action before closing the card',
+    async (actionKey) => {
+      bridge.invoke.mockResolvedValue({ ok: true, data: { interaction: { outcome: 'accepted' } } });
+      const wrapper = mount(CustomNotificationView);
+      const receive = bridge.on.mock.calls.find(
+        ([channel]) => channel === NotificationChannels.CUSTOM_RECEIVE,
+      )![1];
+      receive({
+        id: 'routine-card',
+        title: 'Stand',
+        body: 'Move',
+        data: {
+          notificationId: 'notification-1',
+          actions: [
+            { kind: 'owner-command', actionKey: 'complete' },
+            { kind: 'owner-command', actionKey: 'snooze-10m' },
+          ],
+        },
+      });
+      await nextTick();
+      const buttons = wrapper.findAll('button');
+      expect(buttons.map((button) => button.text())).toEqual(['完成', '10 分钟后提醒']);
+      await buttons[actionKey === 'complete' ? 0 : 1]!.trigger('click');
+      await vi.advanceTimersByTimeAsync(0);
+      expect(bridge.invoke).toHaveBeenCalledWith(NotificationChannels.EXECUTE_ACTION, {
+        notificationId: 'notification-1',
+        actionKey,
+      });
+      expect(bridge.invoke).toHaveBeenCalledWith(NotificationChannels.CUSTOM_CLOSE, 'routine-card');
+      expect(wrapper.text()).not.toContain('Stand');
+      wrapper.unmount();
+    },
+  );
+
+  it('keeps the reminder visible and reports a rejected owner action', async () => {
+    bridge.invoke.mockImplementation(async (channel) =>
+      channel === NotificationChannels.EXECUTE_ACTION
+        ? { ok: true, data: { interaction: { outcome: 'rejected' } } }
+        : undefined,
+    );
     const wrapper = mount(CustomNotificationView);
-    const receive = bridge.on.mock.calls.find(([channel]) => channel === NotificationChannels.CUSTOM_RECEIVE)![1];
-    receive({ id: 'routine-card', title: 'Stand', body: 'Move', data: {
-      notificationId: 'notification-1', actions: [
-        { kind: 'owner-command', actionKey: 'complete' },
-        { kind: 'owner-command', actionKey: 'snooze-10m' },
-      ],
-    } });
-    await nextTick();
-    const buttons = wrapper.findAll('button');
-    expect(buttons.map((button) => button.text())).toEqual(['完成', '10 分钟后提醒']);
-    await buttons[actionKey === 'complete' ? 0 : 1]!.trigger('click');
-    await vi.advanceTimersByTimeAsync(0);
-    expect(bridge.invoke).toHaveBeenCalledWith(NotificationChannels.EXECUTE_ACTION, {
-      notificationId: 'notification-1', actionKey,
+    const receive = bridge.on.mock.calls.find(
+      ([channel]) => channel === NotificationChannels.CUSTOM_RECEIVE,
+    )![1];
+    receive({
+      id: 'rejected-card',
+      title: 'Stand',
+      body: 'Move',
+      data: {
+        notificationId: 'notification-1',
+        actions: [{ kind: 'owner-command', actionKey: 'complete' }],
+      },
     });
-    expect(bridge.invoke).toHaveBeenCalledWith(NotificationChannels.CUSTOM_CLOSE, 'routine-card');
-    expect(wrapper.text()).not.toContain('Stand');
+    await nextTick();
+    await wrapper.get('button').trigger('click');
+    await vi.advanceTimersByTimeAsync(0);
+    expect(wrapper.text()).toContain('Stand');
+    expect(wrapper.get('[role="alert"]').text()).toContain('操作失败');
+    expect(bridge.invoke).not.toHaveBeenCalledWith(
+      NotificationChannels.CUSTOM_CLOSE,
+      'rejected-card',
+    );
     wrapper.unmount();
   });
 

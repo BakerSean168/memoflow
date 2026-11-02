@@ -44,7 +44,8 @@ vi.mock('vue-sonner', () => ({
   toast: { success: vi.fn(), error: vi.fn() },
 }));
 
-vi.mock('@memoflow/ui-vue-shadcn', async () => {
+vi.mock('@memoflow/ui-vue-shadcn', async (importOriginal) => {
+  const original = await importOriginal<typeof import('@memoflow/ui-vue-shadcn')>();
   const vue = await import('vue');
   const Button = vue.defineComponent({
     name: 'ButtonStub',
@@ -68,7 +69,7 @@ vi.mock('@memoflow/ui-vue-shadcn', async () => {
         );
     },
   });
-  return { Button };
+  return { ...original, Button };
 });
 
 const i18n = createI18n({
