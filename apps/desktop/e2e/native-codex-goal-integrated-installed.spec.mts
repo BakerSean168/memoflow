@@ -52,6 +52,13 @@ test('real Windows Codex invokes MemoFlow MCP to fill and save the installed Goa
   let app: ElectronApplication | null = null;
   let bridge: ReturnType<typeof createDesktopLocalAgentTools> | null = null;
   const observedCommands: string[] = [];
+  type RequestApproval = NonNullable<
+    Parameters<ReturnType<typeof createDesktopLocalAgentTools>['open']>[0]['requestApproval']
+  >;
+  const approvalRequests: Array<{
+    toolName: string;
+    details: Parameters<RequestApproval>[2];
+  }> = [];
 
   async function launch(): Promise<ElectronApplication> {
     return electron.launch({
@@ -147,6 +154,12 @@ test('real Windows Codex invokes MemoFlow MCP to fill and save the installed Goa
   ): Promise<NativePanelIpcResponse> {
     if (context.signal.aborted || context.grantSignal.aborted) {
       throw new Error('EXPIRED_NATIVE_GRANT');
+    }
+    if (command.action === 'submit') {
+      expect(approvalRequests).toContainEqual({
+        toolName: 'goal_panel_submit',
+        details: expect.objectContaining({ action: 'create', object: 'goal' }),
+      });
     }
     const request: NativePanelIpcRequest = {
       requestId: randomUUID(),
@@ -269,6 +282,7 @@ test('real Windows Codex invokes MemoFlow MCP to fill and save the installed Goa
     ) => Promise<TestModule>;
     const {
       LocalAgentRepository,
+      PermissionLocalRepository,
       createDesktopLocalAgentTools,
       createTimeContext,
       createPowerSyncSqliteFixture,
@@ -310,11 +324,21 @@ test('real Windows Codex invokes MemoFlow MCP to fill and save the installed Goa
       enabled: true,
       writeScopes: ['goals:write'],
     });
+    // Keep the real confirm-each gate and its stale-policy revision check active.
+    await new PermissionLocalRepository(fixture.db).saveSettings(identityId, {
+      preset: 'confirm_each',
+      agentPresets: {},
+      revision: 1,
+    });
     const grant = await bridge.open({
       identityId,
       connectionId: connection.id,
       conversationId: 'qa-570-integrated',
       runId: 'native-codex-goal-write',
+      requestApproval: async (toolName, _signal, details) => {
+        approvalRequests.push({ toolName, details });
+        return true;
+      },
     });
 
     const script = path.resolve(
@@ -332,6 +356,21 @@ test('real Windows Codex invokes MemoFlow MCP to fill and save the installed Goa
         MF570_MCP_URL: grant.url,
         MF570_MCP_TOKEN: grant.token,
       },
+    }).catch(async (error: unknown) => {
+      const failure = error as Error & { stdout?: string; stderr?: string };
+      const stdout = failure.stdout ?? '';
+      const stderr = failure.stderr ?? '';
+      await test.info().attach('codex-operator-stdout', {
+        body: stdout,
+        contentType: 'text/plain',
+      });
+      await test.info().attach('codex-operator-stderr', {
+        body: stderr,
+        contentType: 'text/plain',
+      });
+      throw new Error(
+        `${failure.message}\nOperator stdout:\n${stdout}\nOperator stderr:\n${stderr}`,
+      );
     });
     expect(stdout).toContain('DISCOVERED_GOAL_PANEL_TOOLS=8');
     expect(stdout).toContain('CODEX_GOAL_SNAPSHOT_CALL=true');
