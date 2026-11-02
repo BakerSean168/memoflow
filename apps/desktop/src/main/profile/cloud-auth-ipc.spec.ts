@@ -26,7 +26,9 @@ function registerFixture() {
       cloudBinding: { cloudAccountId: 'account-1' },
     })),
     signOutActiveProfile: vi.fn(
-      async (invalidate: (descriptor: { profileId: string; profileKind: string }) => Promise<void>) => {
+      async (
+        invalidate: (descriptor: { profileId: string; profileKind: string }) => Promise<void>,
+      ) => {
         await invalidate({ profileId: 'profile-1', profileKind: 'registered' });
       },
     ),
@@ -235,7 +237,9 @@ describe('registerCloudAuthIpc', () => {
   it('never touches a cloud session when signing out a local account', async () => {
     const { handlers, runtime, sessions, cloudConnection } = registerFixture();
     runtime.signOutActiveProfile.mockImplementation(
-      async (invalidate: (descriptor: { profileId: string; profileKind: string }) => Promise<void>) => {
+      async (
+        invalidate: (descriptor: { profileId: string; profileKind: string }) => Promise<void>,
+      ) => {
         await invalidate({ profileId: 'profile-1', profileKind: 'local' });
       },
     );

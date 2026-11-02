@@ -43,8 +43,6 @@ describe('account logout production locale contract', () => {
   });
 
   it('keeps the signOut key set in parity across locales', () => {
-    expect(keyPaths(enUS.account.signOut).sort()).toEqual(
-      keyPaths(zhCN.account.signOut).sort(),
-    );
+    expect(keyPaths(enUS.account.signOut).sort()).toEqual(keyPaths(zhCN.account.signOut).sort());
   });
 });

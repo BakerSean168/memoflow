@@ -47,8 +47,11 @@ interface MountOptions {
 }
 
 function mountComposable(options: MountOptions = {}) {
-  const { profileKind = 'local', withDesktop = true, logout = vi.fn().mockResolvedValue(undefined) } =
-    options;
+  const {
+    profileKind = 'local',
+    withDesktop = true,
+    logout = vi.fn().mockResolvedValue(undefined),
+  } = options;
   let composable!: ReturnType<typeof useAccountSignOut>;
   const provide: Record<symbol, unknown> = {};
   if (logout) provide[LOGOUT_HANDLER_KEY as symbol] = logout;

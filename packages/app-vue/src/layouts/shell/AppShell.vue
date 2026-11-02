@@ -36,11 +36,7 @@ import { useShellRouterSync, AUTO_FOCUS_VIEWPORT, moduleForPath } from './useShe
 import { useDesktopWindowControls } from '../../shared/composables/useDesktopWindowControls';
 import { hasDesktopAuthApi } from '../../shared/utils/desktop-auth-recovery';
 import { useNotificationUnreadQuery } from '@memoflow/notification-ui';
-import {
-  useAccountSignOut,
-  useAccountStore,
-  useAuthenticationStore,
-} from '@memoflow/account-ui';
+import { useAccountSignOut, useAccountStore, useAuthenticationStore } from '@memoflow/account-ui';
 import {
   ConversationSelectionKey,
   createConversationSelectionStore,
