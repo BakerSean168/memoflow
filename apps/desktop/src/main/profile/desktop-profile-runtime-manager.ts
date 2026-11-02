@@ -545,16 +545,15 @@ export class DesktopProfileRuntimeManager {
   ): Promise<void> {
     return this.runExclusive(async () => {
       const descriptor = this.activeRuntime?.descriptor;
-      if (!descriptor)
-        throw new ResultErrorException('PROFILE_NOT_ACTIVE', '当前没有已登录的账号');
+      if (!descriptor) throw new ResultErrorException('当前没有已登录的账号', 'PROFILE_NOT_ACTIVE');
       await invalidateCloudSession(descriptor);
       await this.deactivateProfileNow();
       try {
         await this.removeProfileNow(descriptor.profileId);
       } catch (error) {
         throw new ResultErrorException(
-          'SIGN_OUT_PARTIAL',
           error instanceof Error ? error.message : 'SIGN_OUT_PARTIAL',
+          'SIGN_OUT_PARTIAL',
         );
       }
     });
