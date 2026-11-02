@@ -99,7 +99,7 @@ async function selectMenuItem(testId: string) {
 }
 
 describe('ConversationSidebar attention', () => {
-  it('archives without confirmation and exposes searchable recovery with guarded pending rows', async () => {
+  it('archives without confirmation and guards pending rows', async () => {
     const originalConfirm = window.confirm;
     const confirm = vi.fn();
     window.confirm = confirm;
@@ -108,7 +108,6 @@ describe('ConversationSidebar attention', () => {
         groups,
         activeConversationId: 'b',
         conversationStatuses: { a: 'working' },
-        archivedConversations: [{ id: 'old', title: 'Archived history' }],
       },
       global: { plugins: [i18n] },
     });
@@ -132,11 +131,7 @@ describe('ConversationSidebar attention', () => {
       expect(wrapper.emitted('archive-conversation')).toEqual([['b']]);
       expect(wrapper.emitted('select-conversation')).toBeUndefined();
       expect(confirm).not.toHaveBeenCalled();
-      await wrapper.get('[data-testid="conversation-archive-toggle"]').trigger('click');
-      expect(wrapper.text()).toContain('Archived history');
-      expect(wrapper.text()).not.toContain('Training plan');
-      await wrapper.get('[data-testid="conversation-restore"]').trigger('click');
-      expect(wrapper.emitted('restore-conversation')).toEqual([['old']]);
+      expect(wrapper.find('[data-testid="conversation-archive-toggle"]').exists()).toBe(false);
     } finally {
       window.confirm = originalConfirm;
       wrapper.unmount();
@@ -631,28 +626,5 @@ describe('ConversationSidebar T3 Code row interactions', () => {
     } finally {
       wrapper.unmount();
     }
-  });
-
-  it('keeps the archived view behind a toolbar icon and restores from the row slot', async () => {
-    const wrapper = mount(ConversationSidebar, {
-      props: {
-        groups,
-        activeConversationId: null,
-        archivedConversations: [{ id: 'old', title: 'Old' }],
-      },
-      global: { plugins: [i18n] },
-    });
-    const toggle = wrapper
-      .get('[data-testid="conversation-toolbar"]')
-      .get('[data-testid="conversation-archive-toggle"]');
-    expect(toggle.attributes('aria-pressed')).toBe('false');
-    expect(toggle.text()).toBe('');
-    await toggle.trigger('click');
-    expect(toggle.attributes('aria-pressed')).toBe('true');
-    const restore = wrapper.get('[data-testid="conversation-restore"]');
-    expect(restore.classes()).toContain('opacity-0');
-    await restore.trigger('click');
-    expect(wrapper.emitted('restore-conversation')).toEqual([['old']]);
-    wrapper.unmount();
   });
 });

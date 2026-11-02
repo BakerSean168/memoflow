@@ -25,7 +25,6 @@ import {
 import { useI18n } from 'vue-i18n';
 import {
   Archive,
-  ArchiveRestore,
   Search,
   SquarePen,
   Trash2,
@@ -83,9 +82,6 @@ const props = defineProps<{
   activeProfileId?: string;
   cloudState?: ProfileCloudState;
   groups: ConversationGroup[];
-  archivedConversations?: ConversationEntry[];
-  archivePage?: number;
-  archiveHasMore?: boolean;
   conversationStatuses?: ConversationAttentionMap;
   titleBusy?: Record<string, boolean>;
   activeConversationId: string | null;
@@ -107,8 +103,6 @@ const emit = defineEmits<{
   (e: 'select-conversation', id: string): void;
   (e: 'delete-conversation', id: string): void;
   (e: 'archive-conversation', id: string): void;
-  (e: 'restore-conversation', id: string): void;
-  (e: 'change-archive-page', direction: number): void;
   (e: 'refresh-conversations'): void;
   (e: 'open-settings'): void;
   (e: 'open-cloud-connection'): void;
@@ -180,7 +174,6 @@ async function restoreAccountMenuFocus(event: Event): Promise<void> {
   accountMenuTrigger.value?.focus({ preventScroll: true });
 }
 
-const showingArchive = ref(false);
 const searchOpen = ref(false);
 const searchQuery = ref('');
 const searchInput = ref<HTMLInputElement | null>(null);
@@ -194,14 +187,7 @@ const sidebarRoot = ref<HTMLElement | null>(null);
 
 const normalizedSearchQuery = computed(() => searchQuery.value.trim().toLocaleLowerCase());
 const filteredGroups = computed(() => {
-  const groups = showingArchive.value
-    ? [
-        {
-          labelKey: 'shell.conversation.archived',
-          items: props.archivedConversations ?? [],
-        },
-      ]
-    : props.groups;
+  const groups = props.groups;
   if (!normalizedSearchQuery.value) return groups;
   return groups
     .map((group) => ({
@@ -239,12 +225,11 @@ function archiveBlocked(id: string): boolean {
 }
 /** 行尾槽位的唯一主操作：活跃视图归档，归档视图恢复；被阻断时不出现，保留状态图标。 */
 function hasRowAction(id: string): boolean {
-  return showingArchive.value || !archiveBlocked(id);
+  return !archiveBlocked(id);
 }
 function runRowAction(id: string) {
   if (selection.state.busy) return;
-  if (showingArchive.value) emit('restore-conversation', id);
-  else if (!archiveBlocked(id)) emit('archive-conversation', id);
+  if (!archiveBlocked(id)) emit('archive-conversation', id);
 }
 function selectRow(id: string, event: MouseEvent) {
   if (selection.state.busy) return;
@@ -254,8 +239,7 @@ function selectRow(id: string, event: MouseEvent) {
     range: event.shiftKey,
   });
   if (!multi) {
-    if (showingArchive.value) emit('restore-conversation', id);
-    else emit('select-conversation', id);
+    emit('select-conversation', id);
   }
 }
 function openContext(id: string) {
@@ -280,7 +264,7 @@ function handleContextKey(event: KeyboardEvent, item: ConversationEntry) {
  * 单个会话时菜单不显示数量（T3 Code buildThreadActionMenuItems 同款），多选时显示。
  */
 function contextStatusAction() {
-  void emitBulk(showingArchive.value ? 'restore' : 'archive', [...contextIds.value]);
+  void emitBulk('archive', [...contextIds.value]);
 }
 function contextDeleteAction() {
   void emitBulk('delete', [...contextIds.value]);
@@ -288,9 +272,7 @@ function contextDeleteAction() {
 const contextStatusDisabled = computed(
   () =>
     selection.state.busy ||
-    (!showingArchive.value &&
-      contextIds.value.length === 1 &&
-      archiveBlocked(contextIds.value[0]!)),
+    (contextIds.value.length === 1 && archiveBlocked(contextIds.value[0]!)),
 );
 async function restoreContextFocus(event: Event) {
   if (editingId.value) {
@@ -467,26 +449,6 @@ const identityLabel = () => {
       </div>
       <button
         type="button"
-        data-testid="conversation-archive-toggle"
-        class="flex h-8 w-8 shrink-0 items-center justify-center rounded-md transition-colors hover:bg-[hsl(var(--hover))] hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-        :class="
-          showingArchive
-            ? 'bg-[hsl(var(--selected)/0.82)] text-foreground'
-            : 'text-[hsl(var(--foreground-subtle))]'
-        "
-        :aria-label="t('shell.conversation.archived')"
-        :title="t(showingArchive ? 'shell.conversation.active' : 'shell.conversation.archived')"
-        :aria-pressed="showingArchive"
-        @click="
-          showingArchive = !showingArchive;
-          exitSelection();
-          emit('refresh-conversations');
-        "
-      >
-        <Archive class="h-4 w-4" />
-      </button>
-      <button
-        type="button"
         data-testid="shell-new-conversation"
         class="flex h-8 w-8 shrink-0 items-center justify-center rounded-md text-[hsl(var(--foreground-subtle))] transition-colors hover:bg-[hsl(var(--hover))] hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
         :aria-label="t('shell.newChat')"
@@ -661,34 +623,17 @@ const identityLabel = () => {
                     <TooltipTrigger as-child>
                       <button
                         type="button"
-                        :data-testid="
-                          showingArchive ? 'conversation-restore' : 'conversation-archive'
-                        "
+                        data-testid="conversation-archive"
                         class="pointer-events-none absolute inset-0 flex h-6 w-6 items-center justify-center rounded-md text-[hsl(var(--foreground-subtle))] opacity-0 transition-opacity duration-150 hover:bg-[hsl(var(--hover))] hover:text-foreground focus-visible:pointer-events-auto focus-visible:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring group-any-hover/item:pointer-events-auto group-any-hover/item:opacity-100 group-has-[:focus-visible]/item:pointer-events-auto group-has-[:focus-visible]/item:opacity-100 disabled:opacity-40"
-                        :aria-label="
-                          t(
-                            showingArchive
-                              ? 'shell.conversation.restore'
-                              : 'shell.conversation.archive',
-                          )
-                        "
+                        :aria-label="t('shell.conversation.archive')"
                         :disabled="selection.state.busy"
                         @click.stop="runRowAction(item.id)"
                       >
-                        <component
-                          :is="showingArchive ? ArchiveRestore : Archive"
-                          class="h-3.5 w-3.5"
-                        />
+                        <component :is="Archive" class="h-3.5 w-3.5" />
                       </button>
                     </TooltipTrigger>
                     <TooltipContent side="right" class="text-xs">
-                      {{
-                        t(
-                          showingArchive
-                            ? 'shell.conversation.restore'
-                            : 'shell.conversation.archive',
-                        )
-                      }}
+                      {{ t('shell.conversation.archive') }}
                     </TooltipContent>
                   </Tooltip>
                 </TooltipProvider>
@@ -727,13 +672,8 @@ const identityLabel = () => {
               data-testid="conversation-context-status"
               @select="contextStatusAction"
             >
-              <component
-                :is="showingArchive ? ArchiveRestore : Archive"
-                class="mr-2 h-3.5 w-3.5"
-                aria-hidden="true"
-              />
-              {{
-                t(showingArchive ? 'shell.conversation.restore' : 'shell.conversation.archive')
+              <component :is="Archive" class="mr-2 h-3.5 w-3.5" aria-hidden="true" />
+              {{ t('shell.conversation.archive')
               }}<template v-if="contextIds.length > 1"> ({{ contextIds.length }})</template>
             </ContextMenuItem>
             <ContextMenuItem
@@ -748,25 +688,6 @@ const identityLabel = () => {
             </ContextMenuItem>
           </ContextMenuContent>
         </ContextMenu>
-      </div>
-      <div
-        v-if="showingArchive"
-        class="flex items-center justify-between gap-2 px-2 py-2 text-xs"
-      >
-        <button
-          type="button"
-          :disabled="(archivePage ?? 1) <= 1 || loading"
-          @click="emit('change-archive-page', -1)"
-        >
-          {{ t('shell.conversation.previousPage') }}
-        </button>
-        <button
-          type="button"
-          :disabled="!archiveHasMore || loading"
-          @click="emit('change-archive-page', 1)"
-        >
-          {{ t('shell.conversation.nextPage') }}
-        </button>
       </div>
     </nav>
 

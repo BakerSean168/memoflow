@@ -20,7 +20,16 @@
 import { DesktopProfileImportChannels } from '@memoflow/desktop-contracts';
 import { DESKTOP_BRIDGE_KEY } from '../../di/keys';
 import { toast } from 'vue-sonner';
-import { computed, inject, onBeforeUnmount, onMounted, provide, ref, shallowRef, watch } from 'vue';
+import {
+  computed,
+  inject,
+  onBeforeUnmount,
+  onMounted,
+  provide,
+  ref,
+  shallowRef,
+  watch,
+} from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import { storeToRefs } from 'pinia';
@@ -36,7 +45,11 @@ import { useShellRouterSync, AUTO_FOCUS_VIEWPORT, moduleForPath } from './useShe
 import { useDesktopWindowControls } from '../../shared/composables/useDesktopWindowControls';
 import { hasDesktopAuthApi } from '../../shared/utils/desktop-auth-recovery';
 import { useNotificationUnreadQuery } from '@memoflow/notification-ui';
-import { useAccountSignOut, useAccountStore, useAuthenticationStore } from '@memoflow/account-ui';
+import {
+  useAccountSignOut,
+  useAccountStore,
+  useAuthenticationStore,
+} from '@memoflow/account-ui';
 import {
   ConversationSelectionKey,
   createConversationSelectionStore,
@@ -227,7 +240,10 @@ const effectiveSidebarWidth = computed(() => {
     ? BUSINESS_HARD_MIN + (layout.value === 'split' ? AI_HARD_MIN : 0)
     : AI_HARD_MIN;
   const chrome = workspaceChromeBudget(effectiveViewportWidth.value);
-  const dynamicMax = Math.max(SIDEBAR_HARD_MIN, effectiveViewportWidth.value - reserved - chrome);
+  const dynamicMax = Math.max(
+    SIDEBAR_HARD_MIN,
+    effectiveViewportWidth.value - reserved - chrome,
+  );
   return Math.min(sidebarWidth.value, dynamicMax);
 });
 // ── AI 常驻层（单实例；会话侧栏数据经 defineExpose 上浮） ──
@@ -289,7 +305,9 @@ const conversations = computed<ConversationSummary[]>(
 
 function conversationTimestamp(item: ConversationSummary): number {
   const raw =
-    (item as { updatedAt?: unknown }).updatedAt ?? (item as { createdAt?: unknown }).createdAt ?? 0;
+    (item as { updatedAt?: unknown }).updatedAt ??
+    (item as { createdAt?: unknown }).createdAt ??
+    0;
   const value = Number(raw);
   return Number.isFinite(value) ? value : 0;
 }
@@ -423,7 +441,11 @@ const profileImportSource = ref<string>();
 watch(
   () => desktopAccess.value?.profile?.profileId,
   async (profileId) => {
-    if (!profileId || !desktopBridge || desktopAccess.value?.profile?.profileKind !== 'registered')
+    if (
+      !profileId ||
+      !desktopBridge ||
+      desktopAccess.value?.profile?.profileKind !== 'registered'
+    )
       return;
     try {
       const result = z
@@ -1048,7 +1070,9 @@ onBeforeUnmount(() => {
     <!-- 顶部窗口栏：工作区 launcher + 日程入口 + 窗控 -->
     <WindowHeader
       :mode="isSettingsScene ? 'settings' : 'workspace'"
-      :sidebar-collapsed="isSettingsScene ? !store.settingsNavigationOpen : headerSidebarCollapsed"
+      :sidebar-collapsed="
+        isSettingsScene ? !store.settingsNavigationOpen : headerSidebarCollapsed
+      "
       :right-panel-open="rightPanelOpen"
       :is-desktop="isDesktop"
       :is-mac="isMac"
@@ -1080,19 +1104,25 @@ onBeforeUnmount(() => {
       </template>
       <template #capsule-preview-routine="{ closePreview }">
         <RoutineCapsulePreview
-          @view-all="openHeaderPreviewModule(closePreview, { id: 'routine', route: '/routines' })"
+          @view-all="
+            openHeaderPreviewModule(closePreview, { id: 'routine', route: '/routines' })
+          "
           @select="openHeaderRoutinePreview(closePreview, $event)"
         />
       </template>
       <template #capsule-preview-note="{ closePreview }">
         <NoteCapsulePreview
-          @view-all="openHeaderPreviewModule(closePreview, { id: 'note', route: '/repository' })"
+          @view-all="
+            openHeaderPreviewModule(closePreview, { id: 'note', route: '/repository' })
+          "
           @select="openHeaderNotePreview(closePreview, $event)"
         />
       </template>
       <template #capsule-preview-schedule="{ closePreview }">
         <ScheduleCapsulePreview
-          @view-all="openHeaderPreviewModule(closePreview, { id: 'schedule', route: '/schedule' })"
+          @view-all="
+            openHeaderPreviewModule(closePreview, { id: 'schedule', route: '/schedule' })
+          "
           @select="openHeaderScheduleItem(closePreview, $event)"
         />
       </template>
@@ -1113,7 +1143,52 @@ onBeforeUnmount(() => {
          业务 default view 为空；WorkspaceSceneHost 用 v-show 常驻——KeepAlive 实例、
          AIChatView 流式回复、Teleport 宿主都不随设置导航销毁（Phase 0 / UI-001）。 -->
     <StandaloneSettingsLayout v-if="isSettingsScene" class="min-h-0 flex-1">
-      <router-view name="settings" />
+      <router-view name="settings" v-slot="{ Component }">
+        <component :is="Component">
+          <template #archived-conversations>
+            <section class="space-y-3" data-testid="settings-archived-conversations">
+              <h2 class="text-lg font-semibold">{{ t('shell.conversation.archived') }}</h2>
+              <p v-if="!archivedConversations.length" class="text-sm text-muted-foreground">
+                {{ t('aiAssistant.dialogs.chat.noSavedConversations') }}
+              </p>
+              <ul class="space-y-2">
+                <li
+                  v-for="item in archivedConversations"
+                  :key="item.id"
+                  class="flex items-center gap-3"
+                >
+                  <span class="min-w-0 flex-1 truncate">{{ item.title }}</span>
+                  <button
+                    type="button"
+                    class="rounded border px-3 py-1 text-sm focus-visible:ring-2 focus-visible:ring-ring"
+                    :disabled="aiRef?.conversationListLoading"
+                    data-testid="settings-restore-conversation"
+                    @click="handleRestoreConversation(item.id)"
+                  >
+                    {{ t('shell.conversation.restore') }}
+                  </button>
+                </li>
+              </ul>
+              <div class="flex justify-between text-sm">
+                <button
+                  type="button"
+                  :disabled="(aiRef?.archivePage ?? 1) <= 1 || aiRef?.conversationListLoading"
+                  @click="handleChangeArchivePage(-1)"
+                >
+                  {{ t('shell.conversation.previousPage') }}
+                </button>
+                <button
+                  type="button"
+                  :disabled="!aiRef?.archiveHasMore || aiRef?.conversationListLoading"
+                  @click="handleChangeArchivePage(1)"
+                >
+                  {{ t('shell.conversation.nextPage') }}
+                </button>
+              </div>
+            </section>
+          </template>
+        </component>
+      </router-view>
     </StandaloneSettingsLayout>
 
     <!-- 主工作区（STATE A/B/C）：Hybrid Workspace。
@@ -1133,7 +1208,9 @@ onBeforeUnmount(() => {
           :class="isSidebarResizing ? 'transition-none' : ''"
           :style="{ width: effectiveSidebarWidth + 'px' }"
           data-sidebar-presentation="docked"
-          :data-conversation-projection="aiRef?.conversationProjectionLive ? 'live' : 'calibrating'"
+          :data-conversation-projection="
+            aiRef?.conversationProjectionLive ? 'live' : 'calibrating'
+          "
           data-testid="shell-sidebar-pane-host"
         >
           <div
@@ -1143,16 +1220,11 @@ onBeforeUnmount(() => {
             <ConversationSidebar
               class="h-full w-full"
               :groups="conversationGroups"
-              :archived-conversations="archivedConversations"
-              :archive-page="aiRef?.archivePage ?? 1"
-              :archive-has-more="aiRef?.archiveHasMore ?? false"
               @rename-conversation="(id, name) => aiRef?.renameConversation(id, name)"
               @regenerate-title="(id) => aiRef?.regenerateConversationTitle(id)"
               :title-busy="aiRef?.titleBusy"
               :bulk-action="handleBulkConversationAction"
               @archive-conversation="handleArchiveConversation"
-              @restore-conversation="handleRestoreConversation"
-              @change-archive-page="handleChangeArchivePage"
               @refresh-conversations="aiRef?.loadConversationList()"
               :conversation-statuses="conversationStatuses"
               :profiles="desktopProfiles"
@@ -1317,7 +1389,9 @@ onBeforeUnmount(() => {
           maxWidth: 'calc(100vw - 48px)',
         }"
         data-sidebar-presentation="overlay"
-        :data-conversation-projection="aiRef?.conversationProjectionLive ? 'live' : 'calibrating'"
+        :data-conversation-projection="
+          aiRef?.conversationProjectionLive ? 'live' : 'calibrating'
+        "
         data-testid="shell-sidebar-pane-host"
       >
         <SheetTitle class="sr-only">{{ t('shell.conversation.navigation') }}</SheetTitle>
@@ -1331,16 +1405,11 @@ onBeforeUnmount(() => {
           <ConversationSidebar
             class="h-full w-full"
             :groups="conversationGroups"
-            :archived-conversations="archivedConversations"
-            :archive-page="aiRef?.archivePage ?? 1"
-            :archive-has-more="aiRef?.archiveHasMore ?? false"
             @rename-conversation="(id, name) => aiRef?.renameConversation(id, name)"
             @regenerate-title="(id) => aiRef?.regenerateConversationTitle(id)"
             :title-busy="aiRef?.titleBusy"
             :bulk-action="handleBulkConversationAction"
             @archive-conversation="handleArchiveConversation"
-            @restore-conversation="handleRestoreConversation"
-            @change-archive-page="handleChangeArchivePage"
             @refresh-conversations="aiRef?.loadConversationList()"
             :conversation-statuses="conversationStatuses"
             :profiles="desktopProfiles"
