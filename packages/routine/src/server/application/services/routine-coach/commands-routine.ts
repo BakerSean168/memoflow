@@ -1,6 +1,10 @@
 import { ProfileMembership, RoutineDefinition } from '../../../domain/routine';
 import type { RoutineCoachCommandPort } from '../routine-coach-command.service';
-import { routineConflict, routineNotFound, type RoutineCoachCommandContext } from './command-context';
+import {
+  routineConflict,
+  routineNotFound,
+  type RoutineCoachCommandContext,
+} from './command-context';
 
 export function createRoutineCommands(
   ctx: RoutineCoachCommandContext,
