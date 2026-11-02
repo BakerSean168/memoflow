@@ -67,6 +67,19 @@ describe('TaskOccurrenceGenerationService', () => {
     ).toEqual([]);
   });
 
+  it('materializes a one-time plan dated before now without a window cursor', () => {
+    const plan = aOneTimeTask({ startDate: Date.now() - DAY_MS });
+    const firstPass = service.generateOccurrences(plan, TASK_TEST_TIME_CONTEXT);
+
+    expect(firstPass).toHaveLength(1);
+    expect(firstPass[0].scheduleDate).toBe('2025-06-14');
+    expect(
+      service.generateOccurrences(plan, TASK_TEST_TIME_CONTEXT, {
+        existingOccurrences: firstPass,
+      }),
+    ).toEqual([]);
+  });
+
   it('caps materialization by the finite recurrence count', () => {
     const plan = aLoadedTaskPlan({
       schedule: canonicalTaskPlanScheduleForTest(
