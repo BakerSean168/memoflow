@@ -470,6 +470,8 @@ try {
     manualRelaunchCount = $manualRelaunchCount
     identityResetCompletedBeforeUpdate = $identityResetBefore
     identityResetCompletedAfterUpdate = (Test-Path -LiteralPath $identityResetMarker)
+    identityResetVersionAfterUpdate = (Get-Content -LiteralPath $identityResetMarker -Raw | ConvertFrom-Json).version
+    profileRegistryAfterUpdate = (Get-Content -LiteralPath $registryPath -Raw | ConvertFrom-Json)
     profileRegistrySemanticSha256Before = $registryBefore
     profileRegistrySemanticSha256After = $registryAfter
     preservationSentinelSha256Before = $sentinelBefore
