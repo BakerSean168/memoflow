@@ -452,8 +452,7 @@ export class WindowManager {
     // must return to the session window, so it is hidden but kept — together with
     // its running scheduler. The lock/sign-out transitions still tear the session
     // down and keep the existing quit-on-close behavior.
-    const preserveActiveSession =
-      view === 'login' && !targetProfileId && this.hasActiveSession();
+    const preserveActiveSession = view === 'login' && !targetProfileId && this.hasActiveSession();
 
     try {
       this.mainWindow?.hide();
@@ -511,7 +510,6 @@ export class WindowManager {
     return this.profileAccessWindow || this.mainWindow;
   }
 
-
   focusMainWindow(): boolean {
     if (!this.canNavigateToMainWindow() || !this.mainWindow) {
       return false;
@@ -532,12 +530,11 @@ export class WindowManager {
   private hasActiveSession(): boolean {
     return Boolean(
       this.mainWindow &&
-        !this.mainWindow.isDestroyed() &&
-        this.activeMainProfileId !== null &&
-        this.runtimeManager?.getActiveProfileId() === this.activeMainProfileId,
+      !this.mainWindow.isDestroyed() &&
+      this.activeMainProfileId !== null &&
+      this.runtimeManager?.getActiveProfileId() === this.activeMainProfileId,
     );
   }
-
 
   /**
    * 加载窗口内容
