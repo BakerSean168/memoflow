@@ -1,6 +1,6 @@
 import { expect, test, type Locator } from '@playwright/test';
 import { matrix, validateMatrix } from './manifest.mjs';
-import { openVisualCase, waitForVisualLayout } from './environment';
+import { openVisualCase, waitForChatBodyToSettle, waitForVisualLayout } from './environment';
 validateMatrix(matrix);
 
 // #459 acceptance exercises production owners with deterministic injected ports.
@@ -444,6 +444,8 @@ for (const host of ['web', 'desktop'] as const) {
         }
       }
       await waitForVisualLayout(page);
+      // #783: the AI-native body owns a smooth auto-scroll that can rest 41px above the bottom.
+      if (entry.surface === 'specialized.ai-native') await waitForChatBodyToSettle(page);
       expect(errors).toEqual([]);
       expect(externalRequests).toEqual([]);
       await expect(page).toHaveScreenshot(`${entry.id}.png`);
