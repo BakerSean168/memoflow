@@ -5,9 +5,18 @@ import { z } from 'zod';
 import type { ProfileSummary } from '@memoflow/desktop-contracts';
 import { DESKTOP_BRIDGE_KEY } from '../../di/keys';
 import { translateResultError } from '../utils/translate-result-error';
-import { useDesktopProfileCatalog, type DesktopProfileCatalogCross } from './useDesktopProfileCatalog';
-import { useDesktopProfileCloudSignIn, type DesktopProfileCloudSignInCross } from './useDesktopProfileCloudSignIn';
-import { useDesktopProfileRegistration, type DesktopProfileRegistrationCross } from './useDesktopProfileRegistration';
+import {
+  useDesktopProfileCatalog,
+  type DesktopProfileCatalogCross,
+} from './useDesktopProfileCatalog';
+import {
+  useDesktopProfileCloudSignIn,
+  type DesktopProfileCloudSignInCross,
+} from './useDesktopProfileCloudSignIn';
+import {
+  useDesktopProfileRegistration,
+  type DesktopProfileRegistrationCross,
+} from './useDesktopProfileRegistration';
 import { useDesktopProfileUnlock, type DesktopProfileUnlockCross } from './useDesktopProfileUnlock';
 
 /**

@@ -44,8 +44,18 @@ export function useDesktopProfileCatalog(
   ctx: DesktopProfilesSharedContext,
   cross: DesktopProfileCatalogCross,
 ) {
-  const { t, options, invoke, invokeScoped, profiles, busyProfileId, selectedProfileId, accessView, password, remember } =
-    ctx;
+  const {
+    t,
+    options,
+    invoke,
+    invokeScoped,
+    profiles,
+    busyProfileId,
+    selectedProfileId,
+    accessView,
+    password,
+    remember,
+  } = ctx;
   const snapshot = ref<z.infer<typeof snapshotSchema> | null>(null);
   const newName = ref('');
   const newPassword = ref('');

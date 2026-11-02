@@ -13,10 +13,7 @@ import type { DesktopProfilesSharedContext, DesktopRegisterMode } from './useDes
 export interface DesktopProfileRegistrationCross {
   enterOpenedProfile: () => Promise<boolean>;
   refreshProfiles: () => Promise<void>;
-  selectAndEnter: (
-    profile: ProfileSummary,
-    credentials: { password?: string },
-  ) => Promise<boolean>;
+  selectAndEnter: (profile: ProfileSummary, credentials: { password?: string }) => Promise<boolean>;
 }
 
 /** Registration: one form shape, two backends (cloud / local account). */

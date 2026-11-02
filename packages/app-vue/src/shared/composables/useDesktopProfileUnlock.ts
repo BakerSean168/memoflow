@@ -5,10 +5,7 @@ import type { DesktopProfilesSharedContext } from './useDesktopProfiles';
 
 /** Catalog actions the local Profile unlock composable calls into. */
 export interface DesktopProfileUnlockCross {
-  selectAndEnter: (
-    profile: ProfileSummary,
-    credentials: { password?: string },
-  ) => Promise<boolean>;
+  selectAndEnter: (profile: ProfileSummary, credentials: { password?: string }) => Promise<boolean>;
 }
 
 /** Local Profile unlock: the per-tile password state of the access window. */
