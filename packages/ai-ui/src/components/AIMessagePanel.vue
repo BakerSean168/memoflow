@@ -275,7 +275,7 @@
       </template>
 
       <!-- Welcome / idle (no messages): content sits directly on the canvas, not in a dashboard card. -->
-      <div v-else class="flex min-h-[27rem] flex-col items-center justify-center py-10">
+      <div v-else class="flex min-h-0 flex-col items-center justify-center py-6">
         <div class="w-full max-w-xl text-center" data-testid="ai-welcome-state">
           <div
             class="mx-auto flex h-10 w-10 items-center justify-center rounded-xl bg-[hsl(var(--surface-raised)/0.72)] text-[hsl(var(--foreground-muted))]"
