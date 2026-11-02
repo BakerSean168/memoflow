@@ -162,7 +162,9 @@ describe('ConversationSidebar attention', () => {
       .find((item) => item.text() === 'Personal systems architecture');
     expect(firstRow?.classes()).toContain('pr-9');
     expect(firstRow?.find('span').classes()).toContain('truncate');
-    const normalRow = wrapper.findAll('nav button').find((item) => item.text() === 'Training plan');
+    const normalRow = wrapper
+      .findAll('nav button')
+      .find((item) => item.text() === 'Training plan');
     expect(normalRow?.classes()).toContain('pr-9');
     await icons[0]!.trigger('click');
     expect(wrapper.emitted('select-conversation')).toEqual([['a']]);
@@ -248,7 +250,9 @@ describe('ConversationSidebar mouse and batch selection', () => {
     expect(row('b').attributes('aria-selected')).toBe('false');
     await wrapper.get('[data-testid="conversation-search-toggle"]').trigger('click');
     await wrapper.get('[data-testid="conversation-search-input"]').setValue('Infrastructure');
-    expect(wrapper.get('[data-testid="conversation-selection-count"]').text()).toBe('1 selected');
+    expect(wrapper.get('[data-testid="conversation-selection-count"]').text()).toBe(
+      '1 selected',
+    );
     await wrapper.setProps({ activeProfileId: 'two' });
     expect(row('c').attributes('aria-selected')).toBe('false');
     wrapper.unmount();
@@ -280,6 +284,37 @@ describe('ConversationSidebar mouse and batch selection', () => {
       wrapper.unmount();
     }
   });
+  it.each([['a'], ['a', 'b']])(
+    'removes deleted rows without persistent success residue (%j)',
+    async (...ids) => {
+      const bulkAction = vi.fn(async (_action: string, selected: string[]) => {
+        await wrapper.setProps({
+          groups: groups.map((group) => ({
+            ...group,
+            items: group.items.filter((item) => !selected.includes(item.id)),
+          })),
+        });
+        return selected.map((id) => ({ id, success: true }));
+      });
+      const wrapper = mount(ConversationSidebar, {
+        attachTo: document.body,
+        props: { groups, activeConversationId: null, bulkAction },
+        global: { plugins: [i18n] },
+      });
+      try {
+        for (const id of ids)
+          await wrapper.get(`[data-keyboard-item="${id}"]`).trigger('click', { ctrlKey: true });
+        await openRowMenu(wrapper, ids[0]!);
+        await selectMenuItem('conversation-context-delete');
+        expect(bulkAction).toHaveBeenCalledWith('delete', ids);
+        for (const id of ids)
+          expect(wrapper.find(`[data-keyboard-item="${id}"]`).exists()).toBe(false);
+        expect(wrapper.find('[data-testid="conversation-bulk-results"]').exists()).toBe(false);
+      } finally {
+        wrapper.unmount();
+      }
+    },
+  );
   it('reports each result, retains failed selection, and ignores stale Profile completions', async () => {
     let finish!: (value: { id: string; success: boolean }[]) => void;
     const bulkAction = vi.fn(
@@ -290,7 +325,12 @@ describe('ConversationSidebar mouse and batch selection', () => {
     );
     const wrapper = mount(ConversationSidebar, {
       attachTo: document.body,
-      props: { groups, activeConversationId: null, activeProfileId: 'one', bulkAction },
+      props: {
+        groups,
+        activeConversationId: null,
+        activeProfileId: 'one',
+        bulkAction,
+      },
       global: { plugins: [i18n] },
     });
     await wrapper.get('[data-keyboard-item="a"]').trigger('click', { ctrlKey: true });
@@ -309,8 +349,12 @@ describe('ConversationSidebar mouse and batch selection', () => {
       { id: 'c', success: true },
     ]);
     await flushPromises();
-    expect(wrapper.get('[data-testid="conversation-selection-count"]').text()).toBe('1 selected');
-    expect(wrapper.get('[data-testid="conversation-bulk-results"]').findAll('li')).toHaveLength(3);
+    expect(wrapper.get('[data-testid="conversation-selection-count"]').text()).toBe(
+      '1 selected',
+    );
+    expect(wrapper.get('[data-testid="conversation-bulk-results"]').findAll('li')).toHaveLength(
+      3,
+    );
     await document.body.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }));
     await flushPromises();
     await openRowMenu(wrapper, 'b');
@@ -339,7 +383,9 @@ describe('ConversationSidebar compact toolbar', () => {
       expect(wrapper.find('input[type="checkbox"]').exists()).toBe(false);
       await wrapper.get('[data-keyboard-item="a"]').trigger('click', { metaKey: true });
       await wrapper.get('[data-keyboard-item="c"]').trigger('click', { shiftKey: true });
-      expect(wrapper.get('[data-testid="conversation-selection-count"]').text()).toBe('3 selected');
+      expect(wrapper.get('[data-testid="conversation-selection-count"]').text()).toBe(
+        '3 selected',
+      );
       expect(wrapper.emitted('select-conversation')).toBeUndefined();
       await openRowMenu(wrapper, 'a');
       expect(menuItem('conversation-context-rename')).toBeNull();
@@ -347,7 +393,9 @@ describe('ConversationSidebar compact toolbar', () => {
       await selectMenuItem('conversation-context-status');
       expect(bulkAction).toHaveBeenCalledWith('archive', ['a', 'b', 'c']);
       expect(wrapper.findAll('[aria-selected="true"]')).toHaveLength(0);
-      expect(wrapper.find('[data-testid="conversation-selection-toolbar"]').exists()).toBe(false);
+      expect(wrapper.find('[data-testid="conversation-selection-toolbar"]').exists()).toBe(
+        false,
+      );
     } finally {
       wrapper.unmount();
     }
@@ -382,10 +430,17 @@ describe('ConversationSidebar account menu', () => {
   async function openMenu(props = {}) {
     const wrapper = mount(ConversationSidebar, {
       attachTo: document.body,
-      props: { groups: [], activeConversationId: null, userName: 'Alice', ...props },
+      props: {
+        groups: [],
+        activeConversationId: null,
+        userName: 'Alice',
+        ...props,
+      },
       global: { plugins: [i18n] },
     });
-    await wrapper.get('[data-testid="shell-account-menu"]').trigger('keydown', { key: 'Enter' });
+    await wrapper
+      .get('[data-testid="shell-account-menu"]')
+      .trigger('keydown', { key: 'Enter' });
     await flushPromises();
     return wrapper;
   }
@@ -402,7 +457,11 @@ describe('ConversationSidebar account menu', () => {
   ] as const)(
     'shows the conditional action for %s and hides desktop actions on web',
     async (identityKind, cloudConnected, action, label) => {
-      const wrapper = await openMenu({ identityKind, cloudConnected, isDesktop: false });
+      const wrapper = await openMenu({
+        identityKind,
+        cloudConnected,
+        isDesktop: false,
+      });
       try {
         expect(item('shell-account-identity').textContent?.match(/Alice/g)).toHaveLength(1);
         expect(item('shell-open-settings')).toBeTruthy();
@@ -431,7 +490,11 @@ describe('ConversationSidebar account menu', () => {
       remembered: false,
       lastActiveAt: index,
     }));
-    const wrapper = await openMenu({ isDesktop: true, profiles, activeProfileId: 'id-2' });
+    const wrapper = await openMenu({
+      isDesktop: true,
+      profiles,
+      activeProfileId: 'id-2',
+    });
     try {
       item('shell-switch-account').focus();
       item('shell-switch-account').dispatchEvent(

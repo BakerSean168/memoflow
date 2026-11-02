@@ -314,7 +314,10 @@ async function restoreContextFocus(event: Event) {
   ].find((item) => item.dataset.keyboardItem === id);
   row?.focus({ preventScroll: true });
 }
-async function emitBulk(action: 'archive' | 'restore' | 'delete', ids = [...selectedIds.value]) {
+async function emitBulk(
+  action: 'archive' | 'restore' | 'delete',
+  ids = [...selectedIds.value],
+) {
   if (!ids.length || selection.state.busy) return;
   contextOpen.value = false;
   if (!props.bulkAction) return;
@@ -326,11 +329,14 @@ async function emitBulk(action: 'archive' | 'restore' | 'delete', ids = [...sele
   try {
     const results = await props.bulkAction(action, ids);
     if (!selection.isOperationCurrent(operation)) return;
-    selection.state.results = results.map((result) => ({
-      ...result,
-      title: titles.get(result.id) ?? result.id,
-      action,
-    }));
+    // A deleted conversation must not survive as a persistent success summary.
+    selection.state.results = results
+      .filter((result) => action !== 'delete' || !result.success)
+      .map((result) => ({
+        ...result,
+        title: titles.get(result.id) ?? result.id,
+        action,
+      }));
     selection.complete(results.filter((item) => item.success).map((item) => item.id));
     for (const item of results.filter((item) => !item.success)) {
       if (visibleIds.value.includes(item.id) && !selection.isSelected(item.id))
@@ -410,7 +416,10 @@ const identityLabel = () => {
     @keydown.escape="exitSelection"
   >
     <!-- 搜索与新会话保持同一工具行，搜索展开时高度不变 -->
-    <div class="flex h-11 shrink-0 items-center gap-1.5 px-2" data-testid="conversation-toolbar">
+    <div
+      class="flex h-11 shrink-0 items-center gap-1.5 px-2"
+      data-testid="conversation-toolbar"
+    >
       <div
         class="flex h-8 min-w-0 flex-1 items-center rounded-md bg-[hsl(var(--surface-raised)/0.35)] transition-colors hover:bg-[hsl(var(--hover))]"
         data-testid="conversation-search"
@@ -490,7 +499,9 @@ const identityLabel = () => {
 
     <!-- 多选没有常驻工具栏（T3 Code 同款）：数量只给读屏播报，操作在右键菜单里。 -->
     <span class="sr-only" aria-live="polite" data-testid="conversation-selection-count">{{
-      selectedIds.length ? t('shell.conversation.selectedCount', { count: selectedIds.length }) : ''
+      selectedIds.length
+        ? t('shell.conversation.selectedCount', { count: selectedIds.length })
+        : ''
     }}</span>
     <ul
       v-if="selection.state.results.length"
@@ -527,7 +538,10 @@ const identityLabel = () => {
         }
       "
     >
-      <p v-if="loading && groups.length === 0" class="px-3 py-2 text-xs text-muted-foreground/60">
+      <p
+        v-if="loading && groups.length === 0"
+        class="px-3 py-2 text-xs text-muted-foreground/60"
+      >
         {{ t('common.loading') }}
       </p>
       <p
@@ -718,7 +732,8 @@ const identityLabel = () => {
                 class="mr-2 h-3.5 w-3.5"
                 aria-hidden="true"
               />
-              {{ t(showingArchive ? 'shell.conversation.restore' : 'shell.conversation.archive')
+              {{
+                t(showingArchive ? 'shell.conversation.restore' : 'shell.conversation.archive')
               }}<template v-if="contextIds.length > 1"> ({{ contextIds.length }})</template>
             </ContextMenuItem>
             <ContextMenuItem
@@ -734,7 +749,10 @@ const identityLabel = () => {
           </ContextMenuContent>
         </ContextMenu>
       </div>
-      <div v-if="showingArchive" class="flex items-center justify-between gap-2 px-2 py-2 text-xs">
+      <div
+        v-if="showingArchive"
+        class="flex items-center justify-between gap-2 px-2 py-2 text-xs"
+      >
         <button
           type="button"
           :disabled="(archivePage ?? 1) <= 1 || loading"
@@ -753,7 +771,9 @@ const identityLabel = () => {
     </nav>
 
     <!-- 底：账户菜单 -->
-    <div class="flex h-11 shrink-0 items-center border-t border-[hsl(var(--border-subtle))] px-2.5">
+    <div
+      class="flex h-11 shrink-0 items-center border-t border-[hsl(var(--border-subtle))] px-2.5"
+    >
       <DropdownMenu
         @update:open="
           (open) => {
@@ -814,7 +834,10 @@ const identityLabel = () => {
               :collision-padding="8"
               :avoid-collisions="true"
             >
-              <div class="max-h-[min(60vh,24rem)] overflow-y-auto" data-testid="shell-profile-list">
+              <div
+                class="max-h-[min(60vh,24rem)] overflow-y-auto"
+                data-testid="shell-profile-list"
+              >
                 <DropdownMenuItem
                   v-for="profile in orderedProfiles"
                   :key="profile.profileId"
