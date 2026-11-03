@@ -1244,6 +1244,7 @@ describe('conversation deletion confirmation', () => {
       expect.anything(),
       expect.any(Function),
       expect.any(Function),
+      false,
     );
     expect(nativeConfirm).not.toHaveBeenCalled();
   });
@@ -1264,6 +1265,14 @@ describe('conversation deletion confirmation', () => {
       { id: 'b', success: false },
     ]);
     expect(fixture.session.deleteConversation).toHaveBeenCalledTimes(2);
+    // 批量删除静默逐条提示，结果由侧栏汇总（#831）。
+    expect(fixture.session.deleteConversation).toHaveBeenCalledWith(
+      'b',
+      expect.anything(),
+      expect.any(Function),
+      expect.any(Function),
+      true,
+    );
     expect(nativeConfirm).not.toHaveBeenCalled();
   });
 });

@@ -303,8 +303,9 @@ describe('ConversationSidebar mouse and batch selection', () => {
     }
   });
   it.each([{ ids: ['a'] }, { ids: ['a', 'b'] }])(
-    'removes deleted rows without persistent success residue ($ids)',
+    'removes deleted rows and reports success only as a transient toast ($ids)',
     async ({ ids }) => {
+      const toaster = mount(Toaster, { attachTo: document.body });
       const bulkAction = vi.fn(async (_action: string, selected: string[]) => {
         await wrapper.setProps({
           groups: groups.map((group) => ({
@@ -328,8 +329,11 @@ describe('ConversationSidebar mouse and batch selection', () => {
         for (const id of ids)
           expect(wrapper.find(`[data-keyboard-item="${id}"]`).exists()).toBe(false);
         expect(wrapper.find('[data-testid="conversation-bulk-results"]').exists()).toBe(false);
+        await settleToast();
+        expect(toastElement('success')?.textContent).toContain(`Delete completed · ${ids.length}`);
       } finally {
         wrapper.unmount();
+        toaster.unmount();
       }
     },
   );
@@ -434,9 +438,10 @@ describe('ConversationSidebar mouse and batch selection', () => {
       // 真重试：同一动作、同一批失败 ids 再次执行。
       expect(bulkAction).toHaveBeenCalledTimes(2);
       expect(bulkAction).toHaveBeenLastCalledWith('archive', ['a', 'b', 'c']);
-      // 点击后旧提示进入退场（jsdom 不跑动画，只能断言已标记移除并让位给成功提示）。
+      // 点击后旧提示进入退场（jsdom 不跑动画，只能断言已标记移除）。
       expect(toastElement('error')?.getAttribute('data-removed')).toBe('true');
-      expect(toastElement('success')?.textContent).toContain('Archive completed · 3');
+      // 归档成功由会话层带 Undo 的既有 toast 负责，侧栏不再叠一条重复成功提示。
+      expect(toastElement('success')).toBeNull();
       expect(wrapper.find('[data-testid="conversation-bulk-results"]').exists()).toBe(false);
     } finally {
       wrapper.unmount();

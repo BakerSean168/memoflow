@@ -17,7 +17,7 @@
  *   handleMultiSelectContextMenu 与 threadSelectionStore.ts。
  */
 import { vKeyboardList } from '../../shared/keyboard/list-adapter';
-import { computed, inject, nextTick, ref, watch } from 'vue';
+import { computed, inject, nextTick, onUnmounted, ref, watch } from 'vue';
 import {
   ConversationSelectionKey,
   createConversationSelectionStore,
@@ -130,6 +130,11 @@ const emit = defineEmits<{
 }>();
 
 const { t } = useI18n();
+/** 卸载后的迟到结果不再弹出提示（切换 Profile 会让旧侧栏实例的批量操作过期）。 */
+const sidebarAlive = ref(true);
+onUnmounted(() => {
+  sidebarAlive.value = false;
+});
 const editingId = ref<string | null>(null);
 const titleDraft = ref('');
 const titleInput = ref<HTMLInputElement | null>(null);
@@ -355,7 +360,7 @@ async function emitBulk(action: BulkAction, ids = [...selectedIds.value]) {
   );
   try {
     const results = await props.bulkAction(action, ids);
-    if (!selection.isOperationCurrent(operation)) return;
+    if (!sidebarAlive.value || !selection.isOperationCurrent(operation)) return;
     // 仅作内部记录，不再驱动列表流内的任何渲染。
     selection.state.results = results.map((result) => ({
       ...result,
@@ -369,10 +374,11 @@ async function emitBulk(action: BulkAction, ids = [...selectedIds.value]) {
       if (visibleIds.value.includes(id) && !selection.isSelected(id)) selection.toggle(id);
     }
     // 取消的危险删除返回空结果：既没有成功也没有失败，不给任何提示。
-    if (succeeded.length) showBulkSuccess(action, succeeded.length);
+    // 归档成功沿用会话层带 Undo 的那条 toast，避免同一次批量操作出现两条成功提示。
+    if (succeeded.length && action !== 'archive') showBulkSuccess(action, succeeded.length);
     if (failed.length) showBulkFailure(action, failed);
   } catch {
-    if (selection.isOperationCurrent(operation)) {
+    if (sidebarAlive.value && selection.isOperationCurrent(operation)) {
       selection.state.results = ids.map((id) => ({
         id,
         title: titles.get(id) ?? id,

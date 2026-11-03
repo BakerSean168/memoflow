@@ -68,11 +68,14 @@ test('partial failures remain selected, rapid actions serialize, and Ctrl+Z only
     0,
   );
   const failureToast = page.locator('[data-sonner-toast][data-type="error"]');
+  // 逐条失败提示已由侧栏汇总成一条，带真重试，不再刷多条。
+  await expect(failureToast).toHaveCount(1);
   await expect(failureToast).toContainText('Archive failed · 1');
   await expect(failureToast.locator('[data-button][data-action]')).toHaveText('Retry');
-  await expect(
-    page.locator('[data-sonner-toast][data-type="success"]'),
-  ).toContainText('Archive completed · 3');
+  // 归档成功沿用会话层带 Undo 的既有 toast，同一次操作不叠第二条成功提示。
+  const successToast = page.locator('[data-sonner-toast][data-type="success"]');
+  await expect(successToast).toHaveCount(1);
+  await expect(successToast).toContainText('Conversation archived');
   // 浮层不占流：提示出现时列表容器位置不变（若仍是流内结果行，nav 会被顶下去）。
   expect((await nav.boundingBox())!.y).toBe(navBoxBefore.y);
   await expect(page.getByTestId('conversation-selection-count')).toHaveText('1 selected');
@@ -114,8 +117,10 @@ test('Profile switch drops old batch feedback and prevents subsequent writes and
   await expect(page.locator('[aria-selected="true"]')).toHaveCount(0);
   await page.getByTestId('release-write').click();
   await expect(page.getByTestId('settled')).toHaveText('1');
-  // 过期 Profile 的完成结果既不渲染行，也不产生提示。
-  await expect(page.locator('[data-sonner-toast]')).toHaveCount(0);
+  // 过期 Profile 的完成结果既不渲染行，也不产生侧栏的批量结果提示。
+  await expect(
+    page.locator('[data-sonner-toast]').filter({ hasText: /Archive (completed|failed)/ }),
+  ).toHaveCount(0);
   await page.keyboard.press('Control+z');
   await expect(page.getByTestId('calls')).toHaveText('b:Archived');
 });
@@ -138,7 +143,7 @@ test('narrow sidebar preserves search, blank clearing, archive bulk result and s
   await page.getByTestId('conversation-context-status').click();
   await expect(page.getByTestId('conversation-bulk-results')).toHaveCount(0);
   await expect(page.locator('[data-sonner-toast][data-type="success"]')).toContainText(
-    'Archive completed · 1',
+    'Conversation archived',
   );
   await expect(page.getByRole('listbox')).not.toHaveAttribute('aria-busy', 'true');
   // 归档后会话离开侧栏（归档列表与恢复入口在「设置 → AI」，不属本侧栏夹具），
