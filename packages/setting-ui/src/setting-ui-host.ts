@@ -173,7 +173,10 @@ export interface SettingAiFacade {
     providerId: string,
     request: CommitAIProviderReplacementReq,
   ): Promise<AIProviderConfigClientDTO>;
-  refreshProviderModels(providerId: string): Promise<AIProviderModelCatalogSnapshot>;
+  refreshProviderModels(
+    providerId: string,
+    force?: boolean,
+  ): Promise<AIProviderModelCatalogSnapshot>;
 }
 
 /** Desktop bridge surface used by the ACP / import-export flows. */

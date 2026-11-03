@@ -80,6 +80,7 @@ export interface AIProviderManagementPort {
   refreshProviderModels(
     providerId: string,
     cx: ExecutionContext,
+    force?: boolean,
   ): Promise<Result<AIProviderModelCatalogSnapshot>>;
 }
 
