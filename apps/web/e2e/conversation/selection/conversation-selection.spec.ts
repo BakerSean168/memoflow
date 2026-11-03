@@ -64,9 +64,9 @@ test('partial failures remain selected, rapid actions serialize, and Ctrl+Z only
   await expect(page.getByTestId('conversation-bulk-results')).toHaveCount(0);
   const toaster = page.locator('[data-sonner-toaster]');
   await expect(toaster).toHaveCSS('position', 'fixed');
-  await expect(page.getByTestId('conversation-sidebar').locator('[data-sonner-toaster]')).toHaveCount(
-    0,
-  );
+  await expect(
+    page.getByTestId('conversation-sidebar').locator('[data-sonner-toaster]'),
+  ).toHaveCount(0);
   const failureToast = page.locator('[data-sonner-toast][data-type="error"]');
   // 逐条失败提示已由侧栏汇总成一条，带真重试，不再刷多条。
   await expect(failureToast).toHaveCount(1);

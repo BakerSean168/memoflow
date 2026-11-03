@@ -685,7 +685,8 @@ export function useConversationProjection(input: {
     } catch (error) {
       if (!alive) return false;
       upsertConversation(before);
-      if (!silent) toast.error(getAIErrorMessage(error, t, 'aiAssistant.dialogs.chat.archiveFailed'));
+      if (!silent)
+        toast.error(getAIErrorMessage(error, t, 'aiAssistant.dialogs.chat.archiveFailed'));
       return false;
     } finally {
       statusMutations.delete(id);
@@ -729,7 +730,8 @@ export function useConversationProjection(input: {
       if (!silent) toast.success(t('aiAssistant.dialogs.chat.deleted'));
       return true;
     } catch (error) {
-      if (!silent) toast.error(getAIErrorMessage(error, t, 'aiAssistant.dialogs.chat.deleteFailed'));
+      if (!silent)
+        toast.error(getAIErrorMessage(error, t, 'aiAssistant.dialogs.chat.deleteFailed'));
       return false;
     }
   }

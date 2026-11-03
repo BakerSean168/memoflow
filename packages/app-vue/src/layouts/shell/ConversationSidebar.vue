@@ -85,10 +85,7 @@ export interface ArchivedConversationEntry extends ConversationEntry {
 }
 
 const props = defineProps<{
-  bulkAction?: (
-    action: BulkAction,
-    ids: string[],
-  ) => Promise<{ id: string; success: boolean }[]>;
+  bulkAction?: (action: BulkAction, ids: string[]) => Promise<{ id: string; success: boolean }[]>;
   profiles?: ProfileSummary[];
   activeProfileId?: string;
   cloudState?: ProfileCloudState;

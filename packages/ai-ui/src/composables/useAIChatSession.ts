@@ -200,10 +200,7 @@ export function useAIChatSession(options: UseAIChatSessionOptions) {
       if (!silent) toast.error(t('aiAssistant.dialogs.chat.archiveBlocked'));
       return false;
     }
-    if (
-      !(await conversation.setConversationStatus(id, 'Archived', silent)) ||
-      !sessionAlive
-    )
+    if (!(await conversation.setConversationStatus(id, 'Archived', silent)) || !sessionAlive)
       return false;
     // The user may have typed or started a turn while persistence was in flight.
     if (
