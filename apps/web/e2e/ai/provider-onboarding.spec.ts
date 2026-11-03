@@ -407,7 +407,7 @@ test('[P0] T3 Agent wizard and inline Endpoint/Key configure the persistent comp
     await page.getByTestId('ai-chat-model-selector').click();
     const picker = page.getByTestId('ai-model-picker');
     await expect(picker).toBeVisible();
-    // Width alone can pass during zoom-in: the picker now uses 35rem, not
+    // Width alone can pass during the opening scale: the picker now uses 37.25rem, not
     // 360px. Capture the box that passes both dimensions with no transform.
     const measureSettledPicker = async () => {
       const sample = () =>
