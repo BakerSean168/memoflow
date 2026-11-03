@@ -38,6 +38,7 @@ const i18n = createI18n({
           noMatches: 'No matching conversations',
           clearSearch: 'Clear conversation search',
           archived: 'Archived',
+          noArchivedConversations: 'No archived conversations yet',
           active: 'Active',
           archive: 'Archive',
           restore: 'Restore',
@@ -593,6 +594,107 @@ describe('conversation title editing', () => {
     expect(wrapper.emitted('rename-conversation')).toHaveLength(1);
     expect(wrapper.find('[role="status"]').exists()).toBe(true);
     wrapper.unmount();
+  });
+});
+
+describe('ConversationSidebar archived partition', () => {
+  const archived = [{ id: 'z', title: 'Old architecture notes', time: '2 days ago' }];
+
+  it('shows archived conversations in their own collapsed partition and restores them', async () => {
+    const wrapper = mount(ConversationSidebar, {
+      props: { groups, activeConversationId: 'b', archivedConversations: archived },
+      global: { plugins: [i18n] },
+    });
+    try {
+      const section = wrapper.get('[data-testid="conversation-archived-section"]');
+      expect(section.text()).toContain('Archived');
+      expect(section.get('[data-testid="conversation-archived-count"]').text()).toBe('1');
+      const toggle = section.get('[data-testid="conversation-archived-toggle"]');
+      expect(toggle.attributes('aria-expanded')).toBe('false');
+      expect(toggle.attributes('aria-controls')).toBe('conversation-archived-list');
+      expect(wrapper.find('[data-testid="archived-conversation-row"]').exists()).toBe(false);
+
+      await toggle.trigger('click');
+      expect(toggle.attributes('aria-expanded')).toBe('true');
+      const row = wrapper.get('[data-testid="archived-conversation-row"]');
+      expect(row.text()).toContain('Old architecture notes');
+      expect(row.get('[data-testid="archived-conversation-time"]').text()).toBe('2 days ago');
+      // 归档行不属于主列表的选择集合，恢复是唯一入口。
+      expect(row.find('[role="option"]').exists()).toBe(false);
+
+      await row.get('[data-testid="archived-conversation-restore"]').trigger('click');
+      expect(wrapper.emitted('restore-conversation')).toEqual([['z']]);
+      expect(wrapper.emitted('select-conversation')).toBeUndefined();
+
+      // 父级恢复后：分区消失，会话回到普通列表分组。
+      await wrapper.setProps({
+        archivedConversations: [],
+        groups: [
+          ...groups,
+          {
+            labelKey: 'shell.conversation.earlier',
+            items: [{ id: 'z', title: 'Old architecture notes' }],
+          },
+        ],
+      });
+      expect(wrapper.find('[data-testid="archived-conversation-row"]').exists()).toBe(false);
+      expect(wrapper.get('[data-testid="conversation-archived-count"]').text()).toBe('0');
+      expect(wrapper.find('[data-keyboard-item="z"]').exists()).toBe(true);
+      expect(wrapper.find('[data-testid="conversation-archive-toggle"]').exists()).toBe(false);
+    } finally {
+      wrapper.unmount();
+    }
+  });
+
+  it('keeps the partition with an empty state when nothing is archived', async () => {
+    const wrapper = mount(ConversationSidebar, {
+      props: { groups, activeConversationId: null },
+      global: { plugins: [i18n] },
+    });
+    try {
+      const section = wrapper.get('[data-testid="conversation-archived-section"]');
+      expect(section.get('[data-testid="conversation-archived-count"]').text()).toBe('0');
+      await section.get('[data-testid="conversation-archived-toggle"]').trigger('click');
+      expect(wrapper.get('[data-testid="conversation-archived-empty"]').text()).toBe(
+        'No archived conversations yet',
+      );
+      expect(wrapper.find('[data-testid="archived-conversation-row"]').exists()).toBe(false);
+    } finally {
+      wrapper.unmount();
+    }
+  });
+
+  it('pages the archived projection while expanded', async () => {
+    const wrapper = mount(ConversationSidebar, {
+      props: {
+        groups,
+        activeConversationId: null,
+        archivedConversations: archived,
+        archivePage: 2,
+        archiveHasMore: true,
+      },
+      global: { plugins: [i18n] },
+    });
+    try {
+      await wrapper.get('[data-testid="conversation-archived-toggle"]').trigger('click');
+      const previous = wrapper.get('[data-testid="archived-conversation-previous-page"]');
+      const next = wrapper.get('[data-testid="archived-conversation-next-page"]');
+      expect(previous.attributes('disabled')).toBeUndefined();
+      expect(next.attributes('disabled')).toBeUndefined();
+      await previous.trigger('click');
+      await next.trigger('click');
+      expect(wrapper.emitted('change-archive-page')).toEqual([[-1], [1]]);
+
+      await wrapper.setProps({ archivePage: 1, archiveHasMore: false, loading: true });
+      expect(
+        wrapper.get('[data-testid="archived-conversation-previous-page"]').attributes('disabled'),
+      ).toBeDefined();
+      expect(
+        wrapper.get('[data-testid="archived-conversation-next-page"]').attributes('disabled'),
+      ).toBeDefined();
+    } finally {
+      wrapper.unmount();
+    }
   });
 });
 

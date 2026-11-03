@@ -58,6 +58,7 @@ export default {
     archive: 'Archive',
     restore: 'Restore',
     archived: 'Archived',
+    noArchivedConversations: 'No archived conversations yet',
     active: 'Active conversations',
     confirmDelete: 'Permanently delete this conversation and its messages? This cannot be undone.',
     confirmDeleteTitle: 'Delete conversation',

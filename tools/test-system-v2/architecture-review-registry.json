@@ -2816,9 +2816,11 @@
         "testRole": "behavior"
       },
       "decision": "retain",
-      "behavior": "会话状态、搜索、Profile 菜单与焦点恢复，本地及云账户菜单添加账号/退出登录事件与旧入口移除，跨组选择、逐项失败反馈、失败项保留和旧 Profile 结果隔离，以及 T3 Code 单槽位行操作、单项/批量右键菜单、F2 重命名、成功删除不残留摘要和顶栏无归档筛选",
-
+      "behavior": "会话状态、搜索、Profile 菜单与焦点恢复，本地及云账户菜单添加账号/退出登录事件与旧入口移除，跨组选择、逐项失败反馈、失败项保留和旧 Profile 结果隔离，T3 Code 单槽位行操作、单项/批量右键菜单、F2 重命名、成功删除不残留摘要，侧栏已归档专属分区的折叠/数量/时间/空态/分页与恢复事件，以及顶栏无归档筛选",
       "assertionEvidence": [
+        "conversation-archived-section",
+        "conversation-archived-toggle",
+        "archived-conversation-row",
         "conversation-search-input",
         "aria-selected",
         "conversation-bulk-results",
@@ -2831,7 +2833,7 @@
         "status": "none-verified",
         "testFiles": []
       },
-      "sourceSha256": "ef9159431e728165422739dd2548d5a524371c29d2bd2f611bc50f77682cdf9e"
+      "sourceSha256": "7f2e30cf855d718d53194e0be84c46bf249c598a2c9baff0c67207fe7004fbe1"
     },
     {
       "path": "packages/app-vue/src/layouts/shell/WindowHeader.spec.ts",

@@ -58,6 +58,7 @@ export default {
     archive: '归档',
     restore: '恢复',
     archived: '已归档',
+    noArchivedConversations: '还没有已归档的会话',
     active: '活跃会话',
     confirmDelete: '删除此会话及其消息？此操作无法撤销。',
     confirmDeleteTitle: '确认删除会话',

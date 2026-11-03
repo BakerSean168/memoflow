@@ -192,10 +192,7 @@ onBeforeUnmount(() => {
           <div class="min-w-0 space-y-8">
             <UserPreferenceSettingsSection v-if="activeTab === 'appearance'" />
             <KeyboardSettings v-else-if="activeTab === 'shortcuts'" />
-            <template v-else-if="activeTab === 'ai'">
-              <AISettings />
-              <slot name="archived-conversations" />
-            </template>
+            <AISettings v-else-if="activeTab === 'ai'" />
             <KnowledgeRepositorySettings v-else-if="activeTab === 'repository'" />
             <NotificationSettings v-else-if="activeTab === 'notifications'" />
             <AccountSettingsSection v-else-if="activeTab === 'account'" />

@@ -25,6 +25,8 @@ import {
 import { useI18n } from 'vue-i18n';
 import {
   Archive,
+  ArchiveRestore,
+  ChevronDown,
   Search,
   SquarePen,
   Trash2,
@@ -73,6 +75,11 @@ interface ConversationGroup {
   items: ConversationEntry[];
 }
 
+/** 归档分区条目：标题之外带一个已格式化的时间，避免侧栏重复时间规则。 */
+export interface ArchivedConversationEntry extends ConversationEntry {
+  time: string;
+}
+
 const props = defineProps<{
   bulkAction?: (
     action: 'archive' | 'restore' | 'delete',
@@ -82,6 +89,10 @@ const props = defineProps<{
   activeProfileId?: string;
   cloudState?: ProfileCloudState;
   groups: ConversationGroup[];
+  /** 已归档会话投影（与设置页共用同一份数据通路）。 */
+  archivedConversations?: ArchivedConversationEntry[];
+  archivePage?: number;
+  archiveHasMore?: boolean;
   conversationStatuses?: ConversationAttentionMap;
   titleBusy?: Record<string, boolean>;
   activeConversationId: string | null;
@@ -103,6 +114,8 @@ const emit = defineEmits<{
   (e: 'select-conversation', id: string): void;
   (e: 'delete-conversation', id: string): void;
   (e: 'archive-conversation', id: string): void;
+  (e: 'restore-conversation', id: string): void;
+  (e: 'change-archive-page', direction: number): void;
   (e: 'refresh-conversations'): void;
   (e: 'open-settings'): void;
   (e: 'open-cloud-connection'): void;
@@ -176,6 +189,8 @@ async function restoreAccountMenuFocus(event: Event): Promise<void> {
 
 const searchOpen = ref(false);
 const searchQuery = ref('');
+/** 归档分区与置顶/会话列表一样是独立分区，默认收起，展开状态只属于本侧栏。 */
+const archivedOpen = ref(false);
 const searchInput = ref<HTMLInputElement | null>(null);
 const searchToggle = ref<HTMLButtonElement | null>(null);
 const selection = inject(ConversationSelectionKey, null) ?? createConversationSelectionStore();
@@ -678,6 +693,88 @@ const identityLabel = () => {
         </ContextMenu>
       </div>
     </nav>
+
+    <!-- 已归档专属分区：与置顶/会话列表并列，标题行折叠，空归档保留分区与空态文案。 -->
+    <section
+      class="shrink-0 border-t border-[hsl(var(--border-subtle))] px-2 py-1"
+      data-testid="conversation-archived-section"
+    >
+      <button
+        type="button"
+        data-testid="conversation-archived-toggle"
+        class="flex w-full items-center gap-1.5 rounded-md px-2 py-1.5 text-left text-[10px] font-medium tracking-[0.025em] text-[hsl(var(--foreground-subtle))] transition-colors hover:bg-[hsl(var(--hover))] hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+        :aria-expanded="archivedOpen"
+        aria-controls="conversation-archived-list"
+        @click="archivedOpen = !archivedOpen"
+      >
+        <ChevronDown
+          class="h-3 w-3 shrink-0 transition-transform"
+          :class="archivedOpen ? '' : '-rotate-90'"
+          aria-hidden="true"
+        />
+        <span>{{ t('shell.conversation.archived') }}</span>
+        <span class="ml-auto tabular-nums" data-testid="conversation-archived-count">{{
+          archivedConversations?.length ?? 0
+        }}</span>
+      </button>
+      <div v-if="archivedOpen" id="conversation-archived-list">
+        <p
+          v-if="!archivedConversations?.length"
+          class="px-2 py-3 text-center text-[11px] leading-5 text-muted-foreground/65"
+          data-testid="conversation-archived-empty"
+        >
+          {{ t('shell.conversation.noArchivedConversations') }}
+        </p>
+        <ul v-else class="max-h-60 overflow-y-auto" data-testid="conversation-archived-list-items">
+          <li
+            v-for="item in archivedConversations"
+            :key="item.id"
+            class="group/archived flex items-center gap-2 rounded-md px-2 py-1.5 text-[hsl(var(--foreground-muted))] transition-colors hover:bg-[hsl(var(--hover))] hover:text-foreground"
+            data-testid="archived-conversation-row"
+          >
+            <span class="min-w-0 flex-1 truncate text-[12.5px] leading-5" :title="item.title">{{
+              item.title
+            }}</span>
+            <span
+              class="shrink-0 text-[10px] tabular-nums text-[hsl(var(--foreground-subtle))]"
+              data-testid="archived-conversation-time"
+              >{{ item.time }}</span
+            >
+            <button
+              type="button"
+              data-testid="archived-conversation-restore"
+              class="flex h-6 w-6 shrink-0 items-center justify-center rounded-md text-[hsl(var(--foreground-subtle))] transition-colors hover:bg-[hsl(var(--hover))] hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-40"
+              :aria-label="t('shell.conversation.restore')"
+              :title="t('shell.conversation.restore')"
+              :disabled="loading || selection.state.busy"
+              @click="emit('restore-conversation', item.id)"
+            >
+              <ArchiveRestore class="h-3.5 w-3.5" aria-hidden="true" />
+            </button>
+          </li>
+        </ul>
+        <div class="flex items-center justify-between gap-2 px-2 py-1 text-[10px]">
+          <button
+            type="button"
+            data-testid="archived-conversation-previous-page"
+            class="rounded px-1 py-0.5 transition-colors hover:bg-[hsl(var(--hover))] hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-40"
+            :disabled="(archivePage ?? 1) <= 1 || loading"
+            @click="emit('change-archive-page', -1)"
+          >
+            {{ t('shell.conversation.previousPage') }}
+          </button>
+          <button
+            type="button"
+            data-testid="archived-conversation-next-page"
+            class="rounded px-1 py-0.5 transition-colors hover:bg-[hsl(var(--hover))] hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-40"
+            :disabled="!archiveHasMore || loading"
+            @click="emit('change-archive-page', 1)"
+          >
+            {{ t('shell.conversation.nextPage') }}
+          </button>
+        </div>
+      </div>
+    </section>
 
     <!-- 底：账户菜单 -->
     <div class="flex h-11 shrink-0 items-center border-t border-[hsl(var(--border-subtle))] px-2.5">
