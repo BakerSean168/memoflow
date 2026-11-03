@@ -84,7 +84,8 @@ const ALLOWLIST: Record<string, string> = {
   'packages/notification/src/server/infrastructure/adapters/deliverers/real-channel-deliverers.ts':
     'native deliverer duck-typing casts (allowlist)',
   // Notification SSE: stream adapter flush + event id structural probing.
-  'packages/notification/src/api/routes.ts': 'SSE stream adapter structural casts (allowlist)',
+  'packages/notification/src/api/routes/notification-stream.routes.ts':
+    'SSE stream adapter structural casts (allowlist)',
 };
 
 function listSourceFiles(dir: string): string[] {

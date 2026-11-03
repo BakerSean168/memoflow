@@ -20,7 +20,7 @@ export interface AuthorizeInput {
   now?: number;
   /** Objects this single call affects; forwarded to the dynamic bulk-risk check. */
   itemCount?: number;
-  /** Per-call bulk threshold override; defaults to the policy default. */
+  /** Per-call bulk threshold override; defaults to the user's permission setting. */
   bulkThreshold?: number;
   ask?: (auditId: string) => Promise<'allow' | 'deny' | 'timeout'>;
 }
@@ -53,7 +53,10 @@ export async function authorize(
     customMatrix: settings?.customMatrix,
     now: input.now,
     itemCount: input.itemCount,
-    bulkThreshold: input.bulkThreshold,
+    // The user's stored threshold is the default; a per-call value overrides
+    // it, and evaluatePermission falls back to DEFAULT_BULK_THRESHOLD when
+    // neither exists (settings written before the field existed).
+    bulkThreshold: input.bulkThreshold ?? settings?.bulkThreshold,
   });
   const auditId = randomUUID();
   // Missing policy storage can never grant a data mutation, even a create.
@@ -84,6 +87,7 @@ export async function authorize(
     ruleId: result.ruleId ?? null,
     execution: 'not_started' as const,
     ...(input.itemCount === undefined ? {} : { itemCount: input.itemCount }),
+    ...(result.operation?.risks.length ? { risks: [...result.operation.risks] } : {}),
   } satisfies PermissionAuditRecord;
   try {
     await repository.appendAudit(input.owner, record);

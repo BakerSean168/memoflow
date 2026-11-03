@@ -162,9 +162,16 @@ export function evaluatePermission(context: PermissionContext): PermissionEvalua
   // A global read-only selection cannot be silently raised by an earlier grant.
   if (context.preset === 'read_only' && operation.action !== 'read')
     return { decision: 'deny', reason: 'preset', operation: operationView };
-  // Elevated-risk operations require a fresh decision except in full-auto mode.
-  // Object-level grants never accidentally authorize bulk or permanent deletion.
-  if (operationView.risks.length && context.preset !== 'full_auto')
+  // #762 phase 4: elevated-risk operations — permanent deletion, bulk
+  // (statically registered or dynamically detected above), and external send —
+  // always require a fresh, in-the-moment confirmation. No preset, not even
+  // full_auto, and no remembered allow rule or grant ever auto-approves them;
+  // only an explicit user deny or the read-only preset (both handled above)
+  // can refuse them outright. This deliberately diverges from mainstream
+  // coding agents, whose widest mode auto-approves deletions: MemoFlow holds
+  // personal data with no version-control safety net underneath, and a
+  // permanent deletion by definition bypasses the recycle-bin net.
+  if (operationView.risks.length)
     return { decision: 'ask', reason: 'preset', operation: operationView };
   const ask = [...rules].reverse().find((rule) => rule.effect === 'ask');
   if (ask)
@@ -183,15 +190,6 @@ export function evaluatePermission(context: PermissionContext): PermissionEvalua
       ruleId: allow.id,
     };
 
-  if (operationView.risks.length) {
-    const highRiskDecision =
-      context.preset === 'read_only' ? 'deny' : context.preset === 'full_auto' ? 'allow' : 'ask';
-    return {
-      decision: highRiskDecision,
-      reason: 'preset',
-      operation: operationView,
-    };
-  }
   const preset = context.preset === 'custom' ? 'on_demand' : context.preset;
   const decision =
     context.preset === 'custom'

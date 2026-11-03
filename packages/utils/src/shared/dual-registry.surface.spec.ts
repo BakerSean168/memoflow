@@ -392,7 +392,7 @@ import {
     const sole = readFileSync(resolve(sharedDir, 'parse-query-value.ts'), 'utf8');
     const index = readFileSync(resolve(sharedDir, 'index.ts'), 'utf8');
     const notification = readFileSync(
-      resolve(sharedDir, '../../../notification/src/api/routes.ts'),
+      resolve(sharedDir, '../../../notification/src/api/routes/notification-inbox.routes.ts'),
       'utf8',
     );
     const schedule = readFileSync(
@@ -463,7 +463,7 @@ import {
     const sole = readFileSync(resolve(sharedDir, 'parse-query-value.ts'), 'utf8');
     const index = readFileSync(resolve(sharedDir, 'index.ts'), 'utf8');
     const notification = readFileSync(
-      resolve(sharedDir, '../../../notification/src/api/routes.ts'),
+      resolve(sharedDir, '../../../notification/src/api/routes/notification-inbox.routes.ts'),
       'utf8',
     );
     const schedule = readFileSync(
