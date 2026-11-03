@@ -178,11 +178,11 @@ test('[P0] T3 Agent wizard and inline Endpoint/Key configure the persistent comp
   await expect(
     page.getByTestId('ai-model-picker-option').filter({ hasText: 'E2E Model Beta' }),
   ).toBeVisible();
-  // #781 combines model selection and traits in the fixed 35rem picker.
-  // Measure after the opening zoom animation; retain strict geometry assertions.
+  // #828 keeps model selection, the always-on options column and the footer in one 37.25rem picker.
+  // Measure after the opening scale animation; retain strict geometry assertions.
   await expect
     .poll(async () => (await page.getByTestId('ai-model-picker').boundingBox())?.width ?? 0)
-    .toBeCloseTo(560, 1);
+    .toBeCloseTo(596, 1);
   const filledBox = await page.getByTestId('ai-model-picker').boundingBox();
   await page.getByTestId('ai-model-picker-agent-agent:mastra').click();
   await expect(page.getByTestId('ai-model-picker-empty')).toContainText(
@@ -407,7 +407,7 @@ test('[P0] T3 Agent wizard and inline Endpoint/Key configure the persistent comp
     await page.getByTestId('ai-chat-model-selector').click();
     const picker = page.getByTestId('ai-model-picker');
     await expect(picker).toBeVisible();
-    // Width alone can pass during zoom-in: the picker now uses 35rem, not
+    // Width alone can pass during the opening scale: the picker now uses 37.25rem, not
     // 360px. Capture the box that passes both dimensions with no transform.
     const measureSettledPicker = async () => {
       const sample = () =>

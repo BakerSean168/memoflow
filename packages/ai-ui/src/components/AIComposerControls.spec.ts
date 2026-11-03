@@ -468,9 +468,15 @@ describe('T3 model picker / conditional traits / enforced permissions', () => {
     const wrapper = setup();
     await openModels(wrapper);
     const picker = wrapper.get('[data-testid="ai-model-picker"]');
-    const frame = picker.get('div');
-    expect(picker.classes()).toContain('w-[min(35rem,calc(100vw-1.5rem))]');
-    expect(frame.classes()).toContain('h-[min(346px,calc(100dvh-80px))]');
+    const frame = wrapper.get('[data-testid="ai-model-picker-frame"]');
+    const body = wrapper.get('[data-testid="ai-model-picker-body"]');
+    expect(picker.classes()).toContain('w-[min(37.25rem,calc(100vw-1.5rem))]');
+    expect(body.classes()).toContain('h-[min(346px,calc(100dvh-80px))]');
+    // 44px rail + 360px list + 192px options column, plus the footer row.
+    expect(wrapper.get('[data-testid="ai-model-picker-sidebar"]').classes()).toContain('w-11');
+    expect(body.get('.max-w-90').classes()).toContain('flex-1');
+    expect(wrapper.get('[data-testid="ai-model-picker-options"]').classes()).toContain('w-48');
+    expect(wrapper.find('[data-testid="ai-model-picker-footer"]').exists()).toBe(true);
 
     await wrapper.get('[data-testid="ai-model-picker-agent-local:codex"]').trigger('click');
     expect(wrapper.get('[data-testid="ai-model-picker-empty"]').exists()).toBe(true);
@@ -480,7 +486,7 @@ describe('T3 model picker / conditional traits / enforced permissions', () => {
     expect(wrapper.get('[data-testid="ai-model-picker-empty"]').text()).toContain('没有匹配的模型');
     expect(wrapper.find('[data-testid="ai-model-picker-empty-settings"]').exists()).toBe(false);
     expect(wrapper.get('[data-testid="ai-model-picker"]').element).toBe(picker.element);
-    expect(wrapper.get('[data-testid="ai-model-picker"]').get('div').element).toBe(frame.element);
+    expect(wrapper.get('[data-testid="ai-model-picker-frame"]').element).toBe(frame.element);
     wrapper.unmount();
   });
 
@@ -534,33 +540,38 @@ describe('T3 model picker / conditional traits / enforced permissions', () => {
     wrapper.unmount();
   });
 
-  it('highlights the browsed sidebar item with a right-hand rail, not an active-model dot', async () => {
+  it('slides one rail indicator to the browsed sidebar item instead of marking each button', async () => {
     const wrapper = setup();
     await openModels(wrapper);
-    const selected = wrapper.get('[data-testid="ai-model-picker-agent-agent:mastra"]');
-    expect(selected.attributes('aria-pressed')).toBe('true');
-    expect(selected.classes()).toContain('hover:bg-foreground/10');
-    expect(selected.find('[data-testid="ai-model-picker-active-indicator"]').exists()).toBe(true);
+    const indicators = wrapper.findAll('[data-testid="ai-model-picker-active-indicator"]');
+    expect(indicators).toHaveLength(1);
+    expect(indicators[0]!.classes()).toContain('transition-[top]');
+    expect(indicators[0]!.classes()).toContain('duration-200');
+    expect(indicators[0]!.classes()).toContain('ease-out');
+    expect(
+      wrapper
+        .get('[data-testid="ai-model-picker-agent-agent:mastra"]')
+        .attributes('data-rail-active'),
+    ).toBe('true');
 
     await wrapper.get('[data-testid="ai-model-picker-agent-agent:work"]').trigger('click');
-    expect(selected.attributes('aria-pressed')).toBe('false');
-    expect(selected.find('[data-testid="ai-model-picker-active-indicator"]').exists()).toBe(false);
+    expect(wrapper.findAll('[data-testid="ai-model-picker-active-indicator"]')).toHaveLength(1);
     expect(
       wrapper
         .get('[data-testid="ai-model-picker-agent-agent:work"]')
-        .find('[data-testid="ai-model-picker-active-indicator"]')
-        .exists(),
-    ).toBe(true);
-    expect(wrapper.findAll('[data-testid="ai-model-picker-active-indicator"]')).toHaveLength(1);
-
-    await wrapper.get('[data-testid="ai-model-picker-favorites"]').trigger('click');
+        .attributes('data-rail-active'),
+    ).toBe('true');
     expect(
       wrapper
-        .get('[data-testid="ai-model-picker-favorites"]')
-        .find('[data-testid="ai-model-picker-active-indicator"]')
-        .exists(),
-    ).toBe(true);
+        .get('[data-testid="ai-model-picker-agent-agent:mastra"]')
+        .attributes('data-rail-active'),
+    ).toBeUndefined();
+
+    await wrapper.get('[data-testid="ai-model-picker-favorites"]').trigger('click');
     expect(wrapper.findAll('[data-testid="ai-model-picker-active-indicator"]')).toHaveLength(1);
+    expect(
+      wrapper.get('[data-testid="ai-model-picker-favorites"]').attributes('data-rail-active'),
+    ).toBe('true');
     wrapper.unmount();
   });
 
@@ -645,7 +656,7 @@ describe('T3 model picker / conditional traits / enforced permissions', () => {
     expect(wrapper.findAll('[data-testid^="ai-traits-effort-"]')).toHaveLength(3);
     await wrapper.get('[data-testid="ai-traits-effort-super-high"]').trigger('click');
     expect(wrapper.emitted('modelOption')).toEqual([['reasoningEffort', 'super-high']]);
-    await wrapper.get('[data-testid="ai-traits-tier-priority"]').trigger('click');
+    await wrapper.get('[data-testid="ai-model-picker-speed-priority"]').trigger('click');
     expect(wrapper.emitted('modelOption')).toEqual([
       ['reasoningEffort', 'super-high'],
       ['serviceTier', 'priority'],
@@ -697,10 +708,13 @@ describe('integrated picker configuration', () => {
 
   it('uses the existing permission event for built-in access and highlights the current value', async () => {
     const wrapper = setup({ permissionMode: 'read-only' });
+    expect(wrapper.get('[data-testid="ai-model-picker-permissions"]').text()).toContain('只读');
     expect(
-      wrapper.get('[data-testid="ai-model-picker-access-read-only"]').attributes('aria-pressed'),
+      wrapper
+        .get('[data-testid="ai-model-picker-permission-read-only"]')
+        .attributes('aria-checked'),
     ).toBe('true');
-    await wrapper.get('[data-testid="ai-model-picker-access-supervised"]').trigger('click');
+    await wrapper.get('[data-testid="ai-model-picker-permission-supervised"]').trigger('click');
     expect(wrapper.emitted('permission')).toEqual([['supervised']]);
     wrapper.unmount();
   });
@@ -710,8 +724,15 @@ describe('integrated picker configuration', () => {
       native: true,
       agents: [{ ...agents[0], nativePermissionMode: 'auto-approve' }],
     });
-    expect(wrapper.get('[data-testid="ai-model-picker-native-access"]').text()).toBe('自动批准');
-    expect(wrapper.find('[data-testid="ai-model-picker-access-supervised"]').exists()).toBe(false);
+    const trigger = wrapper.get('[data-testid="ai-model-picker-permissions"]');
+    expect(trigger.text()).toContain('自动批准');
+    const option = wrapper.get('[data-testid="ai-model-picker-permission-auto-approve"]');
+    expect(option.attributes('disabled')).toBeDefined();
+    expect(option.attributes('aria-disabled')).toBe('true');
+    expect(option.text()).toContain('由 Agent 实例管理');
+    expect(wrapper.find('[data-testid="ai-model-picker-permission-supervised"]').exists()).toBe(
+      false,
+    );
     expect(wrapper.emitted('permission')).toBeUndefined();
     wrapper.unmount();
   });
@@ -727,15 +748,99 @@ describe('integrated picker configuration', () => {
         },
       ],
     });
-    expect(wrapper.get('[data-testid="ai-traits-tier-priority"]').attributes('aria-pressed')).toBe(
-      'true',
-    );
+    expect(wrapper.get('[data-testid="ai-model-picker-speed-default"]').text()).toContain('标准');
+    expect(
+      wrapper.get('[data-testid="ai-model-picker-speed-priority"]').attributes('aria-checked'),
+    ).toBe('true');
     await wrapper.setProps({ nativeModelOptions: { serviceTier: 'default' } });
-    expect(wrapper.get('[data-testid="ai-traits-tier-default"]').attributes('aria-pressed')).toBe(
-      'true',
-    );
-    await wrapper.get('[data-testid="ai-traits-tier-priority"]').trigger('click');
+    expect(
+      wrapper.get('[data-testid="ai-model-picker-speed-default"]').attributes('aria-checked'),
+    ).toBe('true');
+    await wrapper.get('[data-testid="ai-model-picker-speed-priority"]').trigger('click');
     expect(wrapper.emitted('modelOption')).toEqual([['serviceTier', 'priority']]);
+    wrapper.unmount();
+  });
+
+  it('hides the speed segment for a model that declares no service tier', () => {
+    const wrapper = setup({ native: true });
+    expect(wrapper.find('[data-testid="ai-model-picker-speed"]').exists()).toBe(false);
+    wrapper.unmount();
+  });
+
+  it('keeps the options column mounted before any model is committed', async () => {
+    const wrapper = setup({
+      selectedAgentId: '',
+      selectedModelKey: '',
+      agents: [{ ...agents[2], nativePermissionMode: 'supervised' }],
+      models: [],
+    });
+    await openModels(wrapper);
+    const column = wrapper.get('[data-testid="ai-model-picker-options"]');
+    expect(column.exists()).toBe(true);
+    expect(column.get('[data-testid="ai-traits-empty"]').text()).toContain('无可用档位');
+    expect(wrapper.find('[data-testid="ai-model-picker-footer"]').exists()).toBe(true);
+    wrapper.unmount();
+  });
+
+  it('derives the options column from the browsed Agent until a model is committed', async () => {
+    const nativeModel = {
+      key: 'agent:mastra::google-connection::gpt-4.1',
+      agentKey: 'agent:mastra',
+      providerId: 'google-connection',
+      providerName: 'Google',
+      modelId: 'gpt-4.1',
+      modelName: 'Model Alpha',
+      reasoningEfforts: ['low', 'medium', 'high'],
+      defaultReasoningEffort: 'medium',
+    };
+    const otherModel = {
+      key: 'agent:work::other-connection::gpt-4.1',
+      agentKey: 'agent:work',
+      providerId: 'other-connection',
+      providerName: 'AnyRouter',
+      modelId: 'gpt-4.1',
+      modelName: 'Work Model',
+      reasoningEfforts: ['minimal', 'high'],
+      defaultReasoningEffort: 'high',
+    };
+    const wrapper = setup({ native: true, models: [nativeModel, otherModel] });
+    await openModels(wrapper);
+    expect(wrapper.get('[data-testid="ai-traits-model"]').text()).toBe('Model Alpha');
+    expect(wrapper.findAll('[data-testid^="ai-traits-effort-"]')).toHaveLength(3);
+
+    await wrapper.get('[data-testid="ai-model-picker-agent-agent:work"]').trigger('click');
+    await nextTick();
+    expect(wrapper.get('[data-testid="ai-traits-model"]').text()).toBe('Work Model');
+    expect(wrapper.findAll('[data-testid^="ai-traits-effort-"]')).toHaveLength(2);
+    // The browsed Agent's model is not committed yet, so its levels stay read-only.
+    expect(wrapper.find('[data-testid="ai-traits-locked"]').exists()).toBe(true);
+    expect(
+      wrapper.get('[data-testid="ai-traits-effort-high"]').attributes('disabled'),
+    ).toBeDefined();
+
+    await wrapper.get('[data-testid="ai-model-picker-option"]').trigger('click');
+    expect(wrapper.emitted('selectModel')).toEqual([[otherModel.key, 'agent:work']]);
+    wrapper.unmount();
+  });
+
+  it('cycles providers with Ctrl+Shift+Arrow while keeping Ctrl+number for models', async () => {
+    const wrapper = setup();
+    await openModels(wrapper);
+    const frame = wrapper.get('[data-testid="ai-model-picker-frame"]');
+    await frame.trigger('keydown', { key: 'ArrowDown', ctrlKey: true, shiftKey: true });
+    expect(
+      wrapper
+        .get('[data-testid="ai-model-picker-agent-agent:work"]')
+        .attributes('data-rail-active'),
+    ).toBe('true');
+    await frame.trigger('keydown', { key: 'ArrowUp', ctrlKey: true, shiftKey: true });
+    expect(
+      wrapper
+        .get('[data-testid="ai-model-picker-agent-agent:mastra"]')
+        .attributes('data-rail-active'),
+    ).toBe('true');
+    await frame.trigger('keydown', { key: '1', ctrlKey: true });
+    expect(wrapper.emitted('selectModel')).toEqual([[models[0]!.key, 'agent:mastra']]);
     wrapper.unmount();
   });
 });

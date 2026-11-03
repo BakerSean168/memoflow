@@ -59,6 +59,8 @@ export default {
     },
     modelOptions: '模型选项',
     reasoningEffort: '推理强度',
+    noEffortLevels: '无可用档位',
+    selectModelToAdjust: '选择此模型后可调整其选项。',
     standardMode: '标准',
     instanceManagedAccess: '由 Agent 实例管理，不支持会话内覆盖。',
     serviceTier: '服务等级',

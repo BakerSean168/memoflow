@@ -69,6 +69,8 @@ export default {
     },
     modelOptions: 'Model options',
     reasoningEffort: 'Reasoning',
+    noEffortLevels: 'No effort levels',
+    selectModelToAdjust: 'Select this model to change its options.',
     standardMode: 'Standard',
     instanceManagedAccess: 'Managed by the Agent instance; session overrides are not supported.',
     serviceTier: 'Service tier',

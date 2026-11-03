@@ -1,6 +1,16 @@
 <script setup lang="ts">
-import { computed, nextTick, ref, watch } from 'vue';
-import { CircleAlert, Check, ChevronDown, LockKeyhole, Search, Star } from '@lucide/vue';
+import { computed, nextTick, onUpdated, ref, watch } from 'vue';
+import {
+  Check,
+  ChevronDown,
+  ChevronUp,
+  CircleAlert,
+  LockKeyhole,
+  Search,
+  ShieldCheck,
+  Star,
+  Zap,
+} from '@lucide/vue';
 import { useI18n } from 'vue-i18n';
 import { Popover, PopoverContent, PopoverTrigger } from '@memoflow/ui-vue-shadcn';
 import type {
@@ -50,11 +60,16 @@ const favoritesStorageKey = computed(() => {
   return identity ? `${FAVORITES_KEY}:${identity}` : '';
 });
 const openMenu = ref<'models' | null>(null);
+const permissionMenuOpen = ref(false);
 const search = ref('');
 const activeSection = ref('favorites');
 const favorites = ref<string[]>([]);
 const searchInput = ref<HTMLInputElement | null>(null);
 const modelList = ref<HTMLElement | null>(null);
+const sidebar = ref<HTMLElement | null>(null);
+const traitsPanel = ref<InstanceType<typeof AIModelTraitsPanel> | null>(null);
+const indicatorTop = ref<number | null>(null);
+const pendingTraitFocus = ref(false);
 
 const currentAgent = computed(() =>
   props.agents.find((agent) => agent.id === props.selectedAgentId),
@@ -126,10 +141,6 @@ const traitsLabel = computed(
       ? selectedServiceTier.value
       : t('aiAssistant.composer.defaultOptions')),
 );
-function chooseTrait(kind: keyof LocalAgentModelOptions, value?: string) {
-  if (props.disabled || !hasModelTraits.value) return;
-  emit('modelOption', kind, value);
-}
 const instanceName = (agent: ComposerAgentOption) => {
   const duplicates = props.agents.filter((item) => item.name === agent.name).length;
   return duplicates > 1 ? agent.name + ' · ' + agent.id.replace(/^(agent|local):/, '') : agent.name;
@@ -167,6 +178,109 @@ const visibleModels = computed(() => {
   });
 });
 const browsedAgent = computed(() => props.agents.find((entry) => entry.id === activeSection.value));
+/**
+ * The model the options column describes: the browsed Agent's own model, preferring the
+ * committed selection and falling back to its default/first model. Favorites and search keep
+ * the committed selection because no single Agent owns those rows.
+ */
+const browsedModel = computed<ComposerModel | undefined>(() => {
+  const agent = browsedAgent.value;
+  if (!agent) return selectedModel.value;
+  if (agent.id === props.selectedAgentId && selectedModel.value) return selectedModel.value;
+  const agentModels = props.models.filter((model) => model.agentKey === agent.id);
+  return agentModels.find((model) => model.key === props.selectedModelKey) ?? agentModels[0];
+});
+const browsedModelCommitted = computed(
+  () =>
+    Boolean(selectedModel.value) &&
+    selectedModel.value?.key === browsedModel.value?.key &&
+    selectedModel.value?.agentKey === browsedModel.value?.agentKey,
+);
+const browsedEffort = computed(() => {
+  const model = browsedModel.value;
+  if (!model) return '';
+  if (browsedModelCommitted.value)
+    return props.nativeModelOptions?.reasoningEffort ?? model.defaultReasoningEffort ?? '';
+  return model.defaultReasoningEffort ?? model.reasoningEfforts?.[0] ?? '';
+});
+const browsedServiceTier = computed(() => {
+  const model = browsedModel.value;
+  if (!model) return 'default';
+  if (browsedModelCommitted.value)
+    return props.nativeModelOptions?.serviceTier ?? model.defaultServiceTier ?? 'default';
+  return model.defaultServiceTier ?? 'default';
+});
+const lockedTraitsHint = computed(() =>
+  browsedModel.value && !browsedModelCommitted.value
+    ? t('aiAssistant.composer.selectModelToAdjust')
+    : '',
+);
+const speedOptions = computed(() => {
+  // Service tiers are discovered native model parameters, like reasoning levels.
+  const tiers = props.native ? (browsedModel.value?.serviceTiers ?? []) : [];
+  return tiers.length
+    ? [
+        { id: 'default', label: t('aiAssistant.composer.standardMode') },
+        ...tiers.map((tier) => ({ id: tier.id, label: tier.name })),
+      ]
+    : [];
+});
+const nativePermission = computed<AIChatPermissionMode>(
+  () => currentAgent.value?.nativePermissionMode ?? 'supervised',
+);
+const permissionValue = computed<AIChatPermissionMode>(() =>
+  props.native ? nativePermission.value : (props.permissionMode ?? 'supervised'),
+);
+const permissionOptions = computed<{ id: AIChatPermissionMode; label: string; hint: string }[]>(
+  () =>
+    props.native
+      ? [
+          {
+            id: nativePermission.value,
+            label: t('aiAssistant.composer.' + nativePermission.value),
+            hint: t('aiAssistant.composer.instanceManagedAccess'),
+          },
+        ]
+      : [
+          {
+            id: 'supervised',
+            label: t('aiAssistant.composer.supervised'),
+            hint: t('aiAssistant.composer.supervisedHint'),
+          },
+          {
+            id: 'read-only',
+            label: t('aiAssistant.composer.read-only'),
+            hint: t('aiAssistant.composer.readOnlyHint'),
+          },
+        ],
+);
+const permissionLabel = computed(
+  () =>
+    permissionOptions.value.find((option) => option.id === permissionValue.value)?.label ??
+    t('aiAssistant.composer.supervised'),
+);
+const permissionIcon = computed(() => {
+  if (permissionValue.value === 'read-only') return LockKeyhole;
+  if (permissionValue.value === 'auto-approve') return Zap;
+  return ShieldCheck;
+});
+const canAdjustBrowsed = computed(
+  () => browsedModelCommitted.value && !props.disabled && !props.loading,
+);
+
+function chooseTrait(kind: keyof LocalAgentModelOptions, value?: string) {
+  if (!canAdjustBrowsed.value) return;
+  emit('modelOption', kind, value);
+}
+function chooseSpeed(value: string) {
+  if (!canAdjustBrowsed.value || value === browsedServiceTier.value) return;
+  emit('modelOption', 'serviceTier', value);
+}
+function selectPermission(mode: AIChatPermissionMode) {
+  permissionMenuOpen.value = false;
+  if (props.native || props.disabled || mode === permissionValue.value) return;
+  emit('permission', mode);
+}
 const canChooseModel = (model: ComposerModel) =>
   !props.disabled &&
   !props.loading &&
@@ -196,6 +310,7 @@ function browseAgent(agent: ComposerAgentOption) {
 function setMenu(menu: 'models', opened: boolean) {
   if (opened && props.disabled) return;
   openMenu.value = opened ? menu : null;
+  if (!opened) permissionMenuOpen.value = false;
   if (opened && menu === 'models') {
     search.value = '';
     activeSection.value = enabledAgents.value.some((agent) => agent.id === props.selectedAgentId)
@@ -205,11 +320,18 @@ function setMenu(menu: 'models', opened: boolean) {
     void nextTick(() => searchInput.value?.focus());
   }
 }
+function focusTraits() {
+  traitsPanel.value?.focusSelected();
+}
 function selectModel(model: ComposerModel) {
   if (!canChooseModel(model)) return;
+  const changed = model.key !== props.selectedModelKey || model.agentKey !== props.selectedAgentId;
   emit('selectModel', model.key, model.agentKey);
   // Keep the picker open so the committed model's configuration can be chosen next.
   openMenu.value = 'models';
+  // The column renders the new model's levels on commit, then takes focus.
+  if (changed) pendingTraitFocus.value = true;
+  else void nextTick(focusTraits);
 }
 function storeFavorites() {
   // Favorites are per cloud identity or desktop Profile, never shared by
@@ -228,6 +350,21 @@ function toggleFavorite(model: ComposerModel) {
     : [...favorites.value, key].slice(-100);
   storeFavorites();
 }
+function measureIndicator() {
+  const active = sidebar.value?.querySelector<HTMLElement>('[data-rail-active="true"]');
+  indicatorTop.value = active ? active.offsetTop + active.offsetHeight / 2 - 10 : null;
+}
+function cycleProvider(direction: 1 | -1) {
+  const sections = ['favorites', ...enabledAgents.value.map((agent) => agent.id)];
+  const index = sections.indexOf(activeSection.value);
+  const next = sections[(index + direction + sections.length) % sections.length]!;
+  if (next === 'favorites') activeSection.value = 'favorites';
+  else {
+    const agent = enabledAgents.value.find((entry) => entry.id === next);
+    if (agent) browseAgent(agent);
+  }
+  search.value = '';
+}
 function keyboardNavigation(event: KeyboardEvent) {
   if (event.isComposing || event.repeat) return;
   if (
@@ -242,6 +379,19 @@ function keyboardNavigation(event: KeyboardEvent) {
     event.stopPropagation();
     const model = visibleModels.value[Number(event.key) - 1];
     if (model) selectModel(model);
+    return;
+  }
+  if (
+    openMenu.value === 'models' &&
+    event.ctrlKey &&
+    event.shiftKey &&
+    !event.altKey &&
+    !event.metaKey &&
+    (event.key === 'ArrowUp' || event.key === 'ArrowDown')
+  ) {
+    event.preventDefault();
+    event.stopPropagation();
+    cycleProvider(event.key === 'ArrowDown' ? 1 : -1);
     return;
   }
   if (event.ctrlKey || event.metaKey || event.altKey || event.shiftKey) return;
@@ -270,8 +420,20 @@ watch(enabledAgents, (agents) => {
 watch(
   () => [props.disabled, providerUnavailable.value] as const,
   ([disabled, unavailable]) => {
-    if (disabled || unavailable) openMenu.value = null;
+    if (disabled || unavailable) {
+      openMenu.value = null;
+      permissionMenuOpen.value = false;
+    }
   },
+);
+watch(
+  () => [props.selectedModelKey, props.selectedAgentId] as const,
+  () => {
+    if (!pendingTraitFocus.value) return;
+    pendingTraitFocus.value = false;
+    void nextTick(focusTraits);
+  },
+  { flush: 'post' },
 );
 watch(
   favoritesStorageKey,
@@ -290,6 +452,12 @@ watch(
   },
   { immediate: true },
 );
+// The rail indicator follows the browsed item's measured offset, so it slides
+// instead of blinking between items.
+onUpdated(measureIndicator);
+watch([activeSection, search, () => enabledAgents.value.length], () => {
+  void nextTick(measureIndicator);
+});
 </script>
 
 <template>
@@ -346,230 +514,315 @@ watch(
         align="end"
         :side-offset="7"
         :collision-padding="12"
-        class="w-[min(35rem,calc(100vw-1.5rem))] max-w-[calc(100vw-1.5rem)] overflow-hidden rounded-xl p-0"
+        class="w-[min(37.25rem,calc(100vw-1.5rem))] max-w-[calc(100vw-1.5rem)] overflow-hidden rounded-xl p-0 transition-[width,height,scale,opacity] duration-150 data-[state=open]:zoom-in-[0.98]! data-[state=closed]:zoom-out-[0.98]! data-[side=top]:slide-in-from-bottom-0!"
         data-testid="ai-model-picker"
       >
-        <div class="flex h-[min(346px,calc(100dvh-80px))] min-h-0" @keydown="keyboardNavigation">
-          <nav
-            class="composer-agent-sidebar flex h-full min-h-0 w-12 shrink-0 flex-col items-center gap-1 overflow-y-auto border-r border-border/60 bg-muted/25 px-1 py-2"
-            :aria-label="t('aiAssistant.composer.agents')"
-            data-testid="ai-model-picker-sidebar"
+        <div
+          class="flex flex-col"
+          data-testid="ai-model-picker-frame"
+          @keydown="keyboardNavigation"
+        >
+          <div
+            class="flex h-[min(346px,calc(100dvh-80px))] min-h-0"
+            data-testid="ai-model-picker-body"
           >
-            <button
-              type="button"
-              class="relative grid size-9 shrink-0 place-items-center rounded-lg text-muted-foreground transition-colors hover:bg-foreground/10 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
-              :class="
-                activeSection === 'favorites' && !search ? 'bg-foreground/10 text-foreground' : ''
-              "
-              :aria-label="t('aiAssistant.composer.favorites')"
-              :aria-pressed="activeSection === 'favorites' && !search"
-              data-testid="ai-model-picker-favorites"
-              @click="
-                activeSection = 'favorites';
-                search = '';
-              "
+            <nav
+              ref="sidebar"
+              class="composer-agent-sidebar relative flex h-full min-h-0 w-11 shrink-0 flex-col gap-1 overflow-y-auto border-r border-border/60 bg-muted/25 p-1"
+              :aria-label="t('aiAssistant.composer.agents')"
+              data-testid="ai-model-picker-sidebar"
             >
-              <Star class="size-4 fill-current" />
               <span
-                v-if="activeSection === 'favorites' && !search"
+                v-if="indicatorTop !== null"
                 aria-hidden="true"
-                class="pointer-events-none absolute -right-1.5 top-1/2 h-5 w-[3px] -translate-y-1/2 rounded-l-full bg-primary"
+                class="pointer-events-none absolute right-0 top-0 z-10 h-5 w-[3px] rounded-l-full bg-primary transition-[top] duration-200 ease-out motion-reduce:transition-none"
+                :style="{ top: indicatorTop + 'px' }"
                 data-testid="ai-model-picker-active-indicator"
               />
-            </button>
-            <div class="mx-auto my-0.5 h-px w-6 shrink-0 bg-border/70" />
-            <button
-              v-for="agent in enabledAgents"
-              :key="agent.id"
-              type="button"
-              class="relative grid size-9 shrink-0 place-items-center rounded-lg text-muted-foreground transition-colors hover:bg-foreground/10 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary disabled:opacity-35 disabled:hover:bg-transparent"
-              :class="
-                agent.switchBlockedReason
-                  ? 'opacity-35 hover:bg-transparent hover:text-muted-foreground'
-                  : activeSection === agent.id && !search
-                    ? 'bg-foreground/10 text-foreground'
-                    : ''
-              "
-              :disabled="!agent.enabled"
-              :title="blockedMessage(agent) || instanceName(agent)"
-              :aria-label="
-                blockedMessage(agent)
-                  ? instanceName(agent) + ' · ' + blockedMessage(agent)
-                  : instanceName(agent)
-              "
-              :aria-disabled="Boolean(agent.switchBlockedReason) || !agent.enabled"
-              :aria-pressed="activeSection === agent.id && !search"
-              :data-testid="'ai-model-picker-agent-' + agent.id"
-              @click="browseAgent(agent)"
-            >
-              <AgentDriverIcon :driver="agent.driver" class="size-4" />
-              <LockKeyhole
-                v-if="agent.switchBlockedReason === 'incompatible'"
-                class="absolute bottom-1 right-1 size-2.5"
-                aria-hidden="true"
-              />
-              <span
-                v-if="activeSection === agent.id && !search"
-                aria-hidden="true"
-                class="pointer-events-none absolute -right-1.5 top-1/2 h-5 w-[3px] -translate-y-1/2 rounded-l-full bg-primary"
-                data-testid="ai-model-picker-active-indicator"
-              />
-            </button>
-          </nav>
-          <div class="flex min-h-0 min-w-0 flex-1 flex-col">
-            <label class="flex h-11 shrink-0 items-center gap-2 border-b border-border/65 px-3">
-              <Search class="size-3.5 shrink-0 text-muted-foreground" />
-              <input
-                ref="searchInput"
-                v-model="search"
-                type="search"
-                class="h-full min-w-0 flex-1 bg-transparent text-xs text-foreground outline-none placeholder:text-muted-foreground"
-                :placeholder="t('aiAssistant.composer.searchModels')"
-                :aria-label="t('aiAssistant.composer.searchModels')"
-                data-testid="ai-model-picker-search"
-              />
-            </label>
-            <div
-              ref="modelList"
-              class="min-h-0 flex-1 overflow-y-auto px-1.5 py-1.5"
-              data-testid="ai-model-picker-results"
-            >
-              <template v-if="visibleModels.length">
-                <div
-                  v-for="(model, index) in visibleModels"
-                  :key="modelIdentity(model)"
-                  class="group flex min-w-0 items-center gap-0.5 rounded-lg"
-                  :class="canChooseModel(model) ? 'hover:bg-muted/60' : ''"
-                  :title="blockedMessage(agents.find((agent) => agent.id === model.agentKey))"
-                  :tabindex="
-                    agents.find((agent) => agent.id === model.agentKey)?.switchBlockedReason
-                      ? 0
-                      : undefined
-                  "
-                  :aria-label="
-                    agents.find((agent) => agent.id === model.agentKey)?.switchBlockedReason
-                      ? model.modelName +
-                        ' · ' +
-                        blockedMessage(agents.find((agent) => agent.id === model.agentKey))
-                      : undefined
-                  "
-                >
-                  <button
-                    type="button"
-                    class="flex min-w-0 flex-1 items-start gap-2 rounded-lg px-2 py-2 text-left outline-none focus-visible:ring-2 focus-visible:ring-primary disabled:opacity-45"
-                    :disabled="!canChooseModel(model)"
-                    :aria-pressed="
-                      selectedAgentId === model.agentKey && selectedModelKey === model.key
-                    "
-                    data-model-picker-row
-                    data-testid="ai-model-picker-option"
-                    :data-model-key="model.key"
-                    :title="
-                      blockedMessage(agents.find((agent) => agent.id === model.agentKey)) ||
-                      model.modelName + ' · ' + model.providerName
-                    "
-                    @click="selectModel(model)"
-                  >
-                    <AgentDriverIcon
-                      :driver="
-                        agents.find((agent) => agent.id === model.agentKey)?.driver ?? 'mastra'
-                      "
-                      class="mt-0.5 size-3.5"
-                    />
-                    <span class="min-w-0 flex-1">
-                      <span class="block truncate text-xs font-medium text-foreground">{{
-                        model.modelName
-                      }}</span>
-                      <span class="mt-0.5 block truncate text-[10px] text-muted-foreground">
-                        {{ instanceName(agents.find((agent) => agent.id === model.agentKey)!) }}
-                        ·
-                        {{ model.providerName }}
-                      </span>
-                    </span>
-                    <kbd v-if="index < 9" class="mt-0.5 shrink-0 text-[9px] text-muted-foreground"
-                      >Ctrl+{{ index + 1 }}</kbd
-                    >
-                    <Check
-                      v-if="selectedAgentId === model.agentKey && selectedModelKey === model.key"
-                      class="mt-0.5 size-3.5 shrink-0 text-primary"
-                    />
-                  </button>
-                  <LockKeyhole
-                    v-if="
-                      agents.find((agent) => agent.id === model.agentKey)?.switchBlockedReason ===
-                      'incompatible'
-                    "
-                    class="size-3 shrink-0 text-muted-foreground"
-                    aria-hidden="true"
-                  />
-                  <button
-                    type="button"
-                    class="grid size-7 shrink-0 place-items-center rounded-md text-muted-foreground hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
-                    :aria-label="
-                      isFavorite(model)
-                        ? t('aiAssistant.composer.unfavorite')
-                        : t('aiAssistant.composer.favorite')
-                    "
-                    :aria-pressed="isFavorite(model)"
-                    data-testid="ai-model-picker-toggle-favorite"
-                    @click.stop="toggleFavorite(model)"
-                  >
-                    <Star
-                      class="size-3.5"
-                      :class="isFavorite(model) ? 'fill-current text-primary' : ''"
-                    />
-                  </button>
-                </div>
-              </template>
-              <div
-                v-else
-                class="px-2.5 py-3 text-left text-xs leading-relaxed"
-                data-testid="ai-model-picker-empty"
-                role="status"
+              <button
+                type="button"
+                class="relative grid aspect-square w-full shrink-0 place-items-center rounded-lg text-muted-foreground transition-colors hover:bg-foreground/10 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                :class="
+                  activeSection === 'favorites' && !search ? 'bg-foreground/10 text-foreground' : ''
+                "
+                :aria-label="t('aiAssistant.composer.favorites')"
+                :aria-pressed="activeSection === 'favorites' && !search"
+                :data-rail-active="activeSection === 'favorites' && !search ? 'true' : undefined"
+                data-testid="ai-model-picker-favorites"
+                @click="
+                  activeSection = 'favorites';
+                  search = '';
+                "
               >
-                <p class="text-muted-foreground">
-                  {{ emptyMessage }}
-                </p>
-                <template v-if="browsedAgent && !search && !browseLoading">
-                  <button
-                    type="button"
-                    class="mt-1.5 block text-left font-semibold text-foreground hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
-                    data-testid="ai-model-picker-empty-settings"
-                    @click="
-                      openMenu = null;
-                      emit('settings');
+                <Star class="size-4 fill-current" />
+              </button>
+              <div class="border-b border-border/70" aria-hidden="true" />
+              <button
+                v-for="agent in enabledAgents"
+                :key="agent.id"
+                type="button"
+                class="relative grid aspect-square w-full shrink-0 place-items-center rounded-lg text-muted-foreground transition-colors hover:bg-foreground/10 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary disabled:opacity-35 disabled:hover:bg-transparent"
+                :class="
+                  agent.switchBlockedReason
+                    ? 'opacity-35 hover:bg-transparent hover:text-muted-foreground'
+                    : activeSection === agent.id && !search
+                      ? 'bg-foreground/10 text-foreground'
+                      : ''
+                "
+                :disabled="!agent.enabled"
+                :title="blockedMessage(agent) || instanceName(agent)"
+                :aria-label="
+                  blockedMessage(agent)
+                    ? instanceName(agent) + ' · ' + blockedMessage(agent)
+                    : instanceName(agent)
+                "
+                :aria-disabled="Boolean(agent.switchBlockedReason) || !agent.enabled"
+                :aria-pressed="activeSection === agent.id && !search"
+                :data-rail-active="activeSection === agent.id && !search ? 'true' : undefined"
+                :data-testid="'ai-model-picker-agent-' + agent.id"
+                @click="browseAgent(agent)"
+              >
+                <AgentDriverIcon :driver="agent.driver" class="size-4" />
+                <LockKeyhole
+                  v-if="agent.switchBlockedReason === 'incompatible'"
+                  class="absolute bottom-1 right-1 size-2.5"
+                  aria-hidden="true"
+                />
+              </button>
+            </nav>
+            <div class="flex min-h-0 min-w-0 max-w-90 flex-1 flex-col">
+              <label class="flex h-11 shrink-0 items-center gap-2 border-b border-border/65 px-3">
+                <Search class="size-3.5 shrink-0 text-muted-foreground" />
+                <input
+                  ref="searchInput"
+                  v-model="search"
+                  type="search"
+                  class="h-full min-w-0 flex-1 bg-transparent text-xs text-foreground outline-none placeholder:text-muted-foreground"
+                  :placeholder="t('aiAssistant.composer.searchModels')"
+                  :aria-label="t('aiAssistant.composer.searchModels')"
+                  data-testid="ai-model-picker-search"
+                />
+              </label>
+              <div
+                ref="modelList"
+                class="min-h-0 flex-1 overflow-y-auto px-1.5 py-1.5"
+                data-testid="ai-model-picker-results"
+              >
+                <template v-if="visibleModels.length">
+                  <div
+                    v-for="(model, index) in visibleModels"
+                    :key="modelIdentity(model)"
+                    class="group flex min-w-0 items-center gap-0.5 rounded-lg"
+                    :class="canChooseModel(model) ? 'hover:bg-muted/60' : ''"
+                    :title="blockedMessage(agents.find((agent) => agent.id === model.agentKey))"
+                    :tabindex="
+                      agents.find((agent) => agent.id === model.agentKey)?.switchBlockedReason
+                        ? 0
+                        : undefined
+                    "
+                    :aria-label="
+                      agents.find((agent) => agent.id === model.agentKey)?.switchBlockedReason
+                        ? model.modelName +
+                          ' · ' +
+                          blockedMessage(agents.find((agent) => agent.id === model.agentKey))
+                        : undefined
                     "
                   >
-                    {{ t('aiAssistant.composer.openAgentSetup') }}
-                  </button>
-                  <button
-                    type="button"
-                    class="mt-2 block text-left text-muted-foreground hover:text-foreground hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
-                    data-testid="ai-model-picker-recheck"
-                    @click="emit('refresh')"
-                  >
-                    {{ t('aiAssistant.composer.recheckModels') }}
-                  </button>
+                    <button
+                      type="button"
+                      class="flex min-w-0 flex-1 items-start gap-2 rounded-lg px-2 py-2 text-left outline-none focus-visible:ring-2 focus-visible:ring-primary disabled:opacity-45"
+                      :disabled="!canChooseModel(model)"
+                      :aria-pressed="
+                        selectedAgentId === model.agentKey && selectedModelKey === model.key
+                      "
+                      data-model-picker-row
+                      data-testid="ai-model-picker-option"
+                      :data-model-key="model.key"
+                      :title="
+                        blockedMessage(agents.find((agent) => agent.id === model.agentKey)) ||
+                        model.modelName + ' · ' + model.providerName
+                      "
+                      @click="selectModel(model)"
+                    >
+                      <AgentDriverIcon
+                        :driver="
+                          agents.find((agent) => agent.id === model.agentKey)?.driver ?? 'mastra'
+                        "
+                        class="mt-0.5 size-3.5"
+                      />
+                      <span class="min-w-0 flex-1">
+                        <span class="block truncate text-xs font-medium text-foreground">{{
+                          model.modelName
+                        }}</span>
+                        <span class="mt-0.5 block truncate text-[10px] text-muted-foreground">
+                          {{ instanceName(agents.find((agent) => agent.id === model.agentKey)!) }}
+                          ·
+                          {{ model.providerName }}
+                        </span>
+                      </span>
+                      <kbd v-if="index < 9" class="mt-0.5 shrink-0 text-[9px] text-muted-foreground"
+                        >Ctrl+{{ index + 1 }}</kbd
+                      >
+                      <Check
+                        v-if="selectedAgentId === model.agentKey && selectedModelKey === model.key"
+                        class="mt-0.5 size-3.5 shrink-0 text-primary"
+                      />
+                    </button>
+                    <LockKeyhole
+                      v-if="
+                        agents.find((agent) => agent.id === model.agentKey)?.switchBlockedReason ===
+                        'incompatible'
+                      "
+                      class="size-3 shrink-0 text-muted-foreground"
+                      aria-hidden="true"
+                    />
+                    <button
+                      type="button"
+                      class="grid size-7 shrink-0 place-items-center rounded-md text-muted-foreground hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                      :aria-label="
+                        isFavorite(model)
+                          ? t('aiAssistant.composer.unfavorite')
+                          : t('aiAssistant.composer.favorite')
+                      "
+                      :aria-pressed="isFavorite(model)"
+                      data-testid="ai-model-picker-toggle-favorite"
+                      @click.stop="toggleFavorite(model)"
+                    >
+                      <Star
+                        class="size-3.5"
+                        :class="isFavorite(model) ? 'fill-current text-primary' : ''"
+                      />
+                    </button>
+                  </div>
                 </template>
+                <div
+                  v-else
+                  class="px-2.5 py-3 text-left text-xs leading-relaxed"
+                  data-testid="ai-model-picker-empty"
+                  role="status"
+                >
+                  <p class="text-muted-foreground">
+                    {{ emptyMessage }}
+                  </p>
+                  <template v-if="browsedAgent && !search && !browseLoading">
+                    <button
+                      type="button"
+                      class="mt-1.5 block text-left font-semibold text-foreground hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                      data-testid="ai-model-picker-empty-settings"
+                      @click="
+                        openMenu = null;
+                        emit('settings');
+                      "
+                    >
+                      {{ t('aiAssistant.composer.openAgentSetup') }}
+                    </button>
+                    <button
+                      type="button"
+                      class="mt-2 block text-left text-muted-foreground hover:text-foreground hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                      data-testid="ai-model-picker-recheck"
+                      @click="emit('refresh')"
+                    >
+                      {{ t('aiAssistant.composer.recheckModels') }}
+                    </button>
+                  </template>
+                </div>
               </div>
             </div>
+            <AIModelTraitsPanel
+              ref="traitsPanel"
+              :model="browsedModel"
+              :reasoning-efforts="native ? browsedModel?.reasoningEfforts : undefined"
+              :selected-effort="browsedEffort"
+              :disabled="disabled || Boolean(loading)"
+              :locked-hint="lockedTraitsHint"
+              @model-option="chooseTrait"
+            />
           </div>
-          <AIModelTraitsPanel
-            v-if="selectedModel"
-            :reasoning-efforts="hasModelTraits ? selectedModel?.reasoningEfforts : undefined"
-            :service-tiers="hasModelTraits ? selectedModel?.serviceTiers : undefined"
-            :selected-effort="selectedEffort"
-            :selected-service-tier="selectedServiceTier"
-            :disabled="disabled || Boolean(loading)"
-            :permission-mode="
-              native
-                ? (currentAgent?.nativePermissionMode ?? 'supervised')
-                : (permissionMode ?? 'supervised')
-            "
-            :native="native"
-            @permission="emit('permission', $event)"
-            @model-option="chooseTrait"
-          />
+          <div
+            class="flex flex-wrap items-center gap-2 border-t border-border/65 bg-muted/40 px-3 py-2"
+            data-testid="ai-model-picker-footer"
+          >
+            <div
+              v-if="speedOptions.length"
+              role="radiogroup"
+              :aria-label="t('aiAssistant.composer.serviceTier')"
+              class="flex rounded-lg bg-input/40 p-0.5"
+              data-testid="ai-model-picker-speed"
+            >
+              <button
+                v-for="option in speedOptions"
+                :key="option.id"
+                type="button"
+                role="radio"
+                class="flex h-6 items-center justify-center gap-1 rounded-md px-2 text-xs outline-none transition-colors hover:text-foreground focus-visible:ring-2 focus-visible:ring-primary disabled:cursor-not-allowed disabled:opacity-45"
+                :class="
+                  browsedServiceTier === option.id
+                    ? 'bg-background text-foreground shadow-sm'
+                    : 'text-muted-foreground'
+                "
+                :aria-checked="browsedServiceTier === option.id"
+                :disabled="!canAdjustBrowsed"
+                :data-testid="'ai-model-picker-speed-' + option.id"
+                @click="chooseSpeed(option.id)"
+              >
+                <Zap v-if="option.id !== 'default'" class="size-3 shrink-0" aria-hidden="true" />{{
+                  option.label
+                }}
+              </button>
+            </div>
+            <Popover :open="permissionMenuOpen" @update:open="permissionMenuOpen = $event">
+              <PopoverTrigger as-child>
+                <button
+                  type="button"
+                  class="ms-auto flex h-7 items-center gap-1.5 rounded-md px-2 text-xs text-muted-foreground transition-colors hover:bg-foreground/10 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                  :aria-label="t('aiAssistant.composer.permissions') + ': ' + permissionLabel"
+                  data-testid="ai-model-picker-permissions"
+                >
+                  <component :is="permissionIcon" class="size-3.5 shrink-0" aria-hidden="true" />
+                  {{ permissionLabel }}
+                  <ChevronUp class="size-3 shrink-0" aria-hidden="true" />
+                </button>
+              </PopoverTrigger>
+              <PopoverContent
+                side="top"
+                align="end"
+                :side-offset="6"
+                class="w-72 p-1.5"
+                data-testid="ai-model-picker-permissions-menu"
+              >
+                <p class="px-2 pb-1 pt-0.5 text-[10px] font-medium text-muted-foreground">
+                  {{ t('aiAssistant.composer.permissions') }}
+                </p>
+                <button
+                  v-for="option in permissionOptions"
+                  :key="option.id"
+                  type="button"
+                  role="menuitemradio"
+                  class="flex w-full items-start gap-2 rounded-md px-2 py-1.5 text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                  :class="
+                    native ? 'cursor-default opacity-100' : 'hover:bg-muted/70 disabled:opacity-45'
+                  "
+                  :aria-checked="permissionValue === option.id"
+                  :aria-disabled="native"
+                  :disabled="native || disabled"
+                  :data-testid="'ai-model-picker-permission-' + option.id"
+                  @click="selectPermission(option.id)"
+                >
+                  <span class="flex min-w-0 flex-1 flex-col gap-0.5">
+                    <span class="text-xs text-foreground">{{ option.label }}</span>
+                    <span class="text-[10px] leading-snug text-muted-foreground">{{
+                      option.hint
+                    }}</span>
+                  </span>
+                  <Check
+                    v-if="permissionValue === option.id"
+                    class="mt-0.5 size-3.5 shrink-0"
+                    aria-hidden="true"
+                  />
+                </button>
+              </PopoverContent>
+            </Popover>
+          </div>
         </div>
       </PopoverContent>
     </Popover>
