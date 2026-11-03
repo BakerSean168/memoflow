@@ -23,7 +23,11 @@ import type {
   LocalAgentModelOptions,
 } from '@memoflow/ai-contracts';
 import { useAI } from './useAI';
-import { useAIModelCatalog, composerAgentKey } from './useAIModelCatalog';
+import {
+  useAIModelCatalog,
+  composerAgentKey,
+  sharedAIModelCatalogState,
+} from './useAIModelCatalog';
 import { sortAgentInstances } from '../agent-instance-order';
 import { antigravityEffortVariant, presentAntigravityModels } from './antigravityModelPresentation';
 import { useLocalAssistantChoices } from './useLocalAssistantChoices';
@@ -88,12 +92,18 @@ export function useAIChatView(options: UseAIChatViewOptions) {
   const localAgent = inject(AI_LOCAL_AGENT_KEY, undefined);
   const agentRegistryClient = inject(AI_AGENT_REGISTRY_KEY, undefined);
   const resolveIdentity = aiUiHost.useServerStateIdentityScope();
-  const catalog = useAIModelCatalog({
-    resolveIdentity,
-    registry: agentRegistryClient,
-    native: localAgent,
-    refreshProviderModels,
-  });
+  const catalog = useAIModelCatalog(
+    {
+      resolveIdentity,
+      registry: agentRegistryClient,
+      native: localAgent,
+      refreshProviderModels,
+      autoRevalidate: true,
+    },
+    // Application-level directory: an AIChatView remount re-presents the last
+    // verified catalog instead of losing it and re-probing every native driver.
+    sharedAIModelCatalogState(agentRegistryClient ?? localAgent),
+  );
   const agentRegistrySnapshot = catalog.snapshot;
   const modelCatalog = catalog.entries;
   const modelCatalogLoading = catalog.loading;
@@ -596,12 +606,10 @@ export function useAIChatView(options: UseAIChatViewOptions) {
         )
           throw new Error('Native Agent connection is no longer available');
         // Explicit selection needs an identity-bound membership check, but not
-        // another slow ACP spawn if Desktop has recently verified this exact
-        // saved AGY account/configuration. Sending still performs fresh native checks.
+        // another slow native spawn when Desktop has recently verified this exact
+        // saved account/configuration. Sending still performs fresh native checks.
         const [verified, beforeCommitSnapshot] = await Promise.all([
-          instance.driver === 'antigravity'
-            ? localAgent.cachedCatalogConnection(id)
-            : Promise.resolve(null),
+          localAgent.cachedCatalogConnection?.(id) ?? null,
           agentRegistryClient.list(),
         ]);
         if (
@@ -1255,7 +1263,10 @@ export function useAIChatView(options: UseAIChatViewOptions) {
       selectedComposerAgent,
       composerModels,
       composerCatalog,
-      refreshComposerCatalog: refreshConfiguration,
+      // Opening the picker reads the presented directory. Only entries that were
+      // never loaded or previously failed are discovered; it is not a full
+      // configuration refresh.
+      refreshComposerCatalog: () => catalog.ensureLoaded(),
       composerModelKey,
       modelCatalogLoading,
       composerLoading,

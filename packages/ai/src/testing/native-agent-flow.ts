@@ -19,8 +19,7 @@ import { CodexDriver } from '../server/local-agent/codex-driver';
 import { NativeRpcTransport } from '../server/local-agent/native-rpc-transport';
 
 export type NativeProbeFailure =
-  | { kind: 'spawn' | 'stderr'; message: string }
-  | { kind: 'rpc'; code: number; message: string };
+  { kind: 'spawn' | 'stderr'; message: string } | { kind: 'rpc'; code: number; message: string };
 
 /** Node-only cross-layer fixture for #456: real AI implementation, synthetic
  * Electron delivery and Codex JSON-RPC process. Callers must unset provider auth
@@ -128,6 +127,8 @@ export function createNativeAgentFlowFixture(directory: string) {
             return ok(await active.probeDefaultDriver(owner, input.driver));
           case 'probe_connection':
             return ok(await active.probeConnection(owner, input.id));
+          case 'catalog_cached_connection':
+            return ok(await active.cachedCatalogConnection(owner, input.id));
           case 'list_conversations':
             return ok(await active.listConversations(owner));
           case 'create_conversation':
@@ -137,11 +138,17 @@ export function createNativeAgentFlowFixture(directory: string) {
         }
       }
       if (channel === AIChannels.RUNTIME_ASSISTANT_START) {
-        const { streamId, command } = raw as { streamId: string; command: unknown };
+        const { streamId, command } = raw as {
+          streamId: string;
+          command: unknown;
+        };
         const input = AssistantRuntimeClientCommandSchema.parse(command);
         if (input.type !== 'message' || input.runtimeKind !== 'local_agent')
           throw new Error('Unexpected route');
-        for await (const event of active.dispatchMessage({ ...input, identityId: owner }))
+        for await (const event of active.dispatchMessage({
+          ...input,
+          identityId: owner,
+        }))
           for (const listener of [
             ...(listeners.get(AIStreamChannels.RUNTIME_ASSISTANT_EVENT) ?? []),
           ])

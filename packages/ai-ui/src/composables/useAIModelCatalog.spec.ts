@@ -153,10 +153,12 @@ describe('identity-scoped read-only model catalog', () => {
   it('reuses profile-owned verified AGY models for Workspace without launching another ACP', async () => {
     const { snapshot, catalog, native, scope } = setup();
     snapshot.instances.push(instance('antigravity', 'antigravity', true, 'conn-agy'));
-    native.cachedCatalogConnection.mockResolvedValueOnce(ready('gemini-3.8-flash'));
+    native.cachedCatalogConnection.mockImplementation(async (id: string) =>
+      id === 'conn-agy' ? ready('gemini-3.8-flash') : null,
+    );
     const probeCount = native.probeConnection.mock.calls.length;
     await catalog.refresh();
-    expect(native.cachedCatalogConnection).toHaveBeenCalledExactlyOnceWith('conn-agy');
+    expect(native.cachedCatalogConnection).toHaveBeenCalledWith('conn-agy');
     expect(native.probeConnection.mock.calls.length).toBe(probeCount + 1);
     // The normal saved Codex connection is still freshly probed.
     expect(native.probeConnection).toHaveBeenCalledWith('conn-work');
@@ -175,6 +177,64 @@ describe('identity-scoped read-only model catalog', () => {
     scope.stop();
   });
 
+  it('presents a saved Codex directory from the profile cache without spawning the CLI', async () => {
+    const { catalog, native, scope } = setup();
+    native.cachedCatalogConnection.mockImplementation(async (id: string) =>
+      id === 'conn-work' ? ready('cached-codex-model') : null,
+    );
+    await catalog.refresh();
+    expect(native.cachedCatalogConnection).toHaveBeenCalledWith('conn-work');
+    expect(native.probeConnection).not.toHaveBeenCalledWith('conn-work');
+    expect(catalog.entries.value.work).toMatchObject({
+      status: 'ready',
+      models: [{ modelId: 'cached-codex-model' }],
+    });
+    expect(isModelSelectable(catalog.entries.value, 'work', 'cached-codex-model')).toBe(true);
+    scope.stop();
+  });
+
+  it('presents the implicit default driver directory from the profile cache', async () => {
+    const { catalog, native, scope } = setup();
+    native.cachedCatalogConnection.mockImplementation(async (id: string) =>
+      id === 'implicit:codex' ? ready('cached-default-model') : null,
+    );
+    await catalog.refresh();
+    expect(native.probeDefaultDriver).not.toHaveBeenCalled();
+    expect(catalog.entries.value.codex?.models.map((m) => m.modelId)).toEqual([
+      'cached-default-model',
+    ]);
+    scope.stop();
+  });
+
+  it('opening the picker re-reads presented entries and only fills missing ones', async () => {
+    const { catalog, native, refreshProviderModels, scope } = setup();
+    await catalog.refresh();
+    native.probeConnection.mockClear();
+    native.probeDefaultDriver.mockClear();
+    native.cachedCatalogConnection.mockClear();
+    refreshProviderModels.mockClear();
+    await catalog.ensureLoaded();
+    expect(native.probeConnection).not.toHaveBeenCalled();
+    expect(native.probeDefaultDriver).not.toHaveBeenCalled();
+    expect(native.cachedCatalogConnection).not.toHaveBeenCalled();
+    expect(refreshProviderModels).not.toHaveBeenCalled();
+    expect(isModelSelectable(catalog.entries.value, 'work', 'work-model')).toBe(true);
+    scope.stop();
+  });
+
+  it('keeps the last presented directory when revalidation fails', async () => {
+    const { catalog, native, scope } = setup();
+    await catalog.refresh();
+    native.probeConnection.mockRejectedValueOnce(new Error('native discovery failed'));
+    await catalog.refresh();
+    expect(catalog.entries.value.work).toMatchObject({
+      status: 'ready',
+      models: [{ modelId: 'work-model' }],
+    });
+    expect(isModelSelectable(catalog.entries.value, 'work', 'work-model')).toBe(true);
+    scope.stop();
+  });
+
   it('falls back to a fresh official ACP probe when its scoped model observation is absent', async () => {
     const { snapshot, catalog, native, scope } = setup();
     snapshot.instances.push(instance('antigravity', 'antigravity', true, 'conn-agy'));
@@ -182,7 +242,7 @@ describe('identity-scoped read-only model catalog', () => {
       id === 'conn-agy' ? ready('fresh-agy-model') : ready('work-model'),
     );
     await catalog.refresh();
-    expect(native.cachedCatalogConnection).toHaveBeenCalledExactlyOnceWith('conn-agy');
+    expect(native.cachedCatalogConnection).toHaveBeenCalledWith('conn-agy');
     expect(native.probeConnection).toHaveBeenCalledWith('conn-agy');
     expect(catalog.entries.value.antigravity?.models[0]?.modelId).toBe('fresh-agy-model');
     scope.stop();
@@ -192,12 +252,15 @@ describe('identity-scoped read-only model catalog', () => {
     const { snapshot, catalog, native, identity, scope } = setup();
     snapshot.instances.push(instance('antigravity', 'antigravity', true, 'conn-agy'));
     const old = deferred<LocalAgentStatus | null>();
-    native.cachedCatalogConnection.mockImplementationOnce(() => old.promise);
+    let agy: Promise<LocalAgentStatus | null> = old.promise;
+    native.cachedCatalogConnection.mockImplementation((id: string) =>
+      id === 'conn-agy' ? agy : Promise.resolve(null),
+    );
     const first = catalog.refresh();
-    await vi.waitFor(() => expect(native.cachedCatalogConnection).toHaveBeenCalledTimes(1));
+    await vi.waitFor(() => expect(native.cachedCatalogConnection).toHaveBeenCalledWith('conn-agy'));
     identity.value = 'profile-b';
     expect(catalog.entries.value).toEqual({});
-    native.cachedCatalogConnection.mockResolvedValueOnce(ready('new-owner-model'));
+    agy = Promise.resolve(ready('new-owner-model'));
     await catalog.refresh();
     old.resolve(ready('old-owner-model'));
     await first;
