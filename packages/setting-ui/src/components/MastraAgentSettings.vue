@@ -209,7 +209,8 @@ async function refreshModels() {
   message.value = '';
   const request = ++generation;
   try {
-    const result = await ai.refreshProviderModels(String(current.id));
+    // The explicit button bypasses the server-side inventory cache.
+    const result = await ai.refreshProviderModels(String(current.id), true);
     if (disposed || request !== generation) return;
     models.value = result.models;
   } catch (error) {

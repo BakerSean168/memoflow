@@ -128,8 +128,8 @@ export function useAI() {
     await loadProviders();
   }
 
-  async function refreshProviderModels(providerId: string) {
-    return unwrap(await client.refreshProviderModels(providerId));
+  async function refreshProviderModels(providerId: string, force = false) {
+    return unwrap(await client.refreshProviderModels(providerId, force));
   }
 
   async function testProvider(request: TestAIProviderReq): Promise<TestAIProviderRes> {

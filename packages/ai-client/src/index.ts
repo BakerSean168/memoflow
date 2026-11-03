@@ -78,7 +78,10 @@ export interface AIClientPort {
   deleteProvider(id: string): Promise<Result<void>>;
   testProvider(request: TestAIProviderReq): Promise<Result<TestAIProviderRes>>;
   setDefaultProvider(providerId: string): Promise<Result<void>>;
-  refreshProviderModels(id: string): Promise<Result<AIProviderModelCatalogSnapshot>>;
+  refreshProviderModels(
+    id: string,
+    force?: boolean,
+  ): Promise<Result<AIProviderModelCatalogSnapshot>>;
 
   createConversation(request: CreateConversationReq): Promise<Result<AIConversationClientDTO>>;
   updateConversation(
@@ -133,7 +136,7 @@ function createProductClient(adapters: ProductAdapters): AIClientPort {
       adapters.providerConfig.setDefaultProvider({
         providerId: providerId as AiProviderConfigId,
       }),
-    refreshProviderModels: (id) => adapters.providerConfig.refreshProviderModels(id),
+    refreshProviderModels: (id, force) => adapters.providerConfig.refreshProviderModels(id, force),
 
     createConversation: (request) => adapters.conversation.createConversation(request),
     updateConversation: (id, request) => adapters.conversation.updateConversation(id, request),

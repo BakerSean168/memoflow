@@ -802,8 +802,8 @@ export function createAIModule(dependencies: AIModuleDependencies): AIModuleInst
     listProviders: (cx) => services.providerServices.list.execute(cx),
     testConnection: (req, cx) => services.providerServices.testConnection.execute(req, cx),
     setDefaultProvider: (id, cx) => services.providerServices.setDefault.execute(id, cx),
-    refreshProviderModels: (providerId, cx) =>
-      services.providerServices.refreshModels.execute(providerId, cx),
+    refreshProviderModels: (providerId, cx, force) =>
+      services.providerServices.refreshModels.execute(providerId, cx, { force }),
   };
 
   const assistantConversation: AssistantConversationPort = {

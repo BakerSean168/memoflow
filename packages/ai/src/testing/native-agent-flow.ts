@@ -19,7 +19,8 @@ import { CodexDriver } from '../server/local-agent/codex-driver';
 import { NativeRpcTransport } from '../server/local-agent/native-rpc-transport';
 
 export type NativeProbeFailure =
-  { kind: 'spawn' | 'stderr'; message: string } | { kind: 'rpc'; code: number; message: string };
+  | { kind: 'spawn' | 'stderr'; message: string }
+  | { kind: 'rpc'; code: number; message: string };
 
 /** Node-only cross-layer fixture for #456: real AI implementation, synthetic
  * Electron delivery and Codex JSON-RPC process. Callers must unset provider auth

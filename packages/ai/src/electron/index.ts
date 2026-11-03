@@ -428,10 +428,16 @@ export function createAIElectronModule(options: AIElectronModuleOptions): AIElec
           }),
         );
         installed.push(AIChannels.PROVIDER_SET_DEFAULT);
-        ipcMain.handle(AIChannels.PROVIDER_REFRESH_MODELS, async (_, id) =>
-          withAuthenticatedValue(ctx, async (requestContext) =>
-            providerManagement.refreshProviderModels(String(id), requestContext),
-          ),
+        ipcMain.handle(AIChannels.PROVIDER_REFRESH_MODELS, async (_, payload) =>
+          withAuthenticatedValue(ctx, async (requestContext) => {
+            const request =
+              typeof payload === 'string' ? { id: payload, force: false } : (payload ?? {});
+            return providerManagement.refreshProviderModels(
+              String(request.id),
+              requestContext,
+              request.force === true,
+            );
+          }),
         );
         installed.push(AIChannels.PROVIDER_REFRESH_MODELS);
 

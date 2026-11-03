@@ -221,7 +221,12 @@ export function registerAIProviderRoutes(
       },
     },
     [auth],
-    (req, ctx) => controller.refreshModels(req.params!.id, ctx),
+    (req, ctx) =>
+      controller.refreshModels(
+        req.params!.id,
+        ctx,
+        req.query?.force === 'true' || req.query?.force === true,
+      ),
   );
 
   return router;
