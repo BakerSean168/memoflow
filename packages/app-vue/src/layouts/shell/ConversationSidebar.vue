@@ -252,6 +252,13 @@ function runRowAction(id: string) {
   if (selection.state.busy) return;
   if (!archiveBlocked(id)) emit('archive-conversation', id);
 }
+/**
+ * 归档分区的恢复走批量结果通路（#831 的 toast/重试），没有 bulkAction 时退回 #830 的事件。
+ */
+function restoreArchived(id: string) {
+  if (props.bulkAction) void emitBulk('restore', [id]);
+  else emit('restore-conversation', id);
+}
 function selectRow(id: string, event: MouseEvent) {
   if (selection.state.busy) return;
   const multi = event.ctrlKey || event.metaKey || event.shiftKey;
@@ -766,7 +773,7 @@ const identityLabel = () => {
               :aria-label="t('shell.conversation.restore')"
               :title="t('shell.conversation.restore')"
               :disabled="loading || selection.state.busy"
-              @click="emit('restore-conversation', item.id)"
+              @click="restoreArchived(item.id)"
             >
               <ArchiveRestore class="h-3.5 w-3.5" aria-hidden="true" />
             </button>

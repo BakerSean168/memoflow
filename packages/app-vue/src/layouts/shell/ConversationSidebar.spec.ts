@@ -694,8 +694,11 @@ describe('ConversationSidebar archived partition', () => {
   const archived = [{ id: 'z', title: 'Old architecture notes', time: '2 days ago' }];
 
   it('shows archived conversations in their own collapsed partition and restores them', async () => {
+    const bulkAction = vi.fn(async (_action: string, ids: string[]) =>
+      ids.map((id) => ({ id, success: true })),
+    );
     const wrapper = mount(ConversationSidebar, {
-      props: { groups, activeConversationId: 'b', archivedConversations: archived },
+      props: { groups, activeConversationId: 'b', archivedConversations: archived, bulkAction },
       global: { plugins: [i18n] },
     });
     try {
@@ -716,7 +719,9 @@ describe('ConversationSidebar archived partition', () => {
       expect(row.find('[role="option"]').exists()).toBe(false);
 
       await row.get('[data-testid="archived-conversation-restore"]').trigger('click');
-      expect(wrapper.emitted('restore-conversation')).toEqual([['z']]);
+      // 恢复也走批量结果通路（#831 的 toast/重试），不再单独发 restore-conversation。
+      expect(bulkAction).toHaveBeenCalledWith('restore', ['z']);
+      expect(wrapper.emitted('restore-conversation')).toBeUndefined();
       expect(wrapper.emitted('select-conversation')).toBeUndefined();
 
       // 父级恢复后：分区消失，会话回到普通列表分组。
