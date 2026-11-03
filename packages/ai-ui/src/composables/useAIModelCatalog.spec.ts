@@ -249,13 +249,13 @@ describe('identity-scoped read-only model catalog', () => {
       ['beta', 'provider'],
       ['beta', 'provider-two'],
     ]);
-    expect(
-      listSelectableModels(catalog.entries.value, 'mastra').map((model) => model.key),
-    ).toEqual([
-      'agent:mastra::provider::alpha',
-      'agent:mastra::provider::beta',
-      'agent:mastra::provider-two::beta',
-    ]);
+    expect(listSelectableModels(catalog.entries.value, 'mastra').map((model) => model.key)).toEqual(
+      [
+        'agent:mastra::provider::alpha',
+        'agent:mastra::provider::beta',
+        'agent:mastra::provider-two::beta',
+      ],
+    );
     scope.stop();
   });
 
