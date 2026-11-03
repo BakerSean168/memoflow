@@ -2816,7 +2816,7 @@
         "testRole": "behavior"
       },
       "decision": "retain",
-      "behavior": "会话状态、搜索、Profile 菜单与焦点恢复，本地及云账户菜单添加账号/退出登录事件与旧入口移除，跨组选择、逐项失败反馈、失败项保留和旧 Profile 结果隔离，T3 Code 单槽位行操作、单项/批量右键菜单、F2 重命名、成功删除不残留摘要，侧栏已归档专属分区的折叠/数量/时间/空态/分页与恢复事件，以及顶栏无归档筛选",
+      "behavior": "会话状态、搜索、Profile 菜单与焦点恢复，本地及云账户菜单添加账号/退出登录事件与旧入口移除，跨组选择、失败项保留和旧 Profile 结果隔离，批量结果只以浮层 toast 呈现且列表流内无常驻结果行、失败 toast 带可点击重试并真正重跑同一批会话、toast 出现前后侧栏结构与行顺序不变，T3 Code 单槽位行操作、单项/批量右键菜单、F2 重命名，侧栏已归档专属分区的折叠/数量/时间/空态/分页与恢复事件，以及顶栏无归档筛选",
       "assertionEvidence": [
         "conversation-archived-section",
         "conversation-archived-toggle",
@@ -2824,6 +2824,8 @@
         "conversation-search-input",
         "aria-selected",
         "conversation-bulk-results",
+        "data-sonner-toast",
+        "data-action",
         "bulkAction",
         "shell-add-account",
         "shell-logout"
@@ -2833,7 +2835,7 @@
         "status": "none-verified",
         "testFiles": []
       },
-      "sourceSha256": "7f2e30cf855d718d53194e0be84c46bf249c598a2c9baff0c67207fe7004fbe1"
+      "sourceSha256": "c212182e6a3feca5f6ac05d636433934331b23a355cc8e3e3acf7ec988c18a8a"
     },
     {
       "path": "packages/app-vue/src/layouts/shell/WindowHeader.spec.ts",
@@ -3085,10 +3087,13 @@
         "testRole": "behavior"
       },
       "decision": "retain",
-      "behavior": "真实鼠标和键盘的跨组/非连续选择、右键菜单数量、部分失败 Undo、Profile 卸载、窄栏、危险删除确认，以及行操作平时隐藏、悬浮或键盘聚焦才出现（T3 Code 单槽位）",
+      "behavior": "真实鼠标和键盘的跨组/非连续选择、右键菜单数量、部分失败 Undo 与批量结果浮层 toast（失败带 Retry、fixed 浮层不顶动列表、无常驻结果行）、Profile 卸载后的过期结果静默、窄栏、危险删除确认，以及行操作平时隐藏、悬浮或键盘聚焦才出现（T3 Code 单槽位）",
       "assertionEvidence": [
         "aria-selected",
         "conversation-context-status",
+        "conversation-bulk-results",
+        "data-sonner-toast",
+        "Retry",
         "Control+z",
         "width.scroll"
       ],
@@ -3097,7 +3102,7 @@
         "status": "none-verified",
         "testFiles": []
       },
-      "sourceSha256": "b2e6b6efcd3bec9badc3c4f1fcd5eb58f73539b06f7a1274a1d2155e50865d8e"
+      "sourceSha256": "fe867a0ccadb9fc930f621369c5ce4b5e7baf47fb14e64c4c1e99d5d66fd9c85"
     }
   ],
   "storyReviews": [],
