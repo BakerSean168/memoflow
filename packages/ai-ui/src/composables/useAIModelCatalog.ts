@@ -309,6 +309,9 @@ export function useAIModelCatalog(options: Options, state = createAIModelCatalog
             // Opening a picker must not restart discovery. Keep the presented
             // models, but rebind them to this instance's current connection so a
             // just-materialized native default is selectable without a probe.
+            // A Mastra instance may hold several bindings, so each of its models
+            // already carries the Connection it was discovered under; rewriting
+            // that id would detach the model from its binding group.
             const providerId = instance.legacyConnectionId ?? instance.instanceId;
             rawEntries.value = {
               ...rawEntries.value,
@@ -318,7 +321,7 @@ export function useAIModelCatalog(options: Options, state = createAIModelCatalog
                 models: presented.models.map((model) => ({
                   ...model,
                   agentKey,
-                  providerId,
+                  providerId: instance.driver === 'mastra' ? model.providerId : providerId,
                 })),
               },
             };

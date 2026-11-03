@@ -216,8 +216,8 @@ const lockedTraitsHint = computed(() =>
     : '',
 );
 const speedOptions = computed(() => {
-  // Service tiers are discovered native model parameters, like reasoning levels.
-  const tiers = props.native ? (browsedModel.value?.serviceTiers ?? []) : [];
+  // Service tiers are discovered model parameters, like reasoning levels.
+  const tiers = browsedModel.value?.serviceTiers ?? [];
   return tiers.length
     ? [
         { id: 'default', label: t('aiAssistant.composer.standardMode') },
@@ -518,14 +518,11 @@ watch([activeSection, search, () => enabledAgents.value.length], () => {
         data-testid="ai-model-picker"
       >
         <div
-          class="flex flex-col"
+          class="flex h-[min(346px,calc(100dvh-80px))] flex-col"
           data-testid="ai-model-picker-frame"
           @keydown="keyboardNavigation"
         >
-          <div
-            class="flex h-[min(346px,calc(100dvh-80px))] min-h-0"
-            data-testid="ai-model-picker-body"
-          >
+          <div class="flex min-h-0 flex-1" data-testid="ai-model-picker-body">
             <nav
               ref="sidebar"
               class="composer-agent-sidebar relative flex h-full min-h-0 w-11 shrink-0 flex-col gap-1 overflow-y-auto border-r border-border/60 bg-muted/25 p-1"
@@ -731,7 +728,7 @@ watch([activeSection, search, () => enabledAgents.value.length], () => {
             <AIModelTraitsPanel
               ref="traitsPanel"
               :model="browsedModel"
-              :reasoning-efforts="native ? browsedModel?.reasoningEfforts : undefined"
+              :reasoning-efforts="browsedModel?.reasoningEfforts"
               :selected-effort="browsedEffort"
               :disabled="disabled || Boolean(loading)"
               :locked-hint="lockedTraitsHint"
