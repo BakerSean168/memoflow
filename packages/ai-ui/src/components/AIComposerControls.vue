@@ -179,22 +179,22 @@ const visibleModels = computed(() => {
 });
 const browsedAgent = computed(() => props.agents.find((entry) => entry.id === activeSection.value));
 /**
- * The model the options column describes: the browsed Agent's own model, preferring the
- * committed selection and falling back to its default/first model. Favorites and search keep
- * the committed selection because no single Agent owns those rows.
+ * The model the options column describes. T3-aligned: the column follows the
+ * committed selection while browsing, so the current model's levels stay
+ * directly adjustable without re-clicking its model row. Only an Agent section
+ * without any committed model previews that Agent's default/first model, and
+ * that preview stays read-only until a model is committed. Favorites and
+ * search keep the committed selection because no single Agent owns those rows.
  */
 const browsedModel = computed<ComposerModel | undefined>(() => {
+  if (selectedModel.value) return selectedModel.value;
   const agent = browsedAgent.value;
-  if (!agent) return selectedModel.value;
-  if (agent.id === props.selectedAgentId && selectedModel.value) return selectedModel.value;
+  if (!agent) return undefined;
   const agentModels = props.models.filter((model) => model.agentKey === agent.id);
   return agentModels.find((model) => model.key === props.selectedModelKey) ?? agentModels[0];
 });
 const browsedModelCommitted = computed(
-  () =>
-    Boolean(selectedModel.value) &&
-    selectedModel.value?.key === browsedModel.value?.key &&
-    selectedModel.value?.agentKey === browsedModel.value?.agentKey,
+  () => Boolean(browsedModel.value) && browsedModel.value === selectedModel.value,
 );
 const browsedEffort = computed(() => {
   const model = browsedModel.value;
