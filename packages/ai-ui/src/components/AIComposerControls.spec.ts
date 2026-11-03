@@ -471,8 +471,10 @@ describe('T3 model picker / conditional traits / enforced permissions', () => {
     const frame = wrapper.get('[data-testid="ai-model-picker-frame"]');
     const body = wrapper.get('[data-testid="ai-model-picker-body"]');
     expect(picker.classes()).toContain('w-[min(37.25rem,calc(100vw-1.5rem))]');
-    expect(body.classes()).toContain('h-[min(346px,calc(100dvh-80px))]');
-    // 44px rail + 360px list + 192px options column, plus the footer row.
+    // The panel's total height includes the footer row; the body shrinks to fit.
+    expect(frame.classes()).toContain('h-[min(346px,calc(100dvh-80px))]');
+    expect(body.classes()).toContain('flex-1');
+    // 44px rail + 360px list + 192px options column, with the footer inside the panel.
     expect(wrapper.get('[data-testid="ai-model-picker-sidebar"]').classes()).toContain('w-11');
     expect(body.get('.max-w-90').classes()).toContain('flex-1');
     expect(wrapper.get('[data-testid="ai-model-picker-options"]').classes()).toContain('w-48');
@@ -659,6 +661,25 @@ describe('T3 model picker / conditional traits / enforced permissions', () => {
     await wrapper.get('[data-testid="ai-model-picker-speed-priority"]').trigger('click');
     expect(wrapper.emitted('modelOption')).toEqual([
       ['reasoningEffort', 'super-high'],
+      ['serviceTier', 'priority'],
+    ]);
+    wrapper.unmount();
+  });
+
+  it('shows discovered traits and tiers for any runtime shape, not only the native one', async () => {
+    const tiered = {
+      ...models[0]!,
+      reasoningEfforts: ['low', 'high'],
+      defaultReasoningEffort: 'low',
+      serviceTiers: [{ id: 'priority', name: 'Fast' }],
+    };
+    const wrapper = setup({ models: [tiered] });
+    expect(wrapper.findAll('[data-testid^="ai-traits-effort-"]')).toHaveLength(2);
+    expect(wrapper.find('[data-testid="ai-model-picker-speed"]').exists()).toBe(true);
+    await wrapper.get('[data-testid="ai-traits-effort-high"]').trigger('click');
+    await wrapper.get('[data-testid="ai-model-picker-speed-priority"]').trigger('click');
+    expect(wrapper.emitted('modelOption')).toEqual([
+      ['reasoningEffort', 'high'],
       ['serviceTier', 'priority'],
     ]);
     wrapper.unmount();

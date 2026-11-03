@@ -222,6 +222,43 @@ describe('identity-scoped read-only model catalog', () => {
     scope.stop();
   });
 
+  it('keeps each presented Mastra model bound to its own Connection when the picker reuses it', async () => {
+    const { snapshot, catalog, refreshProviderModels, scope } = setup();
+    snapshot.bindings.push({ instanceId: 'mastra', connectionId: 'provider-two', modelId: 'beta' });
+    refreshProviderModels.mockImplementation(async (id: string) => ({
+      models:
+        id === 'provider-two'
+          ? [{ id: 'beta', name: 'Beta' }]
+          : [
+              { id: 'alpha', name: 'Alpha' },
+              { id: 'beta', name: 'Beta' },
+            ],
+    }));
+    await catalog.refresh();
+    const bindings = () =>
+      catalog.entries.value.mastra?.models.map((model) => [model.modelId, model.providerId]);
+    expect(bindings()).toEqual([
+      ['alpha', 'provider'],
+      ['beta', 'provider'],
+      ['beta', 'provider-two'],
+    ]);
+
+    await catalog.ensureLoaded();
+    expect(bindings()).toEqual([
+      ['alpha', 'provider'],
+      ['beta', 'provider'],
+      ['beta', 'provider-two'],
+    ]);
+    expect(listSelectableModels(catalog.entries.value, 'mastra').map((model) => model.key)).toEqual(
+      [
+        'agent:mastra::provider::alpha',
+        'agent:mastra::provider::beta',
+        'agent:mastra::provider-two::beta',
+      ],
+    );
+    scope.stop();
+  });
+
   it('keeps the last presented directory when revalidation fails', async () => {
     const { catalog, native, scope } = setup();
     await catalog.refresh();
