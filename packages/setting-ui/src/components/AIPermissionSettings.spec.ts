@@ -82,6 +82,34 @@ describe('AI permissions integrated under AI Provider settings', () => {
     wrapper.unmount();
   });
 
+  it('configures the bulk threshold in the high-risk section and keeps it across preset saves', async () => {
+    const { wrapper, permissions } = setup();
+    await flushPromises();
+    const section = wrapper.get('[data-testid="ai-permission-high-risk"]');
+    expect(section.text()).toContain('高风险操作');
+    expect(section.text()).toContain('当场确认');
+    const input = wrapper.get('[data-testid="ai-permission-bulk-threshold"]');
+    expect((input.element as HTMLInputElement).value).toBe('10');
+    (input.element as HTMLInputElement).value = '25';
+    await input.trigger('change');
+    await flushPromises();
+    expect(permissions).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        action: 'settings',
+        settings: expect.objectContaining({ bulkThreshold: 25 }),
+      }),
+    );
+    await wrapper.get('[data-testid="ai-permission-preset-full_auto"]').trigger('click');
+    await flushPromises();
+    expect(permissions).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        action: 'settings',
+        settings: expect.objectContaining({ preset: 'full_auto', bulkThreshold: 25 }),
+      }),
+    );
+    wrapper.unmount();
+  });
+
   it('preserves but lets users revoke migrated deny rules without agent-level configuration', async () => {
     const { wrapper, permissions } = setup();
     await flushPromises();

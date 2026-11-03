@@ -3,11 +3,12 @@ import { computed, inject, onMounted, ref } from 'vue';
 import { ChevronDown, LockKeyhole, RefreshCw } from '@lucide/vue';
 import { useI18n } from 'vue-i18n';
 import { Button } from '@memoflow/ui-vue-shadcn';
-import type {
-  PermissionEffect,
-  PermissionObject,
-  PermissionSettings,
-  PermissionSnapshot,
+import {
+  DEFAULT_BULK_THRESHOLD,
+  type PermissionEffect,
+  type PermissionObject,
+  type PermissionSettings,
+  type PermissionSnapshot,
 } from '@memoflow/ai-contracts';
 import { settingUiHost } from '../setting-ui-host';
 
@@ -103,6 +104,14 @@ async function save(patch: Partial<PermissionSettings>) {
 
 async function setPreset(preset: (typeof presets)[number]) {
   await save({ preset, customMatrix: undefined });
+}
+
+const bulkThreshold = computed(() => settings.value?.bulkThreshold ?? DEFAULT_BULK_THRESHOLD);
+
+async function saveBulkThreshold(event: Event) {
+  const value = Number((event.target as HTMLInputElement).value);
+  if (!Number.isInteger(value) || value < 1 || value > 1000) return;
+  await save({ bulkThreshold: value });
 }
 
 /** Keep persisted CRUD contracts; present the common read/write group to users. */
@@ -259,6 +268,33 @@ onMounted(() => {
           </table>
         </div>
       </details>
+
+      <div
+        class="space-y-2 rounded-lg border border-border/70 px-3 py-3"
+        data-testid="ai-permission-high-risk"
+      >
+        <p class="text-sm font-medium">{{ t('setting.permissions.highRisk.title') }}</p>
+        <p class="text-xs leading-5 text-muted-foreground">
+          {{ t('setting.permissions.highRisk.description') }}
+        </p>
+        <label class="flex flex-wrap items-center gap-2 text-xs">
+          <span>{{ t('setting.permissions.highRisk.bulkThreshold') }}</span>
+          <input
+            type="number"
+            min="1"
+            max="1000"
+            step="1"
+            class="h-8 w-24 rounded-md border border-border/70 bg-background px-2 text-xs outline-none focus-visible:ring-2 focus-visible:ring-primary disabled:opacity-45"
+            :value="bulkThreshold"
+            :disabled="busy"
+            data-testid="ai-permission-bulk-threshold"
+            @change="saveBulkThreshold($event)"
+          />
+        </label>
+        <p class="text-xs leading-5 text-muted-foreground">
+          {{ t('setting.permissions.highRisk.bulkHint') }}
+        </p>
+      </div>
 
       <div class="flex items-start gap-2 text-xs leading-5 text-muted-foreground">
         <LockKeyhole class="mt-0.5 size-3.5 shrink-0" />
