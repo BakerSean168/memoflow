@@ -803,7 +803,7 @@ describe('integrated picker configuration', () => {
     wrapper.unmount();
   });
 
-  it('derives the options column from the browsed Agent until a model is committed', async () => {
+  it('keeps the options column on the committed model while browsing other Agents', async () => {
     const nativeModel = {
       key: 'agent:mastra::google-connection::gpt-4.1',
       agentKey: 'agent:mastra',
@@ -831,16 +831,74 @@ describe('integrated picker configuration', () => {
 
     await wrapper.get('[data-testid="ai-model-picker-agent-agent:work"]').trigger('click');
     await nextTick();
+    // The column follows the committed selection, so the current model's
+    // levels stay directly adjustable without re-clicking its model row.
+    expect(wrapper.get('[data-testid="ai-traits-model"]').text()).toBe('Model Alpha');
+    expect(wrapper.findAll('[data-testid^="ai-traits-effort-"]')).toHaveLength(3);
+    expect(wrapper.find('[data-testid="ai-traits-locked"]').exists()).toBe(false);
+    expect(
+      wrapper.get('[data-testid="ai-traits-effort-high"]').attributes('disabled'),
+    ).toBeUndefined();
+    await wrapper.get('[data-testid="ai-traits-effort-high"]').trigger('click');
+    expect(wrapper.emitted('modelOption')).toEqual([['reasoningEffort', 'high']]);
+
+    await wrapper.get('[data-testid="ai-model-picker-option"]').trigger('click');
+    expect(wrapper.emitted('selectModel')).toEqual([[otherModel.key, 'agent:work']]);
+    wrapper.unmount();
+  });
+
+  it('previews a browsed Agent default model read-only before any model is committed', async () => {
+    const otherModel = {
+      key: 'agent:work::other-connection::gpt-4.1',
+      agentKey: 'agent:work',
+      providerId: 'other-connection',
+      providerName: 'AnyRouter',
+      modelId: 'gpt-4.1',
+      modelName: 'Work Model',
+      reasoningEfforts: ['minimal', 'high'],
+      defaultReasoningEffort: 'high',
+    };
+    const wrapper = setup({
+      native: true,
+      selectedAgentId: 'agent:mastra',
+      selectedModelKey: '',
+      models: [otherModel],
+    });
+    await openModels(wrapper);
+    await wrapper.get('[data-testid="ai-model-picker-agent-agent:work"]').trigger('click');
+    await nextTick();
+    // No model is committed, so the browsed Agent's default model stays a
+    // genuine read-only preview with the select-to-adjust hint.
     expect(wrapper.get('[data-testid="ai-traits-model"]').text()).toBe('Work Model');
     expect(wrapper.findAll('[data-testid^="ai-traits-effort-"]')).toHaveLength(2);
-    // The browsed Agent's model is not committed yet, so its levels stay read-only.
     expect(wrapper.find('[data-testid="ai-traits-locked"]').exists()).toBe(true);
     expect(
       wrapper.get('[data-testid="ai-traits-effort-high"]').attributes('disabled'),
     ).toBeDefined();
+    wrapper.unmount();
+  });
 
-    await wrapper.get('[data-testid="ai-model-picker-option"]').trigger('click');
-    expect(wrapper.emitted('selectModel')).toEqual([[otherModel.key, 'agent:work']]);
+  it('adjusts the current model tiers directly on open without a model row click', async () => {
+    const currentModel = {
+      ...models[0]!,
+      reasoningEfforts: ['low', 'medium', 'high'],
+      defaultReasoningEffort: 'medium',
+      serviceTiers: [{ id: 'priority', name: 'Fast' }],
+    };
+    const wrapper = setup({ native: true, models: [currentModel] });
+    await openModels(wrapper);
+    expect(wrapper.find('[data-testid="ai-traits-locked"]').exists()).toBe(false);
+    const row = wrapper.get('[data-testid="ai-traits-effort-high"]');
+    expect(row.attributes('disabled')).toBeUndefined();
+    await row.trigger('click');
+    expect(wrapper.emitted('modelOption')).toEqual([['reasoningEffort', 'high']]);
+    const speed = wrapper.get('[data-testid="ai-model-picker-speed-priority"]');
+    expect(speed.attributes('disabled')).toBeUndefined();
+    await speed.trigger('click');
+    expect(wrapper.emitted('modelOption')).toEqual([
+      ['reasoningEffort', 'high'],
+      ['serviceTier', 'priority'],
+    ]);
     wrapper.unmount();
   });
 
