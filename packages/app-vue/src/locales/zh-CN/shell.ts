@@ -68,8 +68,9 @@ export default {
     select: '选择会话',
     confirmDeleteSelected: '永久删除 {count} 个会话及其消息？此操作无法撤销。',
     confirmDeleteSelectedTitle: '确认删除 {count} 个会话',
-    operationSucceeded: '成功',
-    operationFailed: '失败，可重试',
+    bulkSucceeded: '{action}完成 · {count} 个',
+    bulkFailed: '{action}失败 · {count} 个',
+    retry: '重试',
     delete: '删除',
 
     today: '今天',

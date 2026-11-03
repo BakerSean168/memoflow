@@ -23,6 +23,7 @@ import {
   createConversationSelectionStore,
 } from './conversation-selection';
 import { useI18n } from 'vue-i18n';
+import { toast } from 'vue-sonner';
 import {
   Archive,
   ArchiveRestore,
@@ -69,6 +70,9 @@ interface ConversationEntry {
   title: string;
 }
 
+/** 批量动作：单删、批删、归档、恢复共用同一条结果反馈通路。 */
+type BulkAction = 'archive' | 'restore' | 'delete';
+
 interface ConversationGroup {
   /** 分组 i18n key（如 'shell.conversation.today'）。 */
   labelKey: string;
@@ -82,7 +86,7 @@ export interface ArchivedConversationEntry extends ConversationEntry {
 
 const props = defineProps<{
   bulkAction?: (
-    action: 'archive' | 'restore' | 'delete',
+    action: BulkAction,
     ids: string[],
   ) => Promise<{ id: string; success: boolean }[]>;
   profiles?: ProfileSummary[];
@@ -310,7 +314,37 @@ async function restoreContextFocus(event: Event) {
   ].find((item) => item.dataset.keyboardItem === id);
   row?.focus({ preventScroll: true });
 }
-async function emitBulk(action: 'archive' | 'restore' | 'delete', ids = [...selectedIds.value]) {
+/**
+ * 批量结果只走全局浮层 toast（#831）：成功与失败都不在列表流内留常驻行，
+ * 失败 toast 在存续期间带「重试」，点击后按同一动作重跑失败的那批会话。
+ */
+function bulkToastMessage(key: 'bulkSucceeded' | 'bulkFailed', action: BulkAction, count: number) {
+  return t(`shell.conversation.${key}`, {
+    action: t(`shell.conversation.${action}`),
+    count,
+  });
+}
+function showBulkSuccess(action: BulkAction, count: number) {
+  toast.success(bulkToastMessage('bulkSucceeded', action, count), {
+    id: 'conversation-bulk-success',
+    duration: 4000,
+  });
+}
+function showBulkFailure(action: BulkAction, ids: string[]) {
+  toast.error(bulkToastMessage('bulkFailed', action, ids.length), {
+    id: 'conversation-bulk-failure',
+    duration: 8000,
+    action: {
+      label: t('shell.conversation.retry'),
+      onClick: () => {
+        // 失败项按原动作、原 ids 重跑；toast 点击后由组件自身关闭，不留残留。
+        void emitBulk(action, ids);
+      },
+    },
+  });
+}
+
+async function emitBulk(action: BulkAction, ids = [...selectedIds.value]) {
   if (!ids.length || selection.state.busy) return;
   contextOpen.value = false;
   if (!props.bulkAction) return;
@@ -322,19 +356,21 @@ async function emitBulk(action: 'archive' | 'restore' | 'delete', ids = [...sele
   try {
     const results = await props.bulkAction(action, ids);
     if (!selection.isOperationCurrent(operation)) return;
-    // A deleted conversation must not survive as a persistent success summary.
-    selection.state.results = results
-      .filter((result) => action !== 'delete' || !result.success)
-      .map((result) => ({
-        ...result,
-        title: titles.get(result.id) ?? result.id,
-        action,
-      }));
-    selection.complete(results.filter((item) => item.success).map((item) => item.id));
-    for (const item of results.filter((item) => !item.success)) {
-      if (visibleIds.value.includes(item.id) && !selection.isSelected(item.id))
-        selection.toggle(item.id);
+    // 仅作内部记录，不再驱动列表流内的任何渲染。
+    selection.state.results = results.map((result) => ({
+      ...result,
+      title: titles.get(result.id) ?? result.id,
+      action,
+    }));
+    const succeeded = results.filter((result) => result.success).map((result) => result.id);
+    const failed = results.filter((result) => !result.success).map((result) => result.id);
+    selection.complete(succeeded);
+    for (const id of failed) {
+      if (visibleIds.value.includes(id) && !selection.isSelected(id)) selection.toggle(id);
     }
+    // 取消的危险删除返回空结果：既没有成功也没有失败，不给任何提示。
+    if (succeeded.length) showBulkSuccess(action, succeeded.length);
+    if (failed.length) showBulkFailure(action, failed);
   } catch {
     if (selection.isOperationCurrent(operation)) {
       selection.state.results = ids.map((id) => ({
@@ -346,6 +382,7 @@ async function emitBulk(action: 'archive' | 'restore' | 'delete', ids = [...sele
       for (const id of ids) {
         if (visibleIds.value.includes(id) && !selection.isSelected(id)) selection.toggle(id);
       }
+      showBulkFailure(action, ids);
     }
   } finally {
     selection.finishOperation(operation);
@@ -471,27 +508,6 @@ const identityLabel = () => {
     <span class="sr-only" aria-live="polite" data-testid="conversation-selection-count">{{
       selectedIds.length ? t('shell.conversation.selectedCount', { count: selectedIds.length }) : ''
     }}</span>
-    <ul
-      v-if="selection.state.results.length"
-      class="max-h-28 overflow-y-auto break-words px-3 text-xs"
-      aria-live="polite"
-      data-testid="conversation-bulk-results"
-    >
-      <li
-        v-for="result in selection.state.results"
-        :key="result.id"
-        :class="result.success ? '' : 'text-destructive'"
-      >
-        {{ result.title }} · {{ t(`shell.conversation.${result.action}`) }} ·
-        {{
-          t(
-            result.success
-              ? 'shell.conversation.operationSucceeded'
-              : 'shell.conversation.operationFailed',
-          )
-        }}
-      </li>
-    </ul>
     <!-- 会话列表（按时间分组） -->
     <nav
       v-keyboard-list="{ selectable: true, selection: keyboardSelection }"

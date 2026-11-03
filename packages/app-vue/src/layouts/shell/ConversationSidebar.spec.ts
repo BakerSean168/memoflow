@@ -1,6 +1,7 @@
-import { describe, expect, it, vi } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import { flushPromises, mount } from '@vue/test-utils';
 import { createI18n } from 'vue-i18n';
+import { Toaster, toast } from 'vue-sonner';
 import ConversationSidebar from './ConversationSidebar.vue';
 import { listAdapterFor } from '../../shared/keyboard/list-adapter';
 import auth from '../../locales/en-US/auth';
@@ -49,6 +50,10 @@ const i18n = createI18n({
           rename: 'Rename',
           regenerateTitle: 'Regenerate title',
           generatingTitle: 'Generating title…',
+          delete: 'Delete',
+          bulkSucceeded: '{action} completed · {count}',
+          bulkFailed: '{action} failed · {count}',
+          retry: 'Retry',
         },
         account: {
           menu: 'Account menu',
@@ -99,6 +104,26 @@ async function selectMenuItem(testId: string) {
   item.click();
   await flushPromises();
 }
+
+/** 等 sonner 完成一次渲染/退场动画调度。 */
+async function settleToast() {
+  await flushPromises();
+  await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
+  await flushPromises();
+}
+function toastElement(type: 'success' | 'error'): HTMLElement | null {
+  return document.body.querySelector<HTMLElement>(`[data-sonner-toast][data-type="${type}"]`);
+}
+/** 列表流/侧栏根节点的子节点结构，用于断言结果反馈没有插入流内元素。 */
+function sidebarLayout(sidebar: Element): string[] {
+  return [...sidebar.children].map((child) => child.getAttribute('data-testid') ?? child.tagName);
+}
+
+// sonner 的 toast 队列是模块级单例，测试之间必须清掉，否则会串到下一个用例。
+afterEach(() => {
+  toast.dismiss();
+  document.body.innerHTML = '';
+});
 
 describe('ConversationSidebar attention', () => {
   it('archives without confirmation and guards pending rows', async () => {
@@ -343,7 +368,9 @@ describe('ConversationSidebar mouse and batch selection', () => {
     ]);
     await flushPromises();
     expect(wrapper.get('[data-testid="conversation-selection-count"]').text()).toBe('1 selected');
-    expect(wrapper.get('[data-testid="conversation-bulk-results"]').findAll('li')).toHaveLength(3);
+    // #831：批量结果不再渲染成列表顶部的常驻行，失败会话只保留选中。
+    expect(wrapper.find('[data-testid="conversation-bulk-results"]').exists()).toBe(false);
+    expect(wrapper.findAll('[aria-selected="true"]')).toHaveLength(1);
     await document.body.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }));
     await flushPromises();
     await openRowMenu(wrapper, 'b');
@@ -354,6 +381,67 @@ describe('ConversationSidebar mouse and batch selection', () => {
     expect(wrapper.find('[data-testid="conversation-bulk-results"]').exists()).toBe(false);
     expect(wrapper.findAll('[aria-selected="true"]')).toHaveLength(0);
     wrapper.unmount();
+  });
+  /**
+   * #831：批量结果改为全局浮层 toast。列表流内不留常驻行，失败提示带真重试，
+   * 提示出现前后侧栏结构与行顺序保持不变，证明反馈不占列表布局。
+   */
+  it('reports bulk results as an overlay toast with a real retry and no list-flow change', async () => {
+    const toaster = mount(Toaster, { attachTo: document.body });
+    let attempts = 0;
+    const bulkAction = vi.fn(async (_action: string, selected: string[]) => {
+      attempts += 1;
+      // 首次失败走 catch 分支（模拟离线写入），重试成功。
+      if (attempts === 1) throw new Error('Simulated offline write');
+      return selected.map((id) => ({ id, success: true }));
+    });
+    const wrapper = mount(ConversationSidebar, {
+      attachTo: document.body,
+      props: { groups, activeConversationId: null, bulkAction },
+      global: { plugins: [i18n] },
+    });
+    try {
+      const sidebar = wrapper.get('[data-testid="conversation-sidebar"]').element;
+      const layoutBefore = sidebarLayout(sidebar);
+      const rowsBefore = wrapper
+        .findAll('[data-keyboard-item]')
+        .map((row) => row.attributes('data-keyboard-item'));
+
+      for (const id of ['a', 'b', 'c'])
+        await wrapper.get(`[data-keyboard-item="${id}"]`).trigger('click', { ctrlKey: true });
+      await openRowMenu(wrapper, 'b');
+      await selectMenuItem('conversation-context-status');
+      expect(bulkAction).toHaveBeenCalledWith('archive', ['a', 'b', 'c']);
+      await settleToast();
+
+      // 反馈只在 body 的浮层里，侧栏与列表流结构、行顺序不变。
+      expect(sidebarLayout(sidebar)).toEqual(layoutBefore);
+      expect(
+        wrapper.findAll('[data-keyboard-item]').map((row) => row.attributes('data-keyboard-item')),
+      ).toEqual(rowsBefore);
+      expect(wrapper.find('[data-testid="conversation-bulk-results"]').exists()).toBe(false);
+      const toasterEl = document.body.querySelector('[data-sonner-toaster]');
+      expect(toasterEl).not.toBeNull();
+      expect(sidebar.contains(toasterEl!)).toBe(false);
+
+      const failure = toastElement('error');
+      expect(failure?.textContent).toContain('Archive failed · 3');
+      const retry = failure?.querySelector<HTMLButtonElement>('[data-button][data-action]');
+      expect(retry?.textContent).toBe('Retry');
+
+      retry!.click();
+      await settleToast();
+      // 真重试：同一动作、同一批失败 ids 再次执行。
+      expect(bulkAction).toHaveBeenCalledTimes(2);
+      expect(bulkAction).toHaveBeenLastCalledWith('archive', ['a', 'b', 'c']);
+      // 点击后旧提示进入退场（jsdom 不跑动画，只能断言已标记移除并让位给成功提示）。
+      expect(toastElement('error')?.getAttribute('data-removed')).toBe('true');
+      expect(toastElement('success')?.textContent).toContain('Archive completed · 3');
+      expect(wrapper.find('[data-testid="conversation-bulk-results"]').exists()).toBe(false);
+    } finally {
+      wrapper.unmount();
+      toaster.unmount();
+    }
   });
 });
 describe('ConversationSidebar compact toolbar', () => {
