@@ -58,6 +58,7 @@ export default {
     archive: 'Archive',
     restore: 'Restore',
     archived: 'Archived',
+    noArchivedConversations: 'No archived conversations yet',
     active: 'Active conversations',
     confirmDelete: 'Permanently delete this conversation and its messages? This cannot be undone.',
     confirmDeleteTitle: 'Delete conversation',
@@ -68,8 +69,9 @@ export default {
     confirmDeleteSelected:
       'Permanently delete {count} conversations and their messages? This cannot be undone.',
     confirmDeleteSelectedTitle: 'Delete {count} conversations',
-    operationSucceeded: 'Succeeded',
-    operationFailed: 'Failed — retry available',
+    bulkSucceeded: '{action} completed · {count}',
+    bulkFailed: '{action} failed · {count}',
+    retry: 'Retry',
     delete: 'Delete',
 
     today: 'Today',

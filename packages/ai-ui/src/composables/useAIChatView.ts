@@ -1193,12 +1193,13 @@ export function useAIChatView(options: UseAIChatViewOptions) {
       archivePage: chatSession.archivePage,
       archiveHasMore: chatSession.archiveHasMore,
       changeArchivePage: chatSession.changeArchivePage,
-      deleteConversation: (id: string) =>
+      deleteConversation: (id: string, silent = false) =>
         chatSession.deleteConversation(
           id,
           service,
           persistence.clearWorkflowState,
           modelSelection.clearConversationModelSelection,
+          silent,
         ),
       loadConversationList: loadWorkspaceLists,
       startNewConversation,

@@ -1,6 +1,7 @@
-import { describe, expect, it, vi } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import { flushPromises, mount } from '@vue/test-utils';
 import { createI18n } from 'vue-i18n';
+import { Toaster, toast } from 'vue-sonner';
 import ConversationSidebar from './ConversationSidebar.vue';
 import { listAdapterFor } from '../../shared/keyboard/list-adapter';
 import auth from '../../locales/en-US/auth';
@@ -38,6 +39,7 @@ const i18n = createI18n({
           noMatches: 'No matching conversations',
           clearSearch: 'Clear conversation search',
           archived: 'Archived',
+          noArchivedConversations: 'No archived conversations yet',
           active: 'Active',
           archive: 'Archive',
           restore: 'Restore',
@@ -48,6 +50,10 @@ const i18n = createI18n({
           rename: 'Rename',
           regenerateTitle: 'Regenerate title',
           generatingTitle: 'Generating title…',
+          delete: 'Delete',
+          bulkSucceeded: '{action} completed · {count}',
+          bulkFailed: '{action} failed · {count}',
+          retry: 'Retry',
         },
         account: {
           menu: 'Account menu',
@@ -98,6 +104,26 @@ async function selectMenuItem(testId: string) {
   item.click();
   await flushPromises();
 }
+
+/** 等 sonner 完成一次渲染/退场动画调度。 */
+async function settleToast() {
+  await flushPromises();
+  await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
+  await flushPromises();
+}
+function toastElement(type: 'success' | 'error'): HTMLElement | null {
+  return document.body.querySelector<HTMLElement>(`[data-sonner-toast][data-type="${type}"]`);
+}
+/** 列表流/侧栏根节点的子节点结构，用于断言结果反馈没有插入流内元素。 */
+function sidebarLayout(sidebar: Element): string[] {
+  return [...sidebar.children].map((child) => child.getAttribute('data-testid') ?? child.tagName);
+}
+
+// sonner 的 toast 队列是模块级单例，测试之间必须清掉，否则会串到下一个用例。
+afterEach(() => {
+  toast.dismiss();
+  document.body.innerHTML = '';
+});
 
 describe('ConversationSidebar attention', () => {
   it('archives without confirmation and guards pending rows', async () => {
@@ -277,8 +303,9 @@ describe('ConversationSidebar mouse and batch selection', () => {
     }
   });
   it.each([{ ids: ['a'] }, { ids: ['a', 'b'] }])(
-    'removes deleted rows without persistent success residue ($ids)',
+    'removes deleted rows and reports success only as a transient toast ($ids)',
     async ({ ids }) => {
+      const toaster = mount(Toaster, { attachTo: document.body });
       const bulkAction = vi.fn(async (_action: string, selected: string[]) => {
         await wrapper.setProps({
           groups: groups.map((group) => ({
@@ -302,8 +329,11 @@ describe('ConversationSidebar mouse and batch selection', () => {
         for (const id of ids)
           expect(wrapper.find(`[data-keyboard-item="${id}"]`).exists()).toBe(false);
         expect(wrapper.find('[data-testid="conversation-bulk-results"]').exists()).toBe(false);
+        await settleToast();
+        expect(toastElement('success')?.textContent).toContain(`Delete completed · ${ids.length}`);
       } finally {
         wrapper.unmount();
+        toaster.unmount();
       }
     },
   );
@@ -342,7 +372,9 @@ describe('ConversationSidebar mouse and batch selection', () => {
     ]);
     await flushPromises();
     expect(wrapper.get('[data-testid="conversation-selection-count"]').text()).toBe('1 selected');
-    expect(wrapper.get('[data-testid="conversation-bulk-results"]').findAll('li')).toHaveLength(3);
+    // #831：批量结果不再渲染成列表顶部的常驻行，失败会话只保留选中。
+    expect(wrapper.find('[data-testid="conversation-bulk-results"]').exists()).toBe(false);
+    expect(wrapper.findAll('[aria-selected="true"]')).toHaveLength(1);
     await document.body.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }));
     await flushPromises();
     await openRowMenu(wrapper, 'b');
@@ -353,6 +385,68 @@ describe('ConversationSidebar mouse and batch selection', () => {
     expect(wrapper.find('[data-testid="conversation-bulk-results"]').exists()).toBe(false);
     expect(wrapper.findAll('[aria-selected="true"]')).toHaveLength(0);
     wrapper.unmount();
+  });
+  /**
+   * #831：批量结果改为全局浮层 toast。列表流内不留常驻行，失败提示带真重试，
+   * 提示出现前后侧栏结构与行顺序保持不变，证明反馈不占列表布局。
+   */
+  it('reports bulk results as an overlay toast with a real retry and no list-flow change', async () => {
+    const toaster = mount(Toaster, { attachTo: document.body });
+    let attempts = 0;
+    const bulkAction = vi.fn(async (_action: string, selected: string[]) => {
+      attempts += 1;
+      // 首次失败走 catch 分支（模拟离线写入），重试成功。
+      if (attempts === 1) throw new Error('Simulated offline write');
+      return selected.map((id) => ({ id, success: true }));
+    });
+    const wrapper = mount(ConversationSidebar, {
+      attachTo: document.body,
+      props: { groups, activeConversationId: null, bulkAction },
+      global: { plugins: [i18n] },
+    });
+    try {
+      const sidebar = wrapper.get('[data-testid="conversation-sidebar"]').element;
+      const layoutBefore = sidebarLayout(sidebar);
+      const rowsBefore = wrapper
+        .findAll('[data-keyboard-item]')
+        .map((row) => row.attributes('data-keyboard-item'));
+
+      for (const id of ['a', 'b', 'c'])
+        await wrapper.get(`[data-keyboard-item="${id}"]`).trigger('click', { ctrlKey: true });
+      await openRowMenu(wrapper, 'b');
+      await selectMenuItem('conversation-context-status');
+      expect(bulkAction).toHaveBeenCalledWith('archive', ['a', 'b', 'c']);
+      await settleToast();
+
+      // 反馈只在 body 的浮层里，侧栏与列表流结构、行顺序不变。
+      expect(sidebarLayout(sidebar)).toEqual(layoutBefore);
+      expect(
+        wrapper.findAll('[data-keyboard-item]').map((row) => row.attributes('data-keyboard-item')),
+      ).toEqual(rowsBefore);
+      expect(wrapper.find('[data-testid="conversation-bulk-results"]').exists()).toBe(false);
+      const toasterEl = document.body.querySelector('[data-sonner-toaster]');
+      expect(toasterEl).not.toBeNull();
+      expect(sidebar.contains(toasterEl!)).toBe(false);
+
+      const failure = toastElement('error');
+      expect(failure?.textContent).toContain('Archive failed · 3');
+      const retry = failure?.querySelector<HTMLButtonElement>('[data-button][data-action]');
+      expect(retry?.textContent).toBe('Retry');
+
+      retry!.click();
+      await settleToast();
+      // 真重试：同一动作、同一批失败 ids 再次执行。
+      expect(bulkAction).toHaveBeenCalledTimes(2);
+      expect(bulkAction).toHaveBeenLastCalledWith('archive', ['a', 'b', 'c']);
+      // 点击后旧提示进入退场（jsdom 不跑动画，只能断言已标记移除）。
+      expect(toastElement('error')?.getAttribute('data-removed')).toBe('true');
+      // 归档成功由会话层带 Undo 的既有 toast 负责，侧栏不再叠一条重复成功提示。
+      expect(toastElement('success')).toBeNull();
+      expect(wrapper.find('[data-testid="conversation-bulk-results"]').exists()).toBe(false);
+    } finally {
+      wrapper.unmount();
+      toaster.unmount();
+    }
   });
 });
 describe('ConversationSidebar compact toolbar', () => {
@@ -593,6 +687,112 @@ describe('conversation title editing', () => {
     expect(wrapper.emitted('rename-conversation')).toHaveLength(1);
     expect(wrapper.find('[role="status"]').exists()).toBe(true);
     wrapper.unmount();
+  });
+});
+
+describe('ConversationSidebar archived partition', () => {
+  const archived = [{ id: 'z', title: 'Old architecture notes', time: '2 days ago' }];
+
+  it('shows archived conversations in their own collapsed partition and restores them', async () => {
+    const bulkAction = vi.fn(async (_action: string, ids: string[]) =>
+      ids.map((id) => ({ id, success: true })),
+    );
+    const wrapper = mount(ConversationSidebar, {
+      props: { groups, activeConversationId: 'b', archivedConversations: archived, bulkAction },
+      global: { plugins: [i18n] },
+    });
+    try {
+      const section = wrapper.get('[data-testid="conversation-archived-section"]');
+      expect(section.text()).toContain('Archived');
+      expect(section.get('[data-testid="conversation-archived-count"]').text()).toBe('1');
+      const toggle = section.get('[data-testid="conversation-archived-toggle"]');
+      expect(toggle.attributes('aria-expanded')).toBe('false');
+      expect(toggle.attributes('aria-controls')).toBe('conversation-archived-list');
+      expect(wrapper.find('[data-testid="archived-conversation-row"]').exists()).toBe(false);
+
+      await toggle.trigger('click');
+      expect(toggle.attributes('aria-expanded')).toBe('true');
+      const row = wrapper.get('[data-testid="archived-conversation-row"]');
+      expect(row.text()).toContain('Old architecture notes');
+      expect(row.get('[data-testid="archived-conversation-time"]').text()).toBe('2 days ago');
+      // 归档行不属于主列表的选择集合，恢复是唯一入口。
+      expect(row.find('[role="option"]').exists()).toBe(false);
+
+      await row.get('[data-testid="archived-conversation-restore"]').trigger('click');
+      // 恢复也走批量结果通路（#831 的 toast/重试），不再单独发 restore-conversation。
+      expect(bulkAction).toHaveBeenCalledWith('restore', ['z']);
+      expect(wrapper.emitted('restore-conversation')).toBeUndefined();
+      expect(wrapper.emitted('select-conversation')).toBeUndefined();
+
+      // 父级恢复后：分区消失，会话回到普通列表分组。
+      await wrapper.setProps({
+        archivedConversations: [],
+        groups: [
+          ...groups,
+          {
+            labelKey: 'shell.conversation.earlier',
+            items: [{ id: 'z', title: 'Old architecture notes' }],
+          },
+        ],
+      });
+      expect(wrapper.find('[data-testid="archived-conversation-row"]').exists()).toBe(false);
+      expect(wrapper.get('[data-testid="conversation-archived-count"]').text()).toBe('0');
+      expect(wrapper.find('[data-keyboard-item="z"]').exists()).toBe(true);
+      expect(wrapper.find('[data-testid="conversation-archive-toggle"]').exists()).toBe(false);
+    } finally {
+      wrapper.unmount();
+    }
+  });
+
+  it('keeps the partition with an empty state when nothing is archived', async () => {
+    const wrapper = mount(ConversationSidebar, {
+      props: { groups, activeConversationId: null },
+      global: { plugins: [i18n] },
+    });
+    try {
+      const section = wrapper.get('[data-testid="conversation-archived-section"]');
+      expect(section.get('[data-testid="conversation-archived-count"]').text()).toBe('0');
+      await section.get('[data-testid="conversation-archived-toggle"]').trigger('click');
+      expect(wrapper.get('[data-testid="conversation-archived-empty"]').text()).toBe(
+        'No archived conversations yet',
+      );
+      expect(wrapper.find('[data-testid="archived-conversation-row"]').exists()).toBe(false);
+    } finally {
+      wrapper.unmount();
+    }
+  });
+
+  it('pages the archived projection while expanded', async () => {
+    const wrapper = mount(ConversationSidebar, {
+      props: {
+        groups,
+        activeConversationId: null,
+        archivedConversations: archived,
+        archivePage: 2,
+        archiveHasMore: true,
+      },
+      global: { plugins: [i18n] },
+    });
+    try {
+      await wrapper.get('[data-testid="conversation-archived-toggle"]').trigger('click');
+      const previous = wrapper.get('[data-testid="archived-conversation-previous-page"]');
+      const next = wrapper.get('[data-testid="archived-conversation-next-page"]');
+      expect(previous.attributes('disabled')).toBeUndefined();
+      expect(next.attributes('disabled')).toBeUndefined();
+      await previous.trigger('click');
+      await next.trigger('click');
+      expect(wrapper.emitted('change-archive-page')).toEqual([[-1], [1]]);
+
+      await wrapper.setProps({ archivePage: 1, archiveHasMore: false, loading: true });
+      expect(
+        wrapper.get('[data-testid="archived-conversation-previous-page"]').attributes('disabled'),
+      ).toBeDefined();
+      expect(
+        wrapper.get('[data-testid="archived-conversation-next-page"]').attributes('disabled'),
+      ).toBeDefined();
+    } finally {
+      wrapper.unmount();
+    }
   });
 });
 

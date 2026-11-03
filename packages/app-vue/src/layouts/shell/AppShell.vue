@@ -52,7 +52,7 @@ import NoteCapsulePreview from './previews/NoteCapsulePreview.vue';
 import ScheduleCapsulePreview from './previews/ScheduleCapsulePreview.vue';
 import type { CalendarEventItem } from '@memoflow/schedule-ui';
 import { NotificationCapsulePreview } from '@memoflow/notification-ui';
-import ConversationSidebar from './ConversationSidebar.vue';
+import ConversationSidebar, { type ArchivedConversationEntry } from './ConversationSidebar.vue';
 import BusinessPanel from './BusinessPanel.vue';
 import TodayOverviewPanel from './TodayOverviewPanel.vue';
 import PanelErrorBoundary from './PanelErrorBoundary.vue';
@@ -356,11 +356,23 @@ async function handleSelectConversation(id: string) {
   await aiRef.value?.selectConversation(summary);
 }
 
-const archivedConversations = computed(() =>
-  conversations.value
+/**
+ * 已归档投影：侧栏专属分区与恢复动作共用 #804 的归档数据通路
+ * （useConversationProjection 的 Archived 分页 + setConversationStatus）。
+ */
+const archivedConversations = computed<ArchivedConversationEntry[]>(() => {
+  const time = getProductTime();
+  return conversations.value
     .filter((item) => item.status === 'Archived')
-    .map((item) => ({ id: item.id, title: item.name })),
-);
+    .map((item) => {
+      const ts = conversationTimestamp(item);
+      return {
+        id: String(item.id),
+        title: item.name || t('common.untitled'),
+        time: ts ? time.format.relative(ts) : '',
+      };
+    });
+});
 function handleArchiveConversation(id: string) {
   void aiRef.value?.archiveConversation(id);
 }
@@ -1130,52 +1142,7 @@ onBeforeUnmount(() => {
           {{ t('shell.account.manageProfiles') }}
         </button>
         <div class="min-h-0 flex-1">
-          <router-view name="settings" v-slot="{ Component }">
-            <component :is="Component">
-              <template #archived-conversations>
-                <section class="space-y-3" data-testid="settings-archived-conversations">
-                  <h2 class="text-lg font-semibold">{{ t('shell.conversation.archived') }}</h2>
-                  <p v-if="!archivedConversations.length" class="text-sm text-muted-foreground">
-                    {{ t('aiAssistant.dialogs.chat.noSavedConversations') }}
-                  </p>
-                  <ul class="space-y-2">
-                    <li
-                      v-for="item in archivedConversations"
-                      :key="item.id"
-                      class="flex items-center gap-3"
-                    >
-                      <span class="min-w-0 flex-1 truncate">{{ item.title }}</span>
-                      <button
-                        type="button"
-                        class="rounded border px-3 py-1 text-sm focus-visible:ring-2 focus-visible:ring-ring"
-                        :disabled="aiRef?.conversationListLoading"
-                        data-testid="settings-restore-conversation"
-                        @click="handleRestoreConversation(item.id)"
-                      >
-                        {{ t('shell.conversation.restore') }}
-                      </button>
-                    </li>
-                  </ul>
-                  <div class="flex justify-between text-sm">
-                    <button
-                      type="button"
-                      :disabled="(aiRef?.archivePage ?? 1) <= 1 || aiRef?.conversationListLoading"
-                      @click="handleChangeArchivePage(-1)"
-                    >
-                      {{ t('shell.conversation.previousPage') }}
-                    </button>
-                    <button
-                      type="button"
-                      :disabled="!aiRef?.archiveHasMore || aiRef?.conversationListLoading"
-                      @click="handleChangeArchivePage(1)"
-                    >
-                      {{ t('shell.conversation.nextPage') }}
-                    </button>
-                  </div>
-                </section>
-              </template>
-            </component>
-          </router-view>
+          <router-view name="settings" />
         </div>
       </div>
     </StandaloneSettingsLayout>
@@ -1207,6 +1174,11 @@ onBeforeUnmount(() => {
             <ConversationSidebar
               class="h-full w-full"
               :groups="conversationGroups"
+              :archived-conversations="archivedConversations"
+              :archive-page="aiRef?.archivePage"
+              :archive-has-more="aiRef?.archiveHasMore"
+              @restore-conversation="handleRestoreConversation"
+              @change-archive-page="handleChangeArchivePage"
               @rename-conversation="(id, name) => aiRef?.renameConversation(id, name)"
               @regenerate-title="(id) => aiRef?.regenerateConversationTitle(id)"
               :title-busy="aiRef?.titleBusy"
@@ -1390,6 +1362,11 @@ onBeforeUnmount(() => {
           <ConversationSidebar
             class="h-full w-full"
             :groups="conversationGroups"
+            :archived-conversations="archivedConversations"
+            :archive-page="aiRef?.archivePage"
+            :archive-has-more="aiRef?.archiveHasMore"
+            @restore-conversation="handleRestoreConversation"
+            @change-archive-page="handleChangeArchivePage"
             @rename-conversation="(id, name) => aiRef?.renameConversation(id, name)"
             @regenerate-title="(id) => aiRef?.regenerateConversationTitle(id)"
             :title-busy="aiRef?.titleBusy"

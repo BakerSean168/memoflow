@@ -146,12 +146,12 @@ export function useAIChatSession(options: UseAIChatSessionOptions) {
     if (undoArchive) toast.dismiss(undoArchive.toastId);
     undoArchive = null;
   }
-  async function restoreConversation(id: string) {
+  async function restoreConversation(id: string, silent = false) {
     if (undoArchive?.ids.includes(id)) {
       undoArchive.ids = undoArchive.ids.filter((item) => item !== id);
       if (!undoArchive.ids.length) clearArchiveUndo();
     }
-    return conversation.setConversationStatus(id, 'Active');
+    return conversation.setConversationStatus(id, 'Active', silent);
   }
   function undoLastArchive() {
     if (!undoArchive || Date.now() >= undoArchive.expiresAt) {
@@ -160,9 +160,17 @@ export function useAIChatSession(options: UseAIChatSessionOptions) {
     }
     const ids = [...undoArchive.ids];
     clearArchiveUndo();
-    return Promise.all(ids.map(restoreConversation));
+    return Promise.all(ids.map((id) => restoreConversation(id)));
   }
-  async function archiveConversation(id: string, recordUndo = true): Promise<boolean> {
+  /**
+   * `silent` 用于批量路径：逐条的归档失败提示由调用方（侧栏）汇总成一条可重试的浮层提示，
+   * 会话层不再为同一批操作逐条弹 toast。
+   */
+  async function archiveConversation(
+    id: string,
+    recordUndo = true,
+    silent = false,
+  ): Promise<boolean> {
     if (recordUndo && bulkBusy) return false;
     let state: ConversationAttentionStatus | undefined = durableAttention.statuses.value[id];
     try {
@@ -175,7 +183,8 @@ export function useAIChatSession(options: UseAIChatSessionOptions) {
       state = fresh?.[0]?.state === 'normal' ? undefined : (fresh?.[0]?.state ?? state);
     } catch (error) {
       if (!sessionAlive) return false;
-      toast.error(getAIErrorMessage(error, t, 'aiAssistant.dialogs.chat.archiveFailed'));
+      if (!silent)
+        toast.error(getAIErrorMessage(error, t, 'aiAssistant.dialogs.chat.archiveFailed'));
       return false;
     }
     if (
@@ -188,10 +197,11 @@ export function useAIChatSession(options: UseAIChatSessionOptions) {
           composerAttachments.value.length ||
           composerContextEntities.value.some((item) => item.origin === 'explicit')))
     ) {
-      toast.error(t('aiAssistant.dialogs.chat.archiveBlocked'));
+      if (!silent) toast.error(t('aiAssistant.dialogs.chat.archiveBlocked'));
       return false;
     }
-    if (!(await conversation.setConversationStatus(id, 'Archived')) || !sessionAlive) return false;
+    if (!(await conversation.setConversationStatus(id, 'Archived', silent)) || !sessionAlive)
+      return false;
     // The user may have typed or started a turn while persistence was in flight.
     if (
       id === chatConversationId.value &&
@@ -233,8 +243,8 @@ export function useAIChatSession(options: UseAIChatSessionOptions) {
           id,
           success:
             action === 'archive'
-              ? await archiveConversation(id, false)
-              : await restoreConversation(id),
+              ? await archiveConversation(id, false, true)
+              : await restoreConversation(id, true),
         });
       }
       if (action === 'archive')

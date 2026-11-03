@@ -804,7 +804,8 @@ async function deleteConversations(ids: string[]) {
   const results: { id: string; success: boolean }[] = [];
   for (const id of new Set(ids)) {
     if (!bulkDeleteAlive) break;
-    results.push({ id, success: Boolean(await deleteConversationBase(id)) });
+    // 批量删除的逐条成功/失败提示由侧栏汇总成一条浮层提示。
+    results.push({ id, success: Boolean(await deleteConversationBase(id, true)) });
   }
   return results;
 }

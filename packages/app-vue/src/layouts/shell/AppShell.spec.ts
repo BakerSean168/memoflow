@@ -68,12 +68,12 @@ const passThrough = (name: string) =>
   });
 
 const activeChatConversationId = ref<string | null>(null);
-const conversationList = reactive<{ id: string; title?: string; name?: string; status?: string }[]>(
-  [
-    { id: 'conversation-a', title: 'A' },
-    { id: 'conversation-b', title: 'B' },
-  ],
-);
+const conversationList = reactive<
+  { id: string; title?: string; name?: string; status?: string; updatedAt?: number }[]
+>([
+  { id: 'conversation-a', title: 'A' },
+  { id: 'conversation-b', title: 'B' },
+]);
 const restoreConversation = vi.fn(async (id: string) => {
   const item = conversationList.find((item) => item.id === id);
   if (item) item.status = 'Active';
@@ -130,11 +130,52 @@ const WindowHeaderStub = defineComponent({
   },
 });
 
+interface SidebarConversationEntry {
+  id: string;
+  title: string;
+}
+
 const ConversationSidebarStub = defineComponent({
   name: 'ConversationSidebar',
-  emits: ['select-conversation', 'new-conversation', 'delete-conversation'],
-  setup() {
-    return () => h('aside', { 'data-testid': 'conversation-sidebar' });
+  props: {
+    groups: {
+      type: Array<{ labelKey: string; items: SidebarConversationEntry[] }>,
+      default: () => [],
+    },
+    archivedConversations: { type: Array<SidebarConversationEntry>, default: () => [] },
+  },
+  emits: ['select-conversation', 'new-conversation', 'delete-conversation', 'restore-conversation'],
+  setup(props, { emit }) {
+    return () =>
+      h('aside', { 'data-testid': 'conversation-sidebar' }, [
+        h(
+          'ul',
+          { 'data-testid': 'conversation-sidebar-archived' },
+          props.archivedConversations.map((item) =>
+            h('li', { key: item.id, 'data-testid': 'conversation-sidebar-archived-row' }, [
+              h('span', item.title),
+              h(
+                'button',
+                {
+                  type: 'button',
+                  'data-testid': 'conversation-sidebar-restore',
+                  onClick: () => emit('restore-conversation', item.id),
+                },
+                'restore',
+              ),
+            ]),
+          ),
+        ),
+        h(
+          'ul',
+          { 'data-testid': 'conversation-sidebar-groups' },
+          props.groups.flatMap((group) =>
+            group.items.map((item) =>
+              h('li', { key: item.id, 'data-testid': 'conversation-sidebar-row' }, item.title),
+            ),
+          ),
+        ),
+      ]);
   },
 });
 
@@ -219,8 +260,7 @@ async function mountShell(
         path: '/settings',
         components: {
           settings: {
-            template:
-              '<div data-testid="settings-view"><slot name="archived-conversations" /></div>',
+            template: '<div data-testid="settings-view" />',
           },
         },
         meta: { shellScene: 'settings' },
@@ -772,18 +812,53 @@ describe('AppShell right-panel integration', () => {
     wrapper.unmount();
   });
 
-  it('shows archived conversations in settings and restores through the existing session', async () => {
-    conversationList.push({ id: 'archived-test', name: 'Archived test', status: 'Archived' });
+  it('shows archived conversations in the sidebar partition and restores them into the list', async () => {
+    conversationList.push({
+      id: 'archived-test',
+      name: 'Archived test',
+      status: 'Archived',
+      updatedAt: Date.parse('2026-11-01T10:00:00Z'),
+    });
+    const { wrapper } = await mountShell('/goals');
+    try {
+      const archivedSection = wrapper.get('[data-testid="conversation-sidebar-archived"]');
+      expect(archivedSection.text()).toContain('Archived test');
+      expect(wrapper.get('[data-testid="conversation-sidebar-groups"]').text()).not.toContain(
+        'Archived test',
+      );
+
+      await wrapper.get('[data-testid="conversation-sidebar-restore"]').trigger('click');
+      await flushPromises();
+      expect(restoreConversation).toHaveBeenCalledWith('archived-test');
+      expect(wrapper.find('[data-testid="conversation-sidebar-archived-row"]').exists()).toBe(
+        false,
+      );
+      expect(wrapper.get('[data-testid="conversation-sidebar-groups"]').text()).toContain(
+        'Archived test',
+      );
+    } finally {
+      wrapper.unmount();
+      conversationList.splice(
+        conversationList.findIndex((item) => item.id === 'archived-test'),
+        1,
+      );
+    }
+  });
+
+  it('no longer renders the archived conversation list in settings', async () => {
+    conversationList.push({
+      id: 'archived-test',
+      name: 'Archived test',
+      status: 'Archived',
+      updatedAt: Date.now(),
+    });
     const { wrapper, router } = await mountShell('/goals');
     try {
       await router.push('/settings?tab=ai');
       await flushPromises();
-      const section = wrapper.get('[data-testid="settings-archived-conversations"]');
-      expect(section.text()).toContain('Archived test');
-      await section.get('[data-testid="settings-restore-conversation"]').trigger('click');
-      await flushPromises();
-      expect(restoreConversation).toHaveBeenCalledWith('archived-test');
-      expect(section.text()).not.toContain('Archived test');
+      expect(wrapper.get('[data-testid="settings-view"]').text()).not.toContain('Archived test');
+      expect(wrapper.find('[data-testid="settings-archived-conversations"]').exists()).toBe(false);
+      expect(wrapper.find('[data-testid="settings-restore-conversation"]').exists()).toBe(false);
     } finally {
       wrapper.unmount();
       conversationList.splice(
