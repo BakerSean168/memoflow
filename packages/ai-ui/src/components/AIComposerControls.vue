@@ -1,6 +1,16 @@
 <script setup lang="ts">
-import { computed, nextTick, ref, watch } from 'vue';
-import { CircleAlert, Check, ChevronDown, LockKeyhole, Search, Star } from '@lucide/vue';
+import { computed, nextTick, onUpdated, ref, watch } from 'vue';
+import {
+  CircleAlert,
+  Check,
+  ChevronDown,
+  ChevronUp,
+  LockKeyhole,
+  Search,
+  ShieldCheck,
+  Star,
+  Zap,
+} from '@lucide/vue';
 import { useI18n } from 'vue-i18n';
 import { Popover, PopoverContent, PopoverTrigger } from '@memoflow/ui-vue-shadcn';
 import type {
