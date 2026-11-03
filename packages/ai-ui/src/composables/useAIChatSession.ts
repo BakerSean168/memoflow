@@ -160,7 +160,7 @@ export function useAIChatSession(options: UseAIChatSessionOptions) {
     }
     const ids = [...undoArchive.ids];
     clearArchiveUndo();
-    return Promise.all(ids.map(restoreConversation));
+    return Promise.all(ids.map((id) => restoreConversation(id)));
   }
   /**
    * `silent` 用于批量路径：逐条的归档失败提示由调用方（侧栏）汇总成一条可重试的浮层提示，
