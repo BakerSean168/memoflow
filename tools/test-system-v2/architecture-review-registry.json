@@ -2584,7 +2584,7 @@
         "status": "none-verified",
         "testFiles": []
       },
-      "sourceSha256": "131cb60151b484d626dd3445205b9fb4f0506dd6a2862584a2606f3cccb8e2cc"
+      "sourceSha256": "75b93ec1f69b316b709582e621661f838d179000a4b462bedb454174aad66d04"
     },
     {
       "path": "packages/patterns/src/events/create-event-bus-adapter-dual.surface.spec.ts",
