@@ -339,7 +339,7 @@ function showBulkFailure(action: BulkAction, ids: string[]) {
     action: {
       label: t('shell.conversation.retry'),
       onClick: () => {
-        // 失败项按原动作、原 ids 重跑；toast 点击后由组件自身关闭，不留残留。
+        // 按原动作重跑本次失败的 ids（整批抛错时即原 ids 全集）；toast 点击后自动关闭，零残留。
         void emitBulk(action, ids);
       },
     },
