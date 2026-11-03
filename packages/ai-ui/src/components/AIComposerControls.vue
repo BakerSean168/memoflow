@@ -736,7 +736,7 @@ watch([activeSection, search, () => enabledAgents.value.length], () => {
             />
           </div>
           <div
-            class="flex flex-wrap items-center gap-2 border-t border-border/65 bg-muted/40 px-3 py-2"
+            class="flex shrink-0 flex-wrap items-center gap-2 border-t border-border/65 bg-muted/40 px-3 py-2"
             data-testid="ai-model-picker-footer"
           >
             <div
