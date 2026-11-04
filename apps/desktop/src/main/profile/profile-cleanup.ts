@@ -6,7 +6,7 @@ import {
   createSharedPathResolver,
   type DesktopStorageRoots,
 } from '../paths';
-import { getProfilePartition } from './profile-partition';
+import { getProfilePartition, getProfilePartitionDirectoryName } from './profile-partition';
 import { syncProfileDirectory, writeProfileDurableFile } from './profile-durable-file';
 
 export const LocalProfileIdSchema = z.string().regex(/^p_[a-f0-9]{24}$/);
@@ -76,6 +76,18 @@ export class ProfileCleanup {
     const session = this.partitionSession(getProfilePartition(profileId));
     await session.clearStorageData();
     await session.clearCache();
+    // Sign-out removes local data. Electron writes the persistent partition under
+    // electronSessionData/Partitions using the name without the `persist:` prefix,
+    // and those files can retain session traces the session API does not purge.
+    // Remove only this Profile's directory; other profiles' partitions stay.
+    await fs.rm(
+      path.join(
+        this.roots.electronSessionData,
+        'Partitions',
+        getProfilePartitionDirectoryName(profileId),
+      ),
+      { recursive: true, force: true },
+    );
     // Directory must be gone before discarding the only keys that can unlock it.
     await finalize();
     await fs.rm(marker);

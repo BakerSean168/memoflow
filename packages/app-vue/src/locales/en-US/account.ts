@@ -124,7 +124,7 @@ export default {
     guestCloseAccountUnavailable: 'Guest mode cannot close the account',
   },
   logoutHint:
-    'Disconnect the current cloud session and stop sync while keeping this local Profile available.',
+    'Disconnect the current cloud session and stop sync while keeping this local account available.',
   logoutConfirm: {
     title: 'Log out of your account?',
     description: 'Cloud sync will pause. Local data will remain unlocked and available.',

@@ -119,7 +119,7 @@ export default {
     closeFailed: '注销失败',
     guestCloseAccountUnavailable: '访客模式下无法注销账户',
   },
-  logoutHint: '断开当前云端会话并停止同步，本地 Profile 和数据仍可继续使用。',
+  logoutHint: '断开当前云端会话并停止同步，本地账户和数据仍可继续使用。',
   logoutConfirm: {
     title: '确认退出登录？',
     description: '退出后云端同步会暂停；本地数据不会被锁定或删除。',
