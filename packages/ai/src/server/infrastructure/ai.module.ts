@@ -376,7 +376,14 @@ async function getKnowledgeIndexDiagnostics(
 // Helpers
 // ---------------------------------------------------------------------------
 
-function normalizeRuntimeContributions(
+/**
+ * Normalize host-provided runtime contributions into a stable list.
+ * 将宿主提供的运行时贡献归一化为稳定列表。
+ *
+ * Kept as an explicit assembly step (mirrors the module assembly pattern) so
+ * `createAIModule` only wires lifecycle around already-normalized contributions.
+ */
+export function createAIRuntimeContributions(
   runtimeContributions?: AIRuntimeContributionsInput,
 ): readonly AIModuleRuntimeContribution[] {
   return normalizeContribution(runtimeContributions);
@@ -445,25 +452,29 @@ function providerCatalogDto(): ListAIProviderCatalogRes {
 // ---------------------------------------------------------------------------
 
 /**
- * Canonical composition root.
- * 规范化的 AI 模块主组合根。
- *
- * AI-VNEXT-07: services are assembled directly from canonical use cases; the
- * Mastra runtime is the only runtime. Legacy dual-runtime selection and
- * AgentHost lifecycle objects are gone. Legacy AgentRun / AssistantFacade /
- * checkpoint application methods fail closed.
- *
- * AI-VNEXT-07：服务直接从规范 use case 组装；Mastra runtime 是唯一 runtime。
- * 旧双 runtime 选择与 AgentHost lifecycle 对象已删除。旧 AgentRun /
- * AssistantFacade / checkpoint 应用方法 fail closed。
+ * Result of `createAIUseCases` — assembled use cases plus the seams the
+ * composition root still needs for capabilities, ports and lifecycle.
+ * `createAIUseCases` 的结果：已装配 use case 及组合根后续需要的接缝。
  */
-export function createAIModule(dependencies: AIModuleDependencies): AIModuleInstance {
+export interface AIUseCaseAssembly {
+  readonly services: AIModuleServices;
+  readonly agentRegistry: AgentInstanceRegistry | null;
+  /** True when both knowledge-index repository and source port are present. */
+  readonly hasKnowledgeIndexStack: boolean;
+  /** Owned here because use cases and lifecycle both depend on it. */
+  readonly providerSafeFetch: ProviderSafeFetch;
+}
+
+/**
+ * Pure assembly helper used by the composition root and tests.
+ * 纯组装函数：给定依赖对象，返回已经接好线的 use case 集合。
+ *
+ * Mirrors the `createTaskUseCases` pattern: construction order is preserved
+ * verbatim from the original `createAIModule` body, and absence of optional
+ * dependency stacks keeps the fail-closed `SERVICE_UNAVAILABLE` services.
+ */
+export function createAIUseCases(dependencies: AIModuleDependencies): AIUseCaseAssembly {
   const { conversationRepository, providerConfigRepository } = dependencies;
-  const portableCapability = new AIConversationPortableCapability(conversationRepository);
-
-  // --- Runtime contributions (host-provided side effects) ---
-
-  const runtimeContributions = normalizeRuntimeContributions(dependencies.runtimeContributions);
 
   // --- Services assembled directly from canonical use cases ---
 
@@ -714,6 +725,35 @@ export function createAIModule(dependencies: AIModuleDependencies): AIModuleInst
     analyticsQueryService,
     evaluationReportService,
   };
+
+  return { services, agentRegistry, hasKnowledgeIndexStack, providerSafeFetch };
+}
+
+/**
+ * Canonical composition root.
+ * 规范化的 AI 模块主组合根。
+ *
+ * AI-VNEXT-07: services are assembled directly from canonical use cases; the
+ * Mastra runtime is the only runtime. Legacy dual-runtime selection and
+ * AgentHost lifecycle objects are gone. Legacy AgentRun / AssistantFacade /
+ * checkpoint application methods fail closed.
+ *
+ * AI-VNEXT-07：服务直接从规范 use case 组装；Mastra runtime 是唯一 runtime。
+ * 旧双 runtime 选择与 AgentHost lifecycle 对象已删除。旧 AgentRun /
+ * AssistantFacade / checkpoint 应用方法 fail closed。
+ */
+export function createAIModule(dependencies: AIModuleDependencies): AIModuleInstance {
+  const { conversationRepository, providerConfigRepository } = dependencies;
+  const portableCapability = new AIConversationPortableCapability(conversationRepository);
+
+  // --- Runtime contributions (host-provided side effects) ---
+
+  const runtimeContributions = createAIRuntimeContributions(dependencies.runtimeContributions);
+
+  // --- Services assembled directly from canonical use cases ---
+
+  const { services, agentRegistry, hasKnowledgeIndexStack, providerSafeFetch } =
+    createAIUseCases(dependencies);
 
   // --- Application capabilities: one projection per proven consumer boundary ---
 
