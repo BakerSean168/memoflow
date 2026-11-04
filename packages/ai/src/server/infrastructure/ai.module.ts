@@ -57,6 +57,7 @@ import type {
 } from '../application/ports';
 
 import { createLogger } from '@memoflow/utils/logger';
+import { normalizeContribution } from '@memoflow/utils/shared';
 import { AI_PROVIDER_CATALOG } from '@memoflow/ai-contracts';
 import type { AIWorkflowRuntimePort, MastraAIRuntime } from '../mastra/runtime';
 import type { LocalAgentRuntime } from '../local-agent/local-agent-runtime';
@@ -378,15 +379,7 @@ async function getKnowledgeIndexDiagnostics(
 function normalizeRuntimeContributions(
   runtimeContributions?: AIRuntimeContributionsInput,
 ): readonly AIModuleRuntimeContribution[] {
-  if (!runtimeContributions) {
-    return [];
-  }
-
-  if (Array.isArray(runtimeContributions)) {
-    return Array.from(runtimeContributions);
-  }
-
-  return [runtimeContributions as AIModuleRuntimeContribution];
+  return normalizeContribution(runtimeContributions);
 }
 
 function unavailable<T>(): Promise<Result<T>> {

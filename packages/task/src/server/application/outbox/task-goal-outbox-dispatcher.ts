@@ -6,6 +6,7 @@ import {
   type TaskGoalSettlementSource,
 } from '@memoflow/task-contracts';
 import { createLogger } from '@memoflow/utils/logger';
+import { isRecord } from '@memoflow/utils/shared';
 
 const logger = createLogger('TaskGoalOutboxDispatcher');
 
@@ -124,8 +125,4 @@ function requireNonEmptyString(value: unknown, label: string): asserts value is 
   if (typeof value !== 'string' || value.length === 0) {
     throw new Error(`${label} must be a non-empty string`);
   }
-}
-
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === 'object' && value !== null && !Array.isArray(value);
 }
