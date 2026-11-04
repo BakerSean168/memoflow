@@ -1,7 +1,7 @@
 # Oracle2 native production-selected watcher
 
 Oracle2 production is a separate Compose project at /opt/memoflow-oracle2. Its
-shared CPA Caddy is a different project and owns host ports 80/443.
+shared public Caddy gateway is a different project and owns host ports 80/443.
 Never install or run deployment/production/install-production-deploy-watch.sh
 (the former Alibaba installer) on Oracle2.
 
@@ -14,7 +14,7 @@ watcher reads that pointer and checks OCI control labels against the embedded
 production-set-v1.json byte hash, release revision, and immutable image refs.
 
 - Only the existing API and Web services and one-shot Migrator may switch images.
-- The DB/Redis/PowerSync runtime pins and shared CPA Caddy pin must not change.
+- The DB/Redis/PowerSync runtime pins and shared public Caddy pin must not change.
   A change requires a separate, explicitly reviewed migration, not automatic rollout.
 - No network, Caddy, port, bind-mount, healthcheck or named-volume changes are
   permitted. The existing oracle2-topology-preflight.mjs and

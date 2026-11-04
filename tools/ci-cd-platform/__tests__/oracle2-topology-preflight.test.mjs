@@ -82,7 +82,7 @@ function fixture() {
   const caddy = {
     Config: { Labels: { 'com.docker.compose.project': 'cpa' } },
     State: { Running: true },
-    Mounts: [{ Destination: '/etc/caddy/Caddyfile', Source: '/opt/cpa/Caddyfile' }],
+    Mounts: [{ Destination: '/etc/caddy/Caddyfile', Source: '/opt/public-gateway/Caddyfile' }],
     HostConfig: {
       PortBindings: {
         '80/tcp': [{ HostIp: '', HostPort: '80' }],
@@ -93,7 +93,7 @@ function fixture() {
   return { compose, containers, caddy, arch: 'arm64' };
 }
 
-test('Oracle2 dry-run preflight accepts exact existing named volumes and shared CPA edge', () => {
+test('Oracle2 dry-run preflight accepts exact existing named volumes and shared public edge', () => {
   assert.deepEqual(validateOracle2Topology(fixture()), []);
 });
 
@@ -105,7 +105,7 @@ test('Oracle2 preflight rejects an internally owned Caddy and dangerous publishe
   const result = validateOracle2Topology(site).join('; ');
   assert.match(result, /no Caddy/u);
   assert.match(result, /postgres must not publish host ports/u);
-  assert.match(result, /Shared CPA Caddy/u);
+  assert.match(result, /Shared public Caddy/u);
 });
 
 test('Oracle2 preflight rejects changed DB and API data volumes before any deploy', () => {
