@@ -152,11 +152,7 @@ it('clears partition and staging before finalization; re-adding the Profile has 
   const staging = path.join(roots.cacheRoot, 'snapshot-staging', id);
   const profile = path.join(roots.dataRoot, 'profiles', id);
   const partitionDir = path.join(roots.electronSessionData, 'Partitions', `profile-${id}`);
-  const otherPartitionDir = path.join(
-    roots.electronSessionData,
-    'Partitions',
-    `profile-${other}`,
-  );
+  const otherPartitionDir = path.join(roots.electronSessionData, 'Partitions', `profile-${other}`);
   const partitionStorage = new Map([
     ['cookie', 'old-account'],
     ['cache', 'old-page'],
