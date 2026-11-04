@@ -1,4 +1,5 @@
 import type { Instant } from '@memoflow/time';
+import { isRecord } from '@memoflow/utils/shared';
 import {
   createActiveUsageTrigger,
   createElapsedTrigger,
@@ -112,10 +113,6 @@ export function deserializeRoutineTemporaryOverride(
     reason: requireString(parsed.reason, 'reason'),
     source: requireOverrideSource(parsed.source),
   });
-}
-
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === 'object' && value !== null && !Array.isArray(value);
 }
 
 function requireRecord(value: unknown, field: string): Record<string, unknown> {

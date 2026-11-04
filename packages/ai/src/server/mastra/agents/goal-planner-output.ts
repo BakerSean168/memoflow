@@ -2,11 +2,7 @@ import type { Agent } from '@mastra/core/agent';
 import type { RequestContext } from '@mastra/core/request-context';
 import { GOAL_WORKFLOW_LIVE_ACTION_SINK_KEY } from '../workflows/goal-business-action-journal';
 import type { z } from 'zod';
-type UnknownRecord = Record<string, unknown>;
-
-function isRecord(value: unknown): value is UnknownRecord {
-  return typeof value === 'object' && value !== null && !Array.isArray(value);
-}
+import { isRecord } from '@memoflow/utils/shared';
 
 function unwrapTaskYmdWireValue(value: unknown): unknown {
   if (!isRecord(value)) return value;

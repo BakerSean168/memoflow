@@ -2636,7 +2636,7 @@
         "status": "none-verified",
         "testFiles": []
       },
-      "sourceSha256": "eb3752a8ec321a9e57ea8774e0087d78e0f562bb47c068c1780ea3e6bfbcb5f6"
+      "sourceSha256": "c42bacf00b25d43d0499b9f12fb1718a1bd0b61b2fd3b49e42dd35d90d5acefb"
     },
     {
       "path": "packages/repository/src/server/infrastructure/adapters/prisma/__tests__/knowledge-remote-binding-ownership.surface.spec.ts",
