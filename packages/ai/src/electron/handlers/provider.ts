@@ -101,10 +101,7 @@ export function registerProviderHandlers(
   installed.push(AIChannels.PROVIDER_TEST);
   ipcMain.handle(AIChannels.PROVIDER_SET_DEFAULT, async (_, dto) =>
     withAuthenticatedValue(ctx, async (requestContext) => {
-      const result = await providerManagement.setDefaultProvider(
-        dto.providerId,
-        requestContext,
-      );
+      const result = await providerManagement.setDefaultProvider(dto.providerId, requestContext);
       if (!result.ok) return result;
       return ok(null);
     }),
@@ -112,8 +109,7 @@ export function registerProviderHandlers(
   installed.push(AIChannels.PROVIDER_SET_DEFAULT);
   ipcMain.handle(AIChannels.PROVIDER_REFRESH_MODELS, async (_, payload) =>
     withAuthenticatedValue(ctx, async (requestContext) => {
-      const request =
-        typeof payload === 'string' ? { id: payload, force: false } : (payload ?? {});
+      const request = typeof payload === 'string' ? { id: payload, force: false } : (payload ?? {});
       return providerManagement.refreshProviderModels(
         String(request.id),
         requestContext,

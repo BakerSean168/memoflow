@@ -60,10 +60,7 @@ export function registerConversationHandlers(
   installed.push(AIChannels.CONVERSATION_GET);
   ipcMain.handle(AIChannels.CONVERSATION_DELETE, async (_, id) =>
     withAuthenticatedValue(ctx, async (requestContext) => {
-      const result = await assistantConversation.deleteConversation(
-        String(id),
-        requestContext,
-      );
+      const result = await assistantConversation.deleteConversation(String(id), requestContext);
       if (!result.ok) return result;
       return ok(null);
     }),

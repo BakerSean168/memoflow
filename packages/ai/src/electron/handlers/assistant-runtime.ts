@@ -40,8 +40,13 @@ export function registerWorkspaceHandlers(
   ctx: IElectronModuleContext,
   deps: AIElectronHandlerDeps,
 ): void {
-  const { instance: aiModule, activeStreamSessions, workspaceOwners, workspaceAcks, installed } =
-    deps;
+  const {
+    instance: aiModule,
+    activeStreamSessions,
+    workspaceOwners,
+    workspaceAcks,
+    installed,
+  } = deps;
 
   ipcMain.handle(AIChannels.RUNTIME_WORKSPACE_START, async (event, request) =>
     withAuthenticatedValue(ctx, async (requestContext) => {
@@ -63,11 +68,7 @@ export function registerWorkspaceHandlers(
       } catch {
         return fail({ code: 'SERVICE_UNAVAILABLE', message: 'Workspace events unavailable' });
       }
-      if (
-        !source &&
-        !aiModule.conversationAttentionPort?.events &&
-        !aiModule.conversationEvents
-      )
+      if (!source && !aiModule.conversationAttentionPort?.events && !aiModule.conversationEvents)
         return fail({ code: 'SERVICE_UNAVAILABLE', message: 'Workspace events unavailable' });
       if (
         event.sender.isDestroyed() ||
@@ -251,8 +252,7 @@ export function registerAssistantRuntimeHandlers(
             modelId: messageCommand.modelId,
             agentInstanceId: messageCommand.agentInstanceId,
             permissionMode: messageCommand.permissionMode,
-            ...(messageCommand.runtimeKind === 'local_agent' &&
-            messageCommand.nativeModelOptions
+            ...(messageCommand.runtimeKind === 'local_agent' && messageCommand.nativeModelOptions
               ? { modelOptions: messageCommand.nativeModelOptions }
               : {}),
             locale: messageCommand.locale,
@@ -472,8 +472,7 @@ export function registerAssistantRuntimeHandlers(
         await aiModule.conversationAttentionPort
           ?.forget({
             identityId: requestContext.identityId,
-            runtimeKind:
-              parsed.data.runtimeKind === 'local_agent' ? 'local_agent' : 'builtin',
+            runtimeKind: parsed.data.runtimeKind === 'local_agent' ? 'local_agent' : 'builtin',
             conversationId: parsed.data.conversationId,
           })
           .catch(() => undefined);
@@ -567,9 +566,7 @@ export function registerAssistantRuntimeHandlers(
         const summary = AIRuntimeUsageSummarySchema.parse(
           await aiModule.mastraRuntime.summarizeUsage({
             identityId: requestContext.identityId,
-            ...(parsed.data.conversationId
-              ? { conversationId: parsed.data.conversationId }
-              : {}),
+            ...(parsed.data.conversationId ? { conversationId: parsed.data.conversationId } : {}),
             ...(parsed.data.runId ? { runId: parsed.data.runId } : {}),
           }),
         );

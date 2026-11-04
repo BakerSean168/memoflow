@@ -41,9 +41,7 @@ export function registerKnowledgeAnalyticsHandlers(
   );
   installed.push(AIChannels.ANALYTICS_QUERY);
   ipcMain.handle(AIChannels.EVALUATION_OVERVIEW_GET, async (_, dto) =>
-    withAuthenticatedValue(ctx, async () =>
-      evaluationOperations.getEvaluationOverview(dto ?? {}),
-    ),
+    withAuthenticatedValue(ctx, async () => evaluationOperations.getEvaluationOverview(dto ?? {})),
   );
   installed.push(AIChannels.EVALUATION_OVERVIEW_GET);
 }
