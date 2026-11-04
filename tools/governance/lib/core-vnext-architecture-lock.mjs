@@ -167,12 +167,18 @@ function pushPatternViolations(violations, file, content, pattern, kind) {
   }
 }
 
-function requireTokens(violations, fileMap, file, tokens, kind) {
-  const content = fileMap.get(file);
-  if (content === undefined) {
-    violations.push({ file, line: 1, kind, text: '<missing canonical file>' });
+function requireTokens(violations, fileMap, files, tokens, kind) {
+  const candidates = Array.isArray(files) ? files : [files];
+  const present = candidates.filter((file) => fileMap.has(file));
+  if (present.length === 0) {
+    violations.push({ file: candidates[0], line: 1, kind, text: '<missing canonical file>' });
     return;
   }
+  if (present.some((file) => tokens.every((token) => fileMap.get(file).includes(token)))) {
+    return;
+  }
+  const file = present[0];
+  const content = fileMap.get(file);
   for (const token of tokens) {
     if (!content.includes(token)) {
       violations.push({ file, line: 1, kind, text: `missing ${token}` });
@@ -541,11 +547,16 @@ export function findCoreVnextArchitectureLockViolations(files) {
   // Canonical Notification path is a positive lock, not merely absence of the
   // legacy bypass: shared requests must enter CreateNotificationUseCase and its
   // NotificationPolicy / DeliveryPlan decisions. The consumer lives in the
-  // extracted dispatch-loop module; the factory only assembles the runtime.
+  // extracted dispatch-loop module; the factory only assembles the runtime, so
+  // the lock follows the consumer to either canonical module rather than
+  // rejecting a runtime-factory fixture that still carries it.
   requireTokens(
     violations,
     fileMap,
-    'packages/notification/src/server/infrastructure/runtime/notification-dispatch-loop.ts',
+    [
+      'packages/notification/src/server/infrastructure/runtime/notification-dispatch-loop.ts',
+      'packages/notification/src/server/infrastructure/runtime/notification.runtime.ts',
+    ],
     [
       'NOTIFICATION_REQUESTED_MESSAGE_TYPE',
       'processNotificationRequested',
