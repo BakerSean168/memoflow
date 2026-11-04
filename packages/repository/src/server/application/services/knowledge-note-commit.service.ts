@@ -4,7 +4,6 @@ import type { Result } from '@memoflow/transport-contracts/result';
 import { fail, ok } from '@memoflow/transport-contracts/result';
 import {
   CreateConfirmedKnowledgeNoteSchema,
-  AdoptKnowledgeDocumentSchema,
   type CreateConfirmedKnowledgeNoteReq,
   type CreateConfirmedKnowledgeNoteResponse,
   type AdoptKnowledgeDocumentReq,
@@ -37,6 +36,13 @@ import {
   KnowledgeProjectionEngine,
   type IKnowledgeProjectionEngine,
 } from './knowledge-projection.engine';
+import {
+  hashAdoptionRequest,
+  parseAdoptionRequest,
+  prepareKnowledgeAdoption,
+} from './knowledge-adoption-request';
+import { commitKnowledgeAdoption } from './knowledge-adoption-commit';
+import { KnowledgeWriteQueue } from './knowledge-write-queue';
 
 const logger = createLogger('KnowledgeNoteCommitService');
 
@@ -81,7 +87,7 @@ export class KnowledgeNoteCommitService {
       operation: Promise<Result<AdoptKnowledgeDocumentResponse>>;
     }
   >();
-  private readonly connectionQueues = new Map<string, Promise<void>>();
+  private readonly writeQueue = new KnowledgeWriteQueue();
   private readonly leaseCoordinator: KnowledgeRepositoryLeaseCoordinator;
 
   constructor(private readonly options: KnowledgeNoteCommitServiceOptions) {
@@ -127,30 +133,32 @@ export class KnowledgeNoteCommitService {
             message: 'requestId is already committing a different knowledge note proposal',
           });
     }
-    const operation = this.queueConnectionRequest(request.connectionId, async () => {
-      try {
-        const claimed = await this.leaseCoordinator.execute(
-          knowledgeRepositoryConnectionLeaseKey(request.connectionId),
-          async (guard) => this.createInternal(identityId, request, requestHash, guard),
-        );
-        return claimed.acquired
-          ? claimed.value!
-          : fail({
-              code: 'CONFLICT',
-              message: 'Knowledge repository is processing another write or projection',
+    const operation = this.writeQueue
+      .enqueue(request.connectionId, async () => {
+        try {
+          const claimed = await this.leaseCoordinator.execute(
+            knowledgeRepositoryConnectionLeaseKey(request.connectionId),
+            async (guard) => this.createInternal(identityId, request, requestHash, guard),
+          );
+          return claimed.acquired
+            ? claimed.value!
+            : fail({
+                code: 'CONFLICT',
+                message: 'Knowledge repository is processing another write or projection',
+              });
+        } catch (error) {
+          if (error instanceof KnowledgeRepositoryLeaseLostError) {
+            return fail({
+              code: 'SERVICE_UNAVAILABLE',
+              message: 'Knowledge note commit ownership expired; retry the same request',
             });
-      } catch (error) {
-        if (error instanceof KnowledgeRepositoryLeaseLostError) {
-          return fail({
-            code: 'SERVICE_UNAVAILABLE',
-            message: 'Knowledge note commit ownership expired; retry the same request',
-          });
+          }
+          throw error;
         }
-        throw error;
-      }
-    }).finally(() => {
-      if (this.inFlight.get(key)?.operation === operation) this.inFlight.delete(key);
-    });
+      })
+      .finally(() => {
+        if (this.inFlight.get(key)?.operation === operation) this.inFlight.delete(key);
+      });
     this.inFlight.set(key, { requestHash, operation });
     return operation;
   }
@@ -159,12 +167,9 @@ export class KnowledgeNoteCommitService {
     identityId: string,
     input: AdoptKnowledgeDocumentReq,
   ): Promise<Result<AdoptKnowledgeDocumentResponse>> {
-    const parsed = AdoptKnowledgeDocumentSchema.safeParse(input);
-    if (!parsed.success) {
-      return fail({
-        code: 'VALIDATION_ERROR',
-        message: 'Invalid knowledge document adoption request',
-      });
+    const parsed = parseAdoptionRequest(input);
+    if (!parsed.ok) {
+      return parsed;
     }
     const request = parsed.data;
     const projection = await this.options.projectionRepository.findByIdForIdentity(
@@ -175,7 +180,7 @@ export class KnowledgeNoteCommitService {
       return fail({ code: 'NOT_FOUND', message: 'Knowledge note projection was not found' });
     }
 
-    const requestHash = this.hashAdoptionRequest(request);
+    const requestHash = hashAdoptionRequest(request);
     const key = `${identityId}:${request.requestId}`;
     const active = this.adoptionInFlight.get(key);
     if (active) {
@@ -187,31 +192,33 @@ export class KnowledgeNoteCommitService {
           });
     }
 
-    const operation = this.queueConnectionRequest(projection.connectionId, async () => {
-      try {
-        const claimed = await this.leaseCoordinator.execute(
-          knowledgeRepositoryConnectionLeaseKey(projection.connectionId),
-          async (guard) => this.adoptInternal(identityId, request, requestHash, guard),
-        );
-        return claimed.acquired
-          ? claimed.value!
-          : fail({
-              code: 'CONFLICT',
-              message: 'Knowledge repository is processing another write or projection',
+    const operation = this.writeQueue
+      .enqueue(projection.connectionId, async () => {
+        try {
+          const claimed = await this.leaseCoordinator.execute(
+            knowledgeRepositoryConnectionLeaseKey(projection.connectionId),
+            async (guard) => this.adoptInternal(identityId, request, requestHash, guard),
+          );
+          return claimed.acquired
+            ? claimed.value!
+            : fail({
+                code: 'CONFLICT',
+                message: 'Knowledge repository is processing another write or projection',
+              });
+        } catch (error) {
+          if (error instanceof KnowledgeRepositoryLeaseLostError) {
+            return fail({
+              code: 'SERVICE_UNAVAILABLE',
+              message: 'Knowledge adoption ownership expired; retry the same request',
             });
-      } catch (error) {
-        if (error instanceof KnowledgeRepositoryLeaseLostError) {
-          return fail({
-            code: 'SERVICE_UNAVAILABLE',
-            message: 'Knowledge adoption ownership expired; retry the same request',
-          });
+          }
+          throw error;
         }
-        throw error;
-      }
-    }).finally(() => {
-      if (this.adoptionInFlight.get(key)?.operation === operation)
-        this.adoptionInFlight.delete(key);
-    });
+      })
+      .finally(() => {
+        if (this.adoptionInFlight.get(key)?.operation === operation)
+          this.adoptionInFlight.delete(key);
+      });
     this.adoptionInFlight.set(key, { requestHash, operation });
     return operation;
   }
@@ -222,271 +229,34 @@ export class KnowledgeNoteCommitService {
     requestHash: string,
     guard: KnowledgeRepositoryLeaseGuard,
   ): Promise<Result<AdoptKnowledgeDocumentResponse>> {
-    if (this.options.closureChecker && (await this.options.closureChecker(identityId))) {
-      return fail({ code: 'FORBIDDEN', message: 'Account is closed or closure in progress' });
-    }
-
-    const existing = await this.options.writeRequestRepository.findByIdentityAndRequestId(
-      identityId,
-      request.requestId,
+    const preparation = await prepareKnowledgeAdoption(
+      { identityId, request, requestHash, guard },
+      {
+        projectionRepository: this.options.projectionRepository,
+        writeRequestRepository: this.options.writeRequestRepository,
+        connectionRepository: this.options.connectionRepository,
+        observationRepository: this.options.observationRepository,
+        historyFenceRepository: this.options.historyFenceRepository,
+        documentIdentityRepository: this.options.documentIdentityRepository,
+        githubAppClient: this.options.githubAppClient,
+        closureChecker: this.options.closureChecker,
+        metrics: this.options.metrics,
+        canWrite: (contentsPermission, repository) => this.canWrite(contentsPermission, repository),
+        now: this.now,
+      },
     );
-    if (existing) {
-      if (existing.requestHash !== requestHash) {
-        return fail({
-          code: 'CONFLICT',
-          message: 'requestId has already been used for a different knowledge write',
-        });
-      }
-      if (existing.status === 'Committed' && existing.commitSha) {
-        return ok({
-          requestId: request.requestId,
-          knowledgeDocumentId: existing.knowledgeDocumentId,
-          relativePath: existing.relativePath,
-          commitSha: existing.commitSha,
-          status: 'Committed',
-        });
-      }
+    if (preparation.kind === 'result') {
+      return preparation.result;
     }
-
-    const projection = await this.options.projectionRepository.findByIdForIdentity(
-      identityId,
-      request.projectionId,
+    return commitKnowledgeAdoption(
+      { identityId, request, context: preparation.context, guard },
+      {
+        githubAppClient: this.options.githubAppClient,
+        writeRequestRepository: this.options.writeRequestRepository,
+        projectionEngine: this.projectionEngine,
+        now: this.now,
+      },
     );
-    if (!projection || projection.deletedAt !== null) {
-      return fail({ code: 'NOT_FOUND', message: 'Knowledge note projection was not found' });
-    }
-    if (projection.knowledgeDocumentId !== null) {
-      return fail({
-        code: 'CONFLICT',
-        message: 'Knowledge note already has a stable document identity',
-      });
-    }
-    if (projection.blobSha !== request.expectedBlobSha) {
-      return fail({
-        code: 'CONFLICT',
-        message: 'Knowledge note changed after adoption was reviewed',
-      });
-    }
-    if (projection.frontmatter['memoflow_id'] !== undefined) {
-      return fail({
-        code: 'CONFLICT',
-        message: 'Knowledge note already contains an invalid or unrecognized memoflow_id marker',
-      });
-    }
-
-    const connection = await this.options.connectionRepository.findByIdForIdentity(
-      identityId,
-      projection.connectionId,
-    );
-    if (!connection || connection.disconnectedAt !== null) {
-      return fail({ code: 'NOT_FOUND', message: 'Active knowledge remote binding was not found' });
-    }
-    const [observation, historyFence] = await Promise.all([
-      this.options.observationRepository.findByBindingId(connection.id),
-      this.options.historyFenceRepository.findByBindingId(connection.id),
-    ]);
-    if (!observation || observation.eligibility.state !== 'Ready') {
-      return fail({
-        code: 'FORBIDDEN',
-        message: 'Knowledge repository provider state requires attention',
-      });
-    }
-    const inventory = await this.options.githubAppClient.getInstallationInventory(
-      connection.installationId,
-    );
-    const repository = inventory.repositories.find(
-      (candidate) => candidate.id === connection.repositoryId,
-    );
-    if (!repository || !this.canWrite(inventory.contentsPermission, repository)) {
-      return fail({ code: 'FORBIDDEN', message: 'Knowledge repository is not writable' });
-    }
-    if (historyFence && repository.defaultBranch !== historyFence.defaultBranch) {
-      return fail({
-        code: 'CONFLICT',
-        message: 'Knowledge repository default branch changed; reconcile before adopting notes',
-      });
-    }
-    const writeBranch = historyFence?.defaultBranch ?? repository.defaultBranch;
-    const now = this.now();
-
-    let record: KnowledgeWriteRequestRecord;
-    if (existing?.status === 'Pending') {
-      record = existing;
-    } else if (existing?.status === 'Failed') {
-      await guard.ensureHeld();
-      if (!(await this.options.writeRequestRepository.retryFailed(identityId, existing.id, now))) {
-        return fail({ code: 'CONFLICT', message: 'Knowledge adoption is already in progress' });
-      }
-      record = {
-        ...existing,
-        status: 'Pending',
-        commitSha: null,
-        errorCode: null,
-        errorMessage: null,
-        projectionStatus: 'Pending',
-        projectionErrorCode: null,
-        projectionErrorMessage: null,
-        projectionAttempts: 0,
-        projectedAt: null,
-        blobSha: null,
-        markdownContent: null,
-        updatedAt: now,
-        completedAt: null,
-      };
-    } else {
-      record = {
-        id: `knowledge-write-${randomUUID()}`,
-        identityId,
-        connectionId: connection.id,
-        requestId: request.requestId,
-        requestHash,
-        knowledgeDocumentId: request.knowledgeDocumentId,
-        relativePath: projection.relativePath,
-        status: 'Pending',
-        commitSha: null,
-        errorCode: null,
-        errorMessage: null,
-        projectionStatus: 'Pending',
-        projectionErrorCode: null,
-        projectionErrorMessage: null,
-        projectionAttempts: 0,
-        projectedAt: null,
-        blobSha: null,
-        markdownContent: null,
-        createdAt: now,
-        updatedAt: now,
-        completedAt: null,
-      };
-    }
-    await guard.ensureHeld();
-    if (!existing && !(await this.options.writeRequestRepository.create(record))) {
-      return fail({ code: 'CONFLICT', message: 'Knowledge adoption is already in progress' });
-    }
-    this.options.metrics?.recordOutbox('knowledge', 'persisted');
-
-    const liveIdentityMatches = await this.options.projectionRepository.findLiveByDocumentId(
-      connection.id,
-      request.knowledgeDocumentId,
-    );
-    if (liveIdentityMatches.length > 0) {
-      const message = 'Knowledge document identity is already attached to a live document';
-      await guard.ensureHeld();
-      await this.options.writeRequestRepository.markFailed(
-        identityId,
-        record.id,
-        'CONFLICT',
-        message,
-      );
-      return fail({ code: 'CONFLICT', message });
-    }
-    const identityClaimed = await this.options.documentIdentityRepository.claimForAdoption(
-      connection.knowledgeSpaceId,
-      request.knowledgeDocumentId,
-      request.requestId,
-      now,
-    );
-    if (!identityClaimed) {
-      const message = 'Knowledge document identity is already owned by another document';
-      await guard.ensureHeld();
-      await this.options.writeRequestRepository.markFailed(
-        identityId,
-        record.id,
-        'CONFLICT',
-        message,
-      );
-      return fail({ code: 'CONFLICT', message });
-    }
-
-    const parsedMarkdown = matter(projection.markdownContent);
-    const frontmatter = {
-      ...(parsedMarkdown.data as Record<string, unknown>),
-      memoflow_id: request.knowledgeDocumentId,
-    };
-    const markdownContent = matter.stringify(parsedMarkdown.content, frontmatter);
-    let committed: GitHubFileCommitResult;
-    try {
-      await guard.ensureHeld();
-      committed = await this.options.githubAppClient.updateFileCommit(connection.installationId, {
-        repository,
-        path: projection.relativePath,
-        branch: writeBranch,
-        content: markdownContent,
-        message: `Adopt knowledge note identity: ${projection.title}`,
-        requestId: request.requestId,
-        expectedBlobSha: request.expectedBlobSha,
-      });
-    } catch (error) {
-      if (error instanceof KnowledgeRepositoryLeaseLostError) throw error;
-      const code =
-        error instanceof GitHubAppClientFailureError && error.failure.kind === 'conflict'
-          ? 'CONFLICT'
-          : 'SERVICE_UNAVAILABLE';
-      const message =
-        code === 'CONFLICT'
-          ? 'Knowledge note changed while adoption was being committed'
-          : 'Knowledge repository provider is unavailable';
-      await guard.ensureHeld();
-      await this.options.writeRequestRepository.markFailed(identityId, record.id, code, message);
-      return fail({ code, message });
-    }
-
-    await guard.ensureHeld();
-    await this.options.writeRequestRepository.markCommitted(
-      identityId,
-      record.id,
-      committed.commitSha,
-    );
-    await guard.ensureHeld();
-    await this.options.writeRequestRepository.bindProjectionSource(identityId, record.id, {
-      blobSha: committed.blobSha,
-      markdownContent,
-    });
-
-    try {
-      await guard.ensureHeld();
-      await this.projectionEngine.applyChanges(connection, committed.commitSha, {
-        notes: [
-          {
-            projectionId: projection.id,
-            relativePath: projection.relativePath,
-            blobSha: committed.blobSha,
-            markdownContent,
-            mutation: 'content_updated',
-          },
-        ],
-      });
-      await guard.ensureHeld();
-      await this.options.writeRequestRepository.markProjectionSucceeded(
-        identityId,
-        record.id,
-        this.now(),
-      );
-    } catch (error) {
-      if (error instanceof KnowledgeRepositoryLeaseLostError) throw error;
-      logger.warn('Knowledge adoption committed but immediate projection update failed', {
-        error,
-        identityId,
-        connectionId: connection.id,
-        requestId: request.requestId,
-        commitSha: committed.commitSha,
-      });
-      await guard.ensureHeld();
-      await this.options.writeRequestRepository.markProjectionFailed(
-        identityId,
-        record.id,
-        'PROJECTION_FAILED',
-        error instanceof Error ? error.message : 'Knowledge adoption projection failed',
-        this.now(),
-      );
-    }
-
-    return ok({
-      requestId: request.requestId,
-      knowledgeDocumentId: request.knowledgeDocumentId,
-      relativePath: projection.relativePath,
-      commitSha: committed.commitSha,
-      status: 'Committed',
-    });
   }
 
   private async createInternal(
@@ -753,22 +523,6 @@ export class KnowledgeNoteCommitService {
     });
   }
 
-  private queueConnectionRequest<T>(connectionId: string, task: () => Promise<T>): Promise<T> {
-    const previous = this.connectionQueues.get(connectionId) ?? Promise.resolve();
-    const operation = previous.then(task, task);
-    const tail = operation.then(
-      () => undefined,
-      () => undefined,
-    );
-    this.connectionQueues.set(connectionId, tail);
-    void tail.then(() => {
-      if (this.connectionQueues.get(connectionId) === tail) {
-        this.connectionQueues.delete(connectionId);
-      }
-    });
-    return operation;
-  }
-
   private canWrite(
     contentsPermission: 'read' | 'write' | 'none',
     repository: GitHubInstallationRepositoryDTO,
@@ -781,20 +535,6 @@ export class KnowledgeNoteCommitService {
       !repository.disabled &&
       repository.permissions.push
     );
-  }
-
-  private hashAdoptionRequest(request: AdoptKnowledgeDocumentReq): string {
-    return createHash('sha256')
-      .update(
-        JSON.stringify({
-          operation: 'adopt',
-          projectionId: request.projectionId,
-          knowledgeDocumentId: request.knowledgeDocumentId,
-          requestId: request.requestId,
-          expectedBlobSha: request.expectedBlobSha,
-        }),
-      )
-      .digest('hex');
   }
 
   private hashRequest(request: CreateConfirmedKnowledgeNoteReq): string {
