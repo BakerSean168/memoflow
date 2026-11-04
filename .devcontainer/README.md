@@ -2,10 +2,10 @@
 
 Two cost-aware Dev Container profiles are available:
 
-| Profile | Path | Environment |
-| --- | --- | --- |
-| **Lite (default)** | `.devcontainer/devcontainer.json` | Node 22.20.0, pnpm 11.20.0, GH CLI, SSHD; no Docker daemon |
-| **Full** | `.devcontainer/full/devcontainer.json` | Lite plus Docker-in-Docker / Compose for API, PostgreSQL and E2E |
+| Profile            | Path                                   | Environment                                                      |
+| ------------------ | -------------------------------------- | ---------------------------------------------------------------- |
+| **Lite (default)** | `.devcontainer/devcontainer.json`      | Node 22.20.0, pnpm 11.20.0, GH CLI, SSHD; no Docker daemon       |
+| **Full**           | `.devcontainer/full/devcontainer.json` | Lite plus Docker-in-Docker / Compose for API, PostgreSQL and E2E |
 
 Both profiles match the root `package.json` pnpm version, use a non-root `vscode` user, and do not impose an artificial `--cpus=2 --memory=8g` container limit. Select the VM machine type in Codespaces. SSHD supports `gh codespace ssh`.
 
