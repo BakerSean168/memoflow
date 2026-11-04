@@ -4,6 +4,7 @@ import {
   isIpcResultEnvelope,
   ok,
   type IpcResult,
+  type Result,
 } from '@memoflow/transport-contracts/result';
 import type { IElectronModuleContext } from '@memoflow/desktop-contracts';
 import type { ExecutionContext } from '@memoflow/transport-contracts';
@@ -101,3 +102,92 @@ export function createAuthenticatedIdentityIpcWrapper(
 }
 
 export const withAuthenticatedIdentity = createAuthenticatedIdentityIpcWrapper();
+
+/** Minimal structural schema interface (avoid hard Zod dependency in the seam). */
+export interface ZodLikeSchema<TInput> {
+  safeParse(
+    data: unknown,
+  ):
+    | { success: true; data: TInput }
+    | { success: false; error: { issues: Array<{ path: PropertyKey[]; message: string }> } };
+}
+
+/** Event-like object accepted by the IPC adapter (avoid hard Electron dependency). */
+export interface IpcInvokeEventLike {
+  sender?: unknown;
+  senderFrame?: unknown;
+}
+
+/**
+ * Options accepted by the injected validation IPC adapter.
+ *
+ * Structural mirror of `@memoflow/utils`' `IpcAdapterValidationOptions`: the
+ * adapter is injected by each consuming package instead of imported here,
+ * because `@memoflow/utils` already depends on `@memoflow/host-runtime` (a
+ * reverse import would create a dependency cycle).
+ */
+export interface AuthenticatedValidationAdapterOptions {
+  extractContext?: (event: IpcInvokeEventLike) => ExecutionContext;
+  projectArgs?: (args: unknown) => unknown;
+}
+
+/**
+ * Structural signature of the real `ipcAdapterWithValidation` from
+ * `@memoflow/utils/result`, injected by each consuming package.
+ */
+export type AuthenticatedValidationAdapter = <TInput, TOutput>(
+  schema: ZodLikeSchema<TInput>,
+  controllerFn: (data: TInput, context: ExecutionContext) => Promise<Result<TOutput>>,
+  options?: AuthenticatedValidationAdapterOptions,
+) => (event: IpcInvokeEventLike, args: unknown) => Promise<IpcResult<TOutput>>;
+
+/**
+ * Options for `createAuthenticatedValidationHandler`.
+ */
+export interface AuthenticatedValidationHandlerOptions {
+  /** Package-owned `withAuthenticatedValue` (carries the package error messages). */
+  withAuthenticatedValue: ReturnType<typeof createAuthenticatedIpcWrapper>;
+  /** Real validation IPC adapter (`ipcAdapterWithValidation` from `@memoflow/utils/result`). */
+  ipcAdapterWithValidation: AuthenticatedValidationAdapter;
+}
+
+/**
+ * Composes a package's authenticated context resolution with the real
+ * validation IPC adapter for a single channel. The returned handler validates
+ * the projected canonical input BEFORE the controller runs and returns an
+ * `IpcResult`. Existing channels pass a `projectArgs` projector that composes
+ * the raw wire args (positional or object payload) into the contract request
+ * shape (e.g. `(args) => ({ params: { id: args[0] }, body: args[1] })`).
+ *
+ * The composition injects the package's own `withAuthenticatedValue` so each
+ * package keeps its verbatim error shapes (unexpectedErrorMessage etc.).
+ *
+ * 把各包的鉴权 context 解析与真实验证型 IPC adapter 组合成单通道 handler：
+ * 返回的 handler 在 controller 执行前校验投影后的 canonical 输入，并返回
+ * `IpcResult`。既有通道通过 `projectArgs` projector 把原始 wire args
+ * （positional 或 object payload）组合成 contract 请求形状（例如
+ * `(args) => ({ params: { id: args[0] }, body: args[1] })`）。
+ *
+ * 组合时注入各包自己的 `withAuthenticatedValue`，逐字保持各包错误形态
+ * （unexpectedErrorMessage 等）。
+ */
+export function createAuthenticatedValidationHandler(
+  options: AuthenticatedValidationHandlerOptions,
+) {
+  const { withAuthenticatedValue, ipcAdapterWithValidation } = options;
+
+  return function withAuthenticatedValidation<TInput, TOutput>(
+    ctx: IElectronModuleContext,
+    schema: ZodLikeSchema<TInput>,
+    controllerFn: (data: TInput, context: ExecutionContext) => Promise<Result<TOutput>>,
+    projectArgs?: (args: unknown) => unknown,
+  ): (event: IpcInvokeEventLike, args: unknown) => Promise<IpcResult<TOutput>> {
+    return (event, args) =>
+      withAuthenticatedValue(ctx, async (requestContext) =>
+        ipcAdapterWithValidation(schema, (data) => controllerFn(data, requestContext), {
+          extractContext: () => requestContext,
+          projectArgs,
+        })(event, args),
+      );
+  };
+}
