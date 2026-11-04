@@ -18,10 +18,10 @@
  * `ipcAdapterWithValidation` 内部执行。
  */
 
-import { createAuthenticatedIpcWrapper } from '@memoflow/host-runtime/electron-ipc';
-import type { IElectronModuleContext } from '@memoflow/desktop-contracts';
-import type { Result } from '@memoflow/transport-contracts/result';
-import type { ExecutionContext } from '@memoflow/transport-contracts';
+import {
+  createAuthenticatedIpcWrapper,
+  createAuthenticatedValidationHandler,
+} from '@memoflow/host-runtime/electron-ipc';
 import { ipcAdapterWithValidation } from '@memoflow/utils/result';
 
 export const withAuthenticatedValue = createAuthenticatedIpcWrapper({
@@ -29,53 +29,7 @@ export const withAuthenticatedValue = createAuthenticatedIpcWrapper({
   unexpectedErrorMessage: 'Internal task IPC error',
 });
 
-/** Minimal structural schema interface (avoid hard Zod dependency in the seam). */
-interface ZodLikeSchema<TInput> {
-  safeParse(
-    data: unknown,
-  ):
-    | { success: true; data: TInput }
-    | { success: false; error: { issues: Array<{ path: PropertyKey[]; message: string }> } };
-}
-
-/** Event-like object accepted by the IPC adapter (avoid hard Electron dependency). */
-interface IpcInvokeEventLike {
-  sender?: unknown;
-  senderFrame?: unknown;
-}
-
-/**
- * Composes authenticated context resolution with the real validation IPC
- * adapter for a single channel. The returned handler validates the projected
- * canonical input BEFORE the controller runs and returns an `IpcResult`.
- * Existing object payload channels pass a `projectArgs` projector that composes
- * the wire payload into the contract request shape.
- *
- * 把鉴权 context 解析与真实验证型 IPC adapter 组合成单通道 handler：
- * 返回的 handler 在 controller 执行前校验投影后的 canonical 输入，并返回
- * `IpcResult`。既有 object payload channel 通过 `projectArgs` projector 把
- * wire payload 组合成 contract 请求形状。
- *
- * @param ctx - Electron module context resolving the canonical ExecutionContext.
- * @param schema - Contract request schema (single source of truth).
- * @param controllerFn - Controller invocation receiving parsed data + context.
- * @param projectArgs - Optional projector from wire payload to canonical input.
- * @returns A `(event, args) => Promise<IpcResult<T>>` handler for `ipcMain.handle`.
- */
-export function withAuthenticatedValidation<TInput, TOutput>(
-  ctx: IElectronModuleContext,
-  schema: ZodLikeSchema<TInput>,
-  controllerFn: (data: TInput, context: ExecutionContext) => Promise<Result<TOutput>>,
-  projectArgs?: (args: unknown) => unknown,
-): (
-  event: IpcInvokeEventLike,
-  args: unknown,
-) => Promise<import('@memoflow/transport-contracts/result').IpcResult<TOutput>> {
-  return (event, args) =>
-    withAuthenticatedValue(ctx, async (requestContext) =>
-      ipcAdapterWithValidation(schema, (data) => controllerFn(data, requestContext), {
-        extractContext: () => requestContext,
-        projectArgs,
-      })(event, args),
-    );
-}
+export const withAuthenticatedValidation = createAuthenticatedValidationHandler({
+  withAuthenticatedValue,
+  ipcAdapterWithValidation,
+});
