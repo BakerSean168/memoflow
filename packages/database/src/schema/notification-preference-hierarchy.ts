@@ -1,3 +1,5 @@
+import { isRecord } from '@memoflow/utils/shared';
+
 export interface NotificationPreferenceSchemaQueryClient {
   query(
     sql: string,
@@ -26,10 +28,6 @@ const ALL_VNEXT_CHANNELS = ['InApp', 'Email', 'Push', 'Desktop', 'Sms', 'Webhook
 type JsonRecord = Record<string, unknown>;
 type ChannelPreferences = Record<string, boolean>;
 type WorkflowOverrides = Record<string, ChannelPreferences>;
-
-function isRecord(value: unknown): value is JsonRecord {
-  return typeof value === 'object' && value !== null && !Array.isArray(value);
-}
 
 function parseRecord(value: unknown): JsonRecord {
   if (isRecord(value)) return value;

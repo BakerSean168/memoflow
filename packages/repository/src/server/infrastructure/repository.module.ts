@@ -17,6 +17,7 @@ import { OperationTimelineEntrySchema } from '@memoflow/operations-contracts';
 import type { OperationTimelineEntry } from '@memoflow/operations-contracts';
 import type { KnowledgeWriteRequestClientDTO } from '@memoflow/repository-contracts';
 import { createLogger } from '@memoflow/utils/logger';
+import { normalizeContribution } from '@memoflow/utils/shared';
 
 const logger = createLogger('RepositoryModule');
 
@@ -50,13 +51,7 @@ export interface RepositoryModuleInstance {
 function normalizeRuntimeContributions(
   runtimeContributions?: RepositoryRuntimeContributionsInput,
 ): readonly RepositoryModuleRuntimeContribution[] {
-  if (!runtimeContributions) {
-    return [];
-  }
-  if (Array.isArray(runtimeContributions)) {
-    return Array.from(runtimeContributions);
-  }
-  return [runtimeContributions as RepositoryModuleRuntimeContribution];
+  return normalizeContribution(runtimeContributions);
 }
 
 function buildApplicationPort(deps: RepositoryModuleDependencies): RepositoryApplicationPort {

@@ -4,6 +4,7 @@ import {
 } from '@memoflow/routine-contracts';
 import type { ScheduledIntent, SchedulingOwner } from '@memoflow/schedule-contracts';
 import { buildSchedulingKey } from '@memoflow/schedule-contracts';
+import { isRecord } from '@memoflow/utils/shared';
 
 /** Neutral scheduler-handler keys for durable Routine timing lanes. */
 export const ROUTINE_WALLCLOCK_HANDLER_KEY = 'routine.wallclock.fire';
@@ -170,10 +171,6 @@ export function buildRoutineElapsedIntent(input: {
       tags: [ROUTINE_SCHEDULING_OWNER_TYPE, 'elapsed'],
     },
   };
-}
-
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === 'object' && value !== null && !Array.isArray(value);
 }
 
 function requireString(value: unknown, field: string): string {
