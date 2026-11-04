@@ -20,6 +20,7 @@ import {
   type NotificationReliableOperationPort,
 } from '@memoflow/reliable-messaging-contracts';
 import type { NotificationMetricsService } from '../../../domain/services/notification-metrics-service';
+import { OUTBOX_MESSAGES_INDEX_DDLS, OUTBOX_MESSAGES_TABLE_DDL } from '../../../../powersync-ddl';
 
 export interface PowerSyncOutboxRow {
   id: string;
@@ -274,35 +275,10 @@ export class PowerSyncNotificationReliableAdapter implements NotificationReliabl
     // canonical PowerSync schema. At runtime they are writable SQLite views, so
     // this adapter must never try to create tables or indexes for them. Only the
     // shared `outbox_messages` table is adapter-owned local SQLite state.
-    await this.db.execute(`
-      CREATE TABLE IF NOT EXISTS outbox_messages (
-        id TEXT PRIMARY KEY,
-        aggregate_type TEXT NOT NULL DEFAULT 'shared',
-        aggregate_id TEXT NOT NULL DEFAULT 'shared',
-        message_type TEXT NOT NULL,
-        payload_json TEXT NOT NULL,
-        status TEXT NOT NULL,
-        attempts INTEGER NOT NULL DEFAULT 0,
-        owner_token TEXT,
-        claim_id TEXT,
-        fencing_token INTEGER NOT NULL DEFAULT 0,
-        lease_expires_at TEXT,
-        last_error TEXT,
-        next_retry_at TEXT,
-        identity_id TEXT,
-        idempotency_key TEXT UNIQUE,
-        created_at TEXT NOT NULL,
-        updated_at TEXT NOT NULL,
-        correlation_id TEXT NOT NULL DEFAULT '',
-        causation_id TEXT,
-        schema_version INTEGER NOT NULL DEFAULT 1,
-        dispatched_at TEXT
-      );
-    `);
-    await this.db.execute(
-      `CREATE INDEX IF NOT EXISTS idx_om_message_type ON outbox_messages(message_type);`,
-    );
-    await this.db.execute(`CREATE INDEX IF NOT EXISTS idx_om_status ON outbox_messages(status);`);
+    await this.db.execute(OUTBOX_MESSAGES_TABLE_DDL);
+    for (const indexDdl of OUTBOX_MESSAGES_INDEX_DDLS) {
+      await this.db.execute(indexDdl);
+    }
     this.tableInitialized = true;
   }
 

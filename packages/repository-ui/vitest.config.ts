@@ -37,6 +37,7 @@ export default mergeConfig(
       '@memoflow/http-client': '../../packages/http-client/src/index.ts',
       '@memoflow/ipc-client': '../../packages/ipc-client/src/index.ts',
       '@memoflow/transport-contracts': '../../packages/transport-contracts/src/index.ts',
+      '@memoflow/time': '../../packages/time/src/index.ts',
     },
     setupFiles: ['../app-vue/src/test/setup.ts', './vitest.setup.ts'],
   }),

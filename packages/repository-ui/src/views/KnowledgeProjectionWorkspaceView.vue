@@ -169,9 +169,9 @@
             :refreshing="loadingNotes || loadingConnections || treeLoading"
             :repository-name="repositoryShortName"
             :repository-display-name="
-              selectedConnection ? repositoryDisplayName(selectedConnection) : ''
+              selectedConnection ? resolveRepositoryDisplayName(selectedConnection) : ''
             "
-            :default-branch="selectedConnection ? repositoryDefaultBranch(selectedConnection) : '—'"
+            :default-branch="selectedConnection ? resolveDefaultBranch(selectedConnection) : '—'"
             :note-count-label="noteCountLabel"
             :provider-needs-attention="providerNeedsAttention"
             :provider-warning-label="
@@ -264,9 +264,9 @@
             :refreshing="loadingNotes || loadingConnections || treeLoading"
             :repository-name="repositoryShortName"
             :repository-display-name="
-              selectedConnection ? repositoryDisplayName(selectedConnection) : ''
+              selectedConnection ? resolveRepositoryDisplayName(selectedConnection) : ''
             "
-            :default-branch="selectedConnection ? repositoryDefaultBranch(selectedConnection) : '—'"
+            :default-branch="selectedConnection ? resolveDefaultBranch(selectedConnection) : '—'"
             :note-count-label="noteCountLabel"
             :provider-needs-attention="providerNeedsAttention"
             :provider-warning-label="
@@ -410,7 +410,13 @@ import {
   type KnowledgeNoteTreeNodeDTO,
   type KnowledgeRemoteBindingClientDTO,
 } from '@memoflow/repository-contracts';
+import { formatLocaleMediumDate } from '@memoflow/time';
 import { repositoryUiHost, type PanelSurfaceStatus } from '../repository-ui-host';
+import {
+  resolveDefaultBranch,
+  resolveProviderState,
+  resolveRepositoryDisplayName,
+} from '../utils/knowledge-repository-display';
 import DocumentWorkspaceState from '../components/DocumentWorkspaceState.vue';
 import DocumentWorkspaceToolbar from '../components/DocumentWorkspaceToolbar.vue';
 import KnowledgeMarkdownPreview from '../components/KnowledgeMarkdownPreview.vue';
@@ -503,7 +509,7 @@ const knowledgeCaptureSourceOptions = computed<KnowledgeCaptureSourceOption[]>((
       const source = { kind: 'repository' as const, connectionId: String(connection.id) };
       return {
         key: knowledgeCaptureSourceKey(source),
-        label: repositoryDisplayName(connection),
+        label: resolveRepositoryDisplayName(connection),
         source,
       };
     }),
@@ -516,7 +522,9 @@ const knowledgeCaptureDefaultSourceKey = computed(() => {
   return option?.key;
 });
 const repositoryShortName = computed(() => {
-  const fullName = selectedConnection.value ? repositoryDisplayName(selectedConnection.value) : '';
+  const fullName = selectedConnection.value
+    ? resolveRepositoryDisplayName(selectedConnection.value)
+    : '';
   const parts = fullName.split('/');
   return parts[parts.length - 1] || t('repository.projection.title');
 });
@@ -666,26 +674,12 @@ function createKnowledgeDocumentId(): AdoptKnowledgeDocumentReq['knowledgeDocume
   return KnowledgeDocumentIdSchema.parse(`kdoc_${createUuidV4()}`);
 }
 
-function repositoryDisplayName(binding: KnowledgeRemoteBindingClientDTO): string {
-  return binding.observation?.repositoryFullName ?? binding.repositoryFullNameSnapshot;
-}
-
-function repositoryDefaultBranch(binding: KnowledgeRemoteBindingClientDTO): string {
-  return binding.observation?.defaultBranch ?? binding.historyFence?.defaultBranch ?? '—';
-}
-
 function providerStateLabel(binding: KnowledgeRemoteBindingClientDTO): string {
-  return t(
-    `repository.projection.providerStatus.${binding.observation?.eligibility.state ?? 'Unchecked'}`,
-  );
+  return t(`repository.projection.providerStatus.${resolveProviderState(binding)}`);
 }
 
 function formatUpdatedAt(timestamp: number): string {
-  return new Intl.DateTimeFormat(locale.value, {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
-  }).format(new Date(timestamp));
+  return formatLocaleMediumDate(timestamp, locale.value);
 }
 
 async function handleKnowledgeCaptureOpenChange(open: boolean): Promise<void> {
