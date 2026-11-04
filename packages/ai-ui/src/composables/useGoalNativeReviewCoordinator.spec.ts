@@ -689,3 +689,317 @@ describe('useGoalNativeReviewCoordinator owner actions', () => {
     wrapper.unmount();
   });
 });
+
+describe('useGoalNativeReviewCoordinator guards and surface custody', () => {
+  it('opens nothing when the run has no native projection or live command', async () => {
+    const { coordinator, goalWorkflowRun, options, wrapper } = setup();
+
+    await coordinator.openGoalNativeReview();
+    await coordinator.project(makeGoalRun());
+
+    goalWorkflowRun.value = makeGoalRun();
+    await coordinator.openGoalNativeReview();
+    await coordinator.projectLive(goalWorkflowRun.value);
+
+    expect(native.openCreate).not.toHaveBeenCalled();
+    expect(native.readGoal).not.toHaveBeenCalled();
+    expect(options.chatTimeline.value).toHaveLength(0);
+    expect(coordinator.goalSurfaceReady.value).toBe(false);
+    wrapper.unmount();
+  });
+
+  it('ignores live commands outside a running run', async () => {
+    const { coordinator, goalWorkflowRun, options, wrapper } = setup();
+    const run = makeGoalRun({
+      status: 'suspended',
+      suspension: review(makeDraft(1)),
+      liveActions: [
+        {
+          sequence: 1,
+          command: {
+            actionId: 'name',
+            revision: 1,
+            operation: 'goal.setName',
+            value: 'Ignored',
+          },
+        },
+      ],
+    });
+    goalWorkflowRun.value = run;
+
+    await coordinator.projectLive(run);
+
+    expect(native.openCreate).not.toHaveBeenCalled();
+    expect(options.chatTimeline.value).toHaveLength(0);
+    expect(coordinator.goalSurfaceReady.value).toBe(false);
+    wrapper.unmount();
+  });
+
+  it('rejects blank or out-of-phase owner input without resuming the run', async () => {
+    const { coordinator, goalWorkflowRun, runtime, wrapper } = setup();
+
+    await expect(coordinator.submitGoalRevisionResponse('revise')).resolves.toBe(false);
+    await expect(coordinator.submitGoalClarificationResponse('answer')).resolves.toBe(false);
+
+    goalWorkflowRun.value = makeGoalRun({ status: 'suspended', suspension: review(makeDraft(1)) });
+    await expect(coordinator.submitGoalRevisionResponse('   ')).resolves.toBe(false);
+    await expect(coordinator.submitGoalClarificationResponse('   ')).resolves.toBe(false);
+
+    goalWorkflowRun.value = makeGoalRun({
+      status: 'suspended',
+      suspension: {
+        type: 'clarification_required',
+        questions: ['Which target?'],
+        round: 1,
+        candidateDraft: makeDraft(1),
+      },
+    });
+    await expect(coordinator.submitGoalRevisionResponse('revise')).resolves.toBe(false);
+    await expect(coordinator.submitGoalClarificationResponse('   ')).resolves.toBe(false);
+
+    expect(runtime.resume).not.toHaveBeenCalled();
+    expect(native.openCreate).not.toHaveBeenCalled();
+    wrapper.unmount();
+  });
+
+  it('does not confirm a run that is not awaiting owner approval', async () => {
+    const { coordinator, goalWorkflowRun, runtime, creatingGoal, wrapper } = setup();
+    goalWorkflowRun.value = makeGoalRun({ status: 'running' });
+
+    await coordinator.confirmGoalAgentRun();
+
+    expect(native.requestSubmit).not.toHaveBeenCalled();
+    expect(runtime.resume).not.toHaveBeenCalled();
+    expect(creatingGoal.value).toBe(false);
+    wrapper.unmount();
+  });
+
+  it('fails a review projection closed when the native surface is unavailable', async () => {
+    const { coordinator, goalWorkflowRun, wrapper } = setup();
+    native.available = false;
+    goalWorkflowRun.value = makeGoalRun({ status: 'suspended', suspension: review(makeDraft(1)) });
+
+    await coordinator.project(goalWorkflowRun.value);
+
+    expect(native.openCreate).not.toHaveBeenCalled();
+    expect(coordinator.goalSurfaceConflict.value).toBe(true);
+    expect(coordinator.goalSurfaceReady.value).toBe(false);
+    wrapper.unmount();
+  });
+
+  it('freezes the mounted owner draft once surface control is lost', async () => {
+    const { coordinator, goalWorkflowRun, wrapper } = setup();
+    const run = makeGoalRun({ status: 'suspended', suspension: review(makeDraft(1)) });
+    goalWorkflowRun.value = run;
+    await coordinator.project(run);
+    expect(coordinator.goalSurfaceReady.value).toBe(true);
+
+    coordinator.freezeGoalSurfaceControl();
+    await coordinator.project(run);
+
+    expect(coordinator.goalSurfaceControlLost.value).toBe(true);
+    expect(coordinator.goalSurfaceConflict.value).toBe(true);
+    expect(coordinator.goalSurfaceReady.value).toBe(false);
+    expect(native.blocked).toBe(true);
+    expect(native.openCreate).toHaveBeenCalledOnce();
+    wrapper.unmount();
+  });
+
+  it('hands the owner dialog back without reopening the projection', async () => {
+    const { coordinator, goalWorkflowRun, wrapper } = setup();
+    coordinator.handoffGoalNativeReview();
+    expect(native.releaseControl).not.toHaveBeenCalled();
+
+    const run = makeGoalRun({ status: 'suspended', suspension: review(makeDraft(1)) });
+    goalWorkflowRun.value = run;
+    await coordinator.project(run);
+    coordinator.handoffGoalNativeReview();
+
+    expect(native.releaseControl).toHaveBeenCalledOnce();
+    expect(native.locate).toHaveBeenCalled();
+    expect(coordinator.goalManualHandoff.value).toBe(true);
+    expect(native.openCreate).toHaveBeenCalledOnce();
+    wrapper.unmount();
+  });
+
+  it('cancels a suspended review and retires its native draft', async () => {
+    const { coordinator, goalWorkflowRun, runtime, projectRun, wrapper } = setup();
+    const run = makeGoalRun({ status: 'suspended', suspension: review(makeDraft(1)) });
+    goalWorkflowRun.value = run;
+    await coordinator.project(run);
+    runtime.resume.mockResolvedValue(makeGoalRun({ status: 'cancelled' }));
+
+    await coordinator.cancelGoalAgentRun();
+
+    expect(runtime.resume).toHaveBeenCalledExactlyOnceWith({
+      runId: 'run-1',
+      command: { type: 'cancel' },
+    });
+    expect(native.requestCancel).toHaveBeenCalledOnce();
+    expect(coordinator.goalSurfaceReady.value).toBe(false);
+    expect(projectRun).toHaveBeenCalledOnce();
+    wrapper.unmount();
+  });
+
+  it('cancels a running run and drains a recovery-required suspension', async () => {
+    const running = setup();
+    running.goalWorkflowRun.value = makeGoalRun({ status: 'running' });
+    await running.coordinator.cancelGoalAgentRun();
+
+    expect(running.runtime.cancel).toHaveBeenCalledExactlyOnceWith({ runId: 'run-1' });
+    expect(running.runtime.resume).not.toHaveBeenCalled();
+    running.wrapper.unmount();
+
+    const recovery = setup();
+    recovery.goalWorkflowRun.value = makeGoalRun({
+      status: 'suspended',
+      suspension: {
+        type: 'recovery_required',
+        message: 'Needs attention',
+        retryable: true,
+        failures: [],
+      },
+    });
+    await recovery.coordinator.cancelGoalAgentRun();
+
+    expect(recovery.runtime.resume).toHaveBeenCalledExactlyOnceWith({
+      runId: 'run-1',
+      command: { type: 'cancel_remaining' },
+    });
+    expect(recovery.runtime.cancel).not.toHaveBeenCalled();
+    recovery.wrapper.unmount();
+  });
+});
+
+describe('useGoalNativeReviewCoordinator preserved draft recovery', () => {
+  it('refuses restart preparation until a failed review preserved its draft', () => {
+    const { coordinator, wrapper } = setup();
+
+    expect(coordinator.prepareGoalRestart('run-1')).toBeUndefined();
+    expect(coordinator.goalRestartPending.value).toBe(false);
+    wrapper.unmount();
+  });
+
+  it('prepares a restart seed from the preserved draft and adopts the new run', async () => {
+    const { coordinator, goalWorkflowRun, wrapper } = setup();
+    const run = makeGoalRun({ status: 'suspended', suspension: review(makeDraft(1)) });
+    goalWorkflowRun.value = run;
+    await coordinator.project(run);
+    coordinator.detachFailedReview(makeGoalRun({ status: 'failed' }));
+    expect(coordinator.goalDraftPreserved.value).toBe(true);
+
+    const source = coordinator.prepareGoalRestart('run-1');
+
+    expect(source).toMatchObject({
+      sourceRunId: 'run-1',
+      draftRevision: 1,
+      draft: { goal: { name: 'Deep work' } },
+    });
+    expect(coordinator.goalRestartPending.value).toBe(true);
+    expect(native.blocked).toBe(true);
+    expect(() => coordinator.prepareGoalRestart('run-1')).toThrow(
+      'The preserved Goal draft is unavailable for restart',
+    );
+
+    await coordinator.adoptGoalRestart(makeGoalRun({ runId: 'run-2' }));
+
+    expect(native.reclaim).toHaveBeenCalledWith(
+      'run-2',
+      expect.anything(),
+      expect.objectContaining({ revision: 1 }),
+    );
+    expect(coordinator.goalRestartPending.value).toBe(false);
+    expect(coordinator.goalDraftPreserved.value).toBe(false);
+    expect(coordinator.goalSurfaceReady.value).toBe(true);
+    expect(native.blocked).toBe(false);
+    wrapper.unmount();
+  });
+
+  it('keeps an unresolved restart read-only', async () => {
+    const { coordinator, goalWorkflowRun, wrapper } = setup();
+    const run = makeGoalRun({ status: 'suspended', suspension: review(makeDraft(1)) });
+    goalWorkflowRun.value = run;
+    await coordinator.project(run);
+    coordinator.detachFailedReview(makeGoalRun({ status: 'failed' }));
+    coordinator.prepareGoalRestart('run-1');
+
+    coordinator.keepGoalRestartReadonly();
+
+    expect(coordinator.goalSurfaceControlLost.value).toBe(true);
+    expect(coordinator.goalSurfaceConflict.value).toBe(true);
+    expect(coordinator.goalSurfaceReady.value).toBe(false);
+    expect(coordinator.goalRestartPending.value).toBe(true);
+    wrapper.unmount();
+  });
+
+  it('resumes a pending restart only through the correlated run', async () => {
+    const { coordinator, goalWorkflowRun, runtime, projectRun, wrapper } = setup();
+    const run = makeGoalRun({ status: 'suspended', suspension: review(makeDraft(1)) });
+    goalWorkflowRun.value = run;
+    await coordinator.project(run);
+    coordinator.detachFailedReview(makeGoalRun({ status: 'failed' }));
+    const source = coordinator.prepareGoalRestart('run-1')!;
+    runtime.list.mockResolvedValue([
+      makeGoalRun({ runId: 'run-2', startRequestId: source.attemptId }),
+    ]);
+
+    await coordinator.continueGoalSurfaceControl();
+
+    expect(runtime.list).toHaveBeenCalledExactlyOnceWith({ conversationId: 'conv-1' });
+    expect(coordinator.goalRestartPending.value).toBe(false);
+    expect(coordinator.goalSurfaceReady.value).toBe(true);
+    expect(projectRun).toHaveBeenCalledOnce();
+    wrapper.unmount();
+  });
+
+  it('re-claims a lost surface lease before projecting the same run again', async () => {
+    const { coordinator, goalWorkflowRun, runtime, projectRun, wrapper } = setup();
+    const run = makeGoalRun({ status: 'suspended', suspension: review(makeDraft(1)) });
+    goalWorkflowRun.value = run;
+    await coordinator.project(run);
+    coordinator.freezeGoalSurfaceControl();
+    runtime.get.mockResolvedValue(run);
+
+    await coordinator.continueGoalSurfaceControl();
+
+    expect(runtime.goalSurfaceLease).toHaveBeenCalledWith(
+      expect.objectContaining({ action: 'renew', runId: 'run-1' }),
+    );
+    expect(coordinator.goalSurfaceControlLost.value).toBe(false);
+    expect(coordinator.goalSurfaceConflict.value).toBe(false);
+    expect(coordinator.goalSurfaceReady.value).toBe(true);
+    expect(projectRun).toHaveBeenCalledOnce();
+    wrapper.unmount();
+  });
+});
+
+describe('useGoalNativeReviewCoordinator owner truth reconciliation', () => {
+  it('retires review without reopening when canonical owner truth already exists', async () => {
+    const { coordinator, goalWorkflowRun, wrapper } = setup();
+    native.readGoal.mockResolvedValue(
+      ok({ goal: { id: 'GoalId_revision-1' }, keyResults: [{ id: 'KeyResultId_revision-1-0' }] }),
+    );
+    goalWorkflowRun.value = makeGoalRun({ status: 'suspended', suspension: review(makeDraft(1)) });
+
+    await coordinator.project(goalWorkflowRun.value);
+
+    expect(native.readGoal).toHaveBeenCalledExactlyOnceWith('GoalId_revision-1');
+    expect(native.openCreate).not.toHaveBeenCalled();
+    expect(coordinator.goalOwnerSubmitted.value).toBe(true);
+    expect(coordinator.goalSurfaceReady.value).toBe(false);
+    wrapper.unmount();
+  });
+
+  it('surfaces a mismatch between canonical Goal and workflow owner identities', async () => {
+    const { coordinator, goalWorkflowRun, wrapper } = setup();
+    native.readGoal.mockResolvedValue(ok({ goal: { id: 'GoalId_revision-1' }, keyResults: [] }));
+    goalWorkflowRun.value = makeGoalRun({ status: 'suspended', suspension: review(makeDraft(1)) });
+
+    await coordinator.openGoalNativeReview();
+
+    expect(toastMocks.error).toHaveBeenCalledOnce();
+    expect(native.openCreate).not.toHaveBeenCalled();
+    expect(coordinator.goalOwnerSubmitted.value).toBe(false);
+    wrapper.unmount();
+  });
+});
