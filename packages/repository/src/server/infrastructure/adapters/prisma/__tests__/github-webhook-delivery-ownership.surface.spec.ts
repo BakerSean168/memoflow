@@ -18,13 +18,25 @@ describe('github webhook delivery ownership surface', () => {
     resolve(__dirname, '../github-webhook-delivery-prisma.repository.ts'),
     'utf8',
   );
-  const service = readFileSync(
-    resolve(
-      __dirname,
-      '../../../../application/services/knowledge-repository-projection.service.ts',
+  // Aggregate file plus the extracted submodules it delegates to: the ownership
+  // fence is asserted over the union, not over one physical file.
+  const service = [
+    readFileSync(
+      resolve(
+        __dirname,
+        '../../../../application/services/knowledge-repository-projection.service.ts',
+      ),
+      'utf8',
     ),
-    'utf8',
-  );
+    readFileSync(
+      resolve(__dirname, '../../../../application/services/knowledge-attachment-content.ts'),
+      'utf8',
+    ),
+    readFileSync(
+      resolve(__dirname, '../../../../application/services/knowledge-delivery-queue.ts'),
+      'utf8',
+    ),
+  ].join('\n');
 
   it('port updateStatus requires connectionId', () => {
     expect(port).toMatch(
