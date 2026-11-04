@@ -183,6 +183,8 @@ it('clears partition and staging before finalization; re-adding the Profile has 
       expect(partitionStorage.size).toBe(0);
       expect(clearStorageData).toHaveBeenCalledOnce();
       expect(clearCache).toHaveBeenCalledOnce();
+      // The partition directory is already gone before the keys are discarded.
+      await expect(access(partitionDir)).rejects.toThrow();
     });
     await mkdir(profile, { recursive: true });
     expect(await fs.readdir(profile)).toEqual([]);
@@ -193,6 +195,41 @@ it('clears partition and staging before finalization; re-adding the Profile has 
     expect(await readFile(path.join(otherPartitionDir, 'Cookies'), 'utf8')).toBe('other-account');
     expect(await cleanup.pending()).toEqual([]);
   } finally {
+    await rm(root, { recursive: true, force: true });
+  }
+});
+
+it('keeps the tombstone when the partition directory cannot be removed', async () => {
+  const root = await mkdtemp(path.join(tmpdir(), 'profile-partition-dir-fault-'));
+  const roots = resolveDesktopStorageRoots({
+    platform: 'linux',
+    channel: 'test',
+    home: root,
+    env: { MEMOFLOW_DESKTOP_STORAGE_TEST_ROOT: root },
+  });
+  const id = 'p_012345678901234567890123';
+  const partitionDir = path.join(roots.electronSessionData, 'Partitions', `profile-${id}`);
+  const originalRm = fs.rm;
+  vi.spyOn(fs, 'rm').mockImplementation(async (name, options) => {
+    if (name === partitionDir) throw new Error('partition busy');
+    return originalRm(name, options);
+  });
+  const finalize = vi.fn(async () => undefined);
+  const cleanup = new ProfileCleanup(roots, emptyPartition);
+  try {
+    await mkdir(partitionDir, { recursive: true });
+    await writeFile(path.join(partitionDir, 'Cookies'), 'session-trace');
+    await expect(cleanup.remove(id, finalize)).rejects.toThrow('partition busy');
+    // Residue blocks completion instead of being reported as a clean removal.
+    expect(finalize).not.toHaveBeenCalled();
+    expect(await cleanup.isPending(id)).toBe(true);
+    vi.restoreAllMocks();
+    await cleanup.remove(id, finalize);
+    expect(finalize).toHaveBeenCalledOnce();
+    await expect(access(partitionDir)).rejects.toThrow();
+    expect(await cleanup.pending()).toEqual([]);
+  } finally {
+    vi.restoreAllMocks();
     await rm(root, { recursive: true, force: true });
   }
 });
