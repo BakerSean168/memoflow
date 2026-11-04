@@ -102,7 +102,14 @@ describe('AI application capability boundaries', () => {
   });
 
   it('locks Electron handlers to the matching capability owner', () => {
-    const electron = read('packages/ai/src/electron/index.ts');
+    const electron = [
+      read('packages/ai/src/electron/handlers/provider.ts'),
+      read('packages/ai/src/electron/handlers/conversation.ts'),
+      read('packages/ai/src/electron/handlers/assistant-runtime.ts'),
+      read('packages/ai/src/electron/handlers/workflow.ts'),
+      read('packages/ai/src/electron/handlers/knowledge-analytics.ts'),
+      read('packages/ai/src/electron/index.ts'),
+    ].join('\n');
     const provider = between(electron, '// -- Provider Config --', '// -- Conversations --');
     const assistant = between(
       electron,

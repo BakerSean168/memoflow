@@ -3706,6 +3706,16 @@
       ]
     },
     {
+      "path": "packages/ai/src/electron/ai-electron-channels.surface.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/ai/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "packages/ai/vitest.config.ts"
+      ]
+    },
+    {
       "path": "packages/ai/src/electron/index-lifecycle.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -12840,7 +12850,7 @@
       "type": "measurement",
       "suite": "coverage",
       "runner": "vitest",
-      "fileCount": 124
+      "fileCount": 125
     },
     {
       "id": "packages/app-vue/vitest.store-coverage.config.ts",
@@ -13375,7 +13385,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 124
+      "fileCount": 125
     },
     {
       "id": "packages/app-vue/vitest.config.ts",
@@ -13891,6 +13901,7 @@
       "packages/ai/src/api/routes/ai-void-success-envelope.surface.spec.ts",
       "packages/ai/src/api/routes/assistant-sse.http.spec.ts",
       "packages/ai/src/api/routes/workspace-sse.http.spec.ts",
+      "packages/ai/src/electron/ai-electron-channels.surface.spec.ts",
       "packages/ai/src/electron/index-lifecycle.spec.ts",
       "packages/ai/src/evals/eval-runner.spec.ts",
       "packages/ai/src/server/application/agent-instance/agent-instance.registry.spec.ts",
