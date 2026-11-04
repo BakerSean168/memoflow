@@ -1,4 +1,4 @@
-import { readFileSync } from 'node:fs';
+import { readFileSync, readdirSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
 
@@ -18,7 +18,29 @@ describe('ai void success envelope surface', () => {
     resolve(__dirname, '../../server/transport/ai-chat.controller.ts'),
     'utf8',
   );
-  const electron = readFileSync(resolve(__dirname, '../../electron/index.ts'), 'utf8');
+  const electronDir = resolve(__dirname, '../../electron');
+  const handlerDir = resolve(electronDir, 'handlers');
+  // Channel registrations moved from the index aggregate into ./handlers when
+  // the Electron transport was split into channel groups. Read the aggregate
+  // plus every handler module, concatenated in registration order so the
+  // positional slices below still span exactly one handler.
+  const handlerOrder = [
+    'provider.ts',
+    'conversation.ts',
+    'assistant-runtime.ts',
+    'workflow.ts',
+    'knowledge-analytics.ts',
+    'context.ts',
+  ];
+  const handlerFiles = readdirSync(handlerDir).filter((name) => name.endsWith('.ts'));
+  const orderedHandlerFiles = [
+    ...handlerOrder.filter((name) => handlerFiles.includes(name)),
+    ...handlerFiles.filter((name) => !handlerOrder.includes(name)).sort(),
+  ];
+  const electron = [
+    readFileSync(resolve(electronDir, 'index.ts'), 'utf8'),
+    ...orderedHandlerFiles.map((name) => readFileSync(resolve(handlerDir, name), 'utf8')),
+  ].join('\n');
   const responseSchemas = readFileSync(
     resolve(__dirname, '../../../../ai-contracts/src/api/response-schemas.ts'),
     'utf8',
