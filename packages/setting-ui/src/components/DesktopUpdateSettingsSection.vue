@@ -23,6 +23,7 @@ import type {
   DesktopUpdateDiagnosticsDTO,
   DesktopUpdateSnapshotDTO,
 } from '@memoflow/desktop-contracts';
+import { formatLocaleMediumDateTime } from '@memoflow/time';
 import { settingUiHost } from '../setting-ui-host';
 import { presentDesktopUpdateSettings } from './desktop-update-settings.presentation';
 
@@ -106,10 +107,7 @@ const lastCheckedAt = computed(() => {
   if (!state || state.type !== 'idle' || !state.lastCheckedAt) return null;
 
   try {
-    return new Intl.DateTimeFormat(locale.value, {
-      dateStyle: 'medium',
-      timeStyle: 'short',
-    }).format(new Date(state.lastCheckedAt));
+    return formatLocaleMediumDateTime(state.lastCheckedAt, locale.value);
   } catch {
     return state.lastCheckedAt;
   }
