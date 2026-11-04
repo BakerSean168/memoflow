@@ -1,5 +1,3 @@
-import { isRecord } from '@memoflow/utils/shared';
-
 export interface NotificationPreferenceSchemaQueryClient {
   query(
     sql: string,
@@ -28,6 +26,13 @@ const ALL_VNEXT_CHANNELS = ['InApp', 'Email', 'Push', 'Desktop', 'Sms', 'Webhook
 type JsonRecord = Record<string, unknown>;
 type ChannelPreferences = Record<string, boolean>;
 type WorkflowOverrides = Record<string, ChannelPreferences>;
+
+// Retained locally: @memoflow/database compiles src with rootDir=src and workspace-source
+// paths, so importing @memoflow/utils/shared would pull that package's sources into this
+// program (TS6059). No dependency edge is added here; the shared guard lives in utils.
+function isRecord(value: unknown): value is JsonRecord {
+  return typeof value === 'object' && value !== null && !Array.isArray(value);
+}
 
 function parseRecord(value: unknown): JsonRecord {
   if (isRecord(value)) return value;
