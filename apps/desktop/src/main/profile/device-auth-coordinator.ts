@@ -130,7 +130,7 @@ export class DeviceAuthCoordinator {
   ): Promise<Result<DesktopCloudConnectionAttempt>> {
     const profileId = this.runtime.getActiveProfileId();
     if (!profileId) {
-      return fail({ code: 'PROFILE_LOCKED', message: '请先打开本地 Profile' });
+      return fail({ code: 'PROFILE_LOCKED', message: '请先打开本地账户' });
     }
     const generation = ++this.beginGeneration;
     const profileGeneration = this.runtime.getProfileGeneration();

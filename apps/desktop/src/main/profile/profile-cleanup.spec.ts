@@ -148,8 +148,15 @@ it('clears partition and staging before finalization; re-adding the Profile has 
     env: { MEMOFLOW_DESKTOP_STORAGE_TEST_ROOT: root },
   });
   const id = 'p_012345678901234567890123';
+  const other = 'p_098765432109876543210987';
   const staging = path.join(roots.cacheRoot, 'snapshot-staging', id);
   const profile = path.join(roots.dataRoot, 'profiles', id);
+  const partitionDir = path.join(roots.electronSessionData, 'Partitions', `profile-${id}`);
+  const otherPartitionDir = path.join(
+    roots.electronSessionData,
+    'Partitions',
+    `profile-${other}`,
+  );
   const partitionStorage = new Map([
     ['cookie', 'old-account'],
     ['cache', 'old-page'],
@@ -165,6 +172,10 @@ it('clears partition and staging before finalization; re-adding the Profile has 
     await mkdir(profile, { recursive: true });
     await mkdir(staging, { recursive: true });
     await writeFile(path.join(staging, 'snapshot'), 'old-account');
+    await mkdir(partitionDir, { recursive: true });
+    await writeFile(path.join(partitionDir, 'Cookies'), 'session-trace');
+    await mkdir(otherPartitionDir, { recursive: true });
+    await writeFile(path.join(otherPartitionDir, 'Cookies'), 'other-account');
     const cleanup = new ProfileCleanup(roots, clearPartition);
     await cleanup.remove(id, async () => {
       expect(clearPartition).toHaveBeenCalledExactlyOnceWith(`persist:profile-${id}`);
@@ -176,6 +187,10 @@ it('clears partition and staging before finalization; re-adding the Profile has 
     await mkdir(profile, { recursive: true });
     expect(await fs.readdir(profile)).toEqual([]);
     await expect(access(staging)).rejects.toThrow();
+    // The Profile's Chromium partition goes with the rest of its local data.
+    await expect(access(partitionDir)).rejects.toThrow();
+    // A sibling profile's partition must survive.
+    expect(await readFile(path.join(otherPartitionDir, 'Cookies'), 'utf8')).toBe('other-account');
     expect(await cleanup.pending()).toEqual([]);
   } finally {
     await rm(root, { recursive: true, force: true });

@@ -85,11 +85,11 @@ export default {
     rememberMe: 'Remember me',
     enter: 'Enter',
     createInvalid: 'Enter a nickname and a password of at least 8 characters',
-    remove: 'Delete local Profile',
-    removeConfirmTitle: 'Delete local Profile?',
+    remove: 'Delete local account',
+    removeConfirmTitle: 'Delete local account?',
     removeConfirm:
       'Remove {name} and its local data from this device? Unsynced data will be permanently lost. This does not close the cloud account.',
-    removed: 'Local Profile deleted',
+    removed: 'Local account deleted',
   },
   field: {
     name: 'Name',
@@ -118,7 +118,7 @@ export default {
     VALIDATION_ERROR: 'Some submitted fields are invalid.',
     RATE_LIMITED: 'Too many attempts. Try again later.',
     NETWORK_ERROR:
-      'The authentication server is unreachable. Your local Profile remains available.',
+      'The authentication server is unreachable. Your local account remains available.',
     SERVICE_UNAVAILABLE: 'Authentication is temporarily unavailable.',
     INTERNAL_ERROR: 'The authentication service encountered an error.',
     TIMEOUT: 'The authentication request timed out.',
