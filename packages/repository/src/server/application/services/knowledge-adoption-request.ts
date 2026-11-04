@@ -227,9 +227,7 @@ export async function prepareKnowledgeAdoption(
     record = existing;
   } else if (existing?.status === 'Failed') {
     await guard.ensureHeld();
-    if (
-      !(await dependencies.writeRequestRepository.retryFailed(identityId, existing.id, now))
-    ) {
+    if (!(await dependencies.writeRequestRepository.retryFailed(identityId, existing.id, now))) {
       return {
         kind: 'result',
         result: fail({ code: 'CONFLICT', message: 'Knowledge adoption is already in progress' }),
