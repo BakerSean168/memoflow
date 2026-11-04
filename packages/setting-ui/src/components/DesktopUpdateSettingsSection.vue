@@ -107,7 +107,7 @@ const lastCheckedAt = computed(() => {
   if (!state || state.type !== 'idle' || !state.lastCheckedAt) return null;
 
   try {
-    return formatLocaleMediumDateTime(state.lastCheckedAt, locale.value);
+    return formatLocaleMediumDateTime(new Date(state.lastCheckedAt), locale.value);
   } catch {
     return state.lastCheckedAt;
   }
