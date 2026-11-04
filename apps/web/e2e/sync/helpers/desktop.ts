@@ -3,6 +3,9 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { expect, type Locator, type Page } from '@playwright/test';
 import { _electron as electron, type ElectronApplication } from 'playwright';
+// The identity window is the only way into a workspace (#785/#788). This local
+// helper mirrors the desktop suite's gate traversal; see profile-access.ts.
+import { registerLocalProfile, selectRememberedProfile } from './profile-access';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const workspaceRoot = path.resolve(__dirname, '..', '..', '..', '..', '..');
@@ -54,7 +57,14 @@ export class DesktopAppController {
     return this.currentWindow;
   }
 
-  async launch(): Promise<Page> {
+  /**
+   * Launches the desktop and enters a workspace through the identity window.
+   *
+   * A fresh user-data directory has no Profile, so the first launch registers
+   * the local account; later launches (restart) select the Profile the previous
+   * run activated. The identity window never exposes the workspace by itself.
+   */
+  async launch(profileId?: string): Promise<Page> {
     if (!fs.existsSync(desktopMainEntrypoint)) {
       throw new Error(
         `Desktop entrypoint not found at ${desktopMainEntrypoint}. The sync global setup must build desktop first.`,
@@ -111,19 +121,46 @@ export class DesktopAppController {
       }
     }
 
-    this.currentWindow = await this.electronApp.firstWindow();
+    this.currentWindow = await this.electronApp.firstWindow({ timeout: 45_000 });
     await this.currentWindow.waitForLoadState('domcontentloaded');
+    this.currentWindow = await this.enterWorkspace(this.currentWindow, profileId);
     return this.currentWindow;
+  }
+
+  /**
+   * Traverses the identity window using the desktop suite's shared helpers.
+   *
+   * Registration happens once per isolated user-data directory. A restart
+   * targets the Profile that was active before closing, because the tile list
+   * also contains the bootstrap local account and selecting it would leave the
+   * cloud-bound sync Profile unopened.
+   */
+  private async enterWorkspace(first: Page, profileId?: string): Promise<Page> {
+    const app = this.electronApp;
+    if (!app) {
+      throw new Error('Electron app has not been launched.');
+    }
+
+    const workspace = first.getByTestId('app-shell');
+    const access = first.getByTestId('desktop-profile-access');
+    await expect(workspace.or(access)).toBeVisible({ timeout: 45_000 });
+    if (await workspace.isVisible()) {
+      return first;
+    }
+
+    return profileId
+      ? selectRememberedProfile(app, first, profileId)
+      : registerLocalProfile(app, first);
   }
 
   /**
    * Connects the desktop to the E2E cloud account through the product's own
    * device-authorization flow.
    *
-   * The desktop deliberately boots into a guest Profile, and guest Profiles
-   * never attach a PowerSync connector, so the lane has to create a registered
-   * Profile the same way a user does: ask the desktop for a device code and
-   * approve it in the already signed-in Web session.
+   * The desktop enters a local Profile after passing the identity window, and
+   * local Profiles never attach a PowerSync connector, so the lane has to create
+   * a registered Profile the same way a user does: ask the desktop for a device
+   * code and approve it in the already signed-in Web session.
    */
   async connectCloudProfile(approvalPage: Page): Promise<Page> {
     const app = this.electronApp;
@@ -201,8 +238,11 @@ export class DesktopAppController {
 
   /** Relaunches the desktop and waits for the restored cloud-bound Profile. */
   async restart(): Promise<Page> {
+    // Resolve the active Profile before closing: the identity window lists every
+    // account, and only this one carries the cloud binding the spec asserts.
+    const activeProfileId = this.readProfileRegistry()?.activeProfileId ?? undefined;
     await this.close();
-    await this.launch();
+    await this.launch(activeProfileId);
 
     const mainWindow = await this.waitForMainWindow();
     this.currentWindow = mainWindow;
