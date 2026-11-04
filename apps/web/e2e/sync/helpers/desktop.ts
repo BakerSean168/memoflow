@@ -3,12 +3,9 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { expect, type Locator, type Page } from '@playwright/test';
 import { _electron as electron, type ElectronApplication } from 'playwright';
-// The identity window is the only way into a workspace (#785/#788). Reuse the
-// desktop suite's real gate traversal instead of re-implementing its states.
-import {
-  registerLocalProfile,
-  selectRememberedProfile,
-} from '../../../../desktop/e2e/support/profile-access';
+// The identity window is the only way into a workspace (#785/#788). This local
+// helper mirrors the desktop suite's gate traversal; see profile-access.ts.
+import { registerLocalProfile, selectRememberedProfile } from './profile-access';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const workspaceRoot = path.resolve(__dirname, '..', '..', '..', '..', '..');
