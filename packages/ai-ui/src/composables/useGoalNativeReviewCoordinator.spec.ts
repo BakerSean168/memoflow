@@ -2,7 +2,7 @@ import { installAiUiHost } from '@ai-ui-test-host/di/ai-ui-host';
 installAiUiHost();
 import { installGoalUiHost } from '@ai-ui-test-host/di/goal-ui-host';
 installGoalUiHost();
-import { flushPromises, mount } from '@vue/test-utils';
+import { mount } from '@vue/test-utils';
 import {
   GoalPlanDraftSchema,
   type AIWorkflowRunView,
@@ -503,5 +503,189 @@ describe('useGoalNativeReviewCoordinator native projection', () => {
     expect(coordinator.goalSurfaceConflict.value).toBe(false);
     wrapper.unmount();
     expect(native.requestCancel).not.toHaveBeenCalled();
+  });
+});
+
+describe('useGoalNativeReviewCoordinator owner actions', () => {
+  it('flushes host edits, submits the fresh owner identities, then approves in order', async () => {
+    const { coordinator, goalWorkflowRun, runtime, wrapper } = setup();
+    const run = makeGoalRun({ status: 'suspended', suspension: review(makeDraft(1)) });
+    goalWorkflowRun.value = run;
+    await coordinator.project(run);
+    const order: string[] = [];
+    runtime.resume.mockImplementation(async ({ command }) => {
+      order.push(command.type);
+      if (command.type === 'edit_structured') {
+        expect(command.patch.goal).toMatchObject({
+          name: 'Owner title',
+          summary: 'Owner summary',
+        });
+        return makeGoalRun({
+          status: 'suspended',
+          suspension: review(GoalPlanDraftSchema.parse({ ...command.patch, revision: 2 })),
+        });
+      }
+      return makeGoalRun({ status: 'completed' });
+    });
+    native.requestSubmit.mockImplementation(async (context) => {
+      order.push('owner_submit');
+      expect(context).toMatchObject({
+        createId: 'GoalId_revision-2',
+        keyResultIds: ['KeyResultId_revision-2-0'],
+        expectedDraft: { name: 'Owner title', summary: 'Owner summary' },
+      });
+      return { id: context.createId };
+    });
+
+    await coordinator.confirmGoalAgentRun({
+      title: 'Owner title',
+      description: 'Owner summary',
+    });
+
+    expect(order).toEqual(['edit_structured', 'owner_submit', 'approve']);
+    expect(native.requestSubmit).toHaveBeenCalledOnce();
+    expect(coordinator.goalOwnerSubmitted.value).toBe(true);
+    expect(coordinator.goalOwnerAttemptPending.value).toBe(false);
+    expect(toastMocks.success).toHaveBeenCalledExactlyOnceWith('Goal created');
+    wrapper.unmount();
+  });
+
+  it('retries only approval after a successful owner submit loses the approval response', async () => {
+    const { coordinator, goalWorkflowRun, runtime, wrapper } = setup();
+    const run = makeGoalRun({ status: 'suspended', suspension: review(makeDraft(1)) });
+    goalWorkflowRun.value = run;
+    await coordinator.project(run);
+    runtime.resume
+      .mockRejectedValueOnce(new Error('network'))
+      .mockResolvedValueOnce(makeGoalRun({ status: 'completed' }));
+
+    await coordinator.confirmGoalAgentRun();
+    expect(coordinator.goalOwnerSubmitted.value).toBe(true);
+    await coordinator.confirmGoalAgentRun();
+
+    expect(native.requestSubmit).toHaveBeenCalledOnce();
+    expect(runtime.resume.mock.calls.map(([call]) => call.command.type)).toEqual([
+      'approve',
+      'approve',
+    ]);
+    expect(toastMocks.error).toHaveBeenCalledOnce();
+    expect(toastMocks.success).toHaveBeenCalledOnce();
+    wrapper.unmount();
+  });
+
+  it('keeps an unresolved owner attempt frozen until canonical owner truth permits approval', async () => {
+    const { coordinator, goalWorkflowRun, runtime, wrapper } = setup();
+    const suspension = review(makeDraft(1));
+    const run = makeGoalRun({ status: 'suspended', suspension });
+    goalWorkflowRun.value = run;
+    await coordinator.project(run);
+    native.requestSubmit.mockImplementationOnce(async (context) => {
+      context.onCreateAttempt();
+      return null;
+    });
+
+    await coordinator.confirmGoalAgentRun();
+    expect(coordinator.goalOwnerAttemptPending.value).toBe(true);
+    expect(native.blocked).toBe(true);
+    expect(runtime.resume).not.toHaveBeenCalled();
+
+    await coordinator.reviseGoalAgentRun({ title: 'Forbidden revision' });
+    expect(native.state!.name).toBe('Deep work');
+    expect(runtime.resume).not.toHaveBeenCalled();
+
+    native.readGoal.mockResolvedValue(
+      ok({
+        goal: { id: suspension.ownerCreate.goalId },
+        keyResults: Object.values(suspension.ownerCreate.keyResultIds).map((id) => ({ id })),
+      }),
+    );
+    runtime.resume.mockResolvedValue(makeGoalRun({ status: 'completed' }));
+    await coordinator.confirmGoalAgentRun();
+
+    expect(native.requestSubmit).toHaveBeenCalledOnce();
+    expect(runtime.resume).toHaveBeenCalledExactlyOnceWith({
+      runId: 'run-1',
+      command: { type: 'approve' },
+    });
+    expect(coordinator.goalOwnerAttemptPending.value).toBe(false);
+    expect(coordinator.goalOwnerSubmitted.value).toBe(true);
+    wrapper.unmount();
+  });
+
+  it('trims natural-language revision input and sends the typed revision command', async () => {
+    const { coordinator, goalWorkflowRun, runtime, goalAgentResuming, wrapper } = setup();
+    const run = makeGoalRun({ status: 'suspended', suspension: review(makeDraft(1)) });
+    goalWorkflowRun.value = run;
+    await coordinator.project(run);
+    runtime.resume.mockResolvedValue(
+      makeGoalRun({ status: 'suspended', suspension: review(makeDraft(2)) }),
+    );
+
+    await expect(coordinator.submitGoalRevisionResponse('   ')).resolves.toBe(false);
+    await expect(
+      coordinator.submitGoalRevisionResponse('  Make the supporting task recurring  '),
+    ).resolves.toBe(true);
+
+    expect(runtime.resume).toHaveBeenCalledExactlyOnceWith({
+      runId: 'run-1',
+      command: {
+        type: 'revise_natural_language',
+        instruction: 'Make the supporting task recurring',
+      },
+      workflowTurn: 'Make the supporting task recurring',
+    });
+    expect(goalAgentResuming.value).toBe(false);
+    wrapper.unmount();
+  });
+
+  it('reconciles native clarification edits before sending the trimmed answer', async () => {
+    const { coordinator, goalWorkflowRun, runtime, wrapper } = setup();
+    const candidate = makeDraft(1);
+    const clarification = makeGoalRun({
+      status: 'suspended',
+      suspension: {
+        type: 'clarification_required',
+        questions: ['Which target?'],
+        round: 1,
+        candidateDraft: candidate,
+      },
+    });
+    goalWorkflowRun.value = clarification;
+    await coordinator.project(clarification);
+    native.state!.name = 'Manual deep work';
+    runtime.resume
+      .mockImplementationOnce(async ({ command }) =>
+        makeGoalRun({
+          status: 'suspended',
+          suspension: {
+            type: 'clarification_required',
+            questions: ['Which target?'],
+            round: 1,
+            candidateDraft: GoalPlanDraftSchema.parse({ ...command.patch, revision: 2 }),
+          },
+        }),
+      )
+      .mockResolvedValueOnce(makeGoalRun({ status: 'running', updatedAt: 2 }));
+
+    await expect(coordinator.submitGoalClarificationResponse('  Kyoto University  ')).resolves.toBe(
+      true,
+    );
+
+    expect(runtime.resume).toHaveBeenNthCalledWith(1, {
+      runId: 'run-1',
+      command: {
+        type: 'edit_structured',
+        patch: expect.objectContaining({
+          goal: expect.objectContaining({ name: 'Manual deep work' }),
+        }),
+      },
+    });
+    expect(runtime.resume).toHaveBeenNthCalledWith(2, {
+      runId: 'run-1',
+      command: { type: 'answer', answers: ['Kyoto University'] },
+      workflowTurn: 'Kyoto University',
+    });
+    expect(native.state!.keyResults[0]!.id).toBe('workflow-draft-ref:kr%3Afocus-blocks');
+    wrapper.unmount();
   });
 });
