@@ -3,6 +3,10 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { expect, type Locator, type Page } from '@playwright/test';
 import { _electron as electron, type ElectronApplication } from 'playwright';
+import {
+  registerLocalProfile,
+  selectRememberedProfile,
+} from '../../../../desktop/e2e/support/profile-access';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const workspaceRoot = path.resolve(__dirname, '..', '..', '..', '..', '..');
