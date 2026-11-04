@@ -540,11 +540,12 @@ export function findCoreVnextArchitectureLockViolations(files) {
 
   // Canonical Notification path is a positive lock, not merely absence of the
   // legacy bypass: shared requests must enter CreateNotificationUseCase and its
-  // NotificationPolicy / DeliveryPlan decisions.
+  // NotificationPolicy / DeliveryPlan decisions. The consumer lives in the
+  // extracted dispatch-loop module; the factory only assembles the runtime.
   requireTokens(
     violations,
     fileMap,
-    'packages/notification/src/server/infrastructure/runtime/notification.runtime.ts',
+    'packages/notification/src/server/infrastructure/runtime/notification-dispatch-loop.ts',
     [
       'NOTIFICATION_REQUESTED_MESSAGE_TYPE',
       'processNotificationRequested',

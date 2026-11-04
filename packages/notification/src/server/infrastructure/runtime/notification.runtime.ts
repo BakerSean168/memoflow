@@ -1,9 +1,4 @@
-import { createLogger } from '@memoflow/utils/logger';
-import {
-  NotificationChannelType as ChannelTypeEnum,
-  NotificationRequestedSchema,
-  NOTIFICATION_REQUESTED_MESSAGE_TYPE,
-} from '@memoflow/notification-contracts';
+import { NotificationChannelType as ChannelTypeEnum } from '@memoflow/notification-contracts';
 import { Notification } from '../../domain/aggregates/notification';
 import { CreateNotificationUseCase } from '../../application/use-cases/commands/create-notification.use-case';
 import type { INotificationRepository } from '../../domain/repositories/i-notification-repository';
@@ -123,8 +118,9 @@ import {
   RealDesktopChannelDeliverer,
   RealInAppChannelDeliverer,
 } from '../adapters/deliverers/real-channel-deliverers';
-
-const logger = createLogger('NotificationRuntime');
+import { createNotificationDispatchLoop } from './notification-dispatch-loop';
+import { createNotificationRuntimeMetricsPort } from './notification-metrics';
+import { createNotificationRuntimeSsePort } from './notification-sse-adapter';
 
 export const NOTIFICATION_CHANNEL_POLL_INTERVAL_MS = 2_000;
 /** 指数退避基数（毫秒）：delay = baseDelay * 2^attempts */
@@ -214,6 +210,37 @@ export interface NotificationDurableRuntimePort extends NotificationModuleRuntim
         },
   ): Promise<BusinessOperationReceipt[]>;
   getSseAdapter(): NotificationSseAdapter;
+}
+
+/**
+ * Shared closure state handed to every extracted runtime part.
+ *
+ * The split modules never own their own copy of the adapter, the deliverer
+ * registry, the lazy use case or the loop guards — they read and mutate the
+ * single instance created by the factory, which keeps claim/dispatch/retry/
+ * dead-letter ordering identical to the pre-split runtime.
+ */
+export interface NotificationRuntimeContext {
+  readonly deps: NotificationRuntimeDeps;
+  readonly env: 'production' | 'development' | 'test';
+  readonly ownerToken: string;
+  readonly pollIntervalMs: number;
+  readonly backoffBaseMs: number;
+  readonly deadLetterThreshold: number;
+  readonly leaseDurationMs: number;
+  readonly metricsService: NotificationMetricsService;
+  readonly sseAdapter: NotificationSseAdapter;
+  readonly repository?: INotificationRepository;
+  readonly preferenceRepository?: INotificationPreferenceRepository;
+  readonly closureChecker: (identityId: string) => Promise<boolean>;
+  readonly reliableAdapter?: NotificationReliableOperationPort;
+  readonly registry: Record<string, NotificationChannelDeliverer>;
+  getCreateNotificationUseCase(): CreateNotificationUseCase;
+  getDelivererForChannel(channelType: string): NotificationChannelDeliverer;
+  hasDelivererForChannel(channelType: string): boolean;
+  started: boolean;
+  timer: ReturnType<typeof setInterval> | null;
+  flushing: boolean;
 }
 
 function normalizeChannelType(channelType: string): string {
@@ -376,494 +403,41 @@ export function createNotificationRuntimeContribution(
     }
   }
 
-  let started = false;
-  let timer: ReturnType<typeof setInterval> | null = null;
-  let flushing = false;
-
-  /**
-   * Deliver a claimed durable dispatch outbox entry using W0 lease/claim fencing.
-   * Returns the final recorded receipt so callers can reconcile downstream state.
-   */
-  const processClaimedDispatch = async (entry: {
-    claimed: boolean;
-    receipt: BusinessOperationReceipt;
-    outbox: NotificationDispatchOutboxRow;
-    notification?: Notification | null;
-  }): Promise<BusinessOperationReceipt> => {
-    const { receipt, outbox } = entry;
-    if (!entry.claimed) return receipt;
-
-    if (!reliableAdapter) {
-      throw new Error(
-        '[FAIL-FAST] NotificationRuntime requires a reliableAdapter to record delivery receipts.',
-      );
-    }
-
-    metricsService.recordDispatched();
-
-    const claimContext = {
-      ownerToken: receipt.lease?.ownerToken ?? outbox.ownerToken ?? ownerToken,
-      fencingToken: receipt.lease?.fencingToken ?? outbox.fencingToken,
-    };
-
-    let notification: Notification | null = entry.notification ?? null;
-    if (!notification && repository) {
-      notification = await repository.findByIdForIdentity(outbox.identityId, outbox.notificationId);
-    }
-
-    let payloadData: Record<string, unknown> = {};
-    try {
-      payloadData = JSON.parse(outbox.payloadJson);
-    } catch {
-      payloadData = {};
-    }
-
-    const deliveryContext = {
-      deliveryId: outbox.id,
-      idempotencyKey: outbox.idempotencyKey,
-      identityId: outbox.identityId,
-    };
-
-    try {
-      const deliverer = getDelivererForChannel(outbox.channel);
-
-      const deliveryTarget: NotificationDeliveryTarget = {
-        channelType: outbox.channel,
-        recipient: outbox.identityId,
-      };
-      let deliveryResult: void | { status: 'suppressed'; reason: string };
-      if (notification) {
-        deliveryResult = await deliverer.deliver(notification, deliveryTarget, deliveryContext);
-      } else {
-        // No persisted Fact is required to execute a durable dispatch.
-        deliveryResult = await deliverer.deliver(
-          {
-            id: outbox.notificationId,
-            identityId: outbox.identityId,
-            title: (payloadData.title as string) ?? 'Notification',
-            content: (payloadData.content as string) ?? '',
-            type: (payloadData.type as never) ?? 'Info',
-            category: (payloadData.category as never) ?? 'System',
-          } as never,
-          deliveryTarget,
-          deliveryContext,
-        );
-      }
-
-      if (deliveryResult?.status === 'suppressed') {
-        logger.info('[NotificationRuntime] Desktop delivery suppressed', {
-          operationId: outbox.id,
-          channel: outbox.channel,
-          reason: deliveryResult.reason,
-        });
-        return reliableAdapter.recordDeliveryReceipt(
-          {
-            ...receipt,
-            status: 'skipped',
-            lease: null,
-            lastError: null,
-            nextRetryAt: null,
-            deadLetterAt: null,
-            finishedAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString(),
-            attemptsHistory: [
-              ...(receipt.attemptsHistory ?? []),
-              {
-                schemaVersion: 1,
-                attempt: receipt.attempt,
-                attemptedAt: new Date().toISOString(),
-                result: 'skipped',
-                error: null,
-                durationMs: null,
-                channel: outbox.channel,
-              },
-            ],
-          },
-          claimContext,
-        );
-      }
-
-      const updatedReceipt: BusinessOperationReceipt = {
-        ...receipt,
-        status: 'succeeded',
-        lease: null,
-        finishedAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-        attemptsHistory: [
-          ...(receipt.attemptsHistory ?? []),
-          {
-            schemaVersion: 1,
-            attempt: receipt.attempt,
-            attemptedAt: new Date().toISOString(),
-            result: 'succeeded',
-            error: null,
-            durationMs: null,
-            channel: outbox.channel,
-          },
-        ],
-      };
-
-      const recordedReceipt = await reliableAdapter.recordDeliveryReceipt(
-        updatedReceipt,
-        claimContext,
-      );
-      const isApplied = (recordedReceipt as unknown as { applied?: boolean }).applied !== false;
-
-      if (recordedReceipt.status === 'succeeded' && isApplied) {
-        metricsService.recordDelivered();
-
-        // SSE is a read-only outbox consumer: broadcast the real-time delivery
-        // event only AFTER the durable receipt is persisted.
-        sseAdapter.broadcastDeliveryEvent(outbox.identityId, recordedReceipt, {
-          outboxChannel: outbox.channel,
-          notificationId: outbox.notificationId,
-          title: (payloadData.title as string) ?? 'Notification',
-          content: (payloadData.content as string) ?? '',
-          category: (payloadData.category as string) ?? 'System',
-          type: (payloadData.type as string) ?? 'Info',
-          data: payloadData,
-        });
-
-        logger.info('[NotificationRuntime] Outbox dispatch succeeded', {
-          operationId: outbox.id,
-          channel: outbox.channel,
-          identityId: outbox.identityId,
-        });
-      } else {
-        logger.warn(
-          '[NotificationRuntime] Outbox completion condition failed (stale owner or preempted)',
-          {
-            operationId: outbox.id,
-            expectedStatus: 'succeeded',
-            actualStatus: recordedReceipt.status,
-          },
-        );
-      }
-      return recordedReceipt;
-    } catch (error) {
-      const errorMsg = error instanceof Error ? error.message : String(error);
-      const isDeadLetter = receipt.attempt >= deadLetterThreshold;
-
-      if (isDeadLetter) {
-        const deadReceipt: BusinessOperationReceipt = {
-          ...receipt,
-          status: 'dead_letter',
-          lease: null,
-          deadLetterAt: new Date().toISOString(),
-          lastError: errorMsg,
-          updatedAt: new Date().toISOString(),
-          attemptsHistory: [
-            ...(receipt.attemptsHistory ?? []),
-            {
-              schemaVersion: 1,
-              attempt: receipt.attempt,
-              attemptedAt: new Date().toISOString(),
-              result: 'failed',
-              error: errorMsg,
-              durationMs: null,
-              channel: outbox.channel,
-            },
-          ],
-        };
-
-        const recordedReceipt = await reliableAdapter.recordDeliveryReceipt(
-          deadReceipt,
-          claimContext,
-        );
-        if (recordedReceipt.status === 'dead_letter') {
-          // W7 互斥语义：dead-letter 是独立终态，不再累计 outbox.failed
-          metricsService.recordDeadLetter();
-
-          logger.error('[NotificationRuntime] Outbox dispatch reached dead-letter state', {
-            operationId: outbox.id,
-            channel: outbox.channel,
-            attempts: receipt.attempt,
-            error: errorMsg,
-          });
-        } else {
-          logger.warn('[NotificationRuntime] Outbox dead-letter completion ignored (stale owner)', {
-            operationId: outbox.id,
-          });
-        }
-        return recordedReceipt;
-      }
-
-      const backoffMs = backoffBaseMs * 2 ** Math.max(0, receipt.attempt - 1);
-      const nextRetryAt = new Date(Date.now() + backoffMs).toISOString();
-
-      const retryReceipt: BusinessOperationReceipt = {
-        ...receipt,
-        status: 'retryable',
-        lease: null,
-        nextRetryAt,
-        lastError: errorMsg,
-        updatedAt: new Date().toISOString(),
-        attemptsHistory: [
-          ...(receipt.attemptsHistory ?? []),
-          {
-            schemaVersion: 1,
-            attempt: receipt.attempt,
-            attemptedAt: new Date().toISOString(),
-            result: 'retryable',
-            error: errorMsg,
-            durationMs: null,
-            channel: outbox.channel,
-          },
-        ],
-      };
-
-      const recordedReceipt = await reliableAdapter.recordDeliveryReceipt(
-        retryReceipt,
-        claimContext,
-      );
-      if (recordedReceipt.status === 'retryable') {
-        // W7 互斥语义：retryable 是独立状态，不再累计 outbox.failed
-        metricsService.recordRetry();
-
-        logger.warn('[NotificationRuntime] Outbox dispatch failed, scheduled retry', {
-          operationId: outbox.id,
-          channel: outbox.channel,
-          attempts: receipt.attempt,
-          nextRetryAt,
-          error: errorMsg,
-        });
-      } else {
-        logger.warn('[NotificationRuntime] Outbox retry completion ignored (stale owner)', {
-          operationId: outbox.id,
-        });
-      }
-      return recordedReceipt;
-    }
+  const ctx: NotificationRuntimeContext = {
+    deps,
+    env,
+    ownerToken,
+    pollIntervalMs,
+    backoffBaseMs,
+    deadLetterThreshold,
+    leaseDurationMs,
+    metricsService,
+    sseAdapter,
+    repository,
+    preferenceRepository,
+    closureChecker,
+    reliableAdapter,
+    registry,
+    getCreateNotificationUseCase,
+    getDelivererForChannel,
+    hasDelivererForChannel,
+    started: false,
+    timer: null,
+    flushing: false,
   };
 
-  const markSharedFailed = async (
-    sharedMsg: NotificationSharedOutboxMessageRow,
-    leaseContext: {
-      ownerToken: string;
-      fencingToken: number;
-      claimId: string;
-    },
-    error: unknown,
-  ): Promise<void> => {
-    const errorMsg = error instanceof Error ? error.message : String(error);
-    const isDeadLetter = sharedMsg.attempts >= deadLetterThreshold;
-    if (isDeadLetter) {
-      const res = await deps?.reliableAdapter?.updateSharedOutboxStatus(
-        sharedMsg.id,
-        'dead_letter',
-        errorMsg,
-        null,
-        leaseContext,
-      );
-      if (res === 'ok') {
-        // W7 互斥语义：dead-letter 是独立终态，不再累计 outbox.failed
-        metricsService.recordDeadLetter();
-      } else {
-        logger.warn(
-          '[NotificationRuntime] Shared outbox dead-letter returned conflict (stale owner ignored)',
-          {
-            operationId: sharedMsg.id,
-          },
-        );
-      }
-      logger.error('[NotificationRuntime] Shared outbox reached dead-letter state', {
-        operationId: sharedMsg.id,
-        attempts: sharedMsg.attempts,
-        error: errorMsg,
-      });
-      return;
-    }
-    const backoffMs = backoffBaseMs * 2 ** Math.max(0, sharedMsg.attempts - 1);
-    const sharedReceipt = await deps?.reliableAdapter?.updateSharedOutboxStatus(
-      sharedMsg.id,
-      'retryable',
-      errorMsg,
-      new Date(Date.now() + backoffMs),
-      leaseContext,
-    );
-    if (sharedReceipt === 'ok') {
-      // W7 互斥语义：retryable 是独立状态，不再累计 outbox.failed
-      metricsService.recordRetry();
-      logger.warn('[NotificationRuntime] Shared outbox dispatch failed, scheduled retry', {
-        operationId: sharedMsg.id,
-        attempts: sharedMsg.attempts,
-        error: errorMsg,
-      });
-    } else {
-      logger.warn('[NotificationRuntime] Shared outbox failure update ignored (stale owner)', {
-        operationId: sharedMsg.id,
-      });
-    }
-  };
-
-  /**
-   * Priority 2: consume a `notification.requested` shared envelope.
-   *
-   * Reuses CreateNotificationUseCase so the Fact + DeliveryPlan + dispatch
-   * outboxes materialize in one transactional save(). The dispatch rows are
-   * picked up by the next tick's claimOutboxDispatch (Priority 1) or by the
-   * shared dispatch path — external channel delivery stays strictly out of this
-   * handler's critical path.
-   */
-  const processNotificationRequested = async (
-    sharedMsg: NotificationSharedOutboxMessageRow,
-  ): Promise<void> => {
-    if (!repository || !preferenceRepository) {
-      throw new Error(
-        '[FAIL-CLOSED] notification.requested consumer requires repository + preferenceRepository for policy evaluation.',
-      );
-    }
-    const useCase = getCreateNotificationUseCase();
-    let envelope: import('@memoflow/notification-contracts').NotificationRequested;
-    try {
-      envelope = NotificationRequestedSchema.parse(JSON.parse(sharedMsg.payloadJson));
-    } catch (cause) {
-      throw new Error(
-        `Invalid NotificationRequested envelope for '${sharedMsg.id}': ${cause instanceof Error ? cause.message : String(cause)}`,
-      );
-    }
-    const result = await useCase.execute({
-      identityId: envelope.identityId,
-      workflowKey: envelope.workflowKey,
-      topic: envelope.topic,
-      idempotencyKey: envelope.idempotencyKey,
-      title: envelope.content.title,
-      content: envelope.content.content,
-      type: envelope.content.type ?? 'Info',
-      category: envelope.content.category ?? 'Other',
-      importance: envelope.importance,
-      urgency: envelope.urgency,
-      relatedEntityType: envelope.relatedEntity?.type,
-      relatedEntityId: envelope.relatedEntity?.id ?? undefined,
-      navigationIntent: envelope.navigationIntent ?? null,
-      actions: envelope.actions,
-      channels:
-        envelope.suggestedChannels && envelope.suggestedChannels.length > 0
-          ? [...new Set(envelope.suggestedChannels)]
-          : [ChannelTypeEnum.InApp],
-      expiresAt: envelope.expiresAt ?? null,
-      // Correlation/causation chain is carried durably on the shared-outbox row
-      // (writer resolves envelope -> input -> operationId and persists the
-      // winner). Prefer the durable values so caller-provided fallbacks survive
-      // consumer materialization, not just the envelope attributes.
-      correlationId: sharedMsg.correlationId ?? envelope.correlationId ?? null,
-      causationId: sharedMsg.causationId ?? envelope.causationId ?? null,
-    });
-    if (!result.ok) {
-      throw new Error(`NotificationRequested materialization failed: ${result.error.message}`);
-    }
-  };
-
-  const tick = async (): Promise<void> => {
-    if (!deps?.reliableAdapter) {
-      throw new Error(
-        '[FAIL-FAST] NotificationRuntime requires a reliableAdapter. Non-durable repository fallback is strictly prohibited.',
-      );
-    }
-    if (flushing) return;
-    flushing = true;
-    try {
-      // Priority 1: Process the durable NotificationDispatchOutbox via lease/claim.
-      const claimedEntries = await deps.reliableAdapter.claimOutboxDispatch({
-        ownerToken,
-        leaseDurationMs,
-        limit: 50,
-      });
-
-      for (const entry of claimedEntries) {
-        await processClaimedDispatch(entry);
-      }
-
-      // Priority 2: canonical cross-module `notification.requested` envelopes only.
-      // The shared row's leaseExpiresAt deadline is the recoverable consumer lease.
-      const sharedOutboxes = await deps.reliableAdapter.claimSharedOutboxIntents({
-        ownerToken,
-        leaseDurationMs,
-        limit: 50,
-      });
-
-      for (const sharedMsg of sharedOutboxes) {
-        const leaseContext = {
-          ownerToken: sharedMsg.ownerToken!,
-          claimId: sharedMsg.claimId!,
-          fencingToken: sharedMsg.fencingToken!,
-        };
-        try {
-          if (sharedMsg.messageType !== NOTIFICATION_REQUESTED_MESSAGE_TYPE) {
-            throw new Error(
-              `[FAIL-CLOSED] Unsupported shared notification message type: ${sharedMsg.messageType}`,
-            );
-          }
-          await processNotificationRequested(sharedMsg);
-          const res = await deps.reliableAdapter.updateSharedOutboxStatus(
-            sharedMsg.id,
-            'succeeded',
-            null,
-            null,
-            leaseContext,
-          );
-          if (res === 'ok') {
-            metricsService.recordDelivered();
-          } else {
-            logger.warn(
-              '[NotificationRuntime] Shared outbox notification.requested completion returned conflict (stale owner ignored)',
-              { operationId: sharedMsg.id },
-            );
-          }
-        } catch (error) {
-          await markSharedFailed(sharedMsg, leaseContext, error);
-        }
-      }
-
-      metricsService.recordWorkerOutcome('completed');
-    } catch (error) {
-      logger.error('[NotificationRuntime] Channel worker tick failed', {
-        error: error instanceof Error ? error.message : String(error),
-      });
-      metricsService.recordWorkerOutcome('failed');
-    } finally {
-      flushing = false;
-    }
-  };
+  const dispatchLoop = createNotificationDispatchLoop(ctx);
 
   return {
-    start(): void {
-      if (!deps?.reliableAdapter) {
-        throw new Error(
-          '[FAIL-FAST] NotificationRuntime requires a reliableAdapter. Non-durable repository fallback is strictly prohibited.',
-        );
-      }
-      if (started) return;
-      started = true;
-      void tick();
-      timer = setInterval(() => void tick(), pollIntervalMs);
-      timer.unref?.();
-      logger.info('[Notification] Channel worker started', { pollIntervalMs });
-    },
-
-    stop(): void {
-      if (!started) return;
-      started = false;
-      if (timer) {
-        clearInterval(timer);
-        timer = null;
-      }
-      logger.info('[Notification] Channel worker stopped');
-    },
-
-    tick,
+    start: dispatchLoop.start,
+    stop: dispatchLoop.stop,
+    tick: dispatchLoop.tick,
 
     getDurableRuntime(): NotificationDurableRuntimePort {
       return this;
     },
 
-    getMetrics(): NotificationMetricsSnapshot {
-      return metricsService.getMetrics();
-    },
-
-    getUnifiedSnapshot(): Readonly<Record<string, number>> {
-      return metricsService.getUnifiedSnapshot();
-    },
+    ...createNotificationRuntimeMetricsPort(ctx),
 
     async queryDeadLetters(identityId: string): Promise<BusinessOperationReceipt[]> {
       if (!deps?.reliableAdapter) {
@@ -900,7 +474,7 @@ export function createNotificationRuntimeContribution(
         audit && adapter.replayDeadLetterWithAudit && auditRepository
           ? await adapter.replayDeadLetterWithAudit(params, audit, auditRepository)
           : await adapter.replayDeadLetter(params);
-      void tick();
+      void dispatchLoop.tick();
       return receipt;
     },
 
@@ -921,9 +495,7 @@ export function createNotificationRuntimeContribution(
       return deps.reliableAdapter.queryReceipts(identityId, options);
     },
 
-    getSseAdapter(): NotificationSseAdapter {
-      return sseAdapter;
-    },
+    ...createNotificationRuntimeSsePort(ctx),
   };
 }
 
