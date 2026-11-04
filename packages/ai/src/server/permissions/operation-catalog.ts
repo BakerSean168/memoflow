@@ -51,9 +51,44 @@ export const PERMISSION_OPERATIONS: readonly PermissionOperation[] = [
     object: 'notification',
     action: 'update',
   },
+  // Recoverability contract (#762 phase 4): a plain `.delete` operation is by
+  // definition recoverable — the data layer behind it must offer a recycle
+  // bin or undo. An irreversible deletion may only ever be registered as
+  // `.delete_permanent` carrying the delete_permanent risk; destructive work
+  // that is not registered at all fails closed in evaluation.
   {
     id: 'goal.delete_permanent',
     object: 'goal',
+    action: 'delete',
+    risks: ['delete_permanent'],
+  },
+  {
+    id: 'key_result.delete_permanent',
+    object: 'key_result',
+    action: 'delete',
+    risks: ['delete_permanent'],
+  },
+  {
+    id: 'task.delete_permanent',
+    object: 'task',
+    action: 'delete',
+    risks: ['delete_permanent'],
+  },
+  {
+    id: 'routine.delete_permanent',
+    object: 'routine',
+    action: 'delete',
+    risks: ['delete_permanent'],
+  },
+  {
+    id: 'knowledge.delete_permanent',
+    object: 'knowledge',
+    action: 'delete',
+    risks: ['delete_permanent'],
+  },
+  {
+    id: 'notification.delete_permanent',
+    object: 'notification',
     action: 'delete',
     risks: ['delete_permanent'],
   },

@@ -104,9 +104,12 @@ export class AIProviderConfigHttpAdapter implements IAIProviderConfigApiClient {
     return this.httpClient.post<void>(`${this.baseUrl}/${request.providerId}/set-default`);
   }
 
-  async refreshProviderModels(id: string): Promise<Result<AIProviderModelCatalogSnapshot>> {
+  async refreshProviderModels(
+    id: string,
+    force = false,
+  ): Promise<Result<AIProviderModelCatalogSnapshot>> {
     return this.httpClient.post<AIProviderModelCatalogSnapshot>(
-      `${this.baseUrl}/${id}/refresh-models`,
+      `${this.baseUrl}/${id}/refresh-models${force ? '?force=true' : ''}`,
     );
   }
 }

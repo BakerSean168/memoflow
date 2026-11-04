@@ -8,7 +8,9 @@
     "
   >
     <ProductDialogShell
+      @request-close="requestClose()"
       :open="visible"
+      :close-disabled="isSubmitting"
       test-id="goal-record-dialog"
       size="sm"
       initial-focus-selector="#change-amount"
@@ -38,9 +40,6 @@
       </p>
       <p v-if="submitError" role="alert" class="text-xs text-destructive">{{ submitError }}</p>
       <template #footer>
-        <Button type="button" variant="ghost" :disabled="isSubmitting" @click="handleCancel">{{
-          t('goal.recordDialog.cancel')
-        }}</Button>
         <Button
           type="button"
           data-testid="save-goal-record"

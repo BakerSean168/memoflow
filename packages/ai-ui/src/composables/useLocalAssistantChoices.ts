@@ -66,14 +66,16 @@ export function useLocalAssistantChoices(
     if (!client || refreshingConfiguration) return;
     const request = ++generation;
     loading.value = true;
-    status.value = null;
+    // Retain the presented directory while revalidating: a slow or failed
+    // refresh must not blank the selected Agent's models.
     try {
       const connection = connections.value.find((item) => item.id === connectionId);
-      // Workspace can reuse the same Profile-owned verified catalog as Settings.
-      // The native source and OAuth identity are checked by Desktop on every read.
+      // Workspace reuses the same Profile-owned verified catalog as Settings for
+      // every native driver. The native source, revision and credential identity
+      // are checked by Desktop on every read.
       const cached =
-        !options.fresh && connection?.driver === 'antigravity'
-          ? await client.cachedCatalogConnection(connectionId)
+        !options.fresh && connection
+          ? ((await client.cachedCatalogConnection?.(connectionId)) ?? null)
           : null;
       if (request !== generation) return;
       const result = cached ?? (await client.probeConnection(connectionId));
@@ -82,6 +84,8 @@ export function useLocalAssistantChoices(
         error.value = false;
       }
     } catch {
+      // Discovery failure keeps the last verified directory; only the error flag
+      // changes, so a transient spawn failure does not disable a usable model.
       if (request === generation) error.value = true;
     } finally {
       if (request === generation) loading.value = false;

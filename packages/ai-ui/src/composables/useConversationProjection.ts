@@ -660,9 +660,11 @@ export function useConversationProjection(input: {
     }
   }
 
+  /** `silent` 供批量路径使用：逐条失败提示由调用方汇总，避免一批操作刷出多条 toast。 */
   async function setConversationStatus(
     id: string,
     status: 'Active' | 'Archived',
+    silent = false,
   ): Promise<boolean> {
     if (!alive || statusMutations.has(id)) return false;
     const before = conversationList.value.find((item) => item.id === id);
@@ -683,7 +685,8 @@ export function useConversationProjection(input: {
     } catch (error) {
       if (!alive) return false;
       upsertConversation(before);
-      toast.error(getAIErrorMessage(error, t, 'aiAssistant.dialogs.chat.archiveFailed'));
+      if (!silent)
+        toast.error(getAIErrorMessage(error, t, 'aiAssistant.dialogs.chat.archiveFailed'));
       return false;
     } finally {
       statusMutations.delete(id);
@@ -700,6 +703,7 @@ export function useConversationProjection(input: {
     loadService: AIChatService,
     onClearWorkflow: (id: string) => void,
     onClearModel: (id: string) => void,
+    silent = false,
   ) {
     try {
       // Delete authoritative Mastra memory first. If the legacy shell delete
@@ -723,10 +727,11 @@ export function useConversationProjection(input: {
       conversationList.value = conversationList.value.filter((item) => item.id !== id);
       if (chatConversationId.value === id) startNewConversation();
       if (lastActiveConversationId.value === id) clearLastActiveConversation();
-      toast.success(t('aiAssistant.dialogs.chat.deleted'));
+      if (!silent) toast.success(t('aiAssistant.dialogs.chat.deleted'));
       return true;
     } catch (error) {
-      toast.error(getAIErrorMessage(error, t, 'aiAssistant.dialogs.chat.deleteFailed'));
+      if (!silent)
+        toast.error(getAIErrorMessage(error, t, 'aiAssistant.dialogs.chat.deleteFailed'));
       return false;
     }
   }

@@ -122,6 +122,7 @@ import { registerCloudAuthIpc } from './profile/cloud-auth-ipc';
 import { CloudSessionStore } from './profile/cloud-session-store';
 import { DesktopCloudConnectionManager } from './profile/desktop-cloud-connection-manager';
 import { DesktopCloudConnectionService } from './profile/desktop-cloud-connection-service';
+import { DesktopCloudSignInService } from './profile/desktop-cloud-sign-in-service';
 import { DeviceAuthCoordinator } from './profile/device-auth-coordinator';
 import type { PowerSyncDatabase } from '@powersync/node';
 import { KnowledgeRepositoryRemoteGateway } from './modules/repository/knowledge-repository-remote.gateway';
@@ -252,6 +253,7 @@ async function registerBusinessModules(
           notificationType: payload.type,
           notificationCategory: payload.category,
           navigationIntent: payload.navigationIntent,
+          actions: payload.actions,
         },
       });
     },
@@ -302,7 +304,7 @@ async function registerBusinessModules(
     runtime: routineComposed.interventionRuntime,
     host: interventionWindowHost,
     onCommand: async ({ commandId, snapshot, command, at }) => {
-      const receipt = await routineComposed.routineCommandPort.respondToOccurrence({
+      await routineComposed.routineCommandPort.respondToOccurrence({
         commandId,
         identityId: snapshot.identityId,
         routineId: snapshot.routineId,
@@ -312,22 +314,9 @@ async function registerBusinessModules(
         metadata: { surface: 'InterventionWindow' },
         at,
       });
-
-      if (command.action === 'complete') {
-        if (receipt.occurrence.triggerKind === 'ActiveUsage') {
-          routineComposed.activeUsageRuntime.markSatisfied({
-            identityId: snapshot.identityId,
-            routineId: snapshot.routineId,
-            at,
-          });
-        } else if (receipt.occurrence.triggerKind === 'Elapsed') {
-          routineComposed.elapsedRuntime.markSatisfied({
-            identityId: snapshot.identityId,
-            routineId: snapshot.routineId,
-            at,
-          });
-        }
-      }
+      // Elapsed/ActiveUsage lane re-arming is owned by the Routine command
+      // seam (onOccurrenceCompleted), shared with the desktop popup and in-app
+      // notification paths. Do not mark satisfied a second time here.
       if (command.action === 'snooze') {
         // Reload the durable override into runtime gates. The composer preserves
         // the current accumulator snapshot across this refresh.
@@ -802,9 +791,16 @@ async function initializeShellRuntime(): Promise<void> {
     cloudSessionStore,
     cloudConnectionManager,
   );
+  // Sign-in from the identity window runs before any Profile is active; it
+  // registers or finds the cloud Profile and opens it itself.
+  const cloudSignInService = new DesktopCloudSignInService(
+    profileRuntimeManager,
+    cloudSessionStore,
+  );
   const deviceAuthCoordinator = new DeviceAuthCoordinator(
     profileRuntimeManager,
     cloudConnectionService,
+    { signIn: cloudSignInService },
   );
 
   // Desktop Update is a process/Shell capability. Compose it before any
@@ -888,6 +884,7 @@ async function initializeShellRuntime(): Promise<void> {
     cloudSessionStore,
     cloudConnectionManager,
     deviceAuthCoordinator,
+    cloudSignInService,
   );
 
   // Set up module registration — this closure captures the business module

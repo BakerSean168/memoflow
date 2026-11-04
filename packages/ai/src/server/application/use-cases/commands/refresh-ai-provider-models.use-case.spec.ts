@@ -56,6 +56,31 @@ describe('RefreshAIProviderModelsUseCase', () => {
     expect(stored.version).toBe(7);
   });
 
+  it('serves non-forced reads from a bounded cache and re-queries on force or config change', async () => {
+    let stored = provider();
+    const repository = {
+      findByIdForIdentity: vi.fn(async () => stored),
+      save: vi.fn(),
+    } as unknown as IAIProviderConfigRepository;
+    const listModels = vi.fn(async () => [{ id: 'openai/gpt-5', name: 'GPT-5' }]);
+    const catalog = { listModels } as unknown as IAIProviderModelCatalogPort;
+    const useCase = new RefreshAIProviderModelsUseCase(
+      repository,
+      catalog,
+      createAIProviderSecretVaultStub(),
+    );
+    const cx = { identityId: 'identity-1' };
+    const first = await useCase.execute('provider-1', cx);
+    const cached = await useCase.execute('provider-1', cx);
+    expect(listModels).toHaveBeenCalledTimes(1);
+    expect(cached).toEqual(first);
+    await useCase.execute('provider-1', cx, { force: true });
+    expect(listModels).toHaveBeenCalledTimes(2);
+    stored = { ...provider(), version: 8, baseUrl: 'https://other.example/v1' };
+    await useCase.execute('provider-1', cx);
+    expect(listModels).toHaveBeenCalledTimes(3);
+  });
+
   it('returns NOT_FOUND without attempting discovery', async () => {
     const repository = {
       findByIdForIdentity: vi.fn(async () => null),

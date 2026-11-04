@@ -134,6 +134,7 @@ export const RoutineUpcomingQuerySchema = z
     start: z.number().finite().nonnegative(),
     end: z.number().finite().nonnegative(),
     limit: z.number().int().positive().max(500).default(200),
+    includeElapsed: z.boolean().optional(),
   })
   .refine((value) => value.end >= value.start, {
     message: 'Routine upcoming range end must be greater than or equal to start',
@@ -147,6 +148,8 @@ export const RoutineUpcomingOccurrenceSchema = z.object({
   title: z.string().trim().min(1),
   description: z.string().nullable(),
   occurrenceAt: z.number().finite().nonnegative(),
+  intervalMs: z.number().positive().optional(),
+  timingStatus: z.enum(['scheduled', 'awaiting-completion', 'local-runtime']).optional(),
   endAt: z.number().finite().nonnegative().nullable(),
   revision: z.number().int().positive(),
   editable: z.literal(false),

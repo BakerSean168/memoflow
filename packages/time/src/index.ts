@@ -73,6 +73,7 @@ export {
   requireTimeZoneId,
 } from './timezone/time-zone';
 export { TimeZoneIdSchema } from '@memoflow/shared-primitives';
+export { formatLocaleMediumDate, formatLocaleMediumDateTime } from './format/intl-format';
 export { createDateFnsEngine } from './engine/date-fns-engine';
 export {
   WALL_CLOCK_RESOLUTION_POLICY,

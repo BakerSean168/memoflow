@@ -329,10 +329,11 @@ describe('GoalRecordDialog live preview and keyboard', () => {
     wrapper.vm.openDialog('goal-1', 'kr-1');
     await nextTick();
     await new DOMWrapper(document.querySelector('#change-amount')!).setValue('5');
-    const cancel = [...document.querySelectorAll('button')].find(
-      (button) => button.textContent?.trim() === 'Cancel',
+    const close = document.querySelector<HTMLButtonElement>(
+      '[data-testid="goal-record-dialog-close"]',
     );
-    await new DOMWrapper(cancel!).trigger('click');
+    expect(close).not.toBeNull();
+    await new DOMWrapper(close!).trigger('click');
     await flushPromises();
     expect(confirmMock).toHaveBeenCalledTimes(2);
     expect(goalActions.createGoalRecord).not.toHaveBeenCalled();

@@ -69,6 +69,24 @@ describe('Routine API module', () => {
     expect(legacy.status).toBe(404);
   });
 
+  it('forwards interval aggregation only when explicitly requested', async () => {
+    const getUpcomingOccurrences = vi.fn().mockResolvedValue({ occurrences: [] });
+    const app = await createHttpHarness({
+      commandPort: {} as RoutineCoachCommandPort,
+      queryPort: { getUpcomingOccurrences } as unknown as RoutineConfigurationQueryPort,
+    });
+    expect(
+      (await request(app).get('/api/routines/upcoming?start=100&end=200&includeElapsed=true'))
+        .status,
+    ).toBe(200);
+    expect(getUpcomingOccurrences).toHaveBeenCalledWith('identity-1', {
+      start: 100,
+      end: 200,
+      limit: 200,
+      includeElapsed: true,
+    });
+  });
+
   it('injects authenticated identity for mutations and ignores body authority claims', async () => {
     const createRoutine = vi.fn().mockResolvedValue({
       routineId: 'routine-1',

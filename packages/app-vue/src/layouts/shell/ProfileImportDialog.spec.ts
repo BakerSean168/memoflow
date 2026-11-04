@@ -25,6 +25,7 @@ const source: ProfileSummary = {
   cloudAccountId: null,
   lastActiveAt: 0,
   hasCredential: false,
+  remembered: false,
 };
 const target: ProfileSummary = {
   ...source,
@@ -34,9 +35,15 @@ const target: ProfileSummary = {
   cloudAccountId: 'owner',
 };
 
-function fixture(blocked = false, profiles = [source, target], targetChanges = false) {
+function fixture(
+  blocked = false,
+  profiles = [source, target],
+  targetChanges = false,
+  hanging = false,
+) {
   let current: DesktopProfileImportView | null = null;
   const invoke = vi.fn(async (channel: string, input: Record<string, unknown>) => {
+    if (hanging) return new Promise<never>(() => undefined);
     if (channel === Channels.LIST) return { ok: true, data: current ? [current] : [] };
     if (channel === Channels.PREPARE) {
       current = {
@@ -164,5 +171,29 @@ it('shows the durable recovery state immediately when target changes invalidate 
   expect(
     wrapper.findAll('button').some((button) => button.text() === 'Recover and verify again'),
   ).toBe(true);
+  wrapper.unmount();
+});
+
+it('closes from the footer like the other management dialogs', async () => {
+  const { wrapper } = fixture();
+  await flushPromises();
+  const close = wrapper.findAll('button').find((button) => button.text() === 'Close');
+  expect(close).toBeDefined();
+  expect(close!.attributes('disabled')).toBeUndefined();
+  await close!.trigger('click');
+  expect(wrapper.emitted('update:open')).toEqual([[false]]);
+  wrapper.unmount();
+});
+
+it('disables the footer close action while an import step is running', async () => {
+  const { wrapper } = fixture(false, [source, target], false, true);
+  await flushPromises();
+  const close = wrapper.findAll('button').find((button) => button.text() === 'Close');
+  expect(close).toBeDefined();
+  expect(close!.attributes('disabled')).toBeUndefined();
+  const preview = wrapper.findAll('button').find((button) => button.text() === 'Preview import');
+  await preview!.trigger('click');
+  expect(preview!.attributes('disabled')).toBeDefined();
+  expect(close!.attributes('disabled')).toBeDefined();
   wrapper.unmount();
 });

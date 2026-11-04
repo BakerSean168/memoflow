@@ -109,7 +109,7 @@ export function requireStaticRuntime(previous, incoming) {
   assert.deepEqual(
     runtimePins(incoming),
     runtimePins(previous),
-    'Oracle2 datastore, PowerSync and shared CPA Caddy image changes need their own rollout',
+    'Oracle2 datastore, PowerSync and shared public Caddy image changes need their own rollout',
   );
 }
 
@@ -141,7 +141,7 @@ export function assertAlreadyDeployed(state, current, containers, caddy) {
     }
   }
   if (!caddy?.State?.Running || caddy?.Id !== state.dataIds?.caddy) {
-    throw new Error('shared CPA Caddy changed without watcher approval');
+    throw new Error('shared public Caddy changed without watcher approval');
   }
   return true;
 }

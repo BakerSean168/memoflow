@@ -128,6 +128,8 @@ export function createNativeAgentFlowFixture(directory: string) {
             return ok(await active.probeDefaultDriver(owner, input.driver));
           case 'probe_connection':
             return ok(await active.probeConnection(owner, input.id));
+          case 'catalog_cached_connection':
+            return ok(await active.cachedCatalogConnection(owner, input.id));
           case 'list_conversations':
             return ok(await active.listConversations(owner));
           case 'create_conversation':
@@ -137,11 +139,17 @@ export function createNativeAgentFlowFixture(directory: string) {
         }
       }
       if (channel === AIChannels.RUNTIME_ASSISTANT_START) {
-        const { streamId, command } = raw as { streamId: string; command: unknown };
+        const { streamId, command } = raw as {
+          streamId: string;
+          command: unknown;
+        };
         const input = AssistantRuntimeClientCommandSchema.parse(command);
         if (input.type !== 'message' || input.runtimeKind !== 'local_agent')
           throw new Error('Unexpected route');
-        for await (const event of active.dispatchMessage({ ...input, identityId: owner }))
+        for await (const event of active.dispatchMessage({
+          ...input,
+          identityId: owner,
+        }))
           for (const listener of [
             ...(listeners.get(AIStreamChannels.RUNTIME_ASSISTANT_EVENT) ?? []),
           ])

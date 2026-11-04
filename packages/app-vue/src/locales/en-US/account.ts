@@ -49,11 +49,8 @@ export default {
   logoutHandlerUnavailable: 'The logout handler is currently unavailable',
   actions: {
     logout: 'Log out',
-    lockProfile: 'Lock local Profile',
     saveProfile: 'Save Profile',
   },
-  lockProfileHint:
-    'Close the current local data runtime and return to Profile unlock. The cloud account binding remains intact.',
   localPassword: {
     title: 'Local account password',
     description:
@@ -127,11 +124,27 @@ export default {
     guestCloseAccountUnavailable: 'Guest mode cannot close the account',
   },
   logoutHint:
-    'Disconnect the current cloud session and stop sync while keeping this local Profile available.',
+    'Disconnect the current cloud session and stop sync while keeping this local account available.',
   logoutConfirm: {
     title: 'Log out of your account?',
     description: 'Cloud sync will pause. Local data will remain unlocked and available.',
     confirmText: 'Log out',
     cancelText: 'Cancel',
+  },
+  signOut: {
+    action: 'Sign out',
+    hint: 'Sign out of this account and remove it from this device.',
+    confirm: {
+      local: {
+        title: 'Sign out and delete this local account?',
+        description:
+          'A local account exists only on this device. Signing out deletes everything permanently; it cannot be recovered.',
+      },
+      registered: {
+        title: 'Sign out and delete this device’s account data?',
+        description:
+          'Data on this device, including local changes that have not synced yet, will be deleted permanently. The account stays in the cloud and syncs back when you sign in again.',
+      },
+    },
   },
 } as const;

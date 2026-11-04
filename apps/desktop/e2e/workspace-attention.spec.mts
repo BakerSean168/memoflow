@@ -1,3 +1,4 @@
+import { enterLocalWorkspace } from './support/profile-access';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
@@ -90,7 +91,7 @@ async function verifyOfflineNativeFailure(
         ELECTRON_DISABLE_SECURITY_WARNINGS: 'true',
       },
     });
-    const main = await app.firstWindow({ timeout: 30000 });
+    const main = await enterLocalWorkspace(app);
     await expect(main.getByTestId('app-shell')).toBeVisible({ timeout: 30000 });
     let preload = path.resolve('dist-electron/preload.cjs');
     if (installedExecutable) {
@@ -308,8 +309,11 @@ async function verifyOfflineNativeFailure(
       { channel: AIChannels.LOCAL_AGENT, id: connectionId },
     );
     expect(status).toMatchObject({ ok: true, data: { status: 'ready' } });
-    const failure = (status.data as { lastExecutionFailure?: { code: string; modelId: string } })
-      .lastExecutionFailure;
+    const failure = (
+      status.data as {
+        lastExecutionFailure?: { code: string; modelId: string };
+      }
+    ).lastExecutionFailure;
     if (scenario.mode === 'unavailable') expect(failure).toBeUndefined();
     else
       expect(failure).toMatchObject({

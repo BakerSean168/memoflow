@@ -26,6 +26,15 @@ export default {
     revoke: 'Revoke',
     limits:
       'AI cannot change permissions. Explicit deny rules and independent safety checks still apply.',
+    highRisk: {
+      title: 'High-risk operations',
+      description:
+        'Permanent deletion, bulk operations and external sends always require a fresh confirmation in the moment, in every permission mode — including automatic execution. Saved allow rules never auto-approve them. Ordinary deletes go to a recycle bin and stay recoverable.',
+      bulkThreshold:
+        'Bulk threshold (a single call affecting more objects than this counts as bulk)',
+      bulkHint:
+        'A lower threshold asks earlier on bulk calls. This value only affects bulk detection; it never changes the confirm-in-the-moment rule for permanent deletion or external sends.',
+    },
     presets: {
       read_only: 'Read only',
       confirm_each: 'Ask before writing',

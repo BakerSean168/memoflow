@@ -39,6 +39,13 @@ export interface WindowStateManagerOptions {
   defaultHeight: number;
   /** Explicit path for the persisted window state file. */
   stateFilePath: string;
+  /**
+   * Lower bounds applied to a persisted state. A window whose layout was
+   * redesigned keeps a stale, smaller saved size otherwise; clamping brings
+   * existing installs onto the new layout without a separate migration file.
+   */
+  minimumWidth?: number;
+  minimumHeight?: number;
 }
 
 /**
@@ -52,6 +59,12 @@ export class WindowStateManager {
   private readonly configPath: string;
   private readonly windowName: string;
   private readonly options: WindowStateManagerOptions;
+  /**
+   * A layout-only height the window can take without that height becoming the
+   * persisted one. The identity window grows for its registration state and
+   * must still open at its base height next time.
+   */
+  private pinnedHeight: number | null = null;
 
   /**
    * @constructor
@@ -163,6 +176,17 @@ export class WindowStateManager {
     this.updateState();
   };
 
+  /**
+   * @method pinHeight
+   * @description Keeps the persisted height at a fixed value while the window
+   * itself may show a taller layout state.
+   *
+   * @param {number | null} height - Height to persist, or null to track the window.
+   */
+  pinHeight(height: number | null): void {
+    this.pinnedHeight = height;
+  }
+
   private updateState(): void {
     if (!this.winRef) return;
 
@@ -177,7 +201,7 @@ export class WindowStateManager {
         this.state.x = windowBounds.x;
         this.state.y = windowBounds.y;
         this.state.width = windowBounds.width;
-        this.state.height = windowBounds.height;
+        this.state.height = this.pinnedHeight ?? windowBounds.height;
       }
 
       this.saveState();
@@ -213,7 +237,7 @@ export class WindowStateManager {
         const data = fs.readFileSync(this.configPath, 'utf8');
         const state = JSON.parse(data);
         if (this.validateState(state)) {
-          return state;
+          return this.clampState(state);
         }
       }
     } catch (_error) {
@@ -225,6 +249,20 @@ export class WindowStateManager {
       height: this.options.defaultHeight,
       isMaximized: false,
     };
+  }
+
+  /**
+   * @method clampState
+   * @description Raises a persisted size to the configured lower bounds so a
+   * window whose layout grew does not keep the retired dimensions.
+   *
+   * @param {WindowState} state - The loaded state.
+   * @returns {WindowState} The state with the lower bounds applied.
+   */
+  private clampState(state: WindowState): WindowState {
+    const width = Math.max(state.width, this.options.minimumWidth ?? 0);
+    const height = Math.max(state.height, this.options.minimumHeight ?? 0);
+    return width === state.width && height === state.height ? state : { ...state, width, height };
   }
 
   /**

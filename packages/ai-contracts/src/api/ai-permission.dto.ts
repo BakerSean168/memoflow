@@ -11,6 +11,10 @@ export const PermissionObjectSchema = z.enum([
 ]);
 export const PermissionActionSchema = z.enum(['read', 'create', 'update', 'delete']);
 export const PermissionEffectSchema = z.enum(['allow', 'ask', 'deny']);
+/** Irreversible or wide-blast-radius risks an operation can carry (#762). */
+export const PermissionRiskSchema = z.enum(['delete_permanent', 'bulk', 'send_external']);
+/** A single call affecting more objects than this is treated as bulk (#762). */
+export const DEFAULT_BULK_THRESHOLD = 10;
 export const PermissionPresetSchema = z.enum([
   'read_only',
   'confirm_each',
@@ -43,6 +47,13 @@ export const PermissionSettingsSchema = z
       .optional(),
     revision: z.number().int().positive().default(1),
     migratedFrom: z.string().optional(),
+    /**
+     * User-set bulk threshold (#762 phase 4): a write call affecting more
+     * objects than this escalates to a fresh confirmation in every preset.
+     * Optional in storage so settings written before this field existed stay
+     * valid; evaluation resolves a missing value to DEFAULT_BULK_THRESHOLD.
+     */
+    bulkThreshold: z.number().int().min(1).max(1000).optional(),
   })
   .strict();
 export const PermissionAuditRecordSchema = z
@@ -57,6 +68,10 @@ export const PermissionAuditRecordSchema = z
     decision: PermissionEffectSchema,
     decidedBy: z.enum(['rule', 'user', 'timeout', 'preset', 'system']),
     ruleId: z.string().nullable(),
+    /** Objects the single call affected, when the caller declared a count (#762). */
+    itemCount: z.number().int().nonnegative().optional(),
+    /** Final evaluated risk set, including dynamically detected bulk (#762 phase 4). */
+    risks: z.array(PermissionRiskSchema).optional(),
     execution: z.enum(['not_started', 'succeeded', 'failed']).default('not_started'),
   })
   .strict();
@@ -64,6 +79,7 @@ export const PermissionAuditRecordSchema = z
 export type PermissionObject = z.infer<typeof PermissionObjectSchema>;
 export type PermissionAction = z.infer<typeof PermissionActionSchema>;
 export type PermissionEffect = z.infer<typeof PermissionEffectSchema>;
+export type PermissionRisk = z.infer<typeof PermissionRiskSchema>;
 export type PermissionPreset = z.infer<typeof PermissionPresetSchema>;
 export type PermissionRule = z.infer<typeof PermissionRuleSchema>;
 export type PermissionSettings = z.infer<typeof PermissionSettingsSchema>;

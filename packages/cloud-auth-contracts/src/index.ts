@@ -70,6 +70,39 @@ export const BetterAuthSessionResponseSchema = z.object({
 
 export const DesktopCloudAttemptRequestSchema = z.object({ attemptId: z.string().uuid() }).strict();
 
+/**
+ * Credentials the identity window submits for cloud sign-in. The password is
+ * only ever carried in this request; it is never stored or logged.
+ */
+export const DesktopCloudCredentialSignInSchema = z
+  .object({
+    email: z.string().email(),
+    password: z.string().min(1).max(100),
+    remember: z.boolean(),
+  })
+  .strict();
+
+export const DesktopCloudRegistrationSchema = z
+  .object({
+    email: z.string().email(),
+    password: z.string().min(1).max(100),
+    name: z.string().max(80).optional(),
+    remember: z.boolean(),
+  })
+  .strict();
+
+export const DesktopCloudGithubSignInSchema = z.object({ remember: z.boolean() }).strict();
+export type DesktopCloudCredentialSignIn = z.infer<typeof DesktopCloudCredentialSignInSchema>;
+export type DesktopCloudRegistration = z.infer<typeof DesktopCloudRegistrationSchema>;
+export type DesktopCloudGithubSignIn = z.infer<typeof DesktopCloudGithubSignInSchema>;
+
+/**
+ * The Profile the main process registered or found and opened for the new
+ * session.
+ */
+export const DesktopCloudSignInResultSchema = z.object({ profileId: z.string().min(1) }).strict();
+export type DesktopCloudSignInResult = z.infer<typeof DesktopCloudSignInResultSchema>;
+
 export interface DesktopCloudConnectionResult {
   targetProfileId: string;
   activation: 'active' | 'pending' | 'password_required' | 'sync_pending';
@@ -77,7 +110,11 @@ export interface DesktopCloudConnectionResult {
 
 export interface DesktopCloudConnectionAttempt {
   attemptId: string;
-  originProfileId: string;
+  /**
+   * The Profile the attempt is anchored to. `null` for a source-less attempt
+   * started from the identity window, where no Profile is open yet.
+   */
+  originProfileId: string | null;
   result: DesktopCloudConnectionResult | null;
   userCode: string;
   verificationUrl: string;

@@ -40,7 +40,7 @@
             :aria-describedby="titleError ? 'schedule-title-error' : undefined"
             @blur="titleTouched = true"
             data-testid="schedule-title-input"
-            class="h-10 border-0 bg-transparent px-0 text-xl font-semibold tracking-[-0.015em] shadow-none placeholder:text-muted-foreground/55 focus-visible:ring-2 focus-visible:ring-ring"
+            class="h-10 border-0 bg-transparent px-0 text-xl font-semibold tracking-[-0.015em] shadow-none placeholder:text-muted-foreground/55 focus-visible:bg-[hsl(var(--surface-raised)/0.22)] focus-visible:ring-0"
           />
 
           <ProductInlineValidation
@@ -59,7 +59,7 @@
             :placeholder="t('schedule.createDialog.fieldDescriptionPlaceholder')"
             rows="2"
             maxlength="1000"
-            class="min-h-11 resize-none border-0 bg-transparent px-0 py-1 text-sm leading-5 text-foreground/80 shadow-none placeholder:text-muted-foreground/55 focus-visible:ring-2 focus-visible:ring-ring"
+            class="min-h-11 resize-none border-0 bg-transparent px-0 py-1 text-sm leading-5 text-foreground/80 shadow-none placeholder:text-muted-foreground/55 focus-visible:bg-[hsl(var(--surface-raised)/0.22)] focus-visible:ring-0"
           />
         </section>
 
@@ -296,9 +296,6 @@
     </form>
 
     <template #footer>
-      <Button type="button" variant="ghost" :disabled="busy" @click="requestClose()">
-        {{ t('common.cancel') }}
-      </Button>
       <Button
         type="submit"
         form="schedule-form"

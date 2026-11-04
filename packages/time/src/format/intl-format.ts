@@ -64,6 +64,33 @@ export function formatInstantDateTime(
   }).format(new Date(instant));
 }
 
+/**
+ * Locale-driven medium date for UI chrome that already owns its display locale.
+ *
+ * UI boundary adapter: keeps the host timezone and Intl's locale defaults so
+ * existing component output stays byte-identical. Business/product time
+ * formatting must use FormatApi with an explicit TimeContext.
+ */
+export function formatLocaleMediumDate(value: Instant | number | Date, locale: string): string {
+  return formatter(locale, {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+  }).format(new Date(value));
+}
+
+/**
+ * Locale-driven medium date + short time for UI chrome that already owns its
+ * display locale. UI boundary adapter: keeps the host timezone and Intl's
+ * locale-default hour cycle so existing component output stays byte-identical.
+ */
+export function formatLocaleMediumDateTime(value: Instant | number | Date, locale: string): string {
+  return formatter(locale, {
+    dateStyle: 'medium',
+    timeStyle: 'short',
+  }).format(new Date(value));
+}
+
 /** Stable detail/export timestamp rendered in the requested product timezone. */
 export function formatInstantDateTimeSeconds(instant: Instant, timeZone: TimeZoneId): string {
   const parts = getZonedDateTimeParts(instant, timeZone);

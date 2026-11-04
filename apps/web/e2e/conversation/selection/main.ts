@@ -108,9 +108,6 @@ const Session = defineComponent({
               .map((item) => ({ id: item.id, title: item.name })),
           },
         ],
-        archivedConversations: session.conversationList.value
-          .filter((item) => item.status === 'Archived')
-          .map((item) => ({ id: item.id, title: item.name })),
         onSelectConversation: (id: string) => {
           opened.value = id;
         },
@@ -124,11 +121,13 @@ const Session = defineComponent({
             results.push({
               id,
               success: Boolean(
+                // 批量路径静默逐条提示，由侧栏汇总成一条结果 toast（#831）。
                 await session.deleteConversation(
                   id,
                   service as never,
                   () => {},
                   () => {},
+                  true,
                 ),
               ),
             });

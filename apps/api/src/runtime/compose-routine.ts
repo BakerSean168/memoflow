@@ -42,6 +42,7 @@ export function composeRoutine(dependencies: ComposeRoutineDependencies): Compos
     onScheduleChanged: scheduleChanged,
   });
   const routineQueryPort = createRoutineConfigurationQueryService({
+    occurrenceTruthStore: repositories.routineOccurrenceTruthStore,
     routineProfileStore: repositories.routineProfileStore,
     routinePreferencesStore: repositories.routinePreferencesStore,
     runtimeContextStore,

@@ -8,6 +8,7 @@
     "
   >
     <ProductDialogShell
+      @request-close="emit('close')"
       :open="open"
       test-id="goal-review-inspect-dialog"
       recipe="inspect"

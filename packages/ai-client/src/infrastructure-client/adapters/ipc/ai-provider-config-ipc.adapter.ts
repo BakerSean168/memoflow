@@ -108,10 +108,13 @@ export class AIProviderConfigIpcAdapter implements IAIProviderConfigApiClient {
     return this.ipcClient.invoke<void>(AIChannels.PROVIDER_SET_DEFAULT, request);
   }
 
-  async refreshProviderModels(id: string): Promise<Result<AIProviderModelCatalogSnapshot>> {
+  async refreshProviderModels(
+    id: string,
+    force = false,
+  ): Promise<Result<AIProviderModelCatalogSnapshot>> {
     return this.ipcClient.invoke<AIProviderModelCatalogSnapshot>(
       AIChannels.PROVIDER_REFRESH_MODELS,
-      id,
+      { id, force },
     );
   }
 }

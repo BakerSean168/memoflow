@@ -55,15 +55,31 @@ test('partial failures remain selected, rapid actions serialize, and Ctrl+Z only
   await page.goto('/?fail=1');
   const row = (id: string) => page.locator(`[data-keyboard-item="${id}"]`);
   for (const id of ['a', 'b', 'c', 'd']) await row(id).click({ modifiers: ['Control'] });
+  const nav = page.locator('nav');
+  const navBoxBefore = (await nav.boundingBox())!;
   await row('b').click({ button: 'right' });
   await expect(page.getByTestId('conversation-context-status')).toHaveText('Archive (4)');
   await page.getByTestId('conversation-context-status').click();
-  await expect(page.getByTestId('conversation-bulk-results').locator('li')).toHaveCount(4);
+  // #831：结果只走 body 上的浮层 toast，列表顶部不再有常驻结果行。
+  await expect(page.getByTestId('conversation-bulk-results')).toHaveCount(0);
+  const toaster = page.locator('[data-sonner-toaster]');
+  await expect(toaster).toHaveCSS('position', 'fixed');
+  await expect(
+    page.getByTestId('conversation-sidebar').locator('[data-sonner-toaster]'),
+  ).toHaveCount(0);
+  const failureToast = page.locator('[data-sonner-toast][data-type="error"]');
+  // 逐条失败提示已由侧栏汇总成一条，带真重试，不再刷多条。
+  await expect(failureToast).toHaveCount(1);
+  await expect(failureToast).toContainText('Archive failed · 1');
+  await expect(failureToast.locator('[data-button][data-action]')).toHaveText('Retry');
+  // 归档成功沿用会话层带 Undo 的既有 toast，同一次操作不叠第二条成功提示。
+  const successToast = page.locator('[data-sonner-toast][data-type="success"]');
+  await expect(successToast).toHaveCount(1);
+  await expect(successToast).toContainText('Conversation archived');
+  // 浮层不占流：提示出现时列表容器位置不变（若仍是流内结果行，nav 会被顶下去）。
+  expect((await nav.boundingBox())!.y).toBe(navBoxBefore.y);
   await expect(page.getByTestId('conversation-selection-count')).toHaveText('1 selected');
   await expect(page.locator('[data-keyboard-item="b"]')).toHaveAttribute('aria-selected', 'true');
-  await expect(page.getByTestId('conversation-bulk-results')).toContainText(
-    'Conversation B · Archive · Failed',
-  );
   const editor = page.getByTestId('editor');
   await editor.fill('draft');
   await editor.press('Control+z');
@@ -99,14 +115,17 @@ test('Profile switch drops old batch feedback and prevents subsequent writes and
   await page.getByTestId('conversation-context-status').click();
   await page.getByTestId('switch-profile').click();
   await expect(page.locator('[aria-selected="true"]')).toHaveCount(0);
-  await expect(page.getByTestId('conversation-bulk-results')).toHaveCount(0);
   await page.getByTestId('release-write').click();
   await expect(page.getByTestId('settled')).toHaveText('1');
+  // 过期 Profile 的完成结果既不渲染行，也不产生侧栏的批量结果提示。
+  await expect(
+    page.locator('[data-sonner-toast]').filter({ hasText: /Archive (completed|failed)/ }),
+  ).toHaveCount(0);
   await page.keyboard.press('Control+z');
   await expect(page.getByTestId('calls')).toHaveText('b:Archived');
 });
 
-test('narrow sidebar preserves search, blank clearing, recovery and separate destructive confirmation', async ({
+test('narrow sidebar preserves search, blank clearing, archive bulk result and separate destructive confirmation', async ({
   page,
 }) => {
   await page.goto('/?narrow=1');
@@ -122,29 +141,29 @@ test('narrow sidebar preserves search, blank clearing, recovery and separate des
   await page.locator('[data-keyboard-item="a"]').click({ modifiers: ['Control'] });
   await page.locator('[data-keyboard-item="a"]').click({ button: 'right' });
   await page.getByTestId('conversation-context-status').click();
-  await expect(page.getByTestId('conversation-bulk-results')).toContainText('Succeeded');
-  await page.getByTestId('conversation-archive-toggle').click();
-  await page.locator('[data-keyboard-item="a"]').click({ button: 'right' });
-  await expect(page.getByTestId('conversation-context-status')).toHaveText('Restore');
-  await page.getByTestId('conversation-context-status').click();
-  await expect(page.getByTestId('calls')).toContainText('a:Active');
-  await page.getByTestId('conversation-archive-toggle').click();
+  await expect(page.getByTestId('conversation-bulk-results')).toHaveCount(0);
+  await expect(page.locator('[data-sonner-toast][data-type="success"]')).toContainText(
+    'Conversation archived',
+  );
   await expect(page.getByRole('listbox')).not.toHaveAttribute('aria-busy', 'true');
-  await page.locator('[data-keyboard-item="a"]').click({ modifiers: ['Control'] });
+  // 归档后会话离开侧栏（归档列表与恢复入口在「设置 → AI」，不属本侧栏夹具），
+  // 因此危险删除确认沿用仍可见的会话 b，断言强度与原来一致。
+  await expect(page.locator('[data-keyboard-item="a"]')).toHaveCount(0);
+  await page.locator('[data-keyboard-item="b"]').click({ modifiers: ['Control'] });
   page.once('dialog', async (dialog) => {
     expect(dialog.message()).toContain('cannot be undone');
     await dialog.dismiss();
   });
-  await page.locator('[data-keyboard-item="a"]').click({ button: 'right' });
+  await page.locator('[data-keyboard-item="b"]').click({ button: 'right' });
   await page.getByTestId('conversation-context-delete').click();
   await expect(page.getByTestId('calls')).not.toContainText(':Deleted');
-  await expect(page.locator('[data-keyboard-item="a"]')).toHaveAttribute('aria-selected', 'true');
+  await expect(page.locator('[data-keyboard-item="b"]')).toHaveAttribute('aria-selected', 'true');
   page.once('dialog', async (dialog) => {
     await dialog.accept();
   });
-  await page.locator('[data-keyboard-item="a"]').click({ button: 'right' });
+  await page.locator('[data-keyboard-item="b"]').click({ button: 'right' });
   await page.getByTestId('conversation-context-delete').click();
-  await expect(page.getByTestId('calls')).toContainText('a:Deleted');
+  await expect(page.getByTestId('calls')).toContainText('b:Deleted');
   const width = await page
     .getByTestId('conversation-sidebar')
     .evaluate((el) => ({ client: el.clientWidth, scroll: el.scrollWidth }));

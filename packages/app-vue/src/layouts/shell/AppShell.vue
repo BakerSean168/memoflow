@@ -17,7 +17,7 @@
  * - 会话侧栏消费 AIChatView defineExpose 的会话状态（单一 chat session）；
  * - 桌面窗控走 useDesktopWindowControls（Web 端不渲染，V2 决策 #6）。
  */
-import { DesktopProfileImportChannels } from '@memoflow/desktop-contracts';
+import { WindowChannels, DesktopProfileImportChannels } from '@memoflow/desktop-contracts';
 import { DESKTOP_BRIDGE_KEY } from '../../di/keys';
 import { toast } from 'vue-sonner';
 import { computed, inject, onBeforeUnmount, onMounted, provide, ref, shallowRef, watch } from 'vue';
@@ -32,11 +32,11 @@ import { canLeaveBusinessSurface } from './surface-leave-protocol';
 import { GoalSurfaceLeaveGuardKey, GoalSurfaceStatusSinkKey } from '@memoflow/goal-ui';
 import { provideKnowledgeNativeSurface } from './useKnowledgeNativeSurface';
 import { useNativeBusinessPanelBridge } from './useNativeBusinessPanelBridge';
-import { useShellRouterSync, AUTO_FOCUS_VIEWPORT, moduleForPath } from './useShellRouterSync';
+import { useShellRouterSync, moduleForPath } from './useShellRouterSync';
 import { useDesktopWindowControls } from '../../shared/composables/useDesktopWindowControls';
 import { hasDesktopAuthApi } from '../../shared/utils/desktop-auth-recovery';
 import { useNotificationUnreadQuery } from '@memoflow/notification-ui';
-import { useAccountStore, useAuthenticationStore } from '@memoflow/account-ui';
+import { useAccountSignOut, useAccountStore, useAuthenticationStore } from '@memoflow/account-ui';
 import {
   ConversationSelectionKey,
   createConversationSelectionStore,
@@ -52,7 +52,7 @@ import NoteCapsulePreview from './previews/NoteCapsulePreview.vue';
 import ScheduleCapsulePreview from './previews/ScheduleCapsulePreview.vue';
 import type { CalendarEventItem } from '@memoflow/schedule-ui';
 import { NotificationCapsulePreview } from '@memoflow/notification-ui';
-import ConversationSidebar from './ConversationSidebar.vue';
+import ConversationSidebar, { type ArchivedConversationEntry } from './ConversationSidebar.vue';
 import BusinessPanel from './BusinessPanel.vue';
 import TodayOverviewPanel from './TodayOverviewPanel.vue';
 import PanelErrorBoundary from './PanelErrorBoundary.vue';
@@ -67,25 +67,17 @@ import { z } from 'zod';
 import StandaloneSettingsLayout from './StandaloneSettingsLayout.vue';
 import {
   COMPOSER_BOTTOM_GAP,
-  AI_HARD_MIN,
   BUSINESS_HARD_MIN,
   SIDEBAR_HARD_MIN,
-  computePanelGeometry,
-  panelWidthFromPointer,
   resolveComposerDensity,
-  resolveWorkspaceChromeMetrics,
-  resolveSidebarPresentation,
-  sidebarWidthFromPointer,
-  workspaceChromeBudget,
-  shouldCollapsePanelWidth,
-  shouldCollapseSidebarWidth,
   type ComposerDensity,
 } from './panel-geometry';
+import { useShellScene } from './useShellScene';
+import { useShellPanelResize } from './useShellPanelResize';
 import {
   SHELL_COMPOSER_DENSITY_KEY,
   SHELL_COMPOSER_MOUNT_KEY,
   DESKTOP_ACCESS_SNAPSHOT_KEY,
-  LOGOUT_HANDLER_KEY,
   MODULE_CAPSULES_KEY,
 } from '../../di/keys';
 import { useDeviceKeymap } from '../../shared/keyboard/device-keymap';
@@ -129,19 +121,26 @@ useNativeBusinessPanelBridge(goalNativeSurface);
 const isDesktop = typeof window !== 'undefined' && hasDesktopAuthApi(window);
 const isMac = typeof navigator !== 'undefined' && /Mac|iPhone|iPad/.test(navigator.platform);
 
-const shellScene = computed<'workspace' | 'settings'>(() => {
-  if (
-    route.meta.shellScene === 'settings' ||
-    route.path === '/settings' ||
-    route.path.startsWith('/settings/') ||
-    route.path.startsWith('/account')
-  ) {
-    return 'settings';
-  }
-  return 'workspace';
+const {
+  shellScene,
+  isSettingsScene,
+  shellState,
+  effectiveViewportWidth,
+  workspaceChromeStyle,
+  sidebarPresentation,
+  overlaySidebarOpen,
+  showDockedSidebar,
+  headerSidebarCollapsed,
+  overlaySidebarWidth,
+  closeOverlaySidebar,
+  handleShellSidebarToggle,
+} = useShellScene({
+  store,
+  layout,
+  rightPanelOpen,
+  sidebarCollapsed,
+  sidebarWidth,
 });
-
-const isSettingsScene = computed(() => shellScene.value === 'settings');
 const configuredModuleCapsules = inject(MODULE_CAPSULES_KEY, defaultModuleCapsules);
 
 // Phase 5 / UI-008：badgeSource token → 实时计数（notification unread）。
@@ -163,73 +162,29 @@ const headerCapsules = computed<WindowHeaderCapsule[]>(() =>
   })),
 );
 
-/** STATE A/B/C 派生（§1.1）。 */
-const shellState = computed<'chat' | 'split' | 'focus'>(() => {
-  if (!rightPanelOpen.value) return 'chat';
-  return layout.value === 'focus' ? 'focus' : 'split';
-});
-
-const effectiveViewportWidth = ref(typeof window === 'undefined' ? 1280 : window.innerWidth);
-const workspaceChromeStyle = computed(() => {
-  const { inset, gap } = resolveWorkspaceChromeMetrics(effectiveViewportWidth.value);
-  return {
-    '--workspace-edge-inset': `${inset}px`,
-    '--workspace-sidebar-gap': `${gap}px`,
-  };
-});
-/**
- * Responsive sidebar contract:
- * - >= 960px: docked/persistent, consuming workspace width and honoring the persisted preference;
- * - < 960px: off-canvas overlay, closed by default and controlled by transient shell state.
- * Narrow geometry never mutates the user's docked preference.
- */
-const sidebarPresentation = computed(() =>
-  resolveSidebarPresentation(effectiveViewportWidth.value),
-);
-const overlaySidebarOpen = ref(false);
-const showDockedSidebar = computed(
-  () => sidebarPresentation.value === 'docked' && !sidebarCollapsed.value,
-);
-const headerSidebarCollapsed = computed(() =>
-  sidebarPresentation.value === 'overlay' ? !overlaySidebarOpen.value : sidebarCollapsed.value,
-);
-const overlaySidebarWidth = computed(() =>
-  Math.max(
-    SIDEBAR_HARD_MIN,
-    Math.min(
-      sidebarWidth.value,
-      360,
-      Math.max(SIDEBAR_HARD_MIN, effectiveViewportWidth.value - 48),
-    ),
-  ),
-);
-
-function closeOverlaySidebar(): void {
-  overlaySidebarOpen.value = false;
-}
-
-function handleShellSidebarToggle(): void {
-  if (isSettingsScene.value) {
-    store.toggleSettingsNavigation();
-    return;
-  }
-  if (sidebarPresentation.value === 'overlay') {
-    overlaySidebarOpen.value = !overlaySidebarOpen.value;
-    return;
-  }
-  store.toggleSidebar();
-}
-
-/** 右侧面板显隐由独立持久化偏好控制。 */
-const showPanel = computed(() => rightPanelOpen.value);
-/** 当前几何下的有效侧栏宽度；用户偏好本身不被动态边界改写。 */
-const effectiveSidebarWidth = computed(() => {
-  const reserved = showPanel.value
-    ? BUSINESS_HARD_MIN + (layout.value === 'split' ? AI_HARD_MIN : 0)
-    : AI_HARD_MIN;
-  const chrome = workspaceChromeBudget(effectiveViewportWidth.value);
-  const dynamicMax = Math.max(SIDEBAR_HARD_MIN, effectiveViewportWidth.value - reserved - chrome);
-  return Math.min(sidebarWidth.value, dynamicMax);
+const {
+  isSidebarResizing,
+  isPanelResizing,
+  showPanel,
+  effectiveSidebarWidth,
+  startSidebarResize,
+  resizeSidebarBy,
+  effectivePanelWidth,
+  onViewportGeometryChange,
+  startPanelResize,
+  resetPanelWidth,
+  resizePanelBy,
+  disposeResizeHandlers,
+} = useShellPanelResize({
+  store,
+  sync,
+  layout,
+  rightPanelOpen,
+  panelWidth,
+  sidebarWidth,
+  effectiveViewportWidth,
+  showDockedSidebar,
+  shellState,
 });
 // ── AI 常驻层（单实例；会话侧栏数据经 defineExpose 上浮） ──
 provide(ConversationSelectionKey, createConversationSelectionStore());
@@ -243,8 +198,6 @@ const workspaceMainRef = ref<HTMLElement | null>(null);
 const aiColumnRef = ref<HTMLElement | null>(null);
 const workspaceMainWidth = ref(0);
 const aiColumnWidth = ref(0);
-const isSidebarResizing = ref(false);
-const isPanelResizing = ref(false);
 provide(SHELL_COMPOSER_MOUNT_KEY, shellComposerMount);
 provide(SHELL_COMPOSER_DENSITY_KEY, shellComposerDensity);
 
@@ -357,11 +310,23 @@ async function handleSelectConversation(id: string) {
   await aiRef.value?.selectConversation(summary);
 }
 
-const archivedConversations = computed(() =>
-  conversations.value
+/**
+ * 已归档投影：侧栏专属分区与恢复动作共用 #804 的归档数据通路
+ * （useConversationProjection 的 Archived 分页 + setConversationStatus）。
+ */
+const archivedConversations = computed<ArchivedConversationEntry[]>(() => {
+  const time = getProductTime();
+  return conversations.value
     .filter((item) => item.status === 'Archived')
-    .map((item) => ({ id: item.id, title: item.name })),
-);
+    .map((item) => {
+      const ts = conversationTimestamp(item);
+      return {
+        id: String(item.id),
+        title: item.name || t('common.untitled'),
+        time: ts ? time.format.relative(ts) : '',
+      };
+    });
+});
 function handleArchiveConversation(id: string) {
   void aiRef.value?.archiveConversation(id);
 }
@@ -395,7 +360,7 @@ function handleNewConversation() {
 const authStore = useAuthenticationStore();
 const accountStore = useAccountStore();
 const { isAuthenticated } = storeToRefs(authStore);
-const logout = inject(LOGOUT_HANDLER_KEY, null);
+const { isDesktopSignOut, confirmSignOut, executeSignOut } = useAccountSignOut();
 const desktopAccess = inject(DESKTOP_ACCESS_SNAPSHOT_KEY, ref(null));
 useDeviceKeymap(() => authStore.getIdentityId, desktopAccess);
 const cloudConnectionOpen = ref(false);
@@ -450,6 +415,12 @@ watch(
 onMounted(() => {
   if (desktopBridge) void refreshProfiles();
 });
+async function addMenuAccount() {
+  closeOverlaySidebar();
+  await desktopBridge?.invoke(WindowChannels.TRANSITION_TO_PROFILE_ACCESS, {
+    view: 'login',
+  });
+}
 function addAccount() {
   closeManagement();
   cloudConnectionIntent.value = 'add_account';
@@ -499,263 +470,7 @@ onBeforeUnmount(() => {
 });
 
 // ── 拖拽调宽（侧栏 / 面板），状态回写 store ──
-function maxSidebarWidth(): number {
-  if (typeof window === 'undefined') return Number.POSITIVE_INFINITY;
-  const reserved = showPanel.value
-    ? BUSINESS_HARD_MIN + (shellState.value === 'split' ? AI_HARD_MIN : 0)
-    : AI_HARD_MIN;
-  const chrome = workspaceChromeBudget(window.innerWidth);
-  return Math.max(SIDEBAR_HARD_MIN, window.innerWidth - reserved - chrome);
-}
-
-const resizeDisposers = new Set<() => void>();
-onBeforeUnmount(() => {
-  resizeDisposers.forEach((dispose) => dispose());
-  resizeDisposers.clear();
-});
-
-function startSidebarResize(e: MouseEvent) {
-  e.preventDefault();
-  const previousUserSelect = document.body.style.userSelect;
-  const previousCursor = document.body.style.cursor;
-  // 记录拖拽前聚焦元素，拖拽结束后恢复（面板调整不打断用户输入焦点，
-  // 如任务搜索框——e2e 断言拖拽布局后搜索框保持聚焦）。
-  const previouslyFocused =
-    document.activeElement instanceof HTMLElement ? document.activeElement : null;
-  document.body.style.userSelect = 'none';
-  document.body.style.cursor = 'col-resize';
-  isSidebarResizing.value = true;
-  const cleanup = () => {
-    resizeDisposers.delete(cleanup);
-    isSidebarResizing.value = false;
-    window.removeEventListener('mousemove', move);
-    window.removeEventListener('mouseup', up);
-    window.removeEventListener('keydown', cancel);
-    window.removeEventListener('blur', cleanup);
-    document.body.style.userSelect = previousUserSelect;
-    document.body.style.cursor = previousCursor;
-    if (previouslyFocused && document.contains(previouslyFocused)) {
-      previouslyFocused.focus();
-    }
-  };
-  const move = (ev: MouseEvent) => {
-    const width = sidebarWidthFromPointer(ev.clientX, window.innerWidth);
-    if (shouldCollapseSidebarWidth(width)) {
-      cleanup();
-      store.setSidebarCollapsed(true);
-      return;
-    }
-    store.setSidebarWidth(width, maxSidebarWidth());
-  };
-  const up = () => {
-    cleanup();
-  };
-  const cancel = (ev: KeyboardEvent) => {
-    if (ev.key === 'Escape') cleanup();
-  };
-  resizeDisposers.add(cleanup);
-  window.addEventListener('mousemove', move);
-  window.addEventListener('mouseup', up);
-  window.addEventListener('keydown', cancel);
-  window.addEventListener('blur', cleanup);
-}
-
-function resizeSidebarBy(delta: number): void {
-  const next = effectiveSidebarWidth.value + delta;
-  if (shouldCollapseSidebarWidth(next)) {
-    store.setSidebarCollapsed(true);
-    return;
-  }
-  store.setSidebarWidth(next, maxSidebarWidth());
-}
-
-function occupiedSidebarWidth(): number {
-  return showDockedSidebar.value ? effectiveSidebarWidth.value : 0;
-}
-
-/** 分栏态只计算 docked sidebar；overlay 永远不占 workspace geometry。 */
-function prospectiveSidebarOccupied(): number {
-  return showDockedSidebar.value ? effectiveSidebarWidth.value : 0;
-}
-
-function effectivePanelWidth(): number {
-  if (typeof window === 'undefined') return panelWidth.value ?? 520;
-  return store.resolvePanelWidth(window.innerWidth, occupiedSidebarWidth());
-}
-
-/**
- * 视口/侧栏变化：
- * - 不回写用户偏好宽度（由 effectivePanelWidth 即时 clamp）
- * - viewport 触发的 focus 可在空间恢复后回到 split；user focus 保持
- */
-function onViewportGeometryChange(): void {
-  if (typeof window === 'undefined') return;
-  effectiveViewportWidth.value = window.innerWidth;
-  if (store.isChatOnly) return;
-
-  const geo = computePanelGeometry({
-    viewportWidth: window.innerWidth,
-    sidebarOccupiedWidth: prospectiveSidebarOccupied(),
-  });
-  // 窄视口或几何上无法同时保证 AI 与业务硬下限时强制 viewport focus（§6.2）。
-  const shouldFocus = window.innerWidth < AUTO_FOCUS_VIEWPORT || !geo.canSplit;
-
-  if (shouldFocus) {
-    if (store.layout !== 'focus') {
-      store.setLayout('focus', 'viewport');
-    }
-    return;
-  }
-
-  if (store.layout === 'focus' && store.layoutReason === 'viewport') {
-    store.restoreLayoutPreference();
-  }
-}
-
-function startPanelResize(e: PointerEvent) {
-  const focusedElement =
-    document.activeElement instanceof HTMLElement ? document.activeElement : null;
-  e.preventDefault();
-  const captureTarget =
-    e.target instanceof Element
-      ? ((e.target.closest('[data-testid="business-panel-resizer"]') as HTMLElement | null) ??
-        (e.target as HTMLElement))
-      : null;
-  try {
-    captureTarget?.setPointerCapture?.(e.pointerId);
-  } catch {
-    // pointer capture 在部分测试/非指针设备上可能失败，忽略即可
-  }
-
-  const previousUserSelect = document.body.style.userSelect;
-  const previousCursor = document.body.style.cursor;
-  document.body.style.userSelect = 'none';
-  document.body.style.cursor = 'col-resize';
-  isPanelResizing.value = true;
-
-  const restoreFocusedElement = () => {
-    if (!focusedElement) return;
-    if (focusedElement.isConnected) {
-      if (document.activeElement !== focusedElement) {
-        focusedElement.focus({ preventScroll: true });
-      }
-      return;
-    }
-
-    // 拖拽触发布局重渲染导致原元素被替换（如任务搜索框）时，
-    // 按 data-testid 定位新元素恢复焦点，保持用户输入上下文。
-    const testId = focusedElement.getAttribute('data-testid');
-    if (!testId) return;
-    const replacement = document.querySelector<HTMLElement>(
-      `[data-testid="${CSS.escape(testId)}"]`,
-    );
-    if (replacement && document.activeElement !== replacement) {
-      replacement.focus({ preventScroll: true });
-    }
-  };
-
-  // The trailing native pointer focus default (the drag handle is focusable) or
-  // a menu closing with the same gesture can steal focus long after the restore
-  // frame ran — on loaded machines this lands well beyond the next animation
-  // frame. Until the user performs the next real interaction or the deadline
-  // passes, redirect focus taken by the drag handle or cleared to body back to
-  // the user's element. Tab and mouse presses end the guard before their focus
-  // side effects, so keyboard and pointer users keep full control.
-  const guardLateFocusTheft = () => {
-    if (!focusedElement) return;
-    let settled = false;
-    const settle = () => {
-      if (settled) return;
-      settled = true;
-      resizeDisposers.delete(settle);
-      document.removeEventListener('focusin', onFocusIn, true);
-      document.removeEventListener('pointerdown', settle, true);
-      document.removeEventListener('keydown', settle, true);
-      window.clearTimeout(guardDeadline);
-    };
-    const onFocusIn = (event: FocusEvent) => {
-      if (settled) return;
-      if (event.target === captureTarget || event.target === document.body) {
-        restoreFocusedElement();
-      }
-    };
-    document.addEventListener('focusin', onFocusIn, true);
-    document.addEventListener('pointerdown', settle, true);
-    document.addEventListener('keydown', settle, true);
-    const guardDeadline = window.setTimeout(settle, 2000);
-    resizeDisposers.add(settle);
-  };
-
-  const dispose = () => cleanup(e.pointerId, false);
-  const cleanup = (pointerId?: number, restoreFocusAfterGesture = true) => {
-    resizeDisposers.delete(dispose);
-    if (typeof pointerId === 'number') {
-      try {
-        captureTarget?.releasePointerCapture?.(pointerId);
-      } catch {
-        // ignore
-      }
-    }
-    window.removeEventListener('pointermove', move);
-    window.removeEventListener('pointerup', up);
-    window.removeEventListener('pointercancel', pointerCancel);
-    window.removeEventListener('keydown', cancel);
-    window.removeEventListener('blur', blur);
-    document.body.style.userSelect = previousUserSelect;
-    document.body.style.cursor = previousCursor;
-    isPanelResizing.value = false;
-    if (restoreFocusAfterGesture) {
-      // Chromium may apply the native pointer/mouse focus default after pointerup listeners.
-      // Restore on the next frame so the user's active input wins after the full gesture settles.
-      const frame = window.requestAnimationFrame(() => {
-        resizeDisposers.delete(cancelFrame);
-        restoreFocusedElement();
-        guardLateFocusTheft();
-      });
-      const cancelFrame = () => window.cancelAnimationFrame(frame);
-      resizeDisposers.add(cancelFrame);
-    }
-  };
-
-  const move = (ev: PointerEvent) => {
-    const width = panelWidthFromPointer(ev.clientX, window.innerWidth);
-    if (shouldCollapsePanelWidth(width)) {
-      cleanup(ev.pointerId, false);
-      void sync.closePanel();
-      return;
-    }
-    store.setPanelWidth(width);
-  };
-  const up = (ev: PointerEvent) => {
-    cleanup(ev.pointerId);
-  };
-  const pointerCancel = (ev: PointerEvent) => {
-    cleanup(ev.pointerId);
-  };
-  const cancel = (ev: KeyboardEvent) => {
-    if (ev.key === 'Escape') cleanup();
-  };
-  const blur = () => cleanup();
-  resizeDisposers.add(dispose);
-  window.addEventListener('pointermove', move);
-  window.addEventListener('pointerup', up);
-  window.addEventListener('pointercancel', pointerCancel);
-  window.addEventListener('keydown', cancel);
-  window.addEventListener('blur', blur);
-}
-
-function resetPanelWidth(): void {
-  store.resetPanelWidthPreference();
-}
-
-function resizePanelBy(delta: number): void {
-  const next = effectivePanelWidth() + delta;
-  if (shouldCollapsePanelWidth(next)) {
-    void sync.closePanel();
-    return;
-  }
-  store.setPanelWidth(next);
-}
+onBeforeUnmount(disposeResizeHandlers);
 
 onMounted(() => {
   onViewportGeometryChange();
@@ -912,7 +627,10 @@ function openCloudConnection() {
 
 async function handleLogout() {
   closeOverlaySidebar();
-  await logout?.();
+  // The account menu never confirmed before; only the desktop "退出账号" adds
+  // the dialog, and it is the same one the Settings section uses.
+  if (isDesktopSignOut.value && !(await confirmSignOut())) return;
+  await executeSignOut().catch(() => undefined);
 }
 
 /**
@@ -1111,7 +829,20 @@ onBeforeUnmount(() => {
          业务 default view 为空；WorkspaceSceneHost 用 v-show 常驻——KeepAlive 实例、
          AIChatView 流式回复、Teleport 宿主都不随设置导航销毁（Phase 0 / UI-001）。 -->
     <StandaloneSettingsLayout v-if="isSettingsScene" class="min-h-0 flex-1">
-      <router-view name="settings" />
+      <div class="flex h-full min-h-0 flex-col">
+        <button
+          v-if="isDesktop && route.query.tab === 'account'"
+          type="button"
+          data-testid="shell-manage-profiles"
+          class="m-4 self-start rounded-md border px-3 py-2 text-sm hover:bg-muted"
+          @click="manageProfiles($event.currentTarget as HTMLButtonElement)"
+        >
+          {{ t('shell.account.manageProfiles') }}
+        </button>
+        <div class="min-h-0 flex-1">
+          <router-view name="settings" />
+        </div>
+      </div>
     </StandaloneSettingsLayout>
 
     <!-- 主工作区（STATE A/B/C）：Hybrid Workspace。
@@ -1142,15 +873,15 @@ onBeforeUnmount(() => {
               class="h-full w-full"
               :groups="conversationGroups"
               :archived-conversations="archivedConversations"
-              :archive-page="aiRef?.archivePage ?? 1"
-              :archive-has-more="aiRef?.archiveHasMore ?? false"
+              :archive-page="aiRef?.archivePage"
+              :archive-has-more="aiRef?.archiveHasMore"
+              @restore-conversation="handleRestoreConversation"
+              @change-archive-page="handleChangeArchivePage"
               @rename-conversation="(id, name) => aiRef?.renameConversation(id, name)"
               @regenerate-title="(id) => aiRef?.regenerateConversationTitle(id)"
               :title-busy="aiRef?.titleBusy"
               :bulk-action="handleBulkConversationAction"
               @archive-conversation="handleArchiveConversation"
-              @restore-conversation="handleRestoreConversation"
-              @change-archive-page="handleChangeArchivePage"
               @refresh-conversations="aiRef?.loadConversationList()"
               :conversation-statuses="conversationStatuses"
               :profiles="desktopProfiles"
@@ -1167,7 +898,7 @@ onBeforeUnmount(() => {
               @delete-conversation="handleDeleteConversation"
               @open-settings="openSettings"
               @open-cloud-connection="openCloudConnection"
-              @manage-profiles="manageProfiles"
+              @add-account="addMenuAccount"
               @switch-profile="switchProfile"
               @refresh-profiles="refreshProfiles"
               @logout="() => void handleLogout()"
@@ -1330,15 +1061,15 @@ onBeforeUnmount(() => {
             class="h-full w-full"
             :groups="conversationGroups"
             :archived-conversations="archivedConversations"
-            :archive-page="aiRef?.archivePage ?? 1"
-            :archive-has-more="aiRef?.archiveHasMore ?? false"
+            :archive-page="aiRef?.archivePage"
+            :archive-has-more="aiRef?.archiveHasMore"
+            @restore-conversation="handleRestoreConversation"
+            @change-archive-page="handleChangeArchivePage"
             @rename-conversation="(id, name) => aiRef?.renameConversation(id, name)"
             @regenerate-title="(id) => aiRef?.regenerateConversationTitle(id)"
             :title-busy="aiRef?.titleBusy"
             :bulk-action="handleBulkConversationAction"
             @archive-conversation="handleArchiveConversation"
-            @restore-conversation="handleRestoreConversation"
-            @change-archive-page="handleChangeArchivePage"
             @refresh-conversations="aiRef?.loadConversationList()"
             :conversation-statuses="conversationStatuses"
             :profiles="desktopProfiles"
@@ -1355,7 +1086,7 @@ onBeforeUnmount(() => {
             @delete-conversation="handleDeleteConversation"
             @open-settings="openSettings"
             @open-cloud-connection="openCloudConnection"
-            @manage-profiles="manageProfiles"
+            @add-account="addMenuAccount"
             @switch-profile="switchProfile"
             @refresh-profiles="refreshProfiles"
             @logout="() => void handleLogout()"

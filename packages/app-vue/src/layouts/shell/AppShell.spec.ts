@@ -1,11 +1,12 @@
 import { installRoutineUiHost } from '../../di/routine-ui-host';
+import { installAccountUiHost } from '../../di/account-ui-host';
 /** @vitest-environment happy-dom */
 
 import { flushPromises, mount } from '@vue/test-utils';
 import { createPinia, setActivePinia } from 'pinia';
 import { createI18n } from 'vue-i18n';
 import { createMemoryHistory, createRouter } from 'vue-router';
-import { defineComponent, h, nextTick, onMounted, ref } from 'vue';
+import { defineComponent, h, nextTick, onMounted, reactive, ref } from 'vue';
 import { beforeEach, describe, expect, it, onTestFinished, vi } from 'vitest';
 import { DESKTOP_UPDATE_SERVICE_KEY } from '../../di/keys';
 import type { DesktopUpdateService } from '../../di/types';
@@ -20,6 +21,7 @@ import { installNotificationUiHost } from '../../di/notification-ui-host';
 
 installShellTestCleanup();
 installNotificationUiHost();
+installAccountUiHost();
 
 vi.mock('@memoflow/notification-ui', async (importOriginal) => {
   const { ref: vueRef } = await import('vue');
@@ -66,10 +68,17 @@ const passThrough = (name: string) =>
   });
 
 const activeChatConversationId = ref<string | null>(null);
-const conversationList = [
+const conversationList = reactive<
+  { id: string; title?: string; name?: string; status?: string; updatedAt?: number }[]
+>([
   { id: 'conversation-a', title: 'A' },
   { id: 'conversation-b', title: 'B' },
-];
+]);
+const restoreConversation = vi.fn(async (id: string) => {
+  const item = conversationList.find((item) => item.id === id);
+  if (item) item.status = 'Active';
+  return true;
+});
 const selectConversation = vi.fn(async (summary: { id: string }) => {
   activeChatConversationId.value = summary.id;
 });
@@ -90,6 +99,7 @@ const AIChatViewStub = defineComponent({
       selectConversation,
       startNewConversation,
       deleteConversation,
+      restoreConversation,
     });
 
     return () => h('div', { 'data-testid': 'ai-chat-view' });
@@ -120,11 +130,52 @@ const WindowHeaderStub = defineComponent({
   },
 });
 
+interface SidebarConversationEntry {
+  id: string;
+  title: string;
+}
+
 const ConversationSidebarStub = defineComponent({
   name: 'ConversationSidebar',
-  emits: ['select-conversation', 'new-conversation', 'delete-conversation'],
-  setup() {
-    return () => h('aside', { 'data-testid': 'conversation-sidebar' });
+  props: {
+    groups: {
+      type: Array<{ labelKey: string; items: SidebarConversationEntry[] }>,
+      default: () => [],
+    },
+    archivedConversations: { type: Array<SidebarConversationEntry>, default: () => [] },
+  },
+  emits: ['select-conversation', 'new-conversation', 'delete-conversation', 'restore-conversation'],
+  setup(props, { emit }) {
+    return () =>
+      h('aside', { 'data-testid': 'conversation-sidebar' }, [
+        h(
+          'ul',
+          { 'data-testid': 'conversation-sidebar-archived' },
+          props.archivedConversations.map((item) =>
+            h('li', { key: item.id, 'data-testid': 'conversation-sidebar-archived-row' }, [
+              h('span', item.title),
+              h(
+                'button',
+                {
+                  type: 'button',
+                  'data-testid': 'conversation-sidebar-restore',
+                  onClick: () => emit('restore-conversation', item.id),
+                },
+                'restore',
+              ),
+            ]),
+          ),
+        ),
+        h(
+          'ul',
+          { 'data-testid': 'conversation-sidebar-groups' },
+          props.groups.flatMap((group) =>
+            group.items.map((item) =>
+              h('li', { key: item.id, 'data-testid': 'conversation-sidebar-row' }, item.title),
+            ),
+          ),
+        ),
+      ]);
   },
 });
 
@@ -207,7 +258,11 @@ async function mountShell(
       { path: '/goals', component: GoalRouteProbe },
       {
         path: '/settings',
-        components: { settings: { template: '<div data-testid="settings-view" />' } },
+        components: {
+          settings: {
+            template: '<div data-testid="settings-view" />',
+          },
+        },
         meta: { shellScene: 'settings' },
       },
     ],
@@ -755,6 +810,62 @@ describe('AppShell right-panel integration', () => {
     expect(store.activeTab?.route).toBe('/goals');
     expect(goalRouteMountCount).toBe(1);
     wrapper.unmount();
+  });
+
+  it('shows archived conversations in the sidebar partition and restores them into the list', async () => {
+    conversationList.push({
+      id: 'archived-test',
+      name: 'Archived test',
+      status: 'Archived',
+      updatedAt: Date.parse('2026-11-01T10:00:00Z'),
+    });
+    const { wrapper } = await mountShell('/goals');
+    try {
+      const archivedSection = wrapper.get('[data-testid="conversation-sidebar-archived"]');
+      expect(archivedSection.text()).toContain('Archived test');
+      expect(wrapper.get('[data-testid="conversation-sidebar-groups"]').text()).not.toContain(
+        'Archived test',
+      );
+
+      await wrapper.get('[data-testid="conversation-sidebar-restore"]').trigger('click');
+      await flushPromises();
+      expect(restoreConversation).toHaveBeenCalledWith('archived-test');
+      expect(wrapper.find('[data-testid="conversation-sidebar-archived-row"]').exists()).toBe(
+        false,
+      );
+      expect(wrapper.get('[data-testid="conversation-sidebar-groups"]').text()).toContain(
+        'Archived test',
+      );
+    } finally {
+      wrapper.unmount();
+      conversationList.splice(
+        conversationList.findIndex((item) => item.id === 'archived-test'),
+        1,
+      );
+    }
+  });
+
+  it('no longer renders the archived conversation list in settings', async () => {
+    conversationList.push({
+      id: 'archived-test',
+      name: 'Archived test',
+      status: 'Archived',
+      updatedAt: Date.now(),
+    });
+    const { wrapper, router } = await mountShell('/goals');
+    try {
+      await router.push('/settings?tab=ai');
+      await flushPromises();
+      expect(wrapper.get('[data-testid="settings-view"]').text()).not.toContain('Archived test');
+      expect(wrapper.find('[data-testid="settings-archived-conversations"]').exists()).toBe(false);
+      expect(wrapper.find('[data-testid="settings-restore-conversation"]').exists()).toBe(false);
+    } finally {
+      wrapper.unmount();
+      conversationList.splice(
+        conversationList.findIndex((item) => item.id === 'archived-test'),
+        1,
+      );
+    }
   });
 
   it('keeps the workspace and AI instance mounted while the settings scene is active', async () => {

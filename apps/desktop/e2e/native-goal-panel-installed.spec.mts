@@ -1,3 +1,4 @@
+import { enterLocalWorkspace } from './support/profile-access';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
@@ -53,7 +54,11 @@ test('installed Windows Goal panel accepts agent commands and persists the real 
     instance: ElectronApplication,
   ): Promise<void> {
     await instance.evaluate(({ ipcMain, BrowserWindow }, channel) => {
-      type TestResponse = { requestId: string; ok: boolean; [key: string]: unknown };
+      type TestResponse = {
+        requestId: string;
+        ok: boolean;
+        [key: string]: unknown;
+      };
       const qa = globalThis as typeof globalThis & {
         __mf570WindowReplyMap?: Map<string, TestResponse>;
       };
@@ -146,7 +151,10 @@ test('installed Windows Goal panel accepts agent commands and persists the real 
                 request: object,
               ): Promise<{
                 ok: boolean;
-                data?: { pagination: { total: number }; data: Array<{ id: string; name: string }> };
+                data?: {
+                  pagination: { total: number };
+                  data: Array<{ id: string; name: string }>;
+                };
               }>;
             };
           }
@@ -182,8 +190,10 @@ test('installed Windows Goal panel accepts agent commands and persists the real 
 
   try {
     app = await launch();
-    let page = await app.firstWindow({ timeout: 45_000 });
-    await expect(page.getByTestId('app-shell')).toBeVisible({ timeout: 45_000 });
+    let page = await enterLocalWorkspace(app);
+    await expect(page.getByTestId('app-shell')).toBeVisible({
+      timeout: 45_000,
+    });
     const provenance = await verifyInstalledNativeBinary(
       app,
       executable!,
@@ -337,8 +347,10 @@ test('installed Windows Goal panel accepts agent commands and persists the real 
     await app.close();
     app = null;
     app = await launch();
-    page = await app.firstWindow({ timeout: 45_000 });
-    await expect(page.getByTestId('app-shell')).toBeVisible({ timeout: 45_000 });
+    page = await enterLocalWorkspace(app);
+    await expect(page.getByTestId('app-shell')).toBeVisible({
+      timeout: 45_000,
+    });
     owner = await readLocalGoals(page);
     expect(owner.pagination.total).toBe(1);
     expect(owner.data.some((record) => record.id === goalId && record.name === title)).toBe(true);

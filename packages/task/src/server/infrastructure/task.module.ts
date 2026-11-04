@@ -52,6 +52,7 @@ import {
   type TaskPortableCapability,
 } from '../application/task-portability';
 import { createLogger } from '@memoflow/utils/logger';
+import { normalizeContribution } from '@memoflow/utils/shared';
 import type { UserTimeContextPort } from '@memoflow/time';
 
 const logger = createLogger('TaskModule');
@@ -173,18 +174,11 @@ export interface TaskModuleInstance {
 
 // Residual 987 keep-boundary: composition-root local normalize (TaskRuntimeContributionsInput host).
 // Sole API/Electron helper lives in normalize-runtime-contributions.ts (avoids circular import).
+// B2-03: normalization body is the shared @memoflow/utils/shared normalizeContribution.
 function normalizeRuntimeContributions(
   runtimeContributions?: TaskRuntimeContributionsInput,
 ): readonly TaskModuleRuntimeContribution[] {
-  if (!runtimeContributions) {
-    return [];
-  }
-
-  if (Array.isArray(runtimeContributions)) {
-    return Array.from(runtimeContributions);
-  }
-
-  return [runtimeContributions as TaskModuleRuntimeContribution];
+  return normalizeContribution(runtimeContributions);
 }
 
 /**

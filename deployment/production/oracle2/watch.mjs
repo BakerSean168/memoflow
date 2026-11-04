@@ -92,7 +92,7 @@ function singleLive(service) {
 
 function liveSnapshot() {
   const containers = Object.fromEntries(LIVE_SERVICES.map((name) => [name, singleLive(name)]));
-  const caddy = JSON.parse(docker('inspect', 'cpa-caddy'))[0];
+  const caddy = JSON.parse(docker('inspect', 'public-gateway-caddy'))[0];
   return { containers, caddy };
 }
 
@@ -427,7 +427,7 @@ function compareDataContainers(original, current) {
     }
   }
   if (original.caddy.Id !== current.caddy.Id) {
-    throw new Error('shared CPA Caddy was changed during deployment');
+    throw new Error('shared public Caddy was changed during deployment');
   }
 }
 
@@ -560,7 +560,12 @@ async function reconcile(mode) {
   fs.chmodSync(stage, 0o700);
   try {
     const target = extractControl(image, labels, current.env, stage);
-    verifyTopologicalSafety(stage);
+    // Existing release is a read-only no-op: current state, pinned identities,
+    // the independently migrated Caddy identity and HTTPS are checked here.
+    // Published pre-migration control artifacts contain the obsolete CPA edge
+    // preflight. Do not execute that old candidate guard for a no-op; for any
+    // actual new release or first adoption the full candidate preflight below
+    // remains mandatory.
     if (old && old.productionSetDigest === selectedSha) {
       if (
         old.releaseSha !== target.releaseSha ||
@@ -574,6 +579,7 @@ async function reconcile(mode) {
       console.log('ORACLE2_WATCH=NO_CHANGE release=' + old.releaseTag);
       return;
     }
+    verifyTopologicalSafety(stage);
     if (old && old.productionSetDigest !== selectedSha) {
       requireVersionForward(old.releaseTag, target.selected.releaseTag);
       assert.deepEqual(

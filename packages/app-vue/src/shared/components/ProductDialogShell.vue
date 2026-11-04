@@ -36,12 +36,24 @@
             </DialogDescription>
           </div>
         </div>
-        <div
-          v-if="$slots.actions"
-          class="mr-7 flex shrink-0 items-center gap-2"
-          data-testid="product-dialog-header-actions"
-        >
-          <slot name="actions" />
+        <div class="flex shrink-0 items-center gap-1">
+          <div
+            v-if="$slots.actions"
+            class="flex items-center gap-2"
+            data-testid="product-dialog-header-actions"
+          >
+            <slot name="actions" />
+          </div>
+          <button
+            type="button"
+            :disabled="closeDisabled"
+            :data-testid="`${testId}-close`"
+            :aria-label="closeLabel"
+            @click="emit('request-close')"
+            class="flex size-8 shrink-0 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-accent hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-50"
+          >
+            <X class="size-4" aria-hidden="true" />
+          </button>
         </div>
       </div>
     </DialogHeader>
@@ -66,6 +78,7 @@
 
 <script setup lang="ts">
 import { computed, nextTick, watch, type HTMLAttributes } from 'vue';
+import { X } from '@lucide/vue';
 import {
   cn,
   DialogContent,
@@ -79,6 +92,9 @@ const props = withDefaults(
   defineProps<{
     open: boolean;
     testId: string;
+    closeDisabled?: boolean;
+    /** Accessible label supplied by localized consumers; safe without a global i18n plugin. */
+    closeLabel?: string;
     recipe?: 'form' | 'inspect' | 'config' | 'workspace';
     size?: 'sm' | 'md' | 'lg';
     heightMode?: 'content' | 'workspace';
@@ -89,6 +105,8 @@ const props = withDefaults(
   }>(),
   {
     recipe: 'form',
+    closeDisabled: false,
+    closeLabel: 'Close',
     contentClass: undefined,
     bodyClass: undefined,
     initialFocusSelector: undefined,
@@ -96,6 +114,7 @@ const props = withDefaults(
   },
 );
 
+const emit = defineEmits<{ 'request-close': [] }>();
 const resolvedSize = computed<'sm' | 'md' | 'lg'>(() => {
   if (props.size) return props.size;
   return props.recipe === 'inspect' ? 'sm' : props.recipe === 'workspace' ? 'lg' : 'md';

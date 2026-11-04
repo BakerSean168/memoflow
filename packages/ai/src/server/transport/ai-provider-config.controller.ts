@@ -66,6 +66,7 @@ interface AIProviderConfigControllerService {
   refreshProviderModels(
     providerId: string,
     cx: ExecutionContext,
+    force?: boolean,
   ): Promise<Result<AIProviderModelCatalogSnapshot>>;
 }
 
@@ -204,7 +205,8 @@ export class AIProviderConfigController {
   async refreshModels(
     id: string,
     cx: ExecutionContext,
+    force = false,
   ): Promise<Result<AIProviderModelCatalogSnapshot>> {
-    return this.service.refreshProviderModels(id, cx);
+    return this.service.refreshProviderModels(id, cx, force);
   }
 }

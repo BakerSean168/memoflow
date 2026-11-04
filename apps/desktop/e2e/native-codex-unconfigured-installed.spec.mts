@@ -1,3 +1,4 @@
+import { enterLocalWorkspace } from './support/profile-access';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
@@ -55,8 +56,10 @@ test('installed Windows defaults never expose an unconfigured Codex account or c
       ),
       contentType: 'application/json',
     });
-    const window = await app.firstWindow({ timeout: 45_000 });
-    await expect(window.getByTestId('app-shell')).toBeVisible({ timeout: 45_000 });
+    const window = await enterLocalWorkspace(app);
+    await expect(window.getByTestId('app-shell')).toBeVisible({
+      timeout: 45_000,
+    });
     const before = await window.evaluate(
       (channel) =>
         (window as unknown as Bridge).electronAPI.invoke(channel, { action: 'list_connections' }),

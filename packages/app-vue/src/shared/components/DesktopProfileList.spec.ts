@@ -18,6 +18,7 @@ const profiles: ProfileSummary[] = [
     identifierHint: null,
     cloudAccountId: null,
     hasCredential: false,
+    remembered: false,
     lastActiveAt: 1,
   },
   {
@@ -28,6 +29,7 @@ const profiles: ProfileSummary[] = [
     identifierHint: 'work@example.com',
     cloudAccountId: 'cloud-1',
     hasCredential: false,
+    remembered: false,
     lastActiveAt: 2,
   },
 ];
@@ -46,6 +48,7 @@ function presenter() {
     editName: ref(''),
     refreshProfiles: vi.fn(async () => {}),
     openProfile: vi.fn(async () => {}),
+    selectProfile: vi.fn(async () => {}),
     switchProfile: vi.fn(async () => {}),
     createLocalAccount: vi.fn(async () => {}),
     renameProfile: vi.fn(async () => {}),

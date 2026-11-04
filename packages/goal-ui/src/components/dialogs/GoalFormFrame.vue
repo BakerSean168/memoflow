@@ -33,6 +33,8 @@ defineEmits<{ 'update:open': [boolean] }>();
     <ProductDialogShell
       :open="open"
       test-id="goal-dialog"
+      :close-disabled="closeDisabled"
+      @request-close="$emit('update:open', false)"
       recipe="workspace"
       initial-focus-selector="[data-testid='goal-name-input']"
     >

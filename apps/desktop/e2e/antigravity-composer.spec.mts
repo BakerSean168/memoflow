@@ -1,3 +1,4 @@
+import { enterLocalWorkspace } from './support/profile-access';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
@@ -8,7 +9,11 @@ import { createIsolatedNativeAgentEnvironment } from './packaged-runtime/isolate
 import { verifyInstalledNativeBinary } from './support/installed-native-provenance';
 
 type Rpc = { ok: boolean; data?: unknown; error?: { code: string } };
-type Event = { type: string; conversationId: string; data?: { content?: string; code?: string } };
+type Event = {
+  type: string;
+  conversationId: string;
+  data?: { content?: string; code?: string };
+};
 type BridgeWindow = {
   electronAPI: {
     invoke(channel: string, ...args: unknown[]): Promise<Rpc>;
@@ -76,7 +81,7 @@ test('Windows AGY Composer selects, sends, persists and restores its native conn
       ),
       contentType: 'application/json',
     });
-    let page = await app.firstWindow();
+    let page = await enterLocalWorkspace(app);
     await expect(page.getByTestId('app-shell')).toBeVisible();
     const saved = await page.evaluate(
       ({ channel, executablePath, homePath }) =>
@@ -119,6 +124,8 @@ test('Windows AGY Composer selects, sends, persists and restores its native conn
     const picker = page.getByTestId('ai-chat-model-selector');
     await picker.click();
     await page.getByTestId(`ai-model-picker-agent-local:${connectionId}`).click();
+    // Installed-state async model discovery can lag; wait for the catalog before asserting the option.
+    await expect(page.getByTestId('ai-model-picker-option').first()).toBeVisible();
     await page
       .getByTestId('ai-model-picker-option')
       .filter({ hasText: 'Offline Attention Fixture' })
@@ -159,7 +166,7 @@ test('Windows AGY Composer selects, sends, persists and restores its native conn
     await app.close();
     app = undefined;
     app = await launch();
-    page = await app.firstWindow();
+    page = await enterLocalWorkspace(app);
     await expect(page.getByTestId('app-shell')).toBeVisible();
     const restored = await page.evaluate(
       (channel) =>

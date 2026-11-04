@@ -17,15 +17,17 @@
  *   handleMultiSelectContextMenu 与 threadSelectionStore.ts。
  */
 import { vKeyboardList } from '../../shared/keyboard/list-adapter';
-import { computed, inject, nextTick, ref, watch } from 'vue';
+import { computed, inject, nextTick, onUnmounted, ref, watch } from 'vue';
 import {
   ConversationSelectionKey,
   createConversationSelectionStore,
 } from './conversation-selection';
 import { useI18n } from 'vue-i18n';
+import { toast } from 'vue-sonner';
 import {
   Archive,
   ArchiveRestore,
+  ChevronDown,
   Search,
   SquarePen,
   Trash2,
@@ -68,22 +70,28 @@ interface ConversationEntry {
   title: string;
 }
 
+/** 批量动作：单删、批删、归档、恢复共用同一条结果反馈通路。 */
+type BulkAction = 'archive' | 'restore' | 'delete';
+
 interface ConversationGroup {
   /** 分组 i18n key（如 'shell.conversation.today'）。 */
   labelKey: string;
   items: ConversationEntry[];
 }
 
+/** 归档分区条目：标题之外带一个已格式化的时间，避免侧栏重复时间规则。 */
+export interface ArchivedConversationEntry extends ConversationEntry {
+  time: string;
+}
+
 const props = defineProps<{
-  bulkAction?: (
-    action: 'archive' | 'restore' | 'delete',
-    ids: string[],
-  ) => Promise<{ id: string; success: boolean }[]>;
+  bulkAction?: (action: BulkAction, ids: string[]) => Promise<{ id: string; success: boolean }[]>;
   profiles?: ProfileSummary[];
   activeProfileId?: string;
   cloudState?: ProfileCloudState;
   groups: ConversationGroup[];
-  archivedConversations?: ConversationEntry[];
+  /** 已归档会话投影（与设置页共用同一份数据通路）。 */
+  archivedConversations?: ArchivedConversationEntry[];
   archivePage?: number;
   archiveHasMore?: boolean;
   conversationStatuses?: ConversationAttentionMap;
@@ -113,12 +121,17 @@ const emit = defineEmits<{
   (e: 'open-settings'): void;
   (e: 'open-cloud-connection'): void;
   (e: 'logout'): void;
-  (e: 'manage-profiles', trigger: HTMLButtonElement | null): void;
+  (e: 'add-account'): void;
   (e: 'switch-profile', profileId: string): void;
   (e: 'refresh-profiles'): void;
 }>();
 
 const { t } = useI18n();
+/** 卸载后的迟到结果不再弹出提示（切换 Profile 会让旧侧栏实例的批量操作过期）。 */
+const sidebarAlive = ref(true);
+onUnmounted(() => {
+  sidebarAlive.value = false;
+});
 const editingId = ref<string | null>(null);
 const titleDraft = ref('');
 const titleInput = ref<HTMLInputElement | null>(null);
@@ -180,9 +193,10 @@ async function restoreAccountMenuFocus(event: Event): Promise<void> {
   accountMenuTrigger.value?.focus({ preventScroll: true });
 }
 
-const showingArchive = ref(false);
 const searchOpen = ref(false);
 const searchQuery = ref('');
+/** 归档分区与置顶/会话列表一样是独立分区，默认收起，展开状态只属于本侧栏。 */
+const archivedOpen = ref(false);
 const searchInput = ref<HTMLInputElement | null>(null);
 const searchToggle = ref<HTMLButtonElement | null>(null);
 const selection = inject(ConversationSelectionKey, null) ?? createConversationSelectionStore();
@@ -194,14 +208,7 @@ const sidebarRoot = ref<HTMLElement | null>(null);
 
 const normalizedSearchQuery = computed(() => searchQuery.value.trim().toLocaleLowerCase());
 const filteredGroups = computed(() => {
-  const groups = showingArchive.value
-    ? [
-        {
-          labelKey: 'shell.conversation.archived',
-          items: props.archivedConversations ?? [],
-        },
-      ]
-    : props.groups;
+  const groups = props.groups;
   if (!normalizedSearchQuery.value) return groups;
   return groups
     .map((group) => ({
@@ -239,12 +246,18 @@ function archiveBlocked(id: string): boolean {
 }
 /** 行尾槽位的唯一主操作：活跃视图归档，归档视图恢复；被阻断时不出现，保留状态图标。 */
 function hasRowAction(id: string): boolean {
-  return showingArchive.value || !archiveBlocked(id);
+  return !archiveBlocked(id);
 }
 function runRowAction(id: string) {
   if (selection.state.busy) return;
-  if (showingArchive.value) emit('restore-conversation', id);
-  else if (!archiveBlocked(id)) emit('archive-conversation', id);
+  if (!archiveBlocked(id)) emit('archive-conversation', id);
+}
+/**
+ * 归档分区的恢复走批量结果通路（#831 的 toast/重试），没有 bulkAction 时退回 #830 的事件。
+ */
+function restoreArchived(id: string) {
+  if (props.bulkAction) void emitBulk('restore', [id]);
+  else emit('restore-conversation', id);
 }
 function selectRow(id: string, event: MouseEvent) {
   if (selection.state.busy) return;
@@ -254,8 +267,7 @@ function selectRow(id: string, event: MouseEvent) {
     range: event.shiftKey,
   });
   if (!multi) {
-    if (showingArchive.value) emit('restore-conversation', id);
-    else emit('select-conversation', id);
+    emit('select-conversation', id);
   }
 }
 function openContext(id: string) {
@@ -280,17 +292,14 @@ function handleContextKey(event: KeyboardEvent, item: ConversationEntry) {
  * 单个会话时菜单不显示数量（T3 Code buildThreadActionMenuItems 同款），多选时显示。
  */
 function contextStatusAction() {
-  void emitBulk(showingArchive.value ? 'restore' : 'archive', [...contextIds.value]);
+  void emitBulk('archive', [...contextIds.value]);
 }
 function contextDeleteAction() {
   void emitBulk('delete', [...contextIds.value]);
 }
 const contextStatusDisabled = computed(
   () =>
-    selection.state.busy ||
-    (!showingArchive.value &&
-      contextIds.value.length === 1 &&
-      archiveBlocked(contextIds.value[0]!)),
+    selection.state.busy || (contextIds.value.length === 1 && archiveBlocked(contextIds.value[0]!)),
 );
 async function restoreContextFocus(event: Event) {
   if (editingId.value) {
@@ -314,7 +323,37 @@ async function restoreContextFocus(event: Event) {
   ].find((item) => item.dataset.keyboardItem === id);
   row?.focus({ preventScroll: true });
 }
-async function emitBulk(action: 'archive' | 'restore' | 'delete', ids = [...selectedIds.value]) {
+/**
+ * 批量结果只走全局浮层 toast（#831）：成功与失败都不在列表流内留常驻行，
+ * 失败 toast 在存续期间带「重试」，点击后按同一动作重跑失败的那批会话。
+ */
+function bulkToastMessage(key: 'bulkSucceeded' | 'bulkFailed', action: BulkAction, count: number) {
+  return t(`shell.conversation.${key}`, {
+    action: t(`shell.conversation.${action}`),
+    count,
+  });
+}
+function showBulkSuccess(action: BulkAction, count: number) {
+  toast.success(bulkToastMessage('bulkSucceeded', action, count), {
+    id: 'conversation-bulk-success',
+    duration: 4000,
+  });
+}
+function showBulkFailure(action: BulkAction, ids: string[]) {
+  toast.error(bulkToastMessage('bulkFailed', action, ids.length), {
+    id: 'conversation-bulk-failure',
+    duration: 8000,
+    action: {
+      label: t('shell.conversation.retry'),
+      onClick: () => {
+        // 按原动作重跑本次失败的 ids（整批抛错时即原 ids 全集）；toast 点击后自动关闭，零残留。
+        void emitBulk(action, ids);
+      },
+    },
+  });
+}
+
+async function emitBulk(action: BulkAction, ids = [...selectedIds.value]) {
   if (!ids.length || selection.state.busy) return;
   contextOpen.value = false;
   if (!props.bulkAction) return;
@@ -325,19 +364,25 @@ async function emitBulk(action: 'archive' | 'restore' | 'delete', ids = [...sele
   );
   try {
     const results = await props.bulkAction(action, ids);
-    if (!selection.isOperationCurrent(operation)) return;
+    if (!sidebarAlive.value || !selection.isOperationCurrent(operation)) return;
+    // 仅作内部记录，不再驱动列表流内的任何渲染。
     selection.state.results = results.map((result) => ({
       ...result,
       title: titles.get(result.id) ?? result.id,
       action,
     }));
-    selection.complete(results.filter((item) => item.success).map((item) => item.id));
-    for (const item of results.filter((item) => !item.success)) {
-      if (visibleIds.value.includes(item.id) && !selection.isSelected(item.id))
-        selection.toggle(item.id);
+    const succeeded = results.filter((result) => result.success).map((result) => result.id);
+    const failed = results.filter((result) => !result.success).map((result) => result.id);
+    selection.complete(succeeded);
+    for (const id of failed) {
+      if (visibleIds.value.includes(id) && !selection.isSelected(id)) selection.toggle(id);
     }
+    // 取消的危险删除返回空结果：既没有成功也没有失败，不给任何提示。
+    // 归档成功沿用会话层带 Undo 的那条 toast，避免同一次批量操作出现两条成功提示。
+    if (succeeded.length && action !== 'archive') showBulkSuccess(action, succeeded.length);
+    if (failed.length) showBulkFailure(action, failed);
   } catch {
-    if (selection.isOperationCurrent(operation)) {
+    if (sidebarAlive.value && selection.isOperationCurrent(operation)) {
       selection.state.results = ids.map((id) => ({
         id,
         title: titles.get(id) ?? id,
@@ -347,6 +392,7 @@ async function emitBulk(action: 'archive' | 'restore' | 'delete', ids = [...sele
       for (const id of ids) {
         if (visibleIds.value.includes(id) && !selection.isSelected(id)) selection.toggle(id);
       }
+      showBulkFailure(action, ids);
     }
   } finally {
     selection.finishOperation(operation);
@@ -458,26 +504,6 @@ const identityLabel = () => {
       </div>
       <button
         type="button"
-        data-testid="conversation-archive-toggle"
-        class="flex h-8 w-8 shrink-0 items-center justify-center rounded-md transition-colors hover:bg-[hsl(var(--hover))] hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-        :class="
-          showingArchive
-            ? 'bg-[hsl(var(--selected)/0.82)] text-foreground'
-            : 'text-[hsl(var(--foreground-subtle))]'
-        "
-        :aria-label="t('shell.conversation.archived')"
-        :title="t(showingArchive ? 'shell.conversation.active' : 'shell.conversation.archived')"
-        :aria-pressed="showingArchive"
-        @click="
-          showingArchive = !showingArchive;
-          exitSelection();
-          emit('refresh-conversations');
-        "
-      >
-        <Archive class="h-4 w-4" />
-      </button>
-      <button
-        type="button"
         data-testid="shell-new-conversation"
         class="flex h-8 w-8 shrink-0 items-center justify-center rounded-md text-[hsl(var(--foreground-subtle))] transition-colors hover:bg-[hsl(var(--hover))] hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
         :aria-label="t('shell.newChat')"
@@ -492,27 +518,6 @@ const identityLabel = () => {
     <span class="sr-only" aria-live="polite" data-testid="conversation-selection-count">{{
       selectedIds.length ? t('shell.conversation.selectedCount', { count: selectedIds.length }) : ''
     }}</span>
-    <ul
-      v-if="selection.state.results.length"
-      class="max-h-28 overflow-y-auto break-words px-3 text-xs"
-      aria-live="polite"
-      data-testid="conversation-bulk-results"
-    >
-      <li
-        v-for="result in selection.state.results"
-        :key="result.id"
-        :class="result.success ? '' : 'text-destructive'"
-      >
-        {{ result.title }} · {{ t(`shell.conversation.${result.action}`) }} ·
-        {{
-          t(
-            result.success
-              ? 'shell.conversation.operationSucceeded'
-              : 'shell.conversation.operationFailed',
-          )
-        }}
-      </li>
-    </ul>
     <!-- 会话列表（按时间分组） -->
     <nav
       v-keyboard-list="{ selectable: true, selection: keyboardSelection }"
@@ -647,34 +652,17 @@ const identityLabel = () => {
                     <TooltipTrigger as-child>
                       <button
                         type="button"
-                        :data-testid="
-                          showingArchive ? 'conversation-restore' : 'conversation-archive'
-                        "
+                        data-testid="conversation-archive"
                         class="pointer-events-none absolute inset-0 flex h-6 w-6 items-center justify-center rounded-md text-[hsl(var(--foreground-subtle))] opacity-0 transition-opacity duration-150 hover:bg-[hsl(var(--hover))] hover:text-foreground focus-visible:pointer-events-auto focus-visible:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring group-any-hover/item:pointer-events-auto group-any-hover/item:opacity-100 group-has-[:focus-visible]/item:pointer-events-auto group-has-[:focus-visible]/item:opacity-100 disabled:opacity-40"
-                        :aria-label="
-                          t(
-                            showingArchive
-                              ? 'shell.conversation.restore'
-                              : 'shell.conversation.archive',
-                          )
-                        "
+                        :aria-label="t('shell.conversation.archive')"
                         :disabled="selection.state.busy"
                         @click.stop="runRowAction(item.id)"
                       >
-                        <component
-                          :is="showingArchive ? ArchiveRestore : Archive"
-                          class="h-3.5 w-3.5"
-                        />
+                        <component :is="Archive" class="h-3.5 w-3.5" />
                       </button>
                     </TooltipTrigger>
                     <TooltipContent side="right" class="text-xs">
-                      {{
-                        t(
-                          showingArchive
-                            ? 'shell.conversation.restore'
-                            : 'shell.conversation.archive',
-                        )
-                      }}
+                      {{ t('shell.conversation.archive') }}
                     </TooltipContent>
                   </Tooltip>
                 </TooltipProvider>
@@ -713,12 +701,8 @@ const identityLabel = () => {
               data-testid="conversation-context-status"
               @select="contextStatusAction"
             >
-              <component
-                :is="showingArchive ? ArchiveRestore : Archive"
-                class="mr-2 h-3.5 w-3.5"
-                aria-hidden="true"
-              />
-              {{ t(showingArchive ? 'shell.conversation.restore' : 'shell.conversation.archive')
+              <component :is="Archive" class="mr-2 h-3.5 w-3.5" aria-hidden="true" />
+              {{ t('shell.conversation.archive')
               }}<template v-if="contextIds.length > 1"> ({{ contextIds.length }})</template>
             </ContextMenuItem>
             <ContextMenuItem
@@ -734,23 +718,89 @@ const identityLabel = () => {
           </ContextMenuContent>
         </ContextMenu>
       </div>
-      <div v-if="showingArchive" class="flex items-center justify-between gap-2 px-2 py-2 text-xs">
-        <button
-          type="button"
-          :disabled="(archivePage ?? 1) <= 1 || loading"
-          @click="emit('change-archive-page', -1)"
-        >
-          {{ t('shell.conversation.previousPage') }}
-        </button>
-        <button
-          type="button"
-          :disabled="!archiveHasMore || loading"
-          @click="emit('change-archive-page', 1)"
-        >
-          {{ t('shell.conversation.nextPage') }}
-        </button>
-      </div>
     </nav>
+
+    <!-- 已归档专属分区：与置顶/会话列表并列，标题行折叠，空归档保留分区与空态文案。 -->
+    <section
+      class="shrink-0 border-t border-[hsl(var(--border-subtle))] px-2 py-1"
+      data-testid="conversation-archived-section"
+    >
+      <button
+        type="button"
+        data-testid="conversation-archived-toggle"
+        class="flex w-full items-center gap-1.5 rounded-md px-2 py-1.5 text-left text-[10px] font-medium tracking-[0.025em] text-[hsl(var(--foreground-subtle))] transition-colors hover:bg-[hsl(var(--hover))] hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+        :aria-expanded="archivedOpen"
+        aria-controls="conversation-archived-list"
+        @click="archivedOpen = !archivedOpen"
+      >
+        <ChevronDown
+          class="h-3 w-3 shrink-0 transition-transform"
+          :class="archivedOpen ? '' : '-rotate-90'"
+          aria-hidden="true"
+        />
+        <span>{{ t('shell.conversation.archived') }}</span>
+        <span class="ml-auto tabular-nums" data-testid="conversation-archived-count">{{
+          archivedConversations?.length ?? 0
+        }}</span>
+      </button>
+      <div v-if="archivedOpen" id="conversation-archived-list">
+        <p
+          v-if="!archivedConversations?.length"
+          class="px-2 py-3 text-center text-[11px] leading-5 text-muted-foreground/65"
+          data-testid="conversation-archived-empty"
+        >
+          {{ t('shell.conversation.noArchivedConversations') }}
+        </p>
+        <ul v-else class="max-h-60 overflow-y-auto" data-testid="conversation-archived-list-items">
+          <li
+            v-for="item in archivedConversations"
+            :key="item.id"
+            class="group/archived flex items-center gap-2 rounded-md px-2 py-1.5 text-[hsl(var(--foreground-muted))] transition-colors hover:bg-[hsl(var(--hover))] hover:text-foreground"
+            data-testid="archived-conversation-row"
+          >
+            <span class="min-w-0 flex-1 truncate text-[12.5px] leading-5" :title="item.title">{{
+              item.title
+            }}</span>
+            <span
+              class="shrink-0 text-[10px] tabular-nums text-[hsl(var(--foreground-subtle))]"
+              data-testid="archived-conversation-time"
+              >{{ item.time }}</span
+            >
+            <button
+              type="button"
+              data-testid="archived-conversation-restore"
+              class="flex h-6 w-6 shrink-0 items-center justify-center rounded-md text-[hsl(var(--foreground-subtle))] transition-colors hover:bg-[hsl(var(--hover))] hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-40"
+              :aria-label="t('shell.conversation.restore')"
+              :title="t('shell.conversation.restore')"
+              :disabled="loading || selection.state.busy"
+              @click="restoreArchived(item.id)"
+            >
+              <ArchiveRestore class="h-3.5 w-3.5" aria-hidden="true" />
+            </button>
+          </li>
+        </ul>
+        <div class="flex items-center justify-between gap-2 px-2 py-1 text-[10px]">
+          <button
+            type="button"
+            data-testid="archived-conversation-previous-page"
+            class="rounded px-1 py-0.5 transition-colors hover:bg-[hsl(var(--hover))] hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-40"
+            :disabled="(archivePage ?? 1) <= 1 || loading"
+            @click="emit('change-archive-page', -1)"
+          >
+            {{ t('shell.conversation.previousPage') }}
+          </button>
+          <button
+            type="button"
+            data-testid="archived-conversation-next-page"
+            class="rounded px-1 py-0.5 transition-colors hover:bg-[hsl(var(--hover))] hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-40"
+            :disabled="!archiveHasMore || loading"
+            @click="emit('change-archive-page', 1)"
+          >
+            {{ t('shell.conversation.nextPage') }}
+          </button>
+        </div>
+      </div>
+    </section>
 
     <!-- 底：账户菜单 -->
     <div class="flex h-11 shrink-0 items-center border-t border-[hsl(var(--border-subtle))] px-2.5">
@@ -863,17 +913,14 @@ const identityLabel = () => {
                 </DropdownMenuItem>
               </div>
               <DropdownMenuSeparator />
-              <DropdownMenuItem
-                data-testid="shell-manage-profiles"
-                @select="emit('manage-profiles', accountMenuTrigger)"
-              >
-                {{ t('shell.account.manageProfiles') }}
+              <DropdownMenuItem data-testid="shell-add-account" @select="emit('add-account')">
+                {{ t('shell.account.menuAddAccount') }}
               </DropdownMenuItem>
             </DropdownMenuSubContent>
           </DropdownMenuSub>
           <DropdownMenuSeparator />
           <DropdownMenuItem
-            v-if="cloudConnected"
+            v-if="isDesktop || cloudConnected"
             data-testid="shell-logout"
             class="text-destructive focus:text-destructive"
             @click="emit('logout')"

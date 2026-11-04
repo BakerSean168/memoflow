@@ -105,7 +105,7 @@
         </SelectTrigger>
         <SelectContent>
           <SelectItem v-for="connection in connections" :key="connection.id" :value="connection.id">
-            {{ connectionDisplayName(connection) }}
+            {{ resolveRepositoryDisplayName(connection) }}
           </SelectItem>
         </SelectContent>
       </Select>
@@ -274,6 +274,7 @@ import type {
   KnowledgeRemoteBindingClientDTO,
 } from '@memoflow/repository-contracts';
 import { useI18n } from 'vue-i18n';
+import { resolveRepositoryDisplayName } from '../utils/knowledge-repository-display';
 import DocumentCatalogRow from './DocumentCatalogRow.vue';
 import DocumentCatalogSearch from './DocumentCatalogSearch.vue';
 import DocumentSourceStatus from './DocumentSourceStatus.vue';
@@ -341,10 +342,6 @@ const treeRows = computed(() => {
   visit('', 0);
   return rows;
 });
-
-function connectionDisplayName(connection: KnowledgeRemoteBindingClientDTO): string {
-  return connection.observation?.repositoryFullName ?? connection.repositoryFullNameSnapshot;
-}
 
 function handleConnectionChange(value: unknown): void {
   if (typeof value !== 'string' || !value || value === props.selectedConnectionId) return;

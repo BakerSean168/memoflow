@@ -335,12 +335,14 @@
               :catalog="composerCatalog"
               :selected-model-key="composerModelKey"
               :native-model-options="currentNativeModelOptions"
+              :permission-mode="permissionMode"
               :native="runtimeChoice.runtimeKind === 'local_agent'"
               :disabled="chatLoading"
               :loading="composerLoading"
               @refresh="refreshComposerCatalog"
               @select-model="selectComposerModel"
               @model-option="selectNativeModelOption"
+              @permission="selectPermission"
               @settings="openAISettings"
             />
           </template>
@@ -488,6 +490,7 @@ const {
   composerModelKey,
   composerLoading,
   permissionMode,
+  selectPermission,
   currentNativeModelOptions,
   selectNativeModelOption,
   composerCatalog,
@@ -787,8 +790,12 @@ onUnmounted(() => {
 });
 async function deleteConversations(ids: string[]) {
   const confirmed = await useConfirm({
-    title: t('shell.conversation.confirmDeleteSelectedTitle', { count: ids.length }),
-    description: t('shell.conversation.confirmDeleteSelected', { count: ids.length }),
+    title: t('shell.conversation.confirmDeleteSelectedTitle', {
+      count: ids.length,
+    }),
+    description: t('shell.conversation.confirmDeleteSelected', {
+      count: ids.length,
+    }),
     confirmText: t('common.delete'),
     cancelText: t('common.cancel'),
     variant: 'destructive',
@@ -797,7 +804,8 @@ async function deleteConversations(ids: string[]) {
   const results: { id: string; success: boolean }[] = [];
   for (const id of new Set(ids)) {
     if (!bulkDeleteAlive) break;
-    results.push({ id, success: Boolean(await deleteConversationBase(id)) });
+    // 批量删除的逐条成功/失败提示由侧栏汇总成一条浮层提示。
+    results.push({ id, success: Boolean(await deleteConversationBase(id, true)) });
   }
   return results;
 }

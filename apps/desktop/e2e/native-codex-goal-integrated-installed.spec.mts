@@ -1,3 +1,4 @@
+import { enterLocalWorkspace } from './support/profile-access';
 import { execFile } from 'node:child_process';
 import { randomUUID } from 'node:crypto';
 import fs from 'node:fs';
@@ -51,6 +52,13 @@ test('real Windows Codex invokes MemoFlow MCP to fill and save the installed Goa
   let app: ElectronApplication | null = null;
   let bridge: ReturnType<typeof createDesktopLocalAgentTools> | null = null;
   const observedCommands: string[] = [];
+  type RequestApproval = NonNullable<
+    Parameters<ReturnType<typeof createDesktopLocalAgentTools>['open']>[0]['requestApproval']
+  >;
+  const approvalRequests: Array<{
+    toolName: string;
+    details: Parameters<RequestApproval>[2];
+  }> = [];
 
   async function launch(): Promise<ElectronApplication> {
     return electron.launch({
@@ -76,7 +84,10 @@ test('real Windows Codex invokes MemoFlow MCP to fill and save the installed Goa
                 params: object,
               ): Promise<{
                 ok: boolean;
-                data?: { pagination: { total: number }; data: Array<{ id: string; name: string }> };
+                data?: {
+                  pagination: { total: number };
+                  data: Array<{ id: string; name: string }>;
+                };
               }>;
             };
           }
@@ -111,7 +122,10 @@ test('real Windows Codex invokes MemoFlow MCP to fill and save the installed Goa
 
   async function installTestOnlyResponseRelay(instance: ElectronApplication) {
     await instance.evaluate(({ ipcMain, BrowserWindow }, channel) => {
-      type Pending = { sender: Electron.WebContents; finish: (response: unknown) => void };
+      type Pending = {
+        sender: Electron.WebContents;
+        finish: (response: unknown) => void;
+      };
       const state = globalThis as typeof globalThis & {
         __mf570IntegratedPending?: Map<string, Pending>;
       };
@@ -141,6 +155,12 @@ test('real Windows Codex invokes MemoFlow MCP to fill and save the installed Goa
     if (context.signal.aborted || context.grantSignal.aborted) {
       throw new Error('EXPIRED_NATIVE_GRANT');
     }
+    if (command.action === 'submit') {
+      expect(approvalRequests).toContainEqual({
+        toolName: 'goal_panel_submit',
+        details: expect.objectContaining({ action: 'create', object: 'goal' }),
+      });
+    }
     const request: NativePanelIpcRequest = {
       requestId: randomUUID(),
       identityId: context.identityId,
@@ -153,7 +173,10 @@ test('real Windows Codex invokes MemoFlow MCP to fill and save the installed Goa
         const state = globalThis as typeof globalThis & {
           __mf570IntegratedPending?: Map<
             string,
-            { sender: Electron.WebContents; finish: (response: unknown) => void }
+            {
+              sender: Electron.WebContents;
+              finish: (response: unknown) => void;
+            }
           >;
         };
         const target = BrowserWindow.getAllWindows().find(
@@ -259,6 +282,7 @@ test('real Windows Codex invokes MemoFlow MCP to fill and save the installed Goa
     ) => Promise<TestModule>;
     const {
       LocalAgentRepository,
+      PermissionLocalRepository,
       createDesktopLocalAgentTools,
       createTimeContext,
       createPowerSyncSqliteFixture,
@@ -267,8 +291,10 @@ test('real Windows Codex invokes MemoFlow MCP to fill and save the installed Goa
     const store = new LocalAgentRepository(fixture.db);
 
     app = await launch();
-    let page = await app.firstWindow({ timeout: 45_000 });
-    await expect(page.getByTestId('app-shell')).toBeVisible({ timeout: 45_000 });
+    let page = await enterLocalWorkspace(app);
+    await expect(page.getByTestId('app-shell')).toBeVisible({
+      timeout: 45_000,
+    });
     const provenance = await verifyInstalledNativeBinary(
       app,
       executable!,
@@ -298,11 +324,21 @@ test('real Windows Codex invokes MemoFlow MCP to fill and save the installed Goa
       enabled: true,
       writeScopes: ['goals:write'],
     });
+    // Keep the real confirm-each gate and its stale-policy revision check active.
+    await new PermissionLocalRepository(fixture.db).saveSettings(identityId, {
+      preset: 'confirm_each',
+      agentPresets: {},
+      revision: 1,
+    });
     const grant = await bridge.open({
       identityId,
       connectionId: connection.id,
       conversationId: 'qa-570-integrated',
       runId: 'native-codex-goal-write',
+      requestApproval: async (toolName, _signal, details) => {
+        approvalRequests.push({ toolName, details });
+        return true;
+      },
     });
 
     const script = path.resolve(
@@ -320,6 +356,21 @@ test('real Windows Codex invokes MemoFlow MCP to fill and save the installed Goa
         MF570_MCP_URL: grant.url,
         MF570_MCP_TOKEN: grant.token,
       },
+    }).catch(async (error: unknown) => {
+      const failure = error as Error & { stdout?: string; stderr?: string };
+      const stdout = failure.stdout ?? '';
+      const stderr = failure.stderr ?? '';
+      await test.info().attach('codex-operator-stdout', {
+        body: stdout,
+        contentType: 'text/plain',
+      });
+      await test.info().attach('codex-operator-stderr', {
+        body: stderr,
+        contentType: 'text/plain',
+      });
+      throw new Error(
+        `${failure.message}\nOperator stdout:\n${stdout}\nOperator stderr:\n${stderr}`,
+      );
     });
     expect(stdout).toContain('DISCOVERED_GOAL_PANEL_TOOLS=8');
     expect(stdout).toContain('CODEX_GOAL_SNAPSHOT_CALL=true');
@@ -385,8 +436,10 @@ test('real Windows Codex invokes MemoFlow MCP to fill and save the installed Goa
     await app.close();
     app = null;
     app = await launch();
-    page = await app.firstWindow({ timeout: 45_000 });
-    await expect(page.getByTestId('app-shell')).toBeVisible({ timeout: 45_000 });
+    page = await enterLocalWorkspace(app);
+    await expect(page.getByTestId('app-shell')).toBeVisible({
+      timeout: 45_000,
+    });
     goals = await readGoals(page);
     expect(goals.pagination.total).toBe(1);
     expect(goals.data.some((goal) => goal.id === proof.goalId && goal.name === NAME)).toBe(true);

@@ -2,24 +2,25 @@
  * Window Manager - 窗口管理器
  *
  * 管理 Desktop 应用的多窗口系统：
- * - Profile Access 窗口（小窗口）
+ * - Profile Access 身份窗口
  * - 主窗口（完整应用）
  *
- * 启动流程：
- * 1. 读取最近使用的本地 Profile
- * 2. 无 PIN 时直接打开本地主窗口
- * 3. 有 PIN 时显示 Profile 解锁窗口
- * 4. 云端 session 在本地 Profile 打开后独立恢复
+ * 启动先进入 Profile Access，用户选择并解锁账户后才打开主窗口。
+ * 云端 session 在 Profile 打开后独立恢复；工作区内显式切换 registered
+ * Profile 仍复用现有切换路径，不属于启动自动直入。
  */
 
 import { getProfilePartition } from '../profile/profile-partition';
 import { BrowserWindow, ipcMain, app } from 'electron';
 import path from 'path';
+import { z } from 'zod';
 import { fileURLToPath } from 'url';
 import {
   RendererEventChannels,
   WindowChannels,
   ProfileIdSchema,
+  ProfileAccessHeightSchema,
+  PROFILE_ACCESS_BASE_HEIGHT,
 } from '@memoflow/desktop-contracts';
 import { fail, ok } from '@memoflow/transport-contracts/result';
 import { createLogger } from '@memoflow/utils/logger';
@@ -83,6 +84,12 @@ export class WindowManager {
   setStartupHidden(hidden: boolean): void {
     this.startupHidden = hidden;
   }
+
+  /**
+   * True while the login gate was opened from a live session ("Add account").
+   * That session window is kept hidden so closing the gate returns to it.
+   */
+  private returnToActiveSessionOnGateClose = false;
 
   private allowProcessExit = () => false;
   private cleaningUp = false;
@@ -174,7 +181,11 @@ export class WindowManager {
   /**
    * 创建 Profile Access 窗口
    */
-  createProfileAccessWindow(targetProfileId?: string, interactive = true): BrowserWindow {
+  createProfileAccessWindow(
+    targetProfileId?: string,
+    interactive = true,
+    view?: 'login',
+  ): BrowserWindow {
     if (this.profileAccessWindow && !this.profileAccessWindow.isDestroyed()) {
       this.profileAccessWindow.setEnabled(interactive);
       this.profileAccessWindow.focus();
@@ -183,8 +194,12 @@ export class WindowManager {
 
     logger.info('Creating Profile Access window');
     this.profileAccessWindowStateManager = new WindowStateManager('profile-access', {
-      defaultWidth: 420,
-      defaultHeight: 580,
+      defaultWidth: 1024,
+      defaultHeight: 640,
+      // Pre-#785 installs persisted the old 420×580 gate; clamp it up so an
+      // upgrade lands on the v3 skeleton instead of the retired one.
+      minimumWidth: 1024,
+      minimumHeight: 640,
       stateFilePath: getSharedPathResolver().profileAccessWindowStatePath,
     });
 
@@ -222,6 +237,9 @@ export class WindowManager {
     this.attachWindowDiagnostics(this.profileAccessWindow, 'profile-access');
     this.attachWindowControlStateSync(this.profileAccessWindow);
     this.profileAccessWindowStateManager.manage(this.profileAccessWindow);
+    // The registration state grows the window; that height is layout, never the
+    // persisted one, so the next launch opens on the base skeleton.
+    this.profileAccessWindowStateManager.pinHeight(PROFILE_ACCESS_BASE_HEIGHT);
 
     // Capture startup intent: capability initialization can finish before this renderer is ready.
     const showProfileAccessOnReady = !this.startupHidden;
@@ -235,7 +253,9 @@ export class WindowManager {
       this.profileAccessWindow,
       targetProfileId
         ? `/profile-access?profileId=${encodeURIComponent(targetProfileId)}`
-        : '/profile-access',
+        : view === 'login'
+          ? '/profile-access?view=login'
+          : '/profile-access',
     );
 
     if (this.config.isDev) {
@@ -247,6 +267,21 @@ export class WindowManager {
       this.profileAccessWindowStateManager?.unmanage();
       this.profileAccessWindowStateManager = null;
       this.profileAccessWindow = null;
+
+      const returnToSession = this.returnToActiveSessionOnGateClose;
+      this.returnToActiveSessionOnGateClose = false;
+
+      // Cancelling "Add account" returns to the session that opened the gate:
+      // that window was hidden, never destroyed, and its scheduler never stopped.
+      if (returnToSession && !this.cleaningUp) {
+        const mainWindow = this.mainWindow;
+        if (mainWindow && !mainWindow.isDestroyed()) {
+          this.desktopFeaturesRuntime?.bindWindow(mainWindow);
+          this.focusMainWindow();
+          return;
+        }
+      }
+
       // 如果没有主窗口且不是在切换过程中，退出应用
       if (!this.mainWindow && !this.isTransitioning) {
         app.quit();
@@ -359,6 +394,17 @@ export class WindowManager {
     logger.info('Transitioning from Profile Access to main window');
 
     try {
+      // A window kept for a cancelled "Add account" gate belongs to the outgoing
+      // Profile; a newly opened Profile must never adopt that renderer.
+      if (this.returnToActiveSessionOnGateClose) {
+        const preserved = this.mainWindow;
+        if (preserved && !preserved.isDestroyed()) {
+          await this.scheduleRuntimeController?.stop();
+          preserved.destroy();
+        }
+        this.returnToActiveSessionOnGateClose = false;
+      }
+
       // 1. 创建主窗口（先不显示）
       const mainWin = this.createMainWindow(profileId, stateFilePath);
 
@@ -392,6 +438,7 @@ export class WindowManager {
   async transitionToProfileAccessWindow(
     targetProfileId?: string,
     interactive = true,
+    view?: 'login',
   ): Promise<void> {
     if (this.isTransitioning) {
       logger.warn('Already transitioning');
@@ -401,12 +448,23 @@ export class WindowManager {
     this.isTransitioning = true;
     logger.info('Transitioning from main to Profile Access window');
 
+    // "Add account" opens the login gate over a live session. Cancelling that gate
+    // must return to the session window, so it is hidden but kept — together with
+    // its running scheduler. The lock/sign-out transitions still tear the session
+    // down and keep the existing quit-on-close behavior.
+    const preserveActiveSession = view === 'login' && !targetProfileId && this.hasActiveSession();
+
     try {
       this.mainWindow?.hide();
-      await this.scheduleRuntimeController?.stop();
-      const profileAccessWindow = this.createProfileAccessWindow(targetProfileId, interactive);
+      if (!preserveActiveSession) await this.scheduleRuntimeController?.stop();
+      this.returnToActiveSessionOnGateClose = preserveActiveSession;
+      const profileAccessWindow = this.createProfileAccessWindow(
+        targetProfileId,
+        interactive,
+        view,
+      );
       // Destroy the old renderer before Profile Access can select a different runtime.
-      this.mainWindow?.destroy();
+      if (!preserveActiveSession) this.mainWindow?.destroy();
 
       // 2. 等待 Profile Access 窗口准备好
       await new Promise<void>((resolve) => {
@@ -447,7 +505,9 @@ export class WindowManager {
    * 获取当前活动窗口
    */
   getActiveWindow(): BrowserWindow | null {
-    return this.mainWindow || this.profileAccessWindow;
+    // The identity gate owns the foreground while it is open; a session window
+    // kept for a cancelled "Add account" gate is never revealed underneath it.
+    return this.profileAccessWindow || this.mainWindow;
   }
 
   focusMainWindow(): boolean {
@@ -465,6 +525,16 @@ export class WindowManager {
   }
 
   // ============ Private Methods ============
+
+  /** A live Profile session owns the main window and is still the active runtime. */
+  private hasActiveSession(): boolean {
+    return Boolean(
+      this.mainWindow &&
+      !this.mainWindow.isDestroyed() &&
+      this.activeMainProfileId !== null &&
+      this.runtimeManager?.getActiveProfileId() === this.activeMainProfileId,
+    );
+  }
 
   /**
    * 加载窗口内容
@@ -596,27 +666,37 @@ export class WindowManager {
     });
 
     ipcMain.handle(WindowChannels.TRANSITION_TO_PROFILE_ACCESS, async (_event, input: unknown) => {
-      const parsed = ProfileIdSchema.optional().safeParse(input);
-      if (!parsed.success) return fail({ code: 'INVALID_REQUEST', message: 'Invalid Profile ID' });
-      if (parsed.data && parsed.data === this.runtimeManager?.getActiveProfileId()) return ok(null);
+      const parsed = z
+        .union([ProfileIdSchema, z.object({ view: z.literal('login') })])
+        .optional()
+        .safeParse(input);
+      if (!parsed.success)
+        return fail({
+          code: 'INVALID_REQUEST',
+          message: 'Invalid Profile ID',
+        });
+      const targetProfileId = typeof parsed.data === 'string' ? parsed.data : undefined;
+      const view = typeof parsed.data === 'object' ? parsed.data.view : undefined;
+      if (targetProfileId && targetProfileId === this.runtimeManager?.getActiveProfileId())
+        return ok(null);
       if (this.profileNavigationPending || this.isTransitioning)
         return fail({ code: 'WINDOW_TRANSITION_PENDING', message: 'Profile 切换正在进行' });
       this.profileNavigationPending = true;
       try {
-        const target = parsed.data
+        const target = targetProfileId
           ? (await this.runtimeManager?.listProfiles())?.find(
-              (profile) => profile.profileId === parsed.data,
+              (profile) => profile.profileId === targetProfileId,
             )
           : undefined;
         const autoOpen = Boolean(
-          parsed.data && this.runtimeManager && target?.profileKind === 'registered',
+          targetProfileId && this.runtimeManager && target?.profileKind === 'registered',
         );
-        await this.transitionToProfileAccessWindow(parsed.data, !autoOpen);
-        if (autoOpen && parsed.data && this.runtimeManager) {
+        await this.transitionToProfileAccessWindow(targetProfileId, !autoOpen, view);
+        if (autoOpen && targetProfileId && this.runtimeManager) {
           try {
-            const prepared = await this.runtimeManager.openProfile(parsed.data);
+            const prepared = await this.runtimeManager.openProfile(targetProfileId);
             await this.transitionToMainWindow(
-              parsed.data,
+              targetProfileId,
               prepared.profileResolver.mainWindowStatePath,
             );
           } catch (error) {
@@ -630,6 +710,28 @@ export class WindowManager {
       } finally {
         this.profileNavigationPending = false;
       }
+    });
+
+    // The identity window's registration state is taller than the base
+    // skeleton. Only the two known heights are accepted, and the window is not
+    // resizable, so this never becomes a user-driven size.
+    ipcMain.handle(WindowChannels.SET_PROFILE_ACCESS_HEIGHT, (event, input: unknown) => {
+      const parsed = ProfileAccessHeightSchema.safeParse(input);
+      if (!parsed.success)
+        return fail({ code: 'INVALID_REQUEST', message: 'Invalid window height' });
+      const window = BrowserWindow.fromWebContents(event.sender);
+      if (!window || window.isDestroyed() || window !== this.profileAccessWindow)
+        return fail({ code: 'UNAVAILABLE', message: 'Window is not available' });
+      const bounds = window.getBounds();
+      if (bounds.height !== parsed.data.height) {
+        window.setBounds({
+          x: bounds.x,
+          y: bounds.y,
+          width: bounds.width,
+          height: parsed.data.height,
+        });
+      }
+      return ok(null);
     });
 
     // 获取当前窗口类型

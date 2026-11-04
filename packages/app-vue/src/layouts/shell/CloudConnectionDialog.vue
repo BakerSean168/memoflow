@@ -178,6 +178,7 @@ onBeforeUnmount(stopPolling);
 <template>
   <Dialog :open="open" @update:open="emit('update:open', $event)">
     <ProductDialogShell
+      @request-close="emit('update:open', false)"
       :open="open"
       test-id="cloud-connection-dialog"
       size="sm"

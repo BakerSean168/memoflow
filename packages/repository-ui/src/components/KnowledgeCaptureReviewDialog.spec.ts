@@ -177,7 +177,8 @@ describe('Repository native Knowledge review', () => {
     session.coordinateSubmit(submit, cancel);
     await flushPromises();
     await wrapper.get('[data-testid="knowledge-capture-native-confirm"]').trigger('click');
-    await wrapper.get('[data-testid="knowledge-capture-native-cancel"]').trigger('click');
+    // The shared dialog header X is routed through the same owner cancel coordinator.
+    wrapper.findComponent(passthrough).vm.$emit('request-close');
     await flushPromises();
     expect(submit).toHaveBeenCalledTimes(1);
     expect(cancel).toHaveBeenCalledTimes(1);

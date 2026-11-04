@@ -1,13 +1,10 @@
 import type { CrudTransaction } from '@powersync/common';
+import { isRecord } from '@memoflow/utils/shared';
 
 export interface SerializedCrudOperation extends Record<string, unknown> {
   op: 'PUT' | 'PATCH' | 'DELETE';
   type: string;
   id: string;
-}
-
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return value !== null && typeof value === 'object' && !Array.isArray(value);
 }
 
 function assertSerializedCrudOperation(value: unknown): asserts value is SerializedCrudOperation {

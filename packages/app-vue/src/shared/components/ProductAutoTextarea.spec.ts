@@ -31,6 +31,16 @@ describe('ProductAutoTextarea', () => {
     expect(wrapper.emitted('limit-exceeded')?.at(-1)).toEqual([2]);
   });
 
+  it('keeps focus visible without drawing a rectangular outline', () => {
+    const wrapper = mount(ProductAutoTextarea, { props: { modelValue: 'Draft' } });
+    const input = wrapper.get('textarea');
+    expect(input.classes()).toContain('border-0');
+    expect(input.classes()).toContain('focus-visible:ring-0');
+    expect(input.classes()).not.toContain('focus-visible:ring-2');
+    expect(input.classes().some((className) => className.includes('focus-visible:bg-'))).toBe(true);
+    wrapper.unmount();
+  });
+
   it('does not show the browser resize handle', () => {
     const wrapper = mount(ProductAutoTextarea, { props: { modelValue: '' } });
     expect(wrapper.get('textarea').classes()).toContain('resize-none');

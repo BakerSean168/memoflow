@@ -99,6 +99,7 @@ import { computed } from 'vue';
 import { Badge, Button } from '@memoflow/ui-vue-shadcn';
 import { Info, Link2, ListTree, PanelRight, X } from '@lucide/vue';
 import type { KnowledgeNoteProjectionClientDTO } from '@memoflow/repository-contracts';
+import { formatLocaleMediumDate } from '@memoflow/time';
 import { useI18n } from 'vue-i18n';
 import { repositoryUiHost } from '../repository-ui-host';
 import KnowledgeProjectionRelationsView from './KnowledgeProjectionRelationsView.vue';
@@ -132,11 +133,7 @@ const outline = computed(() => {
 });
 
 const formattedUpdatedAt = computed(() =>
-  new Intl.DateTimeFormat(locale.value, {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
-  }).format(new Date(props.note.updatedAt)),
+  formatLocaleMediumDate(props.note.updatedAt, locale.value),
 );
 
 function scrollToHeading(label: string): void {

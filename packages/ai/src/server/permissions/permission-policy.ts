@@ -5,6 +5,9 @@ export type PermissionPreset = 'read_only' | 'confirm_each' | 'on_demand' | 'ful
 export type PermissionDecision = 'allow' | 'ask' | 'deny';
 export type PermissionRuleEffect = PermissionDecision;
 
+/** Issue #762 default: a call affecting more than this many objects is bulk. */
+export const DEFAULT_BULK_THRESHOLD = 10;
+
 export interface PermissionRule {
   id: string;
   agentId: string | null;
@@ -75,6 +78,10 @@ export interface PermissionContext {
     Record<PermissionObject, Partial<Record<PermissionAction, PermissionDecision>>>
   >;
   now?: number;
+  /** How many objects this single call affects; enables dynamic bulk risk. */
+  itemCount?: number;
+  /** Per-evaluation override for {@link DEFAULT_BULK_THRESHOLD}. */
+  bulkThreshold?: number;
 }
 
 export interface PermissionEvaluation {
@@ -121,6 +128,16 @@ export function evaluatePermission(context: PermissionContext): PermissionEvalua
   const operation = getPermissionOperation(context.operationId);
   if (!operation) return { decision: 'deny', reason: 'unregistered' };
   const operationView = { ...operation, risks: operation.risks ?? [] };
+  // Issue #762: one call affecting more objects than the threshold is bulk by
+  // nature, even when the operation itself is statically unremarkable. Reads are
+  // exempt because they consume no data. Only the strict greater-than boundary
+  // escalates, so `itemCount === threshold` stays an ordinary call.
+  const bulk =
+    context.itemCount !== undefined &&
+    context.itemCount > (context.bulkThreshold ?? DEFAULT_BULK_THRESHOLD) &&
+    operation.action !== 'read';
+  if (bulk && !operationView.risks.includes('bulk'))
+    operationView.risks = [...operationView.risks, 'bulk'];
   if (operation.object === 'ai_permission')
     return {
       decision: 'deny',
@@ -145,9 +162,16 @@ export function evaluatePermission(context: PermissionContext): PermissionEvalua
   // A global read-only selection cannot be silently raised by an earlier grant.
   if (context.preset === 'read_only' && operation.action !== 'read')
     return { decision: 'deny', reason: 'preset', operation: operationView };
-  // Elevated-risk operations require a fresh decision except in full-auto mode.
-  // Object-level grants never accidentally authorize bulk or permanent deletion.
-  if (operationView.risks.length && context.preset !== 'full_auto')
+  // #762 phase 4: elevated-risk operations — permanent deletion, bulk
+  // (statically registered or dynamically detected above), and external send —
+  // always require a fresh, in-the-moment confirmation. No preset, not even
+  // full_auto, and no remembered allow rule or grant ever auto-approves them;
+  // only an explicit user deny or the read-only preset (both handled above)
+  // can refuse them outright. This deliberately diverges from mainstream
+  // coding agents, whose widest mode auto-approves deletions: MemoFlow holds
+  // personal data with no version-control safety net underneath, and a
+  // permanent deletion by definition bypasses the recycle-bin net.
+  if (operationView.risks.length)
     return { decision: 'ask', reason: 'preset', operation: operationView };
   const ask = [...rules].reverse().find((rule) => rule.effect === 'ask');
   if (ask)
@@ -166,15 +190,6 @@ export function evaluatePermission(context: PermissionContext): PermissionEvalua
       ruleId: allow.id,
     };
 
-  if (operationView.risks.length) {
-    const highRiskDecision =
-      context.preset === 'read_only' ? 'deny' : context.preset === 'full_auto' ? 'allow' : 'ask';
-    return {
-      decision: highRiskDecision,
-      reason: 'preset',
-      operation: operationView,
-    };
-  }
   const preset = context.preset === 'custom' ? 'on_demand' : context.preset;
   const decision =
     context.preset === 'custom'

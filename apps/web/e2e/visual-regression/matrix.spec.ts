@@ -1,6 +1,6 @@
 import { expect, test, type Locator } from '@playwright/test';
 import { matrix, validateMatrix } from './manifest.mjs';
-import { openVisualCase, waitForVisualLayout } from './environment';
+import { openVisualCase, waitForChatBodyToSettle, waitForVisualLayout } from './environment';
 validateMatrix(matrix);
 
 // #459 acceptance exercises production owners with deterministic injected ports.
@@ -93,14 +93,31 @@ for (const theme of ['light', 'dark'] as const) {
         ).toBe('auto');
         await expect(input).not.toHaveAttribute('aria-invalid', 'true');
         await page.keyboard.press('Tab');
-        await expect(input).toHaveAttribute('aria-invalid', 'true');
-        await expect(editor.getByRole('alert').first()).toBeVisible();
+        if (owner === 'task') {
+          // The required placeholder is enough; no duplicated blur-time message.
+          await expect(input).not.toHaveAttribute('aria-invalid', 'true');
+          await expect(editor.getByRole('alert')).toHaveCount(0);
+        } else {
+          await expect(input).toHaveAttribute('aria-invalid', 'true');
+          await expect(editor.getByRole('alert').first()).toBeVisible();
+        }
         expect(await geometry(editor)).toEqual(before);
         expect(await geometry(footer)).toEqual(footerBefore);
         expect(await geometry(input)).toEqual(inputBefore);
         await page.keyboard.press('Shift+Tab');
         await expect(input).toBeFocused();
-        expect(await input.evaluate((el) => getComputedStyle(el).boxShadow)).not.toBe('none');
+        // :focus-visible matching commits in a later rendering lifecycle update, so a single
+        // computed-style read right after focus can still report the unfocused style.
+        if (owner !== 'schedule') {
+          // ProductAutoTextarea has a faint fill; native Schedule inputs use a caret.
+          await expect
+            .poll(() => input.evaluate((el) => getComputedStyle(el).backgroundColor))
+            .not.toBe('rgba(0, 0, 0, 0)');
+        }
+        // Tailwind ring-0 still emits zero-width shadow layers in computed style.
+        // Reject visible (>0px) shadow borders while preserving subtle focus fill.
+        const focusedShadow = await input.evaluate((el) => getComputedStyle(el).boxShadow);
+        expect(focusedShadow).not.toMatch(/\s[1-9]\d*px\b/);
         const draft = `验收 ${owner} ${width}`;
         await input.fill(draft);
         await expect(input).not.toHaveAttribute('aria-invalid', 'true');
@@ -427,6 +444,8 @@ for (const host of ['web', 'desktop'] as const) {
         }
       }
       await waitForVisualLayout(page);
+      // #783: the AI-native body owns a smooth auto-scroll that can rest 41px above the bottom.
+      if (entry.surface === 'specialized.ai-native') await waitForChatBodyToSettle(page);
       expect(errors).toEqual([]);
       expect(externalRequests).toEqual([]);
       await expect(page).toHaveScreenshot(`${entry.id}.png`);

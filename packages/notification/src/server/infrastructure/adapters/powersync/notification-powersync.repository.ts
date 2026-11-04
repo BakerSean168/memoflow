@@ -131,84 +131,23 @@ import { NotificationOutboxDispatchInputSchema } from '@memoflow/reliable-messag
 import { randomUUID } from 'crypto';
 import type { NotificationMetricsService } from '../../../domain/services/notification-metrics-service';
 
+/**
+ * `notification_interactions`, `notification_delivery_decisions` and
+ * `notification_dispatch_outbox` are owned by the canonical PowerSync schema.
+ * At runtime they are writable SQLite views, so this adapter must never try to
+ * create tables or indexes for them.
+ */
 export class PowerSyncNotificationRepository implements INotificationRepository {
-  private tablesInitialized = false;
-
   constructor(
     private readonly db: IElectronDatabase,
     private readonly metricsService?: NotificationMetricsService,
   ) {}
-
-  private async ensureTablesExist(): Promise<void> {
-    if (this.tablesInitialized) return;
-    await this.db.execute(`
-      CREATE TABLE IF NOT EXISTS notification_interactions (
-        id TEXT PRIMARY KEY,
-        idempotency_key TEXT UNIQUE NOT NULL,
-        identity_id TEXT NOT NULL,
-        notification_id TEXT NOT NULL,
-        action_key TEXT NOT NULL,
-        action_kind TEXT NOT NULL,
-        occurred_at TEXT NOT NULL,
-        command_receipt_id TEXT,
-        outcome TEXT NOT NULL,
-        correlation_id TEXT,
-        causation_id TEXT
-      );
-    `);
-    await this.db.execute(`
-      CREATE TABLE IF NOT EXISTS notification_delivery_decisions (
-        id TEXT PRIMARY KEY,
-        identity_id TEXT NOT NULL,
-        notification_id TEXT NOT NULL,
-        channel TEXT NOT NULL,
-        outcome TEXT NOT NULL,
-        reason TEXT NOT NULL,
-        preference_source TEXT,
-        retry_at TEXT,
-        created_at TEXT NOT NULL,
-        updated_at TEXT NOT NULL,
-        UNIQUE(notification_id, channel)
-      );
-    `);
-    await this.db.execute(`
-      CREATE TABLE IF NOT EXISTS notification_dispatch_outbox (
-        id TEXT PRIMARY KEY,
-        identity_id TEXT NOT NULL,
-        notification_id TEXT NOT NULL,
-        source TEXT NOT NULL DEFAULT 'notification',
-        occurrence_key TEXT NOT NULL,
-        channel TEXT NOT NULL,
-        payload_json TEXT NOT NULL,
-        idempotency_key TEXT UNIQUE NOT NULL,
-        status TEXT NOT NULL,
-        attempt INTEGER NOT NULL DEFAULT 0,
-        owner_token TEXT,
-        claim_id TEXT,
-        fencing_token INTEGER NOT NULL DEFAULT 0,
-        lease_expires_at TEXT,
-        last_heartbeat_at TEXT,
-        heartbeat_interval_ms INTEGER,
-        last_error TEXT,
-        next_retry_at TEXT,
-        dead_letter_at TEXT,
-        correlation_id TEXT,
-        causation_id TEXT,
-        attempts_history_json TEXT,
-        created_at TEXT NOT NULL,
-        updated_at TEXT NOT NULL,
-        finished_at TEXT
-      );
-    `);
-    this.tablesInitialized = true;
-  }
 
   async save(
     notification: Notification,
     outboxDispatches?: NotificationOutboxDispatchPlan[],
     deliveryDecisions?: readonly NotificationDeliveryDecision[],
   ): Promise<void> {
-    await this.ensureTablesExist();
     const dto = notification.toServerDTO();
     await this.db.writeTransaction(async (tx) => {
       const existing = await tx.getOptional<{ id: string }>(

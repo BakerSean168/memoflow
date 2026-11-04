@@ -70,6 +70,16 @@
   --color-chart-4: hsl(var(--chart-4));
   --color-chart-5: hsl(var(--chart-5));
 
+  /*
+   * Brand accent: the gold ribbon of the MemoFlow logo. Reserved for the
+   * identity surface (primary action, focus ring, key marks); product surfaces
+   * keep the neutral/indigo hierarchy above.
+   */
+  --color-brand-gold-from: hsl(var(--brand-gold-from));
+  --color-brand-gold-via: hsl(var(--brand-gold-via));
+  --color-brand-gold-to: hsl(var(--brand-gold-to));
+  --color-brand-gold-foreground: hsl(var(--brand-gold-foreground));
+
   --radius-lg: var(--radius);
   --radius-md: calc(var(--radius) - 2px);
   --radius-sm: calc(var(--radius) - 4px);
@@ -185,6 +195,12 @@
     --chart-3: 197 37% 24%;
     --chart-4: 43 74% 66%;
     --chart-5: 27 87% 67%;
+
+    /* Brand accent ramp (#F8CF7D → #F5A623 → #E8862A), theme-independent. */
+    --brand-gold-from: 40 90% 73%;
+    --brand-gold-via: 37 91% 55%;
+    --brand-gold-to: 29 81% 54%;
+    --brand-gold-foreground: 28 45% 10%;
 
     --sidebar: 0 0% 98%;
     --sidebar-foreground: 240 5.3% 26.1%;

@@ -24,6 +24,7 @@ vi.mock('../modules/window', () => ({
     height = 800;
     manage() {}
     unmanage() {}
+    pinHeight() {}
   },
 }));
 
@@ -110,6 +111,74 @@ describe('Windows main-window close lifecycle', () => {
       expect(main.isDestroyed()).toBe(true);
     },
   );
+
+  it('routes add account through the existing identity window transition with a login intent', async () => {
+    const main = await open();
+    const transition = manager.transitionToProfileAccessWindow(undefined, true, 'login');
+    await Promise.resolve();
+    const gate = manager.getProfileAccessWindow()!;
+    gate.emit('ready-to-show');
+    await transition;
+    expect(main.isDestroyed()).toBe(false);
+    expect(main.isVisible()).toBe(false);
+    expect(gate.loadFile).toHaveBeenCalledWith(expect.any(String), {
+      hash: '/profile-access?view=login',
+    });
+  });
+
+  it('add account keeps the live session and closing the gate returns to it', async () => {
+    const main = await open();
+    const transition = manager.transitionToProfileAccessWindow(undefined, true, 'login');
+    await Promise.resolve();
+    const gate = manager.getProfileAccessWindow()!;
+    gate.emit('ready-to-show');
+    await transition;
+
+    // The session window and its scheduler survive the login gate.
+    expect(main.isDestroyed()).toBe(false);
+    expect(manager.getMainWindow()).toBe(main);
+    expect(stop).not.toHaveBeenCalled();
+    // The gate owns the foreground; the session window is never exposed under it.
+    expect(manager.focusActiveWindow()).toBe(true);
+    expect(gate.isVisible()).toBe(true);
+    expect(main.isVisible()).toBe(false);
+
+    gate.close();
+
+    expect(app.quit).not.toHaveBeenCalled();
+    expect(manager.getProfileAccessWindow()).toBeNull();
+    expect(manager.getMainWindow()).toBe(main);
+    expect(main.isVisible()).toBe(true);
+    expect(start).toHaveBeenCalledTimes(1);
+  });
+
+  it('closing an identity gate without a session still quits the app', () => {
+    const gate = manager.createProfileAccessWindow();
+    gate.close();
+    expect(app.quit).toHaveBeenCalledTimes(1);
+  });
+
+  it('logging in from an add-account gate never adopts the outgoing renderer', async () => {
+    const main = await open();
+    const transition = manager.transitionToProfileAccessWindow(undefined, true, 'login');
+    await Promise.resolve();
+    manager.getProfileAccessWindow()!.emit('ready-to-show');
+    await transition;
+
+    const openNext: Promise<void> = manager.transitionToMainWindow(
+      'profile-b',
+      path.join(root, 'window-b.json'),
+    );
+    await Promise.resolve();
+    await Promise.resolve();
+    expect(main.isDestroyed()).toBe(true);
+    const next = manager.getMainWindow()!;
+    next.emit('ready-to-show');
+    await openNext;
+    expect(manager.getMainWindow()).toBe(next);
+    expect(next.isVisible()).toBe(true);
+    expect(app.quit).not.toHaveBeenCalled();
+  });
 
   it('lock stops scheduling and destroys the old renderer; restore opens only Profile Access', async () => {
     const main = await open();

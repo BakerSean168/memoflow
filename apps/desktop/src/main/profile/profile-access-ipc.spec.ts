@@ -25,6 +25,7 @@ describe('registerProfileAccessIpc', () => {
     const runtime = {
       getActiveProfileDescriptorSync: vi.fn(() => profile),
       hasCredential: vi.fn(async () => false),
+      hasRememberedKey: vi.fn(async () => false),
     };
     const cloud = {
       getState: vi.fn(async () => 'CHECKING'),
@@ -50,6 +51,7 @@ describe('registerProfileAccessIpc', () => {
     const runtime = {
       getActiveProfileDescriptorSync: vi.fn().mockReturnValue({ profileId: 'old-profile' }),
       hasCredential: vi.fn(async () => false),
+      hasRememberedKey: vi.fn(async () => false),
     };
     const cloud = {
       getState: vi.fn(async () => {
@@ -98,10 +100,33 @@ describe('registerProfileAccessIpc', () => {
     expect(
       await handlers.get(ProfileAccessChannels.SELECT)?.(
         {},
-        { profileId: 'second-local', password: 'account-password' },
+        { profileId: 'second-local', password: 'account-password', remember: true },
       ),
     ).toMatchObject({ ok: true });
-    expect(runtime.openProfile).toHaveBeenCalledWith('second-local', 'account-password');
+    expect(runtime.openProfile).toHaveBeenCalledWith('second-local', 'account-password', {
+      remember: true,
+    });
+    expect(accessLogs.warn).not.toHaveBeenCalled();
+  });
+
+  it('reports the password-required routing result without logging it as a defect', async () => {
+    const handlers = new Map<string, Handler>();
+    vi.mocked(ipcMain.handle).mockImplementation((channel, handler) => {
+      handlers.set(channel, handler as Handler);
+    });
+    const runtime = {
+      getActiveProfileId: () => null,
+      openProfile: vi
+        .fn()
+        .mockRejectedValue(
+          new ResultErrorException('此本地账户需要密码解锁', 'PROFILE_PASSWORD_REQUIRED'),
+        ),
+    };
+    registerProfileAccessIpc({} as never, runtime as never, {} as never);
+
+    expect(
+      await handlers.get(ProfileAccessChannels.SELECT)?.({}, { profileId: 'local-2' }),
+    ).toMatchObject({ ok: false, error: { code: 'PROFILE_PASSWORD_REQUIRED' } });
     expect(accessLogs.warn).not.toHaveBeenCalled();
   });
 
@@ -156,6 +181,44 @@ describe('registerProfileAccessIpc', () => {
     );
   });
 
+  it('reports the remembered key copy only for local accounts', async () => {
+    const handlers = new Map<string, Handler>();
+    vi.mocked(ipcMain.handle).mockImplementation((channel, handler) => {
+      handlers.set(channel, handler as Handler);
+    });
+    const descriptor = (profileId: string, profileKind: 'local' | 'registered') => ({
+      profileId,
+      profileKind,
+      displayName: profileId,
+      avatarSeed: profileId,
+      identifier: null,
+      cloudBinding: null,
+      lastActiveAt: 1,
+      hasSnapshot: false,
+    });
+    const runtime = {
+      hasCredential: vi.fn(async () => true),
+      hasRememberedKey: vi.fn(async (profileId: string) => profileId === 'local-remembered'),
+    };
+    const registry = {
+      list: vi.fn(async () => [
+        descriptor('local-remembered', 'local'),
+        descriptor('local-plain', 'local'),
+        descriptor('work', 'registered'),
+      ]),
+    };
+    registerProfileAccessIpc(registry as never, runtime as never, {} as never);
+
+    await expect(handlers.get(ProfileAccessChannels.LIST)?.({})).resolves.toMatchObject({
+      ok: true,
+      data: [
+        { profileId: 'local-remembered', remembered: true },
+        { profileId: 'local-plain', remembered: false },
+        { profileId: 'work', remembered: false },
+      ],
+    });
+  });
+
   it('creates a local account with a nickname and password', async () => {
     const handlers = new Map<string, Handler>();
     vi.mocked(ipcMain.handle).mockImplementation((channel, handler) => {
@@ -173,6 +236,7 @@ describe('registerProfileAccessIpc', () => {
         hasSnapshot: false,
       })),
       hasCredential: vi.fn(async () => true),
+      hasRememberedKey: vi.fn(async () => false),
     };
     registerProfileAccessIpc({} as never, runtime as never, {} as never);
 

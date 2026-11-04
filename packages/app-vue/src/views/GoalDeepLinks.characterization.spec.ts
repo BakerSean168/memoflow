@@ -408,7 +408,7 @@ describe('Goal deep links — PVC-BASE-002', () => {
       expect(store.surfaceStatus).toBe('dirty');
       await textarea.setValue('');
       expect(store.surfaceStatus).toBe('clean');
-      await createDialog().get('[data-testid="goal-review-cancel"]').trigger('click');
+      await createDialog().get('[data-testid="goal-review-create-dialog-close"]').trigger('click');
       await flushPromises();
       expect(router.currentRoute.value.fullPath).toBe('/goals/goal-1?filter=active#context');
       expect(window.confirm).not.toHaveBeenCalled();
@@ -454,7 +454,7 @@ describe('Goal deep links — PVC-BASE-002', () => {
   it('guards cancel and Escape through the route rather than hiding the dialog', async () => {
     const { router } = await load('/goals/goal-1/review/create');
     await createDialog().get('textarea').setValue('Keep draft');
-    await createDialog().get('[data-testid="goal-review-cancel"]').trigger('click');
+    await createDialog().get('[data-testid="goal-review-create-dialog-close"]').trigger('click');
     await flushPromises();
     expect(confirmState.calls).toHaveLength(1);
     document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
@@ -610,7 +610,7 @@ describe('Goal deep links — PVC-BASE-002', () => {
     await createDialog().get('[data-testid="goal-review-save"]').trigger('click');
     expect(store.surfaceStatus).toBe('busy');
     expect(
-      createDialog().get('[data-testid="goal-review-cancel"]').attributes('disabled'),
+      createDialog().get('[data-testid="goal-review-create-dialog-close"]').attributes('disabled'),
     ).toBeDefined();
     document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
     await router.push('/tasks');

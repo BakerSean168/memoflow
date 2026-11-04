@@ -1598,6 +1598,14 @@
       "measurementCollectors": []
     },
     {
+      "path": "apps/desktop/src/main/modules/window/window-state-manager.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "apps/desktop/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "apps/desktop/src/main/paths/clear-storage-cache.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -1695,6 +1703,14 @@
     },
     {
       "path": "apps/desktop/src/main/profile/desktop-cloud-connection-service.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "apps/desktop/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "apps/desktop/src/main/profile/desktop-cloud-sign-in-service.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "apps/desktop/vitest.config.ts"
@@ -2684,6 +2700,14 @@
       "measurementCollectors": []
     },
     {
+      "path": "packages/account-ui/src/account/composables/useAccountSignOut.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/account-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "packages/account-ui/src/account/index.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -3526,6 +3550,14 @@
       "measurementCollectors": []
     },
     {
+      "path": "packages/ai-ui/src/composables/useGoalNativeReviewCoordinator.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/ai-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "packages/ai-ui/src/composables/useGoalSurfaceLease.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -3665,6 +3697,16 @@
     },
     {
       "path": "packages/ai/src/api/routes/workspace-sse.http.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/ai/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "packages/ai/vitest.config.ts"
+      ]
+    },
+    {
+      "path": "packages/ai/src/electron/ai-electron-channels.surface.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/ai/vitest.config.ts"
@@ -9126,6 +9168,14 @@
       "measurementCollectors": []
     },
     {
+      "path": "packages/routine-ui/src/composables/routineUpcomingCache.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/routine-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "packages/routine-ui/src/views/RoutineConfigurationView.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -12044,6 +12094,22 @@
       "measurementCollectors": []
     },
     {
+      "path": "packages/utils/src/shared/guards.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/utils/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/utils/src/shared/normalize-contribution.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/utils/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "packages/utils/src/shared/uuid.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -12784,7 +12850,7 @@
       "type": "measurement",
       "suite": "coverage",
       "runner": "vitest",
-      "fileCount": 124
+      "fileCount": 125
     },
     {
       "id": "packages/app-vue/vitest.store-coverage.config.ts",
@@ -13242,7 +13308,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 105
+      "fileCount": 107
     },
     {
       "id": "apps/migrator/vitest.config.ts",
@@ -13277,7 +13343,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 7
+      "fileCount": 8
     },
     {
       "id": "packages/account/vitest.config.ts",
@@ -13312,14 +13378,14 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 41
+      "fileCount": 42
     },
     {
       "id": "packages/ai/vitest.config.ts",
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 124
+      "fileCount": 125
     },
     {
       "id": "packages/app-vue/vitest.config.ts",
@@ -13571,7 +13637,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 5
+      "fileCount": 6
     },
     {
       "id": "packages/routine/vitest.config.ts",
@@ -13732,7 +13798,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 14
+      "fileCount": 16
     }
   ],
   "measurementSuites": {
@@ -13835,6 +13901,7 @@
       "packages/ai/src/api/routes/ai-void-success-envelope.surface.spec.ts",
       "packages/ai/src/api/routes/assistant-sse.http.spec.ts",
       "packages/ai/src/api/routes/workspace-sse.http.spec.ts",
+      "packages/ai/src/electron/ai-electron-channels.surface.spec.ts",
       "packages/ai/src/electron/index-lifecycle.spec.ts",
       "packages/ai/src/evals/eval-runner.spec.ts",
       "packages/ai/src/server/application/agent-instance/agent-instance.registry.spec.ts",
@@ -14370,7 +14437,7 @@
   "duplicate": [],
   "unexpected": [],
   "counts": {
-    "unit": 1181,
+    "unit": 1188,
     "integration": 58,
     "smoke": 3,
     "boundary-ipc": 6,

@@ -119,7 +119,12 @@
     </SheetContent>
   </Sheet>
   <Dialog v-else :open="open" @update:open="emit('update:open', $event)">
-    <ProductDialogShell :open="open" test-id="planner-event-dialog" size="sm">
+    <ProductDialogShell
+      @request-close="emit('update:open', false)"
+      :open="open"
+      test-id="planner-event-dialog"
+      size="sm"
+    >
       <template #icon>
         <span
           class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary"

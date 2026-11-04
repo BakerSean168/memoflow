@@ -1,4 +1,4 @@
-import { readFileSync } from 'node:fs';
+import { readdirSync, readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
 
@@ -10,7 +10,15 @@ import { describe, expect, it } from 'vitest';
  * (no { success, affected } dual-track); mark-all/batch-read align count shapes.
  */
 describe('notification void success envelope surface', () => {
-  const routes = readFileSync(resolve(__dirname, './routes.ts'), 'utf8');
+  // B1-2: route definitions live in `./routes.ts` (aggregate) plus
+  // `./routes/*.routes.ts`; the surface assertions read the union.
+  const routesPath = resolve(__dirname, './routes');
+  const routes = [
+    readFileSync(`${routesPath}.ts`, 'utf8'),
+    ...readdirSync(routesPath)
+      .filter((file) => file.endsWith('.ts'))
+      .map((file) => readFileSync(resolve(routesPath, file), 'utf8')),
+  ].join('\n');
   const controller = readFileSync(
     resolve(__dirname, '../server/transport/notification.controller.ts'),
     'utf8',

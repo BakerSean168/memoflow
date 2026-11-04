@@ -16,12 +16,15 @@
 // ---------------------------------------------------------------------------
 export {
   createAIModule,
+  createAIUseCases,
+  createAIRuntimeContributions,
   type AIModuleDependencies,
   type AIModuleInstance,
   type AITransportModuleInstance,
   type AIModuleServices,
   type AIModuleRuntimeContribution,
   type AIRuntimeContributionsInput,
+  type AIUseCaseAssembly,
 } from './ai.module';
 export type {
   AIEvaluationOperationsPort,

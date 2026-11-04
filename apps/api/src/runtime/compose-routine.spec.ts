@@ -74,6 +74,7 @@ describe('composeRoutine', () => {
       }),
     );
     expect(mocks.createRoutineConfigurationQueryService).toHaveBeenCalledWith({
+      occurrenceTruthStore: mocks.repositories.routineOccurrenceTruthStore,
       routineProfileStore: mocks.repositories.routineProfileStore,
       routinePreferencesStore: mocks.repositories.routinePreferencesStore,
       runtimeContextStore: mocks.runtimeContextStore,

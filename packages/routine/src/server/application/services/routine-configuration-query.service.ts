@@ -10,6 +10,7 @@ import type {
 } from '@memoflow/routine-contracts';
 import { asInstant, createRecurrenceEngine, type RecurrenceEnginePort } from '@memoflow/time';
 import type {
+  RoutineOccurrenceTruthStore,
   RoutineProfileStore,
   RoutinePreferencesStore,
   RoutineRuntimeContextStore,
@@ -17,6 +18,7 @@ import type {
 } from '../../domain/ports';
 import {
   computeRoutineNextEligibleOccurrence,
+  computeDurableElapsedNextOccurrence,
   type ProfileMembership,
   type RoutineDefinition,
   type RoutineProfile,
@@ -36,6 +38,7 @@ export interface CreateRoutineConfigurationQueryServiceOptions {
   readonly routinePreferencesStore?: RoutinePreferencesStore;
   readonly runtimeContextStore: RoutineRuntimeContextStore;
   readonly temporaryOverrideStore: RoutineTemporaryOverrideStore;
+  readonly occurrenceTruthStore?: RoutineOccurrenceTruthStore;
   readonly recurrenceEngine?: RecurrenceEnginePort;
   /** True only when this host owns the local Elapsed/ActiveUsage runtime. */
   readonly localRuntimeAvailable?: boolean;
@@ -163,8 +166,17 @@ export function createRoutineConfigurationQueryService(
       }
       const occurrences: RoutineUpcomingResponse['occurrences'] = [];
 
+      const facts =
+        query.includeElapsed && options.occurrenceTruthStore
+          ? await options.occurrenceTruthStore.listOccurrences({ identityId })
+          : [];
       for (const definition of definitions) {
-        if (!definition.enabled || definition.trigger?.type !== 'WallClock') continue;
+        if (!definition.enabled || !definition.trigger) continue;
+        if (
+          definition.trigger.type !== 'WallClock' &&
+          !(query.includeElapsed && definition.trigger.type === 'Elapsed')
+        )
+          continue;
         const paths = membershipsByRoutine.get(definition.id) ?? [];
         const durableProfileGateOpen =
           paths.length === 0 ||
@@ -179,6 +191,44 @@ export function createRoutineConfigurationQueryService(
             routineId: definition.id,
           },
         );
+        if (definition.trigger.type === 'Elapsed') {
+          const history = facts.filter((fact) => fact.routineId === definition.id);
+          const open = history.find((fact) => fact.resolutionState === 'Open');
+          const next =
+            definition.trigger.timingOwner === 'scheduler'
+              ? computeDurableElapsedNextOccurrence({
+                  routineId: definition.id,
+                  trigger: definition.trigger,
+                  activatedAt: definition.activatedAt,
+                  occurrences: history,
+                  temporaryOverride,
+                })
+              : null;
+          const occurrenceAt = open
+            ? Number(open.scheduledFor ?? open.becameDueAt)
+            : next
+              ? Number(next.runAt)
+              : query.start;
+          if (occurrenceAt > query.end) continue;
+          occurrences.push({
+            identityId,
+            routineId: definition.id,
+            occurrenceKey:
+              open?.occurrenceKey ??
+              next?.occurrenceKey ??
+              `routine:${definition.id}:local-runtime`,
+            title: definition.name,
+            description: definition.description,
+            occurrenceAt,
+            intervalMs: definition.trigger.durationMs,
+            timingStatus: open ? 'awaiting-completion' : next ? 'scheduled' : 'local-runtime',
+            endAt: null,
+            revision: definition.version,
+            editable: false,
+          });
+          continue;
+        }
+        if (definition.trigger.type !== 'WallClock') continue;
         let cursor = asInstant(query.start > 0 ? query.start - 1 : query.start);
 
         for (let count = 0; count < query.limit; count += 1) {

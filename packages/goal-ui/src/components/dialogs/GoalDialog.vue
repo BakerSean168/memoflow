@@ -52,7 +52,6 @@
             :placeholder="t('goal.dialog.goalTitlePlaceholder')"
             :aria-describedby="nameError ? 'goal-name-limit-feedback' : undefined"
             :aria-invalid="Boolean(nameError)"
-            focus-ring
             @blur="nameTouched = true"
             @limit-exceeded="nameLimitFeedback.show()"
           />
@@ -80,7 +79,6 @@
               summaryLimitFeedback.visible.value ? 'goal-summary-limit-feedback' : undefined
             "
             :aria-invalid="summaryLimitFeedback.visible.value || undefined"
-            :focus-ring="true"
             @limit-exceeded="summaryLimitFeedback.show()"
           />
           <ProductInlineValidation
@@ -182,6 +180,15 @@
         />
       </section>
 
+      <GoalKeyResultDraftEditor
+        :key="mode"
+        v-model="draft.keyResults"
+        :disabled="fieldsBusy"
+        :goal-start="draft.start"
+        :goal-target="draft.target"
+        @editing-change="krEditorOpen = $event"
+      />
+
       <section class="space-y-2" data-testid="goal-description-section">
         <Label for="goal-description" class="sr-only">{{ t('goal.dialog.description') }}</Label>
         <ProductAutoTextarea
@@ -198,7 +205,6 @@
             descriptionLimitFeedback.visible.value ? 'goal-description-limit-feedback' : undefined
           "
           :aria-invalid="descriptionLimitFeedback.visible.value || undefined"
-          :focus-ring="true"
           @limit-exceeded="descriptionLimitFeedback.show()"
         />
         <ProductInlineValidation
@@ -250,21 +256,9 @@
           {{ t('goal.dialog.checkpointRetrySave') }}
         </Button>
       </div>
-      <GoalKeyResultDraftEditor
-        :key="mode"
-        v-model="draft.keyResults"
-        class="mt-auto"
-        :disabled="fieldsBusy"
-        :goal-start="draft.start"
-        :goal-target="draft.target"
-        @editing-change="krEditorOpen = $event"
-      />
     </form>
 
     <template #footer>
-      <Button variant="ghost" :disabled="interactionBusy" @click="setOpen(false)">
-        {{ t('common.cancel') }}
-      </Button>
       <Button
         type="submit"
         form="goal-form"
@@ -387,7 +381,7 @@ const control = ref<symbol | null>(null);
 // Once the AI has projected a draft and coordinated submit/cancel, the owner must be
 // able to confirm or dismiss it even though the AI capability still holds `control`.
 // `isBusy` keeps inputs locked during AI patching; `interactionBusy` gates only the
-// Save/Cancel affordances and the close guard so the owner can always settle a review.
+// Save and guarded header-close affordances so the owner can always settle a review.
 const coordinated = ref(false);
 const isBusy = computed(
   () =>

@@ -36,6 +36,7 @@ export interface NotificationInboxPort {
     notificationId: string,
     actionKey: string,
     identityId: string,
+    snoozeDurationMs?: number,
   ): Promise<Result<ExecuteNotificationActionRes>>;
   subscribeSseEvents(handler: (payload: NotificationSseDeliveryEvent) => void): () => void;
 }

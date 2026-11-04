@@ -164,7 +164,7 @@ describe('evaluatePermission', () => {
     ['read_only', 'deny'],
     ['confirm_each', 'ask'],
     ['on_demand', 'ask'],
-    ['full_auto', 'allow'],
+    ['full_auto', 'ask'],
   ] as const)('applies the high risk default for %s', (preset, decision) => {
     expect(
       evaluatePermission({
@@ -173,6 +173,101 @@ describe('evaluatePermission', () => {
         preset,
       }),
     ).toMatchObject({ decision, reason: 'preset' });
+  });
+
+  describe('dynamic bulk risk (#762)', () => {
+    const updateAllowRule = {
+      id: 'allow-task-update',
+      agentId: null,
+      object: 'task' as const,
+      action: 'update' as const,
+      effect: 'allow' as const,
+      source: 'user' as const,
+    };
+
+    it('keeps the default threshold boundary exclusive', () => {
+      expect(
+        evaluatePermission({
+          agentId: 'codex',
+          operationId: 'task.update',
+          preset: 'confirm_each',
+          itemCount: 10,
+          globalRules: [updateAllowRule],
+        }),
+      ).toMatchObject({ decision: 'allow', reason: 'allow_rule', operation: { risks: [] } });
+    });
+
+    it('escalates an over-threshold update even when an object grant exists', () => {
+      expect(
+        evaluatePermission({
+          agentId: 'codex',
+          operationId: 'task.update',
+          preset: 'confirm_each',
+          itemCount: 11,
+          globalRules: [updateAllowRule],
+        }),
+      ).toMatchObject({ decision: 'ask', reason: 'preset', operation: { risks: ['bulk'] } });
+    });
+
+    it('keeps user denies and the read-only preset above dynamic bulk risk', () => {
+      expect(
+        evaluatePermission({
+          agentId: 'codex',
+          operationId: 'task.update',
+          preset: 'confirm_each',
+          itemCount: 11,
+          agentRules: [{ ...updateAllowRule, id: 'deny', agentId: 'codex', effect: 'deny' }],
+        }),
+      ).toMatchObject({ decision: 'deny', reason: 'user_deny', ruleId: 'deny' });
+      expect(
+        evaluatePermission({
+          agentId: 'codex',
+          operationId: 'task.update',
+          preset: 'read_only',
+          itemCount: 11,
+          globalRules: [updateAllowRule],
+        }),
+      ).toMatchObject({ decision: 'deny', reason: 'preset', operation: { risks: ['bulk'] } });
+    });
+
+    it('escalates dynamic bulk even in full auto and never escalates reads', () => {
+      expect(
+        evaluatePermission({
+          agentId: 'codex',
+          operationId: 'task.update',
+          preset: 'full_auto',
+          itemCount: 11,
+          globalRules: [updateAllowRule],
+        }),
+      ).toMatchObject({ decision: 'ask', reason: 'preset', operation: { risks: ['bulk'] } });
+      expect(
+        evaluatePermission({
+          agentId: 'codex',
+          operationId: 'task.read',
+          preset: 'confirm_each',
+          itemCount: 500,
+        }),
+      ).toMatchObject({ decision: 'allow', reason: 'preset', operation: { risks: [] } });
+    });
+
+    it('honors a per-call threshold override', () => {
+      const context = {
+        agentId: 'codex',
+        operationId: 'task.update',
+        preset: 'confirm_each' as const,
+        bulkThreshold: 3,
+        globalRules: [updateAllowRule],
+      };
+      expect(evaluatePermission({ ...context, itemCount: 4 })).toMatchObject({
+        decision: 'ask',
+        operation: { risks: ['bulk'] },
+      });
+      expect(evaluatePermission({ ...context, itemCount: 3 })).toMatchObject({
+        decision: 'allow',
+        reason: 'allow_rule',
+        operation: { risks: [] },
+      });
+    });
   });
 
   it('uses custom matrix cells and derives MCP hint metadata from the operation catalog', () => {
@@ -206,5 +301,106 @@ describe('evaluatePermission', () => {
         isGoalPanelEdit: true,
       }),
     ).toEqual({ readOnlyHint: false, destructiveHint: true });
+  });
+
+  describe('high-risk ceiling (#762 phase 4)', () => {
+    const riskyOperations = [
+      'goal.delete_permanent',
+      'task.bulk_update',
+      'notification.send_external',
+    ] as const;
+    const allowEverythingMatrix = {
+      goal: { delete: 'allow' as const },
+      task: { update: 'allow' as const },
+      notification: { create: 'allow' as const },
+    };
+
+    it.each(['read_only', 'confirm_each', 'on_demand', 'full_auto', 'custom'] as const)(
+      'never auto-approves risky operations under the %s preset',
+      (preset) => {
+        for (const operationId of riskyOperations) {
+          expect(
+            evaluatePermission({
+              agentId: 'codex',
+              operationId,
+              preset,
+              customMatrix: allowEverythingMatrix,
+            }).decision,
+          ).toBe(preset === 'read_only' ? 'deny' : 'ask');
+        }
+      },
+    );
+
+    it('does not let a remembered allow rule auto-approve a risky operation', () => {
+      expect(
+        evaluatePermission({
+          agentId: 'codex',
+          operationId: 'goal.delete_permanent',
+          preset: 'full_auto',
+          globalRules: [
+            {
+              id: 'allow-goal-delete',
+              agentId: null,
+              object: 'goal',
+              action: 'delete',
+              effect: 'allow',
+              source: 'user',
+            },
+          ],
+        }),
+      ).toMatchObject({ decision: 'ask', reason: 'preset' });
+    });
+
+    it('keeps explicit user denies above the high-risk ceiling', () => {
+      expect(
+        evaluatePermission({
+          agentId: 'codex',
+          operationId: 'goal.delete_permanent',
+          preset: 'full_auto',
+          agentRules: [
+            {
+              id: 'deny-goal-delete',
+              agentId: 'codex',
+              object: 'goal',
+              action: 'delete',
+              effect: 'deny',
+              source: 'user',
+            },
+          ],
+        }),
+      ).toMatchObject({ decision: 'deny', reason: 'user_deny', ruleId: 'deny-goal-delete' });
+    });
+
+    it('registers a permanent-deletion operation for every business object', () => {
+      for (const object of [
+        'goal',
+        'key_result',
+        'task',
+        'routine',
+        'knowledge',
+        'notification',
+      ] as const) {
+        expect(
+          PERMISSION_OPERATIONS.find((candidate) => candidate.id === `${object}.delete_permanent`),
+        ).toMatchObject({ object, action: 'delete', risks: ['delete_permanent'] });
+      }
+    });
+
+    it('keeps ordinary recoverable deletes on the normal ladder', () => {
+      expect(
+        evaluatePermission({
+          agentId: 'codex',
+          operationId: 'goal.delete',
+          preset: 'full_auto',
+        }),
+      ).toMatchObject({ decision: 'allow', reason: 'preset', operation: { risks: [] } });
+      expect(
+        evaluatePermission({
+          agentId: 'codex',
+          operationId: 'goal.delete',
+          preset: 'confirm_each',
+        }),
+      ).toMatchObject({ decision: 'ask', reason: 'preset', operation: { risks: [] } });
+    });
   });
 });

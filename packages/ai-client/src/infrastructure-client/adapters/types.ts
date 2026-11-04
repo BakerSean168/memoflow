@@ -90,7 +90,10 @@ export interface IAIProviderConfigApiClient {
   deleteProvider(id: string): Promise<Result<void>>;
   testConnection(request: TestAIProviderReq): Promise<Result<TestAIProviderRes>>;
   setDefaultProvider(request: SetDefaultAIProviderReq): Promise<Result<void>>;
-  refreshProviderModels(id: string): Promise<Result<AIProviderModelCatalogSnapshot>>;
+  refreshProviderModels(
+    id: string,
+    force?: boolean,
+  ): Promise<Result<AIProviderModelCatalogSnapshot>>;
 }
 
 export interface AIKnowledgeQueryApiClient {

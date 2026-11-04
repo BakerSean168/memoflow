@@ -22,19 +22,18 @@ import {
   AvatarFallback,
   AvatarImage,
   Separator,
-  useConfirm,
 } from '@memoflow/ui-vue-shadcn';
 import { accountUiHost } from '../../account-ui-host';
 import { LockKeyhole, LogOut } from '@lucide/vue';
 import { toast } from 'vue-sonner';
 import { useAccount } from '../composables/useAccount';
+import { useAccountSignOut } from '../composables/useAccountSignOut';
 import { useAuthenticationStore } from '../../authentication/stores/authentication-store';
 import { ProfileAccessChannels } from '@memoflow/desktop-contracts';
 
 const { t } = useI18n();
-const { SettingsDangerZone, SettingsSection } = accountUiHost.components;
-const logout = inject(accountUiHost.LOGOUT_HANDLER_KEY);
-const lockProfile = inject(accountUiHost.PROFILE_LOCK_HANDLER_KEY, null);
+const { SettingsDangerZone } = accountUiHost.components;
+const { isDesktopSignOut, confirmSignOut, executeSignOut } = useAccountSignOut();
 const desktopBridge = inject(accountUiHost.DESKTOP_BRIDGE_KEY, null);
 const desktopAccess = inject(accountUiHost.DESKTOP_ACCESS_SNAPSHOT_KEY, ref(null));
 const authStore = useAuthenticationStore();
@@ -87,28 +86,16 @@ async function handleSave() {
 }
 
 async function handleLogout() {
-  const confirmed = await useConfirm({
-    title: t('account.logoutConfirm.title'),
-    description: t('account.logoutConfirm.description'),
-    confirmText: t('account.logoutConfirm.confirmText'),
-    cancelText: t('account.logoutConfirm.cancelText'),
-    variant: 'destructive',
-  });
-
+  const confirmed = await confirmSignOut();
   if (!confirmed) {
     return;
   }
 
-  if (!logout) {
-    toast.error(t('auth.toast.operationFailed'), {
-      description: t('account.logoutHandlerUnavailable'),
-    });
-    return;
-  }
-
   try {
-    await logout();
-    toast.success(t('auth.toast.loggedOut'));
+    await executeSignOut();
+    // The desktop handler leaves for the account chooser, so only the web
+    // surface still has a window to report into.
+    if (!isDesktopSignOut.value) toast.success(t('auth.toast.loggedOut'));
   } catch (error) {
     toast.error(t('auth.toast.operationFailed'), {
       description: accountUiHost.translateResultError(error, t, {
@@ -116,11 +103,6 @@ async function handleLogout() {
       }),
     });
   }
-}
-
-async function handleLockProfile() {
-  if (!lockProfile) return;
-  await lockProfile();
 }
 
 async function changeLocalPassword(): Promise<void> {
@@ -255,24 +237,6 @@ onMounted(() => {
       </CardFooter>
     </Card>
 
-    <SettingsSection
-      v-if="lockProfile"
-      :title="t('account.actions.lockProfile')"
-      :description="t('account.lockProfileHint')"
-      test-id="account-lock-profile-section"
-    >
-      <template #actions>
-        <Button
-          data-testid="account-lock-profile-button"
-          variant="outline"
-          @click="handleLockProfile"
-        >
-          <LockKeyhole class="mr-2 h-4 w-4" />
-          {{ t('account.actions.lockProfile') }}
-        </Button>
-      </template>
-    </SettingsSection>
-
     <Card v-if="isLocalAccount" class="border-border/70">
       <CardHeader>
         <CardTitle class="flex items-center gap-2">
@@ -326,12 +290,12 @@ onMounted(() => {
 
     <!-- Destructive account actions stay explicit while sharing the Settings danger-zone grammar. -->
     <SettingsDangerZone
-      v-if="authStore.isAuthenticated"
-      :title="t('account.actions.logout')"
-      :description="t('account.logoutHint')"
+      v-if="authStore.isAuthenticated || isDesktopSignOut"
+      :title="isDesktopSignOut ? t('account.signOut.action') : t('account.actions.logout')"
+      :description="isDesktopSignOut ? t('account.signOut.hint') : t('account.logoutHint')"
       test-id="account-logout-section"
     >
-      <p class="mt-2 text-xs leading-5 text-muted-foreground">
+      <p v-if="!isDesktopSignOut" class="mt-2 text-xs leading-5 text-muted-foreground">
         {{ t('account.logoutConfirm.description') }}
       </p>
 
@@ -343,7 +307,7 @@ onMounted(() => {
           @click="handleLogout"
         >
           <LogOut class="mr-2 h-4 w-4" />
-          {{ t('account.actions.logout') }}
+          {{ isDesktopSignOut ? t('account.signOut.action') : t('account.actions.logout') }}
         </Button>
       </template>
     </SettingsDangerZone>

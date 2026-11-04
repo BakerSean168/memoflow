@@ -8,7 +8,7 @@ import {
 } from './lib/promotion-evidence.mjs';
 import { buildDeliveryManifest } from './generate-delivery-manifest.mjs';
 import { validateCandidateSet } from './candidate-manifest.mjs';
-import { requireProof, verifyCiRun } from './lib/ci-evidence.mjs';
+import { requireProof, selectPromotionRun, verifyCiRun } from './lib/ci-evidence.mjs';
 import { validateDeliveryManifest } from './lib/contracts.mjs';
 
 async function main() {
@@ -47,7 +47,9 @@ async function main() {
       Array.isArray(runs.workflow_runs) && runs.total_count === runs.workflow_runs.length,
       'incomplete CI run list',
     );
-    runId = runs.workflow_runs.sort((a, b) => b.id - a.id)[0]?.id;
+    runId = selectPromotionRun(runs.workflow_runs)?.id;
+    requireProof(runId, 'missing successful CI run');
+    console.log(`Selected CI run ${runId} for ${sha}`);
   }
   if (process.argv.includes('--allow-docs')) {
     const run = await verifyCiRun({ ...client, runId, head: sha, event: 'push' });

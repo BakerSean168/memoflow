@@ -1,64 +1,84 @@
-import { computed, inject, ref } from 'vue';
+import { inject, ref, type Ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { toast } from 'vue-sonner';
 import { z } from 'zod';
-import {
-  ProfileAccessChannels,
-  WindowChannels,
-  type ProfileSummary,
-} from '@memoflow/desktop-contracts';
-import { useConfirm } from '@memoflow/ui-vue-shadcn';
+import type { ProfileSummary } from '@memoflow/desktop-contracts';
 import { DESKTOP_BRIDGE_KEY } from '../../di/keys';
 import { translateResultError } from '../utils/translate-result-error';
+import {
+  useDesktopProfileCatalog,
+  type DesktopProfileCatalogCross,
+} from './useDesktopProfileCatalog';
+import {
+  useDesktopProfileCloudSignIn,
+  type DesktopProfileCloudSignInCross,
+} from './useDesktopProfileCloudSignIn';
+import {
+  useDesktopProfileRegistration,
+  type DesktopProfileRegistrationCross,
+} from './useDesktopProfileRegistration';
+import { useDesktopProfileUnlock, type DesktopProfileUnlockCross } from './useDesktopProfileUnlock';
 
-const profileSchema = z.object({
-  profileId: z.string(),
-  profileKind: z.enum(['local', 'registered']),
-  displayName: z.string(),
-  avatarSeed: z.string(),
-  identifierHint: z.string().nullable(),
-  cloudAccountId: z.string().nullable(),
-  lastActiveAt: z.number(),
-  hasCredential: z.boolean(),
-}) satisfies z.ZodType<ProfileSummary>;
-const snapshotSchema = z.object({
-  profile: profileSchema.nullable(),
-  unlockState: z.enum(['LOCKED', 'UNLOCKED']),
-  cloudState: z.enum(['UNBOUND', 'CHECKING', 'ONLINE', 'OFFLINE', 'REAUTH_REQUIRED']),
-  capabilities: z.object({
-    local: z.boolean(),
-    sync: z.boolean(),
-    cloudAi: z.boolean(),
-    repositoryConnection: z.boolean(),
-  }),
-});
+/**
+ * States the identity window swaps inside one window. `login` and `register`
+ * are the formal sign-in/registration surfaces; `password` is the per-tile
+ * unlock state of a local account.
+ */
+export type DesktopAccessView = 'select' | 'password' | 'login' | 'register';
+export type DesktopRegisterMode = 'cloud' | 'local';
+
+/**
+ * State and host helpers shared by the four focused Profile composables. The
+ * refs are created once here and injected, so every group operates on the
+ * same instance instead of private copies.
+ */
+export interface DesktopProfilesSharedContext {
+  t: ReturnType<typeof useI18n>['t'];
+  options: { accessWindow?: boolean };
+  invoke: <T>(
+    channel: string,
+    schema: z.ZodType<T>,
+    ...args: unknown[]
+  ) => Promise<{ data: T } | null>;
+  invokeScoped: <T>(
+    channel: string,
+    schema: z.ZodType<T>,
+    options: { scope?: string; silent?: boolean },
+    ...args: unknown[]
+  ) => Promise<{ data: T } | null>;
+  profiles: Ref<ProfileSummary[]>;
+  busyProfileId: Ref<string | null>;
+  selectedProfileId: Ref<string | null>;
+  accessView: Ref<DesktopAccessView>;
+  password: Ref<string>;
+  remember: Ref<boolean>;
+  loginRemember: Ref<boolean>;
+}
 
 /** Registry metadata and operations shared by the access window and workspace management. */
 export function useDesktopProfiles(options: { accessWindow?: boolean } = {}) {
   const bridge = inject(DESKTOP_BRIDGE_KEY, null);
   const { t } = useI18n();
   const profiles = ref<ProfileSummary[]>([]);
-  const snapshot = ref<z.infer<typeof snapshotSchema> | null>(null);
   const busyProfileId = ref<string | null>(null);
   const selectedProfileId = ref<string | null>(null);
+  const accessView = ref<DesktopAccessView>('select');
   const password = ref('');
-  const newName = ref('');
-  const newPassword = ref('');
-  const editingProfileId = ref<string | null>(null);
-  const editName = ref('');
-  const sortedProfiles = computed(() =>
-    [...profiles.value].sort((a, b) => {
-      const active = snapshot.value?.profile?.profileId;
-      return (
-        Number(b.profileId === active) - Number(a.profileId === active) ||
-        b.lastActiveAt - a.lastActiveAt
-      );
-    }),
-  );
+  const remember = ref(false);
+  const loginRemember = ref(true);
 
   async function invoke<T>(
     channel: string,
     schema: z.ZodType<T>,
+    ...args: unknown[]
+  ): Promise<{ data: T } | null> {
+    return invokeScoped(channel, schema, {}, ...args);
+  }
+
+  async function invokeScoped<T>(
+    channel: string,
+    schema: z.ZodType<T>,
+    options: { scope?: string; silent?: boolean },
     ...args: unknown[]
   ): Promise<{ data: T } | null> {
     if (!bridge) return null;
@@ -73,150 +93,101 @@ export function useDesktopProfiles(options: { accessWindow?: boolean } = {}) {
       if (!result.ok) throw result.error ?? new Error(t('common.operationFailed'));
       return { data: schema.parse(result.data) };
     } catch (error) {
-      toast.error(translateResultError(error, t, { fallbackKey: 'common.operationFailed' }));
+      if (!options.silent)
+        toast.error(
+          translateResultError(error, t, {
+            scope: options.scope,
+            fallbackKey: 'common.operationFailed',
+          }),
+        );
       return null;
     }
   }
 
-  async function refreshProfiles(): Promise<void> {
-    const list = await invoke(ProfileAccessChannels.LIST, z.array(profileSchema));
-    const access = await invoke(ProfileAccessChannels.GET_SNAPSHOT, snapshotSchema);
-    if (list) profiles.value = list.data;
-    if (access) snapshot.value = access.data;
-  }
-
-  async function navigate(profile: ProfileSummary): Promise<boolean> {
-    if (!options.accessWindow) {
-      // The host destroys the outgoing renderer and stops schedulers before opening by ID.
-      // Protected targets arrive preselected at Profile Access; metadata never authorizes access.
-      return !!(await invoke(
-        WindowChannels.TRANSITION_TO_PROFILE_ACCESS,
-        z.unknown(),
-        profile.profileId,
-      ));
-    }
-    const opened = await invoke(
-      ProfileAccessChannels.SELECT,
-      z.unknown(),
-      profile.hasCredential
-        ? { profileId: profile.profileId, password: password.value }
-        : { profileId: profile.profileId },
-    );
-    return !!opened && !!(await invoke(WindowChannels.TRANSITION_TO_MAIN, z.unknown()));
-  }
-
-  async function openProfile(profile: ProfileSummary): Promise<void> {
-    if (
-      busyProfileId.value ||
-      (!options.accessWindow && snapshot.value?.profile?.profileId === profile.profileId)
-    )
-      return;
-    if (
-      options.accessWindow &&
-      profile.hasCredential &&
-      selectedProfileId.value !== profile.profileId
-    ) {
-      selectedProfileId.value = profile.profileId;
-      password.value = '';
-      return;
-    }
-    if (options.accessWindow && profile.hasCredential && password.value.length < 8) {
-      toast.error(t('auth.profileAccess.passwordRequired'));
-      return;
-    }
-    busyProfileId.value = profile.profileId;
-    try {
-      if (!(await navigate(profile))) busyProfileId.value = null;
-    } finally {
-      password.value = '';
-    }
-  }
-
-  async function switchProfile(profileId: string): Promise<void> {
-    const profile = profiles.value.find((item) => item.profileId === profileId);
-    if (profile) await openProfile(profile);
-  }
-
-  async function createLocalAccount(): Promise<void> {
-    if (busyProfileId.value) return;
-    if (!newName.value.trim() || newPassword.value.length < 8) {
-      toast.error(t('auth.profileAccess.createInvalid'));
-      return;
-    }
-    busyProfileId.value = 'creating';
-    try {
-      const created = await invoke(ProfileAccessChannels.CREATE_LOCAL_ACCOUNT, profileSchema, {
-        displayName: newName.value.trim(),
-        password: newPassword.value,
-      });
-      if (!created) return;
-      newName.value = '';
-      password.value = newPassword.value;
-      newPassword.value = '';
-      await refreshProfiles();
-      if (await navigate(created.data)) busyProfileId.value = created.data.profileId;
-    } finally {
-      password.value = '';
-      if (busyProfileId.value === 'creating') busyProfileId.value = null;
-    }
-  }
-
-  async function renameProfile(profile: ProfileSummary): Promise<void> {
-    if (busyProfileId.value) return;
-    busyProfileId.value = profile.profileId;
-    try {
-      if (
-        await invoke(ProfileAccessChannels.RENAME, z.unknown(), {
-          profileId: profile.profileId,
-          displayName: editName.value.trim(),
-        })
-      ) {
-        editingProfileId.value = null;
-        await refreshProfiles();
-      }
-    } finally {
-      busyProfileId.value = null;
-    }
-  }
-
-  async function removeProfile(profile: ProfileSummary): Promise<void> {
-    if (busyProfileId.value || snapshot.value?.profile?.profileId === profile.profileId) return;
-    const confirmed = await useConfirm({
-      title: t('auth.profileAccess.removeConfirmTitle'),
-      description: t('auth.profileAccess.removeConfirm', { name: profile.displayName }),
-      confirmText: t('common.delete'),
-      cancelText: t('common.cancel'),
-      variant: 'destructive',
-    });
-    if (!confirmed) return;
-    busyProfileId.value = profile.profileId;
-    try {
-      if (
-        await invoke(ProfileAccessChannels.REMOVE, z.unknown(), { profileId: profile.profileId })
-      ) {
-        toast.success(t('auth.profileAccess.removed'));
-        await refreshProfiles();
-      }
-    } finally {
-      busyProfileId.value = null;
-    }
-  }
-
-  return {
-    profiles: sortedProfiles,
-    snapshot,
+  const ctx: DesktopProfilesSharedContext = {
+    t,
+    options,
+    invoke,
+    invokeScoped,
+    profiles,
     busyProfileId,
     selectedProfileId,
+    accessView,
     password,
-    newName,
-    newPassword,
-    editingProfileId,
-    editName,
-    refreshProfiles,
-    openProfile,
-    switchProfile,
-    createLocalAccount,
-    renameProfile,
-    removeProfile,
+    remember,
+    loginRemember,
+  };
+
+  // Cross-group actions are wired after the groups run: every group reads them
+  // off its `cross` holder at call time, so the function references stay the
+  // exact instances each group created.
+  const catalogCross = {} as DesktopProfileCatalogCross;
+  const unlockCross = {} as DesktopProfileUnlockCross;
+  const cloudCross = {} as DesktopProfileCloudSignInCross;
+  const registrationCross = {} as DesktopProfileRegistrationCross;
+
+  const catalog = useDesktopProfileCatalog(ctx, catalogCross);
+  const unlock = useDesktopProfileUnlock(ctx, unlockCross);
+  const cloud = useDesktopProfileCloudSignIn(ctx, cloudCross);
+  const registration = useDesktopProfileRegistration(ctx, registrationCross);
+
+  Object.assign(catalogCross, {
+    enterPasswordState: unlock.enterPasswordState,
+    resetSignInState: cloud.resetSignInState,
+    resetRegisterState: registration.resetRegisterState,
+  });
+  Object.assign(unlockCross, { selectAndEnter: catalog.selectAndEnter });
+  Object.assign(cloudCross, { enterOpenedProfile: catalog.enterOpenedProfile });
+  Object.assign(registrationCross, {
+    enterOpenedProfile: catalog.enterOpenedProfile,
+    refreshProfiles: catalog.refreshProfiles,
+    selectAndEnter: catalog.selectAndEnter,
+  });
+
+  return {
+    profiles: catalog.sortedProfiles,
+    snapshot: catalog.snapshot,
+    busyProfileId,
+    selectedProfileId,
+    passwordTarget: unlock.passwordTarget,
+    accessView,
+    password,
+    remember,
+    newName: catalog.newName,
+    newPassword: catalog.newPassword,
+    editingProfileId: catalog.editingProfileId,
+    editName: catalog.editName,
+    loginEmail: cloud.loginEmail,
+    loginPassword: cloud.loginPassword,
+    loginRemember,
+    signInBusy: cloud.signInBusy,
+    githubPending: cloud.githubPending,
+    githubUserCode: cloud.githubUserCode,
+    registerMode: registration.registerMode,
+    registerEmail: registration.registerEmail,
+    registerName: registration.registerName,
+    registerPassword: registration.registerPassword,
+    registerPasswordConfirm: registration.registerPasswordConfirm,
+    registerBusy: registration.registerBusy,
+    refreshProfiles: catalog.refreshProfiles,
+    openProfile: catalog.openProfile,
+    selectProfile: catalog.selectProfile,
+    enterPasswordState: unlock.enterPasswordState,
+    enterLoginState: cloud.enterLoginState,
+    enterRegisterState: registration.enterRegisterState,
+    backToSelect: catalog.backToSelect,
+    submitPassword: unlock.submitPassword,
+    switchProfile: catalog.switchProfile,
+    setAccessWindowHeight: catalog.setAccessWindowHeight,
+    signInWithPassword: cloud.signInWithPassword,
+    signInWithGithub: cloud.signInWithGithub,
+    cancelGithubSignIn: cloud.cancelGithubSignIn,
+    forgotPassword: cloud.forgotPassword,
+    submitCloudRegistration: registration.submitCloudRegistration,
+    submitLocalRegistration: registration.submitLocalRegistration,
+    createLocalAccount: catalog.createLocalAccount,
+    renameProfile: catalog.renameProfile,
+    removeProfile: catalog.removeProfile,
+    disposeAuth: cloud.stopGithubPolling,
   };
 }

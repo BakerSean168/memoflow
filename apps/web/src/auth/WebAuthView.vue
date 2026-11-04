@@ -62,7 +62,9 @@ const scene = ref<Scene>(
     ? 'reset'
     : query.get('scene') === 'verify-email'
       ? 'verify'
-      : 'login',
+      : query.get('scene') === 'forgot'
+        ? 'forgot'
+        : 'login',
 );
 const email = ref(query.get('email') ?? '');
 const password = ref('');

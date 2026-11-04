@@ -4,7 +4,7 @@
  * dependencies are externalized to preserve their native ESM conditions.
  */
 export { createDesktopLocalAgentTools } from '../src/main/modules/ai/local-agent-tools';
-export { LocalAgentRepository } from '@memoflow/ai';
+export { LocalAgentRepository, PermissionLocalRepository } from '@memoflow/ai';
 // This test-only ESM bundling entry bundles sibling package sources because
 // Playwright's Desktop CJS test loader cannot require their ESM-only exports.
 // eslint-disable-next-line @nx/enforce-module-boundaries
