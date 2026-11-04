@@ -12076,6 +12076,22 @@
       "measurementCollectors": []
     },
     {
+      "path": "packages/utils/src/shared/guards.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/utils/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/utils/src/shared/normalize-contribution.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/utils/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "packages/utils/src/shared/uuid.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -13764,7 +13780,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 14
+      "fileCount": 16
     }
   ],
   "measurementSuites": {
@@ -14402,7 +14418,7 @@
   "duplicate": [],
   "unexpected": [],
   "counts": {
-    "unit": 1185,
+    "unit": 1187,
     "integration": 58,
     "smoke": 3,
     "boundary-ipc": 6,

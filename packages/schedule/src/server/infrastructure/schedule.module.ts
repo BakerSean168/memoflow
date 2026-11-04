@@ -38,6 +38,7 @@ import type { ScheduleRebuildOutboxDTO } from '../domain/repositories/i-schedule
 import { eventBus } from '@memoflow/utils/domain';
 import type { CreateScheduleRequest, UpdateScheduleRequest } from '@memoflow/schedule-contracts';
 import { resultify } from '@memoflow/utils/result';
+import { normalizeContribution } from '@memoflow/utils/shared';
 
 export interface ScheduleModuleRuntimeContribution {
   start(): Promise<void> | void;
@@ -120,8 +121,7 @@ export function createScheduleUseCases(
 function normalizeRuntimeContributions(
   input?: ScheduleRuntimeContributionsInput,
 ): readonly ScheduleModuleRuntimeContribution[] {
-  if (!input) return [];
-  return Array.isArray(input) ? Array.from(input) : [input as ScheduleModuleRuntimeContribution];
+  return normalizeContribution(input);
 }
 
 export function createScheduleModule(

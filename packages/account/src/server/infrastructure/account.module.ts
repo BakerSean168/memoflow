@@ -22,6 +22,7 @@ import type { OperationTimelineEntry, OperationAuditRecord } from '@memoflow/ope
 import { OperationTimelineEntrySchema } from '@memoflow/operations-contracts';
 import { ok, fail } from '@memoflow/transport-contracts/result';
 import { createLogger } from '@memoflow/utils/logger';
+import { normalizeContribution } from '@memoflow/utils/shared';
 import type { AccountClosureOperationRecord } from '../domain/repositories/i-account-closure-operation-repository';
 
 const logger = createLogger('AccountModule');
@@ -122,15 +123,7 @@ function normalizeRuntimeContributions(
     | AccountModuleRuntimeContribution
     | readonly AccountModuleRuntimeContribution[],
 ): readonly AccountModuleRuntimeContribution[] {
-  if (!runtimeContributions) {
-    return [];
-  }
-
-  if (Array.isArray(runtimeContributions)) {
-    return Array.from(runtimeContributions);
-  }
-
-  return [runtimeContributions as AccountModuleRuntimeContribution];
+  return normalizeContribution(runtimeContributions);
 }
 
 /**

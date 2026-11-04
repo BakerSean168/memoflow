@@ -31,6 +31,7 @@ import {
 } from '@memoflow/patterns/operations';
 import type { OperationAuditRecord, OperationAuditRepository } from '@memoflow/patterns/operations';
 import { createLogger } from '@memoflow/utils/logger';
+import { normalizeContribution } from '@memoflow/utils/shared';
 import type { UserTimeContextPort } from '@memoflow/time';
 
 const logger = createLogger('NotificationModule');
@@ -119,9 +120,7 @@ function normalizeRuntimeContributions(
     | NotificationModuleRuntimeContribution
     | ReadonlyArray<NotificationModuleRuntimeContribution>,
 ): readonly NotificationModuleRuntimeContribution[] {
-  if (!runtimeContributions) return [];
-  if (Array.isArray(runtimeContributions)) return Array.from(runtimeContributions);
-  return [runtimeContributions as NotificationModuleRuntimeContribution];
+  return normalizeContribution(runtimeContributions);
 }
 
 export function createNotificationModule(
