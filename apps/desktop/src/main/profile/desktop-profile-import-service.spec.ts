@@ -1,5 +1,5 @@
 import { resolveDesktopStorageRoots } from '../paths';
-import { mkdtemp, mkdir, rm, readFile, access } from 'node:fs/promises';
+import { mkdtemp, mkdir, rm, readFile, access, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import Database from 'better-sqlite3';
@@ -420,6 +420,72 @@ it('does not invite a guest containing only account and default preferences', as
     await markProfileImportOpportunity(f.root, targetId, sourceId);
     expect(await f.service().consumePrompt(targetId)).toBeNull();
   } finally {
+    await f.dispose();
+  }
+});
+
+it('completes a used local profile import to a registered target and removes its source after real manifest verification', async () => {
+  const f = await fixture();
+  const phases: Array<{ phase: string }> = [];
+  const save = ProfileImportJournal.prototype.save;
+  const journalSpy = vi
+    .spyOn(ProfileImportJournal.prototype, 'save')
+    .mockImplementation(async function (this: ProfileImportJournal, entry) {
+      phases.push(JSON.parse(JSON.stringify(entry)));
+      return save.call(this, entry);
+    });
+  await mkdir(path.join(f.source.storageDir, 'local-agents/model-catalog'), { recursive: true });
+  const mastra = new Database(path.join(f.source.storageDir, 'mastra.db'));
+  try {
+    mastra.pragma('journal_mode = WAL');
+    mastra.exec(`CREATE TABLE memoflow_goal_event_meta(id INTEGER PRIMARY KEY CHECK(id=1),epoch TEXT NOT NULL);
+      INSERT INTO memoflow_goal_event_meta VALUES(1,'00000000-0000-4000-8000-000000000865');`);
+    await writeFile(
+      path.join(f.source.storageDir, 'local-agents/model-catalog', 'a'.repeat(64) + '.json'),
+      '{"revision":1}',
+    );
+    f.remove.mockImplementation(async () => {
+      mastra.close();
+      f.src.close();
+      await rm(f.source.profileDir, { recursive: true });
+    });
+    const prepared = await f
+      .service()
+      .prepare({ requestId, sourceProfileId: sourceId, targetProfileId: targetId });
+    expect(prepared.blockers).toEqual([]);
+    expect(
+      await f.service().commit({ requestId, targetProfileId: targetId, deleteSource: true }),
+    ).toMatchObject({ phase: 'committed', localVerified: false });
+    expect(f.remove).not.toHaveBeenCalled();
+    await f.sync();
+    expect(await f.service().recover({ requestId, targetProfileId: targetId })).toMatchObject({
+      phase: 'completed',
+      serverVerified: true,
+      localVerified: true,
+      sourceUnchanged: true,
+      blockers: [],
+    });
+    await expect(access(f.source.profileDir)).rejects.toMatchObject({ code: 'ENOENT' });
+    expect(f.remove).toHaveBeenCalledOnce();
+    expect(phases.map((entry) => entry.phase)).toEqual(
+      expect.arrayContaining([
+        'prepared',
+        'preflight',
+        'committing',
+        'committed',
+        'verified',
+        'cleanup_pending',
+        'completed',
+      ]),
+    );
+    if (process.env.VERIFY_865_DIR)
+      await writeFile(
+        path.join(process.env.VERIFY_865_DIR, 'service-journal-phases.json'),
+        JSON.stringify(phases, null, 2),
+      );
+  } finally {
+    journalSpy.mockRestore();
+    if (mastra.open) mastra.close();
     await f.dispose();
   }
 });
