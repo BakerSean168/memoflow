@@ -30,6 +30,8 @@ import AccountAvatarUploader from './AccountAvatarUploader.vue';
 import { useAuthenticationStore } from '../../authentication/stores/authentication-store';
 import { ProfileAccessChannels } from '@memoflow/desktop-contracts';
 
+withDefaults(defineProps<{ showProfile?: boolean }>(), { showProfile: true });
+
 const { t } = useI18n();
 const { SettingsDangerZone } = accountUiHost.components;
 const { isDesktopSignOut, confirmSignOut, executeSignOut } = useAccountSignOut();
@@ -139,7 +141,7 @@ onMounted(() => {
 
 <template>
   <div data-testid="account-center-view" class="space-y-6">
-    <Card class="border-border/70">
+    <Card v-if="showProfile" class="border-border/70">
       <CardHeader>
         <CardTitle>{{ t('account.center') }}</CardTitle>
         <CardDescription>{{ t('account.description') }}</CardDescription>

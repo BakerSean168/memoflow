@@ -12,7 +12,7 @@ const externalAgents = inject(settingUiHost.EXTERNAL_AGENT_SERVICE_KEY, null);
 
 <template>
   <section class="space-y-8" data-testid="account-settings-section">
-    <AccountProfileSection />
+    <AccountProfileSection :show-profile="false" />
     <CloudPasswordSection v-if="cloudPasswordService" />
     <ExternalAgentConnectionsSection v-if="externalAgents" />
   </section>
