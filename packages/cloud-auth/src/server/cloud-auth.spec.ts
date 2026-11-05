@@ -1,3 +1,4 @@
+import { deleteCloudAccount } from './account-security.js';
 import { describe, expect, it, vi } from 'vitest';
 import { createCloudAuth, type CloudPrincipal } from './cloud-auth.js';
 
@@ -449,5 +450,55 @@ describe('cloud auth contract', () => {
     expect(signInRes.status).toBe(403);
     const body2 = (await signInRes.json()) as { error: string };
     expect(body2.error).toBe('Account closure in progress or completed');
+  });
+});
+
+describe('permanent cloud account deletion', () => {
+  it('removes restricting rows and orphan queues in the same transaction before the cloud identity', async () => {
+    const order: string[] = [];
+    const models = [
+      'walletTransaction',
+      'taskOccurrence',
+      'taskPlanHistory',
+      'notificationDispatchOutbox',
+      'routineOccurrence',
+      'outboxMessage',
+      'taskGoalOutbox',
+      'notificationDeliveryDecisionRecord',
+      'notificationPreference',
+      'scheduleRebuildOutbox',
+      'scheduleDomainEventOutbox',
+      'accountClosureOperation',
+      'operationAuditLog',
+      'cloudAuthVerification',
+    ];
+    const tx = Object.fromEntries(
+      models.map((model) => [
+        model,
+        {
+          deleteMany: vi.fn(async () => {
+            order.push(model);
+            return { count: 1 };
+          }),
+        },
+      ]),
+    );
+    tx.cloudAuthUser = {
+      findUnique: vi.fn().mockResolvedValue({ email: 'person@example.com' }),
+      delete: vi.fn(async () => {
+        order.push('cloudAuthUser');
+      }),
+    } as never;
+    const database = { $transaction: vi.fn(async (fn: (tx: unknown) => Promise<void>) => fn(tx)) };
+    await deleteCloudAccount(database as never, 'user-1');
+    expect(database.$transaction).toHaveBeenCalledOnce();
+    expect(order.at(-1)).toBe('cloudAuthUser');
+    expect(tx.taskOccurrence!.deleteMany).toHaveBeenCalledWith({ where: { identityId: 'user-1' } });
+    expect(tx.operationAuditLog!.deleteMany).toHaveBeenCalledWith({
+      where: { actorIdentityId: 'user-1' },
+    });
+    expect(tx.cloudAuthVerification!.deleteMany).toHaveBeenCalledWith({
+      where: { identifier: 'person@example.com' },
+    });
   });
 });

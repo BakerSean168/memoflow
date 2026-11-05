@@ -282,3 +282,131 @@ describe('email and password auth flow', () => {
     await expect(expired.json()).resolves.toMatchObject({ code: 'TOKEN_EXPIRED' });
   });
 });
+
+describe('account security', () => {
+  async function signedIn() {
+    const fixture = createAuthFlowFixture();
+    await fixture.post('/sign-up/email', {
+      email: 'old@example.com',
+      password: PASSWORD,
+      name: 'Person',
+    });
+    const link = fixture.sentEmails[0]!.url;
+    expect((await fixture.auth.handler(new Request(link))).status).toBe(302);
+    const signIn = await fixture.post('/sign-in/email', {
+      email: 'old@example.com',
+      password: PASSWORD,
+    });
+    const { token } = (await signIn.json()) as { token: string };
+    const headers = { authorization: `Bearer ${token}`, 'content-type': 'application/json' };
+    const post = (path: string, body: unknown) =>
+      fixture.request(path, { method: 'POST', headers, body: JSON.stringify(body) });
+    return { ...fixture, headers, securedPost: post };
+  }
+
+  it('rechecks the password, verifies the new inbox and notifies the old inbox only after confirmation', async () => {
+    const fixture = await signedIn();
+    const wrong = await fixture.securedPost('/account-security/change-email', {
+      password: 'incorrect-password',
+      newEmail: 'new@example.com',
+    });
+    expect(wrong.status).toBe(400);
+    expect(await wrong.json()).toMatchObject({ code: 'INVALID_PASSWORD' });
+    expect(fixture.sentEmails).toHaveLength(1);
+    expect(
+      (
+        await fixture.securedPost('/account-security/change-email', {
+          password: PASSWORD,
+          newEmail: 'new@example.com',
+        })
+      ).status,
+    ).toBe(200);
+    expect(fixture.memory.cloudAuthUser[0]?.email).toBe('old@example.com');
+    const link = fixture.sentEmails.at(-1)!;
+    expect(link.email).toBe('new@example.com');
+    expect(
+      (await fixture.auth.handler(new Request(link.url, { headers: fixture.headers }))).status,
+    ).toBe(302);
+    expect(fixture.memory.cloudAuthUser[0]?.email).toBe('new@example.com');
+    expect(fixture.sentEmails.at(-1)).toMatchObject({
+      kind: 'email-changed',
+      email: 'old@example.com',
+    });
+    expect(
+      (await fixture.post('/sign-in/email', { email: 'old@example.com', password: PASSWORD }))
+        .status,
+    ).toBe(401);
+    expect(
+      (await fixture.post('/sign-in/email', { email: 'new@example.com', password: PASSWORD }))
+        .status,
+    ).toBe(200);
+  });
+
+  it('rejects tampered and expired change-email links without changing the login email', async () => {
+    const fixture = await signedIn();
+    const invalid = await fixture.request('/verify-email?token=invalid-token');
+    expect(invalid.status).toBe(401);
+    expect(await invalid.json()).toMatchObject({ code: 'INVALID_TOKEN' });
+    const token = await createEmailVerificationToken(
+      SECRET,
+      'old@example.com',
+      'new@example.com',
+      -1,
+      { requestType: 'change-email-verification' },
+    );
+    const expired = await fixture.request(`/verify-email?token=${token}`);
+    expect(expired.status).toBe(401);
+    expect(await expired.json()).toMatchObject({ code: 'TOKEN_EXPIRED' });
+    expect(fixture.memory.cloudAuthUser[0]?.email).toBe('old@example.com');
+  });
+
+  it('lists sessions without tokens and revokes only another session owned by the user', async () => {
+    const fixture = await signedIn();
+    await fixture.post('/sign-in/email', { email: 'old@example.com', password: PASSWORD });
+    const list = await fixture.request('/account-security/sessions', { headers: fixture.headers });
+    expect(list.status).toBe(200);
+    const sessions = (await list.json()) as Array<{ id: string; current: boolean }>;
+    expect(sessions).toHaveLength(2);
+    expect(sessions.filter((s) => s.current)).toHaveLength(1);
+    expect(sessions.every((s) => !('token' in s))).toBe(true);
+    expect(
+      (
+        await fixture.securedPost('/account-security/revoke-session', {
+          sessionId: sessions.find((s) => s.current)!.id,
+        })
+      ).status,
+    ).toBe(400);
+    expect(
+      (
+        await fixture.securedPost('/account-security/revoke-session', {
+          sessionId: 'another-users-session',
+        })
+      ).status,
+    ).toBe(400);
+    const other = sessions.find((s) => !s.current)!;
+    expect(
+      (await fixture.securedPost('/account-security/revoke-session', { sessionId: other.id }))
+        .status,
+    ).toBe(200);
+    expect(fixture.memory.cloudAuthSession).toHaveLength(1);
+  });
+
+  it('requires both password and the exact deletion word on the server', async () => {
+    const fixture = await signedIn();
+    expect(
+      (
+        await fixture.securedPost('/account-security/delete-account', {
+          password: PASSWORD,
+          confirmation: 'delete',
+        })
+      ).status,
+    ).toBe(400);
+    const response = await fixture.securedPost('/account-security/delete-account', {
+      password: 'incorrect-password',
+      confirmation: 'DELETE',
+    });
+    expect(response.status).toBe(400);
+    expect(await response.json()).toMatchObject({ code: 'INVALID_PASSWORD' });
+    expect(fixture.memory.cloudAuthUser).toHaveLength(1);
+  });
+});

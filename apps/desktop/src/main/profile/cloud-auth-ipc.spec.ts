@@ -82,6 +82,7 @@ describe('registerCloudAuthIpc', () => {
 
     expect([...handlers.keys()].sort()).toEqual([...Object.values(CloudAuthChannels)].sort());
     expect(Object.keys(CloudAuthChannels)).toEqual([
+      'ACCOUNT_SECURITY',
       'SIGN_OUT',
       'SIGN_OUT_ACCOUNT',
       'SESSION',

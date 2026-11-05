@@ -118,6 +118,7 @@ export const ProfileAccessChannels = {
 } as const;
 
 export const CloudAuthChannels = {
+  ACCOUNT_SECURITY: 'cloud-auth:account-security',
   SIGN_OUT: 'cloud-auth:sign-out',
   /**
    * "退出账号": the in-app action that ends the active account. It reuses the
