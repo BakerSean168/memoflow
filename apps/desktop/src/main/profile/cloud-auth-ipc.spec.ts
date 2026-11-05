@@ -97,6 +97,78 @@ describe('registerCloudAuthIpc', () => {
     ]);
   });
 
+  it('validates security requests and refuses a local Profile before contacting the cloud', async () => {
+    const { handlers, runtime } = registerFixture();
+    const fetchMock = vi.fn();
+    vi.stubGlobal('fetch', fetchMock);
+    const invoke = handlers.get(CloudAuthChannels.ACCOUNT_SECURITY)!;
+    expect(
+      await invoke({}, {
+        action: 'delete-account',
+        password: 'password',
+        confirmation: 'delete',
+      } as never),
+    ).toMatchObject({ ok: false, error: { code: 'INVALID_REQUEST' } });
+    runtime.getActiveProfileDescriptorSync.mockReturnValue({
+      profileId: 'profile-1',
+      profileKind: 'local',
+    } as never);
+    expect(await invoke({}, { action: 'sessions' } as never)).toMatchObject({
+      ok: false,
+      error: { code: 'PROFILE_CHANGED' },
+    });
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
+
+  it('keeps local data and the session when the cloud rejects permanent deletion', async () => {
+    const { handlers, runtime, sessions, cloudConnection } = registerFixture();
+    sessions.load.mockResolvedValue({ token: 'test-only-token' });
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockResolvedValue(
+        new Response(JSON.stringify({ code: 'INVALID_PASSWORD', message: 'Wrong password' }), {
+          status: 400,
+        }),
+      ),
+    );
+    expect(
+      await handlers.get(CloudAuthChannels.ACCOUNT_SECURITY)!({}, {
+        action: 'delete-account',
+        password: 'incorrect-password',
+        confirmation: 'DELETE',
+      } as never),
+    ).toMatchObject({ ok: false, error: { code: 'INVALID_PASSWORD' } });
+    expect(runtime.signOutActiveProfile).toHaveBeenCalledOnce();
+    expect(sessions.remove).not.toHaveBeenCalled();
+    expect(cloudConnection.cancelForProfile).not.toHaveBeenCalled();
+  });
+
+  it('deletes remotely before the unified local sign-out and cancels pending authentication', async () => {
+    const { handlers, runtime, sessions, cloudConnection } = registerFixture();
+    sessions.load.mockResolvedValue({ token: 'test-only-token' });
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValue(new Response(JSON.stringify({ status: true }), { status: 200 }));
+    vi.stubGlobal('fetch', fetchMock);
+    expect(
+      await handlers.get(CloudAuthChannels.ACCOUNT_SECURITY)!({}, {
+        action: 'delete-account',
+        password: 'current-password',
+        confirmation: 'DELETE',
+      } as never),
+    ).toMatchObject({ ok: true });
+    expect(runtime.signOutActiveProfile).toHaveBeenCalledOnce();
+    expect(fetchMock).toHaveBeenCalledWith(
+      'https://api.memo.test/api/auth/account-security/delete-account',
+      expect.objectContaining({
+        method: 'POST',
+        body: JSON.stringify({ password: 'current-password', confirmation: 'DELETE' }),
+      }),
+    );
+    expect(sessions.remove).toHaveBeenCalledWith('profile-1');
+    expect(cloudConnection.cancelForProfile).toHaveBeenCalledWith('profile-1');
+  });
+
   it('forwards a valid sign-in to the cloud sign-in service and rejects malformed input', async () => {
     const { handlers, signIn } = registerFixture();
 

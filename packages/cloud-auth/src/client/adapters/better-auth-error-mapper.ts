@@ -6,6 +6,10 @@ interface FailureProjection {
 }
 
 const PROVIDER_FAILURE_PROJECTIONS: Readonly<Record<string, FailureProjection>> = Object.freeze({
+  INVALID_PASSWORD: Object.freeze({
+    code: 'UNAUTHORIZED',
+    message: 'Current password is incorrect',
+  }),
   INVALID_EMAIL_OR_PASSWORD: Object.freeze({
     code: 'UNAUTHORIZED',
     message: 'Invalid credentials',
