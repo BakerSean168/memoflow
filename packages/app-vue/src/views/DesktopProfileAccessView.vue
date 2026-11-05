@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onBeforeUnmount, onMounted, watch } from 'vue';
+import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import {
   Avatar,
@@ -17,11 +17,13 @@ import {
   type DesktopRegisterMode,
 } from '../shared/composables/useDesktopProfiles';
 import DesktopProfileList from '../shared/components/DesktopProfileList.vue';
+import ProfileImportDialog from '../layouts/shell/ProfileImportDialog.vue';
 
 const { t } = useI18n();
 const presenter = useDesktopProfiles({ accessWindow: true });
 const {
   profiles,
+  snapshot,
   busyProfileId,
   accessView,
   passwordTarget,
@@ -62,6 +64,14 @@ const passwordInitials = computed(() => {
 const vFocusPassword = { mounted: (element: HTMLElement) => element.focus() };
 const vFocusLogin = { mounted: (element: HTMLElement) => element.focus() };
 const registerModes: readonly DesktopRegisterMode[] = ['cloud', 'local'];
+
+// Import targets the live registered Profile the gate was opened over. A cold
+// start has no active session, so the entry stays hidden rather than offering
+// an import the main process would reject with IMPORT_TARGET_REQUIRED.
+const importOpen = ref(false);
+const importTarget = computed(() =>
+  snapshot.value?.profile?.profileKind === 'registered' ? snapshot.value.profile : null,
+);
 
 function switchRegisterMode(value: unknown): void {
   if (value === 'cloud' || value === 'local') registerMode.value = value;
@@ -217,6 +227,16 @@ watch(
         </svg>
         {{ t('auth.profileAccess.githubSignIn') }}
       </Button>
+
+      <button
+        v-if="importTarget"
+        type="button"
+        class="text-xs text-foreground/60 transition-colors hover:text-foreground/90"
+        data-testid="desktop-profile-import-profile"
+        @click="importOpen = true"
+      >
+        {{ t('shell.profileImport.title') }}
+      </button>
 
       <div class="flex items-center justify-between text-xs text-foreground/60">
         <button
@@ -419,4 +439,11 @@ watch(
       </form>
     </section>
   </main>
+
+  <ProfileImportDialog
+    v-if="importTarget"
+    v-model:open="importOpen"
+    :target="importTarget"
+    :profiles="profiles"
+  />
 </template>

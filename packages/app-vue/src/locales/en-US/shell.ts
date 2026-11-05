@@ -141,15 +141,11 @@ export default {
       REAUTH_REQUIRED: 'Sign-in required',
       unknown: 'Not checked',
     },
-    manageDescription:
-      'Profiles keep separate local data. Removing one from this device does not close its cloud account. Change the local account password in Settings → Account & privacy after opening the Profile.',
     passwordSettings: 'Password settings',
     switchAccount: 'Switch account',
     createProfile: 'Create local account',
     currentProfile: 'Current Profile',
-    manageProfiles: 'Manage accounts',
     menuAddAccount: 'Add account',
-    addAccount: 'Add another account',
     reauthenticate: 'Reauthenticate this account',
 
     menu: 'Account menu',
