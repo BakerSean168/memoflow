@@ -346,6 +346,7 @@ describe('MastraAIRuntime Assistant approval protocol', () => {
           agentPresets: {},
           revision: 2,
         });
+      if (decision === 'deny') await permissions.saveSettings('identity-a', { preset: 'read_only', agentPresets: {}, revision: 2 });
       vi.spyOn(runtime.history, 'ensureConversation').mockResolvedValue();
       let calls = 0;
       const model = {
@@ -424,7 +425,7 @@ describe('MastraAIRuntime Assistant approval protocol', () => {
           identityId: 'identity-a',
           conversationId: `real-${decision}`,
           permissionMode:
-            decision === 'auto' ? 'auto-approve' : decision === 'deny' ? 'read-only' : undefined,
+            decision === 'auto' || decision === 'deny' ? 'full-access' : undefined,
           content: 'create',
           context: turnContext,
         }))
@@ -863,7 +864,7 @@ describe('MastraAIRuntime Assistant approval protocol', () => {
     const snapshots = await first.runtime.mastra.getStorage()!.getStore('workflows');
     vi.spyOn(snapshots!, 'loadWorkflowSnapshot').mockResolvedValue({
       status: 'suspended',
-      requestContext: { permissionMode: 'supervised' },
+      requestContext: { permissionMode: 'approval-required' },
     } as never);
     const suspendedAgent = first.runtime.assistant as never as {
       listSuspendedRuns: (input: { threadId: string; resourceId: string }) => Promise<{
@@ -953,7 +954,7 @@ describe('MastraAIRuntime Assistant approval protocol', () => {
     const snapshots = await first.runtime.mastra.getStorage()!.getStore('workflows');
     vi.spyOn(snapshots!, 'loadWorkflowSnapshot').mockResolvedValue({
       status: 'suspended',
-      requestContext: { permissionMode: 'supervised' },
+      requestContext: { permissionMode: 'approval-required' },
     } as never);
     const agent = first.runtime.assistant as never as {
       listSuspendedRuns: (query: unknown) => Promise<unknown>;
@@ -1076,7 +1077,7 @@ describe('MastraAIRuntime Assistant approval protocol', () => {
         conversationId: 'ask-approval',
         content: 'ask',
         permissionMode:
-          process.env['MEMOFLOW_NATIVE_RESTART_MODE'] === 'read-only' ? 'read-only' : 'supervised',
+          process.env['MEMOFLOW_NATIVE_RESTART_MODE'] === 'full-access' ? 'full-access' : 'approval-required',
         context: context('identity-a', 'fixture'),
       }))
         events.push(event);
@@ -1121,18 +1122,19 @@ describe('MastraAIRuntime Assistant approval protocol', () => {
   );
 
   it.each([
-    [false, 'answer', 'supervised'],
-    [true, 'answer', 'supervised'],
-    [false, 'cancel', 'supervised'],
-    [true, 'cancel', 'supervised'],
-    [false, 'answer', 'read-only'],
-    [true, 'answer', 'read-only'],
+    [false, 'answer', 'approval-required'],
+    [true, 'answer', 'approval-required'],
+    [false, 'cancel', 'approval-required'],
+    [true, 'cancel', 'approval-required'],
+    [false, 'answer', 'full-access'],
+    [true, 'answer', 'full-access'],
   ] as const)(
     'settles real ask_user through the session without orphaning the run (restart=%s action=%s mode=%s)',
     async (restart, action, permissionMode) => {
       const first = await createRuntime();
       let { runtime, createRoutine } = first;
       const { modelResolver } = first;
+      if (permissionMode === 'full-access') await first.permissions.saveSettings('identity-a', { preset: 'read_only', agentPresets: {}, revision: 2 });
       vi.spyOn(runtime.history, 'ensureConversation').mockResolvedValue();
       let calls = restart ? 1 : 0;
       const model = {
@@ -1351,7 +1353,7 @@ describe('MastraAIRuntime Assistant approval protocol', () => {
         threadId: required.conversationId,
         resourceId: 'identity-a',
       });
-      if (permissionMode === 'read-only') {
+      if (permissionMode === 'full-access') {
         expect(parked.runs).toEqual([]);
         expect(createRoutine).not.toHaveBeenCalled();
         return;

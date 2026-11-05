@@ -58,7 +58,7 @@ export function useComposerModelSelection(options: UseComposerModelSelectionOpti
   const agentRegistrySnapshot = catalog.snapshot;
   const modelCatalog = catalog.entries;
   const modelCatalogLoading = catalog.loading;
-  const loadAgentRegistry = catalog.refresh;
+  const loadAgentRegistry = () => catalog.refresh();
   const permissionMode = ref<AIChatPermissionMode>('approval-required');
   const nativeModelSelections = ref<Record<string, LocalAgentModelOptions>>({});
   const composerInitializing = ref(true);
