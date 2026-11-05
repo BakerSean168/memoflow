@@ -53,11 +53,7 @@ export interface NativeAgentRunInput {
 type NativeResponse = LocalAgentRequestResponse['response'];
 const accountSchema = z.object({
   account: z
-    .object({
-      type: z.string(),
-      email: z.string().nullish(),
-      planType: z.string().nullish(),
-    })
+    .object({ type: z.string(), email: z.string().nullish(), planType: z.string().nullish() })
     .nullable(),
   requiresOpenaiAuth: z.boolean(),
 });
@@ -230,9 +226,7 @@ export class CodexDriver {
         status: 'ready',
         models,
         ...(this.account?.type === 'chatgpt' && this.account.email
-          ? {
-              modelVisibilityContext: nativeModelVisibilityContext(this.connection, fingerprint),
-            }
+          ? { modelVisibilityContext: nativeModelVisibilityContext(this.connection, fingerprint) }
           : {}),
         ...(this.version ? { version: this.version } : {}),
         ...(this.account ? { account: this.account } : {}),
@@ -307,11 +301,7 @@ export class CodexDriver {
       if (input.nativeSessionId && input.nativeSessionId !== response.thread.id)
         throw new LocalAgentError('LOCAL_AGENT_SESSION_UNAVAILABLE');
       this.threadId = response.thread.id;
-      yield {
-        type: 'session',
-        nativeSessionId: this.threadId,
-        accountFingerprint,
-      };
+      yield { type: 'session', nativeSessionId: this.threadId, accountFingerprint };
       if (this.cancelled) {
         yield { type: 'cancelled' };
         return;
@@ -435,10 +425,7 @@ export class CodexDriver {
       });
     } else if (method === 'serverRequest/resolved') {
       const value = z
-        .object({
-          threadId: z.string(),
-          requestId: z.union([z.string(), z.number()]),
-        })
+        .object({ threadId: z.string(), requestId: z.union([z.string(), z.number()]) })
         .parse(params);
       if (value.threadId !== this.threadId) return;
       for (const [id, pending] of this.requests)
@@ -567,10 +554,7 @@ export class CodexDriver {
     this.cancelled = true;
     if (this.threadId && this.turnId) {
       void this.transport
-        ?.request('turn/interrupt', {
-          threadId: this.threadId,
-          turnId: this.turnId,
-        })
+        ?.request('turn/interrupt', { threadId: this.threadId, turnId: this.turnId })
         .catch(() => undefined);
       this.cancelTimer ??= setTimeout(() => {
         void this.close();

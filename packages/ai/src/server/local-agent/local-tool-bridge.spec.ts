@@ -214,10 +214,7 @@ it.each(['timeout', 'missing-handler'] as const)(
             });
             return { content: [{ type: 'text', text: 'saved' }] };
           } catch (error) {
-            return {
-              isError: true,
-              content: [{ type: 'text', text: (error as Error).message }],
-            };
+            return { isError: true, content: [{ type: 'text', text: (error as Error).message }] };
           }
         });
       },
@@ -285,10 +282,7 @@ it.each(['approve_once', 'approve_conversation', 'approve_always', 'decline'] as
             });
             return { content: [{ type: 'text', text: 'saved' }] };
           } catch {
-            return {
-              isError: true,
-              content: [{ type: 'text', text: 'denied' }],
-            };
+            return { isError: true, content: [{ type: 'text', text: 'denied' }] };
           }
         });
       },
@@ -341,9 +335,7 @@ it.each(['approve_once', 'approve_conversation', 'approve_always', 'decline'] as
       await call(grant);
       expect(writes).toBe(decision === 'decline' ? 0 : 2);
       expect(requests).toBe(['approve_conversation', 'approve_always'].includes(decision) ? 1 : 2);
-      const snapshot = await bridge.permissions('owner', {
-        action: 'snapshot',
-      });
+      const snapshot = await bridge.permissions('owner', { action: 'snapshot' });
       expect(snapshot.audit).toHaveLength(2);
       expect(snapshot.rules.filter((rule) => rule.source === 'user')).toHaveLength(0);
       if (decision === 'approve_always') {
@@ -364,11 +356,7 @@ it.each(['approve_once', 'approve_conversation', 'approve_always', 'decline'] as
         });
         await bridge.permissions('owner', {
           action: 'settings',
-          settings: {
-            ...snapshot.settings,
-            preset: 'confirm_each',
-            customMatrix: undefined,
-          },
+          settings: { ...snapshot.settings, preset: 'confirm_each', customMatrix: undefined },
         });
         await call(grant);
         expect(requests).toBe(2);
@@ -459,20 +447,10 @@ it('replaces old matrix prohibitions when the user selects a new global preset',
         { read: 'allow', create: 'deny', update: 'ask', delete: 'ask' },
       ]),
     );
-    const settings = PermissionSettingsSchema.parse({
-      preset: 'custom',
-      customMatrix,
-    });
-    const first = await bridge.permissions('owner', {
-      action: 'settings',
-      settings,
-    });
+    const settings = PermissionSettingsSchema.parse({ preset: 'custom', customMatrix });
+    const first = await bridge.permissions('owner', { action: 'settings', settings });
     expect(first.rules).toContainEqual(
-      expect.objectContaining({
-        id: 'matrix:goal:create',
-        effect: 'deny',
-        agentId: null,
-      }),
+      expect.objectContaining({ id: 'matrix:goal:create', effect: 'deny', agentId: null }),
     );
     const raised = await bridge.permissions('owner', {
       action: 'settings',
@@ -508,10 +486,7 @@ it('makes legacy tools visible after settings changes without discarding migrate
   try {
     const migrated = await bridge.permissions('owner', { action: 'snapshot' });
     expect(migrated.rules).toContainEqual(
-      expect.objectContaining({
-        id: `legacy:${connection.id}:goal:create`,
-        effect: 'deny',
-      }),
+      expect.objectContaining({ id: `legacy:${connection.id}:goal:create`, effect: 'deny' }),
     );
     const changed = await bridge.permissions('owner', {
       action: 'settings',
