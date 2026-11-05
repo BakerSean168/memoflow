@@ -89,6 +89,14 @@ export default {
     birthday: '生日',
     editProfile: '编辑资料',
   },
+  profileEditor: {
+    title: '编辑个人资料',
+    description: '昵称就是你的唯一展示名，修改后会直接保存到当前账号。',
+    unsaved: '别忘了保存您的更改！',
+    reset: '重置',
+    save: '保存',
+    saving: '保存中…',
+  },
   avatar: {
     saved: '头像已更新',
     uploading: '正在处理头像...',
