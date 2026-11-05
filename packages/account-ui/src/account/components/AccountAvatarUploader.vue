@@ -102,9 +102,7 @@ async function handleFile(event: Event): Promise<void> {
       @change="handleFile"
     />
     <p class="text-xs text-muted-foreground">
-      {{
-        isUploading ? t('account.avatar.uploading') : t('account.profile.avatarRecommendation')
-      }}
+      {{ isUploading ? t('account.avatar.uploading') : t('account.profile.avatarRecommendation') }}
     </p>
   </div>
 </template>

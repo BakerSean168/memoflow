@@ -11,11 +11,6 @@ import type { AccountAvatarStore } from './account-avatar-store';
  */
 const avatarRevision = ref(0);
 
-/** Exposed for tests that need to reset the shared revision between cases. */
-export function resetAccountAvatarRevisionForTests(): void {
-  avatarRevision.value = 0;
-}
-
 /**
  * Resolve the current account's local avatar and expose the upload action.
  *
@@ -75,5 +70,3 @@ export function useAccountAvatar(fallbackUrl?: () => string | null) {
     upload,
   };
 }
-
-export { avatarRevision };
