@@ -4954,16 +4954,6 @@
       ]
     },
     {
-      "path": "packages/app-vue/src/layouts/shell/ManageAccountsDialog.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/app-vue/vitest.store-coverage.config.ts"
-      ]
-    },
-    {
       "path": "packages/app-vue/src/layouts/shell/ModuleCapsule.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -12857,7 +12847,7 @@
       "type": "measurement",
       "suite": "coverage",
       "runner": "vitest",
-      "fileCount": 92
+      "fileCount": 91
     },
     {
       "id": "packages/data-portability/vitest.config.ts",
@@ -13392,7 +13382,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 92
+      "fileCount": 91
     },
     {
       "id": "packages/assets/vitest.config.ts",
@@ -14025,7 +14015,6 @@
       "packages/app-vue/src/layouts/shell/CloudConnectionDialog.spec.ts",
       "packages/app-vue/src/layouts/shell/ConversationSidebar.spec.ts",
       "packages/app-vue/src/layouts/shell/DesktopUpdateShellIndicator.spec.ts",
-      "packages/app-vue/src/layouts/shell/ManageAccountsDialog.spec.ts",
       "packages/app-vue/src/layouts/shell/ModuleCapsule.spec.ts",
       "packages/app-vue/src/layouts/shell/PanelErrorBoundary.spec.ts",
       "packages/app-vue/src/layouts/shell/ProfileImportDialog.spec.ts",
@@ -14437,7 +14426,7 @@
   "duplicate": [],
   "unexpected": [],
   "counts": {
-    "unit": 1189,
+    "unit": 1188,
     "integration": 58,
     "smoke": 3,
     "boundary-ipc": 6,

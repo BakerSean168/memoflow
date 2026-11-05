@@ -1,4 +1,4 @@
-import { enterLocalWorkspace, LOCAL_PASSWORD, unlockLocalProfile } from './support/profile-access';
+import { enterLocalWorkspace, LOCAL_PASSWORD } from './support/profile-access';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
@@ -430,22 +430,29 @@ test('real Windows Electron Workspace IPC authenticates start, ack, stop, cursor
 
     // The same Electron instance switches to a new isolated Guest, without copying any app data.
     await main.getByTestId('shell-account-menu').click();
-    await main.getByTestId('shell-open-settings').click();
-    await main.getByTestId('settings-tab-account').click();
-    await main.getByTestId('shell-manage-profiles').click();
-    await expect(main.getByTestId('manage-accounts-dialog')).toBeVisible({ timeout: 12000 });
-    await main
-      .getByTestId('desktop-profile-create')
-      .locator('input')
-      .first()
-      .fill('QA Workspace other owner');
-    await main
-      .getByTestId('desktop-profile-create')
-      .locator('input[type="password"]')
-      .fill(LOCAL_PASSWORD);
+    await main.getByTestId('shell-switch-account').click();
     const secondGatePromise = app.waitForEvent('window');
-    await main.getByTestId('desktop-profile-create').getByRole('button').click();
-    const secondMain = await unlockLocalProfile(app, await secondGatePromise);
+    await main.getByTestId('shell-add-account').click();
+    const secondGate = await secondGatePromise;
+    await expect(secondGate.getByTestId('desktop-profile-login-state')).toBeVisible();
+    await secondGate.getByTestId('desktop-profile-go-register').click();
+    await secondGate.getByTestId('desktop-profile-register-mode-local').click();
+    await secondGate.getByTestId('desktop-profile-register-name').fill('QA Workspace other owner');
+    await secondGate.getByTestId('desktop-profile-register-password').fill(LOCAL_PASSWORD);
+    await secondGate.getByTestId('desktop-profile-register-confirm').fill(LOCAL_PASSWORD);
+    const secondMainPromise = app.waitForEvent('window', {
+      predicate: async (window) => {
+        try {
+          await window.getByTestId('app-shell').waitFor({ state: 'visible', timeout: 45_000 });
+          return true;
+        } catch {
+          return false;
+        }
+      },
+      timeout: 60_000,
+    });
+    await secondGate.getByTestId('desktop-profile-register-submit').click();
+    const secondMain = await secondMainPromise;
     await expect(secondMain.getByTestId('app-shell')).toBeVisible({
       timeout: 18000,
     });
