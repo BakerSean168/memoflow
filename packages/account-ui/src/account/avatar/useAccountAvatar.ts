@@ -3,7 +3,6 @@ import { accountUiHost } from '../../account-ui-host';
 import type { DesktopAccessSnapshot } from '@memoflow/desktop-contracts';
 import { useAccountStore } from '../stores/account-store';
 import { processAvatarFile } from './avatar-image';
-import type { AccountAvatarStore } from './account-avatar-store';
 
 /**
  * Bumped after a successful save so every mounted surface re-reads the same
