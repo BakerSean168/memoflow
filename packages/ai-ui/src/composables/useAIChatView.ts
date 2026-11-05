@@ -748,13 +748,6 @@ export function useAIChatView(options: UseAIChatViewOptions) {
             : 'agent:' + modelSelection.selectedAgentId.value;
         if (composerSwitchBlockedReason(key)) return;
         composerModel.bumpExplicitRuntimeSelection();
-        if (
-          chatSession.runtimeChoice.value.runtimeKind !== choice.runtimeKind ||
-          (choice.runtimeKind === 'local_agent' &&
-            chatSession.runtimeChoice.value.runtimeKind === 'local_agent' &&
-            chatSession.runtimeChoice.value.connectionId !== choice.connectionId)
-        )
-          permissionMode.value = 'supervised';
         chatSession.runtimeChoice.value = choice;
       },
       async setDefault() {

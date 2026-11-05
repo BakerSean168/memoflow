@@ -62,7 +62,6 @@ export default {
     noEffortLevels: '无可用档位',
     selectModelToAdjust: '选择此模型后可调整其选项。',
     standardMode: '标准',
-    instanceManagedAccess: '由 Agent 实例管理，不支持会话内覆盖。',
     serviceTier: '服务等级',
     defaultOptions: '默认',
     noExecutableTraits:
@@ -73,13 +72,12 @@ export default {
     configure: '配置 Agent',
     notConfigured: '此 Agent 尚未配置模型。',
     disabled: '已停用',
-    supervised: '需要确认',
-    supervisedHint: '需要权限的操作逐次确认，现有账号及业务授权限制仍然生效。',
-    'read-only': '只读',
-    readOnlyHint: '本轮对话仅读取 MemoFlow 上下文，不执行修改数据的工具，也不启动写入工作流。',
-    'auto-approve': '自动批准',
-    autoApproveHint:
-      '本轮自动批准原生 Agent 发出的权限请求，但不会扩大 MemoFlow 业务授权或绕过原生沙盒。',
+    runtimeModes: {
+      'approval-required': { label: '需要确认', hint: '执行命令和修改文件前询问。' },
+      'auto-accept-edits': { label: '自动接受编辑', hint: '自动批准文件编辑，其他操作仍需询问。' },
+      'auto': { label: '自动', hint: '支持的提供方自动批准例行操作，其他提供方仍需询问。' },
+      'full-access': { label: '完全访问', hint: '允许执行命令和编辑文件，无需逐项确认。' },
+    },
     unsupportedPermission: '当前 Agent 不支持这种权限模式。',
     readOnlyWorkflow: '只读对话只讨论当前请求，不启动写入工作流。',
   },

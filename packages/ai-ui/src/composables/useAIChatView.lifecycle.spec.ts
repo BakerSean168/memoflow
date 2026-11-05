@@ -742,14 +742,14 @@ describe('AI conversation restoration and business navigation', () => {
     await flushPromises();
     fixture.session.chatConversationId.value = 'same-conversation';
     fixture.session.chatMessage.value = 'Keep draft';
-    wrapper.vm.permissionMode = 'read-only';
+    wrapper.vm.permissionMode = 'full-access';
     await flushPromises();
     await wrapper.vm.selectComposerModel('agent:work::p1::model', 'agent:work');
     expect(fixture.session.startNewConversation).not.toHaveBeenCalled();
     expect(fixture.session.chatConversationId.value).toBe('same-conversation');
     expect(fixture.session.chatMessage.value).toBe('Keep draft');
     expect(wrapper.vm.selectedModelKey).toBe('agent:work::p1::model');
-    expect(wrapper.vm.permissionMode).toBe('supervised');
+    expect(wrapper.vm.permissionMode).toBe('approval-required');
     fixture.session.chatLoading.value = true;
     await wrapper.vm.selectComposerModel('agent:mastra::p1::model', 'agent:mastra');
     expect(wrapper.vm.selectedModelKey).toBe('agent:work::p1::model');

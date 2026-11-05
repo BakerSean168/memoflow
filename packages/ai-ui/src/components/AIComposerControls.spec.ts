@@ -727,34 +727,30 @@ describe('integrated picker configuration', () => {
     wrapper.unmount();
   });
 
-  it('uses the existing permission event for built-in access and highlights the current value', async () => {
-    const wrapper = setup({ permissionMode: 'read-only' });
-    expect(wrapper.get('[data-testid="ai-model-picker-permissions"]').text()).toContain('只读');
-    expect(
-      wrapper
-        .get('[data-testid="ai-model-picker-permission-read-only"]')
-        .attributes('aria-checked'),
-    ).toBe('true');
-    await wrapper.get('[data-testid="ai-model-picker-permission-supervised"]').trigger('click');
-    expect(wrapper.emitted('permission')).toEqual([['supervised']]);
+  it('offers four icon segments, previews on hover/focus, and emits a session choice', async () => {
+    const wrapper = setup({ native: true, permissionMode: 'full-access' });
+    expect(wrapper.get('[data-testid="ai-model-picker-permissions"]').text()).toContain('完全访问');
+    expect(wrapper.get('[data-testid="ai-model-picker-permission-full-access"]').attributes('aria-checked')).toBe('true');
+    const edits = wrapper.get('[data-testid="ai-model-picker-permission-auto-accept-edits"]');
+    await edits.trigger('mouseenter');
+    expect(wrapper.get('[data-testid="ai-permission-preview"]').text()).toContain('自动接受编辑');
+    await edits.trigger('focus');
+    expect(wrapper.get('[data-testid="ai-permission-preview"]').text()).toContain('其他操作仍需询问');
+    await edits.trigger('click');
+    expect(wrapper.emitted('permission')).toEqual([['auto-accept-edits']]);
+    expect(wrapper.get('[data-testid="ai-model-picker-options"]').text()).not.toContain('权限');
     wrapper.unmount();
   });
 
-  it('reports actual instance access without offering an ineffective native override', () => {
+  it('intersects declared provider capabilities and resolves an unsupported mode', () => {
     const wrapper = setup({
       native: true,
-      agents: [{ ...agents[0], nativePermissionMode: 'auto-approve' }],
+      permissionMode: 'auto',
+      agents: [{ ...agents[0], supportedRuntimeModes: ['approval-required', 'full-access'] }],
     });
-    const trigger = wrapper.get('[data-testid="ai-model-picker-permissions"]');
-    expect(trigger.text()).toContain('自动批准');
-    const option = wrapper.get('[data-testid="ai-model-picker-permission-auto-approve"]');
-    expect(option.attributes('disabled')).toBeDefined();
-    expect(option.attributes('aria-disabled')).toBe('true');
-    expect(option.text()).toContain('由 Agent 实例管理');
-    expect(wrapper.find('[data-testid="ai-model-picker-permission-supervised"]').exists()).toBe(
-      false,
-    );
-    expect(wrapper.emitted('permission')).toBeUndefined();
+    expect(wrapper.get('[data-testid="ai-model-picker-permissions"]').text()).toContain('需要确认');
+    expect(wrapper.find('[data-testid="ai-model-picker-permission-auto"]').exists()).toBe(false);
+    expect(wrapper.find('[data-testid="ai-model-picker-permission-full-access"]').exists()).toBe(true);
     wrapper.unmount();
   });
 
@@ -792,7 +788,7 @@ describe('integrated picker configuration', () => {
     const wrapper = setup({
       selectedAgentId: '',
       selectedModelKey: '',
-      agents: [{ ...agents[2], nativePermissionMode: 'supervised' }],
+      agents: [{ ...agents[2], supportedRuntimeModes: ['approval-required'] }],
       models: [],
     });
     await openModels(wrapper);

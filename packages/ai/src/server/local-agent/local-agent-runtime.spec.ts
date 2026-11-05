@@ -308,8 +308,8 @@ describe('native directory snapshot for every driver', () => {
 });
 
 describe('local Agent conversation execution', () => {
-  it.each(['supervised', 'auto-approve'] as const)(
-    'enforces saved %s native permissions independently of per-turn business choices',
+  it.each(['approval-required', 'full-access'] as const)(
+    'enforces session %s native permissions independently of saved instance defaults',
     async (permissionMode) => {
       const { store, conversation } = await setup();
       const saved = await store.getConnection('owner', conversation.connectionId);
@@ -319,7 +319,7 @@ describe('local Agent conversation execution', () => {
         executablePath: saved.executablePath,
         enabled: saved.enabled,
         writeScopes: saved.writeScopes,
-        nativePermissionMode: permissionMode,
+        nativePermissionMode: permissionMode === 'approval-required' ? 'auto-approve' : 'supervised',
       });
       const respond = vi.fn(() => true);
       const runtime = new LocalAgentRuntime({
@@ -364,10 +364,10 @@ describe('local Agent conversation execution', () => {
         identityId: 'owner',
         conversationId: conversation.id,
         content: 'Proceed',
-        permissionMode: permissionMode === 'supervised' ? 'auto-approve' : 'supervised',
+        permissionMode,
       }))
         events.push(event);
-      if (permissionMode === 'auto-approve') {
+      if (permissionMode === 'full-access') {
         expect(respond).toHaveBeenCalledOnce();
         expect(respond).toHaveBeenCalledWith('permission-1', {
           type: 'permission',
@@ -403,7 +403,7 @@ describe('local Agent conversation execution', () => {
             identityId: 'owner',
             conversationId: conversation.id,
             content: 'Read',
-            permissionMode: 'read-only',
+            permissionMode: 'read-only' as never,
           })
           .next(),
       ).rejects.toMatchObject({ code: 'LOCAL_AGENT_PERMISSION_DENIED' });
@@ -1528,7 +1528,7 @@ it.each(['approve_once', 'decline'] as const)(
       cwd: '/tmp',
       bridge: {
         async open(input) {
-          expect(input.permissionMode).toBe('supervised');
+          expect(input.permissionMode).toBe('approval-required');
           requestApproval = input.requestApproval!;
           return { url: 'test:bridge', token: 'test', revoke() {} };
         },

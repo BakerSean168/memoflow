@@ -72,7 +72,6 @@ export default {
     noEffortLevels: 'No effort levels',
     selectModelToAdjust: 'Select this model to change its options.',
     standardMode: 'Standard',
-    instanceManagedAccess: 'Managed by the Agent instance; session overrides are not supported.',
     serviceTier: 'Service tier',
     defaultOptions: 'Default',
     noExecutableTraits:
@@ -83,15 +82,12 @@ export default {
     configure: 'Configure Agent',
     notConfigured: 'No models are configured for this Agent.',
     disabled: 'Disabled',
-    supervised: 'Supervised',
-    supervisedHint:
-      'Ask before actions that require permission. Existing owner scopes still apply.',
-    'read-only': 'Read only',
-    readOnlyHint:
-      'This chat may read MemoFlow context but cannot execute data-changing tools or start write workflows.',
-    'auto-approve': 'Auto-approve',
-    autoApproveHint:
-      "Approve this native Agent's permission requests for this turn. This does not grant new MemoFlow scopes or bypass its sandbox.",
+    runtimeModes: {
+      'approval-required': { label: 'Supervised', hint: 'Ask before commands and file changes.' },
+      'auto-accept-edits': { label: 'Auto-accept edits', hint: 'Auto-approve edits, ask before other actions.' },
+      'auto': { label: 'Auto', hint: 'Supported providers approve routine actions; others still ask.' },
+      'full-access': { label: 'Full access', hint: 'Allow commands and edits without prompts.' },
+    },
     unsupportedPermission: 'This Agent does not support that permission mode.',
     readOnlyWorkflow: 'Read-only chat will discuss your request without starting a write workflow.',
   },
