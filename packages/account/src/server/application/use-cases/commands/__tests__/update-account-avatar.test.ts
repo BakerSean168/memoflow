@@ -51,11 +51,9 @@ describe('UpdateAccountAvatarUseCase', () => {
   it('stores the authenticated account avatar bytes and last-write-wins timestamp', async () => {
     const account = accountFor();
     const avatars = avatarRepository();
-    const useCase = new UpdateAccountAvatarUseCase(
-      repositoryWith(account),
-      avatars,
-      { now: () => 2_000 } as never,
-    );
+    const useCase = new UpdateAccountAvatarUseCase(repositoryWith(account), avatars, {
+      now: () => 2_000,
+    } as never);
 
     const result = await useCase.execute({ dataUrl: DATA_URL }, context());
 
@@ -71,11 +69,9 @@ describe('UpdateAccountAvatarUseCase', () => {
     const account = accountFor();
     const avatars = avatarRepository();
     const accountRepository = repositoryWith(account);
-    const useCase = new UpdateAccountAvatarUseCase(
-      accountRepository,
-      avatars,
-      { now: () => 2_000 } as never,
-    );
+    const useCase = new UpdateAccountAvatarUseCase(accountRepository, avatars, {
+      now: () => 2_000,
+    } as never);
 
     const result = await useCase.execute(
       { dataUrl: DATA_URL, targetAccountId: ID_B.toString() },
@@ -92,11 +88,9 @@ describe('UpdateAccountAvatarUseCase', () => {
   it('rejects a payload that is not a PNG data URL', async () => {
     const account = accountFor();
     const avatars = avatarRepository();
-    const useCase = new UpdateAccountAvatarUseCase(
-      repositoryWith(account),
-      avatars,
-      { now: () => 2_000 } as never,
-    );
+    const useCase = new UpdateAccountAvatarUseCase(repositoryWith(account), avatars, {
+      now: () => 2_000,
+    } as never);
 
     const result = await useCase.execute(
       { dataUrl: 'data:image/png;base64,bm90LWEtcG5n' },

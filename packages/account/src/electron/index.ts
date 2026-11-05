@@ -76,8 +76,15 @@
 import { ipcMain } from 'electron';
 import { ok } from '@memoflow/transport-contracts/result';
 import { AccountChannels, type IElectronModuleContext } from '@memoflow/desktop-contracts';
-import type { CloseAccountReq, UpdateAccountReq } from '@memoflow/account-contracts';
-import { CloseAccountSchema } from '@memoflow/account-contracts';
+import type {
+  AccountAvatarContent,
+  AccountAvatarMeta,
+  AccountAvatarUploadResult,
+  CloseAccountReq,
+  UpdateAccountReq,
+  UploadAccountAvatarReq,
+} from '@memoflow/account-contracts';
+import { CloseAccountSchema, UploadAccountAvatarRequestSchema } from '@memoflow/account-contracts';
 import { fail } from '@memoflow/transport-contracts/result';
 import { formatZodErrors } from '@memoflow/utils/result';
 import { createLogger } from '@memoflow/utils/logger';
@@ -141,10 +148,21 @@ export interface AccountElectronModuleDef {
  * 并有延迟 flush 定时器保持云端资料同步；CLOSE handler 用 `syncOptions`
  * 执行云端账号关闭 saga。两者都缺省时，模块退化为纯 controller 路径。
  */
+export interface AccountCloudAvatarPort {
+  /** Cloud identity bound to the active Profile, or null for a local Profile. */
+  getCloudAccountId(): string | null;
+  getCloudAccessToken(): Promise<string | null>;
+  readMeta(token: string): Promise<AccountAvatarMeta>;
+  download(token: string): Promise<AccountAvatarContent>;
+  upload(token: string, request: UploadAccountAvatarReq): Promise<AccountAvatarUploadResult>;
+}
+
 export interface AccountElectronModuleOptions {
   readonly instance: AccountModuleInstance;
   readonly syncOptions?: DesktopAccountProfileSyncOptions;
   readonly profileSync?: DesktopAccountProfileSync;
+  /** Issue #859: cloud avatar transport (token stays in the main process). */
+  readonly cloudAvatar?: AccountCloudAvatarPort;
 }
 
 /**
@@ -187,6 +205,30 @@ export function createAccountElectronModule(
       const installed: string[] = [];
       const syncOptions = options.syncOptions;
       const profileSync = options.profileSync;
+      const cloudAvatar = options.cloudAvatar;
+
+      const withCloudAvatarToken = (
+        requestContext: { identityId: string },
+        run: (token: string) => Promise<unknown>,
+      ) => {
+        if (!cloudAvatar || cloudAvatar.getCloudAccountId() !== requestContext.identityId) {
+          return Promise.resolve(
+            fail({ code: 'SERVICE_UNAVAILABLE', message: '仅云账户支持云端头像' }),
+          );
+        }
+        return (async () => {
+          const token = await cloudAvatar.getCloudAccessToken();
+          if (!token) {
+            return fail({ code: 'REAUTH_REQUIRED', message: '云端头像同步需要重新认证' });
+          }
+          try {
+            return ok(await run(token));
+          } catch (error: unknown) {
+            const message = error instanceof Error ? error.message : String(error);
+            return fail({ code: 'CLOUD_AVATAR_SYNC_FAILED', message });
+          }
+        })();
+      };
 
       try {
         const controller = new AccountController(options.instance.api);
@@ -294,6 +336,37 @@ export function createAccountElectronModule(
           });
         });
         installed.push(AccountChannels.CLOSE);
+
+        ipcMain.handle(AccountChannels.AVATAR_META, async () => {
+          return withAuthenticatedValue(ctx, (requestContext) =>
+            withCloudAvatarToken(requestContext, (token) => cloudAvatar!.readMeta(token)),
+          );
+        });
+        installed.push(AccountChannels.AVATAR_META);
+
+        ipcMain.handle(AccountChannels.AVATAR_DOWNLOAD, async () => {
+          return withAuthenticatedValue(ctx, (requestContext) =>
+            withCloudAvatarToken(requestContext, (token) => cloudAvatar!.download(token)),
+          );
+        });
+        installed.push(AccountChannels.AVATAR_DOWNLOAD);
+
+        ipcMain.handle(AccountChannels.AVATAR_UPLOAD, async (_event, payload: unknown) => {
+          return withAuthenticatedValue(ctx, async (requestContext) => {
+            const parsed = UploadAccountAvatarRequestSchema.safeParse(payload);
+            if (!parsed.success) {
+              return fail({
+                code: 'VALIDATION_ERROR',
+                message: '参数验证失败',
+                details: formatZodErrors(parsed.error.issues),
+              });
+            }
+            return withCloudAvatarToken(requestContext, (token) =>
+              cloudAvatar!.upload(token, parsed.data),
+            );
+          });
+        });
+        installed.push(AccountChannels.AVATAR_UPLOAD);
 
         options.instance.start();
 

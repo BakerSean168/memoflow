@@ -59,6 +59,7 @@ export default {
     confirmPassword: 'Confirm new password',
     placeholder: 'At least 8 characters',
     save: 'Change password',
+    cloudSyncFailed: 'Avatar saved; cloud sync will retry shortly',
     saved: 'Local account password updated',
     failed: 'Failed to change the local account password',
     mismatch: 'Passwords do not match',

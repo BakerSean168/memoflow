@@ -10,7 +10,10 @@ import type { Result } from '@memoflow/transport-contracts/result';
 import { fail, ok } from '@memoflow/transport-contracts/result';
 import type { ExecutionContext } from '@memoflow/transport-contracts';
 import type { AccountAvatarUploadResult } from '@memoflow/account-contracts';
-import { ACCOUNT_AVATAR_DATA_URL_PREFIX, ACCOUNT_AVATAR_MAX_BYTES } from '@memoflow/account-contracts';
+import {
+  ACCOUNT_AVATAR_DATA_URL_PREFIX,
+  ACCOUNT_AVATAR_MAX_BYTES,
+} from '@memoflow/account-contracts';
 import type { Clock } from '@memoflow/time';
 import type { IAccountRepository } from '../../../domain';
 import type { IAccountAvatarRepository } from '../../../domain/repositories/i-account-avatar-repository';

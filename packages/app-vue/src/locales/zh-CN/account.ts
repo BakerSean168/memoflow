@@ -55,6 +55,7 @@ export default {
     confirmPassword: '确认新密码',
     placeholder: '至少 8 位',
     save: '修改密码',
+    cloudSyncFailed: '头像已保存，云端同步稍后重试',
     saved: '本地账户密码已更新',
     failed: '本地账户密码修改失败',
     mismatch: '两次输入的密码不一致',
