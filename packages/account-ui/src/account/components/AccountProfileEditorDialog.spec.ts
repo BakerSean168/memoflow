@@ -301,11 +301,11 @@ describe('AccountProfileEditorDialog', () => {
 
     expect(open.value).toBe(true);
     expect(dialog(wrapper).attributes('data-guard')).toBe('alert');
-    expect(dialog(wrapper).classes()).toContain('profile-editor-shake-a');
+    expect(dialog(wrapper).attributes('data-shake-attempts')).toBe('1');
 
-    // A second attempt replays the animation through the alternating class.
+    // A second attempt replays the shake and escalates the counter.
     await wrapper.get('[data-testid="profile-editor-close"]').trigger('click');
-    expect(dialog(wrapper).classes()).toContain('profile-editor-shake-b');
+    expect(dialog(wrapper).attributes('data-shake-attempts')).toBe('2');
     expect(dialog(wrapper).attributes('data-guard')).toBe('alert');
   });
 
