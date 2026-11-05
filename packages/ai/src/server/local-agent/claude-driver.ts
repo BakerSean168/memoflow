@@ -145,38 +145,34 @@ export class ClaudeDriver {
         // The SDK treats bare allowedTools rules as unconditional grants and
         // skips canUseTool. Gate our MCP tools before native allow rules instead.
         allowedTools: [],
-        hooks: input?.mcp
-          ? {
-              PreToolUse: [
-                {
-                  hooks: [
-                    async (event) => {
-                      if (event.hook_event_name !== 'PreToolUse') return {};
-                      if (!event.tool_name.startsWith(memoFlowToolPrefix))
-                        return {
-                          hookSpecificOutput: {
-                            hookEventName: 'PreToolUse',
-                            permissionDecision: 'ask',
-                          },
-                        };
-                      const name = event.tool_name.slice(memoFlowToolPrefix.length);
-                      // Names come from the authenticated bridge's actual tools/list registry.
-                      // Business writes are approved by the bridge, not twice by the Provider.
-                      return {
-                        hookSpecificOutput: {
-                          hookEventName: 'PreToolUse',
-                          permissionDecision: input.mcp?.toolNames?.includes(name)
-                            ? 'allow'
-                            : 'deny',
-                          permissionDecisionReason: 'MemoFlow bridge authorizes registered tools',
-                        },
-                      };
+        hooks: {
+          PreToolUse: [
+            {
+              hooks: [
+                async (event) => {
+                  if (event.hook_event_name !== 'PreToolUse') return {};
+                  if (!event.tool_name.startsWith(memoFlowToolPrefix))
+                    return {
+                      hookSpecificOutput: {
+                        hookEventName: 'PreToolUse',
+                        permissionDecision: 'ask',
+                      },
+                    };
+                  const name = event.tool_name.slice(memoFlowToolPrefix.length);
+                  // Names come from the authenticated bridge's actual tools/list registry.
+                  // Business writes are approved by the bridge, not twice by the Provider.
+                  return {
+                    hookSpecificOutput: {
+                      hookEventName: 'PreToolUse',
+                      permissionDecision: input?.mcp?.toolNames?.includes(name) ? 'allow' : 'deny',
+                      permissionDecisionReason: 'MemoFlow bridge authorizes registered tools',
                     },
-                  ],
+                  };
                 },
               ],
-            }
-          : {},
+            },
+          ],
+        },
         permissionMode: 'default',
         persistSession: Boolean(input),
         includePartialMessages: true,
@@ -185,9 +181,7 @@ export class ClaudeDriver {
               model: input.modelId,
               ...(input.modelOptions?.reasoningEffort &&
               LocalAgentModelOptionValueSchema.safeParse(input.modelOptions.reasoningEffort).success
-                ? {
-                    effort: input.modelOptions.reasoningEffort as Options['effort'],
-                  }
+                ? { effort: input.modelOptions.reasoningEffort as Options['effort'] }
                 : {}),
               ...(input.nativeSessionId ? { resume: input.nativeSessionId } : {}),
             }
@@ -312,10 +306,7 @@ export class ClaudeDriver {
       void this.consume(input, init.fingerprint).catch((error) => {
         if (error instanceof z.ZodError)
           logger.warn('Native protocol shape rejected', {
-            issues: error.issues.map((issue) => ({
-              path: issue.path,
-              code: issue.code,
-            })),
+            issues: error.issues.map((issue) => ({ path: issue.path, code: issue.code })),
           });
         this.queue.fail(
           error instanceof LocalAgentError
@@ -364,10 +355,7 @@ export class ClaudeDriver {
           .object({
             type: z.string(),
             delta: z
-              .object({
-                type: z.string(),
-                text: z.string().max(200_000).optional(),
-              })
+              .object({ type: z.string(), text: z.string().max(200_000).optional() })
               .optional(),
             content_block: z
               .object({
@@ -402,10 +390,7 @@ export class ClaudeDriver {
         const message = z
           .object({
             content: z.array(
-              z.object({
-                type: z.string(),
-                text: z.string().max(200_000).optional(),
-              }),
+              z.object({ type: z.string(), text: z.string().max(200_000).optional() }),
             ),
           })
           .parse(frame.message);

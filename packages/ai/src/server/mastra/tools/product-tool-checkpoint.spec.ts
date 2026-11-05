@@ -42,7 +42,11 @@ it.each([
   ['full_auto', 'allow', 'allow'],
 ] as const)('uses %s for native creation/update decisions', async (preset, create, update) => {
   const f = fixture();
-  await f.permissions.saveSettings('owner', { preset, agentPresets: {}, revision: 1 });
+  await f.permissions.saveSettings('owner', {
+    preset,
+    agentPresets: {},
+    revision: 1,
+  });
   await applyMemoFlowSessionToolPolicy(f.session, 'approval-required', f.context);
   for (const [name, expected] of [
     ['routine_create', create],
@@ -182,13 +186,34 @@ it('honors a custom ask for a read tool through the native approval policy', asy
   expect(f.session.resolveToolApproval('knowledge_search')).toBe('ask');
 });
 
-it.each(['approval-required', 'auto-accept-edits', 'auto', 'full-access'] as const)('keeps business presets independent of runtime mode %s', async (mode) => {
-  const f = fixture();
-  f.context.setRaw('permissionMode', mode);
-  await f.permissions.saveSettings('owner', { preset: 'full_auto', agentPresets: {}, revision: 1 });
-  expect(await checkMemoFlowToolPermission(f.permissions, 'routine_create', f.context)).toBe('allow');
-  await f.permissions.saveSettings('owner', { preset: 'confirm_each', agentPresets: {}, revision: 2 });
-  expect(await checkMemoFlowToolPermission(f.permissions, 'routine_create', f.context)).toBe('ask');
-  await f.permissions.saveSettings('owner', { preset: 'read_only', agentPresets: {}, revision: 3 });
-  expect(await checkMemoFlowToolPermission(f.permissions, 'routine_create', f.context)).toBe('deny');
-});
+it.each(['approval-required', 'auto-accept-edits', 'auto', 'full-access'] as const)(
+  'keeps business presets independent of runtime mode %s',
+  async (mode) => {
+    const f = fixture();
+    f.context.setRaw('permissionMode', mode);
+    await f.permissions.saveSettings('owner', {
+      preset: 'full_auto',
+      agentPresets: {},
+      revision: 1,
+    });
+    expect(await checkMemoFlowToolPermission(f.permissions, 'routine_create', f.context)).toBe(
+      'allow',
+    );
+    await f.permissions.saveSettings('owner', {
+      preset: 'confirm_each',
+      agentPresets: {},
+      revision: 2,
+    });
+    expect(await checkMemoFlowToolPermission(f.permissions, 'routine_create', f.context)).toBe(
+      'ask',
+    );
+    await f.permissions.saveSettings('owner', {
+      preset: 'read_only',
+      agentPresets: {},
+      revision: 3,
+    });
+    expect(await checkMemoFlowToolPermission(f.permissions, 'routine_create', f.context)).toBe(
+      'deny',
+    );
+  },
+);

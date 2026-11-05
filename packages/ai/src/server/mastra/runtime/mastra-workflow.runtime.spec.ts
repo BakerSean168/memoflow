@@ -166,10 +166,7 @@ async function createRuntime(
     estimatedCost: 0.000075,
   }));
   const createRoutine = vi.fn(async () => ({ routineId: 'created-routine' }));
-  const setProfileActive = vi.fn(async () => ({
-    profileId: 'p',
-    active: true,
-  }));
+  const setProfileActive = vi.fn(async () => ({ profileId: 'p', active: true }));
   const modelResolver = new MastraModelResolver(
     {} as never,
     createAIProviderSecretVaultStub(),
@@ -192,9 +189,7 @@ async function createRuntime(
     agentRegistry,
     storage,
     modelResolver,
-    conversationShellSource: {
-      loadShell: vi.fn(async () => ({ title: 'Runtime test' })),
-    },
+    conversationShellSource: { loadShell: vi.fn(async () => ({ title: 'Runtime test' })) },
     conversationActivity: { recordActivity },
     goalPlanMutationPort: mutations,
     taskPlanMutationPort: {
@@ -320,16 +315,7 @@ describe('MastraAIRuntime Assistant approval protocol', () => {
       toolCallId: 'call-1',
       decision: 'approve' as const,
     };
-    return {
-      runtime,
-      session,
-      approve,
-      decline,
-      events,
-      finished,
-      command,
-      nativeEvents,
-    };
+    return { runtime, session, approve, decline, events, finished, command, nativeEvents };
   }
 
   it.each([
@@ -502,12 +488,7 @@ describe('MastraAIRuntime Assistant approval protocol', () => {
       expect(setProfileActive).not.toHaveBeenCalled();
       const response = decision === 'on-demand-update' ? 'approve' : decision;
       if (decision === 'cancel')
-        expect(
-          runtime.cancelRun({
-            identityId: 'identity-a',
-            runId: required.runId,
-          }),
-        ).toBe(true);
+        expect(runtime.cancelRun({ identityId: 'identity-a', runId: required.runId })).toBe(true);
       else
         expect(
           await runtime.decideToolApproval({
@@ -542,9 +523,7 @@ describe('MastraAIRuntime Assistant approval protocol', () => {
         ).toBe(true);
       }
       if (decision === 'approve')
-        expect(createRoutine.mock.calls[0][0]).toMatchObject({
-          context: turnContext,
-        });
+        expect(createRoutine.mock.calls[0][0]).toMatchObject({ context: turnContext });
       expect(events.at(-1)?.type).toBe(
         decision === 'cancel' ? 'assistant.run.cancelled' : 'assistant.run.completed',
       );
@@ -613,10 +592,7 @@ describe('MastraAIRuntime Assistant approval protocol', () => {
     );
     expect(turn.decline).not.toHaveBeenCalled();
     expect(
-      await turn.runtime.decideToolApproval({
-        context: executionContext,
-        command: turn.command,
-      }),
+      await turn.runtime.decideToolApproval({ context: executionContext, command: turn.command }),
     ).toBe(true);
     expect(turn.events.filter((event) => event.type === 'assistant.run.started')).toHaveLength(1);
     expect(turn.events.at(-1)?.type).toBe('assistant.run.completed');
@@ -644,12 +620,7 @@ describe('MastraAIRuntime Assistant approval protocol', () => {
         command: turn.command,
       }),
     ).toBe(false);
-    expect(
-      turn.runtime.cancelRun({
-        identityId: 'identity-a',
-        runId: 'native-turn',
-      }),
-    ).toBe(false);
+    expect(turn.runtime.cancelRun({ identityId: 'identity-a', runId: 'native-turn' })).toBe(false);
     expect(turn.session.approval.isArmed()).toBe(true);
     turn.session.emit({ type: 'agent_start' });
     await turn.finished;
@@ -661,9 +632,7 @@ describe('MastraAIRuntime Assistant approval protocol', () => {
 
   it('reserves a conversation before asynchronous model validation and does not mutate selection on failure', async () => {
     const assertTurnSelection = vi.fn(async () => {});
-    const { runtime, modelResolver } = await createRuntime(undefined, {
-      assertTurnSelection,
-    });
+    const { runtime, modelResolver } = await createRuntime(undefined, { assertTurnSelection });
     vi.spyOn(runtime.history, 'ensureConversation').mockResolvedValue();
     let rejectModel!: (error: Error) => void;
     const resolving = new Promise<never>((_resolve, reject) => {
@@ -697,11 +666,7 @@ describe('MastraAIRuntime Assistant approval protocol', () => {
     resolve.mockRejectedValueOnce(new Error('retry validation'));
     await expect(
       runtime
-        .dispatchMessage({
-          identityId: 'owner',
-          conversationId: 'same',
-          content: 'retry',
-        })
+        .dispatchMessage({ identityId: 'owner', conversationId: 'same', content: 'retry' })
         .next(),
     ).rejects.toThrow('retry validation');
     expect(resolve).toHaveBeenCalledTimes(2);
@@ -728,9 +693,7 @@ describe('MastraAIRuntime Assistant approval protocol', () => {
                   controller.enqueue({ type: 'stream-start', warnings: [] });
                   controller.enqueue({
                     type: 'error',
-                    error: Object.assign(new Error('PRIVATE_RESPONSE_BODY'), {
-                      statusCode: 503,
-                    }),
+                    error: Object.assign(new Error('PRIVATE_RESPONSE_BODY'), { statusCode: 503 }),
                   });
                   controller.close();
                 },
@@ -753,10 +716,7 @@ describe('MastraAIRuntime Assistant approval protocol', () => {
       expect(events.at(-1)).toMatchObject({
         conversationId: 'retryable-chat',
         type: 'assistant.run.failed',
-        data: {
-          code: 'SERVICE_UNAVAILABLE',
-          message: 'AI service is unavailable',
-        },
+        data: { code: 'SERVICE_UNAVAILABLE', message: 'AI service is unavailable' },
       });
       expect(JSON.stringify(events)).not.toContain('PRIVATE_RESPONSE_BODY');
       const persisted = await runtime.history.listMessages({
@@ -777,14 +737,8 @@ describe('MastraAIRuntime Assistant approval protocol', () => {
         .map(([record]) => record)
         .filter((record) => record.operation === 'assistant.turn'),
     ).toEqual([
-      expect.objectContaining({
-        modelId: 'first',
-        errorCategory: 'SERVICE_UNAVAILABLE',
-      }),
-      expect.objectContaining({
-        modelId: 'switched',
-        errorCategory: 'SERVICE_UNAVAILABLE',
-      }),
+      expect.objectContaining({ modelId: 'first', errorCategory: 'SERVICE_UNAVAILABLE' }),
+      expect.objectContaining({ modelId: 'switched', errorCategory: 'SERVICE_UNAVAILABLE' }),
     ]);
   });
 
@@ -819,20 +773,12 @@ describe('MastraAIRuntime Assistant approval protocol', () => {
                   for (const chunk of [
                     { type: 'stream-start', warnings: [] },
                     { type: 'text-start', id: 'reply' },
-                    {
-                      type: 'text-delta',
-                      id: 'reply',
-                      delta: `Reply from ${modelId}`,
-                    },
+                    { type: 'text-delta', id: 'reply', delta: `Reply from ${modelId}` },
                     { type: 'text-end', id: 'reply' },
                     {
                       type: 'finish',
                       finishReason: 'stop',
-                      usage: {
-                        inputTokens: 1,
-                        outputTokens: 1,
-                        totalTokens: 2,
-                      },
+                      usage: { inputTokens: 1, outputTokens: 1, totalTokens: 2 },
                     },
                   ])
                     controller.enqueue(chunk);
@@ -947,10 +893,7 @@ describe('MastraAIRuntime Assistant approval protocol', () => {
             {
               toolCallId: 'question-1',
               toolName: 'ask_user',
-              suspendPayload: {
-                question: 'Pick one',
-                options: [{ label: 'A' }, { label: 'B' }],
-              },
+              suspendPayload: { question: 'Pick one', options: [{ label: 'A' }, { label: 'B' }] },
             },
           ],
         },
@@ -992,10 +935,7 @@ describe('MastraAIRuntime Assistant approval protocol', () => {
       answer: 'A',
     };
     await expect(
-      first.runtime.answerToolSuspension({
-        context: context('identity-b', 'foreign'),
-        command,
-      }),
+      first.runtime.answerToolSuspension({ context: context('identity-b', 'foreign'), command }),
     ).resolves.toBe(false);
     await expect(
       first.runtime.answerToolSuspension({
@@ -1004,10 +944,7 @@ describe('MastraAIRuntime Assistant approval protocol', () => {
       }),
     ).resolves.toBe(false);
     await expect(
-      first.runtime.answerToolSuspension({
-        context: context('identity-a', 'answer'),
-        command,
-      }),
+      first.runtime.answerToolSuspension({ context: context('identity-a', 'answer'), command }),
     ).resolves.toBe(true);
     expect(resume).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -1073,10 +1010,7 @@ describe('MastraAIRuntime Assistant approval protocol', () => {
       answer: 'cancelled',
     };
     await expect(
-      first.runtime.answerToolSuspension({
-        context: context('identity-b', 'foreign'),
-        command,
-      }),
+      first.runtime.answerToolSuspension({ context: context('identity-b', 'foreign'), command }),
     ).resolves.toBe(false);
     await expect(
       first.runtime.answerToolSuspension({
@@ -1086,10 +1020,7 @@ describe('MastraAIRuntime Assistant approval protocol', () => {
     ).resolves.toBe(false);
     expect(resume).not.toHaveBeenCalled();
     await expect(
-      first.runtime.answerToolSuspension({
-        context: context('identity-a', 'owner'),
-        command,
-      }),
+      first.runtime.answerToolSuspension({ context: context('identity-a', 'owner'), command }),
     ).resolves.toBe(true);
     expect(resume).not.toHaveBeenCalled();
     expect(abort).toHaveBeenCalledWith('cancel-run');
@@ -1118,10 +1049,7 @@ describe('MastraAIRuntime Assistant approval protocol', () => {
                   toolName: fixtureCalls === 0 ? 'ask_user' : 'routine_create',
                   input: JSON.stringify(
                     fixtureCalls++ === 0
-                      ? {
-                          question: 'Pick one',
-                          options: [{ label: 'A' }, { label: 'B' }],
-                        }
+                      ? { question: 'Pick one', options: [{ label: 'A' }, { label: 'B' }] }
                       : {
                           name: 'Private routine',
                           trigger: {
@@ -1241,10 +1169,7 @@ describe('MastraAIRuntime Assistant approval protocol', () => {
                     toolName: step === 0 ? 'ask_user' : 'routine_create',
                     input: JSON.stringify(
                       step === 0
-                        ? {
-                            question: 'Pick one',
-                            options: [{ label: 'A' }, { label: 'B' }],
-                          }
+                        ? { question: 'Pick one', options: [{ label: 'A' }, { label: 'B' }] }
                         : {
                             name: 'Private routine',
                             trigger: {
@@ -1456,10 +1381,7 @@ describe('MastraAIRuntime Assistant approval protocol', () => {
       }
       expect(parked.runs.flatMap((run) => run.toolCalls)).toEqual(
         expect.arrayContaining([
-          expect.objectContaining({
-            toolCallId: 'approval-real',
-            toolName: 'routine_create',
-          }),
+          expect.objectContaining({ toolCallId: 'approval-real', toolName: 'routine_create' }),
         ]),
       );
       expect(
@@ -1470,11 +1392,7 @@ describe('MastraAIRuntime Assistant approval protocol', () => {
       ).toEqual([
         expect.objectContaining({
           toolCallId: 'approval-real',
-          approval: {
-            toolName: 'routine_create',
-            category: 'edit',
-            risk: 'high',
-          },
+          approval: { toolName: 'routine_create', category: 'edit', risk: 'high' },
         }),
       ]);
       const approvalCommand = {
@@ -1582,11 +1500,7 @@ describe('MastraAIRuntime Assistant approval protocol', () => {
             for (const chunk of [
               { type: 'stream-start', warnings: [] },
               { type: 'text-start', id: 'text' },
-              {
-                type: 'text-delta',
-                id: 'text',
-                delta: 'Recovered approval finished',
-              },
+              { type: 'text-delta', id: 'text', delta: 'Recovered approval finished' },
               { type: 'text-end', id: 'text' },
               {
                 type: 'finish',
@@ -1615,10 +1529,7 @@ describe('MastraAIRuntime Assistant approval protocol', () => {
       decision: 'approve' as const,
     };
     await expect(
-      recovered.runtime.decideToolApproval({
-        context: context('foreign', 'foreign'),
-        command,
-      }),
+      recovered.runtime.decideToolApproval({ context: context('foreign', 'foreign'), command }),
     ).resolves.toBe(false);
     await expect(
       recovered.runtime.decideToolApproval({
@@ -1655,10 +1566,7 @@ describe('MastraAIRuntime Assistant approval protocol', () => {
       ).toBe(true),
     );
     await expect(
-      recovered.runtime.decideToolApproval({
-        context: context('identity-a', 'replay'),
-        command,
-      }),
+      recovered.runtime.decideToolApproval({ context: context('identity-a', 'replay'), command }),
     ).resolves.toBe(true);
     expect(recovered.createRoutine).toHaveBeenCalledTimes(1);
   }, 120000);
@@ -1767,12 +1675,9 @@ describe('MastraAIRuntime Assistant approval protocol', () => {
       'assistant.run.cancelled',
     ]);
     expect(new Set(events.map((event) => event.runId))).toEqual(new Set(['native-delayed-start']));
-    expect(
-      runtime.cancelRun({
-        identityId: 'identity-a',
-        runId: 'native-delayed-start',
-      }),
-    ).toBe(false);
+    expect(runtime.cancelRun({ identityId: 'identity-a', runId: 'native-delayed-start' })).toBe(
+      false,
+    );
 
     // The completed dispatch removed its AbortSignal listener and active-run reservation,
     // so a later native run in the same session cannot be killed by the stale turn.
@@ -1790,12 +1695,7 @@ describe('MastraAIRuntime Assistant approval protocol', () => {
       context: context('identity-a', 'approve'),
       command: turn.command,
     });
-    expect(
-      turn.runtime.cancelRun({
-        identityId: 'identity-a',
-        runId: 'native-turn',
-      }),
-    ).toBe(true);
+    expect(turn.runtime.cancelRun({ identityId: 'identity-a', runId: 'native-turn' })).toBe(true);
     await expect(deciding).resolves.toBe(true);
     await turn.finished;
     expect(turn.approve).not.toHaveBeenCalled();
@@ -1830,12 +1730,7 @@ describe('MastraAIRuntime Assistant approval protocol', () => {
 
   it('Stop releases a real native approval wait and cancel-first rejects approval', async () => {
     const turn = await parkedTurn();
-    expect(
-      turn.runtime.cancelRun({
-        identityId: 'identity-a',
-        runId: 'native-turn',
-      }),
-    ).toBe(true);
+    expect(turn.runtime.cancelRun({ identityId: 'identity-a', runId: 'native-turn' })).toBe(true);
     expect(
       await turn.runtime.decideToolApproval({
         context: context('identity-a', 'late'),
@@ -1868,12 +1763,7 @@ describe('MastraAIRuntime Assistant tool policy', () => {
     await session.state.set({
       yolo: true,
       permissionRules: {
-        categories: {
-          read: 'deny',
-          edit: 'allow',
-          execute: 'allow',
-          other: 'allow',
-        },
+        categories: { read: 'deny', edit: 'allow', execute: 'allow', other: 'allow' },
         tools: { knowledge_search: 'deny', routine_create: 'allow' },
       },
     });
@@ -1923,16 +1813,8 @@ describe('MastraAIRuntime Assistant tool policy', () => {
 });
 
 const workflowRequests = [
-  {
-    kind: 'goal.create',
-    conversationId: 'durable-goal',
-    input: { idea: 'Plan a durable goal' },
-  },
-  {
-    kind: 'task.create',
-    conversationId: 'durable-task',
-    input: { idea: 'Plan a durable task' },
-  },
+  { kind: 'goal.create', conversationId: 'durable-goal', input: { idea: 'Plan a durable goal' } },
+  { kind: 'task.create', conversationId: 'durable-task', input: { idea: 'Plan a durable task' } },
   {
     kind: 'knowledge.capture',
     conversationId: 'durable-knowledge',
@@ -1965,10 +1847,7 @@ describe.each(workflowRequests)('MastraAIRuntime $kind durable boundary', (reque
       request,
     });
     try {
-      expect(started).toMatchObject({
-        kind: request.kind,
-        status: 'running',
-      });
+      expect(started).toMatchObject({ kind: request.kind, status: 'running' });
       await vi.waitFor(() => expect(plan).toHaveBeenCalledTimes(1));
       expect(await runtime.get({ identityId, runId: started.runId })).toMatchObject({
         status: 'running',
@@ -2003,20 +1882,14 @@ describe.each(workflowRequests)('MastraAIRuntime $kind durable boundary', (reque
         context: context(identityId, 'duplicate-resume'),
         request: {
           runId: started.runId,
-          command: {
-            type: 'answer',
-            answers: ['Do not dispatch while running'],
-          },
+          command: { type: 'answer', answers: ['Do not dispatch while running'] },
           workflowTurn: 'This replay must not enter history',
         },
       });
       expect(duplicate.status).toBe('running');
       expect(plan).toHaveBeenCalledTimes(2);
       expect(
-        await runtime.listMessages({
-          identityId,
-          conversationId: request.conversationId,
-        }),
+        await runtime.listMessages({ identityId, conversationId: request.conversationId }),
       ).toMatchObject({ messages: [] });
       expect(plan.mock.calls[1]?.[1]?.getRaw('executionContext')).toMatchObject({
         identityId,
@@ -2066,10 +1939,7 @@ describe.each(workflowRequests)('MastraAIRuntime $kind durable boundary', (reque
     }
     expect(first.summarizeUsage).not.toHaveBeenCalled();
     expect(
-      await first.runtime.listMessages({
-        identityId,
-        conversationId: request.conversationId,
-      }),
+      await first.runtime.listMessages({ identityId, conversationId: request.conversationId }),
     ).toMatchObject({ messages: [] });
     await first.runtime.dispose();
     const restored = await createRuntime(first.file);
@@ -2104,14 +1974,8 @@ describe.each(workflowRequests)('MastraAIRuntime $kind durable boundary', (reque
       identityId,
       requestId: 'restart-resume',
     });
-    const cancelled = await restored.runtime.cancel({
-      identityId,
-      runId: started.runId,
-    });
-    expect(cancelled).toMatchObject({
-      kind: request.kind,
-      status: 'cancelled',
-    });
+    const cancelled = await restored.runtime.cancel({ identityId, runId: started.runId });
+    expect(cancelled).toMatchObject({ kind: request.kind, status: 'cancelled' });
     for (const resume of ['resume', 'resumeDetached'] as const) {
       expect(
         await restored.runtime[resume]({
@@ -2135,12 +1999,7 @@ describe('MastraAIRuntime workflow queries', () => {
     const identityId = 'query-owner';
     const runs = [];
     for (const request of workflowRequests) {
-      runs.push(
-        await runtime.start({
-          context: context(identityId, 'query-start'),
-          request,
-        }),
-      );
+      runs.push(await runtime.start({ context: context(identityId, 'query-start'), request }));
     }
     const [goal, task, knowledge] = runs;
     expect((await runtime.list({ identityId })).map((run) => run.runId)).toEqual([
@@ -2149,19 +2008,10 @@ describe('MastraAIRuntime workflow queries', () => {
       goal!.runId,
     ]);
     summarizeUsage.mockClear();
-    const filtered = await runtime.list({
-      identityId,
-      conversationId: task!.conversationId,
-    });
+    const filtered = await runtime.list({ identityId, conversationId: task!.conversationId });
     expect(filtered).toHaveLength(1);
-    expect(filtered[0]).toMatchObject({
-      runId: task!.runId,
-      usage: { totalTokens: 250 },
-    });
-    expect(summarizeUsage).toHaveBeenCalledExactlyOnceWith({
-      identityId,
-      runId: task!.runId,
-    });
+    expect(filtered[0]).toMatchObject({ runId: task!.runId, usage: { totalTokens: 250 } });
+    expect(summarizeUsage).toHaveBeenCalledExactlyOnceWith({ identityId, runId: task!.runId });
     summarizeUsage.mockResolvedValueOnce({
       executionCount: 0,
       promptTokens: 0,
@@ -2241,10 +2091,7 @@ describe('MastraAIRuntime goal.create product projection', () => {
     expect(started.kind).toBe('goal.create');
     expect(dispatch).not.toHaveBeenCalled();
     await expect(
-      runtime.listMessages({
-        identityId: 'identity-turn',
-        conversationId: 'conversation-turn',
-      }),
+      runtime.listMessages({ identityId: 'identity-turn', conversationId: 'conversation-turn' }),
     ).resolves.toMatchObject({
       messages: [{ role: 'user', content: 'Create a focused study goal' }],
     });
@@ -2343,9 +2190,7 @@ describe('MastraAIRuntime goal.create product projection', () => {
 
   it('starts a fresh owner-scoped Goal run from a failed run and seeds its planner with user edits', async () => {
     const { runtime } = await createRuntime();
-    vi.mocked(runtime.goalPlanner.plan).mockRejectedValueOnce({
-      statusCode: 503,
-    });
+    vi.mocked(runtime.goalPlanner.plan).mockRejectedValueOnce({ statusCode: 503 });
     const failed = await runtime.start({
       context: context('restart-owner', 'first-request'),
       request: {
@@ -2362,11 +2207,7 @@ describe('MastraAIRuntime goal.create product projection', () => {
       draftRevision: 7,
       draft: {
         ...content,
-        goal: {
-          ...content.goal,
-          name: 'Manual user goal',
-          description: 'User description',
-        },
+        goal: { ...content.goal, name: 'Manual user goal', description: 'User description' },
       },
     };
     await expect(
@@ -2469,10 +2310,7 @@ describe('MastraAIRuntime goal.create product projection', () => {
       context: context('identity-knowledge-turn', 'request-knowledge-answer'),
       request: {
         runId: knowledge.runId,
-        command: {
-          type: 'answer',
-          answers: ['Durability and recovery semantics'],
-        },
+        command: { type: 'answer', answers: ['Durability and recovery semantics'] },
         workflowTurn: 'Durability and recovery semantics',
       },
     });
@@ -2510,10 +2348,7 @@ describe('MastraAIRuntime goal.create product projection', () => {
       suspension: {
         type: 'goal_draft_review',
         revision: 1,
-        draft: {
-          revision: 1,
-          goal: { name: 'Ship the Mastra reference workflow' },
-        },
+        draft: { revision: 1, goal: { name: 'Ship the Mastra reference workflow' } },
       },
     });
     expect(await runtime.get({ identityId: 'identity-b', runId: started.runId })).toBeNull();
@@ -2524,10 +2359,7 @@ describe('MastraAIRuntime goal.create product projection', () => {
       totalTokens: 250,
       estimatedCost: 0.000075,
     });
-    expect(summarizeUsage).toHaveBeenCalledWith({
-      identityId,
-      runId: started.runId,
-    });
+    expect(summarizeUsage).toHaveBeenCalledWith({ identityId, runId: started.runId });
     const listed = await runtime.list({ identityId });
     expect(listed).toHaveLength(1);
     expect(listed[0]?.usage?.totalTokens).toBe(250);
@@ -2579,17 +2411,11 @@ describe('MastraAIRuntime goal.create product projection', () => {
 
     await first.runtime.dispose();
     const restarted = await createRuntime(first.file);
-    const restored = await restarted.runtime.get({
-      identityId,
-      runId: started.runId,
-    });
+    const restored = await restarted.runtime.get({ identityId, runId: started.runId });
 
     expect(restored).toEqual(started);
     expect(
-      await restarted.runtime.get({
-        identityId: 'other-identity',
-        runId: started.runId,
-      }),
+      await restarted.runtime.get({ identityId: 'other-identity', runId: started.runId }),
     ).toBeNull();
 
     const completed = await restarted.runtime.resume({
@@ -2624,10 +2450,7 @@ describe('MastraAIRuntime goal.create product projection', () => {
       },
     });
 
-    const cancelled = await runtime.cancel({
-      identityId,
-      runId: started.runId,
-    });
+    const cancelled = await runtime.cancel({ identityId, runId: started.runId });
 
     expect(cancelled).toMatchObject({
       runId: started.runId,
@@ -2635,12 +2458,7 @@ describe('MastraAIRuntime goal.create product projection', () => {
       status: 'cancelled',
     });
     expect(mutations.createGoal).not.toHaveBeenCalled();
-    expect(
-      await runtime.cancel({
-        identityId: 'other-identity',
-        runId: started.runId,
-      }),
-    ).toBeNull();
+    expect(await runtime.cancel({ identityId: 'other-identity', runId: started.runId })).toBeNull();
   });
 
   it('owns a task.create workflow: start → draft review → approve creates one task template', async () => {
@@ -2834,10 +2652,7 @@ describe('MastraAIRuntime knowledge.capture product projection', () => {
         locale: 'en-US',
       },
     });
-    const selected = {
-      kind: 'repository' as const,
-      connectionId: 'owner-binding',
-    };
+    const selected = { kind: 'repository' as const, connectionId: 'owner-binding' };
     await runtime.resume({
       context: context(identityId, 'select-source'),
       request: {
@@ -2854,18 +2669,12 @@ describe('MastraAIRuntime knowledge.capture product projection', () => {
       context: context(identityId, 'revise-source'),
       request: {
         runId: started.runId,
-        command: {
-          type: 'revise_natural_language',
-          instruction: 'Clarify topic',
-        },
+        command: { type: 'revise_natural_language', instruction: 'Clarify topic' },
       },
     });
     const answered = await runtime.resume({
       context: context(identityId, 'answer-source'),
-      request: {
-        runId: started.runId,
-        command: { type: 'answer', answers: ['Durability'] },
-      },
+      request: { runId: started.runId, command: { type: 'answer', answers: ['Durability'] } },
     });
     expect(answered.suspension).toMatchObject({
       type: 'knowledge_draft_review',
@@ -2888,10 +2697,7 @@ describe('MastraAIRuntime knowledge.capture product projection', () => {
       context: context(identityId, 'switch-source'),
       request: {
         runId: started.runId,
-        command: {
-          type: 'edit_structured',
-          patch: { source: { kind: 'local_vault' } },
-        },
+        command: { type: 'edit_structured', patch: { source: { kind: 'local_vault' } } },
       },
     });
     expect(switched.suspension).toMatchObject({
@@ -2917,10 +2723,7 @@ describe('MastraAIRuntime knowledge.capture product projection', () => {
       context: context(identityId, 'select-retry'),
       request: {
         runId: started.runId,
-        command: {
-          type: 'edit_structured',
-          patch: { source: { kind: 'local_vault' } },
-        },
+        command: { type: 'edit_structured', patch: { source: { kind: 'local_vault' } } },
       },
     });
     createConfirmedKnowledgeNote.mockResolvedValueOnce(
@@ -2930,30 +2733,16 @@ describe('MastraAIRuntime knowledge.capture product projection', () => {
       context: context(identityId, 'approve-retry'),
       request: { runId: started.runId, command: { type: 'approve' } },
     });
-    expect(recovery.suspension).toMatchObject({
-      type: 'recovery_required',
-      retryable: true,
-    });
-    expect(recovery.result).toMatchObject({
-      status: 'failed',
-      revision: 2,
-      retryable: true,
-    });
+    expect(recovery.suspension).toMatchObject({ type: 'recovery_required', retryable: true });
+    expect(recovery.result).toMatchObject({ status: 'failed', revision: 2, retryable: true });
     const restored = await runtime.get({ identityId, runId: started.runId });
     expect(restored?.suspension).toMatchObject({ type: 'recovery_required' });
-    expect(restored?.result).toMatchObject({
-      status: 'failed',
-      revision: 2,
-      retryable: true,
-    });
+    expect(restored?.result).toMatchObject({ status: 'failed', revision: 2, retryable: true });
     const completed = await runtime.resume({
       context: context(identityId, 'retry-host'),
       request: { runId: started.runId, command: { type: 'retry' } },
     });
-    expect(completed).toMatchObject({
-      status: 'completed',
-      result: { revision: 2 },
-    });
+    expect(completed).toMatchObject({ status: 'completed', result: { revision: 2 } });
     expect(createConfirmedKnowledgeNote).toHaveBeenCalledTimes(2);
     const first = createConfirmedKnowledgeNote.mock.calls[0]?.[0];
     expect(createConfirmedKnowledgeNote.mock.calls[1]?.[0]).toMatchObject({
@@ -2977,10 +2766,7 @@ describe('workflow Agent identity authority', () => {
       modelId: 'm',
       input: { idea: 'Ship a release' },
     };
-    const started = await runtime.start({
-      context: context('owner', 'start'),
-      request,
-    });
+    const started = await runtime.start({ context: context('owner', 'start'), request });
     expect(assertTurnSelection).toHaveBeenCalledWith({
       owner: 'owner',
       conversationId: 'bound-goal',

@@ -83,13 +83,23 @@ export default {
     notConfigured: 'No models are configured for this Agent.',
     disabled: 'Disabled',
     runtimeModes: {
-      'approval-required': { label: 'Supervised', hint: 'Ask before commands and file changes.' },
-      'auto-accept-edits': { label: 'Auto-accept edits', hint: 'Auto-approve edits, ask before other actions.' },
-      'auto': { label: 'Auto', hint: 'Supported providers approve routine actions; others still ask.' },
-      'full-access': { label: 'Full access', hint: 'Allow commands and edits without prompts.' },
+      'approval-required': {
+        label: 'Supervised',
+        hint: 'Ask before commands and file changes.',
+      },
+      'auto-accept-edits': {
+        label: 'Auto-accept edits',
+        hint: 'Auto-approve edits, ask before other actions.',
+      },
+      auto: {
+        label: 'Auto',
+        hint: 'Supported providers approve routine actions; others still ask.',
+      },
+      'full-access': {
+        label: 'Full access',
+        hint: 'Allow commands and edits without prompts.',
+      },
     },
-    unsupportedPermission: 'This Agent does not support that permission mode.',
-    readOnlyWorkflow: 'Read-only chat will discuss your request without starting a write workflow.',
   },
   agentSwitchNewConversation:
     'Started a new conversation for the selected Agent. Your previous conversation keeps its original Agent.',

@@ -64,7 +64,6 @@ function authorizationInput(name: string, context: RequestContext) {
     agentId: typeof agent === 'string' ? agent : 'builtin-mastra',
     conversationId: typeof conversation === 'string' ? conversation : null,
     operationId: permissionOperationForTool(name)?.id ?? name,
-
   };
 }
 
@@ -92,7 +91,9 @@ export async function checkMemoFlowToolPermission(
   // Runtime machine permissions never select or widen a business preset.
   const decision = records.some((record) => record.decision === 'deny')
     ? 'deny'
-    : records.some((record) => record.decision === 'ask') ? 'ask' : 'allow';
+    : records.some((record) => record.decision === 'ask')
+      ? 'ask'
+      : 'allow';
   current[name] = decision;
   return decision;
 }

@@ -73,13 +73,23 @@ export default {
     notConfigured: '此 Agent 尚未配置模型。',
     disabled: '已停用',
     runtimeModes: {
-      'approval-required': { label: '需要确认', hint: '执行命令和修改文件前询问。' },
-      'auto-accept-edits': { label: '自动接受编辑', hint: '自动批准文件编辑，其他操作仍需询问。' },
-      'auto': { label: '自动', hint: '支持的提供方自动批准例行操作，其他提供方仍需询问。' },
-      'full-access': { label: '完全访问', hint: '允许执行命令和编辑文件，无需逐项确认。' },
+      'approval-required': {
+        label: '需要确认',
+        hint: '执行命令和修改文件前询问。',
+      },
+      'auto-accept-edits': {
+        label: '自动接受编辑',
+        hint: '自动批准文件编辑，其他操作仍需询问。',
+      },
+      auto: {
+        label: '自动',
+        hint: '支持的提供方自动批准例行操作，其他提供方仍需询问。',
+      },
+      'full-access': {
+        label: '完全访问',
+        hint: '允许执行命令和编辑文件，无需逐项确认。',
+      },
     },
-    unsupportedPermission: '当前 Agent 不支持这种权限模式。',
-    readOnlyWorkflow: '只读对话只讨论当前请求，不启动写入工作流。',
   },
   agentSwitchNewConversation: '已为所选 Agent 新建会话。原会话仍保留原 Agent。',
   activity: {

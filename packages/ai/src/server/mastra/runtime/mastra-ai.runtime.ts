@@ -552,11 +552,7 @@ export class MastraAIRuntime implements AIWorkflowRuntimePort {
       threadId: conversationId,
       requestContext,
     });
-    await this.applySessionPolicy(
-      session,
-      mode,
-      requestContext,
-    );
+    await this.applySessionPolicy(session, mode, requestContext);
     return { session, requestContext };
   }
 
@@ -1263,7 +1259,11 @@ export class MastraAIRuntime implements AIWorkflowRuntimePort {
     if (conversationBusy() || session.run.isRunning())
       throw new Error('Assistant conversation already has an active turn');
     // Reapply on cached/reconnected sessions; setup failure must prevent the turn.
-    await this.applySessionPolicy(session, input.permissionMode ?? 'approval-required', requestContext);
+    await this.applySessionPolicy(
+      session,
+      input.permissionMode ?? 'approval-required',
+      requestContext,
+    );
     if (conversationBusy() || session.run.isRunning())
       throw new Error('Assistant conversation already has an active turn');
     if (this.deps.agentRegistry) {

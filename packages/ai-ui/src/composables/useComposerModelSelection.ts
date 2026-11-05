@@ -1,4 +1,8 @@
-import { AIChatPermissionModeSchema, AGENT_SUPPORTED_RUNTIME_MODES, resolveCompatibleRuntimeMode } from '@memoflow/ai-contracts';
+import {
+  AIChatPermissionModeSchema,
+  AGENT_SUPPORTED_RUNTIME_MODES,
+  resolveCompatibleRuntimeMode,
+} from '@memoflow/ai-contracts';
 import { computed, onActivated, ref, watch, type Ref } from 'vue';
 import { useRoute } from 'vue-router';
 import { useI18n } from 'vue-i18n';
@@ -297,32 +301,50 @@ export function useComposerModelSelection(options: UseComposerModelSelectionOpti
   const supportedRuntimeModes = computed(() => {
     const choice = chatSession.runtimeChoice.value;
     const instance = agentRegistrySnapshot.value?.instances.find((entry) =>
-      choice.runtimeKind === 'local_agent' ? entry.legacyConnectionId === choice.connectionId : entry.instanceId === modelSelection.selectedAgentId.value,
+      choice.runtimeKind === 'local_agent'
+        ? entry.legacyConnectionId === choice.connectionId
+        : entry.instanceId === modelSelection.selectedAgentId.value,
     );
-    return instance ? AGENT_SUPPORTED_RUNTIME_MODES[instance.driver] : AIChatPermissionModeSchema.options;
+    return instance
+      ? AGENT_SUPPORTED_RUNTIME_MODES[instance.driver]
+      : AIChatPermissionModeSchema.options;
   });
   const permissionStorageKey = () => {
     const owner = resolveIdentity();
     const id = chatSession.chatConversationId.value;
-    return owner && id ? `ai:composer:runtime-mode:v1:${encodeURIComponent(owner)}:${encodeURIComponent(id)}` : '';
+    return owner && id
+      ? `ai:composer:runtime-mode:v1:${encodeURIComponent(owner)}:${encodeURIComponent(id)}`
+      : '';
   };
-  watch([resolveIdentity, chatSession.chatConversationId], ([owner, id], previous) => {
-    let saved: unknown;
-    try {
-      const key = permissionStorageKey();
-      saved = key ? JSON.parse(localStorage.getItem(key) ?? 'null') : null;
-    } catch { /* Storage restrictions do not prevent a supervised session. */ }
-    const parsed = AIChatPermissionModeSchema.safeParse(saved);
-    // Creating the first thread preserves its draft choice; opening another thread restores its own choice.
-    const mode = parsed.success ? parsed.data : previous && previous[0] === owner && !previous[1] && id ? permissionMode.value : 'approval-required';
-    permissionMode.value = resolveCompatibleRuntimeMode(mode, supportedRuntimeModes.value);
-    savePermission();
-  }, { flush: 'sync', immediate: true });
+  watch(
+    [resolveIdentity, chatSession.chatConversationId],
+    ([owner, id], previous) => {
+      let saved: unknown;
+      try {
+        const key = permissionStorageKey();
+        saved = key ? JSON.parse(localStorage.getItem(key) ?? 'null') : null;
+      } catch {
+        /* Storage restrictions do not prevent a supervised session. */
+      }
+      const parsed = AIChatPermissionModeSchema.safeParse(saved);
+      // Creating the first thread preserves its draft choice; opening another thread restores its own choice.
+      const mode = parsed.success
+        ? parsed.data
+        : previous && previous[0] === owner && !previous[1] && id
+          ? permissionMode.value
+          : 'approval-required';
+      permissionMode.value = resolveCompatibleRuntimeMode(mode, supportedRuntimeModes.value);
+      savePermission();
+    },
+    { flush: 'sync', immediate: true },
+  );
   function savePermission() {
     try {
       const key = permissionStorageKey();
       if (key) localStorage.setItem(key, JSON.stringify(permissionMode.value));
-    } catch { /* In-memory selection still applies to subsequent turns. */ }
+    } catch {
+      /* In-memory selection still applies to subsequent turns. */
+    }
   }
   watch(permissionMode, savePermission, { flush: 'sync' });
   watch(supportedRuntimeModes, (supported) => {
@@ -482,7 +504,6 @@ export function useComposerModelSelection(options: UseComposerModelSelectionOpti
     } else {
       if (modelSelection.selectModel(key) !== 'selected') return;
       chatSession.runtimeChoice.value = { runtimeKind: 'builtin' };
-
     }
   }
   function selectPermission(mode: AIChatPermissionMode) {

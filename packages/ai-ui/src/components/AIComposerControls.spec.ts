@@ -730,12 +730,18 @@ describe('integrated picker configuration', () => {
   it('offers four icon segments, previews on hover/focus, and emits a session choice', async () => {
     const wrapper = setup({ native: true, permissionMode: 'full-access' });
     expect(wrapper.get('[data-testid="ai-model-picker-permissions"]').text()).toContain('完全访问');
-    expect(wrapper.get('[data-testid="ai-model-picker-permission-full-access"]').attributes('aria-checked')).toBe('true');
+    expect(
+      wrapper
+        .get('[data-testid="ai-model-picker-permission-full-access"]')
+        .attributes('aria-checked'),
+    ).toBe('true');
     const edits = wrapper.get('[data-testid="ai-model-picker-permission-auto-accept-edits"]');
     await edits.trigger('mouseenter');
     expect(wrapper.get('[data-testid="ai-permission-preview"]').text()).toContain('自动接受编辑');
     await edits.trigger('focus');
-    expect(wrapper.get('[data-testid="ai-permission-preview"]').text()).toContain('其他操作仍需询问');
+    expect(wrapper.get('[data-testid="ai-permission-preview"]').text()).toContain(
+      '其他操作仍需询问',
+    );
     await edits.trigger('click');
     expect(wrapper.emitted('permission')).toEqual([['auto-accept-edits']]);
     expect(wrapper.get('[data-testid="ai-model-picker-options"]').text()).not.toContain('权限');
@@ -746,11 +752,18 @@ describe('integrated picker configuration', () => {
     const wrapper = setup({
       native: true,
       permissionMode: 'auto',
-      agents: [{ ...agents[0], supportedRuntimeModes: ['approval-required', 'full-access'] }],
+      agents: [
+        {
+          ...agents[0],
+          supportedRuntimeModes: ['approval-required', 'full-access'],
+        },
+      ],
     });
     expect(wrapper.get('[data-testid="ai-model-picker-permissions"]').text()).toContain('需要确认');
     expect(wrapper.find('[data-testid="ai-model-picker-permission-auto"]').exists()).toBe(false);
-    expect(wrapper.find('[data-testid="ai-model-picker-permission-full-access"]').exists()).toBe(true);
+    expect(wrapper.find('[data-testid="ai-model-picker-permission-full-access"]').exists()).toBe(
+      true,
+    );
     wrapper.unmount();
   });
 

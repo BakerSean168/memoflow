@@ -74,6 +74,21 @@ test('T3 segments, persistence, and same-thread native command approval', async 
   await page.getByTestId('ai-chat-model-selector').click();
   await expect(page.getByTestId('ai-model-picker')).not.toBeVisible();
   await page.getByTestId('run-command').click();
+  await expect
+    .poll(async () => {
+      const state = await page.request.get('/__runtime/state').then((result) => result.json());
+      return (
+        !state.running &&
+        state.events[0]?.runId !== supervised.events[0].runId &&
+        state.events.some((event: { type: string }) => event.type === 'assistant.run.completed')
+      );
+    })
+    .toBe(true);
+  const fullRunId = await page.request
+    .get('/__runtime/state')
+    .then((result) => result.json())
+    .then((state) => state.events[0].runId);
+  await expect(page.getByTestId('runtime-log')).toContainText(fullRunId);
   await expect(page.getByTestId('runtime-log')).toContainText('runtime-861-command-executed');
   await expect(page.getByTestId('run-command')).toBeEnabled();
   await expect(page.getByTestId('ai-native-request')).toHaveCount(0);
