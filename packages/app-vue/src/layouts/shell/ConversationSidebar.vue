@@ -29,8 +29,10 @@ import {
   ArchiveRestore,
   ChevronDown,
   Search,
+  Settings,
   SquarePen,
   Trash2,
+  UserPen,
   X,
   Check,
   LockKeyhole,
@@ -61,6 +63,7 @@ import {
 } from '@memoflow/ui-vue-shadcn';
 import type { ProfileSummary, ProfileCloudState } from '@memoflow/desktop-contracts';
 import { useAccountAvatar, useAccountStore } from '@memoflow/account-ui';
+import { PROFILE_EDITOR_INTENT_KEY } from '../../di/keys';
 import type {
   ConversationAttentionStatus,
   ConversationAttentionMap,
@@ -99,6 +102,8 @@ const props = defineProps<{
   titleBusy?: Record<string, boolean>;
   activeConversationId: string | null;
   userName?: string;
+  /** 云账户邮箱（本地账户没有）；账户块与个人卡片的小字行共用。 */
+  accountEmail?: string | null;
   /** 当前壳层展示的是哪一种身份，而不是含混的“是否登录”。 */
   identityKind?: 'local' | 'registered-local' | 'cloud';
   /** 云端会话是否可用；只影响同步账号动作，不影响本地身份。 */
@@ -453,6 +458,15 @@ const identityLabel = () => {
   if (props.identityKind === 'registered-local') return t('shell.account.localProfile');
   return t('shell.account.localIdentity');
 };
+
+/**
+ * 「编辑个人资料」只发出意图（#856）；对话框本体由 #857 实现，读取同一个
+ * intent 的 `open`。宿主未接线时（独立挂载的组件测试）点击是安全的空操作。
+ */
+const profileEditorIntent = inject(PROFILE_EDITOR_INTENT_KEY, null);
+function requestEditProfile(): void {
+  profileEditorIntent?.request();
+}
 </script>
 
 <template>
@@ -809,8 +823,11 @@ const identityLabel = () => {
       </div>
     </section>
 
-    <!-- 底：账户菜单 -->
-    <div class="flex h-11 shrink-0 items-center border-t border-[hsl(var(--border-subtle))] px-2.5">
+    <!-- 底：账户块（左）+ 独立设置入口（右），见 #856。 -->
+    <div
+      class="flex h-11 shrink-0 items-center gap-1 border-t border-[hsl(var(--border-subtle))] px-2.5"
+      data-testid="shell-account-footer"
+    >
       <DropdownMenu
         @update:open="
           (open) => {
@@ -822,9 +839,10 @@ const identityLabel = () => {
           <button
             type="button"
             ref="accountMenuTrigger"
-            data-testid="shell-account-menu"
-            class="flex h-8 w-full min-w-0 items-center justify-start gap-2 rounded-md px-1.5 text-left transition-colors hover:bg-[hsl(var(--hover))] focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+            data-testid="shell-account-card"
             :title="t('shell.account.menu')"
+            :aria-label="t('shell.account.menu')"
+            class="flex h-8 min-w-0 flex-1 items-center gap-2 rounded-md px-1.5 text-left transition-colors hover:bg-[hsl(var(--hover))] focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
           >
             <span
               class="flex h-6 w-6 shrink-0 items-center justify-center overflow-hidden rounded-full bg-primary/90 text-[10px] font-semibold text-primary-foreground shadow-[0_0_0_1px_hsl(var(--primary)/0.18)]"
@@ -839,135 +857,183 @@ const identityLabel = () => {
               />
               <template v-else>{{ displayName().slice(0, 1).toUpperCase() }}</template>
             </span>
-            <span
-              data-testid="shell-account-name"
-              class="min-w-0 truncate text-[11.5px] font-medium"
-              >{{ displayName() }}</span
-            >
+            <span class="flex min-w-0 flex-1 flex-col justify-center">
+              <span
+                data-testid="shell-account-name"
+                class="block min-w-0 truncate text-[11.5px] font-medium leading-4"
+                >{{ displayName() }}</span
+              >
+              <span
+                v-if="accountEmail"
+                data-testid="shell-account-email"
+                class="block min-w-0 truncate text-[10px] leading-[13px] text-[hsl(var(--foreground-subtle))]"
+                >{{ accountEmail }}</span
+              >
+            </span>
           </button>
         </DropdownMenuTrigger>
+        <!-- 个人卡片：#801 的菜单语义（子菜单、键盘导航、关闭后焦点归还）保留，
+             外观改为卡片；卡面自身不设滚动容器，长内容靠 truncate 裁剪。 -->
         <DropdownMenuContent
           align="start"
           side="top"
-          class="w-52"
+          :side-offset="6"
+          class="w-64 max-w-[calc(100vw-1rem)] rounded-xl p-1.5"
           @close-auto-focus="restoreAccountMenuFocus"
         >
-          <div class="flex items-center gap-2 px-2 py-1.5" data-testid="shell-account-identity">
-            <span
-              class="flex h-8 w-8 shrink-0 items-center justify-center overflow-hidden rounded-full bg-primary text-xs text-primary-foreground"
-              aria-hidden="true"
+          <!-- data-testid 只能落在真实元素上：Reka 的内容根是 portal/fragment。 -->
+          <div data-testid="shell-account-card-panel" class="min-w-0">
+            <div
+              class="flex items-center gap-2.5 px-1.5 py-1.5"
+              data-testid="shell-account-identity"
             >
-              <img
-                v-if="accountAvatarUrl"
-                :src="accountAvatarUrl"
-                alt=""
-                class="h-full w-full object-cover"
-              />
-              <template v-else>{{ displayName().slice(0, 2).toUpperCase() }}</template>
-            </span>
-            <div class="min-w-0">
-              <p class="truncate text-sm font-medium">{{ displayName() }}</p>
-              <p class="text-[11px] text-muted-foreground">
-                {{ identityLabel() }}
-              </p>
-            </div>
-          </div>
-          <DropdownMenuSeparator />
-          <DropdownMenuItem data-testid="shell-open-settings" @select="emit('open-settings')">
-            {{ t('shell.account.settings') }}
-          </DropdownMenuItem>
-          <DropdownMenuSub v-if="isDesktop">
-            <DropdownMenuSubTrigger data-testid="shell-switch-account">
-              {{ t('shell.account.switchAccount') }}
-            </DropdownMenuSubTrigger>
-            <DropdownMenuSubContent
-              data-testid="shell-profile-switcher"
-              class="w-72 max-w-[calc(100vw-1rem)]"
-              :collision-padding="8"
-              :avoid-collisions="true"
-            >
-              <div class="max-h-[min(60vh,24rem)] overflow-y-auto" data-testid="shell-profile-list">
-                <DropdownMenuItem
-                  v-for="profile in orderedProfiles"
-                  :key="profile.profileId"
-                  :data-testid="`shell-switch-profile-${profile.profileId}`"
-                  :aria-label="profileLabel(profile)"
-                  :aria-current="profile.profileId === activeProfileId ? 'true' : undefined"
-                  @select="
-                    profile.profileId !== activeProfileId &&
-                    emit('switch-profile', profile.profileId)
-                  "
+              <span
+                class="flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-full bg-primary text-xs text-primary-foreground"
+                aria-hidden="true"
+              >
+                <img
+                  v-if="accountAvatarUrl"
+                  :src="accountAvatarUrl"
+                  alt=""
+                  class="h-full w-full object-cover"
+                />
+                <template v-else>{{ displayName().slice(0, 2).toUpperCase() }}</template>
+              </span>
+              <div class="min-w-0 flex-1">
+                <p
+                  class="truncate text-[13px] font-medium leading-4"
+                  data-testid="shell-account-card-name"
                 >
-                  <span
-                    class="mr-2 flex h-8 w-8 shrink-0 items-center justify-center overflow-hidden rounded-full bg-muted text-xs"
-                    aria-hidden="true"
-                  >
-                    <img
-                      v-if="profile.avatarUrl"
-                      :src="profile.avatarUrl"
-                      alt=""
-                      class="h-full w-full object-cover"
-                    />
-                    <template v-else>{{ profile.displayName.slice(0, 2).toUpperCase() }}</template>
-                  </span>
-                  <span class="min-w-0 flex-1">
-                    <span class="block truncate" :title="profile.displayName">{{
-                      profile.displayName
-                    }}</span>
-                    <small class="block truncate text-muted-foreground">
-                      {{
-                        profile.profileKind === 'local'
-                          ? t('auth.profileAccess.local')
-                          : t('auth.profileAccess.registered')
-                      }}
-                      · {{ profile.identifierHint || profile.profileId }} ·
-                      {{
-                        profile.profileId === activeProfileId && cloudState
-                          ? t('shell.account.connection.' + cloudState)
-                          : t('shell.account.connection.unknown')
-                      }}
-                    </small>
-                  </span>
-                  <LockKeyhole
-                    v-if="profile.hasCredential"
-                    class="ml-1 h-3 w-3 shrink-0"
-                    :aria-label="t('auth.profileAccess.unlock')"
-                  />
-                  <Check
-                    v-if="profile.profileId === activeProfileId"
-                    class="ml-1 h-3 w-3 shrink-0"
-                    :aria-label="t('shell.account.currentProfile')"
-                  />
-                </DropdownMenuItem>
+                  {{ displayName() }}
+                </p>
+                <p
+                  class="truncate text-[11px] leading-4 text-muted-foreground"
+                  data-testid="shell-account-card-kind"
+                >
+                  {{ identityLabel() }}
+                </p>
+                <p
+                  v-if="accountEmail"
+                  class="truncate text-[11px] leading-4 text-muted-foreground/80"
+                  data-testid="shell-account-card-email"
+                >
+                  {{ accountEmail }}
+                </p>
               </div>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem data-testid="shell-add-account" @select="emit('add-account')">
-                {{ t('shell.account.menuAddAccount') }}
-              </DropdownMenuItem>
-            </DropdownMenuSubContent>
-          </DropdownMenuSub>
-          <DropdownMenuSeparator />
-          <DropdownMenuItem
-            v-if="isDesktop || cloudConnected"
-            data-testid="shell-logout"
-            class="text-destructive focus:text-destructive"
-            @click="emit('logout')"
-          >
-            {{ t('shell.account.logout') }}
-          </DropdownMenuItem>
-          <DropdownMenuItem
-            v-else
-            data-testid="shell-open-cloud-connection"
-            @click="emit('open-cloud-connection')"
-          >
-            {{
-              identityKind === 'registered-local'
-                ? t('shell.account.reauthenticate')
-                : t('shell.account.connectCloud')
-            }}
-          </DropdownMenuItem>
+            </div>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem data-testid="shell-edit-profile" @select="requestEditProfile">
+              <UserPen class="mr-2 h-3.5 w-3.5" aria-hidden="true" />
+              {{ t('shell.account.editProfile') }}
+            </DropdownMenuItem>
+            <DropdownMenuSub v-if="isDesktop">
+              <DropdownMenuSubTrigger data-testid="shell-switch-account">
+                {{ t('shell.account.switchAccount') }}
+              </DropdownMenuSubTrigger>
+              <DropdownMenuSubContent
+                data-testid="shell-profile-switcher"
+                class="w-72 max-w-[calc(100vw-1rem)]"
+                :collision-padding="8"
+                :avoid-collisions="true"
+              >
+                <div
+                  class="max-h-[min(60vh,24rem)] overflow-y-auto"
+                  data-testid="shell-profile-list"
+                >
+                  <DropdownMenuItem
+                    v-for="profile in orderedProfiles"
+                    :key="profile.profileId"
+                    :data-testid="`shell-switch-profile-${profile.profileId}`"
+                    :aria-label="profileLabel(profile)"
+                    :aria-current="profile.profileId === activeProfileId ? 'true' : undefined"
+                    @select="
+                      profile.profileId !== activeProfileId &&
+                      emit('switch-profile', profile.profileId)
+                    "
+                  >
+                    <span
+                      class="mr-2 flex h-8 w-8 shrink-0 items-center justify-center overflow-hidden rounded-full bg-muted text-xs"
+                      aria-hidden="true"
+                    >
+                      <img
+                        v-if="profile.avatarUrl"
+                        :src="profile.avatarUrl"
+                        alt=""
+                        class="h-full w-full object-cover"
+                      />
+                      <template v-else>{{
+                        profile.displayName.slice(0, 2).toUpperCase()
+                      }}</template>
+                    </span>
+                    <span class="min-w-0 flex-1">
+                      <span class="block truncate" :title="profile.displayName">{{
+                        profile.displayName
+                      }}</span>
+                      <small class="block truncate text-muted-foreground">
+                        {{
+                          profile.profileKind === 'local'
+                            ? t('auth.profileAccess.local')
+                            : t('auth.profileAccess.registered')
+                        }}
+                        · {{ profile.identifierHint || profile.profileId }} ·
+                        {{
+                          profile.profileId === activeProfileId && cloudState
+                            ? t('shell.account.connection.' + cloudState)
+                            : t('shell.account.connection.unknown')
+                        }}
+                      </small>
+                    </span>
+                    <LockKeyhole
+                      v-if="profile.hasCredential"
+                      class="ml-1 h-3 w-3 shrink-0"
+                      :aria-label="t('auth.profileAccess.unlock')"
+                    />
+                    <Check
+                      v-if="profile.profileId === activeProfileId"
+                      class="ml-1 h-3 w-3 shrink-0"
+                      :aria-label="t('shell.account.currentProfile')"
+                    />
+                  </DropdownMenuItem>
+                </div>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem data-testid="shell-add-account" @select="emit('add-account')">
+                  {{ t('shell.account.menuAddAccount') }}
+                </DropdownMenuItem>
+              </DropdownMenuSubContent>
+            </DropdownMenuSub>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem
+              v-if="isDesktop || cloudConnected"
+              data-testid="shell-logout"
+              class="text-destructive focus:text-destructive"
+              @click="emit('logout')"
+            >
+              {{ t('shell.account.logout') }}
+            </DropdownMenuItem>
+            <DropdownMenuItem
+              v-else
+              data-testid="shell-open-cloud-connection"
+              @click="emit('open-cloud-connection')"
+            >
+              {{
+                identityKind === 'registered-local'
+                  ? t('shell.account.reauthenticate')
+                  : t('shell.account.connectCloud')
+              }}
+            </DropdownMenuItem>
+          </div>
         </DropdownMenuContent>
       </DropdownMenu>
+      <button
+        type="button"
+        data-testid="shell-open-settings"
+        :title="t('shell.account.settings')"
+        :aria-label="t('shell.account.settings')"
+        class="flex h-8 w-8 shrink-0 items-center justify-center rounded-md text-[hsl(var(--foreground-subtle))] transition-colors hover:bg-[hsl(var(--hover))] hover:text-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+        @click="emit('open-settings')"
+      >
+        <Settings class="h-4 w-4" aria-hidden="true" />
+      </button>
     </div>
   </aside>
 </template>

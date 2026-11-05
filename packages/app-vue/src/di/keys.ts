@@ -18,7 +18,7 @@ import type {
 import type { ElectronBridge } from '@memoflow/ipc-client';
 import type { LocalAgentClient, AgentRegistryClient } from '@memoflow/ai-client';
 import type { AIRuntimeSurface } from '@memoflow/ai-contracts';
-import type { AccountAvatarStore } from '@memoflow/account-ui';
+import type { AccountAvatarStore, ProfileEditorIntent } from '@memoflow/account-ui';
 import type { Result } from '@memoflow/transport-contracts/result';
 import type { DesktopAuthApi } from '../shared/utils/desktop-auth-recovery';
 import type {
@@ -112,6 +112,13 @@ export const DESKTOP_BRIDGE_KEY: InjectionKey<ElectronBridge> = Symbol('DesktopB
  */
 export const ACCOUNT_AVATAR_STORE_KEY: InjectionKey<AccountAvatarStore> =
   Symbol('AccountAvatarStore');
+
+/**
+ * Profile editor intent (Issue #856). The sidebar account card requests it;
+ * Issue #857 binds the dialog against the same flag.
+ */
+export const PROFILE_EDITOR_INTENT_KEY: InjectionKey<ProfileEditorIntent> =
+  Symbol('ProfileEditorIntent');
 
 /** Optional host-neutral Desktop Update capability. Web hosts intentionally omit it. */
 export const DESKTOP_UPDATE_SERVICE_KEY: InjectionKey<DesktopUpdateService> =
