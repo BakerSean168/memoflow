@@ -161,5 +161,6 @@ export {
   type DeviceKeymap,
 } from './keyboard-keymap';
 export * from './profile-import';
+export * from './profile-avatar';
 
 export * from './desktop-startup';

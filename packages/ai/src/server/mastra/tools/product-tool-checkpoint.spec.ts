@@ -42,8 +42,12 @@ it.each([
   ['full_auto', 'allow', 'allow'],
 ] as const)('uses %s for native creation/update decisions', async (preset, create, update) => {
   const f = fixture();
-  await f.permissions.saveSettings('owner', { preset, agentPresets: {}, revision: 1 });
-  await applyMemoFlowSessionToolPolicy(f.session, 'supervised', f.context);
+  await f.permissions.saveSettings('owner', {
+    preset,
+    agentPresets: {},
+    revision: 1,
+  });
+  await applyMemoFlowSessionToolPolicy(f.session, 'approval-required', f.context);
   for (const [name, expected] of [
     ['routine_create', create],
     ['routine_set_profile_active', update],
@@ -72,7 +76,7 @@ it('executes authorized creation, records execution, and rechecks a deny added w
     effect: 'allow',
     source: 'user',
   });
-  await applyMemoFlowSessionToolPolicy(f.session, 'supervised', f.context);
+  await applyMemoFlowSessionToolPolicy(f.session, 'approval-required', f.context);
   expect(await checkMemoFlowToolPermission(f.permissions, 'routine_create', f.context)).toBe(
     'allow',
   );
@@ -114,7 +118,7 @@ it('executes authorized creation, records execution, and rechecks a deny added w
 
 it('keeps explicit denies in full auto and fails closed on unknown tools and storage failures', async () => {
   const f = fixture();
-  f.context.setRaw('permissionMode', 'auto-approve');
+  f.context.setRaw('permissionMode', 'full-access');
   await f.permissions.saveRule('owner', {
     id: 'deny',
     agentId: null,
@@ -123,7 +127,7 @@ it('keeps explicit denies in full auto and fails closed on unknown tools and sto
     effect: 'deny',
     source: 'user',
   });
-  await applyMemoFlowSessionToolPolicy(f.session, 'auto-approve', f.context);
+  await applyMemoFlowSessionToolPolicy(f.session, 'full-access', f.context);
   expect(await checkMemoFlowToolPermission(f.permissions, 'routine_create', f.context)).toBe(
     'deny',
   );
@@ -149,7 +153,7 @@ it('checks every owner exposed by workspace context instead of bypassing a task 
     effect: 'deny',
     source: 'user',
   });
-  await applyMemoFlowSessionToolPolicy(f.session, 'supervised', f.context);
+  await applyMemoFlowSessionToolPolicy(f.session, 'approval-required', f.context);
   expect(await checkMemoFlowToolPermission(f.permissions, 'workspace_overview', f.context)).toBe(
     'deny',
   );
@@ -172,7 +176,7 @@ it('honors a custom ask for a read tool through the native approval policy', asy
     effect: 'ask',
     source: 'user',
   });
-  await applyMemoFlowSessionToolPolicy(f.session, 'supervised', f.context);
+  await applyMemoFlowSessionToolPolicy(f.session, 'approval-required', f.context);
   expect(
     await f.tools.knowledge_search.needsApprovalFn!(
       { query: 'notes' },
@@ -182,27 +186,67 @@ it('honors a custom ask for a read tool through the native approval policy', asy
   expect(f.session.resolveToolApproval('knowledge_search')).toBe('ask');
 });
 
-it('intersects native permission modes with global MemoFlow business permissions', async () => {
-  const f = fixture();
-  await f.permissions.saveSettings('owner', { preset: 'full_auto', agentPresets: {}, revision: 1 });
-  f.context.setRaw('permissionMode', 'read-only');
-  expect(await checkMemoFlowToolPermission(f.permissions, 'routine_create', f.context)).toBe(
-    'deny',
-  );
-  f.context.setRaw('permissionMode', 'confirm-each');
-  expect(await checkMemoFlowToolPermission(f.permissions, 'routine_create', f.context)).toBe('ask');
-  f.context.setRaw('permissionMode', 'auto-approve');
-  expect(await checkMemoFlowToolPermission(f.permissions, 'routine_create', f.context)).toBe(
-    'allow',
-  );
-  await f.permissions.saveSettings('owner', {
-    preset: 'confirm_each',
-    agentPresets: {},
-    revision: 2,
-  });
-  expect(await checkMemoFlowToolPermission(f.permissions, 'routine_create', f.context)).toBe('ask');
-  await f.permissions.saveSettings('owner', { preset: 'read_only', agentPresets: {}, revision: 3 });
-  expect(await checkMemoFlowToolPermission(f.permissions, 'routine_create', f.context)).toBe(
-    'deny',
-  );
-});
+it.each(['approval-required', 'auto-accept-edits', 'auto', 'full-access'] as const)(
+  'keeps business presets independent of runtime mode %s',
+  async (mode) => {
+    const f = fixture();
+    f.context.setRaw('permissionMode', mode);
+    await f.permissions.saveSettings('owner', {
+      preset: 'full_auto',
+      agentPresets: {},
+      revision: 1,
+    });
+    expect(await checkMemoFlowToolPermission(f.permissions, 'routine_create', f.context)).toBe(
+      'allow',
+    );
+    await f.permissions.saveSettings('owner', {
+      preset: 'confirm_each',
+      agentPresets: {},
+      revision: 2,
+    });
+    expect(await checkMemoFlowToolPermission(f.permissions, 'routine_create', f.context)).toBe(
+      'ask',
+    );
+    await f.permissions.saveSettings('owner', {
+      preset: 'read_only',
+      agentPresets: {},
+      revision: 3,
+    });
+    expect(await checkMemoFlowToolPermission(f.permissions, 'routine_create', f.context)).toBe(
+      'deny',
+    );
+  },
+);
+
+// The session business preset can narrow global grants, including under full machine access.
+it.each([
+  ['read_only', 'deny'],
+  ['confirm_each', 'ask'],
+  ['on_demand', 'ask'],
+  ['full_auto', 'allow'],
+] as const)(
+  'applies the %s business ceiling independently of full-access',
+  async (preset, expected) => {
+    const f = fixture();
+    f.context.setRaw('permissionMode', 'full-access');
+    f.context.setRaw('conversationBusinessPreset', preset);
+    await f.permissions.saveSettings('owner', {
+      preset: 'full_auto',
+      agentPresets: {},
+      revision: 1,
+    });
+    await applyMemoFlowSessionToolPolicy(f.session, 'full-access', f.context);
+    expect(await checkMemoFlowToolPermission(f.permissions, 'routine_create', f.context)).toBe(
+      expected,
+    );
+    expect(f.session.resolveToolApproval('routine_create')).toBe(expected);
+    await f.permissions.saveSettings('owner', {
+      preset: 'read_only',
+      agentPresets: {},
+      revision: 2,
+    });
+    expect(await checkMemoFlowToolPermission(f.permissions, 'routine_create', f.context)).toBe(
+      'deny',
+    );
+  },
+);

@@ -296,6 +296,7 @@ export const LocalAgentRequestSchema = z.discriminatedUnion('type', [
       /** What the approval would cover (tool kind, paths, cwd), as reported by the Provider. */
       scope: z.string().max(500).optional(),
       business: BusinessApprovalSchema.optional(),
+      operation: z.enum(['edit', 'command', 'other']).optional(),
     })
     .strict(),
   z

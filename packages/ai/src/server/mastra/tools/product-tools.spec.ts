@@ -91,24 +91,27 @@ describe('MemoFlow AI owner tools (AI-9609)', () => {
       state: { set: vi.fn(async () => {}) },
       resolveToolApproval: (_name: string): 'allow' | 'ask' | 'deny' => 'allow',
     };
-    await applyMemoFlowSessionToolPolicy(session, 'read-only');
+    const requestContext = context();
+    requestContext.setRaw('conversationBusinessPreset', 'read_only');
+    await applyMemoFlowSessionToolPolicy(session, 'full-access', requestContext);
     for (const [name, policy] of Object.entries(MEMOFLOW_PRODUCT_TOOL_POLICY))
       expect(session.resolveToolApproval(name)).toBe(policy.category === 'read' ? 'allow' : 'deny');
     expect(session.resolveToolApproval('unclassified')).toBe('deny');
     const executeAction = vi.fn();
     const tools = createTools({ notificationReadPort: { executeAction } as never });
-    const requestContext = context();
-    requestContext.setRaw('permissionMode', 'read-only');
+    requestContext.setRaw('permissionMode', 'full-access');
     await expect(
       tools.notification_execute_action.execute?.(
         { notificationId: 'n', actionKey: 'archive' },
         { requestContext, observe: {} as never },
       ),
-    ).rejects.toThrow('Read-only Assistant');
+    ).rejects.toThrow('not authorized');
     expect(executeAction).not.toHaveBeenCalled();
-    await applyMemoFlowSessionToolPolicy(session, 'supervised');
+    requestContext.setRaw('conversationBusinessPreset', 'confirm_each');
+    await applyMemoFlowSessionToolPolicy(session, 'full-access', requestContext);
     expect(session.resolveToolApproval('notification_execute_action')).toBe('ask');
-    await applyMemoFlowSessionToolPolicy(session, 'auto-approve');
+    requestContext.setRaw('conversationBusinessPreset', 'full_auto');
+    await applyMemoFlowSessionToolPolicy(session, 'approval-required', requestContext);
     expect(session.resolveToolApproval('notification_execute_action')).toBe('allow');
   });
 

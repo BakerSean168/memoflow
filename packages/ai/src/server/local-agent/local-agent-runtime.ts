@@ -23,6 +23,9 @@ import type {
 } from '@memoflow/ai-contracts';
 import {
   LocalAgentConversationSchema,
+  AIChatPermissionModeSchema,
+  AGENT_SUPPORTED_RUNTIME_MODES,
+  resolveCompatibleRuntimeMode,
   inspectGoalIntent,
   resolveGoalIntent,
   type AssistantRuntimeToolAnswerCommand,
@@ -694,7 +697,7 @@ export class LocalAgentRuntime {
   async *dispatchMessage(input: MessageInput): AsyncGenerator<AssistantRuntimeEvent> {
     this.assertActive();
     if ((await this.listAskUserSuspensions(input)).length) throw new LocalAgentError('CONFLICT');
-    if (input.permissionMode && !['supervised', 'auto-approve'].includes(input.permissionMode))
+    if (input.permissionMode && !AIChatPermissionModeSchema.safeParse(input.permissionMode).success)
       throw new LocalAgentError('LOCAL_AGENT_PERMISSION_DENIED');
     if (input.attachments?.length) throw new LocalAgentError('LOCAL_AGENT_UNSUPPORTED_INPUT');
     // Never trust model options from the renderer. A fresh owner-scoped native
@@ -830,6 +833,13 @@ export class LocalAgentRuntime {
         };
         return;
       }
+      const runtimeMode = resolveCompatibleRuntimeMode(
+        input.permissionMode ??
+          (connection.nativePermissionMode === 'auto-approve'
+            ? 'full-access'
+            : 'approval-required'),
+        AGENT_SUPPORTED_RUNTIME_MODES[connection.driver],
+      );
       const events = new NativeEventQueue();
       run.businessApprovals = new Map();
       run.grant = await this.options.bridge?.open({
@@ -838,7 +848,7 @@ export class LocalAgentRuntime {
         conversationId: conversation.id,
         runId: run.runId,
         goalIntent: input.content,
-        permissionMode: input.permissionMode ?? 'supervised',
+        permissionMode: input.permissionMode ?? 'approval-required',
         requestApproval: (toolName, signal, business) =>
           new Promise<boolean | BusinessApprovalDecision>((resolve) => {
             const requestId = randomUUID();
@@ -897,6 +907,7 @@ export class LocalAgentRuntime {
       const toolRouting = run.grant ? `\n\n${MEMOFLOW_NATIVE_TOOL_ROUTING_INSTRUCTIONS}` : '';
       const content = `${input.content}${toolRouting}\n\nMemoFlow reference format: cite Goal and TaskPlan results using Markdown links [name](/goals/ID) and [title](/tasks/ID), with IDs returned by MemoFlow tools. Cite Knowledge notes using [title](url) with the exact url returned by knowledge_search/knowledge_get.${input.selectedEntities?.length ? `\nUser-selected MemoFlow references (look up using MemoFlow tools):\n${JSON.stringify(input.selectedEntities)}` : ''}`;
       const nativeEvents = run.driver.run({
+        runtimeMode,
         nativeSessionId: conversation.nativeSessionId,
         accountFingerprint: conversation.accountFingerprint,
         modelId,
@@ -975,8 +986,9 @@ export class LocalAgentRuntime {
               data: event.request,
             };
           } else if (
-            connection.nativePermissionMode === 'auto-approve' &&
-            event.request.type === 'permission'
+            event.request.type === 'permission' &&
+            (runtimeMode === 'full-access' ||
+              (runtimeMode === 'auto-accept-edits' && event.request.operation === 'edit'))
           ) {
             if (
               !run.driver.respond(event.request.requestId, {

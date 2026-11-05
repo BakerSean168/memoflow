@@ -373,6 +373,18 @@ it.each([
   expect(fixture.transports[0].closed).toBe(true);
 });
 
+it('selects the exposed yolo session mode for full-access before prompting', async () => {
+  const fixture = await setup();
+  await collect(fixture.make(), 'flash-low', { runtimeMode: 'full-access' });
+  const transport = fixture.transports[0];
+  expect(transport.calls.find((call) => call.method === 'session/set_mode')?.params).toMatchObject({
+    modeId: 'yolo',
+  });
+  expect(transport.calls.findIndex((call) => call.method === 'session/set_mode')).toBeLessThan(
+    transport.calls.findIndex((call) => call.method === 'session/prompt'),
+  );
+});
+
 it('resumes the same native identity while restoring per-action approval mode before prompting', async () => {
   const fixture = await setup((transport) => {
     transport.mode = 'yolo';

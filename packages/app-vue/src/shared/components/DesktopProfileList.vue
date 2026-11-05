@@ -4,6 +4,7 @@ import { useI18n } from 'vue-i18n';
 import {
   Avatar,
   AvatarFallback,
+  AvatarImage,
   Button,
   Input,
   Popover,
@@ -196,6 +197,11 @@ onBeforeUnmount(() => {
             @click="openProfile(profile)"
           >
             <Avatar class="h-9 w-9 border bg-muted/60">
+              <AvatarImage
+                v-if="profile.avatarUrl"
+                :src="profile.avatarUrl"
+                :alt="profile.displayName"
+              />
               <AvatarFallback class="text-xs font-semibold">{{
                 initials(profile.displayName)
               }}</AvatarFallback>
@@ -340,6 +346,11 @@ onBeforeUnmount(() => {
                   activeProfileId === profile.profileId ? 'ring-primary/70' : 'ring-transparent'
                 "
               >
+                <AvatarImage
+                  v-if="profile.avatarUrl"
+                  :src="profile.avatarUrl"
+                  :alt="profile.displayName"
+                />
                 <AvatarFallback class="font-semibold text-muted-foreground">{{
                   initials(profile.displayName)
                 }}</AvatarFallback>

@@ -5,6 +5,7 @@ import type { CloudAuthClientPort } from '@memoflow/cloud-auth-contracts';
 import type { ExternalAgentClientPort } from '@memoflow/agent-gateway';
 import type { AccountClientPort } from '@memoflow/account-client';
 import type { PlatformRendererHost } from '@memoflow/ui-host-contracts';
+import type { AccountAvatarStore } from './account/avatar/account-avatar-store';
 
 /**
  * Renderer composition dependencies for the Account UI package.
@@ -20,6 +21,8 @@ export interface AccountUiHost extends PlatformRendererHost {
   EXTERNAL_AGENT_SERVICE_KEY: InjectionKey<ExternalAgentClientPort>;
   DESKTOP_ACCESS_SNAPSHOT_KEY: InjectionKey<Ref<DesktopAccessSnapshot | null>>;
   DESKTOP_BRIDGE_KEY: InjectionKey<ElectronBridge>;
+  /** Platform avatar persistence (desktop Profile directory / web storage). */
+  ACCOUNT_AVATAR_STORE_KEY: InjectionKey<AccountAvatarStore>;
   /**
    * Execution-only sign-out handler: the host performs the platform sign-out.
    * Confirmation belongs to {@link useAccountSignOut} so both entries ask once.

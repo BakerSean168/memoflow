@@ -93,6 +93,14 @@ export default {
     birthday: 'Birthday',
     editProfile: 'Edit Profile',
   },
+  avatar: {
+    saved: 'Avatar updated',
+    uploading: 'Processing avatar...',
+    failed: 'Could not update avatar',
+    invalidType: 'Choose an image file',
+    decodeFailed: 'Could not read that image',
+    encodeFailed: 'Could not process that image',
+  },
   placeholder: {
     nickname: 'Enter nickname',
     avatarUrl: 'https://... ',

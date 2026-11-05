@@ -46,6 +46,8 @@ import {
   ASSISTANT_SURFACE_KEY,
   defaultModuleCapsules,
   useAuthenticationStore,
+  ACCOUNT_AVATAR_STORE_KEY,
+  createWebAccountAvatarStore,
 } from '@memoflow/app-vue/web-core';
 import { resultHttpClient } from './http';
 import { createLazyService } from './lazy-service';
@@ -149,6 +151,7 @@ export function installAppServices(app: App): void {
   installRoutineUiHost();
   app.provide(ACCOUNT_SERVICE_KEY, accountService);
   app.provide(AUTH_SERVICE_KEY, authService);
+  app.provide(ACCOUNT_AVATAR_STORE_KEY, createWebAccountAvatarStore());
   app.provide(EXTERNAL_AGENT_SERVICE_KEY, createExternalAgentHttpClient(window.location.origin));
   app.provide(GOAL_SERVICE_KEY, goalService);
   app.provide(

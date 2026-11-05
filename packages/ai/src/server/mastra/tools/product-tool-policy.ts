@@ -1,10 +1,10 @@
-import type { AIChatPermissionMode, PermissionPreset } from '@memoflow/ai-contracts';
+import { PermissionPresetSchema, type AIChatPermissionMode } from '@memoflow/ai-contracts';
 import type { RequestContext } from '@mastra/core/request-context';
 import {
   authorize,
   executeAuthorized,
-  permissionOperationForTool,
   evaluatePermission,
+  permissionOperationForTool,
   type PermissionRepository,
 } from '../../permissions';
 import type { PermissionDecision } from '../../permissions';
@@ -46,22 +46,20 @@ export function memoFlowToolCategory(toolName: string): ToolCategory {
   return memoFlowToolPolicy(toolName)?.category ?? 'other';
 }
 
-/** Legacy native modes map onto business presets, without bypassing user deny rules. */
-export function assistantPermissionPreset(
-  mode?: AIChatPermissionMode,
-): PermissionPreset | undefined {
-  switch (mode) {
-    case 'read-only':
-      return 'read_only';
-    case 'confirm-each':
-      return 'confirm_each';
-    case 'auto-approve':
-      return 'full_auto';
-    case 'on-demand':
-      return 'on_demand';
-    default:
-      return undefined;
-  }
+/** Business session ceiling; runtime machine modes are deliberately never read here. */
+function conversationBusinessPreset(context: RequestContext) {
+  const preset = PermissionPresetSchema.safeParse(context.getRaw('conversationBusinessPreset'));
+  return preset.success ? preset.data : undefined;
+}
+
+function businessCeiling(name: string, context: RequestContext) {
+  const preset = conversationBusinessPreset(context);
+  return preset
+    ? operationIds(name).map(
+        (operationId) =>
+          evaluatePermission({ agentId: 'builtin-mastra', operationId, preset }).decision,
+      )
+    : [];
 }
 
 const DECISIONS = 'memoFlowToolDecisions';
@@ -83,9 +81,7 @@ function authorizationInput(name: string, context: RequestContext) {
     agentId: typeof agent === 'string' ? agent : 'builtin-mastra',
     conversationId: typeof conversation === 'string' ? conversation : null,
     operationId: permissionOperationForTool(name)?.id ?? name,
-    conversationPreset: assistantPermissionPreset(
-      context.getRaw('permissionMode') as AIChatPermissionMode,
-    ),
+    conversationPreset: conversationBusinessPreset(context),
   };
 }
 
@@ -110,27 +106,12 @@ export async function checkMemoFlowToolPermission(
       authorize(repository, { ...authorizationInput(name, context), operationId }),
     ),
   );
-  // Native Agent modes are a ceiling, never a substitute for the user's
-  // global MemoFlow business policy. A native read-only session cannot write
-  // even when business permissions are automatic, and native auto-approve
-  // cannot waive a business confirmation.
-  const nativePreset = assistantPermissionPreset(
-    context.getRaw('permissionMode') as AIChatPermissionMode,
-  );
-  const nativeDecisions = nativePreset
-    ? operationIds(name).map(
-        (operationId) =>
-          evaluatePermission({
-            agentId: 'builtin-mastra',
-            operationId,
-            preset: nativePreset,
-          }).decision,
-      )
-    : [];
+  // Compose existing business authorization with the business-only session ceiling.
+  const ceiling = businessCeiling(name, context);
   const decision =
-    records.some((record) => record.decision === 'deny') || nativeDecisions.includes('deny')
+    records.some((record) => record.decision === 'deny') || ceiling.includes('deny')
       ? 'deny'
-      : records.some((record) => record.decision === 'ask') || nativeDecisions.includes('ask')
+      : records.some((record) => record.decision === 'ask') || ceiling.includes('ask')
         ? 'ask'
         : 'allow';
   current[name] = decision;
@@ -175,6 +156,9 @@ export async function executeMemoFlowTool<T>(
   work: () => Promise<T>,
 ): Promise<T> {
   const approved = decisions(context)[name];
+  const ceiling = businessCeiling(name, context);
+  if (ceiling.includes('deny') || (ceiling.includes('ask') && approved !== 'ask'))
+    throw new Error('Agent operation is not authorized');
   let execute = work;
   for (const operationId of operationIds(name)) {
     const next = execute;
@@ -199,19 +183,20 @@ export async function applyMemoFlowSessionToolPolicy(
     resolveToolApproval(toolName: string): PermissionPolicy;
     state: { set(updates: Record<string, unknown>): Promise<void> };
   },
-  mode: AIChatPermissionMode = 'supervised',
+  _mode: AIChatPermissionMode = 'approval-required',
   context?: RequestContext,
 ): Promise<void> {
   const current = context ? decisions(context) : undefined;
   const permissionFor = (name: string): PermissionPolicy => {
     if (name === 'ask_user') return 'allow';
     if (!memoFlowToolPolicy(name)) return 'deny';
-    if (current)
-      return Object.prototype.hasOwnProperty.call(current, name) ? current[name]! : 'ask';
+    if (current && Object.prototype.hasOwnProperty.call(current, name)) return current[name]!;
+    const preset = context ? conversationBusinessPreset(context) : undefined;
+    if (current && !preset) return 'ask';
     return evaluatePermission({
       agentId: 'builtin-mastra',
       operationId: permissionOperationForTool(name)?.id ?? name,
-      preset: assistantPermissionPreset(mode) ?? 'on_demand',
+      preset: preset ?? 'on_demand',
     }).decision;
   };
   await session.state.set({

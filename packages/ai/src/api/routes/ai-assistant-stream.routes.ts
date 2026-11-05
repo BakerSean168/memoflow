@@ -194,6 +194,7 @@ export function registerAIAssistantStreamRoutes(
         providerId: parsed.data.providerId,
         modelId: parsed.data.modelId,
         agentInstanceId: parsed.data.agentInstanceId,
+        conversationBusinessPreset: parsed.data.conversationBusinessPreset,
         permissionMode: parsed.data.permissionMode,
         locale: parsed.data.locale,
         attachments: parsed.data.attachments,
