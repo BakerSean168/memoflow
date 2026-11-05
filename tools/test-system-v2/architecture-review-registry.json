@@ -872,14 +872,19 @@
         "testRole": "behavior"
       },
       "decision": "retain",
-      "behavior": "云端账号资料修改、密码变更、注销并清除 Better Auth 会话",
-      "assertionEvidence": ["account-logout-button"],
-      "reason": "每测试通过 openAccountSettings 间接 UI 注册；仅密码/注销专项保留独立账号，资料类可迁移 API 前置。 仅做源码/断言阅读，未运行真实浏览器或 Electron。",
+      "behavior": "云账户安全展示、编辑资料对话框保存、云密码变更及退出后清除 Better Auth 会话",
+      "assertionEvidence": [
+        "account-login-email",
+        "profile-editor-save",
+        "cloud-password-change-button",
+        "account-logout-button"
+      ],
+      "reason": "Issue #860 审阅：设置页断言改为脱敏邮箱及无资料保存入口；昵称保存沿 #857 对话框和原 PUT 持久化通道验证。保留原密码/退出场景。已阅读本文件断言；本文件未在完整测试栈执行，同类交互由隔离真实后端的临时 Playwright 验收覆盖。",
       "replacement": {
         "status": "none-verified",
         "testFiles": []
       },
-      "sourceSha256": "7926902d0f2aa76e63247a0f139a5d45e2db8aeaa6ab7e209be198626fa7bd7f"
+      "sourceSha256": "ce5daee1e9cbaf6b363012fdad74199ea32aa0839debac47f3b952acda81bf84"
     },
     {
       "path": "apps/web/e2e/authentication/auth-oauth-real.spec.ts",
