@@ -208,7 +208,7 @@ async function openLoginGate(app: ElectronApplication, page: Page): Promise<Page
   if (await page.getByTestId('settings-return-to-app').isVisible()) {
     await page.getByTestId('settings-return-to-app').click();
   }
-  await page.getByTestId('shell-account-menu').click();
+  await page.getByTestId('shell-account-card').click();
   await page.getByTestId('shell-switch-account').click();
   const gatePromise = app.waitForEvent('window');
   await page.getByTestId('shell-add-account').click();
@@ -291,7 +291,7 @@ test('account menu add account opens the identity login surface without removing
     app = await launchDesktop(userDataPath);
     const main = await registerLocalProfile(app, await app.firstWindow());
     const profileId = readRegistry(userDataPath).activeProfileId;
-    await main.getByTestId('shell-account-menu').click();
+    await main.getByTestId('shell-account-card').click();
     await expect(main.getByTestId('shell-open-cloud-connection')).toHaveCount(0);
     await expect(main.getByTestId('shell-logout')).toBeVisible();
     await main.getByTestId('shell-switch-account').click();
@@ -360,7 +360,7 @@ test('local account works offline, keeps its profile across restart and signs ou
     // the user on the chooser's empty state.
     const removedProfileId = readRegistry(userDataPath).activeProfileId;
     expect(removedProfileId).not.toBeNull();
-    await restartedMainWindow.getByTestId('shell-account-menu').click();
+    await restartedMainWindow.getByTestId('shell-account-card').click();
     await expect(restartedMainWindow.getByTestId('shell-open-cloud-connection')).toHaveCount(0);
     await expect(restartedMainWindow.getByTestId('shell-logout')).toBeVisible();
 
@@ -491,7 +491,7 @@ test('device authorization opens an independent cloud Profile and preserves the 
     const cloudWindow = appMainWindow(electronApp);
     await expect(cloudWindow.getByTestId('app-shell')).toBeVisible();
     cloud.setIdentity('IdentityId_00000000-0000-4000-8000-0000000000e3');
-    await cloudWindow.getByTestId('shell-account-menu').click();
+    await cloudWindow.getByTestId('shell-account-card').click();
     await cloudWindow.getByTestId('shell-switch-account').click();
     const anotherGate = await switchToProfileGate(electronApp, cloudWindow, source.profileId);
     await anotherGate.getByTestId('desktop-profile-back').click();
@@ -585,14 +585,14 @@ test('a second local account keeps independent data and its password selection a
     ).toBe(false);
     const secondWindow = await secondWindowPromise;
     await expect(secondWindow.getByTestId('shell-account-name')).toHaveText('Work');
-    await secondWindow.getByTestId('shell-account-menu').click();
+    await secondWindow.getByTestId('shell-account-card').click();
     await secondWindow.getByTestId('shell-switch-account').click();
     const firstAgain = await unlockLocalProfile(
       app,
       await switchToProfileGate(app, secondWindow, first.profileId),
     );
     await expect.poll(() => readRegistry(userData).activeProfileId).toBe(first.profileId);
-    await firstAgain.getByTestId('shell-account-menu').click();
+    await firstAgain.getByTestId('shell-account-card').click();
     await firstAgain.getByTestId('shell-switch-account').click();
     const workAgain = await unlockLocalProfile(
       app,

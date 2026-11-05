@@ -349,9 +349,10 @@ for (const theme of ['light', 'dark'] as const) {
     await page.locator('[data-business-tab-id]').first().click();
     await expect(title).toHaveValue('Draft survives workspace actions');
 
-    const account = sidebar.getByTestId('shell-account-menu');
+    const account = sidebar.getByTestId('shell-account-card');
     const accountBox = (await account.boundingBox())!;
-    await account.click();
+    // The settings entry is a standalone gear button since #856; the account
+    // card no longer carries a Settings item.
     await page.getByTestId('shell-open-settings').click();
     await expect(page.getByTestId('settings-navigation-footer')).toBeVisible();
     const footer = (await page.getByTestId('settings-navigation-footer').boundingBox())!;
