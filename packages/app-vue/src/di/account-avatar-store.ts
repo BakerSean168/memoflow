@@ -18,7 +18,10 @@ export function createDesktopAccountAvatarStore(ipc: IResultIpcClient): AccountA
     async save(_accountKey, image) {
       const dataUrl = await blobToDataUrl(image);
       const result = await ipc.invoke<string>(ProfileAvatarChannels.SAVE, dataUrl);
-      if (!result.ok) throw new Error(result.error.message);
+      // The uploader maps any non-AvatarImageError to its own localized
+      // failure toast, so a stable code is enough; a raw main-process message
+      // must not cross into presentation code.
+      if (!result.ok) throw new Error('AVATAR_SAVE_FAILED');
       return result.data;
     },
   };
