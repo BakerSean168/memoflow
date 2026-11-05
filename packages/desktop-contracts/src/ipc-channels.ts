@@ -103,6 +103,10 @@ export const AccountChannels = {
   GET_ME: 'account:get-me',
   UPDATE_PROFILE: 'account:update-profile',
   CLOSE: 'account:close',
+  /** Issue #859: cloud avatar metadata / download / upload for the active profile. */
+  AVATAR_META: 'account:avatar-meta',
+  AVATAR_DOWNLOAD: 'account:avatar-download',
+  AVATAR_UPLOAD: 'account:avatar-upload',
 } as const;
 
 export const ProfileAccessChannels = {

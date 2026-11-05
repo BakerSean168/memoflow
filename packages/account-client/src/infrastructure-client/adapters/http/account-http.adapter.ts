@@ -9,8 +9,12 @@ import type { IAccountApiClient } from '../types';
 import type { IResultHttpClient } from '@memoflow/http-client';
 import type { Result } from '@memoflow/transport-contracts';
 import type {
+  AccountAvatarContent,
+  AccountAvatarMeta,
+  AccountAvatarUploadResult,
   AccountView,
   UpdateAccountReq,
+  UploadAccountAvatarReq,
   CloseAccountReq,
   CloseAccountRes,
 } from '@memoflow/account-contracts';
@@ -30,6 +34,20 @@ export class AccountHttpAdapter implements IAccountApiClient {
 
   async closeAccount(request: CloseAccountReq): Promise<Result<CloseAccountRes>> {
     return this.httpClient.post(`${this.baseUrl}/me/close`, request);
+  }
+
+  async getMyAvatarMeta(): Promise<Result<AccountAvatarMeta>> {
+    return this.httpClient.get(`${this.baseUrl}/me/avatar/meta`);
+  }
+
+  async downloadMyAvatar(): Promise<Result<AccountAvatarContent>> {
+    return this.httpClient.get(`${this.baseUrl}/me/avatar`);
+  }
+
+  async uploadMyAvatar(
+    request: UploadAccountAvatarReq,
+  ): Promise<Result<AccountAvatarUploadResult>> {
+    return this.httpClient.put(`${this.baseUrl}/me/avatar`, request);
   }
 }
 

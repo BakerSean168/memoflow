@@ -126,6 +126,7 @@ export default {
   },
   avatar: {
     saved: 'Avatar updated',
+    cloudSyncFailed: 'Avatar saved; cloud sync will retry shortly',
     uploading: 'Processing avatar...',
     failed: 'Could not update avatar',
     invalidType: 'Choose an image file',

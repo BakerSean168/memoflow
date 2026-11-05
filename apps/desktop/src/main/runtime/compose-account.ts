@@ -57,6 +57,7 @@ import type { Clock, UserTimeContextPort } from '@memoflow/time';
 import {
   createAccountElectronModule,
   DesktopAccountProfileSync,
+  type AccountCloudAvatarPort,
   type AccountElectronModuleDef,
   type DesktopAccountProfileSyncOptions,
 } from '@memoflow/account/electron';
@@ -74,6 +75,8 @@ export interface ComposeAccountDesktopDependencies {
   readonly userTimeContextPort: UserTimeContextPort;
   /** Host-owned cloud-close / profile-sync callbacks (built in main.ts). 宿主持有的 cloud-close / profile-sync 回调（构建于 main.ts）。 */
   readonly syncOptions?: DesktopAccountProfileSyncOptions;
+  /** Issue #859: host-owned cloud avatar transport; tokens stay in main. */
+  readonly cloudAvatar?: AccountCloudAvatarPort;
   /** Extra runtime contributions from the host. 宿主提供的额外运行时贡献。 */
   readonly runtimeContributions?: AccountRuntimeContributionsInput;
 }
@@ -162,6 +165,7 @@ export function composeAccount(
       instance,
       syncOptions: dependencies.syncOptions,
       profileSync,
+      cloudAvatar: dependencies.cloudAvatar,
     }),
     portableCapability: instance.portableCapability,
     repositories: {

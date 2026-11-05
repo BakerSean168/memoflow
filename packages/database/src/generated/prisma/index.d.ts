@@ -19,6 +19,16 @@ export type PrismaPromise<T> = $Public.PrismaPromise<T>
  */
 export type Account = $Result.DefaultSelection<Prisma.$AccountPayload>
 /**
+ * Model AccountAvatar
+ * Normalized PNG avatar bytes for a cloud Account (Issue #859).
+ *
+ * Kept out of `accounts.profile` so ordinary Account reads never load the
+ * image, and stored in the existing Postgres deployment instead of adding a
+ * new object-storage service. `Account.avatarUpdatedAt` is the conflict
+ * timestamp surfaced to clients.
+ */
+export type AccountAvatar = $Result.DefaultSelection<Prisma.$AccountAvatarPayload>
+/**
  * Model AiConversation
  *
  */
@@ -653,6 +663,16 @@ export class PrismaClient<
     * ```
     */
   get account(): Prisma.AccountDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.accountAvatar`: Exposes CRUD operations for the **AccountAvatar** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more AccountAvatars
+    * const accountAvatars = await prisma.accountAvatar.findMany()
+    * ```
+    */
+  get accountAvatar(): Prisma.AccountAvatarDelegate<ExtArgs, ClientOptions>;
 
   /**
    * `prisma.aiConversation`: Exposes CRUD operations for the **AiConversation** model.
@@ -2041,6 +2061,7 @@ export namespace Prisma {
 
   export const ModelName: {
     Account: 'Account',
+    AccountAvatar: 'AccountAvatar',
     AiConversation: 'AiConversation',
     AiGoalSurfaceLease: 'AiGoalSurfaceLease',
     AiConversationAttention: 'AiConversationAttention',
@@ -2150,7 +2171,7 @@ export namespace Prisma {
       omit: GlobalOmitOptions
     }
     meta: {
-      modelProps: "account" | "aiConversation" | "aiGoalSurfaceLease" | "aiConversationAttention" | "aiExecutionRecord" | "aiPermissionSetting" | "aiPermissionRule" | "aiPermissionAudit" | "aiProviderConfig" | "aiAgentInstance" | "aiAgentInstanceBinding" | "aiAgentConversationBinding" | "aiProviderOnboardingSession" | "aiProviderSecret" | "aiKnowledgeIndexEntry" | "aiAgentRegistryMigration" | "aiAssistedWorkflow" | "cloudAuthUser" | "cloudAuthSession" | "cloudAuthProviderAccount" | "cloudAuthVerification" | "cloudAuthDeviceCode" | "externalAgentPat" | "externalAgentConnection" | "goal" | "keyResult" | "goalRecord" | "goalReview" | "keyResultWeightSnapshot" | "habit" | "habitOccurrence" | "habitCheckIn" | "habitStreakProjection" | "label" | "goalLabel" | "taskLabel" | "notification" | "notificationInteraction" | "notificationDeliveryDecisionRecord" | "notificationPreference" | "notificationDispatchOutbox" | "jwks" | "oauthClient" | "oauthResource" | "oauthClientResource" | "oauthRefreshToken" | "oauthAccessToken" | "oauthConsent" | "oauthClientAssertion" | "profileImportOperation" | "relation" | "outboxMessage" | "inboxReceipt" | "projectionCursor" | "accountClosureOperation" | "operationAuditLog" | "externalMutationReceipt" | "routineDefinition" | "routinePreference" | "routineProfile" | "routineProfileMembership" | "routineProtocolDefinition" | "routineProtocolSession" | "routineOccurrence" | "routineInteraction" | "routineTemporaryOverride" | "knowledgeRepositoryInstallationIntent" | "knowledgeSpace" | "knowledgeDocumentIdentity" | "knowledgeRemoteBinding" | "remoteRepositoryObservation" | "remoteHistoryFence" | "knowledgeProjectionCheckpoint" | "githubWebhookDelivery" | "knowledgeNoteProjection" | "knowledgeAttachmentProjection" | "knowledgeAttachmentContentCache" | "knowledgeWriteRequest" | "knowledgeRepositoryLease" | "schedule" | "scheduledInvocation" | "invocationAttempt" | "schedulingReconcileOperation" | "scheduleLease" | "scheduleRebuildOutbox" | "scheduleDomainEventOutbox" | "scheduleEventConsumerReceipt" | "scheduleEventDeliveryLog" | "userPreferenceRecord" | "taskPlan" | "taskOccurrence" | "taskGoalOutbox" | "taskPlanHistory" | "walletAccount" | "walletTransaction"
+      modelProps: "account" | "accountAvatar" | "aiConversation" | "aiGoalSurfaceLease" | "aiConversationAttention" | "aiExecutionRecord" | "aiPermissionSetting" | "aiPermissionRule" | "aiPermissionAudit" | "aiProviderConfig" | "aiAgentInstance" | "aiAgentInstanceBinding" | "aiAgentConversationBinding" | "aiProviderOnboardingSession" | "aiProviderSecret" | "aiKnowledgeIndexEntry" | "aiAgentRegistryMigration" | "aiAssistedWorkflow" | "cloudAuthUser" | "cloudAuthSession" | "cloudAuthProviderAccount" | "cloudAuthVerification" | "cloudAuthDeviceCode" | "externalAgentPat" | "externalAgentConnection" | "goal" | "keyResult" | "goalRecord" | "goalReview" | "keyResultWeightSnapshot" | "habit" | "habitOccurrence" | "habitCheckIn" | "habitStreakProjection" | "label" | "goalLabel" | "taskLabel" | "notification" | "notificationInteraction" | "notificationDeliveryDecisionRecord" | "notificationPreference" | "notificationDispatchOutbox" | "jwks" | "oauthClient" | "oauthResource" | "oauthClientResource" | "oauthRefreshToken" | "oauthAccessToken" | "oauthConsent" | "oauthClientAssertion" | "profileImportOperation" | "relation" | "outboxMessage" | "inboxReceipt" | "projectionCursor" | "accountClosureOperation" | "operationAuditLog" | "externalMutationReceipt" | "routineDefinition" | "routinePreference" | "routineProfile" | "routineProfileMembership" | "routineProtocolDefinition" | "routineProtocolSession" | "routineOccurrence" | "routineInteraction" | "routineTemporaryOverride" | "knowledgeRepositoryInstallationIntent" | "knowledgeSpace" | "knowledgeDocumentIdentity" | "knowledgeRemoteBinding" | "remoteRepositoryObservation" | "remoteHistoryFence" | "knowledgeProjectionCheckpoint" | "githubWebhookDelivery" | "knowledgeNoteProjection" | "knowledgeAttachmentProjection" | "knowledgeAttachmentContentCache" | "knowledgeWriteRequest" | "knowledgeRepositoryLease" | "schedule" | "scheduledInvocation" | "invocationAttempt" | "schedulingReconcileOperation" | "scheduleLease" | "scheduleRebuildOutbox" | "scheduleDomainEventOutbox" | "scheduleEventConsumerReceipt" | "scheduleEventDeliveryLog" | "userPreferenceRecord" | "taskPlan" | "taskOccurrence" | "taskGoalOutbox" | "taskPlanHistory" | "walletAccount" | "walletTransaction"
       txIsolationLevel: Prisma.TransactionIsolationLevel
     }
     model: {
@@ -2225,6 +2246,80 @@ export namespace Prisma {
           count: {
             args: Prisma.AccountCountArgs<ExtArgs>
             result: $Utils.Optional<AccountCountAggregateOutputType> | number
+          }
+        }
+      }
+      AccountAvatar: {
+        payload: Prisma.$AccountAvatarPayload<ExtArgs>
+        fields: Prisma.AccountAvatarFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.AccountAvatarFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AccountAvatarPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.AccountAvatarFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AccountAvatarPayload>
+          }
+          findFirst: {
+            args: Prisma.AccountAvatarFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AccountAvatarPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.AccountAvatarFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AccountAvatarPayload>
+          }
+          findMany: {
+            args: Prisma.AccountAvatarFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AccountAvatarPayload>[]
+          }
+          create: {
+            args: Prisma.AccountAvatarCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AccountAvatarPayload>
+          }
+          createMany: {
+            args: Prisma.AccountAvatarCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.AccountAvatarCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AccountAvatarPayload>[]
+          }
+          delete: {
+            args: Prisma.AccountAvatarDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AccountAvatarPayload>
+          }
+          update: {
+            args: Prisma.AccountAvatarUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AccountAvatarPayload>
+          }
+          deleteMany: {
+            args: Prisma.AccountAvatarDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.AccountAvatarUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.AccountAvatarUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AccountAvatarPayload>[]
+          }
+          upsert: {
+            args: Prisma.AccountAvatarUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AccountAvatarPayload>
+          }
+          aggregate: {
+            args: Prisma.AccountAvatarAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateAccountAvatar>
+          }
+          groupBy: {
+            args: Prisma.AccountAvatarGroupByArgs<ExtArgs>
+            result: $Utils.Optional<AccountAvatarGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.AccountAvatarCountArgs<ExtArgs>
+            result: $Utils.Optional<AccountAvatarCountAggregateOutputType> | number
           }
         }
       }
@@ -9308,6 +9403,7 @@ export namespace Prisma {
   }
   export type GlobalOmitConfig = {
     account?: AccountOmit
+    accountAvatar?: AccountAvatarOmit
     aiConversation?: AiConversationOmit
     aiGoalSurfaceLease?: AiGoalSurfaceLeaseOmit
     aiConversationAttention?: AiConversationAttentionOmit
@@ -10885,6 +10981,7 @@ export namespace Prisma {
     createdAt: Date | null
     updatedAt: Date | null
     closedAt: Date | null
+    avatarUpdatedAt: Date | null
   }
 
   export type AccountMaxAggregateOutputType = {
@@ -10893,6 +10990,7 @@ export namespace Prisma {
     createdAt: Date | null
     updatedAt: Date | null
     closedAt: Date | null
+    avatarUpdatedAt: Date | null
   }
 
   export type AccountCountAggregateOutputType = {
@@ -10902,6 +11000,7 @@ export namespace Prisma {
     createdAt: number
     updatedAt: number
     closedAt: number
+    avatarUpdatedAt: number
     _all: number
   }
 
@@ -10912,6 +11011,7 @@ export namespace Prisma {
     createdAt?: true
     updatedAt?: true
     closedAt?: true
+    avatarUpdatedAt?: true
   }
 
   export type AccountMaxAggregateInputType = {
@@ -10920,6 +11020,7 @@ export namespace Prisma {
     createdAt?: true
     updatedAt?: true
     closedAt?: true
+    avatarUpdatedAt?: true
   }
 
   export type AccountCountAggregateInputType = {
@@ -10929,6 +11030,7 @@ export namespace Prisma {
     createdAt?: true
     updatedAt?: true
     closedAt?: true
+    avatarUpdatedAt?: true
     _all?: true
   }
 
@@ -11011,6 +11113,7 @@ export namespace Prisma {
     createdAt: Date
     updatedAt: Date
     closedAt: Date | null
+    avatarUpdatedAt: Date | null
     _count: AccountCountAggregateOutputType | null
     _min: AccountMinAggregateOutputType | null
     _max: AccountMaxAggregateOutputType | null
@@ -11037,8 +11140,10 @@ export namespace Prisma {
     createdAt?: boolean
     updatedAt?: boolean
     closedAt?: boolean
+    avatarUpdatedAt?: boolean
     assistedWorkflows?: boolean | Account$assistedWorkflowsArgs<ExtArgs>
     cloudUser?: boolean | CloudAuthUserDefaultArgs<ExtArgs>
+    avatar?: boolean | Account$avatarArgs<ExtArgs>
     externalMutationReceipts?: boolean | Account$externalMutationReceiptsArgs<ExtArgs>
     goals?: boolean | Account$goalsArgs<ExtArgs>
     profileImportOperations?: boolean | Account$profileImportOperationsArgs<ExtArgs>
@@ -11095,6 +11200,7 @@ export namespace Prisma {
     createdAt?: boolean
     updatedAt?: boolean
     closedAt?: boolean
+    avatarUpdatedAt?: boolean
     cloudUser?: boolean | CloudAuthUserDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["account"]>
 
@@ -11105,6 +11211,7 @@ export namespace Prisma {
     createdAt?: boolean
     updatedAt?: boolean
     closedAt?: boolean
+    avatarUpdatedAt?: boolean
     cloudUser?: boolean | CloudAuthUserDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["account"]>
 
@@ -11115,12 +11222,14 @@ export namespace Prisma {
     createdAt?: boolean
     updatedAt?: boolean
     closedAt?: boolean
+    avatarUpdatedAt?: boolean
   }
 
-  export type AccountOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "status" | "profile" | "createdAt" | "updatedAt" | "closedAt", ExtArgs["result"]["account"]>
+  export type AccountOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "status" | "profile" | "createdAt" | "updatedAt" | "closedAt" | "avatarUpdatedAt", ExtArgs["result"]["account"]>
   export type AccountInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     assistedWorkflows?: boolean | Account$assistedWorkflowsArgs<ExtArgs>
     cloudUser?: boolean | CloudAuthUserDefaultArgs<ExtArgs>
+    avatar?: boolean | Account$avatarArgs<ExtArgs>
     externalMutationReceipts?: boolean | Account$externalMutationReceiptsArgs<ExtArgs>
     goals?: boolean | Account$goalsArgs<ExtArgs>
     profileImportOperations?: boolean | Account$profileImportOperationsArgs<ExtArgs>
@@ -11181,6 +11290,7 @@ export namespace Prisma {
     objects: {
       assistedWorkflows: Prisma.$AiAssistedWorkflowPayload<ExtArgs>[]
       cloudUser: Prisma.$CloudAuthUserPayload<ExtArgs>
+      avatar: Prisma.$AccountAvatarPayload<ExtArgs> | null
       externalMutationReceipts: Prisma.$ExternalMutationReceiptPayload<ExtArgs>[]
       goals: Prisma.$GoalPayload<ExtArgs>[]
       profileImportOperations: Prisma.$ProfileImportOperationPayload<ExtArgs>[]
@@ -11235,6 +11345,7 @@ export namespace Prisma {
       createdAt: Date
       updatedAt: Date
       closedAt: Date | null
+      avatarUpdatedAt: Date | null
     }, ExtArgs["result"]["account"]>
     composites: {}
   }
@@ -11631,6 +11742,7 @@ export namespace Prisma {
     readonly [Symbol.toStringTag]: "PrismaPromise"
     assistedWorkflows<T extends Account$assistedWorkflowsArgs<ExtArgs> = {}>(args?: Subset<T, Account$assistedWorkflowsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$AiAssistedWorkflowPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     cloudUser<T extends CloudAuthUserDefaultArgs<ExtArgs> = {}>(args?: Subset<T, CloudAuthUserDefaultArgs<ExtArgs>>): Prisma__CloudAuthUserClient<$Result.GetResult<Prisma.$CloudAuthUserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    avatar<T extends Account$avatarArgs<ExtArgs> = {}>(args?: Subset<T, Account$avatarArgs<ExtArgs>>): Prisma__AccountAvatarClient<$Result.GetResult<Prisma.$AccountAvatarPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
     externalMutationReceipts<T extends Account$externalMutationReceiptsArgs<ExtArgs> = {}>(args?: Subset<T, Account$externalMutationReceiptsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ExternalMutationReceiptPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     goals<T extends Account$goalsArgs<ExtArgs> = {}>(args?: Subset<T, Account$goalsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$GoalPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     profileImportOperations<T extends Account$profileImportOperationsArgs<ExtArgs> = {}>(args?: Subset<T, Account$profileImportOperationsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ProfileImportOperationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
@@ -11712,6 +11824,7 @@ export namespace Prisma {
     readonly createdAt: FieldRef<"Account", 'DateTime'>
     readonly updatedAt: FieldRef<"Account", 'DateTime'>
     readonly closedAt: FieldRef<"Account", 'DateTime'>
+    readonly avatarUpdatedAt: FieldRef<"Account", 'DateTime'>
   }
 
 
@@ -12134,6 +12247,25 @@ export namespace Prisma {
     take?: number
     skip?: number
     distinct?: AiAssistedWorkflowScalarFieldEnum | AiAssistedWorkflowScalarFieldEnum[]
+  }
+
+  /**
+   * Account.avatar
+   */
+  export type Account$avatarArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AccountAvatar
+     */
+    select?: AccountAvatarSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AccountAvatar
+     */
+    omit?: AccountAvatarOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AccountAvatarInclude<ExtArgs> | null
+    where?: AccountAvatarWhereInput
   }
 
   /**
@@ -13251,6 +13383,1090 @@ export namespace Prisma {
      * Choose, which related nodes to fetch as well
      */
     include?: AccountInclude<ExtArgs> | null
+  }
+
+
+  /**
+   * Model AccountAvatar
+   */
+
+  export type AggregateAccountAvatar = {
+    _count: AccountAvatarCountAggregateOutputType | null
+    _avg: AccountAvatarAvgAggregateOutputType | null
+    _sum: AccountAvatarSumAggregateOutputType | null
+    _min: AccountAvatarMinAggregateOutputType | null
+    _max: AccountAvatarMaxAggregateOutputType | null
+  }
+
+  export type AccountAvatarAvgAggregateOutputType = {
+    byteSize: number | null
+  }
+
+  export type AccountAvatarSumAggregateOutputType = {
+    byteSize: number | null
+  }
+
+  export type AccountAvatarMinAggregateOutputType = {
+    accountId: string | null
+    contentBytes: Bytes | null
+    byteSize: number | null
+    updatedAt: Date | null
+  }
+
+  export type AccountAvatarMaxAggregateOutputType = {
+    accountId: string | null
+    contentBytes: Bytes | null
+    byteSize: number | null
+    updatedAt: Date | null
+  }
+
+  export type AccountAvatarCountAggregateOutputType = {
+    accountId: number
+    contentBytes: number
+    byteSize: number
+    updatedAt: number
+    _all: number
+  }
+
+
+  export type AccountAvatarAvgAggregateInputType = {
+    byteSize?: true
+  }
+
+  export type AccountAvatarSumAggregateInputType = {
+    byteSize?: true
+  }
+
+  export type AccountAvatarMinAggregateInputType = {
+    accountId?: true
+    contentBytes?: true
+    byteSize?: true
+    updatedAt?: true
+  }
+
+  export type AccountAvatarMaxAggregateInputType = {
+    accountId?: true
+    contentBytes?: true
+    byteSize?: true
+    updatedAt?: true
+  }
+
+  export type AccountAvatarCountAggregateInputType = {
+    accountId?: true
+    contentBytes?: true
+    byteSize?: true
+    updatedAt?: true
+    _all?: true
+  }
+
+  export type AccountAvatarAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which AccountAvatar to aggregate.
+     */
+    where?: AccountAvatarWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     *
+     * Determine the order of AccountAvatars to fetch.
+     */
+    orderBy?: AccountAvatarOrderByWithRelationInput | AccountAvatarOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     *
+     * Sets the start position
+     */
+    cursor?: AccountAvatarWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     *
+     * Take `±n` AccountAvatars from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     *
+     * Skip the first `n` AccountAvatars.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     *
+     * Count returned AccountAvatars
+    **/
+    _count?: true | AccountAvatarCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     *
+     * Select which fields to average
+    **/
+    _avg?: AccountAvatarAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     *
+     * Select which fields to sum
+    **/
+    _sum?: AccountAvatarSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     *
+     * Select which fields to find the minimum value
+    **/
+    _min?: AccountAvatarMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     *
+     * Select which fields to find the maximum value
+    **/
+    _max?: AccountAvatarMaxAggregateInputType
+  }
+
+  export type GetAccountAvatarAggregateType<T extends AccountAvatarAggregateArgs> = {
+        [P in keyof T & keyof AggregateAccountAvatar]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateAccountAvatar[P]>
+      : GetScalarType<T[P], AggregateAccountAvatar[P]>
+  }
+
+
+
+
+  export type AccountAvatarGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: AccountAvatarWhereInput
+    orderBy?: AccountAvatarOrderByWithAggregationInput | AccountAvatarOrderByWithAggregationInput[]
+    by: AccountAvatarScalarFieldEnum[] | AccountAvatarScalarFieldEnum
+    having?: AccountAvatarScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: AccountAvatarCountAggregateInputType | true
+    _avg?: AccountAvatarAvgAggregateInputType
+    _sum?: AccountAvatarSumAggregateInputType
+    _min?: AccountAvatarMinAggregateInputType
+    _max?: AccountAvatarMaxAggregateInputType
+  }
+
+  export type AccountAvatarGroupByOutputType = {
+    accountId: string
+    contentBytes: Bytes
+    byteSize: number
+    updatedAt: Date
+    _count: AccountAvatarCountAggregateOutputType | null
+    _avg: AccountAvatarAvgAggregateOutputType | null
+    _sum: AccountAvatarSumAggregateOutputType | null
+    _min: AccountAvatarMinAggregateOutputType | null
+    _max: AccountAvatarMaxAggregateOutputType | null
+  }
+
+  type GetAccountAvatarGroupByPayload<T extends AccountAvatarGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<AccountAvatarGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof AccountAvatarGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], AccountAvatarGroupByOutputType[P]>
+            : GetScalarType<T[P], AccountAvatarGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type AccountAvatarSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    accountId?: boolean
+    contentBytes?: boolean
+    byteSize?: boolean
+    updatedAt?: boolean
+    account?: boolean | AccountDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["accountAvatar"]>
+
+  export type AccountAvatarSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    accountId?: boolean
+    contentBytes?: boolean
+    byteSize?: boolean
+    updatedAt?: boolean
+    account?: boolean | AccountDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["accountAvatar"]>
+
+  export type AccountAvatarSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    accountId?: boolean
+    contentBytes?: boolean
+    byteSize?: boolean
+    updatedAt?: boolean
+    account?: boolean | AccountDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["accountAvatar"]>
+
+  export type AccountAvatarSelectScalar = {
+    accountId?: boolean
+    contentBytes?: boolean
+    byteSize?: boolean
+    updatedAt?: boolean
+  }
+
+  export type AccountAvatarOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"accountId" | "contentBytes" | "byteSize" | "updatedAt", ExtArgs["result"]["accountAvatar"]>
+  export type AccountAvatarInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    account?: boolean | AccountDefaultArgs<ExtArgs>
+  }
+  export type AccountAvatarIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    account?: boolean | AccountDefaultArgs<ExtArgs>
+  }
+  export type AccountAvatarIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    account?: boolean | AccountDefaultArgs<ExtArgs>
+  }
+
+  export type $AccountAvatarPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "AccountAvatar"
+    objects: {
+      account: Prisma.$AccountPayload<ExtArgs>
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      accountId: string
+      contentBytes: Prisma.Bytes
+      byteSize: number
+      updatedAt: Date
+    }, ExtArgs["result"]["accountAvatar"]>
+    composites: {}
+  }
+
+  type AccountAvatarGetPayload<S extends boolean | null | undefined | AccountAvatarDefaultArgs> = $Result.GetResult<Prisma.$AccountAvatarPayload, S>
+
+  type AccountAvatarCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<AccountAvatarFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: AccountAvatarCountAggregateInputType | true
+    }
+
+  export interface AccountAvatarDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['AccountAvatar'], meta: { name: 'AccountAvatar' } }
+    /**
+     * Find zero or one AccountAvatar that matches the filter.
+     * @param {AccountAvatarFindUniqueArgs} args - Arguments to find a AccountAvatar
+     * @example
+     * // Get one AccountAvatar
+     * const accountAvatar = await prisma.accountAvatar.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends AccountAvatarFindUniqueArgs>(args: SelectSubset<T, AccountAvatarFindUniqueArgs<ExtArgs>>): Prisma__AccountAvatarClient<$Result.GetResult<Prisma.$AccountAvatarPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one AccountAvatar that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {AccountAvatarFindUniqueOrThrowArgs} args - Arguments to find a AccountAvatar
+     * @example
+     * // Get one AccountAvatar
+     * const accountAvatar = await prisma.accountAvatar.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends AccountAvatarFindUniqueOrThrowArgs>(args: SelectSubset<T, AccountAvatarFindUniqueOrThrowArgs<ExtArgs>>): Prisma__AccountAvatarClient<$Result.GetResult<Prisma.$AccountAvatarPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first AccountAvatar that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AccountAvatarFindFirstArgs} args - Arguments to find a AccountAvatar
+     * @example
+     * // Get one AccountAvatar
+     * const accountAvatar = await prisma.accountAvatar.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends AccountAvatarFindFirstArgs>(args?: SelectSubset<T, AccountAvatarFindFirstArgs<ExtArgs>>): Prisma__AccountAvatarClient<$Result.GetResult<Prisma.$AccountAvatarPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first AccountAvatar that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AccountAvatarFindFirstOrThrowArgs} args - Arguments to find a AccountAvatar
+     * @example
+     * // Get one AccountAvatar
+     * const accountAvatar = await prisma.accountAvatar.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends AccountAvatarFindFirstOrThrowArgs>(args?: SelectSubset<T, AccountAvatarFindFirstOrThrowArgs<ExtArgs>>): Prisma__AccountAvatarClient<$Result.GetResult<Prisma.$AccountAvatarPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more AccountAvatars that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AccountAvatarFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all AccountAvatars
+     * const accountAvatars = await prisma.accountAvatar.findMany()
+     *
+     * // Get first 10 AccountAvatars
+     * const accountAvatars = await prisma.accountAvatar.findMany({ take: 10 })
+     *
+     * // Only select the `accountId`
+     * const accountAvatarWithAccountIdOnly = await prisma.accountAvatar.findMany({ select: { accountId: true } })
+     *
+     */
+    findMany<T extends AccountAvatarFindManyArgs>(args?: SelectSubset<T, AccountAvatarFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$AccountAvatarPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a AccountAvatar.
+     * @param {AccountAvatarCreateArgs} args - Arguments to create a AccountAvatar.
+     * @example
+     * // Create one AccountAvatar
+     * const AccountAvatar = await prisma.accountAvatar.create({
+     *   data: {
+     *     // ... data to create a AccountAvatar
+     *   }
+     * })
+     *
+     */
+    create<T extends AccountAvatarCreateArgs>(args: SelectSubset<T, AccountAvatarCreateArgs<ExtArgs>>): Prisma__AccountAvatarClient<$Result.GetResult<Prisma.$AccountAvatarPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many AccountAvatars.
+     * @param {AccountAvatarCreateManyArgs} args - Arguments to create many AccountAvatars.
+     * @example
+     * // Create many AccountAvatars
+     * const accountAvatar = await prisma.accountAvatar.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *
+     */
+    createMany<T extends AccountAvatarCreateManyArgs>(args?: SelectSubset<T, AccountAvatarCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many AccountAvatars and returns the data saved in the database.
+     * @param {AccountAvatarCreateManyAndReturnArgs} args - Arguments to create many AccountAvatars.
+     * @example
+     * // Create many AccountAvatars
+     * const accountAvatar = await prisma.accountAvatar.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *
+     * // Create many AccountAvatars and only return the `accountId`
+     * const accountAvatarWithAccountIdOnly = await prisma.accountAvatar.createManyAndReturn({
+     *   select: { accountId: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     *
+     */
+    createManyAndReturn<T extends AccountAvatarCreateManyAndReturnArgs>(args?: SelectSubset<T, AccountAvatarCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$AccountAvatarPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a AccountAvatar.
+     * @param {AccountAvatarDeleteArgs} args - Arguments to delete one AccountAvatar.
+     * @example
+     * // Delete one AccountAvatar
+     * const AccountAvatar = await prisma.accountAvatar.delete({
+     *   where: {
+     *     // ... filter to delete one AccountAvatar
+     *   }
+     * })
+     *
+     */
+    delete<T extends AccountAvatarDeleteArgs>(args: SelectSubset<T, AccountAvatarDeleteArgs<ExtArgs>>): Prisma__AccountAvatarClient<$Result.GetResult<Prisma.$AccountAvatarPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one AccountAvatar.
+     * @param {AccountAvatarUpdateArgs} args - Arguments to update one AccountAvatar.
+     * @example
+     * // Update one AccountAvatar
+     * const accountAvatar = await prisma.accountAvatar.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     *
+     */
+    update<T extends AccountAvatarUpdateArgs>(args: SelectSubset<T, AccountAvatarUpdateArgs<ExtArgs>>): Prisma__AccountAvatarClient<$Result.GetResult<Prisma.$AccountAvatarPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more AccountAvatars.
+     * @param {AccountAvatarDeleteManyArgs} args - Arguments to filter AccountAvatars to delete.
+     * @example
+     * // Delete a few AccountAvatars
+     * const { count } = await prisma.accountAvatar.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     *
+     */
+    deleteMany<T extends AccountAvatarDeleteManyArgs>(args?: SelectSubset<T, AccountAvatarDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more AccountAvatars.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AccountAvatarUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many AccountAvatars
+     * const accountAvatar = await prisma.accountAvatar.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     *
+     */
+    updateMany<T extends AccountAvatarUpdateManyArgs>(args: SelectSubset<T, AccountAvatarUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more AccountAvatars and returns the data updated in the database.
+     * @param {AccountAvatarUpdateManyAndReturnArgs} args - Arguments to update many AccountAvatars.
+     * @example
+     * // Update many AccountAvatars
+     * const accountAvatar = await prisma.accountAvatar.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *
+     * // Update zero or more AccountAvatars and only return the `accountId`
+     * const accountAvatarWithAccountIdOnly = await prisma.accountAvatar.updateManyAndReturn({
+     *   select: { accountId: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     *
+     */
+    updateManyAndReturn<T extends AccountAvatarUpdateManyAndReturnArgs>(args: SelectSubset<T, AccountAvatarUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$AccountAvatarPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one AccountAvatar.
+     * @param {AccountAvatarUpsertArgs} args - Arguments to update or create a AccountAvatar.
+     * @example
+     * // Update or create a AccountAvatar
+     * const accountAvatar = await prisma.accountAvatar.upsert({
+     *   create: {
+     *     // ... data to create a AccountAvatar
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the AccountAvatar we want to update
+     *   }
+     * })
+     */
+    upsert<T extends AccountAvatarUpsertArgs>(args: SelectSubset<T, AccountAvatarUpsertArgs<ExtArgs>>): Prisma__AccountAvatarClient<$Result.GetResult<Prisma.$AccountAvatarPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of AccountAvatars.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AccountAvatarCountArgs} args - Arguments to filter AccountAvatars to count.
+     * @example
+     * // Count the number of AccountAvatars
+     * const count = await prisma.accountAvatar.count({
+     *   where: {
+     *     // ... the filter for the AccountAvatars we want to count
+     *   }
+     * })
+    **/
+    count<T extends AccountAvatarCountArgs>(
+      args?: Subset<T, AccountAvatarCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], AccountAvatarCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a AccountAvatar.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AccountAvatarAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends AccountAvatarAggregateArgs>(args: Subset<T, AccountAvatarAggregateArgs>): Prisma.PrismaPromise<GetAccountAvatarAggregateType<T>>
+
+    /**
+     * Group by AccountAvatar.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AccountAvatarGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     *
+    **/
+    groupBy<
+      T extends AccountAvatarGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: AccountAvatarGroupByArgs['orderBy'] }
+        : { orderBy?: AccountAvatarGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, AccountAvatarGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetAccountAvatarGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the AccountAvatar model
+   */
+  readonly fields: AccountAvatarFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for AccountAvatar.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__AccountAvatarClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    account<T extends AccountDefaultArgs<ExtArgs> = {}>(args?: Subset<T, AccountDefaultArgs<ExtArgs>>): Prisma__AccountClient<$Result.GetResult<Prisma.$AccountPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the AccountAvatar model
+   */
+  interface AccountAvatarFieldRefs {
+    readonly accountId: FieldRef<"AccountAvatar", 'String'>
+    readonly contentBytes: FieldRef<"AccountAvatar", 'Bytes'>
+    readonly byteSize: FieldRef<"AccountAvatar", 'Int'>
+    readonly updatedAt: FieldRef<"AccountAvatar", 'DateTime'>
+  }
+
+
+  // Custom InputTypes
+  /**
+   * AccountAvatar findUnique
+   */
+  export type AccountAvatarFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AccountAvatar
+     */
+    select?: AccountAvatarSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AccountAvatar
+     */
+    omit?: AccountAvatarOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AccountAvatarInclude<ExtArgs> | null
+    /**
+     * Filter, which AccountAvatar to fetch.
+     */
+    where: AccountAvatarWhereUniqueInput
+  }
+
+  /**
+   * AccountAvatar findUniqueOrThrow
+   */
+  export type AccountAvatarFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AccountAvatar
+     */
+    select?: AccountAvatarSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AccountAvatar
+     */
+    omit?: AccountAvatarOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AccountAvatarInclude<ExtArgs> | null
+    /**
+     * Filter, which AccountAvatar to fetch.
+     */
+    where: AccountAvatarWhereUniqueInput
+  }
+
+  /**
+   * AccountAvatar findFirst
+   */
+  export type AccountAvatarFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AccountAvatar
+     */
+    select?: AccountAvatarSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AccountAvatar
+     */
+    omit?: AccountAvatarOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AccountAvatarInclude<ExtArgs> | null
+    /**
+     * Filter, which AccountAvatar to fetch.
+     */
+    where?: AccountAvatarWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     *
+     * Determine the order of AccountAvatars to fetch.
+     */
+    orderBy?: AccountAvatarOrderByWithRelationInput | AccountAvatarOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     *
+     * Sets the position for searching for AccountAvatars.
+     */
+    cursor?: AccountAvatarWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     *
+     * Take `±n` AccountAvatars from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     *
+     * Skip the first `n` AccountAvatars.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     *
+     * Filter by unique combinations of AccountAvatars.
+     */
+    distinct?: AccountAvatarScalarFieldEnum | AccountAvatarScalarFieldEnum[]
+  }
+
+  /**
+   * AccountAvatar findFirstOrThrow
+   */
+  export type AccountAvatarFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AccountAvatar
+     */
+    select?: AccountAvatarSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AccountAvatar
+     */
+    omit?: AccountAvatarOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AccountAvatarInclude<ExtArgs> | null
+    /**
+     * Filter, which AccountAvatar to fetch.
+     */
+    where?: AccountAvatarWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     *
+     * Determine the order of AccountAvatars to fetch.
+     */
+    orderBy?: AccountAvatarOrderByWithRelationInput | AccountAvatarOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     *
+     * Sets the position for searching for AccountAvatars.
+     */
+    cursor?: AccountAvatarWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     *
+     * Take `±n` AccountAvatars from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     *
+     * Skip the first `n` AccountAvatars.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     *
+     * Filter by unique combinations of AccountAvatars.
+     */
+    distinct?: AccountAvatarScalarFieldEnum | AccountAvatarScalarFieldEnum[]
+  }
+
+  /**
+   * AccountAvatar findMany
+   */
+  export type AccountAvatarFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AccountAvatar
+     */
+    select?: AccountAvatarSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AccountAvatar
+     */
+    omit?: AccountAvatarOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AccountAvatarInclude<ExtArgs> | null
+    /**
+     * Filter, which AccountAvatars to fetch.
+     */
+    where?: AccountAvatarWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     *
+     * Determine the order of AccountAvatars to fetch.
+     */
+    orderBy?: AccountAvatarOrderByWithRelationInput | AccountAvatarOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     *
+     * Sets the position for listing AccountAvatars.
+     */
+    cursor?: AccountAvatarWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     *
+     * Take `±n` AccountAvatars from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     *
+     * Skip the first `n` AccountAvatars.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     *
+     * Filter by unique combinations of AccountAvatars.
+     */
+    distinct?: AccountAvatarScalarFieldEnum | AccountAvatarScalarFieldEnum[]
+  }
+
+  /**
+   * AccountAvatar create
+   */
+  export type AccountAvatarCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AccountAvatar
+     */
+    select?: AccountAvatarSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AccountAvatar
+     */
+    omit?: AccountAvatarOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AccountAvatarInclude<ExtArgs> | null
+    /**
+     * The data needed to create a AccountAvatar.
+     */
+    data: XOR<AccountAvatarCreateInput, AccountAvatarUncheckedCreateInput>
+  }
+
+  /**
+   * AccountAvatar createMany
+   */
+  export type AccountAvatarCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many AccountAvatars.
+     */
+    data: AccountAvatarCreateManyInput | AccountAvatarCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * AccountAvatar createManyAndReturn
+   */
+  export type AccountAvatarCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AccountAvatar
+     */
+    select?: AccountAvatarSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the AccountAvatar
+     */
+    omit?: AccountAvatarOmit<ExtArgs> | null
+    /**
+     * The data used to create many AccountAvatars.
+     */
+    data: AccountAvatarCreateManyInput | AccountAvatarCreateManyInput[]
+    skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AccountAvatarIncludeCreateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * AccountAvatar update
+   */
+  export type AccountAvatarUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AccountAvatar
+     */
+    select?: AccountAvatarSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AccountAvatar
+     */
+    omit?: AccountAvatarOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AccountAvatarInclude<ExtArgs> | null
+    /**
+     * The data needed to update a AccountAvatar.
+     */
+    data: XOR<AccountAvatarUpdateInput, AccountAvatarUncheckedUpdateInput>
+    /**
+     * Choose, which AccountAvatar to update.
+     */
+    where: AccountAvatarWhereUniqueInput
+  }
+
+  /**
+   * AccountAvatar updateMany
+   */
+  export type AccountAvatarUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update AccountAvatars.
+     */
+    data: XOR<AccountAvatarUpdateManyMutationInput, AccountAvatarUncheckedUpdateManyInput>
+    /**
+     * Filter which AccountAvatars to update
+     */
+    where?: AccountAvatarWhereInput
+    /**
+     * Limit how many AccountAvatars to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * AccountAvatar updateManyAndReturn
+   */
+  export type AccountAvatarUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AccountAvatar
+     */
+    select?: AccountAvatarSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the AccountAvatar
+     */
+    omit?: AccountAvatarOmit<ExtArgs> | null
+    /**
+     * The data used to update AccountAvatars.
+     */
+    data: XOR<AccountAvatarUpdateManyMutationInput, AccountAvatarUncheckedUpdateManyInput>
+    /**
+     * Filter which AccountAvatars to update
+     */
+    where?: AccountAvatarWhereInput
+    /**
+     * Limit how many AccountAvatars to update.
+     */
+    limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AccountAvatarIncludeUpdateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * AccountAvatar upsert
+   */
+  export type AccountAvatarUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AccountAvatar
+     */
+    select?: AccountAvatarSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AccountAvatar
+     */
+    omit?: AccountAvatarOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AccountAvatarInclude<ExtArgs> | null
+    /**
+     * The filter to search for the AccountAvatar to update in case it exists.
+     */
+    where: AccountAvatarWhereUniqueInput
+    /**
+     * In case the AccountAvatar found by the `where` argument doesn't exist, create a new AccountAvatar with this data.
+     */
+    create: XOR<AccountAvatarCreateInput, AccountAvatarUncheckedCreateInput>
+    /**
+     * In case the AccountAvatar was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<AccountAvatarUpdateInput, AccountAvatarUncheckedUpdateInput>
+  }
+
+  /**
+   * AccountAvatar delete
+   */
+  export type AccountAvatarDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AccountAvatar
+     */
+    select?: AccountAvatarSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AccountAvatar
+     */
+    omit?: AccountAvatarOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AccountAvatarInclude<ExtArgs> | null
+    /**
+     * Filter which AccountAvatar to delete.
+     */
+    where: AccountAvatarWhereUniqueInput
+  }
+
+  /**
+   * AccountAvatar deleteMany
+   */
+  export type AccountAvatarDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which AccountAvatars to delete
+     */
+    where?: AccountAvatarWhereInput
+    /**
+     * Limit how many AccountAvatars to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * AccountAvatar without action
+   */
+  export type AccountAvatarDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AccountAvatar
+     */
+    select?: AccountAvatarSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AccountAvatar
+     */
+    omit?: AccountAvatarOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AccountAvatarInclude<ExtArgs> | null
   }
 
 
@@ -123175,10 +124391,21 @@ export namespace Prisma {
     profile: 'profile',
     createdAt: 'createdAt',
     updatedAt: 'updatedAt',
-    closedAt: 'closedAt'
+    closedAt: 'closedAt',
+    avatarUpdatedAt: 'avatarUpdatedAt'
   };
 
   export type AccountScalarFieldEnum = (typeof AccountScalarFieldEnum)[keyof typeof AccountScalarFieldEnum]
+
+
+  export const AccountAvatarScalarFieldEnum: {
+    accountId: 'accountId',
+    contentBytes: 'contentBytes',
+    byteSize: 'byteSize',
+    updatedAt: 'updatedAt'
+  };
+
+  export type AccountAvatarScalarFieldEnum = (typeof AccountAvatarScalarFieldEnum)[keyof typeof AccountAvatarScalarFieldEnum]
 
 
   export const AiConversationScalarFieldEnum: {
@@ -124871,6 +126098,20 @@ export namespace Prisma {
 
 
   /**
+   * Reference to a field of type 'Bytes'
+   */
+  export type BytesFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Bytes'>
+
+
+
+  /**
+   * Reference to a field of type 'Bytes[]'
+   */
+  export type ListBytesFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Bytes[]'>
+
+
+
+  /**
    * Reference to a field of type 'Int'
    */
   export type IntFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Int'>
@@ -124906,20 +126147,6 @@ export namespace Prisma {
 
 
   /**
-   * Reference to a field of type 'Bytes'
-   */
-  export type BytesFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Bytes'>
-
-
-
-  /**
-   * Reference to a field of type 'Bytes[]'
-   */
-  export type ListBytesFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Bytes[]'>
-
-
-
-  /**
    * Reference to a field of type 'Decimal'
    */
   export type DecimalFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Decimal'>
@@ -124946,8 +126173,10 @@ export namespace Prisma {
     createdAt?: DateTimeFilter<"Account"> | Date | string
     updatedAt?: DateTimeFilter<"Account"> | Date | string
     closedAt?: DateTimeNullableFilter<"Account"> | Date | string | null
+    avatarUpdatedAt?: DateTimeNullableFilter<"Account"> | Date | string | null
     assistedWorkflows?: AiAssistedWorkflowListRelationFilter
     cloudUser?: XOR<CloudAuthUserScalarRelationFilter, CloudAuthUserWhereInput>
+    avatar?: XOR<AccountAvatarNullableScalarRelationFilter, AccountAvatarWhereInput> | null
     externalMutationReceipts?: ExternalMutationReceiptListRelationFilter
     goals?: GoalListRelationFilter
     profileImportOperations?: ProfileImportOperationListRelationFilter
@@ -125003,8 +126232,10 @@ export namespace Prisma {
     createdAt?: SortOrder
     updatedAt?: SortOrder
     closedAt?: SortOrderInput | SortOrder
+    avatarUpdatedAt?: SortOrderInput | SortOrder
     assistedWorkflows?: AiAssistedWorkflowOrderByRelationAggregateInput
     cloudUser?: CloudAuthUserOrderByWithRelationInput
+    avatar?: AccountAvatarOrderByWithRelationInput
     externalMutationReceipts?: ExternalMutationReceiptOrderByRelationAggregateInput
     goals?: GoalOrderByRelationAggregateInput
     profileImportOperations?: ProfileImportOperationOrderByRelationAggregateInput
@@ -125063,8 +126294,10 @@ export namespace Prisma {
     createdAt?: DateTimeFilter<"Account"> | Date | string
     updatedAt?: DateTimeFilter<"Account"> | Date | string
     closedAt?: DateTimeNullableFilter<"Account"> | Date | string | null
+    avatarUpdatedAt?: DateTimeNullableFilter<"Account"> | Date | string | null
     assistedWorkflows?: AiAssistedWorkflowListRelationFilter
     cloudUser?: XOR<CloudAuthUserScalarRelationFilter, CloudAuthUserWhereInput>
+    avatar?: XOR<AccountAvatarNullableScalarRelationFilter, AccountAvatarWhereInput> | null
     externalMutationReceipts?: ExternalMutationReceiptListRelationFilter
     goals?: GoalListRelationFilter
     profileImportOperations?: ProfileImportOperationListRelationFilter
@@ -125120,6 +126353,7 @@ export namespace Prisma {
     createdAt?: SortOrder
     updatedAt?: SortOrder
     closedAt?: SortOrderInput | SortOrder
+    avatarUpdatedAt?: SortOrderInput | SortOrder
     _count?: AccountCountOrderByAggregateInput
     _max?: AccountMaxOrderByAggregateInput
     _min?: AccountMinOrderByAggregateInput
@@ -125135,6 +126369,59 @@ export namespace Prisma {
     createdAt?: DateTimeWithAggregatesFilter<"Account"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"Account"> | Date | string
     closedAt?: DateTimeNullableWithAggregatesFilter<"Account"> | Date | string | null
+    avatarUpdatedAt?: DateTimeNullableWithAggregatesFilter<"Account"> | Date | string | null
+  }
+
+  export type AccountAvatarWhereInput = {
+    AND?: AccountAvatarWhereInput | AccountAvatarWhereInput[]
+    OR?: AccountAvatarWhereInput[]
+    NOT?: AccountAvatarWhereInput | AccountAvatarWhereInput[]
+    accountId?: StringFilter<"AccountAvatar"> | string
+    contentBytes?: BytesFilter<"AccountAvatar"> | Bytes
+    byteSize?: IntFilter<"AccountAvatar"> | number
+    updatedAt?: DateTimeFilter<"AccountAvatar"> | Date | string
+    account?: XOR<AccountScalarRelationFilter, AccountWhereInput>
+  }
+
+  export type AccountAvatarOrderByWithRelationInput = {
+    accountId?: SortOrder
+    contentBytes?: SortOrder
+    byteSize?: SortOrder
+    updatedAt?: SortOrder
+    account?: AccountOrderByWithRelationInput
+  }
+
+  export type AccountAvatarWhereUniqueInput = Prisma.AtLeast<{
+    accountId?: string
+    AND?: AccountAvatarWhereInput | AccountAvatarWhereInput[]
+    OR?: AccountAvatarWhereInput[]
+    NOT?: AccountAvatarWhereInput | AccountAvatarWhereInput[]
+    contentBytes?: BytesFilter<"AccountAvatar"> | Bytes
+    byteSize?: IntFilter<"AccountAvatar"> | number
+    updatedAt?: DateTimeFilter<"AccountAvatar"> | Date | string
+    account?: XOR<AccountScalarRelationFilter, AccountWhereInput>
+  }, "accountId">
+
+  export type AccountAvatarOrderByWithAggregationInput = {
+    accountId?: SortOrder
+    contentBytes?: SortOrder
+    byteSize?: SortOrder
+    updatedAt?: SortOrder
+    _count?: AccountAvatarCountOrderByAggregateInput
+    _avg?: AccountAvatarAvgOrderByAggregateInput
+    _max?: AccountAvatarMaxOrderByAggregateInput
+    _min?: AccountAvatarMinOrderByAggregateInput
+    _sum?: AccountAvatarSumOrderByAggregateInput
+  }
+
+  export type AccountAvatarScalarWhereWithAggregatesInput = {
+    AND?: AccountAvatarScalarWhereWithAggregatesInput | AccountAvatarScalarWhereWithAggregatesInput[]
+    OR?: AccountAvatarScalarWhereWithAggregatesInput[]
+    NOT?: AccountAvatarScalarWhereWithAggregatesInput | AccountAvatarScalarWhereWithAggregatesInput[]
+    accountId?: StringWithAggregatesFilter<"AccountAvatar"> | string
+    contentBytes?: BytesWithAggregatesFilter<"AccountAvatar"> | Bytes
+    byteSize?: IntWithAggregatesFilter<"AccountAvatar"> | number
+    updatedAt?: DateTimeWithAggregatesFilter<"AccountAvatar"> | Date | string
   }
 
   export type AiConversationWhereInput = {
@@ -133468,8 +134755,10 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     closedAt?: Date | string | null
+    avatarUpdatedAt?: Date | string | null
     assistedWorkflows?: AiAssistedWorkflowCreateNestedManyWithoutAccountInput
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
+    avatar?: AccountAvatarCreateNestedOneWithoutAccountInput
     externalMutationReceipts?: ExternalMutationReceiptCreateNestedManyWithoutAccountInput
     goals?: GoalCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationCreateNestedManyWithoutAccountInput
@@ -133525,7 +134814,9 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     closedAt?: Date | string | null
+    avatarUpdatedAt?: Date | string | null
     assistedWorkflows?: AiAssistedWorkflowUncheckedCreateNestedManyWithoutAccountInput
+    avatar?: AccountAvatarUncheckedCreateNestedOneWithoutAccountInput
     externalMutationReceipts?: ExternalMutationReceiptUncheckedCreateNestedManyWithoutAccountInput
     goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationUncheckedCreateNestedManyWithoutAccountInput
@@ -133580,8 +134871,10 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    avatarUpdatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     assistedWorkflows?: AiAssistedWorkflowUpdateManyWithoutAccountNestedInput
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
+    avatar?: AccountAvatarUpdateOneWithoutAccountNestedInput
     externalMutationReceipts?: ExternalMutationReceiptUpdateManyWithoutAccountNestedInput
     goals?: GoalUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUpdateManyWithoutAccountNestedInput
@@ -133637,7 +134930,9 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    avatarUpdatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     assistedWorkflows?: AiAssistedWorkflowUncheckedUpdateManyWithoutAccountNestedInput
+    avatar?: AccountAvatarUncheckedUpdateOneWithoutAccountNestedInput
     externalMutationReceipts?: ExternalMutationReceiptUncheckedUpdateManyWithoutAccountNestedInput
     goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUncheckedUpdateManyWithoutAccountNestedInput
@@ -133693,6 +134988,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     closedAt?: Date | string | null
+    avatarUpdatedAt?: Date | string | null
   }
 
   export type AccountUpdateManyMutationInput = {
@@ -133701,6 +134997,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    avatarUpdatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   }
 
   export type AccountUncheckedUpdateManyInput = {
@@ -133710,6 +135007,55 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    avatarUpdatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  }
+
+  export type AccountAvatarCreateInput = {
+    contentBytes: Bytes
+    byteSize: number
+    updatedAt: Date | string
+    account: AccountCreateNestedOneWithoutAvatarInput
+  }
+
+  export type AccountAvatarUncheckedCreateInput = {
+    accountId: string
+    contentBytes: Bytes
+    byteSize: number
+    updatedAt: Date | string
+  }
+
+  export type AccountAvatarUpdateInput = {
+    contentBytes?: BytesFieldUpdateOperationsInput | Bytes
+    byteSize?: IntFieldUpdateOperationsInput | number
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    account?: AccountUpdateOneRequiredWithoutAvatarNestedInput
+  }
+
+  export type AccountAvatarUncheckedUpdateInput = {
+    accountId?: StringFieldUpdateOperationsInput | string
+    contentBytes?: BytesFieldUpdateOperationsInput | Bytes
+    byteSize?: IntFieldUpdateOperationsInput | number
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type AccountAvatarCreateManyInput = {
+    accountId: string
+    contentBytes: Bytes
+    byteSize: number
+    updatedAt: Date | string
+  }
+
+  export type AccountAvatarUpdateManyMutationInput = {
+    contentBytes?: BytesFieldUpdateOperationsInput | Bytes
+    byteSize?: IntFieldUpdateOperationsInput | number
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type AccountAvatarUncheckedUpdateManyInput = {
+    accountId?: StringFieldUpdateOperationsInput | string
+    contentBytes?: BytesFieldUpdateOperationsInput | Bytes
+    byteSize?: IntFieldUpdateOperationsInput | number
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type AiConversationCreateInput = {
@@ -143082,6 +144428,11 @@ export namespace Prisma {
     isNot?: CloudAuthUserWhereInput
   }
 
+  export type AccountAvatarNullableScalarRelationFilter = {
+    is?: AccountAvatarWhereInput | null
+    isNot?: AccountAvatarWhereInput | null
+  }
+
   export type ExternalMutationReceiptListRelationFilter = {
     every?: ExternalMutationReceiptWhereInput
     some?: ExternalMutationReceiptWhereInput
@@ -143553,6 +144904,7 @@ export namespace Prisma {
     createdAt?: SortOrder
     updatedAt?: SortOrder
     closedAt?: SortOrder
+    avatarUpdatedAt?: SortOrder
   }
 
   export type AccountMaxOrderByAggregateInput = {
@@ -143561,6 +144913,7 @@ export namespace Prisma {
     createdAt?: SortOrder
     updatedAt?: SortOrder
     closedAt?: SortOrder
+    avatarUpdatedAt?: SortOrder
   }
 
   export type AccountMinOrderByAggregateInput = {
@@ -143569,6 +144922,7 @@ export namespace Prisma {
     createdAt?: SortOrder
     updatedAt?: SortOrder
     closedAt?: SortOrder
+    avatarUpdatedAt?: SortOrder
   }
 
   export type StringWithAggregatesFilter<$PrismaModel = never> = {
@@ -143643,6 +144997,13 @@ export namespace Prisma {
     _max?: NestedDateTimeNullableFilter<$PrismaModel>
   }
 
+  export type BytesFilter<$PrismaModel = never> = {
+    equals?: Bytes | BytesFieldRefInput<$PrismaModel>
+    in?: Bytes[] | ListBytesFieldRefInput<$PrismaModel>
+    notIn?: Bytes[] | ListBytesFieldRefInput<$PrismaModel>
+    not?: NestedBytesFilter<$PrismaModel> | Bytes
+  }
+
   export type IntFilter<$PrismaModel = never> = {
     equals?: number | IntFieldRefInput<$PrismaModel>
     in?: number[] | ListIntFieldRefInput<$PrismaModel>
@@ -143657,6 +145018,61 @@ export namespace Prisma {
   export type AccountScalarRelationFilter = {
     is?: AccountWhereInput
     isNot?: AccountWhereInput
+  }
+
+  export type AccountAvatarCountOrderByAggregateInput = {
+    accountId?: SortOrder
+    contentBytes?: SortOrder
+    byteSize?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type AccountAvatarAvgOrderByAggregateInput = {
+    byteSize?: SortOrder
+  }
+
+  export type AccountAvatarMaxOrderByAggregateInput = {
+    accountId?: SortOrder
+    contentBytes?: SortOrder
+    byteSize?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type AccountAvatarMinOrderByAggregateInput = {
+    accountId?: SortOrder
+    contentBytes?: SortOrder
+    byteSize?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type AccountAvatarSumOrderByAggregateInput = {
+    byteSize?: SortOrder
+  }
+
+  export type BytesWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: Bytes | BytesFieldRefInput<$PrismaModel>
+    in?: Bytes[] | ListBytesFieldRefInput<$PrismaModel>
+    notIn?: Bytes[] | ListBytesFieldRefInput<$PrismaModel>
+    not?: NestedBytesWithAggregatesFilter<$PrismaModel> | Bytes
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedBytesFilter<$PrismaModel>
+    _max?: NestedBytesFilter<$PrismaModel>
+  }
+
+  export type IntWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: number | IntFieldRefInput<$PrismaModel>
+    in?: number[] | ListIntFieldRefInput<$PrismaModel>
+    notIn?: number[] | ListIntFieldRefInput<$PrismaModel>
+    lt?: number | IntFieldRefInput<$PrismaModel>
+    lte?: number | IntFieldRefInput<$PrismaModel>
+    gt?: number | IntFieldRefInput<$PrismaModel>
+    gte?: number | IntFieldRefInput<$PrismaModel>
+    not?: NestedIntWithAggregatesFilter<$PrismaModel> | number
+    _count?: NestedIntFilter<$PrismaModel>
+    _avg?: NestedFloatFilter<$PrismaModel>
+    _sum?: NestedIntFilter<$PrismaModel>
+    _min?: NestedIntFilter<$PrismaModel>
+    _max?: NestedIntFilter<$PrismaModel>
   }
 
   export type AiAgentConversationBindingNullableScalarRelationFilter = {
@@ -143708,22 +145124,6 @@ export namespace Prisma {
 
   export type AiConversationSumOrderByAggregateInput = {
     version?: SortOrder
-  }
-
-  export type IntWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: number | IntFieldRefInput<$PrismaModel>
-    in?: number[] | ListIntFieldRefInput<$PrismaModel>
-    notIn?: number[] | ListIntFieldRefInput<$PrismaModel>
-    lt?: number | IntFieldRefInput<$PrismaModel>
-    lte?: number | IntFieldRefInput<$PrismaModel>
-    gt?: number | IntFieldRefInput<$PrismaModel>
-    gte?: number | IntFieldRefInput<$PrismaModel>
-    not?: NestedIntWithAggregatesFilter<$PrismaModel> | number
-    _count?: NestedIntFilter<$PrismaModel>
-    _avg?: NestedFloatFilter<$PrismaModel>
-    _sum?: NestedIntFilter<$PrismaModel>
-    _min?: NestedIntFilter<$PrismaModel>
-    _max?: NestedIntFilter<$PrismaModel>
   }
 
   export type StringNullableFilter<$PrismaModel = never> = {
@@ -147776,13 +149176,6 @@ export namespace Prisma {
     byteSize?: SortOrder
   }
 
-  export type BytesFilter<$PrismaModel = never> = {
-    equals?: Bytes | BytesFieldRefInput<$PrismaModel>
-    in?: Bytes[] | ListBytesFieldRefInput<$PrismaModel>
-    notIn?: Bytes[] | ListBytesFieldRefInput<$PrismaModel>
-    not?: NestedBytesFilter<$PrismaModel> | Bytes
-  }
-
   export type KnowledgeAttachmentContentCacheBindingIdBlobShaCompoundUniqueInput = {
     bindingId: string
     blobSha: string
@@ -147821,16 +149214,6 @@ export namespace Prisma {
 
   export type KnowledgeAttachmentContentCacheSumOrderByAggregateInput = {
     byteSize?: SortOrder
-  }
-
-  export type BytesWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: Bytes | BytesFieldRefInput<$PrismaModel>
-    in?: Bytes[] | ListBytesFieldRefInput<$PrismaModel>
-    notIn?: Bytes[] | ListBytesFieldRefInput<$PrismaModel>
-    not?: NestedBytesWithAggregatesFilter<$PrismaModel> | Bytes
-    _count?: NestedIntFilter<$PrismaModel>
-    _min?: NestedBytesFilter<$PrismaModel>
-    _max?: NestedBytesFilter<$PrismaModel>
   }
 
   export type KnowledgeWriteRequestIdentityIdRequestIdCompoundUniqueInput = {
@@ -148899,6 +150282,12 @@ export namespace Prisma {
     connect?: CloudAuthUserWhereUniqueInput
   }
 
+  export type AccountAvatarCreateNestedOneWithoutAccountInput = {
+    create?: XOR<AccountAvatarCreateWithoutAccountInput, AccountAvatarUncheckedCreateWithoutAccountInput>
+    connectOrCreate?: AccountAvatarCreateOrConnectWithoutAccountInput
+    connect?: AccountAvatarWhereUniqueInput
+  }
+
   export type ExternalMutationReceiptCreateNestedManyWithoutAccountInput = {
     create?: XOR<ExternalMutationReceiptCreateWithoutAccountInput, ExternalMutationReceiptUncheckedCreateWithoutAccountInput> | ExternalMutationReceiptCreateWithoutAccountInput[] | ExternalMutationReceiptUncheckedCreateWithoutAccountInput[]
     connectOrCreate?: ExternalMutationReceiptCreateOrConnectWithoutAccountInput | ExternalMutationReceiptCreateOrConnectWithoutAccountInput[]
@@ -149225,6 +150614,12 @@ export namespace Prisma {
     connectOrCreate?: AiAssistedWorkflowCreateOrConnectWithoutAccountInput | AiAssistedWorkflowCreateOrConnectWithoutAccountInput[]
     createMany?: AiAssistedWorkflowCreateManyAccountInputEnvelope
     connect?: AiAssistedWorkflowWhereUniqueInput | AiAssistedWorkflowWhereUniqueInput[]
+  }
+
+  export type AccountAvatarUncheckedCreateNestedOneWithoutAccountInput = {
+    create?: XOR<AccountAvatarCreateWithoutAccountInput, AccountAvatarUncheckedCreateWithoutAccountInput>
+    connectOrCreate?: AccountAvatarCreateOrConnectWithoutAccountInput
+    connect?: AccountAvatarWhereUniqueInput
   }
 
   export type ExternalMutationReceiptUncheckedCreateNestedManyWithoutAccountInput = {
@@ -149580,6 +150975,16 @@ export namespace Prisma {
     upsert?: CloudAuthUserUpsertWithoutAccountInput
     connect?: CloudAuthUserWhereUniqueInput
     update?: XOR<XOR<CloudAuthUserUpdateToOneWithWhereWithoutAccountInput, CloudAuthUserUpdateWithoutAccountInput>, CloudAuthUserUncheckedUpdateWithoutAccountInput>
+  }
+
+  export type AccountAvatarUpdateOneWithoutAccountNestedInput = {
+    create?: XOR<AccountAvatarCreateWithoutAccountInput, AccountAvatarUncheckedCreateWithoutAccountInput>
+    connectOrCreate?: AccountAvatarCreateOrConnectWithoutAccountInput
+    upsert?: AccountAvatarUpsertWithoutAccountInput
+    disconnect?: AccountAvatarWhereInput | boolean
+    delete?: AccountAvatarWhereInput | boolean
+    connect?: AccountAvatarWhereUniqueInput
+    update?: XOR<XOR<AccountAvatarUpdateToOneWithWhereWithoutAccountInput, AccountAvatarUpdateWithoutAccountInput>, AccountAvatarUncheckedUpdateWithoutAccountInput>
   }
 
   export type ExternalMutationReceiptUpdateManyWithoutAccountNestedInput = {
@@ -150236,6 +151641,16 @@ export namespace Prisma {
     deleteMany?: AiAssistedWorkflowScalarWhereInput | AiAssistedWorkflowScalarWhereInput[]
   }
 
+  export type AccountAvatarUncheckedUpdateOneWithoutAccountNestedInput = {
+    create?: XOR<AccountAvatarCreateWithoutAccountInput, AccountAvatarUncheckedCreateWithoutAccountInput>
+    connectOrCreate?: AccountAvatarCreateOrConnectWithoutAccountInput
+    upsert?: AccountAvatarUpsertWithoutAccountInput
+    disconnect?: AccountAvatarWhereInput | boolean
+    delete?: AccountAvatarWhereInput | boolean
+    connect?: AccountAvatarWhereUniqueInput
+    update?: XOR<XOR<AccountAvatarUpdateToOneWithWhereWithoutAccountInput, AccountAvatarUpdateWithoutAccountInput>, AccountAvatarUncheckedUpdateWithoutAccountInput>
+  }
+
   export type ExternalMutationReceiptUncheckedUpdateManyWithoutAccountNestedInput = {
     create?: XOR<ExternalMutationReceiptCreateWithoutAccountInput, ExternalMutationReceiptUncheckedCreateWithoutAccountInput> | ExternalMutationReceiptCreateWithoutAccountInput[] | ExternalMutationReceiptUncheckedCreateWithoutAccountInput[]
     connectOrCreate?: ExternalMutationReceiptCreateOrConnectWithoutAccountInput | ExternalMutationReceiptCreateOrConnectWithoutAccountInput[]
@@ -150876,6 +152291,32 @@ export namespace Prisma {
     deleteMany?: KnowledgeWriteRequestScalarWhereInput | KnowledgeWriteRequestScalarWhereInput[]
   }
 
+  export type AccountCreateNestedOneWithoutAvatarInput = {
+    create?: XOR<AccountCreateWithoutAvatarInput, AccountUncheckedCreateWithoutAvatarInput>
+    connectOrCreate?: AccountCreateOrConnectWithoutAvatarInput
+    connect?: AccountWhereUniqueInput
+  }
+
+  export type BytesFieldUpdateOperationsInput = {
+    set?: Bytes
+  }
+
+  export type IntFieldUpdateOperationsInput = {
+    set?: number
+    increment?: number
+    decrement?: number
+    multiply?: number
+    divide?: number
+  }
+
+  export type AccountUpdateOneRequiredWithoutAvatarNestedInput = {
+    create?: XOR<AccountCreateWithoutAvatarInput, AccountUncheckedCreateWithoutAvatarInput>
+    connectOrCreate?: AccountCreateOrConnectWithoutAvatarInput
+    upsert?: AccountUpsertWithoutAvatarInput
+    connect?: AccountWhereUniqueInput
+    update?: XOR<XOR<AccountUpdateToOneWithWhereWithoutAvatarInput, AccountUpdateWithoutAvatarInput>, AccountUncheckedUpdateWithoutAvatarInput>
+  }
+
   export type AccountCreateNestedOneWithoutAiConversationsInput = {
     create?: XOR<AccountCreateWithoutAiConversationsInput, AccountUncheckedCreateWithoutAiConversationsInput>
     connectOrCreate?: AccountCreateOrConnectWithoutAiConversationsInput
@@ -150892,14 +152333,6 @@ export namespace Prisma {
     create?: XOR<AiAgentConversationBindingCreateWithoutConversationInput, AiAgentConversationBindingUncheckedCreateWithoutConversationInput>
     connectOrCreate?: AiAgentConversationBindingCreateOrConnectWithoutConversationInput
     connect?: AiAgentConversationBindingWhereUniqueInput
-  }
-
-  export type IntFieldUpdateOperationsInput = {
-    set?: number
-    increment?: number
-    decrement?: number
-    multiply?: number
-    divide?: number
   }
 
   export type AccountUpdateOneRequiredWithoutAiConversationsNestedInput = {
@@ -154520,10 +155953,6 @@ export namespace Prisma {
     connect?: KnowledgeRemoteBindingWhereUniqueInput
   }
 
-  export type BytesFieldUpdateOperationsInput = {
-    set?: Bytes
-  }
-
   export type KnowledgeRemoteBindingUpdateOneRequiredWithoutAttachmentContentCachesNestedInput = {
     create?: XOR<KnowledgeRemoteBindingCreateWithoutAttachmentContentCachesInput, KnowledgeRemoteBindingUncheckedCreateWithoutAttachmentContentCachesInput>
     connectOrCreate?: KnowledgeRemoteBindingCreateOrConnectWithoutAttachmentContentCachesInput
@@ -155116,6 +156545,23 @@ export namespace Prisma {
     not?: NestedIntNullableFilter<$PrismaModel> | number | null
   }
 
+  export type NestedBytesFilter<$PrismaModel = never> = {
+    equals?: Bytes | BytesFieldRefInput<$PrismaModel>
+    in?: Bytes[] | ListBytesFieldRefInput<$PrismaModel>
+    notIn?: Bytes[] | ListBytesFieldRefInput<$PrismaModel>
+    not?: NestedBytesFilter<$PrismaModel> | Bytes
+  }
+
+  export type NestedBytesWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: Bytes | BytesFieldRefInput<$PrismaModel>
+    in?: Bytes[] | ListBytesFieldRefInput<$PrismaModel>
+    notIn?: Bytes[] | ListBytesFieldRefInput<$PrismaModel>
+    not?: NestedBytesWithAggregatesFilter<$PrismaModel> | Bytes
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedBytesFilter<$PrismaModel>
+    _max?: NestedBytesFilter<$PrismaModel>
+  }
+
   export type NestedIntWithAggregatesFilter<$PrismaModel = never> = {
     equals?: number | IntFieldRefInput<$PrismaModel>
     in?: number[] | ListIntFieldRefInput<$PrismaModel>
@@ -155282,23 +156728,6 @@ export namespace Prisma {
     _max?: NestedBoolNullableFilter<$PrismaModel>
   }
 
-  export type NestedBytesFilter<$PrismaModel = never> = {
-    equals?: Bytes | BytesFieldRefInput<$PrismaModel>
-    in?: Bytes[] | ListBytesFieldRefInput<$PrismaModel>
-    notIn?: Bytes[] | ListBytesFieldRefInput<$PrismaModel>
-    not?: NestedBytesFilter<$PrismaModel> | Bytes
-  }
-
-  export type NestedBytesWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: Bytes | BytesFieldRefInput<$PrismaModel>
-    in?: Bytes[] | ListBytesFieldRefInput<$PrismaModel>
-    notIn?: Bytes[] | ListBytesFieldRefInput<$PrismaModel>
-    not?: NestedBytesWithAggregatesFilter<$PrismaModel> | Bytes
-    _count?: NestedIntFilter<$PrismaModel>
-    _min?: NestedBytesFilter<$PrismaModel>
-    _max?: NestedBytesFilter<$PrismaModel>
-  }
-
   export type NestedDecimalFilter<$PrismaModel = never> = {
     equals?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
     in?: Decimal[] | DecimalJsLike[] | number[] | string[] | ListDecimalFieldRefInput<$PrismaModel>
@@ -155413,6 +156842,23 @@ export namespace Prisma {
   export type CloudAuthUserCreateOrConnectWithoutAccountInput = {
     where: CloudAuthUserWhereUniqueInput
     create: XOR<CloudAuthUserCreateWithoutAccountInput, CloudAuthUserUncheckedCreateWithoutAccountInput>
+  }
+
+  export type AccountAvatarCreateWithoutAccountInput = {
+    contentBytes: Bytes
+    byteSize: number
+    updatedAt: Date | string
+  }
+
+  export type AccountAvatarUncheckedCreateWithoutAccountInput = {
+    contentBytes: Bytes
+    byteSize: number
+    updatedAt: Date | string
+  }
+
+  export type AccountAvatarCreateOrConnectWithoutAccountInput = {
+    where: AccountAvatarWhereUniqueInput
+    create: XOR<AccountAvatarCreateWithoutAccountInput, AccountAvatarUncheckedCreateWithoutAccountInput>
   }
 
   export type ExternalMutationReceiptCreateWithoutAccountInput = {
@@ -157307,6 +158753,29 @@ export namespace Prisma {
     oauthconsents?: OauthConsentUncheckedUpdateManyWithoutCloudauthuserNestedInput
   }
 
+  export type AccountAvatarUpsertWithoutAccountInput = {
+    update: XOR<AccountAvatarUpdateWithoutAccountInput, AccountAvatarUncheckedUpdateWithoutAccountInput>
+    create: XOR<AccountAvatarCreateWithoutAccountInput, AccountAvatarUncheckedCreateWithoutAccountInput>
+    where?: AccountAvatarWhereInput
+  }
+
+  export type AccountAvatarUpdateToOneWithWhereWithoutAccountInput = {
+    where?: AccountAvatarWhereInput
+    data: XOR<AccountAvatarUpdateWithoutAccountInput, AccountAvatarUncheckedUpdateWithoutAccountInput>
+  }
+
+  export type AccountAvatarUpdateWithoutAccountInput = {
+    contentBytes?: BytesFieldUpdateOperationsInput | Bytes
+    byteSize?: IntFieldUpdateOperationsInput | number
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type AccountAvatarUncheckedUpdateWithoutAccountInput = {
+    contentBytes?: BytesFieldUpdateOperationsInput | Bytes
+    byteSize?: IntFieldUpdateOperationsInput | number
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
   export type ExternalMutationReceiptUpsertWithWhereUniqueWithoutAccountInput = {
     where: ExternalMutationReceiptWhereUniqueInput
     update: XOR<ExternalMutationReceiptUpdateWithoutAccountInput, ExternalMutationReceiptUncheckedUpdateWithoutAccountInput>
@@ -158866,14 +160335,260 @@ export namespace Prisma {
     completedAt?: DateTimeNullableFilter<"KnowledgeWriteRequest"> | Date | string | null
   }
 
+  export type AccountCreateWithoutAvatarInput = {
+    status?: string
+    profile: JsonNullValueInput | InputJsonValue
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    closedAt?: Date | string | null
+    avatarUpdatedAt?: Date | string | null
+    assistedWorkflows?: AiAssistedWorkflowCreateNestedManyWithoutAccountInput
+    cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
+    externalMutationReceipts?: ExternalMutationReceiptCreateNestedManyWithoutAccountInput
+    goals?: GoalCreateNestedManyWithoutAccountInput
+    profileImportOperations?: ProfileImportOperationCreateNestedManyWithoutAccountInput
+    labels?: LabelCreateNestedManyWithoutAccountInput
+    goalLabels?: GoalLabelCreateNestedManyWithoutAccountInput
+    taskLabels?: TaskLabelCreateNestedManyWithoutAccountInput
+    routineDefinitions?: RoutineDefinitionCreateNestedManyWithoutAccountInput
+    routinePreference?: RoutinePreferenceCreateNestedOneWithoutAccountInput
+    routineTemporaryOverrides?: RoutineTemporaryOverrideCreateNestedManyWithoutAccountInput
+    routineProfiles?: RoutineProfileCreateNestedManyWithoutAccountInput
+    routineProfileMemberships?: RoutineProfileMembershipCreateNestedManyWithoutAccountInput
+    routineProtocolDefinitions?: RoutineProtocolDefinitionCreateNestedManyWithoutAccountInput
+    routineProtocolSessions?: RoutineProtocolSessionCreateNestedManyWithoutAccountInput
+    schedules?: ScheduleCreateNestedManyWithoutAccountInput
+    schedulingReconcileOperations?: SchedulingReconcileOperationCreateNestedManyWithoutAccountInput
+    scheduledInvocations?: ScheduledInvocationCreateNestedManyWithoutAccountInput
+    invocationAttempts?: InvocationAttemptCreateNestedManyWithoutAccountInput
+    habits?: HabitCreateNestedManyWithoutAccountInput
+    relations?: RelationCreateNestedManyWithoutAccountInput
+    walletAccounts?: WalletAccountCreateNestedManyWithoutAccountInput
+    walletTransactions?: WalletTransactionCreateNestedManyWithoutAccount_identityInput
+    taskPlans?: TaskPlanCreateNestedManyWithoutAccountInput
+    taskOccurrences?: TaskOccurrenceCreateNestedManyWithoutAccountInput
+    userPreferenceRecords?: UserPreferenceRecordCreateNestedManyWithoutAccountInput
+    notifications?: NotificationCreateNestedManyWithoutAccountInput
+    aiConversations?: AiConversationCreateNestedManyWithoutAccountInput
+    aiExecutionRecords?: AiExecutionRecordCreateNestedManyWithoutAccountInput
+    aiPermissionSettings?: AiPermissionSettingCreateNestedManyWithoutAccountInput
+    aiPermissionRules?: AiPermissionRuleCreateNestedManyWithoutAccountInput
+    aiPermissionAudits?: AiPermissionAuditCreateNestedManyWithoutAccountInput
+    aiGoalSurfaceLeases?: AiGoalSurfaceLeaseCreateNestedManyWithoutAccountInput
+    aiConversationAttention?: AiConversationAttentionCreateNestedManyWithoutAccountInput
+    aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryCreateNestedManyWithoutAccountInput
+    aiProviderConfigs?: AiProviderConfigCreateNestedManyWithoutAccountInput
+    aiAgentInstances?: AiAgentInstanceCreateNestedManyWithoutAccountInput
+    aiAgentInstanceBindings?: AiAgentInstanceBindingCreateNestedManyWithoutAccountInput
+    aiProviderOnboardingSessions?: AiProviderOnboardingSessionCreateNestedManyWithoutAccountInput
+    aiProviderSecrets?: AiProviderSecretCreateNestedManyWithoutAccountInput
+    taskPlanHistory?: TaskPlanHistoryCreateNestedManyWithoutIdentityInput
+    routineOccurrences?: RoutineOccurrenceCreateNestedManyWithoutAccountInput
+    routineInteractions?: RoutineInteractionCreateNestedManyWithoutAccountInput
+    notificationInteractions?: NotificationInteractionCreateNestedManyWithoutIdentityInput
+    notificationDispatchOutboxes?: NotificationDispatchOutboxCreateNestedManyWithoutAccountInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingCreateNestedManyWithoutAccountInput
+    knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentCreateNestedManyWithoutAccountInput
+    knowledgeWriteRequests?: KnowledgeWriteRequestCreateNestedManyWithoutAccountInput
+  }
+
+  export type AccountUncheckedCreateWithoutAvatarInput = {
+    id: string
+    status?: string
+    profile: JsonNullValueInput | InputJsonValue
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    closedAt?: Date | string | null
+    avatarUpdatedAt?: Date | string | null
+    assistedWorkflows?: AiAssistedWorkflowUncheckedCreateNestedManyWithoutAccountInput
+    externalMutationReceipts?: ExternalMutationReceiptUncheckedCreateNestedManyWithoutAccountInput
+    goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
+    profileImportOperations?: ProfileImportOperationUncheckedCreateNestedManyWithoutAccountInput
+    labels?: LabelUncheckedCreateNestedManyWithoutAccountInput
+    goalLabels?: GoalLabelUncheckedCreateNestedManyWithoutAccountInput
+    taskLabels?: TaskLabelUncheckedCreateNestedManyWithoutAccountInput
+    routineDefinitions?: RoutineDefinitionUncheckedCreateNestedManyWithoutAccountInput
+    routinePreference?: RoutinePreferenceUncheckedCreateNestedOneWithoutAccountInput
+    routineTemporaryOverrides?: RoutineTemporaryOverrideUncheckedCreateNestedManyWithoutAccountInput
+    routineProfiles?: RoutineProfileUncheckedCreateNestedManyWithoutAccountInput
+    routineProfileMemberships?: RoutineProfileMembershipUncheckedCreateNestedManyWithoutAccountInput
+    routineProtocolDefinitions?: RoutineProtocolDefinitionUncheckedCreateNestedManyWithoutAccountInput
+    routineProtocolSessions?: RoutineProtocolSessionUncheckedCreateNestedManyWithoutAccountInput
+    schedules?: ScheduleUncheckedCreateNestedManyWithoutAccountInput
+    schedulingReconcileOperations?: SchedulingReconcileOperationUncheckedCreateNestedManyWithoutAccountInput
+    scheduledInvocations?: ScheduledInvocationUncheckedCreateNestedManyWithoutAccountInput
+    invocationAttempts?: InvocationAttemptUncheckedCreateNestedManyWithoutAccountInput
+    habits?: HabitUncheckedCreateNestedManyWithoutAccountInput
+    relations?: RelationUncheckedCreateNestedManyWithoutAccountInput
+    walletAccounts?: WalletAccountUncheckedCreateNestedManyWithoutAccountInput
+    walletTransactions?: WalletTransactionUncheckedCreateNestedManyWithoutAccount_identityInput
+    taskPlans?: TaskPlanUncheckedCreateNestedManyWithoutAccountInput
+    taskOccurrences?: TaskOccurrenceUncheckedCreateNestedManyWithoutAccountInput
+    userPreferenceRecords?: UserPreferenceRecordUncheckedCreateNestedManyWithoutAccountInput
+    notifications?: NotificationUncheckedCreateNestedManyWithoutAccountInput
+    aiConversations?: AiConversationUncheckedCreateNestedManyWithoutAccountInput
+    aiExecutionRecords?: AiExecutionRecordUncheckedCreateNestedManyWithoutAccountInput
+    aiPermissionSettings?: AiPermissionSettingUncheckedCreateNestedManyWithoutAccountInput
+    aiPermissionRules?: AiPermissionRuleUncheckedCreateNestedManyWithoutAccountInput
+    aiPermissionAudits?: AiPermissionAuditUncheckedCreateNestedManyWithoutAccountInput
+    aiGoalSurfaceLeases?: AiGoalSurfaceLeaseUncheckedCreateNestedManyWithoutAccountInput
+    aiConversationAttention?: AiConversationAttentionUncheckedCreateNestedManyWithoutAccountInput
+    aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedCreateNestedManyWithoutAccountInput
+    aiProviderConfigs?: AiProviderConfigUncheckedCreateNestedManyWithoutAccountInput
+    aiAgentInstances?: AiAgentInstanceUncheckedCreateNestedManyWithoutAccountInput
+    aiAgentInstanceBindings?: AiAgentInstanceBindingUncheckedCreateNestedManyWithoutAccountInput
+    aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedCreateNestedManyWithoutAccountInput
+    aiProviderSecrets?: AiProviderSecretUncheckedCreateNestedManyWithoutAccountInput
+    taskPlanHistory?: TaskPlanHistoryUncheckedCreateNestedManyWithoutIdentityInput
+    routineOccurrences?: RoutineOccurrenceUncheckedCreateNestedManyWithoutAccountInput
+    routineInteractions?: RoutineInteractionUncheckedCreateNestedManyWithoutAccountInput
+    notificationInteractions?: NotificationInteractionUncheckedCreateNestedManyWithoutIdentityInput
+    notificationDispatchOutboxes?: NotificationDispatchOutboxUncheckedCreateNestedManyWithoutAccountInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingUncheckedCreateNestedManyWithoutAccountInput
+    knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentUncheckedCreateNestedManyWithoutAccountInput
+    knowledgeWriteRequests?: KnowledgeWriteRequestUncheckedCreateNestedManyWithoutAccountInput
+  }
+
+  export type AccountCreateOrConnectWithoutAvatarInput = {
+    where: AccountWhereUniqueInput
+    create: XOR<AccountCreateWithoutAvatarInput, AccountUncheckedCreateWithoutAvatarInput>
+  }
+
+  export type AccountUpsertWithoutAvatarInput = {
+    update: XOR<AccountUpdateWithoutAvatarInput, AccountUncheckedUpdateWithoutAvatarInput>
+    create: XOR<AccountCreateWithoutAvatarInput, AccountUncheckedCreateWithoutAvatarInput>
+    where?: AccountWhereInput
+  }
+
+  export type AccountUpdateToOneWithWhereWithoutAvatarInput = {
+    where?: AccountWhereInput
+    data: XOR<AccountUpdateWithoutAvatarInput, AccountUncheckedUpdateWithoutAvatarInput>
+  }
+
+  export type AccountUpdateWithoutAvatarInput = {
+    status?: StringFieldUpdateOperationsInput | string
+    profile?: JsonNullValueInput | InputJsonValue
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    avatarUpdatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    assistedWorkflows?: AiAssistedWorkflowUpdateManyWithoutAccountNestedInput
+    cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
+    externalMutationReceipts?: ExternalMutationReceiptUpdateManyWithoutAccountNestedInput
+    goals?: GoalUpdateManyWithoutAccountNestedInput
+    profileImportOperations?: ProfileImportOperationUpdateManyWithoutAccountNestedInput
+    labels?: LabelUpdateManyWithoutAccountNestedInput
+    goalLabels?: GoalLabelUpdateManyWithoutAccountNestedInput
+    taskLabels?: TaskLabelUpdateManyWithoutAccountNestedInput
+    routineDefinitions?: RoutineDefinitionUpdateManyWithoutAccountNestedInput
+    routinePreference?: RoutinePreferenceUpdateOneWithoutAccountNestedInput
+    routineTemporaryOverrides?: RoutineTemporaryOverrideUpdateManyWithoutAccountNestedInput
+    routineProfiles?: RoutineProfileUpdateManyWithoutAccountNestedInput
+    routineProfileMemberships?: RoutineProfileMembershipUpdateManyWithoutAccountNestedInput
+    routineProtocolDefinitions?: RoutineProtocolDefinitionUpdateManyWithoutAccountNestedInput
+    routineProtocolSessions?: RoutineProtocolSessionUpdateManyWithoutAccountNestedInput
+    schedules?: ScheduleUpdateManyWithoutAccountNestedInput
+    schedulingReconcileOperations?: SchedulingReconcileOperationUpdateManyWithoutAccountNestedInput
+    scheduledInvocations?: ScheduledInvocationUpdateManyWithoutAccountNestedInput
+    invocationAttempts?: InvocationAttemptUpdateManyWithoutAccountNestedInput
+    habits?: HabitUpdateManyWithoutAccountNestedInput
+    relations?: RelationUpdateManyWithoutAccountNestedInput
+    walletAccounts?: WalletAccountUpdateManyWithoutAccountNestedInput
+    walletTransactions?: WalletTransactionUpdateManyWithoutAccount_identityNestedInput
+    taskPlans?: TaskPlanUpdateManyWithoutAccountNestedInput
+    taskOccurrences?: TaskOccurrenceUpdateManyWithoutAccountNestedInput
+    userPreferenceRecords?: UserPreferenceRecordUpdateManyWithoutAccountNestedInput
+    notifications?: NotificationUpdateManyWithoutAccountNestedInput
+    aiConversations?: AiConversationUpdateManyWithoutAccountNestedInput
+    aiExecutionRecords?: AiExecutionRecordUpdateManyWithoutAccountNestedInput
+    aiPermissionSettings?: AiPermissionSettingUpdateManyWithoutAccountNestedInput
+    aiPermissionRules?: AiPermissionRuleUpdateManyWithoutAccountNestedInput
+    aiPermissionAudits?: AiPermissionAuditUpdateManyWithoutAccountNestedInput
+    aiGoalSurfaceLeases?: AiGoalSurfaceLeaseUpdateManyWithoutAccountNestedInput
+    aiConversationAttention?: AiConversationAttentionUpdateManyWithoutAccountNestedInput
+    aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUpdateManyWithoutAccountNestedInput
+    aiProviderConfigs?: AiProviderConfigUpdateManyWithoutAccountNestedInput
+    aiAgentInstances?: AiAgentInstanceUpdateManyWithoutAccountNestedInput
+    aiAgentInstanceBindings?: AiAgentInstanceBindingUpdateManyWithoutAccountNestedInput
+    aiProviderOnboardingSessions?: AiProviderOnboardingSessionUpdateManyWithoutAccountNestedInput
+    aiProviderSecrets?: AiProviderSecretUpdateManyWithoutAccountNestedInput
+    taskPlanHistory?: TaskPlanHistoryUpdateManyWithoutIdentityNestedInput
+    routineOccurrences?: RoutineOccurrenceUpdateManyWithoutAccountNestedInput
+    routineInteractions?: RoutineInteractionUpdateManyWithoutAccountNestedInput
+    notificationInteractions?: NotificationInteractionUpdateManyWithoutIdentityNestedInput
+    notificationDispatchOutboxes?: NotificationDispatchOutboxUpdateManyWithoutAccountNestedInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingUpdateManyWithoutAccountNestedInput
+    knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentUpdateManyWithoutAccountNestedInput
+    knowledgeWriteRequests?: KnowledgeWriteRequestUpdateManyWithoutAccountNestedInput
+  }
+
+  export type AccountUncheckedUpdateWithoutAvatarInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    status?: StringFieldUpdateOperationsInput | string
+    profile?: JsonNullValueInput | InputJsonValue
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    avatarUpdatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    assistedWorkflows?: AiAssistedWorkflowUncheckedUpdateManyWithoutAccountNestedInput
+    externalMutationReceipts?: ExternalMutationReceiptUncheckedUpdateManyWithoutAccountNestedInput
+    goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
+    profileImportOperations?: ProfileImportOperationUncheckedUpdateManyWithoutAccountNestedInput
+    labels?: LabelUncheckedUpdateManyWithoutAccountNestedInput
+    goalLabels?: GoalLabelUncheckedUpdateManyWithoutAccountNestedInput
+    taskLabels?: TaskLabelUncheckedUpdateManyWithoutAccountNestedInput
+    routineDefinitions?: RoutineDefinitionUncheckedUpdateManyWithoutAccountNestedInput
+    routinePreference?: RoutinePreferenceUncheckedUpdateOneWithoutAccountNestedInput
+    routineTemporaryOverrides?: RoutineTemporaryOverrideUncheckedUpdateManyWithoutAccountNestedInput
+    routineProfiles?: RoutineProfileUncheckedUpdateManyWithoutAccountNestedInput
+    routineProfileMemberships?: RoutineProfileMembershipUncheckedUpdateManyWithoutAccountNestedInput
+    routineProtocolDefinitions?: RoutineProtocolDefinitionUncheckedUpdateManyWithoutAccountNestedInput
+    routineProtocolSessions?: RoutineProtocolSessionUncheckedUpdateManyWithoutAccountNestedInput
+    schedules?: ScheduleUncheckedUpdateManyWithoutAccountNestedInput
+    schedulingReconcileOperations?: SchedulingReconcileOperationUncheckedUpdateManyWithoutAccountNestedInput
+    scheduledInvocations?: ScheduledInvocationUncheckedUpdateManyWithoutAccountNestedInput
+    invocationAttempts?: InvocationAttemptUncheckedUpdateManyWithoutAccountNestedInput
+    habits?: HabitUncheckedUpdateManyWithoutAccountNestedInput
+    relations?: RelationUncheckedUpdateManyWithoutAccountNestedInput
+    walletAccounts?: WalletAccountUncheckedUpdateManyWithoutAccountNestedInput
+    walletTransactions?: WalletTransactionUncheckedUpdateManyWithoutAccount_identityNestedInput
+    taskPlans?: TaskPlanUncheckedUpdateManyWithoutAccountNestedInput
+    taskOccurrences?: TaskOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
+    userPreferenceRecords?: UserPreferenceRecordUncheckedUpdateManyWithoutAccountNestedInput
+    notifications?: NotificationUncheckedUpdateManyWithoutAccountNestedInput
+    aiConversations?: AiConversationUncheckedUpdateManyWithoutAccountNestedInput
+    aiExecutionRecords?: AiExecutionRecordUncheckedUpdateManyWithoutAccountNestedInput
+    aiPermissionSettings?: AiPermissionSettingUncheckedUpdateManyWithoutAccountNestedInput
+    aiPermissionRules?: AiPermissionRuleUncheckedUpdateManyWithoutAccountNestedInput
+    aiPermissionAudits?: AiPermissionAuditUncheckedUpdateManyWithoutAccountNestedInput
+    aiGoalSurfaceLeases?: AiGoalSurfaceLeaseUncheckedUpdateManyWithoutAccountNestedInput
+    aiConversationAttention?: AiConversationAttentionUncheckedUpdateManyWithoutAccountNestedInput
+    aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedUpdateManyWithoutAccountNestedInput
+    aiProviderConfigs?: AiProviderConfigUncheckedUpdateManyWithoutAccountNestedInput
+    aiAgentInstances?: AiAgentInstanceUncheckedUpdateManyWithoutAccountNestedInput
+    aiAgentInstanceBindings?: AiAgentInstanceBindingUncheckedUpdateManyWithoutAccountNestedInput
+    aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedUpdateManyWithoutAccountNestedInput
+    aiProviderSecrets?: AiProviderSecretUncheckedUpdateManyWithoutAccountNestedInput
+    taskPlanHistory?: TaskPlanHistoryUncheckedUpdateManyWithoutIdentityNestedInput
+    routineOccurrences?: RoutineOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
+    routineInteractions?: RoutineInteractionUncheckedUpdateManyWithoutAccountNestedInput
+    notificationInteractions?: NotificationInteractionUncheckedUpdateManyWithoutIdentityNestedInput
+    notificationDispatchOutboxes?: NotificationDispatchOutboxUncheckedUpdateManyWithoutAccountNestedInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingUncheckedUpdateManyWithoutAccountNestedInput
+    knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentUncheckedUpdateManyWithoutAccountNestedInput
+    knowledgeWriteRequests?: KnowledgeWriteRequestUncheckedUpdateManyWithoutAccountNestedInput
+  }
+
   export type AccountCreateWithoutAiConversationsInput = {
     status?: string
     profile: JsonNullValueInput | InputJsonValue
     createdAt?: Date | string
     updatedAt?: Date | string
     closedAt?: Date | string | null
+    avatarUpdatedAt?: Date | string | null
     assistedWorkflows?: AiAssistedWorkflowCreateNestedManyWithoutAccountInput
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
+    avatar?: AccountAvatarCreateNestedOneWithoutAccountInput
     externalMutationReceipts?: ExternalMutationReceiptCreateNestedManyWithoutAccountInput
     goals?: GoalCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationCreateNestedManyWithoutAccountInput
@@ -158928,7 +160643,9 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     closedAt?: Date | string | null
+    avatarUpdatedAt?: Date | string | null
     assistedWorkflows?: AiAssistedWorkflowUncheckedCreateNestedManyWithoutAccountInput
+    avatar?: AccountAvatarUncheckedCreateNestedOneWithoutAccountInput
     externalMutationReceipts?: ExternalMutationReceiptUncheckedCreateNestedManyWithoutAccountInput
     goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationUncheckedCreateNestedManyWithoutAccountInput
@@ -159017,8 +160734,10 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    avatarUpdatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     assistedWorkflows?: AiAssistedWorkflowUpdateManyWithoutAccountNestedInput
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
+    avatar?: AccountAvatarUpdateOneWithoutAccountNestedInput
     externalMutationReceipts?: ExternalMutationReceiptUpdateManyWithoutAccountNestedInput
     goals?: GoalUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUpdateManyWithoutAccountNestedInput
@@ -159073,7 +160792,9 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    avatarUpdatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     assistedWorkflows?: AiAssistedWorkflowUncheckedUpdateManyWithoutAccountNestedInput
+    avatar?: AccountAvatarUncheckedUpdateOneWithoutAccountNestedInput
     externalMutationReceipts?: ExternalMutationReceiptUncheckedUpdateManyWithoutAccountNestedInput
     goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUncheckedUpdateManyWithoutAccountNestedInput
@@ -159152,8 +160873,10 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     closedAt?: Date | string | null
+    avatarUpdatedAt?: Date | string | null
     assistedWorkflows?: AiAssistedWorkflowCreateNestedManyWithoutAccountInput
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
+    avatar?: AccountAvatarCreateNestedOneWithoutAccountInput
     externalMutationReceipts?: ExternalMutationReceiptCreateNestedManyWithoutAccountInput
     goals?: GoalCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationCreateNestedManyWithoutAccountInput
@@ -159208,7 +160931,9 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     closedAt?: Date | string | null
+    avatarUpdatedAt?: Date | string | null
     assistedWorkflows?: AiAssistedWorkflowUncheckedCreateNestedManyWithoutAccountInput
+    avatar?: AccountAvatarUncheckedCreateNestedOneWithoutAccountInput
     externalMutationReceipts?: ExternalMutationReceiptUncheckedCreateNestedManyWithoutAccountInput
     goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationUncheckedCreateNestedManyWithoutAccountInput
@@ -159278,8 +161003,10 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    avatarUpdatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     assistedWorkflows?: AiAssistedWorkflowUpdateManyWithoutAccountNestedInput
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
+    avatar?: AccountAvatarUpdateOneWithoutAccountNestedInput
     externalMutationReceipts?: ExternalMutationReceiptUpdateManyWithoutAccountNestedInput
     goals?: GoalUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUpdateManyWithoutAccountNestedInput
@@ -159334,7 +161061,9 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    avatarUpdatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     assistedWorkflows?: AiAssistedWorkflowUncheckedUpdateManyWithoutAccountNestedInput
+    avatar?: AccountAvatarUncheckedUpdateOneWithoutAccountNestedInput
     externalMutationReceipts?: ExternalMutationReceiptUncheckedUpdateManyWithoutAccountNestedInput
     goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUncheckedUpdateManyWithoutAccountNestedInput
@@ -159388,8 +161117,10 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     closedAt?: Date | string | null
+    avatarUpdatedAt?: Date | string | null
     assistedWorkflows?: AiAssistedWorkflowCreateNestedManyWithoutAccountInput
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
+    avatar?: AccountAvatarCreateNestedOneWithoutAccountInput
     externalMutationReceipts?: ExternalMutationReceiptCreateNestedManyWithoutAccountInput
     goals?: GoalCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationCreateNestedManyWithoutAccountInput
@@ -159444,7 +161175,9 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     closedAt?: Date | string | null
+    avatarUpdatedAt?: Date | string | null
     assistedWorkflows?: AiAssistedWorkflowUncheckedCreateNestedManyWithoutAccountInput
+    avatar?: AccountAvatarUncheckedCreateNestedOneWithoutAccountInput
     externalMutationReceipts?: ExternalMutationReceiptUncheckedCreateNestedManyWithoutAccountInput
     goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationUncheckedCreateNestedManyWithoutAccountInput
@@ -159514,8 +161247,10 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    avatarUpdatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     assistedWorkflows?: AiAssistedWorkflowUpdateManyWithoutAccountNestedInput
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
+    avatar?: AccountAvatarUpdateOneWithoutAccountNestedInput
     externalMutationReceipts?: ExternalMutationReceiptUpdateManyWithoutAccountNestedInput
     goals?: GoalUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUpdateManyWithoutAccountNestedInput
@@ -159570,7 +161305,9 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    avatarUpdatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     assistedWorkflows?: AiAssistedWorkflowUncheckedUpdateManyWithoutAccountNestedInput
+    avatar?: AccountAvatarUncheckedUpdateOneWithoutAccountNestedInput
     externalMutationReceipts?: ExternalMutationReceiptUncheckedUpdateManyWithoutAccountNestedInput
     goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUncheckedUpdateManyWithoutAccountNestedInput
@@ -159624,8 +161361,10 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     closedAt?: Date | string | null
+    avatarUpdatedAt?: Date | string | null
     assistedWorkflows?: AiAssistedWorkflowCreateNestedManyWithoutAccountInput
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
+    avatar?: AccountAvatarCreateNestedOneWithoutAccountInput
     externalMutationReceipts?: ExternalMutationReceiptCreateNestedManyWithoutAccountInput
     goals?: GoalCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationCreateNestedManyWithoutAccountInput
@@ -159680,7 +161419,9 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     closedAt?: Date | string | null
+    avatarUpdatedAt?: Date | string | null
     assistedWorkflows?: AiAssistedWorkflowUncheckedCreateNestedManyWithoutAccountInput
+    avatar?: AccountAvatarUncheckedCreateNestedOneWithoutAccountInput
     externalMutationReceipts?: ExternalMutationReceiptUncheckedCreateNestedManyWithoutAccountInput
     goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationUncheckedCreateNestedManyWithoutAccountInput
@@ -159750,8 +161491,10 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    avatarUpdatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     assistedWorkflows?: AiAssistedWorkflowUpdateManyWithoutAccountNestedInput
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
+    avatar?: AccountAvatarUpdateOneWithoutAccountNestedInput
     externalMutationReceipts?: ExternalMutationReceiptUpdateManyWithoutAccountNestedInput
     goals?: GoalUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUpdateManyWithoutAccountNestedInput
@@ -159806,7 +161549,9 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    avatarUpdatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     assistedWorkflows?: AiAssistedWorkflowUncheckedUpdateManyWithoutAccountNestedInput
+    avatar?: AccountAvatarUncheckedUpdateOneWithoutAccountNestedInput
     externalMutationReceipts?: ExternalMutationReceiptUncheckedUpdateManyWithoutAccountNestedInput
     goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUncheckedUpdateManyWithoutAccountNestedInput
@@ -159860,8 +161605,10 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     closedAt?: Date | string | null
+    avatarUpdatedAt?: Date | string | null
     assistedWorkflows?: AiAssistedWorkflowCreateNestedManyWithoutAccountInput
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
+    avatar?: AccountAvatarCreateNestedOneWithoutAccountInput
     externalMutationReceipts?: ExternalMutationReceiptCreateNestedManyWithoutAccountInput
     goals?: GoalCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationCreateNestedManyWithoutAccountInput
@@ -159916,7 +161663,9 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     closedAt?: Date | string | null
+    avatarUpdatedAt?: Date | string | null
     assistedWorkflows?: AiAssistedWorkflowUncheckedCreateNestedManyWithoutAccountInput
+    avatar?: AccountAvatarUncheckedCreateNestedOneWithoutAccountInput
     externalMutationReceipts?: ExternalMutationReceiptUncheckedCreateNestedManyWithoutAccountInput
     goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationUncheckedCreateNestedManyWithoutAccountInput
@@ -159986,8 +161735,10 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    avatarUpdatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     assistedWorkflows?: AiAssistedWorkflowUpdateManyWithoutAccountNestedInput
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
+    avatar?: AccountAvatarUpdateOneWithoutAccountNestedInput
     externalMutationReceipts?: ExternalMutationReceiptUpdateManyWithoutAccountNestedInput
     goals?: GoalUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUpdateManyWithoutAccountNestedInput
@@ -160042,7 +161793,9 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    avatarUpdatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     assistedWorkflows?: AiAssistedWorkflowUncheckedUpdateManyWithoutAccountNestedInput
+    avatar?: AccountAvatarUncheckedUpdateOneWithoutAccountNestedInput
     externalMutationReceipts?: ExternalMutationReceiptUncheckedUpdateManyWithoutAccountNestedInput
     goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUncheckedUpdateManyWithoutAccountNestedInput
@@ -160096,8 +161849,10 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     closedAt?: Date | string | null
+    avatarUpdatedAt?: Date | string | null
     assistedWorkflows?: AiAssistedWorkflowCreateNestedManyWithoutAccountInput
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
+    avatar?: AccountAvatarCreateNestedOneWithoutAccountInput
     externalMutationReceipts?: ExternalMutationReceiptCreateNestedManyWithoutAccountInput
     goals?: GoalCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationCreateNestedManyWithoutAccountInput
@@ -160152,7 +161907,9 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     closedAt?: Date | string | null
+    avatarUpdatedAt?: Date | string | null
     assistedWorkflows?: AiAssistedWorkflowUncheckedCreateNestedManyWithoutAccountInput
+    avatar?: AccountAvatarUncheckedCreateNestedOneWithoutAccountInput
     externalMutationReceipts?: ExternalMutationReceiptUncheckedCreateNestedManyWithoutAccountInput
     goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationUncheckedCreateNestedManyWithoutAccountInput
@@ -160222,8 +161979,10 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    avatarUpdatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     assistedWorkflows?: AiAssistedWorkflowUpdateManyWithoutAccountNestedInput
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
+    avatar?: AccountAvatarUpdateOneWithoutAccountNestedInput
     externalMutationReceipts?: ExternalMutationReceiptUpdateManyWithoutAccountNestedInput
     goals?: GoalUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUpdateManyWithoutAccountNestedInput
@@ -160278,7 +162037,9 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    avatarUpdatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     assistedWorkflows?: AiAssistedWorkflowUncheckedUpdateManyWithoutAccountNestedInput
+    avatar?: AccountAvatarUncheckedUpdateOneWithoutAccountNestedInput
     externalMutationReceipts?: ExternalMutationReceiptUncheckedUpdateManyWithoutAccountNestedInput
     goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUncheckedUpdateManyWithoutAccountNestedInput
@@ -160332,8 +162093,10 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     closedAt?: Date | string | null
+    avatarUpdatedAt?: Date | string | null
     assistedWorkflows?: AiAssistedWorkflowCreateNestedManyWithoutAccountInput
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
+    avatar?: AccountAvatarCreateNestedOneWithoutAccountInput
     externalMutationReceipts?: ExternalMutationReceiptCreateNestedManyWithoutAccountInput
     goals?: GoalCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationCreateNestedManyWithoutAccountInput
@@ -160388,7 +162151,9 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     closedAt?: Date | string | null
+    avatarUpdatedAt?: Date | string | null
     assistedWorkflows?: AiAssistedWorkflowUncheckedCreateNestedManyWithoutAccountInput
+    avatar?: AccountAvatarUncheckedCreateNestedOneWithoutAccountInput
     externalMutationReceipts?: ExternalMutationReceiptUncheckedCreateNestedManyWithoutAccountInput
     goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationUncheckedCreateNestedManyWithoutAccountInput
@@ -160458,8 +162223,10 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    avatarUpdatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     assistedWorkflows?: AiAssistedWorkflowUpdateManyWithoutAccountNestedInput
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
+    avatar?: AccountAvatarUpdateOneWithoutAccountNestedInput
     externalMutationReceipts?: ExternalMutationReceiptUpdateManyWithoutAccountNestedInput
     goals?: GoalUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUpdateManyWithoutAccountNestedInput
@@ -160514,7 +162281,9 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    avatarUpdatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     assistedWorkflows?: AiAssistedWorkflowUncheckedUpdateManyWithoutAccountNestedInput
+    avatar?: AccountAvatarUncheckedUpdateOneWithoutAccountNestedInput
     externalMutationReceipts?: ExternalMutationReceiptUncheckedUpdateManyWithoutAccountNestedInput
     goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUncheckedUpdateManyWithoutAccountNestedInput
@@ -160568,8 +162337,10 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     closedAt?: Date | string | null
+    avatarUpdatedAt?: Date | string | null
     assistedWorkflows?: AiAssistedWorkflowCreateNestedManyWithoutAccountInput
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
+    avatar?: AccountAvatarCreateNestedOneWithoutAccountInput
     externalMutationReceipts?: ExternalMutationReceiptCreateNestedManyWithoutAccountInput
     goals?: GoalCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationCreateNestedManyWithoutAccountInput
@@ -160624,7 +162395,9 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     closedAt?: Date | string | null
+    avatarUpdatedAt?: Date | string | null
     assistedWorkflows?: AiAssistedWorkflowUncheckedCreateNestedManyWithoutAccountInput
+    avatar?: AccountAvatarUncheckedCreateNestedOneWithoutAccountInput
     externalMutationReceipts?: ExternalMutationReceiptUncheckedCreateNestedManyWithoutAccountInput
     goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationUncheckedCreateNestedManyWithoutAccountInput
@@ -160717,8 +162490,10 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    avatarUpdatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     assistedWorkflows?: AiAssistedWorkflowUpdateManyWithoutAccountNestedInput
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
+    avatar?: AccountAvatarUpdateOneWithoutAccountNestedInput
     externalMutationReceipts?: ExternalMutationReceiptUpdateManyWithoutAccountNestedInput
     goals?: GoalUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUpdateManyWithoutAccountNestedInput
@@ -160773,7 +162548,9 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    avatarUpdatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     assistedWorkflows?: AiAssistedWorkflowUncheckedUpdateManyWithoutAccountNestedInput
+    avatar?: AccountAvatarUncheckedUpdateOneWithoutAccountNestedInput
     externalMutationReceipts?: ExternalMutationReceiptUncheckedUpdateManyWithoutAccountNestedInput
     goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUncheckedUpdateManyWithoutAccountNestedInput
@@ -160843,8 +162620,10 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     closedAt?: Date | string | null
+    avatarUpdatedAt?: Date | string | null
     assistedWorkflows?: AiAssistedWorkflowCreateNestedManyWithoutAccountInput
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
+    avatar?: AccountAvatarCreateNestedOneWithoutAccountInput
     externalMutationReceipts?: ExternalMutationReceiptCreateNestedManyWithoutAccountInput
     goals?: GoalCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationCreateNestedManyWithoutAccountInput
@@ -160899,7 +162678,9 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     closedAt?: Date | string | null
+    avatarUpdatedAt?: Date | string | null
     assistedWorkflows?: AiAssistedWorkflowUncheckedCreateNestedManyWithoutAccountInput
+    avatar?: AccountAvatarUncheckedCreateNestedOneWithoutAccountInput
     externalMutationReceipts?: ExternalMutationReceiptUncheckedCreateNestedManyWithoutAccountInput
     goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationUncheckedCreateNestedManyWithoutAccountInput
@@ -161016,8 +162797,10 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    avatarUpdatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     assistedWorkflows?: AiAssistedWorkflowUpdateManyWithoutAccountNestedInput
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
+    avatar?: AccountAvatarUpdateOneWithoutAccountNestedInput
     externalMutationReceipts?: ExternalMutationReceiptUpdateManyWithoutAccountNestedInput
     goals?: GoalUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUpdateManyWithoutAccountNestedInput
@@ -161072,7 +162855,9 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    avatarUpdatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     assistedWorkflows?: AiAssistedWorkflowUncheckedUpdateManyWithoutAccountNestedInput
+    avatar?: AccountAvatarUncheckedUpdateOneWithoutAccountNestedInput
     externalMutationReceipts?: ExternalMutationReceiptUncheckedUpdateManyWithoutAccountNestedInput
     goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUncheckedUpdateManyWithoutAccountNestedInput
@@ -161170,8 +162955,10 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     closedAt?: Date | string | null
+    avatarUpdatedAt?: Date | string | null
     assistedWorkflows?: AiAssistedWorkflowCreateNestedManyWithoutAccountInput
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
+    avatar?: AccountAvatarCreateNestedOneWithoutAccountInput
     externalMutationReceipts?: ExternalMutationReceiptCreateNestedManyWithoutAccountInput
     goals?: GoalCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationCreateNestedManyWithoutAccountInput
@@ -161226,7 +163013,9 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     closedAt?: Date | string | null
+    avatarUpdatedAt?: Date | string | null
     assistedWorkflows?: AiAssistedWorkflowUncheckedCreateNestedManyWithoutAccountInput
+    avatar?: AccountAvatarUncheckedCreateNestedOneWithoutAccountInput
     externalMutationReceipts?: ExternalMutationReceiptUncheckedCreateNestedManyWithoutAccountInput
     goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationUncheckedCreateNestedManyWithoutAccountInput
@@ -161374,8 +163163,10 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    avatarUpdatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     assistedWorkflows?: AiAssistedWorkflowUpdateManyWithoutAccountNestedInput
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
+    avatar?: AccountAvatarUpdateOneWithoutAccountNestedInput
     externalMutationReceipts?: ExternalMutationReceiptUpdateManyWithoutAccountNestedInput
     goals?: GoalUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUpdateManyWithoutAccountNestedInput
@@ -161430,7 +163221,9 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    avatarUpdatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     assistedWorkflows?: AiAssistedWorkflowUncheckedUpdateManyWithoutAccountNestedInput
+    avatar?: AccountAvatarUncheckedUpdateOneWithoutAccountNestedInput
     externalMutationReceipts?: ExternalMutationReceiptUncheckedUpdateManyWithoutAccountNestedInput
     goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUncheckedUpdateManyWithoutAccountNestedInput
@@ -161714,8 +163507,10 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     closedAt?: Date | string | null
+    avatarUpdatedAt?: Date | string | null
     assistedWorkflows?: AiAssistedWorkflowCreateNestedManyWithoutAccountInput
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
+    avatar?: AccountAvatarCreateNestedOneWithoutAccountInput
     externalMutationReceipts?: ExternalMutationReceiptCreateNestedManyWithoutAccountInput
     goals?: GoalCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationCreateNestedManyWithoutAccountInput
@@ -161770,7 +163565,9 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     closedAt?: Date | string | null
+    avatarUpdatedAt?: Date | string | null
     assistedWorkflows?: AiAssistedWorkflowUncheckedCreateNestedManyWithoutAccountInput
+    avatar?: AccountAvatarUncheckedCreateNestedOneWithoutAccountInput
     externalMutationReceipts?: ExternalMutationReceiptUncheckedCreateNestedManyWithoutAccountInput
     goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationUncheckedCreateNestedManyWithoutAccountInput
@@ -161840,8 +163637,10 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    avatarUpdatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     assistedWorkflows?: AiAssistedWorkflowUpdateManyWithoutAccountNestedInput
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
+    avatar?: AccountAvatarUpdateOneWithoutAccountNestedInput
     externalMutationReceipts?: ExternalMutationReceiptUpdateManyWithoutAccountNestedInput
     goals?: GoalUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUpdateManyWithoutAccountNestedInput
@@ -161896,7 +163695,9 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    avatarUpdatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     assistedWorkflows?: AiAssistedWorkflowUncheckedUpdateManyWithoutAccountNestedInput
+    avatar?: AccountAvatarUncheckedUpdateOneWithoutAccountNestedInput
     externalMutationReceipts?: ExternalMutationReceiptUncheckedUpdateManyWithoutAccountNestedInput
     goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUncheckedUpdateManyWithoutAccountNestedInput
@@ -161950,8 +163751,10 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     closedAt?: Date | string | null
+    avatarUpdatedAt?: Date | string | null
     assistedWorkflows?: AiAssistedWorkflowCreateNestedManyWithoutAccountInput
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
+    avatar?: AccountAvatarCreateNestedOneWithoutAccountInput
     externalMutationReceipts?: ExternalMutationReceiptCreateNestedManyWithoutAccountInput
     goals?: GoalCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationCreateNestedManyWithoutAccountInput
@@ -162006,7 +163809,9 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     closedAt?: Date | string | null
+    avatarUpdatedAt?: Date | string | null
     assistedWorkflows?: AiAssistedWorkflowUncheckedCreateNestedManyWithoutAccountInput
+    avatar?: AccountAvatarUncheckedCreateNestedOneWithoutAccountInput
     externalMutationReceipts?: ExternalMutationReceiptUncheckedCreateNestedManyWithoutAccountInput
     goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationUncheckedCreateNestedManyWithoutAccountInput
@@ -162076,8 +163881,10 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    avatarUpdatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     assistedWorkflows?: AiAssistedWorkflowUpdateManyWithoutAccountNestedInput
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
+    avatar?: AccountAvatarUpdateOneWithoutAccountNestedInput
     externalMutationReceipts?: ExternalMutationReceiptUpdateManyWithoutAccountNestedInput
     goals?: GoalUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUpdateManyWithoutAccountNestedInput
@@ -162132,7 +163939,9 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    avatarUpdatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     assistedWorkflows?: AiAssistedWorkflowUncheckedUpdateManyWithoutAccountNestedInput
+    avatar?: AccountAvatarUncheckedUpdateOneWithoutAccountNestedInput
     externalMutationReceipts?: ExternalMutationReceiptUncheckedUpdateManyWithoutAccountNestedInput
     goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUncheckedUpdateManyWithoutAccountNestedInput
@@ -162186,8 +163995,10 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     closedAt?: Date | string | null
+    avatarUpdatedAt?: Date | string | null
     assistedWorkflows?: AiAssistedWorkflowCreateNestedManyWithoutAccountInput
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
+    avatar?: AccountAvatarCreateNestedOneWithoutAccountInput
     externalMutationReceipts?: ExternalMutationReceiptCreateNestedManyWithoutAccountInput
     goals?: GoalCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationCreateNestedManyWithoutAccountInput
@@ -162242,7 +164053,9 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     closedAt?: Date | string | null
+    avatarUpdatedAt?: Date | string | null
     assistedWorkflows?: AiAssistedWorkflowUncheckedCreateNestedManyWithoutAccountInput
+    avatar?: AccountAvatarUncheckedCreateNestedOneWithoutAccountInput
     externalMutationReceipts?: ExternalMutationReceiptUncheckedCreateNestedManyWithoutAccountInput
     goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationUncheckedCreateNestedManyWithoutAccountInput
@@ -162312,8 +164125,10 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    avatarUpdatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     assistedWorkflows?: AiAssistedWorkflowUpdateManyWithoutAccountNestedInput
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
+    avatar?: AccountAvatarUpdateOneWithoutAccountNestedInput
     externalMutationReceipts?: ExternalMutationReceiptUpdateManyWithoutAccountNestedInput
     goals?: GoalUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUpdateManyWithoutAccountNestedInput
@@ -162368,7 +164183,9 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    avatarUpdatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     assistedWorkflows?: AiAssistedWorkflowUncheckedUpdateManyWithoutAccountNestedInput
+    avatar?: AccountAvatarUncheckedUpdateOneWithoutAccountNestedInput
     externalMutationReceipts?: ExternalMutationReceiptUncheckedUpdateManyWithoutAccountNestedInput
     goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUncheckedUpdateManyWithoutAccountNestedInput
@@ -162422,7 +164239,9 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     closedAt?: Date | string | null
+    avatarUpdatedAt?: Date | string | null
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
+    avatar?: AccountAvatarCreateNestedOneWithoutAccountInput
     externalMutationReceipts?: ExternalMutationReceiptCreateNestedManyWithoutAccountInput
     goals?: GoalCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationCreateNestedManyWithoutAccountInput
@@ -162478,6 +164297,8 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     closedAt?: Date | string | null
+    avatarUpdatedAt?: Date | string | null
+    avatar?: AccountAvatarUncheckedCreateNestedOneWithoutAccountInput
     externalMutationReceipts?: ExternalMutationReceiptUncheckedCreateNestedManyWithoutAccountInput
     goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationUncheckedCreateNestedManyWithoutAccountInput
@@ -162548,7 +164369,9 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    avatarUpdatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
+    avatar?: AccountAvatarUpdateOneWithoutAccountNestedInput
     externalMutationReceipts?: ExternalMutationReceiptUpdateManyWithoutAccountNestedInput
     goals?: GoalUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUpdateManyWithoutAccountNestedInput
@@ -162604,6 +164427,8 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    avatarUpdatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    avatar?: AccountAvatarUncheckedUpdateOneWithoutAccountNestedInput
     externalMutationReceipts?: ExternalMutationReceiptUncheckedUpdateManyWithoutAccountNestedInput
     goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUncheckedUpdateManyWithoutAccountNestedInput
@@ -163060,7 +164885,9 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     closedAt?: Date | string | null
+    avatarUpdatedAt?: Date | string | null
     assistedWorkflows?: AiAssistedWorkflowCreateNestedManyWithoutAccountInput
+    avatar?: AccountAvatarCreateNestedOneWithoutAccountInput
     externalMutationReceipts?: ExternalMutationReceiptCreateNestedManyWithoutAccountInput
     goals?: GoalCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationCreateNestedManyWithoutAccountInput
@@ -163115,7 +164942,9 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     closedAt?: Date | string | null
+    avatarUpdatedAt?: Date | string | null
     assistedWorkflows?: AiAssistedWorkflowUncheckedCreateNestedManyWithoutAccountInput
+    avatar?: AccountAvatarUncheckedCreateNestedOneWithoutAccountInput
     externalMutationReceipts?: ExternalMutationReceiptUncheckedCreateNestedManyWithoutAccountInput
     goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationUncheckedCreateNestedManyWithoutAccountInput
@@ -163515,7 +165344,9 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    avatarUpdatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     assistedWorkflows?: AiAssistedWorkflowUpdateManyWithoutAccountNestedInput
+    avatar?: AccountAvatarUpdateOneWithoutAccountNestedInput
     externalMutationReceipts?: ExternalMutationReceiptUpdateManyWithoutAccountNestedInput
     goals?: GoalUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUpdateManyWithoutAccountNestedInput
@@ -163570,7 +165401,9 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    avatarUpdatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     assistedWorkflows?: AiAssistedWorkflowUncheckedUpdateManyWithoutAccountNestedInput
+    avatar?: AccountAvatarUncheckedUpdateOneWithoutAccountNestedInput
     externalMutationReceipts?: ExternalMutationReceiptUncheckedUpdateManyWithoutAccountNestedInput
     goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUncheckedUpdateManyWithoutAccountNestedInput
@@ -164233,8 +166066,10 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     closedAt?: Date | string | null
+    avatarUpdatedAt?: Date | string | null
     assistedWorkflows?: AiAssistedWorkflowCreateNestedManyWithoutAccountInput
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
+    avatar?: AccountAvatarCreateNestedOneWithoutAccountInput
     externalMutationReceipts?: ExternalMutationReceiptCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationCreateNestedManyWithoutAccountInput
     labels?: LabelCreateNestedManyWithoutAccountInput
@@ -164289,7 +166124,9 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     closedAt?: Date | string | null
+    avatarUpdatedAt?: Date | string | null
     assistedWorkflows?: AiAssistedWorkflowUncheckedCreateNestedManyWithoutAccountInput
+    avatar?: AccountAvatarUncheckedCreateNestedOneWithoutAccountInput
     externalMutationReceipts?: ExternalMutationReceiptUncheckedCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationUncheckedCreateNestedManyWithoutAccountInput
     labels?: LabelUncheckedCreateNestedManyWithoutAccountInput
@@ -164498,8 +166335,10 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    avatarUpdatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     assistedWorkflows?: AiAssistedWorkflowUpdateManyWithoutAccountNestedInput
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
+    avatar?: AccountAvatarUpdateOneWithoutAccountNestedInput
     externalMutationReceipts?: ExternalMutationReceiptUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUpdateManyWithoutAccountNestedInput
     labels?: LabelUpdateManyWithoutAccountNestedInput
@@ -164554,7 +166393,9 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    avatarUpdatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     assistedWorkflows?: AiAssistedWorkflowUncheckedUpdateManyWithoutAccountNestedInput
+    avatar?: AccountAvatarUncheckedUpdateOneWithoutAccountNestedInput
     externalMutationReceipts?: ExternalMutationReceiptUncheckedUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUncheckedUpdateManyWithoutAccountNestedInput
     labels?: LabelUncheckedUpdateManyWithoutAccountNestedInput
@@ -165468,8 +167309,10 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     closedAt?: Date | string | null
+    avatarUpdatedAt?: Date | string | null
     assistedWorkflows?: AiAssistedWorkflowCreateNestedManyWithoutAccountInput
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
+    avatar?: AccountAvatarCreateNestedOneWithoutAccountInput
     externalMutationReceipts?: ExternalMutationReceiptCreateNestedManyWithoutAccountInput
     goals?: GoalCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationCreateNestedManyWithoutAccountInput
@@ -165524,7 +167367,9 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     closedAt?: Date | string | null
+    avatarUpdatedAt?: Date | string | null
     assistedWorkflows?: AiAssistedWorkflowUncheckedCreateNestedManyWithoutAccountInput
+    avatar?: AccountAvatarUncheckedCreateNestedOneWithoutAccountInput
     externalMutationReceipts?: ExternalMutationReceiptUncheckedCreateNestedManyWithoutAccountInput
     goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationUncheckedCreateNestedManyWithoutAccountInput
@@ -165643,8 +167488,10 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    avatarUpdatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     assistedWorkflows?: AiAssistedWorkflowUpdateManyWithoutAccountNestedInput
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
+    avatar?: AccountAvatarUpdateOneWithoutAccountNestedInput
     externalMutationReceipts?: ExternalMutationReceiptUpdateManyWithoutAccountNestedInput
     goals?: GoalUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUpdateManyWithoutAccountNestedInput
@@ -165699,7 +167546,9 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    avatarUpdatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     assistedWorkflows?: AiAssistedWorkflowUncheckedUpdateManyWithoutAccountNestedInput
+    avatar?: AccountAvatarUncheckedUpdateOneWithoutAccountNestedInput
     externalMutationReceipts?: ExternalMutationReceiptUncheckedUpdateManyWithoutAccountNestedInput
     goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUncheckedUpdateManyWithoutAccountNestedInput
@@ -166055,8 +167904,10 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     closedAt?: Date | string | null
+    avatarUpdatedAt?: Date | string | null
     assistedWorkflows?: AiAssistedWorkflowCreateNestedManyWithoutAccountInput
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
+    avatar?: AccountAvatarCreateNestedOneWithoutAccountInput
     externalMutationReceipts?: ExternalMutationReceiptCreateNestedManyWithoutAccountInput
     goals?: GoalCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationCreateNestedManyWithoutAccountInput
@@ -166111,7 +167962,9 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     closedAt?: Date | string | null
+    avatarUpdatedAt?: Date | string | null
     assistedWorkflows?: AiAssistedWorkflowUncheckedCreateNestedManyWithoutAccountInput
+    avatar?: AccountAvatarUncheckedCreateNestedOneWithoutAccountInput
     externalMutationReceipts?: ExternalMutationReceiptUncheckedCreateNestedManyWithoutAccountInput
     goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationUncheckedCreateNestedManyWithoutAccountInput
@@ -166219,8 +168072,10 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    avatarUpdatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     assistedWorkflows?: AiAssistedWorkflowUpdateManyWithoutAccountNestedInput
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
+    avatar?: AccountAvatarUpdateOneWithoutAccountNestedInput
     externalMutationReceipts?: ExternalMutationReceiptUpdateManyWithoutAccountNestedInput
     goals?: GoalUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUpdateManyWithoutAccountNestedInput
@@ -166275,7 +168130,9 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    avatarUpdatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     assistedWorkflows?: AiAssistedWorkflowUncheckedUpdateManyWithoutAccountNestedInput
+    avatar?: AccountAvatarUncheckedUpdateOneWithoutAccountNestedInput
     externalMutationReceipts?: ExternalMutationReceiptUncheckedUpdateManyWithoutAccountNestedInput
     goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUncheckedUpdateManyWithoutAccountNestedInput
@@ -166361,8 +168218,10 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     closedAt?: Date | string | null
+    avatarUpdatedAt?: Date | string | null
     assistedWorkflows?: AiAssistedWorkflowCreateNestedManyWithoutAccountInput
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
+    avatar?: AccountAvatarCreateNestedOneWithoutAccountInput
     externalMutationReceipts?: ExternalMutationReceiptCreateNestedManyWithoutAccountInput
     goals?: GoalCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationCreateNestedManyWithoutAccountInput
@@ -166417,7 +168276,9 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     closedAt?: Date | string | null
+    avatarUpdatedAt?: Date | string | null
     assistedWorkflows?: AiAssistedWorkflowUncheckedCreateNestedManyWithoutAccountInput
+    avatar?: AccountAvatarUncheckedCreateNestedOneWithoutAccountInput
     externalMutationReceipts?: ExternalMutationReceiptUncheckedCreateNestedManyWithoutAccountInput
     goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationUncheckedCreateNestedManyWithoutAccountInput
@@ -166567,8 +168428,10 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    avatarUpdatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     assistedWorkflows?: AiAssistedWorkflowUpdateManyWithoutAccountNestedInput
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
+    avatar?: AccountAvatarUpdateOneWithoutAccountNestedInput
     externalMutationReceipts?: ExternalMutationReceiptUpdateManyWithoutAccountNestedInput
     goals?: GoalUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUpdateManyWithoutAccountNestedInput
@@ -166623,7 +168486,9 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    avatarUpdatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     assistedWorkflows?: AiAssistedWorkflowUncheckedUpdateManyWithoutAccountNestedInput
+    avatar?: AccountAvatarUncheckedUpdateOneWithoutAccountNestedInput
     externalMutationReceipts?: ExternalMutationReceiptUncheckedUpdateManyWithoutAccountNestedInput
     goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUncheckedUpdateManyWithoutAccountNestedInput
@@ -166769,8 +168634,10 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     closedAt?: Date | string | null
+    avatarUpdatedAt?: Date | string | null
     assistedWorkflows?: AiAssistedWorkflowCreateNestedManyWithoutAccountInput
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
+    avatar?: AccountAvatarCreateNestedOneWithoutAccountInput
     externalMutationReceipts?: ExternalMutationReceiptCreateNestedManyWithoutAccountInput
     goals?: GoalCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationCreateNestedManyWithoutAccountInput
@@ -166825,7 +168692,9 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     closedAt?: Date | string | null
+    avatarUpdatedAt?: Date | string | null
     assistedWorkflows?: AiAssistedWorkflowUncheckedCreateNestedManyWithoutAccountInput
+    avatar?: AccountAvatarUncheckedCreateNestedOneWithoutAccountInput
     externalMutationReceipts?: ExternalMutationReceiptUncheckedCreateNestedManyWithoutAccountInput
     goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationUncheckedCreateNestedManyWithoutAccountInput
@@ -166984,8 +168853,10 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    avatarUpdatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     assistedWorkflows?: AiAssistedWorkflowUpdateManyWithoutAccountNestedInput
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
+    avatar?: AccountAvatarUpdateOneWithoutAccountNestedInput
     externalMutationReceipts?: ExternalMutationReceiptUpdateManyWithoutAccountNestedInput
     goals?: GoalUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUpdateManyWithoutAccountNestedInput
@@ -167040,7 +168911,9 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    avatarUpdatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     assistedWorkflows?: AiAssistedWorkflowUncheckedUpdateManyWithoutAccountNestedInput
+    avatar?: AccountAvatarUncheckedUpdateOneWithoutAccountNestedInput
     externalMutationReceipts?: ExternalMutationReceiptUncheckedUpdateManyWithoutAccountNestedInput
     goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUncheckedUpdateManyWithoutAccountNestedInput
@@ -167329,8 +169202,10 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     closedAt?: Date | string | null
+    avatarUpdatedAt?: Date | string | null
     assistedWorkflows?: AiAssistedWorkflowCreateNestedManyWithoutAccountInput
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
+    avatar?: AccountAvatarCreateNestedOneWithoutAccountInput
     externalMutationReceipts?: ExternalMutationReceiptCreateNestedManyWithoutAccountInput
     goals?: GoalCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationCreateNestedManyWithoutAccountInput
@@ -167385,7 +169260,9 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     closedAt?: Date | string | null
+    avatarUpdatedAt?: Date | string | null
     assistedWorkflows?: AiAssistedWorkflowUncheckedCreateNestedManyWithoutAccountInput
+    avatar?: AccountAvatarUncheckedCreateNestedOneWithoutAccountInput
     externalMutationReceipts?: ExternalMutationReceiptUncheckedCreateNestedManyWithoutAccountInput
     goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationUncheckedCreateNestedManyWithoutAccountInput
@@ -167519,8 +169396,10 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    avatarUpdatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     assistedWorkflows?: AiAssistedWorkflowUpdateManyWithoutAccountNestedInput
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
+    avatar?: AccountAvatarUpdateOneWithoutAccountNestedInput
     externalMutationReceipts?: ExternalMutationReceiptUpdateManyWithoutAccountNestedInput
     goals?: GoalUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUpdateManyWithoutAccountNestedInput
@@ -167575,7 +169454,9 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    avatarUpdatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     assistedWorkflows?: AiAssistedWorkflowUncheckedUpdateManyWithoutAccountNestedInput
+    avatar?: AccountAvatarUncheckedUpdateOneWithoutAccountNestedInput
     externalMutationReceipts?: ExternalMutationReceiptUncheckedUpdateManyWithoutAccountNestedInput
     goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUncheckedUpdateManyWithoutAccountNestedInput
@@ -167629,8 +169510,10 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     closedAt?: Date | string | null
+    avatarUpdatedAt?: Date | string | null
     assistedWorkflows?: AiAssistedWorkflowCreateNestedManyWithoutAccountInput
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
+    avatar?: AccountAvatarCreateNestedOneWithoutAccountInput
     externalMutationReceipts?: ExternalMutationReceiptCreateNestedManyWithoutAccountInput
     goals?: GoalCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationCreateNestedManyWithoutAccountInput
@@ -167685,7 +169568,9 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     closedAt?: Date | string | null
+    avatarUpdatedAt?: Date | string | null
     assistedWorkflows?: AiAssistedWorkflowUncheckedCreateNestedManyWithoutAccountInput
+    avatar?: AccountAvatarUncheckedCreateNestedOneWithoutAccountInput
     externalMutationReceipts?: ExternalMutationReceiptUncheckedCreateNestedManyWithoutAccountInput
     goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationUncheckedCreateNestedManyWithoutAccountInput
@@ -167822,8 +169707,10 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    avatarUpdatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     assistedWorkflows?: AiAssistedWorkflowUpdateManyWithoutAccountNestedInput
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
+    avatar?: AccountAvatarUpdateOneWithoutAccountNestedInput
     externalMutationReceipts?: ExternalMutationReceiptUpdateManyWithoutAccountNestedInput
     goals?: GoalUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUpdateManyWithoutAccountNestedInput
@@ -167878,7 +169765,9 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    avatarUpdatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     assistedWorkflows?: AiAssistedWorkflowUncheckedUpdateManyWithoutAccountNestedInput
+    avatar?: AccountAvatarUncheckedUpdateOneWithoutAccountNestedInput
     externalMutationReceipts?: ExternalMutationReceiptUncheckedUpdateManyWithoutAccountNestedInput
     goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUncheckedUpdateManyWithoutAccountNestedInput
@@ -168212,8 +170101,10 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     closedAt?: Date | string | null
+    avatarUpdatedAt?: Date | string | null
     assistedWorkflows?: AiAssistedWorkflowCreateNestedManyWithoutAccountInput
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
+    avatar?: AccountAvatarCreateNestedOneWithoutAccountInput
     externalMutationReceipts?: ExternalMutationReceiptCreateNestedManyWithoutAccountInput
     goals?: GoalCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationCreateNestedManyWithoutAccountInput
@@ -168268,7 +170159,9 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     closedAt?: Date | string | null
+    avatarUpdatedAt?: Date | string | null
     assistedWorkflows?: AiAssistedWorkflowUncheckedCreateNestedManyWithoutAccountInput
+    avatar?: AccountAvatarUncheckedCreateNestedOneWithoutAccountInput
     externalMutationReceipts?: ExternalMutationReceiptUncheckedCreateNestedManyWithoutAccountInput
     goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationUncheckedCreateNestedManyWithoutAccountInput
@@ -168411,8 +170304,10 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    avatarUpdatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     assistedWorkflows?: AiAssistedWorkflowUpdateManyWithoutAccountNestedInput
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
+    avatar?: AccountAvatarUpdateOneWithoutAccountNestedInput
     externalMutationReceipts?: ExternalMutationReceiptUpdateManyWithoutAccountNestedInput
     goals?: GoalUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUpdateManyWithoutAccountNestedInput
@@ -168467,7 +170362,9 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    avatarUpdatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     assistedWorkflows?: AiAssistedWorkflowUncheckedUpdateManyWithoutAccountNestedInput
+    avatar?: AccountAvatarUncheckedUpdateOneWithoutAccountNestedInput
     externalMutationReceipts?: ExternalMutationReceiptUncheckedUpdateManyWithoutAccountNestedInput
     goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUncheckedUpdateManyWithoutAccountNestedInput
@@ -170284,8 +172181,10 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     closedAt?: Date | string | null
+    avatarUpdatedAt?: Date | string | null
     assistedWorkflows?: AiAssistedWorkflowCreateNestedManyWithoutAccountInput
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
+    avatar?: AccountAvatarCreateNestedOneWithoutAccountInput
     externalMutationReceipts?: ExternalMutationReceiptCreateNestedManyWithoutAccountInput
     goals?: GoalCreateNestedManyWithoutAccountInput
     labels?: LabelCreateNestedManyWithoutAccountInput
@@ -170340,7 +172239,9 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     closedAt?: Date | string | null
+    avatarUpdatedAt?: Date | string | null
     assistedWorkflows?: AiAssistedWorkflowUncheckedCreateNestedManyWithoutAccountInput
+    avatar?: AccountAvatarUncheckedCreateNestedOneWithoutAccountInput
     externalMutationReceipts?: ExternalMutationReceiptUncheckedCreateNestedManyWithoutAccountInput
     goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
     labels?: LabelUncheckedCreateNestedManyWithoutAccountInput
@@ -170410,8 +172311,10 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    avatarUpdatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     assistedWorkflows?: AiAssistedWorkflowUpdateManyWithoutAccountNestedInput
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
+    avatar?: AccountAvatarUpdateOneWithoutAccountNestedInput
     externalMutationReceipts?: ExternalMutationReceiptUpdateManyWithoutAccountNestedInput
     goals?: GoalUpdateManyWithoutAccountNestedInput
     labels?: LabelUpdateManyWithoutAccountNestedInput
@@ -170466,7 +172369,9 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    avatarUpdatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     assistedWorkflows?: AiAssistedWorkflowUncheckedUpdateManyWithoutAccountNestedInput
+    avatar?: AccountAvatarUncheckedUpdateOneWithoutAccountNestedInput
     externalMutationReceipts?: ExternalMutationReceiptUncheckedUpdateManyWithoutAccountNestedInput
     goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
     labels?: LabelUncheckedUpdateManyWithoutAccountNestedInput
@@ -170520,8 +172425,10 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     closedAt?: Date | string | null
+    avatarUpdatedAt?: Date | string | null
     assistedWorkflows?: AiAssistedWorkflowCreateNestedManyWithoutAccountInput
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
+    avatar?: AccountAvatarCreateNestedOneWithoutAccountInput
     externalMutationReceipts?: ExternalMutationReceiptCreateNestedManyWithoutAccountInput
     goals?: GoalCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationCreateNestedManyWithoutAccountInput
@@ -170576,7 +172483,9 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     closedAt?: Date | string | null
+    avatarUpdatedAt?: Date | string | null
     assistedWorkflows?: AiAssistedWorkflowUncheckedCreateNestedManyWithoutAccountInput
+    avatar?: AccountAvatarUncheckedCreateNestedOneWithoutAccountInput
     externalMutationReceipts?: ExternalMutationReceiptUncheckedCreateNestedManyWithoutAccountInput
     goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationUncheckedCreateNestedManyWithoutAccountInput
@@ -170646,8 +172555,10 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    avatarUpdatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     assistedWorkflows?: AiAssistedWorkflowUpdateManyWithoutAccountNestedInput
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
+    avatar?: AccountAvatarUpdateOneWithoutAccountNestedInput
     externalMutationReceipts?: ExternalMutationReceiptUpdateManyWithoutAccountNestedInput
     goals?: GoalUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUpdateManyWithoutAccountNestedInput
@@ -170702,7 +172613,9 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    avatarUpdatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     assistedWorkflows?: AiAssistedWorkflowUncheckedUpdateManyWithoutAccountNestedInput
+    avatar?: AccountAvatarUncheckedUpdateOneWithoutAccountNestedInput
     externalMutationReceipts?: ExternalMutationReceiptUncheckedUpdateManyWithoutAccountNestedInput
     goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUncheckedUpdateManyWithoutAccountNestedInput
@@ -170756,8 +172669,10 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     closedAt?: Date | string | null
+    avatarUpdatedAt?: Date | string | null
     assistedWorkflows?: AiAssistedWorkflowCreateNestedManyWithoutAccountInput
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
+    avatar?: AccountAvatarCreateNestedOneWithoutAccountInput
     goals?: GoalCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationCreateNestedManyWithoutAccountInput
     labels?: LabelCreateNestedManyWithoutAccountInput
@@ -170812,7 +172727,9 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     closedAt?: Date | string | null
+    avatarUpdatedAt?: Date | string | null
     assistedWorkflows?: AiAssistedWorkflowUncheckedCreateNestedManyWithoutAccountInput
+    avatar?: AccountAvatarUncheckedCreateNestedOneWithoutAccountInput
     goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationUncheckedCreateNestedManyWithoutAccountInput
     labels?: LabelUncheckedCreateNestedManyWithoutAccountInput
@@ -170882,8 +172799,10 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    avatarUpdatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     assistedWorkflows?: AiAssistedWorkflowUpdateManyWithoutAccountNestedInput
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
+    avatar?: AccountAvatarUpdateOneWithoutAccountNestedInput
     goals?: GoalUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUpdateManyWithoutAccountNestedInput
     labels?: LabelUpdateManyWithoutAccountNestedInput
@@ -170938,7 +172857,9 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    avatarUpdatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     assistedWorkflows?: AiAssistedWorkflowUncheckedUpdateManyWithoutAccountNestedInput
+    avatar?: AccountAvatarUncheckedUpdateOneWithoutAccountNestedInput
     goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUncheckedUpdateManyWithoutAccountNestedInput
     labels?: LabelUncheckedUpdateManyWithoutAccountNestedInput
@@ -170992,8 +172913,10 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     closedAt?: Date | string | null
+    avatarUpdatedAt?: Date | string | null
     assistedWorkflows?: AiAssistedWorkflowCreateNestedManyWithoutAccountInput
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
+    avatar?: AccountAvatarCreateNestedOneWithoutAccountInput
     externalMutationReceipts?: ExternalMutationReceiptCreateNestedManyWithoutAccountInput
     goals?: GoalCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationCreateNestedManyWithoutAccountInput
@@ -171048,7 +172971,9 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     closedAt?: Date | string | null
+    avatarUpdatedAt?: Date | string | null
     assistedWorkflows?: AiAssistedWorkflowUncheckedCreateNestedManyWithoutAccountInput
+    avatar?: AccountAvatarUncheckedCreateNestedOneWithoutAccountInput
     externalMutationReceipts?: ExternalMutationReceiptUncheckedCreateNestedManyWithoutAccountInput
     goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationUncheckedCreateNestedManyWithoutAccountInput
@@ -171275,8 +173200,10 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    avatarUpdatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     assistedWorkflows?: AiAssistedWorkflowUpdateManyWithoutAccountNestedInput
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
+    avatar?: AccountAvatarUpdateOneWithoutAccountNestedInput
     externalMutationReceipts?: ExternalMutationReceiptUpdateManyWithoutAccountNestedInput
     goals?: GoalUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUpdateManyWithoutAccountNestedInput
@@ -171331,7 +173258,9 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    avatarUpdatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     assistedWorkflows?: AiAssistedWorkflowUncheckedUpdateManyWithoutAccountNestedInput
+    avatar?: AccountAvatarUncheckedUpdateOneWithoutAccountNestedInput
     externalMutationReceipts?: ExternalMutationReceiptUncheckedUpdateManyWithoutAccountNestedInput
     goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUncheckedUpdateManyWithoutAccountNestedInput
@@ -171459,8 +173388,10 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     closedAt?: Date | string | null
+    avatarUpdatedAt?: Date | string | null
     assistedWorkflows?: AiAssistedWorkflowCreateNestedManyWithoutAccountInput
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
+    avatar?: AccountAvatarCreateNestedOneWithoutAccountInput
     externalMutationReceipts?: ExternalMutationReceiptCreateNestedManyWithoutAccountInput
     goals?: GoalCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationCreateNestedManyWithoutAccountInput
@@ -171515,7 +173446,9 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     closedAt?: Date | string | null
+    avatarUpdatedAt?: Date | string | null
     assistedWorkflows?: AiAssistedWorkflowUncheckedCreateNestedManyWithoutAccountInput
+    avatar?: AccountAvatarUncheckedCreateNestedOneWithoutAccountInput
     externalMutationReceipts?: ExternalMutationReceiptUncheckedCreateNestedManyWithoutAccountInput
     goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationUncheckedCreateNestedManyWithoutAccountInput
@@ -171585,8 +173518,10 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    avatarUpdatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     assistedWorkflows?: AiAssistedWorkflowUpdateManyWithoutAccountNestedInput
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
+    avatar?: AccountAvatarUpdateOneWithoutAccountNestedInput
     externalMutationReceipts?: ExternalMutationReceiptUpdateManyWithoutAccountNestedInput
     goals?: GoalUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUpdateManyWithoutAccountNestedInput
@@ -171641,7 +173576,9 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    avatarUpdatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     assistedWorkflows?: AiAssistedWorkflowUncheckedUpdateManyWithoutAccountNestedInput
+    avatar?: AccountAvatarUncheckedUpdateOneWithoutAccountNestedInput
     externalMutationReceipts?: ExternalMutationReceiptUncheckedUpdateManyWithoutAccountNestedInput
     goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUncheckedUpdateManyWithoutAccountNestedInput
@@ -171695,8 +173632,10 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     closedAt?: Date | string | null
+    avatarUpdatedAt?: Date | string | null
     assistedWorkflows?: AiAssistedWorkflowCreateNestedManyWithoutAccountInput
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
+    avatar?: AccountAvatarCreateNestedOneWithoutAccountInput
     externalMutationReceipts?: ExternalMutationReceiptCreateNestedManyWithoutAccountInput
     goals?: GoalCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationCreateNestedManyWithoutAccountInput
@@ -171751,7 +173690,9 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     closedAt?: Date | string | null
+    avatarUpdatedAt?: Date | string | null
     assistedWorkflows?: AiAssistedWorkflowUncheckedCreateNestedManyWithoutAccountInput
+    avatar?: AccountAvatarUncheckedCreateNestedOneWithoutAccountInput
     externalMutationReceipts?: ExternalMutationReceiptUncheckedCreateNestedManyWithoutAccountInput
     goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationUncheckedCreateNestedManyWithoutAccountInput
@@ -171848,8 +173789,10 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    avatarUpdatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     assistedWorkflows?: AiAssistedWorkflowUpdateManyWithoutAccountNestedInput
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
+    avatar?: AccountAvatarUpdateOneWithoutAccountNestedInput
     externalMutationReceipts?: ExternalMutationReceiptUpdateManyWithoutAccountNestedInput
     goals?: GoalUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUpdateManyWithoutAccountNestedInput
@@ -171904,7 +173847,9 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    avatarUpdatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     assistedWorkflows?: AiAssistedWorkflowUncheckedUpdateManyWithoutAccountNestedInput
+    avatar?: AccountAvatarUncheckedUpdateOneWithoutAccountNestedInput
     externalMutationReceipts?: ExternalMutationReceiptUncheckedUpdateManyWithoutAccountNestedInput
     goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUncheckedUpdateManyWithoutAccountNestedInput
@@ -171974,8 +173919,10 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     closedAt?: Date | string | null
+    avatarUpdatedAt?: Date | string | null
     assistedWorkflows?: AiAssistedWorkflowCreateNestedManyWithoutAccountInput
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
+    avatar?: AccountAvatarCreateNestedOneWithoutAccountInput
     externalMutationReceipts?: ExternalMutationReceiptCreateNestedManyWithoutAccountInput
     goals?: GoalCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationCreateNestedManyWithoutAccountInput
@@ -172030,7 +173977,9 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     closedAt?: Date | string | null
+    avatarUpdatedAt?: Date | string | null
     assistedWorkflows?: AiAssistedWorkflowUncheckedCreateNestedManyWithoutAccountInput
+    avatar?: AccountAvatarUncheckedCreateNestedOneWithoutAccountInput
     externalMutationReceipts?: ExternalMutationReceiptUncheckedCreateNestedManyWithoutAccountInput
     goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationUncheckedCreateNestedManyWithoutAccountInput
@@ -172164,8 +174113,10 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    avatarUpdatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     assistedWorkflows?: AiAssistedWorkflowUpdateManyWithoutAccountNestedInput
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
+    avatar?: AccountAvatarUpdateOneWithoutAccountNestedInput
     externalMutationReceipts?: ExternalMutationReceiptUpdateManyWithoutAccountNestedInput
     goals?: GoalUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUpdateManyWithoutAccountNestedInput
@@ -172220,7 +174171,9 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    avatarUpdatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     assistedWorkflows?: AiAssistedWorkflowUncheckedUpdateManyWithoutAccountNestedInput
+    avatar?: AccountAvatarUncheckedUpdateOneWithoutAccountNestedInput
     externalMutationReceipts?: ExternalMutationReceiptUncheckedUpdateManyWithoutAccountNestedInput
     goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUncheckedUpdateManyWithoutAccountNestedInput
@@ -172350,8 +174303,10 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     closedAt?: Date | string | null
+    avatarUpdatedAt?: Date | string | null
     assistedWorkflows?: AiAssistedWorkflowCreateNestedManyWithoutAccountInput
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
+    avatar?: AccountAvatarCreateNestedOneWithoutAccountInput
     externalMutationReceipts?: ExternalMutationReceiptCreateNestedManyWithoutAccountInput
     goals?: GoalCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationCreateNestedManyWithoutAccountInput
@@ -172406,7 +174361,9 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     closedAt?: Date | string | null
+    avatarUpdatedAt?: Date | string | null
     assistedWorkflows?: AiAssistedWorkflowUncheckedCreateNestedManyWithoutAccountInput
+    avatar?: AccountAvatarUncheckedCreateNestedOneWithoutAccountInput
     externalMutationReceipts?: ExternalMutationReceiptUncheckedCreateNestedManyWithoutAccountInput
     goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationUncheckedCreateNestedManyWithoutAccountInput
@@ -172511,8 +174468,10 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    avatarUpdatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     assistedWorkflows?: AiAssistedWorkflowUpdateManyWithoutAccountNestedInput
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
+    avatar?: AccountAvatarUpdateOneWithoutAccountNestedInput
     externalMutationReceipts?: ExternalMutationReceiptUpdateManyWithoutAccountNestedInput
     goals?: GoalUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUpdateManyWithoutAccountNestedInput
@@ -172567,7 +174526,9 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    avatarUpdatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     assistedWorkflows?: AiAssistedWorkflowUncheckedUpdateManyWithoutAccountNestedInput
+    avatar?: AccountAvatarUncheckedUpdateOneWithoutAccountNestedInput
     externalMutationReceipts?: ExternalMutationReceiptUncheckedUpdateManyWithoutAccountNestedInput
     goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUncheckedUpdateManyWithoutAccountNestedInput
@@ -172637,8 +174598,10 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     closedAt?: Date | string | null
+    avatarUpdatedAt?: Date | string | null
     assistedWorkflows?: AiAssistedWorkflowCreateNestedManyWithoutAccountInput
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
+    avatar?: AccountAvatarCreateNestedOneWithoutAccountInput
     externalMutationReceipts?: ExternalMutationReceiptCreateNestedManyWithoutAccountInput
     goals?: GoalCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationCreateNestedManyWithoutAccountInput
@@ -172693,7 +174656,9 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     closedAt?: Date | string | null
+    avatarUpdatedAt?: Date | string | null
     assistedWorkflows?: AiAssistedWorkflowUncheckedCreateNestedManyWithoutAccountInput
+    avatar?: AccountAvatarUncheckedCreateNestedOneWithoutAccountInput
     externalMutationReceipts?: ExternalMutationReceiptUncheckedCreateNestedManyWithoutAccountInput
     goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationUncheckedCreateNestedManyWithoutAccountInput
@@ -172788,8 +174753,10 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    avatarUpdatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     assistedWorkflows?: AiAssistedWorkflowUpdateManyWithoutAccountNestedInput
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
+    avatar?: AccountAvatarUpdateOneWithoutAccountNestedInput
     externalMutationReceipts?: ExternalMutationReceiptUpdateManyWithoutAccountNestedInput
     goals?: GoalUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUpdateManyWithoutAccountNestedInput
@@ -172844,7 +174811,9 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    avatarUpdatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     assistedWorkflows?: AiAssistedWorkflowUncheckedUpdateManyWithoutAccountNestedInput
+    avatar?: AccountAvatarUncheckedUpdateOneWithoutAccountNestedInput
     externalMutationReceipts?: ExternalMutationReceiptUncheckedUpdateManyWithoutAccountNestedInput
     goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUncheckedUpdateManyWithoutAccountNestedInput
@@ -172966,8 +174935,10 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     closedAt?: Date | string | null
+    avatarUpdatedAt?: Date | string | null
     assistedWorkflows?: AiAssistedWorkflowCreateNestedManyWithoutAccountInput
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
+    avatar?: AccountAvatarCreateNestedOneWithoutAccountInput
     externalMutationReceipts?: ExternalMutationReceiptCreateNestedManyWithoutAccountInput
     goals?: GoalCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationCreateNestedManyWithoutAccountInput
@@ -173022,7 +174993,9 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     closedAt?: Date | string | null
+    avatarUpdatedAt?: Date | string | null
     assistedWorkflows?: AiAssistedWorkflowUncheckedCreateNestedManyWithoutAccountInput
+    avatar?: AccountAvatarUncheckedCreateNestedOneWithoutAccountInput
     externalMutationReceipts?: ExternalMutationReceiptUncheckedCreateNestedManyWithoutAccountInput
     goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationUncheckedCreateNestedManyWithoutAccountInput
@@ -173169,8 +175142,10 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    avatarUpdatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     assistedWorkflows?: AiAssistedWorkflowUpdateManyWithoutAccountNestedInput
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
+    avatar?: AccountAvatarUpdateOneWithoutAccountNestedInput
     externalMutationReceipts?: ExternalMutationReceiptUpdateManyWithoutAccountNestedInput
     goals?: GoalUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUpdateManyWithoutAccountNestedInput
@@ -173225,7 +175200,9 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    avatarUpdatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     assistedWorkflows?: AiAssistedWorkflowUncheckedUpdateManyWithoutAccountNestedInput
+    avatar?: AccountAvatarUncheckedUpdateOneWithoutAccountNestedInput
     externalMutationReceipts?: ExternalMutationReceiptUncheckedUpdateManyWithoutAccountNestedInput
     goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUncheckedUpdateManyWithoutAccountNestedInput
@@ -173295,8 +175272,10 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     closedAt?: Date | string | null
+    avatarUpdatedAt?: Date | string | null
     assistedWorkflows?: AiAssistedWorkflowCreateNestedManyWithoutAccountInput
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
+    avatar?: AccountAvatarCreateNestedOneWithoutAccountInput
     externalMutationReceipts?: ExternalMutationReceiptCreateNestedManyWithoutAccountInput
     goals?: GoalCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationCreateNestedManyWithoutAccountInput
@@ -173351,7 +175330,9 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     closedAt?: Date | string | null
+    avatarUpdatedAt?: Date | string | null
     assistedWorkflows?: AiAssistedWorkflowUncheckedCreateNestedManyWithoutAccountInput
+    avatar?: AccountAvatarUncheckedCreateNestedOneWithoutAccountInput
     externalMutationReceipts?: ExternalMutationReceiptUncheckedCreateNestedManyWithoutAccountInput
     goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationUncheckedCreateNestedManyWithoutAccountInput
@@ -173529,8 +175510,10 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    avatarUpdatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     assistedWorkflows?: AiAssistedWorkflowUpdateManyWithoutAccountNestedInput
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
+    avatar?: AccountAvatarUpdateOneWithoutAccountNestedInput
     externalMutationReceipts?: ExternalMutationReceiptUpdateManyWithoutAccountNestedInput
     goals?: GoalUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUpdateManyWithoutAccountNestedInput
@@ -173585,7 +175568,9 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    avatarUpdatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     assistedWorkflows?: AiAssistedWorkflowUncheckedUpdateManyWithoutAccountNestedInput
+    avatar?: AccountAvatarUncheckedUpdateOneWithoutAccountNestedInput
     externalMutationReceipts?: ExternalMutationReceiptUncheckedUpdateManyWithoutAccountNestedInput
     goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUncheckedUpdateManyWithoutAccountNestedInput
@@ -173796,8 +175781,10 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     closedAt?: Date | string | null
+    avatarUpdatedAt?: Date | string | null
     assistedWorkflows?: AiAssistedWorkflowCreateNestedManyWithoutAccountInput
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
+    avatar?: AccountAvatarCreateNestedOneWithoutAccountInput
     externalMutationReceipts?: ExternalMutationReceiptCreateNestedManyWithoutAccountInput
     goals?: GoalCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationCreateNestedManyWithoutAccountInput
@@ -173852,7 +175839,9 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     closedAt?: Date | string | null
+    avatarUpdatedAt?: Date | string | null
     assistedWorkflows?: AiAssistedWorkflowUncheckedCreateNestedManyWithoutAccountInput
+    avatar?: AccountAvatarUncheckedCreateNestedOneWithoutAccountInput
     externalMutationReceipts?: ExternalMutationReceiptUncheckedCreateNestedManyWithoutAccountInput
     goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationUncheckedCreateNestedManyWithoutAccountInput
@@ -173965,8 +175954,10 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    avatarUpdatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     assistedWorkflows?: AiAssistedWorkflowUpdateManyWithoutAccountNestedInput
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
+    avatar?: AccountAvatarUpdateOneWithoutAccountNestedInput
     externalMutationReceipts?: ExternalMutationReceiptUpdateManyWithoutAccountNestedInput
     goals?: GoalUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUpdateManyWithoutAccountNestedInput
@@ -174021,7 +176012,9 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    avatarUpdatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     assistedWorkflows?: AiAssistedWorkflowUncheckedUpdateManyWithoutAccountNestedInput
+    avatar?: AccountAvatarUncheckedUpdateOneWithoutAccountNestedInput
     externalMutationReceipts?: ExternalMutationReceiptUncheckedUpdateManyWithoutAccountNestedInput
     goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUncheckedUpdateManyWithoutAccountNestedInput
@@ -174075,8 +176068,10 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     closedAt?: Date | string | null
+    avatarUpdatedAt?: Date | string | null
     assistedWorkflows?: AiAssistedWorkflowCreateNestedManyWithoutAccountInput
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
+    avatar?: AccountAvatarCreateNestedOneWithoutAccountInput
     externalMutationReceipts?: ExternalMutationReceiptCreateNestedManyWithoutAccountInput
     goals?: GoalCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationCreateNestedManyWithoutAccountInput
@@ -174131,7 +176126,9 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     closedAt?: Date | string | null
+    avatarUpdatedAt?: Date | string | null
     assistedWorkflows?: AiAssistedWorkflowUncheckedCreateNestedManyWithoutAccountInput
+    avatar?: AccountAvatarUncheckedCreateNestedOneWithoutAccountInput
     externalMutationReceipts?: ExternalMutationReceiptUncheckedCreateNestedManyWithoutAccountInput
     goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationUncheckedCreateNestedManyWithoutAccountInput
@@ -174201,8 +176198,10 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    avatarUpdatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     assistedWorkflows?: AiAssistedWorkflowUpdateManyWithoutAccountNestedInput
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
+    avatar?: AccountAvatarUpdateOneWithoutAccountNestedInput
     externalMutationReceipts?: ExternalMutationReceiptUpdateManyWithoutAccountNestedInput
     goals?: GoalUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUpdateManyWithoutAccountNestedInput
@@ -174257,7 +176256,9 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    avatarUpdatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     assistedWorkflows?: AiAssistedWorkflowUncheckedUpdateManyWithoutAccountNestedInput
+    avatar?: AccountAvatarUncheckedUpdateOneWithoutAccountNestedInput
     externalMutationReceipts?: ExternalMutationReceiptUncheckedUpdateManyWithoutAccountNestedInput
     goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUncheckedUpdateManyWithoutAccountNestedInput
@@ -174497,8 +176498,10 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     closedAt?: Date | string | null
+    avatarUpdatedAt?: Date | string | null
     assistedWorkflows?: AiAssistedWorkflowCreateNestedManyWithoutAccountInput
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
+    avatar?: AccountAvatarCreateNestedOneWithoutAccountInput
     externalMutationReceipts?: ExternalMutationReceiptCreateNestedManyWithoutAccountInput
     goals?: GoalCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationCreateNestedManyWithoutAccountInput
@@ -174553,7 +176556,9 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     closedAt?: Date | string | null
+    avatarUpdatedAt?: Date | string | null
     assistedWorkflows?: AiAssistedWorkflowUncheckedCreateNestedManyWithoutAccountInput
+    avatar?: AccountAvatarUncheckedCreateNestedOneWithoutAccountInput
     externalMutationReceipts?: ExternalMutationReceiptUncheckedCreateNestedManyWithoutAccountInput
     goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationUncheckedCreateNestedManyWithoutAccountInput
@@ -174913,8 +176918,10 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    avatarUpdatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     assistedWorkflows?: AiAssistedWorkflowUpdateManyWithoutAccountNestedInput
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
+    avatar?: AccountAvatarUpdateOneWithoutAccountNestedInput
     externalMutationReceipts?: ExternalMutationReceiptUpdateManyWithoutAccountNestedInput
     goals?: GoalUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUpdateManyWithoutAccountNestedInput
@@ -174969,7 +176976,9 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    avatarUpdatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     assistedWorkflows?: AiAssistedWorkflowUncheckedUpdateManyWithoutAccountNestedInput
+    avatar?: AccountAvatarUncheckedUpdateOneWithoutAccountNestedInput
     externalMutationReceipts?: ExternalMutationReceiptUncheckedUpdateManyWithoutAccountNestedInput
     goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUncheckedUpdateManyWithoutAccountNestedInput
@@ -175931,8 +177940,10 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     closedAt?: Date | string | null
+    avatarUpdatedAt?: Date | string | null
     assistedWorkflows?: AiAssistedWorkflowCreateNestedManyWithoutAccountInput
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
+    avatar?: AccountAvatarCreateNestedOneWithoutAccountInput
     externalMutationReceipts?: ExternalMutationReceiptCreateNestedManyWithoutAccountInput
     goals?: GoalCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationCreateNestedManyWithoutAccountInput
@@ -175987,7 +177998,9 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     closedAt?: Date | string | null
+    avatarUpdatedAt?: Date | string | null
     assistedWorkflows?: AiAssistedWorkflowUncheckedCreateNestedManyWithoutAccountInput
+    avatar?: AccountAvatarUncheckedCreateNestedOneWithoutAccountInput
     externalMutationReceipts?: ExternalMutationReceiptUncheckedCreateNestedManyWithoutAccountInput
     goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationUncheckedCreateNestedManyWithoutAccountInput
@@ -176102,8 +178115,10 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    avatarUpdatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     assistedWorkflows?: AiAssistedWorkflowUpdateManyWithoutAccountNestedInput
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
+    avatar?: AccountAvatarUpdateOneWithoutAccountNestedInput
     externalMutationReceipts?: ExternalMutationReceiptUpdateManyWithoutAccountNestedInput
     goals?: GoalUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUpdateManyWithoutAccountNestedInput
@@ -176158,7 +178173,9 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    avatarUpdatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     assistedWorkflows?: AiAssistedWorkflowUncheckedUpdateManyWithoutAccountNestedInput
+    avatar?: AccountAvatarUncheckedUpdateOneWithoutAccountNestedInput
     externalMutationReceipts?: ExternalMutationReceiptUncheckedUpdateManyWithoutAccountNestedInput
     goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUncheckedUpdateManyWithoutAccountNestedInput
@@ -176263,8 +178280,10 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     closedAt?: Date | string | null
+    avatarUpdatedAt?: Date | string | null
     assistedWorkflows?: AiAssistedWorkflowCreateNestedManyWithoutAccountInput
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
+    avatar?: AccountAvatarCreateNestedOneWithoutAccountInput
     externalMutationReceipts?: ExternalMutationReceiptCreateNestedManyWithoutAccountInput
     goals?: GoalCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationCreateNestedManyWithoutAccountInput
@@ -176319,7 +178338,9 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     closedAt?: Date | string | null
+    avatarUpdatedAt?: Date | string | null
     assistedWorkflows?: AiAssistedWorkflowUncheckedCreateNestedManyWithoutAccountInput
+    avatar?: AccountAvatarUncheckedCreateNestedOneWithoutAccountInput
     externalMutationReceipts?: ExternalMutationReceiptUncheckedCreateNestedManyWithoutAccountInput
     goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationUncheckedCreateNestedManyWithoutAccountInput
@@ -176389,8 +178410,10 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    avatarUpdatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     assistedWorkflows?: AiAssistedWorkflowUpdateManyWithoutAccountNestedInput
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
+    avatar?: AccountAvatarUpdateOneWithoutAccountNestedInput
     externalMutationReceipts?: ExternalMutationReceiptUpdateManyWithoutAccountNestedInput
     goals?: GoalUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUpdateManyWithoutAccountNestedInput
@@ -176445,7 +178468,9 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    avatarUpdatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     assistedWorkflows?: AiAssistedWorkflowUncheckedUpdateManyWithoutAccountNestedInput
+    avatar?: AccountAvatarUncheckedUpdateOneWithoutAccountNestedInput
     externalMutationReceipts?: ExternalMutationReceiptUncheckedUpdateManyWithoutAccountNestedInput
     goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUncheckedUpdateManyWithoutAccountNestedInput
@@ -176499,8 +178524,10 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     closedAt?: Date | string | null
+    avatarUpdatedAt?: Date | string | null
     assistedWorkflows?: AiAssistedWorkflowCreateNestedManyWithoutAccountInput
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
+    avatar?: AccountAvatarCreateNestedOneWithoutAccountInput
     externalMutationReceipts?: ExternalMutationReceiptCreateNestedManyWithoutAccountInput
     goals?: GoalCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationCreateNestedManyWithoutAccountInput
@@ -176555,7 +178582,9 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     closedAt?: Date | string | null
+    avatarUpdatedAt?: Date | string | null
     assistedWorkflows?: AiAssistedWorkflowUncheckedCreateNestedManyWithoutAccountInput
+    avatar?: AccountAvatarUncheckedCreateNestedOneWithoutAccountInput
     externalMutationReceipts?: ExternalMutationReceiptUncheckedCreateNestedManyWithoutAccountInput
     goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationUncheckedCreateNestedManyWithoutAccountInput
@@ -176669,8 +178698,10 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    avatarUpdatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     assistedWorkflows?: AiAssistedWorkflowUpdateManyWithoutAccountNestedInput
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
+    avatar?: AccountAvatarUpdateOneWithoutAccountNestedInput
     externalMutationReceipts?: ExternalMutationReceiptUpdateManyWithoutAccountNestedInput
     goals?: GoalUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUpdateManyWithoutAccountNestedInput
@@ -176725,7 +178756,9 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    avatarUpdatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     assistedWorkflows?: AiAssistedWorkflowUncheckedUpdateManyWithoutAccountNestedInput
+    avatar?: AccountAvatarUncheckedUpdateOneWithoutAccountNestedInput
     externalMutationReceipts?: ExternalMutationReceiptUncheckedUpdateManyWithoutAccountNestedInput
     goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUncheckedUpdateManyWithoutAccountNestedInput
@@ -176795,8 +178828,10 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     closedAt?: Date | string | null
+    avatarUpdatedAt?: Date | string | null
     assistedWorkflows?: AiAssistedWorkflowCreateNestedManyWithoutAccountInput
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
+    avatar?: AccountAvatarCreateNestedOneWithoutAccountInput
     externalMutationReceipts?: ExternalMutationReceiptCreateNestedManyWithoutAccountInput
     goals?: GoalCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationCreateNestedManyWithoutAccountInput
@@ -176851,7 +178886,9 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     closedAt?: Date | string | null
+    avatarUpdatedAt?: Date | string | null
     assistedWorkflows?: AiAssistedWorkflowUncheckedCreateNestedManyWithoutAccountInput
+    avatar?: AccountAvatarUncheckedCreateNestedOneWithoutAccountInput
     externalMutationReceipts?: ExternalMutationReceiptUncheckedCreateNestedManyWithoutAccountInput
     goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationUncheckedCreateNestedManyWithoutAccountInput
@@ -176986,8 +179023,10 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    avatarUpdatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     assistedWorkflows?: AiAssistedWorkflowUpdateManyWithoutAccountNestedInput
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
+    avatar?: AccountAvatarUpdateOneWithoutAccountNestedInput
     externalMutationReceipts?: ExternalMutationReceiptUpdateManyWithoutAccountNestedInput
     goals?: GoalUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUpdateManyWithoutAccountNestedInput
@@ -177042,7 +179081,9 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    avatarUpdatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     assistedWorkflows?: AiAssistedWorkflowUncheckedUpdateManyWithoutAccountNestedInput
+    avatar?: AccountAvatarUncheckedUpdateOneWithoutAccountNestedInput
     externalMutationReceipts?: ExternalMutationReceiptUncheckedUpdateManyWithoutAccountNestedInput
     goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUncheckedUpdateManyWithoutAccountNestedInput
@@ -177167,8 +179208,10 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     closedAt?: Date | string | null
+    avatarUpdatedAt?: Date | string | null
     assistedWorkflows?: AiAssistedWorkflowCreateNestedManyWithoutAccountInput
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
+    avatar?: AccountAvatarCreateNestedOneWithoutAccountInput
     externalMutationReceipts?: ExternalMutationReceiptCreateNestedManyWithoutAccountInput
     goals?: GoalCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationCreateNestedManyWithoutAccountInput
@@ -177223,7 +179266,9 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     closedAt?: Date | string | null
+    avatarUpdatedAt?: Date | string | null
     assistedWorkflows?: AiAssistedWorkflowUncheckedCreateNestedManyWithoutAccountInput
+    avatar?: AccountAvatarUncheckedCreateNestedOneWithoutAccountInput
     externalMutationReceipts?: ExternalMutationReceiptUncheckedCreateNestedManyWithoutAccountInput
     goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationUncheckedCreateNestedManyWithoutAccountInput
@@ -177293,8 +179338,10 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    avatarUpdatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     assistedWorkflows?: AiAssistedWorkflowUpdateManyWithoutAccountNestedInput
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
+    avatar?: AccountAvatarUpdateOneWithoutAccountNestedInput
     externalMutationReceipts?: ExternalMutationReceiptUpdateManyWithoutAccountNestedInput
     goals?: GoalUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUpdateManyWithoutAccountNestedInput
@@ -177349,7 +179396,9 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    avatarUpdatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     assistedWorkflows?: AiAssistedWorkflowUncheckedUpdateManyWithoutAccountNestedInput
+    avatar?: AccountAvatarUncheckedUpdateOneWithoutAccountNestedInput
     externalMutationReceipts?: ExternalMutationReceiptUncheckedUpdateManyWithoutAccountNestedInput
     goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUncheckedUpdateManyWithoutAccountNestedInput
@@ -177403,8 +179452,10 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     closedAt?: Date | string | null
+    avatarUpdatedAt?: Date | string | null
     assistedWorkflows?: AiAssistedWorkflowCreateNestedManyWithoutAccountInput
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
+    avatar?: AccountAvatarCreateNestedOneWithoutAccountInput
     externalMutationReceipts?: ExternalMutationReceiptCreateNestedManyWithoutAccountInput
     goals?: GoalCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationCreateNestedManyWithoutAccountInput
@@ -177459,7 +179510,9 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     closedAt?: Date | string | null
+    avatarUpdatedAt?: Date | string | null
     assistedWorkflows?: AiAssistedWorkflowUncheckedCreateNestedManyWithoutAccountInput
+    avatar?: AccountAvatarUncheckedCreateNestedOneWithoutAccountInput
     externalMutationReceipts?: ExternalMutationReceiptUncheckedCreateNestedManyWithoutAccountInput
     goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationUncheckedCreateNestedManyWithoutAccountInput
@@ -177529,8 +179582,10 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    avatarUpdatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     assistedWorkflows?: AiAssistedWorkflowUpdateManyWithoutAccountNestedInput
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
+    avatar?: AccountAvatarUpdateOneWithoutAccountNestedInput
     externalMutationReceipts?: ExternalMutationReceiptUpdateManyWithoutAccountNestedInput
     goals?: GoalUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUpdateManyWithoutAccountNestedInput
@@ -177585,7 +179640,9 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    avatarUpdatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     assistedWorkflows?: AiAssistedWorkflowUncheckedUpdateManyWithoutAccountNestedInput
+    avatar?: AccountAvatarUncheckedUpdateOneWithoutAccountNestedInput
     externalMutationReceipts?: ExternalMutationReceiptUncheckedUpdateManyWithoutAccountNestedInput
     goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUncheckedUpdateManyWithoutAccountNestedInput
@@ -177639,8 +179696,10 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     closedAt?: Date | string | null
+    avatarUpdatedAt?: Date | string | null
     assistedWorkflows?: AiAssistedWorkflowCreateNestedManyWithoutAccountInput
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
+    avatar?: AccountAvatarCreateNestedOneWithoutAccountInput
     externalMutationReceipts?: ExternalMutationReceiptCreateNestedManyWithoutAccountInput
     goals?: GoalCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationCreateNestedManyWithoutAccountInput
@@ -177695,7 +179754,9 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     closedAt?: Date | string | null
+    avatarUpdatedAt?: Date | string | null
     assistedWorkflows?: AiAssistedWorkflowUncheckedCreateNestedManyWithoutAccountInput
+    avatar?: AccountAvatarUncheckedCreateNestedOneWithoutAccountInput
     externalMutationReceipts?: ExternalMutationReceiptUncheckedCreateNestedManyWithoutAccountInput
     goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationUncheckedCreateNestedManyWithoutAccountInput
@@ -177902,8 +179963,10 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    avatarUpdatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     assistedWorkflows?: AiAssistedWorkflowUpdateManyWithoutAccountNestedInput
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
+    avatar?: AccountAvatarUpdateOneWithoutAccountNestedInput
     externalMutationReceipts?: ExternalMutationReceiptUpdateManyWithoutAccountNestedInput
     goals?: GoalUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUpdateManyWithoutAccountNestedInput
@@ -177958,7 +180021,9 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    avatarUpdatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     assistedWorkflows?: AiAssistedWorkflowUncheckedUpdateManyWithoutAccountNestedInput
+    avatar?: AccountAvatarUncheckedUpdateOneWithoutAccountNestedInput
     externalMutationReceipts?: ExternalMutationReceiptUncheckedUpdateManyWithoutAccountNestedInput
     goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUncheckedUpdateManyWithoutAccountNestedInput
@@ -178114,8 +180179,10 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     closedAt?: Date | string | null
+    avatarUpdatedAt?: Date | string | null
     assistedWorkflows?: AiAssistedWorkflowCreateNestedManyWithoutAccountInput
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
+    avatar?: AccountAvatarCreateNestedOneWithoutAccountInput
     externalMutationReceipts?: ExternalMutationReceiptCreateNestedManyWithoutAccountInput
     goals?: GoalCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationCreateNestedManyWithoutAccountInput
@@ -178170,7 +180237,9 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     closedAt?: Date | string | null
+    avatarUpdatedAt?: Date | string | null
     assistedWorkflows?: AiAssistedWorkflowUncheckedCreateNestedManyWithoutAccountInput
+    avatar?: AccountAvatarUncheckedCreateNestedOneWithoutAccountInput
     externalMutationReceipts?: ExternalMutationReceiptUncheckedCreateNestedManyWithoutAccountInput
     goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationUncheckedCreateNestedManyWithoutAccountInput
@@ -178302,8 +180371,10 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    avatarUpdatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     assistedWorkflows?: AiAssistedWorkflowUpdateManyWithoutAccountNestedInput
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
+    avatar?: AccountAvatarUpdateOneWithoutAccountNestedInput
     externalMutationReceipts?: ExternalMutationReceiptUpdateManyWithoutAccountNestedInput
     goals?: GoalUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUpdateManyWithoutAccountNestedInput
@@ -178358,7 +180429,9 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    avatarUpdatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     assistedWorkflows?: AiAssistedWorkflowUncheckedUpdateManyWithoutAccountNestedInput
+    avatar?: AccountAvatarUncheckedUpdateOneWithoutAccountNestedInput
     externalMutationReceipts?: ExternalMutationReceiptUncheckedUpdateManyWithoutAccountNestedInput
     goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUncheckedUpdateManyWithoutAccountNestedInput
@@ -178480,8 +180553,10 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     closedAt?: Date | string | null
+    avatarUpdatedAt?: Date | string | null
     assistedWorkflows?: AiAssistedWorkflowCreateNestedManyWithoutAccountInput
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
+    avatar?: AccountAvatarCreateNestedOneWithoutAccountInput
     externalMutationReceipts?: ExternalMutationReceiptCreateNestedManyWithoutAccountInput
     goals?: GoalCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationCreateNestedManyWithoutAccountInput
@@ -178536,7 +180611,9 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     closedAt?: Date | string | null
+    avatarUpdatedAt?: Date | string | null
     assistedWorkflows?: AiAssistedWorkflowUncheckedCreateNestedManyWithoutAccountInput
+    avatar?: AccountAvatarUncheckedCreateNestedOneWithoutAccountInput
     externalMutationReceipts?: ExternalMutationReceiptUncheckedCreateNestedManyWithoutAccountInput
     goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationUncheckedCreateNestedManyWithoutAccountInput
@@ -178668,8 +180745,10 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    avatarUpdatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     assistedWorkflows?: AiAssistedWorkflowUpdateManyWithoutAccountNestedInput
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
+    avatar?: AccountAvatarUpdateOneWithoutAccountNestedInput
     externalMutationReceipts?: ExternalMutationReceiptUpdateManyWithoutAccountNestedInput
     goals?: GoalUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUpdateManyWithoutAccountNestedInput
@@ -178724,7 +180803,9 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    avatarUpdatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     assistedWorkflows?: AiAssistedWorkflowUncheckedUpdateManyWithoutAccountNestedInput
+    avatar?: AccountAvatarUncheckedUpdateOneWithoutAccountNestedInput
     externalMutationReceipts?: ExternalMutationReceiptUncheckedUpdateManyWithoutAccountNestedInput
     goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUncheckedUpdateManyWithoutAccountNestedInput
@@ -178846,8 +180927,10 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     closedAt?: Date | string | null
+    avatarUpdatedAt?: Date | string | null
     assistedWorkflows?: AiAssistedWorkflowCreateNestedManyWithoutAccountInput
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
+    avatar?: AccountAvatarCreateNestedOneWithoutAccountInput
     externalMutationReceipts?: ExternalMutationReceiptCreateNestedManyWithoutAccountInput
     goals?: GoalCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationCreateNestedManyWithoutAccountInput
@@ -178902,7 +180985,9 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     closedAt?: Date | string | null
+    avatarUpdatedAt?: Date | string | null
     assistedWorkflows?: AiAssistedWorkflowUncheckedCreateNestedManyWithoutAccountInput
+    avatar?: AccountAvatarUncheckedCreateNestedOneWithoutAccountInput
     externalMutationReceipts?: ExternalMutationReceiptUncheckedCreateNestedManyWithoutAccountInput
     goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationUncheckedCreateNestedManyWithoutAccountInput
@@ -179006,8 +181091,10 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    avatarUpdatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     assistedWorkflows?: AiAssistedWorkflowUpdateManyWithoutAccountNestedInput
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
+    avatar?: AccountAvatarUpdateOneWithoutAccountNestedInput
     externalMutationReceipts?: ExternalMutationReceiptUpdateManyWithoutAccountNestedInput
     goals?: GoalUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUpdateManyWithoutAccountNestedInput
@@ -179062,7 +181149,9 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    avatarUpdatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     assistedWorkflows?: AiAssistedWorkflowUncheckedUpdateManyWithoutAccountNestedInput
+    avatar?: AccountAvatarUncheckedUpdateOneWithoutAccountNestedInput
     externalMutationReceipts?: ExternalMutationReceiptUncheckedUpdateManyWithoutAccountNestedInput
     goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUncheckedUpdateManyWithoutAccountNestedInput
@@ -179157,8 +181246,10 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     closedAt?: Date | string | null
+    avatarUpdatedAt?: Date | string | null
     assistedWorkflows?: AiAssistedWorkflowCreateNestedManyWithoutAccountInput
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
+    avatar?: AccountAvatarCreateNestedOneWithoutAccountInput
     externalMutationReceipts?: ExternalMutationReceiptCreateNestedManyWithoutAccountInput
     goals?: GoalCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationCreateNestedManyWithoutAccountInput
@@ -179213,7 +181304,9 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     closedAt?: Date | string | null
+    avatarUpdatedAt?: Date | string | null
     assistedWorkflows?: AiAssistedWorkflowUncheckedCreateNestedManyWithoutAccountInput
+    avatar?: AccountAvatarUncheckedCreateNestedOneWithoutAccountInput
     externalMutationReceipts?: ExternalMutationReceiptUncheckedCreateNestedManyWithoutAccountInput
     goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationUncheckedCreateNestedManyWithoutAccountInput
@@ -179314,8 +181407,10 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    avatarUpdatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     assistedWorkflows?: AiAssistedWorkflowUpdateManyWithoutAccountNestedInput
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
+    avatar?: AccountAvatarUpdateOneWithoutAccountNestedInput
     externalMutationReceipts?: ExternalMutationReceiptUpdateManyWithoutAccountNestedInput
     goals?: GoalUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUpdateManyWithoutAccountNestedInput
@@ -179370,7 +181465,9 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    avatarUpdatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     assistedWorkflows?: AiAssistedWorkflowUncheckedUpdateManyWithoutAccountNestedInput
+    avatar?: AccountAvatarUncheckedUpdateOneWithoutAccountNestedInput
     externalMutationReceipts?: ExternalMutationReceiptUncheckedUpdateManyWithoutAccountNestedInput
     goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUncheckedUpdateManyWithoutAccountNestedInput

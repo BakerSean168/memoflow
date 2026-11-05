@@ -7,7 +7,7 @@
  * result immediately. Reused by the settings profile card today and by the
  * edit-profile dialog (#857) later.
  */
-import { ref } from 'vue';
+import { ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { toast } from 'vue-sonner';
 import { Camera } from '@lucide/vue';
@@ -35,7 +35,7 @@ const props = withDefaults(
 const emit = defineEmits<{ (event: 'updated', url: string): void }>();
 
 const { t } = useI18n();
-const { upload, isUploading, hasStore } = useAccountAvatar();
+const { upload, isUploading, hasStore, cloudSyncFailed } = useAccountAvatar();
 const fileInput = ref<HTMLInputElement | null>(null);
 
 const errorKeys: Record<AvatarImageErrorCode, string> = {
@@ -45,6 +45,12 @@ const errorKeys: Record<AvatarImageErrorCode, string> = {
 };
 
 const isDisabled = () => props.disabled || isUploading.value || !hasStore;
+
+// Issue #859: the local save already succeeded; a failed background upload only
+// shows the short retry notice so the user is never blocked.
+watch(cloudSyncFailed, () => {
+  toast.error(t('account.avatar.cloudSyncFailed'));
+});
 
 function openPicker(): void {
   if (isDisabled()) return;

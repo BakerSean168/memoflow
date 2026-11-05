@@ -69,6 +69,7 @@ export class PrismaAccountRepository
         profile: toPrismaJson(account.profile.toDTO()),
         updatedAt: new Date(account.updatedAt),
         closedAt: account.closedAt != null ? new Date(account.closedAt) : null,
+        avatarUpdatedAt: account.avatarUpdatedAt != null ? new Date(account.avatarUpdatedAt) : null,
       },
       create: {
         id: account.id.toString(),
@@ -77,6 +78,7 @@ export class PrismaAccountRepository
         createdAt: new Date(account.createdAt),
         updatedAt: new Date(account.updatedAt),
         closedAt: account.closedAt != null ? new Date(account.closedAt) : null,
+        avatarUpdatedAt: account.avatarUpdatedAt != null ? new Date(account.avatarUpdatedAt) : null,
       },
     });
   }

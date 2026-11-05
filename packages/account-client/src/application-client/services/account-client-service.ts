@@ -20,10 +20,14 @@
 import type { Result } from '@memoflow/transport-contracts';
 import { fail } from '@memoflow/transport-contracts';
 import type {
+  AccountAvatarContent,
+  AccountAvatarMeta,
+  AccountAvatarUploadResult,
   AccountView,
   CloseAccountReq,
   CloseAccountRes,
   UpdateAccountReq,
+  UploadAccountAvatarReq,
 } from '@memoflow/account-contracts';
 import type { IAccountApiClient } from '../ports/account-api-client.port';
 
@@ -55,6 +59,9 @@ export class AccountClientService implements IAccountApiClient {
     this.getMyProfile = this.getMyProfile.bind(this);
     this.updateMyProfile = this.updateMyProfile.bind(this);
     this.closeAccount = this.closeAccount.bind(this);
+    this.getMyAvatarMeta = this.getMyAvatarMeta.bind(this);
+    this.downloadMyAvatar = this.downloadMyAvatar.bind(this);
+    this.uploadMyAvatar = this.uploadMyAvatar.bind(this);
   }
 
   async getMyProfile(): Promise<Result<AccountView>> {
@@ -67,6 +74,20 @@ export class AccountClientService implements IAccountApiClient {
 
   async closeAccount(request: CloseAccountReq): Promise<Result<CloseAccountRes>> {
     return this.apiClient.closeAccount(request);
+  }
+
+  async getMyAvatarMeta(): Promise<Result<AccountAvatarMeta>> {
+    return this.apiClient.getMyAvatarMeta();
+  }
+
+  async downloadMyAvatar(): Promise<Result<AccountAvatarContent>> {
+    return this.apiClient.downloadMyAvatar();
+  }
+
+  async uploadMyAvatar(
+    request: UploadAccountAvatarReq,
+  ): Promise<Result<AccountAvatarUploadResult>> {
+    return this.apiClient.uploadMyAvatar(request);
   }
 }
 

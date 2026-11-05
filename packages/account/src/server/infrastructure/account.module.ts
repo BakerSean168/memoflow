@@ -1,8 +1,14 @@
-import type { IAccountRepository, IAccountClosureOperationRepository } from '../domain';
+import type {
+  IAccountRepository,
+  IAccountAvatarRepository,
+  IAccountClosureOperationRepository,
+} from '../domain';
 import {
   ListAccountsUseCase,
   GetAccountProfileUseCase,
   UpdateAccountProfileUseCase,
+  UpdateAccountAvatarUseCase,
+  GetAccountAvatarUseCase,
   CloseAccountUseCase,
   AccountClosureCoordinator,
   createAccountProfilePortableCapability,
@@ -30,6 +36,8 @@ const logger = createLogger('AccountModule');
 /** Explicit dependencies required by the account runtime. */
 export interface AccountModuleDependencies {
   readonly accountRepository: IAccountRepository;
+  /** Issue #859: cloud avatar blob store. Only lanes that serve cloud avatars provide it. */
+  readonly avatarRepository?: IAccountAvatarRepository;
   readonly closureOperationRepository?: IAccountClosureOperationRepository;
   readonly revocationPort?: CloudAuthRevocationPort;
   readonly eventPublisher?: AccountClosureEventPublisher;
@@ -56,6 +64,8 @@ export interface AccountModuleUseCases {
   readonly getProfile: GetAccountProfileUseCase;
   readonly updateProfile: UpdateAccountProfileUseCase;
   readonly closeAccount: CloseAccountUseCase;
+  readonly updateAvatar: UpdateAccountAvatarUseCase | null;
+  readonly getAvatar: GetAccountAvatarUseCase | null;
 }
 
 export interface AccountModuleInstance {
@@ -110,11 +120,18 @@ export function createAccountUseCases(
     }
   }
 
+  const avatarRepository = dependencies.avatarRepository ?? null;
+
   return {
     listAccounts: new ListAccountsUseCase(accountRepository),
     getProfile: new GetAccountProfileUseCase(accountRepository),
     updateProfile: new UpdateAccountProfileUseCase(accountRepository, clock),
     closeAccount: new CloseAccountUseCase(coordinator),
+    updateAvatar:
+      avatarRepository !== null
+        ? new UpdateAccountAvatarUseCase(accountRepository, avatarRepository, clock)
+        : null,
+    getAvatar: avatarRepository !== null ? new GetAccountAvatarUseCase(avatarRepository) : null,
   };
 }
 
@@ -153,6 +170,27 @@ export function createAccountModule(
       getProfile: (cx) => useCases.getProfile.execute(cx),
       updateProfile: (data, cx) => useCases.updateProfile.execute(data, cx),
       closeAccount: (data, cx) => useCases.closeAccount.execute(data, cx),
+      updateAvatar: async (data, cx) =>
+        useCases.updateAvatar
+          ? useCases.updateAvatar.execute(data, cx)
+          : fail({
+              code: 'SERVICE_UNAVAILABLE',
+              message: 'Cloud avatars are not available on this lane',
+            }),
+      getAvatar: async (cx) =>
+        useCases.getAvatar
+          ? useCases.getAvatar.execute(cx)
+          : fail({
+              code: 'SERVICE_UNAVAILABLE',
+              message: 'Cloud avatars are not available on this lane',
+            }),
+      getAvatarMeta: async (cx) =>
+        useCases.getAvatar
+          ? useCases.getAvatar.meta(cx)
+          : fail({
+              code: 'SERVICE_UNAVAILABLE',
+              message: 'Cloud avatars are not available on this lane',
+            }),
       queryClosureTimeline: async (cx) => {
         const operationRepo = dependencies.closureOperationRepository;
         if (!operationRepo || !auditRepository) {

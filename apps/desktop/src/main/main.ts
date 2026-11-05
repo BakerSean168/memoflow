@@ -108,7 +108,13 @@ import { DesktopKnowledgeSourceAdapter } from './modules/ai/desktop-knowledge-so
 import { configureDesktopShellIdentity } from './utils/app-icon';
 import { getApiBaseUrl } from './utils/api-config';
 import { createLogger } from '@memoflow/utils/logger';
-import type { AccountClosureReceiptDTO } from '@memoflow/account-contracts';
+import type {
+  AccountAvatarContent,
+  AccountAvatarMeta,
+  AccountAvatarUploadResult,
+  AccountClosureReceiptDTO,
+  UploadAccountAvatarReq,
+} from '@memoflow/account-contracts';
 import { createRuntimeOwnership } from '@memoflow/shared-primitives';
 import { ok, ResultErrorException } from '@memoflow/transport-contracts/result';
 import { toGoalReference, toKeyResultReference } from '@memoflow/goal-contracts';
@@ -507,12 +513,58 @@ async function registerBusinessModules(
     }),
   });
 
+  // Issue #859: cloud avatar transport. The access token never leaves main; the
+  // renderer only receives the avatar data URL / metadata.
+  const cloudAvatarRequest = async <T>(
+    token: string,
+    method: 'GET' | 'PUT',
+    path: string,
+    body?: unknown,
+  ): Promise<T> => {
+    const response = await fetch(`${getApiBaseUrl()}${path}`, {
+      method,
+      headers: {
+        authorization: `Bearer ${token}`,
+        ...(body === undefined ? {} : { 'content-type': 'application/json' }),
+      },
+      body: body === undefined ? undefined : JSON.stringify(body),
+    });
+    const envelope = (await response.json().catch(() => null)) as {
+      ok?: boolean;
+      data?: T;
+      error?: { message?: string };
+    } | null;
+    if (!response.ok || envelope?.ok !== true || envelope.data === undefined) {
+      throw new ResultErrorException(
+        '云端头像同步失败',
+        'CLOUD_AVATAR_SYNC_FAILED',
+        undefined,
+        undefined,
+        undefined,
+        envelope?.error,
+      );
+    }
+    return envelope.data;
+  };
+
   // 5. Account/data-portability/setting/AI/repository with explicit instances.
   //    account/data-portability/setting/AI/repository 均以显式实例组装。
   const accountComposed = composeAccount({
     db,
     clock: createSystemClock(),
     userTimeContextPort: settingElectronModule.userTimeContextPort,
+    cloudAvatar: {
+      getCloudAccountId: () =>
+        mainRuntime?.profileRuntimeManager.getActiveProfileDescriptorSync()?.cloudBinding
+          ?.cloudAccountId ?? null,
+      getCloudAccessToken,
+      readMeta: (token) =>
+        cloudAvatarRequest<AccountAvatarMeta>(token, 'GET', '/accounts/me/avatar/meta'),
+      download: (token) =>
+        cloudAvatarRequest<AccountAvatarContent>(token, 'GET', '/accounts/me/avatar'),
+      upload: (token, request: UploadAccountAvatarReq) =>
+        cloudAvatarRequest<AccountAvatarUploadResult>(token, 'PUT', '/accounts/me/avatar', request),
+    },
     syncOptions: {
       getCloudAccountId: () =>
         mainRuntime?.profileRuntimeManager.getActiveProfileDescriptorSync()?.cloudBinding

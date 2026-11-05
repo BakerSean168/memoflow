@@ -19,6 +19,8 @@ export interface AccountState {
   closedAt: Instant | null;
   createdAt: Instant;
   updatedAt: Instant;
+  /** Cloud avatar last-write-wins timestamp (Issue #859). */
+  avatarUpdatedAt: Instant | null;
 }
 
 export class Account extends AggregateRoot<IdentityId> {
@@ -50,6 +52,10 @@ export class Account extends AggregateRoot<IdentityId> {
     const v = this._props.updatedAt;
     return v as Instant;
   }
+  get avatarUpdatedAt(): Instant | null {
+    const v = this._props.avatarUpdatedAt;
+    return v == null ? null : (v as Instant);
+  }
 
   // ================= Factory Methods =================
 
@@ -62,6 +68,7 @@ export class Account extends AggregateRoot<IdentityId> {
       createdAt: now,
       updatedAt: now,
       closedAt: null,
+      avatarUpdatedAt: null,
     };
     const account = new Account(state);
 
@@ -92,6 +99,15 @@ export class Account extends AggregateRoot<IdentityId> {
     });
   }
 
+  /**
+   * Record that the cloud avatar blob changed. The timestamp is the sole
+   * conflict signal (last-write-wins); the bytes live in `AccountAvatar`.
+   */
+  public markAvatarUpdated(now: Instant): void {
+    this._props.avatarUpdatedAt = now;
+    this._props.updatedAt = now;
+  }
+
   public close(now: Instant): void {
     if (this._props.status === AccountStatus.Closed) {
       throw new Error('Account is already closed.');
@@ -120,6 +136,7 @@ export class Account extends AggregateRoot<IdentityId> {
       createdAt: this._props.createdAt,
       updatedAt: this._props.updatedAt,
       closedAt: this._props.closedAt ? this._props.closedAt : null,
+      avatarUpdatedAt: this._props.avatarUpdatedAt,
     };
   }
 
@@ -131,6 +148,7 @@ export class Account extends AggregateRoot<IdentityId> {
       createdAt: this._props.createdAt,
       updatedAt: this._props.updatedAt,
       closedAt: this._props.closedAt ? this._props.closedAt : null,
+      avatarUpdatedAt: this._props.avatarUpdatedAt,
     };
   }
 }

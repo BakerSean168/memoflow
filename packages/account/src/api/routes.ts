@@ -25,6 +25,10 @@ import {
   AccountViewSchema,
   AccountClosureReceiptSchema,
   BusinessDataSummarySchema,
+  AccountAvatarContentSchema,
+  AccountAvatarMetaSchema,
+  AccountAvatarUploadResultSchema,
+  UploadAccountAvatarRequestSchema,
 } from '@memoflow/account-contracts';
 import type {
   AccountClientDTO,
@@ -120,6 +124,77 @@ export function registerAccountRoutes(
     [...readAuth],
     async (req, ctx) =>
       mapResult(await controller.getProfile(ctx), (account) => composeAccountView(account, req)),
+  );
+
+  // GET /me/avatar/meta — 当前账户头像更新时间（Issue #859）
+  r.route(
+    {
+      method: 'get',
+      path: '/me/avatar/meta',
+      summary: '获取当前账户头像更新时间',
+      responses: {
+        200: successResponse(AccountAvatarMetaSchema, '获取成功'),
+        401: errorResponse('未认证'),
+      },
+    },
+    [...readAuth],
+    (_req, ctx) => controller.getAvatarMeta(ctx),
+  );
+
+  // GET /me/avatar — 当前账户头像（Issue #859）
+  r.route(
+    {
+      method: 'get',
+      path: '/me/avatar',
+      summary: '获取当前账户头像',
+      responses: {
+        200: successResponse(AccountAvatarContentSchema, '获取成功'),
+        401: errorResponse('未认证'),
+        404: errorResponse('头像不存在'),
+      },
+    },
+    [...readAuth],
+    (_req, ctx) => controller.getAvatar(ctx),
+  );
+
+  // PUT /me/avatar — 上传当前账户头像（Issue #859）
+  r.route(
+    {
+      method: 'put',
+      path: '/me/avatar',
+      summary: '上传当前账户头像',
+      request: {
+        body: { content: { 'application/json': { schema: UploadAccountAvatarRequestSchema } } },
+      },
+      responses: {
+        200: successResponse(AccountAvatarUploadResultSchema, '上传成功'),
+        400: errorResponse('参数错误'),
+        401: errorResponse('未认证'),
+      },
+    },
+    [...writeAuth],
+    (req, ctx) => controller.updateAvatar(req.body, ctx),
+  );
+
+  // PUT /:accountId/avatar — 显式账号 id 入口；仅允许操作自己账户（Issue #859）
+  r.route(
+    {
+      method: 'put',
+      path: '/:accountId/avatar',
+      summary: '上传指定账户头像（仅限本人）',
+      request: {
+        params: z.object({ accountId: z.string().min(1) }),
+        body: { content: { 'application/json': { schema: UploadAccountAvatarRequestSchema } } },
+      },
+      responses: {
+        200: successResponse(AccountAvatarUploadResultSchema, '上传成功'),
+        400: errorResponse('参数错误'),
+        401: errorResponse('未认证'),
+        403: errorResponse('不能操作其他账户的头像'),
+      },
+    },
+    [...writeAuth],
+    (req, ctx) => controller.updateAvatar(req.body, ctx, req.params!.accountId),
   );
 
   // PUT /me — 更新当前用户资料

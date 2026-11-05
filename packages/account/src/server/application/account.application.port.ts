@@ -1,9 +1,16 @@
 import type {
   CloseAccountUseCase,
+  GetAccountAvatarUseCase,
   GetAccountProfileUseCase,
   ListAccountsUseCase,
+  UpdateAccountAvatarUseCase,
   UpdateAccountProfileUseCase,
 } from './use-cases';
+import type {
+  AccountAvatarContent,
+  AccountAvatarMeta,
+  AccountAvatarUploadResult,
+} from '@memoflow/account-contracts';
 import type { OperationTimelineEntry, OperationAuditRecord } from '@memoflow/operations-contracts';
 import type { Result } from '@memoflow/transport-contracts/result';
 import type { ExecutionContext } from '@memoflow/transport-contracts';
@@ -27,6 +34,19 @@ export interface AccountApplicationPort {
     data: Parameters<CloseAccountUseCase['execute']>[0],
     cx: Parameters<CloseAccountUseCase['execute']>[1],
   ): Promise<Awaited<ReturnType<CloseAccountUseCase['execute']>>>;
+  /** Issue #859: store the authenticated account's cloud avatar. */
+  updateAvatar(
+    data: Parameters<UpdateAccountAvatarUseCase['execute']>[0],
+    cx: Parameters<UpdateAccountAvatarUseCase['execute']>[1],
+  ): Promise<Result<AccountAvatarUploadResult>>;
+  /** Issue #859: read the authenticated account's cloud avatar. */
+  getAvatar(
+    cx: Parameters<GetAccountAvatarUseCase['execute']>[0],
+  ): Promise<Result<AccountAvatarContent>>;
+  /** Issue #859: read only the avatar timestamp for conflict checks. */
+  getAvatarMeta(
+    cx: Parameters<GetAccountAvatarUseCase['meta']>[0],
+  ): Promise<Result<AccountAvatarMeta>>;
   /** W7: 按 identity 查询 closure operation timeline */
   queryClosureTimeline(cx: ExecutionContext): Promise<Result<OperationTimelineEntry[]>>;
   /** W7: 重放失败的 closure operation 并记录审计 */

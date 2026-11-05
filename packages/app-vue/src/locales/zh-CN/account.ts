@@ -119,6 +119,7 @@ export default {
   },
   avatar: {
     saved: '头像已更新',
+    cloudSyncFailed: '头像已保存，云端同步稍后重试',
     uploading: '正在处理头像...',
     failed: '头像更新失败',
     invalidType: '请选择图片文件',

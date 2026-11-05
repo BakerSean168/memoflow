@@ -10,9 +10,13 @@ import { map as mapResult } from '@memoflow/transport-contracts';
 import { AccountChannels } from '@memoflow/desktop-contracts';
 import type { IAccountApiClient, IResultIpcClient } from '../types';
 import type {
+  AccountAvatarContent,
+  AccountAvatarMeta,
+  AccountAvatarUploadResult,
   AccountClientDTO,
   AccountView,
   UpdateAccountReq,
+  UploadAccountAvatarReq,
   CloseAccountReq,
   CloseAccountRes,
 } from '@memoflow/account-contracts';
@@ -35,6 +39,20 @@ export class AccountIpcAdapter implements IAccountApiClient {
 
   async closeAccount(request: CloseAccountReq): Promise<Result<CloseAccountRes>> {
     return this.ipcClient.invoke(AccountChannels.CLOSE, request);
+  }
+
+  async getMyAvatarMeta(): Promise<Result<AccountAvatarMeta>> {
+    return this.ipcClient.invoke(AccountChannels.AVATAR_META);
+  }
+
+  async downloadMyAvatar(): Promise<Result<AccountAvatarContent>> {
+    return this.ipcClient.invoke(AccountChannels.AVATAR_DOWNLOAD);
+  }
+
+  async uploadMyAvatar(
+    request: UploadAccountAvatarReq,
+  ): Promise<Result<AccountAvatarUploadResult>> {
+    return this.ipcClient.invoke(AccountChannels.AVATAR_UPLOAD, request);
   }
 }
 

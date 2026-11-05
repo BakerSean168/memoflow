@@ -74,6 +74,7 @@ describe('Account', () => {
         createdAt: original.createdAt,
         updatedAt: original.updatedAt,
         closedAt: original.closedAt,
+        avatarUpdatedAt: original.avatarUpdatedAt,
       });
       expect(loaded.profile.nickname).toBe('Loaded User');
       expect(loaded.domainEvents).toHaveLength(0); // no events on load

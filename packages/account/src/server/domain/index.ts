@@ -11,6 +11,10 @@ export type { AccountState } from './aggregates/account';
 // Repositories
 export { type IAccountRepository } from './repositories/i-account-repository';
 export {
+  type IAccountAvatarRepository,
+  type AccountAvatarRecord,
+} from './repositories/i-account-avatar-repository';
+export {
   type IAccountClosureOperationRepository,
   type AccountClosureOperationRecord,
   type AccountClosurePhase,
