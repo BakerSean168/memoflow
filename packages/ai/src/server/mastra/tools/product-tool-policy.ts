@@ -1,4 +1,4 @@
-import type { AIChatPermissionMode } from '@memoflow/ai-contracts';
+import { PermissionPresetSchema, type AIChatPermissionMode } from '@memoflow/ai-contracts';
 import type { RequestContext } from '@mastra/core/request-context';
 import {
   authorize,
@@ -46,6 +46,22 @@ export function memoFlowToolCategory(toolName: string): ToolCategory {
   return memoFlowToolPolicy(toolName)?.category ?? 'other';
 }
 
+/** Business session ceiling; runtime machine modes are deliberately never read here. */
+function conversationBusinessPreset(context: RequestContext) {
+  const preset = PermissionPresetSchema.safeParse(context.getRaw('conversationBusinessPreset'));
+  return preset.success ? preset.data : undefined;
+}
+
+function businessCeiling(name: string, context: RequestContext) {
+  const preset = conversationBusinessPreset(context);
+  return preset
+    ? operationIds(name).map(
+        (operationId) =>
+          evaluatePermission({ agentId: 'builtin-mastra', operationId, preset }).decision,
+      )
+    : [];
+}
+
 const DECISIONS = 'memoFlowToolDecisions';
 type Decisions = Record<string, PermissionDecision>;
 function decisions(context: RequestContext): Decisions {
@@ -65,6 +81,7 @@ function authorizationInput(name: string, context: RequestContext) {
     agentId: typeof agent === 'string' ? agent : 'builtin-mastra',
     conversationId: typeof conversation === 'string' ? conversation : null,
     operationId: permissionOperationForTool(name)?.id ?? name,
+    conversationPreset: conversationBusinessPreset(context),
   };
 }
 
@@ -89,12 +106,14 @@ export async function checkMemoFlowToolPermission(
       authorize(repository, { ...authorizationInput(name, context), operationId }),
     ),
   );
-  // Runtime machine permissions never select or widen a business preset.
-  const decision = records.some((record) => record.decision === 'deny')
-    ? 'deny'
-    : records.some((record) => record.decision === 'ask')
-      ? 'ask'
-      : 'allow';
+  // Compose existing business authorization with the business-only session ceiling.
+  const ceiling = businessCeiling(name, context);
+  const decision =
+    records.some((record) => record.decision === 'deny') || ceiling.includes('deny')
+      ? 'deny'
+      : records.some((record) => record.decision === 'ask') || ceiling.includes('ask')
+        ? 'ask'
+        : 'allow';
   current[name] = decision;
   return decision;
 }
@@ -137,6 +156,9 @@ export async function executeMemoFlowTool<T>(
   work: () => Promise<T>,
 ): Promise<T> {
   const approved = decisions(context)[name];
+  const ceiling = businessCeiling(name, context);
+  if (ceiling.includes('deny') || (ceiling.includes('ask') && approved !== 'ask'))
+    throw new Error('Agent operation is not authorized');
   let execute = work;
   for (const operationId of operationIds(name)) {
     const next = execute;

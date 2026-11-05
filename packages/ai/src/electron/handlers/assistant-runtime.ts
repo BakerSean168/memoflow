@@ -251,6 +251,7 @@ export function registerAssistantRuntimeHandlers(
             providerId: messageCommand.providerId,
             modelId: messageCommand.modelId,
             agentInstanceId: messageCommand.agentInstanceId,
+            conversationBusinessPreset: messageCommand.conversationBusinessPreset,
             permissionMode: messageCommand.permissionMode,
             ...(messageCommand.runtimeKind === 'local_agent' && messageCommand.nativeModelOptions
               ? { modelOptions: messageCommand.nativeModelOptions }

@@ -217,3 +217,36 @@ it.each(['approval-required', 'auto-accept-edits', 'auto', 'full-access'] as con
     );
   },
 );
+
+// The session business preset can narrow global grants, including under full machine access.
+it.each([
+  ['read_only', 'deny'],
+  ['confirm_each', 'ask'],
+  ['on_demand', 'ask'],
+  ['full_auto', 'allow'],
+] as const)(
+  'applies the %s business ceiling independently of full-access',
+  async (preset, expected) => {
+    const f = fixture();
+    f.context.setRaw('permissionMode', 'full-access');
+    f.context.setRaw('conversationBusinessPreset', preset);
+    await f.permissions.saveSettings('owner', {
+      preset: 'full_auto',
+      agentPresets: {},
+      revision: 1,
+    });
+    await applyMemoFlowSessionToolPolicy(f.session, 'full-access', f.context);
+    expect(await checkMemoFlowToolPermission(f.permissions, 'routine_create', f.context)).toBe(
+      expected,
+    );
+    expect(f.session.resolveToolApproval('routine_create')).toBe(expected);
+    await f.permissions.saveSettings('owner', {
+      preset: 'read_only',
+      agentPresets: {},
+      revision: 2,
+    });
+    expect(await checkMemoFlowToolPermission(f.permissions, 'routine_create', f.context)).toBe(
+      'deny',
+    );
+  },
+);

@@ -76,6 +76,7 @@ export type AssistantTurnInput = {
   providerId?: string;
   modelId?: string;
   agentInstanceId?: string;
+  conversationBusinessPreset?: import('@memoflow/ai-contracts').PermissionPreset;
   permissionMode?: AIChatPermissionMode;
   locale?: 'zh-CN' | 'en-US';
   attachments?: readonly AssistantRuntimeAttachment[];

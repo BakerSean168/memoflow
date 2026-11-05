@@ -14,6 +14,7 @@ import {
  * client payload that attempts to smuggle identityId is rejected.
  */
 
+import { PermissionPresetSchema } from './ai-permission.dto';
 import { AIChatPermissionModeSchema } from './runtime-permission';
 export { AIChatPermissionModeSchema } from './runtime-permission';
 export type { AIChatPermissionMode } from './runtime-permission';
@@ -180,6 +181,7 @@ export const AssistantRuntimeClientCommandSchema = z
         /** Stable Mastra instance chosen in the composer (never API vendor ID). */
         agentInstanceId: AgentInstanceSlugSchema.optional(),
         permissionMode: AIChatPermissionModeSchema.optional(),
+        conversationBusinessPreset: PermissionPresetSchema.optional(),
         /** Desktop native-agent only; validated against the current host model catalog. */
         nativeModelOptions: LocalAgentModelOptionsSchema.optional(),
         locale: z.enum(['zh-CN', 'en-US']).optional(),

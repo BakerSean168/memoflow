@@ -519,6 +519,10 @@ export class MastraAIRuntime implements AIWorkflowRuntimePort {
       : 'approval-required';
     const requestContext = new RequestContext();
     requestContext.setRaw('permissionMode', mode);
+    requestContext.setRaw(
+      'conversationBusinessPreset',
+      snapshot?.requestContext?.conversationBusinessPreset,
+    );
     const agentInstanceId = snapshot?.requestContext?.agentInstanceId;
     if (typeof agentInstanceId === 'string')
       requestContext.setRaw('agentInstanceId', agentInstanceId);
@@ -1195,6 +1199,7 @@ export class MastraAIRuntime implements AIWorkflowRuntimePort {
     const requestContext = new RequestContext();
     requestContext.setRaw('identityId', input.identityId);
     requestContext.setRaw('permissionMode', input.permissionMode ?? 'approval-required');
+    requestContext.setRaw('conversationBusinessPreset', input.conversationBusinessPreset);
     if (input.agentInstanceId) requestContext.setRaw('agentInstanceId', input.agentInstanceId);
     requestContext.setRaw('providerId', resolvedModel.providerId);
     requestContext.setRaw('modelId', resolvedModel.modelId);
