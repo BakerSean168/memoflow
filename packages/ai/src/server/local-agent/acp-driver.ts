@@ -332,22 +332,30 @@ export class AcpDriver {
     const sessionId = input?.nativeSessionId ?? sessionResponse.parse(session).sessionId;
     this.sessionId = sessionId;
     const state = modelsFromOptions(session);
-    if (antigravity) {
-      const modes = z
-        .object({
-          modes: z.object({
+    const modes = z
+      .object({
+        modes: z
+          .object({
             currentModeId: z.string(),
             availableModes: z.array(z.object({ id: z.string() })).max(20),
-          }),
-        })
-        .parse(session).modes;
-      if (!modes.availableModes.some((mode) => mode.id === 'default'))
+          })
+          .optional(),
+      })
+      .parse(session).modes;
+    if (modes) {
+      // ACP mode IDs are provider-defined. Only recognized unrestricted modes
+      // have known semantics; never infer permission strength from list order.
+      const permissive = ['bypassPermissions', 'yolo', 'full-access', 'auto-approve'].find((id) =>
+        modes.availableModes.some((mode) => mode.id === id),
+      );
+      const modeId = input?.runtimeMode === 'full-access' ? (permissive ?? 'default') : 'default';
+      if (!modes.availableModes.some((mode) => mode.id === modeId))
         throw new LocalAgentError('LOCAL_AGENT_PROTOCOL_ERROR');
-      // Keep the native Agent in per-action approval mode, even when resuming an
-      // externally-created session. MemoFlow alone applies this turn's permission mode.
-      if (modes.currentModeId !== 'default')
-        await transport.request('session/set_mode', { sessionId, modeId: 'default' });
+      if (modes.currentModeId !== modeId)
+        await transport.request('session/set_mode', { sessionId, modeId });
     }
+    // DSH can omit modes entirely; then native permission callbacks are handled
+    // by the MemoFlow relay. Unknown kinds remain ask, never presumed edits.
     const reportedVersion = init.agentInfo?.version;
     const version = nativeVersion(
       antigravity ? reportedVersion?.replace(/^agy_acp_server_/u, '') : reportedVersion,
@@ -596,6 +604,14 @@ export class AcpDriver {
           type: 'permission',
           requestId,
           title,
+          operation:
+            parsed.data.toolCall.kind === 'edit'
+              ? 'edit'
+              : parsed.data.toolCall.kind === 'read'
+                ? 'read'
+                : parsed.data.toolCall.kind === 'execute'
+                  ? 'command'
+                  : 'other',
           ...acpPermissionScope(parsed.data.toolCall),
         };
     this.requests.set(requestId, {
