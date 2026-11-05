@@ -93,6 +93,14 @@ export default {
     birthday: 'Birthday',
     editProfile: 'Edit Profile',
   },
+  profileEditor: {
+    title: 'Edit profile',
+    description: 'Your nickname is the primary display name and saves to the current account.',
+    unsaved: "Don't forget to save your changes!",
+    reset: 'Reset',
+    save: 'Save',
+    saving: 'Saving…',
+  },
   avatar: {
     saved: 'Avatar updated',
     uploading: 'Processing avatar...',

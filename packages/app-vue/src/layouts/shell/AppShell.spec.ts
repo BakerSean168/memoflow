@@ -8,7 +8,7 @@ import { createI18n } from 'vue-i18n';
 import { createMemoryHistory, createRouter } from 'vue-router';
 import { defineComponent, h, nextTick, onMounted, reactive, ref } from 'vue';
 import { beforeEach, describe, expect, it, onTestFinished, vi } from 'vitest';
-import { DESKTOP_UPDATE_SERVICE_KEY } from '../../di/keys';
+import { ACCOUNT_SERVICE_KEY, DESKTOP_UPDATE_SERVICE_KEY } from '../../di/keys';
 import type { DesktopUpdateService } from '../../di/types';
 import { ok } from '@memoflow/transport-contracts/result';
 import type { DesktopUpdateSnapshotDTO } from '@memoflow/desktop-contracts';
@@ -207,6 +207,23 @@ const i18n = createI18n({
   messages: {
     'en-US': {
       common: { untitled: 'Untitled', close: 'Close' },
+      account: {
+        profile: {
+          nickname: 'Nickname',
+          bio: 'Bio',
+          changeAvatar: 'Change avatar',
+          avatarRecommendation: 'Recommended: 200x200 pixels',
+        },
+        placeholder: { nickname: 'Enter nickname', bio: 'About you' },
+        profileEditor: {
+          title: 'Edit profile',
+          description: 'Update your profile.',
+          unsaved: "Don't forget to save your changes!",
+          reset: 'Reset',
+          save: 'Save',
+          saving: 'Saving…',
+        },
+      },
       nav: {
         capsule: {
           goal: 'Goals',
@@ -244,6 +261,33 @@ const i18n = createI18n({
   },
 });
 
+const shellAccountService = {
+  getMyProfile: vi.fn().mockResolvedValue({
+    ok: true,
+    data: {
+      account: {
+        id: 'account-1',
+        status: 'Active',
+        profile: {
+          nickname: 'Shell User',
+          realName: null,
+          avatarUrl: null,
+          bio: null,
+          gender: 'Unspecified',
+          birthday: null,
+        },
+        version: 1,
+        createdAt: 1,
+        updatedAt: 1,
+        closedAt: null,
+      },
+      cloudIdentity: null,
+    },
+  }),
+  updateMyProfile: vi.fn(),
+  closeAccount: vi.fn(),
+};
+
 async function mountShell(
   initialPath = '/',
   attachTo?: Element,
@@ -274,7 +318,12 @@ async function mountShell(
     attachTo,
     global: {
       plugins: [pinia, router, i18n],
-      provide: updateService ? { [DESKTOP_UPDATE_SERVICE_KEY as symbol]: updateService } : {},
+      provide: {
+        ...(updateService ? { [DESKTOP_UPDATE_SERVICE_KEY as symbol]: updateService } : {}),
+        // The shell owns the profile editor dialog; its account seam lives at the
+        // app root in production, so the shell spec supplies the same slot.
+        [ACCOUNT_SERVICE_KEY as symbol]: shellAccountService,
+      },
       stubs: {
         AIChatView: AIChatViewStub,
         WindowHeader: WindowHeaderStub,
@@ -900,6 +949,28 @@ describe('AppShell right-panel integration', () => {
     expect(wrapper.get('[data-testid="goal-draft-probe"]').exists()).toBe(true);
     expect(goalRouteMountCount).toBe(1);
     wrapper.unmount();
+  });
+
+  it('keeps the profile editor dialog behind the shell-provided intent', async () => {
+    const { wrapper } = await mountShell();
+    const dialog = wrapper.findComponent({ name: 'AccountProfileEditorDialog' });
+    expect(dialog.exists()).toBe(true);
+    expect(dialog.props('open')).toBe(false);
+    expect(document.querySelector('[data-testid="profile-editor-dialog"]')).toBeNull();
+
+    // v-model write → the shell intent is the single owner of the open flag.
+    dialog.vm.$emit('update:open', true);
+    await flushPromises();
+    await nextTick();
+    expect(dialog.props('open')).toBe(true);
+    expect(document.querySelector('[data-testid="profile-editor-dialog"]')).not.toBeNull();
+
+    // Clean dialog: closing through the same binding hides it again.
+    dialog.vm.$emit('update:open', false);
+    await flushPromises();
+    await nextTick();
+    expect(dialog.props('open')).toBe(false);
+    expect(document.querySelector('[data-testid="profile-editor-dialog"]')).toBeNull();
   });
 });
 

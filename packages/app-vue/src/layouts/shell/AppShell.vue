@@ -36,7 +36,12 @@ import { useShellRouterSync, moduleForPath } from './useShellRouterSync';
 import { useDesktopWindowControls } from '../../shared/composables/useDesktopWindowControls';
 import { hasDesktopAuthApi } from '../../shared/utils/desktop-auth-recovery';
 import { useNotificationUnreadQuery } from '@memoflow/notification-ui';
-import { useAccountSignOut, useAccountStore, useAuthenticationStore } from '@memoflow/account-ui';
+import {
+  useAccountSignOut,
+  useAccountStore,
+  useAuthenticationStore,
+  AccountProfileEditorDialog,
+} from '@memoflow/account-ui';
 import { createProfileEditorIntent } from '@memoflow/account-ui/host';
 import {
   ConversationSelectionKey,
@@ -440,6 +445,13 @@ const needsEmailVerification = computed(
  */
 const profileEditorIntent = createProfileEditorIntent();
 provide(PROFILE_EDITOR_INTENT_KEY, profileEditorIntent);
+/** `v-model:open` bridge: the dialog closes through the same intent the sidebar opens. */
+const profileEditorOpen = computed({
+  get: () => profileEditorIntent.open.value,
+  set: (open: boolean) => {
+    profileEditorIntent.open.value = open;
+  },
+});
 
 /** 云账户在账户块与个人卡片里显示邮箱；本地账户没有邮箱。 */
 const accountEmail = computed<string | null>(() => authStore.currentIdentity?.email ?? null);
@@ -1083,6 +1095,7 @@ onBeforeUnmount(() => {
     :profile-name="desktopAccess?.profile?.displayName"
     :intent="cloudConnectionIntent"
   />
+  <AccountProfileEditorDialog v-model:open="profileEditorOpen" />
 </template>
 
 <style scoped>
