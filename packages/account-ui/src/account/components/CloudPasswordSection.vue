@@ -30,6 +30,7 @@ const { isLoading: passwordLoading, changePassword, forgotPassword } = usePasswo
 
 const changeForm = ref({ currentPassword: '', newPassword: '', confirmPassword: '' });
 const forgotEmail = ref(store.currentIdentity?.email ?? '');
+const maskedResetEmail = computed(() => forgotEmail.value.replace(/^(.).*(@.*)$/, '$1***$2'));
 
 const receipt = computed(() => store.passwordMutationError);
 const isAuthenticated = computed(() => store.isAuthenticated);
@@ -201,14 +202,10 @@ function handleDismiss() {
           @submit.prevent="handleSendResetEmail"
         >
           <div class="min-w-0 flex-1 space-y-2">
-            <Label for="cloud-forgot-email">{{ t('account.password.resetEmail') }}</Label>
-            <Input
-              id="cloud-forgot-email"
-              v-model="forgotEmail"
-              data-testid="cloud-password-forgot-email"
-              type="email"
-              autocomplete="email"
-            />
+            <p class="text-sm">{{ t('account.password.resetEmail') }}</p>
+            <p data-testid="cloud-password-reset-recipient" class="text-sm text-muted-foreground">
+              {{ maskedResetEmail }}
+            </p>
           </div>
           <Button
             type="submit"

@@ -200,6 +200,20 @@ describe('CloudPasswordSection (W6 P1-3 auth receipt restore UI)', () => {
     ).toBe(false);
   });
 
+  it('masks the reset recipient but sends the link to the authenticated email', async () => {
+    const pinia = createPinia();
+    seedAuthenticatedAccount(pinia);
+    const service = createService({ forgotPassword: vi.fn().mockResolvedValue(ok(undefined)) });
+    const wrapper = mountSection(service, pinia);
+    expect(wrapper.get('[data-testid="cloud-password-reset-recipient"]').text()).toBe(
+      'p***@example.com',
+    );
+    expect(wrapper.text()).not.toContain('person@example.com');
+    expect(wrapper.find('input[type="email"]').exists()).toBe(false);
+    await submitClosestForm(wrapper, 'cloud-password-forgot-button');
+    expect(service.forgotPassword).toHaveBeenCalledWith('person@example.com');
+  });
+
   it('renders the structured receipt with message, request id and retry action after a failed change-password', async () => {
     const service = createService({
       changePassword: vi.fn().mockResolvedValue(

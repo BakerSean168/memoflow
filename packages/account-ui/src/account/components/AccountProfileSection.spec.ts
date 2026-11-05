@@ -438,6 +438,24 @@ describe('AccountProfileSection', () => {
     expect(logout).toHaveBeenCalledOnce();
   });
 
+  it('removes every personal profile field in settings while preserving password and sign-out', async () => {
+    const service = {
+      getMyProfile: vi
+        .fn()
+        .mockResolvedValue({ ok: true, data: { account: guestDto, cloudIdentity: null } }),
+      updateMyProfile: vi.fn(),
+    } as unknown as AccountClientPort;
+    const wrapper = mountSection(service, { desktop: { invoke: vi.fn() } });
+    await wrapper.setProps({ showProfile: false });
+    await flushPromises();
+    expect(wrapper.find('[data-testid="account-profile-nickname"]').exists()).toBe(false);
+    expect(wrapper.find('#bio').exists()).toBe(false);
+    expect(wrapper.find('[data-testid="account-profile-avatar"]').exists()).toBe(false);
+    expect(wrapper.find('[data-testid="account-profile-save"]').exists()).toBe(false);
+    expect(wrapper.find('[data-testid="account-local-password"]').exists()).toBe(true);
+    expect(wrapper.find('[data-testid="account-logout-button"]').exists()).toBe(true);
+  });
+
   it('changes the local account password only when both entries match', async () => {
     const invoke = vi.fn().mockResolvedValue({ ok: true, data: null });
     const accountService = {
@@ -451,6 +469,7 @@ describe('AccountProfileSection', () => {
     await flushPromises();
 
     const form = wrapper.get('[data-testid="account-local-password"]');
+    await wrapper.get('[data-testid="account-local-password-current"]').setValue('old-password');
     await wrapper.get('[data-testid="account-local-password-new"]').setValue('account-password');
     await wrapper
       .get('[data-testid="account-local-password-confirmation"]')
@@ -465,7 +484,10 @@ describe('AccountProfileSection', () => {
     form.element.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
     await flushPromises();
 
-    expect(invoke).toHaveBeenCalledWith(ProfileAccessChannels.PASSWORD_SET, 'account-password');
+    expect(invoke).toHaveBeenCalledWith(ProfileAccessChannels.PASSWORD_SET, {
+      currentPassword: 'old-password',
+      newPassword: 'account-password',
+    });
     expect(
       (wrapper.get('[data-testid="account-local-password-new"]').element as HTMLInputElement).value,
     ).toBe('');

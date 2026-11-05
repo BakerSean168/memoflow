@@ -1,4 +1,6 @@
 import type {
+  CloudAccountSecurityPort,
+  AccountSecuritySession,
   CloudAuthClientPort,
   CloudAuthDesktopClientPort,
   CloudAuthWebClientPort,
@@ -46,7 +48,7 @@ function account(user: BetterAuthUser) {
   return { id: user.id, email: user.email, name: user.name, emailVerified: user.emailVerified };
 }
 
-class CloudAuthHttpClient implements CloudAuthWebClientPort {
+class CloudAuthHttpClient implements CloudAuthWebClientPort, CloudAccountSecurityPort {
   constructor(private readonly baseUrl: string) {}
 
   private async request<T>(path: string, body?: unknown): Promise<Result<T>> {
@@ -134,6 +136,21 @@ class CloudAuthHttpClient implements CloudAuthWebClientPort {
   changePassword(input: { currentPassword: string; newPassword: string }) {
     return this.request<void>('/change-password', input);
   }
+  verifyAccountPassword(password: string) {
+    return this.request<void>('/account-security/verify-password', { password });
+  }
+  requestEmailChange(input: { password: string; newEmail: string }) {
+    return this.request<void>('/account-security/change-email', input);
+  }
+  listAccountSessions() {
+    return this.request<AccountSecuritySession[]>('/account-security/sessions');
+  }
+  revokeAccountSession(sessionId: string) {
+    return this.request<void>('/account-security/revoke-session', { sessionId });
+  }
+  deleteAccountPermanently(input: { password: string; confirmation: 'DELETE' }) {
+    return this.request<void>('/account-security/delete-account', input);
+  }
   beginGithubSignIn(callbackURL = '/') {
     return this.request<{ url: string }>('/sign-in/social', { provider: 'github', callbackURL });
   }
@@ -160,13 +177,42 @@ class CloudAuthHttpClient implements CloudAuthWebClientPort {
   }
 }
 
-class CloudAuthIpcClient implements CloudAuthDesktopClientPort {
+class CloudAuthIpcClient implements CloudAuthDesktopClientPort, CloudAccountSecurityPort {
   constructor(private readonly ipc: IResultIpcClient) {}
   signOut() {
     return this.ipc.invoke<void>(CloudAuthChannels.SIGN_OUT);
   }
   getSession() {
     return this.ipc.invoke<CloudSessionState>(CloudAuthChannels.SESSION);
+  }
+  verifyAccountPassword(password: string) {
+    return this.ipc.invoke<void>(CloudAuthChannels.ACCOUNT_SECURITY, {
+      action: 'verify-password',
+      password,
+    });
+  }
+  requestEmailChange(input: { password: string; newEmail: string }) {
+    return this.ipc.invoke<void>(CloudAuthChannels.ACCOUNT_SECURITY, {
+      action: 'change-email',
+      ...input,
+    });
+  }
+  listAccountSessions() {
+    return this.ipc.invoke<AccountSecuritySession[]>(CloudAuthChannels.ACCOUNT_SECURITY, {
+      action: 'sessions',
+    });
+  }
+  revokeAccountSession(sessionId: string) {
+    return this.ipc.invoke<void>(CloudAuthChannels.ACCOUNT_SECURITY, {
+      action: 'revoke-session',
+      sessionId,
+    });
+  }
+  deleteAccountPermanently(input: { password: string; confirmation: 'DELETE' }) {
+    return this.ipc.invoke<void>(CloudAuthChannels.ACCOUNT_SECURITY, {
+      action: 'delete-account',
+      ...input,
+    });
   }
   beginCloudConnection(
     request: import('@memoflow/cloud-auth-contracts').DesktopCloudConnectionRequest,
@@ -195,12 +241,14 @@ class CloudAuthIpcClient implements CloudAuthDesktopClientPort {
 export function createCloudAuthHttpClient(
   _httpClient?: IResultHttpClient,
   options?: { baseUrl?: string },
-): CloudAuthWebClientPort {
+): CloudAuthWebClientPort & CloudAccountSecurityPort {
   const configured =
     options?.baseUrl ?? (typeof window !== 'undefined' ? window.location.origin : '');
   return new CloudAuthHttpClient(normalizeBaseUrl(configured));
 }
 
-export function createCloudAuthIpcClient(ipcClient: IResultIpcClient): CloudAuthDesktopClientPort {
+export function createCloudAuthIpcClient(
+  ipcClient: IResultIpcClient,
+): CloudAuthDesktopClientPort & CloudAccountSecurityPort {
   return new CloudAuthIpcClient(ipcClient);
 }

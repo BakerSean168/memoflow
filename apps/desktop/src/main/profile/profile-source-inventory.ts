@@ -202,7 +202,15 @@ export async function inspectProfileSource(db: IElectronDatabase, profileDir: st
             .parse(await snapshot.getAll(`SELECT * FROM ${quoted} LIMIT 10001`));
           if (rows.length > 10000)
             throw new ResultErrorException('SOURCE_INVENTORY_LIMIT', 'SOURCE_INVENTORY_LIMIT');
-          if (rows.length) block('storage/mastra.db');
+          // Only the startup-generated stream epoch is disposable metadata.
+          // Messages, workflow snapshots and unreviewed tables retain the source.
+          const runtimeEpoch =
+            name === 'memoflow_goal_event_meta' &&
+            rows.length === 1 &&
+            Object.keys(rows[0]!).sort().join(',') === 'epoch,id' &&
+            rows[0]!.id === 1 &&
+            z.uuid().safeParse(rows[0]!.epoch).success;
+          if (rows.length && !runtimeEpoch) block('storage/mastra.db');
           content.push({
             name,
             digest: profileImportDigest(
@@ -244,7 +252,13 @@ export async function inspectProfileSource(db: IElectronDatabase, profileDir: st
         proof.push({ name: relative, digest: profileImportDigest(await fs.readlink(absolute)) });
       } else if (entry.isDirectory()) {
         await walk(absolute);
-      } else if (entry.isFile() && !technicalFiles.has(relative)) {
+      } else if (
+        entry.isFile() &&
+        !technicalFiles.has(relative) &&
+        !/^storage\/local-agents\/model-catalog\/[a-f0-9]{64}\.json(?:\.[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}\.tmp)?$/.test(
+          relative,
+        )
+      ) {
         const stat = await fs.stat(absolute);
         bytes += stat.size;
         if (bytes > 512 * 1024 * 1024)

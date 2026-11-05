@@ -305,11 +305,20 @@ describe('registerProfileAccessIpc', () => {
     registerProfileAccessIpc({} as never, runtime as never, {} as never);
 
     expect(
-      await handlers.get(ProfileAccessChannels.PASSWORD_SET)?.({}, 'account-password'),
+      await handlers.get(ProfileAccessChannels.PASSWORD_SET)?.(
+        {},
+        { currentPassword: 'old-password', newPassword: 'account-password' },
+      ),
     ).toMatchObject({ ok: true });
-    expect(runtime.setCurrentProfilePassword).toHaveBeenCalledWith('account-password');
+    expect(runtime.setCurrentProfilePassword).toHaveBeenCalledWith(
+      'account-password',
+      'old-password',
+    );
     expect(
-      await handlers.get(ProfileAccessChannels.PASSWORD_SET)?.({}, 'account-password'),
+      await handlers.get(ProfileAccessChannels.PASSWORD_SET)?.(
+        {},
+        { currentPassword: 'old-password', newPassword: 'account-password' },
+      ),
     ).toMatchObject({ ok: false, error: { code: 'PROFILE_NOT_LOCAL_ACCOUNT' } });
     expect(await handlers.get(ProfileAccessChannels.PASSWORD_SET)?.({}, 'short')).toMatchObject({
       ok: false,

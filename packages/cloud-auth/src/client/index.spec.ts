@@ -91,6 +91,13 @@ describe('CloudAuthHttpClient', () => {
 
   it.each([
     {
+      status: 400,
+      providerCode: 'INVALID_PASSWORD',
+      providerMessage: 'Password invalid',
+      expectedCode: 'UNAUTHORIZED',
+      expectedMessage: 'Current password is incorrect',
+    },
+    {
       status: 401,
       providerCode: 'INVALID_EMAIL_OR_PASSWORD',
       providerMessage: 'Invalid email or password',
