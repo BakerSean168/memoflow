@@ -151,12 +151,14 @@ export class ClaudeDriver {
                 {
                   hooks: [
                     async (event) => {
-                      if (
-                        event.hook_event_name !== 'PreToolUse'
-                      )
-                        return {};
+                      if (event.hook_event_name !== 'PreToolUse') return {};
                       if (!event.tool_name.startsWith(memoFlowToolPrefix))
-                        return { hookSpecificOutput: { hookEventName: 'PreToolUse', permissionDecision: 'ask' } };
+                        return {
+                          hookSpecificOutput: {
+                            hookEventName: 'PreToolUse',
+                            permissionDecision: 'ask',
+                          },
+                        };
                       const name = event.tool_name.slice(memoFlowToolPrefix.length);
                       // Names come from the authenticated bridge's actual tools/list registry.
                       // Business writes are approved by the bridge, not twice by the Provider.
@@ -183,7 +185,9 @@ export class ClaudeDriver {
               model: input.modelId,
               ...(input.modelOptions?.reasoningEffort &&
               LocalAgentModelOptionValueSchema.safeParse(input.modelOptions.reasoningEffort).success
-                ? { effort: input.modelOptions.reasoningEffort as Options['effort'] }
+                ? {
+                    effort: input.modelOptions.reasoningEffort as Options['effort'],
+                  }
                 : {}),
               ...(input.nativeSessionId ? { resume: input.nativeSessionId } : {}),
             }
@@ -308,7 +312,10 @@ export class ClaudeDriver {
       void this.consume(input, init.fingerprint).catch((error) => {
         if (error instanceof z.ZodError)
           logger.warn('Native protocol shape rejected', {
-            issues: error.issues.map((issue) => ({ path: issue.path, code: issue.code })),
+            issues: error.issues.map((issue) => ({
+              path: issue.path,
+              code: issue.code,
+            })),
           });
         this.queue.fail(
           error instanceof LocalAgentError
@@ -357,7 +364,10 @@ export class ClaudeDriver {
           .object({
             type: z.string(),
             delta: z
-              .object({ type: z.string(), text: z.string().max(200_000).optional() })
+              .object({
+                type: z.string(),
+                text: z.string().max(200_000).optional(),
+              })
               .optional(),
             content_block: z
               .object({
@@ -392,7 +402,10 @@ export class ClaudeDriver {
         const message = z
           .object({
             content: z.array(
-              z.object({ type: z.string(), text: z.string().max(200_000).optional() }),
+              z.object({
+                type: z.string(),
+                text: z.string().max(200_000).optional(),
+              }),
             ),
           })
           .parse(frame.message);
@@ -459,7 +472,11 @@ export class ClaudeDriver {
     } else
       request = {
         type: 'permission',
-        operation: ['Edit', 'Write', 'MultiEdit', 'NotebookEdit'].includes(name) ? 'edit' : name === 'Bash' ? 'command' : 'other',
+        operation: ['Edit', 'Write', 'MultiEdit', 'NotebookEdit'].includes(name)
+          ? 'edit'
+          : name === 'Bash'
+            ? 'command'
+            : 'other',
         requestId,
         title: `${name}: ${JSON.stringify(args)}`.slice(0, 500),
       };

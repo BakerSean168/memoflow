@@ -231,21 +231,42 @@ const speedOptions = computed(() => {
 });
 const permissionOptions = computed(() => {
   const supported = currentAgent.value?.supportedRuntimeModes;
-  return AIChatPermissionModeSchema.options.filter((mode) => !supported || supported.includes(mode)).map((id) => ({
-    id,
-    label: t('aiAssistant.composer.runtimeModes.' + id + '.label'),
-    hint: t('aiAssistant.composer.runtimeModes.' + id + '.hint'),
-    icon: { 'approval-required': Lock, 'auto-accept-edits': PenLine, auto: Sparkles, 'full-access': ShieldOff }[id],
-  }));
+  return AIChatPermissionModeSchema.options
+    .filter((mode) => !supported || supported.includes(mode))
+    .map((id) => ({
+      id,
+      label: t('aiAssistant.composer.runtimeModes.' + id + '.label'),
+      hint: t('aiAssistant.composer.runtimeModes.' + id + '.hint'),
+      icon: {
+        'approval-required': Lock,
+        'auto-accept-edits': PenLine,
+        auto: Sparkles,
+        'full-access': ShieldOff,
+      }[id],
+    }));
 });
-const permissionValue = computed(() => resolveCompatibleRuntimeMode(
-  props.permissionMode ?? 'approval-required', permissionOptions.value.map((option) => option.id),
-));
-const permissionLabel = computed(() => permissionOptions.value.find((option) => option.id === permissionValue.value)?.label ?? '');
-const permissionIcon = computed(() => permissionOptions.value.find((option) => option.id === permissionValue.value)?.icon ?? Lock);
+const permissionValue = computed(() =>
+  resolveCompatibleRuntimeMode(
+    props.permissionMode ?? 'approval-required',
+    permissionOptions.value.map((option) => option.id),
+  ),
+);
+const permissionLabel = computed(
+  () => permissionOptions.value.find((option) => option.id === permissionValue.value)?.label ?? '',
+);
+const permissionIcon = computed(
+  () => permissionOptions.value.find((option) => option.id === permissionValue.value)?.icon ?? Lock,
+);
 const previewPermission = ref<AIChatPermissionMode | null>(null);
-const permissionPreview = computed(() => permissionOptions.value.find((option) => option.id === (previewPermission.value ?? permissionValue.value)) ?? permissionOptions.value[0]);
-watch(permissionMenuOpen, () => { previewPermission.value = null; });
+const permissionPreview = computed(
+  () =>
+    permissionOptions.value.find(
+      (option) => option.id === (previewPermission.value ?? permissionValue.value),
+    ) ?? permissionOptions.value[0],
+);
+watch(permissionMenuOpen, () => {
+  previewPermission.value = null;
+});
 const canAdjustBrowsed = computed(
   () => browsedModelCommitted.value && !props.disabled && !props.loading,
 );
@@ -261,9 +282,16 @@ function chooseSpeed(value: string) {
 function movePermissionFocus(event: KeyboardEvent) {
   if (!['ArrowRight', 'ArrowLeft', 'Home', 'End'].includes(event.key)) return;
   const target = event.currentTarget as HTMLElement;
-  const rows = Array.from(target.parentElement?.querySelectorAll<HTMLButtonElement>('button:not(:disabled)') ?? []);
+  const rows = Array.from(
+    target.parentElement?.querySelectorAll<HTMLButtonElement>('button:not(:disabled)') ?? [],
+  );
   const index = rows.indexOf(target as HTMLButtonElement);
-  const next = event.key === 'Home' ? 0 : event.key === 'End' ? rows.length - 1 : (index + (event.key === 'ArrowRight' ? 1 : -1) + rows.length) % rows.length;
+  const next =
+    event.key === 'Home'
+      ? 0
+      : event.key === 'End'
+        ? rows.length - 1
+        : (index + (event.key === 'ArrowRight' ? 1 : -1) + rows.length) % rows.length;
   event.preventDefault();
   rows[next]?.focus();
 }
@@ -781,14 +809,20 @@ watch([activeSection, search, () => enabledAgents.value.length], () => {
                 <p class="px-2 pb-1 pt-0.5 text-[10px] font-medium text-muted-foreground">
                   {{ t('aiAssistant.composer.permissions') }}
                 </p>
-                <div role="radiogroup" :aria-label="t('aiAssistant.composer.permissions')" class="flex gap-1 rounded-md bg-muted p-1">
+                <div
+                  role="radiogroup"
+                  :aria-label="t('aiAssistant.composer.permissions')"
+                  class="flex gap-1 rounded-md bg-muted p-1"
+                >
                   <button
                     v-for="option in permissionOptions"
                     :key="option.id"
                     type="button"
                     role="radio"
                     class="flex h-6 flex-1 items-center justify-center rounded-sm text-muted-foreground outline-none hover:text-foreground focus-visible:ring-2 focus-visible:ring-primary disabled:opacity-45"
-                    :class="permissionValue === option.id ? 'bg-background text-foreground shadow-sm' : ''"
+                    :class="
+                      permissionValue === option.id ? 'bg-background text-foreground shadow-sm' : ''
+                    "
                     :aria-checked="permissionValue === option.id"
                     :aria-label="option.label"
                     :disabled="disabled"
@@ -804,8 +838,12 @@ watch([activeSection, search, () => enabledAgents.value.length], () => {
                   </button>
                 </div>
                 <div class="px-2 pb-1 pt-2" aria-live="polite" data-testid="ai-permission-preview">
-                  <p class="text-xs font-medium">{{ permissionPreview?.label }}</p>
-                  <p class="mt-1 min-h-[2.5em] text-xs leading-snug text-muted-foreground">{{ permissionPreview?.hint }}</p>
+                  <p class="text-xs font-medium">
+                    {{ permissionPreview?.label }}
+                  </p>
+                  <p class="mt-1 min-h-[2.75em] text-xs leading-snug text-muted-foreground">
+                    {{ permissionPreview?.hint }}
+                  </p>
                 </div>
               </PopoverContent>
             </Popover>

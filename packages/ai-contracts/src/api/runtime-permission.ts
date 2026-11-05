@@ -11,7 +11,8 @@ export type AIChatPermissionMode = z.infer<typeof AIChatPermissionModeSchema>;
 
 /** Capabilities of the adapters, not inferred from a model's display name. */
 export const AGENT_SUPPORTED_RUNTIME_MODES = {
-  codex: ['approval-required', 'auto-accept-edits', 'auto', 'full-access'],
+  // Native Codex may skip approvals for safe commands; it cannot promise strict per-action supervision.
+  codex: ['auto', 'full-access'],
   claude: ['approval-required', 'auto-accept-edits', 'full-access'],
   pi: ['approval-required', 'auto-accept-edits', 'full-access'],
   // ACP exposes permission callbacks, but no dependable routine-action classifier.

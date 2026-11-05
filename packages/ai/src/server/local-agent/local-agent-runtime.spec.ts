@@ -23,14 +23,14 @@ afterEach(async () => {
     ephemeralHomes.splice(0).map((home) => rm(home, { recursive: true, force: true })),
   );
 });
-async function setup() {
+async function setup(driver: 'codex' | 'claude' = 'codex') {
   const db = createLocalAgentSqlite();
   databases.push(db);
   const store = new LocalAgentRepository(db);
   const connection = await store.createConnection('owner', {
-    driver: 'codex',
-    name: 'Codex',
-    executablePath: '/fake/codex',
+    driver,
+    name: 'Fixture',
+    executablePath: '/fake/agent',
     enabled: true,
     writeScopes: [],
   });
@@ -311,7 +311,7 @@ describe('local Agent conversation execution', () => {
   it.each(['approval-required', 'full-access'] as const)(
     'enforces session %s native permissions independently of saved instance defaults',
     async (permissionMode) => {
-      const { store, conversation } = await setup();
+      const { store, conversation } = await setup('claude');
       const saved = await store.getConnection('owner', conversation.connectionId);
       await store.updateConnection('owner', saved.id, saved.revision, {
         driver: saved.driver,
@@ -319,7 +319,8 @@ describe('local Agent conversation execution', () => {
         executablePath: saved.executablePath,
         enabled: saved.enabled,
         writeScopes: saved.writeScopes,
-        nativePermissionMode: permissionMode === 'approval-required' ? 'auto-approve' : 'supervised',
+        nativePermissionMode:
+          permissionMode === 'approval-required' ? 'auto-approve' : 'supervised',
       });
       const respond = vi.fn(() => true);
       const runtime = new LocalAgentRuntime({
@@ -418,22 +419,49 @@ describe('local Agent conversation execution', () => {
     ['auto-accept-edits', undefined, false],
     ['auto', 'command', false],
     ['full-access', 'command', true],
-  ] as const)('applies %s to structured operation %s (automatic=%s)', async (permissionMode, operation, automatic) => {
-    const { store, conversation } = await setup();
-    const respond = vi.fn(() => true);
-    const runtime = new LocalAgentRuntime({ store, cwd: '/tmp', createDriver: () => ({
-      async *run(input: NativeAgentRunInput): AsyncGenerator<NativeAgentEvent> {
-        expect(input.runtimeMode).toBe(permissionMode);
-        yield { type: 'request', request: { type: 'permission', requestId: 'p', title: 'Opaque provider title', ...(operation ? { operation } : {}) } };
-        yield { type: 'completed' };
-      }, respond, cancel() {}, async close() {}, async probe() { return { status: 'ready' as const, models: [] }; },
-    }) });
-    const events = [];
-    for await (const event of runtime.dispatchMessage({ identityId: 'owner', conversationId: conversation.id, content: 'Proceed', permissionMode })) events.push(event);
-    expect(respond).toHaveBeenCalledTimes(automatic ? 1 : 0);
-    expect(events.some((event) => event.type === 'assistant.request.required')).toBe(!automatic);
-    await runtime.dispose();
-  });
+  ] as const)(
+    'applies %s to structured operation %s (automatic=%s)',
+    async (permissionMode, operation, automatic) => {
+      const { store, conversation } = await setup(permissionMode === 'auto' ? 'codex' : 'claude');
+      const respond = vi.fn(() => true);
+      const runtime = new LocalAgentRuntime({
+        store,
+        cwd: '/tmp',
+        createDriver: () => ({
+          async *run(input: NativeAgentRunInput): AsyncGenerator<NativeAgentEvent> {
+            expect(input.runtimeMode).toBe(permissionMode);
+            yield {
+              type: 'request',
+              request: {
+                type: 'permission',
+                requestId: 'p',
+                title: 'Opaque provider title',
+                ...(operation ? { operation } : {}),
+              },
+            };
+            yield { type: 'completed' };
+          },
+          respond,
+          cancel() {},
+          async close() {},
+          async probe() {
+            return { status: 'ready' as const, models: [] };
+          },
+        }),
+      });
+      const events = [];
+      for await (const event of runtime.dispatchMessage({
+        identityId: 'owner',
+        conversationId: conversation.id,
+        content: 'Proceed',
+        permissionMode,
+      }))
+        events.push(event);
+      expect(respond).toHaveBeenCalledTimes(automatic ? 1 : 0);
+      expect(events.some((event) => event.type === 'assistant.request.required')).toBe(!automatic);
+      await runtime.dispose();
+    },
+  );
 
   it('rejects unadvertised effort or tier before starting a native turn, but forwards accepted options', async () => {
     const { store, conversation } = await setup();

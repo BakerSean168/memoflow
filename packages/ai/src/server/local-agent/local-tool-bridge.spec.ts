@@ -214,7 +214,10 @@ it.each(['timeout', 'missing-handler'] as const)(
             });
             return { content: [{ type: 'text', text: 'saved' }] };
           } catch (error) {
-            return { isError: true, content: [{ type: 'text', text: (error as Error).message }] };
+            return {
+              isError: true,
+              content: [{ type: 'text', text: (error as Error).message }],
+            };
           }
         });
       },
@@ -282,7 +285,10 @@ it.each(['approve_once', 'approve_conversation', 'approve_always', 'decline'] as
             });
             return { content: [{ type: 'text', text: 'saved' }] };
           } catch {
-            return { isError: true, content: [{ type: 'text', text: 'denied' }] };
+            return {
+              isError: true,
+              content: [{ type: 'text', text: 'denied' }],
+            };
           }
         });
       },
@@ -335,7 +341,9 @@ it.each(['approve_once', 'approve_conversation', 'approve_always', 'decline'] as
       await call(grant);
       expect(writes).toBe(decision === 'decline' ? 0 : 2);
       expect(requests).toBe(['approve_conversation', 'approve_always'].includes(decision) ? 1 : 2);
-      const snapshot = await bridge.permissions('owner', { action: 'snapshot' });
+      const snapshot = await bridge.permissions('owner', {
+        action: 'snapshot',
+      });
       expect(snapshot.audit).toHaveLength(2);
       expect(snapshot.rules.filter((rule) => rule.source === 'user')).toHaveLength(0);
       if (decision === 'approve_always') {
@@ -356,7 +364,11 @@ it.each(['approve_once', 'approve_conversation', 'approve_always', 'decline'] as
         });
         await bridge.permissions('owner', {
           action: 'settings',
-          settings: { ...snapshot.settings, preset: 'confirm_each', customMatrix: undefined },
+          settings: {
+            ...snapshot.settings,
+            preset: 'confirm_each',
+            customMatrix: undefined,
+          },
         });
         await call(grant);
         expect(requests).toBe(2);
@@ -447,10 +459,20 @@ it('replaces old matrix prohibitions when the user selects a new global preset',
         { read: 'allow', create: 'deny', update: 'ask', delete: 'ask' },
       ]),
     );
-    const settings = PermissionSettingsSchema.parse({ preset: 'custom', customMatrix });
-    const first = await bridge.permissions('owner', { action: 'settings', settings });
+    const settings = PermissionSettingsSchema.parse({
+      preset: 'custom',
+      customMatrix,
+    });
+    const first = await bridge.permissions('owner', {
+      action: 'settings',
+      settings,
+    });
     expect(first.rules).toContainEqual(
-      expect.objectContaining({ id: 'matrix:goal:create', effect: 'deny', agentId: null }),
+      expect.objectContaining({
+        id: 'matrix:goal:create',
+        effect: 'deny',
+        agentId: null,
+      }),
     );
     const raised = await bridge.permissions('owner', {
       action: 'settings',
@@ -486,7 +508,10 @@ it('makes legacy tools visible after settings changes without discarding migrate
   try {
     const migrated = await bridge.permissions('owner', { action: 'snapshot' });
     expect(migrated.rules).toContainEqual(
-      expect.objectContaining({ id: `legacy:${connection.id}:goal:create`, effect: 'deny' }),
+      expect.objectContaining({
+        id: `legacy:${connection.id}:goal:create`,
+        effect: 'deny',
+      }),
     );
     const changed = await bridge.permissions('owner', {
       action: 'settings',
@@ -517,41 +542,81 @@ it.each([
   ['goal.delete_permanent', 'full_auto', 'ask'],
   ['notification.send_external', 'full_auto', 'ask'],
   ['goal.create', 'read_only', 'deny'],
-] as const)('full-access preserves business %s under %s (%s)', async (operationId, preset, expected) => {
-  const db = createLocalAgentSqlite();
-  const store = new LocalAgentRepository(db);
-  const permissions = new PermissionLocalRepository(db);
-  const connection = await store.createConnection('owner', {
-    driver: 'codex', name: 'Fixture', executablePath: 'codex', enabled: true, writeScopes: ['goals:write'],
-  });
-  let asks = 0;
-  let executed = 0;
-  const bridge = new LocalAgentToolBridge({
-    store, permissions, isActive: () => true,
-    registerTools(server, context) {
-      server.registerTool('operation', { inputSchema: z.object({}) }, async () => {
-        try {
-          await context.executeAuthorized(operationId, 'operation', async () => { executed++; });
-          return { content: [{ type: 'text', text: 'executed' }] };
-        } catch { return { isError: true, content: [{ type: 'text', text: 'denied' }] }; }
-      });
-    },
-  });
-  try {
-    await bridge.permissions('owner', { action: 'settings', settings: { preset, agentPresets: {}, revision: 1 } });
-    const grant = await bridge.open({
-      identityId: 'owner', connectionId: connection.id, conversationId: 'chat', runId: 'r', permissionMode: 'full-access',
-      requestApproval: async (_tool, _signal, business) => { asks++; expect(business).toBeDefined(); return 'approve_once'; },
+] as const)(
+  'full-access preserves business %s under %s (%s)',
+  async (operationId, preset, expected) => {
+    const db = createLocalAgentSqlite();
+    const store = new LocalAgentRepository(db);
+    const permissions = new PermissionLocalRepository(db);
+    const connection = await store.createConnection('owner', {
+      driver: 'codex',
+      name: 'Fixture',
+      executablePath: 'codex',
+      enabled: true,
+      writeScopes: ['goals:write'],
     });
-    for (let i = 0; i < 2; i++) {
-      const response = await fetch(grant.url, {
-        method: 'POST', headers: { authorization: `Bearer ${grant.token}`, accept: 'application/json, text/event-stream', 'content-type': 'application/json' },
-        body: JSON.stringify({ jsonrpc: '2.0', id: i + 1, method: 'tools/call', params: { name: 'operation', arguments: {} } }),
+    let asks = 0;
+    let executed = 0;
+    const bridge = new LocalAgentToolBridge({
+      store,
+      permissions,
+      isActive: () => true,
+      registerTools(server, context) {
+        server.registerTool('operation', { inputSchema: z.object({}) }, async () => {
+          try {
+            await context.executeAuthorized(operationId, 'operation', async () => {
+              executed++;
+            });
+            return { content: [{ type: 'text', text: 'executed' }] };
+          } catch {
+            return {
+              isError: true,
+              content: [{ type: 'text', text: 'denied' }],
+            };
+          }
+        });
+      },
+    });
+    try {
+      await bridge.permissions('owner', {
+        action: 'settings',
+        settings: { preset, agentPresets: {}, revision: 1 },
       });
-      expect(await response.text()).toContain(expected === 'deny' ? 'denied' : 'executed');
+      const grant = await bridge.open({
+        identityId: 'owner',
+        connectionId: connection.id,
+        conversationId: 'chat',
+        runId: 'r',
+        permissionMode: 'full-access',
+        requestApproval: async (_tool, _signal, business) => {
+          asks++;
+          expect(business).toBeDefined();
+          return 'approve_once';
+        },
+      });
+      for (let i = 0; i < 2; i++) {
+        const response = await fetch(grant.url, {
+          method: 'POST',
+          headers: {
+            authorization: `Bearer ${grant.token}`,
+            accept: 'application/json, text/event-stream',
+            'content-type': 'application/json',
+          },
+          body: JSON.stringify({
+            jsonrpc: '2.0',
+            id: i + 1,
+            method: 'tools/call',
+            params: { name: 'operation', arguments: {} },
+          }),
+        });
+        expect(await response.text()).toContain(expected === 'deny' ? 'denied' : 'executed');
+      }
+      expect(asks).toBe(expected === 'ask' ? 2 : 0);
+      expect(executed).toBe(expected === 'ask' ? 2 : 0);
+      expect(await permissions.listAudit('owner')).toHaveLength(2);
+    } finally {
+      await bridge.dispose();
+      db.close();
     }
-    expect(asks).toBe(expected === 'ask' ? 2 : 0);
-    expect(executed).toBe(expected === 'ask' ? 2 : 0);
-    expect(await permissions.listAudit('owner')).toHaveLength(2);
-  } finally { await bridge.dispose(); db.close(); }
-});
+  },
+);

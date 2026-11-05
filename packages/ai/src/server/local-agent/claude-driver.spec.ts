@@ -45,11 +45,15 @@ it('rejects a changed account before giving the SDK the old session ID', async (
   const driver = new ClaudeDriver(connection, '/tmp', factory);
   const stream = driver.run({
     nativeSessionId: 'private-old-session',
-    accountFingerprint: await nativeIdentity('claude', undefined, { email: 'old@example.test' }),
+    accountFingerprint: await nativeIdentity('claude', undefined, {
+      email: 'old@example.test',
+    }),
     modelId: 'sonnet',
     content: 'Hi',
   });
-  await expect(stream.next()).rejects.toMatchObject({ code: 'LOCAL_AGENT_SESSION_UNAVAILABLE' });
+  await expect(stream.next()).rejects.toMatchObject({
+    code: 'LOCAL_AGENT_SESSION_UNAVAILABLE',
+  });
   expect(resumes).toEqual([undefined]);
 });
 it('uses SDK initialization for a model catalog without sending a probe prompt', async () => {
@@ -86,7 +90,13 @@ it('uses SDK initialization for a model catalog without sending a probe prompt',
   const result = await driver.probe();
   expect(result).toMatchObject({
     status: 'ready',
-    models: [{ id: 'sonnet', name: 'Sonnet', reasoningEfforts: ['low', 'medium', 'high'] }],
+    models: [
+      {
+        id: 'sonnet',
+        name: 'Sonnet',
+        reasoningEfforts: ['low', 'medium', 'high'],
+      },
+    ],
   });
   // SDK package version is not proof of the installed Claude CLI version.
   expect(result).not.toHaveProperty('version');
@@ -168,7 +178,10 @@ it('resumes the SDK session, injects MCP, answers native permission and streams 
         yield {
           type: 'stream_event',
           session_id: 'native',
-          event: { type: 'content_block_delta', delta: { type: 'text_delta', text: 'Answer' } },
+          event: {
+            type: 'content_block_delta',
+            delta: { type: 'text_delta', text: 'Answer' },
+          },
         };
         yield {
           type: 'assistant',
@@ -184,7 +197,12 @@ it('resumes the SDK session, injects MCP, answers native permission and streams 
             usage: { output_tokens: 4 },
           },
         };
-        yield { type: 'result', subtype: 'success', session_id: 'native', result: 'Answer' };
+        yield {
+          type: 'result',
+          subtype: 'success',
+          session_id: 'native',
+          result: 'Answer',
+        };
         break;
       }
     },
@@ -204,7 +222,10 @@ it('resumes the SDK session, injects MCP, answers native permission and streams 
     events.push(event);
     if (event.type === 'request')
       expect(
-        driver.respond(event.request.requestId, { type: 'permission', decision: 'approve_once' }),
+        driver.respond(event.request.requestId, {
+          type: 'permission',
+          decision: 'approve_once',
+        }),
       ).toBe(true);
   }
   expect(events.filter((event) => event.type === 'delta')).toEqual([
@@ -252,7 +273,9 @@ it('allows only bridge-registered MemoFlow tools, including every Goal panel too
         expect(await check('mcp__memoflow__unknown_new_tool')).toMatchObject({
           hookSpecificOutput: { permissionDecision: 'deny' },
         });
-        expect(await check('Bash')).toMatchObject({ hookSpecificOutput: { permissionDecision: 'ask' } });
+        expect(await check('Bash')).toMatchObject({
+          hookSpecificOutput: { permissionDecision: 'ask' },
+        });
         for (const name of [
           'goal_panel_open',
           'goal_panel_patch',
@@ -343,7 +366,10 @@ it('retires a permission card when the native request signal expires', async () 
   });
   const driver = new ClaudeDriver(connection, '/tmp', factory);
   const events = [];
-  for await (const event of driver.run({ modelId: 'sonnet', content: 'Hello' })) {
+  for await (const event of driver.run({
+    modelId: 'sonnet',
+    content: 'Hello',
+  })) {
     events.push(event);
     if (event.type === 'request') {
       expiredId = event.request.requestId;
