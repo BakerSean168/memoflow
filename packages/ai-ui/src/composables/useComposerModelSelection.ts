@@ -314,7 +314,7 @@ export function useComposerModelSelection(options: UseComposerModelSelectionOpti
       : AGENT_SUPPORTED_RUNTIME_MODES.mastra;
   });
   const seededPermissionMode = computed<AIChatPermissionMode>(() =>
-    selectedRuntimeInstance.value?.nativePermissionMode === 'auto-approve'
+    selectedRuntimeInstance.value?.nativeConfig?.nativePermissionMode === 'auto-approve'
       ? 'full-access'
       : 'approval-required',
   );

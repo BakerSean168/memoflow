@@ -10,6 +10,7 @@ import { createPinia } from 'pinia';
 import { createI18n } from 'vue-i18n';
 import { createMemoryHistory, createRouter } from 'vue-router';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { AgentInstanceSchema } from '@memoflow/ai-contracts';
 import type { AIWorkflowRunView, AssistantRuntimeChoice } from '@memoflow/ai-contracts';
 import AIChatView from '../views/AIChatView.vue';
 import enAI from '@ai-ui-test-host/locales/en-US/aiAssistant';
@@ -449,7 +450,7 @@ describe('AI conversation restoration and business navigation', () => {
   it.each(['supervised', 'auto-approve'] as const)(
     'seeds %s from the instance and restores a saved session choice first',
     async (nativePermissionMode) => {
-      const instance = {
+      const instance = AgentInstanceSchema.parse({
         instanceId: 'codex',
         driver: 'codex' as const,
         name: 'Codex',
@@ -458,11 +459,18 @@ describe('AI conversation restoration and business navigation', () => {
         createdAt: 1,
         updatedAt: 1,
         legacyConnectionId: 'native-seed',
-        nativePermissionMode,
-      };
+        nativeConfig: { nativePermissionMode },
+        accentColor: '#123456',
+      });
       const local = {
         listConnections: vi.fn(async () => [
-          { ...instance, id: 'native-seed', executablePath: 'codex', writeScopes: [] },
+          {
+            ...instance,
+            nativePermissionMode,
+            id: 'native-seed',
+            executablePath: 'codex',
+            writeScopes: [],
+          },
         ]),
         getDefaultChoice: vi.fn(async () => ({
           runtimeKind: 'local_agent' as const,
