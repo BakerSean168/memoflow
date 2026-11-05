@@ -4,6 +4,7 @@ import { createI18n } from 'vue-i18n';
 import { ok } from '@memoflow/transport-contracts/result';
 import {
   CloudAuthChannels,
+  DesktopProfileImportChannels,
   ProfileAccessChannels,
   WindowChannels,
   type ProfileSummary,
@@ -75,6 +76,7 @@ function mountView(
       return ok(created);
     }
     if (channel === ProfileAccessChannels.LIST) return ok(profiles);
+    if (channel === DesktopProfileImportChannels.LIST) return ok([]);
     if (channel === ProfileAccessChannels.GET_SNAPSHOT)
       return ok({
         profile: options.activeProfileId
@@ -140,6 +142,37 @@ describe('DesktopProfileAccessView', () => {
       expect(element('desktop-profile-login-email')).not.toBeNull();
       expect(element('desktop-profile-login-password')).not.toBeNull();
       expect(invoke).not.toHaveBeenCalledWith(ProfileAccessChannels.SELECT, expect.anything());
+    } finally {
+      wrapper.unmount();
+      window.location.hash = previousHash;
+    }
+  });
+
+  it('opens the local-account import dialog from the login state of a registered Profile', async () => {
+    const previousHash = window.location.hash;
+    window.location.hash = '#/profile-access?view=login';
+    const { wrapper } = mountView({ attachTo: document.body, activeProfileId: 'profile-2' });
+    try {
+      await flushPromises();
+      const entry = element('desktop-profile-import-profile');
+      expect(entry).not.toBeNull();
+      entry!.click();
+      await flushPromises();
+      expect(element('profile-import-dialog')).not.toBeNull();
+    } finally {
+      wrapper.unmount();
+      window.location.hash = previousHash;
+    }
+  });
+
+  it('hides the import entry without an active registered Profile', async () => {
+    const previousHash = window.location.hash;
+    window.location.hash = '#/profile-access?view=login';
+    const { wrapper } = mountView({ attachTo: document.body, activeProfileId: 'profile-1' });
+    try {
+      await flushPromises();
+      expect(element('desktop-profile-login-state')).not.toBeNull();
+      expect(element('desktop-profile-import-profile')).toBeNull();
     } finally {
       wrapper.unmount();
       window.location.hash = previousHash;
