@@ -135013,7 +135013,7 @@ export namespace Prisma {
   export type AccountAvatarCreateInput = {
     contentBytes: Bytes
     byteSize: number
-    updatedAt?: Date | string
+    updatedAt: Date | string
     account: AccountCreateNestedOneWithoutAvatarInput
   }
 
@@ -135021,7 +135021,7 @@ export namespace Prisma {
     accountId: string
     contentBytes: Bytes
     byteSize: number
-    updatedAt?: Date | string
+    updatedAt: Date | string
   }
 
   export type AccountAvatarUpdateInput = {
@@ -135042,7 +135042,7 @@ export namespace Prisma {
     accountId: string
     contentBytes: Bytes
     byteSize: number
-    updatedAt?: Date | string
+    updatedAt: Date | string
   }
 
   export type AccountAvatarUpdateManyMutationInput = {
@@ -156847,13 +156847,13 @@ export namespace Prisma {
   export type AccountAvatarCreateWithoutAccountInput = {
     contentBytes: Bytes
     byteSize: number
-    updatedAt?: Date | string
+    updatedAt: Date | string
   }
 
   export type AccountAvatarUncheckedCreateWithoutAccountInput = {
     contentBytes: Bytes
     byteSize: number
-    updatedAt?: Date | string
+    updatedAt: Date | string
   }
 
   export type AccountAvatarCreateOrConnectWithoutAccountInput = {

@@ -19,7 +19,9 @@ import { useAccountStore } from '../stores/account-store';
 import { useAccountAvatar } from './useAccountAvatar';
 
 vi.mock('./avatar-image', () => ({
-  processAvatarFile: vi.fn(async () => new Blob([new Uint8Array([1, 2, 3])], { type: 'image/png' })),
+  processAvatarFile: vi.fn(
+    async () => new Blob([new Uint8Array([1, 2, 3])], { type: 'image/png' }),
+  ),
 }));
 
 const SYNC_KEY = 'memoflow:account-avatar-sync:cloud-1';

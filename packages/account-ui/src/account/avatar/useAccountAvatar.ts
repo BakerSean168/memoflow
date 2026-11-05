@@ -114,6 +114,9 @@ export function useAccountAvatar(fallbackUrl?: () => string | null) {
       if (avatarRevision.value !== revisionAtRead) return;
       localUrl.value = url;
       writeCloudAvatarSyncState(key, { lastSyncedAt: content.data.updatedAt, pending: false });
+      // Every mounted surface reads the same local cache; bump so the quick-login
+      // tile, sidebar block and profile card all re-read the pulled avatar.
+      avatarRevision.value += 1;
     } catch {
       // Keep the existing local cache; a later entry retries the pull.
     }

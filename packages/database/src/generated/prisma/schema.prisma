@@ -100,7 +100,7 @@ model AccountAvatar {
   accountId    String   @id @map("account_id")
   contentBytes Bytes    @map("content_bytes")
   byteSize     Int      @map("byte_size")
-  updatedAt    DateTime @updatedAt @map("updated_at")
+  updatedAt    DateTime @map("updated_at")
 
   account Account @relation(fields: [accountId], references: [id], onDelete: Cascade)
 
