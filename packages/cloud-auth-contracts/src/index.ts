@@ -160,3 +160,44 @@ export interface CloudAuthDesktopClientPort extends CloudSessionClientPort {
   getCloudConnectionStatus(attemptId: string): Promise<Result<DesktopCloudConnectionAttempt>>;
   cancelCloudConnection(attemptId: string): Promise<Result<void>>;
 }
+
+/** Account security projection. Session bearer tokens never cross this port. */
+export interface AccountSecuritySession {
+  id: string;
+  expiresAt: string;
+  createdAt: string;
+  ipAddress: string | null;
+  userAgent: string | null;
+  current: boolean;
+}
+
+export interface CloudAccountSecurityPort {
+  verifyAccountPassword(password: string): Promise<Result<void>>;
+  requestEmailChange(input: { password: string; newEmail: string }): Promise<Result<void>>;
+  listAccountSessions(): Promise<Result<AccountSecuritySession[]>>;
+  revokeAccountSession(sessionId: string): Promise<Result<void>>;
+  deleteAccountPermanently(input: {
+    password: string;
+    confirmation: 'DELETE';
+  }): Promise<Result<void>>;
+}
+
+export const AccountSecurityRequestSchema = z.discriminatedUnion('action', [
+  z.object({ action: z.literal('verify-password'), password: z.string().min(1).max(100) }).strict(),
+  z
+    .object({
+      action: z.literal('change-email'),
+      password: z.string().min(1).max(100),
+      newEmail: z.string().email(),
+    })
+    .strict(),
+  z.object({ action: z.literal('sessions') }).strict(),
+  z.object({ action: z.literal('revoke-session'), sessionId: z.string().min(1).max(200) }).strict(),
+  z
+    .object({
+      action: z.literal('delete-account'),
+      password: z.string().min(1).max(100),
+      confirmation: z.literal('DELETE'),
+    })
+    .strict(),
+]);

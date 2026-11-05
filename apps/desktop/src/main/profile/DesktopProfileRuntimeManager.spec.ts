@@ -136,6 +136,23 @@ describe('DesktopProfileRuntimeManager', () => {
 
   afterEach(async () => fs.promises.rm(rootDir, { recursive: true, force: true }));
 
+  it('requires the old password, invalidates it and disables remembered unlock after change', async () => {
+    const profile = await createLocal('Change password');
+    await runtime.openProfile(profile.profileId, LOCAL_PASSWORD, { remember: true });
+    await expect(
+      runtime.setCurrentProfilePassword('replacement-password', 'incorrect-password'),
+    ).rejects.toThrow();
+    expect(await runtime.hasRememberedKey(profile.profileId)).toBe(true);
+    await runtime.setCurrentProfilePassword('replacement-password', LOCAL_PASSWORD);
+    expect(await runtime.hasRememberedKey(profile.profileId)).toBe(false);
+    await runtime.deactivateProfile();
+    await expect(runtime.openProfile(profile.profileId, LOCAL_PASSWORD)).rejects.toThrow();
+    await expect(runtime.openProfile(profile.profileId)).rejects.toThrow();
+    expect(
+      (await runtime.openProfile(profile.profileId, 'replacement-password')).descriptor.profileId,
+    ).toBe(profile.profileId);
+  }, 15_000);
+
   it('opens local accounts only with their password and cannot restart one without it', async () => {
     const first = await createLocal('First');
     const second = await createLocal('Work');

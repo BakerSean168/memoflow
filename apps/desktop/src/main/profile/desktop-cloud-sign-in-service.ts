@@ -184,7 +184,7 @@ export class DesktopCloudSignInService {
     try {
       response = await this.fetchImpl(`${authOrigin()}/api/auth${path}`, {
         method: 'POST',
-        headers: { 'content-type': 'application/json' },
+        headers: { 'content-type': 'application/json', origin: authOrigin() },
         body: JSON.stringify(body),
         signal: AbortSignal.timeout(15_000),
       });

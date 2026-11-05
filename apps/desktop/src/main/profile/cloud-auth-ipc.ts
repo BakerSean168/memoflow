@@ -1,5 +1,6 @@
 import { ipcMain } from 'electron';
 import {
+  AccountSecurityRequestSchema,
   DesktopCloudConnectionRequestSchema,
   DesktopCloudAttemptRequestSchema,
   DesktopCloudCredentialSignInSchema,
@@ -29,6 +30,59 @@ export function registerCloudAuthIpc(
   cloudConnection?: DeviceAuthCoordinator,
   signIn?: DesktopCloudSignInService,
 ): void {
+  ipcMain.handle(CloudAuthChannels.ACCOUNT_SECURITY, async (_event, input: unknown) => {
+    const parsed = AccountSecurityRequestSchema.safeParse(input);
+    if (!parsed.success) return fail({ code: 'INVALID_REQUEST', message: '账户安全请求无效' });
+    const origin = runtime.getActiveProfileDescriptorSync()?.profileId;
+    const request = parsed.data;
+    async function send(profileId: string) {
+      const stored = await sessions.load(profileId);
+      if (!stored) throw new ResultErrorException('请重新登录云账户', 'UNAUTHORIZED');
+      const { action, ...body } = request;
+      const path = `/account-security/${action}`;
+      const response = await fetch(`${authOrigin()}/api/auth${path}`, {
+        method: action === 'sessions' ? 'GET' : 'POST',
+        headers: {
+          'content-type': 'application/json',
+          origin: authOrigin(),
+          authorization: `Bearer ${stored.token}`,
+        },
+        body: action === 'sessions' ? undefined : JSON.stringify(body),
+        signal: AbortSignal.timeout(15_000),
+      });
+      const payload = (await response.json()) as { code?: string; message?: string };
+      if (!response.ok)
+        throw new ResultErrorException(
+          payload.message ?? '账户安全操作失败',
+          payload.code ?? 'ACCOUNT_SECURITY_FAILED',
+        );
+      return payload;
+    }
+    try {
+      if (request.action === 'delete-account') {
+        await runtime.signOutActiveProfile(async (profile) => {
+          if (profile.profileId !== origin || profile.profileKind !== 'registered')
+            throw new ResultErrorException('云账户已切换', 'PROFILE_CHANGED');
+          await send(profile.profileId);
+          cloudConnection?.cancelForProfile(profile.profileId);
+          await cloudChecks.clearSession(profile.profileId);
+        });
+        return ok(null);
+      }
+      return await runtime.runExclusive(async () => {
+        const profile = runtime.getActiveProfileDescriptorSync();
+        if (!profile || profile.profileId !== origin || profile.profileKind !== 'registered')
+          return fail({ code: 'PROFILE_CHANGED', message: '请在当前云账户重试' });
+        return ok(await send(profile.profileId));
+      });
+    } catch (error) {
+      return fail({
+        code: error instanceof ResultErrorException ? error.code : 'ACCOUNT_SECURITY_FAILED',
+        message: error instanceof Error ? error.message : '账户安全操作失败',
+      });
+    }
+  });
+
   ipcMain.handle(CloudAuthChannels.SESSION, async () => {
     const origin = runtime.getActiveProfileDescriptorSync()?.profileId;
     return runtime.runExclusive(async () => {
@@ -61,6 +115,7 @@ export function registerCloudAuthIpc(
       method: 'POST',
       headers: {
         'content-type': 'application/json',
+        origin: authOrigin(),
         authorization: `Bearer ${stored.token}`,
       },
       body: '{}',

@@ -49,9 +49,8 @@ async function expectAccountSettings(page: Page): Promise<void> {
     timeout: TIMEOUT_CONFIG.ELEMENT_WAIT,
   });
   await expect(page.getByTestId('account-center-view')).toBeVisible();
-  await expect(page.getByTestId('account-profile-nickname')).toBeVisible({
-    timeout: TIMEOUT_CONFIG.ELEMENT_WAIT,
-  });
+  await expect(page.getByTestId('account-profile-nickname')).toHaveCount(0);
+  await expect(page.getByTestId('cloud-account-security')).toBeVisible();
 }
 
 export async function confirmGlobalDialog(page: Page): Promise<void> {
@@ -59,4 +58,13 @@ export async function confirmGlobalDialog(page: Page): Promise<void> {
     timeout: TIMEOUT_CONFIG.ELEMENT_WAIT,
   });
   await page.getByTestId('global-confirm-confirm').click();
+}
+
+/** Profile editing moved out of Settings in #857/#860. */
+export async function openProfileEditor(page: Page): Promise<void> {
+  const back = page.getByTestId('settings-return-to-app').first();
+  if (await back.isVisible()) await back.click();
+  await page.getByTestId('shell-account-card').click();
+  await page.getByTestId('shell-edit-profile').click();
+  await expect(page.getByTestId('profile-editor-dialog')).toBeVisible();
 }

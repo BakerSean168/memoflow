@@ -332,20 +332,28 @@ export class DesktopProfileRuntimeManager {
   }
 
   /** Change the password of the active local account; re-wraps the same data key. */
-  setCurrentProfilePassword(password: string): Promise<void> {
+  setCurrentProfilePassword(password: string, currentPassword: string): Promise<void> {
     const expectedProfileId = this.getActiveProfileId();
     return this.runExclusive(async () => {
       if (this.getActiveProfileId() !== expectedProfileId) throw new Error('Profile 已切换');
-      await this.setCurrentProfilePasswordNow(password);
+      await this.setCurrentProfilePasswordNow(password, currentPassword);
     });
   }
 
-  private async setCurrentProfilePasswordNow(password: string): Promise<void> {
+  private async setCurrentProfilePasswordNow(
+    password: string,
+    currentPassword: string,
+  ): Promise<void> {
     const descriptor = this.activeRuntime?.descriptor;
     if (!descriptor || !this.activeProfileKey) throw new Error('必须先解锁 Profile');
     if (descriptor.profileKind !== 'local') {
       throw new ResultErrorException('只有本地账户可以设置密码', 'PROFILE_NOT_LOCAL_ACCOUNT');
     }
+    const verifiedKey = await this.passwordStore.unlock(descriptor.profileId, currentPassword);
+    verifiedKey.fill(0);
+    // A password change explicitly disables automatic unlock until the user
+    // opts into "remember me" again with the new password.
+    await this.rememberedKeyStore.remove(descriptor.profileId);
     await this.passwordStore.setCredential(descriptor.profileId, password, this.activeProfileKey);
   }
 

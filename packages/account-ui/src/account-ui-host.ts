@@ -1,7 +1,7 @@
 import { ref, type Component, type InjectionKey, type Ref } from 'vue';
 import type { DesktopAccessSnapshot } from '@memoflow/desktop-contracts';
 import type { ElectronBridge } from '@memoflow/ipc-client';
-import type { CloudAuthClientPort } from '@memoflow/cloud-auth-contracts';
+import type { CloudAccountSecurityPort, CloudAuthClientPort } from '@memoflow/cloud-auth-contracts';
 import type { ExternalAgentClientPort } from '@memoflow/agent-gateway';
 import type { AccountClientPort } from '@memoflow/account-client';
 import type { PlatformRendererHost } from '@memoflow/ui-host-contracts';
@@ -69,3 +69,7 @@ export let accountUiHost: AccountUiHost;
 export function bindAccountUiHost(host: AccountUiHost): void {
   accountUiHost = host;
 }
+
+/** Bound by each platform to its authenticated transport. */
+export const CLOUD_ACCOUNT_SECURITY_KEY: InjectionKey<CloudAccountSecurityPort> =
+  Symbol('CloudAccountSecurity');

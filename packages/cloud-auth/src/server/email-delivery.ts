@@ -1,7 +1,7 @@
 import nodemailer from 'nodemailer';
 import type { Transporter } from 'nodemailer';
 
-export type CloudAuthEmailKind = 'email-verification' | 'password-reset';
+export type CloudAuthEmailKind = 'email-verification' | 'password-reset' | 'email-changed';
 
 export interface CloudAuthEmailDelivery {
   send(input: {
@@ -67,6 +67,12 @@ function template(
   text: string;
   html: string;
 } {
+  if (kind === 'email-changed')
+    return {
+      subject: 'MemoFlow 登录邮箱已更改',
+      text: '你的 MemoFlow 登录邮箱已更改，旧邮箱现已无法用于登录。如非本人操作，请联系支持。',
+      html: '<p>你的 MemoFlow 登录邮箱已更改，旧邮箱现已无法用于登录。如非本人操作，请联系支持。</p>',
+    };
   const action = kind === 'email-verification' ? '验证邮箱' : '重置密码';
   return {
     subject: `MemoFlow ${action}`,

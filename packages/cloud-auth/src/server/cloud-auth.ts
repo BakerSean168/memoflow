@@ -1,3 +1,5 @@
+import { randomUUID } from 'node:crypto';
+import { accountSecurityPlugin } from './account-security.js';
 import type { PrismaClient } from '@memoflow/database';
 import { IdentityId } from '@memoflow/utils/domain';
 import { prismaAdapter } from 'better-auth/adapters/prisma';
@@ -107,6 +109,7 @@ export function createCloudAuth(
   const databaseOverride = dependencies.database as BetterAuthOptions['database'] | undefined;
   const auth = betterAuth({
     appName: 'MemoFlow',
+    disabledPaths: ['/change-email'],
     baseURL: options.baseUrl,
     secret: options.secret,
     trustedOrigins: [...options.trustedOrigins],
@@ -123,11 +126,15 @@ export function createCloudAuth(
         ipAddressHeaders: ['x-forwarded-for', 'x-real-ip'],
       },
       database: {
-        generateId: ({ model }) => (model === 'user' ? IdentityId.generate().toString() : false),
+        generateId: ({ model }) =>
+          model === 'user' ? IdentityId.generate().toString() : randomUUID(),
       },
     },
     rateLimit: options.rateLimit,
-    user: { modelName: 'cloudAuthUser' },
+    user: {
+      modelName: 'cloudAuthUser',
+      changeEmail: { enabled: true, updateEmailWithoutVerification: false },
+    },
     session: { modelName: 'cloudAuthSession' },
     account: { modelName: 'cloudAuthProviderAccount' },
     verification: { modelName: 'cloudAuthVerification' },
@@ -147,6 +154,22 @@ export function createCloudAuth(
     },
     emailVerification: {
       sendOnSignUp: true,
+      async afterEmailVerification(user, request) {
+        // Better Auth has verified this signed token before invoking the hook.
+        const token = request && new URL(request.url).searchParams.get('token');
+        if (!token) return;
+        const payload = JSON.parse(Buffer.from(token.split('.')[1]!, 'base64url').toString()) as {
+          email?: string;
+          updateTo?: string;
+        };
+        if (payload.updateTo === user.email && payload.email && payload.email !== user.email) {
+          await options.emailDelivery.send({
+            kind: 'email-changed',
+            email: payload.email,
+            url: options.baseUrl,
+          });
+        }
+      },
       sendVerificationEmail: async ({ user, url }) => {
         await options.emailDelivery.send({
           kind: 'email-verification',
@@ -204,6 +227,7 @@ export function createCloudAuth(
     },
     plugins: [
       bearer(),
+      accountSecurityPlugin(options.database),
       deviceAuthorization({
         expiresIn: '10m',
         interval: '5s',

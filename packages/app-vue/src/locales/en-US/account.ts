@@ -51,7 +51,30 @@ export default {
     logout: 'Log out',
     saveProfile: 'Save Profile',
   },
+  security: {
+    continue: 'Continue',
+    title: 'Cloud account',
+    emailDescription:
+      'The new email takes effect after confirmation. The old email then stops working for sign-in and receives a notification.',
+    changeEmail: 'Change email',
+    newEmail: 'New email',
+    sendConfirmation: 'Send confirmation email',
+    emailSent:
+      'Confirmation sent. Open the link in your new inbox. Keep using the old email until you confirm.',
+    sessions: 'Devices and sessions',
+    sessionsDescription: 'Revoke other sessions here. Use Sign out below for this device.',
+    noSessions: 'No sessions.',
+    unknownDevice: 'Unknown device',
+    currentDevice: 'Current device',
+    revoke: 'Revoke session',
+    deleteTitle: 'Permanently delete cloud account',
+    deleteDescription:
+      'Permanently delete your cloud account and cloud data, remove local data and the quick-login tile. Unsynced changes are lost. This cannot be undone.',
+    confirmation: 'Type DELETE to confirm permanent deletion',
+  },
   localPassword: {
+    rememberReset:
+      'Changing your password turns off remember me. Enter the new password next time.',
     title: 'Local account password',
     description:
       'The local account password is the only credential that unwraps this device data and is independent from your MemoFlow cloud password.',

@@ -58,7 +58,10 @@ describe('DesktopCloudSignInService', () => {
     expect(fetchImpl).toHaveBeenNthCalledWith(
       1,
       'https://api.memo.test/api/auth/sign-in/email',
-      expect.objectContaining({ method: 'POST' }),
+      expect.objectContaining({
+        method: 'POST',
+        headers: { 'content-type': 'application/json', origin: 'https://api.memo.test' },
+      }),
     );
     expect(runtime.registerCloudProfile).toHaveBeenCalledWith(
       'account-1',

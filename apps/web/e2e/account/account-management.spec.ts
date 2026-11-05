@@ -5,15 +5,18 @@ import {
   confirmGlobalDialog,
   createAccountAuditEmail,
   openAccountSettings,
+  openProfileEditor,
 } from './account-settings.helpers';
 
 test.describe('Account & Privacy settings', () => {
-  test('[P1] renders the canonical account profile with cloud identity', async ({ page }) => {
+  test('[P1] renders account security without personal profile fields', async ({ page }) => {
     const email = createAccountAuditEmail('e2e-account-profile');
     await openAccountSettings(page, { email });
 
-    await expect(page.getByTestId('account-center-view')).toContainText(email);
-    await expect(page.getByTestId('account-profile-save')).toBeVisible();
+    await expect(page.getByTestId('account-login-email')).toHaveText(
+      email.replace(/^(.).*(@.*)$/, '$1***$2'),
+    );
+    await expect(page.getByTestId('account-profile-save')).toHaveCount(0);
     await expect(page.getByTestId('cloud-password-current')).toBeVisible();
     await expect(page.getByTestId('account-logout-button')).toBeVisible();
   });
@@ -21,8 +24,9 @@ test.describe('Account & Privacy settings', () => {
   test('[P1] updates the profile nickname and persists it after refresh', async ({ page }) => {
     await openAccountSettings(page);
 
+    await openProfileEditor(page);
     const nickname = `Audit-${String(Date.now()).slice(-8)}`;
-    const nicknameInput = page.getByTestId('account-profile-nickname');
+    const nicknameInput = page.getByTestId('profile-editor-nickname');
     await nicknameInput.fill(nickname);
 
     const updateResponse = page.waitForResponse(
@@ -31,15 +35,13 @@ test.describe('Account & Privacy settings', () => {
         new URL(response.url()).pathname.endsWith('/api/v1/accounts/me'),
       { timeout: TIMEOUT_CONFIG.API_REQUEST },
     );
-    await page.getByTestId('account-profile-save').click();
+    await page.getByTestId('profile-editor-save').click();
     expect((await updateResponse).ok()).toBe(true);
 
     await expect(nicknameInput).toHaveValue(nickname);
     await page.reload({ waitUntil: 'domcontentloaded' });
-    await expect(page.getByTestId('account-settings-section')).toBeVisible({
-      timeout: TIMEOUT_CONFIG.NAVIGATION,
-    });
-    await expect(page.getByTestId('account-profile-nickname')).toHaveValue(nickname, {
+    await openProfileEditor(page);
+    await expect(page.getByTestId('profile-editor-nickname')).toHaveValue(nickname, {
       timeout: TIMEOUT_CONFIG.ELEMENT_WAIT,
     });
   });

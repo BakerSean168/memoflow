@@ -1,6 +1,6 @@
 import { expect, test } from '../helpers/fixtures';
 import { TIMEOUT_CONFIG } from '../config';
-import { openAccountSettingsForSession } from './account-settings.helpers';
+import { openAccountSettingsForSession, openProfileEditor } from './account-settings.helpers';
 
 test.describe('Account profile canonical surface', () => {
   test.beforeEach(async ({ page, testData }) => {
@@ -32,23 +32,22 @@ test.describe('Account profile canonical surface', () => {
       'base64',
     );
     await expect(page.locator('#avatar')).toHaveCount(0);
+    await openProfileEditor(page);
 
-    await page.getByTestId('account-profile-avatar-input').setInputFiles({
+    await page.getByTestId('profile-editor-avatar-input').setInputFiles({
       name: 'avatar.png',
       mimeType: 'image/png',
       buffer: png,
     });
 
-    const preview = page.getByTestId('account-profile-avatar').locator('img');
+    const preview = page.getByTestId('profile-editor-avatar').locator('img');
     await expect(preview).toHaveAttribute('src', /^data:image\/png;base64,/, {
       timeout: TIMEOUT_CONFIG.ELEMENT_WAIT,
     });
 
     await page.reload({ waitUntil: 'domcontentloaded' });
-    await expect(page.getByTestId('account-profile-nickname')).toBeVisible({
-      timeout: TIMEOUT_CONFIG.NAVIGATION,
-    });
-    await expect(page.getByTestId('account-profile-avatar').locator('img')).toHaveAttribute(
+    await openProfileEditor(page);
+    await expect(page.getByTestId('profile-editor-avatar').locator('img')).toHaveAttribute(
       'src',
       /^data:image\/png;base64,/,
       { timeout: TIMEOUT_CONFIG.ELEMENT_WAIT },
@@ -59,14 +58,12 @@ test.describe('Account profile canonical surface', () => {
     page,
     workerAccount,
   }) => {
-    await expect(page.getByTestId('account-center-view')).toContainText(workerAccount.email);
-    await expect(page.locator('input[type="email"]')).toHaveCount(1);
-    await expect(page.getByTestId('cloud-password-forgot-email')).toHaveValue(workerAccount.email);
-    await expect(page.locator('#nickname')).toBeEditable();
-    await expect(page.getByTestId('account-profile-avatar')).toBeEnabled();
-    await expect(page.locator('#bio')).toBeEditable();
-
-    // Cloud Auth owns the login email; Account profile editing intentionally has no email field.
-    await expect(page.locator('#email')).toHaveCount(0);
+    const masked = workerAccount.email.replace(/^(.).*(@.*)$/, '$1***$2');
+    await expect(page.getByTestId('account-login-email')).toHaveText(masked);
+    await expect(page.getByTestId('cloud-password-reset-recipient')).toHaveText(masked);
+    await expect(page.locator('input[type="email"]')).toHaveCount(0);
+    await expect(page.locator('#nickname,#bio')).toHaveCount(0);
+    await expect(page.getByTestId('account-profile-avatar')).toHaveCount(0);
+    await expect(page.getByTestId('account-profile-save')).toHaveCount(0);
   });
 });
