@@ -73,15 +73,22 @@ export function useAccountAvatar(fallbackUrl?: () => string | null) {
   async function pushCloudAvatar(dataUrl: string): Promise<void> {
     const key = cloudAccountKey.value;
     if (!accountService || !key) return;
-    const previous = readCloudAvatarSyncState(key);
-    try {
-      const result = await accountService.uploadMyAvatar({ dataUrl });
-      if (!result.ok) throw new Error(result.error.message);
-      writeCloudAvatarSyncState(key, { lastSyncedAt: result.data.updatedAt, pending: false });
-    } catch {
-      writeCloudAvatarSyncState(key, { ...previous, pending: true });
+    const markPending = () => {
+      writeCloudAvatarSyncState(key, { ...readCloudAvatarSyncState(key), pending: true });
       cloudSyncFailed.value += 1;
+    };
+    let result: Awaited<ReturnType<AccountClientPort['uploadMyAvatar']>>;
+    try {
+      result = await accountService.uploadMyAvatar({ dataUrl });
+    } catch {
+      markPending();
+      return;
     }
+    if (!result.ok) {
+      markPending();
+      return;
+    }
+    writeCloudAvatarSyncState(key, { lastSyncedAt: result.data.updatedAt, pending: false });
   }
 
   async function pullCloudAvatar(): Promise<void> {
