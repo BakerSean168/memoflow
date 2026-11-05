@@ -607,11 +607,9 @@ export class AcpDriver {
           operation:
             parsed.data.toolCall.kind === 'edit'
               ? 'edit'
-              : parsed.data.toolCall.kind === 'read'
-                ? 'read'
-                : parsed.data.toolCall.kind === 'execute'
-                  ? 'command'
-                  : 'other',
+              : parsed.data.toolCall.kind === 'execute'
+                ? 'command'
+                : 'other',
           ...acpPermissionScope(parsed.data.toolCall),
         };
     this.requests.set(requestId, {

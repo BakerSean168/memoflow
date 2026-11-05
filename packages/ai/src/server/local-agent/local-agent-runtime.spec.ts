@@ -429,7 +429,9 @@ describe('local Agent conversation execution', () => {
         cwd: '/tmp',
         createDriver: () => ({
           async *run(input: NativeAgentRunInput): AsyncGenerator<NativeAgentEvent> {
-            expect(input.runtimeMode).toBe(permissionMode);
+            expect(input.runtimeMode).toBe(
+              permissionMode === 'auto' ? 'approval-required' : permissionMode,
+            );
             yield {
               type: 'request',
               request: {

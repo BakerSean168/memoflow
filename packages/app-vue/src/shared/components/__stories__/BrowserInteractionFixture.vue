@@ -190,7 +190,7 @@ function chooseModel(modelKey: string, agentId: string) {
         :selected-agent-id="selectedAgentId"
         :models="models"
         :selected-model-key="selectedModelKey"
-        permission-mode="supervised"
+        permission-mode="approval-required"
         :native="false"
         :disabled="false"
         @select-model="chooseModel"

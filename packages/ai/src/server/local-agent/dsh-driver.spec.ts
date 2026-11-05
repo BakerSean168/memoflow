@@ -41,6 +41,7 @@ class FakeAcp {
   readonly sent: Array<{ id: number; result: unknown }> = [];
   readonly notifications: Array<{ method: string; params: unknown }> = [];
   closed = false;
+  toolKind = 'fetch';
   onNotification?: (method: string, params: unknown) => void;
   onRequest?: (request: { id: number; method: string; params?: unknown }) => void;
   onFailure?: (error: never) => void;
@@ -85,7 +86,7 @@ class FakeAcp {
           toolCall: {
             toolCallId: 'call-1',
             title: 'goal_search',
-            kind: 'fetch',
+            kind: this.toolKind,
             locations: [{ path: '/repo' }],
           },
           options: [
@@ -189,7 +190,7 @@ it('sends a per-run MCP grant and can resume the same native DSH session', async
       }
       if (event.type === 'request') {
         expect(event.request.title).toBe('goal_search');
-        expect(event.request).toMatchObject({ scope: 'fetch · /repo' });
+        expect(event.request).toMatchObject({ scope: 'fetch · /repo', operation: 'other' });
         expect(
           driver.respond(event.request.requestId, { type: 'permission', decision: 'approve_once' }),
         ).toBe(true);
@@ -458,3 +459,23 @@ it.each([
     }
   },
 );
+
+it.each([
+  ['edit', 'edit'],
+  ['execute', 'command'],
+  ['read', 'other'],
+] as const)('marks ACP %s permission requests as %s', async (kind, operation) => {
+  const instances: FakeAcp[] = [];
+  const make = factory(instances);
+  const driver = new AcpDriver(connection, '/tmp', (options) => {
+    const transport = make(options);
+    instances.at(-1)!.toolKind = kind;
+    return transport;
+  });
+  for await (const event of driver.run({ modelId: route, content: 'Inspect' })) {
+    if (event.type === 'request') {
+      expect(event.request).toMatchObject({ operation });
+      driver.respond(event.request.requestId, { type: 'permission', decision: 'approve_once' });
+    }
+  }
+});

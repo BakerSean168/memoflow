@@ -12,6 +12,13 @@ export default mergeConfig(
     root: import.meta.dirname,
     resolve: {
       alias: [
+        {
+          find: '@memoflow/ai/testing',
+          replacement: path.resolve(
+            import.meta.dirname,
+            '../../../../../packages/ai/src/testing/runtime-permission-acceptance.ts',
+          ),
+        },
         ...createAiUiAliasEntries(path.resolve(import.meta.dirname, '../../../../..')),
         ...createTaskContractsAliasEntries(path.resolve(import.meta.dirname, '../../../../..')),
         ...createRepositoryContractsAliasEntries(

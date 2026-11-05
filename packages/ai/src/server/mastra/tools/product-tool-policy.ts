@@ -190,12 +190,13 @@ export async function applyMemoFlowSessionToolPolicy(
   const permissionFor = (name: string): PermissionPolicy => {
     if (name === 'ask_user') return 'allow';
     if (!memoFlowToolPolicy(name)) return 'deny';
-    if (current)
-      return Object.prototype.hasOwnProperty.call(current, name) ? current[name]! : 'ask';
+    if (current && Object.prototype.hasOwnProperty.call(current, name)) return current[name]!;
+    const preset = context ? conversationBusinessPreset(context) : undefined;
+    if (current && !preset) return 'ask';
     return evaluatePermission({
       agentId: 'builtin-mastra',
       operationId: permissionOperationForTool(name)?.id ?? name,
-      preset: 'on_demand',
+      preset: preset ?? 'on_demand',
     }).decision;
   };
   await session.state.set({

@@ -119,3 +119,16 @@ test('T3 segments, persistence, and same-thread native command approval', async 
       ),
     );
 });
+
+test('Mastra has no runtime permission control', async ({ page }) => {
+  await page.goto('/?runtime=mastra');
+  await page.getByTestId('ai-chat-model-selector').click();
+  await expect(page.getByTestId('ai-model-picker')).toBeVisible();
+  await expect(page.getByTestId('ai-model-picker-permissions')).toHaveCount(0);
+  await expect(page.getByTestId('ai-model-picker-permissions-menu')).toHaveCount(0);
+  const evidence = process.env.RUNTIME_PERMISSION_EVIDENCE_DIR;
+  if (evidence) {
+    await mkdir(evidence, { recursive: true });
+    await page.screenshot({ path: join(evidence, '07-mastra-no-runtime-permission.png') });
+  }
+});

@@ -12,6 +12,7 @@ import type { AssistantRuntimeEvent, AssistantRuntimeChoice } from '@memoflow/ai
 import '../../../../../apps/web/src/styles/index.css';
 
 installAiUiHost();
+const mastra = new URLSearchParams(location.search).get('runtime') === 'mastra';
 const seed = await fetch('/__runtime/state').then((result) => result.json());
 const Root = defineComponent({
   setup() {
@@ -20,15 +21,19 @@ const Root = defineComponent({
     const failure = ref('');
     const conversationId = ref(seed.conversationId);
     const identity = ref('runtime-861-isolated');
-    const runtimeChoice = ref<AssistantRuntimeChoice>({
-      runtimeKind: 'local_agent',
-      connectionId: seed.connectionId,
-      modelId: 'fixture/model',
-    });
+    const runtimeChoice = ref<AssistantRuntimeChoice>(
+      mastra
+        ? { runtimeKind: 'builtin' }
+        : {
+            runtimeKind: 'local_agent',
+            connectionId: seed.connectionId,
+            modelId: 'fixture/model',
+          },
+    );
     const model = {
       key: 'model',
-      agentKey: `local:${seed.connectionId}`,
-      agentInstanceId: 'codex',
+      agentKey: mastra ? 'agent:mastra' : `local:${seed.connectionId}`,
+      agentInstanceId: mastra ? 'mastra' : 'codex',
       providerId: seed.connectionId,
       providerName: 'Pi',
       modelId: 'fixture/model',
@@ -38,9 +43,9 @@ const Root = defineComponent({
     const snapshot = ref({
       instances: [
         {
-          instanceId: 'codex',
-          driver: 'pi',
-          name: 'Pi acceptance',
+          instanceId: mastra ? 'mastra' : 'codex',
+          driver: mastra ? 'mastra' : 'pi',
+          name: mastra ? 'Mastra acceptance' : 'Pi acceptance',
           enabled: true,
           legacyConnectionId: seed.connectionId,
           revision: 1,
@@ -121,7 +126,7 @@ const Root = defineComponent({
             models: [model],
             catalog: entries.value,
             selectedModelKey: 'model',
-            native: true,
+            native: !mastra,
             permissionMode: selection.permissionMode.value,
             disabled: running.value,
             onPermission: selection.selectPermission,
