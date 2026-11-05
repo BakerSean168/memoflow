@@ -834,7 +834,10 @@ export class LocalAgentRuntime {
         return;
       }
       const runtimeMode = resolveCompatibleRuntimeMode(
-        input.permissionMode ?? 'approval-required',
+        input.permissionMode ??
+          (connection.nativePermissionMode === 'auto-approve'
+            ? 'full-access'
+            : 'approval-required'),
         AGENT_SUPPORTED_RUNTIME_MODES[connection.driver],
       );
       const events = new NativeEventQueue();

@@ -446,6 +446,61 @@ describe('AI conversation restoration and business navigation', () => {
     expect(wrapper.vm.canSendMessage).toBe(true);
   });
 
+  it.each(['supervised', 'auto-approve'] as const)(
+    'seeds %s from the instance and restores a saved session choice first',
+    async (nativePermissionMode) => {
+      const instance = {
+        instanceId: 'codex',
+        driver: 'codex' as const,
+        name: 'Codex',
+        enabled: true,
+        revision: 1,
+        createdAt: 1,
+        updatedAt: 1,
+        legacyConnectionId: 'native-seed',
+        nativePermissionMode,
+      };
+      const local = {
+        listConnections: vi.fn(async () => [
+          { ...instance, id: 'native-seed', executablePath: 'codex', writeScopes: [] },
+        ]),
+        getDefaultChoice: vi.fn(async () => ({
+          runtimeKind: 'local_agent' as const,
+          connectionId: 'native-seed',
+          modelId: 'native-model',
+        })),
+        probeConnection: vi.fn(async () => ({
+          status: 'ready',
+          models: [{ id: 'native-model', name: 'Native' }],
+        })),
+      };
+      localStorage.clear();
+      const { wrapper } = await mountView({
+        [SERVER_STATE_IDENTITY_SCOPE_KEY as symbol]: () => 'seed-owner',
+        [AI_LOCAL_AGENT_KEY as symbol]: local,
+        [AI_AGENT_REGISTRY_KEY as symbol]: {
+          list: vi.fn(async () => ({ instances: [instance], bindings: [] })),
+        },
+      });
+      await flushPromises();
+      expect(wrapper.vm.permissionMode).toBe(
+        nativePermissionMode === 'auto-approve' ? 'full-access' : 'approval-required',
+      );
+      fixture.session.chatConversationId.value = 'seed-session';
+      await flushPromises();
+      wrapper.vm.selectPermission('auto-accept-edits');
+      await flushPromises();
+      fixture.session.chatConversationId.value = 'another-session';
+      await flushPromises();
+      expect(wrapper.vm.permissionMode).toBe(
+        nativePermissionMode === 'auto-approve' ? 'full-access' : 'approval-required',
+      );
+      fixture.session.chatConversationId.value = 'seed-session';
+      await flushPromises();
+      expect(wrapper.vm.permissionMode).toBe('auto-accept-edits');
+    },
+  );
+
   it('shows Provider-verified AGY Gemini models in Workspace without starting a second ACP scan', async () => {
     const connection = {
       id: 'native-antigravity',

@@ -64,6 +64,7 @@ export function useComposerModelSelection(options: UseComposerModelSelectionOpti
   const modelCatalogLoading = catalog.loading;
   const loadAgentRegistry = () => catalog.refresh();
   const permissionMode = ref<AIChatPermissionMode>('approval-required');
+  let explicitPermission = false;
   const nativeModelSelections = ref<Record<string, LocalAgentModelOptions>>({});
   const composerInitializing = ref(true);
   const nativeSelectionPending = ref(false);
@@ -298,17 +299,25 @@ export function useComposerModelSelection(options: UseComposerModelSelectionOpti
   onActivated(() => {
     void refreshConfiguration();
   });
-  const supportedRuntimeModes = computed(() => {
+  const selectedRuntimeInstance = computed(() => {
     const choice = chatSession.runtimeChoice.value;
-    const instance = agentRegistrySnapshot.value?.instances.find((entry) =>
+    return agentRegistrySnapshot.value?.instances.find((entry) =>
       choice.runtimeKind === 'local_agent'
         ? entry.legacyConnectionId === choice.connectionId
         : `agent:${entry.instanceId}` === selectedComposerAgent.value,
     );
+  });
+  const supportedRuntimeModes = computed(() => {
+    const instance = selectedRuntimeInstance.value;
     return instance
       ? AGENT_SUPPORTED_RUNTIME_MODES[instance.driver]
       : AGENT_SUPPORTED_RUNTIME_MODES.mastra;
   });
+  const seededPermissionMode = computed<AIChatPermissionMode>(() =>
+    selectedRuntimeInstance.value?.nativePermissionMode === 'auto-approve'
+      ? 'full-access'
+      : 'approval-required',
+  );
   const permissionStorageKey = () => {
     const owner = resolveIdentity();
     const id = chatSession.chatConversationId.value;
@@ -328,11 +337,13 @@ export function useComposerModelSelection(options: UseComposerModelSelectionOpti
       }
       const parsed = AIChatPermissionModeSchema.safeParse(saved);
       // Creating the first thread preserves its draft choice; opening another thread restores its own choice.
+      const preserveDraft = Boolean(previous && previous[0] === owner && !previous[1] && id);
+      explicitPermission = parsed.success || (preserveDraft && explicitPermission);
       const mode = parsed.success
         ? parsed.data
         : previous && previous[0] === owner && !previous[1] && id
           ? permissionMode.value
-          : 'approval-required';
+          : seededPermissionMode.value;
       permissionMode.value = resolveCompatibleRuntimeMode(mode, supportedRuntimeModes.value);
       savePermission();
     },
@@ -341,15 +352,23 @@ export function useComposerModelSelection(options: UseComposerModelSelectionOpti
   function savePermission() {
     try {
       const key = permissionStorageKey();
-      if (key) localStorage.setItem(key, JSON.stringify(permissionMode.value));
+      if (key && explicitPermission)
+        localStorage.setItem(key, JSON.stringify(permissionMode.value));
     } catch {
       /* In-memory selection still applies to subsequent turns. */
     }
   }
   watch(permissionMode, savePermission, { flush: 'sync' });
-  watch(supportedRuntimeModes, (supported) => {
-    permissionMode.value = resolveCompatibleRuntimeMode(permissionMode.value, supported);
-  });
+  watch(
+    [supportedRuntimeModes, seededPermissionMode],
+    ([supported, seed]) => {
+      permissionMode.value = resolveCompatibleRuntimeMode(
+        explicitPermission ? permissionMode.value : seed,
+        supported,
+      );
+    },
+    { flush: 'sync' },
+  );
   function composerSwitchBlockedReason(
     key: string,
   ): 'incompatible' | 'busy' | 'loading' | undefined {
@@ -508,7 +527,9 @@ export function useComposerModelSelection(options: UseComposerModelSelectionOpti
   }
   function selectPermission(mode: AIChatPermissionMode) {
     if (chatSession.chatLoading.value) return;
+    explicitPermission = true;
     permissionMode.value = resolveCompatibleRuntimeMode(mode, supportedRuntimeModes.value);
+    savePermission();
   }
 
   return {
