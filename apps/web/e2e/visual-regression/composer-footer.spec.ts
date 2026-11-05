@@ -83,7 +83,9 @@ async function expectRowFeedback(page: Page, button: Locator) {
   await page.mouse.move(0, 0);
   const idle = await button.evaluate((el) => getComputedStyle(el).backgroundColor);
   const box = await footerGeometry(button);
-  await page.mouse.move(box.right - 2, box.y + box.height / 2);
+  // Hover the control itself: since #856 the footer row also holds the gear, so
+  // the footer's content-right edge is no longer inside the account card.
+  await page.mouse.move(box.x + box.width - 2, box.y + box.height / 2);
   await expect
     .poll(() => button.evaluate((el) => getComputedStyle(el).backgroundColor))
     .not.toBe(idle);

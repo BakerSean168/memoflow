@@ -183,7 +183,7 @@
         "status": "none-verified",
         "testFiles": []
       },
-      "sourceSha256": "d60c93b00bd4399dd750f17dc382a4efe9d47f836ed76665b0b172963f2c8288"
+      "sourceSha256": "9a1e6d831da48e3f1a78a5fb2d53f70de2737a0eba6127e7c8b38f09cdd96164"
     },
     {
       "path": "apps/api/src/shared/infrastructure/middleware/error-result-envelope.surface.spec.ts",
@@ -1083,7 +1083,7 @@
         "status": "none-verified",
         "testFiles": []
       },
-      "sourceSha256": "e59e6abca497c1f4670eff166f832931aab4cd14b23acc2d2f08cf3b8e3bdcac"
+      "sourceSha256": "3a014663d617192459a503d8b17b9f9df98fc085b7ae406f2bffeac450940411"
     },
     {
       "path": "apps/api/src/__tests__/integration/agent-instance-registry.integration.test.ts",
