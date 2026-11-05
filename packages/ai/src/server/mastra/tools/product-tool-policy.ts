@@ -3,6 +3,7 @@ import type { RequestContext } from '@mastra/core/request-context';
 import {
   authorize,
   executeAuthorized,
+  evaluatePermission,
   permissionOperationForTool,
   type PermissionRepository,
 } from '../../permissions';
@@ -169,7 +170,11 @@ export async function applyMemoFlowSessionToolPolicy(
     if (!memoFlowToolPolicy(name)) return 'deny';
     if (current)
       return Object.prototype.hasOwnProperty.call(current, name) ? current[name]! : 'ask';
-    return 'ask';
+    return evaluatePermission({
+      agentId: 'builtin-mastra',
+      operationId: permissionOperationForTool(name)?.id ?? name,
+      preset: 'on_demand',
+    }).decision;
   };
   await session.state.set({
     yolo: false,
