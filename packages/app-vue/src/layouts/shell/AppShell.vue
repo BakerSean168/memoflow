@@ -37,6 +37,7 @@ import { useDesktopWindowControls } from '../../shared/composables/useDesktopWin
 import { hasDesktopAuthApi } from '../../shared/utils/desktop-auth-recovery';
 import { useNotificationUnreadQuery } from '@memoflow/notification-ui';
 import { useAccountSignOut, useAccountStore, useAuthenticationStore } from '@memoflow/account-ui';
+import { createProfileEditorIntent } from '@memoflow/account-ui/host';
 import {
   ConversationSelectionKey,
   createConversationSelectionStore,
@@ -78,6 +79,7 @@ import {
   SHELL_COMPOSER_MOUNT_KEY,
   DESKTOP_ACCESS_SNAPSHOT_KEY,
   MODULE_CAPSULES_KEY,
+  PROFILE_EDITOR_INTENT_KEY,
 } from '../../di/keys';
 import { useDeviceKeymap } from '../../shared/keyboard/device-keymap';
 import { keyboard } from '../../shared/keyboard/runtime';
@@ -431,6 +433,16 @@ const shellIdentityKind = computed<'local' | 'registered-local' | 'cloud'>(() =>
 const needsEmailVerification = computed(
   () => isAuthenticated.value && authStore.currentIdentity?.emailVerified === false,
 );
+
+/**
+ * 个人卡片（#856）：账户块只发出「打开编辑个人资料」意图，对话框由 #857 实现
+ * 并消费同一个 intent（`open` 双向绑定）。壳内 provide，侧栏与后续对话框都读这一份。
+ */
+const profileEditorIntent = createProfileEditorIntent();
+provide(PROFILE_EDITOR_INTENT_KEY, profileEditorIntent);
+
+/** 云账户在账户块与个人卡片里显示邮箱；本地账户没有邮箱。 */
+const accountEmail = computed<string | null>(() => authStore.currentIdentity?.email ?? null);
 
 function goVerifyEmail() {
   void router.push({ path: '/auth', query: { scene: 'verify-email' } });
@@ -788,10 +800,7 @@ onBeforeUnmount(() => {
       <template #capsule-preview-notification="{ closePreview }">
         <NotificationCapsulePreview
           @view-all="
-            openHeaderPreviewModule(closePreview, {
-              id: 'notification',
-              route: '/notifications',
-            })
+            openHeaderPreviewModule(closePreview, { id: 'notification', route: '/notifications' })
           "
           @navigate="openHeaderNotificationDestination(closePreview, $event)"
         />
@@ -852,6 +861,7 @@ onBeforeUnmount(() => {
               :active-profile-id="desktopAccess?.profile?.profileId"
               :active-conversation-id="activeConversationId"
               :user-name="userName"
+              :account-email="accountEmail"
               :identity-kind="shellIdentityKind"
               :cloud-connected="shellCloudConnected"
               :cloud-state="desktopAccess?.cloudState"
@@ -1040,6 +1050,7 @@ onBeforeUnmount(() => {
             :active-profile-id="desktopAccess?.profile?.profileId"
             :active-conversation-id="activeConversationId"
             :user-name="userName"
+            :account-email="accountEmail"
             :identity-kind="shellIdentityKind"
             :cloud-connected="shellCloudConnected"
             :cloud-state="desktopAccess?.cloudState"

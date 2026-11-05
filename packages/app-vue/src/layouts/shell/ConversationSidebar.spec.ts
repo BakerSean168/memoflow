@@ -1,9 +1,11 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { flushPromises, mount } from '@vue/test-utils';
+import { ref } from 'vue';
 import { createI18n } from 'vue-i18n';
 import { Toaster, toast } from 'vue-sonner';
 import ConversationSidebar from './ConversationSidebar.vue';
 import { listAdapterFor } from '../../shared/keyboard/list-adapter';
+import { PROFILE_EDITOR_INTENT_KEY } from '../../di/keys';
 import auth from '../../locales/en-US/auth';
 
 const i18n = createI18n({
@@ -68,6 +70,7 @@ const i18n = createI18n({
           switchAccount: 'Switch account',
           menuAddAccount: 'Add account',
           currentProfile: 'Current Profile',
+          editProfile: 'Edit profile',
           connection: { unknown: 'Not checked' },
         },
       },
@@ -503,8 +506,8 @@ describe('ConversationSidebar compact toolbar', () => {
   });
 });
 
-describe('ConversationSidebar account menu', () => {
-  async function openMenu(props = {}) {
+describe('ConversationSidebar account footer', () => {
+  async function openCard(props = {}, provide: Record<symbol, unknown> = {}) {
     const wrapper = mount(ConversationSidebar, {
       attachTo: document.body,
       props: {
@@ -513,9 +516,9 @@ describe('ConversationSidebar account menu', () => {
         userName: 'Alice',
         ...props,
       },
-      global: { plugins: [i18n] },
+      global: { plugins: [i18n], provide },
     });
-    await wrapper.get('[data-testid="shell-account-menu"]').trigger('keydown', { key: 'Enter' });
+    await wrapper.get('[data-testid="shell-account-card"]').trigger('keydown', { key: 'Enter' });
     await flushPromises();
     return wrapper;
   }
@@ -532,14 +535,20 @@ describe('ConversationSidebar account menu', () => {
   ] as const)(
     'shows the conditional action for %s and hides desktop actions on web',
     async (identityKind, cloudConnected, action, label) => {
-      const wrapper = await openMenu({
+      const wrapper = await openCard({
         identityKind,
         cloudConnected,
         isDesktop: false,
       });
       try {
+        const panel = item('shell-account-card-panel');
         expect(item('shell-account-identity').textContent?.match(/Alice/g)).toHaveLength(1);
-        expect(item('shell-open-settings')).toBeTruthy();
+        // 设置入口是卡片外的独立齿轮，#801 菜单里的「设置」项已删除。
+        expect(panel.querySelector('[data-testid="shell-open-settings"]')).toBeNull();
+        expect(panel).not.toBe(item('shell-open-settings'));
+        expect(panel.querySelector('[data-testid="shell-edit-profile"]')?.textContent).toContain(
+          'Edit profile',
+        );
         expect(item(action).textContent?.trim()).toBe(label);
         expect(document.querySelector('[data-testid="shell-switch-account"]')).toBeNull();
         expect(document.querySelector('[data-testid="shell-open-account"]')).toBeNull();
@@ -553,6 +562,86 @@ describe('ConversationSidebar account menu', () => {
     },
   );
 
+  it('keeps the settings entry reachable without opening the account card', async () => {
+    const wrapper = mount(ConversationSidebar, {
+      attachTo: document.body,
+      props: { groups: [], activeConversationId: null, userName: 'Alice' },
+      global: { plugins: [i18n] },
+    });
+    try {
+      const gear = wrapper.get('[data-testid="shell-open-settings"]');
+      expect(gear.attributes('aria-label')).toBe('Settings');
+      await gear.trigger('click');
+      expect(wrapper.emitted('open-settings')).toEqual([[]]);
+      expect(document.querySelector('[data-testid="shell-account-card-panel"]')).toBeNull();
+    } finally {
+      wrapper.unmount();
+    }
+  });
+
+  it('shows the cloud email in the account block and the personal card', async () => {
+    const wrapper = mount(ConversationSidebar, {
+      attachTo: document.body,
+      props: {
+        groups: [],
+        activeConversationId: null,
+        userName: 'Alice',
+        identityKind: 'cloud',
+        cloudConnected: true,
+        accountEmail: 'alice@example.com',
+      },
+      global: { plugins: [i18n] },
+    });
+    try {
+      expect(wrapper.get('[data-testid="shell-account-email"]').text()).toBe('alice@example.com');
+      await wrapper.get('[data-testid="shell-account-card"]').trigger('keydown', { key: 'Enter' });
+      await flushPromises();
+      expect(item('shell-account-card-email').textContent?.trim()).toBe('alice@example.com');
+      expect(item('shell-account-card-kind').textContent?.trim()).toBe('Signed in');
+    } finally {
+      wrapper.unmount();
+    }
+  });
+
+  it('keeps the personal card scroll-free and clips long identity text', async () => {
+    const wrapper = await openCard({
+      isDesktop: true,
+      userName: 'A very long account name that must never widen the card',
+    });
+    try {
+      const panel = item('shell-account-card-panel');
+      const surface = panel.closest('[role="menu"]') as HTMLElement;
+      // 卡片靠固定窄宽度 + truncate 裁剪，不设滚动容器。
+      expect(surface.className).toContain('w-64');
+      expect(surface.className).not.toContain('overflow-y-auto');
+      expect(surface.className).not.toContain('overflow-y-scroll');
+      expect(getComputedStyle(surface).overflowY).not.toBe('auto');
+      expect(panel.className).not.toContain('overflow-y-auto');
+      for (const id of ['shell-account-card-name', 'shell-account-card-kind']) {
+        expect(item(id).className).toContain('truncate');
+      }
+      expect(item('shell-account-card-name').parentElement?.className).toContain('min-w-0');
+    } finally {
+      wrapper.unmount();
+    }
+  });
+
+  it('raises the profile editor intent from the card', async () => {
+    const request = vi.fn();
+    const wrapper = await openCard(
+      { isDesktop: true },
+      { [PROFILE_EDITOR_INTENT_KEY as symbol]: { open: ref(false), request } },
+    );
+    try {
+      item('shell-edit-profile').click();
+      await flushPromises();
+      expect(request).toHaveBeenCalledTimes(1);
+      expect(wrapper.emitted('open-settings')).toBeUndefined();
+    } finally {
+      wrapper.unmount();
+    }
+  });
+
   it.each([
     ['local', false],
     ['registered-local', false],
@@ -560,7 +649,7 @@ describe('ConversationSidebar account menu', () => {
   ] as const)(
     'offers desktop sign out and login entry for %s',
     async (identityKind, cloudConnected) => {
-      const wrapper = await openMenu({
+      const wrapper = await openCard({
         isDesktop: true,
         identityKind,
         cloudConnected,
@@ -571,7 +660,7 @@ describe('ConversationSidebar account menu', () => {
         await flushPromises();
         expect(wrapper.emitted('logout')).toEqual([[]]);
         await wrapper
-          .get('[data-testid="shell-account-menu"]')
+          .get('[data-testid="shell-account-card"]')
           .trigger('keydown', { key: 'Enter' });
         await flushPromises();
         item('shell-switch-account').click();
@@ -598,7 +687,7 @@ describe('ConversationSidebar account menu', () => {
       remembered: false,
       lastActiveAt: index,
     }));
-    const wrapper = await openMenu({
+    const wrapper = await openCard({
       isDesktop: true,
       profiles,
       activeProfileId: 'id-2',
@@ -643,7 +732,7 @@ describe('ConversationSidebar account menu', () => {
   });
 
   it('supports touch/click opening and restores the footer trigger on Escape', async () => {
-    const wrapper = await openMenu({ isDesktop: true });
+    const wrapper = await openCard({ isDesktop: true });
     try {
       item('shell-switch-account').click();
       await flushPromises();
@@ -656,7 +745,7 @@ describe('ConversationSidebar account menu', () => {
       // lifecycle; asserting synchronously races the portal unmount on CI.
       await vi.waitFor(() =>
         expect(document.activeElement).toBe(
-          wrapper.get('[data-testid="shell-account-menu"]').element,
+          wrapper.get('[data-testid="shell-account-card"]').element,
         ),
       );
       expect(wrapper.emitted('switch-profile')).toBeUndefined();
@@ -697,7 +786,12 @@ describe('ConversationSidebar archived partition', () => {
       ids.map((id) => ({ id, success: true })),
     );
     const wrapper = mount(ConversationSidebar, {
-      props: { groups, activeConversationId: 'b', archivedConversations: archived, bulkAction },
+      props: {
+        groups,
+        activeConversationId: 'b',
+        archivedConversations: archived,
+        bulkAction,
+      },
       global: { plugins: [i18n] },
     });
     try {
@@ -782,7 +876,11 @@ describe('ConversationSidebar archived partition', () => {
       await next.trigger('click');
       expect(wrapper.emitted('change-archive-page')).toEqual([[-1], [1]]);
 
-      await wrapper.setProps({ archivePage: 1, archiveHasMore: false, loading: true });
+      await wrapper.setProps({
+        archivePage: 1,
+        archiveHasMore: false,
+        loading: true,
+      });
       expect(
         wrapper.get('[data-testid="archived-conversation-previous-page"]').attributes('disabled'),
       ).toBeDefined();

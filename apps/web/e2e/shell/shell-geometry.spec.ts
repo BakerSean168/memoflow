@@ -300,12 +300,17 @@ test.describe('Electron shell geometry matrix', () => {
     await saveMatrixShot(page, '1440x900-focus-goal-single-toolbar.png');
   });
 
-  test('[P1] Account menu opens independent Settings scene', async () => {
+  test('[P1] The account gear opens the independent Settings scene', async () => {
     const page = desktop.page;
     await desktop.setWindowSize({ width: 1200, height: 800 });
 
-    await page.getByTestId('shell-account-menu').click();
-    await expect(page.getByTestId('shell-open-settings')).toBeVisible();
+    // #856 split the gear out of the account card; it must reach Settings alone.
+    await page.getByTestId('shell-account-card').click();
+    await expect(page.getByTestId('shell-account-card-panel')).toBeVisible();
+    await expect(
+      page.getByTestId('shell-account-card-panel').getByTestId('shell-open-settings'),
+    ).toHaveCount(0);
+    await page.keyboard.press('Escape');
     await page.getByTestId('shell-open-settings').click();
 
     await expect(page.getByTestId('standalone-settings-layout')).toBeVisible({ timeout: 15_000 });
@@ -356,7 +361,7 @@ test.describe('Electron shell geometry matrix', () => {
     await page.getByTestId('settings-return-to-app').click();
     await expect(page.getByTestId('app-shell')).toHaveAttribute('data-shell-scene', 'workspace');
     // Account control remains reachable after the shell returns.
-    await expect(page.getByTestId('shell-account-menu')).toBeVisible();
+    await expect(page.getByTestId('shell-account-card')).toBeVisible();
     await saveMatrixShot(page, '1200-theme-light-en-workspace.png');
 
     // Switch back to Chinese for isolation of later serial tests (serial suite is fine either way).

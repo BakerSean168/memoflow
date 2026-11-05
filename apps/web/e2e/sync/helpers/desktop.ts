@@ -179,11 +179,12 @@ export class DesktopAppController {
 
     const guestWindow = await this.waitForMainWindow();
     // #855 removed the legacy Manage accounts dialog. Adding an account is the
-    // identity gate's login state, reached from the sidebar's account submenu.
+    // identity gate's login state, reached from the sidebar account card's
+    // switch-account submenu (#856).
     if (await guestWindow.getByTestId('settings-return-to-app').isVisible()) {
       await guestWindow.getByTestId('settings-return-to-app').click();
     }
-    await guestWindow.getByTestId('shell-account-menu').click();
+    await guestWindow.getByTestId('shell-account-card').click();
     await guestWindow.getByTestId('shell-switch-account').click();
     const gatePromise = app.waitForEvent('window');
     await guestWindow.getByTestId('shell-add-account').click();

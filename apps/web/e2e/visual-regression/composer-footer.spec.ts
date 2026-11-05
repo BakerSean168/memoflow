@@ -35,11 +35,57 @@ async function expectFullRow(button: Locator) {
   return box;
 }
 
+/**
+ * #856: the sidebar footer is two controls — the account card (left) and a
+ * standalone gear (right). Together they must fill the same 44px content row
+ * the single account button used to own.
+ */
+async function expectAccountFooterRow(page: Page) {
+  const footer = page.getByTestId('shell-account-footer').filter({ visible: true });
+  const card = footer.getByTestId('shell-account-card');
+  const gear = footer.getByTestId('shell-open-settings');
+  await expect(card).toBeVisible();
+  await expect(gear).toBeVisible();
+  const box = await footer.evaluate((element) => {
+    const rect = element.getBoundingClientRect();
+    const style = getComputedStyle(element);
+    return {
+      y: rect.y,
+      height: rect.height,
+      left: rect.left + parseFloat(style.borderLeftWidth) + parseFloat(style.paddingLeft),
+      right: rect.right - parseFloat(style.borderRightWidth) - parseFloat(style.paddingRight),
+    };
+  });
+  expect(box.height).toBe(44);
+  const cardBox = (await card.boundingBox())!;
+  const gearBox = (await gear.boundingBox())!;
+  expect(cardBox.height).toBe(32);
+  expect(gearBox.height).toBe(32);
+  expect(gearBox.width).toBe(32);
+  expect(Math.abs(cardBox.x - box.left)).toBeLessThanOrEqual(1);
+  expect(Math.abs(gearBox.x + gearBox.width - box.right)).toBeLessThanOrEqual(1);
+  // The top border consumes 1px of the footer's centered content box.
+  expect(Math.abs(cardBox.y + cardBox.height / 2 - (box.y + 22.5))).toBeLessThanOrEqual(1);
+  expect(Math.abs(gearBox.y + gearBox.height / 2 - (box.y + 22.5))).toBeLessThanOrEqual(1);
+  return {
+    card,
+    gear,
+    x: cardBox.x,
+    y: cardBox.y,
+    width: cardBox.width,
+    height: cardBox.height,
+    right: cardBox.x + cardBox.width,
+    padding: await card.evaluate((element) => getComputedStyle(element).paddingLeft),
+  };
+}
+
 async function expectRowFeedback(page: Page, button: Locator) {
   await page.mouse.move(0, 0);
   const idle = await button.evaluate((el) => getComputedStyle(el).backgroundColor);
   const box = await footerGeometry(button);
-  await page.mouse.move(box.right - 2, box.y + box.height / 2);
+  // Hover the control itself: since #856 the footer row also holds the gear, so
+  // the footer's content-right edge is no longer inside the account card.
+  await page.mouse.move(box.x + box.width - 2, box.y + box.height / 2);
   await expect
     .poll(() => button.evaluate((el) => getComputedStyle(el).backgroundColor))
     .not.toBe(idle);
@@ -66,18 +112,18 @@ for (const host of ['web', 'desktop'] as const) {
         });
         await page.setViewportSize({ width, height: 900 });
         await page.getByTestId('shell-sidebar-toggle').click();
-        const account = page.getByTestId('shell-account-menu').filter({ visible: true });
         await waitForVisualLayout(page);
-        const before = await expectFullRow(account);
+        const before = await expectAccountFooterRow(page);
         if (width === 840) {
-          const name = account.getByTestId('shell-account-name');
+          const name = before.card.getByTestId('shell-account-name');
           expect(await name.evaluate((el) => el.scrollWidth > el.clientWidth)).toBe(true);
           expect(await name.evaluate((el) => getComputedStyle(el).textOverflow)).toBe('ellipsis');
         }
-        await expectRowFeedback(page, account);
+        await expectRowFeedback(page, before.card);
         await page.mouse.click(before.right - 2, before.y + before.height / 2);
-        await expect(page.getByTestId('shell-open-settings')).toBeVisible();
-        await page.getByTestId('shell-open-settings').click();
+        await expect(page.getByTestId('shell-account-card-panel')).toBeVisible();
+        await page.keyboard.press('Escape');
+        await before.gear.click();
         if (width < 1024) await page.getByTestId('shell-sidebar-toggle').click();
         const back = page.getByTestId('settings-return-to-app').filter({ visible: true });
         const after = await expectFullRow(back);

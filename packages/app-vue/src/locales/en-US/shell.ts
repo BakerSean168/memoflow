@@ -154,6 +154,7 @@ export default {
     localProfile: 'Local account (sync paused)',
     accountAndPrivacy: 'Account & privacy',
     settings: 'Settings',
+    editProfile: 'Edit profile',
     logout: 'Sign out',
     loginOrRegister: 'Sign in / Register',
     connectCloud: 'Connect MemoFlow account',

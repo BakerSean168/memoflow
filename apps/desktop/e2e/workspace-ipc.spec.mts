@@ -429,7 +429,7 @@ test('real Windows Electron Workspace IPC authenticates start, ack, stop, cursor
     expect(goalStop).toMatchObject({ ok: true, data: { accepted: true } });
 
     // The same Electron instance switches to a new isolated Guest, without copying any app data.
-    await main.getByTestId('shell-account-menu').click();
+    await main.getByTestId('shell-account-card').click();
     await main.getByTestId('shell-switch-account').click();
     const secondGatePromise = app.waitForEvent('window');
     await main.getByTestId('shell-add-account').click();

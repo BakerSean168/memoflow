@@ -150,6 +150,7 @@ export default {
     localProfile: '本地账户（同步已暂停）',
     accountAndPrivacy: '账户与隐私',
     settings: '设置',
+    editProfile: '编辑个人资料',
     logout: '退出登录',
     loginOrRegister: '登录/注册',
     connectCloud: '连接 MemoFlow 账号',
