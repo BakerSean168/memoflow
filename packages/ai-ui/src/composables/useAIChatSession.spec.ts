@@ -1234,7 +1234,7 @@ describe('useAIChatSession Mastra-native open chat', () => {
         conversationId: 'conv-1',
         content: 'hello',
         surface: 'web',
-        permissionMode: 'supervised',
+        permissionMode: 'approval-required',
         providerId: 'provider-1',
         modelId: 'model-1',
         attachments: [],
@@ -1251,9 +1251,9 @@ describe('useAIChatSession Mastra-native open chat', () => {
   it('snapshots the requested read-only mode before creating a new conversation', async () => {
     const service = createServiceStub();
     const runtime = createRuntimeStub();
-    let mode: 'supervised' | 'read-only' = 'read-only';
+    let mode: 'approval-required' | 'full-access' = 'full-access';
     service.createConversation.mockImplementation(async () => {
-      mode = 'supervised'; // UI may initialize a new conversation during creation.
+      mode = 'approval-required'; // UI may initialize a new conversation during creation.
       return ok(createConversationDTO('conv-1'));
     });
     const composable = mountComposable(service, runtime, 'web', createUsageRuntimeStub(), {
@@ -1262,7 +1262,7 @@ describe('useAIChatSession Mastra-native open chat', () => {
     await send(composable, service, runtime);
     expect(runtime.streamMessage).toHaveBeenCalledWith(
       expect.objectContaining({
-        permissionMode: 'read-only',
+        permissionMode: 'full-access',
         providerId: 'provider-1',
         modelId: 'model-1',
       }),

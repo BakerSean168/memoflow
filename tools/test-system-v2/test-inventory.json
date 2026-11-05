@@ -2096,6 +2096,20 @@
       }
     },
     {
+      "path": "apps/web/e2e/ai/runtime-permissions/runtime-permissions.spec.ts",
+      "primarySuite": "e2e",
+      "collectors": [
+        "apps/web/playwright.runtime-permissions.config.ts"
+      ],
+      "measurementCollectors": [],
+      "e2eOwnership": {
+        "surface": "ai",
+        "role": "reference",
+        "lifecycle": "active",
+        "primaryCollector": "apps/web/playwright.runtime-permissions.config.ts"
+      }
+    },
+    {
       "path": "apps/web/e2e/authentication/auth-oauth-real.spec.ts",
       "primarySuite": "e2e",
       "collectors": [
@@ -13076,6 +13090,21 @@
       }
     },
     {
+      "id": "apps/web/playwright.runtime-permissions.config.ts",
+      "type": "primary",
+      "suite": "e2e",
+      "runner": "playwright",
+      "fileCount": 1,
+      "e2eOwnership": {
+        "lane": "reference",
+        "lifecycle": "active",
+        "execution": {
+          "kind": "manual",
+          "command": "pnpm exec playwright test --config apps/web/playwright.runtime-permissions.config.ts"
+        }
+      }
+    },
+    {
       "id": "apps/web/playwright.schedule-presentation-authority.config.ts",
       "type": "primary",
       "suite": "e2e",
@@ -14442,7 +14471,7 @@
     "smoke": 3,
     "boundary-ipc": 6,
     "boundary-main": 17,
-    "e2e": 42,
+    "e2e": 43,
     "perf": 2,
     "governance": 89
   },
@@ -14453,7 +14482,7 @@
       "desktop": 13,
       "local-validation": 6,
       "nightly": 7,
-      "reference": 7,
+      "reference": 8,
       "secure-acceptance": 1,
       "specialized": 5,
       "visual-artifact": 3
@@ -14461,7 +14490,7 @@
     "countsByRole": {
       "artifact": 3,
       "canonical": 4,
-      "reference": 7,
+      "reference": 8,
       "supplemental": 28
     },
     "automatedCollectorCount": 3,

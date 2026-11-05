@@ -33,13 +33,15 @@ const stateSchema = z.object({ sessionId: z.string().min(1).max(512) });
 const extensionSource = `export default function (pi) {
   if (typeof pi.registerMcpServer !== 'function') throw new Error('MemoFlow requires Pi with session MCP support');
   const name = process.env.MEMOFLOW_PI_MCP_NAME;
-  pi.registerMcpServer(name, {url: process.env.MEMOFLOW_PI_MCP_URL, headers: {Authorization: 'Bearer ' + process.env.MEMOFLOW_PI_MCP_TOKEN}, exposure: 'direct', timeout: 30});
+  if (name) pi.registerMcpServer(name, {url: process.env.MEMOFLOW_PI_MCP_URL, headers: {Authorization: 'Bearer ' + process.env.MEMOFLOW_PI_MCP_TOKEN}, exposure: 'direct', timeout: 30});
   pi.on('tool_call', async (event, ctx) => {
-    if (event.toolName.startsWith('mcp__' + name + '__')) return;
+    if (name && event.toolName.startsWith('mcp__' + name + '__')) return;
+    const mode = process.env.MEMOFLOW_RUNTIME_MODE;
+    if (mode === 'full-access' || (mode === 'auto-accept-edits' && ['edit', 'write'].includes(event.toolName))) return;
     const approved = await ctx.ui.confirm('Allow native Agent operation once?', event.toolName + ': ' + JSON.stringify(event.input).slice(0, 400));
     if (!approved) return {block: true, reason: 'User declined native operation'};
   });
-  pi.on('session_shutdown', () => pi.unregisterMcpServer(name));
+  pi.on('session_shutdown', () => { if (name) pi.unregisterMcpServer(name); });
 }`;
 
 /** Pi owns its JSONL sessions and inference; MemoFlow owns only this process and grant. */
@@ -75,11 +77,13 @@ export class PiDriver {
     };
     if (input) {
       if (input.nativeSessionId) args.push('--session', input.nativeSessionId);
+      this.extensionDirectory = await mkdtemp(join(this.cwd, 'memoflow-pi-extension-'));
+      const extension = join(this.extensionDirectory, 'memoflow.mjs');
+      await writeFile(extension, extensionSource, { mode: 0o600 });
+      args.push('--extension', extension);
+      Object.assign(env, { MEMOFLOW_RUNTIME_MODE: input.runtimeMode ?? 'approval-required' });
       if (input.mcp) {
-        this.extensionDirectory = await mkdtemp(join(this.cwd, 'memoflow-pi-extension-'));
-        const extension = join(this.extensionDirectory, 'memoflow.mjs');
-        await writeFile(extension, extensionSource, { mode: 0o600 });
-        args.push('--extension', 'builtin:mcp', '--extension', extension);
+        args.push('--extension', 'builtin:mcp');
         Object.assign(env, {
           MEMOFLOW_PI_MCP_NAME: `memoflow_${randomUUID().replace(/-/g, '')}`,
           MEMOFLOW_PI_MCP_URL: input.mcp.url,

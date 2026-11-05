@@ -603,7 +603,7 @@ export function useAssistantStream(input: {
       )
         chatMessage.value = originalDraft;
     };
-    const permissionMode = options.getPermissionMode?.() ?? 'supervised';
+    const permissionMode = options.getPermissionMode?.() ?? 'approval-required';
     const nativeModelOptions =
       choice.runtimeKind === 'local_agent' ? options.getNativeModelOptions?.() : undefined;
 

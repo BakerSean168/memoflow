@@ -13,3 +13,4 @@ export {
   ApplyKnowledgeNoteService,
 } from '../server/mastra';
 export { createPermissionFlowFixture } from './permission-flow';
+export { createRuntimePermissionAcceptance } from './runtime-permission-acceptance';

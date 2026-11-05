@@ -10,6 +10,7 @@ import { createPinia } from 'pinia';
 import { createI18n } from 'vue-i18n';
 import { createMemoryHistory, createRouter } from 'vue-router';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { AgentInstanceSchema } from '@memoflow/ai-contracts';
 import type { AIWorkflowRunView, AssistantRuntimeChoice } from '@memoflow/ai-contracts';
 import AIChatView from '../views/AIChatView.vue';
 import enAI from '@ai-ui-test-host/locales/en-US/aiAssistant';
@@ -446,6 +447,68 @@ describe('AI conversation restoration and business navigation', () => {
     expect(wrapper.vm.canSendMessage).toBe(true);
   });
 
+  it.each(['supervised', 'auto-approve'] as const)(
+    'seeds %s from the instance and restores a saved session choice first',
+    async (nativePermissionMode) => {
+      const instance = AgentInstanceSchema.parse({
+        instanceId: 'codex',
+        driver: 'codex' as const,
+        name: 'Codex',
+        enabled: true,
+        revision: 1,
+        createdAt: 1,
+        updatedAt: 1,
+        legacyConnectionId: 'native-seed',
+        nativeConfig: { nativePermissionMode },
+        accentColor: '#123456',
+      });
+      const local = {
+        listConnections: vi.fn(async () => [
+          {
+            ...instance,
+            nativePermissionMode,
+            id: 'native-seed',
+            executablePath: 'codex',
+            writeScopes: [],
+          },
+        ]),
+        getDefaultChoice: vi.fn(async () => ({
+          runtimeKind: 'local_agent' as const,
+          connectionId: 'native-seed',
+          modelId: 'native-model',
+        })),
+        probeConnection: vi.fn(async () => ({
+          status: 'ready',
+          models: [{ id: 'native-model', name: 'Native' }],
+        })),
+      };
+      localStorage.clear();
+      const { wrapper } = await mountView({
+        [SERVER_STATE_IDENTITY_SCOPE_KEY as symbol]: () => 'seed-owner',
+        [AI_LOCAL_AGENT_KEY as symbol]: local,
+        [AI_AGENT_REGISTRY_KEY as symbol]: {
+          list: vi.fn(async () => ({ instances: [instance], bindings: [] })),
+        },
+      });
+      await flushPromises();
+      expect(wrapper.vm.permissionMode).toBe(
+        nativePermissionMode === 'auto-approve' ? 'full-access' : 'approval-required',
+      );
+      fixture.session.chatConversationId.value = 'seed-session';
+      await flushPromises();
+      wrapper.vm.selectPermission('auto-accept-edits');
+      await flushPromises();
+      fixture.session.chatConversationId.value = 'another-session';
+      await flushPromises();
+      expect(wrapper.vm.permissionMode).toBe(
+        nativePermissionMode === 'auto-approve' ? 'full-access' : 'approval-required',
+      );
+      fixture.session.chatConversationId.value = 'seed-session';
+      await flushPromises();
+      expect(wrapper.vm.permissionMode).toBe('auto-accept-edits');
+    },
+  );
+
   it('shows Provider-verified AGY Gemini models in Workspace without starting a second ACP scan', async () => {
     const connection = {
       id: 'native-antigravity',
@@ -742,14 +805,14 @@ describe('AI conversation restoration and business navigation', () => {
     await flushPromises();
     fixture.session.chatConversationId.value = 'same-conversation';
     fixture.session.chatMessage.value = 'Keep draft';
-    wrapper.vm.permissionMode = 'read-only';
+    wrapper.vm.permissionMode = 'full-access';
     await flushPromises();
     await wrapper.vm.selectComposerModel('agent:work::p1::model', 'agent:work');
     expect(fixture.session.startNewConversation).not.toHaveBeenCalled();
     expect(fixture.session.chatConversationId.value).toBe('same-conversation');
     expect(fixture.session.chatMessage.value).toBe('Keep draft');
     expect(wrapper.vm.selectedModelKey).toBe('agent:work::p1::model');
-    expect(wrapper.vm.permissionMode).toBe('supervised');
+    expect(wrapper.vm.permissionMode).toBe('full-access');
     fixture.session.chatLoading.value = true;
     await wrapper.vm.selectComposerModel('agent:mastra::p1::model', 'agent:mastra');
     expect(wrapper.vm.selectedModelKey).toBe('agent:work::p1::model');

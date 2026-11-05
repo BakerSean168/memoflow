@@ -214,46 +214,97 @@ it('resumes the SDK session, injects MCP, answers native permission and streams 
   expect(initializationCalls).toEqual([undefined, 'native']);
   expect(driver.respond('stale', { type: 'permission', decision: 'approve_once' })).toBe(false);
 });
-it('allows only bridge-registered MemoFlow tools, including every Goal panel tool', async () => {
-  const requests: string[] = [];
-  const decisions: string[] = [];
-  const factory: ClaudeQueryFactory = ({ prompt, options }) => ({
-    async initializationResult() {
-      return {
-        account: { email: 'test@example.test', tokenSource: 'oauth' },
-        models: [{ value: 'sonnet', displayName: 'Sonnet' }],
-      };
-    },
-    async interrupt() {},
-    close() {},
-    async *[Symbol.asyncIterator]() {
-      for await (const _message of prompt) {
-        yield { type: 'system', session_id: 'native' };
-        // A bare wildcard grants every MCP tool without consulting canUseTool.
-        expect(options.allowedTools).toEqual([]);
-        const hook = options.hooks?.PreToolUse?.[0]?.hooks[0];
-        expect(hook).toBeDefined();
-        const check = (name: string) =>
-          hook!(
+it.each(['approval-required', 'auto-accept-edits', 'auto', 'full-access'] as const)(
+  'keeps business tools behind the bridge under %s SDK mode',
+  async (runtimeMode) => {
+    const requests: string[] = [];
+    const decisions: string[] = [];
+    const factory: ClaudeQueryFactory = ({ prompt, options }) => ({
+      async initializationResult() {
+        return {
+          account: { email: 'test@example.test', tokenSource: 'oauth' },
+          models: [{ value: 'sonnet', displayName: 'Sonnet' }],
+        };
+      },
+      async interrupt() {},
+      close() {},
+      async *[Symbol.asyncIterator]() {
+        for await (const _message of prompt) {
+          yield { type: 'system', session_id: 'native' };
+          // A bare wildcard grants every MCP tool without consulting canUseTool.
+          expect(options.allowedTools).toEqual([]);
+          expect(options.permissionMode).toBe(
             {
-              hook_event_name: 'PreToolUse',
-              tool_name: name,
-              tool_input: { name: 'test' },
-            } as unknown as HookInput,
-            'tool',
-            { signal: new AbortController().signal },
+              'approval-required': 'default',
+              'auto-accept-edits': 'acceptEdits',
+              auto: 'auto',
+              'full-access': 'bypassPermissions',
+            }[runtimeMode],
           );
-        expect(await check('mcp__memoflow__goal_search')).toMatchObject({
-          hookSpecificOutput: { permissionDecision: 'allow' },
-        });
-        expect(await check('mcp__memoflow__task_plan_get')).toMatchObject({
-          hookSpecificOutput: { permissionDecision: 'allow' },
-        });
-        expect(await check('mcp__memoflow__unknown_new_tool')).toMatchObject({
-          hookSpecificOutput: { permissionDecision: 'deny' },
-        });
-        expect(await check('Bash')).toEqual({});
-        for (const name of [
+          const hook = options.hooks?.PreToolUse?.[0]?.hooks[0];
+          expect(hook).toBeDefined();
+          const check = (name: string) =>
+            hook!(
+              {
+                hook_event_name: 'PreToolUse',
+                tool_name: name,
+                tool_input: { name: 'test' },
+              } as unknown as HookInput,
+              'tool',
+              { signal: new AbortController().signal },
+            );
+          expect(await check('mcp__memoflow__goal_search')).toMatchObject({
+            hookSpecificOutput: { permissionDecision: 'allow' },
+          });
+          expect(await check('mcp__memoflow__task_plan_get')).toMatchObject({
+            hookSpecificOutput: { permissionDecision: 'allow' },
+          });
+          expect(await check('mcp__memoflow__unknown_new_tool')).toMatchObject({
+            hookSpecificOutput: { permissionDecision: 'deny' },
+          });
+          expect(await check('Bash')).toEqual({});
+          for (const name of [
+            'goal_panel_open',
+            'goal_panel_patch',
+            'goal_panel_add_key_result',
+            'goal_panel_remove_key_result',
+            'goal_panel_focus',
+            'goal_panel_snapshot',
+            'goal_panel_release',
+            'goal_panel_submit',
+          ]) {
+            expect(await check(`mcp__memoflow__${name}`)).toMatchObject({
+              hookSpecificOutput: { permissionDecision: 'allow' },
+            });
+          }
+          const allowed = await check('mcp__memoflow__goal_create');
+          decisions.push(
+            (allowed.hookSpecificOutput as { permissionDecision?: string })?.permissionDecision ??
+              '',
+          );
+          const denied = await check('mcp__memoflow__goal_update');
+          decisions.push(
+            (denied.hookSpecificOutput as { permissionDecision?: string })?.permissionDecision ??
+              '',
+          );
+          yield { type: 'result', subtype: 'success', session_id: 'native' };
+          break;
+        }
+      },
+    });
+    const driver = new ClaudeDriver(connection, '/tmp', factory);
+    for await (const event of driver.run({
+      runtimeMode,
+      modelId: 'sonnet',
+      content: 'Hello',
+      mcp: {
+        url: 'http://127.0.0.1/mcp',
+        token: 'token',
+        toolNames: [
+          'goal_search',
+          'task_plan_get',
+          'goal_create',
+          'goal_update',
           'goal_panel_open',
           'goal_panel_patch',
           'goal_panel_add_key_result',
@@ -262,61 +313,24 @@ it('allows only bridge-registered MemoFlow tools, including every Goal panel too
           'goal_panel_snapshot',
           'goal_panel_release',
           'goal_panel_submit',
-        ]) {
-          expect(await check(`mcp__memoflow__${name}`)).toMatchObject({
-            hookSpecificOutput: { permissionDecision: 'allow' },
-          });
-        }
-        const allowed = await check('mcp__memoflow__goal_create');
-        decisions.push(
-          (allowed.hookSpecificOutput as { permissionDecision?: string })?.permissionDecision ?? '',
-        );
-        const denied = await check('mcp__memoflow__goal_update');
-        decisions.push(
-          (denied.hookSpecificOutput as { permissionDecision?: string })?.permissionDecision ?? '',
-        );
-        yield { type: 'result', subtype: 'success', session_id: 'native' };
-        break;
+        ],
+      },
+    })) {
+      if (event.type === 'request') {
+        expect(event.request.type).toBe('permission');
+        requests.push(event.request.title);
+        expect(
+          driver.respond(event.request.requestId, {
+            type: 'permission',
+            decision: requests.length === 1 ? 'approve_once' : 'decline',
+          }),
+        ).toBe(true);
       }
-    },
-  });
-  const driver = new ClaudeDriver(connection, '/tmp', factory);
-  for await (const event of driver.run({
-    modelId: 'sonnet',
-    content: 'Hello',
-    mcp: {
-      url: 'http://127.0.0.1/mcp',
-      token: 'token',
-      toolNames: [
-        'goal_search',
-        'task_plan_get',
-        'goal_create',
-        'goal_update',
-        'goal_panel_open',
-        'goal_panel_patch',
-        'goal_panel_add_key_result',
-        'goal_panel_remove_key_result',
-        'goal_panel_focus',
-        'goal_panel_snapshot',
-        'goal_panel_release',
-        'goal_panel_submit',
-      ],
-    },
-  })) {
-    if (event.type === 'request') {
-      expect(event.request.type).toBe('permission');
-      requests.push(event.request.title);
-      expect(
-        driver.respond(event.request.requestId, {
-          type: 'permission',
-          decision: requests.length === 1 ? 'approve_once' : 'decline',
-        }),
-      ).toBe(true);
     }
-  }
-  expect(requests).toHaveLength(0);
-  expect(decisions).toEqual(['allow', 'allow']);
-});
+    expect(requests).toHaveLength(0);
+    expect(decisions).toEqual(['allow', 'allow']);
+  },
+);
 
 it('retires a permission card when the native request signal expires', async () => {
   let expiredId = '';

@@ -1,3 +1,8 @@
+import {
+  AIChatPermissionModeSchema,
+  AGENT_SUPPORTED_RUNTIME_MODES,
+  resolveCompatibleRuntimeMode,
+} from '@memoflow/ai-contracts';
 import { computed, onActivated, ref, watch, type Ref } from 'vue';
 import { useRoute } from 'vue-router';
 import { useI18n } from 'vue-i18n';
@@ -57,8 +62,9 @@ export function useComposerModelSelection(options: UseComposerModelSelectionOpti
   const agentRegistrySnapshot = catalog.snapshot;
   const modelCatalog = catalog.entries;
   const modelCatalogLoading = catalog.loading;
-  const loadAgentRegistry = catalog.refresh;
-  const permissionMode = ref<AIChatPermissionMode>('supervised');
+  const loadAgentRegistry = () => catalog.refresh();
+  const permissionMode = ref<AIChatPermissionMode>('approval-required');
+  let explicitPermission = false;
   const nativeModelSelections = ref<Record<string, LocalAgentModelOptions>>({});
   const composerInitializing = ref(true);
   const nativeSelectionPending = ref(false);
@@ -175,7 +181,7 @@ export function useComposerModelSelection(options: UseComposerModelSelectionOpti
       driver: instance.driver,
       enabled: instance.enabled,
       accentColor: instance.accentColor,
-      nativePermissionMode: instance.nativeConfig?.nativePermissionMode ?? 'supervised',
+      supportedRuntimeModes: AGENT_SUPPORTED_RUNTIME_MODES[instance.driver],
       switchBlockedReason: composerSwitchBlockedReason(
         instance.driver === 'mastra'
           ? `agent:${instance.instanceId}`
@@ -293,15 +299,76 @@ export function useComposerModelSelection(options: UseComposerModelSelectionOpti
   onActivated(() => {
     void refreshConfiguration();
   });
-  watch(
-    () => chatSession.runtimeChoice.value.runtimeKind,
-    () => {
-      permissionMode.value = 'supervised';
-    },
-  );
-  watch(chatSession.chatConversationId, (next, previous) => {
-    if (previous && next !== previous) permissionMode.value = 'supervised';
+  const selectedRuntimeInstance = computed(() => {
+    const choice = chatSession.runtimeChoice.value;
+    return agentRegistrySnapshot.value?.instances.find((entry) =>
+      choice.runtimeKind === 'local_agent'
+        ? entry.legacyConnectionId === choice.connectionId
+        : `agent:${entry.instanceId}` === selectedComposerAgent.value,
+    );
   });
+  const supportedRuntimeModes = computed(() => {
+    const instance = selectedRuntimeInstance.value;
+    return instance
+      ? AGENT_SUPPORTED_RUNTIME_MODES[instance.driver]
+      : AGENT_SUPPORTED_RUNTIME_MODES.mastra;
+  });
+  const seededPermissionMode = computed<AIChatPermissionMode>(() =>
+    selectedRuntimeInstance.value?.nativeConfig?.nativePermissionMode === 'auto-approve'
+      ? 'full-access'
+      : 'approval-required',
+  );
+  const permissionStorageKey = () => {
+    const owner = resolveIdentity();
+    const id = chatSession.chatConversationId.value;
+    return owner && id
+      ? `ai:composer:runtime-mode:v1:${encodeURIComponent(owner)}:${encodeURIComponent(id)}`
+      : '';
+  };
+  watch(
+    [resolveIdentity, chatSession.chatConversationId],
+    ([owner, id], previous) => {
+      let saved: unknown;
+      try {
+        const key = permissionStorageKey();
+        saved = key ? JSON.parse(localStorage.getItem(key) ?? 'null') : null;
+      } catch {
+        /* Storage restrictions do not prevent a supervised session. */
+      }
+      const parsed = AIChatPermissionModeSchema.safeParse(saved);
+      // Creating the first thread preserves its draft choice; opening another thread restores its own choice.
+      const preserveDraft = Boolean(previous && previous[0] === owner && !previous[1] && id);
+      explicitPermission = parsed.success || (preserveDraft && explicitPermission);
+      const mode = parsed.success
+        ? parsed.data
+        : previous && previous[0] === owner && !previous[1] && id
+          ? permissionMode.value
+          : seededPermissionMode.value;
+      permissionMode.value = resolveCompatibleRuntimeMode(mode, supportedRuntimeModes.value);
+      savePermission();
+    },
+    { flush: 'sync', immediate: true },
+  );
+  function savePermission() {
+    try {
+      const key = permissionStorageKey();
+      if (key && explicitPermission)
+        localStorage.setItem(key, JSON.stringify(permissionMode.value));
+    } catch {
+      /* In-memory selection still applies to subsequent turns. */
+    }
+  }
+  watch(permissionMode, savePermission, { flush: 'sync' });
+  watch(
+    [supportedRuntimeModes, seededPermissionMode],
+    ([supported, seed]) => {
+      permissionMode.value = resolveCompatibleRuntimeMode(
+        explicitPermission ? permissionMode.value : seed,
+        supported,
+      );
+    },
+    { flush: 'sync' },
+  );
   function composerSwitchBlockedReason(
     key: string,
   ): 'incompatible' | 'busy' | 'loading' | undefined {
@@ -326,7 +393,6 @@ export function useComposerModelSelection(options: UseComposerModelSelectionOpti
     ++newThreadSelectionEpoch;
     const identity = resolveIdentity();
     const conversationId = chatSession.chatConversationId.value;
-    const previousAgent = selectedComposerAgent.value;
     if (instance.driver !== 'mastra') {
       if (!localAgent || !agentRegistryClient) return;
       nativeSelectionPending.value = true;
@@ -445,7 +511,7 @@ export function useComposerModelSelection(options: UseComposerModelSelectionOpti
           connectionId: id,
           modelId: model.modelId,
         };
-        if (previousAgent !== agentKey) permissionMode.value = 'supervised';
+
         if (!instance.legacyConnectionId) void loadAgentRegistry();
         await localChoices.refresh();
       } catch (error) {
@@ -457,14 +523,13 @@ export function useComposerModelSelection(options: UseComposerModelSelectionOpti
     } else {
       if (modelSelection.selectModel(key) !== 'selected') return;
       chatSession.runtimeChoice.value = { runtimeKind: 'builtin' };
-      if (previousAgent !== agentKey) permissionMode.value = 'supervised';
     }
   }
   function selectPermission(mode: AIChatPermissionMode) {
     if (chatSession.chatLoading.value) return;
-    const native = chatSession.runtimeChoice.value.runtimeKind === 'local_agent';
-    if (mode === 'supervised' || (native ? mode === 'auto-approve' : mode === 'read-only'))
-      permissionMode.value = mode;
+    explicitPermission = true;
+    permissionMode.value = resolveCompatibleRuntimeMode(mode, supportedRuntimeModes.value);
+    savePermission();
   }
 
   return {

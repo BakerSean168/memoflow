@@ -108,6 +108,14 @@
         "kind": "manual",
         "command": "pnpm exec playwright test --config apps/web/playwright.conversation-selection.config.ts"
       }
+    },
+    "apps/web/playwright.runtime-permissions.config.ts": {
+      "lane": "reference",
+      "lifecycle": "active",
+      "execution": {
+        "kind": "manual",
+        "command": "pnpm exec playwright test --config apps/web/playwright.runtime-permissions.config.ts"
+      }
     }
   },
   "specs": {
@@ -362,6 +370,12 @@
       "role": "reference",
       "lifecycle": "active",
       "primaryCollector": "apps/web/playwright.conversation-selection.config.ts"
+    },
+    "apps/web/e2e/ai/runtime-permissions/runtime-permissions.spec.ts": {
+      "surface": "ai",
+      "role": "reference",
+      "lifecycle": "active",
+      "primaryCollector": "apps/web/playwright.runtime-permissions.config.ts"
     }
   }
 }

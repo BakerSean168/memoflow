@@ -227,7 +227,7 @@ it.each(['timeout', 'missing-handler'] as const)(
         runId: 'run',
         ...(reason === 'timeout'
           ? {
-              permissionMode: 'supervised' as const,
+              permissionMode: 'approval-required' as const,
               requestApproval: () => new Promise<boolean>(() => {}),
             }
           : {}),
@@ -512,3 +512,86 @@ it('makes legacy tools visible after settings changes without discarding migrate
     db.close();
   }
 });
+
+it.each([
+  ['goal.delete_permanent', 'full_auto', 'ask'],
+  ['notification.send_external', 'full_auto', 'ask'],
+  ['goal.create', 'read_only', 'deny'],
+] as const)(
+  'full-access preserves business %s under %s (%s)',
+  async (operationId, preset, expected) => {
+    const db = createLocalAgentSqlite();
+    const store = new LocalAgentRepository(db);
+    const permissions = new PermissionLocalRepository(db);
+    const connection = await store.createConnection('owner', {
+      driver: 'codex',
+      name: 'Fixture',
+      executablePath: 'codex',
+      enabled: true,
+      writeScopes: ['goals:write'],
+    });
+    let asks = 0;
+    let executed = 0;
+    const bridge = new LocalAgentToolBridge({
+      store,
+      permissions,
+      isActive: () => true,
+      registerTools(server, context) {
+        server.registerTool('operation', { inputSchema: z.object({}) }, async () => {
+          try {
+            await context.executeAuthorized(operationId, 'operation', async () => {
+              executed++;
+            });
+            return { content: [{ type: 'text', text: 'executed' }] };
+          } catch {
+            return {
+              isError: true,
+              content: [{ type: 'text', text: 'denied' }],
+            };
+          }
+        });
+      },
+    });
+    try {
+      await bridge.permissions('owner', {
+        action: 'settings',
+        settings: { preset, agentPresets: {}, revision: 1 },
+      });
+      const grant = await bridge.open({
+        identityId: 'owner',
+        connectionId: connection.id,
+        conversationId: 'chat',
+        runId: 'r',
+        permissionMode: 'full-access',
+        requestApproval: async (_tool, _signal, business) => {
+          asks++;
+          expect(business).toBeDefined();
+          return 'approve_once';
+        },
+      });
+      for (let i = 0; i < 2; i++) {
+        const response = await fetch(grant.url, {
+          method: 'POST',
+          headers: {
+            authorization: `Bearer ${grant.token}`,
+            accept: 'application/json, text/event-stream',
+            'content-type': 'application/json',
+          },
+          body: JSON.stringify({
+            jsonrpc: '2.0',
+            id: i + 1,
+            method: 'tools/call',
+            params: { name: 'operation', arguments: {} },
+          }),
+        });
+        expect(await response.text()).toContain(expected === 'deny' ? 'denied' : 'executed');
+      }
+      expect(asks).toBe(expected === 'ask' ? 2 : 0);
+      expect(executed).toBe(expected === 'ask' ? 2 : 0);
+      expect(await permissions.listAudit('owner')).toHaveLength(2);
+    } finally {
+      await bridge.dispose();
+      db.close();
+    }
+  },
+);

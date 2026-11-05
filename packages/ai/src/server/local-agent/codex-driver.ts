@@ -1,6 +1,7 @@
 import { randomUUID } from 'node:crypto';
 import { z } from 'zod';
 import type {
+  AIChatPermissionMode,
   LocalAgentConnection,
   LocalAgentRequest,
   LocalAgentRequestResponse,
@@ -22,6 +23,29 @@ import { LocalAgentError } from '../../shared/local-agent-error';
 import { nativeIdentity, nativeModelVisibilityContext } from './native-identity';
 import { nativeFailure } from './native-failure';
 
+// Based on T3 CodexAdapterV2's policy/reviewer/sandbox triple. MemoFlow has no
+// auto_review reviewer; unsupported auto falls back to approval-required.
+const CODEX_RUNTIME_POLICY = {
+  'approval-required': {
+    approvalPolicy: 'on-request',
+    approvalsReviewer: 'user',
+    sandbox: 'read-only',
+    sandboxType: 'readOnly',
+  },
+  'auto-accept-edits': {
+    approvalPolicy: 'on-request',
+    approvalsReviewer: 'user',
+    sandbox: 'workspace-write',
+    sandboxType: 'workspaceWrite',
+  },
+  'full-access': {
+    approvalPolicy: 'never',
+    approvalsReviewer: 'user',
+    sandbox: 'danger-full-access',
+    sandboxType: 'dangerFullAccess',
+  },
+} as const;
+
 export type NativeAgentEvent =
   | { type: 'session'; nativeSessionId: string; accountFingerprint: string }
   | { type: 'delta'; content: string }
@@ -32,10 +56,15 @@ export type NativeAgentEvent =
       state: 'running' | 'completed' | 'failed' | 'denied';
     }
   | { type: 'request'; request: LocalAgentRequest }
-  | { type: 'request_resolved'; requestId: string; resolution: 'answered' | 'cancelled' }
+  | {
+      type: 'request_resolved';
+      requestId: string;
+      resolution: 'answered' | 'cancelled';
+    }
   | { type: 'completed' }
   | { type: 'cancelled' };
 export interface NativeAgentRunInput {
+  runtimeMode?: AIChatPermissionMode;
   nativeSessionId?: string | null;
   accountFingerprint?: string | null;
   modelId: string;
@@ -282,12 +311,22 @@ export class CodexDriver {
             },
           }
         : {};
+      // on-request plus MemoFlow's relay handles approvals; edits are accepted only in edits mode.
+      const policy =
+        CODEX_RUNTIME_POLICY[
+          input.runtimeMode === 'auto'
+            ? 'approval-required'
+            : (input.runtimeMode ?? 'approval-required')
+        ];
       const response = threadSchema.parse(
         await transport.request(input.nativeSessionId ? 'thread/resume' : 'thread/start', {
           ...(input.nativeSessionId ? { threadId: input.nativeSessionId } : {}),
           model: input.modelId,
           cwd: this.cwd,
           config,
+          approvalPolicy: policy.approvalPolicy,
+          approvalsReviewer: policy.approvalsReviewer,
+          sandbox: policy.sandbox,
         }),
       );
       if (input.nativeSessionId && input.nativeSessionId !== response.thread.id)
@@ -313,6 +352,12 @@ export class CodexDriver {
       const turn = turnSchema.parse(
         await transport.request('turn/start', {
           threadId: this.threadId,
+          approvalPolicy: policy.approvalPolicy,
+          approvalsReviewer: policy.approvalsReviewer,
+          sandboxPolicy:
+            policy.sandboxType === 'workspaceWrite'
+              ? { type: policy.sandboxType, writableRoots: [this.cwd], networkAccess: false }
+              : { type: policy.sandboxType },
           model: input.modelId,
           ...(input.modelOptions?.reasoningEffort
             ? { effort: input.modelOptions.reasoningEffort }
@@ -458,6 +503,7 @@ export class CodexDriver {
       }
       request = {
         type: 'permission',
+        operation: wire.method === 'item/fileChange/requestApproval' ? 'edit' : 'command',
         requestId,
         title:
           value.data.command ??

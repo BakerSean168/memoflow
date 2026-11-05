@@ -3,6 +3,7 @@ import { z } from 'zod';
 import { createLogger } from '@memoflow/utils/logger';
 import type { Options, PermissionResult, SDKUserMessage } from '@anthropic-ai/claude-agent-sdk';
 import type {
+  AIChatPermissionMode,
   LocalAgentConnection,
   LocalAgentRequest,
   LocalAgentRequestResponse,
@@ -16,6 +17,13 @@ import { probeNativeVersion, resolveNativeExecutable } from './native-executable
 import { nativeFailure } from './native-failure';
 import { nativeIdentity, nativeModelVisibilityContext } from './native-identity';
 const logger = createLogger('ClaudeLocalDriver');
+
+const CLAUDE_RUNTIME_POLICY = {
+  'approval-required': 'default',
+  'auto-accept-edits': 'acceptEdits',
+  auto: 'auto',
+  'full-access': 'bypassPermissions',
+} as const satisfies Record<AIChatPermissionMode, Options['permissionMode']>;
 
 const memoFlowToolPrefix = 'mcp__memoflow__';
 
@@ -145,36 +153,30 @@ export class ClaudeDriver {
         // The SDK treats bare allowedTools rules as unconditional grants and
         // skips canUseTool. Gate our MCP tools before native allow rules instead.
         allowedTools: [],
-        hooks: input?.mcp
-          ? {
-              PreToolUse: [
-                {
-                  hooks: [
-                    async (event) => {
-                      if (
-                        event.hook_event_name !== 'PreToolUse' ||
-                        !event.tool_name.startsWith(memoFlowToolPrefix)
-                      )
-                        return {};
-                      const name = event.tool_name.slice(memoFlowToolPrefix.length);
-                      // Names come from the authenticated bridge's actual tools/list registry.
-                      // Business writes are approved by the bridge, not twice by the Provider.
-                      return {
-                        hookSpecificOutput: {
-                          hookEventName: 'PreToolUse',
-                          permissionDecision: input.mcp?.toolNames?.includes(name)
-                            ? 'allow'
-                            : 'deny',
-                          permissionDecisionReason: 'MemoFlow bridge authorizes registered tools',
-                        },
-                      };
+        hooks: {
+          PreToolUse: [
+            {
+              hooks: [
+                async (event) => {
+                  if (event.hook_event_name !== 'PreToolUse') return {};
+                  if (!event.tool_name.startsWith(memoFlowToolPrefix)) return {};
+                  const name = event.tool_name.slice(memoFlowToolPrefix.length);
+                  // Names come from the authenticated bridge's actual tools/list registry.
+                  // Business writes are approved by the bridge, not twice by the Provider.
+                  return {
+                    hookSpecificOutput: {
+                      hookEventName: 'PreToolUse',
+                      permissionDecision: input?.mcp?.toolNames?.includes(name) ? 'allow' : 'deny',
+                      permissionDecisionReason: 'MemoFlow bridge authorizes registered tools',
                     },
-                  ],
+                  };
                 },
               ],
-            }
-          : {},
-        permissionMode: 'default',
+            },
+          ],
+        },
+        permissionMode: CLAUDE_RUNTIME_POLICY[input?.runtimeMode ?? 'approval-required'],
+        allowDangerouslySkipPermissions: input?.runtimeMode === 'full-access',
         persistSession: Boolean(input),
         includePartialMessages: true,
         ...(input
@@ -458,6 +460,11 @@ export class ClaudeDriver {
     } else
       request = {
         type: 'permission',
+        operation: ['Edit', 'Write', 'MultiEdit', 'NotebookEdit'].includes(name)
+          ? 'edit'
+          : name === 'Bash'
+            ? 'command'
+            : 'other',
         requestId,
         title: `${name}: ${JSON.stringify(args)}`.slice(0, 500),
       };

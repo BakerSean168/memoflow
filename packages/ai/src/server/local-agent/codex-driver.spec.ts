@@ -155,6 +155,36 @@ describe('Codex native driver', () => {
     await expect(run.next()).rejects.toMatchObject({ code: 'LOCAL_AGENT_QUOTA_EXHAUSTED' });
   });
 
+  it.each([
+    ['approval-required', 'on-request', 'read-only', 'readOnly'],
+    ['auto-accept-edits', 'on-request', 'workspace-write', 'workspaceWrite'],
+    ['full-access', 'never', 'danger-full-access', 'dangerFullAccess'],
+  ] as const)(
+    'maps %s on both thread/start and turn/start',
+    async (runtimeMode, approvalPolicy, sandbox, sandboxType) => {
+      const native = driver(`
+      if (frame.method === 'thread/start' || frame.method === 'turn/start') {
+        const p = frame.params;
+        if (p.approvalPolicy !== '${approvalPolicy}' || p.approvalsReviewer !== 'user') process.exit(11);
+        if (frame.method === 'thread/start' && p.sandbox !== '${sandbox}') process.exit(12);
+        if (frame.method === 'turn/start' && p.sandboxPolicy.type !== '${sandboxType}') process.exit(13);
+      }
+    `);
+      const events = [];
+      for await (const event of native.run({
+        runtimeMode,
+        modelId: 'model',
+        content: 'Hi',
+        mcp: { url: 'http://127.0.0.1/mcp', token: 'fixture' },
+      })) {
+        events.push(event);
+        if (event.type === 'request')
+          native.respond(event.request.requestId, { type: 'permission', decision: 'approve_once' });
+      }
+      expect(events.at(-1)).toEqual({ type: 'completed' });
+    },
+  );
+
   it('queries native account and catalog without starting inference', async () => {
     expect(await driver().probe()).toMatchObject({
       status: 'ready',
