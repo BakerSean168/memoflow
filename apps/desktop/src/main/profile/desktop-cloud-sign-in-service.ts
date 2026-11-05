@@ -12,6 +12,7 @@ import { createLogger } from '@memoflow/utils/logger';
 import { getApiBaseUrl } from '../utils/api-config';
 import type { CloudSessionStore, StoredCloudSession } from './cloud-session-store';
 import type { DesktopProfileRuntimeManager } from './desktop-profile-runtime-manager';
+import { markProfileImportOpportunity } from './profile-import-opportunity';
 
 const logger = createLogger('DesktopCloudSignInService');
 
@@ -135,7 +136,13 @@ export class DesktopCloudSignInService {
     remember: boolean,
   ): Promise<Result<DesktopCloudSignInResult>> {
     let profileId: string;
+    let isNewTarget = false;
     try {
+      // Same test as the anchored connection flow: the cloud account has no
+      // registered Profile yet, so this adoption creates one.
+      isNewTarget = !(await this.runtime.listProfiles()).some(
+        (profile) => profile.cloudBinding?.cloudAccountId === stored.account.id,
+      );
       const target = await this.runtime.registerCloudProfile(
         stored.account.id,
         stored.account.name || stored.account.email,
@@ -163,6 +170,25 @@ export class DesktopCloudSignInService {
         message: '无法保存登录状态，请检查本机安全存储后重试',
         cause,
       });
+    }
+
+    // A newly adopted cloud Profile gets the same one-shot import invitation
+    // the anchored connection flow leaves; the identity window has no source
+    // Profile, so the prompt offers every eligible local account.
+    if (isNewTarget) {
+      try {
+        await markProfileImportOpportunity(
+          this.runtime.getSharedResolver().roots.dataRoot,
+          profileId,
+          null,
+        );
+      } catch (cause) {
+        // The optional invitation must never change a committed sign-in.
+        logger.warn('Cloud sign-in could not record the import opportunity', {
+          profileId,
+          reason: cause instanceof Error ? cause.message : 'unknown',
+        });
+      }
     }
 
     try {
