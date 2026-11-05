@@ -2714,6 +2714,14 @@
       "measurementCollectors": []
     },
     {
+      "path": "packages/account-ui/src/account/components/CloudAccountSecuritySection.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/account-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "packages/account-ui/src/account/components/CloudPasswordSection.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -13378,7 +13386,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 9
+      "fileCount": 10
     },
     {
       "id": "packages/account/vitest.config.ts",
@@ -14471,7 +14479,7 @@
   "duplicate": [],
   "unexpected": [],
   "counts": {
-    "unit": 1190,
+    "unit": 1191,
     "integration": 58,
     "smoke": 3,
     "boundary-ipc": 6,

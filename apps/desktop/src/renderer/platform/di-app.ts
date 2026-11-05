@@ -1,3 +1,4 @@
+import { CLOUD_ACCOUNT_SECURITY_KEY } from '@memoflow/account-ui/host';
 import {
   installAccountUiHost,
   installGoalUiHost,
@@ -113,6 +114,21 @@ export function installDesktopAppServices(
 
   const cloudAuth = createCloudAuthIpcClient(resultIpcClient);
   app.provide(DESKTOP_CLOUD_AUTH_SERVICE_KEY, cloudAuth);
+  app.provide(CLOUD_ACCOUNT_SECURITY_KEY, {
+    verifyAccountPassword: (password) => cloudAuth.verifyAccountPassword(password),
+    requestEmailChange: (input) => cloudAuth.requestEmailChange(input),
+    listAccountSessions: () => cloudAuth.listAccountSessions(),
+    revokeAccountSession: (id) => cloudAuth.revokeAccountSession(id),
+    async deleteAccountPermanently(input) {
+      const result = await cloudAuth.deleteAccountPermanently(input);
+      if (result.ok || result.error.code === 'SIGN_OUT_PARTIAL') {
+        clearDesktopServerStateIdentity(useAccountStore().getCurrentAccountId ?? '');
+        useAuthenticationStore().reset();
+        await bridge.invoke(WindowChannels.TRANSITION_TO_PROFILE_ACCESS);
+      }
+      return result;
+    },
+  });
 
   app.provide(GOAL_SERVICE_KEY, createGoalIpcClient(resultIpcClient));
   app.provide(GOAL_KNOWLEDGE_SERVICE_KEY, createGoalKnowledgeIpcClient(resultIpcClient));

@@ -27,6 +27,7 @@ import { useAccount } from '../composables/useAccount';
 import { useAccountSignOut } from '../composables/useAccountSignOut';
 import { useAccountAvatar } from '../avatar/useAccountAvatar';
 import AccountAvatarUploader from './AccountAvatarUploader.vue';
+import CloudAccountSecuritySection from './CloudAccountSecuritySection.vue';
 import { useAuthenticationStore } from '../../authentication/stores/authentication-store';
 import { ProfileAccessChannels } from '@memoflow/desktop-contracts';
 
@@ -297,6 +298,8 @@ onMounted(() => {
         </form>
       </CardContent>
     </Card>
+
+    <CloudAccountSecuritySection v-if="!isGuest" :email="email" />
 
     <!-- Destructive account actions stay explicit while sharing the Settings danger-zone grammar. -->
     <SettingsDangerZone
