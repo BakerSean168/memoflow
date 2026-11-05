@@ -42,7 +42,11 @@ export function registerCloudAuthIpc(
       const path = `/account-security/${action}`;
       const response = await fetch(`${authOrigin()}/api/auth${path}`, {
         method: action === 'sessions' ? 'GET' : 'POST',
-        headers: { 'content-type': 'application/json', authorization: `Bearer ${stored.token}` },
+        headers: {
+          'content-type': 'application/json',
+          origin: authOrigin(),
+          authorization: `Bearer ${stored.token}`,
+        },
         body: action === 'sessions' ? undefined : JSON.stringify(body),
         signal: AbortSignal.timeout(15_000),
       });
@@ -111,6 +115,7 @@ export function registerCloudAuthIpc(
       method: 'POST',
       headers: {
         'content-type': 'application/json',
+        origin: authOrigin(),
         authorization: `Bearer ${stored.token}`,
       },
       body: '{}',
