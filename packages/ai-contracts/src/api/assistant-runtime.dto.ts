@@ -14,14 +14,9 @@ import {
  * client payload that attempts to smuggle identityId is rejected.
  */
 
-/** Session runtime permissions, enforced by the execution driver on subsequent turns. */
-export const AIChatPermissionModeSchema = z.enum([
-  'approval-required',
-  'auto-accept-edits',
-  'auto',
-  'full-access',
-]);
-export type AIChatPermissionMode = z.infer<typeof AIChatPermissionModeSchema>;
+import { AIChatPermissionModeSchema } from './runtime-permission';
+export { AIChatPermissionModeSchema } from './runtime-permission';
+export type { AIChatPermissionMode } from './runtime-permission';
 
 export const AIRuntimeSurfaceSchema = z.enum(['web', 'desktop', 'mobile', 'server']);
 export type AIRuntimeSurface = z.infer<typeof AIRuntimeSurfaceSchema>;

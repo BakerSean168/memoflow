@@ -22,11 +22,10 @@ describe('AI vNext runtime contracts', () => {
       surface: 'web',
     };
     for (const permissionMode of [
-      'supervised',
-      'read-only',
-      'auto-approve',
-      'on-demand',
-      'confirm-each',
+      'approval-required',
+      'auto-accept-edits',
+      'auto',
+      'full-access',
     ])
       expect(
         AssistantRuntimeClientCommandSchema.safeParse({
@@ -34,7 +33,7 @@ describe('AI vNext runtime contracts', () => {
           permissionMode,
         }).success,
       ).toBe(true);
-    for (const permissionMode of ['fullAccess', 'ignore-security', { yolo: true }])
+    for (const permissionMode of ['supervised', 'read-only', 'auto-approve', 'fullAccess', 'ignore-security', { yolo: true }])
       expect(
         AssistantRuntimeClientCommandSchema.safeParse({
           ...input,
@@ -44,7 +43,7 @@ describe('AI vNext runtime contracts', () => {
     expect(
       AssistantRuntimeClientCommandSchema.safeParse({
         ...input,
-        permissionMode: 'auto-approve',
+        permissionMode: 'full-access',
         writeScopes: ['*'],
       }).success,
     ).toBe(false);

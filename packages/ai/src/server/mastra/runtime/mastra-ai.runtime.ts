@@ -151,7 +151,6 @@ export class MastraAIRuntime implements AIWorkflowRuntimePort {
     string,
     { session: Session; done: Promise<boolean> }
   >();
-  private readonly sessionModes = new WeakMap<Session, AIChatPermissionMode>();
   private readonly selectedContextHydrator: AssistantSelectedContextHydrator;
 
   /** A bounded, tool-free call using only the explicitly selected model. No memory/context hydration. */
@@ -482,11 +481,10 @@ export class MastraAIRuntime implements AIWorkflowRuntimePort {
 
   private async applySessionPolicy(
     session: Session,
-    mode: AIChatPermissionMode = 'supervised',
+    mode: AIChatPermissionMode = 'approval-required',
     requestContext?: RequestContext,
   ) {
     await applyMemoFlowSessionToolPolicy(session, mode, requestContext);
-    this.sessionModes.set(session, mode);
   }
 
   private async suspensionSession(
@@ -518,7 +516,7 @@ export class MastraAIRuntime implements AIWorkflowRuntimePort {
     const mode = AIChatPermissionModeSchema.safeParse(snapshot?.requestContext?.permissionMode)
       .success
       ? AIChatPermissionModeSchema.parse(snapshot?.requestContext?.permissionMode)
-      : 'read-only';
+      : 'approval-required';
     const requestContext = new RequestContext();
     requestContext.setRaw('permissionMode', mode);
     const agentInstanceId = snapshot?.requestContext?.agentInstanceId;
@@ -556,7 +554,7 @@ export class MastraAIRuntime implements AIWorkflowRuntimePort {
     });
     await this.applySessionPolicy(
       session,
-      this.sessionModes.get(session) === 'read-only' ? 'read-only' : mode,
+      mode,
       requestContext,
     );
     return { session, requestContext };
@@ -1200,7 +1198,7 @@ export class MastraAIRuntime implements AIWorkflowRuntimePort {
     });
     const requestContext = new RequestContext();
     requestContext.setRaw('identityId', input.identityId);
-    requestContext.setRaw('permissionMode', input.permissionMode ?? 'supervised');
+    requestContext.setRaw('permissionMode', input.permissionMode ?? 'approval-required');
     if (input.agentInstanceId) requestContext.setRaw('agentInstanceId', input.agentInstanceId);
     requestContext.setRaw('providerId', resolvedModel.providerId);
     requestContext.setRaw('modelId', resolvedModel.modelId);
@@ -1265,7 +1263,7 @@ export class MastraAIRuntime implements AIWorkflowRuntimePort {
     if (conversationBusy() || session.run.isRunning())
       throw new Error('Assistant conversation already has an active turn');
     // Reapply on cached/reconnected sessions; setup failure must prevent the turn.
-    await this.applySessionPolicy(session, input.permissionMode ?? 'supervised', requestContext);
+    await this.applySessionPolicy(session, input.permissionMode ?? 'approval-required', requestContext);
     if (conversationBusy() || session.run.isRunning())
       throw new Error('Assistant conversation already has an active turn');
     if (this.deps.agentRegistry) {

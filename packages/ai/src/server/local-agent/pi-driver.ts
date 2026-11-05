@@ -36,6 +36,8 @@ const extensionSource = `export default function (pi) {
   pi.registerMcpServer(name, {url: process.env.MEMOFLOW_PI_MCP_URL, headers: {Authorization: 'Bearer ' + process.env.MEMOFLOW_PI_MCP_TOKEN}, exposure: 'direct', timeout: 30});
   pi.on('tool_call', async (event, ctx) => {
     if (event.toolName.startsWith('mcp__' + name + '__')) return;
+    const mode = process.env.MEMOFLOW_RUNTIME_MODE;
+    if (mode === 'full-access' || (mode === 'auto-accept-edits' && ['edit', 'write'].includes(event.toolName))) return;
     const approved = await ctx.ui.confirm('Allow native Agent operation once?', event.toolName + ': ' + JSON.stringify(event.input).slice(0, 400));
     if (!approved) return {block: true, reason: 'User declined native operation'};
   });
@@ -81,6 +83,7 @@ export class PiDriver {
         await writeFile(extension, extensionSource, { mode: 0o600 });
         args.push('--extension', 'builtin:mcp', '--extension', extension);
         Object.assign(env, {
+          MEMOFLOW_RUNTIME_MODE: input.runtimeMode ?? 'approval-required',
           MEMOFLOW_PI_MCP_NAME: `memoflow_${randomUUID().replace(/-/g, '')}`,
           MEMOFLOW_PI_MCP_URL: input.mcp.url,
           MEMOFLOW_PI_MCP_TOKEN: input.mcp.token,

@@ -1,6 +1,7 @@
 import { randomUUID } from 'node:crypto';
 import { z } from 'zod';
 import type {
+  AIChatPermissionMode,
   LocalAgentConnection,
   LocalAgentRequest,
   LocalAgentRequestResponse,
@@ -36,6 +37,7 @@ export type NativeAgentEvent =
   | { type: 'completed' }
   | { type: 'cancelled' };
 export interface NativeAgentRunInput {
+  runtimeMode?: AIChatPermissionMode;
   nativeSessionId?: string | null;
   accountFingerprint?: string | null;
   modelId: string;
@@ -288,6 +290,8 @@ export class CodexDriver {
           model: input.modelId,
           cwd: this.cwd,
           config,
+          approvalPolicy: input.runtimeMode === 'full-access' ? 'never' : input.runtimeMode === 'auto' ? 'on-request' : 'untrusted',
+          sandbox: input.runtimeMode === 'full-access' ? 'danger-full-access' : 'read-only',
         }),
       );
       if (input.nativeSessionId && input.nativeSessionId !== response.thread.id)
@@ -313,6 +317,8 @@ export class CodexDriver {
       const turn = turnSchema.parse(
         await transport.request('turn/start', {
           threadId: this.threadId,
+          approvalPolicy: input.runtimeMode === 'full-access' ? 'never' : input.runtimeMode === 'auto' ? 'on-request' : 'untrusted',
+          sandboxPolicy: input.runtimeMode === 'full-access' ? { type: 'dangerFullAccess' } : { type: 'readOnly' },
           model: input.modelId,
           ...(input.modelOptions?.reasoningEffort
             ? { effort: input.modelOptions.reasoningEffort }
@@ -458,6 +464,7 @@ export class CodexDriver {
       }
       request = {
         type: 'permission',
+        operation: wire.method === 'item/fileChange/requestApproval' ? 'edit' : 'command',
         requestId,
         title:
           value.data.command ??

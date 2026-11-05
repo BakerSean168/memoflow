@@ -152,10 +152,11 @@ export class ClaudeDriver {
                   hooks: [
                     async (event) => {
                       if (
-                        event.hook_event_name !== 'PreToolUse' ||
-                        !event.tool_name.startsWith(memoFlowToolPrefix)
+                        event.hook_event_name !== 'PreToolUse'
                       )
                         return {};
+                      if (!event.tool_name.startsWith(memoFlowToolPrefix))
+                        return { hookSpecificOutput: { hookEventName: 'PreToolUse', permissionDecision: 'ask' } };
                       const name = event.tool_name.slice(memoFlowToolPrefix.length);
                       // Names come from the authenticated bridge's actual tools/list registry.
                       // Business writes are approved by the bridge, not twice by the Provider.
@@ -458,6 +459,7 @@ export class ClaudeDriver {
     } else
       request = {
         type: 'permission',
+        operation: ['Edit', 'Write', 'MultiEdit', 'NotebookEdit'].includes(name) ? 'edit' : name === 'Bash' ? 'command' : 'other',
         requestId,
         title: `${name}: ${JSON.stringify(args)}`.slice(0, 500),
       };

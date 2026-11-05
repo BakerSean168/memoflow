@@ -24,3 +24,5 @@ export * from './response-schemas';
 export * from './agent-instance.dto';
 export * from './goal-panel.dto';
 export * from './goal-intent-clarification';
+
+export * from './runtime-permission';
