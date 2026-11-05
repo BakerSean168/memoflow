@@ -38,6 +38,7 @@ const { isDesktopSignOut, confirmSignOut, executeSignOut } = useAccountSignOut()
 const desktopBridge = inject(accountUiHost.DESKTOP_BRIDGE_KEY, null);
 const desktopAccess = inject(accountUiHost.DESKTOP_ACCESS_SNAPSHOT_KEY, ref(null));
 const authStore = useAuthenticationStore();
+const localCurrentPassword = ref('');
 const localPassword = ref('');
 const localPasswordConfirmation = ref('');
 const localPasswordBusy = ref(false);
@@ -117,21 +118,24 @@ async function changeLocalPassword(): Promise<void> {
     return;
   }
   localPasswordBusy.value = true;
-  const result = (await desktopBridge.invoke(
-    ProfileAccessChannels.PASSWORD_SET,
-    localPassword.value,
-  )) as {
-    ok?: boolean;
-    error?: { message?: string };
-  };
-  localPasswordBusy.value = false;
-  if (!result.ok) {
-    toast.error(result.error?.message ?? t('account.localPassword.failed'));
-    return;
+  try {
+    const result = (await desktopBridge.invoke(ProfileAccessChannels.PASSWORD_SET, {
+      currentPassword: localCurrentPassword.value,
+      newPassword: localPassword.value,
+    })) as { ok?: boolean; error?: { message?: string } };
+    if (!result.ok) {
+      toast.error(result.error?.message ?? t('account.localPassword.failed'));
+      return;
+    }
+    localCurrentPassword.value = '';
+    localPassword.value = '';
+    localPasswordConfirmation.value = '';
+    toast.success(t('account.localPassword.saved'));
+  } catch {
+    toast.error(t('account.localPassword.failed'));
+  } finally {
+    localPasswordBusy.value = false;
   }
-  localPassword.value = '';
-  localPasswordConfirmation.value = '';
-  toast.success(t('account.localPassword.saved'));
 }
 
 onMounted(() => {
@@ -244,6 +248,19 @@ onMounted(() => {
           data-testid="account-local-password"
           @submit.prevent="changeLocalPassword"
         >
+          <div class="space-y-2 sm:col-span-2">
+            <Label for="local-current-password">{{ t('account.password.currentPassword') }}</Label>
+            <Input
+              id="local-current-password"
+              v-model="localCurrentPassword"
+              data-testid="account-local-password-current"
+              type="password"
+              autocomplete="current-password"
+            />
+            <p class="text-xs text-muted-foreground">
+              {{ t('account.localPassword.rememberReset') }}
+            </p>
+          </div>
           <div class="space-y-2">
             <Label for="local-profile-password">{{ t('account.localPassword.newPassword') }}</Label>
             <Input

@@ -451,6 +451,7 @@ describe('AccountProfileSection', () => {
     await flushPromises();
 
     const form = wrapper.get('[data-testid="account-local-password"]');
+    await wrapper.get('[data-testid="account-local-password-current"]').setValue('old-password');
     await wrapper.get('[data-testid="account-local-password-new"]').setValue('account-password');
     await wrapper
       .get('[data-testid="account-local-password-confirmation"]')
@@ -465,7 +466,10 @@ describe('AccountProfileSection', () => {
     form.element.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
     await flushPromises();
 
-    expect(invoke).toHaveBeenCalledWith(ProfileAccessChannels.PASSWORD_SET, 'account-password');
+    expect(invoke).toHaveBeenCalledWith(ProfileAccessChannels.PASSWORD_SET, {
+      currentPassword: 'old-password',
+      newPassword: 'account-password',
+    });
     expect(
       (wrapper.get('[data-testid="account-local-password-new"]').element as HTMLInputElement).value,
     ).toBe('');

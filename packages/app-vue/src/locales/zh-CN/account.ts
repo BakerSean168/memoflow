@@ -49,6 +49,7 @@ export default {
     saveProfile: '保存资料',
   },
   localPassword: {
+    rememberReset: '改密后将关闭「记住我」，下次需输入新密码。',
     title: '本地账户密码',
     description: '本地账户密码是解开本机数据的唯一凭据，与 MemoFlow 云端密码相互独立。',
     newPassword: '新密码',

@@ -1,4 +1,5 @@
 import { ipcMain } from 'electron';
+import { z } from 'zod';
 import { ok, fail, ResultErrorException } from '@memoflow/transport-contracts/result';
 import { createLogger } from '@memoflow/utils/logger';
 import {
@@ -175,10 +176,13 @@ export function registerProfileAccessIpc(
   });
 
   ipcMain.handle(ProfileAccessChannels.PASSWORD_SET, async (_event, password: unknown) => {
-    const parsed = ProfilePasswordSchema.safeParse(password);
+    const parsed = z
+      .object({ currentPassword: ProfilePasswordSchema, newPassword: ProfilePasswordSchema })
+      .strict()
+      .safeParse(password);
     if (!parsed.success) return fail({ code: 'INVALID_REQUEST', message: '密码长度需为 8–100 位' });
     try {
-      await runtime.setCurrentProfilePassword(parsed.data);
+      await runtime.setCurrentProfilePassword(parsed.data.newPassword, parsed.data.currentPassword);
       return ok(null);
     } catch (error) {
       return fail({

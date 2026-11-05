@@ -52,6 +52,8 @@ export default {
     saveProfile: 'Save Profile',
   },
   localPassword: {
+    rememberReset:
+      'Changing your password turns off remember me. Enter the new password next time.',
     title: 'Local account password',
     description:
       'The local account password is the only credential that unwraps this device data and is independent from your MemoFlow cloud password.',
