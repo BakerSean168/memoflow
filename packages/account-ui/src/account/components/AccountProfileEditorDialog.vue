@@ -54,9 +54,7 @@ const shakeAttempts = ref(0);
 const nicknameInput = ref<InstanceType<typeof Input> | null>(null);
 const surface = ref<HTMLElement | null>(null);
 
-const isDirty = computed(
-  () => draft.nickname !== baseline.nickname || draft.bio !== baseline.bio,
-);
+const isDirty = computed(() => draft.nickname !== baseline.nickname || draft.bio !== baseline.bio);
 const initials = computed(() => (draft.nickname || 'DU').slice(0, 2).toUpperCase());
 const canSave = computed(() => isDirty.value && draft.nickname.trim().length > 0 && !saving.value);
 const fieldsDisabled = computed(() => saving.value || (!currentAccount.value && isLoading.value));
@@ -105,7 +103,10 @@ function playShake(): void {
   shakeAttempts.value += 1;
   const element = surface.value;
   if (!element || typeof element.animate !== 'function') return;
-  if (typeof window !== 'undefined' && window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) {
+  if (
+    typeof window !== 'undefined' &&
+    window.matchMedia?.('(prefers-reduced-motion: reduce)').matches
+  ) {
     return;
   }
   element.animate(

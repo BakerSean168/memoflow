@@ -167,7 +167,9 @@ const storedAccount = {
   closedAt: null,
 };
 
-function accountService(overrides: Partial<Record<'getMyProfile' | 'updateMyProfile', unknown>> = {}) {
+function accountService(
+  overrides: Partial<Record<'getMyProfile' | 'updateMyProfile', unknown>> = {},
+) {
   return {
     getMyProfile: vi.fn().mockResolvedValue({
       ok: true,
@@ -175,7 +177,10 @@ function accountService(overrides: Partial<Record<'getMyProfile' | 'updateMyProf
     }),
     updateMyProfile: vi.fn().mockResolvedValue({
       ok: true,
-      data: { account: { ...storedAccount, profile: { ...storedAccount.profile, nickname: 'Renamed' } }, cloudIdentity: null },
+      data: {
+        account: { ...storedAccount, profile: { ...storedAccount.profile, nickname: 'Renamed' } },
+        cloudIdentity: null,
+      },
     }),
     closeAccount: vi.fn(),
     ...overrides,
@@ -261,7 +266,10 @@ describe('AccountProfileEditorDialog', () => {
     await wrapper.get('[data-testid="profile-editor-save"]').trigger('click');
     await flushPromises();
 
-    expect(service.updateMyProfile).toHaveBeenCalledWith({ nickname: 'Renamed', bio: 'Existing bio' });
+    expect(service.updateMyProfile).toHaveBeenCalledWith({
+      nickname: 'Renamed',
+      bio: 'Existing bio',
+    });
     // Saved: the bar disappears while the dialog stays open.
     expect(wrapper.find('[data-testid="profile-editor-prompt"]').exists()).toBe(false);
     expect(open.value).toBe(true);
@@ -362,7 +370,9 @@ describe('AccountProfileEditorDialog', () => {
       'Draft bio',
     );
     expect(wrapper.find('[data-testid="profile-editor-prompt"]').exists()).toBe(true);
-    expect(wrapper.get('[data-testid="profile-editor-save"]').attributes('disabled')).toBeUndefined();
+    expect(
+      wrapper.get('[data-testid="profile-editor-save"]').attributes('disabled'),
+    ).toBeUndefined();
 
     await wrapper.get('[data-testid="profile-editor-save"]').trigger('click');
     await flushPromises();

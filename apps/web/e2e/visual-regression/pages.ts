@@ -326,6 +326,18 @@ app.provide(keys.SETTING_SERVICE_KEY, {
   getPreferenceNamespace: async (namespace: 'presentation' | 'regional') =>
     ok({ namespace, preferences: profile[namespace], revision: 1 }),
 } as never);
+// AppShell also mounts the edit-profile dialog (#857), whose setup strict-injects
+// the account service production provides at app level. The fixture has no
+// account: profile reads fail closed and any write is unexpected.
+app.provide(keys.ACCOUNT_SERVICE_KEY, {
+  getMyProfile: async () => fail({ code: 'NOT_FOUND', message: 'Fixture has no account profile' }),
+  updateMyProfile: async () => {
+    throw new Error('Unexpected fixture write');
+  },
+  closeAccount: async () => {
+    throw new Error('Unexpected fixture write');
+  },
+} as never);
 const nativeRun = AIWorkflowRunViewSchema.parse({
   runId: 'visual-run',
   conversationId: 'visual-conversation',
