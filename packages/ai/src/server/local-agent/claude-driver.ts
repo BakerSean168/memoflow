@@ -3,6 +3,7 @@ import { z } from 'zod';
 import { createLogger } from '@memoflow/utils/logger';
 import type { Options, PermissionResult, SDKUserMessage } from '@anthropic-ai/claude-agent-sdk';
 import type {
+  AIChatPermissionMode,
   LocalAgentConnection,
   LocalAgentRequest,
   LocalAgentRequestResponse,
@@ -16,6 +17,13 @@ import { probeNativeVersion, resolveNativeExecutable } from './native-executable
 import { nativeFailure } from './native-failure';
 import { nativeIdentity, nativeModelVisibilityContext } from './native-identity';
 const logger = createLogger('ClaudeLocalDriver');
+
+const CLAUDE_RUNTIME_POLICY = {
+  'approval-required': 'default',
+  'auto-accept-edits': 'acceptEdits',
+  auto: 'auto',
+  'full-access': 'bypassPermissions',
+} as const satisfies Record<AIChatPermissionMode, Options['permissionMode']>;
 
 const memoFlowToolPrefix = 'mcp__memoflow__';
 
@@ -151,13 +159,7 @@ export class ClaudeDriver {
               hooks: [
                 async (event) => {
                   if (event.hook_event_name !== 'PreToolUse') return {};
-                  if (!event.tool_name.startsWith(memoFlowToolPrefix))
-                    return {
-                      hookSpecificOutput: {
-                        hookEventName: 'PreToolUse',
-                        permissionDecision: 'ask',
-                      },
-                    };
+                  if (!event.tool_name.startsWith(memoFlowToolPrefix)) return {};
                   const name = event.tool_name.slice(memoFlowToolPrefix.length);
                   // Names come from the authenticated bridge's actual tools/list registry.
                   // Business writes are approved by the bridge, not twice by the Provider.
@@ -173,7 +175,8 @@ export class ClaudeDriver {
             },
           ],
         },
-        permissionMode: 'default',
+        permissionMode: CLAUDE_RUNTIME_POLICY[input?.runtimeMode ?? 'approval-required'],
+        allowDangerouslySkipPermissions: input?.runtimeMode === 'full-access',
         persistSession: Boolean(input),
         includePartialMessages: true,
         ...(input
