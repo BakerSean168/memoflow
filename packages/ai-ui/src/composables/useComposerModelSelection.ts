@@ -2,31 +2,25 @@ import {
   AIChatPermissionModeSchema,
   AGENT_SUPPORTED_RUNTIME_MODES,
   resolveCompatibleRuntimeMode,
-} from "@memoflow/ai-contracts";
-import { computed, onActivated, ref, watch, type Ref } from "vue";
-import { useRoute } from "vue-router";
-import { useI18n } from "vue-i18n";
-import { toast } from "vue-sonner";
+} from '@memoflow/ai-contracts';
+import { computed, onActivated, ref, watch, type Ref } from 'vue';
+import { useRoute } from 'vue-router';
+import { useI18n } from 'vue-i18n';
+import { toast } from 'vue-sonner';
 import type {
   AIChatPermissionMode,
   AIProviderConfigClientDTO,
   LocalAgentModelOptions,
-} from "@memoflow/ai-contracts";
-import type {
-  AgentRegistryClient,
-  LocalAgentClient,
-} from "@memoflow/ai-client";
-import { composerAgentKey, type useAIModelCatalog } from "./useAIModelCatalog";
-import { sortAgentInstances } from "../agent-instance-order";
-import {
-  antigravityEffortVariant,
-  presentAntigravityModels,
-} from "./antigravityModelPresentation";
-import { getAIErrorMessage } from "./error";
-import { useAIModelSelection } from "./useAIModelSelection";
-import type { useAIChatSession } from "./useAIChatSession";
-import type { useLocalAssistantChoices } from "./useLocalAssistantChoices";
-import type { ProviderListItem } from "./types";
+} from '@memoflow/ai-contracts';
+import type { AgentRegistryClient, LocalAgentClient } from '@memoflow/ai-client';
+import { composerAgentKey, type useAIModelCatalog } from './useAIModelCatalog';
+import { sortAgentInstances } from '../agent-instance-order';
+import { antigravityEffortVariant, presentAntigravityModels } from './antigravityModelPresentation';
+import { getAIErrorMessage } from './error';
+import { useAIModelSelection } from './useAIModelSelection';
+import type { useAIChatSession } from './useAIChatSession';
+import type { useLocalAssistantChoices } from './useLocalAssistantChoices';
+import type { ProviderListItem } from './types';
 
 /**
  * Composer model selection and capability validation extracted from useAIChatView.ts
@@ -43,16 +37,14 @@ export interface UseComposerModelSelectionOptions {
   configurationRevision?: Ref<number>;
   chatSession: Pick<
     ReturnType<typeof useAIChatSession>,
-    "runtimeChoice" | "chatLoading" | "chatConversationId" | "chatTimeline"
+    'runtimeChoice' | 'chatLoading' | 'chatConversationId' | 'chatTimeline'
   >;
   localChoices: ReturnType<typeof useLocalAssistantChoices>;
   /** Late-bound reader; the caller computes the lock after the workflow composables exist. */
   isWorkflowSelectionLocked: () => boolean;
 }
 
-export function useComposerModelSelection(
-  options: UseComposerModelSelectionOptions,
-) {
+export function useComposerModelSelection(options: UseComposerModelSelectionOptions) {
   const { t } = useI18n();
   const route = useRoute();
   const {
@@ -71,7 +63,7 @@ export function useComposerModelSelection(
   const modelCatalog = catalog.entries;
   const modelCatalogLoading = catalog.loading;
   const loadAgentRegistry = () => catalog.refresh();
-  const permissionMode = ref<AIChatPermissionMode>("approval-required");
+  const permissionMode = ref<AIChatPermissionMode>('approval-required');
   const nativeModelSelections = ref<Record<string, LocalAgentModelOptions>>({});
   const composerInitializing = ref(true);
   const nativeSelectionPending = ref(false);
@@ -89,44 +81,35 @@ export function useComposerModelSelection(
   );
   const selectedNativeModel = computed(() => {
     const choice = chatSession.runtimeChoice.value;
-    return choice.runtimeKind === "local_agent"
+    return choice.runtimeKind === 'local_agent'
       ? localChoices.models.value.find((model) => model.id === choice.modelId)
       : undefined;
   });
-  const currentNativeModelOptions = computed<
-    LocalAgentModelOptions | undefined
-  >(() => {
+  const currentNativeModelOptions = computed<LocalAgentModelOptions | undefined>(() => {
     const choice = chatSession.runtimeChoice.value;
     const model = selectedNativeModel.value;
-    if (choice.runtimeKind !== "local_agent" || !model) return undefined;
-    const saved =
-      nativeModelSelections.value[`${choice.connectionId}::${model.id}`];
+    if (choice.runtimeKind !== 'local_agent' || !model) return undefined;
+    const saved = nativeModelSelections.value[`${choice.connectionId}::${model.id}`];
     if (!saved) return undefined;
     const selected: LocalAgentModelOptions = {};
-    if (
-      saved.reasoningEffort &&
-      model.reasoningEfforts?.includes(saved.reasoningEffort)
-    )
+    if (saved.reasoningEffort && model.reasoningEfforts?.includes(saved.reasoningEffort))
       selected.reasoningEffort = saved.reasoningEffort;
     if (
       saved.serviceTier &&
-      (saved.serviceTier === "default" ||
+      (saved.serviceTier === 'default' ||
         model.serviceTiers?.some((tier) => tier.id === saved.serviceTier))
     )
       selected.serviceTier = saved.serviceTier;
     return Object.keys(selected).length ? selected : undefined;
   });
-  function selectNativeModelOption(
-    kind: keyof LocalAgentModelOptions,
-    value?: string,
-  ) {
+  function selectNativeModelOption(kind: keyof LocalAgentModelOptions, value?: string) {
     if (chatSession.chatLoading.value) return;
     const choice = chatSession.runtimeChoice.value;
     const model = selectedNativeModel.value;
-    if (choice.runtimeKind !== "local_agent" || !model) return;
+    if (choice.runtimeKind !== 'local_agent' || !model) return;
     // AGY's thinking levels are native model IDs, not a modelOptions field.
     // Switch to a verified exact slug rather than sending unsupported RPC params.
-    if (kind === "reasoningEffort" && value) {
+    if (kind === 'reasoningEffort' && value) {
       const variant = antigravityEffortVariant(model.id);
       const target =
         variant &&
@@ -135,24 +118,21 @@ export function useComposerModelSelection(
           .find(
             (item) =>
               item.providerId === choice.connectionId &&
-              item.modelId === variant.family + "-" + value,
+              item.modelId === variant.family + '-' + value,
           );
       const instance = agentRegistrySnapshot.value?.instances.find(
-        (item) =>
-          item.legacyConnectionId === choice.connectionId &&
-          item.driver === "antigravity",
+        (item) => item.legacyConnectionId === choice.connectionId && item.driver === 'antigravity',
       );
-      if (target && instance && ["high", "medium", "low"].includes(value)) {
+      if (target && instance && ['high', 'medium', 'low'].includes(value)) {
         void selectComposerModel(target.key, target.agentKey);
         return;
       }
     }
     const allowed =
-      kind === "reasoningEffort"
-        ? value === undefined ||
-          Boolean(model.reasoningEfforts?.includes(value))
+      kind === 'reasoningEffort'
+        ? value === undefined || Boolean(model.reasoningEfforts?.includes(value))
         : value === undefined ||
-          value === "default" ||
+          value === 'default' ||
           Boolean(model.serviceTiers?.some((tier) => tier.id === value));
     if (!allowed) return;
     const identity = `${choice.connectionId}::${model.id}`;
@@ -172,33 +152,28 @@ export function useComposerModelSelection(
     resolveIdentity,
     getDefaultModelKey: () => {
       const choice = localChoices.defaultChoice.value;
-      if (choice.runtimeKind !== "local_agent") return undefined;
+      if (choice.runtimeKind !== 'local_agent') return undefined;
       return Object.values(modelCatalog.value)
         .flatMap((entry) => entry.models)
         .find(
-          (model) =>
-            model.providerId === choice.connectionId &&
-            model.modelId === choice.modelId,
+          (model) => model.providerId === choice.connectionId && model.modelId === choice.modelId,
         )?.key;
     },
     chatConversationId: chatSession.chatConversationId,
     ...(agentRegistryClient?.conversationSelection
       ? {
-          readConversationSelection: (id: string) =>
-            agentRegistryClient.conversationSelection!(id),
+          readConversationSelection: (id: string) => agentRegistryClient.conversationSelection!(id),
         }
       : {}),
   });
 
   const composerAgents = computed(() => {
     const entries = sortAgentInstances(
-      agentRegistrySnapshot.value?.instances.filter(
-        (instance) => instance.enabled,
-      ) ?? [],
+      agentRegistrySnapshot.value?.instances.filter((instance) => instance.enabled) ?? [],
     );
     return entries.map((instance) => ({
       id:
-        instance.driver === "mastra"
+        instance.driver === 'mastra'
           ? `agent:${instance.instanceId}`
           : `local:${instance.legacyConnectionId ?? instance.instanceId}`,
       name: instance.name,
@@ -207,12 +182,12 @@ export function useComposerModelSelection(
       accentColor: instance.accentColor,
       supportedRuntimeModes: AGENT_SUPPORTED_RUNTIME_MODES[instance.driver],
       switchBlockedReason: composerSwitchBlockedReason(
-        instance.driver === "mastra"
+        instance.driver === 'mastra'
           ? `agent:${instance.instanceId}`
           : `local:${instance.legacyConnectionId ?? instance.instanceId}`,
       ),
       configured:
-        instance.driver === "mastra"
+        instance.driver === 'mastra'
           ? Boolean(
               agentRegistrySnapshot.value?.bindings.some(
                 (binding) => binding.instanceId === instance.instanceId,
@@ -223,15 +198,14 @@ export function useComposerModelSelection(
   });
   const selectedComposerAgent = computed(() => {
     const choice = chatSession.runtimeChoice.value;
-    if (choice.runtimeKind === "local_agent")
-      return `local:${choice.connectionId}`;
+    if (choice.runtimeKind === 'local_agent') return `local:${choice.connectionId}`;
     const id =
       modelSelection.selectedAgentId.value ||
       modelSelection.selectedModel.value?.agentInstanceId ||
       agentRegistrySnapshot.value?.instances.find(
-        (entry) => entry.driver === "mastra" && entry.enabled,
+        (entry) => entry.driver === 'mastra' && entry.enabled,
       )?.instanceId;
-    return id ? `agent:${id}` : "";
+    return id ? `agent:${id}` : '';
   });
   const composerCatalog = catalog.entries;
   const composerModels = computed(() => {
@@ -242,26 +216,21 @@ export function useComposerModelSelection(
         .map((model) => ({
           ...model,
           providerName:
-            providerList.value.find(
-              (provider) => provider.id === model.providerId,
-            )?.name ?? model.providerName,
+            providerList.value.find((provider) => provider.id === model.providerId)?.name ??
+            model.providerName,
         })),
       composerAgents.value,
-      choice.runtimeKind === "local_agent" ? choice.modelId : "",
+      choice.runtimeKind === 'local_agent' ? choice.modelId : '',
       selectedComposerAgent.value,
     );
   });
   const composerModelKey = computed(() =>
-    chatSession.runtimeChoice.value.runtimeKind === "local_agent"
+    chatSession.runtimeChoice.value.runtimeKind === 'local_agent'
       ? chatSession.runtimeChoice.value.modelId
       : modelSelection.selectedModelKey.value,
   );
   async function refreshConfiguration() {
-    await Promise.allSettled([
-      loadProviders(),
-      loadAgentRegistry(),
-      localChoices.refresh(),
-    ]);
+    await Promise.allSettled([loadProviders(), loadAgentRegistry(), localChoices.refresh()]);
   }
   watch(
     resolveIdentity,
@@ -271,14 +240,10 @@ export function useComposerModelSelection(
       nativeModelSelections.value = {};
       void refreshConfiguration();
     },
-    { flush: "sync" },
+    { flush: 'sync' },
   );
   watch(
-    [
-      () => modelSelection.selectedModel.value?.key,
-      () => modelCatalog.value,
-      resolveIdentity,
-    ],
+    [() => modelSelection.selectedModel.value?.key, () => modelCatalog.value, resolveIdentity],
     () => {
       const selectionEpoch = newThreadSelectionEpoch;
       const identity = resolveIdentity();
@@ -296,10 +261,10 @@ export function useComposerModelSelection(
       );
       if (
         !instance ||
-        instance.driver === "mastra" ||
+        instance.driver === 'mastra' ||
         !instance.enabled ||
         !instance.legacyConnectionId ||
-        chatSession.runtimeChoice.value.runtimeKind !== "builtin"
+        chatSession.runtimeChoice.value.runtimeKind !== 'builtin'
       )
         return;
       if (
@@ -311,12 +276,12 @@ export function useComposerModelSelection(
       )
         return;
       chatSession.runtimeChoice.value = {
-        runtimeKind: "local_agent",
+        runtimeKind: 'local_agent',
         connectionId: instance.legacyConnectionId,
         modelId: selected.modelId,
       };
     },
-    { flush: "sync" },
+    { flush: 'sync' },
   );
   if (configurationRevision) {
     watch(configurationRevision, () => {
@@ -326,7 +291,7 @@ export function useComposerModelSelection(
   watch(
     () => route.path,
     (path, previous) => {
-      if (previous?.startsWith("/settings") && !path.startsWith("/settings"))
+      if (previous?.startsWith('/settings') && !path.startsWith('/settings'))
         void refreshConfiguration();
     },
   );
@@ -336,7 +301,7 @@ export function useComposerModelSelection(
   const supportedRuntimeModes = computed(() => {
     const choice = chatSession.runtimeChoice.value;
     const instance = agentRegistrySnapshot.value?.instances.find((entry) =>
-      choice.runtimeKind === "local_agent"
+      choice.runtimeKind === 'local_agent'
         ? entry.legacyConnectionId === choice.connectionId
         : `agent:${entry.instanceId}` === selectedComposerAgent.value,
     );
@@ -349,7 +314,7 @@ export function useComposerModelSelection(
     const id = chatSession.chatConversationId.value;
     return owner && id
       ? `ai:composer:runtime-mode:v1:${encodeURIComponent(owner)}:${encodeURIComponent(id)}`
-      : "";
+      : '';
   };
   watch(
     [resolveIdentity, chatSession.chatConversationId],
@@ -357,7 +322,7 @@ export function useComposerModelSelection(
       let saved: unknown;
       try {
         const key = permissionStorageKey();
-        saved = key ? JSON.parse(localStorage.getItem(key) ?? "null") : null;
+        saved = key ? JSON.parse(localStorage.getItem(key) ?? 'null') : null;
       } catch {
         /* Storage restrictions do not prevent a supervised session. */
       }
@@ -367,14 +332,11 @@ export function useComposerModelSelection(
         ? parsed.data
         : previous && previous[0] === owner && !previous[1] && id
           ? permissionMode.value
-          : "approval-required";
-      permissionMode.value = resolveCompatibleRuntimeMode(
-        mode,
-        supportedRuntimeModes.value,
-      );
+          : 'approval-required';
+      permissionMode.value = resolveCompatibleRuntimeMode(mode, supportedRuntimeModes.value);
       savePermission();
     },
-    { flush: "sync", immediate: true },
+    { flush: 'sync', immediate: true },
   );
   function savePermission() {
     try {
@@ -384,27 +346,20 @@ export function useComposerModelSelection(
       /* In-memory selection still applies to subsequent turns. */
     }
   }
-  watch(permissionMode, savePermission, { flush: "sync" });
+  watch(permissionMode, savePermission, { flush: 'sync' });
   watch(supportedRuntimeModes, (supported) => {
-    permissionMode.value = resolveCompatibleRuntimeMode(
-      permissionMode.value,
-      supported,
-    );
+    permissionMode.value = resolveCompatibleRuntimeMode(permissionMode.value, supported);
   });
   function composerSwitchBlockedReason(
     key: string,
-  ): "incompatible" | "busy" | "loading" | undefined {
-    if (chatSession.chatLoading.value || isWorkflowSelectionLocked())
-      return "busy";
-    if (modelSelection.selectionLoading.value || nativeSelectionPending.value)
-      return "loading";
+  ): 'incompatible' | 'busy' | 'loading' | undefined {
+    if (chatSession.chatLoading.value || isWorkflowSelectionLocked()) return 'busy';
+    if (modelSelection.selectionLoading.value || nativeSelectionPending.value) return 'loading';
     if (!chatSession.chatConversationId.value) return undefined;
     const choice = chatSession.runtimeChoice.value;
-    if (choice.runtimeKind === "local_agent")
-      return key === `local:${choice.connectionId}`
-        ? undefined
-        : "incompatible";
-    return key.startsWith("agent:") ? undefined : "incompatible";
+    if (choice.runtimeKind === 'local_agent')
+      return key === `local:${choice.connectionId}` ? undefined : 'incompatible';
+    return key.startsWith('agent:') ? undefined : 'incompatible';
   }
   async function selectComposerModel(key: string, agentKey: string) {
     if (composerSwitchBlockedReason(agentKey)) return;
@@ -413,25 +368,23 @@ export function useComposerModelSelection(
     );
     const entry = instance && composerCatalog.value[instance.instanceId];
     const model =
-      entry?.status === "ready"
-        ? entry.models.find((item) => item.key === key)
-        : undefined;
+      entry?.status === 'ready' ? entry.models.find((item) => item.key === key) : undefined;
     if (!instance || !model) return;
     const request = ++explicitRuntimeSelection;
     ++newThreadSelectionEpoch;
     const identity = resolveIdentity();
     const conversationId = chatSession.chatConversationId.value;
-    if (instance.driver !== "mastra") {
+    if (instance.driver !== 'mastra') {
       if (!localAgent || !agentRegistryClient) return;
       nativeSelectionPending.value = true;
       try {
         let id = instance.legacyConnectionId;
         if (!id) {
           if (instance.instanceId !== instance.driver)
-            throw new Error("Native instance has no connection");
-          const beforeMaterialization = (
-            await agentRegistryClient.list()
-          ).instances.find((item) => item.instanceId === instance.instanceId);
+            throw new Error('Native instance has no connection');
+          const beforeMaterialization = (await agentRegistryClient.list()).instances.find(
+            (item) => item.instanceId === instance.instanceId,
+          );
           if (
             !beforeMaterialization ||
             !beforeMaterialization.enabled ||
@@ -439,23 +392,21 @@ export function useComposerModelSelection(
             beforeMaterialization.revision !== instance.revision ||
             beforeMaterialization.legacyConnectionId
           )
-            throw new Error(
-              "Native Agent changed before connection materialization",
-            );
+            throw new Error('Native Agent changed before connection materialization');
           try {
             const updated = await agentRegistryClient.execute({
-              action: "update",
+              action: 'update',
               instanceId: instance.instanceId,
               expectedRevision: instance.revision,
               patch: {},
             });
             if (
               !updated ||
-              !("instanceId" in updated) ||
+              !('instanceId' in updated) ||
               updated.instanceId !== instance.instanceId ||
-              !("legacyConnectionId" in updated)
+              !('legacyConnectionId' in updated)
             )
-              throw new Error("Native Agent connection could not be resolved");
+              throw new Error('Native Agent connection could not be resolved');
             id = updated.legacyConnectionId;
           } catch (error) {
             // Resolve a concurrent idempotent materialization from fresh authority.
@@ -466,11 +417,7 @@ export function useComposerModelSelection(
             id = latest.legacyConnectionId;
           }
         }
-        if (
-          disposed ||
-          identity !== resolveIdentity() ||
-          request !== explicitRuntimeSelection
-        )
+        if (disposed || identity !== resolveIdentity() || request !== explicitRuntimeSelection)
           return;
         const [connections, latest] = await Promise.all([
           localAgent.listConnections(),
@@ -494,11 +441,10 @@ export function useComposerModelSelection(
           !id ||
           !active ||
           !connections.some(
-            (item) =>
-              item.id === id && item.enabled && item.driver === instance.driver,
+            (item) => item.id === id && item.enabled && item.driver === instance.driver,
           )
         )
-          throw new Error("Native Agent connection is no longer available");
+          throw new Error('Native Agent connection is no longer available');
         // Explicit selection needs an identity-bound membership check, but not
         // another slow native spawn when Desktop has recently verified this exact
         // saved account/configuration. Sending still performs fresh native checks.
@@ -522,12 +468,10 @@ export function useComposerModelSelection(
         )
           return;
         if (
-          discovered.status !== "ready" ||
+          discovered.status !== 'ready' ||
           !discovered.models.some((item) => item.id === model.modelId)
         )
-          throw new Error(
-            "Native model is no longer available; check the instance again",
-          );
+          throw new Error('Native model is no longer available; check the instance again');
         const beforeCommit = beforeCommitSnapshot.instances.find(
           (item) => item.instanceId === instance.instanceId,
         );
@@ -537,20 +481,14 @@ export function useComposerModelSelection(
           beforeCommit.driver !== instance.driver ||
           beforeCommit.legacyConnectionId !== id
         )
-          throw new Error(
-            "Native Agent changed before model selection was committed",
-          );
+          throw new Error('Native Agent changed before model selection was committed');
         // Do not commit a partial empty-model selection. All failures preserve draft and prior route.
-        if (chatSession.chatLoading.value || isWorkflowSelectionLocked())
-          return;
+        if (chatSession.chatLoading.value || isWorkflowSelectionLocked()) return;
         const choice = chatSession.runtimeChoice.value;
-        if (
-          conversationId &&
-          (choice.runtimeKind !== "local_agent" || choice.connectionId !== id)
-        )
+        if (conversationId && (choice.runtimeKind !== 'local_agent' || choice.connectionId !== id))
           return;
         chatSession.runtimeChoice.value = {
-          runtimeKind: "local_agent",
+          runtimeKind: 'local_agent',
           connectionId: id,
           modelId: model.modelId,
         };
@@ -558,29 +496,19 @@ export function useComposerModelSelection(
         if (!instance.legacyConnectionId) void loadAgentRegistry();
         await localChoices.refresh();
       } catch (error) {
-        if (
-          !disposed &&
-          identity === resolveIdentity() &&
-          request === explicitRuntimeSelection
-        )
-          toast.error(
-            getAIErrorMessage(error, t, "aiAssistant.local.actionFailed"),
-          );
+        if (!disposed && identity === resolveIdentity() && request === explicitRuntimeSelection)
+          toast.error(getAIErrorMessage(error, t, 'aiAssistant.local.actionFailed'));
       } finally {
-        if (request === explicitRuntimeSelection)
-          nativeSelectionPending.value = false;
+        if (request === explicitRuntimeSelection) nativeSelectionPending.value = false;
       }
     } else {
-      if (modelSelection.selectModel(key) !== "selected") return;
-      chatSession.runtimeChoice.value = { runtimeKind: "builtin" };
+      if (modelSelection.selectModel(key) !== 'selected') return;
+      chatSession.runtimeChoice.value = { runtimeKind: 'builtin' };
     }
   }
   function selectPermission(mode: AIChatPermissionMode) {
     if (chatSession.chatLoading.value) return;
-    permissionMode.value = resolveCompatibleRuntimeMode(
-      mode,
-      supportedRuntimeModes.value,
-    );
+    permissionMode.value = resolveCompatibleRuntimeMode(mode, supportedRuntimeModes.value);
   }
 
   return {
