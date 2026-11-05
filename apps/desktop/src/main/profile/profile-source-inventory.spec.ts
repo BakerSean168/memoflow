@@ -3,6 +3,8 @@ import { tmpdir } from 'node:os';
 import path from 'node:path';
 import Database from 'better-sqlite3';
 import { expect, it } from 'vitest';
+import { Memory } from '@mastra/memory';
+import { LibSQLStore } from '@mastra/libsql';
 import { readProfileSqliteSnapshot } from './profile-sqlite-snapshot';
 import { inspectProfileSource } from './profile-source-inventory';
 
@@ -135,7 +137,7 @@ it('does not open Mastra through a linked external storage directory', async () 
   }
 });
 
-it('does not block a used profile containing only proven Mastra epoch metadata and model catalog cache', async () => {
+it('does not block startup epoch metadata and model catalog cache', async () => {
   const dir = mkdtempSync(path.join(tmpdir(), 'profile-used-inventory-'));
   mkdirSync(path.join(dir, 'db'));
   mkdirSync(path.join(dir, 'storage/local-agents/model-catalog'), {
@@ -146,16 +148,111 @@ it('does not block a used profile containing only proven Mastra epoch metadata a
   const mastra = new Database(path.join(dir, 'storage/mastra.db'));
   try {
     mastra.exec(`CREATE TABLE memoflow_goal_event_meta(id INTEGER PRIMARY KEY CHECK(id=1), epoch TEXT NOT NULL);
-      INSERT INTO memoflow_goal_event_meta VALUES (1, 'runtime-epoch');`);
+      INSERT INTO memoflow_goal_event_meta VALUES (1, '00000000-0000-4000-8000-000000000865');`);
     writeFileSync(
       path.join(dir, 'storage/local-agents/model-catalog', 'a'.repeat(64) + '.json'),
       '{"revision":1,"status":{"status":"ready"}}',
     );
     const result = await readProfileSqliteSnapshot(filename, (db) => inspectProfileSource(db, dir));
     expect(result.blockers).toEqual([]);
+    mastra.exec(
+      "UPDATE memoflow_goal_event_meta SET epoch = '00000000-0000-4000-8000-000000000866'",
+    );
+    expect(
+      (await readProfileSqliteSnapshot(filename, (db) => inspectProfileSource(db, dir))).digest,
+    ).not.toBe(result.digest);
+    mastra.exec("UPDATE memoflow_goal_event_meta SET epoch = 'invalid'");
+    expect(
+      (await readProfileSqliteSnapshot(filename, (db) => inspectProfileSource(db, dir))).blockers,
+    ).toContainEqual(expect.objectContaining({ field: 'storage/mastra.db' }));
   } finally {
     writer.close();
     mastra.close();
+    rmSync(dir, { recursive: true, force: true });
+  }
+});
+
+it('retains real Assistant Memory messages rather than treating conversation shells as their backup', async () => {
+  const dir = mkdtempSync(path.join(tmpdir(), 'profile-real-history-'));
+  mkdirSync(path.join(dir, 'db'));
+  mkdirSync(path.join(dir, 'storage'));
+  const filename = path.join(dir, 'db/powersync.sqlite');
+  const writer = new Database(filename);
+  const storage = new LibSQLStore({
+    id: 'inventory-regression',
+    url: `file:${path.join(dir, 'storage/mastra.db')}`,
+  });
+  try {
+    await storage.init();
+    const memory = new Memory({ storage });
+    await memory.createThread({
+      threadId: 'source-conversation',
+      resourceId: 'source-owner',
+      title: 'Real local conversation',
+    });
+    await memory.saveMessages({
+      messages: [
+        {
+          id: 'user-865',
+          threadId: 'source-conversation',
+          resourceId: 'source-owner',
+          role: 'user',
+          createdAt: new Date(),
+          type: 'text',
+          content: {
+            format: 2,
+            parts: [{ type: 'text', text: 'Keep this authoritative message' }],
+          },
+        },
+      ],
+    });
+    await memory.settled();
+    expect(
+      (await memory.recall({ threadId: 'source-conversation', perPage: false })).messages,
+    ).toEqual([expect.objectContaining({ role: 'user' })]);
+    const result = await readProfileSqliteSnapshot(filename, (db) => inspectProfileSource(db, dir));
+    expect(result.blockers).toContainEqual({
+      capability: 'local-source',
+      field: 'storage/mastra.db',
+      reason: 'unsupported_user_data',
+    });
+  } finally {
+    await storage.close();
+    writer.close();
+    rmSync(dir, { recursive: true, force: true });
+  }
+});
+
+it('ignores only exact catalog cache names and keeps unknown files and symlinks', async () => {
+  const dir = mkdtempSync(path.join(tmpdir(), 'profile-catalog-'));
+  mkdirSync(path.join(dir, 'db'));
+  const catalog = path.join(dir, 'storage/local-agents/model-catalog');
+  mkdirSync(catalog, { recursive: true });
+  const filename = path.join(dir, 'db/powersync.sqlite');
+  const writer = new Database(filename);
+  try {
+    const cache = 'a'.repeat(64) + '.json';
+    writeFileSync(path.join(catalog, cache), '{}');
+    writeFileSync(path.join(catalog, cache + '.00000000-0000-4000-8000-000000000865.tmp'), '{}');
+    const inspect = () =>
+      readProfileSqliteSnapshot(filename, (db) => inspectProfileSource(db, dir));
+    const before = await inspect();
+    expect(before.blockers).toEqual([]);
+    writeFileSync(path.join(catalog, cache), '{"revision":2}');
+    expect((await inspect()).digest).toBe(before.digest);
+    for (const name of [cache + '.tmp', 'catalog.json', 'A'.repeat(64) + '.json']) {
+      writeFileSync(path.join(catalog, name), '{}');
+      expect((await inspect()).blockers).toContainEqual(
+        expect.objectContaining({ field: 'storage/local-agents/model-catalog/' + name }),
+      );
+    }
+    rmSync(path.join(catalog, cache));
+    symlinkSync(filename, path.join(catalog, cache));
+    expect((await inspect()).blockers).toContainEqual(
+      expect.objectContaining({ field: 'storage/local-agents/model-catalog/' + cache }),
+    );
+  } finally {
+    writer.close();
     rmSync(dir, { recursive: true, force: true });
   }
 });

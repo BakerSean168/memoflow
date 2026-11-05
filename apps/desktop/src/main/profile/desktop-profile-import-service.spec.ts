@@ -424,7 +424,7 @@ it('does not invite a guest containing only account and default preferences', as
   }
 });
 
-it('completes a used local profile import to a registered target and removes its source after real manifest verification', async () => {
+it('completes an epoch-and-cache-only local profile import to a registered target and removes its source after real manifest verification', async () => {
   const f = await fixture();
   const phases: Array<{ phase: string }> = [];
   const save = ProfileImportJournal.prototype.save;
