@@ -39,6 +39,8 @@ export class AccountPowerSyncMapper {
       createdAt: new Date(row.created_at).getTime(),
       updatedAt: new Date(row.updated_at).getTime(),
       closedAt: row.closed_at ? new Date(row.closed_at).getTime() : null,
+      // Desktop rows are a local mirror; cloud avatar sync owns this signal.
+      avatarUpdatedAt: null,
     };
 
     return Account.load(state);

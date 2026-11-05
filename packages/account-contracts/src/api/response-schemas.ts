@@ -42,6 +42,12 @@ export const AccountResponseSchema = z.object({
   createdAt: z.number(),
   updatedAt: z.number(),
   closedAt: z.union([z.number(), z.null()]),
+  /**
+   * Issue #859: server-authoritative cloud avatar timestamp. Optional so
+   * pre-#859 producers/consumers stay wire-compatible; absent means "no cloud
+   * avatar information".
+   */
+  avatarUpdatedAt: z.number().nullable().optional(),
 });
 
 /**

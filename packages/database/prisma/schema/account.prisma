@@ -12,9 +12,13 @@ model Account {
   createdAt        DateTime  @default(now()) @map("created_at")
   updatedAt        DateTime  @updatedAt @map("updated_at")
   closedAt         DateTime? @map("closed_at")
+  // Cloud avatar reference: the blob lives in AccountAvatar; this is the
+  // server-authoritative last-write-wins timestamp used by other devices.
+  avatarUpdatedAt  DateTime? @map("avatar_updated_at")
 
   // 关联关系
   cloudUser CloudAuthUser @relation(fields: [id], references: [id], onDelete: Cascade)
+  avatar    AccountAvatar?
 
   // 关联的业务模块
   externalMutationReceipts         ExternalMutationReceipt[]
@@ -67,4 +71,21 @@ model Account {
   knowledgeWriteRequests         KnowledgeWriteRequest[]
 
   @@map("accounts")
+}
+
+/// Normalized PNG avatar bytes for a cloud Account (Issue #859).
+///
+/// Kept out of `accounts.profile` so ordinary Account reads never load the
+/// image, and stored in the existing Postgres deployment instead of adding a
+/// new object-storage service. `Account.avatarUpdatedAt` is the conflict
+/// timestamp surfaced to clients.
+model AccountAvatar {
+  accountId    String   @id @map("account_id")
+  contentBytes Bytes    @map("content_bytes")
+  byteSize     Int      @map("byte_size")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  account Account @relation(fields: [accountId], references: [id], onDelete: Cascade)
+
+  @@map("account_avatars")
 }

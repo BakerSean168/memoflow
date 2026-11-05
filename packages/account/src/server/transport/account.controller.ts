@@ -8,8 +8,18 @@
 import type { Result } from '@memoflow/transport-contracts/result';
 import { fail, ok } from '@memoflow/transport-contracts/result';
 import type { ExecutionContext } from '@memoflow/transport-contracts';
-import { UpdateAccountSchema, CloseAccountSchema } from '@memoflow/account-contracts';
-import type { GetAccountRes, UpdateAccountRes } from '@memoflow/account-contracts';
+import {
+  UpdateAccountSchema,
+  CloseAccountSchema,
+  UploadAccountAvatarRequestSchema,
+} from '@memoflow/account-contracts';
+import type {
+  AccountAvatarContent,
+  AccountAvatarMeta,
+  AccountAvatarUploadResult,
+  GetAccountRes,
+  UpdateAccountRes,
+} from '@memoflow/account-contracts';
 import { formatZodErrors } from '@memoflow/utils/result';
 import type { AccountApplicationPort } from '../application';
 
@@ -52,6 +62,32 @@ export class AccountController {
       });
     }
     return this.api.closeAccount(parsed.data, cx);
+  }
+
+  // ==================== Cloud avatar (Issue #859) ====================
+
+  async updateAvatar(
+    input: unknown,
+    cx: ExecutionContext,
+    targetAccountId?: string,
+  ): Promise<Result<AccountAvatarUploadResult>> {
+    const parsed = UploadAccountAvatarRequestSchema.safeParse(input);
+    if (!parsed.success) {
+      return fail({
+        code: 'VALIDATION_ERROR',
+        message: '参数验证失败',
+        details: formatZodErrors(parsed.error.issues),
+      });
+    }
+    return this.api.updateAvatar({ dataUrl: parsed.data.dataUrl, targetAccountId }, cx);
+  }
+
+  async getAvatar(cx: ExecutionContext): Promise<Result<AccountAvatarContent>> {
+    return this.api.getAvatar(cx);
+  }
+
+  async getAvatarMeta(cx: ExecutionContext): Promise<Result<AccountAvatarMeta>> {
+    return this.api.getAvatarMeta(cx);
   }
 
   // ==================== W7 Operation Timeline / Replay / Audit ====================

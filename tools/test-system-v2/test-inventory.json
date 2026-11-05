@@ -2868,6 +2868,16 @@
       ]
     },
     {
+      "path": "packages/account/src/server/application/use-cases/commands/__tests__/update-account-avatar.test.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/account/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "packages/account/vitest.config.ts"
+      ]
+    },
+    {
       "path": "packages/account/src/server/application/use-cases/commands/__tests__/update-account-profile.test.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -12863,7 +12873,7 @@
       "type": "measurement",
       "suite": "coverage",
       "runner": "vitest",
-      "fileCount": 25
+      "fileCount": 26
     },
     {
       "id": "packages/ai/vitest.config.ts",
@@ -13385,7 +13395,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 25
+      "fileCount": 26
     },
     {
       "id": "packages/agent-gateway/vitest.config.ts",
@@ -13910,6 +13920,7 @@
       "packages/account/src/server/application/business-data-summary.spec.ts",
       "packages/account/src/server/application/services/__tests__/account-closure-coordinator.spec.ts",
       "packages/account/src/server/application/use-cases/commands/__tests__/close-account.test.ts",
+      "packages/account/src/server/application/use-cases/commands/__tests__/update-account-avatar.test.ts",
       "packages/account/src/server/application/use-cases/commands/__tests__/update-account-profile.test.ts",
       "packages/account/src/server/application/use-cases/queries/__tests__/get-account-profile.test.ts",
       "packages/account/src/server/application/use-cases/queries/__tests__/is-account-active.test.ts",
@@ -14471,7 +14482,7 @@
   "duplicate": [],
   "unexpected": [],
   "counts": {
-    "unit": 1190,
+    "unit": 1191,
     "integration": 58,
     "smoke": 3,
     "boundary-ipc": 6,

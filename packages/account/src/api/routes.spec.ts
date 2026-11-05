@@ -7,6 +7,7 @@ import { describe, expect, it, vi } from 'vitest';
 import type { OpenApiRegistryLike } from '@memoflow/utils/result';
 import type { AccountApplicationPort } from '../server/application';
 import { composeAccountView, registerAccountRoutes } from './routes';
+import { ok } from '@memoflow/transport-contracts/result';
 
 type RegisteredRoute = {
   method: string;
@@ -59,6 +60,50 @@ it('serves data-summary only for the authenticated principal and ignores a reque
     expect(response.status).toBe(200);
     expect(await response.json()).toMatchObject({ ok: true, data: { state: 'non_empty' } });
     expect(seen).toEqual(['principal-a']);
+  } finally {
+    server.closeAllConnections();
+    await new Promise<void>((resolve, reject) =>
+      server.close((error) => (error ? reject(error) : resolve())),
+    );
+  }
+});
+
+it('rejects unauthenticated avatar uploads and forwards the explicit account id to the ownership guard', async () => {
+  const updateAvatar = vi.fn(async () => ok({ updatedAt: 123 }));
+  const api = { ...createAccountApiStub(), updateAvatar } as unknown as AccountApplicationPort;
+  const auth: RequestHandler = (req, res, next) => {
+    if (req.get('authorization') !== 'Bearer avatar-test') {
+      res.sendStatus(401);
+      return;
+    }
+    Object.assign(req, { user: { identityId: 'principal-a', sessionId: 'session-a' } });
+    next();
+  };
+  const app = express();
+  app.use(express.json());
+  app.use('/accounts', registerAccountRoutes(api, { auth, requireRole: () => auth }, null));
+  const server = app.listen(0, '127.0.0.1');
+  await once(server, 'listening');
+  const origin = `http://127.0.0.1:${(server.address() as AddressInfo).port}`;
+  const body = JSON.stringify({ dataUrl: 'data:image/png;base64,AAAA' });
+  try {
+    const unauthenticated = await fetch(`${origin}/accounts/me/avatar`, {
+      method: 'PUT',
+      headers: { 'content-type': 'application/json' },
+      body,
+    });
+    expect(unauthenticated.status).toBe(401);
+
+    const response = await fetch(`${origin}/accounts/other-account/avatar`, {
+      method: 'PUT',
+      headers: { authorization: 'Bearer avatar-test', 'content-type': 'application/json' },
+      body,
+    });
+    expect(response.status).toBe(200);
+    expect(updateAvatar).toHaveBeenCalledWith(
+      { dataUrl: 'data:image/png;base64,AAAA', targetAccountId: 'other-account' },
+      expect.objectContaining({ identityId: 'principal-a' }),
+    );
   } finally {
     server.closeAllConnections();
     await new Promise<void>((resolve, reject) =>

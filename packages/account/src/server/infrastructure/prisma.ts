@@ -22,6 +22,7 @@ export interface CloudAuthLike {
 }
 import { createAccountModule, type AccountModuleInstance } from './account.module';
 import { PrismaAccountRepository } from './adapters/prisma/account-prisma.repository';
+import { createAccountAvatarPrismaRepository } from './adapters/prisma/account-avatar-prisma.repository';
 import { PrismaAccountClosureOperationRepository } from './adapters/prisma/account-closure-operation-prisma.repository';
 import { AccountClosureOutboxEventPublisher } from './adapters/outbox/account-closure-outbox-event-publisher';
 import { PrismaCloudAuthRevocationAdapter } from './adapters/cloud-auth/cloud-auth-revocation.adapter';
@@ -35,7 +36,7 @@ import {
   type AccountRuntimeContributionsInput,
 } from './runtime';
 import { PrismaOperationAuditRepository } from '@memoflow/patterns/operations';
-import type { IAccountRepository } from '../domain';
+import type { IAccountAvatarRepository, IAccountRepository } from '../domain';
 import type { OperationAuditRepository } from '@memoflow/patterns/operations';
 
 export interface CreateAccountPrismaModuleOptions {
@@ -69,6 +70,8 @@ export interface CreateAccountPrismaModuleOptions {
  */
 export interface AccountPrismaRepositorySet {
   readonly accountRepository: IAccountRepository;
+  /** Issue #859: cloud avatar blob store (Postgres-backed). */
+  readonly avatarRepository: IAccountAvatarRepository;
   readonly closureOperationRepository: IAccountClosureOperationRepository;
   readonly revocationPort: CloudAuthRevocationPort;
   readonly eventPublisher: AccountClosureEventPublisher;
@@ -105,6 +108,7 @@ export function createAccountPrismaRepositories(deps: {
 }): AccountPrismaRepositorySet {
   return {
     accountRepository: createAccountPrismaRepository(deps.db),
+    avatarRepository: createAccountAvatarPrismaRepository(deps.db),
     closureOperationRepository: new PrismaAccountClosureOperationRepository(deps.db),
     revocationPort: new PrismaCloudAuthRevocationAdapter(deps.db, deps.clock, deps.cloudAuth),
     eventPublisher: new AccountClosureOutboxEventPublisher(deps.db),
@@ -125,6 +129,7 @@ export function createAccountPrismaModule(
 
   return createAccountModule({
     accountRepository: repositories.accountRepository,
+    avatarRepository: repositories.avatarRepository,
     clock: options.clock,
     userTimeContextPort: options.userTimeContextPort,
     closureOperationRepository:

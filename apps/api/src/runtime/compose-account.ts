@@ -120,6 +120,7 @@ export function composeAccount(dependencies: ComposeAccountDependencies): Compos
 
   const instance = createAccountModule({
     accountRepository: repositories.accountRepository,
+    avatarRepository: repositories.avatarRepository,
     clock: dependencies.clock,
     userTimeContextPort: dependencies.userTimeContextPort,
     closureOperationRepository: repositories.closureOperationRepository,

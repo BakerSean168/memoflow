@@ -40,6 +40,7 @@ export class AccountPrismaMapper {
       createdAt: requiredInstant(row.createdAt),
       updatedAt: requiredInstant(row.updatedAt),
       closedAt: optionalInstant(row.closedAt),
+      avatarUpdatedAt: optionalInstant(row.avatarUpdatedAt),
     };
     return Account.load(state);
   }

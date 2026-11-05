@@ -21,4 +21,6 @@ export interface AccountServerDTO {
   createdAt: TransferDate;
   updatedAt: TransferDate;
   closedAt: TransferDate | null;
+  /** Issue #859: cloud avatar last-write-wins timestamp. */
+  avatarUpdatedAt?: TransferDate | null;
 }

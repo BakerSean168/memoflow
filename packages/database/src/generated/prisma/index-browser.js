@@ -126,7 +126,15 @@ exports.Prisma.AccountScalarFieldEnum = {
   profile: 'profile',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
-  closedAt: 'closedAt'
+  closedAt: 'closedAt',
+  avatarUpdatedAt: 'avatarUpdatedAt'
+};
+
+exports.Prisma.AccountAvatarScalarFieldEnum = {
+  accountId: 'accountId',
+  contentBytes: 'contentBytes',
+  byteSize: 'byteSize',
+  updatedAt: 'updatedAt'
 };
 
 exports.Prisma.AiConversationScalarFieldEnum = {
@@ -1474,6 +1482,7 @@ exports.Prisma.NullsOrder = {
 
 exports.Prisma.ModelName = {
   Account: 'Account',
+  AccountAvatar: 'AccountAvatar',
   AiConversation: 'AiConversation',
   AiGoalSurfaceLease: 'AiGoalSurfaceLease',
   AiConversationAttention: 'AiConversationAttention',
