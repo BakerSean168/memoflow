@@ -14,13 +14,12 @@ import {
  * client payload that attempts to smuggle identityId is rejected.
  */
 
-/** Permission choices are per turn and are enforced by each runtime, never by prompt text. */
+/** Session runtime permissions, enforced by the execution driver on subsequent turns. */
 export const AIChatPermissionModeSchema = z.enum([
-  'supervised',
-  'read-only',
-  'auto-approve',
-  'on-demand',
-  'confirm-each',
+  'approval-required',
+  'auto-accept-edits',
+  'auto',
+  'full-access',
 ]);
 export type AIChatPermissionMode = z.infer<typeof AIChatPermissionModeSchema>;
 
