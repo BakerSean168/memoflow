@@ -25,33 +25,34 @@ test.describe('Account profile canonical surface', () => {
     await expect(page.getByTestId('account-center-view')).toBeVisible();
   });
 
-  test('[P0] persists profile avatar URL and bio on the canonical account owner', async ({
-    page,
-  }) => {
-    const avatar = 'https://example.com/audit-avatar.png';
-    const bio = `Nightly audit bio ${Date.now()}`;
-    await page.locator('#avatar').fill(avatar);
-    await page.locator('#bio').fill(bio);
-
-    const updateResponse = page.waitForResponse(
-      (response) =>
-        response.request().method() === 'PUT' &&
-        new URL(response.url()).pathname.endsWith('/api/v1/accounts/me'),
-      { timeout: TIMEOUT_CONFIG.API_REQUEST },
+  test('[P0] uploads a local avatar instead of exposing an avatar URL field', async ({ page }) => {
+    // 1×1 PNG: the upload path normalizes and re-encodes it before persisting.
+    const png = Buffer.from(
+      'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+ip1sAAAAASUVORK5CYII=',
+      'base64',
     );
-    await page.getByTestId('account-profile-save').click();
-    expect((await updateResponse).ok()).toBe(true);
+    await expect(page.locator('#avatar')).toHaveCount(0);
+
+    await page.getByTestId('account-profile-avatar-input').setInputFiles({
+      name: 'avatar.png',
+      mimeType: 'image/png',
+      buffer: png,
+    });
+
+    const preview = page.getByTestId('account-profile-avatar').locator('img');
+    await expect(preview).toHaveAttribute('src', /^data:image\/png;base64,/, {
+      timeout: TIMEOUT_CONFIG.ELEMENT_WAIT,
+    });
 
     await page.reload({ waitUntil: 'domcontentloaded' });
-    // Page-load readiness after a reload is not the persisted-value assertion;
-    // give the cold settings graph the navigation budget, then assert values.
     await expect(page.getByTestId('account-profile-nickname')).toBeVisible({
       timeout: TIMEOUT_CONFIG.NAVIGATION,
     });
-    await expect(page.locator('#avatar')).toHaveValue(avatar, {
-      timeout: TIMEOUT_CONFIG.ELEMENT_WAIT,
-    });
-    await expect(page.locator('#bio')).toHaveValue(bio);
+    await expect(page.getByTestId('account-profile-avatar').locator('img')).toHaveAttribute(
+      'src',
+      /^data:image\/png;base64,/,
+      { timeout: TIMEOUT_CONFIG.ELEMENT_WAIT },
+    );
   });
 
   test('[P1] keeps the cloud identity email visible but outside the editable profile fields', async ({
@@ -62,7 +63,7 @@ test.describe('Account profile canonical surface', () => {
     await expect(page.locator('input[type="email"]')).toHaveCount(1);
     await expect(page.getByTestId('cloud-password-forgot-email')).toHaveValue(workerAccount.email);
     await expect(page.locator('#nickname')).toBeEditable();
-    await expect(page.locator('#avatar')).toBeEditable();
+    await expect(page.getByTestId('account-profile-avatar')).toBeEnabled();
     await expect(page.locator('#bio')).toBeEditable();
 
     // Cloud Auth owns the login email; Account profile editing intentionally has no email field.
