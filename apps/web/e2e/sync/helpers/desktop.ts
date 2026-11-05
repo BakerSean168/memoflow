@@ -178,21 +178,21 @@ export class DesktopAppController {
     });
 
     const guestWindow = await this.waitForMainWindow();
-    // #801 moved "Manage accounts" out of the account menu and into
-    // Settings -> Account & privacy; the sidebar only links to Settings now.
+    // #855 removed the legacy Manage accounts dialog. Adding an account is the
+    // identity gate's login state, reached from the sidebar's account submenu.
     if (await guestWindow.getByTestId('settings-return-to-app').isVisible()) {
       await guestWindow.getByTestId('settings-return-to-app').click();
     }
     await guestWindow.getByTestId('shell-account-menu').click();
-    await guestWindow.getByTestId('shell-open-settings').click();
-    await guestWindow.getByTestId('settings-tab-account').click();
-    await guestWindow.getByTestId('shell-manage-profiles').click();
-    await expect(guestWindow.getByTestId('manage-accounts-dialog')).toBeVisible();
-
+    await guestWindow.getByTestId('shell-switch-account').click();
+    const gatePromise = app.waitForEvent('window');
     await guestWindow.getByTestId('shell-add-account').click();
-    await guestWindow.getByTestId('cloud-connection-continue').click();
+    const gate = await gatePromise;
+    await expect(gate.getByTestId('desktop-profile-login-state')).toBeVisible();
 
-    const pending = guestWindow.getByTestId('cloud-connection-pending');
+    await gate.getByTestId('desktop-profile-github-signin').click();
+
+    const pending = gate.getByTestId('desktop-profile-github-waiting');
     await expect(pending).toBeVisible({ timeout: 30_000 });
     const userCode = await readDeviceUserCode(pending);
 

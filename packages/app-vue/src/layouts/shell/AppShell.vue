@@ -61,7 +61,6 @@ import { DialogDraftScopeKey } from './dialog-draft-store';
 import GlobalComposer from './GlobalComposer.vue';
 import CloudConnectionDialog from './CloudConnectionDialog.vue';
 import ProfileImportDialog from './ProfileImportDialog.vue';
-import ManageAccountsDialog from './ManageAccountsDialog.vue';
 import { useDesktopProfiles } from '../../shared/composables/useDesktopProfiles';
 import { z } from 'zod';
 import StandaloneSettingsLayout from './StandaloneSettingsLayout.vue';
@@ -366,23 +365,7 @@ useDeviceKeymap(() => authStore.getIdentityId, desktopAccess);
 const cloudConnectionOpen = ref(false);
 const cloudConnectionIntent = ref<'add_account' | 'reauthenticate'>('add_account');
 const desktopBridge = inject(DESKTOP_BRIDGE_KEY, null);
-const profilePresenter = useDesktopProfiles();
-const { profiles: desktopProfiles, refreshProfiles, switchProfile } = profilePresenter;
-const manageAccountsOpen = ref(false);
-const accountReturnFocus = shallowRef<HTMLElement | null>(null);
-async function manageProfiles(trigger: HTMLButtonElement | null) {
-  accountReturnFocus.value = trigger;
-  // Allow the submenu to restore its trigger before the Dialog takes focus.
-  await nextTick();
-  manageAccountsOpen.value = true;
-}
-function closeManagement() {
-  manageAccountsOpen.value = false;
-}
-function managePasswordSettings() {
-  closeManagement();
-  openAccount();
-}
+const { profiles: desktopProfiles, refreshProfiles, switchProfile } = useDesktopProfiles();
 
 const profileImportOpen = ref(false);
 const profileImportSource = ref<string>();
@@ -420,11 +403,6 @@ async function addMenuAccount() {
   await desktopBridge?.invoke(WindowChannels.TRANSITION_TO_PROFILE_ACCESS, {
     view: 'login',
   });
-}
-function addAccount() {
-  closeManagement();
-  cloudConnectionIntent.value = 'add_account';
-  cloudConnectionOpen.value = true;
 }
 const userName = computed<string | undefined>(
   () =>
@@ -602,11 +580,6 @@ function openPanelRoute(_module: 'goal' | 'task' | 'routine', path: string) {
 function openSettings(path = '/settings') {
   closeOverlaySidebar();
   void sync.openSettings(path);
-}
-
-function openAccount() {
-  closeOverlaySidebar();
-  void sync.openSettings('/settings?tab=account');
 }
 
 function openUpdateSettings() {
@@ -830,15 +803,6 @@ onBeforeUnmount(() => {
          AIChatView 流式回复、Teleport 宿主都不随设置导航销毁（Phase 0 / UI-001）。 -->
     <StandaloneSettingsLayout v-if="isSettingsScene" class="min-h-0 flex-1">
       <div class="flex h-full min-h-0 flex-col">
-        <button
-          v-if="isDesktop && route.query.tab === 'account'"
-          type="button"
-          data-testid="shell-manage-profiles"
-          class="m-4 self-start rounded-md border px-3 py-2 text-sm hover:bg-muted"
-          @click="manageProfiles($event.currentTarget as HTMLButtonElement)"
-        >
-          {{ t('shell.account.manageProfiles') }}
-        </button>
         <div class="min-h-0 flex-1">
           <router-view name="settings" />
         </div>
@@ -1095,18 +1059,6 @@ onBeforeUnmount(() => {
       </SheetContent>
     </Sheet>
   </div>
-  <ManageAccountsDialog
-    v-if="isDesktop"
-    v-model:open="manageAccountsOpen"
-    :presenter="profilePresenter"
-    :return-focus="accountReturnFocus"
-    @add-account="addAccount"
-    @import-profile="
-      closeManagement();
-      profileImportOpen = true;
-    "
-    @password-settings="managePasswordSettings"
-  />
   <ProfileImportDialog
     v-if="desktopAccess?.profile?.profileKind === 'registered'"
     v-model:open="profileImportOpen"

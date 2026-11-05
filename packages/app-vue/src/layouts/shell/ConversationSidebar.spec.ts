@@ -66,7 +66,6 @@ const i18n = createI18n({
           connectCloud: 'Connect cloud',
           reauthenticate: 'Sign in again',
           switchAccount: 'Switch account',
-          manageProfiles: 'Manage accounts',
           menuAddAccount: 'Add account',
           currentProfile: 'Current Profile',
           connection: { unknown: 'Not checked' },

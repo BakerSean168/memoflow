@@ -204,16 +204,17 @@ function appMainWindow(app: ElectronApplication): Page {
   return page;
 }
 
-async function openManageAccounts(page: Page): Promise<void> {
+async function openLoginGate(app: ElectronApplication, page: Page): Promise<Page> {
   if (await page.getByTestId('settings-return-to-app').isVisible()) {
     await page.getByTestId('settings-return-to-app').click();
   }
   await page.getByTestId('shell-account-menu').click();
-  await page.getByTestId('shell-open-settings').click();
-  await page.getByTestId('settings-tab-account').click();
-  await page.getByTestId('shell-manage-profiles').click();
-  await expect(page.getByTestId('manage-accounts-dialog')).toBeVisible();
-  await expect(page.getByTestId('app-shell')).toBeVisible();
+  await page.getByTestId('shell-switch-account').click();
+  const gatePromise = app.waitForEvent('window');
+  await page.getByTestId('shell-add-account').click();
+  const gate = await gatePromise;
+  await expect(gate.getByTestId('desktop-profile-login-state')).toBeVisible();
+  return gate;
 }
 
 function captureRendererConsole(page: Page): void {
@@ -312,7 +313,7 @@ test('account menu add account opens the identity login surface without removing
   }
 });
 
-test('local account works offline, keeps its renamed profile across restart and signs out to the chooser', async () => {
+test('local account works offline, keeps its profile across restart and signs out to the chooser', async () => {
   const runtimeRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'memoflow-desktop-e2e-'));
   const userDataPath = path.join(runtimeRoot, 'user-data');
   let electronApp: ElectronApplication | null = null;
@@ -325,17 +326,6 @@ test('local account works offline, keeps its renamed profile across restart and 
     const localProfileName = await mainWindow.getByTestId('shell-account-name').innerText();
     expect(localProfileName).toBe('Nightly Local');
 
-    await openManageAccounts(mainWindow);
-    const localId = readRegistry(userDataPath).activeProfileId!;
-    await mainWindow.getByTestId(`desktop-profile-rename-${localId}`).click();
-    const rename = mainWindow
-      .getByTestId(`desktop-profile-rename-${localId}`)
-      .locator('../..')
-      .locator('form')
-      .first();
-    await rename.locator('input').fill('离线旅程用户');
-    await rename.locator('button[type="submit"]').click();
-    await expect(mainWindow.getByTestId('shell-account-name')).toHaveText('离线旅程用户');
     const profileDirectories = fs
       .readdirSync(path.join(userDataPath, 'data', 'profiles'), {
         withFileTypes: true,
@@ -354,7 +344,7 @@ test('local account works offline, keeps its renamed profile across restart and 
     );
     captureRendererConsole(restartedMainWindow);
     await expect(restartedMainWindow.getByTestId('app-shell')).toBeVisible();
-    await expect(restartedMainWindow.getByTestId('shell-account-name')).toHaveText('离线旅程用户');
+    await expect(restartedMainWindow.getByTestId('shell-account-name')).toHaveText('Nightly Local');
 
     await electronApp.close();
     electronApp = await launchDesktop(userDataPath);
@@ -363,7 +353,7 @@ test('local account works offline, keeps its renamed profile across restart and 
       await electronApp.firstWindow(),
     );
     await expect(rememberedWindow.getByTestId('app-shell')).toBeVisible();
-    await expect(rememberedWindow.getByTestId('shell-account-name')).toHaveText('离线旅程用户');
+    await expect(rememberedWindow.getByTestId('shell-account-name')).toHaveText('Nightly Local');
 
     restartedMainWindow = rememberedWindow;
     // "退出账号" is the only account exit: it removes the last Profile and lands
@@ -567,24 +557,24 @@ test('a second local account keeps independent data and its password selection a
     const first = readRegistry(userData).profiles[0]!;
     const firstMarker = path.join(userData, 'data', 'profiles', first.profileId, 'independent.txt');
     fs.writeFileSync(firstMarker, 'first account only');
-    await openManageAccounts(firstWindow);
-    const windowsBefore = app.windows().length;
-    await firstWindow
-      .getByTestId('manage-accounts-dialog')
-      .getByRole('button', { name: '关闭', exact: true })
-      .click();
-    await expect(firstWindow.getByTestId('manage-accounts-dialog')).toBeHidden();
-    await expect(firstWindow.getByTestId('shell-manage-profiles')).toBeFocused();
-    expect(app.windows().length).toBe(windowsBefore);
-    expect(readRegistry(userData).activeProfileId).toBe(first.profileId);
-    await openManageAccounts(firstWindow);
-    await firstWindow.getByTestId('desktop-profile-create').locator('input').first().fill('Work');
-    await firstWindow
-      .getByTestId('desktop-profile-create')
-      .locator('input[type="password"]')
-      .fill(LOCAL_PASSWORD);
-    const secondGatePromise = app.waitForEvent('window');
-    await firstWindow.getByTestId('desktop-profile-create').getByRole('button').click();
+    const firstGate = await openLoginGate(app, firstWindow);
+    const secondWindowPromise = app.waitForEvent('window', {
+      predicate: async (window) => {
+        try {
+          await window.getByTestId('app-shell').waitFor({ state: 'visible', timeout: 45_000 });
+          return true;
+        } catch {
+          return false;
+        }
+      },
+      timeout: 60_000,
+    });
+    await firstGate.getByTestId('desktop-profile-go-register').click();
+    await firstGate.getByTestId('desktop-profile-register-mode-local').click();
+    await firstGate.getByTestId('desktop-profile-register-name').fill('Work');
+    await firstGate.getByTestId('desktop-profile-register-password').fill(LOCAL_PASSWORD);
+    await firstGate.getByTestId('desktop-profile-register-confirm').fill(LOCAL_PASSWORD);
+    await firstGate.getByTestId('desktop-profile-register-submit').click();
     await expect.poll(() => readRegistry(userData).profiles.length).toBe(2);
     const second = readRegistry(userData).profiles.find(
       (profile) => profile.profileId !== first.profileId,
@@ -593,11 +583,7 @@ test('a second local account keeps independent data and its password selection a
     expect(
       fs.existsSync(path.join(userData, 'data', 'profiles', second.profileId, 'independent.txt')),
     ).toBe(false);
-    const secondGate = await secondGatePromise;
-    await expect(
-      secondGate.getByTestId(`desktop-profile-password-${second.profileId}`),
-    ).toBeVisible();
-    const secondWindow = await unlockLocalProfile(app, secondGate);
+    const secondWindow = await secondWindowPromise;
     await expect(secondWindow.getByTestId('shell-account-name')).toHaveText('Work');
     await secondWindow.getByTestId('shell-account-menu').click();
     await secondWindow.getByTestId('shell-switch-account').click();
@@ -782,8 +768,7 @@ test('local account copy preview persists across restart and waits for local con
       });
     });
     expect(seeded).toMatchObject({ ok: true });
-    await openManageAccounts(guest);
-    await guest.getByTestId('shell-add-account').click();
+    const gate = await openLoginGate(app, guest);
     const targetWindowPromise = app.waitForEvent('window', {
       predicate: async (window) => {
         try {
@@ -795,7 +780,8 @@ test('local account copy preview persists across restart and waits for local con
       },
       timeout: 60_000,
     });
-    await guest.getByTestId('cloud-connection-continue').click();
+    await gate.getByTestId('desktop-profile-github-signin').click();
+    await expect(gate.getByTestId('desktop-profile-github-waiting')).toBeVisible();
     await expect.poll(() => readRegistry(userData).profiles.length).toBe(2);
     await expect.poll(() => guest.isClosed()).toBe(true);
     const targetWindow = await targetWindowPromise;
@@ -814,9 +800,9 @@ test('local account copy preview persists across restart and waits for local con
     const restarted = await selectRememberedProfile(app, await app.firstWindow());
     await expect(restarted.getByTestId('app-shell')).toBeVisible();
     await expect(restarted.getByTestId('profile-import-dialog')).not.toBeVisible();
-    await openManageAccounts(restarted);
-    await restarted.getByTestId('shell-import-profile').click();
-    const recovered = restarted.getByTestId('profile-import-dialog');
+    const recoveryGate = await openLoginGate(app, restarted);
+    await recoveryGate.getByTestId('desktop-profile-import-profile').click();
+    const recovered = recoveryGate.getByTestId('profile-import-dialog');
     await recovered.locator('summary').click();
     await recovered.getByRole('button', { name: /已复制到云端，等待本机核验/ }).click();
     await recovered.getByRole('button', { name: '恢复并重新核验', exact: true }).click();

@@ -137,15 +137,11 @@ export default {
       REAUTH_REQUIRED: '需要重新登录',
       unknown: '尚未检查',
     },
-    manageDescription:
-      '各 Profile 的本地资料独立。从本机移除不会关闭云端账号。打开目标 Profile 后，在设置 → 账户与隐私修改本地账户密码。',
     passwordSettings: '密码设置',
     switchAccount: '切换账号',
     createProfile: '创建本地账户',
     currentProfile: '当前 Profile',
-    manageProfiles: '管理账号',
     menuAddAccount: '添加账号',
-    addAccount: '添加其他账号',
     reauthenticate: '重新认证此账号',
 
     menu: '账户菜单',
