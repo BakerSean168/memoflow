@@ -252,7 +252,7 @@ it('allows only bridge-registered MemoFlow tools, including every Goal panel too
         expect(await check('mcp__memoflow__unknown_new_tool')).toMatchObject({
           hookSpecificOutput: { permissionDecision: 'deny' },
         });
-        expect(await check('Bash')).toEqual({});
+        expect(await check('Bash')).toMatchObject({ hookSpecificOutput: { permissionDecision: 'ask' } });
         for (const name of [
           'goal_panel_open',
           'goal_panel_patch',

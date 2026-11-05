@@ -294,7 +294,13 @@ export function useComposerModelSelection(options: UseComposerModelSelectionOpti
   onActivated(() => {
     void refreshConfiguration();
   });
-  const supportedRuntimeModes = computed(() => composerAgents.value.find((agent) => agent.id === selectedComposerAgent.value)?.supportedRuntimeModes ?? AIChatPermissionModeSchema.options);
+  const supportedRuntimeModes = computed(() => {
+    const choice = chatSession.runtimeChoice.value;
+    const instance = agentRegistrySnapshot.value?.instances.find((entry) =>
+      choice.runtimeKind === 'local_agent' ? entry.legacyConnectionId === choice.connectionId : entry.instanceId === modelSelection.selectedAgentId.value,
+    );
+    return instance ? AGENT_SUPPORTED_RUNTIME_MODES[instance.driver] : AIChatPermissionModeSchema.options;
+  });
   const permissionStorageKey = () => {
     const owner = resolveIdentity();
     const id = chatSession.chatConversationId.value;
