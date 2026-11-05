@@ -21,8 +21,14 @@ it('blocks unhandled data and detects changed content even with unchanged size a
     const first = await inspect();
     expect(first.blockers).toEqual(
       expect.arrayContaining([
-        expect.objectContaining({ field: 'future_owner', reason: 'unsupported_user_data' }),
-        expect.objectContaining({ field: 'note.txt', reason: 'unsupported_user_data' }),
+        expect.objectContaining({
+          field: 'future_owner',
+          reason: 'unsupported_user_data',
+        }),
+        expect.objectContaining({
+          field: 'note.txt',
+          reason: 'unsupported_user_data',
+        }),
       ]),
     );
     writeFileSync(file, 'xyz');
@@ -126,5 +132,30 @@ it('does not open Mastra through a linked external storage directory', async () 
   } finally {
     writer.close();
     rmSync(root, { recursive: true, force: true });
+  }
+});
+
+it('does not block a used profile containing only proven Mastra epoch metadata and model catalog cache', async () => {
+  const dir = mkdtempSync(path.join(tmpdir(), 'profile-used-inventory-'));
+  mkdirSync(path.join(dir, 'db'));
+  mkdirSync(path.join(dir, 'storage/local-agents/model-catalog'), {
+    recursive: true,
+  });
+  const filename = path.join(dir, 'db/powersync.sqlite');
+  const writer = new Database(filename);
+  const mastra = new Database(path.join(dir, 'storage/mastra.db'));
+  try {
+    mastra.exec(`CREATE TABLE memoflow_goal_event_meta(id INTEGER PRIMARY KEY CHECK(id=1), epoch TEXT NOT NULL);
+      INSERT INTO memoflow_goal_event_meta VALUES (1, 'runtime-epoch');`);
+    writeFileSync(
+      path.join(dir, 'storage/local-agents/model-catalog', 'a'.repeat(64) + '.json'),
+      '{"revision":1,"status":{"status":"ready"}}',
+    );
+    const result = await readProfileSqliteSnapshot(filename, (db) => inspectProfileSource(db, dir));
+    expect(result.blockers).toEqual([]);
+  } finally {
+    writer.close();
+    mastra.close();
+    rmSync(dir, { recursive: true, force: true });
   }
 });
