@@ -58,7 +58,9 @@ export async function deleteCloudAccount(
       where: { id: identityId },
       select: { email: true },
     });
-    if (user) await tx.cloudAuthVerification.deleteMany({ where: { identifier: user.email } });
+    await tx.cloudAuthVerification.deleteMany({
+      where: { OR: [{ value: identityId }, ...(user ? [{ identifier: user.email }] : [])] },
+    });
     await tx.cloudAuthUser.delete({ where: { id: identityId } });
   });
 }

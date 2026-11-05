@@ -498,7 +498,7 @@ describe('permanent cloud account deletion', () => {
       where: { actorIdentityId: 'user-1' },
     });
     expect(tx.cloudAuthVerification!.deleteMany).toHaveBeenCalledWith({
-      where: { identifier: 'person@example.com' },
+      where: { OR: [{ value: 'user-1' }, { identifier: 'person@example.com' }] },
     });
   });
 });

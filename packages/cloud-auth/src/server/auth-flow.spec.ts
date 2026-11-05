@@ -306,6 +306,9 @@ describe('account security', () => {
 
   it('rechecks the password, verifies the new inbox and notifies the old inbox only after confirmation', async () => {
     const fixture = await signedIn();
+    expect(
+      (await fixture.securedPost('/change-email', { newEmail: 'bypass@example.com' })).status,
+    ).toBe(404);
     const wrong = await fixture.securedPost('/account-security/change-email', {
       password: 'incorrect-password',
       newEmail: 'new@example.com',
