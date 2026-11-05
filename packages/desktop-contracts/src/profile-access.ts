@@ -8,6 +8,11 @@ export interface ProfileSummary {
   profileKind: ProfileKind;
   displayName: string;
   avatarSeed: string;
+  /**
+   * Local avatar of this Profile as a renderable URL (data URL), or null when
+   * the Profile has never uploaded one. Issue #858.
+   */
+  avatarUrl?: string | null;
   identifierHint: string | null;
   cloudAccountId: string | null;
   lastActiveAt: number;

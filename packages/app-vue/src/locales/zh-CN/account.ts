@@ -89,6 +89,14 @@ export default {
     birthday: '生日',
     editProfile: '编辑资料',
   },
+  avatar: {
+    saved: '头像已更新',
+    uploading: '正在处理头像...',
+    failed: '头像更新失败',
+    invalidType: '请选择图片文件',
+    decodeFailed: '无法读取该图片',
+    encodeFailed: '图片处理失败',
+  },
   placeholder: {
     nickname: '请输入昵称',
     avatarUrl: 'https://... ',

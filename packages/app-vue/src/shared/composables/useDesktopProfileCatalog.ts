@@ -14,6 +14,7 @@ export const profileSchema = z.object({
   profileKind: z.enum(['local', 'registered']),
   displayName: z.string(),
   avatarSeed: z.string(),
+  avatarUrl: z.string().nullable().optional(),
   identifierHint: z.string().nullable(),
   cloudAccountId: z.string().nullable(),
   lastActiveAt: z.number(),

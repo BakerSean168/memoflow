@@ -79,6 +79,7 @@ describe('storage path derivation', () => {
       repositoryStorageDir: path.join(data, 'storage/repository-storage'),
       knowledgeNotesDir: path.join(data, 'storage/knowledge-notes'),
       attachmentsDir: path.join(data, 'storage/attachments'),
+      avatarPath: path.join(data, 'storage/avatar.png'),
       localVaultBindingPath: path.join(data, 'storage/local-vault-binding.json'),
       localVaultWriteLedgerPath: path.join(data, 'storage/local-vault-write-ledger.json'),
       knowledgeRepositoryAutoSyncStatePath: path.join(

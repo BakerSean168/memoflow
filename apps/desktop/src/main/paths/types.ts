@@ -35,6 +35,8 @@ export interface ProfilePathResolver {
   readonly repositoryStorageDir: string;
   readonly knowledgeNotesDir: string;
   readonly attachmentsDir: string;
+  /** Fixed local avatar slot inside the Profile's storage directory. */
+  readonly avatarPath: string;
   readonly localVaultBindingPath: string;
   readonly localVaultWriteLedgerPath: string;
   readonly knowledgeRepositoryAutoSyncStatePath: string;

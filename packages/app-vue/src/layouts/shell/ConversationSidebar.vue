@@ -60,6 +60,7 @@ import {
   TooltipProvider,
 } from '@memoflow/ui-vue-shadcn';
 import type { ProfileSummary, ProfileCloudState } from '@memoflow/desktop-contracts';
+import { useAccountAvatar, useAccountStore } from '@memoflow/account-ui';
 import type {
   ConversationAttentionStatus,
   ConversationAttentionMap,
@@ -424,6 +425,12 @@ const orderedProfiles = computed(() =>
   ),
 );
 const displayName = () => props.userName || t('shell.guest');
+// Local avatar for the current account; the legacy profile URL is only the
+// one-time compatibility fallback (Issue #858).
+const accountStore = useAccountStore();
+const { avatarUrl: accountAvatarUrl } = useAccountAvatar(
+  () => accountStore.currentAccount?.profile?.avatarUrl ?? null,
+);
 
 function profileLabel(profile: ProfileSummary): string {
   return [
@@ -820,9 +827,17 @@ const identityLabel = () => {
             :title="t('shell.account.menu')"
           >
             <span
-              class="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary/90 text-[10px] font-semibold text-primary-foreground shadow-[0_0_0_1px_hsl(var(--primary)/0.18)]"
+              class="flex h-6 w-6 shrink-0 items-center justify-center overflow-hidden rounded-full bg-primary/90 text-[10px] font-semibold text-primary-foreground shadow-[0_0_0_1px_hsl(var(--primary)/0.18)]"
+              data-testid="shell-account-avatar"
             >
-              {{ displayName().slice(0, 1).toUpperCase() }}
+              <img
+                v-if="accountAvatarUrl"
+                :src="accountAvatarUrl"
+                alt=""
+                class="h-full w-full object-cover"
+                data-testid="shell-account-avatar-image"
+              />
+              <template v-else>{{ displayName().slice(0, 1).toUpperCase() }}</template>
             </span>
             <span
               data-testid="shell-account-name"
@@ -839,10 +854,17 @@ const identityLabel = () => {
         >
           <div class="flex items-center gap-2 px-2 py-1.5" data-testid="shell-account-identity">
             <span
-              class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary text-xs text-primary-foreground"
+              class="flex h-8 w-8 shrink-0 items-center justify-center overflow-hidden rounded-full bg-primary text-xs text-primary-foreground"
               aria-hidden="true"
-              >{{ displayName().slice(0, 2).toUpperCase() }}</span
             >
+              <img
+                v-if="accountAvatarUrl"
+                :src="accountAvatarUrl"
+                alt=""
+                class="h-full w-full object-cover"
+              />
+              <template v-else>{{ displayName().slice(0, 2).toUpperCase() }}</template>
+            </span>
             <div class="min-w-0">
               <p class="truncate text-sm font-medium">{{ displayName() }}</p>
               <p class="text-[11px] text-muted-foreground">
@@ -877,10 +899,16 @@ const identityLabel = () => {
                   "
                 >
                   <span
-                    class="mr-2 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-muted text-xs"
+                    class="mr-2 flex h-8 w-8 shrink-0 items-center justify-center overflow-hidden rounded-full bg-muted text-xs"
                     aria-hidden="true"
                   >
-                    {{ profile.displayName.slice(0, 2).toUpperCase() }}
+                    <img
+                      v-if="profile.avatarUrl"
+                      :src="profile.avatarUrl"
+                      alt=""
+                      class="h-full w-full object-cover"
+                    />
+                    <template v-else>{{ profile.displayName.slice(0, 2).toUpperCase() }}</template>
                   </span>
                   <span class="min-w-0 flex-1">
                     <span class="block truncate" :title="profile.displayName">{{

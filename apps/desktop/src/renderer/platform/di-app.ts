@@ -6,6 +6,7 @@ import {
   installRepositoryUiHost,
   installRoutineUiHost,
   installTaskUiHost,
+  createDesktopAccountAvatarStore,
 } from '@memoflow/app-vue/di';
 /**
  * Desktop Platform DI — IPC Adapter Injection
@@ -37,6 +38,7 @@ import {
 import { createDataPortabilityIpcClient } from '@memoflow/data-portability/client';
 import {
   ACCOUNT_SERVICE_KEY,
+  ACCOUNT_AVATAR_STORE_KEY,
   DESKTOP_CLOUD_AUTH_SERVICE_KEY,
   GOAL_SERVICE_KEY,
   GOAL_DRAFT_CHECKPOINT_KEY,
@@ -107,6 +109,7 @@ export function installDesktopAppServices(
   const resultIpcClient = createResultIpcClient({ bridge });
 
   app.provide(ACCOUNT_SERVICE_KEY, createAccountIpcClient(resultIpcClient));
+  app.provide(ACCOUNT_AVATAR_STORE_KEY, createDesktopAccountAvatarStore(resultIpcClient));
 
   const cloudAuth = createCloudAuthIpcClient(resultIpcClient);
   app.provide(DESKTOP_CLOUD_AUTH_SERVICE_KEY, cloudAuth);

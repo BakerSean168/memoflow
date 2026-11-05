@@ -339,8 +339,10 @@ describe('AccountProfileSection', () => {
     await flushPromises();
 
     expect(wrapper.get('#nickname').attributes('disabled')).not.toBe('true');
-    expect(wrapper.get('#avatar').attributes('disabled')).not.toBe('true');
     expect(wrapper.get('#bio').attributes('disabled')).not.toBe('true');
+    // Issue #858: the avatar URL input is gone; the avatar itself is the upload control.
+    expect(wrapper.find('#avatar').exists()).toBe(false);
+    expect(wrapper.get('[data-testid="account-profile-avatar"]').exists()).toBe(true);
     expect(wrapper.text()).toContain('Local guest');
     expect(wrapper.find('[data-testid="account-logout-button"]').exists()).toBe(false);
   });

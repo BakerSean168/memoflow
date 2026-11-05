@@ -4,5 +4,6 @@
  */
 
 export { default as AccountProfileSection } from './AccountProfileSection.vue';
+export { default as AccountAvatarUploader } from './AccountAvatarUploader.vue';
 export { default as CloudPasswordSection } from './CloudPasswordSection.vue';
 export { default as ExternalAgentConnectionsSection } from './ExternalAgentConnectionsSection.vue';
