@@ -163,7 +163,7 @@
         {
           "runner": "desktop-e2e",
           "file": "apps/desktop/e2e/authentication/desktop-auth-flow.spec.mts",
-          "title": "local account works offline, keeps its renamed profile across restart and signs out to the chooser"
+          "title": "local account works offline, keeps its profile across restart and signs out to the chooser"
         }
       ]
     },
