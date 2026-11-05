@@ -18,6 +18,7 @@ import type {
 import type { ElectronBridge } from '@memoflow/ipc-client';
 import type { LocalAgentClient, AgentRegistryClient } from '@memoflow/ai-client';
 import type { AIRuntimeSurface } from '@memoflow/ai-contracts';
+import type { AccountAvatarStore } from '@memoflow/account-ui';
 import type { Result } from '@memoflow/transport-contracts/result';
 import type { DesktopAuthApi } from '../shared/utils/desktop-auth-recovery';
 import type {
@@ -104,6 +105,13 @@ export const DESKTOP_AUTH_API_KEY: InjectionKey<DesktopAuthApi> = Symbol('Deskto
 export type { ElectronBridge };
 
 export const DESKTOP_BRIDGE_KEY: InjectionKey<ElectronBridge> = Symbol('DesktopBridge');
+
+/**
+ * Platform avatar persistence (Issue #858). Desktop writes to the active
+ * Profile data directory; the web shell uses account-scoped browser storage.
+ */
+export const ACCOUNT_AVATAR_STORE_KEY: InjectionKey<AccountAvatarStore> =
+  Symbol('AccountAvatarStore');
 
 /** Optional host-neutral Desktop Update capability. Web hosts intentionally omit it. */
 export const DESKTOP_UPDATE_SERVICE_KEY: InjectionKey<DesktopUpdateService> =

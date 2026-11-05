@@ -21,7 +21,10 @@ export {
   MODULE_CAPSULES_KEY,
   LOGOUT_HANDLER_KEY,
   ASSISTANT_SURFACE_KEY,
+  ACCOUNT_AVATAR_STORE_KEY,
 } from './di/keys';
+
+export { createWebAccountAvatarStore } from './di/account-avatar-store';
 
 export { defaultModuleCapsules } from './di/navigation';
 

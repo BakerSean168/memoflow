@@ -118,6 +118,7 @@ import type { ProfilePathResolver } from './paths';
 import { ProfileRegistry } from './profile/profile-registry';
 import { DesktopProfileRuntimeManager } from './profile/desktop-profile-runtime-manager';
 import { registerProfileAccessIpc } from './profile/profile-access-ipc';
+import { registerProfileAvatarIpc } from './profile/profile-avatar-ipc';
 import { registerCloudAuthIpc } from './profile/cloud-auth-ipc';
 import { CloudSessionStore } from './profile/cloud-session-store';
 import { DesktopCloudConnectionManager } from './profile/desktop-cloud-connection-manager';
@@ -878,6 +879,7 @@ async function initializeShellRuntime(): Promise<void> {
     cloudConnectionManager,
     deviceAuthCoordinator,
   );
+  registerProfileAvatarIpc(profileRuntimeManager);
   registerCloudAuthIpc(
     profileRegistry,
     profileRuntimeManager,

@@ -1,11 +1,29 @@
+import os from 'node:os';
+import path from 'node:path';
 import { ipcMain } from 'electron';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { ProfileAccessChannels } from '@memoflow/desktop-contracts';
 import { ResultErrorException } from '@memoflow/transport-contracts/result';
+import { resolveDesktopStorageRoots } from '../paths/desktop-storage-roots';
+import { createSharedPathResolver } from '../paths/shared-path-resolver';
 import { registerProfileAccessIpc } from './profile-access-ipc';
 
 const accessLogs = vi.hoisted(() => ({ info: vi.fn(), warn: vi.fn(), error: vi.fn() }));
 vi.mock('@memoflow/utils/logger', () => ({ createLogger: () => accessLogs }));
+
+// The runtime memoizes one shared resolver and the summary projection reads
+// avatars through it, so the double returns a real resolver whose test root
+// holds no avatar files.
+const platform =
+  process.platform === 'win32' ? 'win32' : process.platform === 'darwin' ? 'darwin' : 'linux';
+const sharedResolver = createSharedPathResolver(
+  resolveDesktopStorageRoots({
+    platform,
+    channel: 'test',
+    home: os.tmpdir(),
+    env: { MEMOFLOW_DESKTOP_STORAGE_TEST_ROOT: path.join(os.tmpdir(), 'memoflow-access-ipc') },
+  }),
+);
 
 type Handler = (_event: unknown, input?: unknown) => Promise<unknown>;
 
@@ -24,6 +42,7 @@ describe('registerProfileAccessIpc', () => {
     };
     const runtime = {
       getActiveProfileDescriptorSync: vi.fn(() => profile),
+      getSharedResolver: () => sharedResolver,
       hasCredential: vi.fn(async () => false),
       hasRememberedKey: vi.fn(async () => false),
     };
@@ -50,6 +69,7 @@ describe('registerProfileAccessIpc', () => {
     });
     const runtime = {
       getActiveProfileDescriptorSync: vi.fn().mockReturnValue({ profileId: 'old-profile' }),
+      getSharedResolver: () => sharedResolver,
       hasCredential: vi.fn(async () => false),
       hasRememberedKey: vi.fn(async () => false),
     };
@@ -197,6 +217,7 @@ describe('registerProfileAccessIpc', () => {
       hasSnapshot: false,
     });
     const runtime = {
+      getSharedResolver: () => sharedResolver,
       hasCredential: vi.fn(async () => true),
       hasRememberedKey: vi.fn(async (profileId: string) => profileId === 'local-remembered'),
     };
@@ -237,6 +258,7 @@ describe('registerProfileAccessIpc', () => {
       })),
       hasCredential: vi.fn(async () => true),
       hasRememberedKey: vi.fn(async () => false),
+      getSharedResolver: () => sharedResolver,
     };
     registerProfileAccessIpc({} as never, runtime as never, {} as never);
 

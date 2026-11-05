@@ -18,9 +18,6 @@ import {
   CardTitle,
   Input,
   Label,
-  Avatar,
-  AvatarFallback,
-  AvatarImage,
   Separator,
 } from '@memoflow/ui-vue-shadcn';
 import { accountUiHost } from '../../account-ui-host';
@@ -28,6 +25,8 @@ import { LockKeyhole, LogOut } from '@lucide/vue';
 import { toast } from 'vue-sonner';
 import { useAccount } from '../composables/useAccount';
 import { useAccountSignOut } from '../composables/useAccountSignOut';
+import { useAccountAvatar } from '../avatar/useAccountAvatar';
+import AccountAvatarUploader from './AccountAvatarUploader.vue';
 import { useAuthenticationStore } from '../../authentication/stores/authentication-store';
 import { ProfileAccessChannels } from '@memoflow/desktop-contracts';
 
@@ -55,11 +54,13 @@ const {
 const form = reactive({
   nickname: '',
   bio: '',
-  avatar: '',
 });
 
 const hasAccount = computed(() => currentAccount.value !== null);
 const initials = computed(() => (form.nickname || 'DU').slice(0, 2).toUpperCase());
+// Local avatar wins; a legacy URL still renders when no local file exists, but
+// the URL itself is no longer editable (Issue #858 one-way compatibility read).
+const { avatarUrl } = useAccountAvatar(() => currentAccount.value?.profile?.avatarUrl ?? null);
 const isLocalAccount = computed(
   () => desktopAccess.value?.profile?.profileKind === 'local' && Boolean(desktopBridge),
 );
@@ -72,7 +73,6 @@ watch(
     }
     form.nickname = account.profile.nickname || '';
     form.bio = account.profile.bio || '';
-    form.avatar = account.profile.avatarUrl || '';
   },
   { immediate: true },
 );
@@ -81,7 +81,6 @@ async function handleSave() {
   await updateMyProfile({
     nickname: form.nickname,
     bio: form.bio || null,
-    avatar: form.avatar || null,
   });
 }
 
@@ -148,10 +147,12 @@ onMounted(() => {
 
       <CardContent v-if="hasAccount" class="space-y-8">
         <div class="flex flex-col gap-5 md:flex-row md:items-center">
-          <Avatar class="h-20 w-20 border border-border bg-muted/60">
-            <AvatarImage :src="form.avatar" :alt="form.nickname" />
-            <AvatarFallback class="text-xl font-semibold">{{ initials }}</AvatarFallback>
-          </Avatar>
+          <AccountAvatarUploader
+            :avatar-url="avatarUrl"
+            :initials="initials"
+            :disabled="isLoading"
+            test-id="account-profile-avatar"
+          />
 
           <div class="space-y-1">
             <div class="text-xl font-semibold">{{ form.nickname }}</div>
@@ -174,16 +175,6 @@ onMounted(() => {
               v-model="form.nickname"
               data-testid="account-profile-nickname"
               :placeholder="t('account.placeholder.nickname')"
-              :disabled="isLoading"
-            />
-          </div>
-
-          <div class="space-y-2">
-            <Label for="avatar">{{ t('account.profile.avatarUrl') }}</Label>
-            <Input
-              id="avatar"
-              v-model="form.avatar"
-              :placeholder="t('account.placeholder.avatarUrl')"
               :disabled="isLoading"
             />
           </div>

@@ -13,6 +13,7 @@ import {
 } from '@memoflow/desktop-contracts';
 import type { ProfileRegistry } from './profile-registry';
 import type { DesktopProfileRuntimeManager } from './desktop-profile-runtime-manager';
+import { ProfileAvatarStore } from './profile-avatar-store';
 import type { DesktopCloudConnectionManager } from './desktop-cloud-connection-manager';
 import type { DeviceAuthCoordinator } from './device-auth-coordinator';
 
@@ -47,6 +48,7 @@ async function toSummary(
     profileKind: profile.profileKind,
     displayName: profile.displayName,
     avatarSeed: profile.avatarSeed,
+    avatarUrl: await new ProfileAvatarStore(runtime.getSharedResolver()).read(profile.profileId),
     identifierHint: profile.identifier,
     cloudAccountId: profile.cloudBinding?.cloudAccountId ?? null,
     lastActiveAt: profile.lastActiveAt,
