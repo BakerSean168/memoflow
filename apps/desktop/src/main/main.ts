@@ -132,6 +132,8 @@ import { DesktopCloudConnectionService } from './profile/desktop-cloud-connectio
 import { DesktopCloudSignInService } from './profile/desktop-cloud-sign-in-service';
 import { DeviceAuthCoordinator } from './profile/device-auth-coordinator';
 import type { PowerSyncDatabase } from '@powersync/node';
+import { getCurrentSyncHealth, refreshSyncHealth, subscribeSyncHealth } from './database/powersync';
+import { createDesktopSyncStatusModule } from './sync/desktop-sync-status';
 import { KnowledgeRepositoryRemoteGateway } from './modules/repository/knowledge-repository-remote.gateway';
 import { DesktopKnowledgeRepositoryGitRuntime } from './modules/repository/desktop-knowledge-repository-git.runtime';
 import { DesktopKnowledgeRepositoryReconciliationService } from './modules/repository/desktop-knowledge-repository-reconciliation.service';
@@ -610,7 +612,7 @@ async function registerBusinessModules(
             'REMOTE_SYNC_FAILED',
             undefined,
             undefined,
-            undefined,
+            response.status,
             envelope?.error,
           );
         }
@@ -672,6 +674,22 @@ async function registerBusinessModules(
   if (accountComposed.flushProfileSync) {
     profileSyncFlushers.set(profilePaths.profileId, accountComposed.flushProfileSync);
   }
+  const profileSync = accountComposed.profileSync;
+  if (!profileSync) {
+    throw new Error('Account profile sync bridge is required for the sync indicator');
+  }
+  const syncStatusModule = createDesktopSyncStatusModule({
+    profile: {
+      getState: () => profileSync.getState(),
+      flush: () => profileSync.flush(),
+      subscribe: (listener) => profileSync.subscribe(listener),
+    },
+    business: {
+      getHealth: getCurrentSyncHealth,
+      refresh: refreshSyncHealth,
+      subscribe: subscribeSyncHealth,
+    },
+  });
 
   const analyticsReadAdapter = new DesktopAnalyticsReadAdapter({
     goalApplicationPort: goalComposed.applicationPort,
@@ -789,6 +807,7 @@ async function registerBusinessModules(
   await bootstrapper
     // Core services
     .register(accountComposed.module)
+    .register(syncStatusModule)
     .register(settingElectronModule)
     .register(notificationComposed.module)
     .register(routineConfigurationElectronModule)

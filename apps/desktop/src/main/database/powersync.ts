@@ -37,7 +37,7 @@ import { serializeCrudTransaction } from './powersync-crud';
 import { recoverPreferenceCanonicalId } from './powersync-preference-recovery';
 import { normalizePowerSyncTableName, POWER_SYNC_CHANGE_TABLES } from './powersync-table-changes';
 import { resolvePackagedWorkerPath } from './packaged-worker-path';
-import { describePowerSyncStatus } from './powersync-health';
+import { describePowerSyncStatus, type SafeSyncHealth } from './powersync-health';
 import { closePowerSyncHttpTransport, powerSyncHttpFetch } from './powersync-http-transport';
 
 const syncLogger = createLogger('DesktopPowerSync');
@@ -410,6 +410,7 @@ function closeProfileDatabase(instance: ProfileDatabaseInstance): Promise<void> 
         }
       }
       if (powerSyncInstance === instance) powerSyncInstance = null;
+      notifySyncHealth({ phase: 'idle', hasSynced: false });
       console.log('[PowerSync] Profile database closed (data preserved)');
     } catch (error) {
       // Keep ownership so a retry can close it; a new Profile must not hide it.
@@ -460,6 +461,7 @@ export async function ensurePowerSyncSyncMode(
     instance.syncConnected = true;
     const health = describePowerSyncStatus(instance.db.currentStatus);
     syncLogger.info('Sync connector attached; first-download status', health);
+    notifySyncHealth(health);
     console.log('[PowerSync] Promoted to sync mode');
     return instance.db;
   });
@@ -470,6 +472,7 @@ export async function disablePowerSyncSyncMode(): Promise<void> {
   const instance = powerSyncInstance;
   if (!instance || instance.phase !== 'open') return;
   await stopSync(instance);
+  notifySyncHealth(getCurrentSyncHealth());
   console.log('[PowerSync] Cloud sync disconnected; local Profile remains open');
 }
 
@@ -511,6 +514,50 @@ export function getPowerSyncDatabase(): PowerSyncDatabase | null {
 let onChangeDispose: (() => void) | null = null;
 let onSyncStatusDispose: (() => void) | null = null;
 
+const syncHealthListeners = new Set<(health: SafeSyncHealth) => void>();
+
+function notifySyncHealth(health: SafeSyncHealth): void {
+  for (const listener of syncHealthListeners) {
+    try {
+      listener(health);
+    } catch (error) {
+      syncLogger.warn('PowerSync health listener failed', {
+        errorType: error instanceof Error ? error.name : typeof error,
+      });
+    }
+  }
+}
+
+/** Sanitized snapshot of the active Profile's business sync state. */
+export function getCurrentSyncHealth(): SafeSyncHealth {
+  const db = powerSyncInstance?.phase === 'open' ? powerSyncInstance.db : null;
+  return db ? describePowerSyncStatus(db.currentStatus) : { phase: 'idle', hasSynced: false };
+}
+
+/**
+ * Subscribe the shell to sanitized PowerSync status changes. The listener is
+ * called immediately with the current state so a late subscriber never waits
+ * for the next SDK event.
+ */
+export function subscribeSyncHealth(listener: (health: SafeSyncHealth) => void): () => void {
+  syncHealthListeners.add(listener);
+  listener(getCurrentSyncHealth());
+  return () => {
+    syncHealthListeners.delete(listener);
+  };
+}
+
+/**
+ * Re-read and broadcast the current health. The SDK owns retry timing; this
+ * only gives "sync now" an immediate status projection without inventing a
+ * second sync engine.
+ */
+export function refreshSyncHealth(): SafeSyncHealth {
+  const health = getCurrentSyncHealth();
+  notifySyncHealth(health);
+  return health;
+}
+
 function startSyncStatusLogging(db: PowerSyncDatabase): void {
   if (onSyncStatusDispose) return;
   let previous: string | null = null;
@@ -519,6 +566,7 @@ function startSyncStatusLogging(db: PowerSyncDatabase): void {
     const key = [
       health.phase,
       health.hasSynced,
+      health.lastSyncedAt,
       health.errorType,
       health.errorCode,
       health.httpStatus,
@@ -530,6 +578,7 @@ function startSyncStatusLogging(db: PowerSyncDatabase): void {
     } else {
       syncLogger.info('PowerSync download state changed', health);
     }
+    notifySyncHealth(health);
   };
   onSyncStatusDispose = db.registerListener({ statusChanged: inspect });
   inspect(db.currentStatus);

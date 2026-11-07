@@ -63,6 +63,7 @@ import {
   DESKTOP_BRIDGE_KEY,
   DESKTOP_NOTIFICATION_DEVICE_PREFERENCE_KEY,
   DESKTOP_UPDATE_SERVICE_KEY,
+  DESKTOP_SYNC_STATUS_SERVICE_KEY,
   DESKTOP_STARTUP_SERVICE_KEY,
   MODULE_CAPSULES_KEY,
   LOGOUT_HANDLER_KEY,
@@ -78,6 +79,7 @@ import { requireElectronBridge } from './electron-bridge';
 import { clearDesktopServerStateIdentity } from './server-state';
 import { createDesktopStartupService } from './desktop-startup-service';
 import { createDesktopUpdateService } from './desktop-update-service';
+import { createDesktopSyncStatusService } from './desktop-sync-status-service';
 import {
   CloudAuthChannels,
   WindowChannels,
@@ -171,6 +173,10 @@ export function installDesktopAppServices(
   app.provide(DESKTOP_BRIDGE_KEY, bridge);
   app.provide(DESKTOP_STARTUP_SERVICE_KEY, createDesktopStartupService(resultIpcClient, bridge));
   app.provide(DESKTOP_UPDATE_SERVICE_KEY, createDesktopUpdateService(resultIpcClient, bridge));
+  app.provide(
+    DESKTOP_SYNC_STATUS_SERVICE_KEY,
+    createDesktopSyncStatusService(resultIpcClient, bridge),
+  );
   const desktopAccessSnapshot = ref<DesktopAccessSnapshot | null>(initialSnapshot);
   let snapshotGeneration = 0;
   const refreshGeneration = snapshotGeneration;

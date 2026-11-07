@@ -3,6 +3,7 @@ export interface PowerSyncStatusLike {
   readonly connected?: boolean;
   readonly connecting?: boolean;
   readonly hasSynced?: boolean;
+  readonly lastSyncedAt?: unknown;
   readonly dataFlowStatus?: {
     readonly downloadError?: unknown;
   };
@@ -11,10 +12,19 @@ export interface PowerSyncStatusLike {
 export interface SafeSyncHealth {
   readonly phase: 'idle' | 'connecting' | 'download_error' | 'connected' | 'synced';
   readonly hasSynced: boolean;
+  /** Epoch milliseconds of the last completed sync, when the SDK reports it. */
+  readonly lastSyncedAt?: number;
   readonly errorType?: string;
   readonly errorCode?: string;
   readonly httpStatus?: number;
 }
+
+export type SafeSyncErrorCategory =
+  | 'network'
+  | 'authorization'
+  | 'validation'
+  | 'server'
+  | 'unknown';
 
 const SAFE_ERROR_TYPES = new Set([
   'Error',
@@ -27,10 +37,46 @@ const SAFE_ERROR_TYPES = new Set([
   'PowerSyncError',
 ]);
 
+const NETWORK_ERROR_TYPES = new Set([
+  'TypeError',
+  'AbortError',
+  'TimeoutError',
+  'NetworkError',
+  'FetchError',
+]);
+
+function safeLastSyncedAt(value: unknown): number | null {
+  if (value instanceof Date) {
+    const time = value.getTime();
+    return Number.isFinite(time) ? time : null;
+  }
+  if (typeof value === 'number') {
+    return Number.isFinite(value) ? Math.trunc(value) : null;
+  }
+  if (typeof value === 'string') {
+    const time = Date.parse(value);
+    return Number.isFinite(time) ? time : null;
+  }
+  return null;
+}
+
 export function safeSyncErrorType(error: unknown): string {
   if (!error || typeof error !== 'object') return 'UnknownError';
   const name = (error as { name?: unknown }).name;
   return typeof name === 'string' && SAFE_ERROR_TYPES.has(name) ? name : 'UnknownError';
+}
+
+/** Categorical failure only; never carries a message, URL, or credential. */
+export function safeSyncErrorCategory(health: SafeSyncHealth): SafeSyncErrorCategory | null {
+  if (health.phase !== 'download_error') return null;
+  if (health.httpStatus === 401 || health.httpStatus === 403) return 'authorization';
+  if (health.httpStatus !== undefined) {
+    if (health.httpStatus >= 400 && health.httpStatus < 500) return 'validation';
+    if (health.httpStatus >= 500) return 'server';
+  }
+  if (health.errorType && NETWORK_ERROR_TYPES.has(health.errorType)) return 'network';
+  if (health.errorType === 'AuthorizationError') return 'authorization';
+  return 'unknown';
 }
 
 /** Never serialize an SDK Error: message, stack and arbitrary fields can hold bearer tokens. */
@@ -38,6 +84,8 @@ export function describePowerSyncStatus(
   status: PowerSyncStatusLike | null | undefined,
 ): SafeSyncHealth {
   const hasSynced = status?.hasSynced === true;
+  const lastSyncedAt = safeLastSyncedAt(status?.lastSyncedAt);
+  const time = lastSyncedAt === null ? {} : { lastSyncedAt };
   const error = status?.dataFlowStatus?.downloadError;
   if (error != null) {
     const record = typeof error === 'object' ? (error as Record<string, unknown>) : null;
@@ -46,6 +94,7 @@ export function describePowerSyncStatus(
     return {
       phase: 'download_error',
       hasSynced,
+      ...time,
       errorType: safeSyncErrorType(error),
       ...(typeof candidateCode === 'string' && /^PSYNC_[A-Z0-9_]{1,32}$/.test(candidateCode)
         ? { errorCode: candidateCode }
@@ -67,5 +116,6 @@ export function describePowerSyncStatus(
         ? 'connecting'
         : 'idle',
     hasSynced,
+    ...time,
   };
 }

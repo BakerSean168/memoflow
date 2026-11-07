@@ -332,6 +332,16 @@ export const DesktopUpdateChannels = {
   STATE_CHANGED: 'desktop-update:state-changed',
 } as const;
 
+/**
+ * Profile + business sync status projection (Issue #874). The payload is a
+ * sanitized snapshot; no outbox rows, tokens, error messages or row counts.
+ */
+export const SyncStatusChannels = {
+  GET_SNAPSHOT: 'sync-status:get-snapshot',
+  SYNC_NOW: 'sync-status:sync-now',
+  STATE_CHANGED: 'sync-status:state-changed',
+} as const;
+
 // V3-only portable user-data surface — no server-held disclosure IPC channel.
 export const DataPortabilityChannels = {
   EXPORT: 'data-portability:export',

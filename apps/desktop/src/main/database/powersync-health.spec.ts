@@ -1,5 +1,9 @@
 import { describe, expect, it } from 'vitest';
-import { describePowerSyncStatus } from './powersync-health';
+import {
+  describePowerSyncStatus,
+  safeSyncErrorCategory,
+  type SafeSyncHealth,
+} from './powersync-health';
 
 describe('PowerSync safe first-download diagnostics', () => {
   it('does not confuse attached or connecting with first download checkpoint', () => {
@@ -78,5 +82,34 @@ describe('PowerSync safe first-download diagnostics', () => {
   it('reports no connection for empty/idle SDK status without manufacturing a download', () => {
     expect(describePowerSyncStatus(undefined)).toEqual({ phase: 'idle', hasSynced: false });
     expect(describePowerSyncStatus({})).toEqual({ phase: 'idle', hasSynced: false });
+  });
+
+  it('exposes only a finite last-sync timestamp from the SDK', () => {
+    const at = new Date('2026-11-07T10:00:00.000Z');
+    expect(describePowerSyncStatus({ connected: true, hasSynced: true, lastSyncedAt: at })).toEqual(
+      { phase: 'synced', hasSynced: true, lastSyncedAt: at.getTime() },
+    );
+    expect(
+      describePowerSyncStatus({ connected: true, hasSynced: true, lastSyncedAt: 'not-a-date' }),
+    ).toEqual({ phase: 'synced', hasSynced: true });
+    expect(
+      describePowerSyncStatus({ connected: true, hasSynced: true, lastSyncedAt: Number.NaN }),
+    ).toEqual({ phase: 'synced', hasSynced: true });
+  });
+
+  it('maps download failures to categorical error classes without copying details', () => {
+    const health = (error: unknown): SafeSyncHealth =>
+      describePowerSyncStatus({
+        dataFlowStatus: { downloadError: error },
+      });
+    expect(safeSyncErrorCategory(health({ name: 'FetchError', status: 401 }))).toBe(
+      'authorization',
+    );
+    expect(safeSyncErrorCategory(health({ name: 'FetchError', status: 422 }))).toBe('validation');
+    expect(safeSyncErrorCategory(health({ name: 'FetchError', status: 503 }))).toBe('server');
+    expect(safeSyncErrorCategory(health({ name: 'TimeoutError' }))).toBe('network');
+    expect(safeSyncErrorCategory(health({ name: 'AuthorizationError' }))).toBe('authorization');
+    expect(safeSyncErrorCategory(health({ name: 'OddSecret' }))).toBe('unknown');
+    expect(safeSyncErrorCategory({ phase: 'synced', hasSynced: true })).toBeNull();
   });
 });
