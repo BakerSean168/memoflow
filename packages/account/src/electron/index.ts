@@ -100,6 +100,11 @@ export { Account } from '../server/domain';
 export type { IAccountRepository } from '../server/domain';
 export type { Transactional } from '../server/infrastructure';
 export { DesktopAccountProfileSync, type DesktopAccountProfileSyncOptions };
+export type {
+  PendingProfileSyncField,
+  PendingProfileSyncState,
+  ProfileSyncFailureCategory,
+} from './desktop-account-profile-sync';
 
 const logger = createLogger('AccountElectron');
 

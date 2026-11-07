@@ -96,6 +96,8 @@ export interface ComposedAccountDesktop {
   };
   /** Flush pending cloud profile sync for this Profile, when cloud sync is wired. 本 Profile 的待同步资料补推入口（接线了云同步时）。 */
   readonly flushProfileSync?: () => Promise<boolean>;
+  /** Pending projection + flush for the shell sync indicator (same instance). */
+  readonly profileSync?: DesktopAccountProfileSync;
 }
 
 /**
@@ -174,5 +176,6 @@ export function composeAccount(
       accountRepository,
     },
     flushProfileSync: profileSync ? () => profileSync.flush() : undefined,
+    profileSync,
   };
 }
