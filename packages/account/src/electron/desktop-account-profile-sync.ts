@@ -3,10 +3,13 @@ import { UpdateAccountSchema } from '@memoflow/account-contracts';
 import type { Result } from '@memoflow/transport-contracts/result';
 import { fail } from '@memoflow/transport-contracts/result';
 import type { ExecutionContext } from '@memoflow/transport-contracts';
+import { createLogger } from '@memoflow/utils/logger';
 import { formatZodErrors } from '@memoflow/utils/result';
 import type { UpdateAccountProfileUseCase } from '../server/application';
 import type { IAccountRepository } from '../server/domain';
 import type { Transactional } from '../server/infrastructure';
+
+const logger = createLogger('DesktopAccountProfileSync');
 
 interface PendingProfileSyncRow {
   owner_id: string;
@@ -67,10 +70,33 @@ export class DesktopAccountProfileSync {
     });
 
     if (result.ok) {
-      await this.options.updateLocalProfileMetadata?.(parsed.data);
-      void this.flush().catch(() => undefined);
+      // The local transaction is the save. Everything after it (local display
+      // metadata, cloud delivery) is best effort: a failure is logged and only
+      // affects the sync state, never the returned Result or the committed row.
+      await this.runAfterCommit('metadata update', () =>
+        this.options.updateLocalProfileMetadata?.(parsed.data),
+      );
+      void this.flush().catch((error: unknown) => {
+        logger.warn('Account profile flush after save failed', {
+          error: error instanceof Error ? error.message : String(error),
+        });
+      });
     }
     return result;
+  }
+
+  /** Run a post-commit step, swallowing and logging its failure. */
+  private async runAfterCommit(
+    label: string,
+    step: () => Promise<void> | undefined,
+  ): Promise<void> {
+    try {
+      await step();
+    } catch (error: unknown) {
+      logger.warn(`Account profile ${label} failed after commit`, {
+        error: error instanceof Error ? error.message : String(error),
+      });
+    }
   }
 
   async flush(): Promise<boolean> {
