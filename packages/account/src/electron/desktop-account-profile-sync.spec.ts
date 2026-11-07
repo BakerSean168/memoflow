@@ -198,6 +198,21 @@ describe('DesktopAccountProfileSync', () => {
     expect(harness.db.execute).toHaveBeenCalledWith(expect.stringContaining('revision = ?'), [2]);
   });
 
+  it('keeps the save result and outbox when the post-save flush fails', async () => {
+    const harness = createHarness({
+      cloudAccountId: 'cloud-1',
+      token: 'session-token',
+      pending: { owner_id: 'cloud-1', revision: 1 },
+    });
+    harness.pushCloudProfile.mockRejectedValueOnce(new Error('offline'));
+
+    const result = await harness.sync.update({ nickname: 'Offline Name' }, ipcContext('cloud-1'));
+
+    expect(result.ok).toBe(true);
+    await vi.waitFor(() => expect(harness.pushCloudProfile).toHaveBeenCalledOnce());
+    expect(harness.db.execute).not.toHaveBeenCalled();
+  });
+
   it('reports a missing local account row as a failed result, not a thrown error', async () => {
     const harness = createHarness({ cloudAccountId: 'cloud-1' });
     harness.updateProfileUseCase.execute.mockResolvedValueOnce(
