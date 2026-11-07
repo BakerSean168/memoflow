@@ -17,6 +17,11 @@ import {
 import { bindAccountUiHost, type AccountUiHost } from '../../account-ui-host';
 import { useAccountStore } from '../stores/account-store';
 import { useAccountAvatar } from './useAccountAvatar';
+import { toast } from 'vue-sonner';
+
+vi.mock('vue-sonner', () => ({
+  toast: { info: vi.fn(), error: vi.fn(), success: vi.fn() },
+}));
 
 vi.mock('./avatar-image', () => ({
   processAvatarFile: vi.fn(
@@ -229,6 +234,65 @@ describe('useAccountAvatar cloud sync (Issue #859)', () => {
     expect(service.downloadMyAvatar).not.toHaveBeenCalled();
     expect(JSON.parse(localStorage.getItem(SYNC_KEY)!)).toEqual({
       lastSyncedAt: 8_100,
+      pending: false,
+    });
+    stop();
+  });
+
+  it('records and surfaces a one-time notice when a newer cloud avatar replaces a known local copy', async () => {
+    localStorage.setItem(SYNC_KEY, JSON.stringify({ lastSyncedAt: 5_000, pending: false }));
+    const service = createService();
+    let cached: string | null = 'data:image/png;base64,b2xk';
+    const store = {
+      load: vi.fn(async () => cached),
+      save: vi.fn(async () => {
+        cached = 'data:image/png;base64,bmV3';
+        return cached;
+      }),
+    };
+    vi.mocked(service.getMyAvatarMeta).mockResolvedValue(ok({ updatedAt: 9_000 }));
+    vi.mocked(service.downloadMyAvatar).mockResolvedValue(
+      ok({ dataUrl: 'data:image/png;base64,AQID', updatedAt: 9_000 }),
+    );
+    vi.mocked(toast.info).mockClear();
+
+    const { avatar, stop } = mountAvatar(service, store);
+    await settle();
+
+    expect(avatar.cloudAlignedAt.value).toEqual(expect.any(Number));
+    expect(avatar.avatarUrl.value).toBe('data:image/png;base64,bmV3');
+    expect(toast.info).toHaveBeenCalledOnce();
+    expect(JSON.parse(localStorage.getItem(SYNC_KEY)!)).toMatchObject({
+      lastSyncedAt: 9_000,
+      pending: false,
+      lastAlignedAt: expect.any(Number),
+    });
+
+    avatar.dismissCloudAlignment();
+    expect(avatar.cloudAlignedAt.value).toBeNull();
+    expect(JSON.parse(localStorage.getItem(SYNC_KEY)!).lastAlignedAt).toBeUndefined();
+    stop();
+  });
+
+  it('does not claim an overwrite on the first cloud pull of a fresh device', async () => {
+    const service = createService();
+    const store = {
+      load: vi.fn(async () => null),
+      save: vi.fn(async () => 'data:image/png;base64,bmV3'),
+    };
+    vi.mocked(service.getMyAvatarMeta).mockResolvedValue(ok({ updatedAt: 9_000 }));
+    vi.mocked(service.downloadMyAvatar).mockResolvedValue(
+      ok({ dataUrl: 'data:image/png;base64,AQID', updatedAt: 9_000 }),
+    );
+    vi.mocked(toast.info).mockClear();
+
+    const { avatar, stop } = mountAvatar(service, store);
+    await settle();
+
+    expect(avatar.cloudAlignedAt.value).toBeNull();
+    expect(toast.info).not.toHaveBeenCalled();
+    expect(JSON.parse(localStorage.getItem(SYNC_KEY)!)).toEqual({
+      lastSyncedAt: 9_000,
       pending: false,
     });
     stop();

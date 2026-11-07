@@ -162,6 +162,7 @@ export default {
     closeAccountFailed: 'Failed to close account',
     closeFailed: 'Close failed',
     guestCloseAccountUnavailable: 'Guest mode cannot close the account',
+    avatarAlignedWithCloud: 'Avatar aligned with a newer cloud version',
   },
   logoutHint:
     'Disconnect the current cloud session and stop sync while keeping this local account available.',

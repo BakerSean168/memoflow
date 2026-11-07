@@ -11,6 +11,11 @@ export interface CloudAvatarSyncState {
   lastSyncedAt: number | null;
   /** True while a local edit still needs to be pushed. */
   pending: boolean;
+  /**
+   * Epoch milliseconds of the last cloud-newer download that replaced a local
+   * avatar. Kept until the user dismisses it or a later upload succeeds.
+   */
+  lastAlignedAt?: number | null;
 }
 
 export type CloudAvatarSyncAction = 'none' | 'upload' | 'download';
@@ -57,9 +62,11 @@ export function readCloudAvatarSyncState(
     const raw = storage.getItem(storageKey(accountKey));
     if (!raw) return { lastSyncedAt: null, pending: false };
     const parsed = JSON.parse(raw) as Partial<CloudAvatarSyncState>;
+    const lastAlignedAt = typeof parsed.lastAlignedAt === 'number' ? parsed.lastAlignedAt : null;
     return {
       lastSyncedAt: typeof parsed.lastSyncedAt === 'number' ? parsed.lastSyncedAt : null,
       pending: parsed.pending === true,
+      ...(lastAlignedAt === null ? {} : { lastAlignedAt }),
     };
   } catch {
     return { lastSyncedAt: null, pending: false };
