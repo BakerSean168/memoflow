@@ -187,6 +187,41 @@ const TodayOverviewPanelStub = defineComponent({
   },
 });
 
+/**
+ * Settings dialog seam: the shell owns the dialog, the settings module owns the
+ * view. The stub records the embedded contract the dialog passes down.
+ */
+const UserSettingsViewStub = defineComponent({
+  name: 'UserSettingsView',
+  props: {
+    embedded: { type: Boolean, default: false },
+    initialTab: { type: String, default: undefined },
+  },
+  emits: ['close'],
+  setup(props, { emit }) {
+    return () =>
+      h(
+        'div',
+        {
+          'data-testid': 'user-settings-view-stub',
+          'data-embedded': String(props.embedded),
+          'data-initial-tab': props.initialTab ?? '',
+        },
+        [
+          h(
+            'button',
+            {
+              type: 'button',
+              'data-testid': 'user-settings-view-return',
+              onClick: () => emit('close'),
+            },
+            'Back',
+          ),
+        ],
+      );
+  },
+});
+
 let goalRouteMountCount = 0;
 const GoalRouteProbe = defineComponent({
   name: 'GoalRouteProbe',
@@ -207,6 +242,7 @@ const i18n = createI18n({
   messages: {
     'en-US': {
       common: { untitled: 'Untitled', close: 'Close' },
+      setting: { title: 'App Settings' },
       account: {
         profile: {
           nickname: 'Nickname',
@@ -334,6 +370,7 @@ async function mountShell(
         PanelErrorBoundary: passThrough('PanelErrorBoundary'),
         GlobalComposer: true,
         StandaloneSettingsLayout: passThrough('StandaloneSettingsLayout'),
+        UserSettingsView: UserSettingsViewStub,
       },
     },
   });
@@ -464,7 +501,7 @@ describe('AppShell right-panel integration', () => {
     expect(activate).not.toHaveBeenCalled();
   });
 
-  it('routes the update indicator through settings without starting an install', async () => {
+  it('routes the update indicator through the settings dialog without starting an install', async () => {
     const ready: DesktopUpdateSnapshotDTO = {
       currentVersion: '1.2.0',
       channel: 'stable',
@@ -506,13 +543,97 @@ describe('AppShell right-panel integration', () => {
     await wrapper.get('[data-testid="desktop-update-shell-indicator"]').trigger('click');
     await flushPromises();
 
-    expect(router.currentRoute.value.fullPath).toBe('/settings?tab=updates');
-    expect(wrapper.get('[data-testid="settings-view"]').exists()).toBe(true);
-    expect(store.settingsOrigin?.route).toBe('/goals');
+    // The dialog is the entry surface: the workspace route and the shell origin
+    // bookkeeping stay untouched, so closing it returns to the same view.
+    expect(router.currentRoute.value.fullPath).toBe('/goals');
+    expect(document.querySelector('[data-testid="shell-settings-dialog"]')).not.toBeNull();
+    const settingsView = wrapper.getComponent(UserSettingsViewStub);
+    expect(settingsView.props('embedded')).toBe(true);
+    expect(settingsView.props('initialTab')).toBe('updates');
+    expect(store.settingsOrigin).toBeNull();
+    expect(wrapper.find('[data-testid="settings-view"]').exists()).toBe(false);
     expect(service.check).not.toHaveBeenCalled();
     expect(service.restartAndInstall).not.toHaveBeenCalled();
     wrapper.unmount();
     expect(unsubscribe).toHaveBeenCalledTimes(1);
+  });
+
+  it('opens settings in a dialog from the gear and closes back into the workspace', async () => {
+    const { wrapper, router, store } = await mountShell('/goals');
+    const businessView = wrapper.get('[data-testid="goal-draft-probe"]').element;
+
+    wrapper.getComponent(ConversationSidebarStub).vm.$emit('open-settings');
+    await flushPromises();
+
+    expect(router.currentRoute.value.fullPath).toBe('/goals');
+    const dialog = document.querySelector<HTMLElement>('[data-testid="shell-settings-dialog"]');
+    expect(dialog).not.toBeNull();
+    // Default entry: no `?tab=`, so the settings view falls back to its own default.
+    expect(wrapper.getComponent(UserSettingsViewStub).props('initialTab')).toBeUndefined();
+    expect(wrapper.getComponent(UserSettingsViewStub).props('embedded')).toBe(true);
+    expect(store.settingsOrigin).toBeNull();
+
+    // Closing is a local state change: no navigation, workspace instance survives.
+    // Dialog content is teleported to body, so it is queried from the document.
+    document.querySelector<HTMLElement>('[data-testid="shell-settings-dialog-close"]')!.click();
+    await flushPromises();
+    expect(document.querySelector('[data-testid="shell-settings-dialog"]')).toBeNull();
+    expect(wrapper.get('[data-testid="goal-draft-probe"]').element).toBe(businessView);
+    expect(router.currentRoute.value.fullPath).toBe('/goals');
+
+    // The settings view's own return action closes through the same state.
+    wrapper.getComponent(ConversationSidebarStub).vm.$emit('open-settings');
+    await flushPromises();
+    document.querySelector<HTMLElement>('[data-testid="user-settings-view-return"]')!.click();
+    await flushPromises();
+    expect(document.querySelector('[data-testid="shell-settings-dialog"]')).toBeNull();
+    wrapper.unmount();
+  });
+
+  it('opens the shortcuts section in the settings dialog from the keyboard command', async () => {
+    const { wrapper, router } = await mountShell('/goals');
+
+    keyboard.engine.execute('app.shortcuts');
+    await flushPromises();
+
+    expect(router.currentRoute.value.fullPath).toBe('/goals');
+    expect(document.querySelector('[data-testid="shell-settings-dialog"]')).not.toBeNull();
+    expect(wrapper.getComponent(UserSettingsViewStub).props('initialTab')).toBe('shortcuts');
+    expect(wrapper.getComponent(UserSettingsViewStub).props('embedded')).toBe(true);
+    wrapper.unmount();
+  });
+
+  it('stacks a later dialog above the settings dialog at equal z-index', async () => {
+    const { wrapper } = await mountShell('/goals');
+    wrapper.getComponent(ConversationSidebarStub).vm.$emit('open-settings');
+    await flushPromises();
+
+    const settingsDialog = document.querySelector<HTMLElement>(
+      '[data-testid="shell-settings-dialog"]',
+    );
+    expect(settingsDialog).not.toBeNull();
+
+    // Every dialog opened on top of settings (settings-section dialogs such as the
+    // shortcut recorder, or shell dialogs like the profile editor) mounts through
+    // DialogPortal at z-50, so the later mount paints above the settings content.
+    const profileEditor = wrapper.getComponent({ name: 'AccountProfileEditorDialog' });
+    profileEditor.vm.$emit('update:open', true);
+    await flushPromises();
+    await nextTick();
+
+    const nestedDialog = document.querySelector<HTMLElement>(
+      '[data-testid="profile-editor-dialog"]',
+    );
+    expect(nestedDialog).not.toBeNull();
+    // DOCUMENT_POSITION_FOLLOWING means the nested content comes after the settings
+    // content in DOM order, which is what decides the paint order for equal z-index.
+    expect(
+      settingsDialog!.compareDocumentPosition(nestedDialog!) & Node.DOCUMENT_POSITION_FOLLOWING,
+    ).toBeTruthy();
+
+    profileEditor.vm.$emit('update:open', false);
+    await flushPromises();
+    wrapper.unmount();
   });
 
   it('mounts Home by default without a shell-owned workflow surface', async () => {
