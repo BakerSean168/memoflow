@@ -5,6 +5,12 @@
  * The root owns navigation/layout only. Each section owns its own capability client,
  * loading/error/mutation state. `?tab=` and `settings-tab-{value}` remain the stable
  * deep-link/E2E contract.
+ *
+ * Two hosting modes share this composition:
+ * - route mode (default): the standalone `/settings` scene owns the URL; the view reads
+ *   `?tab=`, writes it back on selection and returns through the settings-scene host.
+ * - embedded mode: a shell dialog owns the surface; the URL never changes, the initial
+ *   section comes from the `initialTab` prop and the return action emits `close`.
  */
 import {
   computed,
@@ -49,6 +55,21 @@ const DesktopUpdateSettingsSection = defineAsyncComponent(
 const { t } = useI18n();
 const route = useRoute();
 const router = useRouter();
+
+const props = withDefaults(
+  defineProps<{
+    /** Render inside a host-owned dialog: no URL reads/writes, return emits `close`. */
+    embedded?: boolean;
+    /** Section shown when embedded; ignored in route mode (URL owns the section). */
+    initialTab?: string;
+  }>(),
+  {
+    embedded: false,
+    initialTab: undefined,
+  },
+);
+const emit = defineEmits<{ close: [] }>();
+
 const shellStore = settingUiHost.useAppShellStore();
 const desktopStartupService = inject(settingUiHost.DESKTOP_STARTUP_SERVICE_KEY, null);
 const desktopUpdateService = inject(settingUiHost.DESKTOP_UPDATE_SERVICE_KEY, null);
@@ -99,7 +120,9 @@ function normalizeGroup(value: unknown): SettingsGroup {
   return GROUP_VALUES.includes(candidate) && isGroupAvailable(candidate) ? candidate : 'appearance';
 }
 
-const activeTab = ref<SettingsGroup>(normalizeGroup(route.query.tab));
+const activeTab = ref<SettingsGroup>(
+  normalizeGroup(props.embedded ? props.initialTab : route.query.tab),
+);
 const groups = computed(() =>
   GROUP_DEFINITIONS.filter((group) => isGroupAvailable(group.value)).map((group) => ({
     value: group.value,
@@ -110,6 +133,8 @@ const groups = computed(() =>
 watch(
   () => route.query.tab,
   (tab) => {
+    // The dialog owns its section; a background route change must not steal it.
+    if (props.embedded) return;
     const next = normalizeGroup(tab);
     if (next !== activeTab.value) activeTab.value = next;
   },
@@ -118,13 +143,17 @@ watch(
 function selectGroup(group: SettingsGroup | string): void {
   const normalized = normalizeGroup(group);
   activeTab.value = normalized;
-  if (route.query.tab !== normalized) {
+  if (!props.embedded && route.query.tab !== normalized) {
     void router.replace({ query: { ...route.query, tab: normalized } });
   }
   if (isNarrow.value) shellStore.setSettingsNavigationOpen(false);
 }
 
 function returnToApp(): void {
+  if (props.embedded) {
+    emit('close');
+    return;
+  }
   void settingUiHost.returnFromSettingsScene(router, shellStore, route.fullPath);
 }
 
