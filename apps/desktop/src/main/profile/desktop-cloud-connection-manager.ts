@@ -210,6 +210,7 @@ export class DesktopCloudConnectionManager {
         if (typeof remote === 'string') {
           state = remote;
         } else {
+          stage = 'session_persist';
           await this.sessions.save(check.profileId, remote);
           if (!this.isCurrent(check)) return 'OFFLINE';
           stage = 'power_sync_activation';
