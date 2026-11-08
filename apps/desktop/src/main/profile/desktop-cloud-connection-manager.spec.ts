@@ -306,6 +306,32 @@ describe('DesktopCloudConnectionManager', () => {
     expect(runtime.enableCloudSync).not.toHaveBeenCalled();
   });
 
+  it('notifies the restored-session hook only after the connection is ONLINE', async () => {
+    const sessions = { load: vi.fn().mockResolvedValue(stored), save: vi.fn() };
+    const runtime = runtimeFixture();
+    const onSessionRestored = vi.fn();
+    const manager = new DesktopCloudConnectionManager(
+      sessions as never,
+      runtime as never,
+      vi.fn().mockResolvedValue(remoteSession()),
+      { onSessionRestored },
+    );
+
+    await expect(manager.restore(profile('account-1'))).resolves.toBe('ONLINE');
+    expect(onSessionRestored).toHaveBeenCalledWith('profile-1');
+
+    const offlineSessions = { load: vi.fn().mockResolvedValue(stored), save: vi.fn() };
+    const offline = new DesktopCloudConnectionManager(
+      offlineSessions as never,
+      runtimeFixture() as never,
+      vi.fn().mockRejectedValue(new Error('offline')),
+      { onSessionRestored },
+    );
+    onSessionRestored.mockClear();
+    await expect(offline.restore(profile('account-1'))).resolves.toBe('OFFLINE');
+    expect(onSessionRestored).not.toHaveBeenCalled();
+  });
+
   it('times out a response body that never completes and clears its deadline', async () => {
     vi.useFakeTimers();
     const response = new Response(new ReadableStream());

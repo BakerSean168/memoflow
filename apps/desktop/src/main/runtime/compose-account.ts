@@ -94,6 +94,8 @@ export interface ComposedAccountDesktop {
   readonly repositories: {
     readonly accountRepository: IAccountRepository;
   };
+  /** Flush pending cloud profile sync for this Profile, when cloud sync is wired. 本 Profile 的待同步资料补推入口（接线了云同步时）。 */
+  readonly flushProfileSync?: () => Promise<boolean>;
 }
 
 /**
@@ -171,5 +173,6 @@ export function composeAccount(
     repositories: {
       accountRepository,
     },
+    flushProfileSync: profileSync ? () => profileSync.flush() : undefined,
   };
 }

@@ -18,6 +18,11 @@ interface CloudCheck {
   task: Promise<ProfileCloudState> | null;
 }
 
+export interface DesktopCloudConnectionHooks {
+  /** Fired after a Profile's cloud session reaches ONLINE (session/connection restored). */
+  onSessionRestored?(profileId: string): void;
+}
+
 export class DesktopCloudConnectionManager {
   private current: CloudCheck | null = null;
   private authentication: {
@@ -31,6 +36,7 @@ export class DesktopCloudConnectionManager {
     private readonly sessions: CloudSessionStore,
     private readonly runtime: DesktopProfileRuntimeManager,
     private readonly fetchImpl: typeof fetch = fetch,
+    private readonly hooks: DesktopCloudConnectionHooks = {},
   ) {}
 
   /** The local shell never waits for a network check to learn that it is unlocked. */
@@ -228,6 +234,15 @@ export class DesktopCloudConnectionManager {
     }
     if (!this.isCurrent(check)) return 'OFFLINE';
     check.state = state;
+    if (state === 'ONLINE') {
+      try {
+        this.hooks.onSessionRestored?.(check.profileId);
+      } catch (error) {
+        cloudLogger.warn('Cloud session restored hook failed', {
+          errorType: safeSyncErrorType(error),
+        });
+      }
+    }
     return state;
   }
 

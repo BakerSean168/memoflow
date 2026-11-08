@@ -52,6 +52,7 @@ vi.mock('electron', () => ({
 }));
 
 import { createAccountElectronModule } from './index';
+import { DesktopAccountProfileSync } from './desktop-account-profile-sync';
 
 function createFakeInstance() {
   const api = {
@@ -540,6 +541,53 @@ describe('AccountElectronModule cloud-close behavior', () => {
     if (!result.ok) {
       expect(result.error.code).toBe('CLOUD_ACCOUNT_CLOSE_TEARDOWN_FAILED');
     }
+    module.destroy?.();
+  });
+
+  it('returns ok over IPC when the local commit succeeds but post-commit work fails offline', async () => {
+    const fake = createFakeInstance();
+    const context = createFakeContext();
+    const txExecute = vi.fn().mockResolvedValue({ rowsAffected: 1 });
+    const db = {
+      writeTransaction: vi.fn(async (callback: (tx: unknown) => Promise<unknown>) =>
+        callback({ execute: txExecute }),
+      ),
+      getOptional: vi.fn().mockResolvedValue(null),
+      execute: vi.fn().mockResolvedValue({ rowsAffected: 1 }),
+    };
+    const update = vi.fn().mockResolvedValue(
+      ok({
+        id: 'identity-1',
+        status: 'Active',
+        profile: { nickname: 'Offline Name', avatarUrl: null, bio: null },
+      } as never),
+    );
+    const profileSync = new DesktopAccountProfileSync(
+      db as never,
+      { findById: vi.fn() } as never,
+      { execute: update } as never,
+      {
+        getCloudAccountId: () => 'identity-1',
+        getCloudAccessToken: async () => null,
+        pushCloudProfile: vi.fn().mockRejectedValue(new Error('offline')),
+        updateLocalProfileMetadata: vi.fn().mockRejectedValue(new Error('metadata unavailable')),
+      },
+    );
+    const module = createAccountElectronModule({
+      instance: fake.instance,
+      profileSync,
+    });
+    module.register(context);
+
+    const result = await registered(AccountChannels.UPDATE_PROFILE)(undefined, {
+      nickname: 'Offline Name',
+    });
+
+    expect(result).toMatchObject({ ok: true, data: { id: 'identity-1' } });
+    expect(txExecute).toHaveBeenCalledWith(expect.stringContaining('account_profile_sync_outbox'), [
+      'identity-1',
+      expect.any(Number),
+    ]);
     module.destroy?.();
   });
 });

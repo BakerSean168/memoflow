@@ -170,6 +170,12 @@ let activeReminderActivityRuntime: StartStopRuntime | null = null;
 let activeReminderElapsedRuntime: StartStopRuntime | null = null;
 let activeReminderUsageRuntime: StartStopRuntime | null = null;
 let activeReminderOccurrenceFlush: (() => Promise<void>) | null = null;
+/**
+ * Per-Profile entry point for an immediate profile-sync flush after the cloud
+ * session/connection is restored. Populated when the Profile's account module is
+ * registered and cleared on deactivation.
+ */
+const profileSyncFlushers = new Map<string, () => Promise<boolean>>();
 
 /**
  * Register all business modules on a bootstrapper for the active profile.
@@ -570,6 +576,21 @@ async function registerBusinessModules(
         mainRuntime?.profileRuntimeManager.getActiveProfileDescriptorSync()?.cloudBinding
           ?.cloudAccountId ?? null,
       getCloudAccessToken,
+      async updateLocalProfileMetadata(request) {
+        // Nickname is the account-profile projection of the Profile display
+        // name shown by the account block / profile tiles. Only cloud-bound
+        // Profiles are touched here (local-account behaviour stays unchanged).
+        // Best effort: the caller logs and ignores failures, so a registry
+        // write cannot fail a committed profile save.
+        if (request.nickname === undefined) return;
+        const descriptor =
+          mainRuntime?.profileRuntimeManager.getActiveProfileDescriptorSync() ?? null;
+        if (!descriptor?.cloudBinding) return;
+        await mainRuntime?.profileRuntimeManager.updateProfileDisplayName(
+          descriptor.profileId,
+          request.nickname,
+        );
+      },
       async pushCloudProfile(token, request) {
         const response = await fetch(`${getApiBaseUrl()}/accounts/me`, {
           method: 'PUT',
@@ -647,6 +668,10 @@ async function registerBusinessModules(
       },
     },
   });
+
+  if (accountComposed.flushProfileSync) {
+    profileSyncFlushers.set(profilePaths.profileId, accountComposed.flushProfileSync);
+  }
 
   const analyticsReadAdapter = new DesktopAnalyticsReadAdapter({
     goalApplicationPort: goalComposed.applicationPort,
@@ -838,6 +863,17 @@ async function initializeShellRuntime(): Promise<void> {
   const cloudConnectionManager = new DesktopCloudConnectionManager(
     cloudSessionStore,
     profileRuntimeManager,
+    fetch,
+    {
+      onSessionRestored(profileId) {
+        if (profileRuntimeManager.getActiveProfileId() !== profileId) return;
+        const flush = profileSyncFlushers.get(profileId);
+        if (!flush) return;
+        void flush().catch((error) => {
+          logger.warn('Account profile flush after cloud session restore failed', { error });
+        });
+      },
+    },
   );
   const cloudConnectionService = new DesktopCloudConnectionService(
     profileRuntimeManager,
@@ -977,6 +1013,8 @@ async function initializeShellRuntime(): Promise<void> {
     });
   });
   profileRuntimeManager.setBeforeDeactivation(async () => {
+    const deactivatingProfileId = profileRuntimeManager.getActiveProfileId();
+    if (deactivatingProfileId) profileSyncFlushers.delete(deactivatingProfileId);
     const usageRuntime = activeReminderUsageRuntime;
     const elapsedRuntime = activeReminderElapsedRuntime;
     const activityRuntime = activeReminderActivityRuntime;
