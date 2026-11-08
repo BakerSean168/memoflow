@@ -218,6 +218,7 @@ const i18n = createI18n({
         profileEditor: {
           title: 'Edit profile',
           description: 'Update your profile.',
+          nicknameHint: 'Nickname must be 2–20 characters.',
           unsaved: "Don't forget to save your changes!",
           reset: 'Reset',
           save: 'Save',

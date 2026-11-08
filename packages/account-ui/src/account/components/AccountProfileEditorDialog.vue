@@ -54,9 +54,17 @@ const shakeAttempts = ref(0);
 const nicknameInput = ref<InstanceType<typeof Input> | null>(null);
 const surface = ref<HTMLElement | null>(null);
 
+// Mirrors AccountProfile.validate: raw String.length (UTF-16 code units), no trim.
+const NICKNAME_MIN_LENGTH = 2;
+const NICKNAME_MAX_LENGTH = 20;
+
 const isDirty = computed(() => draft.nickname !== baseline.nickname || draft.bio !== baseline.bio);
 const initials = computed(() => (draft.nickname || 'DU').slice(0, 2).toUpperCase());
-const canSave = computed(() => isDirty.value && draft.nickname.trim().length > 0 && !saving.value);
+const isNicknameValid = computed(() => {
+  const { length } = draft.nickname;
+  return length >= NICKNAME_MIN_LENGTH && length <= NICKNAME_MAX_LENGTH;
+});
+const canSave = computed(() => isDirty.value && isNicknameValid.value && !saving.value);
 const fieldsDisabled = computed(() => saving.value || (!currentAccount.value && isLoading.value));
 
 function persistedDraft(): ProfileDraft {
@@ -241,8 +249,17 @@ function focusNickname(event: Event): void {
               data-testid="profile-editor-nickname"
               :placeholder="t('account.placeholder.nickname')"
               :disabled="fieldsDisabled"
-              maxlength="100"
+              :aria-invalid="!isNicknameValid"
+              maxlength="20"
             />
+            <p
+              v-if="!isNicknameValid"
+              class="text-xs text-destructive"
+              data-testid="profile-editor-nickname-hint"
+              role="alert"
+            >
+              {{ t('account.profileEditor.nicknameHint') }}
+            </p>
           </div>
 
           <div class="space-y-1.5">
