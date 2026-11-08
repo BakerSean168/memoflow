@@ -27,12 +27,16 @@ import { toast } from 'vue-sonner';
 import {
   Archive,
   ArchiveRestore,
+  ArrowLeftRight,
   ChevronDown,
+  Cloud,
+  LogOut,
   Search,
   Settings,
   SquarePen,
   Trash2,
   UserPen,
+  UserPlus,
   X,
   Check,
   LockKeyhole,
@@ -460,6 +464,26 @@ const identityLabel = () => {
 };
 
 /**
+ * 卡面头像状态点：只投影已有的 identityKind/cloudState，不新增状态来源。
+ * 色调沿用同步指示器的约定（离线弱化、需重新授权用 destructive、进行中用琥珀）。
+ */
+const cloudStatusTone = computed<string | null>(() => {
+  if (props.identityKind !== 'cloud') return null;
+  switch (props.cloudState) {
+    case 'ONLINE':
+      return 'bg-emerald-500';
+    case 'CHECKING':
+      return 'bg-amber-500';
+    case 'OFFLINE':
+      return 'bg-[hsl(var(--foreground-subtle))]';
+    case 'REAUTH_REQUIRED':
+      return 'bg-destructive';
+    default:
+      return null;
+  }
+});
+
+/**
  * 「编辑个人资料」只发出意图（#856）；对话框本体由 #857 实现，读取同一个
  * intent 的 `open`。宿主未接线时（独立挂载的组件测试）点击是安全的空操作。
  */
@@ -883,30 +907,44 @@ function requestEditProfile(): void {
         >
           <!-- data-testid 只能落在真实元素上：Reka 的内容根是 portal/fragment。 -->
           <div data-testid="shell-account-card-panel" class="min-w-0">
+            <!-- 横幅贴住卡片上缘/两侧（抵消 content 的 p-1.5），圆角由卡片 overflow-hidden 收口。 -->
             <div
-              class="flex items-center gap-2.5 px-1.5 py-1.5"
-              data-testid="shell-account-identity"
-            >
-              <span
-                class="flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-full bg-primary text-xs text-primary-foreground"
-                aria-hidden="true"
-              >
-                <img
-                  v-if="accountAvatarUrl"
-                  :src="accountAvatarUrl"
-                  alt=""
-                  class="h-full w-full object-cover"
+              class="-mx-1.5 -mt-1.5 h-16 rounded-t-md bg-gradient-to-br from-[hsl(var(--primary)/0.22)] to-[hsl(var(--primary)/0.06)]"
+              data-testid="shell-account-card-banner"
+              aria-hidden="true"
+            />
+            <div class="px-1.5 pb-1.5" data-testid="shell-account-identity">
+              <div class="relative -mt-7 mb-1.5 h-14 w-14">
+                <span
+                  class="flex h-14 w-14 items-center justify-center overflow-hidden rounded-full bg-primary text-base font-semibold text-primary-foreground ring-2 ring-[hsl(var(--surface-overlay))]"
+                  data-testid="shell-account-card-avatar"
+                  aria-hidden="true"
+                >
+                  <img
+                    v-if="accountAvatarUrl"
+                    :src="accountAvatarUrl"
+                    alt=""
+                    class="h-full w-full object-cover"
+                  />
+                  <template v-else>{{ displayName().slice(0, 2).toUpperCase() }}</template>
+                </span>
+                <span
+                  v-if="cloudStatusTone"
+                  class="absolute -bottom-0.5 -right-0.5 h-3.5 w-3.5 rounded-full ring-2 ring-[hsl(var(--surface-overlay))]"
+                  :class="cloudStatusTone"
+                  data-testid="shell-account-card-status"
+                  aria-hidden="true"
                 />
-                <template v-else>{{ displayName().slice(0, 2).toUpperCase() }}</template>
-              </span>
-              <div class="min-w-0 flex-1">
+              </div>
+              <div class="min-w-0">
                 <p
-                  class="truncate text-[13px] font-medium leading-4"
+                  class="truncate text-[15px] font-semibold leading-5"
                   data-testid="shell-account-card-name"
                 >
                   {{ displayName() }}
                 </p>
                 <p
+                  v-if="identityKind !== 'cloud'"
                   class="truncate text-[11px] leading-4 text-muted-foreground"
                   data-testid="shell-account-card-kind"
                 >
@@ -923,11 +961,12 @@ function requestEditProfile(): void {
             </div>
             <DropdownMenuSeparator />
             <DropdownMenuItem data-testid="shell-edit-profile" @select="requestEditProfile">
-              <UserPen class="mr-2 h-3.5 w-3.5" aria-hidden="true" />
+              <UserPen class="mr-2 h-4 w-4" aria-hidden="true" />
               {{ t('shell.account.editProfile') }}
             </DropdownMenuItem>
             <DropdownMenuSub v-if="isDesktop">
-              <DropdownMenuSubTrigger data-testid="shell-switch-account">
+              <DropdownMenuSubTrigger data-testid="shell-switch-account" class="gap-2">
+                <ArrowLeftRight class="mr-2 h-4 w-4" aria-hidden="true" />
                 {{ t('shell.account.switchAccount') }}
               </DropdownMenuSubTrigger>
               <DropdownMenuSubContent
@@ -997,6 +1036,7 @@ function requestEditProfile(): void {
                 </div>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem data-testid="shell-add-account" @select="emit('add-account')">
+                  <UserPlus class="mr-2 h-4 w-4" aria-hidden="true" />
                   {{ t('shell.account.menuAddAccount') }}
                 </DropdownMenuItem>
               </DropdownMenuSubContent>
@@ -1008,6 +1048,7 @@ function requestEditProfile(): void {
               class="text-destructive focus:text-destructive"
               @click="emit('logout')"
             >
+              <LogOut class="mr-2 h-4 w-4" aria-hidden="true" />
               {{ t('shell.account.logout') }}
             </DropdownMenuItem>
             <DropdownMenuItem
@@ -1015,6 +1056,7 @@ function requestEditProfile(): void {
               data-testid="shell-open-cloud-connection"
               @click="emit('open-cloud-connection')"
             >
+              <Cloud class="mr-2 h-4 w-4" aria-hidden="true" />
               {{
                 identityKind === 'registered-local'
                   ? t('shell.account.reauthenticate')
