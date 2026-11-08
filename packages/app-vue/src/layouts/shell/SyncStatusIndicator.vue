@@ -5,6 +5,7 @@ import { useI18n } from 'vue-i18n';
 import { Popover, PopoverContent, PopoverTrigger } from '@memoflow/ui-vue-shadcn';
 import type { DesktopSyncSnapshotDTO, ProfileCloudState } from '@memoflow/desktop-contracts';
 import { DESKTOP_SYNC_STATUS_SERVICE_KEY } from '../../di/keys';
+import { formatProductDateTime } from '../../shared/utils/product-time';
 import { presentSyncStatusIndicator } from './sync-status-indicator.presentation';
 
 const props = withDefaults(
@@ -22,7 +23,7 @@ const emit = defineEmits<{
   (e: 'dismiss-avatar-alignment'): void;
 }>();
 
-const { t, locale } = useI18n();
+const { t } = useI18n();
 const service = inject(DESKTOP_SYNC_STATUS_SERVICE_KEY, null);
 const snapshot = ref<DesktopSyncSnapshotDTO | null>(null);
 const open = ref(false);
@@ -51,16 +52,9 @@ const icon = computed(() => {
   }
 });
 
-function formatTime(timestamp: number): string {
-  return new Intl.DateTimeFormat(locale.value, {
-    dateStyle: 'medium',
-    timeStyle: 'short',
-  }).format(new Date(timestamp));
-}
-
 const lastSyncedText = computed(() => {
   const value = presentation.value?.lastSyncedAt;
-  return value == null ? null : formatTime(value);
+  return value == null ? null : formatProductDateTime(value);
 });
 
 const tooltip = computed(() => {
@@ -104,7 +98,9 @@ const hasDetails = computed(() => {
 
 const alignedText = computed(() => {
   const value = props.avatarAlignedAt;
-  return value == null ? null : t('shell.sync.alignedNotice', { time: formatTime(value) });
+  return value == null
+    ? null
+    : t('shell.sync.alignedNotice', { time: formatProductDateTime(value) });
 });
 
 function adoptSnapshot(next: DesktopSyncSnapshotDTO): void {
@@ -255,7 +251,7 @@ onBeforeUnmount(() => {
             >
               <span class="shrink-0 text-muted-foreground">{{ t('shell.sync.lastSynced') }}</span>
               <span class="min-w-0 truncate text-right font-medium">
-                {{ formatTime(presentation.business.lastSyncedAt) }}
+                {{ formatProductDateTime(presentation.business.lastSyncedAt) }}
               </span>
             </div>
             <div v-if="businessErrorText" class="flex items-baseline justify-between gap-2">
