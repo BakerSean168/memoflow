@@ -568,6 +568,18 @@ describe('AppShell right-panel integration', () => {
     expect(router.currentRoute.value.fullPath).toBe('/goals');
     const dialog = document.querySelector<HTMLElement>('[data-testid="shell-settings-dialog"]');
     expect(dialog).not.toBeNull();
+    // contentClass overrides the workspace recipe geometry through cn ordering.
+    expect(dialog!.dataset.productDialogRecipe).toBe('workspace');
+    expect(dialog!.classList.contains('sm:max-w-6xl')).toBe(true);
+    expect(dialog!.classList.contains('h-[85vh]')).toBe(true);
+    expect(dialog!.classList.contains('sm:h-[85vh]')).toBe(true);
+    // The settings view scrolls internally; the shell body neither scrolls nor pads.
+    const body = dialog!.querySelector<HTMLElement>('[data-testid="product-dialog-body"]')!;
+    expect(body.classList.contains('overflow-hidden')).toBe(true);
+    expect(body.classList.contains('p-0')).toBe(true);
+    expect(body.classList.contains('px-5')).toBe(false);
+    // No footer content means no empty bordered footer bar.
+    expect(dialog!.querySelector('[data-testid="product-dialog-footer"]')).toBeNull();
     // Default entry: no `?tab=`, so the settings view falls back to its own default.
     expect(wrapper.getComponent(UserSettingsViewStub).props('initialTab')).toBeUndefined();
     expect(wrapper.getComponent(UserSettingsViewStub).props('embedded')).toBe(true);
