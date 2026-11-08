@@ -2349,7 +2349,7 @@
         "status": "none-verified",
         "testFiles": []
       },
-      "sourceSha256": "8dd15f5b03a7ddf7c9f78f5bf389fd9862e48f7bcdf1fe8ef1ea3bd9a2af88bc"
+      "sourceSha256": "6d44550ada5907f7c1d0e6db67d7171acd0a432ea239144440c3375098018168"
     },
     {
       "path": "apps/desktop/src/main/database/powersync-http-transport.spec.ts",
