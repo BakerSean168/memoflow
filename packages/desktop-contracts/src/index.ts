@@ -96,6 +96,22 @@ export {
   type DesktopUpdateDiagnosticsDTO,
 } from './desktop-update';
 export { AIStreamChannels } from './ipc-channels';
+export {
+  DesktopSyncPhaseSchema,
+  DesktopSyncErrorCategorySchema,
+  DesktopBusinessSyncStateSchema,
+  DesktopProfileSyncFieldSchema,
+  DesktopProfilePendingFieldSchema,
+  DesktopProfileSyncStateSchema,
+  DesktopSyncSnapshotSchema,
+  type DesktopSyncPhaseDTO,
+  type DesktopSyncErrorCategoryDTO,
+  type DesktopBusinessSyncStateDTO,
+  type DesktopProfileSyncFieldDTO,
+  type DesktopProfilePendingFieldDTO,
+  type DesktopProfileSyncStateDTO,
+  type DesktopSyncSnapshotDTO,
+} from './sync-status';
 export type {
   IElectronDatabase,
   IElectronDatabaseQueryResult,

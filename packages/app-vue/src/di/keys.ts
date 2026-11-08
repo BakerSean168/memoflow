@@ -39,6 +39,7 @@ import type {
   IRuntimeUsageService,
   IWorkflowRuntimeService,
   DesktopUpdateService,
+  DesktopSyncStatusService,
   DesktopStartupService,
   ModuleCapsule,
 } from './types';
@@ -123,6 +124,11 @@ export const PROFILE_EDITOR_INTENT_KEY: InjectionKey<ProfileEditorIntent> =
 /** Optional host-neutral Desktop Update capability. Web hosts intentionally omit it. */
 export const DESKTOP_UPDATE_SERVICE_KEY: InjectionKey<DesktopUpdateService> =
   Symbol('DesktopUpdateService');
+
+/** Optional host-neutral sync status capability (Issue #874). Web hosts omit it. */
+export const DESKTOP_SYNC_STATUS_SERVICE_KEY: InjectionKey<DesktopSyncStatusService> = Symbol(
+  'DesktopSyncStatusService',
+);
 
 /** Shell-owned Global Composer teleport mount (HTMLElement). */
 export const SHELL_COMPOSER_MOUNT_KEY: InjectionKey<ShallowRef<HTMLElement | null>> =

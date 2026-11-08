@@ -1024,6 +1024,7 @@ function requestEditProfile(): void {
           </div>
         </DropdownMenuContent>
       </DropdownMenu>
+      <slot name="footer-actions" />
       <button
         type="button"
         data-testid="shell-open-settings"

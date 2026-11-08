@@ -37,6 +37,7 @@ const portableTables = new Set([
 const technicalTables = new Set([
   'goal_operation_receipts',
   'account_profile_sync_outbox',
+  'account_profile_sync_snapshot',
   'scheduling_reconcile_operations',
   'scheduled_invocations',
   'invocation_attempts',

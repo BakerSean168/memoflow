@@ -33,6 +33,7 @@ import type {
   DesktopStartupPatch,
   DesktopStartupSnapshot,
   DesktopStartupUpdate,
+  DesktopSyncSnapshotDTO,
   DesktopUpdateDiagnosticsDTO,
   DesktopUpdateSnapshotDTO,
 } from '@memoflow/desktop-contracts';
@@ -76,6 +77,16 @@ export interface DesktopUpdateService {
   check(): Promise<Result<DesktopUpdateSnapshotDTO>>;
   restartAndInstall(): Promise<Result<DesktopUpdateSnapshotDTO>>;
   subscribe(listener: (snapshot: DesktopUpdateSnapshotDTO) => void): () => void;
+}
+
+/**
+ * Host-neutral sync status capability exposed to the shell (Issue #874).
+ * Web hosts omit it; Desktop provides the IPC-backed adapter.
+ */
+export interface DesktopSyncStatusService {
+  getSnapshot(): Promise<Result<DesktopSyncSnapshotDTO>>;
+  syncNow(): Promise<Result<DesktopSyncSnapshotDTO>>;
+  subscribe(listener: (snapshot: DesktopSyncSnapshotDTO) => void): () => void;
 }
 
 // ── Module Capsules (UI Redesign V2 shell) ──

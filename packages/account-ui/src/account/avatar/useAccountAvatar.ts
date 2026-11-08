@@ -1,4 +1,5 @@
 import { computed, inject, onScopeDispose, ref, watch, type Ref } from 'vue';
+import { toast } from 'vue-sonner';
 import { accountUiHost } from '../../account-ui-host';
 import type { DesktopAccessSnapshot } from '@memoflow/desktop-contracts';
 import type { AccountClientPort } from '@memoflow/account-client';
@@ -60,6 +61,34 @@ export function useAccountAvatar(fallbackUrl?: () => string | null) {
   const isUploading = ref(false);
   /** Incremented on every background cloud-sync failure (short-lived toast hook). */
   const cloudSyncFailed = ref(0);
+  /** True while the local avatar still needs to reach the cloud (Issue #874). */
+  const cloudSyncPending = ref(false);
+  /** Last cloud-newer download that replaced this device's cached avatar. */
+  const cloudAlignedAt = ref<number | null>(null);
+
+  function readSyncFlags(): void {
+    const key = cloudAccountKey.value;
+    if (!key) {
+      cloudSyncPending.value = false;
+      cloudAlignedAt.value = null;
+      return;
+    }
+    const state = readCloudAvatarSyncState(key);
+    cloudSyncPending.value = state.pending;
+    cloudAlignedAt.value = state.lastAlignedAt ?? null;
+  }
+
+  /** Dismiss the "aligned with a newer cloud copy" record after it was seen. */
+  function dismissCloudAlignment(): void {
+    const key = cloudAccountKey.value;
+    if (!key) return;
+    const current = readCloudAvatarSyncState(key);
+    writeCloudAvatarSyncState(key, {
+      lastSyncedAt: current.lastSyncedAt,
+      pending: current.pending,
+    });
+    cloudAlignedAt.value = null;
+  }
 
   async function loadLocal(): Promise<void> {
     if (!store) return;
@@ -74,7 +103,9 @@ export function useAccountAvatar(fallbackUrl?: () => string | null) {
     const key = cloudAccountKey.value;
     if (!accountService || !key) return;
     const markPending = () => {
-      writeCloudAvatarSyncState(key, { ...readCloudAvatarSyncState(key), pending: true });
+      const current = readCloudAvatarSyncState(key);
+      writeCloudAvatarSyncState(key, { lastSyncedAt: current.lastSyncedAt, pending: true });
+      cloudSyncPending.value = true;
       cloudSyncFailed.value += 1;
     };
     let result: Awaited<ReturnType<AccountClientPort['uploadMyAvatar']>>;
@@ -88,7 +119,12 @@ export function useAccountAvatar(fallbackUrl?: () => string | null) {
       markPending();
       return;
     }
-    writeCloudAvatarSyncState(key, { lastSyncedAt: result.data.updatedAt, pending: false });
+    writeCloudAvatarSyncState(key, {
+      lastSyncedAt: result.data.updatedAt,
+      pending: false,
+    });
+    cloudSyncPending.value = false;
+    cloudAlignedAt.value = null;
   }
 
   async function pullCloudAvatar(): Promise<void> {
@@ -117,10 +153,23 @@ export function useAccountAvatar(fallbackUrl?: () => string | null) {
     const blob = dataUrlToPngBlob(content.data.dataUrl);
     if (!blob) return;
     try {
+      // A prior server checkpoint plus an existing local file means this
+      // download replaced something this device already had, not a first sync.
+      const replacedLocalAvatar = state.lastSyncedAt !== null && localUrl.value !== null;
+      const alignedAt = replacedLocalAvatar ? Date.now() : null;
       const url = await store.save(accountKey.value, blob);
       if (avatarRevision.value !== revisionAtRead) return;
       localUrl.value = url;
-      writeCloudAvatarSyncState(key, { lastSyncedAt: content.data.updatedAt, pending: false });
+      writeCloudAvatarSyncState(key, {
+        lastSyncedAt: content.data.updatedAt,
+        pending: false,
+        ...(alignedAt === null ? {} : { lastAlignedAt: alignedAt }),
+      });
+      cloudSyncPending.value = false;
+      cloudAlignedAt.value = alignedAt;
+      if (alignedAt !== null) {
+        toast.info(host?.getI18nGlobal?.().t('account.toast.avatarAlignedWithCloud') ?? '');
+      }
       // Every mounted surface reads the same local cache; bump so the quick-login
       // tile, sidebar block and profile card all re-read the pulled avatar.
       avatarRevision.value += 1;
@@ -132,12 +181,14 @@ export function useAccountAvatar(fallbackUrl?: () => string | null) {
   let syncInFlight = false;
   async function refresh(): Promise<void> {
     await loadLocal();
+    readSyncFlags();
     if (!isCloudAccount.value || syncInFlight) return;
     syncInFlight = true;
     try {
       await pullCloudAvatar();
     } finally {
       syncInFlight = false;
+      readSyncFlags();
     }
   }
 
@@ -153,11 +204,15 @@ export function useAccountAvatar(fallbackUrl?: () => string | null) {
       const key = cloudAccountKey.value;
       if (key) {
         // Mark the local edit before the revision bump: the reconcile pass then
-        // pushes it, and a failure leaves it pending for the next retry.
+        // pushes it, and a failure leaves it pending for the next retry. A new
+        // local edit supersedes any previously acknowledged cloud alignment.
+        const current = readCloudAvatarSyncState(key);
         writeCloudAvatarSyncState(key, {
-          ...readCloudAvatarSyncState(key),
+          lastSyncedAt: current.lastSyncedAt,
           pending: true,
         });
+        cloudSyncPending.value = true;
+        cloudAlignedAt.value = null;
       }
       avatarRevision.value += 1;
       return url;
@@ -183,6 +238,9 @@ export function useAccountAvatar(fallbackUrl?: () => string | null) {
     accountKey,
     isCloudAccount,
     cloudSyncFailed,
+    cloudSyncPending,
+    cloudAlignedAt,
+    dismissCloudAlignment,
     refresh,
     upload,
   };

@@ -47,6 +47,23 @@ const account_profile_sync_outbox = new Table(
 );
 
 /**
+ * Last successfully delivered account profile used to derive a field-level
+ * pending list while `account_profile_sync_outbox` only records a revision.
+ * `synced_at` is null for the pre-edit baseline written before the first
+ * successful flush.
+ */
+const account_profile_sync_snapshot = new Table(
+  {
+    owner_id: column.text,
+    nickname: column.text,
+    bio: column.text,
+    avatar_url: column.text,
+    synced_at: column.integer,
+  },
+  { localOnly: true },
+);
+
+/**
  * Local-only marker set BEFORE a cloud account-close request starts (the
  * requested/revoking window where the remote Account row is still Active).
  * Local new-work entrypoints (AI / scheduler / use-cases) fail-closed against
@@ -928,6 +945,7 @@ export const PowerSyncAppSchema = new Schema({
   // Account
   accounts,
   account_profile_sync_outbox,
+  account_profile_sync_snapshot,
   account_closure_requested,
   user_preference_records,
   // Goal

@@ -1902,6 +1902,14 @@
       "measurementCollectors": []
     },
     {
+      "path": "apps/desktop/src/main/sync/desktop-sync-status.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "apps/desktop/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "apps/desktop/src/main/utils/__tests__/api-config.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -1919,6 +1927,14 @@
     },
     {
       "path": "apps/desktop/src/preload/allowed-channels.desktop-update.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "apps/desktop/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "apps/desktop/src/preload/allowed-channels.sync-status.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "apps/desktop/vitest.config.ts"
@@ -1999,6 +2015,14 @@
     },
     {
       "path": "apps/desktop/src/renderer/platform/desktop-startup-service.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "apps/desktop/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "apps/desktop/src/renderer/platform/desktop-sync-status-service.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "apps/desktop/vitest.config.ts"
@@ -5048,6 +5072,16 @@
       ]
     },
     {
+      "path": "packages/app-vue/src/layouts/shell/SyncStatusIndicator.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/app-vue/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "packages/app-vue/vitest.store-coverage.config.ts"
+      ]
+    },
+    {
       "path": "packages/app-vue/src/layouts/shell/TodayOverviewPanel.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -5189,6 +5223,16 @@
     },
     {
       "path": "packages/app-vue/src/layouts/shell/surface-leave-protocol.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/app-vue/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "packages/app-vue/vitest.store-coverage.config.ts"
+      ]
+    },
+    {
+      "path": "packages/app-vue/src/layouts/shell/sync-status-indicator.presentation.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/app-vue/vitest.config.ts"
@@ -12911,7 +12955,7 @@
       "type": "measurement",
       "suite": "coverage",
       "runner": "vitest",
-      "fileCount": 91
+      "fileCount": 93
     },
     {
       "id": "packages/data-portability/vitest.config.ts",
@@ -13377,7 +13421,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 108
+      "fileCount": 111
     },
     {
       "id": "apps/migrator/vitest.config.ts",
@@ -13461,7 +13505,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 91
+      "fileCount": 93
     },
     {
       "id": "packages/assets/vitest.config.ts",
@@ -14098,6 +14142,7 @@
       "packages/app-vue/src/layouts/shell/ModuleCapsule.spec.ts",
       "packages/app-vue/src/layouts/shell/PanelErrorBoundary.spec.ts",
       "packages/app-vue/src/layouts/shell/ProfileImportDialog.spec.ts",
+      "packages/app-vue/src/layouts/shell/SyncStatusIndicator.spec.ts",
       "packages/app-vue/src/layouts/shell/TodayOverviewPanel.spec.ts",
       "packages/app-vue/src/layouts/shell/WindowHeader.spec.ts",
       "packages/app-vue/src/layouts/shell/business-surface-control.spec.ts",
@@ -14113,6 +14158,7 @@
       "packages/app-vue/src/layouts/shell/previews/ScheduleCapsulePreview.spec.ts",
       "packages/app-vue/src/layouts/shell/previews/TaskCapsulePreview.spec.ts",
       "packages/app-vue/src/layouts/shell/surface-leave-protocol.spec.ts",
+      "packages/app-vue/src/layouts/shell/sync-status-indicator.presentation.spec.ts",
       "packages/app-vue/src/layouts/shell/unverified-email-banner.spec.ts",
       "packages/app-vue/src/layouts/shell/useAppShellStore.spec.ts",
       "packages/app-vue/src/layouts/shell/useKnowledgeNativeSurface.spec.ts",
@@ -14506,7 +14552,7 @@
   "duplicate": [],
   "unexpected": [],
   "counts": {
-    "unit": 1194,
+    "unit": 1199,
     "integration": 58,
     "smoke": 3,
     "boundary-ipc": 6,

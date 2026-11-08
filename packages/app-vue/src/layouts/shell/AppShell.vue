@@ -19,7 +19,6 @@
  */
 import { WindowChannels, DesktopProfileImportChannels } from '@memoflow/desktop-contracts';
 import { DESKTOP_BRIDGE_KEY } from '../../di/keys';
-import { toast } from 'vue-sonner';
 import { computed, inject, onBeforeUnmount, onMounted, provide, ref, shallowRef, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
@@ -39,6 +38,7 @@ import { useNotificationUnreadQuery } from '@memoflow/notification-ui';
 import {
   useAccountSignOut,
   useAccountStore,
+  useAccountAvatar,
   useAuthenticationStore,
   AccountProfileEditorDialog,
 } from '@memoflow/account-ui';
@@ -51,6 +51,7 @@ import AIChatView from '@memoflow/ai-ui/views/AIChatView.vue';
 import type { ConversationSummary } from '@memoflow/ai-ui/composables/types';
 import WindowHeader, { type WindowHeaderCapsule } from './WindowHeader.vue';
 import DesktopUpdateShellIndicator from './DesktopUpdateShellIndicator.vue';
+import SyncStatusIndicator from './SyncStatusIndicator.vue';
 import GoalCapsulePreview from './previews/GoalCapsulePreview.vue';
 import TaskCapsulePreview from './previews/TaskCapsulePreview.vue';
 import RoutineCapsulePreview from '@memoflow/routine-ui/components/RoutineCapsulePreview';
@@ -434,6 +435,17 @@ const shellIdentityKind = computed<'local' | 'registered-local' | 'cloud'>(() =>
   }
   return accountStore.currentAccount ? 'registered-local' : 'local';
 });
+
+const {
+  cloudSyncPending,
+  cloudAlignedAt,
+  dismissCloudAlignment,
+  refresh: refreshAccountAvatar,
+} = useAccountAvatar();
+/** Only a cloud-bound Profile has a sync indicator; local accounts stay bare. */
+const syncIndicatorVisible = computed(
+  () => isDesktop && Boolean(desktopAccess.value?.profile?.cloudAccountId),
+);
 
 const needsEmailVerification = computed(
   () => isAuthenticated.value && authStore.currentIdentity?.emailVerified === false,
@@ -888,7 +900,18 @@ onBeforeUnmount(() => {
               @switch-profile="switchProfile"
               @refresh-profiles="refreshProfiles"
               @logout="() => void handleLogout()"
-            />
+            >
+              <template #footer-actions>
+                <SyncStatusIndicator
+                  :cloud-account-bound="syncIndicatorVisible"
+                  :cloud-state="desktopAccess?.cloudState"
+                  :avatar-pending="cloudSyncPending"
+                  :avatar-aligned-at="cloudAlignedAt"
+                  @request-avatar-refresh="() => void refreshAccountAvatar()"
+                  @dismiss-avatar-alignment="dismissCloudAlignment"
+                />
+              </template>
+            </ConversationSidebar>
           </div>
 
           <div
@@ -1077,7 +1100,18 @@ onBeforeUnmount(() => {
             @switch-profile="switchProfile"
             @refresh-profiles="refreshProfiles"
             @logout="() => void handleLogout()"
-          />
+          >
+            <template #footer-actions>
+              <SyncStatusIndicator
+                :cloud-account-bound="syncIndicatorVisible"
+                :cloud-state="desktopAccess?.cloudState"
+                :avatar-pending="cloudSyncPending"
+                :avatar-aligned-at="cloudAlignedAt"
+                @request-avatar-refresh="() => void refreshAccountAvatar()"
+                @dismiss-avatar-alignment="dismissCloudAlignment"
+              />
+            </template>
+          </ConversationSidebar>
         </div>
       </SheetContent>
     </Sheet>
