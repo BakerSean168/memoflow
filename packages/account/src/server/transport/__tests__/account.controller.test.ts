@@ -111,6 +111,23 @@ describe('AccountController', () => {
       expect(api.updateProfile).not.toHaveBeenCalled();
     });
 
+    it('should enforce the 2-20 nickname length boundaries', async () => {
+      (api.updateProfile as ReturnType<typeof vi.fn>).mockResolvedValue(ok(FAKE_ACCOUNT_DTO));
+
+      for (const nickname of ['A', 'A'.repeat(21)]) {
+        const result = await controller.updateProfile({ nickname }, FAKE_CONTEXT);
+        expect(isOk(result)).toBe(false);
+        if (!isOk(result)) {
+          expect(result.error.code).toBe('VALIDATION_ERROR');
+        }
+      }
+
+      for (const nickname of ['AB', 'A'.repeat(20)]) {
+        const result = await controller.updateProfile({ nickname }, FAKE_CONTEXT);
+        expect(isOk(result)).toBe(true);
+      }
+    });
+
     it('should reject invalid avatar URL', async () => {
       const result = await controller.updateProfile({ avatar: 'not-a-url' }, FAKE_CONTEXT);
 

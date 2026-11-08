@@ -119,6 +119,7 @@ export default {
   profileEditor: {
     title: 'Edit profile',
     description: 'Your nickname is the primary display name and saves to the current account.',
+    nicknameHint: 'Nickname must be 2–20 characters.',
     unsaved: "Don't forget to save your changes!",
     reset: 'Reset',
     save: 'Save',

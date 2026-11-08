@@ -5,7 +5,7 @@ export type GetAccountReq = void;
 export type GetAccountRes = AccountClientDTO;
 
 export const UpdateAccountSchema = z.object({
-  nickname: z.string().min(1).max(100).optional(),
+  nickname: z.string().min(2).max(20).optional(),
   avatar: z.string().url().optional().nullable(),
   bio: z.string().max(500).optional().nullable(),
 });

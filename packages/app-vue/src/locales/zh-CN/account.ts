@@ -112,6 +112,7 @@ export default {
   profileEditor: {
     title: '编辑个人资料',
     description: '昵称就是你的唯一展示名，修改后会直接保存到当前账号。',
+    nicknameHint: '昵称需为 2–20 个字符。',
     unsaved: '别忘了保存您的更改！',
     reset: '重置',
     save: '保存',

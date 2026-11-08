@@ -2,6 +2,7 @@ import { flushPromises, mount } from '@vue/test-utils';
 import { createI18n } from 'vue-i18n';
 import { defineComponent, h, ref } from 'vue';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { toast } from 'vue-sonner';
 import { fail } from '@memoflow/transport-contracts/result';
 import type { AccountClientPort } from '@memoflow/account-client';
 import {
@@ -39,6 +40,7 @@ const i18n = createI18n({
         profileEditor: {
           title: 'Edit profile',
           description: 'Update your profile.',
+          nicknameHint: 'Nickname must be 2–20 characters.',
           unsaved: "Don't forget to save your changes!",
           reset: 'Reset',
           save: 'Save',
@@ -239,6 +241,7 @@ describe('AccountProfileEditorDialog', () => {
   // The shared test Pinia persists for the file; every case starts without an account.
   beforeEach(() => {
     useAccountStore().reset();
+    vi.clearAllMocks();
   });
 
   it('opens with inline persisted values and saves through the account service', async () => {
@@ -408,5 +411,63 @@ describe('AccountProfileEditorDialog', () => {
     await flushPromises();
     // Saved once: the bar (and its disabled button) is gone.
     expect(wrapper.find('[data-testid="profile-editor-prompt"]').exists()).toBe(false);
+  });
+
+  it('blocks a 1-character nickname, shows the field hint and never calls the service', async () => {
+    const service = accountService();
+    const { wrapper } = mountDialog(service);
+    await flushPromises();
+
+    await wrapper.get('[data-testid="profile-editor-nickname"]').setValue('A');
+
+    expect(wrapper.get('[data-testid="profile-editor-nickname-hint"]').text()).toBe(
+      'Nickname must be 2–20 characters.',
+    );
+    expect(
+      (wrapper.get('[data-testid="profile-editor-save"]').element as HTMLButtonElement).disabled,
+    ).toBe(true);
+
+    await wrapper.get('[data-testid="profile-editor-save"]').trigger('click');
+    await flushPromises();
+
+    expect(service.updateMyProfile).not.toHaveBeenCalled();
+    expect(toast.error).not.toHaveBeenCalled();
+  });
+
+  it('blocks a 21-character nickname even when maxlength is bypassed', async () => {
+    const service = accountService();
+    const { wrapper } = mountDialog(service);
+    await flushPromises();
+
+    await wrapper.get('[data-testid="profile-editor-nickname"]').setValue('A'.repeat(21));
+
+    expect(wrapper.find('[data-testid="profile-editor-nickname-hint"]').exists()).toBe(true);
+    expect(
+      (wrapper.get('[data-testid="profile-editor-save"]').element as HTMLButtonElement).disabled,
+    ).toBe(true);
+
+    await wrapper.get('[data-testid="profile-editor-save"]').trigger('click');
+    await flushPromises();
+
+    expect(service.updateMyProfile).not.toHaveBeenCalled();
+    expect(toast.error).not.toHaveBeenCalled();
+  });
+
+  it.each([2, 20])('saves a %i-character nickname at the boundary', async (length) => {
+    const service = accountService();
+    const { wrapper } = mountDialog(service);
+    await flushPromises();
+
+    const nickname = 'A'.repeat(length);
+    await wrapper.get('[data-testid="profile-editor-nickname"]').setValue(nickname);
+
+    expect(wrapper.find('[data-testid="profile-editor-nickname-hint"]').exists()).toBe(false);
+    const save = wrapper.get('[data-testid="profile-editor-save"]');
+    expect((save.element as HTMLButtonElement).disabled).toBe(false);
+
+    await save.trigger('click');
+    await flushPromises();
+
+    expect(service.updateMyProfile).toHaveBeenCalledWith({ nickname, bio: 'Existing bio' });
   });
 });
