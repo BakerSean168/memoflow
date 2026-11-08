@@ -965,7 +965,7 @@ function requestEditProfile(): void {
               {{ t('shell.account.editProfile') }}
             </DropdownMenuItem>
             <DropdownMenuSub v-if="isDesktop">
-              <DropdownMenuSubTrigger data-testid="shell-switch-account" class="gap-2">
+              <DropdownMenuSubTrigger data-testid="shell-switch-account">
                 <ArrowLeftRight class="mr-2 h-4 w-4" aria-hidden="true" />
                 {{ t('shell.account.switchAccount') }}
               </DropdownMenuSubTrigger>
