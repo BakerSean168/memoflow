@@ -1065,6 +1065,8 @@ describe('AppShell right-panel integration', () => {
       'settings',
     );
     expect(wrapper.get('[data-testid="settings-view"]').exists()).toBe(true);
+    // Deep link keeps the standalone scene: the dialog surface stays absent.
+    expect(document.querySelector('[data-testid="shell-settings-dialog"]')).toBeNull();
 
     // Phase 0 / UI-001：workspace scene host 常驻——AI 实例不卸载（只是隐藏），
     // 业务 Tab 组件不再重挂载（KeepAlive 缓存实例保持，流式回复/草稿不丢）。
