@@ -4,6 +4,9 @@ import type { AccountClientDTO } from '@memoflow/account-contracts';
 import type { ExecutionContext } from '@memoflow/transport-contracts';
 import { DesktopAccountProfileSync } from './desktop-account-profile-sync';
 
+const syncLogs = vi.hoisted(() => ({ info: vi.fn(), warn: vi.fn(), error: vi.fn() }));
+vi.mock('@memoflow/utils/logger', () => ({ createLogger: () => syncLogs }));
+
 function ipcContext(identityId: string): ExecutionContext {
   return {
     requestId: `req-profile-${identityId}`,
@@ -76,12 +79,25 @@ function createHarness(options?: {
         revision: (pending?.revision ?? 0) + 1,
       };
     }
+    if (
+      sql.includes('account_profile_sync_outbox') &&
+      sql.trimStart().toUpperCase().startsWith('UPDATE')
+    ) {
+      pending = { owner_id: String(parameters[0]), revision: Number(parameters[1]) };
+    }
     if (sql.includes('DELETE FROM account_profile_sync_outbox')) pending = null;
     return { rowsAffected: 1 };
   };
   const txExecute = vi.fn(applySql);
+  const txGetOptional = vi.fn(async (sql: string) => {
+    if (sql.includes('account_profile_sync_snapshot')) return snapshot ? { id: 'current' } : null;
+    if (sql.includes('account_profile_sync_outbox')) {
+      return pending ? { revision: pending.revision } : null;
+    }
+    return null;
+  });
   const dbExecute = vi.fn(applySql);
-  const tx = { execute: txExecute };
+  const tx = { execute: txExecute, getOptional: txGetOptional };
   const db = {
     writeTransaction: vi.fn(async (callback: (value: typeof tx) => Promise<unknown>) =>
       callback(tx),
@@ -226,6 +242,30 @@ describe('DesktopAccountProfileSync', () => {
       ['cloud-1', expect.any(Number)],
     );
     expect(harness.updateLocalProfileMetadata).toHaveBeenCalledWith({ nickname: 'Committed Name' });
+  });
+
+  it('logs a sanitized reason and rethrows when the local commit fails', async () => {
+    const harness = createHarness({ cloudAccountId: 'cloud-1' });
+    syncLogs.error.mockClear();
+    harness.db.writeTransaction.mockRejectedValueOnce(
+      new TypeError(
+        'cannot UPSERT a view https://private.example/x Bearer secret-token eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIn0.sig',
+      ),
+    );
+
+    await expect(
+      harness.sync.update({ nickname: 'Next Name' }, ipcContext('cloud-1')),
+    ).rejects.toThrow('cannot UPSERT a view');
+
+    expect(syncLogs.error).toHaveBeenCalledWith('Account profile local commit failed', {
+      phase: 'local_commit',
+      errorType: 'TypeError',
+      reason: expect.stringContaining('cannot UPSERT a view'),
+    });
+    const logged = JSON.stringify(syncLogs.error.mock.calls);
+    expect(logged).not.toContain('private.example');
+    expect(logged).not.toContain('secret-token');
+    expect(logged).not.toContain('eyJhbGci');
   });
 
   it('saves locally while offline and delivers the retained intent after recovery', async () => {
