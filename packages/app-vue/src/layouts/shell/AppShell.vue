@@ -23,7 +23,7 @@ import { computed, inject, onBeforeUnmount, onMounted, provide, ref, shallowRef,
 import { useRoute, useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import { storeToRefs } from 'pinia';
-import { Sheet, SheetContent, SheetDescription, SheetTitle } from '@memoflow/ui-vue-shadcn';
+import { Dialog, Sheet, SheetContent, SheetDescription, SheetTitle } from '@memoflow/ui-vue-shadcn';
 import { useAppShellStore, MAX_BUSINESS_TABS } from './useAppShellStore';
 import { provideTaskNativeSurface } from './useTaskNativeSurface';
 import { provideGoalNativeSurface } from './useGoalNativeSurface';
@@ -68,6 +68,8 @@ import { DialogDraftScopeKey } from './dialog-draft-store';
 import GlobalComposer from './GlobalComposer.vue';
 import CloudConnectionDialog from './CloudConnectionDialog.vue';
 import ProfileImportDialog from './ProfileImportDialog.vue';
+import ProductDialogShell from '../../shared/components/ProductDialogShell.vue';
+import { UserSettingsView } from '@memoflow/setting-ui';
 import { useDesktopProfiles } from '../../shared/composables/useDesktopProfiles';
 import { z } from 'zod';
 import StandaloneSettingsLayout from './StandaloneSettingsLayout.vue';
@@ -613,13 +615,32 @@ function openPanelRoute(_module: 'goal' | 'task' | 'routine', path: string) {
   void router.push(path).catch(() => {});
 }
 
+/**
+ * Settings entry points open the shell dialog instead of navigating to `/settings`.
+ * The route stays untouched, so closing the dialog returns to the exact workspace
+ * state (tabs, drafts, chat streaming) that was visible before opening it.
+ * `/settings` remains a deep-link fallback handled by the standalone settings scene.
+ */
+const settingsDialogOpen = ref(false);
+const settingsDialogTab = ref<string>();
+/** Bumped on every open so the dialog always mounts a fresh settings view. */
+const settingsDialogSession = ref(0);
+
+/** Read `?tab=` from an in-app settings path (`/settings?tab=updates`). */
+function parseSettingsTab(path: string): string | undefined {
+  const query = path.split('?')[1]?.split('#')[0] ?? '';
+  return new URLSearchParams(query).get('tab') ?? undefined;
+}
+
 function openSettings(path = '/settings') {
   closeOverlaySidebar();
-  void sync.openSettings(path);
+  settingsDialogTab.value = parseSettingsTab(path);
+  settingsDialogSession.value += 1;
+  settingsDialogOpen.value = true;
 }
 
 function openUpdateSettings() {
-  void sync.openSettings('/settings?tab=updates');
+  openSettings('/settings?tab=updates');
 }
 
 function openCloudConnection() {
@@ -717,7 +738,7 @@ keyboardDisposers.push(
     },
     inWorkspace,
   ),
-  keyboard.register('app.shortcuts', () => sync.openSettings('/settings?tab=shortcuts')),
+  keyboard.register('app.shortcuts', () => openSettings('/settings?tab=shortcuts')),
 );
 for (const [id, direction] of [
   ['tab.next', 1],
@@ -1037,6 +1058,41 @@ onBeforeUnmount(() => {
         />
       </div>
     </div>
+
+    <!-- 设置大弹窗：所有应用内入口（齿轮 / 更新指示器 / 快捷键命令）都打开这里，
+         路由保持不变，关闭即回到打开前的视图与状态。深链 /settings 仍走上面的
+         StandaloneSettingsLayout 整页场景（行为逐字保留）。
+
+         层级（Issue #887 C）：本弹窗和设置分区里再打开的对话框（快捷键录制、
+         Agent 向导、知识库断开确认等）都经 ProductDialogShell → DialogContent →
+         DialogPortal 挂到 body，同为 z-50。Reka 的 portal 在挂载时追加到 body 末尾，
+         因此后打开的嵌套对话框 content 在 DOM 中晚于本弹窗 content 出现、绘制在
+         其上方——不需要额外 z-index 令牌；AppShell.spec.ts 断言了该 DOM 顺序。 -->
+    <Dialog :open="settingsDialogOpen" @update:open="settingsDialogOpen = $event">
+      <!-- workspace recipe 自带 sm:h-* 与 max-h 上限；contentClass 连同基础 h-* 一起覆写，
+           否则 sm 断点会回落到 recipe 的高度。 -->
+      <ProductDialogShell
+        :open="settingsDialogOpen"
+        test-id="shell-settings-dialog"
+        recipe="workspace"
+        size="lg"
+        :content-class="'h-[85vh] max-h-none sm:h-[85vh] sm:max-w-6xl'"
+        body-class="overflow-hidden p-0"
+        :close-label="t('common.close')"
+        @request-close="settingsDialogOpen = false"
+      >
+        <template #title>{{ t('setting.title') }}</template>
+        <!-- UserSettingsView 根节点是 h-full，外层补齐高度链；视图自带内部滚动。 -->
+        <div class="h-full min-h-0">
+          <UserSettingsView
+            :key="settingsDialogSession"
+            embedded
+            :initial-tab="settingsDialogTab"
+            @close="settingsDialogOpen = false"
+          />
+        </div>
+      </ProductDialogShell>
+    </Dialog>
 
     <!-- 窄屏会话导航：统一复用 Sheet（Modal Navigation Drawer）原语。
          它不占 workspace geometry；focus trap / Escape / backdrop / Portal 由 UI 基础层统一负责。 -->

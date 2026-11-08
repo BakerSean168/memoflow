@@ -68,6 +68,7 @@
     </div>
 
     <DialogFooter
+      v-if="$slots.footer"
       class="sticky bottom-0 z-10 shrink-0 gap-2 border-t border-[hsl(var(--border-subtle))] bg-[hsl(var(--surface)/0.72)] px-5 py-3.5 backdrop-blur-sm sm:gap-2"
       data-testid="product-dialog-footer"
     >
