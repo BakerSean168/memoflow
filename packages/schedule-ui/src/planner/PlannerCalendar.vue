@@ -351,17 +351,48 @@ function eventToneClass(projection: CalendarEventProjection): string {
  * v6-style .fc-timegrid-* selectors.
  */
 .planner-calendar {
+  /* neutral backgrounds */
   --fc-classic-background: hsl(var(--background));
-  --fc-classic-foreground: hsl(var(--foreground));
   --fc-classic-faint: hsl(var(--muted) / 0.05);
   --fc-classic-muted: hsl(var(--muted) / 0.08);
   --fc-classic-strong: hsl(var(--muted) / 0.14);
+
+  /* neutral foregrounds */
+  --fc-classic-foreground: hsl(var(--foreground));
   --fc-classic-faint-foreground: hsl(var(--muted-foreground) / 0.55);
   --fc-classic-muted-foreground: hsl(var(--muted-foreground) / 0.78);
+
+  /* neutral borders */
   --fc-classic-border: hsl(var(--border) / 0.2);
-  --fc-classic-strong-border: hsl(var(--border) / 0.34);
+  --fc-classic-strong-border: hsl(var(--border) / 0.3);
+
+  /* buttons */
+  --fc-classic-button: hsl(var(--surface) / 0.92);
+  --fc-classic-button-foreground: hsl(var(--foreground));
+  --fc-classic-button-border: hsl(var(--border) / 0.42);
+  --fc-classic-button-strong: hsl(var(--selected) / 0.92);
+  --fc-classic-button-strong-border: hsl(var(--border) / 0.62);
+  --fc-classic-button-outline: hsl(var(--primary) / 0.45);
+
+  /* primary */
+  --fc-classic-primary: hsl(var(--primary));
+  --fc-classic-primary-foreground: hsl(var(--primary-foreground));
+
+  /* calendar content */
+  --fc-classic-event: hsl(var(--primary));
+  --fc-classic-event-contrast: hsl(var(--primary-foreground));
+  --fc-classic-background-event: hsl(var(--success));
+  --fc-classic-background-event-opacity: 15%;
+  --fc-classic-background-event-foreground-opacity: 50%;
+  --fc-classic-highlight: hsl(var(--primary) / 0.12);
   --fc-classic-today: hsl(var(--primary) / 0.028);
   --fc-classic-now: hsl(var(--destructive) / 0.72);
+  --fc-classic-ring-color: hsl(var(--background));
+
+  /* non-colors */
+  --fc-classic-small-dot-width: 8px;
+  --fc-classic-large-dot-width: 10px;
+
   height: 100%;
   color: hsl(var(--foreground));
   background:
@@ -396,7 +427,7 @@ function eventToneClass(projection: CalendarEventProjection): string {
   color: hsl(var(--muted-foreground));
   font-size: 0.75rem;
   font-weight: 600;
-  letter-spacing: -0.01em;
+  letter-spacing: 0.01em;
   line-height: 1;
   text-decoration: none;
 }
@@ -500,7 +531,7 @@ function eventToneClass(projection: CalendarEventProjection): string {
   margin: 1px 2px;
   overflow: hidden;
   border: 1px solid hsl(var(--planner-event-hsl) / 0.48) !important;
-  border-radius: 0.42rem;
+  border-radius: 0.5rem;
   cursor: pointer;
   color: hsl(var(--planner-event-foreground-hsl)) !important;
   background: linear-gradient(
@@ -532,7 +563,7 @@ function eventToneClass(projection: CalendarEventProjection): string {
 }
 
 :global(.planner-event) {
-  padding: 0.3rem 0.42rem 0.25rem 0.48rem;
+  padding: 0.32rem 0.45rem;
   color: inherit;
   font-size: 0.75rem;
   line-height: 1.18;
