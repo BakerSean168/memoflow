@@ -1216,10 +1216,10 @@ describe('GoalDialog vNext surface (GOAL-5101)', () => {
       properties.element.compareDocumentPosition(editor.element) & Node.DOCUMENT_POSITION_FOLLOWING,
     ).toBeTruthy();
     expect(
-      editor.element.compareDocumentPosition(description.element) &
+      description.element.compareDocumentPosition(editor.element) &
         Node.DOCUMENT_POSITION_FOLLOWING,
     ).toBeTruthy();
-    expect(editor.classes()).not.toContain('mt-auto');
+    expect(editor.classes()).toContain('mt-auto');
     expect(editor.classes()).toContain('bg-[hsl(var(--surface-raised)/0.24)]');
     expect(editor.classes()).toContain('shadow-[inset_0_0_0_1px_hsl(var(--border-subtle)/0.48)]');
     expect(document.querySelector('[data-testid="goal-key-results-empty"]')).toBeNull();

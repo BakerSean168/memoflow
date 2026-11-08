@@ -252,10 +252,11 @@ describe('TaskPlanForm', () => {
         Node.DOCUMENT_POSITION_FOLLOWING,
     ).toBeTruthy();
     expect(
-      checklist.element.compareDocumentPosition(description.element) &
+      description.element.compareDocumentPosition(checklist.element) &
         Node.DOCUMENT_POSITION_FOLLOWING,
     ).toBeTruthy();
-    expect(checklist.classes()).not.toContain('mt-auto');
+    expect(checklist.classes()).toContain('mt-auto');
+    expect(checklist.classes()).toContain('shrink-0');
     expect(wrapper.find('[data-testid="task-plan-property-editor"]').exists()).toBe(false);
     expect(wrapper.find('[data-testid="task-checklist-chip"]').exists()).toBe(false);
   });

@@ -180,15 +180,6 @@
         />
       </section>
 
-      <GoalKeyResultDraftEditor
-        :key="mode"
-        v-model="draft.keyResults"
-        :disabled="fieldsBusy"
-        :goal-start="draft.start"
-        :goal-target="draft.target"
-        @editing-change="krEditorOpen = $event"
-      />
-
       <section class="space-y-2" data-testid="goal-description-section">
         <Label for="goal-description" class="sr-only">{{ t('goal.dialog.description') }}</Label>
         <ProductAutoTextarea
@@ -256,6 +247,16 @@
           {{ t('goal.dialog.checkpointRetrySave') }}
         </Button>
       </div>
+
+      <GoalKeyResultDraftEditor
+        :key="mode"
+        v-model="draft.keyResults"
+        class="mt-auto"
+        :disabled="fieldsBusy"
+        :goal-start="draft.start"
+        :goal-target="draft.target"
+        @editing-change="krEditorOpen = $event"
+      />
     </form>
 
     <template #footer>
