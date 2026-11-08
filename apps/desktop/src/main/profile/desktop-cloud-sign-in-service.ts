@@ -10,6 +10,7 @@ import { mapBetterAuthFailure } from '@memoflow/cloud-auth';
 import { fail, ok, type Result } from '@memoflow/transport-contracts/result';
 import { createLogger } from '@memoflow/utils/logger';
 import { getApiBaseUrl } from '../utils/api-config';
+import { safeSyncErrorCode, safeSyncErrorType } from '../database/powersync-health';
 import type { CloudSessionStore, StoredCloudSession } from './cloud-session-store';
 import type { DesktopProfileRuntimeManager } from './desktop-profile-runtime-manager';
 import { markProfileImportOpportunity } from './profile-import-opportunity';
@@ -28,6 +29,19 @@ export interface DesktopCloudSignInServiceOptions {
 
 function authOrigin(): string {
   return new URL(getApiBaseUrl()).origin;
+}
+
+/**
+ * A silent network failure here reads as "the button did nothing". Keep the
+ * category and the fixed request path, never the URL, response body or token.
+ */
+function logSignInRequestFailure(path: string, error: unknown): void {
+  const errorCode = safeSyncErrorCode(error);
+  logger.warn('Cloud sign-in request failed', {
+    path,
+    errorType: safeSyncErrorType(error),
+    ...(errorCode ? { errorCode } : {}),
+  });
 }
 
 /**
@@ -215,6 +229,7 @@ export class DesktopCloudSignInService {
         signal: AbortSignal.timeout(15_000),
       });
     } catch (cause) {
+      logSignInRequestFailure(path, cause);
       return fail({ code: 'NETWORK_ERROR', message: '无法连接认证服务器', cause });
     }
     const payload = (await response.json().catch(() => null)) as unknown;
@@ -234,6 +249,7 @@ export class DesktopCloudSignInService {
         signal: AbortSignal.timeout(15_000),
       });
     } catch (cause) {
+      logSignInRequestFailure('/get-session', cause);
       return fail({ code: 'NETWORK_ERROR', message: '无法连接认证服务器', cause });
     }
     if (!response.ok) {

@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import {
   describePowerSyncStatus,
   safeSyncErrorCategory,
+  safeSyncErrorCode,
   type SafeSyncHealth,
 } from './powersync-health';
 
@@ -95,6 +96,21 @@ describe('PowerSync safe first-download diagnostics', () => {
     expect(
       describePowerSyncStatus({ connected: true, hasSynced: true, lastSyncedAt: Number.NaN }),
     ).toEqual({ phase: 'synced', hasSynced: true });
+  });
+
+  it('keeps only a transport-shaped code from the error or its cause', () => {
+    expect(
+      safeSyncErrorCode(
+        Object.assign(new TypeError('fetch failed'), {
+          cause: { code: 'ENOTFOUND' },
+        }),
+      ),
+    ).toBe('ENOTFOUND');
+    expect(safeSyncErrorCode({ code: 'CERT_HAS_EXPIRED' })).toBe('CERT_HAS_EXPIRED');
+    expect(safeSyncErrorCode({ code: 'secret token with spaces' })).toBeUndefined();
+    expect(safeSyncErrorCode({ code: 'Bearer abc.def' })).toBeUndefined();
+    expect(safeSyncErrorCode(new Error('fetch failed'))).toBeUndefined();
+    expect(safeSyncErrorCode(null)).toBeUndefined();
   });
 
   it('maps download failures to categorical error classes without copying details', () => {

@@ -4,6 +4,9 @@ import path from 'node:path';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { DesktopCloudSignInService } from './desktop-cloud-sign-in-service';
 
+const signInLogs = vi.hoisted(() => ({ info: vi.fn(), warn: vi.fn(), error: vi.fn() }));
+vi.mock('@memoflow/utils/logger', () => ({ createLogger: () => signInLogs }));
+
 vi.mock('../utils/api-config', () => ({
   getApiBaseUrl: () => 'https://api.memo.test/api/v1',
 }));
@@ -191,6 +194,33 @@ describe('DesktopCloudSignInService', () => {
 
     expect(result).toMatchObject({ ok: false, error: { code: 'NETWORK_ERROR' } });
     expect(runtime.openProfile).not.toHaveBeenCalled();
+  });
+
+  it('logs a sanitized transport failure instead of failing silently', async () => {
+    signInLogs.warn.mockClear();
+    const cause = Object.assign(new Error('getaddrinfo ENOTFOUND api.memo.test'), {
+      code: 'ENOTFOUND',
+    });
+    const fetchImpl = vi
+      .fn()
+      .mockRejectedValue(Object.assign(new TypeError('fetch failed'), { cause }));
+    const { service } = setup(fetchImpl);
+
+    const result = await service.signIn({
+      email: 'person@example.com',
+      password: 'cloud-password',
+      remember: true,
+    });
+
+    expect(result).toMatchObject({ ok: false, error: { code: 'NETWORK_ERROR' } });
+    expect(signInLogs.warn).toHaveBeenCalledWith('Cloud sign-in request failed', {
+      path: '/sign-in/email',
+      errorType: 'TypeError',
+      errorCode: 'ENOTFOUND',
+    });
+    const logged = JSON.stringify(signInLogs.warn.mock.calls);
+    expect(logged).not.toContain('api.memo.test');
+    expect(logged).not.toContain('cloud-password');
   });
 
   it('requires email verification when sign-up issues no session token', async () => {

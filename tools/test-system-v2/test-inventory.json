@@ -1830,6 +1830,14 @@
       "measurementCollectors": []
     },
     {
+      "path": "apps/desktop/src/main/runtime/account-profile-sync.powersync.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "apps/desktop/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "apps/desktop/src/main/runtime/compose-ai.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -13421,7 +13429,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 111
+      "fileCount": 112
     },
     {
       "id": "apps/migrator/vitest.config.ts",
@@ -14552,7 +14560,7 @@
   "duplicate": [],
   "unexpected": [],
   "counts": {
-    "unit": 1199,
+    "unit": 1200,
     "integration": 58,
     "smoke": 3,
     "boundary-ipc": 6,

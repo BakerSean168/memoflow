@@ -82,6 +82,54 @@ describe('DesktopCloudConnectionManager', () => {
     });
     expect(JSON.stringify(cloudLogs.warn.mock.calls)).not.toContain('hidden-session-jwt');
   });
+  it('records the sanitized transport code and attempted path when the session request fails', async () => {
+    const sessions = { load: vi.fn().mockResolvedValue(stored), save: vi.fn() };
+    const runtime = runtimeFixture();
+    const fetchImpl = vi.fn().mockRejectedValue(
+      Object.assign(new TypeError('fetch failed'), {
+        cause: Object.assign(new Error('getaddrinfo ENOTFOUND memo.test'), {
+          code: 'ENOTFOUND',
+        }),
+      }),
+    );
+    const manager = new DesktopCloudConnectionManager(
+      sessions as never,
+      runtime as never,
+      fetchImpl,
+    );
+
+    await expect(manager.restore(profile('account-1'))).resolves.toBe('OFFLINE');
+    expect(cloudLogs.warn).toHaveBeenCalledWith('Cloud connection restore unsuccessful', {
+      stage: 'remote_session',
+      errorType: 'TypeError',
+      errorCode: 'ENOTFOUND',
+      requestPath: 'auth/get-session',
+    });
+    const logged = JSON.stringify(cloudLogs.warn.mock.calls);
+    expect(logged).not.toContain('memo.test');
+    expect(logged).not.toContain('token-1');
+  });
+
+  it('keeps a local session write failure out of the remote request stage', async () => {
+    const sessions = {
+      load: vi.fn().mockResolvedValue(stored),
+      save: vi.fn().mockRejectedValue(new Error('本机安全存储不可用')),
+    };
+    const runtime = runtimeFixture();
+    const manager = new DesktopCloudConnectionManager(
+      sessions as never,
+      runtime as never,
+      vi.fn(async () => remoteSession()),
+    );
+
+    await expect(manager.restore(profile('account-1'))).resolves.toBe('OFFLINE');
+    expect(cloudLogs.warn).toHaveBeenCalledWith('Cloud connection restore unsuccessful', {
+      stage: 'session_persist',
+      errorType: 'Error',
+    });
+    expect(runtime.enableCloudSync).not.toHaveBeenCalled();
+  });
+
   it('interrupts pending sync startup before waiting for the cloud check to stop', async () => {
     let finishConnect!: () => void;
     const runtime = runtimeFixture();

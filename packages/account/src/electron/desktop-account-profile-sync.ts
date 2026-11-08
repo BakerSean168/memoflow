@@ -6,7 +6,7 @@ import type { ExecutionContext } from '@memoflow/transport-contracts';
 import { createLogger } from '@memoflow/utils/logger';
 import { formatZodErrors } from '@memoflow/utils/result';
 import type { UpdateAccountProfileUseCase } from '../server/application';
-import type { IAccountRepository } from '../server/domain';
+import type { Account, IAccountRepository } from '../server/domain';
 import type { Transactional } from '../server/infrastructure';
 
 const logger = createLogger('DesktopAccountProfileSync');
@@ -22,6 +22,12 @@ interface ProfileSyncSnapshotRow {
   bio: string | null;
   avatar_url: string | null;
   synced_at: number | null;
+}
+
+/** The subset of a database transaction the single-row sync state needs. */
+interface ProfileSyncWriter {
+  execute(sql: string, parameters?: unknown[]): Promise<unknown>;
+  getOptional<T>(sql: string, parameters?: unknown[]): Promise<T | null>;
 }
 
 export type ProfileSyncFailureCategory =
@@ -112,36 +118,7 @@ export class DesktopAccountProfileSync {
         ? await Promise.resolve(this.repository.findById(cx.identityId)).catch(() => null)
         : null;
 
-    const result = await this.db.writeTransaction(async (tx) => {
-      const updated = await this.updateProfileUseCase.execute(parsed.data, cx, tx);
-      if (!updated.ok || this.options.getCloudAccountId() !== cx.identityId) {
-        return updated;
-      }
-
-      await tx.execute(
-        `INSERT INTO account_profile_sync_outbox (id, owner_id, revision, requested_at)
-         VALUES ('current', ?, 1, ?)
-         ON CONFLICT(id) DO UPDATE SET
-           owner_id = excluded.owner_id,
-           revision = account_profile_sync_outbox.revision + 1,
-           requested_at = excluded.requested_at`,
-        [cx.identityId, Date.now()],
-      );
-      if (priorAccount) {
-        await tx.execute(
-          `INSERT OR IGNORE INTO account_profile_sync_snapshot
-             (id, owner_id, nickname, bio, avatar_url, synced_at)
-           VALUES ('current', ?, ?, ?, ?, NULL)`,
-          [
-            cx.identityId,
-            priorAccount.profile.nickname,
-            priorAccount.profile.bio || null,
-            priorAccount.profile.avatarUrl || null,
-          ],
-        );
-      }
-      return updated;
-    });
+    const result = await this.commitLocalUpdate(parsed.data, cx, priorAccount);
 
     if (result.ok) {
       this.notifyStateChanged();
@@ -158,6 +135,116 @@ export class DesktopAccountProfileSync {
       });
     }
     return result;
+  }
+
+  /**
+   * Runs the local save and its sync intent in one transaction.
+   *
+   * A local write failure is a real save failure, but it must stay
+   * diagnosable: log a sanitized reason before rethrowing so the IPC boundary
+   * cannot reduce it to a generic error without any trace.
+   */
+  private async commitLocalUpdate(
+    request: UpdateAccountReq,
+    cx: ExecutionContext,
+    priorAccount: Account | null,
+  ): Promise<Result<UpdateAccountRes>> {
+    try {
+      return await this.db.writeTransaction(async (tx) => {
+        const updated = await this.updateProfileUseCase.execute(request, cx, tx);
+        if (!updated.ok || this.options.getCloudAccountId() !== cx.identityId) {
+          return updated;
+        }
+
+        await this.writePendingOutboxRow(tx, cx.identityId);
+        if (priorAccount) {
+          // The baseline only exists until the first successful delivery; a
+          // later save must never move it forward.
+          await tx.execute(
+            `INSERT OR IGNORE INTO account_profile_sync_snapshot
+               (id, owner_id, nickname, bio, avatar_url, synced_at)
+             VALUES ('current', ?, ?, ?, ?, NULL)`,
+            [
+              cx.identityId,
+              priorAccount.profile.nickname,
+              priorAccount.profile.bio || null,
+              priorAccount.profile.avatarUrl || null,
+            ],
+          );
+        }
+        return updated;
+      });
+    } catch (error: unknown) {
+      logger.error('Account profile local commit failed', {
+        phase: 'local_commit',
+        errorType: profileWriteErrorType(error),
+        reason: sanitizeProfileWriteReason(error),
+      });
+      throw error;
+    }
+  }
+
+  /**
+   * Coalesced single-row sync intent.
+   *
+   * PowerSync publishes local-only tables as writable views backed by
+   * `ps_data_local__*` storage, and SQLite rejects UPSERT against a view
+   * ("cannot UPSERT a view"). The row is therefore read and then updated or
+   * inserted explicitly inside the caller's transaction.
+   */
+  private async writePendingOutboxRow(writer: ProfileSyncWriter, ownerId: string): Promise<void> {
+    const requestedAt = Date.now();
+    const current = await writer.getOptional<{ revision: number }>(
+      `SELECT revision FROM account_profile_sync_outbox WHERE id = 'current' LIMIT 1`,
+    );
+    if (!current) {
+      await writer.execute(
+        `INSERT INTO account_profile_sync_outbox (id, owner_id, revision, requested_at)
+         VALUES ('current', ?, 1, ?)`,
+        [ownerId, requestedAt],
+      );
+      return;
+    }
+
+    const revision = Number(current.revision);
+    await writer.execute(
+      `UPDATE account_profile_sync_outbox
+       SET owner_id = ?, revision = ?, requested_at = ?
+       WHERE id = 'current'`,
+      [ownerId, (Number.isFinite(revision) ? revision : 0) + 1, requestedAt],
+    );
+  }
+
+  /** Same single-row write, for the last delivered profile snapshot. */
+  private async writeSnapshotRow(
+    writer: ProfileSyncWriter,
+    row: {
+      ownerId: string;
+      nickname: string | null;
+      bio: string | null;
+      avatarUrl: string | null;
+      syncedAt: number | null;
+    },
+  ): Promise<void> {
+    const values = [row.ownerId, row.nickname, row.bio, row.avatarUrl, row.syncedAt];
+    const current = await writer.getOptional<{ id: string }>(
+      `SELECT id FROM account_profile_sync_snapshot WHERE id = 'current' LIMIT 1`,
+    );
+    if (current) {
+      await writer.execute(
+        `UPDATE account_profile_sync_snapshot
+         SET owner_id = ?, nickname = ?, bio = ?, avatar_url = ?, synced_at = ?
+         WHERE id = 'current'`,
+        values,
+      );
+      return;
+    }
+    await writer.execute(
+      `INSERT INTO account_profile_sync_snapshot
+         (id, owner_id, nickname, bio, avatar_url, synced_at)
+       VALUES ('current', ?, ?, ?, ?, ?)`,
+      values,
+    );
   }
 
   /** Run a post-commit step, swallowing and logging its failure. */
@@ -199,24 +286,13 @@ export class DesktopAccountProfileSync {
       this.notifyStateChanged();
       throw error;
     }
-    await this.db.execute(
-      `INSERT INTO account_profile_sync_snapshot
-         (id, owner_id, nickname, bio, avatar_url, synced_at)
-       VALUES ('current', ?, ?, ?, ?, ?)
-       ON CONFLICT(id) DO UPDATE SET
-         owner_id = excluded.owner_id,
-         nickname = excluded.nickname,
-         bio = excluded.bio,
-         avatar_url = excluded.avatar_url,
-         synced_at = excluded.synced_at`,
-      [
-        pending.owner_id,
-        account.profile.nickname,
-        account.profile.bio || null,
-        account.profile.avatarUrl || null,
-        Date.now(),
-      ],
-    );
+    await this.writeSnapshotRow(this.db, {
+      ownerId: pending.owner_id,
+      nickname: account.profile.nickname,
+      bio: account.profile.bio || null,
+      avatarUrl: account.profile.avatarUrl || null,
+      syncedAt: Date.now(),
+    });
     await this.db.execute(
       `DELETE FROM account_profile_sync_outbox
        WHERE id = 'current' AND revision = ?`,
@@ -309,4 +385,38 @@ function classifyProfileSyncFailure(error: unknown): ProfileSyncFailureCategory 
   const name = typeof candidate.name === 'string' ? candidate.name : '';
   if (/Network|Fetch|Abort|Timeout|TypeError/i.test(name)) return 'network';
   return 'unknown';
+}
+
+const PROFILE_WRITE_ERROR_TYPES = new Set([
+  'Error',
+  'TypeError',
+  'RangeError',
+  'SqliteError',
+  'AbortError',
+  'TimeoutError',
+]);
+
+/** Categorical error name only; never carries a message or stack. */
+function profileWriteErrorType(error: unknown): string {
+  if (!error || typeof error !== 'object') return 'UnknownError';
+  const name = (error as { name?: unknown }).name;
+  return typeof name === 'string' && PROFILE_WRITE_ERROR_TYPES.has(name) ? name : 'UnknownError';
+}
+
+/**
+ * A bounded, credential-free description of a failed local write.
+ *
+ * SQLite messages are safe by themselves (table/column names only), but the
+ * reason passes through the same generic log sink, so URLs, bearer values and
+ * JWT-looking strings are stripped before they can reach it.
+ */
+function sanitizeProfileWriteReason(error: unknown): string | null {
+  if (!(error instanceof Error)) return null;
+  const sanitized = error.message
+    .replace(/https?:\/\/\S+/gi, '[url]')
+    .replace(/\bBearer\s+\S+/gi, 'Bearer [redacted]')
+    .replace(/\beyJ[A-Za-z0-9_-]{8,}(?:\.[A-Za-z0-9_-]+){0,2}\b/g, '[token]')
+    .replace(/\s+/g, ' ')
+    .trim();
+  return sanitized ? sanitized.slice(0, 200) : null;
 }

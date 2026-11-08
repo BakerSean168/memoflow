@@ -2,7 +2,7 @@ import { BetterAuthSessionResponseSchema } from '@memoflow/cloud-auth-contracts'
 import { createLogger } from '@memoflow/utils/logger';
 import type { ProfileCloudState } from '@memoflow/desktop-contracts';
 import { getApiBaseUrl } from '../utils/api-config';
-import { safeSyncErrorType } from '../database/powersync-health';
+import { safeSyncErrorCode, safeSyncErrorType } from '../database/powersync-health';
 import type { DesktopProfileRuntimeManager } from './desktop-profile-runtime-manager';
 import type { ProfileDescriptor } from './profile-registry';
 import type { CloudSessionStore, StoredCloudSession } from './cloud-session-store';
@@ -210,6 +210,7 @@ export class DesktopCloudConnectionManager {
         if (typeof remote === 'string') {
           state = remote;
         } else {
+          stage = 'session_persist';
           await this.sessions.save(check.profileId, remote);
           if (!this.isCurrent(check)) return 'OFFLINE';
           stage = 'power_sync_activation';
@@ -225,10 +226,15 @@ export class DesktopCloudConnectionManager {
       }
     } catch (error) {
       // The SDK may swallow lower-level errors. Log only categorical metadata:
-      // Error.message/stack can contain URLs or bearer credentials.
+      // Error.message/stack can contain URLs or bearer credentials. The
+      // transport code plus the attempted path separate a fetch-layer failure
+      // from a response-contract problem without logging either.
+      const errorCode = safeSyncErrorCode(error);
       cloudLogger.warn('Cloud connection restore unsuccessful', {
         stage,
         errorType: safeSyncErrorType(error),
+        ...(errorCode ? { errorCode } : {}),
+        ...(stage === 'remote_session' ? { requestPath: 'auth/get-session' } : {}),
       });
       state = 'OFFLINE';
     }
