@@ -45,6 +45,8 @@ const NETWORK_ERROR_TYPES = new Set([
   'FetchError',
 ]);
 
+const SAFE_ERROR_CODE = /^[A-Z][A-Z0-9_]{1,39}$/;
+
 function safeLastSyncedAt(value: unknown): number | null {
   if (value instanceof Date) {
     const time = value.getTime();
@@ -64,6 +66,22 @@ export function safeSyncErrorType(error: unknown): string {
   if (!error || typeof error !== 'object') return 'UnknownError';
   const name = (error as { name?: unknown }).name;
   return typeof name === 'string' && SAFE_ERROR_TYPES.has(name) ? name : 'UnknownError';
+}
+
+/**
+ * Machine-readable transport code (ENOTFOUND, CERT_HAS_EXPIRED, ...) from the
+ * error or its cause. Only an allowlisted shape is returned so free-form
+ * messages, URLs or credentials can never pass as a code.
+ */
+export function safeSyncErrorCode(error: unknown): string | undefined {
+  if (!error || typeof error !== 'object') return undefined;
+  const candidates = [error, (error as { cause?: unknown }).cause];
+  for (const candidate of candidates) {
+    if (!candidate || typeof candidate !== 'object') continue;
+    const code = (candidate as { code?: unknown }).code;
+    if (typeof code === 'string' && SAFE_ERROR_CODE.test(code)) return code;
+  }
+  return undefined;
 }
 
 /** Categorical failure only; never carries a message, URL, or credential. */
