@@ -43,7 +43,14 @@ async function createHarness() {
   await db.execute(
     `INSERT INTO accounts (id, status, profile, created_at, updated_at, closed_at)
      VALUES (?, ?, ?, ?, ?, ?)`,
-    [CLOUD_ACCOUNT_ID, 'Active', ACCOUNT_PROFILE, '2026-11-01T00:00:00.000Z', '2026-11-01T00:00:00.000Z', null],
+    [
+      CLOUD_ACCOUNT_ID,
+      'Active',
+      ACCOUNT_PROFILE,
+      '2026-11-01T00:00:00.000Z',
+      '2026-11-01T00:00:00.000Z',
+      null,
+    ],
   );
 
   let token: string | null = null;
@@ -88,7 +95,10 @@ describe('DesktopAccountProfileSync on a real PowerSync profile database', () =>
   });
 
   it('commits the local profile and sync intent while the cloud is unreachable', async () => {
-    const result = await harness.sync.update({ nickname: 'Offline Name' }, ipcContext(CLOUD_ACCOUNT_ID));
+    const result = await harness.sync.update(
+      { nickname: 'Offline Name' },
+      ipcContext(CLOUD_ACCOUNT_ID),
+    );
 
     expect(result.ok).toBe(true);
     const account = await harness.db.get<{ profile: string }>(
@@ -122,7 +132,9 @@ describe('DesktopAccountProfileSync on a real PowerSync profile database', () =>
       avatar: null,
       bio: 'Local bio',
     });
-    await expect(harness.db.getAll('SELECT * FROM account_profile_sync_outbox')).resolves.toEqual([]);
+    await expect(harness.db.getAll('SELECT * FROM account_profile_sync_outbox')).resolves.toEqual(
+      [],
+    );
     await expect(
       harness.db.get<{ nickname: string; synced_at: number }>(
         'SELECT nickname, synced_at FROM account_profile_sync_snapshot WHERE id = ?',
