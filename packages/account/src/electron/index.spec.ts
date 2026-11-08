@@ -548,9 +548,10 @@ describe('AccountElectronModule cloud-close behavior', () => {
     const fake = createFakeInstance();
     const context = createFakeContext();
     const txExecute = vi.fn().mockResolvedValue({ rowsAffected: 1 });
+    const txGetOptional = vi.fn().mockResolvedValue(null);
     const db = {
       writeTransaction: vi.fn(async (callback: (tx: unknown) => Promise<unknown>) =>
-        callback({ execute: txExecute }),
+        callback({ execute: txExecute, getOptional: txGetOptional }),
       ),
       getOptional: vi.fn().mockResolvedValue(null),
       execute: vi.fn().mockResolvedValue({ rowsAffected: 1 }),
