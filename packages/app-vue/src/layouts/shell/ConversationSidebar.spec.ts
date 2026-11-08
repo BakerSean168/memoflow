@@ -588,6 +588,7 @@ describe('ConversationSidebar account footer', () => {
         userName: 'Alice',
         identityKind: 'cloud',
         cloudConnected: true,
+        cloudState: 'ONLINE',
         accountEmail: 'alice@example.com',
       },
       global: { plugins: [i18n] },
@@ -597,30 +598,88 @@ describe('ConversationSidebar account footer', () => {
       await wrapper.get('[data-testid="shell-account-card"]').trigger('keydown', { key: 'Enter' });
       await flushPromises();
       expect(item('shell-account-card-email').textContent?.trim()).toBe('alice@example.com');
-      expect(item('shell-account-card-kind').textContent?.trim()).toBe('Signed in');
+      // 云端卡片不再渲染「已登录」类型行，该元素从 DOM 消失。
+      expect(document.querySelector('[data-testid="shell-account-card-kind"]')).toBeNull();
+      // Discord 式卡面：横幅 + 大头像 + 云端状态点。
+      expect(item('shell-account-card-banner')).not.toBeNull();
+      expect(item('shell-account-card-avatar').className).toContain('h-14');
+      expect(item('shell-account-card-status')).not.toBeNull();
     } finally {
       wrapper.unmount();
     }
   });
 
-  it('keeps the personal card scroll-free and clips long identity text', async () => {
+  /** 卡片靠固定窄宽度 + truncate 裁剪，不设滚动容器；按场景检查实际出现的文本行。 */
+  function expectCardClipsPanel(ids: string[]) {
+    const panel = item('shell-account-card-panel');
+    const surface = panel.closest('[role="menu"]') as HTMLElement;
+    expect(surface.className).toContain('w-64');
+    expect(surface.className).not.toContain('overflow-y-auto');
+    expect(surface.className).not.toContain('overflow-y-scroll');
+    expect(getComputedStyle(surface).overflowY).not.toBe('auto');
+    expect(panel.className).not.toContain('overflow-y-auto');
+    for (const id of ids) {
+      expect(item(id).className).toContain('truncate');
+    }
+    expect(item('shell-account-card-name').parentElement?.className).toContain('min-w-0');
+  }
+
+  it('keeps the personal card scroll-free and clips long local identity text', async () => {
     const wrapper = await openCard({
       isDesktop: true,
       userName: 'A very long account name that must never widen the card',
     });
     try {
-      const panel = item('shell-account-card-panel');
-      const surface = panel.closest('[role="menu"]') as HTMLElement;
-      // 卡片靠固定窄宽度 + truncate 裁剪，不设滚动容器。
-      expect(surface.className).toContain('w-64');
-      expect(surface.className).not.toContain('overflow-y-auto');
-      expect(surface.className).not.toContain('overflow-y-scroll');
-      expect(getComputedStyle(surface).overflowY).not.toBe('auto');
-      expect(panel.className).not.toContain('overflow-y-auto');
-      for (const id of ['shell-account-card-name', 'shell-account-card-kind']) {
-        expect(item(id).className).toContain('truncate');
+      expectCardClipsPanel(['shell-account-card-name', 'shell-account-card-kind']);
+    } finally {
+      wrapper.unmount();
+    }
+  });
+
+  it('keeps the personal card scroll-free and clips long cloud name and email', async () => {
+    const wrapper = await openCard({
+      isDesktop: true,
+      identityKind: 'cloud',
+      cloudConnected: true,
+      cloudState: 'ONLINE',
+      userName: 'A very long account name that must never widen the card',
+      accountEmail: 'a-very-long-cloud-address-that-must-never-widen-the-card@example.com',
+    });
+    try {
+      expectCardClipsPanel(['shell-account-card-name', 'shell-account-card-email']);
+      expect(document.querySelector('[data-testid="shell-account-card-kind"]')).toBeNull();
+    } finally {
+      wrapper.unmount();
+    }
+  });
+
+  it('renders a leading icon on every account menu row', async () => {
+    const wrapper = await openCard({
+      isDesktop: true,
+      identityKind: 'cloud',
+      cloudConnected: true,
+    });
+    try {
+      for (const id of ['shell-edit-profile', 'shell-switch-account', 'shell-logout']) {
+        expect(item(id).querySelector('svg'), id).not.toBeNull();
       }
-      expect(item('shell-account-card-name').parentElement?.className).toContain('min-w-0');
+      item('shell-switch-account').click();
+      await flushPromises();
+      expect(item('shell-add-account').querySelector('svg')).not.toBeNull();
+    } finally {
+      wrapper.unmount();
+    }
+  });
+
+  it('renders the cloud connection icon on the web account row', async () => {
+    const wrapper = await openCard({
+      isDesktop: false,
+      identityKind: 'local',
+      cloudConnected: false,
+    });
+    try {
+      expect(item('shell-edit-profile').querySelector('svg')).not.toBeNull();
+      expect(item('shell-open-cloud-connection').querySelector('svg')).not.toBeNull();
     } finally {
       wrapper.unmount();
     }
