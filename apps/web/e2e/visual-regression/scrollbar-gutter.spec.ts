@@ -34,12 +34,22 @@ for (const host of ['web', 'desktop'] as const) {
           width: width === 440 ? 'narrow' : 'wide',
           clock: 'running',
           query:
-            surface === 'providers'
-              ? 'surface=settings&tab=ai&acceptance=484'
-              : surface === 'shared-list'
-                ? 'surface=shared-list&acceptance=484'
-                : 'surface=shell-split&acceptance=484',
+            surface === 'shared-list'
+              ? 'surface=shared-list&acceptance=484'
+              : 'surface=shell-split&acceptance=484',
         });
+        if (surface === 'providers') {
+          // The standalone settings page is gone: reach the AI section through the
+          // shell settings dialog. Open it wide enough for the section navigation,
+          // then resize back to the measured width with AI still selected.
+          if (width < 1024) await page.setViewportSize({ width: 1280, height: 1800 });
+          await page.getByTestId('shell-sidebar-toggle').click();
+          await page.getByTestId('shell-open-settings').click();
+          await expect(page.getByTestId('shell-settings-dialog')).toBeVisible();
+          await expect(page.getByTestId('settings-tab-ai')).toBeVisible();
+          await page.getByTestId('settings-tab-ai').click();
+          await expect(page.getByTestId('ai-mastra-agent-name')).toBeVisible();
+        }
         await page.setViewportSize({ width, height: 1800 });
         const scroll =
           surface === 'providers'
