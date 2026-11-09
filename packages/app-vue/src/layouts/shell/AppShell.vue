@@ -31,7 +31,8 @@ import { canLeaveBusinessSurface } from './surface-leave-protocol';
 import { GoalSurfaceLeaveGuardKey, GoalSurfaceStatusSinkKey } from '@memoflow/goal-ui';
 import { provideKnowledgeNativeSurface } from './useKnowledgeNativeSurface';
 import { useNativeBusinessPanelBridge } from './useNativeBusinessPanelBridge';
-import { useShellRouterSync, moduleForPath } from './useShellRouterSync';
+import { useShellRouterSync, moduleForPath, returnFromSettingsScene } from './useShellRouterSync';
+import { isStandaloneSettingsPath } from './shell-scene';
 import { useDesktopWindowControls } from '../../shared/composables/useDesktopWindowControls';
 import { hasDesktopAuthApi } from '../../shared/utils/desktop-auth-recovery';
 import { useNotificationUnreadQuery } from '@memoflow/notification-ui';
@@ -72,7 +73,6 @@ import ProductDialogShell from '../../shared/components/ProductDialogShell.vue';
 import { UserSettingsView } from '@memoflow/setting-ui';
 import { useDesktopProfiles } from '../../shared/composables/useDesktopProfiles';
 import { z } from 'zod';
-import StandaloneSettingsLayout from './StandaloneSettingsLayout.vue';
 import {
   COMPOSER_BOTTOM_GAP,
   BUSINESS_HARD_MIN,
@@ -131,8 +131,6 @@ const isDesktop = typeof window !== 'undefined' && hasDesktopAuthApi(window);
 const isMac = typeof navigator !== 'undefined' && /Mac|iPhone|iPad/.test(navigator.platform);
 
 const {
-  shellScene,
-  isSettingsScene,
   shellState,
   effectiveViewportWidth,
   workspaceChromeStyle,
@@ -519,10 +517,6 @@ watch(sidebarPresentation, (presentation) => {
   if (presentation === 'docked') closeOverlaySidebar();
 });
 
-watch(isSettingsScene, (settings) => {
-  if (settings) closeOverlaySidebar();
-});
-
 watch(rightPanelOpen, (open) => {
   // Reopening the business panel must immediately re-apply viewport constraints.
   if (open) onViewportGeometryChange();
@@ -617,9 +611,11 @@ function openPanelRoute(_module: 'goal' | 'task' | 'routine', path: string) {
 
 /**
  * Settings entry points open the shell dialog instead of navigating to `/settings`.
- * The route stays untouched, so closing the dialog returns to the exact workspace
- * state (tabs, drafts, chat streaming) that was visible before opening it.
- * `/settings` remains a deep-link fallback handled by the standalone settings scene.
+ * In-app entry points leave the route untouched, so closing the dialog returns to
+ * the exact workspace state (tabs, drafts, chat streaming) that was visible before.
+ * A `/settings` deep link (typed URL, reload, or an in-app link) renders the same
+ * workspace and opens the same dialog: the URL stays on the deep link while the
+ * dialog is open, and closing it replaces the address with the underlying view.
  */
 const settingsDialogOpen = ref(false);
 const settingsDialogTab = ref<string>();
@@ -637,6 +633,40 @@ function openSettings(path = '/settings') {
   settingsDialogTab.value = parseSettingsTab(path);
   settingsDialogSession.value += 1;
   settingsDialogOpen.value = true;
+}
+
+/**
+ * Route-driven entry: a settings URL never owns a full-page scene. It opens the
+ * dialog on top of the workspace and keeps the URL for reload/deep-link fidelity;
+ * the tab comes from the same `?tab=` contract the embedded settings view consumes.
+ */
+watch(
+  () => route.fullPath,
+  (fullPath, previousFullPath) => {
+    if (isStandaloneSettingsPath(route.path)) {
+      closeOverlaySidebar();
+      settingsDialogTab.value = parseSettingsTab(fullPath);
+      settingsDialogSession.value += 1;
+      settingsDialogOpen.value = true;
+      return;
+    }
+    if (previousFullPath && isStandaloneSettingsPath(previousFullPath)) {
+      settingsDialogOpen.value = false;
+    }
+  },
+  { immediate: true },
+);
+
+/**
+ * Closing the dialog is local state for in-app entries. When the address is still
+ * a settings deep link, the same close also replaces it with the workspace view
+ * captured on entry (active tab or Home), so no dead settings route is left behind.
+ */
+function closeSettingsDialog(): void {
+  if (!settingsDialogOpen.value) return;
+  settingsDialogOpen.value = false;
+  if (!isStandaloneSettingsPath(route.path)) return;
+  void returnFromSettingsScene(router, store, route.fullPath);
 }
 
 function openUpdateSettings() {
@@ -683,10 +713,8 @@ function panelCacheKey(
   return `${owner}:${resolvePanelRouteIdentity(matched, fullPath)}`;
 }
 const keyboardDisposers: Array<() => void> = [];
-const inWorkspace = () => !isSettingsScene.value;
 for (const module of keyboardModules) {
-  const enabled = () =>
-    inWorkspace() && headerCapsules.value.some((entry) => entry.id === module.id);
+  const enabled = () => headerCapsules.value.some((entry) => entry.id === module.id);
   keyboardDisposers.push(
     keyboard.register(
       `module.${module.id}.preview`,
@@ -715,29 +743,25 @@ keyboard.setPreviewEntry(() => {
 });
 keyboardDisposers.push(
   keyboard.register('layout.sidebar', handleShellSidebarToggle),
-  keyboard.register('layout.panel', () => sync.togglePanel(), inWorkspace),
-  keyboard.register('conversation.new', handleNewConversation, inWorkspace),
-  keyboard.register(
-    'conversation.search',
-    async () => {
-      if (sidebarPresentation.value === 'overlay') overlaySidebarOpen.value = true;
-      else store.sidebarCollapsed = false;
-      await nextTick();
-      const sidebars = [
-        ...document.querySelectorAll<HTMLElement>('[data-testid="conversation-sidebar"]'),
-      ];
-      const sidebar = sidebars.find((el) => el.getClientRects().length > 0);
-      const input = sidebar?.querySelector<HTMLInputElement>(
-        '[data-testid="conversation-search-input"]',
-      );
-      if (input) input.focus();
-      else
-        sidebar
-          ?.querySelector<HTMLButtonElement>('[data-testid="conversation-search-toggle"]')
-          ?.click();
-    },
-    inWorkspace,
-  ),
+  keyboard.register('layout.panel', () => sync.togglePanel()),
+  keyboard.register('conversation.new', handleNewConversation),
+  keyboard.register('conversation.search', async () => {
+    if (sidebarPresentation.value === 'overlay') overlaySidebarOpen.value = true;
+    else store.sidebarCollapsed = false;
+    await nextTick();
+    const sidebars = [
+      ...document.querySelectorAll<HTMLElement>('[data-testid="conversation-sidebar"]'),
+    ];
+    const sidebar = sidebars.find((el) => el.getClientRects().length > 0);
+    const input = sidebar?.querySelector<HTMLInputElement>(
+      '[data-testid="conversation-search-input"]',
+    );
+    if (input) input.focus();
+    else
+      sidebar
+        ?.querySelector<HTMLButtonElement>('[data-testid="conversation-search-toggle"]')
+        ?.click();
+  }),
   keyboard.register('app.shortcuts', () => openSettings('/settings?tab=shortcuts')),
 );
 for (const [id, direction] of [
@@ -752,7 +776,7 @@ for (const [id, direction] of [
         const next = tabs.value[(index + direction + tabs.value.length) % tabs.value.length];
         return next ? sync.activateTab(next.id) : undefined;
       },
-      () => inWorkspace() && tabs.value.length > 1,
+      () => tabs.value.length > 1,
     ),
   );
 }
@@ -771,8 +795,7 @@ onBeforeUnmount(() => {
   <div
     class="flex h-full min-h-0 w-full flex-col overflow-hidden bg-background text-foreground"
     data-testid="app-shell"
-    :data-shell-state="isSettingsScene ? 'settings' : shellState"
-    :data-shell-scene="shellScene"
+    :data-shell-state="shellState"
   >
     <div
       v-if="needsEmailVerification"
@@ -793,8 +816,8 @@ onBeforeUnmount(() => {
 
     <!-- 顶部窗口栏：工作区 launcher + 日程入口 + 窗控 -->
     <WindowHeader
-      :mode="isSettingsScene ? 'settings' : 'workspace'"
-      :sidebar-collapsed="isSettingsScene ? !store.settingsNavigationOpen : headerSidebarCollapsed"
+      mode="workspace"
+      :sidebar-collapsed="headerSidebarCollapsed"
       :right-panel-open="rightPanelOpen"
       :is-desktop="isDesktop"
       :is-mac="isMac"
@@ -814,60 +837,76 @@ onBeforeUnmount(() => {
       </template>
       <template #capsule-preview-goal="{ closePreview }">
         <GoalCapsulePreview
-          @view-all="openHeaderPreviewModule(closePreview, { id: 'goal', route: '/goals' })"
+          @view-all="
+            openHeaderPreviewModule(closePreview, {
+              id: 'goal',
+              route: '/goals',
+            })
+          "
           @select="openHeaderGoalPreview(closePreview, $event)"
         />
       </template>
       <template #capsule-preview-task="{ closePreview }">
         <TaskCapsulePreview
-          @view-all="openHeaderPreviewModule(closePreview, { id: 'task', route: '/tasks' })"
+          @view-all="
+            openHeaderPreviewModule(closePreview, {
+              id: 'task',
+              route: '/tasks',
+            })
+          "
           @select="openHeaderTaskPreview(closePreview, $event)"
         />
       </template>
       <template #capsule-preview-routine="{ closePreview }">
         <RoutineCapsulePreview
-          @view-all="openHeaderPreviewModule(closePreview, { id: 'routine', route: '/routines' })"
+          @view-all="
+            openHeaderPreviewModule(closePreview, {
+              id: 'routine',
+              route: '/routines',
+            })
+          "
           @select="openHeaderRoutinePreview(closePreview, $event)"
         />
       </template>
       <template #capsule-preview-note="{ closePreview }">
         <NoteCapsulePreview
-          @view-all="openHeaderPreviewModule(closePreview, { id: 'note', route: '/repository' })"
+          @view-all="
+            openHeaderPreviewModule(closePreview, {
+              id: 'note',
+              route: '/repository',
+            })
+          "
           @select="openHeaderNotePreview(closePreview, $event)"
         />
       </template>
       <template #capsule-preview-schedule="{ closePreview }">
         <ScheduleCapsulePreview
-          @view-all="openHeaderPreviewModule(closePreview, { id: 'schedule', route: '/schedule' })"
+          @view-all="
+            openHeaderPreviewModule(closePreview, {
+              id: 'schedule',
+              route: '/schedule',
+            })
+          "
           @select="openHeaderScheduleItem(closePreview, $event)"
         />
       </template>
       <template #capsule-preview-notification="{ closePreview }">
         <NotificationCapsulePreview
           @view-all="
-            openHeaderPreviewModule(closePreview, { id: 'notification', route: '/notifications' })
+            openHeaderPreviewModule(closePreview, {
+              id: 'notification',
+              route: '/notifications',
+            })
           "
           @navigate="openHeaderNotificationDestination(closePreview, $event)"
         />
       </template>
     </WindowHeader>
 
-    <!-- STATE D：独立设置场景。设置路由只渲染 named view `settings`（UserSettingsView），
-         业务 default view 为空；WorkspaceSceneHost 用 v-show 常驻——KeepAlive 实例、
-         AIChatView 流式回复、Teleport 宿主都不随设置导航销毁（Phase 0 / UI-001）。 -->
-    <StandaloneSettingsLayout v-if="isSettingsScene" class="min-h-0 flex-1">
-      <div class="flex h-full min-h-0 flex-col">
-        <div class="min-h-0 flex-1">
-          <router-view name="settings" />
-        </div>
-      </div>
-    </StandaloneSettingsLayout>
-
     <!-- 主工作区（STATE A/B/C）：Hybrid Workspace。
          Sidebar 属于 Shell；Chat + Business 共享一个圆角 content well，
          圆角只表达主工作台层级，内部面板用 divider 分区。 -->
     <div
-      v-show="!isSettingsScene"
       class="workspace-stage relative flex min-h-0 flex-1 overflow-hidden"
       :style="workspaceChromeStyle"
       data-testid="shell-workspace-stage"
@@ -1059,16 +1098,16 @@ onBeforeUnmount(() => {
       </div>
     </div>
 
-    <!-- 设置大弹窗：所有应用内入口（齿轮 / 更新指示器 / 快捷键命令）都打开这里，
-         路由保持不变，关闭即回到打开前的视图与状态。深链 /settings 仍走上面的
-         StandaloneSettingsLayout 整页场景（行为逐字保留）。
+    <!-- 设置大弹窗：所有入口（齿轮 / 更新指示器 / 快捷键命令 / `/settings` 深链）
+         都打开这里。应用内入口不改路由，关闭即回到打开前的视图与状态；深链入口
+         由上面的路由 watch 打开，关闭时把地址 replace 回下层视图。
 
          层级（Issue #887 C）：本弹窗和设置分区里再打开的对话框（快捷键录制、
          Agent 向导、知识库断开确认等）都经 ProductDialogShell → DialogContent →
          DialogPortal 挂到 body，同为 z-50。Reka 的 portal 在挂载时追加到 body 末尾，
          因此后打开的嵌套对话框 content 在 DOM 中晚于本弹窗 content 出现、绘制在
          其上方——不需要额外 z-index 令牌；AppShell.spec.ts 断言了该 DOM 顺序。 -->
-    <Dialog :open="settingsDialogOpen" @update:open="settingsDialogOpen = $event">
+    <Dialog :open="settingsDialogOpen" @update:open="!$event && closeSettingsDialog()">
       <!-- workspace recipe 自带 sm:h-* 与 max-h 上限；contentClass 连同基础 h-* 一起覆写，
            否则 sm 断点会回落到 recipe 的高度。 -->
       <ProductDialogShell
@@ -1079,16 +1118,15 @@ onBeforeUnmount(() => {
         :content-class="'h-[85vh] max-h-none sm:h-[85vh] sm:max-w-6xl'"
         body-class="overflow-hidden p-0"
         :close-label="t('common.close')"
-        @request-close="settingsDialogOpen = false"
+        @request-close="closeSettingsDialog"
       >
         <template #title>{{ t('setting.title') }}</template>
         <!-- UserSettingsView 根节点是 h-full，外层补齐高度链；视图自带内部滚动。 -->
         <div class="h-full min-h-0">
           <UserSettingsView
             :key="settingsDialogSession"
-            embedded
             :initial-tab="settingsDialogTab"
-            @close="settingsDialogOpen = false"
+            @close="closeSettingsDialog"
           />
         </div>
       </ProductDialogShell>
@@ -1097,7 +1135,7 @@ onBeforeUnmount(() => {
     <!-- 窄屏会话导航：统一复用 Sheet（Modal Navigation Drawer）原语。
          它不占 workspace geometry；focus trap / Escape / backdrop / Portal 由 UI 基础层统一负责。 -->
     <Sheet
-      v-if="sidebarPresentation === 'overlay' && !isSettingsScene"
+      v-if="sidebarPresentation === 'overlay'"
       :open="overlaySidebarOpen"
       @update:open="overlaySidebarOpen = $event"
     >

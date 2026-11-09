@@ -69,7 +69,13 @@ const passThrough = (name: string) =>
 
 const activeChatConversationId = ref<string | null>(null);
 const conversationList = reactive<
-  { id: string; title?: string; name?: string; status?: string; updatedAt?: number }[]
+  {
+    id: string;
+    title?: string;
+    name?: string;
+    status?: string;
+    updatedAt?: number;
+  }[]
 >([
   { id: 'conversation-a', title: 'A' },
   { id: 'conversation-b', title: 'B' },
@@ -142,7 +148,10 @@ const ConversationSidebarStub = defineComponent({
       type: Array<{ labelKey: string; items: SidebarConversationEntry[] }>,
       default: () => [],
     },
-    archivedConversations: { type: Array<SidebarConversationEntry>, default: () => [] },
+    archivedConversations: {
+      type: Array<SidebarConversationEntry>,
+      default: () => [],
+    },
   },
   emits: ['select-conversation', 'new-conversation', 'delete-conversation', 'restore-conversation'],
   setup(props, { emit }) {
@@ -152,18 +161,25 @@ const ConversationSidebarStub = defineComponent({
           'ul',
           { 'data-testid': 'conversation-sidebar-archived' },
           props.archivedConversations.map((item) =>
-            h('li', { key: item.id, 'data-testid': 'conversation-sidebar-archived-row' }, [
-              h('span', item.title),
-              h(
-                'button',
-                {
-                  type: 'button',
-                  'data-testid': 'conversation-sidebar-restore',
-                  onClick: () => emit('restore-conversation', item.id),
-                },
-                'restore',
-              ),
-            ]),
+            h(
+              'li',
+              {
+                key: item.id,
+                'data-testid': 'conversation-sidebar-archived-row',
+              },
+              [
+                h('span', item.title),
+                h(
+                  'button',
+                  {
+                    type: 'button',
+                    'data-testid': 'conversation-sidebar-restore',
+                    onClick: () => emit('restore-conversation', item.id),
+                  },
+                  'restore',
+                ),
+              ],
+            ),
           ),
         ),
         h(
@@ -189,12 +205,11 @@ const TodayOverviewPanelStub = defineComponent({
 
 /**
  * Settings dialog seam: the shell owns the dialog, the settings module owns the
- * view. The stub records the embedded contract the dialog passes down.
+ * view. The stub records the embedded `initialTab` contract the dialog passes down.
  */
 const UserSettingsViewStub = defineComponent({
   name: 'UserSettingsView',
   props: {
-    embedded: { type: Boolean, default: false },
     initialTab: { type: String, default: undefined },
   },
   emits: ['close'],
@@ -204,7 +219,6 @@ const UserSettingsViewStub = defineComponent({
         'div',
         {
           'data-testid': 'user-settings-view-stub',
-          'data-embedded': String(props.embedded),
           'data-initial-tab': props.initialTab ?? '',
         },
         [
@@ -339,12 +353,8 @@ async function mountShell(
       { path: '/goals', component: GoalRouteProbe },
       {
         path: '/settings',
-        components: {
-          settings: {
-            template: '<div data-testid="settings-view" />',
-          },
-        },
-        meta: { shellScene: 'settings' },
+        // No named `settings` view: the route is only a dialog deep link now.
+        component: { render: () => null },
       },
     ],
   });
@@ -369,7 +379,6 @@ async function mountShell(
         TodayOverviewPanel: TodayOverviewPanelStub,
         PanelErrorBoundary: passThrough('PanelErrorBoundary'),
         GlobalComposer: true,
-        StandaloneSettingsLayout: passThrough('StandaloneSettingsLayout'),
         UserSettingsView: UserSettingsViewStub,
       },
     },
@@ -380,7 +389,10 @@ async function mountShell(
 
 describe('AppShell right-panel integration', () => {
   beforeEach(() => {
-    Object.defineProperty(window, 'innerWidth', { configurable: true, value: 1280 });
+    Object.defineProperty(window, 'innerWidth', {
+      configurable: true,
+      value: 1280,
+    });
     goalRouteMountCount = 0;
     activeChatConversationId.value = null;
   });
@@ -403,7 +415,10 @@ describe('AppShell right-panel integration', () => {
       abandoned = await mountShell('/goals', host);
       onTestFinished(abandoned.router.beforeEach(navigation));
       window.confirm = vi.fn(() => false);
-      Object.defineProperty(window, 'innerHeight', { configurable: true, value: 390 });
+      Object.defineProperty(window, 'innerHeight', {
+        configurable: true,
+        value: 390,
+      });
       vi.stubGlobal('matchMedia', vi.fn());
       vi.useFakeTimers();
       setTimeout(() => window.confirm('leaked timer'), 1000);
@@ -439,7 +454,10 @@ describe('AppShell right-panel integration', () => {
       const sidebar = pane === 'sidebar';
       await wrapper
         .get(`[data-testid="${sidebar ? 'conversation-sidebar' : 'business-panel'}-resizer"]`)
-        .trigger(sidebar ? 'mousedown' : 'pointerdown', { pointerId: 31, clientX: 700 });
+        .trigger(sidebar ? 'mousedown' : 'pointerdown', {
+          pointerId: 31,
+          clientX: 700,
+        });
 
       wrapper.unmount();
       expect(document.body.style.userSelect).toBe(originalUserSelect);
@@ -548,7 +566,6 @@ describe('AppShell right-panel integration', () => {
     expect(router.currentRoute.value.fullPath).toBe('/goals');
     expect(document.querySelector('[data-testid="shell-settings-dialog"]')).not.toBeNull();
     const settingsView = wrapper.getComponent(UserSettingsViewStub);
-    expect(settingsView.props('embedded')).toBe(true);
     expect(settingsView.props('initialTab')).toBe('updates');
     expect(store.settingsOrigin).toBeNull();
     expect(wrapper.find('[data-testid="settings-view"]').exists()).toBe(false);
@@ -582,7 +599,6 @@ describe('AppShell right-panel integration', () => {
     expect(dialog!.querySelector('[data-testid="product-dialog-footer"]')).toBeNull();
     // Default entry: no `?tab=`, so the settings view falls back to its own default.
     expect(wrapper.getComponent(UserSettingsViewStub).props('initialTab')).toBeUndefined();
-    expect(wrapper.getComponent(UserSettingsViewStub).props('embedded')).toBe(true);
     expect(store.settingsOrigin).toBeNull();
 
     // Closing is a local state change: no navigation, workspace instance survives.
@@ -611,7 +627,6 @@ describe('AppShell right-panel integration', () => {
     expect(router.currentRoute.value.fullPath).toBe('/goals');
     expect(document.querySelector('[data-testid="shell-settings-dialog"]')).not.toBeNull();
     expect(wrapper.getComponent(UserSettingsViewStub).props('initialTab')).toBe('shortcuts');
-    expect(wrapper.getComponent(UserSettingsViewStub).props('embedded')).toBe(true);
     wrapper.unmount();
   });
 
@@ -628,7 +643,9 @@ describe('AppShell right-panel integration', () => {
     // Every dialog opened on top of settings (settings-section dialogs such as the
     // shortcut recorder, or shell dialogs like the profile editor) mounts through
     // DialogPortal at z-50, so the later mount paints above the settings content.
-    const profileEditor = wrapper.getComponent({ name: 'AccountProfileEditorDialog' });
+    const profileEditor = wrapper.getComponent({
+      name: 'AccountProfileEditorDialog',
+    });
     profileEditor.vm.$emit('update:open', true);
     await flushPromises();
     await nextTick();
@@ -701,7 +718,10 @@ describe('AppShell right-panel integration', () => {
   });
 
   it('uses an off-canvas overlay sidebar below 960px without mutating the docked preference', async () => {
-    Object.defineProperty(window, 'innerWidth', { configurable: true, value: 900 });
+    Object.defineProperty(window, 'innerWidth', {
+      configurable: true,
+      value: 900,
+    });
     const { wrapper, store } = await mountShell('/goals');
 
     expect(store.sidebarCollapsed).toBe(false);
@@ -731,7 +751,10 @@ describe('AppShell right-panel integration', () => {
     ).toBeNull();
     expect(store.sidebarCollapsed).toBe(false);
 
-    Object.defineProperty(window, 'innerWidth', { configurable: true, value: 1280 });
+    Object.defineProperty(window, 'innerWidth', {
+      configurable: true,
+      value: 1280,
+    });
     window.dispatchEvent(new Event('resize'));
     await nextTick();
 
@@ -747,7 +770,10 @@ describe('AppShell right-panel integration', () => {
     store.setSidebarCollapsed(true);
     await nextTick();
 
-    Object.defineProperty(window, 'innerWidth', { configurable: true, value: 900 });
+    Object.defineProperty(window, 'innerWidth', {
+      configurable: true,
+      value: 900,
+    });
     window.dispatchEvent(new Event('resize'));
     await nextTick();
 
@@ -761,7 +787,10 @@ describe('AppShell right-panel integration', () => {
     ).toBe('overlay');
     expect(store.sidebarCollapsed).toBe(true);
 
-    Object.defineProperty(window, 'innerWidth', { configurable: true, value: 1280 });
+    Object.defineProperty(window, 'innerWidth', {
+      configurable: true,
+      value: 1280,
+    });
     window.dispatchEvent(new Event('resize'));
     await nextTick();
     expect(wrapper.find('[data-testid="shell-sidebar-pane-host"]').exists()).toBe(false);
@@ -789,7 +818,10 @@ describe('AppShell right-panel integration', () => {
   });
 
   it('reapplies viewport focus when reopening the right panel on a narrow screen', async () => {
-    Object.defineProperty(window, 'innerWidth', { configurable: true, value: 390 });
+    Object.defineProperty(window, 'innerWidth', {
+      configurable: true,
+      value: 390,
+    });
     const { wrapper, store } = await mountShell();
 
     store.closeRightPanel();
@@ -813,7 +845,11 @@ describe('AppShell right-panel integration', () => {
     expect(store.panelWidth).toBeNull();
     await resizer.trigger('pointerdown', { pointerId: 11, clientX: 640 });
     window.dispatchEvent(
-      new PointerEvent('pointermove', { pointerId: 11, clientX: 620, bubbles: true }),
+      new PointerEvent('pointermove', {
+        pointerId: 11,
+        clientX: 620,
+        bubbles: true,
+      }),
     );
     await nextTick();
 
@@ -821,7 +857,11 @@ describe('AppShell right-panel integration', () => {
     expect(store.panelWidth).toBe(654);
 
     window.dispatchEvent(
-      new PointerEvent('pointerup', { pointerId: 11, clientX: 620, bubbles: true }),
+      new PointerEvent('pointerup', {
+        pointerId: 11,
+        clientX: 620,
+        bubbles: true,
+      }),
     );
     wrapper.unmount();
   });
@@ -968,14 +1008,20 @@ describe('AppShell right-panel integration', () => {
       const { wrapper, store } = await mountShell('/goals');
       store.setLayout(preference, 'user');
       const tabId = store.activeTabId;
-      Object.defineProperty(window, 'innerWidth', { configurable: true, value: 390 });
+      Object.defineProperty(window, 'innerWidth', {
+        configurable: true,
+        value: 390,
+      });
       window.dispatchEvent(new Event('resize'));
       await nextTick();
       expect(store.layout).toBe('focus');
       expect(store.layoutPreference).toBe(preference);
       activeChatConversationId.value = 'conversation-b';
       await nextTick();
-      Object.defineProperty(window, 'innerWidth', { configurable: true, value: 1280 });
+      Object.defineProperty(window, 'innerWidth', {
+        configurable: true,
+        value: 1280,
+      });
       window.dispatchEvent(new Event('resize'));
       await nextTick();
       expect(store.layout).toBe(preference);
@@ -1028,7 +1074,7 @@ describe('AppShell right-panel integration', () => {
     }
   });
 
-  it('no longer renders the archived conversation list in settings', async () => {
+  it('does not render archived conversations in the settings dialog', async () => {
     conversationList.push({
       id: 'archived-test',
       name: 'Archived test',
@@ -1039,7 +1085,8 @@ describe('AppShell right-panel integration', () => {
     try {
       await router.push('/settings?tab=ai');
       await flushPromises();
-      expect(wrapper.get('[data-testid="settings-view"]').text()).not.toContain('Archived test');
+      expect(document.querySelector('[data-testid="shell-settings-dialog"]')).not.toBeNull();
+      expect(wrapper.getComponent(UserSettingsViewStub).props('initialTab')).toBe('ai');
       expect(wrapper.find('[data-testid="settings-archived-conversations"]').exists()).toBe(false);
       expect(wrapper.find('[data-testid="settings-restore-conversation"]').exists()).toBe(false);
     } finally {
@@ -1051,45 +1098,60 @@ describe('AppShell right-panel integration', () => {
     }
   });
 
-  it('keeps the workspace and AI instance mounted while the settings scene is active', async () => {
+  it('keeps the workspace and AI instance mounted while the settings dialog is open', async () => {
     const { wrapper, router } = await mountShell('/goals');
     await nextTick();
     expect(goalRouteMountCount).toBe(1);
     const aiInstance = wrapper.get('[data-testid="ai-chat-view"]').element;
 
     await router.push('/settings');
-    await nextTick();
+    await flushPromises();
 
-    // 设置场景外壳切换（data-shell-scene + settings view 渲染）。
-    expect(wrapper.get('[data-testid="app-shell"]').attributes('data-shell-scene')).toBe(
-      'settings',
-    );
-    expect(wrapper.get('[data-testid="settings-view"]').exists()).toBe(true);
-    // Deep link keeps the standalone scene: the dialog surface stays absent.
-    expect(document.querySelector('[data-testid="shell-settings-dialog"]')).toBeNull();
-
-    // Phase 0 / UI-001：workspace scene host 常驻——AI 实例不卸载（只是隐藏），
-    // 业务 Tab 组件不再重挂载（KeepAlive 缓存实例保持，流式回复/草稿不丢）。
-    expect(wrapper.get('[data-testid="ai-chat-view"]').element).toBe(aiInstance);
-    // v-show 隐藏 workspace host（happy-dom 下 isVisible 对祖先 display:none 检测不可靠，
-    // 直接断言 v-show 写入的 inline style）。
+    // The deep link opens the dialog over the workspace; no full-page settings scene.
+    expect(wrapper.find('[data-testid="settings-view"]').exists()).toBe(false);
+    expect(document.querySelector('[data-testid="shell-settings-dialog"]')).not.toBeNull();
     const workspaceHost = wrapper.get('[data-testid="shell-workspace-main"]').element
       .parentElement as HTMLElement;
-    expect(workspaceHost.style.display).toBe('none');
+    expect(workspaceHost.style.display).not.toBe('none');
+    expect(wrapper.get('[data-testid="ai-chat-view"]').element).toBe(aiInstance);
     expect(goalRouteMountCount).toBe(1);
 
-    // 返回 workspace 后：AI 仍是同一实例，业务 Tab 恢复且没有二次挂载。
-    await router.push('/goals');
-    await nextTick();
+    // Closing replaces the settings URL with the saved origin; the AI instance and
+    // the business tab are reused rather than remounted.
+    document.querySelector<HTMLElement>('[data-testid="shell-settings-dialog-close"]')!.click();
+    await flushPromises();
+    expect(document.querySelector('[data-testid="shell-settings-dialog"]')).toBeNull();
+    expect(router.currentRoute.value.fullPath).toBe('/goals');
     expect(wrapper.get('[data-testid="ai-chat-view"]').element).toBe(aiInstance);
     expect(wrapper.get('[data-testid="goal-draft-probe"]').exists()).toBe(true);
     expect(goalRouteMountCount).toBe(1);
     wrapper.unmount();
   });
 
+  it('opens the settings dialog on a direct settings URL and replaces it on close', async () => {
+    const { wrapper, router } = await mountShell('/settings?tab=ai');
+    await flushPromises();
+
+    // A reloaded deep link still lands on the workspace with the dialog open.
+    expect(wrapper.get('[data-testid="app-shell"]').exists()).toBe(true);
+    expect(wrapper.find('[data-testid="settings-view"]').exists()).toBe(false);
+    expect(document.querySelector('[data-testid="shell-settings-dialog"]')).not.toBeNull();
+    expect(wrapper.getComponent(UserSettingsViewStub).props('initialTab')).toBe('ai');
+
+    // No captured origin on a cold load: closing goes Home instead of leaving a
+    // blank page on the settings route.
+    document.querySelector<HTMLElement>('[data-testid="shell-settings-dialog-close"]')!.click();
+    await flushPromises();
+    expect(document.querySelector('[data-testid="shell-settings-dialog"]')).toBeNull();
+    expect(router.currentRoute.value.fullPath).toBe('/');
+    wrapper.unmount();
+  });
+
   it('keeps the profile editor dialog behind the shell-provided intent', async () => {
     const { wrapper } = await mountShell();
-    const dialog = wrapper.findComponent({ name: 'AccountProfileEditorDialog' });
+    const dialog = wrapper.findComponent({
+      name: 'AccountProfileEditorDialog',
+    });
     expect(dialog.exists()).toBe(true);
     expect(dialog.props('open')).toBe(false);
     expect(document.querySelector('[data-testid="profile-editor-dialog"]')).toBeNull();

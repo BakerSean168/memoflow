@@ -46,16 +46,22 @@ const SettingsNavigationStub = defineComponent({
   },
 });
 
-async function mountView(path: string, props: { embedded?: boolean; initialTab?: string } = {}) {
+async function mountView(path: string, props: { initialTab?: string } = {}) {
   const router = createRouter({
     history: createMemoryHistory(),
     routes: [{ path: '/settings', component: UserSettingsView }],
   });
   await router.push(path);
   await router.isReady();
-  Object.defineProperty(window, 'innerWidth', { configurable: true, value: 1280 });
+  Object.defineProperty(window, 'innerWidth', {
+    configurable: true,
+    value: 1280,
+  });
   const replace = vi.spyOn(router, 'replace');
-  const shellStore = { settingsNavigationOpen: true, setSettingsNavigationOpen: vi.fn() };
+  const shellStore = {
+    settingsNavigationOpen: true,
+    setSettingsNavigationOpen: vi.fn(),
+  };
   const storeSpy = vi.spyOn(settingUiHost, 'useAppShellStore').mockReturnValue(shellStore);
   const wrapper = shallowMount(UserSettingsView, {
     props,
@@ -82,7 +88,6 @@ async function mountView(path: string, props: { embedded?: boolean; initialTab?:
 describe('UserSettingsView embedded mode', () => {
   it('takes the section from initialTab, ignores route changes and closes by event', async () => {
     const { router, wrapper, replace, storeSpy } = await mountView('/settings?tab=appearance', {
-      embedded: true,
       initialTab: 'updates',
     });
 
@@ -105,26 +110,22 @@ describe('UserSettingsView embedded mode', () => {
     storeSpy.mockRestore();
   });
 
-  it('keeps route mode reading and writing ?tab= and returning through the scene host', async () => {
-    const returnToApp = vi
-      .spyOn(settingUiHost, 'returnFromSettingsScene')
-      .mockResolvedValue(undefined);
+  it('never reads or writes ?tab= and only closes by event', async () => {
     const { router, wrapper, replace, storeSpy } = await mountView('/settings?tab=ai');
 
-    expect(wrapper.get('nav').attributes('data-active')).toBe('ai');
-
-    await wrapper.get('[data-testid="settings-tab-appearance"]').trigger('click');
-    await flushPromises();
+    // Without initialTab the view falls back to its own default; the URL is inert.
     expect(wrapper.get('nav').attributes('data-active')).toBe('appearance');
-    expect(replace).toHaveBeenCalledTimes(1);
-    expect(router.currentRoute.value.query.tab).toBe('appearance');
+
+    await wrapper.get('[data-testid="settings-tab-repository"]').trigger('click');
+    await flushPromises();
+    expect(wrapper.get('nav').attributes('data-active')).toBe('repository');
+    expect(replace).not.toHaveBeenCalled();
+    expect(router.currentRoute.value.query.tab).toBe('ai');
 
     await wrapper.get('[data-testid="settings-return-to-app"]').trigger('click');
-    expect(returnToApp).toHaveBeenCalledTimes(1);
-    expect(wrapper.emitted('close')).toBeUndefined();
+    expect(wrapper.emitted('close')).toHaveLength(1);
 
     wrapper.unmount();
-    returnToApp.mockRestore();
     storeSpy.mockRestore();
   });
 });
