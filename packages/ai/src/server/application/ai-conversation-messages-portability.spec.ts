@@ -142,7 +142,6 @@ class MemoryMessageStore implements AiMessageStore {
       .sort((left, right) => (left.id < right.id ? -1 : left.id > right.id ? 1 : 0))
       .map((thread) => ({
         id: thread.id,
-        title: thread.title,
         createdAt: new Date(thread.createdAt),
         updatedAt: new Date(thread.updatedAt),
       }));

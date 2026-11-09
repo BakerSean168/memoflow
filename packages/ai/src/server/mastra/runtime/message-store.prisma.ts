@@ -1,7 +1,6 @@
 import type { Prisma } from '@memoflow/database';
 import {
   createdAtExpression,
-  timestampExpression,
   writeMessagesBatchWithInvariants,
   type BatchMessage,
   type MessageStoreTables,
@@ -26,7 +25,6 @@ export interface AiThreadInsert {
 
 export interface AiStoredThreadRow {
   readonly id: string;
-  readonly title: string;
   readonly createdAt: Date;
   readonly updatedAt: Date;
 }
@@ -64,7 +62,6 @@ const TABLES: MessageStoreTables = {
 };
 
 const MESSAGE_CREATED_AT = createdAtExpression();
-const THREAD_CREATED_AT = createdAtExpression('t.');
 
 export function createAiMessageStore(client: AiMessageSqlClient): AiMessageStore {
   const executor: SqlExecutor = {
@@ -131,11 +128,14 @@ export function createAiMessageStore(client: AiMessageSqlClient): AiMessageStore
       return rows.map((row) => row.id);
     },
 
+    // Thread rows project only columns present in every environment's schema;
+    // name and timestamps are authoritative on the ai_conversations shell
+    // (integration stub DDL only has id/resourceId).
     async listLiveThreads(identityId) {
       return executor.query<AiStoredThreadRow>(
-        `SELECT t.id, t.title,
-            ${THREAD_CREATED_AT} AS "createdAt",
-            ${timestampExpression('updatedAt', 't.')} AS "updatedAt"
+        `SELECT t.id,
+            c.created_at AS "createdAt",
+            c.updated_at AS "updatedAt"
           FROM ${TABLES.threads} t
           JOIN public.ai_conversations c
             ON c.id = t.id AND c.identity_id = t."resourceId"
