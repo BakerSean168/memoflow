@@ -69,8 +69,12 @@ export class AccountProfilePortableCapability implements PortableCapability<Port
     const current = this.payloadSchema.parse(account.profile.toDTO());
     const target = { ...source };
     const preservedFields: string[] = [];
-    // There is no durable provenance for a provisioned nickname. Keep it rather
-    // than guessing from a display name, email prefix, or account creation time.
+    // The domain profile is non-nullable after read-time normalization, so a
+    // field is "default" exactly when it matches the createDefault baseline
+    // (neutral nickname, PreferNotToSay gender, null optional facts).
+    const defaultProfile = AccountProfile.createDefault('').toDTO();
+    // A non-default nickname has no durable provenance. Keep it rather than
+    // guessing from a display name, email prefix, or account creation time.
     for (const field of [
       'nickname',
       'realName',
@@ -79,8 +83,7 @@ export class AccountProfilePortableCapability implements PortableCapability<Port
       'gender',
       'birthday',
     ] as const) {
-      const isDefault =
-        current[field] === null || (field === 'gender' && current[field] === 'PreferNotToSay');
+      const isDefault = current[field] === defaultProfile[field];
       if (!isDefault && current[field] !== source[field]) {
         Object.assign(target, { [field]: current[field] });
         preservedFields.push(field);

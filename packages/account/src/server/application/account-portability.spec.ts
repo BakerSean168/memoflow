@@ -6,6 +6,7 @@ import type { Instant } from '@memoflow/shared-primitives';
 import { createTimeContext, type Clock, type UserTimeContextPort } from '@memoflow/time';
 import { Account } from '../domain/aggregates/account';
 import type { IAccountRepository } from '../domain/repositories/i-account-repository';
+import { AccountPrismaMapper } from '../infrastructure/adapters/prisma/mappers/account-prisma.mapper';
 import { AccountProfilePortableCapability } from './account-portability';
 
 const identityId = 'identity-portability-test';
@@ -71,6 +72,39 @@ describe('AccountProfilePortableCapability', () => {
     expect(payload).not.toHaveProperty('id');
     expect(payload).not.toHaveProperty('identityId');
     expect(payload).not.toHaveProperty('status');
+  });
+
+  it('plans an import against a host account stored with a null nickname', async () => {
+    const storedIdentityId = 'IdentityId_00000000-0000-4000-8000-000000000001';
+    const stored = AccountPrismaMapper.toDomain({
+      id: storedIdentityId,
+      status: 'Active',
+      profile: {
+        nickname: null,
+        realName: null,
+        avatarUrl: null,
+        bio: null,
+        gender: 'PreferNotToSay',
+        birthday: null,
+      },
+      createdAt: new Date(now - 2000),
+      updatedAt: new Date(now - 1000),
+      closedAt: null,
+      avatarUpdatedAt: null,
+    } as never);
+    const repository: IAccountRepository = {
+      save: vi.fn(async () => undefined),
+      findById: vi.fn(async (id: string) => (id === storedIdentityId ? stored : null)),
+      delete: vi.fn(async () => undefined),
+      findAll: vi.fn(async () => ({ accounts: [stored], total: 1 })),
+    };
+    const capability = new AccountProfilePortableCapability(repository, clock, {
+      getUserTimeContext: async () => createTimeContext({ timeZone: 'UTC', weekStartsOn: 1 }),
+    });
+
+    await expect(
+      capability.planProfileImport(target, { ...context, identityId: storedIdentityId }),
+    ).resolves.toEqual({ payload: target, preservedFields: [] });
   });
 
   it('dry-runs and applies the complete profile onto the existing host account', async () => {
