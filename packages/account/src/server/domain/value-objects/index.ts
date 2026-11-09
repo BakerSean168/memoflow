@@ -5,4 +5,4 @@
 
 export { AccountStatus } from './account-status';
 export { GenderType } from './gender-type';
-export { AccountProfile } from './account-profile';
+export { AccountProfile, normalizeStoredAccountProfile } from './account-profile';

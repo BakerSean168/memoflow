@@ -1,13 +1,38 @@
 import { ValueObject } from '@memoflow/utils/domain';
-import type {
-  AccountProfileDTO,
-  AccountProfile as IAccountProfile,
+import {
+  ACCOUNT_NICKNAME_MAX_LENGTH,
+  ACCOUNT_NICKNAME_MIN_LENGTH,
+  normalizeAccountNickname,
+  type AccountProfileDTO,
+  type AccountProfile as IAccountProfile,
 } from '@memoflow/account-contracts';
 import { requireYmd, type Ymd } from '@memoflow/shared-primitives';
 import { GenderType } from './gender-type';
 
 function normalizeBirthday(value: AccountProfileDTO['birthday']): Ymd | null {
   return value == null ? null : requireYmd(value);
+}
+
+/**
+ * Normalize a profile read from persistence before domain construction.
+ *
+ * Legacy rows may carry `nickname: null` (or a missing profile object). The
+ * stored-data contract is unchanged; normalization happens in memory only.
+ */
+export function normalizeStoredAccountProfile(profile: unknown): AccountProfileDTO {
+  const source =
+    profile !== null && typeof profile === 'object' && !Array.isArray(profile)
+      ? (profile as Partial<AccountProfileDTO>)
+      : {};
+
+  return {
+    nickname: normalizeAccountNickname(source.nickname),
+    realName: source.realName ?? null,
+    avatarUrl: source.avatarUrl ?? null,
+    bio: source.bio ?? null,
+    gender: source.gender ?? GenderType.PreferNotToSay,
+    birthday: source.birthday ?? null,
+  };
 }
 
 export class AccountProfile extends ValueObject<AccountProfileDTO> implements IAccountProfile {
@@ -21,8 +46,7 @@ export class AccountProfile extends ValueObject<AccountProfileDTO> implements IA
   }
 
   public static createDefault(displayNameSeed: string): AccountProfile {
-    const trimmed = displayNameSeed.trim();
-    const defaultNickname = (trimmed.length >= 2 ? trimmed : 'User').slice(0, 20);
+    const defaultNickname = normalizeAccountNickname(displayNameSeed.trim());
 
     return new AccountProfile({
       nickname: defaultNickname,
@@ -35,10 +59,13 @@ export class AccountProfile extends ValueObject<AccountProfileDTO> implements IA
   }
 
   private static validate(props: AccountProfileDTO): void {
-    if (props.nickname.length > 20) {
+    if (typeof props.nickname !== 'string') {
+      throw new Error('Nickname must be a string');
+    }
+    if (props.nickname.length > ACCOUNT_NICKNAME_MAX_LENGTH) {
       throw new Error('Nickname must be under 20 characters');
     }
-    if (props.nickname.length < 2) {
+    if (props.nickname.length < ACCOUNT_NICKNAME_MIN_LENGTH) {
       throw new Error('Nickname must be at least 2 characters');
     }
     GenderType.of(props.gender);

@@ -51,4 +51,31 @@ describe('PowerSyncAccountRepository', () => {
     );
     expect(account.domainEvents).toHaveLength(0);
   });
+
+  it('reads a stored null nickname as the createDefault fallback instead of throwing', async () => {
+    const id = 'IdentityId_00000000-0000-4000-8000-000000000001';
+    const db = {
+      ...createQueryable(),
+      writeTransaction: vi.fn(),
+    } satisfies Transactional;
+    db.getOptional.mockResolvedValue({
+      id,
+      status: 'Active',
+      profile: JSON.stringify({
+        nickname: null,
+        realName: null,
+        avatarUrl: null,
+        bio: null,
+        gender: 'PreferNotToSay',
+        birthday: null,
+      }),
+      created_at: '2026-11-01T00:00:00.000Z',
+      updated_at: '2026-11-01T00:00:00.000Z',
+      closed_at: null,
+    });
+
+    const account = await new PowerSyncAccountRepository(db).findById(id);
+
+    expect(account?.profile.nickname).toBe('User');
+  });
 });

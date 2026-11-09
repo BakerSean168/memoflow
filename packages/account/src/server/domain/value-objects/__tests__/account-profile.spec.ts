@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { AccountProfile } from '../account-profile';
+import { AccountProfile, normalizeStoredAccountProfile } from '../account-profile';
 import { GenderType } from '../gender-type';
 import type { AccountProfileDTO } from '@memoflow/account-contracts';
 import { requireYmd } from '@memoflow/shared-primitives';
@@ -69,6 +69,48 @@ describe('AccountProfile', () => {
           aProfileDTO({ birthday: '2025-02-29' as AccountProfileDTO['birthday'] }),
         ),
       ).toThrow('Invalid calendar date');
+    });
+
+    it.each([
+      ['null', null],
+      ['undefined', undefined],
+      ['a number', 42],
+    ])('should throw a domain error when nickname is %s', (_label, nickname) => {
+      expect(() =>
+        AccountProfile.create(aProfileDTO({ nickname: nickname as unknown as string })),
+      ).toThrow('Nickname must be a string');
+    });
+  });
+
+  // =========================================================================
+  // persisted-profile normalization
+  // =========================================================================
+  describe('normalizeStoredAccountProfile', () => {
+    it('replaces a null nickname with the createDefault fallback', () => {
+      const normalized = normalizeStoredAccountProfile({
+        ...aProfileDTO(),
+        nickname: null as unknown as string,
+      });
+
+      expect(normalized.nickname).toBe('User');
+      expect(AccountProfile.create(normalized).nickname).toBe('User');
+    });
+
+    it('replaces a missing profile with a usable default profile', () => {
+      const normalized = normalizeStoredAccountProfile(null);
+
+      expect(normalized).toMatchObject({
+        nickname: 'User',
+        gender: GenderType.PreferNotToSay,
+        realName: null,
+        avatarUrl: null,
+        bio: null,
+        birthday: null,
+      });
+    });
+
+    it('keeps a valid stored nickname unchanged', () => {
+      expect(normalizeStoredAccountProfile(aProfileDTO()).nickname).toBe('TestUser');
     });
   });
 
