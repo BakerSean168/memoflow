@@ -5,8 +5,17 @@ import Database from 'better-sqlite3';
 import { expect, it } from 'vitest';
 import { Memory } from '@mastra/memory';
 import { LibSQLStore } from '@mastra/libsql';
+import {
+  computeArchiveManifest,
+  computeThreadManifestEntry,
+  type ArchiveMessageLineV1,
+} from '@memoflow/ai-contracts/portable-messages-archive';
+import type { ArchiveManifest } from '@memoflow/data-portability-contracts';
 import { readProfileSqliteSnapshot } from './profile-sqlite-snapshot';
-import { inspectProfileSource } from './profile-source-inventory';
+import {
+  inspectProfileSource,
+  type ProfileSourceMessageCoverage,
+} from './profile-source-inventory';
 
 it('blocks unhandled data and detects changed content even with unchanged size and timestamps', async () => {
   const dir = mkdtempSync(path.join(tmpdir(), 'profile-inventory-'));
@@ -214,7 +223,7 @@ it('retains real Assistant Memory messages rather than treating conversation she
     expect(result.blockers).toContainEqual({
       capability: 'local-source',
       field: 'storage/mastra.db',
-      reason: 'unsupported_user_data',
+      reason: 'storage/mastra.db:orphan-thread',
     });
   } finally {
     await storage.close();
@@ -254,5 +263,204 @@ it('ignores only exact catalog cache names and keeps unknown files and symlinks'
   } finally {
     writer.close();
     rmSync(dir, { recursive: true, force: true });
+  }
+});
+
+function mastraFixture() {
+  const dir = mkdtempSync(path.join(tmpdir(), 'profile-mastra-coverage-'));
+  mkdirSync(path.join(dir, 'db'));
+  mkdirSync(path.join(dir, 'storage'));
+  const powerSyncPath = path.join(dir, 'db/powersync.sqlite');
+  const powerSync = new Database(powerSyncPath);
+  const mastra = new Database(path.join(dir, 'storage/mastra.db'));
+  mastra.exec(`
+    CREATE TABLE mastra_threads (
+      id TEXT PRIMARY KEY,
+      resourceId TEXT,
+      title TEXT,
+      metadata TEXT,
+      createdAt TEXT,
+      updatedAt TEXT
+    );
+    CREATE TABLE mastra_messages (
+      id TEXT PRIMARY KEY,
+      thread_id TEXT,
+      content TEXT,
+      role TEXT,
+      type TEXT,
+      createdAt TEXT,
+      resourceId TEXT
+    );
+    CREATE TABLE mastra_resources (id TEXT PRIMARY KEY, snapshot TEXT);
+    CREATE TABLE mastra_workflow_snapshot (workflow_name TEXT, run_id TEXT, snapshot TEXT);
+  `);
+  return {
+    dir,
+    mastra,
+    addThread: (id: string, options: { metadata?: string | null; resourceId?: string } = {}) =>
+      mastra
+        .prepare(
+          'INSERT INTO mastra_threads (id, resourceId, title, metadata, createdAt, updatedAt) VALUES (?, ?, ?, ?, ?, ?)',
+        )
+        .run(
+          id,
+          options.resourceId ?? 'owner',
+          `Thread ${id}`,
+          options.metadata ?? null,
+          '2026-01-01T00:00:00.000Z',
+          '2026-01-01T00:00:00.100Z',
+        ),
+    addMessage: (id: string, threadId: string, content: string, createdAt: string) =>
+      mastra
+        .prepare(
+          'INSERT INTO mastra_messages (id, thread_id, content, role, type, createdAt, resourceId) VALUES (?, ?, ?, ?, ?, ?, ?)',
+        )
+        .run(id, threadId, content, 'user', 'text', createdAt, 'owner'),
+    inspect: (messages?: ProfileSourceMessageCoverage | null) =>
+      readProfileSqliteSnapshot(powerSyncPath, (db) =>
+        inspectProfileSource(db, dir, { messages: messages ?? null }),
+      ),
+    close: () => {
+      mastra.close();
+      powerSync.close();
+      rmSync(dir, { recursive: true, force: true });
+    },
+  };
+}
+
+function messageCoverage(
+  threadId: string,
+  ref: string,
+  messages: readonly { id: string; content: string; createdAt: string }[],
+): ProfileSourceMessageCoverage {
+  const lines: ArchiveMessageLineV1[] = messages.map((message, ordinal) => ({
+    k: 'message',
+    v: 1,
+    ref,
+    ordinal,
+    sid: message.id,
+    role: 'user',
+    type: 'text',
+    content: message.content,
+    createdAt: Date.parse(message.createdAt),
+  }));
+  const manifest: ArchiveManifest = computeArchiveManifest([
+    computeThreadManifestEntry(ref, lines),
+  ]);
+  return { manifest, refsByThreadId: [{ threadId, ref }] };
+}
+
+it('releases a Mastra transcript only when it matches the exported manifest', async () => {
+  const f = mastraFixture();
+  try {
+    f.addThread('thread-1');
+    f.addMessage('message-1', 'thread-1', 'hello', '2026-01-01T00:00:01.000Z');
+    f.addMessage('message-2', 'thread-1', 'world', '2026-01-01T00:00:02.000Z');
+    const coverage = messageCoverage('thread-1', 'ai-conversations:1', [
+      { id: 'message-1', content: 'hello', createdAt: '2026-01-01T00:00:01.000Z' },
+      { id: 'message-2', content: 'world', createdAt: '2026-01-01T00:00:02.000Z' },
+    ]);
+    expect((await f.inspect(coverage)).blockers).toEqual([]);
+  } finally {
+    f.close();
+  }
+});
+
+it('blocks message count and digest mismatches against the exported manifest', async () => {
+  const f = mastraFixture();
+  try {
+    f.addThread('thread-1');
+    f.addMessage('message-1', 'thread-1', 'hello', '2026-01-01T00:00:01.000Z');
+    f.addMessage('message-2', 'thread-1', 'world', '2026-01-01T00:00:02.000Z');
+    const countMismatch = messageCoverage('thread-1', 'ai-conversations:1', [
+      { id: 'message-1', content: 'hello', createdAt: '2026-01-01T00:00:01.000Z' },
+    ]);
+    expect((await f.inspect(countMismatch)).blockers).toContainEqual(
+      expect.objectContaining({ reason: 'storage/mastra.db:messages-uncovered' }),
+    );
+    const digestMismatch = messageCoverage('thread-1', 'ai-conversations:1', [
+      { id: 'message-1', content: 'different', createdAt: '2026-01-01T00:00:01.000Z' },
+      { id: 'message-2', content: 'world', createdAt: '2026-01-01T00:00:02.000Z' },
+    ]);
+    expect((await f.inspect(digestMismatch)).blockers).toContainEqual(
+      expect.objectContaining({ reason: 'storage/mastra.db:messages-uncovered' }),
+    );
+  } finally {
+    f.close();
+  }
+});
+
+it('keeps independent reasons for resources, runtime state and orphan messages', async () => {
+  const f = mastraFixture();
+  try {
+    f.addThread('thread-1');
+    f.addMessage('message-1', 'thread-1', 'hello', '2026-01-01T00:00:01.000Z');
+    f.mastra.prepare('INSERT INTO mastra_resources (id, snapshot) VALUES (?, ?)').run('r1', '{}');
+    f.mastra
+      .prepare(
+        'INSERT INTO mastra_workflow_snapshot (workflow_name, run_id, snapshot) VALUES (?, ?, ?)',
+      )
+      .run('workflow', 'run', '{}');
+    f.addMessage('orphan', 'missing-thread', 'lost', '2026-01-01T00:00:03.000Z');
+    const coverage = messageCoverage('thread-1', 'ai-conversations:1', [
+      { id: 'message-1', content: 'hello', createdAt: '2026-01-01T00:00:01.000Z' },
+    ]);
+    const reasons = (await f.inspect(coverage)).blockers.map((blocker) => blocker.reason);
+    expect(reasons).toEqual(
+      expect.arrayContaining([
+        'storage/mastra.db:resources',
+        'storage/mastra.db:unsupported-runtime-state',
+        'storage/mastra.db:orphan-thread',
+      ]),
+    );
+  } finally {
+    f.close();
+  }
+});
+
+it('keeps blocking unknown Mastra tables and non-empty thread metadata', async () => {
+  const f = mastraFixture();
+  try {
+    f.addThread('thread-1', { metadata: '{"pinned":true}' });
+    f.addMessage('message-1', 'thread-1', 'hello', '2026-01-01T00:00:01.000Z');
+    f.mastra.exec(
+      "CREATE TABLE mastra_unreviewed_facts (id TEXT PRIMARY KEY); INSERT INTO mastra_unreviewed_facts VALUES ('one')",
+    );
+    const coverage = messageCoverage('thread-1', 'ai-conversations:1', [
+      { id: 'message-1', content: 'hello', createdAt: '2026-01-01T00:00:01.000Z' },
+    ]);
+    const blockers = (await f.inspect(coverage)).blockers;
+    expect(blockers).toContainEqual(
+      expect.objectContaining({
+        reason: 'storage/mastra.db:messages-uncovered',
+        field: 'storage/mastra.db',
+      }),
+    );
+    expect(blockers).toContainEqual(
+      expect.objectContaining({ reason: 'unsupported_user_data', field: 'storage/mastra.db' }),
+    );
+  } finally {
+    f.close();
+  }
+});
+
+it('changes the inventory digest when a message arrives after export', async () => {
+  const f = mastraFixture();
+  try {
+    f.addThread('thread-1');
+    f.addMessage('message-1', 'thread-1', 'hello', '2026-01-01T00:00:01.000Z');
+    const coverage = messageCoverage('thread-1', 'ai-conversations:1', [
+      { id: 'message-1', content: 'hello', createdAt: '2026-01-01T00:00:01.000Z' },
+    ]);
+    const before = await f.inspect(coverage);
+    expect(before.blockers).toEqual([]);
+    f.addMessage('message-2', 'thread-1', 'new turn', '2026-01-01T00:00:02.000Z');
+    const after = await f.inspect(coverage);
+    expect(after.digest).not.toBe(before.digest);
+    expect(after.blockers).toContainEqual(
+      expect.objectContaining({ reason: 'storage/mastra.db:messages-uncovered' }),
+    );
+  } finally {
+    f.close();
   }
 });

@@ -1718,6 +1718,14 @@
       "measurementCollectors": []
     },
     {
+      "path": "apps/desktop/src/main/profile/desktop-message-archive.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "apps/desktop/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "apps/desktop/src/main/profile/desktop-profile-import-service.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -13519,7 +13527,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 112
+      "fileCount": 113
     },
     {
       "id": "apps/migrator/vitest.config.ts",
@@ -14655,7 +14663,7 @@
   "duplicate": [],
   "unexpected": [],
   "counts": {
-    "unit": 1210,
+    "unit": 1211,
     "integration": 58,
     "smoke": 3,
     "boundary-ipc": 6,

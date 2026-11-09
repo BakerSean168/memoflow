@@ -49,7 +49,17 @@ export const ProfileImportCommitRequestSchema = ProfileImportRequestSchema.exten
 export const ProfileImportBlockerSchema = z
   .object({
     capability: z.string().min(1),
-    reason: z.enum(['preserved_target', 'unsupported_user_data', 'unknown']),
+    reason: z.enum([
+      'preserved_target',
+      'unsupported_user_data',
+      'unknown',
+      // #865 design §2.7/§6: per-table Mastra coverage blockers keep their own
+      // stable codes so an explicit exclusion is distinguishable from unknown data.
+      'storage/mastra.db:messages-uncovered',
+      'storage/mastra.db:resources',
+      'storage/mastra.db:unsupported-runtime-state',
+      'storage/mastra.db:orphan-thread',
+    ]),
     field: z.string().min(1),
   })
   .strict();

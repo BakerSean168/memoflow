@@ -245,6 +245,10 @@ export default {
       preserved_target: '目标自定义资料已保留，源差异未复制',
       unsupported_user_data: '含当前未支持复制的本地资料',
       unknown: '存在尚未识别的数据',
+      'storage/mastra.db:messages-uncovered': '本地 AI 消息尚未被导出归档完整覆盖',
+      'storage/mastra.db:resources': '存在未迁移的 AI 资源记忆',
+      'storage/mastra.db:unsupported-runtime-state': '存在无法迁移的 AI 运行状态',
+      'storage/mastra.db:orphan-thread': '存在没有会话壳的孤立 AI 消息',
     },
     owners: {
       account: '账户资料',

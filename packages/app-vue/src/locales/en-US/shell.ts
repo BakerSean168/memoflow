@@ -250,6 +250,11 @@ export default {
       preserved_target: 'Target customization kept; differing source values were not copied',
       unsupported_user_data: 'Local content is outside current import support',
       unknown: 'Unrecognized data needs review',
+      'storage/mastra.db:messages-uncovered':
+        'Local AI messages are not fully covered by the exported archive',
+      'storage/mastra.db:resources': 'AI resource memory cannot be migrated',
+      'storage/mastra.db:unsupported-runtime-state': 'AI runtime state cannot be migrated',
+      'storage/mastra.db:orphan-thread': 'AI messages exist without a conversation shell',
     },
     owners: {
       account: 'Account profile',
