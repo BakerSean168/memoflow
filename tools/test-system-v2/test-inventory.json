@@ -3350,6 +3350,22 @@
       "measurementCollectors": []
     },
     {
+      "path": "packages/ai-contracts/src/portable-messages-archive.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/ai-contracts/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/ai-contracts/src/portable-v3-messages.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/ai-contracts/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "packages/ai-contracts/src/portable-v3.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -6019,6 +6035,22 @@
     },
     {
       "path": "packages/data-portability-contracts/src/portable-v3.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/data-portability-contracts/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/data-portability-contracts/src/profile-import-archive.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/data-portability-contracts/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/data-portability-contracts/src/profile-import-error-codes.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/data-portability-contracts/vitest.config.ts"
@@ -13500,7 +13532,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 16
+      "fileCount": 18
     },
     {
       "id": "packages/ai-ui/vitest.config.ts",
@@ -13549,7 +13581,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 3
+      "fileCount": 5
     },
     {
       "id": "packages/data-portability/vitest.config.ts",
@@ -14568,7 +14600,7 @@
   "duplicate": [],
   "unexpected": [],
   "counts": {
-    "unit": 1201,
+    "unit": 1205,
     "integration": 58,
     "smoke": 3,
     "boundary-ipc": 6,

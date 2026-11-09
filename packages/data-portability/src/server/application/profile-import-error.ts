@@ -1,14 +1,7 @@
+import type { ProfileImportErrorCode } from '@memoflow/data-portability-contracts';
 import { ResultErrorException } from '@memoflow/transport-contracts/result';
 
-export type ProfileImportErrorCode =
-  | 'TARGET_UNAVAILABLE'
-  | 'TARGET_NOT_EMPTY'
-  | 'TARGET_UNKNOWN'
-  | 'TARGET_CHANGED'
-  | 'IMPORT_REQUEST_CONFLICT'
-  | 'IMPORT_NOT_COMMITTED'
-  | 'IMPORT_PREFLIGHT_REQUIRED'
-  | 'IMPORT_NOT_FOUND';
+export type { ProfileImportErrorCode } from '@memoflow/data-portability-contracts';
 
 export class ProfileImportError extends ResultErrorException {
   constructor(code: ProfileImportErrorCode) {
@@ -21,7 +14,9 @@ export class ProfileImportError extends ResultErrorException {
         ? 404
         : code === 'TARGET_UNKNOWN' || code === 'TARGET_UNAVAILABLE'
           ? 503
-          : 409,
+          : code === 'IMPORT_LIMIT_EXCEEDED'
+            ? 413
+            : 409,
     );
   }
 }

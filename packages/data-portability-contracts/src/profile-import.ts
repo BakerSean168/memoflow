@@ -4,6 +4,28 @@ import { PortableDataV3ImportResSchema } from './api/portable-v3.dto';
 
 // The existing HTTP body limit is 256 KiB; JSON-string wrapping stays below it.
 export const PROFILE_IMPORT_MAX_BYTES = 100_000;
+
+/**
+ * Stable Profile import failure codes. This is the single definition; the
+ * server error class derives both its type and HTTP status from it.
+ */
+export const PROFILE_IMPORT_ERROR_CODES = [
+  'TARGET_UNAVAILABLE',
+  'TARGET_NOT_EMPTY',
+  'TARGET_UNKNOWN',
+  'TARGET_CHANGED',
+  'IMPORT_REQUEST_CONFLICT',
+  'IMPORT_NOT_COMMITTED',
+  'IMPORT_PREFLIGHT_REQUIRED',
+  'IMPORT_NOT_FOUND',
+  'IMPORT_ARCHIVE_REQUIRED',
+  'IMPORT_ARCHIVE_MISMATCH',
+  'IMPORT_ARCHIVE_UNAVAILABLE',
+  'IMPORT_VERIFICATION_FAILED',
+  'IMPORT_LIMIT_EXCEEDED',
+] as const;
+export const ProfileImportErrorCodeSchema = z.enum(PROFILE_IMPORT_ERROR_CODES);
+export type ProfileImportErrorCode = z.infer<typeof ProfileImportErrorCodeSchema>;
 export const ProfileImportRequestSchema = z
   .object({
     requestId: z

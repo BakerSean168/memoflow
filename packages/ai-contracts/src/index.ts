@@ -32,6 +32,9 @@ export * from './context';
 
 // ============ Owner-driven Data Portability V3 ============
 export * from './portable-v3';
+export * from './portable-v3-messages';
+// The archive canonicalizer is served from
+// `@memoflow/ai-contracts/portable-messages-archive` (node:crypto), not this barrel.
 
 export type {
   AiConversationId,
