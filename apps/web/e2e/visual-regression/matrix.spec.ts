@@ -349,18 +349,16 @@ for (const theme of ['light', 'dark'] as const) {
     await page.locator('[data-business-tab-id]').first().click();
     await expect(title).toHaveValue('Draft survives workspace actions');
 
-    const account = sidebar.getByTestId('shell-account-card');
-    const accountBox = (await account.boundingBox())!;
     // The settings entry is a standalone gear button since #856; the account
     // card no longer carries a Settings item.
     await page.getByTestId('shell-open-settings').click();
+    await expect(page.getByTestId('shell-settings-dialog')).toBeVisible();
     await expect(page.getByTestId('settings-navigation-footer')).toBeVisible();
     const footer = (await page.getByTestId('settings-navigation-footer').boundingBox())!;
     expect(footer.height).toBe(44);
-    expect(accountBox.y).toBeGreaterThanOrEqual(footer.y);
-    expect(accountBox.y + accountBox.height).toBeLessThanOrEqual(footer.y + footer.height);
     await page.screenshot({ path: testInfo.outputPath(`settings-footer-${theme}.png`) });
     await page.getByTestId('settings-return-to-app').click();
+    await expect(page.getByTestId('shell-settings-dialog')).toHaveCount(0);
     await expect(title).toHaveValue('Draft survives workspace actions');
     expect(errors).toEqual([]);
     expect(external).toEqual([]);

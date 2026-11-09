@@ -102,7 +102,11 @@ test('Keyboard-first V1: preview, input protection, commands and device override
   await page.keyboard.press('Enter');
   await expect(page.getByTestId('keyboard-settings-status')).toContainText('已保存');
   await expect(page.getByTestId('shortcut-module.goal.activate')).toContainText('Alt+G');
-  await page.reload({ waitUntil: 'domcontentloaded' });
+  // The settings dialog owns the surface without changing the URL, so a reload
+  // from the workspace no longer restores it. Land on the deep link to verify the
+  // saved binding survives a fresh document load.
+  await page.goto('/settings?tab=shortcuts', { waitUntil: 'domcontentloaded' });
+  await expect(page.getByTestId('shell-settings-dialog')).toBeVisible();
   await expect(page.getByTestId('shortcut-module.goal.activate')).toContainText('Alt+G');
   await page.getByTestId('settings-return-to-app').click();
   await page.getByTestId('capsule-nav-task').click();

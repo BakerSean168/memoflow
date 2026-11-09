@@ -124,20 +124,21 @@ for (const host of ['web', 'desktop'] as const) {
         await expect(page.getByTestId('shell-account-card-panel')).toBeVisible();
         await page.keyboard.press('Escape');
         await before.gear.click();
-        if (width < 1024) await page.getByTestId('shell-sidebar-toggle').click();
-        const back = page.getByTestId('settings-return-to-app').filter({ visible: true });
-        const after = await expectFullRow(back);
-        expect(after.padding).toBe(before.padding);
-        await expectRowFeedback(page, back);
+        await expect(page.getByTestId('shell-settings-dialog')).toBeVisible();
+        const back =
+          width < 1024
+            ? page.getByTestId('settings-compact-back')
+            : page.getByTestId('settings-return-to-app').filter({ visible: true });
         if (width >= 1024) {
-          expect(after.y).toBe(before.y);
-          expect(after.x).toBe(before.x);
+          const after = await expectFullRow(back);
+          expect(after.padding).toBe(before.padding);
+          await expectRowFeedback(page, back);
+          await page.mouse.click(after.right - 2, after.y + after.height / 2);
+        } else {
+          await expect(back).toBeVisible();
+          await back.click();
         }
-        await page.mouse.click(after.right - 2, after.y + after.height / 2);
-        await expect(page.getByTestId('app-shell')).toHaveAttribute(
-          'data-shell-scene',
-          'workspace',
-        );
+        await expect(page.getByTestId('shell-settings-dialog')).toHaveCount(0);
         await expect(page.getByTestId('task-page-toolbar')).toBeVisible();
       });
     }

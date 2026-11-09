@@ -23,7 +23,15 @@ test('desktop keyboard preview and Profile-scoped keymap survive renderer reload
     await page.keyboard.press('Alt+g');
     await page.getByRole('button', { name: '保存', exact: true }).click();
     await expect(page.getByTestId('keyboard-settings-status')).toContainText('已保存');
+    // The command opens the settings dialog without changing the URL; point the
+    // hash route at the deep link before reloading so the reopened dialog proves
+    // the saved binding survives a renderer reload.
+    await page.evaluate(() => {
+      window.location.hash = '#/settings?tab=shortcuts';
+    });
+    await expect(page.getByTestId('shell-settings-dialog')).toBeVisible();
     await page.reload();
+    await expect(page.getByTestId('shell-settings-dialog')).toBeVisible();
     await expect(page.getByTestId('shortcut-module.goal.activate')).toContainText('Alt+G');
     await page.getByTestId('settings-return-to-app').click();
     await page.keyboard.press('Alt+2');
