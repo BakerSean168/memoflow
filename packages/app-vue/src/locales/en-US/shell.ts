@@ -250,6 +250,11 @@ export default {
       preserved_target: 'Target customization kept; differing source values were not copied',
       unsupported_user_data: 'Local content is outside current import support',
       unknown: 'Unrecognized data needs review',
+      'storage/mastra.db:messages-uncovered':
+        'Local AI messages are not fully covered by the exported archive',
+      'storage/mastra.db:resources': 'AI resource memory cannot be migrated',
+      'storage/mastra.db:unsupported-runtime-state': 'AI runtime state cannot be migrated',
+      'storage/mastra.db:orphan-thread': 'AI messages exist without a conversation shell',
     },
     owners: {
       account: 'Account profile',
@@ -274,6 +279,15 @@ export default {
       IMPORT_REAUTH_REQUIRED: 'Reauthenticate the current cloud account first.',
       SOURCE_PROFILE_ACTIVE: 'Close the source Profile and import from the target cloud Profile.',
       PROFILE_CHANGED: 'The Profile changed. Retry in the target Profile.',
+      IMPORT_ARCHIVE_REQUIRED:
+        'This import includes chat history that must be transferred separately. Restore it through a local-account import.',
+      IMPORT_ARCHIVE_MISMATCH:
+        'The transferred chat history did not match. Transfer it again and retry.',
+      IMPORT_ARCHIVE_UNAVAILABLE:
+        'Chat history has not finished transferring. Transfer it again to continue.',
+      IMPORT_VERIFICATION_FAILED:
+        'Chat history verification failed, so this import did not complete. Retry or contact support.',
+      IMPORT_LIMIT_EXCEEDED: 'Chat history exceeds the import limit and cannot be imported.',
     },
   },
   cloudConnection: {

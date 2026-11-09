@@ -572,6 +572,16 @@
       "measurementCollectors": []
     },
     {
+      "path": "apps/api/src/runtime/message-export-composition.surface.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "apps/api/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "apps/api/vitest.config.ts"
+      ]
+    },
+    {
       "path": "apps/api/src/runtime/profile-import-capabilities.integration.test.ts",
       "primarySuite": "integration",
       "collectors": [
@@ -1711,6 +1721,14 @@
     },
     {
       "path": "apps/desktop/src/main/profile/desktop-cloud-sign-in-service.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "apps/desktop/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "apps/desktop/src/main/profile/desktop-message-archive.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "apps/desktop/vitest.config.ts"
@@ -3350,6 +3368,22 @@
       "measurementCollectors": []
     },
     {
+      "path": "packages/ai-contracts/src/portable-messages-archive.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/ai-contracts/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/ai-contracts/src/portable-v3-messages.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/ai-contracts/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "packages/ai-contracts/src/portable-v3.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -3843,6 +3877,16 @@
     },
     {
       "path": "packages/ai/src/server/application/ai-application-capabilities.surface.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/ai/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "packages/ai/vitest.config.ts"
+      ]
+    },
+    {
+      "path": "packages/ai/src/server/application/ai-conversation-messages-portability.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/ai/vitest.config.ts"
@@ -4402,6 +4446,16 @@
       ]
     },
     {
+      "path": "packages/ai/src/server/infrastructure/ai-profile-import.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/ai/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "packages/ai/vitest.config.ts"
+      ]
+    },
+    {
       "path": "packages/ai/src/server/infrastructure/gateways/openai-compatible-model-catalog.gateway.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -4751,6 +4805,16 @@
     },
     {
       "path": "packages/ai/src/server/mastra/runtime/mastra-workflow.runtime.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/ai/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "packages/ai/vitest.config.ts"
+      ]
+    },
+    {
+      "path": "packages/ai/src/server/mastra/runtime/message-store.postgres.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/ai/vitest.config.ts"
@@ -6026,6 +6090,22 @@
       "measurementCollectors": []
     },
     {
+      "path": "packages/data-portability-contracts/src/profile-import-archive.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/data-portability-contracts/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/data-portability-contracts/src/profile-import-error-codes.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/data-portability-contracts/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "packages/data-portability/src/api/module-lifecycle.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -6137,6 +6217,46 @@
     },
     {
       "path": "packages/data-portability/src/server/infrastructure/__tests__/data-portability-module-partial-start.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/data-portability/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "packages/data-portability/vitest.config.ts"
+      ]
+    },
+    {
+      "path": "packages/data-portability/src/server/infrastructure/data-portability.module.test.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/data-portability/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "packages/data-portability/vitest.config.ts"
+      ]
+    },
+    {
+      "path": "packages/data-portability/src/server/infrastructure/prisma-profile-import-archive.test.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/data-portability/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "packages/data-portability/vitest.config.ts"
+      ]
+    },
+    {
+      "path": "packages/data-portability/src/server/infrastructure/prisma-profile-import-message-archive.test.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/data-portability/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "packages/data-portability/vitest.config.ts"
+      ]
+    },
+    {
+      "path": "packages/data-portability/src/server/infrastructure/prisma-profile-import.test.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/data-portability/vitest.config.ts"
@@ -12950,7 +13070,7 @@
       "type": "measurement",
       "suite": "coverage",
       "runner": "vitest",
-      "fileCount": 63
+      "fileCount": 64
     },
     {
       "id": "packages/account/vitest.config.ts",
@@ -12964,7 +13084,7 @@
       "type": "measurement",
       "suite": "coverage",
       "runner": "vitest",
-      "fileCount": 125
+      "fileCount": 128
     },
     {
       "id": "packages/app-vue/vitest.store-coverage.config.ts",
@@ -12978,7 +13098,7 @@
       "type": "measurement",
       "suite": "coverage",
       "runner": "vitest",
-      "fileCount": 14
+      "fileCount": 18
     },
     {
       "id": "packages/goal/vitest.config.ts",
@@ -13430,14 +13550,14 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 63
+      "fileCount": 64
     },
     {
       "id": "apps/desktop/vitest.config.ts",
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 112
+      "fileCount": 113
     },
     {
       "id": "apps/migrator/vitest.config.ts",
@@ -13500,7 +13620,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 16
+      "fileCount": 18
     },
     {
       "id": "packages/ai-ui/vitest.config.ts",
@@ -13514,7 +13634,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 125
+      "fileCount": 128
     },
     {
       "id": "packages/app-vue/vitest.config.ts",
@@ -13549,14 +13669,14 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 3
+      "fileCount": 5
     },
     {
       "id": "packages/data-portability/vitest.config.ts",
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 14
+      "fileCount": 18
     },
     {
       "id": "packages/database/vitest.config.ts",
@@ -13973,6 +14093,7 @@
       "apps/api/src/runtime/compose-schedule.spec.ts",
       "apps/api/src/runtime/compose-setting.spec.ts",
       "apps/api/src/runtime/compose-task.spec.ts",
+      "apps/api/src/runtime/message-export-composition.surface.spec.ts",
       "apps/api/src/scripts/database-startup-chain.test.ts",
       "apps/api/src/shared/infrastructure/config/env.schema.spec.ts",
       "apps/api/src/shared/infrastructure/config/get-github-oauth-config.surface.spec.ts",
@@ -14036,6 +14157,7 @@
       "packages/ai/src/evals/eval-runner.spec.ts",
       "packages/ai/src/server/application/agent-instance/agent-instance.registry.spec.ts",
       "packages/ai/src/server/application/ai-application-capabilities.surface.spec.ts",
+      "packages/ai/src/server/application/ai-conversation-messages-portability.spec.ts",
       "packages/ai/src/server/application/ai-conversation-portability.spec.ts",
       "packages/ai/src/server/application/ports/knowledge-source-note.surface.spec.ts",
       "packages/ai/src/server/application/services/conversation-attention-observer.spec.ts",
@@ -14091,6 +14213,7 @@
       "packages/ai/src/server/infrastructure/adapters/provider-secret-vault.contract.spec.ts",
       "packages/ai/src/server/infrastructure/adapters/provider-web-research.adapter.spec.ts",
       "packages/ai/src/server/infrastructure/adapters/tokenize-keep-boundary.surface.spec.ts",
+      "packages/ai/src/server/infrastructure/ai-profile-import.spec.ts",
       "packages/ai/src/server/infrastructure/gateways/openai-compatible-model-catalog.gateway.spec.ts",
       "packages/ai/src/server/infrastructure/gateways/openai-compatible.gateway.spec.ts",
       "packages/ai/src/server/infrastructure/migrations/conversation-shell.source.spec.ts",
@@ -14126,6 +14249,7 @@
       "packages/ai/src/server/mastra/runtime/goal-workflow-events.postgres.spec.ts",
       "packages/ai/src/server/mastra/runtime/mastra-goal-surface-lease.runtime.spec.ts",
       "packages/ai/src/server/mastra/runtime/mastra-workflow.runtime.spec.ts",
+      "packages/ai/src/server/mastra/runtime/message-store.postgres.spec.ts",
       "packages/ai/src/server/mastra/runtime/ordered-memory.shared.spec.ts",
       "packages/ai/src/server/mastra/runtime/workflow-run-projection.spec.ts",
       "packages/ai/src/server/mastra/tools/product-tool-checkpoint.spec.ts",
@@ -14251,6 +14375,10 @@
       "packages/data-portability/src/server/application/use-cases/__tests__/portable-capability-registry.test.ts",
       "packages/data-portability/src/server/application/use-cases/__tests__/server-held-disclosure-not-importable.surface.spec.ts",
       "packages/data-portability/src/server/infrastructure/__tests__/data-portability-module-partial-start.spec.ts",
+      "packages/data-portability/src/server/infrastructure/data-portability.module.test.ts",
+      "packages/data-portability/src/server/infrastructure/prisma-profile-import-archive.test.ts",
+      "packages/data-portability/src/server/infrastructure/prisma-profile-import-message-archive.test.ts",
+      "packages/data-portability/src/server/infrastructure/prisma-profile-import.test.ts",
       "packages/data-portability/src/server/infrastructure/prisma-server-held-data-disclosure.source.test.ts",
       "packages/data-portability/src/server/transport/data-portability.controller.test.ts",
       "packages/goal/src/__tests__/dual-registry.surface.spec.ts",
@@ -14568,7 +14696,7 @@
   "duplicate": [],
   "unexpected": [],
   "counts": {
-    "unit": 1201,
+    "unit": 1214,
     "integration": 58,
     "smoke": 3,
     "boundary-ipc": 6,

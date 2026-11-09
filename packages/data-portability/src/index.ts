@@ -28,3 +28,4 @@ export { createPrismaProfileImportService } from './server/infrastructure/prisma
 export type { ProfileImportApplicationPort } from './server/infrastructure/prisma-profile-import';
 export { profileImportDigest } from './server/application/profile-import-manifest';
 export { createProfileImportScheduleRecovery } from './server/infrastructure/profile-import-schedule-recovery';
+export { createProfileImportArchiveSweep } from './server/infrastructure/prisma-profile-import-archive';

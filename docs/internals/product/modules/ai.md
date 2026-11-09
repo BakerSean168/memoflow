@@ -5,7 +5,7 @@ tags:
   - ai
 description: AI 模块当前功能、Mastra durable workflows、Routine tools 与产品读写边界
 created: 2026-06-02T00:00:00
-updated: 2026-10-02T00:00:00+00:00
+updated: 2026-11-09T00:00:00+00:00
 ---
 
 # AI 模块说明
@@ -122,7 +122,9 @@ Planner 工具读取 Calendar/Task owner projection；Notification 工具读取 
 
 API 与 Desktop 各自在 composition root 注入 Goal/Task/Reminder owner mutation ports、Routine command port、Planner read port、Notification read port、Repository/Knowledge ports 与 LabelService。AI package 不 deep-import Prisma/PowerSync provider 实现，也不创建第二套业务 repository。
 
-HTTP 与 Electron IPC 共用相同的 runtime failure projection：capability、configuration、provider availability、model availability、timeout、cancel 与 validation 均以稳定 code 对外；provider/Mastra 原始错误只留在内部诊断边界。Data Portability 的 owner-driven V3 capability `ai-conversations@3` 只导出/导入 Conversation shell 的 `name` 与 canonical `status`；不把 Mastra transcript、provider secret、execution record 或 AI index cache 伪装成第二份产品 truth。PORT-1611 后旧 V1/V2 backup path 已删除，AI shell 只通过 owner V3 capability 参与 export/dry-run/apply。
+HTTP 与 Electron IPC 共用相同的 runtime failure projection：capability、configuration、provider availability、model availability、timeout、cancel 与 validation 均以稳定 code 对外；provider/Mastra 原始错误只留在内部诊断边界。Data Portability 的 AI 可移植边界由两个 owner capability 组成：`ai-conversations@3` 只承载 Conversation shell 的 `name` 与 canonical `status`；`ai-conversation-messages@1`（`dependsOn: ['ai-conversations']`）在信封中声明可重算的归档 manifest（`archive.digest/threads/messages` 与每会话 `conversationRef/messageCount/digest`），消息正文作为同一次 Profile 导入的 sidecar NDJSON 归档传输，并由服务端在导入事务内写回 Mastra Memory。
+
+消息的唯一权威仍是 Mastra Memory：不新增 Prisma 消息表、不做双写，桌面也不会因导入在本地再写一份 transcript。仍明确排除 workflow/suspension 运行状态（`mastra_workflow_snapshot`，A 案）、附件二进制、provider secret 与 Local Agent（`ai_local_conversation_items`）transcript；`mastra_resources` 非空与孤儿线程会形成源 blocker，导出后新增消息会使 inventory digest 变化，从而在删除前复核失败并保留源。通用 V3 `/dry-run` 与 `/apply` 不承载归档，遇到消息能力以 `IMPORT_ARCHIVE_REQUIRED` 失败关闭；PORT-1611 后旧 V1/V2 backup path 已删除。
 
 ## 8. 相关资产
 

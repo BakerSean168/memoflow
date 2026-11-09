@@ -10,6 +10,7 @@ const logger = createLogger('ExportServerHeldDataDisclosure');
 
 const DISCLOSURE_NOTES = [
   'This artifact is a read-only disclosure and cannot be imported into MemoFlow.',
+  'AI conversation messages can be restored by importing a local account Profile. Attachment binaries, provider secrets, and workflow/suspension state remain non-importable.',
   'GitHub installation identifiers are non-replayable references; no MemoFlow-managed OAuth token, installation access token, private key, or other replayable authorization is included.',
   'User-authored Markdown, frontmatter, and cached repository bytes are disclosed verbatim and may contain secrets the user placed in the repository.',
   'Local Vault files, local Git history, and GitHub repository history are not held in this server disclosure.',

@@ -8,20 +8,44 @@ import {
   ProfileImportPlanSchema,
   ProfileImportCommittedSchema,
   ProfileImportOperationSchema,
+  ArchiveManifestSchema,
   type PortableCapability,
   type ProfileImportRequest,
   type ProfileImportCommitRequest,
   type ProfileImportCommitted,
   type ProfileImportOperation as ProfileImportOperationResult,
+  type ProfileImportArchivePrepareRequest,
+  type ProfileImportArchivePrepareResponse,
+  type ProfileImportArchiveChunkRequest,
+  type ProfileImportArchiveChunkResponse,
+  type ProfileImportArchiveCompleteResponse,
 } from '@memoflow/data-portability-contracts';
+import { computeArchiveManifest } from '@memoflow/ai-contracts/portable-messages-archive';
 import { PortableCapabilityRegistry } from '../application/portable-capability';
-import { PortableCapabilityCoordinator } from '../application/portable-capability-coordinator';
+import {
+  PortableCapabilityCoordinator,
+  ProfileImportVerificationError,
+} from '../application/portable-capability-coordinator';
 import { profileImportDigest } from '../application/profile-import-manifest';
+import {
+  createProfileImportArchiveStore,
+  type ProfileImportArchiveRows,
+} from './prisma-profile-import-archive';
+
+/** Rows the message capability may load from staging during commit. */
+export interface ProfileImportCapabilityOptions {
+  readonly messageArchive?: () => ProfileImportArchiveRows | Promise<ProfileImportArchiveRows>;
+}
 
 interface ProfileImportDependencies {
-  capabilities(tx: Prisma.TransactionClient): readonly PortableCapability<unknown>[];
+  capabilities(
+    tx: Prisma.TransactionClient,
+    options?: ProfileImportCapabilityOptions,
+  ): readonly PortableCapability<unknown>[];
   readSummary(tx: Prisma.TransactionClient, identityId: string): Promise<BusinessDataSummary>;
 }
+
+const MESSAGES_CAPABILITY = 'ai-conversation-messages';
 
 /**
  * V1 bounded import fence. PostgreSQL writers acquire ROW EXCLUSIVE table locks,
@@ -53,9 +77,10 @@ export function createPrismaProfileImportService(
   db: PrismaClient,
   dependencies: ProfileImportDependencies,
 ) {
-  const coordinator = (tx: Prisma.TransactionClient) => {
+  const archiveStore = createProfileImportArchiveStore(db);
+  const coordinator = (tx: Prisma.TransactionClient, options?: ProfileImportCapabilityOptions) => {
     const registry = new PortableCapabilityRegistry();
-    for (const capability of dependencies.capabilities(tx)) registry.register(capability);
+    for (const capability of dependencies.capabilities(tx, options)) registry.register(capability);
     return new PortableCapabilityCoordinator(registry, {
       productVersion: 'profile-import-v1',
       nowIsoString: () => new Date().toISOString(),
@@ -104,8 +129,75 @@ export function createPrismaProfileImportService(
     }
     return ProfileImportCommittedSchema.parse({ ...result, serverVerified });
   }
+  /**
+   * L2: the envelope must declare exactly the manifest recomputed from the
+   * completed archive, and the archive must exist before planning. Owner
+   * `validateImport` still checks that every conversationRef belongs to the
+   * batch's `ai-conversations` payload.
+   */
+  async function assertMessageArchive(
+    tx: Prisma.TransactionClient,
+    identityId: string,
+    requestId: string,
+    envelope: { capabilities: readonly { key: string; payload: unknown }[] },
+  ): Promise<void> {
+    const entry = envelope.capabilities.find((item) => item.key === MESSAGES_CAPABILITY);
+    if (!entry) return;
+    const declared = ArchiveManifestSchema.safeParse(entry.payload);
+    if (!declared.success) throw new ProfileImportError('IMPORT_ARCHIVE_MISMATCH');
+    const computed = await archiveStore.readComputedManifest(tx, identityId, requestId);
+    if (
+      JSON.stringify(computeArchiveManifest(declared.data.threads)) !== JSON.stringify(computed)
+    ) {
+      throw new ProfileImportError('IMPORT_ARCHIVE_MISMATCH');
+    }
+  }
+  const archiveOptions = (
+    tx: Prisma.TransactionClient,
+    identityId: string,
+    requestId: string,
+  ): ProfileImportCapabilityOptions => ({
+    messageArchive: () => archiveStore.loadParsedArchive(tx, identityId, requestId),
+  });
 
   return {
+    async prepareArchive(
+      principal: string,
+      requestId: string,
+      raw: ProfileImportArchivePrepareRequest,
+    ): Promise<ProfileImportArchivePrepareResponse> {
+      const identityId = identity(principal);
+      return archiveStore.prepare(
+        identityId,
+        ProfileImportRequestSchema.shape.requestId.parse(requestId),
+        raw,
+      );
+    },
+
+    async putArchiveChunk(
+      principal: string,
+      requestId: string,
+      raw: ProfileImportArchiveChunkRequest,
+    ): Promise<ProfileImportArchiveChunkResponse> {
+      const identityId = identity(principal);
+      return archiveStore.putChunk(
+        identityId,
+        ProfileImportRequestSchema.shape.requestId.parse(requestId),
+        raw,
+      );
+    },
+
+    async completeArchive(
+      principal: string,
+      requestId: string,
+    ): Promise<ProfileImportArchiveCompleteResponse> {
+      const identityId = identity(principal);
+      return archiveStore.complete(
+        identityId,
+        ProfileImportRequestSchema.shape.requestId.parse(requestId),
+      );
+    },
+
     async preflight(principal: string, raw: ProfileImportRequest) {
       const identityId = identity(principal);
       const input = ProfileImportRequestSchema.parse(raw);
@@ -119,12 +211,12 @@ export function createPrismaProfileImportService(
           if (existing?.status === 'committed')
             return ProfileImportPlanSchema.parse(JSON.parse(existing.planJson));
           await assertEmpty(tx, identityId);
+          await assertMessageArchive(tx, identityId, input.requestId, decoded);
           const operationId = ids(identityId, input.requestId);
-          const prepared = await coordinator(tx).planProfileCopy(
-            input.content,
-            identityId,
-            operationId,
-          );
+          const prepared = await coordinator(
+            tx,
+            archiveOptions(tx, identityId, input.requestId),
+          ).planProfileCopy(input.content, identityId, operationId);
           const plan = ProfileImportPlanSchema.parse({
             schemaVersion: 1,
             operationId,
@@ -148,6 +240,8 @@ export function createPrismaProfileImportService(
             },
             update: { effectiveDigest: plan.effectiveDigest, planJson: JSON.stringify(plan) },
           });
+          // Staging exists before preflight; link it now that the operation is durable.
+          await archiveStore.attachOperation(tx, identityId, input.requestId, operationId);
           return plan;
         },
         { timeout: 15_000, maxWait: 2000 },
@@ -160,7 +254,8 @@ export function createPrismaProfileImportService(
     ): Promise<ProfileImportCommitted> {
       const identityId = identity(principal);
       const input = ProfileImportCommitRequestSchema.parse(raw);
-      const sourceDigest = profileImportDigest(coordinator(db).decode(input.content));
+      const decoded = coordinator(db).decode(input.content);
+      const sourceDigest = profileImportDigest(decoded);
       return db.$transaction(
         async (tx) => {
           await lockProfileImportWrites(tx);
@@ -169,22 +264,31 @@ export function createPrismaProfileImportService(
           if (!existing) throw new ProfileImportError('IMPORT_PREFLIGHT_REQUIRED');
           if (existing.status === 'committed') return verify(tx, existing);
           await assertEmpty(tx, identityId);
-          const prepared = await coordinator(tx).planProfileCopy(
-            input.content,
-            identityId,
-            existing.id,
-          );
+          await assertMessageArchive(tx, identityId, input.requestId, decoded);
+          await archiveStore.attachOperation(tx, identityId, input.requestId, existing.id);
+          const prepared = await coordinator(
+            tx,
+            archiveOptions(tx, identityId, input.requestId),
+          ).planProfileCopy(input.content, identityId, existing.id);
           if (
             prepared.effectiveDigest !== input.effectiveDigest ||
             existing.effectiveDigest !== input.effectiveDigest
           ) {
             throw new ProfileImportError('TARGET_CHANGED');
           }
-          const applied = await coordinator(tx).applyProfileCopy(
-            prepared.effectiveContent,
-            identityId,
-            existing.id,
-          );
+          let applied;
+          try {
+            applied = await coordinator(
+              tx,
+              archiveOptions(tx, identityId, input.requestId),
+            ).applyProfileCopy(prepared.effectiveContent, identityId, existing.id);
+          } catch (error) {
+            // L3 readback mismatch is a stable failure, not an internal error.
+            if (error instanceof ProfileImportVerificationError) {
+              throw new ProfileImportError('IMPORT_VERIFICATION_FAILED');
+            }
+            throw error;
+          }
           const result = ProfileImportCommittedSchema.parse({
             status: 'committed',
             plan: JSON.parse(existing.planJson),
@@ -196,6 +300,8 @@ export function createPrismaProfileImportService(
             where: { id: existing.id },
             data: { status: 'committed', resultJson: JSON.stringify(result) },
           });
+          // Committed copies no longer need staged bytes (§5.4).
+          await archiveStore.deleteChunks(tx, identityId, input.requestId);
           return result;
         },
         { timeout: 15_000, maxWait: 2000 },

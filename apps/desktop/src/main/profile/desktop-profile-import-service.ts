@@ -14,6 +14,10 @@ import {
   ProfileImportPlanSchema,
   ProfileImportCommittedSchema,
   ProfileImportOperationSchema,
+  ArchiveManifestSchema,
+  ProfileImportArchivePrepareResponseSchema,
+  ProfileImportArchiveChunkResponseSchema,
+  ProfileImportArchiveCompleteResponseSchema,
 } from '@memoflow/data-portability-contracts';
 import { profileImportDigest } from '@memoflow/data-portability';
 import { ResultErrorException } from '@memoflow/transport-contracts/result';
@@ -23,11 +27,20 @@ import { ProfileImportJournal, type ProfileImportJournalEntry } from './profile-
 import { readProfileSqliteSnapshot } from './profile-sqlite-snapshot';
 import { composeProfilePortability } from './compose-profile-portability';
 import { inspectProfileSource } from './profile-source-inventory';
+import {
+  createDesktopMessageExportPort,
+  encodeDesktopMessageArchive,
+  messageChunkDigest,
+  type DesktopMessageArchive,
+} from './desktop-message-archive';
 import { profileImportHttp } from './profile-import-http';
 import { LocalProfileIdSchema } from './profile-cleanup';
 import { writeProfileDurableFile } from './profile-durable-file';
 
 const endpoint = '/data-portability/profile-import';
+const MESSAGE_CAPABILITY = 'ai-conversation-messages';
+/** The server owns the target transcript; the desktop never recomputes it locally. */
+const serverScopedCapabilities = new Set<string>([MESSAGE_CAPABILITY]);
 const view = (entry: ProfileImportJournalEntry): DesktopProfileImportView =>
   DesktopProfileImportViewSchema.parse(
     Object.fromEntries(
@@ -78,18 +91,110 @@ export class DesktopProfileImportService {
   private readSource(sourceProfileId: string, password: string | undefined, exportedAt: string) {
     return this.runtime.withInactiveLocalAccount(sourceProfileId, password, (profile, paths) =>
       readProfileSqliteSnapshot(paths.dbPath, async (db) => {
-        const exported = await composeProfilePortability(db, exportedAt).export(
-          profile.localOwnerId,
+        const messageExportPort = createDesktopMessageExportPort(
+          path.join(paths.storageDir, 'mastra.db'),
         );
-        const inventory = await inspectProfileSource(db, paths.profileDir);
+        const exported = await composeProfilePortability(db, exportedAt, {
+          messageExportPort,
+        }).export(profile.localOwnerId);
+        const messagePayload = exported.envelope.capabilities.find(
+          (capability) => capability.key === MESSAGE_CAPABILITY,
+        )?.payload;
+        const inventory = await inspectProfileSource(db, paths.profileDir, {
+          messages:
+            messagePayload === undefined
+              ? null
+              : {
+                  manifest: ArchiveManifestSchema.parse(messagePayload),
+                  refsByThreadId: messageExportPort.lastArchive?.refsByThreadId ?? [],
+                },
+        });
         return {
           sourceLastActiveAt: profile.lastActiveAt,
           content: JSON.stringify(exported.envelope),
           sourceDigest: profileImportDigest(exported.envelope),
           inventory,
+          archive: messagePayload === undefined ? null : messageExportPort.lastArchive,
         };
       }),
     );
+  }
+  private async uploadArchive(
+    token: string,
+    requestId: string,
+    archive: DesktopMessageArchive,
+  ): Promise<void> {
+    const encoded = encodeDesktopMessageArchive(archive);
+    const base = `${endpoint}/${requestId}/archive`;
+    const prepared = await profileImportHttp(
+      token,
+      `${base}/prepare`,
+      ProfileImportArchivePrepareResponseSchema,
+      {
+        archiveDigest: encoded.manifest.archive.digest,
+        codec: encoded.codec,
+        chunkCount: encoded.chunks.length,
+        uncompressedBytes: encoded.uncompressedBytes,
+      },
+    );
+    if (prepared.archiveState === 'complete') return;
+    const received = new Set(prepared.receivedChunkIndexes);
+    for (const [index, chunk] of encoded.chunks.entries()) {
+      if (received.has(index)) continue;
+      await this.uploadArchiveChunk(token, `${base}/chunk`, index, chunk);
+    }
+    const completed = await profileImportHttp(
+      token,
+      `${base}/complete`,
+      ProfileImportArchiveCompleteResponseSchema,
+      {},
+    );
+    if (profileImportDigest(completed.computedManifest) !== profileImportDigest(encoded.manifest))
+      throw new ResultErrorException('IMPORT_ARCHIVE_MISMATCH', 'IMPORT_ARCHIVE_MISMATCH');
+  }
+  private async uploadArchiveChunk(
+    token: string,
+    url: string,
+    index: number,
+    chunk: Buffer,
+  ): Promise<void> {
+    let lastError: unknown;
+    for (let attempt = 0; attempt < 3; attempt += 1) {
+      try {
+        await profileImportHttp(token, url, ProfileImportArchiveChunkResponseSchema, {
+          index,
+          digest: messageChunkDigest(chunk),
+          data: chunk.toString('base64'),
+        });
+        return;
+      } catch (error) {
+        // Stable server conflicts (mismatch/limit) are final. Transport errors
+        // are safe to retry because the server treats same-digest bytes as idempotent.
+        if (error instanceof ResultErrorException) throw error;
+        lastError = error;
+      }
+    }
+    throw lastError;
+  }
+  /** Recovery may not have uploaded the sidecar yet; rebuild it from the unchanged source. */
+  private async ensureArchive(
+    entry: ProfileImportJournalEntry,
+    token: string,
+    journal: ProfileImportJournal,
+    password?: string,
+  ): Promise<void> {
+    const content = await this.content(entry, journal);
+    const envelope = z
+      .object({ capabilities: z.array(z.object({ key: z.string() })).optional() })
+      .passthrough()
+      .parse(JSON.parse(content));
+    if (!envelope.capabilities?.some((capability) => capability.key === MESSAGE_CAPABILITY)) return;
+    const source = await this.readSource(entry.sourceProfileId, password, entry.exportedAt);
+    if (source.sourceDigest !== entry.sourceDigest)
+      throw new ResultErrorException('IMPORT_SNAPSHOT_CHANGED', 'IMPORT_SNAPSHOT_CHANGED');
+    if (!source.archive)
+      throw new ResultErrorException('IMPORT_ARCHIVE_MISMATCH', 'IMPORT_ARCHIVE_MISMATCH');
+    await this.uploadArchive(token, entry.requestId, source.archive);
   }
   prepare(input: DesktopProfileImportPrepare) {
     return this.exclusive(async () => {
@@ -101,6 +206,8 @@ export class DesktopProfileImportService {
           previous.targetIdentityId !== profile.localOwnerId
         )
           throw new ResultErrorException('IMPORT_REQUEST_CONFLICT', 'IMPORT_REQUEST_CONFLICT');
+        if (previous.phase === 'prepared')
+          await this.ensureArchive(previous, token, journal, input.password);
         return view(previous);
       }
       const exportedAt = new Date().toISOString();
@@ -129,6 +236,8 @@ export class DesktopProfileImportService {
         journal.saveSnapshot(entry, source.content, key),
       );
       await journal.save(entry);
+      // The archive must be complete before L2 preflight can compare manifests.
+      if (source.archive) await this.uploadArchive(token, entry.requestId, source.archive);
       entry.plan = await profileImportHttp(
         token,
         `${endpoint}/preflight`,
@@ -210,6 +319,9 @@ export class DesktopProfileImportService {
       entry.phase = 'committed';
     }
     if (entry.phase === 'prepared') {
+      // A crash after the snapshot but before preflight can leave the sidecar
+      // unstaged; staging is idempotent, so rebuild/complete it first.
+      await this.ensureArchive(entry, token, journal, password);
       entry.plan = await profileImportHttp(
         token,
         `${endpoint}/preflight`,
@@ -259,15 +371,17 @@ export class DesktopProfileImportService {
       throw new ResultErrorException('PROFILE_CHANGED', 'PROFILE_CHANGED');
     try {
       const result = entry.result;
+      const localManifests = result.manifests.filter(
+        (manifest) => !serverScopedCapabilities.has(manifest.key),
+      );
       const manifests = await readProfileSqliteSnapshot(paths.dbPath, (db) =>
         composeProfilePortability(db, entry.exportedAt).readProfileManifests(
           entry.targetIdentityId,
           result.bindings,
-          result.manifests.map((manifest) => manifest.key),
+          localManifests.map((manifest) => manifest.key),
         ),
       );
-      entry.localVerified =
-        profileImportDigest(manifests) === profileImportDigest(result.manifests);
+      entry.localVerified = profileImportDigest(manifests) === profileImportDigest(localManifests);
     } catch {
       /* Incomplete sync never authorizes cleanup; retry reads actual owner facts. */
     }

@@ -758,7 +758,7 @@ export default {
     exportServerDataDisclosure: 'Download Server-held Data Disclosure',
     exportingServerDataDisclosure: 'Preparing disclosure...',
     serverDataDisclosureDescription:
-      'Web-only, non-importable JSON disclosure of repository connection metadata and the projections, cached attachment bytes, webhook/write history, and RAG index held by MemoFlow. It excludes MemoFlow-managed replayable GitHub authorization, local Vault files, and GitHub history; repository content is included verbatim.',
+      'Web-only, non-importable JSON disclosure of repository connection metadata and the projections, cached attachment bytes, webhook/write history, and RAG index held by MemoFlow. AI conversation messages can be restored through a local-account import; attachment binaries, provider secrets, and AI runtime state remain non-importable. It excludes MemoFlow-managed replayable GitHub authorization, local Vault files, and GitHub history; repository content is included verbatim.',
   },
   resetPreferences: {
     title: 'Reset preferences',

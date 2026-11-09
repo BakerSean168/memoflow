@@ -36,7 +36,9 @@ export {
   type AIPowerSyncRepositorySet,
   type AIPrismaRepositorySet,
   AIConversationPortableCapability,
+  AIConversationMessagesPortableCapability,
   createAIConversationPortableCapability,
+  createAIConversationMessagesPortableCapability,
   type IAIConversationRepository,
   type IAIProviderConfigRepository,
   KnowledgeCapturePersistenceAdapter,
@@ -150,7 +152,12 @@ export {
   goalPanelSubmitOperationId,
 } from './server/permissions';
 export { createAiBusinessDataPresence } from './server/infrastructure/business-data-presence';
-export { createAiPrismaPortableCapability } from './server/infrastructure/ai-profile-import';
+export {
+  createAiPrismaPortableCapability,
+  createAiProfileImportCapabilities,
+  createAiMessageExportCapability,
+  type AiProfileImportCapabilityOptions,
+} from './server/infrastructure/ai-profile-import';
 
 export type {
   AIWorkflowRuntimePort,

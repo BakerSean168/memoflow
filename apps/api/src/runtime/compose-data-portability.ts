@@ -13,6 +13,7 @@ import type { PrismaClient } from '@memoflow/database';
 import {
   createDataPortabilityModule,
   createPrismaProfileImportService,
+  createProfileImportArchiveSweep,
   createProfileImportScheduleRecovery,
   createPrismaServerHeldDataDisclosureApplicationPort,
   type ServerHeldDataDisclosureApplicationPort,
@@ -43,9 +44,19 @@ export function composeDataPortability(
     dependencies.db,
   );
   const instance = createDataPortabilityModule({
-    runtimeContributions: dependencies.reconcileImportedProfile
-      ? createProfileImportScheduleRecovery(dependencies.db, dependencies.reconcileImportedProfile)
-      : undefined,
+    runtimeContributions: [
+      ...(dependencies.reconcileImportedProfile
+        ? [
+            createProfileImportScheduleRecovery(
+              dependencies.db,
+              dependencies.reconcileImportedProfile,
+            ),
+          ]
+        : []),
+      // Archive staging is technical data: sweep it after 72h without touching
+      // business tables or operation status (#865 §5.4).
+      createProfileImportArchiveSweep(dependencies.db),
+    ],
     portableCapabilities: dependencies.portableCapabilities,
     productVersion: dependencies.productVersion ?? '0.0.1',
   });

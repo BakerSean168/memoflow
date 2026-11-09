@@ -1,5 +1,7 @@
 import { resolveDesktopStorageRoots } from '../paths';
 import { mkdtemp, mkdir, rm, readFile, access, writeFile } from 'node:fs/promises';
+import { createHash } from 'node:crypto';
+import { gunzipSync } from 'node:zlib';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import Database from 'better-sqlite3';
@@ -7,9 +9,17 @@ import { afterEach, expect, it, vi } from 'vitest';
 import { PowerSyncAppSchema } from '@memoflow/powersync-schema';
 import type { IElectronDatabase } from '@memoflow/desktop-contracts';
 import type {
+  ArchiveManifest,
   ProfileImportPlan,
   ProfileImportCommitted,
 } from '@memoflow/data-portability-contracts';
+import {
+  ArchiveLineV1Schema,
+  computeArchiveManifest,
+  computeThreadManifestEntry,
+  type ArchiveMessageLineV1,
+} from '@memoflow/ai-contracts/portable-messages-archive';
+import { PROFILE_IMPORT_ARCHIVE_MAX_CHUNK_BYTES } from '@memoflow/data-portability-contracts';
 import { profileImportDigest } from '@memoflow/data-portability';
 import { createProfilePathResolver } from '../paths';
 import { composeProfilePortability } from './compose-profile-portability';
@@ -80,7 +90,38 @@ function writable(db: Database.Database): IElectronDatabase {
   return adapter;
 }
 
-async function fixture() {
+function archiveManifestFromNdjson(text: string): ArchiveManifest {
+  const messagesByRef = new Map<string, ArchiveMessageLineV1[]>();
+  const refs: string[] = [];
+  for (const line of text.split(/\r?\n/)) {
+    if (!line.trim()) continue;
+    const parsed = ArchiveLineV1Schema.parse(JSON.parse(line));
+    if (parsed.k === 'thread') {
+      refs.push(parsed.ref);
+      continue;
+    }
+    const list = messagesByRef.get(parsed.ref);
+    if (list) list.push(parsed);
+    else messagesByRef.set(parsed.ref, [parsed]);
+  }
+  return computeArchiveManifest(
+    refs.map((ref) => computeThreadManifestEntry(ref, messagesByRef.get(ref) ?? [])),
+  );
+}
+
+function emptyPreview(dryRun: boolean) {
+  return {
+    batchId: 'stable-batch',
+    dryRun,
+    capabilities: [],
+    created: {},
+    updated: {},
+    skipped: {},
+    warnings: [],
+  };
+}
+
+async function fixture(fixtureOptions: { messages?: boolean } = {}) {
   const root = await mkdtemp(path.join(tmpdir(), 'profile-copy-'));
   const roots = {
     ...resolveDesktopStorageRoots({
@@ -96,18 +137,83 @@ async function fixture() {
   await mkdir(source.dbDir, { recursive: true });
   await mkdir(target.dbDir, { recursive: true });
   const src = initialize(source.dbPath, 'IdentityId_11111111-1111-4111-8111-111111111111');
+  const sourceIdentity = 'IdentityId_11111111-1111-4111-8111-111111111111';
   src
     .prepare(
       'INSERT INTO labels (id, identity_id, name, normalized_name, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?)',
     )
     .run(
       'label-source',
-      'IdentityId_11111111-1111-4111-8111-111111111111',
+      sourceIdentity,
       'Travel',
       'travel',
       '2026-10-09T00:00:00Z',
       '2026-10-09T00:00:00Z',
     );
+  if (fixtureOptions.messages) {
+    src
+      .prepare(
+        'INSERT INTO ai_conversations (id, identity_id, name, status, version, created_at, updated_at, deleted_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
+      )
+      .run(
+        'IAiConversationId_11111111-1111-4111-8111-111111111111',
+        sourceIdentity,
+        'Conversation',
+        'Active',
+        1,
+        '2026-10-09T00:00:00Z',
+        '2026-10-09T00:00:00Z',
+        null,
+      );
+    await mkdir(source.storageDir, { recursive: true });
+    const mastra = new Database(path.join(source.storageDir, 'mastra.db'));
+    mastra.exec(`
+      CREATE TABLE mastra_threads (
+        id TEXT PRIMARY KEY,
+        resourceId TEXT,
+        title TEXT,
+        metadata TEXT,
+        createdAt TEXT,
+        updatedAt TEXT
+      );
+      CREATE TABLE mastra_messages (
+        id TEXT PRIMARY KEY,
+        thread_id TEXT,
+        content TEXT,
+        role TEXT,
+        type TEXT,
+        createdAt TEXT,
+        resourceId TEXT
+      );
+      INSERT INTO mastra_threads VALUES (
+        'IAiConversationId_11111111-1111-4111-8111-111111111111',
+        '${sourceIdentity}',
+        'Conversation',
+        NULL,
+        '2026-10-09T00:00:00.000Z',
+        '2026-10-09T00:00:02.000Z'
+      );
+      INSERT INTO mastra_messages VALUES (
+        'message-1',
+        'IAiConversationId_11111111-1111-4111-8111-111111111111',
+        '{"format":2,"parts":[{"type":"text","text":"hello"}]}',
+        'user',
+        'text',
+        '2026-10-09T00:00:01.000Z',
+        '${sourceIdentity}'
+      );
+      INSERT INTO mastra_messages VALUES (
+        'message-2',
+        'IAiConversationId_11111111-1111-4111-8111-111111111111',
+        '{"format":2,"parts":[{"type":"text","text":"world"}]}',
+        'assistant',
+        'text',
+        '2026-10-09T00:00:02.000Z',
+        '${sourceIdentity}'
+      );
+    `);
+    mastra.close();
+  }
   const identity = 'IdentityId_22222222-2222-4222-8222-222222222222';
   initialize(target.dbPath, identity).close();
   const server = initialize(path.join(root, 'server.sqlite'), identity);
@@ -156,8 +262,69 @@ async function fixture() {
   let result: ProfileImportCommitted | null = null;
   let loseCommitResponse = false;
   let commits = 0;
+  const archive = {
+    events: [] as string[],
+    digest: '',
+    codec: '',
+    chunkCount: 0,
+    uncompressedBytes: 0,
+    chunks: new Map<number, Buffer>(),
+    complete: false,
+    manifest: null as ArchiveManifest | null,
+  };
   const http = vi.fn(async (url: string, options?: RequestInit) => {
     const input = JSON.parse(String(options?.body ?? '{}'));
+    if (url.endsWith('/archive/prepare')) {
+      archive.events.push('prepare');
+      if (!archive.digest) {
+        archive.digest = input.archiveDigest;
+        archive.codec = input.codec;
+        archive.chunkCount = input.chunkCount;
+        archive.uncompressedBytes = input.uncompressedBytes;
+      } else {
+        expect(input).toMatchObject({
+          archiveDigest: archive.digest,
+          codec: archive.codec,
+          chunkCount: archive.chunkCount,
+          uncompressedBytes: archive.uncompressedBytes,
+        });
+      }
+      return Response.json({
+        ok: true,
+        data: {
+          archiveState: archive.complete ? 'complete' : 'partial',
+          receivedChunkIndexes: [...archive.chunks.keys()].sort((a, b) => a - b),
+        },
+      });
+    }
+    if (url.endsWith('/archive/chunk')) {
+      archive.events.push(`chunk:${input.index}`);
+      const bytes = Buffer.from(input.data, 'base64');
+      expect(bytes.byteLength).toBeLessThanOrEqual(PROFILE_IMPORT_ARCHIVE_MAX_CHUNK_BYTES);
+      expect(createHash('sha256').update(bytes).digest('hex')).toBe(input.digest);
+      archive.chunks.set(input.index, bytes);
+      return Response.json({
+        ok: true,
+        data: {
+          archiveState: 'partial',
+          receivedChunkIndexes: [...archive.chunks.keys()].sort((a, b) => a - b),
+        },
+      });
+    }
+    if (url.endsWith('/archive/complete')) {
+      archive.events.push('complete');
+      const ordered = [...archive.chunks.entries()].sort((left, right) => left[0] - right[0]);
+      expect(ordered).toHaveLength(archive.chunkCount);
+      let bytes = Buffer.concat(ordered.map(([, chunk]) => chunk));
+      if (archive.codec === 'ndjson+gzip') bytes = gunzipSync(bytes);
+      archive.manifest = archiveManifestFromNdjson(bytes.toString('utf8'));
+      expect(archive.manifest.archive.digest).toBe(archive.digest);
+      archive.complete = true;
+      return Response.json({
+        ok: true,
+        data: { archiveState: 'complete', computedManifest: archive.manifest },
+      });
+    }
     if (url.endsWith('/data-summary'))
       return Response.json({
         ok: true,
@@ -179,6 +346,27 @@ async function fixture() {
         },
       });
     if (url.endsWith('/preflight')) {
+      archive.events.push('preflight');
+      if (fixtureOptions.messages) {
+        expect(archive.complete).toBe(true);
+        const envelope = JSON.parse(input.content);
+        const declared = envelope.capabilities.find(
+          (capability: { key: string }) => capability.key === 'ai-conversation-messages',
+        )?.payload;
+        expect(declared).toEqual(archive.manifest);
+        const sourceDigest = profileImportDigest(envelope);
+        plan = {
+          schemaVersion: 1,
+          requestId,
+          operationId: 'stable-batch',
+          batchId: 'stable-batch',
+          sourceDigest,
+          effectiveDigest: sourceDigest,
+          blockers: [],
+          preview: emptyPreview(true),
+        };
+        return Response.json({ ok: true, data: plan });
+      }
       const prepared = await coordinator.planProfileCopy(input.content, identity, 'stable-batch');
       plan = {
         schemaVersion: 1,
@@ -194,6 +382,21 @@ async function fixture() {
     }
     if (url.endsWith('/commit')) {
       commits += 1;
+      if (fixtureOptions.messages) {
+        result = {
+          status: 'committed',
+          plan,
+          receipt: emptyPreview(false),
+          bindings: [],
+          // The desktop must ignore this server-scoped manifest during local verification.
+          manifests: [
+            { key: 'ai-conversation-messages', schemaVersion: 1, digest: 'a'.repeat(64) },
+          ],
+          committedAt: new Date().toISOString(),
+          serverVerified: true,
+        };
+        return Response.json({ ok: true, data: result });
+      }
       const prepared = await coordinator.planProfileCopy(input.content, identity, 'stable-batch');
       const applied = await coordinator.applyProfileCopy(
         prepared.effectiveContent,
@@ -223,6 +426,7 @@ async function fixture() {
     remove,
     http,
     runtime,
+    archive,
     sourceDescriptor,
     loseResponse: () => {
       loseCommitResponse = true;
@@ -486,6 +690,31 @@ it('completes an epoch-and-cache-only local profile import to a registered targe
   } finally {
     journalSpy.mockRestore();
     if (mastra.open) mastra.close();
+    await f.dispose();
+  }
+});
+
+it('uploads the message archive before preflight and ignores the server-scoped manifest locally', async () => {
+  const f = await fixture({ messages: true });
+  try {
+    const prepared = await f
+      .service()
+      .prepare({ requestId, sourceProfileId: sourceId, targetProfileId: targetId });
+    expect(prepared.blockers).toEqual([]);
+    expect(f.archive.manifest?.archive).toMatchObject({ threads: 1, messages: 2 });
+    expect(f.archive.codec).toBe('ndjson+gzip');
+    expect(f.archive.events).toEqual(['prepare', 'chunk:0', 'complete', 'preflight']);
+    const committed = await f.service().commit({
+      requestId,
+      targetProfileId: targetId,
+      deleteSource: false,
+    });
+    expect(committed).toMatchObject({
+      phase: 'verified',
+      localVerified: true,
+      serverVerified: true,
+    });
+  } finally {
     await f.dispose();
   }
 });

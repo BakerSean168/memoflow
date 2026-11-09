@@ -45,6 +45,15 @@ it('authenticates preflight, commit and recovery and takes the principal only fr
     preflight: vi.fn(async () => plan),
     commit: vi.fn(async () => committed),
     get: vi.fn(async () => committed),
+    prepareArchive: vi.fn(async () => ({ archiveState: 'partial', receivedChunkIndexes: [0] })),
+    putArchiveChunk: vi.fn(async () => ({ archiveState: 'partial', receivedChunkIndexes: [0] })),
+    completeArchive: vi.fn(async () => ({
+      archiveState: 'complete',
+      computedManifest: {
+        archive: { digest: 'c'.repeat(64), threads: 0, messages: 0 },
+        threads: [],
+      },
+    })),
   };
   const app = express();
   app.use(express.json());
@@ -100,6 +109,54 @@ it('authenticates preflight, commit and recovery and takes the principal only fr
       ).status,
     ).toBeGreaterThanOrEqual(400);
     expect(api.preflight).toHaveBeenCalledTimes(1);
+
+    const prepareInput = {
+      archiveDigest: 'd'.repeat(64),
+      codec: 'ndjson',
+      chunkCount: 1,
+      uncompressedBytes: 10,
+    };
+    expect(
+      (
+        await fetch(`${base}/request-test/archive/prepare`, {
+          method: 'POST',
+          headers,
+          body: JSON.stringify(prepareInput),
+        })
+      ).status,
+    ).toBe(200);
+    expect(api.prepareArchive).toHaveBeenCalledWith(
+      'authenticated-account',
+      'request-test',
+      prepareInput,
+    );
+
+    const chunkInput = { index: 0, digest: 'e'.repeat(64), data: 'eA==' };
+    expect(
+      (
+        await fetch(`${base}/request-test/archive/chunk`, {
+          method: 'POST',
+          headers,
+          body: JSON.stringify(chunkInput),
+        })
+      ).status,
+    ).toBe(200);
+    expect(api.putArchiveChunk).toHaveBeenCalledWith(
+      'authenticated-account',
+      'request-test',
+      chunkInput,
+    );
+
+    expect(
+      (
+        await fetch(`${base}/request-test/archive/complete`, {
+          method: 'POST',
+          headers,
+          body: JSON.stringify({}),
+        })
+      ).status,
+    ).toBe(200);
+    expect(api.completeArchive).toHaveBeenCalledWith('authenticated-account', 'request-test');
   } finally {
     await new Promise<void>((resolve) => server.close(() => resolve()));
   }

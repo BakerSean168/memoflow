@@ -204,7 +204,7 @@ watch(
           <p>{{ t('shell.profileImport.keepSource') }}</p>
           <ul class="space-y-1">
             <li v-for="(blocker, index) in blockers" :key="index">
-              {{ t(`shell.profileImport.blockers.${blocker.reason}`) }} ·
+              {{ t(`shell.profileImport.blockers["${blocker.reason}"]`) }} ·
               {{ t(`shell.profileImport.owners.${names[blocker.capability] ?? 'other'}`) }}
             </li>
           </ul>

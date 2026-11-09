@@ -693,7 +693,8 @@ export default {
       '导出可导入的业务数据备份（任务、目标、日程等），可在其他设备导入恢复。',
     exportServerDataDisclosure: '导出服务端数据副本',
     exportingServerDataDisclosure: '正在导出服务端数据副本…',
-    serverDataDisclosureDescription: '导出服务端存储的个人数据副本（仅供查阅，不支持导入）。',
+    serverDataDisclosureDescription:
+      '导出服务端存储的个人数据副本（仅供查阅，不支持导入）。AI 对话消息可通过导入本地账户恢复；附件二进制、服务商密钥和 AI 运行状态仍不可导入。',
   },
   resetPreferences: {
     title: '重置偏好设置',

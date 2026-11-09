@@ -11,6 +11,14 @@ export {
   AIConversationPortableCapability,
   createAIConversationPortableCapability,
 } from './ai-conversation-portability';
+export {
+  AIConversationMessagesPortableCapability,
+  createAIConversationMessagesPortableCapability,
+  deriveImportedMessageId,
+  type AiMessageArchive,
+  type AiMessageArchiveLoader,
+  type AIConversationMessagesPortabilityDependencies,
+} from './ai-conversation-messages-portability';
 export type {
   AIEvaluationOperationsPort,
   AIKnowledgePort,

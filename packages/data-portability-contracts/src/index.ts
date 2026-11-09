@@ -21,3 +21,5 @@ export * from './rules';
 // ============ Owner Capability Protocol ============
 export * from './portable-capability';
 export * from './profile-import';
+export * from './archive-manifest';
+export * from './profile-import-archive';

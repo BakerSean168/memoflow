@@ -7,6 +7,12 @@ import {
   ProfileImportPlanSchema,
   ProfileImportCommittedSchema,
   ProfileImportOperationSchema,
+  ProfileImportArchivePrepareRequestSchema,
+  ProfileImportArchivePrepareResponseSchema,
+  ProfileImportArchiveChunkRequestSchema,
+  ProfileImportArchiveChunkResponseSchema,
+  ProfileImportArchiveCompleteRequestSchema,
+  ProfileImportArchiveCompleteResponseSchema,
 } from '@memoflow/data-portability-contracts';
 /**
  * Data Portability API Routes
@@ -189,6 +195,88 @@ export function registerDataPortabilityRoutes(
         ok(
           ProfileImportOperationSchema.parse(
             await profileImport.get(
+              ctx.identityId,
+              ProfileImportRequestSchema.shape.requestId.parse(req.params?.requestId),
+            ),
+          ),
+        ),
+    );
+    r.route(
+      {
+        method: 'post',
+        path: '/profile-import/:requestId/archive/prepare',
+        summary: '准备 Profile 导入消息归档暂存',
+        request: {
+          params: z.object({ requestId: ProfileImportRequestSchema.shape.requestId }),
+          body: {
+            content: { 'application/json': { schema: ProfileImportArchivePrepareRequestSchema } },
+          },
+        },
+        responses: {
+          200: successResponse(ProfileImportArchivePrepareResponseSchema, '归档暂存已就绪'),
+        },
+      },
+      [auth],
+      async (req, ctx) =>
+        ok(
+          ProfileImportArchivePrepareResponseSchema.parse(
+            await profileImport.prepareArchive(
+              ctx.identityId,
+              ProfileImportRequestSchema.shape.requestId.parse(req.params?.requestId),
+              ProfileImportArchivePrepareRequestSchema.parse(req.body),
+            ),
+          ),
+        ),
+    );
+    r.route(
+      {
+        method: 'post',
+        path: '/profile-import/:requestId/archive/chunk',
+        summary: '上传 Profile 导入消息归档分块',
+        request: {
+          params: z.object({ requestId: ProfileImportRequestSchema.shape.requestId }),
+          body: {
+            content: { 'application/json': { schema: ProfileImportArchiveChunkRequestSchema } },
+          },
+        },
+        responses: {
+          200: successResponse(ProfileImportArchiveChunkResponseSchema, '归档分块已接收'),
+        },
+      },
+      [auth],
+      async (req, ctx) =>
+        ok(
+          ProfileImportArchiveChunkResponseSchema.parse(
+            await profileImport.putArchiveChunk(
+              ctx.identityId,
+              ProfileImportRequestSchema.shape.requestId.parse(req.params?.requestId),
+              ProfileImportArchiveChunkRequestSchema.parse(req.body),
+            ),
+          ),
+        ),
+    );
+    r.route(
+      {
+        method: 'post',
+        path: '/profile-import/:requestId/archive/complete',
+        summary: '完成 Profile 导入消息归档暂存',
+        request: {
+          params: z.object({ requestId: ProfileImportRequestSchema.shape.requestId }),
+          body: {
+            content: {
+              'application/json': { schema: ProfileImportArchiveCompleteRequestSchema },
+            },
+          },
+        },
+        responses: {
+          200: successResponse(ProfileImportArchiveCompleteResponseSchema, '归档已解析'),
+        },
+      },
+      [auth],
+      async (req, ctx) =>
+        ok(
+          ProfileImportArchiveCompleteResponseSchema.parse(
+            await profileImport.completeArchive(
               ctx.identityId,
               ProfileImportRequestSchema.shape.requestId.parse(req.params?.requestId),
             ),

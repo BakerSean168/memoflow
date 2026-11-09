@@ -4,8 +4,13 @@ import { createReadStream, promises as fs } from 'node:fs';
 import path from 'node:path';
 import { z } from 'zod';
 import type { IElectronDatabase } from '@memoflow/desktop-contracts';
-import type { ProfileImportBlocker } from '@memoflow/data-portability-contracts';
+import type { ArchiveManifest, ProfileImportBlocker } from '@memoflow/data-portability-contracts';
 import { profileImportDigest } from '@memoflow/data-portability';
+import {
+  computeThreadManifestEntry,
+  type ArchiveMessageLineV1,
+} from '@memoflow/ai-contracts/portable-messages-archive';
+import { mastraTimestampToMs } from './desktop-message-archive';
 import { readProfileSqliteSnapshot } from './profile-sqlite-snapshot';
 
 // Reviewed owner facts represented by V3. Everything else is retained by default.
@@ -79,11 +84,115 @@ const technicalFiles = new Set([
 ]);
 
 /** Content proofs stay in the host; neither raw rows nor filenames are uploaded. */
-export async function inspectProfileSource(db: IElectronDatabase, profileDir: string) {
+export interface ProfileSourceMessageCoverage {
+  readonly manifest: ArchiveManifest;
+  /** Maps live Mastra threads to the portable conversation refs in the manifest. */
+  readonly refsByThreadId: readonly { readonly threadId: string; readonly ref: string }[];
+}
+
+export interface InspectProfileSourceOptions {
+  /** Manifest produced by the same export that created the inventory. */
+  readonly messages?: ProfileSourceMessageCoverage | null;
+}
+
+function isRuntimeEpoch(rows: readonly Record<string, unknown>[]): boolean {
+  return (
+    rows.length === 1 &&
+    Object.keys(rows[0]!).sort().join(',') === 'epoch,id' &&
+    rows[0]!.id === 1 &&
+    z.uuid().safeParse(rows[0]!.epoch).success
+  );
+}
+
+/** `null` is what Mastra writes when a thread has no metadata; `{}` is the explicit empty value. */
+function isEmptyThreadMetadata(value: unknown): boolean {
+  if (value == null) return true;
+  try {
+    const parsed = typeof value === 'string' ? JSON.parse(value) : value;
+    return (
+      parsed !== null &&
+      typeof parsed === 'object' &&
+      !Array.isArray(parsed) &&
+      Object.keys(parsed as Record<string, unknown>).length === 0
+    );
+  } catch {
+    return false;
+  }
+}
+
+interface MastraMessageInput {
+  readonly id: string;
+  readonly role: string;
+  readonly type: string;
+  readonly content: string;
+  readonly createdAt: number;
+}
+
+function readMastraMessage(row: Record<string, unknown>): MastraMessageInput | null {
+  const { id, role, type, content } = row;
+  if (
+    typeof id !== 'string' ||
+    id.length === 0 ||
+    typeof role !== 'string' ||
+    role.length === 0 ||
+    typeof type !== 'string' ||
+    type.length === 0 ||
+    typeof content !== 'string'
+  )
+    return null;
+  try {
+    return { id, role, type, content, createdAt: mastraTimestampToMs(row.createdAt) };
+  } catch {
+    return null;
+  }
+}
+
+function toArchiveMessageLines(
+  ref: string,
+  rows: readonly Record<string, unknown>[],
+): ArchiveMessageLineV1[] | null {
+  const messages: MastraMessageInput[] = [];
+  for (const row of rows) {
+    const message = readMastraMessage(row);
+    if (!message) return null;
+    messages.push(message);
+  }
+  messages.sort(
+    (left, right) =>
+      left.createdAt - right.createdAt || (left.id < right.id ? -1 : left.id > right.id ? 1 : 0),
+  );
+  return messages.map((message, ordinal) => ({
+    k: 'message',
+    v: 1,
+    ref,
+    ordinal,
+    sid: message.id,
+    role: message.role,
+    type: message.type,
+    content: message.content,
+    createdAt: message.createdAt,
+  }));
+}
+
+export async function inspectProfileSource(
+  db: IElectronDatabase,
+  profileDir: string,
+  options: InspectProfileSourceOptions = {},
+) {
   const blockers: ProfileImportBlocker[] = [];
   const proof: { name: string; digest: string }[] = [];
   const block = (field: string, reason: ProfileImportBlocker['reason'] = 'unsupported_user_data') =>
     blockers.push({ capability: 'local-source', reason, field });
+  const blocked = new Set<string>();
+  const blockOnce = (
+    field: string,
+    reason: ProfileImportBlocker['reason'] = 'unsupported_user_data',
+  ) => {
+    const key = `${field}\u0000${reason}`;
+    if (blocked.has(key)) return;
+    blocked.add(key);
+    block(field, reason);
+  };
   const tables = z
     .array(z.object({ name: z.string() }))
     .parse(
@@ -188,7 +297,7 @@ export async function inspectProfileSource(db: IElectronDatabase, profileDir: st
       (await fs.lstat(mastraPath)).isFile()
     ) {
       await readProfileSqliteSnapshot(mastraPath, async (snapshot) => {
-        const tables = z
+        const listedTables = z
           .array(z.object({ name: z.string() }))
           .parse(
             await snapshot.getAll(
@@ -196,22 +305,15 @@ export async function inspectProfileSource(db: IElectronDatabase, profileDir: st
             ),
           );
         const content: { name: string; digest: string }[] = [];
-        for (const { name } of tables) {
+        const rowsByTable = new Map<string, Record<string, unknown>[]>();
+        for (const { name } of listedTables) {
           const quoted = '"' + name.replace(/"/g, '""') + '"';
           const rows = z
             .array(z.record(z.string(), z.unknown()))
             .parse(await snapshot.getAll(`SELECT * FROM ${quoted} LIMIT 10001`));
           if (rows.length > 10000)
             throw new ResultErrorException('SOURCE_INVENTORY_LIMIT', 'SOURCE_INVENTORY_LIMIT');
-          // Only the startup-generated stream epoch is disposable metadata.
-          // Messages, workflow snapshots and unreviewed tables retain the source.
-          const runtimeEpoch =
-            name === 'memoflow_goal_event_meta' &&
-            rows.length === 1 &&
-            Object.keys(rows[0]!).sort().join(',') === 'epoch,id' &&
-            rows[0]!.id === 1 &&
-            z.uuid().safeParse(rows[0]!.epoch).success;
-          if (rows.length && !runtimeEpoch) block('storage/mastra.db');
+          rowsByTable.set(name, rows);
           content.push({
             name,
             digest: profileImportDigest(
@@ -231,6 +333,97 @@ export async function inspectProfileSource(db: IElectronDatabase, profileDir: st
           });
         }
         proof.push({ name: 'storage/mastra.db', digest: profileImportDigest(content) });
+
+        const coverage = options.messages ?? null;
+        const expectedByRef = new Map(
+          (coverage?.manifest.threads ?? []).map((thread) => [thread.conversationRef, thread]),
+        );
+        const refsByThreadId = new Map(
+          (coverage?.refsByThreadId ?? []).map((entry) => [entry.threadId, entry.ref]),
+        );
+
+        const threadRows = rowsByTable.get('mastra_threads') ?? [];
+        const messageRows = rowsByTable.get('mastra_messages') ?? [];
+        const threadIds = new Set(threadRows.map((row) => String(row.id ?? '')));
+        const messagesByThread = new Map<string, Record<string, unknown>[]>();
+        let orphanThread = false;
+        for (const row of messageRows) {
+          const threadId = typeof row.thread_id === 'string' ? row.thread_id : '';
+          if (!threadId || !threadIds.has(threadId)) {
+            orphanThread = true;
+            continue;
+          }
+          const list = messagesByThread.get(threadId);
+          if (list) list.push(row);
+          else messagesByThread.set(threadId, [row]);
+        }
+
+        let uncovered = false;
+        const seenRefs = new Set<string>();
+        for (const thread of threadRows) {
+          const threadId = typeof thread.id === 'string' ? thread.id : '';
+          if (!threadId) {
+            uncovered = true;
+            continue;
+          }
+          // A thread's metadata is not part of the transcript archive; any
+          // non-empty value is an uncovered fact retained with the source.
+          if (!isEmptyThreadMetadata(thread.metadata)) uncovered = true;
+          const messages = messagesByThread.get(threadId) ?? [];
+          const ref = refsByThreadId.get(threadId);
+          if (!ref) {
+            // Messages without a live conversation shell cannot be exported.
+            if (messages.length) orphanThread = true;
+            continue;
+          }
+          if (!messages.length) {
+            if (expectedByRef.has(ref)) uncovered = true;
+            continue;
+          }
+          const lines = toArchiveMessageLines(ref, messages);
+          if (!lines) {
+            uncovered = true;
+            continue;
+          }
+          const entry = computeThreadManifestEntry(ref, lines);
+          const expected = expectedByRef.get(ref);
+          if (
+            !expected ||
+            expected.messageCount !== entry.messageCount ||
+            expected.digest !== entry.digest
+          ) {
+            uncovered = true;
+            continue;
+          }
+          seenRefs.add(ref);
+        }
+        if (seenRefs.size !== expectedByRef.size) uncovered = true;
+
+        for (const [name, rows] of rowsByTable) {
+          if (!rows.length) continue;
+          if (name === 'mastra_threads' || name === 'mastra_messages') continue;
+          if (name === 'mastra_resources') {
+            blockOnce('storage/mastra.db', 'storage/mastra.db:resources');
+            continue;
+          }
+          if (name === 'mastra_workflow_snapshot') {
+            // A 案: runtime state is explicitly excluded, with its own reason so
+            // users can distinguish it from an unrecognized table (design §6/§2.7).
+            blockOnce('storage/mastra.db', 'storage/mastra.db:unsupported-runtime-state');
+            continue;
+          }
+          // Only the startup-generated stream epoch is disposable metadata.
+          if (name === 'memoflow_goal_event_meta' && isRuntimeEpoch(rows)) continue;
+          block('storage/mastra.db');
+        }
+        if (uncovered) blockOnce('storage/mastra.db', 'storage/mastra.db:messages-uncovered');
+        if (orphanThread) blockOnce('storage/mastra.db', 'storage/mastra.db:orphan-thread');
+
+        // Changing the transcript after export must always change the inventory.
+        proof.push({
+          name: 'storage/mastra.db:archive',
+          digest: coverage?.manifest.archive.digest ?? profileImportDigest(null),
+        });
       });
       inspectedMastra = true;
     }

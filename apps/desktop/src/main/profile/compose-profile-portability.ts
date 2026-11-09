@@ -23,12 +23,27 @@ import {
   PowerSyncLabelRepository,
 } from '@memoflow/label';
 import { createDataPortabilityModule } from '@memoflow/data-portability';
+import {
+  createDesktopConversationMessagesPortableCapability,
+  createDesktopMessageExportPort,
+  type DesktopMessageExportPort,
+} from './desktop-message-archive';
+
+export interface ComposeProfilePortabilityOptions {
+  /** Export-side read port for the local Mastra transcript sidecar. */
+  readonly messageExportPort?: DesktopMessageExportPort;
+}
 
 /** Repository-only composition: never starts module runtimes or a second PowerSync instance. */
-export function composeProfilePortability(db: IElectronDatabase, exportedAt: string) {
+export function composeProfilePortability(
+  db: IElectronDatabase,
+  exportedAt: string,
+  options: ComposeProfilePortabilityOptions = {},
+) {
   const setting = createSettingPowerSyncModule(db);
   const notification = createNotificationPowerSyncPortability(db);
   const clock = createSystemClock();
+  const messageExportPort = options.messageExportPort ?? createDesktopMessageExportPort(null);
   return createDataPortabilityModule({
     productVersion: 'profile-import-v1',
     nowIsoString: () => exportedAt,
@@ -45,6 +60,7 @@ export function composeProfilePortability(db: IElectronDatabase, exportedAt: str
       createAIConversationPortableCapability(
         createAIPowerSyncRepositories(db).conversationRepository,
       ),
+      createDesktopConversationMessagesPortableCapability(messageExportPort),
     ],
   }).portableCapabilityCoordinator;
 }

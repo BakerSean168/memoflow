@@ -245,6 +245,10 @@ export default {
       preserved_target: '目标自定义资料已保留，源差异未复制',
       unsupported_user_data: '含当前未支持复制的本地资料',
       unknown: '存在尚未识别的数据',
+      'storage/mastra.db:messages-uncovered': '本地 AI 消息尚未被导出归档完整覆盖',
+      'storage/mastra.db:resources': '存在未迁移的 AI 资源记忆',
+      'storage/mastra.db:unsupported-runtime-state': '存在无法迁移的 AI 运行状态',
+      'storage/mastra.db:orphan-thread': '存在没有会话壳的孤立 AI 消息',
     },
     owners: {
       account: '账户资料',
@@ -268,6 +272,11 @@ export default {
       IMPORT_REAUTH_REQUIRED: '请先重新认证当前云端账号。',
       SOURCE_PROFILE_ACTIVE: '请先退出源 Profile，再从目标云端 Profile 导入。',
       PROFILE_CHANGED: 'Profile 已切换，请在目标 Profile 中重试。',
+      IMPORT_ARCHIVE_REQUIRED: '此导入包含需要单独传输的聊天记录，请通过导入本地账户恢复。',
+      IMPORT_ARCHIVE_MISMATCH: '聊天记录传输内容不一致，请重新传输后再试。',
+      IMPORT_ARCHIVE_UNAVAILABLE: '聊天记录尚未传输完成，请重新传输后再继续。',
+      IMPORT_VERIFICATION_FAILED: '聊天记录核验未通过，本次导入未完成，请重试或联系支持。',
+      IMPORT_LIMIT_EXCEEDED: '聊天记录超出可导入上限，无法导入。',
     },
   },
   cloudConnection: {

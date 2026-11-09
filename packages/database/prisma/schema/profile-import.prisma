@@ -12,7 +12,49 @@ model ProfileImportOperation {
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
   account Account @relation(fields: [identityId], references: [id], onDelete: Cascade)
+  archive ProfileImportArchive?
 
   @@unique([identityId, requestId])
   @@map("profile_import_operations")
+}
+
+/// Sidecar archive staging for `ai-conversation-messages@1` (#865 §2.6).
+///
+/// Staging precedes preflight, so `operationId` stays null until the operation
+/// row exists. The row is linked to the owning Account (cascade) and to the
+/// operation once preflight creates it. This is technical transfer data: it is
+/// not part of BusinessDataSummary.
+model ProfileImportArchive {
+  id                String   @id
+  identityId        String   @map("identity_id")
+  requestId         String   @map("request_id")
+  operationId       String?  @unique @map("operation_id")
+  archiveDigest     String   @map("archive_digest")
+  codec             String
+  chunkCount        Int      @map("chunk_count")
+  uncompressedBytes Int      @map("uncompressed_bytes")
+  archiveState      String   @map("archive_state")
+  computedManifest  String?  @map("computed_manifest")
+  parsedContent     String?  @map("parsed_content")
+  createdAt         DateTime @default(now()) @map("created_at")
+  updatedAt         DateTime @updatedAt @map("updated_at")
+  account           Account  @relation(fields: [identityId], references: [id], onDelete: Cascade)
+  operation         ProfileImportOperation? @relation(fields: [operationId], references: [id], onDelete: Cascade)
+  chunks            ProfileImportArchiveChunk[]
+
+  @@unique([identityId, requestId])
+  @@map("profile_import_archives")
+}
+
+/// One uploaded archive chunk. `bytes` is the decoded payload (<= 96 KiB).
+model ProfileImportArchiveChunk {
+  archiveId String   @map("archive_id")
+  index     Int
+  digest    String
+  bytes     Bytes
+  createdAt DateTime @default(now()) @map("created_at")
+  archive   ProfileImportArchive @relation(fields: [archiveId], references: [id], onDelete: Cascade)
+
+  @@id([archiveId, index])
+  @@map("profile_import_archive_chunks")
 }
