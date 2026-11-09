@@ -183,7 +183,7 @@
         "status": "none-verified",
         "testFiles": []
       },
-      "sourceSha256": "9a1e6d831da48e3f1a78a5fb2d53f70de2737a0eba6127e7c8b38f09cdd96164"
+      "sourceSha256": "74fbe144111e053805b76801bb8b93d998b8cc0cb7473af807d9cc75e0863553"
     },
     {
       "path": "apps/api/src/shared/infrastructure/middleware/error-result-envelope.surface.spec.ts",
@@ -1003,7 +1003,7 @@
         "status": "none-verified",
         "testFiles": []
       },
-      "sourceSha256": "54989bcfd1e59e01bc2605020d1bc2623c54b4e2321f34c4638f64c1f2ca4803"
+      "sourceSha256": "01c4a60e1a3202770c46a69dad92bbd4d6d6d7f00c6fef792e5585bac1842c65"
     },
     {
       "path": "apps/web/e2e/schedule/presentation-authority/collision-regression.spec.ts",
@@ -1071,7 +1071,7 @@
         "status": "none-verified",
         "testFiles": []
       },
-      "sourceSha256": "f02649be1534e8a25dfcd65358828a9c0ca3ee359db1e426e528a243df0427b0"
+      "sourceSha256": "85625f5e61799dfb1b14358dee711edf47190d2cd39980fe2149f5be399ebb9a"
     },
     {
       "path": "apps/web/e2e/shell/shell-geometry.spec.ts",
