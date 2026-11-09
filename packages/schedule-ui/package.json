@@ -9,6 +9,7 @@
     "dist"
   ],
   "exports": {
+    "./style.css": "./dist/schedule-ui.css",
     ".": {
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js"

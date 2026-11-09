@@ -1,2 +1,3 @@
 /* Production app-vue library styles; development loads styles from Vue source. */
 @import '@memoflow/app-vue/style.css';
+@import '@memoflow/schedule-ui/style.css';
