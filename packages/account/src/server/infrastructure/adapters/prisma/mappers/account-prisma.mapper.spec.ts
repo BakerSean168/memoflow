@@ -41,3 +41,20 @@ describe('AccountPrismaMapper.toDomain timestamps', () => {
     expect(account.updatedAt).toBe(1_700_000_000_123);
   });
 });
+
+describe('AccountPrismaMapper.toDomain profile normalization', () => {
+  it('reads a stored null nickname as the createDefault fallback instead of throwing', () => {
+    const account = AccountPrismaMapper.toDomain(
+      row({ profile: { ...validProfile, nickname: null } }),
+    );
+
+    expect(account.profile.nickname).toBe('User');
+  });
+
+  it('reads a missing profile as a usable default instead of throwing', () => {
+    const account = AccountPrismaMapper.toDomain(row({ profile: null }));
+
+    expect(account.profile.nickname).toBe('User');
+    expect(account.profile.gender).toBe('PreferNotToSay');
+  });
+});

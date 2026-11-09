@@ -9,8 +9,11 @@
 import type { AccountState } from '../../../../domain';
 import { Account } from '../../../../domain';
 import { IdentityId } from '@memoflow/utils/domain';
-import { AccountProfile, AccountStatus } from '../../../../domain/value-objects';
-import type { AccountProfileDTO } from '@memoflow/account-contracts';
+import {
+  AccountProfile,
+  AccountStatus,
+  normalizeStoredAccountProfile,
+} from '../../../../domain/value-objects';
 
 export type PowerSyncAccountRow = {
   id: string;
@@ -23,19 +26,12 @@ export type PowerSyncAccountRow = {
 
 export class AccountPowerSyncMapper {
   static toDomain(row: PowerSyncAccountRow): Account {
-    const profile = this.parseJson<AccountProfileDTO>(row.profile);
+    const profile = normalizeStoredAccountProfile(this.parseJson<unknown>(row.profile));
 
     const state: AccountState = {
       id: IdentityId.of(row.id),
       status: AccountStatus.of(row.status),
-      profile: AccountProfile.create({
-        nickname: profile.nickname,
-        realName: profile.realName,
-        avatarUrl: profile.avatarUrl,
-        bio: profile.bio,
-        gender: profile.gender,
-        birthday: profile.birthday ?? null,
-      }),
+      profile: AccountProfile.create(profile),
       createdAt: new Date(row.created_at).getTime(),
       updatedAt: new Date(row.updated_at).getTime(),
       closedAt: row.closed_at ? new Date(row.closed_at).getTime() : null,

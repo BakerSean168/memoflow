@@ -40,6 +40,23 @@ describe('CloudAccountProvisioner', () => {
     expect(repository.save.mock.calls[0]![0].profile.nickname).toBe('fallback');
   });
 
+  it('never creates an empty nickname when the display name and email prefix are unusable', async () => {
+    const repository = {
+      findById: vi.fn().mockResolvedValue(null),
+      save: vi.fn(),
+    };
+    const provisioner = createCloudAccountProvisionerFromRepository(repository as never, clock);
+
+    await provisioner.provision({
+      identityId: 'IdentityId_00000000-0000-4000-8000-000000000003',
+      email: 'a@example.com',
+      name: '',
+      emailVerified: false,
+    });
+
+    expect(repository.save.mock.calls[0]![0].profile.nickname).toBe('User');
+  });
+
   it('does not rewrite an existing Account when Cloud Auth email verification changes', async () => {
     const initialRepository = {
       findById: vi.fn().mockResolvedValue(null),

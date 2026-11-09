@@ -2,8 +2,11 @@ import type { Account as PrismaAccount } from '@memoflow/database';
 import type { AccountState } from '../../../../domain';
 import { Account } from '../../../../domain';
 import { IdentityId } from '@memoflow/utils/domain';
-import { AccountProfile, AccountStatus } from '../../../../domain/value-objects';
-import type { AccountProfileDTO } from '@memoflow/account-contracts';
+import {
+  AccountProfile,
+  AccountStatus,
+  normalizeStoredAccountProfile,
+} from '../../../../domain/value-objects';
 
 /** Prisma Date/DateTime → Instant (epoch ms). Required fields never null. */
 function requiredInstant(value: Date | string | number | null | undefined): number {
@@ -24,19 +27,12 @@ function optionalInstant(value: Date | string | number | null | undefined): numb
 
 export class AccountPrismaMapper {
   static toDomain(row: PrismaAccount): Account {
-    const profile = row.profile as unknown as AccountProfileDTO;
+    const profile = normalizeStoredAccountProfile(row.profile);
 
     const state: AccountState = {
       id: IdentityId.of(row.id),
       status: AccountStatus.of(row.status),
-      profile: AccountProfile.create({
-        nickname: profile.nickname,
-        realName: profile.realName,
-        avatarUrl: profile.avatarUrl,
-        bio: profile.bio,
-        gender: profile.gender,
-        birthday: profile.birthday ?? null,
-      }),
+      profile: AccountProfile.create(profile),
       createdAt: requiredInstant(row.createdAt),
       updatedAt: requiredInstant(row.updatedAt),
       closedAt: optionalInstant(row.closedAt),
