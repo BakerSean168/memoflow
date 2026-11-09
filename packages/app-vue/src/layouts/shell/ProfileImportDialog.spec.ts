@@ -40,6 +40,7 @@ function fixture(
   profiles = [source, target],
   targetChanges = false,
   hanging = false,
+  blockerReason = 'unsupported_user_data',
 ) {
   let current: DesktopProfileImportView | null = null;
   const invoke = vi.fn(async (channel: string, input: Record<string, unknown>) => {
@@ -72,7 +73,7 @@ function fixture(
           },
         },
         blockers: blocked
-          ? [{ capability: 'local-source', reason: 'unsupported_user_data', field: 'attachments' }]
+          ? [{ capability: 'local-source', reason: blockerReason, field: 'attachments' }]
           : [],
         deleteSource: false,
         serverVerified: false,
@@ -134,6 +135,22 @@ it('explains incomplete coverage and disables source deletion', async () => {
   ).toBe(true);
   expect(wrapper.get('[data-testid="profile-import-blockers"]').text()).toContain(
     'source Profile will be kept',
+  );
+  wrapper.unmount();
+});
+
+it('localizes table-specific Mastra blocker reasons', async () => {
+  const { wrapper, click } = fixture(
+    true,
+    [source, target],
+    false,
+    false,
+    'storage/mastra.db:orphan-thread',
+  );
+  await flushPromises();
+  await click('Preview import');
+  expect(wrapper.get('[data-testid="profile-import-blockers"]').text()).toContain(
+    'AI messages exist without a conversation shell',
   );
   wrapper.unmount();
 });
