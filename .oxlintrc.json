@@ -1434,7 +1434,9 @@
       }
     },
     {
-      "files": ["packages/data-portability/src/server/infrastructure/prisma-profile-import-message-archive.test.ts"],
+      "files": [
+        "packages/data-portability/src/server/infrastructure/prisma-profile-import-message-archive.test.ts"
+      ],
       "rules": {
         "@nx/enforce-module-boundaries": [
           "error",

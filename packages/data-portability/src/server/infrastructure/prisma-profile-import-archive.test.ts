@@ -1,6 +1,9 @@
 import { describe, expect, it } from 'vitest';
 import { gzipSync } from 'node:zlib';
-import { createProfileImportArchiveStore, createProfileImportArchiveSweep } from './prisma-profile-import-archive';
+import {
+  createProfileImportArchiveStore,
+  createProfileImportArchiveSweep,
+} from './prisma-profile-import-archive';
 import {
   buildArchiveFixture,
   createFakeProfileImportDb,
@@ -69,7 +72,9 @@ describe('Profile import archive staging', () => {
     const replay = await store.putChunk(identity, requestId, chunk);
     expect(replay.receivedChunkIndexes).toEqual([0]);
 
-    const other = Buffer.from('{"k":"thread","v":1,"ref":"ai-conversations:9","createdAt":1,"updatedAt":1}\n');
+    const other = Buffer.from(
+      '{"k":"thread","v":1,"ref":"ai-conversations:9","createdAt":1,"updatedAt":1}\n',
+    );
     await expect(
       store.putChunk(identity, requestId, {
         index: 0,
@@ -238,9 +243,7 @@ describe('Profile import archive staging', () => {
 
     const sweep = createProfileImportArchiveSweep(fake.db, { now: () => now });
     expect(await sweep.sweep()).toBe(1);
-    expect(
-      [...fake.archives.values()].map((row) => row.requestId),
-    ).toEqual(['request-new']);
+    expect([...fake.archives.values()].map((row) => row.requestId)).toEqual(['request-new']);
     expect(fake.operations.size).toBe(0);
   });
 });

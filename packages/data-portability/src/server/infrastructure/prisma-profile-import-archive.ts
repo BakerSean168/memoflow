@@ -244,7 +244,10 @@ export function createProfileImportArchiveStore(db: PrismaClient) {
         ) {
           throw new ProfileImportError('IMPORT_ARCHIVE_MISMATCH');
         }
-        return prepareResponse(existing.archiveState as 'partial' | 'complete', await chunksOf(db, existing.id));
+        return prepareResponse(
+          existing.archiveState as 'partial' | 'complete',
+          await chunksOf(db, existing.id),
+        );
       }
       try {
         const created = await db.profileImportArchive.create({
@@ -270,7 +273,10 @@ export function createProfileImportArchiveStore(db: PrismaClient) {
         ) {
           throw new ProfileImportError('IMPORT_ARCHIVE_MISMATCH');
         }
-        return prepareResponse(raced.archiveState as 'partial' | 'complete', await chunksOf(db, raced.id));
+        return prepareResponse(
+          raced.archiveState as 'partial' | 'complete',
+          await chunksOf(db, raced.id),
+        );
       }
     },
 

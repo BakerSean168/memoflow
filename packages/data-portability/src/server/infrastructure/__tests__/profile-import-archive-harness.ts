@@ -109,8 +109,7 @@ export function createFakeProfileImportDb() {
       const key = where.identityId_requestId as { identityId: string; requestId: string };
       return (
         [...archives.values()].find(
-          (row) =>
-            row.identityId === key.identityId && row.requestId === key.requestId,
+          (row) => row.identityId === key.identityId && row.requestId === key.requestId,
         ) ?? null
       );
     },
@@ -139,15 +138,7 @@ export function createFakeProfileImportDb() {
       }
       return { count };
     },
-    async findMany({
-      where = {},
-      select,
-      take,
-    }: {
-      where?: Row;
-      select?: Row;
-      take?: number;
-    }) {
+    async findMany({ where = {}, select, take }: { where?: Row; select?: Row; take?: number }) {
       let rows = [...archives.values()].filter((row) => matches(row, where));
       if (take !== undefined) rows = rows.slice(0, take);
       return rows.map((row) =>
@@ -265,15 +256,18 @@ export function createFakeProfileImportDb() {
       );
       return row ? { ...row } : null;
     },
-    async findMany({ where = {}, orderBy }: { where?: Row; orderBy?: { updatedAt?: 'asc' | 'desc' } }) {
-      let rows = [...conversations.values()].filter((row) =>
-        matches(row as unknown as Row, where),
-      );
+    async findMany({
+      where = {},
+      orderBy,
+    }: {
+      where?: Row;
+      orderBy?: { updatedAt?: 'asc' | 'desc' };
+    }) {
+      let rows = [...conversations.values()].filter((row) => matches(row as unknown as Row, where));
       if (orderBy?.updatedAt) {
         const direction = orderBy.updatedAt === 'asc' ? 1 : -1;
         rows = rows.sort(
-          (left, right) =>
-            (left.updatedAt.getTime() - right.updatedAt.getTime()) * direction,
+          (left, right) => (left.updatedAt.getTime() - right.updatedAt.getTime()) * direction,
         );
       }
       return rows.map((row) => ({ ...row }));
@@ -359,9 +353,7 @@ export function createFakeProfileImportDb() {
         .filter((message) => message.thread_id === threadId)
         .reduce<number | null>(
           (max, message) =>
-            max === null || message.createdAt.getTime() > max
-              ? message.createdAt.getTime()
-              : max,
+            max === null || message.createdAt.getTime() > max ? message.createdAt.getTime() : max,
           null,
         );
       return [{ latest: latest === null ? null : new Date(latest) }];
@@ -405,7 +397,10 @@ export function createFakeProfileImportDb() {
           throw new Error('Injected message write failure');
         }
         const existing = messages.get(row.id);
-        if (existing && (existing.thread_id !== row.thread_id || existing.resourceId !== row.resourceId)) {
+        if (
+          existing &&
+          (existing.thread_id !== row.thread_id || existing.resourceId !== row.resourceId)
+        ) {
           continue;
         }
         messages.set(row.id, {
@@ -517,10 +512,7 @@ export interface ArchiveFixture {
   readonly text: string;
 }
 
-export function buildArchiveFixture(
-  ref = 'ai-conversations:1',
-  count = 2,
-): ArchiveFixture {
+export function buildArchiveFixture(ref = 'ai-conversations:1', count = 2): ArchiveFixture {
   const thread: ArchiveThreadLineV1 = {
     k: 'thread',
     v: 1,

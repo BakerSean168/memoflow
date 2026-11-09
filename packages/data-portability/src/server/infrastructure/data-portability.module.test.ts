@@ -23,16 +23,16 @@ const content = JSON.stringify({
 describe('generic V3 archive rejection', () => {
   it('refuses to dry-run messages without a sidecar archive', async () => {
     const module = createDataPortabilityModule({});
-    await expect(
-      module.api.dryRunPortableDataV3('account-1', { content }),
-    ).rejects.toMatchObject({ code: 'IMPORT_ARCHIVE_REQUIRED' });
+    await expect(module.api.dryRunPortableDataV3('account-1', { content })).rejects.toMatchObject({
+      code: 'IMPORT_ARCHIVE_REQUIRED',
+    });
   });
 
   it('refuses to apply messages without a sidecar archive', async () => {
     const module = createDataPortabilityModule({});
-    await expect(
-      module.api.applyPortableDataV3('account-1', { content }),
-    ).rejects.toMatchObject({ code: 'IMPORT_ARCHIVE_REQUIRED' });
+    await expect(module.api.applyPortableDataV3('account-1', { content })).rejects.toMatchObject({
+      code: 'IMPORT_ARCHIVE_REQUIRED',
+    });
   });
 });
 
@@ -43,9 +43,7 @@ const conversationsCapability = {
   payloadSchema: z.object({ conversations: z.array(z.object({}).passthrough()) }),
   async export() {
     return {
-      conversations: [
-        { ref: 'ai-conversations:1', name: 'Chat', status: 'Active' },
-      ],
+      conversations: [{ ref: 'ai-conversations:1', name: 'Chat', status: 'Active' }],
     };
   },
   async dryRun() {
@@ -76,18 +74,13 @@ function messageCapability(payload: unknown | null) {
 
 const messageManifest = {
   archive: { digest: 'a'.repeat(64), threads: 1, messages: 2 },
-  threads: [
-    { conversationRef: 'ai-conversations:1', messageCount: 2, digest: 'b'.repeat(64) },
-  ],
+  threads: [{ conversationRef: 'ai-conversations:1', messageCount: 2, digest: 'b'.repeat(64) }],
 };
 
 describe('V3 export message boundary', () => {
   it('fails closed instead of emitting an envelope whose archive bytes cannot be delivered', async () => {
     const module = createDataPortabilityModule({
-      portableCapabilities: [
-        conversationsCapability,
-        messageCapability(messageManifest),
-      ] as never,
+      portableCapabilities: [conversationsCapability, messageCapability(messageManifest)] as never,
     });
 
     await expect(
@@ -97,10 +90,7 @@ describe('V3 export message boundary', () => {
 
   it('keeps the existing export envelope when the account has no messages', async () => {
     const module = createDataPortabilityModule({
-      portableCapabilities: [
-        conversationsCapability,
-        messageCapability(null),
-      ] as never,
+      portableCapabilities: [conversationsCapability, messageCapability(null)] as never,
     });
 
     const result = await module.api.exportPortableDataV3(

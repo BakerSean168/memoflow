@@ -59,8 +59,14 @@ interface CapabilityState {
   applied: string[];
 }
 
-function createCapabilities(state: CapabilityState, options: { messageArchive?: () => Promise<ProfileImportArchiveRows> | ProfileImportArchiveRows }) {
-  const bind = (payload: CapabilityState['conversations'], context: PortableCapabilityExecutionContext) => {
+function createCapabilities(
+  state: CapabilityState,
+  options: { messageArchive?: () => Promise<ProfileImportArchiveRows> | ProfileImportArchiveRows },
+) {
+  const bind = (
+    payload: CapabilityState['conversations'],
+    context: PortableCapabilityExecutionContext,
+  ) => {
     for (const conversation of payload.conversations) {
       context.references.bindImportedReference(conversation.ref, `target-${conversation.ref}`);
     }
@@ -134,8 +140,9 @@ function setup() {
     failReadback: false,
     applied: [],
   };
-  const factory = (options?: { messageArchive?: () => Promise<ProfileImportArchiveRows> | ProfileImportArchiveRows }) =>
-    createCapabilities(state, options ?? {});
+  const factory = (options?: {
+    messageArchive?: () => Promise<ProfileImportArchiveRows> | ProfileImportArchiveRows;
+  }) => createCapabilities(state, options ?? {});
   const service = createPrismaProfileImportService(fake.db, {
     capabilities: (_tx: Prisma.TransactionClient, options) => factory(options),
     readSummary: async () => summary(),
@@ -234,9 +241,9 @@ describe('Profile import message archive integration', () => {
         effectiveDigest: plan.effectiveDigest,
       }),
     ).rejects.toMatchObject({ code: 'IMPORT_ARCHIVE_UNAVAILABLE' });
-    expect(value.operations.get(`profile-import-${profileImportDigest([identity, requestId])}`)?.status).toBe(
-      'pending',
-    );
+    expect(
+      value.operations.get(`profile-import-${profileImportDigest([identity, requestId])}`)?.status,
+    ).toBe('pending');
   });
 
   it('maps a commit readback mismatch to IMPORT_VERIFICATION_FAILED and keeps the operation pending', async () => {
