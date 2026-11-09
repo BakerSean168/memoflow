@@ -17,10 +17,17 @@ describe('desktop startup navigation availability', () => {
       });
       await router.push('/settings?tab=startup');
       await router.isReady();
-      Object.defineProperty(window, 'innerWidth', { configurable: true, value: 1280 });
-      const store = { settingsNavigationOpen: true, setSettingsNavigationOpen: vi.fn() };
+      Object.defineProperty(window, 'innerWidth', {
+        configurable: true,
+        value: 1280,
+      });
+      const store = {
+        settingsNavigationOpen: true,
+        setSettingsNavigationOpen: vi.fn(),
+      };
       const spy = vi.spyOn(settingUiHost, 'useAppShellStore').mockReturnValue(store);
       const wrapper = shallowMount(UserSettingsView, {
+        props: { initialTab: 'startup' },
         global: {
           plugins: [
             router,
