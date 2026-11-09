@@ -3240,6 +3240,7 @@
             "ai-ui",
             "api",
             "app-vue",
+            "data-portability",
             "desktop",
             "governance-tools",
             "setting-ui",
@@ -3253,6 +3254,7 @@
             "api",
             "app-react",
             "app-vue",
+            "data-portability",
             "desktop",
             "mobile",
             "setting-ui",
@@ -3265,6 +3267,7 @@
             "ai-ui",
             "api",
             "app-vue",
+            "data-portability",
             "desktop",
             "governance-tools",
             "setting-ui",
@@ -3280,7 +3283,7 @@
           "test:interaction": ["ui-storybook"],
           "e2e:ai-provider": ["web"],
           "e2e:visual-regression": ["web"],
-          "test:coverage": ["ai", "api", "app-vue"]
+          "test:coverage": ["ai", "api", "app-vue", "data-portability"]
         },
         "jobs": {
           "lint": [
@@ -3290,7 +3293,7 @@
             "memoflow:governance-check"
           ],
           "unit-1": [],
-          "unit-2": [],
+          "unit-2": ["data-portability:test"],
           "unit-3": ["desktop:test", "ai:test"],
           "build": [
             "ai:build",
@@ -3298,6 +3301,7 @@
             "ai-ui:build",
             "api:build",
             "app-vue:build",
+            "data-portability:build",
             "desktop:build",
             "setting-ui:build",
             "ui-storybook:build",
@@ -3308,6 +3312,7 @@
             "api:typecheck",
             "app-react:typecheck",
             "app-vue:typecheck",
+            "data-portability:typecheck",
             "desktop:typecheck",
             "mobile:typecheck",
             "setting-ui:typecheck",
