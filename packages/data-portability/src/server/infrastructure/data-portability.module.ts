@@ -110,6 +110,13 @@ export function createDataPortabilityModule(
     async exportPortableDataV3(identityId, request) {
       try {
         const result = await portableCapabilityCoordinator.export(identityId, request.capabilities);
+        // The generic export channel carries one JSON envelope and has no way
+        // to deliver the message sidecar. Sending the envelope alone would be
+        // an unrecoverable half-product, so a source account with messages
+        // fails closed and must use the Profile export instead (#865 §2.5).
+        if (result.capabilityKeys.includes('ai-conversation-messages')) {
+          throw new ProfileImportError('IMPORT_ARCHIVE_REQUIRED');
+        }
         const exportedAt = result.envelope.exportedAt;
         const timestamp = exportedAt.replace(/[:.]/g, '-').slice(0, 19);
         return {

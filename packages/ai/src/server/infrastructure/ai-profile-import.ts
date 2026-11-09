@@ -1,7 +1,8 @@
-import type { Prisma } from '@memoflow/database';
+import type { Prisma, PrismaClient } from '@memoflow/database';
 import type { PortableCapability } from '@memoflow/data-portability-contracts';
 import {
   createAIConversationMessagesPortableCapability,
+  type AIConversationMessagesPortableCapability,
   type AiMessageArchiveLoader,
 } from '../application/ai-conversation-messages-portability';
 import { createAIConversationPortableCapability } from '../application/ai-conversation-portability';
@@ -38,4 +39,25 @@ export function createAiProfileImportCapabilities(
         }),
     }),
   ];
+}
+
+/**
+ * Export-only message capability for the Web V3 export surface.
+ *
+ * The generic export channel has no sidecar archive delivery, so the host must
+ * fail closed when this capability contributes a manifest (#865 §2.5). The
+ * archive loader always throws, so an accidental import through this instance
+ * can never write messages outside the Profile import transaction.
+ */
+export function createAiMessageExportCapability(
+  client: Pick<PrismaClient, '$queryRawUnsafe' | '$executeRawUnsafe'>,
+): AIConversationMessagesPortableCapability {
+  const store = createAiMessageImportPort(client);
+  return createAIConversationMessagesPortableCapability({
+    exportReader: createAiMessageExportReader(store),
+    importPort: store,
+    archive: () => {
+      throw new Error('Export-only message capability cannot import messages');
+    },
+  });
 }

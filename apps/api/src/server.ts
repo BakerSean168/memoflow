@@ -39,6 +39,7 @@ import { bindGatewayWrites } from './modules/agent-gateway/write.port';
 import { composeAgentGatewayModule } from './modules/agent-gateway/module';
 import { bindAssistedWorkflow } from './modules/agent-gateway/assisted-workflow';
 import { AiAssistedWorkflowRepository } from '@memoflow/ai/agent-gateway';
+import { createAiMessageExportCapability } from '@memoflow/ai';
 import { GatewayTaskReceiptSchema } from '@memoflow/agent-gateway';
 import { externalMutationReceiptId } from '@memoflow/database/transaction';
 import { createPilotAdmission } from './modules/agent-gateway/pilot-admission';
@@ -426,6 +427,10 @@ async function bootstrap(): Promise<void> {
       goalComposed.portableCapability,
       taskComposed.portableCapability,
       aiComposed.portableCapability,
+      // Manifest-only export capability: the Web export surface rejects an
+      // envelope that carries messages because it cannot deliver the sidecar
+      // archive (#865 §2.5).
+      createAiMessageExportCapability(prisma),
     ],
   });
   // App-local infrastructure modules: DB-backed dependencies are bound by the

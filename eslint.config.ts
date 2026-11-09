@@ -595,6 +595,25 @@ export default tseslint.config(
       },
     },
     {
+      // Profile import end-to-end verification must execute the AI-owned message
+      // writer, so this one test composes the server-side import capability.
+      files: [
+        'packages/data-portability/src/server/infrastructure/prisma-profile-import-message-archive.test.ts',
+      ],
+      rules: {
+        '@nx/enforce-module-boundaries': [
+          'error',
+          {
+            ...moduleBoundaryOptions,
+            allow: [
+              ...moduleBoundaryOptions.allow,
+              '@memoflow/ai/server/infrastructure/ai-profile-import',
+            ],
+          },
+        ],
+      },
+    },
+    {
       // Native integration fixture composes real clients with the server runtime.
       files: ['packages/ai/src/testing/native-agent-flow.ts'],
       rules: {

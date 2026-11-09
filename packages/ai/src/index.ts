@@ -155,6 +155,7 @@ export { createAiBusinessDataPresence } from './server/infrastructure/business-d
 export {
   createAiPrismaPortableCapability,
   createAiProfileImportCapabilities,
+  createAiMessageExportCapability,
   type AiProfileImportCapabilityOptions,
 } from './server/infrastructure/ai-profile-import';
 
