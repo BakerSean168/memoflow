@@ -11,6 +11,24 @@
  * Soft residual 1095: data-portability parseJsonField keep-boundary (no force-merge).
  */
 
+/**
+ * Mirrors the Account nickname invariant (2-20 chars) and the createDefault
+ * fallback. The API must enforce it before a raw PowerSync upload reaches
+ * Prisma, because this path bypasses the domain repository.
+ */
+const ACCOUNT_NICKNAME_MIN_LENGTH = 2;
+const ACCOUNT_NICKNAME_MAX_LENGTH = 20;
+const DEFAULT_ACCOUNT_NICKNAME = 'User';
+
+function normalizeAccountNickname(value: unknown): string {
+  if (typeof value !== 'string') return DEFAULT_ACCOUNT_NICKNAME;
+  if (value.length > ACCOUNT_NICKNAME_MAX_LENGTH) {
+    return value.slice(0, ACCOUNT_NICKNAME_MAX_LENGTH);
+  }
+  if (value.length < ACCOUNT_NICKNAME_MIN_LENGTH) return DEFAULT_ACCOUNT_NICKNAME;
+  return value;
+}
+
 export const JSON_FIELDS_BY_TABLE: Record<string, ReadonlySet<string>> = {
   accounts: new Set(['profile']),
   user_preference_records: new Set(['payload']),
@@ -62,20 +80,43 @@ function normalizeBooleanLikeValue(value: unknown): unknown {
   return value;
 }
 
+/**
+ * Server-side write fence for `accounts.profile` uploads.
+ *
+ * A PowerSync upload bypasses the domain repository, so a client row created by
+ * an older build (or any malformed payload) could persist `nickname: null` and
+ * make every later domain read throw. Coerce the invariant at this boundary
+ * instead of trusting the client; valid values pass through unchanged.
+ */
+function normalizeAccountProfile(value: unknown): unknown {
+  if (typeof value !== 'object' || value === null || Array.isArray(value)) {
+    return { nickname: DEFAULT_ACCOUNT_NICKNAME };
+  }
+  const profile = value as Record<string, unknown>;
+  return { ...profile, nickname: normalizeAccountNickname(profile.nickname) };
+}
+
 function normalizeCrudValue(tableName: string, key: string, value: unknown): unknown {
+  let normalized = value;
+
   if (JSON_FIELDS_BY_TABLE[tableName]?.has(key) && typeof value === 'string') {
     try {
-      return parseJsonLikeString(value);
+      normalized = parseJsonLikeString(value);
     } catch {
-      return value;
+      // Malformed JSON stays untouched for every other table; the account
+      // profile branch below still coerces it into a usable object.
     }
   }
 
-  if (BOOLEAN_FIELDS_BY_TABLE[tableName]?.has(key)) {
-    return normalizeBooleanLikeValue(value);
+  if (tableName === 'accounts' && key === 'profile') {
+    return normalizeAccountProfile(normalized);
   }
 
-  return value;
+  if (BOOLEAN_FIELDS_BY_TABLE[tableName]?.has(key)) {
+    return normalizeBooleanLikeValue(normalized);
+  }
+
+  return normalized;
 }
 
 export function normalizeCrudData(

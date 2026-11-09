@@ -74,6 +74,76 @@ describe('normalizeCrudData', () => {
   });
 });
 
+describe('account profile upload normalization', () => {
+  it('replaces a null nickname before an accounts row is persisted', () => {
+    expect(
+      normalizeCrudData('accounts', {
+        profile: JSON.stringify({
+          nickname: null,
+          realName: null,
+          avatarUrl: null,
+          bio: null,
+          gender: 'PreferNotToSay',
+          birthday: null,
+        }),
+      }),
+    ).toEqual({
+      profile: {
+        nickname: 'User',
+        realName: null,
+        avatarUrl: null,
+        bio: null,
+        gender: 'PreferNotToSay',
+        birthday: null,
+      },
+    });
+  });
+
+  it('leaves a valid nickname unchanged', () => {
+    expect(normalizeCrudData('accounts', { profile: '{"nickname":"Ada"}' })).toEqual({
+      profile: { nickname: 'Ada' },
+    });
+  });
+
+  it('replaces a null profile with a usable default profile', () => {
+    expect(normalizeCrudData('accounts', { profile: 'null' })).toEqual({
+      profile: { nickname: 'User' },
+    });
+  });
+
+  it('normalizes the profile value passed to the Prisma upsert', async () => {
+    const delegate = {
+      upsert: vi.fn(),
+      update: vi.fn(),
+      deleteMany: vi.fn(),
+    };
+    const db = {
+      $transaction: async <T>(work: (tx: { account: typeof delegate }) => Promise<T>) =>
+        work({ account: delegate }),
+    };
+    const id = 'IdentityId_00000000-0000-4000-8000-000000000001';
+
+    await executeCrudBatch(db, id, [
+      {
+        ops: [
+          {
+            op: 'PUT',
+            type: 'accounts',
+            id,
+            data: { profile: '{"nickname":null,"gender":"PreferNotToSay"}' },
+          },
+        ],
+      },
+    ]);
+
+    expect(delegate.upsert).toHaveBeenCalledWith({
+      where: { id },
+      create: { profile: { nickname: 'User', gender: 'PreferNotToSay' }, id },
+      update: { profile: { nickname: 'User', gender: 'PreferNotToSay' }, id },
+    });
+  });
+});
+
 describe('AI conversation archive state upload', () => {
   it.each(['Archived', 'Active'])(
     'preserves activity order and ownership for a changed-column %s patch',
