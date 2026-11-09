@@ -1,13 +1,13 @@
 ---
 tags: [architecture, desktop, profile, data-portability, protocol]
-description: 已实现的本地账户复制导入、持久恢复、内容核验与本地清理协议
+description: 已实现的本地账户复制导入、消息归档通道、持久恢复、内容核验与本地清理协议
 created: 2026-10-09T00:00:00Z
-updated: 2026-10-09T00:00:00Z
+updated: 2026-11-09T00:00:00Z
 ---
 
 # Desktop Profile 导入、核验与清理协议
 
-**状态：V1 已实现并通过 Linux Electron、真实 PostgreSQL 与本地部署验证。** 决策见 [ADR-119](./decisions/ADR-119-independent-desktop-profiles-and-guest-copy-import.md)，实际测试和未验证范围见[实施计划](https://github.com/BakerSean168/memoflow/issues/487)。本文描述当前实现，不将测试替身当作生产云端或跨平台验收。
+**状态：V1 与消息归档通道已实现并通过 Linux Electron、真实 PostgreSQL 与本地部署验证。** 决策见 [ADR-119](./decisions/ADR-119-independent-desktop-profiles-and-guest-copy-import.md)，实际测试和未验证范围见[实施计划](https://github.com/BakerSean168/memoflow/issues/487)。本文描述当前实现，不将测试替身当作生产云端或跨平台验收。
 
 ## 1. 责任与身份边界
 
@@ -28,7 +28,7 @@ updated: 2026-10-09T00:00:00Z
 
 `GET /api/v1/accounts/me/data-summary` 使用认证主体，唯一契约为 `BusinessDataSummarySchema`：`schemaVersion`、`state`、`observedAt`、逐 owner 状态。状态只有 `empty | non_empty | unknown`。任一 owner 有业务为非空；所有必需 owner 已知且为空才为空；缺失、失败或不能判定为 unknown。
 
-九个 owner 为 Goal、Task、Label、Schedule、Routine、Repository、AI、Notification、Relation。判定包含归档/软删除事实、Knowledge/Repository 和 AI 消息/持久配置等不可导入资料。Account/Preferences 不作为业务非空条件，但另有目标值保护。摘要仅提供观察结果；提交事务会重新判空。
+九个 owner 为 Goal、Task、Label、Schedule、Routine、Repository、AI、Notification、Relation。判定包含归档/软删除事实、Knowledge/Repository 和 AI 消息/持久配置。Account/Preferences 不作为业务非空条件，但另有目标值保护。摘要仅提供观察结果；提交事务会重新判空。
 
 新建本机云端 Profile 的 `add_account` 成功后写入一次性机会记录。已有 Profile 和重新认证不创建机会。消费时先持久化 `consumed=true`，然后读取云端摘要；失败或非空不提示，也不影响登录。
 
@@ -40,16 +40,16 @@ updated: 2026-10-09T00:00:00Z
 
 快照包含源 envelope、固定 exportedAt、source digest、源 lastActiveAt 和 inventory digest。源 inventory 对表内容与文件内容取 hash；不依靠大小/mtime。PowerSync 已知内部表明确列入白名单；底层 `ps_data__*` 由 logical view 检查，未知非空表和 `ps_untyped` 不被当作缓存跳过。
 
-| 范围                                                                         | 当前行为                                                                                             |
-| ---------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------- |
-| Account、Preferences、Notification delivery preferences、Routine preferences | 仅补目标默认/缺失值；不同的目标自定义值保留，形成 `preserved_target` blocker                         |
-| Goal、Task、Label、Schedule、Routine、Notification                           | 复制 V3 支持的业务事实和 portable refs，不重放历史业务事件/通知                                      |
-| AI                                                                           | 仅 conversation shell；batch/ref 稳定映射，不能复活已软删除的目标 shell                              |
-| Notification                                                                 | 不携带源实体 ID、导航/owner-command 链接；只保留可执行 archive action，历史交互作为事实保留          |
-| 未覆盖资料                                                                   | Knowledge/Vault、附件、AI 消息/凭据、Routine protocol definitions/sessions、未知表/文件等阻止清理    |
-| V3 未覆盖字段                                                                | soft-delete 事实、通知链接/额外 metadata/quiet hours、Goal 自定义排序和 record authorship 等阻止清理 |
+| 范围                                                                         | 当前行为                                                                                                                                             |
+| ---------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Account、Preferences、Notification delivery preferences、Routine preferences | 仅补目标默认/缺失值；不同的目标自定义值保留，形成 `preserved_target` blocker                                                                         |
+| Goal、Task、Label、Schedule、Routine、Notification                           | 复制 V3 支持的业务事实和 portable refs，不重放历史业务事件/通知                                                                                      |
+| AI                                                                           | conversation shell（`ai-conversations@3`）+ 消息正文（`ai-conversation-messages@1`）；ref 稳定映射，不能复活已软删除的目标 shell；正文经归档通道恢复 |
+| Notification                                                                 | 不携带源实体 ID、导航/owner-command 链接；只保留可执行 archive action，历史交互作为事实保留                                                          |
+| 未覆盖资料                                                                   | Knowledge/Vault、附件二进制、AI 凭据/运行状态、Routine protocol definitions/sessions、未知表/文件等阻止清理                                          |
+| V3 未覆盖字段                                                                | soft-delete 事实、通知链接/额外 metadata/quiet hours、Goal 自定义排序和 record authorship 等阻止清理                                                 |
 
-`storage/mastra.db` 单独用只读事务检查：只有空表的 runtime 库允许清理，任意非空表阻止；其 WAL/SHM 不重复当作用户文件。遇到符号链接只读取链接目标字符串，不遍历外部 Vault；链接本身阻止自动清理。支持表集合和技术白名单由 Desktop inventory 显式维护，新增 owner/表必须审查覆盖，不能把未知事实自动归为可重建数据。
+`storage/mastra.db` 单独用只读事务检查，按表判定覆盖（不再对任意非空表一律阻止）：`mastra_threads` / `mastra_messages` 仅当会话与消息集合同本次导出的归档 manifest 逐项一致（条数 + 共享 canonicalizer 摘要）时视为已覆盖，不一致或 `threads.metadata` 非空时阻止 `storage/mastra.db:messages-uncovered`；`mastra_resources` 非空阻止 `storage/mastra.db:resources`；`mastra_workflow_snapshot` 非空阻止 `storage/mastra.db:unsupported-runtime-state`（A 案：workflow/suspension 明确排除）；`memoflow_goal_event_meta` 单行 epoch 沿用豁免；其它任何非空表保持阻止；有消息但无存活会话壳的线程阻止 `storage/mastra.db:orphan-thread`。归档摘要并入 inventory digest，导出后新增消息会改变 digest 并使删除前复核失败。其 WAL/SHM 不重复当作用户文件。遇到符号链接只读取链接目标字符串，不遍历外部 Vault；链接本身阻止自动清理。支持表集合和技术白名单由 Desktop inventory 显式维护，新增 owner/表必须审查覆盖，不能把未知事实自动归为可重建数据。
 
 当前没有已持久化的昵称默认值来源证据，因此目标非空昵称一律保留；与源昵称不同会形成保留差异并阻止自动清理。
 
@@ -63,23 +63,103 @@ updated: 2026-10-09T00:00:00Z
 | `POST /api/v1/data-portability/profile-import/commit`    | `{requestId, content, effectiveDigest}` → `ProfileImportCommitted`           |
 | `GET /api/v1/data-portability/profile-import/:requestId` | 当前认证主体的 pending/committed operation；committed 会重新读服务端内容核验 |
 
-请求/响应均有 Zod schema，使用既有 Result envelope。body 不接受 identityId；服务端从 middleware 取 principal。其他账户无法读取原 operation。服务器自行解析 V3、校验禁止字段和引用闭包、重算 source/effective digest。有效计划来自 owner 的目标保护策略；UI 数量来自这个计划。结构化 blocker 的 reason 为 `preserved_target | unsupported_user_data | unknown`，普通 warning 不授予删除权限。
+消息归档的 `prepare` / `chunk` / `complete` 三条路由见 §5.3。它们与上述接口共用认证和 Result envelope，但只暂存字节，不写业务事实。
+
+请求/响应均有 Zod schema，使用既有 Result envelope。body 不接受 identityId；服务端从 middleware 取 principal。其他账户无法读取原 operation。服务器自行解析 V3、校验禁止字段和引用闭包、重算 source/effective digest。有效计划来自 owner 的目标保护策略；UI 数量来自这个计划。结构化 blocker 的 reason 为 `preserved_target | unsupported_user_data | unknown | storage/mastra.db:messages-uncovered | storage/mastra.db:resources | storage/mastra.db:unsupported-runtime-state | storage/mastra.db:orphan-thread`，普通 warning 不授予删除权限。
 
 preflight 持久化 pending operation，但不写入业务事实。同一 `(identityId, requestId)` 有唯一键，operationId/batchId 根据两者确定生成。相同 key 不同 source digest 返回 `IMPORT_REQUEST_CONFLICT`；相同已提交请求返回原结果，绝不重新 apply。
 
-## 5. 并发准入和原子提交
+## 5. 消息归档通道与三层核验
+
+消息正文不进入 V3 JSON 信封，也不占用 `content` 的 100,000 bytes 上限。源端（桌面 Profile 导出）在信封中声明 `ai-conversation-messages@1` 的可重算 manifest，正文作为**同一 `requestId` 的 sidecar 归档**经下列三条路由上传；服务端只暂存字节并在锁外解析，写入仍只发生在 Profile 导入的 commit 事务内。
+
+### 5.1 归档格式与 manifest
+
+归档是 NDJSON 文本（`codec` 为 `ndjson` 或 `ndjson+gzip`），只有两类行：
+
+```jsonc
+{"k":"thread","v":1,"ref":"ai-conversations:3","createdAt":1699999999000,"updatedAt":1699999999000}
+{"k":"message","v":1,"ref":"ai-conversations:3","ordinal":17,"sid":"<源消息 id>","role":"assistant","type":"text","content":"<原始 content>","createdAt":1699999999123}
+```
+
+- `content` 原样保留，单条上限 1 MiB；`ordinal` 是会话内从 0 开始的位置，导出时按 `createdAt, id` 排序后编号。
+- `sid` 只用于目标端派生幂等消息 id，不参与摘要、不进入信封。
+- 信封 payload 与 `complete` 返回的 `computedManifest` 形状一致：`archive: {digest, threads, messages}`，以及每条会话的 `{conversationRef, messageCount, digest}`；没有消息时导出不声明该能力。
+- 摘要由 `@memoflow/ai-contracts/portable-messages-archive` 的共享 canonicalizer 计算，源导出与目标读回使用同一实现：`messageDigest = sha256(JSON([ordinal, role, type, sha256(content)]))`；`threadDigest = sha256(按 ordinal 拼接的 messageDigest)`；`archiveDigest = sha256(JSON(按 ref 排序的 [ref, messageCount, threadDigest]))`。摘要不包含消息 id 与 `createdAt`。
+
+### 5.2 分块与上限
+
+| 常量                                            | 值      | 语义                             |
+| ----------------------------------------------- | ------- | -------------------------------- |
+| `PROFILE_IMPORT_ARCHIVE_MAX_UNCOMPRESSED_BYTES` | 64 MiB  | 解压后归档总字节上限             |
+| `PROFILE_IMPORT_ARCHIVE_MAX_MESSAGES`           | 100,000 | 全归档消息行上限                 |
+| `PROFILE_IMPORT_ARCHIVE_MAX_THREAD_MESSAGES`    | 50,000  | 单会话消息行上限                 |
+| `PROFILE_IMPORT_ARCHIVE_MAX_CONTENT_BYTES`      | 1 MiB   | 单条 `content` 的 UTF-8 字节上限 |
+| `PROFILE_IMPORT_ARCHIVE_MAX_CHUNK_BYTES`        | 96 KiB  | 单块 base64 解码后的字节上限     |
+
+超限一律返回 `IMPORT_LIMIT_EXCEEDED`（HTTP 413），不截断、不部分导入。桌面对压缩后的 NDJSON 按 96 KiB 切块并默认使用 `ndjson+gzip`；服务端用 `gunzip` 的 `maxOutputLength` 强制 64 MiB 上限。
+
+### 5.3 路由与幂等
+
+三条路由都挂在 Profile import 资源族下，只移动字节和生成 manifest，不写任何业务事实；信封包含消息能力时，归档 `complete` 之后才能进入 preflight。
+
+| 接口                                                                       | 输入                                                    | 输出                                           |
+| -------------------------------------------------------------------------- | ------------------------------------------------------- | ---------------------------------------------- |
+| `POST /api/v1/data-portability/profile-import/:requestId/archive/prepare`  | `{archiveDigest, codec, chunkCount, uncompressedBytes}` | `{archiveState, receivedChunkIndexes}`         |
+| `POST /api/v1/data-portability/profile-import/:requestId/archive/chunk`    | `{index, digest, data}`，`data` 为 base64               | `{archiveState, receivedChunkIndexes}`         |
+| `POST /api/v1/data-portability/profile-import/:requestId/archive/complete` | `{}`                                                    | `{archiveState: 'complete', computedManifest}` |
+
+- `prepare` 按 `(identityId, requestId)` 幂等：首次创建返回 `archiveState=partial`；重复调用必须给出相同的 `archiveDigest` / `codec` / `chunkCount` / `uncompressedBytes`，否则返回 `IMPORT_ARCHIVE_MISMATCH`。已 `complete` 时返回 `complete`，不会重置解析结果。
+- `chunk` 按 `(archiveId, index)` 幂等：同 index 且 digest 相同则覆盖写同字节并成功；digest 不同、`index >= chunkCount` 或归档已 `complete` 时返回 `IMPORT_ARCHIVE_MISMATCH`。归档不存在时返回 `IMPORT_ARCHIVE_UNAVAILABLE`。
+- `complete` 校验块索引连续为 `0..chunkCount-1`、每块摘要和 `archiveDigest`，再解压解析 NDJSON、重算 manifest 并持久化 `archiveState=complete` 与 `computedManifest`；重复调用返回已存结果。解析或摘要不符返回 `IMPORT_ARCHIVE_MISMATCH`。
+
+### 5.4 暂存生命周期
+
+- 暂存归档挂在 Profile import 的 `(identityId, requestId)` 上，preflight 时关联 operation；它是技术数据，不参与云端账户判空。
+- commit 成功时在**同一个导入事务内**删除全部分块，`committed` 之后不再保留可重传的分块。
+- 后台清扫每小时运行一次，删除创建超过 72 小时的归档行（分块级联删除）。清扫只删除暂存，不修改 operation 状态，也不触碰业务表。
+- 归档行被清扫后再调用 `complete` 返回 `IMPORT_ARCHIVE_UNAVAILABLE`，要求重新上传归档并重新预检；已提交的 operation 仍可通过 GET 恢复，不会重新 apply。
+
+### 5.5 三层核验
+
+| 层            | 时机                                     | 内容                                                                                                                                                                                                      | 失败                                                                                          |
+| ------------- | ---------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------- |
+| L1 归档完整性 | 上传 / `complete`，锁外                  | 每块摘要、块数与索引连续性、`archiveDigest`、解压后上限                                                                                                                                                   | `IMPORT_ARCHIVE_MISMATCH`；超限 `IMPORT_LIMIT_EXCEEDED`                                       |
+| L2 声明对归档 | preflight / commit 锁内，仅比对 manifest | 信封 payload 的 manifest 与服务端从归档重算并持久化的 `computedManifest` 相等；每个 `conversationRef` 必须能在同批 `ai-conversations` payload 中解析                                                      | 归档缺失或未 `complete` 为 `IMPORT_ARCHIVE_UNAVAILABLE`；比对不等为 `IMPORT_ARCHIVE_MISMATCH` |
+| L3 目标对声明 | commit，同一 Prisma 事务内               | 按目标会话逐条读回 `role/type/content/createdAt`，按 ordinal 重算 `messageDigest` / `threadDigest` / `archiveDigest` 并与声明比较；同时断言该 identity 下的会话集合恰等于本次导入的会话集合（无多、无少） | `IMPORT_VERIFICATION_FAILED`，事务回滚                                                        |
+
+L2 只比较摘要和计数，不重新解析客户端字节（解析结果已在 `complete` 持久化）。L3 的读回必须走同一事务：消息能力的 `exportValidated` 读到未提交行；若改用 Mastra 运行时连接池会读不到未提交行，也会与导入锁冲突。三层都通过后 operation 才写入 `committed` 并给出 `serverVerified=true`；GET 会用 committed bindings 重新读回并重算，内容变化时 `serverVerified` 会降为 false，删除门禁随之失效。
+
+### 5.6 五个失败码
+
+| code                         | HTTP | 触发                                                                                         | 产品行为                    |
+| ---------------------------- | ---- | -------------------------------------------------------------------------------------------- | --------------------------- |
+| `IMPORT_ARCHIVE_REQUIRED`    | 409  | 通用 V3 `/dry-run` 或 `/apply` 的信封包含 `ai-conversation-messages`                         | 阻止；引导改用 Profile 导入 |
+| `IMPORT_ARCHIVE_MISMATCH`    | 409  | 分块/归档摘要不符、声明 manifest 与服务端重算不等、`prepare` 描述变化、`complete` 后继续写块 | 阻止；保留源，允许重传      |
+| `IMPORT_ARCHIVE_UNAVAILABLE` | 409  | preflight/commit 时暂存缺失或未 `complete`                                                   | 阻止；重传归档后重新预检    |
+| `IMPORT_VERIFICATION_FAILED` | 409  | L3 读回条数/摘要不一致                                                                       | 事务回滚；不产生 committed  |
+| `IMPORT_LIMIT_EXCEEDED`      | 413  | 超过 5.2 的任一上限                                                                          | 阻止并明确告知超限，不截断  |
+
+UI 只按 code 映射本地化文案，不直出服务端 message 或运行时/数据库原文。
+
+### 5.7 通用 V3 apply 与 workflow 排除
+
+- 服务端通用 V3 `/export` 仍只返回单个 JSON 信封；`/dry-run` 与 `/apply` 不承载 sidecar 归档。信封中出现消息能力时必须显式拒绝并返回 `IMPORT_ARCHIVE_REQUIRED`，不得按「0 条消息」通过。
+- `mastra_workflow_snapshot`（workflow/suspension 运行状态）明确排除（A 案）：不进入归档、不进入可移植契约；源库该表非空即保留 blocker `storage/mastra.db:unsupported-runtime-state`，源不可删除。`mastra_resources` 与附件二进制同样不迁移。
+
+## 6. 并发准入和原子提交
 
 V1 使用 PostgreSQL 真实写入 fence：按固定顺序对 `public`、`mastra` 全部持久业务表获取 `SHARE ROW EXCLUSIVE` 锁，并用 transaction advisory lock 串行化导入。普通 SQL writer 的 `ROW EXCLUSIVE` 与其冲突，因此 API、PowerSync CRUD、后台任务、通用导入、Agent 和 FK cascade 无需另接应用层账户锁。
 
 **代价：预检和提交的短事务会暂停其他账户写入。** 锁等待最多 2 秒、单 SQL 最多 12 秒、整个 Prisma transaction 最多 15 秒；读请求继续。吞吐量需要更细粒度时，必须先证明所有写入口参与账户级 fence，不能只把当前锁换成单独 Account 行锁。
 
-锁内依次确认 Active Account、九 owner 空摘要、目标字段策略和 effective digest，随后在同一个 transaction client 上执行十 owner apply、生成 bindings/manifests 并持久化 committed receipt。任一 owner 失败则全部回滚；事务内不发外部请求，不以反向删除补偿。源解析在锁外完成，必要最终验证在事务内完成。
+锁内依次确认 Active Account、九 owner 空摘要、目标字段策略和 effective digest，随后在同一个 transaction client 上执行十 owner 的十一个 capability（AI owner 含会话壳与消息正文两个）apply、生成 bindings/manifests 并持久化 committed receipt。任一 owner 失败则全部回滚；事务内不发外部请求，不以反向删除补偿。源解析在锁外完成，必要最终验证在事务内完成。
 
 其他设备先写业务返回 `TARGET_NOT_EMPTY`，摘要未知返回 `TARGET_UNKNOWN`；目标资料/偏好导致有效计划变化返回 `TARGET_CHANGED`。后者使 Desktop journal 回到 prepared，清除旧 plan 和删除勾选，要求重新预检并确认。排在导入提交后的普通写入按正常业务执行。
 
 未来调度通过同事务内留下的 `schedulingReconciledAt=null` marker 恢复。worker 每 15 秒扫描最多 20 条 committed operation，用现有 Goal/Task/Routine projection sources 和稳定 scheduling keys 恢复未来 invocation；成功 CAS 标记完成，失败轮转重试。重启可继续，不重放历史通知。服务关闭先 stop，再 drain 在途恢复，随后才释放数据库。
 
-## 6. 持久恢复与本地核验
+## 7. 持久恢复与本地核验
 
 服务端状态为 `pending | committed`。Desktop journal 状态为：
 
@@ -99,7 +179,9 @@ prepared → preflight → committing → committed → verified
 
 核验使用每 owner 的版本化内容 manifest 和 portable ref→目标键 bindings，覆盖支持的语义及关联，不以队列空、hasSynced、总行数或源文件 hash 代替。服务端 GET 用 RepeatableRead 读当前事实；本机直接只读目标 PowerSync SQLite，并比较相同映射的 manifest。缺少下载、目标修改/删除或读取失败均保持未通过，不能删除源。当前没有本机第二次 apply，也不依赖 alpha checkpoint requests。
 
-## 7. 删除门禁和崩溃恢复
+`ai-conversation-messages` 是 server-scoped capability：目标消息只存在于云端 Memory，桌面本机 `mastra.db` 不因导入获得副本。本机核验前先从 `result.manifests` 过滤该能力，避免本地因未注册它而在依赖排序时抛错，也避免把本地重算的「空」误判为不一致。该能力的最终依据是服务端 GET 复算的 `serverVerified=true`，删除前还会再 GET 一次；不得为此在目标桌面写第二份 Mastra 副本。
+
+## 8. 删除门禁和崩溃恢复
 
 只有以下条件同时满足才进入清理：
 
@@ -107,8 +189,8 @@ prepared → preflight → committing → committed → verified
 2. 服务端回执与目标身份/原 source digest 对应，且当前 serverVerified 为 true。
 3. 实际目标本地 owner manifest 匹配，localVerified 为 true。
 4. 源仍是可访问的 inactive 本地账户，密码校验通过。
-5. 重新读取的 source digest、inventory digest、lastActiveAt 均与快照一致；源重新打开过也阻止清理。
-6. 源和计划 blocker 均为零；删除前再次 GET 服务端核验通过。
+5. 重新读取的 source digest、inventory digest、lastActiveAt 均与快照一致；inventory digest 已包含本次导出的归档摘要，导出后新增消息会使其变化；源重新打开过也阻止清理。
+6. 源和计划 blocker 均为零（含 `mastra_workflow_snapshot` 等 A 案排除项）；删除前再次 GET 服务端核验通过。
 
 最后核验不能与未来云端编辑组成全球事务；它证明此快照在核验时已经复制并在本机可用。用户随后修改或删除目标属于普通业务操作，不自动撤销。
 
@@ -121,10 +203,10 @@ prepared → preflight → committing → committed → verified
 
 Profile ID 严格为 `p_` 加 24 位小写十六进制；IPC 不接受路径。物理删除开始后不承诺还原源。崩溃后按 tombstone/目录存在性继续，不能重建空源或先丢失唯一密钥。
 
-## 8. 容量和验收边界
+## 9. 容量和验收边界
 
-- V3 content 的 UTF-8 上限为 **100,000 bytes**，外层 JSON 字符串包装保守落在现有 256 KiB body limit 内；V1 无分块上传。
-- 源 inventory 每表最多 10,000 行、目录最多 10,000 个条目、普通文件内容合计最多 512 MiB；超限失败保留源。
+- V3 content 的 UTF-8 上限为 **100,000 bytes**，外层 JSON 字符串包装保守落在现有 256 KiB body limit 内。消息正文不走 `content`，而走独立的分块归档：单块 96 KiB、解压后 64 MiB、100,000 条消息、单会话 50,000 条、单条 1 MiB，见 §5.2。
+- 源 inventory 每表最多 10,000 行、目录最多 10,000 个条目、普通文件内容合计最多 512 MiB；超限失败保留源。该每表上限同样约束 `mastra.db` 的源清单，因此可清理的源档案仍受此范围限制。
 - 磁盘写入失败不会继续 preflight/commit 或清理；没有额外磁盘预留机制。
 - 日志/renderer 不接收 token、密钥、完整 envelope；本机 journal 的诊断字段不上传源文件名或原始行。
 - real-PG 已验证原子回滚、普通 SQL 并发 fence、幂等和未来调度恢复。真实 PowerSync 本地库可被只读 adapter 读取；所有 owner 的跨网络下载、真实多设备竞争、生产 OAuth、Windows/macOS 尚需独立验收。任何本机核验缺口都保留源，不能把 Linux fixture E2E 当作这些验收的替代。

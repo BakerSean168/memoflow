@@ -2,7 +2,7 @@
 tags: [product, module, data-portability]
 description: Data Portability V3-only owner-driven backup and restore boundary
 created: 2026-09-09T00:31:00+08:00
-updated: 2026-09-18T00:00:00+00:00
+updated: 2026-11-09T00:00:00+00:00
 ---
 
 # Data Portability 模块说明
@@ -34,20 +34,21 @@ V3 parser 对旧 `schemaVersion` 只返回 unsupported，不保留旧格式 DTO 
 
 ## Current owner coverage
 
-生产 API/Desktop registry 当前注册相同的十个 capability，schema version 均为 3：
+生产 API 通用 V3 registry 与 Desktop 导出 composition 共享十个 `schemaVersion: 3` 的 owner capability；Profile 导入与 Desktop 导出另注册 `ai-conversation-messages@1`，其正文不经 JSON 信封，而走 Profile 导入的归档通道（见 [Desktop Profile 导入协议](../../desktop-profile-import-protocol.md) §5）：
 
-| key                                 | owner            | dependency        |
-| ----------------------------------- | ---------------- | ----------------- |
-| `account-profile`                   | Account          | `preferences`     |
-| `preferences`                       | Setting          | —                 |
-| `notification-delivery-preferences` | Notification     | —                 |
-| `routines`                          | Reminder/Routine | —                 |
-| `schedules`                         | Schedule         | —                 |
-| `notifications`                     | Notification     | —                 |
-| `labels`                            | Label            | —                 |
-| `goals`                             | Goal             | `labels`          |
-| `tasks`                             | Task             | `labels`, `goals` |
-| `ai-conversations`                  | AI               | —                 |
+| key                                 | owner            | dependency         |
+| ----------------------------------- | ---------------- | ------------------ |
+| `account-profile`                   | Account          | `preferences`      |
+| `preferences`                       | Setting          | —                  |
+| `notification-delivery-preferences` | Notification     | —                  |
+| `routines`                          | Reminder/Routine | —                  |
+| `schedules`                         | Schedule         | —                  |
+| `notifications`                     | Notification     | —                  |
+| `labels`                            | Label            | —                  |
+| `goals`                             | Goal             | `labels`           |
+| `tasks`                             | Task             | `labels`, `goals`  |
+| `ai-conversations`                  | AI               | —                  |
+| `ai-conversation-messages`          | AI               | `ai-conversations` |
 
 Data Portability 只负责 registry、确定性 dependency/reference ordering、envelope
 版本检查、host-owned identity、安全 blacklist、dry-run/conflict receipt 和 warnings。
@@ -66,7 +67,9 @@ Server-held disclosure 是单独的 Web-only transparency export，不是 busine
 - V3 parser 在 capability validation 前拒绝 disclosure payload。
 
 Disclosure 仍可包含服务端持有的 Knowledge projection、repository observation 和 cached
-bytes，但这些事实不会进入任何 V3 import/apply path。
+bytes，但这些事实不会进入任何 V3 import/apply path。AI 对话消息也不在该副本中：它们经
+Profile 导入的 sidecar 归档通道恢复到目标云端账户；附件二进制、provider secret 与
+workflow/suspension 运行状态仍不可导入。
 
 ## Evidence and boundaries
 

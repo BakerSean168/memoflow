@@ -272,6 +272,11 @@ export default {
       IMPORT_REAUTH_REQUIRED: '请先重新认证当前云端账号。',
       SOURCE_PROFILE_ACTIVE: '请先退出源 Profile，再从目标云端 Profile 导入。',
       PROFILE_CHANGED: 'Profile 已切换，请在目标 Profile 中重试。',
+      IMPORT_ARCHIVE_REQUIRED: '此导入包含需要单独传输的聊天记录，请通过导入本地账户恢复。',
+      IMPORT_ARCHIVE_MISMATCH: '聊天记录传输内容不一致，请重新传输后再试。',
+      IMPORT_ARCHIVE_UNAVAILABLE: '聊天记录尚未传输完成，请重新传输后再继续。',
+      IMPORT_VERIFICATION_FAILED: '聊天记录核验未通过，本次导入未完成，请重试或联系支持。',
+      IMPORT_LIMIT_EXCEEDED: '聊天记录超出可导入上限，无法导入。',
     },
   },
   cloudConnection: {

@@ -279,6 +279,15 @@ export default {
       IMPORT_REAUTH_REQUIRED: 'Reauthenticate the current cloud account first.',
       SOURCE_PROFILE_ACTIVE: 'Close the source Profile and import from the target cloud Profile.',
       PROFILE_CHANGED: 'The Profile changed. Retry in the target Profile.',
+      IMPORT_ARCHIVE_REQUIRED:
+        'This import includes chat history that must be transferred separately. Restore it through a local-account import.',
+      IMPORT_ARCHIVE_MISMATCH:
+        'The transferred chat history did not match. Transfer it again and retry.',
+      IMPORT_ARCHIVE_UNAVAILABLE:
+        'Chat history has not finished transferring. Transfer it again to continue.',
+      IMPORT_VERIFICATION_FAILED:
+        'Chat history verification failed, so this import did not complete. Retry or contact support.',
+      IMPORT_LIMIT_EXCEEDED: 'Chat history exceeds the import limit and cannot be imported.',
     },
   },
   cloudConnection: {
