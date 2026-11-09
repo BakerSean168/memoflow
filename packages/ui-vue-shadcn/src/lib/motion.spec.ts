@@ -26,6 +26,10 @@ describe('overlay reduced-motion recipes', () => {
     expect(reducedMotionClass).toContain('motion-reduce:transition-none');
   });
 
+  it('opts dialog content out of CSS transitions so layout resizes are not animated', () => {
+    expect(dialogContentMotionClass).toContain('transition-none');
+  });
+
   it('applies the reduced-motion recipe to rendered Popover content', async () => {
     const view = render(
       defineComponent({
