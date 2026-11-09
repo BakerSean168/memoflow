@@ -47,7 +47,9 @@ export async function returnFromSettingsScene(
 
   if (!origin) {
     if (store.activeTab) {
-      await router.push(store.activeTab.route).catch(() => {});
+      // Replace, not push: closing the settings dialog must hand the settings
+      // address back to the workspace instead of leaving it in history.
+      await router.replace(store.activeTab.route).catch(() => {});
       return;
     }
     // A deep-linked or reloaded Settings page has no trustworthy SPA origin.
