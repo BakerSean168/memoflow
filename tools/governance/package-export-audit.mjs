@@ -64,7 +64,7 @@ const PACKAGE_SPECIFIC_SUBPATHS = {
   account: ['./api', './electron'],
   'task-contracts': ['./*'],
   'task-ui': ['./host', './composables/*', './components/*'],
-  'schedule-ui': ['./host'],
+  'schedule-ui': ['./host', './style.css'], // style.css: Vite library CSS consumed by the packaged Desktop renderer (see #894).
   'schedule-contracts': ['./*'],
   'setting-contracts': ['./*'],
   'cloud-auth-contracts': ['./*'],
