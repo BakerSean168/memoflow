@@ -961,12 +961,12 @@ function requestEditProfile(): void {
             </div>
             <DropdownMenuSeparator />
             <DropdownMenuItem data-testid="shell-edit-profile" @select="requestEditProfile">
-              <UserPen class="mr-2 h-4 w-4" aria-hidden="true" />
+              <UserPen class="h-4 w-4" aria-hidden="true" />
               {{ t('shell.account.editProfile') }}
             </DropdownMenuItem>
             <DropdownMenuSub v-if="isDesktop">
-              <DropdownMenuSubTrigger data-testid="shell-switch-account">
-                <ArrowLeftRight class="mr-2 h-4 w-4" aria-hidden="true" />
+              <DropdownMenuSubTrigger data-testid="shell-switch-account" class="gap-2">
+                <ArrowLeftRight class="h-4 w-4" aria-hidden="true" />
                 {{ t('shell.account.switchAccount') }}
               </DropdownMenuSubTrigger>
               <DropdownMenuSubContent
@@ -1036,7 +1036,7 @@ function requestEditProfile(): void {
                 </div>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem data-testid="shell-add-account" @select="emit('add-account')">
-                  <UserPlus class="mr-2 h-4 w-4" aria-hidden="true" />
+                  <UserPlus class="h-4 w-4" aria-hidden="true" />
                   {{ t('shell.account.menuAddAccount') }}
                 </DropdownMenuItem>
               </DropdownMenuSubContent>
@@ -1048,7 +1048,7 @@ function requestEditProfile(): void {
               class="text-destructive focus:text-destructive"
               @click="emit('logout')"
             >
-              <LogOut class="mr-2 h-4 w-4" aria-hidden="true" />
+              <LogOut class="h-4 w-4" aria-hidden="true" />
               {{ t('shell.account.logout') }}
             </DropdownMenuItem>
             <DropdownMenuItem
@@ -1056,7 +1056,7 @@ function requestEditProfile(): void {
               data-testid="shell-open-cloud-connection"
               @click="emit('open-cloud-connection')"
             >
-              <Cloud class="mr-2 h-4 w-4" aria-hidden="true" />
+              <Cloud class="h-4 w-4" aria-hidden="true" />
               {{
                 identityKind === 'registered-local'
                   ? t('shell.account.reauthenticate')
