@@ -27,6 +27,17 @@ export interface PortableCapabilityReceiptEntry extends PortableCapabilityReceip
   readonly schemaVersion: number;
 }
 
+/**
+ * Commit-time L3 readback did not match the declared manifest. The caller maps
+ * this to the stable `IMPORT_VERIFICATION_FAILED` code and rolls back.
+ */
+export class ProfileImportVerificationError extends Error {
+  constructor(readonly capabilityKey: PortableCapabilityKey) {
+    super(`Profile import readback mismatch: ${capabilityKey}`);
+    this.name = 'ProfileImportVerificationError';
+  }
+}
+
 export interface PortableImportReceiptV3 {
   readonly batchId: string;
   readonly dryRun: boolean;
@@ -174,7 +185,7 @@ export class PortableCapabilityCoordinator {
       const entry = envelope.capabilities.find((item) => item.key === manifest.key)!;
       const expected = this.registry.get(entry.key)!.validatePayload(entry.payload);
       if (manifest.digest !== profileImportDigest(expected)) {
-        throw new Error(`Profile import readback mismatch: ${manifest.key}`);
+        throw new ProfileImportVerificationError(manifest.key);
       }
     }
     return { receipt, bindings, manifests };

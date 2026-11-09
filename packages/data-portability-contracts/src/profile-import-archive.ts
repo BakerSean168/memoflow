@@ -60,7 +60,9 @@ export const ProfileImportArchiveChunkRequestSchema = z
     data: z.string().min(1),
   })
   .strict();
-export type ProfileImportArchiveChunkRequest = z.infer<typeof ProfileImportArchiveChunkRequestSchema>;
+export type ProfileImportArchiveChunkRequest = z.infer<
+  typeof ProfileImportArchiveChunkRequestSchema
+>;
 
 export const ProfileImportArchiveChunkResponseSchema = z
   .object({

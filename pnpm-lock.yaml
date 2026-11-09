@@ -2152,6 +2152,9 @@ importers:
       '@memoflow/account-contracts':
         specifier: workspace:*
         version: link:../account-contracts
+      '@memoflow/ai-contracts':
+        specifier: workspace:*
+        version: link:../ai-contracts
       '@memoflow/data-portability-contracts':
         specifier: workspace:*
         version: link:../data-portability-contracts

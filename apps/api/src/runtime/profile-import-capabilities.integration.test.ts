@@ -12,7 +12,7 @@ import { composeProfileImportCapabilities } from './compose-profile-import-capab
 beforeEach(cleanAll);
 afterAll(disconnectPrisma);
 
-it('joins all ten capabilities to one transaction without historical delivery or duplicate facts', async () => {
+it('joins all eleven capabilities to one transaction without historical delivery or duplicate facts', async () => {
   const db = await getPrisma();
   const account = await seedAccount({
     profile: {
@@ -162,7 +162,7 @@ it('joins all ten capabilities to one transaction without historical delivery or
     return db.$transaction(
       async (tx) => {
         const capabilities = composeProfileImportCapabilities(tx);
-        expect(capabilities).toHaveLength(10);
+        expect(capabilities).toHaveLength(11);
         const result = await createDataPortabilityModule({
           portableCapabilities: capabilities,
         }).portableCapabilityCoordinator.applyProfileCopy(content, account.id, 'ten-owner-batch');

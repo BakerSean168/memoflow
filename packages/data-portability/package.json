@@ -30,6 +30,7 @@
   "scripts": {},
   "dependencies": {
     "@memoflow/account-contracts": "workspace:*",
+    "@memoflow/ai-contracts": "workspace:*",
     "@memoflow/data-portability-contracts": "workspace:*",
     "@memoflow/database": "workspace:*",
     "@memoflow/desktop-contracts": "workspace:*",

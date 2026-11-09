@@ -65,12 +65,7 @@ type MessageDigestInput = Pick<ArchiveMessageLineV1, 'ordinal' | 'role' | 'type'
 /** Digest one message. `sid` and `createdAt` are deliberately excluded. */
 export function computeMessageDigest(message: MessageDigestInput): string {
   return sha256Hex(
-    JSON.stringify([
-      message.ordinal,
-      message.role,
-      message.type,
-      sha256Hex(message.content),
-    ]),
+    JSON.stringify([message.ordinal, message.role, message.type, sha256Hex(message.content)]),
   );
 }
 

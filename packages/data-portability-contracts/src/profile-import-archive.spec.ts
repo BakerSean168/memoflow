@@ -98,7 +98,9 @@ describe('Profile import archive chunk DTO', () => {
 describe('Profile import archive complete DTO', () => {
   it('requires an empty request body', () => {
     expect(ProfileImportArchiveCompleteRequestSchema.parse({})).toEqual({});
-    expect(ProfileImportArchiveCompleteRequestSchema.safeParse({ extra: true }).success).toBe(false);
+    expect(ProfileImportArchiveCompleteRequestSchema.safeParse({ extra: true }).success).toBe(
+      false,
+    );
   });
 
   it('returns the completed state with a self-consistent computed manifest', () => {

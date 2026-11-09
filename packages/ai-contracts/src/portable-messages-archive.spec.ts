@@ -77,7 +77,10 @@ describe('archive canonicalizer digests', () => {
     const second = message(1, 'second');
     expect(computeThreadDigest([second, first])).toBe(computeThreadDigest([first, second]));
     expect(
-      computeThreadDigest([{ ...first, ordinal: 1 }, { ...second, ordinal: 0 }]),
+      computeThreadDigest([
+        { ...first, ordinal: 1 },
+        { ...second, ordinal: 0 },
+      ]),
     ).not.toBe(computeThreadDigest([first, second]));
   });
 

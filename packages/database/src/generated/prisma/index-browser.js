@@ -814,6 +814,30 @@ exports.Prisma.ProfileImportOperationScalarFieldEnum = {
   updatedAt: 'updatedAt'
 };
 
+exports.Prisma.ProfileImportArchiveScalarFieldEnum = {
+  id: 'id',
+  identityId: 'identityId',
+  requestId: 'requestId',
+  operationId: 'operationId',
+  archiveDigest: 'archiveDigest',
+  codec: 'codec',
+  chunkCount: 'chunkCount',
+  uncompressedBytes: 'uncompressedBytes',
+  archiveState: 'archiveState',
+  computedManifest: 'computedManifest',
+  parsedContent: 'parsedContent',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.ProfileImportArchiveChunkScalarFieldEnum = {
+  archiveId: 'archiveId',
+  index: 'index',
+  digest: 'digest',
+  bytes: 'bytes',
+  createdAt: 'createdAt'
+};
+
 exports.Prisma.RelationScalarFieldEnum = {
   id: 'id',
   identityId: 'identityId',
@@ -1532,6 +1556,8 @@ exports.Prisma.ModelName = {
   OauthConsent: 'OauthConsent',
   OauthClientAssertion: 'OauthClientAssertion',
   ProfileImportOperation: 'ProfileImportOperation',
+  ProfileImportArchive: 'ProfileImportArchive',
+  ProfileImportArchiveChunk: 'ProfileImportArchiveChunk',
   Relation: 'Relation',
   OutboxMessage: 'OutboxMessage',
   InboxReceipt: 'InboxReceipt',

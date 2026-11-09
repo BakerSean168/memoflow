@@ -7,6 +7,7 @@ import type { DataPortabilityApplicationPort } from '../application';
 import { PortableCapabilityCoordinator } from '../application/portable-capability-coordinator';
 import type { PortableImportReceiptV3 } from '../application/portable-capability-coordinator';
 import { PortableCapabilityRegistry } from '../application/portable-capability';
+import { ProfileImportError } from '../application/profile-import-error';
 import { createLogger } from '@memoflow/utils/logger';
 
 const logger = createLogger('DataPortabilityModule');
@@ -60,6 +61,21 @@ function toPortableValidationError(error: unknown): ResultErrorException {
   return new ResultErrorException(message, ResultCode.VALIDATION_ERROR, undefined, undefined, 400);
 }
 
+/**
+ * The generic V3 channel transfers one JSON envelope and has no sidecar
+ * archive. A messages capability must fail closed instead of importing zero
+ * messages (#865 §2.5 / D3).
+ */
+function assertNoArchiveCapability(
+  coordinator: PortableCapabilityCoordinator,
+  content: string,
+): void {
+  const envelope = coordinator.decode(content);
+  if (envelope.capabilities.some((capability) => capability.key === 'ai-conversation-messages')) {
+    throw new ProfileImportError('IMPORT_ARCHIVE_REQUIRED');
+  }
+}
+
 function createDefaultBatchId(): string {
   return `portable-${Date.now().toString(36)}-${Math.random().toString(36).slice(2)}`;
 }
@@ -107,6 +123,7 @@ export function createDataPortabilityModule(
     },
     async dryRunPortableDataV3(identityId, request) {
       try {
+        assertNoArchiveCapability(portableCapabilityCoordinator, request.content);
         return toTransportReceipt(
           await portableCapabilityCoordinator.dryRun(request.content, identityId),
         );
@@ -116,6 +133,7 @@ export function createDataPortabilityModule(
     },
     async applyPortableDataV3(identityId, request) {
       try {
+        assertNoArchiveCapability(portableCapabilityCoordinator, request.content);
         return toTransportReceipt(
           await portableCapabilityCoordinator.apply(request.content, identityId),
         );

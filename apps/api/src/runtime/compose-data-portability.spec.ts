@@ -51,17 +51,25 @@ describe('composeDataPortability V3 assembly', () => {
   it('assembles owner capabilities, disclosure and the durable Profile import API', () => {
     composeDataPortability({ db: fakeDb, portableCapabilities });
     expect(createPrismaServerHeldDataDisclosureApplicationPort).toHaveBeenCalledWith(fakeDb);
-    expect(createDataPortabilityModule).toHaveBeenCalledWith({
-      portableCapabilities,
-      productVersion: '0.0.1',
-    });
+    expect(createDataPortabilityModule).toHaveBeenCalledWith(
+      expect.objectContaining({
+        portableCapabilities,
+        productVersion: '0.0.1',
+        runtimeContributions: expect.arrayContaining([
+          expect.objectContaining({ start: expect.any(Function), stop: expect.any(Function) }),
+        ]),
+      }),
+    );
     expect(createDataPortabilityApiModule).toHaveBeenCalledWith({
       instance: createDataPortabilityModule.mock.results[0]!.value,
-      profileImport: {
+      profileImport: expect.objectContaining({
         preflight: expect.any(Function),
         commit: expect.any(Function),
         get: expect.any(Function),
-      },
+        prepareArchive: expect.any(Function),
+        putArchiveChunk: expect.any(Function),
+        completeArchive: expect.any(Function),
+      }),
       serverHeldDataDisclosureApi:
         createPrismaServerHeldDataDisclosureApplicationPort.mock.results[0]!.value,
     });

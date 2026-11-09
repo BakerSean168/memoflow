@@ -6198,6 +6198,36 @@
       ]
     },
     {
+      "path": "packages/data-portability/src/server/infrastructure/data-portability.module.test.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/data-portability/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "packages/data-portability/vitest.config.ts"
+      ]
+    },
+    {
+      "path": "packages/data-portability/src/server/infrastructure/prisma-profile-import-archive.test.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/data-portability/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "packages/data-portability/vitest.config.ts"
+      ]
+    },
+    {
+      "path": "packages/data-portability/src/server/infrastructure/prisma-profile-import.test.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/data-portability/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "packages/data-portability/vitest.config.ts"
+      ]
+    },
+    {
       "path": "packages/data-portability/src/server/infrastructure/prisma-server-held-data-disclosure.source.test.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -13030,7 +13060,7 @@
       "type": "measurement",
       "suite": "coverage",
       "runner": "vitest",
-      "fileCount": 14
+      "fileCount": 17
     },
     {
       "id": "packages/goal/vitest.config.ts",
@@ -13608,7 +13638,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 14
+      "fileCount": 17
     },
     {
       "id": "packages/database/vitest.config.ts",
@@ -14305,6 +14335,9 @@
       "packages/data-portability/src/server/application/use-cases/__tests__/portable-capability-registry.test.ts",
       "packages/data-portability/src/server/application/use-cases/__tests__/server-held-disclosure-not-importable.surface.spec.ts",
       "packages/data-portability/src/server/infrastructure/__tests__/data-portability-module-partial-start.spec.ts",
+      "packages/data-portability/src/server/infrastructure/data-portability.module.test.ts",
+      "packages/data-portability/src/server/infrastructure/prisma-profile-import-archive.test.ts",
+      "packages/data-portability/src/server/infrastructure/prisma-profile-import.test.ts",
       "packages/data-portability/src/server/infrastructure/prisma-server-held-data-disclosure.source.test.ts",
       "packages/data-portability/src/server/transport/data-portability.controller.test.ts",
       "packages/goal/src/__tests__/dual-registry.surface.spec.ts",
@@ -14622,7 +14655,7 @@
   "duplicate": [],
   "unexpected": [],
   "counts": {
-    "unit": 1207,
+    "unit": 1210,
     "integration": 58,
     "smoke": 3,
     "boundary-ipc": 6,

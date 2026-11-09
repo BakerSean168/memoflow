@@ -1,7 +1,10 @@
 import type { Prisma } from '@memoflow/database';
 import type { PortableCapability } from '@memoflow/data-portability-contracts';
 import { createAccountPrismaPortableCapability } from '@memoflow/account';
-import { createAiPrismaPortableCapability } from '@memoflow/ai';
+import {
+  createAiProfileImportCapabilities,
+  type AiProfileImportCapabilityOptions,
+} from '@memoflow/ai';
 import { createGoalPrismaPortableCapability } from '@memoflow/goal';
 import { createTaskPrismaPortableCapability } from '@memoflow/task';
 import { createLabelPrismaPortableCapability } from '@memoflow/label';
@@ -16,6 +19,7 @@ import {
 /** Owner restore seams only: no second runtime, timers, transports, or independent commits. */
 export function composeProfileImportCapabilities(
   tx: Prisma.TransactionClient,
+  options: AiProfileImportCapabilityOptions = {},
 ): readonly PortableCapability<unknown>[] {
   const setting = createSettingPrismaPortability(tx);
   const notification = createNotificationPrismaPortability(tx);
@@ -29,6 +33,6 @@ export function composeProfileImportCapabilities(
     createSchedulePrismaPortableCapability(tx),
     createRoutinePortableCapability(createRoutinePrismaRepositories(tx)),
     notification.portableFactCapability,
-    createAiPrismaPortableCapability(tx),
+    ...createAiProfileImportCapabilities(tx, options),
   ];
 }

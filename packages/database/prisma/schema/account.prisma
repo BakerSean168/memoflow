@@ -24,6 +24,7 @@ model Account {
   externalMutationReceipts         ExternalMutationReceipt[]
   goals                           Goal[]
   profileImportOperations         ProfileImportOperation[]
+  profileImportArchives           ProfileImportArchive[]
   labels                          Label[]
   goalLabels                      GoalLabel[]
   taskLabels                      TaskLabel[]
