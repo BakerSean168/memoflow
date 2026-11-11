@@ -7,7 +7,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import { createLocalAgentSqlite } from '../../testing/local-agent-sqlite';
 import { LocalAgentRepository } from '../infrastructure/adapters/powersync/local-agent.repository';
 import type { NativeAgentEvent } from './codex-driver';
-import { LocalAgentRuntime } from './local-agent-runtime';
+import { LocalAgentRuntime, type LocalAgentSnapshotChange } from './local-agent-runtime';
 import { nativeIdentity, nativeModelVisibilityContext } from './native-identity';
 
 const databases: ReturnType<typeof createLocalAgentSqlite>[] = [];
@@ -70,6 +70,32 @@ async function storedSnapshot(cwd: string, identityId: string, connectionId: str
   return JSON.parse(text) as Record<string, unknown>;
 }
 
+async function writeSnapshot(
+  cwd: string,
+  connection: Awaited<ReturnType<typeof connectionFixture>>['connection'],
+  status: LocalAgentStatus,
+  checkedAt: number,
+  extra: Record<string, unknown> = {},
+) {
+  const identity = await nativeIdentity(connection.driver, connection.homePath);
+  await mkdir(join(cwd, 'model-catalog'), { recursive: true });
+  await writeFile(
+    catalogPath(cwd, 'owner', connection.id),
+    JSON.stringify({
+      schemaVersion: 2,
+      revision: connection.revision,
+      driver: connection.driver,
+      executablePath: connection.executablePath,
+      homePath: connection.homePath ?? null,
+      identity,
+      checkedAt,
+      status,
+      ...extra,
+    }),
+    { mode: 0o600 },
+  );
+}
+
 describe('native discovery snapshot persistence', () => {
   it.each([
     ['unavailable', 'no_models'],
@@ -93,7 +119,7 @@ describe('native discovery snapshot persistence', () => {
       status: { status, message: `${status} fixture` },
       reason,
     });
-    expect(await runtime.cachedCatalogConnection('owner', connection.id)).toBeNull();
+    expect(await runtime.cachedCatalogConnection('owner', connection.id)).toMatchObject({ status });
     await runtime.dispose();
   });
 
@@ -181,16 +207,269 @@ describe('native discovery snapshot persistence', () => {
   });
 
   it('does not delete an unreadable snapshot file', async () => {
-    const { store, cwd, connection } = await connectionFixture();
+    const { store, cwd, home, connection } = await connectionFixture();
     await mkdir(join(cwd, 'model-catalog'), { recursive: true });
     const path = catalogPath(cwd, 'owner', connection.id);
     await writeFile(path, '{ not json', { mode: 0o600 });
-    const runtime = runtimeWith(store, cwd, async () => {
-      throw new Error('Unreadable snapshots are refreshed in the background later');
+    // A resolvable executable plus credentials keep the cheap layer on the full-probe
+    // path, so the unreadable file survives until the background probe completes.
+    const executable = join(cwd, 'codex');
+    await writeFile(executable, '', { mode: 0o700 });
+    await writeFile(join(home, 'auth.json'), '{}');
+    await store.updateConnection('owner', connection.id, connection.revision, {
+      driver: 'codex',
+      name: connection.name,
+      executablePath: executable,
+      homePath: home,
+      enabled: true,
+      writeScopes: [],
+    });
+    let release!: () => void;
+    const gate = new Promise<void>((resolve) => {
+      release = resolve;
+    });
+    const runtime = new LocalAgentRuntime({
+      store,
+      cwd,
+      createDriver: () => ({
+        async probe(): Promise<LocalAgentStatus> {
+          await gate;
+          return { status: 'unavailable', message: 'stopped' };
+        },
+        async *run(): AsyncGenerator<NativeAgentEvent> {
+          throw new Error('Snapshot tests never run inference');
+        },
+        respond: () => false,
+        cancel: release,
+        async close() {
+          release();
+        },
+      }),
     });
 
     expect(await runtime.cachedCatalogConnection('owner', connection.id)).toBeNull();
     expect(await readFile(path, 'utf8')).toBe('{ not json');
+    await runtime.dispose();
+  });
+
+  it('serves a 25h snapshot and joins twenty reads into one full probe flight', async () => {
+    const { store, cwd, home, connection } = await connectionFixture();
+    const executable = join(cwd, 'codex');
+    await writeFile(executable, '', { mode: 0o700 });
+    await writeFile(join(home, 'auth.json'), '{}');
+    await store.updateConnection('owner', connection.id, connection.revision, {
+      driver: 'codex',
+      name: connection.name,
+      executablePath: executable,
+      homePath: home,
+      enabled: true,
+      writeScopes: [],
+    });
+    const active = await store.getConnection('owner', connection.id);
+    const now = 1_800_000_000_000;
+    const clock = vi.spyOn(Date, 'now').mockReturnValue(now);
+    await writeSnapshot(
+      cwd,
+      active,
+      { status: 'ready', models: [{ id: 'stale-model', name: 'Stale' }] },
+      now - 25 * 60 * 60_000,
+    );
+    let probes = 0;
+    let releaseFirst!: () => void;
+    const firstGate = new Promise<void>((resolve) => {
+      releaseFirst = resolve;
+    });
+    const runtime = new LocalAgentRuntime({
+      store,
+      cwd,
+      createDriver: () => ({
+        async probe(): Promise<LocalAgentStatus> {
+          probes++;
+          if (probes === 1) await firstGate;
+          return { status: 'ready', models: [{ id: 'fresh-model', name: 'Fresh' }] };
+        },
+        async *run(): AsyncGenerator<NativeAgentEvent> {
+          throw new Error('Snapshot tests never run inference');
+        },
+        respond: () => false,
+        cancel() {},
+        async close() {},
+      }),
+    });
+
+    const firstReads = await Promise.all(
+      Array.from({ length: 20 }, () => runtime.cachedCatalogConnection('owner', connection.id)),
+    );
+    // Time no longer invalidates: every read still sees the last ready directory.
+    expect(firstReads.every((status) => status?.status === 'ready')).toBe(true);
+    await vi.waitFor(() => expect(probes).toBe(1));
+    releaseFirst();
+    await vi.waitFor(async () =>
+      expect(await storedSnapshot(cwd, 'owner', connection.id)).toMatchObject({ checkedAt: now }),
+    );
+
+    await Promise.all(
+      Array.from({ length: 20 }, () => runtime.cachedCatalogConnection('owner', connection.id)),
+    );
+    expect(probes).toBe(1);
+
+    clock.mockReturnValue(now + 25 * 60 * 60_000);
+    await Promise.all(
+      Array.from({ length: 20 }, () => runtime.cachedCatalogConnection('owner', connection.id)),
+    );
+    await vi.waitFor(() => expect(probes).toBe(2));
+    clock.mockRestore();
+    await runtime.dispose();
+  });
+
+  it('backs off a failed refresh before scheduling another probe', async () => {
+    const { store, cwd, home, connection } = await connectionFixture();
+    const executable = join(cwd, 'codex');
+    await writeFile(executable, '', { mode: 0o700 });
+    await writeFile(join(home, 'auth.json'), '{}');
+    await store.updateConnection('owner', connection.id, connection.revision, {
+      driver: 'codex',
+      name: connection.name,
+      executablePath: executable,
+      homePath: home,
+      enabled: true,
+      writeScopes: [],
+    });
+    const active = await store.getConnection('owner', connection.id);
+    const now = 1_800_000_000_000;
+    const clock = vi.spyOn(Date, 'now').mockReturnValue(now);
+    await writeSnapshot(
+      cwd,
+      active,
+      { status: 'ready', models: [{ id: 'stale-model', name: 'Stale' }] },
+      now - 25 * 60 * 60_000,
+    );
+    let probes = 0;
+    const runtime = new LocalAgentRuntime({
+      store,
+      cwd,
+      createDriver: () => ({
+        async probe(): Promise<LocalAgentStatus> {
+          probes++;
+          throw new Error('fixture spawn failure');
+        },
+        async *run(): AsyncGenerator<NativeAgentEvent> {
+          throw new Error('Snapshot tests never run inference');
+        },
+        respond: () => false,
+        cancel() {},
+        async close() {},
+      }),
+    });
+
+    await Promise.all(
+      Array.from({ length: 20 }, () => runtime.cachedCatalogConnection('owner', connection.id)),
+    );
+    await vi.waitFor(() => expect(probes).toBe(1));
+    await vi.waitFor(async () =>
+      expect(await storedSnapshot(cwd, 'owner', connection.id)).toMatchObject({
+        status: { status: 'unavailable' },
+        reason: 'spawn_failed',
+      }),
+    );
+    await Promise.all(
+      Array.from({ length: 20 }, () => runtime.cachedCatalogConnection('owner', connection.id)),
+    );
+    expect(probes).toBe(1);
+
+    clock.mockReturnValue(now + 30_000);
+    await runtime.cachedCatalogConnection('owner', connection.id);
+    await vi.waitFor(() => expect(probes).toBe(2));
+    clock.mockRestore();
+    await runtime.dispose();
+  });
+
+  it('emits a catalog change only when the status content changes', async () => {
+    const { store, cwd, connection } = await connectionFixture();
+    const changes: LocalAgentSnapshotChange[] = [];
+    let observed: LocalAgentStatus = {
+      status: 'ready',
+      models: [{ id: 'model', name: 'Model' }],
+    };
+    const runtime = new LocalAgentRuntime({
+      store,
+      cwd,
+      onSnapshotChange: (change) => changes.push(change),
+      createDriver: () => ({
+        async probe(): Promise<LocalAgentStatus> {
+          return observed;
+        },
+        async *run(): AsyncGenerator<NativeAgentEvent> {
+          throw new Error('Snapshot tests never run inference');
+        },
+        respond: () => false,
+        cancel() {},
+        async close() {},
+      }),
+    });
+
+    await runtime.probeConnection('owner', connection.id);
+    expect(changes).toHaveLength(1);
+    expect(changes[0]).toMatchObject({ key: connection.id, status: { status: 'ready' } });
+    // Same content with a new checkedAt must not wake renderers.
+    await runtime.probeConnection('owner', connection.id);
+    expect(changes).toHaveLength(1);
+
+    observed = { status: 'login_required', message: 'Sign in' };
+    await runtime.probeConnection('owner', connection.id);
+    expect(changes).toHaveLength(2);
+    expect(changes[1]).toMatchObject({ key: connection.id, status: { status: 'login_required' } });
+
+    await runtime.deleteConnection('owner', connection.id);
+    expect(changes.at(-1)).toEqual({ key: connection.id, status: null });
+    await runtime.dispose();
+  });
+
+  it('serves a non-ready AGY snapshot without applying the ready-only visibility gate', async () => {
+    const { store, cwd, connection } = await connectionFixture('antigravity');
+    await writeSnapshot(
+      cwd,
+      connection,
+      { status: 'login_required', message: 'Google sign-in' },
+      Date.now(),
+    );
+    const runtime = new LocalAgentRuntime({
+      store,
+      cwd,
+      createDriver: () => {
+        throw new Error('A non-ready snapshot must be served without probing');
+      },
+    });
+
+    expect(await runtime.cachedCatalogConnection('owner', connection.id)).toMatchObject({
+      status: 'login_required',
+    });
+    await runtime.dispose();
+  });
+
+  it('rejects a ready AGY snapshot whose visibility context no longer matches', async () => {
+    const { store, cwd, connection } = await connectionFixture('antigravity');
+    const mismatched = nativeModelVisibilityContext(connection, 'b'.repeat(64));
+    await writeSnapshot(
+      cwd,
+      connection,
+      {
+        status: 'ready',
+        models: [{ id: 'gemini', name: 'Gemini' }],
+        modelVisibilityContext: mismatched,
+      },
+      Date.now(),
+      { visibilityContext: mismatched },
+    );
+    const runtime = new LocalAgentRuntime({
+      store,
+      cwd,
+      createDriver: () => {
+        throw new Error('A mismatched snapshot must be discarded');
+      },
+    });
+
+    expect(await runtime.cachedCatalogConnection('owner', connection.id)).toBeNull();
     await runtime.dispose();
   });
 });
