@@ -76,6 +76,32 @@ test.describe('Canonical appearance and locale settings', () => {
       .toBe('dark');
   });
 
+  test('[P1] applies and persists the canonical accent preference', async ({ page }) => {
+    const responsePromise = page.waitForResponse(
+      (response) =>
+        response.request().method() === 'PATCH' &&
+        new URL(response.url()).pathname.endsWith('/api/v1/settings/preferences/presentation'),
+      { timeout: TIMEOUT_CONFIG.AUTH_MUTATION },
+    );
+
+    await page.getByTestId('appearance-accent-option-violet').click();
+
+    const response = await responsePromise;
+    expect(response.ok()).toBe(true);
+    expect(response.request().postDataJSON()).toMatchObject({ patch: { accent: 'violet' } });
+    await expect
+      .poll(async () => page.evaluate(() => document.documentElement.dataset.accent))
+      .toBe('violet');
+
+    await page.reload({ waitUntil: 'domcontentloaded', timeout: TIMEOUT_CONFIG.NAVIGATION });
+    await expect(page.getByTestId('appearance-settings-card')).toBeVisible({
+      timeout: TIMEOUT_CONFIG.NAVIGATION,
+    });
+    await expect
+      .poll(async () => page.evaluate(() => document.documentElement.dataset.accent))
+      .toBe('violet');
+  });
+
   test('[P1] applies and persists the canonical interface language', async ({ page }) => {
     const responsePromise = page.waitForResponse(
       (response) =>
