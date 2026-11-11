@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia';
-import type { UserPreferenceProfile } from '@memoflow/setting-contracts';
+import { AccentSchema, type Accent, type UserPreferenceProfile } from '@memoflow/setting-contracts';
 import type { SettingLocale } from '../setting-ui-host';
 // Residual 1005: sole presentation helpers (local dual retired).
 import {
@@ -16,12 +16,22 @@ export type { PresentationThemeMode };
 export interface PresentationPreferenceState {
   locale: SettingLocale;
   theme: PresentationThemeMode;
+  accent: Accent;
+}
+
+const DEFAULT_ACCENT: Accent = 'brand-gold';
+
+/** Unknown or legacy accent values fall back to the brand gold. */
+export function normalizeAccent(accent: unknown): Accent {
+  const parsed = AccentSchema.safeParse(accent);
+  return parsed.success ? parsed.data : DEFAULT_ACCENT;
 }
 
 export const usePresentationPreferenceStore = defineStore('presentation-preference', {
   state: (): PresentationPreferenceState => ({
     locale: detectBrowserLocale(),
     theme: 'auto',
+    accent: DEFAULT_ACCENT,
   }),
 
   actions: {
@@ -33,13 +43,18 @@ export const usePresentationPreferenceStore = defineStore('presentation-preferen
       this.theme = normalizeTheme(theme);
     },
 
+    setAccent(accent: Accent | string) {
+      this.accent = normalizeAccent(accent);
+    },
+
     syncFromUserPreferenceProfile(profile: UserPreferenceProfile) {
       this.locale = normalizeLocale(profile.presentation.language);
       this.theme = normalizeTheme(profile.presentation.theme);
+      this.accent = normalizeAccent(profile.presentation.accent);
     },
   },
 
   persist: {
-    pick: ['locale', 'theme'] as Array<keyof PresentationPreferenceState>,
+    pick: ['locale', 'theme', 'accent'] as Array<keyof PresentationPreferenceState>,
   },
 });

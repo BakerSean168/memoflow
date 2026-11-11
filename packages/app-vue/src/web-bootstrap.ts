@@ -16,4 +16,4 @@ export {
   type WebLiveNotificationPresenterOptions,
   type WebLiveNotificationPresentation,
 } from '@memoflow/notification-ui';
-export { usePresentationPreferenceStore, applyThemeMode } from '@memoflow/setting-ui';
+export { usePresentationPreferenceStore, applyThemeMode, applyAccent } from '@memoflow/setting-ui';

@@ -18,6 +18,7 @@ export {
   useLocaleSync,
   useThemeSync,
   applyThemeMode,
+  applyAccent,
 } from './composables';
 
 // Routes

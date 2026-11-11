@@ -13,7 +13,7 @@ import { usePresentationPreferenceStore } from '../stores/presentation-preferenc
 import { usePresentationBootstrap } from './usePresentationBootstrap';
 
 const profile: UserPreferenceProfile = {
-  presentation: { theme: 'dark', language: 'en-US' },
+  presentation: { theme: 'dark', language: 'en-US', accent: 'ocean-blue' },
   regional: {
     timeZone: 'Asia/Tokyo',
     dateStyle: 'long',
@@ -98,6 +98,7 @@ describe('usePresentationBootstrap canonical preferences', () => {
     expect(service.getPreferenceProfile).toHaveBeenCalledTimes(1);
     expect(usePresentationPreferenceStore(pinia).theme).toBe('dark');
     expect(usePresentationPreferenceStore(pinia).locale).toBe('en-US');
+    expect(usePresentationPreferenceStore(pinia).accent).toBe('ocean-blue');
     expect(getProductTime().context).toMatchObject({ timeZone: 'Asia/Tokyo', weekStartsOn: 0 });
     expect(getProductTime().presentation).toMatchObject({
       locale: 'en-US',

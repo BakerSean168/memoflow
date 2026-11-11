@@ -2,6 +2,39 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
+    <script>
+      // Apply the saved theme + accent before first paint to avoid a flash.
+      (function () {
+        try {
+          var raw = localStorage.getItem('presentation-preference');
+          var parsed = raw ? JSON.parse(raw) : null;
+          var theme = parsed && parsed.theme;
+          var resolved =
+            theme === 'light' || theme === 'dark'
+              ? theme
+              : window.matchMedia('(prefers-color-scheme: dark)').matches
+                ? 'dark'
+                : 'light';
+          var accents = [
+            'brand-gold',
+            'linear-indigo',
+            'ocean-blue',
+            'emerald-green',
+            'rose-red',
+            'violet',
+          ];
+          var accent =
+            parsed && accents.indexOf(parsed.accent) !== -1 ? parsed.accent : 'brand-gold';
+          var root = document.documentElement;
+          root.classList.toggle('dark', resolved === 'dark');
+          root.dataset.theme = resolved;
+          root.style.colorScheme = resolved;
+          root.dataset.accent = accent;
+        } catch (error) {
+          // Best effort only; the bootstrap applies the final values.
+        }
+      })();
+    </script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <!-- <meta http-equiv="Content-Security-Policy"
     content="default-src 'self'; script-src 'self' 'unsafe-eval' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data:;" /> -->

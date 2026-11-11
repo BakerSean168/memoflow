@@ -14,7 +14,7 @@ import {
   createNotificationStartupHook,
   createNotificationClickNavigation,
 } from '@memoflow/notification-ui';
-import { usePresentationPreferenceStore } from '@memoflow/app-vue';
+import { applyAccent, applyThemeMode, usePresentationPreferenceStore } from '@memoflow/app-vue';
 import { useAccountStore, useAuthenticationStore } from '@memoflow/account-ui';
 import { progressStart, progressDone } from '@memoflow/ui-vue-shadcn/composables/useProgressBar';
 
@@ -45,6 +45,8 @@ export async function bootstrapMainApp() {
   app.use(pinia);
 
   const presentationStore = usePresentationPreferenceStore();
+  applyThemeMode(presentationStore.theme);
+  applyAccent(presentationStore.accent);
   document.documentElement.lang = presentationStore.locale;
 
   const localeMessages = await loadLocaleMessages(presentationStore.locale);
