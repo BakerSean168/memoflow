@@ -44,6 +44,10 @@ export function createNativeAgentFlowFixture(directory: string) {
       store,
       cwd: directory,
       isActive: () => profile === owner,
+      onSnapshotChange: (change) => {
+        for (const listener of listeners.get(AIStreamChannels.LOCAL_AGENT_CATALOG) ?? [])
+          listener(change);
+      },
       createDriver: (connection) =>
         new CodexDriver(connection, directory, (options) => {
           if (probeFailure?.kind === 'spawn')

@@ -265,25 +265,32 @@ async function probe(instance: AgentInstance, fresh = false) {
   const isCurrent = () =>
     !disposed && epoch === generation && probeEpochs.get(instance.instanceId) === probeId;
   try {
-    // T3-style health/read path: a previously verified, Profile-owned AGY
-    // snapshot must be instant. Only explicit Refresh forces a costly ACP launch.
-    const verified =
-      !fresh && instance.driver === 'antigravity' && instance.legacyConnectionId
-        ? await local.cachedCatalogConnection(instance.legacyConnectionId)
-        : null;
-    if (!isCurrent()) return;
-    const result =
-      verified ??
-      (instance.legacyConnectionId
-        ? await local.probeConnection(instance.legacyConnectionId)
-        : await local.probeDefaultDriver(instance.driver));
+    if (!fresh) {
+      // Mount/selection reads the persisted snapshot only. A missing or
+      // non-ready snapshot is presented as-is; Desktop schedules the refresh
+      // and the next read/recheck converges without starting a process.
+      const snapshot = await local.cachedCatalogConnection(
+        instance.legacyConnectionId ?? `implicit:${instance.driver}`,
+      );
+      if (!isCurrent()) return;
+      if (snapshot) statuses.value[instance.instanceId] = snapshot;
+      else delete statuses.value[instance.instanceId];
+      return;
+    }
+    // The explicit Recheck button, an inline check and the post-login verify
+    // keep their synchronous probe semantics and write the resulting snapshot.
+    const result = instance.legacyConnectionId
+      ? await local.probeConnection(instance.legacyConnectionId)
+      : await local.probeDefaultDriver(instance.driver);
     if (isCurrent()) statuses.value[instance.instanceId] = result;
   } catch {
-    if (isCurrent())
+    if (!isCurrent()) return;
+    if (fresh)
       statuses.value[instance.instanceId] = {
         status: 'unavailable',
         message: t('aiAssistant.local.actionFailed'),
       };
+    else delete statuses.value[instance.instanceId];
   } finally {
     if (isCurrent()) checking.value[instance.instanceId] = false;
   }

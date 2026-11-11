@@ -116,6 +116,7 @@ import type {
   UploadAccountAvatarReq,
 } from '@memoflow/account-contracts';
 import { createRuntimeOwnership } from '@memoflow/shared-primitives';
+import { AIStreamChannels } from '@memoflow/desktop-contracts';
 import { ok, ResultErrorException } from '@memoflow/transport-contracts/result';
 import { toGoalReference, toKeyResultReference } from '@memoflow/goal-contracts';
 import { getSharedPathResolver } from './runtime-init';
@@ -706,6 +707,14 @@ async function registerBusinessModules(
       cwd: path.join(profilePaths.storageDir, 'local-agents'),
       isActive: () =>
         mainRuntime?.profileRuntimeManager.getActiveProfileId() === profilePaths.profileId,
+      // Directory snapshots are content-only; every live window gets the same
+      // idempotent payload and applies it to its own in-memory view.
+      onSnapshotChange: (change) => {
+        for (const window of BrowserWindow.getAllWindows()) {
+          if (window.isDestroyed() || window.webContents.isDestroyed()) continue;
+          window.webContents.send(AIStreamChannels.LOCAL_AGENT_CATALOG, change);
+        }
+      },
     },
     panelBridge: new DesktopNativePanelBridge({
       getMainWindow: () => windowManager.getMainWindow(),

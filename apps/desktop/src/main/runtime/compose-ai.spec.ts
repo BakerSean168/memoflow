@@ -271,6 +271,19 @@ describe('Desktop composeAI Mastra-only ownership', () => {
     );
   });
 
+  it('passes the renderer catalog broadcast into the local Agent runtime', () => {
+    const onSnapshotChange = vi.fn();
+    composeAI({
+      ...dependencies,
+      localAgent: { ...dependencies.localAgent, onSnapshotChange },
+    });
+    const runtime = vi.mocked(createAIModule).mock.calls[0][0].localAgentRuntime as unknown as {
+      options: { onSnapshotChange?: (change: unknown) => void };
+    };
+    runtime.options.onSnapshotChange?.({ key: 'implicit:codex', status: null });
+    expect(onSnapshotChange).toHaveBeenCalledWith({ key: 'implicit:codex', status: null });
+  });
+
   it('uses the same Mastra runtime as assistant and workflow owner and binds exactly that module instance to IPC', () => {
     composeAI(dependencies);
 

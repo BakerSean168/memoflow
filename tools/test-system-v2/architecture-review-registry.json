@@ -22,7 +22,7 @@
         "status": "none-verified",
         "testFiles": []
       },
-      "sourceSha256": "031c6f47ef0409add094aff482ef2b365fff33fd696695d3ab9a92e4b1b2633e"
+      "sourceSha256": "0abec399ff04ba2703e40489be8f46568ff91327fcf95db4a0ddfbb56864a7fd"
     },
     {
       "path": "apps/desktop/src/main/profile/ProfileSnapshotService.spec.ts",

@@ -75,13 +75,9 @@ function authenticationIdentity(driver: LocalAgentDriver, text: string, account:
   return JSON.stringify(value);
 }
 
-/** Only the digest crosses into local binding storage; credentials remain in native homes. */
-export async function nativeIdentity(
-  driver: LocalAgentDriver,
-  home?: string,
-  account: unknown = null,
-) {
-  const directory =
+/** Resolve the native home exactly like identity hashing does, without reading it. */
+export function nativeHome(driver: LocalAgentDriver, home?: string): string {
+  return (
     home ??
     (driver === 'codex'
       ? (process.env.CODEX_HOME ?? join(homedir(), '.codex'))
@@ -91,7 +87,17 @@ export async function nativeIdentity(
           ? (process.env.GEMINI_HOME ?? join(homedir(), '.gemini'))
           : driver === 'dsh'
             ? (process.env.DSH_HOME ?? join(homedir(), '.dsh'))
-            : (process.env.PI_CODING_AGENT_DIR ?? join(homedir(), '.pi', 'agent')));
+            : (process.env.PI_CODING_AGENT_DIR ?? join(homedir(), '.pi', 'agent')))
+  );
+}
+
+/** Only the digest crosses into local binding storage; credentials remain in native homes. */
+export async function nativeIdentity(
+  driver: LocalAgentDriver,
+  home?: string,
+  account: unknown = null,
+) {
+  const directory = nativeHome(driver, home);
   const hash = createHash('sha256').update(JSON.stringify([driver, directory, account]));
   if (driver === 'antigravity') {
     // The official Agent rewrites the cache during authentication. File timestamps

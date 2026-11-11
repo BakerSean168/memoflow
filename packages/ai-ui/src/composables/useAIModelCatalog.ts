@@ -1,4 +1,4 @@
-import { computed, onScopeDispose, ref, watch, type Ref } from 'vue';
+import { computed, getCurrentScope, onScopeDispose, ref, watch, type Ref } from 'vue';
 import type { AgentRegistryClient, LocalAgentClient } from '@memoflow/ai-client';
 import type {
   AgentInstance,
@@ -21,7 +21,7 @@ export interface InstanceModelCatalog {
   agentKey: string;
   status: 'idle' | 'loading' | 'ready' | 'error' | 'unavailable';
   models: ComposerModel[];
-  reason?: 'not_installed' | 'login_required' | 'unavailable' | 'discovery_failed';
+  reason?: 'not_installed' | 'login_required' | 'unavailable' | 'discovery_failed' | 'discovering';
 }
 export type ModelCatalog = Readonly<Record<string, InstanceModelCatalog>>;
 
@@ -89,21 +89,35 @@ export function sharedAIModelCatalogState(host: object | undefined): AIModelCata
 interface Options {
   resolveIdentity: () => string;
   registry?: Pick<AgentRegistryClient, 'list'>;
-  native?: Pick<
-    LocalAgentClient,
-    'probeConnection' | 'probeDefaultDriver' | 'cachedCatalogConnection'
-  >;
+  native?: Pick<LocalAgentClient, 'cachedCatalogConnection' | 'subscribeCatalog'>;
   refreshProviderModels: (id: string) => Promise<{ models: AIModelInfo[] }>;
   /** Periodic stale-while-revalidate of an already presented catalog. */
   autoRevalidate?: boolean;
 }
 interface RefreshOptions {
-  /** Ignore the native directory snapshot and probe every enabled instance. */
+  /** Ignore presented provider catalogs while re-reading snapshots. Never probes. */
   fresh?: boolean;
   /** Only discover entries that were never presented or previously failed. */
   onlyMissing?: boolean;
 }
 const REVALIDATE_INTERVAL_MS = 5 * 60_000;
+
+function composerModels(
+  instance: AgentInstance,
+  agentKey: string,
+  status: Extract<LocalAgentStatus, { status: 'ready' }>,
+): ComposerModel[] {
+  return status.models.map((model) => ({
+    ...model,
+    key: model.id,
+    agentKey,
+    agentInstanceId: instance.instanceId,
+    providerId: instance.legacyConnectionId ?? instance.instanceId,
+    providerName: model.provider ?? instance.name,
+    modelId: model.id,
+    modelName: model.name,
+  }));
+}
 
 /** One ephemeral directory for all enabled instances in this identity/profile.
  * Only read ports are accepted: browsing cannot materialize connections or run inference. */
@@ -151,12 +165,61 @@ export function useAIModelCatalog(options: Options, state = createAIModelCatalog
     );
   });
 
+  function applyInstanceStatus(instance: AgentInstance, status: LocalAgentStatus | null): void {
+    const agentKey = composerAgentKey(instance);
+    if (!status) {
+      const statuses = { ...nativeStatuses.value };
+      delete statuses[instance.instanceId];
+      nativeStatuses.value = statuses;
+      rawEntries.value = {
+        ...rawEntries.value,
+        [instance.instanceId]: {
+          instanceId: instance.instanceId,
+          agentKey,
+          status: 'loading',
+          models: [],
+          reason: 'discovering',
+        },
+      };
+      return;
+    }
+    nativeStatuses.value = { ...nativeStatuses.value, [instance.instanceId]: status };
+    rawEntries.value = {
+      ...rawEntries.value,
+      [instance.instanceId]:
+        status.status === 'ready'
+          ? {
+              instanceId: instance.instanceId,
+              agentKey,
+              status: 'ready',
+              models: composerModels(instance, agentKey, status),
+            }
+          : {
+              instanceId: instance.instanceId,
+              agentKey,
+              status: 'unavailable',
+              models: [],
+              reason: status.status,
+            },
+    };
+  }
+  const unsubscribe = options.native?.subscribeCatalog((change) => {
+    if (disposed || state.owner.value !== options.resolveIdentity()) return;
+    const instances = snapshot.value?.instances;
+    if (!instances) return;
+    const instance = instances.find(
+      (entry) =>
+        entry.enabled && (entry.legacyConnectionId ?? `implicit:${entry.driver}`) === change.key,
+    );
+    if (instance) applyInstanceStatus(instance, change.status);
+  });
+  if (unsubscribe && getCurrentScope()) onScopeDispose(unsubscribe);
+
   async function discoverNative(
     instance: AgentInstance,
     agentKey: string,
     request: number,
     identity: string,
-    refreshOptions: RefreshOptions,
   ): Promise<InstanceModelCatalog> {
     let result: InstanceModelCatalog = {
       instanceId: instance.instanceId,
@@ -169,37 +232,26 @@ export function useAIModelCatalog(options: Options, state = createAIModelCatalog
     try {
       // A presented directory is always read first. It comes from this exact
       // Profile and connection revision, so no native process is needed to
-      // populate the picker on a cold start.
-      const cached =
-        refreshOptions.fresh || !options.native
-          ? null
-          : ((await options.native.cachedCatalogConnection?.(
-              instance.legacyConnectionId ?? `implicit:${instance.driver}`,
-            )) ?? null);
+      // populate the picker on a cold start. A missing snapshot only schedules
+      // a background refresh in Desktop and leaves this entry loading.
+      const status = options.native
+        ? ((await options.native.cachedCatalogConnection(
+            instance.legacyConnectionId ?? `implicit:${instance.driver}`,
+          )) ?? null)
+        : null;
       if (!current(request, identity)) return result;
-      const status =
-        cached ??
-        (options.native
-          ? instance.legacyConnectionId
-            ? await options.native.probeConnection(instance.legacyConnectionId)
-            : await options.native.probeDefaultDriver(instance.driver)
-          : null);
-      if (!current(request, identity) || !status) return result;
+      if (!status)
+        return {
+          ...result,
+          status: 'loading',
+          models: [],
+          reason: 'discovering',
+        };
       nativeStatuses.value = {
         ...nativeStatuses.value,
         [instance.instanceId]: status,
       };
-      if (status.status === 'ready')
-        result.models = status.models.map((model) => ({
-          ...model,
-          key: model.id,
-          agentKey,
-          agentInstanceId: instance.instanceId,
-          providerId: instance.legacyConnectionId ?? instance.instanceId,
-          providerName: model.provider ?? instance.name,
-          modelId: model.id,
-          modelName: model.name,
-        }));
+      if (status.status === 'ready') result.models = composerModels(instance, agentKey, status);
       else
         result = {
           ...result,
@@ -272,6 +324,7 @@ export function useAIModelCatalog(options: Options, state = createAIModelCatalog
                   agentKey: composerAgentKey(instance),
                   status: 'loading',
                   models: [],
+                  reason: 'discovering',
                 },
           ];
         }),
@@ -358,7 +411,7 @@ export function useAIModelCatalog(options: Options, state = createAIModelCatalog
               );
               result.models = groups.flat();
             } else if (options.native) {
-              result = await discoverNative(instance, agentKey, request, identity, refreshOptions);
+              result = await discoverNative(instance, agentKey, request, identity);
             } else
               result = {
                 ...result,

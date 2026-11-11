@@ -27,10 +27,19 @@ async function setup(driver: 'codex' | 'claude' = 'codex') {
   const db = createLocalAgentSqlite();
   databases.push(db);
   const store = new LocalAgentRepository(db);
+  // A real executable and credential file keep the zero-process cheap layer from
+  // downgrading fixtures that exercise dispatch without a seeded snapshot.
+  const home = await mkdtemp(join(tmpdir(), 'mf-runtime-home-'));
+  ephemeralHomes.push(home);
+  const executable = join(home, 'agent');
+  await writeFile(executable, '', { mode: 0o700 });
+  await writeFile(join(home, 'auth.json'), '{}');
+  await writeFile(join(home, '.credentials.json'), '{}');
   const connection = await store.createConnection('owner', {
     driver,
     name: 'Fixture',
-    executablePath: '/fake/agent',
+    executablePath: executable,
+    homePath: home,
     enabled: true,
     writeScopes: [],
   });
@@ -317,6 +326,7 @@ describe('local Agent conversation execution', () => {
         driver: saved.driver,
         name: saved.name,
         executablePath: saved.executablePath,
+        homePath: saved.homePath,
         enabled: saved.enabled,
         writeScopes: saved.writeScopes,
         nativePermissionMode:
@@ -494,6 +504,8 @@ describe('local Agent conversation execution', () => {
         },
       }),
     });
+    // A fresh ready snapshot is the only state allowed to reject an unadvertised option.
+    await runtime.probeConnection('owner', conversation.connectionId);
     for (const modelOptions of [{ reasoningEffort: 'unavailable' }, { serviceTier: 'unknown' }]) {
       await expect(
         runtime
@@ -670,7 +682,7 @@ describe('local Agent conversation execution', () => {
       }),
     });
     const connections = [];
-    for (let index = 0; index < 5; index++)
+    for (let index = 0; index < 3; index++)
       connections.push(
         await store.createConnection('owner', {
           driver: 'codex',
@@ -680,9 +692,9 @@ describe('local Agent conversation execution', () => {
           writeScopes: [],
         }),
       );
-    const probes = connections.slice(0, 4).map((item) => runtime.probeConnection('owner', item.id));
-    const queued = runtime.probeConnection('owner', connections[4]!.id);
-    await vi.waitFor(() => expect(started).toBe(4));
+    const probes = connections.slice(0, 2).map((item) => runtime.probeConnection('owner', item.id));
+    const queued = runtime.probeConnection('owner', connections[2]!.id);
+    await vi.waitFor(() => expect(started).toBe(2));
     let queuedFinished = false;
     void queued.finally(() => {
       queuedFinished = true;
@@ -691,10 +703,10 @@ describe('local Agent conversation execution', () => {
     expect(queuedFinished).toBe(false);
     release();
     await Promise.all([...probes, queued]);
-    expect(started).toBe(5);
+    expect(started).toBe(3);
     await runtime.dispose();
   });
-  it('waits for discovery capacity instead of rejecting a user turn as a conflict', async () => {
+  it('starts a user turn while the probe pool is saturated', async () => {
     const { store, conversation } = await setup();
     let release!: () => void;
     const gate = new Promise<void>((resolve) => {
@@ -722,49 +734,123 @@ describe('local Agent conversation execution', () => {
         },
       }),
     });
-    const connections = [];
-    for (let index = 0; index < 4; index++)
-      connections.push(
+    // Two probes fill the dedicated discovery pool.
+    const fillers = [];
+    for (let index = 0; index < 2; index++) {
+      fillers.push(
         await store.createConnection('owner', {
           driver: 'codex',
-          name: `Codex ${index}`,
+          name: `Probe filler ${index}`,
           executablePath: '/fake/codex',
           enabled: true,
           writeScopes: [],
         }),
       );
-    const probes = connections.map((item) => runtime.probeConnection('owner', item.id));
-    await vi.waitFor(() => expect(probing).toBe(4));
+    }
+    const pendingProbes = fillers.map((item) => runtime.probeConnection('owner', item.id));
+    await vi.waitFor(() => expect(probing).toBe(2));
+
+    // Two more instances want a background refresh; both queue behind the probe pool.
+    const home = await mkdtemp(join(tmpdir(), 'mf-probe-queue-'));
+    ephemeralHomes.push(home);
+    const executable = join(home, 'agent');
+    await writeFile(executable, '', { mode: 0o700 });
+    await writeFile(join(home, 'auth.json'), '{}');
+    const queued = [];
+    for (let index = 0; index < 2; index++) {
+      const connection = await store.createConnection('owner', {
+        driver: 'codex',
+        name: `Background ${index}`,
+        executablePath: executable,
+        homePath: home,
+        enabled: true,
+        writeScopes: [],
+      });
+      queued.push(await runtime.cachedCatalogConnection('owner', connection.id));
+    }
+    expect(queued).toEqual([null, null]);
+
     try {
       const stream = runtime.dispatchMessage({
         identityId: 'owner',
         conversationId: conversation.id,
         content: 'Hello',
       });
-      let settled = false;
-      const first = stream
-        .next()
-        .then(
-          (value) => ({ value }),
-          (error: unknown) => ({ error }),
-        )
-        .finally(() => {
-          settled = true;
-        });
-      await new Promise((resolve) => setTimeout(resolve, 20));
-      expect(settled).toBe(false);
-
-      release();
-      await Promise.all(probes);
-      const outcome = await first;
-      expect(outcome).not.toHaveProperty('error');
-      expect(outcome).toMatchObject({ value: { value: { type: 'assistant.run.started' } } });
+      const first = await stream.next();
+      // The turn starts immediately; it never waits for discovery, and no third probe
+      // may start while the pool is occupied by the two explicit probes.
+      expect(first.value).toMatchObject({ type: 'assistant.run.started' });
+      expect(probing).toBe(2);
       await stream.return(undefined);
     } finally {
       release();
-      await Promise.allSettled(probes);
+      await Promise.allSettled(pendingProbes);
       await runtime.dispose();
     }
+  });
+
+  it('keeps the four-run bound and same-conversation conflict', async () => {
+    const { store, conversation } = await setup();
+    const connection = await store.getConnection('owner', conversation.connectionId);
+    const conversations = [conversation.id];
+    for (let index = 0; index < 4; index++)
+      conversations.push(
+        (
+          await store.createConversation('owner', {
+            connectionId: connection.id,
+            modelId: 'model',
+            name: `Parallel ${index}`,
+          })
+        ).id,
+      );
+    const runtime = new LocalAgentRuntime({
+      store,
+      cwd: '/tmp',
+      createDriver: () => ({
+        async probe() {
+          return { status: 'ready' as const, models: [{ id: 'model', name: 'Model' }] };
+        },
+        async *run(): AsyncGenerator<NativeAgentEvent> {
+          yield { type: 'completed' };
+        },
+        respond: () => false,
+        cancel() {},
+        async close() {},
+      }),
+    });
+    const streams = conversations.map((conversationId) =>
+      runtime.dispatchMessage({ identityId: 'owner', conversationId, content: 'Hello' }),
+    );
+    const firstEvents = streams.map((stream) => stream.next());
+    const started = await Promise.all(firstEvents.slice(0, 4));
+    expect(started.map((event) => event.value?.type)).toEqual([
+      'assistant.run.started',
+      'assistant.run.started',
+      'assistant.run.started',
+      'assistant.run.started',
+    ]);
+
+    let fifthSettled = false;
+    void firstEvents[4]!.finally(() => {
+      fifthSettled = true;
+    });
+    await Promise.resolve();
+    expect(fifthSettled).toBe(false);
+    await expect(
+      runtime
+        .dispatchMessage({
+          identityId: 'owner',
+          conversationId: conversations[0]!,
+          content: 'Again',
+        })
+        .next(),
+    ).rejects.toMatchObject({ code: 'CONFLICT' });
+
+    for (const stream of streams.slice(0, 4)) await stream.return(undefined);
+    const fifth = await firstEvents[4]!;
+    expect(fifth.value).toMatchObject({ type: 'assistant.run.started' });
+    await streams[4]!.return(undefined);
+    await runtime.dispose();
   });
   it('joins concurrent discovery for the same connection into one native probe', async () => {
     const { store, conversation } = await setup();
@@ -1194,6 +1280,8 @@ it('keeps Google sign-in guidance when conversation creation rejects a logged-ou
       },
     }),
   });
+  // Seed a fresh failure snapshot: creation is optimistic when nothing is known.
+  await runtime.probeConnection('owner', connection.id);
   await expect(
     runtime.createConversation('owner', {
       connectionId: connection.id,

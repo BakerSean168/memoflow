@@ -41,6 +41,11 @@ import { AntigravityLoginManager } from './antigravity-login';
 import { LocalAgentError } from '../../shared/local-agent-error';
 import { nativeIdentity, nativeModelVisibilityContext } from './native-identity';
 import { antigravityHasCachedAuth } from './antigravity-native';
+import {
+  cheapVerdict,
+  nativeExecutableSignature,
+  resolveEffectiveExecutable,
+} from './snapshot-cheap-check';
 import type { LocalAgentRepository } from '../infrastructure/adapters/powersync/local-agent.repository';
 import { verifyLocalAgentMcpConnectivity } from './local-tool-bridge';
 import { NativeEventQueue } from './native-event-queue';
@@ -133,6 +138,8 @@ export interface LocalAgentRuntimeOptions {
   isActive?: () => boolean;
   bridge?: LocalAgentToolBridgePort;
   createDriver?: (connection: LocalAgentConnection, cwd: string) => Driver;
+  /** Directory change push; only content changes are emitted, never timestamp-only updates. */
+  onSnapshotChange?: (change: LocalAgentSnapshotChange) => void;
 }
 type MessageInput = {
   identityId: string;
@@ -149,32 +156,99 @@ type ConversationInput = { identityId: string; conversationId: string };
 
 // T3-inspired Provider snapshot: only public model metadata is persisted in
 // this Desktop Profile's storage. Authentication and execution are ALWAYS native.
-const CATALOG_OBSERVATION_MAX_AGE_MS = 24 * 60 * 60_000;
-/** Bounded native discovery concurrency; callers wait for a slot instead of failing. */
-const PROBE_CONCURRENCY = 4;
+/** A snapshot older than this is stale: reads still serve it, but schedule a refresh. */
+const SNAPSHOT_SOFT_TTL_MS = 5 * 60_000;
+/** Minimum spacing between two background refresh attempts for the same key. */
+const REFRESH_MIN_INTERVAL_MS = 30_000;
+/** Deterministic non-ready states are re-confirmed cheaply at the soft-TTL cadence. */
+const CHEAP_RECONFIRM_INTERVAL_MS = SNAPSHOT_SOFT_TTL_MS;
+/** Failure backoff: 30s → 60s → 120s → 300s, capped at five minutes. */
+const REFRESH_BACKOFF_MS = [30_000, 60_000, 120_000, 300_000] as const;
+/** Bounded background queue; the oldest entry is dropped when a burst exceeds it. */
+const BACKGROUND_REFRESH_QUEUE_LIMIT = 16;
+/** Discovery has its own process budget; it never consumes a user turn's slots. */
+const PROBE_POOL_SIZE = 2;
+/** User turns remain bounded at four concurrent native sessions. */
+const RUN_CONCURRENCY = 4;
+/** Stable snapshot failure categories; never provider stderr or raw diagnostics. */
+type SnapshotReason =
+  | 'timeout'
+  | 'spawn_failed'
+  | 'protocol_error'
+  | 'no_models'
+  | 'login'
+  | 'not_installed'
+  | 'unknown';
+
+/** Content change broadcast to renderers; never carries identity, paths or credentials. */
+export interface LocalAgentSnapshotChange {
+  key: string;
+  status: LocalAgentStatus | null;
+}
 export const MEMOFLOW_NATIVE_TOOL_ROUTING_INSTRUCTIONS =
   'MemoFlow business tool policy: use only the MemoFlow MCP tools for MemoFlow Goals, Tasks, and Knowledge. Never use shell, filesystem, browser, or Chrome DevTools tools to inspect or operate MemoFlow. Creating a Goal always uses the right-side native form, even when the user does not mention the form: call goal_panel_open first, then use goal_panel_snapshot/patch/add_key_result/remove_key_result/focus and finish with goal_panel_submit; do not use goal_create for that flow. Use goal_create or goal_update only when the user explicitly requests a direct background Goal write without the form; if goal_create returns GOAL_PANEL_REQUIRED, continue with goal_panel_open. Say a Goal was created only after goal_panel_submit or goal_create returned its Goal id, and cite that id; never describe a Goal from shell or filesystem output. If a required MemoFlow tool is missing or access is denied, report the specific failure and stop without retrying or switching paths.';
+/** One persisted discovery observation. v1 files only contained `ready`; v2 also
+ * stores explicit failures so a cold start can explain why a native Agent is not
+ * usable without spawning it. `account` and `lastExecutionFailure` never persist. */
 interface ObservedNativeCatalog {
+  schemaVersion: 1 | 2;
   revision: number;
   driver: LocalAgentDriver;
   executablePath: string;
+  /** PATH/shim resolution result (diagnostic drift signal), when known. */
+  resolvedExecutablePath?: string;
+  /** Cheap `size:mtime` fingerprint of the resolved executable, when known. */
+  executableSignature?: string;
   homePath: string | null;
   /** `nativeIdentity()` digest captured with the observation; recomputed on every read. */
   identity: string;
   visibilityContext?: string;
+  /** Last complete probe attempt, including failed attempts. */
   checkedAt: number;
-  status: LocalAgentStatus & { status: 'ready' };
+  /** Last zero-process cheap confirmation (never decides freshness). */
+  validatedAt?: number;
+  reason?: SnapshotReason;
+  status: LocalAgentStatus;
 }
+const snapshotReasonSchema = z.enum([
+  'timeout',
+  'spawn_failed',
+  'protocol_error',
+  'no_models',
+  'login',
+  'not_installed',
+  'unknown',
+]);
 const observedCatalogSchema = z.object({
+  schemaVersion: z.union([z.literal(1), z.literal(2)]).optional(),
   revision: z.number().int().nonnegative(),
   driver: z.enum(['codex', 'claude', 'pi', 'dsh', 'antigravity']),
   executablePath: z.string().min(1),
+  resolvedExecutablePath: z.string().min(1).optional(),
+  executableSignature: z.string().min(1).optional(),
   homePath: z.string().nullable(),
   identity: z.string().min(1),
   visibilityContext: z.string().min(1).optional(),
   checkedAt: z.number().finite(),
-  status: LocalAgentStatusSchema.refine((status) => status.status === 'ready'),
+  validatedAt: z.number().finite().optional(),
+  reason: snapshotReasonSchema.optional(),
+  status: LocalAgentStatusSchema,
 });
+
+/** The write-time view of one probe attempt; the reason is only persisted for failures. */
+interface ProbeOutcome {
+  status: LocalAgentStatus;
+  reason?: SnapshotReason;
+}
+
+/** Stable reason for a probe result that did not observe a model catalog. */
+function statusReason(status: LocalAgentStatus): SnapshotReason | undefined {
+  if (status.status === 'ready') return undefined;
+  if (status.status === 'login_required') return 'login';
+  if (status.status === 'not_installed') return 'not_installed';
+  // A driver that reports unavailable without throwing observed no usable models.
+  return 'no_models';
+}
 
 /** One Desktop Profile's native resources; no inference, retry or checkpoint authority. */
 export class LocalAgentRuntime {
@@ -186,8 +260,19 @@ export class LocalAgentRuntime {
   >();
   private readonly nativeCatalogObservations = new Map<string, ObservedNativeCatalog>();
   private readonly probes = new Set<Driver>();
-  private readonly probeFlights = new Map<string, Promise<LocalAgentStatus>>();
+  private readonly probeFlights = new Map<
+    string,
+    { promise: Promise<ProbeOutcome>; full: boolean }
+  >();
+  /** Background refreshes waiting for a probe slot; keyed by owner/connection tuple. */
+  private readonly refreshQueue = new Map<string, { identityId: string; connectionId: string }>();
+  /** Earliest time the next background attempt may start for a key. */
+  private readonly nextAttemptAt = new Map<string, number>();
+  private readonly failureStreak = new Map<string, number>();
+  private refreshDraining = false;
+  private readonly backgroundWork = new Set<Promise<unknown>>();
   private readonly probeWaiters: Array<() => void> = [];
+  private readonly runWaiters: Array<() => void> = [];
   private pendingProbes = 0;
   private pendingRuns = 0;
   private stopped = false;
@@ -222,9 +307,41 @@ export class LocalAgentRuntime {
       const parsed = observedCatalogSchema.safeParse(
         JSON.parse(await readFile(this.catalogFile(identityId, connectionId), 'utf8')),
       );
-      return parsed.success && parsed.data.status.status === 'ready'
-        ? (parsed.data as ObservedNativeCatalog)
-        : null;
+      if (!parsed.success) return null;
+      const schemaVersion = parsed.data.schemaVersion ?? 1;
+      // v1 only ever contained a verified ready status; anything else is not a v1 file.
+      if (schemaVersion === 1 && parsed.data.status.status !== 'ready') return null;
+      return {
+        ...parsed.data,
+        schemaVersion,
+        // v1 had one timestamp; the observation was also the validation moment.
+        validatedAt: parsed.data.validatedAt ?? parsed.data.checkedAt,
+      };
+    } catch {
+      return null;
+    }
+  }
+
+  /** Strip execution-time and account metadata before anything touches the Profile disk. */
+  private projectStatus(status: LocalAgentStatus): LocalAgentStatus {
+    if (status.status !== 'ready') return { status: status.status, message: status.message };
+    return {
+      status: 'ready',
+      models: status.models,
+      ...(status.version ? { version: status.version } : {}),
+      ...(status.modelVisibilityContext
+        ? { modelVisibilityContext: status.modelVisibilityContext }
+        : {}),
+    };
+  }
+
+  /** Read the raw `checkedAt` of an existing file without validating the whole envelope. */
+  private async catalogCheckedAt(identityId: string, connectionId: string): Promise<number | null> {
+    try {
+      const parsed = z
+        .object({ checkedAt: z.number().finite() })
+        .safeParse(JSON.parse(await readFile(this.catalogFile(identityId, connectionId), 'utf8')));
+      return parsed.success ? parsed.data.checkedAt : null;
     } catch {
       return null;
     }
@@ -234,10 +351,21 @@ export class LocalAgentRuntime {
     identityId: string,
     connectionId: string,
     observation: ObservedNativeCatalog,
-  ): Promise<void> {
+    allowEqualReplace = true,
+  ): Promise<boolean> {
     const filename = this.catalogFile(identityId, connectionId);
     const temporary = filename + '.' + randomUUID() + '.tmp';
     try {
+      // Cheap confirmations and full probes can cross-write; never let the older
+      // `checkedAt` win. A cheap downgrade also loses a same-millisecond probe result,
+      // while a complete probe may replace an equal-timestamp observation in place.
+      const current = await this.catalogCheckedAt(identityId, connectionId);
+      if (
+        current !== null &&
+        (current > observation.checkedAt ||
+          (!allowEqualReplace && current === observation.checkedAt))
+      )
+        return false;
       await mkdir(join(this.options.cwd, 'model-catalog'), {
         recursive: true,
         mode: 0o700,
@@ -246,35 +374,51 @@ export class LocalAgentRuntime {
       await writeFile(
         temporary,
         JSON.stringify({
+          schemaVersion: 2,
           revision: observation.revision,
           driver: observation.driver,
           executablePath: observation.executablePath,
+          ...(observation.resolvedExecutablePath
+            ? { resolvedExecutablePath: observation.resolvedExecutablePath }
+            : {}),
+          ...(observation.executableSignature
+            ? { executableSignature: observation.executableSignature }
+            : {}),
           homePath: observation.homePath,
           identity: observation.identity,
           ...(observation.visibilityContext
             ? { visibilityContext: observation.visibilityContext }
             : {}),
           checkedAt: observation.checkedAt,
-          status: {
-            status: 'ready',
-            models: observation.status.models,
-            ...(observation.visibilityContext
-              ? { modelVisibilityContext: observation.visibilityContext }
-              : {}),
-            ...(observation.status.version ? { version: observation.status.version } : {}),
-          },
+          ...(observation.validatedAt !== undefined
+            ? { validatedAt: observation.validatedAt }
+            : {}),
+          ...(observation.reason ? { reason: observation.reason } : {}),
+          status: this.projectStatus(observation.status),
         }),
         { mode: 0o600 },
       );
       await rename(temporary, filename);
+      return true;
     } finally {
       await rm(temporary, { force: true }).catch(() => undefined);
     }
   }
 
   private async clearCatalog(identityId: string, connectionId: string) {
-    this.nativeCatalogObservations.delete(JSON.stringify([identityId, connectionId]));
+    const key = JSON.stringify([identityId, connectionId]);
+    const hadSnapshot = this.nativeCatalogObservations.delete(key);
+    let existed = hadSnapshot;
+    if (!existed) {
+      try {
+        await readFile(this.catalogFile(identityId, connectionId));
+        existed = true;
+      } catch {
+        // No persisted snapshot to announce.
+      }
+    }
     await rm(this.catalogFile(identityId, connectionId), { force: true }).catch(() => undefined);
+    if (existed) this.emitSnapshotChange({ key: connectionId, status: null });
   }
 
   private assertActive() {
@@ -333,9 +477,15 @@ export class LocalAgentRuntime {
         this.options.store.updateConnection(identityId, id, revision, input),
       );
       await this.clearCatalog(identityId, id);
+      // A saved configuration is a new fingerprint; refresh it once in the background.
+      if (updated.enabled) this.scheduleRefresh(identityId, updated.id);
       return updated;
     }
-    return this.persist(() => this.options.store.createConnection(identityId, input));
+    const created = await this.persist(() =>
+      this.options.store.createConnection(identityId, input),
+    );
+    if (created.enabled) this.scheduleRefresh(identityId, created.id);
+    return created;
   }
   async deleteConnection(identityId: string, id: string) {
     this.assertActive();
@@ -345,7 +495,7 @@ export class LocalAgentRuntime {
   }
   /** Probe an existing saved instance without mutating its configuration. */
   async probeConnection(identityId: string, id: string): Promise<LocalAgentStatus> {
-    const status = await this.probeOnce(JSON.stringify([identityId, id]), () =>
+    const { status } = await this.probeOnce(JSON.stringify([identityId, id]), () =>
       this.observeConnection(identityId, id),
     );
     const previous = this.executionFailures.get(JSON.stringify([identityId, id]));
@@ -356,38 +506,103 @@ export class LocalAgentRuntime {
       : status;
   }
 
-  /** One native discovery per connection at a time; concurrent callers join it. */
-  private probeOnce(key: string, work: () => Promise<LocalAgentStatus>): Promise<LocalAgentStatus> {
+  /** One native discovery per connection at a time; concurrent callers join it.
+   * Explicit verify (`full`) never settles for a cheap-only background refresh:
+   * it waits for that flight, then starts the required complete probe. */
+  private probeOnce(
+    key: string,
+    work: () => Promise<ProbeOutcome>,
+    full = true,
+  ): Promise<ProbeOutcome> {
     const existing = this.probeFlights.get(key);
-    if (existing) return existing;
-    const flight = work().finally(() => this.probeFlights.delete(key));
-    this.probeFlights.set(key, flight);
-    return flight;
+    if (existing && (existing.full || !full)) return existing.promise;
+    const run = existing ? existing.promise.then(work, work) : work();
+    const entry = { promise: run, full };
+    this.probeFlights.set(key, entry);
+    void run
+      .finally(() => {
+        if (this.probeFlights.get(key) === entry) this.probeFlights.delete(key);
+      })
+      // Callers observe the rejection; this cleanup branch must not leak it.
+      .catch(() => undefined);
+    return run;
   }
 
-  private async observeConnection(identityId: string, id: string): Promise<LocalAgentStatus> {
+  private async observeConnection(identityId: string, id: string): Promise<ProbeOutcome> {
     let probedConnection: LocalAgentConnection | undefined;
-    const status = await this.runProbe(async () => {
-      const connection = await this.persist(() => this.options.store.getConnection(identityId, id));
-      probedConnection = connection;
-      return connection;
-    });
-    if (probedConnection && status.status === 'ready' && status.models.length)
-      await this.recordCatalog(identityId, id, probedConnection, status);
-    return status;
+    let outcome: ProbeOutcome;
+    try {
+      outcome = await this.runProbe(async () => {
+        const connection = await this.persist(() =>
+          this.options.store.getConnection(identityId, id),
+        );
+        probedConnection = connection;
+        return connection;
+      });
+    } catch (error) {
+      // Explicit verify keeps its synchronous failure, but a failed attempt is
+      // still the newest discovery fact for the next snapshot read.
+      if (probedConnection && !this.stopped && this.options.isActive?.() !== false) {
+        const failure = this.failureOutcome(error);
+        if (failure)
+          await this.recordCatalog(
+            identityId,
+            id,
+            probedConnection,
+            failure.status,
+            failure.reason,
+          ).catch(() => undefined);
+      }
+      throw error;
+    }
+    if (probedConnection)
+      await this.recordCatalog(
+        identityId,
+        id,
+        probedConnection,
+        outcome.status,
+        outcome.reason,
+      ).catch(() => undefined);
+    return outcome;
+  }
+
+  /** Map a thrown probe failure to its stable snapshot state; Profile shutdown stays transient. */
+  private failureOutcome(error: unknown): ProbeOutcome | null {
+    if (error instanceof LocalAgentError) {
+      if (error.code === 'LOCAL_AGENT_PERMISSION_DENIED' || error.code === 'NOT_FOUND') return null;
+      if (error.code === 'LOCAL_AGENT_NOT_INSTALLED')
+        return {
+          status: { status: 'not_installed', message: error.message },
+          reason: 'not_installed',
+        };
+      if (error.code === 'LOCAL_AGENT_LOGIN_REQUIRED')
+        return { status: { status: 'login_required', message: error.message }, reason: 'login' };
+      if (error.code === 'LOCAL_AGENT_PROTOCOL_ERROR')
+        return {
+          status: { status: 'unavailable', message: error.message },
+          reason: 'protocol_error',
+        };
+    }
+    return {
+      status: { status: 'unavailable', message: 'The local Agent probe failed.' },
+      reason: 'spawn_failed',
+    };
   }
 
   /**
-   * Persist one verified native directory for read-only browsing. Every driver
-   * shares the same observation shape so a cold start can present models before
-   * any native process is spawned. Validation stays strict: the saved revision,
-   * driver, executable, Home and native credential identity must all still match.
+   * Persist one discovery attempt for read-only browsing. Every driver shares the
+   * same observation shape so a cold start can present a directory, or explain a
+   * known failure, before any native process is spawned. Validation stays strict:
+   * the saved revision, driver, executable, Home and native credential identity
+   * must all still match.
    */
   private async recordCatalog(
     identityId: string,
     connectionId: string,
     observed: LocalAgentConnection,
-    status: LocalAgentStatus & { status: 'ready' },
+    status: LocalAgentStatus,
+    reason?: SnapshotReason,
+    allowEqualReplace = true,
   ): Promise<void> {
     try {
       const latest = observed.id.startsWith('implicit:')
@@ -400,89 +615,327 @@ export class LocalAgentRuntime {
         (latest.homePath ?? null) !== (observed.homePath ?? null)
       )
         return;
-      const identity = await nativeIdentity(latest.driver, latest.homePath);
-      if (latest.driver === 'antigravity') {
-        // AGY probes bind models to the exact native OAuth identity. Other
-        // drivers' probe fingerprints may include the live account object, so
-        // they are validated through the credential-file digest instead.
+      let identity: string;
+      try {
+        identity = await nativeIdentity(latest.driver, latest.homePath);
+      } catch (error) {
+        // A malformed credential file is itself a discovery result. Only a ready
+        // catalog is unusable without an identity; failures may store a placeholder
+        // digest that the next read rejects once nativeIdentity can run again.
+        if (status.status === 'ready') throw error;
+        identity = createHash('sha256')
+          .update(JSON.stringify(['unverified', latest.driver, latest.homePath ?? null]))
+          .digest('hex');
+      }
+      if (latest.driver === 'antigravity' && status.status === 'ready') {
+        // AGY probes bind models to the exact native OAuth identity. Only a ready
+        // snapshot has a model visibility partition, so this strict comparison is
+        // deliberately ready-only; non-ready snapshots carry no models.
         const context = nativeModelVisibilityContext(latest, identity);
         if (status.modelVisibilityContext !== context) return;
       }
       const key = JSON.stringify([identityId, connectionId]);
+      const visibilityContext =
+        status.status === 'ready' ? status.modelVisibilityContext : undefined;
+      const previousStatus = this.nativeCatalogObservations.get(key)?.status;
       const observation: ObservedNativeCatalog = {
+        schemaVersion: 2,
         revision: latest.revision,
         driver: latest.driver,
         executablePath: latest.executablePath,
+        ...this.executableFacts(latest),
         homePath: latest.homePath ?? null,
         identity,
-        ...(status.modelVisibilityContext
-          ? { visibilityContext: status.modelVisibilityContext }
-          : {}),
+        ...(visibilityContext ? { visibilityContext } : {}),
         checkedAt: Date.now(),
+        ...(reason ? { reason } : {}),
         status,
       };
+      if (!(await this.saveCatalog(identityId, connectionId, observation, allowEqualReplace)))
+        return;
+      // The disk accepted this observation, so the memory cache may follow it.
       this.nativeCatalogObservations.set(key, observation);
       // Small, bounded in-memory cache; never persisted or shared across profiles.
       if (this.nativeCatalogObservations.size > 100)
         this.nativeCatalogObservations.delete(this.nativeCatalogObservations.keys().next().value!);
-      await this.saveCatalog(identityId, connectionId, observation);
+      if (
+        JSON.stringify(previousStatus ? this.projectStatus(previousStatus) : null) !==
+        JSON.stringify(this.projectStatus(status))
+      )
+        this.emitSnapshotChange({ key: connectionId, status: this.projectStatus(status) });
     } catch {
-      // Model discovery still succeeded. Cache invalidation is best effort.
+      // Discovery still produced a result. Cache invalidation is best effort.
     }
   }
 
-  /** Recent verified native models for read-only selection UI only.
-   * Never used by dispatchMessage() or native permissions.
-   * Cache keys are profile/connection-scoped; revision, executable, Home and the
-   * native credential identity are checked against the native store on every read. */
+  /** Executable drift signals are diagnostic metadata, never an availability verdict. */
+  private executableFacts(connection: LocalAgentConnection): {
+    resolvedExecutablePath?: string;
+    executableSignature?: string;
+  } {
+    try {
+      const resolved = resolveEffectiveExecutable(connection);
+      const signature = nativeExecutableSignature(connection);
+      return {
+        resolvedExecutablePath: resolved,
+        ...(signature ? { executableSignature: signature } : {}),
+      };
+    } catch {
+      return {};
+    }
+  }
+
+  private emitSnapshotChange(change: LocalAgentSnapshotChange): void {
+    if (this.stopped || this.options.isActive?.() === false) return;
+    try {
+      this.options.onSnapshotChange?.(change);
+    } catch {
+      // Renderer push failures must never break discovery.
+    }
+  }
+
+  /** Stale-while-revalidate native directory for read-only selection UI only.
+   * Never spawns: a missing, stale or mismatched snapshot only schedules a
+   * background refresh. Ready snapshots require every fingerprint to still match. */
   async cachedCatalogConnection(identityId: string, id: string): Promise<LocalAgentStatus | null> {
+    return (await this.readSnapshot(identityId, id)).status;
+  }
+
+  /**
+   * Read one persisted snapshot with the full fingerprint gate (design R1–R12).
+   *
+   * Time is not an invalidation condition: a stale snapshot is still served while a
+   * throttled background refresh runs. Fingerprint mismatches delete the snapshot
+   * and schedule a refresh. A disabled connection returns missing without deleting
+   * or scheduling; an unreadable file returns missing without deleting.
+   */
+  private async readSnapshot(
+    identityId: string,
+    id: string,
+  ): Promise<{ status: LocalAgentStatus | null; fresh: boolean }> {
     this.assertActive();
     const key = JSON.stringify([identityId, id]);
+    const connection = await this.loadCatalogConnection(identityId, id);
+    if (!connection) return { status: null, fresh: false };
+    // R2: a disabled instance is not an authority to delete or refresh its snapshot.
+    if (!connection.enabled) return { status: null, fresh: false };
+
     let proof = this.nativeCatalogObservations.get(key);
     if (!proof) {
       proof = (await this.readCatalog(identityId, id)) ?? undefined;
-      if (!proof) return null;
-      this.nativeCatalogObservations.set(key, proof);
+      if (proof) this.nativeCatalogObservations.set(key, proof);
     }
-    const connection = id.startsWith('implicit:')
-      ? this.implicitConnection(id.slice('implicit:'.length) as LocalAgentDriver)
-      : await this.persist(() => this.options.store.getConnection(identityId, id));
+    if (!proof) {
+      this.scheduleRefresh(identityId, id);
+      return { status: null, fresh: false };
+    }
+
+    // R3–R6: revision, driver, executable and Home must still describe this instance.
     if (
-      !connection ||
-      !connection.enabled ||
       connection.driver !== proof.driver ||
       connection.revision !== proof.revision ||
       connection.executablePath !== proof.executablePath ||
-      (connection.homePath ?? null) !== proof.homePath ||
-      Date.now() - proof.checkedAt >= CATALOG_OBSERVATION_MAX_AGE_MS ||
-      (connection.driver === 'antigravity' && !antigravityHasCachedAuth(connection.homePath))
+      (connection.homePath ?? null) !== proof.homePath
     ) {
       await this.clearCatalog(identityId, id);
-      return null;
+      this.scheduleRefresh(identityId, id);
+      return { status: null, fresh: false };
     }
+
+    // R7: credential identity is recomputed on every read; a cached digest never suffices.
+    let identity: string;
     try {
-      const identity = await nativeIdentity(connection.driver, connection.homePath);
+      identity = await nativeIdentity(connection.driver, connection.homePath);
       this.assertActive();
-      if (identity !== proof.identity) {
-        await this.clearCatalog(identityId, id);
-        return null;
-      }
+    } catch {
+      await this.clearCatalog(identityId, id);
+      this.scheduleRefresh(identityId, id);
+      return { status: null, fresh: false };
+    }
+    if (identity !== proof.identity) {
+      await this.clearCatalog(identityId, id);
+      this.scheduleRefresh(identityId, id);
+      return { status: null, fresh: false };
+    }
+
+    // R8/R9: AGY visibility context and cached auth are ready-only checks. A non-ready
+    // snapshot has no models and therefore no visibility partition to protect; the
+    // ready branch below stays a strict full comparison.
+    if (proof.status.status === 'ready' && connection.driver === 'antigravity') {
       if (
-        connection.driver === 'antigravity' &&
-        nativeModelVisibilityContext(connection, identity) !== proof.visibilityContext
+        nativeModelVisibilityContext(connection, identity) !== proof.visibilityContext ||
+        !antigravityHasCachedAuth(connection.homePath)
       ) {
         await this.clearCatalog(identityId, id);
-        return null;
+        this.scheduleRefresh(identityId, id);
+        return { status: null, fresh: false };
       }
-    } catch {
-      // Missing, rotated or malformed native credentials never reuse old models.
-      await this.clearCatalog(identityId, id);
-      return null;
     }
+
+    // R10: age only decides whether a refresh is due, never whether the value is served.
+    const fresh = Date.now() - proof.checkedAt < SNAPSHOT_SOFT_TTL_MS;
+    // Non-ready snapshots retry on read, bounded by backoff/min interval; ready ones
+    // only revalidate once the soft TTL has elapsed.
+    if (proof.status.status !== 'ready' || !fresh) this.scheduleRefresh(identityId, id);
+
     const failure = this.executionFailures.get(key);
-    return failure && failure.context === proof.visibilityContext
-      ? { ...proof.status, lastExecutionFailure: failure.failure }
-      : proof.status;
+    const status =
+      proof.status.status === 'ready' && failure && failure.context === proof.visibilityContext
+        ? { ...proof.status, lastExecutionFailure: failure.failure }
+        : proof.status;
+    return { status, fresh };
+  }
+
+  private async loadCatalogConnection(
+    identityId: string,
+    id: string,
+  ): Promise<LocalAgentConnection | null> {
+    if (id.startsWith('implicit:'))
+      return this.implicitConnection(id.slice('implicit:'.length) as LocalAgentDriver);
+    try {
+      return await this.persist(() => this.options.store.getConnection(identityId, id));
+    } catch (error) {
+      if (error instanceof LocalAgentError && error.code === 'NOT_FOUND') return null;
+      throw error;
+    }
+  }
+
+  private scheduleBackoff(key: string): void {
+    const streak = (this.failureStreak.get(key) ?? 0) + 1;
+    this.failureStreak.set(key, streak);
+    const delay = REFRESH_BACKOFF_MS[Math.min(streak - 1, REFRESH_BACKOFF_MS.length - 1)]!;
+    this.nextAttemptAt.set(key, Date.now() + delay);
+  }
+
+  private resetRefreshPolicy(key: string, delay: number): void {
+    this.failureStreak.delete(key);
+    this.nextAttemptAt.set(key, Date.now() + delay);
+  }
+
+  /** Queue one background refresh; concurrent reads and in-flight probes merge. */
+  private scheduleRefresh(identityId: string, id: string): void {
+    if (this.stopped || this.options.isActive?.() === false) return;
+    const key = JSON.stringify([identityId, id]);
+    if (this.probeFlights.has(key)) return;
+    if (this.refreshQueue.has(key)) return;
+    if (Date.now() < (this.nextAttemptAt.get(key) ?? 0)) return;
+    if (this.refreshQueue.size >= BACKGROUND_REFRESH_QUEUE_LIMIT) {
+      // Drop the oldest background attempt; its snapshot stays as-is for the next TTL.
+      const oldest = this.refreshQueue.keys().next().value;
+      if (oldest !== undefined) this.refreshQueue.delete(oldest);
+    }
+    this.refreshQueue.set(key, { identityId, connectionId: id });
+    if (!this.refreshDraining) {
+      const drain = this.drainRefreshQueue();
+      this.backgroundWork.add(drain);
+      void drain.finally(() => this.backgroundWork.delete(drain)).catch(() => undefined);
+    }
+  }
+
+  private async drainRefreshQueue(): Promise<void> {
+    if (this.refreshDraining) return;
+    this.refreshDraining = true;
+    try {
+      for (;;) {
+        if (this.stopped || this.options.isActive?.() === false) {
+          this.refreshQueue.clear();
+          return;
+        }
+        const entry = this.refreshQueue.entries().next();
+        if (entry.done) return;
+        const [key, item] = entry.value;
+        this.refreshQueue.delete(key);
+        try {
+          await this.probeOnce(
+            key,
+            () => this.refreshConnection(item.identityId, item.connectionId),
+            false,
+          );
+        } catch {
+          // Background failures are already folded into snapshots; Profile shutdown is not.
+        }
+      }
+    } finally {
+      this.refreshDraining = false;
+    }
+  }
+
+  /** Cheap layer first; only a changed/stale/unknown instance reaches a native probe. */
+  private async refreshConnection(identityId: string, id: string): Promise<ProbeOutcome> {
+    const connection = await this.loadCatalogConnection(identityId, id);
+    if (!connection) throw new LocalAgentError('NOT_FOUND');
+    if (!connection.enabled) throw new LocalAgentError('NOT_FOUND');
+    const key = JSON.stringify([identityId, id]);
+    const proof =
+      this.nativeCatalogObservations.get(key) ?? (await this.readCatalog(identityId, id)) ?? null;
+    if (proof) this.nativeCatalogObservations.set(key, proof);
+
+    const verdict = await cheapVerdict(
+      connection,
+      // `unchanged` may only preserve a ready directory; a failed/absent status
+      // always needs a complete probe to prove availability again.
+      proof && proof.status.status === 'ready'
+        ? {
+            identity: proof.identity,
+            executableSignature: proof.executableSignature,
+            checkedAt: proof.checkedAt,
+          }
+        : null,
+    );
+    this.assertActive();
+    if (verdict.kind === 'not_installed') {
+      const outcome: ProbeOutcome = {
+        status: { status: 'not_installed', message: verdict.message },
+        reason: 'not_installed',
+      };
+      await this.recordCatalog(identityId, id, connection, outcome.status, outcome.reason, false);
+      this.resetRefreshPolicy(key, CHEAP_RECONFIRM_INTERVAL_MS);
+      return outcome;
+    }
+    if (verdict.kind === 'login_required') {
+      const outcome: ProbeOutcome = {
+        status: { status: 'login_required', message: verdict.message },
+        reason: 'login',
+      };
+      await this.recordCatalog(identityId, id, connection, outcome.status, outcome.reason, false);
+      this.resetRefreshPolicy(key, CHEAP_RECONFIRM_INTERVAL_MS);
+      return outcome;
+    }
+    if (verdict.kind === 'unchanged') {
+      if (proof) await this.markValidated(identityId, id, proof);
+      this.resetRefreshPolicy(key, REFRESH_MIN_INTERVAL_MS);
+      return { status: proof!.status };
+    }
+
+    try {
+      const outcome = await this.runProbe(async () => connection);
+      await this.recordCatalog(identityId, id, connection, outcome.status, outcome.reason);
+      if (outcome.status.status === 'ready') this.resetRefreshPolicy(key, REFRESH_MIN_INTERVAL_MS);
+      else if (outcome.status.status === 'unavailable') this.scheduleBackoff(key);
+      else this.resetRefreshPolicy(key, CHEAP_RECONFIRM_INTERVAL_MS);
+      return outcome;
+    } catch (error) {
+      const failure = this.failureOutcome(error);
+      if (!failure) throw error;
+      await this.recordCatalog(identityId, id, connection, failure.status, failure.reason);
+      this.scheduleBackoff(key);
+      return failure;
+    }
+  }
+
+  /** Cheap confirmation: extend `validatedAt` only; the status and `checkedAt` stay put. */
+  private async markValidated(
+    identityId: string,
+    id: string,
+    proof: ObservedNativeCatalog,
+  ): Promise<void> {
+    const validated: ObservedNativeCatalog = {
+      ...proof,
+      schemaVersion: 2,
+      validatedAt: Date.now(),
+    };
+    if (await this.saveCatalog(identityId, id, validated))
+      this.nativeCatalogObservations.set(JSON.stringify([identityId, id]), validated);
   }
 
   private implicitConnection(kind: LocalAgentDriver): LocalAgentConnection | null {
@@ -532,17 +985,43 @@ export class LocalAgentRuntime {
   async probeDefaultDriver(identityId: string, kind: LocalAgentDriver): Promise<LocalAgentStatus> {
     const connection = this.implicitConnection(kind);
     if (!connection) throw new LocalAgentError('LOCAL_AGENT_UNAVAILABLE');
-    return this.probeOnce(JSON.stringify([identityId, connection.id]), async () => {
-      const status = await this.runProbe(async () => connection);
-      if (status.status === 'ready' && status.models.length)
-        await this.recordCatalog(identityId, connection.id, connection, status);
-      return status;
-    });
+    const { status } = await this.probeOnce(
+      JSON.stringify([identityId, connection.id]),
+      async () => {
+        let outcome: ProbeOutcome;
+        try {
+          outcome = await this.runProbe(async () => connection);
+        } catch (error) {
+          // Explicit verify still rejects, but the failed attempt is persisted first.
+          if (!this.stopped && this.options.isActive?.() !== false) {
+            const failure = this.failureOutcome(error);
+            if (failure)
+              await this.recordCatalog(
+                identityId,
+                connection.id,
+                connection,
+                failure.status,
+                failure.reason,
+              ).catch(() => undefined);
+          }
+          throw error;
+        }
+        await this.recordCatalog(
+          identityId,
+          connection.id,
+          connection,
+          outcome.status,
+          outcome.reason,
+        ).catch(() => undefined);
+        return outcome;
+      },
+    );
+    return status;
   }
 
   private async runProbe(
     loadConnection: () => Promise<LocalAgentConnection>,
-  ): Promise<LocalAgentStatus> {
+  ): Promise<ProbeOutcome> {
     this.assertActive();
     // A saturated host queues discovery instead of surfacing a user-facing
     // failure. A waiting caller still fails closed when the Profile closes.
@@ -557,9 +1036,11 @@ export class LocalAgentRuntime {
       driver = this.driver(connection);
       this.probes.add(driver);
       const activeDriver = driver;
-      const timedOut = new Promise<never>((_, reject) => {
+      let timedOut = false;
+      const timedOutPromise = new Promise<never>((_, reject) => {
         timeout = setTimeout(
           () => {
+            timedOut = true;
             try {
               activeDriver.cancel();
             } catch {
@@ -571,12 +1052,15 @@ export class LocalAgentRuntime {
         );
       });
       try {
-        const status = await Promise.race([activeDriver.probe(), timedOut]);
+        const status = await Promise.race([activeDriver.probe(), timedOutPromise]);
         this.assertActive();
-        return status;
+        return { status, reason: statusReason(status) };
       } catch (cause) {
         if (cause instanceof LocalAgentError && cause.code === 'LOCAL_AGENT_UNAVAILABLE')
-          return { status: 'unavailable', message: cause.message };
+          return {
+            status: { status: 'unavailable', message: cause.message },
+            reason: timedOut ? 'timeout' : 'spawn_failed',
+          };
         throw cause;
       }
     } finally {
@@ -589,30 +1073,32 @@ export class LocalAgentRuntime {
       }
     }
   }
-  private atNativeCapacity(): boolean {
-    return this.pendingProbes + this.pendingRuns + this.runs.size >= PROBE_CONCURRENCY;
+  private atProbeCapacity(): boolean {
+    return this.pendingProbes >= PROBE_POOL_SIZE;
+  }
+  private atRunCapacity(): boolean {
+    return this.pendingRuns + this.runs.size >= RUN_CONCURRENCY;
   }
   private async acquireProbeSlot(): Promise<void> {
-    while (this.atNativeCapacity()) {
+    while (this.atProbeCapacity()) {
       this.assertActive();
       await new Promise<void>((resolve) => this.probeWaiters.push(resolve));
       this.assertActive();
     }
     this.pendingProbes++;
   }
-  /** User turns share the native-process bound with discovery, but wait for a
-   * slot instead of surfacing a data-conflict error caused by slow probes. */
+  /** User turns have an independent budget; a saturated discovery pool never delays them. */
   private async acquireRunSlot(): Promise<void> {
-    while (this.atNativeCapacity()) {
+    while (this.atRunCapacity()) {
       this.assertActive();
-      await new Promise<void>((resolve) => this.probeWaiters.push(resolve));
+      await new Promise<void>((resolve) => this.runWaiters.push(resolve));
       this.assertActive();
     }
     this.pendingRuns++;
   }
   private releaseRunSlot() {
     if (this.pendingRuns > 0) this.pendingRuns--;
-    this.wakeProbeWaiter();
+    this.wakeRunWaiter();
   }
   private releaseProbeSlot() {
     if (this.pendingProbes > 0) this.pendingProbes--;
@@ -620,6 +1106,9 @@ export class LocalAgentRuntime {
   }
   private wakeProbeWaiter() {
     this.probeWaiters.shift()?.();
+  }
+  private wakeRunWaiter() {
+    this.runWaiters.shift()?.();
   }
   async listConversations(identityId: string) {
     this.assertActive();
@@ -664,25 +1153,23 @@ export class LocalAgentRuntime {
     return this.persist(() => this.options.store.setConversationStatus(identityId, id, status));
   }
   async createConversation(identityId: string, input: LocalAgentConversationCreate) {
-    const known = await this.cachedCatalogConnection(identityId, input.connectionId);
-    // This only checks advertised membership for storage. dispatchMessage()
-    // starts the official native session and validates the actual model before a prompt.
-    const status = known ?? (await this.probeConnection(identityId, input.connectionId));
-    if (status.status !== 'ready') {
-      const connection = await this.persist(() =>
-        this.options.store.getConnection(identityId, input.connectionId),
-      );
-      throw new LocalAgentError(
-        status.status === 'login_required'
-          ? 'LOCAL_AGENT_LOGIN_REQUIRED'
-          : status.status === 'not_installed'
-            ? 'LOCAL_AGENT_NOT_INSTALLED'
-            : 'LOCAL_AGENT_UNAVAILABLE',
-        connection.driver,
-      );
+    // Creation is always optimistic: a missing/stale snapshot is "not discovered yet",
+    // not a failure. Only a *fresh* snapshot can reject, and only for a deterministic
+    // state or a fresh ready catalog that does not advertise the requested model.
+    const { status, fresh } = await this.readSnapshot(identityId, input.connectionId);
+    if (status && fresh) {
+      if (status.status === 'login_required' || status.status === 'not_installed') {
+        const connection = await this.loadCatalogConnection(identityId, input.connectionId);
+        throw new LocalAgentError(
+          status.status === 'login_required'
+            ? 'LOCAL_AGENT_LOGIN_REQUIRED'
+            : 'LOCAL_AGENT_NOT_INSTALLED',
+          connection?.driver,
+        );
+      }
+      if (status.status === 'ready' && !status.models.some((model) => model.id === input.modelId))
+        throw new LocalAgentError('LOCAL_AGENT_MODEL_UNSUPPORTED');
     }
-    if (!status.models.some((model) => model.id === input.modelId))
-      throw new LocalAgentError('LOCAL_AGENT_MODEL_UNSUPPORTED');
     this.assertActive();
     const saved = await this.persist(() =>
       this.options.store.createConversation(identityId, input),
@@ -718,41 +1205,55 @@ export class LocalAgentRuntime {
     if (input.permissionMode && !AIChatPermissionModeSchema.safeParse(input.permissionMode).success)
       throw new LocalAgentError('LOCAL_AGENT_PERMISSION_DENIED');
     if (input.attachments?.length) throw new LocalAgentError('LOCAL_AGENT_UNSUPPORTED_INPUT');
-    // Never trust model options from the renderer. A fresh owner-scoped native
-    // probe validates that the selected model itself advertises each option.
+    // Snapshots decide admission, never spawn: a fresh deterministic failure is
+    // reported early, while missing/stale/unavailable states pass through to the
+    // native session so it can return the real reason.
     if (input.modelOptions) {
       const { connection, conversation } = await this.persist(() =>
         this.options.store.resolveConversation(input.identityId, input.conversationId),
       );
-      // Reuse the identity-bound directory when it is still valid instead of
-      // paying another native spawn; the driver validates the same option
-      // against the *live* session before the prompt is sent.
-      const verified = await this.cachedCatalogConnection(input.identityId, connection.id);
-      const status = verified ?? (await this.runProbe(async () => connection));
-      const model =
-        status.status === 'ready'
-          ? status.models.find((entry) => entry.id === (input.modelId ?? conversation.modelId))
-          : undefined;
-      if (
-        !model ||
-        (input.modelOptions.reasoningEffort &&
-          !model.reasoningEfforts?.includes(input.modelOptions.reasoningEffort)) ||
-        (input.modelOptions.serviceTier &&
-          (!model.serviceTiers?.length ||
-            (input.modelOptions.serviceTier !== 'default' &&
-              !model.serviceTiers.some((tier) => tier.id === input.modelOptions?.serviceTier))))
-      ) {
-        throw new LocalAgentError('LOCAL_AGENT_MODEL_UNSUPPORTED');
+      const { status, fresh } = await this.readSnapshot(input.identityId, connection.id);
+      if (status && fresh) {
+        if (status.status === 'login_required')
+          throw new LocalAgentError('LOCAL_AGENT_LOGIN_REQUIRED', connection.driver);
+        if (status.status === 'not_installed')
+          throw new LocalAgentError('LOCAL_AGENT_NOT_INSTALLED', connection.driver);
+        if (status.status === 'ready') {
+          const model = status.models.find(
+            (entry) => entry.id === (input.modelId ?? conversation.modelId),
+          );
+          if (
+            !model ||
+            (input.modelOptions.reasoningEffort &&
+              !model.reasoningEfforts?.includes(input.modelOptions.reasoningEffort)) ||
+            (input.modelOptions.serviceTier &&
+              (!model.serviceTiers?.length ||
+                (input.modelOptions.serviceTier !== 'default' &&
+                  !model.serviceTiers.some((tier) => tier.id === input.modelOptions?.serviceTier))))
+          ) {
+            throw new LocalAgentError('LOCAL_AGENT_MODEL_UNSUPPORTED');
+          }
+        }
       }
+    } else {
+      const { connection } = await this.persist(() =>
+        this.options.store.resolveConversation(input.identityId, input.conversationId),
+      );
+      const { status, fresh } = await this.readSnapshot(input.identityId, connection.id);
+      if (fresh && status?.status === 'login_required')
+        throw new LocalAgentError('LOCAL_AGENT_LOGIN_REQUIRED', connection.driver);
+      if (fresh && status?.status === 'not_installed')
+        throw new LocalAgentError('LOCAL_AGENT_NOT_INSTALLED', connection.driver);
     }
     const sameConversationRun = () =>
       [...this.runs.values()].some(
         (run) => run.conversationId === input.conversationId && run.identityId === input.identityId,
       );
     if (sameConversationRun()) throw new LocalAgentError('CONFLICT');
-    // A user turn must not fail merely because background discovery holds the
-    // shared native-process slots. Wait for the same bound the probe path uses,
-    // then re-check the conversation so two queued turns cannot overlap.
+    // A user turn must not fail merely because background discovery is busy:
+    // runs have their own four-slot budget, so only other user turns can queue
+    // it. Re-check the conversation after waiting so two queued turns for the
+    // same conversation can never overlap.
     await this.acquireRunSlot();
     let run!: ActiveRun;
     try {
@@ -1177,8 +1678,8 @@ export class LocalAgentRuntime {
         await run.driver?.close();
       } finally {
         this.runs.delete(run.runId);
-        // A finished turn frees capacity for a discovery that was queued.
-        this.wakeProbeWaiter();
+        // A finished turn only frees another turn; discovery has its own pool.
+        this.wakeRunWaiter();
       }
     }
   }
@@ -1312,8 +1813,12 @@ export class LocalAgentRuntime {
     this.stopped = true;
     this.executionFailures.clear();
     this.nativeCatalogObservations.clear();
-    // Waiting discovery must observe the closed Profile instead of hanging.
+    this.refreshQueue.clear();
+    this.nextAttemptAt.clear();
+    this.failureStreak.clear();
+    // Waiting discovery and turns must observe the closed Profile instead of hanging.
     for (const wake of this.probeWaiters.splice(0)) wake();
+    for (const wake of this.runWaiters.splice(0)) wake();
     this.disposing ??= (async () => {
       const runs = [...this.runs.values()];
       for (const run of runs) this.cancel(run);
@@ -1328,7 +1833,7 @@ export class LocalAgentRuntime {
       // A UI consumer may stop advancing its generator at any yield. Resource
       // disposal must not depend on it requesting another event. The stopped
       // fence rejects resumed generators before they touch the Profile database.
-      await Promise.allSettled([...this.storageWork]);
+      await Promise.allSettled([...this.storageWork, ...this.backgroundWork]);
       this.runs.clear();
     })();
     return this.disposing;

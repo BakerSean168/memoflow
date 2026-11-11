@@ -55,6 +55,21 @@ function idleAuth(): LocalAgentAuthState {
   };
 }
 
+function catalogChannel() {
+  let listener: ((change: { key: string; status: LocalAgentStatus | null }) => void) | undefined;
+  const subscribe = vi.fn((callback: typeof listener) => {
+    listener = callback;
+    return () => {
+      if (listener === callback) listener = undefined;
+    };
+  });
+  return {
+    subscribe,
+    emit: (change: { key: string; status: LocalAgentStatus | null }) => listener?.(change),
+    hasListener: () => Boolean(listener),
+  };
+}
+
 function clientStub(overrides: Partial<LocalAgentClient> = {}): LocalAgentClient {
   return {
     listConnections: vi.fn(async () => [connection('Profile A')]),
@@ -63,7 +78,8 @@ function clientStub(overrides: Partial<LocalAgentClient> = {}): LocalAgentClient
     saveConnection: vi.fn(async () => connection('Profile A')),
     deleteConnection: vi.fn(async () => undefined),
     probeConnection: vi.fn(async () => ready('model-a')),
-    cachedCatalogConnection: vi.fn(async () => null),
+    cachedCatalogConnection: vi.fn(async () => ready('model-a')),
+    subscribeCatalog: vi.fn(() => () => undefined),
     probeDefaultDriver: vi.fn(async () => ready('model-a')),
     listConversations: vi.fn(async () => []),
     createConversation: vi.fn(async () => {
@@ -79,18 +95,28 @@ function clientStub(overrides: Partial<LocalAgentClient> = {}): LocalAgentClient
   };
 }
 
+function eventClient(overrides: Partial<LocalAgentClient> = {}) {
+  const channel = catalogChannel();
+  const client = clientStub({ subscribeCatalog: channel.subscribe, ...overrides });
+  return { client, ...channel };
+}
+
 afterEach(() => localStorage.clear());
 
-describe('local assistant choices: profile and discovery isolation', () => {
-  it('awaits the selected connection discovery before refresh completes', async () => {
-    const probe = deferred<LocalAgentStatus>();
+describe('local assistant choices: snapshot reads and catalog events', () => {
+  it('reads the selected connection snapshot and finishes without a probe', async () => {
+    const snapshot = deferred<LocalAgentStatus | null>();
+    const probeConnection = vi.fn(async () => ready('model-a'));
     const choice = ref<AssistantRuntimeChoice>({
       runtimeKind: 'local_agent',
       connectionId: 'shared-connection',
       modelId: 'model-a',
     });
     const options = useLocalAssistantChoices(
-      clientStub({ probeConnection: vi.fn(() => probe.promise) }),
+      clientStub({
+        cachedCatalogConnection: vi.fn(() => snapshot.promise),
+        probeConnection,
+      }),
       choice,
     );
     let completed = false;
@@ -100,12 +126,14 @@ describe('local assistant choices: profile and discovery isolation', () => {
     await vi.waitFor(() => expect(options.loading.value).toBe(true));
     expect(completed).toBe(false);
     expect(options.canSend.value).toBe(false);
-    probe.resolve(ready('model-a'));
+    snapshot.resolve(ready('model-a'));
     await refresh;
     expect(completed).toBe(true);
     expect(options.canSend.value).toBe(true);
+    expect(probeConnection).not.toHaveBeenCalled();
   });
-  it('reuses a verified AGY account for selected Workspace Agent without repeating the ACP scan', async () => {
+
+  it('re-reads the persisted snapshot for a fresh confirmation instead of probing natively', async () => {
     const saved: LocalAgentConnection = {
       ...connection('AGY'),
       driver: 'antigravity',
@@ -116,7 +144,10 @@ describe('local assistant choices: profile and discovery isolation', () => {
       connectionId: saved.id,
       modelId: 'gemini-3.8-flash',
     });
-    const cached = vi.fn(async () => ready('gemini-3.8-flash'));
+    const cached = vi
+      .fn<LocalAgentClient['cachedCatalogConnection']>()
+      .mockResolvedValueOnce(ready('gemini-3.8-flash'))
+      .mockResolvedValueOnce(ready('refreshed-gemini-model'));
     const probe = vi.fn(async () => ready('fresh-gemini-model'));
     const client = clientStub({
       listConnections: vi.fn(async () => [saved]),
@@ -129,15 +160,15 @@ describe('local assistant choices: profile and discovery isolation', () => {
     expect(cached).toHaveBeenCalledExactlyOnceWith(saved.id);
     expect(probe).not.toHaveBeenCalled();
     expect(options.canSend.value).toBe(true);
-    expect(options.models.value.map((model) => model.id)).toEqual(['gemini-3.8-flash']);
 
-    // A finished native turn must still refresh the underlying status/limits.
+    // A finished native turn re-reads the snapshot; it still never starts ACP.
     await options.probe(saved.id, { fresh: true });
-    expect(probe).toHaveBeenCalledExactlyOnceWith(saved.id);
-    expect(options.models.value.map((model) => model.id)).toEqual(['fresh-gemini-model']);
+    expect(cached).toHaveBeenCalledTimes(2);
+    expect(probe).not.toHaveBeenCalled();
+    expect(options.models.value.map((model) => model.id)).toEqual(['refreshed-gemini-model']);
   });
 
-  it('falls back to a live AGY probe when no verified model observation exists', async () => {
+  it('presents an empty directory when no snapshot exists and never probes', async () => {
     const saved: LocalAgentConnection = {
       ...connection('AGY'),
       driver: 'antigravity',
@@ -159,7 +190,43 @@ describe('local assistant choices: profile and discovery isolation', () => {
       choice,
     );
     await options.refresh();
-    expect(probe).toHaveBeenCalledExactlyOnceWith(saved.id);
+    expect(probe).not.toHaveBeenCalled();
+    expect(options.loading.value).toBe(false);
+    expect(options.status.value).toBeNull();
+    expect(options.models.value).toEqual([]);
+    expect(options.canSend.value).toBe(false);
+  });
+
+  it('updates the selected directory in place from a catalog event without another IPC read', async () => {
+    const { client, emit } = eventClient({
+      cachedCatalogConnection: vi.fn(async () => ready('model-a')),
+    });
+    const choice = ref<AssistantRuntimeChoice>({
+      runtimeKind: 'local_agent',
+      connectionId: 'shared-connection',
+      modelId: 'model-a',
+    });
+    const options = useLocalAssistantChoices(client, choice);
+    await options.refresh();
+    const reads = vi.mocked(client.cachedCatalogConnection).mock.calls.length;
+
+    emit({ key: 'shared-connection', status: ready('model-b') });
+    await nextTick();
+    expect(vi.mocked(client.cachedCatalogConnection).mock.calls.length).toBe(reads);
+    expect(options.models.value.map((model) => model.id)).toEqual(['model-b']);
+
+    // Events for another connection never leak into the selected directory.
+    emit({ key: 'another-connection', status: ready('model-c') });
+    await nextTick();
+    expect(options.models.value.map((model) => model.id)).toEqual(['model-b']);
+
+    // A cleared snapshot becomes an explicit empty state; a later event restores it.
+    emit({ key: 'shared-connection', status: null });
+    await nextTick();
+    expect(options.status.value).toBeNull();
+    expect(options.canSend.value).toBe(false);
+    emit({ key: 'shared-connection', status: ready('model-a') });
+    await nextTick();
     expect(options.canSend.value).toBe(true);
   });
 
@@ -196,25 +263,26 @@ describe('local assistant choices: profile and discovery isolation', () => {
     await nextTick();
     expect(options.canSend.value).toBe(false);
   });
-  it('ignores an old in-flight probe when refreshing a reused connection ID', async () => {
-    const previousProbe = deferred<LocalAgentStatus>();
+
+  it('ignores an old in-flight snapshot when refreshing a reused connection ID', async () => {
+    const previousRead = deferred<LocalAgentStatus | null>();
     const nextSnapshot = deferred<LocalAgentConnection[]>();
-    const nextProbe = deferred<LocalAgentStatus>();
+    const nextRead = deferred<LocalAgentStatus | null>();
     const listConnections = vi
       .fn<LocalAgentClient['listConnections']>()
       .mockResolvedValueOnce([connection('Profile A')])
       .mockImplementationOnce(() => nextSnapshot.promise);
-    const probeConnection = vi
-      .fn<LocalAgentClient['probeConnection']>()
-      .mockImplementationOnce(() => previousProbe.promise)
-      .mockImplementationOnce(() => nextProbe.promise);
+    const cachedCatalogConnection = vi
+      .fn<LocalAgentClient['cachedCatalogConnection']>()
+      .mockImplementationOnce(() => previousRead.promise)
+      .mockImplementationOnce(() => nextRead.promise);
     const choice = ref<AssistantRuntimeChoice>({
       runtimeKind: 'local_agent',
       connectionId: 'shared-connection',
       modelId: 'model-a',
     });
     const options = useLocalAssistantChoices(
-      clientStub({ listConnections, probeConnection }),
+      clientStub({ listConnections, cachedCatalogConnection }),
       choice,
     );
     const firstRefresh = options.refresh();
@@ -223,13 +291,13 @@ describe('local assistant choices: profile and discovery isolation', () => {
     const secondRefresh = options.refresh();
     expect(options.status.value).toBeNull();
     expect(options.canSend.value).toBe(false);
-    previousProbe.resolve(ready('model-a'));
+    previousRead.resolve(ready('model-a'));
     await firstRefresh;
     expect(options.status.value).toBeNull();
 
     nextSnapshot.resolve([connection('Profile B')]);
-    await vi.waitFor(() => expect(probeConnection).toHaveBeenCalledTimes(2));
-    nextProbe.resolve(ready('model-b'));
+    await vi.waitFor(() => expect(cachedCatalogConnection).toHaveBeenCalledTimes(2));
+    nextRead.resolve(ready('model-b'));
     await secondRefresh;
     expect(options.connections.value[0]?.name).toBe('Profile B');
     expect(options.models.value.map((model) => model.id)).toEqual(['model-b']);
@@ -262,14 +330,14 @@ describe('local assistant choices: profile and discovery isolation', () => {
     expect(options.error.value).toBe(false);
   });
 
-  it('does not allow an explicit probe during a pending profile refresh', async () => {
+  it('does not allow a snapshot read during a pending profile refresh', async () => {
     const nextSnapshot = deferred<LocalAgentConnection[]>();
     const listConnections = vi
       .fn<LocalAgentClient['listConnections']>()
       .mockResolvedValueOnce([connection('Profile A')])
       .mockImplementationOnce(() => nextSnapshot.promise);
-    const probeConnection = vi
-      .fn<LocalAgentClient['probeConnection']>()
+    const cached = vi
+      .fn<LocalAgentClient['cachedCatalogConnection']>()
       .mockResolvedValueOnce(ready('model-a'))
       .mockResolvedValueOnce(ready('model-b'));
     const choice = ref<AssistantRuntimeChoice>({
@@ -278,31 +346,31 @@ describe('local assistant choices: profile and discovery isolation', () => {
       modelId: 'model-a',
     });
     const options = useLocalAssistantChoices(
-      clientStub({ listConnections, probeConnection }),
+      clientStub({ listConnections, cachedCatalogConnection: cached }),
       choice,
     );
     await options.refresh();
     await Promise.resolve();
     expect(options.canSend.value).toBe(true);
-    expect(probeConnection).toHaveBeenCalledTimes(1);
+    expect(cached).toHaveBeenCalledTimes(1);
 
     const next = options.refresh();
     await options.probe('shared-connection');
     await Promise.resolve();
     expect(options.status.value).toBeNull();
     expect(options.canSend.value).toBe(false);
-    expect(probeConnection).toHaveBeenCalledTimes(1);
+    expect(cached).toHaveBeenCalledTimes(1);
 
     nextSnapshot.resolve([connection('Profile B')]);
     await next;
     await Promise.resolve();
-    expect(probeConnection).toHaveBeenCalledTimes(2);
+    expect(cached).toHaveBeenCalledTimes(2);
     expect(options.models.value.map((model) => model.id)).toEqual(['model-b']);
     expect(options.canSend.value).toBe(false);
   });
 
-  it('fails closed on a snapshot error and keeps stale probe results non-sendable', async () => {
-    const staleProbe = deferred<LocalAgentStatus>();
+  it('fails closed on a snapshot error and keeps stale results non-sendable', async () => {
+    const staleRead = deferred<LocalAgentStatus | null>();
     const listConnections = vi
       .fn<LocalAgentClient['listConnections']>()
       .mockResolvedValueOnce([connection('Profile A')])
@@ -315,14 +383,14 @@ describe('local assistant choices: profile and discovery isolation', () => {
     const options = useLocalAssistantChoices(
       clientStub({
         listConnections,
-        probeConnection: vi.fn(() => staleProbe.promise),
+        cachedCatalogConnection: vi.fn(() => staleRead.promise),
       }),
       choice,
     );
     const firstRefresh = options.refresh();
     await vi.waitFor(() => expect(options.loading.value).toBe(true));
     await options.refresh();
-    staleProbe.resolve(ready('model-a'));
+    staleRead.resolve(ready('model-a'));
     await firstRefresh;
     expect(options.error.value).toBe(true);
     expect(options.status.value).toBeNull();
@@ -331,13 +399,21 @@ describe('local assistant choices: profile and discovery isolation', () => {
   });
 });
 
-it('uses the current probe context and preserves the selected historical model across account changes', async () => {
+it('uses the current snapshot context and preserves the selected historical model across account changes', async () => {
   const choice = ref<AssistantRuntimeChoice>({
     runtimeKind: 'local_agent',
     connectionId: 'shared-connection',
     modelId: 'model-a',
   });
-  const client = clientStub();
+  const cached = vi
+    .fn<LocalAgentClient['cachedCatalogConnection']>()
+    .mockResolvedValueOnce(ready('model-a'))
+    .mockResolvedValueOnce({
+      ...ready('model-a'),
+      modelVisibilityContext: 'mvc1:' + 'b'.repeat(64),
+    })
+    .mockResolvedValueOnce(ready('model-a'));
+  const client = clientStub({ cachedCatalogConnection: cached });
   const options = useLocalAssistantChoices(client, choice, () => 'profile');
   await options.refresh();
   await Promise.resolve();
@@ -350,10 +426,6 @@ it('uses the current probe context and preserves the selected historical model a
   );
   expect(visibility.setVisible('shared-connection', 'model-a', false)).toBe(true);
   expect(options.canSend.value).toBe(false);
-  vi.mocked(client.probeConnection).mockResolvedValueOnce({
-    ...ready('model-a'),
-    modelVisibilityContext: 'mvc1:' + 'b'.repeat(64),
-  });
   await options.probe('shared-connection');
   expect(options.canSend.value).toBe(true);
   expect(options.models.value.map((model) => model.id)).toEqual(['model-a']);
@@ -375,7 +447,7 @@ it('retains the catalog after a request limit and scopes its observation to the 
     modelId: 'model-a',
   });
   const client = clientStub({
-    probeConnection: vi.fn(async () => ({
+    cachedCatalogConnection: vi.fn(async () => ({
       ...ready('model-a'),
       lastExecutionFailure: {
         code: 'LOCAL_AGENT_QUOTA_EXHAUSTED' as const,

@@ -21,9 +21,20 @@ import {
   type LocalAgentStatus,
   type LocalAgentAuthState,
 } from '@memoflow/ai-contracts';
-import { AIChannels } from '@memoflow/desktop-contracts';
+import { AIChannels, AIStreamChannels } from '@memoflow/desktop-contracts';
 import { unwrapOrThrowError } from '@memoflow/transport-contracts/result';
 import type { IResultIpcClient } from '@memoflow/ipc-client';
+
+/** Directory change push. `key` is a connection id or `implicit:<driver>`;
+ * `status === null` means the persisted snapshot was cleared. The payload
+ * never carries identity, account, paths or credentials. */
+export const LocalAgentCatalogChangeSchema = z
+  .object({
+    key: z.string().min(1).max(200),
+    status: LocalAgentStatusSchema.nullable(),
+  })
+  .strict();
+export type LocalAgentCatalogChange = z.infer<typeof LocalAgentCatalogChangeSchema>;
 
 /** Optional Desktop capability. Web hosts do not provide a local Agent client. */
 export interface LocalAgentClient {
@@ -40,6 +51,8 @@ export interface LocalAgentClient {
   probeConnection(id: string): Promise<LocalAgentStatus>;
   /** Reuse recent, account-bound verified catalog data without starting ACP again. */
   cachedCatalogConnection(id: string): Promise<LocalAgentStatus | null>;
+  /** Observe content-only snapshot changes. Returns an idempotent unsubscribe. */
+  subscribeCatalog(listener: (change: LocalAgentCatalogChange) => void): () => void;
   /** Read-only, unsaved default driver check; available only on Desktop. */
   probeDefaultDriver(driver: LocalAgentDriver): Promise<LocalAgentStatus>;
   listConversations(): Promise<LocalAgentConversation[]>;
@@ -91,6 +104,21 @@ export function createLocalAgentIpcClient(ipc: IResultIpcClient): LocalAgentClie
     probeConnection: (id) => invoke({ action: 'probe_connection', id }, LocalAgentStatusSchema),
     cachedCatalogConnection: (id) =>
       invoke({ action: 'catalog_cached_connection', id }, LocalAgentStatusSchema.nullable()),
+    subscribeCatalog(listener) {
+      const bridge = ipc.getBridge?.();
+      if (!bridge) return () => undefined;
+      const onCatalogChange = (payload: unknown) => {
+        const parsed = LocalAgentCatalogChangeSchema.safeParse(payload);
+        if (parsed.success) listener(parsed.data);
+      };
+      bridge.on(AIStreamChannels.LOCAL_AGENT_CATALOG, onCatalogChange);
+      let subscribed = true;
+      return () => {
+        if (!subscribed) return;
+        subscribed = false;
+        bridge.off(AIStreamChannels.LOCAL_AGENT_CATALOG, onCatalogChange);
+      };
+    },
     probeDefaultDriver: (driver) =>
       invoke({ action: 'probe_default', driver }, LocalAgentStatusSchema),
     listConversations: () =>

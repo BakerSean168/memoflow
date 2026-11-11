@@ -3224,6 +3224,14 @@
       "measurementCollectors": []
     },
     {
+      "path": "packages/ai-client/src/local-agent.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/ai-client/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "packages/ai-client/src/runtime-assistant.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -4596,6 +4604,16 @@
       ]
     },
     {
+      "path": "packages/ai/src/server/local-agent/local-agent-snapshot.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/ai/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "packages/ai/vitest.config.ts"
+      ]
+    },
+    {
       "path": "packages/ai/src/server/local-agent/local-tool-bridge.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -4647,6 +4665,16 @@
     },
     {
       "path": "packages/ai/src/server/local-agent/pi-driver.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/ai/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "packages/ai/vitest.config.ts"
+      ]
+    },
+    {
+      "path": "packages/ai/src/server/local-agent/snapshot-cheap-check.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/ai/vitest.config.ts"
@@ -13084,7 +13112,7 @@
       "type": "measurement",
       "suite": "coverage",
       "runner": "vitest",
-      "fileCount": 128
+      "fileCount": 130
     },
     {
       "id": "packages/app-vue/vitest.store-coverage.config.ts",
@@ -13613,7 +13641,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 7
+      "fileCount": 8
     },
     {
       "id": "packages/ai-contracts/vitest.config.ts",
@@ -13634,7 +13662,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 128
+      "fileCount": 130
     },
     {
       "id": "packages/app-vue/vitest.config.ts",
@@ -14228,12 +14256,14 @@
       "packages/ai/src/server/local-agent/codex-driver.spec.ts",
       "packages/ai/src/server/local-agent/dsh-driver.spec.ts",
       "packages/ai/src/server/local-agent/local-agent-runtime.spec.ts",
+      "packages/ai/src/server/local-agent/local-agent-snapshot.spec.ts",
       "packages/ai/src/server/local-agent/local-tool-bridge.spec.ts",
       "packages/ai/src/server/local-agent/native-executable.spec.ts",
       "packages/ai/src/server/local-agent/native-failure.spec.ts",
       "packages/ai/src/server/local-agent/native-identity.spec.ts",
       "packages/ai/src/server/local-agent/native-rpc-transport-acp.spec.ts",
       "packages/ai/src/server/local-agent/pi-driver.spec.ts",
+      "packages/ai/src/server/local-agent/snapshot-cheap-check.spec.ts",
       "packages/ai/src/server/mastra/agents/goal-planner.worker.spec.ts",
       "packages/ai/src/server/mastra/agents/planner-observability.spec.ts",
       "packages/ai/src/server/mastra/agents/user-time-context.spec.ts",
@@ -14696,7 +14726,7 @@
   "duplicate": [],
   "unexpected": [],
   "counts": {
-    "unit": 1214,
+    "unit": 1217,
     "integration": 58,
     "smoke": 3,
     "boundary-ipc": 6,

@@ -35,6 +35,20 @@ function deferred<T>() {
   });
   return { promise, resolve };
 }
+function catalogChannel() {
+  let listener: ((change: { key: string; status: LocalAgentStatus | null }) => void) | undefined;
+  const subscribeCatalog = vi.fn((callback: typeof listener) => {
+    listener = callback;
+    return () => {
+      if (listener === callback) listener = undefined;
+    };
+  });
+  return {
+    subscribeCatalog,
+    emit: (change: { key: string; status: LocalAgentStatus | null }) => listener?.(change),
+    hasListener: () => Boolean(listener),
+  };
+}
 function setup() {
   const identity = ref('profile-a');
   const snapshot: AgentRegistrySnapshot = {
@@ -47,10 +61,14 @@ function setup() {
     bindings: [{ instanceId: 'mastra', connectionId: 'provider', modelId: 'alpha' }],
   };
   const registry = { list: vi.fn(async () => snapshot) };
+  const channel = catalogChannel();
   const native = {
-    probeDefaultDriver: vi.fn(async () => ready('default-model')),
-    probeConnection: vi.fn(async () => ready('work-model')),
-    cachedCatalogConnection: vi.fn(async (): Promise<LocalAgentStatus | null> => null),
+    cachedCatalogConnection: vi.fn(async (id: string): Promise<LocalAgentStatus | null> => {
+      if (id === 'implicit:codex') return ready('default-model');
+      if (id === 'conn-work') return ready('work-model');
+      return null;
+    }),
+    subscribeCatalog: channel.subscribeCatalog,
   };
   const refreshProviderModels = vi.fn(async () => ({
     models: [
@@ -72,13 +90,14 @@ function setup() {
     snapshot,
     registry,
     native,
+    channel,
     refreshProviderModels,
     catalog,
     scope,
   };
 }
 describe('identity-scoped read-only model catalog', () => {
-  it('aggregates every enabled instance from real discovery without selecting or materializing connections', async () => {
+  it('aggregates every enabled instance from persisted snapshots without probing', async () => {
     const { catalog, native, refreshProviderModels, scope } = setup();
     await catalog.refresh();
     expect(Object.keys(catalog.entries.value)).toEqual(['mastra', 'codex', 'work']);
@@ -92,19 +111,20 @@ describe('identity-scoped read-only model catalog', () => {
     expect(isModelSelectable(catalog.entries.value, 'off', 'work-model')).toBe(false);
     expect(isModelSelectable(catalog.entries.value, '', 'work-model')).toBe(false);
     expect(isModelSelectable(catalog.entries.value, 'unknown', 'work-model')).toBe(false);
-    expect(native.probeDefaultDriver).toHaveBeenCalledExactlyOnceWith('codex');
-    expect(native.probeConnection).toHaveBeenCalledExactlyOnceWith('conn-work');
+    expect(native.cachedCatalogConnection).toHaveBeenCalledWith('implicit:codex');
+    expect(native.cachedCatalogConnection).toHaveBeenCalledWith('conn-work');
     expect(refreshProviderModels).toHaveBeenCalledExactlyOnceWith('provider');
     scope.stop();
   });
   it('publishes per-instance loading, empty, unavailable and error independently', async () => {
     const { catalog, native, scope } = setup();
-    const pending = deferred<LocalAgentStatus>();
-    native.probeDefaultDriver.mockImplementationOnce(() => pending.promise);
-    native.probeConnection.mockRejectedValueOnce(new Error('offline'));
+    const pending = deferred<LocalAgentStatus | null>();
+    native.cachedCatalogConnection.mockImplementationOnce(() => pending.promise);
+    native.cachedCatalogConnection.mockRejectedValueOnce(new Error('offline'));
     const refresh = catalog.refresh();
     await vi.waitFor(() => expect(catalog.entries.value.codex?.status).toBe('loading'));
     await vi.waitFor(() => expect(catalog.entries.value.work?.status).toBe('error'));
+    expect(catalog.entries.value.codex?.reason).toBe('discovering');
     expect(isModelSelectable(catalog.entries.value, 'codex', 'cached')).toBe(false);
     pending.resolve({ status: 'login_required', message: 'Sign in' });
     await refresh;
@@ -113,7 +133,7 @@ describe('identity-scoped read-only model catalog', () => {
       reason: 'login_required',
       models: [],
     });
-    native.probeDefaultDriver.mockResolvedValueOnce({
+    native.cachedCatalogConnection.mockResolvedValueOnce({
       status: 'ready',
       models: [],
     });
@@ -124,12 +144,32 @@ describe('identity-scoped read-only model catalog', () => {
     });
     scope.stop();
   });
-  it('ignores old epochs even when an older probe finishes last', async () => {
+  it('keeps a missing snapshot loading instead of starting a native probe', async () => {
     const { catalog, native, scope } = setup();
-    const old = deferred<LocalAgentStatus>();
-    native.probeDefaultDriver.mockImplementationOnce(() => old.promise);
+    native.cachedCatalogConnection.mockResolvedValue(null);
+    await catalog.refresh();
+    expect(catalog.entries.value.codex).toMatchObject({
+      status: 'loading',
+      reason: 'discovering',
+      models: [],
+    });
+    expect(catalog.entries.value.work).toMatchObject({
+      status: 'loading',
+      reason: 'discovering',
+      models: [],
+    });
+    expect(listSelectableModels(catalog.entries.value).map((model) => model.modelId)).toEqual([
+      'alpha',
+      'beta',
+    ]);
+    scope.stop();
+  });
+  it('ignores old epochs even when an older snapshot read finishes last', async () => {
+    const { catalog, native, scope } = setup();
+    const old = deferred<LocalAgentStatus | null>();
+    native.cachedCatalogConnection.mockImplementationOnce(() => old.promise);
     const first = catalog.refresh();
-    await vi.waitFor(() => expect(native.probeDefaultDriver).toHaveBeenCalledTimes(1));
+    await vi.waitFor(() => expect(native.cachedCatalogConnection).toHaveBeenCalledTimes(2));
     await catalog.refresh();
     old.resolve(ready('stale-model'));
     await first;
@@ -138,10 +178,10 @@ describe('identity-scoped read-only model catalog', () => {
   });
   it('immediately isolates identity switches and rejects late results with reused instance ids', async () => {
     const { catalog, native, identity, scope } = setup();
-    const old = deferred<LocalAgentStatus>();
-    native.probeDefaultDriver.mockImplementationOnce(() => old.promise);
+    const old = deferred<LocalAgentStatus | null>();
+    native.cachedCatalogConnection.mockImplementationOnce(() => old.promise);
     const first = catalog.refresh();
-    await vi.waitFor(() => expect(native.probeDefaultDriver).toHaveBeenCalledTimes(1));
+    await vi.waitFor(() => expect(native.cachedCatalogConnection).toHaveBeenCalledTimes(2));
     identity.value = 'profile-b';
     expect(catalog.entries.value).toEqual({});
     await catalog.refresh();
@@ -150,19 +190,18 @@ describe('identity-scoped read-only model catalog', () => {
     expect(catalog.entries.value.codex?.models.map((m) => m.modelId)).toEqual(['default-model']);
     scope.stop();
   });
-  it('reuses profile-owned verified AGY models for Workspace without launching another ACP', async () => {
+  it('reuses profile-owned verified AGY models for Workspace without another ACP', async () => {
     const { snapshot, catalog, native, scope } = setup();
     snapshot.instances.push(instance('antigravity', 'antigravity', true, 'conn-agy'));
     native.cachedCatalogConnection.mockImplementation(async (id: string) =>
-      id === 'conn-agy' ? ready('gemini-3.8-flash') : null,
+      id === 'conn-agy'
+        ? ready('gemini-3.8-flash')
+        : id === 'implicit:codex'
+          ? ready('default-model')
+          : null,
     );
-    const probeCount = native.probeConnection.mock.calls.length;
     await catalog.refresh();
     expect(native.cachedCatalogConnection).toHaveBeenCalledWith('conn-agy');
-    expect(native.probeConnection.mock.calls.length).toBe(probeCount + 1);
-    // The normal saved Codex connection is still freshly probed.
-    expect(native.probeConnection).toHaveBeenCalledWith('conn-work');
-    expect(native.probeConnection).not.toHaveBeenCalledWith('conn-agy');
     expect(catalog.entries.value.antigravity).toMatchObject({
       status: 'ready',
       models: [
@@ -177,45 +216,32 @@ describe('identity-scoped read-only model catalog', () => {
     scope.stop();
   });
 
-  it('presents a saved Codex directory from the profile cache without spawning the CLI', async () => {
+  it('presents a saved Codex directory from the profile snapshot without spawning the CLI', async () => {
     const { catalog, native, scope } = setup();
-    native.cachedCatalogConnection.mockImplementation(async (id: string) =>
-      id === 'conn-work' ? ready('cached-codex-model') : null,
-    );
     await catalog.refresh();
     expect(native.cachedCatalogConnection).toHaveBeenCalledWith('conn-work');
-    expect(native.probeConnection).not.toHaveBeenCalledWith('conn-work');
     expect(catalog.entries.value.work).toMatchObject({
       status: 'ready',
-      models: [{ modelId: 'cached-codex-model' }],
+      models: [{ modelId: 'work-model' }],
     });
-    expect(isModelSelectable(catalog.entries.value, 'work', 'cached-codex-model')).toBe(true);
+    expect(isModelSelectable(catalog.entries.value, 'work', 'work-model')).toBe(true);
     scope.stop();
   });
 
-  it('presents the implicit default driver directory from the profile cache', async () => {
+  it('presents the implicit default driver directory from the profile snapshot', async () => {
     const { catalog, native, scope } = setup();
-    native.cachedCatalogConnection.mockImplementation(async (id: string) =>
-      id === 'implicit:codex' ? ready('cached-default-model') : null,
-    );
     await catalog.refresh();
-    expect(native.probeDefaultDriver).not.toHaveBeenCalled();
-    expect(catalog.entries.value.codex?.models.map((m) => m.modelId)).toEqual([
-      'cached-default-model',
-    ]);
+    expect(native.cachedCatalogConnection).toHaveBeenCalledWith('implicit:codex');
+    expect(catalog.entries.value.codex?.models.map((m) => m.modelId)).toEqual(['default-model']);
     scope.stop();
   });
 
   it('opening the picker re-reads presented entries and only fills missing ones', async () => {
     const { catalog, native, refreshProviderModels, scope } = setup();
     await catalog.refresh();
-    native.probeConnection.mockClear();
-    native.probeDefaultDriver.mockClear();
     native.cachedCatalogConnection.mockClear();
     refreshProviderModels.mockClear();
     await catalog.ensureLoaded();
-    expect(native.probeConnection).not.toHaveBeenCalled();
-    expect(native.probeDefaultDriver).not.toHaveBeenCalled();
     expect(native.cachedCatalogConnection).not.toHaveBeenCalled();
     expect(refreshProviderModels).not.toHaveBeenCalled();
     expect(isModelSelectable(catalog.entries.value, 'work', 'work-model')).toBe(true);
@@ -259,10 +285,10 @@ describe('identity-scoped read-only model catalog', () => {
     scope.stop();
   });
 
-  it('keeps the last presented directory when revalidation fails', async () => {
+  it('keeps the last presented directory when a snapshot read fails', async () => {
     const { catalog, native, scope } = setup();
     await catalog.refresh();
-    native.probeConnection.mockRejectedValueOnce(new Error('native discovery failed'));
+    native.cachedCatalogConnection.mockRejectedValueOnce(new Error('native discovery failed'));
     await catalog.refresh();
     expect(catalog.entries.value.work).toMatchObject({
       status: 'ready',
@@ -272,26 +298,28 @@ describe('identity-scoped read-only model catalog', () => {
     scope.stop();
   });
 
-  it('falls back to a fresh official ACP probe when its scoped model observation is absent', async () => {
+  it('treats a missing AGY snapshot as undiscovered without probing', async () => {
     const { snapshot, catalog, native, scope } = setup();
     snapshot.instances.push(instance('antigravity', 'antigravity', true, 'conn-agy'));
-    native.probeConnection.mockImplementation(async (id) =>
-      id === 'conn-agy' ? ready('fresh-agy-model') : ready('work-model'),
-    );
     await catalog.refresh();
     expect(native.cachedCatalogConnection).toHaveBeenCalledWith('conn-agy');
-    expect(native.probeConnection).toHaveBeenCalledWith('conn-agy');
-    expect(catalog.entries.value.antigravity?.models[0]?.modelId).toBe('fresh-agy-model');
+    expect(catalog.entries.value.antigravity).toMatchObject({
+      status: 'loading',
+      reason: 'discovering',
+      models: [],
+    });
     scope.stop();
   });
 
-  it('ignores cached AGY models returned after a Profile switch or superseded refresh', async () => {
+  it('ignores cached results returned after a Profile switch or superseded refresh', async () => {
     const { snapshot, catalog, native, identity, scope } = setup();
     snapshot.instances.push(instance('antigravity', 'antigravity', true, 'conn-agy'));
     const old = deferred<LocalAgentStatus | null>();
     let agy: Promise<LocalAgentStatus | null> = old.promise;
     native.cachedCatalogConnection.mockImplementation((id: string) =>
-      id === 'conn-agy' ? agy : Promise.resolve(null),
+      id === 'conn-agy'
+        ? agy
+        : Promise.resolve(id === 'implicit:codex' ? ready('default-model') : null),
     );
     const first = catalog.refresh();
     await vi.waitFor(() => expect(native.cachedCatalogConnection).toHaveBeenCalledWith('conn-agy'));
@@ -304,7 +332,6 @@ describe('identity-scoped read-only model catalog', () => {
     expect(catalog.entries.value.antigravity?.models.map((m) => m.modelId)).toEqual([
       'new-owner-model',
     ]);
-    expect(native.probeConnection).not.toHaveBeenCalledWith('conn-agy');
     scope.stop();
   });
 
@@ -318,5 +345,47 @@ describe('identity-scoped read-only model catalog', () => {
     await catalog.refresh();
     expect(isModelSelectable(catalog.entries.value, 'work', 'work-model')).toBe(true);
     scope.stop();
+  });
+
+  it('applies catalog events in place without another snapshot read', async () => {
+    const { catalog, native, channel, scope } = setup();
+    await catalog.refresh();
+    const reads = native.cachedCatalogConnection.mock.calls.length;
+
+    channel.emit({ key: 'implicit:codex', status: ready('event-model') });
+    expect(catalog.entries.value.codex?.models.map((model) => model.modelId)).toEqual([
+      'event-model',
+    ]);
+    expect(native.cachedCatalogConnection.mock.calls.length).toBe(reads);
+
+    channel.emit({
+      key: 'conn-work',
+      status: { status: 'login_required', message: 'Sign in' },
+    });
+    expect(catalog.entries.value.work).toMatchObject({
+      status: 'unavailable',
+      reason: 'login_required',
+      models: [],
+    });
+
+    channel.emit({ key: 'conn-work', status: null });
+    expect(catalog.entries.value.work).toMatchObject({
+      status: 'loading',
+      reason: 'discovering',
+      models: [],
+    });
+    expect(native.cachedCatalogConnection.mock.calls.length).toBe(reads);
+    scope.stop();
+  });
+
+  it('ignores events for unknown connections and unsubscribes on scope disposal', async () => {
+    const { catalog, channel, scope } = setup();
+    await catalog.refresh();
+    const before = catalog.entries.value.codex;
+    channel.emit({ key: 'unknown-connection', status: ready('unknown-model') });
+    expect(catalog.entries.value.codex).toBe(before);
+    expect(channel.hasListener()).toBe(true);
+    scope.stop();
+    expect(channel.hasListener()).toBe(false);
   });
 });
