@@ -519,9 +519,12 @@ export class LocalAgentRuntime {
     const run = existing ? existing.promise.then(work, work) : work();
     const entry = { promise: run, full };
     this.probeFlights.set(key, entry);
-    void run.finally(() => {
-      if (this.probeFlights.get(key) === entry) this.probeFlights.delete(key);
-    });
+    void run
+      .finally(() => {
+        if (this.probeFlights.get(key) === entry) this.probeFlights.delete(key);
+      })
+      // Callers observe the rejection; this cleanup branch must not leak it.
+      .catch(() => undefined);
     return run;
   }
 
@@ -825,7 +828,9 @@ export class LocalAgentRuntime {
     if (!this.refreshDraining) {
       const drain = this.drainRefreshQueue();
       this.backgroundWork.add(drain);
-      void drain.finally(() => this.backgroundWork.delete(drain));
+      void drain
+        .finally(() => this.backgroundWork.delete(drain))
+        .catch(() => undefined);
     }
   }
 
@@ -1033,9 +1038,11 @@ export class LocalAgentRuntime {
       driver = this.driver(connection);
       this.probes.add(driver);
       const activeDriver = driver;
-      const timedOut = new Promise<never>((_, reject) => {
+      let timedOut = false;
+      const timedOutPromise = new Promise<never>((_, reject) => {
         timeout = setTimeout(
           () => {
+            timedOut = true;
             try {
               activeDriver.cancel();
             } catch {
@@ -1047,12 +1054,15 @@ export class LocalAgentRuntime {
         );
       });
       try {
-        const status = await Promise.race([activeDriver.probe(), timedOut]);
+        const status = await Promise.race([activeDriver.probe(), timedOutPromise]);
         this.assertActive();
         return { status, reason: statusReason(status) };
       } catch (cause) {
         if (cause instanceof LocalAgentError && cause.code === 'LOCAL_AGENT_UNAVAILABLE')
-          return { status: { status: 'unavailable', message: cause.message }, reason: 'timeout' };
+          return {
+            status: { status: 'unavailable', message: cause.message },
+            reason: timedOut ? 'timeout' : 'spawn_failed',
+          };
         throw cause;
       }
     } finally {
