@@ -13,10 +13,16 @@ function expectProgress(progress: DOMWrapper<Element>, percent: number) {
   expect(progress.attributes('data-progress')).toBe(String(percent));
   const style = progress.attributes('style') ?? '';
   expect(style).toContain(`clip-path: inset(0 ${100 - percent}% 0 0)`);
+  expect(style).not.toContain('box-shadow');
+  const trackStyle =
+    progress.element.closest('[data-testid="task-quick-progress-track"]')?.getAttribute('style') ??
+    '';
   if (percent >= 100) {
-    expect(style).toContain('box-shadow: 0 0 10px hsl(var(--progress-fill-end) / 0.45)');
+    expect(trackStyle).toContain(
+      'filter: drop-shadow(0 0 6px hsl(var(--progress-fill-end) / 0.55))',
+    );
   } else {
-    expect(style).not.toContain('box-shadow');
+    expect(trackStyle).not.toContain('filter');
   }
 }
 

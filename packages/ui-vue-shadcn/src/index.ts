@@ -96,7 +96,7 @@ export {
 // 3. Utility Functions
 // ==========================================
 export * from './lib/utils';
-export { progressFillStyle } from './lib/progress-fill';
+export { progressFillStyle, progressGlowStyle } from './lib/progress-fill';
 
 // ==========================================
 // Official shadcn-vue components
