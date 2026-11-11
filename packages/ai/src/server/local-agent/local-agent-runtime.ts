@@ -1250,9 +1250,10 @@ export class LocalAgentRuntime {
         (run) => run.conversationId === input.conversationId && run.identityId === input.identityId,
       );
     if (sameConversationRun()) throw new LocalAgentError('CONFLICT');
-    // A user turn must not fail merely because background discovery holds the
-    // shared native-process slots. Wait for the same bound the probe path uses,
-    // then re-check the conversation so two queued turns cannot overlap.
+    // A user turn must not fail merely because background discovery is busy:
+    // runs have their own four-slot budget, so only other user turns can queue
+    // it. Re-check the conversation after waiting so two queued turns for the
+    // same conversation can never overlap.
     await this.acquireRunSlot();
     let run!: ActiveRun;
     try {
