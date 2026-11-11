@@ -86,7 +86,7 @@ describe('UserPreferenceService canonical seam', () => {
     const { service } = createHarness();
     await service.patchPreferenceNamespace('u1', 'presentation', { theme: 'dark' });
     await expect(service.getPreferenceProfile('u1')).resolves.toEqual({
-      presentation: { theme: 'dark', language: 'zh-CN' },
+      presentation: { theme: 'dark', language: 'zh-CN', accent: 'brand-gold' },
       regional: {
         timeZone: 'UTC',
         dateStyle: 'medium',
