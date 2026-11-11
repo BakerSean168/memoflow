@@ -152,29 +152,79 @@ type ConversationInput = { identityId: string; conversationId: string };
 const CATALOG_OBSERVATION_MAX_AGE_MS = 24 * 60 * 60_000;
 /** Bounded native discovery concurrency; callers wait for a slot instead of failing. */
 const PROBE_CONCURRENCY = 4;
+/** Stable snapshot failure categories; never provider stderr or raw diagnostics. */
+type SnapshotReason =
+  | 'timeout'
+  | 'spawn_failed'
+  | 'protocol_error'
+  | 'no_models'
+  | 'login'
+  | 'not_installed'
+  | 'unknown';
 export const MEMOFLOW_NATIVE_TOOL_ROUTING_INSTRUCTIONS =
   'MemoFlow business tool policy: use only the MemoFlow MCP tools for MemoFlow Goals, Tasks, and Knowledge. Never use shell, filesystem, browser, or Chrome DevTools tools to inspect or operate MemoFlow. Creating a Goal always uses the right-side native form, even when the user does not mention the form: call goal_panel_open first, then use goal_panel_snapshot/patch/add_key_result/remove_key_result/focus and finish with goal_panel_submit; do not use goal_create for that flow. Use goal_create or goal_update only when the user explicitly requests a direct background Goal write without the form; if goal_create returns GOAL_PANEL_REQUIRED, continue with goal_panel_open. Say a Goal was created only after goal_panel_submit or goal_create returned its Goal id, and cite that id; never describe a Goal from shell or filesystem output. If a required MemoFlow tool is missing or access is denied, report the specific failure and stop without retrying or switching paths.';
+/** One persisted discovery observation. v1 files only contained `ready`; v2 also
+ * stores explicit failures so a cold start can explain why a native Agent is not
+ * usable without spawning it. `account` and `lastExecutionFailure` never persist. */
 interface ObservedNativeCatalog {
+  schemaVersion: 1 | 2;
   revision: number;
   driver: LocalAgentDriver;
   executablePath: string;
+  /** PATH/shim resolution result (diagnostic drift signal), when known. */
+  resolvedExecutablePath?: string;
+  /** Cheap `size:mtime` fingerprint of the resolved executable, when known. */
+  executableSignature?: string;
   homePath: string | null;
   /** `nativeIdentity()` digest captured with the observation; recomputed on every read. */
   identity: string;
   visibilityContext?: string;
+  /** Last complete probe attempt, including failed attempts. */
   checkedAt: number;
-  status: LocalAgentStatus & { status: 'ready' };
+  /** Last zero-process cheap confirmation (never decides freshness). */
+  validatedAt?: number;
+  reason?: SnapshotReason;
+  status: LocalAgentStatus;
 }
+const snapshotReasonSchema = z.enum([
+  'timeout',
+  'spawn_failed',
+  'protocol_error',
+  'no_models',
+  'login',
+  'not_installed',
+  'unknown',
+]);
 const observedCatalogSchema = z.object({
+  schemaVersion: z.union([z.literal(1), z.literal(2)]).optional(),
   revision: z.number().int().nonnegative(),
   driver: z.enum(['codex', 'claude', 'pi', 'dsh', 'antigravity']),
   executablePath: z.string().min(1),
+  resolvedExecutablePath: z.string().min(1).optional(),
+  executableSignature: z.string().min(1).optional(),
   homePath: z.string().nullable(),
   identity: z.string().min(1),
   visibilityContext: z.string().min(1).optional(),
   checkedAt: z.number().finite(),
-  status: LocalAgentStatusSchema.refine((status) => status.status === 'ready'),
+  validatedAt: z.number().finite().optional(),
+  reason: snapshotReasonSchema.optional(),
+  status: LocalAgentStatusSchema,
 });
+
+/** The write-time view of one probe attempt; the reason is only persisted for failures. */
+interface ProbeOutcome {
+  status: LocalAgentStatus;
+  reason?: SnapshotReason;
+}
+
+/** Stable reason for a probe result that did not observe a model catalog. */
+function statusReason(status: LocalAgentStatus): SnapshotReason | undefined {
+  if (status.status === 'ready') return undefined;
+  if (status.status === 'login_required') return 'login';
+  if (status.status === 'not_installed') return 'not_installed';
+  // A driver that reports unavailable without throwing observed no usable models.
+  return 'no_models';
+}
 
 /** One Desktop Profile's native resources; no inference, retry or checkpoint authority. */
 export class LocalAgentRuntime {
@@ -186,7 +236,7 @@ export class LocalAgentRuntime {
   >();
   private readonly nativeCatalogObservations = new Map<string, ObservedNativeCatalog>();
   private readonly probes = new Set<Driver>();
-  private readonly probeFlights = new Map<string, Promise<LocalAgentStatus>>();
+  private readonly probeFlights = new Map<string, Promise<ProbeOutcome>>();
   private readonly probeWaiters: Array<() => void> = [];
   private pendingProbes = 0;
   private pendingRuns = 0;
@@ -222,9 +272,41 @@ export class LocalAgentRuntime {
       const parsed = observedCatalogSchema.safeParse(
         JSON.parse(await readFile(this.catalogFile(identityId, connectionId), 'utf8')),
       );
-      return parsed.success && parsed.data.status.status === 'ready'
-        ? (parsed.data as ObservedNativeCatalog)
-        : null;
+      if (!parsed.success) return null;
+      const schemaVersion = parsed.data.schemaVersion ?? 1;
+      // v1 only ever contained a verified ready status; anything else is not a v1 file.
+      if (schemaVersion === 1 && parsed.data.status.status !== 'ready') return null;
+      return {
+        ...parsed.data,
+        schemaVersion,
+        // v1 had one timestamp; the observation was also the validation moment.
+        validatedAt: parsed.data.validatedAt ?? parsed.data.checkedAt,
+      };
+    } catch {
+      return null;
+    }
+  }
+
+  /** Strip execution-time and account metadata before anything touches the Profile disk. */
+  private projectStatus(status: LocalAgentStatus): LocalAgentStatus {
+    if (status.status !== 'ready') return { status: status.status, message: status.message };
+    return {
+      status: 'ready',
+      models: status.models,
+      ...(status.version ? { version: status.version } : {}),
+      ...(status.modelVisibilityContext
+        ? { modelVisibilityContext: status.modelVisibilityContext }
+        : {}),
+    };
+  }
+
+  /** Read the raw `checkedAt` of an existing file without validating the whole envelope. */
+  private async catalogCheckedAt(identityId: string, connectionId: string): Promise<number | null> {
+    try {
+      const parsed = z
+        .object({ checkedAt: z.number().finite() })
+        .safeParse(JSON.parse(await readFile(this.catalogFile(identityId, connectionId), 'utf8')));
+      return parsed.success ? parsed.data.checkedAt : null;
     } catch {
       return null;
     }
@@ -234,10 +316,14 @@ export class LocalAgentRuntime {
     identityId: string,
     connectionId: string,
     observation: ObservedNativeCatalog,
-  ): Promise<void> {
+  ): Promise<boolean> {
     const filename = this.catalogFile(identityId, connectionId);
     const temporary = filename + '.' + randomUUID() + '.tmp';
     try {
+      // Cheap confirmations and full probes can cross-write; never let the older
+      // `checkedAt` win. Equal timestamps may replace an observation in place.
+      const current = await this.catalogCheckedAt(identityId, connectionId);
+      if (current !== null && current > observation.checkedAt) return false;
       await mkdir(join(this.options.cwd, 'model-catalog'), {
         recursive: true,
         mode: 0o700,
@@ -246,27 +332,32 @@ export class LocalAgentRuntime {
       await writeFile(
         temporary,
         JSON.stringify({
+          schemaVersion: 2,
           revision: observation.revision,
           driver: observation.driver,
           executablePath: observation.executablePath,
+          ...(observation.resolvedExecutablePath
+            ? { resolvedExecutablePath: observation.resolvedExecutablePath }
+            : {}),
+          ...(observation.executableSignature
+            ? { executableSignature: observation.executableSignature }
+            : {}),
           homePath: observation.homePath,
           identity: observation.identity,
           ...(observation.visibilityContext
             ? { visibilityContext: observation.visibilityContext }
             : {}),
           checkedAt: observation.checkedAt,
-          status: {
-            status: 'ready',
-            models: observation.status.models,
-            ...(observation.visibilityContext
-              ? { modelVisibilityContext: observation.visibilityContext }
-              : {}),
-            ...(observation.status.version ? { version: observation.status.version } : {}),
-          },
+          ...(observation.validatedAt !== undefined
+            ? { validatedAt: observation.validatedAt }
+            : {}),
+          ...(observation.reason ? { reason: observation.reason } : {}),
+          status: this.projectStatus(observation.status),
         }),
         { mode: 0o600 },
       );
       await rename(temporary, filename);
+      return true;
     } finally {
       await rm(temporary, { force: true }).catch(() => undefined);
     }
@@ -345,7 +436,7 @@ export class LocalAgentRuntime {
   }
   /** Probe an existing saved instance without mutating its configuration. */
   async probeConnection(identityId: string, id: string): Promise<LocalAgentStatus> {
-    const status = await this.probeOnce(JSON.stringify([identityId, id]), () =>
+    const { status } = await this.probeOnce(JSON.stringify([identityId, id]), () =>
       this.observeConnection(identityId, id),
     );
     const previous = this.executionFailures.get(JSON.stringify([identityId, id]));
@@ -357,7 +448,7 @@ export class LocalAgentRuntime {
   }
 
   /** One native discovery per connection at a time; concurrent callers join it. */
-  private probeOnce(key: string, work: () => Promise<LocalAgentStatus>): Promise<LocalAgentStatus> {
+  private probeOnce(key: string, work: () => Promise<ProbeOutcome>): Promise<ProbeOutcome> {
     const existing = this.probeFlights.get(key);
     if (existing) return existing;
     const flight = work().finally(() => this.probeFlights.delete(key));
@@ -365,29 +456,80 @@ export class LocalAgentRuntime {
     return flight;
   }
 
-  private async observeConnection(identityId: string, id: string): Promise<LocalAgentStatus> {
+  private async observeConnection(identityId: string, id: string): Promise<ProbeOutcome> {
     let probedConnection: LocalAgentConnection | undefined;
-    const status = await this.runProbe(async () => {
-      const connection = await this.persist(() => this.options.store.getConnection(identityId, id));
-      probedConnection = connection;
-      return connection;
-    });
-    if (probedConnection && status.status === 'ready' && status.models.length)
-      await this.recordCatalog(identityId, id, probedConnection, status);
-    return status;
+    let outcome: ProbeOutcome;
+    try {
+      outcome = await this.runProbe(async () => {
+        const connection = await this.persist(() =>
+          this.options.store.getConnection(identityId, id),
+        );
+        probedConnection = connection;
+        return connection;
+      });
+    } catch (error) {
+      // Explicit verify keeps its synchronous failure, but a failed attempt is
+      // still the newest discovery fact for the next snapshot read.
+      if (probedConnection && !this.stopped && this.options.isActive?.() !== false) {
+        const failure = this.failureOutcome(error);
+        if (failure)
+          await this.recordCatalog(
+            identityId,
+            id,
+            probedConnection,
+            failure.status,
+            failure.reason,
+          ).catch(() => undefined);
+      }
+      throw error;
+    }
+    if (probedConnection)
+      await this.recordCatalog(
+        identityId,
+        id,
+        probedConnection,
+        outcome.status,
+        outcome.reason,
+      ).catch(() => undefined);
+    return outcome;
+  }
+
+  /** Map a thrown probe failure to its stable snapshot state; Profile shutdown stays transient. */
+  private failureOutcome(error: unknown): ProbeOutcome | null {
+    if (error instanceof LocalAgentError) {
+      if (error.code === 'LOCAL_AGENT_PERMISSION_DENIED' || error.code === 'NOT_FOUND') return null;
+      if (error.code === 'LOCAL_AGENT_NOT_INSTALLED')
+        return {
+          status: { status: 'not_installed', message: error.message },
+          reason: 'not_installed',
+        };
+      if (error.code === 'LOCAL_AGENT_LOGIN_REQUIRED')
+        return { status: { status: 'login_required', message: error.message }, reason: 'login' };
+      if (error.code === 'LOCAL_AGENT_PROTOCOL_ERROR')
+        return {
+          status: { status: 'unavailable', message: error.message },
+          reason: 'protocol_error',
+        };
+    }
+    return {
+      status: { status: 'unavailable', message: 'The local Agent probe failed.' },
+      reason: 'spawn_failed',
+    };
   }
 
   /**
-   * Persist one verified native directory for read-only browsing. Every driver
-   * shares the same observation shape so a cold start can present models before
-   * any native process is spawned. Validation stays strict: the saved revision,
-   * driver, executable, Home and native credential identity must all still match.
+   * Persist one discovery attempt for read-only browsing. Every driver shares the
+   * same observation shape so a cold start can present a directory, or explain a
+   * known failure, before any native process is spawned. Validation stays strict:
+   * the saved revision, driver, executable, Home and native credential identity
+   * must all still match.
    */
   private async recordCatalog(
     identityId: string,
     connectionId: string,
     observed: LocalAgentConnection,
-    status: LocalAgentStatus & { status: 'ready' },
+    status: LocalAgentStatus,
+    reason?: SnapshotReason,
   ): Promise<void> {
     try {
       const latest = observed.id.startsWith('implicit:')
@@ -400,34 +542,48 @@ export class LocalAgentRuntime {
         (latest.homePath ?? null) !== (observed.homePath ?? null)
       )
         return;
-      const identity = await nativeIdentity(latest.driver, latest.homePath);
-      if (latest.driver === 'antigravity') {
-        // AGY probes bind models to the exact native OAuth identity. Other
-        // drivers' probe fingerprints may include the live account object, so
-        // they are validated through the credential-file digest instead.
+      let identity: string;
+      try {
+        identity = await nativeIdentity(latest.driver, latest.homePath);
+      } catch (error) {
+        // A malformed credential file is itself a discovery result. Only a ready
+        // catalog is unusable without an identity; failures may store a placeholder
+        // digest that the next read rejects once nativeIdentity can run again.
+        if (status.status === 'ready') throw error;
+        identity = createHash('sha256')
+          .update(JSON.stringify(['unverified', latest.driver, latest.homePath ?? null]))
+          .digest('hex');
+      }
+      if (latest.driver === 'antigravity' && status.status === 'ready') {
+        // AGY probes bind models to the exact native OAuth identity. Only a ready
+        // snapshot has a model visibility partition, so this strict comparison is
+        // deliberately ready-only; non-ready snapshots carry no models.
         const context = nativeModelVisibilityContext(latest, identity);
         if (status.modelVisibilityContext !== context) return;
       }
       const key = JSON.stringify([identityId, connectionId]);
+      const visibilityContext =
+        status.status === 'ready' ? status.modelVisibilityContext : undefined;
       const observation: ObservedNativeCatalog = {
+        schemaVersion: 2,
         revision: latest.revision,
         driver: latest.driver,
         executablePath: latest.executablePath,
         homePath: latest.homePath ?? null,
         identity,
-        ...(status.modelVisibilityContext
-          ? { visibilityContext: status.modelVisibilityContext }
-          : {}),
+        ...(visibilityContext ? { visibilityContext } : {}),
         checkedAt: Date.now(),
+        ...(reason ? { reason } : {}),
         status,
       };
+      if (!(await this.saveCatalog(identityId, connectionId, observation))) return;
+      // The disk accepted this observation, so the memory cache may follow it.
       this.nativeCatalogObservations.set(key, observation);
       // Small, bounded in-memory cache; never persisted or shared across profiles.
       if (this.nativeCatalogObservations.size > 100)
         this.nativeCatalogObservations.delete(this.nativeCatalogObservations.keys().next().value!);
-      await this.saveCatalog(identityId, connectionId, observation);
     } catch {
-      // Model discovery still succeeded. Cache invalidation is best effort.
+      // Discovery still produced a result. Cache invalidation is best effort.
     }
   }
 
@@ -444,6 +600,8 @@ export class LocalAgentRuntime {
       if (!proof) return null;
       this.nativeCatalogObservations.set(key, proof);
     }
+    // Step 1 keeps the read surface ready-only; the SWR reader replaces this in step 3.
+    if (proof.status.status !== 'ready') return null;
     const connection = id.startsWith('implicit:')
       ? this.implicitConnection(id.slice('implicit:'.length) as LocalAgentDriver)
       : await this.persist(() => this.options.store.getConnection(identityId, id));
@@ -532,17 +690,26 @@ export class LocalAgentRuntime {
   async probeDefaultDriver(identityId: string, kind: LocalAgentDriver): Promise<LocalAgentStatus> {
     const connection = this.implicitConnection(kind);
     if (!connection) throw new LocalAgentError('LOCAL_AGENT_UNAVAILABLE');
-    return this.probeOnce(JSON.stringify([identityId, connection.id]), async () => {
-      const status = await this.runProbe(async () => connection);
-      if (status.status === 'ready' && status.models.length)
-        await this.recordCatalog(identityId, connection.id, connection, status);
-      return status;
-    });
+    const { status } = await this.probeOnce(
+      JSON.stringify([identityId, connection.id]),
+      async () => {
+        const outcome = await this.runProbe(async () => connection);
+        await this.recordCatalog(
+          identityId,
+          connection.id,
+          connection,
+          outcome.status,
+          outcome.reason,
+        ).catch(() => undefined);
+        return outcome;
+      },
+    );
+    return status;
   }
 
   private async runProbe(
     loadConnection: () => Promise<LocalAgentConnection>,
-  ): Promise<LocalAgentStatus> {
+  ): Promise<ProbeOutcome> {
     this.assertActive();
     // A saturated host queues discovery instead of surfacing a user-facing
     // failure. A waiting caller still fails closed when the Profile closes.
@@ -573,10 +740,10 @@ export class LocalAgentRuntime {
       try {
         const status = await Promise.race([activeDriver.probe(), timedOut]);
         this.assertActive();
-        return status;
+        return { status, reason: statusReason(status) };
       } catch (cause) {
         if (cause instanceof LocalAgentError && cause.code === 'LOCAL_AGENT_UNAVAILABLE')
-          return { status: 'unavailable', message: cause.message };
+          return { status: { status: 'unavailable', message: cause.message }, reason: 'timeout' };
         throw cause;
       }
     } finally {
@@ -728,7 +895,9 @@ export class LocalAgentRuntime {
       // paying another native spawn; the driver validates the same option
       // against the *live* session before the prompt is sent.
       const verified = await this.cachedCatalogConnection(input.identityId, connection.id);
-      const status = verified ?? (await this.runProbe(async () => connection));
+      const { status } = verified
+        ? { status: verified }
+        : await this.runProbe(async () => connection);
       const model =
         status.status === 'ready'
           ? status.models.find((entry) => entry.id === (input.modelId ?? conversation.modelId))
