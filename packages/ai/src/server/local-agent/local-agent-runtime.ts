@@ -1137,25 +1137,23 @@ export class LocalAgentRuntime {
     return this.persist(() => this.options.store.setConversationStatus(identityId, id, status));
   }
   async createConversation(identityId: string, input: LocalAgentConversationCreate) {
-    const known = await this.cachedCatalogConnection(identityId, input.connectionId);
-    // This only checks advertised membership for storage. dispatchMessage()
-    // starts the official native session and validates the actual model before a prompt.
-    const status = known ?? (await this.probeConnection(identityId, input.connectionId));
-    if (status.status !== 'ready') {
-      const connection = await this.persist(() =>
-        this.options.store.getConnection(identityId, input.connectionId),
-      );
-      throw new LocalAgentError(
-        status.status === 'login_required'
-          ? 'LOCAL_AGENT_LOGIN_REQUIRED'
-          : status.status === 'not_installed'
-            ? 'LOCAL_AGENT_NOT_INSTALLED'
-            : 'LOCAL_AGENT_UNAVAILABLE',
-        connection.driver,
-      );
+    // Creation is always optimistic: a missing/stale snapshot is "not discovered yet",
+    // not a failure. Only a *fresh* snapshot can reject, and only for a deterministic
+    // state or a fresh ready catalog that does not advertise the requested model.
+    const { status, fresh } = await this.readSnapshot(identityId, input.connectionId);
+    if (status && fresh) {
+      if (status.status === 'login_required' || status.status === 'not_installed') {
+        const connection = await this.loadCatalogConnection(identityId, input.connectionId);
+        throw new LocalAgentError(
+          status.status === 'login_required'
+            ? 'LOCAL_AGENT_LOGIN_REQUIRED'
+            : 'LOCAL_AGENT_NOT_INSTALLED',
+          connection?.driver,
+        );
+      }
+      if (status.status === 'ready' && !status.models.some((model) => model.id === input.modelId))
+        throw new LocalAgentError('LOCAL_AGENT_MODEL_UNSUPPORTED');
     }
-    if (!status.models.some((model) => model.id === input.modelId))
-      throw new LocalAgentError('LOCAL_AGENT_MODEL_UNSUPPORTED');
     this.assertActive();
     const saved = await this.persist(() =>
       this.options.store.createConversation(identityId, input),
@@ -1191,38 +1189,45 @@ export class LocalAgentRuntime {
     if (input.permissionMode && !AIChatPermissionModeSchema.safeParse(input.permissionMode).success)
       throw new LocalAgentError('LOCAL_AGENT_PERMISSION_DENIED');
     if (input.attachments?.length) throw new LocalAgentError('LOCAL_AGENT_UNSUPPORTED_INPUT');
-    // Never trust model options from the renderer. A fresh owner-scoped native
-    // probe validates that the selected model itself advertises each option.
+    // Snapshots decide admission, never spawn: a fresh deterministic failure is
+    // reported early, while missing/stale/unavailable states pass through to the
+    // native session so it can return the real reason.
     if (input.modelOptions) {
       const { connection, conversation } = await this.persist(() =>
         this.options.store.resolveConversation(input.identityId, input.conversationId),
       );
-      // Reuse the identity-bound directory when it is still valid instead of
-      // paying another native spawn; the driver validates the same option
-      // against the *live* session before the prompt is sent.
-      const verified = await this.cachedCatalogConnection(input.identityId, connection.id);
-      const { status } = verified
-        ? { status: verified }
-        : await this.probeOnce(
-            JSON.stringify([input.identityId, connection.id]),
-            () => this.observeConnection(input.identityId, connection.id),
-            true,
+      const { status, fresh } = await this.readSnapshot(input.identityId, connection.id);
+      if (status && fresh) {
+        if (status.status === 'login_required')
+          throw new LocalAgentError('LOCAL_AGENT_LOGIN_REQUIRED', connection.driver);
+        if (status.status === 'not_installed')
+          throw new LocalAgentError('LOCAL_AGENT_NOT_INSTALLED', connection.driver);
+        if (status.status === 'ready') {
+          const model = status.models.find(
+            (entry) => entry.id === (input.modelId ?? conversation.modelId),
           );
-      const model =
-        status.status === 'ready'
-          ? status.models.find((entry) => entry.id === (input.modelId ?? conversation.modelId))
-          : undefined;
-      if (
-        !model ||
-        (input.modelOptions.reasoningEffort &&
-          !model.reasoningEfforts?.includes(input.modelOptions.reasoningEffort)) ||
-        (input.modelOptions.serviceTier &&
-          (!model.serviceTiers?.length ||
-            (input.modelOptions.serviceTier !== 'default' &&
-              !model.serviceTiers.some((tier) => tier.id === input.modelOptions?.serviceTier))))
-      ) {
-        throw new LocalAgentError('LOCAL_AGENT_MODEL_UNSUPPORTED');
+          if (
+            !model ||
+            (input.modelOptions.reasoningEffort &&
+              !model.reasoningEfforts?.includes(input.modelOptions.reasoningEffort)) ||
+            (input.modelOptions.serviceTier &&
+              (!model.serviceTiers?.length ||
+                (input.modelOptions.serviceTier !== 'default' &&
+                  !model.serviceTiers.some((tier) => tier.id === input.modelOptions?.serviceTier))))
+          ) {
+            throw new LocalAgentError('LOCAL_AGENT_MODEL_UNSUPPORTED');
+          }
+        }
       }
+    } else {
+      const { connection } = await this.persist(() =>
+        this.options.store.resolveConversation(input.identityId, input.conversationId),
+      );
+      const { status, fresh } = await this.readSnapshot(input.identityId, connection.id);
+      if (fresh && status?.status === 'login_required')
+        throw new LocalAgentError('LOCAL_AGENT_LOGIN_REQUIRED', connection.driver);
+      if (fresh && status?.status === 'not_installed')
+        throw new LocalAgentError('LOCAL_AGENT_NOT_INSTALLED', connection.driver);
     }
     const sameConversationRun = () =>
       [...this.runs.values()].some(

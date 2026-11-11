@@ -472,4 +472,170 @@ describe('native discovery snapshot persistence', () => {
     expect(await runtime.cachedCatalogConnection('owner', connection.id)).toBeNull();
     await runtime.dispose();
   });
+
+  it('decides creation, dispatch and directory reads from a snapshot with zero probes', async () => {
+    const { store, cwd, connection } = await connectionFixture();
+    const conversation = await store.createConversation('owner', {
+      connectionId: connection.id,
+      modelId: 'model',
+      name: 'Chat',
+    });
+    await writeSnapshot(
+      cwd,
+      connection,
+      {
+        status: 'ready',
+        models: [{ id: 'model', name: 'Model', reasoningEfforts: ['high'] }],
+      },
+      Date.now(),
+    );
+    const fillers = await Promise.all(
+      ['Filler 1', 'Filler 2'].map((name) =>
+        store.createConnection('owner', {
+          driver: 'codex',
+          name,
+          executablePath: '/fake/filler',
+          enabled: true,
+          writeScopes: [],
+        }),
+      ),
+    );
+    let probes = 0;
+    const releases: Array<() => void> = [];
+    const releaseAll = () => releases.splice(0).forEach((release) => release());
+    const runtime = new LocalAgentRuntime({
+      store,
+      cwd,
+      createDriver: () => ({
+        async probe(): Promise<LocalAgentStatus> {
+          probes++;
+          await new Promise<void>((resolve) => releases.push(resolve));
+          return { status: 'unavailable', message: 'latched' };
+        },
+        async *run(): AsyncGenerator<NativeAgentEvent> {
+          yield { type: 'completed' };
+        },
+        respond: () => false,
+        cancel: releaseAll,
+        async close() {
+          releaseAll();
+        },
+      }),
+    });
+    const pending = fillers.map((filler) => runtime.probeConnection('owner', filler.id));
+    await vi.waitFor(() => expect(probes).toBe(2));
+
+    const created = await runtime.createConversation('owner', {
+      connectionId: connection.id,
+      modelId: 'model',
+      name: 'Second',
+    });
+    expect(created.modelId).toBe('model');
+    const events = [];
+    for await (const event of runtime.dispatchMessage({
+      identityId: 'owner',
+      conversationId: conversation.id,
+      content: 'Hello',
+      modelOptions: { reasoningEffort: 'high' },
+    }))
+      events.push(event);
+    expect(events.at(-1)?.type).toBe('assistant.run.completed');
+    expect(await runtime.cachedCatalogConnection('owner', connection.id)).toMatchObject({
+      status: 'ready',
+    });
+    // Only the two pool-filling probes ran; the snapshot entries never spawned one.
+    expect(probes).toBe(2);
+
+    await runtime.dispose();
+    await Promise.allSettled(pending);
+  });
+
+  it('early-reports only fresh deterministic failures and never blocks on unavailable', async () => {
+    const { store, cwd } = await connectionFixture();
+    const loginConnection = await store.createConnection('owner', {
+      driver: 'codex',
+      name: 'Logged out',
+      executablePath: '/fake/login',
+      enabled: true,
+      writeScopes: [],
+    });
+    const unavailableConnection = await store.createConnection('owner', {
+      driver: 'codex',
+      name: 'Transient',
+      executablePath: '/fake/unavailable',
+      enabled: true,
+      writeScopes: [],
+    });
+    const conversation = await store.createConversation('owner', {
+      connectionId: unavailableConnection.id,
+      modelId: 'model',
+      name: 'Transient chat',
+    });
+    const loginConversation = await store.createConversation('owner', {
+      connectionId: loginConnection.id,
+      modelId: 'model',
+      name: 'Logged out chat',
+    });
+    await writeSnapshot(
+      cwd,
+      loginConnection,
+      { status: 'login_required', message: 'Sign in' },
+      Date.now(),
+    );
+    await writeSnapshot(
+      cwd,
+      unavailableConnection,
+      { status: 'unavailable', message: 'Probe timed out' },
+      Date.now(),
+    );
+    const runtime = new LocalAgentRuntime({
+      store,
+      cwd,
+      createDriver: () => ({
+        async probe(): Promise<LocalAgentStatus> {
+          return { status: 'unavailable', message: 'latched' };
+        },
+        async *run(): AsyncGenerator<NativeAgentEvent> {
+          yield { type: 'completed' };
+        },
+        respond: () => false,
+        cancel() {},
+        async close() {},
+      }),
+    });
+
+    await expect(
+      runtime.createConversation('owner', {
+        connectionId: loginConnection.id,
+        modelId: 'model',
+        name: 'Chat',
+      }),
+    ).rejects.toMatchObject({ code: 'LOCAL_AGENT_LOGIN_REQUIRED' });
+    await expect(
+      runtime
+        .dispatchMessage({
+          identityId: 'owner',
+          conversationId: loginConversation.id,
+          content: 'Hello',
+        })
+        .next(),
+    ).rejects.toMatchObject({ code: 'LOCAL_AGENT_LOGIN_REQUIRED' });
+    // `unavailable` is a display-only state: both creation and sending stay optimistic.
+    await expect(
+      runtime.createConversation('owner', {
+        connectionId: unavailableConnection.id,
+        modelId: 'model',
+        name: 'Optimistic',
+      }),
+    ).resolves.toMatchObject({ modelId: 'model' });
+    const events = [];
+    for await (const event of runtime.dispatchMessage({
+      identityId: 'owner',
+      conversationId: conversation.id,
+      content: 'Hello',
+    }))
+      events.push(event);
+    expect(events.at(-1)?.type).toBe('assistant.run.completed');
+    await runtime.dispose();
+  });
 });

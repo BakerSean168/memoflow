@@ -27,10 +27,19 @@ async function setup(driver: 'codex' | 'claude' = 'codex') {
   const db = createLocalAgentSqlite();
   databases.push(db);
   const store = new LocalAgentRepository(db);
+  // A real executable and credential file keep the zero-process cheap layer from
+  // downgrading fixtures that exercise dispatch without a seeded snapshot.
+  const home = await mkdtemp(join(tmpdir(), 'mf-runtime-home-'));
+  ephemeralHomes.push(home);
+  const executable = join(home, 'agent');
+  await writeFile(executable, '', { mode: 0o700 });
+  await writeFile(join(home, 'auth.json'), '{}');
+  await writeFile(join(home, '.credentials.json'), '{}');
   const connection = await store.createConnection('owner', {
     driver,
     name: 'Fixture',
-    executablePath: '/fake/agent',
+    executablePath: executable,
+    homePath: home,
     enabled: true,
     writeScopes: [],
   });
@@ -317,6 +326,7 @@ describe('local Agent conversation execution', () => {
         driver: saved.driver,
         name: saved.name,
         executablePath: saved.executablePath,
+        homePath: saved.homePath,
         enabled: saved.enabled,
         writeScopes: saved.writeScopes,
         nativePermissionMode:
@@ -494,6 +504,8 @@ describe('local Agent conversation execution', () => {
         },
       }),
     });
+    // A fresh ready snapshot is the only state allowed to reject an unadvertised option.
+    await runtime.probeConnection('owner', conversation.connectionId);
     for (const modelOptions of [{ reasoningEffort: 'unavailable' }, { serviceTier: 'unknown' }]) {
       await expect(
         runtime
@@ -1194,6 +1206,8 @@ it('keeps Google sign-in guidance when conversation creation rejects a logged-ou
       },
     }),
   });
+  // Seed a fresh failure snapshot: creation is optimistic when nothing is known.
+  await runtime.probeConnection('owner', connection.id);
   await expect(
     runtime.createConversation('owner', {
       connectionId: connection.id,
