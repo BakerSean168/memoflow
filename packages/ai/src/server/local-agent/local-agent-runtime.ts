@@ -166,8 +166,10 @@ const CHEAP_RECONFIRM_INTERVAL_MS = SNAPSHOT_SOFT_TTL_MS;
 const REFRESH_BACKOFF_MS = [30_000, 60_000, 120_000, 300_000] as const;
 /** Bounded background queue; the oldest entry is dropped when a burst exceeds it. */
 const BACKGROUND_REFRESH_QUEUE_LIMIT = 16;
-/** Bounded native discovery concurrency; callers wait for a slot instead of failing. */
-const PROBE_CONCURRENCY = 4;
+/** Discovery has its own process budget; it never consumes a user turn's slots. */
+const PROBE_POOL_SIZE = 2;
+/** User turns remain bounded at four concurrent native sessions. */
+const RUN_CONCURRENCY = 4;
 /** Stable snapshot failure categories; never provider stderr or raw diagnostics. */
 type SnapshotReason =
   | 'timeout'
@@ -270,6 +272,7 @@ export class LocalAgentRuntime {
   private refreshDraining = false;
   private readonly backgroundWork = new Set<Promise<unknown>>();
   private readonly probeWaiters: Array<() => void> = [];
+  private readonly runWaiters: Array<() => void> = [];
   private pendingProbes = 0;
   private pendingRuns = 0;
   private stopped = false;
@@ -1062,30 +1065,32 @@ export class LocalAgentRuntime {
       }
     }
   }
-  private atNativeCapacity(): boolean {
-    return this.pendingProbes + this.pendingRuns + this.runs.size >= PROBE_CONCURRENCY;
+  private atProbeCapacity(): boolean {
+    return this.pendingProbes >= PROBE_POOL_SIZE;
+  }
+  private atRunCapacity(): boolean {
+    return this.pendingRuns + this.runs.size >= RUN_CONCURRENCY;
   }
   private async acquireProbeSlot(): Promise<void> {
-    while (this.atNativeCapacity()) {
+    while (this.atProbeCapacity()) {
       this.assertActive();
       await new Promise<void>((resolve) => this.probeWaiters.push(resolve));
       this.assertActive();
     }
     this.pendingProbes++;
   }
-  /** User turns share the native-process bound with discovery, but wait for a
-   * slot instead of surfacing a data-conflict error caused by slow probes. */
+  /** User turns have an independent budget; a saturated discovery pool never delays them. */
   private async acquireRunSlot(): Promise<void> {
-    while (this.atNativeCapacity()) {
+    while (this.atRunCapacity()) {
       this.assertActive();
-      await new Promise<void>((resolve) => this.probeWaiters.push(resolve));
+      await new Promise<void>((resolve) => this.runWaiters.push(resolve));
       this.assertActive();
     }
     this.pendingRuns++;
   }
   private releaseRunSlot() {
     if (this.pendingRuns > 0) this.pendingRuns--;
-    this.wakeProbeWaiter();
+    this.wakeRunWaiter();
   }
   private releaseProbeSlot() {
     if (this.pendingProbes > 0) this.pendingProbes--;
@@ -1093,6 +1098,9 @@ export class LocalAgentRuntime {
   }
   private wakeProbeWaiter() {
     this.probeWaiters.shift()?.();
+  }
+  private wakeRunWaiter() {
+    this.runWaiters.shift()?.();
   }
   async listConversations(identityId: string) {
     this.assertActive();
@@ -1661,8 +1669,8 @@ export class LocalAgentRuntime {
         await run.driver?.close();
       } finally {
         this.runs.delete(run.runId);
-        // A finished turn frees capacity for a discovery that was queued.
-        this.wakeProbeWaiter();
+        // A finished turn only frees another turn; discovery has its own pool.
+        this.wakeRunWaiter();
       }
     }
   }
@@ -1799,8 +1807,9 @@ export class LocalAgentRuntime {
     this.refreshQueue.clear();
     this.nextAttemptAt.clear();
     this.failureStreak.clear();
-    // Waiting discovery must observe the closed Profile instead of hanging.
+    // Waiting discovery and turns must observe the closed Profile instead of hanging.
     for (const wake of this.probeWaiters.splice(0)) wake();
+    for (const wake of this.runWaiters.splice(0)) wake();
     this.disposing ??= (async () => {
       const runs = [...this.runs.values()];
       for (const run of runs) this.cancel(run);
