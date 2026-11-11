@@ -828,9 +828,7 @@ export class LocalAgentRuntime {
     if (!this.refreshDraining) {
       const drain = this.drainRefreshQueue();
       this.backgroundWork.add(drain);
-      void drain
-        .finally(() => this.backgroundWork.delete(drain))
-        .catch(() => undefined);
+      void drain.finally(() => this.backgroundWork.delete(drain)).catch(() => undefined);
     }
   }
 
