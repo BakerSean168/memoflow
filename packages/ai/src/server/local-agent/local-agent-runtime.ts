@@ -189,6 +189,7 @@ export class LocalAgentRuntime {
   private readonly probeFlights = new Map<string, Promise<LocalAgentStatus>>();
   private readonly probeWaiters: Array<() => void> = [];
   private pendingProbes = 0;
+  private pendingRuns = 0;
   private stopped = false;
   private readonly storageWork = new Set<Promise<unknown>>();
   private readonly logins: AntigravityLoginManager;
@@ -588,13 +589,30 @@ export class LocalAgentRuntime {
       }
     }
   }
+  private atNativeCapacity(): boolean {
+    return this.pendingProbes + this.pendingRuns + this.runs.size >= PROBE_CONCURRENCY;
+  }
   private async acquireProbeSlot(): Promise<void> {
-    while (this.pendingProbes + this.runs.size >= PROBE_CONCURRENCY) {
+    while (this.atNativeCapacity()) {
       this.assertActive();
       await new Promise<void>((resolve) => this.probeWaiters.push(resolve));
       this.assertActive();
     }
     this.pendingProbes++;
+  }
+  /** User turns share the native-process bound with discovery, but wait for a
+   * slot instead of surfacing a data-conflict error caused by slow probes. */
+  private async acquireRunSlot(): Promise<void> {
+    while (this.atNativeCapacity()) {
+      this.assertActive();
+      await new Promise<void>((resolve) => this.probeWaiters.push(resolve));
+      this.assertActive();
+    }
+    this.pendingRuns++;
+  }
+  private releaseRunSlot() {
+    if (this.pendingRuns > 0) this.pendingRuns--;
+    this.wakeProbeWaiter();
   }
   private releaseProbeSlot() {
     if (this.pendingProbes > 0) this.pendingProbes--;
@@ -727,20 +745,29 @@ export class LocalAgentRuntime {
         throw new LocalAgentError('LOCAL_AGENT_MODEL_UNSUPPORTED');
       }
     }
-    if (
-      this.runs.size + this.pendingProbes >= 4 ||
+    const sameConversationRun = () =>
       [...this.runs.values()].some(
         (run) => run.conversationId === input.conversationId && run.identityId === input.identityId,
-      )
-    )
-      throw new LocalAgentError('CONFLICT');
-    const run: ActiveRun = {
-      ...input,
-      runId: randomUUID(),
-      abort: new AbortController(),
-      permissions: createNativePermissionLedger(),
-    };
-    this.runs.set(run.runId, run);
+      );
+    if (sameConversationRun()) throw new LocalAgentError('CONFLICT');
+    // A user turn must not fail merely because background discovery holds the
+    // shared native-process slots. Wait for the same bound the probe path uses,
+    // then re-check the conversation so two queued turns cannot overlap.
+    await this.acquireRunSlot();
+    let run!: ActiveRun;
+    try {
+      this.assertActive();
+      if (sameConversationRun()) throw new LocalAgentError('CONFLICT');
+      run = {
+        ...input,
+        runId: randomUUID(),
+        abort: new AbortController(),
+        permissions: createNativePermissionLedger(),
+      };
+      this.runs.set(run.runId, run);
+    } finally {
+      this.releaseRunSlot();
+    }
     const onAbort = () => this.cancel(run);
     input.signal?.addEventListener('abort', onAbort, { once: true });
     let sequence = 0;

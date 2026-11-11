@@ -694,6 +694,78 @@ describe('local Agent conversation execution', () => {
     expect(started).toBe(5);
     await runtime.dispose();
   });
+  it('waits for discovery capacity instead of rejecting a user turn as a conflict', async () => {
+    const { store, conversation } = await setup();
+    let release!: () => void;
+    const gate = new Promise<void>((resolve) => {
+      release = resolve;
+    });
+    let probing = 0;
+    const runtime = new LocalAgentRuntime({
+      store,
+      cwd: '/tmp',
+      createDriver: () => ({
+        async probe() {
+          probing++;
+          await gate;
+          return { status: 'ready' as const, models: [] };
+        },
+        async *run(): AsyncGenerator<NativeAgentEvent> {
+          yield { type: 'completed' };
+        },
+        respond: () => false,
+        cancel() {
+          release();
+        },
+        async close() {
+          release();
+        },
+      }),
+    });
+    const connections = [];
+    for (let index = 0; index < 4; index++)
+      connections.push(
+        await store.createConnection('owner', {
+          driver: 'codex',
+          name: `Codex ${index}`,
+          executablePath: '/fake/codex',
+          enabled: true,
+          writeScopes: [],
+        }),
+      );
+    const probes = connections.map((item) => runtime.probeConnection('owner', item.id));
+    await vi.waitFor(() => expect(probing).toBe(4));
+    try {
+      const stream = runtime.dispatchMessage({
+        identityId: 'owner',
+        conversationId: conversation.id,
+        content: 'Hello',
+      });
+      let settled = false;
+      const first = stream
+        .next()
+        .then(
+          (value) => ({ value }),
+          (error: unknown) => ({ error }),
+        )
+        .finally(() => {
+          settled = true;
+        });
+      await new Promise((resolve) => setTimeout(resolve, 20));
+      expect(settled).toBe(false);
+
+      release();
+      await Promise.all(probes);
+      const outcome = await first;
+      expect(outcome).not.toHaveProperty('error');
+      expect(outcome).toMatchObject({ value: { value: { type: 'assistant.run.started' } } });
+      await stream.return(undefined);
+    } finally {
+      release();
+      await Promise.allSettled(probes);
+      await runtime.dispose();
+    }
+  });
   it('joins concurrent discovery for the same connection into one native probe', async () => {
     const { store, conversation } = await setup();
     let release!: () => void;
