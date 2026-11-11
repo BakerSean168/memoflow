@@ -203,6 +203,8 @@ export const AIStreamChannels = {
   RUNTIME_WORKSPACE_EVENT: 'ai:runtime:workspace:event',
   RUNTIME_WORKSPACE_END: 'ai:runtime:workspace:end',
   RUNTIME_ASSISTANT_ERROR: 'ai:runtime:assistant:error',
+  /** Native Agent directory snapshot change; content-only, never account or paths. */
+  LOCAL_AGENT_CATALOG: 'ai:local-agent:catalog',
 } as const;
 
 export const NotificationChannels = {

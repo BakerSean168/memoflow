@@ -19,6 +19,7 @@ describe('AIChannels / AIStreamChannels vNext surface', () => {
     );
     expect(AIStreamChannels.RUNTIME_ASSISTANT_EVENT).toBe('ai:runtime:assistant:event');
     expect(AIStreamChannels.RUNTIME_ASSISTANT_ERROR).toBe('ai:runtime:assistant:error');
+    expect(AIStreamChannels.LOCAL_AGENT_CATALOG).toBe('ai:local-agent:catalog');
   });
 
   it('does not reintroduce legacy message-stream or AssistantFacade IPC channels', () => {

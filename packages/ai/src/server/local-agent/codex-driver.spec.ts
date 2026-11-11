@@ -110,6 +110,32 @@ describe('Codex native driver', () => {
     },
   );
 
+  it('publishes a content-only catalog change through the native fixture bridge', async () => {
+    const directory = await mkdtemp(join(tmpdir(), 'memoflow-catalog-event-'));
+    vi.stubEnv('CODEX_HOME', directory);
+    const flow = createNativeAgentFlowFixture(directory);
+    const changes: Array<{ key: string; status: unknown }> = [];
+    const unsubscribe = flow.local.subscribeCatalog((change) => changes.push(change));
+    try {
+      const result = await flow.local.probeDefaultDriver('codex');
+      expect(result.status).toBe('ready');
+      expect(changes).toHaveLength(1);
+      expect(changes[0]).toMatchObject({
+        key: 'implicit:codex',
+        status: { status: 'ready', models: [{ id: 'fixture-model' }] },
+      });
+      expect(changes[0].status).not.toHaveProperty('account');
+      expect(changes[0].status).not.toHaveProperty('lastExecutionFailure');
+      unsubscribe();
+      await flow.local.probeDefaultDriver('codex');
+      expect(changes).toHaveLength(1);
+    } finally {
+      await flow.close();
+      vi.unstubAllEnvs();
+      await rm(directory, { recursive: true, force: true });
+    }
+  });
+
   it('reports a valid failed turn as unavailable instead of protocol corruption', async () => {
     const native = driver(`if (frame.method === 'turn/start') {
       reply({turn:{id:'turn-1'}});

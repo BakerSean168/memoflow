@@ -40,6 +40,7 @@ import {
   MastraModelResolver,
   AgentInstanceRegistry,
   ProviderWebResearchAdapter,
+  type LocalAgentSnapshotChange,
   type MastraStorageConfig,
   type IAnalyticsReadPort,
   type IKnowledgeNotePersistencePort,
@@ -73,7 +74,12 @@ export interface ComposeAIElectronDependencies {
   readonly notificationInbox: NotificationInboxPort;
   readonly userTimeContextPort: UserTimeContextPort;
   readonly mastraStorage: MastraStorageConfig;
-  readonly localAgent: { cwd: string; isActive: () => boolean };
+  readonly localAgent: {
+    cwd: string;
+    isActive: () => boolean;
+    /** Process-owned renderer push; content-only catalog changes. */
+    onSnapshotChange?: (change: LocalAgentSnapshotChange) => void;
+  };
   readonly panelBridge?: IDesktopNativePanelBridge;
 }
 

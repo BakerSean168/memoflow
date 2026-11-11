@@ -69,7 +69,10 @@ export type {
   GoalSurfaceLeaseGrant,
 } from './server/application/ports/goal-surface-lease.port';
 export { AIEvaluationReportFileAdapter } from './server/infrastructure';
-export { LocalAgentRuntime } from './server/local-agent/local-agent-runtime';
+export {
+  LocalAgentRuntime,
+  type LocalAgentSnapshotChange,
+} from './server/local-agent/local-agent-runtime';
 export { AgentInstanceRegistry } from './server/application/agent-instance/agent-instance.registry';
 export { LocalAgentRepository } from './server/infrastructure/adapters/powersync/local-agent.repository';
 export {
