@@ -213,15 +213,10 @@ export function useAIChatView(options: UseAIChatViewOptions) {
     onNativeRunSettled: (connectionId) => {
       const selected = chatSession.runtimeChoice.value;
       if (selected.runtimeKind === 'local_agent' && selected.connectionId === connectionId) {
-        // Re-reading the cached AGY status after each turn must not unpack and
-        // spawn another ~1GB PyInstaller process. Other drivers keep the
-        // existing native validation behavior.
-        const connection = localChoices.connections.value.find(
-          (entry) => entry.id === connectionId,
-        );
-        void localChoices.probe(connectionId, {
-          fresh: connection?.driver !== 'antigravity',
-        });
+        // Re-read the persisted snapshot after each turn. This is the fallback
+        // confirmation: the catalog event is primary and neither path starts
+        // another native process.
+        void localChoices.probe(connectionId, { fresh: true });
       }
     },
     getPermissionMode: () => permissionMode.value,

@@ -495,10 +495,12 @@ describe('T3-style Agent settings and direct endpoint configuration', () => {
     });
     expect(epoch.value).toBe(2);
   });
-  it('shows all native defaults, probes without saving, and persists their toggles through the registry', async () => {
+  it('shows all native defaults, reads snapshots without escaping to a probe, and persists their toggles through the registry', async () => {
     const { wrapper, registry, localClient } = await setup({ native: true });
     expect(wrapper.findAll('[role="listitem"]')).toHaveLength(6);
-    expect(localClient.probeDefaultDriver).toHaveBeenCalledTimes(5);
+    expect(localClient.cachedCatalogConnection).toHaveBeenCalledTimes(5);
+    expect(localClient.probeDefaultDriver).not.toHaveBeenCalled();
+    expect(localClient.probeConnection).not.toHaveBeenCalled();
     expect(registry.execute).not.toHaveBeenCalled();
     for (const id of ['mastra', 'codex', 'claude', 'pi', 'dsh', 'antigravity'])
       expect(wrapper.find(`[data-testid="ai-provider-toggle-${id}"]`).exists()).toBe(true);
@@ -514,6 +516,22 @@ describe('T3-style Agent settings and direct endpoint configuration', () => {
     await wrapper.get('[data-testid="ai-provider-select-agent:codex"]').trigger('click');
     expect(wrapper.get('[data-testid="ai-provider-toggle-codex"]').attributes('data-state')).toBe(
       'unchecked',
+    );
+  });
+  it('renders a non-ready snapshot without starting a native probe', async () => {
+    const { wrapper, localClient } = await setup({ native: true });
+    localClient.cachedCatalogConnection.mockResolvedValue({
+      status: 'login_required',
+      message: 'Sign in through the native command',
+    });
+    const probesBefore = localClient.probeConnection.mock.calls.length;
+    await wrapper.get('[data-testid="ai-provider-select-agent:codex"]').trigger('click');
+    await flushPromises();
+    expect(localClient.cachedCatalogConnection).toHaveBeenCalledWith('implicit:codex');
+    expect(localClient.probeConnection).toHaveBeenCalledTimes(probesBefore);
+    expect(localClient.probeDefaultDriver).not.toHaveBeenCalled();
+    expect(wrapper.get('[data-testid="ai-provider-select-agent:codex"]').text()).toContain(
+      'Sign in through the native command',
     );
   });
   it('clears native probe metadata while reloading a Registry for another Desktop profile', async () => {

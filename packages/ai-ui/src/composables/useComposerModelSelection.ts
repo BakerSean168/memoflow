@@ -464,9 +464,9 @@ export function useComposerModelSelection(options: UseComposerModelSelectionOpti
           )
         )
           throw new Error('Native Agent connection is no longer available');
-        // Explicit selection needs an identity-bound membership check, but not
-        // another slow native spawn when Desktop has recently verified this exact
-        // saved account/configuration. Sending still performs fresh native checks.
+        // Explicit selection needs an identity-bound membership check. This is a
+        // snapshot read only: a missing, stale or unavailable observation never
+        // starts a native process. Sending still performs the real native check.
         const [verified, beforeCommitSnapshot] = await Promise.all([
           localAgent.cachedCatalogConnection?.(id) ?? null,
           agentRegistryClient.list(),
@@ -478,19 +478,15 @@ export function useComposerModelSelection(options: UseComposerModelSelectionOpti
           conversationId !== chatSession.chatConversationId.value
         )
           return;
-        const discovered = verified ?? (await localAgent.probeConnection(id));
-        if (
-          disposed ||
-          identity !== resolveIdentity() ||
-          request !== explicitRuntimeSelection ||
-          conversationId !== chatSession.chatConversationId.value
-        )
-          return;
-        if (
-          discovered.status !== 'ready' ||
-          !discovered.models.some((item) => item.id === model.modelId)
-        )
-          throw new Error('Native model is no longer available; check the instance again');
+        if (verified) {
+          if (verified.status === 'login_required' || verified.status === 'not_installed')
+            throw new Error('Native model is no longer available; check the instance again');
+          if (
+            verified.status === 'ready' &&
+            !verified.models.some((item) => item.id === model.modelId)
+          )
+            throw new Error('Native model is no longer available; check the instance again');
+        }
         const beforeCommit = beforeCommitSnapshot.instances.find(
           (item) => item.instanceId === instance.instanceId,
         );

@@ -1,4 +1,4 @@
-import { computed, ref, watch, type Ref } from 'vue';
+import { computed, getCurrentScope, onScopeDispose, ref, watch, type Ref } from 'vue';
 import { useNativeModelVisibility } from './nativeModelVisibility';
 import type { LocalAgentClient } from '@memoflow/ai-client';
 import type {
@@ -29,7 +29,7 @@ export function useLocalAssistantChoices(
     const request = ++refreshGeneration;
     refreshingConfiguration = true;
     // A new configuration/identity snapshot must never inherit the previous
-    // Profile's successful model probe (even if a connection ID is reused).
+    // Profile's successful model snapshot (even if a connection ID is reused).
     ++generation;
     status.value = null;
     loading.value = false;
@@ -42,7 +42,7 @@ export function useLocalAssistantChoices(
       connections.value = items;
       defaultChoice.value = saved;
       error.value = false;
-      // Only the current Profile snapshot may initiate a fresh model probe.
+      // Only the current Profile snapshot may initiate a fresh model read.
       refreshingConfiguration = false;
       const selected = choice.value;
       if (
@@ -64,33 +64,38 @@ export function useLocalAssistantChoices(
     // An explicit check or selection watch during a Profile refresh must not
     // resurrect an old Profile's catalog before its new registry is loaded.
     if (!client || refreshingConfiguration) return;
+    // `fresh` no longer authorizes a native probe. It only asks the client to
+    // ignore any renderer copy; this composable has none, so every read asks
+    // Desktop for the persisted snapshot. A missing snapshot stays empty and
+    // converges through the catalog event or the next periodic re-read.
+    void options;
     const request = ++generation;
     loading.value = true;
-    // Retain the presented directory while revalidating: a slow or failed
-    // refresh must not blank the selected Agent's models.
     try {
-      const connection = connections.value.find((item) => item.id === connectionId);
-      // Workspace reuses the same Profile-owned verified catalog as Settings for
-      // every native driver. The native source, revision and credential identity
-      // are checked by Desktop on every read.
-      const cached =
-        !options.fresh && connection
-          ? ((await client.cachedCatalogConnection?.(connectionId)) ?? null)
-          : null;
+      // The native source, revision and credential identity are checked by
+      // Desktop on every read; the read itself never starts a process.
+      const result = (await client.cachedCatalogConnection(connectionId)) ?? null;
       if (request !== generation) return;
-      const result = cached ?? (await client.probeConnection(connectionId));
-      if (request === generation) {
-        status.value = result;
-        error.value = false;
-      }
+      status.value = result;
+      error.value = false;
     } catch {
-      // Discovery failure keeps the last verified directory; only the error flag
-      // changes, so a transient spawn failure does not disable a usable model.
+      // A read failure keeps the last verified directory; only the error flag
+      // changes, so a transient transport failure does not disable a usable model.
       if (request === generation) error.value = true;
     } finally {
       if (request === generation) loading.value = false;
     }
   }
+  const unsubscribe = client?.subscribeCatalog((change) => {
+    if (choice.value.runtimeKind !== 'local_agent' || change.key !== choice.value.connectionId)
+      return;
+    // An event is newer than any in-flight snapshot read.
+    ++generation;
+    status.value = change.status;
+    error.value = false;
+    loading.value = false;
+  });
+  if (unsubscribe && getCurrentScope()) onScopeDispose(unsubscribe);
   watch(
     () => (choice.value.runtimeKind === 'local_agent' ? choice.value.connectionId : null),
     (id) => {

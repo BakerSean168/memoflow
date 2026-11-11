@@ -370,25 +370,26 @@ describe('AI conversation restoration and business navigation', () => {
     const local = {
       listConnections: vi.fn(async () => [native]),
       getDefaultChoice: vi.fn(async () => choice),
-      probeConnection: vi.fn(async () => ready),
+      cachedCatalogConnection: vi.fn(async () => ready),
+      subscribeCatalog: vi.fn(() => () => undefined),
     };
     const { wrapper } = await mountView({
       [AI_LOCAL_AGENT_KEY as symbol]: local,
     });
     await flushPromises();
     fixture.session.chatMessage.value = 'Keep the next draft';
-    const probesBefore = local.probeConnection.mock.calls.length;
-    local.probeConnection.mockResolvedValueOnce({
+    const readsBefore = local.cachedCatalogConnection.mock.calls.length;
+    local.cachedCatalogConnection.mockResolvedValueOnce({
       ...ready,
       lastExecutionFailure: {
         code: 'LOCAL_AGENT_QUOTA_EXHAUSTED',
         modelId: 'native-model',
         occurredAt: 123,
       },
-    } as typeof ready);
+    });
     fixture.nativeRunSettled(native.id);
     await flushPromises();
-    expect(local.probeConnection).toHaveBeenCalledTimes(probesBefore + 1);
+    expect(local.cachedCatalogConnection).toHaveBeenCalledTimes(readsBefore + 1);
     expect(wrapper.get('[data-testid="ai-native-execution-status"]').text()).toContain(
       'insufficient quota',
     );
@@ -398,7 +399,7 @@ describe('AI conversation restoration and business navigation', () => {
     fixture.nativeRunSettled(native.id);
     await flushPromises();
     expect(wrapper.find('[data-testid="ai-native-execution-status"]').exists()).toBe(false);
-    expect(local.probeConnection).toHaveBeenCalledTimes(probesBefore + 2);
+    expect(local.cachedCatalogConnection).toHaveBeenCalledTimes(readsBefore + 2);
   });
 
   it('applies a discovered saved native default without clearing a Composer draft or resetting twice', async () => {
@@ -419,10 +420,11 @@ describe('AI conversation restoration and business navigation', () => {
       getDefaultChoice: vi.fn(
         () => new Promise<AssistantRuntimeChoice>((resolve) => (resolveDefault = resolve)),
       ),
-      probeConnection: vi.fn(async () => ({
+      cachedCatalogConnection: vi.fn(async () => ({
         status: 'ready',
         models: [{ id: 'native-model', name: 'Real native model' }],
       })),
+      subscribeCatalog: vi.fn(() => () => undefined),
     };
     const { wrapper } = await mountView({
       [AI_LOCAL_AGENT_KEY as symbol]: local,
@@ -443,7 +445,7 @@ describe('AI conversation restoration and business navigation', () => {
     });
     expect(fixture.session.chatMessage.value).toBe('Keep my unsent draft');
     expect(fixture.session.resetChatSession).toHaveBeenCalledOnce();
-    expect(local.probeConnection).toHaveBeenCalledWith(native.id);
+    expect(local.cachedCatalogConnection).toHaveBeenCalledWith(native.id);
     expect(wrapper.vm.canSendMessage).toBe(true);
   });
 
@@ -481,6 +483,11 @@ describe('AI conversation restoration and business navigation', () => {
           status: 'ready',
           models: [{ id: 'native-model', name: 'Native' }],
         })),
+        cachedCatalogConnection: vi.fn(async () => ({
+          status: 'ready',
+          models: [{ id: 'native-model', name: 'Native' }],
+        })),
+        subscribeCatalog: vi.fn(() => () => undefined),
       };
       localStorage.clear();
       const { wrapper } = await mountView({
@@ -551,6 +558,7 @@ describe('AI conversation restoration and business navigation', () => {
       probeDefaultDriver: vi.fn(async () => {
         throw new Error('Unexpected implicit ACP scan');
       }),
+      subscribeCatalog: vi.fn(() => () => undefined),
     };
     const { wrapper } = await mountView({
       [AI_AGENT_REGISTRY_KEY as symbol]: registry,
@@ -629,14 +637,11 @@ describe('AI conversation restoration and business navigation', () => {
       getDefaultChoice: vi.fn(async () => ({
         runtimeKind: 'builtin' as const,
       })),
-      probeConnection: vi.fn(async () => ({
+      cachedCatalogConnection: vi.fn(async () => ({
         status: 'ready',
         models: [{ id: 'real-codex-model', name: 'From Codex model/list' }],
       })),
-      probeDefaultDriver: vi.fn(async () => ({
-        status: 'ready',
-        models: [{ id: 'real-codex-model', name: 'From Codex model/list' }],
-      })),
+      subscribeCatalog: vi.fn(() => () => undefined),
     };
     const { wrapper } = await mountView({
       [AI_AGENT_REGISTRY_KEY as symbol]: registry,
@@ -662,7 +667,7 @@ describe('AI conversation restoration and business navigation', () => {
     });
     expect(fixture.session.chatMessage.value).toBe('Preserve the draft');
     expect(await local.listConnections()).toEqual([]);
-    local.probeConnection.mockRejectedValueOnce(
+    local.cachedCatalogConnection.mockRejectedValueOnce(
       new Error('Native discovery failed during selection'),
     );
     await wrapper.vm.selectComposerModel('real-codex-model', 'local:codex');
@@ -1150,6 +1155,9 @@ it.each(['implicit default', 'saved instance'])(
       const [connection] = await flow.store.listConnections('profile-a');
       expect(await flow.store.listConnections('profile-a')).toHaveLength(1);
       expect(connection.instanceSlug).toBe('codex');
+      // Explicit verification is the only path that writes a ready snapshot;
+      // composition itself never probes.
+      await flow.local.probeConnection(connection.id);
       await wrapper.vm.selectComposerModel('fixture-model', `local:${connection.id}`);
       await flushPromises();
       expect(wrapper.vm.runtimeChoice).toEqual({
@@ -1225,6 +1233,9 @@ it.each(['implicit default', 'saved instance'])(
       expect(await flow.store.listConnections('profile-b')).toEqual([]);
       expect(await flow.local.listConversations()).toEqual([]);
       await expect(flow.store.getConversation('profile-b', conversationId)).rejects.toThrow();
+      // A new Profile has no snapshot yet. An explicit check seeds one; the
+      // catalog then converges through the snapshot event, not a composer probe.
+      await flow.local.probeDefaultDriver('codex');
       await waitFor(() =>
         expect(
           wrapper!.vm.composerModels.filter(
