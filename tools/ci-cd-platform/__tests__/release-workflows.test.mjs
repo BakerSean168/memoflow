@@ -779,7 +779,7 @@ test('Desktop release runtime gates execute before receipts and cannot be bypass
   assert.match(helper, /org\.freedesktop\.DBus\.GetNameOwner/u);
   assert.match(packagedSpec, /ROUTE_READY_TIMEOUT_MS = 45_000/u);
   assert.match(packagedSpec, /SETTINGS_READY_TIMEOUT_MS = 45_000/u);
-  assert.match(packagedSpec, /toHaveAttribute\(\s*'data-shell-scene',\s*'settings'/u);
+  assert.match(packagedSpec, /getByTestId\('shell-settings-dialog'\)\)\.toBeVisible/u);
   assert.match(packagedSpec, /getByTestId\('user-settings-view'\)/u);
   assert.match(packagedSpec, /getByTestId\('settings-content-scroll'\)/u);
   assert.match(packagedSpec, /close-timeout/u);

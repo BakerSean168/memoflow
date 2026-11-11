@@ -189,17 +189,14 @@ test('packaged MemoFlow boots through renderer readiness', async ({}, testInfo) 
       window.location.hash = '#/settings?tab=account';
     });
     await expect(mainWindow).toHaveURL(/#\/settings\?tab=account$/);
-    // The raw hash mutates before Vue Router has resolved the lazy settings route.
-    // Gate on AppShell's router-derived scene contract rather than treating the URL
-    // mutation itself as navigation completion. Cold packaged runners can spend
-    // materially longer loading the first settings chunk than dev/browser builds.
-    await expect(mainWindow.getByTestId('app-shell')).toHaveAttribute(
-      'data-shell-scene',
-      'settings',
-      { timeout: ROUTE_READY_TIMEOUT_MS },
-    );
-    await expect(mainWindow.getByTestId('standalone-settings-layout')).toBeVisible({
-      timeout: 10_000,
+    // The raw hash mutates before Vue Router has resolved the settings deep link.
+    // Settings is a shell dialog, not a page: a `/settings` URL opens the dialog
+    // over the still-mounted workspace. Gate on that dialog rather than treating
+    // the URL mutation itself as navigation completion. Cold packaged runners can
+    // spend materially longer loading the first settings chunk than dev/browser
+    // builds.
+    await expect(mainWindow.getByTestId('shell-settings-dialog')).toBeVisible({
+      timeout: ROUTE_READY_TIMEOUT_MS,
     });
     // The named lazy view and the account section mount separately from routing.
     await expect(mainWindow.getByTestId('user-settings-view')).toBeVisible({
