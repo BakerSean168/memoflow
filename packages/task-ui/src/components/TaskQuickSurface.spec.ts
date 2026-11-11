@@ -43,15 +43,19 @@ it('renders summary, progress and sorted rows, with optional summary/footer', as
   expect(w.text()).toContain('Tasks');
   expect(w.text()).toContain('Today');
   expect(w.get('[data-testid="task-quick-count"]').text()).toBe('0/1');
-  expect(w.get('[data-testid="task-quick-progress"]').attributes('data-progress')).toBe('0');
+  const progress = w.get('[data-testid="task-quick-progress"]');
+  expect(progress.attributes('data-progress')).toBe('0');
+  expect(progress.attributes('style')).toContain('clip-path: inset(0 100% 0 0)');
   await w.setProps({
     occurrences: [
       instance({ status: 'Completed' }),
       instance({ id: 'second' as ReturnType<typeof instance>['id'] }),
     ],
   });
-  expect(w.get('[data-testid="task-quick-progress"]').attributes('style')).toContain('50%');
-  expect(w.get('[data-testid="task-quick-progress"]').attributes('data-progress')).toBe('50');
+  const halfway = w.get('[data-testid="task-quick-progress"]');
+  expect(halfway.attributes('style')).toContain('clip-path: inset(0 50% 0 0)');
+  expect(halfway.attributes('style')).not.toContain('box-shadow');
+  expect(halfway.attributes('data-progress')).toBe('50');
   expect(w.getComponent(TaskOccurrenceCompactList).props('rows')[0].occurrence.id).toBe('second');
   await w.get('[data-testid="task-quick-view-all"]').trigger('click');
   expect(w.emitted('view-all')).toEqual([[]]);
@@ -75,7 +79,15 @@ it.each([
     ),
   });
   expect(w.get('[data-testid="task-quick-count"]').text()).toBe(`${completed}/3`);
-  expect(w.get('[data-testid="task-quick-progress"]').attributes('data-progress')).toBe(progress);
+  const progressElement = w.get('[data-testid="task-quick-progress"]');
+  expect(progressElement.attributes('data-progress')).toBe(progress);
+  const style = progressElement.attributes('style') ?? '';
+  expect(style).toContain(`clip-path: inset(0 ${100 - Number(progress)}% 0 0)`);
+  if (progress === '100') {
+    expect(style).toContain('box-shadow: 0 0 10px hsl(var(--progress-fill-end) / 0.45)');
+  } else {
+    expect(style).not.toContain('box-shadow');
+  }
 });
 it('handles loading, error/retry, empty and stale rows', async () => {
   const w = surface({ occurrences: [], loading: true });

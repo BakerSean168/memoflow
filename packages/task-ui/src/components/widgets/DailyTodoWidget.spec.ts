@@ -1,12 +1,24 @@
 import { defineComponent, ref } from 'vue';
 import { createI18n } from 'vue-i18n';
 import { flushPromises, mount } from '@vue/test-utils';
+import type { DOMWrapper } from '@vue/test-utils';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { TaskOccurrenceClientDTO, TaskPlanClientDTO } from '@memoflow/task-contracts';
 import { useTaskToday } from '../../composables/useTaskToday';
 import DailyTodoWidget from './DailyTodoWidget.vue';
 import { installTaskUiHost } from '@task-ui-test-host/di/task-ui-host';
 installTaskUiHost();
+
+function expectProgress(progress: DOMWrapper<Element>, percent: number) {
+  expect(progress.attributes('data-progress')).toBe(String(percent));
+  const style = progress.attributes('style') ?? '';
+  expect(style).toContain(`clip-path: inset(0 ${100 - percent}% 0 0)`);
+  if (percent >= 100) {
+    expect(style).toContain('box-shadow: 0 0 10px hsl(var(--progress-fill-end) / 0.45)');
+  } else {
+    expect(style).not.toContain('box-shadow');
+  }
+}
 
 vi.mock('../../composables/useTaskPlanMutations', () => ({
   useTaskPlanMutations: () => ({ createPlanSafe: vi.fn(), isSaving: ref(false) }),
@@ -102,9 +114,7 @@ describe('DailyTodoWidget', () => {
     await flushPromises();
 
     expect(wrapper.text()).toContain('0/1');
-    expect(wrapper.get('.h-full.rounded-full.bg-emerald-500').attributes('style')).toContain(
-      'width: 0%',
-    );
+    expectProgress(wrapper.get('[data-testid="task-quick-progress"]'), 0);
 
     await wrapper.get('button[aria-label="task.action.complete"]').trigger('click');
     await flushPromises();
@@ -114,9 +124,7 @@ describe('DailyTodoWidget', () => {
       [expect.objectContaining({ id: 'TaskOccurrenceId_today', status: 'Completed' })],
     ]);
     expect(wrapper.text()).toContain('1/1');
-    expect(wrapper.get('.h-full.rounded-full.bg-emerald-500').attributes('style')).toContain(
-      'width: 100%',
-    );
+    expectProgress(wrapper.get('[data-testid="task-quick-progress"]'), 100);
     const undoButton = wrapper.get('button[aria-label="task.action.undoComplete"]');
     expect(undoButton.attributes('disabled')).toBeUndefined();
 
@@ -125,9 +133,7 @@ describe('DailyTodoWidget', () => {
 
     expect(uncompleteOccurrence).toHaveBeenCalledWith('TaskOccurrenceId_today');
     expect(wrapper.text()).toContain('0/1');
-    expect(wrapper.get('.h-full.rounded-full.bg-emerald-500').attributes('style')).toContain(
-      'width: 0%',
-    );
+    expectProgress(wrapper.get('[data-testid="task-quick-progress"]'), 0);
   });
 
   it('refreshes today data when the kept-alive Home surface becomes active again', async () => {

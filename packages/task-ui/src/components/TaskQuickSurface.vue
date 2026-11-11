@@ -2,7 +2,7 @@
 import { computed, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { ArrowRight, CheckCircle2, Plus, RotateCcw } from '@lucide/vue';
-import { Button, Input } from '@memoflow/ui-vue-shadcn';
+import { Button, Input, progressFillStyle } from '@memoflow/ui-vue-shadcn';
 import type { TaskOccurrenceClientDTO, TaskPlanClientDTO } from '@memoflow/task-contracts';
 import {
   useTaskOccurrenceActionCoordinator,
@@ -107,11 +107,11 @@ async function createQuickTask() {
 
       <div
         v-if="summary && occurrences.length"
-        class="mt-2 h-1 overflow-hidden rounded-full bg-muted"
+        class="relative mt-2 h-1 overflow-hidden rounded-full bg-muted"
       >
         <div
-          class="h-full rounded-full bg-emerald-500 transition-[width] duration-300"
-          :style="{ width: `${progressPct}%` }"
+          class="h-full w-full transition-[clip-path] duration-500"
+          :style="progressFillStyle(progressPct)"
           data-testid="task-quick-progress"
           :data-progress="progressPct"
         />
