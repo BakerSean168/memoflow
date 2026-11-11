@@ -322,7 +322,18 @@ test('packaged MemoFlow boots through renderer readiness', async ({}, testInfo) 
       restartedWindow.getByRole('button', { name: '启用：进入任务', exact: true }),
     ).toBeVisible();
     await expect(restartedWindow.getByText('当前使用默认键位', { exact: false })).toHaveCount(0);
-    await restartedWindow.getByTestId('settings-return-to-app').click();
+    // Leaving settings has one contract and two layouts: the wide sidebar keeps
+    // `settings-return-to-app` in its footer, the narrow layout drops the sidebar
+    // and exposes only the compact header back button. Both call the same
+    // `returnToApp()` emit, so probe without waiting and use whichever the
+    // current window width mounted rather than assuming the wide sidebar.
+    const returnToAppButton = restartedWindow.getByTestId('settings-return-to-app');
+    if (await returnToAppButton.isVisible()) {
+      await returnToAppButton.click();
+    } else {
+      await restartedWindow.getByTestId('settings-compact-back').click();
+    }
+    await expect(restartedWindow.getByTestId('shell-settings-dialog')).toHaveCount(0);
     await restartedWindow.keyboard.press('Alt+g');
     await expect(restartedWindow).toHaveURL(/#\/goals$/);
     await restartedWindow.keyboard.press('Alt+2');
