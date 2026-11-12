@@ -6,6 +6,7 @@ import { APP_TITLE_NAME } from '@memoflow/assets';
 import {
   createAppRouter,
   useAuthenticationStore,
+  applyAccent,
   applyThemeMode,
   presentWebLiveNotification,
   usePresentationPreferenceStore,
@@ -56,6 +57,7 @@ export async function bootstrapMainApp() {
 
   const presentationStore = usePresentationPreferenceStore();
   applyThemeMode(presentationStore.theme);
+  applyAccent(presentationStore.accent);
   document.documentElement.lang = presentationStore.locale;
 
   const localeMessages = await loadLocaleMessages(presentationStore.locale);

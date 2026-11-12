@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import type { ProgressRootProps } from 'reka-ui';
 import type { HTMLAttributes } from 'vue';
+import { progressFillStyle, progressGlowStyle } from '../../../lib/progress-fill';
 import { cn } from '../../../lib/utils';
 import { ProgressIndicator, ProgressRoot } from 'reka-ui';
 import { computed } from 'vue';
@@ -14,16 +15,20 @@ const delegatedProps = computed(() => {
 
   return delegated;
 });
+
+const indicatorStyle = computed(() => progressFillStyle(props.modelValue));
+const rootStyle = computed(() => progressGlowStyle(props.modelValue));
 </script>
 
 <template>
   <ProgressRoot
     v-bind="delegatedProps"
     :class="cn('relative h-2 w-full overflow-hidden rounded-full bg-primary/20', props.class)"
+    :style="rootStyle"
   >
     <ProgressIndicator
-      class="h-full w-full flex-1 bg-primary transition-all"
-      :style="`transform: translateX(-${100 - (props.modelValue ?? 0)}%);`"
+      class="h-full w-full flex-1 transition-[clip-path] duration-500"
+      :style="indicatorStyle"
     />
   </ProgressRoot>
 </template>

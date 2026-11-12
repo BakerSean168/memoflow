@@ -9,7 +9,7 @@ import { PreferencePortableCapability, PreferencePortableService } from './prefe
 import type { UserPreferenceService } from './user-preference-service';
 
 const target: UserPreferenceProfile = {
-  presentation: { theme: 'dark', language: 'en-US' },
+  presentation: { theme: 'dark', language: 'en-US', accent: 'brand-gold' },
   regional: {
     timeZone: 'Asia/Tokyo',
     dateStyle: 'long',
@@ -60,7 +60,9 @@ describe('PreferencePortableService', () => {
     const preferenceService = {
       getPreferenceNamespace: vi
         .fn()
-        .mockResolvedValueOnce(response('presentation', 0, { theme: 'auto', language: 'zh-CN' }))
+        .mockResolvedValueOnce(
+          response('presentation', 0, { theme: 'auto', language: 'zh-CN', accent: 'brand-gold' }),
+        )
         .mockResolvedValueOnce(response('regional', 4, target.regional)),
       patchPreferenceNamespace: vi.fn(),
     } as unknown as UserPreferenceService;
@@ -79,7 +81,9 @@ describe('PreferencePortableService', () => {
     const preferenceService = {
       getPreferenceNamespace: vi
         .fn()
-        .mockResolvedValueOnce(response('presentation', 2, { theme: 'auto', language: 'zh-CN' }))
+        .mockResolvedValueOnce(
+          response('presentation', 2, { theme: 'auto', language: 'zh-CN', accent: 'brand-gold' }),
+        )
         .mockResolvedValueOnce(
           response('regional', 0, {
             timeZone: 'UTC',
@@ -125,8 +129,12 @@ describe('PreferencePortableService', () => {
     const preferenceService = {
       getPreferenceNamespace: vi
         .fn()
-        .mockResolvedValueOnce(response('presentation', 1, { theme: 'auto', language: 'zh-CN' }))
-        .mockResolvedValueOnce(response('presentation', 2, { theme: 'light', language: 'zh-CN' }))
+        .mockResolvedValueOnce(
+          response('presentation', 1, { theme: 'auto', language: 'zh-CN', accent: 'brand-gold' }),
+        )
+        .mockResolvedValueOnce(
+          response('presentation', 2, { theme: 'light', language: 'zh-CN', accent: 'brand-gold' }),
+        )
         .mockResolvedValueOnce(response('regional', 5, target.regional)),
       patchPreferenceNamespace: vi
         .fn()
@@ -134,7 +142,11 @@ describe('PreferencePortableService', () => {
           code: 'preference_revision_conflict',
           namespace: 'presentation',
           expectedRevision: 1,
-          latest: response('presentation', 2, { theme: 'light', language: 'zh-CN' }),
+          latest: response('presentation', 2, {
+            theme: 'light',
+            language: 'zh-CN',
+            accent: 'brand-gold',
+          }),
         })
         .mockResolvedValueOnce({
           namespace: 'presentation',

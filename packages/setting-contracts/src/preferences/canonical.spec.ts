@@ -1,5 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
+  ACCENT_VALUES,
+  AccentSchema,
   DEFAULT_USER_PREFERENCE_PROFILE,
   PREFERENCE_NAMESPACES,
   PREFERENCE_NAMESPACE_REGISTRY,
@@ -7,6 +9,7 @@ import {
   PreferenceNamespaceResponseSchema,
   PreferenceNamespaceSchema,
   PreferenceRevisionConflictSchema,
+  PresentationPreferencesPatchSchema,
   PresentationPreferencesSchema,
   RegionalPreferencesSchema,
   UserPreferenceProfileSchema,
@@ -84,7 +87,7 @@ describe('canonical user preference contracts', () => {
     const second = createDefaultUserPreferenceProfile();
 
     expect(first).toEqual({
-      presentation: { theme: 'auto', language: 'zh-CN' },
+      presentation: { theme: 'auto', language: 'zh-CN', accent: 'brand-gold' },
       regional: {
         timeZone: 'UTC',
         dateStyle: 'medium',
@@ -100,6 +103,43 @@ describe('canonical user preference contracts', () => {
     expect(first).not.toHaveProperty('identityId');
     expect(first).not.toHaveProperty('id');
     expect(first).not.toHaveProperty('revision');
+  });
+
+  it('accepts supported accents and defaults legacy profiles to brand gold', () => {
+    for (const accent of ACCENT_VALUES) {
+      expect(AccentSchema.safeParse(accent).success).toBe(true);
+    }
+    expect(AccentSchema.safeParse('amber').success).toBe(false);
+    expect(AccentSchema.safeParse(null).success).toBe(false);
+
+    expect(PresentationPreferencesSchema.parse({ theme: 'dark', language: 'en-US' }).accent).toBe(
+      'brand-gold',
+    );
+    expect(
+      PresentationPreferencesSchema.parse({
+        theme: 'dark',
+        language: 'en-US',
+        accent: 'violet',
+      }).accent,
+    ).toBe('violet');
+    expect(
+      PresentationPreferencesSchema.safeParse({
+        theme: 'dark',
+        language: 'en-US',
+        accent: 'amber',
+      }).success,
+    ).toBe(false);
+  });
+
+  it('keeps accent optional in presentation patches', () => {
+    expect(PresentationPreferencesPatchSchema.parse({})).toEqual({});
+    expect(PresentationPreferencesPatchSchema.parse({ accent: 'ocean-blue' })).toEqual({
+      accent: 'ocean-blue',
+    });
+    expect(
+      PresentationPreferencesPatchSchema.parse({ theme: 'light', accent: 'rose-red' }),
+    ).toEqual({ theme: 'light', accent: 'rose-red' });
+    expect(PresentationPreferencesPatchSchema.safeParse({ accent: 'amber' }).success).toBe(false);
   });
 
   it('keeps response, receipt, and conflict shapes strict', () => {

@@ -1,5 +1,7 @@
 /** Canonical Setting preferences: presentation/regional + preferences@3 portability. */
 export {
+  ACCENT_VALUES,
+  AccentSchema,
   DateStyleSchema,
   DEFAULT_USER_PREFERENCE_PROFILE,
   LocaleIdSchema,
@@ -26,6 +28,7 @@ export {
 } from './canonical';
 
 export type {
+  Accent,
   LocaleId,
   PreferenceMutationReceipt,
   PreferenceNamespace,

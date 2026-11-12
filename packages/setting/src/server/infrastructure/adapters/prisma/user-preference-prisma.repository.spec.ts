@@ -9,7 +9,7 @@ function row(overrides: Partial<PrismaUserPreferenceRecord> = {}): PrismaUserPre
     id: 'pref-1',
     identityId: 'identity-1',
     namespace: 'presentation',
-    payload: { theme: 'dark', language: 'zh-CN' },
+    payload: { theme: 'dark', language: 'zh-CN', accent: 'brand-gold' },
     revision: 1,
     createdAt: new Date('2026-09-09T00:00:00.000Z'),
     updatedAt: new Date('2026-09-09T00:00:00.000Z'),
@@ -22,7 +22,7 @@ function document(revision = 1): UserPreferenceDocument {
     id: 'pref-1',
     identityId: 'identity-1',
     namespace: 'presentation',
-    payload: { theme: 'dark', language: 'zh-CN' },
+    payload: { theme: 'dark', language: 'zh-CN', accent: 'brand-gold' },
     revision,
     createdAt: Date.parse('2026-09-09T00:00:00.000Z'),
     updatedAt: Date.parse(`2026-09-09T00:00:0${Math.min(revision, 9)}.000Z`),
@@ -45,14 +45,14 @@ describe('PrismaUserPreferenceMapper', () => {
     const domain = PrismaUserPreferenceMapper.toDomain(row());
     expect(domain.toResponse()).toEqual({
       namespace: 'presentation',
-      preferences: { theme: 'dark', language: 'zh-CN' },
+      preferences: { theme: 'dark', language: 'zh-CN', accent: 'brand-gold' },
       revision: 1,
     });
     expect(PrismaUserPreferenceMapper.toPersistence(domain)).toMatchObject({
       id: 'pref-1',
       identityId: 'identity-1',
       namespace: 'presentation',
-      payload: { theme: 'dark', language: 'zh-CN' },
+      payload: { theme: 'dark', language: 'zh-CN', accent: 'brand-gold' },
       revision: 1,
     });
   });
@@ -79,7 +79,7 @@ describe('UserPreferencePrismaRepository', () => {
     expect(db.userPreferenceRecord.updateMany).toHaveBeenCalledWith({
       where: { identityId: 'identity-1', namespace: 'presentation', revision: 1 },
       data: {
-        payload: { theme: 'dark', language: 'zh-CN' },
+        payload: { theme: 'dark', language: 'zh-CN', accent: 'brand-gold' },
         revision: 2,
         updatedAt: new Date('2026-09-09T00:00:02.000Z'),
       },
@@ -105,7 +105,7 @@ describe('UserPreferencePrismaRepository', () => {
     const db = createDb();
     db.userPreferenceRecord.create.mockRejectedValue({ code: 'P2002' });
     db.userPreferenceRecord.findUnique.mockResolvedValue(
-      row({ id: 'winner', payload: { theme: 'light', language: 'zh-CN' } }),
+      row({ id: 'winner', payload: { theme: 'light', language: 'zh-CN', accent: 'brand-gold' } }),
     );
     const repository = new UserPreferencePrismaRepository(db as never);
 

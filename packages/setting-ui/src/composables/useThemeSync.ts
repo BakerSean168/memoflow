@@ -1,6 +1,9 @@
 import { onScopeDispose, watch } from 'vue';
 import { WindowChannels } from '@memoflow/desktop-contracts';
-import { usePresentationPreferenceStore } from '../stores/presentation-preference-store';
+import {
+  normalizeAccent,
+  usePresentationPreferenceStore,
+} from '../stores/presentation-preference-store';
 import { settingUiHost } from '../setting-ui-host';
 
 // Residual 907: inline electronAPI dual retired — DesktopAuthApi sole invoke-api shape.
@@ -35,6 +38,11 @@ export function applyThemeMode(theme: ThemeMode | string | null | undefined): vo
   syncDesktopWindowChrome(resolvedTheme);
 }
 
+/** Writes the accent to `data-accent`; brand gold is written explicitly too. */
+export function applyAccent(accent: unknown): void {
+  document.documentElement.dataset.accent = normalizeAccent(accent);
+}
+
 export function useThemeSync() {
   const store = usePresentationPreferenceStore();
   const mediaQuery = window.matchMedia(MEDIA_QUERY);
@@ -43,9 +51,15 @@ export function useThemeSync() {
     applyThemeMode(store.theme);
   };
 
+  const syncAccent = () => {
+    applyAccent(store.accent);
+  };
+
   syncTheme();
+  syncAccent();
 
   watch(() => store.theme, syncTheme);
+  watch(() => store.accent, syncAccent);
 
   const handleSystemThemeChange = () => {
     if (store.theme === 'auto') {
@@ -60,5 +74,6 @@ export function useThemeSync() {
 
   return {
     syncTheme,
+    syncAccent,
   };
 }

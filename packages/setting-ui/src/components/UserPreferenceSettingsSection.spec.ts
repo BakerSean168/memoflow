@@ -8,9 +8,10 @@ import { SETTING_SERVICE_KEY } from '@setting-ui-test-host/di/keys';
 import { createI18nPlugin } from '@setting-ui-test-host/plugins/i18n';
 import enUS from '@setting-ui-test-host/locales/en-US';
 import UserPreferenceSettingsSection from './UserPreferenceSettingsSection.vue';
+import { usePresentationPreferenceStore } from '../stores/presentation-preference-store';
 
 const canonicalProfile: UserPreferenceProfile = {
-  presentation: { theme: 'dark', language: 'en-US' },
+  presentation: { theme: 'dark', language: 'en-US', accent: 'linear-indigo' },
   regional: {
     timeZone: 'Asia/Tokyo',
     dateStyle: 'long',
@@ -110,6 +111,7 @@ function themeValue(wrapper: ReturnType<typeof mount>) {
 describe('UserPreferenceSettingsSection canonical ownership', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    delete document.documentElement.dataset.accent;
   });
 
   it('renders canonical presentation/regional data without touching the legacy giant-tree API', async () => {
@@ -121,11 +123,19 @@ describe('UserPreferenceSettingsSection canonical ownership', () => {
     expect(service.getUserSettings).not.toHaveBeenCalled();
     expect(service.getUserSettingDefaults).not.toHaveBeenCalled();
     expect(themeValue(wrapper)).toBe('dark');
+    expect(
+      wrapper
+        .get('[data-testid="appearance-accent-option-linear-indigo"]')
+        .attributes('aria-checked'),
+    ).toBe('true');
+    expect(
+      wrapper.get('[data-testid="appearance-accent-option-brand-gold"]').attributes('aria-checked'),
+    ).toBe('false');
   });
 
   it('uses canonical defaults/profile values and stays independent from legacy setting availability', async () => {
     const profile: UserPreferenceProfile = {
-      presentation: { theme: 'auto', language: 'zh-CN' },
+      presentation: { theme: 'auto', language: 'zh-CN', accent: 'brand-gold' },
       regional: { timeZone: 'UTC', dateStyle: 'medium', timeStyle: '24h', weekStartsOn: 1 },
     };
     const service = createService({ profile });
@@ -134,6 +144,49 @@ describe('UserPreferenceSettingsSection canonical ownership', () => {
 
     expect(themeValue(wrapper)).toBe('auto');
     expect(service.getUserSettings).not.toHaveBeenCalled();
+  });
+
+  it('applies and persists an accent selection optimistically', async () => {
+    const { wrapper, service } = mountSection();
+    await flushPromises();
+
+    await wrapper.get('[data-testid="appearance-accent-option-violet"]').trigger('click');
+    await flushPromises();
+
+    expect(document.documentElement.dataset.accent).toBe('violet');
+    expect(usePresentationPreferenceStore().accent).toBe('violet');
+    expect(service.patchPreferenceNamespace).toHaveBeenCalledWith(
+      'presentation',
+      { accent: 'violet' },
+      3,
+    );
+    expect(
+      wrapper.get('[data-testid="appearance-accent-option-violet"]').attributes('aria-checked'),
+    ).toBe('true');
+  });
+
+  it('rolls back an optimistic accent update when the canonical mutation fails', async () => {
+    const service = createService();
+    service.patchPreferenceNamespace.mockResolvedValue(
+      fail({ code: 'SERVICE_UNAVAILABLE', message: 'canonical down' }),
+    );
+    const { wrapper } = mountSection(service);
+    await flushPromises();
+
+    await wrapper.get('[data-testid="appearance-accent-option-rose-red"]').trigger('click');
+    await flushPromises();
+
+    expect(document.documentElement.dataset.accent).toBe('linear-indigo');
+    expect(usePresentationPreferenceStore().accent).toBe('linear-indigo');
+    expect(
+      wrapper.get('[data-testid="appearance-accent-option-rose-red"]').attributes('aria-checked'),
+    ).toBe('false');
+    expect(
+      wrapper
+        .get('[data-testid="appearance-accent-option-linear-indigo"]')
+        .attributes('aria-checked'),
+    ).toBe('true');
+    expect(wrapper.find('[data-testid="user-preference-mutation-error"]').exists()).toBe(true);
   });
 
   it('contains canonical load failure inside the User Preferences section', async () => {

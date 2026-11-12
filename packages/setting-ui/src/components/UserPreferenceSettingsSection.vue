@@ -6,6 +6,7 @@
 import { computed, onMounted, ref, watch } from 'vue';
 import {
   DEFAULT_USER_PREFERENCE_PROFILE,
+  type Accent,
   type PresentationPreferences,
   type RegionalPreferences,
   type UserPreferenceProfile,
@@ -19,7 +20,7 @@ const { SettingsStatusBlock } = settingUiHost.components;
 
 type PreferenceResetTarget = 'all' | 'presentation' | 'regional';
 import { useUserPreferences } from '../composables/useUserPreferences';
-import { applyThemeMode } from '../composables';
+import { applyAccent, applyThemeMode } from '../composables';
 import { usePresentationPreferenceStore } from '../stores/presentation-preference-store';
 import type { SettingLocale } from '../setting-ui-host';
 
@@ -36,8 +37,9 @@ const {
   resetAllUserPreferences,
 } = useUserPreferences();
 
-const appearance = ref<{ theme: PresentationPreferences['theme'] }>({
+const appearance = ref<{ theme: PresentationPreferences['theme']; accent: Accent }>({
   theme: DEFAULT_USER_PREFERENCE_PROFILE.presentation.theme,
+  accent: DEFAULT_USER_PREFERENCE_PROFILE.presentation.accent,
 });
 const locale = ref<RegionalPreferences & { language: PresentationPreferences['language'] }>({
   language: DEFAULT_USER_PREFERENCE_PROFILE.presentation.language,
@@ -55,7 +57,10 @@ function hydrateCanonicalPreferences(): void {
   const regionalValue = regional.value?.preferences;
   if (!presentationValue || !regionalValue) return;
 
-  appearance.value = { theme: presentationValue.theme };
+  appearance.value = {
+    theme: presentationValue.theme,
+    accent: presentationValue.accent ?? 'brand-gold',
+  };
   locale.value = { language: presentationValue.language, ...regionalValue };
   const profile: UserPreferenceProfile = {
     presentation: presentationValue,
@@ -67,19 +72,29 @@ function hydrateCanonicalPreferences(): void {
 
 async function handleAppearanceUpdate(value: {
   theme?: PresentationPreferences['theme'];
+  accent?: Accent;
 }): Promise<void> {
-  const nextTheme = value.theme ?? appearance.value.theme;
-  const previousTheme = appearance.value.theme;
-  if (nextTheme === previousTheme) return;
+  const previous = { ...appearance.value };
+  const nextTheme = value.theme ?? previous.theme;
+  const nextAccent = value.accent ?? previous.accent;
+  if (nextTheme === previous.theme && nextAccent === previous.accent) return;
 
-  appearance.value = { theme: nextTheme };
+  appearance.value = { theme: nextTheme, accent: nextAccent };
   presentationStore.setTheme(nextTheme);
   applyThemeMode(nextTheme);
-  if (await patchPresentation({ theme: nextTheme })) return;
+  presentationStore.setAccent(nextAccent);
+  applyAccent(nextAccent);
 
-  appearance.value = { theme: previousTheme };
-  presentationStore.setTheme(previousTheme);
-  applyThemeMode(previousTheme);
+  const patch: { theme?: typeof nextTheme; accent?: Accent } = {};
+  if (nextTheme !== previous.theme) patch.theme = nextTheme;
+  if (nextAccent !== previous.accent) patch.accent = nextAccent;
+  if (await patchPresentation(patch)) return;
+
+  appearance.value = previous;
+  presentationStore.setTheme(previous.theme);
+  applyThemeMode(previous.theme);
+  presentationStore.setAccent(previous.accent);
+  applyAccent(previous.accent);
 }
 
 async function handleLocaleUpdate(

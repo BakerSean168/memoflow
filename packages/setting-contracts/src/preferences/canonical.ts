@@ -12,6 +12,15 @@ export const LocaleIdSchema = z.enum(SUPPORTED_LOCALE_IDS);
 export type LocaleId = z.infer<typeof LocaleIdSchema>;
 
 export const ThemeSchema = z.enum(['light', 'dark', 'auto']);
+export const ACCENT_VALUES = [
+  'brand-gold',
+  'linear-indigo',
+  'ocean-blue',
+  'emerald-green',
+  'rose-red',
+  'violet',
+] as const;
+export const AccentSchema = z.enum(ACCENT_VALUES);
 export const DateStyleSchema = z.enum(['short', 'medium', 'long']);
 export const TimeStyleSchema = z.enum(['12h', '24h']);
 export const WeekStartsOnSchema = z.union([
@@ -28,6 +37,8 @@ export const PresentationPreferencesSchema = z
   .object({
     theme: ThemeSchema,
     language: LocaleIdSchema,
+    /** Stored profiles created before accents existed fall back to the brand gold. */
+    accent: AccentSchema.default('brand-gold'),
   })
   .strict();
 
@@ -48,6 +59,7 @@ export const UserPreferenceProfileSchema = z
   .strict();
 
 export type PresentationPreferences = z.infer<typeof PresentationPreferencesSchema>;
+export type Accent = z.infer<typeof AccentSchema>;
 export type RegionalPreferences = z.infer<typeof RegionalPreferencesSchema>;
 export type UserPreferenceProfile = z.infer<typeof UserPreferenceProfileSchema>;
 
@@ -63,6 +75,7 @@ export const PresentationPreferencesPatchSchema = z
   .object({
     theme: ThemeSchema.optional(),
     language: LocaleIdSchema.optional(),
+    accent: AccentSchema.optional(),
   })
   .strict();
 
@@ -173,6 +186,7 @@ export const DEFAULT_USER_PREFERENCE_PROFILE: UserPreferenceProfile = Object.fre
   presentation: Object.freeze({
     theme: 'auto',
     language: 'zh-CN',
+    accent: 'brand-gold',
   }),
   regional: Object.freeze({
     timeZone: DEFAULT_TIME_ZONE,

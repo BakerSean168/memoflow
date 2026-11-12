@@ -51,7 +51,15 @@ const mocks = vi.hoisted(() => {
     createPinia: vi.fn(() => pinia),
     createAppRouter: vi.fn(() => router),
     useAuthenticationStore: vi.fn(() => authStore),
-    usePresentationPreferenceStore: vi.fn(() => ({ locale: 'en-US' })),
+    usePresentationPreferenceStore: vi.fn(() => ({
+      locale: 'en-US',
+      theme: 'dark',
+      accent: 'violet',
+    })),
+    applyThemeMode: vi.fn(),
+    applyAccent: vi.fn((accent: string) => {
+      document.documentElement.dataset.accent = accent;
+    }),
     createI18nPlugin: vi.fn(() => ({ name: 'desktop-i18n-plugin' })),
     loadLocaleMessages: vi.fn(async () => ({ hello: 'desktop' })),
     translateMessageKey: vi.fn((key: string) =>
@@ -143,6 +151,8 @@ vi.mock('@memoflow/notification-ui', () => ({
 
 vi.mock('@memoflow/app-vue', () => ({
   usePresentationPreferenceStore: mocks.usePresentationPreferenceStore,
+  applyThemeMode: mocks.applyThemeMode,
+  applyAccent: mocks.applyAccent,
 }));
 
 vi.mock('@memoflow/ui-vue-shadcn/composables/useProgressBar', () => ({
@@ -222,6 +232,7 @@ describe('desktop bootstrapMainApp', () => {
       start: vi.fn(),
     });
     document.documentElement.lang = '';
+    delete document.documentElement.dataset.accent;
     document.title = '';
     Object.defineProperty(window, 'requestIdleCallback', {
       configurable: true,
@@ -240,6 +251,13 @@ describe('desktop bootstrapMainApp', () => {
     expect(mocks.authStore.hydrateCloudSession).toHaveBeenCalledTimes(1);
     expect(mocks.accountStore.setCurrentAccount).toHaveBeenCalledWith({ id: 'cloud-1' });
     expect(document.documentElement.lang).toBe('en-US');
+    // Persisted theme and accent are applied to the document root before mount.
+    expect(mocks.applyThemeMode).toHaveBeenCalledWith('dark');
+    expect(mocks.applyAccent).toHaveBeenCalledWith('violet');
+    expect(document.documentElement.dataset.accent).toBe('violet');
+    expect(mocks.applyAccent.mock.invocationCallOrder[0]).toBeLessThan(
+      mocks.app.mount.mock.invocationCallOrder[0] ?? Number.POSITIVE_INFINITY,
+    );
     expect(mocks.createAppRouter).toHaveBeenCalledTimes(1);
     expect(mocks.initElectronFeatures).toHaveBeenCalledWith(mocks.app);
     expect(mocks.app.mount).toHaveBeenCalledWith('#app');
@@ -278,6 +296,8 @@ describe('desktop bootstrapMainApp', () => {
 
     expect(mocks.authStore.reset).toHaveBeenCalledTimes(1);
     expect(mocks.accountStore.reset).toHaveBeenCalledTimes(1);
+    // Presentation sync is independent of cloud hydration (pre-mount theme/accent).
+    expect(document.documentElement.dataset.accent).toBe('violet');
     expect(mocks.router.replace).not.toHaveBeenCalled();
     // auth-only entry (locked profile) must not install the Query Cache (plan §3.1; P2-4).
     expect(mocks.installDesktopServerStateRuntime).not.toHaveBeenCalled();

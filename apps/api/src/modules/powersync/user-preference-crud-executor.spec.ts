@@ -52,12 +52,35 @@ describe('canonical preference PowerSync upload CAS', () => {
         id: 'pref-1',
         identityId: 'identity-1',
         namespace: 'presentation',
-        payload: { theme: 'dark', language: 'zh-CN' },
+        // Legacy payloads without an accent persist the canonical brand-gold default.
+        payload: { theme: 'dark', language: 'zh-CN', accent: 'brand-gold' },
         revision: 1,
         createdAt: '2026-09-09T00:00:00.000Z',
         updatedAt: '2026-09-09T00:00:00.000Z',
       },
     });
+  });
+
+  it('round-trips an explicit accent through create and conflict read-back', async () => {
+    const tx = createTx();
+    const payload = { theme: 'light', language: 'zh-CN', accent: 'violet' };
+    tx.userPreferenceRecord.createMany.mockResolvedValue({ count: 0 });
+    tx.userPreferenceRecord.findUnique.mockResolvedValue(preferenceRow({ id: 'winner', payload }));
+
+    await expect(
+      executeUserPreferenceCrudOperation(tx, 'identity-1', {
+        ...put,
+        data: { ...put.data, payload: JSON.stringify(payload) },
+      }),
+    ).rejects.toMatchObject({
+      code: 'preference_revision_conflict',
+      latest: { revision: 1, preferences: payload },
+    });
+    expect(tx.userPreferenceRecord.createMany).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({ payload }),
+      }),
+    );
   });
 
   it('rejects a new row that tries to start above revision 1', async () => {
@@ -81,7 +104,10 @@ describe('canonical preference PowerSync upload CAS', () => {
     await expect(executeUserPreferenceCrudOperation(tx, 'identity-1', put)).rejects.toMatchObject({
       name: 'PowerSyncPreferenceConflictError',
       expectedRevision: 0,
-      latest: { revision: 1, preferences: { theme: 'light', language: 'zh-CN' } },
+      latest: {
+        revision: 1,
+        preferences: { theme: 'light', language: 'zh-CN', accent: 'brand-gold' },
+      },
     });
   });
 
@@ -128,7 +154,7 @@ describe('canonical preference PowerSync upload CAS', () => {
       op: 'PATCH',
       id: 'pref-1',
       data: {
-        payload: JSON.stringify({ theme: 'light', language: 'zh-CN' }),
+        payload: JSON.stringify({ theme: 'light', language: 'zh-CN', accent: 'ocean-blue' }),
         revision: 2,
         updated_at: '2026-09-09T00:01:00.000Z',
       },
@@ -137,7 +163,7 @@ describe('canonical preference PowerSync upload CAS', () => {
     expect(tx.userPreferenceRecord.updateMany).toHaveBeenCalledWith({
       where: { id: 'pref-1', identityId: 'identity-1', revision: 1 },
       data: {
-        payload: { theme: 'light', language: 'zh-CN' },
+        payload: { theme: 'light', language: 'zh-CN', accent: 'ocean-blue' },
         revision: 2,
         updatedAt: '2026-09-09T00:01:00.000Z',
       },
@@ -166,7 +192,10 @@ describe('canonical preference PowerSync upload CAS', () => {
     tx.userPreferenceRecord.findUnique
       .mockResolvedValueOnce(preferenceRow({ revision: 1 }))
       .mockResolvedValueOnce(
-        preferenceRow({ revision: 2, payload: { theme: 'auto', language: 'zh-CN' } }),
+        preferenceRow({
+          revision: 2,
+          payload: { theme: 'auto', language: 'zh-CN', accent: 'rose-red' },
+        }),
       );
     tx.userPreferenceRecord.updateMany.mockResolvedValue({ count: 0 });
 
@@ -181,7 +210,10 @@ describe('canonical preference PowerSync upload CAS', () => {
       }),
     ).rejects.toMatchObject({
       expectedRevision: 1,
-      latest: { revision: 2, preferences: { theme: 'auto', language: 'zh-CN' } },
+      latest: {
+        revision: 2,
+        preferences: { theme: 'auto', language: 'zh-CN', accent: 'rose-red' },
+      },
     });
   });
 

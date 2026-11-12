@@ -99,6 +99,7 @@ export {
 
 // ── Theme / presentation ──
 export {
+  applyAccent,
   applyThemeMode,
   useLocaleSync,
   usePresentationBootstrap,
