@@ -64,11 +64,34 @@ export interface ShellOrigin {
 /** 胶囊/深链可落地的业务模块标识。Settings 已升为独立场景，不在此列。 */
 export type ShellModule = 'goal' | 'task' | 'routine' | 'note' | 'notification' | 'schedule';
 
+/** 模块 Tab 标题的 i18n key（S1 用模块名；S2 起换具体对象名）。 */
+export const MODULE_TITLE_KEYS: Record<ShellModule, string> = {
+  goal: 'nav.capsule.goal',
+  task: 'nav.capsule.task',
+  routine: 'nav.capsule.routine',
+  note: 'nav.capsule.note',
+  notification: 'nav.capsule.notification',
+  schedule: 'nav.schedule',
+};
+
+/**
+ * 标题归属：module = 渲染时按 i18n key 翻译；object = 视图上报的对象名数据。
+ * 结构字段而不是标题字符串内容决定归属，避免语言切换误改对象名。
+ */
+export type BusinessTabTitleSource = 'module' | 'object';
+
 export interface BusinessTab {
   id: string;
   module: ShellModule;
   route: string;
   title: string;
+  /** 模块 Tab 的标题键；渲染时按当前语言翻译。对象 Tab 不设置。 */
+  titleKey?: string;
+  /**
+   * 标题归属。旧持久化数据没有该字段，由 sanitizeLegacyTabs 迁移为 module；
+   * 对象 Tab 显式写 object，标题只作为数据保存。
+   */
+  titleSource?: BusinessTabTitleSource;
   lastActiveAt: number;
 }
 
@@ -76,6 +99,8 @@ export interface OpenTabInput {
   module: ShellModule;
   route: string;
   title: string;
+  /** 模块 Tab 传入；渲染时按当前语言翻译。对象 Tab 省略。 */
+  titleKey?: string;
   intent: 'capsule' | 'deeplink';
 }
 
@@ -232,6 +257,13 @@ export const useAppShellStore = defineStore('app-shell', {
       if (existing) {
         existing.route = input.route;
         existing.title = input.title;
+        if (input.titleKey) {
+          existing.titleKey = input.titleKey;
+          existing.titleSource = 'module';
+        } else {
+          delete existing.titleKey;
+          existing.titleSource = 'object';
+        }
         existing.lastActiveAt = now;
         this.activeTabId = existing.id;
         this.rightPanelOpen = true;
@@ -253,6 +285,9 @@ export const useAppShellStore = defineStore('app-shell', {
         module: input.module,
         route: input.route,
         title: input.title,
+        ...(input.titleKey
+          ? { titleKey: input.titleKey, titleSource: 'module' as const }
+          : { titleSource: 'object' as const }),
         lastActiveAt: now,
       };
       this.tabs.push(tab);
@@ -369,13 +404,27 @@ export const useAppShellStore = defineStore('app-shell', {
               tab.route.startsWith('/note?')
             ),
         )
-        .map((tab) => ({
-          ...tab,
-          route: canonicalizePersistedBusinessRoute(tab.route),
-        }));
+        .map((tab) => {
+          const route = canonicalizePersistedBusinessRoute(tab.route);
+          // Object titles are data and must survive hydration untouched.
+          if (tab.titleSource === 'object') return { ...tab, route };
+          // Tabs persisted before titleSource existed were always module-owned:
+          // no production writer ever persisted an object title.
+          return {
+            ...tab,
+            route,
+            titleSource: 'module' as const,
+            titleKey: tab.titleKey ?? MODULE_TITLE_KEYS[tab.module],
+          };
+        });
       const tabsChanged =
         next.length !== this.tabs.length ||
-        next.some((tab, index) => tab.route !== this.tabs[index]?.route);
+        next.some(
+          (tab, index) =>
+            tab.route !== this.tabs[index]?.route ||
+            tab.titleSource !== this.tabs[index]?.titleSource ||
+            tab.titleKey !== this.tabs[index]?.titleKey,
+        );
       if (tabsChanged) {
         this.tabs = next;
         if (this.activeTabId && !next.some((tab) => tab.id === this.activeTabId)) {
@@ -410,10 +459,17 @@ export const useAppShellStore = defineStore('app-shell', {
     /**
      * 更新当前激活 Tab 的标题（Phase 1：详情视图加载到对象名后调用，
      * 格式由视图拼装为「模块名 · 对象标题」；列表路由保持模块名）。
+     *
+     * 对象标题是数据而不是翻译结果：写入时清除模块标题键并标记为 object，
+     * 语言切换不得改写它。
      */
     setActiveTabTitle(title: string): void {
       const tab = this.tabs.find((t) => t.id === this.activeTabId);
-      if (tab) tab.title = title;
+      if (tab) {
+        tab.title = title;
+        tab.titleSource = 'object';
+        delete tab.titleKey;
+      }
     },
 
     setLayout(layout: ShellLayout, reason: ShellLayoutReason = 'default'): void {

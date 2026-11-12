@@ -148,6 +148,72 @@ describe('useAppShellStore (V2 shell tabs)', () => {
     expect(store.tabs.find((t) => t.id === result.tabId)?.title).toBe('Goals · My goal');
   });
 
+  it('stores module titles as keys and object titles as data', () => {
+    const store = useAppShellStore();
+    const result = store.openTab({
+      module: 'goal',
+      route: '/goals/g-1',
+      title: 'Goals',
+      titleKey: 'nav.capsule.goal',
+      intent: 'deeplink',
+    });
+
+    expect(store.tabs.find((t) => t.id === result.tabId)).toMatchObject({
+      title: 'Goals',
+      titleKey: 'nav.capsule.goal',
+      titleSource: 'module',
+    });
+
+    store.setActiveTabTitle('提升英语');
+    expect(store.tabs.find((t) => t.id === result.tabId)).toMatchObject({
+      title: '提升英语',
+      titleSource: 'object',
+    });
+    expect(store.tabs.find((t) => t.id === result.tabId)?.titleKey).toBeUndefined();
+  });
+
+  it('migrates legacy persisted tabs to module title keys', () => {
+    const store = useAppShellStore();
+    store.tabs = [
+      {
+        id: 'tab-goal-legacy',
+        module: 'goal',
+        route: '/goals',
+        title: 'Goals',
+        lastActiveAt: Date.now(),
+      },
+    ];
+
+    store.sanitizeLegacyTabs();
+
+    expect(store.tabs[0]).toMatchObject({
+      titleSource: 'module',
+      titleKey: 'nav.capsule.goal',
+    });
+  });
+
+  it('keeps object-owned titles as data through sanitize', () => {
+    const store = useAppShellStore();
+    store.tabs = [
+      {
+        id: 'tab-goal-object',
+        module: 'goal',
+        route: '/goals/g-1',
+        title: '提升英语',
+        titleSource: 'object',
+        lastActiveAt: Date.now(),
+      },
+    ];
+
+    store.sanitizeLegacyTabs();
+
+    expect(store.tabs[0]).toMatchObject({
+      title: '提升英语',
+      titleSource: 'object',
+    });
+    expect(store.tabs[0]?.titleKey).toBeUndefined();
+  });
+
   it('closing the active tab activates a neighbor; closing the last returns to panel Home', () => {
     const store = useAppShellStore();
     const a = store.openTab({ module: 'goal', route: '/goals', title: 'G', intent: 'deeplink' });

@@ -1,9 +1,45 @@
 import { DOMWrapper, flushPromises, mount } from '@vue/test-utils';
-import { describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it } from 'vitest';
+import { nextTick } from 'vue';
+import { createDefaultUserPreferenceProfile } from '@memoflow/setting-contracts';
 import { requireYmd } from '@memoflow/shared-primitives';
+import { formatProductYmd, setProductTimePreferences } from '../utils/product-time';
 import ProductDatePicker from './ProductDatePicker.vue';
 
 describe('ProductDatePicker', () => {
+  afterEach(() => {
+    setProductTimePreferences(createDefaultUserPreferenceProfile());
+  });
+
+  it('reformats a day chip when the product locale changes', async () => {
+    const base = createDefaultUserPreferenceProfile();
+    setProductTimePreferences({
+      ...base,
+      presentation: { ...base.presentation, language: 'en-US' },
+    });
+    const enLabel = formatProductYmd('2027-11-15');
+    const wrapper = mount(ProductDatePicker, {
+      props: {
+        modelValue: requireYmd('2027-11-15'),
+        label: 'Start',
+        testId: 'start-picker',
+      },
+      attachTo: document.body,
+    });
+    expect(wrapper.get('[data-testid="start-picker"]').text()).toContain(enLabel);
+
+    setProductTimePreferences({
+      ...base,
+      presentation: { ...base.presentation, language: 'zh-CN' },
+    });
+    await nextTick();
+
+    const zhLabel = formatProductYmd('2027-11-15');
+    expect(zhLabel).not.toBe(enLabel);
+    expect(wrapper.get('[data-testid="start-picker"]').text()).toContain(zhLabel);
+    wrapper.unmount();
+  });
+
   it('reserves a single validation line and associates only a visible parse error', async () => {
     const wrapper = mount(ProductDatePicker, {
       props: { modelValue: null, label: 'Start', testId: 'start-picker' },

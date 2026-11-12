@@ -143,6 +143,8 @@ export interface AiUiHost extends PlatformRendererHost {
           module: 'goal' | 'task' | 'note' | 'schedule' | 'routine' | 'notification';
           route: string;
           title: string;
+          /** Module-owned title key; resolve against the live locale when present. */
+          titleKey?: string;
         }
       | null
       | undefined;

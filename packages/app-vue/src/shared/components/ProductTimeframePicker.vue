@@ -234,6 +234,10 @@ watch(
 );
 
 const triggerLabel = computed(() => {
+  // Day precision formats through the product-time session, which is not a
+  // reactive dependency of this computed. Track the revision so a locale
+  // change re-renders the chip instead of freezing the opening language.
+  void productTimeRevision.value;
   if (!props.modelValue) return props.placeholder || props.label;
   if (props.modelValue.kind === 'day') return formatProductYmd(props.modelValue.date);
   return goalTimeframeLabel(props.modelValue, props.locale);

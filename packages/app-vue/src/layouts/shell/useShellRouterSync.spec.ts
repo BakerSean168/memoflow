@@ -2,7 +2,6 @@
 
 import { mount } from '@vue/test-utils';
 import { createPinia, setActivePinia } from 'pinia';
-import { createI18n } from 'vue-i18n';
 import { createMemoryHistory, createRouter } from 'vue-router';
 import { defineComponent, h, nextTick } from 'vue';
 import { flushPromises } from '@vue/test-utils';
@@ -15,7 +14,10 @@ import {
   AUTO_FOCUS_VIEWPORT,
 } from './useShellRouterSync';
 import { useShellRouterSync } from './useShellRouterSync';
+import { resolveTabTitle } from './useTabTitle';
 import { MAX_BUSINESS_TABS, useAppShellStore } from './useAppShellStore';
+import { createI18nPlugin, setI18nLocale } from '../../plugins/i18n';
+import { productionLocaleMessages } from '../../locales/production-messages';
 
 const originalInnerWidth = window.innerWidth;
 
@@ -46,7 +48,8 @@ vi.mock('@memoflow/ui-vue-shadcn', async (importOriginal) => {
   };
 });
 
-afterEach(() => {
+afterEach(async () => {
+  await setI18nLocale('en-US');
   Object.defineProperty(window, 'innerWidth', {
     configurable: true,
     value: originalInnerWidth,
@@ -135,26 +138,10 @@ describe('resolveEntryLayout (schedule/settings no longer force focus)', () => {
   });
 });
 
-const i18n = createI18n({
-  legacy: false,
-  locale: 'en-US',
-  messages: {
-    'en-US': {
-      nav: { capsule: { goal: 'Goals' } },
-      common: { confirm: 'Confirm', cancel: 'Cancel' },
-      shell: {
-        panel: {
-          dirtyTransitionConfirm: 'Continue with unsaved changes?',
-          dirtyTransitionConfirmTitle: 'Leave this form?',
-          busyTransitionHint: 'Please wait',
-          tabLimitConfirm: 'Close "{title}" to open this?',
-          tabLimitConfirmTitle: 'Tab limit reached',
-          tabLimitDeniedHint: 'Tab limit reached — close a tab first.',
-        },
-      },
-    },
-  },
-});
+// The real plugin/singleton so locale switches exercise the same setI18nLocale
+// path as preference hydration in the app.
+const i18n = createI18nPlugin('en-US', productionLocaleMessages['en-US']);
+const translate = (key: string): string => i18n.global.t(key);
 
 async function mountRouterSync(initialPath: string) {
   const pinia = createPinia();
@@ -467,7 +454,7 @@ describe('useShellRouterSync Phase 1 landing / deep-link semantics', () => {
     expect(confirmState.calls).toHaveLength(1);
     expect(confirmState.calls[0]).toMatchObject({
       title: 'Tab limit reached',
-      description: 'Close "Goals" to open this?',
+      description: 'Tab limit reached — close "Goals" (least recently used) to open this?',
       confirmText: 'Confirm',
       cancelText: 'Cancel',
       variant: 'default',
@@ -555,6 +542,95 @@ describe('keyboard module activation', () => {
     expect(fixture.router.currentRoute.value.fullPath).toBe('/goals/g-2');
     expect(fixture.store.activeTabId).toBe(second.tabId);
     expect(fixture.store.tabs.find((tab) => tab.id === first.tabId)?.route).toBe('/goals/g-1');
+    wrapper.unmount();
+  });
+});
+
+describe('module tab titles follow the active locale', () => {
+  it('retranslates an already-open module tab when switching en-US -> zh-CN', async () => {
+    const fixture = await mountRouterSync('/goals');
+    const wrapper = fixture.mount();
+    const tab = fixture.store.tabs[0]!;
+
+    expect(tab.titleSource).toBe('module');
+    expect(tab.titleKey).toBe('nav.capsule.goal');
+    expect(resolveTabTitle(tab, translate)).toBe('Goals');
+
+    await setI18nLocale('zh-CN');
+    await nextTick();
+
+    expect(resolveTabTitle(fixture.store.tabs[0]!, translate)).toBe('目标');
+    wrapper.unmount();
+  });
+
+  it('retranslates an already-open module tab when switching zh-CN -> en-US', async () => {
+    await setI18nLocale('zh-CN');
+    const fixture = await mountRouterSync('/tasks');
+    const wrapper = fixture.mount();
+    expect(resolveTabTitle(fixture.store.tabs[0]!, translate)).toBe('任务');
+
+    await setI18nLocale('en-US');
+    await nextTick();
+
+    expect(resolveTabTitle(fixture.store.tabs[0]!, translate)).toBe('Tasks');
+    wrapper.unmount();
+  });
+
+  it('keeps a deep-linked tab in the preference locale when startup opens it before hydration', async () => {
+    // restoreStartupRoute() opens the tab during setup, before async preferences load.
+    const fixture = await mountRouterSync('/goals');
+    const wrapper = fixture.mount();
+    expect(resolveTabTitle(fixture.store.tabs[0]!, translate)).toBe('Goals');
+
+    await setI18nLocale('zh-CN');
+    await nextTick();
+
+    expect(resolveTabTitle(fixture.store.tabs[0]!, translate)).toBe('目标');
+    wrapper.unmount();
+  });
+
+  it('never rewrites an object-owned data title when the locale changes', async () => {
+    const fixture = await mountRouterSync('/goals/g-1');
+    const wrapper = fixture.mount();
+    fixture.store.setActiveTabTitle('提升英语');
+    const tab = fixture.store.tabs[0]!;
+
+    expect(tab.titleSource).toBe('object');
+    expect(tab.titleKey).toBeUndefined();
+
+    await setI18nLocale('zh-CN');
+    await nextTick();
+
+    expect(tab.title).toBe('提升英语');
+    expect(tab.titleKey).toBeUndefined();
+    expect(resolveTabTitle(tab, translate)).toBe('提升英语');
+    wrapper.unmount();
+  });
+
+  it('uses the current-locale title in the tab-limit confirmation', async () => {
+    confirmState.reset();
+    const fixture = await mountRouterSync('/goals');
+    const wrapper = fixture.mount();
+    for (let i = 0; i < MAX_BUSINESS_TABS - 1; i += 1) {
+      fixture.store.openTab({
+        module: 'note',
+        route: `/repository?note=${i}`,
+        title: `N${i}`,
+        intent: 'deeplink',
+      });
+    }
+
+    await setI18nLocale('zh-CN');
+    await nextTick();
+    confirmState.setAnswer(true);
+
+    await fixture.router.push('/goals/g-2');
+    await flushPromises();
+    await nextTick();
+
+    expect(confirmState.calls[0]).toMatchObject({
+      description: expect.stringContaining('「目标」'),
+    });
     wrapper.unmount();
   });
 });

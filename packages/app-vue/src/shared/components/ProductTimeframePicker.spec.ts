@@ -1,9 +1,13 @@
 import { DOMWrapper, flushPromises, mount } from '@vue/test-utils';
 import { afterEach, describe, expect, it } from 'vitest';
+import { nextTick } from 'vue';
+import { createDefaultUserPreferenceProfile } from '@memoflow/setting-contracts';
+import { formatProductYmd, setProductTimePreferences } from '../utils/product-time';
 import ProductTimeframePicker from './ProductTimeframePicker.vue';
 
 describe('ProductTimeframePicker', () => {
   afterEach(() => {
+    setProductTimePreferences(createDefaultUserPreferenceProfile());
     document.body.innerHTML = '';
   });
 
@@ -21,6 +25,35 @@ describe('ProductTimeframePicker', () => {
     expect(
       (document.querySelector('[data-testid="target-picker-query"]') as HTMLInputElement).value,
     ).toBe('2027/11/15');
+    wrapper.unmount();
+  });
+
+  it('reformats a day-precision chip when the product locale changes', async () => {
+    const base = createDefaultUserPreferenceProfile();
+    setProductTimePreferences({
+      ...base,
+      presentation: { ...base.presentation, language: 'en-US' },
+    });
+    const enLabel = formatProductYmd('2027-11-15');
+    const wrapper = mount(ProductTimeframePicker, {
+      props: {
+        modelValue: { kind: 'day', date: '2027-11-15' },
+        label: 'Target',
+        testId: 'target-picker',
+      },
+      attachTo: document.body,
+    });
+    expect(wrapper.get('[data-testid="target-picker"]').text()).toContain(enLabel);
+
+    setProductTimePreferences({
+      ...base,
+      presentation: { ...base.presentation, language: 'zh-CN' },
+    });
+    await nextTick();
+
+    const zhLabel = formatProductYmd('2027-11-15');
+    expect(zhLabel).not.toBe(enLabel);
+    expect(wrapper.get('[data-testid="target-picker"]').text()).toContain(zhLabel);
     wrapper.unmount();
   });
 

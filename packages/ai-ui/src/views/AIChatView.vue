@@ -370,6 +370,7 @@ import { aiUiHost } from '../ai-ui-host';
 import { SHELL_COMPOSER_DENSITY_KEY, SHELL_COMPOSER_MOUNT_KEY } from '../ai-ui-host';
 import { type ComposerDensity } from '../ai-ui-host';
 import { useAIChatView } from '../composables/useAIChatView';
+import { resolveSurfaceTitle } from '../composables/surfaceContext';
 import { inferWorkflowMode } from '../composables/workflowIntent';
 import type { ConversationSummary, WorkflowMode } from '../composables/types';
 
@@ -420,10 +421,11 @@ const {
     ) {
       return null;
     }
+    const tab = shellStore.activeTab;
     return {
-      module: shellStore.activeTab.module,
-      route: shellStore.activeTab.route,
-      title: shellStore.activeTab.title,
+      module: tab.module,
+      route: tab.route,
+      title: resolveSurfaceTitle(tab, t),
     };
   },
 });

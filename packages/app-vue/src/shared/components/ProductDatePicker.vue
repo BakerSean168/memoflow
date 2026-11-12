@@ -167,12 +167,16 @@ const calendarReturnDate = computed(() => {
   void productTimeRevision.value;
   return parseToCalendarDate(getProductTodayYmd());
 });
-const resolvedLabel = computed(() =>
-  props.modelValue ? formatProductYmd(props.modelValue) : props.placeholder,
-);
-const triggerLabel = computed(() =>
-  props.modelValue ? formatProductYmd(props.modelValue) : props.placeholder || props.label,
-);
+const resolvedLabel = computed(() => {
+  // Product-time formatting is not reactive by itself; track preference changes
+  // so the chip follows the active locale instead of freezing at open time.
+  void productTimeRevision.value;
+  return props.modelValue ? formatProductYmd(props.modelValue) : props.placeholder;
+});
+const triggerLabel = computed(() => {
+  void productTimeRevision.value;
+  return props.modelValue ? formatProductYmd(props.modelValue) : props.placeholder || props.label;
+});
 
 function seedControlsFromYmd(date: Ymd): void {
   const year = Number(date.slice(0, 4));

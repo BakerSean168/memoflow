@@ -2811,7 +2811,7 @@
         "status": "none-verified",
         "testFiles": []
       },
-      "sourceSha256": "22726432f5d0da1c26331b8b9c3681b07a1f876d0f54fc98e2712250389d117c"
+      "sourceSha256": "2f16c4256068650646e00203bd0fb760e6543c696ed7fce8f140c9eb707768a8"
     },
     {
       "path": "packages/app-vue/src/layouts/shell/ConversationSidebar.spec.ts",
@@ -2896,7 +2896,7 @@
         "status": "none-verified",
         "testFiles": []
       },
-      "sourceSha256": "9823147745ac275f066e9e9d56f1509c68d15cbfd1631e850e0bb74e510d4989"
+      "sourceSha256": "9fefbfcb52034ff82f990f86b698af95bace62eb8f1420a22bb2dca82af56f2b"
     },
     {
       "path": "packages/repository-ui/src/components/DocumentPresentationPrimitives.spec.ts",
@@ -3015,7 +3015,7 @@
         "status": "none-verified",
         "testFiles": []
       },
-      "sourceSha256": "6c09ab0ecd1d5fedad49a4111f54a7c364782421a4da79d1be84112b53535900"
+      "sourceSha256": "57f18093ccc4b3452eba675f70e6e2a546f4a8a424a1a9835eb0846c0ac6fc09"
     },
     {
       "path": "packages/app-vue/src/shared/components/ProductTimePicker.spec.ts",
