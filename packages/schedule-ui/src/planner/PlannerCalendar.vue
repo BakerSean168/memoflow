@@ -604,12 +604,31 @@ function eventToneClass(projection: CalendarEventProjection): string {
   box-shadow: inset 2px 0 0 hsl(var(--planner-event-hsl) / 0.72);
 }
 
+/*
+ * FullCalendar's classic theme paints the event content container with
+ * `color: var(--fc-event-contrast-color)`, which resolves to
+ * --fc-classic-event-contrast (primary-foreground) for every event in this
+ * calendar. That container color is what .planner-event inherits, so the
+ * harness-level `color` declarations above never reach event titles: on the
+ * faint all-day / marker surfaces the near-black title collapsed to ~1:1
+ * contrast in dark themes (#916). Pin the content color for those two
+ * variants to the theme foreground, which keeps >= 4.5:1 against their
+ * tinted surfaces in both themes; the source hue stays in the border/tint.
+ */
+:global(.planner-event-all-day .planner-event) {
+  color: hsl(var(--foreground));
+}
+
 :global(.planner-occupancy-marker) {
   border-style: dashed !important;
   border-color: hsl(var(--planner-event-hsl) / 0.66) !important;
   color: hsl(var(--planner-event-hsl)) !important;
   background: hsl(var(--planner-event-hsl) / 0.09) !important;
   box-shadow: none;
+}
+
+:global(.planner-occupancy-marker .planner-event) {
+  color: hsl(var(--foreground));
 }
 
 :global(.planner-tone-muted) {
