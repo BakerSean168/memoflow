@@ -235,12 +235,21 @@ export class TaskOccurrencePrismaRepository
       if (row.status === 'Completed') stat.completedOccurrenceCount += count;
       if (row.status === 'Pending') stat.pendingOccurrenceCount += count;
     }
+    // Unified with the #915 today caliber: Missed/Skipped are terminal exits
+    // and never occupy the completion-rate denominator.
+    const actionableDueOccurrenceCounts: Record<string, number> = Object.fromEntries(
+      planIds.map((planId) => [planId, 0]),
+    );
     for (const row of dueGrouped) {
       const stat = stats[row.planId];
       if (!stat) continue;
       const count = row._count._all;
       stat.dueOccurrenceCount += count;
       if (row.status === 'Completed') stat.completedDueOccurrenceCount += count;
+      if (row.status !== 'Missed' && row.status !== 'Skipped') {
+        actionableDueOccurrenceCounts[row.planId] =
+          (actionableDueOccurrenceCounts[row.planId] ?? 0) + count;
+      }
     }
     for (const row of futurePendingGrouped) {
       const stat = stats[row.planId];
@@ -253,9 +262,10 @@ export class TaskOccurrencePrismaRepository
             | TaskOccurrenceStatus
             | undefined) ?? null;
       }
+      const actionableDueOccurrenceCount = actionableDueOccurrenceCounts[stat.planId] ?? 0;
       stat.completionRate =
-        stat.dueOccurrenceCount > 0
-          ? Math.round((stat.completedDueOccurrenceCount / stat.dueOccurrenceCount) * 100)
+        actionableDueOccurrenceCount > 0
+          ? Math.round((stat.completedDueOccurrenceCount / actionableDueOccurrenceCount) * 100)
           : 0;
     }
     return stats;

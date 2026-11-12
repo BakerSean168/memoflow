@@ -47,9 +47,47 @@ describe('TaskWorkspaceQueryService', () => {
     const result = await service.getWorkspace('identity-1', 'task-1', { recentLimit: 3 });
     expect(result).toMatchObject({
       ok: true,
-      data: { occurrenceSummary: { total: 10, completed: 4, completionRate: 40 } },
+      data: { occurrenceSummary: { total: 10, completed: 4, completionRate: 50 } },
     });
     expect(occurrences.findRecentByPlan).toHaveBeenCalledWith('task-1', 'identity-1', 3);
+  });
+
+  it('mirrors the #915 today-surface caliber on the #910 scenario multiset', async () => {
+    const { service, occurrences } = harness();
+    // Cross-caliber assertion (#920): the same status multiset pinned by
+    // TaskQuickSurface.spec.ts ('counts the #910 observation scenario as 2/6
+    // instead of 2/7 when one occurrence is Missed') must yield the same
+    // rate here: 2 Completed of 6 actionable -> 33.
+    occurrences.getStatusCountsForPlan.mockResolvedValue({
+      total: 7,
+      completed: 2,
+      missed: 1,
+      skipped: 0,
+      pending: 4,
+      inProgress: 0,
+    });
+    const result = await service.getWorkspace('identity-1', 'task-1');
+    expect(result).toMatchObject({
+      ok: true,
+      data: { occurrenceSummary: { completionRate: 33 } },
+    });
+  });
+
+  it('returns a zero completion rate when every occurrence is Missed or Skipped', async () => {
+    const { service, occurrences } = harness();
+    occurrences.getStatusCountsForPlan.mockResolvedValue({
+      total: 2,
+      completed: 0,
+      missed: 1,
+      skipped: 1,
+      pending: 0,
+      inProgress: 0,
+    });
+    const result = await service.getWorkspace('identity-1', 'task-1');
+    expect(result).toMatchObject({
+      ok: true,
+      data: { occurrenceSummary: { completionRate: 0 } },
+    });
   });
 
   it('defaults to five recent occurrences independently of all-time counts', async () => {
