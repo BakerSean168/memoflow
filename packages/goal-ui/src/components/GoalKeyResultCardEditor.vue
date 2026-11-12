@@ -260,7 +260,12 @@ const startLabel = computed(() =>
     ? goalTimeframeLabel(props.goalStart, locale.value)
     : t('goal.dialog.krTrajectoryNotSet'),
 );
-const currentLabel = computed(() => formatProductYmd(getProductTodayYmd()));
+const currentLabel = computed(() => {
+  // The day label formats through product time; track preference changes so a
+  // locale switch does not leave the opening language frozen in the plot.
+  void goalUiHost.productTimeRevision.value;
+  return formatProductYmd(getProductTodayYmd());
+});
 const effectiveTargetLabel = computed(() => {
   const effective = target.value ?? props.goalTarget;
   return effective
