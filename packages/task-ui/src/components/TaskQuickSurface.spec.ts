@@ -136,9 +136,7 @@ it('reaches 100% when every actionable occurrence is completed and only a Missed
   const progressElement = w.get('[data-testid="task-quick-progress"]');
   expect(progressElement.attributes('data-progress')).toBe('100');
   const trackStyle = w.get('[data-testid="task-quick-progress-track"]').attributes('style') ?? '';
-  expect(trackStyle).toContain(
-    'filter: drop-shadow(0 0 6px hsl(var(--progress-fill-end) / 0.55))',
-  );
+  expect(trackStyle).toContain('filter: drop-shadow(0 0 6px hsl(var(--progress-fill-end) / 0.55))');
 });
 it('pins the zero-actionable boundary: all Missed renders 0/0 and 0% with no NaN', () => {
   const w = surface({

@@ -70,9 +70,7 @@ const actionableCount = computed(
       .length,
 );
 const progressPct = computed(() =>
-  actionableCount.value
-    ? Math.round((completedCount.value / actionableCount.value) * 100)
-    : 0,
+  actionableCount.value ? Math.round((completedCount.value / actionableCount.value) * 100) : 0,
 );
 const visibleRows = computed(() => {
   const templates = new Map(props.templates.map((plan) => [String(plan.id), plan]));
