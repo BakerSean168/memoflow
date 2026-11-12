@@ -65,9 +65,7 @@ describe('canonical preference PowerSync upload CAS', () => {
     const tx = createTx();
     const payload = { theme: 'light', language: 'zh-CN', accent: 'violet' };
     tx.userPreferenceRecord.createMany.mockResolvedValue({ count: 0 });
-    tx.userPreferenceRecord.findUnique.mockResolvedValue(
-      preferenceRow({ id: 'winner', payload }),
-    );
+    tx.userPreferenceRecord.findUnique.mockResolvedValue(preferenceRow({ id: 'winner', payload }));
 
     await expect(
       executeUserPreferenceCrudOperation(tx, 'identity-1', {
@@ -106,7 +104,10 @@ describe('canonical preference PowerSync upload CAS', () => {
     await expect(executeUserPreferenceCrudOperation(tx, 'identity-1', put)).rejects.toMatchObject({
       name: 'PowerSyncPreferenceConflictError',
       expectedRevision: 0,
-      latest: { revision: 1, preferences: { theme: 'light', language: 'zh-CN', accent: 'brand-gold' } },
+      latest: {
+        revision: 1,
+        preferences: { theme: 'light', language: 'zh-CN', accent: 'brand-gold' },
+      },
     });
   });
 
