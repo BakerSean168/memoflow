@@ -49,8 +49,15 @@ const mocks = vi.hoisted(() => {
       ok: true,
       data: { account: { id: 'cloud-1' }, session: { id: 'session-1' } },
     })),
-    usePresentationPreferenceStore: vi.fn(() => ({ theme: 'dark', locale: 'zh-CN' })),
+    usePresentationPreferenceStore: vi.fn(() => ({
+      theme: 'dark',
+      locale: 'zh-CN',
+      accent: 'violet',
+    })),
     applyThemeMode: vi.fn(),
+    applyAccent: vi.fn((accent: string) => {
+      document.documentElement.dataset.accent = accent;
+    }),
     presentWebLiveNotification: vi.fn(),
     executeWebNotificationAction: vi.fn(async () => ({
       ok: true,
@@ -103,6 +110,7 @@ vi.mock('@memoflow/assets', () => ({
 vi.mock('@memoflow/app-vue/web-bootstrap', () => ({
   createAppRouter: mocks.createAppRouter,
   useAuthenticationStore: mocks.useAuthenticationStore,
+  applyAccent: mocks.applyAccent,
   applyThemeMode: mocks.applyThemeMode,
   presentWebLiveNotification: mocks.presentWebLiveNotification,
   usePresentationPreferenceStore: mocks.usePresentationPreferenceStore,
@@ -170,6 +178,7 @@ describe('bootstrapMainApp', () => {
       reset: vi.fn(),
     });
     document.documentElement.lang = '';
+    delete document.documentElement.dataset.accent;
     document.title = '';
     Object.defineProperty(window, 'requestIdleCallback', {
       configurable: true,
@@ -190,6 +199,12 @@ describe('bootstrapMainApp', () => {
     expect(mocks.createPinia).toHaveBeenCalledTimes(1);
     expect(mocks.pinia.use).toHaveBeenCalledWith('persisted-plugin');
     expect(mocks.applyThemeMode).toHaveBeenCalledWith('dark');
+    // Persisted accent is applied to the document root before the app mounts.
+    expect(mocks.applyAccent).toHaveBeenCalledWith('violet');
+    expect(document.documentElement.dataset.accent).toBe('violet');
+    expect(mocks.applyAccent.mock.invocationCallOrder[0]).toBeLessThan(
+      mocks.app.mount.mock.invocationCallOrder[0] ?? Number.POSITIVE_INFINITY,
+    );
     expect(document.documentElement.lang).toBe('zh-CN');
     expect(mocks.loadLocaleMessages).toHaveBeenCalledWith('zh-CN');
     expect(mocks.createI18nPlugin).toHaveBeenCalledWith('zh-CN', { hello: 'world' });
