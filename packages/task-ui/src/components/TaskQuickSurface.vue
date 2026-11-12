@@ -62,10 +62,15 @@ const quickTaskTitle = ref('');
 const completedCount = computed(
   () => props.occurrences.filter((item) => item.status === 'Completed').length,
 );
+// Completion progress is measured against actionable occurrences only:
+// Missed/Skipped are terminal exits and no longer occupy the rate (#915).
+const actionableCount = computed(
+  () =>
+    props.occurrences.filter((item) => item.status !== 'Missed' && item.status !== 'Skipped')
+      .length,
+);
 const progressPct = computed(() =>
-  props.occurrences.length
-    ? Math.round((completedCount.value / props.occurrences.length) * 100)
-    : 0,
+  actionableCount.value ? Math.round((completedCount.value / actionableCount.value) * 100) : 0,
 );
 const visibleRows = computed(() => {
   const templates = new Map(props.templates.map((plan) => [String(plan.id), plan]));
@@ -101,7 +106,7 @@ async function createQuickTask() {
           class="rounded-full bg-muted/70 px-2 py-0.5 font-mono text-[10px] tabular-nums text-muted-foreground"
           data-testid="task-quick-count"
         >
-          {{ completedCount }}/{{ occurrences.length }}
+          {{ completedCount }}/{{ actionableCount }}
         </span>
       </template>
 

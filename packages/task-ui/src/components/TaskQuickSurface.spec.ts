@@ -97,6 +97,59 @@ it.each([
     expect(trackStyle).not.toContain('filter');
   }
 });
+it('measures progress against actionable occurrences only, excluding Missed and Skipped', () => {
+  const w = surface({
+    occurrences: [
+      instance({ id: 'o-completed' as ReturnType<typeof instance>['id'], status: 'Completed' }),
+      instance({ id: 'o-pending' as ReturnType<typeof instance>['id'], status: 'Pending' }),
+      instance({ id: 'o-missed' as ReturnType<typeof instance>['id'], status: 'Missed' }),
+      instance({ id: 'o-skipped' as ReturnType<typeof instance>['id'], status: 'Skipped' }),
+    ],
+  });
+  expect(w.get('[data-testid="task-quick-count"]').text()).toBe('1/2');
+  expect(w.get('[data-testid="task-quick-progress"]').attributes('data-progress')).toBe('50');
+});
+it('counts the #910 observation scenario as 2/6 instead of 2/7 when one occurrence is Missed', () => {
+  const w = surface({
+    occurrences: [
+      instance({ id: 's-1' as ReturnType<typeof instance>['id'], status: 'Completed' }),
+      instance({ id: 's-2' as ReturnType<typeof instance>['id'], status: 'Completed' }),
+      instance({ id: 's-3' as ReturnType<typeof instance>['id'], status: 'Pending' }),
+      instance({ id: 's-4' as ReturnType<typeof instance>['id'], status: 'Pending' }),
+      instance({ id: 's-5' as ReturnType<typeof instance>['id'], status: 'Pending' }),
+      instance({ id: 's-6' as ReturnType<typeof instance>['id'], status: 'Pending' }),
+      instance({ id: 's-7' as ReturnType<typeof instance>['id'], status: 'Missed' }),
+    ],
+  });
+  expect(w.get('[data-testid="task-quick-count"]').text()).toBe('2/6');
+  expect(w.get('[data-testid="task-quick-progress"]').attributes('data-progress')).toBe('33');
+});
+it('reaches 100% when every actionable occurrence is completed and only a Missed one remains', () => {
+  const w = surface({
+    occurrences: [
+      instance({ id: 'f-1' as ReturnType<typeof instance>['id'], status: 'Completed' }),
+      instance({ id: 'f-2' as ReturnType<typeof instance>['id'], status: 'Completed' }),
+      instance({ id: 'f-3' as ReturnType<typeof instance>['id'], status: 'Missed' }),
+    ],
+  });
+  expect(w.get('[data-testid="task-quick-count"]').text()).toBe('2/2');
+  const progressElement = w.get('[data-testid="task-quick-progress"]');
+  expect(progressElement.attributes('data-progress')).toBe('100');
+  const trackStyle = w.get('[data-testid="task-quick-progress-track"]').attributes('style') ?? '';
+  expect(trackStyle).toContain('filter: drop-shadow(0 0 6px hsl(var(--progress-fill-end) / 0.55))');
+});
+it('pins the zero-actionable boundary: all Missed renders 0/0 and 0% with no NaN', () => {
+  const w = surface({
+    occurrences: [
+      instance({ id: 'z-1' as ReturnType<typeof instance>['id'], status: 'Missed' }),
+      instance({ id: 'z-2' as ReturnType<typeof instance>['id'], status: 'Skipped' }),
+    ],
+  });
+  expect(w.get('[data-testid="task-quick-count"]').text()).toBe('0/0');
+  const progressElement = w.get('[data-testid="task-quick-progress"]');
+  expect(progressElement.attributes('data-progress')).toBe('0');
+  expect(w.text()).not.toContain('NaN');
+});
 it('handles loading, error/retry, empty and stale rows', async () => {
   const w = surface({ occurrences: [], loading: true });
   expect(w.find('[data-testid="task-quick-loading"]').exists()).toBe(true);
