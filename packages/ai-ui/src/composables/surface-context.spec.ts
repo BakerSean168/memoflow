@@ -1,7 +1,7 @@
 import { installAiUiHost } from '@ai-ui-test-host/di/ai-ui-host';
 installAiUiHost();
 import { describe, expect, it } from 'vitest';
-import { surfaceDescriptorToContextEntity } from './surfaceContext';
+import { resolveSurfaceTitle, surfaceDescriptorToContextEntity } from './surfaceContext';
 
 describe('surfaceDescriptorToContextEntity', () => {
   it('maps visible goal/task detail tabs to implicit entity context', () => {
@@ -56,5 +56,23 @@ describe('surfaceDescriptorToContextEntity', () => {
         title: '知识',
       }),
     ).toBeNull();
+  });
+
+  it('resolves module-owned tab keys into the chip label while object titles stay data', () => {
+    const translate = (key: string): string =>
+      key === 'nav.capsule.goal' ? '目标' : `missing:${key}`;
+
+    expect(resolveSurfaceTitle({ title: 'Goals', titleKey: 'nav.capsule.goal' }, translate)).toBe(
+      '目标',
+    );
+    expect(
+      surfaceDescriptorToContextEntity({
+        module: 'goal',
+        route: '/goals/goal-1',
+        title: resolveSurfaceTitle({ title: 'Goals', titleKey: 'nav.capsule.goal' }, translate),
+      }),
+    ).toEqual({ entityType: 'goal', id: 'goal-1', label: '目标' });
+
+    expect(resolveSurfaceTitle({ title: '提升英语' }, translate)).toBe('提升英语');
   });
 });

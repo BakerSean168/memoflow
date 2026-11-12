@@ -32,6 +32,7 @@ import type { Component } from 'vue';
 import type { BusinessTab, PanelSurface, ShellLayout, ShellModule } from './useAppShellStore';
 import { providePanelWidth } from './usePanelWidth';
 import { resolveBusinessTabDensity, type BusinessTabDensity } from './business-tab-layout';
+import { resolveTabTitle } from './useTabTitle';
 
 const props = defineProps<{
   tabs: BusinessTab[];
@@ -91,6 +92,11 @@ function isActiveTab(tab: BusinessTab): boolean {
 
 function showTabLabel(tab: BusinessTab): boolean {
   return tabDensity.value !== 'icon' || isActiveTab(tab);
+}
+
+/** Module tabs resolve their key against the live locale; object titles stay data. */
+function tabTitle(tab: BusinessTab): string {
+  return resolveTabTitle(tab, t);
 }
 
 function tabWidthClass(tab: BusinessTab): string {
@@ -202,8 +208,8 @@ function handleTabKeydown(event: KeyboardEvent, tabId: string): void {
               :tabindex="
                 (panelSurface === 'business' ? isActiveTab(tab) : tab.id === tabs[0]?.id) ? 0 : -1
               "
-              :title="tab.title"
-              :aria-label="tab.title"
+              :title="tabTitle(tab)"
+              :aria-label="tabTitle(tab)"
               @click="emit('activate-tab', tab.id)"
               @keydown="handleTabKeydown($event, tab.id)"
             >
@@ -213,7 +219,7 @@ function handleTabKeydown(event: KeyboardEvent, tabId: string): void {
                 aria-hidden="true"
               />
               <span v-if="showTabLabel(tab)" class="min-w-0 flex-1 truncate leading-none">
-                {{ tab.title }}
+                {{ tabTitle(tab) }}
               </span>
             </button>
 
@@ -228,7 +234,7 @@ function handleTabKeydown(event: KeyboardEvent, tabId: string): void {
               ]"
               data-testid="business-panel-tab-close"
               tabindex="-1"
-              :aria-label="`${t('shell.panel.closeTab')}: ${tab.title}`"
+              :aria-label="`${t('shell.panel.closeTab')}: ${tabTitle(tab)}`"
               @click.stop="emit('close-tab', tab.id)"
             >
               <X class="h-3 w-3" />

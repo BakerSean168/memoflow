@@ -21,7 +21,13 @@ import { useI18n } from 'vue-i18n';
 import { toast } from 'vue-sonner';
 import { useConfirm } from '@memoflow/ui-vue-shadcn';
 import type { RouteLocationNormalizedGeneric } from 'vue-router';
-import { useAppShellStore, type ShellLayoutReason, type ShellModule } from './useAppShellStore';
+import {
+  useAppShellStore,
+  MODULE_TITLE_KEYS,
+  type ShellLayoutReason,
+  type ShellModule,
+} from './useAppShellStore';
+import { resolveTabTitle } from './useTabTitle';
 import { canLeaveBusinessSurface, navigateBusinessSurface } from './surface-leave-protocol';
 import { isStandaloneSettingsPath } from './shell-scene';
 import {
@@ -89,14 +95,7 @@ const MODULE_PREFIXES: Array<[prefix: string, module: ShellModule]> = [
 ];
 
 /** Tab 标题的 i18n key（S1 用模块名；S2 起换具体对象名）。 */
-export const MODULE_TITLE_KEYS: Record<ShellModule, string> = {
-  goal: 'nav.capsule.goal',
-  task: 'nav.capsule.task',
-  routine: 'nav.capsule.routine',
-  note: 'nav.capsule.note',
-  notification: 'nav.capsule.notification',
-  schedule: 'nav.schedule',
-};
+export { MODULE_TITLE_KEYS };
 
 /** Settings / Account 独立场景：不落 BusinessTab。 */
 // isStandaloneSettingsPath 定义移至 ./shell-scene（供场景守卫复用，避免循环依赖）。
@@ -215,6 +214,7 @@ export function useShellRouterSync() {
       module,
       route: to.fullPath,
       title: titleFor(module),
+      titleKey: MODULE_TITLE_KEYS[module],
       intent: 'deeplink',
     });
     if (opened.evictionCandidateId && !opened.tabId) {
@@ -256,7 +256,9 @@ export function useShellRouterSync() {
     try {
       const confirmed = await useConfirm({
         title: t('shell.panel.tabLimitConfirmTitle'),
-        description: t('shell.panel.tabLimitConfirm', { title: candidate.title }),
+        description: t('shell.panel.tabLimitConfirm', {
+          title: resolveTabTitle(candidate, t),
+        }),
         confirmText: t('common.confirm'),
         cancelText: t('common.cancel'),
         variant: 'default',
@@ -274,6 +276,7 @@ export function useShellRouterSync() {
         module,
         route: to.fullPath,
         title: titleFor(module),
+        titleKey: MODULE_TITLE_KEYS[module],
         intent: 'deeplink',
       });
       if (retried.tabId) maybeAutoFocus();
@@ -351,6 +354,7 @@ export function useShellRouterSync() {
         module,
         route: landingRoute,
         title: titleFor(module),
+        titleKey: MODULE_TITLE_KEYS[module],
         intent: 'capsule',
       });
       return;

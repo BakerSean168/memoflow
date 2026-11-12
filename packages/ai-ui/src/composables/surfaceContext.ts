@@ -6,6 +6,17 @@ export interface AIActiveSurfaceDescriptor {
   title: string;
 }
 
+/**
+ * Resolve the visible tab title against the live locale.
+ * Module tabs carry a key; object tabs carry data and stay verbatim.
+ */
+export function resolveSurfaceTitle(
+  tab: { title: string; titleKey?: string },
+  translate: (key: string) => string,
+): string {
+  return tab.titleKey ? translate(tab.titleKey) : tab.title;
+}
+
 function exactEntityId(route: string, prefix: '/goals/' | '/tasks/'): string | null {
   const path = route.split(/[?#]/u, 1)[0] ?? '';
   if (!path.startsWith(prefix)) return null;

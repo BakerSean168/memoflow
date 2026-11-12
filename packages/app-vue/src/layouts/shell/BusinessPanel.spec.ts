@@ -3,7 +3,7 @@
 import { mount } from '@vue/test-utils';
 import { createI18n } from 'vue-i18n';
 import { defineComponent, h, nextTick } from 'vue';
-import { describe, expect, it, vi } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import BusinessPanel from './BusinessPanel.vue';
 import { resolveBusinessTabDensity } from './business-tab-layout';
 import type { BusinessTab } from './useAppShellStore';
@@ -13,6 +13,7 @@ const i18n = createI18n({
   locale: 'en-US',
   messages: {
     'en-US': {
+      nav: { capsule: { goal: 'Goals' } },
       shell: {
         moduleNav: 'Module navigation',
         panel: {
@@ -23,6 +24,21 @@ const i18n = createI18n({
           enterFocus: 'Enter focus',
           exitFocus: 'Exit focus',
           resize: 'Resize business panel',
+        },
+      },
+    },
+    'zh-CN': {
+      nav: { capsule: { goal: '目标' } },
+      shell: {
+        moduleNav: '模块导航',
+        panel: {
+          home: '今天',
+          workflow: '工作流',
+          closeTab: '关闭标签',
+          closeWorkflow: '关闭工作流',
+          enterFocus: '进入专注',
+          exitFocus: '退出专注',
+          resize: '调整业务面板宽度',
         },
       },
     },
@@ -61,6 +77,10 @@ function mountPanel(panelSurface: 'home' | 'business' = 'home') {
   });
 }
 
+afterEach(() => {
+  i18n.global.locale.value = 'en-US';
+});
+
 describe('BusinessPanel tab density', () => {
   it('degrades labels before allowing the eight-tab strip to overflow', () => {
     expect(resolveBusinessTabDensity(960, 4)).toBe('comfortable');
@@ -83,6 +103,56 @@ describe('BusinessPanel surfaces', () => {
     ).toBe('Enter focus');
     expect(wrapper.find('[data-testid="business-panel-close"]').exists()).toBe(false);
     expect(tabs).toHaveLength(1);
+  });
+
+  it('translates module-owned titles at render time and keeps object titles as data', async () => {
+    const moduleTab: BusinessTab = {
+      id: 'tab-goal-module',
+      module: 'goal',
+      route: '/goals',
+      title: 'Goals',
+      titleKey: 'nav.capsule.goal',
+      titleSource: 'module',
+      lastActiveAt: 1,
+    };
+    const objectTab: BusinessTab = {
+      id: 'tab-goal-object',
+      module: 'goal',
+      route: '/goals/g-1',
+      title: '提升英语',
+      titleSource: 'object',
+      lastActiveAt: 2,
+    };
+    const wrapper = mount(BusinessPanel, {
+      props: {
+        tabs: [moduleTab, objectTab],
+        activeTabId: objectTab.id,
+        layout: 'split',
+        panelSurface: 'business',
+      },
+      slots: {
+        home: '<div data-testid="home-surface">Home</div>',
+        default: StatefulBusinessContent,
+      },
+      global: { plugins: [i18n] },
+    });
+
+    expect(wrapper.get('[data-business-tab-id="tab-goal-module"]').attributes('aria-label')).toBe(
+      'Goals',
+    );
+    expect(wrapper.get('[data-business-tab-id="tab-goal-object"]').attributes('aria-label')).toBe(
+      '提升英语',
+    );
+
+    i18n.global.locale.value = 'zh-CN';
+    await nextTick();
+
+    expect(wrapper.get('[data-business-tab-id="tab-goal-module"]').attributes('aria-label')).toBe(
+      '目标',
+    );
+    expect(wrapper.get('[data-business-tab-id="tab-goal-object"]').attributes('aria-label')).toBe(
+      '提升英语',
+    );
   });
 
   it('keeps business content mounted while Home is active', async () => {
