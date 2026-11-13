@@ -571,6 +571,9 @@ export function useAIChatView(options: UseAIChatViewOptions) {
     composerModel.bumpNewThreadSelectionEpoch();
     const normalizedMode = normalizeWorkflowMode(mode);
     chatSession.startNewConversation(normalizedMode);
+    // A new chat inherits the explicit new-session default or the last choice;
+    // workflow modes stay on their builtin runtime.
+    if (normalizedMode === 'chat') composerModel.applyNewSessionSelection();
     resetWorkflowArtifacts();
     toolMode.value = normalizedMode;
     syncSurfaceContext();
@@ -610,14 +613,21 @@ export function useAIChatView(options: UseAIChatViewOptions) {
     try {
       await localChoices.refresh();
       const savedDefault = localChoices.defaultChoice.value;
-      if (
+      const newSessionReady =
         !composerModel.isDisposed() &&
         selectionAtStart === composerModel.readExplicitRuntimeSelection() &&
         !chatSession.chatConversationId.value &&
+        selectionEpoch === composerModel.readNewThreadSelectionEpoch() &&
+        !chatSession.chatTimeline.value.length;
+      // The explicit new-session default and sticky memory fill the empty
+      // Composer first; the runtime default is only a last resort.
+      const restoredFromMemory =
+        newSessionReady && composerModel.applyNewSessionSelection() !== 'none';
+      if (
+        !restoredFromMemory &&
+        newSessionReady &&
         chatSession.runtimeChoice.value.runtimeKind === 'builtin' &&
         savedDefault.runtimeKind === 'local_agent' &&
-        selectionEpoch === composerModel.readNewThreadSelectionEpoch() &&
-        !chatSession.chatTimeline.value.length &&
         localChoices.connections.value.some(
           (entry) => entry.id === savedDefault.connectionId && entry.enabled,
         )
@@ -744,6 +754,7 @@ export function useAIChatView(options: UseAIChatViewOptions) {
         if (composerSwitchBlockedReason(key)) return;
         composerModel.bumpExplicitRuntimeSelection();
         chatSession.runtimeChoice.value = choice;
+        composerModel.rememberRuntimeChoice();
       },
       async setDefault() {
         try {

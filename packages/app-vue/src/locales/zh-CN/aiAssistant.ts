@@ -90,6 +90,8 @@ export default {
         hint: '允许执行命令和编辑文件，无需逐项确认。',
       },
     },
+    newSessionDefaultUnavailable:
+      '新会话默认的 Agent 或模型当前不可用，已回退到上次使用的选择或默认状态。',
   },
   agentSwitchNewConversation: '已为所选 Agent 新建会话。原会话仍保留原 Agent。',
   activity: {

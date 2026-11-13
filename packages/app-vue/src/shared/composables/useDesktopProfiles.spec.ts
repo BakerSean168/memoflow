@@ -405,3 +405,119 @@ describe('useDesktopProfiles access routing', () => {
     expect(invoke).not.toHaveBeenCalledWith(ProfileAccessChannels.SELECT, expect.anything());
   });
 });
+
+describe('useDesktopProfiles launch-time automatic entry (#926)', () => {
+  const emptySnapshot = {
+    profile: null,
+    unlockState: 'LOCKED' as const,
+    cloudState: 'UNBOUND' as const,
+    capabilities: { local: false, sync: false, cloudAi: false, repositoryConnection: false },
+  };
+
+  async function autoEnterWindow(
+    list: ProfileSummary[],
+    setting: { profileId: string | null; suppressed?: boolean },
+    selectResult: (payload: unknown) => unknown = () => ok(null),
+  ) {
+    const harness = setup(null, { accessWindow: true });
+    cleanups.push(() => harness.wrapper.unmount());
+    harness.invoke.mockImplementation(async (channel: string, payload?: unknown) => {
+      if (channel === ProfileAccessChannels.LIST) return ok(list);
+      if (channel === ProfileAccessChannels.GET_SNAPSHOT) return ok(emptySnapshot);
+      if (channel === ProfileAccessChannels.AUTO_ENTER_GET)
+        return ok({
+          candidates: list.map((item) => ({
+            profileId: item.profileId,
+            displayName: item.displayName,
+            profileKind: item.profileKind,
+          })),
+          suppressed: false,
+          ...setting,
+        });
+      if (channel === ProfileAccessChannels.SELECT) return selectResult(payload);
+      return ok(null);
+    });
+    await harness.presenter.refreshProfiles();
+    return harness;
+  }
+
+  it('enters the stored account without a password while its material is remembered', async () => {
+    const target = profile('remembered', { hasCredential: true, remembered: true });
+    const { presenter, invoke } = await autoEnterWindow([target], { profileId: 'remembered' });
+
+    await expect(presenter.tryAutoEnter()).resolves.toBe('entered');
+
+    expect(invoke).toHaveBeenCalledWith(ProfileAccessChannels.SELECT, { profileId: 'remembered' });
+    expect(invoke).toHaveBeenCalledWith(WindowChannels.TRANSITION_TO_MAIN);
+    expect(presenter.autoEnterFailed.value).toBe(false);
+    expect(presenter.accessView.value).toBe('select');
+  });
+
+  it('enters a registered Profile without touching cloud state', async () => {
+    const target = profile('work', { profileKind: 'registered', remembered: false });
+    const { presenter, invoke } = await autoEnterWindow([target], { profileId: 'work' });
+
+    await expect(presenter.tryAutoEnter()).resolves.toBe('entered');
+
+    expect(invoke).toHaveBeenCalledWith(ProfileAccessChannels.SELECT, { profileId: 'work' });
+  });
+
+  it('falls back to the gate with one hint when the remembered key is gone', async () => {
+    const target = profile('plain', { hasCredential: true, remembered: false });
+    const { presenter, invoke } = await autoEnterWindow([target], { profileId: 'plain' });
+
+    await expect(presenter.tryAutoEnter()).resolves.toBe('failed');
+
+    expect(invoke).not.toHaveBeenCalledWith(ProfileAccessChannels.SELECT, expect.anything());
+    expect(presenter.autoEnterFailed.value).toBe(true);
+    expect(presenter.accessView.value).toBe('select');
+  });
+
+  it('falls back to the gate when the stored account no longer exists', async () => {
+    const { presenter, invoke } = await autoEnterWindow([], { profileId: 'gone' });
+
+    await expect(presenter.tryAutoEnter()).resolves.toBe('failed');
+
+    expect(invoke).not.toHaveBeenCalledWith(ProfileAccessChannels.SELECT, expect.anything());
+    expect(presenter.autoEnterFailed.value).toBe(true);
+  });
+
+  it('falls back to the gate when the remembered key can no longer be unsealed', async () => {
+    const target = profile('stale', { hasCredential: true, remembered: true });
+    const { presenter, invoke } = await autoEnterWindow([target], { profileId: 'stale' }, () => ({
+      ok: false,
+      error: { code: 'PROFILE_PASSWORD_REQUIRED', message: '此本地账户需要密码解锁' },
+    }));
+
+    await expect(presenter.tryAutoEnter()).resolves.toBe('failed');
+
+    expect(invoke).not.toHaveBeenCalledWith(WindowChannels.TRANSITION_TO_MAIN);
+    expect(presenter.autoEnterFailed.value).toBe(true);
+    // The automatic path never swaps the gate into the password state.
+    expect(presenter.accessView.value).toBe('select');
+    expect(presenter.passwordTarget.value).toBeNull();
+  });
+
+  it('does not enter after a sign-out in this launch', async () => {
+    const target = profile('remembered', { hasCredential: true, remembered: true });
+    const { presenter, invoke } = await autoEnterWindow([target], {
+      profileId: 'remembered',
+      suppressed: true,
+    });
+
+    await expect(presenter.tryAutoEnter()).resolves.toBe('skipped');
+
+    expect(invoke).not.toHaveBeenCalledWith(ProfileAccessChannels.SELECT, expect.anything());
+    expect(presenter.autoEnterFailed.value).toBe(false);
+  });
+
+  it('does nothing when automatic entry is off', async () => {
+    const target = profile('remembered', { hasCredential: true, remembered: true });
+    const { presenter, invoke } = await autoEnterWindow([target], { profileId: null });
+
+    await expect(presenter.tryAutoEnter()).resolves.toBe('skipped');
+
+    expect(invoke).not.toHaveBeenCalledWith(ProfileAccessChannels.SELECT, expect.anything());
+    expect(presenter.autoEnterFailed.value).toBe(false);
+  });
+});

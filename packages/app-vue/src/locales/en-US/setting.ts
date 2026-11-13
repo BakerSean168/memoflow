@@ -728,6 +728,38 @@ export default {
     providerActionFailed: 'Provider action failed',
     providerTestPassed: 'Connection test passed',
     providerTestFailed: 'Connection test failed',
+    newSessionDefault: {
+      title: 'New conversation default',
+      description:
+        'Set the Agent, model, reasoning effort and runtime permission a new conversation starts with. Existing conversations keep their own selection.',
+      enable: 'Use a new conversation default',
+      enableDescription:
+        'New conversations prefer this selection; if its Agent or model is unavailable, the last-used selection applies instead.',
+      agent: 'Agent',
+      agentDescription: 'Agent instance a new conversation starts with.',
+      model: 'Model',
+      modelDescription: 'Model a new conversation starts with.',
+      reasoningEffort: 'Reasoning effort',
+      reasoningEffortDescription: 'Reasoning levels this model supports.',
+      noReasoningEffort: 'This model has no adjustable reasoning effort; its default is used.',
+      modelDefault: 'Model default',
+      permission: 'Runtime permission',
+      permissionDescription:
+        'Limited to what the Agent supports; business denials always take precedence.',
+      save: 'Save',
+      saved: 'Saved',
+      unsaved: 'Unsaved changes',
+      unavailableInstance:
+        'The saved default Agent is unavailable or disabled; new conversations fall back to your last selection.',
+      noAgents: 'No Agent instances are available. Configure one in Provider settings first.',
+      noModels: 'The selected Agent has no available models yet. Check it in Provider settings.',
+      incomplete: 'Choose an available Agent and model first.',
+      expand: 'Expand new conversation default settings',
+      collapse: 'Collapse new conversation default settings',
+      summaryDisabled: 'Not enabled',
+      summaryEnabled: 'Enabled · {selection}',
+      summaryUnavailable: 'Enabled · Agent unavailable',
+    },
   },
   notifications: {
     title: 'Notifications',

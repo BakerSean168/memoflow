@@ -87,6 +87,17 @@ export default {
     mismatch: 'Passwords do not match',
     tooShort: 'Password must be at least 8 characters',
   },
+  autoEnter: {
+    title: 'Enter automatically at launch',
+    description:
+      'Open the selected account on a cold start and skip the account chooser. Only accounts that already remember their credentials on this device are offered; no password is stored and no sign-in is kept alive longer.',
+    label: 'Account to enter',
+    off: 'Off',
+    unavailable:
+      'No account on this device remembers its credentials yet, so automatic entry is unavailable. Select “Remember me” in the sign-in window first.',
+    unavailableTarget: 'Its remembered credentials are no longer available',
+    failed: 'Could not read or save the automatic entry setting',
+  },
   password: {
     title: 'Cloud password',
     description: 'Change your MemoFlow cloud password or request a password reset email.',

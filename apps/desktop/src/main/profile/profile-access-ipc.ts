@@ -4,7 +4,10 @@ import { ok, fail, ResultErrorException } from '@memoflow/transport-contracts/re
 import { createLogger } from '@memoflow/utils/logger';
 import {
   ProfileAccessChannels,
+  ProfileAutoEnterUpdateSchema,
   type DesktopAccessSnapshot,
+  type ProfileAutoEnterCandidate,
+  type ProfileAutoEnterSnapshot,
   type ProfileSummary,
   SelectProfileRequestSchema,
   RemoveProfileRequestSchema,
@@ -12,6 +15,8 @@ import {
   RenameProfileRequestSchema,
   ProfilePasswordSchema,
 } from '@memoflow/desktop-contracts';
+import type { ProfileAutoEnterPreference } from './profile-auto-enter-preference';
+import { isProfileAutoEnterSuppressed } from './profile-auto-enter-suppression';
 import type { ProfileRegistry } from './profile-registry';
 import type { DesktopProfileRuntimeManager } from './desktop-profile-runtime-manager';
 import { ProfileAvatarStore } from './profile-avatar-store';
@@ -66,7 +71,34 @@ export function registerProfileAccessIpc(
   runtime: DesktopProfileRuntimeManager,
   cloudConnection: DesktopCloudConnectionManager,
   deviceAuth?: DeviceAuthCoordinator,
+  autoEnterPreference?: ProfileAutoEnterPreference,
 ): void {
+  /**
+   * The quick-enter set: a registered Profile always has its own safeStorage
+   * key, and a local account qualifies only while its remembered key copy
+   * exists. This is the same source as the tile's `remembered` flag, so the
+   * launch path can never offer an account the gate would ask a password for.
+   */
+  const autoEnterCandidates = async (): Promise<ProfileAutoEnterCandidate[]> => {
+    const candidates: ProfileAutoEnterCandidate[] = [];
+    for (const profile of await registry.list()) {
+      const eligible =
+        profile.profileKind === 'registered' || (await runtime.hasRememberedKey(profile.profileId));
+      if (eligible)
+        candidates.push({
+          profileId: profile.profileId,
+          displayName: profile.displayName,
+          profileKind: profile.profileKind,
+        });
+    }
+    return candidates;
+  };
+  const readAutoEnter = async (): Promise<ProfileAutoEnterSnapshot> => ({
+    profileId: autoEnterPreference?.get() ?? null,
+    candidates: await autoEnterCandidates(),
+    suppressed: isProfileAutoEnterSuppressed(),
+  });
+
   const readSnapshot = async (): Promise<DesktopAccessSnapshot> => {
     const descriptor = runtime.getActiveProfileDescriptorSync();
     const [cloudState, profile] = await Promise.all([
@@ -100,6 +132,27 @@ export function registerProfileAccessIpc(
   ipcMain.handle(ProfileAccessChannels.LIST, async () =>
     ok(await Promise.all((await registry.list()).map((profile) => toSummary(profile, runtime)))),
   );
+
+  // Issue #926: the identity window reads this on a cold start and the Settings
+  // account section reads/writes it. A target without remembered material is
+  // rejected here, so no password-free channel is ever created for it.
+  ipcMain.handle(ProfileAccessChannels.AUTO_ENTER_GET, async () => ok(await readAutoEnter()));
+  ipcMain.handle(ProfileAccessChannels.AUTO_ENTER_SET, async (_event, input: unknown) => {
+    if (!autoEnterPreference)
+      return fail({
+        code: 'SERVICE_UNAVAILABLE',
+        message: 'Automatic entry preference is unavailable',
+      });
+    const parsed = ProfileAutoEnterUpdateSchema.safeParse(input);
+    if (!parsed.success) return fail({ code: 'INVALID_REQUEST', message: '自动进入设置格式无效' });
+    if (parsed.data.profileId !== null) {
+      const candidates = await autoEnterCandidates();
+      if (!candidates.some((candidate) => candidate.profileId === parsed.data.profileId))
+        return fail({ code: 'AUTO_ENTER_INELIGIBLE', message: '该账号没有可用的记住凭据' });
+    }
+    autoEnterPreference.set(parsed.data.profileId);
+    return ok(await readAutoEnter());
+  });
 
   ipcMain.handle(ProfileAccessChannels.CREATE_LOCAL_ACCOUNT, async (_event, input: unknown) => {
     const parsed = CreateLocalAccountRequestSchema.safeParse(input);

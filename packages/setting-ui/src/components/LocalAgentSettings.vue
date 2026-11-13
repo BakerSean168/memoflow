@@ -2,7 +2,15 @@
 import { computed, inject, onBeforeUnmount, reactive, ref, useId, watch } from 'vue';
 import { RefreshCw, RotateCcw, Trash2 } from '@lucide/vue';
 import { useI18n } from 'vue-i18n';
-import { Button, Input } from '@memoflow/ui-vue-shadcn';
+import {
+  Button,
+  Input,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@memoflow/ui-vue-shadcn';
 import {
   LocalAgentConnectionInputSchema,
   LocalAgentAuthStateSchema,
@@ -708,19 +716,19 @@ onBeforeUnmount(stopPolling);
       <p class="text-xs text-muted-foreground">
         {{ t('setting.permissions.nativeHint') }}
       </p>
-      <select
-        v-model="form.nativePermissionMode"
-        :disabled="busy"
-        class="rounded border bg-background p-2"
-        data-testid="ai-agent-native-permission"
-      >
-        <option value="supervised">
-          {{ t('setting.permissions.nativeConfirm') }}
-        </option>
-        <option value="auto-approve">
-          {{ t('setting.permissions.nativeAuto') }}
-        </option>
-      </select>
+      <Select v-model="form.nativePermissionMode" :disabled="busy">
+        <SelectTrigger class="w-full" data-testid="ai-agent-native-permission">
+          <SelectValue />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="supervised">
+            {{ t('setting.permissions.nativeConfirm') }}
+          </SelectItem>
+          <SelectItem value="auto-approve">
+            {{ t('setting.permissions.nativeAuto') }}
+          </SelectItem>
+        </SelectContent>
+      </Select>
     </section>
     <section class="space-y-3">
       <div class="flex items-center justify-between px-3">

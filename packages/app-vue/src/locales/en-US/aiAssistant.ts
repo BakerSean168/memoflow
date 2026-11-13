@@ -100,6 +100,8 @@ export default {
         hint: 'Allow commands and edits without prompts.',
       },
     },
+    newSessionDefaultUnavailable:
+      'The new-session default Agent or model is unavailable; using your last selection or the default state instead.',
   },
   agentSwitchNewConversation:
     'Started a new conversation for the selected Agent. Your previous conversation keeps its original Agent.',

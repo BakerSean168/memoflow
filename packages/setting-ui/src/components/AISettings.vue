@@ -25,6 +25,7 @@ import AgentInstanceWizard from './AgentInstanceWizard.vue';
 import LocalAgentSettings from './LocalAgentSettings.vue';
 import MastraAgentSettings from './MastraAgentSettings.vue';
 import AIPermissionSettings from './AIPermissionSettings.vue';
+import NewSessionDefaultSettings from './NewSessionDefaultSettings.vue';
 
 const { t } = useI18n();
 const registry = inject(settingUiHost.AI_AGENT_REGISTRY_KEY, undefined);
@@ -483,6 +484,11 @@ onBeforeUnmount(() => {
       kind="loading"
       :title="t('aiAssistant.local.checking')"
       test-id="ai-provider-loading"
+    />
+    <NewSessionDefaultSettings
+      :instances="instances"
+      :bindings="snapshot?.bindings ?? []"
+      :providers="ai.providers.value"
     />
     <AIPermissionSettings v-if="local" />
     <AgentInstanceWizard

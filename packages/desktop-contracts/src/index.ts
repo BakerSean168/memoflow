@@ -178,5 +178,6 @@ export {
 } from './keyboard-keymap';
 export * from './profile-import';
 export * from './profile-avatar';
+export * from './profile-auto-enter';
 
 export * from './desktop-startup';

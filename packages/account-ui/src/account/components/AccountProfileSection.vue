@@ -27,6 +27,7 @@ import { useAccount } from '../composables/useAccount';
 import { useAccountSignOut } from '../composables/useAccountSignOut';
 import { useAccountAvatar } from '../avatar/useAccountAvatar';
 import AccountAvatarUploader from './AccountAvatarUploader.vue';
+import AccountAutoEnterSection from './AccountAutoEnterSection.vue';
 import CloudAccountSecuritySection from './CloudAccountSecuritySection.vue';
 import { useAuthenticationStore } from '../../authentication/stores/authentication-store';
 import { ProfileAccessChannels } from '@memoflow/desktop-contracts';
@@ -298,6 +299,8 @@ onMounted(() => {
         </form>
       </CardContent>
     </Card>
+
+    <AccountAutoEnterSection />
 
     <CloudAccountSecuritySection v-if="!isGuest" :email="email" />
 
