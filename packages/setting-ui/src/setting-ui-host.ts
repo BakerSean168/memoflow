@@ -23,6 +23,7 @@ import type {
   AIProviderModelCatalogSnapshot,
   CommitAIProviderOnboardingReq,
   CommitAIProviderReplacementReq,
+  AIChatPermissionMode,
   LocalAgentAuthState,
   LocalAgentConnection,
   LocalAgentDriver,
@@ -151,9 +152,35 @@ export interface SettingNativeModelVisibility {
   setVisible(instanceId: string, modelId: string, visible: boolean): boolean;
 }
 
+/** Identity-scoped Composer memory shared with the AI feature (issue #925). */
+export interface SettingComposerSessionSelection {
+  runtimeKind: 'local_agent' | 'builtin';
+  connectionId?: string;
+  modelId?: string;
+  agentInstanceId?: string;
+  modelKey?: string;
+  reasoningEffort?: string;
+  serviceTier?: string;
+  permissionMode?: AIChatPermissionMode;
+}
+
+export interface SettingComposerDefaultsPort {
+  readNewSessionDefault(): {
+    enabled: boolean;
+    selection: SettingComposerSessionSelection | null;
+  };
+  writeNewSessionDefault(value: {
+    enabled: boolean;
+    selection: SettingComposerSessionSelection | null;
+  }): void;
+  readStickySelection(): SettingComposerSessionSelection | null;
+}
+
 /** AI provider facade owned by the AI feature (`useAI`). */
 export interface SettingAiFacade {
   providers: Ref<AIProviderConfigClientDTO[]>;
+  /** New-conversation Composer default and last-used memory (identity-scoped). */
+  composerDefaults: SettingComposerDefaultsPort;
   invalidateConfiguration(): void;
   loadProviders(): Promise<AIProviderConfigClientDTO[]>;
   probeProviderConnection(
