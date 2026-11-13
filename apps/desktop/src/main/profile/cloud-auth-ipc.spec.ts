@@ -3,6 +3,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { CloudAuthChannels } from '@memoflow/desktop-contracts';
 import { ok, ResultErrorException } from '@memoflow/transport-contracts/result';
 import { registerCloudAuthIpc } from './cloud-auth-ipc';
+import { isProfileAutoEnterSuppressed } from './profile-auto-enter-suppression';
 
 vi.mock('../utils/api-config', () => ({
   getApiBaseUrl: () => 'https://api.memo.test/api/v1',
@@ -299,6 +300,8 @@ describe('registerCloudAuthIpc', () => {
     expect(cloudConnection.cancelForProfile).toHaveBeenCalledWith('profile-1');
     expect(cloudConnection.clearForProfile).toHaveBeenCalledWith('profile-1');
     expect(sessions.remove).toHaveBeenCalledWith('profile-1');
+    // #926: the gate this sign-out returns to must not enter again in this launch.
+    expect(isProfileAutoEnterSuppressed()).toBe(true);
     expect(fetch).toHaveBeenCalledWith(
       'https://api.memo.test/api/auth/sign-out',
       expect.objectContaining({

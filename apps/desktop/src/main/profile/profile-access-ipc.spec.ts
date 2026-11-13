@@ -1,3 +1,4 @@
+import { randomUUID } from 'node:crypto';
 import os from 'node:os';
 import path from 'node:path';
 import { ipcMain } from 'electron';
@@ -7,6 +8,8 @@ import { ResultErrorException } from '@memoflow/transport-contracts/result';
 import { resolveDesktopStorageRoots } from '../paths/desktop-storage-roots';
 import { createSharedPathResolver } from '../paths/shared-path-resolver';
 import { registerProfileAccessIpc } from './profile-access-ipc';
+import { ProfileAutoEnterPreference } from './profile-auto-enter-preference';
+import { suppressProfileAutoEnterForLaunch } from './profile-auto-enter-suppression';
 
 const accessLogs = vi.hoisted(() => ({ info: vi.fn(), warn: vi.fn(), error: vi.fn() }));
 vi.mock('@memoflow/utils/logger', () => ({ createLogger: () => accessLogs }));
@@ -368,5 +371,108 @@ describe('registerProfileAccessIpc', () => {
 
     expect(result).toMatchObject({ ok: true });
     expect(runtime.removeProfile).toHaveBeenCalledWith('profile-2');
+  });
+
+  describe('automatic entry preference (#926)', () => {
+    const descriptor = (profileId: string, profileKind: 'local' | 'registered') => ({
+      profileId,
+      profileKind,
+      displayName: profileId,
+      avatarSeed: profileId,
+      identifier: null,
+      cloudBinding: null,
+      lastActiveAt: 1,
+      hasSnapshot: false,
+    });
+    const profiles = [
+      descriptor('local-remembered', 'local'),
+      descriptor('local-plain', 'local'),
+      descriptor('work', 'registered'),
+    ];
+    const runtime = {
+      hasRememberedKey: vi.fn(async (profileId: string) => profileId === 'local-remembered'),
+      getSharedResolver: () => sharedResolver,
+    };
+    const registry = { list: vi.fn(async () => profiles) };
+
+    function mount() {
+      const handlers = new Map<string, Handler>();
+      vi.mocked(ipcMain.handle).mockImplementation((channel, handler) => {
+        handlers.set(channel, handler as Handler);
+      });
+      const preferenceFile = path.join(os.tmpdir(), `memoflow-auto-enter-${randomUUID()}.json`);
+      registerProfileAccessIpc(
+        registry as never,
+        runtime as never,
+        {} as never,
+        undefined,
+        new ProfileAutoEnterPreference(preferenceFile),
+      );
+      return { handlers, preferenceFile };
+    }
+
+    it('offers only accounts that can already enter without a password', async () => {
+      const { handlers } = mount();
+
+      await expect(handlers.get(ProfileAccessChannels.AUTO_ENTER_GET)?.({})).resolves.toMatchObject(
+        {
+          ok: true,
+          data: {
+            profileId: null,
+            suppressed: false,
+            candidates: [
+              { profileId: 'local-remembered', profileKind: 'local' },
+              { profileId: 'work', profileKind: 'registered' },
+            ],
+          },
+        },
+      );
+    });
+
+    it('stores an eligible target and refuses a local account without remembered material', async () => {
+      const { handlers, preferenceFile } = mount();
+
+      await expect(
+        handlers.get(ProfileAccessChannels.AUTO_ENTER_SET)?.({}, { profileId: 'local-plain' }),
+      ).resolves.toMatchObject({ ok: false, error: { code: 'AUTO_ENTER_INELIGIBLE' } });
+      expect(new ProfileAutoEnterPreference(preferenceFile).get()).toBeNull();
+
+      await expect(
+        handlers.get(ProfileAccessChannels.AUTO_ENTER_SET)?.({}, { profileId: 'work' }),
+      ).resolves.toMatchObject({ ok: true, data: { profileId: 'work' } });
+      // The choice is device-local and survives the next process start.
+      expect(new ProfileAutoEnterPreference(preferenceFile).get()).toBe('work');
+
+      await expect(
+        handlers.get(ProfileAccessChannels.AUTO_ENTER_SET)?.({}, { profileId: null }),
+      ).resolves.toMatchObject({ ok: true, data: { profileId: null } });
+      expect(new ProfileAutoEnterPreference(preferenceFile).get()).toBeNull();
+    });
+
+    it('rejects a malformed update and does not imagine a preference without a store', async () => {
+      const { handlers } = mount();
+      await expect(
+        handlers.get(ProfileAccessChannels.AUTO_ENTER_SET)?.({}, { profileId: '' }),
+      ).resolves.toMatchObject({ ok: false, error: { code: 'INVALID_REQUEST' } });
+
+      const bare = new Map<string, Handler>();
+      vi.mocked(ipcMain.handle).mockImplementation((channel, handler) => {
+        bare.set(channel, handler as Handler);
+      });
+      registerProfileAccessIpc(registry as never, runtime as never, {} as never);
+      await expect(
+        bare.get(ProfileAccessChannels.AUTO_ENTER_SET)?.({}, { profileId: 'work' }),
+      ).resolves.toMatchObject({ ok: false, error: { code: 'SERVICE_UNAVAILABLE' } });
+    });
+
+    // Kept last: a sign-out marker is process memory for the rest of this launch.
+    it('reports the launch marker after a sign-out so the gate does not bounce back', async () => {
+      const { handlers } = mount();
+      suppressProfileAutoEnterForLaunch();
+
+      await expect(handlers.get(ProfileAccessChannels.AUTO_ENTER_GET)?.({})).resolves.toMatchObject(
+        { ok: true, data: { suppressed: true } },
+      );
+    });
   });
 });

@@ -119,6 +119,9 @@ export const ProfileAccessChannels = {
   REMOVE: 'profile-access:remove',
   LOCK: 'profile-access:lock',
   PASSWORD_SET: 'profile-access:password-set',
+  /** Issue #926: the launch-time automatic entry preference and its candidates. */
+  AUTO_ENTER_GET: 'profile-access:auto-enter:get',
+  AUTO_ENTER_SET: 'profile-access:auto-enter:set',
 } as const;
 
 export const CloudAuthChannels = {

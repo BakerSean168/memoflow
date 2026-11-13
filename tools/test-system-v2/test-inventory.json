@@ -2764,6 +2764,14 @@
       "measurementCollectors": []
     },
     {
+      "path": "packages/account-ui/src/account/components/AccountAutoEnterSection.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/account-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "packages/account-ui/src/account/components/AccountProfileEditorDialog.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -13652,7 +13660,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 12
+      "fileCount": 13
     },
     {
       "id": "packages/account/vitest.config.ts",
@@ -14758,7 +14766,7 @@
   "duplicate": [],
   "unexpected": [],
   "counts": {
-    "unit": 1221,
+    "unit": 1222,
     "integration": 58,
     "smoke": 3,
     "boundary-ipc": 6,

@@ -53,6 +53,8 @@ const {
   submitCloudRegistration,
   submitLocalRegistration,
   refreshProfiles,
+  tryAutoEnter,
+  autoEnterFailed,
   setAccessWindowHeight,
   disposeAuth,
 } = presenter;
@@ -81,6 +83,12 @@ onMounted(async () => {
   await refreshProfiles();
   const query = window.location.hash.split('?')[1];
   const params = new URLSearchParams(query);
+  // Only a bare launch is a cold start (#926). A host login intent or a
+  // preselected target belongs to an explicit flow and must stay untouched.
+  if (!query) {
+    await tryAutoEnter();
+    return;
+  }
   if (params.get('view') === 'login') {
     enterLoginState();
     return;
@@ -116,6 +124,17 @@ watch(
       <h1 class="text-sm font-medium tracking-[0.02em] text-foreground/85">
         {{ t('auth.profileAccess.selectTitle') }}
       </h1>
+
+      <!-- Issue #926: a failed launch-time automatic entry falls back here and
+           reports itself once, inside the gate, instead of an error window. -->
+      <p
+        v-if="autoEnterFailed"
+        role="status"
+        class="max-w-md text-center text-xs leading-relaxed text-foreground/75"
+        data-testid="desktop-profile-auto-enter-failed"
+      >
+        {{ t('auth.profileAccess.autoEnterFailed') }}
+      </p>
 
       <DesktopProfileList :presenter="presenter" @add="enterLoginState" />
     </section>

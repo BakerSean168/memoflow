@@ -49,6 +49,7 @@ function mountView(
     remembered?: boolean;
     activeProfileId?: string | null;
     attachTo?: HTMLElement;
+    autoEnter?: { profileId: string | null; suppressed?: boolean };
   } = {},
 ) {
   const profiles: ProfileSummary[] = [
@@ -76,6 +77,16 @@ function mountView(
       return ok(created);
     }
     if (channel === ProfileAccessChannels.LIST) return ok(profiles);
+    if (channel === ProfileAccessChannels.AUTO_ENTER_GET)
+      return ok({
+        profileId: options.autoEnter?.profileId ?? null,
+        candidates: profiles.map((item) => ({
+          profileId: item.profileId,
+          displayName: item.displayName,
+          profileKind: item.profileKind,
+        })),
+        suppressed: options.autoEnter?.suppressed ?? false,
+      });
     if (channel === DesktopProfileImportChannels.LIST) return ok([]);
     if (channel === ProfileAccessChannels.GET_SNAPSHOT)
       return ok({
@@ -132,6 +143,71 @@ beforeEach(() => {
 });
 
 describe('DesktopProfileAccessView', () => {
+  it('enters the remembered account automatically on a cold start (#926)', async () => {
+    const previousHash = window.location.hash;
+    window.location.hash = '';
+    const { wrapper, invoke } = mountView({
+      hasCredential: true,
+      remembered: true,
+      autoEnter: { profileId: 'profile-1' },
+      attachTo: document.body,
+    });
+    cleanups.push(() => wrapper.unmount());
+    try {
+      await flushPromises();
+
+      expect(invoke).toHaveBeenCalledWith(ProfileAccessChannels.SELECT, { profileId: 'profile-1' });
+      expect(invoke).toHaveBeenCalledWith(WindowChannels.TRANSITION_TO_MAIN);
+      expect(element('desktop-profile-auto-enter-failed')).toBeNull();
+      expect(element('desktop-profile-password-state')).toBeNull();
+    } finally {
+      window.location.hash = previousHash;
+    }
+  });
+
+  it('falls back to the gate with one visible hint when automatic entry fails', async () => {
+    const previousHash = window.location.hash;
+    window.location.hash = '';
+    const { wrapper, invoke } = mountView({
+      hasCredential: true,
+      remembered: false,
+      autoEnter: { profileId: 'profile-1' },
+      attachTo: document.body,
+    });
+    cleanups.push(() => wrapper.unmount());
+    try {
+      await flushPromises();
+
+      expect(invoke).not.toHaveBeenCalledWith(ProfileAccessChannels.SELECT, expect.anything());
+      expect(element('desktop-profile-access')).not.toBeNull();
+      expect(element('desktop-profile-auto-enter-failed')?.textContent).toContain(
+        auth.profileAccess.autoEnterFailed,
+      );
+      expect(element('desktop-profile-password-state')).toBeNull();
+    } finally {
+      window.location.hash = previousHash;
+    }
+  });
+
+  it('does not auto-enter when the host opened the gate for another flow', async () => {
+    const previousHash = window.location.hash;
+    window.location.hash = '#/profile-access?view=login';
+    const { wrapper, invoke } = mountView({
+      remembered: true,
+      autoEnter: { profileId: 'profile-1' },
+      attachTo: document.body,
+    });
+    cleanups.push(() => wrapper.unmount());
+    try {
+      await flushPromises();
+
+      expect(element('desktop-profile-login-state')).not.toBeNull();
+      expect(invoke).not.toHaveBeenCalledWith(ProfileAccessChannels.SELECT, expect.anything());
+    } finally {
+      window.location.hash = previousHash;
+    }
+  });
+
   it('opens the same login state as the plus tile for the host login intent', async () => {
     const previousHash = window.location.hash;
     window.location.hash = '#/profile-access?view=login';

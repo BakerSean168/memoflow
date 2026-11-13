@@ -90,6 +90,8 @@ export default {
     removeConfirm:
       'Remove {name} and its local data from this device? Unsynced data will be permanently lost. This does not close the cloud account.',
     removed: 'Local account deleted',
+    autoEnterFailed:
+      'Could not enter the selected account automatically. Choose an account to continue.',
   },
   field: {
     name: 'Name',
