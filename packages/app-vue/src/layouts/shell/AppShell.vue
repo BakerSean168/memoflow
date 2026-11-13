@@ -1115,13 +1115,16 @@ onBeforeUnmount(() => {
         test-id="shell-settings-dialog"
         recipe="workspace"
         size="lg"
+        headerless
         :content-class="'h-[85vh] max-h-none sm:h-[85vh] sm:max-w-6xl'"
         body-class="overflow-hidden p-0"
         :close-label="t('common.close')"
         @request-close="closeSettingsDialog"
       >
         <template #title>{{ t('setting.title') }}</template>
-        <!-- UserSettingsView 根节点是 h-full，外层补齐高度链；视图自带内部滚动。 -->
+        <!-- UserSettingsView 根节点是 h-full，外层补齐高度链；视图自带内部滚动。
+             Issue #927：视图自己渲染唯一的头部行（面包屑 / 恢复默认 / 关闭），
+             所以弹窗壳不带标题栏；关闭仍统一走 closeSettingsDialog。 -->
         <div class="h-full min-h-0">
           <UserSettingsView
             :key="settingsDialogSession"

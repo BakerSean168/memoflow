@@ -237,6 +237,15 @@ const UserSettingsViewStub = defineComponent({
 });
 
 let goalRouteMountCount = 0;
+
+/**
+ * Issue #927: the settings view owns the only close control now that the dialog
+ * header is gone. The stub stands in for its X, closing through the same `close`
+ * event the shell routes into `returnFromSettingsScene`.
+ */
+function clickSettingsClose(): void {
+  document.querySelector<HTMLElement>('[data-testid="user-settings-view-return"]')!.click();
+}
 const GoalRouteProbe = defineComponent({
   name: 'GoalRouteProbe',
   setup() {
@@ -597,22 +606,25 @@ describe('AppShell right-panel integration', () => {
     expect(body.classList.contains('px-5')).toBe(false);
     // No footer content means no empty bordered footer bar.
     expect(dialog!.querySelector('[data-testid="product-dialog-footer"]')).toBeNull();
+    // Issue #927: the dialog has no title bar, so the settings view owns the only
+    // header row (breadcrumb, restore defaults, close).
+    expect(dialog!.querySelector('[data-testid="shell-settings-dialog-close"]')).toBeNull();
     // Default entry: no `?tab=`, so the settings view falls back to its own default.
     expect(wrapper.getComponent(UserSettingsViewStub).props('initialTab')).toBeUndefined();
     expect(store.settingsOrigin).toBeNull();
 
     // Closing is a local state change: no navigation, workspace instance survives.
     // Dialog content is teleported to body, so it is queried from the document.
-    document.querySelector<HTMLElement>('[data-testid="shell-settings-dialog-close"]')!.click();
+    clickSettingsClose();
     await flushPromises();
     expect(document.querySelector('[data-testid="shell-settings-dialog"]')).toBeNull();
     expect(wrapper.get('[data-testid="goal-draft-probe"]').element).toBe(businessView);
     expect(router.currentRoute.value.fullPath).toBe('/goals');
 
-    // The settings view's own return action closes through the same state.
+    // Reopened: the same close event still ends the dialog.
     wrapper.getComponent(ConversationSidebarStub).vm.$emit('open-settings');
     await flushPromises();
-    document.querySelector<HTMLElement>('[data-testid="user-settings-view-return"]')!.click();
+    clickSettingsClose();
     await flushPromises();
     expect(document.querySelector('[data-testid="shell-settings-dialog"]')).toBeNull();
     wrapper.unmount();
@@ -1118,13 +1130,32 @@ describe('AppShell right-panel integration', () => {
 
     // Closing replaces the settings URL with the saved origin; the AI instance and
     // the business tab are reused rather than remounted.
-    document.querySelector<HTMLElement>('[data-testid="shell-settings-dialog-close"]')!.click();
+    clickSettingsClose();
     await flushPromises();
     expect(document.querySelector('[data-testid="shell-settings-dialog"]')).toBeNull();
     expect(router.currentRoute.value.fullPath).toBe('/goals');
     expect(wrapper.get('[data-testid="ai-chat-view"]').element).toBe(aiInstance);
     expect(wrapper.get('[data-testid="goal-draft-probe"]').exists()).toBe(true);
     expect(goalRouteMountCount).toBe(1);
+    wrapper.unmount();
+  });
+
+  it('leaves a settings deep link through Escape with the origin restored', async () => {
+    const { wrapper, router } = await mountShell('/goals');
+    await flushPromises();
+
+    await router.push('/settings?tab=ai');
+    await flushPromises();
+    expect(document.querySelector('[data-testid="shell-settings-dialog"]')).not.toBeNull();
+
+    document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+    await nextTick();
+    await flushPromises();
+
+    // Issue #927: the view's X, Escape and the backdrop all end in the same close
+    // handler, so every dismissal restores the captured origin route.
+    expect(document.querySelector('[data-testid="shell-settings-dialog"]')).toBeNull();
+    expect(router.currentRoute.value.fullPath).toBe('/goals');
     wrapper.unmount();
   });
 
@@ -1140,7 +1171,7 @@ describe('AppShell right-panel integration', () => {
 
     // No captured origin on a cold load: closing goes Home instead of leaving a
     // blank page on the settings route.
-    document.querySelector<HTMLElement>('[data-testid="shell-settings-dialog-close"]')!.click();
+    clickSettingsClose();
     await flushPromises();
     expect(document.querySelector('[data-testid="shell-settings-dialog"]')).toBeNull();
     expect(router.currentRoute.value.fullPath).toBe('/');

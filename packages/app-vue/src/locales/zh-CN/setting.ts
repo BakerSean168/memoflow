@@ -216,6 +216,25 @@ export default {
   },
   title: '设置',
   userSettings: '用户设置',
+  navSearch: {
+    placeholder: '搜索设置',
+    label: '搜索设置分区',
+    empty: '没有匹配的分区',
+    clear: '清除搜索',
+  },
+  breadcrumb: {
+    label: '设置分区',
+  },
+  nav: {
+    open: '打开设置导航',
+  },
+  restoreDefaults: {
+    label: '恢复默认',
+    title: '把「{section}」恢复为默认？',
+    description: '只重置当前分区的默认值，其他分区保持不变。',
+    confirm: '恢复默认',
+    cancel: '取消',
+  },
   groups: {
     startup: '启动与窗口',
     shortcuts: '快捷键',
