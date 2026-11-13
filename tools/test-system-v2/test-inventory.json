@@ -3568,6 +3568,14 @@
       "measurementCollectors": []
     },
     {
+      "path": "packages/ai-ui/src/composables/newSessionSelection.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/ai-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "packages/ai-ui/src/composables/surface-context.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -3665,6 +3673,14 @@
     },
     {
       "path": "packages/ai-ui/src/composables/useAssistantStream.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/ai-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/ai-ui/src/composables/useComposerModelSelection.new-session.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/ai-ui/vitest.config.ts"
@@ -10530,6 +10546,14 @@
       "measurementCollectors": []
     },
     {
+      "path": "packages/setting-ui/src/components/NewSessionDefaultSettings.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/setting-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "packages/setting-ui/src/components/NotificationSettings.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -13663,7 +13687,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 42
+      "fileCount": 44
     },
     {
       "id": "packages/ai/vitest.config.ts",
@@ -13992,7 +14016,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 19
+      "fileCount": 20
     },
     {
       "id": "packages/setting/vitest.config.ts",
@@ -14734,7 +14758,7 @@
   "duplicate": [],
   "unexpected": [],
   "counts": {
-    "unit": 1218,
+    "unit": 1221,
     "integration": 58,
     "smoke": 3,
     "boundary-ipc": 6,

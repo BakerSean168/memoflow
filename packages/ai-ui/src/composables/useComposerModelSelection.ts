@@ -83,7 +83,7 @@ export function useComposerModelSelection(options: UseComposerModelSelectionOpti
   // Last explicit composer choice for this identity. Reused for new conversations
   // only; an open conversation never has its selection rewritten by this memory.
   let stickySelection = readStickySelection(resolveIdentity());
-  let autoSessionApply: { signature: string; explicit: boolean; selection: number } | null = null;
+  let autoSessionApply: { choice: string; explicit: boolean; selection: number } | null = null;
   let fallbackNotifiedIdentity = '';
   const composerLoading = computed(
     () =>
@@ -627,6 +627,33 @@ export function useComposerModelSelection(options: UseComposerModelSelectionOpti
     );
   }
 
+  /** The Agent/model part of a selection, ignoring tunables that never reset a session. */
+  function choiceSignature(selection: ComposerSessionSelection): string {
+    return JSON.stringify({
+      runtimeKind: selection.runtimeKind,
+      connectionId: selection.connectionId,
+      modelId: selection.modelId,
+      agentInstanceId: selection.agentInstanceId,
+      modelKey: selection.modelKey,
+    });
+  }
+  function currentSelection(): ComposerSessionSelection {
+    const choice = chatSession.runtimeChoice.value;
+    if (choice.runtimeKind === 'local_agent')
+      return {
+        runtimeKind: 'local_agent',
+        connectionId: choice.connectionId,
+        modelId: choice.modelId,
+      };
+    const agentInstanceId = modelSelection.selectedAgentId.value;
+    const modelKey = modelSelection.selectedModelKey.value;
+    return {
+      runtimeKind: 'builtin',
+      ...(agentInstanceId ? { agentInstanceId } : {}),
+      ...(modelKey ? { modelKey } : {}),
+    };
+  }
+
   /**
    * Initialise an empty, unconversationed composer from the explicit new-session
    * default, then sticky memory. Re-entrant: as the Agent directory arrives this
@@ -649,11 +676,14 @@ export function useComposerModelSelection(options: UseComposerModelSelectionOpti
       availability: availabilityOf,
     });
     if (!resolution.selection) return 'none';
-    const signature = JSON.stringify(resolution.selection);
-    if (autoSessionApply?.signature === signature) return 'none';
+    const choice = choiceSignature(resolution.selection);
+    // A reset (new conversation) can restore a runtime default after the first
+    // apply, so compare the live choice rather than only remembering the last one.
+    if (autoSessionApply?.choice === choice && choiceSignature(currentSelection()) === choice)
+      return 'none';
     applySelection(resolution.selection);
     autoSessionApply = {
-      signature,
+      choice,
       explicit: resolution.source === 'explicit',
       selection: explicitRuntimeSelection,
     };
