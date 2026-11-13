@@ -14,6 +14,7 @@ import {
 } from '@memoflow/ui-vue-shadcn';
 import type { DeviceKeymap, KeyboardCommandId } from '@memoflow/desktop-contracts';
 import { settingUiHost } from '../setting-ui-host';
+import { useSettingsSectionReset } from '../composables/useSettingsSectionReset';
 
 const keyboard = settingUiHost.keyboard;
 
@@ -137,6 +138,9 @@ function toggle(id: KeyboardCommandId) {
   else if (!command.keys.length) reset(id);
   else void save({ ...keyboard.keymap.value, disabled: [...disabled, id] });
 }
+async function applyDefaultKeymap() {
+  await save({ version: 1, overrides: {} });
+}
 async function resetAll() {
   if (
     await useConfirm({
@@ -146,8 +150,10 @@ async function resetAll() {
       cancelText: '取消',
     })
   )
-    await save({ version: 1, overrides: {} });
+    await applyDefaultKeymap();
 }
+// The settings shell restores the active section through the same action.
+useSettingsSectionReset('shortcuts', applyDefaultKeymap);
 function exportKeymap() {
   const url = URL.createObjectURL(
     new Blob([JSON.stringify(keyboard.keymap.value, null, 2)], { type: 'application/json' }),
