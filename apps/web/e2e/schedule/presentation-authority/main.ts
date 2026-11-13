@@ -34,6 +34,7 @@ import {
   SCHEDULE_SERVICE_KEY,
   TASK_SERVICE_KEY,
   GOAL_SERVICE_KEY,
+  ROUTINE_SERVICE_KEY,
 } from '@memoflow/app-vue/di/keys';
 import { installServerStateRuntime } from '@memoflow/app-vue/platform/server-state';
 // Bind the Schedule host port exactly as the production renderer does.
@@ -397,6 +398,12 @@ app.provide(GOAL_SERVICE_KEY, {
   updateGoal: async () => {
     throw new Error('Unexpected Goal mutation');
   },
+} as never);
+// The Planner marker feed injects the Routine owner port before planning owners are read.
+// This acceptance fixture owns its Routine capsule row, so real reads resolve to an empty window
+// and any write fails closed like the other service doubles.
+app.provide(ROUTINE_SERVICE_KEY, {
+  getUpcomingOccurrences: async () => ok({ occurrences: [] }),
 } as never);
 app.use(
   createI18n({

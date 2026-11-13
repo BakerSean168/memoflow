@@ -15,6 +15,14 @@ import {
 const root = import.meta.dirname;
 const workspace = path.resolve(root, '../../../../..');
 const capsuleCalendarFixture = path.resolve(root, 'useCalendarView.fixture.ts');
+// Bare `@memoflow/schedule-ui` is already rewritten by `resolve.alias` before user
+// resolveId hooks run, so the capsule branch matches both the bare and resolved forms.
+const scheduleUiSource = path.resolve(workspace, 'packages/schedule-ui/src');
+const scheduleUiSpecifiers = new Set([
+  '@memoflow/schedule-ui',
+  scheduleUiSource,
+  path.join(scheduleUiSource, 'index.ts'),
+]);
 
 export default defineConfig({
   root,
@@ -27,7 +35,7 @@ export default defineConfig({
           importer?.includes(
             '/packages/app-vue/src/layouts/shell/previews/ScheduleCapsulePreview.vue',
           ) &&
-          source === '@memoflow/schedule-ui'
+          scheduleUiSpecifiers.has(source)
         ) {
           return capsuleCalendarFixture;
         }
