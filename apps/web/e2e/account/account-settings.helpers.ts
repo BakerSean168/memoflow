@@ -62,7 +62,7 @@ export async function confirmGlobalDialog(page: Page): Promise<void> {
 
 /** Profile editing moved out of Settings in #857/#860. */
 export async function openProfileEditor(page: Page): Promise<void> {
-  const back = page.getByTestId('settings-return-to-app').first();
+  const back = page.getByTestId('settings-close').first();
   if (await back.isVisible()) await back.click();
   await page.getByTestId('shell-account-card').click();
   await page.getByTestId('shell-edit-profile').click();

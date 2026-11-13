@@ -80,9 +80,7 @@ for (const host of ['web', 'desktop'] as const) {
             : content;
         const chrome =
           surface === 'providers'
-            ? width === 440
-              ? page.getByTestId('settings-compact-back')
-              : page.getByTestId('settings-return-to-app')
+            ? page.getByTestId('settings-close')
             : surface === 'workspace'
               ? page.getByTestId('task-page-toolbar')
               : surface === 'shared-list'

@@ -205,8 +205,8 @@ function appMainWindow(app: ElectronApplication): Page {
 }
 
 async function openLoginGate(app: ElectronApplication, page: Page): Promise<Page> {
-  if (await page.getByTestId('settings-return-to-app').isVisible()) {
-    await page.getByTestId('settings-return-to-app').click();
+  if (await page.getByTestId('settings-close').isVisible()) {
+    await page.getByTestId('settings-close').click();
   }
   await page.getByTestId('shell-account-card').click();
   await page.getByTestId('shell-switch-account').click();

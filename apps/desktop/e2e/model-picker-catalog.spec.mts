@@ -144,7 +144,7 @@ test('native picker browses a different enabled instance, directly selects its d
     await page.getByTestId('ai-provider-toggle-picker-second').click();
     await expect(page.getByTestId('ai-provider-toggle-picker-second')).not.toBeChecked();
     await expect(page.getByTestId('ai-provider-select-agent:picker-second')).toBeVisible();
-    await page.getByTestId('settings-return-to-app').first().click();
+    await page.getByTestId('settings-close').first().click();
     await picker.click();
     await expect(page.getByTestId(`ai-model-picker-agent-local:${connections[1]!.id}`)).toHaveCount(
       0,
@@ -159,7 +159,7 @@ test('native picker browses a different enabled instance, directly selects its d
     });
     await page.getByTestId('ai-provider-toggle-picker-second').click();
     await expect(page.getByTestId('ai-provider-toggle-picker-second')).toBeChecked();
-    await page.getByTestId('settings-return-to-app').first().click();
+    await page.getByTestId('settings-close').first().click();
     await picker.click();
     await page.getByTestId('ai-model-picker-favorites').click();
     await expect(page.getByTestId('ai-model-picker-option')).toHaveCount(1);

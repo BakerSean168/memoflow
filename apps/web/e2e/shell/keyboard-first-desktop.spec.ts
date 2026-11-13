@@ -33,7 +33,7 @@ test('desktop keyboard preview and Profile-scoped keymap survive renderer reload
     await page.reload();
     await expect(page.getByTestId('shell-settings-dialog')).toBeVisible();
     await expect(page.getByTestId('shortcut-module.goal.activate')).toContainText('Alt+G');
-    await page.getByTestId('settings-return-to-app').click();
+    await page.getByTestId('settings-close').click();
     await page.keyboard.press('Alt+2');
     await expect(page).toHaveURL(/#\/tasks$/);
     await page.keyboard.press('Alt+g');
