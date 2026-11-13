@@ -23,15 +23,16 @@ async function footerGeometry(button: Locator) {
   });
 }
 
-async function expectFullRow(button: Locator) {
-  await expect(button).toBeVisible();
-  const box = await footerGeometry(button);
-  expect(box.footerHeight).toBe(44);
+/**
+ * #927: the settings surface no longer owns a sidebar footer row, so the settings
+ * entry is no longer a full-row control. It opens the settings dialog, whose one
+ * header row owns the only close control.
+ */
+async function expectSettingsClose(close: Locator) {
+  await expect(close).toBeVisible();
+  const box = (await close.boundingBox())!;
+  expect(box.width).toBe(32);
   expect(box.height).toBe(32);
-  expect(Math.abs(box.width - (box.right - box.left))).toBeLessThanOrEqual(1);
-  expect(Math.abs(box.x - box.left)).toBeLessThanOrEqual(1);
-  // The top border consumes 1px of the footer's centered content box.
-  expect(Math.abs(box.y + box.height / 2 - (box.footerY + 22.5))).toBeLessThanOrEqual(1);
   return box;
 }
 
@@ -125,19 +126,10 @@ for (const host of ['web', 'desktop'] as const) {
         await page.keyboard.press('Escape');
         await before.gear.click();
         await expect(page.getByTestId('shell-settings-dialog')).toBeVisible();
-        const back =
-          width < 1024
-            ? page.getByTestId('settings-compact-back')
-            : page.getByTestId('settings-return-to-app').filter({ visible: true });
-        if (width >= 1024) {
-          const after = await expectFullRow(back);
-          expect(after.padding).toBe(before.padding);
-          await expectRowFeedback(page, back);
-          await page.mouse.click(after.right - 2, after.y + after.height / 2);
-        } else {
-          await expect(back).toBeVisible();
-          await back.click();
-        }
+        const close = page.getByTestId('settings-close').filter({ visible: true });
+        await expectSettingsClose(close);
+        await expectRowFeedback(page, close);
+        await close.click();
         await expect(page.getByTestId('shell-settings-dialog')).toHaveCount(0);
         await expect(page.getByTestId('task-page-toolbar')).toBeVisible();
       });

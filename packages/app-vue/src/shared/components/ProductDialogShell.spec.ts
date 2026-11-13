@@ -214,6 +214,34 @@ describe('ProductDialogShell', () => {
     wrapper.unmount();
   });
 
+  it('drops the title bar for views that own the header row', async () => {
+    const Host = defineComponent({
+      components: { AppDialog, ProductDialogShell },
+      template: `
+        <AppDialog :open="true">
+          <ProductDialogShell :open="true" test-id="headerless-dialog" headerless>
+            <template #title>Settings</template>
+            <div data-testid="headerless-body">Body</div>
+          </ProductDialogShell>
+        </AppDialog>
+      `,
+    });
+    const wrapper = mount(Host, { attachTo: document.body });
+    await flushPromises();
+    const dialog = document.body.querySelector<HTMLElement>('[data-testid="headerless-dialog"]')!;
+
+    // No built-in title bar and no built-in close control: the slotted view draws
+    // both, so the dialog must not add a second one.
+    expect(dialog.querySelector('[data-testid="headerless-dialog-close"]')).toBeNull();
+    expect(dialog.querySelector('[data-testid="product-dialog-description"]')).toBeNull();
+    expect(dialog.querySelector('[data-testid="headerless-body"]')).not.toBeNull();
+    // The dialog keeps its accessible name from the (visually hidden) title slot.
+    const labelledBy = dialog.getAttribute('aria-labelledby');
+    expect(labelledBy).toBeTruthy();
+    expect(document.getElementById(labelledBy!)?.textContent).toBe('Settings');
+    wrapper.unmount();
+  });
+
   it('maps semantic recipes to stable default dialog geometry', async () => {
     const Host = defineComponent({
       components: { AppDialog, ProductDialogShell },

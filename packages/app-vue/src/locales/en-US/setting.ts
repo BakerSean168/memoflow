@@ -231,6 +231,25 @@ export default {
   },
   title: 'App Settings',
   userSettings: 'User Settings',
+  navSearch: {
+    placeholder: 'Search settings',
+    label: 'Search settings sections',
+    empty: 'No matching sections',
+    clear: 'Clear search',
+  },
+  breadcrumb: {
+    label: 'Settings section',
+  },
+  nav: {
+    open: 'Open settings navigation',
+  },
+  restoreDefaults: {
+    label: 'Restore defaults',
+    title: 'Restore “{section}” to its defaults?',
+    description: 'Only this section returns to its defaults; other sections stay unchanged.',
+    confirm: 'Restore defaults',
+    cancel: 'Cancel',
+  },
   groups: {
     startup: 'Startup & window',
     shortcuts: 'Keyboard shortcuts',

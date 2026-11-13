@@ -181,8 +181,8 @@ export class DesktopAppController {
     // #855 removed the legacy Manage accounts dialog. Adding an account is the
     // identity gate's login state, reached from the sidebar account card's
     // switch-account submenu (#856).
-    if (await guestWindow.getByTestId('settings-return-to-app').isVisible()) {
-      await guestWindow.getByTestId('settings-return-to-app').click();
+    if (await guestWindow.getByTestId('settings-close').isVisible()) {
+      await guestWindow.getByTestId('settings-close').click();
     }
     await guestWindow.getByTestId('shell-account-card').click();
     await guestWindow.getByTestId('shell-switch-account').click();

@@ -15,6 +15,7 @@
     @interact-outside="handleInteractOutside"
   >
     <DialogHeader
+      v-if="!headerless"
       class="shrink-0 border-b border-[hsl(var(--border-subtle))] bg-[hsl(var(--surface)/0.5)] px-5 py-4 text-left"
     >
       <div class="flex min-w-0 items-start justify-between gap-4">
@@ -57,6 +58,13 @@
         </div>
       </div>
     </DialogHeader>
+    <!-- Headerless dialogs (settings, Issue #927) render their own header row and
+         close control; the accessible name and description still come from the
+         title slot, so no dialog loses its label. -->
+    <template v-else>
+      <DialogTitle class="sr-only"><slot name="title" /></DialogTitle>
+      <DialogDescription class="sr-only"><slot name="title" /></DialogDescription>
+    </template>
 
     <slot name="status" />
 
@@ -94,6 +102,8 @@ const props = withDefaults(
     open: boolean;
     testId: string;
     closeDisabled?: boolean;
+    /** Drop the built-in title bar; the slotted content owns its own header row. */
+    headerless?: boolean;
     /** Accessible label supplied by localized consumers; safe without a global i18n plugin. */
     closeLabel?: string;
     recipe?: 'form' | 'inspect' | 'config' | 'workspace';
@@ -107,6 +117,7 @@ const props = withDefaults(
   {
     recipe: 'form',
     closeDisabled: false,
+    headerless: false,
     closeLabel: 'Close',
     contentClass: undefined,
     bodyClass: undefined,

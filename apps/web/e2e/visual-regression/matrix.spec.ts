@@ -353,11 +353,14 @@ for (const theme of ['light', 'dark'] as const) {
     // card no longer carries a Settings item.
     await page.getByTestId('shell-open-settings').click();
     await expect(page.getByTestId('shell-settings-dialog')).toBeVisible();
-    await expect(page.getByTestId('settings-navigation-footer')).toBeVisible();
-    const footer = (await page.getByTestId('settings-navigation-footer').boundingBox())!;
-    expect(footer.height).toBe(44);
-    await page.screenshot({ path: testInfo.outputPath(`settings-footer-${theme}.png`) });
-    await page.getByTestId('settings-return-to-app').click();
+    // #927 replaced the footer "back to app" row with the settings shell header:
+    // breadcrumb on the left, section restore and the only close control on the right.
+    const header = page.getByTestId('settings-shell-header');
+    await expect(header).toBeVisible();
+    expect((await header.boundingBox())!.height).toBe(48);
+    await expect(page.getByTestId('settings-navigation-footer')).toHaveCount(0);
+    await page.screenshot({ path: testInfo.outputPath(`settings-header-${theme}.png`) });
+    await page.getByTestId('settings-close').click();
     await expect(page.getByTestId('shell-settings-dialog')).toHaveCount(0);
     await expect(title).toHaveValue('Draft survives workspace actions');
     expect(errors).toEqual([]);

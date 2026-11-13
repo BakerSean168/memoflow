@@ -191,7 +191,7 @@ test.describe('Electron shell geometry matrix', () => {
     await expect(page.getByTestId('global-composer')).toHaveCount(0);
     await expect(page.getByTestId('ai-footer-composer')).toHaveCount(0);
 
-    await page.getByTestId('settings-return-to-app').click();
+    await page.getByTestId('settings-close').click();
     await expect(page.getByTestId('app-shell')).toHaveAttribute('data-shell-scene', 'workspace');
     await expect(page.getByTestId('business-panel')).toBeVisible();
     await expect(page.getByTestId('ai-chat-view')).toBeVisible();
@@ -224,7 +224,7 @@ test.describe('Electron shell geometry matrix', () => {
 
     // Settings narrow navigation still independent.
     await openStandaloneSettings(page);
-    await expect(page.getByTestId('settings-return-to-app')).toBeVisible();
+    await expect(page.getByTestId('settings-close')).toBeVisible();
     await expect(page.getByTestId('settings-scene-rail')).toHaveCount(0);
     await expect(page.getByTestId('global-composer')).toHaveCount(0);
   });
@@ -358,7 +358,7 @@ test.describe('Electron shell geometry matrix', () => {
       .toMatch(/^en/i);
 
     // Shell chrome should reflect English copy after return.
-    await page.getByTestId('settings-return-to-app').click();
+    await page.getByTestId('settings-close').click();
     await expect(page.getByTestId('app-shell')).toHaveAttribute('data-shell-scene', 'workspace');
     // Account control remains reachable after the shell returns.
     await expect(page.getByTestId('shell-account-card')).toBeVisible();

@@ -20,6 +20,7 @@ const { SettingsStatusBlock } = settingUiHost.components;
 
 type PreferenceResetTarget = 'all' | 'presentation' | 'regional';
 import { useUserPreferences } from '../composables/useUserPreferences';
+import { useSettingsSectionReset } from '../composables/useSettingsSectionReset';
 import { applyAccent, applyThemeMode } from '../composables';
 import { usePresentationPreferenceStore } from '../stores/presentation-preference-store';
 import type { SettingLocale } from '../setting-ui-host';
@@ -132,6 +133,9 @@ async function handleReset(target: PreferenceResetTarget): Promise<void> {
 }
 
 watch([presentation, regional], hydrateCanonicalPreferences);
+
+// The settings shell restores the active section through the same action.
+useSettingsSectionReset('appearance', () => handleReset('all'));
 
 onMounted(async () => {
   await loadPreferences();

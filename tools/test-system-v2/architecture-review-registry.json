@@ -183,7 +183,7 @@
         "status": "none-verified",
         "testFiles": []
       },
-      "sourceSha256": "74fbe144111e053805b76801bb8b93d998b8cc0cb7473af807d9cc75e0863553"
+      "sourceSha256": "8129540df62dc8098ba854f2dd1dab671bc9293c684c4e44806a6b4cc0f5edf3"
     },
     {
       "path": "apps/api/src/shared/infrastructure/middleware/error-result-envelope.surface.spec.ts",
@@ -862,7 +862,7 @@
         "status": "none-verified",
         "testFiles": []
       },
-      "sourceSha256": "83bba5ccf2a4b20f527f184ec10d3d550ee51eed35fdd0686a622a9a3e2bcaa2"
+      "sourceSha256": "7eee78290f2de4c65af363516f898b12d628bacb12bb208a1fb8b778991012c8"
     },
     {
       "path": "apps/web/e2e/account/account-management.spec.ts",
@@ -1003,7 +1003,7 @@
         "status": "none-verified",
         "testFiles": []
       },
-      "sourceSha256": "01c4a60e1a3202770c46a69dad92bbd4d6d6d7f00c6fef792e5585bac1842c65"
+      "sourceSha256": "6fd7a214de9f73bea055b9ca885172c7b75c514ff723aa74fa344ad3a35655d8"
     },
     {
       "path": "apps/web/e2e/schedule/presentation-authority/collision-regression.spec.ts",
@@ -1071,7 +1071,7 @@
         "status": "none-verified",
         "testFiles": []
       },
-      "sourceSha256": "85625f5e61799dfb1b14358dee711edf47190d2cd39980fe2149f5be399ebb9a"
+      "sourceSha256": "3eafa52d96e1c2a421f4c9584aead32e4c4bc82ab4df68b2c639438ee59c27f0"
     },
     {
       "path": "apps/web/e2e/shell/shell-geometry.spec.ts",
@@ -1088,7 +1088,7 @@
         "status": "none-verified",
         "testFiles": []
       },
-      "sourceSha256": "3a014663d617192459a503d8b17b9f9df98fc085b7ae406f2bffeac450940411"
+      "sourceSha256": "7f831b5d87cba3b18e2af641855bd540b499945f9973c99356fff905350b426c"
     },
     {
       "path": "apps/api/src/__tests__/integration/agent-instance-registry.integration.test.ts",
@@ -2947,7 +2947,7 @@
         "status": "none-verified",
         "testFiles": []
       },
-      "sourceSha256": "8371952f89d5d87fd27caf2230fab73709c4dd687454a7bdde134956539f2880"
+      "sourceSha256": "c898a6e0132e4c2e0b898dde9e03542867e0247ec3c666c89b74074676e54311"
     },
     {
       "path": "packages/app-vue/src/shared/components/ProductEditorFrame.spec.ts",

@@ -10578,6 +10578,14 @@
       "measurementCollectors": []
     },
     {
+      "path": "packages/setting-ui/src/components/SettingsNavigation.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/setting-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "packages/setting-ui/src/components/SettingsResetSection.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -10619,6 +10627,14 @@
     },
     {
       "path": "packages/setting-ui/src/composables/usePresentationBootstrap.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/setting-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/setting-ui/src/composables/useSettingsSectionReset.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/setting-ui/vitest.config.ts"
@@ -14024,7 +14040,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 20
+      "fileCount": 22
     },
     {
       "id": "packages/setting/vitest.config.ts",
@@ -14766,7 +14782,7 @@
   "duplicate": [],
   "unexpected": [],
   "counts": {
-    "unit": 1222,
+    "unit": 1224,
     "integration": 58,
     "smoke": 3,
     "boundary-ipc": 6,

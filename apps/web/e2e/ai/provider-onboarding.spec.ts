@@ -163,7 +163,7 @@ test('[P0] T3 Agent wizard and inline Endpoint/Key configure the persistent comp
     (window as unknown as { __agentParityMarker: string }).__agentParityMarker =
       'same-mounted-application';
   });
-  await page.getByTestId('settings-return-to-app').first().click();
+  await page.getByTestId('settings-close').first().click();
   await expect(page.getByTestId('ai-chat-model-selector')).toBeVisible();
   expect(
     await page.evaluate(
@@ -223,7 +223,7 @@ test('[P0] T3 Agent wizard and inline Endpoint/Key configure the persistent comp
   expect(boundMaster.ok()).toBe(true);
   await page.goto('/settings?tab=ai');
   await expect(page.getByTestId('ai-provider-list')).toBeVisible();
-  await page.getByTestId('settings-return-to-app').first().click();
+  await page.getByTestId('settings-close').first().click();
   // #481: browse a second enabled instance without changing selection or sending.
   await page.getByTestId('ai-chat-composer').fill('Draft survives browsing');
   await page.getByTestId('ai-chat-model-selector').click();
@@ -239,7 +239,7 @@ test('[P0] T3 Agent wizard and inline Endpoint/Key configure the persistent comp
   await page.getByTestId('ai-provider-toggle-mastra-parity').click();
   await expect(page.getByTestId('ai-provider-toggle-mastra-parity')).not.toBeChecked();
   await expect(page.getByTestId('ai-provider-select-agent:mastra-parity')).toBeVisible();
-  await page.getByTestId('settings-return-to-app').first().click();
+  await page.getByTestId('settings-close').first().click();
   await page.getByTestId('ai-chat-model-selector').click();
   await expect(page.getByTestId('ai-model-picker-agent-agent:mastra-parity')).toHaveCount(0);
   await page.getByTestId('ai-model-picker-favorites').click();
@@ -252,7 +252,7 @@ test('[P0] T3 Agent wizard and inline Endpoint/Key configure the persistent comp
   await page.goto('/settings?tab=ai');
   await page.getByTestId('ai-provider-toggle-mastra-parity').click();
   await expect(page.getByTestId('ai-provider-toggle-mastra-parity')).toBeChecked();
-  await page.getByTestId('settings-return-to-app').first().click();
+  await page.getByTestId('settings-close').first().click();
   await page.getByTestId('ai-chat-model-selector').click();
   await expect(page.getByTestId('ai-model-picker-agent-agent:mastra-parity')).toBeVisible();
   await page.getByTestId('ai-model-picker-favorites').click();
@@ -387,7 +387,7 @@ test('[P0] T3 Agent wizard and inline Endpoint/Key configure the persistent comp
   ).toBe(true);
   await page.goto('/settings?tab=ai');
   await expect(page.getByTestId('ai-provider-list')).toBeVisible();
-  await page.getByTestId('settings-return-to-app').first().click();
+  await page.getByTestId('settings-close').first().click();
   await expect(page.getByTestId('ai-chat-model-selector')).toContainText('E2E Model Beta');
   // Mastra does not declare executable native traits; no inert UI should appear.
   await expect(page.getByTestId('ai-chat-traits-selector')).toHaveCount(0);
@@ -469,7 +469,7 @@ test('[P0] T3 Agent wizard and inline Endpoint/Key configure the persistent comp
   if (await aiTab.count()) await aiTab.first().click();
   await page.getByTestId('ai-provider-toggle-mastra-parity').click();
   await expect(page.getByTestId('ai-provider-toggle-mastra-parity')).not.toBeChecked();
-  await page.getByTestId('settings-return-to-app').first().click();
+  await page.getByTestId('settings-close').first().click();
   await expect(page.getByTestId('ai-composer-provider-unavailable')).toBeVisible();
   await expect(page.getByTestId('ai-chat-model-selector')).toHaveCount(0);
   await expect(page.getByTestId('ai-chat-business-permission-selector')).toHaveCount(0);
