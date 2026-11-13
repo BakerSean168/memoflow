@@ -247,6 +247,7 @@ export class PowerSyncTaskOccurrenceRepository
       pendingOccurrenceCount: number;
       dueOccurrenceCount: number;
       completedDueOccurrenceCount: number;
+      actionableDueOccurrenceCount: number;
       futurePendingOccurrenceCount: number;
       singleOccurrenceStatus: TaskOccurrenceStatus | null;
     }>(
@@ -256,12 +257,15 @@ export class PowerSyncTaskOccurrenceRepository
               SUM(CASE WHEN status = 'Pending' THEN 1 ELSE 0 END) as pendingOccurrenceCount,
               SUM(CASE WHEN schedule_date >= ? AND schedule_date <= ? THEN 1 ELSE 0 END) as dueOccurrenceCount,
               SUM(CASE WHEN status = 'Completed' AND schedule_date >= ? AND schedule_date <= ? THEN 1 ELSE 0 END) as completedDueOccurrenceCount,
+              SUM(CASE WHEN schedule_date >= ? AND schedule_date <= ? AND status NOT IN ('Missed', 'Skipped') THEN 1 ELSE 0 END) as actionableDueOccurrenceCount,
               SUM(CASE WHEN status = 'Pending' AND schedule_date > ? THEN 1 ELSE 0 END) as futurePendingOccurrenceCount,
               CASE WHEN COUNT(*) = 1 THEN MAX(status) ELSE NULL END as singleOccurrenceStatus
          FROM task_occurrences
         WHERE plan_id IN (${placeholders}) AND identity_id = ? AND deleted_at IS NULL
         GROUP BY plan_id`,
       [
+        window.windowStart,
+        window.asOf,
         window.windowStart,
         window.asOf,
         window.windowStart,
@@ -298,9 +302,10 @@ export class PowerSyncTaskOccurrenceRepository
       stat.completedDueOccurrenceCount = Number(row.completedDueOccurrenceCount ?? 0);
       stat.futurePendingOccurrenceCount = Number(row.futurePendingOccurrenceCount ?? 0);
       stat.singleOccurrenceStatus = row.singleOccurrenceStatus ?? null;
+      const actionableDueOccurrenceCount = Number(row.actionableDueOccurrenceCount ?? 0);
       stat.completionRate =
-        stat.dueOccurrenceCount > 0
-          ? Math.round((stat.completedDueOccurrenceCount / stat.dueOccurrenceCount) * 100)
+        actionableDueOccurrenceCount > 0
+          ? Math.round((stat.completedDueOccurrenceCount / actionableDueOccurrenceCount) * 100)
           : 0;
     }
     return stats;

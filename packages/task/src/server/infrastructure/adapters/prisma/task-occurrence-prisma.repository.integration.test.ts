@@ -230,4 +230,35 @@ describe('TaskOccurrencePrismaRepository canonical integration', () => {
       completionRate: 50,
     });
   });
+
+  it('excludes Missed and Skipped due occurrences from the completion-rate denominator', async () => {
+    const identityId = IdentityId.generate();
+    await seedAccount({ id: identityId });
+    const { prisma, plan } = await seedPlan({ identityId, date: '2026-07-31' });
+    const repository = new TaskOccurrencePrismaRepository(prisma);
+
+    const dueCompletedA = createOccurrence({ planId: plan.id, identityId, date: '2026-07-10' });
+    dueCompletedA.complete();
+    const dueCompletedB = createOccurrence({ planId: plan.id, identityId, date: '2026-07-11' });
+    dueCompletedB.complete();
+    const duePending = createOccurrence({ planId: plan.id, identityId, date: '2026-07-20' });
+    const dueMissed = createOccurrence({ planId: plan.id, identityId, date: '2026-07-21' });
+    dueMissed.markMissed();
+    const dueSkipped = createOccurrence({ planId: plan.id, identityId, date: '2026-07-22' });
+    dueSkipped.skip();
+    await repository.saveMany([dueCompletedA, dueCompletedB, duePending, dueMissed, dueSkipped]);
+
+    const stats = (
+      await repository.getPlanStats([plan.id], String(identityId), {
+        windowStart: asYmd('2026-07-01'),
+        asOf: asYmd('2026-07-30'),
+      })
+    )[plan.id];
+
+    expect(stats?.dueOccurrenceCount).toBe(5);
+    expect(stats?.completedDueOccurrenceCount).toBe(2);
+    // 2 completed of 3 actionable due (Missed + Skipped excluded) -> 67,
+    // not 2 of 5 -> 40.
+    expect(stats?.completionRate).toBe(67);
+  });
 });

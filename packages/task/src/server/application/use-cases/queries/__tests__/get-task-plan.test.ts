@@ -74,6 +74,70 @@ describe('GetTaskPlanUseCase', () => {
     }
   });
 
+  it('excludes Missed and Skipped due occurrences from the completion-rate denominator', async () => {
+    const plan = aOneTimeTask({ title: 'My Task' });
+    const completedInstance = await aTaskOccurrence({ planId: plan.id as any });
+    completedInstance.complete();
+    const pendingInstance = await aTaskOccurrence({ planId: plan.id as any });
+    const missedInstance = await aTaskOccurrence({ planId: plan.id as any });
+    missedInstance.markMissed();
+    const skippedInstance = await aTaskOccurrence({ planId: plan.id as any });
+    skippedInstance.skip();
+
+    vi.mocked(templateRepo.findByIdForIdentity).mockResolvedValue(plan);
+    vi.mocked(instanceRepo.findByPlanId).mockResolvedValue([
+      completedInstance,
+      pendingInstance,
+      missedInstance,
+      skippedInstance,
+    ]);
+
+    const result = await useCase.execute(plan.id, plan.identityId);
+
+    expect(result).toBeOk();
+    if (result.ok && result.data) {
+      // Same status multiset as the #915 today-surface mixed scenario:
+      // 1 Completed of 2 actionable -> 50, not 1 of 4 -> 25.
+      expect(result.data.completionRate).toBe(50);
+    }
+  });
+
+  it('reaches 100% when the only other due occurrence is Missed', async () => {
+    const plan = aOneTimeTask({ title: 'My Task' });
+    const completedInstance = await aTaskOccurrence({ planId: plan.id as any });
+    completedInstance.complete();
+    const missedInstance = await aTaskOccurrence({ planId: plan.id as any });
+    missedInstance.markMissed();
+
+    vi.mocked(templateRepo.findByIdForIdentity).mockResolvedValue(plan);
+    vi.mocked(instanceRepo.findByPlanId).mockResolvedValue([completedInstance, missedInstance]);
+
+    const result = await useCase.execute(plan.id, plan.identityId);
+
+    expect(result).toBeOk();
+    if (result.ok && result.data) {
+      expect(result.data.completionRate).toBe(100);
+    }
+  });
+
+  it('returns a zero completion rate when every due occurrence is Missed or Skipped', async () => {
+    const plan = aOneTimeTask({ title: 'My Task' });
+    const missedInstance = await aTaskOccurrence({ planId: plan.id as any });
+    missedInstance.markMissed();
+    const skippedInstance = await aTaskOccurrence({ planId: plan.id as any });
+    skippedInstance.skip();
+
+    vi.mocked(templateRepo.findByIdForIdentity).mockResolvedValue(plan);
+    vi.mocked(instanceRepo.findByPlanId).mockResolvedValue([missedInstance, skippedInstance]);
+
+    const result = await useCase.execute(plan.id, plan.identityId);
+
+    expect(result).toBeOk();
+    if (result.ok && result.data) {
+      expect(result.data.completionRate).toBe(0);
+    }
+  });
+
   it('uses 30 Product Time calendar dates across spring-forward DST', async () => {
     const plan = aOneTimeTask({ title: 'DST Task' });
     const timeContext = createTimeContext({ timeZone: 'America/New_York', weekStartsOn: 0 });

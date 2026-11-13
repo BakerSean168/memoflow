@@ -44,6 +44,7 @@ describe('PowerSyncTaskOccurrenceRepository canonical persistence', () => {
         pendingOccurrenceCount: 2,
         dueOccurrenceCount: 2,
         completedDueOccurrenceCount: 1,
+        actionableDueOccurrenceCount: 2,
         futurePendingOccurrenceCount: 1,
         singleOccurrenceStatus: null,
       },
@@ -73,9 +74,12 @@ describe('PowerSyncTaskOccurrenceRepository canonical persistence', () => {
     expect(sql).toContain('schedule_date >= ?');
     expect(sql).toContain('schedule_date <= ?');
     expect(sql).toContain("status = 'Pending' AND schedule_date > ?");
+    expect(sql).toContain("status NOT IN ('Missed', 'Skipped')");
     expect(sql).toContain('plan_id IN');
     expect(sql).not.toContain('instance_date');
     expect(params).toEqual([
+      '2026-07-01',
+      '2026-07-30',
       '2026-07-01',
       '2026-07-30',
       '2026-07-01',
@@ -85,6 +89,47 @@ describe('PowerSyncTaskOccurrenceRepository canonical persistence', () => {
       'plan-without-occurrences',
       'identity-a',
     ]);
+  });
+
+  it('excludes Missed and Skipped due occurrences from the completion-rate denominator', async () => {
+    const getAll = vi.fn().mockResolvedValue([
+      {
+        planId: 'plan-a',
+        occurrenceCount: 5,
+        completedOccurrenceCount: 2,
+        pendingOccurrenceCount: 1,
+        dueOccurrenceCount: 4,
+        completedDueOccurrenceCount: 2,
+        actionableDueOccurrenceCount: 3,
+        futurePendingOccurrenceCount: 1,
+        singleOccurrenceStatus: null,
+      },
+      {
+        planId: 'plan-b',
+        occurrenceCount: 2,
+        completedOccurrenceCount: 0,
+        pendingOccurrenceCount: 0,
+        dueOccurrenceCount: 2,
+        completedDueOccurrenceCount: 0,
+        actionableDueOccurrenceCount: 0,
+        futurePendingOccurrenceCount: 0,
+        singleOccurrenceStatus: null,
+      },
+    ]);
+    const repository = new PowerSyncTaskOccurrenceRepository({
+      getAll,
+    } as unknown as IElectronDatabaseTransaction);
+
+    const result = await repository.getPlanStats(['plan-a', 'plan-b'], 'identity-a', {
+      windowStart: ymd('2026-07-01'),
+      asOf: ymd('2026-07-30'),
+    });
+
+    // 2 completed of 3 actionable due (terminal negatives excluded) -> 67,
+    // not 2 of 4 -> 50.
+    expect(result['plan-a']).toMatchObject({ completionRate: 67 });
+    // No actionable due occurrences left -> 0, never NaN.
+    expect(result['plan-b']).toMatchObject({ completionRate: 0 });
   });
 
   it('deduplicates a new occurrence by plan + occurrenceKey before insert', async () => {

@@ -46,7 +46,9 @@ export class TaskWorkspaceQueryService implements TaskWorkspaceApplicationPort {
       this.loadNotes(identityId, planId, parsed.data.recentLimit),
     ]);
     const planDto = plan.toClientDTOAt(timeContext, false, Date.now());
-    const total = counts.total;
+    // Unified with the #915 today caliber: Missed/Skipped are terminal exits
+    // and never occupy the completion-rate denominator.
+    const actionableTotal = counts.total - counts.missed - counts.skipped;
     return ok(
       TaskPlanWorkspaceSchema.parse({
         plan: planDto,
@@ -54,7 +56,9 @@ export class TaskWorkspaceQueryService implements TaskWorkspaceApplicationPort {
         goalContext,
         occurrenceSummary: {
           ...counts,
-          completionRate: total ? Math.round((counts.completed / total) * 100) : 0,
+          completionRate: actionableTotal
+            ? Math.round((counts.completed / actionableTotal) * 100)
+            : 0,
         },
         recentOccurrences: recent.map((occurrence) =>
           occurrence.toClientDTOAt(timeContext, Date.now()),

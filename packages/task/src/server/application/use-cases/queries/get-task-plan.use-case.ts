@@ -88,6 +88,13 @@ export class GetTaskPlanUseCase {
     const completedDueOccurrenceCount = dueOccurrences.filter(
       (occurrence) => occurrence.status === TaskOccurrenceStatus.Completed,
     ).length;
+    // Unified with the #915 today caliber: Missed/Skipped are terminal exits
+    // and never occupy the completion-rate denominator.
+    const actionableDueOccurrenceCount = dueOccurrences.filter(
+      (occurrence) =>
+        occurrence.status !== TaskOccurrenceStatus.Missed &&
+        occurrence.status !== TaskOccurrenceStatus.Skipped,
+    ).length;
 
     return {
       planId,
@@ -103,8 +110,8 @@ export class GetTaskPlanUseCase {
       ).length,
       singleOccurrenceStatus: occurrences.length === 1 ? occurrences[0].status : null,
       completionRate:
-        dueOccurrences.length > 0
-          ? Math.round((completedDueOccurrenceCount / dueOccurrences.length) * 100)
+        actionableDueOccurrenceCount > 0
+          ? Math.round((completedDueOccurrenceCount / actionableDueOccurrenceCount) * 100)
           : 0,
     };
   }
