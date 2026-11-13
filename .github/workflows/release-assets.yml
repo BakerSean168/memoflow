@@ -249,6 +249,7 @@ jobs:
           NODE_OPTIONS: --require=${{ github.workspace }}/release-source/tools/ci/node-process-bootstrap.cjs
           PYTHON: ${{ env.pythonLocation }}/python
           npm_config_python: ${{ env.pythonLocation }}/python
+          RUST_BACKTRACE: '1'
         run: pnpm nx run desktop:build:production --outputStyle=static
 
       - name: Rebuild native dependencies for Electron
