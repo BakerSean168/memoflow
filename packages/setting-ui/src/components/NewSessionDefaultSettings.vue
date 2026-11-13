@@ -193,7 +193,7 @@ const effortChoice = computed({
 const selection = computed<SettingComposerSessionSelection | null>(() => {
   const instance = selectedInstance.value;
   if (!instance || !modelValue.value) return null;
-  const base: SettingComposerSessionSelection =
+  const base: SettingComposerSessionSelection | null =
     instance.driver === 'mastra'
       ? {
           runtimeKind: 'builtin',
