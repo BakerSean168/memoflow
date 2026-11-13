@@ -673,6 +673,11 @@ export default {
       noAgents: '没有可用的 Agent 实例。请先在 Provider 设置中完成配置。',
       noModels: '所选 Agent 暂未提供可用模型，请先在 Provider 设置中检查该 Agent。',
       incomplete: '请先选择可用的 Agent 与模型。',
+      expand: '展开新会话默认设置',
+      collapse: '收起新会话默认设置',
+      summaryDisabled: '未启用',
+      summaryEnabled: '已启用 · {selection}',
+      summaryUnavailable: '已启用 · Agent 不可用',
     },
   },
   notifications: {

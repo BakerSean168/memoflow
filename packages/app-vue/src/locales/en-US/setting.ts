@@ -735,6 +735,11 @@ export default {
       noAgents: 'No Agent instances are available. Configure one in Provider settings first.',
       noModels: 'The selected Agent has no available models yet. Check it in Provider settings.',
       incomplete: 'Choose an available Agent and model first.',
+      expand: 'Expand new conversation default settings',
+      collapse: 'Collapse new conversation default settings',
+      summaryDisabled: 'Not enabled',
+      summaryEnabled: 'Enabled · {selection}',
+      summaryUnavailable: 'Enabled · Agent unavailable',
     },
   },
   notifications: {

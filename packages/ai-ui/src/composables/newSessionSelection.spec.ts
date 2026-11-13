@@ -88,9 +88,7 @@ describe('new-session selection priority', () => {
   });
 
   it('leaves the composer untouched without any remembered layer', () => {
-    expect(
-      resolveNewSessionSelection({ explicit: null, sticky: null }).selection,
-    ).toBeNull();
+    expect(resolveNewSessionSelection({ explicit: null, sticky: null }).selection).toBeNull();
   });
 
   it('does not consult availability for sticky-only memories', () => {
@@ -160,7 +158,9 @@ describe('composer selection sanitisation', () => {
       runtimeKind: 'local_agent',
       connectionId: 'connection-claude',
       modelId: 'sonnet',
-      nativeOptions: { 'connection-claude::sonnet': { reasoningEffort: 'high', serviceTier: 'fast' } },
+      nativeOptions: {
+        'connection-claude::sonnet': { reasoningEffort: 'high', serviceTier: 'fast' },
+      },
     });
   });
 

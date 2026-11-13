@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, inject, onBeforeUnmount, ref, useId, watch } from 'vue';
+import { ChevronDown } from '@lucide/vue';
 import { useI18n } from 'vue-i18n';
 import {
   Button,
@@ -49,7 +50,10 @@ interface ModelChoice {
 }
 
 const saved = ai.composerDefaults.readNewSessionDefault();
+const savedState = ref(saved);
 const savedSnapshot = ref(JSON.stringify(saved));
+// Collapsed by default: the collapsed row is the status, the form is opt-in.
+const expanded = ref(false);
 // Without an explicit default the draft starts from the last-used selection, so
 // the form shows what new conversations currently do instead of seeding a
 // system-picked Agent.
@@ -97,11 +101,12 @@ const selectedInstance = computed(() =>
 );
 const savedInstanceUnavailable = computed(
   () =>
-    Boolean(saved.enabled) &&
-    Boolean(saved.selection) &&
+    Boolean(savedState.value.enabled) &&
+    Boolean(savedState.value.selection) &&
     !enabledInstances.value.some(
       (entry) =>
-        entry.instanceId === instanceForSelection(saved.selection, props.instances)?.instanceId,
+        entry.instanceId ===
+        instanceForSelection(savedState.value.selection, props.instances)?.instanceId,
     ),
 );
 
@@ -173,8 +178,7 @@ const currentEfforts = computed(
 const permissionOptions = computed<AIChatPermissionMode[]>(() => {
   const instance = selectedInstance.value;
   if (!instance) return [];
-  const supported: readonly AIChatPermissionMode[] =
-    AGENT_SUPPORTED_RUNTIME_MODES[instance.driver];
+  const supported: readonly AIChatPermissionMode[] = AGENT_SUPPORTED_RUNTIME_MODES[instance.driver];
   return AIChatPermissionModeSchema.options.filter((mode) => supported.includes(mode));
 });
 const effectivePermission = computed<AIChatPermissionMode | undefined>(() =>
@@ -224,6 +228,25 @@ const snapshot = computed(() =>
 );
 const dirty = computed(() => snapshot.value !== savedSnapshot.value);
 const canSave = computed(() => !enabled.value || selection.value !== null);
+/**
+ * Persisted status, not the draft: the collapsed row answers "what does a new
+ * conversation start with right now?". Unsaved edits stay visible next to it.
+ */
+const statusSummary = computed(() => {
+  const current = savedState.value;
+  if (!current.enabled || !current.selection)
+    return t('setting.ai.newSessionDefault.summaryDisabled');
+  if (savedInstanceUnavailable.value) return t('setting.ai.newSessionDefault.summaryUnavailable');
+  const instance = instanceForSelection(current.selection, props.instances);
+  const model =
+    current.selection.runtimeKind === 'local_agent'
+      ? (current.selection.modelId ?? '')
+      : ((current.selection.modelKey ?? '').split('::').pop() ?? '');
+  const detail = [instance?.name, model].filter(Boolean).join(' · ');
+  return detail
+    ? t('setting.ai.newSessionDefault.summaryEnabled', { selection: detail })
+    : t('setting.ai.newSessionDefault.summaryDisabled');
+});
 
 function save() {
   if (!canSave.value) return;
@@ -231,6 +254,7 @@ function save() {
     enabled: enabled.value,
     selection: selection.value,
   });
+  savedState.value = { enabled: enabled.value, selection: selection.value };
   savedSnapshot.value = snapshot.value;
   savedNotice.value = true;
 }
@@ -246,179 +270,213 @@ watch(enabled, (value) => {
 <template>
   <SettingsSection
     :title="t('setting.ai.newSessionDefault.title')"
-    :description="t('setting.ai.newSessionDefault.description')"
+    :description="expanded ? t('setting.ai.newSessionDefault.description') : undefined"
     test-id="ai-new-session-default"
   >
-    <SettingsPropertyRow
-      :label="t('setting.ai.newSessionDefault.enable')"
-      :description="t('setting.ai.newSessionDefault.enableDescription')"
-      :html-for="`${uid}-enabled`"
-    >
-      <div class="flex justify-end">
-        <Switch
-          :id="`${uid}-enabled`"
-          :model-value="enabled"
-          :disabled="!selection"
-          data-testid="ai-new-session-default-enabled"
-          @update:model-value="enabled = $event"
-        />
-      </div>
-    </SettingsPropertyRow>
-
-    <p
-      v-if="!enabledInstances.length"
-      class="py-2 text-xs leading-5 text-muted-foreground"
-      data-testid="ai-new-session-default-no-agents"
-    >
-      {{ t('setting.ai.newSessionDefault.noAgents') }}
-    </p>
-    <template v-else>
-      <SettingsPropertyRow
-        :label="t('setting.ai.newSessionDefault.agent')"
-        :description="t('setting.ai.newSessionDefault.agentDescription')"
-        :html-for="`${uid}-agent`"
+    <template #actions>
+      <span
+        class="min-w-0 max-w-[14rem] truncate text-xs text-muted-foreground"
+        data-testid="ai-new-session-default-summary"
+        >{{ statusSummary }}</span
       >
-        <Select v-model="agentInstanceId">
-          <SelectTrigger
-            :id="`${uid}-agent`"
-            class="h-8 rounded-lg text-xs"
-            data-testid="ai-new-session-default-agent"
-            ><SelectValue :placeholder="t('aiAssistant.composer.chooseAgent')"
-          /></SelectTrigger>
-          <SelectContent class="max-h-64">
-            <SelectItem
-              v-for="instance in enabledInstances"
-              :key="instance.instanceId"
-              :value="instance.instanceId"
-              class="text-xs"
-              >{{ instance.name }}</SelectItem
-            >
-          </SelectContent>
-        </Select>
+      <span
+        v-if="dirty"
+        class="shrink-0 text-xs text-muted-foreground"
+        data-testid="ai-new-session-default-summary-unsaved"
+        >{{ t('setting.ai.newSessionDefault.unsaved') }}</span
+      >
+      <Button
+        variant="ghost"
+        size="icon"
+        class="size-7 shrink-0"
+        :aria-expanded="expanded"
+        :aria-controls="expanded ? `${uid}-body` : undefined"
+        :aria-label="
+          expanded
+            ? t('setting.ai.newSessionDefault.collapse')
+            : t('setting.ai.newSessionDefault.expand')
+        "
+        data-testid="ai-new-session-default-toggle"
+        @click="expanded = !expanded"
+      >
+        <ChevronDown
+          class="size-4 transition-transform duration-200 motion-reduce:transition-none"
+          :class="expanded ? 'rotate-180' : ''"
+        />
+      </Button>
+    </template>
+    <div v-if="expanded" :id="`${uid}-body`" class="min-w-0">
+      <SettingsPropertyRow
+        :label="t('setting.ai.newSessionDefault.enable')"
+        :description="t('setting.ai.newSessionDefault.enableDescription')"
+        :html-for="`${uid}-enabled`"
+      >
+        <div class="flex justify-end">
+          <Switch
+            :id="`${uid}-enabled`"
+            :model-value="enabled"
+            :disabled="!selection"
+            data-testid="ai-new-session-default-enabled"
+            @update:model-value="enabled = $event"
+          />
+        </div>
       </SettingsPropertyRow>
 
       <p
-        v-if="selectedInstance && !modelChoices.length"
+        v-if="!enabledInstances.length"
         class="py-2 text-xs leading-5 text-muted-foreground"
-        data-testid="ai-new-session-default-no-models"
+        data-testid="ai-new-session-default-no-agents"
       >
-        {{ t('setting.ai.newSessionDefault.noModels') }}
+        {{ t('setting.ai.newSessionDefault.noAgents') }}
       </p>
-      <SettingsPropertyRow
-        v-else
-        :label="t('setting.ai.newSessionDefault.model')"
-        :description="t('setting.ai.newSessionDefault.modelDescription')"
-        :html-for="`${uid}-model`"
-      >
-        <Select v-model="modelValue">
-          <SelectTrigger
-            :id="`${uid}-model`"
-            class="h-8 rounded-lg text-xs"
-            data-testid="ai-new-session-default-model"
-            ><SelectValue :placeholder="t('aiAssistant.composer.chooseModel')"
-          /></SelectTrigger>
-          <SelectContent class="max-h-64">
-            <SelectItem
-              v-for="choice in modelChoices"
-              :key="choice.value"
-              :value="choice.value"
-              class="text-xs"
-              >{{ choice.label }}</SelectItem
-            >
-          </SelectContent>
-        </Select>
-      </SettingsPropertyRow>
+      <template v-else>
+        <SettingsPropertyRow
+          :label="t('setting.ai.newSessionDefault.agent')"
+          :description="t('setting.ai.newSessionDefault.agentDescription')"
+          :html-for="`${uid}-agent`"
+        >
+          <Select v-model="agentInstanceId">
+            <SelectTrigger
+              :id="`${uid}-agent`"
+              class="h-8 rounded-lg text-xs"
+              data-testid="ai-new-session-default-agent"
+              ><SelectValue :placeholder="t('aiAssistant.composer.chooseAgent')"
+            /></SelectTrigger>
+            <SelectContent class="max-h-64">
+              <SelectItem
+                v-for="instance in enabledInstances"
+                :key="instance.instanceId"
+                :value="instance.instanceId"
+                class="text-xs"
+                >{{ instance.name }}</SelectItem
+              >
+            </SelectContent>
+          </Select>
+        </SettingsPropertyRow>
 
-      <SettingsPropertyRow
-        :label="t('setting.ai.newSessionDefault.reasoningEffort')"
-        :description="
-          currentEfforts.length
-            ? t('setting.ai.newSessionDefault.reasoningEffortDescription')
-            : t('setting.ai.newSessionDefault.noReasoningEffort')
-        "
-        :html-for="`${uid}-effort`"
-      >
-        <Select v-model="effortChoice" :disabled="!currentEfforts.length">
-          <SelectTrigger
-            :id="`${uid}-effort`"
-            class="h-8 rounded-lg text-xs"
-            data-testid="ai-new-session-default-reasoning"
-            ><SelectValue :placeholder="t('setting.ai.newSessionDefault.modelDefault')"
-          /></SelectTrigger>
-          <SelectContent class="max-h-64">
-            <SelectItem :value="MODEL_DEFAULT_EFFORT" class="text-xs">{{
-              t('setting.ai.newSessionDefault.modelDefault')
-            }}</SelectItem>
-            <SelectItem
-              v-for="effort in currentEfforts"
-              :key="effort"
-              :value="effort"
-              class="text-xs"
-              >{{ effort }}</SelectItem
-            >
-          </SelectContent>
-        </Select>
-      </SettingsPropertyRow>
+        <p
+          v-if="selectedInstance && !modelChoices.length"
+          class="py-2 text-xs leading-5 text-muted-foreground"
+          data-testid="ai-new-session-default-no-models"
+        >
+          {{ t('setting.ai.newSessionDefault.noModels') }}
+        </p>
+        <SettingsPropertyRow
+          v-else
+          :label="t('setting.ai.newSessionDefault.model')"
+          :description="t('setting.ai.newSessionDefault.modelDescription')"
+          :html-for="`${uid}-model`"
+        >
+          <Select v-model="modelValue">
+            <SelectTrigger
+              :id="`${uid}-model`"
+              class="h-8 rounded-lg text-xs"
+              data-testid="ai-new-session-default-model"
+              ><SelectValue :placeholder="t('aiAssistant.composer.chooseModel')"
+            /></SelectTrigger>
+            <SelectContent class="max-h-64">
+              <SelectItem
+                v-for="choice in modelChoices"
+                :key="choice.value"
+                :value="choice.value"
+                class="text-xs"
+                >{{ choice.label }}</SelectItem
+              >
+            </SelectContent>
+          </Select>
+        </SettingsPropertyRow>
 
-      <SettingsPropertyRow
-        v-if="permissionOptions.length"
-        :label="t('setting.ai.newSessionDefault.permission')"
-        :description="t('setting.ai.newSessionDefault.permissionDescription')"
-        :html-for="`${uid}-permission`"
-      >
-        <Select v-model="permissionMode">
-          <SelectTrigger
-            :id="`${uid}-permission`"
-            class="h-8 rounded-lg text-xs"
-            data-testid="ai-new-session-default-permission"
-            ><SelectValue
-          /></SelectTrigger>
-          <SelectContent class="max-h-64">
-            <SelectItem
-              v-for="mode in permissionOptions"
-              :key="mode"
-              :value="mode"
-              class="text-xs"
-              >{{ t(`aiAssistant.composer.runtimeModes.${mode}.label`) }}</SelectItem
-            >
-          </SelectContent>
-        </Select>
-      </SettingsPropertyRow>
-    </template>
+        <SettingsPropertyRow
+          :label="t('setting.ai.newSessionDefault.reasoningEffort')"
+          :description="
+            currentEfforts.length
+              ? t('setting.ai.newSessionDefault.reasoningEffortDescription')
+              : t('setting.ai.newSessionDefault.noReasoningEffort')
+          "
+          :html-for="`${uid}-effort`"
+        >
+          <Select v-model="effortChoice" :disabled="!currentEfforts.length">
+            <SelectTrigger
+              :id="`${uid}-effort`"
+              class="h-8 rounded-lg text-xs"
+              data-testid="ai-new-session-default-reasoning"
+              ><SelectValue :placeholder="t('setting.ai.newSessionDefault.modelDefault')"
+            /></SelectTrigger>
+            <SelectContent class="max-h-64">
+              <SelectItem :value="MODEL_DEFAULT_EFFORT" class="text-xs">{{
+                t('setting.ai.newSessionDefault.modelDefault')
+              }}</SelectItem>
+              <SelectItem
+                v-for="effort in currentEfforts"
+                :key="effort"
+                :value="effort"
+                class="text-xs"
+                >{{ effort }}</SelectItem
+              >
+            </SelectContent>
+          </Select>
+        </SettingsPropertyRow>
 
-    <p
-      v-if="savedInstanceUnavailable"
-      class="py-2 text-xs leading-5 text-muted-foreground"
-      data-testid="ai-new-session-default-unavailable"
-    >
-      {{ t('setting.ai.newSessionDefault.unavailableInstance') }}
-    </p>
-    <p
-      v-if="enabled && !selection"
-      class="py-2 text-xs leading-5 text-destructive"
-      data-testid="ai-new-session-default-invalid"
-    >
-      {{ t('setting.ai.newSessionDefault.incomplete') }}
-    </p>
+        <SettingsPropertyRow
+          v-if="permissionOptions.length"
+          :label="t('setting.ai.newSessionDefault.permission')"
+          :description="t('setting.ai.newSessionDefault.permissionDescription')"
+          :html-for="`${uid}-permission`"
+        >
+          <Select v-model="permissionMode">
+            <SelectTrigger
+              :id="`${uid}-permission`"
+              class="h-8 rounded-lg text-xs"
+              data-testid="ai-new-session-default-permission"
+              ><SelectValue
+            /></SelectTrigger>
+            <SelectContent class="max-h-64">
+              <SelectItem
+                v-for="mode in permissionOptions"
+                :key="mode"
+                :value="mode"
+                class="text-xs"
+                >{{ t(`aiAssistant.composer.runtimeModes.${mode}.label`) }}</SelectItem
+              >
+            </SelectContent>
+          </Select>
+        </SettingsPropertyRow>
+      </template>
 
-    <div class="flex items-center justify-end gap-3 pt-2">
-      <span
-        v-if="savedNotice && !dirty"
-        class="text-xs text-muted-foreground"
-        data-testid="ai-new-session-default-saved"
-        >{{ t('setting.ai.newSessionDefault.saved') }}</span
+      <p
+        v-if="savedInstanceUnavailable"
+        class="py-2 text-xs leading-5 text-muted-foreground"
+        data-testid="ai-new-session-default-unavailable"
       >
-      <span v-else-if="dirty" class="text-xs text-muted-foreground">{{
-        t('setting.ai.newSessionDefault.unsaved')
-      }}</span>
-      <Button
-        size="sm"
-        class="h-8 text-xs"
-        :disabled="!dirty || !canSave"
-        data-testid="ai-new-session-default-save"
-        @click="save"
-        >{{ t('setting.ai.newSessionDefault.save') }}</Button
+        {{ t('setting.ai.newSessionDefault.unavailableInstance') }}
+      </p>
+      <p
+        v-if="enabled && !selection"
+        class="py-2 text-xs leading-5 text-destructive"
+        data-testid="ai-new-session-default-invalid"
       >
+        {{ t('setting.ai.newSessionDefault.incomplete') }}
+      </p>
+
+      <div class="flex items-center justify-end gap-3 pt-2">
+        <span
+          v-if="savedNotice && !dirty"
+          class="text-xs text-muted-foreground"
+          data-testid="ai-new-session-default-saved"
+          >{{ t('setting.ai.newSessionDefault.saved') }}</span
+        >
+        <span v-else-if="dirty" class="text-xs text-muted-foreground">{{
+          t('setting.ai.newSessionDefault.unsaved')
+        }}</span>
+        <Button
+          size="sm"
+          class="h-8 text-xs"
+          :disabled="!dirty || !canSave"
+          data-testid="ai-new-session-default-save"
+          @click="save"
+          >{{ t('setting.ai.newSessionDefault.save') }}</Button
+        >
+      </div>
     </div>
   </SettingsSection>
 </template>

@@ -187,7 +187,8 @@ export function resolveNewSessionSelection(
       return { selection: input.sticky, source: 'sticky', explicitDefaultFallback: true };
     return { selection: null, source: 'none', explicitDefaultFallback: true };
   }
-  if (input.sticky) return { selection: input.sticky, source: 'sticky', explicitDefaultFallback: false };
+  if (input.sticky)
+    return { selection: input.sticky, source: 'sticky', explicitDefaultFallback: false };
   return { selection: null, source: 'none', explicitDefaultFallback: false };
 }
 
