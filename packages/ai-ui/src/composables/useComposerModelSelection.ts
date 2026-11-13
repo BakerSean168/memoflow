@@ -598,6 +598,13 @@ export function useComposerModelSelection(options: UseComposerModelSelectionOpti
 
   function applySelection(selection: ComposerSessionSelection) {
     if (selection.runtimeKind === 'local_agent' && selection.connectionId && selection.modelId) {
+      // Restore every remembered per-model option first, then make sure the
+      // applied model has its own entry even when only flat fields were saved.
+      if (selection.nativeOptions)
+        nativeModelSelections.value = {
+          ...selection.nativeOptions,
+          ...nativeModelSelections.value,
+        };
       const seeded = nativeOptionsForSelection(selection);
       if (seeded)
         nativeModelSelections.value = {
