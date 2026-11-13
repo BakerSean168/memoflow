@@ -247,8 +247,8 @@ test('packaged MemoFlow boots through renderer readiness', async ({}, testInfo) 
       // per-agent write checkboxes are gone and the native mode defaults to
       // asking before the Agent runs commands or edits files.
       await expect(localSettings.getByLabel('创建和修改目标', { exact: true })).toHaveCount(0);
-      await expect(localSettings.getByTestId('ai-agent-native-permission')).toHaveValue(
-        'supervised',
+      await expect(localSettings.getByTestId('ai-agent-native-permission')).toContainText(
+        '需要确认',
       );
       await localSettings.getByRole('button', { name: '检查登录与模型', exact: true }).click();
       // The AGY detail renders both a native status and a Google sign-in
