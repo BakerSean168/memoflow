@@ -200,17 +200,28 @@ const selection = computed<SettingComposerSessionSelection | null>(() => {
           agentInstanceId: instance.instanceId,
           modelKey: modelValue.value,
         }
-      : {
-          runtimeKind: 'local_agent',
-          connectionId: instance.legacyConnectionId,
-          modelId: modelValue.value,
-        };
-  if (reasoningEffort.value && currentEfforts.value.includes(reasoningEffort.value))
+      : instance.legacyConnectionId
+        ? {
+            runtimeKind: 'local_agent',
+            connectionId: instance.legacyConnectionId,
+            modelId: modelValue.value,
+          }
+        : // A native instance without a materialized connection cannot be a default.
+          null;
+  if (!base) return null;
+  // An unverified directory still keeps a previously saved effort instead of
+  // silently downgrading the default to the model's own value.
+  if (
+    reasoningEffort.value &&
+    (!currentEfforts.value.length || currentEfforts.value.includes(reasoningEffort.value))
+  )
     base.reasoningEffort = reasoningEffort.value;
   if (effectivePermission.value) base.permissionMode = effectivePermission.value;
   return base;
 });
-const snapshot = computed(() => JSON.stringify({ enabled: enabled.value, selection: selection.value }));
+const snapshot = computed(() =>
+  JSON.stringify({ enabled: enabled.value, selection: selection.value }),
+);
 const dirty = computed(() => snapshot.value !== savedSnapshot.value);
 const canSave = computed(() => !enabled.value || selection.value !== null);
 
