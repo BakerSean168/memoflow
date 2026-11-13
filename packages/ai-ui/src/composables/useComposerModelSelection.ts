@@ -17,6 +17,15 @@ import { composerAgentKey, type useAIModelCatalog } from './useAIModelCatalog';
 import { sortAgentInstances } from '../agent-instance-order';
 import { antigravityEffortVariant, presentAntigravityModels } from './antigravityModelPresentation';
 import { getAIErrorMessage } from './error';
+import {
+  nativeOptionsForSelection,
+  readNewSessionDefault,
+  readStickySelection,
+  resolveNewSessionSelection,
+  writeStickySelection,
+  type ComposerSessionSelection,
+  type NewSessionAvailability,
+} from './newSessionSelection';
 import { useAIModelSelection } from './useAIModelSelection';
 import type { useAIChatSession } from './useAIChatSession';
 import type { useLocalAssistantChoices } from './useLocalAssistantChoices';
@@ -71,6 +80,11 @@ export function useComposerModelSelection(options: UseComposerModelSelectionOpti
   let explicitRuntimeSelection = 0;
   let newThreadSelectionEpoch = 0;
   let disposed = false;
+  // Last explicit composer choice for this identity. Reused for new conversations
+  // only; an open conversation never has its selection rewritten by this memory.
+  let stickySelection = readStickySelection(resolveIdentity());
+  let autoSessionApply: { choice: string; explicit: boolean; selection: number } | null = null;
+  let fallbackNotifiedIdentity = '';
   const composerLoading = computed(
     () =>
       nativeSelectionPending.value ||
@@ -144,6 +158,7 @@ export function useComposerModelSelection(options: UseComposerModelSelectionOpti
       ...nativeModelSelections.value,
       [identity]: next,
     };
+    rememberSelection();
   }
 
   const modelSelection = useAIModelSelection({
@@ -239,6 +254,9 @@ export function useComposerModelSelection(options: UseComposerModelSelectionOpti
       ++explicitRuntimeSelection;
       nativeSelectionPending.value = false;
       nativeModelSelections.value = {};
+      stickySelection = readStickySelection(resolveIdentity());
+      autoSessionApply = null;
+      fallbackNotifiedIdentity = '';
       void refreshConfiguration();
     },
     { flush: 'sync' },
@@ -510,6 +528,7 @@ export function useComposerModelSelection(options: UseComposerModelSelectionOpti
 
         if (!instance.legacyConnectionId) void loadAgentRegistry();
         await localChoices.refresh();
+        rememberSelection();
       } catch (error) {
         if (!disposed && identity === resolveIdentity() && request === explicitRuntimeSelection)
           toast.error(getAIErrorMessage(error, t, 'aiAssistant.local.actionFailed'));
@@ -519,6 +538,7 @@ export function useComposerModelSelection(options: UseComposerModelSelectionOpti
     } else {
       if (modelSelection.selectModel(key) !== 'selected') return;
       chatSession.runtimeChoice.value = { runtimeKind: 'builtin' };
+      rememberSelection();
     }
   }
   function selectPermission(mode: AIChatPermissionMode) {
@@ -526,7 +546,169 @@ export function useComposerModelSelection(options: UseComposerModelSelectionOpti
     explicitPermission = true;
     permissionMode.value = resolveCompatibleRuntimeMode(mode, supportedRuntimeModes.value);
     savePermission();
+    rememberSelection();
   }
+
+  /** Whether a remembered selection can still be applied to a new conversation. */
+  function availabilityOf(selection: ComposerSessionSelection): NewSessionAvailability {
+    const snapshot = agentRegistrySnapshot.value;
+    // Cold start: the registry has not answered yet. Apply the remembered choice
+    // and let the existing snapshot semantics (unavailable/loading) present it.
+    if (!snapshot) return 'pending';
+    const instance =
+      selection.runtimeKind === 'local_agent'
+        ? snapshot.instances.find(
+            (entry) => composerAgentKey(entry) === `local:${selection.connectionId}`,
+          )
+        : snapshot.instances.find((entry) => entry.instanceId === selection.agentInstanceId);
+    if (!instance || !instance.enabled) return 'unavailable';
+    const entry = composerCatalog.value[instance.instanceId];
+    if (!entry || entry.status === 'loading') return 'pending';
+    if (entry.status !== 'ready') return 'unavailable';
+    if (selection.runtimeKind === 'local_agent')
+      return entry.models.some((model) => model.modelId === selection.modelId)
+        ? 'ready'
+        : 'unavailable';
+    if (!selection.modelKey) return 'ready';
+    return entry.models.some((model) => model.key === selection.modelKey) ? 'ready' : 'unavailable';
+  }
+
+  /** Write the current explicit choice back as this identity's sticky memory. */
+  function rememberSelection() {
+    if (disposed) return;
+    const choice = chatSession.runtimeChoice.value;
+    const next: ComposerSessionSelection =
+      choice.runtimeKind === 'local_agent'
+        ? { runtimeKind: 'local_agent', connectionId: choice.connectionId, modelId: choice.modelId }
+        : {
+            runtimeKind: 'builtin',
+            ...(modelSelection.selectedAgentId.value
+              ? { agentInstanceId: modelSelection.selectedAgentId.value }
+              : {}),
+            ...(modelSelection.selectedModelKey.value
+              ? { modelKey: modelSelection.selectedModelKey.value }
+              : {}),
+          };
+    if (Object.keys(nativeModelSelections.value).length)
+      next.nativeOptions = { ...nativeModelSelections.value };
+    if (explicitPermission) next.permissionMode = permissionMode.value;
+    else if (stickySelection?.permissionMode) next.permissionMode = stickySelection.permissionMode;
+    stickySelection = writeStickySelection(next, resolveIdentity());
+  }
+
+  function applySelection(selection: ComposerSessionSelection) {
+    if (selection.runtimeKind === 'local_agent' && selection.connectionId && selection.modelId) {
+      // Restore every remembered per-model option first, then make sure the
+      // applied model has its own entry even when only flat fields were saved.
+      if (selection.nativeOptions)
+        nativeModelSelections.value = {
+          ...selection.nativeOptions,
+          ...nativeModelSelections.value,
+        };
+      const seeded = nativeOptionsForSelection(selection);
+      if (seeded)
+        nativeModelSelections.value = {
+          ...nativeModelSelections.value,
+          [seeded.key]: { ...nativeModelSelections.value[seeded.key], ...seeded.options },
+        };
+      chatSession.runtimeChoice.value = {
+        runtimeKind: 'local_agent',
+        connectionId: selection.connectionId,
+        modelId: selection.modelId,
+      };
+    } else {
+      const restored =
+        selection.modelKey && modelSelection.selectModel(selection.modelKey) === 'selected';
+      // A catalogue that has not loaded yet still restores the Agent; its model
+      // is restored by the normal persisted-preference sync once it arrives.
+      if (!restored && selection.agentInstanceId)
+        modelSelection.selectAgent(selection.agentInstanceId);
+      chatSession.runtimeChoice.value = { runtimeKind: 'builtin' };
+    }
+    if (!selection.permissionMode) return;
+    // Sticky/default permissions stay subject to the Agent's supported modes.
+    explicitPermission = true;
+    permissionMode.value = resolveCompatibleRuntimeMode(
+      selection.permissionMode,
+      supportedRuntimeModes.value,
+    );
+  }
+
+  /** The Agent/model part of a selection, ignoring tunables that never reset a session. */
+  function choiceSignature(selection: ComposerSessionSelection): string {
+    return JSON.stringify({
+      runtimeKind: selection.runtimeKind,
+      connectionId: selection.connectionId,
+      modelId: selection.modelId,
+      agentInstanceId: selection.agentInstanceId,
+      modelKey: selection.modelKey,
+    });
+  }
+  function currentSelection(): ComposerSessionSelection {
+    const choice = chatSession.runtimeChoice.value;
+    if (choice.runtimeKind === 'local_agent')
+      return {
+        runtimeKind: 'local_agent',
+        connectionId: choice.connectionId,
+        modelId: choice.modelId,
+      };
+    const agentInstanceId = modelSelection.selectedAgentId.value;
+    const modelKey = modelSelection.selectedModelKey.value;
+    return {
+      runtimeKind: 'builtin',
+      ...(agentInstanceId ? { agentInstanceId } : {}),
+      ...(modelKey ? { modelKey } : {}),
+    };
+  }
+
+  /**
+   * Initialise an empty, unconversationed composer from the explicit new-session
+   * default, then sticky memory. Re-entrant: as the Agent directory arrives this
+   * re-evaluates the explicit default and falls back exactly once.
+   */
+  function applyNewSessionSelection(): 'applied' | 'fallback' | 'none' {
+    if (disposed) return 'none';
+    if (chatSession.chatConversationId.value || chatSession.chatTimeline.value.length) {
+      autoSessionApply = null;
+      return 'none';
+    }
+    if (autoSessionApply && autoSessionApply.selection !== explicitRuntimeSelection) {
+      // The user chose after the automatic apply; never overwrite that choice.
+      autoSessionApply = null;
+      return 'none';
+    }
+    const resolution = resolveNewSessionSelection({
+      explicit: readNewSessionDefault(resolveIdentity()),
+      sticky: stickySelection,
+      availability: availabilityOf,
+    });
+    if (!resolution.selection) return 'none';
+    const choice = choiceSignature(resolution.selection);
+    // A reset (new conversation) can restore a runtime default after the first
+    // apply, so compare the live choice rather than only remembering the last one.
+    if (autoSessionApply?.choice === choice && choiceSignature(currentSelection()) === choice)
+      return 'none';
+    applySelection(resolution.selection);
+    autoSessionApply = {
+      choice,
+      explicit: resolution.source === 'explicit',
+      selection: explicitRuntimeSelection,
+    };
+    if (!resolution.explicitDefaultFallback) return 'applied';
+    const identity = resolveIdentity();
+    if (fallbackNotifiedIdentity !== identity) {
+      fallbackNotifiedIdentity = identity;
+      toast.warning(t('aiAssistant.composer.newSessionDefaultUnavailable'));
+    }
+    return 'fallback';
+  }
+  watch(
+    [agentRegistrySnapshot, composerCatalog],
+    () => {
+      if (autoSessionApply?.explicit) applyNewSessionSelection();
+    },
+    { flush: 'sync' },
+  );
 
   return {
     permissionMode,
@@ -545,6 +727,8 @@ export function useComposerModelSelection(options: UseComposerModelSelectionOpti
     composerSwitchBlockedReason,
     selectComposerModel,
     selectPermission,
+    applyNewSessionSelection,
+    rememberRuntimeChoice: rememberSelection,
     bumpExplicitRuntimeSelection: () => ++explicitRuntimeSelection,
     readExplicitRuntimeSelection: () => explicitRuntimeSelection,
     bumpNewThreadSelectionEpoch: () => ++newThreadSelectionEpoch,

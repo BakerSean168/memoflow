@@ -16,6 +16,11 @@ import type {
 import { unwrap } from '@memoflow/transport-contracts/result';
 import { AI_CLIENT_KEY, AI_CONFIGURATION_REVISION_KEY } from '../ai-ui-host';
 import { aiUiHost } from '../ai-ui-host';
+import {
+  readNewSessionDefault,
+  readStickySelection,
+  writeNewSessionDefault,
+} from './newSessionSelection';
 
 /**
  * AI provider/capabilities composable.
@@ -27,6 +32,16 @@ export function useAI() {
   const configurationRevision = inject(AI_CONFIGURATION_REVISION_KEY, undefined);
   const invalidateConfiguration = () => {
     if (configurationRevision) configurationRevision.value++;
+  };
+  // New-session Composer memory is identity-scoped, exactly like model preferences.
+  const resolveIdentityScope = aiUiHost.useServerStateIdentityScope();
+  const composerDefaults = {
+    readNewSessionDefault: () => readNewSessionDefault(resolveIdentityScope()),
+    writeNewSessionDefault: (value: {
+      enabled: boolean;
+      selection: Parameters<typeof writeNewSessionDefault>[0]['selection'];
+    }) => writeNewSessionDefault(value, resolveIdentityScope()),
+    readStickySelection: () => readStickySelection(resolveIdentityScope()),
   };
   let providerLoadGeneration = 0;
   let disposed = false;
@@ -143,6 +158,7 @@ export function useAI() {
   return {
     service: client,
     invalidateConfiguration,
+    composerDefaults,
     providers,
     capabilities,
     providerCatalog,
