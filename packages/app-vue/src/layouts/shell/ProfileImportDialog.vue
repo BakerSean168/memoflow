@@ -2,7 +2,16 @@
 import { computed, inject, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { z } from 'zod';
-import { Button, Dialog, Input } from '@memoflow/ui-vue-shadcn';
+import {
+  Button,
+  Dialog,
+  Input,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@memoflow/ui-vue-shadcn';
 import {
   DesktopProfileImportChannels as Channels,
   DesktopProfileImportViewSchema,
@@ -158,20 +167,27 @@ watch(
       }}</template>
       <p v-if="error" role="alert" class="text-sm text-destructive">{{ error }}</p>
       <template v-if="!selected">
-        <label class="block space-y-2 text-sm">
+        <div class="space-y-2 text-sm">
           <span>{{ t('shell.profileImport.source') }}</span>
-          <select
-            v-model="sourceId"
-            :disabled="busy"
-            class="w-full rounded-md border bg-background p-2"
-            data-testid="profile-import-source"
-          >
-            <option disabled value="">{{ t('shell.profileImport.source') }}</option>
-            <option v-for="profile in sources" :key="profile.profileId" :value="profile.profileId">
-              {{ profile.displayName }}
-            </option>
-          </select>
-        </label>
+          <Select v-model="sourceId" :disabled="busy">
+            <SelectTrigger
+              class="w-full"
+              :aria-label="t('shell.profileImport.source')"
+              data-testid="profile-import-source"
+            >
+              <SelectValue :placeholder="t('shell.profileImport.source')" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem
+                v-for="profile in sources"
+                :key="profile.profileId"
+                :value="profile.profileId"
+              >
+                {{ profile.displayName }}
+              </SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
         <p v-if="sources.length === 0" class="text-sm text-muted-foreground">
           {{ t('shell.profileImport.noSources') }}
         </p>

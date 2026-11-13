@@ -7,6 +7,7 @@ import {
   type DesktopProfileImportView,
   type ProfileSummary,
 } from '@memoflow/desktop-contracts';
+import { Select } from '@memoflow/ui-vue-shadcn';
 import { DESKTOP_BRIDGE_KEY } from '../../di/keys';
 import shell from '../../locales/en-US/shell';
 import ProfileImportDialog from './ProfileImportDialog.vue';
@@ -163,12 +164,12 @@ it('requires an explicit source choice when more than one guest is available', a
   };
   const { wrapper, invoke, click } = fixture(false, [source, second, target]);
   await flushPromises();
-  expect(
-    (wrapper.get('[data-testid="profile-import-source"]').element as HTMLSelectElement).value,
-  ).toBe('');
+  const sourceSelect = wrapper.findComponent(Select);
+  expect(sourceSelect.props('modelValue')).toBe('');
   const preview = wrapper.findAll('button').find((button) => button.text() === 'Preview import')!;
   expect(preview.attributes('disabled')).toBeDefined();
-  await wrapper.get('[data-testid="profile-import-source"]').setValue(second.profileId);
+  sourceSelect.vm.$emit('update:modelValue', second.profileId);
+  await flushPromises();
   await click('Preview import');
   expect(invoke.mock.calls.find(([channel]) => channel === Channels.PREPARE)?.[1]).toMatchObject({
     sourceProfileId: second.profileId,
