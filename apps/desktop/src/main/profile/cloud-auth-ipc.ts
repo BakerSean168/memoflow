@@ -17,6 +17,7 @@ import type { ProfileRegistry } from './profile-registry';
 import type { DesktopCloudConnectionManager } from './desktop-cloud-connection-manager';
 import type { CloudSessionStore } from './cloud-session-store';
 import type { DesktopCloudSignInService } from './desktop-cloud-sign-in-service';
+import { suppressProfileAutoEnterForLaunch } from './profile-auto-enter-suppression';
 
 function authOrigin(): string {
   return new URL(getApiBaseUrl()).origin;
@@ -135,6 +136,10 @@ export function registerCloudAuthIpc(
   });
 
   ipcMain.handle(CloudAuthChannels.SIGN_OUT_ACCOUNT, async () => {
+    // Issue #926: signing out returns to the identity gate, and this launch must
+    // not answer that return by entering an account again. The marker is memory
+    // only, so the next launch still honours the stored preference.
+    suppressProfileAutoEnterForLaunch();
     try {
       await runtime.signOutActiveProfile(async (descriptor) => {
         // A pending device-code attempt belongs to the account being removed.

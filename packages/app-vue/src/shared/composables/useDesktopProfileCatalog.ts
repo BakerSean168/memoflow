@@ -3,10 +3,12 @@ import { toast } from 'vue-sonner';
 import { z } from 'zod';
 import {
   ProfileAccessChannels,
+  ProfileAutoEnterSnapshotSchema,
   WindowChannels,
   type ProfileSummary,
 } from '@memoflow/desktop-contracts';
 import { useConfirm } from '@memoflow/ui-vue-shadcn';
+import { canQuickEnterProfile } from '../utils/desktop-profile-access';
 import type { DesktopProfilesSharedContext } from './useDesktopProfiles';
 
 export const profileSchema = z.object({
@@ -62,6 +64,9 @@ export function useDesktopProfileCatalog(
   const newPassword = ref('');
   const editingProfileId = ref<string | null>(null);
   const editName = ref('');
+  // One in-window hint after a failed launch-time automatic entry; it is never a
+  // separate error window and disappears as soon as the user picks a tile.
+  const autoEnterFailed = ref(false);
 
   const sortedProfiles = computed(() =>
     [...profiles.value].sort((a, b) => {
@@ -101,10 +106,12 @@ export function useDesktopProfileCatalog(
   async function selectAndEnter(
     profile: ProfileSummary,
     credentials: { password?: string } = {},
+    behavior: { silent?: boolean } = {},
   ): Promise<boolean> {
-    const opened = await invoke(
+    const opened = await invokeScoped(
       ProfileAccessChannels.SELECT,
       z.unknown(),
+      { silent: behavior.silent },
       credentials.password === undefined
         ? { profileId: profile.profileId }
         : {
@@ -114,30 +121,64 @@ export function useDesktopProfileCatalog(
           },
     );
     if (!opened) return false;
-    return !!(await invoke(WindowChannels.TRANSITION_TO_MAIN, z.unknown()));
+    return !!(await invokeScoped(WindowChannels.TRANSITION_TO_MAIN, z.unknown(), {
+      silent: behavior.silent,
+    }));
   }
 
   /**
    * Tile routing for the access window. A registered Profile and a local account
    * whose data key is still remembered open directly; every other local account
    * asks for its password inside the window.
+   *
+   * `silent` is the launch-time automatic entry (#926): it reuses exactly this
+   * path, but reports failure to the caller instead of toasting and never opens
+   * the password state for a target that no longer qualifies.
    */
-  async function selectProfile(profile: ProfileSummary): Promise<void> {
-    if (busyProfileId.value) return;
+  async function selectProfile(
+    profile: ProfileSummary,
+    behavior: { silent?: boolean } = {},
+  ): Promise<boolean> {
+    if (busyProfileId.value) return false;
+    autoEnterFailed.value = false;
     if (!options.accessWindow) {
       await openProfile(profile);
-      return;
+      return false;
     }
-    if (profile.profileKind === 'registered' || profile.remembered) {
+    if (canQuickEnterProfile(profile)) {
       busyProfileId.value = profile.profileId;
-      if (await selectAndEnter(profile)) return;
+      if (await selectAndEnter(profile, {}, behavior)) return true;
       busyProfileId.value = null;
       // A registered Profile keeps its existing re-authentication presentation in
       // the workspace. A remembered key that safeStorage can no longer unseal
       // falls through to the password state; the copy is never deleted here.
-      if (profile.profileKind === 'registered') return;
+      if (profile.profileKind === 'registered' || behavior.silent) return false;
     }
     cross.enterPasswordState(profile);
+    return false;
+  }
+
+  /**
+   * The Steam-style cold start (#926): when automatic entry is on and the target
+   * still owns remembered material, fire the tile path once. Anything else —
+   * disabled, suppressed by a sign-out in this launch, no target, or invalid
+   * material — falls back to the identity window with one visible hint.
+   */
+  async function tryAutoEnter(): Promise<'entered' | 'skipped' | 'failed'> {
+    const setting = await invokeScoped(
+      ProfileAccessChannels.AUTO_ENTER_GET,
+      ProfileAutoEnterSnapshotSchema,
+      { silent: true },
+    );
+    if (!setting?.data.profileId || setting.data.suppressed) return 'skipped';
+    const target = profiles.value.find((profile) => profile.profileId === setting.data.profileId);
+    if (!target || !canQuickEnterProfile(target)) {
+      autoEnterFailed.value = true;
+      return 'failed';
+    }
+    if (await selectProfile(target, { silent: true })) return 'entered';
+    autoEnterFailed.value = true;
+    return 'failed';
   }
 
   function backToSelect(): void {
@@ -267,10 +308,12 @@ export function useDesktopProfileCatalog(
     newPassword,
     editingProfileId,
     editName,
+    autoEnterFailed,
     refreshProfiles,
     navigate,
     selectAndEnter,
     selectProfile,
+    tryAutoEnter,
     backToSelect,
     enterOpenedProfile,
     setAccessWindowHeight,

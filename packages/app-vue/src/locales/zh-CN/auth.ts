@@ -88,6 +88,7 @@ export default {
     removeConfirmTitle: '删除本地账户？',
     removeConfirm: '从本机移除“{name}”及其本地数据？未同步资料将永久丢失，云端账号不会关闭。',
     removed: '本地账户已删除',
+    autoEnterFailed: '未能自动进入上次选择的账号，请选择账号继续。',
   },
   field: {
     name: '昵称',

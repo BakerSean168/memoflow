@@ -80,6 +80,17 @@ export default {
     mismatch: '两次输入的密码不一致',
     tooShort: '密码至少需要 8 位',
   },
+  autoEnter: {
+    title: '启动时自动进入',
+    description:
+      '冷启动时直接进入所选账号，跳过选择账号窗口。仅对本机已记住凭据的账号生效，不会保存密码或延长登录有效期。',
+    label: '自动进入的账号',
+    off: '关闭',
+    unavailable:
+      '本机还没有已记住凭据的账号，暂时无法自动进入。先在登录窗口勾选「记住我」，再回来设置。',
+    unavailableTarget: '该账号的记住凭据已失效',
+    failed: '自动进入设置读取或保存失败',
+  },
   password: {
     title: '云端密码',
     description: '修改 MemoFlow 云端密码，或向账户邮箱发送密码重置邮件。',
