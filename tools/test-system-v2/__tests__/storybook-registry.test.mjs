@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { existsSync, readFileSync } from 'node:fs';
+import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import path from 'node:path';
 
 const repositoryRoot = process.cwd();
@@ -165,6 +165,27 @@ test('full enforcement rejects planned entries while staged enforcement reports 
     validateRegistry(full).some((issue) =>
       issue.startsWith('planned-entries-block-full-enforcement:'),
     ),
+  );
+});
+
+test('every package with Vue components is catalogued', () => {
+  const packagesDirectory = path.join(repositoryRoot, 'packages');
+  const uncatalogued = readdirSync(packagesDirectory)
+    .filter((name) => existsSync(path.join(packagesDirectory, name, 'src')))
+    .filter((name) => {
+      const sourceFiles = readdirSync(path.join(packagesDirectory, name, 'src'), {
+        recursive: true,
+        encoding: 'utf8',
+      });
+      const hasVueComponents = sourceFiles.some((file) => file.endsWith('.vue'));
+      const isCatalogued = catalogGlobs.some((glob) => glob.includes(`packages/${name}/`));
+      return hasVueComponents && !isCatalogued;
+    });
+
+  assert.deepEqual(
+    uncatalogued,
+    [],
+    'a package with Vue components must have a catalog glob in apps/storybook/.storybook/main.ts',
   );
 });
 
