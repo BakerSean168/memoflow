@@ -1,19 +1,15 @@
 import type { Meta, StoryObj } from '@storybook/vue3-vite';
-import { provide } from 'vue';
+import { onBeforeUnmount, ref } from 'vue';
 import { userEvent, within } from 'storybook/test';
-import { ok } from '@memoflow/transport-contracts/result';
 import type {
   AgentInstance,
   AgentInstanceModelBinding,
   AIProviderConfigClientDTO,
 } from '@memoflow/ai-contracts';
-import { aiUiHost } from '@memoflow/ai-ui/host';
+import { settingUiHost } from '../setting-ui-host';
 import NewSessionDefaultSettings from './NewSessionDefaultSettings.vue';
 
 const now = Date.now();
-const identityScope = 'storybook';
-const stickyKey = `ai:composer:sticky-selection:v1:${encodeURIComponent(identityScope)}`;
-const defaultKey = `ai:composer:new-session-default:v1:${encodeURIComponent(identityScope)}`;
 
 const provider = {
   id: 'provider-demo-1',
@@ -57,6 +53,32 @@ const selection = {
   permissionMode: 'approval-required' as const,
 };
 
+/**
+ * `NewSessionDefaultSettings` reads persisted Composer memory through the host
+ * AI facade. Storybook installs the host without a live AI client, so the story
+ * supplies the two memory reads it needs and restores the facade on unmount.
+ */
+function usePreviewAiFacade(options: { selection?: typeof selection; savedDefault?: boolean }) {
+  const providers = ref<AIProviderConfigClientDTO[]>([provider]);
+  const original = settingUiHost.useAiFacade;
+  settingUiHost.useAiFacade = (() => ({
+    providers,
+    loadProviders: async () => providers.value,
+    invalidateConfiguration: () => undefined,
+    composerDefaults: {
+      readNewSessionDefault: () => ({
+        enabled: options.savedDefault === true && Boolean(options.selection),
+        selection: options.selection ?? null,
+      }),
+      writeNewSessionDefault: () => undefined,
+      readStickySelection: () => options.selection ?? null,
+    },
+  })) as never;
+  onBeforeUnmount(() => {
+    settingUiHost.useAiFacade = original;
+  });
+}
+
 function renderSettings(
   options: {
     selection?: typeof selection;
@@ -67,21 +89,7 @@ function renderSettings(
   return {
     components: { NewSessionDefaultSettings },
     setup() {
-      try {
-        localStorage.removeItem(stickyKey);
-        localStorage.removeItem(defaultKey);
-        if (options.selection) localStorage.setItem(stickyKey, JSON.stringify(options.selection));
-        if (options.savedDefault)
-          localStorage.setItem(defaultKey, JSON.stringify({ enabled: true, selection }));
-      } catch {
-        /* Storybook storage restrictions only drop the seeded selection. */
-      }
-      provide(
-        aiUiHost.AI_CLIENT_KEY as symbol,
-        {
-          listProviders: async () => ok([provider]),
-        } as never,
-      );
+      usePreviewAiFacade(options);
       return {
         instances: options.instances ?? [instance],
         bindings: options.selection ? [binding] : [],

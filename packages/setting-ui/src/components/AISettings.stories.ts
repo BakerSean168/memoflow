@@ -1,8 +1,10 @@
 import type { Meta, StoryObj } from '@storybook/vue3-vite';
-import { provide, ref } from 'vue';
-import { ok } from '@memoflow/transport-contracts/result';
-import type { AgentInstance, AgentRegistrySnapshot } from '@memoflow/ai-contracts';
-import { aiUiHost } from '@memoflow/ai-ui/host';
+import { onBeforeUnmount, provide, ref } from 'vue';
+import type {
+  AgentInstance,
+  AgentRegistrySnapshot,
+  AIProviderConfigClientDTO,
+} from '@memoflow/ai-contracts';
 import { settingUiHost } from '../setting-ui-host';
 import AISettings from './AISettings.vue';
 
@@ -28,9 +30,32 @@ function registrySnapshot(instances: AgentInstance[]): AgentRegistrySnapshot {
 }
 
 /**
- * The Provider registry and provider list are injected ports. Each story keeps a
- * local copy so toggling a provider updates the row instead of snapping back on
- * the refresh the component runs after every mutation.
+ * `AISettings` reaches the AI client through the host facade. Storybook binds the
+ * host but provides no live AI client, so each story swaps only that facade for a
+ * local double and restores it when the story unmounts.
+ */
+function usePreviewAiFacade() {
+  const providers = ref<AIProviderConfigClientDTO[]>([]);
+  const original = settingUiHost.useAiFacade;
+  settingUiHost.useAiFacade = (() => ({
+    providers,
+    loadProviders: async () => providers.value,
+    invalidateConfiguration: () => undefined,
+    composerDefaults: {
+      readNewSessionDefault: () => ({ enabled: false, selection: null }),
+      writeNewSessionDefault: () => undefined,
+      readStickySelection: () => null,
+    },
+  })) as never;
+  onBeforeUnmount(() => {
+    settingUiHost.useAiFacade = original;
+  });
+}
+
+/**
+ * The Provider registry is an injected port. Each story keeps a local copy so
+ * toggling a provider updates the row instead of snapping back on the refresh
+ * the component runs after every mutation.
  */
 function renderWithRegistry(initial: AgentInstance[]) {
   return {
@@ -54,12 +79,7 @@ function renderWithRegistry(initial: AgentInstance[]) {
           },
         } as never,
       );
-      provide(
-        aiUiHost.AI_CLIENT_KEY as symbol,
-        {
-          listProviders: async () => ok([]),
-        } as never,
-      );
+      usePreviewAiFacade();
       return {};
     },
     template: '<AISettings />',
@@ -119,12 +139,7 @@ export const LoadingRegistry: Story = {
           execute: async () => null,
         } as never,
       );
-      provide(
-        aiUiHost.AI_CLIENT_KEY as symbol,
-        {
-          listProviders: async () => ok([]),
-        } as never,
-      );
+      usePreviewAiFacade();
       return {};
     },
     template: '<AISettings />',
@@ -144,12 +159,7 @@ export const RegistryError: Story = {
           execute: async () => null,
         } as never,
       );
-      provide(
-        aiUiHost.AI_CLIENT_KEY as symbol,
-        {
-          listProviders: async () => ok([]),
-        } as never,
-      );
+      usePreviewAiFacade();
       return {};
     },
     template: '<AISettings />',
