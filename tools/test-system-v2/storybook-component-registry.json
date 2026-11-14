@@ -2,7 +2,7 @@
   "version": 1,
   "scope": "Primary UI components that must expose a Storybook catalog story. Batches #934/#935/#936 fill planned entries; the coordination line flips enforcement to full once every batch lands.",
   "description": "Story catalog coverage registry. Catalog stories are visual review surfaces only; promoting a story to the audited browser interaction suite stays a separate decision.",
-  "enforcement": "staged",
+  "enforcement": "full",
   "entries": [
     {
       "path": "packages/ui-vue-shadcn/src/components/ui/accordion",
