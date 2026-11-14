@@ -408,154 +408,154 @@
       "package": "@memoflow/app-vue",
       "kind": "component",
       "storyPath": "packages/app-vue/src/shared/components/ProductDialogShell.stories.ts",
-      "status": "planned"
+      "status": "present"
     },
     {
       "path": "packages/app-vue/src/shared/components/ProductSheetSurface.vue",
       "package": "@memoflow/app-vue",
       "kind": "component",
       "storyPath": "packages/app-vue/src/shared/components/ProductSheetSurface.stories.ts",
-      "status": "planned"
+      "status": "present"
     },
     {
       "path": "packages/app-vue/src/shared/components/ProductPopoverSurface.vue",
       "package": "@memoflow/app-vue",
       "kind": "component",
       "storyPath": "packages/app-vue/src/shared/components/ProductPopoverSurface.stories.ts",
-      "status": "planned"
+      "status": "present"
     },
     {
       "path": "packages/app-vue/src/shared/components/ProductSurfaceHeader.vue",
       "package": "@memoflow/app-vue",
       "kind": "component",
       "storyPath": "packages/app-vue/src/shared/components/ProductSurfaceHeader.stories.ts",
-      "status": "planned"
+      "status": "present"
     },
     {
       "path": "packages/app-vue/src/shared/components/ProductEditorFrame.vue",
       "package": "@memoflow/app-vue",
       "kind": "component",
       "storyPath": "packages/app-vue/src/shared/components/ProductEditorFrame.stories.ts",
-      "status": "planned"
+      "status": "present"
     },
     {
       "path": "packages/app-vue/src/shared/components/ProductPropertyChip.vue",
       "package": "@memoflow/app-vue",
       "kind": "component",
       "storyPath": "packages/app-vue/src/shared/components/ProductPropertyChip.stories.ts",
-      "status": "planned"
+      "status": "present"
     },
     {
       "path": "packages/app-vue/src/shared/components/ProductMetadataRow.vue",
       "package": "@memoflow/app-vue",
       "kind": "component",
       "storyPath": "packages/app-vue/src/shared/components/ProductMetadataRow.stories.ts",
-      "status": "planned"
+      "status": "present"
     },
     {
       "path": "packages/app-vue/src/shared/components/ProductMoreProperties.vue",
       "package": "@memoflow/app-vue",
       "kind": "component",
       "storyPath": "packages/app-vue/src/shared/components/ProductMoreProperties.stories.ts",
-      "status": "planned"
+      "status": "present"
     },
     {
       "path": "packages/app-vue/src/shared/components/ProductExpandableSection.vue",
       "package": "@memoflow/app-vue",
       "kind": "component",
       "storyPath": "packages/app-vue/src/shared/components/ProductExpandableSection.stories.ts",
-      "status": "planned"
+      "status": "present"
     },
     {
       "path": "packages/app-vue/src/shared/components/ProductInlineValidation.vue",
       "package": "@memoflow/app-vue",
       "kind": "component",
       "storyPath": "packages/app-vue/src/shared/components/ProductInlineValidation.stories.ts",
-      "status": "planned"
+      "status": "present"
     },
     {
       "path": "packages/app-vue/src/shared/components/ProductSingleSelectFilter.vue",
       "package": "@memoflow/app-vue",
       "kind": "component",
       "storyPath": "packages/app-vue/src/shared/components/ProductSingleSelectFilter.stories.ts",
-      "status": "planned"
+      "status": "present"
     },
     {
       "path": "packages/app-vue/src/shared/components/ProductDatePicker.vue",
       "package": "@memoflow/app-vue",
       "kind": "component",
       "storyPath": "packages/app-vue/src/shared/components/ProductDatePicker.stories.ts",
-      "status": "planned"
+      "status": "present"
     },
     {
       "path": "packages/app-vue/src/shared/components/ProductDateTimePicker.vue",
       "package": "@memoflow/app-vue",
       "kind": "component",
       "storyPath": "packages/app-vue/src/shared/components/ProductDateTimePicker.stories.ts",
-      "status": "planned"
+      "status": "present"
     },
     {
       "path": "packages/app-vue/src/shared/components/ProductTimeZoneSelector.vue",
       "package": "@memoflow/app-vue",
       "kind": "component",
       "storyPath": "packages/app-vue/src/shared/components/ProductTimeZoneSelector.stories.ts",
-      "status": "planned"
+      "status": "present"
     },
     {
       "path": "packages/app-vue/src/shared/components/ColorPickerField.vue",
       "package": "@memoflow/app-vue",
       "kind": "component",
       "storyPath": "packages/app-vue/src/shared/components/ColorPickerField.stories.ts",
-      "status": "planned"
+      "status": "present"
     },
     {
       "path": "packages/app-vue/src/shared/components/LabelPicker.vue",
       "package": "@memoflow/app-vue",
       "kind": "component",
       "storyPath": "packages/app-vue/src/shared/components/LabelPicker.stories.ts",
-      "status": "planned"
+      "status": "present"
     },
     {
       "path": "packages/app-vue/src/shared/components/GlobalCommandPalette.vue",
       "package": "@memoflow/app-vue",
       "kind": "component",
       "storyPath": "packages/app-vue/src/shared/components/GlobalCommandPalette.stories.ts",
-      "status": "planned"
+      "status": "present"
     },
     {
       "path": "packages/app-vue/src/shared/components/GlobalConfirmDialog.vue",
       "package": "@memoflow/app-vue",
       "kind": "component",
       "storyPath": "packages/app-vue/src/shared/components/GlobalConfirmDialog.stories.ts",
-      "status": "planned"
+      "status": "present"
     },
     {
       "path": "packages/app-vue/src/shared/components/DesktopProfileList.vue",
       "package": "@memoflow/app-vue",
       "kind": "component",
       "storyPath": "packages/app-vue/src/shared/components/DesktopProfileList.stories.ts",
-      "status": "planned"
+      "status": "present"
     },
     {
       "path": "packages/app-vue/src/components/shared/AppEmptyState.vue",
       "package": "@memoflow/app-vue",
       "kind": "component",
       "storyPath": "packages/app-vue/src/components/shared/AppEmptyState.stories.ts",
-      "status": "planned"
+      "status": "present"
     },
     {
       "path": "packages/app-vue/src/components/shared/FilterBar.vue",
       "package": "@memoflow/app-vue",
       "kind": "component",
       "storyPath": "packages/app-vue/src/components/shared/FilterBar.stories.ts",
-      "status": "planned"
+      "status": "present"
     },
     {
       "path": "packages/app-vue/src/layouts/shell/ProfileImportDialog.vue",
       "package": "@memoflow/app-vue",
       "kind": "component",
       "storyPath": "packages/app-vue/src/layouts/shell/ProfileImportDialog.stories.ts",
-      "status": "planned"
+      "status": "present"
     },
     {
       "path": "packages/setting-ui/src/components/AppearanceSettings.vue",
