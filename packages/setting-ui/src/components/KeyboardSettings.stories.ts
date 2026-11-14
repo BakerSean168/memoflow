@@ -19,10 +19,7 @@ export const Default: Story = {};
 export const FilteredCommands: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
-    await userEvent.type(
-      canvas.getByRole('textbox', { name: '搜索快捷键' }),
-      '命令面板',
-    );
+    await userEvent.type(canvas.getByRole('textbox', { name: '搜索快捷键' }), '命令面板');
   },
 };
 

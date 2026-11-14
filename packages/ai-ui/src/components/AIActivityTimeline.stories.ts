@@ -71,9 +71,7 @@ export const Completed: Story = {
       ...base,
       status: 'success',
       content: 'The plan was updated.',
-      nativeActivities: [
-        { toolCallId: 'tool-1', label: 'commandExecution', state: 'completed' },
-      ],
+      nativeActivities: [{ toolCallId: 'tool-1', label: 'commandExecution', state: 'completed' }],
     },
   },
 };

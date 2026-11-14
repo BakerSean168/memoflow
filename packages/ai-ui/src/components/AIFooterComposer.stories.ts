@@ -62,7 +62,13 @@ const contextEntities: ComposerContextEntity[] = [
 ];
 
 const recentGoals: AIWorkspaceRecentGoal[] = [
-  { id: 'goal-1', title: 'Ship the settings shell', status: 'Active', updatedAt: now, progress: 64 },
+  {
+    id: 'goal-1',
+    title: 'Ship the settings shell',
+    status: 'Active',
+    updatedAt: now,
+    progress: 64,
+  },
 ];
 
 const recentTasks: AIWorkspaceRecentTask[] = [

@@ -12,7 +12,12 @@ const now = Date.now();
 
 const conversations = [
   { id: 'c-1', name: 'Plan the next sprint', runtimeKind: 'builtin', status: 'Active' },
-  { id: 'c-2', name: 'Summarize the design review notes', runtimeKind: 'builtin', status: 'Active' },
+  {
+    id: 'c-2',
+    name: 'Summarize the design review notes',
+    runtimeKind: 'builtin',
+    status: 'Active',
+  },
   {
     id: 'c-3',
     name: 'Refactor the task editor layout',
@@ -30,8 +35,20 @@ const attention: ConversationAttentionMap = {
 };
 
 const recentGoals: AIWorkspaceRecentGoal[] = [
-  { id: 'goal-1', title: 'Ship the settings shell', status: 'Active', updatedAt: now, progress: 64 },
-  { id: 'goal-2', title: 'Stabilize desktop updates', status: 'Active', updatedAt: now, progress: null },
+  {
+    id: 'goal-1',
+    title: 'Ship the settings shell',
+    status: 'Active',
+    updatedAt: now,
+    progress: 64,
+  },
+  {
+    id: 'goal-2',
+    title: 'Stabilize desktop updates',
+    status: 'Active',
+    updatedAt: now,
+    progress: null,
+  },
 ];
 
 const recentKnowledgeNotes: AIWorkspaceRecentKnowledgeNote[] = [

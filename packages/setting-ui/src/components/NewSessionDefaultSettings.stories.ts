@@ -58,7 +58,11 @@ const selection = {
 };
 
 function renderSettings(
-  options: { selection?: typeof selection; instances?: AgentInstance[]; savedDefault?: boolean } = {},
+  options: {
+    selection?: typeof selection;
+    instances?: AgentInstance[];
+    savedDefault?: boolean;
+  } = {},
 ) {
   return {
     components: { NewSessionDefaultSettings },
@@ -72,9 +76,12 @@ function renderSettings(
       } catch {
         /* Storybook storage restrictions only drop the seeded selection. */
       }
-      provide(aiUiHost.AI_CLIENT_KEY as symbol, {
-        listProviders: async () => ok([provider]),
-      } as never);
+      provide(
+        aiUiHost.AI_CLIENT_KEY as symbol,
+        {
+          listProviders: async () => ok([provider]),
+        } as never,
+      );
       return {
         instances: options.instances ?? [instance],
         bindings: options.selection ? [binding] : [],

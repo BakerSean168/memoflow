@@ -41,10 +41,7 @@ function service(overrides: Partial<AccountClientPort> = {}): AccountClientPort 
   } as unknown as AccountClientPort;
 }
 
-function renderWithService(
-  accountService: AccountClientPort,
-  options: { cloud?: boolean } = {},
-) {
+function renderWithService(accountService: AccountClientPort, options: { cloud?: boolean } = {}) {
   return {
     components: { AccountProfileSection },
     setup() {
@@ -64,8 +61,7 @@ function renderWithService(
       provide(accountUiHost.ACCOUNT_SERVICE_KEY as symbol, accountService as never);
       return {};
     },
-    template:
-      '<div style="max-width: 720px"><AccountProfileSection :show-profile="true" /></div>',
+    template: '<div style="max-width: 720px"><AccountProfileSection :show-profile="true" /></div>',
   };
 }
 
@@ -104,8 +100,7 @@ export const ProfileHidden: Story = {
       provide(accountUiHost.ACCOUNT_SERVICE_KEY as symbol, service() as never);
       return {};
     },
-    template:
-      '<div style="max-width: 720px"><AccountProfileSection :show-profile="false" /></div>',
+    template: '<div style="max-width: 720px"><AccountProfileSection :show-profile="false" /></div>',
   }),
 };
 

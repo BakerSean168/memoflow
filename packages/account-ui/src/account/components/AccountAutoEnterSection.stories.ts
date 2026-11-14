@@ -6,7 +6,11 @@ import AccountAutoEnterSection from './AccountAutoEnterSection.vue';
 
 const candidates = [
   { profileId: 'profile-work', displayName: 'Work profile', profileKind: 'local' as const },
-  { profileId: 'profile-personal', displayName: 'Personal profile', profileKind: 'registered' as const },
+  {
+    profileId: 'profile-personal',
+    displayName: 'Personal profile',
+    profileKind: 'registered' as const,
+  },
 ];
 
 const snapshot: ProfileAutoEnterSnapshot = {
@@ -19,9 +23,12 @@ function renderWithBridge(result: unknown) {
   return {
     components: { AccountAutoEnterSection },
     setup() {
-      provide(accountUiHost.DESKTOP_BRIDGE_KEY as symbol, {
-        invoke: async () => result,
-      } as never);
+      provide(
+        accountUiHost.DESKTOP_BRIDGE_KEY as symbol,
+        {
+          invoke: async () => result,
+        } as never,
+      );
       return {};
     },
     template: '<div style="max-width: 560px"><AccountAutoEnterSection /></div>',

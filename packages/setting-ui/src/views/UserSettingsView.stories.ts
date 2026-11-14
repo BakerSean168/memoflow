@@ -7,7 +7,11 @@ import UserSettingsView from './UserSettingsView.vue';
 
 const presentation = {
   namespace: 'presentation' as const,
-  preferences: { theme: 'light' as const, language: 'en-US' as const, accent: 'brand-gold' as const },
+  preferences: {
+    theme: 'light' as const,
+    language: 'en-US' as const,
+    accent: 'brand-gold' as const,
+  },
   revision: 4,
 };
 const regional = {
@@ -31,8 +35,7 @@ const settingService = {
   ) =>
     ok({
       namespace,
-      revision:
-        (namespace === 'presentation' ? presentation.revision : regional.revision) + 1,
+      revision: (namespace === 'presentation' ? presentation.revision : regional.revision) + 1,
       changedKeys: Object.keys(patch),
       requestedRevision: revision,
     }),

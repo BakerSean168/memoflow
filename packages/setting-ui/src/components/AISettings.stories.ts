@@ -37,23 +37,29 @@ function renderWithRegistry(initial: AgentInstance[]) {
     components: { AISettings },
     setup() {
       const snapshot = ref(registrySnapshot(initial.map((item) => ({ ...item }))));
-      provide(settingUiHost.AI_AGENT_REGISTRY_KEY as symbol, {
-        list: async () => registrySnapshot(snapshot.value.instances.map((item) => ({ ...item }))),
-        execute: async (command: {
-          action: string;
-          instanceId?: string;
-          patch?: { enabled?: boolean; name?: string };
-        }) => {
-          const target = snapshot.value.instances.find(
-            (item) => item.instanceId === command.instanceId,
-          );
-          if (target && command.patch) Object.assign(target, command.patch);
-          return target ?? snapshot.value;
-        },
-      } as never);
-      provide(aiUiHost.AI_CLIENT_KEY as symbol, {
-        listProviders: async () => ok([]),
-      } as never);
+      provide(
+        settingUiHost.AI_AGENT_REGISTRY_KEY as symbol,
+        {
+          list: async () => registrySnapshot(snapshot.value.instances.map((item) => ({ ...item }))),
+          execute: async (command: {
+            action: string;
+            instanceId?: string;
+            patch?: { enabled?: boolean; name?: string };
+          }) => {
+            const target = snapshot.value.instances.find(
+              (item) => item.instanceId === command.instanceId,
+            );
+            if (target && command.patch) Object.assign(target, command.patch);
+            return target ?? snapshot.value;
+          },
+        } as never,
+      );
+      provide(
+        aiUiHost.AI_CLIENT_KEY as symbol,
+        {
+          listProviders: async () => ok([]),
+        } as never,
+      );
       return {};
     },
     template: '<AISettings />',
@@ -73,44 +79,52 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {
-  render: () => renderWithRegistry([
-    nativeInstance(),
-    nativeInstance({
-      instanceId: 'claude-work',
-      driver: 'claude',
-      name: 'Claude Code',
-      accentColor: '#d97757',
-      legacyConnectionId: 'connection-claude-work',
-      revision: 1,
-    }),
-  ]),
+  render: () =>
+    renderWithRegistry([
+      nativeInstance(),
+      nativeInstance({
+        instanceId: 'claude-work',
+        driver: 'claude',
+        name: 'Claude Code',
+        accentColor: '#d97757',
+        legacyConnectionId: 'connection-claude-work',
+        revision: 1,
+      }),
+    ]),
 };
 
 export const DisabledProvider: Story = {
-  render: () => renderWithRegistry([
-    nativeInstance(),
-    nativeInstance({
-      instanceId: 'antigravity-personal',
-      driver: 'antigravity',
-      name: 'Antigravity (AGY)',
-      accentColor: '#4285f4',
-      enabled: false,
-      revision: 2,
-    }),
-  ]),
+  render: () =>
+    renderWithRegistry([
+      nativeInstance(),
+      nativeInstance({
+        instanceId: 'antigravity-personal',
+        driver: 'antigravity',
+        name: 'Antigravity (AGY)',
+        accentColor: '#4285f4',
+        enabled: false,
+        revision: 2,
+      }),
+    ]),
 };
 
 export const LoadingRegistry: Story = {
   render: () => ({
     components: { AISettings },
     setup() {
-      provide(settingUiHost.AI_AGENT_REGISTRY_KEY as symbol, {
-        list: () => new Promise(() => undefined),
-        execute: async () => null,
-      } as never);
-      provide(aiUiHost.AI_CLIENT_KEY as symbol, {
-        listProviders: async () => ok([]),
-      } as never);
+      provide(
+        settingUiHost.AI_AGENT_REGISTRY_KEY as symbol,
+        {
+          list: () => new Promise(() => undefined),
+          execute: async () => null,
+        } as never,
+      );
+      provide(
+        aiUiHost.AI_CLIENT_KEY as symbol,
+        {
+          listProviders: async () => ok([]),
+        } as never,
+      );
       return {};
     },
     template: '<AISettings />',
@@ -121,15 +135,21 @@ export const RegistryError: Story = {
   render: () => ({
     components: { AISettings },
     setup() {
-      provide(settingUiHost.AI_AGENT_REGISTRY_KEY as symbol, {
-        list: async () => {
-          throw new Error('Agent registry is unavailable on this device.');
-        },
-        execute: async () => null,
-      } as never);
-      provide(aiUiHost.AI_CLIENT_KEY as symbol, {
-        listProviders: async () => ok([]),
-      } as never);
+      provide(
+        settingUiHost.AI_AGENT_REGISTRY_KEY as symbol,
+        {
+          list: async () => {
+            throw new Error('Agent registry is unavailable on this device.');
+          },
+          execute: async () => null,
+        } as never,
+      );
+      provide(
+        aiUiHost.AI_CLIENT_KEY as symbol,
+        {
+          listProviders: async () => ok([]),
+        } as never,
+      );
       return {};
     },
     template: '<AISettings />',
