@@ -1,0 +1,932 @@
+{
+  "version": 1,
+  "scope": "Primary UI components that must expose a Storybook catalog story. Batches #934/#935/#936 fill planned entries; the coordination line flips enforcement to full once every batch lands.",
+  "description": "Story catalog coverage registry. Catalog stories are visual review surfaces only; promoting a story to the audited browser interaction suite stays a separate decision.",
+  "enforcement": "staged",
+  "entries": [
+    {
+      "path": "packages/ui-vue-shadcn/src/components/ui/accordion",
+      "package": "@memoflow/ui-vue-shadcn",
+      "kind": "family",
+      "storyPath": "packages/ui-vue-shadcn/src/components/ui/accordion/Accordion.stories.ts",
+      "status": "present"
+    },
+    {
+      "path": "packages/ui-vue-shadcn/src/components/ui/alert",
+      "package": "@memoflow/ui-vue-shadcn",
+      "kind": "family",
+      "storyPath": "packages/ui-vue-shadcn/src/components/ui/alert/Alert.stories.ts",
+      "status": "present"
+    },
+    {
+      "path": "packages/ui-vue-shadcn/src/components/ui/alert-dialog",
+      "package": "@memoflow/ui-vue-shadcn",
+      "kind": "family",
+      "storyPath": "packages/ui-vue-shadcn/src/components/ui/alert-dialog/AlertDialog.stories.ts",
+      "status": "present"
+    },
+    {
+      "path": "packages/ui-vue-shadcn/src/components/ui/aspect-ratio",
+      "package": "@memoflow/ui-vue-shadcn",
+      "kind": "family",
+      "storyPath": "packages/ui-vue-shadcn/src/components/ui/aspect-ratio/AspectRatio.stories.ts",
+      "status": "present"
+    },
+    {
+      "path": "packages/ui-vue-shadcn/src/components/ui/avatar",
+      "package": "@memoflow/ui-vue-shadcn",
+      "kind": "family",
+      "storyPath": "packages/ui-vue-shadcn/src/components/ui/avatar/Avatar.stories.ts",
+      "status": "present"
+    },
+    {
+      "path": "packages/ui-vue-shadcn/src/components/ui/badge",
+      "package": "@memoflow/ui-vue-shadcn",
+      "kind": "family",
+      "storyPath": "packages/ui-vue-shadcn/src/components/ui/badge/Badge.stories.ts",
+      "status": "present"
+    },
+    {
+      "path": "packages/ui-vue-shadcn/src/components/ui/breadcrumb",
+      "package": "@memoflow/ui-vue-shadcn",
+      "kind": "family",
+      "storyPath": "packages/ui-vue-shadcn/src/components/ui/breadcrumb/Breadcrumb.stories.ts",
+      "status": "present"
+    },
+    {
+      "path": "packages/ui-vue-shadcn/src/components/ui/button",
+      "package": "@memoflow/ui-vue-shadcn",
+      "kind": "family",
+      "storyPath": "packages/ui-vue-shadcn/src/components/ui/button/Button.stories.ts",
+      "status": "present"
+    },
+    {
+      "path": "packages/ui-vue-shadcn/src/components/ui/button-group",
+      "package": "@memoflow/ui-vue-shadcn",
+      "kind": "family",
+      "storyPath": "packages/ui-vue-shadcn/src/components/ui/button-group/ButtonGroup.stories.ts",
+      "status": "present"
+    },
+    {
+      "path": "packages/ui-vue-shadcn/src/components/ui/calendar",
+      "package": "@memoflow/ui-vue-shadcn",
+      "kind": "family",
+      "storyPath": "packages/ui-vue-shadcn/src/components/ui/calendar/Calendar.stories.ts",
+      "status": "present"
+    },
+    {
+      "path": "packages/ui-vue-shadcn/src/components/ui/card",
+      "package": "@memoflow/ui-vue-shadcn",
+      "kind": "family",
+      "storyPath": "packages/ui-vue-shadcn/src/components/ui/card/Card.stories.ts",
+      "status": "present"
+    },
+    {
+      "path": "packages/ui-vue-shadcn/src/components/ui/carousel",
+      "package": "@memoflow/ui-vue-shadcn",
+      "kind": "family",
+      "storyPath": "packages/ui-vue-shadcn/src/components/ui/carousel/Carousel.stories.ts",
+      "status": "present"
+    },
+    {
+      "path": "packages/ui-vue-shadcn/src/components/ui/chart",
+      "package": "@memoflow/ui-vue-shadcn",
+      "kind": "family",
+      "storyPath": "packages/ui-vue-shadcn/src/components/ui/chart/ChartTooltip.stories.ts",
+      "status": "present"
+    },
+    {
+      "path": "packages/ui-vue-shadcn/src/components/ui/checkbox",
+      "package": "@memoflow/ui-vue-shadcn",
+      "kind": "family",
+      "storyPath": "packages/ui-vue-shadcn/src/components/ui/checkbox/Checkbox.stories.ts",
+      "status": "present"
+    },
+    {
+      "path": "packages/ui-vue-shadcn/src/components/ui/collapsible",
+      "package": "@memoflow/ui-vue-shadcn",
+      "kind": "family",
+      "storyPath": "packages/ui-vue-shadcn/src/components/ui/collapsible/Collapsible.stories.ts",
+      "status": "present"
+    },
+    {
+      "path": "packages/ui-vue-shadcn/src/components/ui/command",
+      "package": "@memoflow/ui-vue-shadcn",
+      "kind": "family",
+      "storyPath": "packages/ui-vue-shadcn/src/components/ui/command/Command.stories.ts",
+      "status": "present"
+    },
+    {
+      "path": "packages/ui-vue-shadcn/src/components/ui/context-menu",
+      "package": "@memoflow/ui-vue-shadcn",
+      "kind": "family",
+      "storyPath": "packages/ui-vue-shadcn/src/components/ui/context-menu/ContextMenu.stories.ts",
+      "status": "present"
+    },
+    {
+      "path": "packages/ui-vue-shadcn/src/components/ui/dialog",
+      "package": "@memoflow/ui-vue-shadcn",
+      "kind": "family",
+      "storyPath": "packages/ui-vue-shadcn/src/components/ui/dialog/Dialog.stories.ts",
+      "status": "present"
+    },
+    {
+      "path": "packages/ui-vue-shadcn/src/components/ui/drawer",
+      "package": "@memoflow/ui-vue-shadcn",
+      "kind": "family",
+      "storyPath": "packages/ui-vue-shadcn/src/components/ui/drawer/Drawer.stories.ts",
+      "status": "present"
+    },
+    {
+      "path": "packages/ui-vue-shadcn/src/components/ui/dropdown-menu",
+      "package": "@memoflow/ui-vue-shadcn",
+      "kind": "family",
+      "storyPath": "packages/ui-vue-shadcn/src/components/ui/dropdown-menu/DropdownMenu.stories.ts",
+      "status": "present"
+    },
+    {
+      "path": "packages/ui-vue-shadcn/src/components/ui/form",
+      "package": "@memoflow/ui-vue-shadcn",
+      "kind": "family",
+      "storyPath": "packages/ui-vue-shadcn/src/components/ui/form/FormItem.stories.ts",
+      "status": "present"
+    },
+    {
+      "path": "packages/ui-vue-shadcn/src/components/ui/hover-card",
+      "package": "@memoflow/ui-vue-shadcn",
+      "kind": "family",
+      "storyPath": "packages/ui-vue-shadcn/src/components/ui/hover-card/HoverCard.stories.ts",
+      "status": "present"
+    },
+    {
+      "path": "packages/ui-vue-shadcn/src/components/ui/input",
+      "package": "@memoflow/ui-vue-shadcn",
+      "kind": "family",
+      "storyPath": "packages/ui-vue-shadcn/src/components/ui/input/Input.stories.ts",
+      "status": "present"
+    },
+    {
+      "path": "packages/ui-vue-shadcn/src/components/ui/label",
+      "package": "@memoflow/ui-vue-shadcn",
+      "kind": "family",
+      "storyPath": "packages/ui-vue-shadcn/src/components/ui/label/Label.stories.ts",
+      "status": "present"
+    },
+    {
+      "path": "packages/ui-vue-shadcn/src/components/ui/menubar",
+      "package": "@memoflow/ui-vue-shadcn",
+      "kind": "family",
+      "storyPath": "packages/ui-vue-shadcn/src/components/ui/menubar/Menubar.stories.ts",
+      "status": "present"
+    },
+    {
+      "path": "packages/ui-vue-shadcn/src/components/ui/navigation-menu",
+      "package": "@memoflow/ui-vue-shadcn",
+      "kind": "family",
+      "storyPath": "packages/ui-vue-shadcn/src/components/ui/navigation-menu/NavigationMenu.stories.ts",
+      "status": "present"
+    },
+    {
+      "path": "packages/ui-vue-shadcn/src/components/ui/number-field",
+      "package": "@memoflow/ui-vue-shadcn",
+      "kind": "family",
+      "storyPath": "packages/ui-vue-shadcn/src/components/ui/number-field/NumberField.stories.ts",
+      "status": "present"
+    },
+    {
+      "path": "packages/ui-vue-shadcn/src/components/ui/pagination",
+      "package": "@memoflow/ui-vue-shadcn",
+      "kind": "family",
+      "storyPath": "packages/ui-vue-shadcn/src/components/ui/pagination/Pagination.stories.ts",
+      "status": "present"
+    },
+    {
+      "path": "packages/ui-vue-shadcn/src/components/ui/pin-input",
+      "package": "@memoflow/ui-vue-shadcn",
+      "kind": "family",
+      "storyPath": "packages/ui-vue-shadcn/src/components/ui/pin-input/PinInput.stories.ts",
+      "status": "present"
+    },
+    {
+      "path": "packages/ui-vue-shadcn/src/components/ui/popover",
+      "package": "@memoflow/ui-vue-shadcn",
+      "kind": "family",
+      "storyPath": "packages/ui-vue-shadcn/src/components/ui/popover/Popover.stories.ts",
+      "status": "present"
+    },
+    {
+      "path": "packages/ui-vue-shadcn/src/components/ui/progress",
+      "package": "@memoflow/ui-vue-shadcn",
+      "kind": "family",
+      "storyPath": "packages/ui-vue-shadcn/src/components/ui/progress/Progress.stories.ts",
+      "status": "present"
+    },
+    {
+      "path": "packages/ui-vue-shadcn/src/components/ui/radio-group",
+      "package": "@memoflow/ui-vue-shadcn",
+      "kind": "family",
+      "storyPath": "packages/ui-vue-shadcn/src/components/ui/radio-group/RadioGroup.stories.ts",
+      "status": "present"
+    },
+    {
+      "path": "packages/ui-vue-shadcn/src/components/ui/range-calendar",
+      "package": "@memoflow/ui-vue-shadcn",
+      "kind": "family",
+      "storyPath": "packages/ui-vue-shadcn/src/components/ui/range-calendar/RangeCalendar.stories.ts",
+      "status": "present"
+    },
+    {
+      "path": "packages/ui-vue-shadcn/src/components/ui/resizable",
+      "package": "@memoflow/ui-vue-shadcn",
+      "kind": "family",
+      "storyPath": "packages/ui-vue-shadcn/src/components/ui/resizable/ResizablePanelGroup.stories.ts",
+      "status": "present"
+    },
+    {
+      "path": "packages/ui-vue-shadcn/src/components/ui/scroll-area",
+      "package": "@memoflow/ui-vue-shadcn",
+      "kind": "family",
+      "storyPath": "packages/ui-vue-shadcn/src/components/ui/scroll-area/ScrollArea.stories.ts",
+      "status": "present"
+    },
+    {
+      "path": "packages/ui-vue-shadcn/src/components/ui/select",
+      "package": "@memoflow/ui-vue-shadcn",
+      "kind": "family",
+      "storyPath": "packages/ui-vue-shadcn/src/components/ui/select/Select.stories.ts",
+      "status": "present"
+    },
+    {
+      "path": "packages/ui-vue-shadcn/src/components/ui/separator",
+      "package": "@memoflow/ui-vue-shadcn",
+      "kind": "family",
+      "storyPath": "packages/ui-vue-shadcn/src/components/ui/separator/Separator.stories.ts",
+      "status": "present"
+    },
+    {
+      "path": "packages/ui-vue-shadcn/src/components/ui/sheet",
+      "package": "@memoflow/ui-vue-shadcn",
+      "kind": "family",
+      "storyPath": "packages/ui-vue-shadcn/src/components/ui/sheet/Sheet.stories.ts",
+      "status": "present"
+    },
+    {
+      "path": "packages/ui-vue-shadcn/src/components/ui/sidebar",
+      "package": "@memoflow/ui-vue-shadcn",
+      "kind": "family",
+      "storyPath": "packages/ui-vue-shadcn/src/components/ui/sidebar/Sidebar.stories.ts",
+      "status": "present"
+    },
+    {
+      "path": "packages/ui-vue-shadcn/src/components/ui/skeleton",
+      "package": "@memoflow/ui-vue-shadcn",
+      "kind": "family",
+      "storyPath": "packages/ui-vue-shadcn/src/components/ui/skeleton/Skeleton.stories.ts",
+      "status": "present"
+    },
+    {
+      "path": "packages/ui-vue-shadcn/src/components/ui/slider",
+      "package": "@memoflow/ui-vue-shadcn",
+      "kind": "family",
+      "storyPath": "packages/ui-vue-shadcn/src/components/ui/slider/Slider.stories.ts",
+      "status": "present"
+    },
+    {
+      "path": "packages/ui-vue-shadcn/src/components/ui/sonner",
+      "package": "@memoflow/ui-vue-shadcn",
+      "kind": "family",
+      "storyPath": "packages/ui-vue-shadcn/src/components/ui/sonner/Toaster.stories.ts",
+      "status": "present"
+    },
+    {
+      "path": "packages/ui-vue-shadcn/src/components/ui/stepper",
+      "package": "@memoflow/ui-vue-shadcn",
+      "kind": "family",
+      "storyPath": "packages/ui-vue-shadcn/src/components/ui/stepper/Stepper.stories.ts",
+      "status": "present"
+    },
+    {
+      "path": "packages/ui-vue-shadcn/src/components/ui/switch",
+      "package": "@memoflow/ui-vue-shadcn",
+      "kind": "family",
+      "storyPath": "packages/ui-vue-shadcn/src/components/ui/switch/Switch.stories.ts",
+      "status": "present"
+    },
+    {
+      "path": "packages/ui-vue-shadcn/src/components/ui/table",
+      "package": "@memoflow/ui-vue-shadcn",
+      "kind": "family",
+      "storyPath": "packages/ui-vue-shadcn/src/components/ui/table/Table.stories.ts",
+      "status": "present"
+    },
+    {
+      "path": "packages/ui-vue-shadcn/src/components/ui/tabs",
+      "package": "@memoflow/ui-vue-shadcn",
+      "kind": "family",
+      "storyPath": "packages/ui-vue-shadcn/src/components/ui/tabs/Tabs.stories.ts",
+      "status": "present"
+    },
+    {
+      "path": "packages/ui-vue-shadcn/src/components/ui/tags-input",
+      "package": "@memoflow/ui-vue-shadcn",
+      "kind": "family",
+      "storyPath": "packages/ui-vue-shadcn/src/components/ui/tags-input/TagsInput.stories.ts",
+      "status": "present"
+    },
+    {
+      "path": "packages/ui-vue-shadcn/src/components/ui/textarea",
+      "package": "@memoflow/ui-vue-shadcn",
+      "kind": "family",
+      "storyPath": "packages/ui-vue-shadcn/src/components/ui/textarea/Textarea.stories.ts",
+      "status": "present"
+    },
+    {
+      "path": "packages/ui-vue-shadcn/src/components/ui/toggle",
+      "package": "@memoflow/ui-vue-shadcn",
+      "kind": "family",
+      "storyPath": "packages/ui-vue-shadcn/src/components/ui/toggle/Toggle.stories.ts",
+      "status": "present"
+    },
+    {
+      "path": "packages/ui-vue-shadcn/src/components/ui/toggle-group",
+      "package": "@memoflow/ui-vue-shadcn",
+      "kind": "family",
+      "storyPath": "packages/ui-vue-shadcn/src/components/ui/toggle-group/ToggleGroup.stories.ts",
+      "status": "present"
+    },
+    {
+      "path": "packages/ui-vue-shadcn/src/components/ui/tooltip",
+      "package": "@memoflow/ui-vue-shadcn",
+      "kind": "family",
+      "storyPath": "packages/ui-vue-shadcn/src/components/ui/tooltip/Tooltip.stories.ts",
+      "status": "present"
+    },
+    {
+      "path": "packages/ui-vue-shadcn/src/components/custom/linear/LinearListItem.vue",
+      "package": "@memoflow/ui-vue-shadcn",
+      "kind": "component",
+      "storyPath": "packages/ui-vue-shadcn/src/components/custom/linear/LinearListItem.stories.ts",
+      "status": "present"
+    },
+    {
+      "path": "packages/ui-vue-shadcn/src/components/custom/linear/LinearPageHeader.vue",
+      "package": "@memoflow/ui-vue-shadcn",
+      "kind": "component",
+      "storyPath": "packages/ui-vue-shadcn/src/components/custom/linear/LinearPageHeader.stories.ts",
+      "status": "present"
+    },
+    {
+      "path": "packages/ui-vue-shadcn/src/components/custom/linear/LinearPanel.vue",
+      "package": "@memoflow/ui-vue-shadcn",
+      "kind": "component",
+      "storyPath": "packages/ui-vue-shadcn/src/components/custom/linear/LinearPanel.stories.ts",
+      "status": "present"
+    },
+    {
+      "path": "packages/ui-vue-shadcn/src/components/custom/linear/LinearSidebarItem.vue",
+      "package": "@memoflow/ui-vue-shadcn",
+      "kind": "component",
+      "storyPath": "packages/ui-vue-shadcn/src/components/custom/linear/LinearSidebarItem.stories.ts",
+      "status": "present"
+    },
+    {
+      "path": "packages/ui-vue-shadcn/src/components/custom/form/date-time",
+      "package": "@memoflow/ui-vue-shadcn",
+      "kind": "family",
+      "storyPath": "packages/ui-vue-shadcn/src/components/custom/form/date-time/DateTimeFields.stories.ts",
+      "status": "present"
+    },
+    {
+      "path": "packages/ui-vue-shadcn/src/components/custom/form/TagInput.vue",
+      "package": "@memoflow/ui-vue-shadcn",
+      "kind": "component",
+      "storyPath": "packages/ui-vue-shadcn/src/components/custom/form/TagInput.stories.ts",
+      "status": "planned"
+    },
+    {
+      "path": "packages/app-vue/src/shared/components/ProductDialogShell.vue",
+      "package": "@memoflow/app-vue",
+      "kind": "component",
+      "storyPath": "packages/app-vue/src/shared/components/ProductDialogShell.stories.ts",
+      "status": "planned"
+    },
+    {
+      "path": "packages/app-vue/src/shared/components/ProductSheetSurface.vue",
+      "package": "@memoflow/app-vue",
+      "kind": "component",
+      "storyPath": "packages/app-vue/src/shared/components/ProductSheetSurface.stories.ts",
+      "status": "planned"
+    },
+    {
+      "path": "packages/app-vue/src/shared/components/ProductPopoverSurface.vue",
+      "package": "@memoflow/app-vue",
+      "kind": "component",
+      "storyPath": "packages/app-vue/src/shared/components/ProductPopoverSurface.stories.ts",
+      "status": "planned"
+    },
+    {
+      "path": "packages/app-vue/src/shared/components/ProductSurfaceHeader.vue",
+      "package": "@memoflow/app-vue",
+      "kind": "component",
+      "storyPath": "packages/app-vue/src/shared/components/ProductSurfaceHeader.stories.ts",
+      "status": "planned"
+    },
+    {
+      "path": "packages/app-vue/src/shared/components/ProductEditorFrame.vue",
+      "package": "@memoflow/app-vue",
+      "kind": "component",
+      "storyPath": "packages/app-vue/src/shared/components/ProductEditorFrame.stories.ts",
+      "status": "planned"
+    },
+    {
+      "path": "packages/app-vue/src/shared/components/ProductPropertyChip.vue",
+      "package": "@memoflow/app-vue",
+      "kind": "component",
+      "storyPath": "packages/app-vue/src/shared/components/ProductPropertyChip.stories.ts",
+      "status": "planned"
+    },
+    {
+      "path": "packages/app-vue/src/shared/components/ProductMetadataRow.vue",
+      "package": "@memoflow/app-vue",
+      "kind": "component",
+      "storyPath": "packages/app-vue/src/shared/components/ProductMetadataRow.stories.ts",
+      "status": "planned"
+    },
+    {
+      "path": "packages/app-vue/src/shared/components/ProductMoreProperties.vue",
+      "package": "@memoflow/app-vue",
+      "kind": "component",
+      "storyPath": "packages/app-vue/src/shared/components/ProductMoreProperties.stories.ts",
+      "status": "planned"
+    },
+    {
+      "path": "packages/app-vue/src/shared/components/ProductExpandableSection.vue",
+      "package": "@memoflow/app-vue",
+      "kind": "component",
+      "storyPath": "packages/app-vue/src/shared/components/ProductExpandableSection.stories.ts",
+      "status": "planned"
+    },
+    {
+      "path": "packages/app-vue/src/shared/components/ProductInlineValidation.vue",
+      "package": "@memoflow/app-vue",
+      "kind": "component",
+      "storyPath": "packages/app-vue/src/shared/components/ProductInlineValidation.stories.ts",
+      "status": "planned"
+    },
+    {
+      "path": "packages/app-vue/src/shared/components/ProductSingleSelectFilter.vue",
+      "package": "@memoflow/app-vue",
+      "kind": "component",
+      "storyPath": "packages/app-vue/src/shared/components/ProductSingleSelectFilter.stories.ts",
+      "status": "planned"
+    },
+    {
+      "path": "packages/app-vue/src/shared/components/ProductDatePicker.vue",
+      "package": "@memoflow/app-vue",
+      "kind": "component",
+      "storyPath": "packages/app-vue/src/shared/components/ProductDatePicker.stories.ts",
+      "status": "planned"
+    },
+    {
+      "path": "packages/app-vue/src/shared/components/ProductDateTimePicker.vue",
+      "package": "@memoflow/app-vue",
+      "kind": "component",
+      "storyPath": "packages/app-vue/src/shared/components/ProductDateTimePicker.stories.ts",
+      "status": "planned"
+    },
+    {
+      "path": "packages/app-vue/src/shared/components/ProductTimeZoneSelector.vue",
+      "package": "@memoflow/app-vue",
+      "kind": "component",
+      "storyPath": "packages/app-vue/src/shared/components/ProductTimeZoneSelector.stories.ts",
+      "status": "planned"
+    },
+    {
+      "path": "packages/app-vue/src/shared/components/ColorPickerField.vue",
+      "package": "@memoflow/app-vue",
+      "kind": "component",
+      "storyPath": "packages/app-vue/src/shared/components/ColorPickerField.stories.ts",
+      "status": "planned"
+    },
+    {
+      "path": "packages/app-vue/src/shared/components/LabelPicker.vue",
+      "package": "@memoflow/app-vue",
+      "kind": "component",
+      "storyPath": "packages/app-vue/src/shared/components/LabelPicker.stories.ts",
+      "status": "planned"
+    },
+    {
+      "path": "packages/app-vue/src/shared/components/GlobalCommandPalette.vue",
+      "package": "@memoflow/app-vue",
+      "kind": "component",
+      "storyPath": "packages/app-vue/src/shared/components/GlobalCommandPalette.stories.ts",
+      "status": "planned"
+    },
+    {
+      "path": "packages/app-vue/src/shared/components/GlobalConfirmDialog.vue",
+      "package": "@memoflow/app-vue",
+      "kind": "component",
+      "storyPath": "packages/app-vue/src/shared/components/GlobalConfirmDialog.stories.ts",
+      "status": "planned"
+    },
+    {
+      "path": "packages/app-vue/src/shared/components/DesktopProfileList.vue",
+      "package": "@memoflow/app-vue",
+      "kind": "component",
+      "storyPath": "packages/app-vue/src/shared/components/DesktopProfileList.stories.ts",
+      "status": "planned"
+    },
+    {
+      "path": "packages/app-vue/src/components/shared/AppEmptyState.vue",
+      "package": "@memoflow/app-vue",
+      "kind": "component",
+      "storyPath": "packages/app-vue/src/components/shared/AppEmptyState.stories.ts",
+      "status": "planned"
+    },
+    {
+      "path": "packages/app-vue/src/components/shared/FilterBar.vue",
+      "package": "@memoflow/app-vue",
+      "kind": "component",
+      "storyPath": "packages/app-vue/src/components/shared/FilterBar.stories.ts",
+      "status": "planned"
+    },
+    {
+      "path": "packages/app-vue/src/layouts/shell/ProfileImportDialog.vue",
+      "package": "@memoflow/app-vue",
+      "kind": "component",
+      "storyPath": "packages/app-vue/src/layouts/shell/ProfileImportDialog.stories.ts",
+      "status": "planned"
+    },
+    {
+      "path": "packages/setting-ui/src/components/AppearanceSettings.vue",
+      "package": "@memoflow/setting-ui",
+      "kind": "component",
+      "storyPath": "packages/setting-ui/src/components/AppearanceSettings.stories.ts",
+      "status": "present"
+    },
+    {
+      "path": "packages/setting-ui/src/components/LocaleSettings.vue",
+      "package": "@memoflow/setting-ui",
+      "kind": "component",
+      "storyPath": "packages/setting-ui/src/components/LocaleSettings.stories.ts",
+      "status": "present"
+    },
+    {
+      "path": "packages/setting-ui/src/components/NotificationSettings.vue",
+      "package": "@memoflow/setting-ui",
+      "kind": "component",
+      "storyPath": "packages/setting-ui/src/components/NotificationSettings.stories.ts",
+      "status": "present"
+    },
+    {
+      "path": "packages/setting-ui/src/components/SettingAdvancedActions.vue",
+      "package": "@memoflow/setting-ui",
+      "kind": "component",
+      "storyPath": "packages/setting-ui/src/components/SettingAdvancedActions.stories.ts",
+      "status": "present"
+    },
+    {
+      "path": "packages/setting-ui/src/components/AISettings.vue",
+      "package": "@memoflow/setting-ui",
+      "kind": "component",
+      "storyPath": "packages/setting-ui/src/components/AISettings.stories.ts",
+      "status": "planned"
+    },
+    {
+      "path": "packages/setting-ui/src/components/KeyboardSettings.vue",
+      "package": "@memoflow/setting-ui",
+      "kind": "component",
+      "storyPath": "packages/setting-ui/src/components/KeyboardSettings.stories.ts",
+      "status": "planned"
+    },
+    {
+      "path": "packages/setting-ui/src/components/LocalAgentSettings.vue",
+      "package": "@memoflow/setting-ui",
+      "kind": "component",
+      "storyPath": "packages/setting-ui/src/components/LocalAgentSettings.stories.ts",
+      "status": "planned"
+    },
+    {
+      "path": "packages/setting-ui/src/components/SettingsNavigation.vue",
+      "package": "@memoflow/setting-ui",
+      "kind": "component",
+      "storyPath": "packages/setting-ui/src/components/SettingsNavigation.stories.ts",
+      "status": "planned"
+    },
+    {
+      "path": "packages/setting-ui/src/components/NewSessionDefaultSettings.vue",
+      "package": "@memoflow/setting-ui",
+      "kind": "component",
+      "storyPath": "packages/setting-ui/src/components/NewSessionDefaultSettings.stories.ts",
+      "status": "planned"
+    },
+    {
+      "path": "packages/setting-ui/src/views/UserSettingsView.vue",
+      "package": "@memoflow/setting-ui",
+      "kind": "component",
+      "storyPath": "packages/setting-ui/src/views/UserSettingsView.stories.ts",
+      "status": "planned"
+    },
+    {
+      "path": "packages/ai-ui/src/components/AIMessagePanel.vue",
+      "package": "@memoflow/ai-ui",
+      "kind": "component",
+      "storyPath": "packages/ai-ui/src/components/AIMessagePanel.stories.ts",
+      "status": "planned"
+    },
+    {
+      "path": "packages/ai-ui/src/components/AIFooterComposer.vue",
+      "package": "@memoflow/ai-ui",
+      "kind": "component",
+      "storyPath": "packages/ai-ui/src/components/AIFooterComposer.stories.ts",
+      "status": "planned"
+    },
+    {
+      "path": "packages/ai-ui/src/components/AIConversationSidebar.vue",
+      "package": "@memoflow/ai-ui",
+      "kind": "component",
+      "storyPath": "packages/ai-ui/src/components/AIConversationSidebar.stories.ts",
+      "status": "planned"
+    },
+    {
+      "path": "packages/ai-ui/src/components/AILocalRequestCard.vue",
+      "package": "@memoflow/ai-ui",
+      "kind": "component",
+      "storyPath": "packages/ai-ui/src/components/AILocalRequestCard.stories.ts",
+      "status": "planned"
+    },
+    {
+      "path": "packages/ai-ui/src/components/AIModelTraitsPanel.vue",
+      "package": "@memoflow/ai-ui",
+      "kind": "component",
+      "storyPath": "packages/ai-ui/src/components/AIModelTraitsPanel.stories.ts",
+      "status": "planned"
+    },
+    {
+      "path": "packages/ai-ui/src/components/AIActivityTimeline.vue",
+      "package": "@memoflow/ai-ui",
+      "kind": "component",
+      "storyPath": "packages/ai-ui/src/components/AIActivityTimeline.stories.ts",
+      "status": "planned"
+    },
+    {
+      "path": "packages/account-ui/src/account/components/AccountProfileSection.vue",
+      "package": "@memoflow/account-ui",
+      "kind": "component",
+      "storyPath": "packages/account-ui/src/account/components/AccountProfileSection.stories.ts",
+      "status": "planned"
+    },
+    {
+      "path": "packages/account-ui/src/account/components/AccountProfileEditorDialog.vue",
+      "package": "@memoflow/account-ui",
+      "kind": "component",
+      "storyPath": "packages/account-ui/src/account/components/AccountProfileEditorDialog.stories.ts",
+      "status": "planned"
+    },
+    {
+      "path": "packages/account-ui/src/account/components/AccountAutoEnterSection.vue",
+      "package": "@memoflow/account-ui",
+      "kind": "component",
+      "storyPath": "packages/account-ui/src/account/components/AccountAutoEnterSection.stories.ts",
+      "status": "planned"
+    },
+    {
+      "path": "packages/goal-ui/src/components/dialogs/GoalDialog.vue",
+      "package": "@memoflow/goal-ui",
+      "kind": "component",
+      "storyPath": "packages/goal-ui/src/components/dialogs/GoalDialog.stories.ts",
+      "status": "present"
+    },
+    {
+      "path": "packages/goal-ui/src/components/cards/GoalRecordCard.vue",
+      "package": "@memoflow/goal-ui",
+      "kind": "component",
+      "storyPath": "packages/goal-ui/src/components/cards/GoalRecordCard.stories.ts",
+      "status": "planned"
+    },
+    {
+      "path": "packages/goal-ui/src/components/GoalProgressRow.vue",
+      "package": "@memoflow/goal-ui",
+      "kind": "component",
+      "storyPath": "packages/goal-ui/src/components/GoalProgressRow.stories.ts",
+      "status": "planned"
+    },
+    {
+      "path": "packages/goal-ui/src/components/GoalStatusPicker.vue",
+      "package": "@memoflow/goal-ui",
+      "kind": "component",
+      "storyPath": "packages/goal-ui/src/components/GoalStatusPicker.stories.ts",
+      "status": "planned"
+    },
+    {
+      "path": "packages/goal-ui/src/components/GoalKeyResultCardEditor.vue",
+      "package": "@memoflow/goal-ui",
+      "kind": "component",
+      "storyPath": "packages/goal-ui/src/components/GoalKeyResultCardEditor.stories.ts",
+      "status": "planned"
+    },
+    {
+      "path": "packages/goal-ui/src/components/timeline/GoalTimelineView.vue",
+      "package": "@memoflow/goal-ui",
+      "kind": "component",
+      "storyPath": "packages/goal-ui/src/components/timeline/GoalTimelineView.stories.ts",
+      "status": "planned"
+    },
+    {
+      "path": "packages/goal-ui/src/components/echarts/KrCompletionChart.vue",
+      "package": "@memoflow/goal-ui",
+      "kind": "component",
+      "storyPath": "packages/goal-ui/src/components/echarts/GoalCharts.stories.ts",
+      "status": "planned"
+    },
+    {
+      "path": "packages/goal-ui/src/components/echarts/KrWeightDistributionChart.vue",
+      "package": "@memoflow/goal-ui",
+      "kind": "component",
+      "storyPath": "packages/goal-ui/src/components/echarts/GoalCharts.stories.ts",
+      "status": "planned"
+    },
+    {
+      "path": "packages/goal-ui/src/components/echarts/PeriodBarChart.vue",
+      "package": "@memoflow/goal-ui",
+      "kind": "component",
+      "storyPath": "packages/goal-ui/src/components/echarts/GoalCharts.stories.ts",
+      "status": "planned"
+    },
+    {
+      "path": "packages/goal-ui/src/components/weight-snapshot/WeightTrendChart.vue",
+      "package": "@memoflow/goal-ui",
+      "kind": "component",
+      "storyPath": "packages/goal-ui/src/components/echarts/GoalCharts.stories.ts",
+      "status": "planned"
+    },
+    {
+      "path": "packages/task-ui/src/components/TaskPlanForm/TaskPlanForm.vue",
+      "package": "@memoflow/task-ui",
+      "kind": "component",
+      "storyPath": "packages/task-ui/src/components/TaskPlanForm/TaskPlanForm.stories.ts",
+      "status": "present"
+    },
+    {
+      "path": "packages/task-ui/src/components/dialogs/QuickTaskDialog.vue",
+      "package": "@memoflow/task-ui",
+      "kind": "component",
+      "storyPath": "packages/task-ui/src/components/dialogs/QuickTaskDialog.stories.ts",
+      "status": "planned"
+    },
+    {
+      "path": "packages/task-ui/src/components/dialogs/TaskPlanDialog.vue",
+      "package": "@memoflow/task-ui",
+      "kind": "component",
+      "storyPath": "packages/task-ui/src/components/dialogs/TaskPlanDialog.stories.ts",
+      "status": "planned"
+    },
+    {
+      "path": "packages/task-ui/src/components/TaskOccurrenceRow.vue",
+      "package": "@memoflow/task-ui",
+      "kind": "component",
+      "storyPath": "packages/task-ui/src/components/TaskOccurrenceRow.stories.ts",
+      "status": "planned"
+    },
+    {
+      "path": "packages/task-ui/src/components/widgets/DailyTodoWidget.vue",
+      "package": "@memoflow/task-ui",
+      "kind": "component",
+      "storyPath": "packages/task-ui/src/components/widgets/DailyTodoWidget.stories.ts",
+      "status": "planned"
+    },
+    {
+      "path": "packages/repository-ui/src/components/KnowledgeMarkdownPreview.vue",
+      "package": "@memoflow/repository-ui",
+      "kind": "component",
+      "storyPath": "packages/repository-ui/src/components/KnowledgeMarkdownPreview.stories.ts",
+      "status": "planned"
+    },
+    {
+      "path": "packages/repository-ui/src/components/KnowledgeNoteCatalog.vue",
+      "package": "@memoflow/repository-ui",
+      "kind": "component",
+      "storyPath": "packages/repository-ui/src/components/KnowledgeNoteCatalog.stories.ts",
+      "status": "planned"
+    },
+    {
+      "path": "packages/repository-ui/src/components/DocumentCatalogRow.vue",
+      "package": "@memoflow/repository-ui",
+      "kind": "component",
+      "storyPath": "packages/repository-ui/src/components/DocumentCatalogRow.stories.ts",
+      "status": "planned"
+    },
+    {
+      "path": "packages/routine-ui/src/components/RoutineEditorDialog.vue",
+      "package": "@memoflow/routine-ui",
+      "kind": "component",
+      "storyPath": "packages/routine-ui/src/components/RoutineEditorDialog.stories.ts",
+      "status": "planned"
+    },
+    {
+      "path": "packages/routine-ui/src/components/RoutineProfileDialog.vue",
+      "package": "@memoflow/routine-ui",
+      "kind": "component",
+      "storyPath": "packages/routine-ui/src/components/RoutineProfileDialog.stories.ts",
+      "status": "planned"
+    },
+    {
+      "path": "packages/routine-ui/src/components/ActiveUsageTriggerEditor.vue",
+      "package": "@memoflow/routine-ui",
+      "kind": "component",
+      "storyPath": "packages/routine-ui/src/components/RoutineTriggerEditors.stories.ts",
+      "status": "planned"
+    },
+    {
+      "path": "packages/routine-ui/src/components/ElapsedTriggerEditor.vue",
+      "package": "@memoflow/routine-ui",
+      "kind": "component",
+      "storyPath": "packages/routine-ui/src/components/RoutineTriggerEditors.stories.ts",
+      "status": "planned"
+    },
+    {
+      "path": "packages/routine-ui/src/components/WallClockTriggerEditor.vue",
+      "package": "@memoflow/routine-ui",
+      "kind": "component",
+      "storyPath": "packages/routine-ui/src/components/RoutineTriggerEditors.stories.ts",
+      "status": "planned"
+    },
+    {
+      "path": "packages/schedule-ui/src/components/CreateScheduleDialog.vue",
+      "package": "@memoflow/schedule-ui",
+      "kind": "component",
+      "storyPath": "packages/schedule-ui/src/components/CreateScheduleDialog.stories.ts",
+      "status": "present"
+    },
+    {
+      "path": "packages/schedule-ui/src/planner/PlannerCalendar.vue",
+      "package": "@memoflow/schedule-ui",
+      "kind": "component",
+      "storyPath": "packages/schedule-ui/src/planner/PlannerCalendar.stories.ts",
+      "status": "planned"
+    },
+    {
+      "path": "packages/schedule-ui/src/components/PlannerEventDialog.vue",
+      "package": "@memoflow/schedule-ui",
+      "kind": "component",
+      "storyPath": "packages/schedule-ui/src/components/PlannerEventDialog.stories.ts",
+      "status": "planned"
+    },
+    {
+      "path": "packages/notification-ui/src/components/InAppNotification.vue",
+      "package": "@memoflow/notification-ui",
+      "kind": "component",
+      "storyPath": "packages/notification-ui/src/components/InAppNotification.stories.ts",
+      "status": "present"
+    },
+    {
+      "path": "packages/notification-ui/src/components/NotificationBell.vue",
+      "package": "@memoflow/notification-ui",
+      "kind": "component",
+      "storyPath": "packages/notification-ui/src/components/NotificationBell.stories.ts",
+      "status": "present"
+    },
+    {
+      "path": "packages/notification-ui/src/components/NotificationDrawer.vue",
+      "package": "@memoflow/notification-ui",
+      "kind": "component",
+      "storyPath": "packages/notification-ui/src/components/NotificationDrawer.stories.ts",
+      "status": "present"
+    },
+    {
+      "path": "packages/notification-ui/src/components/NotificationItem.vue",
+      "package": "@memoflow/notification-ui",
+      "kind": "component",
+      "storyPath": "packages/notification-ui/src/components/NotificationItem.stories.ts",
+      "status": "present"
+    },
+    {
+      "path": "packages/notification-ui/src/components/NotificationList.vue",
+      "package": "@memoflow/notification-ui",
+      "kind": "component",
+      "storyPath": "packages/notification-ui/src/components/NotificationList.stories.ts",
+      "status": "present"
+    },
+    {
+      "path": "packages/notification-ui/src/components/NotificationPermissionWarning.vue",
+      "package": "@memoflow/notification-ui",
+      "kind": "component",
+      "storyPath": "packages/notification-ui/src/components/NotificationPermissionWarning.stories.ts",
+      "status": "present"
+    },
+    {
+      "path": "packages/notification-ui/src/components/NotificationCapsulePreview.vue",
+      "package": "@memoflow/notification-ui",
+      "kind": "component",
+      "storyPath": "packages/notification-ui/src/components/NotificationCapsulePreview.stories.ts",
+      "status": "planned"
+    },
+    {
+      "path": "packages/notification-ui/src/components/NotificationQuickActions.vue",
+      "package": "@memoflow/notification-ui",
+      "kind": "component",
+      "storyPath": "packages/notification-ui/src/components/NotificationQuickActions.stories.ts",
+      "status": "planned"
+    }
+  ]
+}
