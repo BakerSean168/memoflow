@@ -590,105 +590,105 @@
       "package": "@memoflow/setting-ui",
       "kind": "component",
       "storyPath": "packages/setting-ui/src/components/AISettings.stories.ts",
-      "status": "planned"
+      "status": "present"
     },
     {
       "path": "packages/setting-ui/src/components/KeyboardSettings.vue",
       "package": "@memoflow/setting-ui",
       "kind": "component",
       "storyPath": "packages/setting-ui/src/components/KeyboardSettings.stories.ts",
-      "status": "planned"
+      "status": "present"
     },
     {
       "path": "packages/setting-ui/src/components/LocalAgentSettings.vue",
       "package": "@memoflow/setting-ui",
       "kind": "component",
       "storyPath": "packages/setting-ui/src/components/LocalAgentSettings.stories.ts",
-      "status": "planned"
+      "status": "present"
     },
     {
       "path": "packages/setting-ui/src/components/SettingsNavigation.vue",
       "package": "@memoflow/setting-ui",
       "kind": "component",
       "storyPath": "packages/setting-ui/src/components/SettingsNavigation.stories.ts",
-      "status": "planned"
+      "status": "present"
     },
     {
       "path": "packages/setting-ui/src/components/NewSessionDefaultSettings.vue",
       "package": "@memoflow/setting-ui",
       "kind": "component",
       "storyPath": "packages/setting-ui/src/components/NewSessionDefaultSettings.stories.ts",
-      "status": "planned"
+      "status": "present"
     },
     {
       "path": "packages/setting-ui/src/views/UserSettingsView.vue",
       "package": "@memoflow/setting-ui",
       "kind": "component",
       "storyPath": "packages/setting-ui/src/views/UserSettingsView.stories.ts",
-      "status": "planned"
+      "status": "present"
     },
     {
       "path": "packages/ai-ui/src/components/AIMessagePanel.vue",
       "package": "@memoflow/ai-ui",
       "kind": "component",
       "storyPath": "packages/ai-ui/src/components/AIMessagePanel.stories.ts",
-      "status": "planned"
+      "status": "present"
     },
     {
       "path": "packages/ai-ui/src/components/AIFooterComposer.vue",
       "package": "@memoflow/ai-ui",
       "kind": "component",
       "storyPath": "packages/ai-ui/src/components/AIFooterComposer.stories.ts",
-      "status": "planned"
+      "status": "present"
     },
     {
       "path": "packages/ai-ui/src/components/AIConversationSidebar.vue",
       "package": "@memoflow/ai-ui",
       "kind": "component",
       "storyPath": "packages/ai-ui/src/components/AIConversationSidebar.stories.ts",
-      "status": "planned"
+      "status": "present"
     },
     {
       "path": "packages/ai-ui/src/components/AILocalRequestCard.vue",
       "package": "@memoflow/ai-ui",
       "kind": "component",
       "storyPath": "packages/ai-ui/src/components/AILocalRequestCard.stories.ts",
-      "status": "planned"
+      "status": "present"
     },
     {
       "path": "packages/ai-ui/src/components/AIModelTraitsPanel.vue",
       "package": "@memoflow/ai-ui",
       "kind": "component",
       "storyPath": "packages/ai-ui/src/components/AIModelTraitsPanel.stories.ts",
-      "status": "planned"
+      "status": "present"
     },
     {
       "path": "packages/ai-ui/src/components/AIActivityTimeline.vue",
       "package": "@memoflow/ai-ui",
       "kind": "component",
       "storyPath": "packages/ai-ui/src/components/AIActivityTimeline.stories.ts",
-      "status": "planned"
+      "status": "present"
     },
     {
       "path": "packages/account-ui/src/account/components/AccountProfileSection.vue",
       "package": "@memoflow/account-ui",
       "kind": "component",
       "storyPath": "packages/account-ui/src/account/components/AccountProfileSection.stories.ts",
-      "status": "planned"
+      "status": "present"
     },
     {
       "path": "packages/account-ui/src/account/components/AccountProfileEditorDialog.vue",
       "package": "@memoflow/account-ui",
       "kind": "component",
       "storyPath": "packages/account-ui/src/account/components/AccountProfileEditorDialog.stories.ts",
-      "status": "planned"
+      "status": "present"
     },
     {
       "path": "packages/account-ui/src/account/components/AccountAutoEnterSection.vue",
       "package": "@memoflow/account-ui",
       "kind": "component",
       "storyPath": "packages/account-ui/src/account/components/AccountAutoEnterSection.stories.ts",
-      "status": "planned"
+      "status": "present"
     },
     {
       "path": "packages/goal-ui/src/components/dialogs/GoalDialog.vue",
