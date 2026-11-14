@@ -2,7 +2,7 @@
   "version": 1,
   "scope": "Primary UI components that must expose a Storybook catalog story. Batches #934/#935/#936 fill planned entries; the coordination line flips enforcement to full once every batch lands.",
   "description": "Story catalog coverage registry. Catalog stories are visual review surfaces only; promoting a story to the audited browser interaction suite stays a separate decision.",
-  "enforcement": "staged",
+  "enforcement": "full",
   "entries": [
     {
       "path": "packages/ui-vue-shadcn/src/components/ui/accordion",
@@ -401,7 +401,7 @@
       "package": "@memoflow/ui-vue-shadcn",
       "kind": "component",
       "storyPath": "packages/ui-vue-shadcn/src/components/custom/form/TagInput.stories.ts",
-      "status": "planned"
+      "status": "present"
     },
     {
       "path": "packages/app-vue/src/shared/components/ProductDialogShell.vue",
@@ -702,63 +702,63 @@
       "package": "@memoflow/goal-ui",
       "kind": "component",
       "storyPath": "packages/goal-ui/src/components/cards/GoalRecordCard.stories.ts",
-      "status": "planned"
+      "status": "present"
     },
     {
       "path": "packages/goal-ui/src/components/GoalProgressRow.vue",
       "package": "@memoflow/goal-ui",
       "kind": "component",
       "storyPath": "packages/goal-ui/src/components/GoalProgressRow.stories.ts",
-      "status": "planned"
+      "status": "present"
     },
     {
       "path": "packages/goal-ui/src/components/GoalStatusPicker.vue",
       "package": "@memoflow/goal-ui",
       "kind": "component",
       "storyPath": "packages/goal-ui/src/components/GoalStatusPicker.stories.ts",
-      "status": "planned"
+      "status": "present"
     },
     {
       "path": "packages/goal-ui/src/components/GoalKeyResultCardEditor.vue",
       "package": "@memoflow/goal-ui",
       "kind": "component",
       "storyPath": "packages/goal-ui/src/components/GoalKeyResultCardEditor.stories.ts",
-      "status": "planned"
+      "status": "present"
     },
     {
       "path": "packages/goal-ui/src/components/timeline/GoalTimelineView.vue",
       "package": "@memoflow/goal-ui",
       "kind": "component",
       "storyPath": "packages/goal-ui/src/components/timeline/GoalTimelineView.stories.ts",
-      "status": "planned"
+      "status": "present"
     },
     {
       "path": "packages/goal-ui/src/components/echarts/KrCompletionChart.vue",
       "package": "@memoflow/goal-ui",
       "kind": "component",
       "storyPath": "packages/goal-ui/src/components/echarts/GoalCharts.stories.ts",
-      "status": "planned"
+      "status": "present"
     },
     {
       "path": "packages/goal-ui/src/components/echarts/KrWeightDistributionChart.vue",
       "package": "@memoflow/goal-ui",
       "kind": "component",
       "storyPath": "packages/goal-ui/src/components/echarts/GoalCharts.stories.ts",
-      "status": "planned"
+      "status": "present"
     },
     {
       "path": "packages/goal-ui/src/components/echarts/PeriodBarChart.vue",
       "package": "@memoflow/goal-ui",
       "kind": "component",
       "storyPath": "packages/goal-ui/src/components/echarts/GoalCharts.stories.ts",
-      "status": "planned"
+      "status": "present"
     },
     {
       "path": "packages/goal-ui/src/components/weight-snapshot/WeightTrendChart.vue",
       "package": "@memoflow/goal-ui",
       "kind": "component",
       "storyPath": "packages/goal-ui/src/components/echarts/GoalCharts.stories.ts",
-      "status": "planned"
+      "status": "present"
     },
     {
       "path": "packages/task-ui/src/components/TaskPlanForm/TaskPlanForm.vue",
@@ -772,84 +772,84 @@
       "package": "@memoflow/task-ui",
       "kind": "component",
       "storyPath": "packages/task-ui/src/components/dialogs/QuickTaskDialog.stories.ts",
-      "status": "planned"
+      "status": "present"
     },
     {
       "path": "packages/task-ui/src/components/dialogs/TaskPlanDialog.vue",
       "package": "@memoflow/task-ui",
       "kind": "component",
       "storyPath": "packages/task-ui/src/components/dialogs/TaskPlanDialog.stories.ts",
-      "status": "planned"
+      "status": "present"
     },
     {
       "path": "packages/task-ui/src/components/TaskOccurrenceRow.vue",
       "package": "@memoflow/task-ui",
       "kind": "component",
       "storyPath": "packages/task-ui/src/components/TaskOccurrenceRow.stories.ts",
-      "status": "planned"
+      "status": "present"
     },
     {
       "path": "packages/task-ui/src/components/widgets/DailyTodoWidget.vue",
       "package": "@memoflow/task-ui",
       "kind": "component",
       "storyPath": "packages/task-ui/src/components/widgets/DailyTodoWidget.stories.ts",
-      "status": "planned"
+      "status": "present"
     },
     {
       "path": "packages/repository-ui/src/components/KnowledgeMarkdownPreview.vue",
       "package": "@memoflow/repository-ui",
       "kind": "component",
       "storyPath": "packages/repository-ui/src/components/KnowledgeMarkdownPreview.stories.ts",
-      "status": "planned"
+      "status": "present"
     },
     {
       "path": "packages/repository-ui/src/components/KnowledgeNoteCatalog.vue",
       "package": "@memoflow/repository-ui",
       "kind": "component",
       "storyPath": "packages/repository-ui/src/components/KnowledgeNoteCatalog.stories.ts",
-      "status": "planned"
+      "status": "present"
     },
     {
       "path": "packages/repository-ui/src/components/DocumentCatalogRow.vue",
       "package": "@memoflow/repository-ui",
       "kind": "component",
       "storyPath": "packages/repository-ui/src/components/DocumentCatalogRow.stories.ts",
-      "status": "planned"
+      "status": "present"
     },
     {
       "path": "packages/routine-ui/src/components/RoutineEditorDialog.vue",
       "package": "@memoflow/routine-ui",
       "kind": "component",
       "storyPath": "packages/routine-ui/src/components/RoutineEditorDialog.stories.ts",
-      "status": "planned"
+      "status": "present"
     },
     {
       "path": "packages/routine-ui/src/components/RoutineProfileDialog.vue",
       "package": "@memoflow/routine-ui",
       "kind": "component",
       "storyPath": "packages/routine-ui/src/components/RoutineProfileDialog.stories.ts",
-      "status": "planned"
+      "status": "present"
     },
     {
       "path": "packages/routine-ui/src/components/ActiveUsageTriggerEditor.vue",
       "package": "@memoflow/routine-ui",
       "kind": "component",
       "storyPath": "packages/routine-ui/src/components/RoutineTriggerEditors.stories.ts",
-      "status": "planned"
+      "status": "present"
     },
     {
       "path": "packages/routine-ui/src/components/ElapsedTriggerEditor.vue",
       "package": "@memoflow/routine-ui",
       "kind": "component",
       "storyPath": "packages/routine-ui/src/components/RoutineTriggerEditors.stories.ts",
-      "status": "planned"
+      "status": "present"
     },
     {
       "path": "packages/routine-ui/src/components/WallClockTriggerEditor.vue",
       "package": "@memoflow/routine-ui",
       "kind": "component",
       "storyPath": "packages/routine-ui/src/components/RoutineTriggerEditors.stories.ts",
-      "status": "planned"
+      "status": "present"
     },
     {
       "path": "packages/schedule-ui/src/components/CreateScheduleDialog.vue",
@@ -863,14 +863,14 @@
       "package": "@memoflow/schedule-ui",
       "kind": "component",
       "storyPath": "packages/schedule-ui/src/planner/PlannerCalendar.stories.ts",
-      "status": "planned"
+      "status": "present"
     },
     {
       "path": "packages/schedule-ui/src/components/PlannerEventDialog.vue",
       "package": "@memoflow/schedule-ui",
       "kind": "component",
       "storyPath": "packages/schedule-ui/src/components/PlannerEventDialog.stories.ts",
-      "status": "planned"
+      "status": "present"
     },
     {
       "path": "packages/notification-ui/src/components/InAppNotification.vue",
@@ -919,14 +919,14 @@
       "package": "@memoflow/notification-ui",
       "kind": "component",
       "storyPath": "packages/notification-ui/src/components/NotificationCapsulePreview.stories.ts",
-      "status": "planned"
+      "status": "present"
     },
     {
       "path": "packages/notification-ui/src/components/NotificationQuickActions.vue",
       "package": "@memoflow/notification-ui",
       "kind": "component",
       "storyPath": "packages/notification-ui/src/components/NotificationQuickActions.stories.ts",
-      "status": "planned"
+      "status": "present"
     }
   ]
 }

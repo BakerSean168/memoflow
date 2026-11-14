@@ -6914,6 +6914,14 @@
       "measurementCollectors": []
     },
     {
+      "path": "packages/goal-ui/src/utils/chart-theme.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/goal-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "packages/goal-ui/src/utils/key-result-calculation-presentation.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -13810,7 +13818,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 26
+      "fileCount": 27
     },
     {
       "id": "packages/goal-workspace-contracts/vitest.config.ts",
@@ -14790,7 +14798,7 @@
   "duplicate": [],
   "unexpected": [],
   "counts": {
-    "unit": 1224,
+    "unit": 1225,
     "integration": 58,
     "smoke": 3,
     "boundary-ipc": 6,

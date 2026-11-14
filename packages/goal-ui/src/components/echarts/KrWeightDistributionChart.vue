@@ -16,6 +16,7 @@ import { TitleComponent, TooltipComponent, LegendComponent } from 'echarts/compo
 import { CanvasRenderer } from 'echarts/renderers';
 import type { ECElementEvent } from 'echarts';
 import type { GoalClientDTO } from '@memoflow/goal-contracts';
+import { useChartTheme } from '../../utils/chart-theme';
 
 use([TitleComponent, TooltipComponent, LegendComponent, PieChart, CanvasRenderer]);
 
@@ -26,7 +27,7 @@ const props = defineProps<{
 }>();
 
 const surfaceColor = 'transparent';
-const fontColor = '#64748b';
+const chartTheme = useChartTheme();
 
 const keyResults = computed(() => props.goal?.keyResults || []);
 
@@ -57,15 +58,15 @@ const weightOption = computed(() => {
       subtext: `${t('goal.chart.krWeightDistribution.subtextPrefix')}${totalWeight}`,
       left: 'center',
       top: 10,
-      textStyle: { fontSize: 16 },
-      subtextStyle: { fontSize: 12, color: fontColor },
+      textStyle: { fontSize: 16, color: chartTheme.value.foreground },
+      subtextStyle: { fontSize: 12, color: chartTheme.value.foreground },
     },
     tooltip: {
       trigger: 'item',
       backgroundColor: surfaceColor,
       borderColor: 'transparent',
       textStyle: {
-        color: fontColor,
+        color: chartTheme.value.foreground,
         fontSize: 14,
       },
       formatter: (params: ECElementEvent) => {
@@ -81,7 +82,7 @@ const weightOption = computed(() => {
       orient: 'vertical',
       right: 20,
       top: 'center',
-      textStyle: { color: fontColor },
+      textStyle: { color: chartTheme.value.foreground },
     },
     series: [
       {
@@ -117,17 +118,7 @@ const weightOption = computed(() => {
           value: item.value,
           name: item.name,
           itemStyle: {
-            color: [
-              '#5470c6',
-              '#91cc75',
-              '#fac858',
-              '#ee6666',
-              '#73c0de',
-              '#3ba272',
-              '#fc8452',
-              '#9a60b4',
-              '#ea7ccc',
-            ][index % 9],
+            color: chartTheme.value.series[index % (chartTheme.value.series.length || 1)],
           },
         })),
       },

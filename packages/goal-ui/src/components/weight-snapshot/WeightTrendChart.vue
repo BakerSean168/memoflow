@@ -47,7 +47,7 @@
             :key="kr.id"
             :style="{
               backgroundColor: getKRColor(kr.id),
-              color: '#fff',
+              color: chartTheme.background,
               borderColor: getKRColor(kr.id),
             }"
           >
@@ -78,6 +78,7 @@ import { CanvasRenderer } from 'echarts/renderers';
 import VChart from 'vue-echarts';
 import type { ECElementEvent } from 'echarts';
 import { useWeightSnapshot } from '../../composables/useWeightSnapshot';
+import { useChartTheme } from '../../utils/chart-theme';
 import { Card, CardHeader, CardTitle, CardContent } from '@memoflow/ui-vue-shadcn';
 import { Button } from '@memoflow/ui-vue-shadcn';
 import { Alert, AlertDescription } from '@memoflow/ui-vue-shadcn';
@@ -106,6 +107,7 @@ const {
 } = useWeightSnapshot();
 
 const { t } = useI18n();
+const chartTheme = useChartTheme();
 
 const selectedRange = ref<'7d' | '30d' | '90d' | '180d'>('30d');
 
@@ -117,22 +119,10 @@ const timeRanges = computed(() => [
   { label: t('goal.weightTrend.range180d'), value: '180d' as const },
 ]);
 
-// KR 颜色映射
-const krColors = [
-  '#5470c6',
-  '#91cc75',
-  '#fac858',
-  '#ee6666',
-  '#73c0de',
-  '#3ba272',
-  '#fc8452',
-  '#9a60b4',
-  '#ea7ccc',
-];
-
+// KR 颜色映射：取自主题令牌，随明暗主题切换
 const getKRColor = (krId: string) => {
   const index = trendData.value?.keyResults.findIndex((kr) => kr.id === krId) || 0;
-  return krColors[index % krColors.length];
+  return chartTheme.value.series[index % (chartTheme.value.series.length || 1)];
 };
 
 // ECharts 配置
@@ -156,7 +146,7 @@ const chartOption = computed(() => {
     },
     data: kr.data.map((point: { time: number; weight: number }) => [point.time, point.weight]),
     itemStyle: {
-      color: krColors[index % krColors.length],
+      color: chartTheme.value.series[index % (chartTheme.value.series.length || 1)],
     },
   }));
 
@@ -166,6 +156,7 @@ const chartOption = computed(() => {
       left: 'center',
       textStyle: {
         fontSize: 16,
+        color: chartTheme.value.foreground,
       },
     },
     tooltip: {
@@ -173,7 +164,7 @@ const chartOption = computed(() => {
       axisPointer: {
         type: 'cross',
         label: {
-          backgroundColor: '#6a7985',
+          backgroundColor: chartTheme.value.foreground,
         },
       },
       formatter: (params: ECElementEvent[]) => {

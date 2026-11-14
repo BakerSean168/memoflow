@@ -17,6 +17,7 @@ import { CanvasRenderer } from 'echarts/renderers';
 import type { ECElementEvent } from 'echarts';
 import type { GoalClientDTO } from '@memoflow/goal-contracts';
 import { getKeyResultProgressPercentage } from '../../utils/progress';
+import { useChartTheme } from '../../utils/chart-theme';
 
 use([TitleComponent, TooltipComponent, LegendComponent, PieChart, CanvasRenderer]);
 
@@ -27,7 +28,7 @@ const props = defineProps<{
 }>();
 
 const surfaceColor = 'transparent';
-const fontColor = '#64748b';
+const chartTheme = useChartTheme();
 
 const keyResults = computed(() => props.goal?.keyResults || []);
 
@@ -64,15 +65,15 @@ const completionOption = computed(() => {
       subtext: `${t('goal.chart.krCompletion.subtextPrefix')}${stats.completedRate}%`,
       left: 'center',
       top: 10,
-      textStyle: { fontSize: 16 },
-      subtextStyle: { fontSize: 12, color: fontColor },
+      textStyle: { fontSize: 16, color: chartTheme.value.foreground },
+      subtextStyle: { fontSize: 12, color: chartTheme.value.foreground },
     },
     tooltip: {
       trigger: 'item',
       backgroundColor: surfaceColor,
       borderColor: 'transparent',
       textStyle: {
-        color: fontColor,
+        color: chartTheme.value.foreground,
         fontSize: 14,
       },
       formatter: (params: ECElementEvent) => {
@@ -85,7 +86,7 @@ const completionOption = computed(() => {
       orient: 'vertical',
       right: 20,
       top: 'center',
-      textStyle: { color: fontColor },
+      textStyle: { color: chartTheme.value.foreground },
     },
     series: [
       {
@@ -119,17 +120,17 @@ const completionOption = computed(() => {
           {
             value: stats.completed,
             name: t('goal.chart.krCompletion.completed'),
-            itemStyle: { color: '#52c41a' },
+            itemStyle: { color: chartTheme.value.success },
           },
           {
             value: stats.inProgress,
             name: t('goal.chart.krCompletion.inProgress'),
-            itemStyle: { color: '#1890ff' },
+            itemStyle: { color: chartTheme.value.primary },
           },
           {
             value: stats.notStarted,
             name: t('goal.chart.krCompletion.notStarted'),
-            itemStyle: { color: '#d9d9d9' },
+            itemStyle: { color: chartTheme.value.border },
           },
         ],
       },
