@@ -6,6 +6,8 @@ import { installNotificationUiHost } from '../../../packages/app-vue/src/di/noti
 import { installSettingUiHost } from '../../../packages/app-vue/src/di/setting-ui-host';
 import { installTaskUiHost } from '../../../packages/app-vue/src/di/task-ui-host';
 import { installRepositoryUiHost } from '../../../packages/app-vue/src/di/repository-ui-host';
+import { installRoutineUiHost } from '../../../packages/app-vue/src/di/routine-ui-host';
+import { installScheduleUiHost } from '../../../packages/app-vue/src/di/schedule-ui-host';
 import { setup, type Preview } from '@storybook/vue3-vite';
 import { createPinia } from 'pinia';
 import { createI18n } from 'vue-i18n';
@@ -22,6 +24,8 @@ setup((app) => {
   installSettingUiHost();
   installTaskUiHost();
   installRepositoryUiHost();
+  installRoutineUiHost();
+  installScheduleUiHost();
   app.use(createPinia());
   app.use(createI18n({ legacy: false, locale: 'en-US', messages: productionLocaleMessages }));
   app.use(

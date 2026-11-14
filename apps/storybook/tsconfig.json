@@ -4,7 +4,8 @@
     "noEmit": true,
     "paths": {
       "@goal-ui-test-host/*": ["../../packages/app-vue/src/*"],
-      "@task-ui-test-host/*": ["../../packages/app-vue/src/*"]
+      "@task-ui-test-host/*": ["../../packages/app-vue/src/*"],
+      "@notification-ui-test-host/*": ["../../packages/app-vue/src/*"]
     },
     "declaration": false,
     "declarationMap": false,
@@ -15,7 +16,27 @@
     "../../packages/app-vue/src/env.d.ts",
     "../../packages/goal-ui/src/components/dialogs/GoalDialog.stories.ts",
     "../../packages/task-ui/src/components/TaskPlanForm/TaskPlanForm.stories.ts",
-    "../../packages/app-vue/src/shared/components/__stories__/BrowserInteraction.stories.ts"
+    "../../packages/app-vue/src/shared/components/__stories__/BrowserInteraction.stories.ts",
+    "../../packages/goal-ui/src/components/cards/GoalRecordCard.stories.ts",
+    "../../packages/goal-ui/src/components/GoalProgressRow.stories.ts",
+    "../../packages/goal-ui/src/components/GoalStatusPicker.stories.ts",
+    "../../packages/goal-ui/src/components/GoalKeyResultCardEditor.stories.ts",
+    "../../packages/goal-ui/src/components/timeline/GoalTimelineView.stories.ts",
+    "../../packages/goal-ui/src/components/echarts/GoalCharts.stories.ts",
+    "../../packages/task-ui/src/components/dialogs/QuickTaskDialog.stories.ts",
+    "../../packages/task-ui/src/components/dialogs/TaskPlanDialog.stories.ts",
+    "../../packages/task-ui/src/components/TaskOccurrenceRow.stories.ts",
+    "../../packages/task-ui/src/components/widgets/DailyTodoWidget.stories.ts",
+    "../../packages/repository-ui/src/components/KnowledgeMarkdownPreview.stories.ts",
+    "../../packages/repository-ui/src/components/KnowledgeNoteCatalog.stories.ts",
+    "../../packages/repository-ui/src/components/DocumentCatalogRow.stories.ts",
+    "../../packages/routine-ui/src/components/RoutineEditorDialog.stories.ts",
+    "../../packages/routine-ui/src/components/RoutineProfileDialog.stories.ts",
+    "../../packages/routine-ui/src/components/RoutineTriggerEditors.stories.ts",
+    "../../packages/schedule-ui/src/planner/PlannerCalendar.stories.ts",
+    "../../packages/schedule-ui/src/components/PlannerEventDialog.stories.ts",
+    "../../packages/notification-ui/src/components/NotificationCapsulePreview.stories.ts",
+    "../../packages/notification-ui/src/components/NotificationQuickActions.stories.ts"
   ],
   "exclude": []
 }

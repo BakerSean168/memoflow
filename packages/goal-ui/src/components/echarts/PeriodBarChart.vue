@@ -19,6 +19,7 @@ import { TitleComponent, TooltipComponent, GridComponent } from 'echarts/compone
 import { CanvasRenderer } from 'echarts/renderers';
 import type { ECElementEvent } from 'echarts';
 import type { GoalClientDTO, GoalRecordClientDTO } from '@memoflow/goal-contracts';
+import { useChartTheme } from '../../utils/chart-theme';
 
 use([TitleComponent, TooltipComponent, GridComponent, BarChart, CanvasRenderer]);
 
@@ -33,7 +34,7 @@ const props = defineProps<{
 }>();
 
 const surfaceColor = 'transparent';
-const fontColor = '#64748b';
+const chartTheme = useChartTheme();
 
 type TimePeriod = '早晨' | '下午' | '晚上' | '凌晨';
 const timePeriods: TimePeriod[] = ['早晨', '下午', '晚上', '凌晨'];
@@ -96,13 +97,13 @@ const periodBarOption = computed(() => {
       text: t('goal.chart.periodBar.title'),
       left: 'center',
       top: 10,
-      textStyle: { fontSize: 16 },
+      textStyle: { fontSize: 16, color: chartTheme.value.foreground },
     },
     tooltip: {
       backgroundColor: surfaceColor,
       borderColor: 'transparent',
       textStyle: {
-        color: fontColor,
+        color: chartTheme.value.foreground,
         fontSize: 14,
       },
       trigger: 'axis',
@@ -130,9 +131,9 @@ const periodBarOption = computed(() => {
         data: dataArr,
         itemStyle: {
           color: (params: ECElementEvent) => {
-            if (params.dataIndex === maxIdx) return '#52c41a'; // 绿色
-            if (params.dataIndex === minIdx) return '#ff4d4f'; // 红色
-            return '#5470C6'; // 其他
+            if (params.dataIndex === maxIdx) return chartTheme.value.success;
+            if (params.dataIndex === minIdx) return chartTheme.value.destructive;
+            return chartTheme.value.primary;
           },
           borderRadius: [8, 8, 8, 8],
         },
@@ -142,7 +143,7 @@ const periodBarOption = computed(() => {
           position: 'top',
           formatter: '{c}',
           fontSize: 12,
-          color: fontColor,
+          color: chartTheme.value.foreground,
         },
       },
     ],
