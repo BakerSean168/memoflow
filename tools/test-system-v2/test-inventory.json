@@ -13116,6 +13116,14 @@
       "measurementCollectors": []
     },
     {
+      "path": "tools/test-system-v2/__tests__/storybook-registry.test.mjs",
+      "primarySuite": "governance",
+      "collectors": [
+        "test-system-v2:test"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "tools/test-system-v2/__tests__/test-report-summary.test.mjs",
       "primarySuite": "governance",
       "collectors": [
@@ -13516,7 +13524,7 @@
       "type": "primary",
       "suite": "governance",
       "runner": "node-test",
-      "fileCount": 10
+      "fileCount": 11
     },
     {
       "id": "tools/governance/vitest.config.ts",
@@ -14797,7 +14805,7 @@
     "boundary-main": 17,
     "e2e": 43,
     "perf": 2,
-    "governance": 89
+    "governance": 90
   },
   "e2eGovernance": {
     "version": 2,
