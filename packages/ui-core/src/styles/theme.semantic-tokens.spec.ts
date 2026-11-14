@@ -17,6 +17,8 @@ const SWITCHING_TOKENS = [
   'progress-fill-end',
 ] as const;
 
+const CHART_TOKENS = ['chart-1', 'chart-2', 'chart-3', 'chart-4', 'chart-5'] as const;
+
 interface AccentValues {
   light: Record<(typeof SWITCHING_TOKENS)[number], string>;
   dark: Record<(typeof SWITCHING_TOKENS)[number], string>;
@@ -170,6 +172,43 @@ const ACCENTS: Record<string, AccentValues> = {
   },
 };
 
+interface ChartPalette {
+  light: readonly string[];
+  dark: readonly string[];
+}
+
+/**
+ * Chart ramps per accent. `chart-1` anchors the accent hue; `chart-2…5` spread
+ * across the hue ring, keeping clear of the success/warning/destructive/info
+ * hue ranges where an alternative exists. Brand gold keeps the base ramp.
+ */
+const CHART_PALETTES: Record<string, ChartPalette> = {
+  'brand-gold': {
+    light: ['12 76% 61%', '173 58% 39%', '197 37% 24%', '43 74% 41%', '27 87% 48%'],
+    dark: ['220 70% 50%', '160 60% 45%', '30 80% 55%', '280 65% 60%', '340 75% 55%'],
+  },
+  'linear-indigo': {
+    light: ['235 68% 55%', '285 55% 48%', '325 55% 38%', '100 50% 42%', '65 62% 37%'],
+    dark: ['235 60% 58%', '285 55% 55%', '325 55% 52%', '100 50% 55%', '65 60% 52%'],
+  },
+  'ocean-blue': {
+    light: ['199 78% 47%', '240 58% 48%', '285 55% 38%', '330 52% 52%', '70 62% 37%'],
+    dark: ['199 72% 58%', '240 58% 60%', '285 55% 55%', '330 52% 56%', '70 60% 50%'],
+  },
+  'emerald-green': {
+    light: ['160 70% 38%', '105 50% 43%', '65 62% 37%', '240 55% 48%', '285 52% 52%'],
+    dark: ['160 62% 52%', '105 45% 50%', '65 60% 55%', '240 55% 60%', '285 52% 56%'],
+  },
+  'rose-red': {
+    light: ['347 72% 48%', '65 62% 37%', '180 48% 38%', '240 55% 48%', '285 52% 52%'],
+    dark: ['347 70% 58%', '65 60% 52%', '180 45% 55%', '240 55% 60%', '285 52% 56%'],
+  },
+  violet: {
+    light: ['262 68% 52%', '310 55% 48%', '100 50% 40%', '65 62% 37%', '180 48% 38%'],
+    dark: ['262 62% 58%', '310 55% 55%', '100 50% 55%', '65 60% 52%', '180 45% 56%'],
+  },
+};
+
 function block(selector: string): string {
   const pattern = new RegExp(
     `^  ${selector.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')} \\{([\\s\\S]*?)^  \\}`,
@@ -184,6 +223,67 @@ function declare(source: string, token: string): string {
   const match = source.match(new RegExp(`--${token}:\\s*([^;]+);`));
   expect(match, `missing declaration: --${token}`).not.toBeNull();
   return match![1]!.trim();
+}
+
+interface Hsl {
+  h: number;
+  s: number;
+  l: number;
+}
+
+function parseHsl(value: string): Hsl {
+  const match = value.match(/(-?[\d.]+)\s+([\d.]+)%\s+([\d.]+)%/);
+  expect(match, `invalid HSL channels: ${value}`).not.toBeNull();
+  return { h: Number(match![1]), s: Number(match![2]), l: Number(match![3]) };
+}
+
+function channelLuminance(channel: number): number {
+  return channel <= 0.04045 ? channel / 12.92 : ((channel + 0.055) / 1.055) ** 2.4;
+}
+
+function relativeLuminance({ h, s, l }: Hsl): number {
+  const saturation = s / 100;
+  const lightness = l / 100;
+  const chroma = (1 - Math.abs(2 * lightness - 1)) * saturation;
+  const huePrime = (((h % 360) + 360) % 360) / 60;
+  const secondary = chroma * (1 - Math.abs((huePrime % 2) - 1));
+  let red = 0;
+  let green = 0;
+  let blue = 0;
+  if (huePrime < 1) {
+    red = chroma;
+    green = secondary;
+  } else if (huePrime < 2) {
+    red = secondary;
+    green = chroma;
+  } else if (huePrime < 3) {
+    green = chroma;
+    blue = secondary;
+  } else if (huePrime < 4) {
+    green = secondary;
+    blue = chroma;
+  } else if (huePrime < 5) {
+    red = secondary;
+    blue = chroma;
+  } else {
+    red = chroma;
+    blue = secondary;
+  }
+  const offset = lightness - chroma / 2;
+  const linear = [red + offset, green + offset, blue + offset].map(channelLuminance);
+  return 0.2126 * linear[0]! + 0.7152 * linear[1]! + 0.0722 * linear[2]!;
+}
+
+/** WCAG contrast ratio, used for the graphical-object 3:1 floor. */
+function contrastRatio(foreground: Hsl, background: Hsl): number {
+  const a = relativeLuminance(foreground);
+  const b = relativeLuminance(background);
+  return (Math.max(a, b) + 0.05) / (Math.min(a, b) + 0.05);
+}
+
+function hueDistance(a: number, b: number): number {
+  const delta = Math.abs(a - b) % 360;
+  return delta > 180 ? 360 - delta : delta;
 }
 
 describe('accent-driven theme tokens', () => {
@@ -234,10 +334,70 @@ describe('accent-driven theme tokens', () => {
     expect(declare(block(`.dark[data-accent='linear-indigo']`), 'primary')).toBe('235 58% 60%');
   });
 
-  it('keeps chart slots and brand gold tokens outside the accent switching set', () => {
+  it('keeps the brand gold chart ramp and brand tokens on the base blocks', () => {
     const root = block(':root');
-    expect(declare(root, 'chart-2')).toBe('173 58% 39%');
-    expect(declare(block('.dark'), 'chart-2')).toBe('160 60% 45%');
+    const dark = block('.dark');
+    const brandGold = CHART_PALETTES['brand-gold']!;
+    for (const [index, token] of CHART_TOKENS.entries()) {
+      expect(declare(root, token), `brand gold light --${token}`).toBe(brandGold.light[index]);
+      expect(declare(dark, token), `brand gold dark --${token}`).toBe(brandGold.dark[index]);
+    }
     expect(declare(root, 'brand-gold-via')).toBe('37 91% 55%');
+  });
+
+  it('switches all five chart slots with every non-default accent', () => {
+    const brandGold = CHART_PALETTES['brand-gold']!;
+    for (const [accent, palette] of Object.entries(CHART_PALETTES)) {
+      if (accent === 'brand-gold') continue;
+      const light = block(`:root[data-accent='${accent}']`);
+      const dark = block(`.dark[data-accent='${accent}']`);
+      for (const [index, token] of CHART_TOKENS.entries()) {
+        expect(declare(light, token), `${accent} light --${token}`).toBe(palette.light[index]);
+        expect(declare(dark, token), `${accent} dark --${token}`).toBe(palette.dark[index]);
+        expect(declare(light, token), `${accent} light --${token} reuses brand gold`).not.toBe(
+          brandGold.light[index],
+        );
+        expect(declare(dark, token), `${accent} dark --${token} reuses brand gold`).not.toBe(
+          brandGold.dark[index],
+        );
+      }
+    }
+  });
+
+  it('keeps every chart slot at 3:1 or better against its block background', () => {
+    const backgrounds = {
+      light: parseHsl(declare(block(':root'), 'background')),
+      dark: parseHsl(declare(block('.dark'), 'background')),
+    };
+    for (const [accent, palette] of Object.entries(CHART_PALETTES)) {
+      for (const mode of ['light', 'dark'] as const) {
+        for (const [index, token] of CHART_TOKENS.entries()) {
+          const ratio = contrastRatio(parseHsl(palette[mode][index]!), backgrounds[mode]);
+          expect(ratio, `${accent} ${mode} --${token} contrast`).toBeGreaterThanOrEqual(3);
+        }
+      }
+    }
+  });
+
+  it('anchors chart-1 on the accent hue and keeps the ramp hues apart', () => {
+    for (const [accent, values] of Object.entries(ACCENTS)) {
+      if (accent === 'brand-gold') continue;
+      for (const mode of ['light', 'dark'] as const) {
+        const primaryHue = parseHsl(values[mode].primary).h;
+        const hues = CHART_PALETTES[accent]![mode].map((value) => parseHsl(value).h);
+        expect(
+          hueDistance(hues[0]!, primaryHue),
+          `${accent} ${mode} --chart-1 hue`,
+        ).toBeLessThanOrEqual(15);
+        for (let i = 0; i < hues.length; i += 1) {
+          for (let j = i + 1; j < hues.length; j += 1) {
+            expect(
+              hueDistance(hues[i]!, hues[j]!),
+              `${accent} ${mode} chart ${i + 1}/${j + 1} hue distance`,
+            ).toBeGreaterThanOrEqual(30);
+          }
+        }
+      }
+    }
   });
 });

@@ -199,8 +199,18 @@ export const WeightTrend: Story = {
 
 const themeComparisonTemplate = `
   <div class="grid gap-6 md:grid-cols-2">
+    <p class="text-xs text-muted-foreground md:col-span-2">
+      Same data and token scopes. Switch the Storybook accent toolbar to compare the chart ramp across all six accents.
+    </p>
     <section class="rounded-xl border border-border bg-background p-4 text-foreground">
-      <p class="mb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">Light · brand gold</p>
+      <p class="mb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">Light · accent tokens</p>
+      <div class="mb-3 flex gap-1" aria-hidden="true">
+        <span class="h-2 flex-1 rounded-full" style="background: hsl(var(--chart-1))"></span>
+        <span class="h-2 flex-1 rounded-full" style="background: hsl(var(--chart-2))"></span>
+        <span class="h-2 flex-1 rounded-full" style="background: hsl(var(--chart-3))"></span>
+        <span class="h-2 flex-1 rounded-full" style="background: hsl(var(--chart-4))"></span>
+        <span class="h-2 flex-1 rounded-full" style="background: hsl(var(--chart-5))"></span>
+      </div>
       <div class="chart-stack">
         <KrCompletionChart :goal="goal" />
         <KrWeightDistributionChart :goal="goal" />
@@ -208,7 +218,14 @@ const themeComparisonTemplate = `
       </div>
     </section>
     <section class="dark rounded-xl border border-border bg-background p-4 text-foreground">
-      <p class="mb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">Dark · brand gold</p>
+      <p class="mb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">Dark · accent tokens</p>
+      <div class="mb-3 flex gap-1" aria-hidden="true">
+        <span class="h-2 flex-1 rounded-full" style="background: hsl(var(--chart-1))"></span>
+        <span class="h-2 flex-1 rounded-full" style="background: hsl(var(--chart-2))"></span>
+        <span class="h-2 flex-1 rounded-full" style="background: hsl(var(--chart-3))"></span>
+        <span class="h-2 flex-1 rounded-full" style="background: hsl(var(--chart-4))"></span>
+        <span class="h-2 flex-1 rounded-full" style="background: hsl(var(--chart-5))"></span>
+      </div>
       <div class="chart-stack">
         <KrCompletionChart :goal="goal" />
         <KrWeightDistributionChart :goal="goal" />
@@ -218,7 +235,7 @@ const themeComparisonTemplate = `
   </div>
 `;
 
-/** Same data, two theme scopes: chart colors follow the token layer. */
+/** Same data, two theme scopes; the accent toolbar switches the shared ramp. */
 export const ThemeComparison: Story = {
   args: { goal },
   render: () => ({
