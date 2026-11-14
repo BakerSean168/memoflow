@@ -2,6 +2,7 @@ import { mount, flushPromises } from '@vue/test-utils';
 import { createI18n } from 'vue-i18n';
 import { describe, expect, it, vi } from 'vitest';
 import type { PermissionCommand, PermissionSnapshot } from '@memoflow/ai-contracts';
+import { Select } from '@memoflow/ui-vue-shadcn';
 import { settingUiHost } from '../setting-ui-host';
 import { productionLocaleMessages } from '@setting-ui-test-host/locales/production-messages';
 import AIPermissionSettings from './AIPermissionSettings.vue';
@@ -63,7 +64,13 @@ describe('AI permissions integrated under AI Provider settings', () => {
     const { wrapper, permissions } = setup();
     await flushPromises();
     expect(wrapper.findAll('[data-testid^="ai-permission-cell-"]')).toHaveLength(12);
-    await wrapper.get('[data-testid="ai-permission-cell-goal-write"]').setValue('deny');
+    const cellSelect = wrapper
+      .findAllComponents(Select)
+      .find((candidate) =>
+        candidate.find('[data-testid="ai-permission-cell-goal-write"]').exists(),
+      );
+    expect(cellSelect).toBeDefined();
+    cellSelect!.vm.$emit('update:modelValue', 'deny');
     await flushPromises();
     expect(permissions).toHaveBeenLastCalledWith(
       expect.objectContaining({
@@ -78,6 +85,9 @@ describe('AI permissions integrated under AI Provider settings', () => {
     );
     expect(wrapper.find('[data-testid="ai-permission-cell-ai_permission-write"]').exists()).toBe(
       false,
+    );
+    expect(wrapper.get('[data-testid="ai-permission-cell-goal-write"]').classes()).toEqual(
+      expect.arrayContaining(['h-8', 'text-xs', 'min-w-24']),
     );
     wrapper.unmount();
   });
