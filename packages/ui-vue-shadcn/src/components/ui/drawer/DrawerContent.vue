@@ -15,6 +15,7 @@ const forwarded = useForwardPropsEmits(props, emits);
 <template>
   <DrawerPortal>
     <DrawerOverlay />
+    <!-- Reserved: mt-24 is shadcn/vaul upstream parity — keep verbatim to stay in sync with upstream. -->
     <DrawerContent
       v-bind="forwarded"
       :class="

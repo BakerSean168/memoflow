@@ -104,11 +104,42 @@ Off-scale values snap **down** to the nearest step:
 | 17, 18, 19   | 16         |              |            |
 | 21, 22, 23   | 20         |              |            |
 
-Values above 64px are not snapped mechanically; they are reported and decided
-by the coordination line.
+Values above 64px are not snapped mechanically: they are reported and decided by
+the coordination line. The decided cases are under
+[Reserved space](#reserved-space-预留型).
 
 Prefer the equivalent scale utility (`p-2`, `gap-3`, `mb-6`, `px-8`). Only when
 no step exists write the arbitrary form at a scale value (`h-[6px]`).
+
+### Reserved space (预留型)
+
+Some large values are not rhythm at all: they reserve geometry for an overlay, a
+floating action area or a host-drawn control. T3 Code keeps the same pattern —
+`RightPanelTabs` uses a conditional `pr-28`, `ChatHeader` uses `pr-24`, and macOS
+window controls are offset through the host-injected
+`--desktop-window-controls-inset` (default `90px`).
+
+A reservation is neither rhythm nor real geometry, so it is not snapped and it
+does not belong in
+[`style-arbitrary-exemptions.json`](./style-arbitrary-exemptions.json): that
+registry only matches arbitrary values (`utility-[…]`), while every case below is
+already a scale class. Each one is enumerated here and carries a one-line
+comment at the call site naming what the space is reserved for.
+
+| File                                                                                  | Class               | Reserved for                                          |
+| ------------------------------------------------------------------------------------- | ------------------- | ----------------------------------------------------- |
+| `packages/ai-ui/src/components/AIConversationSidebar.vue`                             | `pr-24`             | floating action area at the end of a conversation row |
+| `packages/notification-ui/src/components/NotificationCapsulePreview.vue`              | conditional `pr-28` | `owner-command` action buttons                        |
+| `packages/notification-ui/src/components/NotificationItem.vue`                        | conditional `pr-28` | quick actions                                         |
+| `packages/notification-ui/src/components/NotificationPermissionWarning.vue`           | `top-20`            | fixed banner clearing the window title bar            |
+| `packages/ui-vue-shadcn/src/components/custom/form/date-time/ReminderOffsetField.vue` | `pr-20`             | suffix unit rendered inside the field                 |
+| `packages/ui-vue-shadcn/src/components/ui/drawer/DrawerContent.vue`                   | `mt-24`             | upstream parity with shadcn/vaul drawers              |
+
+The macOS window-control reservation is a named variable rather than a literal:
+`--window-controls-inset` (default `80px`) lives with the shell tokens in
+`packages/ui-core/src/styles/theme.css`, and `WindowHeader` consumes it only on
+macOS. This follows T3's `--desktop-window-controls-inset`, so a host can inject
+its own inset without editing the component.
 
 ### Layout conventions
 
@@ -155,8 +186,9 @@ value and are registered as exemptions instead of being snapped.
   a managed dimension here; a typography pass can extend the guard later.
 - Radius arbitrary values have no equivalent `--radius-*` token at every pixel
   size; they are registered as exemptions and are a separate radius pass.
-- Spacing values above 64px found by the #946 sweep are listed on the issue and
-  left unchanged until the coordination line decides.
+- Spacing values above 64px found by the #946 sweep were divided: the six
+  reserved-space cases are enumerated under [Reserved space](#reserved-space-预留型)
+  and the macOS window-control inset became a named variable.
 
 ### Enforcement lane
 

@@ -58,7 +58,7 @@ const props = defineProps<{
   rightPanelOpen: boolean;
   /** 是否桌面环境（渲染窗控 + 拖拽区）。 */
   isDesktop?: boolean;
-  /** macOS：原生交通灯占左上角——左侧留位、不渲染自绘窗控。 */
+  /** macOS：原生交通灯占左上角——左侧按 --window-controls-inset 留位（默认 80px），不渲染自绘窗控。 */
   isMac?: boolean;
   /** 桌面窗控状态（isDesktop 时由 AppShell 透传）。 */
   windowControls?: WindowControlsState;
@@ -90,7 +90,10 @@ const utilityCapsules = computed(() =>
 <template>
   <header
     class="window-header flex h-11 shrink-0 items-center justify-between gap-1.5 border-b border-[hsl(var(--border-subtle))] bg-[hsl(var(--surface)/0.94)] px-2 text-xs shadow-[0_1px_0_hsl(var(--border)/0.05)] backdrop-blur-sm"
-    :class="[isDesktop ? 'window-header--drag' : '', isMac ? 'pl-20' : '']"
+    :class="[
+      isDesktop ? 'window-header--drag' : '',
+      isMac ? 'pl-[var(--window-controls-inset)]' : '',
+    ]"
     data-testid="window-header"
     :data-header-mode="props.mode ?? 'workspace'"
   >

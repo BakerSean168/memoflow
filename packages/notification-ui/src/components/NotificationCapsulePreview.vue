@@ -57,6 +57,7 @@
         :data-testid="`notification-capsule-item-${item.id}`"
         :data-read-state="item.isRead ? 'read' : 'unread'"
       >
+        <!-- 预留：owner-command 操作按钮浮在行尾，pr-28 为它让位，不属节奏间距。 -->
         <button
           type="button"
           class="flex w-full items-start gap-1.5 rounded-lg px-2 py-1.5 text-left transition-colors hover:bg-[hsl(var(--hover))] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"

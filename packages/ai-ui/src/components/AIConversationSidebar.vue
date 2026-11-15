@@ -73,6 +73,7 @@
       <TooltipProvider>
         <ContextMenu v-for="item in visibleConversations" :key="item.id">
           <ContextMenuTrigger as-child>
+            <!-- 预留：行尾右侧是悬浮操作区（状态图标），按钮 pr-24 为它让位，不属节奏间距。 -->
             <div
               class="group relative mb-1 flex min-h-9 items-center rounded-lg text-sm transition-colors"
               :class="

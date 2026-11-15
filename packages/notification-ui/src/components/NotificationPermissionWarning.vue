@@ -1,4 +1,5 @@
 <template>
+  <!-- 预留：固定定位的顶部横幅，top-20 躲开窗口标题栏，不属节奏间距。 -->
   <div
     v-if="showWarning"
     class="fixed top-20 left-1/2 -translate-x-1/2 z-[9999] w-[90%] max-w-[500px]"

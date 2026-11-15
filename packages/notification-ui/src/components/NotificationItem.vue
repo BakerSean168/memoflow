@@ -7,6 +7,7 @@
     :more-button-label="t('notification.action.more')"
   >
     <div class="relative flex items-center">
+      <!-- 预留：quick actions 浮在行尾，pr-28 为它让位，不属节奏间距。 -->
       <button
         type="button"
         :data-keyboard-item="String(notification.id)"

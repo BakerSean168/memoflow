@@ -70,6 +70,28 @@ describe('WindowHeader desktop drag contract', () => {
   });
 });
 
+describe('WindowHeader macOS window-control inset', () => {
+  it('reserves the header start edge through the named inset variable only on macOS', () => {
+    const mac = mount(WindowHeader, {
+      props: { sidebarCollapsed: false, rightPanelOpen: true, isDesktop: true, isMac: true },
+      global: { plugins: [i18n] },
+    });
+    expect(mac.get('[data-testid="window-header"]').classes()).toContain(
+      'pl-[var(--window-controls-inset)]',
+    );
+    mac.unmount();
+
+    const nonMac = mount(WindowHeader, {
+      props: { sidebarCollapsed: false, rightPanelOpen: true, isDesktop: true, isMac: false },
+      global: { plugins: [i18n] },
+    });
+    expect(nonMac.get('[data-testid="window-header"]').classes()).not.toContain(
+      'pl-[var(--window-controls-inset)]',
+    );
+    nonMac.unmount();
+  });
+});
+
 describe('WindowHeader workspace navigation', () => {
   it('renders generic shell status actions without owning their business domain', () => {
     const wrapper = mount(WindowHeader, {
