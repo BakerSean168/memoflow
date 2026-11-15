@@ -29,13 +29,7 @@
         </Alert>
 
         <!-- 图表 -->
-        <v-chart
-          v-else
-          class="w-full min-h-[400px]"
-          :option="chartOption"
-          autoresize
-          style="height: 400px"
-        />
+        <v-chart v-else class="h-[400px] w-full" :option="chartOption" autoresize />
 
         <!-- 图例说明 -->
         <div

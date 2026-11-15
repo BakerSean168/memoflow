@@ -31,7 +31,7 @@ watch(
 </script>
 <template>
   <Card
-    class="flex flex-col rounded-xl border-transparent bg-[hsl(var(--surface-raised)/0.56)] p-3.5 shadow-[inset_0_0_0_1px_hsl(var(--border-subtle)/0.72),inset_0_1px_0_hsl(var(--foreground)/0.02)]"
+    class="flex flex-col rounded-xl border-transparent bg-[hsl(var(--surface-raised)/0.56)] p-3 shadow-[inset_0_0_0_1px_hsl(var(--border-subtle)/0.72),inset_0_1px_0_hsl(var(--foreground)/0.02)]"
     data-testid="daily-todo-widget"
   >
     <TaskQuickSurface

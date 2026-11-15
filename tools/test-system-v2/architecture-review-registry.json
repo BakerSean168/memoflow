@@ -2845,7 +2845,7 @@
         "status": "none-verified",
         "testFiles": []
       },
-      "sourceSha256": "6ffb41aba3aa89ea63046bd29c90892cfb81b90fa659348294117d312cae58fd"
+      "sourceSha256": "4bca417258273af0a94b2b7ebbb54aa8125d79f21f908c7995ff101e033cf25f"
     },
     {
       "path": "packages/app-vue/src/layouts/shell/WindowHeader.spec.ts",
@@ -2862,7 +2862,7 @@
         "status": "none-verified",
         "testFiles": []
       },
-      "sourceSha256": "2ecf16516efdf5780b76244f310baa5c9528b9f55bd092905a42f6577a0a6e48"
+      "sourceSha256": "1a7f07a43b7a1faecdd474ace3c01bb1e00ca20f496d797250f1823559ffe6b4"
     },
     {
       "path": "packages/app-vue/src/layouts/shell/usePanelWidth.spec.ts",

@@ -29,7 +29,7 @@ onMounted(auth.load);
 <template>
   <main class="flex min-h-screen items-center justify-center bg-neutral-950 px-4 py-12 text-white">
     <section class="w-full max-w-sm" aria-labelledby="device-auth-title">
-      <header class="mb-7 text-center">
+      <header class="mb-6 text-center">
         <img :src="logo128" :alt="APP_DISPLAY_NAME" class="mx-auto mb-4 h-16 w-16" />
         <h1 id="device-auth-title" class="text-2xl font-semibold">连接 MemoFlow Desktop</h1>
         <p class="mt-2 text-sm leading-6 text-white/55">

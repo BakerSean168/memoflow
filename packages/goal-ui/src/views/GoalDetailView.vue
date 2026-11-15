@@ -252,7 +252,7 @@
                     <button type="button" class="max-w-64">
                       <Badge
                         variant="outline"
-                        class="h-7 max-w-full rounded-full border-[hsl(var(--border-subtle))] bg-[hsl(var(--surface-raised)/0.46)] px-2.5 font-normal hover:bg-[hsl(var(--hover))]"
+                        class="h-7 max-w-full rounded-full border-[hsl(var(--border-subtle))] bg-[hsl(var(--surface-raised)/0.46)] px-2 font-normal hover:bg-[hsl(var(--hover))]"
                       >
                         <span class="truncate">{{ reminderTriggerLabel(trigger) }}</span>
                       </Badge>
@@ -305,7 +305,7 @@
                   v-for="option in selectedLabelOptions"
                   :key="option.id"
                   variant="outline"
-                  class="h-7 max-w-48 gap-1.5 rounded-full border-[hsl(var(--border-subtle))] bg-[hsl(var(--surface-raised)/0.46)] px-2.5 font-normal"
+                  class="h-7 max-w-48 gap-1.5 rounded-full border-[hsl(var(--border-subtle))] bg-[hsl(var(--surface-raised)/0.46)] px-2 font-normal"
                 >
                   <span
                     v-if="option.color"
@@ -358,7 +358,7 @@
                 >
                   <Badge
                     variant="outline"
-                    class="h-7 max-w-full rounded-full border-[hsl(var(--border-subtle))] bg-[hsl(var(--surface-raised)/0.46)] px-2.5 font-normal hover:bg-[hsl(var(--hover))]"
+                    class="h-7 max-w-full rounded-full border-[hsl(var(--border-subtle))] bg-[hsl(var(--surface-raised)/0.46)] px-2 font-normal hover:bg-[hsl(var(--hover))]"
                   >
                     <span class="truncate">{{ task.name }}</span>
                   </Badge>
@@ -366,7 +366,7 @@
                 <Badge
                   v-if="taskCount > taskPreviewItems.length"
                   variant="secondary"
-                  class="h-7 rounded-full px-2.5 font-normal"
+                  class="h-7 rounded-full px-2 font-normal"
                 >
                   +{{ taskCount - taskPreviewItems.length }}
                 </Badge>
@@ -397,7 +397,7 @@
                 >
                   <Badge
                     variant="outline"
-                    class="h-7 max-w-full rounded-full border-[hsl(var(--border-subtle))] bg-[hsl(var(--surface-raised)/0.46)] px-2.5 font-normal hover:bg-[hsl(var(--hover))]"
+                    class="h-7 max-w-full rounded-full border-[hsl(var(--border-subtle))] bg-[hsl(var(--surface-raised)/0.46)] px-2 font-normal hover:bg-[hsl(var(--hover))]"
                   >
                     <span class="truncate">
                       {{ note.state === 'Resolved' ? note.title : note.documentId }}
@@ -407,7 +407,7 @@
                 <Badge
                   v-if="knowledgeCount > knowledgePreviewItems.length"
                   variant="secondary"
-                  class="h-7 rounded-full px-2.5 font-normal"
+                  class="h-7 rounded-full px-2 font-normal"
                 >
                   +{{ knowledgeCount - knowledgePreviewItems.length }}
                 </Badge>
@@ -443,7 +443,7 @@
                 <button type="button" class="max-w-72" @click="openLatestReview">
                   <Badge
                     variant="outline"
-                    class="h-7 max-w-full rounded-full border-[hsl(var(--border-subtle))] bg-[hsl(var(--surface-raised)/0.46)] px-2.5 font-normal hover:bg-[hsl(var(--hover))]"
+                    class="h-7 max-w-full rounded-full border-[hsl(var(--border-subtle))] bg-[hsl(var(--surface-raised)/0.46)] px-2 font-normal hover:bg-[hsl(var(--hover))]"
                   >
                     <span class="truncate">{{ latestReviewText }}</span>
                   </Badge>
@@ -451,7 +451,7 @@
                 <Badge
                   v-if="reviewCount > 1"
                   variant="secondary"
-                  class="h-7 rounded-full px-2.5 font-normal"
+                  class="h-7 rounded-full px-2 font-normal"
                 >
                   +{{ reviewCount - 1 }}
                 </Badge>

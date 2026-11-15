@@ -191,7 +191,7 @@
 
       <div
         v-if="goalScopeLabel"
-        class="flex min-w-0 max-w-28 items-center gap-1 rounded-full bg-[hsl(var(--surface-raised)/0.5)] px-2 py-1 text-xs text-[hsl(var(--foreground-muted))] shadow-[inset_0_0_0_1px_hsl(var(--border-subtle)/0.42)] @2xl/panel:max-w-64 @2xl/panel:px-2.5"
+        class="flex min-w-0 max-w-28 items-center gap-1 rounded-full bg-[hsl(var(--surface-raised)/0.5)] px-2 py-1 text-xs text-[hsl(var(--foreground-muted))] shadow-[inset_0_0_0_1px_hsl(var(--border-subtle)/0.42)] @2xl/panel:max-w-64 @2xl/panel:px-2"
         data-testid="task-goal-deeplink-filter"
       >
         <span class="truncate">{{ goalScopeLabel }}</span>

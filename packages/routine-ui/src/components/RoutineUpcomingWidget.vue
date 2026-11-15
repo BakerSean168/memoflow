@@ -68,7 +68,7 @@ watch(
     class="rounded-xl border-transparent bg-[hsl(var(--surface-raised)/0.56)] shadow-[inset_0_0_0_1px_hsl(var(--border-subtle)/0.72),inset_0_1px_0_hsl(var(--foreground)/0.02)]"
     data-testid="routine-upcoming-widget"
   >
-    <CardHeader class="flex flex-row items-center justify-between px-3.5 pb-2 pt-3.5">
+    <CardHeader class="flex flex-row items-center justify-between px-3 pb-2 pt-3">
       <CardTitle class="flex items-center gap-2 text-[13px] font-semibold text-foreground">
         <Repeat2 class="h-3.5 w-3.5 text-[hsl(var(--foreground-subtle))]" />
         {{ t('routine.home.title') }}
@@ -86,7 +86,7 @@ watch(
         </Button>
       </div>
     </CardHeader>
-    <CardContent class="px-3.5 pb-3.5">
+    <CardContent class="px-3 pb-3">
       <div v-if="loading" class="space-y-3">
         <div v-for="i in 3" :key="i" class="flex items-center gap-2">
           <Skeleton class="h-8 w-12 rounded" />
@@ -98,7 +98,7 @@ watch(
         <div
           v-for="occurrence in visible"
           :key="occurrence.occurrenceKey"
-          class="flex items-center gap-2.5 rounded-md px-1.5 py-1.5 transition-colors hover:bg-[hsl(var(--hover))]"
+          class="flex items-center gap-2 rounded-md px-1.5 py-1.5 transition-colors hover:bg-[hsl(var(--hover))]"
           data-testid="routine-upcoming-item"
         >
           <span class="w-12 shrink-0 font-mono text-xs font-medium text-foreground">

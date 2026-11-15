@@ -180,6 +180,11 @@
     --workspace-primary: 0 0% 100%;
     --workspace-business: 0 0% 99%;
     --workspace-shadow: 0 0% 0%;
+    /*
+     * Host chrome reservation: macOS traffic lights float over the header's start
+     * edge. A host may override the inset; the shell header never hardcodes it.
+     */
+    --window-controls-inset: 80px;
     --hover: 240 4.8% 95.9%;
     --selected: 240 4.8% 93%;
     --border-subtle: 240 5.9% 93%;

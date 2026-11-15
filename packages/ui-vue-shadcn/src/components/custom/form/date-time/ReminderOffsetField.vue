@@ -34,6 +34,7 @@ function update(value: string | number) {
   <div class="grid gap-1.5">
     <Label :for="fieldId">{{ label }}</Label>
     <div class="relative">
+      <!-- 预留：后缀单位浮在输入框右端，pr-20 为它让位，不属节奏间距。 -->
       <Input
         :id="fieldId"
         type="number"

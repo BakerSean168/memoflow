@@ -72,7 +72,7 @@ const weightOption = computed(() => {
       formatter: (params: ECElementEvent) => {
         const item = data[params.dataIndex];
         return `
-          <div style="font-weight: bold; margin-bottom: 4px;">${params.name}</div>
+          <div class="mb-1 font-bold">${params.name}</div>
           <div>${t('goal.chart.krWeightDistribution.tooltipWeight')} ${item.value}/5</div>
           <div>${t('goal.chart.krWeightDistribution.tooltipPercent')} ${item.percentage}%</div>
         `;

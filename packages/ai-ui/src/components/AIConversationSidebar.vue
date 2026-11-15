@@ -73,6 +73,7 @@
       <TooltipProvider>
         <ContextMenu v-for="item in visibleConversations" :key="item.id">
           <ContextMenuTrigger as-child>
+            <!-- 预留：行尾右侧是悬浮操作区（状态图标），按钮 pr-24 为它让位，不属节奏间距。 -->
             <div
               class="group relative mb-1 flex min-h-9 items-center rounded-lg text-sm transition-colors"
               :class="
@@ -156,7 +157,7 @@
                     variant="ghost"
                     size="icon"
                     :aria-label="t('common.more')"
-                    class="absolute right-9 top-1/2 h-7 w-7 -translate-y-1/2"
+                    class="absolute right-8 top-1/2 h-7 w-7 -translate-y-1/2"
                     ><MoreHorizontal class="h-4 w-4"
                   /></Button>
                 </DropdownMenuTrigger>

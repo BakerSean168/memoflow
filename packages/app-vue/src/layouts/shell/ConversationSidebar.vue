@@ -582,12 +582,12 @@ function requestEditProfile(): void {
       </p>
       <p
         v-if="searchOpen && normalizedSearchQuery && filteredGroups.length === 0"
-        class="px-2.5 py-6 text-center text-xs leading-5 text-muted-foreground/65"
+        class="px-2 py-6 text-center text-xs leading-5 text-muted-foreground/65"
         data-testid="conversation-search-empty"
       >
         {{ t('shell.conversation.noMatches') }}
       </p>
-      <div v-for="group in filteredGroups" :key="group.labelKey" class="mb-2.5">
+      <div v-for="group in filteredGroups" :key="group.labelKey" class="mb-2">
         <p
           class="px-2 pb-1 pt-2 text-[10px] font-medium tracking-[0.025em] text-[hsl(var(--foreground-subtle))]"
         >
@@ -640,7 +640,7 @@ function requestEditProfile(): void {
                 type="button"
                 @dblclick.stop="!selection.state.busy && editTitle(item)"
                 class="min-w-0 w-full flex-1 px-2 py-1.5 text-left text-[12.5px] leading-5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring"
-                :class="stateOf(item.id) || hasRowAction(item.id) ? 'pr-9' : 'pr-2'"
+                :class="stateOf(item.id) || hasRowAction(item.id) ? 'pr-8' : 'pr-2'"
                 :data-keyboard-item="item.id"
                 role="option"
                 :aria-selected="selection.isSelected(item.id)"
@@ -849,7 +849,7 @@ function requestEditProfile(): void {
 
     <!-- 底：账户块（左）+ 独立设置入口（右），见 #856。 -->
     <div
-      class="flex h-11 shrink-0 items-center gap-1 border-t border-[hsl(var(--border-subtle))] px-2.5"
+      class="flex h-11 shrink-0 items-center gap-1 border-t border-[hsl(var(--border-subtle))] px-2"
       data-testid="shell-account-footer"
     >
       <DropdownMenu
@@ -914,7 +914,7 @@ function requestEditProfile(): void {
               aria-hidden="true"
             />
             <div class="px-1.5 pb-1.5" data-testid="shell-account-identity">
-              <div class="relative -mt-7 mb-1.5 h-14 w-14">
+              <div class="relative -mt-6 mb-1.5 h-14 w-14">
                 <span
                   class="flex h-14 w-14 items-center justify-center overflow-hidden rounded-full bg-primary text-base font-semibold text-primary-foreground ring-2 ring-[hsl(var(--surface-overlay))]"
                   data-testid="shell-account-card-avatar"

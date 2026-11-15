@@ -112,7 +112,7 @@
 
     <div
       v-if="checklistOpen && occurrence.checklistState.length"
-      class="ml-9 mr-2 border-l border-[hsl(var(--border-subtle))] pb-1.5 pl-2"
+      class="ml-8 mr-2 border-l border-[hsl(var(--border-subtle))] pb-1.5 pl-2"
       :data-testid="`task-compact-checklist-${occurrence.id}`"
     >
       <label

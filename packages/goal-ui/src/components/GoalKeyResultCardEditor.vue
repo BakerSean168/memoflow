@@ -69,7 +69,7 @@
               type="button"
               variant="ghost"
               size="sm"
-              class="h-7 shrink-0 gap-2 rounded-full px-2.5 text-xs font-normal text-[hsl(var(--foreground-muted))] hover:bg-[hsl(var(--hover))] hover:text-foreground"
+              class="h-7 shrink-0 gap-2 rounded-full px-2 text-xs font-normal text-[hsl(var(--foreground-muted))] hover:bg-[hsl(var(--hover))] hover:text-foreground"
               :disabled="disabled"
               data-testid="draft-kr-weight"
             >
@@ -80,7 +80,7 @@
                 {{ normalizedWeight }}
               </span>
               <span
-                class="flex h-3 items-center gap-[2px]"
+                class="flex h-3 items-center gap-0.5"
                 aria-hidden="true"
                 data-testid="draft-kr-weight-glyph"
               >
@@ -108,7 +108,7 @@
               :data-testid="`draft-kr-weight-option-${level}`"
               @click="setWeight(level)"
             >
-              <span class="flex h-3 w-7 items-center gap-[2px]" aria-hidden="true">
+              <span class="flex h-3 w-7 items-center gap-0.5" aria-hidden="true">
                 <span
                   v-for="bar in weightLevels"
                   :key="bar"

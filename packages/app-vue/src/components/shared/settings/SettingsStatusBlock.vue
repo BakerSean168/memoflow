@@ -32,7 +32,7 @@ const statusToneClass = computed(() => semanticToneStatusClass(statusTone.value)
 
 <template>
   <div
-    class="flex min-w-0 items-start gap-3 rounded-md px-3 py-2.5 text-sm"
+    class="flex min-w-0 items-start gap-3 rounded-md px-3 py-2 text-sm"
     :class="statusToneClass"
     :role="kind === 'error' ? 'alert' : 'status'"
     :aria-busy="kind === 'loading' ? 'true' : undefined"

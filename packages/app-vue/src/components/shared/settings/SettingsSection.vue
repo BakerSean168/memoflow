@@ -14,7 +14,7 @@ withDefaults(
 
 <template>
   <section
-    class="border-b border-[hsl(var(--border-subtle)/0.72)] pb-7 last:border-b-0 last:pb-0"
+    class="border-b border-[hsl(var(--border-subtle)/0.72)] pb-6 last:border-b-0 last:pb-0"
     :data-testid="testId"
   >
     <header class="mb-5 flex min-w-0 flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">

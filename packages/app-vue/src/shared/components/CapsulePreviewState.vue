@@ -19,7 +19,7 @@ const resolvedLayout = computed(() => {
 const stateClass = computed(() =>
   resolvedLayout.value === 'stack'
     ? 'space-y-1.5 py-3'
-    : 'flex flex-col items-center justify-center gap-2 py-7 text-center',
+    : 'flex flex-col items-center justify-center gap-2 py-6 text-center',
 );
 
 const role = computed(() => {

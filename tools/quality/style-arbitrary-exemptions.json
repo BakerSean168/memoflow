@@ -1,5 +1,711 @@
 {
   "kind": "style-guard-exemptions-v1",
   "description": "Per-occurrence exemptions for real-geometry arbitrary values. See tools/quality/README.md. Each entry needs file, exact token and reason; stale entries fail the guard.",
-  "entries": []
+  "entries": [
+    {
+      "file": "apps/desktop/src/renderer/CustomNotificationView.vue",
+      "token": "min-w-[92px]",
+      "reason": "组件几何宽度（面板/画布/控件）"
+    },
+    {
+      "file": "apps/desktop/src/renderer/CustomNotificationView.vue",
+      "token": "rounded-[22px]",
+      "reason": "组件圆角像素值，主题 --radius-* 无等值档"
+    },
+    {
+      "file": "apps/web/e2e/goal/reference/main.ts",
+      "token": "w-[44%]",
+      "reason": "相对容器比例尺寸，无刻度等价值"
+    },
+    {
+      "file": "apps/web/e2e/schedule/presentation-authority/main.ts",
+      "token": "h-[760px]",
+      "reason": "组件几何高度（画布/列表/控件）"
+    },
+    {
+      "file": "packages/account-ui/src/account/components/AccountProfileEditorDialog.vue",
+      "token": "max-h-[min(88vh,620px)]",
+      "reason": "视口高度约束，随窗口变化，无刻度等价值"
+    },
+    {
+      "file": "packages/account-ui/src/account/components/AccountProfileEditorDialog.vue",
+      "token": "max-w-[420px]",
+      "reason": "内容/浮层容器最大宽度，几何约束"
+    },
+    {
+      "file": "packages/account-ui/src/account/components/AccountProfileEditorDialog.vue",
+      "token": "min-h-[76px]",
+      "reason": "组件几何高度（画布/列表/控件）"
+    },
+    {
+      "file": "packages/ai-ui/src/components/AIComposerControls.vue",
+      "token": "h-[min(346px,calc(100dvh-80px))]",
+      "reason": "视口高度约束，随窗口变化，无刻度等价值"
+    },
+    {
+      "file": "packages/ai-ui/src/components/AIComposerControls.vue",
+      "token": "max-w-[calc(100vw-1.5rem)]",
+      "reason": "视口宽度约束，随窗口变化，无刻度等价值"
+    },
+    {
+      "file": "packages/ai-ui/src/components/AIComposerControls.vue",
+      "token": "max-w-[clamp(7rem,42cqw,15rem)]",
+      "reason": "响应式容器尺寸计算式，无刻度等价值"
+    },
+    {
+      "file": "packages/ai-ui/src/components/AIComposerControls.vue",
+      "token": "min-h-[2.75em]",
+      "reason": "组件几何高度（画布/列表/控件）"
+    },
+    {
+      "file": "packages/ai-ui/src/components/AIComposerControls.vue",
+      "token": "w-[3px]",
+      "reason": "组件几何宽度（面板/画布/控件）"
+    },
+    {
+      "file": "packages/ai-ui/src/components/AIComposerControls.vue",
+      "token": "w-[min(37.25rem,calc(100vw-1.5rem))]",
+      "reason": "视口宽度约束，随窗口变化，无刻度等价值"
+    },
+    {
+      "file": "packages/ai-ui/src/components/AIFooterComposer.vue",
+      "token": "bottom-[calc(100%-0.25rem)]",
+      "reason": "覆盖层定位偏移（相对容器百分比）"
+    },
+    {
+      "file": "packages/ai-ui/src/components/AIFooterComposer.vue",
+      "token": "max-w-[15rem]",
+      "reason": "内容/浮层容器最大宽度，几何约束"
+    },
+    {
+      "file": "packages/ai-ui/src/components/AIFooterComposer.vue",
+      "token": "max-w-[52rem]",
+      "reason": "内容/浮层容器最大宽度，几何约束"
+    },
+    {
+      "file": "packages/ai-ui/src/components/AIFooterComposer.vue",
+      "token": "rounded-[24px]",
+      "reason": "组件圆角像素值，主题 --radius-* 无等值档"
+    },
+    {
+      "file": "packages/ai-ui/src/components/AIFooterComposer.vue",
+      "token": "w-[min(20rem,calc(100%-1rem))]",
+      "reason": "相对容器比例尺寸，无刻度等价值"
+    },
+    {
+      "file": "packages/ai-ui/src/components/AIMessagePanel.vue",
+      "token": "h-[18px]",
+      "reason": "组件几何高度（画布/列表/控件）"
+    },
+    {
+      "file": "packages/ai-ui/src/components/AIMessagePanel.vue",
+      "token": "max-w-[15rem]",
+      "reason": "内容/浮层容器最大宽度，几何约束"
+    },
+    {
+      "file": "packages/ai-ui/src/components/AIMessagePanel.vue",
+      "token": "max-w-[52rem]",
+      "reason": "内容/浮层容器最大宽度，几何约束"
+    },
+    {
+      "file": "packages/ai-ui/src/components/AIMessagePanel.vue",
+      "token": "max-w-[78%]",
+      "reason": "相对容器比例尺寸，无刻度等价值"
+    },
+    {
+      "file": "packages/ai-ui/src/components/AIMessagePanel.vue",
+      "token": "max-w-[82%]",
+      "reason": "相对容器比例尺寸，无刻度等价值"
+    },
+    {
+      "file": "packages/ai-ui/src/components/AIMessagePanel.vue",
+      "token": "max-w-[88%]",
+      "reason": "相对容器比例尺寸，无刻度等价值"
+    },
+    {
+      "file": "packages/ai-ui/src/components/AIMessagePanel.vue",
+      "token": "min-h-[27rem]",
+      "reason": "组件几何高度（画布/列表/控件）"
+    },
+    {
+      "file": "packages/ai-ui/src/components/AIMessagePanel.vue",
+      "token": "rounded-[16px]",
+      "reason": "组件圆角像素值，主题 --radius-* 无等值档"
+    },
+    {
+      "file": "packages/ai-ui/src/components/AIMessagePanel.vue",
+      "token": "rounded-br-[6px]",
+      "reason": "组件圆角像素值，主题 --radius-* 无等值档"
+    },
+    {
+      "file": "packages/ai-ui/src/components/AIMessagePanel.vue",
+      "token": "w-[18px]",
+      "reason": "组件几何宽度（面板/画布/控件）"
+    },
+    {
+      "file": "packages/ai-ui/src/views/AIChatView.vue",
+      "token": "w-[min(22rem,calc(100vw-3rem))]",
+      "reason": "视口宽度约束，随窗口变化，无刻度等价值"
+    },
+    {
+      "file": "packages/app-vue/src/layouts/shell/AppShell.vue",
+      "token": "h-[85vh]",
+      "reason": "视口高度约束，随窗口变化，无刻度等价值"
+    },
+    {
+      "file": "packages/app-vue/src/layouts/shell/BusinessPanel.vue",
+      "token": "max-w-[12rem]",
+      "reason": "内容/浮层容器最大宽度，几何约束"
+    },
+    {
+      "file": "packages/app-vue/src/layouts/shell/BusinessPanel.vue",
+      "token": "max-w-[6.5rem]",
+      "reason": "内容/浮层容器最大宽度，几何约束"
+    },
+    {
+      "file": "packages/app-vue/src/layouts/shell/BusinessPanel.vue",
+      "token": "max-w-[7.5rem]",
+      "reason": "内容/浮层容器最大宽度，几何约束"
+    },
+    {
+      "file": "packages/app-vue/src/layouts/shell/BusinessPanel.vue",
+      "token": "max-w-[9rem]",
+      "reason": "内容/浮层容器最大宽度，几何约束"
+    },
+    {
+      "file": "packages/app-vue/src/layouts/shell/BusinessPanel.vue",
+      "token": "min-w-[4.5rem]",
+      "reason": "组件几何宽度（面板/画布/控件）"
+    },
+    {
+      "file": "packages/app-vue/src/layouts/shell/BusinessPanel.vue",
+      "token": "rounded-[5px]",
+      "reason": "组件圆角像素值，主题 --radius-* 无等值档"
+    },
+    {
+      "file": "packages/app-vue/src/layouts/shell/ConversationSidebar.vue",
+      "token": "max-h-[min(60vh,24rem)]",
+      "reason": "视口高度约束，随窗口变化，无刻度等价值"
+    },
+    {
+      "file": "packages/app-vue/src/layouts/shell/ConversationSidebar.vue",
+      "token": "max-w-[calc(100vw-1rem)]",
+      "reason": "视口宽度约束，随窗口变化，无刻度等价值"
+    },
+    {
+      "file": "packages/app-vue/src/layouts/shell/ModuleCapsule.vue",
+      "token": "max-w-[calc(100vw-1rem)]",
+      "reason": "视口宽度约束，随窗口变化，无刻度等价值"
+    },
+    {
+      "file": "packages/app-vue/src/layouts/shell/ModuleCapsule.vue",
+      "token": "w-[22rem]",
+      "reason": "组件几何宽度（面板/画布/控件）"
+    },
+    {
+      "file": "packages/app-vue/src/layouts/shell/ModuleCapsule.vue",
+      "token": "w-[24rem]",
+      "reason": "组件几何宽度（面板/画布/控件）"
+    },
+    {
+      "file": "packages/app-vue/src/layouts/shell/SyncStatusIndicator.vue",
+      "token": "max-w-[calc(100vw-1rem)]",
+      "reason": "视口宽度约束，随窗口变化，无刻度等价值"
+    },
+    {
+      "file": "packages/app-vue/src/layouts/shell/TodayOverviewPanel.vue",
+      "token": "min-h-[9rem]",
+      "reason": "组件几何高度（画布/列表/控件）"
+    },
+    {
+      "file": "packages/app-vue/src/layouts/shell/WindowHeader.vue",
+      "token": "max-w-[35vw]",
+      "reason": "视口宽度约束，随窗口变化，无刻度等价值"
+    },
+    {
+      "file": "packages/app-vue/src/shared/components/__stories__/BrowserInteractionFixture.vue",
+      "token": "h-[530px]",
+      "reason": "组件几何高度（画布/列表/控件）"
+    },
+    {
+      "file": "packages/app-vue/src/shared/components/__stories__/BrowserInteractionFixture.vue",
+      "token": "w-[630px]",
+      "reason": "组件几何宽度（面板/画布/控件）"
+    },
+    {
+      "file": "packages/app-vue/src/shared/components/__stories__/BrowserInteractionFixture.vue",
+      "token": "w-[760px]",
+      "reason": "组件几何宽度（面板/画布/控件）"
+    },
+    {
+      "file": "packages/app-vue/src/shared/components/DesktopProfileList.vue",
+      "token": "w-[5.5rem]",
+      "reason": "组件几何宽度（面板/画布/控件）"
+    },
+    {
+      "file": "packages/app-vue/src/shared/components/KeyboardHelp.vue",
+      "token": "max-h-[80vh]",
+      "reason": "视口高度约束，随窗口变化，无刻度等价值"
+    },
+    {
+      "file": "packages/app-vue/src/shared/components/LabelFilterPopover.vue",
+      "token": "max-w-[calc(100vw-2rem)]",
+      "reason": "视口宽度约束，随窗口变化，无刻度等价值"
+    },
+    {
+      "file": "packages/app-vue/src/shared/components/LabelPicker.vue",
+      "token": "max-w-[calc(100vw-2rem)]",
+      "reason": "视口宽度约束，随窗口变化，无刻度等价值"
+    },
+    {
+      "file": "packages/app-vue/src/shared/components/LabelPicker.vue",
+      "token": "rounded-[3px]",
+      "reason": "组件圆角像素值，主题 --radius-* 无等值档"
+    },
+    {
+      "file": "packages/app-vue/src/shared/components/PaneScopedDialog.vue",
+      "token": "h-[min(88%,900px)]",
+      "reason": "相对容器比例尺寸，无刻度等价值"
+    },
+    {
+      "file": "packages/app-vue/src/shared/components/PaneScopedDialog.vue",
+      "token": "max-w-[368px]",
+      "reason": "内容/浮层容器最大宽度，几何约束"
+    },
+    {
+      "file": "packages/app-vue/src/shared/components/PaneScopedDialog.vue",
+      "token": "max-w-[440px]",
+      "reason": "内容/浮层容器最大宽度，几何约束"
+    },
+    {
+      "file": "packages/app-vue/src/shared/components/PaneScopedDialog.vue",
+      "token": "max-w-[620px]",
+      "reason": "内容/浮层容器最大宽度，几何约束"
+    },
+    {
+      "file": "packages/app-vue/src/shared/components/PaneScopedDialog.vue",
+      "token": "max-w-[960px]",
+      "reason": "内容/浮层容器最大宽度，几何约束"
+    },
+    {
+      "file": "packages/app-vue/src/shared/components/PaneScopedDialog.vue",
+      "token": "w-[96%]",
+      "reason": "相对容器比例尺寸，无刻度等价值"
+    },
+    {
+      "file": "packages/app-vue/src/shared/components/ProductDatePicker.vue",
+      "token": "max-w-[calc(100vw-1rem)]",
+      "reason": "视口宽度约束，随窗口变化，无刻度等价值"
+    },
+    {
+      "file": "packages/app-vue/src/shared/components/ProductDatePicker.vue",
+      "token": "w-[19rem]",
+      "reason": "组件几何宽度（面板/画布/控件）"
+    },
+    {
+      "file": "packages/app-vue/src/shared/components/ProductDatePicker.vue",
+      "token": "w-[23rem]",
+      "reason": "组件几何宽度（面板/画布/控件）"
+    },
+    {
+      "file": "packages/app-vue/src/shared/components/ProductDateTimePicker.vue",
+      "token": "max-w-[calc(100vw-1.25rem)]",
+      "reason": "视口宽度约束，随窗口变化，无刻度等价值"
+    },
+    {
+      "file": "packages/app-vue/src/shared/components/ProductDateTimePicker.vue",
+      "token": "w-[23rem]",
+      "reason": "组件几何宽度（面板/画布/控件）"
+    },
+    {
+      "file": "packages/app-vue/src/shared/components/ProductDialogShell.vue",
+      "token": "h-[calc(100dvh-2rem)]",
+      "reason": "视口高度约束，随窗口变化，无刻度等价值"
+    },
+    {
+      "file": "packages/app-vue/src/shared/components/ProductDialogShell.vue",
+      "token": "h-[calc(100dvh-3rem)]",
+      "reason": "视口高度约束，随窗口变化，无刻度等价值"
+    },
+    {
+      "file": "packages/app-vue/src/shared/components/ProductDialogShell.vue",
+      "token": "max-h-[1100px]",
+      "reason": "组件几何高度（画布/列表/控件）"
+    },
+    {
+      "file": "packages/app-vue/src/shared/components/ProductDialogShell.vue",
+      "token": "max-h-[min(90vh,760px)]",
+      "reason": "视口高度约束，随窗口变化，无刻度等价值"
+    },
+    {
+      "file": "packages/app-vue/src/shared/components/ProductDialogShell.vue",
+      "token": "max-w-[440px]",
+      "reason": "内容/浮层容器最大宽度，几何约束"
+    },
+    {
+      "file": "packages/app-vue/src/shared/components/ProductDialogShell.vue",
+      "token": "max-w-[680px]",
+      "reason": "内容/浮层容器最大宽度，几何约束"
+    },
+    {
+      "file": "packages/app-vue/src/shared/components/ProductDialogShell.vue",
+      "token": "max-w-[960px]",
+      "reason": "内容/浮层容器最大宽度，几何约束"
+    },
+    {
+      "file": "packages/app-vue/src/shared/components/ProductSheetSurface.vue",
+      "token": "w-[min(88vw,22rem)]",
+      "reason": "视口宽度约束，随窗口变化，无刻度等价值"
+    },
+    {
+      "file": "packages/app-vue/src/shared/components/ProductSheetSurface.vue",
+      "token": "w-[min(92vw,24rem)]",
+      "reason": "视口宽度约束，随窗口变化，无刻度等价值"
+    },
+    {
+      "file": "packages/app-vue/src/shared/components/ProductTimeframePicker.vue",
+      "token": "max-w-[calc(100vw-1rem)]",
+      "reason": "视口宽度约束，随窗口变化，无刻度等价值"
+    },
+    {
+      "file": "packages/app-vue/src/shared/components/ProductTimeframePicker.vue",
+      "token": "w-[19rem]",
+      "reason": "组件几何宽度（面板/画布/控件）"
+    },
+    {
+      "file": "packages/app-vue/src/shared/components/ProductTimeZoneSelector.vue",
+      "token": "max-w-[calc(100vw-1rem)]",
+      "reason": "视口宽度约束，随窗口变化，无刻度等价值"
+    },
+    {
+      "file": "packages/goal-ui/src/components/dag/ExportDialog.vue",
+      "token": "max-w-[600px]",
+      "reason": "内容/浮层容器最大宽度，几何约束"
+    },
+    {
+      "file": "packages/goal-ui/src/components/dialogs/KeyResultDialog.vue",
+      "token": "max-w-[860px]",
+      "reason": "内容/浮层容器最大宽度，几何约束"
+    },
+    {
+      "file": "packages/goal-ui/src/components/GoalKeyResultCardEditor.vue",
+      "token": "w-[3px]",
+      "reason": "组件几何宽度（面板/画布/控件）"
+    },
+    {
+      "file": "packages/goal-ui/src/components/GoalKeyResultTrajectoryPlot.vue",
+      "token": "h-[14.5rem]",
+      "reason": "组件几何高度（画布/列表/控件）"
+    },
+    {
+      "file": "packages/goal-ui/src/components/GoalKeyResultTrajectoryPlot.vue",
+      "token": "left-[14%]",
+      "reason": "覆盖层定位偏移（相对容器百分比）"
+    },
+    {
+      "file": "packages/goal-ui/src/components/GoalKeyResultTrajectoryPlot.vue",
+      "token": "left-[86%]",
+      "reason": "覆盖层定位偏移（相对容器百分比）"
+    },
+    {
+      "file": "packages/goal-ui/src/components/GoalKeyResultTrajectoryPlot.vue",
+      "token": "w-[27%]",
+      "reason": "相对容器比例尺寸，无刻度等价值"
+    },
+    {
+      "file": "packages/goal-ui/src/components/GoalReminderChip.vue",
+      "token": "max-w-[calc(100vw-2rem)]",
+      "reason": "视口宽度约束，随窗口变化，无刻度等价值"
+    },
+    {
+      "file": "packages/goal-ui/src/components/GoalReminderMenuItems.vue",
+      "token": "max-w-[calc(100vw-2rem)]",
+      "reason": "视口宽度约束，随窗口变化，无刻度等价值"
+    },
+    {
+      "file": "packages/goal-ui/src/components/weight-snapshot/WeightComparison.vue",
+      "token": "h-[400px]",
+      "reason": "组件几何高度（画布/列表/控件）"
+    },
+    {
+      "file": "packages/goal-ui/src/components/weight-snapshot/WeightTrendChart.vue",
+      "token": "h-[400px]",
+      "reason": "组件几何高度（画布/列表/控件）"
+    },
+    {
+      "file": "packages/goal-ui/src/components/weight/WeightSuggestionPanel.vue",
+      "token": "max-w-[1000px]",
+      "reason": "内容/浮层容器最大宽度，几何约束"
+    },
+    {
+      "file": "packages/goal-ui/src/components/weight/WeightSuggestionPanel.vue",
+      "token": "min-h-[120px]",
+      "reason": "组件几何高度（画布/列表/控件）"
+    },
+    {
+      "file": "packages/goal-ui/src/components/widgets/GoalProgressWidget.vue",
+      "token": "max-w-[60%]",
+      "reason": "相对容器比例尺寸，无刻度等价值"
+    },
+    {
+      "file": "packages/goal-ui/src/views/GoalDetailView.vue",
+      "token": "max-w-[calc(100vw-2rem)]",
+      "reason": "视口宽度约束，随窗口变化，无刻度等价值"
+    },
+    {
+      "file": "packages/notification-ui/src/components/InAppNotification.vue",
+      "token": "max-w-[400px]",
+      "reason": "内容/浮层容器最大宽度，几何约束"
+    },
+    {
+      "file": "packages/notification-ui/src/components/InAppNotification.vue",
+      "token": "min-w-[320px]",
+      "reason": "组件几何宽度（面板/画布/控件）"
+    },
+    {
+      "file": "packages/notification-ui/src/components/NotificationDrawer.vue",
+      "token": "w-[400px]",
+      "reason": "组件几何宽度（面板/画布/控件）"
+    },
+    {
+      "file": "packages/notification-ui/src/components/NotificationDrawer.vue",
+      "token": "w-[540px]",
+      "reason": "组件几何宽度（面板/画布/控件）"
+    },
+    {
+      "file": "packages/notification-ui/src/components/NotificationPermissionWarning.vue",
+      "token": "max-w-[500px]",
+      "reason": "内容/浮层容器最大宽度，几何约束"
+    },
+    {
+      "file": "packages/notification-ui/src/components/NotificationPermissionWarning.vue",
+      "token": "w-[90%]",
+      "reason": "相对容器比例尺寸，无刻度等价值"
+    },
+    {
+      "file": "packages/notification-ui/src/views/SSEMonitorPage.vue",
+      "token": "h-[50vh]",
+      "reason": "视口高度约束，随窗口变化，无刻度等价值"
+    },
+    {
+      "file": "packages/repository-ui/src/views/KnowledgeProjectionWorkspaceView.vue",
+      "token": "max-w-[46%]",
+      "reason": "相对容器比例尺寸，无刻度等价值"
+    },
+    {
+      "file": "packages/repository-ui/src/views/KnowledgeProjectionWorkspaceView.vue",
+      "token": "w-[min(20rem,32%)]",
+      "reason": "相对容器比例尺寸，无刻度等价值"
+    },
+    {
+      "file": "packages/repository-ui/src/views/LocalVaultWorkspaceView.vue",
+      "token": "max-w-[46%]",
+      "reason": "相对容器比例尺寸，无刻度等价值"
+    },
+    {
+      "file": "packages/routine-ui/src/components/RoutineProfileDialog.vue",
+      "token": "max-w-[440px]",
+      "reason": "内容/浮层容器最大宽度，几何约束"
+    },
+    {
+      "file": "packages/schedule-ui/src/components/CreateScheduleDialog.vue",
+      "token": "max-w-[620px]",
+      "reason": "内容/浮层容器最大宽度，几何约束"
+    },
+    {
+      "file": "packages/setting-ui/src/components/AgentInstanceWizard.vue",
+      "token": "max-h-[min(90dvh,46rem)]",
+      "reason": "视口高度约束，随窗口变化，无刻度等价值"
+    },
+    {
+      "file": "packages/setting-ui/src/components/AgentInstanceWizard.vue",
+      "token": "min-h-[16rem]",
+      "reason": "组件几何高度（画布/列表/控件）"
+    },
+    {
+      "file": "packages/setting-ui/src/components/AgentInstanceWizard.vue",
+      "token": "w-[calc(100%-2rem)]",
+      "reason": "相对容器比例尺寸，无刻度等价值"
+    },
+    {
+      "file": "packages/setting-ui/src/components/AISettings.vue",
+      "token": "max-h-[18rem]",
+      "reason": "组件几何高度（画布/列表/控件）"
+    },
+    {
+      "file": "packages/setting-ui/src/components/AISettings.vue",
+      "token": "max-w-[min(28rem,calc(100vw-2rem))]",
+      "reason": "视口宽度约束，随窗口变化，无刻度等价值"
+    },
+    {
+      "file": "packages/setting-ui/src/components/AISettings.vue",
+      "token": "min-h-[34rem]",
+      "reason": "组件几何高度（画布/列表/控件）"
+    },
+    {
+      "file": "packages/setting-ui/src/components/NewSessionDefaultSettings.vue",
+      "token": "max-w-[14rem]",
+      "reason": "内容/浮层容器最大宽度，几何约束"
+    },
+    {
+      "file": "packages/setting-ui/src/views/UserSettingsView.vue",
+      "token": "max-w-[1064px]",
+      "reason": "内容/浮层容器最大宽度，几何约束"
+    },
+    {
+      "file": "packages/setting-ui/src/views/UserSettingsView.vue",
+      "token": "w-[min(20rem,88vw)]",
+      "reason": "视口宽度约束，随窗口变化，无刻度等价值"
+    },
+    {
+      "file": "packages/task-ui/src/components/dialogs/QuickTaskDialog.vue",
+      "token": "max-w-[440px]",
+      "reason": "内容/浮层容器最大宽度，几何约束"
+    },
+    {
+      "file": "packages/task-ui/src/components/TaskPlanForm/sections/ReminderSection.vue",
+      "token": "w-[80px]",
+      "reason": "组件几何宽度（面板/画布/控件）"
+    },
+    {
+      "file": "packages/task-ui/src/components/TaskPlanForm/sections/TimeConfigSection.vue",
+      "token": "w-[80px]",
+      "reason": "组件几何宽度（面板/画布/控件）"
+    },
+    {
+      "file": "packages/task-ui/src/components/TaskPlanForm/TaskPlanForm.vue",
+      "token": "max-h-[70vh]",
+      "reason": "视口高度约束，随窗口变化，无刻度等价值"
+    },
+    {
+      "file": "packages/task-ui/src/components/TaskPlanForm/TaskPlanForm.vue",
+      "token": "max-w-[calc(100vw-2rem)]",
+      "reason": "视口宽度约束，随窗口变化，无刻度等价值"
+    },
+    {
+      "file": "packages/task-ui/src/components/TaskPlanForm/TaskPlanForm.vue",
+      "token": "w-[440px]",
+      "reason": "组件几何宽度（面板/画布/控件）"
+    },
+    {
+      "file": "packages/task-ui/src/components/TaskPlanForm/TaskPlanForm.vue",
+      "token": "w-[460px]",
+      "reason": "组件几何宽度（面板/画布/控件）"
+    },
+    {
+      "file": "packages/task-ui/src/components/TaskPlanForm/TaskPlanForm.vue",
+      "token": "w-[500px]",
+      "reason": "组件几何宽度（面板/画布/控件）"
+    },
+    {
+      "file": "packages/task-ui/src/components/TaskPlanForm/TaskPlanForm.vue",
+      "token": "w-[560px]",
+      "reason": "组件几何宽度（面板/画布/控件）"
+    },
+    {
+      "file": "packages/task-ui/src/views/TaskDetailView.vue",
+      "token": "max-h-[70vh]",
+      "reason": "视口高度约束，随窗口变化，无刻度等价值"
+    },
+    {
+      "file": "packages/task-ui/src/views/TaskDetailView.vue",
+      "token": "max-w-[calc(100vw-2rem)]",
+      "reason": "视口宽度约束，随窗口变化，无刻度等价值"
+    },
+    {
+      "file": "packages/task-ui/src/views/TaskDetailView.vue",
+      "token": "w-[440px]",
+      "reason": "组件几何宽度（面板/画布/控件）"
+    },
+    {
+      "file": "packages/task-ui/src/views/TaskDetailView.vue",
+      "token": "w-[460px]",
+      "reason": "组件几何宽度（面板/画布/控件）"
+    },
+    {
+      "file": "packages/task-ui/src/views/TaskDetailView.vue",
+      "token": "w-[500px]",
+      "reason": "组件几何宽度（面板/画布/控件）"
+    },
+    {
+      "file": "packages/task-ui/src/views/TaskDetailView.vue",
+      "token": "w-[560px]",
+      "reason": "组件几何宽度（面板/画布/控件）"
+    },
+    {
+      "file": "packages/ui-vue-shadcn/src/components/custom/form/TagInput.vue",
+      "token": "min-h-[38px]",
+      "reason": "组件几何高度（画布/列表/控件）"
+    },
+    {
+      "file": "packages/ui-vue-shadcn/src/components/custom/form/TagInput.vue",
+      "token": "min-w-[120px]",
+      "reason": "组件几何宽度（面板/画布/控件）"
+    },
+    {
+      "file": "packages/ui-vue-shadcn/src/components/ui/calendar/Calendar.vue",
+      "token": "h-[34px]",
+      "reason": "组件几何高度（画布/列表/控件）"
+    },
+    {
+      "file": "packages/ui-vue-shadcn/src/components/ui/chart/ChartTooltip.vue",
+      "token": "min-w-[180px]",
+      "reason": "组件几何宽度（面板/画布/控件）"
+    },
+    {
+      "file": "packages/ui-vue-shadcn/src/components/ui/command/CommandList.vue",
+      "token": "max-h-[300px]",
+      "reason": "组件几何高度（画布/列表/控件）"
+    },
+    {
+      "file": "packages/ui-vue-shadcn/src/components/ui/drawer/DrawerContent.vue",
+      "token": "rounded-t-[10px]",
+      "reason": "组件圆角像素值，主题 --radius-* 无等值档"
+    },
+    {
+      "file": "packages/ui-vue-shadcn/src/components/ui/drawer/DrawerContent.vue",
+      "token": "w-[100px]",
+      "reason": "组件几何宽度（面板/画布/控件）"
+    },
+    {
+      "file": "packages/ui-vue-shadcn/src/components/ui/navigation-menu/NavigationMenuIndicator.vue",
+      "token": "top-[60%]",
+      "reason": "覆盖层定位偏移（相对容器百分比）"
+    },
+    {
+      "file": "packages/ui-vue-shadcn/src/components/ui/scroll-area/ScrollArea.vue",
+      "token": "rounded-[inherit]",
+      "reason": "组件圆角像素值，主题 --radius-* 无等值档"
+    },
+    {
+      "file": "packages/ui-vue-shadcn/src/components/ui/sidebar/Sidebar.vue",
+      "token": "left-[calc(var(--sidebar-width)*-1)]",
+      "reason": "侧栏/覆盖层定位偏移，几何定位"
+    },
+    {
+      "file": "packages/ui-vue-shadcn/src/components/ui/sidebar/Sidebar.vue",
+      "token": "right-[calc(var(--sidebar-width)*-1)]",
+      "reason": "侧栏/覆盖层定位偏移，几何定位"
+    },
+    {
+      "file": "packages/ui-vue-shadcn/src/components/ui/sidebar/Sidebar.vue",
+      "token": "w-[calc(var(--sidebar-width-icon)_+_theme(spacing.4)_+2px)]",
+      "reason": "响应式容器尺寸计算式，无刻度等价值"
+    },
+    {
+      "file": "packages/ui-vue-shadcn/src/components/ui/sidebar/Sidebar.vue",
+      "token": "w-[calc(var(--sidebar-width-icon)_+_theme(spacing.4))]",
+      "reason": "响应式容器尺寸计算式，无刻度等价值"
+    },
+    {
+      "file": "packages/ui-vue-shadcn/src/components/ui/sidebar/SidebarInset.vue",
+      "token": "min-h-[calc(100svh-theme(spacing.4))]",
+      "reason": "视口高度约束，随窗口变化，无刻度等价值"
+    },
+    {
+      "file": "packages/ui-vue-shadcn/src/components/ui/textarea/Textarea.vue",
+      "token": "min-h-[60px]",
+      "reason": "组件几何高度（画布/列表/控件）"
+    }
+  ]
 }

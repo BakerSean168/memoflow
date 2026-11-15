@@ -41,7 +41,7 @@ const { t } = useI18n();
     class="rounded-xl border-transparent bg-[hsl(var(--surface-raised)/0.56)] shadow-[inset_0_0_0_1px_hsl(var(--border-subtle)/0.72),inset_0_1px_0_hsl(var(--foreground)/0.02)]"
     data-testid="goal-progress-widget"
   >
-    <CardHeader class="flex flex-row items-center justify-between px-3.5 pb-2 pt-3.5">
+    <CardHeader class="flex flex-row items-center justify-between px-3 pb-2 pt-3">
       <CardTitle class="flex items-center gap-2 text-[13px] font-semibold text-foreground">
         <Target class="h-3.5 w-3.5 text-[hsl(var(--foreground-subtle))]" />
         {{ t('goal.homeProgress.title') }}
@@ -56,7 +56,7 @@ const { t } = useI18n();
         <ArrowRight class="w-3 h-3 ml-1" />
       </Button>
     </CardHeader>
-    <CardContent class="px-3.5 pb-3.5">
+    <CardContent class="px-3 pb-3">
       <template v-if="loading">
         <div class="space-y-4">
           <div v-for="i in 4" :key="i" class="space-y-1.5">

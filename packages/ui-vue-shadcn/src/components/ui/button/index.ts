@@ -19,7 +19,7 @@ export const buttonVariants = cva(
       },
       size: {
         default: 'h-8 px-3 text-xs', // Linear style default: smaller, 32px height
-        sm: 'h-7 px-2.5 text-xs', // 28px
+        sm: 'h-7 px-2 text-xs', // 28px
         xs: 'h-6 px-2 text-[11px]', // 24px, very small
         lg: 'h-9 px-4 text-sm', // 36px
         icon: 'h-8 w-8',

@@ -89,6 +89,15 @@ for (const host of ['web', 'desktop'] as const) {
         expect(await scroll.evaluate((el) => getComputedStyle(el).scrollbarGutter)).toContain(
           'stable',
         );
+        if (surface === 'providers' && width < 1024) {
+          // The settings dialog derives its narrow layout from a ResizeObserver on
+          // its content, so the wide pane opened at 1280px can still be on screen
+          // for a frame after the viewport shrinks. Wait for the narrow layout
+          // before sampling geometry, otherwise "before" captures the wide pane.
+          await expect
+            .poll(async () => (await geometry(scroll)).width, { timeout: 5000 })
+            .toBeGreaterThanOrEqual(width - 4);
+        }
         const chromeBefore = await chrome.boundingBox();
         const before = {
           scroll: await geometry(scroll),

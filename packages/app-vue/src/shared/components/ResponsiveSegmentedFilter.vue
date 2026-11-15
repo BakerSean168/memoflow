@@ -17,7 +17,7 @@
         :key="option.value"
         :value="option.value"
         size="sm"
-        class="h-7 rounded-md px-2.5 text-xs font-normal text-[hsl(var(--foreground-muted))] hover:bg-[hsl(var(--hover))] hover:text-foreground data-[state=on]:bg-[hsl(var(--surface-overlay))] data-[state=on]:text-foreground data-[state=on]:shadow-[inset_0_0_0_1px_hsl(var(--border-subtle)/0.62)]"
+        class="h-7 rounded-md px-2 text-xs font-normal text-[hsl(var(--foreground-muted))] hover:bg-[hsl(var(--hover))] hover:text-foreground data-[state=on]:bg-[hsl(var(--surface-overlay))] data-[state=on]:text-foreground data-[state=on]:shadow-[inset_0_0_0_1px_hsl(var(--border-subtle)/0.62)]"
         :disabled="disabled || option.disabled"
         :role="optionRole"
         :aria-selected="optionRole === 'tab' ? modelValue === option.value : undefined"

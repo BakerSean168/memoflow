@@ -60,7 +60,7 @@ const emit = defineEmits<{
     </div>
 
     <div
-      class="mt-3 flex items-center gap-3 rounded-xl bg-[hsl(var(--surface-raised)/0.28)] px-3 py-2.5 shadow-[inset_0_0_0_1px_hsl(var(--border-subtle)/0.42)]"
+      class="mt-3 flex items-center gap-3 rounded-xl bg-[hsl(var(--surface-raised)/0.28)] px-3 py-2 shadow-[inset_0_0_0_1px_hsl(var(--border-subtle)/0.42)]"
     >
       <Clock3 class="h-4 w-4 shrink-0 text-muted-foreground" />
       <div class="min-w-0 flex-1">

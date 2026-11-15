@@ -200,7 +200,7 @@ function handleTabKeydown(event: KeyboardEvent, tabId: string): void {
               type="button"
               class="flex h-full min-w-0 flex-1 items-center gap-1.5 rounded-t-md pl-2 text-left outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring/70"
               :class="[
-                showTabLabel(tab) ? 'pr-9' : 'justify-center px-0',
+                showTabLabel(tab) ? 'pr-8' : 'justify-center px-0',
                 tabDensity === 'comfortable' ? 'font-medium' : 'font-normal',
               ]"
               :data-business-tab-id="tab.id"

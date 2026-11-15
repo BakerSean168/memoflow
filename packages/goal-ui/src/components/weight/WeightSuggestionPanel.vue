@@ -45,7 +45,7 @@
               <div class="mb-3 min-h-[120px]">
                 <div v-for="(weight, index) in strategy.weights" :key="index" class="mb-2">
                   <div class="mb-1 flex items-center">
-                    <span class="min-w-[40px] text-xs text-muted-foreground">
+                    <span class="min-w-10 text-xs text-muted-foreground">
                       {{ t('goal.weightSuggestion.keyResultIndex', { index: index + 1 }) }}
                     </span>
                     <div

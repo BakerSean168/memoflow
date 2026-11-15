@@ -21,7 +21,7 @@
       <div class="grid grid-cols-12 gap-4">
         <div class="col-span-12">
           <div
-            class="flex items-center justify-between gap-3 rounded-lg bg-[hsl(var(--surface-raised)/0.34)] px-2.5 py-2 shadow-[inset_0_0_0_1px_hsl(var(--border-subtle)/0.42)]"
+            class="flex items-center justify-between gap-3 rounded-lg bg-[hsl(var(--surface-raised)/0.34)] px-2 py-2 shadow-[inset_0_0_0_1px_hsl(var(--border-subtle)/0.42)]"
           >
             <div class="flex min-w-0 items-center gap-2">
               <Bell class="h-4 w-4 shrink-0 text-muted-foreground" />
@@ -48,7 +48,7 @@
               class="mb-3 border-0 bg-[hsl(var(--surface-raised)/0.28)] shadow-[inset_0_0_0_1px_hsl(var(--border-subtle)/0.46)]"
               :data-testid="`task-reminder-trigger-${index}`"
             >
-              <CardContent class="p-3.5">
+              <CardContent class="p-3">
                 <div class="grid grid-cols-12 gap-4">
                   <div class="col-span-12 md:col-span-4">
                     <Label :for="`task-reminder-type-${index}`" class="mb-2 block">{{

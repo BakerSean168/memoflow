@@ -15,7 +15,7 @@
           id="change-amount"
           v-model.number="draft.value"
           type="number"
-          class="h-11 pl-9 pr-16 text-lg font-semibold"
+          class="h-11 pl-8 pr-16 text-lg font-semibold"
           step="any"
           :disabled="disabled"
         />
