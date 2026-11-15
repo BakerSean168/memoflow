@@ -13060,6 +13060,14 @@
       "measurementCollectors": []
     },
     {
+      "path": "tools/quality/__tests__/style-guard.test.mjs",
+      "primarySuite": "governance",
+      "collectors": [
+        "quality:test"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "tools/runtime/host-dev-env.spec.mjs",
       "primarySuite": "governance",
       "collectors": [
@@ -13525,7 +13533,7 @@
       "type": "primary",
       "suite": "governance",
       "runner": "node-test",
-      "fileCount": 3
+      "fileCount": 4
     },
     {
       "id": "test-system-v2:test",
@@ -14813,7 +14821,7 @@
     "boundary-main": 17,
     "e2e": 43,
     "perf": 2,
-    "governance": 91
+    "governance": 92
   },
   "e2eGovernance": {
     "version": 2,
