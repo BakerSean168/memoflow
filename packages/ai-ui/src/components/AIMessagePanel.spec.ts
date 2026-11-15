@@ -3,6 +3,7 @@ installAiUiHost();
 import { describe, expect, it, vi } from 'vitest';
 import { mount } from '@vue/test-utils';
 import { createI18n } from 'vue-i18n';
+import { Select } from '@memoflow/ui-vue-shadcn';
 import AIMessagePanel from './AIMessagePanel.vue';
 import { semanticElevationClass } from '@ai-ui-test-host/shared/constants/semantic-elevation';
 import enAI from '@ai-ui-test-host/locales/en-US/aiAssistant';
@@ -15,6 +16,16 @@ const i18n = createI18n({
     'en-US': {
       aiAssistant: {
         activity: enAI.activity,
+        local: {
+          pending: 'Waiting',
+          sending: 'Sending',
+          answered: 'Answered',
+          expired: 'Expired',
+          answer: 'Send answer',
+          chooseAnswer: 'Choose answer',
+          answerRequired: 'Choose an answer before sending.',
+          cancel: 'Cancel',
+        },
         dialogs: {
           chat: {
             you: 'You',
@@ -35,15 +46,6 @@ const i18n = createI18n({
           emptyDescription: 'Describe',
           context: { todayOverview: 'Today' },
           message: { copy: 'Copy', copied: 'Copied' },
-          local: {
-            pending: 'Waiting',
-            sending: 'Sending',
-            answered: 'Answered',
-            expired: 'Expired',
-            answer: 'Send answer',
-            chooseAnswer: 'Choose answer',
-            cancel: 'Cancel',
-          },
           tools: {
             approvalTitle: 'Tool approval',
             pending: 'Waiting for your decision',
@@ -263,14 +265,56 @@ describe('AIMessagePanel (V2 §6.0 welcome)', () => {
       global: { plugins: [i18n] },
     });
     expect(wrapper.get('[data-testid="ai-ask-user-request"]').text()).toContain('Choose a target');
-    await wrapper.get('select').setValue('Long term');
-    await wrapper.get('[data-testid="ai-ask-user-submit"]').trigger('submit');
+    wrapper.findComponent(Select).vm.$emit('update:modelValue', 'Long term');
+    await wrapper.vm.$nextTick();
+    await wrapper.get('form').trigger('submit');
     expect(wrapper.emitted('ask-user-answer')?.[0]).toMatchObject([
       { toolCallId: 'ask-1' },
       'Long term',
     ]);
     await wrapper.get('[data-testid="ai-ask-user-cancel"]').trigger('click');
     expect(wrapper.emitted('ask-user-cancel')?.[0]).toMatchObject([{ toolCallId: 'ask-1' }]);
+    wrapper.unmount();
+  });
+
+  it('blocks an empty Ask User selection with a visible alert', async () => {
+    const wrapper = mount(AIMessagePanel, {
+      props: {
+        timeline: [
+          {
+            id: 'assistant-ask-empty',
+            role: 'assistant',
+            content: '',
+            status: 'generating',
+            askUserRequests: [
+              {
+                toolCallId: 'ask-empty',
+                runId: 'run-1',
+                conversationId: 'conversation-1',
+                question: 'Choose a target',
+                options: [{ label: 'Near term' }, { label: 'Long term' }],
+                selectionMode: 'single_select',
+                status: 'pending',
+              },
+            ],
+          },
+        ],
+        toolMode: 'chat',
+      },
+      global: { plugins: [i18n] },
+    });
+
+    await wrapper.get('form').trigger('submit');
+    expect(wrapper.emitted('ask-user-answer')).toBeUndefined();
+    expect(wrapper.get('[role="alert"]').text()).toBe('Choose an answer before sending.');
+
+    wrapper.findComponent(Select).vm.$emit('update:modelValue', 'Near term');
+    await wrapper.vm.$nextTick();
+    await wrapper.get('form').trigger('submit');
+    expect(wrapper.emitted('ask-user-answer')?.[0]).toMatchObject([
+      { toolCallId: 'ask-empty' },
+      'Near term',
+    ]);
     wrapper.unmount();
   });
 

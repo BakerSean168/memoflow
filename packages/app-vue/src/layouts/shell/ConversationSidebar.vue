@@ -183,11 +183,11 @@ const stateIcons = {
   done: CircleCheck,
 } as const;
 const stateColors: Record<ConversationAttentionStatus, string> = {
-  failed: 'text-[#F87171]',
-  input: 'text-[#A5B4FC]',
-  approval: 'text-[#FBBF24]',
-  working: 'text-[#7DD3FC]',
-  done: 'text-[#6EE7B7]',
+  failed: 'text-destructive',
+  input: 'text-primary',
+  approval: 'text-warning',
+  working: 'text-info',
+  done: 'text-success',
 };
 function stateOf(id: string): ConversationAttentionStatus | undefined {
   return props.conversationStatuses?.[id];

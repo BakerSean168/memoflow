@@ -5,6 +5,7 @@ import { mount } from '@vue/test-utils';
 import { createI18n } from 'vue-i18n';
 import { describe, expect, it, vi } from 'vitest';
 import { productionLocaleMessages } from '@ai-ui-test-host/locales/production-messages';
+import { Select } from '@memoflow/ui-vue-shadcn';
 import AILocalRequestCard from './AILocalRequestCard.vue';
 import type { ChatNativeRequest } from '../composables/types';
 
@@ -51,6 +52,26 @@ describe('AILocalRequestCard', () => {
       questions: [{ id: 'q', prompt: 'Which branch?', options: ['main'] }],
     });
     expect(question.find('[data-testid="ai-native-permission-kind"]').exists()).toBe(false);
+  });
+
+  it('blocks an empty answer choice with a visible alert and submits a chosen option', async () => {
+    const wrapper = mountCard({
+      type: 'user_input',
+      requestId: 'q2',
+      questions: [{ id: 'q', prompt: 'Which branch?', options: ['main', 'release'] }],
+    });
+
+    await wrapper.get('form').trigger('submit');
+    expect(wrapper.emitted('respond')).toBeUndefined();
+    expect(wrapper.get('[role="alert"]').text()).toBe('请先选择答案再提交。');
+
+    wrapper.findComponent(Select).vm.$emit('update:modelValue', 'release');
+    await wrapper.vm.$nextTick();
+    await wrapper.get('form').trigger('submit');
+    expect(wrapper.emitted('respond')?.[0]).toEqual([
+      { type: 'user_input', answers: [{ questionId: 'q', values: ['release'] }] },
+    ]);
+    wrapper.unmount();
   });
 });
 

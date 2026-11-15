@@ -126,17 +126,21 @@
           class="block space-y-1 text-sm"
         >
           <span>{{ question.prompt }}</span>
-          <select
+          <Select
             v-if="question.options.length"
-            v-model="answers[question.id]"
-            class="block w-full rounded border bg-background p-2"
+            :model-value="answers[question.id] as string"
             :disabled="request.status !== 'pending'"
-            required
+            @update:model-value="setAnswer(question.id, $event)"
           >
-            <option v-for="option in question.options" :key="option" :value="option">
-              {{ option }}
-            </option>
-          </select>
+            <SelectTrigger class="w-full" :aria-label="question.prompt">
+              <SelectValue :placeholder="t('aiAssistant.local.chooseAnswer')" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem v-for="option in question.options" :key="option" :value="option">
+                {{ option }}
+              </SelectItem>
+            </SelectContent>
+          </Select>
           <Input
             v-else
             v-model="answers[question.id]"
@@ -144,6 +148,13 @@
             :maxlength="8000"
             required
           />
+          <span
+            v-if="answerErrors[question.id]"
+            role="alert"
+            class="block text-xs text-destructive"
+          >
+            {{ answerErrors[question.id] }}
+          </span>
         </label>
         <Button type="submit" size="sm" :disabled="request.status !== 'pending'">{{
           t('aiAssistant.local.answer')
@@ -155,7 +166,15 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, onMounted, reactive, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { Button, Input } from '@memoflow/ui-vue-shadcn';
+import {
+  Button,
+  Input,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@memoflow/ui-vue-shadcn';
 import type { LocalAgentRequestResponse } from '@memoflow/ai-contracts';
 import type { ChatNativeRequest } from '../composables/types';
 const props = defineProps<{ request: ChatNativeRequest }>();
@@ -178,8 +197,24 @@ const seconds = computed(() =>
     : 0,
 );
 const answers = reactive<Record<string, string>>({});
+const answerErrors = reactive<Record<string, string>>({});
+
+function setAnswer(questionId: string, value: unknown) {
+  answers[questionId] = typeof value === 'string' ? value : '';
+  if (answers[questionId]!.trim()) delete answerErrors[questionId];
+}
+
 function answer() {
   if (props.request.request.type !== 'user_input') return;
+  const missing = props.request.request.questions.filter(
+    (question) => question.options.length && !(answers[question.id] ?? '').trim(),
+  );
+  if (missing.length) {
+    for (const question of missing) {
+      answerErrors[question.id] = t('aiAssistant.local.answerRequired');
+    }
+    return;
+  }
   emit('respond', {
     type: 'user_input',
     answers: props.request.request.questions.map((q) => ({

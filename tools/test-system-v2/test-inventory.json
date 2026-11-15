@@ -13108,6 +13108,14 @@
       "measurementCollectors": []
     },
     {
+      "path": "tools/test-system-v2/__tests__/native-select-governance.test.mjs",
+      "primarySuite": "governance",
+      "collectors": [
+        "test-system-v2:test"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "tools/test-system-v2/__tests__/oracle.test.mjs",
       "primarySuite": "governance",
       "collectors": [
@@ -13532,7 +13540,7 @@
       "type": "primary",
       "suite": "governance",
       "runner": "node-test",
-      "fileCount": 11
+      "fileCount": 12
     },
     {
       "id": "tools/governance/vitest.config.ts",

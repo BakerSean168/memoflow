@@ -80,7 +80,7 @@ describe('AIConversationSidebar attention icons', () => {
     expect(status.exists()).toBe(true);
     expect(status.attributes('aria-label')).toBe('等待审批');
     expect(status.classes()).toContain('right-2');
-    expect(status.find('svg').classes()).toContain('text-[#FBBF24]');
+    expect(status.find('svg').classes()).toContain('text-warning');
     expect(row.text()).toContain('等待审批');
     expect(wrapper.findAll('[data-testid="ai-sidebar-conversation-status"]')).toHaveLength(1);
     await status.trigger('click');
@@ -96,10 +96,10 @@ describe('AIConversationSidebar attention icons', () => {
   });
 
   it.each([
-    ['failed', '执行失败', 'text-[#F87171]'],
-    ['input', '等待回答', 'text-[#A5B4FC]'],
-    ['working', '正在执行', 'text-[#7DD3FC]'],
-    ['done', '有新结果', 'text-[#6EE7B7]'],
+    ['failed', '执行失败', 'text-destructive'],
+    ['input', '等待回答', 'text-primary'],
+    ['working', '正在执行', 'text-info'],
+    ['done', '有新结果', 'text-success'],
   ] as const)('renders %s with one icon and the correct semantic color', (state, label, color) => {
     const wrapper = mountSidebar({ a: state });
     const status = wrapper.find('[data-testid="ai-sidebar-conversation-status"]');

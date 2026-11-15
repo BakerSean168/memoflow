@@ -157,6 +157,7 @@ export default {
     decline: 'Decline',
     answer: 'Send answer',
     chooseAnswer: 'Choose an answer',
+    answerRequired: 'Choose an answer before sending.',
     incompleteHistory: 'This history is incomplete. Unfinished operations will not be replayed.',
     description:
       'Use a locally installed and configured Codex, Claude Code, Pi, or DeepSeek Harness (DSH). The built-in assistant remains available through your model connections.',
