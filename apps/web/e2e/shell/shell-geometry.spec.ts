@@ -14,7 +14,6 @@ import { expect, test, type Page } from '@playwright/test';
 import {
   AI_HARD_MIN,
   BUSINESS_HARD_MIN,
-  COMPOSER_MAX,
   PANEL_COLLAPSE_THRESHOLD,
   computePanelGeometry,
 } from '../../../../packages/app-vue/src/layouts/shell/panel-geometry';
@@ -197,7 +196,7 @@ test.describe('Electron shell geometry matrix', () => {
     await expect(page.getByTestId('ai-chat-view')).toBeVisible();
   });
 
-  test('[P0] 900x600 module entry uses focus; floating composer <= COMPOSER_MAX', async () => {
+  test('[P0] 900x600 module entry uses focus and leaves no composer behind', async () => {
     const page = desktop.page;
     await desktop.setWindowSize({ width: 900, height: 600 });
     await page.waitForTimeout(300);
@@ -206,19 +205,10 @@ test.describe('Electron shell geometry matrix', () => {
     await expect(page.getByTestId('app-shell')).toHaveAttribute('data-shell-state', 'focus');
     await expect(page.getByTestId('conversation-sidebar')).toHaveCount(0);
 
-    // AI column hidden in focus, but floating GlobalComposer is present.
-    const composer = page.getByTestId('global-composer');
-    await expect(composer).toBeVisible();
-    await expect(composer).toHaveAttribute('data-composer-mode', 'floating');
-
-    const composerBox = await boxOf(page, 'global-composer-mount');
-    expect(composerBox.width).toBeLessThanOrEqual(COMPOSER_MAX + 2);
-
-    const workspace = await boxOf(page, 'shell-workspace-main');
-    // Floating host is centered in workspace main (not full window).
-    const composerCenter = composerBox.x + composerBox.width / 2;
-    const workspaceCenter = workspace.x + workspace.width / 2;
-    expect(Math.abs(composerCenter - workspaceCenter)).toBeLessThanOrEqual(24);
+    // #951: focus owns only the business surface. The AI column stays mounted but
+    // hidden, and neither the shell host nor the footer input exists.
+    await expect(page.getByTestId('global-composer')).toHaveCount(0);
+    await expect(page.getByTestId('ai-footer-composer')).toHaveCount(0);
 
     await saveMatrixShot(page, '900x600-focus-task.png');
 
@@ -237,11 +227,8 @@ test.describe('Electron shell geometry matrix', () => {
     await page.waitForTimeout(300);
     await openModuleFromCapsule(page, 'goal');
     await expect(page.getByTestId('app-shell')).toHaveAttribute('data-shell-state', 'focus');
-    const composer1024 = page.getByTestId('global-composer');
-    await expect(composer1024).toBeVisible();
-    await expect(composer1024).toHaveAttribute('data-composer-mode', 'floating');
-    const composerBox1024 = await boxOf(page, 'global-composer-mount');
-    expect(composerBox1024.width).toBeLessThanOrEqual(COMPOSER_MAX + 2);
+    // #951: entering focus removes the composer host instead of floating it.
+    await expect(page.getByTestId('global-composer')).toHaveCount(0);
     await saveMatrixShot(page, '1024x768-focus-goal.png');
 
     // Return to chat-only then resize wide.

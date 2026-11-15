@@ -9,7 +9,8 @@ import { flushPromises, shallowMount } from '@vue/test-utils';
 import { createPinia } from 'pinia';
 import { createI18n } from 'vue-i18n';
 import { createMemoryHistory, createRouter } from 'vue-router';
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { defineComponent, h, nextTick, ref, type Ref } from 'vue';
+import { afterEach, beforeEach, describe, expect, it, onTestFinished, vi } from 'vitest';
 import { AgentInstanceSchema } from '@memoflow/ai-contracts';
 import type { AIWorkflowRunView, AssistantRuntimeChoice } from '@memoflow/ai-contracts';
 import AIChatView from '../views/AIChatView.vue';
@@ -240,7 +241,41 @@ afterEach(() => {
   window.confirm = initialConfirm;
 });
 
-async function mountView(extraProvide: Record<symbol, unknown> = {}) {
+/**
+ * Issue #951: the shell owns the composer slot. The probe stands in for the real
+ * footer so the view's focus contract (`composerRef.composerTextarea`) is observable.
+ */
+const AIFooterComposerProbe = defineComponent({
+  name: 'AIFooterComposer',
+  props: { modelValue: { type: String, default: '' } },
+  emits: ['update:modelValue', 'send'],
+  setup(_props, { expose }) {
+    const composerTextarea = ref<HTMLTextAreaElement | null>(null);
+    expose({ composerTextarea });
+    return () =>
+      h('textarea', {
+        ref: composerTextarea,
+        'data-testid': 'composer-probe-textarea',
+      });
+  },
+});
+
+interface MountViewOptions {
+  /** Standalone composer preview (shell not hosting the slot). */
+  composerOnly?: boolean;
+  /** Shell-hosted page hides its own conversation sidebar. */
+  hideConversationSidebar?: boolean;
+  /** Shell-owned teleport host; parent mutates it to model layout changes. */
+  composerMount?: Ref<HTMLElement | null>;
+  /** Swap the auto-stub for a probe that exposes a real textarea. */
+  composerProbe?: boolean;
+  attachTo?: Element;
+}
+
+async function mountView(
+  extraProvide: Record<symbol, unknown> = {},
+  options: MountViewOptions = {},
+) {
   const router = createRouter({
     history: createMemoryHistory(),
     routes: [{ path: '/goals/:id', component: { template: '<div />' } }],
@@ -248,9 +283,15 @@ async function mountView(extraProvide: Record<symbol, unknown> = {}) {
   await router.push('/goals/current-goal');
   const pinia = createPinia();
   const wrapper = shallowMount(AIChatView, {
-    props: { composerOnly: true },
+    attachTo: options.attachTo,
+    props: {
+      composerOnly: options.composerOnly ?? true,
+      hideConversationSidebar: options.hideConversationSidebar ?? false,
+    },
     global: {
-      stubs: { teleport: true },
+      stubs: options.composerProbe
+        ? { teleport: true, AIFooterComposer: AIFooterComposerProbe }
+        : { teleport: true },
       plugins: [
         pinia,
         router,
@@ -263,7 +304,7 @@ async function mountView(extraProvide: Record<symbol, unknown> = {}) {
         }),
       ],
       provide: {
-        [SHELL_COMPOSER_MOUNT_KEY as symbol]: { value: null },
+        [SHELL_COMPOSER_MOUNT_KEY as symbol]: options.composerMount ?? { value: null },
         ...extraProvide,
       },
     },
@@ -1348,5 +1389,82 @@ describe('conversation deletion confirmation', () => {
       true,
     );
     expect(nativeConfirm).not.toHaveBeenCalled();
+  });
+});
+
+/**
+ * Issue #951: focus layout only owns the business panel. The shell stops
+ * providing a composer host there, so the conversation page must stop offering
+ * an input whose turns (approval, follow-up, streaming output) have nowhere to
+ * land — and it must hand focus back when the host returns.
+ */
+describe('shell composer host across layouts', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    fixture.confirm.mockReset();
+    fixture.realSession = false;
+    fixture.goal.goalWorkflowRun.value = null;
+    fixture.task.taskWorkflowRun.value = null;
+    fixture.knowledge.knowledgeCaptureRun.value = null;
+    fixture.session.chatConversationId.value = null;
+    fixture.session.chatMessage.value = '';
+    fixture.session.chatLoading.value = false;
+    fixture.session.runtimeChoice.value = { runtimeKind: 'builtin' };
+  });
+
+  async function mountHostedView(initialHost: HTMLElement | null) {
+    const host = document.createElement('div');
+    document.body.appendChild(host);
+    onTestFinished(() => host.remove());
+    const composerMount = ref<HTMLElement | null>(initialHost);
+    const view = await mountView(
+      {},
+      {
+        composerOnly: false,
+        hideConversationSidebar: true,
+        composerMount,
+        composerProbe: true,
+        attachTo: host,
+      },
+    );
+    await flushPromises();
+    return { ...view, composerMount, host };
+  }
+
+  it('renders no composer while the shell provides no host (focus)', async () => {
+    const { wrapper } = await mountHostedView(null);
+
+    expect(wrapper.findComponent({ name: 'AIFooterComposer' }).exists()).toBe(false);
+    // The conversation itself keeps living: only the orphaned input is gone.
+    expect(wrapper.find('[data-testid="ai-chat-view"]').exists()).toBe(true);
+  });
+
+  it('keeps an unsent draft across the layout switch', async () => {
+    const { wrapper, composerMount } = await mountHostedView(null);
+    fixture.session.chatMessage.value = 'draft across layouts';
+    await nextTick();
+    expect(wrapper.findComponent({ name: 'AIFooterComposer' }).exists()).toBe(false);
+
+    composerMount.value = document.createElement('div');
+    await flushPromises();
+
+    const composer = wrapper.findComponent({ name: 'AIFooterComposer' });
+    expect(composer.exists()).toBe(true);
+    expect(composer.props('modelValue')).toBe('draft across layouts');
+    expect(fixture.session.chatMessage.value).toBe('draft across layouts');
+  });
+
+  it('re-renders the composer and focuses it when the shell leaves focus', async () => {
+    const { wrapper, composerMount } = await mountHostedView(null);
+    expect(wrapper.findComponent({ name: 'AIFooterComposer' }).exists()).toBe(false);
+
+    // The shell mounts its host and asks for focus in the same exit-focus step.
+    composerMount.value = document.createElement('div');
+    wrapper.vm.requestComposerFocus();
+    await flushPromises();
+
+    const textarea = wrapper.get('[data-testid="composer-probe-textarea"]')
+      .element as HTMLTextAreaElement;
+    expect(document.activeElement).toBe(textarea);
   });
 });

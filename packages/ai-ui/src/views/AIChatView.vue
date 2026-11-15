@@ -302,7 +302,11 @@
       >
         {{ localAssistant.executionFailureMessage.value }}
       </p>
-      <Teleport :to="shellComposerMount ?? 'body'" :disabled="!shellComposerMount">
+      <Teleport
+        v-if="composerHostAvailable"
+        :to="shellComposerMount ?? 'body'"
+        :disabled="!shellComposerMount"
+      >
         <AIFooterComposer
           ref="composerRef"
           v-model="chatMessage"
@@ -353,7 +357,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, inject, onMounted, onUnmounted, ref, watch } from 'vue';
+import { computed, inject, nextTick, onMounted, onUnmounted, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import { Menu, Plus } from '@lucide/vue';
@@ -378,7 +382,7 @@ const { t } = useI18n();
 const route = useRoute();
 const router = useRouter();
 
-withDefaults(
+const props = withDefaults(
   defineProps<{
     hideConversationSidebar?: boolean;
     composerOnly?: boolean;
@@ -394,11 +398,40 @@ const composerDensity = computed<ComposerDensity>(
   () => shellComposerDensityRef?.value ?? 'comfortable',
 );
 
+/**
+ * Issue #951: 壳层只在普通布局提供 composer 宿主；宿主不存在（专注布局）时
+ * 对话不再渲染输入框——消息流/审批卡/执行状态都留在隐藏的对话页里，单发输入
+ * 只会得到「输出后自动暂停」。独立挂载（composerOnly 或无人注入宿主键）仍
+ * 内联渲染，供预览等场景使用。
+ */
+const composerHostAvailable = computed(
+  () => props.composerOnly || !shellComposerMountRef || Boolean(shellComposerMount.value),
+);
+
 const messagePanelRef = ref<{ viewport?: HTMLElement | null } | null>(null);
 const composerRef = ref<{
   composerTextarea?: HTMLTextAreaElement | null;
 } | null>(null);
 const composerControlsRef = ref<{ openModelPicker: () => void } | null>(null);
+
+/**
+ * Issue #951: 退出专注后输入框重新出现，壳层请求它直接接管焦点。宿主由壳在
+ * 同一帧挂载，因此请求先挂起，等宿主出现后的渲染完成再聚焦。
+ */
+const composerFocusPending = ref(false);
+function requestComposerFocus() {
+  composerFocusPending.value = true;
+}
+watch(
+  [shellComposerMount, composerFocusPending],
+  async ([host, pending]) => {
+    if (!host || !pending) return;
+    composerFocusPending.value = false;
+    await nextTick();
+    composerRef.value?.composerTextarea?.focus();
+  },
+  { flush: 'post' },
+);
 
 const {
   session,
@@ -840,5 +873,6 @@ defineExpose({
   changeArchivePage,
   startNewConversation,
   loadConversationList,
+  requestComposerFocus,
 });
 </script>
