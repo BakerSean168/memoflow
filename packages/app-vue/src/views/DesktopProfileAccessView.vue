@@ -182,14 +182,15 @@ watch(
             />
             {{ t('auth.profileAccess.rememberMe') }}
           </label>
-          <button
+          <Button
             type="button"
-            class="text-xs text-foreground/60 transition-colors hover:text-foreground/90"
+            variant="link"
+            class="h-auto p-0 text-xs font-normal text-foreground/60 hover:text-foreground/90 hover:no-underline"
             data-testid="desktop-profile-forgot-password"
             @click="forgotPassword"
           >
             {{ t('auth.profileAccess.forgotPassword') }}
-          </button>
+          </Button>
         </div>
 
         <Button
@@ -247,35 +248,38 @@ watch(
         {{ t('auth.profileAccess.githubSignIn') }}
       </Button>
 
-      <button
+      <Button
         v-if="importTarget"
         type="button"
-        class="text-xs text-foreground/60 transition-colors hover:text-foreground/90"
+        variant="link"
+        class="h-auto p-0 text-xs font-normal text-foreground/60 hover:text-foreground/90 hover:no-underline"
         data-testid="desktop-profile-import-profile"
         @click="importOpen = true"
       >
         {{ t('shell.profileImport.title') }}
-      </button>
+      </Button>
 
       <div class="flex items-center justify-between text-xs text-foreground/60">
-        <button
+        <Button
           type="button"
-          class="flex items-center gap-1 transition-colors hover:text-foreground/90"
+          variant="link"
+          class="flex h-auto items-center gap-1 p-0 font-normal hover:text-foreground/90 hover:no-underline"
           data-testid="desktop-profile-back-to-select"
           @click="backToSelect"
         >
           <ArrowLeft class="h-3.5 w-3.5" aria-hidden="true" />
           {{ t('auth.profileAccess.backToSelect') }}
-        </button>
-        <button
+        </Button>
+        <Button
           type="button"
-          class="transition-colors hover:text-foreground/90"
+          variant="link"
+          class="h-auto p-0 font-normal hover:text-foreground/90 hover:no-underline"
           data-testid="desktop-profile-go-register"
           @click="enterRegisterState('cloud')"
         >
           {{ t('auth.profileAccess.noAccount') }}
           <span class="text-brand-gold-via">{{ t('auth.profileAccess.registerAction') }}</span>
-        </button>
+        </Button>
       </div>
     </section>
 
@@ -384,24 +388,26 @@ watch(
       </form>
 
       <div class="flex items-center justify-between text-xs text-foreground/60">
-        <button
+        <Button
           type="button"
-          class="flex items-center gap-1 transition-colors hover:text-foreground/90"
+          variant="link"
+          class="flex h-auto items-center gap-1 p-0 font-normal hover:text-foreground/90 hover:no-underline"
           data-testid="desktop-profile-back-to-select"
           @click="backToSelect"
         >
           <ArrowLeft class="h-3.5 w-3.5" aria-hidden="true" />
           {{ t('auth.profileAccess.backToSelect') }}
-        </button>
-        <button
+        </Button>
+        <Button
           type="button"
-          class="transition-colors hover:text-foreground/90"
+          variant="link"
+          class="h-auto p-0 font-normal hover:text-foreground/90 hover:no-underline"
           data-testid="desktop-profile-go-login"
           @click="enterLoginState"
         >
           {{ t('auth.profileAccess.haveAccount') }}
           <span class="text-brand-gold-via">{{ t('auth.profileAccess.signInAction') }}</span>
-        </button>
+        </Button>
       </div>
     </section>
 

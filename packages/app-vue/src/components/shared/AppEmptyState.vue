@@ -62,15 +62,15 @@ defineEmits<{
       </slot>
 
       <slot name="secondary">
-        <button
+        <Button
           v-if="secondaryLabel"
-          type="button"
-          class="text-xs text-muted-foreground underline-offset-4 hover:text-foreground hover:underline"
+          variant="link"
+          class="h-auto p-0 text-xs text-muted-foreground underline-offset-4 hover:text-foreground"
           data-testid="empty-state-secondary"
           @click="$emit('secondary')"
         >
           {{ secondaryLabel }}
-        </button>
+        </Button>
       </slot>
     </template>
   </ProductSurfaceState>

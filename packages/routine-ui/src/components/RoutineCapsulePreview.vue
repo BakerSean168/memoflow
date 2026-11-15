@@ -83,9 +83,10 @@
           </span>
         </button>
 
-        <button
+        <Button
           type="button"
-          class="mt-0.5 flex h-6 shrink-0 items-center gap-1 rounded-md px-1.5 text-[10px] text-[hsl(var(--foreground-subtle))] opacity-0 transition-opacity hover:bg-[hsl(var(--hover))] hover:text-foreground group-hover:opacity-100 focus:opacity-100"
+          variant="ghost"
+          class="mt-0.5 flex h-6 shrink-0 items-center gap-1 px-1.5 text-[10px] text-[hsl(var(--foreground-subtle))] opacity-0 hover:bg-[hsl(var(--hover))] hover:text-foreground group-hover:opacity-100 focus:opacity-100"
           :disabled="mutatingRoutineId === occurrence.routineId"
           :title="t('routine.card.snooze30')"
           @click="snoozeRoutine(occurrence.routineId)"
@@ -93,20 +94,21 @@
           <Loader2 v-if="mutatingRoutineId === occurrence.routineId" class="h-3 w-3 animate-spin" />
           <Clock3 v-else class="h-3 w-3" />
           {{ t('routine.card.snooze30') }}
-        </button>
+        </Button>
       </div>
     </div>
 
     <CapsulePreviewFooter>
-      <button
+      <Button
         type="button"
-        class="flex h-8 items-center gap-1 rounded-md px-2 text-[11px] font-medium text-[hsl(var(--foreground-muted))] transition-colors hover:bg-[hsl(var(--hover))] hover:text-foreground"
+        variant="ghost"
+        class="flex h-8 items-center gap-1 px-2 text-[11px] font-medium text-[hsl(var(--foreground-muted))] hover:bg-[hsl(var(--hover))] hover:text-foreground"
         data-testid="routine-capsule-view-all"
         @click="emit('view-all')"
       >
         {{ t('routine.home.viewAll') }}
         <ArrowRight class="h-3.5 w-3.5" />
-      </button>
+      </Button>
     </CapsulePreviewFooter>
   </CapsulePreviewShell>
 </template>

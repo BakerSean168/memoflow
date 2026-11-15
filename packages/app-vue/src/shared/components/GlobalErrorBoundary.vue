@@ -12,6 +12,7 @@
  */
 import { ref, onErrorCaptured } from 'vue';
 import { useI18n } from 'vue-i18n';
+import { Button } from '@memoflow/ui-vue-shadcn';
 import { createLogger } from '@memoflow/utils/logger';
 
 const { t } = useI18n();
@@ -88,18 +89,17 @@ function handleGoHome() {
 
       <!-- Actions -->
       <div class="flex items-center justify-center gap-3">
-        <button
-          class="inline-flex h-9 items-center justify-center rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground shadow hover:bg-primary/90 transition-colors"
-          @click="handleRetry"
-        >
+        <Button size="lg" class="shadow hover:bg-primary/90" @click="handleRetry">
           {{ t('common.retry') }}
-        </button>
-        <button
-          class="inline-flex h-9 items-center justify-center rounded-md border border-[hsl(var(--border-subtle))] bg-[hsl(var(--surface-raised)/0.42)] px-4 text-sm font-medium text-foreground shadow-none transition-colors hover:bg-[hsl(var(--hover))]"
+        </Button>
+        <Button
+          size="lg"
+          variant="outline"
+          class="border-[hsl(var(--border-subtle))] bg-[hsl(var(--surface-raised)/0.42)] text-foreground shadow-none hover:bg-[hsl(var(--hover))]"
           @click="handleGoHome"
         >
           {{ t('common.goHome') }}
-        </button>
+        </Button>
       </div>
 
       <!-- Error Details (dev only) -->

@@ -15,22 +15,25 @@
       @keyup.enter="emit('submit')"
       @keyup.esc="emit('clear')"
     />
-    <button
+    <Button
       v-if="modelValue"
       type="button"
-      class="absolute right-2 top-1/2 grid h-5 w-5 -translate-y-1/2 place-items-center rounded-sm text-[hsl(var(--foreground-subtle))] transition-colors hover:bg-[hsl(var(--hover))] hover:text-foreground"
+      variant="ghost"
+      size="icon"
+      class="absolute right-2 top-1/2 h-5 w-5 -translate-y-1/2 rounded-sm text-[hsl(var(--foreground-subtle))] hover:bg-[hsl(var(--hover))] hover:text-foreground"
       :aria-label="clearLabel"
       :data-testid="testId ? `${testId}-clear` : undefined"
       @click="emit('clear')"
     >
       <X class="h-3.5 w-3.5" />
-    </button>
+    </Button>
   </div>
 </template>
 
 <script setup lang="ts">
 import { Search, X } from '@lucide/vue';
 import { Input } from '@memoflow/ui-vue-shadcn';
+import { Button } from '@memoflow/ui-vue-shadcn/components/ui/button';
 
 withDefaults(
   defineProps<{

@@ -7,7 +7,9 @@ import type {
   ExternalAgentFailureCode,
 } from '@memoflow/agent-gateway';
 import { Button } from '@memoflow/ui-vue-shadcn/components/ui/button';
+import { Checkbox } from '@memoflow/ui-vue-shadcn/components/ui/checkbox';
 import { Input } from '@memoflow/ui-vue-shadcn/components/ui/input';
+import { Textarea } from '@memoflow/ui-vue-shadcn/components/ui/textarea';
 import { accountUiHost } from '../../account-ui-host';
 
 const injected = inject(accountUiHost.EXTERNAL_AGENT_SERVICE_KEY);
@@ -183,12 +185,8 @@ onMounted(load);
         />
         <fieldset class="flex gap-4 text-sm" :disabled="busy">
           <legend class="mb-2">允许读取</legend>
-          <label class="flex items-center gap-2"
-            ><input v-model="goals" type="checkbox" /> Goals</label
-          >
-          <label class="flex items-center gap-2"
-            ><input v-model="tasks" type="checkbox" /> Tasks</label
-          >
+          <label class="flex items-center gap-2"><Checkbox v-model="goals" /> Goals</label>
+          <label class="flex items-center gap-2"><Checkbox v-model="tasks" /> Tasks</label>
         </fieldset>
         <Button type="submit" :disabled="busy || !name.trim() || (!goals && !tasks)"
           >创建只读 Token</Button
@@ -198,9 +196,9 @@ onMounted(load);
         <label for="external-pat-secret" class="block text-sm font-medium"
           >请立即复制，关闭后无法再次查看</label
         >
-        <textarea
+        <Textarea
           id="external-pat-secret"
-          :value="secret"
+          :model-value="secret"
           readonly
           rows="2"
           class="w-full rounded border bg-muted p-2 font-mono text-sm"

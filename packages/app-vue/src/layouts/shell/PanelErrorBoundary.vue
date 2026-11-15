@@ -8,6 +8,7 @@
  */
 import { onErrorCaptured, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
+import { Button } from '@memoflow/ui-vue-shadcn';
 import { createLogger } from '@memoflow/utils/logger';
 
 const props = withDefaults(
@@ -108,14 +109,14 @@ defineExpose({
           </p>
         </div>
 
-        <button
-          type="button"
+        <Button
+          size="lg"
           data-testid="panel-error-retry"
-          class="inline-flex h-9 items-center justify-center rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground shadow transition-colors hover:bg-primary/90"
+          class="shadow hover:bg-primary/90"
           @click="handleRetry"
         >
           {{ t('common.retry') }}
-        </button>
+        </Button>
 
         <details v-if="error.stack" class="text-left">
           <summary

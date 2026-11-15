@@ -4,6 +4,7 @@ import { useI18n } from 'vue-i18n';
 import { z } from 'zod';
 import {
   Button,
+  Checkbox,
   Dialog,
   Input,
   Select,
@@ -245,9 +246,8 @@ watch(
           }}
         </p>
         <label v-if="canCommit" class="flex items-start gap-2 text-sm">
-          <input
+          <Checkbox
             v-model="deleteSource"
-            type="checkbox"
             :disabled="busy || blockers.length > 0"
             data-testid="profile-import-delete-source"
           />

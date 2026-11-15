@@ -2,6 +2,7 @@
 import { computed } from 'vue';
 import { X } from '@lucide/vue';
 import { useI18n } from 'vue-i18n';
+import { Button } from '@memoflow/ui-vue-shadcn';
 
 /**
  * A non-modal dialog whose containing block is the owning business surface.
@@ -82,16 +83,17 @@ const heightClass = computed(() =>
         </div>
         <div class="flex min-w-0 shrink-0 items-center gap-1">
           <slot name="actions" />
-          <button
-            type="button"
-            class="flex size-8 shrink-0 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-accent hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-50"
+          <Button
+            variant="ghost"
+            size="icon"
+            class="size-8 shrink-0 text-muted-foreground hover:bg-accent hover:text-foreground"
             :aria-label="t('common.close')"
             :disabled="closeDisabled"
             :data-testid="closeTestId"
             @click="emit('close')"
           >
             <X class="size-4" aria-hidden="true" />
-          </button>
+          </Button>
         </div>
       </header>
       <div v-if="$slots.status" class="shrink-0 px-4 pt-3 @2xl/panel:px-5">

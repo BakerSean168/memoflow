@@ -8,7 +8,7 @@
 import { computed, onMounted, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { ArrowRight, FileText, Link2, Search } from '@lucide/vue';
-import { Input } from '@memoflow/ui-vue-shadcn';
+import { Button, Input } from '@memoflow/ui-vue-shadcn';
 import { useRecentKnowledgeNotes } from '@memoflow/repository-ui';
 import {
   CapsulePreviewFooter,
@@ -124,14 +124,15 @@ onMounted(() => {
 
     <CapsulePreviewState v-else-if="localError" kind="error" data-testid="note-capsule-error">
       <p class="max-w-64 text-[11px] leading-4 text-muted-foreground">{{ localError }}</p>
-      <button
+      <Button
         type="button"
-        class="text-[11px] font-medium text-primary"
+        variant="link"
+        class="h-auto p-0 text-[11px] font-medium text-primary"
         data-testid="note-capsule-retry"
         @click="load(true)"
       >
         {{ t('common.retry') }}
-      </button>
+      </Button>
     </CapsulePreviewState>
 
     <CapsulePreviewState
@@ -179,15 +180,16 @@ onMounted(() => {
     </ul>
 
     <CapsulePreviewFooter>
-      <button
+      <Button
         type="button"
-        class="flex h-8 items-center gap-1 rounded-md px-2 text-[11px] font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
+        variant="ghost"
+        class="flex h-8 items-center gap-1 px-2 text-[11px] font-medium text-muted-foreground hover:bg-accent hover:text-foreground"
         data-testid="note-capsule-view-all"
         @click="$emit('view-all')"
       >
         {{ t('shell.noteWorkspace.viewAll') }}
         <ArrowRight class="h-3.5 w-3.5" />
-      </button>
+      </Button>
     </CapsulePreviewFooter>
   </CapsulePreviewShell>
 </template>

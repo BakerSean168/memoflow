@@ -3,6 +3,7 @@ import { computed, inject, onMounted, ref } from 'vue';
 import { ChevronDown, LockKeyhole, RefreshCw } from '@lucide/vue';
 import { useI18n } from 'vue-i18n';
 import { Button } from '@memoflow/ui-vue-shadcn';
+import { Input } from '@memoflow/ui-vue-shadcn/components/ui/input';
 import {
   DEFAULT_BULK_THRESHOLD,
   type PermissionEffect,
@@ -279,13 +280,13 @@ onMounted(() => {
         </p>
         <label class="flex flex-wrap items-center gap-2 text-xs">
           <span>{{ t('setting.permissions.highRisk.bulkThreshold') }}</span>
-          <input
+          <Input
             type="number"
             min="1"
             max="1000"
             step="1"
-            class="h-8 w-24 rounded-md border border-border/70 bg-background px-2 text-xs outline-none focus-visible:ring-2 focus-visible:ring-primary disabled:opacity-45"
-            :value="bulkThreshold"
+            class="h-8 w-24 rounded-md border-border/70 px-2 text-xs"
+            :model-value="bulkThreshold"
             :disabled="busy"
             data-testid="ai-permission-bulk-threshold"
             @change="saveBulkThreshold($event)"
