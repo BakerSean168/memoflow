@@ -144,7 +144,7 @@
                   >
                     <span>{{ t('aiAssistant.local.chooseAnswer') }}</span>
                     <Select
-                      :model-value="askUserAnswers[request.toolCallId] as string | undefined"
+                      :model-value="askUserAnswers[request.toolCallId] as string"
                       :disabled="request.status !== 'pending'"
                       @update:model-value="setAskUserAnswer(request.toolCallId, $event)"
                     >

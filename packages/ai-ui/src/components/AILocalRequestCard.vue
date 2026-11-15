@@ -128,7 +128,7 @@
           <span>{{ question.prompt }}</span>
           <Select
             v-if="question.options.length"
-            :model-value="answers[question.id] as string | undefined"
+            :model-value="answers[question.id] as string"
             :disabled="request.status !== 'pending'"
             @update:model-value="setAnswer(question.id, $event)"
           >
