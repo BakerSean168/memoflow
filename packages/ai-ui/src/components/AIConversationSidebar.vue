@@ -453,11 +453,11 @@ const attentionIcon = {
   done: CircleCheck,
 } satisfies Record<ConversationAttentionStatus, Component>;
 const attentionColor = {
-  failed: 'text-[#F87171]',
-  input: 'text-[#A5B4FC]',
-  approval: 'text-[#FBBF24]',
-  working: 'text-[#7DD3FC]',
-  done: 'text-[#6EE7B7]',
+  failed: 'text-destructive',
+  input: 'text-primary',
+  approval: 'text-warning',
+  working: 'text-info',
+  done: 'text-success',
 } satisfies Record<ConversationAttentionStatus, string>;
 
 // 折叠段默认收起（回溯/快捷入口非日常路径，§1-5）

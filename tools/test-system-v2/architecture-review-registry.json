@@ -2811,7 +2811,7 @@
         "status": "none-verified",
         "testFiles": []
       },
-      "sourceSha256": "2f16c4256068650646e00203bd0fb760e6543c696ed7fce8f140c9eb707768a8"
+      "sourceSha256": "6ffb41aba3aa89ea63046bd29c90892cfb81b90fa659348294117d312cae58fd"
     },
     {
       "path": "packages/app-vue/src/layouts/shell/ConversationSidebar.spec.ts",
