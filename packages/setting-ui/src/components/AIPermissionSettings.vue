@@ -2,7 +2,14 @@
 import { computed, inject, onMounted, ref } from 'vue';
 import { ChevronDown, LockKeyhole, RefreshCw } from '@lucide/vue';
 import { useI18n } from 'vue-i18n';
-import { Button } from '@memoflow/ui-vue-shadcn';
+import {
+  Button,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@memoflow/ui-vue-shadcn';
 import {
   DEFAULT_BULK_THRESHOLD,
   type PermissionEffect,
@@ -115,8 +122,11 @@ async function saveBulkThreshold(event: Event) {
 }
 
 /** Keep persisted CRUD contracts; present the common read/write group to users. */
-async function changeAccess(object: PermissionObject, access: AccessKind, event: Event) {
-  const effect = (event.target as HTMLSelectElement).value as PermissionEffect;
+async function changeAccess(
+  object: PermissionObject,
+  access: AccessKind,
+  effect: PermissionEffect,
+) {
   const matrix = Object.fromEntries(
     objects.map((entry) => {
       const original = settings.value?.customMatrix?.[entry];
@@ -136,6 +146,10 @@ async function changeAccess(object: PermissionObject, access: AccessKind, event:
   if (access === 'read') matrix[object]!.read = effect;
   else for (const action of writeActions) matrix[object]![action] = effect;
   await save({ preset: 'custom', customMatrix: matrix });
+}
+
+function selectAccess(object: PermissionObject, access: AccessKind, value: unknown) {
+  if (typeof value === 'string') void changeAccess(object, access, value as PermissionEffect);
 }
 
 onMounted(() => {
@@ -247,21 +261,34 @@ onMounted(() => {
                   {{ t(`setting.permissions.objects.${object}`) }}
                 </th>
                 <td v-for="access in ['read', 'write'] as const" :key="access" class="py-1.5 pr-2">
-                  <select
-                    class="h-8 w-full min-w-24 rounded-md border border-border/70 bg-background px-2 text-xs outline-none focus-visible:ring-2 focus-visible:ring-primary disabled:opacity-45"
+                  <Select
+                    :model-value="cell(object, access)"
                     :disabled="busy"
-                    :value="cell(object, access)"
-                    :aria-label="`${t(`setting.permissions.objects.${object}`)} ${access === 'write' ? t('setting.permissions.write') : t('setting.permissions.actions.read')}`"
-                    :data-testid="`ai-permission-cell-${object}-${access}`"
-                    @change="changeAccess(object, access, $event)"
+                    @update:model-value="selectAccess(object, access, $event)"
                   >
-                    <option v-if="cell(object, access) === 'mixed'" value="mixed" disabled>
-                      {{ t('setting.permissions.legacyMixed') }}
-                    </option>
-                    <option v-for="effect in effects" :key="effect" :value="effect">
-                      {{ effectLabel(effect) }}
-                    </option>
-                  </select>
+                    <SelectTrigger
+                      size="sm"
+                      class="min-w-24"
+                      :aria-label="`${t(`setting.permissions.objects.${object}`)} ${access === 'write' ? t('setting.permissions.write') : t('setting.permissions.actions.read')}`"
+                      :data-testid="`ai-permission-cell-${object}-${access}`"
+                    >
+                      <SelectValue
+                        :placeholder="
+                          cell(object, access) === 'mixed'
+                            ? t('setting.permissions.legacyMixed')
+                            : undefined
+                        "
+                      />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem v-if="cell(object, access) === 'mixed'" value="mixed" disabled>
+                        {{ t('setting.permissions.legacyMixed') }}
+                      </SelectItem>
+                      <SelectItem v-for="effect in effects" :key="effect" :value="effect">
+                        {{ effectLabel(effect) }}
+                      </SelectItem>
+                    </SelectContent>
+                  </Select>
                 </td>
               </tr>
             </tbody>
