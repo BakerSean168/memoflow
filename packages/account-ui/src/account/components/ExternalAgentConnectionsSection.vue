@@ -182,8 +182,12 @@ onMounted(load);
         />
         <fieldset class="flex gap-4 text-sm" :disabled="busy">
           <legend class="mb-2">允许读取</legend>
-          <label class="flex items-center gap-2"><Checkbox v-model="goals" /> Goals</label>
-          <label class="flex items-center gap-2"><Checkbox v-model="tasks" /> Tasks</label>
+          <label class="flex items-center gap-2"
+            ><Checkbox v-model="goals" aria-label="Goals" /> Goals</label
+          >
+          <label class="flex items-center gap-2"
+            ><Checkbox v-model="tasks" aria-label="Tasks" /> Tasks</label
+          >
         </fieldset>
         <Button type="submit" :disabled="busy || !name.trim() || (!goals && !tasks)"
           >创建只读 Token</Button

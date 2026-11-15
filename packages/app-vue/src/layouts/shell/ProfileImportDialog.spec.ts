@@ -110,10 +110,9 @@ it('keeps source deletion off by default and recovers the same request while loc
   const { wrapper, invoke, click } = fixture();
   await flushPromises();
   await click('Preview import');
-  expect(
-    (wrapper.get('[data-testid="profile-import-delete-source"]').element as HTMLInputElement)
-      .checked,
-  ).toBe(false);
+  const deleteSource = wrapper.get('[data-testid="profile-import-delete-source"]');
+  expect(deleteSource.attributes('aria-checked')).toBe('false');
+  expect(deleteSource.attributes('data-state')).toBe('unchecked');
   await click('Confirm copy');
   const commit = invoke.mock.calls.find(([channel]) => channel === Channels.COMMIT)!;
   expect(commit[1]).toMatchObject({ deleteSource: false, targetProfileId: target.profileId });
@@ -131,9 +130,8 @@ it('explains incomplete coverage and disables source deletion', async () => {
   await flushPromises();
   await click('Preview import');
   expect(
-    (wrapper.get('[data-testid="profile-import-delete-source"]').element as HTMLInputElement)
-      .disabled,
-  ).toBe(true);
+    wrapper.get('[data-testid="profile-import-delete-source"]').attributes('data-disabled'),
+  ).toBeDefined();
   expect(wrapper.get('[data-testid="profile-import-blockers"]').text()).toContain(
     'source Profile will be kept',
   );
@@ -181,7 +179,10 @@ it('shows the durable recovery state immediately when target changes invalidate 
   const { wrapper, click } = fixture(false, [source, target], true);
   await flushPromises();
   await click('Preview import');
-  await wrapper.get('[data-testid="profile-import-delete-source"]').setValue(true);
+  const deleteSource = wrapper.get('[data-testid="profile-import-delete-source"]');
+  await deleteSource.trigger('click');
+  await flushPromises();
+  expect(deleteSource.attributes('aria-checked')).toBe('true');
   await click('Confirm copy');
   expect(wrapper.text()).toContain('Snapshot saved; preflight pending');
   expect(wrapper.text()).toContain('Run preflight again');

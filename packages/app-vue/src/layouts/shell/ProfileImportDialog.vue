@@ -249,6 +249,7 @@ watch(
           <Checkbox
             v-model="deleteSource"
             :disabled="busy || blockers.length > 0"
+            :aria-label="t('shell.profileImport.deleteSource')"
             data-testid="profile-import-delete-source"
           />
           <span>{{ t('shell.profileImport.deleteSource') }}</span>

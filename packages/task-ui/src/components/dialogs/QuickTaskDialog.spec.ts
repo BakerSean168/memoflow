@@ -1,5 +1,6 @@
 import { defineComponent, h } from 'vue';
 import { mount } from '@vue/test-utils';
+import { fireEvent, within } from '@testing-library/vue';
 import { createI18n } from 'vue-i18n';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 const confirmMock = vi.hoisted(() => vi.fn(async () => true));
@@ -160,7 +161,9 @@ describe('QuickTaskDialog', () => {
   it('confirms before discarding a dirty draft and then clears it', async () => {
     const wrapper = mountDialog();
     await wrapper.get('input').setValue('Unsaved');
-    await wrapper.get('button[type="button"]').trigger('click');
+    await fireEvent.click(
+      within(wrapper.element as HTMLElement).getByRole('button', { name: 'Close' }),
+    );
     await Promise.resolve();
 
     expect(confirmMock).toHaveBeenCalledOnce();
@@ -174,7 +177,9 @@ describe('QuickTaskDialog', () => {
     confirmMock.mockResolvedValueOnce(false);
     const wrapper = mountDialog();
     await wrapper.get('input').setValue('Keep me');
-    await wrapper.get('button[type="button"]').trigger('click');
+    await fireEvent.click(
+      within(wrapper.element as HTMLElement).getByRole('button', { name: 'Close' }),
+    );
     await Promise.resolve();
 
     expect(confirmMock).toHaveBeenCalledOnce();
