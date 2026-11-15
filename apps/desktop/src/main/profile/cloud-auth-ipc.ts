@@ -23,6 +23,29 @@ function authOrigin(): string {
   return new URL(getApiBaseUrl()).origin;
 }
 
+/**
+ * Read the cloud failure fields without assuming a JSON body exists.
+ *
+ * The account-security endpoints are proxied through a deployment that can
+ * answer with an empty or non-JSON body. Parsing must never surface the
+ * parser's own message (e.g. "Unexpected end of JSON input") to the renderer.
+ */
+function failureField(payload: unknown, key: 'code' | 'message'): string | undefined {
+  if (!payload || typeof payload !== 'object') return undefined;
+  const value = (payload as Record<string, unknown>)[key];
+  return typeof value === 'string' && value.trim() ? value : undefined;
+}
+
+async function readPayload(response: Response): Promise<unknown> {
+  const text = await response.text();
+  if (!text.trim()) return null;
+  try {
+    return JSON.parse(text) as unknown;
+  } catch {
+    return null;
+  }
+}
+
 export function registerCloudAuthIpc(
   _registry: ProfileRegistry,
   runtime: DesktopProfileRuntimeManager,
@@ -51,12 +74,14 @@ export function registerCloudAuthIpc(
         body: action === 'sessions' ? undefined : JSON.stringify(body),
         signal: AbortSignal.timeout(15_000),
       });
-      const payload = (await response.json()) as { code?: string; message?: string };
+      const payload = await readPayload(response);
       if (!response.ok)
         throw new ResultErrorException(
-          payload.message ?? '账户安全操作失败',
-          payload.code ?? 'ACCOUNT_SECURITY_FAILED',
+          failureField(payload, 'message') ?? '账户安全操作失败',
+          failureField(payload, 'code') ?? 'ACCOUNT_SECURITY_FAILED',
         );
+      if (payload === null)
+        throw new ResultErrorException('服务返回异常，请稍后重试', 'ACCOUNT_SECURITY_FAILED');
       return payload;
     }
     try {

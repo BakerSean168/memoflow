@@ -33,6 +33,7 @@ const deleteOpen = ref(false);
 const deletePassword = ref('');
 const confirmation = ref('');
 const sessions = ref<AccountSecuritySession[]>([]);
+const sessionsLoaded = ref(false);
 const busy = ref(false);
 const error = ref('');
 
@@ -50,8 +51,14 @@ async function run(operation: () => Promise<void>) {
 async function loadSessions() {
   if (!service) return;
   const result = await service.listAccountSessions();
-  if (!result.ok) throw new Error(result.error.message);
+  if (!result.ok) {
+    // Only a successful load may render the list or a zero-session state; a
+    // failed refresh must leave just the error and the retry action.
+    sessionsLoaded.value = false;
+    throw new Error(result.error.message);
+  }
   sessions.value = result.data;
+  sessionsLoaded.value = true;
 }
 async function submitEmail() {
   if (!service) return;
@@ -130,8 +137,14 @@ onMounted(() => {
         <Button variant="outline" :disabled="busy" @click="run(loadSessions)">{{
           t('common.refresh')
         }}</Button>
-        <p v-if="!sessions.length && !busy">{{ t('account.security.noSessions') }}</p>
-        <ul class="space-y-3" data-testid="account-sessions">
+        <p v-if="sessionsLoaded && !sessions.length" data-testid="account-sessions-empty">
+          {{ t('account.security.noSessions') }}
+        </p>
+        <ul
+          v-if="sessionsLoaded && sessions.length"
+          class="space-y-3"
+          data-testid="account-sessions"
+        >
           <li
             v-for="session in sessions"
             :key="session.id"

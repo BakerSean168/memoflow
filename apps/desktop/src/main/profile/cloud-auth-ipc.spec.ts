@@ -24,6 +24,7 @@ function registerFixture() {
     runExclusive: <T>(fn: () => Promise<T>) => fn(),
     getActiveProfileDescriptorSync: vi.fn(() => ({
       profileId: 'profile-1',
+      profileKind: 'registered',
       cloudBinding: { cloudAccountId: 'account-1' },
     })),
     signOutActiveProfile: vi.fn(
@@ -142,6 +143,24 @@ describe('registerCloudAuthIpc', () => {
     expect(runtime.signOutActiveProfile).toHaveBeenCalledOnce();
     expect(sessions.remove).not.toHaveBeenCalled();
     expect(cloudConnection.cancelForProfile).not.toHaveBeenCalled();
+  });
+
+  it.each([
+    ['an empty success body', () => new Response(null, { status: 200 })],
+    ['a non-JSON success body', () => new Response('upstream unavailable', { status: 200 })],
+    ['an empty error body', () => new Response(null, { status: 502 })],
+  ])('returns a coded failure without parser text for %s', async (_label, response) => {
+    const { handlers, sessions } = registerFixture();
+    sessions.load.mockResolvedValue({ token: 'test-only-token' });
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue(response()));
+
+    const result = (await handlers.get(CloudAuthChannels.ACCOUNT_SECURITY)!({}, {
+      action: 'sessions',
+    } as never)) as { ok: boolean; error: { code: string; message: string } };
+
+    expect(result).toMatchObject({ ok: false, error: { code: 'ACCOUNT_SECURITY_FAILED' } });
+    expect(result.error.message).toMatch(/服务返回异常|账户安全操作失败/);
+    expect(result.error.message).not.toMatch(/JSON|Unexpected|SyntaxError/i);
   });
 
   it('deletes remotely before the unified local sign-out and cancels pending authentication', async () => {

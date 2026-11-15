@@ -12,26 +12,26 @@ vi.mock('../composables/useAccountSignOut', () => ({
 afterEach(() => {
   document.body.innerHTML = '';
 });
-function fixture() {
+function fixture(
+  sessionsResult: unknown = ok([
+    {
+      id: 'current',
+      current: true,
+      userAgent: 'This device',
+      createdAt: new Date().toISOString(),
+    },
+    {
+      id: 'other',
+      current: false,
+      userAgent: 'Other device',
+      createdAt: new Date().toISOString(),
+    },
+  ]),
+) {
   const service = {
     verifyAccountPassword: vi.fn().mockResolvedValue(ok(undefined)),
     requestEmailChange: vi.fn().mockResolvedValue(ok(undefined)),
-    listAccountSessions: vi.fn().mockResolvedValue(
-      ok([
-        {
-          id: 'current',
-          current: true,
-          userAgent: 'This device',
-          createdAt: new Date().toISOString(),
-        },
-        {
-          id: 'other',
-          current: false,
-          userAgent: 'Other device',
-          createdAt: new Date().toISOString(),
-        },
-      ]),
-    ),
+    listAccountSessions: vi.fn().mockResolvedValue(sessionsResult),
     revokeAccountSession: vi.fn().mockResolvedValue(ok(undefined)),
     deleteAccountPermanently: vi.fn().mockResolvedValue(ok(undefined)),
   };
@@ -123,6 +123,27 @@ describe('CloudAccountSecuritySection', () => {
     });
     expect(nativeConfirm).not.toHaveBeenCalled();
     vi.unstubAllGlobals();
+    wrapper.unmount();
+  });
+  it('shows the error and refresh without the empty state when sessions fail to load', async () => {
+    const { wrapper } = fixture(
+      fail({ code: 'ACCOUNT_SECURITY_FAILED', message: '服务返回异常，请稍后重试' }),
+    );
+    await flushPromises();
+    expect(wrapper.get('[role="alert"]').text()).toContain('服务返回异常，请稍后重试');
+    expect(document.querySelector('[data-testid="account-sessions-empty"]')).toBeNull();
+    expect(document.querySelector('[data-testid="account-sessions"]')).toBeNull();
+    expect(wrapper.text()).not.toContain('No sessions.');
+    expect(wrapper.text()).toContain('Refresh');
+    wrapper.unmount();
+  });
+  it('shows the empty state without an error when a successful load returns no sessions', async () => {
+    const { wrapper } = fixture(ok([]));
+    await flushPromises();
+    expect(document.querySelector('[data-testid="account-sessions-empty"]')).not.toBeNull();
+    expect(wrapper.text()).toContain('No sessions.');
+    expect(wrapper.find('[role="alert"]').exists()).toBe(false);
+    expect(document.querySelector('[data-testid="account-sessions"]')).toBeNull();
     wrapper.unmount();
   });
 });
