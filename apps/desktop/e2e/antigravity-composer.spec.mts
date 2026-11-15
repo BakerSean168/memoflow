@@ -118,9 +118,33 @@ test('Windows AGY Composer selects, sends, persists and restores its native conn
     // #951: a restored window narrower than the split threshold opens in focus,
     // which intentionally renders no composer host. Leave focus the way a user
     // would before asserting the updated app can still chat.
+    //
+    // The reload hydrates the persisted layout preference first and only then
+    // applies the viewport constraint, so a single read can catch an unsettled
+    // state. Sample until two reads a poll interval apart agree.
     const shell = page.getByTestId('app-shell');
-    if ((await shell.getAttribute('data-shell-state')) === 'focus') {
-      await page.getByTestId('business-panel-focus-toggle').click();
+    const readShellState = async () => (await shell.getAttribute('data-shell-state')) ?? 'unknown';
+    let shellState = await readShellState();
+    await expect
+      .poll(
+        async () => {
+          const next = await readShellState();
+          const settled = next === shellState;
+          shellState = next;
+          return settled;
+        },
+        { timeout: 15_000, intervals: [500] },
+      )
+      .toBe(true);
+    expect(shellState).toMatch(/^(chat|split|focus)$/);
+    if (shellState === 'focus') {
+      // #962: viewport-derived focus cannot return to split at this width. The
+      // business panel toggle writes layout=split with reason 'user', and the
+      // geometry pass immediately re-forces focus (AppShell.handleToggleWorkspaceFocus
+      // -> useShellPanelResize.onViewportGeometryChange), so that click is a no-op.
+      // The user-visible exit is the window-header right-panel toggle, which
+      // closes the panel and lands in the chat state (#951).
+      await page.getByTestId('shell-right-panel-toggle').click();
     }
     await expect(shell).toHaveAttribute('data-shell-state', /^(split|chat)$/);
     await expect(page.getByTestId('ai-chat-composer')).toBeVisible();
