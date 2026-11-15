@@ -108,10 +108,12 @@ test.describe('Local Docker core product Phase C', () => {
     await expect(page.getByTestId('conversation-sidebar')).toBeVisible();
     await expect(page.getByTestId('shell-ai-column')).toBeHidden();
     await expect(page.getByTestId('shell-ai-column')).toHaveCount(1);
-    await expect(page.getByTestId('global-composer')).toBeVisible();
+    // #951: focus has no bottom composer; chat returns with the normal layout.
+    await expect(page.getByTestId('global-composer')).toHaveCount(0);
     await page.getByTestId('business-panel-focus-toggle').click();
     await expect(page.getByTestId('app-shell')).toHaveAttribute('data-shell-state', 'split');
     await expect(page.getByTestId('shell-ai-column')).toBeVisible();
+    await expect(page.getByTestId('global-composer')).toBeVisible();
 
     await page.getByTestId('business-panel-tab-close').click();
     await page.waitForURL(/\/$/, { timeout: TIMEOUT_CONFIG.NAVIGATION });

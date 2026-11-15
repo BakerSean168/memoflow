@@ -141,7 +141,6 @@ for (const host of ['web', 'desktop'] as const) {
   for (const theme of ['light', 'dark'] as const) {
     for (const [scene, width] of [
       ['shell-split', 1280],
-      ['shell-focus', 1280],
       ['shell-split', 440],
     ] as const) {
       test(`#483 ${host} bordered composer ${scene} ${width}px ${theme}`, async ({

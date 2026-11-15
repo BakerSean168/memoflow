@@ -74,7 +74,6 @@ import { UserSettingsView } from '@memoflow/setting-ui';
 import { useDesktopProfiles } from '../../shared/composables/useDesktopProfiles';
 import { z } from 'zod';
 import {
-  COMPOSER_BOTTOM_GAP,
   BUSINESS_HARD_MIN,
   SIDEBAR_HARD_MIN,
   resolveComposerDensity,
@@ -198,9 +197,10 @@ provide(ConversationSelectionKey, createConversationSelectionStore());
 const aiRef = ref<InstanceType<typeof AIChatView> | null>(null);
 
 // ── Global Composer host (§8)：壳拥有布局，AIChatView Teleport 真实输入 ──
+// 宿主只在普通布局存在；专注布局撤掉宿主，对话页随之不再提供输入框
+// （Issue #951：全屏只剩业务面板，不再有无法承接回合的半成品入口）。
 const shellComposerMount = shallowRef<HTMLElement | null>(null);
 const shellComposerDensity = ref<ComposerDensity>('comfortable');
-const composerHeight = ref(0);
 const workspaceMainRef = ref<HTMLElement | null>(null);
 const aiColumnRef = ref<HTMLElement | null>(null);
 const workspaceMainWidth = ref(0);
@@ -208,26 +208,13 @@ const aiColumnWidth = ref(0);
 provide(SHELL_COMPOSER_MOUNT_KEY, shellComposerMount);
 provide(SHELL_COMPOSER_DENSITY_KEY, shellComposerDensity);
 
-const composerMode = computed(() => (shellState.value === 'focus' ? 'floating' : 'inline'));
-const composerHostWidth = computed(() =>
-  composerMode.value === 'floating' ? workspaceMainWidth.value : aiColumnWidth.value,
-);
-const focusComposerPad = computed(() => {
-  if (shellState.value !== 'focus') return 0;
-  return Math.max(composerHeight.value, 56) + COMPOSER_BOTTOM_GAP;
-});
-
-function onComposerHeightChange(height: number) {
-  composerHeight.value = height;
-}
-
 function measureComposerHosts() {
   if (typeof window === 'undefined') return;
   workspaceMainWidth.value = workspaceMainRef.value?.clientWidth ?? 0;
   aiColumnWidth.value = aiColumnRef.value?.clientWidth ?? 0;
   shellComposerDensity.value = resolveComposerDensity(
-    composerHostWidth.value || workspaceMainWidth.value,
-    composerMode.value,
+    aiColumnWidth.value || workspaceMainWidth.value,
+    'inline',
   );
 }
 
@@ -506,6 +493,15 @@ watch([showDockedSidebar, sidebarWidth, sidebarCollapsed, shellState, panelWidth
 
 watch([workspaceMainRef, aiColumnRef], () => {
   bindHostResizeObserver();
+});
+
+/**
+ * 退出专注模式即回到普通布局：壳此时才重新提供宿主，这里请对话页在输入框
+ * 落地后接管焦点，用户不必再点一下（Issue #951）。
+ */
+watch(layout, (next, previous) => {
+  if (previous !== 'focus' || next === 'focus') return;
+  aiRef.value?.requestComposerFocus();
 });
 
 watch([showDockedSidebar, sidebarWidth, sidebarCollapsed], () => {
@@ -991,14 +987,15 @@ onBeforeUnmount(() => {
       </Transition>
 
       <!-- 中央区：AI 常驻层 + 业务面板 + GlobalComposer 宿主。
-           三态只换 flex / 显隐，AI 实例永不卸载（流式不中断）。 -->
+           三态只换 flex / 显隐，AI 实例永不卸载（流式不中断）；专注布局不渲染
+           composer 宿主（Issue #951）。 -->
       <div
         ref="workspaceMainRef"
         data-testid="shell-workspace-main"
         class="workspace-content-well relative flex min-h-0 min-w-0 flex-1 overflow-hidden"
         :class="shellState === 'focus' ? 'flex-col' : 'flex-row'"
       >
-        <!-- AI 工作区（A/B 满列；C 隐藏列但实例保活，Composer 改浮动宿主） -->
+        <!-- AI 工作区（A/B 满列；C 隐藏列但实例保活） -->
         <div
           v-show="shellState !== 'focus'"
           ref="aiColumnRef"
@@ -1006,12 +1003,7 @@ onBeforeUnmount(() => {
           class="workspace-primary-surface order-1 flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden"
         >
           <AIChatView ref="aiRef" class="min-h-0 w-full flex-1" hide-conversation-sidebar />
-          <GlobalComposer
-            v-if="shellState !== 'focus'"
-            mode="inline"
-            :host-width="aiColumnWidth"
-            @height-change="onComposerHeightChange"
-          />
+          <GlobalComposer v-if="shellState !== 'focus'" />
         </div>
 
         <!-- 右侧面板 DOM 常驻；Toggle 只显隐，Tab、草稿和工作流上下文继续保活。 -->
@@ -1028,12 +1020,11 @@ onBeforeUnmount(() => {
                   isPanelResizing ? 'transition-none' : '',
                 ]
           "
-          :style="{
-            ...(shellState === 'split'
+          :style="
+            shellState === 'split'
               ? { width: showPanel ? effectivePanelWidth() + 'px' : '0px' }
-              : {}),
-            ...(shellState === 'focus' ? { paddingBottom: focusComposerPad + 'px' } : {}),
-          }"
+              : {}
+          "
         >
           <div
             class="workspace-business-surface h-full min-h-0 w-full overflow-hidden"
@@ -1087,14 +1078,6 @@ onBeforeUnmount(() => {
             @keydown.right.prevent="resizePanelBy(-24)"
           />
         </div>
-
-        <!-- STATE C：相对业务工作区宿主居中的浮动 Composer（§8.4） -->
-        <GlobalComposer
-          v-if="shellState === 'focus'"
-          mode="floating"
-          :host-width="workspaceMainWidth"
-          @height-change="onComposerHeightChange"
-        />
       </div>
     </div>
 

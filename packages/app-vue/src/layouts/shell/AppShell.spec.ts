@@ -95,6 +95,8 @@ const deleteConversation = vi.fn(async (id: string) => {
   if (activeChatConversationId.value === id) activeChatConversationId.value = null;
 });
 
+const requestComposerFocus = vi.fn();
+
 const AIChatViewStub = defineComponent({
   name: 'AIChatView',
   setup(_props, { expose }) {
@@ -106,9 +108,18 @@ const AIChatViewStub = defineComponent({
       startNewConversation,
       deleteConversation,
       restoreConversation,
+      requestComposerFocus,
     });
 
     return () => h('div', { 'data-testid': 'ai-chat-view' });
+  },
+});
+
+/** Host probe: the shell owns the composer slot, the view teleports into it. */
+const GlobalComposerStub = defineComponent({
+  name: 'GlobalComposer',
+  setup() {
+    return () => h('div', { 'data-testid': 'global-composer' });
   },
 });
 
@@ -387,7 +398,7 @@ async function mountShell(
         BusinessPanel,
         TodayOverviewPanel: TodayOverviewPanelStub,
         PanelErrorBoundary: passThrough('PanelErrorBoundary'),
-        GlobalComposer: true,
+        GlobalComposer: GlobalComposerStub,
         UserSettingsView: UserSettingsViewStub,
       },
     },
@@ -404,6 +415,35 @@ describe('AppShell right-panel integration', () => {
     });
     goalRouteMountCount = 0;
     activeChatConversationId.value = null;
+    requestComposerFocus.mockClear();
+  });
+
+  it('drops the AI composer host in focus and restores it with a focus request', async () => {
+    const { wrapper, store } = await mountShell('/goals');
+    if (!store.rightPanelOpen) store.toggleRightPanel();
+    await nextTick();
+    const businessHost = wrapper.get('[data-testid="shell-business-pane-host"]')
+      .element as HTMLElement;
+    const aiView = wrapper.get('[data-testid="ai-chat-view"]').element;
+    expect(wrapper.find('[data-testid="global-composer"]').exists()).toBe(true);
+
+    store.toggleFocus();
+    await nextTick();
+    expect(wrapper.get('[data-testid="app-shell"]').attributes('data-shell-state')).toBe('focus');
+    // Issue #951: full-screen focus owns only the business surface — no input host,
+    // and no composer-sized padding reserved under the panel.
+    expect(wrapper.find('[data-testid="global-composer"]').exists()).toBe(false);
+    expect(businessHost.style.paddingBottom).toBe('');
+    expect(requestComposerFocus).not.toHaveBeenCalled();
+    // The running conversation is only hidden, never remounted or aborted.
+    expect(wrapper.get('[data-testid="ai-chat-view"]').element).toBe(aiView);
+
+    store.toggleFocus();
+    await nextTick();
+    expect(wrapper.get('[data-testid="app-shell"]').attributes('data-shell-state')).toBe('split');
+    expect(wrapper.find('[data-testid="global-composer"]').exists()).toBe(true);
+    // Leaving focus hands the returning input its focus, so typing works immediately.
+    expect(requestComposerFocus).toHaveBeenCalledTimes(1);
   });
 
   describe.sequential('cleanup after an aborted case', () => {
