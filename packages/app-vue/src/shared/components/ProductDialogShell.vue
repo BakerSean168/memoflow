@@ -45,16 +45,17 @@
           >
             <slot name="actions" />
           </div>
-          <button
-            type="button"
+          <Button
+            variant="ghost"
+            size="icon"
             :disabled="closeDisabled"
             :data-testid="`${testId}-close`"
             :aria-label="closeLabel"
             @click="emit('request-close')"
-            class="flex size-8 shrink-0 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-accent hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-50"
+            class="size-8 shrink-0 text-muted-foreground hover:bg-accent hover:text-foreground"
           >
             <X class="size-4" aria-hidden="true" />
-          </button>
+          </Button>
         </div>
       </div>
     </DialogHeader>
@@ -89,6 +90,7 @@
 import { computed, nextTick, watch, type HTMLAttributes } from 'vue';
 import { X } from '@lucide/vue';
 import {
+  Button,
   cn,
   DialogContent,
   DialogDescription,

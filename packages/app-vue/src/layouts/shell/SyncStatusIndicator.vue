@@ -2,7 +2,7 @@
 import { computed, inject, onBeforeUnmount, onMounted, ref } from 'vue';
 import { AlertTriangle, CloudOff, RefreshCw } from '@lucide/vue';
 import { useI18n } from 'vue-i18n';
-import { Popover, PopoverContent, PopoverTrigger } from '@memoflow/ui-vue-shadcn';
+import { Button, Popover, PopoverContent, PopoverTrigger } from '@memoflow/ui-vue-shadcn';
 import type { DesktopSyncSnapshotDTO, ProfileCloudState } from '@memoflow/desktop-contracts';
 import { DESKTOP_SYNC_STATUS_SERVICE_KEY } from '../../di/keys';
 import { formatProductDateTime } from '../../shared/utils/product-time';
@@ -276,19 +276,21 @@ onBeforeUnmount(() => {
           data-testid="sync-status-aligned"
         >
           <span class="min-w-0 flex-1">{{ alignedText }}</span>
-          <button
+          <Button
             type="button"
-            class="shrink-0 text-[10px] text-muted-foreground underline-offset-2 hover:underline"
+            variant="link"
+            class="h-auto shrink-0 p-0 text-[10px] font-normal text-muted-foreground underline-offset-2"
             data-testid="sync-status-dismiss-aligned"
             @click="emit('dismiss-avatar-alignment')"
           >
             {{ t('shell.sync.dismissAligned') }}
-          </button>
+          </Button>
         </div>
 
-        <button
+        <Button
           type="button"
-          class="flex w-full items-center justify-center gap-1.5 rounded-md border border-primary/30 bg-primary/10 px-2 py-1.5 text-[11px] font-medium text-primary transition-colors hover:bg-primary/15 disabled:opacity-50"
+          variant="outline"
+          class="flex w-full items-center justify-center gap-1.5 rounded-md border-primary/30 bg-primary/10 px-2 py-1.5 text-[11px] font-medium text-primary hover:bg-primary/15"
           :disabled="syncing"
           data-testid="sync-status-sync-now"
           @click="syncNow"
@@ -299,7 +301,7 @@ onBeforeUnmount(() => {
             aria-hidden="true"
           />
           {{ syncing ? t('shell.sync.syncing') : t('shell.sync.syncNow') }}
-        </button>
+        </Button>
       </div>
     </PopoverContent>
   </Popover>

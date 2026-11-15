@@ -22,17 +22,19 @@
         >
           <DropdownMenu>
             <DropdownMenuTrigger as-child>
-              <button
+              <Button
                 type="button"
+                variant="outline"
+                size="icon"
                 :data-testid="moreButtonTestId"
-                class="inline-flex h-8 w-8 items-center justify-center rounded-md border border-border/50 bg-background/80 text-muted-foreground opacity-0 shadow-sm backdrop-blur-sm transition-opacity duration-150 hover:bg-accent hover:text-accent-foreground focus-visible:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring group-hover/actionable:opacity-100"
+                class="border-border/50 bg-background/80 text-muted-foreground opacity-0 backdrop-blur-sm transition-opacity duration-150 hover:bg-accent hover:text-accent-foreground focus-visible:opacity-100 group-hover/actionable:opacity-100"
                 :class="moreButtonClass"
                 :aria-label="moreButtonLabel"
                 :title="moreButtonLabel"
                 @click.stop
               >
                 <MoreHorizontal class="h-3.5 w-3.5" />
-              </button>
+              </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent :align="dropdownAlign" :side="dropdownSide" :class="menuWidth">
               <template v-for="action in actions" :key="action.key">
@@ -89,6 +91,7 @@ import {
   ContextMenuTrigger,
 } from '@memoflow/ui-vue-shadcn';
 import {
+  Button,
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,

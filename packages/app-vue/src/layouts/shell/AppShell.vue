@@ -23,7 +23,14 @@ import { computed, inject, onBeforeUnmount, onMounted, provide, ref, shallowRef,
 import { useRoute, useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import { storeToRefs } from 'pinia';
-import { Dialog, Sheet, SheetContent, SheetDescription, SheetTitle } from '@memoflow/ui-vue-shadcn';
+import {
+  Button,
+  Dialog,
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetTitle,
+} from '@memoflow/ui-vue-shadcn';
 import { useAppShellStore, MAX_BUSINESS_TABS } from './useAppShellStore';
 import { provideTaskNativeSurface } from './useTaskNativeSurface';
 import { provideGoalNativeSurface } from './useGoalNativeSurface';
@@ -804,14 +811,15 @@ onBeforeUnmount(() => {
       role="status"
     >
       <span>{{ t('shell.auth.unverifiedBanner') }}</span>
-      <button
+      <Button
         type="button"
-        class="rounded-md bg-amber-900/10 px-3 py-1 text-xs font-medium text-amber-950 hover:bg-amber-900/15 dark:bg-amber-400/20 dark:text-amber-50 dark:hover:bg-amber-400/30"
+        size="sm"
+        class="h-auto rounded-md bg-amber-900/10 px-3 py-1 text-xs font-medium text-amber-950 hover:bg-amber-900/15 dark:bg-amber-400/20 dark:text-amber-50 dark:hover:bg-amber-400/30"
         data-testid="unverified-email-banner-action"
         @click="goVerifyEmail"
       >
         {{ t('shell.auth.unverifiedAction') }}
-      </button>
+      </Button>
     </div>
 
     <!-- 顶部窗口栏：工作区 launcher + 日程入口 + 窗控 -->

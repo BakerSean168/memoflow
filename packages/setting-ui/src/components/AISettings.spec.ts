@@ -615,9 +615,12 @@ describe('T3-style Agent settings and direct endpoint configuration', () => {
     await wrapper.get('[data-testid="ai-provider-select-agent:codex"]').trigger('click');
     await flushPromises();
     const toggle = wrapper.get('[data-testid="ai-native-model-visible:model-a"]');
-    expect((toggle.element as HTMLInputElement).checked).toBe(true);
-    await toggle.setValue(false);
-    expect((toggle.element as HTMLInputElement).checked).toBe(false);
+    expect(toggle.attributes('aria-checked')).toBe('true');
+    expect(toggle.attributes('data-state')).toBe('checked');
+    await toggle.trigger('click');
+    await flushPromises();
+    expect(toggle.attributes('aria-checked')).toBe('false');
+    expect(toggle.attributes('data-state')).toBe('unchecked');
     expect(wrapper.findAll('[data-testid="ai-native-model"]')).toHaveLength(2);
     expect(
       localStorage.getItem(
@@ -632,9 +635,8 @@ describe('T3-style Agent settings and direct endpoint configuration', () => {
     await wrapper.get('[data-testid="ai-provider-recheck"]').trigger('click');
     await flushPromises();
     expect(
-      (wrapper.get('[data-testid="ai-native-model-visible:model-a"]').element as HTMLInputElement)
-        .checked,
-    ).toBe(true);
+      wrapper.get('[data-testid="ai-native-model-visible:model-a"]').attributes('aria-checked'),
+    ).toBe('true');
     localClient.probeDefaultDriver.mockResolvedValue({
       status: 'ready',
       models: [{ id: 'model-a', name: 'Model A' }],
@@ -643,10 +645,13 @@ describe('T3-style Agent settings and direct endpoint configuration', () => {
     await wrapper.get('[data-testid="ai-provider-recheck"]').trigger('click');
     await flushPromises();
     expect(
-      (wrapper.get('[data-testid="ai-native-model-visible:model-a"]').element as HTMLInputElement)
-        .checked,
-    ).toBe(false);
-    await wrapper.get('[data-testid="ai-native-model-visible:model-a"]').setValue(true);
+      wrapper.get('[data-testid="ai-native-model-visible:model-a"]').attributes('aria-checked'),
+    ).toBe('false');
+    await wrapper.get('[data-testid="ai-native-model-visible:model-a"]').trigger('click');
+    await flushPromises();
+    expect(
+      wrapper.get('[data-testid="ai-native-model-visible:model-a"]').attributes('data-state'),
+    ).toBe('checked');
     expect(
       localStorage.getItem(
         'ai:native-model-hidden:v2:desktop-profile-a:codex:mvc1:' + 'a'.repeat(64),

@@ -16,16 +16,18 @@
           @keydown.enter.prevent="emit('commit-query')"
         />
 
-        <button
+        <Button
           v-if="query"
           type="button"
+          variant="ghost"
+          size="icon"
           :aria-label="clearLabel"
-          class="absolute right-1.5 top-1/2 flex h-5 w-5 -translate-y-1/2 items-center justify-center rounded-full text-[hsl(var(--foreground-subtle))] transition-colors hover:bg-[hsl(var(--hover))] hover:text-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+          class="absolute right-1.5 top-1/2 h-5 w-5 -translate-y-1/2 rounded-full text-[hsl(var(--foreground-subtle))] hover:bg-[hsl(var(--hover))] hover:text-foreground"
           @pointerdown.prevent
           @click="emit('clear')"
         >
           <CircleX class="h-3.5 w-3.5" />
-        </button>
+        </Button>
       </div>
 
       <ProductInlineValidation

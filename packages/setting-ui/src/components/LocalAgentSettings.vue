@@ -4,6 +4,7 @@ import { RefreshCw, RotateCcw, Trash2 } from '@lucide/vue';
 import { useI18n } from 'vue-i18n';
 import {
   Button,
+  Checkbox,
   Input,
   Select,
   SelectContent,
@@ -60,10 +61,9 @@ const visibilityInstanceId = computed(
     props.connection?.id ??
     props.driver,
 );
-function updateModelVisibility(modelId: string, event: Event) {
-  const input = event.target as HTMLInputElement;
-  if (!modelVisibility.setVisible(visibilityInstanceId.value, modelId, input.checked))
-    input.checked = !input.checked;
+function updateModelVisibility(modelId: string, visible: boolean | 'indeterminate') {
+  if (typeof visible !== 'boolean') return;
+  modelVisibility.setVisible(visibilityInstanceId.value, modelId, visible);
 }
 const names = {
   codex: 'Codex',
@@ -634,14 +634,15 @@ onBeforeUnmount(stopPolling);
             :aria-label="t('setting.agentInstances.antigravityLoginCopy')"
             @focus="selectAuthorization"
           />
-          <button
+          <Button
             type="button"
-            class="text-[11px] leading-4 text-muted-foreground underline-offset-2 hover:underline"
+            variant="link"
+            class="h-auto p-0 text-[11px] font-normal leading-4 text-muted-foreground underline-offset-2"
             data-testid="ai-agy-callback-toggle"
             @click="callbackOpen = !callbackOpen"
           >
             {{ t('setting.agentInstances.antigravityLoginCallbackHint') }}
-          </button>
+          </Button>
           <form
             v-if="callbackOpen"
             class="flex min-w-0 items-center gap-2"
@@ -766,14 +767,12 @@ onBeforeUnmount(stopPolling);
           <div class="flex min-w-0 items-center justify-between gap-2">
             <p class="min-w-0 truncate font-medium" :title="model.name">{{ model.name }}</p>
             <label class="flex shrink-0 items-center gap-1.5 text-[11px] text-muted-foreground">
-              <input
-                type="checkbox"
-                class="accent-primary"
-                :checked="modelVisibility.isVisible(visibilityInstanceId, model.id)"
+              <Checkbox
+                :model-value="modelVisibility.isVisible(visibilityInstanceId, model.id)"
                 :disabled="busy || enabled === false || !modelVisibility.canPersist.value"
                 :aria-label="t('setting.ai.showModelNamed', { name: model.name })"
                 :data-testid="`ai-native-model-visible:${model.id}`"
-                @change="updateModelVisibility(model.id, $event)"
+                @update:model-value="updateModelVisibility(model.id, $event)"
               />
               {{ t('setting.ai.showModel') }}
             </label>

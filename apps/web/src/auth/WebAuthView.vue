@@ -387,23 +387,25 @@ watch([newPassword, confirmNewPassword], () => {
           {{ t('auth.receipt.requestId') }}: {{ receipt.requestId }}
         </p>
         <div class="flex gap-3">
-          <button
+          <Button
             v-if="receipt.retryable"
             type="button"
+            variant="link"
             data-testid="web-auth-password-receipt-retry"
-            class="underline underline-offset-2 hover:text-white"
+            class="h-auto p-0 text-inherit underline underline-offset-2 hover:text-white"
             @click="handleReceiptRetry"
           >
             {{ t('auth.receipt.retry') }}
-          </button>
-          <button
+          </Button>
+          <Button
             type="button"
+            variant="link"
             data-testid="web-auth-password-receipt-dismiss"
-            class="underline underline-offset-2 hover:text-white"
+            class="h-auto p-0 text-inherit underline underline-offset-2 hover:text-white"
             @click="handleReceiptDismiss"
           >
             {{ t('auth.receipt.dismiss') }}
-          </button>
+          </Button>
         </div>
       </div>
 
@@ -454,14 +456,15 @@ watch([newPassword, confirmNewPassword], () => {
             {{ t(loginErrors.password) }}
           </p>
         </div>
-        <button
+        <Button
           data-testid="login-forgot-link"
           type="button"
-          class="justify-self-end text-xs text-white/55 hover:text-white"
+          variant="link"
+          class="h-auto justify-self-end p-0 text-xs text-white/55 hover:text-white"
           @click="switchScene('forgot')"
         >
           {{ t('auth.login.forgotLink') }}
-        </button>
+        </Button>
         <Button data-testid="login-submit-button" type="submit" :disabled="isLoading">
           <Loader2 v-if="isLoading && action === 'login'" class="mr-2 h-4 w-4 animate-spin" />
           {{ t(isLoading && action === 'login' ? 'auth.login.submitting' : 'auth.login.submit') }}
@@ -643,12 +646,25 @@ watch([newPassword, confirmNewPassword], () => {
       </section>
 
       <div class="mt-5 flex justify-center text-sm text-white/55">
-        <button v-if="scene === 'login'" type="button" @click="switchScene('register')">
+        <Button
+          v-if="scene === 'login'"
+          type="button"
+          variant="link"
+          class="h-auto p-0 text-inherit"
+          @click="switchScene('register')"
+        >
           {{ t('auth.login.registerLink') }}
-        </button>
-        <button v-else type="button" data-testid="auth-back-to-login" @click="switchScene('login')">
+        </Button>
+        <Button
+          v-else
+          type="button"
+          variant="link"
+          data-testid="auth-back-to-login"
+          class="h-auto p-0 text-inherit"
+          @click="switchScene('login')"
+        >
           {{ t('auth.verify.backToLogin') }}
-        </button>
+        </Button>
       </div>
     </section>
 

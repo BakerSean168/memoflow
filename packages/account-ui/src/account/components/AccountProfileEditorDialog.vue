@@ -219,16 +219,18 @@ function focusNickname(event: Event): void {
               {{ t('account.profileEditor.description') }}
             </DialogDescription>
           </div>
-          <button
+          <Button
             type="button"
-            class="flex size-8 shrink-0 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-accent hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-50"
+            variant="ghost"
+            size="icon"
+            class="size-8 shrink-0 text-muted-foreground hover:bg-accent hover:text-foreground"
             :aria-label="t('common.close')"
             :disabled="saving"
             data-testid="profile-editor-close"
             @click="requestClose"
           >
             <X class="size-4" aria-hidden="true" />
-          </button>
+          </Button>
         </div>
 
         <div class="min-h-0 flex-1 space-y-4 overflow-hidden px-5 py-5">

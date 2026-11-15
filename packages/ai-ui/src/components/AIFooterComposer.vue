@@ -53,14 +53,16 @@
             <span class="truncate">{{
               attachment.filename || t('aiAssistant.chatPage.attachments.file')
             }}</span>
-            <button
+            <Button
               type="button"
-              class="flex h-6 w-6 shrink-0 items-center justify-center rounded-md text-muted-foreground hover:bg-muted hover:text-foreground"
+              variant="ghost"
+              size="icon"
+              class="h-6 w-6 shrink-0 text-muted-foreground hover:bg-muted hover:text-foreground"
               :aria-label="t('common.remove')"
               @click="$emit('remove-attachment', attachment.id)"
             >
               <X class="h-3.5 w-3.5" />
-            </button>
+            </Button>
           </span>
 
           <span
@@ -85,14 +87,16 @@
             />
             <FileText v-else class="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
             <span class="truncate">{{ entity.label }}</span>
-            <button
+            <Button
               type="button"
-              class="flex h-6 w-6 shrink-0 items-center justify-center rounded-md text-muted-foreground hover:bg-muted hover:text-foreground"
+              variant="ghost"
+              size="icon"
+              class="h-6 w-6 shrink-0 text-muted-foreground hover:bg-muted hover:text-foreground"
               :aria-label="t('common.remove')"
               @click="$emit('remove-context-entity', entity.entityType, entity.id)"
             >
               <X class="h-3.5 w-3.5" />
-            </button>
+            </Button>
           </span>
         </div>
 

@@ -79,6 +79,12 @@ function mountDialog() {
   });
 }
 
+function closeButton(wrapper: ReturnType<typeof mountDialog>) {
+  // The shared dialog shell renders its close control as a `Button`, so locate it
+  // by role + accessible name instead of the native `type` attribute.
+  return wrapper.get('button[aria-label="Close"]');
+}
+
 describe('QuickTaskDialog', () => {
   it('supports a non-modal business pane while retaining the title-only save contract', async () => {
     const wrapper = mount(QuickTaskDialog, {
@@ -160,7 +166,7 @@ describe('QuickTaskDialog', () => {
   it('confirms before discarding a dirty draft and then clears it', async () => {
     const wrapper = mountDialog();
     await wrapper.get('input').setValue('Unsaved');
-    await wrapper.get('button[type="button"]').trigger('click');
+    await closeButton(wrapper).trigger('click');
     await Promise.resolve();
 
     expect(confirmMock).toHaveBeenCalledOnce();
@@ -174,7 +180,7 @@ describe('QuickTaskDialog', () => {
     confirmMock.mockResolvedValueOnce(false);
     const wrapper = mountDialog();
     await wrapper.get('input').setValue('Keep me');
-    await wrapper.get('button[type="button"]').trigger('click');
+    await closeButton(wrapper).trigger('click');
     await Promise.resolve();
 
     expect(confirmMock).toHaveBeenCalledOnce();
