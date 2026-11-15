@@ -110,6 +110,7 @@ import type { ECharts } from 'echarts';
 import TimelineControls from './TimelineControls.vue';
 import { Button } from '@memoflow/ui-vue-shadcn/components/ui/button';
 import { useGoalTimeline } from '../../composables/useGoalTimeline';
+import { useChartTheme } from '../../utils/chart-theme';
 import type { TimelineSnapshot } from '../../utils/goal-timeline';
 import type { GoalClientDTO } from '@memoflow/goal-contracts';
 
@@ -124,6 +125,9 @@ const props = defineProps<{
 
 const weightChartRef = ref<HTMLDivElement>();
 let weightChart: ECharts | null = null;
+
+// Pie slice borders and the exported image backdrop follow the active theme.
+const chartTheme = useChartTheme();
 
 const exporting = ref(false);
 
@@ -181,7 +185,7 @@ function updateWeightChart() {
         avoidLabelOverlap: false,
         itemStyle: {
           borderRadius: 8,
-          borderColor: '#fff',
+          borderColor: chartTheme.value.background,
           borderWidth: 2,
         },
         label: {
@@ -219,7 +223,7 @@ async function exportAsImage() {
     const imageData = weightChart.getDataURL({
       type: 'png',
       pixelRatio: 2,
-      backgroundColor: '#fff',
+      backgroundColor: chartTheme.value.background,
     });
 
     // 创建下载链接
@@ -237,6 +241,11 @@ async function exportAsImage() {
 // ==================== Watchers ====================
 
 watch(currentSnapshot, () => {
+  updateWeightChart();
+});
+
+// Re-paint on light/dark or accent changes: the chart reads tokens once per render.
+watch(chartTheme, () => {
   updateWeightChart();
 });
 
@@ -268,7 +277,7 @@ function handleResize() {
 <style scoped>
 .goal-timeline-view {
   padding: 24px;
-  background: #f5f5f5;
+  background: hsl(var(--muted));
   min-height: 100vh;
 }
 
@@ -279,18 +288,18 @@ function handleResize() {
 .timeline-header h2 {
   margin: 0 0 12px 0;
   font-size: 24px;
-  color: #333;
+  color: hsl(var(--foreground));
 }
 
 .timeline-stats {
   display: flex;
   gap: 24px;
   font-size: 14px;
-  color: #666;
+  color: hsl(var(--muted-foreground));
 }
 
 .stat strong {
-  color: #4caf50;
+  color: hsl(var(--success));
 }
 
 /* 加载状态 */
@@ -300,7 +309,7 @@ function handleResize() {
   align-items: center;
   justify-content: center;
   padding: 60px;
-  background: #fff;
+  background: hsl(var(--card));
   border-radius: 8px;
   gap: 16px;
 }
@@ -308,8 +317,8 @@ function handleResize() {
 .spinner {
   width: 40px;
   height: 40px;
-  border: 4px solid #e8e8e8;
-  border-top-color: #4caf50;
+  border: 4px solid hsl(var(--border));
+  border-top-color: hsl(var(--success));
   border-radius: 50%;
   animation: spin 1s linear infinite;
 }
@@ -330,7 +339,7 @@ function handleResize() {
 
 .weight-chart,
 .weight-list {
-  background: #fff;
+  background: hsl(var(--card));
   border-radius: 8px;
   padding: 20px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
@@ -340,7 +349,7 @@ function handleResize() {
 .weight-list h3 {
   margin: 0 0 16px 0;
   font-size: 16px;
-  color: #333;
+  color: hsl(var(--foreground));
 }
 
 .chart-container {
@@ -356,9 +365,9 @@ function handleResize() {
 
 .kr-item {
   padding: 12px;
-  background: #f9f9f9;
+  background: hsl(var(--surface));
   border-radius: 6px;
-  border-left: 4px solid #4caf50;
+  border-left: 4px solid hsl(var(--success));
 }
 
 .kr-header {
@@ -371,13 +380,13 @@ function handleResize() {
 .kr-title {
   font-size: 14px;
   font-weight: 500;
-  color: #333;
+  color: hsl(var(--foreground));
 }
 
 .kr-weight {
   font-size: 16px;
   font-weight: bold;
-  color: #4caf50;
+  color: hsl(var(--success));
 }
 
 .kr-progress {
@@ -389,20 +398,20 @@ function handleResize() {
 .progress-bar {
   flex: 1;
   height: 8px;
-  background: #e8e8e8;
+  background: hsl(var(--border));
   border-radius: 4px;
   overflow: hidden;
 }
 
 .progress-fill {
   height: 100%;
-  background: linear-gradient(90deg, #4caf50, #8bc34a);
+  background: linear-gradient(90deg, hsl(var(--success)), hsl(var(--success) / 0.8));
   transition: width 0.3s ease;
 }
 
 .progress-text {
   font-size: 12px;
-  color: #666;
+  color: hsl(var(--muted-foreground));
   min-width: 45px;
   text-align: right;
 }
@@ -419,8 +428,8 @@ function handleResize() {
   align-items: center;
   gap: 8px;
   padding: 10px 20px;
-  background: #4caf50;
-  color: #fff;
+  background: hsl(var(--success));
+  color: hsl(var(--success-foreground));
   border: none;
   border-radius: 6px;
   font-size: 14px;
@@ -430,9 +439,9 @@ function handleResize() {
 }
 
 .export-btn:hover:not(:disabled) {
-  background: #45a049;
+  background: hsl(var(--success) / 0.9);
   transform: translateY(-1px);
-  box-shadow: 0 4px 8px rgba(76, 175, 80, 0.3);
+  box-shadow: 0 4px 8px hsl(var(--success) / 0.3);
 }
 
 .export-btn:disabled {

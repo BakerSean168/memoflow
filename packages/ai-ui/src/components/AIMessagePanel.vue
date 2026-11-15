@@ -132,32 +132,41 @@
                 <form
                   v-if="request.status === 'pending' || request.status === 'sending'"
                   class="space-y-2"
-                  @submit.prevent="
-                    $emit('ask-user-answer', request, askUserAnswers[request.toolCallId] ?? '')
-                  "
+                  @submit.prevent="submitAskUser(request)"
                 >
+                  <p
+                    v-if="askUserErrors[request.toolCallId]"
+                    role="alert"
+                    class="text-xs text-destructive"
+                  >
+                    {{ askUserErrors[request.toolCallId] }}
+                  </p>
                   <label
                     v-if="request.options && request.selectionMode !== 'multi_select'"
                     class="block space-y-1 text-sm"
                   >
                     <span>{{ t('aiAssistant.local.chooseAnswer') }}</span>
-                    <select
-                      v-model="askUserAnswers[request.toolCallId]"
-                      class="block w-full rounded border bg-background p-2"
-                      required
+                    <Select
+                      :model-value="askUserAnswers[request.toolCallId] as string"
                       :disabled="request.status !== 'pending'"
+                      @update:model-value="setAskUserAnswer(request.toolCallId, $event)"
                     >
-                      <option disabled value="">
-                        {{ t('aiAssistant.local.chooseAnswer') }}
-                      </option>
-                      <option
-                        v-for="option in request.options"
-                        :key="option.label"
-                        :value="option.label"
+                      <SelectTrigger
+                        class="w-full"
+                        :aria-label="t('aiAssistant.local.chooseAnswer')"
                       >
-                        {{ option.label }}
-                      </option>
-                    </select>
+                        <SelectValue :placeholder="t('aiAssistant.local.chooseAnswer')" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem
+                          v-for="option in request.options"
+                          :key="option.label"
+                          :value="option.label"
+                        >
+                          {{ option.label }}
+                        </SelectItem>
+                      </SelectContent>
+                    </Select>
                   </label>
                   <template v-else-if="request.options && request.selectionMode === 'multi_select'">
                     <label
@@ -438,6 +447,13 @@ import {
 import { useI18n } from 'vue-i18n';
 import { Button } from '@memoflow/ui-vue-shadcn/components/ui/button';
 import { Input } from '@memoflow/ui-vue-shadcn/components/ui/input';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@memoflow/ui-vue-shadcn';
 import type { LocalAgentRequestResponse } from '@memoflow/ai-contracts';
 import AILocalRequestCard from './AILocalRequestCard.vue';
 import AIMessageContent from './AIMessageContent.vue';
@@ -473,7 +489,7 @@ const props = withDefaults(
   },
 );
 
-defineEmits<{
+const emit = defineEmits<{
   'select-shortcut': [mode: WorkflowMode];
   'configure-ai': [];
   'create-goal': [];
@@ -525,8 +541,27 @@ onBeforeUnmount(() => {
 
 defineExpose({ viewport });
 
-const askUserAnswers = reactive<Record<string, string | string[]>>({});
 const { t } = useI18n();
+const askUserAnswers = reactive<Record<string, string | string[]>>({});
+const askUserErrors = reactive<Record<string, string>>({});
+
+function setAskUserAnswer(toolCallId: string, value: unknown) {
+  askUserAnswers[toolCallId] = typeof value === 'string' ? value : '';
+  if (typeof value === 'string' && value.trim()) delete askUserErrors[toolCallId];
+}
+
+function submitAskUser(request: ChatAskUserRequest) {
+  const answer = askUserAnswers[request.toolCallId];
+  if (request.options && request.selectionMode !== 'multi_select') {
+    if (typeof answer !== 'string' || !answer.trim()) {
+      askUserErrors[request.toolCallId] = t('aiAssistant.local.answerRequired');
+      return;
+    }
+    delete askUserErrors[request.toolCallId];
+  }
+  emit('ask-user-answer', request, answer ?? '');
+}
+
 const { getMessageStatusLabel } = useAIFormatters();
 const visibleTimeline = computed(() =>
   props.timeline.filter(

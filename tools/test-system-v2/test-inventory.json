@@ -13100,7 +13100,7 @@
       "measurementCollectors": []
     },
     {
-      "path": "tools/test-system-v2/__tests__/native-controls-governance.test.mjs",
+      "path": "tools/test-system-v2/__tests__/native-select-governance.test.mjs",
       "primarySuite": "governance",
       "collectors": [
         "test-system-v2:test"
