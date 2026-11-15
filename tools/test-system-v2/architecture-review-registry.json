@@ -969,7 +969,7 @@
         "status": "none-verified",
         "testFiles": []
       },
-      "sourceSha256": "08dfa806858dfb71aae043e4dcfbdc5fb3604ac99ddfe0ddaf64957cd2d2e182"
+      "sourceSha256": "7df9f81402ea74b94ff598a5e2901d5dcf85bd47c12f7dd0ecd60fd9fa7e23f3"
     },
     {
       "path": "apps/web/e2e/local-docker/core-product-phase-d.spec.ts",
@@ -1088,7 +1088,7 @@
         "status": "none-verified",
         "testFiles": []
       },
-      "sourceSha256": "7f831b5d87cba3b18e2af641855bd540b499945f9973c99356fff905350b426c"
+      "sourceSha256": "f53410005e44dfd1d5ee93265a15939ac0f1b7c1e237ec0a4f8871490d0781ab"
     },
     {
       "path": "apps/api/src/__tests__/integration/agent-instance-registry.integration.test.ts",
