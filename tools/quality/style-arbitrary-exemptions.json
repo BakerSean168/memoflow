@@ -38,6 +38,11 @@
       "reason": "组件几何高度（画布/列表/控件）"
     },
     {
+      "file": "packages/account-ui/src/account/components/AccountProfileSection.vue",
+      "token": "min-h-[76px]",
+      "reason": "组件几何高度（画布/列表/控件），与个人资料编辑器保持一致"
+    },
+    {
       "file": "packages/ai-ui/src/components/AIComposerControls.vue",
       "token": "h-[min(346px,calc(100dvh-80px))]",
       "reason": "视口高度约束，随窗口变化，无刻度等价值"

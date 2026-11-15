@@ -2,6 +2,7 @@
 import { presentErrorMessage } from '@memoflow/http-client';
 import { ResultErrorException } from '@memoflow/transport-contracts/result';
 import { computed, onBeforeUnmount, ref } from 'vue';
+import { useI18n } from 'vue-i18n';
 import {
   Button,
   Input,
@@ -13,9 +14,10 @@ import {
   useConfirm,
 } from '@memoflow/ui-vue-shadcn';
 import type { DeviceKeymap, KeyboardCommandId } from '@memoflow/desktop-contracts';
-import { settingUiHost } from '../setting-ui-host';
+import { settingUiHost, type SettingShortcutScope } from '../setting-ui-host';
 import { useSettingsSectionReset } from '../composables/useSettingsSectionReset';
 
+const { t } = useI18n();
 const keyboard = settingUiHost.keyboard;
 
 const search = ref('');
@@ -24,7 +26,8 @@ const recorded = ref<string | null>(null);
 const message = ref('');
 const busy = ref(false);
 const fileInput = ref<HTMLInputElement | null>(null);
-const scopeNames = { app: '应用', workspace: '工作区', preview: '预览', list: '列表' };
+const scopeLabel = (scope: SettingShortcutScope) => t(`setting.keyboard.scopes.${scope}`);
+const listSeparator = computed(() => t('setting.keyboard.listSeparator'));
 const commands = computed(() =>
   keyboard.commands.value.filter((c) =>
     `${c.title} ${c.id} ${c.keys.join(' ')}`.toLowerCase().includes(search.value.toLowerCase()),
@@ -42,14 +45,17 @@ const validation = computed(() => {
   try {
     return { ...settingUiHost.validateKeymap(draft.value, keyboard.engine.host), error: '' };
   } catch (error) {
-    return { conflicts: [], error: error instanceof Error ? error.message : '无效配置' };
+    return {
+      conflicts: [],
+      error: error instanceof Error ? error.message : t('setting.keyboard.invalidKeymap'),
+    };
   }
 });
 const conflictTitles = computed(() =>
   [...new Set(validation.value.conflicts.flatMap((c) => c.commands))]
     .filter((id) => id !== editing.value)
     .map((id) => keyboard.commands.value.find((c) => c.id === id)?.title ?? id)
-    .join('、'),
+    .join(listSeparator.value),
 );
 function stopRecording() {
   keyboard.recorder.value = null;
@@ -91,15 +97,15 @@ async function save(input: DeviceKeymap) {
         delete next.overrides[command.id];
     }
     await settingUiHost.saveDeviceKeymap(next);
-    message.value = '已保存到此设备，即时生效';
+    message.value = t('setting.keyboard.saved');
     stopRecording();
   } catch (error) {
     message.value =
       error instanceof ResultErrorException || error instanceof DOMException
-        ? presentErrorMessage(error, '保存失败')
+        ? presentErrorMessage(error, t('setting.keyboard.saveFailed'))
         : error instanceof Error
           ? error.message
-          : '保存失败';
+          : t('setting.keyboard.saveFailed');
   } finally {
     busy.value = false;
   }
@@ -144,10 +150,10 @@ async function applyDefaultKeymap() {
 async function resetAll() {
   if (
     await useConfirm({
-      title: '恢复默认快捷键',
-      description: '清除此设备当前用户的所有自定义键位？',
-      confirmText: '恢复默认',
-      cancelText: '取消',
+      title: t('setting.keyboard.restoreConfirm.title'),
+      description: t('setting.keyboard.restoreConfirm.description'),
+      confirmText: t('setting.keyboard.restoreConfirm.confirm'),
+      cancelText: t('setting.keyboard.restoreConfirm.cancel'),
     })
   )
     await applyDefaultKeymap();
@@ -170,24 +176,30 @@ async function importKeymap(event: Event) {
   const file = input.files?.[0];
   try {
     if (!file) return;
-    if (file.size > 65536) throw new Error('配置文件不能超过 64 KB');
+    if (file.size > 65536) throw new Error(t('setting.keyboard.fileTooLarge'));
     const parsed = settingUiHost.validateKeymap(
       JSON.parse(await file.text()),
       keyboard.engine.host,
     );
     if (parsed.conflicts.length)
-      throw new Error(`导入配置存在冲突：${parsed.conflicts.map((c) => c.chord).join('、')}`);
+      throw new Error(
+        t('setting.keyboard.importConflicts', {
+          chords: parsed.conflicts.map((c) => c.chord).join(listSeparator.value),
+        }),
+      );
     if (
       await useConfirm({
-        title: '导入快捷键',
-        description: `将替换此设备的自定义配置（${Object.keys(parsed.keymap.overrides).length} 条覆盖）。`,
-        confirmText: '导入',
-        cancelText: '取消',
+        title: t('setting.keyboard.importConfirm.title'),
+        description: t('setting.keyboard.importConfirm.description', {
+          count: Object.keys(parsed.keymap.overrides).length,
+        }),
+        confirmText: t('setting.keyboard.importConfirm.confirm'),
+        cancelText: t('setting.keyboard.importConfirm.cancel'),
       })
     )
       await save(parsed.keymap);
   } catch (error) {
-    message.value = error instanceof Error ? error.message : '导入失败';
+    message.value = error instanceof Error ? error.message : t('setting.keyboard.importFailed');
   } finally {
     input.value = '';
   }
@@ -198,35 +210,39 @@ onBeforeUnmount(stopRecording);
 <template>
   <section class="space-y-6" data-testid="keyboard-settings">
     <header class="space-y-2">
-      <h2 class="text-xl font-semibold tracking-tight">快捷键</h2>
+      <h2 class="text-xl font-semibold tracking-tight">{{ t('setting.keyboard.title') }}</h2>
       <p class="text-sm text-muted-foreground">
-        此设备 · 当前用户配置。修改即时生效，通过导入导出迁移到其他设备。
+        {{ t('setting.keyboard.description') }}
       </p>
       <p class="text-xs text-muted-foreground">
-        数字键预览，Enter 进入，Alt + 数字直达。J / K 仅在列表获得焦点时生效。
+        {{ t('setting.keyboard.hints') }}
       </p>
     </header>
     <div class="flex flex-wrap items-center gap-2">
       <Input
         v-model="search"
         class="min-w-48 flex-1"
-        placeholder="搜索命令或快捷键…"
-        aria-label="搜索快捷键"
+        :placeholder="t('setting.keyboard.searchPlaceholder')"
+        :aria-label="t('setting.keyboard.searchAria')"
       />
-      <Button variant="outline" :disabled="busy" @click="fileInput?.click()">导入</Button>
-      <Button variant="outline" @click="exportKeymap">导出</Button>
-      <Button variant="ghost" :disabled="busy" @click="resetAll">恢复默认</Button>
+      <Button variant="outline" :disabled="busy" @click="fileInput?.click()">{{
+        t('setting.keyboard.import')
+      }}</Button>
+      <Button variant="outline" @click="exportKeymap">{{ t('setting.keyboard.export') }}</Button>
+      <Button variant="ghost" :disabled="busy" @click="resetAll">{{
+        t('setting.keyboard.restoreDefaults')
+      }}</Button>
       <input
         ref="fileInput"
         type="file"
         accept="application/json,.json"
         class="hidden"
-        aria-label="导入快捷键配置"
+        :aria-label="t('setting.keyboard.importAria')"
         @change="importKeymap"
       />
     </div>
     <p v-if="keyboard.storageError.value" role="alert" class="text-sm text-destructive">
-      {{ keyboard.storageError.value }}；当前使用默认键位。
+      {{ t('setting.keyboard.storageFallback', { error: keyboard.storageError.value }) }}
     </p>
     <p v-if="message" role="status" class="text-sm" data-testid="keyboard-settings-status">
       {{ message }}
@@ -240,19 +256,19 @@ onBeforeUnmount(stopRecording);
       >
         <div class="min-w-40 flex-1">
           <p class="text-sm font-medium">{{ command.title }}</p>
-          <p class="mt-1 text-xs text-muted-foreground">{{ scopeNames[command.scope] }}</p>
+          <p class="mt-1 text-xs text-muted-foreground">{{ scopeLabel(command.scope) }}</p>
         </div>
         <Button
           variant="outline"
           size="sm"
           class="min-w-24 font-mono"
-          :aria-label="`录制：${command.title}`"
+          :aria-label="t('setting.keyboard.recordAria', { title: command.title })"
           :disabled="busy"
           @click="record(command.id)"
           >{{
             command.keys
               .map((key) => settingUiHost.displayChord(key, keyboard.engine.host))
-              .join(' / ') || '未绑定'
+              .join(' / ') || t('setting.keyboard.unbound')
           }}</Button
         >
         <Button
@@ -264,9 +280,16 @@ onBeforeUnmount(stopRecording);
               !keyboard.keymap.value.disabled?.includes(command.id) &&
               !keyboard.engine.definitions.find((c) => c.id === command.id)?.keys.length)
           "
-          :aria-label="`${command.keys.length ? '禁用' : '启用'}：${command.title}`"
+          :aria-label="
+            t(
+              command.keys.length ? 'setting.keyboard.disableAria' : 'setting.keyboard.enableAria',
+              { title: command.title },
+            )
+          "
           @click="toggle(command.id)"
-          >{{ command.keys.length ? '禁用' : '启用' }}</Button
+          >{{
+            command.keys.length ? t('setting.keyboard.disable') : t('setting.keyboard.enable')
+          }}</Button
         >
         <Button
           variant="ghost"
@@ -276,19 +299,17 @@ onBeforeUnmount(stopRecording);
             (!(command.id in keyboard.keymap.value.overrides) &&
               !keyboard.keymap.value.disabled?.includes(command.id))
           "
-          :aria-label="`重置：${command.title}`"
+          :aria-label="t('setting.keyboard.resetAria', { title: command.title })"
           @click="reset(command.id)"
-          >重置</Button
+          >{{ t('setting.keyboard.reset') }}</Button
         >
       </div>
       <p v-if="!commands.length" class="p-6 text-center text-sm text-muted-foreground">
-        没有匹配的快捷键
+        {{ t('setting.keyboard.empty') }}
       </p>
     </div>
     <p class="text-xs leading-relaxed text-muted-foreground">
-      Alt 组合键可能被系统或浏览器扩展占用；macOS 使用
-      Option，组合中的字母和数字按物理键位匹配。已知浏览器保留键会被阻止绑定。应用快捷键只在
-      MemoFlow 获得焦点时生效。
+      {{ t('setting.keyboard.notes') }}
     </p>
     <Dialog
       :open="editing !== null"
@@ -300,34 +321,44 @@ onBeforeUnmount(stopRecording);
     >
       <DialogContent data-testid="shortcut-recorder">
         <DialogHeader
-          ><DialogTitle>录制快捷键</DialogTitle
-          ><DialogDescription
-            >按下新的按键组合。Tab 停止录制并移至操作按钮，Esc 取消。</DialogDescription
-          ></DialogHeader
+          ><DialogTitle>{{ t('setting.keyboard.recorder.title') }}</DialogTitle
+          ><DialogDescription>{{
+            t('setting.keyboard.recorder.description')
+          }}</DialogDescription></DialogHeader
         >
         <div
           class="rounded-lg border bg-muted/30 py-8 text-center font-mono text-xl"
           aria-live="polite"
         >
-          {{ recorded || (keyboard.recorder.value ? '等待按键…' : '按 Esc 返回后重新录制') }}
+          {{
+            recorded ||
+            (keyboard.recorder.value
+              ? t('setting.keyboard.recorder.waiting')
+              : t('setting.keyboard.recorder.idle'))
+          }}
         </div>
         <p v-if="validation.error" role="alert" class="text-sm text-destructive">
           {{ validation.error }}
         </p>
         <p v-if="conflictTitles" role="alert" class="text-sm text-destructive">
-          与 {{ conflictTitles }} 冲突。可替换其绑定，或录制其他按键。
+          {{ t('setting.keyboard.recorder.conflict', { titles: conflictTitles }) }}
         </p>
         <p v-if="message" role="status" class="text-sm text-destructive">{{ message }}</p>
         <div class="flex justify-end gap-2">
-          <Button variant="ghost" @click="stopRecording">取消</Button>
+          <Button variant="ghost" @click="stopRecording">{{
+            t('setting.keyboard.recorder.cancel')
+          }}</Button>
           <Button
             v-if="conflictTitles"
             :disabled="busy || !!validation.error"
             @click="saveRecorded(true)"
-            >替换冲突绑定</Button
+            >{{ t('setting.keyboard.recorder.replace') }}</Button
           >
-          <Button v-else :disabled="busy || !recorded || !!validation.error" @click="saveRecorded()"
-            >保存</Button
+          <Button
+            v-else
+            :disabled="busy || !recorded || !!validation.error"
+            @click="saveRecorded()"
+            >{{ t('setting.keyboard.recorder.save') }}</Button
           >
         </div>
       </DialogContent>

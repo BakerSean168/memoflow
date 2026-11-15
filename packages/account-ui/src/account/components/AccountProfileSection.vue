@@ -19,6 +19,7 @@ import {
   Input,
   Label,
   Separator,
+  Textarea,
 } from '@memoflow/ui-vue-shadcn';
 import { accountUiHost } from '../../account-ui-host';
 import { LockKeyhole, LogOut } from '@lucide/vue';
@@ -189,11 +190,14 @@ onMounted(() => {
 
           <div class="space-y-2 md:col-span-2">
             <Label for="bio">{{ t('account.profile.bio') }}</Label>
-            <Input
+            <Textarea
               id="bio"
               v-model="form.bio"
+              class="min-h-[76px] resize-none"
               :placeholder="t('account.placeholder.bio')"
               :disabled="isLoading"
+              maxlength="500"
+              rows="3"
             />
           </div>
         </div>
