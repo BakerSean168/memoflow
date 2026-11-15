@@ -400,8 +400,21 @@ test('[P0] T3 Agent wizard and inline Endpoint/Key configure the persistent comp
     path: testInfo.outputPath('composer-three-controls.png'),
     animations: 'disabled',
   });
+  const shell = page.getByTestId('app-shell');
   for (const width of [1440, 530, 390]) {
     await page.setViewportSize({ width, height: 900 });
+    if (width < 1024) {
+      // #951: keeping the business panel open at these widths selects viewport
+      // focus, which intentionally renders no composer host. The chat scene is
+      // the only narrow-width composer owner, so hide the panel before probing
+      // the controls; this preserves the original three-control coverage.
+      if ((await shell.getAttribute('data-shell-state')) !== 'chat') {
+        await page.getByTestId('shell-right-panel-toggle').click();
+      }
+      await expect(shell).toHaveAttribute('data-shell-state', 'chat');
+    } else {
+      await expect(shell).toHaveAttribute('data-shell-state', 'split');
+    }
     await expect(page.getByTestId('ai-chat-model-selector')).toBeVisible();
     await expect(page.getByTestId('ai-chat-traits-selector')).toHaveCount(0);
     await page.getByTestId('ai-chat-model-selector').click();
