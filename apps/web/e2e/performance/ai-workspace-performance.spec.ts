@@ -158,17 +158,27 @@ test.describe('AI workspace performance', () => {
   });
 
   test('[P1] preserves one AI workspace while resizing', async ({ page }) => {
+    const shell = page.getByTestId('app-shell');
     const workspace = page.getByTestId('ai-chat-view');
     await workspace.evaluate((element) => element.setAttribute('data-instance-probe', 'ai'));
 
     for (const viewport of [
-      { width: 768, height: 1024 },
-      { width: 1024, height: 768 },
-      { width: 1440, height: 900 },
-    ]) {
+      // #951: narrow geometry hands the workspace to focus, which hides the AI
+      // column and intentionally owns no composer host or input.
+      { width: 768, height: 1024, shellState: 'focus' },
+      { width: 1024, height: 768, shellState: 'focus' },
+      { width: 1440, height: 900, shellState: 'split' },
+    ] as const) {
       await page.setViewportSize(viewport);
+      await expect(shell).toHaveAttribute('data-shell-state', viewport.shellState);
+      // The probe dies with the element, so this proves the workspace instance
+      // survived the resize instead of being remounted.
       await expect(workspace).toHaveAttribute('data-instance-probe', 'ai');
-      await expect(page.getByTestId('ai-chat-composer')).toBeVisible();
+      if (viewport.shellState === 'focus') {
+        await expect(page.getByTestId('ai-chat-composer')).toHaveCount(0);
+      } else {
+        await expect(page.getByTestId('ai-chat-composer')).toBeVisible();
+      }
     }
   });
 
