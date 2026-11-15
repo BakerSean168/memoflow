@@ -129,9 +129,9 @@ it('explains incomplete coverage and disables source deletion', async () => {
   const { wrapper, click } = fixture(true);
   await flushPromises();
   await click('Preview import');
-  expect(
-    wrapper.get('[data-testid="profile-import-delete-source"]').attributes('data-disabled'),
-  ).toBeDefined();
+  const deleteSource = wrapper.get('[data-testid="profile-import-delete-source"]');
+  expect(deleteSource.attributes('disabled')).toBeDefined();
+  expect(deleteSource.attributes('data-disabled')).toBeDefined();
   expect(wrapper.get('[data-testid="profile-import-blockers"]').text()).toContain(
     'source Profile will be kept',
   );
