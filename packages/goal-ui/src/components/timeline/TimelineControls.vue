@@ -312,7 +312,7 @@ onUnmounted(() => {
 .timeline-controls {
   width: 100%;
   padding: 16px;
-  background: #ffffff;
+  background: hsl(var(--card));
   border-radius: 8px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
@@ -326,7 +326,7 @@ onUnmounted(() => {
 .timeline-track {
   position: relative;
   height: 8px;
-  background: #e8e8e8;
+  background: hsl(var(--border));
   border-radius: 4px;
   overflow: hidden;
 }
@@ -336,7 +336,7 @@ onUnmounted(() => {
   left: 0;
   top: 0;
   height: 100%;
-  background: linear-gradient(90deg, #4caf50, #8bc34a);
+  background: linear-gradient(90deg, hsl(var(--success)), hsl(var(--success) / 0.8));
   border-radius: 4px;
   transition: width 0.2s ease;
 }
@@ -360,7 +360,7 @@ onUnmounted(() => {
   appearance: none;
   width: 16px;
   height: 16px;
-  background: #4caf50;
+  background: hsl(var(--success));
   border-radius: 50%;
   cursor: pointer;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
@@ -374,7 +374,7 @@ onUnmounted(() => {
 .timeline-slider::-moz-range-thumb {
   width: 16px;
   height: 16px;
-  background: #4caf50;
+  background: hsl(var(--success));
   border: none;
   border-radius: 50%;
   cursor: pointer;
@@ -403,15 +403,15 @@ onUnmounted(() => {
 .mark-dot {
   width: 8px;
   height: 8px;
-  background: #bbb;
+  background: hsl(var(--border-strong));
   border-radius: 50%;
   transition: all 0.2s ease;
 }
 
 .timeline-mark.active .mark-dot {
-  background: #4caf50;
+  background: hsl(var(--success));
   transform: scale(1.5);
-  box-shadow: 0 0 8px rgba(76, 175, 80, 0.5);
+  box-shadow: 0 0 8px hsl(var(--success) / 0.5);
 }
 
 .timeline-mark:hover .mark-dot {
@@ -438,7 +438,7 @@ onUnmounted(() => {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #f5f5f5;
+  background: hsl(var(--muted));
   border: none;
   border-radius: 4px;
   cursor: pointer;
@@ -446,7 +446,7 @@ onUnmounted(() => {
 }
 
 .control-btn:hover:not(:disabled) {
-  background: #e0e0e0;
+  background: hsl(var(--selected));
   transform: scale(1.05);
 }
 
@@ -456,8 +456,8 @@ onUnmounted(() => {
 }
 
 .control-btn.active {
-  background: #4caf50;
-  color: #fff;
+  background: hsl(var(--success));
+  color: hsl(var(--success-foreground));
 }
 
 .icon {
@@ -474,12 +474,12 @@ onUnmounted(() => {
 
 .speed-label {
   font-size: 14px;
-  color: #666;
+  color: hsl(var(--muted-foreground));
 }
 
 .speed-btn {
   padding: 4px 12px;
-  background: #f5f5f5;
+  background: hsl(var(--muted));
   border: none;
   border-radius: 4px;
   font-size: 13px;
@@ -488,12 +488,12 @@ onUnmounted(() => {
 }
 
 .speed-btn:hover {
-  background: #e0e0e0;
+  background: hsl(var(--selected));
 }
 
 .speed-btn.active {
-  background: #4caf50;
-  color: #fff;
+  background: hsl(var(--success));
+  color: hsl(var(--success-foreground));
 }
 
 /* 时间信息 */
@@ -508,18 +508,18 @@ onUnmounted(() => {
 .current-time {
   font-size: 14px;
   font-weight: 500;
-  color: #333;
+  color: hsl(var(--foreground));
 }
 
 .snapshot-counter {
   font-size: 12px;
-  color: #999;
+  color: hsl(var(--foreground-subtle));
 }
 
 /* 快照信息 */
 .snapshot-info {
   padding-top: 12px;
-  border-top: 1px solid #e8e8e8;
+  border-top: 1px solid hsl(var(--border));
 }
 
 .snapshot-reason {
@@ -528,13 +528,13 @@ onUnmounted(() => {
   gap: 8px;
   margin-bottom: 12px;
   font-size: 14px;
-  color: #666;
+  color: hsl(var(--muted-foreground));
 }
 
 .info-icon {
   width: 18px;
   height: 18px;
-  color: #4caf50;
+  color: hsl(var(--success));
 }
 
 .snapshot-stats {
@@ -549,12 +549,12 @@ onUnmounted(() => {
 }
 
 .stat-label {
-  color: #999;
+  color: hsl(var(--foreground-subtle));
 }
 
 .stat-value {
   font-weight: 500;
-  color: #333;
+  color: hsl(var(--foreground));
 }
 
 /* 响应式 */
