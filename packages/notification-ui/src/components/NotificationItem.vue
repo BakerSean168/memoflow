@@ -16,7 +16,7 @@
         :data-notification-type="notification.type"
         data-density="compact"
         :class="[
-          'group relative flex w-full gap-3 px-4 py-2.5 text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring',
+          'group relative flex w-full gap-3 px-4 py-2 text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring',
           quickActions.length ? 'pr-28' : '',
           notification.isRead
             ? 'bg-transparent text-[hsl(var(--foreground-muted))] hover:bg-[hsl(var(--hover)/0.42)]'

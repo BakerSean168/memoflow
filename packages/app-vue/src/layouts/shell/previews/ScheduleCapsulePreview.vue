@@ -116,7 +116,7 @@ onMounted(() => {
         <p class="px-1 text-[10px] font-medium text-muted-foreground">{{ primaryTitle }}</p>
         <button
           type="button"
-          class="mt-1 w-full rounded-lg bg-accent/45 px-2.5 py-2 text-left transition-colors hover:bg-accent/70 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring/60"
+          class="mt-1 w-full rounded-lg bg-accent/45 px-2 py-2 text-left transition-colors hover:bg-accent/70 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring/60"
           data-testid="schedule-capsule-primary"
           @click="primaryEvent && emit('select', primaryEvent)"
         >

@@ -112,7 +112,7 @@
         <ReuseBody />
       </div>
       <SheetFooter
-        class="shrink-0 flex-wrap gap-2 border-t border-[hsl(var(--border-subtle))] px-5 py-3.5"
+        class="shrink-0 flex-wrap gap-2 border-t border-[hsl(var(--border-subtle))] px-5 py-3"
       >
         <ReuseFooter />
       </SheetFooter>

@@ -30,12 +30,38 @@ function renderStartupError(error: unknown): void {
   }
 
   mountTarget.innerHTML = `
-    <div style="height:100%;display:flex;align-items:center;justify-content:center;padding:24px;background:#111827;color:#f9fafb;font-family:system-ui,sans-serif;">
-      <div style="max-width:720px;">
-        <h1 style="margin:0 0 12px;font-size:20px;">Desktop renderer failed</h1>
-        <pre style="white-space:pre-wrap;word-break:break-word;background:#1f2937;padding:12px;border-radius:8px;overflow:auto;">${escapeHtml(
-          formatError(error),
-        )}</pre>
+    <style>
+      .startup-error {
+        box-sizing: border-box;
+        display: flex;
+        height: 100%;
+        align-items: center;
+        justify-content: center;
+        padding: 24px;
+        background: #111827;
+        color: #f9fafb;
+        font-family: system-ui, sans-serif;
+      }
+      .startup-error__body {
+        max-width: 720px;
+      }
+      .startup-error__title {
+        margin: 0 0 12px;
+        font-size: 20px;
+      }
+      .startup-error__stack {
+        overflow: auto;
+        padding: 12px;
+        border-radius: 8px;
+        background: #1f2937;
+        white-space: pre-wrap;
+        word-break: break-word;
+      }
+    </style>
+    <div class="startup-error">
+      <div class="startup-error__body">
+        <h1 class="startup-error__title">Desktop renderer failed</h1>
+        <pre class="startup-error__stack">${escapeHtml(formatError(error))}</pre>
       </div>
     </div>
   `;

@@ -241,7 +241,7 @@
           <p class="text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
             {{ t('aiAssistant.dialogs.automation.recoveryTitle') }}
           </p>
-          <span class="rounded-full border bg-muted px-2.5 py-1 text-xs text-muted-foreground">
+          <span class="rounded-full border bg-muted px-2 py-1 text-xs text-muted-foreground">
             {{ goalRecovery.retryable ? 'retryable' : 'blocked' }}
           </span>
         </div>

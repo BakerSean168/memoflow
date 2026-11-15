@@ -173,7 +173,7 @@ onBeforeUnmount(() => {
     >
       <button
         type="button"
-        class="module-capsule-main flex h-8 min-w-8 items-center gap-1.5 px-2.5 text-[12px] font-medium leading-none text-[hsl(var(--foreground-muted))] transition-colors hover:bg-[hsl(var(--selected)/0.72)] hover:text-foreground focus-visible:z-10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/70"
+        class="module-capsule-main flex h-8 min-w-8 items-center gap-1.5 px-2 text-[12px] font-medium leading-none text-[hsl(var(--foreground-muted))] transition-colors hover:bg-[hsl(var(--selected)/0.72)] hover:text-foreground focus-visible:z-10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/70"
         :data-testid="`capsule-nav-${id}`"
         :title="label"
         :aria-label="label"

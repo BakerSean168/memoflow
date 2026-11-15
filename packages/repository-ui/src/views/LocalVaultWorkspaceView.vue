@@ -83,7 +83,7 @@
           class="flex min-h-0 flex-col border-b border-[hsl(var(--border-subtle))] bg-[hsl(var(--surface)/0.55)] @3xl/panel:border-b-0 @3xl/panel:border-r"
           data-testid="local-vault-catalog"
         >
-          <div class="border-b border-[hsl(var(--border-subtle))] px-3 py-2.5">
+          <div class="border-b border-[hsl(var(--border-subtle))] px-3 py-2">
             <DocumentSourceStatus
               :title="binding?.displayName ?? ''"
               :subtitle="binding?.rootPath ?? ''"
@@ -140,7 +140,7 @@
             </DocumentSourceStatus>
           </div>
 
-          <div class="px-2.5 pb-2 pt-2.5">
+          <div class="px-2 pb-2 pt-2">
             <DocumentCatalogSearch
               v-model="searchQuery"
               :placeholder="t('repository.localVault.searchPlaceholder')"

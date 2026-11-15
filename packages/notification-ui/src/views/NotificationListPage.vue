@@ -20,7 +20,7 @@
           data-testid="mark-all-read-button"
           variant="ghost"
           size="sm"
-          class="h-8 shrink-0 gap-1.5 px-2.5 text-xs text-[hsl(var(--foreground-muted))] hover:bg-[hsl(var(--hover))] hover:text-foreground"
+          class="h-8 shrink-0 gap-1.5 px-2 text-xs text-[hsl(var(--foreground-muted))] hover:bg-[hsl(var(--hover))] hover:text-foreground"
           :aria-label="t('notification.action.markAllRead')"
           :disabled="!hasUnread"
           @click="handleMarkAllRead"

@@ -4,8 +4,9 @@
 
 `style-guard.mjs` enforces the style rule for newly added code. It is the
 changed-file companion to `fmt.mjs`: it only audits **lines added by the current
-change**, so the existing arbitrary-value backlog (about 819 occurrences) is
-explicitly out of scope and cannot block the guard.
+change**, so the existing backlog cannot block the guard. The spacing backlog
+was normalized to the scale below in #946; the remaining arbitrary values are
+real geometry and are registered in the exemption file.
 
 ```bash
 # Part of pnpm check:changed
@@ -67,6 +68,69 @@ whose token no longer appears in the file, fails the run and must be deleted. A
 duplicate `file + token` entry also fails. Static inline style is never
 exemptible.
 
+### Spacing scale (issue #946)
+
+The whole repository shares one spacing scale. There is no per-surface or
+per-package variant; a value that is not on the scale is a bug, not a taste.
+
+| px  | Tailwind step | Typical use                                                    |
+| --- | ------------- | -------------------------------------------------------------- |
+| 2   | `0.5`         | component-internal micro distance (hairline gaps, icon nudges) |
+| 4   | `1`           | component-internal micro distance                              |
+| 6   | `1.5`         | component-internal micro distance                              |
+| 8   | `2`           | workspace density: control padding, list gaps                  |
+| 12  | `3`           | workspace density                                              |
+| 16  | `4`           | workspace density                                              |
+| 20  | `5`           | block separation                                               |
+| 24  | `6`           | block separation                                               |
+| 32  | `8`           | page section separation                                        |
+| 40  | `10`          | page section separation                                        |
+| 48  | `12`          | page section separation                                        |
+| 64  | `16`          | page section separation                                        |
+
+Bands: 2/4/6 are **component-internal micro distance only**; 8/12/16 are the
+workspace rhythm; 20/24 separate blocks inside a page; 32 and above separate
+page sections.
+
+Off-scale values snap **down** to the nearest step:
+
+| off-scale px | snapped px | off-scale px | snapped px |
+| ------------ | ---------- | ------------ | ---------- |
+| 3            | 2          | 25–31        | 24         |
+| 5            | 4          | 33–39        | 32         |
+| 7            | 6          | 41–47        | 40         |
+| 9, 10, 11    | 8          | 49–63        | 48         |
+| 13, 14, 15   | 12         |              |            |
+| 17, 18, 19   | 16         |              |            |
+| 21, 22, 23   | 20         |              |            |
+
+Values above 64px are not snapped mechanically; they are reported and decided
+by the coordination line.
+
+Prefer the equivalent scale utility (`p-2`, `gap-3`, `mb-6`, `px-8`). Only when
+no step exists write the arbitrary form at a scale value (`h-[6px]`).
+
+### Layout conventions
+
+- A component owns its internal padding. Consumers must not override component
+  padding from the outside (`class="px-...">` on a component that already pads
+  itself) and must not pass `p-*` to restyle an existing component's insets.
+- Distance **between** components is owned by the parent (`flex`/`grid` plus
+  `gap-*`). A child component must not ship its own outer margin to create that
+  distance.
+- Control heights and icon sizes are geometry, not spacing. Use the component's
+  existing size variants (button `size`, input height, avatar size); do not
+  drag them into the spacing scale.
+
+### Inline style boundary
+
+- `style="…"` and literal `:style` objects are static styling and are rejected:
+  move them to utilities or design tokens.
+- `:style` bound to a runtime value is allowed: chart and canvas sizing,
+  virtual-list offsets, drag positions, progress percentages, data-driven
+  colors. The judgment is whether the value can only be known at runtime, not
+  whether the expression happens to be short.
+
 ### Managed dimensions
 
 Derived from the Tailwind v4 theme in `packages/ui-core/src/styles/theme.css`
@@ -77,14 +141,22 @@ Derived from the Tailwind v4 theme in `packages/ui-core/src/styles/theme.css`
 | spacing | `p px py ps pe pt pr pb pl`, `m mx my ms me mt mr mb ml`, `space-x space-y`, `gap gap-x gap-y`, `w h size`, `min-w min-h max-w max-h`, `inset inset-x inset-y`, `top right bottom left start end`, `translate-x translate-y`, `scroll-m* scroll-p*`, `border-spacing*` |
 | radius  | `rounded`, `rounded-s e t r b l`, `rounded-ss se ee es`, `rounded-tl tr br bl`                                                                                                                                                                                         |
 
-### Out of scope for this issue
+The scale applies to the distance families (`p*`, `m*`, `gap*`, `space-*`,
+`inset*`, `top/right/bottom/left`, `translate-*`). `w/h/size/min-*/max-*` are
+managed for the arbitrary-value check but are geometry: they keep their pixel
+value and are registered as exemptions instead of being snapped.
+
+### Out of scope
 
 - Colors (`text-[#…]`, `bg-[hsl(…)]`) belong to the hardcoded-color problem and
   are handled separately; the sidebar color pass is another issue.
 - Typography (`text-[11px]`, `leading-[…]`, `tracking-[…]`) uses a different
   scale and the existing micro-type set (10–13px) predates this rule. It is not
   a managed dimension here; a typography pass can extend the guard later.
-- Existing violations are not cleaned up by this issue.
+- Radius arbitrary values have no equivalent `--radius-*` token at every pixel
+  size; they are registered as exemptions and are a separate radius pass.
+- Spacing values above 64px found by the #946 sweep are listed on the issue and
+  left unchanged until the coordination line decides.
 
 ### Enforcement lane
 

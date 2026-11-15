@@ -293,8 +293,7 @@ onUnmounted(() => {
 <template>
   <div
     ref="containerRef"
-    class="flex flex-col gap-3 bg-transparent p-3 pointer-events-none"
-    style="width: 100%; min-height: 10px"
+    class="flex w-full min-h-2.5 flex-col gap-3 bg-transparent p-3 pointer-events-none"
   >
     <TransitionGroup name="notification-list" @after-leave="updateWindowBounds">
       <div
@@ -337,7 +336,7 @@ onUnmounted(() => {
           <div class="min-w-0 flex-1">
             <div class="mb-2 flex items-center gap-2">
               <span
-                class="inline-flex items-center rounded-full border border-amber-300/20 bg-amber-300/10 px-2.5 py-1 text-[11px] font-medium tracking-[0.18em] text-amber-200"
+                class="inline-flex items-center rounded-full border border-amber-300/20 bg-amber-300/10 px-2 py-1 text-[11px] font-medium tracking-[0.18em] text-amber-200"
               >
                 REMINDER
               </span>

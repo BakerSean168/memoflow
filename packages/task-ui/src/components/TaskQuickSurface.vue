@@ -191,7 +191,7 @@ async function createQuickTask() {
         <Button
           type="submit"
           size="sm"
-          class="h-8 px-2.5 text-xs"
+          class="h-8 px-2 text-xs"
           :disabled="!quickTaskTitle.trim() || isCreatingQuickTask"
           :loading="isCreatingQuickTask"
         >

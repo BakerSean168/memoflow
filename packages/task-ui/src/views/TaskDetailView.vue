@@ -349,14 +349,14 @@
                 <Badge
                   v-else-if="viewModel.goalBinding"
                   variant="secondary"
-                  class="h-7 max-w-64 rounded-full px-2.5 font-normal"
+                  class="h-7 max-w-64 rounded-full px-2 font-normal"
                 >
                   <span class="truncate">{{ goalContextText }}</span>
                 </Badge>
                 <Badge
                   v-if="goalContextKeyResultName"
                   variant="outline"
-                  class="h-7 max-w-64 rounded-full border-[hsl(var(--border-subtle))] bg-[hsl(var(--surface-raised)/0.46)] px-2.5 font-normal"
+                  class="h-7 max-w-64 rounded-full border-[hsl(var(--border-subtle))] bg-[hsl(var(--surface-raised)/0.46)] px-2 font-normal"
                 >
                   <span class="truncate">{{ goalContextKeyResultName }}</span>
                 </Badge>
@@ -521,22 +521,22 @@
             <div class="flex min-w-0 flex-wrap items-center gap-1.5">
               <Badge
                 variant="outline"
-                class="h-7 rounded-full border-[hsl(var(--border-subtle))] bg-[hsl(var(--surface-raised)/0.46)] px-2.5 font-normal"
+                class="h-7 rounded-full border-[hsl(var(--border-subtle))] bg-[hsl(var(--surface-raised)/0.46)] px-2 font-normal"
               >
                 {{ t('task.detail.totalInstances') }} {{ executionSummary.total }}
               </Badge>
               <Badge
                 variant="outline"
-                class="h-7 rounded-full border-[hsl(var(--border-subtle))] bg-[hsl(var(--surface-raised)/0.46)] px-2.5 font-normal"
+                class="h-7 rounded-full border-[hsl(var(--border-subtle))] bg-[hsl(var(--surface-raised)/0.46)] px-2 font-normal"
               >
                 {{ t('task.detail.completed') }} {{ executionSummary.completed }}
               </Badge>
-              <Badge variant="secondary" class="h-7 rounded-full px-2.5 font-normal">
+              <Badge variant="secondary" class="h-7 rounded-full px-2 font-normal">
                 {{ t('task.detail.completionRate') }} {{ executionSummary.completionRate }}%
               </Badge>
               <Badge
                 variant="outline"
-                class="h-7 rounded-full border-[hsl(var(--border-subtle))] bg-[hsl(var(--surface-raised)/0.46)] px-2.5 font-normal"
+                class="h-7 rounded-full border-[hsl(var(--border-subtle))] bg-[hsl(var(--surface-raised)/0.46)] px-2 font-normal"
               >
                 {{
                   t('task.detail.openCount', {
@@ -547,14 +547,14 @@
               <Badge
                 v-if="executionSummary.missed"
                 variant="outline"
-                class="h-7 rounded-full border-[hsl(var(--border-subtle))] bg-[hsl(var(--surface-raised)/0.46)] px-2.5 font-normal"
+                class="h-7 rounded-full border-[hsl(var(--border-subtle))] bg-[hsl(var(--surface-raised)/0.46)] px-2 font-normal"
               >
                 {{ t('task.detail.instanceStatusMissed') }} {{ executionSummary.missed }}
               </Badge>
               <Badge
                 v-if="executionSummary.skipped"
                 variant="outline"
-                class="h-7 rounded-full border-[hsl(var(--border-subtle))] bg-[hsl(var(--surface-raised)/0.46)] px-2.5 font-normal"
+                class="h-7 rounded-full border-[hsl(var(--border-subtle))] bg-[hsl(var(--surface-raised)/0.46)] px-2 font-normal"
               >
                 {{ t('task.detail.instanceStatusSkipped') }} {{ executionSummary.skipped }}
               </Badge>

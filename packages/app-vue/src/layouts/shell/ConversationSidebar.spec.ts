@@ -184,10 +184,10 @@ describe('ConversationSidebar attention', () => {
     const firstRow = wrapper
       .findAll('nav button')
       .find((item) => item.text() === 'Personal systems architecture');
-    expect(firstRow?.classes()).toContain('pr-9');
+    expect(firstRow?.classes()).toContain('pr-8');
     expect(firstRow?.find('span').classes()).toContain('truncate');
     const normalRow = wrapper.findAll('nav button').find((item) => item.text() === 'Training plan');
-    expect(normalRow?.classes()).toContain('pr-9');
+    expect(normalRow?.classes()).toContain('pr-8');
     await icons[0]!.trigger('click');
     expect(wrapper.emitted('select-conversation')).toEqual([['a']]);
     wrapper.unmount();

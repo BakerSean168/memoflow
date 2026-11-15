@@ -162,7 +162,7 @@ const utilityCapsules = computed(() =>
       data-testid="settings-window-header-title"
     >
       <span
-        class="truncate rounded-md border border-[hsl(var(--border-subtle))] bg-[hsl(var(--surface-raised)/0.72)] px-2.5 py-1 text-[12px] font-medium text-foreground"
+        class="truncate rounded-md border border-[hsl(var(--border-subtle))] bg-[hsl(var(--surface-raised)/0.72)] px-2 py-1 text-[12px] font-medium text-foreground"
         >{{ t('setting.title') }}</span
       >
     </div>

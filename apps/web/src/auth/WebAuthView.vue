@@ -341,7 +341,7 @@ watch([newPassword, confirmNewPassword], () => {
         :variant="currentLocale === option.value ? 'default' : 'ghost'"
         :aria-pressed="currentLocale === option.value"
         :data-testid="`auth-locale-${option.value}`"
-        class="h-7 px-2.5 text-xs"
+        class="h-7 px-2 text-xs"
         @click="setLocale(option.value)"
       >
         {{ option.label }}
@@ -349,7 +349,7 @@ watch([newPassword, confirmNewPassword], () => {
     </div>
 
     <section class="w-full max-w-sm" aria-labelledby="auth-title">
-      <header class="mb-7 text-center">
+      <header class="mb-6 text-center">
         <img :src="logo128" :alt="APP_DISPLAY_NAME" class="mx-auto mb-4 h-16 w-16" />
         <h1 id="auth-title" class="text-2xl font-semibold">{{ title }}</h1>
         <p class="mt-2 text-sm leading-6 text-white/55">{{ description }}</p>
@@ -670,7 +670,7 @@ watch([newPassword, confirmNewPassword], () => {
 
     <footer
       data-testid="auth-legal-footer"
-      class="mt-7 max-w-sm text-center text-xs leading-5 text-white/40"
+      class="mt-6 max-w-sm text-center text-xs leading-5 text-white/40"
     >
       <span>{{ t('auth.page.legalNoticePrefix') }}</span>
       <a

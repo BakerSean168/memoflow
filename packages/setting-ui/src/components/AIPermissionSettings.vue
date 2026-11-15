@@ -235,7 +235,7 @@ onMounted(() => {
         data-testid="ai-permission-overrides"
       >
         <summary
-          class="flex cursor-pointer list-none items-center justify-between gap-2 px-3 py-2.5 text-sm font-medium [&::-webkit-details-marker]:hidden"
+          class="flex cursor-pointer list-none items-center justify-between gap-2 px-3 py-2 text-sm font-medium [&::-webkit-details-marker]:hidden"
         >
           <span>{{ t('setting.permissions.byObject') }}</span>
           <ChevronDown
@@ -335,7 +335,7 @@ onMounted(() => {
         data-testid="ai-permission-grants"
       >
         <summary
-          class="flex cursor-pointer list-none items-center justify-between gap-2 px-3 py-2.5 text-sm [&::-webkit-details-marker]:hidden"
+          class="flex cursor-pointer list-none items-center justify-between gap-2 px-3 py-2 text-sm [&::-webkit-details-marker]:hidden"
         >
           <span>{{ t('setting.permissions.grants') }} ({{ snapshot?.rules.length }})</span>
           <ChevronDown
@@ -376,7 +376,7 @@ onMounted(() => {
         data-testid="ai-permission-activity"
       >
         <summary
-          class="flex cursor-pointer list-none items-center justify-between gap-2 px-3 py-2.5 text-sm [&::-webkit-details-marker]:hidden"
+          class="flex cursor-pointer list-none items-center justify-between gap-2 px-3 py-2 text-sm [&::-webkit-details-marker]:hidden"
         >
           <span>{{ t('setting.permissions.activity') }}</span>
           <ChevronDown

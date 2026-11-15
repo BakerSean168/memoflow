@@ -385,7 +385,7 @@ onBeforeUnmount(() => {
               <TooltipTrigger as-child>
                 <button
                   type="button"
-                  class="flex min-w-0 flex-1 items-start gap-2.5 rounded-lg px-1.5 py-1.5 text-left outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                  class="flex min-w-0 flex-1 items-start gap-2 rounded-lg px-1.5 py-1.5 text-left outline-none focus-visible:ring-2 focus-visible:ring-primary"
                   :class="[
                     selectedId === instance.instanceId ? 'ring-1 ring-inset ring-primary/65' : '',
                     !instance.enabled ? 'opacity-45' : '',

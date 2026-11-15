@@ -230,15 +230,15 @@ onBeforeUnmount(() => {
 
       <CardContent class="space-y-5">
         <dl class="grid gap-3 text-sm sm:grid-cols-3">
-          <div class="rounded-lg border border-border/70 bg-muted/20 px-3 py-2.5">
+          <div class="rounded-lg border border-border/70 bg-muted/20 px-3 py-2">
             <dt class="text-xs text-muted-foreground">{{ t('setting.updates.currentVersion') }}</dt>
             <dd class="mt-1 font-medium">{{ currentVersion }}</dd>
           </div>
-          <div class="rounded-lg border border-border/70 bg-muted/20 px-3 py-2.5">
+          <div class="rounded-lg border border-border/70 bg-muted/20 px-3 py-2">
             <dt class="text-xs text-muted-foreground">{{ t('setting.updates.releaseChannel') }}</dt>
             <dd class="mt-1 font-medium">{{ channelLabel }}</dd>
           </div>
-          <div class="rounded-lg border border-border/70 bg-muted/20 px-3 py-2.5">
+          <div class="rounded-lg border border-border/70 bg-muted/20 px-3 py-2">
             <dt class="text-xs text-muted-foreground">{{ t('setting.updates.updateOwner') }}</dt>
             <dd class="mt-1 font-medium">{{ ownerLabel }}</dd>
           </div>

@@ -11,7 +11,7 @@
           :aria-label="ariaLabel"
           :aria-invalid="parseError || undefined"
           :aria-describedby="parseError ? `${testId}-validation` : undefined"
-          class="h-8 rounded-md border-[hsl(var(--border-subtle))] bg-[hsl(var(--surface-raised)/0.34)] px-2.5 pr-8 text-[13px] shadow-none focus-visible:border-primary/50 focus-visible:ring-primary/40"
+          class="h-8 rounded-md border-[hsl(var(--border-subtle))] bg-[hsl(var(--surface-raised)/0.34)] px-2 pr-8 text-[13px] shadow-none focus-visible:border-primary/50 focus-visible:ring-primary/40"
           @update:model-value="emit('update:query', String($event))"
           @keydown.enter.prevent="emit('commit-query')"
         />
@@ -69,18 +69,18 @@
       :max-value="maxDate"
       :return-date="returnDate"
       :return-to-selected-label="returnToSelectedLabel"
-      class="pt-3.5"
+      class="pt-3"
       @update:model-value="emit('calendar', $event)"
     />
 
-    <div v-else class="space-y-2.5 pt-2.5">
+    <div v-else class="space-y-2 pt-2">
       <Input
         :model-value="yearValue"
         type="number"
         min="1"
         max="9999"
         :data-testid="`${testId}-year`"
-        class="h-8 rounded-md border-[hsl(var(--border-subtle))] bg-[hsl(var(--surface-raised)/0.34)] px-2.5 text-[13px] shadow-none focus-visible:border-primary/50 focus-visible:ring-primary/40"
+        class="h-8 rounded-md border-[hsl(var(--border-subtle))] bg-[hsl(var(--surface-raised)/0.34)] px-2 text-[13px] shadow-none focus-visible:border-primary/50 focus-visible:ring-primary/40"
         :aria-label="yearLabel"
         @update:model-value="emit('update-year', Number($event))"
       />

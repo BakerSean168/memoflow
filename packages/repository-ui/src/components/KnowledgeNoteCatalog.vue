@@ -4,7 +4,7 @@
     data-testid="knowledge-note-catalog"
   >
     <div
-      class="border-b border-[hsl(var(--border-subtle))] px-3 py-2.5"
+      class="border-b border-[hsl(var(--border-subtle))] px-3 py-2"
       data-testid="knowledge-catalog-repository"
     >
       <DocumentSourceStatus
@@ -111,7 +111,7 @@
       </Select>
     </div>
 
-    <div class="px-2.5 pb-2 pt-2.5">
+    <div class="px-2 pb-2 pt-2">
       <DocumentCatalogSearch
         :model-value="searchQuery"
         :placeholder="t('repository.projection.searchPlaceholder')"

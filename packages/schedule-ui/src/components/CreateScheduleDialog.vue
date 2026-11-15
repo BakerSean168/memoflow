@@ -64,7 +64,7 @@
         </section>
 
         <section
-          class="rounded-xl bg-[hsl(var(--surface-raised)/0.34)] p-3.5 shadow-[inset_0_0_0_1px_hsl(var(--border-subtle)/0.5)]"
+          class="rounded-xl bg-[hsl(var(--surface-raised)/0.34)] p-3 shadow-[inset_0_0_0_1px_hsl(var(--border-subtle)/0.5)]"
           data-testid="schedule-time-panel"
         >
           <div class="flex items-center gap-3">
@@ -116,7 +116,7 @@
             </div>
 
             <ArrowRight
-              class="hidden h-4 w-4 self-end text-muted-foreground/70 @lg/panel:block @lg/panel:mb-2.5"
+              class="hidden h-4 w-4 self-end text-muted-foreground/70 @lg/panel:block @lg/panel:mb-2"
             />
 
             <div class="space-y-1.5">
@@ -146,7 +146,7 @@
           >
             <button
               type="button"
-              class="group min-w-0 rounded-lg bg-[hsl(var(--surface)/0.68)] px-3 py-2.5 text-left shadow-[inset_0_0_0_1px_hsl(var(--border-subtle)/0.5)] transition-[background-color,box-shadow] hover:bg-[hsl(var(--hover)/0.72)] hover:shadow-[inset_0_0_0_1px_hsl(var(--border-subtle)/0.72)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/45"
+              class="group min-w-0 rounded-lg bg-[hsl(var(--surface)/0.68)] px-3 py-2 text-left shadow-[inset_0_0_0_1px_hsl(var(--border-subtle)/0.5)] transition-[background-color,box-shadow] hover:bg-[hsl(var(--hover)/0.72)] hover:shadow-[inset_0_0_0_1px_hsl(var(--border-subtle)/0.72)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/45"
               data-testid="schedule-start-time-button"
               @click="startPickerOpen = true"
             >
@@ -164,7 +164,7 @@
 
             <button
               type="button"
-              class="group min-w-0 rounded-lg bg-[hsl(var(--surface)/0.68)] px-3 py-2.5 text-left shadow-[inset_0_0_0_1px_hsl(var(--border-subtle)/0.5)] transition-[background-color,box-shadow] hover:bg-[hsl(var(--hover)/0.72)] hover:shadow-[inset_0_0_0_1px_hsl(var(--border-subtle)/0.72)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/45"
+              class="group min-w-0 rounded-lg bg-[hsl(var(--surface)/0.68)] px-3 py-2 text-left shadow-[inset_0_0_0_1px_hsl(var(--border-subtle)/0.5)] transition-[background-color,box-shadow] hover:bg-[hsl(var(--hover)/0.72)] hover:shadow-[inset_0_0_0_1px_hsl(var(--border-subtle)/0.72)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/45"
               data-testid="schedule-end-time-button"
               @click="endPickerOpen = true"
             >
@@ -219,24 +219,24 @@
                 {{ t('schedule.createDialog.fieldLocation') }}
               </Label>
               <div class="relative">
-                <MapPin class="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
+                <MapPin class="absolute left-3 top-2 h-4 w-4 text-muted-foreground" />
                 <Input
                   id="location"
                   v-model="formData.location"
                   :placeholder="t('schedule.createDialog.fieldLocationPlaceholder')"
-                  class="h-9 border-[hsl(var(--border-subtle))] bg-[hsl(var(--surface-raised)/0.3)] pl-9 shadow-none"
+                  class="h-9 border-[hsl(var(--border-subtle))] bg-[hsl(var(--surface-raised)/0.3)] pl-8 shadow-none"
                   maxlength="200"
                 />
               </div>
             </div>
 
-            <div v-else class="space-y-2.5">
+            <div v-else class="space-y-2">
               <div v-if="formData.attendees.length > 0" class="flex flex-wrap gap-1.5">
                 <Badge
                   v-for="(attendee, index) in formData.attendees"
                   :key="attendee"
                   variant="secondary"
-                  class="h-7 gap-1 rounded-full px-2.5 font-normal"
+                  class="h-7 gap-1 rounded-full px-2 font-normal"
                 >
                   {{ attendee }}
                   <button
@@ -267,7 +267,7 @@
 
           <div
             v-if="!formData.allDay"
-            class="flex items-center gap-3 rounded-lg bg-[hsl(var(--surface-raised)/0.3)] px-3 py-2.5 shadow-[inset_0_0_0_1px_hsl(var(--border-subtle)/0.46)]"
+            class="flex items-center gap-3 rounded-lg bg-[hsl(var(--surface-raised)/0.3)] px-3 py-2 shadow-[inset_0_0_0_1px_hsl(var(--border-subtle)/0.46)]"
             data-testid="schedule-conflict-setting"
           >
             <ShieldCheck class="h-4 w-4 shrink-0 text-success" />

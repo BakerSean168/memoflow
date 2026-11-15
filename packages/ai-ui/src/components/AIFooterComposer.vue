@@ -10,7 +10,7 @@
       <div
         class="relative rounded-[24px] border bg-[hsl(var(--surface-overlay)/0.94)] backdrop-blur-xl transition-[border-color,background-color] duration-150 focus-within:bg-[hsl(var(--surface-overlay))]"
         :class="[
-          density === 'comfortable' ? 'px-4 pb-3 pt-4' : 'px-3 pb-2.5 pt-3',
+          density === 'comfortable' ? 'px-4 pb-3 pt-4' : 'px-3 pb-2 pt-3',
           dragging
             ? 'border-primary/60 bg-muted/20'
             : 'border-[hsl(var(--border-strong))] focus-within:border-ring/50',
@@ -137,7 +137,7 @@
           :value="modelValue"
           rows="1"
           class="block w-full resize-none border-0 bg-transparent px-1 py-1 text-[13.5px] leading-6 text-foreground shadow-none outline-none placeholder:text-[hsl(var(--foreground-subtle))] focus-visible:ring-0"
-          :class="density === 'comfortable' ? 'min-h-[64px]' : 'min-h-[40px]'"
+          :class="density === 'comfortable' ? 'min-h-16' : 'min-h-10'"
           :style="{ maxHeight: `${textareaMaxPx}px` }"
           :disabled="!canType"
           :placeholder="t('aiAssistant.dialogs.chat.messagePlaceholder')"
@@ -503,7 +503,7 @@ const canSubmit = computed(
 
 const footerPaddingClass = computed(() => {
   if (props.density === 'comfortable') return 'px-4 pb-3 pt-5 sm:px-6';
-  if (props.density === 'compact') return 'px-3 pb-2.5 pt-4';
+  if (props.density === 'compact') return 'px-3 pb-2 pt-4';
   return 'px-2 pb-2 pt-3';
 });
 

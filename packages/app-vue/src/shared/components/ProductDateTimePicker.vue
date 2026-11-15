@@ -65,7 +65,7 @@
           </span>
           {{ title }}
         </DialogTitle>
-        <DialogDescription v-if="description" class="pl-9 text-xs leading-5">
+        <DialogDescription v-if="description" class="pl-8 text-xs leading-5">
           {{ description }}
         </DialogDescription>
       </DialogHeader>

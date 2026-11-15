@@ -713,7 +713,7 @@ watch([activeSection, search, () => enabledAgents.value.length], () => {
                 </template>
                 <div
                   v-else
-                  class="px-2.5 py-3 text-left text-xs leading-relaxed"
+                  class="px-2 py-3 text-left text-xs leading-relaxed"
                   data-testid="ai-model-picker-empty"
                   role="status"
                 >

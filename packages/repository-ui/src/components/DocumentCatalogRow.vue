@@ -1,7 +1,7 @@
 <template>
   <button
     type="button"
-    class="group block w-full rounded-md px-2.5 py-2 text-left transition-colors hover:bg-[hsl(var(--hover)/0.6)]"
+    class="group block w-full rounded-md px-2 py-2 text-left transition-colors hover:bg-[hsl(var(--hover)/0.6)]"
     :class="
       selected
         ? 'bg-[hsl(var(--selected)/0.82)] text-foreground shadow-[inset_0_0_0_1px_hsl(var(--border-subtle)/0.42)]'

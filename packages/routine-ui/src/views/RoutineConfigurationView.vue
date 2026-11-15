@@ -260,7 +260,7 @@
                 @click="openEditRoutine(routine)"
               >
                 <div
-                  class="hidden grid-cols-[minmax(0,1fr)_10rem_10rem] items-center gap-x-6 px-3 py-2.5 @2xl/panel:grid"
+                  class="hidden grid-cols-[minmax(0,1fr)_10rem_10rem] items-center gap-x-6 px-3 py-2 @2xl/panel:grid"
                   data-testid="routine-row-desktop"
                 >
                   <div class="min-w-0">

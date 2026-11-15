@@ -58,12 +58,7 @@ const actionClass = computed(() =>
         </AlertDialogDescription>
       </AlertDialogHeader>
       <AlertDialogFooter>
-        <Button
-          data-testid="global-confirm-cancel"
-          variant="outline"
-          class="mt-2 sm:mt-0"
-          @click="handleCancel"
-        >
+        <Button data-testid="global-confirm-cancel" variant="outline" @click="handleCancel">
           {{ state.cancelText }}
         </Button>
         <Button data-testid="global-confirm-confirm" :class="actionClass" @click="handleConfirm">

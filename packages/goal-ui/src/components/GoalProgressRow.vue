@@ -20,7 +20,7 @@
         @click="emit('view')"
       >
         <div
-          class="hidden min-h-14 grid-cols-[minmax(0,1fr)_6.5rem_8.5rem_10rem] items-center gap-x-6 px-3 py-2.5 pr-12 @2xl/panel:grid"
+          class="hidden min-h-14 grid-cols-[minmax(0,1fr)_6.5rem_8.5rem_10rem] items-center gap-x-6 px-3 py-2 pr-12 @2xl/panel:grid"
           data-testid="goal-row-desktop"
         >
           <div class="min-w-0">

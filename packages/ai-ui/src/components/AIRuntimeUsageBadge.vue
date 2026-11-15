@@ -1,7 +1,7 @@
 <template>
   <span
     v-if="visible"
-    class="inline-flex items-center gap-1.5 rounded-full border bg-muted/40 px-2.5 py-1 text-[11px] tabular-nums text-muted-foreground"
+    class="inline-flex items-center gap-1.5 rounded-full border bg-muted/40 px-2 py-1 text-[11px] tabular-nums text-muted-foreground"
     data-testid="ai-runtime-usage"
     :title="title"
   >

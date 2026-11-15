@@ -1,11 +1,11 @@
 <template>
   <div
     ref="viewport"
-    class="min-h-0 flex-1 overflow-y-auto scrollbar-gutter-stable px-4 py-5 @md/ai:px-7 @xl/ai:px-10"
+    class="min-h-0 flex-1 overflow-y-auto scrollbar-gutter-stable px-4 py-5 @md/ai:px-6 @xl/ai:px-10"
     data-testid="ai-message-panel"
   >
     <div
-      class="mx-auto flex w-full max-w-[52rem] flex-col gap-7"
+      class="mx-auto flex w-full max-w-[52rem] flex-col gap-6"
       role="log"
       aria-live="polite"
       aria-relevant="additions text"
@@ -20,7 +20,7 @@
         >
           <div
             v-if="item.role === 'user'"
-            class="max-w-[88%] rounded-[16px] rounded-br-[6px] bg-[hsl(var(--surface-raised))] px-3.5 py-2.5 text-[13.5px] leading-6 text-foreground @md/ai:max-w-[82%] @xl/ai:max-w-[78%]"
+            class="max-w-[88%] rounded-[16px] rounded-br-[6px] bg-[hsl(var(--surface-raised))] px-3 py-2 text-[13.5px] leading-6 text-foreground @md/ai:max-w-[82%] @xl/ai:max-w-[78%]"
             :class="aiUiHost.semanticElevationClass('raised')"
           >
             <div v-if="item.attachments?.length" class="mb-2 flex flex-wrap gap-1.5">
@@ -341,7 +341,7 @@
             data-testid="ai-welcome-no-model"
           >
             <div
-              class="mx-auto flex max-w-md items-center gap-2.5 rounded-xl bg-[hsl(var(--surface-raised)/0.5)] px-3 py-2.5 text-left"
+              class="mx-auto flex max-w-md items-center gap-2 rounded-xl bg-[hsl(var(--surface-raised)/0.5)] px-3 py-2 text-left"
               :class="aiUiHost.semanticElevationClass('inset')"
             >
               <Settings2 class="h-4 w-4 shrink-0 text-muted-foreground" />
@@ -361,7 +361,7 @@
             <div class="mx-auto mt-4 grid max-w-md gap-1 @sm/ai:grid-cols-2">
               <button
                 type="button"
-                class="group flex items-center gap-2.5 rounded-xl bg-[hsl(var(--surface-raised)/0.28)] px-3 py-2.5 text-left text-[13px] text-[hsl(var(--foreground-muted))] shadow-[inset_0_0_0_1px_hsl(var(--border-subtle)/0.32)] transition-[background-color,box-shadow,color,transform] duration-150 hover:-translate-y-px hover:bg-[hsl(var(--surface-raised)/0.72)] hover:text-foreground hover:shadow-[inset_0_0_0_1px_hsl(var(--border-subtle)/0.72),0_6px_18px_-14px_rgba(0,0,0,0.55)]"
+                class="group flex items-center gap-2 rounded-xl bg-[hsl(var(--surface-raised)/0.28)] px-3 py-2 text-left text-[13px] text-[hsl(var(--foreground-muted))] shadow-[inset_0_0_0_1px_hsl(var(--border-subtle)/0.32)] transition-[background-color,box-shadow,color,transform] duration-150 hover:-translate-y-px hover:bg-[hsl(var(--surface-raised)/0.72)] hover:text-foreground hover:shadow-[inset_0_0_0_1px_hsl(var(--border-subtle)/0.72),0_6px_18px_-14px_rgba(0,0,0,0.55)]"
                 data-testid="ai-welcome-create-goal"
                 @click="$emit('create-goal')"
               >
@@ -374,7 +374,7 @@
               </button>
               <button
                 type="button"
-                class="group flex items-center gap-2.5 rounded-xl bg-[hsl(var(--surface-raised)/0.28)] px-3 py-2.5 text-left text-[13px] text-[hsl(var(--foreground-muted))] shadow-[inset_0_0_0_1px_hsl(var(--border-subtle)/0.32)] transition-[background-color,box-shadow,color,transform] duration-150 hover:-translate-y-px hover:bg-[hsl(var(--surface-raised)/0.72)] hover:text-foreground hover:shadow-[inset_0_0_0_1px_hsl(var(--border-subtle)/0.72),0_6px_18px_-14px_rgba(0,0,0,0.55)]"
+                class="group flex items-center gap-2 rounded-xl bg-[hsl(var(--surface-raised)/0.28)] px-3 py-2 text-left text-[13px] text-[hsl(var(--foreground-muted))] shadow-[inset_0_0_0_1px_hsl(var(--border-subtle)/0.32)] transition-[background-color,box-shadow,color,transform] duration-150 hover:-translate-y-px hover:bg-[hsl(var(--surface-raised)/0.72)] hover:text-foreground hover:shadow-[inset_0_0_0_1px_hsl(var(--border-subtle)/0.72),0_6px_18px_-14px_rgba(0,0,0,0.55)]"
                 data-testid="ai-welcome-quick-task"
                 @click="$emit('quick-task')"
               >
@@ -391,13 +391,13 @@
           <!-- Compact shortcut rows: suggestions, not dashboard cards. -->
           <div
             v-else-if="toolMode === 'chat'"
-            class="mx-auto mt-7 grid max-w-lg gap-1 @sm/ai:grid-cols-2"
+            class="mx-auto mt-6 grid max-w-lg gap-1 @sm/ai:grid-cols-2"
           >
             <button
               v-for="entry in shortcutEntries"
               :key="entry.mode"
               type="button"
-              class="group flex items-center gap-2.5 rounded-xl bg-[hsl(var(--surface-raised)/0.28)] px-3 py-2.5 text-left text-[13px] text-[hsl(var(--foreground-muted))] shadow-[inset_0_0_0_1px_hsl(var(--border-subtle)/0.32)] transition-[background-color,box-shadow,color,transform] duration-150 hover:-translate-y-px hover:bg-[hsl(var(--surface-raised)/0.72)] hover:text-foreground hover:shadow-[inset_0_0_0_1px_hsl(var(--border-subtle)/0.72),0_6px_18px_-14px_rgba(0,0,0,0.55)]"
+              class="group flex items-center gap-2 rounded-xl bg-[hsl(var(--surface-raised)/0.28)] px-3 py-2 text-left text-[13px] text-[hsl(var(--foreground-muted))] shadow-[inset_0_0_0_1px_hsl(var(--border-subtle)/0.32)] transition-[background-color,box-shadow,color,transform] duration-150 hover:-translate-y-px hover:bg-[hsl(var(--surface-raised)/0.72)] hover:text-foreground hover:shadow-[inset_0_0_0_1px_hsl(var(--border-subtle)/0.72),0_6px_18px_-14px_rgba(0,0,0,0.55)]"
               :data-testid="`ai-welcome-entry-${entry.mode}`"
               @click="$emit('select-shortcut', entry.mode)"
             >

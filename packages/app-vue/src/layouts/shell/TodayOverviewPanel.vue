@@ -81,7 +81,7 @@ onBeforeUnmount(() => {
           <Button
             variant="ghost"
             size="sm"
-            class="h-7 rounded-md px-2.5 text-[12px] text-[hsl(var(--foreground-muted))] hover:bg-[hsl(var(--hover))] hover:text-foreground"
+            class="h-7 rounded-md px-2 text-[12px] text-[hsl(var(--foreground-muted))] hover:bg-[hsl(var(--hover))] hover:text-foreground"
             data-testid="today-overview-create-goal"
             @click="emit('open-route', 'goal', '/goals?dialog=goal')"
           >
@@ -90,7 +90,7 @@ onBeforeUnmount(() => {
           </Button>
           <Button
             size="sm"
-            class="h-7 rounded-md px-2.5 text-[12px] shadow-none"
+            class="h-7 rounded-md px-2 text-[12px] shadow-none"
             data-testid="today-overview-create-task"
             @click="emit('open-route', 'task', '/tasks?dialog=quick-task')"
           >
@@ -101,7 +101,7 @@ onBeforeUnmount(() => {
       </div>
     </header>
 
-    <div class="grid gap-2.5 p-3" data-testid="today-overview-widgets">
+    <div class="grid gap-2 p-3" data-testid="today-overview-widgets">
       <DailyTodoWidget
         class="min-h-[9rem]"
         :active="active"
