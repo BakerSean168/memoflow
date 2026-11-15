@@ -2811,7 +2811,7 @@
         "status": "none-verified",
         "testFiles": []
       },
-      "sourceSha256": "6ffb41aba3aa89ea63046bd29c90892cfb81b90fa659348294117d312cae58fd"
+      "sourceSha256": "2f16c4256068650646e00203bd0fb760e6543c696ed7fce8f140c9eb707768a8"
     },
     {
       "path": "packages/app-vue/src/layouts/shell/ConversationSidebar.spec.ts",
@@ -2845,7 +2845,7 @@
         "status": "none-verified",
         "testFiles": []
       },
-      "sourceSha256": "5aa419e7f49e70be9d472f58f68c40a12db6c9be7151e326aa0f2f08d8c4c7f9"
+      "sourceSha256": "6ffb41aba3aa89ea63046bd29c90892cfb81b90fa659348294117d312cae58fd"
     },
     {
       "path": "packages/app-vue/src/layouts/shell/WindowHeader.spec.ts",
