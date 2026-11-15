@@ -446,6 +446,39 @@ describe('AppShell right-panel integration', () => {
     expect(requestComposerFocus).toHaveBeenCalledTimes(1);
   });
 
+  it('does not steal focus from an open dialog when leaving focus', async () => {
+    const { store } = await mountShell('/goals');
+    if (!store.rightPanelOpen) store.toggleRightPanel();
+    await nextTick();
+
+    store.toggleFocus();
+    await nextTick();
+    requestComposerFocus.mockClear();
+
+    const dialog = document.createElement('div');
+    dialog.setAttribute('role', 'dialog');
+    const dialogButton = document.createElement('button');
+    dialog.appendChild(dialogButton);
+    document.body.appendChild(dialog);
+    onTestFinished(() => dialog.remove());
+    dialogButton.focus();
+    expect(document.activeElement).toBe(dialogButton);
+
+    // #958: viewport geometry may restore split while the user is inside a modal;
+    // that must not pull focus out of the dialog into the returning composer.
+    store.toggleFocus();
+    await nextTick();
+    expect(store.layout).toBe('split');
+    expect(requestComposerFocus).not.toHaveBeenCalled();
+
+    dialog.remove();
+    store.toggleFocus();
+    await nextTick();
+    store.toggleFocus();
+    await nextTick();
+    expect(requestComposerFocus).toHaveBeenCalledTimes(1);
+  });
+
   describe.sequential('cleanup after an aborted case', () => {
     let abandoned: Awaited<ReturnType<typeof mountShell>>;
     let host: HTMLDivElement;

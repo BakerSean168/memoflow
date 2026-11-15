@@ -505,9 +505,14 @@ watch([workspaceMainRef, aiColumnRef], () => {
 /**
  * 退出专注模式即回到普通布局：壳此时才重新提供宿主，这里请对话页在输入框
  * 落地后接管焦点，用户不必再点一下（Issue #951）。
+ *
+ * 弹窗（设置等）打开时焦点属于弹窗：窗口跨过 focus 阈值再恢复分栏只是
+ * 几何变化，不能把焦点从用户正在操作的弹窗控件抢到弹窗后的输入框（#958）。
  */
 watch(layout, (next, previous) => {
   if (previous !== 'focus' || next === 'focus') return;
+  const active = typeof document === 'undefined' ? null : document.activeElement;
+  if (active instanceof Element && active.closest('[role="dialog"], [role="alertdialog"]')) return;
   aiRef.value?.requestComposerFocus();
 });
 
