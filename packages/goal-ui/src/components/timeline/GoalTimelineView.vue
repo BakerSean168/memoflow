@@ -76,7 +76,13 @@
 
       <!-- 导出按钮 -->
       <div class="export-actions">
-        <button type="button" class="export-btn" :disabled="exporting" @click="exportAsImage">
+        <Button
+          type="button"
+          variant="ghost"
+          class="export-btn h-auto"
+          :disabled="exporting"
+          @click="exportAsImage"
+        >
           <svg viewBox="0 0 24 24" class="btn-icon">
             <path
               d="M19 12v7H5v-7H3v7c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2v-7h-2zm-6 .67l2.59-2.58L17 11.5l-5 5-5-5 1.41-1.41L11 12.67V3h2z"
@@ -84,7 +90,7 @@
             />
           </svg>
           {{ exporting ? t('goal.timeline.exporting') : t('goal.timeline.exportImage') }}
-        </button>
+        </Button>
       </div>
     </template>
   </div>
@@ -102,6 +108,7 @@ const { t } = useI18n();
 import type { ECharts } from 'echarts';
 
 import TimelineControls from './TimelineControls.vue';
+import { Button } from '@memoflow/ui-vue-shadcn/components/ui/button';
 import { useGoalTimeline } from '../../composables/useGoalTimeline';
 import { useChartTheme } from '../../utils/chart-theme';
 import type { TimelineSnapshot } from '../../utils/goal-timeline';

@@ -127,9 +127,10 @@
           {{ t('goal.dialog.krTrajectoryCurrent') }}
         </dt>
         <dd>
-          <button
+          <Button
             type="button"
-            class="rounded-sm px-1 text-xs font-semibold tabular-nums text-primary underline decoration-dotted underline-offset-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            variant="link"
+            class="h-auto rounded-sm px-1 text-xs font-semibold tabular-nums text-primary underline decoration-dotted underline-offset-4"
             :data-testid="checkInTestId"
             :aria-label="
               checkInLabel ? `${checkInLabel}: ${currentValue}${unit ? ` ${unit}` : ''}` : undefined
@@ -138,7 +139,7 @@
             @click="emit('check-in')"
           >
             {{ currentValue }}{{ unit ? ` ${unit}` : '' }}
-          </button>
+          </Button>
         </dd>
       </div>
       <div>
@@ -266,6 +267,7 @@
 import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { Input } from '@memoflow/ui-vue-shadcn';
+import { Button } from '@memoflow/ui-vue-shadcn/components/ui/button';
 
 defineProps<{
   startLabel: string;

@@ -12,6 +12,7 @@ import {
   DropdownMenuTrigger,
   DropdownMenuContent,
   DropdownMenuItem,
+  Input,
 } from '@memoflow/ui-vue-shadcn';
 import type {
   NotificationActionIntent,
@@ -144,13 +145,14 @@ function actionLabel(action: NotificationActionIntent): string {
         ><DialogTitle>{{ t('notification.action.snoozeCustom') }}</DialogTitle></DialogHeader
       >
       <div class="flex items-center gap-2">
-        <input
-          v-model.number="customMinutes"
+        <Input
+          :model-value="customMinutes"
           type="number"
           min="1"
           max="525600"
-          class="w-24 rounded border bg-background px-2 py-1 text-xs"
+          class="h-auto w-24 rounded px-2 py-1 text-xs"
           :aria-label="t('notification.action.snoozeMinutes')"
+          @update:model-value="customMinutes = Number($event)"
         />
         <Button
           size="sm"

@@ -8,6 +8,7 @@
 import { computed, onMounted, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { ArrowRight, Target } from '@lucide/vue';
+import { Button } from '@memoflow/ui-vue-shadcn';
 import {
   goalTimeframeEndBoundary,
   goalTimeframeLabel,
@@ -104,14 +105,15 @@ onMounted(() => {
 
     <CapsulePreviewState v-else-if="localError" kind="error" data-testid="goal-capsule-error">
       <p class="max-w-64 text-[11px] leading-4 text-muted-foreground">{{ localError }}</p>
-      <button
+      <Button
         type="button"
-        class="text-[11px] font-medium text-primary"
+        variant="link"
+        class="h-auto p-0 text-[11px] font-medium text-primary"
         data-testid="goal-capsule-retry"
         @click="load(true)"
       >
         {{ t('common.retry') }}
-      </button>
+      </Button>
     </CapsulePreviewState>
 
     <CapsulePreviewState
@@ -165,15 +167,16 @@ onMounted(() => {
     </ul>
 
     <CapsulePreviewFooter>
-      <button
+      <Button
         type="button"
-        class="flex h-8 items-center gap-1 rounded-md px-2 text-[11px] font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
+        variant="ghost"
+        class="flex h-8 items-center gap-1 px-2 text-[11px] font-medium text-muted-foreground hover:bg-accent hover:text-foreground"
         data-testid="goal-capsule-view-all"
         @click="$emit('view-all')"
       >
         {{ t('shell.goalWorkspace.viewAll') }}
         <ArrowRight class="h-3.5 w-3.5" />
-      </button>
+      </Button>
     </CapsulePreviewFooter>
   </CapsulePreviewShell>
 </template>

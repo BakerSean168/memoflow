@@ -87,24 +87,27 @@
                   v-if="approval.status === 'pending' || approval.status === 'sending'"
                   class="mt-3 flex flex-wrap gap-2"
                 >
-                  <button
+                  <Button
                     type="button"
-                    class="rounded-md bg-primary px-3 py-2 text-sm text-primary-foreground focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary disabled:opacity-50"
+                    size="lg"
+                    class="px-3"
                     :disabled="approval.status !== 'pending'"
                     data-testid="ai-tool-approve"
                     @click="$emit('tool-decision', approval, 'approve')"
                   >
                     {{ t('aiAssistant.chatPage.tools.approve') }}
-                  </button>
-                  <button
+                  </Button>
+                  <Button
                     type="button"
-                    class="rounded-md border border-border px-3 py-2 text-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary disabled:opacity-50"
+                    variant="outline"
+                    size="lg"
+                    class="px-3"
                     :disabled="approval.status !== 'pending'"
                     data-testid="ai-tool-decline"
                     @click="$emit('tool-decision', approval, 'decline')"
                   >
                     {{ t('aiAssistant.chatPage.tools.decline') }}
-                  </button>
+                  </Button>
                 </div>
               </section>
               <AILocalRequestCard
@@ -180,31 +183,35 @@
                       {{ option.label }}
                     </label>
                   </template>
-                  <input
+                  <Input
                     v-else
-                    v-model="askUserAnswers[request.toolCallId]"
+                    :model-value="String(askUserAnswers[request.toolCallId] ?? '')"
                     class="w-full rounded border bg-background p-2"
                     :maxlength="4000"
                     required
                     :disabled="request.status !== 'pending'"
+                    @update:model-value="askUserAnswers[request.toolCallId] = String($event)"
                   />
-                  <button
+                  <Button
                     type="submit"
-                    class="rounded-md bg-primary px-3 py-2 text-sm text-primary-foreground disabled:opacity-50"
+                    size="lg"
+                    class="px-3"
                     :disabled="request.status !== 'pending'"
                     data-testid="ai-ask-user-submit"
                   >
                     {{ t('aiAssistant.local.answer') }}
-                  </button>
-                  <button
+                  </Button>
+                  <Button
                     type="button"
-                    class="rounded-md border px-3 py-2 text-sm disabled:opacity-50"
+                    variant="outline"
+                    size="lg"
+                    class="px-3"
                     :disabled="request.status !== 'pending'"
                     data-testid="ai-ask-user-cancel"
                     @click="$emit('ask-user-cancel', request)"
                   >
                     {{ t('aiAssistant.local.cancel') }}
-                  </button>
+                  </Button>
                 </form>
               </section>
               <AIMessageContent
@@ -238,19 +245,21 @@
                 class="mt-1.5 flex h-8 items-center gap-1 opacity-0 transition-opacity focus-within:opacity-100 group-hover/message:opacity-100"
                 data-testid="ai-message-actions"
               >
-                <button
+                <Button
                   v-if="canSaveLocalNote && item.status !== 'generating'"
                   type="button"
-                  class="inline-flex h-8 items-center gap-1 rounded-md px-2 text-[11px] text-muted-foreground hover:bg-muted/60 hover:text-foreground"
+                  variant="ghost"
+                  class="h-8 gap-1 px-2 text-[11px] text-muted-foreground hover:bg-muted/60 hover:text-foreground"
                   data-testid="ai-message-save-note"
                   @click="$emit('save-local-note', item.content)"
                 >
                   <NotebookPen class="h-3.5 w-3.5" />
                   {{ t('aiAssistant.local.saveNote') }}
-                </button>
-                <button
+                </Button>
+                <Button
                   type="button"
-                  class="inline-flex h-8 items-center gap-1 rounded-md px-2 text-[11px] text-muted-foreground transition-colors hover:bg-muted/60 hover:text-foreground"
+                  variant="ghost"
+                  class="h-8 gap-1 px-2 text-[11px] text-muted-foreground hover:bg-muted/60 hover:text-foreground"
                   :title="
                     copiedMessageId === item.id
                       ? t('aiAssistant.chatPage.message.copied')
@@ -271,7 +280,7 @@
                       ? t('aiAssistant.chatPage.message.copied')
                       : t('aiAssistant.chatPage.message.copy')
                   }}</span>
-                </button>
+                </Button>
               </div>
             </div>
           </div>
@@ -436,6 +445,8 @@ import {
   Target,
 } from '@lucide/vue';
 import { useI18n } from 'vue-i18n';
+import { Button } from '@memoflow/ui-vue-shadcn/components/ui/button';
+import { Input } from '@memoflow/ui-vue-shadcn/components/ui/input';
 import {
   Select,
   SelectContent,

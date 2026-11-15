@@ -10,6 +10,8 @@ import { computed, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { Search, X } from '@lucide/vue';
 import { LinearSidebarItem } from '@memoflow/ui-vue-shadcn';
+import { Button } from '@memoflow/ui-vue-shadcn/components/ui/button';
+import { Input } from '@memoflow/ui-vue-shadcn/components/ui/input';
 
 export interface SettingsNavigationItem {
   value: string;
@@ -51,25 +53,27 @@ function select(value: string): void {
         class="flex h-8 items-center gap-2 rounded-md px-2 py-1.5 text-sm text-muted-foreground transition-colors focus-within:bg-[hsl(var(--hover))] hover:bg-[hsl(var(--hover))]"
       >
         <Search class="size-4 shrink-0 text-muted-foreground/80" aria-hidden="true" />
-        <input
+        <Input
           v-model="query"
           type="text"
-          class="min-w-0 flex-1 bg-transparent text-sm text-foreground outline-none placeholder:text-muted-foreground"
+          class="h-auto min-w-0 flex-1 rounded-none border-0 bg-transparent p-0 text-sm text-foreground shadow-none focus-visible:ring-0"
           :placeholder="t('setting.navSearch.placeholder')"
           :aria-label="t('setting.navSearch.label')"
           data-testid="settings-nav-search"
           @keydown.esc.stop="clearQuery"
         />
-        <button
+        <Button
           v-if="query"
           type="button"
-          class="flex size-4 shrink-0 items-center justify-center rounded-sm text-muted-foreground hover:text-foreground"
+          variant="ghost"
+          size="icon"
+          class="size-4 shrink-0 rounded-sm text-muted-foreground hover:bg-transparent hover:text-foreground"
           :aria-label="t('setting.navSearch.clear')"
           data-testid="settings-nav-search-clear"
           @click="clearQuery"
         >
           <X class="size-3" aria-hidden="true" />
-        </button>
+        </Button>
       </div>
     </div>
 

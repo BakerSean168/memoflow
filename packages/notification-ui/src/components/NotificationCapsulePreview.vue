@@ -100,15 +100,16 @@
     </ul>
 
     <CapsulePreviewFooter>
-      <button
+      <Button
         type="button"
-        class="flex h-8 items-center gap-1 rounded-md px-2 text-[11px] font-medium text-muted-foreground transition-colors hover:bg-[hsl(var(--hover))] hover:text-foreground"
+        variant="ghost"
+        class="flex h-8 items-center gap-1 px-2 text-[11px] font-medium text-muted-foreground hover:bg-[hsl(var(--hover))] hover:text-foreground"
         data-testid="notification-capsule-view-all"
         @click="$emit('view-all')"
       >
         {{ t('notification.drawer.viewAll') }}
         <ArrowRight class="h-3.5 w-3.5" />
-      </button>
+      </Button>
     </CapsulePreviewFooter>
   </CapsulePreviewShell>
 </template>

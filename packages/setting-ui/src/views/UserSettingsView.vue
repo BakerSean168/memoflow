@@ -214,16 +214,18 @@ onBeforeUnmount(() => {
         class="flex h-12 shrink-0 items-center gap-3 border-b border-[hsl(var(--border-subtle))] pe-2 ps-5"
         data-testid="settings-shell-header"
       >
-        <button
+        <Button
           v-if="isNarrow"
           type="button"
-          class="flex size-8 shrink-0 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-accent hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          variant="ghost"
+          size="icon"
+          class="size-8 shrink-0 text-muted-foreground hover:bg-accent hover:text-foreground"
           :aria-label="t('setting.nav.open')"
           data-testid="settings-nav-trigger"
           @click="openNavigation"
         >
           <PanelLeft class="size-4" aria-hidden="true" />
-        </button>
+        </Button>
 
         <nav class="min-w-0" :aria-label="t('setting.breadcrumb.label')">
           <ol class="m-0 flex min-w-0 list-none items-center gap-2 p-0 text-sm">
@@ -255,15 +257,17 @@ onBeforeUnmount(() => {
             <RotateCcw class="size-3.5" aria-hidden="true" />
             <span class="max-sm:sr-only">{{ t('setting.restoreDefaults.label') }}</span>
           </Button>
-          <button
+          <Button
             type="button"
-            class="flex size-8 shrink-0 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-accent hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            variant="ghost"
+            size="icon"
+            class="size-8 shrink-0 text-muted-foreground hover:bg-accent hover:text-foreground"
             :aria-label="t('common.close')"
             data-testid="settings-close"
             @click="closeSettings"
           >
             <X class="size-4" aria-hidden="true" />
-          </button>
+          </Button>
         </div>
       </header>
 
