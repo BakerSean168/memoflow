@@ -115,6 +115,14 @@ test('Windows AGY Composer selects, sends, persists and restores its native conn
     expect(selected.ok).toBe(true);
     await page.reload();
     await expect(page.getByTestId('app-shell')).toBeVisible();
+    // #951: a restored window narrower than the split threshold opens in focus,
+    // which intentionally renders no composer host. Leave focus the way a user
+    // would before asserting the updated app can still chat.
+    const shell = page.getByTestId('app-shell');
+    if ((await shell.getAttribute('data-shell-state')) === 'focus') {
+      await page.getByTestId('business-panel-focus-toggle').click();
+    }
+    await expect(shell).toHaveAttribute('data-shell-state', /^(split|chat)$/);
     await expect(page.getByTestId('ai-chat-composer')).toBeVisible();
     await page.evaluate((channel) => {
       const win = window as unknown as BridgeWindow;
