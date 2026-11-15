@@ -178,9 +178,9 @@ describe('ConversationSidebar attention', () => {
     const icons = wrapper.findAll('[data-testid="shell-conversation-status"]');
     expect(icons).toHaveLength(2);
     expect(icons[0]!.attributes('aria-label')).toBe('Working');
-    expect(icons[0]!.find('svg').classes()).toContain('text-[#7DD3FC]');
+    expect(icons[0]!.find('svg').classes()).toContain('text-info');
     expect(icons[1]!.attributes('aria-label')).toBe('New result');
-    expect(icons[1]!.find('svg').classes()).toContain('text-[#6EE7B7]');
+    expect(icons[1]!.find('svg').classes()).toContain('text-success');
     const firstRow = wrapper
       .findAll('nav button')
       .find((item) => item.text() === 'Personal systems architecture');
