@@ -1,0 +1,5 @@
+{
+  "kind": "style-guard-exemptions-v1",
+  "description": "Per-occurrence exemptions for real-geometry arbitrary values. See tools/quality/README.md. Each entry needs file, exact token and reason; stale entries fail the guard.",
+  "entries": []
+}
