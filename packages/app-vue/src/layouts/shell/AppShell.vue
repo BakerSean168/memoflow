@@ -812,6 +812,7 @@ onBeforeUnmount(() => {
     >
       <span>{{ t('shell.auth.unverifiedBanner') }}</span>
       <Button
+        type="button"
         size="sm"
         class="h-auto rounded-md bg-amber-900/10 px-3 py-1 text-xs font-medium text-amber-950 hover:bg-amber-900/15 dark:bg-amber-400/20 dark:text-amber-50 dark:hover:bg-amber-400/30"
         data-testid="unverified-email-banner-action"

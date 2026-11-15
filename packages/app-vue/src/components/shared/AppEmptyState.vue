@@ -64,6 +64,7 @@ defineEmits<{
       <slot name="secondary">
         <Button
           v-if="secondaryLabel"
+          type="button"
           variant="link"
           class="h-auto p-0 text-xs text-muted-foreground underline-offset-4 hover:text-foreground"
           data-testid="empty-state-secondary"

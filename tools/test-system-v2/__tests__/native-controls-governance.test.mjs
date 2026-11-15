@@ -4,7 +4,10 @@ import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import path from 'node:path';
 
 const repositoryRoot = process.cwd();
-const registryPath = path.join(repositoryRoot, 'tools/test-system-v2/native-controls-registry.json');
+const registryPath = path.join(
+  repositoryRoot,
+  'tools/test-system-v2/native-controls-registry.json',
+);
 const registry = JSON.parse(readFileSync(registryPath, 'utf8'));
 const componentLibrary = 'ui-vue-shadcn';
 const allowedKinds = ['button', 'input', 'textarea', 'file-input'];
@@ -52,9 +55,7 @@ function nativeControlsIn(source) {
   if (/<button(?=[\s>]|$)/m.test(markup)) kinds.push('button');
 
   const inputs = [...markup.matchAll(/<input\b[^>]*>/gs)].map((match) => match[0]);
-  const visibleInput = inputs.some(
-    (tag) => !['hidden', 'file'].includes(inputType(tag)),
-  );
+  const visibleInput = inputs.some((tag) => !['hidden', 'file'].includes(inputType(tag)));
   if (visibleInput) kinds.push('input');
 
   const fileInputs = inputs.filter((tag) => inputType(tag) === 'file');
@@ -202,7 +203,10 @@ test('validation fails closed for stale paths, empty reasons and unknown categor
 
   const issues = validateRegistry(invalid);
   for (const prefix of ['missing-file:', 'empty-reason:', 'unknown-category:']) {
-    assert.ok(issues.some((issue) => issue.startsWith(prefix)), `${prefix} must be reported`);
+    assert.ok(
+      issues.some((issue) => issue.startsWith(prefix)),
+      `${prefix} must be reported`,
+    );
   }
 });
 
@@ -210,7 +214,5 @@ test('validation fails closed when a file is claimed by both sections', () => {
   const invalid = structuredClone(registry);
   invalid.converted[0].path = invalid.exceptions[0].path;
 
-  assert.ok(
-    validateRegistry(invalid).some((issue) => issue.startsWith('duplicate-path:')),
-  );
+  assert.ok(validateRegistry(invalid).some((issue) => issue.startsWith('duplicate-path:')));
 });

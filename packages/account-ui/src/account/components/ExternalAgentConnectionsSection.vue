@@ -6,10 +6,7 @@ import type {
   ScopedPatSummary,
   ExternalAgentFailureCode,
 } from '@memoflow/agent-gateway';
-import { Button } from '@memoflow/ui-vue-shadcn/components/ui/button';
-import { Checkbox } from '@memoflow/ui-vue-shadcn/components/ui/checkbox';
-import { Input } from '@memoflow/ui-vue-shadcn/components/ui/input';
-import { Textarea } from '@memoflow/ui-vue-shadcn/components/ui/textarea';
+import { Button, Checkbox, Input, Textarea } from '@memoflow/ui-vue-shadcn';
 import { accountUiHost } from '../../account-ui-host';
 
 const injected = inject(accountUiHost.EXTERNAL_AGENT_SERVICE_KEY);

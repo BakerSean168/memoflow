@@ -176,11 +176,12 @@
                   </template>
                   <Input
                     v-else
-                    v-model="askUserAnswers[request.toolCallId]"
+                    :model-value="String(askUserAnswers[request.toolCallId] ?? '')"
                     class="w-full rounded border bg-background p-2"
                     :maxlength="4000"
                     required
                     :disabled="request.status !== 'pending'"
+                    @update:model-value="askUserAnswers[request.toolCallId] = String($event)"
                   />
                   <Button
                     type="submit"

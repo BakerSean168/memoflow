@@ -3,435 +3,317 @@
   "scope": "Business packages (packages/*/src) and apps (apps/*/src) Vue components. The component library (packages/ui-vue-shadcn), specs, stories and __stories__ fixtures are out of scope.",
   "rule": "Business code may render a native <button>, <input> or <textarea> only when the component itself is the implementation of that interaction surface (tile, row, tree node, calendar cell, segmented control, window chrome) or when it is a hidden file input opened by a component-library control. Everything that triggers an ordinary action or edits a form value must compose the ui-vue-shadcn component or a wrapper of it. type=\"hidden\" inputs are not UI controls and are out of scope. type=\"file\" inputs are allowed only when hidden and triggered from a library control. Every remaining native control is registered below with a reason; unregistered native controls fail the governance test.",
   "enforcement": "full",
-  "nativeKinds": [
-    "button",
-    "input",
-    "textarea",
-    "file-input"
-  ],
+  "nativeKinds": ["button", "input", "textarea", "file-input"],
   "exceptions": [
     {
       "path": "apps/desktop/src/renderer/CustomNotificationView.vue",
-      "native": [
-        "button"
-      ],
+      "native": ["button"],
       "category": "custom-control",
       "reason": "The notification window owns its visual layer; action buttons are styled by the window chrome (separate visual ticket)."
     },
     {
       "path": "apps/desktop/src/renderer/DesktopAuthApp.vue",
-      "native": [
-        "button"
-      ],
+      "native": ["button"],
       "category": "custom-control",
       "reason": "Standalone authentication window chrome; window controls are host behaviour with their own styling."
     },
     {
       "path": "apps/desktop/src/renderer/focus-window/FocusWindowApp.vue",
-      "native": [
-        "button"
-      ],
+      "native": ["button"],
       "category": "custom-control",
       "reason": "Standalone focus window chrome; window and session actions use the window visual layer."
     },
     {
       "path": "apps/desktop/src/renderer/intervention-window/InterventionWindowApp.vue",
-      "native": [
-        "button"
-      ],
+      "native": ["button"],
       "category": "custom-control",
       "reason": "Standalone intervention window chrome; its action buttons use the window visual layer."
     },
     {
       "path": "packages/account-ui/src/account/components/AccountAvatarUploader.vue",
-      "native": [
-        "button",
-        "file-input"
-      ],
+      "native": ["button", "file-input"],
       "category": "custom-control",
       "reason": "The avatar upload tile is the interaction surface; its file input is hidden and opened from that tile."
     },
     {
       "path": "packages/ai-ui/src/components/AIComposerControls.vue",
-      "native": [
-        "button",
-        "input"
-      ],
+      "native": ["button", "input"],
       "category": "custom-control",
       "reason": "Model/agent picker tiles and segmented radios are the control; the search field needs a native ref for focus."
     },
     {
       "path": "packages/ai-ui/src/components/AIConversationSidebar.vue",
-      "native": [
-        "button",
-        "input"
-      ],
+      "native": ["button", "input"],
       "category": "custom-control",
       "reason": "Conversation/goal/note rows are the control; the inline rename field needs a native ref for focus and selection."
     },
     {
       "path": "packages/ai-ui/src/components/AIFooterComposer.vue",
-      "native": [
-        "button",
-        "file-input",
-        "textarea"
-      ],
+      "native": ["button", "file-input", "textarea"],
       "category": "custom-control",
       "reason": "The composer surface owns its auto-growing textarea, attachment chips, mention rows and hidden file input."
     },
     {
       "path": "packages/ai-ui/src/components/AIMessagePanel.vue",
-      "native": [
-        "button",
-        "input"
-      ],
+      "native": ["button", "input"],
       "category": "custom-control",
       "reason": "Welcome tiles and the free-form Ask User multi-select checkbox group are custom surfaces; Checkbox has no array model."
     },
     {
       "path": "packages/ai-ui/src/components/AIModelTraitsPanel.vue",
-      "native": [
-        "button"
-      ],
+      "native": ["button"],
       "category": "custom-control",
       "reason": "Reasoning-effort rows are a segmented radio control, not a generic action button."
     },
     {
       "path": "packages/ai-ui/src/views/AIChatView.vue",
-      "native": [
-        "button"
-      ],
+      "native": ["button"],
       "category": "custom-control",
       "reason": "The mobile sidebar backdrop is part of the overlay interaction surface and carries its own click behavior."
     },
     {
       "path": "packages/app-vue/src/layouts/shell/BusinessPanel.vue",
-      "native": [
-        "button"
-      ],
+      "native": ["button"],
       "category": "custom-control",
       "reason": "Panel tab strip, tab close and focus toggle are shell chrome implemented by this component."
     },
     {
       "path": "packages/app-vue/src/layouts/shell/ConversationSidebar.vue",
-      "native": [
-        "button",
-        "input"
-      ],
+      "native": ["button", "input"],
       "category": "custom-control",
       "reason": "Conversation rows, archive pagination and inline rename/search fields are the sidebar control itself; inputs need native refs."
     },
     {
       "path": "packages/app-vue/src/layouts/shell/DesktopUpdateShellIndicator.vue",
-      "native": [
-        "button"
-      ],
+      "native": ["button"],
       "category": "custom-control",
       "reason": "The update status capsule is the interaction surface; its button opens the update detail surface."
     },
     {
       "path": "packages/app-vue/src/layouts/shell/ModuleCapsule.vue",
-      "native": [
-        "button"
-      ],
+      "native": ["button"],
       "category": "custom-control",
       "reason": "The module capsule navigation and preview affordance are a composite shell control."
     },
     {
       "path": "packages/app-vue/src/layouts/shell/SyncStatusIndicator.vue",
-      "native": [
-        "button"
-      ],
+      "native": ["button"],
       "category": "custom-control",
       "reason": "The remaining native element is the status capsule that owns the popover trigger and its alignment state."
     },
     {
       "path": "packages/app-vue/src/layouts/shell/WindowHeader.vue",
-      "native": [
-        "button"
-      ],
+      "native": ["button"],
       "category": "custom-control",
       "reason": "Window chrome (history navigation, sidebar/panel toggles, native window controls) is implemented here."
     },
     {
       "path": "packages/app-vue/src/layouts/shell/previews/GoalCapsulePreview.vue",
-      "native": [
-        "button"
-      ],
+      "native": ["button"],
       "category": "custom-control",
       "reason": "Preview list rows are the navigation surface of the goal capsule."
     },
     {
       "path": "packages/app-vue/src/layouts/shell/previews/NoteCapsulePreview.vue",
-      "native": [
-        "button"
-      ],
+      "native": ["button"],
       "category": "custom-control",
       "reason": "Preview list rows are the navigation surface of the note capsule."
     },
     {
       "path": "packages/app-vue/src/layouts/shell/previews/ScheduleCapsulePreview.vue",
-      "native": [
-        "button"
-      ],
+      "native": ["button"],
       "category": "custom-control",
       "reason": "The primary event card and upcoming event rows are the schedule capsule surface."
     },
     {
       "path": "packages/app-vue/src/shared/components/ColorPickerField.vue",
-      "native": [
-        "button"
-      ],
+      "native": ["button"],
       "category": "custom-control",
       "reason": "Colour swatches are the picker control; each swatch is a custom selectable tile."
     },
     {
       "path": "packages/app-vue/src/shared/components/DesktopProfileList.vue",
-      "native": [
-        "button"
-      ],
+      "native": ["button"],
       "category": "custom-control",
       "reason": "Profile cards and the create-local tile are the profile picker surface."
     },
     {
       "path": "packages/app-vue/src/shared/components/ProductAutoTextarea.vue",
-      "native": [
-        "textarea"
-      ],
+      "native": ["textarea"],
       "category": "custom-control",
       "reason": "This component is the auto-growing textarea implementation itself; it owns the native element."
     },
     {
       "path": "packages/goal-ui/src/components/GoalKeyResultDraftEditor.vue",
-      "native": [
-        "button"
-      ],
+      "native": ["button"],
       "category": "custom-control",
       "reason": "Key-result rows open the inline editor; the row itself is the control."
     },
     {
       "path": "packages/goal-ui/src/components/GoalProgressRow.vue",
-      "native": [
-        "button"
-      ],
+      "native": ["button"],
       "category": "custom-control",
       "reason": "The goal row is the navigation control for the goal list."
     },
     {
       "path": "packages/goal-ui/src/components/timeline/TimelineControls.vue",
-      "native": [
-        "button",
-        "input"
-      ],
+      "native": ["button", "input"],
       "category": "custom-control",
       "reason": "Playback controls and the range slider implement the timeline scrubber."
     },
     {
       "path": "packages/goal-ui/src/components/weight-snapshot/WeightSnapshotList.vue",
-      "native": [
-        "button"
-      ],
+      "native": ["button"],
       "category": "custom-control",
       "reason": "Expandable weight snapshot rows are the list control."
     },
     {
       "path": "packages/goal-ui/src/components/widgets/GoalProgressWidget.vue",
-      "native": [
-        "button"
-      ],
+      "native": ["button"],
       "category": "custom-control",
       "reason": "Goal rows in the widget are the navigation control."
     },
     {
       "path": "packages/goal-ui/src/views/GoalDetailView.vue",
-      "native": [
-        "button"
-      ],
+      "native": ["button"],
       "category": "custom-control",
       "reason": "Status badges, task/note chips and the review chip are composite chip triggers."
     },
     {
       "path": "packages/notification-ui/src/components/InAppNotification.vue",
-      "native": [
-        "button"
-      ],
+      "native": ["button"],
       "category": "custom-control",
       "reason": "The notification row is the click target for opening the notification."
     },
     {
       "path": "packages/notification-ui/src/components/NotificationCapsulePreview.vue",
-      "native": [
-        "button"
-      ],
+      "native": ["button"],
       "category": "custom-control",
       "reason": "Notification rows are the navigation surface of the notification capsule."
     },
     {
       "path": "packages/notification-ui/src/components/NotificationItem.vue",
-      "native": [
-        "button"
-      ],
+      "native": ["button"],
       "category": "custom-control",
       "reason": "The notification row is the click target; its actions stay separate."
     },
     {
       "path": "packages/repository-ui/src/components/DocumentCatalogRow.vue",
-      "native": [
-        "button"
-      ],
+      "native": ["button"],
       "category": "custom-control",
       "reason": "The document catalog row is the navigation control."
     },
     {
       "path": "packages/repository-ui/src/components/KnowledgeNoteCatalog.vue",
-      "native": [
-        "button"
-      ],
+      "native": ["button"],
       "category": "custom-control",
       "reason": "Directory and note tree nodes are the tree control itself."
     },
     {
       "path": "packages/repository-ui/src/components/KnowledgeNoteContextPanel.vue",
-      "native": [
-        "button"
-      ],
+      "native": ["button"],
       "category": "custom-control",
       "reason": "Outline entries are navigation rows for the note outline."
     },
     {
       "path": "packages/repository-ui/src/components/KnowledgeProjectionRelationsView.vue",
-      "native": [
-        "button"
-      ],
+      "native": ["button"],
       "category": "custom-control",
       "reason": "Depth segmented buttons and relation list entries are the relations surface."
     },
     {
       "path": "packages/routine-ui/src/components/RoutineCapsulePreview.vue",
-      "native": [
-        "button"
-      ],
+      "native": ["button"],
       "category": "custom-control",
       "reason": "Routine occurrence rows are the interaction surface of the routine capsule."
     },
     {
       "path": "packages/routine-ui/src/components/WallClockTriggerEditor.vue",
-      "native": [
-        "button"
-      ],
+      "native": ["button"],
       "category": "custom-control",
       "reason": "Weekday chips are a multi-select control for the wall-clock trigger."
     },
     {
       "path": "packages/routine-ui/src/views/RoutineConfigurationView.vue",
-      "native": [
-        "button"
-      ],
+      "native": ["button"],
       "category": "custom-control",
       "reason": "Routine cards are the navigation rows of the configuration list."
     },
     {
       "path": "packages/schedule-ui/src/components/CreateScheduleDialog.vue",
-      "native": [
-        "button"
-      ],
+      "native": ["button"],
       "category": "custom-control",
       "reason": "Start/end time field triggers and attendee chips are custom form fields."
     },
     {
       "path": "packages/schedule-ui/src/components/PlannerDayDialog.vue",
-      "native": [
-        "button"
-      ],
+      "native": ["button"],
       "category": "custom-control",
       "reason": "Event rows are the click target for opening a planner event."
     },
     {
       "path": "packages/setting-ui/src/components/AIPermissionSettings.vue",
-      "native": [
-        "button"
-      ],
+      "native": ["button"],
       "category": "custom-control",
       "reason": "Permission preset cards are selectable tiles for the permission profile."
     },
     {
       "path": "packages/setting-ui/src/components/AISettings.vue",
-      "native": [
-        "button"
-      ],
+      "native": ["button"],
       "category": "custom-control",
       "reason": "Agent instance rows are the selection control for the active instance."
     },
     {
       "path": "packages/setting-ui/src/components/AgentInstanceWizard.vue",
-      "native": [
-        "button",
-        "input"
-      ],
+      "native": ["button", "input"],
       "category": "custom-control",
       "reason": "Step rows, agent cards, colour swatches and the native colour input are the wizard controls."
     },
     {
       "path": "packages/setting-ui/src/components/AppearanceSettings.vue",
-      "native": [
-        "button"
-      ],
+      "native": ["button"],
       "category": "custom-control",
       "reason": "Accent swatches are radio-like colour tiles."
     },
     {
       "path": "packages/setting-ui/src/components/DataSettingsSection.vue",
-      "native": [
-        "file-input"
-      ],
+      "native": ["file-input"],
       "category": "hidden-file-input",
       "reason": "The hidden file input is opened by a library Button; it never renders as a control."
     },
     {
       "path": "packages/setting-ui/src/components/KeyboardSettings.vue",
-      "native": [
-        "file-input"
-      ],
+      "native": ["file-input"],
       "category": "hidden-file-input",
       "reason": "The hidden file input is opened by a library Button; it never renders as a control."
     },
     {
       "path": "packages/task-ui/src/components/TaskOccurrenceQuickRow.vue",
-      "native": [
-        "button"
-      ],
+      "native": ["button"],
       "category": "custom-control",
       "reason": "Completion circle, title, overflow menu and checklist toggle form the compact occurrence row."
     },
     {
       "path": "packages/task-ui/src/components/TaskOccurrenceRow.vue",
-      "native": [
-        "button"
-      ],
+      "native": ["button"],
       "category": "custom-control",
       "reason": "The occurrence title row is the click target for opening the plan."
     },
     {
       "path": "packages/task-ui/src/components/TaskPlanForm/sections/ChecklistSection.vue",
-      "native": [
-        "button"
-      ],
+      "native": ["button"],
       "category": "custom-control",
       "reason": "Checklist rows open the inline editor; the row itself is the control."
     },
     {
       "path": "packages/task-ui/src/components/TaskPlanForm/sections/RecurrenceSection.vue",
-      "native": [
-        "button"
-      ],
+      "native": ["button"],
       "category": "custom-control",
       "reason": "Weekday and month-day chips are multi-select controls."
     },
     {
       "path": "packages/task-ui/src/components/TaskPlanRow.vue",
-      "native": [
-        "button"
-      ],
+      "native": ["button"],
       "category": "custom-control",
       "reason": "The task plan row is the navigation control."
     }
@@ -439,138 +321,91 @@
   "converted": [
     {
       "path": "apps/web/src/auth/WebAuthView.vue",
-      "native": [
-        "button"
-      ]
+      "native": ["button"]
     },
     {
       "path": "packages/account-ui/src/account/components/AccountProfileEditorDialog.vue",
-      "native": [
-        "button"
-      ]
+      "native": ["button"]
     },
     {
       "path": "packages/account-ui/src/account/components/ExternalAgentConnectionsSection.vue",
-      "native": [
-        "input",
-        "textarea"
-      ]
+      "native": ["input", "textarea"]
     },
     {
       "path": "packages/app-vue/src/components/shared/ActionableWrapper.vue",
-      "native": [
-        "button"
-      ]
+      "native": ["button"]
     },
     {
       "path": "packages/app-vue/src/components/shared/AppEmptyState.vue",
-      "native": [
-        "button"
-      ]
+      "native": ["button"]
     },
     {
       "path": "packages/app-vue/src/layouts/shell/AppShell.vue",
-      "native": [
-        "button"
-      ]
+      "native": ["button"]
     },
     {
       "path": "packages/app-vue/src/layouts/shell/PanelErrorBoundary.vue",
-      "native": [
-        "button"
-      ]
+      "native": ["button"]
     },
     {
       "path": "packages/app-vue/src/layouts/shell/ProfileImportDialog.vue",
-      "native": [
-        "input"
-      ]
+      "native": ["input"]
     },
     {
       "path": "packages/app-vue/src/shared/components/GlobalErrorBoundary.vue",
-      "native": [
-        "button"
-      ]
+      "native": ["button"]
     },
     {
       "path": "packages/app-vue/src/shared/components/PaneScopedDialog.vue",
-      "native": [
-        "button"
-      ]
+      "native": ["button"]
     },
     {
       "path": "packages/app-vue/src/shared/components/ProductDialogShell.vue",
-      "native": [
-        "button"
-      ]
+      "native": ["button"]
     },
     {
       "path": "packages/app-vue/src/shared/components/ProductTemporalPickerSurface.vue",
-      "native": [
-        "button"
-      ]
+      "native": ["button"]
     },
     {
       "path": "packages/app-vue/src/views/DesktopProfileAccessView.vue",
-      "native": [
-        "button"
-      ]
+      "native": ["button"]
     },
     {
       "path": "packages/app-vue/src/views/NotFoundView.vue",
-      "native": [
-        "button"
-      ]
+      "native": ["button"]
     },
     {
       "path": "packages/goal-ui/src/components/GoalKeyResultTrajectoryPlot.vue",
-      "native": [
-        "button"
-      ]
+      "native": ["button"]
     },
     {
       "path": "packages/goal-ui/src/components/timeline/GoalTimelineView.vue",
-      "native": [
-        "button"
-      ]
+      "native": ["button"]
     },
     {
       "path": "packages/notification-ui/src/components/NotificationQuickActions.vue",
-      "native": [
-        "input"
-      ]
+      "native": ["input"]
     },
     {
       "path": "packages/repository-ui/src/components/DocumentCatalogSearch.vue",
-      "native": [
-        "button"
-      ]
+      "native": ["button"]
     },
     {
       "path": "packages/setting-ui/src/components/LocalAgentSettings.vue",
-      "native": [
-        "button",
-        "input"
-      ]
+      "native": ["button", "input"]
     },
     {
       "path": "packages/setting-ui/src/components/SettingsNavigation.vue",
-      "native": [
-        "button",
-        "input"
-      ]
+      "native": ["button", "input"]
     },
     {
       "path": "packages/setting-ui/src/views/UserSettingsView.vue",
-      "native": [
-        "button"
-      ]
+      "native": ["button"]
     },
     {
       "path": "packages/task-ui/src/components/TaskQuickSurface.vue",
-      "native": [
-        "button"
-      ]
+      "native": ["button"]
     }
   ]
 }

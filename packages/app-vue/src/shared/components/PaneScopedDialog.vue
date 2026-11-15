@@ -84,6 +84,7 @@ const heightClass = computed(() =>
         <div class="flex min-w-0 shrink-0 items-center gap-1">
           <slot name="actions" />
           <Button
+            type="button"
             variant="ghost"
             size="icon"
             class="size-8 shrink-0 text-muted-foreground hover:bg-accent hover:text-foreground"
