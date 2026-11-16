@@ -65,7 +65,9 @@ export default defineConfig({
       formats: ['es'],
       fileName: (format, entryName) => `${entryName}.js`,
     },
-    sourcemap: true,
+    // Release artifacts ship without sourcemaps (#881). Dev surfaces resolve this package
+    // from TypeScript sources through the workspace aliases, so debugging is unaffected.
+    sourcemap: false,
     rolldownOptions: {
       external,
       output: {
