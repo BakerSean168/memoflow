@@ -134,7 +134,10 @@ describe('PAT scope → hosted notification tool boundary (#990)', () => {
       authenticate: (authorization, context) => pats.authenticate(authorization, context),
       consumeReadQuota: async () => true,
     });
-    const response = await f.gateway.fetch(call(issued.secret, 'notification_list'), requestContext);
+    const response = await f.gateway.fetch(
+      call(issued.secret, 'notification_list'),
+      requestContext,
+    );
     expect(response.status).toBe(200);
     expect(await response.json()).toMatchObject({
       result: { structuredContent: { items: [{ id: 'notification-1' }], total: 1 } },
@@ -163,7 +166,10 @@ describe('PAT scope → hosted notification tool boundary (#990)', () => {
       authenticate: (authorization, context) => pats.authenticate(authorization, context),
       consumeReadQuota: async () => true,
     });
-    const response = await f.gateway.fetch(call(issued.secret, 'notification_list'), requestContext);
+    const response = await f.gateway.fetch(
+      call(issued.secret, 'notification_list'),
+      requestContext,
+    );
     expect(response.status).toBe(403);
     expect(f.listNotifications).not.toHaveBeenCalled();
     expect(f.audit).toHaveBeenCalledWith(
