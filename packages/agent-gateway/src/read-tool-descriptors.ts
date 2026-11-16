@@ -20,6 +20,12 @@ import {
   TaskOccurrenceGetOutputSchema,
   TaskOccurrenceListInputSchema,
   TaskOccurrenceListOutputSchema,
+  RoutineGetInputSchema,
+  RoutineGetOutputSchema,
+  RoutineListInputSchema,
+  RoutineListOutputSchema,
+  RoutineUpcomingInputSchema,
+  RoutineUpcomingOutputSchema,
 } from './contracts';
 
 const readAnnotations = {
@@ -94,6 +100,41 @@ export const readToolDescriptors = {
         'List existing owned occurrences in an inclusive account-time date range (epoch ms; at most 31 days). Optional earlier open facts; never materializes upcoming occurrences.',
       inputSchema: TaskOccurrenceListInputSchema,
       outputSchema: TaskOccurrenceListOutputSchema,
+      annotations: readAnnotations,
+    },
+  },
+  routine_get: {
+    version: '1',
+    effect: 'read',
+    requiredScope: 'routines:read',
+    definition: {
+      description: 'Read one owned Routine definition and its trigger revision.',
+      inputSchema: RoutineGetInputSchema,
+      outputSchema: RoutineGetOutputSchema,
+      annotations: readAnnotations,
+    },
+  },
+  routine_list: {
+    version: '1',
+    effect: 'read',
+    requiredScope: 'routines:read',
+    definition: {
+      description:
+        'Search owned Routine definitions by name or description using a bounded keyset page.',
+      inputSchema: RoutineListInputSchema,
+      outputSchema: RoutineListOutputSchema,
+      annotations: readAnnotations,
+    },
+  },
+  routine_upcoming: {
+    version: '1',
+    effect: 'read',
+    requiredScope: 'routines:read',
+    definition: {
+      description:
+        'List upcoming owned Routine occurrences in an ordered epoch-ms window of at most 31 days, bounded to 100 per page.',
+      inputSchema: RoutineUpcomingInputSchema,
+      outputSchema: RoutineUpcomingOutputSchema,
       annotations: readAnnotations,
     },
   },

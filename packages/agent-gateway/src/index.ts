@@ -9,6 +9,7 @@ export type {
   GatewayAiConversationMessage,
   GatewayAiConversationTranscript,
   GatewayAiAgentEntry,
+  RoutineReadPort,
   GatewayCredentialPort,
   GatewayAuditEvent,
   GatewayDiagnostic,

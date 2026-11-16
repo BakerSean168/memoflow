@@ -1,6 +1,13 @@
 import {
   GatewayRoutineCreateSchema,
+  GatewayRoutineDeleteSchema,
+  GatewayRoutineOverrideSchema,
+  GatewayRoutinePauseSchema,
+  GatewayRoutineUpdateSchema,
   GatewayRoutineReceiptSchema,
+  GatewayRoutineUpdateReceiptSchema,
+  GatewayRoutineDeleteReceiptSchema,
+  GatewayRoutineOverrideReceiptSchema,
   GatewayGoalCreateSchema,
   GatewayGoalUpdateSchema,
   GatewayKeyResultCreateSchema,
@@ -24,9 +31,44 @@ export const writeToolDescriptors = {
   routine_create: {
     requiredScope: 'routines:write',
     definition: definition(
-      'Create one hosted WallClock reminder without profile memberships. Resolve the date/time in the user’s Product Time zone; retry with the same idempotencyKey.',
+      'Create one hosted WallClock reminder or recurrence without profile memberships. Resolve the date/time in the user’s Product Time zone; retry with the same idempotencyKey.',
       GatewayRoutineCreateSchema,
       GatewayRoutineReceiptSchema,
+    ),
+  },
+  routine_update: {
+    requiredScope: 'routines:write',
+    definition: definition(
+      'Patch an owned Routine using expectedVersion. Trigger changes accept only hosted WallClock schedules.',
+      GatewayRoutineUpdateSchema,
+      GatewayRoutineUpdateReceiptSchema,
+    ),
+  },
+  routine_delete: {
+    requiredScope: 'routines:write',
+    definition: {
+      ...definition(
+        'Permanently delete an owned Routine using expectedVersion. This cannot be undone.',
+        GatewayRoutineDeleteSchema,
+        GatewayRoutineDeleteReceiptSchema,
+      ),
+      annotations: { ...annotations, destructiveHint: true },
+    },
+  },
+  routine_pause: {
+    requiredScope: 'routines:write',
+    definition: definition(
+      'Pause an owned Routine until an instant (epoch ms, at most 30 days ahead) without changing its definition.',
+      GatewayRoutinePauseSchema,
+      GatewayRoutineOverrideReceiptSchema,
+    ),
+  },
+  routine_override: {
+    requiredScope: 'routines:write',
+    definition: definition(
+      'Set a bounded temporary snooze, suppress or interval override on an owned Routine; expiresAt is required.',
+      GatewayRoutineOverrideSchema,
+      GatewayRoutineOverrideReceiptSchema,
     ),
   },
   goal_create: {

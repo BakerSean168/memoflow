@@ -34,6 +34,7 @@ describe('scoped PAT lifetime contract (#970)', () => {
         'tasks:write',
         'routines:write',
         'ai:read',
+        'routines:read',
       ],
       createdAt: '2026-11-16T00:00:00.000Z',
       expiresAt: '2027-11-16T00:00:00.000Z',

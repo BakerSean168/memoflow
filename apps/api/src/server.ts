@@ -52,6 +52,7 @@ import {
   bindAgentArchiveReadPort,
   bindAssistantConversationReadPort,
 } from './modules/agent-gateway/ai-read.port';
+import { bindRoutineReadPort } from './modules/agent-gateway/routine-read.port';
 import { getTrustedWebOrigins } from './shared/infrastructure/config/web-origin.js';
 import { prisma, connectDatabase, disconnectDatabase } from '@memoflow/database';
 import { getStartupInfo } from './shared/infrastructure/config/logger.config';
@@ -498,6 +499,7 @@ async function bootstrap(): Promise<void> {
       aiComposed.assistantConversationExternal,
     ),
     agents: bindAgentArchiveReadPort(aiComposed.agentInstanceRead),
+    routines: bindRoutineReadPort(routineComposed.routineQueryPort),
     audit: createGatewayAudit(createLogger('ExternalAgentAudit')),
     diagnose: createGatewayDiagnostics(createLogger('ExternalAgentDiagnostics')),
   });

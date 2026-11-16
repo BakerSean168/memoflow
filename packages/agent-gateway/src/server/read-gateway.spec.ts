@@ -589,6 +589,39 @@ describe('Routine hosted write capability', () => {
         return receipt;
       },
     );
+    const routineUpdate = vi.fn(
+      async (_input: unknown, _cx: ExecutionContext, authority: GatewayWriteAuthority) => {
+        await authority.authorize();
+        return { receiptId: 'b'.repeat(64), result: { routine: receipt.result.routine } };
+      },
+    );
+    const routineDelete = vi.fn(
+      async (_input: unknown, _cx: ExecutionContext, authority: GatewayWriteAuthority) => {
+        await authority.authorize();
+        return {
+          receiptId: 'c'.repeat(64),
+          result: { routineId: receipt.result.routine.id },
+        };
+      },
+    );
+    const routinePause = vi.fn(
+      async (_input: unknown, _cx: ExecutionContext, authority: GatewayWriteAuthority) => {
+        await authority.authorize();
+        return {
+          receiptId: 'd'.repeat(64),
+          result: { routineId: receipt.result.routine.id, override: null },
+        };
+      },
+    );
+    const routineOverride = vi.fn(
+      async (_input: unknown, _cx: ExecutionContext, authority: GatewayWriteAuthority) => {
+        await authority.authorize();
+        return {
+          receiptId: 'e'.repeat(64),
+          result: { routineId: receipt.result.routine.id, override: null },
+        };
+      },
+    );
     const unavailable = vi.fn().mockRejectedValue(new Error('Unexpected owner'));
     const writes = {
       goalCreate: unavailable,
@@ -598,9 +631,19 @@ describe('Routine hosted write capability', () => {
       taskCreate: unavailable,
       taskUpdate: unavailable,
       taskComplete: unavailable,
-      ...(enabled ? { routineCreate } : {}),
+      ...(enabled
+        ? { routineCreate, routineUpdate, routineDelete, routinePause, routineOverride }
+        : {}),
     };
-    return { ...f, routineCreate, gateway: createReadGateway({ ...f.options, writes }) };
+    return {
+      ...f,
+      routineCreate,
+      routineUpdate,
+      routineDelete,
+      routinePause,
+      routineOverride,
+      gateway: createReadGateway({ ...f.options, writes }),
+    };
   }
   const input = {
     idempotencyKey: 'once',
@@ -612,13 +655,19 @@ describe('Routine hosted write capability', () => {
       startDate: '2026-10-20',
     },
   };
-  it('discovers exactly routine_create with a routine-only PAT, and keeps the separate gate off', async () => {
+  it('discovers the routine write set with a routine-only PAT, and keeps the separate gate off', async () => {
     const f = routineFixture();
     expect(
       (await (await f.gateway.fetch(request('tools/list'), context)).json()).result.tools.map(
         (t) => t.name,
       ),
-    ).toEqual(['routine_create']);
+    ).toEqual([
+      'routine_create',
+      'routine_update',
+      'routine_delete',
+      'routine_pause',
+      'routine_override',
+    ]);
     const off = routineFixture(false);
     expect(
       (await (await off.gateway.fetch(request('tools/list'), context)).json()).result.tools,
@@ -690,5 +739,140 @@ describe('Routine hosted write capability', () => {
     expect(f.audit).toHaveBeenLastCalledWith(
       expect.objectContaining({ scopeDecision: 'denied', outcome: 'FORBIDDEN' }),
     );
+  });
+});
+
+describe('Routine hosted reads', () => {
+  const routineId = '5b5d8a2b-9934-4be8-8e07-3f62ed122e15';
+  function definition(id: string, name: string, createdAt: string) {
+    return {
+      id,
+      name,
+      description: null,
+      enabled: true,
+      trigger: null,
+      version: 1,
+      createdAt,
+      updatedAt: createdAt,
+    };
+  }
+  function readFixture(scopes = ['routines:read'], routines = true) {
+    const f = fixture();
+    f.authenticate.mockResolvedValue({
+      identityId: 'owner-a',
+      credentialId: 'pat-a',
+      credentialType: 'pat',
+      scopes,
+    });
+    const definitions = [
+      definition(routineId, 'Review', '2026-11-16T00:00:00.000Z'),
+      definition('6c6e9b3c-aa45-4cf9-9f18-4a73fe233f26', 'Stretch', '2026-11-15T00:00:00.000Z'),
+    ];
+    const port = {
+      getConfigurationSnapshot: vi.fn().mockResolvedValue({
+        definitions,
+        profiles: [],
+        memberships: [],
+        preferences: { globalEnabled: true, version: 1 },
+        runtimeContext: { activeProfileIds: [] },
+        capabilities: { localRuntime: false },
+        overrides: [],
+      }),
+      getUpcomingOccurrences: vi.fn().mockResolvedValue({
+        occurrences: [
+          {
+            identityId: 'owner-a',
+            routineId,
+            occurrenceKey: 'routine:1:0',
+            title: 'Review',
+            description: null,
+            occurrenceAt: 1792458000000,
+            endAt: null,
+            revision: 1,
+            editable: false,
+          },
+        ],
+      }),
+    };
+    return {
+      ...f,
+      routines: port,
+      gateway: createReadGateway({ ...f.options, ...(routines ? { routines: port } : {}) }),
+    };
+  }
+
+  it('pages owned definitions with a bound and a signed cursor', async () => {
+    const f = readFixture();
+    const first = await f.gateway.fetch(
+      request('tools/call', { query: 're', limit: 1 }, 'routine_list'),
+      context,
+    );
+    const body = await first.json();
+    expect(body.result.structuredContent.items.map((item: { id: string }) => item.id)).toEqual([
+      routineId,
+    ]);
+    expect(body.result.structuredContent.hasMore).toBe(true);
+    const cursor = body.result.structuredContent.nextCursor;
+    expect(typeof cursor).toBe('string');
+    const second = await f.gateway.fetch(
+      request('tools/call', { query: 're', limit: 1, cursor }, 'routine_list'),
+      context,
+    );
+    expect(
+      (await second.json()).result.structuredContent.items.map(
+        (item: { name: string }) => item.name,
+      ),
+    ).toEqual(['Stretch']);
+    const tampered = await f.gateway.fetch(
+      request('tools/call', { query: 're', limit: 1, cursor: 'tampered' }, 'routine_list'),
+      context,
+    );
+    expect(await tampered.json()).toMatchObject({ result: { isError: true } });
+  });
+
+  it('bounds the upcoming window and omits owner identity', async () => {
+    const f = readFixture();
+    const response = await f.gateway.fetch(
+      request(
+        'tools/call',
+        { start: 1_000, end: 1_000 + 31 * 86400000, limit: 5 },
+        'routine_upcoming',
+      ),
+      context,
+    );
+    const occurrence = (await response.json()).result.structuredContent.items[0];
+    expect(occurrence).toMatchObject({ routineId, occurrenceKey: 'routine:1:0' });
+    expect(occurrence).not.toHaveProperty('identityId');
+    expect(f.routines.getUpcomingOccurrences).toHaveBeenCalledWith(
+      'owner-a',
+      { start: 1_000, end: 1_000 + 31 * 86400000, includeElapsed: false, limit: 6 },
+      expect.objectContaining({ signal: expect.any(AbortSignal) }),
+    );
+    const tooWide = await f.gateway.fetch(
+      request('tools/call', { start: 1_000, end: 1_000 + 32 * 86400000 }, 'routine_upcoming'),
+      context,
+    );
+    expect(await tooWide.json()).toMatchObject({ result: { isError: true } });
+    expect(f.routines.getUpcomingOccurrences).toHaveBeenCalledTimes(1);
+  });
+
+  it('reports a missing routine and hides the tools without a bound port or scope', async () => {
+    const f = readFixture();
+    const missing = await f.gateway.fetch(
+      request('tools/call', { id: '7d7f0c4d-bb56-4dfa-a029-5b84ff344037' }, 'routine_get'),
+      context,
+    );
+    expect(await missing.json()).toMatchObject({ result: { isError: true } });
+    const noPort = readFixture(['routines:read'], false);
+    expect(
+      (await noPort.gateway.fetch(request('tools/call', { id: routineId }, 'routine_get'), context))
+        .status,
+    ).toBe(404);
+    const noScope = readFixture(['tasks:read']);
+    expect(
+      (await (await noScope.gateway.fetch(request('tools/list'), context)).json()).result.tools.map(
+        (tool: { name: string }) => tool.name,
+      ),
+    ).not.toContain('routine_get');
   });
 });

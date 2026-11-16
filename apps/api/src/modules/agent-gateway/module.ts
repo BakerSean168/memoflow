@@ -10,6 +10,7 @@ import type {
   TaskReadPort,
   AssistantConversationReadPort,
   AgentArchiveReadPort,
+  RoutineReadPort,
   GatewayAuditEvent,
   GatewayDiagnostic,
 } from '@memoflow/agent-gateway';
@@ -33,6 +34,7 @@ interface Options {
   readonly tasks?: TaskReadPort;
   readonly assistantConversation?: AssistantConversationReadPort;
   readonly agents?: AgentArchiveReadPort;
+  readonly routines?: RoutineReadPort;
   readonly audit: (event: GatewayAuditEvent) => void;
   readonly diagnose?: (event: GatewayDiagnostic) => void;
 }
