@@ -37,6 +37,7 @@ import {
   AiGoalSurfaceLeasePowerSyncRepository,
   LocalAgentRuntime,
   LocalAgentRepository,
+  LocalMcpClientRepository,
   MastraModelResolver,
   AgentInstanceRegistry,
   ProviderWebResearchAdapter,
@@ -77,6 +78,8 @@ export interface ComposeAIElectronDependencies {
   readonly localAgent: {
     cwd: string;
     isActive: () => boolean;
+    /** 0600 discovery file for the Profile-local external MCP endpoint. */
+    discoveryPath?: string;
     /** Process-owned renderer push; content-only catalog changes. */
     onSnapshotChange?: (change: LocalAgentSnapshotChange) => void;
   };
@@ -164,6 +167,7 @@ export function composeAI(dependencies: ComposeAIElectronDependencies): Composed
     // unavailable while provider settings and local Agents remain usable.
   }
   const localStore = new LocalAgentRepository(dependencies.db);
+  const localMcpClients = new LocalMcpClientRepository(dependencies.db);
   const localAgentRuntime = new LocalAgentRuntime({
     store: localStore,
     bridge: createDesktopLocalAgentTools(
@@ -173,6 +177,10 @@ export function composeAI(dependencies: ComposeAIElectronDependencies): Composed
       dependencies.userTimeContextPort,
       dependencies.knowledgeSourcePort,
       dependencies.panelBridge,
+      {
+        clients: localMcpClients,
+        discoveryPath: dependencies.localAgent.discoveryPath,
+      },
     ),
     ...dependencies.localAgent,
   });

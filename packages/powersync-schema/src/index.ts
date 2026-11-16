@@ -940,6 +940,12 @@ const ai_local_conversation_items = new Table(
   },
   { localOnly: true },
 );
+// External MCP client records: name, write scopes, lifecycle and the token
+// hash. The bearer token itself never reaches persistence.
+const ai_local_mcp_clients = new Table(
+  { identity_id: column.text, record_json: column.text },
+  { localOnly: true },
+);
 
 export const PowerSyncAppSchema = new Schema({
   // Account
@@ -997,6 +1003,7 @@ export const PowerSyncAppSchema = new Schema({
   ai_local_agent_connections,
   ai_local_conversations,
   ai_local_conversation_items,
+  ai_local_mcp_clients,
   ai_conversation_attention,
   ai_conversation_event_metadata,
   ai_conversation_event_heads,

@@ -706,6 +706,7 @@ async function registerBusinessModules(
     db,
     localAgent: {
       cwd: path.join(profilePaths.storageDir, 'local-agents'),
+      discoveryPath: path.join(profilePaths.storageDir, 'local-mcp', 'endpoint.json'),
       isActive: () =>
         mainRuntime?.profileRuntimeManager.getActiveProfileId() === profilePaths.profileId,
       // Directory snapshots are content-only; every live window gets the same

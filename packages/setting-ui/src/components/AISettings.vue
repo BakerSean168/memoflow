@@ -25,6 +25,7 @@ import AgentInstanceWizard from './AgentInstanceWizard.vue';
 import LocalAgentSettings from './LocalAgentSettings.vue';
 import MastraAgentSettings from './MastraAgentSettings.vue';
 import AIPermissionSettings from './AIPermissionSettings.vue';
+import ExternalMcpClients from './ExternalMcpClients.vue';
 import NewSessionDefaultSettings from './NewSessionDefaultSettings.vue';
 
 const { t } = useI18n();
@@ -490,6 +491,7 @@ onBeforeUnmount(() => {
       :bindings="snapshot?.bindings ?? []"
       :providers="ai.providers.value"
     />
+    <ExternalMcpClients v-if="local" />
     <AIPermissionSettings v-if="local" />
     <AgentInstanceWizard
       :open="wizardOpen"

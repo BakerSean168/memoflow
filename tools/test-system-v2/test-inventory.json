@@ -4432,6 +4432,16 @@
       ]
     },
     {
+      "path": "packages/ai/src/server/infrastructure/adapters/powersync/local-mcp-client.repository.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/ai/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "packages/ai/vitest.config.ts"
+      ]
+    },
+    {
       "path": "packages/ai/src/server/infrastructure/adapters/powersync/powersync-ai-rows-affected.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -13262,7 +13272,7 @@
       "type": "measurement",
       "suite": "coverage",
       "runner": "vitest",
-      "fileCount": 133
+      "fileCount": 134
     },
     {
       "id": "packages/app-vue/vitest.store-coverage.config.ts",
@@ -13812,7 +13822,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 133
+      "fileCount": 134
     },
     {
       "id": "packages/app-vue/vitest.config.ts",
@@ -14384,6 +14394,7 @@
       "packages/ai/src/server/infrastructure/adapters/powersync/attention-events.powersync.spec.ts",
       "packages/ai/src/server/infrastructure/adapters/powersync/conversation-events.powersync.spec.ts",
       "packages/ai/src/server/infrastructure/adapters/powersync/local-agent.repository.spec.ts",
+      "packages/ai/src/server/infrastructure/adapters/powersync/local-mcp-client.repository.spec.ts",
       "packages/ai/src/server/infrastructure/adapters/powersync/powersync-ai-rows-affected.spec.ts",
       "packages/ai/src/server/infrastructure/adapters/prisma/__tests__/ai-knowledge-index-prisma.repository.test.ts",
       "packages/ai/src/server/infrastructure/adapters/prisma/__tests__/ai-provider-config-ownership.surface.spec.ts",
@@ -14879,7 +14890,7 @@
   "duplicate": [],
   "unexpected": [],
   "counts": {
-    "unit": 1230,
+    "unit": 1231,
     "integration": 59,
     "smoke": 3,
     "boundary-ipc": 6,

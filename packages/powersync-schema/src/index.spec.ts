@@ -14,6 +14,7 @@ describe('PowerSyncAppSchema', () => {
       'ai_local_agent_connections',
       'ai_local_conversations',
       'ai_local_conversation_items',
+      'ai_local_mcp_clients',
       'task_agent_mutation_receipts',
       'goal_operation_receipts',
     ] as const) {

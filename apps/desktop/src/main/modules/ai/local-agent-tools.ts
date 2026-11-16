@@ -3,6 +3,7 @@ import { randomBytes } from 'node:crypto';
 import {
   LocalAgentToolBridge,
   LocalAgentRepository,
+  LocalMcpClientRepository,
   PermissionLocalRepository,
   permissionOperationForTool,
   goalPanelSubmitOperationId,
@@ -71,6 +72,7 @@ export function createDesktopLocalAgentTools(
   time: UserTimeContextPort,
   knowledge?: IKnowledgeSourcePort,
   panelBridge?: IDesktopNativePanelBridge,
+  mcp?: { clients: LocalMcpClientRepository; discoveryPath?: string },
 ) {
   const tasks = createTaskPowerSyncReadQueries(db, time);
   const goals = createGoalPowerSyncPageQuery(db);
@@ -85,10 +87,15 @@ export function createDesktopLocalAgentTools(
     store,
     permissions: new PermissionLocalRepository(db),
     isActive,
+    clients: mcp?.clients,
+    discoveryPath: mcp?.discoveryPath,
     onRevokeGrant(grantInput) {
       panelBridge?.releaseAllForRun?.(grantInput.conversationId, grantInput.runId);
     },
     registerTools(server, context: LocalToolContext) {
+      // External MCP clients have no visible Agent panel or run, so the panel
+      // tools (and the "use the form" write rule) only apply to built-in runs.
+      const panels = context.origin === 'client' ? undefined : panelBridge;
       if (knowledge) {
         const reference = z.object({
           documentId: KnowledgeDocumentIdWireSchema,
@@ -253,7 +260,7 @@ export function createDesktopLocalAgentTools(
           // The run's user message cannot change mid-run, so one check before the owner write is enough.
           assertGoalIntentCanCommit(context.goalIntent ?? JSON.stringify(parsed.goal));
           // With the visible form available, a hidden write would leave the user nothing to review.
-          if (panelBridge) assertGoalDirectWriteAllowed(context.goalIntent);
+          if (panels) assertGoalDirectWriteAllowed(context.goalIntent);
           return goalWrites.create(parsed, cx, mutationAuthority('goals:write'));
         },
         goalUpdate(input, cx) {
@@ -309,7 +316,7 @@ export function createDesktopLocalAgentTools(
         authorize: () => context.authorize('read'),
       };
       registerWriteTools(server, writes, context, context.writeScopes, writeAuthority, writeCall);
-      if (panelBridge) {
+      if (panels) {
         async function runPanelAction(command: GoalPanelCommand) {
           try {
             if (command.action === 'submit') assertGoalIntentCanCommit(context.goalIntent ?? '');
