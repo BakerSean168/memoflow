@@ -46,11 +46,14 @@ export const writeToolDescriptors = {
   },
   routine_delete: {
     requiredScope: 'routines:write',
-    definition: definition(
-      'Permanently delete an owned Routine using expectedVersion. This cannot be undone.',
-      GatewayRoutineDeleteSchema,
-      GatewayRoutineDeleteReceiptSchema,
-    ),
+    definition: {
+      ...definition(
+        'Permanently delete an owned Routine using expectedVersion. This cannot be undone.',
+        GatewayRoutineDeleteSchema,
+        GatewayRoutineDeleteReceiptSchema,
+      ),
+      annotations: { ...annotations, destructiveHint: true },
+    },
   },
   routine_pause: {
     requiredScope: 'routines:write',
