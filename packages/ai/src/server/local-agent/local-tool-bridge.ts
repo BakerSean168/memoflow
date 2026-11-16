@@ -38,11 +38,14 @@ function tokenDigest(token: string): string {
   return createHash('sha256').update(token).digest('hex');
 }
 /** Business write scope that covers an operation; undefined for reads and owners we do not expose. */
-function writeScopeForOperation(operationId: string): 'goals:write' | 'tasks:write' | undefined {
+function writeScopeForOperation(
+  operationId: string,
+): 'goals:write' | 'tasks:write' | 'routines:write' | undefined {
   const operation = getPermissionOperation(operationId);
   if (!operation || operation.action === 'read') return undefined;
   if (operation.object === 'goal' || operation.object === 'key_result') return 'goals:write';
   if (operation.object === 'task') return 'tasks:write';
+  if (operation.object === 'routine') return 'routines:write';
   return undefined;
 }
 export interface LocalToolContext extends ExecutionContext {

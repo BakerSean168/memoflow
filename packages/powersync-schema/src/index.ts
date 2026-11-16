@@ -861,6 +861,19 @@ const task_agent_mutation_receipts = new Table(
   { localOnly: true },
 );
 
+const routine_agent_mutation_receipts = new Table(
+  {
+    identity_id: column.text,
+    connection_id: column.text,
+    capability: column.text,
+    idempotency_key: column.text,
+    input_digest: column.text,
+    result_json: column.text,
+    created_at: column.text,
+  },
+  { localOnly: true },
+);
+
 const task_goal_outbox = new Table({
   identity_id: column.text,
   task_occurrence_id: column.text,
@@ -986,6 +999,7 @@ export const PowerSyncAppSchema = new Schema({
   routine_temporary_overrides,
   routine_protocol_definitions,
   routine_protocol_sessions,
+  routine_agent_mutation_receipts,
   // Notification
   notifications,
   notification_delivery_decisions,

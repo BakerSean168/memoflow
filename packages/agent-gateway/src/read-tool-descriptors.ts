@@ -17,6 +17,16 @@ import {
   RoutineListOutputSchema,
   RoutineUpcomingInputSchema,
   RoutineUpcomingOutputSchema,
+  NotificationGetInputSchema,
+  NotificationGetOutputSchema,
+  NotificationListInputSchema,
+  NotificationListOutputSchema,
+  NotificationUnreadCountInputSchema,
+  NotificationUnreadCountOutputSchema,
+  ScheduleGetInputSchema,
+  ScheduleGetOutputSchema,
+  ScheduleListInputSchema,
+  ScheduleListOutputSchema,
 } from './contracts';
 
 const readAnnotations = {
@@ -126,6 +136,62 @@ export const readToolDescriptors = {
         'List upcoming owned Routine occurrences in an ordered epoch-ms window of at most 31 days, bounded to 100 per page.',
       inputSchema: RoutineUpcomingInputSchema,
       outputSchema: RoutineUpcomingOutputSchema,
+      annotations: readAnnotations,
+    },
+  },
+  notification_get: {
+    version: '1',
+    effect: 'read',
+    requiredScope: 'notifications:read',
+    definition: {
+      description: 'Read one owned Notification fact.',
+      inputSchema: NotificationGetInputSchema,
+      outputSchema: NotificationGetOutputSchema,
+      annotations: readAnnotations,
+    },
+  },
+  notification_list: {
+    version: '1',
+    effect: 'read',
+    requiredScope: 'notifications:read',
+    definition: {
+      description: 'List owned Notification facts with bounded pagination.',
+      inputSchema: NotificationListInputSchema,
+      outputSchema: NotificationListOutputSchema,
+      annotations: readAnnotations,
+    },
+  },
+  notification_unread_count: {
+    version: '1',
+    effect: 'read',
+    requiredScope: 'notifications:read',
+    definition: {
+      description: 'Get the unread Notification count for the owned profile.',
+      inputSchema: NotificationUnreadCountInputSchema,
+      outputSchema: NotificationUnreadCountOutputSchema,
+      annotations: readAnnotations,
+    },
+  },
+  schedule_get: {
+    version: '1',
+    effect: 'read',
+    requiredScope: 'schedules:read',
+    definition: {
+      description: 'Read one owned Calendar Schedule entry.',
+      inputSchema: ScheduleGetInputSchema,
+      outputSchema: ScheduleGetOutputSchema,
+      annotations: readAnnotations,
+    },
+  },
+  schedule_list: {
+    version: '1',
+    effect: 'read',
+    requiredScope: 'schedules:read',
+    definition: {
+      description:
+        'List owned Calendar Schedule entries in a bounded time range (at most 90 days).',
+      inputSchema: ScheduleListInputSchema,
+      outputSchema: ScheduleListOutputSchema,
       annotations: readAnnotations,
     },
   },

@@ -1462,6 +1462,9 @@ importers:
       '@memoflow/routine-contracts':
         specifier: workspace:*
         version: link:../routine-contracts
+      '@memoflow/schedule-contracts':
+        specifier: workspace:*
+        version: link:../schedule-contracts
       '@memoflow/task-contracts':
         specifier: workspace:*
         version: link:../task-contracts

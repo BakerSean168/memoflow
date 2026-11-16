@@ -47,7 +47,7 @@ export const LocalAgentActivitySchema = z
   })
   .strict();
 export type LocalAgentActivity = z.infer<typeof LocalAgentActivitySchema>;
-export const LocalAgentWriteScopeSchema = z.enum(['goals:write', 'tasks:write']);
+export const LocalAgentWriteScopeSchema = z.enum(['goals:write', 'tasks:write', 'routines:write']);
 export type LocalAgentWriteScope = z.infer<typeof LocalAgentWriteScopeSchema>;
 const nativePath = z
   .string()

@@ -4,6 +4,8 @@ export type {
   GoalReadPort,
   TaskReadPort,
   RoutineReadPort,
+  NotificationReadPort,
+  ScheduleReadPort,
   GatewayCredentialPort,
   GatewayAuditEvent,
   GatewayDiagnostic,

@@ -27,6 +27,16 @@ import {
   createGoalPowerSyncPageQuery,
 } from '@memoflow/goal';
 import {
+  createRoutinePowerSyncAgentMutations,
+  createRoutinePowerSyncRepositories,
+  RoutineAgentMutationError,
+} from '@memoflow/routine';
+import {
+  createRoutineConfigurationQueryService,
+  createInMemoryRoutineRuntimeContextStore,
+  type RoutineConfigurationQueryPort,
+} from '@memoflow/routine/routine-runtime';
+import {
   GatewayFailureCodeSchema,
   GatewayGoalCreateSchema,
   GatewayGoalUpdateSchema,
@@ -36,9 +46,15 @@ import {
   GatewayTaskCreateSchema,
   GatewayTaskUpdateSchema,
   GatewayTaskCompleteSchema,
+  GatewayRoutineCreateSchema,
   type GatewayWriteAuthority,
   type GatewayWritePort,
+  type RoutineReadPort,
+  type NotificationReadPort,
+  type ScheduleReadPort,
 } from '@memoflow/agent-gateway';
+import type { NotificationInboxPort } from '@memoflow/notification';
+import type { ScheduleEventApplicationPort } from '@memoflow/schedule';
 import {
   registerReadTools,
   registerWriteTools,
@@ -59,6 +75,156 @@ import {
 } from '@memoflow/ai-contracts';
 import type { IDesktopNativePanelBridge } from './desktop-native-panel-bridge';
 
+export interface DesktopLocalAgentToolsDomains {
+  readonly routineQuery?: RoutineConfigurationQueryPort;
+  readonly notifications?: NotificationReadPort | NotificationInboxPort;
+  readonly schedules?: ScheduleReadPort | ScheduleEventApplicationPort;
+}
+
+function bindNotificationReadPort(
+  port: NotificationReadPort | NotificationInboxPort,
+): NotificationReadPort {
+  if ('getUnreadCount' in port && 'listNotifications' in port && !('createNotification' in port)) {
+    return port as NotificationReadPort;
+  }
+  const inbox = port as NotificationInboxPort;
+  return {
+    async getNotification(id, cx) {
+      const res = await inbox.getNotification(id, cx.identityId);
+      if (!res.ok || !res.data) return null;
+      const row = res.data as Record<string, unknown>;
+      return {
+        id: String(row.id),
+        workflowKey: String(row.workflowKey ?? ''),
+        topic: String(row.topic ?? ''),
+        title: String(row.title ?? ''),
+        content: String(row.content ?? ''),
+        type: String(row.type ?? 'info'),
+        category: String(row.category ?? 'system'),
+        importance: String(row.importance ?? 'normal'),
+        urgency: String(row.urgency ?? 'normal'),
+        isRead: Boolean(row.isRead),
+        readAt: (row.readAt as string | number | null | undefined) ?? null,
+        createdAt: (row.createdAt as string | number) ?? Date.now(),
+        updatedAt: (row.updatedAt as string | number) ?? Date.now(),
+        expiresAt: (row.expiresAt as string | number | null | undefined) ?? null,
+        relatedEntityType: (row.relatedEntityType as string | null | undefined) ?? null,
+        relatedEntityId: (row.relatedEntityId as string | null | undefined) ?? null,
+        version: typeof row.version === 'number' ? row.version : 1,
+      };
+    },
+    async listNotifications(query, cx) {
+      const res = await inbox.listNotifications({
+        identityId: cx.identityId,
+        isRead: query.isRead,
+        category: query.category,
+        limit: query.limit,
+        page: query.offset ? Math.floor(query.offset / query.limit) + 1 : 1,
+      });
+      if (!res.ok || !res.data) return { items: [], total: 0, hasMore: false };
+      const data = res.data as Record<string, unknown>;
+      const list = (
+        Array.isArray(data) ? data : ((data.notifications ?? data.items ?? []) as unknown[])
+      ) as Record<string, unknown>[];
+      const total = typeof data.total === 'number' ? data.total : list.length;
+      const items = list.map((row) => ({
+        id: String(row.id),
+        workflowKey: String(row.workflowKey ?? ''),
+        topic: String(row.topic ?? ''),
+        title: String(row.title ?? ''),
+        content: String(row.content ?? ''),
+        type: String(row.type ?? 'info'),
+        category: String(row.category ?? 'system'),
+        importance: String(row.importance ?? 'normal'),
+        urgency: String(row.urgency ?? 'normal'),
+        isRead: Boolean(row.isRead),
+        readAt: (row.readAt as string | number | null | undefined) ?? null,
+        createdAt: (row.createdAt as string | number) ?? Date.now(),
+        updatedAt: (row.updatedAt as string | number) ?? Date.now(),
+        expiresAt: (row.expiresAt as string | number | null | undefined) ?? null,
+        relatedEntityType: (row.relatedEntityType as string | null | undefined) ?? null,
+        relatedEntityId: (row.relatedEntityId as string | null | undefined) ?? null,
+        version: typeof row.version === 'number' ? row.version : 1,
+      }));
+      return {
+        items,
+        total,
+        hasMore: total > (query.offset ?? 0) + items.length,
+      };
+    },
+    async getUnreadCount(cx) {
+      const res = await inbox.getUnreadCount(cx.identityId);
+      if (!res.ok) return 0;
+      const data = res.data as unknown;
+      return typeof data === 'number'
+        ? data
+        : typeof (data as { unreadCount?: number })?.unreadCount === 'number'
+          ? (data as { unreadCount: number }).unreadCount
+          : 0;
+    },
+  };
+}
+
+function bindScheduleReadPort(
+  port: ScheduleReadPort | ScheduleEventApplicationPort,
+): ScheduleReadPort {
+  if ('getSchedule' in port && 'listSchedules' in port) {
+    return port as ScheduleReadPort;
+  }
+  const api = port as ScheduleEventApplicationPort;
+  return {
+    async getSchedule(id, cx) {
+      const res = await api.getEvent(id, cx);
+      if (!res.ok || !res.data) return null;
+      const row = res.data as Record<string, unknown>;
+      return {
+        id: String(row.id),
+        title: String(row.title ?? row.name ?? ''),
+        description: (row.description as string | undefined) ?? undefined,
+        range: row.range as import('@memoflow/schedule-contracts').CalendarEntryRange,
+        location: (row.location as string | undefined) ?? undefined,
+        attendees: (row.attendees as string[] | undefined) ?? undefined,
+        version: typeof row.version === 'number' ? row.version : 1,
+        createdAt: (row.createdAt as string | number) ?? Date.now(),
+        updatedAt: (row.updatedAt as string | number) ?? Date.now(),
+      };
+    },
+    async listSchedules(query, cx) {
+      const res = await api.listEvents(
+        {
+          identityId: cx.identityId,
+          startTime: query.startTime,
+          endTime: query.endTime,
+        },
+        cx,
+      );
+      if (!res.ok || !res.data) return { items: [], hasMore: false };
+      const list = (
+        Array.isArray(res.data)
+          ? res.data
+          : (((res.data as Record<string, unknown>).items ?? []) as unknown[])
+      ) as Record<string, unknown>[];
+      const offset = query.offset ?? 0;
+      const sliced = list.slice(offset, offset + query.limit);
+      const items = sliced.map((row) => ({
+        id: String(row.id),
+        title: String(row.title ?? row.name ?? ''),
+        description: (row.description as string | undefined) ?? undefined,
+        range: row.range as import('@memoflow/schedule-contracts').CalendarEntryRange,
+        location: (row.location as string | undefined) ?? undefined,
+        attendees: (row.attendees as string[] | undefined) ?? undefined,
+        version: typeof row.version === 'number' ? row.version : 1,
+        createdAt: (row.createdAt as string | number) ?? Date.now(),
+        updatedAt: (row.updatedAt as string | number) ?? Date.now(),
+      }));
+      return {
+        items,
+        hasMore: list.length > offset + items.length,
+      };
+    },
+  };
+}
+
 function ownerResult<T>(result: Result<T>): T {
   if (result.ok) return result.data;
   const parsed = GatewayFailureCodeSchema.safeParse(result.error.code);
@@ -73,6 +239,7 @@ export function createDesktopLocalAgentTools(
   knowledge?: IKnowledgeSourcePort,
   panelBridge?: IDesktopNativePanelBridge,
   mcp?: { clients: LocalMcpClientRepository; discoveryPath?: string },
+  domains?: DesktopLocalAgentToolsDomains,
 ) {
   const tasks = createTaskPowerSyncReadQueries(db, time);
   const goals = createGoalPowerSyncPageQuery(db);
@@ -82,6 +249,26 @@ export function createDesktopLocalAgentTools(
     time,
     createGoalPowerSyncMeasurementReader,
   );
+  const routineWrites = createRoutinePowerSyncAgentMutations(db);
+  const routineRepos = createRoutinePowerSyncRepositories(db);
+  const defaultRoutineQuery = createRoutineConfigurationQueryService({
+    occurrenceTruthStore: routineRepos.routineOccurrenceTruthStore,
+    routineProfileStore: routineRepos.routineProfileStore,
+    routinePreferencesStore: routineRepos.routinePreferencesStore,
+    runtimeContextStore: createInMemoryRoutineRuntimeContextStore(),
+    temporaryOverrideStore: routineRepos.routineTemporaryOverrideStore,
+    localRuntimeAvailable: true,
+  });
+  const routineQuery = domains?.routineQuery ?? defaultRoutineQuery;
+  const routineReads: RoutineReadPort = {
+    getConfigurationSnapshot: (identityId) => routineQuery.getConfigurationSnapshot(identityId),
+    getUpcomingOccurrences: (identityId, query) =>
+      routineQuery.getUpcomingOccurrences(identityId, query),
+  };
+  const notificationReadPort = domains?.notifications
+    ? bindNotificationReadPort(domains.notifications)
+    : undefined;
+  const scheduleReadPort = domains?.schedules ? bindScheduleReadPort(domains.schedules) : undefined;
   const cursorSecret = randomBytes(32).toString('base64url');
   return new LocalAgentToolBridge({
     store,
@@ -227,7 +414,9 @@ export function createDesktopLocalAgentTools(
             .object({ code: z.enum(['LOCAL_AGENT_PERMISSION_DENIED', 'PERMISSION_DENIED']) })
             .safeParse(error);
           const code =
-            error instanceof GoalAgentMutationError || error instanceof TaskAgentMutationError
+            error instanceof GoalAgentMutationError ||
+            error instanceof TaskAgentMutationError ||
+            error instanceof RoutineAgentMutationError
               ? error.code
               : failure.success
                 ? failure.data.code === 'PERMISSION_DENIED'
@@ -250,7 +439,9 @@ export function createDesktopLocalAgentTools(
       };
       // The bridge revalidates the connection revision and the tool's write
       // scope inside every owner transaction; a port must never bypass it.
-      const mutationAuthority = (scope: 'goals:write' | 'tasks:write'): OwnerMutationAuthority => ({
+      const mutationAuthority = (
+        scope: 'goals:write' | 'tasks:write' | 'routines:write',
+      ): OwnerMutationAuthority => ({
         connectionId: context.connectionId,
         authorize: (tx) => context.authorize(scope, tx),
       });
@@ -259,7 +450,7 @@ export function createDesktopLocalAgentTools(
           const parsed = GatewayGoalCreateSchema.parse(input);
           // The run's user message cannot change mid-run, so one check before the owner write is enough.
           assertGoalIntentCanCommit(context.goalIntent ?? JSON.stringify(parsed.goal));
-          // With the visible form available, a hidden write would leave the user nothing to review.
+          // With the visible form available, a hidden write would leave the user nothing to review operations.
           if (panels) assertGoalDirectWriteAllowed(context.goalIntent);
           return goalWrites.create(parsed, cx, mutationAuthority('goals:write'));
         },
@@ -304,6 +495,13 @@ export function createDesktopLocalAgentTools(
             GatewayTaskCompleteSchema.parse(input),
             cx,
             mutationAuthority('tasks:write'),
+          );
+        },
+        routineCreate(input, cx) {
+          return routineWrites.create(
+            GatewayRoutineCreateSchema.parse(input),
+            cx,
+            mutationAuthority('routines:write'),
           );
         },
       };
@@ -527,10 +725,19 @@ export function createDesktopLocalAgentTools(
               return ownerResult(await goals.searchGoalPage(cx.identityId, query, budget));
             },
           },
+          routines: routineReads,
+          ...(notificationReadPort ? { notifications: notificationReadPort } : {}),
+          ...(scheduleReadPort ? { schedules: scheduleReadPort } : {}),
         },
         context,
         { deadlineAt: context.deadlineAt, signal: context.signal },
-        ['goals:read', 'tasks:read'],
+        [
+          'goals:read',
+          'tasks:read',
+          'routines:read',
+          ...(notificationReadPort ? ['notifications:read'] : []),
+          ...(scheduleReadPort ? ['schedules:read'] : []),
+        ],
         async (toolName, scope, work) => {
           try {
             const operationId = permissionOperationForTool(toolName)?.id ?? toolName;

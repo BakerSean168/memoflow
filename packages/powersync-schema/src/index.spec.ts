@@ -17,6 +17,7 @@ describe('PowerSyncAppSchema', () => {
       'ai_local_mcp_clients',
       'task_agent_mutation_receipts',
       'goal_operation_receipts',
+      'routine_agent_mutation_receipts',
     ] as const) {
       const table = PowerSyncAppSchema.tables.find((candidate) => candidate.name === name);
       expect(table, name).toBeDefined();

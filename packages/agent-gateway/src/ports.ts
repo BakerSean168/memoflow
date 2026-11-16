@@ -18,7 +18,7 @@ import type {
 } from '@memoflow/routine-contracts';
 import type { GatewayWriteToolName } from './write-tool-descriptors';
 import type { GatewayAssistedToolName } from './assisted-tool-descriptors';
-import type { GatewayFailureCode } from './contracts';
+import type { GatewayFailureCode, ExternalNotification, ExternalSchedule } from './contracts';
 import type {
   GoalAgentPersistedReceipt,
   GoalClientDTO,
@@ -69,6 +69,33 @@ export interface RoutineReadPort {
     query: RoutineUpcomingQuery,
     budget?: GatewayReadBudget,
   ): Promise<RoutineUpcomingResponse>;
+}
+
+export interface NotificationReadPort {
+  getNotification(
+    id: string,
+    context: ExecutionContext,
+    budget?: GatewayReadBudget,
+  ): Promise<ExternalNotification | null>;
+  listNotifications(
+    query: { isRead?: boolean; category?: string; limit: number; offset?: number },
+    context: ExecutionContext,
+    budget?: GatewayReadBudget,
+  ): Promise<{ items: readonly ExternalNotification[]; total: number; hasMore: boolean }>;
+  getUnreadCount(context: ExecutionContext, budget?: GatewayReadBudget): Promise<number>;
+}
+
+export interface ScheduleReadPort {
+  getSchedule(
+    id: string,
+    context: ExecutionContext,
+    budget?: GatewayReadBudget,
+  ): Promise<ExternalSchedule | null>;
+  listSchedules(
+    query: { startTime: number; endTime: number; limit: number; offset?: number },
+    context: ExecutionContext,
+    budget?: GatewayReadBudget,
+  ): Promise<{ items: readonly ExternalSchedule[]; hasMore: boolean }>;
 }
 
 export interface GatewayPrincipal {
