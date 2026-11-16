@@ -48,6 +48,7 @@ import { createSettingPrismaTimeQuery } from '@memoflow/setting';
 import { createTaskPrismaReadQueries } from '@memoflow/task';
 import { bindTaskReadPort } from './modules/agent-gateway/task-read.port';
 import { bindGoalReadPort } from './modules/agent-gateway/goal-read.port';
+import { bindRelationReadPort } from './modules/agent-gateway/relation-read.port';
 import { bindLabelReadPort } from './modules/agent-gateway/label-read.port.js';
 import {
   bindNotificationMarkRead,
@@ -123,6 +124,7 @@ import {
   createLabelPortableCapability,
 } from '@memoflow/label';
 import {
+  RelationService,
   GoalKnowledgeService,
   TaskKnowledgeService,
   PrismaRelationRepository,
@@ -351,6 +353,7 @@ async function bootstrap(): Promise<void> {
   );
   const taskGoalContextReadPort = new PrismaTaskBindingReadPort(prisma);
   const relationRepository = new PrismaRelationRepository(prisma);
+  const relationService = new RelationService(relationRepository);
   const goalKnowledgeService = new GoalKnowledgeService(
     relationRepository,
     repositoryApiModule.knowledgeDocumentRefResolver,
@@ -503,6 +506,17 @@ async function bootstrap(): Promise<void> {
     tasks: env.EAG_TASK_READ_ENABLED
       ? bindTaskReadPort(createTaskPrismaReadQueries(prisma, createSettingPrismaTimeQuery(prisma)))
       : undefined,
+    relations: bindRelationReadPort({
+      relationService,
+      goalKnowledgeService,
+      goals: bindGoalReadPort(goalPageQuery),
+      tasks: env.EAG_TASK_READ_ENABLED
+        ? bindTaskReadPort(
+            createTaskPrismaReadQueries(prisma, createSettingPrismaTimeQuery(prisma)),
+          )
+        : undefined,
+      knowledge: repositoryApiModule.knowledgeDocumentRefResolver,
+    }),
     labels: bindLabelReadPort(labelService),
     notification: bindNotificationReadPort(notificationApiModule.inbox),
     assistantConversation: bindAssistantConversationReadPort(

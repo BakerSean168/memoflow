@@ -63,7 +63,7 @@ describe('ExternalAgentConnectionsSection PAT issuing (#970)', () => {
     const { wrapper, service } = fixture();
     await flushPromises();
 
-    expect(wrapper.findAll('[data-testid^="pat-scope-"]')).toHaveLength(10);
+    expect(wrapper.findAll('[data-testid^="pat-scope-"]')).toHaveLength(11);
     expect(wrapper.find('[data-testid="pat-write-warning"]').exists()).toBe(false);
 
     await nameToken(wrapper, 'daily agent');
@@ -112,6 +112,23 @@ describe('ExternalAgentConnectionsSection PAT issuing (#970)', () => {
       name: 'full writer',
       expiresInDays: 90,
       scopes: ['goals:read', 'tasks:read', 'tasks:write', 'routines:read', 'routines:write'],
+    });
+  });
+
+  it('offers relations:read scope for issuing', async () => {
+    const { wrapper, service } = fixture();
+    await flushPromises();
+
+    await wrapper
+      .get('[data-testid="pat-scope-relations:read"] [role="checkbox"]')
+      .trigger('click');
+    await nameToken(wrapper, 'relation reader');
+    await submit(wrapper);
+
+    expect(service.createPat).toHaveBeenCalledWith({
+      name: 'relation reader',
+      expiresInDays: 90,
+      scopes: ['goals:read', 'tasks:read', 'relations:read'],
     });
   });
 

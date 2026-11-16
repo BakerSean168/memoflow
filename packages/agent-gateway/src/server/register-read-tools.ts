@@ -21,6 +21,7 @@ import {
   AiAgentListOutputSchema,
   AiConversationListOutputSchema,
   AiConversationTranscriptOutputSchema,
+  RelationNeighborsOutputSchema,
 } from '../contracts';
 import type { Result } from '@memoflow/transport-contracts/result';
 import { GoalPagePositionSchema, type GoalClientDTO } from '@memoflow/goal-contracts';
@@ -36,6 +37,7 @@ import {
   type AssistantConversationReadPort,
   type AgentArchiveReadPort,
   type GatewayAiAgentEntry,
+  type RelationReadPort,
   type GatewayReadBudget,
 } from '../ports';
 const MAX_BYTES = 256 * 1024;
@@ -55,7 +57,8 @@ export interface ReadToolCall {
       | 'ai:read'
       | 'routines:write'
       | 'notifications:read'
-      | 'notifications:write',
+      | 'notifications:write'
+      | 'relations:read',
     work: () => Promise<T>,
   ): Promise<{
     content: { type: 'text'; text: string }[];
@@ -79,6 +82,17 @@ const TaskCursorSchema = z.strictObject({
   after: z.union([TaskPlanPositionSchema, TaskOccurrencePositionSchema]),
   timeZone: z.string().max(100).optional(),
   asOf: z.number().int().nonnegative().optional(),
+});
+const RelationCursorSchema = z.strictObject({
+  identityId: z.string(),
+  nodeType: z.string(),
+  nodeId: z.string(),
+  relationType: z.string().optional(),
+  targetType: z.string().optional(),
+  direction: z.string().optional(),
+  limit: z.number().int().min(1).max(100),
+  offset: z.number().int().min(0),
+  expiresAt: z.number().int(),
 });
 const RoutineCursorSchema = z.strictObject({
   identityId: z.string(),
@@ -147,6 +161,7 @@ export function registerReadTools(
     routines?: RoutineReadPort;
     assistantConversation?: AssistantConversationReadPort;
     agents?: AgentArchiveReadPort;
+    relations?: RelationReadPort;
   },
   context: ExecutionContext,
   budget: GatewayReadBudget,
@@ -238,6 +253,47 @@ export function registerReadTools(
         parsed.identityId !== identityId ||
         parsed.tool !== tool ||
         parsed.binding !== binding ||
+        parsed.expiresAt <= Date.now()
+      )
+        throw new Error('binding');
+      return parsed.offset;
+    } catch {
+      throw new ControlledError('INVALID_CURSOR');
+    }
+  }
+  function encodeRelationCursor(input: z.infer<typeof RelationCursorSchema>) {
+    const payload = Buffer.from(JSON.stringify(RelationCursorSchema.parse(input))).toString(
+      'base64url',
+    );
+    return `${payload}.${sign(payload)}`;
+  }
+  function decodeRelationCursor(
+    cursor: string,
+    identityId: string,
+    node: { type: string; id: string },
+    relationType?: string,
+    targetType?: string,
+    direction?: string,
+    limit?: number,
+  ) {
+    try {
+      const [payload, signature, extra] = cursor.split('.');
+      if (!payload || !signature || extra) throw new Error('shape');
+      const expected = Buffer.from(sign(payload)),
+        actual = Buffer.from(signature);
+      if (expected.length !== actual.length || !timingSafeEqual(expected, actual))
+        throw new Error('signature');
+      const parsed = RelationCursorSchema.parse(
+        JSON.parse(Buffer.from(payload, 'base64url').toString('utf8')),
+      );
+      if (
+        parsed.identityId !== identityId ||
+        parsed.nodeType !== node.type ||
+        parsed.nodeId !== node.id ||
+        parsed.relationType !== (relationType ?? undefined) ||
+        parsed.targetType !== (targetType ?? undefined) ||
+        parsed.direction !== (direction ?? undefined) ||
+        (limit !== undefined && parsed.limit !== limit) ||
         parsed.expiresAt <= Date.now()
       )
         throw new Error('binding');
@@ -633,6 +689,60 @@ export function registerReadTools(
           const { items: fitted } = fitPage(items);
           return LabelResolveNamesOutputSchema.parse({
             items: fitted,
+          });
+        }),
+    );
+  }
+  if (options.relations && scopes.includes('relations:read')) {
+    const relations = options.relations;
+    server.registerTool(
+      'relation_neighbors',
+      readToolDescriptors.relation_neighbors.definition,
+      ({ node, relationType, targetType, direction, limit, cursor }) =>
+        call('relation_neighbors', 'relations:read', async () => {
+          const offset = cursor
+            ? decodeRelationCursor(
+                cursor,
+                context.identityId,
+                node,
+                relationType,
+                targetType,
+                direction,
+                limit,
+              )
+            : 0;
+          const page = await relations.getNeighbors(
+            {
+              node,
+              relationType,
+              targetType,
+              direction,
+              limit,
+              offset,
+            },
+            context,
+            budget,
+          );
+          const { items, truncated } = fitPage(page.items);
+          const hasMore = page.hasMore || truncated;
+          const nextCursor = hasMore
+            ? encodeRelationCursor({
+                identityId: context.identityId,
+                nodeType: node.type,
+                nodeId: node.id,
+                relationType,
+                targetType,
+                direction,
+                limit,
+                offset: offset + items.length,
+                expiresAt: Date.now() + 86400000,
+              })
+            : null;
+          return RelationNeighborsOutputSchema.parse({
+            items,
+            hasMore,
+            nextCursor,
+            ...(truncated ? { truncated: 'response-budget' as const } : {}),
           });
         }),
     );

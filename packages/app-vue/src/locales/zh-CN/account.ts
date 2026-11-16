@@ -49,6 +49,7 @@ export default {
       notificationsRead: '通知只读',
       notificationsWrite: '通知标记已读',
       labelsRead: 'Labels 只读',
+      relationsRead: 'Relations 只读',
       offlineAccess: '保持连接',
     },
     writeWarning: '持有此令牌的程序可在授权范围内直接写入。',

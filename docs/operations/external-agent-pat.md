@@ -7,7 +7,7 @@ updated: 2026-11-16T00:00:00Z
 
 # External Agent PAT 连接
 
-本车道保留 PAT 与 31 个工具（13 个只读、13 个写、5 个 assisted），全部默认关闭；常规 Agent 连接另见 [OAuth 指南](./external-agent-oauth.md)。PAT 验证状态见 [EAG-03 证据](https://github.com/BakerSean168/memoflow/blob/7a45112e1840950ead1ba98b748fc70fa1b38344/docs/analysis/2026-10-07-eag-03-task-read-evidence.md)。受控开发入口为 `http://127.0.0.1:20201/mcp`，只适用于同机客户端。
+本车道保留 PAT 与 32 个工具（14 个只读、13 个写、5 个 assisted），全部默认关闭；常规 Agent 连接另见 [OAuth 指南](./external-agent-oauth.md)。PAT 验证状态见 [EAG-03 证据](https://github.com/BakerSean168/memoflow/blob/7a45112e1840950ead1ba98b748fc70fa1b38344/docs/analysis/2026-10-07-eag-03-task-read-evidence.md)。受控开发入口为 `http://127.0.0.1:20201/mcp`，只适用于同机客户端。
 
 在既有 `docker-compose.local.yml` prod-like 车道中配置 `EAG_READ_PILOT_ENABLED=1`、`EAG_AUDIENCE=http://127.0.0.1:20201/mcp` 和私密的至少 32 字符 `EAG_CURSOR_SECRET`，沿用 [本地 Docker 流程](./local-docker.md)。Task 注册由 `EAG_TASK_READ_ENABLED` 控制，默认开启；设为 0 可回退至 Goal 两工具。写与 assisted 分别由 `EAG_WRITE_ENABLED`、`EAG_ROUTINE_WRITE_ENABLED`、`EAG_ASSISTED_ENABLED` 控制，默认 `0`；完整顺序见 [Gateway runbook](../internals/external-agent-gateway.md#10-一期开启-runbook)。
 
@@ -36,7 +36,7 @@ tool_timeout_sec = 30
 
 `bearer_token_env_var` 是 [Codex 官方 MCP 配置](https://learn.chatgpt.com/docs/extend/mcp?surface=cli) 支持的显式 Bearer 配置，无需 OAuth 登录步骤。当前证据使用官方 MCP SDK；不将其等同于真实 Codex/Claude OAuth 登录验收。
 
-工具：goal_get、goal_search、task_plan_get、task_plan_search、task_occurrence_get、task_occurrence_list、routine_get、routine_list、routine_upcoming、notification_list、notification_unread_count、label_list、label_resolve_names。notification_list 分页 page ≤ 20、limit ≤ 50，正文截断 2000 字符；execute-action 动作执行不开放。Label 两读工具需 `labels:read`，返回有界强类型标签列表。列表 limit 为 1～100，默认 20；Routine 列表上限 50，upcoming 单页上限 100 且窗口最长 31 天；nextCursor 必须连同原筛选和 limit 使用。Occurrence startDate/endDate 为 epoch 毫秒，最长 31 天，按照当前账户时区查询已有事实；分页固定 asOf，时区改变后应重新从第一页查询。
+工具：goal_get、goal_search、task_plan_get、task_plan_search、task_occurrence_get、task_occurrence_list、routine_get、routine_list、routine_upcoming、notification_list、notification_unread_count、label_list、label_resolve_names、relation_neighbors（需 `relations:read`）。notification_list 分页 page ≤ 20、limit ≤ 50，正文截断 2000 字符；execute-action 动作执行不开放。Label 两读工具需 `labels:read`，返回有界强类型标签列表。relation_neighbors 查询 Goal/Task/Knowledge 跨域邻居并支持类型过滤，遵循可见性规则：只返回双方均可见的关系，指向不可见或跨 owner 节点的边直接省略、不泄露对端存在性。列表 limit 为 1～100，默认 20；Routine 列表上限 50，upcoming 单页上限 100 且窗口最长 31 天；nextCursor 必须连同原筛选和 limit 使用。Occurrence startDate/endDate 为 epoch 毫秒，最长 31 天，按照当前账户时区查询已有事实；分页固定 asOf，时区改变后应重新从第一页查询。
 
 ## 受控写入（#490）
 

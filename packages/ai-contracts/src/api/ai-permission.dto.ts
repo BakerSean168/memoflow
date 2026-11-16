@@ -9,6 +9,7 @@ export const PermissionObjectSchema = z.enum([
   'notification',
   'label',
   'ai',
+  'relation',
   'ai_permission',
 ]);
 export const PermissionActionSchema = z.enum(['read', 'create', 'update', 'delete']);

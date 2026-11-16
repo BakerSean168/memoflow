@@ -126,4 +126,27 @@ describe('scoped PAT lifetime contract (#970)', () => {
       CreateScopedPatSchema.safeParse({ name: 'agent', scopes: ['labels:write'] }).success,
     ).toBe(false);
   });
+
+  it('accepts relations:read within the eleven-scope ceiling (#994)', () => {
+    const scopes = [
+      'goals:read',
+      'goals:write',
+      'tasks:read',
+      'tasks:write',
+      'routines:write',
+      'ai:read',
+      'routines:read',
+      'notifications:read',
+      'notifications:write',
+      'labels:read',
+      'relations:read',
+    ];
+    expect(CreateScopedPatSchema.parse({ name: 'relation agent', scopes }).scopes).toEqual(scopes);
+    expect(
+      CreateScopedPatSchema.safeParse({ name: 'agent', scopes: [...scopes, 'goals:read'] }).success,
+    ).toBe(false);
+    expect(
+      CreateScopedPatSchema.safeParse({ name: 'agent', scopes: ['relations:write'] }).success,
+    ).toBe(false);
+  });
 });

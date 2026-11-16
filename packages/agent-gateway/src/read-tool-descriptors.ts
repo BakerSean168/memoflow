@@ -27,6 +27,8 @@ import {
   TaskOccurrenceGetOutputSchema,
   TaskOccurrenceListInputSchema,
   TaskOccurrenceListOutputSchema,
+  RelationNeighborsInputSchema,
+  RelationNeighborsOutputSchema,
   RoutineGetInputSchema,
   RoutineGetOutputSchema,
   RoutineListInputSchema,
@@ -108,6 +110,18 @@ export const readToolDescriptors = {
         'List existing owned occurrences in an inclusive account-time date range (epoch ms; at most 31 days). Optional earlier open facts; never materializes upcoming occurrences.',
       inputSchema: TaskOccurrenceListInputSchema,
       outputSchema: TaskOccurrenceListOutputSchema,
+      annotations: readAnnotations,
+    },
+  },
+  relation_neighbors: {
+    version: '1',
+    effect: 'read',
+    requiredScope: 'relations:read',
+    definition: {
+      description:
+        'Read cross-domain relation neighbors for a given goal, task, or knowledge note with optional relation/target type filtering and cursor pagination. Only relations between nodes visible to the current owner are returned; edges to invisible or cross-owner nodes are omitted without leaking peer existence.',
+      inputSchema: RelationNeighborsInputSchema,
+      outputSchema: RelationNeighborsOutputSchema,
       annotations: readAnnotations,
     },
   },

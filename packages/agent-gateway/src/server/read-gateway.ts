@@ -22,6 +22,7 @@ import {
   type TaskReadPort,
   type LabelReadPort,
   type RoutineReadPort,
+  type RelationReadPort,
 } from '../ports';
 
 interface Options {
@@ -41,6 +42,7 @@ interface Options {
   readonly assistantConversation?: import('../ports').AssistantConversationReadPort;
   readonly agents?: import('../ports').AgentArchiveReadPort;
   readonly routines?: RoutineReadPort;
+  readonly relations?: RelationReadPort;
   readonly audit: (event: GatewayAuditEvent) => void;
   readonly timeoutMs?: number;
   readonly diagnose?: (event: GatewayDiagnostic) => void;
@@ -195,6 +197,7 @@ export function createReadGateway(options: Options) {
               scope === 'notifications:read' ||
               scope === 'ai:read' ||
               scope === 'routines:read' ||
+              scope === 'relations:read' ||
               ((options.writes || options.assisted) &&
                 principal.credentialType === 'pat' &&
                 (scope === 'goals:write' ||
@@ -303,7 +306,8 @@ export function createReadGateway(options: Options) {
             | 'routines:write'
             | 'notifications:read'
             | 'notifications:write'
-            | 'ai:read',
+            | 'ai:read'
+            | 'relations:read',
           operation: () => Promise<T>,
         ) {
           tool = name;
