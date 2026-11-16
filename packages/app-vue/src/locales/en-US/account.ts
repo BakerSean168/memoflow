@@ -46,6 +46,7 @@ export default {
       tasksRead: 'Tasks (read)',
       tasksWrite: 'Tasks (write)',
       routinesWrite: 'Routines (write)',
+      aiRead: 'AI conversations & agents (read)',
       offlineAccess: 'Stay connected',
     },
     writeWarning: 'Any program holding this token can write directly within the granted scopes.',

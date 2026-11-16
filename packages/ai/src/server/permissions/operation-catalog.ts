@@ -5,6 +5,7 @@ export type PermissionObject =
   | 'routine'
   | 'knowledge'
   | 'notification'
+  | 'ai'
   | 'ai_permission';
 export type PermissionAction = 'read' | 'create' | 'update' | 'delete';
 export type PermissionRisk = 'delete_permanent' | 'bulk' | 'send_external';
@@ -99,6 +100,9 @@ export const PERMISSION_OPERATIONS: readonly PermissionOperation[] = [
     action: 'create',
     risks: ['send_external'],
   },
+  // AI archive/conversation reads are owner metadata only; this scope never
+  // registers a write, so no `ai.create/update/delete` operation exists.
+  { id: 'ai.read', object: 'ai', action: 'read' },
   { id: 'ai_permission.update', object: 'ai_permission', action: 'update' },
 ];
 
@@ -133,6 +137,11 @@ const TOOL_OPERATIONS: Readonly<Record<string, string>> = {
   planner_upcoming_tasks: 'task.read',
   notification_unread_summary: 'notification.read',
   notification_execute_action: 'notification.execute_action',
+  ai_conversation_list: 'ai.read',
+  ai_conversation_get: 'ai.read',
+  ai_conversation_transcript: 'ai.read',
+  ai_agent_list: 'ai.read',
+  ai_agent_get: 'ai.read',
   // Assisted Task workflow tools mutate (start/resume) or re-read the durable
   // run; the reviewed draft only becomes a TaskPlan on approval.
   assisted_workflow_start: 'task.plan.create',
