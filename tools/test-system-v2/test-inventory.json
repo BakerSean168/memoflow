@@ -3972,6 +3972,16 @@
       ]
     },
     {
+      "path": "packages/ai/src/server/application/services/agent-instance-read.service.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/ai/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "packages/ai/vitest.config.ts"
+      ]
+    },
+    {
       "path": "packages/ai/src/server/application/services/conversation-attention-observer.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -13232,7 +13242,7 @@
       "type": "measurement",
       "suite": "coverage",
       "runner": "vitest",
-      "fileCount": 130
+      "fileCount": 131
     },
     {
       "id": "packages/app-vue/vitest.store-coverage.config.ts",
@@ -13782,7 +13792,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 130
+      "fileCount": 131
     },
     {
       "id": "packages/app-vue/vitest.config.ts",
@@ -14308,6 +14318,7 @@
       "packages/ai/src/server/application/ai-conversation-messages-portability.spec.ts",
       "packages/ai/src/server/application/ai-conversation-portability.spec.ts",
       "packages/ai/src/server/application/ports/knowledge-source-note.surface.spec.ts",
+      "packages/ai/src/server/application/services/agent-instance-read.service.spec.ts",
       "packages/ai/src/server/application/services/conversation-attention-observer.spec.ts",
       "packages/ai/src/server/application/services/owner-activity-projection.spec.ts",
       "packages/ai/src/server/application/use-cases/commands/__tests__/ai-provider-config-service.test.ts",
@@ -14846,7 +14857,7 @@
   "duplicate": [],
   "unexpected": [],
   "counts": {
-    "unit": 1227,
+    "unit": 1228,
     "integration": 59,
     "smoke": 3,
     "boundary-ipc": 6,
