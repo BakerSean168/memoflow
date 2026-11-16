@@ -7,8 +7,12 @@ import type {
   GoalReadPort,
   GatewayWritePort,
   GatewayAssistedPort,
+  NotificationReadPort,
   TaskReadPort,
   LabelReadPort,
+  AssistantConversationReadPort,
+  AgentArchiveReadPort,
+  RoutineReadPort,
   GatewayAuditEvent,
   GatewayDiagnostic,
 } from '@memoflow/agent-gateway';
@@ -31,6 +35,10 @@ interface Options {
   readonly goals: GoalReadPort;
   readonly tasks?: TaskReadPort;
   readonly labels?: LabelReadPort;
+  readonly notification?: NotificationReadPort;
+  readonly assistantConversation?: AssistantConversationReadPort;
+  readonly agents?: AgentArchiveReadPort;
+  readonly routines?: RoutineReadPort;
   readonly audit: (event: GatewayAuditEvent) => void;
   readonly diagnose?: (event: GatewayDiagnostic) => void;
 }

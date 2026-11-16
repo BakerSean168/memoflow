@@ -11,6 +11,7 @@ export {
   createAIConversationPortableCapability,
   createAIConversationMessagesPortableCapability,
   createAssistantConversationExternalReadPort,
+  createAssistantConversationExternalSource,
 } from './application';
 export * from './domain';
 export * from './permissions';

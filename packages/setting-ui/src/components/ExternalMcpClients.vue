@@ -5,6 +5,7 @@ import { useI18n } from 'vue-i18n';
 import { Button, Checkbox, Input, Label } from '@memoflow/ui-vue-shadcn';
 import type {
   LocalAgentWriteScope,
+  LocalGatewayAuditRecord,
   LocalMcpClient,
   LocalMcpClientCredential,
   LocalMcpEndpoint,
@@ -14,6 +15,7 @@ import { settingUiHost } from '../setting-ui-host';
 const { t } = useI18n();
 const local = inject(settingUiHost.AI_LOCAL_AGENT_KEY, undefined);
 const clients = ref<LocalMcpClient[]>([]);
+const audit = ref<LocalGatewayAuditRecord[]>([]);
 const endpoint = ref<LocalMcpEndpoint | null>(null);
 const credential = ref<LocalMcpClientCredential | null>(null);
 const name = ref('');
@@ -62,6 +64,7 @@ async function refresh() {
   try {
     if (local.getMcpEndpoint) endpoint.value = await local.getMcpEndpoint();
     if (local.listMcpClients) clients.value = await local.listMcpClients();
+    if (local.listGatewayAudit) audit.value = await local.listGatewayAudit(20);
   } catch {
     error.value = t('setting.ai.localMcp.error');
   } finally {
@@ -128,6 +131,22 @@ function scopeLabel(client: LocalMcpClient) {
 
 function formatDate(value: number) {
   return new Date(value).toLocaleString();
+}
+
+function auditOrigin(entry: LocalGatewayAuditRecord) {
+  if (entry.origin === 'run') return t('setting.ai.localMcp.auditOriginRun');
+  return (
+    clients.value.find((client) => client.id === entry.connectionId)?.name ??
+    t('setting.ai.localMcp.auditOriginClient')
+  );
+}
+
+function auditDecision(entry: LocalGatewayAuditRecord) {
+  return t(
+    entry.scopeDecision === 'allowed'
+      ? 'setting.ai.localMcp.auditAllowed'
+      : 'setting.ai.localMcp.auditDenied',
+  );
 }
 
 onMounted(() => {
@@ -270,5 +289,26 @@ onMounted(() => {
         >
       </li>
     </ul>
+
+    <div class="space-y-2 border-t border-[hsl(var(--border-subtle))] pt-3">
+      <h4 class="text-[12px] font-semibold">{{ t('setting.ai.localMcp.auditTitle') }}</h4>
+      <p v-if="!audit.length" class="text-[11px] text-muted-foreground">
+        {{ t('setting.ai.localMcp.auditEmpty') }}
+      </p>
+      <ul v-else class="space-y-1" data-testid="ai-external-mcp-audit">
+        <li
+          v-for="entry in audit"
+          :key="entry.id"
+          class="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-[11px] text-muted-foreground"
+        >
+          <code class="text-foreground">{{ entry.tool }}</code>
+          <span>{{ auditOrigin(entry) }}</span>
+          <span>· {{ auditDecision(entry) }}</span>
+          <span>· {{ entry.outcome }}</span>
+          <span>· {{ entry.durationMs }}ms</span>
+          <span class="ml-auto">{{ formatDate(entry.at) }}</span>
+        </li>
+      </ul>
+    </div>
   </section>
 </template>

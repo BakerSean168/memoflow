@@ -1,7 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 import { bindGatewayWrites } from './write.port';
 import { bindLabelReadPort } from './label-read.port';
-import { GatewayReadError } from '@memoflow/agent-gateway';
 import type { ExecutionContext } from '@memoflow/transport-contracts';
 import type { PrismaClient } from '@memoflow/database';
 import type { UserTimeContextPort } from '@memoflow/time';

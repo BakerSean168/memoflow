@@ -32,7 +32,11 @@ const scopeOptions = [
   'goals:write',
   'tasks:read',
   'tasks:write',
+  'routines:read',
   'routines:write',
+  'ai:read',
+  'notifications:read',
+  'notifications:write',
   'labels:read',
 ] as const;
 type PatScope = (typeof scopeOptions)[number];
@@ -41,7 +45,11 @@ const selectedScopes = ref<Record<PatScope, boolean>>({
   'goals:write': false,
   'tasks:read': true,
   'tasks:write': false,
+  'routines:read': false,
   'routines:write': false,
+  'ai:read': false,
+  'notifications:read': false,
+  'notifications:write': false,
   'labels:read': false,
 });
 const expiryOptions = ['7', '30', '90', '365'] as const;
@@ -57,7 +65,11 @@ const scopeName = (scope: string) =>
     'goals:write': t('account.externalAgents.scopes.goalsWrite'),
     'tasks:read': t('account.externalAgents.scopes.tasksRead'),
     'tasks:write': t('account.externalAgents.scopes.tasksWrite'),
+    'routines:read': t('account.externalAgents.scopes.routinesRead'),
     'routines:write': t('account.externalAgents.scopes.routinesWrite'),
+    'ai:read': t('account.externalAgents.scopes.aiRead'),
+    'notifications:read': t('account.externalAgents.scopes.notificationsRead'),
+    'notifications:write': t('account.externalAgents.scopes.notificationsWrite'),
     'labels:read': t('account.externalAgents.scopes.labelsRead'),
     offline_access: t('account.externalAgents.scopes.offlineAccess'),
   })[scope] ?? scope;

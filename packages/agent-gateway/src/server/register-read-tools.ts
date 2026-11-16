@@ -6,21 +6,36 @@ import {
   ExternalGoalSchema,
   GoalGetOutputSchema,
   GoalSearchOutputSchema,
+  NotificationListOutputSchema,
+  NotificationUnreadCountOutputSchema,
   TaskPlanGetOutputSchema,
   TaskPlanSearchOutputSchema,
   TaskOccurrenceGetOutputSchema,
   TaskOccurrenceListOutputSchema,
   LabelListOutputSchema,
   LabelResolveNamesOutputSchema,
+  RoutineGetOutputSchema,
+  RoutineListOutputSchema,
+  RoutineUpcomingOutputSchema,
+  AiAgentGetOutputSchema,
+  AiAgentListOutputSchema,
+  AiConversationListOutputSchema,
+  AiConversationTranscriptOutputSchema,
 } from '../contracts';
+import type { Result } from '@memoflow/transport-contracts/result';
 import { GoalPagePositionSchema, type GoalClientDTO } from '@memoflow/goal-contracts';
 import { TaskPlanPositionSchema, TaskOccurrencePositionSchema } from '@memoflow/task-contracts';
 import type { ExecutionContext } from '@memoflow/transport-contracts';
 import {
   GatewayReadError as ControlledError,
   type GoalReadPort,
+  type NotificationReadPort,
   type TaskReadPort,
   type LabelReadPort,
+  type RoutineReadPort,
+  type AssistantConversationReadPort,
+  type AgentArchiveReadPort,
+  type GatewayAiAgentEntry,
   type GatewayReadBudget,
 } from '../ports';
 const MAX_BYTES = 256 * 1024;
@@ -34,9 +49,13 @@ export interface ReadToolCall {
       | 'goals:read'
       | 'tasks:read'
       | 'labels:read'
+      | 'routines:read'
       | 'goals:write'
       | 'tasks:write'
-      | 'routines:write',
+      | 'ai:read'
+      | 'routines:write'
+      | 'notifications:read'
+      | 'notifications:write',
     work: () => Promise<T>,
   ): Promise<{
     content: { type: 'text'; text: string }[];
@@ -61,6 +80,13 @@ const TaskCursorSchema = z.strictObject({
   timeZone: z.string().max(100).optional(),
   asOf: z.number().int().nonnegative().optional(),
 });
+const RoutineCursorSchema = z.strictObject({
+  identityId: z.string(),
+  tool: z.enum(['routine_list', 'routine_upcoming']),
+  binding: z.string().max(1000),
+  expiresAt: z.number().int(),
+  offset: z.number().int().min(0).max(499),
+});
 function fitPage<T>(values: readonly T[]) {
   const items = [...values];
   let truncated = false;
@@ -69,6 +95,24 @@ function fitPage<T>(values: readonly T[]) {
     truncated = true;
   }
   return { items, truncated };
+}
+
+/** The AI application projection already bounds content; only codes cross this seam. */
+function unwrap<T>(result: Result<T>): T {
+  if (result.ok) return result.data;
+  throw new ControlledError(result.error.code === 'NOT_FOUND' ? 'NOT_FOUND' : 'INTERNAL_ERROR');
+}
+
+/** Projects exactly the six Agent archive fields; host-local configuration stays out. */
+function projectAgent(agent: GatewayAiAgentEntry) {
+  return {
+    instanceId: agent.instanceId,
+    driver: agent.driver,
+    name: agent.name,
+    enabled: agent.enabled,
+    createdAt: agent.createdAt,
+    updatedAt: agent.updatedAt,
+  };
 }
 
 function projectGoal(goal: GoalClientDTO) {
@@ -99,6 +143,10 @@ export function registerReadTools(
     goals: GoalReadPort;
     tasks?: TaskReadPort;
     labels?: LabelReadPort;
+    notification?: NotificationReadPort;
+    routines?: RoutineReadPort;
+    assistantConversation?: AssistantConversationReadPort;
+    agents?: AgentArchiveReadPort;
   },
   context: ExecutionContext,
   budget: GatewayReadBudget,
@@ -160,6 +208,40 @@ export function registerReadTools(
       )
         throw new Error('binding');
       return parsed;
+    } catch {
+      throw new ControlledError('INVALID_CURSOR');
+    }
+  }
+  function encodeRoutineCursor(input: z.infer<typeof RoutineCursorSchema>) {
+    const payload = Buffer.from(JSON.stringify(RoutineCursorSchema.parse(input))).toString(
+      'base64url',
+    );
+    return `${payload}.${sign(payload)}`;
+  }
+  function decodeRoutineCursor(
+    cursor: string,
+    identityId: string,
+    tool: z.infer<typeof RoutineCursorSchema>['tool'],
+    binding: string,
+  ): number {
+    try {
+      const [payload, signature, extra] = cursor.split('.');
+      if (!payload || !signature || extra) throw new Error('shape');
+      const expected = Buffer.from(sign(payload));
+      const actual = Buffer.from(signature);
+      if (expected.length !== actual.length || !timingSafeEqual(expected, actual))
+        throw new Error('signature');
+      const parsed = RoutineCursorSchema.parse(
+        JSON.parse(Buffer.from(payload, 'base64url').toString('utf8')),
+      );
+      if (
+        parsed.identityId !== identityId ||
+        parsed.tool !== tool ||
+        parsed.binding !== binding ||
+        parsed.expiresAt <= Date.now()
+      )
+        throw new Error('binding');
+      return parsed.offset;
     } catch {
       throw new ControlledError('INVALID_CURSOR');
     }
@@ -326,6 +408,207 @@ export function registerReadTools(
             ...(truncated ? { truncated: 'response-budget' } : {}),
           });
         }),
+    );
+  }
+  if (options.routines && scopes.includes('routines:read')) {
+    const routines = options.routines;
+    server.registerTool('routine_get', readToolDescriptors.routine_get.definition, ({ id }) =>
+      call('routine_get', 'routines:read', async () => {
+        const snapshot = await routines.getConfigurationSnapshot(context.identityId, budget);
+        const routine = snapshot.definitions.find((definition) => definition.id === id);
+        if (!routine) throw new ControlledError('NOT_FOUND');
+        return RoutineGetOutputSchema.parse({ routine });
+      }),
+    );
+    server.registerTool(
+      'routine_list',
+      readToolDescriptors.routine_list.definition,
+      ({ query, limit, cursor }) =>
+        call('routine_list', 'routines:read', async () => {
+          const binding = JSON.stringify({ query, limit });
+          const offset = cursor
+            ? decodeRoutineCursor(cursor, context.identityId, 'routine_list', binding)
+            : 0;
+          const snapshot = await routines.getConfigurationSnapshot(context.identityId, budget);
+          const needle = query.toLocaleLowerCase();
+          const definitions = snapshot.definitions
+            .filter(
+              (definition) =>
+                !needle ||
+                definition.name.toLocaleLowerCase().includes(needle) ||
+                (definition.description ?? '').toLocaleLowerCase().includes(needle),
+            )
+            .sort(
+              (left, right) =>
+                right.createdAt.localeCompare(left.createdAt) || right.id.localeCompare(left.id),
+            );
+          const { items, truncated } = fitPage(definitions.slice(offset, offset + limit));
+          const hasMore = definitions.length > offset + items.length;
+          const nextCursor = hasMore
+            ? encodeRoutineCursor({
+                tool: 'routine_list',
+                binding,
+                identityId: context.identityId,
+                offset: offset + items.length,
+                expiresAt: Date.now() + 86400000,
+              })
+            : null;
+          return RoutineListOutputSchema.parse({
+            items,
+            hasMore,
+            nextCursor,
+            ...(truncated ? { truncated: 'response-budget' as const } : {}),
+          });
+        }),
+    );
+    server.registerTool(
+      'routine_upcoming',
+      readToolDescriptors.routine_upcoming.definition,
+      ({ start, end, includeElapsed, limit, cursor }) =>
+        call('routine_upcoming', 'routines:read', async () => {
+          const binding = JSON.stringify({ start, end, includeElapsed, limit });
+          const offset = cursor
+            ? decodeRoutineCursor(cursor, context.identityId, 'routine_upcoming', binding)
+            : 0;
+          if (offset + limit > 500) throw new ControlledError('INVALID_CURSOR');
+          const response = await routines.getUpcomingOccurrences(
+            context.identityId,
+            {
+              start,
+              end,
+              includeElapsed,
+              limit: Math.min(500, offset + limit + 1),
+            },
+            budget,
+          );
+          const page = response.occurrences
+            .slice(offset, offset + limit)
+            .map(({ identityId: _identityId, ...occurrence }) => occurrence);
+          const { items, truncated } = fitPage(page);
+          const hasMore = response.occurrences.length > offset + items.length;
+          const nextCursor = hasMore
+            ? encodeRoutineCursor({
+                tool: 'routine_upcoming',
+                binding,
+                identityId: context.identityId,
+                offset: offset + items.length,
+                expiresAt: Date.now() + 86400000,
+              })
+            : null;
+          return RoutineUpcomingOutputSchema.parse({
+            items,
+            hasMore,
+            nextCursor,
+            ...(truncated ? { truncated: 'response-budget' as const } : {}),
+          });
+        }),
+    );
+  }
+  if (options.assistantConversation && scopes.includes('ai:read')) {
+    const conversations = options.assistantConversation;
+    server.registerTool(
+      'ai_conversation_list',
+      readToolDescriptors.ai_conversation_list.definition,
+      ({ page, pageSize, status }) =>
+        call('ai_conversation_list', 'ai:read', async () =>
+          AiConversationListOutputSchema.parse(
+            unwrap(
+              await conversations.listConversations(context, {
+                page,
+                pageSize,
+                ...(status ? { status } : {}),
+              }),
+            ),
+          ),
+        ),
+    );
+    server.registerTool(
+      'ai_conversation_get',
+      readToolDescriptors.ai_conversation_get.definition,
+      ({ id }) =>
+        call('ai_conversation_get', 'ai:read', async () =>
+          AiConversationTranscriptOutputSchema.parse(
+            unwrap(await conversations.readConversation(context, id)),
+          ),
+        ),
+    );
+    server.registerTool(
+      'ai_conversation_transcript',
+      readToolDescriptors.ai_conversation_transcript.definition,
+      ({ id, page, pageSize }) =>
+        call('ai_conversation_transcript', 'ai:read', async () =>
+          AiConversationTranscriptOutputSchema.parse(
+            unwrap(await conversations.readConversation(context, id, { page, pageSize })),
+          ),
+        ),
+    );
+  }
+  if (options.agents && scopes.includes('ai:read')) {
+    const agents = options.agents;
+    server.registerTool(
+      'ai_agent_list',
+      readToolDescriptors.ai_agent_list.definition,
+      ({ limit }) =>
+        call('ai_agent_list', 'ai:read', async () => {
+          const owned = await agents.list(context);
+          const items = owned.slice(0, limit).map(projectAgent);
+          return AiAgentListOutputSchema.parse({
+            agents: items,
+            ...(owned.length > items.length ? { truncated: 'archive-limit' as const } : {}),
+          });
+        }),
+    );
+    server.registerTool(
+      'ai_agent_get',
+      readToolDescriptors.ai_agent_get.definition,
+      ({ instanceId }) =>
+        call('ai_agent_get', 'ai:read', async () => {
+          const agent = await agents.get(instanceId, context);
+          if (!agent) throw new ControlledError('NOT_FOUND');
+          return AiAgentGetOutputSchema.parse({ agent: projectAgent(agent) });
+        }),
+    );
+  }
+  if (options.notification && scopes.includes('notifications:read')) {
+    const notification = options.notification;
+    server.registerTool(
+      'notification_list',
+      readToolDescriptors.notification_list.definition,
+      (input) =>
+        call('notification_list', 'notifications:read', async () => {
+          const page = await notification.listNotifications(
+            {
+              archiveState: input.archiveState,
+              page: input.page,
+              limit: input.limit,
+              ...(input.isRead !== undefined ? { isRead: input.isRead } : {}),
+              ...(input.category ? { category: input.category } : {}),
+              ...(input.type ? { type: input.type } : {}),
+              ...(input.keyword ? { keyword: input.keyword } : {}),
+            },
+            context,
+            budget,
+          );
+          const { items, truncated } = fitPage(page.items);
+          return NotificationListOutputSchema.parse({
+            items,
+            total: page.total,
+            page: page.page,
+            pageSize: page.pageSize,
+            hasMore: page.hasMore || truncated,
+            ...(truncated ? { truncated: 'response-budget' as const } : {}),
+          });
+        }),
+    );
+    server.registerTool(
+      'notification_unread_count',
+      readToolDescriptors.notification_unread_count.definition,
+      () =>
+        call('notification_unread_count', 'notifications:read', async () =>
+          NotificationUnreadCountOutputSchema.parse({
+            count: await notification.getUnreadCount(context, budget),
+          }),
+        ),
     );
   }
   if (options.labels && scopes.includes('labels:read')) {

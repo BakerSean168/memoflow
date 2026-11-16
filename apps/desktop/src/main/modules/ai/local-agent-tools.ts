@@ -4,6 +4,10 @@ import {
   LocalAgentToolBridge,
   LocalAgentRepository,
   LocalMcpClientRepository,
+  LocalGatewayAuditRepository,
+  LocalConversationExternalReadSource,
+  createAssistantConversationExternalReadPort,
+  registerLocalConversationReadTools,
   PermissionLocalRepository,
   permissionOperationForTool,
   goalPanelSubmitOperationId,
@@ -83,11 +87,15 @@ export function createDesktopLocalAgentTools(
     createGoalPowerSyncMeasurementReader,
   );
   const cursorSecret = randomBytes(32).toString('base64url');
+  const assistantConversations = createAssistantConversationExternalReadPort(
+    new LocalConversationExternalReadSource(db),
+  );
   return new LocalAgentToolBridge({
     store,
     permissions: new PermissionLocalRepository(db),
     isActive,
     clients: mcp?.clients,
+    audit: new LocalGatewayAuditRepository(db),
     discoveryPath: mcp?.discoveryPath,
     onRevokeGrant(grantInput) {
       panelBridge?.releaseAllForRun?.(grantInput.conversationId, grantInput.runId);
@@ -208,6 +216,9 @@ export function createDesktopLocalAgentTools(
             }),
         );
       }
+      // Local AI sessions are read through the bounded projection only; the
+      // provider credential and permission tables have no tool surface.
+      registerLocalConversationReadTools(server, assistantConversations, context);
       const writeCall: ReadToolCall = async <T extends object>(
         toolName: Parameters<ReadToolCall>[0],
         _scope: Parameters<ReadToolCall>[1],

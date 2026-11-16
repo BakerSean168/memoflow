@@ -63,7 +63,7 @@ describe('AI permissions integrated under AI Provider settings', () => {
   it('maps one object write exception to create, update and delete without exposing CRUD', async () => {
     const { wrapper, permissions } = setup();
     await flushPromises();
-    expect(wrapper.findAll('[data-testid^="ai-permission-cell-"]')).toHaveLength(12);
+    expect(wrapper.findAll('[data-testid^="ai-permission-cell-"]')).toHaveLength(14);
     const cellSelect = wrapper
       .findAllComponents(Select)
       .find((candidate) =>

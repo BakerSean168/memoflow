@@ -78,12 +78,19 @@ export {
   AgentInstanceReadService,
   projectAgentInstance,
 } from './server/application/services/agent-instance-read.service';
+export { AgentRegistryError } from './server/application/agent-instance/agent-instance.repository';
 export { LocalAgentRepository } from './server/infrastructure/adapters/powersync/local-agent.repository';
 export {
   LocalMcpClientRepository,
   type McpClientCredentialRef,
   type StoredMcpClient,
 } from './server/infrastructure/adapters/powersync/local-mcp-client.repository';
+export { LocalGatewayAuditRepository } from './server/infrastructure/adapters/powersync/local-gateway-audit.repository';
+export { LocalConversationExternalReadSource } from './server/infrastructure/adapters/powersync/local-conversation-external-read.source';
+export {
+  LOCAL_CONVERSATION_EXTERNAL_FIELD_WHITELIST,
+  registerLocalConversationReadTools,
+} from './server/local-agent/local-conversation-tools';
 export {
   projectAIOwnerActivity,
   mergeAIActivityItems,
@@ -111,6 +118,13 @@ export {
   ASSISTANT_CONVERSATION_EXTERNAL_LIMITS,
   createAssistantConversationExternalReadPort,
 } from './server/application/services/assistant-conversation-external-projection';
+export { createAssistantConversationExternalSource } from './server/application/services/assistant-conversation-external-source';
+export type {
+  AssistantConversationExternalSourceDependencies,
+  AssistantConversationHistoryReader,
+  AssistantConversationMessageCountSource,
+} from './server/application/services/assistant-conversation-external-source';
+export { createAssistantConversationMessageCountSource } from './server/infrastructure/adapters/prisma/assistant-conversation-message-count.prisma';
 export type {
   AssistantConversationExternalAttachment,
   AssistantConversationExternalAttachmentFact,
