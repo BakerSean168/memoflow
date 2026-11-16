@@ -161,14 +161,31 @@ test.describe('AI workspace performance', () => {
     const workspace = page.getByTestId('ai-chat-view');
     await workspace.evaluate((element) => element.setAttribute('data-instance-probe', 'ai'));
 
+    // 768 is below AUTO_FOCUS_VIEWPORT (1024) and 1024 with the docked sidebar
+    // cannot satisfy AI + business hard minimums, so both force the viewport
+    // focus layout. Issue #951 is the product decision that focus renders no
+    // composer host; split must bring the same instance's composer back.
     for (const viewport of [
-      { width: 768, height: 1024 },
-      { width: 1024, height: 768 },
-      { width: 1440, height: 900 },
-    ]) {
+      { width: 768, height: 1024, shellState: 'focus' },
+      { width: 1024, height: 768, shellState: 'focus' },
+      { width: 1440, height: 900, shellState: 'split' },
+    ] as const) {
       await page.setViewportSize(viewport);
+      await expect(page.getByTestId('app-shell')).toHaveAttribute(
+        'data-shell-state',
+        viewport.shellState,
+      );
+      if (viewport.shellState === 'focus') {
+        await expect(page.getByTestId('ai-chat-composer')).toHaveCount(0);
+        await expect(page.getByTestId('shell-ai-column')).toBeHidden();
+      } else {
+        await expect(page.getByTestId('ai-chat-composer')).toBeVisible();
+        await expect(page.getByTestId('shell-ai-column')).toBeVisible();
+      }
+      // The AI workspace is hidden with v-show in focus, never unmounted, so the
+      // probe written onto the original element survives every transition.
       await expect(workspace).toHaveAttribute('data-instance-probe', 'ai');
-      await expect(page.getByTestId('ai-chat-composer')).toBeVisible();
+      await expect(workspace).toHaveCount(1);
     }
   });
 

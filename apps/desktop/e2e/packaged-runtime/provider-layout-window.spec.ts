@@ -86,13 +86,17 @@ test('packaged Windows Providers maintain 80px rows and responsive details at 84
       }
     }
     const button = settings.getByTestId('ai-provider-select-agent:codex');
-    // Real keyboard traversal must focus the trigger from the adjacent switch;
-    // Playwright focus() alone may reuse an existing pointer-focused element.
-    await button.focus();
-    await page.keyboard.press('Tab');
-    await page.keyboard.press('Shift+Tab');
-    await expect(button).toBeFocused();
     const tooltip = page.locator('[role="tooltip"]');
+    // Selecting the row left the trigger pointer-focused and closed its tooltip.
+    // A bare focus() would be a no-op there, and Tab/Shift+Tab traversal is not
+    // dependable in a packaged window that is not the active OS window, so both
+    // could leave the trigger focused with the tooltip still closed. Clear focus
+    // first: the following focus is a real transition and proves the status
+    // tooltip opens on focus immediately instead of waiting for hover delay.
+    await button.blur();
+    await expect(button).toHaveAttribute('data-state', 'closed');
+    await button.focus();
+    await expect(button).toBeFocused();
     await expect(button).toHaveAttribute('data-state', 'instant-open');
     await expect(button).toHaveAttribute('aria-describedby', /reka-tooltip-content/);
     // Reka provides an aria-described-by node; use DOM role locator for its portal
