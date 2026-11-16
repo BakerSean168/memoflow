@@ -94,9 +94,7 @@ export function createAssistantConversationExternalSource(
       return conversations
         .filter((conversation) => !conversation.deletedAt)
         .filter((conversation) => !status || conversation.status === status)
-        .map((conversation) =>
-          shellFact(conversation, counts.get(String(conversation.id)) ?? 0),
-        );
+        .map((conversation) => shellFact(conversation, counts.get(String(conversation.id)) ?? 0));
     },
 
     async findOwnedShell(identityId, conversationId) {

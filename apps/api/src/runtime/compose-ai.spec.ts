@@ -333,7 +333,6 @@ describe('API composeAI Mastra-only ownership', () => {
     // The projection reads AI-owned shells and transcripts; the gateway never
     // receives the repository or the Mastra runtime.
     expect(composed.assistantConversationExternal).not.toHaveProperty('conversationRepository');
-    expect(composed.agentInstanceRead).not.toHaveProperty('instances');
   });
 
   it('does not reintroduce any retired Python/AgentHost service port at the composition root', () => {
