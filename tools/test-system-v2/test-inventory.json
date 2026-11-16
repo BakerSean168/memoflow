@@ -4432,6 +4432,26 @@
       ]
     },
     {
+      "path": "packages/ai/src/server/infrastructure/adapters/powersync/local-conversation-external-read.source.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/ai/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "packages/ai/vitest.config.ts"
+      ]
+    },
+    {
+      "path": "packages/ai/src/server/infrastructure/adapters/powersync/local-gateway-audit.repository.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/ai/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "packages/ai/vitest.config.ts"
+      ]
+    },
+    {
       "path": "packages/ai/src/server/infrastructure/adapters/powersync/local-mcp-client.repository.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -4693,6 +4713,16 @@
     },
     {
       "path": "packages/ai/src/server/local-agent/local-agent-snapshot.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/ai/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "packages/ai/vitest.config.ts"
+      ]
+    },
+    {
+      "path": "packages/ai/src/server/local-agent/local-tool-bridge-audit.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/ai/vitest.config.ts"
@@ -13272,7 +13302,7 @@
       "type": "measurement",
       "suite": "coverage",
       "runner": "vitest",
-      "fileCount": 134
+      "fileCount": 137
     },
     {
       "id": "packages/app-vue/vitest.store-coverage.config.ts",
@@ -13822,7 +13852,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 134
+      "fileCount": 137
     },
     {
       "id": "packages/app-vue/vitest.config.ts",
@@ -14394,6 +14424,8 @@
       "packages/ai/src/server/infrastructure/adapters/powersync/attention-events.powersync.spec.ts",
       "packages/ai/src/server/infrastructure/adapters/powersync/conversation-events.powersync.spec.ts",
       "packages/ai/src/server/infrastructure/adapters/powersync/local-agent.repository.spec.ts",
+      "packages/ai/src/server/infrastructure/adapters/powersync/local-conversation-external-read.source.spec.ts",
+      "packages/ai/src/server/infrastructure/adapters/powersync/local-gateway-audit.repository.spec.ts",
       "packages/ai/src/server/infrastructure/adapters/powersync/local-mcp-client.repository.spec.ts",
       "packages/ai/src/server/infrastructure/adapters/powersync/powersync-ai-rows-affected.spec.ts",
       "packages/ai/src/server/infrastructure/adapters/prisma/__tests__/ai-knowledge-index-prisma.repository.test.ts",
@@ -14421,6 +14453,7 @@
       "packages/ai/src/server/local-agent/dsh-driver.spec.ts",
       "packages/ai/src/server/local-agent/local-agent-runtime.spec.ts",
       "packages/ai/src/server/local-agent/local-agent-snapshot.spec.ts",
+      "packages/ai/src/server/local-agent/local-tool-bridge-audit.spec.ts",
       "packages/ai/src/server/local-agent/local-tool-bridge.spec.ts",
       "packages/ai/src/server/local-agent/native-executable.spec.ts",
       "packages/ai/src/server/local-agent/native-failure.spec.ts",
@@ -14890,7 +14923,7 @@
   "duplicate": [],
   "unexpected": [],
   "counts": {
-    "unit": 1231,
+    "unit": 1234,
     "integration": 59,
     "smoke": 3,
     "boundary-ipc": 6,

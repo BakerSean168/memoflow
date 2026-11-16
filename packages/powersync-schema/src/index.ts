@@ -946,6 +946,16 @@ const ai_local_mcp_clients = new Table(
   { identity_id: column.text, record_json: column.text },
   { localOnly: true },
 );
+// Local MCP tool-call audit. Mirrors GatewayAuditEvent plus the local
+// connection/origin context; never stores tool arguments or results.
+const ai_local_gateway_audit = new Table(
+  {
+    identity_id: column.text,
+    at: column.integer,
+    record_json: column.text,
+  },
+  { localOnly: true },
+);
 
 export const PowerSyncAppSchema = new Schema({
   // Account
@@ -1004,6 +1014,7 @@ export const PowerSyncAppSchema = new Schema({
   ai_local_conversations,
   ai_local_conversation_items,
   ai_local_mcp_clients,
+  ai_local_gateway_audit,
   ai_conversation_attention,
   ai_conversation_event_metadata,
   ai_conversation_event_heads,

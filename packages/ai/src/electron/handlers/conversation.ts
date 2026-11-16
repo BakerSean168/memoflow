@@ -168,6 +168,8 @@ export function registerConversationHandlers(
             return ok(await runtime.createMcpClient(owner, input.client));
           case 'revoke_mcp_client':
             return ok(await runtime.revokeMcpClient(owner, input.id));
+          case 'list_gateway_audit':
+            return ok(await runtime.listGatewayAudit(owner, input.limit));
         }
       } catch (error) {
         const failure = toAITransportFailure(error, {

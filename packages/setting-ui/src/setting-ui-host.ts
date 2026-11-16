@@ -32,6 +32,7 @@ import type {
   LocalMcpClientCreate,
   LocalMcpClientCredential,
   LocalMcpEndpoint,
+  LocalGatewayAuditRecord,
   ProbeAIProviderConnectionReq,
   ProbeAIProviderConnectionRes,
   ProbeAIProviderReplacementReq,
@@ -143,6 +144,7 @@ export interface SettingLocalAgentPort {
   createMcpClient(client: LocalMcpClientCreate): Promise<LocalMcpClientCredential>;
   revokeMcpClient(id: string): Promise<LocalMcpClient>;
   getMcpEndpoint(): Promise<LocalMcpEndpoint | null>;
+  listGatewayAudit?(limit?: number): Promise<LocalGatewayAuditRecord[]>;
 }
 
 /** Agent instance registry transport consumed by the AI settings surfaces. */
