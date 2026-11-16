@@ -14,7 +14,7 @@ afterEach(async () => {
     await new Promise<void>((resolve) => server.close(() => resolve()));
   }
 });
-async function fixture(oauthEnabled = false, trustProxyHops = 0) {
+async function fixture(oauthEnabled = false, trustProxyHops = 0, enabled = true) {
   const app = express();
   app.set('trust proxy', trustProxyHops);
   app.use(createRequestContextMiddleware());
@@ -34,6 +34,7 @@ async function fixture(oauthEnabled = false, trustProxyHops = 0) {
   };
   const audit = vi.fn();
   const consumeIp = vi.fn().mockResolvedValue(true);
+  const start = vi.fn(async () => {});
   const oauth = {
     list: vi.fn().mockResolvedValue([]),
     revoke: vi.fn().mockResolvedValue(undefined),
@@ -42,12 +43,12 @@ async function fixture(oauthEnabled = false, trustProxyHops = 0) {
   };
   const module = composeAgentGatewayModule({
     admission: {
-      start: async () => {},
+      start,
       destroy: async () => {},
       consumeIp,
       consumeOwner: async () => true,
     },
-    enabled: true,
+    enabled,
     toolCheckpoint: (async (_principal, _tool, work) => work()) satisfies GatewayToolCheckpoint,
     audience: `${base}/mcp`,
     cursorSecret: 'test-only-secret-'.repeat(3),
@@ -75,9 +76,24 @@ async function fixture(oauthEnabled = false, trustProxyHops = 0) {
     },
   } as never);
   app.use('/api/v1', router);
-  return { base, pats, oauth, audit, consumeIp };
+  return { base, pats, oauth, audit, consumeIp, start };
 }
 describe('Gateway API host admission', () => {
+  it('mounts neither /mcp nor PAT management while the pilot switch is off', async () => {
+    const f = await fixture(false, 0, false);
+    const mcp = await fetch(`${f.base}/mcp`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json', authorization: 'Bearer firstparty' },
+      body: '{}',
+    });
+    expect(mcp.status).toBe(404);
+    const pats = await fetch(`${f.base}/api/v1/agent-connections/pats`, {
+      headers: { authorization: 'Bearer firstparty' },
+    });
+    expect(pats.status).toBe(404);
+    expect(f.audit).not.toHaveBeenCalled();
+    expect(f.start).not.toHaveBeenCalled();
+  });
   it('requires a first-party session, trusted Origin and strict input to mint a PAT', async () => {
     const f = await fixture();
     const url = `${f.base}/api/v1/agent-connections/pats`;

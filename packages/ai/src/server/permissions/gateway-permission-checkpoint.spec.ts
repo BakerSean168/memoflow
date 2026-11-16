@@ -96,36 +96,72 @@ const updateInput = {
   changes: { name: 'Changed', expectedVersion: 1 },
 };
 
-it('allows scoped creates, denies asks with bilingual settings guidance, and preserves the scope ceiling', async () => {
+it('pre-authorizes a scoped PAT write, keeps explicit denies, and preserves the scope ceiling', async () => {
   const f = fixture();
-  // Scope is only the ceiling; MemoFlow still needs a business grant.
-  await f.repository.saveRule('owner', {
-    id: 'create-allowed',
-    agentId: null,
-    object: 'goal',
-    action: 'create',
-    effect: 'allow',
-    source: 'user',
-  });
+  // Default confirm_each would ask; the issued goals:write scope supplies the grant.
   const created = await f.fetch('goal_create', createInput);
   expect(await created.text()).not.toContain('PERMISSION_DENIED');
   expect(f.create).toHaveBeenCalledOnce();
+  const updated = await f.fetch('goal_update', updateInput);
+  expect(await updated.text()).not.toContain('PERMISSION_DENIED');
+  expect(f.update).toHaveBeenCalledOnce();
+  await f.repository.saveRule('owner', {
+    id: 'update-denied',
+    agentId: null,
+    object: 'goal',
+    action: 'update',
+    effect: 'deny',
+    source: 'user',
+  });
   const denied = await f.fetch('goal_update', updateInput);
   const body = await denied.text();
   expect(body).toContain('PERMISSION_DENIED');
   expect(body).toContain('请在 MemoFlow 设置 → AI 权限里授权');
   expect(body).toContain('Settings → AI Permissions');
-  expect(f.update).not.toHaveBeenCalled();
-  expect(await f.repository.listAudit('owner')).toContainEqual(
-    expect.objectContaining({
-      agentId: 'external-mcp:pat',
-      operationId: 'goal.update',
-      decision: 'ask',
-    }),
+  expect(f.update).toHaveBeenCalledOnce();
+  expect(await f.repository.listAudit('owner')).toEqual(
+    expect.arrayContaining([
+      expect.objectContaining({
+        agentId: 'external-mcp:pat',
+        operationId: 'goal.create',
+        decision: 'allow',
+      }),
+      expect.objectContaining({
+        agentId: 'external-mcp:pat',
+        operationId: 'goal.update',
+        decision: 'deny',
+      }),
+    ]),
   );
   f.principal.scopes = ['goals:read'];
   expect((await f.fetch('goal_create', createInput)).status).toBe(403);
   expect(f.create).toHaveBeenCalledOnce();
+});
+
+it('denies OAuth writes, out-of-scope PAT writes and unregistered operations at the checkpoint', async () => {
+  const f = fixture();
+  const checkpoint = createGatewayPermissionCheckpoint(f.repository);
+  const work = vi.fn(async () => 'ok');
+  const oauth = { ...f.principal, credentialType: 'oauth' as const, scopes: ['goals:read'] };
+  expect(await checkpoint(oauth, 'goal_get', work)).toBe('ok');
+  await expect(checkpoint(oauth, 'goal_create', work)).rejects.toMatchObject({
+    code: 'PERMISSION_DENIED',
+    decision: 'ask',
+  });
+  await expect(
+    checkpoint({ ...f.principal, scopes: ['tasks:write'] }, 'goal_create', work),
+  ).rejects.toMatchObject({ code: 'PERMISSION_DENIED', decision: 'ask' });
+  await expect(checkpoint(f.principal, 'unregistered_write', work)).rejects.toMatchObject({
+    code: 'PERMISSION_DENIED',
+    decision: 'deny',
+  });
+  expect(work).toHaveBeenCalledOnce();
+  expect(await f.repository.listAudit('owner')).toEqual(
+    expect.arrayContaining([
+      expect.objectContaining({ operationId: 'goal.create', decision: 'ask' }),
+      expect.objectContaining({ operationId: 'unregistered_write', decision: 'deny' }),
+    ]),
+  );
 });
 
 it('honors per-connection user allows and explicit denies even in full auto', async () => {

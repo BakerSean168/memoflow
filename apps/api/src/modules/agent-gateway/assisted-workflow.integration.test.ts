@@ -15,6 +15,8 @@ import { createMastraStorage } from '@memoflow/ai';
 import {
   AiAssistedWorkflowRepository,
   AiAssistedWorkflowError,
+  createGatewayPermissionCheckpoint,
+  PermissionPrismaRepository,
   taskWorkflowEntityId,
 } from '@memoflow/ai/agent-gateway';
 import { prisma } from '@memoflow/database';
@@ -32,6 +34,13 @@ import {
 } from '@memoflow/test-utils/setup/integration-helpers';
 import { bindAssistedWorkflow } from './assisted-workflow';
 import { bindGatewayWrites } from './write.port';
+import { composeAgentGatewayModule } from './module';
+import { bindGoalReadPort } from './goal-read.port';
+import { once } from 'node:events';
+import express from 'express';
+import { Client, StreamableHTTPClientTransport } from '@modelcontextprotocol/client';
+import { createGoalPrismaPageQuery } from '@memoflow/goal';
+import { createRequestContextMiddleware } from '../../shared/infrastructure/http/middlewares/request-context.middleware';
 
 const databaseUrl = process.env.DATABASE_URL!;
 const schemaName = 'assisted_538_runtime';
@@ -586,4 +595,113 @@ it('preserves committed partial facts on cancellation after an owner lost acknow
   expect(cancelled.steps).toEqual(partial.steps);
   expect(await prisma.taskPlan.count({ where: { identityId: owner } })).toBe(1);
   expect(await prisma.externalMutationReceipt.count({ where: { identityId: owner } })).toBe(1);
+});
+
+it('serves the assisted start → review → approve lifecycle through the real gateway compose and checkpoint', async () => {
+  const f = await fixture();
+  const app = express();
+  app.use(createRequestContextMiddleware({ observer: { complete() {} } }));
+  app.use(express.json({ limit: '256kb' }));
+  const server = app.listen(0, '127.0.0.1');
+  await once(server, 'listening');
+  const address = server.address();
+  if (!address || typeof address === 'string') throw new Error('address');
+  const audience = `http://127.0.0.1:${address.port}/mcp`;
+  const gatewayPats = createScopedPatService({
+    database: prisma,
+    audience,
+    accountIsActive: createAccountPrismaActiveQuery(prisma),
+  });
+  const pat = await gatewayPats.create(owner, {
+    name: 'Assisted gateway',
+    scopes: ['tasks:write'],
+  });
+  const audit: unknown[] = [];
+  const module = composeAgentGatewayModule({
+    admission: {
+      start: async () => {},
+      destroy: async () => {},
+      consumeIp: async () => true,
+      consumeOwner: async () => true,
+    },
+    enabled: true,
+    // Real checkpoint: assisted tools are registered in the operation catalog.
+    toolCheckpoint: createGatewayPermissionCheckpoint(new PermissionPrismaRepository(prisma)),
+    assisted: f.service,
+    audience,
+    cursorSecret: 'test-only-secret-'.repeat(3),
+    trustedOrigins: [],
+    pats: gatewayPats,
+    goals: bindGoalReadPort(createGoalPrismaPageQuery(prisma)),
+    audit: (event) => audit.push(event),
+  });
+  await module.register({
+    app,
+    router: express.Router(),
+    middleware: {
+      auth: (_req, res) => res.sendStatus(401),
+      requireEmailVerified: (_req, res) => res.sendStatus(403),
+      requireRole: () => (_req, res) => res.sendStatus(403),
+    },
+  } as never);
+  const client = new Client(
+    { name: 'assisted-gateway-fixture', version: '1' },
+    { versionNegotiation: { mode: { pin: '2026-07-28' } } },
+  );
+  try {
+    await client.connect(
+      new StreamableHTTPClientTransport(new URL(audience), {
+        requestInit: { headers: { authorization: `Bearer ${pat.secret}` } },
+      }),
+    );
+    expect((await client.listTools()).tools.map((tool) => tool.name)).toEqual([
+      'assisted_workflow_start',
+      'assisted_workflow_get',
+      'assisted_workflow_review',
+      'assisted_workflow_resume',
+      'assisted_workflow_cancel',
+    ]);
+    const started = await client.callTool({
+      name: 'assisted_workflow_start',
+      arguments: startInput(),
+    });
+    const view = started.structuredContent as AssistedView;
+    expect(view.run).toMatchObject({
+      status: 'suspended',
+      suspension: { type: 'task_draft_review' },
+    });
+    const reviewed = await client.callTool({
+      name: 'assisted_workflow_review',
+      arguments: handleInput(view),
+    });
+    expect((reviewed.structuredContent as AssistedView).reviewToken).toBe(view.reviewToken);
+    const applied = await client.callTool({
+      name: 'assisted_workflow_resume',
+      arguments: approve(view),
+    });
+    expect((applied.structuredContent as AssistedView).run.status).toBe('completed');
+    expect(await prisma.taskPlan.count({ where: { identityId: owner } })).toBe(1);
+    // The checkpoint allowed the registered PAT writes and the gateway audited the credential.
+    expect(audit).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          tool: 'assisted_workflow_start',
+          credentialId: pat.id,
+          scopeDecision: 'allowed',
+          outcome: 'OK',
+        }),
+        expect.objectContaining({
+          tool: 'assisted_workflow_resume',
+          credentialId: pat.id,
+          scopeDecision: 'allowed',
+          outcome: 'OK',
+        }),
+      ]),
+    );
+  } finally {
+    await client.close();
+    server.closeAllConnections();
+    await new Promise<void>((resolve) => server.close(() => resolve()));
+    await module.destroy?.();
+  }
 });

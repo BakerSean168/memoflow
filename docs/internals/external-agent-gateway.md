@@ -2,12 +2,12 @@
 tags: [architecture, mcp, ai, external-agent]
 description: MemoFlow External Agent Gateway 当前能力、认证、事务写入与运行边界
 created: 2026-10-07T00:00:00Z
-updated: 2026-10-19T00:00:00Z
+updated: 2026-11-16T00:00:00Z
 ---
 
 # MemoFlow External Agent Gateway
 
-**状态：PAT/OAuth 六个只读工具已实现，OAuth 有历史本地验收证据，公共 rollout 未完成。#490 增加默认关闭的 PAT 写入：Goal/KR、TaskPlan、TaskOccurrence；验收以该 Issue/PR 的实际本地检查为准，不代表生产已部署。Assisted workflow 仍未交付。**
+**状态：代码与组装已就绪，全部默认关闭。** Gateway 当前实现 19 个工具：6 个只读、8 个写（Goal/KR、TaskPlan、TaskOccurrence、`routine_create`）、5 个 assisted Task workflow；OAuth 仍只有 6 个只读工具。写与 assisted 只对 PAT 开放，且每次调用都经过 AI 权限 checkpoint。生产开关尚未翻转，公共 rollout 未完成；开启步骤见 [§10 runbook](#10-一期开启-runbook)。#490/#538/#539 的本地验收只代表代码路径，不代表生产已部署。
 
 先读 [仓库核验](https://github.com/BakerSean168/memoflow/blob/7a45112e1840950ead1ba98b748fc70fa1b38344/docs/analysis/2026-10-07-external-agent-repository-assessment.md) 和 [协议研究](https://github.com/BakerSean168/memoflow/blob/7a45112e1840950ead1ba98b748fc70fa1b38344/docs/analysis/2026-10-07-external-agent-protocol-research.md)。长期决策分别是 [ADR-116：能力边界](./decisions/ADR-116-external-agent-capability-and-gateway-boundary.md)、[ADR-117：授权](./decisions/ADR-117-external-agent-authorization-and-credentials.md)、[ADR-118：写入与工作流](./decisions/ADR-118-external-agent-mutations-and-assisted-workflows.md)。执行顺序以 [实施总方案](https://github.com/BakerSean168/memoflow/issues/490) 为准；[术语表](./glossary.md) 只定义概念。
 
@@ -16,13 +16,13 @@ updated: 2026-10-19T00:00:00Z
 第一里程碑：添加 MemoFlow MCP URL，经 OAuth 登录/注册及同意后，用户可以问“列出本周任务和相关目标”，获得只属于自己的结构化对象。
 第二里程碑：用户授予写权限后，可以创建 Goal（包括 KRs）、创建 TaskPlan、修改定义、完成指定 TaskOccurrence；网络重试不会重复写入，和 Web/Desktop 并发编辑会明确返回冲突。
 
-高级能力随后提供 MemoFlow-assisted planning、云端提醒及 Knowledge capture。SDK/CLI/skills/webhooks 是后续分发渠道，不能成为 Gateway 首版依赖。
+高级能力随后提供 MemoFlow-assisted planning、云端提醒及 Knowledge capture。当前有云端提醒的 `routine_create` 和 5 个 assisted Task workflow 工具，均默认关闭；SDK/CLI/skills/webhooks 是后续分发渠道，不能成为 Gateway 首版依赖。
 
 第一版不提供账号创建工具、全量 REST 自动翻译、批量永久删除、管理员工具、任意 SQL、任意 URL/file 读取、Desktop 远程控制或自建 Agent runtime。ChatGPT 等其他客户端列为后续兼容对象，不将未测试支持写成已交付。
 
 ## 2. 责任与包落点
 
-下列包及 API host 复用 R1/PAT/OAuth 与 Owner 契约；写入由 Owner 持有事务，assisted workflow 尚未发布。
+下列包及 API host 复用 R1/PAT/OAuth 与 Owner 契约；写入由 Owner 持有事务，assisted workflow 通过既有 durable runtime 绑定。
 
 | 所在位置                                     | 责任                                                                  | 不承担                                           |
 | -------------------------------------------- | --------------------------------------------------------------------- | ------------------------------------------------ |
@@ -55,22 +55,28 @@ updated: 2026-10-19T00:00:00Z
 
 ID 使用稳定 snake_case，内部 capability ID 可采用 `goal.get` 等命名；不得将二者用不受控字符串替换相互推导。表中是实现的有限 allowlist；写工具只有显式启用且满足 PAT scope 时才发布。
 
-| 批次 | Tool                            | Owner / scope      | 行为约束                                                           |
-| ---- | ------------------------------- | ------------------ | ------------------------------------------------------------------ |
-| R1   | `goal_get`                      | Goal / goals:read  | ID、摘要、KRs、version；不夹带 Task/Knowledge 私密内容             |
-| R1   | `goal_search`                   | Goal / goals:read  | 有界查询、确定排序和分页                                           |
-| R1   | `task_plan_get`                 | Task / tasks:read  | 返回定义、version、关联引用                                        |
-| R1   | `task_plan_search`              | Task / tasks:read  | 按 owner 支持的过滤检索，不承诺不存在的全文搜索                    |
-| R1   | `task_occurrence_get`           | Task / tasks:read  | 返回执行状态、version、planId                                      |
-| R1   | `task_occurrence_list`          | Task / tasks:read  | 明确时间范围、时区与分页                                           |
-| W1   | `goal_create`                   | Goal / goals:write | initial KRs 与 Goal 原子创建；不自动 activate                      |
-| W1   | `goal_update`                   | Goal / goals:write | expectedVersion；首版排除整组 keyResults replacement               |
-| W1   | `goal_key_result_create/update` | Goal / goals:write | 单 KR 命令使用 Goal expectedVersion；不替换整个集合                |
-| W1   | `task_plan_create`              | Task / tasks:write | schedule/reminderPolicy 由 owner 校验；新 binding 另需 goals:write |
-| W1   | `task_plan_update`              | Task / tasks:write | 显式 patch 与 expectedVersion；binding 同上                        |
-| W1   | `task_occurrence_complete`      | Task / tasks:write | 精确 occurrence、并发条件、明确 measurement decision               |
+| 批次 | Tool                            | Owner / scope            | 行为约束                                                           |
+| ---- | ------------------------------- | ------------------------ | ------------------------------------------------------------------ |
+| R1   | `goal_get`                      | Goal / goals:read        | ID、摘要、KRs、version；不夹带 Task/Knowledge 私密内容             |
+| R1   | `goal_search`                   | Goal / goals:read        | 有界查询、确定排序和分页                                           |
+| R1   | `task_plan_get`                 | Task / tasks:read        | 返回定义、version、关联引用                                        |
+| R1   | `task_plan_search`              | Task / tasks:read        | 按 owner 支持的过滤检索，不承诺不存在的全文搜索                    |
+| R1   | `task_occurrence_get`           | Task / tasks:read        | 返回执行状态、version、planId                                      |
+| R1   | `task_occurrence_list`          | Task / tasks:read        | 明确时间范围、时区与分页                                           |
+| W1   | `goal_create`                   | Goal / goals:write       | initial KRs 与 Goal 原子创建；不自动 activate                      |
+| W1   | `goal_update`                   | Goal / goals:write       | expectedVersion；首版排除整组 keyResults replacement               |
+| W1   | `goal_key_result_create/update` | Goal / goals:write       | 单 KR 命令使用 Goal expectedVersion；不替换整个集合                |
+| W1   | `task_plan_create`              | Task / tasks:write       | schedule/reminderPolicy 由 owner 校验；新 binding 另需 goals:write |
+| W1   | `task_plan_update`              | Task / tasks:write       | 显式 patch 与 expectedVersion；binding 同上                        |
+| W1   | `task_occurrence_complete`      | Task / tasks:write       | 精确 occurrence、并发条件、明确 measurement decision               |
+| W1   | `routine_create`                | Routine / routines:write | 单次 WallClock 提醒；另需 `EAG_ROUTINE_WRITE_ENABLED=1`            |
+| A1   | `assisted_workflow_start`       | Task / tasks:write       | 启动或恢复一个受审核的 Task planning run                           |
+| A1   | `assisted_workflow_get`         | Task / tasks:write       | 读取自有 run 的当前 revision                                       |
+| A1   | `assisted_workflow_review`      | Task / tasks:write       | 读取待决定的 typed ask 或 Task draft                               |
+| A1   | `assisted_workflow_resume`      | Task / tasks:write       | 回答澄清、批准精确 draft 或恢复 apply                              |
+| A1   | `assisted_workflow_cancel`      | Task / tasks:write       | 取消剩余工作并保留已提交的 Task facts                              |
 
-R1 为 **6 个工具**，W1 为 **7 个写工具**，启用后最多 13 个。OAuth 仍只有六个只读工具。MCP 自带发现功能足够，不新增 `capabilities_list` 平台 API。
+R1 为 **6 个工具**，W1 为 **8 个写工具**，A1 为 **5 个 assisted 工具**，合计 **19 个**。OAuth 仍只有六个只读工具；写与 assisted 仅对 PAT 发布，且需要对应 write scope 和相应开关。MCP 自带发现功能足够，不新增 `capabilities_list` 平台 API。
 
 ### 跨 owner 权限
 
@@ -78,7 +84,7 @@ read scope 与 write scope 不互相隐含。MCP write 结果只返回该写操�
 
 Task 的已配置 Goal contribution 是完成动作的一部分，`tasks:write` consent 必须说明它会按既有配置影响目标进度；它不授权直接更新任意 Goal/KR。创建或更改 binding 要求 `tasks:write + goals:write` 及双方归属，不能靠对已有 Task 的写权限引入新 Goal 影响。读取 Goal 名称/测量上下文仍需 `goals:read`；没有时只允许 complete-only，不能偷偷取 protected context。
 
-Planner/Notification/Routine/Knowledge 的扩展按真实需求单列在 [#539](https://github.com/BakerSean168/memoflow/issues/539)，目前没有注册这些工具。
+Planner/Notification/Knowledge 的扩展按真实需求单列在 [#539](https://github.com/BakerSean168/memoflow/issues/539)；`routine_create` 已随 #539 注册并由 `EAG_ROUTINE_WRITE_ENABLED` 单独开关，其余工具尚未注册。
 
 ## 5. 输入、时间、结果与分页
 
@@ -114,7 +120,7 @@ Goal/Task 各自在自己的 infrastructure factory 中创建 transaction-bound 
 
 首批 `goal_update` 排除会整组替换/删除 KRs 的字段；保留 name/summary/description/timeframe/reminderConfig 等经过 owner 允许的 patch。增加危险操作时重新评估 tool effect 和 server approval，不能因为名叫 update 就自动标记无破坏性。
 
-所有普通写工具要求 idempotencyKey。是否弹出客户端确认是额外 UX；服务器的写权限源是 grant。需要再次确认的高风险命令先不发布，直到有真实 approval intent 流程；不把它当作所有 CRUD 的平台前置。
+所有普通写工具要求 idempotencyKey。每次工具调用（读、写、assisted）都经过 `packages/ai` 的 AI 权限 checkpoint，Gateway 不直连 owner port。checkpoint 的默认 preset 是 `confirm_each`；对 MCP 写调用，`PAT + 命中该 operation 的写 scope + operation 已在 `operation-catalog` 登记`视为签发时的用户预授权，checkpoint 放行并写审计。scope 外、未登记 operation、OAuth 凭据写请求仍拒；显式 deny 规则和 `read_only` preset 仍然优先。放行与拒绝都记录 `credentialId`（权限审计中的 `agentId` 为 `external-mcp:<credentialId>`，传输审计另带 `credentialId`）。需要再次确认的高风险命令先不发布，直到有真实 approval intent 流程；不把它当作所有 CRUD 的平台前置。
 
 ## 7. OAuth/PAT 连接与运行策略
 
@@ -122,7 +128,7 @@ OAuth 协议步骤和撤销边界见 ADR-117。canonical resource URI 由部署�
 
 新授权数据不得进入 PowerSync、数据导出、浏览器日志或 AI conversation；用户可见连接名称、scope、最近使用、有效期和撤销按钮。scope 扩大必须重新 consent；已存在只读 connection 不因发布新工具自动获得写能力。
 
-Gateway 启动默认关闭（`EAG_READ_PILOT_ENABLED=0`）；PAT 写入另由 `EAG_WRITE_ENABLED=0` 默认关闭。Assisted 工具尚未注册，不存在已实现的 assisted 开关。read 开关关闭时已有连接收到明确 unavailable；write 关闭时不再发现或执行写工具。shutdown 沿用现有 API host 生命周期；本轮未执行完整容器 shutdown/drain 验收，不宣称已验证该运行边界。
+Gateway 由 `EAG_READ_PILOT_ENABLED` 总开关控制，默认 `0`；关闭时 `/mcp` 与 `/agent-connections/*`（PAT/OAuth 管理）都不挂载，而不是返回空工具列表。其余子开关默认：`EAG_TASK_READ_ENABLED=1`、`EAG_WRITE_ENABLED=0`、`EAG_ROUTINE_WRITE_ENABLED=0`、`EAG_ASSISTED_ENABLED=0`、`EAG_OAUTH_ENABLED=0`。`apps/api/src/server.ts` 的 compose 已把 `enabled`、`writes`（含 `routineWriteEnabled`）和 `assisted` 传入 Gateway；写关闭时不再发现或执行写工具，assisted 关闭时 5 个 assisted 工具不发布。`EAG_ASSISTED_ENABLED=1` 依赖 durable AI workflow runtime，启动时缺失会直接失败。shutdown 沿用现有 API host 生命周期；本轮未执行完整容器 shutdown/drain 验收，不宣称已验证该运行边界。
 
 rate limit 按 IP（未认证）、owner/connection/tool（认证后）组合，在多实例下仍有效。具体阈值来自 load test；请求体建议 256 KiB、普通工具截止时间 30 秒、页大小硬上限作为初值写入统一配置。所有 limits 都在转换为昂贵 owner query 前检查。
 
@@ -142,20 +148,51 @@ Elapsed/ActiveUsage/专注 protocol 需要设备本地执行，暂不通过 Host
 
 ## 9. 当前 main 审计与未交付范围
 
-基线 `973328ed174`；历史 Active Plan 仅供参考。OAuth 早期 PAT 验收中的“延期”已被后续实现替代，不能继续作为当前状态。
+基线 `99101ddd9`（#969）；更早的历史 Active Plan 仅供参考。OAuth 早期 PAT 验收中的“延期”已被后续实现替代，不能继续作为当前状态。
 
-| 项目         | 基线交付状态                                                                | file:line 证据（基线）                                                                                                                                                                                                                                                         |
-| ------------ | --------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| EAG-01/02/03 | Accepted：PAT + 六只读工具                                                  | `packages/cloud-auth/src/server/scoped-pat.ts:96`；`packages/agent-gateway/src/server/register-read-tools.ts:151`、`:199`、`:245`                                                                                                                                              |
-| EAG-04       | Accepted：OAuth 实现及历史本地生命周期验收；公共 rollout 未交付             | `packages/cloud-auth/src/server/external-agent-oauth.ts:154`、`:186`、`:294`、`:353`                                                                                                                                                                                           |
-| EAG-05       | Accepted：历史本地 PG/浏览器/两 CLI 只读验收；未证明生产部署                | `docs/analysis/2026-10-07-eag-04-oauth-read-evidence.md:20`、`:28`                                                                                                                                                                                                             |
-| EAG-06/07/08 | 基线 Hosted 未交付；#490 本次实现 PostgreSQL 通用 receipt 和七个 PAT 写工具 | 基线仅 `packages/goal/src/server/infrastructure/adapters/powersync/goal-agent-mutations.ts:46`、`packages/task/src/server/infrastructure/adapters/powersync/task-agent-mutations.ts:46`；新增验收 `apps/api/src/__tests__/integration/agent-gateway-write.integration.test.ts` |
-| EAG-09       | Follow-up：按需扩展，未交付                                                 | [#539](https://github.com/BakerSean168/memoflow/issues/539)；当前工具 allowlist 无这些工具                                                                                                                                                                                     |
-| EAG-10       | Follow-up：外部 handle/review/resume/cancel 未交付                          | [#538](https://github.com/BakerSean168/memoflow/issues/538)；`packages/ai/src/server/mastra/runtime/workflow-runtime.port.ts:19` 只有现有 runtime，未绑定 external connection                                                                                                  |
+| 项目         | 交付状态                                                                            | file:line 证据                                                                                                                                                                                                                |
+| ------------ | ----------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| EAG-01/02/03 | Accepted：PAT + 六只读工具                                                          | `packages/cloud-auth/src/server/scoped-pat.ts`；`packages/agent-gateway/src/server/register-read-tools.ts`                                                                                                                    |
+| EAG-04       | Accepted：OAuth 实现及历史本地生命周期验收；公共 rollout 未交付                     | `packages/cloud-auth/src/server/external-agent-oauth.ts`                                                                                                                                                                      |
+| EAG-05       | Accepted：历史本地 PG/浏览器/两 CLI 只读验收；未证明生产部署                        | `docs/analysis/2026-10-07-eag-04-oauth-read-evidence.md`                                                                                                                                                                      |
+| EAG-06/07/08 | Accepted：PostgreSQL 通用 receipt + 8 个 PAT 写工具（含 `routine_create`）          | `apps/api/src/modules/agent-gateway/write.port.ts`；`apps/api/src/__tests__/integration/agent-gateway-write.integration.test.ts`、`agent-gateway-assembly.integration.test.ts`                                                |
+| EAG-09       | Partial：`routine_create` 已交付（#539）；Planner/Notification/Knowledge 扩展仍按需 | [#539](https://github.com/BakerSean168/memoflow/issues/539)；`packages/agent-gateway/src/write-tool-descriptors.ts`、`apps/api/src/modules/agent-gateway/write.port.ts`                                                       |
+| EAG-10       | Accepted at code/compose level：5 个 assisted 工具已注册；生产开关未开启            | `apps/api/src/modules/agent-gateway/assisted-workflow.ts`、`packages/agent-gateway/src/server/register-assisted-tools.ts`、`packages/ai/src/server/permissions/operation-catalog.ts`、`assisted-workflow.integration.test.ts` |
 
-[#538](https://github.com/BakerSean168/memoflow/issues/538) 必须复用现有 durable runtime 与 ask/resume，补不透明且 connection-bound handle、revision、apply 前授权和取消竞态验收。当前 runtime 的 identity/runId 不能直接当外部授权；不增加接口占位或第二个执行器。
+[#538](https://github.com/BakerSean168/memoflow/issues/538) 复用现有 durable runtime 与 ask/resume，已提供不透明且 connection-bound handle、revision、apply 前授权和取消竞态验收。runtime 的 identity/runId 不直接当外部授权；没有第二个执行器。
 
 新写入的 Linux 本地 PG/HTTP 验收不代表真实客户端或 release/staging 已验收。公开部署、打包制品、真实 Codex/Claude 写调用仍为 manual acceptance pending，复现步骤及实际结果记录在 #490。禁止仅因文档列出能力就在 release/staging 开启写工具。
+
+## 10. 一期开启 runbook
+
+生产模板见 `deployment/production/docker-compose.production.yml`；本 runbook 只说明运维翻转，本单不改生产 env。
+
+| 变量                        | 开启值                   | 说明                                                                                |
+| --------------------------- | ------------------------ | ----------------------------------------------------------------------------------- |
+| `EAG_READ_PILOT_ENABLED`    | `1`                      | 总开关；为 `0` 时 `/mcp` 与 PAT/OAuth 管理路由都不挂载                              |
+| `EAG_AUDIENCE`              | `https://<api-host>/mcp` | 必须是 HTTPS 的规范 origin + `/mcp`；其 host 必须与请求 `Host` 一致，否则 403       |
+| `EAG_CURSOR_SECRET`         | 随机 ≥32 字节            | 分页游标密钥；跨重启保持稳定                                                        |
+| `EAG_TASK_READ_ENABLED`     | `1`                      | Task 只读工具；默认已为 `1`                                                         |
+| `EAG_WRITE_ENABLED`         | `1`                      | 发布 8 个 PAT 写工具                                                                |
+| `EAG_ROUTINE_WRITE_ENABLED` | `1`                      | 在 writes 打开的前提下发布 `routine_create`                                         |
+| `EAG_ASSISTED_ENABLED`      | `1`                      | 发布 5 个 assisted 工具；要求 durable AI workflow runtime，否则启动失败             |
+| `EAG_OAUTH_ENABLED`         | 可选 `1`                 | 需要总开关、`AUTH_BASE_URL`（HTTPS `/api/auth`）与 `MEMOFLOW_WEB_URL`；OAuth 仍只读 |
+
+一致性检查：
+
+- `AUTH_BASE_URL` 是 OAuth issuer，必须指向 `https://<auth-host>/api/auth`。
+- `MEMOFLOW_WEB_URL` 与 `CORS_ORIGIN` 共同构成 PAT/OAuth 管理端点的 trusted origins；签发/撤销的浏览器请求必须带其中一个 `Origin`，否则 403。
+- `EAG_AUDIENCE` 的 host 必须与公网入口实际转发到 API 的 `Host` 一致；API 不发布宿主端口，`API_TRUST_PROXY_HOPS=1` 只信任一个内部代理 hop。
+
+开启顺序（每步验证后再下一步）：
+
+1. 总开关 + audience + cursor secret：`EAG_READ_PILOT_ENABLED=1`。验证 `/<api-host>/mcp` 可认证、PAT 创建/列表/撤销可用、6 个只读工具可用。
+2. 写：`EAG_WRITE_ENABLED=1`。用带 `goals:write`/`tasks:write` 的 PAT 验证 `goal_create`、`task_plan_create` 与重放。
+3. Routine：`EAG_ROUTINE_WRITE_ENABLED=1`。用 `routines:write` 验证 `routine_create`。
+4. Assisted：`EAG_ASSISTED_ENABLED=1`。验证 `assisted_workflow_start → review → resume(approve)`。
+5. OAuth（可选）：最后再开 `EAG_OAUTH_ENABLED=1`。
+
+回滚：把对应开关置回 `0` 并重启 API。子开关回滚只隐藏对应工具；总开关回滚会同时卸下 `/mcp` 与管理路由，需重新打开才能恢复。已持久化的 receipt 和 assisted workflow 行保留，无需数据迁移回滚。
 
 ## 生产边界
 
