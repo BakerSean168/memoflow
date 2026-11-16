@@ -20,7 +20,12 @@ function fixture(overrides?: {
 }) {
   const visibleGoals = overrides?.visibleGoals ?? new Set(['goal-1', 'goal-2']);
   const visibleTasks = overrides?.visibleTasks ?? new Set(['task-1', 'task-2']);
-  const visibleNotes = overrides?.visibleNotes ?? new Set(['note-1', 'note-2']);
+  const visibleNotes =
+    overrides?.visibleNotes ??
+    new Set([
+      'kdoc_550e8400-e29b-41d4-a716-446655440001',
+      'kdoc_550e8400-e29b-41d4-a716-446655440002',
+    ]);
 
   const relationService = {
     forward: vi.fn().mockImplementation(async (_owner: string, _subject: unknown) => {
@@ -91,7 +96,7 @@ describe('bindRelationReadPort (#994)', () => {
         id: 'rel-1',
         subject: { type: 'goal', id: 'goal-1' },
         relationType: 'related',
-        object: { type: 'note', id: 'note-1' },
+        object: { type: 'note', id: 'kdoc_550e8400-e29b-41d4-a716-446655440001' },
         createdAt: 1000,
       },
       {
@@ -137,7 +142,7 @@ describe('bindRelationReadPort (#994)', () => {
       relationId: 'rel-1',
       relationType: 'related',
       direction: 'outgoing',
-      targetNode: { type: 'knowledge', id: 'note-1' },
+      targetNode: { type: 'knowledge', id: 'kdoc_550e8400-e29b-41d4-a716-446655440001' },
     });
   });
 
@@ -147,14 +152,14 @@ describe('bindRelationReadPort (#994)', () => {
         id: 'rel-1',
         subject: { type: 'goal', id: 'goal-1' },
         relationType: 'related',
-        object: { type: 'note', id: 'note-1' },
+        object: { type: 'note', id: 'kdoc_550e8400-e29b-41d4-a716-446655440001' },
         createdAt: 1000,
       },
       {
         id: 'rel-2',
         subject: { type: 'goal', id: 'goal-1' },
         relationType: 'related',
-        object: { type: 'note', id: 'note-2' },
+        object: { type: 'note', id: 'kdoc_550e8400-e29b-41d4-a716-446655440002' },
         createdAt: 2000,
       },
       {
@@ -203,14 +208,14 @@ describe('bindRelationReadPort (#994)', () => {
         id: 'rel-visible',
         subject: { type: 'goal', id: 'goal-1' },
         relationType: 'related',
-        object: { type: 'note', id: 'note-1' }, // visible
+        object: { type: 'note', id: 'kdoc_550e8400-e29b-41d4-a716-446655440001' }, // visible
         createdAt: 1000,
       },
       {
         id: 'rel-invisible-peer-note',
         subject: { type: 'goal', id: 'goal-1' },
         relationType: 'related',
-        object: { type: 'note', id: 'note-invisible' }, // invisible
+        object: { type: 'note', id: 'kdoc_550e8400-e29b-41d4-a716-446655440099' }, // invisible
         createdAt: 2000,
       },
       {
@@ -226,7 +231,7 @@ describe('bindRelationReadPort (#994)', () => {
       forwardRows,
       reverseRows: [],
       visibleGoals: new Set(['goal-1']),
-      visibleNotes: new Set(['note-1']),
+      visibleNotes: new Set(['kdoc_550e8400-e29b-41d4-a716-446655440001']),
       visibleTasks: new Set(),
     });
 
@@ -240,7 +245,10 @@ describe('bindRelationReadPort (#994)', () => {
     );
     expect(result.items).toHaveLength(1);
     expect(result.items[0].relationId).toBe('rel-visible');
-    expect(result.items[0].targetNode).toEqual({ type: 'knowledge', id: 'note-1' });
+    expect(result.items[0].targetNode).toEqual({
+      type: 'knowledge',
+      id: 'kdoc_550e8400-e29b-41d4-a716-446655440001',
+    });
 
     // 查询不可见的 goal-other，直接返回空，且不调用底层关系查询
     const invisibleResult = await port.getNeighbors(

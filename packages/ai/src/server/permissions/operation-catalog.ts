@@ -5,6 +5,8 @@ export type PermissionObject =
   | 'routine'
   | 'knowledge'
   | 'notification'
+  | 'label'
+  | 'ai'
   | 'relation'
   | 'ai_permission';
 export type PermissionAction = 'read' | 'create' | 'update' | 'delete';
@@ -34,6 +36,7 @@ const BUSINESS_OBJECTS: readonly PermissionObject[] = [
   'routine',
   'knowledge',
   'notification',
+  'label',
 ];
 
 export const PERMISSION_OPERATIONS: readonly PermissionOperation[] = [
@@ -101,6 +104,9 @@ export const PERMISSION_OPERATIONS: readonly PermissionOperation[] = [
     action: 'create',
     risks: ['send_external'],
   },
+  // AI archive/conversation reads are owner metadata only; this scope never
+  // registers a write, so no `ai.create/update/delete` operation exists.
+  { id: 'ai.read', object: 'ai', action: 'read' },
   { id: 'ai_permission.update', object: 'ai_permission', action: 'update' },
 ];
 
@@ -123,6 +129,13 @@ const TOOL_OPERATIONS: Readonly<Record<string, string>> = {
   knowledge_search: 'knowledge.search',
   knowledge_get: 'knowledge.get',
   routine_create: 'routine.create',
+  routine_get: 'routine.read',
+  routine_list: 'routine.read',
+  routine_upcoming: 'routine.read',
+  routine_update: 'routine.update',
+  routine_delete: 'routine.delete_permanent',
+  routine_pause: 'routine.update',
+  routine_override: 'routine.update',
   routine_set_profile_active: 'routine.update',
   routine_set_temporary_override: 'routine.update',
   routine_clear_temporary_override: 'routine.update',
@@ -136,6 +149,16 @@ const TOOL_OPERATIONS: Readonly<Record<string, string>> = {
   planner_upcoming_tasks: 'task.read',
   notification_unread_summary: 'notification.read',
   notification_execute_action: 'notification.execute_action',
+  label_list: 'label.read',
+  label_resolve_names: 'label.read',
+  notification_list: 'notification.read',
+  notification_unread_count: 'notification.read',
+  notification_mark_read: 'notification.update',
+  ai_conversation_list: 'ai.read',
+  ai_conversation_get: 'ai.read',
+  ai_conversation_transcript: 'ai.read',
+  ai_agent_list: 'ai.read',
+  ai_agent_get: 'ai.read',
   // Assisted Task workflow tools mutate (start/resume) or re-read the durable
   // run; the reviewed draft only becomes a TaskPlan on approval.
   assisted_workflow_start: 'task.plan.create',

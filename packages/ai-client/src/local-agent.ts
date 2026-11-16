@@ -23,10 +23,12 @@ import {
   LocalMcpClientSchema,
   LocalMcpClientCredentialSchema,
   LocalMcpEndpointSchema,
+  LocalGatewayAuditRecordSchema,
   type LocalMcpClient,
   type LocalMcpClientCreate,
   type LocalMcpClientCredential,
   type LocalMcpEndpoint,
+  type LocalGatewayAuditRecord,
 } from '@memoflow/ai-contracts';
 import { AIChannels, AIStreamChannels } from '@memoflow/desktop-contracts';
 import { unwrapOrThrowError } from '@memoflow/transport-contracts/result';
@@ -88,6 +90,8 @@ export interface LocalAgentClient {
   revokeMcpClient(id: string): Promise<LocalMcpClient>;
   /** Loopback endpoint of the current Profile MCP host; null when unavailable. */
   getMcpEndpoint(): Promise<LocalMcpEndpoint | null>;
+  /** Most recent local MCP tool-call audit rows for the current Profile. */
+  listGatewayAudit(limit?: number): Promise<LocalGatewayAuditRecord[]>;
 }
 
 export function createLocalAgentIpcClient(ipc: IResultIpcClient): LocalAgentClient {
@@ -168,5 +172,10 @@ export function createLocalAgentIpcClient(ipc: IResultIpcClient): LocalAgentClie
       invoke({ action: 'create_mcp_client', client }, LocalMcpClientCredentialSchema),
     revokeMcpClient: (id) => invoke({ action: 'revoke_mcp_client', id }, LocalMcpClientSchema),
     getMcpEndpoint: () => invoke({ action: 'mcp_endpoint' }, LocalMcpEndpointSchema.nullable()),
+    listGatewayAudit: (limit) =>
+      invoke(
+        { action: 'list_gateway_audit', limit },
+        z.array(LocalGatewayAuditRecordSchema).max(100),
+      ),
   };
 }

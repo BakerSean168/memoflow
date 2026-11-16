@@ -16,6 +16,7 @@ export function createLocalAgentSqlite(): IElectronDatabase & {
     CREATE TABLE ai_local_conversations (id TEXT PRIMARY KEY, identity_id TEXT, record_json TEXT);
     CREATE TABLE ai_local_conversation_items (id TEXT PRIMARY KEY, identity_id TEXT, conversation_id TEXT, created_at INTEGER, record_json TEXT);
     CREATE TABLE ai_local_mcp_clients (id TEXT PRIMARY KEY, identity_id TEXT, record_json TEXT);
+    CREATE TABLE ai_local_gateway_audit (id TEXT PRIMARY KEY, identity_id TEXT, at INTEGER, record_json TEXT);
     CREATE TABLE ai_permission_settings (id TEXT PRIMARY KEY, identity_id TEXT, revision INTEGER, record_json TEXT, updated_at INTEGER);
     CREATE TABLE ai_permission_rules (id TEXT PRIMARY KEY, identity_id TEXT, agent_id TEXT, record_json TEXT, updated_at INTEGER);
     CREATE TABLE ai_permission_audit (id TEXT PRIMARY KEY, identity_id TEXT, occurred_at INTEGER, record_json TEXT);

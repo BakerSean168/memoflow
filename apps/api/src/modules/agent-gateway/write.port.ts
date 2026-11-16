@@ -16,6 +16,10 @@ import {
 import {
   GatewayFailureCodeSchema,
   GatewayRoutineCreateSchema,
+  GatewayRoutineUpdateSchema,
+  GatewayRoutineDeleteSchema,
+  GatewayRoutinePauseSchema,
+  GatewayRoutineOverrideSchema,
   GatewayGoalCreateSchema,
   GatewayGoalUpdateSchema,
   GatewayKeyResultCreateSchema,
@@ -89,6 +93,10 @@ export function bindGatewayWrites(
         if (error instanceof GatewayReadError) throw error;
         if (error instanceof ResultErrorException && error.statusCode === 400)
           throw new GatewayReadError('VALIDATION_ERROR');
+        if (error instanceof ResultErrorException && error.statusCode === 404)
+          throw new GatewayReadError('NOT_FOUND');
+        if (error instanceof ResultErrorException && error.statusCode === 409)
+          throw new GatewayReadError('CONFLICT');
         if (error instanceof z.ZodError) throw new GatewayReadError('VALIDATION_ERROR');
         if (error instanceof ExternalMutationError) {
           const code = GatewayFailureCodeSchema.safeParse(
@@ -106,6 +114,46 @@ export function bindGatewayWrites(
               scope(authority, 'routines:write');
               return createRoutinePrismaAgentMutations(db).create(
                 GatewayRoutineCreateSchema.parse(input),
+                cx,
+                currentAuthority(cx, authority, 'routines:write'),
+              );
+            }),
+          routineUpdate: (input: unknown, cx: ExecutionContext, authority: GatewayWriteAuthority) =>
+            bind(async () => {
+              scope(authority, 'routines:write');
+              return createRoutinePrismaAgentMutations(db).update(
+                GatewayRoutineUpdateSchema.parse(input),
+                cx,
+                currentAuthority(cx, authority, 'routines:write'),
+              );
+            }),
+          routineDelete: (input: unknown, cx: ExecutionContext, authority: GatewayWriteAuthority) =>
+            bind(async () => {
+              scope(authority, 'routines:write');
+              return createRoutinePrismaAgentMutations(db).delete(
+                GatewayRoutineDeleteSchema.parse(input),
+                cx,
+                currentAuthority(cx, authority, 'routines:write'),
+              );
+            }),
+          routinePause: (input: unknown, cx: ExecutionContext, authority: GatewayWriteAuthority) =>
+            bind(async () => {
+              scope(authority, 'routines:write');
+              return createRoutinePrismaAgentMutations(db).pause(
+                GatewayRoutinePauseSchema.parse(input),
+                cx,
+                currentAuthority(cx, authority, 'routines:write'),
+              );
+            }),
+          routineOverride: (
+            input: unknown,
+            cx: ExecutionContext,
+            authority: GatewayWriteAuthority,
+          ) =>
+            bind(async () => {
+              scope(authority, 'routines:write');
+              return createRoutinePrismaAgentMutations(db).override(
+                GatewayRoutineOverrideSchema.parse(input),
                 cx,
                 currentAuthority(cx, authority, 'routines:write'),
               );
@@ -147,12 +195,18 @@ export function bindGatewayWrites(
     taskCreate: (input, cx, authority) =>
       bind(async () => {
         const parsed = GatewayTaskCreateSchema.parse(input);
+        if (parsed.plan.labelIds && parsed.plan.labelIds.length > 0) {
+          throw new GatewayReadError('VALIDATION_ERROR');
+        }
         if (parsed.plan.goalBinding) scope(authority, 'goals:write');
         return tasks.create(parsed, cx, currentAuthority(cx, authority, 'tasks:write'));
       }),
     taskUpdate: (input, cx, authority) =>
       bind(async () => {
         const parsed = GatewayTaskUpdateSchema.parse(input);
+        if (parsed.changes.labelIds && parsed.changes.labelIds.length > 0) {
+          throw new GatewayReadError('VALIDATION_ERROR');
+        }
         if (parsed.changes.goalBinding !== undefined) scope(authority, 'goals:write');
         return tasks.update(parsed, cx, currentAuthority(cx, authority, 'tasks:write'));
       }),

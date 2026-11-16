@@ -1,6 +1,7 @@
 import {
   LocalMcpClientCreateSchema,
   PermissionCommandSchema,
+  type LocalGatewayAuditRecord,
   type LocalMcpClient,
   type LocalMcpClientCreate,
   type LocalMcpClientCredential,
@@ -11,6 +12,7 @@ import {
   type PermissionRule,
   type PermissionSettings,
 } from '@memoflow/ai-contracts';
+import { writeToolDescriptors } from '@memoflow/agent-gateway';
 import { getPermissionOperation } from '../permissions/operation-catalog';
 import { PERMISSION_PRESETS } from '../permissions/permission-policy';
 import { createHash, randomBytes, randomUUID } from 'node:crypto';
@@ -27,6 +29,7 @@ import type {
   McpClientCredentialRef,
 } from '../infrastructure/adapters/powersync/local-mcp-client.repository';
 import type { LocalAgentToolBridgePort, LocalAgentToolGrant } from './local-agent-runtime';
+import type { LocalGatewayAuditRepository } from '../infrastructure/adapters/powersync/local-gateway-audit.repository';
 import { LocalAgentError } from '../../shared/local-agent-error';
 import type { PermissionRepository } from '../permissions/permission.repository';
 import { executeAuthorized, PermissionDeniedError } from '../permissions/authorize';
@@ -44,6 +47,43 @@ function writeScopeForOperation(operationId: string): 'goals:write' | 'tasks:wri
   if (operation.object === 'goal' || operation.object === 'key_result') return 'goals:write';
   if (operation.object === 'task') return 'tasks:write';
   return undefined;
+}
+/** Tools that mutate business state or the visible Goal panel; everything else is a read. */
+const LOCAL_WRITE_TOOLS: ReadonlySet<string> = new Set([
+  ...Object.keys(writeToolDescriptors),
+  'goal_panel_open',
+  'goal_panel_patch',
+  'goal_panel_add_key_result',
+  'goal_panel_remove_key_result',
+  'goal_panel_focus',
+  'goal_panel_submit',
+  'goal_panel_release',
+]);
+function outcomeOf(result: unknown): string {
+  if (typeof result !== 'object' || result === null || !('isError' in result)) return 'ok';
+  if (!result.isError) return 'ok';
+  const content = 'content' in result ? result.content : undefined;
+  if (Array.isArray(content)) {
+    const text = content.find(
+      (entry): entry is { type: 'text'; text: string } =>
+        typeof entry === 'object' &&
+        entry !== null &&
+        'type' in entry &&
+        entry.type === 'text' &&
+        'text' in entry &&
+        typeof entry.text === 'string',
+    )?.text;
+    if (text) return text.slice(0, 120);
+  }
+  return 'ERROR';
+}
+function outcomeOfError(error: unknown): string {
+  if (error instanceof Error && 'code' in error && typeof error.code === 'string')
+    return error.code.slice(0, 120);
+  return 'ERROR';
+}
+function scopeDenied(outcome: string): boolean {
+  return /(?:PERMISSION_DENIED|FORBIDDEN)/u.test(outcome);
 }
 export interface LocalToolContext extends ExecutionContext {
   readonly connectionId: string;
@@ -78,6 +118,8 @@ interface Options {
   onRevokeGrant?(input: GrantInput): void;
   /** Persistent external MCP clients. Absent means the external surface is unavailable. */
   clients?: LocalMcpClientRepository;
+  /** Append-only local audit sink; absent means tool calls are not audited. */
+  audit?: LocalGatewayAuditRepository;
   /** 0600 discovery file published with the loopback endpoint and client hint. */
   discoveryPath?: string;
   /** Loopback by default; the reachability decision (WSL/cross-host) is separate. */
@@ -322,6 +364,62 @@ export class LocalAgentToolBridge implements LocalAgentToolBridgePort {
   private async removeDiscovery(): Promise<void> {
     if (!this.options.discoveryPath) return;
     await rm(this.options.discoveryPath, { force: true }).catch(() => undefined);
+  }
+  /**
+   * Wraps every registered tool so built-in runs and external clients share one
+   * audit path. Only the tool name, connection/origin and a bounded outcome are
+   * recorded; arguments and results never reach the sink.
+   */
+  private instrumentServer(server: McpServer, context: LocalToolContext): void {
+    if (!this.options.audit) return;
+    type ToolHandler = (...args: unknown[]) => unknown;
+    type RegisterTool = (name: string, config: unknown, handler: ToolHandler) => unknown;
+    const original = server.registerTool.bind(server) as unknown as RegisterTool;
+    (server as unknown as { registerTool: RegisterTool }).registerTool = (name, config, handler) =>
+      original(name, config, async (...args) =>
+        this.auditCall(context, name, () => handler(...args)),
+      );
+  }
+  private async auditCall(
+    context: LocalToolContext,
+    tool: string,
+    work: () => unknown,
+  ): Promise<unknown> {
+    const startedAt = Date.now();
+    try {
+      const result = await work();
+      await this.recordAudit(context, tool, startedAt, outcomeOf(result));
+      return result;
+    } catch (error) {
+      await this.recordAudit(context, tool, startedAt, outcomeOfError(error));
+      throw error;
+    }
+  }
+  private async recordAudit(
+    context: LocalToolContext,
+    tool: string,
+    startedAt: number,
+    outcome: string,
+  ): Promise<void> {
+    const audit = this.options.audit;
+    if (!audit) return;
+    try {
+      await audit.record(context.identityId, {
+        version: '1',
+        at: Date.now(),
+        connectionId: context.connectionId,
+        origin: context.origin,
+        tool,
+        effect: LOCAL_WRITE_TOOLS.has(tool) ? 'write' : 'read',
+        scopeDecision: scopeDenied(outcome) ? 'denied' : 'allowed',
+        outcome,
+        durationMs: Math.max(0, Date.now() - startedAt),
+        requestId: context.requestId,
+        traceId: context.traceId,
+      });
+    } catch {
+      // Audit must never change a tool's business result.
+    }
   }
   private async handle(req: IncomingMessage, res: ServerResponse): Promise<void> {
     const rejectRequest = (status: number) => {
@@ -569,6 +667,7 @@ export class LocalAgentToolBridge implements LocalAgentToolBridgePort {
           name: 'memoflow-local',
           version: '1',
         });
+        this.instrumentServer(mcp, context);
         this.options.registerTools(mcp, context);
         return mcp;
       },
@@ -681,6 +780,13 @@ export class LocalAgentToolBridge implements LocalAgentToolBridgePort {
     if (!clients) throw new LocalAgentError('LOCAL_AGENT_UNAVAILABLE');
     if (this.stopped) throw new LocalAgentError('LOCAL_AGENT_PERMISSION_DENIED');
     return clients.list(owner);
+  }
+  /** Most recent tool-call audit rows for this Profile, newest first. */
+  async listGatewayAudit(owner: string, limit = 20): Promise<LocalGatewayAuditRecord[]> {
+    const audit = this.options.audit;
+    if (!audit) return [];
+    if (this.stopped) throw new LocalAgentError('LOCAL_AGENT_PERMISSION_DENIED');
+    return audit.list(owner, limit);
   }
   /**
    * Mint a persistent external client. The plaintext token exists only in this

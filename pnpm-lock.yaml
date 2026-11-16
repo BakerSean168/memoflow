@@ -1459,9 +1459,18 @@ importers:
       '@memoflow/goal-contracts':
         specifier: workspace:*
         version: link:../goal-contracts
+      '@memoflow/label-contracts':
+        specifier: workspace:*
+        version: link:../label-contracts
+      '@memoflow/notification-contracts':
+        specifier: workspace:*
+        version: link:../notification-contracts
       '@memoflow/routine-contracts':
         specifier: workspace:*
         version: link:../routine-contracts
+      '@memoflow/shared-primitives':
+        specifier: workspace:*
+        version: link:../shared-primitives
       '@memoflow/task-contracts':
         specifier: workspace:*
         version: link:../task-contracts

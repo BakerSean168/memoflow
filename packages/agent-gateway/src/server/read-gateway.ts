@@ -18,7 +18,10 @@ import {
   type GatewayDiagnostic,
   type GatewayCredentialPort,
   type GoalReadPort,
+  type NotificationReadPort,
   type TaskReadPort,
+  type LabelReadPort,
+  type RoutineReadPort,
   type RelationReadPort,
 } from '../ports';
 
@@ -34,6 +37,11 @@ interface Options {
   readonly resourceMetadataUrl?: string;
   readonly goals: GoalReadPort;
   readonly tasks?: TaskReadPort;
+  readonly labels?: LabelReadPort;
+  readonly notification?: NotificationReadPort;
+  readonly assistantConversation?: import('../ports').AssistantConversationReadPort;
+  readonly agents?: import('../ports').AgentArchiveReadPort;
+  readonly routines?: RoutineReadPort;
   readonly relations?: RelationReadPort;
   readonly audit: (event: GatewayAuditEvent) => void;
   readonly timeoutMs?: number;
@@ -55,6 +63,16 @@ function isWriteToolName(name: string): name is GatewayWriteToolName {
 function isAssistedToolName(name: string): name is GatewayAssistedToolName {
   return Object.prototype.hasOwnProperty.call(assistedToolDescriptors, name);
 }
+/** Routine writes publish only when the host bound that owner operation. */
+const ROUTINE_WRITE_METHODS: Readonly<
+  Partial<Record<GatewayWriteToolName, keyof GatewayWritePort>>
+> = {
+  routine_create: 'routineCreate',
+  routine_update: 'routineUpdate',
+  routine_delete: 'routineDelete',
+  routine_pause: 'routinePause',
+  routine_override: 'routineOverride',
+};
 const MAX_BYTES = 256 * 1024;
 class ControlledError extends GatewayReadError {}
 async function boundedBody(
@@ -138,7 +156,7 @@ export function createReadGateway(options: Options) {
               'Cache-Control': 'no-store',
               ...(options.resourceMetadataUrl && (status === 401 || code === 'INSUFFICIENT_SCOPE')
                 ? {
-                    'WWW-Authenticate': `Bearer resource_metadata="${options.resourceMetadataUrl}"${code === 'INSUFFICIENT_SCOPE' ? ', error="insufficient_scope", scope="' + (tool !== 'transport' && isToolName(tool) ? toolDescriptors[tool].requiredScope : 'goals:read tasks:read') + '"' : ''}`,
+                    'WWW-Authenticate': `Bearer resource_metadata="${options.resourceMetadataUrl}"${code === 'INSUFFICIENT_SCOPE' ? ', error="insufficient_scope", scope="' + (tool !== 'transport' && isToolName(tool) ? toolDescriptors[tool].requiredScope : 'goals:read tasks:read ai:read') + '"' : ''}`,
                   }
                 : {}),
               ...(status === 429 ? { 'Retry-After': '60' } : {}),
@@ -175,10 +193,17 @@ export function createReadGateway(options: Options) {
             (scope) =>
               scope === 'goals:read' ||
               scope === 'tasks:read' ||
+              scope === 'labels:read' ||
+              scope === 'notifications:read' ||
+              scope === 'ai:read' ||
+              scope === 'routines:read' ||
               scope === 'relations:read' ||
               ((options.writes || options.assisted) &&
                 principal.credentialType === 'pat' &&
-                (scope === 'goals:write' || scope === 'tasks:write' || scope === 'routines:write')),
+                (scope === 'goals:write' ||
+                  scope === 'tasks:write' ||
+                  scope === 'routines:write' ||
+                  scope === 'notifications:write')),
           )
         )
           return reject(403, 'INSUFFICIENT_SCOPE');
@@ -223,7 +248,8 @@ export function createReadGateway(options: Options) {
                 scopeDecision = 'denied';
                 return reject(404, 'DISABLED');
               }
-              if (name === 'routine_create' && !options.writes?.routineCreate) {
+              const routineWrite = ROUTINE_WRITE_METHODS[name as GatewayWriteToolName];
+              if (routineWrite && !options.writes?.[routineWrite]) {
                 scopeDecision = 'denied';
                 return reject(404, 'DISABLED');
               }
@@ -235,6 +261,26 @@ export function createReadGateway(options: Options) {
                 return reject(404, 'DISABLED');
               }
               if (!isWriteToolName(name) && name.startsWith('task_') && !options.tasks) {
+                scopeDecision = 'denied';
+                return reject(404, 'DISABLED');
+              }
+              if (!isWriteToolName(name) && name.startsWith('label_') && !options.labels) {
+                scopeDecision = 'denied';
+                return reject(404, 'DISABLED');
+              }
+              if (
+                !isWriteToolName(name) &&
+                name.startsWith('ai_conversation_') &&
+                !options.assistantConversation
+              ) {
+                scopeDecision = 'denied';
+                return reject(404, 'DISABLED');
+              }
+              if (!isWriteToolName(name) && name.startsWith('ai_agent_') && !options.agents) {
+                scopeDecision = 'denied';
+                return reject(404, 'DISABLED');
+              }
+              if (!isWriteToolName(name) && name.startsWith('routine_') && !options.routines) {
                 scopeDecision = 'denied';
                 return reject(404, 'DISABLED');
               }
@@ -253,9 +299,14 @@ export function createReadGateway(options: Options) {
           requiredScope:
             | 'goals:read'
             | 'tasks:read'
+            | 'labels:read'
+            | 'routines:read'
             | 'goals:write'
             | 'tasks:write'
             | 'routines:write'
+            | 'notifications:read'
+            | 'notifications:write'
+            | 'ai:read'
             | 'relations:read',
           operation: () => Promise<T>,
         ) {

@@ -315,6 +315,34 @@ it('binds answers and approval to the current typed ask/review, rejects stale re
   expect(await f.service.get(handleInput(applied), cx(owner), authority)).toEqual(applied);
 });
 
+it('rejects an approved draft containing labels with explicit VALIDATION_ERROR and fails the execution (#993)', async () => {
+  const labeledDraft = TaskPlanDraftContentSchema.parse({
+    task: {
+      draftRef: 'task:labeled',
+      title: 'Task with label',
+      labels: ['#Urgent'],
+      schedule: { kind: 'OneTime', date: '2026-11-01', timing: { kind: 'AllDay' } },
+    },
+  });
+  const f = await fixture([
+    { status: 'draft_ready', reason: 'Ready', candidateDraft: labeledDraft },
+  ]);
+  const review = await f.service.start(startInput(), cx(owner), authority);
+  const result = await f.service.resume(approve(review), cx(owner), authority);
+  expect(result.run.status).toBe('suspended');
+  expect(result.run.suspension).toMatchObject({
+    type: 'recovery_required',
+    retryable: false,
+    failures: [
+      expect.objectContaining({
+        code: 'VALIDATION_ERROR',
+        message: 'External task assistance cannot create labels. Use an unlabeled task.',
+      }),
+    ],
+  });
+  expect(await prisma.taskPlan.count({ where: { identityId: owner } })).toBe(0);
+});
+
 it('checks consent before saving an answer and clears a stale pending resume so cancel can proceed', async () => {
   const f = await fixture([
     { status: 'needs_clarification', reason: 'Need date', questions: ['When?'] },

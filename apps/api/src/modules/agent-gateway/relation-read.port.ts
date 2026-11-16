@@ -9,6 +9,7 @@ import type { RelationService } from '@memoflow/relation';
 import type { GoalKnowledgeService, KnowledgeDocumentRefResolver } from '@memoflow/relation';
 import type { GoalReadPort, TaskReadPort } from '@memoflow/agent-gateway';
 import type { SubjectRef, SubjectType, RelationDTO } from '@memoflow/relation-contracts';
+import { KnowledgeDocumentIdSchema } from '@memoflow/repository-contracts';
 import type { ExecutionContext } from '@memoflow/transport-contracts';
 import type { GatewayReadBudget } from '@memoflow/agent-gateway';
 
@@ -50,7 +51,9 @@ async function checkNodeVisibility(
   if (normalizedType === 'note') {
     if (!options.knowledge) return false;
     try {
-      const doc = await options.knowledge.resolve(context.identityId, node.id);
+      const documentId = KnowledgeDocumentIdSchema.safeParse(node.id);
+      if (!documentId.success) return false;
+      const doc = await options.knowledge.resolve(context.identityId, documentId.data);
       return doc !== null;
     } catch {
       return false;
@@ -79,8 +82,7 @@ export function bindRelationReadPort(options: BindRelationReadPortOptions): Rela
       }
 
       // 2. Fetch candidate edges
-      const normalizedSourceType =
-        query.node.type === 'knowledge' ? 'note' : query.node.type;
+      const normalizedSourceType = query.node.type === 'knowledge' ? 'note' : query.node.type;
       const sourceRef: SubjectRef = {
         type: normalizedSourceType as SubjectType,
         id: query.node.id,
@@ -134,8 +136,7 @@ export function bindRelationReadPort(options: BindRelationReadPortOptions): Rela
 
       // 4. Filter by targetType
       if (query.targetType) {
-        const normalizedTargetType =
-          query.targetType === 'knowledge' ? 'note' : query.targetType;
+        const normalizedTargetType = query.targetType === 'knowledge' ? 'note' : query.targetType;
         filtered = filtered.filter((edge) => edge.target.type === normalizedTargetType);
       }
 

@@ -397,6 +397,32 @@ export const LocalMcpClientCredentialSchema = z
   .strict();
 export type LocalMcpClientCredential = z.infer<typeof LocalMcpClientCredentialSchema>;
 
+/**
+ * One local MCP tool call as the host records it.
+ *
+ * Field names mirror `GatewayAuditEvent` (version/effect/scopeDecision/
+ * requestId/traceId/outcome/durationMs) so cloud and local audits stay
+ * comparable. `at`, `connectionId` and `origin` are the local context the
+ * cloud event gets from its credential instead.
+ */
+export const LocalGatewayAuditRecordSchema = z
+  .object({
+    id,
+    version: z.literal('1'),
+    at: z.number().int().nonnegative(),
+    connectionId: id,
+    origin: z.enum(['run', 'client']),
+    tool: z.string().min(1).max(120),
+    effect: z.enum(['read', 'write']),
+    scopeDecision: z.enum(['allowed', 'denied']),
+    outcome: z.string().min(1).max(120),
+    durationMs: z.number().int().nonnegative(),
+    requestId: z.string().min(1).max(512),
+    traceId: z.string().min(1).max(512),
+  })
+  .strict();
+export type LocalGatewayAuditRecord = z.infer<typeof LocalGatewayAuditRecordSchema>;
+
 export const LocalAgentClientCommandSchema = z.discriminatedUnion('action', [
   z
     .object({
@@ -483,5 +509,12 @@ export const LocalAgentClientCommandSchema = z.discriminatedUnion('action', [
     })
     .strict(),
   z.object({ action: z.literal('revoke_mcp_client'), id }).strict(),
+  /** Most recent local MCP tool-call audit rows for the current Profile. */
+  z
+    .object({
+      action: z.literal('list_gateway_audit'),
+      limit: z.number().int().min(1).max(100).optional(),
+    })
+    .strict(),
 ]);
 export type LocalAgentClientCommand = z.infer<typeof LocalAgentClientCommandSchema>;
