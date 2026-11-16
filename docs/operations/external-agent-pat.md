@@ -7,9 +7,9 @@ updated: 2026-11-16T00:00:00Z
 
 # External Agent PAT 连接
 
-本车道保留 PAT 与六个只读工具；常规 Agent 连接另见 [OAuth 指南](./external-agent-oauth.md)。PAT 验证状态见 [EAG-03 证据](https://github.com/BakerSean168/memoflow/blob/7a45112e1840950ead1ba98b748fc70fa1b38344/docs/analysis/2026-10-07-eag-03-task-read-evidence.md)。默认关闭 Gateway，受控开发入口为 `http://127.0.0.1:20201/mcp`，只适用于同机客户端。
+本车道保留 PAT 与 19 个工具（6 个只读、8 个写、5 个 assisted），全部默认关闭；常规 Agent 连接另见 [OAuth 指南](./external-agent-oauth.md)。PAT 验证状态见 [EAG-03 证据](https://github.com/BakerSean168/memoflow/blob/7a45112e1840950ead1ba98b748fc70fa1b38344/docs/analysis/2026-10-07-eag-03-task-read-evidence.md)。受控开发入口为 `http://127.0.0.1:20201/mcp`，只适用于同机客户端。
 
-在既有 `docker-compose.local.yml` prod-like 车道中配置 `EAG_READ_PILOT_ENABLED=1`、`EAG_AUDIENCE=http://127.0.0.1:20201/mcp` 和私密的至少 32 字符 `EAG_CURSOR_SECRET`，沿用 [本地 Docker 流程](./local-docker.md)。Task 注册由 `EAG_TASK_READ_ENABLED` 控制，默认开启；设为 0 可回退至 Goal 两工具。
+在既有 `docker-compose.local.yml` prod-like 车道中配置 `EAG_READ_PILOT_ENABLED=1`、`EAG_AUDIENCE=http://127.0.0.1:20201/mcp` 和私密的至少 32 字符 `EAG_CURSOR_SECRET`，沿用 [本地 Docker 流程](./local-docker.md)。Task 注册由 `EAG_TASK_READ_ENABLED` 控制，默认开启；设为 0 可回退至 Goal 两工具。写与 assisted 分别由 `EAG_WRITE_ENABLED`、`EAG_ROUTINE_WRITE_ENABLED`、`EAG_ASSISTED_ENABLED` 控制，默认 `0`；完整顺序见 [Gateway runbook](../internals/external-agent-gateway.md#10-一期开启-runbook)。
 
 用已验证邮箱的第一方登录会话，在可信 Web Origin 下调用 `POST /api/v1/agent-connections/pats`：
 
@@ -36,7 +36,7 @@ tool_timeout_sec = 30
 
 ## 受控写入（#490）
 
-写入仍默认关闭。仅在验证环境中为 API 进程显式设置 `EAG_WRITE_ENABLED=1`；read pilot 也须开启。现有 compose 没有传递该变量时，由部署/CI lane 增补默认关闭的环境 allowlist 后再验收，不能仅改本机 shell 就假设容器已启用。OAuth 当前仍只读。
+写入默认关闭。仅在验证环境中为 API 进程显式设置 `EAG_WRITE_ENABLED=1`；read pilot 也须开启。`deployment/production/docker-compose.production.yml` 已把 `EAG_WRITE_ENABLED`、`EAG_ROUTINE_WRITE_ENABLED`、`EAG_ASSISTED_ENABLED` 传入 API 容器并默认 `0`。OAuth 当前仍只读。
 
 通过上面的第一方 PAT 管理 API 显式申请所需 scope，例如：
 
@@ -50,7 +50,9 @@ tool_timeout_sec = 30
 
 写 scope 不隐含读 scope。`tasks:write` 包含既有 Task binding 的 Fixed/Prompt KR 派生贡献；创建或更改 binding 另需 `goals:write`，记录 Prompt measurement 另需 `goals:read`。PAT 设置界面的既有只读快捷入口不代表已选择写权限。
 
-写工具为 `goal_create`、`goal_update`、`goal_key_result_create`、`goal_key_result_update`、`task_plan_create`、`task_plan_update`、`task_occurrence_complete`。由 MCP 发现严格 input schema；所有写入必须带 `idempotencyKey`，更新/完成必须带调用者读取的 `expectedVersion`。KR 命令使用 Goal 的版本。
+写工具为 `goal_create`、`goal_update`、`goal_key_result_create`、`goal_key_result_update`、`task_plan_create`、`task_plan_update`、`task_occurrence_complete`、`routine_create`（需 `routines:write` 且 `EAG_ROUTINE_WRITE_ENABLED=1`）。Assisted 工具为 `assisted_workflow_start/get/review/resume/cancel`（需 `tasks:write` 且 `EAG_ASSISTED_ENABLED=1`）。由 MCP 发现严格 input schema；所有写入必须带 `idempotencyKey`，更新/完成必须带调用者读取的 `expectedVersion`。KR 命令使用 Goal 的版本。
+
+所有工具调用都经过 AI 权限 checkpoint。签发 PAT 时选择的 write scope 就是该凭据的写预授权：`PAT + 命中写 scope + operation 已登记`的调用直接放行，无需在设置里逐次批准；scope 外、未登记 operation 和 OAuth 写请求仍拒绝。显式 deny 规则与 `read_only` preset 仍然优先。
 
 响应只返回 ID/版本等最小 receipt。超时、断连、响应丢失后，用**同一凭据、同一幂等键、同一输入**重试，返回原 receipt 和 `replayed: true`；不要换 key 盲目重写。同 key 不同输入为 `IDEMPOTENCY_CONFLICT`。版本过期为 `CONFLICT`，重新读取后由调用者决定新意图。撤销 PAT 后，旧 receipt 也不能绕过授权重放。
 

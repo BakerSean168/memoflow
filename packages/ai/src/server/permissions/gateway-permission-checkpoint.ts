@@ -1,21 +1,44 @@
 import type { GatewayPrincipal, GatewayToolCheckpoint } from '@memoflow/agent-gateway';
 import { GatewayPermissionDeniedError } from '@memoflow/agent-gateway';
 import { executeAuthorized, PermissionDeniedError } from './authorize';
-import { permissionOperationForTool } from './operation-catalog';
+import { permissionOperationForTool, type PermissionObject } from './operation-catalog';
 import type { PermissionRepository } from './permission.repository';
+
+/**
+ * Write scope that covers each mutating business object. PAT issuance already
+ * required the user to choose these scopes; a PAT write inside one is a
+ * pre-authorized mutation. Objects without a gateway write scope (knowledge,
+ * notification, ai_permission) never qualify.
+ */
+const WRITE_SCOPE_BY_OBJECT: Partial<Record<PermissionObject, string>> = {
+  goal: 'goals:write',
+  key_result: 'goals:write',
+  task: 'tasks:write',
+  routine: 'routines:write',
+};
 
 /** Scopes are checked by Gateway before entering this business-policy boundary. */
 export function createGatewayPermissionCheckpoint(
   repository: PermissionRepository,
 ): GatewayToolCheckpoint {
   return async <T>(principal: GatewayPrincipal, tool: string, work: () => Promise<T>) => {
+    const operation = permissionOperationForTool(tool);
+    const writeScope =
+      operation && operation.action !== 'read'
+        ? WRITE_SCOPE_BY_OBJECT[operation.object]
+        : undefined;
     try {
       return await executeAuthorized(
         repository,
         {
           owner: principal.identityId,
+          // The credential id stays in every allow/deny audit record.
           agentId: `external-mcp:${principal.credentialId}`,
-          operationId: permissionOperationForTool(tool)?.id ?? tool,
+          operationId: operation?.id ?? tool,
+          preAuthorizedWrite:
+            principal.credentialType === 'pat' &&
+            writeScope !== undefined &&
+            principal.scopes.includes(writeScope),
         },
         work,
       );

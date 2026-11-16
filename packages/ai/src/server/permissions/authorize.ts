@@ -23,6 +23,13 @@ export interface AuthorizeInput {
   /** Per-call bulk threshold override; defaults to the user's permission setting. */
   bulkThreshold?: number;
   ask?: (auditId: string) => Promise<'allow' | 'deny' | 'timeout'>;
+  /**
+   * The caller holds a credential the user issued with the write scope that
+   * covers this registered operation (a scoped PAT). Issuing that scope is the
+   * user's pre-authorization, so a preset `ask` resolves to `allow`. Explicit
+   * denies, the read-only preset and unregistered operations are untouched.
+   */
+  preAuthorizedWrite?: boolean;
 }
 
 export async function authorize(
@@ -69,6 +76,12 @@ export async function authorize(
         ? 'system'
         : 'rule';
   if (storageUnavailable && result.operation?.action !== 'read') decidedBy = 'system';
+  // The scope ceiling already admitted this call; a scoped PAT minted by the
+  // user supplies the missing business grant for its own writes.
+  if (decision === 'ask' && input.preAuthorizedWrite) {
+    decision = 'allow';
+    decidedBy = 'preset';
+  }
   if (decision === 'ask' && input.ask) {
     const response = await input.ask(auditId);
     decision = response === 'allow' ? 'allow' : 'deny';

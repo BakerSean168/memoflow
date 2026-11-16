@@ -29,6 +29,9 @@ test('production keeps external OAuth access disabled until the operator enables
   const environment = apiEnvironment();
   assert.equal(environment.EAG_READ_PILOT_ENABLED, '0');
   assert.equal(environment.EAG_OAUTH_ENABLED, '0');
+  assert.equal(environment.EAG_WRITE_ENABLED, '0');
+  assert.equal(environment.EAG_ROUTINE_WRITE_ENABLED, '0');
+  assert.equal(environment.EAG_ASSISTED_ENABLED, '0');
   assert.equal(environment.EAG_CURSOR_SECRET, '');
 });
 
@@ -37,6 +40,9 @@ test('production delivers the selected OAuth audience, scopes and credentials to
     EAG_READ_PILOT_ENABLED: '1',
     EAG_OAUTH_ENABLED: '1',
     EAG_TASK_READ_ENABLED: '1',
+    EAG_WRITE_ENABLED: '1',
+    EAG_ROUTINE_WRITE_ENABLED: '1',
+    EAG_ASSISTED_ENABLED: '1',
     EAG_AUDIENCE: 'https://api.example.test/mcp',
     EAG_CURSOR_SECRET: 'fixture-cursor-secret-at-least-32-characters',
     EAG_OAUTH_CLIENT_IDS: 'https://client.example.test/oauth/client.json',

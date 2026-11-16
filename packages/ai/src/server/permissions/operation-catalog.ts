@@ -133,6 +133,13 @@ const TOOL_OPERATIONS: Readonly<Record<string, string>> = {
   planner_upcoming_tasks: 'task.read',
   notification_unread_summary: 'notification.read',
   notification_execute_action: 'notification.execute_action',
+  // Assisted Task workflow tools mutate (start/resume) or re-read the durable
+  // run; the reviewed draft only becomes a TaskPlan on approval.
+  assisted_workflow_start: 'task.plan.create',
+  assisted_workflow_get: 'task.read',
+  assisted_workflow_review: 'task.read',
+  assisted_workflow_resume: 'task.plan.create',
+  assisted_workflow_cancel: 'task.plan.update',
 };
 
 export function getPermissionOperation(id: string): PermissionOperation | undefined {
