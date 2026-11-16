@@ -37,6 +37,17 @@ export default {
     revokeConfirmDescription: '该设备将需要重新登录。',
     revokeConfirmText: '撤销会话',
   },
+  externalAgents: {
+    scopes: {
+      goalsRead: 'Goals 只读',
+      goalsWrite: 'Goals 写入',
+      tasksRead: 'Tasks 只读',
+      tasksWrite: 'Tasks 写入',
+      routinesWrite: 'Routines 写入',
+      offlineAccess: '保持连接',
+    },
+    writeWarning: '持有此令牌的程序可在授权范围内直接写入。',
+  },
   title: '个人中心',
   center: '个人中心',
   description: '昵称就是你的唯一展示名，修改后会直接持久化到当前账号。',

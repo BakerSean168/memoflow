@@ -2,7 +2,7 @@
 tags: [guide, development, mcp]
 description: 受控 PAT MCP 的本地连接、只读与写入 scope 配置
 created: 2026-10-07T00:00:00Z
-updated: 2026-10-19T00:00:00Z
+updated: 2026-11-16T00:00:00Z
 ---
 
 # External Agent PAT 连接
@@ -13,10 +13,10 @@ updated: 2026-10-19T00:00:00Z
 
 用已验证邮箱的第一方登录会话，在可信 Web Origin 下调用 `POST /api/v1/agent-connections/pats`：
 
-也可以在 Web 的「设置 → 账户与隐私 → 已连接的应用 / 外部 Agent」创建、查看和撤销 PAT；当前有效期为 7 天，密钥只在创建后显示一次。
+也可以在 Web 的「设置 → 账户与隐私 → 已连接的应用 / 外部 Agent」创建、查看和撤销 PAT；有效期为 7/30/90/365 天，默认 90 天、上限 365 天，密钥只在创建后显示一次。
 
 ```json
-{ "name": "personal-read", "expiresInDays": 7, "scopes": ["goals:read", "tasks:read"] }
+{ "name": "personal-read", "expiresInDays": 90, "scopes": ["goals:read", "tasks:read"] }
 ```
 
 响应中的 `data.secret` 只返回一次。缺省 scopes 为 goals:read；必须显式选择 tasks:read 才能使用 Task 四工具。第一方 session token 不能用作 MCP PAT。`GET /api/v1/agent-connections/pats` 列出凭据元数据；`DELETE /api/v1/agent-connections/pats/:id` 撤销，后续调用立即拒绝。
@@ -43,7 +43,7 @@ tool_timeout_sec = 30
 ```json
 {
   "name": "controlled-write",
-  "expiresInDays": 7,
+  "expiresInDays": 90,
   "scopes": ["goals:read", "tasks:read", "goals:write", "tasks:write"]
 }
 ```
