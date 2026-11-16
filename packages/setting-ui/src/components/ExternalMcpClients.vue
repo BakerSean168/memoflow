@@ -116,7 +116,13 @@ async function copy(text: string) {
 function scopeLabel(client: LocalMcpClient) {
   if (!client.writeScopes.length) return t('setting.ai.localMcp.readOnly');
   return client.writeScopes
-    .map((value) => t(value === 'tasks:write' ? 'setting.ai.localMcp.scopeTasks' : 'setting.ai.localMcp.scopeGoals'))
+    .map((value) =>
+      t(
+        value === 'tasks:write'
+          ? 'setting.ai.localMcp.scopeTasks'
+          : 'setting.ai.localMcp.scopeGoals',
+      ),
+    )
     .join(' · ');
 }
 
@@ -155,7 +161,7 @@ onMounted(() => {
     </div>
 
     <form class="flex flex-wrap items-end gap-2" @submit.prevent="create">
-      <div class="min-w-[12rem] flex-1 space-y-1">
+      <div class="min-w-48 flex-1 space-y-1">
         <Label for="ai-external-mcp-name" class="text-[11px]">{{
           t('setting.ai.localMcp.name')
         }}</Label>
@@ -222,8 +228,7 @@ onMounted(() => {
         <pre
           class="max-h-40 overflow-auto whitespace-pre-wrap break-all rounded bg-muted px-2 py-1 text-[11px]"
           data-testid="ai-external-mcp-snippet"
-          >{{ snippet }}</pre
-        >
+          >{{ snippet }}</pre>
         <Button
           variant="ghost"
           size="sm"

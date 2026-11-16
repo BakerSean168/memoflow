@@ -111,9 +111,7 @@ export class LocalMcpClientRepository {
     );
     const credentials: McpClientCredentialRef[] = [];
     for (const row of rows) {
-      const parsed = z
-        .object({ identity_id: z.string(), record_json: z.string() })
-        .safeParse(row);
+      const parsed = z.object({ identity_id: z.string(), record_json: z.string() }).safeParse(row);
       if (!parsed.success) continue;
       const record = StoredMcpClientSchema.safeParse(JSON.parse(parsed.data.record_json));
       if (!record.success) continue;

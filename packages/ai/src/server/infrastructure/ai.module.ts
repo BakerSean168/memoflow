@@ -885,7 +885,7 @@ export function createAIModule(dependencies: AIModuleDependencies): AIModuleInst
     localAgentRuntime: dependencies.localAgentRuntime ?? null,
     agentRegistry,
     workflowRuntime: dependencies.workflowRuntime ?? null,
-    async start(): Promise<void> {
+    start(): Promise<void> | void {
       if (started) {
         return;
       }
@@ -913,10 +913,13 @@ export function createAIModule(dependencies: AIModuleDependencies): AIModuleInst
       started = true;
       // The local MCP host belongs to this Profile generation: bind (and publish
       // the discovery endpoint) before any run so external clients can connect.
-      await dependencies.localAgentRuntime?.start();
+      // Contribution start above stays synchronous (a failure throws synchronously
+      // after rollback, per the partial-start contract); only the runtime bind is
+      // returned as a promise for callers that await start().
       // Every Mastra chat/history/workflow entry already awaits its own init().
       // Initialize there so an unavailable optional runtime cannot take down
       // provider setup, business services, or Desktop local Agent connections.
+      return dependencies.localAgentRuntime?.start();
     },
     async dispose(): Promise<void> {
       if (!started) {
