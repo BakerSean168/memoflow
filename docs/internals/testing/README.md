@@ -9,6 +9,7 @@ Choose tests by the boundary the change touches; the default local loop is the s
 - [CI evidence and required checks](./ci-validation.md)
 - [Critical E2E gates and evidence matrix](./e2e-gate-evidence.md)
 - [Storybook browser-mode responsibilities](./test-architecture-storybook-browser.md)
+- [WSL to Windows host reachability](./wsl-network-investigation.md)
 - [Local commands](../../operations/testing.md)
 
 Nx targets, test configuration, CI workflow and `.github/rulesets/main.json` define actual behavior. Do not maintain test totals or duplicate config tables in this index.
