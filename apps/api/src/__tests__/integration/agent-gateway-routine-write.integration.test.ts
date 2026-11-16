@@ -239,7 +239,13 @@ it('authenticates real MCP PAT writes, gates discovery, rejects private claims a
   const send = (secret: string, method: string, args: unknown = {}) =>
     f.gateway().fetch(request(secret, method, args), cx(f.a));
   const listed = await (await send(f.pa.secret, 'tools/list')).json();
-  expect(listed.result.tools.map((t: { name: string }) => t.name)).toEqual(['routine_create']);
+  expect(listed.result.tools.map((t: { name: string }) => t.name)).toEqual([
+    'routine_create',
+    'routine_update',
+    'routine_delete',
+    'routine_pause',
+    'routine_override',
+  ]);
   const off = createReadGateway({ ...f.options, writes: bindGatewayWrites(prisma, time) });
   expect(
     (await (await off.fetch(request(f.pa.secret, 'tools/list'), cx(f.a))).json()).result.tools,
@@ -667,3 +673,97 @@ it.each(['revocation', 'scope reduction'] as const)(
     }
   },
 );
+
+it('applies full routine writes with legal recurrence and versioned conflicts', async () => {
+  const a = await identity();
+  const owner = createRoutinePrismaAgentMutations(prisma, { now: () => at });
+  const recurrence = {
+    startDate: '2026-10-20',
+    frequency: 'weekly' as const,
+    interval: 1,
+    byWeekday: [2],
+    count: 12,
+    until: null,
+  };
+  const created = await owner.create(
+    {
+      ...input,
+      trigger: {
+        type: input.trigger.type,
+        localTime: input.trigger.localTime,
+        timeZone: input.trigger.timeZone,
+        recurrence,
+      },
+    },
+    cx(a),
+    authority,
+  );
+  const routineId = created.result.routine.id;
+  const row = await prisma.routineDefinition.findUniqueOrThrow({ where: { id: routineId } });
+  expect(JSON.parse(row.triggerJson!).recurrence).toEqual(recurrence);
+
+  await expect(
+    owner.update(
+      { idempotencyKey: 'update-stale', routineId, expectedVersion: 9, enabled: false },
+      cx(a),
+      authority,
+    ),
+  ).rejects.toMatchObject({ code: 'CONFLICT' });
+  const updated = await owner.update(
+    { idempotencyKey: 'update-ok', routineId, expectedVersion: 1, enabled: false },
+    cx(a),
+    authority,
+  );
+  expect(updated.result.routine).toMatchObject({ id: routineId, version: 2 });
+
+  const until = at + 3_600_000;
+  expect(
+    await owner.pause(
+      { idempotencyKey: 'pause-ok', routineId, until, reason: 'lunch' },
+      cx(a),
+      authority,
+    ),
+  ).toMatchObject({ result: { routineId, override: { snoozeUntil: until, expiresAt: until } } });
+  await expect(
+    owner.pause(
+      { idempotencyKey: 'pause-too-long', routineId, until: at + 31 * 86400000, reason: 'long' },
+      cx(a),
+      authority,
+    ),
+  ).rejects.toMatchObject({ code: 'VALIDATION_ERROR' });
+  expect(
+    await owner.override(
+      {
+        idempotencyKey: 'override-ok',
+        routineId,
+        suppressUntil: until,
+        expiresAt: until,
+        reason: 'travel',
+      },
+      cx(a),
+      authority,
+    ),
+  ).toMatchObject({ result: { routineId, override: { suppressUntil: until } } });
+
+  await expect(
+    owner.delete(
+      { idempotencyKey: 'delete-stale', routineId, expectedVersion: 1 },
+      cx(a),
+      authority,
+    ),
+  ).rejects.toMatchObject({ code: 'CONFLICT' });
+  expect(
+    await owner.delete(
+      { idempotencyKey: 'delete-ok', routineId, expectedVersion: 2 },
+      cx(a),
+      authority,
+    ),
+  ).toMatchObject({ result: { routineId } });
+  await expect(
+    owner.delete(
+      { idempotencyKey: 'delete-missing', routineId, expectedVersion: 2 },
+      cx(a),
+      authority,
+    ),
+  ).rejects.toMatchObject({ code: 'NOT_FOUND' });
+});

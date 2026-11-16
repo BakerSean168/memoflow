@@ -8,6 +8,7 @@ import type {
   GatewayWritePort,
   GatewayAssistedPort,
   TaskReadPort,
+  RoutineReadPort,
   GatewayAuditEvent,
   GatewayDiagnostic,
 } from '@memoflow/agent-gateway';
@@ -29,6 +30,7 @@ interface Options {
   readonly oauth?: ReturnType<typeof createCloudAuth>['externalAgents'];
   readonly goals: GoalReadPort;
   readonly tasks?: TaskReadPort;
+  readonly routines?: RoutineReadPort;
   readonly audit: (event: GatewayAuditEvent) => void;
   readonly diagnose?: (event: GatewayDiagnostic) => void;
 }

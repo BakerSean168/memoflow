@@ -45,6 +45,7 @@ export default {
       goalsWrite: 'Goals (write)',
       tasksRead: 'Tasks (read)',
       tasksWrite: 'Tasks (write)',
+      routinesRead: 'Routines (read)',
       routinesWrite: 'Routines (write)',
       offlineAccess: 'Stay connected',
     },

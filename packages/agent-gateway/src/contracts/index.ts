@@ -55,9 +55,18 @@ export const CreateScopedPatSchema = z.strictObject({
   name: z.string().trim().min(1).max(80),
   expiresInDays: z.number().int().min(1).max(365).default(90),
   scopes: z
-    .array(z.enum(['goals:read', 'tasks:read', 'goals:write', 'tasks:write', 'routines:write']))
+    .array(
+      z.enum([
+        'goals:read',
+        'tasks:read',
+        'routines:read',
+        'goals:write',
+        'tasks:write',
+        'routines:write',
+      ]),
+    )
     .min(1)
-    .max(5)
+    .max(6)
     .refine((scopes) => new Set(scopes).size === scopes.length, 'Duplicate scopes')
     .default(['goals:read']),
 });
@@ -74,7 +83,14 @@ export const ScopedPatSummarySchema = z.object({
   prefix: z.string(),
   audience: z.url(),
   scopes: z.array(
-    z.enum(['goals:read', 'tasks:read', 'goals:write', 'tasks:write', 'routines:write']),
+    z.enum([
+      'goals:read',
+      'tasks:read',
+      'routines:read',
+      'goals:write',
+      'tasks:write',
+      'routines:write',
+    ]),
   ),
   ...credentialDates,
 });
@@ -184,5 +200,6 @@ export const TaskOccurrenceListOutputSchema = z.strictObject({
 });
 
 export * from './writes';
+export * from './routine-reads';
 
 export * from './assisted';
