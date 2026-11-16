@@ -74,6 +74,14 @@ export interface ComposedAI {
   readonly workflowRuntime: AIModuleInstance['workflowRuntime'];
   /** AI-owned Conversation shell portability capability for host registration. */
   readonly portableCapability: AIModuleInstance['portableCapability'];
+  /**
+   * Owner-scoped Assistant conversation port for hosts that need it.
+   *
+   * Exposed but not wired to any transport here: the API module handle keeps
+   * owning HTTP/Electron conversation routes. External hosts (e.g. the cloud
+   * MCP lane) consume it directly instead of re-assembling the AI module.
+   */
+  readonly assistantConversation: AIModuleInstance['assistantConversation'];
 }
 
 export interface ComposeAIDependencies {
@@ -233,5 +241,6 @@ export function composeAI(dependencies: ComposeAIDependencies): ComposedAI {
     module: createAIApiModule({ instance }),
     workflowRuntime: instance.workflowRuntime,
     portableCapability: instance.portableCapability,
+    assistantConversation: instance.assistantConversation,
   };
 }

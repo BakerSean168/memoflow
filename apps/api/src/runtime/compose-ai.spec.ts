@@ -311,6 +311,18 @@ describe('API composeAI Mastra-only ownership', () => {
     expect(createAIApiModule).toHaveBeenCalledWith({ instance });
   });
 
+  it('exposes the assembled assistantConversation port unchanged for host consumers', () => {
+    const composed = composeAI(dependencies);
+    const instance = vi.mocked(createAIModule).mock.results[0].value;
+
+    // The seam only re-exposes the instance the API module is bound to, so the
+    // owner-scoped behavior proven for that instance applies unchanged here.
+    expect(composed.assistantConversation).toBe(instance.assistantConversation);
+    expect(composed.portableCapability).toBe(instance.portableCapability);
+    expect(composed.workflowRuntime).toBe(instance.workflowRuntime);
+    expect(createAIApiModule).toHaveBeenCalledWith({ instance });
+  });
+
   it('does not reintroduce any retired Python/AgentHost service port at the composition root', () => {
     composeAI(dependencies);
 

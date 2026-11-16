@@ -151,6 +151,22 @@ export type {
 } from './notification-read.port';
 
 export type {
+  AssistantConversationExternalAttachment,
+  AssistantConversationExternalAttachmentFact,
+  AssistantConversationExternalListQuery,
+  AssistantConversationExternalMessage,
+  AssistantConversationExternalMessageFact,
+  AssistantConversationExternalReadPort,
+  AssistantConversationExternalReadSource,
+  AssistantConversationExternalRole,
+  AssistantConversationExternalShellFact,
+  AssistantConversationExternalStatus,
+  AssistantConversationExternalSummary,
+  AssistantConversationExternalSummaryPage,
+  AssistantConversationExternalTranscript,
+  AssistantConversationExternalTranscriptQuery,
+} from './assistant-conversation-external-read.port';
+export type {
   IGoalSurfaceLeaseRepository,
   GoalSurfaceLeaseRequest,
   GoalSurfaceLeaseGrant,

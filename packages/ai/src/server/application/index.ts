@@ -19,6 +19,10 @@ export {
   type AiMessageArchiveLoader,
   type AIConversationMessagesPortabilityDependencies,
 } from './ai-conversation-messages-portability';
+export {
+  ASSISTANT_CONVERSATION_EXTERNAL_LIMITS,
+  createAssistantConversationExternalReadPort,
+} from './services/assistant-conversation-external-projection';
 export type {
   AIEvaluationOperationsPort,
   AIKnowledgePort,

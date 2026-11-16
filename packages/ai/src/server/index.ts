@@ -7,8 +7,10 @@ export type * from './application';
 export {
   AIConversationPortableCapability,
   AIConversationMessagesPortableCapability,
+  ASSISTANT_CONVERSATION_EXTERNAL_LIMITS,
   createAIConversationPortableCapability,
   createAIConversationMessagesPortableCapability,
+  createAssistantConversationExternalReadPort,
 } from './application';
 export * from './domain';
 export * from './permissions';
