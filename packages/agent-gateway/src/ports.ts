@@ -7,7 +7,15 @@ import type {
   TaskOccurrenceReadPage,
   TaskAgentPersistedReceipt,
 } from '@memoflow/task-contracts';
-import type { RoutineAgentPersistedReceipt } from '@memoflow/routine-contracts';
+import type {
+  RoutineAgentDeleteReceipt,
+  RoutineAgentOverrideReceipt,
+  RoutineAgentPersistedReceipt,
+  RoutineAgentUpdateReceipt,
+  RoutineConfigurationSnapshot,
+  RoutineUpcomingQuery,
+  RoutineUpcomingResponse,
+} from '@memoflow/routine-contracts';
 import type { GatewayWriteToolName } from './write-tool-descriptors';
 import type { GatewayAssistedToolName } from './assisted-tool-descriptors';
 import type { GatewayFailureCode } from './contracts';
@@ -50,6 +58,19 @@ export interface GoalReadPort {
     budget?: GatewayReadBudget,
   ): Promise<GoalPage>;
 }
+/** Gateway-owned Routine read seam; the API host binds the assembled configuration query port. */
+export interface RoutineReadPort {
+  getConfigurationSnapshot(
+    identityId: string,
+    budget?: GatewayReadBudget,
+  ): Promise<RoutineConfigurationSnapshot>;
+  getUpcomingOccurrences(
+    identityId: string,
+    query: RoutineUpcomingQuery,
+    budget?: GatewayReadBudget,
+  ): Promise<RoutineUpcomingResponse>;
+}
+
 export interface GatewayPrincipal {
   readonly identityId: string;
   readonly credentialId: string;
@@ -82,6 +103,9 @@ export interface GatewayAuditEvent {
     | 'task_plan_search'
     | 'task_occurrence_get'
     | 'task_occurrence_list'
+    | 'routine_get'
+    | 'routine_list'
+    | 'routine_upcoming'
     | 'transport'
     | 'pat_create'
     | 'pat_list'
@@ -135,9 +159,17 @@ type WriteCall<T> = (
 ) => Promise<T>;
 type GoalWriteReceipt = GoalAgentPersistedReceipt & { replayed?: boolean };
 type TaskWriteReceipt = TaskAgentPersistedReceipt & { replayed?: boolean };
+type RoutineWriteReceipt = RoutineAgentPersistedReceipt & { replayed?: boolean };
+type RoutineUpdateWriteReceipt = RoutineAgentUpdateReceipt & { replayed?: boolean };
+type RoutineDeleteWriteReceipt = RoutineAgentDeleteReceipt & { replayed?: boolean };
+type RoutineOverrideWriteReceipt = RoutineAgentOverrideReceipt & { replayed?: boolean };
 /** Only owner application operations cross this boundary; never repositories. */
 export interface GatewayWritePort {
-  routineCreate?: WriteCall<RoutineAgentPersistedReceipt & { replayed?: boolean }>;
+  routineCreate?: WriteCall<RoutineWriteReceipt>;
+  routineUpdate?: WriteCall<RoutineUpdateWriteReceipt>;
+  routineDelete?: WriteCall<RoutineDeleteWriteReceipt>;
+  routinePause?: WriteCall<RoutineOverrideWriteReceipt>;
+  routineOverride?: WriteCall<RoutineOverrideWriteReceipt>;
   goalCreate: WriteCall<GoalWriteReceipt>;
   goalUpdate: WriteCall<GoalWriteReceipt>;
   keyResultCreate: WriteCall<GoalWriteReceipt>;

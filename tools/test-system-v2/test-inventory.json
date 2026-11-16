@@ -3192,6 +3192,14 @@
       "measurementCollectors": []
     },
     {
+      "path": "packages/agent-gateway/src/contracts/routine-reads.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/agent-gateway/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "packages/agent-gateway/src/contracts/routine-writes.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -13794,7 +13802,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 5
+      "fileCount": 6
     },
     {
       "id": "packages/ai-client/vitest.config.ts",
@@ -14890,7 +14898,7 @@
   "duplicate": [],
   "unexpected": [],
   "counts": {
-    "unit": 1231,
+    "unit": 1232,
     "integration": 59,
     "smoke": 3,
     "boundary-ipc": 6,
