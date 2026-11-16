@@ -41,4 +41,35 @@ describe('scoped PAT lifetime contract (#970)', () => {
     };
     expect(ScopedPatSummarySchema.parse(summary)).toEqual(summary);
   });
+
+  it('grants notification and schedule read scopes within the raised eight-scope ceiling (#995)', () => {
+    const scopes = [
+      'goals:read',
+      'goals:write',
+      'tasks:read',
+      'tasks:write',
+      'routines:read',
+      'routines:write',
+      'notifications:read',
+      'schedules:read',
+    ];
+    expect(CreateScopedPatSchema.parse({ name: 'agent', scopes }).scopes).toEqual(scopes);
+    expect(
+      CreateScopedPatSchema.safeParse({ name: 'agent', scopes: [...scopes, 'goals:read'] }).success,
+    ).toBe(false);
+    expect(
+      CreateScopedPatSchema.safeParse({ name: 'agent', scopes: ['schedules:write'] }).success,
+    ).toBe(false);
+    const summary = {
+      id: '5b5d8a2b-9934-4be8-8e07-3f62ed122e15',
+      name: 'domain reader',
+      prefix: 'mfp_AbCdEfG',
+      audience: 'https://api.memo.test/mcp',
+      scopes: ['notifications:read', 'schedules:read'],
+      createdAt: '2026-11-16T00:00:00.000Z',
+      expiresAt: '2027-11-16T00:00:00.000Z',
+      revokedAt: null,
+    };
+    expect(ScopedPatSummarySchema.parse(summary)).toEqual(summary);
+  });
 });

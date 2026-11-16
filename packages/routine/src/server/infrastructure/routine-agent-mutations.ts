@@ -315,6 +315,11 @@ export class RoutineAgentMutationError extends Error {
   }
 }
 
+/** Owner stores see the enclosing write transaction as the database seam. */
+function asTransactionDatabase(tx: IElectronDatabaseTransaction): IElectronDatabase {
+  return { ...tx, writeTransaction: (work) => work(tx) };
+}
+
 /** Desktop owner write: facts and exact result commit together in SQLite; triggers ps_crud sync queue. */
 export function createRoutinePowerSyncAgentMutations(
   db: IElectronDatabase,
@@ -383,7 +388,7 @@ export function createRoutinePowerSyncAgentMutations(
     const scheduleEvents: { identityId: string; routineId: string }[] = [];
     const overrideEvents: { identityId: string; routineId: string }[] = [];
 
-    const receipt = await db.writeTransaction(async (tx) => {
+    const receipt = await db.writeTransaction<TReceipt & { replayed?: boolean }>(async (tx) => {
       await authority.authorize(tx);
       const row = await tx.getOptional<{ input_digest: string; result_json: string }>(
         'SELECT input_digest, result_json FROM routine_agent_mutation_receipts WHERE id = ? AND identity_id = ?',
@@ -413,7 +418,7 @@ export function createRoutinePowerSyncAgentMutations(
           new Date(at()).toISOString(),
         ],
       );
-      return saved;
+      return saved as TReceipt & { replayed?: boolean };
     });
 
     await flush(scheduleEvents, notifySchedule);
@@ -452,7 +457,7 @@ export function createRoutinePowerSyncAgentMutations(
           const scheduledFor = nextWallClockOccurrence(engine, trigger, asInstant(now));
           if (scheduledFor === null || Number(scheduledFor) > now + 366 * 86400000)
             throw new RoutineAgentMutationError('VALIDATION_ERROR');
-          const repositories = createRoutinePowerSyncRepositories(tx);
+          const repositories = createRoutinePowerSyncRepositories(asTransactionDatabase(tx));
           const owner = ownerFor(repositories, scheduleEvents, []);
           const routine = await owner
             .createRoutine({
@@ -498,7 +503,7 @@ export function createRoutinePowerSyncAgentMutations(
         authority,
         RoutineAgentUpdateReceiptSchema,
         async (tx, scheduleEvents) => {
-          const repositories = createRoutinePowerSyncRepositories(tx);
+          const repositories = createRoutinePowerSyncRepositories(asTransactionDatabase(tx));
           const owner = ownerFor(repositories, scheduleEvents, []);
           const trigger =
             parsed.trigger === null
@@ -563,7 +568,7 @@ export function createRoutinePowerSyncAgentMutations(
         authority,
         RoutineAgentDeleteReceiptSchema,
         async (tx, scheduleEvents) => {
-          const repositories = createRoutinePowerSyncRepositories(tx);
+          const repositories = createRoutinePowerSyncRepositories(asTransactionDatabase(tx));
           const existing = await repositories.routineProfileStore.findDefinition({
             identityId: cx.identityId,
             routineId: parsed.routineId,
@@ -604,7 +609,7 @@ export function createRoutinePowerSyncAgentMutations(
         authority,
         RoutineAgentOverrideReceiptSchema,
         async (tx, _schedule, overrideEvents) => {
-          const repositories = createRoutinePowerSyncRepositories(tx);
+          const repositories = createRoutinePowerSyncRepositories(asTransactionDatabase(tx));
           const owner = ownerFor(repositories, [], overrideEvents);
           const result = await owner.setTemporaryOverride({
             identityId: cx.identityId,
@@ -649,7 +654,7 @@ export function createRoutinePowerSyncAgentMutations(
         authority,
         RoutineAgentOverrideReceiptSchema,
         async (tx, _schedule, overrideEvents) => {
-          const repositories = createRoutinePowerSyncRepositories(tx);
+          const repositories = createRoutinePowerSyncRepositories(asTransactionDatabase(tx));
           const owner = ownerFor(repositories, [], overrideEvents);
           const result = await owner
             .setTemporaryOverride({

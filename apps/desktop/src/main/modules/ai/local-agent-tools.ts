@@ -74,6 +74,7 @@ import {
   type GoalPanelCommand,
 } from '@memoflow/ai-contracts';
 import type { IDesktopNativePanelBridge } from './desktop-native-panel-bridge';
+import { IdentityId } from '@memoflow/utils/domain';
 
 export interface DesktopLocalAgentToolsDomains {
   readonly routineQuery?: RoutineConfigurationQueryPort;
@@ -192,7 +193,7 @@ function bindScheduleReadPort(
     async listSchedules(query, cx) {
       const res = await api.listEvents(
         {
-          identityId: cx.identityId,
+          identityId: IdentityId.of(cx.identityId),
           startTime: query.startTime,
           endTime: query.endTime,
         },

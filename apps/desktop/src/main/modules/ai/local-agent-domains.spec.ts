@@ -248,7 +248,12 @@ describe('Local Agent Domain Expansion (Phase 2, #995)', () => {
         arguments: {
           idempotencyKey: 'blocked-key',
           name: 'Blocked',
-          trigger: { type: 'WallClock', localTime: '08:00', timeZone: 'UTC', startDate: '2026-11-20' },
+          trigger: {
+            type: 'WallClock',
+            localTime: '08:00',
+            timeZone: 'UTC',
+            startDate: '2026-11-20',
+          },
         },
       })) as { error?: { message: string } };
       expect(attemptCall.error).toBeDefined();
@@ -450,45 +455,55 @@ describe('Local Agent Domain Expansion (Phase 2, #995)', () => {
       expect(toolNames).toContain('schedule_list');
 
       // 1. notification_get
-      const notifGet = parsePayload(await callMcp(grant, 'tools/call', {
-        name: 'notification_get',
-        arguments: { id: 'notif-1' },
-      }));
+      const notifGet = parsePayload(
+        await callMcp(grant, 'tools/call', {
+          name: 'notification_get',
+          arguments: { id: 'notif-1' },
+        }),
+      );
       expect(notifGet.notification.id).toBe('notif-1');
       expect(notifGet.notification.title).toBe('Daily Review');
 
       // 2. notification_list
-      const notifList = parsePayload(await callMcp(grant, 'tools/call', {
-        name: 'notification_list',
-        arguments: { limit: 10 },
-      }));
+      const notifList = parsePayload(
+        await callMcp(grant, 'tools/call', {
+          name: 'notification_list',
+          arguments: { limit: 10 },
+        }),
+      );
       expect(notifList.items).toHaveLength(1);
       expect(notifList.hasMore).toBe(false);
 
       // 3. notification_unread_count
-      const notifUnread = parsePayload(await callMcp(grant, 'tools/call', {
-        name: 'notification_unread_count',
-        arguments: {},
-      }));
+      const notifUnread = parsePayload(
+        await callMcp(grant, 'tools/call', {
+          name: 'notification_unread_count',
+          arguments: {},
+        }),
+      );
       expect(notifUnread.unreadCount).toBe(1);
 
       // 4. schedule_get
-      const schedGet = parsePayload(await callMcp(grant, 'tools/call', {
-        name: 'schedule_get',
-        arguments: { id: 'sched-1' },
-      }));
+      const schedGet = parsePayload(
+        await callMcp(grant, 'tools/call', {
+          name: 'schedule_get',
+          arguments: { id: 'sched-1' },
+        }),
+      );
       expect(schedGet.schedule.id).toBe('sched-1');
       expect(schedGet.schedule.title).toBe('Team Sync');
 
       // 5. schedule_list bounded
-      const schedList = parsePayload(await callMcp(grant, 'tools/call', {
-        name: 'schedule_list',
-        arguments: {
-          startTime: 1735680000000,
-          endTime: 1735680000000 + 7 * 86400000,
-          limit: 10,
-        },
-      }));
+      const schedList = parsePayload(
+        await callMcp(grant, 'tools/call', {
+          name: 'schedule_list',
+          arguments: {
+            startTime: 1735680000000,
+            endTime: 1735680000000 + 7 * 86400000,
+            limit: 10,
+          },
+        }),
+      );
       expect(schedList.items).toHaveLength(1);
 
       // 6. schedule_list rejects windows > 90 days

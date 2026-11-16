@@ -45,6 +45,8 @@ export default {
       tasksWrite: 'Tasks 写入',
       routinesRead: 'Routines 只读',
       routinesWrite: 'Routines 写入',
+      notificationsRead: '通知只读',
+      schedulesRead: '日程只读',
       offlineAccess: '保持连接',
     },
     writeWarning: '持有此令牌的程序可在授权范围内直接写入。',
