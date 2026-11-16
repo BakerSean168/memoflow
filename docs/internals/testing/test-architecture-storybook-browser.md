@@ -1,6 +1,6 @@
 # MemoFlow Storybook Browser Mode：最终测试架构与 #610 验收
 
-> 2026-10-24，WSL `/home/baker/projects/memoflow`，接续基线 `88d452338`。本地验收与 GitHub CI 执行证据分开记录；网络调查见 [WSL 网络调查](https://github.com/BakerSean168/memoflow/blob/7a45112e1840950ead1ba98b748fc70fa1b38344/docs/internals/testing/wsl-network-investigation.md)。
+> 2026-10-24，WSL `/home/baker/projects/memoflow`，接续基线 `88d452338`。本地验收与 GitHub CI 执行证据分开记录；WSL 与 Windows 宿主之间的本机可达性结论见 [WSL 网络调查](./wsl-network-investigation.md)。
 
 ## 实施结论
 
