@@ -101,6 +101,50 @@ it('advertises only authorized writes, commits through owners and refuses revoke
     ).text();
     expect(plan).toContain('receiptId');
     expect(f.sql.prepare('SELECT COUNT(*) AS n FROM task_plans').get()).toMatchObject({ n: 1 });
+    // Write tools converge on the shared gateway descriptors, including the
+    // Key Result tools that now carry Goal KR edits instead of goal_update.
+    const writes = await (await call(grant, 'tools/list')).text();
+    expect(writes).toContain('goal_key_result_create');
+    expect(writes).toContain('goal_key_result_update');
+    const createdGoal = f.sql.prepare('SELECT id, version FROM goals').get() as {
+      id: string;
+      version: number;
+    };
+    const keyResultCreated = await (
+      await call(grant, 'tools/call', {
+        name: 'goal_key_result_create',
+        arguments: {
+          idempotencyKey: 'key-result',
+          goalId: createdGoal.id,
+          keyResult: {
+            title: 'Read 6 books',
+            targetValue: 6,
+            expectedVersion: createdGoal.version,
+          },
+        },
+      })
+    ).text();
+    expect(keyResultCreated).toContain('receiptId');
+    expect(f.sql.prepare('SELECT COUNT(*) AS n FROM key_results').get()).toMatchObject({ n: 1 });
+    const keyResult = f.sql.prepare('SELECT id FROM key_results').get() as { id: string };
+    const goalAfterKeyResult = f.sql.prepare('SELECT version FROM goals').get() as {
+      version: number;
+    };
+    const keyResultUpdated = await (
+      await call(grant, 'tools/call', {
+        name: 'goal_key_result_update',
+        arguments: {
+          idempotencyKey: 'key-result-update',
+          goalId: createdGoal.id,
+          keyResultId: keyResult.id,
+          changes: { expectedVersion: goalAfterKeyResult.version, targetValue: 4 },
+        },
+      })
+    ).text();
+    expect(keyResultUpdated).toContain('receiptId');
+    expect(
+      f.sql.prepare('SELECT target_value FROM key_results WHERE id = ?').get(keyResult.id),
+    ).toMatchObject({ target_value: 4 });
     const ambiguous = await bridge.open({
       permissionMode: 'auto-approve',
       identityId,
@@ -147,7 +191,7 @@ it('advertises only authorized writes, commits through owners and refuses revoke
     });
     expect(await (await call(afterRevocation, 'tools/list')).text()).not.toContain('goal_create');
     expect(f.sql.prepare('SELECT COUNT(*) AS n FROM goal_operation_receipts').get()).toMatchObject({
-      n: 1,
+      n: 3,
     });
   } finally {
     await bridge.dispose();

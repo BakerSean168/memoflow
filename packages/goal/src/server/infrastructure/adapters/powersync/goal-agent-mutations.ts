@@ -5,6 +5,8 @@ import type { ExecutionContext } from '@memoflow/transport-contracts';
 import {
   GoalAgentCreateSchema,
   GoalAgentUpdateSchema,
+  GoalAgentKeyResultCreateSchema,
+  GoalAgentKeyResultUpdateSchema,
   GoalAgentReceiptSchema,
   type GoalAgentReceipt,
   type GoalMutationReceipt,
@@ -14,6 +16,8 @@ import type { IEventBus } from '@memoflow/patterns';
 import { GoalPolicy } from '../../../domain';
 import { CreateGoalUseCase } from '../../../application/use-cases/commands/create-goal.use-case';
 import { UpdateGoalUseCase } from '../../../application/use-cases/commands/update-goal.use-case';
+import { AddGoalKeyResultUseCase } from '../../../application/use-cases/commands/add-goal-key-result.use-case';
+import { UpdateGoalKeyResultUseCase } from '../../../application/use-cases/commands/update-goal-key-result.use-case';
 import { createInlineGoalWriteTransactionRunner } from '../../../application/use-cases/commands/goal-write-support';
 import { GoalPowerSyncRepository } from './goal-powersync.repository';
 import { GoalRecordPowerSyncRepository } from './goal-record-powersync.repository';
@@ -108,9 +112,33 @@ export function createGoalPowerSyncAgentMutations(
     return {
       create: new CreateGoalUseCase(goalRepository, new GoalPolicy(), runner, goalRecordRepository),
       update: new UpdateGoalUseCase(goalRepository, new GoalPolicy(), runner),
+      addKr: new AddGoalKeyResultUseCase(goalRepository, new GoalPolicy()),
+      updateKr: new UpdateGoalKeyResultUseCase(goalRepository, new GoalPolicy()),
     };
   }
   return {
+    createKeyResult(input: unknown, cx: ExecutionContext, authority: GoalAgentMutationAuthority) {
+      const parsed = GoalAgentKeyResultCreateSchema.parse(input);
+      const { calculationMethod, ...keyResult } = parsed.keyResult;
+      return mutate(parsed, 'goal.key-result.create.v1', cx, authority, (tx, buffered) =>
+        owner(tx, buffered).addKr.execute(parsed.goalId, cx.identityId, {
+          ...keyResult,
+          aggregationMethod: calculationMethod,
+        }),
+      );
+    },
+    updateKeyResult(input: unknown, cx: ExecutionContext, authority: GoalAgentMutationAuthority) {
+      const parsed = GoalAgentKeyResultUpdateSchema.parse(input);
+      const { calculationMethod, description, unit, ...changes } = parsed.changes;
+      return mutate(parsed, 'goal.key-result.update.v1', cx, authority, (tx, buffered) =>
+        owner(tx, buffered).updateKr.execute(parsed.goalId, cx.identityId, parsed.keyResultId, {
+          ...changes,
+          aggregationMethod: calculationMethod,
+          description,
+          unit,
+        }),
+      );
+    },
     create(input: unknown, cx: ExecutionContext, authority: GoalAgentMutationAuthority) {
       const parsed = GoalAgentCreateSchema.parse(input);
       return mutate(parsed, 'goal.create.v1', cx, authority, (tx, buffered) =>
