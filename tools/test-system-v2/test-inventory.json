@@ -3972,6 +3972,16 @@
       ]
     },
     {
+      "path": "packages/ai/src/server/application/services/assistant-conversation-external-projection.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/ai/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "packages/ai/vitest.config.ts"
+      ]
+    },
+    {
       "path": "packages/ai/src/server/application/services/conversation-attention-observer.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -4173,6 +4183,16 @@
     },
     {
       "path": "packages/ai/src/server/domain/value-objects/__tests__/token-usage.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/ai/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "packages/ai/vitest.config.ts"
+      ]
+    },
+    {
+      "path": "packages/ai/src/server/infrastructure/__tests__/ai-module-assistant-conversation.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/ai/vitest.config.ts"
@@ -13232,7 +13252,7 @@
       "type": "measurement",
       "suite": "coverage",
       "runner": "vitest",
-      "fileCount": 130
+      "fileCount": 132
     },
     {
       "id": "packages/app-vue/vitest.store-coverage.config.ts",
@@ -13782,7 +13802,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 130
+      "fileCount": 132
     },
     {
       "id": "packages/app-vue/vitest.config.ts",
@@ -14308,6 +14328,7 @@
       "packages/ai/src/server/application/ai-conversation-messages-portability.spec.ts",
       "packages/ai/src/server/application/ai-conversation-portability.spec.ts",
       "packages/ai/src/server/application/ports/knowledge-source-note.surface.spec.ts",
+      "packages/ai/src/server/application/services/assistant-conversation-external-projection.spec.ts",
       "packages/ai/src/server/application/services/conversation-attention-observer.spec.ts",
       "packages/ai/src/server/application/services/owner-activity-projection.spec.ts",
       "packages/ai/src/server/application/use-cases/commands/__tests__/ai-provider-config-service.test.ts",
@@ -14329,6 +14350,7 @@
       "packages/ai/src/server/domain/services/__tests__/summarization.validation.test.ts",
       "packages/ai/src/server/domain/value-objects/__tests__/ai-value-objects.spec.ts",
       "packages/ai/src/server/domain/value-objects/__tests__/token-usage.spec.ts",
+      "packages/ai/src/server/infrastructure/__tests__/ai-module-assistant-conversation.spec.ts",
       "packages/ai/src/server/infrastructure/__tests__/ai-module-mastra-lifecycle.spec.ts",
       "packages/ai/src/server/infrastructure/__tests__/ai-module-partial-start.spec.ts",
       "packages/ai/src/server/infrastructure/__tests__/ai-provider-secret-ownership.surface.spec.ts",
@@ -14846,7 +14868,7 @@
   "duplicate": [],
   "unexpected": [],
   "counts": {
-    "unit": 1227,
+    "unit": 1229,
     "integration": 59,
     "smoke": 3,
     "boundary-ipc": 6,

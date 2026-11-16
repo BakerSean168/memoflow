@@ -98,6 +98,26 @@ export {
   projectSelectedGoalContext,
   projectSelectedTaskContext,
 } from './server/application/services/selected-entity-owner-projection';
+export {
+  ASSISTANT_CONVERSATION_EXTERNAL_LIMITS,
+  createAssistantConversationExternalReadPort,
+} from './server/application/services/assistant-conversation-external-projection';
+export type {
+  AssistantConversationExternalAttachment,
+  AssistantConversationExternalAttachmentFact,
+  AssistantConversationExternalListQuery,
+  AssistantConversationExternalMessage,
+  AssistantConversationExternalMessageFact,
+  AssistantConversationExternalReadPort,
+  AssistantConversationExternalReadSource,
+  AssistantConversationExternalRole,
+  AssistantConversationExternalShellFact,
+  AssistantConversationExternalStatus,
+  AssistantConversationExternalSummary,
+  AssistantConversationExternalSummaryPage,
+  AssistantConversationExternalTranscript,
+  AssistantConversationExternalTranscriptQuery,
+} from './server/application/ports/assistant-conversation-external-read.port';
 // Host capability ports are re-exported through the package root so desktop
 // composers import only `@memoflow/ai` (no `/ports` subpath).
 export type {
