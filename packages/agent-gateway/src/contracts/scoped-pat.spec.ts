@@ -27,7 +27,15 @@ describe('scoped PAT lifetime contract (#970)', () => {
       name: 'yearly agent',
       prefix: 'mfp_AbCdEfG',
       audience: 'https://api.memo.test/mcp',
-      scopes: ['goals:read', 'goals:write', 'tasks:read', 'tasks:write', 'routines:write'],
+      scopes: [
+        'goals:read',
+        'goals:write',
+        'tasks:read',
+        'tasks:write',
+        'routines:write',
+        'ai:read',
+        'routines:read',
+      ],
       createdAt: '2026-11-16T00:00:00.000Z',
       expiresAt: '2027-11-16T00:00:00.000Z',
       revokedAt: null,
@@ -35,13 +43,15 @@ describe('scoped PAT lifetime contract (#970)', () => {
     expect(ScopedPatSummarySchema.parse(summary)).toEqual(summary);
   });
 
-  it('grants notification scopes within the raised seven-scope ceiling (#990)', () => {
+  it('grants notification scopes within the raised nine-scope ceiling (#990)', () => {
     const scopes = [
       'goals:read',
       'goals:write',
       'tasks:read',
       'tasks:write',
       'routines:write',
+      'ai:read',
+      'routines:read',
       'notifications:read',
       'notifications:write',
     ];
@@ -63,5 +73,34 @@ describe('scoped PAT lifetime contract (#970)', () => {
       revokedAt: null,
     };
     expect(ScopedPatSummarySchema.parse(summary)).toEqual(summary);
+  });
+
+  it('accepts ai:read and rejects a seventh scope', () => {
+    const six = CreateScopedPatSchema.parse({
+      name: 'ai reader',
+      scopes: [
+        'goals:read',
+        'tasks:read',
+        'goals:write',
+        'tasks:write',
+        'routines:write',
+        'ai:read',
+      ],
+    });
+    expect(six.scopes).toContain('ai:read');
+    expect(
+      CreateScopedPatSchema.safeParse({
+        name: 'too many',
+        scopes: [
+          'goals:read',
+          'tasks:read',
+          'goals:write',
+          'tasks:write',
+          'routines:write',
+          'ai:read',
+          'ai:read',
+        ],
+      }).success,
+    ).toBe(false);
   });
 });

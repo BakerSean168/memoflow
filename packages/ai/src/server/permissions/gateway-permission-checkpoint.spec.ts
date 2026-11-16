@@ -189,6 +189,30 @@ it('honors per-connection user allows and explicit denies even in full auto', as
   expect(f.update).toHaveBeenCalledOnce();
 });
 
+it('allows registered AI reads and honors a user deny on the ai object', async () => {
+  const f = fixture();
+  const checkpoint = createGatewayPermissionCheckpoint(f.repository);
+  const work = vi.fn(async () => 'ok');
+  const reader = { ...f.principal, scopes: ['ai:read'] };
+
+  expect(await checkpoint(reader, 'ai_conversation_list', work)).toBe('ok');
+  expect(await checkpoint(reader, 'ai_agent_get', work)).toBe('ok');
+
+  await f.repository.saveRule('owner', {
+    id: 'ai-read-denied',
+    agentId: null,
+    object: 'ai',
+    action: 'read',
+    effect: 'deny',
+    source: 'user',
+  });
+  await expect(checkpoint(reader, 'ai_conversation_transcript', work)).rejects.toMatchObject({
+    code: 'PERMISSION_DENIED',
+    decision: 'deny',
+  });
+  expect(work).toHaveBeenCalledTimes(2);
+});
+
 it('fails closed on cloud writes when permission tables are absent and propagates real failures', async () => {
   const f = fixture();
   for (const method of ['getSettings', 'listRules', 'appendAudit', 'updateAuditExecution'] as const)

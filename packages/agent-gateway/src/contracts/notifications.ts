@@ -1,8 +1,5 @@
 import { z } from 'zod';
-import {
-  NotificationCategory,
-  NotificationType,
-} from '@memoflow/notification-contracts';
+import { NotificationCategory, NotificationType } from '@memoflow/notification-contracts';
 import { ImportanceLevel, UrgencyLevel } from '@memoflow/shared-primitives';
 
 /**

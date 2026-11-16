@@ -50,8 +50,9 @@ export function bindNotificationReadPort(inbox: NotificationInboxPort): Notifica
       };
     },
     async getUnreadCount(context) {
-      return OwnerUnreadCountSchema.parse(unwrapOwner(await inbox.getUnreadCount(context.identityId)))
-        .count;
+      return OwnerUnreadCountSchema.parse(
+        unwrapOwner(await inbox.getUnreadCount(context.identityId)),
+      ).count;
     },
   };
 }
@@ -65,8 +66,7 @@ export function bindNotificationMarkRead(
 ): NonNullable<GatewayWritePort['notificationMarkRead']> {
   return async (input, context, authority) => {
     const { id } = NotificationMarkReadInputSchema.parse(input);
-    if (!authority.scopes.includes('notifications:write'))
-      throw new GatewayReadError('FORBIDDEN');
+    if (!authority.scopes.includes('notifications:write')) throw new GatewayReadError('FORBIDDEN');
     await authority.authorize();
     const fact = projectNotificationFact(
       unwrapOwner(await inbox.markAsRead(id, context.identityId)),

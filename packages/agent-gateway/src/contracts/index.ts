@@ -62,12 +62,14 @@ export const CreateScopedPatSchema = z.strictObject({
         'goals:write',
         'tasks:write',
         'routines:write',
+        'ai:read',
+        'routines:read',
         'notifications:read',
         'notifications:write',
       ]),
     )
     .min(1)
-    .max(7)
+    .max(9)
     .refine((scopes) => new Set(scopes).size === scopes.length, 'Duplicate scopes')
     .default(['goals:read']),
 });
@@ -87,6 +89,8 @@ export const ScopedPatSummarySchema = z.object({
     z.enum([
       'goals:read',
       'tasks:read',
+      'routines:read',
+      'ai:read',
       'goals:write',
       'tasks:write',
       'routines:write',
@@ -202,7 +206,9 @@ export const TaskOccurrenceListOutputSchema = z.strictObject({
 });
 
 export * from './writes';
+export * from './routine-reads';
 
 export * from './assisted';
 
 export * from './notifications';
+export * from './ai';

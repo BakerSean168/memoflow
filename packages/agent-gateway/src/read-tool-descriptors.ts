@@ -1,4 +1,13 @@
 import {
+  AiAgentGetInputSchema,
+  AiAgentGetOutputSchema,
+  AiAgentListInputSchema,
+  AiAgentListOutputSchema,
+  AiConversationGetInputSchema,
+  AiConversationListInputSchema,
+  AiConversationListOutputSchema,
+  AiConversationTranscriptInputSchema,
+  AiConversationTranscriptOutputSchema,
   GoalGetInputSchema,
   GoalGetOutputSchema,
   GoalSearchInputSchema,
@@ -14,6 +23,12 @@ import {
   TaskOccurrenceGetOutputSchema,
   TaskOccurrenceListInputSchema,
   TaskOccurrenceListOutputSchema,
+  RoutineGetInputSchema,
+  RoutineGetOutputSchema,
+  RoutineListInputSchema,
+  RoutineListOutputSchema,
+  RoutineUpcomingInputSchema,
+  RoutineUpcomingOutputSchema,
 } from './contracts';
 import { z } from 'zod';
 
@@ -89,6 +104,101 @@ export const readToolDescriptors = {
         'List existing owned occurrences in an inclusive account-time date range (epoch ms; at most 31 days). Optional earlier open facts; never materializes upcoming occurrences.',
       inputSchema: TaskOccurrenceListInputSchema,
       outputSchema: TaskOccurrenceListOutputSchema,
+      annotations: readAnnotations,
+    },
+  },
+  routine_get: {
+    version: '1',
+    effect: 'read',
+    requiredScope: 'routines:read',
+    definition: {
+      description: 'Read one owned Routine definition and its trigger revision.',
+      inputSchema: RoutineGetInputSchema,
+      outputSchema: RoutineGetOutputSchema,
+      annotations: readAnnotations,
+    },
+  },
+  routine_list: {
+    version: '1',
+    effect: 'read',
+    requiredScope: 'routines:read',
+    definition: {
+      description:
+        'Search owned Routine definitions by name or description using a bounded keyset page.',
+      inputSchema: RoutineListInputSchema,
+      outputSchema: RoutineListOutputSchema,
+      annotations: readAnnotations,
+    },
+  },
+  routine_upcoming: {
+    version: '1',
+    effect: 'read',
+    requiredScope: 'routines:read',
+    definition: {
+      description:
+        'List upcoming owned Routine occurrences in an ordered epoch-ms window of at most 31 days, bounded to 100 per page.',
+      inputSchema: RoutineUpcomingInputSchema,
+      outputSchema: RoutineUpcomingOutputSchema,
+      annotations: readAnnotations,
+    },
+  },
+  ai_conversation_list: {
+    version: '1',
+    effect: 'read',
+    requiredScope: 'ai:read',
+    definition: {
+      description:
+        'List owned Assistant conversations as bounded metadata (title, status, message count, timestamps); never returns message bodies.',
+      inputSchema: AiConversationListInputSchema,
+      outputSchema: AiConversationListOutputSchema,
+      annotations: readAnnotations,
+    },
+  },
+  ai_conversation_get: {
+    version: '1',
+    effect: 'read',
+    requiredScope: 'ai:read',
+    definition: {
+      description:
+        'Open one owned Assistant conversation and return its first bounded transcript page; missing and foreign ids both answer NOT_FOUND.',
+      inputSchema: AiConversationGetInputSchema,
+      outputSchema: AiConversationTranscriptOutputSchema,
+      annotations: readAnnotations,
+    },
+  },
+  ai_conversation_transcript: {
+    version: '1',
+    effect: 'read',
+    requiredScope: 'ai:read',
+    definition: {
+      description:
+        'Read one page of an owned Assistant transcript (at most 25 messages); each body is capped at 2000 characters and flags truncation, attachments carry metadata only.',
+      inputSchema: AiConversationTranscriptInputSchema,
+      outputSchema: AiConversationTranscriptOutputSchema,
+      annotations: readAnnotations,
+    },
+  },
+  ai_agent_list: {
+    version: '1',
+    effect: 'read',
+    requiredScope: 'ai:read',
+    definition: {
+      description:
+        'List owned AI Agent archive entries (instanceId, driver, name, enabled, timestamps); host-local configuration is never projected.',
+      inputSchema: AiAgentListInputSchema,
+      outputSchema: AiAgentListOutputSchema,
+      annotations: readAnnotations,
+    },
+  },
+  ai_agent_get: {
+    version: '1',
+    effect: 'read',
+    requiredScope: 'ai:read',
+    definition: {
+      description:
+        'Read one owned AI Agent archive entry; missing and foreign ids both answer NOT_FOUND.',
+      inputSchema: AiAgentGetInputSchema,
+      outputSchema: AiAgentGetOutputSchema,
       annotations: readAnnotations,
     },
   },

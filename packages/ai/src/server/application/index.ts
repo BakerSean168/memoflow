@@ -23,6 +23,12 @@ export {
   ASSISTANT_CONVERSATION_EXTERNAL_LIMITS,
   createAssistantConversationExternalReadPort,
 } from './services/assistant-conversation-external-projection';
+export { createAssistantConversationExternalSource } from './services/assistant-conversation-external-source';
+export type {
+  AssistantConversationExternalSourceDependencies,
+  AssistantConversationHistoryReader,
+  AssistantConversationMessageCountSource,
+} from './services/assistant-conversation-external-source';
 export type {
   AIEvaluationOperationsPort,
   AIKnowledgePort,

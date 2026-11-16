@@ -7,7 +7,15 @@ import type {
   TaskOccurrenceReadPage,
   TaskAgentPersistedReceipt,
 } from '@memoflow/task-contracts';
-import type { RoutineAgentPersistedReceipt } from '@memoflow/routine-contracts';
+import type {
+  RoutineAgentDeleteReceipt,
+  RoutineAgentOverrideReceipt,
+  RoutineAgentPersistedReceipt,
+  RoutineAgentUpdateReceipt,
+  RoutineConfigurationSnapshot,
+  RoutineUpcomingQuery,
+  RoutineUpcomingResponse,
+} from '@memoflow/routine-contracts';
 import type { GatewayWriteToolName } from './write-tool-descriptors';
 import type { GatewayAssistedToolName } from './assisted-tool-descriptors';
 import type { GatewayFailureCode } from './contracts';
@@ -19,6 +27,8 @@ import type {
   GoalPageQuery,
 } from '@memoflow/goal-contracts';
 import type { ExecutionContext, RequestContext } from '@memoflow/transport-contracts';
+import type { Result } from '@memoflow/transport-contracts/result';
+import type { AgentDriverKind } from '@memoflow/ai-contracts';
 
 /** Read cancellation stays separate from the canonical ExecutionContext. */
 export interface GatewayReadBudget {
@@ -51,6 +61,19 @@ export interface GoalReadPort {
     budget?: GatewayReadBudget,
   ): Promise<GoalPage>;
 }
+/** Gateway-owned Routine read seam; the API host binds the assembled configuration query port. */
+export interface RoutineReadPort {
+  getConfigurationSnapshot(
+    identityId: string,
+    budget?: GatewayReadBudget,
+  ): Promise<RoutineConfigurationSnapshot>;
+  getUpcomingOccurrences(
+    identityId: string,
+    query: RoutineUpcomingQuery,
+    budget?: GatewayReadBudget,
+  ): Promise<RoutineUpcomingResponse>;
+}
+
 export interface GatewayPrincipal {
   readonly identityId: string;
   readonly credentialId: string;
@@ -85,6 +108,14 @@ export interface GatewayAuditEvent {
     | 'task_occurrence_list'
     | 'notification_list'
     | 'notification_unread_count'
+    | 'ai_conversation_list'
+    | 'ai_conversation_get'
+    | 'ai_conversation_transcript'
+    | 'ai_agent_list'
+    | 'ai_agent_get'
+    | 'routine_get'
+    | 'routine_list'
+    | 'routine_upcoming'
     | 'transport'
     | 'pat_create'
     | 'pat_list'
@@ -148,6 +179,81 @@ export interface NotificationReadPage {
   readonly hasMore: boolean;
 }
 
+/**
+ * Gateway-owned AI read seam; the host binds it to the AI application layer's
+ * bounded external projection (#977). The gateway never reaches AI persistence.
+ */
+export interface GatewayAiConversationSummary {
+  readonly id: string;
+  readonly title: string;
+  readonly status: 'Active' | 'Archived';
+  readonly messageCount: number;
+  readonly createdAt: number;
+  readonly updatedAt: number;
+}
+
+export interface GatewayAiConversationAttachment {
+  readonly filename: string | null;
+  readonly mediaType: string;
+  readonly sizeBytes: number | null;
+}
+
+export interface GatewayAiConversationMessage {
+  readonly id: string;
+  readonly role: 'user' | 'assistant' | 'system';
+  readonly content: string;
+  readonly truncated: boolean;
+  readonly attachments: readonly GatewayAiConversationAttachment[];
+  readonly createdAt: number;
+}
+
+export interface GatewayAiConversationPage {
+  readonly conversations: readonly GatewayAiConversationSummary[];
+  readonly total: number;
+  readonly page: number;
+  readonly pageSize: number;
+}
+
+export interface GatewayAiConversationTranscript {
+  readonly conversationId: string;
+  readonly messages: readonly GatewayAiConversationMessage[];
+  readonly total: number;
+  readonly page: number;
+  readonly pageSize: number;
+  readonly hasMore: boolean;
+}
+
+export interface AssistantConversationReadPort {
+  listConversations(
+    cx: ExecutionContext,
+    query?: {
+      readonly page?: number;
+      readonly pageSize?: number;
+      readonly status?: 'Active' | 'Archived';
+    },
+  ): Promise<Result<GatewayAiConversationPage>>;
+  readConversation(
+    cx: ExecutionContext,
+    conversationId: string,
+    query?: { readonly page?: number; readonly pageSize?: number },
+  ): Promise<Result<GatewayAiConversationTranscript>>;
+}
+
+/** Bounded AI Agent archive projection; `get` answers null for missing or foreign ids. */
+export interface GatewayAiAgentEntry {
+  readonly instanceId: string;
+  readonly driver: AgentDriverKind;
+  readonly name: string;
+  readonly enabled: boolean;
+  readonly createdAt: number;
+  readonly updatedAt: number;
+}
+
+export interface AgentArchiveReadPort {
+  list(cx: ExecutionContext): Promise<readonly GatewayAiAgentEntry[]>;
+  get(instanceId: string, cx: ExecutionContext): Promise<GatewayAiAgentEntry | null>;
+}
+
 /** Internal observer only; causes never enter protocol responses or audit payloads. */
 export interface GatewayDiagnostic {
   readonly requestId: string;
@@ -167,9 +273,17 @@ type WriteCall<T> = (
 ) => Promise<T>;
 type GoalWriteReceipt = GoalAgentPersistedReceipt & { replayed?: boolean };
 type TaskWriteReceipt = TaskAgentPersistedReceipt & { replayed?: boolean };
+type RoutineWriteReceipt = RoutineAgentPersistedReceipt & { replayed?: boolean };
+type RoutineUpdateWriteReceipt = RoutineAgentUpdateReceipt & { replayed?: boolean };
+type RoutineDeleteWriteReceipt = RoutineAgentDeleteReceipt & { replayed?: boolean };
+type RoutineOverrideWriteReceipt = RoutineAgentOverrideReceipt & { replayed?: boolean };
 /** Only owner application operations cross this boundary; never repositories. */
 export interface GatewayWritePort {
-  routineCreate?: WriteCall<RoutineAgentPersistedReceipt & { replayed?: boolean }>;
+  routineCreate?: WriteCall<RoutineWriteReceipt>;
+  routineUpdate?: WriteCall<RoutineUpdateWriteReceipt>;
+  routineDelete?: WriteCall<RoutineDeleteWriteReceipt>;
+  routinePause?: WriteCall<RoutineOverrideWriteReceipt>;
+  routineOverride?: WriteCall<RoutineOverrideWriteReceipt>;
   goalCreate: WriteCall<GoalWriteReceipt>;
   goalUpdate: WriteCall<GoalWriteReceipt>;
   keyResultCreate: WriteCall<GoalWriteReceipt>;

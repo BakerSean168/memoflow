@@ -214,6 +214,19 @@ export class AssistantHistoryService {
     conversationId: string;
   }): Promise<AssistantRuntimeHistoryView> {
     await this.ensureConversation(input);
+    return this.readMessages(input);
+  }
+
+  /**
+   * Read-only history projection with no thread provisioning.
+   *
+   * External readers must never create a thread as a side effect of reading;
+   * callers own the existence check (the product shell is the authority).
+   */
+  async readMessages(input: {
+    identityId: string;
+    conversationId: string;
+  }): Promise<AssistantRuntimeHistoryView> {
     const recalled = await this.memory.recall({ threadId: input.conversationId, perPage: false });
     const messages = recalled.messages
       .flatMap((message) => {

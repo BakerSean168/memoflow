@@ -35,7 +35,7 @@ const PassthroughStub = defineComponent({
 });
 
 const SelectStub = defineComponent({
-  name: 'Select',
+  name: 'SelectStub',
   props: { modelValue: { type: String, default: '' }, disabled: Boolean },
   emits: ['update:modelValue'],
   setup(props, { slots }) {

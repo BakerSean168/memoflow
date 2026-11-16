@@ -138,12 +138,12 @@ describe('Notification owner binding', () => {
     const target = row();
     const f = inbox([target]);
     const markRead = bindNotificationMarkRead(f.port);
-    await expect(
-      markRead({ id: target.id }, context('owner-b'), authority),
-    ).rejects.toBeInstanceOf(GatewayReadError);
-    await expect(
-      markRead({ id: target.id }, context('owner-b'), authority),
-    ).rejects.toMatchObject({ code: 'NOT_FOUND' });
+    await expect(markRead({ id: target.id }, context('owner-b'), authority)).rejects.toBeInstanceOf(
+      GatewayReadError,
+    );
+    await expect(markRead({ id: target.id }, context('owner-b'), authority)).rejects.toMatchObject({
+      code: 'NOT_FOUND',
+    });
     expect(target.isRead).toBe(false);
     expect(target.version).toBe(1);
   });

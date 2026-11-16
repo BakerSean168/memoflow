@@ -7,7 +7,7 @@ updated: 2026-11-16T00:00:00Z
 
 # External Agent PAT 连接
 
-本车道保留 PAT 与 19 个工具（6 个只读、8 个写、5 个 assisted），全部默认关闭；常规 Agent 连接另见 [OAuth 指南](./external-agent-oauth.md)。PAT 验证状态见 [EAG-03 证据](https://github.com/BakerSean168/memoflow/blob/7a45112e1840950ead1ba98b748fc70fa1b38344/docs/analysis/2026-10-07-eag-03-task-read-evidence.md)。受控开发入口为 `http://127.0.0.1:20201/mcp`，只适用于同机客户端。
+本车道保留 PAT 与 29 个工具（11 个只读、13 个写、5 个 assisted），全部默认关闭；常规 Agent 连接另见 [OAuth 指南](./external-agent-oauth.md)。PAT 验证状态见 [EAG-03 证据](https://github.com/BakerSean168/memoflow/blob/7a45112e1840950ead1ba98b748fc70fa1b38344/docs/analysis/2026-10-07-eag-03-task-read-evidence.md)。受控开发入口为 `http://127.0.0.1:20201/mcp`，只适用于同机客户端。
 
 在既有 `docker-compose.local.yml` prod-like 车道中配置 `EAG_READ_PILOT_ENABLED=1`、`EAG_AUDIENCE=http://127.0.0.1:20201/mcp` 和私密的至少 32 字符 `EAG_CURSOR_SECRET`，沿用 [本地 Docker 流程](./local-docker.md)。Task 注册由 `EAG_TASK_READ_ENABLED` 控制，默认开启；设为 0 可回退至 Goal 两工具。写与 assisted 分别由 `EAG_WRITE_ENABLED`、`EAG_ROUTINE_WRITE_ENABLED`、`EAG_ASSISTED_ENABLED` 控制，默认 `0`；完整顺序见 [Gateway runbook](../internals/external-agent-gateway.md#10-一期开启-runbook)。
 
@@ -32,7 +32,7 @@ tool_timeout_sec = 30
 
 `bearer_token_env_var` 是 [Codex 官方 MCP 配置](https://learn.chatgpt.com/docs/extend/mcp?surface=cli) 支持的显式 Bearer 配置，无需 OAuth 登录步骤。当前证据使用官方 MCP SDK；不将其等同于真实 Codex/Claude OAuth 登录验收。
 
-工具：goal_get、goal_search、task_plan_get、task_plan_search、task_occurrence_get、task_occurrence_list。列表 limit 为 1～100，默认 20；nextCursor 必须连同原筛选和 limit 使用。Occurrence startDate/endDate 为 epoch 毫秒，最长 31 天，按照当前账户时区查询已有事实；分页固定 asOf，时区改变后应重新从第一页查询。
+工具：goal_get、goal_search、task_plan_get、task_plan_search、task_occurrence_get、task_occurrence_list、routine_get、routine_list、routine_upcoming、notification_list、notification_unread_count。notification_list 分页 page ≤ 20、limit ≤ 50，正文截断 2000 字符；execute-action 动作执行不开放。列表 limit 为 1～100，默认 20；Routine 列表上限 50，upcoming 单页上限 100 且窗口最长 31 天；nextCursor 必须连同原筛选和 limit 使用。Occurrence startDate/endDate 为 epoch 毫秒，最长 31 天，按照当前账户时区查询已有事实；分页固定 asOf，时区改变后应重新从第一页查询。
 
 ## 受控写入（#490）
 
@@ -50,7 +50,7 @@ tool_timeout_sec = 30
 
 写 scope 不隐含读 scope。`tasks:write` 包含既有 Task binding 的 Fixed/Prompt KR 派生贡献；创建或更改 binding 另需 `goals:write`，记录 Prompt measurement 另需 `goals:read`。PAT 设置界面的既有只读快捷入口不代表已选择写权限。
 
-写工具为 `goal_create`、`goal_update`、`goal_key_result_create`、`goal_key_result_update`、`task_plan_create`、`task_plan_update`、`task_occurrence_complete`、`routine_create`（需 `routines:write` 且 `EAG_ROUTINE_WRITE_ENABLED=1`）。Assisted 工具为 `assisted_workflow_start/get/review/resume/cancel`（需 `tasks:write` 且 `EAG_ASSISTED_ENABLED=1`）。由 MCP 发现严格 input schema；所有写入必须带 `idempotencyKey`，更新/完成必须带调用者读取的 `expectedVersion`。KR 命令使用 Goal 的版本。
+写工具为 `goal_create`、`goal_update`、`goal_key_result_create`、`goal_key_result_update`、`task_plan_create`、`task_plan_update`、`task_occurrence_complete`、`routine_create`、`routine_update`、`routine_delete`、`routine_pause`、`routine_override`（Routine 写需 `routines:write` 且 `EAG_ROUTINE_WRITE_ENABLED=1`）、`notification_mark_read`（需 `notifications:write`；execute-action 不开放）。Assisted 工具为 `assisted_workflow_start/get/review/resume/cancel`（需 `tasks:write` 且 `EAG_ASSISTED_ENABLED=1`）。由 MCP 发现严格 input schema；所有写入必须带 `idempotencyKey`，更新/删除/完成必须带调用者读取的 `expectedVersion`。KR 命令使用 Goal 的版本。
 
 所有工具调用都经过 AI 权限 checkpoint。签发 PAT 时选择的 write scope 就是该凭据的写预授权：`PAT + 命中写 scope + operation 已登记`的调用直接放行，无需在设置里逐次批准；scope 外、未登记 operation 和 OAuth 写请求仍拒绝。显式 deny 规则与 `read_only` preset 仍然优先。
 

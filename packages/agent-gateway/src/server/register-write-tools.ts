@@ -1,5 +1,8 @@
 import {
   GatewayRoutineReceiptSchema,
+  GatewayRoutineUpdateReceiptSchema,
+  GatewayRoutineDeleteReceiptSchema,
+  GatewayRoutineOverrideReceiptSchema,
   GatewayGoalReceiptSchema,
   GatewayTaskReceiptSchema,
   NotificationMarkReadOutputSchema,
@@ -19,11 +22,51 @@ export function registerWriteTools(
 ) {
   const d = writeToolDescriptors;
   const routineCreate = writes.routineCreate;
+  const routineUpdate = writes.routineUpdate;
+  const routineDelete = writes.routineDelete;
+  const routinePause = writes.routinePause;
+  const routineOverride = writes.routineOverride;
   if (routineCreate && scopes.includes('routines:write')) {
     server.registerTool('routine_create', d.routine_create.definition, (input) =>
       call('routine_create', 'routines:write', () =>
         routineCreate(input, context, authority).then((result) =>
           GatewayRoutineReceiptSchema.parse(result),
+        ),
+      ),
+    );
+  }
+  if (routineUpdate && scopes.includes('routines:write')) {
+    server.registerTool('routine_update', d.routine_update.definition, (input) =>
+      call('routine_update', 'routines:write', () =>
+        routineUpdate(input, context, authority).then((result) =>
+          GatewayRoutineUpdateReceiptSchema.parse(result),
+        ),
+      ),
+    );
+  }
+  if (routineDelete && scopes.includes('routines:write')) {
+    server.registerTool('routine_delete', d.routine_delete.definition, (input) =>
+      call('routine_delete', 'routines:write', () =>
+        routineDelete(input, context, authority).then((result) =>
+          GatewayRoutineDeleteReceiptSchema.parse(result),
+        ),
+      ),
+    );
+  }
+  if (routinePause && scopes.includes('routines:write')) {
+    server.registerTool('routine_pause', d.routine_pause.definition, (input) =>
+      call('routine_pause', 'routines:write', () =>
+        routinePause(input, context, authority).then((result) =>
+          GatewayRoutineOverrideReceiptSchema.parse(result),
+        ),
+      ),
+    );
+  }
+  if (routineOverride && scopes.includes('routines:write')) {
+    server.registerTool('routine_override', d.routine_override.definition, (input) =>
+      call('routine_override', 'routines:write', () =>
+        routineOverride(input, context, authority).then((result) =>
+          GatewayRoutineOverrideReceiptSchema.parse(result),
         ),
       ),
     );

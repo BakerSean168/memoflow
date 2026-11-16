@@ -1,6 +1,7 @@
 import type { GatewayToolCheckpoint } from '../ports';
 import { describe, expect, it, vi } from 'vitest';
 import type { GatewayWriteAuthority } from '../ports';
+import { GatewayPermissionDeniedError } from '../ports';
 import type { ExecutionContext } from '@memoflow/transport-contracts';
 import { createReadGateway } from './read-gateway';
 
@@ -381,6 +382,186 @@ it('preserves unknown causes for the private observer and returns only a safe pu
   expect(f.audit.mock.calls[0][0]).not.toHaveProperty('cause');
 });
 
+describe('AI hosted read capability', () => {
+  const summary = {
+    id: 'conversation-1',
+    title: 'Weekly review',
+    status: 'Active' as const,
+    messageCount: 1,
+    createdAt: 1,
+    updatedAt: 2,
+  };
+  const transcript = {
+    conversationId: 'conversation-1',
+    messages: [
+      {
+        id: 'message-1',
+        role: 'user' as const,
+        content: 'x'.repeat(2_000),
+        truncated: true,
+        attachments: [{ filename: 'shot.png', mediaType: 'image/png', sizeBytes: 10 }],
+        createdAt: 1,
+      },
+    ],
+    total: 1,
+    page: 1,
+    pageSize: 10,
+    hasMore: false,
+  };
+  const agent = {
+    instanceId: 'instance-1',
+    driver: 'mastra' as const,
+    name: 'Archive entry',
+    enabled: true,
+    createdAt: 1,
+    updatedAt: 2,
+  };
+  function aiFixture() {
+    const f = fixture();
+    f.authenticate.mockResolvedValue({
+      identityId: 'owner-a',
+      credentialId: 'pat-a',
+      credentialType: 'pat',
+      scopes: ['ai:read'],
+    });
+    const conversations = {
+      listConversations: vi.fn().mockResolvedValue({
+        ok: true,
+        data: { conversations: [summary], total: 1, page: 1, pageSize: 20 },
+      }),
+      readConversation: vi.fn(async (_cx: ExecutionContext, id: string) =>
+        id === 'conversation-1'
+          ? { ok: true, data: transcript }
+          : { ok: false, error: { code: 'NOT_FOUND', message: 'Conversation not found' } },
+      ),
+    };
+    const agents = {
+      list: vi.fn().mockResolvedValue(
+        Array.from({ length: 60 }, (_, index) => ({
+          ...agent,
+          instanceId: `instance-${index}`,
+        })),
+      ),
+      get: vi.fn(async (instanceId: string) => (instanceId === agent.instanceId ? agent : null)),
+    };
+    return {
+      ...f,
+      conversations,
+      agents,
+      gateway: createReadGateway({ ...f.options, assistantConversation: conversations, agents }),
+    };
+  }
+
+  it('discovers the five AI reads only for ai:read and never for another read scope', async () => {
+    const f = aiFixture();
+    const listing = await f.gateway.fetch(request('tools/list'), context);
+    expect((await listing.json()).result.tools.map((tool: { name: string }) => tool.name)).toEqual([
+      'ai_conversation_list',
+      'ai_conversation_get',
+      'ai_conversation_transcript',
+      'ai_agent_list',
+      'ai_agent_get',
+    ]);
+
+    f.authenticate.mockResolvedValue({
+      identityId: 'owner-a',
+      credentialId: 'pat-a',
+      credentialType: 'pat',
+      scopes: ['goals:read'],
+    });
+    const denied = await f.gateway.fetch(
+      request('tools/call', { id: 'conversation-1' }, 'ai_conversation_get'),
+      context,
+    );
+    expect(denied.status).toBe(403);
+    expect(f.conversations.readConversation).not.toHaveBeenCalled();
+  });
+
+  it('serves metadata-only lists and answers NOT_FOUND for foreign or missing ids', async () => {
+    const f = aiFixture();
+    const listed = await f.gateway.fetch(
+      request('tools/call', {}, 'ai_conversation_list'),
+      context,
+    );
+    const listedBody = await listed.json();
+    expect(listedBody).toMatchObject({
+      result: { structuredContent: { conversations: [summary], total: 1 } },
+    });
+    expect(JSON.stringify(listedBody)).not.toContain('messages');
+
+    for (const id of ['conversation-2', 'missing']) {
+      const transcript = await f.gateway.fetch(
+        request('tools/call', { id }, 'ai_conversation_transcript'),
+        context,
+      );
+      expect(await transcript.json()).toMatchObject({
+        result: { isError: true, content: [{ text: 'NOT_FOUND' }] },
+      });
+    }
+
+    const foreignAgent = await f.gateway.fetch(
+      request('tools/call', { instanceId: 'instance-other' }, 'ai_agent_get'),
+      context,
+    );
+    expect(await foreignAgent.json()).toMatchObject({
+      result: { isError: true, content: [{ text: 'NOT_FOUND' }] },
+    });
+    expect(f.agents.get).toHaveBeenCalledWith(
+      'instance-other',
+      expect.objectContaining({ identityId: 'owner-a' }),
+    );
+  });
+
+  it('keeps the transcript truncation flag and caps archive and transcript pages', async () => {
+    const f = aiFixture();
+    const transcript = await f.gateway.fetch(
+      request('tools/call', { id: 'conversation-1' }, 'ai_conversation_get'),
+      context,
+    );
+    expect(await transcript.json()).toMatchObject({
+      result: { structuredContent: { messages: [{ truncated: true }] } },
+    });
+
+    const oversized = await f.gateway.fetch(
+      request('tools/call', { id: 'conversation-1', pageSize: 999 }, 'ai_conversation_transcript'),
+      context,
+    );
+    expect(await oversized.json()).toMatchObject({ result: { isError: true } });
+    expect(f.conversations.readConversation).toHaveBeenCalledTimes(1);
+
+    const agents = await f.gateway.fetch(request('tools/call', {}, 'ai_agent_list'), context);
+    const body = await agents.json();
+    expect(body.result.structuredContent.agents).toHaveLength(50);
+    expect(body.result.structuredContent.truncated).toBe('archive-limit');
+  });
+
+  it('returns 404 when the AI host ports are absent and surfaces checkpoint denials', async () => {
+    const f = aiFixture();
+    const disabled = createReadGateway({ ...f.options });
+    expect(
+      (
+        await disabled.fetch(
+          request('tools/call', { id: 'conversation-1' }, 'ai_conversation_get'),
+          context,
+        )
+      ).status,
+    ).toBe(404);
+
+    const denied = createReadGateway({
+      ...f.options,
+      assistantConversation: f.conversations,
+      agents: f.agents,
+      toolCheckpoint: (async () => {
+        throw new GatewayPermissionDeniedError('deny');
+      }) satisfies GatewayToolCheckpoint,
+    });
+    const response = await denied.fetch(request('tools/call', {}, 'ai_conversation_list'), context);
+    const body = await response.text();
+    expect(body).toContain('PERMISSION_DENIED');
+    expect(body).toContain('AI Permissions');
+  });
+});
+
 describe('Routine hosted write capability', () => {
   function routineFixture(
     enabled = true,
@@ -408,6 +589,39 @@ describe('Routine hosted write capability', () => {
         return receipt;
       },
     );
+    const routineUpdate = vi.fn(
+      async (_input: unknown, _cx: ExecutionContext, authority: GatewayWriteAuthority) => {
+        await authority.authorize();
+        return { receiptId: 'b'.repeat(64), result: { routine: receipt.result.routine } };
+      },
+    );
+    const routineDelete = vi.fn(
+      async (_input: unknown, _cx: ExecutionContext, authority: GatewayWriteAuthority) => {
+        await authority.authorize();
+        return {
+          receiptId: 'c'.repeat(64),
+          result: { routineId: receipt.result.routine.id },
+        };
+      },
+    );
+    const routinePause = vi.fn(
+      async (_input: unknown, _cx: ExecutionContext, authority: GatewayWriteAuthority) => {
+        await authority.authorize();
+        return {
+          receiptId: 'd'.repeat(64),
+          result: { routineId: receipt.result.routine.id, override: null },
+        };
+      },
+    );
+    const routineOverride = vi.fn(
+      async (_input: unknown, _cx: ExecutionContext, authority: GatewayWriteAuthority) => {
+        await authority.authorize();
+        return {
+          receiptId: 'e'.repeat(64),
+          result: { routineId: receipt.result.routine.id, override: null },
+        };
+      },
+    );
     const unavailable = vi.fn().mockRejectedValue(new Error('Unexpected owner'));
     const writes = {
       goalCreate: unavailable,
@@ -417,9 +631,19 @@ describe('Routine hosted write capability', () => {
       taskCreate: unavailable,
       taskUpdate: unavailable,
       taskComplete: unavailable,
-      ...(enabled ? { routineCreate } : {}),
+      ...(enabled
+        ? { routineCreate, routineUpdate, routineDelete, routinePause, routineOverride }
+        : {}),
     };
-    return { ...f, routineCreate, gateway: createReadGateway({ ...f.options, writes }) };
+    return {
+      ...f,
+      routineCreate,
+      routineUpdate,
+      routineDelete,
+      routinePause,
+      routineOverride,
+      gateway: createReadGateway({ ...f.options, writes }),
+    };
   }
   const input = {
     idempotencyKey: 'once',
@@ -431,13 +655,19 @@ describe('Routine hosted write capability', () => {
       startDate: '2026-10-20',
     },
   };
-  it('discovers exactly routine_create with a routine-only PAT, and keeps the separate gate off', async () => {
+  it('discovers the routine write set with a routine-only PAT, and keeps the separate gate off', async () => {
     const f = routineFixture();
     expect(
       (await (await f.gateway.fetch(request('tools/list'), context)).json()).result.tools.map(
         (t) => t.name,
       ),
-    ).toEqual(['routine_create']);
+    ).toEqual([
+      'routine_create',
+      'routine_update',
+      'routine_delete',
+      'routine_pause',
+      'routine_override',
+    ]);
     const off = routineFixture(false);
     expect(
       (await (await off.gateway.fetch(request('tools/list'), context)).json()).result.tools,
@@ -512,6 +742,140 @@ describe('Routine hosted write capability', () => {
   });
 });
 
+describe('Routine hosted reads', () => {
+  const routineId = '5b5d8a2b-9934-4be8-8e07-3f62ed122e15';
+  function definition(id: string, name: string, createdAt: string) {
+    return {
+      id,
+      name,
+      description: null,
+      enabled: true,
+      trigger: null,
+      version: 1,
+      createdAt,
+      updatedAt: createdAt,
+    };
+  }
+  function readFixture(scopes = ['routines:read'], routines = true) {
+    const f = fixture();
+    f.authenticate.mockResolvedValue({
+      identityId: 'owner-a',
+      credentialId: 'pat-a',
+      credentialType: 'pat',
+      scopes,
+    });
+    const definitions = [
+      definition(routineId, 'Review', '2026-11-16T00:00:00.000Z'),
+      definition('6c6e9b3c-aa45-4cf9-9f18-4a73fe233f26', 'Stretch', '2026-11-15T00:00:00.000Z'),
+    ];
+    const port = {
+      getConfigurationSnapshot: vi.fn().mockResolvedValue({
+        definitions,
+        profiles: [],
+        memberships: [],
+        preferences: { globalEnabled: true, version: 1 },
+        runtimeContext: { activeProfileIds: [] },
+        capabilities: { localRuntime: false },
+        overrides: [],
+      }),
+      getUpcomingOccurrences: vi.fn().mockResolvedValue({
+        occurrences: [
+          {
+            identityId: 'owner-a',
+            routineId,
+            occurrenceKey: 'routine:1:0',
+            title: 'Review',
+            description: null,
+            occurrenceAt: 1792458000000,
+            endAt: null,
+            revision: 1,
+            editable: false,
+          },
+        ],
+      }),
+    };
+    return {
+      ...f,
+      routines: port,
+      gateway: createReadGateway({ ...f.options, ...(routines ? { routines: port } : {}) }),
+    };
+  }
+
+  it('pages owned definitions with a bound and a signed cursor', async () => {
+    const f = readFixture();
+    const first = await f.gateway.fetch(
+      request('tools/call', { query: 're', limit: 1 }, 'routine_list'),
+      context,
+    );
+    const body = await first.json();
+    expect(body.result.structuredContent.items.map((item: { id: string }) => item.id)).toEqual([
+      routineId,
+    ]);
+    expect(body.result.structuredContent.hasMore).toBe(true);
+    const cursor = body.result.structuredContent.nextCursor;
+    expect(typeof cursor).toBe('string');
+    const second = await f.gateway.fetch(
+      request('tools/call', { query: 're', limit: 1, cursor }, 'routine_list'),
+      context,
+    );
+    expect(
+      (await second.json()).result.structuredContent.items.map(
+        (item: { name: string }) => item.name,
+      ),
+    ).toEqual(['Stretch']);
+    const tampered = await f.gateway.fetch(
+      request('tools/call', { query: 're', limit: 1, cursor: 'tampered' }, 'routine_list'),
+      context,
+    );
+    expect(await tampered.json()).toMatchObject({ result: { isError: true } });
+  });
+
+  it('bounds the upcoming window and omits owner identity', async () => {
+    const f = readFixture();
+    const response = await f.gateway.fetch(
+      request(
+        'tools/call',
+        { start: 1_000, end: 1_000 + 31 * 86400000, limit: 5 },
+        'routine_upcoming',
+      ),
+      context,
+    );
+    const occurrence = (await response.json()).result.structuredContent.items[0];
+    expect(occurrence).toMatchObject({ routineId, occurrenceKey: 'routine:1:0' });
+    expect(occurrence).not.toHaveProperty('identityId');
+    expect(f.routines.getUpcomingOccurrences).toHaveBeenCalledWith(
+      'owner-a',
+      { start: 1_000, end: 1_000 + 31 * 86400000, includeElapsed: false, limit: 6 },
+      expect.objectContaining({ signal: expect.any(AbortSignal) }),
+    );
+    const tooWide = await f.gateway.fetch(
+      request('tools/call', { start: 1_000, end: 1_000 + 32 * 86400000 }, 'routine_upcoming'),
+      context,
+    );
+    expect(await tooWide.json()).toMatchObject({ result: { isError: true } });
+    expect(f.routines.getUpcomingOccurrences).toHaveBeenCalledTimes(1);
+  });
+
+  it('reports a missing routine and hides the tools without a bound port or scope', async () => {
+    const f = readFixture();
+    const missing = await f.gateway.fetch(
+      request('tools/call', { id: '7d7f0c4d-bb56-4dfa-a029-5b84ff344037' }, 'routine_get'),
+      context,
+    );
+    expect(await missing.json()).toMatchObject({ result: { isError: true } });
+    const noPort = readFixture(['routines:read'], false);
+    expect(
+      (await noPort.gateway.fetch(request('tools/call', { id: routineId }, 'routine_get'), context))
+        .status,
+    ).toBe(404);
+    const noScope = readFixture(['tasks:read']);
+    expect(
+      (await (await noScope.gateway.fetch(request('tools/list'), context)).json()).result.tools.map(
+        (tool: { name: string }) => tool.name,
+      ),
+    ).not.toContain('routine_get');
+  });
+});
 describe('Notification hosted read and mark-read capability', () => {
   const fact = {
     id: 'notification-1',
