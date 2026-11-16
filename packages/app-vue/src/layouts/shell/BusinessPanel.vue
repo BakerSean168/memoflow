@@ -103,7 +103,11 @@ const focusActionIcon = computed<Component>(() => {
 });
 
 function handleFocusAction(): void {
-  emit(collapsesPanel.value ? 'collapse-panel' : 'toggle-focus');
+  if (collapsesPanel.value) {
+    emit('collapse-panel');
+    return;
+  }
+  emit('toggle-focus');
 }
 
 const tabDensity = computed<BusinessTabDensity>(() =>
