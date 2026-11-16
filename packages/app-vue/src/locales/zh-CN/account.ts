@@ -46,6 +46,8 @@ export default {
       routinesRead: 'Routines 只读',
       routinesWrite: 'Routines 写入',
       aiRead: 'AI 会话与档案只读',
+      notificationsRead: '通知只读',
+      notificationsWrite: '通知标记已读',
       offlineAccess: '保持连接',
     },
     writeWarning: '持有此令牌的程序可在授权范围内直接写入。',

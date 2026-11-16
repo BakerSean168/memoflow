@@ -12,6 +12,9 @@ import {
   GoalGetOutputSchema,
   GoalSearchInputSchema,
   GoalSearchOutputSchema,
+  NotificationListInputSchema,
+  NotificationListOutputSchema,
+  NotificationUnreadCountOutputSchema,
   TaskPlanGetInputSchema,
   TaskPlanGetOutputSchema,
   TaskPlanSearchInputSchema,
@@ -27,6 +30,7 @@ import {
   RoutineUpcomingInputSchema,
   RoutineUpcomingOutputSchema,
 } from './contracts';
+import { z } from 'zod';
 
 const readAnnotations = {
   readOnlyHint: true,
@@ -195,6 +199,29 @@ export const readToolDescriptors = {
         'Read one owned AI Agent archive entry; missing and foreign ids both answer NOT_FOUND.',
       inputSchema: AiAgentGetInputSchema,
       outputSchema: AiAgentGetOutputSchema,
+      annotations: readAnnotations,
+    },
+  },
+  notification_list: {
+    version: '1',
+    effect: 'read',
+    requiredScope: 'notifications:read',
+    definition: {
+      description:
+        'List owned notifications with an offset page (page ≤ 20, limit ≤ 50). Bodies are truncated at 2000 characters and flagged; action handles are not exposed.',
+      inputSchema: NotificationListInputSchema,
+      outputSchema: NotificationListOutputSchema,
+      annotations: readAnnotations,
+    },
+  },
+  notification_unread_count: {
+    version: '1',
+    effect: 'read',
+    requiredScope: 'notifications:read',
+    definition: {
+      description: 'Count owned unread notifications.',
+      inputSchema: z.strictObject({}),
+      outputSchema: NotificationUnreadCountOutputSchema,
       annotations: readAnnotations,
     },
   },

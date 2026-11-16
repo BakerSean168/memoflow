@@ -64,10 +64,12 @@ export const CreateScopedPatSchema = z.strictObject({
         'routines:write',
         'ai:read',
         'routines:read',
+        'notifications:read',
+        'notifications:write',
       ]),
     )
     .min(1)
-    .max(7)
+    .max(9)
     .refine((scopes) => new Set(scopes).size === scopes.length, 'Duplicate scopes')
     .default(['goals:read']),
 });
@@ -92,6 +94,8 @@ export const ScopedPatSummarySchema = z.object({
       'goals:write',
       'tasks:write',
       'routines:write',
+      'notifications:read',
+      'notifications:write',
     ]),
   ),
   ...credentialDates,
@@ -206,4 +210,5 @@ export * from './routine-reads';
 
 export * from './assisted';
 
+export * from './notifications';
 export * from './ai';

@@ -5,6 +5,7 @@ import {
   GatewayRoutineOverrideReceiptSchema,
   GatewayGoalReceiptSchema,
   GatewayTaskReceiptSchema,
+  NotificationMarkReadOutputSchema,
 } from '../contracts';
 import type { McpServer } from '@modelcontextprotocol/server';
 import type { ExecutionContext } from '@memoflow/transport-contracts';
@@ -124,6 +125,16 @@ export function registerWriteTools(
             .taskComplete(input, context, authority)
             .then((result) => GatewayTaskReceiptSchema.parse(result)),
         ),
+    );
+  }
+  const markRead = writes.notificationMarkRead;
+  if (markRead && scopes.includes('notifications:write')) {
+    server.registerTool('notification_mark_read', d.notification_mark_read.definition, (input) =>
+      call('notification_mark_read', 'notifications:write', () =>
+        markRead(input, context, authority).then((result) =>
+          NotificationMarkReadOutputSchema.parse(result),
+        ),
+      ),
     );
   }
 }

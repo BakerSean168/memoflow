@@ -48,6 +48,8 @@ export default {
       routinesRead: 'Routines (read)',
       routinesWrite: 'Routines (write)',
       aiRead: 'AI conversations & agents (read)',
+      notificationsRead: 'Notifications (read)',
+      notificationsWrite: 'Notifications (mark read)',
       offlineAccess: 'Stay connected',
     },
     writeWarning: 'Any program holding this token can write directly within the granted scopes.',

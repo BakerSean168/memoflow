@@ -49,6 +49,10 @@ import { createTaskPrismaReadQueries } from '@memoflow/task';
 import { bindTaskReadPort } from './modules/agent-gateway/task-read.port';
 import { bindGoalReadPort } from './modules/agent-gateway/goal-read.port';
 import {
+  bindNotificationMarkRead,
+  bindNotificationReadPort,
+} from './modules/agent-gateway/notification.port';
+import {
   bindAgentArchiveReadPort,
   bindAssistantConversationReadPort,
 } from './modules/agent-gateway/ai-read.port';
@@ -477,9 +481,12 @@ async function bootstrap(): Promise<void> {
     admission: createPilotAdmission(createApiRedisClient({ fresh: true, commandTimeout: 5000 })),
     enabled: env.EAG_READ_PILOT_ENABLED,
     writes: env.EAG_WRITE_ENABLED
-      ? bindGatewayWrites(prisma, settingApiModule.userTimeContextPort, {
-          routineWriteEnabled: env.EAG_ROUTINE_WRITE_ENABLED,
-        })
+      ? {
+          ...bindGatewayWrites(prisma, settingApiModule.userTimeContextPort, {
+            routineWriteEnabled: env.EAG_ROUTINE_WRITE_ENABLED,
+          }),
+          notificationMarkRead: bindNotificationMarkRead(notificationApiModule.inbox),
+        }
       : undefined,
     assisted: assistedWorkflow,
     audience: env.EAG_AUDIENCE ?? 'http://localhost:3000/mcp',
@@ -495,6 +502,7 @@ async function bootstrap(): Promise<void> {
     tasks: env.EAG_TASK_READ_ENABLED
       ? bindTaskReadPort(createTaskPrismaReadQueries(prisma, createSettingPrismaTimeQuery(prisma)))
       : undefined,
+    notification: bindNotificationReadPort(notificationApiModule.inbox),
     assistantConversation: bindAssistantConversationReadPort(
       aiComposed.assistantConversationExternal,
     ),

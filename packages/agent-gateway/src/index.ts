@@ -3,6 +3,9 @@ export * from './contracts';
 export type {
   GoalReadPort,
   TaskReadPort,
+  NotificationReadPort,
+  NotificationReadPage,
+  NotificationReadQuery,
   AssistantConversationReadPort,
   AgentArchiveReadPort,
   GatewayAiConversationSummary,

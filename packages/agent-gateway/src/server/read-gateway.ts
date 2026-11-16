@@ -18,6 +18,7 @@ import {
   type GatewayDiagnostic,
   type GatewayCredentialPort,
   type GoalReadPort,
+  type NotificationReadPort,
   type TaskReadPort,
   type RoutineReadPort,
 } from '../ports';
@@ -34,6 +35,7 @@ interface Options {
   readonly resourceMetadataUrl?: string;
   readonly goals: GoalReadPort;
   readonly tasks?: TaskReadPort;
+  readonly notification?: NotificationReadPort;
   readonly assistantConversation?: import('../ports').AssistantConversationReadPort;
   readonly agents?: import('../ports').AgentArchiveReadPort;
   readonly routines?: RoutineReadPort;
@@ -187,11 +189,15 @@ export function createReadGateway(options: Options) {
             (scope) =>
               scope === 'goals:read' ||
               scope === 'tasks:read' ||
+              scope === 'notifications:read' ||
               scope === 'ai:read' ||
               scope === 'routines:read' ||
               ((options.writes || options.assisted) &&
                 principal.credentialType === 'pat' &&
-                (scope === 'goals:write' || scope === 'tasks:write' || scope === 'routines:write')),
+                (scope === 'goals:write' ||
+                  scope === 'tasks:write' ||
+                  scope === 'routines:write' ||
+                  scope === 'notifications:write')),
           )
         )
           return reject(403, 'INSUFFICIENT_SCOPE');
@@ -287,6 +293,8 @@ export function createReadGateway(options: Options) {
             | 'goals:write'
             | 'tasks:write'
             | 'routines:write'
+            | 'notifications:read'
+            | 'notifications:write'
             | 'ai:read',
           operation: () => Promise<T>,
         ) {

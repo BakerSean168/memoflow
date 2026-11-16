@@ -6,6 +6,8 @@ import {
   ExternalGoalSchema,
   GoalGetOutputSchema,
   GoalSearchOutputSchema,
+  NotificationListOutputSchema,
+  NotificationUnreadCountOutputSchema,
   TaskPlanGetOutputSchema,
   TaskPlanSearchOutputSchema,
   TaskOccurrenceGetOutputSchema,
@@ -25,6 +27,7 @@ import type { ExecutionContext } from '@memoflow/transport-contracts';
 import {
   GatewayReadError as ControlledError,
   type GoalReadPort,
+  type NotificationReadPort,
   type TaskReadPort,
   type RoutineReadPort,
   type AssistantConversationReadPort,
@@ -46,7 +49,9 @@ export interface ReadToolCall {
       | 'goals:write'
       | 'tasks:write'
       | 'ai:read'
-      | 'routines:write',
+      | 'routines:write'
+      | 'notifications:read'
+      | 'notifications:write',
     work: () => Promise<T>,
   ): Promise<{
     content: { type: 'text'; text: string }[];
@@ -133,6 +138,7 @@ export function registerReadTools(
     cursorSecret: string;
     goals: GoalReadPort;
     tasks?: TaskReadPort;
+    notification?: NotificationReadPort;
     routines?: RoutineReadPort;
     assistantConversation?: AssistantConversationReadPort;
     agents?: AgentArchiveReadPort;
@@ -556,6 +562,48 @@ export function registerReadTools(
           if (!agent) throw new ControlledError('NOT_FOUND');
           return AiAgentGetOutputSchema.parse({ agent: projectAgent(agent) });
         }),
+    );
+  }
+  if (options.notification && scopes.includes('notifications:read')) {
+    const notification = options.notification;
+    server.registerTool(
+      'notification_list',
+      readToolDescriptors.notification_list.definition,
+      (input) =>
+        call('notification_list', 'notifications:read', async () => {
+          const page = await notification.listNotifications(
+            {
+              archiveState: input.archiveState,
+              page: input.page,
+              limit: input.limit,
+              ...(input.isRead !== undefined ? { isRead: input.isRead } : {}),
+              ...(input.category ? { category: input.category } : {}),
+              ...(input.type ? { type: input.type } : {}),
+              ...(input.keyword ? { keyword: input.keyword } : {}),
+            },
+            context,
+            budget,
+          );
+          const { items, truncated } = fitPage(page.items);
+          return NotificationListOutputSchema.parse({
+            items,
+            total: page.total,
+            page: page.page,
+            pageSize: page.pageSize,
+            hasMore: page.hasMore || truncated,
+            ...(truncated ? { truncated: 'response-budget' as const } : {}),
+          });
+        }),
+    );
+    server.registerTool(
+      'notification_unread_count',
+      readToolDescriptors.notification_unread_count.definition,
+      () =>
+        call('notification_unread_count', 'notifications:read', async () =>
+          NotificationUnreadCountOutputSchema.parse({
+            count: await notification.getUnreadCount(context, budget),
+          }),
+        ),
     );
   }
 }
