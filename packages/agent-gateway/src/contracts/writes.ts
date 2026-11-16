@@ -36,15 +36,19 @@ export const GatewayTaskUpdateSchema = TaskAgentUpdateSchema.extend({
   changes: TaskAgentUpdateSchema.shape.changes.strict(),
 });
 export const GatewayTaskCompleteSchema = TaskAgentCompleteSchema;
-/** A write grant returns only mutation identity/version, not protected read bodies. */
+/**
+ * A write grant returns only mutation identity/version, not protected read bodies.
+ * `replayed` is a hosted audit detail; a host whose owner mutations replay the
+ * identical persisted receipt without a separate flag may omit it.
+ */
 export const GatewayGoalReceiptSchema = GoalAgentPersistedReceiptSchema.extend({
-  replayed: z.boolean(),
+  replayed: z.boolean().optional(),
 });
 export const GatewayTaskReceiptSchema = TaskAgentPersistedReceiptSchema.extend({
-  replayed: z.boolean(),
+  replayed: z.boolean().optional(),
 });
 
 export const GatewayRoutineCreateSchema = RoutineAgentCreateSchema;
 export const GatewayRoutineReceiptSchema = RoutineAgentPersistedReceiptSchema.extend({
-  replayed: z.boolean(),
+  replayed: z.boolean().optional(),
 });

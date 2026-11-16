@@ -133,11 +133,11 @@ type WriteCall<T> = (
   context: ExecutionContext,
   authority: GatewayWriteAuthority,
 ) => Promise<T>;
-type GoalWriteReceipt = GoalAgentPersistedReceipt & { replayed: boolean };
-type TaskWriteReceipt = TaskAgentPersistedReceipt & { replayed: boolean };
+type GoalWriteReceipt = GoalAgentPersistedReceipt & { replayed?: boolean };
+type TaskWriteReceipt = TaskAgentPersistedReceipt & { replayed?: boolean };
 /** Only owner application operations cross this boundary; never repositories. */
 export interface GatewayWritePort {
-  routineCreate?: WriteCall<RoutineAgentPersistedReceipt & { replayed: boolean }>;
+  routineCreate?: WriteCall<RoutineAgentPersistedReceipt & { replayed?: boolean }>;
   goalCreate: WriteCall<GoalWriteReceipt>;
   goalUpdate: WriteCall<GoalWriteReceipt>;
   keyResultCreate: WriteCall<GoalWriteReceipt>;

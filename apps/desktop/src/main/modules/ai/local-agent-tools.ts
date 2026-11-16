@@ -25,15 +25,24 @@ import {
   GoalAgentMutationError,
   createGoalPowerSyncPageQuery,
 } from '@memoflow/goal';
-import { GatewayReadError } from '@memoflow/agent-gateway';
-import { registerReadTools } from '@memoflow/agent-gateway/server';
-import { GatewayFailureCodeSchema } from '@memoflow/agent-gateway';
-import { GoalAgentCreateSchema, GoalAgentUpdateSchema } from '@memoflow/goal-contracts';
 import {
-  TaskAgentCreateSchema,
-  TaskAgentUpdateSchema,
-  TaskAgentCompleteSchema,
-} from '@memoflow/task-contracts';
+  GatewayFailureCodeSchema,
+  GatewayGoalCreateSchema,
+  GatewayGoalUpdateSchema,
+  GatewayKeyResultCreateSchema,
+  GatewayKeyResultUpdateSchema,
+  GatewayReadError,
+  GatewayTaskCreateSchema,
+  GatewayTaskUpdateSchema,
+  GatewayTaskCompleteSchema,
+  type GatewayWriteAuthority,
+  type GatewayWritePort,
+} from '@memoflow/agent-gateway';
+import {
+  registerReadTools,
+  registerWriteTools,
+  type ReadToolCall,
+} from '@memoflow/agent-gateway/server';
 import type { Result } from '@memoflow/transport-contracts/result';
 import type { IElectronDatabase, IElectronDatabaseTransaction } from '@memoflow/desktop-contracts';
 import {
@@ -192,7 +201,11 @@ export function createDesktopLocalAgentTools(
             }),
         );
       }
-      async function write(toolName: string, work: () => Promise<Record<string, unknown>>) {
+      const writeCall: ReadToolCall = async <T extends object>(
+        toolName: Parameters<ReadToolCall>[0],
+        _scope: Parameters<ReadToolCall>[1],
+        work: () => Promise<T>,
+      ) => {
         try {
           const operationId = permissionOperationForTool(toolName)?.id ?? toolName;
           const receipt = await context.executeAuthorized(operationId, toolName, () =>
@@ -200,7 +213,7 @@ export function createDesktopLocalAgentTools(
           );
           return {
             content: [{ type: 'text' as const, text: JSON.stringify(receipt) }],
-            structuredContent: receipt,
+            structuredContent: receipt as Record<string, unknown>,
           };
         } catch (error) {
           const failure = z
@@ -223,94 +236,79 @@ export function createDesktopLocalAgentTools(
             content: [{ type: 'text' as const, text: code }],
           };
         }
-      }
-      if (context.writeScopes.includes('tasks:write')) {
-        const authority = {
-          connectionId: context.connectionId,
-          authorize: (tx: IElectronDatabaseTransaction) => context.authorize('tasks:write', tx),
-        };
-        const annotations = {
-          readOnlyHint: false,
-          destructiveHint: false,
-          idempotentHint: true,
-          openWorldHint: false,
-        };
-        server.registerTool(
-          'task_plan_create',
-          {
-            description:
-              'Create an owned TaskPlan and its occurrences atomically. Reuse the exact input and idempotencyKey on retries.',
-            inputSchema: TaskAgentCreateSchema,
-            annotations,
-          },
-          (input) => write('task_plan_create', () => taskWrites.create(input, context, authority)),
-        );
-        server.registerTool(
-          'task_plan_update',
-          {
-            description:
-              'Update an owned TaskPlan using its explicit expectedVersion. A conflict requires a new user decision, never an automatic version replacement.',
-            inputSchema: TaskAgentUpdateSchema,
-            annotations,
-          },
-          (input) => write('task_plan_update', () => taskWrites.update(input, context, authority)),
-        );
-        server.registerTool(
-          'task_occurrence_complete',
-          {
-            description:
-              'Complete one occurrence with expectedVersion. Prompt contribution must explicitly choose complete_only or record with a measurement; suggestedValue is never a user decision. Fixed contributions follow the existing Task binding.',
-            inputSchema: TaskAgentCompleteSchema,
-            annotations,
-          },
-          (input) =>
-            write('task_occurrence_complete', () => taskWrites.complete(input, context, authority)),
-        );
-      }
-      if (context.writeScopes.includes('goals:write')) {
-        const authority = {
-          connectionId: context.connectionId,
-          authorize: (tx: IElectronDatabaseTransaction) => context.authorize('goals:write', tx),
-        };
-        server.registerTool(
-          'goal_create',
-          {
-            description: panelBridge
-              ? 'Background Goal write that skips the visible form. Only for a user who explicitly asked to write the Goal directly without the form; otherwise it returns GOAL_PANEL_REQUIRED and writes nothing, and the Goal must be created with goal_panel_open. A stable idempotencyKey is required for all retries.'
-              : 'Create an owned Goal atomically. A stable idempotencyKey is required for all retries.',
-            inputSchema: GoalAgentCreateSchema,
-            annotations: {
-              readOnlyHint: false,
-              destructiveHint: false,
-              idempotentHint: true,
-              openWorldHint: false,
-            },
-          },
-          (input) =>
-            write('goal_create', () => {
-              // The run's user message cannot change mid-run, so one check before the owner write is enough.
-              assertGoalIntentCanCommit(context.goalIntent ?? JSON.stringify(input.goal));
-              // With the visible form available, a hidden write would leave the user nothing to review.
-              if (panelBridge) assertGoalDirectWriteAllowed(context.goalIntent);
-              return goalWrites.create(input, context, authority);
-            }),
-        );
-        server.registerTool(
-          'goal_update',
-          {
-            description:
-              'Update an owned Goal with its explicit expectedVersion. Never automatically fetch a newer version to override a conflict.',
-            inputSchema: GoalAgentUpdateSchema,
-            annotations: {
-              readOnlyHint: false,
-              destructiveHint: false,
-              idempotentHint: true,
-              openWorldHint: false,
-            },
-          },
-          (input) => write('goal_update', () => goalWrites.update(input, context, authority)),
-        );
-      }
+      };
+      type OwnerMutationAuthority = {
+        connectionId: string;
+        authorize(tx: IElectronDatabaseTransaction): Promise<void>;
+      };
+      // The bridge revalidates the connection revision and the tool's write
+      // scope inside every owner transaction; a port must never bypass it.
+      const mutationAuthority = (scope: 'goals:write' | 'tasks:write'): OwnerMutationAuthority => ({
+        connectionId: context.connectionId,
+        authorize: (tx) => context.authorize(scope, tx),
+      });
+      const writes: GatewayWritePort = {
+        goalCreate(input, cx) {
+          const parsed = GatewayGoalCreateSchema.parse(input);
+          // The run's user message cannot change mid-run, so one check before the owner write is enough.
+          assertGoalIntentCanCommit(context.goalIntent ?? JSON.stringify(parsed.goal));
+          // With the visible form available, a hidden write would leave the user nothing to review.
+          if (panelBridge) assertGoalDirectWriteAllowed(context.goalIntent);
+          return goalWrites.create(parsed, cx, mutationAuthority('goals:write'));
+        },
+        goalUpdate(input, cx) {
+          return goalWrites.update(
+            GatewayGoalUpdateSchema.parse(input),
+            cx,
+            mutationAuthority('goals:write'),
+          );
+        },
+        keyResultCreate(input, cx) {
+          return goalWrites.createKeyResult(
+            GatewayKeyResultCreateSchema.parse(input),
+            cx,
+            mutationAuthority('goals:write'),
+          );
+        },
+        keyResultUpdate(input, cx) {
+          return goalWrites.updateKeyResult(
+            GatewayKeyResultUpdateSchema.parse(input),
+            cx,
+            mutationAuthority('goals:write'),
+          );
+        },
+        taskCreate(input, cx) {
+          const parsed = GatewayTaskCreateSchema.parse(input);
+          if (parsed.plan.goalBinding && !context.writeScopes.includes('goals:write'))
+            throw new GatewayReadError('FORBIDDEN');
+          return taskWrites.create(parsed, cx, mutationAuthority('tasks:write'));
+        },
+        taskUpdate(input, cx) {
+          const parsed = GatewayTaskUpdateSchema.parse(input);
+          if (
+            parsed.changes.goalBinding !== undefined &&
+            !context.writeScopes.includes('goals:write')
+          )
+            throw new GatewayReadError('FORBIDDEN');
+          return taskWrites.update(parsed, cx, mutationAuthority('tasks:write'));
+        },
+        taskComplete(input, cx) {
+          return taskWrites.complete(
+            GatewayTaskCompleteSchema.parse(input),
+            cx,
+            mutationAuthority('tasks:write'),
+          );
+        },
+      };
+      const writeAuthority: GatewayWriteAuthority = {
+        connectionId: context.connectionId,
+        scopes: context.writeScopes,
+        // The local gate revalidates the tool scope and connection revision
+        // inside every owner transaction (mutationAuthority); this shared
+        // shape only needs to refuse a revoked grant.
+        authorize: () => context.authorize('read'),
+      };
+      registerWriteTools(server, writes, context, context.writeScopes, writeAuthority, writeCall);
       if (panelBridge) {
         async function runPanelAction(command: GoalPanelCommand) {
           try {
