@@ -148,6 +148,26 @@ export function useShellPanelResize(options: ShellPanelResizeOptions) {
     return store.resolvePanelWidth(window.innerWidth, occupiedSidebarWidth());
   }
 
+  /** 当前视口与侧栏占用下分栏是否几何可行；与 onViewportGeometryChange 同源（§6.2）。 */
+  const splitFeasible = computed(() => {
+    if (typeof window === 'undefined') return true;
+    return computePanelGeometry({
+      viewportWidth: effectiveViewportWidth.value,
+      sidebarOccupiedWidth: prospectiveSidebarOccupied(),
+    }).canSplit;
+  });
+
+  /**
+   * focus 是否由视口约束决定（分栏几何不成立）：此时面板内的「退出专注」
+   * 没有可落的分栏，应改为收起面板（#965）。
+   */
+  const viewportFocusForced = computed(
+    () =>
+      rightPanelOpen.value &&
+      layout.value === 'focus' &&
+      (effectiveViewportWidth.value < AUTO_FOCUS_VIEWPORT || !splitFeasible.value),
+  );
+
   /**
    * 视口/侧栏变化：
    * - 不回写用户偏好宽度（由 effectivePanelWidth 即时 clamp）
@@ -330,6 +350,7 @@ export function useShellPanelResize(options: ShellPanelResizeOptions) {
     startSidebarResize,
     resizeSidebarBy,
     effectivePanelWidth,
+    viewportFocusForced,
     onViewportGeometryChange,
     startPanelResize,
     resetPanelWidth,
