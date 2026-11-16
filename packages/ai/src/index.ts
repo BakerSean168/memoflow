@@ -84,6 +84,12 @@ export {
   type McpClientCredentialRef,
   type StoredMcpClient,
 } from './server/infrastructure/adapters/powersync/local-mcp-client.repository';
+export { LocalGatewayAuditRepository } from './server/infrastructure/adapters/powersync/local-gateway-audit.repository';
+export { LocalConversationExternalReadSource } from './server/infrastructure/adapters/powersync/local-conversation-external-read.source';
+export {
+  LOCAL_CONVERSATION_EXTERNAL_FIELD_WHITELIST,
+  registerLocalConversationReadTools,
+} from './server/local-agent/local-conversation-tools';
 export {
   projectAIOwnerActivity,
   mergeAIActivityItems,
