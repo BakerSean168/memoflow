@@ -108,7 +108,7 @@ export const writeToolDescriptors = {
   task_plan_create: {
     requiredScope: 'tasks:write',
     definition: definition(
-      'Create a TaskPlan. A Goal binding additionally requires goals:write.',
+      'Create a TaskPlan. A Goal binding additionally requires goals:write. Label assignment is rejected with VALIDATION_ERROR.',
       GatewayTaskCreateSchema,
       GatewayTaskReceiptSchema,
     ),
@@ -116,7 +116,7 @@ export const writeToolDescriptors = {
   task_plan_update: {
     requiredScope: 'tasks:write',
     definition: definition(
-      'Patch a TaskPlan using expectedVersion. Binding changes additionally require goals:write.',
+      'Patch a TaskPlan using expectedVersion. Binding changes additionally require goals:write. Label assignment is rejected with VALIDATION_ERROR.',
       GatewayTaskUpdateSchema,
       GatewayTaskReceiptSchema,
     ),

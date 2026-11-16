@@ -8,6 +8,7 @@ import {
   TaskOccurrenceReadIdSchema,
 } from '@memoflow/task-contracts';
 import { GoalClientDTOSchema, KeyResultClientDTOSchema } from '@memoflow/goal-contracts';
+import { LabelClientDTOSchema } from '@memoflow/label-contracts';
 
 /** External Goal reads deliberately omit review bodies and private cross-owner context. */
 export const ExternalGoalSchema = GoalClientDTOSchema.pick({
@@ -66,10 +67,11 @@ export const CreateScopedPatSchema = z.strictObject({
         'routines:read',
         'notifications:read',
         'notifications:write',
+        'labels:read',
       ]),
     )
     .min(1)
-    .max(9)
+    .max(10)
     .refine((scopes) => new Set(scopes).size === scopes.length, 'Duplicate scopes')
     .default(['goals:read']),
 });
@@ -96,6 +98,7 @@ export const ScopedPatSummarySchema = z.object({
       'routines:write',
       'notifications:read',
       'notifications:write',
+      'labels:read',
     ]),
   ),
   ...credentialDates,
@@ -204,6 +207,42 @@ export const TaskOccurrenceListOutputSchema = z.strictObject({
   timeZone: z.string(),
   asOf: TaskReadInstantSchema,
 });
+
+export const ExternalLabelColorSchema = z
+  .string()
+  .regex(/^#[0-9a-fA-F]{6}$/, 'Label color must be a 6-digit RGB hex value.');
+
+export const ExternalLabelSchema = z
+  .object({
+    id: z.string().min(1),
+    name: z.string(),
+    color: ExternalLabelColorSchema.nullable(),
+    createdAt: z.number().finite(),
+    updatedAt: z.number().finite(),
+  })
+  .strict();
+export type ExternalLabel = z.infer<typeof ExternalLabelSchema>;
+
+export const LabelListInputSchema = z.strictObject({
+  search: z.string().max(50).optional(),
+  limit: z.number().int().min(1).max(100).default(50),
+});
+export type LabelListInput = z.infer<typeof LabelListInputSchema>;
+
+export const LabelListOutputSchema = z.strictObject({
+  items: z.array(ExternalLabelSchema).max(100),
+});
+export type LabelListOutput = z.infer<typeof LabelListOutputSchema>;
+
+export const LabelResolveNamesInputSchema = z.strictObject({
+  names: z.array(z.string().min(1).max(50)).max(50).default([]),
+});
+export type LabelResolveNamesInput = z.infer<typeof LabelResolveNamesInputSchema>;
+
+export const LabelResolveNamesOutputSchema = z.strictObject({
+  items: z.array(ExternalLabelSchema).max(50),
+});
+export type LabelResolveNamesOutput = z.infer<typeof LabelResolveNamesOutputSchema>;
 
 export * from './writes';
 export * from './routine-reads';

@@ -48,6 +48,7 @@ import { createSettingPrismaTimeQuery } from '@memoflow/setting';
 import { createTaskPrismaReadQueries } from '@memoflow/task';
 import { bindTaskReadPort } from './modules/agent-gateway/task-read.port';
 import { bindGoalReadPort } from './modules/agent-gateway/goal-read.port';
+import { bindLabelReadPort } from './modules/agent-gateway/label-read.port.js';
 import {
   bindNotificationMarkRead,
   bindNotificationReadPort,
@@ -502,6 +503,7 @@ async function bootstrap(): Promise<void> {
     tasks: env.EAG_TASK_READ_ENABLED
       ? bindTaskReadPort(createTaskPrismaReadQueries(prisma, createSettingPrismaTimeQuery(prisma)))
       : undefined,
+    labels: bindLabelReadPort(labelService),
     notification: bindNotificationReadPort(notificationApiModule.inbox),
     assistantConversation: bindAssistantConversationReadPort(
       aiComposed.assistantConversationExternal,

@@ -3,6 +3,7 @@ export * from './contracts';
 export type {
   GoalReadPort,
   TaskReadPort,
+  LabelReadPort,
   NotificationReadPort,
   NotificationReadPage,
   NotificationReadQuery,

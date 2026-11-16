@@ -5,6 +5,7 @@ export type PermissionObject =
   | 'routine'
   | 'knowledge'
   | 'notification'
+  | 'label'
   | 'ai'
   | 'ai_permission';
 export type PermissionAction = 'read' | 'create' | 'update' | 'delete';
@@ -34,6 +35,7 @@ const BUSINESS_OBJECTS: readonly PermissionObject[] = [
   'routine',
   'knowledge',
   'notification',
+  'label',
 ];
 
 export const PERMISSION_OPERATIONS: readonly PermissionOperation[] = [
@@ -144,6 +146,8 @@ const TOOL_OPERATIONS: Readonly<Record<string, string>> = {
   planner_upcoming_tasks: 'task.read',
   notification_unread_summary: 'notification.read',
   notification_execute_action: 'notification.execute_action',
+  label_list: 'label.read',
+  label_resolve_names: 'label.read',
   notification_list: 'notification.read',
   notification_unread_count: 'notification.read',
   notification_mark_read: 'notification.update',

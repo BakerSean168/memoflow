@@ -152,6 +152,16 @@
       ]
     },
     {
+      "path": "apps/api/src/modules/agent-gateway/label-scope.boundary.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "apps/api/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "apps/api/vitest.config.ts"
+      ]
+    },
+    {
       "path": "apps/api/src/modules/agent-gateway/module.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -188,6 +198,16 @@
         "apps/api/vitest.integration.config.ts"
       ],
       "measurementCollectors": []
+    },
+    {
+      "path": "apps/api/src/modules/agent-gateway/write.port.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "apps/api/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "apps/api/vitest.config.ts"
+      ]
     },
     {
       "path": "apps/api/src/modules/ai/controlled-analytics-read.adapter.spec.ts",
@@ -13316,7 +13336,7 @@
       "type": "measurement",
       "suite": "coverage",
       "runner": "vitest",
-      "fileCount": 66
+      "fileCount": 68
     },
     {
       "id": "packages/account/vitest.config.ts",
@@ -13796,7 +13816,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 66
+      "fileCount": 68
     },
     {
       "id": "apps/desktop/vitest.config.ts",
@@ -14301,9 +14321,11 @@
       "apps/api/src/bootstrap-module-names.surface.spec.ts",
       "apps/api/src/bootstrap.spec.ts",
       "apps/api/src/modules/agent-gateway/audit.spec.ts",
+      "apps/api/src/modules/agent-gateway/label-scope.boundary.spec.ts",
       "apps/api/src/modules/agent-gateway/module.spec.ts",
       "apps/api/src/modules/agent-gateway/notification-scope.boundary.spec.ts",
       "apps/api/src/modules/agent-gateway/notification.port.spec.ts",
+      "apps/api/src/modules/agent-gateway/write.port.spec.ts",
       "apps/api/src/modules/ai/controlled-analytics-read.adapter.spec.ts",
       "apps/api/src/modules/ai/owner-activity-read.adapter.equivalence.spec.ts",
       "apps/api/src/modules/ai/owner-activity-read.adapter.spec.ts",
@@ -14953,7 +14975,7 @@
   "duplicate": [],
   "unexpected": [],
   "counts": {
-    "unit": 1237,
+    "unit": 1239,
     "integration": 59,
     "smoke": 3,
     "boundary-ipc": 6,

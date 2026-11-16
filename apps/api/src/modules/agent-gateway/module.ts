@@ -9,6 +9,7 @@ import type {
   GatewayAssistedPort,
   NotificationReadPort,
   TaskReadPort,
+  LabelReadPort,
   AssistantConversationReadPort,
   AgentArchiveReadPort,
   RoutineReadPort,
@@ -33,6 +34,7 @@ interface Options {
   readonly oauth?: ReturnType<typeof createCloudAuth>['externalAgents'];
   readonly goals: GoalReadPort;
   readonly tasks?: TaskReadPort;
+  readonly labels?: LabelReadPort;
   readonly notification?: NotificationReadPort;
   readonly assistantConversation?: AssistantConversationReadPort;
   readonly agents?: AgentArchiveReadPort;

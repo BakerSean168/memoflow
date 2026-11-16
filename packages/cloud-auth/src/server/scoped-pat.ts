@@ -108,7 +108,7 @@ export function createScopedPatService(options: Options) {
         return null;
       if (
         pat.scopes.length < 1 ||
-        pat.scopes.length > 9 ||
+        pat.scopes.length > 10 ||
         new Set(pat.scopes).size !== pat.scopes.length ||
         pat.scopes.some(
           (scope) =>
@@ -122,6 +122,7 @@ export function createScopedPatService(options: Options) {
               'routines:read',
               'notifications:read',
               'notifications:write',
+              'labels:read',
             ].includes(scope),
         ) ||
         !(await isActive(pat.userId, context))

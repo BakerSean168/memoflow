@@ -20,6 +20,7 @@ import {
   type GoalReadPort,
   type NotificationReadPort,
   type TaskReadPort,
+  type LabelReadPort,
   type RoutineReadPort,
 } from '../ports';
 
@@ -35,6 +36,7 @@ interface Options {
   readonly resourceMetadataUrl?: string;
   readonly goals: GoalReadPort;
   readonly tasks?: TaskReadPort;
+  readonly labels?: LabelReadPort;
   readonly notification?: NotificationReadPort;
   readonly assistantConversation?: import('../ports').AssistantConversationReadPort;
   readonly agents?: import('../ports').AgentArchiveReadPort;
@@ -189,6 +191,7 @@ export function createReadGateway(options: Options) {
             (scope) =>
               scope === 'goals:read' ||
               scope === 'tasks:read' ||
+              scope === 'labels:read' ||
               scope === 'notifications:read' ||
               scope === 'ai:read' ||
               scope === 'routines:read' ||
@@ -258,6 +261,10 @@ export function createReadGateway(options: Options) {
                 scopeDecision = 'denied';
                 return reject(404, 'DISABLED');
               }
+              if (!isWriteToolName(name) && name.startsWith('label_') && !options.labels) {
+                scopeDecision = 'denied';
+                return reject(404, 'DISABLED');
+              }
               if (
                 !isWriteToolName(name) &&
                 name.startsWith('ai_conversation_') &&
@@ -289,6 +296,7 @@ export function createReadGateway(options: Options) {
           requiredScope:
             | 'goals:read'
             | 'tasks:read'
+            | 'labels:read'
             | 'routines:read'
             | 'goals:write'
             | 'tasks:write'

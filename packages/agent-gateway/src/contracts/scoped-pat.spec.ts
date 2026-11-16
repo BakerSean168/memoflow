@@ -35,6 +35,7 @@ describe('scoped PAT lifetime contract (#970)', () => {
         'routines:write',
         'ai:read',
         'routines:read',
+        'labels:read',
       ],
       createdAt: '2026-11-16T00:00:00.000Z',
       expiresAt: '2027-11-16T00:00:00.000Z',
@@ -101,6 +102,28 @@ describe('scoped PAT lifetime contract (#970)', () => {
           'ai:read',
         ],
       }).success,
+    ).toBe(false);
+  });
+
+  it('accepts labels:read within the ten-scope ceiling (#993)', () => {
+    const scopes = [
+      'goals:read',
+      'goals:write',
+      'tasks:read',
+      'tasks:write',
+      'routines:write',
+      'ai:read',
+      'routines:read',
+      'notifications:read',
+      'notifications:write',
+      'labels:read',
+    ];
+    expect(CreateScopedPatSchema.parse({ name: 'label agent', scopes }).scopes).toEqual(scopes);
+    expect(
+      CreateScopedPatSchema.safeParse({ name: 'agent', scopes: [...scopes, 'goals:read'] }).success,
+    ).toBe(false);
+    expect(
+      CreateScopedPatSchema.safeParse({ name: 'agent', scopes: ['labels:write'] }).success,
     ).toBe(false);
   });
 });

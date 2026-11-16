@@ -26,6 +26,7 @@ import type {
   GoalPage,
   GoalPageQuery,
 } from '@memoflow/goal-contracts';
+import type { LabelClientDTO } from '@memoflow/label-contracts';
 import type { ExecutionContext, RequestContext } from '@memoflow/transport-contracts';
 import type { Result } from '@memoflow/transport-contracts/result';
 import type { AgentDriverKind } from '@memoflow/ai-contracts';
@@ -116,6 +117,8 @@ export interface GatewayAuditEvent {
     | 'routine_get'
     | 'routine_list'
     | 'routine_upcoming'
+    | 'label_list'
+    | 'label_resolve_names'
     | 'transport'
     | 'pat_create'
     | 'pat_list'
@@ -148,6 +151,20 @@ export interface TaskReadPort {
     context: ExecutionContext,
     budget?: GatewayReadBudget,
   ): Promise<TaskOccurrenceReadPage>;
+}
+
+/** Gateway-owned read seam; the API host binds it to Label application service operations. */
+export interface LabelReadPort {
+  list(
+    input: { search?: string; limit?: number },
+    context: ExecutionContext,
+    budget?: GatewayReadBudget,
+  ): Promise<LabelClientDTO[]>;
+  resolveNames(
+    names: readonly string[],
+    context: ExecutionContext,
+    budget?: GatewayReadBudget,
+  ): Promise<LabelClientDTO[]>;
 }
 
 /**

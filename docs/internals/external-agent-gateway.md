@@ -7,7 +7,7 @@ updated: 2026-11-16T00:00:00Z
 
 # MemoFlow External Agent Gateway
 
-**状态：代码与组装已就绪，全部默认关闭。** Gateway 当前实现 29 个工具：11 个只读（Goal/Task/Routine 9 个 + Notification 2 个）、13 个写（Goal/KR、TaskPlan、TaskOccurrence、Routine 全写、`notification_mark_read`）、5 个 assisted Task workflow；OAuth 仍只有 9 个只读工具。写与 assisted 只对 PAT 开放，且每次调用都经过 AI 权限 checkpoint。生产开关尚未翻转，公共 rollout 未完成；开启步骤见 [§10 runbook](#10-一期开启-runbook)。#490/#538/#539 的本地验收只代表代码路径，不代表生产已部署。
+**状态：代码与组装已就绪，全部默认关闭。** Gateway 当前实现 31 个工具：13 个只读（Goal/Task/Routine 9 个 + Notification 2 个 + Label 2 个）、13 个写（Goal/KR、TaskPlan、TaskOccurrence、Routine 全写、`notification_mark_read`）、5 个 assisted Task workflow；OAuth 仍只有 9 个只读工具。写与 assisted 只对 PAT 开放，且每次调用都经过 AI 权限 checkpoint。生产开关尚未翻转，公共 rollout 未完成；开启步骤见 [§10 runbook](#10-一期开启-runbook)。#490/#538/#539 的本地验收只代表代码路径，不代表生产已部署。
 
 先读 [仓库核验](https://github.com/BakerSean168/memoflow/blob/7a45112e1840950ead1ba98b748fc70fa1b38344/docs/analysis/2026-10-07-external-agent-repository-assessment.md) 和 [协议研究](https://github.com/BakerSean168/memoflow/blob/7a45112e1840950ead1ba98b748fc70fa1b38344/docs/analysis/2026-10-07-external-agent-protocol-research.md)。长期决策分别是 [ADR-116：能力边界](./decisions/ADR-116-external-agent-capability-and-gateway-boundary.md)、[ADR-117：授权](./decisions/ADR-117-external-agent-authorization-and-credentials.md)、[ADR-118：写入与工作流](./decisions/ADR-118-external-agent-mutations-and-assisted-workflows.md)。执行顺序以 [实施总方案](https://github.com/BakerSean168/memoflow/issues/490) 为准；[术语表](./glossary.md) 只定义概念。
 
@@ -55,38 +55,40 @@ updated: 2026-11-16T00:00:00Z
 
 ID 使用稳定 snake_case，内部 capability ID 可采用 `goal.get` 等命名；不得将二者用不受控字符串替换相互推导。表中是实现的有限 allowlist；写工具只有显式启用且满足 PAT scope 时才发布。
 
-| 批次 | Tool                            | Owner / scope                      | 行为约束                                                                     |
-| ---- | ------------------------------- | ---------------------------------- | ---------------------------------------------------------------------------- |
-| R1   | `goal_get`                      | Goal / goals:read                  | ID、摘要、KRs、version；不夹带 Task/Knowledge 私密内容                       |
-| R1   | `goal_search`                   | Goal / goals:read                  | 有界查询、确定排序和分页                                                     |
-| R1   | `task_plan_get`                 | Task / tasks:read                  | 返回定义、version、关联引用                                                  |
-| R1   | `task_plan_search`              | Task / tasks:read                  | 按 owner 支持的过滤检索，不承诺不存在的全文搜索                              |
-| R1   | `task_occurrence_get`           | Task / tasks:read                  | 返回执行状态、version、planId                                                |
-| R1   | `task_occurrence_list`          | Task / tasks:read                  | 明确时间范围、时区与分页                                                     |
-| R1   | `notification_list`             | Notification / notifications:read  | 分页列表（page ≤ 20, limit ≤ 50），正文截断 2000 字符；execute-action 不开放 |
-| R1   | `notification_unread_count`     | Notification / notifications:read  | 统计未读通知数量                                                             |
-| R2   | `routine_get`                   | Routine / routines:read            | 单个定义与 trigger revision                                                  |
-| R2   | `routine_list`                  | Routine / routines:read            | 名称/描述过滤、确定排序、有界分页                                            |
-| R2   | `routine_upcoming`              | Routine / routines:read            | epoch 毫秒窗口最长 31 天，单页最多 100 条                                    |
-| W1   | `goal_create`                   | Goal / goals:write                 | initial KRs 与 Goal 原子创建；不自动 activate                                |
-| W1   | `goal_update`                   | Goal / goals:write                 | expectedVersion；首版排除整组 keyResults replacement                         |
-| W1   | `goal_key_result_create/update` | Goal / goals:write                 | 单 KR 命令使用 Goal expectedVersion；不替换整个集合                          |
-| W1   | `task_plan_create`              | Task / tasks:write                 | schedule/reminderPolicy 由 owner 校验；新 binding 另需 goals:write           |
-| W1   | `task_plan_update`              | Task / tasks:write                 | 显式 patch 与 expectedVersion；binding 同上                                  |
-| W1   | `task_occurrence_complete`      | Task / tasks:write                 | 精确 occurrence、并发条件、明确 measurement decision                         |
-| W1   | `routine_create`                | Routine / routines:write           | WallClock 单次或合法 recurrence；另需 `EAG_ROUTINE_WRITE_ENABLED=1`          |
-| W1   | `routine_update`                | Routine / routines:write           | expectedVersion；trigger 仅接受托管 WallClock                                |
-| W1   | `routine_delete`                | Routine / routines:write           | expectedVersion；不可恢复的永久删除                                          |
-| W1   | `routine_pause`                 | Routine / routines:write           | 暂停至指定时刻，最长 30 天                                                   |
-| W1   | `routine_override`              | Routine / routines:write           | snooze/suppress/interval，expiresAt 必填且最长 30 天                         |
-| W1   | `notification_mark_read`        | Notification / notifications:write | 标记通知已读（幂等）；execute-action 动作执行不开放（留三期评估）            |
-| A1   | `assisted_workflow_start`       | Task / tasks:write                 | 启动或恢复一个受审核的 Task planning run                                     |
-| A1   | `assisted_workflow_get`         | Task / tasks:write                 | 读取自有 run 的当前 revision                                                 |
-| A1   | `assisted_workflow_review`      | Task / tasks:write                 | 读取待决定的 typed ask 或 Task draft                                         |
-| A1   | `assisted_workflow_resume`      | Task / tasks:write                 | 回答澄清、批准精确 draft 或恢复 apply                                        |
-| A1   | `assisted_workflow_cancel`      | Task / tasks:write                 | 取消剩余工作并保留已提交的 Task facts                                        |
+| 批次 | Tool                            | Owner / scope                      | 行为约束                                                                                                               |
+| ---- | ------------------------------- | ---------------------------------- | ---------------------------------------------------------------------------------------------------------------------- |
+| R1   | `goal_get`                      | Goal / goals:read                  | ID、摘要、KRs、version；不夹带 Task/Knowledge 私密内容                                                                 |
+| R1   | `goal_search`                   | Goal / goals:read                  | 有界查询、确定排序和分页                                                                                               |
+| R1   | `task_plan_get`                 | Task / tasks:read                  | 返回定义、version、关联引用                                                                                            |
+| R1   | `task_plan_search`              | Task / tasks:read                  | 按 owner 支持的过滤检索，不承诺不存在的全文搜索                                                                        |
+| R1   | `task_occurrence_get`           | Task / tasks:read                  | 返回执行状态、version、planId                                                                                          |
+| R1   | `task_occurrence_list`          | Task / tasks:read                  | 明确时间范围、时区与分页                                                                                               |
+| R1   | `notification_list`             | Notification / notifications:read  | 分页列表（page ≤ 20, limit ≤ 50），正文截断 2000 字符；execute-action 不开放                                           |
+| R1   | `notification_unread_count`     | Notification / notifications:read  | 统计未读通知数量                                                                                                       |
+| R2   | `routine_get`                   | Routine / routines:read            | 单个定义与 trigger revision                                                                                            |
+| R2   | `routine_list`                  | Routine / routines:read            | 名称/描述过滤、确定排序、有界分页                                                                                      |
+| R2   | `routine_upcoming`              | Routine / routines:read            | epoch 毫秒窗口最长 31 天，单页最多 100 条                                                                              |
+| R2   | `label_list`                    | Label / labels:read                | 标签列表与搜索，支持分页与确定排序；有界强类型契约                                                                     |
+| R2   | `label_resolve_names`           | Label / labels:read                | 按名称批量解析标签，返回已知标签列表；不越界查询                                                                       |
+| W1   | `goal_create`                   | Goal / goals:write                 | initial KRs 与 Goal 原子创建；不自动 activate                                                                          |
+| W1   | `goal_update`                   | Goal / goals:write                 | expectedVersion；首版排除整组 keyResults replacement                                                                   |
+| W1   | `goal_key_result_create/update` | Goal / goals:write                 | 单 KR 命令使用 Goal expectedVersion；不替换整个集合                                                                    |
+| W1   | `task_plan_create`              | Task / tasks:write                 | schedule/reminderPolicy 由 owner 校验；新 binding 另需 goals:write；暂不支持 labelIds（传入非空返回 VALIDATION_ERROR） |
+| W1   | `task_plan_update`              | Task / tasks:write                 | 显式 patch 与 expectedVersion；binding 同上；暂不支持 labelIds（传入非空返回 VALIDATION_ERROR）                        |
+| W1   | `task_occurrence_complete`      | Task / tasks:write                 | 精确 occurrence、并发条件、明确 measurement decision                                                                   |
+| W1   | `routine_create`                | Routine / routines:write           | WallClock 单次或合法 recurrence；另需 `EAG_ROUTINE_WRITE_ENABLED=1`                                                    |
+| W1   | `routine_update`                | Routine / routines:write           | expectedVersion；trigger 仅接受托管 WallClock                                                                          |
+| W1   | `routine_delete`                | Routine / routines:write           | expectedVersion；不可恢复的永久删除                                                                                    |
+| W1   | `routine_pause`                 | Routine / routines:write           | 暂停至指定时刻，最长 30 天                                                                                             |
+| W1   | `routine_override`              | Routine / routines:write           | snooze/suppress/interval，expiresAt 必填且最长 30 天                                                                   |
+| W1   | `notification_mark_read`        | Notification / notifications:write | 标记通知已读（幂等）；execute-action 动作执行不开放（留三期评估）                                                      |
+| A1   | `assisted_workflow_start`       | Task / tasks:write                 | 启动或恢复一个受审核的 Task planning run                                                                               |
+| A1   | `assisted_workflow_get`         | Task / tasks:write                 | 读取自有 run 的当前 revision                                                                                           |
+| A1   | `assisted_workflow_review`      | Task / tasks:write                 | 读取待决定的 typed ask 或 Task draft                                                                                   |
+| A1   | `assisted_workflow_resume`      | Task / tasks:write                 | 回答澄清、批准精确 draft 或恢复 apply                                                                                  |
+| A1   | `assisted_workflow_cancel`      | Task / tasks:write                 | 取消剩余工作并保留已提交的 Task facts                                                                                  |
 
-R1 为 **8 个工具**（Goal 2 个 + Task 4 个 + Notification 2 个），R2 为 **3 个 Routine 只读工具**，W1 为 **13 个写工具**（含 `notification_mark_read`），A1 为 **5 个 assisted 工具**，合计 **29 个**。OAuth 仍只有九个只读工具；写与 assisted 仅对 PAT 发布，且需要对应 write scope 和相应开关。MCP 自带发现功能足够，不新增 `capabilities_list` 平台 API。
+R1 为 **8 个工具**（Goal 2 个 + Task 4 个 + Notification 2 个），R2 为 **3 个 Routine 只读工具与 2 个 Label 只读工具**，W1 为 **13 个写工具**（含 `notification_mark_read`），A1 为 **5 个 assisted 工具**，合计 **31 个**。OAuth 仍只有九个只读工具；写与 assisted 仅对 PAT 发布，且需要对应 write scope 和相应开关。MCP 自带发现功能足够，不新增 `capabilities_list` 平台 API。
 
 ### 跨 owner 权限
 
@@ -95,6 +97,15 @@ read scope 与 write scope 不互相隐含。MCP write 结果只返回该写操�
 Task 的已配置 Goal contribution 是完成动作的一部分，`tasks:write` consent 必须说明它会按既有配置影响目标进度；它不授权直接更新任意 Goal/KR。创建或更改 binding 要求 `tasks:write + goals:write` 及双方归属，不能靠对已有 Task 的写权限引入新 Goal 影响。读取 Goal 名称/测量上下文仍需 `goals:read`；没有时只允许 complete-only，不能偷偷取 protected context。
 
 Notification 域在 #990 接入：开放 `notification_list` 与 `notification_unread_count` 读工具及 `notification_mark_read` 写工具。**execute-action 动作执行明确不开放**（动作执行牵涉各业务域副作用，留三期评估），在工具清单与文档中均明确标注。Planner/Knowledge 的扩展按真实需求单列在 [#539](https://github.com/BakerSean168/memoflow/issues/539)；Routine 读写已随 [#972](https://github.com/BakerSean168/memoflow/issues/972) 二期注册，写工具由 `EAG_ROUTINE_WRITE_ENABLED` 单独开关，其余工具尚未注册。
+
+### 标签写操作显式拒绝契约（#993）
+
+云端 MCP 二期仅开放 `labels:read` 读工具（`label_list`、`label_resolve_names`）。写侧维持对标签创建与分配的一刀切拒绝，但将其固化为显式契约：
+
+- **拒绝入口**：`task_plan_create`（传入非空 `plan.labelIds`）、`task_plan_update`（传入非空 `changes.labelIds`），以及 `assisted_workflow_*` 生成含标签变更草案并审批提交时。
+- **错误码**：返回确定性错误码 `VALIDATION_ERROR`（对外错误文本即该 code；标签写不另造业务错误体系）。
+- **暂不开放原因**：标签体系涉及跨实体双向引用和组织治理策略，目前 External Agent 尚未建立标签生命周期与写安全模型，为避免脏数据和多端同步不一致，暂不开放外部 Agent 写入标签。
+- **回归保证**：写端口与 assisted workflow 集成测试包含显式回归用例，确保写拒绝路径不退化。
 
 ## 5. 输入、时间、结果与分页
 
@@ -162,7 +173,7 @@ Elapsed/ActiveUsage/专注 protocol 需要设备本地执行，暂不通过 Host
 
 | 项目         | 交付状态                                                                            | file:line 证据                                                                                                                                                                                                                |
 | ------------ | ----------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| EAG-01/02/03 | Accepted：PAT + 九只读工具                                                          | `packages/cloud-auth/src/server/scoped-pat.ts`；`packages/agent-gateway/src/server/register-read-tools.ts`                                                                                                                    |
+| EAG-01/02/03 | Accepted：PAT + 十三只读工具                                                        | `packages/cloud-auth/src/server/scoped-pat.ts`；`packages/agent-gateway/src/server/register-read-tools.ts`                                                                                                                    |
 | EAG-04       | Accepted：OAuth 实现及历史本地生命周期验收；公共 rollout 未交付                     | `packages/cloud-auth/src/server/external-agent-oauth.ts`                                                                                                                                                                      |
 | EAG-05       | Accepted：历史本地 PG/浏览器/两 CLI 只读验收；未证明生产部署                        | `docs/analysis/2026-10-07-eag-04-oauth-read-evidence.md`                                                                                                                                                                      |
 | EAG-06/07/08 | Accepted：PostgreSQL 通用 receipt + 12 个 PAT 写工具（含 Routine 全写）             | `apps/api/src/modules/agent-gateway/write.port.ts`；`apps/api/src/__tests__/integration/agent-gateway-write.integration.test.ts`、`agent-gateway-assembly.integration.test.ts`                                                |
@@ -196,8 +207,8 @@ Elapsed/ActiveUsage/专注 protocol 需要设备本地执行，暂不通过 Host
 
 开启顺序（每步验证后再下一步）：
 
-1. 总开关 + audience + cursor secret：`EAG_READ_PILOT_ENABLED=1`。验证 `/<api-host>/mcp` 可认证、PAT 创建/列表/撤销可用、9 个只读工具可用。
-2. 写：`EAG_WRITE_ENABLED=1`。用带 `goals:write`/`tasks:write` 的 PAT 验证 `goal_create`、`task_plan_create` 与重放。
+1. 总开关 + audience + cursor secret：`EAG_READ_PILOT_ENABLED=1`。验证 `/<api-host>/mcp` 可认证、PAT 创建/列表/撤销可用、13 个只读工具可用（含 `labels:read` 授权下的 `label_list`、`label_resolve_names`）。
+2. 写：`EAG_WRITE_ENABLED=1`。用带 `goals:write`/`tasks:write` 的 PAT 验证 `goal_create`、`task_plan_create` 与重放。注意：写侧暂不开放标签写入，`task_plan_create` / `task_plan_update` 传入非空 `labelIds` 时应返回显式 `VALIDATION_ERROR`。
 3. Routine：`EAG_ROUTINE_WRITE_ENABLED=1`。用 `routines:read`/`routines:write` 验证 `routine_list`、`routine_upcoming` 与 `routine_create/update/delete/pause/override`。
 4. Assisted：`EAG_ASSISTED_ENABLED=1`。验证 `assisted_workflow_start → review → resume(approve)`。
 5. OAuth（可选）：最后再开 `EAG_OAUTH_ENABLED=1`。

@@ -12,6 +12,8 @@ import {
   TaskPlanSearchOutputSchema,
   TaskOccurrenceGetOutputSchema,
   TaskOccurrenceListOutputSchema,
+  LabelListOutputSchema,
+  LabelResolveNamesOutputSchema,
   RoutineGetOutputSchema,
   RoutineListOutputSchema,
   RoutineUpcomingOutputSchema,
@@ -29,6 +31,7 @@ import {
   type GoalReadPort,
   type NotificationReadPort,
   type TaskReadPort,
+  type LabelReadPort,
   type RoutineReadPort,
   type AssistantConversationReadPort,
   type AgentArchiveReadPort,
@@ -45,6 +48,7 @@ export interface ReadToolCall {
     scope:
       | 'goals:read'
       | 'tasks:read'
+      | 'labels:read'
       | 'routines:read'
       | 'goals:write'
       | 'tasks:write'
@@ -138,6 +142,7 @@ export function registerReadTools(
     cursorSecret: string;
     goals: GoalReadPort;
     tasks?: TaskReadPort;
+    labels?: LabelReadPort;
     notification?: NotificationReadPort;
     routines?: RoutineReadPort;
     assistantConversation?: AssistantConversationReadPort;
@@ -604,6 +609,32 @@ export function registerReadTools(
             count: await notification.getUnreadCount(context, budget),
           }),
         ),
+    );
+  }
+  if (options.labels && scopes.includes('labels:read')) {
+    server.registerTool(
+      'label_list',
+      readToolDescriptors.label_list.definition,
+      ({ search, limit }) =>
+        call('label_list', 'labels:read', async () => {
+          const items = await options.labels!.list({ search, limit }, context, budget);
+          const { items: fitted } = fitPage(items);
+          return LabelListOutputSchema.parse({
+            items: fitted,
+          });
+        }),
+    );
+    server.registerTool(
+      'label_resolve_names',
+      readToolDescriptors.label_resolve_names.definition,
+      ({ names }) =>
+        call('label_resolve_names', 'labels:read', async () => {
+          const items = await options.labels!.resolveNames(names ?? [], context, budget);
+          const { items: fitted } = fitPage(items);
+          return LabelResolveNamesOutputSchema.parse({
+            items: fitted,
+          });
+        }),
     );
   }
 }
