@@ -280,25 +280,129 @@ export type ClearRoutineTemporaryOverrideRequest = z.infer<
 >;
 export type RoutineMutationReceipt = z.infer<typeof RoutineMutationReceiptSchema>;
 
-/** Finite hosted one-shot creation; owner fields stay canonical here. */
-export const RoutineAgentCreateSchema = CreateRoutineRequestSchema.pick({ name: true })
+const AgentIdempotencyKeySchema = z.string().trim().min(1).max(200);
+const AgentRoutineIdSchema = z.uuid();
+
+/** Hosted recurrence keeps the owner contract but bounds values a remote agent may set. */
+export const RoutineAgentRecurrenceSchema = RoutineWallClockTriggerSchema.shape.recurrence
   .extend({
-    idempotencyKey: z.string().trim().min(1).max(200),
-    description: RoutineDescriptionSchema.optional(),
-    trigger: RoutineWallClockTriggerSchema.pick({ type: true, localTime: true, timeZone: true })
-      .extend({ startDate: RoutineWallClockTriggerSchema.shape.recurrence.shape.startDate })
-      .strict(),
+    interval: z.number().int().min(1).max(366),
+    count: z.number().int().min(1).max(1000).nullable(),
+    byWeekday: z.array(z.number().int().min(0).max(6)).max(7),
   })
+  .refine((value) => new Set(value.byWeekday).size === value.byWeekday.length, {
+    message: 'Duplicate recurrence weekdays',
+    path: ['byWeekday'],
+  });
+
+/**
+ * A hosted WallClock trigger. `startDate` keeps the original one-shot
+ * shorthand; `recurrence` passes a full owner recurrence through unchanged.
+ * Exactly one is required so an ambiguous schedule can never be interpreted
+ * two ways.
+ */
+export const RoutineAgentTriggerSchema = z
+  .strictObject({
+    type: z.literal('WallClock'),
+    localTime: HmSchema,
+    timeZone: TimeZoneIdSchema,
+    startDate: YmdSchema.optional(),
+    recurrence: RoutineAgentRecurrenceSchema.optional(),
+  })
+  .refine((value) => (value.startDate === undefined) !== (value.recurrence === undefined), {
+    message: 'Provide exactly one of startDate or recurrence',
+    path: ['recurrence'],
+  });
+
+export const RoutineAgentCreateSchema = z.strictObject({
+  idempotencyKey: AgentIdempotencyKeySchema,
+  name: RoutineNameSchema,
+  description: RoutineDescriptionSchema.optional(),
+  trigger: RoutineAgentTriggerSchema,
+});
+
+export const RoutineAgentUpdateSchema = z
+  .strictObject({
+    idempotencyKey: AgentIdempotencyKeySchema,
+    routineId: AgentRoutineIdSchema,
+    expectedVersion: z.number().int().positive(),
+    name: RoutineNameSchema.optional(),
+    description: RoutineDescriptionSchema.nullable().optional(),
+    enabled: z.boolean().optional(),
+    trigger: RoutineWallClockTriggerSchema.nullable().optional(),
+  })
+  .refine(
+    (value) =>
+      value.name !== undefined ||
+      value.description !== undefined ||
+      value.enabled !== undefined ||
+      value.trigger !== undefined,
+    { message: 'At least one Routine field must be updated' },
+  );
+
+export const RoutineAgentDeleteSchema = z.strictObject({
+  idempotencyKey: AgentIdempotencyKeySchema,
+  routineId: AgentRoutineIdSchema,
+  expectedVersion: z.number().int().positive(),
+});
+
+/** A pause is a snooze bounded by the caller-supplied instant. */
+export const RoutineAgentPauseSchema = z.strictObject({
+  idempotencyKey: AgentIdempotencyKeySchema,
+  routineId: AgentRoutineIdSchema,
+  until: z.number().int().positive(),
+  reason: z.string().trim().min(1).max(1000),
+});
+
+export const RoutineAgentOverrideSchema = z
+  .strictObject({
+    idempotencyKey: AgentIdempotencyKeySchema,
+    routineId: AgentRoutineIdSchema,
+    snoozeUntil: z.number().int().nonnegative().nullable().optional(),
+    suppressUntil: z.number().int().nonnegative().nullable().optional(),
+    overrideIntervalMs: z.number().int().min(1000).max(604_800_000).nullable().optional(),
+    expiresAt: z.number().int().positive(),
+    reason: z.string().trim().min(1).max(1000),
+  })
+  .refine(
+    (value) =>
+      value.snoozeUntil != null || value.suppressUntil != null || value.overrideIntervalMs != null,
+    { message: 'Temporary override must define at least one effect' },
+  );
+
+const RoutineAgentRoutineProjectionSchema = RoutineDefinitionSchema.pick({
+  id: true,
+  version: true,
+  name: true,
+})
+  .extend({ id: z.uuid() })
   .strict();
+
 export const RoutineAgentPersistedReceiptSchema = z.strictObject({
   receiptId: z.string().regex(/^[a-f0-9]{64}$/),
   result: z.strictObject({
-    routine: RoutineDefinitionSchema.pick({ id: true, version: true, name: true })
-      .extend({ id: z.uuid() })
-      .strict(),
+    routine: RoutineAgentRoutineProjectionSchema,
     scheduledFor: z.number().int().positive(),
   }),
 });
+export const RoutineAgentUpdateReceiptSchema = z.strictObject({
+  receiptId: z.string().regex(/^[a-f0-9]{64}$/),
+  result: z.strictObject({ routine: RoutineAgentRoutineProjectionSchema }),
+});
+export const RoutineAgentDeleteReceiptSchema = z.strictObject({
+  receiptId: z.string().regex(/^[a-f0-9]{64}$/),
+  result: z.strictObject({ routineId: z.uuid() }),
+});
+export const RoutineAgentOverrideReceiptSchema = z.strictObject({
+  receiptId: z.string().regex(/^[a-f0-9]{64}$/),
+  result: z.strictObject({
+    routineId: z.uuid(),
+    override: RoutineTemporaryOverrideSchema.nullable(),
+  }),
+});
 export type RoutineAgentPersistedReceipt = z.infer<typeof RoutineAgentPersistedReceiptSchema>;
+export type RoutineAgentUpdateReceipt = z.infer<typeof RoutineAgentUpdateReceiptSchema>;
+export type RoutineAgentDeleteReceipt = z.infer<typeof RoutineAgentDeleteReceiptSchema>;
+export type RoutineAgentOverrideReceipt = z.infer<typeof RoutineAgentOverrideReceiptSchema>;
 
 export type RoutineProfileId = string & { readonly __brand: 'RoutineProfileId' };

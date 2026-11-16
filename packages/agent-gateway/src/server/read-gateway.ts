@@ -19,6 +19,7 @@ import {
   type GatewayCredentialPort,
   type GoalReadPort,
   type TaskReadPort,
+  type RoutineReadPort,
 } from '../ports';
 
 interface Options {
@@ -33,6 +34,7 @@ interface Options {
   readonly resourceMetadataUrl?: string;
   readonly goals: GoalReadPort;
   readonly tasks?: TaskReadPort;
+  readonly routines?: RoutineReadPort;
   readonly audit: (event: GatewayAuditEvent) => void;
   readonly timeoutMs?: number;
   readonly diagnose?: (event: GatewayDiagnostic) => void;
@@ -53,6 +55,16 @@ function isWriteToolName(name: string): name is GatewayWriteToolName {
 function isAssistedToolName(name: string): name is GatewayAssistedToolName {
   return Object.prototype.hasOwnProperty.call(assistedToolDescriptors, name);
 }
+/** Routine writes publish only when the host bound that owner operation. */
+const ROUTINE_WRITE_METHODS: Readonly<
+  Partial<Record<GatewayWriteToolName, keyof GatewayWritePort>>
+> = {
+  routine_create: 'routineCreate',
+  routine_update: 'routineUpdate',
+  routine_delete: 'routineDelete',
+  routine_pause: 'routinePause',
+  routine_override: 'routineOverride',
+};
 const MAX_BYTES = 256 * 1024;
 class ControlledError extends GatewayReadError {}
 async function boundedBody(
@@ -173,6 +185,7 @@ export function createReadGateway(options: Options) {
             (scope) =>
               scope === 'goals:read' ||
               scope === 'tasks:read' ||
+              scope === 'routines:read' ||
               ((options.writes || options.assisted) &&
                 principal.credentialType === 'pat' &&
                 (scope === 'goals:write' || scope === 'tasks:write' || scope === 'routines:write')),
@@ -220,7 +233,8 @@ export function createReadGateway(options: Options) {
                 scopeDecision = 'denied';
                 return reject(404, 'DISABLED');
               }
-              if (name === 'routine_create' && !options.writes?.routineCreate) {
+              const routineWrite = ROUTINE_WRITE_METHODS[name as GatewayWriteToolName];
+              if (routineWrite && !options.writes?.[routineWrite]) {
                 scopeDecision = 'denied';
                 return reject(404, 'DISABLED');
               }
@@ -232,6 +246,10 @@ export function createReadGateway(options: Options) {
                 return reject(404, 'DISABLED');
               }
               if (!isWriteToolName(name) && name.startsWith('task_') && !options.tasks) {
+                scopeDecision = 'denied';
+                return reject(404, 'DISABLED');
+              }
+              if (!isWriteToolName(name) && name.startsWith('routine_') && !options.routines) {
                 scopeDecision = 'denied';
                 return reject(404, 'DISABLED');
               }
@@ -250,6 +268,7 @@ export function createReadGateway(options: Options) {
           requiredScope:
             | 'goals:read'
             | 'tasks:read'
+            | 'routines:read'
             | 'goals:write'
             | 'tasks:write'
             | 'routines:write',

@@ -43,6 +43,7 @@ export default {
       goalsWrite: 'Goals 写入',
       tasksRead: 'Tasks 只读',
       tasksWrite: 'Tasks 写入',
+      routinesRead: 'Routines 只读',
       routinesWrite: 'Routines 写入',
       offlineAccess: '保持连接',
     },

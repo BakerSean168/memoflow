@@ -32,6 +32,7 @@ const scopeOptions = [
   'goals:write',
   'tasks:read',
   'tasks:write',
+  'routines:read',
   'routines:write',
 ] as const;
 type PatScope = (typeof scopeOptions)[number];
@@ -40,6 +41,7 @@ const selectedScopes = ref<Record<PatScope, boolean>>({
   'goals:write': false,
   'tasks:read': true,
   'tasks:write': false,
+  'routines:read': false,
   'routines:write': false,
 });
 const expiryOptions = ['7', '30', '90', '365'] as const;
@@ -55,6 +57,7 @@ const scopeName = (scope: string) =>
     'goals:write': t('account.externalAgents.scopes.goalsWrite'),
     'tasks:read': t('account.externalAgents.scopes.tasksRead'),
     'tasks:write': t('account.externalAgents.scopes.tasksWrite'),
+    'routines:read': t('account.externalAgents.scopes.routinesRead'),
     'routines:write': t('account.externalAgents.scopes.routinesWrite'),
     offline_access: t('account.externalAgents.scopes.offlineAccess'),
   })[scope] ?? scope;

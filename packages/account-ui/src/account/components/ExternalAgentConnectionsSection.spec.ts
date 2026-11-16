@@ -63,7 +63,7 @@ describe('ExternalAgentConnectionsSection PAT issuing (#970)', () => {
     const { wrapper, service } = fixture();
     await flushPromises();
 
-    expect(wrapper.findAll('[data-testid^="pat-scope-"]')).toHaveLength(5);
+    expect(wrapper.findAll('[data-testid^="pat-scope-"]')).toHaveLength(6);
     expect(wrapper.find('[data-testid="pat-write-warning"]').exists()).toBe(false);
 
     await nameToken(wrapper, 'daily agent');
@@ -98,11 +98,11 @@ describe('ExternalAgentConnectionsSection PAT issuing (#970)', () => {
     });
   });
 
-  it('offers every existing write scope for issuing', async () => {
+  it('offers every existing routine scope for issuing', async () => {
     const { wrapper, service } = fixture();
     await flushPromises();
 
-    for (const scope of ['tasks:write', 'routines:write']) {
+    for (const scope of ['tasks:write', 'routines:read', 'routines:write']) {
       await wrapper.get(`[data-testid="pat-scope-${scope}"] [role="checkbox"]`).trigger('click');
     }
     await nameToken(wrapper, 'full writer');
@@ -111,7 +111,7 @@ describe('ExternalAgentConnectionsSection PAT issuing (#970)', () => {
     expect(service.createPat).toHaveBeenCalledWith({
       name: 'full writer',
       expiresInDays: 90,
-      scopes: ['goals:read', 'tasks:read', 'tasks:write', 'routines:write'],
+      scopes: ['goals:read', 'tasks:read', 'tasks:write', 'routines:read', 'routines:write'],
     });
   });
 });

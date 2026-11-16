@@ -1,7 +1,14 @@
 import { z } from 'zod';
 import {
   RoutineAgentCreateSchema,
+  RoutineAgentDeleteReceiptSchema,
+  RoutineAgentDeleteSchema,
+  RoutineAgentOverrideReceiptSchema,
+  RoutineAgentOverrideSchema,
+  RoutineAgentPauseSchema,
   RoutineAgentPersistedReceiptSchema,
+  RoutineAgentUpdateReceiptSchema,
+  RoutineAgentUpdateSchema,
 } from '@memoflow/routine-contracts';
 import {
   GoalAgentCreateSchema,
@@ -49,6 +56,19 @@ export const GatewayTaskReceiptSchema = TaskAgentPersistedReceiptSchema.extend({
 });
 
 export const GatewayRoutineCreateSchema = RoutineAgentCreateSchema;
+export const GatewayRoutineUpdateSchema = RoutineAgentUpdateSchema;
+export const GatewayRoutineDeleteSchema = RoutineAgentDeleteSchema;
+export const GatewayRoutinePauseSchema = RoutineAgentPauseSchema;
+export const GatewayRoutineOverrideSchema = RoutineAgentOverrideSchema;
 export const GatewayRoutineReceiptSchema = RoutineAgentPersistedReceiptSchema.extend({
+  replayed: z.boolean().optional(),
+});
+export const GatewayRoutineUpdateReceiptSchema = RoutineAgentUpdateReceiptSchema.extend({
+  replayed: z.boolean().optional(),
+});
+export const GatewayRoutineDeleteReceiptSchema = RoutineAgentDeleteReceiptSchema.extend({
+  replayed: z.boolean().optional(),
+});
+export const GatewayRoutineOverrideReceiptSchema = RoutineAgentOverrideReceiptSchema.extend({
   replayed: z.boolean().optional(),
 });
