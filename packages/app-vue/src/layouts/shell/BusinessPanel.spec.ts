@@ -16,6 +16,7 @@ const i18n = createI18n({
       nav: { capsule: { goal: 'Goals' } },
       shell: {
         moduleNav: 'Module navigation',
+        hideSidePanel: 'Hide side panel',
         panel: {
           home: 'Today',
           workflow: 'Workflow',
@@ -31,6 +32,7 @@ const i18n = createI18n({
       nav: { capsule: { goal: '目标' } },
       shell: {
         moduleNav: '模块导航',
+        hideSidePanel: '隐藏右侧面板',
         panel: {
           home: '今天',
           workflow: '工作流',
@@ -296,6 +298,50 @@ describe('BusinessPanel surfaces', () => {
       expect(root.classes()).toContain('overflow-hidden');
       expect(root.findAll('[data-scroll-host]')).toHaveLength(1);
     }
+  });
+
+  it('collapses the panel from the focus control when the viewport forces focus', async () => {
+    const wrapper = mount(BusinessPanel, {
+      props: {
+        tabs,
+        activeTabId: 'tab-goal-1',
+        layout: 'focus',
+        panelSurface: 'business',
+        focusExitCollapsesPanel: true,
+      },
+      global: { plugins: [i18n] },
+    });
+
+    const toggle = wrapper.get('[data-testid="business-panel-focus-toggle"]');
+    // 分栏不成立时按钮承诺的是收起面板，而不是「退出专注到分栏」。
+    expect(toggle.attributes('aria-label')).toBe('Hide side panel');
+    expect(toggle.attributes('title')).toBe('Hide side panel');
+
+    await toggle.trigger('click');
+
+    expect(wrapper.emitted('collapse-panel')).toHaveLength(1);
+    expect(wrapper.emitted('toggle-focus')).toBeUndefined();
+  });
+
+  it('keeps the focus/split toggle when split geometry holds', async () => {
+    const wrapper = mount(BusinessPanel, {
+      props: {
+        tabs,
+        activeTabId: 'tab-goal-1',
+        layout: 'focus',
+        panelSurface: 'business',
+        focusExitCollapsesPanel: false,
+      },
+      global: { plugins: [i18n] },
+    });
+
+    const toggle = wrapper.get('[data-testid="business-panel-focus-toggle"]');
+    expect(toggle.attributes('aria-label')).toBe('Exit focus');
+
+    await toggle.trigger('click');
+
+    expect(wrapper.emitted('toggle-focus')).toHaveLength(1);
+    expect(wrapper.emitted('collapse-panel')).toBeUndefined();
   });
 });
 

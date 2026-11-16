@@ -24,6 +24,7 @@ import {
   ListTodo,
   Maximize2,
   Minimize2,
+  PanelRightClose,
   Repeat2,
   Target,
   X,
@@ -39,6 +40,11 @@ const props = defineProps<{
   activeTabId: string | null;
   layout: ShellLayout;
   panelSurface: PanelSurface;
+  /**
+   * 视口强制的 focus（分栏几何不成立）：此时没有可落的分栏，
+   * 面板内的专注开关改为收起面板（#965）。
+   */
+  focusExitCollapsesPanel?: boolean;
 }>();
 
 const emit = defineEmits<{
@@ -46,6 +52,7 @@ const emit = defineEmits<{
   (e: 'close-tab', id: string): void;
   (e: 'show-home'): void;
   (e: 'toggle-focus'): void;
+  (e: 'collapse-panel'): void;
 }>();
 
 const { t } = useI18n();
@@ -81,6 +88,23 @@ const moduleIcons: Record<ShellModule, Component> = {
 };
 
 const isFocused = computed(() => props.layout === 'focus');
+
+/** 分栏几何不成立时「退出专注」无处可去，开关语义换成收起面板（#965）。 */
+const collapsesPanel = computed(() => isFocused.value && props.focusExitCollapsesPanel === true);
+
+const focusActionLabel = computed(() => {
+  if (collapsesPanel.value) return t('shell.hideSidePanel');
+  return isFocused.value ? t('shell.panel.exitFocus') : t('shell.panel.enterFocus');
+});
+
+const focusActionIcon = computed<Component>(() => {
+  if (collapsesPanel.value) return PanelRightClose;
+  return isFocused.value ? Minimize2 : Maximize2;
+});
+
+function handleFocusAction(): void {
+  emit(collapsesPanel.value ? 'collapse-panel' : 'toggle-focus');
+}
 
 const tabDensity = computed<BusinessTabDensity>(() =>
   resolveBusinessTabDensity(panelContentWidth.value ?? 720, props.tabs.length),
@@ -249,11 +273,11 @@ function handleTabKeydown(event: KeyboardEvent, tabId: string): void {
           type="button"
           data-testid="business-panel-focus-toggle"
           class="flex h-8 w-8 items-center justify-center rounded-md text-[hsl(var(--foreground-subtle))] transition-[background-color,color] duration-150 hover:bg-[hsl(var(--hover))] hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/70"
-          :title="isFocused ? t('shell.panel.exitFocus') : t('shell.panel.enterFocus')"
-          :aria-label="isFocused ? t('shell.panel.exitFocus') : t('shell.panel.enterFocus')"
-          @click="emit('toggle-focus')"
+          :title="focusActionLabel"
+          :aria-label="focusActionLabel"
+          @click="handleFocusAction"
         >
-          <component :is="isFocused ? Minimize2 : Maximize2" class="h-3.5 w-3.5" />
+          <component :is="focusActionIcon" class="h-3.5 w-3.5" />
         </button>
       </div>
     </div>

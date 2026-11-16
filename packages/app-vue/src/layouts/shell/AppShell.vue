@@ -183,6 +183,7 @@ const {
   startSidebarResize,
   resizeSidebarBy,
   effectivePanelWidth,
+  viewportFocusForced,
   onViewportGeometryChange,
   startPanelResize,
   resetPanelWidth,
@@ -298,6 +299,10 @@ const conversationGroups = computed(() => {
 const activeConversationId = computed<string | null>(
   () => (aiRef.value?.chatConversationId as string | undefined) || null,
 );
+/**
+ * 面板内的专注开关：视口强制的 focus 由面板改发 collapse-panel（#965），
+ * 这里只处理几何允许时真正的 focus ⇄ split 切换。
+ */
 function handleToggleWorkspaceFocus(): void {
   store.toggleFocus();
   // 用户偏好与 viewport 临时约束分开；窄屏仍需满足几何下限。
@@ -1048,10 +1053,12 @@ onBeforeUnmount(() => {
               :active-tab-id="activeTabId"
               :layout="layout"
               :panel-surface="panelSurface"
+              :focus-exit-collapses-panel="viewportFocusForced"
               @activate-tab="(id: string) => void sync.activateTab(id)"
               @close-tab="(id: string) => void sync.closeTab(id)"
               @show-home="() => void sync.goHome()"
               @toggle-focus="handleToggleWorkspaceFocus"
+              @collapse-panel="() => void sync.closePanel()"
             >
               <template #home>
                 <TodayOverviewPanel

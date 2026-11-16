@@ -306,6 +306,7 @@ const i18n = createI18n({
         schedule: 'Schedule',
       },
       shell: {
+        hideSidePanel: 'Hide side panel',
         update: {
           ready: 'Update {version} ready',
           attention: 'Update needs attention',
@@ -920,6 +921,54 @@ describe('AppShell right-panel integration', () => {
     expect(store.layout).toBe('focus');
     expect(store.layoutReason).toBe('viewport');
     expect(wrapper.get('[data-testid="app-shell"]').attributes('data-shell-state')).toBe('focus');
+    wrapper.unmount();
+  });
+
+  it('collapses the panel from the focus control when 1024px cannot hold a split (#965)', async () => {
+    Object.defineProperty(window, 'innerWidth', {
+      configurable: true,
+      value: 1024,
+    });
+    const { wrapper, store } = await mountShell('/goals');
+
+    // 1024 - docked sidebar 260 - chrome 8 = 756px 内容区 < AI 320 + 业务 520。
+    expect(store.layout).toBe('focus');
+    expect(store.layoutReason).toBe('viewport');
+    expect(wrapper.find('[data-testid="global-composer"]').exists()).toBe(false);
+    const toggle = wrapper.get('[data-testid="business-panel-focus-toggle"]');
+    expect(toggle.attributes('aria-label')).toBe('Hide side panel');
+
+    await toggle.trigger('click');
+    await flushPromises();
+    await nextTick();
+
+    expect(store.rightPanelOpen).toBe(false);
+    // 收起面板不改写用户布局偏好（旧行为会把 split 持久化后立刻回滚）。
+    expect(store.layoutPreference).toBeNull();
+    expect(wrapper.get('[data-testid="app-shell"]').attributes('data-shell-state')).toBe('chat');
+    expect(wrapper.find('[data-testid="global-composer"]').exists()).toBe(true);
+    wrapper.unmount();
+  });
+
+  it('keeps the focus/split toggle where split geometry holds', async () => {
+    const { wrapper, store } = await mountShell('/goals');
+    expect(store.layout).toBe('split');
+    expect(
+      wrapper.get('[data-testid="business-panel-focus-toggle"]').attributes('aria-label'),
+    ).toBe('Enter focus');
+
+    await wrapper.get('[data-testid="business-panel-focus-toggle"]').trigger('click');
+    await nextTick();
+    expect(store.layout).toBe('focus');
+    expect(store.layoutReason).toBe('user');
+    expect(store.rightPanelOpen).toBe(true);
+    expect(wrapper.find('[data-testid="global-composer"]').exists()).toBe(false);
+
+    await wrapper.get('[data-testid="business-panel-focus-toggle"]').trigger('click');
+    await nextTick();
+    expect(store.layout).toBe('split');
+    expect(store.layoutPreference).toBe('split');
+    expect(wrapper.find('[data-testid="global-composer"]').exists()).toBe(true);
     wrapper.unmount();
   });
 
