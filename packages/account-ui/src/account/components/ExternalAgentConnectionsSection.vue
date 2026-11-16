@@ -1,12 +1,19 @@
 <script setup lang="ts">
-import { inject, onMounted, ref } from 'vue';
+import { computed, inject, onMounted, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import type {
   OAuthConnection,
   ScopedPatSummary,
   ExternalAgentFailureCode,
 } from '@memoflow/agent-gateway';
-import { Button, Checkbox, Input, Textarea } from '@memoflow/ui-vue-shadcn';
+import {
+  Button,
+  Checkbox,
+  Input,
+  RadioGroup,
+  RadioGroupItem,
+  Textarea,
+} from '@memoflow/ui-vue-shadcn';
 import { accountUiHost } from '../../account-ui-host';
 
 const injected = inject(accountUiHost.EXTERNAL_AGENT_SERVICE_KEY);
@@ -20,12 +27,37 @@ const error = ref<ExternalAgentFailureCode>();
 const connections = ref<OAuthConnection[]>([]);
 const pats = ref<ScopedPatSummary[]>([]);
 const name = ref('');
-const goals = ref(true);
-const tasks = ref(true);
+const scopeOptions = [
+  'goals:read',
+  'goals:write',
+  'tasks:read',
+  'tasks:write',
+  'routines:write',
+] as const;
+type PatScope = (typeof scopeOptions)[number];
+const selectedScopes = ref<Record<PatScope, boolean>>({
+  'goals:read': true,
+  'goals:write': false,
+  'tasks:read': true,
+  'tasks:write': false,
+  'routines:write': false,
+});
+const expiryOptions = ['7', '30', '90', '365'] as const;
+const expiresInDays = ref<(typeof expiryOptions)[number]>('90');
+const chosenScopes = computed(() => scopeOptions.filter((scope) => selectedScopes.value[scope]));
+const carriesWriteScope = computed(() =>
+  chosenScopes.value.some((scope) => scope.endsWith(':write')),
+);
 const secret = ref('');
 const scopeName = (scope: string) =>
-  ({ 'goals:read': 'Goals 只读', 'tasks:read': 'Tasks 只读', offline_access: '保持连接' })[scope] ??
-  scope;
+  ({
+    'goals:read': t('account.externalAgents.scopes.goalsRead'),
+    'goals:write': t('account.externalAgents.scopes.goalsWrite'),
+    'tasks:read': t('account.externalAgents.scopes.tasksRead'),
+    'tasks:write': t('account.externalAgents.scopes.tasksWrite'),
+    'routines:write': t('account.externalAgents.scopes.routinesWrite'),
+    offline_access: t('account.externalAgents.scopes.offlineAccess'),
+  })[scope] ?? scope;
 const status = (row: OAuthConnection | ScopedPatSummary) =>
   row.revokedAt ? '已撤销' : Date.parse(row.expiresAt) <= Date.now() ? '已过期' : '已连接';
 
@@ -53,18 +85,15 @@ async function load() {
   }
 }
 async function createPat() {
-  if (!name.value.trim() || (!goals.value && !tasks.value)) return;
+  if (!name.value.trim() || chosenScopes.value.length === 0) return;
   busy.value = true;
   error.value = undefined;
   secret.value = '';
   try {
     const result = await service.createPat({
       name: name.value,
-      expiresInDays: 7,
-      scopes: [
-        ...(goals.value ? ['goals:read' as const] : []),
-        ...(tasks.value ? ['tasks:read' as const] : []),
-      ],
+      expiresInDays: Number(expiresInDays.value),
+      scopes: [...chosenScopes.value],
     });
     if (!result.ok) {
       error.value = result.error.code;
@@ -105,7 +134,7 @@ onMounted(load);
     <header>
       <h2 id="external-agents-heading" class="text-lg font-semibold">已连接的应用 / 外部 Agent</h2>
       <p class="mt-1 text-sm text-muted-foreground">
-        管理能读取你 Goals 和 Tasks 的应用。撤销后，新的访问请求立即失效。
+        管理可访问你的 Goals、Tasks 和 Routines 的应用。撤销后，新的访问请求立即失效。
       </p>
     </header>
     <p v-if="error" role="alert" class="text-sm text-destructive">
@@ -148,7 +177,8 @@ onMounted(load);
     <div class="space-y-3">
       <h3 class="font-medium">Personal Access Tokens</h3>
       <p class="text-sm text-muted-foreground">
-        用于自己的脚本和自托管 Agent。Token 有效期为 7 天，完整密钥只显示一次。
+        用于自己的脚本和自托管 Agent。Token 有效期可选 7/30/90/365 天，默认 90
+        天；完整密钥只显示一次。
       </p>
       <article v-for="pat in pats" :key="pat.id" class="rounded-lg border p-4 text-sm">
         <div class="flex items-center justify-between gap-3">
@@ -180,17 +210,44 @@ onMounted(load);
           placeholder="例如：我的脚本"
           :disabled="busy"
         />
-        <fieldset class="flex gap-4 text-sm" :disabled="busy">
-          <legend class="mb-2">允许读取</legend>
-          <label class="flex items-center gap-2"
-            ><Checkbox v-model="goals" aria-label="Goals" /> Goals</label
-          >
-          <label class="flex items-center gap-2"
-            ><Checkbox v-model="tasks" aria-label="Tasks" /> Tasks</label
-          >
+        <fieldset :disabled="busy">
+          <legend class="mb-2 text-sm font-medium">权限范围</legend>
+          <div class="grid gap-2 text-sm sm:grid-cols-2">
+            <label
+              v-for="scope in scopeOptions"
+              :key="scope"
+              class="flex items-center gap-2"
+              :data-testid="`pat-scope-${scope}`"
+            >
+              <Checkbox v-model="selectedScopes[scope]" :aria-label="scopeName(scope)" />
+              {{ scopeName(scope) }}
+            </label>
+          </div>
         </fieldset>
-        <Button type="submit" :disabled="busy || !name.trim() || (!goals && !tasks)"
-          >创建只读 Token</Button
+        <fieldset :disabled="busy">
+          <legend class="mb-2 text-sm font-medium">有效期</legend>
+          <RadioGroup v-model="expiresInDays" class="flex flex-wrap gap-4 text-sm">
+            <label
+              v-for="days in expiryOptions"
+              :key="days"
+              class="flex items-center gap-2"
+              :data-testid="`pat-expiry-${days}`"
+            >
+              <RadioGroupItem :value="days" :aria-label="`${days} 天`" />
+              {{ days }} 天{{ days === '90' ? '（默认）' : '' }}
+            </label>
+          </RadioGroup>
+        </fieldset>
+        <p
+          v-if="carriesWriteScope"
+          role="status"
+          data-testid="pat-write-warning"
+          class="rounded border border-amber-500/40 bg-amber-500/10 p-3 text-sm text-amber-700 dark:text-amber-300"
+        >
+          {{ t('account.externalAgents.writeWarning') }}
+        </p>
+        <Button type="submit" :disabled="busy || !name.trim() || chosenScopes.length === 0"
+          >创建 Token</Button
         >
       </form>
       <div v-if="secret" class="space-y-2 rounded-lg border p-4" role="status">

@@ -39,6 +39,17 @@ export default {
     revokeConfirmDescription: 'That device will need to sign in again.',
     revokeConfirmText: 'Revoke session',
   },
+  externalAgents: {
+    scopes: {
+      goalsRead: 'Goals (read)',
+      goalsWrite: 'Goals (write)',
+      tasksRead: 'Tasks (read)',
+      tasksWrite: 'Tasks (write)',
+      routinesWrite: 'Routines (write)',
+      offlineAccess: 'Stay connected',
+    },
+    writeWarning: 'Any program holding this token can write directly within the granted scopes.',
+  },
   title: 'Account',
   center: 'Account Center',
   description:
