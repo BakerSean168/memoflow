@@ -109,6 +109,56 @@ it('commits one Goal and immutable receipt, rejects changed inputs and stale ver
     sql.close();
   }
 });
+it('adds and updates a Key Result through the owner with version checks and exact replay', async () => {
+  const { db, sql } = fixture();
+  const port = createGoalPowerSyncAgentMutations(db);
+  const authority = { connectionId: 'connection', authorize: async () => {} };
+  try {
+    const created = await port.create(
+      { idempotencyKey: 'kr-goal', goal: { name: 'Measured Goal' } },
+      cx,
+      authority,
+    );
+    const createInput = {
+      idempotencyKey: 'kr-create',
+      goalId: created.result.goalId,
+      keyResult: {
+        title: 'Read books',
+        targetValue: 6,
+        expectedVersion: created.result.goalVersion,
+      },
+    };
+    const added = await port.createKeyResult(createInput, cx, authority);
+    expect(added.result.goalVersion).toBe(created.result.goalVersion + 1);
+    expect(added.result.affectedEntityIds.keyResultIds).toHaveLength(1);
+    expect(await port.createKeyResult(createInput, cx, authority)).toEqual(added);
+    const keyResultId = added.result.affectedEntityIds.keyResultIds[0]!;
+    const updateInput = {
+      idempotencyKey: 'kr-update',
+      goalId: created.result.goalId,
+      keyResultId,
+      changes: { expectedVersion: added.result.goalVersion, targetValue: 8 },
+    };
+    const updated = await port.updateKeyResult(updateInput, cx, authority);
+    expect(updated.result.goalVersion).toBe(added.result.goalVersion + 1);
+    expect(
+      sql.prepare('SELECT target_value FROM key_results WHERE id = ?').get(keyResultId),
+    ).toMatchObject({ target_value: 8 });
+    await expect(
+      port.updateKeyResult(
+        {
+          ...updateInput,
+          idempotencyKey: 'kr-stale',
+          changes: { expectedVersion: created.result.goalVersion, targetValue: 9 },
+        },
+        cx,
+        authority,
+      ),
+    ).rejects.toMatchObject({ code: 'CONFLICT' });
+  } finally {
+    sql.close();
+  }
+});
 it('rolls back the real Goal mutation when receipt persistence fails', async () => {
   const { db, sql } = fixture();
   const events: string[] = [];

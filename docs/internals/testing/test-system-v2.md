@@ -15,7 +15,7 @@ updated: Sun 2026-10-18 9:50 PM CST (UTC+08:00)
 > `.github/rulesets/main.json` 是执行真源；本文件只记录稳定契约。
 
 > Storybook 组件测试的运行入口与边界见 [Browser Mode 架构](./test-architecture-storybook-browser.md)；
-> WSL 接口重配置的已知证据及未确认项见 [网络调查](https://github.com/BakerSean168/memoflow/blob/7a45112e1840950ead1ba98b748fc70fa1b38344/docs/internals/testing/wsl-network-investigation.md)。
+> WSL 与 Windows 宿主之间的本机可达性结论见 [WSL 网络调查](./wsl-network-investigation.md)。
 
 ## 1. 设计目标
 
