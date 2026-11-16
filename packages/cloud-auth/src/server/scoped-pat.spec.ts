@@ -35,6 +35,38 @@ describe('External scoped PAT boundary', () => {
     expect(findUnique).not.toHaveBeenCalled();
   });
 
+  it('signs the granted lifetime, defaulting to 90 days and capping at 365', async () => {
+    const create = vi.fn(async ({ data }: { data: Record<string, unknown> }) => ({
+      ...data,
+      revokedAt: null,
+    }));
+    const service = createScopedPatService({
+      database: {
+        $transaction: async (run: (tx: unknown) => unknown) =>
+          run({
+            $executeRaw: vi.fn(),
+            cloudAuthUser: { findUnique: vi.fn().mockResolvedValue({ disabledAt: null }) },
+          }),
+        externalAgentPat: { create },
+      } as never,
+      audience: 'https://api.memo.test/mcp',
+      accountIsActive: async () => true,
+    });
+    const daysBetween = (expiresAt: Date, started: number) =>
+      Math.round((expiresAt.getTime() - started) / 86400000);
+
+    const defaultedAt = Date.now();
+    await service.create('identity-a', { name: 'default' });
+    await service.create('identity-a', { name: 'yearly', expiresInDays: 365 });
+    expect(daysBetween(create.mock.calls[0][0].data.expiresAt as Date, defaultedAt)).toBe(90);
+    expect(daysBetween(create.mock.calls[1][0].data.expiresAt as Date, defaultedAt)).toBe(365);
+
+    await expect(
+      service.create('identity-a', { name: 'too long', expiresInDays: 366 }),
+    ).rejects.toThrow();
+    expect(create).toHaveBeenCalledTimes(2);
+  });
+
   it('rejects a revoked grant even when a credential digest matches', async () => {
     const findUnique = vi.fn().mockResolvedValue({
       id: 'pat-id',

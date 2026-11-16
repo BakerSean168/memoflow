@@ -53,7 +53,7 @@ export const GoalSearchOutputSchema = z.strictObject({
 /** First-party credential management contract; not an MCP authorization grant. */
 export const CreateScopedPatSchema = z.strictObject({
   name: z.string().trim().min(1).max(80),
-  expiresInDays: z.number().int().min(1).max(7).default(7),
+  expiresInDays: z.number().int().min(1).max(365).default(90),
   scopes: z
     .array(z.enum(['goals:read', 'tasks:read', 'goals:write', 'tasks:write', 'routines:write']))
     .min(1)

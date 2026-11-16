@@ -2812,6 +2812,14 @@
       "measurementCollectors": []
     },
     {
+      "path": "packages/account-ui/src/account/components/ExternalAgentConnectionsSection.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/account-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "packages/account-ui/src/account/components/account-logout-locale.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -3185,6 +3193,14 @@
     },
     {
       "path": "packages/agent-gateway/src/contracts/routine-writes.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/agent-gateway/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/agent-gateway/src/contracts/scoped-pat.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/agent-gateway/vitest.config.ts"
@@ -13724,7 +13740,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 13
+      "fileCount": 14
     },
     {
       "id": "packages/account/vitest.config.ts",
@@ -13738,7 +13754,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 4
+      "fileCount": 5
     },
     {
       "id": "packages/ai-client/vitest.config.ts",
@@ -14830,7 +14846,7 @@
   "duplicate": [],
   "unexpected": [],
   "counts": {
-    "unit": 1225,
+    "unit": 1227,
     "integration": 59,
     "smoke": 3,
     "boundary-ipc": 6,

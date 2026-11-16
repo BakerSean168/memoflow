@@ -124,7 +124,7 @@ describe('Gateway API host admission', () => {
     expect(created.headers.get('cache-control')).toBe('no-store');
     expect(f.pats.create).toHaveBeenCalledWith(
       'owner-a',
-      { name: 'read pilot', expiresInDays: 7, scopes: ['goals:read'] },
+      { name: 'read pilot', expiresInDays: 90, scopes: ['goals:read'] },
       expect.objectContaining({ source: 'http' }),
     );
     expect(f.audit).toHaveBeenCalledWith(
