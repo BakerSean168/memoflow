@@ -27,11 +27,34 @@ describe('scoped PAT lifetime contract (#970)', () => {
       name: 'yearly agent',
       prefix: 'mfp_AbCdEfG',
       audience: 'https://api.memo.test/mcp',
-      scopes: ['goals:read', 'goals:write', 'tasks:read', 'tasks:write', 'routines:write'],
+      scopes: [
+        'goals:read',
+        'goals:write',
+        'tasks:read',
+        'tasks:write',
+        'routines:write',
+        'labels:read',
+      ] as const,
       createdAt: '2026-11-16T00:00:00.000Z',
       expiresAt: '2027-11-16T00:00:00.000Z',
       revokedAt: null,
     };
     expect(ScopedPatSummarySchema.parse(summary)).toEqual(summary);
+  });
+
+  it('accepts labels:read and permits up to 6 scopes (#993)', () => {
+    const sixScopes = [
+      'goals:read',
+      'tasks:read',
+      'goals:write',
+      'tasks:write',
+      'routines:write',
+      'labels:read',
+    ] as const;
+    const parsed = CreateScopedPatSchema.parse({
+      name: 'six-scope-agent',
+      scopes: sixScopes,
+    });
+    expect(parsed.scopes).toEqual(sixScopes);
   });
 });

@@ -10,6 +10,8 @@ import {
   TaskPlanSearchOutputSchema,
   TaskOccurrenceGetOutputSchema,
   TaskOccurrenceListOutputSchema,
+  LabelListOutputSchema,
+  LabelResolveNamesOutputSchema,
 } from '../contracts';
 import { GoalPagePositionSchema, type GoalClientDTO } from '@memoflow/goal-contracts';
 import { TaskPlanPositionSchema, TaskOccurrencePositionSchema } from '@memoflow/task-contracts';
@@ -18,6 +20,7 @@ import {
   GatewayReadError as ControlledError,
   type GoalReadPort,
   type TaskReadPort,
+  type LabelReadPort,
   type GatewayReadBudget,
 } from '../ports';
 const MAX_BYTES = 256 * 1024;
@@ -27,7 +30,13 @@ export interface ReadToolCall {
       | GatewayReadToolName
       | import('../write-tool-descriptors').GatewayWriteToolName
       | import('../assisted-tool-descriptors').GatewayAssistedToolName,
-    scope: 'goals:read' | 'tasks:read' | 'goals:write' | 'tasks:write' | 'routines:write',
+    scope:
+      | 'goals:read'
+      | 'tasks:read'
+      | 'labels:read'
+      | 'goals:write'
+      | 'tasks:write'
+      | 'routines:write',
     work: () => Promise<T>,
   ): Promise<{
     content: { type: 'text'; text: string }[];
@@ -85,7 +94,12 @@ function projectGoal(goal: GoalClientDTO) {
 /** Shared native MCP definitions; each host retains authentication, deadlines and audit. */
 export function registerReadTools(
   server: McpServer,
-  options: { cursorSecret: string; goals: GoalReadPort; tasks?: TaskReadPort },
+  options: {
+    cursorSecret: string;
+    goals: GoalReadPort;
+    tasks?: TaskReadPort;
+    labels?: LabelReadPort;
+  },
   context: ExecutionContext,
   budget: GatewayReadBudget,
   scopes: readonly string[],
@@ -310,6 +324,32 @@ export function registerReadTools(
             timeZone: page.timeZone,
             asOf: page.asOf,
             ...(truncated ? { truncated: 'response-budget' } : {}),
+          });
+        }),
+    );
+  }
+  if (options.labels && scopes.includes('labels:read')) {
+    server.registerTool(
+      'label_list',
+      readToolDescriptors.label_list.definition,
+      ({ search, limit }) =>
+        call('label_list', 'labels:read', async () => {
+          const items = await options.labels!.list({ search, limit }, context, budget);
+          const { items: fitted } = fitPage(items);
+          return LabelListOutputSchema.parse({
+            items: fitted,
+          });
+        }),
+    );
+    server.registerTool(
+      'label_resolve_names',
+      readToolDescriptors.label_resolve_names.definition,
+      ({ names }) =>
+        call('label_resolve_names', 'labels:read', async () => {
+          const items = await options.labels!.resolveNames(names ?? [], context, budget);
+          const { items: fitted } = fitPage(items);
+          return LabelResolveNamesOutputSchema.parse({
+            items: fitted,
           });
         }),
     );

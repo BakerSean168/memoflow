@@ -147,12 +147,18 @@ export function bindGatewayWrites(
     taskCreate: (input, cx, authority) =>
       bind(async () => {
         const parsed = GatewayTaskCreateSchema.parse(input);
+        if (parsed.plan.labelIds && parsed.plan.labelIds.length > 0) {
+          throw new GatewayReadError('VALIDATION_ERROR');
+        }
         if (parsed.plan.goalBinding) scope(authority, 'goals:write');
         return tasks.create(parsed, cx, currentAuthority(cx, authority, 'tasks:write'));
       }),
     taskUpdate: (input, cx, authority) =>
       bind(async () => {
         const parsed = GatewayTaskUpdateSchema.parse(input);
+        if (parsed.changes.labelIds && parsed.changes.labelIds.length > 0) {
+          throw new GatewayReadError('VALIDATION_ERROR');
+        }
         if (parsed.changes.goalBinding !== undefined) scope(authority, 'goals:write');
         return tasks.update(parsed, cx, currentAuthority(cx, authority, 'tasks:write'));
       }),

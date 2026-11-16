@@ -1459,6 +1459,9 @@ importers:
       '@memoflow/goal-contracts':
         specifier: workspace:*
         version: link:../goal-contracts
+      '@memoflow/label-contracts':
+        specifier: workspace:*
+        version: link:../label-contracts
       '@memoflow/routine-contracts':
         specifier: workspace:*
         version: link:../routine-contracts

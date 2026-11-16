@@ -48,6 +48,7 @@ import { createSettingPrismaTimeQuery } from '@memoflow/setting';
 import { createTaskPrismaReadQueries } from '@memoflow/task';
 import { bindTaskReadPort } from './modules/agent-gateway/task-read.port';
 import { bindGoalReadPort } from './modules/agent-gateway/goal-read.port';
+import { bindLabelReadPort } from './modules/agent-gateway/label-read.port.js';
 import { getTrustedWebOrigins } from './shared/infrastructure/config/web-origin.js';
 import { prisma, connectDatabase, disconnectDatabase } from '@memoflow/database';
 import { getStartupInfo } from './shared/infrastructure/config/logger.config';
@@ -490,6 +491,7 @@ async function bootstrap(): Promise<void> {
     tasks: env.EAG_TASK_READ_ENABLED
       ? bindTaskReadPort(createTaskPrismaReadQueries(prisma, createSettingPrismaTimeQuery(prisma)))
       : undefined,
+    labels: bindLabelReadPort(labelService),
     audit: createGatewayAudit(createLogger('ExternalAgentAudit')),
     diagnose: createGatewayDiagnostics(createLogger('ExternalAgentDiagnostics')),
   });

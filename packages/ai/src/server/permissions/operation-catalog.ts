@@ -5,6 +5,7 @@ export type PermissionObject =
   | 'routine'
   | 'knowledge'
   | 'notification'
+  | 'label'
   | 'ai_permission';
 export type PermissionAction = 'read' | 'create' | 'update' | 'delete';
 export type PermissionRisk = 'delete_permanent' | 'bulk' | 'send_external';
@@ -33,6 +34,7 @@ const BUSINESS_OBJECTS: readonly PermissionObject[] = [
   'routine',
   'knowledge',
   'notification',
+  'label',
 ];
 
 export const PERMISSION_OPERATIONS: readonly PermissionOperation[] = [
@@ -133,6 +135,8 @@ const TOOL_OPERATIONS: Readonly<Record<string, string>> = {
   planner_upcoming_tasks: 'task.read',
   notification_unread_summary: 'notification.read',
   notification_execute_action: 'notification.execute_action',
+  label_list: 'label.read',
+  label_resolve_names: 'label.read',
   // Assisted Task workflow tools mutate (start/resume) or re-read the durable
   // run; the reviewed draft only becomes a TaskPlan on approval.
   assisted_workflow_start: 'task.plan.create',

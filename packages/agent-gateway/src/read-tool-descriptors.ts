@@ -11,6 +11,10 @@ import {
   TaskOccurrenceGetOutputSchema,
   TaskOccurrenceListInputSchema,
   TaskOccurrenceListOutputSchema,
+  LabelListInputSchema,
+  LabelListOutputSchema,
+  LabelResolveNamesInputSchema,
+  LabelResolveNamesOutputSchema,
 } from './contracts';
 
 const readAnnotations = {
@@ -85,6 +89,28 @@ export const readToolDescriptors = {
         'List existing owned occurrences in an inclusive account-time date range (epoch ms; at most 31 days). Optional earlier open facts; never materializes upcoming occurrences.',
       inputSchema: TaskOccurrenceListInputSchema,
       outputSchema: TaskOccurrenceListOutputSchema,
+      annotations: readAnnotations,
+    },
+  },
+  label_list: {
+    version: '1',
+    effect: 'read',
+    requiredScope: 'labels:read',
+    definition: {
+      description: 'List owned labels with optional search query and bounded limit.',
+      inputSchema: LabelListInputSchema,
+      outputSchema: LabelListOutputSchema,
+      annotations: readAnnotations,
+    },
+  },
+  label_resolve_names: {
+    version: '1',
+    effect: 'read',
+    requiredScope: 'labels:read',
+    definition: {
+      description: 'Resolve human-readable label names into owned canonical Label objects.',
+      inputSchema: LabelResolveNamesInputSchema,
+      outputSchema: LabelResolveNamesOutputSchema,
       annotations: readAnnotations,
     },
   },

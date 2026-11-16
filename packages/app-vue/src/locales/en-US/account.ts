@@ -46,6 +46,7 @@ export default {
       tasksRead: 'Tasks (read)',
       tasksWrite: 'Tasks (write)',
       routinesWrite: 'Routines (write)',
+      labelsRead: 'Labels (read)',
       offlineAccess: 'Stay connected',
     },
     writeWarning: 'Any program holding this token can write directly within the granted scopes.',

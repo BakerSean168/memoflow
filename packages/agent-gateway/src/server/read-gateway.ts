@@ -19,6 +19,7 @@ import {
   type GatewayCredentialPort,
   type GoalReadPort,
   type TaskReadPort,
+  type LabelReadPort,
 } from '../ports';
 
 interface Options {
@@ -33,6 +34,7 @@ interface Options {
   readonly resourceMetadataUrl?: string;
   readonly goals: GoalReadPort;
   readonly tasks?: TaskReadPort;
+  readonly labels?: LabelReadPort;
   readonly audit: (event: GatewayAuditEvent) => void;
   readonly timeoutMs?: number;
   readonly diagnose?: (event: GatewayDiagnostic) => void;
@@ -173,6 +175,7 @@ export function createReadGateway(options: Options) {
             (scope) =>
               scope === 'goals:read' ||
               scope === 'tasks:read' ||
+              scope === 'labels:read' ||
               ((options.writes || options.assisted) &&
                 principal.credentialType === 'pat' &&
                 (scope === 'goals:write' || scope === 'tasks:write' || scope === 'routines:write')),
@@ -235,6 +238,10 @@ export function createReadGateway(options: Options) {
                 scopeDecision = 'denied';
                 return reject(404, 'DISABLED');
               }
+              if (!isWriteToolName(name) && name.startsWith('label_') && !options.labels) {
+                scopeDecision = 'denied';
+                return reject(404, 'DISABLED');
+              }
             }
           }
         } catch {
@@ -250,6 +257,7 @@ export function createReadGateway(options: Options) {
           requiredScope:
             | 'goals:read'
             | 'tasks:read'
+            | 'labels:read'
             | 'goals:write'
             | 'tasks:write'
             | 'routines:write',

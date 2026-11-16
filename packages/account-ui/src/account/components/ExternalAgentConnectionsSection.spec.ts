@@ -63,7 +63,7 @@ describe('ExternalAgentConnectionsSection PAT issuing (#970)', () => {
     const { wrapper, service } = fixture();
     await flushPromises();
 
-    expect(wrapper.findAll('[data-testid^="pat-scope-"]')).toHaveLength(5);
+    expect(wrapper.findAll('[data-testid^="pat-scope-"]')).toHaveLength(6);
     expect(wrapper.find('[data-testid="pat-write-warning"]').exists()).toBe(false);
 
     await nameToken(wrapper, 'daily agent');

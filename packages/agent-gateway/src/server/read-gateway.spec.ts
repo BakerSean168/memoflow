@@ -511,3 +511,125 @@ describe('Routine hosted write capability', () => {
     );
   });
 });
+
+describe('Label read tools (#993)', () => {
+  function labelFixture(enabled = true, scopes = ['labels:read']) {
+    const f = fixture();
+    f.authenticate.mockResolvedValue({
+      identityId: 'owner-a',
+      credentialId: 'pat-a',
+      credentialType: 'pat',
+      scopes,
+    });
+    const labelA = {
+      id: 'label-1',
+      name: 'Work',
+      color: '#ff0000' as const,
+      createdAt: 1000,
+      updatedAt: 1000,
+    };
+    const labelB = {
+      id: 'label-2',
+      name: 'Personal',
+      color: null,
+      createdAt: 1001,
+      updatedAt: 1001,
+    };
+    const labels = {
+      list: vi.fn(async (input: { search?: string; limit?: number }) => {
+        if (input.search === 'empty') return [];
+        return [labelA, labelB];
+      }),
+      resolveNames: vi.fn(async (names: readonly string[]) => {
+        if (names.length === 0) return [];
+        return [labelA];
+      }),
+    };
+    return {
+      ...f,
+      labels,
+      gateway: createReadGateway({
+        ...f.options,
+        labels: enabled ? labels : undefined,
+      }),
+    };
+  }
+
+  it('lists registered tools only when labels:read is in PAT scopes', async () => {
+    const enabled = labelFixture();
+    const res = await enabled.gateway.fetch(request('tools/list'), context);
+    const listed = await res.json();
+    const toolNames = listed.result.tools.map((t: { name: string }) => t.name);
+    expect(toolNames).toContain('label_list');
+    expect(toolNames).toContain('label_resolve_names');
+
+    const withoutScope = labelFixture(true, ['goals:read']);
+    const notListed = await (
+      await withoutScope.gateway.fetch(request('tools/list'), context)
+    ).json();
+    const notListedNames = notListed.result.tools.map((t: { name: string }) => t.name);
+    expect(notListedNames).not.toContain('label_list');
+    expect(notListedNames).not.toContain('label_resolve_names');
+  });
+
+  it('calls label_list and returns populated or empty results within bounded contract', async () => {
+    const f = labelFixture();
+    const normalRes = await (
+      await f.gateway.fetch(
+        request('tools/call', { limit: 10, search: 'work' }, 'label_list'),
+        context,
+      )
+    ).json();
+    expect(normalRes.result.structuredContent.items).toHaveLength(2);
+    expect(normalRes.result.structuredContent.items[0]).toEqual({
+      id: 'label-1',
+      name: 'Work',
+      color: '#ff0000',
+      createdAt: 1000,
+      updatedAt: 1000,
+    });
+    expect(f.labels.list).toHaveBeenCalledWith(
+      { limit: 10, search: 'work' },
+      expect.objectContaining({ identityId: 'owner-a' }),
+      expect.anything(),
+    );
+
+    const emptyRes = await (
+      await f.gateway.fetch(request('tools/call', { search: 'empty' }, 'label_list'), context)
+    ).json();
+    expect(emptyRes.result.structuredContent.items).toEqual([]);
+  });
+
+  it('calls label_resolve_names with normal names or empty array', async () => {
+    const f = labelFixture();
+    const normalRes = await (
+      await f.gateway.fetch(
+        request('tools/call', { names: ['Work'] }, 'label_resolve_names'),
+        context,
+      )
+    ).json();
+    expect(normalRes.result.structuredContent.items).toHaveLength(1);
+    expect(f.labels.resolveNames).toHaveBeenCalledWith(
+      ['Work'],
+      expect.objectContaining({ identityId: 'owner-a' }),
+      expect.anything(),
+    );
+
+    const emptyRes = await (
+      await f.gateway.fetch(request('tools/call', { names: [] }, 'label_resolve_names'), context)
+    ).json();
+    expect(emptyRes.result.structuredContent.items).toEqual([]);
+  });
+
+  it('rejects label tool invocation with 403 when scope is missing and 404 when disabled', async () => {
+    const withoutScope = labelFixture(true, ['goals:read']);
+    expect(
+      (await withoutScope.gateway.fetch(request('tools/call', {}, 'label_list'), context)).status,
+    ).toBe(403);
+
+    const disabled = labelFixture(false, ['labels:read']);
+    expect(
+      (await disabled.gateway.fetch(request('tools/call', {}, 'label_list'), context)).status,
+    ).toBe(404);
+  });
+});
