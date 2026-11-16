@@ -55,9 +55,18 @@ export const CreateScopedPatSchema = z.strictObject({
   name: z.string().trim().min(1).max(80),
   expiresInDays: z.number().int().min(1).max(365).default(90),
   scopes: z
-    .array(z.enum(['goals:read', 'tasks:read', 'goals:write', 'tasks:write', 'routines:write']))
+    .array(
+      z.enum([
+        'goals:read',
+        'tasks:read',
+        'goals:write',
+        'tasks:write',
+        'routines:write',
+        'relations:read',
+      ]),
+    )
     .min(1)
-    .max(5)
+    .max(6)
     .refine((scopes) => new Set(scopes).size === scopes.length, 'Duplicate scopes')
     .default(['goals:read']),
 });
@@ -74,7 +83,14 @@ export const ScopedPatSummarySchema = z.object({
   prefix: z.string(),
   audience: z.url(),
   scopes: z.array(
-    z.enum(['goals:read', 'tasks:read', 'goals:write', 'tasks:write', 'routines:write']),
+    z.enum([
+      'goals:read',
+      'tasks:read',
+      'goals:write',
+      'tasks:write',
+      'routines:write',
+      'relations:read',
+    ]),
   ),
   ...credentialDates,
 });
@@ -182,6 +198,53 @@ export const TaskOccurrenceListOutputSchema = z.strictObject({
   timeZone: z.string(),
   asOf: TaskReadInstantSchema,
 });
+
+export const RelationNodeTypeSchema = z.enum(['goal', 'task', 'knowledge', 'note']);
+export type RelationNodeType = z.infer<typeof RelationNodeTypeSchema>;
+
+export const RelationNodeRefSchema = z.strictObject({
+  type: RelationNodeTypeSchema,
+  id: z.string().min(1),
+});
+export type RelationNodeRef = z.infer<typeof RelationNodeRefSchema>;
+
+export const ExternalRelationTypeSchema = z.enum([
+  'references',
+  'related',
+  'depends_on',
+  'contributes_to',
+]);
+export type ExternalRelationType = z.infer<typeof ExternalRelationTypeSchema>;
+
+export const ExternalRelationDirectionSchema = z.enum(['outgoing', 'incoming']);
+export type ExternalRelationDirection = z.infer<typeof ExternalRelationDirectionSchema>;
+
+export const ExternalRelationNeighborSchema = z.strictObject({
+  relationId: z.string().min(1),
+  relationType: ExternalRelationTypeSchema,
+  direction: ExternalRelationDirectionSchema,
+  targetNode: RelationNodeRefSchema,
+  createdAt: z.number().finite(),
+});
+export type ExternalRelationNeighbor = z.infer<typeof ExternalRelationNeighborSchema>;
+
+export const RelationNeighborsInputSchema = z.strictObject({
+  node: RelationNodeRefSchema,
+  relationType: ExternalRelationTypeSchema.optional(),
+  targetType: RelationNodeTypeSchema.optional(),
+  direction: z.enum(['outgoing', 'incoming', 'both']).default('both'),
+  limit: z.number().int().min(1).max(100).default(20),
+  cursor: z.string().max(2048).optional(),
+});
+export type RelationNeighborsInput = z.infer<typeof RelationNeighborsInputSchema>;
+
+export const RelationNeighborsOutputSchema = z.strictObject({
+  items: z.array(ExternalRelationNeighborSchema).max(100),
+  hasMore: z.boolean(),
+  nextCursor: z.string().max(2048).nullable(),
+  truncated: z.literal('response-budget').optional(),
+});
+export type RelationNeighborsOutput = z.infer<typeof RelationNeighborsOutputSchema>;
 
 export * from './writes';
 

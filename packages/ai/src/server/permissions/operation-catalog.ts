@@ -5,6 +5,7 @@ export type PermissionObject =
   | 'routine'
   | 'knowledge'
   | 'notification'
+  | 'relation'
   | 'ai_permission';
 export type PermissionAction = 'read' | 'create' | 'update' | 'delete';
 export type PermissionRisk = 'delete_permanent' | 'bulk' | 'send_external';
@@ -39,6 +40,7 @@ export const PERMISSION_OPERATIONS: readonly PermissionOperation[] = [
   ...BUSINESS_OBJECTS.flatMap((object) =>
     CRUD.map(([action]) => ({ id: `${object}.${action}`, object, action })),
   ),
+  { id: 'relation.read', object: 'relation', action: 'read' },
   { id: 'task.plan.create', object: 'task', action: 'create' },
   { id: 'task.plan.update', object: 'task', action: 'update' },
   { id: 'task.occurrence.complete', object: 'task', action: 'update' },
@@ -117,6 +119,7 @@ const TOOL_OPERATIONS: Readonly<Record<string, string>> = {
   task_occurrence_get: 'task.read',
   task_occurrence_list: 'task.read',
   task_occurrence_complete: 'task.occurrence.complete',
+  relation_neighbors: 'relation.read',
   knowledge_search: 'knowledge.search',
   knowledge_get: 'knowledge.get',
   routine_create: 'routine.create',

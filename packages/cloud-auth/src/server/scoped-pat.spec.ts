@@ -87,4 +87,35 @@ describe('External scoped PAT boundary', () => {
     });
     expect(await service.authenticate(`Bearer mfp_${'a'.repeat(43)}`)).toBeNull();
   });
+
+  it('authenticates a PAT containing relations:read scope', async () => {
+    const findUnique = vi.fn().mockResolvedValue({
+      id: 'pat-rel',
+      userId: 'identity-a',
+      audience: 'https://api.memo.test/mcp',
+      accountIsActive: async () => true,
+      expiresAt: new Date(Date.now() + 60000),
+      revokedAt: null,
+      scopes: ['relations:read'],
+    });
+    const service = createScopedPatService({
+      database: {
+        $transaction: async (run: (tx: unknown) => unknown) =>
+          run({
+            $executeRaw: vi.fn(),
+            externalAgentPat: { findUnique },
+            cloudAuthUser: { findUnique: vi.fn().mockResolvedValue({ disabledAt: null }) },
+          }),
+      } as never,
+      audience: 'https://api.memo.test/mcp',
+      accountIsActive: async () => true,
+    });
+    const principal = await service.authenticate(`Bearer mfp_${'b'.repeat(43)}`);
+    expect(principal).toEqual({
+      identityId: 'identity-a',
+      credentialId: 'pat-rel',
+      credentialType: 'pat',
+      scopes: ['relations:read'],
+    });
+  });
 });

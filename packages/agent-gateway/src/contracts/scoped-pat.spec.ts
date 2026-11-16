@@ -34,4 +34,19 @@ describe('scoped PAT lifetime contract (#970)', () => {
     };
     expect(ScopedPatSummarySchema.parse(summary)).toEqual(summary);
   });
+
+  it('accepts relations:read scope in CreateScopedPatSchema and ScopedPatSummarySchema', () => {
+    const input = {
+      name: 'relation agent',
+      scopes: [
+        'goals:read',
+        'goals:write',
+        'tasks:read',
+        'tasks:write',
+        'routines:write',
+        'relations:read',
+      ],
+    };
+    expect(CreateScopedPatSchema.parse(input).scopes).toHaveLength(6);
+  });
 });

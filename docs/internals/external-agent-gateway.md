@@ -55,26 +55,27 @@ updated: 2026-11-16T00:00:00Z
 
 ID 使用稳定 snake_case，内部 capability ID 可采用 `goal.get` 等命名；不得将二者用不受控字符串替换相互推导。表中是实现的有限 allowlist；写工具只有显式启用且满足 PAT scope 时才发布。
 
-| 批次 | Tool                            | Owner / scope            | 行为约束                                                           |
-| ---- | ------------------------------- | ------------------------ | ------------------------------------------------------------------ |
-| R1   | `goal_get`                      | Goal / goals:read        | ID、摘要、KRs、version；不夹带 Task/Knowledge 私密内容             |
-| R1   | `goal_search`                   | Goal / goals:read        | 有界查询、确定排序和分页                                           |
-| R1   | `task_plan_get`                 | Task / tasks:read        | 返回定义、version、关联引用                                        |
-| R1   | `task_plan_search`              | Task / tasks:read        | 按 owner 支持的过滤检索，不承诺不存在的全文搜索                    |
-| R1   | `task_occurrence_get`           | Task / tasks:read        | 返回执行状态、version、planId                                      |
-| R1   | `task_occurrence_list`          | Task / tasks:read        | 明确时间范围、时区与分页                                           |
-| W1   | `goal_create`                   | Goal / goals:write       | initial KRs 与 Goal 原子创建；不自动 activate                      |
-| W1   | `goal_update`                   | Goal / goals:write       | expectedVersion；首版排除整组 keyResults replacement               |
-| W1   | `goal_key_result_create/update` | Goal / goals:write       | 单 KR 命令使用 Goal expectedVersion；不替换整个集合                |
-| W1   | `task_plan_create`              | Task / tasks:write       | schedule/reminderPolicy 由 owner 校验；新 binding 另需 goals:write |
-| W1   | `task_plan_update`              | Task / tasks:write       | 显式 patch 与 expectedVersion；binding 同上                        |
-| W1   | `task_occurrence_complete`      | Task / tasks:write       | 精确 occurrence、并发条件、明确 measurement decision               |
-| W1   | `routine_create`                | Routine / routines:write | 单次 WallClock 提醒；另需 `EAG_ROUTINE_WRITE_ENABLED=1`            |
-| A1   | `assisted_workflow_start`       | Task / tasks:write       | 启动或恢复一个受审核的 Task planning run                           |
-| A1   | `assisted_workflow_get`         | Task / tasks:write       | 读取自有 run 的当前 revision                                       |
-| A1   | `assisted_workflow_review`      | Task / tasks:write       | 读取待决定的 typed ask 或 Task draft                               |
-| A1   | `assisted_workflow_resume`      | Task / tasks:write       | 回答澄清、批准精确 draft 或恢复 apply                              |
-| A1   | `assisted_workflow_cancel`      | Task / tasks:write       | 取消剩余工作并保留已提交的 Task facts                              |
+| 批次 | Tool                            | Owner / scope             | 行为约束                                                                                                                                |
+| ---- | ------------------------------- | ------------------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
+| R1   | `goal_get`                      | Goal / goals:read         | ID、摘要、KRs、version；不夹带 Task/Knowledge 私密内容                                                                                  |
+| R1   | `goal_search`                   | Goal / goals:read         | 有界查询、确定排序和分页                                                                                                                |
+| R1   | `task_plan_get`                 | Task / tasks:read         | 返回定义、version、关联引用                                                                                                             |
+| R1   | `task_plan_search`              | Task / tasks:read         | 按 owner 支持的过滤检索，不承诺不存在的全文搜索                                                                                         |
+| R1   | `task_occurrence_get`           | Task / tasks:read         | 返回执行状态、version、planId                                                                                                           |
+| R1   | `task_occurrence_list`          | Task / tasks:read         | 明确时间范围、时区与分页                                                                                                                |
+| R2   | `relation_neighbors`            | Relation / relations:read | 查询 Goal/Task/Knowledge 跨域邻居（类型过滤与游标分页）；只返回双方均可见的关系，指向不可见/跨 owner 节点的边直接省略，不泄露对端存在性 |
+| W1   | `goal_create`                   | Goal / goals:write        | initial KRs 与 Goal 原子创建；不自动 activate                                                                                           |
+| W1   | `goal_update`                   | Goal / goals:write        | expectedVersion；首版排除整组 keyResults replacement                                                                                    |
+| W1   | `goal_key_result_create/update` | Goal / goals:write        | 单 KR 命令使用 Goal expectedVersion；不替换整个集合                                                                                     |
+| W1   | `task_plan_create`              | Task / tasks:write        | schedule/reminderPolicy 由 owner 校验；新 binding 另需 goals:write                                                                      |
+| W1   | `task_plan_update`              | Task / tasks:write        | 显式 patch 与 expectedVersion；binding 同上                                                                                             |
+| W1   | `task_occurrence_complete`      | Task / tasks:write        | 精确 occurrence、并发条件、明确 measurement decision                                                                                    |
+| W1   | `routine_create`                | Routine / routines:write  | 单次 WallClock 提醒；另需 `EAG_ROUTINE_WRITE_ENABLED=1`                                                                                 |
+| A1   | `assisted_workflow_start`       | Task / tasks:write        | 启动或恢复一个受审核的 Task planning run                                                                                                |
+| A1   | `assisted_workflow_get`         | Task / tasks:write        | 读取自有 run 的当前 revision                                                                                                            |
+| A1   | `assisted_workflow_review`      | Task / tasks:write        | 读取待决定的 typed ask 或 Task draft                                                                                                    |
+| A1   | `assisted_workflow_resume`      | Task / tasks:write        | 回答澄清、批准精确 draft 或恢复 apply                                                                                                   |
+| A1   | `assisted_workflow_cancel`      | Task / tasks:write        | 取消剩余工作并保留已提交的 Task facts                                                                                                   |
 
 R1 为 **6 个工具**，W1 为 **8 个写工具**，A1 为 **5 个 assisted 工具**，合计 **19 个**。OAuth 仍只有六个只读工具；写与 assisted 仅对 PAT 发布，且需要对应 write scope 和相应开关。MCP 自带发现功能足够，不新增 `capabilities_list` 平台 API。
 

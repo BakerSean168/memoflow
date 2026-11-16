@@ -32,7 +32,7 @@ tool_timeout_sec = 30
 
 `bearer_token_env_var` 是 [Codex 官方 MCP 配置](https://learn.chatgpt.com/docs/extend/mcp?surface=cli) 支持的显式 Bearer 配置，无需 OAuth 登录步骤。当前证据使用官方 MCP SDK；不将其等同于真实 Codex/Claude OAuth 登录验收。
 
-工具：goal_get、goal_search、task_plan_get、task_plan_search、task_occurrence_get、task_occurrence_list。列表 limit 为 1～100，默认 20；nextCursor 必须连同原筛选和 limit 使用。Occurrence startDate/endDate 为 epoch 毫秒，最长 31 天，按照当前账户时区查询已有事实；分页固定 asOf，时区改变后应重新从第一页查询。
+工具：goal_get、goal_search、task_plan_get、task_plan_search、task_occurrence_get、task_occurrence_list、relation_neighbors（需 `relations:read`）。列表 limit 为 1～100，默认 20；nextCursor 必须连同原筛选和 limit 使用。relation_neighbors 查询 Goal/Task/Knowledge 跨域邻居并支持类型过滤，遵循可见性规则：只返回双方均可见的关系，指向不可见或跨 owner 节点的边直接省略、不泄露对端存在性。Occurrence startDate/endDate 为 epoch 毫秒，最长 31 天，按照当前账户时区查询已有事实；分页固定 asOf，时区改变后应重新从第一页查询。
 
 ## 受控写入（#490）
 

@@ -19,6 +19,7 @@ import {
   type GatewayCredentialPort,
   type GoalReadPort,
   type TaskReadPort,
+  type RelationReadPort,
 } from '../ports';
 
 interface Options {
@@ -33,6 +34,7 @@ interface Options {
   readonly resourceMetadataUrl?: string;
   readonly goals: GoalReadPort;
   readonly tasks?: TaskReadPort;
+  readonly relations?: RelationReadPort;
   readonly audit: (event: GatewayAuditEvent) => void;
   readonly timeoutMs?: number;
   readonly diagnose?: (event: GatewayDiagnostic) => void;
@@ -173,6 +175,7 @@ export function createReadGateway(options: Options) {
             (scope) =>
               scope === 'goals:read' ||
               scope === 'tasks:read' ||
+              scope === 'relations:read' ||
               ((options.writes || options.assisted) &&
                 principal.credentialType === 'pat' &&
                 (scope === 'goals:write' || scope === 'tasks:write' || scope === 'routines:write')),
@@ -252,7 +255,8 @@ export function createReadGateway(options: Options) {
             | 'tasks:read'
             | 'goals:write'
             | 'tasks:write'
-            | 'routines:write',
+            | 'routines:write'
+            | 'relations:read',
           operation: () => Promise<T>,
         ) {
           tool = name;

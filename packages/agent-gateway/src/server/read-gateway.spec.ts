@@ -510,4 +510,146 @@ describe('Routine hosted write capability', () => {
       expect.objectContaining({ scopeDecision: 'denied', outcome: 'FORBIDDEN' }),
     );
   });
+
+  it('exposes relation_neighbors only with relations:read scope, validates inputs, and verifies cursor roundtrip', async () => {
+    const authenticate = vi.fn().mockResolvedValue({
+      identityId: 'owner-a',
+      credentialId: 'pat-a',
+      credentialType: 'pat',
+      scopes: ['relations:read'],
+    });
+    const relations = {
+      getNeighbors: vi.fn().mockResolvedValue({
+        items: [
+          {
+            relationId: 'rel-1',
+            relationType: 'related',
+            direction: 'outgoing',
+            targetNode: { type: 'knowledge', id: 'doc-1' },
+            createdAt: 1000,
+          },
+          {
+            relationId: 'rel-2',
+            relationType: 'depends_on',
+            direction: 'incoming',
+            targetNode: { type: 'task', id: 'task-1' },
+            createdAt: 2000,
+          },
+        ],
+        hasMore: true,
+      }),
+    };
+    const audit = vi.fn();
+    const options = {
+      consumeOwnerQuota: vi.fn().mockResolvedValue(true),
+      enabled: true,
+      toolCheckpoint: (async (_principal, _tool, work) => work()) satisfies GatewayToolCheckpoint,
+      audience: 'https://api.memo.test/mcp',
+      trustedOrigins: ['https://memo.test'],
+      cursorSecret: 'test-only-secret-'.repeat(3),
+      credentials: { authenticate, consumeReadQuota: vi.fn().mockResolvedValue(true) },
+      goals: {
+        getGoal: vi.fn().mockResolvedValue(null),
+        searchGoalPage: vi.fn().mockResolvedValue({ items: [], hasMore: false, next: null }),
+      },
+      relations,
+      audit,
+    };
+    const gateway = createReadGateway(options);
+
+    // tools/list includes relation_neighbors
+    const listRes = await gateway.fetch(request('tools/list'), context);
+    const tools = (await listRes.json()).result.tools.map((t: { name: string }) => t.name);
+    expect(tools).toContain('relation_neighbors');
+
+    // Call relation_neighbors
+    const callInput = {
+      node: { type: 'goal', id: 'goal-1' },
+      relationType: 'related',
+      limit: 2,
+    };
+    const callRes = await gateway.fetch(
+      request('tools/call', callInput, 'relation_neighbors'),
+      context,
+    );
+    expect(callRes.status).toBe(200);
+    const callBody = await callRes.json();
+    expect(callBody.result.structuredContent).toMatchObject({
+      items: [
+        {
+          relationId: 'rel-1',
+          relationType: 'related',
+          direction: 'outgoing',
+          targetNode: { type: 'knowledge', id: 'doc-1' },
+          createdAt: 1000,
+        },
+        {
+          relationId: 'rel-2',
+          relationType: 'depends_on',
+          direction: 'incoming',
+          targetNode: { type: 'task', id: 'task-1' },
+          createdAt: 2000,
+        },
+      ],
+      hasMore: true,
+      nextCursor: expect.any(String),
+    });
+    expect(relations.getNeighbors).toHaveBeenCalledWith(
+      expect.objectContaining({
+        node: { type: 'goal', id: 'goal-1' },
+        relationType: 'related',
+        limit: 2,
+        offset: 0,
+      }),
+      expect.objectContaining({ identityId: 'owner-a' }),
+      expect.any(Object),
+    );
+    expect(audit).toHaveBeenCalledWith(
+      expect.objectContaining({
+        tool: 'relation_neighbors',
+        effect: 'read',
+        scopeDecision: 'allowed',
+        outcome: 'OK',
+      }),
+    );
+
+    // Call with the returned nextCursor
+    const nextCursor = callBody.result.structuredContent.nextCursor;
+    relations.getNeighbors.mockResolvedValueOnce({
+      items: [],
+      hasMore: false,
+    });
+    const page2Res = await gateway.fetch(
+      request(
+        'tools/call',
+        {
+          ...callInput,
+          cursor: nextCursor,
+        },
+        'relation_neighbors',
+      ),
+      context,
+    );
+    expect(page2Res.status).toBe(200);
+    expect(relations.getNeighbors).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        offset: 2,
+      }),
+      expect.anything(),
+      expect.anything(),
+    );
+
+    // Denies when scope is lacking
+    authenticate.mockResolvedValueOnce({
+      identityId: 'owner-a',
+      credentialId: 'pat-a',
+      credentialType: 'pat',
+      scopes: ['goals:read'],
+    });
+    const deniedRes = await gateway.fetch(
+      request('tools/call', callInput, 'relation_neighbors'),
+      context,
+    );
+    expect(deniedRes.status).toBe(403);
+  });
 });

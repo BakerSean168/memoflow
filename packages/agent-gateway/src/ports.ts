@@ -82,6 +82,7 @@ export interface GatewayAuditEvent {
     | 'task_plan_search'
     | 'task_occurrence_get'
     | 'task_occurrence_list'
+    | 'relation_neighbors'
     | 'transport'
     | 'pat_create'
     | 'pat_list'
@@ -90,6 +91,32 @@ export interface GatewayAuditEvent {
     | 'oauth_revoke';
   readonly outcome: string;
   readonly durationMs: number;
+}
+
+/** Relation query with bounds and optional filters. */
+export interface RelationNeighborsQuery {
+  readonly node: import('./contracts').RelationNodeRef;
+  readonly relationType?: import('./contracts').ExternalRelationType;
+  readonly targetType?: import('./contracts').RelationNodeType;
+  readonly direction?: 'outgoing' | 'incoming' | 'both';
+  readonly limit: number;
+  readonly offset?: number;
+}
+
+export interface RelationNeighborsPage {
+  readonly items: readonly import('./contracts').ExternalRelationNeighbor[];
+  readonly total?: number;
+  readonly hasMore: boolean;
+  readonly nextCursor?: string | null;
+}
+
+/** Relation owner read seam; provides bounded visibility-filtered cross-domain neighbors. */
+export interface RelationReadPort {
+  getNeighbors(
+    input: RelationNeighborsQuery,
+    context: ExecutionContext,
+    budget?: GatewayReadBudget,
+  ): Promise<RelationNeighborsPage>;
 }
 
 /** Concrete Task owner seam; plan definitions and occurrence facts remain distinct. */

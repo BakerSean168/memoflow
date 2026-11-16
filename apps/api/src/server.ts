@@ -48,6 +48,7 @@ import { createSettingPrismaTimeQuery } from '@memoflow/setting';
 import { createTaskPrismaReadQueries } from '@memoflow/task';
 import { bindTaskReadPort } from './modules/agent-gateway/task-read.port';
 import { bindGoalReadPort } from './modules/agent-gateway/goal-read.port';
+import { bindRelationReadPort } from './modules/agent-gateway/relation-read.port';
 import { getTrustedWebOrigins } from './shared/infrastructure/config/web-origin.js';
 import { prisma, connectDatabase, disconnectDatabase } from '@memoflow/database';
 import { getStartupInfo } from './shared/infrastructure/config/logger.config';
@@ -113,6 +114,7 @@ import {
   createLabelPortableCapability,
 } from '@memoflow/label';
 import {
+  RelationService,
   GoalKnowledgeService,
   TaskKnowledgeService,
   PrismaRelationRepository,
@@ -341,6 +343,7 @@ async function bootstrap(): Promise<void> {
   );
   const taskGoalContextReadPort = new PrismaTaskBindingReadPort(prisma);
   const relationRepository = new PrismaRelationRepository(prisma);
+  const relationService = new RelationService(relationRepository);
   const goalKnowledgeService = new GoalKnowledgeService(
     relationRepository,
     repositoryApiModule.knowledgeDocumentRefResolver,
@@ -490,6 +493,17 @@ async function bootstrap(): Promise<void> {
     tasks: env.EAG_TASK_READ_ENABLED
       ? bindTaskReadPort(createTaskPrismaReadQueries(prisma, createSettingPrismaTimeQuery(prisma)))
       : undefined,
+    relations: bindRelationReadPort({
+      relationService,
+      goalKnowledgeService,
+      goals: bindGoalReadPort(goalPageQuery),
+      tasks: env.EAG_TASK_READ_ENABLED
+        ? bindTaskReadPort(
+            createTaskPrismaReadQueries(prisma, createSettingPrismaTimeQuery(prisma)),
+          )
+        : undefined,
+      knowledge: repositoryApiModule.knowledgeDocumentRefResolver,
+    }),
     audit: createGatewayAudit(createLogger('ExternalAgentAudit')),
     diagnose: createGatewayDiagnostics(createLogger('ExternalAgentDiagnostics')),
   });
