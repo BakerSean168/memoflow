@@ -74,6 +74,10 @@ export {
   type LocalAgentSnapshotChange,
 } from './server/local-agent/local-agent-runtime';
 export { AgentInstanceRegistry } from './server/application/agent-instance/agent-instance.registry';
+export {
+  AgentInstanceReadService,
+  projectAgentInstance,
+} from './server/application/services/agent-instance-read.service';
 export { LocalAgentRepository } from './server/infrastructure/adapters/powersync/local-agent.repository';
 export {
   projectAIOwnerActivity,
@@ -141,6 +145,8 @@ export type {
   AINotificationFactProjection,
   AINotificationActionReceipt,
   AIUnreadNotificationSummary,
+  IAgentInstanceReadPort,
+  AgentInstanceProjection,
 } from './ports';
 
 export {
