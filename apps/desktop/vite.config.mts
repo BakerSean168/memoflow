@@ -233,6 +233,9 @@ export default defineConfig(({ command, mode }) => {
     base: './',
     build: {
       outDir: 'dist-renderer',
+      // Release bundles ship without sourcemaps: the packaged app never consumes them,
+      // and map generation is a suspected trigger of the oversized Rolldown allocation (#881).
+      sourcemap: false,
       rolldownOptions: {
         input: path.resolve(configDir, 'index.html'),
         external: nativeModules,
@@ -278,6 +281,8 @@ export default defineConfig(({ command, mode }) => {
             },
             build: {
               outDir: 'dist-electron',
+              // Release bundles ship without sourcemaps (#881).
+              sourcemap: false,
               rolldownOptions: {
                 external: isElectronMainExternal,
                 // Rolldown 1.2.9 panics while tree shaking Mastra's filesystem re-export.
@@ -302,6 +307,8 @@ export default defineConfig(({ command, mode }) => {
           vite: {
             build: {
               outDir: 'dist-electron',
+              // Release bundles ship without sourcemaps (#881).
+              sourcemap: false,
               rolldownOptions: {
                 external: nativeModules,
                 output: {
