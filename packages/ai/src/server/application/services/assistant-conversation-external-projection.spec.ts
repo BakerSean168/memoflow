@@ -1,5 +1,7 @@
 import { describe, expect, it, vi } from 'vitest';
 import type { ExecutionContext } from '@memoflow/transport-contracts';
+import type { AIConversation } from '../../domain/aggregates/ai-conversation';
+import type { IAIConversationRepository } from '../../domain/repositories/i-ai-conversation-repository';
 import type {
   AssistantConversationExternalMessageFact,
   AssistantConversationExternalReadSource,
@@ -9,6 +11,7 @@ import {
   ASSISTANT_CONVERSATION_EXTERNAL_LIMITS,
   createAssistantConversationExternalReadPort,
 } from './assistant-conversation-external-projection';
+import { createAssistantConversationExternalSource } from './assistant-conversation-external-source';
 
 const OWNER_A = { identityId: 'owner-a' } as ExecutionContext;
 const OWNER_B = { identityId: 'owner-b' } as ExecutionContext;
@@ -310,5 +313,173 @@ describe('assistant conversation external read projection', () => {
     if (failed.ok) return;
     expect(failed.error.code).toBe('INTERNAL_ERROR');
     expect(failed.error.message).toBe('transcript store unavailable');
+  });
+});
+
+describe('assistant conversation external read source', () => {
+  function ownedShell(
+    identityId: string,
+    id: string,
+    overrides: Partial<{ status: 'Active' | 'Archived'; deletedAt: Date | null }> = {},
+  ) {
+    return {
+      id,
+      identityId,
+      name: `Title ${id}`,
+      status: overrides.status ?? 'Active',
+      version: 1,
+      createdAt: new Date(1_000),
+      updatedAt: new Date(2_000),
+      deletedAt: overrides.deletedAt ?? null,
+    } as unknown as AIConversation;
+  }
+
+  function sourceFixture(input: {
+    shells: readonly AIConversation[];
+    counts?: Record<string, number>;
+    messages?: readonly {
+      id: string;
+      role: 'user' | 'assistant' | 'system';
+      content: string;
+      attachments?: readonly { mediaType: string; filename?: string }[];
+      createdAt: number;
+    }[];
+  }) {
+    const shells = {
+      findByIdentityId: vi.fn(async (identityId: string) =>
+        input.shells.filter((item) => String(item.identityId) === identityId),
+      ),
+      findByIdForIdentity: vi.fn(
+        async (identityId: string, id: string) =>
+          input.shells.find(
+            (item) => String(item.identityId) === identityId && String(item.id) === id,
+          ) ?? null,
+      ),
+    } as unknown as Pick<IAIConversationRepository, 'findByIdentityId' | 'findByIdForIdentity'>;
+    const counts = {
+      countsByIdentity: vi.fn(async () => new Map(Object.entries(input.counts ?? {}))),
+      countByIdentity: vi.fn(async (_identityId: string, conversationId: string) =>
+        Number(input.counts?.[conversationId] ?? 0),
+      ),
+    };
+    const history = {
+      readMessages: vi.fn(async () => ({ messages: input.messages ?? [] })),
+    };
+    return {
+      shells,
+      counts,
+      history,
+      source: createAssistantConversationExternalSource({ shells, counts, history }),
+    };
+  }
+
+  it('lists only live owner shells with their bounded message counts', async () => {
+    const f = sourceFixture({
+      shells: [
+        ownedShell('owner-a', 'live'),
+        ownedShell('owner-a', 'archived', { status: 'Archived' }),
+        ownedShell('owner-a', 'deleted', { deletedAt: new Date(9_000) }),
+        ownedShell('owner-b', 'foreign'),
+      ],
+      counts: { live: 4, archived: 2, deleted: 1 },
+    });
+
+    const listed = await f.source.listOwnedShells('owner-a');
+    expect(listed.map((item) => [item.id, item.messageCount, item.status])).toEqual([
+      ['live', 4, 'Active'],
+      ['archived', 2, 'Archived'],
+    ]);
+    expect(f.counts.countsByIdentity).toHaveBeenCalledWith('owner-a');
+    expect(f.history.readMessages).not.toHaveBeenCalled();
+  });
+
+  it('filters by status and hides deleted or foreign shells as not found', async () => {
+    const f = sourceFixture({
+      shells: [
+        ownedShell('owner-a', 'live'),
+        ownedShell('owner-a', 'archived', { status: 'Archived' }),
+        ownedShell('owner-a', 'deleted', { deletedAt: new Date(9_000) }),
+      ],
+      counts: { live: 1, archived: 3, deleted: 1 },
+    });
+
+    const archived = await f.source.listOwnedShells('owner-a', 'Archived');
+    expect(archived.map((item) => item.id)).toEqual(['archived']);
+    expect(await f.source.findOwnedShell('owner-a', 'deleted')).toBeNull();
+    expect(await f.source.findOwnedShell('owner-b', 'live')).toBeNull();
+    expect(await f.source.findOwnedShell('owner-a', 'missing')).toBeNull();
+    await expect(f.source.findOwnedShell('owner-a', 'live')).resolves.toMatchObject({
+      id: 'live',
+      messageCount: 1,
+    });
+  });
+
+  it('slices the transcript page and projects attachment metadata only', async () => {
+    const f = sourceFixture({
+      shells: [ownedShell('owner-a', 'conv')],
+      counts: { conv: 3 },
+      messages: [
+        { id: 'm-1', role: 'user', content: 'one', createdAt: 10 },
+        {
+          id: 'm-2',
+          role: 'assistant',
+          content: 'two',
+          attachments: [{ mediaType: 'image/png', filename: 'shot.png' }],
+          createdAt: 20,
+        },
+        { id: 'm-3', role: 'user', content: 'three', createdAt: 30 },
+      ],
+    });
+
+    const page = await f.source.readMessagePage('owner-a', 'conv', { offset: 1, limit: 1 });
+    expect(page).toEqual([
+      {
+        id: 'm-2',
+        role: 'assistant',
+        content: 'two',
+        attachments: [{ mediaType: 'image/png', filename: 'shot.png' }],
+        createdAt: 20,
+      },
+    ]);
+    expect(page[0]).not.toHaveProperty('url');
+    expect(page[0]).not.toHaveProperty('storageKey');
+  });
+
+  it('keeps the projection bounds and cross-owner NOT_FOUND when composed with the source', async () => {
+    const f = sourceFixture({
+      shells: [
+        ...Array.from({ length: 60 }, (_, index) =>
+          ownedShell('owner-a', `c-${String(index).padStart(2, '0')}`),
+        ),
+        ownedShell('owner-b', 'foreign'),
+      ],
+      counts: { 'c-00': 1 },
+      messages: [{ id: 'm-1', role: 'user', content: 'x'.repeat(2_500), createdAt: 10 }],
+    });
+    const port = createAssistantConversationExternalReadPort(f.source);
+
+    const listed = await port.listConversations(OWNER_A, { pageSize: 999 });
+    expect(listed.ok).toBe(true);
+    if (!listed.ok) return;
+    expect(listed.data.pageSize).toBe(ASSISTANT_CONVERSATION_EXTERNAL_LIMITS.listPageSizeMax);
+    expect(listed.data.conversations).toHaveLength(
+      ASSISTANT_CONVERSATION_EXTERNAL_LIMITS.listPageSizeMax,
+    );
+
+    const transcript = await port.readConversation(OWNER_A, 'c-00', { pageSize: 999 });
+    expect(transcript.ok).toBe(true);
+    if (!transcript.ok) return;
+    expect(transcript.data.pageSize).toBe(
+      ASSISTANT_CONVERSATION_EXTERNAL_LIMITS.messagePageSizeMax,
+    );
+    expect(transcript.data.messages[0]).toMatchObject({
+      content: 'x'.repeat(ASSISTANT_CONVERSATION_EXTERNAL_LIMITS.messageContentMaxChars),
+      truncated: true,
+    });
+
+    const foreign = await port.readConversation(OWNER_A, 'foreign');
+    expect(foreign.ok).toBe(false);
+    if (foreign.ok) return;
+    expect(foreign.error.code).toBe('NOT_FOUND');
   });
 });

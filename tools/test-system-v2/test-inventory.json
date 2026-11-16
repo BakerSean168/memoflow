@@ -152,7 +152,37 @@
       ]
     },
     {
+      "path": "apps/api/src/modules/agent-gateway/label-scope.boundary.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "apps/api/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "apps/api/vitest.config.ts"
+      ]
+    },
+    {
       "path": "apps/api/src/modules/agent-gateway/module.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "apps/api/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "apps/api/vitest.config.ts"
+      ]
+    },
+    {
+      "path": "apps/api/src/modules/agent-gateway/notification-scope.boundary.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "apps/api/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "apps/api/vitest.config.ts"
+      ]
+    },
+    {
+      "path": "apps/api/src/modules/agent-gateway/notification.port.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "apps/api/vitest.config.ts"
@@ -168,6 +198,36 @@
         "apps/api/vitest.integration.config.ts"
       ],
       "measurementCollectors": []
+    },
+    {
+      "path": "apps/api/src/modules/agent-gateway/relation-read.port.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "apps/api/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "apps/api/vitest.config.ts"
+      ]
+    },
+    {
+      "path": "apps/api/src/modules/agent-gateway/relation-scope.boundary.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "apps/api/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "apps/api/vitest.config.ts"
+      ]
+    },
+    {
+      "path": "apps/api/src/modules/agent-gateway/write.port.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "apps/api/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "apps/api/vitest.config.ts"
+      ]
     },
     {
       "path": "apps/api/src/modules/ai/controlled-analytics-read.adapter.spec.ts",
@@ -4448,6 +4508,26 @@
       ]
     },
     {
+      "path": "packages/ai/src/server/infrastructure/adapters/powersync/local-conversation-external-read.source.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/ai/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "packages/ai/vitest.config.ts"
+      ]
+    },
+    {
+      "path": "packages/ai/src/server/infrastructure/adapters/powersync/local-gateway-audit.repository.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/ai/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "packages/ai/vitest.config.ts"
+      ]
+    },
+    {
       "path": "packages/ai/src/server/infrastructure/adapters/powersync/local-mcp-client.repository.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -4709,6 +4789,16 @@
     },
     {
       "path": "packages/ai/src/server/local-agent/local-agent-snapshot.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/ai/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "packages/ai/vitest.config.ts"
+      ]
+    },
+    {
+      "path": "packages/ai/src/server/local-agent/local-tool-bridge-audit.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/ai/vitest.config.ts"
@@ -13274,7 +13364,7 @@
       "type": "measurement",
       "suite": "coverage",
       "runner": "vitest",
-      "fileCount": 64
+      "fileCount": 70
     },
     {
       "id": "packages/account/vitest.config.ts",
@@ -13288,7 +13378,7 @@
       "type": "measurement",
       "suite": "coverage",
       "runner": "vitest",
-      "fileCount": 134
+      "fileCount": 137
     },
     {
       "id": "packages/app-vue/vitest.store-coverage.config.ts",
@@ -13754,7 +13844,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 64
+      "fileCount": 70
     },
     {
       "id": "apps/desktop/vitest.config.ts",
@@ -13838,7 +13928,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 134
+      "fileCount": 137
     },
     {
       "id": "packages/app-vue/vitest.config.ts",
@@ -14259,7 +14349,13 @@
       "apps/api/src/bootstrap-module-names.surface.spec.ts",
       "apps/api/src/bootstrap.spec.ts",
       "apps/api/src/modules/agent-gateway/audit.spec.ts",
+      "apps/api/src/modules/agent-gateway/label-scope.boundary.spec.ts",
       "apps/api/src/modules/agent-gateway/module.spec.ts",
+      "apps/api/src/modules/agent-gateway/notification-scope.boundary.spec.ts",
+      "apps/api/src/modules/agent-gateway/notification.port.spec.ts",
+      "apps/api/src/modules/agent-gateway/relation-read.port.spec.ts",
+      "apps/api/src/modules/agent-gateway/relation-scope.boundary.spec.ts",
+      "apps/api/src/modules/agent-gateway/write.port.spec.ts",
       "apps/api/src/modules/ai/controlled-analytics-read.adapter.spec.ts",
       "apps/api/src/modules/ai/owner-activity-read.adapter.equivalence.spec.ts",
       "apps/api/src/modules/ai/owner-activity-read.adapter.spec.ts",
@@ -14410,6 +14506,8 @@
       "packages/ai/src/server/infrastructure/adapters/powersync/attention-events.powersync.spec.ts",
       "packages/ai/src/server/infrastructure/adapters/powersync/conversation-events.powersync.spec.ts",
       "packages/ai/src/server/infrastructure/adapters/powersync/local-agent.repository.spec.ts",
+      "packages/ai/src/server/infrastructure/adapters/powersync/local-conversation-external-read.source.spec.ts",
+      "packages/ai/src/server/infrastructure/adapters/powersync/local-gateway-audit.repository.spec.ts",
       "packages/ai/src/server/infrastructure/adapters/powersync/local-mcp-client.repository.spec.ts",
       "packages/ai/src/server/infrastructure/adapters/powersync/powersync-ai-rows-affected.spec.ts",
       "packages/ai/src/server/infrastructure/adapters/prisma/__tests__/ai-knowledge-index-prisma.repository.test.ts",
@@ -14437,6 +14535,7 @@
       "packages/ai/src/server/local-agent/dsh-driver.spec.ts",
       "packages/ai/src/server/local-agent/local-agent-runtime.spec.ts",
       "packages/ai/src/server/local-agent/local-agent-snapshot.spec.ts",
+      "packages/ai/src/server/local-agent/local-tool-bridge-audit.spec.ts",
       "packages/ai/src/server/local-agent/local-tool-bridge.spec.ts",
       "packages/ai/src/server/local-agent/native-executable.spec.ts",
       "packages/ai/src/server/local-agent/native-failure.spec.ts",
@@ -14906,7 +15005,7 @@
   "duplicate": [],
   "unexpected": [],
   "counts": {
-    "unit": 1233,
+    "unit": 1242,
     "integration": 59,
     "smoke": 3,
     "boundary-ipc": 6,

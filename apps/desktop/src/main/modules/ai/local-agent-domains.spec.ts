@@ -361,15 +361,19 @@ describe('Local Agent Domain Expansion (Phase 2, #995)', () => {
       topic: 'test',
       title: 'Daily Review',
       content: 'Time for daily review',
-      type: 'reminder',
-      category: 'routine',
-      importance: 'normal',
-      urgency: 'normal',
+      contentTruncated: false,
+      type: 'Reminder',
+      category: 'Reminder',
+      importance: 'Moderate',
+      urgency: 'Medium',
       isRead: false,
       readAt: null,
-      createdAt: '2026-11-16T10:00:00.000Z',
-      updatedAt: '2026-11-16T10:00:00.000Z',
+      archivedAt: null,
+      createdAt: 1792454400000,
+      updatedAt: 1792454400000,
       version: 1,
+      relatedEntityType: null,
+      relatedEntityId: null,
     };
 
     const mockSchedule = {
@@ -405,6 +409,8 @@ describe('Local Agent Domain Expansion (Phase 2, #995)', () => {
             return {
               items: [mockNotification],
               total: 1,
+              page: 1,
+              pageSize: query.limit,
               hasMore: false,
             };
           },
@@ -481,7 +487,7 @@ describe('Local Agent Domain Expansion (Phase 2, #995)', () => {
           arguments: {},
         }),
       );
-      expect(notifUnread.unreadCount).toBe(1);
+      expect(notifUnread.count).toBe(1);
 
       // 4. schedule_get
       const schedGet = parsePayload(

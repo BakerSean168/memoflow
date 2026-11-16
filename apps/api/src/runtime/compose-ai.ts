@@ -20,8 +20,12 @@ import type { PrismaClient } from '@memoflow/database';
 import {
   AIEvaluationReportFileAdapter,
   AIContextAssembler,
+  AgentInstanceReadService,
   createAIModule,
   createAIPrismaRepositories,
+  createAssistantConversationExternalReadPort,
+  createAssistantConversationExternalSource,
+  createAssistantConversationMessageCountSource,
   createMastraStorage,
   ConversationShellSource,
   KnowledgeCapturePersistenceAdapter,
@@ -31,6 +35,8 @@ import {
   MastraModelResolver,
   AgentInstanceRegistry,
   ProviderWebResearchAdapter,
+  type AssistantConversationExternalReadPort,
+  type IAgentInstanceReadPort,
   type IAIActivityReadPort,
   type IAITaskDashboardReadPort,
   type MastraStorageConfig,
@@ -82,6 +88,14 @@ export interface ComposedAI {
    * MCP lane) consume it directly instead of re-assembling the AI module.
    */
   readonly assistantConversation: AIModuleInstance['assistantConversation'];
+  /**
+   * Bounded external read projection of Assistant conversations (#977) for the
+   * cloud MCP lane. Metadata-only listings, page-capped transcripts and
+   * NOT_FOUND for cross-owner ids are owned by the AI application layer.
+   */
+  readonly assistantConversationExternal: AssistantConversationExternalReadPort;
+  /** Owner-scoped AI Agent archive read port (#976); no repository reaches the gateway. */
+  readonly agentInstanceRead: IAgentInstanceReadPort;
 }
 
 export interface ComposeAIDependencies {
@@ -242,5 +256,13 @@ export function composeAI(dependencies: ComposeAIDependencies): ComposedAI {
     workflowRuntime: instance.workflowRuntime,
     portableCapability: instance.portableCapability,
     assistantConversation: instance.assistantConversation,
+    assistantConversationExternal: createAssistantConversationExternalReadPort(
+      createAssistantConversationExternalSource({
+        shells: repositorySet.conversationRepository,
+        counts: createAssistantConversationMessageCountSource(dependencies.db),
+        history: mastraRuntime.history,
+      }),
+    ),
+    agentInstanceRead: new AgentInstanceReadService(repositorySet.agentInstanceRepository),
   };
 }

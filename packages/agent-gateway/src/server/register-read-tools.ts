@@ -6,29 +6,42 @@ import {
   ExternalGoalSchema,
   GoalGetOutputSchema,
   GoalSearchOutputSchema,
+  NotificationListOutputSchema,
+  NotificationUnreadCountOutputSchema,
   TaskPlanGetOutputSchema,
   TaskPlanSearchOutputSchema,
   TaskOccurrenceGetOutputSchema,
   TaskOccurrenceListOutputSchema,
+  LabelListOutputSchema,
+  LabelResolveNamesOutputSchema,
   RoutineGetOutputSchema,
   RoutineListOutputSchema,
   RoutineUpcomingOutputSchema,
   NotificationGetOutputSchema,
-  NotificationListOutputSchema,
-  NotificationUnreadCountOutputSchema,
   ScheduleGetOutputSchema,
   ScheduleListOutputSchema,
+  AiAgentGetOutputSchema,
+  AiAgentListOutputSchema,
+  AiConversationListOutputSchema,
+  AiConversationTranscriptOutputSchema,
+  RelationNeighborsOutputSchema,
 } from '../contracts';
+import type { Result } from '@memoflow/transport-contracts/result';
 import { GoalPagePositionSchema, type GoalClientDTO } from '@memoflow/goal-contracts';
 import { TaskPlanPositionSchema, TaskOccurrencePositionSchema } from '@memoflow/task-contracts';
 import type { ExecutionContext } from '@memoflow/transport-contracts';
 import {
   GatewayReadError as ControlledError,
   type GoalReadPort,
-  type TaskReadPort,
-  type RoutineReadPort,
   type NotificationReadPort,
+  type TaskReadPort,
+  type LabelReadPort,
+  type RoutineReadPort,
   type ScheduleReadPort,
+  type AssistantConversationReadPort,
+  type AgentArchiveReadPort,
+  type GatewayAiAgentEntry,
+  type RelationReadPort,
   type GatewayReadBudget,
 } from '../ports';
 const MAX_BYTES = 256 * 1024;
@@ -41,12 +54,16 @@ export interface ReadToolCall {
     scope:
       | 'goals:read'
       | 'tasks:read'
+      | 'labels:read'
       | 'routines:read'
       | 'notifications:read'
       | 'schedules:read'
       | 'goals:write'
       | 'tasks:write'
-      | 'routines:write',
+      | 'ai:read'
+      | 'routines:write'
+      | 'notifications:write'
+      | 'relations:read',
     work: () => Promise<T>,
   ): Promise<{
     content: { type: 'text'; text: string }[];
@@ -71,6 +88,17 @@ const TaskCursorSchema = z.strictObject({
   timeZone: z.string().max(100).optional(),
   asOf: z.number().int().nonnegative().optional(),
 });
+const RelationCursorSchema = z.strictObject({
+  identityId: z.string(),
+  nodeType: z.string(),
+  nodeId: z.string(),
+  relationType: z.string().optional(),
+  targetType: z.string().optional(),
+  direction: z.string().optional(),
+  limit: z.number().int().min(1).max(100),
+  offset: z.number().int().min(0),
+  expiresAt: z.number().int(),
+});
 const RoutineCursorSchema = z.strictObject({
   identityId: z.string(),
   tool: z.enum(['routine_list', 'routine_upcoming', 'notification_list', 'schedule_list']),
@@ -86,6 +114,24 @@ function fitPage<T>(values: readonly T[]) {
     truncated = true;
   }
   return { items, truncated };
+}
+
+/** The AI application projection already bounds content; only codes cross this seam. */
+function unwrap<T>(result: Result<T>): T {
+  if (result.ok) return result.data;
+  throw new ControlledError(result.error.code === 'NOT_FOUND' ? 'NOT_FOUND' : 'INTERNAL_ERROR');
+}
+
+/** Projects exactly the six Agent archive fields; host-local configuration stays out. */
+function projectAgent(agent: GatewayAiAgentEntry) {
+  return {
+    instanceId: agent.instanceId,
+    driver: agent.driver,
+    name: agent.name,
+    enabled: agent.enabled,
+    createdAt: agent.createdAt,
+    updatedAt: agent.updatedAt,
+  };
 }
 
 function projectGoal(goal: GoalClientDTO) {
@@ -115,9 +161,13 @@ export function registerReadTools(
     cursorSecret: string;
     goals: GoalReadPort;
     tasks?: TaskReadPort;
-    routines?: RoutineReadPort;
+    labels?: LabelReadPort;
     notifications?: NotificationReadPort;
+    routines?: RoutineReadPort;
     schedules?: ScheduleReadPort;
+    assistantConversation?: AssistantConversationReadPort;
+    agents?: AgentArchiveReadPort;
+    relations?: RelationReadPort;
   },
   context: ExecutionContext,
   budget: GatewayReadBudget,
@@ -209,6 +259,47 @@ export function registerReadTools(
         parsed.identityId !== identityId ||
         parsed.tool !== tool ||
         parsed.binding !== binding ||
+        parsed.expiresAt <= Date.now()
+      )
+        throw new Error('binding');
+      return parsed.offset;
+    } catch {
+      throw new ControlledError('INVALID_CURSOR');
+    }
+  }
+  function encodeRelationCursor(input: z.infer<typeof RelationCursorSchema>) {
+    const payload = Buffer.from(JSON.stringify(RelationCursorSchema.parse(input))).toString(
+      'base64url',
+    );
+    return `${payload}.${sign(payload)}`;
+  }
+  function decodeRelationCursor(
+    cursor: string,
+    identityId: string,
+    node: { type: string; id: string },
+    relationType?: string,
+    targetType?: string,
+    direction?: string,
+    limit?: number,
+  ) {
+    try {
+      const [payload, signature, extra] = cursor.split('.');
+      if (!payload || !signature || extra) throw new Error('shape');
+      const expected = Buffer.from(sign(payload)),
+        actual = Buffer.from(signature);
+      if (expected.length !== actual.length || !timingSafeEqual(expected, actual))
+        throw new Error('signature');
+      const parsed = RelationCursorSchema.parse(
+        JSON.parse(Buffer.from(payload, 'base64url').toString('utf8')),
+      );
+      if (
+        parsed.identityId !== identityId ||
+        parsed.nodeType !== node.type ||
+        parsed.nodeId !== node.id ||
+        parsed.relationType !== (relationType ?? undefined) ||
+        parsed.targetType !== (targetType ?? undefined) ||
+        parsed.direction !== (direction ?? undefined) ||
+        (limit !== undefined && parsed.limit !== limit) ||
         parsed.expiresAt <= Date.now()
       )
         throw new Error('binding');
@@ -490,33 +581,28 @@ export function registerReadTools(
     server.registerTool(
       'notification_list',
       readToolDescriptors.notification_list.definition,
-      ({ isRead, category, limit, cursor }) =>
+      (input) =>
         call('notification_list', 'notifications:read', async () => {
-          const binding = JSON.stringify({ isRead, category, limit });
-          const offset = cursor
-            ? decodeRoutineCursor(cursor, context.identityId, 'notification_list', binding)
-            : 0;
-          if (offset + limit > 500) throw new ControlledError('INVALID_CURSOR');
-          const result = await notifications.listNotifications(
-            { isRead, category, limit, offset },
+          const page = await notifications.listNotifications(
+            {
+              archiveState: input.archiveState,
+              page: input.page,
+              limit: input.limit,
+              ...(input.isRead !== undefined ? { isRead: input.isRead } : {}),
+              ...(input.category ? { category: input.category } : {}),
+              ...(input.type ? { type: input.type } : {}),
+              ...(input.keyword ? { keyword: input.keyword } : {}),
+            },
             context,
             budget,
           );
-          const { items, truncated } = fitPage(result.items);
-          const hasMore = result.hasMore || truncated;
-          const nextCursor = hasMore
-            ? encodeRoutineCursor({
-                tool: 'notification_list',
-                binding,
-                identityId: context.identityId,
-                offset: offset + items.length,
-                expiresAt: Date.now() + 86400000,
-              })
-            : null;
+          const { items, truncated } = fitPage(page.items);
           return NotificationListOutputSchema.parse({
             items,
-            hasMore,
-            nextCursor,
+            total: page.total,
+            page: page.page,
+            pageSize: page.pageSize,
+            hasMore: page.hasMore || truncated,
             ...(truncated ? { truncated: 'response-budget' as const } : {}),
           });
         }),
@@ -525,10 +611,11 @@ export function registerReadTools(
       'notification_unread_count',
       readToolDescriptors.notification_unread_count.definition,
       () =>
-        call('notification_unread_count', 'notifications:read', async () => {
-          const unreadCount = await notifications.getUnreadCount(context, budget);
-          return NotificationUnreadCountOutputSchema.parse({ unreadCount });
-        }),
+        call('notification_unread_count', 'notifications:read', async () =>
+          NotificationUnreadCountOutputSchema.parse({
+            count: await notifications.getUnreadCount(context, budget),
+          }),
+        ),
     );
   }
   if (options.schedules && scopes.includes('schedules:read')) {
@@ -567,6 +654,151 @@ export function registerReadTools(
               })
             : null;
           return ScheduleListOutputSchema.parse({
+            items,
+            hasMore,
+            nextCursor,
+            ...(truncated ? { truncated: 'response-budget' as const } : {}),
+          });
+        }),
+    );
+  }
+  if (options.assistantConversation && scopes.includes('ai:read')) {
+    const conversations = options.assistantConversation;
+    server.registerTool(
+      'ai_conversation_list',
+      readToolDescriptors.ai_conversation_list.definition,
+      ({ page, pageSize, status }) =>
+        call('ai_conversation_list', 'ai:read', async () =>
+          AiConversationListOutputSchema.parse(
+            unwrap(
+              await conversations.listConversations(context, {
+                page,
+                pageSize,
+                ...(status ? { status } : {}),
+              }),
+            ),
+          ),
+        ),
+    );
+    server.registerTool(
+      'ai_conversation_get',
+      readToolDescriptors.ai_conversation_get.definition,
+      ({ id }) =>
+        call('ai_conversation_get', 'ai:read', async () =>
+          AiConversationTranscriptOutputSchema.parse(
+            unwrap(await conversations.readConversation(context, id)),
+          ),
+        ),
+    );
+    server.registerTool(
+      'ai_conversation_transcript',
+      readToolDescriptors.ai_conversation_transcript.definition,
+      ({ id, page, pageSize }) =>
+        call('ai_conversation_transcript', 'ai:read', async () =>
+          AiConversationTranscriptOutputSchema.parse(
+            unwrap(await conversations.readConversation(context, id, { page, pageSize })),
+          ),
+        ),
+    );
+  }
+  if (options.agents && scopes.includes('ai:read')) {
+    const agents = options.agents;
+    server.registerTool(
+      'ai_agent_list',
+      readToolDescriptors.ai_agent_list.definition,
+      ({ limit }) =>
+        call('ai_agent_list', 'ai:read', async () => {
+          const owned = await agents.list(context);
+          const items = owned.slice(0, limit).map(projectAgent);
+          return AiAgentListOutputSchema.parse({
+            agents: items,
+            ...(owned.length > items.length ? { truncated: 'archive-limit' as const } : {}),
+          });
+        }),
+    );
+    server.registerTool(
+      'ai_agent_get',
+      readToolDescriptors.ai_agent_get.definition,
+      ({ instanceId }) =>
+        call('ai_agent_get', 'ai:read', async () => {
+          const agent = await agents.get(instanceId, context);
+          if (!agent) throw new ControlledError('NOT_FOUND');
+          return AiAgentGetOutputSchema.parse({ agent: projectAgent(agent) });
+        }),
+    );
+  }
+  if (options.labels && scopes.includes('labels:read')) {
+    server.registerTool(
+      'label_list',
+      readToolDescriptors.label_list.definition,
+      ({ search, limit }) =>
+        call('label_list', 'labels:read', async () => {
+          const items = await options.labels!.list({ search, limit }, context, budget);
+          const { items: fitted } = fitPage(items);
+          return LabelListOutputSchema.parse({
+            items: fitted,
+          });
+        }),
+    );
+    server.registerTool(
+      'label_resolve_names',
+      readToolDescriptors.label_resolve_names.definition,
+      ({ names }) =>
+        call('label_resolve_names', 'labels:read', async () => {
+          const items = await options.labels!.resolveNames(names ?? [], context, budget);
+          const { items: fitted } = fitPage(items);
+          return LabelResolveNamesOutputSchema.parse({
+            items: fitted,
+          });
+        }),
+    );
+  }
+  if (options.relations && scopes.includes('relations:read')) {
+    const relations = options.relations;
+    server.registerTool(
+      'relation_neighbors',
+      readToolDescriptors.relation_neighbors.definition,
+      ({ node, relationType, targetType, direction, limit, cursor }) =>
+        call('relation_neighbors', 'relations:read', async () => {
+          const offset = cursor
+            ? decodeRelationCursor(
+                cursor,
+                context.identityId,
+                node,
+                relationType,
+                targetType,
+                direction,
+                limit,
+              )
+            : 0;
+          const page = await relations.getNeighbors(
+            {
+              node,
+              relationType,
+              targetType,
+              direction,
+              limit,
+              offset,
+            },
+            context,
+            budget,
+          );
+          const { items, truncated } = fitPage(page.items);
+          const hasMore = page.hasMore || truncated;
+          const nextCursor = hasMore
+            ? encodeRelationCursor({
+                identityId: context.identityId,
+                nodeType: node.type,
+                nodeId: node.id,
+                relationType,
+                targetType,
+                direction,
+                limit,
+                offset: offset + items.length,
+                expiresAt: Date.now() + 86400000,
+              })
+            : null;
+          return RelationNeighborsOutputSchema.parse({
             items,
             hasMore,
             nextCursor,

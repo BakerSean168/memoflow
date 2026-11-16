@@ -18,14 +18,18 @@ import type {
 } from '@memoflow/routine-contracts';
 import type { GatewayWriteToolName } from './write-tool-descriptors';
 import type { GatewayAssistedToolName } from './assisted-tool-descriptors';
-import type { GatewayFailureCode, ExternalNotification, ExternalSchedule } from './contracts';
+import type { GatewayFailureCode, ExternalSchedule } from './contracts';
+import type { ExternalNotification, NotificationMarkReadReceipt } from './contracts/notifications';
 import type {
   GoalAgentPersistedReceipt,
   GoalClientDTO,
   GoalPage,
   GoalPageQuery,
 } from '@memoflow/goal-contracts';
+import type { LabelClientDTO } from '@memoflow/label-contracts';
 import type { ExecutionContext, RequestContext } from '@memoflow/transport-contracts';
+import type { Result } from '@memoflow/transport-contracts/result';
+import type { AgentDriverKind } from '@memoflow/ai-contracts';
 
 /** Read cancellation stays separate from the canonical ExecutionContext. */
 export interface GatewayReadBudget {
@@ -69,20 +73,6 @@ export interface RoutineReadPort {
     query: RoutineUpcomingQuery,
     budget?: GatewayReadBudget,
   ): Promise<RoutineUpcomingResponse>;
-}
-
-export interface NotificationReadPort {
-  getNotification(
-    id: string,
-    context: ExecutionContext,
-    budget?: GatewayReadBudget,
-  ): Promise<ExternalNotification | null>;
-  listNotifications(
-    query: { isRead?: boolean; category?: string; limit: number; offset?: number },
-    context: ExecutionContext,
-    budget?: GatewayReadBudget,
-  ): Promise<{ items: readonly ExternalNotification[]; total: number; hasMore: boolean }>;
-  getUnreadCount(context: ExecutionContext, budget?: GatewayReadBudget): Promise<number>;
 }
 
 export interface ScheduleReadPort {
@@ -133,11 +123,19 @@ export interface GatewayAuditEvent {
     | 'notification_get'
     | 'notification_list'
     | 'notification_unread_count'
+    | 'ai_conversation_list'
+    | 'ai_conversation_get'
+    | 'ai_conversation_transcript'
+    | 'ai_agent_list'
+    | 'ai_agent_get'
     | 'schedule_get'
     | 'schedule_list'
     | 'routine_get'
     | 'routine_list'
     | 'routine_upcoming'
+    | 'label_list'
+    | 'label_resolve_names'
+    | 'relation_neighbors'
     | 'transport'
     | 'pat_create'
     | 'pat_list'
@@ -146,6 +144,32 @@ export interface GatewayAuditEvent {
     | 'oauth_revoke';
   readonly outcome: string;
   readonly durationMs: number;
+}
+
+/** Relation query with bounds and optional filters. */
+export interface RelationNeighborsQuery {
+  readonly node: import('./contracts').RelationNodeRef;
+  readonly relationType?: import('./contracts').ExternalRelationType;
+  readonly targetType?: import('./contracts').RelationNodeType;
+  readonly direction?: 'outgoing' | 'incoming' | 'both';
+  readonly limit: number;
+  readonly offset?: number;
+}
+
+export interface RelationNeighborsPage {
+  readonly items: readonly import('./contracts').ExternalRelationNeighbor[];
+  readonly total?: number;
+  readonly hasMore: boolean;
+  readonly nextCursor?: string | null;
+}
+
+/** Relation owner read seam; provides bounded visibility-filtered cross-domain neighbors. */
+export interface RelationReadPort {
+  getNeighbors(
+    input: RelationNeighborsQuery,
+    context: ExecutionContext,
+    budget?: GatewayReadBudget,
+  ): Promise<RelationNeighborsPage>;
 }
 
 /** Concrete Task owner seam; plan definitions and occurrence facts remain distinct. */
@@ -170,6 +194,129 @@ export interface TaskReadPort {
     context: ExecutionContext,
     budget?: GatewayReadBudget,
   ): Promise<TaskOccurrenceReadPage>;
+}
+
+/** Gateway-owned read seam; the API host binds it to Label application service operations. */
+export interface LabelReadPort {
+  list(
+    input: { search?: string; limit?: number },
+    context: ExecutionContext,
+    budget?: GatewayReadBudget,
+  ): Promise<LabelClientDTO[]>;
+  resolveNames(
+    names: readonly string[],
+    context: ExecutionContext,
+    budget?: GatewayReadBudget,
+  ): Promise<LabelClientDTO[]>;
+}
+
+/**
+ * Gateway-owned Notification read seam. The API host binds it to the domain's
+ * `NotificationInboxPort`; the gateway never sees repositories or delivery state.
+ */
+export interface NotificationReadPort {
+  getNotification(
+    id: string,
+    context: ExecutionContext,
+    budget?: GatewayReadBudget,
+  ): Promise<ExternalNotification | null>;
+  listNotifications(
+    query: NotificationReadQuery,
+    context: ExecutionContext,
+    budget?: GatewayReadBudget,
+  ): Promise<NotificationReadPage>;
+  getUnreadCount(context: ExecutionContext, budget?: GatewayReadBudget): Promise<number>;
+}
+export interface NotificationReadQuery {
+  readonly isRead?: boolean;
+  readonly category?: string;
+  readonly type?: string;
+  readonly archiveState: 'active' | 'archived' | 'all';
+  readonly keyword?: string;
+  readonly page: number;
+  readonly limit: number;
+}
+export interface NotificationReadPage {
+  readonly items: readonly ExternalNotification[];
+  readonly total: number;
+  readonly page: number;
+  readonly pageSize: number;
+  readonly hasMore: boolean;
+}
+
+/**
+ * Gateway-owned AI read seam; the host binds it to the AI application layer's
+ * bounded external projection (#977). The gateway never reaches AI persistence.
+ */
+export interface GatewayAiConversationSummary {
+  readonly id: string;
+  readonly title: string;
+  readonly status: 'Active' | 'Archived';
+  readonly messageCount: number;
+  readonly createdAt: number;
+  readonly updatedAt: number;
+}
+
+export interface GatewayAiConversationAttachment {
+  readonly filename: string | null;
+  readonly mediaType: string;
+  readonly sizeBytes: number | null;
+}
+
+export interface GatewayAiConversationMessage {
+  readonly id: string;
+  readonly role: 'user' | 'assistant' | 'system';
+  readonly content: string;
+  readonly truncated: boolean;
+  readonly attachments: readonly GatewayAiConversationAttachment[];
+  readonly createdAt: number;
+}
+
+export interface GatewayAiConversationPage {
+  readonly conversations: readonly GatewayAiConversationSummary[];
+  readonly total: number;
+  readonly page: number;
+  readonly pageSize: number;
+}
+
+export interface GatewayAiConversationTranscript {
+  readonly conversationId: string;
+  readonly messages: readonly GatewayAiConversationMessage[];
+  readonly total: number;
+  readonly page: number;
+  readonly pageSize: number;
+  readonly hasMore: boolean;
+}
+
+export interface AssistantConversationReadPort {
+  listConversations(
+    cx: ExecutionContext,
+    query?: {
+      readonly page?: number;
+      readonly pageSize?: number;
+      readonly status?: 'Active' | 'Archived';
+    },
+  ): Promise<Result<GatewayAiConversationPage>>;
+  readConversation(
+    cx: ExecutionContext,
+    conversationId: string,
+    query?: { readonly page?: number; readonly pageSize?: number },
+  ): Promise<Result<GatewayAiConversationTranscript>>;
+}
+
+/** Bounded AI Agent archive projection; `get` answers null for missing or foreign ids. */
+export interface GatewayAiAgentEntry {
+  readonly instanceId: string;
+  readonly driver: AgentDriverKind;
+  readonly name: string;
+  readonly enabled: boolean;
+  readonly createdAt: number;
+  readonly updatedAt: number;
+}
+
+export interface AgentArchiveReadPort {
+  list(cx: ExecutionContext): Promise<readonly GatewayAiAgentEntry[]>;
+  get(instanceId: string, cx: ExecutionContext): Promise<GatewayAiAgentEntry | null>;
 }
 
 /** Internal observer only; causes never enter protocol responses or audit payloads. */
@@ -209,6 +356,8 @@ export interface GatewayWritePort {
   taskCreate: WriteCall<TaskWriteReceipt>;
   taskUpdate: WriteCall<TaskWriteReceipt>;
   taskComplete: WriteCall<TaskWriteReceipt>;
+  /** Idempotent read-state transition; no mutation receipt, execute-action stays closed. */
+  notificationMarkRead?: WriteCall<NotificationMarkReadReceipt>;
 }
 
 /** Fully implemented lifecycle is supplied only behind the assisted rollout flag. */

@@ -1,8 +1,24 @@
 import {
+  AiAgentGetInputSchema,
+  AiAgentGetOutputSchema,
+  AiAgentListInputSchema,
+  AiAgentListOutputSchema,
+  AiConversationGetInputSchema,
+  AiConversationListInputSchema,
+  AiConversationListOutputSchema,
+  AiConversationTranscriptInputSchema,
+  AiConversationTranscriptOutputSchema,
   GoalGetInputSchema,
   GoalGetOutputSchema,
   GoalSearchInputSchema,
   GoalSearchOutputSchema,
+  LabelListInputSchema,
+  LabelListOutputSchema,
+  LabelResolveNamesInputSchema,
+  LabelResolveNamesOutputSchema,
+  NotificationListInputSchema,
+  NotificationListOutputSchema,
+  NotificationUnreadCountOutputSchema,
   TaskPlanGetInputSchema,
   TaskPlanGetOutputSchema,
   TaskPlanSearchInputSchema,
@@ -11,6 +27,8 @@ import {
   TaskOccurrenceGetOutputSchema,
   TaskOccurrenceListInputSchema,
   TaskOccurrenceListOutputSchema,
+  RelationNeighborsInputSchema,
+  RelationNeighborsOutputSchema,
   RoutineGetInputSchema,
   RoutineGetOutputSchema,
   RoutineListInputSchema,
@@ -19,15 +37,12 @@ import {
   RoutineUpcomingOutputSchema,
   NotificationGetInputSchema,
   NotificationGetOutputSchema,
-  NotificationListInputSchema,
-  NotificationListOutputSchema,
-  NotificationUnreadCountInputSchema,
-  NotificationUnreadCountOutputSchema,
   ScheduleGetInputSchema,
   ScheduleGetOutputSchema,
   ScheduleListInputSchema,
   ScheduleListOutputSchema,
 } from './contracts';
+import { z } from 'zod';
 
 const readAnnotations = {
   readOnlyHint: true,
@@ -104,6 +119,18 @@ export const readToolDescriptors = {
       annotations: readAnnotations,
     },
   },
+  relation_neighbors: {
+    version: '1',
+    effect: 'read',
+    requiredScope: 'relations:read',
+    definition: {
+      description:
+        'Read cross-domain relation neighbors for a given goal, task, or knowledge note with optional relation/target type filtering and cursor pagination. Only relations between nodes visible to the current owner are returned; edges to invisible or cross-owner nodes are omitted without leaking peer existence.',
+      inputSchema: RelationNeighborsInputSchema,
+      outputSchema: RelationNeighborsOutputSchema,
+      annotations: readAnnotations,
+    },
+  },
   routine_get: {
     version: '1',
     effect: 'read',
@@ -150,12 +177,73 @@ export const readToolDescriptors = {
       annotations: readAnnotations,
     },
   },
+  ai_conversation_list: {
+    version: '1',
+    effect: 'read',
+    requiredScope: 'ai:read',
+    definition: {
+      description:
+        'List owned Assistant conversations as bounded metadata (title, status, message count, timestamps); never returns message bodies.',
+      inputSchema: AiConversationListInputSchema,
+      outputSchema: AiConversationListOutputSchema,
+      annotations: readAnnotations,
+    },
+  },
+  ai_conversation_get: {
+    version: '1',
+    effect: 'read',
+    requiredScope: 'ai:read',
+    definition: {
+      description:
+        'Open one owned Assistant conversation and return its first bounded transcript page; missing and foreign ids both answer NOT_FOUND.',
+      inputSchema: AiConversationGetInputSchema,
+      outputSchema: AiConversationTranscriptOutputSchema,
+      annotations: readAnnotations,
+    },
+  },
+  ai_conversation_transcript: {
+    version: '1',
+    effect: 'read',
+    requiredScope: 'ai:read',
+    definition: {
+      description:
+        'Read one page of an owned Assistant transcript (at most 25 messages); each body is capped at 2000 characters and flags truncation, attachments carry metadata only.',
+      inputSchema: AiConversationTranscriptInputSchema,
+      outputSchema: AiConversationTranscriptOutputSchema,
+      annotations: readAnnotations,
+    },
+  },
+  ai_agent_list: {
+    version: '1',
+    effect: 'read',
+    requiredScope: 'ai:read',
+    definition: {
+      description:
+        'List owned AI Agent archive entries (instanceId, driver, name, enabled, timestamps); host-local configuration is never projected.',
+      inputSchema: AiAgentListInputSchema,
+      outputSchema: AiAgentListOutputSchema,
+      annotations: readAnnotations,
+    },
+  },
+  ai_agent_get: {
+    version: '1',
+    effect: 'read',
+    requiredScope: 'ai:read',
+    definition: {
+      description:
+        'Read one owned AI Agent archive entry; missing and foreign ids both answer NOT_FOUND.',
+      inputSchema: AiAgentGetInputSchema,
+      outputSchema: AiAgentGetOutputSchema,
+      annotations: readAnnotations,
+    },
+  },
   notification_list: {
     version: '1',
     effect: 'read',
     requiredScope: 'notifications:read',
     definition: {
-      description: 'List owned Notification facts with bounded pagination.',
+      description:
+        'List owned notifications with an offset page (page ≤ 20, limit ≤ 50). Bodies are truncated at 2000 characters and flagged; action handles are not exposed.',
       inputSchema: NotificationListInputSchema,
       outputSchema: NotificationListOutputSchema,
       annotations: readAnnotations,
@@ -166,8 +254,8 @@ export const readToolDescriptors = {
     effect: 'read',
     requiredScope: 'notifications:read',
     definition: {
-      description: 'Get the unread Notification count for the owned profile.',
-      inputSchema: NotificationUnreadCountInputSchema,
+      description: 'Count owned unread notifications.',
+      inputSchema: z.strictObject({}),
       outputSchema: NotificationUnreadCountOutputSchema,
       annotations: readAnnotations,
     },
@@ -192,6 +280,28 @@ export const readToolDescriptors = {
         'List owned Calendar Schedule entries in a bounded time range (at most 90 days).',
       inputSchema: ScheduleListInputSchema,
       outputSchema: ScheduleListOutputSchema,
+      annotations: readAnnotations,
+    },
+  },
+  label_list: {
+    version: '1',
+    effect: 'read',
+    requiredScope: 'labels:read',
+    definition: {
+      description: 'List owned labels with optional search query and bounded limit.',
+      inputSchema: LabelListInputSchema,
+      outputSchema: LabelListOutputSchema,
+      annotations: readAnnotations,
+    },
+  },
+  label_resolve_names: {
+    version: '1',
+    effect: 'read',
+    requiredScope: 'labels:read',
+    definition: {
+      description: 'Resolve human-readable label names into owned canonical Label objects.',
+      inputSchema: LabelResolveNamesInputSchema,
+      outputSchema: LabelResolveNamesOutputSchema,
       annotations: readAnnotations,
     },
   },

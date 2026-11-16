@@ -18,10 +18,12 @@ import {
   type GatewayDiagnostic,
   type GatewayCredentialPort,
   type GoalReadPort,
-  type TaskReadPort,
-  type RoutineReadPort,
   type NotificationReadPort,
+  type TaskReadPort,
+  type LabelReadPort,
+  type RoutineReadPort,
   type ScheduleReadPort,
+  type RelationReadPort,
 } from '../ports';
 
 interface Options {
@@ -36,9 +38,13 @@ interface Options {
   readonly resourceMetadataUrl?: string;
   readonly goals: GoalReadPort;
   readonly tasks?: TaskReadPort;
-  readonly routines?: RoutineReadPort;
+  readonly labels?: LabelReadPort;
   readonly notifications?: NotificationReadPort;
+  readonly assistantConversation?: import('../ports').AssistantConversationReadPort;
+  readonly agents?: import('../ports').AgentArchiveReadPort;
+  readonly routines?: RoutineReadPort;
   readonly schedules?: ScheduleReadPort;
+  readonly relations?: RelationReadPort;
   readonly audit: (event: GatewayAuditEvent) => void;
   readonly timeoutMs?: number;
   readonly diagnose?: (event: GatewayDiagnostic) => void;
@@ -152,7 +158,7 @@ export function createReadGateway(options: Options) {
               'Cache-Control': 'no-store',
               ...(options.resourceMetadataUrl && (status === 401 || code === 'INSUFFICIENT_SCOPE')
                 ? {
-                    'WWW-Authenticate': `Bearer resource_metadata="${options.resourceMetadataUrl}"${code === 'INSUFFICIENT_SCOPE' ? ', error="insufficient_scope", scope="' + (tool !== 'transport' && isToolName(tool) ? toolDescriptors[tool].requiredScope : 'goals:read tasks:read') + '"' : ''}`,
+                    'WWW-Authenticate': `Bearer resource_metadata="${options.resourceMetadataUrl}"${code === 'INSUFFICIENT_SCOPE' ? ', error="insufficient_scope", scope="' + (tool !== 'transport' && isToolName(tool) ? toolDescriptors[tool].requiredScope : 'goals:read tasks:read ai:read') + '"' : ''}`,
                   }
                 : {}),
               ...(status === 429 ? { 'Retry-After': '60' } : {}),
@@ -189,12 +195,18 @@ export function createReadGateway(options: Options) {
             (scope) =>
               scope === 'goals:read' ||
               scope === 'tasks:read' ||
-              scope === 'routines:read' ||
+              scope === 'labels:read' ||
               scope === 'notifications:read' ||
+              scope === 'ai:read' ||
+              scope === 'routines:read' ||
               scope === 'schedules:read' ||
+              scope === 'relations:read' ||
               ((options.writes || options.assisted) &&
                 principal.credentialType === 'pat' &&
-                (scope === 'goals:write' || scope === 'tasks:write' || scope === 'routines:write')),
+                (scope === 'goals:write' ||
+                  scope === 'tasks:write' ||
+                  scope === 'routines:write' ||
+                  scope === 'notifications:write')),
           )
         )
           return reject(403, 'INSUFFICIENT_SCOPE');
@@ -255,6 +267,22 @@ export function createReadGateway(options: Options) {
                 scopeDecision = 'denied';
                 return reject(404, 'DISABLED');
               }
+              if (!isWriteToolName(name) && name.startsWith('label_') && !options.labels) {
+                scopeDecision = 'denied';
+                return reject(404, 'DISABLED');
+              }
+              if (
+                !isWriteToolName(name) &&
+                name.startsWith('ai_conversation_') &&
+                !options.assistantConversation
+              ) {
+                scopeDecision = 'denied';
+                return reject(404, 'DISABLED');
+              }
+              if (!isWriteToolName(name) && name.startsWith('ai_agent_') && !options.agents) {
+                scopeDecision = 'denied';
+                return reject(404, 'DISABLED');
+              }
               if (!isWriteToolName(name) && name.startsWith('routine_') && !options.routines) {
                 scopeDecision = 'denied';
                 return reject(404, 'DISABLED');
@@ -286,12 +314,16 @@ export function createReadGateway(options: Options) {
           requiredScope:
             | 'goals:read'
             | 'tasks:read'
+            | 'labels:read'
             | 'routines:read'
             | 'notifications:read'
             | 'schedules:read'
             | 'goals:write'
             | 'tasks:write'
-            | 'routines:write',
+            | 'routines:write'
+            | 'notifications:write'
+            | 'ai:read'
+            | 'relations:read',
           operation: () => Promise<T>,
         ) {
           tool = name;

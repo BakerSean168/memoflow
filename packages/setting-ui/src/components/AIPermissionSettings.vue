@@ -34,6 +34,7 @@ const objects: Exclude<PermissionObject, 'ai_permission'>[] = [
   'routine',
   'knowledge',
   'notification',
+  'ai',
 ];
 const effects: PermissionEffect[] = ['allow', 'ask', 'deny'];
 const writeActions = ['create', 'update', 'delete'] as const;

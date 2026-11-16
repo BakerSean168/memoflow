@@ -22,6 +22,7 @@ import type {
   LocalMcpClientCreate,
   LocalMcpClientCredential,
   LocalMcpEndpoint,
+  LocalGatewayAuditRecord,
   LocalAgentRequestResponse,
   AssistantRuntimeChoice,
   AssistantRuntimeSelectedEntity,
@@ -107,6 +108,7 @@ export interface LocalAgentToolBridgePort {
   listMcpClients?(owner: string): Promise<LocalMcpClient[]>;
   createMcpClient?(owner: string, input: LocalMcpClientCreate): Promise<LocalMcpClientCredential>;
   revokeMcpClient?(owner: string, id: string): Promise<LocalMcpClient>;
+  listGatewayAudit?(owner: string, limit?: number): Promise<LocalGatewayAuditRecord[]>;
   dispose(): Promise<void>;
 }
 interface ActiveRun {
@@ -1812,6 +1814,12 @@ export class LocalAgentRuntime {
     this.assertActive();
     if (!this.options.bridge?.revokeMcpClient) throw new LocalAgentError('LOCAL_AGENT_UNAVAILABLE');
     return this.options.bridge.revokeMcpClient(owner, id);
+  }
+
+  async listGatewayAudit(owner: string, limit?: number): Promise<LocalGatewayAuditRecord[]> {
+    this.assertActive();
+    if (!this.options.bridge?.listGatewayAudit) return [];
+    return this.options.bridge.listGatewayAudit(owner, limit);
   }
 
   respond(identityId: string, input: LocalAgentRequestResponse): boolean {

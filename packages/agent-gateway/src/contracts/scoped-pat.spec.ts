@@ -32,8 +32,10 @@ describe('scoped PAT lifetime contract (#970)', () => {
         'goals:write',
         'tasks:read',
         'tasks:write',
-        'routines:read',
         'routines:write',
+        'ai:read',
+        'routines:read',
+        'labels:read',
       ],
       createdAt: '2026-11-16T00:00:00.000Z',
       expiresAt: '2027-11-16T00:00:00.000Z',
@@ -42,16 +44,20 @@ describe('scoped PAT lifetime contract (#970)', () => {
     expect(ScopedPatSummarySchema.parse(summary)).toEqual(summary);
   });
 
-  it('grants notification and schedule read scopes within the raised eight-scope ceiling (#995)', () => {
+  it('grants notification and schedule read scopes within the raised twelve-scope ceiling (#990/#995)', () => {
     const scopes = [
       'goals:read',
       'goals:write',
       'tasks:read',
       'tasks:write',
-      'routines:read',
       'routines:write',
+      'ai:read',
+      'routines:read',
       'notifications:read',
       'schedules:read',
+      'notifications:write',
+      'labels:read',
+      'relations:read',
     ];
     expect(CreateScopedPatSchema.parse({ name: 'agent', scopes }).scopes).toEqual(scopes);
     expect(
@@ -59,6 +65,9 @@ describe('scoped PAT lifetime contract (#970)', () => {
     ).toBe(false);
     expect(
       CreateScopedPatSchema.safeParse({ name: 'agent', scopes: ['schedules:write'] }).success,
+    ).toBe(false);
+    expect(
+      CreateScopedPatSchema.safeParse({ name: 'agent', scopes: ['notifications:admin'] }).success,
     ).toBe(false);
     const summary = {
       id: '5b5d8a2b-9934-4be8-8e07-3f62ed122e15',
@@ -71,5 +80,79 @@ describe('scoped PAT lifetime contract (#970)', () => {
       revokedAt: null,
     };
     expect(ScopedPatSummarySchema.parse(summary)).toEqual(summary);
+  });
+
+  it('accepts ai:read and rejects a duplicate scope', () => {
+    const six = CreateScopedPatSchema.parse({
+      name: 'ai reader',
+      scopes: [
+        'goals:read',
+        'tasks:read',
+        'goals:write',
+        'tasks:write',
+        'routines:write',
+        'ai:read',
+      ],
+    });
+    expect(six.scopes).toContain('ai:read');
+    expect(
+      CreateScopedPatSchema.safeParse({
+        name: 'too many',
+        scopes: [
+          'goals:read',
+          'tasks:read',
+          'goals:write',
+          'tasks:write',
+          'routines:write',
+          'ai:read',
+          'ai:read',
+        ],
+      }).success,
+    ).toBe(false);
+  });
+
+  it('accepts labels:read within the ten-scope ceiling (#993)', () => {
+    const scopes = [
+      'goals:read',
+      'goals:write',
+      'tasks:read',
+      'tasks:write',
+      'routines:write',
+      'ai:read',
+      'routines:read',
+      'notifications:read',
+      'notifications:write',
+      'labels:read',
+    ];
+    expect(CreateScopedPatSchema.parse({ name: 'label agent', scopes }).scopes).toEqual(scopes);
+    expect(
+      CreateScopedPatSchema.safeParse({ name: 'agent', scopes: [...scopes, 'goals:read'] }).success,
+    ).toBe(false);
+    expect(
+      CreateScopedPatSchema.safeParse({ name: 'agent', scopes: ['labels:write'] }).success,
+    ).toBe(false);
+  });
+
+  it('accepts relations:read within the eleven-scope ceiling (#994)', () => {
+    const scopes = [
+      'goals:read',
+      'goals:write',
+      'tasks:read',
+      'tasks:write',
+      'routines:write',
+      'ai:read',
+      'routines:read',
+      'notifications:read',
+      'notifications:write',
+      'labels:read',
+      'relations:read',
+    ];
+    expect(CreateScopedPatSchema.parse({ name: 'relation agent', scopes }).scopes).toEqual(scopes);
+    expect(
+      CreateScopedPatSchema.safeParse({ name: 'agent', scopes: [...scopes, 'goals:read'] }).success,
+    ).toBe(false);
+    expect(
+      CreateScopedPatSchema.safeParse({ name: 'agent', scopes: ['relations:write'] }).success,
+    ).toBe(false);
   });
 });

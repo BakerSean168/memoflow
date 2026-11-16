@@ -4,6 +4,10 @@ import {
   LocalAgentToolBridge,
   LocalAgentRepository,
   LocalMcpClientRepository,
+  LocalGatewayAuditRepository,
+  LocalConversationExternalReadSource,
+  createAssistantConversationExternalReadPort,
+  registerLocalConversationReadTools,
   PermissionLocalRepository,
   permissionOperationForTool,
   goalPanelSubmitOperationId,
@@ -47,6 +51,7 @@ import {
   GatewayTaskUpdateSchema,
   GatewayTaskCompleteSchema,
   GatewayRoutineCreateSchema,
+  projectNotificationFact,
   type GatewayWriteAuthority,
   type GatewayWritePort,
   type RoutineReadPort,
@@ -93,64 +98,25 @@ function bindNotificationReadPort(
     async getNotification(id, cx) {
       const res = await inbox.getNotification(id, cx.identityId);
       if (!res.ok || !res.data) return null;
-      const row = res.data as Record<string, unknown>;
-      return {
-        id: String(row.id),
-        workflowKey: String(row.workflowKey ?? ''),
-        topic: String(row.topic ?? ''),
-        title: String(row.title ?? ''),
-        content: String(row.content ?? ''),
-        type: String(row.type ?? 'info'),
-        category: String(row.category ?? 'system'),
-        importance: String(row.importance ?? 'normal'),
-        urgency: String(row.urgency ?? 'normal'),
-        isRead: Boolean(row.isRead),
-        readAt: (row.readAt as string | number | null | undefined) ?? null,
-        createdAt: (row.createdAt as string | number) ?? Date.now(),
-        updatedAt: (row.updatedAt as string | number) ?? Date.now(),
-        expiresAt: (row.expiresAt as string | number | null | undefined) ?? null,
-        relatedEntityType: (row.relatedEntityType as string | null | undefined) ?? null,
-        relatedEntityId: (row.relatedEntityId as string | null | undefined) ?? null,
-        version: typeof row.version === 'number' ? row.version : 1,
-      };
+      return projectNotificationFact(res.data);
     },
     async listNotifications(query, cx) {
-      const res = await inbox.listNotifications({
-        identityId: cx.identityId,
-        isRead: query.isRead,
-        category: query.category,
-        limit: query.limit,
-        page: query.offset ? Math.floor(query.offset / query.limit) + 1 : 1,
-      });
-      if (!res.ok || !res.data) return { items: [], total: 0, hasMore: false };
+      const res = await inbox.listNotifications({ ...query, identityId: cx.identityId });
+      if (!res.ok || !res.data)
+        return { items: [], total: 0, page: 1, pageSize: query.limit, hasMore: false };
       const data = res.data as Record<string, unknown>;
       const list = (
         Array.isArray(data) ? data : ((data.notifications ?? data.items ?? []) as unknown[])
-      ) as Record<string, unknown>[];
+      ) as unknown[];
+      const pageSize = typeof data.pageSize === 'number' ? data.pageSize : query.limit;
+      const page = typeof data.page === 'number' ? data.page : query.page;
       const total = typeof data.total === 'number' ? data.total : list.length;
-      const items = list.map((row) => ({
-        id: String(row.id),
-        workflowKey: String(row.workflowKey ?? ''),
-        topic: String(row.topic ?? ''),
-        title: String(row.title ?? ''),
-        content: String(row.content ?? ''),
-        type: String(row.type ?? 'info'),
-        category: String(row.category ?? 'system'),
-        importance: String(row.importance ?? 'normal'),
-        urgency: String(row.urgency ?? 'normal'),
-        isRead: Boolean(row.isRead),
-        readAt: (row.readAt as string | number | null | undefined) ?? null,
-        createdAt: (row.createdAt as string | number) ?? Date.now(),
-        updatedAt: (row.updatedAt as string | number) ?? Date.now(),
-        expiresAt: (row.expiresAt as string | number | null | undefined) ?? null,
-        relatedEntityType: (row.relatedEntityType as string | null | undefined) ?? null,
-        relatedEntityId: (row.relatedEntityId as string | null | undefined) ?? null,
-        version: typeof row.version === 'number' ? row.version : 1,
-      }));
       return {
-        items,
+        items: list.map(projectNotificationFact),
         total,
-        hasMore: total > (query.offset ?? 0) + items.length,
+        page,
+        pageSize,
+        hasMore: typeof data.hasMore === 'boolean' ? data.hasMore : total > page * pageSize,
       };
     },
     async getUnreadCount(cx) {
@@ -159,9 +125,11 @@ function bindNotificationReadPort(
       const data = res.data as unknown;
       return typeof data === 'number'
         ? data
-        : typeof (data as { unreadCount?: number })?.unreadCount === 'number'
-          ? (data as { unreadCount: number }).unreadCount
-          : 0;
+        : typeof (data as { count?: number })?.count === 'number'
+          ? (data as { count: number }).count
+          : typeof (data as { unreadCount?: number })?.unreadCount === 'number'
+            ? (data as { unreadCount: number }).unreadCount
+            : 0;
     },
   };
 }
@@ -271,11 +239,15 @@ export function createDesktopLocalAgentTools(
     : undefined;
   const scheduleReadPort = domains?.schedules ? bindScheduleReadPort(domains.schedules) : undefined;
   const cursorSecret = randomBytes(32).toString('base64url');
+  const assistantConversations = createAssistantConversationExternalReadPort(
+    new LocalConversationExternalReadSource(db),
+  );
   return new LocalAgentToolBridge({
     store,
     permissions: new PermissionLocalRepository(db),
     isActive,
     clients: mcp?.clients,
+    audit: new LocalGatewayAuditRepository(db),
     discoveryPath: mcp?.discoveryPath,
     onRevokeGrant(grantInput) {
       panelBridge?.releaseAllForRun?.(grantInput.conversationId, grantInput.runId);
@@ -396,6 +368,9 @@ export function createDesktopLocalAgentTools(
             }),
         );
       }
+      // Local AI sessions are read through the bounded projection only; the
+      // provider credential and permission tables have no tool surface.
+      registerLocalConversationReadTools(server, assistantConversations, context);
       const writeCall: ReadToolCall = async <T extends object>(
         toolName: Parameters<ReadToolCall>[0],
         _scope: Parameters<ReadToolCall>[1],

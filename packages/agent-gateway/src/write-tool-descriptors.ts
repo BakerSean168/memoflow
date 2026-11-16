@@ -17,6 +17,8 @@ import {
   GatewayTaskCompleteSchema,
   GatewayGoalReceiptSchema,
   GatewayTaskReceiptSchema,
+  NotificationMarkReadInputSchema,
+  NotificationMarkReadOutputSchema,
 } from './contracts';
 const annotations = {
   readOnlyHint: false,
@@ -106,7 +108,7 @@ export const writeToolDescriptors = {
   task_plan_create: {
     requiredScope: 'tasks:write',
     definition: definition(
-      'Create a TaskPlan. A Goal binding additionally requires goals:write.',
+      'Create a TaskPlan. A Goal binding additionally requires goals:write. Label assignment is rejected with VALIDATION_ERROR.',
       GatewayTaskCreateSchema,
       GatewayTaskReceiptSchema,
     ),
@@ -114,7 +116,7 @@ export const writeToolDescriptors = {
   task_plan_update: {
     requiredScope: 'tasks:write',
     definition: definition(
-      'Patch a TaskPlan using expectedVersion. Binding changes additionally require goals:write.',
+      'Patch a TaskPlan using expectedVersion. Binding changes additionally require goals:write. Label assignment is rejected with VALIDATION_ERROR.',
       GatewayTaskUpdateSchema,
       GatewayTaskReceiptSchema,
     ),
@@ -125,6 +127,14 @@ export const writeToolDescriptors = {
       'Complete an occurrence using expectedVersion and explicit record/complete_only. Existing Goal contributions are durably delivered. Recording measurement also requires goals:read.',
       GatewayTaskCompleteSchema,
       GatewayTaskReceiptSchema,
+    ),
+  },
+  notification_mark_read: {
+    requiredScope: 'notifications:write',
+    definition: definition(
+      'Mark one owned notification as read (idempotent). Notification action execution is not available through MCP.',
+      NotificationMarkReadInputSchema,
+      NotificationMarkReadOutputSchema,
     ),
   },
 } as const;

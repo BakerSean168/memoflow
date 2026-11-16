@@ -108,19 +108,23 @@ export function createScopedPatService(options: Options) {
         return null;
       if (
         pat.scopes.length < 1 ||
-        pat.scopes.length > 8 ||
+        pat.scopes.length > 12 ||
         new Set(pat.scopes).size !== pat.scopes.length ||
         pat.scopes.some(
           (scope) =>
             ![
               'goals:read',
               'tasks:read',
-              'routines:read',
-              'notifications:read',
-              'schedules:read',
               'goals:write',
               'tasks:write',
               'routines:write',
+              'ai:read',
+              'routines:read',
+              'notifications:read',
+              'schedules:read',
+              'notifications:write',
+              'labels:read',
+              'relations:read',
             ].includes(scope),
         ) ||
         !(await isActive(pat.userId, context))

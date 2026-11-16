@@ -55,6 +55,7 @@ const NON_SYNCABLE_LOCAL_TABLES = [
   'ai_local_conversations',
   'ai_local_conversation_items',
   'ai_local_mcp_clients',
+  'ai_local_gateway_audit',
 ] as const;
 
 // ──────────────────────────────────────────────

@@ -8,14 +8,24 @@ import type { PermissionRepository } from './permission.repository';
  * Write scope that covers each mutating business object. PAT issuance already
  * required the user to choose these scopes; a PAT write inside one is a
  * pre-authorized mutation. Objects without a gateway write scope (knowledge,
- * notification, ai_permission) never qualify.
+ * ai_permission) never qualify.
  */
 const WRITE_SCOPE_BY_OBJECT: Partial<Record<PermissionObject, string>> = {
   goal: 'goals:write',
   key_result: 'goals:write',
   task: 'tasks:write',
   routine: 'routines:write',
+  notification: 'notifications:write',
 };
+
+/**
+ * Notification action execution fans out into other owners' commands, so it
+ * stays outside MCP (#990). Only the notification read-state transition is
+ * pre-authorized by `notifications:write`.
+ */
+const PREAUTHORIZED_WRITE_EXCLUSIONS: ReadonlySet<string> = new Set([
+  'notification.execute_action',
+]);
 
 /** Scopes are checked by Gateway before entering this business-policy boundary. */
 export function createGatewayPermissionCheckpoint(
@@ -38,7 +48,8 @@ export function createGatewayPermissionCheckpoint(
           preAuthorizedWrite:
             principal.credentialType === 'pat' &&
             writeScope !== undefined &&
-            principal.scopes.includes(writeScope),
+            principal.scopes.includes(writeScope) &&
+            !(operation && PREAUTHORIZED_WRITE_EXCLUSIONS.has(operation.id)),
         },
         work,
       );
