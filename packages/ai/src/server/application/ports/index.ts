@@ -142,6 +142,7 @@ export type {
   AIPlannerConflictSummary,
   IAIPlannerReadPort,
 } from './planner-read.port';
+export type { AgentInstanceProjection, IAgentInstanceReadPort } from './agent-instance-read.port';
 export type {
   AINotificationFactProjection,
   AINotificationActionReceipt,

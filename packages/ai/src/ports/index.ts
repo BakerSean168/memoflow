@@ -66,4 +66,6 @@ export type {
   AINotificationFactProjection,
   AINotificationActionReceipt,
   AIUnreadNotificationSummary,
+  IAgentInstanceReadPort,
+  AgentInstanceProjection,
 } from '../server/application/ports';
