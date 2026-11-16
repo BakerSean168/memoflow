@@ -11,6 +11,7 @@ import type { RoutineAgentPersistedReceipt } from '@memoflow/routine-contracts';
 import type { GatewayWriteToolName } from './write-tool-descriptors';
 import type { GatewayAssistedToolName } from './assisted-tool-descriptors';
 import type { GatewayFailureCode } from './contracts';
+import type { ExternalNotification, NotificationMarkReadReceipt } from './contracts/notifications';
 import type {
   GoalAgentPersistedReceipt,
   GoalClientDTO,
@@ -82,6 +83,8 @@ export interface GatewayAuditEvent {
     | 'task_plan_search'
     | 'task_occurrence_get'
     | 'task_occurrence_list'
+    | 'notification_list'
+    | 'notification_unread_count'
     | 'transport'
     | 'pat_create'
     | 'pat_list'
@@ -116,6 +119,35 @@ export interface TaskReadPort {
   ): Promise<TaskOccurrenceReadPage>;
 }
 
+/**
+ * Gateway-owned Notification read seam. The API host binds it to the domain's
+ * `NotificationInboxPort`; the gateway never sees repositories or delivery state.
+ */
+export interface NotificationReadPort {
+  listNotifications(
+    query: NotificationReadQuery,
+    context: ExecutionContext,
+    budget?: GatewayReadBudget,
+  ): Promise<NotificationReadPage>;
+  getUnreadCount(context: ExecutionContext, budget?: GatewayReadBudget): Promise<number>;
+}
+export interface NotificationReadQuery {
+  readonly isRead?: boolean;
+  readonly category?: string;
+  readonly type?: string;
+  readonly archiveState: 'active' | 'archived' | 'all';
+  readonly keyword?: string;
+  readonly page: number;
+  readonly limit: number;
+}
+export interface NotificationReadPage {
+  readonly items: readonly ExternalNotification[];
+  readonly total: number;
+  readonly page: number;
+  readonly pageSize: number;
+  readonly hasMore: boolean;
+}
+
 /** Internal observer only; causes never enter protocol responses or audit payloads. */
 export interface GatewayDiagnostic {
   readonly requestId: string;
@@ -145,6 +177,8 @@ export interface GatewayWritePort {
   taskCreate: WriteCall<TaskWriteReceipt>;
   taskUpdate: WriteCall<TaskWriteReceipt>;
   taskComplete: WriteCall<TaskWriteReceipt>;
+  /** Idempotent read-state transition; no mutation receipt, execute-action stays closed. */
+  notificationMarkRead?: WriteCall<NotificationMarkReadReceipt>;
 }
 
 /** Fully implemented lifecycle is supplied only behind the assisted rollout flag. */

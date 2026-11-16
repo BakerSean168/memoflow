@@ -10,6 +10,8 @@ import {
   GatewayTaskCompleteSchema,
   GatewayGoalReceiptSchema,
   GatewayTaskReceiptSchema,
+  NotificationMarkReadInputSchema,
+  NotificationMarkReadOutputSchema,
 } from './contracts';
 const annotations = {
   readOnlyHint: false,
@@ -83,6 +85,14 @@ export const writeToolDescriptors = {
       'Complete an occurrence using expectedVersion and explicit record/complete_only. Existing Goal contributions are durably delivered. Recording measurement also requires goals:read.',
       GatewayTaskCompleteSchema,
       GatewayTaskReceiptSchema,
+    ),
+  },
+  notification_mark_read: {
+    requiredScope: 'notifications:write',
+    definition: definition(
+      'Mark one owned notification as read (idempotent). Notification action execution is not available through MCP.',
+      NotificationMarkReadInputSchema,
+      NotificationMarkReadOutputSchema,
     ),
   },
 } as const;

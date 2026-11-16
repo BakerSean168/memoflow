@@ -511,3 +511,190 @@ describe('Routine hosted write capability', () => {
     );
   });
 });
+
+describe('Notification hosted read and mark-read capability', () => {
+  const fact = {
+    id: 'notification-1',
+    workflowKey: 'goal.reminder',
+    topic: 'goal',
+    title: 'Goal reminder',
+    content: 'Review the goal',
+    contentTruncated: false,
+    type: 'Reminder',
+    category: 'Goal',
+    importance: 'Moderate',
+    urgency: 'Medium',
+    isRead: false,
+    readAt: null,
+    archivedAt: null,
+    createdAt: 1,
+    updatedAt: 1,
+    version: 1,
+    relatedEntityType: null,
+    relatedEntityId: null,
+  } as const;
+  function notificationFixture(
+    scopes: string[] = ['notifications:read', 'notifications:write'],
+    credentialType: 'pat' | 'oauth' = 'pat',
+  ) {
+    const f = fixture();
+    f.authenticate.mockResolvedValue({
+      identityId: 'owner-a',
+      credentialId: 'pat-a',
+      credentialType,
+      scopes,
+    });
+    const listNotifications = vi.fn().mockResolvedValue({
+      items: [fact],
+      total: 1,
+      page: 1,
+      pageSize: 20,
+      hasMore: false,
+    });
+    const getUnreadCount = vi.fn().mockResolvedValue(3);
+    const markAsRead = vi.fn(
+      async (_input: unknown, _cx: ExecutionContext, authority: GatewayWriteAuthority) => {
+        await authority.authorize();
+        return { id: fact.id, isRead: true, readAt: 5, version: 2, updatedAt: 6 };
+      },
+    );
+    const unavailable = vi.fn().mockRejectedValue(new Error('Unexpected owner'));
+    const writes = {
+      goalCreate: unavailable,
+      goalUpdate: unavailable,
+      keyResultCreate: unavailable,
+      keyResultUpdate: unavailable,
+      taskCreate: unavailable,
+      taskUpdate: unavailable,
+      taskComplete: unavailable,
+      notificationMarkRead: markAsRead,
+    };
+    return {
+      ...f,
+      listNotifications,
+      getUnreadCount,
+      markAsRead,
+      gateway: createReadGateway({
+        ...f.options,
+        notification: { listNotifications, getUnreadCount },
+        writes,
+      }),
+    };
+  }
+  const names = async (gateway: ReturnType<typeof createReadGateway>) =>
+    (await (await gateway.fetch(request('tools/list'), context)).json()).result.tools.map(
+      (tool: { name: string }) => tool.name,
+    );
+  it('publishes only the notification tools the credential scopes allow', async () => {
+    const reads = notificationFixture(['notifications:read']);
+    expect(await names(reads.gateway)).toEqual(['notification_list', 'notification_unread_count']);
+    const writes = notificationFixture(['notifications:write']);
+    expect(await names(writes.gateway)).toEqual(['notification_mark_read']);
+    const goalsOnly = notificationFixture(['goals:read']);
+    expect(await names(goalsOnly.gateway)).not.toContain('notification_list');
+    const oauth = notificationFixture(['notifications:read', 'notifications:write'], 'oauth');
+    expect(await names(oauth.gateway)).toEqual(['notification_list', 'notification_unread_count']);
+  });
+  it('bounds page and limit, rejects injected identity and projects the owner whitelist', async () => {
+    const f = notificationFixture();
+    for (const args of [{ limit: 51 }, { page: 21 }, { limit: 0 }, { identityId: 'owner-b' }]) {
+      expect(
+        await (
+          await f.gateway.fetch(request('tools/call', args, 'notification_list'), context)
+        ).json(),
+      ).toMatchObject({ result: { isError: true } });
+    }
+    expect(f.listNotifications).not.toHaveBeenCalled();
+    const listed = await f.gateway.fetch(request('tools/call', {}, 'notification_list'), context);
+    expect(await listed.json()).toMatchObject({
+      result: {
+        structuredContent: {
+          items: [{ id: 'notification-1', contentTruncated: false }],
+          total: 1,
+          page: 1,
+          pageSize: 20,
+          hasMore: false,
+        },
+      },
+    });
+    expect(f.listNotifications).toHaveBeenCalledWith(
+      { archiveState: 'active', page: 1, limit: 20 },
+      expect.objectContaining({ identityId: 'owner-a' }),
+      expect.objectContaining({ signal: expect.any(AbortSignal) }),
+    );
+    expect(JSON.stringify(f.audit.mock.calls)).not.toContain('Review the goal');
+  });
+  it('counts unread notifications for the credential owner only', async () => {
+    const f = notificationFixture();
+    const counted = await f.gateway.fetch(
+      request('tools/call', {}, 'notification_unread_count'),
+      context,
+    );
+    expect(await counted.json()).toMatchObject({ result: { structuredContent: { count: 3 } } });
+    expect(f.getUnreadCount).toHaveBeenCalledWith(
+      expect.objectContaining({ identityId: 'owner-a' }),
+      expect.objectContaining({ signal: expect.any(AbortSignal) }),
+    );
+  });
+  it('marks read under the write authority and audits the write without payloads', async () => {
+    const f = notificationFixture();
+    const marked = await f.gateway.fetch(
+      request('tools/call', { id: fact.id }, 'notification_mark_read'),
+      context,
+    );
+    expect(await marked.json()).toMatchObject({
+      result: { structuredContent: { id: fact.id, isRead: true, version: 2 } },
+    });
+    expect(f.markAsRead).toHaveBeenCalledWith(
+      { id: fact.id },
+      expect.objectContaining({ identityId: 'owner-a' }),
+      expect.objectContaining({ connectionId: 'pat-a' }),
+    );
+    expect(f.audit).toHaveBeenCalledWith(
+      expect.objectContaining({
+        tool: 'notification_mark_read',
+        effect: 'write',
+        scopeDecision: 'allowed',
+        outcome: 'OK',
+      }),
+    );
+    f.authenticate
+      .mockResolvedValueOnce({
+        identityId: 'owner-a',
+        credentialId: 'pat-a',
+        credentialType: 'pat',
+        scopes: ['notifications:write'],
+      })
+      .mockResolvedValueOnce(null);
+    expect(
+      await (
+        await f.gateway.fetch(
+          request('tools/call', { id: fact.id }, 'notification_mark_read'),
+          context,
+        )
+      ).json(),
+    ).toMatchObject({ result: { isError: true, content: [{ text: 'FORBIDDEN' }] } });
+  });
+  it('denies mark-read for a read-only PAT and for OAuth credentials', async () => {
+    const readOnly = notificationFixture(['notifications:read']);
+    expect(
+      (
+        await readOnly.gateway.fetch(
+          request('tools/call', { id: fact.id }, 'notification_mark_read'),
+          context,
+        )
+      ).status,
+    ).toBe(403);
+    expect(readOnly.markAsRead).not.toHaveBeenCalled();
+    const oauth = notificationFixture(['notifications:write', 'notifications:read'], 'oauth');
+    expect(
+      (
+        await oauth.gateway.fetch(
+          request('tools/call', { id: fact.id }, 'notification_mark_read'),
+          context,
+        )
+      ).status,
+    ).toBe(404);
+    expect(oauth.markAsRead).not.toHaveBeenCalled();
+  });
+});

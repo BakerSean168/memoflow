@@ -201,3 +201,129 @@ it('fails closed on cloud writes when permission tables are absent and propagate
   expect(await (await f.fetch('goal_create', createInput)).text()).toContain('INTERNAL_ERROR');
   expect(f.create).not.toHaveBeenCalled();
 });
+
+function notificationFixture() {
+  const db = createLocalAgentSqlite();
+  databases.push(db);
+  const repository = new PermissionLocalRepository(db);
+  const principal = {
+    identityId: 'owner',
+    credentialId: 'pat',
+    credentialType: 'pat' as const,
+    scopes: ['notifications:read', 'notifications:write'],
+  };
+  const authenticate = vi.fn(async () => principal);
+  const markAsRead = vi.fn(async () => ({
+    id: 'notification-1',
+    isRead: true,
+    readAt: 9,
+    version: 2,
+    updatedAt: 10,
+  }));
+  const unused = vi.fn();
+  const gateway = createReadGateway({
+    enabled: true,
+    toolCheckpoint: createGatewayPermissionCheckpoint(repository),
+    audience: 'https://memo.test/mcp',
+    trustedOrigins: [],
+    cursorSecret: 'fixture-only-'.repeat(4),
+    credentials: { authenticate, consumeReadQuota: async () => true },
+    consumeOwnerQuota: async () => true,
+    audit: vi.fn(),
+    goals: { getGoal: unused, searchGoalPage: unused },
+    notification: {
+      listNotifications: async () => ({
+        items: [],
+        total: 0,
+        page: 1,
+        pageSize: 20,
+        hasMore: false,
+      }),
+      getUnreadCount: async () => 0,
+    },
+    writes: {
+      goalCreate: unused,
+      goalUpdate: unused,
+      keyResultCreate: unused,
+      keyResultUpdate: unused,
+      taskCreate: unused,
+      taskUpdate: unused,
+      taskComplete: unused,
+      notificationMarkRead: markAsRead as never,
+    },
+  });
+  const fetch = (name: string, args: unknown) =>
+    gateway.fetch(
+      new Request('https://memo.test/mcp', {
+        method: 'POST',
+        headers: {
+          'content-type': 'application/json',
+          accept: 'application/json, text/event-stream',
+          'MCP-Protocol-Version': '2026-07-28',
+          'Mcp-Method': 'tools/call',
+          'Mcp-Name': name,
+          authorization: 'Bearer fixture',
+        },
+        body: JSON.stringify({
+          jsonrpc: '2.0',
+          id: 1,
+          method: 'tools/call',
+          params: {
+            name,
+            arguments: args,
+            _meta: {
+              'io.modelcontextprotocol/protocolVersion': '2026-07-28',
+              'io.modelcontextprotocol/clientInfo': { name: 'fixture', version: '1' },
+              'io.modelcontextprotocol/clientCapabilities': {},
+            },
+          },
+        }),
+      }),
+      { requestId: 'r', traceId: 't', startedAt: Date.now(), source: 'http' },
+    );
+  return { repository, principal, markAsRead, fetch };
+}
+
+it('pre-authorizes notification mark-read through the registered write scope only', async () => {
+  const f = notificationFixture();
+  // Default confirm_each would ask; the issued notifications:write scope grants it.
+  expect(
+    await (await f.fetch('notification_mark_read', { id: 'notification-1' })).text(),
+  ).not.toContain('PERMISSION_DENIED');
+  expect(f.markAsRead).toHaveBeenCalledOnce();
+  expect(await f.repository.listAudit('owner')).toEqual(
+    expect.arrayContaining([
+      expect.objectContaining({
+        agentId: 'external-mcp:pat',
+        operationId: 'notification.update',
+        decision: 'allow',
+      }),
+    ]),
+  );
+  await f.repository.saveRule('owner', {
+    id: 'mark-read-denied',
+    agentId: null,
+    object: 'notification',
+    action: 'update',
+    effect: 'deny',
+    source: 'user',
+  });
+  expect(
+    await (await f.fetch('notification_mark_read', { id: 'notification-1' })).text(),
+  ).toContain('PERMISSION_DENIED');
+  expect(f.markAsRead).toHaveBeenCalledOnce();
+  f.principal.scopes = ['notifications:read'];
+  expect((await f.fetch('notification_mark_read', { id: 'notification-1' })).status).toBe(403);
+  expect(f.markAsRead).toHaveBeenCalledOnce();
+});
+
+it('keeps notification execute-action outside the pre-authorized write set', async () => {
+  const f = notificationFixture();
+  const checkpoint = createGatewayPermissionCheckpoint(f.repository);
+  const work = vi.fn(async () => 'ok');
+  await expect(checkpoint(f.principal, 'notification_execute_action', work)).rejects.toMatchObject({
+    code: 'PERMISSION_DENIED',
+    decision: 'ask',
+  });
+  expect(work).not.toHaveBeenCalled();
+});
