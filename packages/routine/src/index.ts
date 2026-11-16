@@ -8,15 +8,18 @@
 export {
   createRoutinePrismaRepositories,
   createRoutinePrismaAgentMutations,
+  createRoutinePowerSyncAgentMutations,
   createRoutinePowerSyncRepositories,
   createRoutineOccurrenceNotificationWriter,
   buildRoutineOccurrenceNotificationRequest,
   createPowerSyncClosureChecker,
   loadPowerSyncRoutineLocalRegistrations,
   RoutineAccountClosedConsumer,
+  RoutineAgentMutationError,
   type RoutinePrismaRepositorySet,
   type RoutinePowerSyncRepositorySet,
   type RoutineLocalRegistrationsSnapshot,
+  type RoutineAgentMutationAuthority,
 } from './server';
 export {
   createRoutineCoachCommandService,

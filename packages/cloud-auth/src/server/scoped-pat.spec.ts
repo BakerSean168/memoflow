@@ -67,6 +67,36 @@ describe('External scoped PAT boundary', () => {
     expect(create).toHaveBeenCalledTimes(2);
   });
 
+  it('authenticates a PAT containing notification and schedule read scopes (#995)', async () => {
+    const findUnique = vi.fn().mockResolvedValue({
+      id: 'pat-domain',
+      userId: 'identity-a',
+      audience: 'https://api.memo.test/mcp',
+      accountIsActive: async () => true,
+      expiresAt: new Date(Date.now() + 60000),
+      revokedAt: null,
+      scopes: ['notifications:read', 'schedules:read'],
+    });
+    const service = createScopedPatService({
+      database: {
+        $transaction: async (run: (tx: unknown) => unknown) =>
+          run({
+            $executeRaw: vi.fn(),
+            externalAgentPat: { findUnique },
+            cloudAuthUser: { findUnique: vi.fn().mockResolvedValue({ disabledAt: null }) },
+          }),
+      } as never,
+      audience: 'https://api.memo.test/mcp',
+      accountIsActive: async () => true,
+    });
+    expect(await service.authenticate(`Bearer mfp_${'c'.repeat(43)}`)).toEqual({
+      identityId: 'identity-a',
+      credentialId: 'pat-domain',
+      credentialType: 'pat',
+      scopes: ['notifications:read', 'schedules:read'],
+    });
+  });
+
   it('rejects a revoked grant even when a credential digest matches', async () => {
     const findUnique = vi.fn().mockResolvedValue({
       id: 'pat-id',

@@ -36,7 +36,7 @@ interface Options {
   readonly goals: GoalReadPort;
   readonly tasks?: TaskReadPort;
   readonly labels?: LabelReadPort;
-  readonly notification?: NotificationReadPort;
+  readonly notifications?: NotificationReadPort;
   readonly assistantConversation?: AssistantConversationReadPort;
   readonly agents?: AgentArchiveReadPort;
   readonly routines?: RoutineReadPort;

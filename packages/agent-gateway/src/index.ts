@@ -14,6 +14,7 @@ export type {
   GatewayAiConversationTranscript,
   GatewayAiAgentEntry,
   RoutineReadPort,
+  ScheduleReadPort,
   RelationReadPort,
   RelationNeighborsQuery,
   RelationNeighborsPage,

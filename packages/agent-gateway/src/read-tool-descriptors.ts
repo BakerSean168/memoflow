@@ -35,6 +35,12 @@ import {
   RoutineListOutputSchema,
   RoutineUpcomingInputSchema,
   RoutineUpcomingOutputSchema,
+  NotificationGetInputSchema,
+  NotificationGetOutputSchema,
+  ScheduleGetInputSchema,
+  ScheduleGetOutputSchema,
+  ScheduleListInputSchema,
+  ScheduleListOutputSchema,
 } from './contracts';
 import { z } from 'zod';
 
@@ -160,6 +166,17 @@ export const readToolDescriptors = {
       annotations: readAnnotations,
     },
   },
+  notification_get: {
+    version: '1',
+    effect: 'read',
+    requiredScope: 'notifications:read',
+    definition: {
+      description: 'Read one owned Notification fact.',
+      inputSchema: NotificationGetInputSchema,
+      outputSchema: NotificationGetOutputSchema,
+      annotations: readAnnotations,
+    },
+  },
   ai_conversation_list: {
     version: '1',
     effect: 'read',
@@ -240,6 +257,29 @@ export const readToolDescriptors = {
       description: 'Count owned unread notifications.',
       inputSchema: z.strictObject({}),
       outputSchema: NotificationUnreadCountOutputSchema,
+      annotations: readAnnotations,
+    },
+  },
+  schedule_get: {
+    version: '1',
+    effect: 'read',
+    requiredScope: 'schedules:read',
+    definition: {
+      description: 'Read one owned Calendar Schedule entry.',
+      inputSchema: ScheduleGetInputSchema,
+      outputSchema: ScheduleGetOutputSchema,
+      annotations: readAnnotations,
+    },
+  },
+  schedule_list: {
+    version: '1',
+    effect: 'read',
+    requiredScope: 'schedules:read',
+    definition: {
+      description:
+        'List owned Calendar Schedule entries in a bounded time range (at most 90 days).',
+      inputSchema: ScheduleListInputSchema,
+      outputSchema: ScheduleListOutputSchema,
       annotations: readAnnotations,
     },
   },

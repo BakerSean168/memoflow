@@ -181,6 +181,10 @@ export function composeAI(dependencies: ComposeAIElectronDependencies): Composed
         clients: localMcpClients,
         discoveryPath: dependencies.localAgent.discoveryPath,
       },
+      {
+        notifications: dependencies.notificationInbox,
+        schedules: dependencies.scheduleEventApi,
+      },
     ),
     ...dependencies.localAgent,
   });

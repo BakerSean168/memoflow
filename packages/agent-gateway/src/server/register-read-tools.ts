@@ -17,6 +17,9 @@ import {
   RoutineGetOutputSchema,
   RoutineListOutputSchema,
   RoutineUpcomingOutputSchema,
+  NotificationGetOutputSchema,
+  ScheduleGetOutputSchema,
+  ScheduleListOutputSchema,
   AiAgentGetOutputSchema,
   AiAgentListOutputSchema,
   AiConversationListOutputSchema,
@@ -34,6 +37,7 @@ import {
   type TaskReadPort,
   type LabelReadPort,
   type RoutineReadPort,
+  type ScheduleReadPort,
   type AssistantConversationReadPort,
   type AgentArchiveReadPort,
   type GatewayAiAgentEntry,
@@ -52,11 +56,12 @@ export interface ReadToolCall {
       | 'tasks:read'
       | 'labels:read'
       | 'routines:read'
+      | 'notifications:read'
+      | 'schedules:read'
       | 'goals:write'
       | 'tasks:write'
       | 'ai:read'
       | 'routines:write'
-      | 'notifications:read'
       | 'notifications:write'
       | 'relations:read',
     work: () => Promise<T>,
@@ -96,7 +101,7 @@ const RelationCursorSchema = z.strictObject({
 });
 const RoutineCursorSchema = z.strictObject({
   identityId: z.string(),
-  tool: z.enum(['routine_list', 'routine_upcoming']),
+  tool: z.enum(['routine_list', 'routine_upcoming', 'notification_list', 'schedule_list']),
   binding: z.string().max(1000),
   expiresAt: z.number().int(),
   offset: z.number().int().min(0).max(499),
@@ -157,8 +162,9 @@ export function registerReadTools(
     goals: GoalReadPort;
     tasks?: TaskReadPort;
     labels?: LabelReadPort;
-    notification?: NotificationReadPort;
+    notifications?: NotificationReadPort;
     routines?: RoutineReadPort;
+    schedules?: ScheduleReadPort;
     assistantConversation?: AssistantConversationReadPort;
     agents?: AgentArchiveReadPort;
     relations?: RelationReadPort;
@@ -560,6 +566,102 @@ export function registerReadTools(
         }),
     );
   }
+  if (options.notifications && scopes.includes('notifications:read')) {
+    const notifications = options.notifications;
+    server.registerTool(
+      'notification_get',
+      readToolDescriptors.notification_get.definition,
+      ({ id }) =>
+        call('notification_get', 'notifications:read', async () => {
+          const notification = await notifications.getNotification(id, context, budget);
+          if (!notification) throw new ControlledError('NOT_FOUND');
+          return NotificationGetOutputSchema.parse({ notification });
+        }),
+    );
+    server.registerTool(
+      'notification_list',
+      readToolDescriptors.notification_list.definition,
+      (input) =>
+        call('notification_list', 'notifications:read', async () => {
+          const page = await notifications.listNotifications(
+            {
+              archiveState: input.archiveState,
+              page: input.page,
+              limit: input.limit,
+              ...(input.isRead !== undefined ? { isRead: input.isRead } : {}),
+              ...(input.category ? { category: input.category } : {}),
+              ...(input.type ? { type: input.type } : {}),
+              ...(input.keyword ? { keyword: input.keyword } : {}),
+            },
+            context,
+            budget,
+          );
+          const { items, truncated } = fitPage(page.items);
+          return NotificationListOutputSchema.parse({
+            items,
+            total: page.total,
+            page: page.page,
+            pageSize: page.pageSize,
+            hasMore: page.hasMore || truncated,
+            ...(truncated ? { truncated: 'response-budget' as const } : {}),
+          });
+        }),
+    );
+    server.registerTool(
+      'notification_unread_count',
+      readToolDescriptors.notification_unread_count.definition,
+      () =>
+        call('notification_unread_count', 'notifications:read', async () =>
+          NotificationUnreadCountOutputSchema.parse({
+            count: await notifications.getUnreadCount(context, budget),
+          }),
+        ),
+    );
+  }
+  if (options.schedules && scopes.includes('schedules:read')) {
+    const schedules = options.schedules;
+    server.registerTool('schedule_get', readToolDescriptors.schedule_get.definition, ({ id }) =>
+      call('schedule_get', 'schedules:read', async () => {
+        const schedule = await schedules.getSchedule(id, context, budget);
+        if (!schedule) throw new ControlledError('NOT_FOUND');
+        return ScheduleGetOutputSchema.parse({ schedule });
+      }),
+    );
+    server.registerTool(
+      'schedule_list',
+      readToolDescriptors.schedule_list.definition,
+      ({ startTime, endTime, limit, cursor }) =>
+        call('schedule_list', 'schedules:read', async () => {
+          const binding = JSON.stringify({ startTime, endTime, limit });
+          const offset = cursor
+            ? decodeRoutineCursor(cursor, context.identityId, 'schedule_list', binding)
+            : 0;
+          if (offset + limit > 500) throw new ControlledError('INVALID_CURSOR');
+          const result = await schedules.listSchedules(
+            { startTime, endTime, limit, offset },
+            context,
+            budget,
+          );
+          const { items, truncated } = fitPage(result.items);
+          const hasMore = result.hasMore || truncated;
+          const nextCursor = hasMore
+            ? encodeRoutineCursor({
+                tool: 'schedule_list',
+                binding,
+                identityId: context.identityId,
+                offset: offset + items.length,
+                expiresAt: Date.now() + 86400000,
+              })
+            : null;
+          return ScheduleListOutputSchema.parse({
+            items,
+            hasMore,
+            nextCursor,
+            ...(truncated ? { truncated: 'response-budget' as const } : {}),
+          });
+        }),
+    );
+  }
   if (options.assistantConversation && scopes.includes('ai:read')) {
     const conversations = options.assistantConversation;
     server.registerTool(
@@ -623,48 +725,6 @@ export function registerReadTools(
           if (!agent) throw new ControlledError('NOT_FOUND');
           return AiAgentGetOutputSchema.parse({ agent: projectAgent(agent) });
         }),
-    );
-  }
-  if (options.notification && scopes.includes('notifications:read')) {
-    const notification = options.notification;
-    server.registerTool(
-      'notification_list',
-      readToolDescriptors.notification_list.definition,
-      (input) =>
-        call('notification_list', 'notifications:read', async () => {
-          const page = await notification.listNotifications(
-            {
-              archiveState: input.archiveState,
-              page: input.page,
-              limit: input.limit,
-              ...(input.isRead !== undefined ? { isRead: input.isRead } : {}),
-              ...(input.category ? { category: input.category } : {}),
-              ...(input.type ? { type: input.type } : {}),
-              ...(input.keyword ? { keyword: input.keyword } : {}),
-            },
-            context,
-            budget,
-          );
-          const { items, truncated } = fitPage(page.items);
-          return NotificationListOutputSchema.parse({
-            items,
-            total: page.total,
-            page: page.page,
-            pageSize: page.pageSize,
-            hasMore: page.hasMore || truncated,
-            ...(truncated ? { truncated: 'response-budget' as const } : {}),
-          });
-        }),
-    );
-    server.registerTool(
-      'notification_unread_count',
-      readToolDescriptors.notification_unread_count.definition,
-      () =>
-        call('notification_unread_count', 'notifications:read', async () =>
-          NotificationUnreadCountOutputSchema.parse({
-            count: await notification.getUnreadCount(context, budget),
-          }),
-        ),
     );
   }
   if (options.labels && scopes.includes('labels:read')) {

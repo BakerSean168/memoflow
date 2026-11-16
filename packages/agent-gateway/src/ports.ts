@@ -18,7 +18,7 @@ import type {
 } from '@memoflow/routine-contracts';
 import type { GatewayWriteToolName } from './write-tool-descriptors';
 import type { GatewayAssistedToolName } from './assisted-tool-descriptors';
-import type { GatewayFailureCode } from './contracts';
+import type { GatewayFailureCode, ExternalSchedule } from './contracts';
 import type { ExternalNotification, NotificationMarkReadReceipt } from './contracts/notifications';
 import type {
   GoalAgentPersistedReceipt,
@@ -75,6 +75,19 @@ export interface RoutineReadPort {
   ): Promise<RoutineUpcomingResponse>;
 }
 
+export interface ScheduleReadPort {
+  getSchedule(
+    id: string,
+    context: ExecutionContext,
+    budget?: GatewayReadBudget,
+  ): Promise<ExternalSchedule | null>;
+  listSchedules(
+    query: { startTime: number; endTime: number; limit: number; offset?: number },
+    context: ExecutionContext,
+    budget?: GatewayReadBudget,
+  ): Promise<{ items: readonly ExternalSchedule[]; hasMore: boolean }>;
+}
+
 export interface GatewayPrincipal {
   readonly identityId: string;
   readonly credentialId: string;
@@ -107,6 +120,7 @@ export interface GatewayAuditEvent {
     | 'task_plan_search'
     | 'task_occurrence_get'
     | 'task_occurrence_list'
+    | 'notification_get'
     | 'notification_list'
     | 'notification_unread_count'
     | 'ai_conversation_list'
@@ -114,6 +128,8 @@ export interface GatewayAuditEvent {
     | 'ai_conversation_transcript'
     | 'ai_agent_list'
     | 'ai_agent_get'
+    | 'schedule_get'
+    | 'schedule_list'
     | 'routine_get'
     | 'routine_list'
     | 'routine_upcoming'
@@ -199,6 +215,11 @@ export interface LabelReadPort {
  * `NotificationInboxPort`; the gateway never sees repositories or delivery state.
  */
 export interface NotificationReadPort {
+  getNotification(
+    id: string,
+    context: ExecutionContext,
+    budget?: GatewayReadBudget,
+  ): Promise<ExternalNotification | null>;
   listNotifications(
     query: NotificationReadQuery,
     context: ExecutionContext,

@@ -66,13 +66,14 @@ export const CreateScopedPatSchema = z.strictObject({
         'ai:read',
         'routines:read',
         'notifications:read',
+        'schedules:read',
         'notifications:write',
         'labels:read',
         'relations:read',
       ]),
     )
     .min(1)
-    .max(11)
+    .max(12)
     .refine((scopes) => new Set(scopes).size === scopes.length, 'Duplicate scopes')
     .default(['goals:read']),
 });
@@ -98,6 +99,7 @@ export const ScopedPatSummarySchema = z.object({
       'tasks:write',
       'routines:write',
       'notifications:read',
+      'schedules:read',
       'notifications:write',
       'labels:read',
       'relations:read',
@@ -295,6 +297,8 @@ export type LabelResolveNamesOutput = z.infer<typeof LabelResolveNamesOutputSche
 
 export * from './writes';
 export * from './routine-reads';
+export * from './notification-reads';
+export * from './schedule-reads';
 
 export * from './assisted';
 

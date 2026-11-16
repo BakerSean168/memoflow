@@ -22,6 +22,7 @@ import {
   type TaskReadPort,
   type LabelReadPort,
   type RoutineReadPort,
+  type ScheduleReadPort,
   type RelationReadPort,
 } from '../ports';
 
@@ -38,10 +39,11 @@ interface Options {
   readonly goals: GoalReadPort;
   readonly tasks?: TaskReadPort;
   readonly labels?: LabelReadPort;
-  readonly notification?: NotificationReadPort;
+  readonly notifications?: NotificationReadPort;
   readonly assistantConversation?: import('../ports').AssistantConversationReadPort;
   readonly agents?: import('../ports').AgentArchiveReadPort;
   readonly routines?: RoutineReadPort;
+  readonly schedules?: ScheduleReadPort;
   readonly relations?: RelationReadPort;
   readonly audit: (event: GatewayAuditEvent) => void;
   readonly timeoutMs?: number;
@@ -197,6 +199,7 @@ export function createReadGateway(options: Options) {
               scope === 'notifications:read' ||
               scope === 'ai:read' ||
               scope === 'routines:read' ||
+              scope === 'schedules:read' ||
               scope === 'relations:read' ||
               ((options.writes || options.assisted) &&
                 principal.credentialType === 'pat' &&
@@ -284,6 +287,18 @@ export function createReadGateway(options: Options) {
                 scopeDecision = 'denied';
                 return reject(404, 'DISABLED');
               }
+              if (
+                !isWriteToolName(name) &&
+                name.startsWith('notification_') &&
+                !options.notifications
+              ) {
+                scopeDecision = 'denied';
+                return reject(404, 'DISABLED');
+              }
+              if (!isWriteToolName(name) && name.startsWith('schedule_') && !options.schedules) {
+                scopeDecision = 'denied';
+                return reject(404, 'DISABLED');
+              }
             }
           }
         } catch {
@@ -301,10 +316,11 @@ export function createReadGateway(options: Options) {
             | 'tasks:read'
             | 'labels:read'
             | 'routines:read'
+            | 'notifications:read'
+            | 'schedules:read'
             | 'goals:write'
             | 'tasks:write'
             | 'routines:write'
-            | 'notifications:read'
             | 'notifications:write'
             | 'ai:read'
             | 'relations:read',

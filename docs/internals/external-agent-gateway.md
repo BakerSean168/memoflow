@@ -63,6 +63,7 @@ ID 使用稳定 snake_case，内部 capability ID 可采用 `goal.get` 等命名
 | R1   | `task_plan_search`              | Task / tasks:read                  | 按 owner 支持的过滤检索，不承诺不存在的全文搜索                                                                                         |
 | R1   | `task_occurrence_get`           | Task / tasks:read                  | 返回执行状态、version、planId                                                                                                           |
 | R1   | `task_occurrence_list`          | Task / tasks:read                  | 明确时间范围、时区与分页                                                                                                                |
+| R1   | `notification_get`              | Notification / notifications:read  | 单个通知事实；不含身份与审计关联                                                                                                        |
 | R1   | `notification_list`             | Notification / notifications:read  | 分页列表（page ≤ 20, limit ≤ 50），正文截断 2000 字符；execute-action 不开放                                                            |
 | R1   | `notification_unread_count`     | Notification / notifications:read  | 统计未读通知数量                                                                                                                        |
 | R2   | `relation_neighbors`            | Relation / relations:read          | 查询 Goal/Task/Knowledge 跨域邻居（类型过滤与游标分页）；只返回双方均可见的关系，指向不可见/跨 owner 节点的边直接省略，不泄露对端存在性 |
@@ -71,6 +72,8 @@ ID 使用稳定 snake_case，内部 capability ID 可采用 `goal.get` 等命名
 | R2   | `routine_upcoming`              | Routine / routines:read            | epoch 毫秒窗口最长 31 天，单页最多 100 条                                                                                               |
 | R2   | `label_list`                    | Label / labels:read                | 标签列表与搜索，支持分页与确定排序；有界强类型契约                                                                                      |
 | R2   | `label_resolve_names`           | Label / labels:read                | 按名称批量解析标签，返回已知标签列表；不越界查询                                                                                        |
+| R3   | `schedule_get`                  | Schedule / schedules:read          | 单个日历条目；不含内部审计或租户关联                                                                                                    |
+| R3   | `schedule_list`                 | Schedule / schedules:read          | epoch 毫秒范围最长 90 天，单页最多 100 条                                                                                               |
 | W1   | `goal_create`                   | Goal / goals:write                 | initial KRs 与 Goal 原子创建；不自动 activate                                                                                           |
 | W1   | `goal_update`                   | Goal / goals:write                 | expectedVersion；首版排除整组 keyResults replacement                                                                                    |
 | W1   | `goal_key_result_create/update` | Goal / goals:write                 | 单 KR 命令使用 Goal expectedVersion；不替换整个集合                                                                                     |
@@ -89,7 +92,7 @@ ID 使用稳定 snake_case，内部 capability ID 可采用 `goal.get` 等命名
 | A1   | `assisted_workflow_resume`      | Task / tasks:write                 | 回答澄清、批准精确 draft 或恢复 apply                                                                                                   |
 | A1   | `assisted_workflow_cancel`      | Task / tasks:write                 | 取消剩余工作并保留已提交的 Task facts                                                                                                   |
 
-R1 为 **8 个工具**（Goal 2 个 + Task 4 个 + Notification 2 个），R2 为 **6 个只读工具**（Routine 3 个、Label 2 个、Relation 1 个），W1 为 **13 个写工具**（含 `notification_mark_read`），A1 为 **5 个 assisted 工具**，合计 **32 个**。OAuth 仍只有九个只读工具；写与 assisted 仅对 PAT 发布，且需要对应 write scope 和相应开关。MCP 自带发现功能足够，不新增 `capabilities_list` 平台 API。
+R1 为 **9 个工具**（Goal 2 个 + Task 4 个 + Notification 3 个），R2 为 **6 个只读工具**（Routine 3 个、Label 2 个、Relation 1 个），R3 为 **2 个 Schedule 只读工具**，W1 为 **13 个写工具**（含 `notification_mark_read`），A1 为 **5 个 assisted 工具**，合计 **35 个**。R3 由宿主绑定 Schedule owner 端口后发布（本地桥接绑定；托管 API 尚未绑定该端口，因此托管连接不可见），只读且不提供日历写入。OAuth 仍只有九个只读工具；写与 assisted 仅对 PAT 发布，且需要对应 write scope 和相应开关。MCP 自带发现功能足够，不新增 `capabilities_list` 平台 API。
 
 ### 跨 owner 权限
 
@@ -97,7 +100,7 @@ read scope 与 write scope 不互相隐含。MCP write 结果只返回该写操�
 
 Task 的已配置 Goal contribution 是完成动作的一部分，`tasks:write` consent 必须说明它会按既有配置影响目标进度；它不授权直接更新任意 Goal/KR。创建或更改 binding 要求 `tasks:write + goals:write` 及双方归属，不能靠对已有 Task 的写权限引入新 Goal 影响。读取 Goal 名称/测量上下文仍需 `goals:read`；没有时只允许 complete-only，不能偷偷取 protected context。
 
-Notification 域在 #990 接入：开放 `notification_list` 与 `notification_unread_count` 读工具及 `notification_mark_read` 写工具。**execute-action 动作执行明确不开放**（动作执行牵涉各业务域副作用，留三期评估），在工具清单与文档中均明确标注。Planner/Knowledge 的扩展按真实需求单列在 [#539](https://github.com/BakerSean168/memoflow/issues/539)；Routine 读写已随 [#972](https://github.com/BakerSean168/memoflow/issues/972) 二期注册，写工具由 `EAG_ROUTINE_WRITE_ENABLED` 单独开关，其余工具尚未注册。
+Notification 域在 #990 接入：开放 `notification_list` 与 `notification_unread_count` 读工具及 `notification_mark_read` 写工具；#995 追加单条读取 `notification_get`（同一 `notifications:read` scope）。**execute-action 动作执行明确不开放**（动作执行牵涉各业务域副作用，留三期评估），在工具清单与文档中均明确标注。Planner/Knowledge 的扩展按真实需求单列在 [#539](https://github.com/BakerSean168/memoflow/issues/539)；Routine 读写已随 [#972](https://github.com/BakerSean168/memoflow/issues/972) 二期注册，写工具由 `EAG_ROUTINE_WRITE_ENABLED` 单独开关，其余工具尚未注册。
 
 ### 标签写操作显式拒绝契约（#993）
 

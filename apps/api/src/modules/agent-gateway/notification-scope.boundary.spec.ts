@@ -69,6 +69,7 @@ function gatewayWith(credentials: GatewayCredentialPort) {
     hasMore: false,
   });
   const getUnreadCount = vi.fn().mockResolvedValue(1);
+  const getNotification = vi.fn().mockResolvedValue(null);
   const audit = vi.fn();
   const gateway = createReadGateway({
     enabled: true,
@@ -82,7 +83,7 @@ function gatewayWith(credentials: GatewayCredentialPort) {
       getGoal: async () => null,
       searchGoalPage: async () => ({ items: [], hasMore: false, next: null }),
     },
-    notification: { listNotifications, getUnreadCount },
+    notifications: { listNotifications, getUnreadCount, getNotification },
     audit,
   });
   return { gateway, listNotifications, getUnreadCount, audit };

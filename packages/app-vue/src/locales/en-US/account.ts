@@ -49,6 +49,7 @@ export default {
       routinesWrite: 'Routines (write)',
       aiRead: 'AI conversations & agents (read)',
       notificationsRead: 'Notifications (read)',
+      schedulesRead: 'Schedule (read)',
       notificationsWrite: 'Notifications (mark read)',
       labelsRead: 'Labels (read)',
       relationsRead: 'Relations (read)',

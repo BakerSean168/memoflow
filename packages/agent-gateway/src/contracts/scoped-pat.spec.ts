@@ -44,7 +44,7 @@ describe('scoped PAT lifetime contract (#970)', () => {
     expect(ScopedPatSummarySchema.parse(summary)).toEqual(summary);
   });
 
-  it('grants notification scopes within the raised nine-scope ceiling (#990)', () => {
+  it('grants notification and schedule read scopes within the raised twelve-scope ceiling (#990/#995)', () => {
     const scopes = [
       'goals:read',
       'goals:write',
@@ -54,21 +54,27 @@ describe('scoped PAT lifetime contract (#970)', () => {
       'ai:read',
       'routines:read',
       'notifications:read',
+      'schedules:read',
       'notifications:write',
+      'labels:read',
+      'relations:read',
     ];
     expect(CreateScopedPatSchema.parse({ name: 'agent', scopes }).scopes).toEqual(scopes);
     expect(
       CreateScopedPatSchema.safeParse({ name: 'agent', scopes: [...scopes, 'goals:read'] }).success,
     ).toBe(false);
     expect(
+      CreateScopedPatSchema.safeParse({ name: 'agent', scopes: ['schedules:write'] }).success,
+    ).toBe(false);
+    expect(
       CreateScopedPatSchema.safeParse({ name: 'agent', scopes: ['notifications:admin'] }).success,
     ).toBe(false);
     const summary = {
       id: '5b5d8a2b-9934-4be8-8e07-3f62ed122e15',
-      name: 'notifications agent',
+      name: 'domain reader',
       prefix: 'mfp_AbCdEfG',
       audience: 'https://api.memo.test/mcp',
-      scopes: ['notifications:read', 'notifications:write'],
+      scopes: ['notifications:read', 'schedules:read'],
       createdAt: '2026-11-16T00:00:00.000Z',
       expiresAt: '2027-11-16T00:00:00.000Z',
       revokedAt: null,
@@ -76,7 +82,7 @@ describe('scoped PAT lifetime contract (#970)', () => {
     expect(ScopedPatSummarySchema.parse(summary)).toEqual(summary);
   });
 
-  it('accepts ai:read and rejects a seventh scope', () => {
+  it('accepts ai:read and rejects a duplicate scope', () => {
     const six = CreateScopedPatSchema.parse({
       name: 'ai reader',
       scopes: [

@@ -37,6 +37,11 @@ function unwrapOwner(result: Result<unknown>): unknown {
  */
 export function bindNotificationReadPort(inbox: NotificationInboxPort): NotificationReadPort {
   return {
+    async getNotification(id, context) {
+      const result = await inbox.getNotification(id, context.identityId);
+      if (!result.ok || !result.data) return null;
+      return projectNotificationFact(result.data);
+    },
     async listNotifications(query, context) {
       const page = OwnerNotificationPageSchema.parse(
         unwrapOwner(await inbox.listNotifications({ ...query, identityId: context.identityId })),

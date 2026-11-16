@@ -518,7 +518,7 @@ async function bootstrap(): Promise<void> {
       knowledge: repositoryApiModule.knowledgeDocumentRefResolver,
     }),
     labels: bindLabelReadPort(labelService),
-    notification: bindNotificationReadPort(notificationApiModule.inbox),
+    notifications: bindNotificationReadPort(notificationApiModule.inbox),
     assistantConversation: bindAssistantConversationReadPort(
       aiComposed.assistantConversationExternal,
     ),

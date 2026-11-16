@@ -1468,6 +1468,9 @@ importers:
       '@memoflow/routine-contracts':
         specifier: workspace:*
         version: link:../routine-contracts
+      '@memoflow/schedule-contracts':
+        specifier: workspace:*
+        version: link:../schedule-contracts
       '@memoflow/shared-primitives':
         specifier: workspace:*
         version: link:../shared-primitives

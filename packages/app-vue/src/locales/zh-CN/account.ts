@@ -47,6 +47,7 @@ export default {
       routinesWrite: 'Routines 写入',
       aiRead: 'AI 会话与档案只读',
       notificationsRead: '通知只读',
+      schedulesRead: '日程只读',
       notificationsWrite: '通知标记已读',
       labelsRead: 'Labels 只读',
       relationsRead: 'Relations 只读',

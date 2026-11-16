@@ -884,6 +884,121 @@ describe('Routine hosted write capability', () => {
   });
 });
 
+describe('Notification and Schedule read capability', () => {
+  const notification = {
+    id: 'notif-1',
+    workflowKey: 'flow-1',
+    topic: 'routine',
+    title: 'Daily Review',
+    content: 'Time for daily review',
+    contentTruncated: false,
+    type: 'Reminder',
+    category: 'Reminder',
+    importance: 'Moderate',
+    urgency: 'Medium',
+    isRead: false,
+    readAt: null,
+    archivedAt: null,
+    createdAt: 1792454400000,
+    updatedAt: 1792454400000,
+    version: 1,
+    relatedEntityType: null,
+    relatedEntityId: null,
+  };
+  const schedule = {
+    id: 'sched-1',
+    title: 'Team Sync',
+    description: 'Weekly team sync',
+    range: { kind: 'Timed', start: 1792458000000, end: 1792461600000 },
+    version: 1,
+    createdAt: 1792454400000,
+    updatedAt: 1792454400000,
+  };
+  function domainFixture(scopes = ['notifications:read', 'schedules:read'], bind = true) {
+    const f = fixture();
+    f.authenticate.mockResolvedValue({
+      identityId: 'owner-a',
+      credentialId: 'pat-a',
+      credentialType: 'pat',
+      scopes,
+    });
+    const notifications = {
+      getNotification: vi.fn().mockResolvedValue(notification),
+      listNotifications: vi.fn().mockResolvedValue({
+        items: [notification],
+        total: 1,
+        page: 1,
+        pageSize: 20,
+        hasMore: false,
+      }),
+      getUnreadCount: vi.fn().mockResolvedValue(1),
+    };
+    const schedules = {
+      getSchedule: vi.fn().mockResolvedValue(schedule),
+      listSchedules: vi.fn().mockResolvedValue({ items: [schedule], hasMore: false }),
+    };
+    return {
+      ...f,
+      notifications,
+      schedules,
+      gateway: createReadGateway({
+        ...f.options,
+        ...(bind ? { notifications, schedules } : {}),
+      }),
+    };
+  }
+  it('allows the new read scopes and denies a PAT without them', async () => {
+    const allowed = domainFixture();
+    const notificationBody = await (
+      await allowed.gateway.fetch(
+        request('tools/call', { id: 'notif-1' }, 'notification_get'),
+        context,
+      )
+    ).json();
+    expect(notificationBody.result.structuredContent.notification.id).toBe('notif-1');
+    const scheduleBody = await (
+      await allowed.gateway.fetch(
+        request(
+          'tools/call',
+          { startTime: 1792454400000, endTime: 1792454400000 + 86400000, limit: 10 },
+          'schedule_list',
+        ),
+        context,
+      )
+    ).json();
+    expect(scheduleBody.result.structuredContent.items).toHaveLength(1);
+
+    const denied = domainFixture(['notifications:read']);
+    const deniedCall = await denied.gateway.fetch(
+      request(
+        'tools/call',
+        { startTime: 1792454400000, endTime: 1792454400000 + 86400000, limit: 10 },
+        'schedule_list',
+      ),
+      context,
+    );
+    expect(deniedCall.status).toBe(403);
+    expect(await deniedCall.json()).toMatchObject({ error: 'INSUFFICIENT_SCOPE' });
+    expect(denied.schedules.listSchedules).not.toHaveBeenCalled();
+    const listing = await (await denied.gateway.fetch(request('tools/list'), context)).json();
+    expect(listing.result.tools.map((tool: { name: string }) => tool.name)).not.toContain(
+      'schedule_list',
+    );
+    expect(listing.result.tools.map((tool: { name: string }) => tool.name)).toContain(
+      'notification_get',
+    );
+  });
+  it('hides the tools when the host does not bind the owner port', async () => {
+    const unbound = domainFixture();
+    const gateway = createReadGateway({ ...unbound.options });
+    expect(
+      (await gateway.fetch(request('tools/call', { id: 'notif-1' }, 'notification_get'), context))
+        .status,
+    ).toBe(404);
+    expect(unbound.notifications.getNotification).not.toHaveBeenCalled();
+  });
+});
+
 describe('Routine hosted reads', () => {
   const routineId = '5b5d8a2b-9934-4be8-8e07-3f62ed122e15';
   function definition(id: string, name: string, createdAt: string) {
@@ -1058,6 +1173,7 @@ describe('Notification hosted read and mark-read capability', () => {
       hasMore: false,
     });
     const getUnreadCount = vi.fn().mockResolvedValue(3);
+    const getNotification = vi.fn().mockResolvedValue(fact);
     const markAsRead = vi.fn(
       async (_input: unknown, _cx: ExecutionContext, authority: GatewayWriteAuthority) => {
         await authority.authorize();
@@ -1079,10 +1195,11 @@ describe('Notification hosted read and mark-read capability', () => {
       ...f,
       listNotifications,
       getUnreadCount,
+      getNotification,
       markAsRead,
       gateway: createReadGateway({
         ...f.options,
-        notification: { listNotifications, getUnreadCount },
+        notifications: { listNotifications, getUnreadCount, getNotification },
         writes,
       }),
     };
@@ -1093,13 +1210,21 @@ describe('Notification hosted read and mark-read capability', () => {
     );
   it('publishes only the notification tools the credential scopes allow', async () => {
     const reads = notificationFixture(['notifications:read']);
-    expect(await names(reads.gateway)).toEqual(['notification_list', 'notification_unread_count']);
+    expect(await names(reads.gateway)).toEqual([
+      'notification_get',
+      'notification_list',
+      'notification_unread_count',
+    ]);
     const writes = notificationFixture(['notifications:write']);
     expect(await names(writes.gateway)).toEqual(['notification_mark_read']);
     const goalsOnly = notificationFixture(['goals:read']);
     expect(await names(goalsOnly.gateway)).not.toContain('notification_list');
     const oauth = notificationFixture(['notifications:read', 'notifications:write'], 'oauth');
-    expect(await names(oauth.gateway)).toEqual(['notification_list', 'notification_unread_count']);
+    expect(await names(oauth.gateway)).toEqual([
+      'notification_get',
+      'notification_list',
+      'notification_unread_count',
+    ]);
   });
   it('bounds page and limit, rejects injected identity and projects the owner whitelist', async () => {
     const f = notificationFixture();
