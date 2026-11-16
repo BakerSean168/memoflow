@@ -43,16 +43,23 @@ function patDatabase() {
 }
 
 function gatewayWith(credentials: GatewayCredentialPort, scopes: readonly string[]) {
-  const list = vi.fn().mockResolvedValue([
-    { id: 'label-1', name: 'Work', color: '#ff0000', createdAt: 1, updatedAt: 1 },
-  ]);
-  const resolveNames = vi.fn().mockResolvedValue([
-    { id: 'label-1', name: 'Work', color: '#ff0000', createdAt: 1, updatedAt: 1 },
-  ]);
+  const list = vi
+    .fn()
+    .mockResolvedValue([
+      { id: 'label-1', name: 'Work', color: '#ff0000', createdAt: 1, updatedAt: 1 },
+    ]);
+  const resolveNames = vi
+    .fn()
+    .mockResolvedValue([
+      { id: 'label-1', name: 'Work', color: '#ff0000', createdAt: 1, updatedAt: 1 },
+    ]);
   const audit = vi.fn();
-  const writes = bindGatewayWrites({} as PrismaClient, {
-    getUserTimeContext: vi.fn(),
-  } as unknown as UserTimeContextPort);
+  const writes = bindGatewayWrites(
+    {} as PrismaClient,
+    {
+      getUserTimeContext: vi.fn(),
+    } as unknown as UserTimeContextPort,
+  );
   const gateway = createReadGateway({
     enabled: true,
     consumeOwnerQuota: async () => true,
