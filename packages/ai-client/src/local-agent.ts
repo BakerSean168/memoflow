@@ -20,6 +20,13 @@ import {
   type LocalAgentRequestResponse,
   type LocalAgentStatus,
   type LocalAgentAuthState,
+  LocalMcpClientSchema,
+  LocalMcpClientCredentialSchema,
+  LocalMcpEndpointSchema,
+  type LocalMcpClient,
+  type LocalMcpClientCreate,
+  type LocalMcpClientCredential,
+  type LocalMcpEndpoint,
 } from '@memoflow/ai-contracts';
 import { AIChannels, AIStreamChannels } from '@memoflow/desktop-contracts';
 import { unwrapOrThrowError } from '@memoflow/transport-contracts/result';
@@ -75,6 +82,12 @@ export interface LocalAgentClient {
     callbackUrl: string,
   ): Promise<LocalAgentAuthState>;
   signOut(connectionId: string): Promise<LocalAgentAuthState>;
+  /** Persistent external MCP clients owned by the current Profile. */
+  listMcpClients(): Promise<LocalMcpClient[]>;
+  createMcpClient(client: LocalMcpClientCreate): Promise<LocalMcpClientCredential>;
+  revokeMcpClient(id: string): Promise<LocalMcpClient>;
+  /** Loopback endpoint of the current Profile MCP host; null when unavailable. */
+  getMcpEndpoint(): Promise<LocalMcpEndpoint | null>;
 }
 
 export function createLocalAgentIpcClient(ipc: IResultIpcClient): LocalAgentClient {
@@ -149,5 +162,11 @@ export function createLocalAgentIpcClient(ipc: IResultIpcClient): LocalAgentClie
       ),
     signOut: (connectionId) =>
       invoke({ action: 'auth_sign_out', connectionId }, LocalAgentAuthStateSchema),
+    listMcpClients: () =>
+      invoke({ action: 'list_mcp_clients' }, z.array(LocalMcpClientSchema).max(100)),
+    createMcpClient: (client) =>
+      invoke({ action: 'create_mcp_client', client }, LocalMcpClientCredentialSchema),
+    revokeMcpClient: (id) => invoke({ action: 'revoke_mcp_client', id }, LocalMcpClientSchema),
+    getMcpEndpoint: () => invoke({ action: 'mcp_endpoint' }, LocalMcpEndpointSchema.nullable()),
   };
 }

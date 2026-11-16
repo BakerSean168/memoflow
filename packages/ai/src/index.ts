@@ -80,6 +80,11 @@ export {
 } from './server/application/services/agent-instance-read.service';
 export { LocalAgentRepository } from './server/infrastructure/adapters/powersync/local-agent.repository';
 export {
+  LocalMcpClientRepository,
+  type McpClientCredentialRef,
+  type StoredMcpClient,
+} from './server/infrastructure/adapters/powersync/local-mcp-client.repository';
+export {
   projectAIOwnerActivity,
   mergeAIActivityItems,
   type AIOwnerActivityGoalFact,

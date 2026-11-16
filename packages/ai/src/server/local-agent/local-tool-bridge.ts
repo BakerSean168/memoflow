@@ -1,5 +1,10 @@
 import {
+  LocalMcpClientCreateSchema,
   PermissionCommandSchema,
+  type LocalMcpClient,
+  type LocalMcpClientCreate,
+  type LocalMcpClientCredential,
+  type LocalMcpEndpoint,
   type PermissionCommand,
   type PermissionSnapshot,
   type PermissionPreset,
@@ -8,13 +13,19 @@ import {
 } from '@memoflow/ai-contracts';
 import { getPermissionOperation } from '../permissions/operation-catalog';
 import { PERMISSION_PRESETS } from '../permissions/permission-policy';
-import { randomBytes, randomUUID } from 'node:crypto';
-import { createServer, type Server } from 'node:http';
+import { createHash, randomBytes, randomUUID } from 'node:crypto';
+import { chmod, mkdir, rename, rm, writeFile } from 'node:fs/promises';
+import { createServer, type IncomingMessage, type Server, type ServerResponse } from 'node:http';
+import { dirname } from 'node:path';
 import { createMcpHandler, McpServer } from '@modelcontextprotocol/server';
 import { toNodeHandler } from '@modelcontextprotocol/node';
 import type { ExecutionContext } from '@memoflow/transport-contracts';
 import type { IElectronDatabaseTransaction } from '@memoflow/desktop-contracts';
 import type { LocalAgentRepository } from '../infrastructure/adapters/powersync/local-agent.repository';
+import type {
+  LocalMcpClientRepository,
+  McpClientCredentialRef,
+} from '../infrastructure/adapters/powersync/local-mcp-client.repository';
 import type { LocalAgentToolBridgePort, LocalAgentToolGrant } from './local-agent-runtime';
 import { LocalAgentError } from '../../shared/local-agent-error';
 import type { PermissionRepository } from '../permissions/permission.repository';
@@ -23,10 +34,23 @@ import { migrateLegacyPermissions } from '../permissions/permission-migration';
 import { withAllowedBusinessAccess } from '../permissions/permission-grants';
 
 type GrantInput = Parameters<LocalAgentToolBridgePort['open']>[0];
+function tokenDigest(token: string): string {
+  return createHash('sha256').update(token).digest('hex');
+}
+/** Business write scope that covers an operation; undefined for reads and owners we do not expose. */
+function writeScopeForOperation(operationId: string): 'goals:write' | 'tasks:write' | undefined {
+  const operation = getPermissionOperation(operationId);
+  if (!operation || operation.action === 'read') return undefined;
+  if (operation.object === 'goal' || operation.object === 'key_result') return 'goals:write';
+  if (operation.object === 'task') return 'tasks:write';
+  return undefined;
+}
 export interface LocalToolContext extends ExecutionContext {
   readonly connectionId: string;
   readonly conversationId: string;
   readonly runId: string;
+  /** `run` for built-in Agent runs, `client` for persistent external MCP clients. */
+  readonly origin: 'run' | 'client';
   /** The user message that opened this run; Goal commits re-check it for unresolved ambiguity. */
   readonly goalIntent?: string;
   readonly signal: AbortSignal;
@@ -52,6 +76,12 @@ interface Options {
   registerTools(server: McpServer, context: LocalToolContext): void;
   approvalTimeoutMs?: number;
   onRevokeGrant?(input: GrantInput): void;
+  /** Persistent external MCP clients. Absent means the external surface is unavailable. */
+  clients?: LocalMcpClientRepository;
+  /** 0600 discovery file published with the loopback endpoint and client hint. */
+  discoveryPath?: string;
+  /** Loopback by default; the reachability decision (WSL/cross-host) is separate. */
+  bindHost?: string;
 }
 /** A loopback transport for native session tools, owned by the existing Profile lifecycle. */
 export class LocalAgentToolBridge implements LocalAgentToolBridgePort {
@@ -164,7 +194,9 @@ export class LocalAgentToolBridge implements LocalAgentToolBridgePort {
     };
   }
   private readonly grants = new Map<string, Grant>();
+  private readonly clientTokens = new Map<string, McpClientCredentialRef>();
   private server?: Server;
+  private endpointUrl?: string;
   private listening?: Promise<string>;
   private stopped = false;
   private pending = 0;
@@ -221,245 +253,387 @@ export class LocalAgentToolBridge implements LocalAgentToolBridgePort {
           keepAliveTimeout: 1000,
         },
         (req, res) => {
-          const rejectRequest = (status: number) => {
-            res.writeHead(status, { 'cache-control': 'no-store' });
+          void this.handle(req, res).catch(() => {
+            if (!res.headersSent) res.writeHead(500, { 'cache-control': 'no-store' });
             res.end();
-          };
-          const address = server.address();
-          if (
-            !address ||
-            typeof address === 'string' ||
-            req.headers.host !== `127.0.0.1:${address.port}` ||
-            req.headers.origin
-          ) {
-            rejectRequest(403);
-            return;
-          }
-          if (req.url !== '/mcp' || req.method !== 'POST') {
-            rejectRequest(405);
-            return;
-          }
-          const token = req.headers.authorization?.match(/^Bearer ([A-Za-z0-9_-]{43})$/)?.[1];
-          const grant = token ? this.grants.get(token) : undefined;
-          if (!token || !grant || !this.live(token, grant)) {
-            rejectRequest(401);
-            return;
-          }
-          if (this.pending >= 8) {
-            rejectRequest(429);
-            return;
-          }
-          this.pending++;
-          const requestController = new AbortController();
-          const signal = AbortSignal.any([grant.controller.signal, requestController.signal]);
-          const deadlineAt = Date.now() + 30_000;
-          const timer = setTimeout(() => {
-            requestController.abort();
-            res.destroy();
-          }, 30_000);
-          const onClose = () => requestController.abort();
-          res.once('close', onClose);
-          const authorize = async (scope: string, tx?: IElectronDatabaseTransaction) => {
-            if (!this.live(token, grant) || signal.aborted)
-              throw new LocalAgentError('LOCAL_AGENT_PERMISSION_DENIED');
-            const current = await this.track(() =>
-              this.options.store.getConnection(
-                grant.input.identityId,
-                grant.input.connectionId,
-                tx,
-              ),
-            );
-            if (
-              !this.live(token, grant) ||
-              signal.aborted ||
-              !current.enabled ||
-              current.revision !== grant.revision ||
-              (scope.endsWith(':write') && !current.writeScopes.some((value) => value === scope))
-            )
-              throw new LocalAgentError('LOCAL_AGENT_PERMISSION_DENIED');
-          };
-          const handler = createMcpHandler(
-            () => {
-              const mcp = new McpServer({
-                name: 'memoflow-local',
-                version: '1',
-              });
-              const requestId = randomUUID();
-              this.options.registerTools(mcp, {
-                ...grant.input,
-                writeScopes: grant.writeScopes,
-                requestId,
-                traceId: requestId,
-                source: 'http',
-                startedAt: Date.now(),
-                deadlineAt,
-                signal,
-                grantSignal: grant.controller.signal,
-                authorize,
-                executeAuthorized: <T>(
-                  operationId: string,
-                  toolName: string,
-                  work: () => Promise<T>,
-                ) =>
-                  executeAuthorized(
-                    this.options.permissions,
-                    {
-                      owner: grant.input.identityId,
-                      agentId: grant.input.connectionId,
-                      conversationId: grant.input.conversationId,
-                      conversationPreset: this.conversation(
-                        grant.input.identityId,
-                        grant.input.conversationId,
-                      ).preset,
-                      conversationRules: this.conversation(
-                        grant.input.identityId,
-                        grant.input.conversationId,
-                      ).rules.filter((rule) => rule.agentId === grant.input.connectionId),
-                      operationId,
-                      ask: async () => {
-                        if (!grant.input.requestApproval) return 'timeout';
-                        const settingsAtRequest = await this.options.permissions.getSettings(
-                          grant.input.identityId,
-                        );
-                        const timeout = AbortSignal.timeout(
-                          this.options.approvalTimeoutMs ?? 25_000,
-                        );
-                        const approvalSignal = AbortSignal.any([signal, timeout]);
-                        return new Promise<'allow' | 'deny' | 'timeout'>((resolve) => {
-                          const onAbort = () => resolve(timeout.aborted ? 'timeout' : 'deny');
-                          if (approvalSignal.aborted) {
-                            onAbort();
-                            return;
-                          }
-                          approvalSignal.addEventListener('abort', onAbort, {
-                            once: true,
-                          });
-                          Promise.resolve(
-                            grant.input.requestApproval!(
-                              toolName,
-                              approvalSignal,
-                              (() => {
-                                const operation = getPermissionOperation(operationId)!;
-                                return {
-                                  agentId: grant.input.connectionId,
-                                  object: operation.object,
-                                  action: operation.action,
-                                  expiresAt:
-                                    Date.now() + (this.options.approvalTimeoutMs ?? 25_000),
-                                };
-                              })(),
-                            ),
-                          )
-                            .then(async (approved) => {
-                              if (
-                                approvalSignal.aborted ||
-                                approved === false ||
-                                approved === 'decline'
-                              )
-                                return resolve('deny');
-                              // Reject a stale approval if the user changed the policy
-                              // while the Agent was awaiting an answer.
-                              const settingsNow = await this.options.permissions.getSettings(
-                                grant.input.identityId,
-                              );
-                              if (
-                                !settingsNow ||
-                                settingsNow.revision !== settingsAtRequest?.revision
-                              )
-                                return resolve('deny');
-                              const operation = getPermissionOperation(operationId)!;
-                              const rule: PermissionRule = {
-                                id: randomUUID(),
-                                agentId: grant.input.connectionId,
-                                object: operation.object,
-                                action: operation.action,
-                                effect: 'allow',
-                                source: 'user',
-                                createdAt: Date.now(),
-                              };
-                              if (approved === 'approve_always') {
-                                // Persist the visible setting without reconciling native
-                                // connection scopes mid-call; doing so would revoke this MCP grant.
-                                await this.saveBusinessSettings(
-                                  grant.input.identityId,
-                                  withAllowedBusinessAccess(
-                                    settingsNow,
-                                    operation.object,
-                                    operation.action,
-                                  ),
-                                );
-                              }
-                              if (approved === 'approve_conversation')
-                                this.conversation(
-                                  grant.input.identityId,
-                                  grant.input.conversationId,
-                                ).rules.push(rule);
-                              resolve(approvalSignal.aborted ? 'deny' : 'allow');
-                            })
-                            .catch(() => resolve('deny'))
-                            .finally(() => approvalSignal.removeEventListener('abort', onAbort));
-                        });
-                      },
-                    },
-                    async () => {
-                      if (!this.live(token, grant) || signal.aborted)
-                        throw new LocalAgentError('LOCAL_AGENT_PERMISSION_DENIED');
-                      return work();
-                    },
-                  ).catch((error: unknown) => {
-                    if (error instanceof PermissionDeniedError)
-                      throw Object.assign(new Error('PERMISSION_DENIED'), {
-                        code: 'PERMISSION_DENIED',
-                      });
-                    throw error;
-                  }),
-                track: <T>(work: () => Promise<T>) => this.track(work),
-              });
-              return mcp;
-            },
-            { legacy: 'stateless' },
-          );
-          const nodeHandler = toNodeHandler(
-            {
-              async fetch(request) {
-                try {
-                  await authorize('read');
-                } catch {
-                  return new Response('Forbidden', { status: 403 });
-                }
-                return handler.fetch(new Request(request, { signal }));
-              },
-            },
-            { maxRequestBodySize: 256 * 1024 },
-          );
-          const handling = nodeHandler(req, res)
-            .catch(() => {
-              if (!res.headersSent) rejectRequest(500);
-              else res.destroy();
-            })
-            .finally(() => {
-              clearTimeout(timer);
-              res.off('close', onClose);
-              this.pending--;
-              this.inFlight.delete(handling);
-            });
-          this.inFlight.add(handling);
+          });
         },
       );
       this.server = server;
       server.maxConnections = 16;
       server.once('error', reject);
-      server.listen(0, '127.0.0.1', () => {
+      server.listen(0, this.options.bindHost ?? '127.0.0.1', () => {
         const address = server.address();
         if (this.stopped || !address || typeof address === 'string') {
           server.close();
           reject(new LocalAgentError('LOCAL_AGENT_UNAVAILABLE'));
           return;
         }
-        resolve(`http://127.0.0.1:${address.port}/mcp`);
+        const url = `http://${this.options.bindHost ?? '127.0.0.1'}:${address.port}/mcp`;
+        this.endpointUrl = url;
+        resolve(url);
       });
     });
     return this.listening;
+  }
+  /**
+   * Start the bridge with the Profile instead of the first Agent run. The
+   * endpoint is published for configured clients; failures are surfaced to the
+   * caller so Profile activation can decide, never silently half-start.
+   */
+  async start(): Promise<void> {
+    if (this.stopped) throw new LocalAgentError('LOCAL_AGENT_UNAVAILABLE');
+    await this.listen();
+    await this.indexClients();
+    await this.publishDiscovery();
+  }
+  private async indexClients(): Promise<void> {
+    const clients = this.options.clients;
+    if (!clients) return;
+    for (const credential of await clients.listCredentials()) {
+      if (!this.stopped) this.clientTokens.set(credential.tokenHash, credential);
+    }
+  }
+  private async publishDiscovery(): Promise<void> {
+    const target = this.options.discoveryPath;
+    const url = this.endpointUrl;
+    if (!target || !url) return;
+    const hint =
+      'Add this server to your MCP client: {"mcpServers":{"memoflow":{"type":"http",' +
+      `"url":"${url}","headers":{"Authorization":"Bearer <token from Settings>"}}}}`;
+    const body = JSON.stringify(
+      {
+        version: 1,
+        url,
+        hint,
+        pid: process.pid,
+        updatedAt: new Date().toISOString(),
+      },
+      null,
+      2,
+    );
+    await mkdir(dirname(target), { recursive: true, mode: 0o700 });
+    const temp = `${target}.tmp`;
+    await rm(temp, { force: true });
+    await writeFile(temp, body, { mode: 0o600 });
+    await chmod(temp, 0o600);
+    await rename(temp, target);
+  }
+  private async removeDiscovery(): Promise<void> {
+    if (!this.options.discoveryPath) return;
+    await rm(this.options.discoveryPath, { force: true }).catch(() => undefined);
+  }
+  private async handle(req: IncomingMessage, res: ServerResponse): Promise<void> {
+    const rejectRequest = (status: number) => {
+      res.writeHead(status, { 'cache-control': 'no-store' });
+      res.end();
+    };
+    const address = this.server?.address();
+    const bindHost = this.options.bindHost ?? '127.0.0.1';
+    if (
+      !address ||
+      typeof address === 'string' ||
+      req.headers.host !== `${bindHost}:${address.port}` ||
+      req.headers.origin
+    ) {
+      rejectRequest(403);
+      return;
+    }
+    if (req.url !== '/mcp' || req.method !== 'POST') {
+      rejectRequest(405);
+      return;
+    }
+    const token = req.headers.authorization?.match(/^Bearer ([A-Za-z0-9_-]{43})$/)?.[1];
+    const grant = token ? this.grants.get(token) : undefined;
+    const clientRef = token && !grant ? this.clientTokens.get(tokenDigest(token)) : undefined;
+    if (
+      !token ||
+      (grant ? !this.live(token, grant) : !clientRef || this.stopped || !this.options.isActive())
+    ) {
+      rejectRequest(401);
+      return;
+    }
+    // External clients resolve their write scopes per request. A revoked or
+    // re-scoped record must be rejected before any tool is registered.
+    let external: LocalMcpClient | undefined;
+    const clients = this.options.clients;
+    if (clientRef) {
+      if (!clients) {
+        rejectRequest(401);
+        return;
+      }
+      try {
+        external = await this.track(() => clients.get(clientRef.identityId, clientRef.id));
+      } catch {
+        rejectRequest(401);
+        return;
+      }
+      if (external.revokedAt || this.stopped || !this.options.isActive()) {
+        rejectRequest(401);
+        return;
+      }
+    }
+    if (this.pending >= 8) {
+      rejectRequest(429);
+      return;
+    }
+    this.pending++;
+    const requestController = new AbortController();
+    const signal = grant
+      ? AbortSignal.any([grant.controller.signal, requestController.signal])
+      : requestController.signal;
+    const deadlineAt = Date.now() + 30_000;
+    const timer = setTimeout(() => {
+      requestController.abort();
+      res.destroy();
+    }, 30_000);
+    const onClose = () => requestController.abort();
+    res.once('close', onClose);
+    const authorize = async (scope: string, tx?: IElectronDatabaseTransaction) => {
+      if (signal.aborted || this.stopped || !this.options.isActive())
+        throw new LocalAgentError('LOCAL_AGENT_PERMISSION_DENIED');
+      if (grant) {
+        if (!this.live(token!, grant)) throw new LocalAgentError('LOCAL_AGENT_PERMISSION_DENIED');
+        const current = await this.track(() =>
+          this.options.store.getConnection(grant.input.identityId, grant.input.connectionId, tx),
+        );
+        if (
+          !this.live(token!, grant) ||
+          signal.aborted ||
+          !current.enabled ||
+          current.revision !== grant.revision ||
+          (scope.endsWith(':write') && !current.writeScopes.some((value) => value === scope))
+        )
+          throw new LocalAgentError('LOCAL_AGENT_PERMISSION_DENIED');
+        return;
+      }
+      const current = await this.track(() =>
+        clients!.get(clientRef!.identityId, clientRef!.id, tx),
+      );
+      if (
+        this.stopped ||
+        !this.options.isActive() ||
+        signal.aborted ||
+        current.revokedAt !== null ||
+        (scope.endsWith(':write') && !current.writeScopes.some((value) => value === scope))
+      )
+        throw new LocalAgentError('LOCAL_AGENT_PERMISSION_DENIED');
+    };
+    const requestId = randomUUID();
+    const context: LocalToolContext = grant
+      ? {
+          ...grant.input,
+          writeScopes: grant.writeScopes,
+          origin: 'run',
+          requestId,
+          traceId: requestId,
+          source: 'http',
+          startedAt: Date.now(),
+          deadlineAt,
+          signal,
+          grantSignal: grant.controller.signal,
+          authorize,
+          executeAuthorized: <T>(operationId: string, toolName: string, work: () => Promise<T>) =>
+            executeAuthorized(
+              this.options.permissions,
+              {
+                owner: grant.input.identityId,
+                agentId: grant.input.connectionId,
+                conversationId: grant.input.conversationId,
+                conversationPreset: this.conversation(
+                  grant.input.identityId,
+                  grant.input.conversationId,
+                ).preset,
+                conversationRules: this.conversation(
+                  grant.input.identityId,
+                  grant.input.conversationId,
+                ).rules.filter((rule) => rule.agentId === grant.input.connectionId),
+                operationId,
+                ask: async () => {
+                  if (!grant.input.requestApproval) return 'timeout';
+                  const settingsAtRequest = await this.options.permissions.getSettings(
+                    grant.input.identityId,
+                  );
+                  const timeout = AbortSignal.timeout(this.options.approvalTimeoutMs ?? 25_000);
+                  const approvalSignal = AbortSignal.any([signal, timeout]);
+                  return new Promise<'allow' | 'deny' | 'timeout'>((resolve) => {
+                    const onAbort = () => resolve(timeout.aborted ? 'timeout' : 'deny');
+                    if (approvalSignal.aborted) {
+                      onAbort();
+                      return;
+                    }
+                    approvalSignal.addEventListener('abort', onAbort, {
+                      once: true,
+                    });
+                    Promise.resolve(
+                      grant.input.requestApproval!(
+                        toolName,
+                        approvalSignal,
+                        (() => {
+                          const operation = getPermissionOperation(operationId)!;
+                          return {
+                            agentId: grant.input.connectionId,
+                            object: operation.object,
+                            action: operation.action,
+                            expiresAt: Date.now() + (this.options.approvalTimeoutMs ?? 25_000),
+                          };
+                        })(),
+                      ),
+                    )
+                      .then(async (approved) => {
+                        if (approvalSignal.aborted || approved === false || approved === 'decline')
+                          return resolve('deny');
+                        // Reject a stale approval if the user changed the policy
+                        // while the Agent was awaiting an answer.
+                        const settingsNow = await this.options.permissions.getSettings(
+                          grant.input.identityId,
+                        );
+                        if (!settingsNow || settingsNow.revision !== settingsAtRequest?.revision)
+                          return resolve('deny');
+                        const operation = getPermissionOperation(operationId)!;
+                        const rule: PermissionRule = {
+                          id: randomUUID(),
+                          agentId: grant.input.connectionId,
+                          object: operation.object,
+                          action: operation.action,
+                          effect: 'allow',
+                          source: 'user',
+                          createdAt: Date.now(),
+                        };
+                        if (approved === 'approve_always') {
+                          // Persist the visible setting without reconciling native
+                          // connection scopes mid-call; doing so would revoke this MCP grant.
+                          await this.saveBusinessSettings(
+                            grant.input.identityId,
+                            withAllowedBusinessAccess(
+                              settingsNow,
+                              operation.object,
+                              operation.action,
+                            ),
+                          );
+                        }
+                        if (approved === 'approve_conversation')
+                          this.conversation(
+                            grant.input.identityId,
+                            grant.input.conversationId,
+                          ).rules.push(rule);
+                        resolve(approvalSignal.aborted ? 'deny' : 'allow');
+                      })
+                      .catch(() => resolve('deny'))
+                      .finally(() => approvalSignal.removeEventListener('abort', onAbort));
+                  });
+                },
+              },
+              async () => {
+                if (!this.live(token!, grant) || signal.aborted)
+                  throw new LocalAgentError('LOCAL_AGENT_PERMISSION_DENIED');
+                return work();
+              },
+            ).catch((error: unknown) => {
+              if (error instanceof PermissionDeniedError)
+                throw Object.assign(new Error('PERMISSION_DENIED'), {
+                  code: 'PERMISSION_DENIED',
+                });
+              throw error;
+            }),
+          track: <T>(work: () => Promise<T>) => this.track(work),
+        }
+      : {
+          identityId: clientRef!.identityId,
+          connectionId: clientRef!.id,
+          conversationId: '',
+          runId: '',
+          origin: 'client',
+          writeScopes: external!.writeScopes,
+          requestId,
+          traceId: requestId,
+          source: 'http',
+          startedAt: Date.now(),
+          deadlineAt,
+          signal,
+          grantSignal: signal,
+          authorize,
+          executeAuthorized: <T>(operationId: string, _toolName: string, work: () => Promise<T>) =>
+            this.executeClientAuthorized(
+              operationId,
+              clientRef!.identityId,
+              () => clients!.get(clientRef!.identityId, clientRef!.id),
+              () => this.track(work),
+              signal,
+            ),
+          track: <T>(work: () => Promise<T>) => this.track(work),
+        };
+    const handler = createMcpHandler(
+      () => {
+        const mcp = new McpServer({
+          name: 'memoflow-local',
+          version: '1',
+        });
+        this.options.registerTools(mcp, context);
+        return mcp;
+      },
+      { legacy: 'stateless' },
+    );
+    const nodeHandler = toNodeHandler(
+      {
+        async fetch(request) {
+          try {
+            await authorize('read');
+          } catch {
+            return new Response('Forbidden', { status: 403 });
+          }
+          return handler.fetch(new Request(request, { signal }));
+        },
+      },
+      { maxRequestBodySize: 256 * 1024 },
+    );
+    const handling = nodeHandler(req, res)
+      .catch(() => {
+        if (!res.headersSent) rejectRequest(500);
+        else res.destroy();
+      })
+      .finally(() => {
+        clearTimeout(timer);
+        res.off('close', onClose);
+        this.pending--;
+        this.inFlight.delete(handling);
+      });
+    this.inFlight.add(handling);
+  }
+  /** External clients carry no run/conversation policy; the token's scopes are the grant. */
+  private executeClientAuthorized<T>(
+    operationId: string,
+    owner: string,
+    loadClient: () => Promise<LocalMcpClient>,
+    run: () => Promise<T>,
+    signal: AbortSignal,
+  ): Promise<T> {
+    return (async () => {
+      const current = await loadClient().catch(() => null);
+      if (!current || current.revokedAt !== null || this.stopped || !this.options.isActive())
+        throw new LocalAgentError('LOCAL_AGENT_PERMISSION_DENIED');
+      const scope = writeScopeForOperation(operationId);
+      return executeAuthorized(
+        this.options.permissions,
+        {
+          owner,
+          agentId: current.id,
+          operationId,
+          // Issuing the scope is the user's pre-authorization; explicit denies
+          // and the read-only preset still win inside the policy check.
+          preAuthorizedWrite: Boolean(scope && current.writeScopes.includes(scope)),
+        },
+        async () => {
+          if (this.stopped || !this.options.isActive() || signal.aborted)
+            throw new LocalAgentError('LOCAL_AGENT_PERMISSION_DENIED');
+          return run();
+        },
+      );
+    })().catch((error: unknown) => {
+      if (error instanceof PermissionDeniedError)
+        throw Object.assign(new Error('PERMISSION_DENIED'), { code: 'PERMISSION_DENIED' });
+      throw error;
+    });
   }
   async open(input: GrantInput): Promise<LocalAgentToolGrant> {
     if (this.stopped || !this.options.isActive())
@@ -497,6 +671,54 @@ export class LocalAgentToolBridge implements LocalAgentToolBridgePort {
       },
     };
   }
+  /** Loopback endpoint for the current Profile, published through the discovery file. */
+  async endpoint(): Promise<LocalMcpEndpoint> {
+    const url = await this.listen();
+    return { url, discoveryPath: this.options.discoveryPath ?? null };
+  }
+  async listMcpClients(owner: string): Promise<LocalMcpClient[]> {
+    const clients = this.options.clients;
+    if (!clients) throw new LocalAgentError('LOCAL_AGENT_UNAVAILABLE');
+    if (this.stopped) throw new LocalAgentError('LOCAL_AGENT_PERMISSION_DENIED');
+    return clients.list(owner);
+  }
+  /**
+   * Mint a persistent external client. The plaintext token exists only in this
+   * return value; the Profile record keeps its hash. Scope changes are not
+   * supported — rotate by creating a new client and revoking the old one.
+   */
+  async createMcpClient(
+    owner: string,
+    raw: LocalMcpClientCreate,
+  ): Promise<LocalMcpClientCredential> {
+    const clients = this.options.clients;
+    if (!clients) throw new LocalAgentError('LOCAL_AGENT_UNAVAILABLE');
+    if (this.stopped || !this.options.isActive())
+      throw new LocalAgentError('LOCAL_AGENT_PERMISSION_DENIED');
+    const input = LocalMcpClientCreateSchema.parse(raw);
+    await this.start();
+    if (this.stopped || !this.options.isActive())
+      throw new LocalAgentError('LOCAL_AGENT_PERMISSION_DENIED');
+    const token = randomBytes(32).toString('base64url');
+    const tokenHash = tokenDigest(token);
+    const client = await clients.create(owner, {
+      ...input,
+      tokenHash,
+      tokenPrefix: token.slice(0, 8),
+    });
+    this.clientTokens.set(tokenHash, { identityId: owner, id: client.id, tokenHash });
+    return { client, token, endpoint: await this.endpoint() };
+  }
+  /** Revocation is immediate: the token index entry is dropped and every call re-reads the record. */
+  async revokeMcpClient(owner: string, id: string): Promise<LocalMcpClient> {
+    const clients = this.options.clients;
+    if (!clients) throw new LocalAgentError('LOCAL_AGENT_UNAVAILABLE');
+    const client = await clients.revoke(owner, id);
+    for (const [hash, ref] of this.clientTokens) {
+      if (ref.identityId === owner && ref.id === id) this.clientTokens.delete(hash);
+    }
+    return client;
+  }
   async dispose(): Promise<void> {
     this.conversations.clear();
     this.stopped = true;
@@ -505,6 +727,8 @@ export class LocalAgentToolBridge implements LocalAgentToolBridgePort {
       this.options.onRevokeGrant?.(grant.input);
     }
     this.grants.clear();
+    this.clientTokens.clear();
+    await this.removeDiscovery();
     await this.listening?.catch(() => undefined);
     if (this.server) {
       this.server.closeAllConnections();

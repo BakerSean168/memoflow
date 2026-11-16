@@ -48,6 +48,7 @@ export const LocalAgentActivitySchema = z
   .strict();
 export type LocalAgentActivity = z.infer<typeof LocalAgentActivitySchema>;
 export const LocalAgentWriteScopeSchema = z.enum(['goals:write', 'tasks:write']);
+export type LocalAgentWriteScope = z.infer<typeof LocalAgentWriteScopeSchema>;
 const nativePath = z
   .string()
   .trim()
@@ -351,6 +352,51 @@ export const LocalAgentRequestResponseSchema = z
   .strict();
 export type LocalAgentRequestResponse = z.infer<typeof LocalAgentRequestResponseSchema>;
 
+/**
+ * A persistent external MCP client owned by the current Profile. Reads are
+ * implicit; `writeScopes` are the only business writes its bearer token may
+ * perform. The token itself is never stored — only its SHA-256 hash and a
+ * short prefix for identification.
+ */
+export const LocalMcpClientSchema = z
+  .object({
+    id,
+    name: z.string().trim().min(1).max(80),
+    writeScopes: z.array(LocalAgentWriteScopeSchema).max(2),
+    tokenPrefix: z.string().min(8).max(16),
+    createdAt: z.number().int().nonnegative(),
+    revokedAt: z.number().int().nonnegative().nullable(),
+  })
+  .strict();
+export type LocalMcpClient = z.infer<typeof LocalMcpClientSchema>;
+
+export const LocalMcpClientCreateSchema = z
+  .object({
+    name: z.string().trim().min(1).max(80),
+    writeScopes: z.array(LocalAgentWriteScopeSchema).max(2),
+  })
+  .strict();
+export type LocalMcpClientCreate = z.infer<typeof LocalMcpClientCreateSchema>;
+
+/** Loopback endpoint published through the Profile discovery file. */
+export const LocalMcpEndpointSchema = z
+  .object({
+    url: z.string().trim().min(1).max(2048),
+    discoveryPath: z.string().trim().min(1).max(4096).nullable(),
+  })
+  .strict();
+export type LocalMcpEndpoint = z.infer<typeof LocalMcpEndpointSchema>;
+
+/** Creation result: the plaintext token is shown once and never persisted. */
+export const LocalMcpClientCredentialSchema = z
+  .object({
+    client: LocalMcpClientSchema,
+    token: z.string().min(32).max(128),
+    endpoint: LocalMcpEndpointSchema,
+  })
+  .strict();
+export type LocalMcpClientCredential = z.infer<typeof LocalMcpClientCredentialSchema>;
+
 export const LocalAgentClientCommandSchema = z.discriminatedUnion('action', [
   z
     .object({
@@ -428,5 +474,14 @@ export const LocalAgentClientCommandSchema = z.discriminatedUnion('action', [
     })
     .strict(),
   z.object({ action: z.literal('auth_sign_out'), connectionId: id }).strict(),
+  z.object({ action: z.literal('list_mcp_clients') }).strict(),
+  z.object({ action: z.literal('mcp_endpoint') }).strict(),
+  z
+    .object({
+      action: z.literal('create_mcp_client'),
+      client: LocalMcpClientCreateSchema,
+    })
+    .strict(),
+  z.object({ action: z.literal('revoke_mcp_client'), id }).strict(),
 ]);
 export type LocalAgentClientCommand = z.infer<typeof LocalAgentClientCommandSchema>;

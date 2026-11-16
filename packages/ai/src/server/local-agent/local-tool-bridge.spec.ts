@@ -1,11 +1,24 @@
 import { PermissionSettingsSchema } from '@memoflow/ai-contracts';
 import { request as httpRequest } from 'node:http';
+import { mkdtemp, readFile, rm, stat } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 import { it, expect } from 'vitest';
 import { z } from 'zod';
 import { LocalAgentToolBridge } from './local-tool-bridge';
 import { LocalAgentRepository } from '../infrastructure/adapters/powersync/local-agent.repository';
+import { LocalMcpClientRepository } from '../infrastructure/adapters/powersync/local-mcp-client.repository';
 import { createLocalAgentSqlite } from '../../testing/local-agent-sqlite';
 import { PermissionLocalRepository } from '../permissions/permission-powersync.repository';
+
+async function discover(directory: string) {
+  const discoveryPath = join(directory, 'endpoint.json');
+  const raw = await readFile(discoveryPath, 'utf8');
+  return {
+    discoveryPath,
+    discovery: JSON.parse(raw) as { url: string; hint?: string },
+  };
+}
 
 it('drains a tool already using the Profile database before disposal returns', async () => {
   const db = createLocalAgentSqlite();
@@ -595,3 +608,218 @@ it.each([
     }
   },
 );
+
+it('accepts a persistent external client token until it is revoked', async () => {
+  const db = createLocalAgentSqlite();
+  const store = new LocalAgentRepository(db);
+  const clients = new LocalMcpClientRepository(db);
+  const directory = await mkdtemp(join(tmpdir(), 'memoflow-mcp-'));
+  const bridge = new LocalAgentToolBridge({
+    store,
+    permissions: new PermissionLocalRepository(db),
+    isActive: () => true,
+    clients,
+    discoveryPath: join(directory, 'endpoint.json'),
+    registerTools(server, context) {
+      server.registerTool('owned_read', { inputSchema: z.object({}).strict() }, async () => {
+        await context.authorize('goals:read');
+        expect(context.origin).toBe('client');
+        return { content: [{ type: 'text', text: context.connectionId }] };
+      });
+    },
+  });
+  const call = (url: string, token: string) =>
+    fetch(url, {
+      method: 'POST',
+      headers: {
+        authorization: `Bearer ${token}`,
+        accept: 'application/json, text/event-stream',
+        'content-type': 'application/json',
+      },
+      body: JSON.stringify({
+        jsonrpc: '2.0',
+        id: 1,
+        method: 'tools/call',
+        params: { name: 'owned_read', arguments: {} },
+      }),
+    });
+  try {
+    const credential = await bridge.createMcpClient('owner', {
+      name: 'Codex',
+      writeScopes: ['tasks:write'],
+    });
+    expect(credential.token).toMatch(/^[A-Za-z0-9_-]{43}$/);
+    expect(credential.client.tokenPrefix).toBe(credential.token.slice(0, 8));
+    expect(credential.client.writeScopes).toEqual(['tasks:write']);
+
+    const first = await call(credential.endpoint.url, credential.token);
+    expect(first.status).toBe(200);
+    expect(await first.text()).toContain(credential.client.id);
+
+    // The token survives process/run boundaries because the record, not a
+    // grant, owns it; a second request still authenticates.
+    expect((await call(credential.endpoint.url, credential.token)).status).toBe(200);
+
+    const { discoveryPath, discovery } = await discover(directory);
+    expect(discovery.url).toBe(credential.endpoint.url);
+    expect((await stat(discoveryPath)).mode & 0o777).toBe(0o600);
+
+    await bridge.revokeMcpClient('owner', credential.client.id);
+    expect((await call(credential.endpoint.url, credential.token)).status).toBe(401);
+    // Reloading the index from the Profile keeps the revocation authoritative.
+    expect((await clients.list('owner'))[0]?.revokedAt).not.toBeNull();
+  } finally {
+    await bridge.dispose();
+    db.close();
+    await rm(directory, { recursive: true, force: true });
+  }
+});
+
+it('re-checks external client write scopes on every call', async () => {
+  const db = createLocalAgentSqlite();
+  const store = new LocalAgentRepository(db);
+  const clients = new LocalMcpClientRepository(db);
+  const bridge = new LocalAgentToolBridge({
+    store,
+    permissions: new PermissionLocalRepository(db),
+    isActive: () => true,
+    clients,
+    registerTools(server, context) {
+      server.registerTool('write_task', { inputSchema: z.object({}).strict() }, async () => {
+        try {
+          await context.authorize('tasks:write');
+          return { content: [{ type: 'text', text: 'allowed' }] };
+        } catch {
+          return { isError: true, content: [{ type: 'text', text: 'denied' }] };
+        }
+      });
+    },
+  });
+  const call = (url: string, token: string) =>
+    fetch(url, {
+      method: 'POST',
+      headers: {
+        authorization: `Bearer ${token}`,
+        accept: 'application/json, text/event-stream',
+        'content-type': 'application/json',
+      },
+      body: JSON.stringify({
+        jsonrpc: '2.0',
+        id: 1,
+        method: 'tools/call',
+        params: { name: 'write_task', arguments: {} },
+      }),
+    });
+  try {
+    const readOnly = await bridge.createMcpClient('owner', { name: 'Read', writeScopes: [] });
+    expect(await (await call(readOnly.endpoint.url, readOnly.token)).text()).toContain('denied');
+
+    const writer = await bridge.createMcpClient('owner', {
+      name: 'Write',
+      writeScopes: ['tasks:write'],
+    });
+    expect(await (await call(writer.endpoint.url, writer.token)).text()).toContain('allowed');
+  } finally {
+    await bridge.dispose();
+    db.close();
+  }
+});
+
+it('rotates the endpoint and discovery file when the Profile restarts', async () => {
+  const db = createLocalAgentSqlite();
+  const store = new LocalAgentRepository(db);
+  const clients = new LocalMcpClientRepository(db);
+  const directory = await mkdtemp(join(tmpdir(), 'memoflow-mcp-'));
+  const discoveryPath = join(directory, 'endpoint.json');
+  const create = () =>
+    new LocalAgentToolBridge({
+      store,
+      permissions: new PermissionLocalRepository(db),
+      isActive: () => true,
+      clients,
+      discoveryPath,
+      registerTools() {},
+    });
+  try {
+    const first = create();
+    await first.start();
+    const firstEndpoint = await first.endpoint();
+    expect((await discover(directory)).discovery.url).toBe(firstEndpoint.url);
+    await first.dispose();
+    await expect(readFile(discoveryPath, 'utf8')).rejects.toThrow();
+
+    const second = create();
+    await second.start();
+    const secondEndpoint = await second.endpoint();
+    expect(secondEndpoint.url).not.toBe(firstEndpoint.url);
+    expect((await discover(directory)).discovery.url).toBe(secondEndpoint.url);
+    await second.dispose();
+  } finally {
+    db.close();
+    await rm(directory, { recursive: true, force: true });
+  }
+});
+
+it('keeps the built-in per-run grant contract after the Profile host starts', async () => {
+  const db = createLocalAgentSqlite();
+  const store = new LocalAgentRepository(db);
+  const connection = await store.createConnection('owner', {
+    driver: 'codex',
+    name: 'Codex',
+    executablePath: 'codex',
+    enabled: true,
+    writeScopes: [],
+  });
+  const bridge = new LocalAgentToolBridge({
+    store,
+    permissions: new PermissionLocalRepository(db),
+    isActive: () => true,
+    clients: new LocalMcpClientRepository(db),
+    registerTools(server, context) {
+      server.registerTool('owned_read', { inputSchema: z.object({}).strict() }, async () => {
+        await context.authorize('goals:read');
+        expect(context.origin).toBe('run');
+        return { content: [{ type: 'text', text: 'ok' }] };
+      });
+    },
+  });
+  try {
+    await bridge.start();
+    const grant = await bridge.open({
+      identityId: 'owner',
+      connectionId: connection.id,
+      conversationId: 'chat',
+      runId: 'run',
+    });
+    expect((await bridge.listMcpClients('owner')).length).toBe(0);
+    const response = await fetch(grant.url, {
+      method: 'POST',
+      headers: {
+        authorization: `Bearer ${grant.token}`,
+        accept: 'application/json, text/event-stream',
+        'content-type': 'application/json',
+      },
+      body: JSON.stringify({
+        jsonrpc: '2.0',
+        id: 1,
+        method: 'tools/call',
+        params: { name: 'owned_read', arguments: {} },
+      }),
+    });
+    expect(response.status).toBe(200);
+    grant.revoke();
+    const revoked = await fetch(grant.url, {
+      method: 'POST',
+      headers: {
+        authorization: `Bearer ${grant.token}`,
+        accept: 'application/json, text/event-stream',
+        'content-type': 'application/json',
+      },
+      body: JSON.stringify({ jsonrpc: '2.0', id: 2, method: 'tools/list', params: {} }),
+    });
+    expect(revoked.status).toBe(401);
+  } finally {
+    await bridge.dispose();
+    db.close();
+  }
+});

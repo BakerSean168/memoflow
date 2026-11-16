@@ -1,4 +1,5 @@
 import { createHash, randomUUID } from 'node:crypto';
+import { createLogger } from '@memoflow/utils/logger';
 import { mkdir, readFile, rename, rm, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { z } from 'zod';
@@ -17,6 +18,10 @@ import type {
   LocalAgentExecutionFailure,
   LocalAgentModelOptions,
   LocalAgentConversationCreate,
+  LocalMcpClient,
+  LocalMcpClientCreate,
+  LocalMcpClientCredential,
+  LocalMcpEndpoint,
   LocalAgentRequestResponse,
   AssistantRuntimeChoice,
   AssistantRuntimeSelectedEntity,
@@ -49,6 +54,8 @@ import {
 import type { LocalAgentRepository } from '../infrastructure/adapters/powersync/local-agent.repository';
 import { verifyLocalAgentMcpConnectivity } from './local-tool-bridge';
 import { NativeEventQueue } from './native-event-queue';
+
+const logger = createLogger('LocalAgentRuntime');
 
 /** Keep Provider backpressure while accepting MCP requests during a pending native next(). */
 async function* mergeRunEvents(
@@ -94,6 +101,12 @@ export interface LocalAgentToolBridgePort {
     ) => Promise<boolean | BusinessApprovalDecision>;
   }): Promise<LocalAgentToolGrant>;
   permissions?(owner: string, command: PermissionCommand): Promise<PermissionSnapshot>;
+  /** Bind the Profile-local MCP host (not tied to a run). */
+  start?(): Promise<void>;
+  endpoint?(): Promise<LocalMcpEndpoint>;
+  listMcpClients?(owner: string): Promise<LocalMcpClient[]>;
+  createMcpClient?(owner: string, input: LocalMcpClientCreate): Promise<LocalMcpClientCredential>;
+  revokeMcpClient?(owner: string, id: string): Promise<LocalMcpClient>;
   dispose(): Promise<void>;
 }
 interface ActiveRun {
@@ -1757,6 +1770,48 @@ export class LocalAgentRuntime {
     this.assertActive();
     if (!this.options.bridge?.permissions) throw new LocalAgentError('LOCAL_AGENT_UNAVAILABLE');
     return this.options.bridge.permissions(owner, command);
+  }
+
+  /**
+   * Bind the Profile-local MCP host. Called by the module lifecycle, not by a
+   * run, so an external client can connect before any Agent runs.
+   */
+  async start(): Promise<void> {
+    if (this.stopped) return;
+    try {
+      await this.options.bridge?.start?.();
+    } catch (error) {
+      // An unavailable loopback host must not take down built-in chat or the
+      // local Agent list; the bridge reports itself as unavailable instead.
+      logger.warn('Local MCP bridge failed to start', error);
+    }
+  }
+
+  async mcpEndpoint(): Promise<LocalMcpEndpoint | null> {
+    this.assertActive();
+    if (!this.options.bridge?.endpoint) return null;
+    return this.options.bridge.endpoint();
+  }
+
+  async listMcpClients(owner: string): Promise<LocalMcpClient[]> {
+    this.assertActive();
+    if (!this.options.bridge?.listMcpClients) throw new LocalAgentError('LOCAL_AGENT_UNAVAILABLE');
+    return this.options.bridge.listMcpClients(owner);
+  }
+
+  async createMcpClient(
+    owner: string,
+    input: LocalMcpClientCreate,
+  ): Promise<LocalMcpClientCredential> {
+    this.assertActive();
+    if (!this.options.bridge?.createMcpClient) throw new LocalAgentError('LOCAL_AGENT_UNAVAILABLE');
+    return this.options.bridge.createMcpClient(owner, input);
+  }
+
+  async revokeMcpClient(owner: string, id: string): Promise<LocalMcpClient> {
+    this.assertActive();
+    if (!this.options.bridge?.revokeMcpClient) throw new LocalAgentError('LOCAL_AGENT_UNAVAILABLE');
+    return this.options.bridge.revokeMcpClient(owner, id);
   }
 
   respond(identityId: string, input: LocalAgentRequestResponse): boolean {

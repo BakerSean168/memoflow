@@ -3,6 +3,7 @@ import { randomBytes } from 'node:crypto';
 import {
   LocalAgentToolBridge,
   LocalAgentRepository,
+  LocalMcpClientRepository,
   PermissionLocalRepository,
   permissionOperationForTool,
   goalPanelSubmitOperationId,
@@ -62,6 +63,7 @@ export function createDesktopLocalAgentTools(
   time: UserTimeContextPort,
   knowledge?: IKnowledgeSourcePort,
   panelBridge?: IDesktopNativePanelBridge,
+  mcp?: { clients: LocalMcpClientRepository; discoveryPath?: string },
 ) {
   const tasks = createTaskPowerSyncReadQueries(db, time);
   const goals = createGoalPowerSyncPageQuery(db);
@@ -76,10 +78,15 @@ export function createDesktopLocalAgentTools(
     store,
     permissions: new PermissionLocalRepository(db),
     isActive,
+    clients: mcp?.clients,
+    discoveryPath: mcp?.discoveryPath,
     onRevokeGrant(grantInput) {
       panelBridge?.releaseAllForRun?.(grantInput.conversationId, grantInput.runId);
     },
     registerTools(server, context: LocalToolContext) {
+      // External MCP clients have no visible Agent panel or run, so the panel
+      // tools (and the "use the form" write rule) only apply to built-in runs.
+      const panels = context.origin === 'client' ? undefined : panelBridge;
       if (knowledge) {
         const reference = z.object({
           documentId: KnowledgeDocumentIdWireSchema,
@@ -275,7 +282,7 @@ export function createDesktopLocalAgentTools(
         server.registerTool(
           'goal_create',
           {
-            description: panelBridge
+            description: panels
               ? 'Background Goal write that skips the visible form. Only for a user who explicitly asked to write the Goal directly without the form; otherwise it returns GOAL_PANEL_REQUIRED and writes nothing, and the Goal must be created with goal_panel_open. A stable idempotencyKey is required for all retries.'
               : 'Create an owned Goal atomically. A stable idempotencyKey is required for all retries.',
             inputSchema: GoalAgentCreateSchema,
@@ -291,7 +298,7 @@ export function createDesktopLocalAgentTools(
               // The run's user message cannot change mid-run, so one check before the owner write is enough.
               assertGoalIntentCanCommit(context.goalIntent ?? JSON.stringify(input.goal));
               // With the visible form available, a hidden write would leave the user nothing to review.
-              if (panelBridge) assertGoalDirectWriteAllowed(context.goalIntent);
+              if (panels) assertGoalDirectWriteAllowed(context.goalIntent);
               return goalWrites.create(input, context, authority);
             }),
         );
@@ -311,7 +318,7 @@ export function createDesktopLocalAgentTools(
           (input) => write('goal_update', () => goalWrites.update(input, context, authority)),
         );
       }
-      if (panelBridge) {
+      if (panels) {
         async function runPanelAction(command: GoalPanelCommand) {
           try {
             if (command.action === 'submit') assertGoalIntentCanCommit(context.goalIntent ?? '');
@@ -319,18 +326,18 @@ export function createDesktopLocalAgentTools(
             await context.authorize(scope);
             let response;
             if (command.action === 'submit') {
-              const snapshot = await panelBridge!.executeCommand(context, { action: 'snapshot' });
+              const snapshot = await panels!.executeCommand(context, { action: 'snapshot' });
               const operationId = goalPanelSubmitOperationId(snapshot.snapshot?.mode === 'edit');
               response = await context.executeAuthorized(
                 operationId,
                 'goal_panel_submit',
                 async () => {
                   await context.authorize(scope);
-                  return context.track(() => panelBridge!.executeCommand(context, command));
+                  return context.track(() => panels!.executeCommand(context, command));
                 },
               );
             } else {
-              response = await context.track(() => panelBridge!.executeCommand(context, command));
+              response = await context.track(() => panels!.executeCommand(context, command));
             }
             if (!response.ok) {
               return {

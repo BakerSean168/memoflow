@@ -160,6 +160,14 @@ export function registerConversationHandlers(
             );
           case 'auth_sign_out':
             return ok(await runtime.signOutLogin(owner, input.connectionId));
+          case 'list_mcp_clients':
+            return ok(await runtime.listMcpClients(owner));
+          case 'mcp_endpoint':
+            return ok(await runtime.mcpEndpoint());
+          case 'create_mcp_client':
+            return ok(await runtime.createMcpClient(owner, input.client));
+          case 'revoke_mcp_client':
+            return ok(await runtime.revokeMcpClient(owner, input.id));
         }
       } catch (error) {
         const failure = toAITransportFailure(error, {
