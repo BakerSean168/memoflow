@@ -34,6 +34,7 @@ const scopeOptions = [
   'tasks:write',
   'routines:read',
   'routines:write',
+  'ai:read',
 ] as const;
 type PatScope = (typeof scopeOptions)[number];
 const selectedScopes = ref<Record<PatScope, boolean>>({
@@ -43,6 +44,7 @@ const selectedScopes = ref<Record<PatScope, boolean>>({
   'tasks:write': false,
   'routines:read': false,
   'routines:write': false,
+  'ai:read': false,
 });
 const expiryOptions = ['7', '30', '90', '365'] as const;
 const expiresInDays = ref<(typeof expiryOptions)[number]>('90');
@@ -59,6 +61,7 @@ const scopeName = (scope: string) =>
     'tasks:write': t('account.externalAgents.scopes.tasksWrite'),
     'routines:read': t('account.externalAgents.scopes.routinesRead'),
     'routines:write': t('account.externalAgents.scopes.routinesWrite'),
+    'ai:read': t('account.externalAgents.scopes.aiRead'),
     offline_access: t('account.externalAgents.scopes.offlineAccess'),
   })[scope] ?? scope;
 const status = (row: OAuthConnection | ScopedPatSummary) =>

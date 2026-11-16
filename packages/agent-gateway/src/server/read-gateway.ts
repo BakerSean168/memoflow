@@ -34,6 +34,8 @@ interface Options {
   readonly resourceMetadataUrl?: string;
   readonly goals: GoalReadPort;
   readonly tasks?: TaskReadPort;
+  readonly assistantConversation?: import('../ports').AssistantConversationReadPort;
+  readonly agents?: import('../ports').AgentArchiveReadPort;
   readonly routines?: RoutineReadPort;
   readonly audit: (event: GatewayAuditEvent) => void;
   readonly timeoutMs?: number;
@@ -148,7 +150,7 @@ export function createReadGateway(options: Options) {
               'Cache-Control': 'no-store',
               ...(options.resourceMetadataUrl && (status === 401 || code === 'INSUFFICIENT_SCOPE')
                 ? {
-                    'WWW-Authenticate': `Bearer resource_metadata="${options.resourceMetadataUrl}"${code === 'INSUFFICIENT_SCOPE' ? ', error="insufficient_scope", scope="' + (tool !== 'transport' && isToolName(tool) ? toolDescriptors[tool].requiredScope : 'goals:read tasks:read') + '"' : ''}`,
+                    'WWW-Authenticate': `Bearer resource_metadata="${options.resourceMetadataUrl}"${code === 'INSUFFICIENT_SCOPE' ? ', error="insufficient_scope", scope="' + (tool !== 'transport' && isToolName(tool) ? toolDescriptors[tool].requiredScope : 'goals:read tasks:read ai:read') + '"' : ''}`,
                   }
                 : {}),
               ...(status === 429 ? { 'Retry-After': '60' } : {}),
@@ -185,6 +187,7 @@ export function createReadGateway(options: Options) {
             (scope) =>
               scope === 'goals:read' ||
               scope === 'tasks:read' ||
+              scope === 'ai:read' ||
               scope === 'routines:read' ||
               ((options.writes || options.assisted) &&
                 principal.credentialType === 'pat' &&
@@ -249,6 +252,18 @@ export function createReadGateway(options: Options) {
                 scopeDecision = 'denied';
                 return reject(404, 'DISABLED');
               }
+              if (
+                !isWriteToolName(name) &&
+                name.startsWith('ai_conversation_') &&
+                !options.assistantConversation
+              ) {
+                scopeDecision = 'denied';
+                return reject(404, 'DISABLED');
+              }
+              if (!isWriteToolName(name) && name.startsWith('ai_agent_') && !options.agents) {
+                scopeDecision = 'denied';
+                return reject(404, 'DISABLED');
+              }
               if (!isWriteToolName(name) && name.startsWith('routine_') && !options.routines) {
                 scopeDecision = 'denied';
                 return reject(404, 'DISABLED');
@@ -271,7 +286,8 @@ export function createReadGateway(options: Options) {
             | 'routines:read'
             | 'goals:write'
             | 'tasks:write'
-            | 'routines:write',
+            | 'routines:write'
+            | 'ai:read',
           operation: () => Promise<T>,
         ) {
           tool = name;

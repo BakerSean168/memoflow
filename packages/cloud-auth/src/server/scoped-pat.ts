@@ -115,10 +115,11 @@ export function createScopedPatService(options: Options) {
             ![
               'goals:read',
               'tasks:read',
-              'routines:read',
               'goals:write',
               'tasks:write',
               'routines:write',
+              'ai:read',
+              'routines:read',
             ].includes(scope),
         ) ||
         !(await isActive(pat.userId, context))

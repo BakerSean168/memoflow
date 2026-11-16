@@ -49,6 +49,7 @@ export { createAIPrismaRepositories, type AIPrismaRepositorySet } from './prisma
 // One-time vNext migration bridges
 // ---------------------------------------------------------------------------
 export { ConversationShellSource } from './migrations/conversation-shell.source';
+export { createAssistantConversationMessageCountSource } from './adapters/prisma/assistant-conversation-message-count.prisma';
 
 // ---------------------------------------------------------------------------
 // Ports (Interfaces)

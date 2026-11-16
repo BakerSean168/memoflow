@@ -428,4 +428,31 @@ describe('AssistantHistoryService', () => {
       service.ensureConversation({ identityId: 'identity-1', conversationId: 'conversation-1' }),
     ).rejects.toBeInstanceOf(AssistantConversationUnavailableError);
   });
+
+  it('reads an owned transcript without provisioning a thread as a side effect', async () => {
+    const harness = createMemoryHarness();
+    harness.setThread({ id: 'conversation-1', resourceId: 'identity-1', metadata: {} });
+    harness.messages.set('message-1', {
+      id: 'message-1',
+      role: 'user',
+      createdAt: new Date(10),
+      threadId: 'conversation-1',
+      resourceId: 'identity-1',
+      type: 'text',
+      content: { format: 2, parts: [{ type: 'text', text: 'hello' }] },
+    });
+    const service = new AssistantHistoryService(harness.memory, shellSource());
+
+    const history = await service.readMessages({
+      identityId: 'identity-1',
+      conversationId: 'conversation-1',
+    });
+
+    expect(history.messages).toMatchObject([{ id: 'message-1', content: 'hello' }]);
+    expect(harness.memory.createThread).not.toHaveBeenCalled();
+    expect(harness.memory.recall).toHaveBeenCalledWith({
+      threadId: 'conversation-1',
+      perPage: false,
+    });
+  });
 });

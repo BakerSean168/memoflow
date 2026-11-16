@@ -63,7 +63,7 @@ describe('ExternalAgentConnectionsSection PAT issuing (#970)', () => {
     const { wrapper, service } = fixture();
     await flushPromises();
 
-    expect(wrapper.findAll('[data-testid^="pat-scope-"]')).toHaveLength(6);
+    expect(wrapper.findAll('[data-testid^="pat-scope-"]')).toHaveLength(7);
     expect(wrapper.find('[data-testid="pat-write-warning"]').exists()).toBe(false);
 
     await nameToken(wrapper, 'daily agent');
@@ -113,5 +113,21 @@ describe('ExternalAgentConnectionsSection PAT issuing (#970)', () => {
       expiresInDays: 90,
       scopes: ['goals:read', 'tasks:read', 'tasks:write', 'routines:read', 'routines:write'],
     });
+  });
+
+  it('issues the read-only ai:read scope without the write warning', async () => {
+    const { wrapper, service } = fixture();
+    await flushPromises();
+
+    await wrapper.get('[data-testid="pat-scope-ai:read"] [role="checkbox"]').trigger('click');
+    await nameToken(wrapper, 'ai reader');
+    await submit(wrapper);
+
+    expect(service.createPat).toHaveBeenCalledWith({
+      name: 'ai reader',
+      expiresInDays: 90,
+      scopes: ['goals:read', 'tasks:read', 'ai:read'],
+    });
+    expect(wrapper.find('[data-testid="pat-write-warning"]').exists()).toBe(false);
   });
 });

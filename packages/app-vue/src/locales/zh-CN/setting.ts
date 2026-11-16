@@ -52,6 +52,7 @@ export default {
       routine: '例行',
       knowledge: '知识',
       notification: '通知',
+      ai: 'AI 会话与档案',
       ai_permission: 'AI 权限设置',
     },
     actions: {

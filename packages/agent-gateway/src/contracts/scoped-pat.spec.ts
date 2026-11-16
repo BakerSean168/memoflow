@@ -32,13 +32,43 @@ describe('scoped PAT lifetime contract (#970)', () => {
         'goals:write',
         'tasks:read',
         'tasks:write',
-        'routines:read',
         'routines:write',
+        'ai:read',
+        'routines:read',
       ],
       createdAt: '2026-11-16T00:00:00.000Z',
       expiresAt: '2027-11-16T00:00:00.000Z',
       revokedAt: null,
     };
     expect(ScopedPatSummarySchema.parse(summary)).toEqual(summary);
+  });
+
+  it('accepts ai:read and rejects a seventh scope', () => {
+    const six = CreateScopedPatSchema.parse({
+      name: 'ai reader',
+      scopes: [
+        'goals:read',
+        'tasks:read',
+        'goals:write',
+        'tasks:write',
+        'routines:write',
+        'ai:read',
+      ],
+    });
+    expect(six.scopes).toContain('ai:read');
+    expect(
+      CreateScopedPatSchema.safeParse({
+        name: 'too many',
+        scopes: [
+          'goals:read',
+          'tasks:read',
+          'goals:write',
+          'tasks:write',
+          'routines:write',
+          'ai:read',
+          'ai:read',
+        ],
+      }).success,
+    ).toBe(false);
   });
 });

@@ -1,6 +1,7 @@
 import type { GatewayToolCheckpoint } from '../ports';
 import { describe, expect, it, vi } from 'vitest';
 import type { GatewayWriteAuthority } from '../ports';
+import { GatewayPermissionDeniedError } from '../ports';
 import type { ExecutionContext } from '@memoflow/transport-contracts';
 import { createReadGateway } from './read-gateway';
 
@@ -379,6 +380,186 @@ it('preserves unknown causes for the private observer and returns only a safe pu
     cause,
   });
   expect(f.audit.mock.calls[0][0]).not.toHaveProperty('cause');
+});
+
+describe('AI hosted read capability', () => {
+  const summary = {
+    id: 'conversation-1',
+    title: 'Weekly review',
+    status: 'Active' as const,
+    messageCount: 1,
+    createdAt: 1,
+    updatedAt: 2,
+  };
+  const transcript = {
+    conversationId: 'conversation-1',
+    messages: [
+      {
+        id: 'message-1',
+        role: 'user' as const,
+        content: 'x'.repeat(2_000),
+        truncated: true,
+        attachments: [{ filename: 'shot.png', mediaType: 'image/png', sizeBytes: 10 }],
+        createdAt: 1,
+      },
+    ],
+    total: 1,
+    page: 1,
+    pageSize: 10,
+    hasMore: false,
+  };
+  const agent = {
+    instanceId: 'instance-1',
+    driver: 'mastra' as const,
+    name: 'Archive entry',
+    enabled: true,
+    createdAt: 1,
+    updatedAt: 2,
+  };
+  function aiFixture() {
+    const f = fixture();
+    f.authenticate.mockResolvedValue({
+      identityId: 'owner-a',
+      credentialId: 'pat-a',
+      credentialType: 'pat',
+      scopes: ['ai:read'],
+    });
+    const conversations = {
+      listConversations: vi.fn().mockResolvedValue({
+        ok: true,
+        data: { conversations: [summary], total: 1, page: 1, pageSize: 20 },
+      }),
+      readConversation: vi.fn(async (_cx: ExecutionContext, id: string) =>
+        id === 'conversation-1'
+          ? { ok: true, data: transcript }
+          : { ok: false, error: { code: 'NOT_FOUND', message: 'Conversation not found' } },
+      ),
+    };
+    const agents = {
+      list: vi.fn().mockResolvedValue(
+        Array.from({ length: 60 }, (_, index) => ({
+          ...agent,
+          instanceId: `instance-${index}`,
+        })),
+      ),
+      get: vi.fn(async (instanceId: string) => (instanceId === agent.instanceId ? agent : null)),
+    };
+    return {
+      ...f,
+      conversations,
+      agents,
+      gateway: createReadGateway({ ...f.options, assistantConversation: conversations, agents }),
+    };
+  }
+
+  it('discovers the five AI reads only for ai:read and never for another read scope', async () => {
+    const f = aiFixture();
+    const listing = await f.gateway.fetch(request('tools/list'), context);
+    expect((await listing.json()).result.tools.map((tool: { name: string }) => tool.name)).toEqual([
+      'ai_conversation_list',
+      'ai_conversation_get',
+      'ai_conversation_transcript',
+      'ai_agent_list',
+      'ai_agent_get',
+    ]);
+
+    f.authenticate.mockResolvedValue({
+      identityId: 'owner-a',
+      credentialId: 'pat-a',
+      credentialType: 'pat',
+      scopes: ['goals:read'],
+    });
+    const denied = await f.gateway.fetch(
+      request('tools/call', { id: 'conversation-1' }, 'ai_conversation_get'),
+      context,
+    );
+    expect(denied.status).toBe(403);
+    expect(f.conversations.readConversation).not.toHaveBeenCalled();
+  });
+
+  it('serves metadata-only lists and answers NOT_FOUND for foreign or missing ids', async () => {
+    const f = aiFixture();
+    const listed = await f.gateway.fetch(
+      request('tools/call', {}, 'ai_conversation_list'),
+      context,
+    );
+    const listedBody = await listed.json();
+    expect(listedBody).toMatchObject({
+      result: { structuredContent: { conversations: [summary], total: 1 } },
+    });
+    expect(JSON.stringify(listedBody)).not.toContain('messages');
+
+    for (const id of ['conversation-2', 'missing']) {
+      const transcript = await f.gateway.fetch(
+        request('tools/call', { id }, 'ai_conversation_transcript'),
+        context,
+      );
+      expect(await transcript.json()).toMatchObject({
+        result: { isError: true, content: [{ text: 'NOT_FOUND' }] },
+      });
+    }
+
+    const foreignAgent = await f.gateway.fetch(
+      request('tools/call', { instanceId: 'instance-other' }, 'ai_agent_get'),
+      context,
+    );
+    expect(await foreignAgent.json()).toMatchObject({
+      result: { isError: true, content: [{ text: 'NOT_FOUND' }] },
+    });
+    expect(f.agents.get).toHaveBeenCalledWith(
+      'instance-other',
+      expect.objectContaining({ identityId: 'owner-a' }),
+    );
+  });
+
+  it('keeps the transcript truncation flag and caps archive and transcript pages', async () => {
+    const f = aiFixture();
+    const transcript = await f.gateway.fetch(
+      request('tools/call', { id: 'conversation-1' }, 'ai_conversation_get'),
+      context,
+    );
+    expect(await transcript.json()).toMatchObject({
+      result: { structuredContent: { messages: [{ truncated: true }] } },
+    });
+
+    const oversized = await f.gateway.fetch(
+      request('tools/call', { id: 'conversation-1', pageSize: 999 }, 'ai_conversation_transcript'),
+      context,
+    );
+    expect(await oversized.json()).toMatchObject({ result: { isError: true } });
+    expect(f.conversations.readConversation).toHaveBeenCalledTimes(1);
+
+    const agents = await f.gateway.fetch(request('tools/call', {}, 'ai_agent_list'), context);
+    const body = await agents.json();
+    expect(body.result.structuredContent.agents).toHaveLength(50);
+    expect(body.result.structuredContent.truncated).toBe('archive-limit');
+  });
+
+  it('returns 404 when the AI host ports are absent and surfaces checkpoint denials', async () => {
+    const f = aiFixture();
+    const disabled = createReadGateway({ ...f.options });
+    expect(
+      (
+        await disabled.fetch(
+          request('tools/call', { id: 'conversation-1' }, 'ai_conversation_get'),
+          context,
+        )
+      ).status,
+    ).toBe(404);
+
+    const denied = createReadGateway({
+      ...f.options,
+      assistantConversation: f.conversations,
+      agents: f.agents,
+      toolCheckpoint: (async () => {
+        throw new GatewayPermissionDeniedError('deny');
+      }) satisfies GatewayToolCheckpoint,
+    });
+    const response = await denied.fetch(request('tools/call', {}, 'ai_conversation_list'), context);
+    const body = await response.text();
+    expect(body).toContain('PERMISSION_DENIED');
+    expect(body).toContain('AI Permissions');
+  });
 });
 
 describe('Routine hosted write capability', () => {

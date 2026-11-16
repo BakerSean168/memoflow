@@ -55,6 +55,7 @@ export default {
       routine: 'Routines',
       knowledge: 'Knowledge',
       notification: 'Notifications',
+      ai: 'AI conversations & agents',
       ai_permission: 'AI permissions',
     },
     actions: {

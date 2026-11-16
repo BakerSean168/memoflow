@@ -13,7 +13,12 @@ import {
   RoutineGetOutputSchema,
   RoutineListOutputSchema,
   RoutineUpcomingOutputSchema,
+  AiAgentGetOutputSchema,
+  AiAgentListOutputSchema,
+  AiConversationListOutputSchema,
+  AiConversationTranscriptOutputSchema,
 } from '../contracts';
+import type { Result } from '@memoflow/transport-contracts/result';
 import { GoalPagePositionSchema, type GoalClientDTO } from '@memoflow/goal-contracts';
 import { TaskPlanPositionSchema, TaskOccurrencePositionSchema } from '@memoflow/task-contracts';
 import type { ExecutionContext } from '@memoflow/transport-contracts';
@@ -22,6 +27,9 @@ import {
   type GoalReadPort,
   type TaskReadPort,
   type RoutineReadPort,
+  type AssistantConversationReadPort,
+  type AgentArchiveReadPort,
+  type GatewayAiAgentEntry,
   type GatewayReadBudget,
 } from '../ports';
 const MAX_BYTES = 256 * 1024;
@@ -37,6 +45,7 @@ export interface ReadToolCall {
       | 'routines:read'
       | 'goals:write'
       | 'tasks:write'
+      | 'ai:read'
       | 'routines:write',
     work: () => Promise<T>,
   ): Promise<{
@@ -79,6 +88,24 @@ function fitPage<T>(values: readonly T[]) {
   return { items, truncated };
 }
 
+/** The AI application projection already bounds content; only codes cross this seam. */
+function unwrap<T>(result: Result<T>): T {
+  if (result.ok) return result.data;
+  throw new ControlledError(result.error.code === 'NOT_FOUND' ? 'NOT_FOUND' : 'INTERNAL_ERROR');
+}
+
+/** Projects exactly the six Agent archive fields; host-local configuration stays out. */
+function projectAgent(agent: GatewayAiAgentEntry) {
+  return {
+    instanceId: agent.instanceId,
+    driver: agent.driver,
+    name: agent.name,
+    enabled: agent.enabled,
+    createdAt: agent.createdAt,
+    updatedAt: agent.updatedAt,
+  };
+}
+
 function projectGoal(goal: GoalClientDTO) {
   if ((goal.keyResults?.length ?? 0) > 100) throw new ControlledError('RESPONSE_TOO_LARGE');
   return ExternalGoalSchema.parse({
@@ -107,6 +134,8 @@ export function registerReadTools(
     goals: GoalReadPort;
     tasks?: TaskReadPort;
     routines?: RoutineReadPort;
+    assistantConversation?: AssistantConversationReadPort;
+    agents?: AgentArchiveReadPort;
   },
   context: ExecutionContext,
   budget: GatewayReadBudget,
@@ -461,6 +490,71 @@ export function registerReadTools(
             nextCursor,
             ...(truncated ? { truncated: 'response-budget' as const } : {}),
           });
+        }),
+    );
+  }
+  if (options.assistantConversation && scopes.includes('ai:read')) {
+    const conversations = options.assistantConversation;
+    server.registerTool(
+      'ai_conversation_list',
+      readToolDescriptors.ai_conversation_list.definition,
+      ({ page, pageSize, status }) =>
+        call('ai_conversation_list', 'ai:read', async () =>
+          AiConversationListOutputSchema.parse(
+            unwrap(
+              await conversations.listConversations(context, {
+                page,
+                pageSize,
+                ...(status ? { status } : {}),
+              }),
+            ),
+          ),
+        ),
+    );
+    server.registerTool(
+      'ai_conversation_get',
+      readToolDescriptors.ai_conversation_get.definition,
+      ({ id }) =>
+        call('ai_conversation_get', 'ai:read', async () =>
+          AiConversationTranscriptOutputSchema.parse(
+            unwrap(await conversations.readConversation(context, id)),
+          ),
+        ),
+    );
+    server.registerTool(
+      'ai_conversation_transcript',
+      readToolDescriptors.ai_conversation_transcript.definition,
+      ({ id, page, pageSize }) =>
+        call('ai_conversation_transcript', 'ai:read', async () =>
+          AiConversationTranscriptOutputSchema.parse(
+            unwrap(await conversations.readConversation(context, id, { page, pageSize })),
+          ),
+        ),
+    );
+  }
+  if (options.agents && scopes.includes('ai:read')) {
+    const agents = options.agents;
+    server.registerTool(
+      'ai_agent_list',
+      readToolDescriptors.ai_agent_list.definition,
+      ({ limit }) =>
+        call('ai_agent_list', 'ai:read', async () => {
+          const owned = await agents.list(context);
+          const items = owned.slice(0, limit).map(projectAgent);
+          return AiAgentListOutputSchema.parse({
+            agents: items,
+            ...(owned.length > items.length ? { truncated: 'archive-limit' as const } : {}),
+          });
+        }),
+    );
+    server.registerTool(
+      'ai_agent_get',
+      readToolDescriptors.ai_agent_get.definition,
+      ({ instanceId }) =>
+        call('ai_agent_get', 'ai:read', async () => {
+          const agent = await agents.get(instanceId, context);
+          if (!agent) throw new ControlledError('NOT_FOUND');
+          return AiAgentGetOutputSchema.parse({ agent: projectAgent(agent) });
         }),
     );
   }
