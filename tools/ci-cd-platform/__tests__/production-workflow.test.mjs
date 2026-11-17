@@ -67,8 +67,22 @@ test('production selector is explicit, Published-release-only, main-bound, and e
   assert.match(workflow, /test "\$control_plane_sha" = "\$current_main"/u);
   assert.match(workflow, /isDraft/u);
   assert.match(workflow, /isPrerelease/u);
-  assert.match(workflow, /test .*\.isDraft.* = false/u);
-  assert.match(workflow, /test .*\.isPrerelease.* = false/u);
+  const release = workflowStep(workflow, 'Resolve immutable Published Release identity');
+  const recheck = workflowStep(
+    workflow,
+    'Recheck release remains Published immediately before mutation',
+  );
+  assert.match(release, /test .*\.isDraft.* = false/u);
+  assert.match(release, /channel="\$\(jq -r '\.channel \/\/ "stable"'/u);
+  assert.match(release, /case "\$channel" in/u);
+  assert.match(release, /stable\)[\s\S]*?\.isPrerelease.* = false/u);
+  assert.ok(release.indexOf('case "$channel" in') < release.indexOf('.isPrerelease'));
+  assert.match(release, /nightly\)[\s\S]*?;;/u);
+  assert.match(release, /unsupported release channel: \$channel/u);
+  assert.match(recheck, /test .*\.isDraft.* = false/u);
+  assert.match(recheck, /case "\$RELEASE_CHANNEL" in/u);
+  assert.match(recheck, /stable\)[\s\S]*?\.isPrerelease.* = false/u);
+  assert.match(recheck, /unsupported release channel: \$RELEASE_CHANNEL/u);
   assert.match(workflow, /git\/ref\/tags\/\$RELEASE_TAG/u);
   assert.match(workflow, /Recheck selector control plane remains current main before mutation/u);
   assert.match(workflow, /git ls-remote .*refs\/heads\/main/u);
