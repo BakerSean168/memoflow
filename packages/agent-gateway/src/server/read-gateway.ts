@@ -20,6 +20,8 @@ import {
   type GoalReadPort,
   type TaskReadPort,
   type RoutineReadPort,
+  type NotificationReadPort,
+  type ScheduleReadPort,
 } from '../ports';
 
 interface Options {
@@ -35,6 +37,8 @@ interface Options {
   readonly goals: GoalReadPort;
   readonly tasks?: TaskReadPort;
   readonly routines?: RoutineReadPort;
+  readonly notifications?: NotificationReadPort;
+  readonly schedules?: ScheduleReadPort;
   readonly audit: (event: GatewayAuditEvent) => void;
   readonly timeoutMs?: number;
   readonly diagnose?: (event: GatewayDiagnostic) => void;
@@ -186,6 +190,8 @@ export function createReadGateway(options: Options) {
               scope === 'goals:read' ||
               scope === 'tasks:read' ||
               scope === 'routines:read' ||
+              scope === 'notifications:read' ||
+              scope === 'schedules:read' ||
               ((options.writes || options.assisted) &&
                 principal.credentialType === 'pat' &&
                 (scope === 'goals:write' || scope === 'tasks:write' || scope === 'routines:write')),
@@ -253,6 +259,18 @@ export function createReadGateway(options: Options) {
                 scopeDecision = 'denied';
                 return reject(404, 'DISABLED');
               }
+              if (
+                !isWriteToolName(name) &&
+                name.startsWith('notification_') &&
+                !options.notifications
+              ) {
+                scopeDecision = 'denied';
+                return reject(404, 'DISABLED');
+              }
+              if (!isWriteToolName(name) && name.startsWith('schedule_') && !options.schedules) {
+                scopeDecision = 'denied';
+                return reject(404, 'DISABLED');
+              }
             }
           }
         } catch {
@@ -269,6 +287,8 @@ export function createReadGateway(options: Options) {
             | 'goals:read'
             | 'tasks:read'
             | 'routines:read'
+            | 'notifications:read'
+            | 'schedules:read'
             | 'goals:write'
             | 'tasks:write'
             | 'routines:write',

@@ -41,4 +41,31 @@ describe('scoped PAT lifetime contract (#970)', () => {
     };
     expect(ScopedPatSummarySchema.parse(summary)).toEqual(summary);
   });
+
+  it('accepts notifications:read and schedules:read up to 8 scopes and rejects duplicates', () => {
+    const allScopes = [
+      'goals:read',
+      'goals:write',
+      'tasks:read',
+      'tasks:write',
+      'routines:read',
+      'routines:write',
+      'notifications:read',
+      'schedules:read',
+    ];
+    const parsed = CreateScopedPatSchema.parse({
+      name: 'all-domain agent',
+      scopes: allScopes,
+    });
+    expect(parsed.scopes).toHaveLength(8);
+    expect(parsed.scopes).toContain('notifications:read');
+    expect(parsed.scopes).toContain('schedules:read');
+
+    expect(
+      CreateScopedPatSchema.safeParse({
+        name: 'duplicate',
+        scopes: [...allScopes, 'notifications:read'],
+      }).success,
+    ).toBe(false);
+  });
 });
