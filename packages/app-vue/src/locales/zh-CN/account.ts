@@ -177,6 +177,10 @@ export default {
     retry: '重试',
     dismiss: '关闭',
     requestId: '请求 ID',
+    requestIdDetails: '查看请求 ID',
+    requestIdPurpose: '联系客服时请提供此 ID，便于定位这次失败的操作。',
+    copyRequestId: '复制请求 ID',
+    copiedRequestId: '已复制',
   },
   profile: {
     editTitle: '编辑个人资料',

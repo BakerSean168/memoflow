@@ -4,6 +4,7 @@ import { useI18n } from 'vue-i18n';
 import {
   AlertTriangle,
   CheckCircle2,
+  Copy,
   Download,
   LoaderCircle,
   RefreshCw,
@@ -113,6 +114,95 @@ const lastCheckedAt = computed(() => {
   }
 });
 
+/** The troubleshooting card keeps raw updater enums out of its main copy: the
+ * summary uses localized state words, and the untouched values live behind the
+ * collapsible diagnostic detail for support. */
+const diagnosticsLastCheckedAt = computed(() => {
+  const value = diagnostics.value?.lastCheckedAt;
+  if (!value) return null;
+
+  try {
+    return formatLocaleMediumDateTime(new Date(value), locale.value);
+  } catch {
+    return value;
+  }
+});
+
+const diagnosticsStateLabel = computed(() =>
+  diagnostics.value
+    ? t(`setting.updates.troubleshooting.stateValue.${diagnostics.value.state}`)
+    : '—',
+);
+
+const diagnosticsLastCheckResultLabel = computed(() =>
+  diagnostics.value?.lastCheckResult
+    ? t(`setting.updates.troubleshooting.lastCheckResultValue.${diagnostics.value.lastCheckResult}`)
+    : '—',
+);
+
+const diagnosticsReceiptLabel = computed(() =>
+  diagnostics.value
+    ? t(`setting.updates.troubleshooting.receiptValue.${diagnostics.value.installReceipt.status}`)
+    : '—',
+);
+
+const diagnosticsFailureSummary = computed(() => {
+  const failure = diagnostics.value?.failure;
+  if (!failure) return null;
+
+  return t('setting.updates.troubleshooting.failureSummary', {
+    operation: t(`setting.updates.troubleshooting.failureOperationValue.${failure.operation}`),
+    code: t(`setting.updates.troubleshooting.failureCodeValue.${failure.code}`),
+  });
+});
+
+const rawDiagnosticsText = computed(() => {
+  const current = diagnostics.value;
+  if (!current) return '';
+
+  const failure = current.failure;
+  return [
+    `currentVersion: ${current.currentVersion}`,
+    `targetVersion: ${current.targetVersion ?? 'none'}`,
+    `state: ${current.state}`,
+    `feedClass: ${current.feedClass}`,
+    `lastCheckedAt: ${current.lastCheckedAt ?? 'none'}`,
+    `lastCheckResult: ${current.lastCheckResult ?? 'none'}`,
+    `installReceipt: ${current.installReceipt.status}`,
+    failure
+      ? `failure: ${failure.operation} · ${failure.code} (retryable: ${failure.retryable})`
+      : 'failure: none',
+  ].join('\n');
+});
+
+const diagnosticsCopied = ref(false);
+let diagnosticsCopiedTimer: ReturnType<typeof setTimeout> | null = null;
+
+function clearDiagnosticsCopiedTimer(): void {
+  if (diagnosticsCopiedTimer) {
+    clearTimeout(diagnosticsCopiedTimer);
+    diagnosticsCopiedTimer = null;
+  }
+}
+
+async function copyDiagnostics(): Promise<void> {
+  const text = rawDiagnosticsText.value;
+  if (!text) return;
+
+  try {
+    await navigator.clipboard.writeText(text);
+  } catch {
+    diagnosticsCopied.value = false;
+    return;
+  }
+  diagnosticsCopied.value = true;
+  clearDiagnosticsCopiedTimer();
+  diagnosticsCopiedTimer = setTimeout(() => {
+    diagnosticsCopied.value = false;
+    diagnosticsCopiedTimer = null;
+  }, 2000);
+}
+
 function formatBytes(bytes: number): string {
   if (!Number.isFinite(bytes) || bytes <= 0) return '0 B';
 
@@ -205,6 +295,7 @@ onMounted(() => {
 onBeforeUnmount(() => {
   unsubscribe?.();
   unsubscribe = null;
+  clearDiagnosticsCopiedTimer();
 });
 </script>
 
@@ -351,38 +442,93 @@ onBeforeUnmount(() => {
         <p v-if="diagnosticsUnavailable" data-testid="desktop-update-diagnostics-unavailable">
           {{ t('setting.updates.troubleshooting.unavailable') }}
         </p>
-        <dl v-if="diagnostics" class="grid gap-2 sm:grid-cols-2">
-          <div
-            v-for="field in [
-              'currentVersion',
-              'targetVersion',
-              'state',
-              'feedClass',
-              'lastCheckedAt',
-              'lastCheckResult',
-            ] as const"
-            :key="field"
+        <template v-else-if="diagnostics">
+          <dl class="grid gap-2 sm:grid-cols-2" data-testid="desktop-update-diagnostics-summary">
+            <div>
+              <dt class="text-xs text-muted-foreground">
+                {{ t('setting.updates.troubleshooting.currentVersion') }}
+              </dt>
+              <dd data-testid="desktop-update-diagnostics-currentVersion">
+                {{ diagnostics.currentVersion }}
+              </dd>
+            </div>
+            <div>
+              <dt class="text-xs text-muted-foreground">
+                {{ t('setting.updates.troubleshooting.targetVersion') }}
+              </dt>
+              <dd data-testid="desktop-update-diagnostics-targetVersion">
+                {{ diagnostics.targetVersion ?? '—' }}
+              </dd>
+            </div>
+            <div>
+              <dt class="text-xs text-muted-foreground">
+                {{ t('setting.updates.troubleshooting.state') }}
+              </dt>
+              <dd data-testid="desktop-update-diagnostics-state">{{ diagnosticsStateLabel }}</dd>
+            </div>
+            <div>
+              <dt class="text-xs text-muted-foreground">
+                {{ t('setting.updates.troubleshooting.lastCheckResult') }}
+              </dt>
+              <dd data-testid="desktop-update-diagnostics-lastCheckResult">
+                {{ diagnosticsLastCheckResultLabel }}
+              </dd>
+            </div>
+            <div>
+              <dt class="text-xs text-muted-foreground">
+                {{ t('setting.updates.troubleshooting.lastCheckedAt') }}
+              </dt>
+              <dd data-testid="desktop-update-diagnostics-lastCheckedAt">
+                {{ diagnosticsLastCheckedAt ?? '—' }}
+              </dd>
+            </div>
+            <div>
+              <dt class="text-xs text-muted-foreground">
+                {{ t('setting.updates.troubleshooting.receiptStatus') }}
+              </dt>
+              <dd data-testid="desktop-update-diagnostics-receipt">
+                {{ diagnosticsReceiptLabel }}
+              </dd>
+            </div>
+          </dl>
+          <p
+            v-if="diagnosticsFailureSummary"
+            class="text-destructive"
+            data-testid="desktop-update-diagnostics-failure"
           >
-            <dt class="text-xs text-muted-foreground">
-              {{ t(`setting.updates.troubleshooting.${field}`) }}
-            </dt>
-            <dd :data-testid="`desktop-update-diagnostics-${field}`">
-              {{ diagnostics[field] ?? '—' }}
-            </dd>
-          </div>
-          <div>
-            <dt class="text-xs text-muted-foreground">
-              {{ t('setting.updates.troubleshooting.receiptStatus') }}
-            </dt>
-            <dd data-testid="desktop-update-diagnostics-receipt">
-              {{ diagnostics.installReceipt.status }}
-            </dd>
-          </div>
-        </dl>
-        <p v-if="diagnostics?.failure" data-testid="desktop-update-diagnostics-failure">
-          {{ t('setting.updates.troubleshooting.failure') }}: {{ diagnostics.failure.operation }} ·
-          {{ diagnostics.failure.code }}
-        </p>
+            {{ diagnosticsFailureSummary }}
+          </p>
+          <details data-testid="desktop-update-diagnostics-technical">
+            <summary class="cursor-pointer select-none text-xs text-muted-foreground">
+              {{ t('setting.updates.troubleshooting.technicalSummary') }}
+            </summary>
+            <div class="mt-2 space-y-2">
+              <pre
+                class="overflow-x-auto rounded-md border border-border/70 bg-muted/20 p-2 font-mono text-xs whitespace-pre-wrap break-all"
+                data-testid="desktop-update-diagnostics-raw"
+                >{{ rawDiagnosticsText }}</pre>
+              <div class="flex flex-wrap items-center gap-2">
+                <Button
+                  type="button"
+                  size="sm"
+                  variant="outline"
+                  data-testid="desktop-update-copy-diagnostics"
+                  @click="copyDiagnostics"
+                >
+                  <Copy class="mr-2 h-4 w-4" />
+                  {{
+                    diagnosticsCopied
+                      ? t('setting.updates.troubleshooting.copiedDiagnostics')
+                      : t('setting.updates.troubleshooting.copyDiagnostics')
+                  }}
+                </Button>
+                <span class="text-xs text-muted-foreground">
+                  {{ t('setting.updates.troubleshooting.technicalHint') }}
+                </span>
+              </div>
+            </div>
+          </details>
+        </template>
       </CardContent>
     </Card>
   </section>

@@ -333,6 +333,18 @@ describe('WebAuthView three-login surface contract', () => {
     expect(first.get('[data-testid="web-auth-password-receipt-request-id"]').text()).toContain(
       'trace-reset-1',
     );
+    // The request id is a support handle: it stays out of the receipt's main
+    // copy and only appears inside the collapsed detail.
+    expect(first.get('[data-testid="web-auth-password-receipt-message"]').text()).not.toContain(
+      'trace-reset-1',
+    );
+    const requestIdDetails = first.get(
+      '[data-testid="web-auth-password-receipt-request-id-details"]',
+    );
+    expect(requestIdDetails.element.tagName).toBe('DETAILS');
+    expect((requestIdDetails.element as HTMLDetailsElement).open).toBe(false);
+    expect(requestIdDetails.text()).toContain('View request ID');
+    expect(requestIdDetails.text()).toContain('Give this ID to support');
     expect(first.get('[data-testid="web-auth-password-receipt-retry"]').exists()).toBe(true);
     // The raw server message (which echoes token + password) is never rendered.
     expect(first.get('[data-testid="web-auth-password-receipt-message"]').text()).not.toContain(

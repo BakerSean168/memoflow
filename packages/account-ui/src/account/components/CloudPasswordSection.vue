@@ -7,7 +7,7 @@
  * 重试动作。receipt 由 store 从 localStorage 恢复，因此页面刷新/卸载重挂后
  * 用户仍能看到上次失败的可操作错误，而不是只看到空表单。
  */
-import { computed, ref, watch } from 'vue';
+import { computed, onBeforeUnmount, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import {
   Button,
@@ -20,7 +20,7 @@ import {
   Label,
   Separator,
 } from '@memoflow/ui-vue-shadcn';
-import { KeyRound, Mail, RotateCcw, X } from '@lucide/vue';
+import { Copy, KeyRound, Mail, RotateCcw, X } from '@lucide/vue';
 import { usePassword } from '../../authentication/composables/usePassword';
 import { useAuthenticationStore } from '../../authentication/stores/authentication-store';
 
@@ -86,6 +86,50 @@ async function handleRetry() {
 function handleDismiss() {
   store.clearPasswordMutationError();
 }
+
+/**
+ * The request id is a support handle, not an action item: it stays out of the
+ * receipt's main copy and only surfaces inside the expandable detail, where it
+ * can be copied for a support conversation.
+ */
+const requestIdCopied = ref(false);
+let requestIdCopiedTimer: ReturnType<typeof setTimeout> | null = null;
+
+function clearRequestIdCopiedTimer() {
+  if (requestIdCopiedTimer) {
+    clearTimeout(requestIdCopiedTimer);
+    requestIdCopiedTimer = null;
+  }
+}
+
+async function copyRequestId() {
+  const requestId = receipt.value?.requestId;
+  if (!requestId) {
+    return;
+  }
+  try {
+    await navigator.clipboard.writeText(requestId);
+  } catch {
+    requestIdCopied.value = false;
+    return;
+  }
+  requestIdCopied.value = true;
+  clearRequestIdCopiedTimer();
+  requestIdCopiedTimer = setTimeout(() => {
+    requestIdCopied.value = false;
+    requestIdCopiedTimer = null;
+  }, 2000);
+}
+
+watch(
+  () => receipt.value?.requestId,
+  () => {
+    clearRequestIdCopiedTimer();
+    requestIdCopied.value = false;
+  },
+);
+
+onBeforeUnmount(clearRequestIdCopiedTimer);
 </script>
 
 <template>
@@ -110,13 +154,39 @@ function handleDismiss() {
         >
           {{ receipt.message }}
         </p>
-        <p
+        <details
           v-if="receipt.requestId"
           class="text-xs text-muted-foreground"
-          data-testid="password-mutation-error-request-id"
+          data-testid="password-mutation-error-request-id-details"
         >
-          {{ t('account.password.requestId') }}: {{ receipt.requestId }}
-        </p>
+          <summary class="cursor-pointer select-none">
+            {{ t('account.password.requestIdDetails') }}
+          </summary>
+          <div class="mt-2 flex flex-wrap items-center gap-2">
+            <span class="shrink-0">{{ t('account.password.requestId') }}</span>
+            <code
+              class="min-w-0 break-all font-mono text-xs"
+              data-testid="password-mutation-error-request-id"
+            >
+              {{ receipt.requestId }}
+            </code>
+            <Button
+              size="sm"
+              variant="ghost"
+              class="h-7 px-2 text-xs"
+              data-testid="password-mutation-error-copy-request-id"
+              @click="copyRequestId"
+            >
+              <Copy class="mr-1 h-3.5 w-3.5" />
+              {{
+                requestIdCopied
+                  ? t('account.password.copiedRequestId')
+                  : t('account.password.copyRequestId')
+              }}
+            </Button>
+          </div>
+          <p class="mt-1">{{ t('account.password.requestIdPurpose') }}</p>
+        </details>
         <div class="flex flex-wrap gap-2">
           <Button
             v-if="receipt.retryable"

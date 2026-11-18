@@ -172,6 +172,7 @@ function createHarness(initial = snapshot(), locale = 'en-US') {
               });
           },
         }),
+        Copy: true,
       },
     },
   });
@@ -320,14 +321,17 @@ describe('DesktopUpdateSettingsSection', () => {
     },
   );
 
-  it('shows safe diagnostics and bounded failure without URLs, paths or messages', async () => {
+  it('summarizes diagnostics in human language and keeps raw values in the collapsed detail', async () => {
     const harness = createHarness();
     await flushPromises();
-    const card = () => harness.wrapper.get('[data-testid="desktop-update-troubleshooting"]');
-    expect(card().text()).toContain('1.2.0');
-    expect(card().text()).toContain('github');
-    expect(card().text()).toContain('—');
-    expect(card().text()).toContain('none');
+    const summary = () => harness.wrapper.get('[data-testid="desktop-update-diagnostics-summary"]');
+    expect(summary().text()).toContain('1.2.0');
+    expect(summary().text()).toContain('Idle');
+    expect(summary().text()).toContain('No install requested');
+    // Raw updater enums never reach the visible summary.
+    expect(summary().text()).not.toContain('github');
+    expect(summary().text()).not.toContain('none');
+
     const result = await harness.getDiagnostics();
     harness.getDiagnostics.mockResolvedValue(
       ok({
@@ -347,13 +351,54 @@ describe('DesktopUpdateSettingsSection', () => {
     );
     await harness.wrapper.get('[data-testid="desktop-update-primary-action"]').trigger('click');
     await flushPromises();
-    expect(card().text()).toContain('1.3.0');
-    expect(card().text()).toContain('2026-10-01T12:00:00.000Z');
-    expect(card().text()).toContain('restart-requested');
-    expect(
-      harness.wrapper.get('[data-testid="desktop-update-diagnostics-failure"]').text(),
-    ).toContain('check · feed-unavailable');
-    expect(card().text()).not.toMatch(/https?:|file:|\/private|token=|release notes/i);
+    expect(summary().text()).toContain('1.3.0');
+    expect(summary().text()).toContain('The last operation failed');
+    expect(summary().text()).toContain('The check failed');
+    expect(summary().text()).toContain('Restart requested');
+    expect(summary().text()).not.toContain('2026-10-01T12:00:00.000Z');
+    expect(harness.wrapper.get('[data-testid="desktop-update-diagnostics-failure"]').text()).toBe(
+      'Failed while checking for updates: the update source is unavailable',
+    );
+
+    const technical = harness.wrapper.get('[data-testid="desktop-update-diagnostics-technical"]');
+    expect(technical.element.tagName).toBe('DETAILS');
+    expect((technical.element as HTMLDetailsElement).open).toBe(false);
+    const raw = technical.get('[data-testid="desktop-update-diagnostics-raw"]');
+    expect(raw.text()).toContain('state: failed');
+    expect(raw.text()).toContain('feedClass: github');
+    expect(raw.text()).toContain('lastCheckResult: failed');
+    expect(raw.text()).toContain('installReceipt: restart-requested');
+    expect(raw.text()).toContain('failure: check · feed-unavailable');
+    expect(raw.text()).toContain('2026-10-01T12:00:00.000Z');
+    expect(technical.text()).not.toMatch(/https?:|file:|\/private|token=|release notes/i);
+  });
+
+  it('copies the serialized diagnostics and resets the copy button state', async () => {
+    const writeText = vi.fn().mockResolvedValue(undefined);
+    Object.defineProperty(navigator, 'clipboard', { value: { writeText }, configurable: true });
+    const harness = createHarness();
+    await flushPromises();
+
+    const copyButton = harness.wrapper.get('[data-testid="desktop-update-copy-diagnostics"]');
+    expect(copyButton.text()).toContain('Copy diagnostic details');
+
+    vi.useFakeTimers();
+    await copyButton.trigger('click');
+    await Promise.resolve();
+    await Promise.resolve();
+    await nextTick();
+    const copied = writeText.mock.calls[0]?.[0] as string;
+    expect(copied).toContain('currentVersion: 1.2.0');
+    expect(copied).toContain('state: idle');
+    expect(copied).toContain('feedClass: github');
+    expect(copied).toContain('failure: none');
+    expect(copyButton.text()).toContain('Copied');
+
+    vi.advanceTimersByTime(2000);
+    await nextTick();
+    expect(copyButton.text()).toContain('Copy diagnostic details');
+    vi.useRealTimers();
+    harness.wrapper.unmount();
   });
   beforeEach(() => {
     vi.clearAllMocks();

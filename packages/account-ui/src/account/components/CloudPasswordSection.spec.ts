@@ -1,4 +1,4 @@
-import { defineComponent, h } from 'vue';
+import { defineComponent, h, nextTick } from 'vue';
 import { mount, flushPromises } from '@vue/test-utils';
 import { createI18n } from 'vue-i18n';
 import { createPinia } from 'pinia';
@@ -58,6 +58,11 @@ const i18n = createI18n({
           retry: 'Try again',
           dismiss: 'Dismiss',
           requestId: 'Request ID',
+          requestIdDetails: 'View request ID',
+          requestIdPurpose:
+            'Give this ID to support so they can trace what went wrong with this attempt.',
+          copyRequestId: 'Copy request ID',
+          copiedRequestId: 'Copied',
         },
       },
     },
@@ -154,6 +159,7 @@ function mountSection(service: CloudAuthClientPort, pinia = createPinia()) {
         Separator: true,
         KeyRound: true,
         Mail: true,
+        Copy: true,
         RotateCcw: true,
         X: true,
       },
@@ -240,6 +246,18 @@ describe('CloudPasswordSection (W6 P1-3 auth receipt restore UI)', () => {
     expect(wrapper.get('[data-testid="password-mutation-error-request-id"]').text()).toContain(
       'trace-change-123',
     );
+    // The request id is a support handle: it stays out of the receipt's main
+    // copy and only appears inside the collapsed detail.
+    expect(wrapper.get('[data-testid="password-mutation-error-message"]').text()).not.toContain(
+      'trace-change-123',
+    );
+    const requestIdDetails = wrapper.get(
+      '[data-testid="password-mutation-error-request-id-details"]',
+    );
+    expect(requestIdDetails.element.tagName).toBe('DETAILS');
+    expect((requestIdDetails.element as HTMLDetailsElement).open).toBe(false);
+    expect(requestIdDetails.text()).toContain('View request ID');
+    expect(requestIdDetails.text()).toContain('Give this ID to support');
     expect(wrapper.find('[data-testid="password-mutation-error-retry"]').exists()).toBe(true);
     expect(service.changePassword).toHaveBeenCalledTimes(1);
   });
@@ -307,6 +325,43 @@ describe('CloudPasswordSection (W6 P1-3 auth receipt restore UI)', () => {
     await flushPromises();
     expect(wrapper.find('[data-testid="password-mutation-error"]').exists()).toBe(false);
     expect(localStorage.getItem('memoflow:auth:password-mutation-error')).toBeNull();
+  });
+
+  it('copies the request id from the expandable detail and resets the copied state', async () => {
+    const writeText = vi.fn().mockResolvedValue(undefined);
+    Object.defineProperty(navigator, 'clipboard', { value: { writeText }, configurable: true });
+    const service = createService({
+      changePassword: vi.fn().mockResolvedValue(
+        fail({
+          code: 'SERVICE_UNAVAILABLE',
+          message: 'down',
+          context: { requestId: 'req-copy-1' },
+        }),
+      ),
+    });
+    const pinia = createPinia();
+    seedAuthenticatedAccount(pinia);
+    const wrapper = mountSection(service, pinia);
+    await fillChangePassword(wrapper);
+    await submitClosestForm(wrapper, 'cloud-password-change-button');
+    await flushPromises();
+
+    const copyButton = wrapper.get('[data-testid="password-mutation-error-copy-request-id"]');
+    expect(copyButton.text()).toContain('Copy request ID');
+
+    vi.useFakeTimers();
+    await copyButton.trigger('click');
+    await Promise.resolve();
+    await Promise.resolve();
+    await nextTick();
+    expect(writeText).toHaveBeenCalledWith('req-copy-1');
+    expect(copyButton.text()).toContain('Copied');
+
+    vi.advanceTimersByTime(2000);
+    await nextTick();
+    expect(copyButton.text()).toContain('Copy request ID');
+    vi.useRealTimers();
+    wrapper.unmount();
   });
 
   it('does not render the password section for a guest (no authenticated account)', async () => {
