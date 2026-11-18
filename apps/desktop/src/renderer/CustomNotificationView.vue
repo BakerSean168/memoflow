@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, ref, onMounted, onUnmounted, nextTick, watch } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { notificationSound } from '@memoflow/assets/audio';
 import type { Result } from '@memoflow/transport-contracts/result';
 import type {
@@ -10,6 +11,9 @@ import { NotificationChannels } from '@memoflow/desktop-contracts';
 // Residual 911: local ElectronBridge dual retired — sole body from @memoflow/ipc-client.
 // Residual 941: local getElectronBridge dual retired — sole host helper in platform/electron-bridge.
 import { getElectronBridge } from './platform/electron-bridge';
+import WindowActionButton from './components/WindowActionButton.vue';
+
+const { t } = useI18n();
 
 interface CustomNotification {
   id: string;
@@ -338,9 +342,11 @@ onUnmounted(() => {
               <span
                 class="inline-flex items-center rounded-full border border-amber-300/20 bg-amber-300/10 px-2 py-1 text-[11px] font-medium tracking-[0.18em] text-amber-200"
               >
-                REMINDER
+                {{ t('notification.custom.reminder') }}
               </span>
-              <span class="text-xs text-slate-400">30s 内未处理将自动标记为已读</span>
+              <span class="text-xs text-slate-400">{{
+                t('notification.custom.autoReadHint')
+              }}</span>
             </div>
 
             <div class="text-base font-semibold leading-6 text-slate-50">
@@ -350,7 +356,7 @@ onUnmounted(() => {
               {{ notification.body }}
             </div>
             <div v-else class="mt-2 text-sm leading-6 text-slate-400">
-              提醒已触发，请确认已收到。
+              {{ t('notification.custom.emptyBody') }}
             </div>
 
             <p
@@ -358,7 +364,7 @@ onUnmounted(() => {
               role="alert"
               class="mt-2 text-sm text-rose-300"
             >
-              操作失败，请重试
+              {{ t('notification.custom.actionFailed') }}
             </p>
             <div class="mt-4 flex items-center justify-between gap-3">
               <div class="text-xs text-slate-500">
@@ -366,25 +372,28 @@ onUnmounted(() => {
               </div>
 
               <div v-if="ownerActions(notification).length" class="flex gap-2">
-                <button
+                <WindowActionButton
                   v-for="action in ownerActions(notification)"
                   :key="action.actionKey"
-                  type="button"
+                  variant="primary"
                   :disabled="actionPending === notification.id"
-                  class="rounded-lg bg-amber-400 px-3 py-2 text-sm text-slate-950 disabled:opacity-50"
                   @click.stop="executeAction(notification, action.actionKey)"
                 >
-                  {{ action.actionKey === 'complete' ? '完成' : '10 分钟后提醒' }}
-                </button>
+                  {{
+                    action.actionKey === 'complete'
+                      ? t('notification.custom.actionComplete')
+                      : t('notification.custom.actionSnooze10m')
+                  }}
+                </WindowActionButton>
               </div>
-              <button
+              <WindowActionButton
                 v-else
-                type="button"
-                class="inline-flex min-w-[92px] items-center justify-center rounded-xl bg-amber-400 px-4 py-2 text-sm font-medium text-slate-950 transition-colors hover:bg-amber-300"
+                variant="primary"
+                class="min-w-[92px]"
                 @click.stop="void acknowledgeNotification(notification, 'button')"
               >
-                收到
-              </button>
+                {{ t('notification.custom.acknowledge') }}
+              </WindowActionButton>
             </div>
           </div>
         </div>

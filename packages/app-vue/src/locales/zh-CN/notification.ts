@@ -73,6 +73,15 @@ export default {
     actionCompleted: '操作已完成',
     actionRejected: '当前操作无法执行',
   },
+  custom: {
+    reminder: '提醒',
+    autoReadHint: '30s 内未处理将自动标记为已读',
+    emptyBody: '提醒已触发，请确认已收到。',
+    actionFailed: '操作失败，请重试',
+    actionComplete: '完成',
+    actionSnooze10m: '10 分钟后提醒',
+    acknowledge: '收到',
+  },
   permission: {
     warningTitle: '通知权限提示',
   },
