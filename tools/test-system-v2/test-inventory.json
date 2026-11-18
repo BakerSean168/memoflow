@@ -496,6 +496,16 @@
       "measurementCollectors": []
     },
     {
+      "path": "apps/api/src/runtime/cloud-auth-client-metadata.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "apps/api/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "apps/api/vitest.config.ts"
+      ]
+    },
+    {
       "path": "apps/api/src/runtime/cloud-auth-http.integration.test.ts",
       "primarySuite": "integration",
       "collectors": [
@@ -2905,6 +2915,14 @@
     },
     {
       "path": "packages/account-ui/src/account/index.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/account-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/account-ui/src/account/lib/session-device.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/account-ui/vitest.config.ts"
@@ -13364,7 +13382,7 @@
       "type": "measurement",
       "suite": "coverage",
       "runner": "vitest",
-      "fileCount": 70
+      "fileCount": 71
     },
     {
       "id": "packages/account/vitest.config.ts",
@@ -13844,7 +13862,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 70
+      "fileCount": 71
     },
     {
       "id": "apps/desktop/vitest.config.ts",
@@ -13886,7 +13904,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 14
+      "fileCount": 15
     },
     {
       "id": "packages/account/vitest.config.ts",
@@ -14381,6 +14399,7 @@
       "apps/api/src/modules/relation/module.spec.ts",
       "apps/api/src/modules/routine/module.spec.ts",
       "apps/api/src/outbox/prisma-outbox-writer.spec.ts",
+      "apps/api/src/runtime/cloud-auth-client-metadata.spec.ts",
       "apps/api/src/runtime/compose-account.spec.ts",
       "apps/api/src/runtime/compose-account.surface.spec.ts",
       "apps/api/src/runtime/compose-ai.spec.ts",
@@ -15005,7 +15024,7 @@
   "duplicate": [],
   "unexpected": [],
   "counts": {
-    "unit": 1242,
+    "unit": 1244,
     "integration": 59,
     "smoke": 3,
     "boundary-ipc": 6,
