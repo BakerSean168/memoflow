@@ -1,7 +1,10 @@
 import { describe, expect, it, vi } from 'vitest';
 import { ok } from '@memoflow/transport-contracts/result';
 import type { KnowledgeRemoteBindingClientDTO } from '@memoflow/repository-contracts';
-import { KNOWLEDGE_REPOSITORY_NOT_CONFIGURED_REASON } from '@memoflow/repository-contracts';
+import {
+  isKnowledgeRepositoryNotConfiguredFailure,
+  KNOWLEDGE_REPOSITORY_NOT_CONFIGURED_REASON,
+} from '@memoflow/repository-contracts';
 import type { KnowledgeRepositoryConnectionService } from '../application/services/knowledge-repository-connection.service';
 import type { IKnowledgeRepositoryProjectionService } from '../application/ports/knowledge-repository-projection.service.port';
 import { createRepositoryModule } from './repository.module';
@@ -177,9 +180,11 @@ describe('repository module GitHub credential boundary', () => {
   it('marks the unconfigured knowledge connection list as a neutral capability state', async () => {
     const module = createRepositoryModule({});
 
-    await expect(
-      module.api.listKnowledgeRepositoryConnections({ identityId: 'identity-without-github-app' }),
-    ).resolves.toMatchObject({
+    const result = await module.api.listKnowledgeRepositoryConnections({
+      identityId: 'identity-without-github-app',
+    });
+
+    expect(result).toMatchObject({
       ok: false,
       error: {
         code: 'SERVICE_UNAVAILABLE',
@@ -187,6 +192,11 @@ describe('repository module GitHub credential boundary', () => {
         context: { reason: KNOWLEDGE_REPOSITORY_NOT_CONFIGURED_REASON },
       },
     });
+    // The same failure shape the settings UI consumes must be classified as the
+    // neutral not-configured state, not as a runtime error.
+    if (!result.ok) {
+      expect(isKnowledgeRepositoryNotConfiguredFailure(result.error)).toBe(true);
+    }
   });
 
   it('reports write-request list/replay as unavailable when the GitHub App is not configured', async () => {
