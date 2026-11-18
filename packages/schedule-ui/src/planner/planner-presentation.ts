@@ -1,4 +1,5 @@
 import type { CalendarEventProjection, PlannerDisplaySemantic } from '@memoflow/schedule-contracts';
+import type { GoalStatus } from '@memoflow/goal-contracts';
 import { scheduleUiHost } from '../schedule-ui-host';
 
 export type PlannerProjectionSource = CalendarEventProjection['sourceType'];
@@ -110,3 +111,24 @@ export const plannerSemanticI18nKey: Record<PlannerDisplaySemantic, string> = {
   'goal-target': 'schedule.eventDetail.semantic.goalTarget',
   'routine-wall-clock': 'schedule.eventDetail.semantic.routineWallClock',
 };
+
+/**
+ * Goal projections carry the owner's lifecycle status. Translate it through the
+ * Goal module's existing status copy instead of leaking raw enum values into the
+ * planner detail surface.
+ */
+export const plannerGoalStatusI18nKey: Record<GoalStatus, string> = {
+  Planned: 'goal.list.statusPlanned',
+  InProgress: 'goal.list.statusInProgress',
+  Completed: 'goal.list.statusCompleted',
+  Abandoned: 'goal.list.statusAbandoned',
+};
+
+export function plannerProjectionStatusLabel(
+  status: string | null | undefined,
+  translate: (key: string) => string,
+): string {
+  if (!status) return '';
+  const key = plannerGoalStatusI18nKey[status as GoalStatus];
+  return key ? translate(key) : '';
+}
