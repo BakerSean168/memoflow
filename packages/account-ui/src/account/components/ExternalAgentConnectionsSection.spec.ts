@@ -73,6 +73,7 @@ describe('ExternalAgentConnectionsSection PAT issuing (#970)', () => {
       name: 'daily agent',
       expiresInDays: 90,
       scopes: ['goals:read', 'tasks:read'],
+      idempotencyKey: expect.any(String),
     });
   });
 
@@ -95,6 +96,7 @@ describe('ExternalAgentConnectionsSection PAT issuing (#970)', () => {
       name: 'daily agent',
       expiresInDays: 365,
       scopes: ['goals:read', 'goals:write', 'tasks:read'],
+      idempotencyKey: expect.any(String),
     });
   });
 
@@ -112,6 +114,7 @@ describe('ExternalAgentConnectionsSection PAT issuing (#970)', () => {
       name: 'full writer',
       expiresInDays: 90,
       scopes: ['goals:read', 'tasks:read', 'tasks:write', 'routines:read', 'routines:write'],
+      idempotencyKey: expect.any(String),
     });
   });
 
@@ -129,6 +132,7 @@ describe('ExternalAgentConnectionsSection PAT issuing (#970)', () => {
       name: 'domain reader',
       expiresInDays: 90,
       scopes: ['goals:read', 'tasks:read', 'notifications:read', 'schedules:read'],
+      idempotencyKey: expect.any(String),
     });
   });
 
@@ -146,6 +150,7 @@ describe('ExternalAgentConnectionsSection PAT issuing (#970)', () => {
       name: 'relation reader',
       expiresInDays: 90,
       scopes: ['goals:read', 'tasks:read', 'relations:read'],
+      idempotencyKey: expect.any(String),
     });
   });
 
@@ -161,7 +166,51 @@ describe('ExternalAgentConnectionsSection PAT issuing (#970)', () => {
       name: 'ai reader',
       expiresInDays: 90,
       scopes: ['goals:read', 'tasks:read', 'ai:read'],
+      idempotencyKey: expect.any(String),
     });
     expect(wrapper.find('[data-testid="pat-write-warning"]').exists()).toBe(false);
+  });
+
+  it('sends one request while a creation is pending and rotates the key per intent', async () => {
+    const { wrapper, service } = fixture();
+    let settle!: (value: unknown) => void;
+    service.createPat.mockReturnValueOnce(
+      new Promise((resolve) => {
+        settle = resolve;
+      }),
+    );
+    await flushPromises();
+    await nameToken(wrapper, 'slow agent');
+    await wrapper.get('form').trigger('submit');
+    await wrapper.get('form').trigger('submit');
+    expect(service.createPat).toHaveBeenCalledTimes(1);
+    expect(wrapper.get('[data-testid="pat-create-submit"]').attributes('disabled')).toBeDefined();
+
+    settle(ok({ ...summary, secret: 'mfp_secret', replayed: false }));
+    await flushPromises();
+    expect(wrapper.get('#external-pat-secret').element).toHaveProperty('value', 'mfp_secret');
+
+    await nameToken(wrapper, 'second agent');
+    await submit(wrapper);
+    const [first, second] = service.createPat.mock.calls.map(
+      ([input]) => (input as { idempotencyKey: string }).idempotencyKey,
+    );
+    expect(first).toBeTruthy();
+    expect(second).toBeTruthy();
+    expect(second).not.toBe(first);
+  });
+
+  it('explains a replayed creation when the one-time secret is no longer available', async () => {
+    const { wrapper, service } = fixture();
+    service.createPat.mockResolvedValueOnce(ok({ ...summary, replayed: true }));
+    await flushPromises();
+
+    await nameToken(wrapper, 'retried agent');
+    await submit(wrapper);
+
+    expect(wrapper.find('#external-pat-secret').exists()).toBe(false);
+    expect(wrapper.get('[data-testid="pat-create-replayed"]').text()).toContain(
+      'already created by an earlier submission',
+    );
   });
 });

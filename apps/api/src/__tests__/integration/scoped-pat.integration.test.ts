@@ -1,18 +1,79 @@
-import { afterAll, beforeEach, describe, expect, it } from 'vitest';
+import { afterAll, beforeEach, describe, expect, it, vi } from 'vitest';
 import { createHash } from 'node:crypto';
+import { once } from 'node:events';
+import type { Server } from 'node:http';
+import express from 'express';
 import { prisma } from '@memoflow/database';
 import { IdentityId } from '@memoflow/utils/domain';
 import { createAccountPrismaActiveQuery } from '@memoflow/account';
 import { createScopedPatService } from '@memoflow/cloud-auth/server';
+import type { GatewayToolCheckpoint } from '@memoflow/agent-gateway';
 import {
   cleanAll,
   disconnectPrisma,
   seedAccount,
 } from '@memoflow/test-utils/setup/integration-helpers';
+import { composeAgentGatewayModule } from '../../modules/agent-gateway/module';
+import { createRequestContextMiddleware } from '../../shared/infrastructure/http/middlewares/request-context.middleware';
 
 const accountIsActive = createAccountPrismaActiveQuery(prisma);
 const audience = 'https://api.memo.test/mcp';
 const service = () => createScopedPatService({ database: prisma, audience, accountIsActive });
+
+/** Mount the real management route over the real PAT service and PostgreSQL. */
+async function mountPatApi(
+  identityId: string,
+): Promise<{ url: string; close: () => Promise<void> }> {
+  const app = express();
+  app.use(createRequestContextMiddleware({ observer: { complete() {} } }));
+  app.use(express.json({ limit: '256kb' }));
+  const server: Server = app.listen(0, '127.0.0.1');
+  await once(server, 'listening');
+  const address = server.address();
+  if (!address || typeof address === 'string') throw new Error('address');
+  const origin = `http://127.0.0.1:${address.port}`;
+  const module = composeAgentGatewayModule({
+    admission: {
+      start: async () => {},
+      destroy: async () => {},
+      consumeIp: async () => true,
+      consumeOwner: async () => true,
+    },
+    enabled: true,
+    toolCheckpoint: (async (_principal, _tool, work) => work()) satisfies GatewayToolCheckpoint,
+    audience: `${origin}/mcp`,
+    cursorSecret: 'test-only-secret-'.repeat(3),
+    trustedOrigins: ['https://memo.test'],
+    pats: createScopedPatService({ database: prisma, audience: `${origin}/mcp`, accountIsActive }),
+    goals: { getGoal: vi.fn(), searchGoalPage: vi.fn() },
+    audit: () => {},
+  });
+  const router = express.Router();
+  await module.register({
+    app,
+    router,
+    middleware: {
+      auth: (req, res, next) => {
+        if (req.headers.authorization !== 'Bearer firstparty') {
+          res.sendStatus(401);
+          return;
+        }
+        Object.assign(req, { user: { identityId, emailVerified: true } });
+        next();
+      },
+      requireEmailVerified: (_req, _res, next) => next(),
+      requireRole: () => (_req, _res, next) => next(),
+    },
+  } as never);
+  app.use('/api/v1', router);
+  return {
+    url: `${origin}/api/v1/agent-connections/pats`,
+    close: async () => {
+      server.closeAllConnections();
+      await new Promise<void>((resolve) => server.close(() => resolve()));
+    },
+  };
+}
 
 describe('scoped PAT durable authority', () => {
   beforeEach(async () => {
@@ -98,6 +159,66 @@ describe('scoped PAT durable authority', () => {
     });
     expect(await service().revoke(String(owner), issued.id)).toBe(true);
     expect(await service().authenticate(`Bearer ${issued.secret}`)).toBeNull();
+  });
+
+  it('replays one PAT per idempotency key and creates distinct tokens for distinct keys', async () => {
+    const owner = IdentityId.generate();
+    await seedAccount({ id: owner });
+    const api = await mountPatApi(String(owner));
+    const post = (body: Record<string, unknown>) =>
+      fetch(api.url, {
+        method: 'POST',
+        headers: {
+          authorization: 'Bearer firstparty',
+          origin: 'https://memo.test',
+          'content-type': 'application/json',
+        },
+        body: JSON.stringify(body),
+      });
+    const request = {
+      name: 'new1',
+      expiresInDays: 90,
+      scopes: ['goals:read'],
+      idempotencyKey: 'web-click-1',
+    };
+    try {
+      const first = await post(request);
+      expect(first.status).toBe(201);
+      const firstBody = (await first.json()) as {
+        data: { id: string; replayed: boolean; secret?: string };
+      };
+      expect(firstBody.data.replayed).toBe(false);
+      expect(firstBody.data.secret).toMatch(/^mfp_/);
+
+      // The client may resend the same submission after a slow/lost response.
+      const replay = await post(request);
+      expect(replay.status).toBe(201);
+      const replayBody = (await replay.json()) as {
+        data: { id: string; replayed: boolean; secret?: string };
+      };
+      expect(replayBody.data.id).toBe(firstBody.data.id);
+      expect(replayBody.data.replayed).toBe(true);
+      expect(replayBody.data.secret).toBeUndefined();
+      expect(await prisma.externalAgentPat.count({ where: { userId: String(owner) } })).toBe(1);
+
+      // A new submission intent (new key) must still create a second credential.
+      const second = await post({ ...request, idempotencyKey: 'web-click-2' });
+      expect(second.status).toBe(201);
+      const secondBody = (await second.json()) as {
+        data: { id: string; replayed: boolean; secret?: string };
+      };
+      expect(secondBody.data.id).not.toBe(firstBody.data.id);
+      expect(secondBody.data.secret).toMatch(/^mfp_/);
+      expect(await prisma.externalAgentPat.count({ where: { userId: String(owner) } })).toBe(2);
+
+      // Same key, different input is a conflict and must not mint a third token.
+      const conflict = await post({ ...request, name: 'renamed' });
+      expect(conflict.status).toBe(409);
+      expect(await conflict.json()).toEqual({ error: 'IDEMPOTENCY_CONFLICT' });
+      expect(await prisma.externalAgentPat.count({ where: { userId: String(owner) } })).toBe(2);
+    } finally {
+      await api.close();
+    }
   });
 
   it('enforces a shared quota for parallel calls from independent service instances', async () => {

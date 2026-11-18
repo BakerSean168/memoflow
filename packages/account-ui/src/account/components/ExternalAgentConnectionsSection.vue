@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, inject, onMounted, ref } from 'vue';
+import { computed, inject, onMounted, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import type {
   OAuthConnection,
@@ -63,6 +63,18 @@ const carriesWriteScope = computed(() =>
   chosenScopes.value.some((scope) => scope.endsWith(':write')),
 );
 const secret = ref('');
+const replayed = ref(false);
+const creating = ref(false);
+/**
+ * One key per submission intent. It stays stable across a failed/ambiguous
+ * retry so the server can replay the original credential, and rotates when the
+ * form starts a new intent (reopened form or edited input after a failure).
+ */
+const newIdempotencyKey = () => crypto.randomUUID();
+const idempotencyKey = ref(newIdempotencyKey());
+watch([name, expiresInDays, () => chosenScopes.value.join(',')], () => {
+  if (!creating.value) idempotencyKey.value = newIdempotencyKey();
+});
 const scopeName = (scope: string) =>
   ({
     'goals:read': t('account.externalAgents.scopes.goalsRead'),
@@ -106,24 +118,30 @@ async function load() {
   }
 }
 async function createPat() {
-  if (!name.value.trim() || chosenScopes.value.length === 0) return;
+  if (creating.value || !name.value.trim() || chosenScopes.value.length === 0) return;
+  creating.value = true;
   busy.value = true;
   error.value = undefined;
   secret.value = '';
+  replayed.value = false;
   try {
     const result = await service.createPat({
       name: name.value,
       expiresInDays: Number(expiresInDays.value),
       scopes: [...chosenScopes.value],
+      idempotencyKey: idempotencyKey.value,
     });
     if (!result.ok) {
       error.value = result.error.code;
       return;
     }
-    secret.value = result.data.secret;
+    if (result.data.secret) secret.value = result.data.secret;
+    else replayed.value = true;
     name.value = '';
+    idempotencyKey.value = newIdempotencyKey();
     await load();
   } finally {
+    creating.value = false;
     busy.value = false;
   }
 }
@@ -131,6 +149,7 @@ async function revoke(id: string, type: 'oauth' | 'pat') {
   busy.value = true;
   error.value = undefined;
   secret.value = '';
+  replayed.value = false;
   try {
     const result = await (type === 'oauth' ? service.revokeConnection(id) : service.revokePat(id));
     if (!result.ok) {
@@ -267,10 +286,21 @@ onMounted(load);
         >
           {{ t('account.externalAgents.writeWarning') }}
         </p>
-        <Button type="submit" :disabled="busy || !name.trim() || chosenScopes.length === 0"
+        <Button
+          type="submit"
+          data-testid="pat-create-submit"
+          :disabled="busy || creating || !name.trim() || chosenScopes.length === 0"
           >创建 Token</Button
         >
       </form>
+      <p
+        v-if="replayed"
+        role="status"
+        data-testid="pat-create-replayed"
+        class="rounded border border-amber-500/40 bg-amber-500/10 p-3 text-sm text-amber-700 dark:text-amber-300"
+      >
+        {{ t('account.externalAgents.createReplayed') }}
+      </p>
       <div v-if="secret" class="space-y-2 rounded-lg border p-4" role="status">
         <label for="external-pat-secret" class="block text-sm font-medium"
           >请立即复制，关闭后无法再次查看</label

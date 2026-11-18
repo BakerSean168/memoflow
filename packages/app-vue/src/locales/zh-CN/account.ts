@@ -54,6 +54,8 @@ export default {
       offlineAccess: '保持连接',
     },
     writeWarning: '持有此令牌的程序可在授权范围内直接写入。',
+    createReplayed:
+      '该令牌已由先前的提交创建，密钥不会再次显示。如果当时没有保存，请撤销后重新创建。',
   },
   title: '个人中心',
   center: '个人中心',

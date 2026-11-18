@@ -56,6 +56,8 @@ export default {
       offlineAccess: 'Stay connected',
     },
     writeWarning: 'Any program holding this token can write directly within the granted scopes.',
+    createReplayed:
+      'This token was already created by an earlier submission, so its secret cannot be shown again. Revoke it and create a new one if you did not save it.',
   },
   title: 'Account',
   center: 'Account Center',

@@ -3,6 +3,7 @@ import {
   ExternalAgentConsentSchema,
   OAuthConnectionSchema,
   ScopedPatSummarySchema,
+  ScopedPatCreationSchema,
   CreateScopedPatSchema,
   externalAgentFailure,
   type ExternalAgentClientPort,
@@ -19,13 +20,20 @@ export function createExternalAgentHttpClient(baseUrl: string): ExternalAgentCli
     schema: z.ZodType<T>,
     method = 'GET',
     body?: unknown,
+    extraHeaders?: Record<string, string>,
   ): Promise<ExternalAgentResult<T>> {
     try {
       const response = await fetch(`${origin}${path}`, {
         method,
         credentials: 'include',
         redirect: 'error',
-        headers: body === undefined ? undefined : { 'content-type': 'application/json' },
+        headers:
+          body === undefined && !extraHeaders
+            ? undefined
+            : {
+                ...(body === undefined ? {} : { 'content-type': 'application/json' }),
+                ...extraHeaders,
+              },
         body: body === undefined ? undefined : JSON.stringify(body),
       });
       if (!response.ok) {
@@ -36,15 +44,17 @@ export function createExternalAgentHttpClient(baseUrl: string): ExternalAgentCli
               ? 'EAG_FORBIDDEN'
               : response.status === 404
                 ? 'EAG_SERVICE_DISABLED'
-                : response.status === 429
-                  ? 'EAG_RATE_LIMITED'
-                  : response.status >= 500
-                    ? 'EAG_SERVICE_UNAVAILABLE'
-                    : response.status === 400
-                      ? path.includes('consent')
-                        ? 'EAG_CONSENT_INVALID'
-                        : 'EAG_VALIDATION_ERROR'
-                      : 'EAG_INVALID_RESPONSE';
+                : response.status === 409
+                  ? 'EAG_CONFLICT'
+                  : response.status === 429
+                    ? 'EAG_RATE_LIMITED'
+                    : response.status >= 500
+                      ? 'EAG_SERVICE_UNAVAILABLE'
+                      : response.status === 400
+                        ? path.includes('consent')
+                          ? 'EAG_CONSENT_INVALID'
+                          : 'EAG_VALIDATION_ERROR'
+                        : 'EAG_INVALID_RESPONSE';
         return fail(externalAgentFailure(code));
       }
       try {
@@ -84,13 +94,16 @@ export function createExternalAgentHttpClient(baseUrl: string): ExternalAgentCli
     revokeConnection: (id) =>
       request(`${root}/oauth/${z.uuid().parse(id)}`, z.undefined(), 'DELETE'),
     listPats: () => list(`${root}/pats`, z.array(ScopedPatSummarySchema)),
-    createPat: (input) =>
-      request(
+    createPat: (input) => {
+      const parsed = CreateScopedPatSchema.parse(input);
+      return request(
         `${root}/pats`,
-        z.object({ data: ScopedPatSummarySchema.extend({ secret: z.string().min(1) }) }),
+        z.object({ data: ScopedPatCreationSchema }),
         'POST',
-        CreateScopedPatSchema.parse(input),
-      ).then((result) => (result.ok ? ok(result.data.data) : result)),
+        parsed,
+        parsed.idempotencyKey ? { 'idempotency-key': parsed.idempotencyKey } : undefined,
+      ).then((result) => (result.ok ? ok(result.data.data) : result));
+    },
     revokePat: (id) => request(`${root}/pats/${z.uuid().parse(id)}`, z.undefined(), 'DELETE'),
   };
 }
