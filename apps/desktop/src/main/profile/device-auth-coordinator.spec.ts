@@ -127,6 +127,12 @@ describe('DeviceAuthCoordinator', () => {
     const begun = await coordinator.begin();
     expect(begun.ok).toBe(true);
     if (!begun.ok) return;
+    // The session is created by the device token exchange, so that request
+    // must identify the desktop instead of Node's bare `node` User-Agent.
+    const [, tokenRequest] = fetchMock.mock.calls[1] as [string, RequestInit];
+    expect(new Headers(tokenRequest.headers).get('user-agent')).toMatch(
+      /^MemoFlow Desktop\/.+ \(.+\)$/,
+    );
     expect(begun.data).not.toHaveProperty('deviceCode');
     expect(JSON.stringify(begun.data)).not.toContain('secret-device-code');
     expect(openExternal).toHaveBeenCalledWith(begun.data.verificationUrl);

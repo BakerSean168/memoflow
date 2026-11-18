@@ -349,15 +349,21 @@
         <SettingsStatusBlock
           v-else-if="!installationRepositories.length"
           kind="info"
-          :title="t('setting.knowledgeRepository.notConnected')"
+          :title="
+            notConfigured
+              ? t('setting.knowledgeRepository.unavailableTitle')
+              : t('setting.knowledgeRepository.notConnected')
+          "
           :description="
-            isLocalAccount
-              ? t('setting.knowledgeRepository.localCloudBlocked')
-              : !canUseCloudKnowledgeRepo
-                ? t('setting.knowledgeRepository.offlineCloudBlocked')
-                : desktopBridge
-                  ? t('setting.knowledgeRepository.desktopConnectHint')
-                  : t('setting.knowledgeRepository.webConnectHint')
+            notConfigured
+              ? t('setting.knowledgeRepository.unavailableDescription')
+              : isLocalAccount
+                ? t('setting.knowledgeRepository.localCloudBlocked')
+                : !canUseCloudKnowledgeRepo
+                  ? t('setting.knowledgeRepository.offlineCloudBlocked')
+                  : desktopBridge
+                    ? t('setting.knowledgeRepository.desktopConnectHint')
+                    : t('setting.knowledgeRepository.webConnectHint')
           "
         />
 
@@ -486,6 +492,7 @@ import type {
   RemoteRepositoryBlockReason,
 } from '@memoflow/repository-contracts';
 import {
+  isKnowledgeRepositoryNotConfiguredFailure,
   KnowledgeRepositorySyncConflictContextSchema,
   KnowledgeRepositorySyncPendingContextSchema,
 } from '@memoflow/repository-contracts';
@@ -553,6 +560,8 @@ const syncConflicts = ref<Record<string, KnowledgeRepositorySyncConflictContext>
 const syncPending = ref<Record<string, KnowledgeRepositorySyncPendingContext>>({});
 const busyAction = ref<string | null>(null);
 const errorMessage = ref('');
+/** Deployment has no GitHub App configured; neutral state, never an error banner on load. */
+const notConfigured = ref(false);
 const disconnectTarget = ref<KnowledgeRemoteBindingClientDTO | null>(null);
 const disconnectDialogOpen = ref(false);
 const purgeCloudData = ref(false);
@@ -646,6 +655,7 @@ function providerDiagnostic(binding: KnowledgeRemoteBindingClientDTO): string {
 async function loadConnections(): Promise<void> {
   if (!canUseCloudKnowledgeRepo.value) {
     connections.value = [];
+    notConfigured.value = false;
     errorMessage.value = '';
     return;
   }
@@ -654,10 +664,19 @@ async function loadConnections(): Promise<void> {
   const result = await service.listKnowledgeRepositoryConnections();
   if (!canUseCloudKnowledgeRepo.value) {
     connections.value = [];
+    notConfigured.value = false;
   } else if (result.ok) {
     connections.value = result.data.connections;
+    notConfigured.value = false;
+  } else if (isKnowledgeRepositoryNotConfiguredFailure(result.error)) {
+    // Initial "backend has no GitHub App" state: show the neutral not-connected
+    // notice instead of a red error banner. Runtime errors still surface below.
+    connections.value = [];
+    notConfigured.value = true;
+    errorMessage.value = '';
   } else {
     connections.value = [];
+    notConfigured.value = false;
     errorMessage.value = resultError(result, t('setting.knowledgeRepository.loadFailed'));
   }
   busyAction.value = null;
@@ -772,6 +791,16 @@ async function beginInstallation(
       errorMessage.value = '';
       busyAction.value = null;
       return;
+    }
+    if (isKnowledgeRepositoryNotConfiguredFailure(result.error)) {
+      notConfigured.value = true;
+      // Automatic recovery/rediscovery must not raise a red banner: only an
+      // explicit "Start connect" click may surface the unavailable reason.
+      if (recoverOnly) {
+        errorMessage.value = '';
+        busyAction.value = null;
+        return;
+      }
     }
     errorMessage.value = resultError(result, t('setting.knowledgeRepository.startFailed'));
     busyAction.value = null;
