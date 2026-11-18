@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import { computed, inject, onMounted, ref } from 'vue';
+import { computed, inject, onBeforeUnmount, onMounted, ref } from 'vue';
 import { Copy, Plus, ShieldOff } from '@lucide/vue';
 import { useI18n } from 'vue-i18n';
-import { Button, Checkbox, Input, Label } from '@memoflow/ui-vue-shadcn';
+import { Button, Checkbox, Dialog, Input, Label } from '@memoflow/ui-vue-shadcn';
 import type {
   LocalAgentWriteScope,
   LocalGatewayAuditRecord,
@@ -12,6 +12,7 @@ import type {
 } from '@memoflow/ai-contracts';
 import { settingUiHost } from '../setting-ui-host';
 
+const { SettingsDialogShell } = settingUiHost.components;
 const { t } = useI18n();
 const local = inject(settingUiHost.AI_LOCAL_AGENT_KEY, undefined);
 const clients = ref<LocalMcpClient[]>([]);
@@ -23,7 +24,13 @@ const writeScopes = ref<LocalAgentWriteScope[]>([]);
 const busy = ref(false);
 const loading = ref(false);
 const error = ref('');
-const copied = ref(false);
+// Copy feedback is per control and self-clears, so the token and snippet
+// buttons can never both claim to have been copied.
+type CopyTarget = 'token' | 'snippet';
+const copied = ref<CopyTarget | null>(null);
+const createOpen = ref(false);
+const COPY_FEEDBACK_MS = 2000;
+let copyTimer: ReturnType<typeof setTimeout> | null = null;
 
 const scopes = [
   { value: 'tasks:write' as const, label: t('setting.ai.localMcp.scopeTasks') },
@@ -77,19 +84,48 @@ async function create() {
   busy.value = true;
   error.value = '';
   try {
-    credential.value = await local.createMcpClient({
+    const created = await local.createMcpClient({
       name: name.value.trim(),
       writeScopes: writeScopes.value,
     });
+    credential.value = created;
+    copied.value = null;
     name.value = '';
     writeScopes.value = [];
-    copied.value = false;
     await refresh();
+    // The new client sits at the top regardless of the host's list ordering.
+    clients.value = [
+      created.client,
+      ...clients.value.filter((client) => client.id !== created.client.id),
+    ];
   } catch {
     error.value = t('setting.ai.localMcp.error');
   } finally {
     busy.value = false;
   }
+}
+
+function openCreateDialog() {
+  error.value = '';
+  name.value = '';
+  writeScopes.value = [];
+  credential.value = null;
+  copied.value = null;
+  createOpen.value = true;
+}
+
+function closeCreateDialog() {
+  createOpen.value = false;
+  credential.value = null;
+  copied.value = null;
+  name.value = '';
+  writeScopes.value = [];
+  error.value = '';
+}
+
+function handleCreateOpenChange(open: boolean) {
+  if (open) openCreateDialog();
+  else closeCreateDialog();
 }
 
 async function revoke(client: LocalMcpClient) {
@@ -107,12 +143,17 @@ async function revoke(client: LocalMcpClient) {
   }
 }
 
-async function copy(text: string) {
+async function copy(text: string, target: CopyTarget) {
   try {
     await navigator.clipboard.writeText(text);
-    copied.value = true;
+    copied.value = target;
+    if (copyTimer) clearTimeout(copyTimer);
+    copyTimer = setTimeout(() => {
+      copyTimer = null;
+      copied.value = null;
+    }, COPY_FEEDBACK_MS);
   } catch {
-    copied.value = false;
+    copied.value = null;
   }
 }
 
@@ -152,6 +193,10 @@ function auditDecision(entry: LocalGatewayAuditRecord) {
 onMounted(() => {
   void refresh();
 });
+
+onBeforeUnmount(() => {
+  if (copyTimer) clearTimeout(copyTimer);
+});
 </script>
 
 <template>
@@ -160,11 +205,20 @@ onMounted(() => {
     data-testid="ai-external-mcp-clients"
     class="space-y-3 rounded-xl border border-[hsl(var(--border-subtle))] p-3 sm:p-4"
   >
-    <header class="space-y-1">
-      <h3 class="text-[13px] font-semibold">{{ t('setting.ai.localMcp.title') }}</h3>
-      <p class="text-[11px] leading-4 text-muted-foreground">
-        {{ t('setting.ai.localMcp.description') }}
-      </p>
+    <header class="flex items-start justify-between gap-3">
+      <div class="space-y-1">
+        <h3 class="text-[13px] font-semibold">{{ t('setting.ai.localMcp.title') }}</h3>
+        <p class="text-[11px] leading-4 text-muted-foreground">
+          {{ t('setting.ai.localMcp.description') }}
+        </p>
+      </div>
+      <Button
+        size="sm"
+        class="h-8 shrink-0 gap-1.5"
+        data-testid="ai-external-mcp-create-open"
+        @click="openCreateDialog"
+        ><Plus class="size-3.5" />{{ t('setting.ai.localMcp.createClient') }}</Button
+      >
     </header>
 
     <div class="space-y-1 text-[11px] text-muted-foreground">
@@ -179,87 +233,139 @@ onMounted(() => {
       </p>
     </div>
 
-    <form class="flex flex-wrap items-end gap-2" @submit.prevent="create">
-      <div class="min-w-48 flex-1 space-y-1">
-        <Label for="ai-external-mcp-name" class="text-[11px]">{{
-          t('setting.ai.localMcp.name')
-        }}</Label>
-        <Input
-          id="ai-external-mcp-name"
-          v-model="name"
-          :placeholder="t('setting.ai.localMcp.namePlaceholder')"
-          maxlength="80"
-          data-testid="ai-external-mcp-name"
-        />
-      </div>
-      <div class="flex items-center gap-3 pb-2">
-        <label
-          v-for="scope in scopes"
-          :key="scope.value"
-          class="flex items-center gap-1.5 text-[11px] text-muted-foreground"
-        >
-          <Checkbox
-            :model-value="writeScopes.includes(scope.value)"
-            :data-testid="`ai-external-mcp-scope-${scope.value}`"
-            @update:model-value="toggle(scope.value, $event)"
-          />
-          {{ scope.label }}
-        </label>
-      </div>
-      <Button
-        type="submit"
-        size="sm"
-        class="h-8 gap-1.5"
-        :disabled="!canCreate"
-        data-testid="ai-external-mcp-create"
-        ><Plus class="size-3.5" />{{ t('setting.ai.localMcp.create') }}</Button
-      >
-    </form>
-
-    <p v-if="error" class="text-[11px] text-destructive" data-testid="ai-external-mcp-error">
+    <p
+      v-if="error && !createOpen"
+      class="text-[11px] text-destructive"
+      data-testid="ai-external-mcp-error"
+    >
       {{ error }}
     </p>
 
-    <div
-      v-if="credential"
-      class="space-y-2 rounded-lg border border-[hsl(var(--border-subtle))] bg-muted/20 p-3"
-      data-testid="ai-external-mcp-credential"
-    >
-      <p class="text-[11px] font-medium">{{ t('setting.ai.localMcp.tokenOnce') }}</p>
-      <div class="flex items-center gap-2">
-        <code class="min-w-0 flex-1 break-all rounded bg-muted px-2 py-1 text-[11px]">{{
-          credential.token
-        }}</code>
-        <Button
-          variant="ghost"
-          size="sm"
-          class="h-7 gap-1 px-2 text-[11px]"
-          data-testid="ai-external-mcp-copy-token"
-          @click="copy(credential.token)"
-          ><Copy class="size-3.5" />{{
-            copied ? t('setting.ai.localMcp.copied') : t('setting.ai.localMcp.copy')
-          }}</Button
+    <Dialog :open="createOpen" @update:open="handleCreateOpenChange">
+      <SettingsDialogShell
+        :title="
+          credential ? t('setting.ai.localMcp.createdTitle') : t('setting.ai.localMcp.createClient')
+        "
+        :description="
+          credential
+            ? t('setting.ai.localMcp.createdDescription')
+            : t('setting.ai.localMcp.createDescription')
+        "
+        test-id="ai-external-mcp-create-dialog"
+      >
+        <form
+          v-if="!credential"
+          id="ai-external-mcp-create-form"
+          class="space-y-3"
+          data-testid="ai-external-mcp-create-form"
+          @submit.prevent="create"
         >
-      </div>
-      <p class="text-[11px] text-muted-foreground">{{ t('setting.ai.localMcp.tokenWarning') }}</p>
-      <div class="space-y-1">
-        <p class="text-[11px] font-medium">{{ t('setting.ai.localMcp.config') }}</p>
-        <pre
-          class="max-h-40 overflow-auto whitespace-pre-wrap break-all rounded bg-muted px-2 py-1 text-[11px]"
-          data-testid="ai-external-mcp-snippet"
-          >{{ snippet }}</pre>
-        <Button
-          variant="ghost"
-          size="sm"
-          class="h-7 gap-1 px-2 text-[11px]"
-          data-testid="ai-external-mcp-copy-snippet"
-          @click="copy(snippet)"
-          ><Copy class="size-3.5" />{{
-            copied ? t('setting.ai.localMcp.copied') : t('setting.ai.localMcp.copy')
-          }}</Button
+          <div class="space-y-1">
+            <Label for="ai-external-mcp-name" class="text-[11px]">{{
+              t('setting.ai.localMcp.name')
+            }}</Label>
+            <Input
+              id="ai-external-mcp-name"
+              v-model="name"
+              :placeholder="t('setting.ai.localMcp.namePlaceholder')"
+              maxlength="80"
+              data-testid="ai-external-mcp-name"
+            />
+          </div>
+          <div class="space-y-1">
+            <p class="text-[11px] font-medium text-foreground">
+              {{ t('setting.ai.localMcp.scopes') }}
+            </p>
+            <div class="flex flex-wrap items-center gap-3">
+              <label
+                v-for="scope in scopes"
+                :key="scope.value"
+                class="flex items-center gap-1.5 text-[11px] text-muted-foreground"
+              >
+                <Checkbox
+                  :model-value="writeScopes.includes(scope.value)"
+                  :data-testid="`ai-external-mcp-scope-${scope.value}`"
+                  @update:model-value="toggle(scope.value, $event)"
+                />
+                {{ scope.label }}
+              </label>
+            </div>
+          </div>
+          <p v-if="error" class="text-[11px] text-destructive" data-testid="ai-external-mcp-error">
+            {{ error }}
+          </p>
+        </form>
+
+        <div
+          v-else
+          class="space-y-2 rounded-lg border border-[hsl(var(--border-subtle))] bg-muted/20 p-3"
+          data-testid="ai-external-mcp-credential"
         >
-      </div>
-    </div>
+          <p class="text-[11px] font-medium">{{ t('setting.ai.localMcp.tokenOnce') }}</p>
+          <div class="flex items-center gap-2">
+            <code class="min-w-0 flex-1 break-all rounded bg-muted px-2 py-1 text-[11px]">{{
+              credential.token
+            }}</code>
+            <Button
+              variant="ghost"
+              size="sm"
+              class="h-7 gap-1 px-2 text-[11px]"
+              data-testid="ai-external-mcp-copy-token"
+              @click="copy(credential.token, 'token')"
+              ><Copy class="size-3.5" />{{
+                copied === 'token' ? t('setting.ai.localMcp.copied') : t('setting.ai.localMcp.copy')
+              }}</Button
+            >
+          </div>
+          <p class="text-[11px] text-muted-foreground">
+            {{ t('setting.ai.localMcp.tokenWarning') }}
+          </p>
+          <div class="space-y-1">
+            <p class="text-[11px] font-medium">{{ t('setting.ai.localMcp.config') }}</p>
+            <pre
+              class="max-h-40 overflow-auto whitespace-pre-wrap break-all rounded bg-muted px-2 py-1 text-[11px]"
+              data-testid="ai-external-mcp-snippet"
+              >{{ snippet }}</pre>
+            <Button
+              variant="ghost"
+              size="sm"
+              class="h-7 gap-1 px-2 text-[11px]"
+              data-testid="ai-external-mcp-copy-snippet"
+              @click="copy(snippet, 'snippet')"
+              ><Copy class="size-3.5" />{{
+                copied === 'snippet'
+                  ? t('setting.ai.localMcp.copied')
+                  : t('setting.ai.localMcp.copy')
+              }}</Button
+            >
+          </div>
+        </div>
+
+        <template #footer>
+          <template v-if="credential">
+            <Button data-testid="ai-external-mcp-create-done" @click="closeCreateDialog">{{
+              t('common.close')
+            }}</Button>
+          </template>
+          <template v-else>
+            <Button
+              variant="outline"
+              data-testid="ai-external-mcp-create-cancel"
+              @click="closeCreateDialog"
+            >
+              {{ t('common.cancel') }}
+            </Button>
+            <Button
+              type="submit"
+              form="ai-external-mcp-create-form"
+              :disabled="!canCreate"
+              data-testid="ai-external-mcp-create"
+              >{{ t('setting.ai.localMcp.create') }}</Button
+            >
+          </template>
+        </template>
+      </SettingsDialogShell>
+    </Dialog>
 
     <p v-if="!active.length && !loading" class="text-[11px] text-muted-foreground">
       {{ t('setting.ai.localMcp.empty') }}
