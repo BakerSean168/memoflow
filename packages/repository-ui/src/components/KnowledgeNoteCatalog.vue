@@ -143,7 +143,18 @@
           v-if="!loading && notes.length === 0"
           kind="empty"
           :title="t('repository.projection.noSearchResults')"
-        />
+        >
+          <template #actions>
+            <Button
+              variant="outline"
+              size="sm"
+              data-testid="knowledge-projection-clear-search"
+              @click="emit('clear-search')"
+            >
+              {{ t('repository.projection.clearSearchAction') }}
+            </Button>
+          </template>
+        </DocumentWorkspaceState>
 
         <DocumentWorkspaceState v-if="loading && notes.length === 0" kind="loading" />
 
@@ -233,7 +244,25 @@
           v-else-if="!treeLoading"
           kind="empty"
           :title="t('repository.projection.noNotes')"
-        />
+        >
+          <template #actions>
+            <Button
+              variant="outline"
+              size="sm"
+              data-testid="knowledge-projection-connect-repository"
+              @click="emit('connect-repository')"
+            >
+              {{ t('repository.projection.connectRepositoryAction') }}
+            </Button>
+            <Button
+              size="sm"
+              data-testid="knowledge-projection-create-note"
+              @click="emit('create-note')"
+            >
+              {{ t('repository.projection.createNoteAction') }}
+            </Button>
+          </template>
+        </DocumentWorkspaceState>
       </template>
     </div>
   </div>
@@ -319,6 +348,8 @@ const emit = defineEmits<{
   'connection-change': [connectionId: string];
   'toggle-directory': [relativePath: string];
   'toggle-hidden': [includeHidden: boolean];
+  'connect-repository': [];
+  'create-note': [];
 }>();
 
 const { t } = useI18n();

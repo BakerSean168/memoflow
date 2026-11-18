@@ -3,17 +3,33 @@
     class="flex h-full min-h-0 flex-col overflow-hidden bg-background"
     data-testid="knowledge-projection-workspace"
   >
-    <div
-      v-if="errorMessage"
-      class="flex items-center justify-between gap-3 border-b border-destructive/30 bg-destructive/10 px-4 py-2 text-sm text-destructive"
-      role="alert"
-      data-testid="knowledge-projection-error"
-    >
-      <span class="min-w-0">{{ errorMessage }}</span>
-      <Button variant="ghost" size="sm" @click="loadConnections">{{ t('common.retry') }}</Button>
-    </div>
-
     <DocumentWorkspaceState v-if="loadingConnections" class="min-h-0 flex-1" kind="loading" />
+
+    <div
+      v-else-if="connectionsError"
+      class="grid min-h-0 flex-1 place-items-center overflow-auto"
+      data-testid="knowledge-projection-load-error"
+    >
+      <DocumentWorkspaceState
+        kind="error"
+        :title="t('repository.projection.loadErrorTitle')"
+        :description="connectionsError"
+      >
+        <template #icon>
+          <CloudOff class="h-5 w-5 text-destructive" />
+        </template>
+        <template #actions>
+          <Button
+            variant="outline"
+            size="sm"
+            data-testid="knowledge-projection-load-retry"
+            @click="loadConnections"
+          >
+            {{ t('common.retry') }}
+          </Button>
+        </template>
+      </DocumentWorkspaceState>
+    </div>
 
     <div
       v-else-if="connections.length === 0"
@@ -190,6 +206,8 @@
             @connection-change="selectConnection"
             @toggle-directory="toggleDirectory"
             @toggle-hidden="toggleHiddenDirectories"
+            @connect-repository="openRepositorySettings"
+            @create-note="openKnowledgeCapture"
           />
         </aside>
 
@@ -287,6 +305,8 @@
             @connection-change="selectConnection"
             @toggle-directory="toggleDirectory"
             @toggle-hidden="toggleHiddenDirectories"
+            @connect-repository="openRepositorySettings"
+            @create-note="openKnowledgeCapture"
           />
         </ProductSheetSurface>
       </Sheet>
@@ -377,6 +397,7 @@
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRoute, useRouter } from 'vue-router';
+import { toast } from 'vue-sonner';
 import {
   BookOpen,
   Check,
@@ -438,6 +459,15 @@ const service = repositoryUiHost.useStrictInject(
 );
 const { isNarrow } = repositoryUiHost.usePanelWidth();
 
+// Tree, list and detail failures are recoverable. They surface as a toast so the
+// workspace keeps its layout; only the initial connection load keeps a state block.
+function reportError(message: string): void {
+  toast.error(t('repository.projection.actionFailed'), {
+    id: 'knowledge-projection-error',
+    description: message,
+  });
+}
+
 const PAGE_SIZE = 50;
 const DETAIL_CACHE_LIMIT = 24;
 const SEARCH_DEBOUNCE_MS = 220;
@@ -466,7 +496,7 @@ const loadingConnections = ref(true);
 const loadingNotes = ref(false);
 const loadingMore = ref(false);
 const loadingDetail = ref(false);
-const errorMessage = ref('');
+const connectionsError = ref('');
 const adoptionDialogOpen = ref(false);
 const adopting = ref(false);
 const adoptionError = ref('');
@@ -630,7 +660,7 @@ async function applyNoteQuerySelection(): Promise<void> {
         (item) => item.id === result.data.connectionId && item.disconnectedAt === null,
       ))
   ) {
-    if (!result.ok && result.error.code !== 'NOT_FOUND') errorMessage.value = result.error.message;
+    if (!result.ok && result.error.code !== 'NOT_FOUND') reportError(result.error.message);
     return;
   }
 
@@ -719,7 +749,6 @@ async function loadTreeDirectory(parent: string, force = false): Promise<void> {
   treeAbortControllers.set(parent, abortController);
   loadingDirectories.value = [...new Set([...loadingDirectories.value, parent])];
   if (parent === '') treeLoading.value = true;
-  errorMessage.value = '';
 
   const result = await service.listKnowledgeNoteTree(
     {
@@ -735,7 +764,7 @@ async function loadTreeDirectory(parent: string, force = false): Promise<void> {
   if (parent === '') treeLoading.value = false;
 
   if (!result.ok) {
-    errorMessage.value = result.error.message;
+    reportError(result.error.message);
     return;
   }
 
@@ -860,11 +889,11 @@ async function refreshProjectionProgress(): Promise<void> {
 
 async function loadConnections(): Promise<void> {
   loadingConnections.value = true;
-  errorMessage.value = '';
+  connectionsError.value = '';
   const result = await service.listKnowledgeRepositoryConnections();
   if (!result.ok) {
     connections.value = [];
-    errorMessage.value = result.error.message;
+    connectionsError.value = result.error.message;
     loadingConnections.value = false;
     return;
   }
@@ -907,7 +936,6 @@ async function loadNotes(options: { append?: boolean } = {}): Promise<void> {
   const sequence = ++noteLoadSequence;
   if (append) loadingMore.value = true;
   else loadingNotes.value = true;
-  errorMessage.value = '';
 
   const result = await service.listKnowledgeNoteProjections(
     {
@@ -922,7 +950,7 @@ async function loadNotes(options: { append?: boolean } = {}): Promise<void> {
   if (sequence !== noteLoadSequence) return;
   if (noteListAbortController === abortController) noteListAbortController = null;
   if (!result.ok) {
-    errorMessage.value = result.error.message;
+    reportError(result.error.message);
     if (!append) {
       notes.value = [];
       totalNotes.value = 0;
@@ -1006,7 +1034,7 @@ async function selectNote(projectionId: string, force = false): Promise<void> {
   if (detailAbortController === abortController) detailAbortController = null;
   loadingDetail.value = false;
   if (!result.ok) {
-    errorMessage.value = result.error.message;
+    reportError(result.error.message);
     return;
   }
   selectedNote.value = result.data;
@@ -1034,7 +1062,7 @@ async function selectGraphNode(projectionId: string): Promise<void> {
   if (detailAbortController === abortController) detailAbortController = null;
   loadingDetail.value = false;
   if (!result.ok) {
-    errorMessage.value = result.error.message;
+    reportError(result.error.message);
     return;
   }
   if (result.data.connectionId !== selectedConnectionId.value) return;
@@ -1138,6 +1166,11 @@ function clearSearch(): void {
 
 function openRepositorySettings(): void {
   void router.push({ path: '/settings', query: { tab: 'repository' } });
+}
+
+async function openKnowledgeCapture(): Promise<void> {
+  catalogOpen.value = false;
+  await router.replace({ query: { ...route.query, dialog: 'knowledge-capture' } });
 }
 
 function openAdoptionDialog(): void {

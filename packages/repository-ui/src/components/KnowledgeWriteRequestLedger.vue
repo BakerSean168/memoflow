@@ -49,6 +49,18 @@ function canReplay(row: KnowledgeWriteRequestClientDTO): boolean {
   return row.status === 'Committed' && row.projectionStatus !== 'Succeeded';
 }
 
+function commitStatusLabel(status: KnowledgeWriteRequestClientDTO['status']): string {
+  return t(`repository.writeRequestLedger.commitStatuses.${status}`);
+}
+
+function projectionStatusLabel(status: KnowledgeWriteRequestClientDTO['projectionStatus']): string {
+  return t(`repository.writeRequestLedger.projectionStatuses.${status}`);
+}
+
+function projectionFailureDetail(row: KnowledgeWriteRequestClientDTO): string {
+  return [row.projectionErrorCode, row.projectionErrorMessage].filter(Boolean).join(' · ');
+}
+
 async function refresh(): Promise<void> {
   replayMessage.value = null;
   await load(props.connectionId ? { connectionId: props.connectionId, limit: 50 } : { limit: 50 });
@@ -61,7 +73,7 @@ async function handleReplay(row: KnowledgeWriteRequestClientDTO): Promise<void> 
     // Re-read the ledger so the UI reflects the server state after the replay.
     await refresh();
     replayMessage.value = t('repository.writeRequestLedger.replayed', {
-      status: result.response.status,
+      status: t(`repository.writeRequestLedger.projectionStatuses.${result.response.status}`),
     });
     return;
   }
@@ -128,13 +140,14 @@ defineExpose({ refresh });
       {{ t('common.loading') }}
     </div>
 
-    <p
-      v-else-if="writeRequests.length === 0"
-      class="py-4 text-sm text-muted-foreground"
-      data-testid="ledger-empty"
-    >
-      {{ t('repository.writeRequestLedger.empty') }}
-    </p>
+    <div v-else-if="writeRequests.length === 0" class="py-4" data-testid="ledger-empty">
+      <p class="text-sm text-muted-foreground">
+        {{ t('repository.writeRequestLedger.empty') }}
+      </p>
+      <p class="mt-1 text-xs text-muted-foreground">
+        {{ t('repository.writeRequestLedger.emptyHint') }}
+      </p>
+    </div>
 
     <div v-else class="divide-y rounded-md border">
       <div
@@ -149,7 +162,11 @@ defineExpose({ refresh });
           </p>
           <div class="mt-1 flex flex-wrap items-center gap-2">
             <Badge :variant="commitBadgeVariant(row.status)" data-testid="ledger-commit-status">
-              {{ t('repository.writeRequestLedger.commitStatus', { status: row.status }) }}
+              {{
+                t('repository.writeRequestLedger.commitStatus', {
+                  status: commitStatusLabel(row.status),
+                })
+              }}
             </Badge>
             <span v-if="row.commitSha" class="text-xs text-muted-foreground">
               {{ t('repository.writeRequestLedger.commitSha', { sha: shortSha(row.commitSha) }) }}
@@ -160,7 +177,7 @@ defineExpose({ refresh });
             >
               {{
                 t('repository.writeRequestLedger.projectionStatus', {
-                  status: row.projectionStatus,
+                  status: projectionStatusLabel(row.projectionStatus),
                 })
               }}
             </Badge>
@@ -175,9 +192,10 @@ defineExpose({ refresh });
           <p
             v-if="row.projectionStatus === 'Failed' && row.projectionErrorMessage"
             class="mt-1 text-xs text-destructive"
+            :title="projectionFailureDetail(row)"
             data-testid="ledger-projection-error"
           >
-            {{ row.projectionErrorCode }}: {{ row.projectionErrorMessage }}
+            {{ t('repository.writeRequestLedger.projectionFailedHint') }}
           </p>
         </div>
         <Button

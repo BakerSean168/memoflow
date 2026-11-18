@@ -4,15 +4,6 @@
     data-testid="local-vault-workspace"
   >
     <div
-      v-if="error"
-      class="flex items-center justify-between gap-3 border-b border-destructive/30 bg-destructive/10 px-4 py-2 text-sm text-destructive"
-      role="alert"
-    >
-      <span class="min-w-0 truncate">{{ error }}</span>
-      <Button variant="ghost" size="sm" @click="loadBinding">{{ t('common.retry') }}</Button>
-    </div>
-
-    <div
       v-if="!isBound"
       class="grid min-h-0 flex-1 place-items-center overflow-auto"
       data-testid="local-vault-empty"
@@ -245,6 +236,7 @@ const vKeyboardList = repositoryUiHost.vKeyboardList;
 import { computed, nextTick, onBeforeUnmount, onDeactivated, onMounted, watch } from 'vue';
 import { useVirtualList } from '@vueuse/core';
 import { useI18n } from 'vue-i18n';
+import { toast } from 'vue-sonner';
 import { useRoute, useRouter } from 'vue-router';
 import {
   BookOpen,
@@ -294,6 +286,17 @@ const {
   openWikiLink,
   notes,
 } = useLocalVault();
+
+// Vault failures are transient: surface them as a toast so the layout never
+// shifts, and keep the retry entry on the toast itself.
+watch(error, (message) => {
+  if (!message) return;
+  toast.error(t('common.operationFailed'), {
+    id: 'local-vault-error',
+    description: message,
+    action: { label: t('common.retry'), onClick: () => void loadBinding() },
+  });
+});
 
 const rowHeight = computed(() => (searchActive.value ? 100 : 56));
 const {

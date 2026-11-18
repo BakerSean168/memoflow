@@ -18,7 +18,10 @@ const i18n = createI18n({
           connectionLabel: 'Repository connection',
           searchPlaceholder: 'Search notes…',
           noSearchResults: 'No search results',
+          clearSearchAction: 'Clear search',
           noNotes: 'No notes',
+          connectRepositoryAction: 'Connect repository',
+          createNoteAction: 'New note',
           loadMore: 'Load more',
           hiddenDirectories: 'Hidden directories',
           showHiddenDirectories: 'Show hidden directories',
@@ -36,6 +39,51 @@ const connection = {
     repositoryFullName: 'BakerSean168/thought-forest',
   },
 } as KnowledgeRemoteBindingClientDTO;
+
+type CatalogProps = InstanceType<typeof KnowledgeNoteCatalog>['$props'];
+
+function mountCatalog(overrides: Partial<CatalogProps> = {}) {
+  return mount(KnowledgeNoteCatalog, {
+    props: {
+      notes: [],
+      treeChildren: {},
+      expandedDirectories: [],
+      loadingDirectories: [],
+      selectedNoteId: '',
+      searchQuery: '',
+      loadedCountLabel: '0 of 0 loaded',
+      nextCursor: null,
+      loading: false,
+      loadingMore: false,
+      treeLoading: false,
+      syncing: false,
+      refreshing: false,
+      repositoryName: 'thought-forest',
+      repositoryDisplayName: 'BakerSean168/thought-forest',
+      defaultBranch: 'main',
+      noteCountLabel: '0',
+      providerNeedsAttention: false,
+      providerWarningLabel: '',
+      connections: [connection],
+      selectedConnectionId: 'connection-1',
+      hiddenDirectories: [],
+      hiddenNoteCount: 0,
+      includeHidden: false,
+      ...overrides,
+    },
+    global: {
+      plugins: [i18n],
+      stubs: {
+        DropdownMenu: { template: '<div><slot /></div>' },
+        DropdownMenuTrigger: { template: '<div><slot /></div>' },
+        DropdownMenuContent: { template: '<div><slot /></div>' },
+        DropdownMenuCheckboxItem: { template: '<button><slot /></button>' },
+        DropdownMenuLabel: { template: '<div><slot /></div>' },
+        DropdownMenuSeparator: true,
+      },
+    },
+  });
+}
 
 describe('KnowledgeNoteCatalog', () => {
   it('keeps repository context above search and renders only one explicit search clear control', async () => {
@@ -166,5 +214,25 @@ describe('KnowledgeNoteCatalog', () => {
 
     await wrapper.get('[data-testid="knowledge-tree-directory-assets"]').trigger('click');
     expect(wrapper.emitted('toggle-directory')).toEqual([['assets']]);
+  });
+
+  it('offers a clear-search action when a search returns no notes', async () => {
+    const wrapper = mountCatalog({ searchQuery: 'missing' });
+
+    expect(wrapper.text()).toContain('No search results');
+    await wrapper.get('[data-testid="knowledge-projection-clear-search"]').trigger('click');
+
+    expect(wrapper.emitted('clear-search')).toHaveLength(1);
+  });
+
+  it('offers connect and create actions when the repository has no notes', async () => {
+    const wrapper = mountCatalog();
+
+    expect(wrapper.text()).toContain('No notes');
+    await wrapper.get('[data-testid="knowledge-projection-connect-repository"]').trigger('click');
+    await wrapper.get('[data-testid="knowledge-projection-create-note"]').trigger('click');
+
+    expect(wrapper.emitted('connect-repository')).toHaveLength(1);
+    expect(wrapper.emitted('create-note')).toHaveLength(1);
   });
 });

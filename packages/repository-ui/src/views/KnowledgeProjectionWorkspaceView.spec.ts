@@ -2,7 +2,7 @@ import { defineComponent, h } from 'vue';
 import { flushPromises, mount } from '@vue/test-utils';
 import { createI18n } from 'vue-i18n';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { ok } from '@memoflow/transport-contracts/result';
+import { ok, fail } from '@memoflow/transport-contracts/result';
 import type {
   AdoptKnowledgeDocumentReq,
   KnowledgeNoteProjectionClientDTO,
@@ -27,6 +27,12 @@ const routerMocks = vi.hoisted(() => ({
   },
 }));
 
+const toastMocks = vi.hoisted(() => ({
+  error: vi.fn(),
+}));
+
+vi.mock('vue-sonner', () => ({ toast: toastMocks }));
+
 vi.mock('vue-router', () => ({
   useRouter: () => ({ push: routerMocks.push, replace: routerMocks.replace }),
   useRoute: () => routerMocks.route,
@@ -46,6 +52,8 @@ const messages = {
       connectTitle: 'Connect a repository',
       connectDescription: 'Connect a private GitHub repository.',
       connectAction: 'Open repository settings',
+      loadErrorTitle: 'Unable to load knowledge repositories',
+      actionFailed: 'Knowledge repository action failed',
       connectionLabel: 'Repository connection',
       commit: 'Commit {sha}',
       refresh: 'Refresh',
@@ -53,7 +61,10 @@ const messages = {
       syncingDescription: 'Notes will appear automatically.',
       searchPlaceholder: 'Search notes…',
       noSearchResults: 'No search results',
+      clearSearchAction: 'Clear search',
       noNotes: 'No notes',
+      connectRepositoryAction: 'Connect repository',
+      createNoteAction: 'New note',
       loadMore: 'Load more',
       loadedCount: '{loaded} of {total} loaded',
       hiddenDirectories: 'Hidden directories',
@@ -391,7 +402,50 @@ describe('KnowledgeProjectionWorkspaceView', () => {
   beforeEach(() => {
     routerMocks.push.mockClear();
     routerMocks.replace.mockClear();
+    toastMocks.error.mockClear();
     routerMocks.route.query = {};
+  });
+
+  it('keeps a page-level state block with retry when the repository list cannot load', async () => {
+    const listKnowledgeRepositoryConnections = vi
+      .fn()
+      .mockResolvedValueOnce(fail({ code: 'UNAVAILABLE', message: 'network down' }))
+      .mockResolvedValueOnce(ok({ connections: [connection()] }));
+    const wrapper = mountWorkspace(createService({ listKnowledgeRepositoryConnections }));
+    await flushPromises();
+
+    const state = wrapper.get('[data-testid="knowledge-projection-load-error"]');
+    expect(state.text()).toContain('Unable to load knowledge repositories');
+    expect(state.text()).toContain('network down');
+
+    await wrapper.get('[data-testid="knowledge-projection-load-retry"]').trigger('click');
+    await flushPromises();
+
+    expect(listKnowledgeRepositoryConnections).toHaveBeenCalledTimes(2);
+    expect(wrapper.find('[data-testid="knowledge-projection-load-error"]').exists()).toBe(false);
+    expect(wrapper.find('[data-testid="knowledge-file-tree"]').exists()).toBe(true);
+  });
+
+  it('reports a recoverable catalog failure as a toast instead of a top banner', async () => {
+    const listKnowledgeNoteTree = vi
+      .fn()
+      .mockResolvedValue(fail({ code: 'UNAVAILABLE', message: 'tree unavailable' }));
+    const wrapper = mountWorkspace(createService({ listKnowledgeNoteTree }));
+    await flushPromises();
+
+    expect(toastMocks.error).toHaveBeenCalledTimes(1);
+    const [title, options] = toastMocks.error.mock.calls[0] as [
+      string,
+      { id: string; description: string },
+    ];
+    expect(title).toBe('Knowledge repository action failed');
+    expect(options.id).toBe('knowledge-projection-error');
+    expect(options.description).toContain('tree unavailable');
+    // The workspace keeps its layout: no fixed banner is inserted above the toolbar.
+    expect(wrapper.find('[data-testid="knowledge-projection-error"]').exists()).toBe(false);
+    expect(wrapper.find('[data-testid="knowledge-projection-document-toolbar"]').exists()).toBe(
+      true,
+    );
   });
 
   it('shows an unconnected state and routes to repository settings', async () => {
