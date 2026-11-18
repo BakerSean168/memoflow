@@ -27,6 +27,7 @@ jobs:
     outputs:
       release_tag: ${{ steps.identity.outputs.release_tag }}
       release_sha: ${{ steps.release.outputs.release_sha }}
+      release_channel: ${{ steps.release.outputs.release_channel }}
       control_plane_sha: ${{ steps.identity.outputs.control_plane_sha }}
       production_set_digest: ${{ steps.production.outputs.production_set_digest }}
       production_set_sha256: ${{ steps.production.outputs.production_set_sha256 }}
@@ -64,7 +65,6 @@ jobs:
           gh release view "$RELEASE_TAG" --json tagName,isDraft,isPrerelease,apiUrl > reports/production/release-evidence/github-release.json
           test "$(jq -r .tagName reports/production/release-evidence/github-release.json)" = "$RELEASE_TAG"
           test "$(jq -r .isDraft reports/production/release-evidence/github-release.json)" = false
-          test "$(jq -r .isPrerelease reports/production/release-evidence/github-release.json)" = false
           ref_json="$(gh api "repos/$GITHUB_REPOSITORY/git/ref/tags/$RELEASE_TAG")"
           object_type="$(jq -r .object.type <<<"$ref_json")"
           release_sha="$(jq -r .object.sha <<<"$ref_json")"
@@ -78,11 +78,28 @@ jobs:
             --dir reports/production/release-evidence
           test -s reports/production/release-evidence/release-manifest.json
           test -s reports/production/release-evidence/candidate-set-v1.json
-          # Legacy Stable releases remain selectable for rollback. New channel-tagged
-          # manifests must be Stable, never a Nightly or an arbitrary draft.
+          # Operator decision 2026-11-16: production follows the Nightly channel
+          # during rapid iteration; Stable remains selectable for rollback.
+          # Both channels must still be a Published (non-draft) release. A Nightly
+          # ships as a GitHub prerelease, so isPrerelease=false is asserted only for
+          # Stable. Legacy manifests without a channel are Stable. Any other channel
+          # value fails closed.
           channel="$(jq -r '.channel // "stable"' reports/production/release-evidence/release-manifest.json)"
-          test "$channel" = stable
+          case "$channel" in
+            stable)
+              test "$(jq -r .isPrerelease reports/production/release-evidence/github-release.json)" = false
+              ;;
+            nightly)
+              # Nightly is published as a prerelease; tag/SHA, candidate digest and
+              # source main CI below remain the integrity anchors.
+              ;;
+            *)
+              echo "unsupported release channel: $channel" >&2
+              exit 1
+              ;;
+          esac
           echo "release_sha=$release_sha" >> "$GITHUB_OUTPUT"
+          echo "release_channel=$channel" >> "$GITHUB_OUTPUT"
 
       - name: Validate release, candidate, and source main CI
         shell: bash
@@ -248,12 +265,24 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
           RELEASE_TAG: ${{ needs.resolve.outputs.release_tag }}
+          RELEASE_CHANNEL: ${{ needs.resolve.outputs.release_channel }}
         run: |
           set -euo pipefail
           gh release view "$RELEASE_TAG" --json tagName,isDraft,isPrerelease > reports/production/release-now.json
           test "$(jq -r .tagName reports/production/release-now.json)" = "$RELEASE_TAG"
           test "$(jq -r .isDraft reports/production/release-now.json)" = false
-          test "$(jq -r .isPrerelease reports/production/release-now.json)" = false
+          # Same channel policy as the initial resolution: Stable must remain a
+          # non-prerelease, Nightly is expected to stay a prerelease.
+          case "$RELEASE_CHANNEL" in
+            stable)
+              test "$(jq -r .isPrerelease reports/production/release-now.json)" = false
+              ;;
+            nightly) ;;
+            *)
+              echo "unsupported release channel: $RELEASE_CHANNEL" >&2
+              exit 1
+              ;;
+          esac
 
       - name: Recheck selector control plane remains current main before mutation
         shell: bash

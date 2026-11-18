@@ -74,7 +74,7 @@ Nightly Audit 是扩展测试，不等于 Nightly Release；Main CI 成功也不
 - Docker 可通过 immutable digest 直接晋升 Stable tag，无须重新构建不同 digest 的镜像。ACR/GHCR 的对应 digest 必须相同。
 - Desktop Nightly 与 Stable 的版本、签名或更新频道不同，必要时必须**同一 SHA 重打包**，不能把夜版安装包简单改名。构建元数据发生变化应明确记录新产物摘要。
 - 不能为修改 Release Please 的版本号再引入一个隐蔽的新 Git SHA；稳定版最终源码必须仍是选定 Nightly 的 SHA。
-- Production 仍通过人工 workflow_dispatch 选择已发布非 prerelease Stable、验证 digest，并保持回滚。
+- Production 仍通过人工 workflow_dispatch 选择已发布 Stable 或 Nightly，按 channel 校验 prerelease 形态并验证 digest，同时保持回滚（当前生产跟 Nightly，Stable 保留可选中）。
 
 ## 现有路径与迁移边界
 
@@ -86,7 +86,7 @@ Nightly Audit 是扩展测试，不等于 Nightly Release；Main CI 成功也不
 | release-assets.yml    | 沿用多平台打包与安装、签名、更新合同，支持独立 Nightly 和 Stable               |
 | publish-images.yml    | 采用 OCI immutable digest 晋升，不重复构建                                     |
 | nightly-audit.yml     | 保持独立夜间扩展回归，而不是发行 Nightly                                       |
-| deploy-production.yml | 人工验证并选择 Stable，严禁 Nightly 直接部署生产                               |
+| deploy-production.yml | 人工验证并选择已发布 Stable 或 Nightly（当前生产跟 Nightly，Stable 保留回滚）  |
 
 ### 当前已实现与未实现
 
