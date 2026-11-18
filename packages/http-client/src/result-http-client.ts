@@ -205,11 +205,9 @@ export class ResultHttpClient implements IResultHttpClient {
     let refreshed = false;
     let replayed = false;
     if (response.status === 401 && this.onTokenRefresh) {
-      const replayable =
-        method === 'GET' ||
-        method === 'HEAD' ||
-        method === 'OPTIONS' ||
-        Boolean(headers.get('Idempotency-Key')?.trim());
+      // The stream surface only advertises GET as a read; every other method is
+      // a write and may replay only when the caller supplied an idempotency key.
+      const replayable = method === 'GET' || Boolean(headers.get('Idempotency-Key')?.trim());
       const refreshedToken = await this.onTokenRefresh();
       if (!refreshedToken) {
         this.onUnauthorized?.();

@@ -67,7 +67,10 @@ describe('ResultHttpClient write replay after token refresh', () => {
     });
 
     expect((await client.get('/agent-connections/pats')).ok).toBe(true);
-    expect((await client.post('/agent-connections/pats', {}, { headers: { 'Idempotency-Key': 'k1' } })).ok).toBe(true);
+    expect(
+      (await client.post('/agent-connections/pats', {}, { headers: { 'Idempotency-Key': 'k1' } }))
+        .ok,
+    ).toBe(true);
     expect(requests).toEqual([
       'get:/agent-connections/pats',
       'get:/agent-connections/pats',
