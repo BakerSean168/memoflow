@@ -37,14 +37,7 @@ async function fixture() {
     },
     { database: memoryAdapter(memory) },
   );
-  const host = new ApiBootstrapper(
-    {} as never,
-    auth,
-    undefined,
-    undefined,
-    { github: false },
-    1,
-  );
+  const host = new ApiBootstrapper({} as never, auth, undefined, undefined, { github: false }, 1);
   const app = await host.init();
   const users = () => memory.cloudAuthUser as MemoryRow[];
   const sessions = () => memory.cloudAuthSession as MemoryRow[];
