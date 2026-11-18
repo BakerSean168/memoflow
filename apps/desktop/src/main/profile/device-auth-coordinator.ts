@@ -12,6 +12,7 @@ import {
 import { fail, ok, type Result, type ResultError } from '@memoflow/transport-contracts/result';
 import { createLogger } from '@memoflow/utils/logger';
 import { getApiBaseUrl } from '../utils/api-config';
+import { desktopClientUserAgent } from '../utils/desktop-client-identity';
 import type { DesktopProfileRuntimeManager } from './desktop-profile-runtime-manager';
 import type { DesktopCloudConnectionService } from './desktop-cloud-connection-service';
 import type { DesktopCloudSignInService } from './desktop-cloud-sign-in-service';
@@ -189,7 +190,10 @@ export class DeviceAuthCoordinator {
     try {
       const response = await this.fetchImpl(`${authOrigin()}/api/auth/device/code`, {
         method: 'POST',
-        headers: { 'content-type': 'application/json' },
+        headers: {
+          'content-type': 'application/json',
+          'user-agent': desktopClientUserAgent(),
+        },
         body: JSON.stringify({ client_id: DESKTOP_CLIENT_ID }),
         signal: AbortSignal.timeout(10_000),
       });
@@ -338,7 +342,10 @@ export class DeviceAuthCoordinator {
       try {
         response = await this.fetchImpl(`${authOrigin()}/api/auth/device/token`, {
           method: 'POST',
-          headers: { 'content-type': 'application/json' },
+          headers: {
+            'content-type': 'application/json',
+            'user-agent': desktopClientUserAgent(),
+          },
           body: JSON.stringify({
             grant_type: DEVICE_GRANT_TYPE,
             device_code: attempt.deviceCode,
@@ -458,7 +465,7 @@ export class DeviceAuthCoordinator {
     signal: AbortSignal,
   ): Promise<CloudAuthResponse | null> {
     const response = await this.fetchImpl(`${authOrigin()}/api/auth/get-session`, {
-      headers: { authorization: `Bearer ${token}` },
+      headers: { authorization: `Bearer ${token}`, 'user-agent': desktopClientUserAgent() },
       signal: AbortSignal.any([signal, AbortSignal.timeout(10_000)]),
     });
     if (!response.ok) return null;

@@ -88,7 +88,11 @@ describe('DesktopCloudSignInService', () => {
       'https://api.memo.test/api/auth/sign-in/email',
       expect.objectContaining({
         method: 'POST',
-        headers: { 'content-type': 'application/json', origin: 'https://api.memo.test' },
+        headers: expect.objectContaining({
+          'content-type': 'application/json',
+          origin: 'https://api.memo.test',
+          'user-agent': expect.stringMatching(/^MemoFlow Desktop\/.+ \(.+\)$/),
+        }),
       }),
     );
     expect(runtime.registerCloudProfile).toHaveBeenCalledWith(
