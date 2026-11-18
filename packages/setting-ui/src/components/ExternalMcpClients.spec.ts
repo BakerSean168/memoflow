@@ -64,9 +64,7 @@ function mountSection() {
   const wrapper = mount(ExternalMcpClients, {
     attachTo: document.body,
     global: {
-      plugins: [
-        createI18n({ legacy: false, locale: 'en-US', messages: productionLocaleMessages }),
-      ],
+      plugins: [createI18n({ legacy: false, locale: 'en-US', messages: productionLocaleMessages })],
       provide: { [settingUiHost.AI_LOCAL_AGENT_KEY as symbol]: port },
     },
   });
