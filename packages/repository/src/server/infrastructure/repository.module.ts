@@ -16,6 +16,7 @@ import { runTimelineQueryWithAudit } from '@memoflow/patterns/operations';
 import { OperationTimelineEntrySchema } from '@memoflow/operations-contracts';
 import type { OperationTimelineEntry } from '@memoflow/operations-contracts';
 import type { KnowledgeWriteRequestClientDTO } from '@memoflow/repository-contracts';
+import { KNOWLEDGE_REPOSITORY_NOT_CONFIGURED_REASON } from '@memoflow/repository-contracts';
 import { createLogger } from '@memoflow/utils/logger';
 import { normalizeContribution } from '@memoflow/utils/shared';
 
@@ -64,6 +65,9 @@ function buildApplicationPort(deps: RepositoryModuleDependencies): RepositoryApp
       fail({
         code: 'SERVICE_UNAVAILABLE',
         message: 'GitHub App knowledge repository connections are not configured',
+        // Machine-readable marker: this is the neutral "not configured" state,
+        // not a runtime failure caused by the current user action.
+        context: { reason: KNOWLEDGE_REPOSITORY_NOT_CONFIGURED_REASON },
       }),
     );
 

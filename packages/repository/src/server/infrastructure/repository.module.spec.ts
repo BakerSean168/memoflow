@@ -1,6 +1,7 @@
 import { describe, expect, it, vi } from 'vitest';
 import { ok } from '@memoflow/transport-contracts/result';
 import type { KnowledgeRemoteBindingClientDTO } from '@memoflow/repository-contracts';
+import { KNOWLEDGE_REPOSITORY_NOT_CONFIGURED_REASON } from '@memoflow/repository-contracts';
 import type { KnowledgeRepositoryConnectionService } from '../application/services/knowledge-repository-connection.service';
 import type { IKnowledgeRepositoryProjectionService } from '../application/ports/knowledge-repository-projection.service.port';
 import { createRepositoryModule } from './repository.module';
@@ -171,6 +172,21 @@ describe('repository module GitHub credential boundary', () => {
       githubRepositoryId: 'repository-1',
     });
     expect(reconcileNow).toHaveBeenCalledTimes(1);
+  });
+
+  it('marks the unconfigured knowledge connection list as a neutral capability state', async () => {
+    const module = createRepositoryModule({});
+
+    await expect(
+      module.api.listKnowledgeRepositoryConnections({ identityId: 'identity-without-github-app' }),
+    ).resolves.toMatchObject({
+      ok: false,
+      error: {
+        code: 'SERVICE_UNAVAILABLE',
+        message: 'GitHub App knowledge repository connections are not configured',
+        context: { reason: KNOWLEDGE_REPOSITORY_NOT_CONFIGURED_REASON },
+      },
+    });
   });
 
   it('reports write-request list/replay as unavailable when the GitHub App is not configured', async () => {
