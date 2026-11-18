@@ -63,9 +63,7 @@ describe('DataSettingsSection preference import failure outlets', () => {
   });
 
   it('reports an unreadable file without attempting to import it', async () => {
-    const invoke = vi.fn(async () =>
-      fail({ code: 'IO_ERROR', message: 'cannot read the file' }),
-    );
+    const invoke = vi.fn(async () => fail({ code: 'IO_ERROR', message: 'cannot read the file' }));
     const { wrapper, service } = mountSection(invoke);
     await flushPromises();
 
@@ -77,17 +75,13 @@ describe('DataSettingsSection preference import failure outlets', () => {
   });
 
   it('reports invalid JSON content distinctly from file read errors', async () => {
-    const invoke = vi.fn(async () =>
-      ok({ canceled: false, content: '{"schemaVersion":3' }),
-    );
+    const invoke = vi.fn(async () => ok({ canceled: false, content: '{"schemaVersion":3' }));
     const { wrapper, service } = mountSection(invoke);
     await flushPromises();
 
     await triggerPreferenceImport(wrapper);
 
-    expect(toast.error).toHaveBeenCalledWith(
-      'The selected file is not a valid settings file.',
-    );
+    expect(toast.error).toHaveBeenCalledWith('The selected file is not a valid settings file.');
     expect(service.importSettings).not.toHaveBeenCalled();
   });
 

@@ -4,10 +4,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { toast } from 'vue-sonner';
 import { SystemChannels } from '@memoflow/desktop-contracts';
 import { fail, ok } from '@memoflow/transport-contracts/result';
-import {
-  DATA_PORTABILITY_SERVICE_KEY,
-  DESKTOP_AUTH_API_KEY,
-} from '@setting-ui-test-host/di/keys';
+import { DATA_PORTABILITY_SERVICE_KEY, DESKTOP_AUTH_API_KEY } from '@setting-ui-test-host/di/keys';
 import { createI18nPlugin } from '@setting-ui-test-host/plugins/i18n';
 import { useDataPortability } from './useDataPortability';
 
@@ -30,8 +27,7 @@ const messages = {
       exportCompleted: 'Export completed: {capabilities}',
       importCompleted: 'Import completed: created {created}, updated {updated}',
       importConfirmTitle: 'Import this data backup?',
-      importConfirmDescription:
-        'New entries: {created} · Updated entries: {updated}. Continue?',
+      importConfirmDescription: 'New entries: {created} · Updated entries: {updated}. Continue?',
       importConfirm: 'Import',
       importWarnings: 'Warnings: {warnings}',
     },
