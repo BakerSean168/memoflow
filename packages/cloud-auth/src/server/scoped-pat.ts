@@ -6,7 +6,10 @@ import {
 } from '@memoflow/agent-gateway';
 import type { RequestContext } from '@memoflow/transport-contracts';
 import type { PrismaClient, Prisma } from '@memoflow/database';
+import type { z } from 'zod';
 import { ExternalMutationError, runExternalMutation } from '@memoflow/database/transaction';
+
+type ScopedPatCreateReceipt = z.output<typeof ScopedPatCreateReceiptSchema>;
 
 export interface VerifiedPatPrincipal {
   readonly identityId: string;
@@ -81,12 +84,13 @@ export function createScopedPatService(options: Options) {
 
       // Legacy callers without a key keep the historical create-per-request
       // behavior; every retrying client must supply a key.
-      if (!parsed.idempotencyKey) {
+      const idempotencyKey = parsed.idempotencyKey;
+      if (!idempotencyKey) {
         if (!(await isActive(identityId, context))) throw new Error('Inactive account');
         return { ...(await mint(db)), secret, replayed: false };
       }
 
-      const receipt = await runExternalMutation(
+      const receipt = await runExternalMutation<ScopedPatCreateReceipt>(
         db,
         identityId,
         {
@@ -97,7 +101,7 @@ export function createScopedPatService(options: Options) {
           },
         },
         'pat.create.v1',
-        parsed,
+        { ...parsed, idempotencyKey },
         ScopedPatCreateReceiptSchema,
         async (tx) => {
           const pat = await mint(tx);

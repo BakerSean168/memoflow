@@ -1,4 +1,4 @@
-import type { AxiosRequestConfig, AxiosResponse } from 'axios';
+import type { AxiosRequestConfig, AxiosResponse, InternalAxiosRequestConfig } from 'axios';
 import { describe, expect, it, vi } from 'vitest';
 import { ResultHttpClient } from '../result-http-client';
 
@@ -10,7 +10,7 @@ function unauthorized(config: AxiosRequestConfig): never {
   };
 }
 
-function envelope(config: AxiosRequestConfig): AxiosResponse {
+function envelope(config: InternalAxiosRequestConfig): AxiosResponse {
   return {
     status: 200,
     statusText: 'OK',
