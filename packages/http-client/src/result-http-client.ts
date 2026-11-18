@@ -202,17 +202,27 @@ export class ResultHttpClient implements IResultHttpClient {
     };
 
     let response = await fetch(this.axios.getUri({ url }), requestInit);
+    let refreshed = false;
+    let replayed = false;
     if (response.status === 401 && this.onTokenRefresh) {
+      // The stream surface only advertises GET as a read; every other method is
+      // a write and may replay only when the caller supplied an idempotency key.
+      const replayable = method === 'GET' || Boolean(headers.get('Idempotency-Key')?.trim());
       const refreshedToken = await this.onTokenRefresh();
-      if (refreshedToken) {
+      if (!refreshedToken) {
+        this.onUnauthorized?.();
+        return response;
+      }
+      refreshed = true;
+      // Replays only reads and keyed writes; an unkeyed write surfaces its 401.
+      if (replayable) {
         headers.set('Authorization', `Bearer ${refreshedToken}`);
         response = await fetch(this.axios.getUri({ url }), requestInit);
-      } else {
-        this.onUnauthorized?.();
+        replayed = true;
       }
     }
 
-    if (response.status === 401) {
+    if (response.status === 401 && (!refreshed || replayed)) {
       this.onUnauthorized?.();
     }
 
@@ -247,6 +257,13 @@ export class ResultHttpClient implements IResultHttpClient {
 
         // 401 自动刷新 Token + 重试
         if (response?.status === 401 && this.onTokenRefresh && !originalConfig._retried) {
+          if (!this.mayReplayAfterRefresh(originalConfig)) {
+            // A write without an idempotency key must never be resent: a slow
+            // first attempt may already have committed on the server.
+            const token = await this.onTokenRefresh().catch(() => null);
+            if (!token) this.onUnauthorized?.();
+            return Promise.reject(error);
+          }
           return this.handleTokenRefresh(originalConfig);
         }
 
@@ -254,6 +271,25 @@ export class ResultHttpClient implements IResultHttpClient {
         return Promise.reject(error);
       },
     );
+  }
+
+  /**
+   * Reads and idempotent writes may be replayed after a token refresh. A write
+   * is only replayable when the caller supplied an `Idempotency-Key` header.
+   */
+  private mayReplayAfterRefresh(config: InternalAxiosRequestConfig): boolean {
+    const method = (config.method ?? 'get').toLowerCase();
+    if (method === 'get' || method === 'head' || method === 'options') return true;
+    const headers = config.headers as unknown as
+      | { get?: (name: string) => unknown }
+      | Record<string, unknown>
+      | undefined;
+    const value =
+      typeof (headers as { get?: unknown } | undefined)?.get === 'function'
+        ? (headers as { get: (name: string) => unknown }).get('idempotency-key')
+        : ((headers as Record<string, unknown> | undefined)?.['Idempotency-Key'] ??
+          (headers as Record<string, unknown> | undefined)?.['idempotency-key']);
+    return typeof value === 'string' && value.trim().length > 0;
   }
 
   /**

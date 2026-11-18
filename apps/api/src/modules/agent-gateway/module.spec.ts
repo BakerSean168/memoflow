@@ -1,4 +1,5 @@
 import type { GatewayToolCheckpoint } from '@memoflow/agent-gateway';
+import { ExternalMutationError } from '@memoflow/database/transaction';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import express from 'express';
 import { once } from 'node:events';
@@ -129,6 +130,51 @@ describe('Gateway API host admission', () => {
     );
     expect(f.audit).toHaveBeenCalledWith(
       expect.objectContaining({ tool: 'pat_create', outcome: 'OK', identityId: 'owner-a' }),
+    );
+  });
+  it('forwards the idempotency key and maps receipt conflicts to 409', async () => {
+    const f = await fixture();
+    const url = `${f.base}/api/v1/agent-connections/pats`;
+    const create = (body: Record<string, unknown>) =>
+      fetch(url, {
+        method: 'POST',
+        headers: {
+          authorization: 'Bearer firstparty',
+          origin: 'https://memo.test',
+          'content-type': 'application/json',
+        },
+        body: JSON.stringify(body),
+      });
+    expect(
+      (
+        await create({
+          name: 'read pilot',
+          scopes: ['goals:read'],
+          idempotencyKey: 'web-click-1',
+        })
+      ).status,
+    ).toBe(201);
+    expect(f.pats.create).toHaveBeenCalledWith(
+      'owner-a',
+      {
+        name: 'read pilot',
+        expiresInDays: 90,
+        scopes: ['goals:read'],
+        idempotencyKey: 'web-click-1',
+      },
+      expect.objectContaining({ source: 'http' }),
+    );
+
+    f.pats.create.mockRejectedValueOnce(new ExternalMutationError('IDEMPOTENCY_CONFLICT'));
+    const conflict = await create({
+      name: 'read pilot',
+      scopes: ['goals:read'],
+      idempotencyKey: 'web-click-1',
+    });
+    expect(conflict.status).toBe(409);
+    expect(await conflict.json()).toEqual({ error: 'IDEMPOTENCY_CONFLICT' });
+    expect(f.audit).toHaveBeenCalledWith(
+      expect.objectContaining({ tool: 'pat_create', outcome: 'HTTP_409' }),
     );
   });
   it('mounts root /mcp with independent credential verification and host checks', async () => {

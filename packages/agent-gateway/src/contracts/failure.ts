@@ -57,6 +57,14 @@ export const ExternalAgentFailureRegistry = defineFailureRegistry({
     i18n: 'errors.EAG_VALIDATION_ERROR',
     http: 400,
   },
+  EAG_CONFLICT: {
+    ...management,
+    category: 'conflict',
+    retryHint: { kind: 'not_retryable' },
+    telemetry: 'external_agent.eag_conflict',
+    i18n: 'errors.EAG_CONFLICT',
+    http: 409,
+  },
   EAG_SERVICE_DISABLED: {
     ...management,
     category: 'unavailable',

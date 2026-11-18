@@ -1,7 +1,15 @@
 import { createHash, randomBytes, randomUUID } from 'node:crypto';
-import { CreateScopedPatSchema, type CreateScopedPatInput } from '@memoflow/agent-gateway';
+import {
+  CreateScopedPatSchema,
+  ScopedPatCreateReceiptSchema,
+  type CreateScopedPatInput,
+} from '@memoflow/agent-gateway';
 import type { RequestContext } from '@memoflow/transport-contracts';
 import type { PrismaClient, Prisma } from '@memoflow/database';
+import type { z } from 'zod';
+import { ExternalMutationError, runExternalMutation } from '@memoflow/database/transaction';
+
+type ScopedPatCreateReceipt = z.output<typeof ScopedPatCreateReceiptSchema>;
 
 export interface VerifiedPatPrincipal {
   readonly identityId: string;
@@ -18,6 +26,11 @@ interface Options {
 }
 
 const digest = (token: string) => createHash('sha256').update(token).digest('hex');
+/**
+ * Receipt domain for first-party credential management. There is no external
+ * connection here; the value only records which lane produced the receipt.
+ */
+const MANAGEMENT_RECEIPT_CONNECTION = 'first-party-management';
 const publicFields = {
   id: true,
   name: true,
@@ -55,22 +68,64 @@ export function createScopedPatService(options: Options) {
     async create(identityId: string, input: CreateScopedPatInput, context?: RequestContext) {
       const parsed = CreateScopedPatSchema.parse(input);
       const days = parsed.expiresInDays;
-      if (!(await isActive(identityId, context))) throw new Error('Inactive account');
       const secret = `mfp_${randomBytes(32).toString('base64url')}`;
-      const pat = await db.externalAgentPat.create({
-        data: {
-          id: randomUUID(),
-          userId: identityId,
-          name: parsed.name,
-          prefix: secret.slice(0, 12),
-          tokenDigest: digest(secret),
-          audience: options.audience,
-          scopes: parsed.scopes,
-          expiresAt: new Date(Date.now() + days * 86400000),
+      const data = {
+        id: randomUUID(),
+        userId: identityId,
+        name: parsed.name,
+        prefix: secret.slice(0, 12),
+        tokenDigest: digest(secret),
+        audience: options.audience,
+        scopes: parsed.scopes,
+        expiresAt: new Date(Date.now() + days * 86400000),
+      };
+      const mint = (tx: PrismaClient | Prisma.TransactionClient) =>
+        tx.externalAgentPat.create({ data, select: publicFields });
+
+      // Legacy callers without a key keep the historical create-per-request
+      // behavior; every retrying client must supply a key.
+      const idempotencyKey = parsed.idempotencyKey;
+      if (!idempotencyKey) {
+        if (!(await isActive(identityId, context))) throw new Error('Inactive account');
+        return { ...(await mint(db)), secret, replayed: false };
+      }
+
+      const receipt = await runExternalMutation<ScopedPatCreateReceipt>(
+        db,
+        identityId,
+        {
+          connectionId: MANAGEMENT_RECEIPT_CONNECTION,
+          authorize: async () => {
+            if (!(await isActive(identityId, context)))
+              throw new ExternalMutationError('FORBIDDEN');
+          },
         },
-        select: publicFields,
-      });
-      return { ...pat, secret };
+        'pat.create.v1',
+        { ...parsed, idempotencyKey },
+        ScopedPatCreateReceiptSchema,
+        async (tx) => {
+          const pat = await mint(tx);
+          return {
+            result: {
+              ...pat,
+              createdAt: pat.createdAt.toISOString(),
+              expiresAt: pat.expiresAt.toISOString(),
+              revokedAt: pat.revokedAt?.toISOString() ?? null,
+            },
+          };
+        },
+      );
+      const summary = {
+        ...receipt.result,
+        createdAt: new Date(receipt.result.createdAt),
+        expiresAt: new Date(receipt.result.expiresAt),
+        revokedAt: receipt.result.revokedAt === null ? null : new Date(receipt.result.revokedAt),
+      };
+      // The plaintext is deliberately absent from the receipt: a replay can
+      // return the same credential identity, never a second copy of the secret.
+      return receipt.replayed
+        ? { ...summary, replayed: true }
+        : { ...summary, secret, replayed: false };
     },
     async list(identityId: string, context?: RequestContext) {
       if (!(await isActive(identityId, context))) throw new Error('Inactive account');

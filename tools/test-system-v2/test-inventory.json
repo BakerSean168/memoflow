@@ -8314,6 +8314,14 @@
       "measurementCollectors": []
     },
     {
+      "path": "packages/http-client/src/__tests__/write-replay.test.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/http-client/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "packages/ipc-client/src/__tests__/ipc-client.test.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -14058,7 +14066,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 5
+      "fileCount": 6
     },
     {
       "id": "packages/ipc-client/vitest.config.ts",
@@ -15024,7 +15032,7 @@
   "duplicate": [],
   "unexpected": [],
   "counts": {
-    "unit": 1244,
+    "unit": 1245,
     "integration": 59,
     "smoke": 3,
     "boundary-ipc": 6,

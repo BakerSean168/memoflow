@@ -1,6 +1,7 @@
 import type { GatewayToolCheckpoint } from '@memoflow/agent-gateway';
 import { z } from 'zod';
 import { CreateScopedPatSchema } from '@memoflow/agent-gateway';
+import { ExternalMutationError } from '@memoflow/database/transaction';
 import type { PilotAdmission } from './pilot-admission';
 import { createReadGateway, toNodeHandler } from '@memoflow/agent-gateway/server';
 import type {
@@ -190,11 +191,26 @@ export function composeAgentGatewayModule(options: Options): IApiModule {
           res.sendStatus(401);
           return;
         }
-        const result = await options.pats.create(
-          identityId,
-          parsed.data,
-          (req as typeof req & RequestContextCarrierRequest).requestContext,
-        );
+        const result = await options.pats
+          .create(
+            identityId,
+            parsed.data,
+            (req as typeof req & RequestContextCarrierRequest).requestContext,
+          )
+          .catch((error: unknown) => {
+            if (!(error instanceof ExternalMutationError)) throw error;
+            const status =
+              error.code === 'FORBIDDEN'
+                ? 403
+                : error.code === 'VALIDATION_ERROR' || error.code === 'RESPONSE_TOO_LARGE'
+                  ? 400
+                  : error.code === 'UNAVAILABLE'
+                    ? 503
+                    : 409;
+            res.status(status).json({ error: error.code });
+            return null;
+          });
+        if (!result) return;
         res.locals.externalAgentCredentialId = result.id;
         res.status(201).json({ data: result });
       });

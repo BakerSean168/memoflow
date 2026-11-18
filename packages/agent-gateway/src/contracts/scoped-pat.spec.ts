@@ -21,6 +21,19 @@ describe('scoped PAT lifetime contract (#970)', () => {
     );
   });
 
+  it('accepts an optional idempotency key and still rejects unknown fields', () => {
+    expect(
+      CreateScopedPatSchema.parse({ name: 'agent', idempotencyKey: 'web-click-1' }).idempotencyKey,
+    ).toBe('web-click-1');
+    expect(CreateScopedPatSchema.parse({ name: 'agent' }).idempotencyKey).toBeUndefined();
+    expect(
+      CreateScopedPatSchema.safeParse({ name: 'agent', idempotencyKey: 'x'.repeat(201) }).success,
+    ).toBe(false);
+    expect(CreateScopedPatSchema.safeParse({ name: 'agent', idempotencyKey: '   ' }).success).toBe(
+      false,
+    );
+  });
+
   it('echoes the granted expiry and scopes in the credential summary', () => {
     const summary = {
       id: '5b5d8a2b-9934-4be8-8e07-3f62ed122e15',

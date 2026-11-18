@@ -55,6 +55,12 @@ export const GoalSearchOutputSchema = z.strictObject({
 export const CreateScopedPatSchema = z.strictObject({
   name: z.string().trim().min(1).max(80),
   expiresInDays: z.number().int().min(1).max(365).default(90),
+  /**
+   * Per-submission key for the first-party management lane. Repeating the same
+   * key with the same input replays the original credential; omitting it keeps
+   * the legacy create-once-per-request behavior for non-retrying callers.
+   */
+  idempotencyKey: z.string().trim().min(1).max(200).optional(),
   scopes: z
     .array(
       z.enum([
@@ -124,6 +130,30 @@ export const ExternalAgentConsentSchema = z.object({
   scopes: z.array(z.enum(['goals:read', 'tasks:read', 'offline_access'])),
 });
 export type ScopedPatSummary = z.infer<typeof ScopedPatSummarySchema>;
+/**
+ * One PAT issuance response. `secret` is returned only for the request that
+ * actually minted the credential; a replayed receipt returns the same metadata
+ * with `replayed: true` and no plaintext, because the secret is never durable.
+ */
+export const ScopedPatCreationSchema = ScopedPatSummarySchema.extend({
+  secret: z.string().min(1).optional(),
+  replayed: z.boolean(),
+});
+export type ScopedPatCreation = z.infer<typeof ScopedPatCreationSchema>;
+/** Durable receipt projection for idempotent issuance; never contains the secret. */
+export const ScopedPatCreateReceiptSchema = z.strictObject({
+  receiptId: z.string().regex(/^[a-f0-9]{64}$/),
+  result: z.strictObject({
+    id: z.uuid(),
+    name: z.string(),
+    prefix: z.string(),
+    audience: z.url(),
+    scopes: z.array(z.string()),
+    createdAt: z.iso.datetime(),
+    expiresAt: z.iso.datetime(),
+    revokedAt: z.iso.datetime().nullable(),
+  }),
+});
 export type OAuthConnection = z.infer<typeof OAuthConnectionSchema>;
 export type ExternalAgentConsent = z.infer<typeof ExternalAgentConsentSchema>;
 export * from './failure';
@@ -137,9 +167,7 @@ export interface ExternalAgentClientPort {
   listConnections(): Promise<ExternalAgentResult<OAuthConnection[]>>;
   revokeConnection(id: string): Promise<ExternalAgentResult<void>>;
   listPats(): Promise<ExternalAgentResult<ScopedPatSummary[]>>;
-  createPat(
-    input: CreateScopedPatInput,
-  ): Promise<ExternalAgentResult<ScopedPatSummary & { secret: string }>>;
+  createPat(input: CreateScopedPatInput): Promise<ExternalAgentResult<ScopedPatCreation>>;
   revokePat(id: string): Promise<ExternalAgentResult<void>>;
 }
 export const GatewayFailureCodeSchema = z.enum([

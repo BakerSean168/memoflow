@@ -2,7 +2,7 @@
 tags: [guide, development, mcp]
 description: 受控 PAT MCP 的本地连接、只读与写入 scope 配置
 created: 2026-10-07T00:00:00Z
-updated: 2026-11-16T00:00:00Z
+updated: 2026-11-18T00:00:00Z
 ---
 
 # External Agent PAT 连接
@@ -19,11 +19,12 @@ updated: 2026-11-16T00:00:00Z
 {
   "name": "personal-read",
   "expiresInDays": 90,
-  "scopes": ["goals:read", "tasks:read", "labels:read"]
+  "scopes": ["goals:read", "tasks:read", "labels:read"],
+  "idempotencyKey": "web-form-7f3c2a1e"
 }
 ```
 
-响应中的 `data.secret` 只返回一次。缺省 scopes 为 goals:read；必须显式选择 tasks:read 才能使用 Task 四工具，选择 labels:read 才能使用 Label 两读工具。第一方 session token 不能用作 MCP PAT。`GET /api/v1/agent-connections/pats` 列出凭据元数据；`DELETE /api/v1/agent-connections/pats/:id` 撤销，后续调用立即拒绝。
+响应中的 `data.secret` 只返回一次。缺省 scopes 为 goals:read；必须显式选择 tasks:read 才能使用 Task 四工具，选择 labels:read 才能使用 Label 两读工具。第一方 session token 不能用作 MCP PAT。同一账户重复提交同一 `idempotencyKey` 与同一输入时只签发一枚令牌，并返回相同凭据元数据与 `replayed: true`；明文密钥不入回执，所以重放响应不含 `secret`，未保存时只能撤销后重建。同 key 不同输入返回 `409 IDEMPOTENCY_CONFLICT`。`GET /api/v1/agent-connections/pats` 列出凭据元数据；`DELETE /api/v1/agent-connections/pats/:id` 撤销，后续调用立即拒绝。
 
 将 PAT 放入本地私密环境变量 `MEMOFLOW_PAT`，Codex 的配置为：
 

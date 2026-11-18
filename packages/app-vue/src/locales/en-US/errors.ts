@@ -2,6 +2,8 @@ export default {
   EAG_SERVICE_UNAVAILABLE: 'The service is temporarily unavailable. Please try again later.',
   EAG_RATE_LIMITED: 'Too many requests. Please try again later.',
   EAG_VALIDATION_ERROR: 'Some submitted data is invalid. Please review and try again.',
+  EAG_CONFLICT:
+    'This request conflicts with an earlier submission or an in-flight change. Refresh and try again.',
   EAG_FORBIDDEN: 'You do not have permission to perform this action.',
   EAG_UNAUTHORIZED: 'Your session is no longer valid. Please sign in again.',
   EAG_CONSENT_INVALID:

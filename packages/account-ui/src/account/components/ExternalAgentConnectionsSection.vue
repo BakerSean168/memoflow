@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, inject, onMounted, ref } from 'vue';
+import { computed, inject, onMounted, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import type {
   OAuthConnection,
@@ -7,13 +7,27 @@ import type {
   ExternalAgentFailureCode,
 } from '@memoflow/agent-gateway';
 import {
+  AlertDialog,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
   Button,
   Checkbox,
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
   Input,
+  Label,
   RadioGroup,
   RadioGroupItem,
   Textarea,
 } from '@memoflow/ui-vue-shadcn';
+import { Copy, LoaderCircle } from '@lucide/vue';
 import { accountUiHost } from '../../account-ui-host';
 
 const injected = inject(accountUiHost.EXTERNAL_AGENT_SERVICE_KEY);
@@ -63,6 +77,23 @@ const carriesWriteScope = computed(() =>
   chosenScopes.value.some((scope) => scope.endsWith(':write')),
 );
 const secret = ref('');
+const replayed = ref(false);
+const copied = ref(false);
+const creating = ref(false);
+const createOpen = ref(false);
+const revokeTarget = ref<{ id: string; type: 'oauth' | 'pat'; name: string } | null>(null);
+const revoking = ref(false);
+
+/**
+ * One key per submission intent. It stays stable across a failed/ambiguous
+ * retry so the server can replay the original credential, and rotates when the
+ * form starts a new intent (reopened form or edited input after a failure).
+ */
+const newIdempotencyKey = () => crypto.randomUUID();
+const idempotencyKey = ref(newIdempotencyKey());
+watch([name, expiresInDays, () => chosenScopes.value.join(',')], () => {
+  if (!creating.value) idempotencyKey.value = newIdempotencyKey();
+});
 const scopeName = (scope: string) =>
   ({
     'goals:read': t('account.externalAgents.scopes.goalsRead'),
@@ -79,8 +110,16 @@ const scopeName = (scope: string) =>
     'relations:read': t('account.externalAgents.scopes.relationsRead'),
     offline_access: t('account.externalAgents.scopes.offlineAccess'),
   })[scope] ?? scope;
-const status = (row: OAuthConnection | ScopedPatSummary) =>
-  row.revokedAt ? '已撤销' : Date.parse(row.expiresAt) <= Date.now() ? '已过期' : '已连接';
+const status = (row: OAuthConnection) =>
+  row.revokedAt
+    ? t('account.externalAgents.statusRevoked')
+    : Date.parse(row.expiresAt) <= Date.now()
+      ? t('account.externalAgents.statusExpired')
+      : t('account.externalAgents.statusActive');
+/** Revoked and expired tokens stay server-side for audit but leave the list (#1010). */
+const isLive = (row: { revokedAt: string | null; expiresAt: string }) =>
+  !row.revokedAt && Date.parse(row.expiresAt) > Date.now();
+const livePats = computed(() => pats.value.filter(isLive));
 
 async function load() {
   busy.value = true;
@@ -105,41 +144,85 @@ async function load() {
     busy.value = false;
   }
 }
+function openCreate() {
+  createOpen.value = true;
+  error.value = undefined;
+  secret.value = '';
+  replayed.value = false;
+  copied.value = false;
+}
+function closeCreate() {
+  if (creating.value) return;
+  createOpen.value = false;
+  secret.value = '';
+  replayed.value = false;
+  copied.value = false;
+}
+function handleCreateOpenChange(open: boolean) {
+  if (!open) closeCreate();
+}
+async function copySecret() {
+  try {
+    await navigator.clipboard.writeText(secret.value);
+    copied.value = true;
+  } catch {
+    copied.value = false;
+  }
+}
 async function createPat() {
-  if (!name.value.trim() || chosenScopes.value.length === 0) return;
+  if (creating.value || !name.value.trim() || chosenScopes.value.length === 0) return;
+  creating.value = true;
   busy.value = true;
   error.value = undefined;
   secret.value = '';
+  replayed.value = false;
+  copied.value = false;
   try {
     const result = await service.createPat({
       name: name.value,
       expiresInDays: Number(expiresInDays.value),
       scopes: [...chosenScopes.value],
+      idempotencyKey: idempotencyKey.value,
     });
     if (!result.ok) {
       error.value = result.error.code;
       return;
     }
-    secret.value = result.data.secret;
+    if (result.data.secret) secret.value = result.data.secret;
+    else replayed.value = true;
     name.value = '';
+    idempotencyKey.value = newIdempotencyKey();
     await load();
   } finally {
+    creating.value = false;
     busy.value = false;
   }
 }
-async function revoke(id: string, type: 'oauth' | 'pat') {
-  busy.value = true;
+function askRevoke(id: string, type: 'oauth' | 'pat', name: string) {
   error.value = undefined;
-  secret.value = '';
+  revokeTarget.value = { id, type, name };
+}
+function cancelRevoke() {
+  if (revoking.value) return;
+  revokeTarget.value = null;
+}
+async function confirmRevoke() {
+  const target = revokeTarget.value;
+  if (!target || revoking.value) return;
+  revoking.value = true;
+  error.value = undefined;
   try {
-    const result = await (type === 'oauth' ? service.revokeConnection(id) : service.revokePat(id));
+    const result = await (target.type === 'oauth'
+      ? service.revokeConnection(target.id)
+      : service.revokePat(target.id));
     if (!result.ok) {
       error.value = result.error.code;
       return;
     }
+    revokeTarget.value = null;
     await load();
   } finally {
-    busy.value = false;
+    revoking.value = false;
   }
 }
 onMounted(load);
@@ -153,19 +236,23 @@ onMounted(load);
     :aria-busy="busy"
   >
     <header>
-      <h2 id="external-agents-heading" class="text-lg font-semibold">已连接的应用 / 外部 Agent</h2>
+      <h2 id="external-agents-heading" class="text-lg font-semibold">
+        {{ t('account.externalAgents.sectionTitle') }}
+      </h2>
       <p class="mt-1 text-sm text-muted-foreground">
-        管理可访问你的 Goals、Tasks 和 Routines 的应用。撤销后，新的访问请求立即失效。
+        {{ t('account.externalAgents.sectionDescription') }}
       </p>
     </header>
-    <p v-if="error" role="alert" class="text-sm text-destructive">
+    <p v-if="error && !createOpen" role="alert" class="text-sm text-destructive">
       {{ t(`errors.${error}`) }}
-      <Button variant="ghost" :disabled="busy" @click="load">重试</Button>
+      <Button variant="ghost" :disabled="busy" @click="load">
+        {{ t('account.externalAgents.retry') }}
+      </Button>
     </p>
     <div v-if="oauthEnabled" class="space-y-3">
-      <h3 class="font-medium">OAuth 应用</h3>
+      <h3 class="font-medium">{{ t('account.externalAgents.oauthTitle') }}</h3>
       <p v-if="!connections.length && !busy" class="text-sm text-muted-foreground">
-        还没有已连接的应用。在 Codex 或 Claude Code 中添加 MemoFlow 后，登录并授权即可。
+        {{ t('account.externalAgents.oauthEmpty') }}
       </p>
       <article
         v-for="connection in connections"
@@ -179,111 +266,252 @@ onMounted(load);
         <p class="break-all text-xs text-muted-foreground">{{ connection.clientId }}</p>
         <p class="text-sm">{{ connection.scopes.map(scopeName).join(' · ') }}</p>
         <p class="text-xs text-muted-foreground">
-          连接于 {{ accountUiHost.formatProductDateTime(connection.createdAt) }} · 最近使用
-          {{ accountUiHost.formatProductDateTime(connection.lastUsedAt) }}
+          {{
+            t('account.externalAgents.connectedOn', {
+              date: accountUiHost.formatProductDateTime(connection.createdAt),
+            })
+          }}
+          ·
+          {{
+            t('account.externalAgents.lastUsedOn', {
+              date: accountUiHost.formatProductDateTime(connection.lastUsedAt),
+            })
+          }}
         </p>
         <p class="text-xs text-muted-foreground">
-          到期：{{ accountUiHost.formatProductDateTime(connection.expiresAt) }}
+          {{
+            t('account.externalAgents.expiresOn', {
+              date: accountUiHost.formatProductDateTime(connection.expiresAt),
+            })
+          }}
         </p>
         <Button
-          v-if="status(connection) === '已连接'"
+          v-if="isLive(connection)"
           variant="outline"
           size="sm"
           :disabled="busy"
-          @click="revoke(connection.id, 'oauth')"
-          >撤销 {{ connection.name }}</Button
+          @click="askRevoke(connection.id, 'oauth', connection.name)"
+          >{{ t('account.externalAgents.revokeNamed', { name: connection.name }) }}</Button
         >
       </article>
     </div>
     <div class="space-y-3">
-      <h3 class="font-medium">Personal Access Tokens</h3>
-      <p class="text-sm text-muted-foreground">
-        用于自己的脚本和自托管 Agent。Token 有效期可选 7/30/90/365 天，默认 90
-        天；完整密钥只显示一次。
+      <div class="flex items-center justify-between gap-3">
+        <h3 class="font-medium">{{ t('account.externalAgents.patTitle') }}</h3>
+        <Button size="sm" :disabled="busy" data-testid="pat-create-open" @click="openCreate">
+          {{ t('account.externalAgents.create') }}
+        </Button>
+      </div>
+      <p v-if="!livePats.length && !busy" class="text-sm text-muted-foreground">
+        {{ t('account.externalAgents.patEmpty') }}
       </p>
-      <article v-for="pat in pats" :key="pat.id" class="rounded-lg border p-4 text-sm">
+      <article v-for="pat in livePats" :key="pat.id" class="rounded-lg border p-4 text-sm">
         <div class="flex items-center justify-between gap-3">
-          <strong>{{ pat.name }}</strong
-          ><span class="text-xs text-muted-foreground">{{ status(pat) }}</span>
+          <strong>{{ pat.name }}</strong>
         </div>
         <p class="mt-2 font-mono">{{ pat.prefix }}…</p>
         <p class="mt-1">{{ pat.scopes.map(scopeName).join(' · ') }}</p>
         <p class="mt-1 text-xs text-muted-foreground">
-          到期：{{ accountUiHost.formatProductDateTime(pat.expiresAt) }}
+          {{
+            t('account.externalAgents.expiresOn', {
+              date: accountUiHost.formatProductDateTime(pat.expiresAt),
+            })
+          }}
         </p>
         <Button
-          v-if="status(pat) === '已连接'"
           class="mt-2"
           variant="outline"
           size="sm"
           :disabled="busy"
-          @click="revoke(pat.id, 'pat')"
-          >撤销 {{ pat.name }}</Button
+          data-testid="pat-revoke-open"
+          @click="askRevoke(pat.id, 'pat', pat.name)"
+          >{{ t('account.externalAgents.revokeNamed', { name: pat.name }) }}</Button
         >
       </article>
-      <form class="space-y-3 rounded-lg border p-4" @submit.prevent="createPat">
-        <label for="external-pat-name" class="block text-sm font-medium">新 Token 名称</label>
-        <Input
-          id="external-pat-name"
-          v-model="name"
-          maxlength="80"
-          required
-          placeholder="例如：我的脚本"
-          :disabled="busy"
-        />
-        <fieldset :disabled="busy">
-          <legend class="mb-2 text-sm font-medium">权限范围</legend>
-          <div class="grid gap-2 text-sm sm:grid-cols-2">
-            <label
-              v-for="scope in scopeOptions"
-              :key="scope"
-              class="flex items-center gap-2"
-              :data-testid="`pat-scope-${scope}`"
-            >
-              <Checkbox v-model="selectedScopes[scope]" :aria-label="scopeName(scope)" />
-              {{ scopeName(scope) }}
-            </label>
-          </div>
-        </fieldset>
-        <fieldset :disabled="busy">
-          <legend class="mb-2 text-sm font-medium">有效期</legend>
-          <RadioGroup v-model="expiresInDays" class="flex flex-wrap gap-4 text-sm">
-            <label
-              v-for="days in expiryOptions"
-              :key="days"
-              class="flex items-center gap-2"
-              :data-testid="`pat-expiry-${days}`"
-            >
-              <RadioGroupItem :value="days" :aria-label="`${days} 天`" />
-              {{ days }} 天{{ days === '90' ? '（默认）' : '' }}
-            </label>
-          </RadioGroup>
-        </fieldset>
-        <p
-          v-if="carriesWriteScope"
-          role="status"
-          data-testid="pat-write-warning"
-          class="rounded border border-amber-500/40 bg-amber-500/10 p-3 text-sm text-amber-700 dark:text-amber-300"
-        >
-          {{ t('account.externalAgents.writeWarning') }}
-        </p>
-        <Button type="submit" :disabled="busy || !name.trim() || chosenScopes.length === 0"
-          >创建 Token</Button
-        >
-      </form>
-      <div v-if="secret" class="space-y-2 rounded-lg border p-4" role="status">
-        <label for="external-pat-secret" class="block text-sm font-medium"
-          >请立即复制，关闭后无法再次查看</label
-        >
-        <Textarea
-          id="external-pat-secret"
-          :model-value="secret"
-          readonly
-          rows="2"
-          class="w-full rounded border bg-muted p-2 font-mono text-sm"
-        />
-        <Button variant="outline" @click="secret = ''">已保存，隐藏密钥</Button>
-      </div>
     </div>
+    <Dialog :open="createOpen" @update:open="handleCreateOpenChange">
+      <DialogContent data-testid="pat-create-dialog" class="sm:max-w-lg">
+        <DialogHeader>
+          <DialogTitle>{{ t('account.externalAgents.createDialogTitle') }}</DialogTitle>
+          <DialogDescription>
+            {{ t('account.externalAgents.createDialogDescription') }}
+          </DialogDescription>
+        </DialogHeader>
+        <p v-if="error" role="alert" class="text-sm text-destructive">
+          {{ t(`errors.${error}`) }}
+        </p>
+        <template v-if="secret">
+          <div class="space-y-2" role="status" data-testid="pat-create-secret">
+            <p class="text-sm font-medium">
+              {{ t('account.externalAgents.secretTitle') }}
+            </p>
+            <div class="flex items-start gap-2">
+              <Textarea
+                id="external-pat-secret"
+                :model-value="secret"
+                readonly
+                rows="2"
+                class="flex-1 font-mono"
+                :aria-label="t('account.externalAgents.secretTitle')"
+              />
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                data-testid="pat-copy-secret"
+                @click="copySecret"
+              >
+                <Copy class="size-4" aria-hidden="true" />
+                {{ copied ? t('account.externalAgents.copied') : t('account.externalAgents.copy') }}
+              </Button>
+            </div>
+            <p class="text-xs text-muted-foreground">
+              {{ t('account.externalAgents.secretNotice') }}
+            </p>
+          </div>
+          <DialogFooter>
+            <Button data-testid="pat-create-done" @click="closeCreate">
+              {{ t('account.externalAgents.done') }}
+            </Button>
+          </DialogFooter>
+        </template>
+        <template v-else-if="replayed">
+          <p
+            role="status"
+            data-testid="pat-create-replayed"
+            class="rounded border border-amber-500/40 bg-amber-500/10 p-3 text-sm text-amber-700 dark:text-amber-300"
+          >
+            {{ t('account.externalAgents.createReplayed') }}
+          </p>
+          <DialogFooter>
+            <Button data-testid="pat-create-done" @click="closeCreate">
+              {{ t('account.externalAgents.done') }}
+            </Button>
+          </DialogFooter>
+        </template>
+        <form v-else class="space-y-4" @submit.prevent="createPat">
+          <div class="space-y-1.5">
+            <Label for="external-pat-name">{{ t('account.externalAgents.nameLabel') }}</Label>
+            <Input
+              id="external-pat-name"
+              v-model="name"
+              maxlength="80"
+              required
+              :placeholder="t('account.externalAgents.namePlaceholder')"
+              :disabled="busy"
+            />
+          </div>
+          <fieldset :disabled="busy">
+            <legend class="mb-2 text-sm font-medium">
+              {{ t('account.externalAgents.scopesLegend') }}
+            </legend>
+            <div class="grid gap-2 text-sm sm:grid-cols-2">
+              <label
+                v-for="scope in scopeOptions"
+                :key="scope"
+                class="flex items-center gap-2"
+                :data-testid="`pat-scope-${scope}`"
+              >
+                <Checkbox v-model="selectedScopes[scope]" :aria-label="scopeName(scope)" />
+                {{ scopeName(scope) }}
+              </label>
+            </div>
+          </fieldset>
+          <fieldset :disabled="busy">
+            <legend class="mb-2 text-sm font-medium">
+              {{ t('account.externalAgents.expiryLegend') }}
+            </legend>
+            <RadioGroup v-model="expiresInDays" class="flex flex-wrap gap-4 text-sm">
+              <label
+                v-for="days in expiryOptions"
+                :key="days"
+                class="flex items-center gap-2"
+                :data-testid="`pat-expiry-${days}`"
+              >
+                <RadioGroupItem :value="days" :aria-label="`${days}`" />
+                {{
+                  days === '90'
+                    ? t('account.externalAgents.expiryDefault', { days })
+                    : t('account.externalAgents.expiryDays', { days })
+                }}
+              </label>
+            </RadioGroup>
+          </fieldset>
+          <p
+            v-if="carriesWriteScope"
+            role="status"
+            data-testid="pat-write-warning"
+            class="rounded border border-amber-500/40 bg-amber-500/10 p-3 text-sm text-amber-700 dark:text-amber-300"
+          >
+            {{ t('account.externalAgents.writeWarning') }}
+          </p>
+          <DialogFooter>
+            <Button
+              type="button"
+              variant="ghost"
+              :disabled="creating"
+              data-testid="pat-create-cancel"
+              @click="closeCreate"
+            >
+              {{ t('account.externalAgents.cancel') }}
+            </Button>
+            <Button
+              type="submit"
+              data-testid="pat-create-submit"
+              :disabled="busy || creating || !name.trim() || chosenScopes.length === 0"
+            >
+              <LoaderCircle v-if="creating" class="mr-2 size-4 animate-spin" aria-hidden="true" />
+              {{
+                creating ? t('account.externalAgents.creating') : t('account.externalAgents.create')
+              }}
+            </Button>
+          </DialogFooter>
+        </form>
+      </DialogContent>
+    </Dialog>
+    <AlertDialog
+      :open="Boolean(revokeTarget)"
+      @update:open="
+        (open) => {
+          if (!open) cancelRevoke();
+        }
+      "
+    >
+      <AlertDialogContent data-testid="pat-revoke-dialog">
+        <AlertDialogHeader>
+          <AlertDialogTitle>
+            {{ t('account.externalAgents.revokeTitle', { name: revokeTarget?.name ?? '' }) }}
+          </AlertDialogTitle>
+          <AlertDialogDescription>
+            {{ t('account.externalAgents.revokeDescription') }}
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <p v-if="error" role="alert" class="text-sm text-destructive">
+          {{ t(`errors.${error}`) }}
+        </p>
+        <AlertDialogFooter>
+          <Button
+            variant="outline"
+            :disabled="revoking"
+            data-testid="pat-revoke-cancel"
+            @click="cancelRevoke"
+          >
+            {{ t('account.externalAgents.cancel') }}
+          </Button>
+          <Button
+            variant="destructive"
+            :disabled="revoking"
+            data-testid="pat-revoke-confirm"
+            @click="confirmRevoke"
+          >
+            {{
+              revoking
+                ? t('account.externalAgents.revoking')
+                : t('account.externalAgents.revokeConfirmText')
+            }}
+          </Button>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
   </section>
 </template>
