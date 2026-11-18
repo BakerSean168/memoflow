@@ -487,6 +487,65 @@ describe('KnowledgeRepositorySettings', () => {
     open.mockRestore();
   });
 
+  it('renders public repositories with neutral badges instead of destructive warnings', async () => {
+    routerMocks.query = { installation_intent: 'intent-public' };
+    const getKnowledgeRepositoryInstallationIntentStatus = vi.fn(async () =>
+      ok({
+        intentId: 'intent-public',
+        status: 'CallbackReceived' as const,
+        clientKind: 'web' as const,
+        expiresAt: Date.now() + 600_000,
+        installationId: 'installation-1',
+      }),
+    );
+    const finalizeKnowledgeRepositoryInstallationIntent = vi.fn(async () =>
+      ok({
+        installationId: 'installation-1',
+        githubAccountId: '42',
+        returnUrl: 'https://app.example.test/settings?tab=repository',
+        repositories: [
+          {
+            id: 'repository-public',
+            nodeId: 'R_public',
+            fullName: 'owner/open-notes',
+            ownerId: '42',
+            private: false,
+            archived: false,
+            disabled: false,
+            defaultBranch: 'main',
+            permissions: { admin: false, push: true, pull: true },
+          },
+          {
+            id: 'repository-private',
+            nodeId: 'R_private',
+            fullName: 'owner/private-notes',
+            ownerId: '42',
+            private: true,
+            archived: false,
+            disabled: false,
+            defaultBranch: 'main',
+            permissions: { admin: false, push: true, pull: true },
+          },
+        ],
+      }),
+    );
+    const wrapper = mountSettings(
+      createService({
+        getKnowledgeRepositoryInstallationIntentStatus,
+        finalizeKnowledgeRepositoryInstallationIntent,
+      }),
+    );
+    await flushPromises();
+
+    expect(wrapper.findAll('[variant="outline"]').some((badge) => badge.text() === 'Public')).toBe(
+      true,
+    );
+    expect(
+      wrapper.findAll('[variant="secondary"]').some((badge) => badge.text() === 'Private'),
+    ).toBe(true);
+    expect(wrapper.find('[variant="destructive"]').exists()).toBe(false);
+  });
+
   it('loads existing identity-scoped repository connections', async () => {
     const listKnowledgeRepositoryConnections = vi.fn(async () =>
       ok({
