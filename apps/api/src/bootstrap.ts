@@ -131,7 +131,17 @@ export class ApiBootstrapper {
             res.json({ data: captured });
           });
         }
-        app.all('/api/auth/*splat', this.cloudAuth.expressHandler);
+        // Better Auth derives session metadata from forwarding headers itself
+        // and falls back to x-real-ip when X-Forwarded-For has several hops.
+        // Express has already applied API_TRUST_PROXY_HOPS to req.ip, so hand
+        // Better Auth that single trusted address instead of a raw header
+        // chain or an untrusted x-real-ip fallback.
+        const forwardTrustedClientIp: RequestHandler = (req, _res, next) => {
+          if (req.ip) req.headers['x-forwarded-for'] = req.ip;
+          delete req.headers['x-real-ip'];
+          next();
+        };
+        app.all('/api/auth/*splat', forwardTrustedClientIp, this.cloudAuth.expressHandler);
         if (this.cloudAuth.externalAgents) {
           app.all(
             [

@@ -17,6 +17,7 @@ import {
   Label,
 } from '@memoflow/ui-vue-shadcn';
 import { CLOUD_ACCOUNT_SECURITY_KEY, accountUiHost } from '../../account-ui-host';
+import { parseSessionUserAgent } from '../lib/session-device';
 import { useAccountSignOut } from '../composables/useAccountSignOut';
 
 const props = defineProps<{ email: string | null }>();
@@ -36,6 +37,15 @@ const sessions = ref<AccountSecuritySession[]>([]);
 const sessionsLoaded = ref(false);
 const busy = ref(false);
 const error = ref('');
+
+/** Friendly device title; the raw User-Agent is never shown as the label. */
+function sessionDeviceLabel(userAgent: string | null): string {
+  const { client, os } = parseSessionUserAgent(userAgent);
+  if (client === 'unknown') return t('account.security.unknownDevice');
+  const clientLabel = t(`account.security.deviceClient.${client}`);
+  if (os === 'unknown') return clientLabel;
+  return `${clientLabel} · ${t(`account.security.deviceOs.${os}`)}`;
+}
 
 async function run(operation: () => Promise<void>) {
   busy.value = true;
@@ -151,8 +161,8 @@ onMounted(() => {
             class="flex items-center justify-between gap-4 rounded-md border p-3"
           >
             <div class="min-w-0 space-y-1 text-sm">
-              <p class="break-words">
-                {{ session.userAgent || t('account.security.unknownDevice') }}
+              <p class="break-words" data-testid="account-session-device">
+                {{ sessionDeviceLabel(session.userAgent) }}
               </p>
               <p class="text-muted-foreground">
                 {{ session.ipAddress || '—' }} · {{ new Date(session.createdAt).toLocaleString() }}

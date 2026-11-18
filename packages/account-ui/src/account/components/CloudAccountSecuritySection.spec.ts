@@ -2,6 +2,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import { flushPromises, mount } from '@vue/test-utils';
 import { createI18n } from 'vue-i18n';
 import { ok, fail } from '@memoflow/transport-contracts/result';
+import { buildDesktopUserAgent } from '@memoflow/cloud-auth-contracts';
 import { CLOUD_ACCOUNT_SECURITY_KEY } from '../../account-ui-host';
 import account from '@account-ui-test-host/locales/en-US/account';
 import CloudAccountSecuritySection from './CloudAccountSecuritySection.vue';
@@ -123,6 +124,34 @@ describe('CloudAccountSecuritySection', () => {
     });
     expect(nativeConfirm).not.toHaveBeenCalled();
     vi.unstubAllGlobals();
+    wrapper.unmount();
+  });
+  it('renders friendly device titles instead of the stored User-Agent', async () => {
+    const createdAt = new Date().toISOString();
+    const { wrapper } = fixture(
+      ok([
+        {
+          id: 'desktop',
+          current: true,
+          userAgent: buildDesktopUserAgent('0.23.0', 'Windows'),
+          createdAt,
+        },
+        { id: 'legacy', current: false, userAgent: 'node', createdAt },
+        {
+          id: 'browser',
+          current: false,
+          userAgent:
+            'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/156.0.0.0 Safari/537.36',
+          createdAt,
+        },
+      ]),
+    );
+    await flushPromises();
+    expect(
+      wrapper.findAll('[data-testid="account-session-device"]').map((node) => node.text()),
+    ).toEqual(['MemoFlow Desktop · Windows', 'MemoFlow Desktop', 'Chrome · Windows']);
+    expect(wrapper.get('[data-testid="account-sessions"]').text()).not.toContain('node');
+    expect(wrapper.get('[data-testid="account-sessions"]').text()).not.toContain('Mozilla/5.0');
     wrapper.unmount();
   });
   it('shows the error and refresh without the empty state when sessions fail to load', async () => {

@@ -10,6 +10,7 @@ import { mapBetterAuthFailure } from '@memoflow/cloud-auth';
 import { fail, ok, type Result } from '@memoflow/transport-contracts/result';
 import { createLogger } from '@memoflow/utils/logger';
 import { getApiBaseUrl } from '../utils/api-config';
+import { desktopClientUserAgent } from '../utils/desktop-client-identity';
 import { safeSyncErrorCode, safeSyncErrorType } from '../database/powersync-health';
 import type { CloudSessionStore, StoredCloudSession } from './cloud-session-store';
 import type { DesktopProfileRuntimeManager } from './desktop-profile-runtime-manager';
@@ -224,7 +225,11 @@ export class DesktopCloudSignInService {
     try {
       response = await this.fetchImpl(`${authOrigin()}/api/auth${path}`, {
         method: 'POST',
-        headers: { 'content-type': 'application/json', origin: authOrigin() },
+        headers: {
+          'content-type': 'application/json',
+          origin: authOrigin(),
+          'user-agent': desktopClientUserAgent(),
+        },
         body: JSON.stringify(body),
         signal: AbortSignal.timeout(15_000),
       });

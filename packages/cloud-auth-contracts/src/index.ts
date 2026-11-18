@@ -171,6 +171,18 @@ export interface AccountSecuritySession {
   current: boolean;
 }
 
+/** Display name the desktop client announces in its session User-Agent. */
+export const DESKTOP_CLIENT_NAME = 'MemoFlow Desktop';
+
+/**
+ * Node clients default to the opaque `node` User-Agent, which the session list
+ * cannot explain. Desktop auth requests announce the app, version and OS so a
+ * stored session stays readable without guessing.
+ */
+export function buildDesktopUserAgent(version: string, platform: string): string {
+  return `${DESKTOP_CLIENT_NAME}/${version} (${platform})`;
+}
+
 export interface CloudAccountSecurityPort {
   verifyAccountPassword(password: string): Promise<Result<void>>;
   requestEmailChange(input: { password: string; newEmail: string }): Promise<Result<void>>;

@@ -20,7 +20,10 @@
 }
 
 {$APP_DOMAIN:memoflow.bakersean.top} {
-	reverse_proxy web:80
+	reverse_proxy web:80 {
+		# Overwrite the client chain at the trusted edge so the API sees one hop.
+		header_up X-Forwarded-For {client_ip}
+	}
 
 	# 安全头（Caddy 层补充，Nginx 层也有）
 	header {
@@ -45,7 +48,10 @@
 }
 
 {$LEGACY_DOMAIN:memoflow.bakersean.top} {
-	reverse_proxy web:80
+	reverse_proxy web:80 {
+		# Overwrite the client chain at the trusted edge so the API sees one hop.
+		header_up X-Forwarded-For {client_ip}
+	}
 
 	header {
 		Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
