@@ -442,6 +442,9 @@ export default {
     createPrivate: 'Create private repository',
     createOpenFailed: 'Unable to open GitHub repository creation',
     notConnected: 'No GitHub knowledge repository connected',
+    unavailableTitle: 'GitHub repository connection is not available',
+    unavailableDescription:
+      'GitHub repository connections are not enabled in this deployment. Your local knowledge base remains available.',
     localCloudBlocked:
       'A local account cannot use the cloud knowledge repository. Sign in with an account first.',
     offlineCloudBlocked:

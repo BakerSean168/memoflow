@@ -144,6 +144,34 @@ export type ListKnowledgeRepositoryConnectionsRes = z.infer<
   typeof ListKnowledgeRepositoryConnectionsResSchema
 >;
 
+/**
+ * Reason carried in `ResultError.context.reason` when the deployment has no
+ * GitHub App configured for knowledge repositories.
+ *
+ * Not-configured is a neutral capability-availability state, not a user action
+ * failure: clients must not render it as an error before the user asks to connect.
+ */
+export const KNOWLEDGE_REPOSITORY_NOT_CONFIGURED_REASON = 'github-app-not-configured';
+
+/** Structural Result failure shape inspected by the not-configured guard. */
+export interface KnowledgeRepositoryFailureLike {
+  readonly code: string;
+  readonly context?: Record<string, unknown>;
+}
+
+/**
+ * True when a knowledge-repository Result failure means the optional GitHub App
+ * is not configured for this deployment.
+ */
+export function isKnowledgeRepositoryNotConfiguredFailure(
+  failure: KnowledgeRepositoryFailureLike,
+): boolean {
+  return (
+    failure.code === 'SERVICE_UNAVAILABLE' &&
+    failure.context?.reason === KNOWLEDGE_REPOSITORY_NOT_CONFIGURED_REASON
+  );
+}
+
 export const KnowledgeRepositoryConnectionParamsSchema = z.object({
   connectionId: z.string().min(1),
 });

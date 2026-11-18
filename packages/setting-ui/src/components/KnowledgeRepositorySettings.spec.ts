@@ -9,6 +9,7 @@ import {
   type DesktopAccessSnapshot,
 } from '@memoflow/desktop-contracts';
 import type { KnowledgeRemoteBindingClientDTO } from '@memoflow/repository-contracts';
+import { KNOWLEDGE_REPOSITORY_NOT_CONFIGURED_REASON } from '@memoflow/repository-contracts';
 import { fail, ok } from '@memoflow/transport-contracts/result';
 import {
   DESKTOP_ACCESS_SNAPSHOT_KEY,
@@ -61,6 +62,8 @@ const messages = {
       createPrivate: 'Create private repository',
       createOpenFailed: 'Create repository page failed',
       notConnected: 'Not connected',
+      unavailableTitle: 'GitHub repository connection is not available',
+      unavailableDescription: 'GitHub connections are not enabled in this deployment.',
       localCloudBlocked: 'A local account cannot use the cloud knowledge repository.',
       offlineCloudBlocked: 'Sign in online first.',
       webConnectHint: 'Web connect hint',
@@ -1310,6 +1313,43 @@ describe('KnowledgeRepositorySettings', () => {
     );
     expect(wrapper.text()).not.toContain('Sync now');
   });
+
+  it('renders a neutral not-configured notice without an error banner when the GitHub App is absent', async () => {
+    const service = createService({
+      listKnowledgeRepositoryConnections: vi.fn(async () =>
+        fail({
+          code: 'SERVICE_UNAVAILABLE',
+          message: 'GitHub App knowledge repository connections are not configured',
+          context: { reason: KNOWLEDGE_REPOSITORY_NOT_CONFIGURED_REASON },
+        }),
+      ),
+      getLocalVaultBinding: vi.fn(async () => ok(null)),
+    });
+    const wrapper = mountSettings(service, { invoke: vi.fn() });
+    await flushPromises();
+
+    expect(wrapper.text()).toContain('GitHub repository connection is not available');
+    expect(wrapper.text()).not.toContain('Error');
+    expect(wrapper.text()).not.toContain(
+      'GitHub App knowledge repository connections are not configured',
+    );
+  });
+
+  it('still renders the error banner for a real backend failure while listing connections', async () => {
+    const service = createService({
+      listKnowledgeRepositoryConnections: vi.fn(async () =>
+        fail({ code: 'INTERNAL_ERROR', message: 'Database is unreachable' }),
+      ),
+      getLocalVaultBinding: vi.fn(async () => ok(null)),
+    });
+    const wrapper = mountSettings(service, { invoke: vi.fn() });
+    await flushPromises();
+
+    expect(wrapper.text()).toContain('Error');
+    expect(wrapper.text()).toContain('Database is unreachable');
+    expect(wrapper.text()).not.toContain('GitHub repository connection is not available');
+  });
+
   it('hides GitHub connect actions and skips cloud listing for local accounts', async () => {
     const service = createService();
     const wrapper = mountSettings(service, undefined, {
