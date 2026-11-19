@@ -111,6 +111,8 @@ export const ScopedPatSummarySchema = z.object({
       'relations:read',
     ]),
   ),
+  /** Last successful use, throttled on the write side; null until the token is first used. */
+  lastUsedAt: z.iso.datetime().nullable(),
   ...credentialDates,
 });
 export const OAuthConnectionSchema = z.object({
@@ -152,6 +154,7 @@ export const ScopedPatCreateReceiptSchema = z.strictObject({
     createdAt: z.iso.datetime(),
     expiresAt: z.iso.datetime(),
     revokedAt: z.iso.datetime().nullable(),
+    lastUsedAt: z.iso.datetime().nullable(),
   }),
 });
 export type OAuthConnection = z.infer<typeof OAuthConnectionSchema>;

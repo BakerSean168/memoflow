@@ -53,6 +53,7 @@ describe('scoped PAT lifetime contract (#970)', () => {
       createdAt: '2026-11-16T00:00:00.000Z',
       expiresAt: '2027-11-16T00:00:00.000Z',
       revokedAt: null,
+      lastUsedAt: null,
     };
     expect(ScopedPatSummarySchema.parse(summary)).toEqual(summary);
   });
@@ -91,6 +92,7 @@ describe('scoped PAT lifetime contract (#970)', () => {
       createdAt: '2026-11-16T00:00:00.000Z',
       expiresAt: '2027-11-16T00:00:00.000Z',
       revokedAt: null,
+      lastUsedAt: null,
     };
     expect(ScopedPatSummarySchema.parse(summary)).toEqual(summary);
   });
