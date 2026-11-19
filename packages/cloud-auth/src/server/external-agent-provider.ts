@@ -9,6 +9,8 @@ export interface ExternalAgentOAuthOptions {
   readonly webOrigin: string;
   readonly allowedClientIds: readonly string[];
   readonly accountIsActive: (identityId: string) => Promise<boolean>;
+  /** Fixed-window read budget per connection; defaults to the calibrated gateway limit. */
+  readonly readQuotaPerMinute?: number;
 }
 
 export const EXTERNAL_AGENT_SCOPES = ['goals:read', 'tasks:read'] as const;

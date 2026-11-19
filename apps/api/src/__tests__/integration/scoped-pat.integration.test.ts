@@ -7,7 +7,10 @@ import { prisma } from '@memoflow/database';
 import { IdentityId } from '@memoflow/utils/domain';
 import { createAccountPrismaActiveQuery } from '@memoflow/account';
 import { createScopedPatService } from '@memoflow/cloud-auth/server';
-import type { GatewayToolCheckpoint } from '@memoflow/agent-gateway';
+import {
+  DEFAULT_EXTERNAL_AGENT_RATE_LIMITS,
+  type GatewayToolCheckpoint,
+} from '@memoflow/agent-gateway';
 import {
   cleanAll,
   disconnectPrisma,
@@ -221,16 +224,31 @@ describe('scoped PAT durable authority', () => {
     }
   });
 
-  it('enforces a shared quota for parallel calls from independent service instances', async () => {
+  it('enforces the configured budget for parallel calls from independent service instances', async () => {
     const owner = IdentityId.generate();
     await seedAccount({ id: owner });
     const issued = await service().create(String(owner), { name: 'quota fixture' });
+    const limited = () =>
+      createScopedPatService({ database: prisma, audience, accountIsActive, readQuotaPerMinute: 12 });
     const results = await Promise.all(
-      Array.from({ length: 70 }, () => service().consumeReadQuota(issued.id)),
+      Array.from({ length: 20 }, () => limited().consumeReadQuota(issued.id)),
     );
-    expect(results.filter(Boolean)).toHaveLength(60);
+    expect(results.filter(Boolean)).toHaveLength(12);
     expect(
       (await prisma.externalAgentPat.findUniqueOrThrow({ where: { id: issued.id } })).rateCount,
-    ).toBe(60);
+    ).toBe(12);
+  });
+
+  it('falls back to the calibrated default when no budget is configured', async () => {
+    const owner = IdentityId.generate();
+    await seedAccount({ id: owner });
+    const issued = await service().create(String(owner), { name: 'default quota fixture' });
+    const perMinute = DEFAULT_EXTERNAL_AGENT_RATE_LIMITS.credentialPerMinute;
+    await prisma.externalAgentPat.update({
+      where: { id: issued.id },
+      data: { rateCount: perMinute - 1, rateWindow: new Date() },
+    });
+    expect(await service().consumeReadQuota(issued.id)).toBe(true);
+    expect(await service().consumeReadQuota(issued.id)).toBe(false);
   });
 });

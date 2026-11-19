@@ -192,6 +192,7 @@ async function bootstrap(): Promise<void> {
           webOrigin: env.MEMOFLOW_WEB_URL!,
           allowedClientIds: env.EAG_OAUTH_CLIENT_IDS,
           accountIsActive: createAccountPrismaActiveQuery(prisma),
+          readQuotaPerMinute: env.EAG_RATE_LIMIT_CREDENTIAL_PER_MIN,
         }
       : undefined,
     database: prisma,
@@ -482,7 +483,10 @@ async function bootstrap(): Promise<void> {
   const goalPageQuery = createGoalPrismaPageQuery(prisma);
   const agentGatewayModule = composeAgentGatewayModule({
     toolCheckpoint: createGatewayPermissionCheckpoint(new PermissionPrismaRepository(prisma)),
-    admission: createPilotAdmission(createApiRedisClient({ fresh: true, commandTimeout: 5000 })),
+    admission: createPilotAdmission(createApiRedisClient({ fresh: true, commandTimeout: 5000 }), {
+      ipPerMinute: env.EAG_RATE_LIMIT_IP_PER_MIN,
+      ownerPerMinute: env.EAG_RATE_LIMIT_OWNER_PER_MIN,
+    }),
     enabled: env.EAG_READ_PILOT_ENABLED,
     writes: env.EAG_WRITE_ENABLED
       ? {
@@ -501,6 +505,7 @@ async function bootstrap(): Promise<void> {
       database: prisma,
       audience: env.EAG_AUDIENCE ?? 'http://localhost:3000/mcp',
       accountIsActive: createAccountPrismaActiveQuery(prisma),
+      readQuotaPerMinute: env.EAG_RATE_LIMIT_CREDENTIAL_PER_MIN,
     }),
     goals: bindGoalReadPort(goalPageQuery),
     tasks: env.EAG_TASK_READ_ENABLED
