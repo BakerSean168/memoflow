@@ -53,7 +53,11 @@ function mcpRequest(secret: string, method: string, name: string, args: unknown)
       params: {
         name,
         arguments: args,
-        _meta: { 'io.modelcontextprotocol/protocolVersion': '2026-07-28' },
+        _meta: {
+          'io.modelcontextprotocol/protocolVersion': '2026-07-28',
+          'io.modelcontextprotocol/clientInfo': { name: 'sync-guard', version: '1' },
+          'io.modelcontextprotocol/clientCapabilities': {},
+        },
       },
     }),
   });
@@ -88,7 +92,8 @@ async function createFixture() {
   });
   const call = async (name: string, args: unknown) => {
     const response = await gateway.fetch(mcpRequest(pat.secret, 'tools/call', name, args), cx(identityId));
-    return (await response.json()) as {
+    const payload: unknown = await response.json();
+    return payload as {
       result?: { structuredContent?: unknown; isError?: boolean; content?: { text: string }[] };
     };
   };
