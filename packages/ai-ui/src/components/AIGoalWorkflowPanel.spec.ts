@@ -38,6 +38,17 @@ const i18n = createI18n({
             startAnotherNote: 'New Note Chat',
             keepCompletedChanges: 'Keep completed changes',
             cancelRemaining: 'Cancel remaining',
+            status: {
+              running: 'Running',
+              suspended: 'Awaiting review',
+              completed: 'Completed',
+              failed: 'Failed',
+              cancelled: 'Cancelled',
+            },
+            recovery: {
+              retryable: 'Retryable',
+              blocked: 'Needs manual action',
+            },
           },
         },
         dialogs: {
@@ -362,10 +373,12 @@ describe('AIGoalWorkflowPanel — ADR-052 goal.create projection', () => {
     });
 
     expect(wrapper.find('[data-testid="goal-workflow-recovery"]').exists()).toBe(true);
-    expect(wrapper.text()).toContain('SERVICE_UNAVAILABLE');
     expect(wrapper.text()).toContain('Execution failed (SERVICE_UNAVAILABLE)');
     expect(wrapper.text()).not.toContain('Knowledge relation unavailable');
-    expect(wrapper.text()).toContain('retryable');
+    expect(wrapper.text()).toContain('Retryable');
+    expect(wrapper.get('[data-testid="goal-workflow-failure"]').attributes('title')).toBe(
+      'knowledge_link · SERVICE_UNAVAILABLE',
+    );
     await wrapper.get('[data-testid="goal-agent-retry-execution"]').trigger('click');
     await wrapper.get('[data-testid="goal-agent-accept-partial"]').trigger('click');
     await wrapper.get('[data-testid="goal-agent-cancel-remaining"]').trigger('click');

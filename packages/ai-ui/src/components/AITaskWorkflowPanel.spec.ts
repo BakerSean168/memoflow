@@ -19,6 +19,18 @@ const i18n = createI18n({
             taskAwaitingApprovalHint: 'Review task',
             keepCompletedChanges: 'Keep completed changes',
             cancelRemaining: 'Cancel remaining',
+            status: {
+              running: 'Running',
+              suspended: 'Awaiting review',
+              completed: 'Completed',
+              failed: 'Failed',
+              cancelled: 'Cancelled',
+            },
+            taskScheduleKind: {
+              oneTime: 'One-time task',
+              recurring: 'Recurring task',
+            },
+            taskCount: 'no tasks | one task | {count} tasks',
           },
         },
         goalDraft: {
@@ -40,6 +52,11 @@ const i18n = createI18n({
           automation: {
             confirm: 'Confirm',
             recoveryRetryReady: 'Fix the issue and retry.',
+            outcomeLabels: {
+              success: 'Success',
+              partial: 'Partial success',
+              failed: 'Failed',
+            },
           },
         },
       },
@@ -92,6 +109,7 @@ describe('AITaskWorkflowPanel', () => {
     });
     expect(wrapper.find('[data-testid="task-workflow-panel"]').exists()).toBe(true);
     expect(wrapper.text()).toContain('Ship it');
+    expect(wrapper.text()).toContain('One-time task');
     expect(wrapper.find('[data-testid="task-workflow-revision"]').text()).toContain('2');
     expect(wrapper.find('[data-testid="task-workflow-draft-editor"]').exists()).toBe(false);
     expect(wrapper.text()).not.toContain('ITaskPlanId_550e8400-e29b-41d4-a716-446655440001');
@@ -187,6 +205,7 @@ describe('AITaskWorkflowPanel', () => {
       },
     });
     expect(wrapper.text()).not.toContain(id);
-    expect(wrapper.get('[data-testid=task-workflow-result]').text()).toContain('1 task');
+    expect(wrapper.get('[data-testid=task-workflow-result]').text()).toContain('one task');
+    expect(wrapper.get('[data-testid=task-workflow-result]').text()).toContain('Success');
   });
 });
