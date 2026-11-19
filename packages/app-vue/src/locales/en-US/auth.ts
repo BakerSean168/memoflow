@@ -150,6 +150,11 @@ export default {
   },
   receipt: {
     requestId: 'Request ID',
+    requestIdDetails: 'View request ID',
+    requestIdPurpose:
+      'Give this ID to support so they can trace what went wrong with this attempt.',
+    copyRequestId: 'Copy request ID',
+    copiedRequestId: 'Copied',
     retry: 'Try again',
     dismiss: 'Dismiss',
   },

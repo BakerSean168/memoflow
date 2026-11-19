@@ -191,6 +191,11 @@ export default {
     retry: 'Try again',
     dismiss: 'Dismiss',
     requestId: 'Request ID',
+    requestIdDetails: 'View request ID',
+    requestIdPurpose:
+      'Give this ID to support so they can trace what went wrong with this attempt.',
+    copyRequestId: 'Copy request ID',
+    copiedRequestId: 'Copied',
   },
   profile: {
     editTitle: 'Edit Profile',

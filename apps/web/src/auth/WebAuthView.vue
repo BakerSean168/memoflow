@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, nextTick, onMounted, reactive, ref, watch } from 'vue';
+import { computed, nextTick, onBeforeUnmount, onMounted, reactive, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { APP_DISPLAY_NAME, logo128 } from '@memoflow/assets';
 import { Button } from '@memoflow/ui-vue-shadcn/components/ui/button';
@@ -287,6 +287,47 @@ function handleReceiptDismiss() {
   authStore.clearPasswordMutationError();
 }
 
+/** Support handle only: the request id sits in the expandable receipt detail
+ * and is copyable, so the failed action's main copy stays actionable. */
+const receiptRequestIdCopied = ref(false);
+let receiptRequestIdCopiedTimer: ReturnType<typeof setTimeout> | null = null;
+
+function clearReceiptRequestIdCopiedTimer() {
+  if (receiptRequestIdCopiedTimer) {
+    clearTimeout(receiptRequestIdCopiedTimer);
+    receiptRequestIdCopiedTimer = null;
+  }
+}
+
+async function copyReceiptRequestId() {
+  const requestId = receipt.value?.requestId;
+  if (!requestId) {
+    return;
+  }
+  try {
+    await navigator.clipboard.writeText(requestId);
+  } catch {
+    receiptRequestIdCopied.value = false;
+    return;
+  }
+  receiptRequestIdCopied.value = true;
+  clearReceiptRequestIdCopiedTimer();
+  receiptRequestIdCopiedTimer = setTimeout(() => {
+    receiptRequestIdCopied.value = false;
+    receiptRequestIdCopiedTimer = null;
+  }, 2000);
+}
+
+watch(
+  () => receipt.value?.requestId,
+  () => {
+    clearReceiptRequestIdCopiedTimer();
+    receiptRequestIdCopied.value = false;
+  },
+);
+
+onBeforeUnmount(clearReceiptRequestIdCopiedTimer);
+
 async function handleGithubLogin() {
   action.value = 'github';
   await startGithubLogin(returnTo);
@@ -379,13 +420,38 @@ watch([newPassword, confirmNewPassword], () => {
         class="mb-4 flex flex-col gap-2 border border-red-400/20 bg-red-400/10 px-3 py-2 text-sm text-red-200"
       >
         <p data-testid="web-auth-password-receipt-message">{{ receipt.message }}</p>
-        <p
+        <details
           v-if="receipt.requestId"
-          data-testid="web-auth-password-receipt-request-id"
+          data-testid="web-auth-password-receipt-request-id-details"
           class="text-xs text-white/55"
         >
-          {{ t('auth.receipt.requestId') }}: {{ receipt.requestId }}
-        </p>
+          <summary class="cursor-pointer select-none">
+            {{ t('auth.receipt.requestIdDetails') }}
+          </summary>
+          <div class="mt-2 flex flex-wrap items-center gap-3">
+            <span class="shrink-0">{{ t('auth.receipt.requestId') }}</span>
+            <code
+              data-testid="web-auth-password-receipt-request-id"
+              class="min-w-0 break-all font-mono"
+            >
+              {{ receipt.requestId }}
+            </code>
+            <Button
+              type="button"
+              variant="link"
+              data-testid="web-auth-password-receipt-copy-request-id"
+              class="h-auto p-0 text-inherit underline underline-offset-2 hover:text-white"
+              @click="copyReceiptRequestId"
+            >
+              {{
+                receiptRequestIdCopied
+                  ? t('auth.receipt.copiedRequestId')
+                  : t('auth.receipt.copyRequestId')
+              }}
+            </Button>
+          </div>
+          <p class="mt-1">{{ t('auth.receipt.requestIdPurpose') }}</p>
+        </details>
         <div class="flex gap-3">
           <Button
             v-if="receipt.retryable"
