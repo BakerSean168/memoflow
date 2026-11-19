@@ -9,5 +9,6 @@ export type {
   CloudAuthEmailKind,
   CreateCloudAuthEmailDeliveryOptions,
 } from './email-delivery.js';
+export { EXTERNAL_AGENT_OAUTH_SCOPES, EXTERNAL_AGENT_SCOPES } from './external-agent-provider.js';
 export { createScopedPatService, isScopedPatAuthorityCurrent } from './scoped-pat.js';
 export type { VerifiedPatPrincipal } from './scoped-pat.js';

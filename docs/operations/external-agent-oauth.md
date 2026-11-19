@@ -30,7 +30,7 @@ CORS_ORIGIN=https://app.example.com
 - `https://chatgpt.com/oauth/codex/client.json`
 - `https://claude.ai/oauth/claude-code-client-metadata`
 
-CIMD 不代表软件可信背书。添加其他客户端前应核实身份与回调策略；DCR 默认关闭。仅本机验证允许 loopback HTTP，例如 API `http://127.0.0.1:20201`、Web `http://127.0.0.1:20200`；远程使用 HTTPS。不要使用通配 callback。
+CIMD 不代表软件可信背书。添加其他客户端前应核实身份与回调策略；DCR 默认关闭。仅本机验证允许 loopback HTTP，例如 API `http://127.0.0.1:20201`、Web `http://127.0.0.1:20200`；远程使用 HTTPS。不要使用通配 callback。客户端如何即时注册、何时需要预置种子、如何停用与回滚，见 [Gateway「OAuth 投产」](../internals/external-agent-gateway.md#11-oauth-投产)。
 
 ## 客户端连接
 
