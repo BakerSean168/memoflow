@@ -2,6 +2,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import { flushPromises, mount } from '@vue/test-utils';
 import { createI18n } from 'vue-i18n';
 import { ok, fail } from '@memoflow/transport-contracts/result';
+import { _getConfirmState, _resolveConfirm } from '@memoflow/ui-vue-shadcn';
 import { buildDesktopUserAgent } from '@memoflow/cloud-auth-contracts';
 import { CLOUD_ACCOUNT_SECURITY_KEY } from '../../account-ui-host';
 import account from '@account-ui-test-host/locales/en-US/account';
@@ -44,7 +45,7 @@ function fixture(
         createI18n({
           legacy: false,
           locale: 'en-US',
-          messages: { 'en-US': { account, common: { refresh: 'Refresh' } } },
+          messages: { 'en-US': { account, common: { refresh: 'Refresh', cancel: 'Cancel' } } },
         }),
       ],
       provide: { [CLOUD_ACCOUNT_SECURITY_KEY as symbol]: service },
@@ -63,13 +64,28 @@ function submit(testId: string) {
 }
 
 describe('CloudAccountSecuritySection', () => {
-  it('masks the email, lists devices and revokes only the other session', async () => {
+  it('masks the email, lists devices and revokes only the other session after confirmation', async () => {
     const { wrapper, service } = fixture();
     await flushPromises();
     expect(wrapper.text()).toContain('p***@example.com');
     expect(wrapper.text()).not.toContain('person@example.com');
     expect(wrapper.findAll('[data-testid="account-session-revoke"]')).toHaveLength(1);
     await wrapper.get('[data-testid="account-session-revoke"]').trigger('click');
+    await flushPromises();
+    expect(_getConfirmState()).toMatchObject({
+      open: true,
+      title: 'Revoke this session?',
+      description:
+        'That device will be signed out and will need to sign in again before it can continue.',
+      variant: 'destructive',
+    });
+    expect(service.revokeAccountSession).not.toHaveBeenCalled();
+    _resolveConfirm(false);
+    await flushPromises();
+    expect(service.revokeAccountSession).not.toHaveBeenCalled();
+    await wrapper.get('[data-testid="account-session-revoke"]').trigger('click');
+    await flushPromises();
+    _resolveConfirm(true);
     await flushPromises();
     expect(service.revokeAccountSession).toHaveBeenCalledWith('other');
     wrapper.unmount();

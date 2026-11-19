@@ -11,6 +11,7 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
+  useConfirm,
 } from '@memoflow/ui-vue-shadcn';
 import type {
   AgentInstance,
@@ -288,6 +289,14 @@ async function save() {
 }
 async function unlink() {
   if (!binding.value || !registry || busy.value) return;
+  const confirmed = await useConfirm({
+    title: t('setting.agentInstances.removeBindingConfirmTitle'),
+    description: t('setting.agentInstances.removeBindingConfirmDescription'),
+    confirmText: t('setting.agentInstances.removeBinding'),
+    cancelText: t('common.cancel'),
+    variant: 'destructive',
+  });
+  if (!confirmed) return;
   phase.value = 'saving';
   try {
     await registry.execute({
@@ -593,7 +602,13 @@ onBeforeUnmount(() => {
               >{{ provider.name }}</SelectItem
             ></SelectContent
           ></Select
-        ><Button v-if="binding" variant="ghost" size="sm" :disabled="busy" @click="unlink"
+        ><Button
+          v-if="binding"
+          variant="ghost"
+          size="sm"
+          :disabled="busy"
+          data-testid="ai-agent-unbind"
+          @click="unlink"
           ><Unplug class="mr-1.5 size-3.5" />{{ t('setting.agentInstances.removeBinding') }}</Button
         >
       </div>

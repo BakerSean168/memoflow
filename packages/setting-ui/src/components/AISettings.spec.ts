@@ -8,7 +8,7 @@ import { createNativeAgentFlowFixture, type NativeProbeFailure } from '@memoflow
 import { ref } from 'vue';
 import { mount, flushPromises, type VueWrapper } from '@vue/test-utils';
 import { createI18n } from 'vue-i18n';
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import {
   AgentInstanceSchema,
   AgentRegistryCommandSchema,
@@ -32,11 +32,22 @@ import {
   DESKTOP_BRIDGE_KEY,
 } from '@setting-ui-test-host/di/keys';
 import { productionLocaleMessages } from '@setting-ui-test-host/locales/production-messages';
+
+const confirmMock = vi.hoisted(() => vi.fn(async () => true));
+vi.mock('@memoflow/ui-vue-shadcn', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('@memoflow/ui-vue-shadcn')>()),
+  useConfirm: confirmMock,
+}));
+
 import AISettings from './AISettings.vue';
 import { SERVER_STATE_IDENTITY_SCOPE_KEY } from '@setting-ui-test-host/platform/server-state';
 import MastraAgentSettings from './MastraAgentSettings.vue';
 
 const wrappers: VueWrapper[] = [];
+beforeEach(() => {
+  confirmMock.mockReset();
+  confirmMock.mockResolvedValue(true);
+});
 afterEach(() => {
   wrappers.splice(0).forEach((wrapper) => wrapper.unmount());
   localStorage.clear();
@@ -345,13 +356,23 @@ describe('T3-style Agent settings and direct endpoint configuration', () => {
     expect(localClient.listConnections).not.toHaveBeenCalled();
     expect(wrapper.text()).not.toMatch(/OpenRouter|DeepSeek|Gemini/);
   });
-  it('puts ordinary deletion and built-in restoration in the detail header', async () => {
+  it('confirms before deleting a Provider or resetting the built-in instance', async () => {
     const { wrapper, registry } = await setup({ extra: true });
     expect(wrapper.find('[data-testid="ai-agent-delete"]').exists()).toBe(false);
     await wrapper.get('[data-testid="ai-provider-toggle-mastra"]').trigger('click');
     await flushPromises();
     const reset = wrapper.get('header [data-testid="ai-agent-reset"]');
     expect(reset.attributes('title')).toContain('keep model connections');
+    confirmMock.mockResolvedValueOnce(false);
+    await reset.trigger('click');
+    await flushPromises();
+    expect(confirmMock).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        title: 'Reset the default instance?',
+        variant: 'destructive',
+      }),
+    );
+    expect(registry.execute).not.toHaveBeenCalledWith(expect.objectContaining({ action: 'reset' }));
     await reset.trigger('click');
     await flushPromises();
     expect(registry.execute).toHaveBeenCalledWith({
@@ -362,6 +383,19 @@ describe('T3-style Agent settings and direct endpoint configuration', () => {
     await wrapper.get('[data-testid="ai-provider-select-agent:mastra-other"]').trigger('click');
     expect(wrapper.find('header [data-testid="ai-agent-delete"]').exists()).toBe(true);
     expect(wrapper.find('footer [data-testid="ai-agent-delete"]').exists()).toBe(false);
+    confirmMock.mockResolvedValueOnce(false);
+    await wrapper.get('[data-testid="ai-agent-delete"]').trigger('click');
+    await flushPromises();
+    expect(confirmMock).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        title: 'Delete this Provider?',
+        description: 'This Provider has 0 model binding(s). Deleting it cannot be undone.',
+        variant: 'destructive',
+      }),
+    );
+    expect(registry.execute).not.toHaveBeenCalledWith(
+      expect.objectContaining({ action: 'remove' }),
+    );
     await wrapper.get('[data-testid="ai-agent-delete"]').trigger('click');
     await flushPromises();
     expect(registry.execute).toHaveBeenCalledWith({
@@ -370,6 +404,32 @@ describe('T3-style Agent settings and direct endpoint configuration', () => {
       expectedRevision: 1,
     });
     expect(wrapper.find('[data-testid="ai-provider-select-agent:mastra"]').exists()).toBe(true);
+  });
+  it('confirms before disconnecting the bound model service', async () => {
+    const { wrapper, registry } = await setup({ bound: true });
+    const unbind = wrapper.get('[data-testid="ai-agent-unbind"]');
+    confirmMock.mockResolvedValueOnce(false);
+    await unbind.trigger('click');
+    await flushPromises();
+    expect(confirmMock).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        title: 'Disconnect this model service?',
+        description:
+          'This Agent will lose its configured model. You can connect a model service again later.',
+        variant: 'destructive',
+      }),
+    );
+    expect(registry.execute).not.toHaveBeenCalledWith(
+      expect.objectContaining({ action: 'unbind' }),
+    );
+    await unbind.trigger('click');
+    await flushPromises();
+    expect(registry.execute).toHaveBeenCalledWith({
+      action: 'unbind',
+      instanceId: 'mastra',
+      expectedRevision: 0,
+      connectionId: '11111111-1111-4111-8111-111111111111',
+    });
   });
   it('keeps the instance editor when an auxiliary request fails, and keeps it on refresh failure', async () => {
     const { wrapper, client, registry, localClient } = await setup({ native: true, bound: true });
