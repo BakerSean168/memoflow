@@ -14,6 +14,7 @@ import {
   EXTERNAL_AGENT_OAUTH_SCOPES,
   EXTERNAL_AGENT_SCOPES,
   createExternalAgentProvider,
+  type CimdFetchTransport,
   type ExternalAgentOAuthOptions,
 } from './external-agent-provider';
 import type { createOAuthStore } from './oauth-store';
@@ -38,7 +39,7 @@ export function createExternalAgentOAuth(
   store: ReturnType<typeof createOAuthStore>,
   options: ExternalAgentOAuthOptions,
   closureBlocked: (identityId: string) => Promise<boolean>,
-  cimdFetch?: (input: string, init?: RequestInit) => Promise<Response>,
+  cimdFetch?: CimdFetchTransport,
 ) {
   const db = store.db;
   const requests = new AsyncLocalStorage<{
