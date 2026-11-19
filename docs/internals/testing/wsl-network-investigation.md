@@ -12,8 +12,9 @@ updated: 2026-11-16T00:00:00+08:00
 > `127.0.0.1` 与 `localhost` 即可。前提是两个 WSL 配置项（`networkingMode=mirrored`、
 > `hostAddressLoopback=true`），以及客户端不要用主机名。
 >
-> 本文件只记录实测事实与由此得到的绑定/校验约束。ADR-121 把「WSL 跨宿主桥」排除在首批验收范围之外
-> 的决策不因本文件改变；这里回答的是「在已开启镜像网络的机器上，WSL 客户端能否到达宿主 loopback 服务」。
+> 本文件只记录实测事实与由此得到的绑定/校验约束。绑定策略已由
+> [ADR-124](../decisions/ADR-124-local-mcp-host-credentials-and-cloud-boundary.md) 采纳；这里回答的是
+> 「在已开启镜像网络的机器上，WSL 客户端能否到达宿主 loopback 服务」。
 
 ## 1. 实测环境
 
