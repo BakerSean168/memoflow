@@ -132,6 +132,7 @@
           </button>
         </div>
 
+        <!-- Native textarea is a registered exception: tools/test-system-v2/native-controls-registry.json -->
         <textarea
           ref="composerTextarea"
           :value="modelValue"
