@@ -1008,13 +1008,22 @@ function requestEditProfile(): void {
                       <span class="block truncate" :title="profile.displayName">{{
                         profile.displayName
                       }}</span>
-                      <small class="block truncate text-muted-foreground">
+                      <small
+                        class="block truncate text-muted-foreground"
+                        :title="profile.profileId"
+                      >
                         {{
                           profile.profileKind === 'local'
                             ? t('auth.profileAccess.local')
                             : t('auth.profileAccess.registered')
                         }}
-                        · {{ profile.identifierHint || profile.profileId }} ·
+                        ·
+                        {{
+                          profile.identifierHint ||
+                          profile.displayName ||
+                          t('auth.profileAccess.localProfileFallback')
+                        }}
+                        ·
                         {{
                           profile.profileId === activeProfileId && cloudState
                             ? t('shell.account.connection.' + cloudState)

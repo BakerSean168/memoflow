@@ -10742,6 +10742,14 @@
       "measurementCollectors": []
     },
     {
+      "path": "packages/setting-ui/src/components/ExternalMcpClients.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/setting-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "packages/setting-ui/src/components/KeyboardSettings.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -14276,7 +14284,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 22
+      "fileCount": 23
     },
     {
       "id": "packages/setting/vitest.config.ts",
@@ -15032,7 +15040,7 @@
   "duplicate": [],
   "unexpected": [],
   "counts": {
-    "unit": 1245,
+    "unit": 1246,
     "integration": 59,
     "smoke": 3,
     "boundary-ipc": 6,

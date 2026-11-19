@@ -34,8 +34,7 @@ const profiles: ProfileSummary[] = [
   },
 ];
 
-function presenter() {
-  const list = ref(profiles);
+function presenter(list = ref(profiles)) {
   return {
     profiles: computed(() => list.value),
     snapshot: ref(null),
@@ -56,8 +55,8 @@ function presenter() {
   };
 }
 
-function mountList(options: { management?: boolean } = {}) {
-  const fake = presenter();
+function mountList(options: { management?: boolean; profiles?: ProfileSummary[] } = {}) {
+  const fake = presenter(options.profiles ? ref(options.profiles) : undefined);
   const wrapper = mount(DesktopProfileList, {
     attachTo: document.body,
     props: {
@@ -101,7 +100,7 @@ describe('DesktopProfileList', () => {
     expect(wrapper.find('input').exists()).toBe(false);
   });
 
-  it('reveals the Profile ID and deletion in the tile card, not in the resting tile', async () => {
+  it('reveals the account hint and deletion in the tile card, never the raw ID', async () => {
     const { wrapper, presenter: fake } = mountList();
     cleanups.push(() => wrapper.unmount());
 
@@ -114,31 +113,96 @@ describe('DesktopProfileList', () => {
     expect(fake.removeProfile).toHaveBeenCalledWith(profiles[1]);
   });
 
-  it('asks for a nickname and password in management-mode creation', () => {
+  it('uses the display name and the profile ID only as a title when no hint exists', async () => {
+    const { wrapper } = mountList();
+    cleanups.push(() => wrapper.unmount());
+
+    element('desktop-profile-open-profile-1')!.dispatchEvent(new FocusEvent('focus'));
+    await flushPromises();
+
+    const card = element('desktop-profile-menu-profile-1')!;
+    expect(card.textContent).toContain('Local 4827');
+    expect(card.textContent).not.toContain('profile-1');
+    expect(card.querySelector('[title="profile-1"]')).not.toBeNull();
+  });
+
+  it('falls back to the localized label instead of the raw ID even without a name', async () => {
+    const unnamed: ProfileSummary = {
+      ...profiles[0]!,
+      profileId: 'profile-9',
+      displayName: '',
+      identifierHint: null,
+    };
+    const { wrapper } = mountList({ profiles: [unnamed] });
+    cleanups.push(() => wrapper.unmount());
+
+    element('desktop-profile-open-profile-9')!.dispatchEvent(new FocusEvent('focus'));
+    await flushPromises();
+
+    const card = element('desktop-profile-menu-profile-9')!;
+    expect(card.textContent).toContain('Local profile');
+    expect(card.textContent).not.toContain('profile-9');
+    expect(card.querySelector('[title="profile-9"]')).not.toBeNull();
+  });
+
+  it('creates a profile from a dialog instead of a permanent form', async () => {
     const { wrapper, presenter: fake } = mountList({ management: true });
     cleanups.push(() => wrapper.unmount());
 
+    expect(element('desktop-profile-create')).toBeNull();
+    element('desktop-profile-create-open')!.click();
+    await flushPromises();
+
     const form = element('desktop-profile-create')!;
     expect(form.querySelectorAll('input')).toHaveLength(2);
+    expect(element('shell-create-profile')!.hasAttribute('disabled')).toBe(true);
+
+    fake.newName.value = 'Desk';
+    fake.newPassword.value = 'password1';
+    await flushPromises();
+    expect(element('shell-create-profile')!.hasAttribute('disabled')).toBe(false);
+
     form.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
     expect(fake.createLocalAccount).toHaveBeenCalled();
   });
 
-  it('keeps management-mode creation, inline rename and metadata intact', async () => {
+  it('closes the creation dialog once the presenter clears the submitted fields', async () => {
+    const { wrapper, presenter: fake } = mountList({ management: true });
+    cleanups.push(() => wrapper.unmount());
+    fake.createLocalAccount.mockImplementation(async () => {
+      fake.newName.value = '';
+      fake.newPassword.value = '';
+    });
+
+    element('desktop-profile-create-open')!.click();
+    await flushPromises();
+    fake.newName.value = 'Desk';
+    fake.newPassword.value = 'password1';
+    await flushPromises();
+    element('shell-create-profile')!.click();
+    await flushPromises();
+
+    expect(element('desktop-profile-create')).toBeNull();
+  });
+
+  it('keeps management-mode rename and metadata intact without a resting create form', async () => {
     const { wrapper, presenter: fake } = mountList({ management: true });
     cleanups.push(() => wrapper.unmount());
 
-    expect(element('desktop-profile-create')).not.toBeNull();
+    expect(element('desktop-profile-create')).toBeNull();
+    expect(element('desktop-profile-create-open')).not.toBeNull();
     expect(element('desktop-profile-create-local')).toBeNull();
     expect(element('desktop-profile-open-profile-2')!.textContent).toContain('work@example.com');
+    expect(element('desktop-profile-open-profile-1')!.textContent).toContain('Local 4827');
+    expect(element('desktop-profile-open-profile-1')!.textContent).not.toContain('profile-1');
     expect(element('desktop-profile-rename-profile-2')).not.toBeNull();
     expect(element('desktop-profile-password-settings-profile-2')).not.toBeNull();
 
     element('desktop-profile-rename-profile-2')!.click();
     await flushPromises();
     const forms = wrapper.findAll('form');
-    expect(forms).toHaveLength(2);
-    forms[1]!.element.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
+    expect(forms).toHaveLength(1);
+    forms[0]!.element.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
     expect(fake.renameProfile).toHaveBeenCalledWith(profiles[1]);
   });
 });

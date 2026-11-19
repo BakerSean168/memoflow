@@ -656,6 +656,11 @@ export default {
       scopeTasks: 'Task writes',
       scopeGoals: 'Goal writes',
       create: 'Create connection',
+      createClient: 'New client',
+      createDescription:
+        'Issue a bearer token for a long-running MCP client. The token is shown once, inside this dialog.',
+      createdTitle: 'Client created',
+      createdDescription: 'The client is now listed. Copy the token before closing this dialog.',
       empty: 'No external connections yet.',
       tokenOnce: 'This token is shown once',
       tokenWarning:
