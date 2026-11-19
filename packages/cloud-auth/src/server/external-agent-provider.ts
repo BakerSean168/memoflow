@@ -20,6 +20,7 @@ export const CONNECTION_LIFETIME_MS = 90 * 86400_000;
 export function createExternalAgentProvider(
   options: ExternalAgentOAuthOptions,
   lifecycle: Pick<OAuthOptions<Scope[]>, 'postLogin' | 'customAccessTokenClaims'> = {},
+  cimdFetch?: (input: string, init?: RequestInit) => Promise<Response>,
 ) {
   return [
     jwt(),
@@ -44,7 +45,7 @@ export function createExternalAgentProvider(
       ...lifecycle,
     }),
     cimd({
-      fetchClientMetadataResource,
+      fetchClientMetadataResource: cimdFetch ?? fetchClientMetadataResource,
       metadataProfile: 'mcp-2026-07-28',
       isMetadataDocumentUrlAllowed: (url) => options.allowedClientIds.includes(url),
     }),

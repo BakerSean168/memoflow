@@ -80,6 +80,8 @@ interface CloudAuth extends CloudSessionCapability {
 interface CloudAuthDependencies {
   /** Opaque test/internal adapter override; Better Auth types stay implementation-private. */
   readonly database?: unknown;
+  /** Test/internal transport override for the CIMD metadata document fetch. */
+  readonly cimdFetch?: (input: string, init?: RequestInit) => Promise<Response>;
 }
 
 export function createCloudAuth(
@@ -104,7 +106,12 @@ export function createCloudAuth(
   }
 
   const externalAgents = options.externalAgents
-    ? createExternalAgentOAuth(oauthStore, options.externalAgents, isClosureBlocked)
+    ? createExternalAgentOAuth(
+        oauthStore,
+        options.externalAgents,
+        isClosureBlocked,
+        dependencies.cimdFetch,
+      )
     : undefined;
   const databaseOverride = dependencies.database as BetterAuthOptions['database'] | undefined;
   const auth = betterAuth({

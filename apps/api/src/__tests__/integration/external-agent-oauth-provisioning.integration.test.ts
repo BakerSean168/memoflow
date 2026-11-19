@@ -45,7 +45,10 @@ const accountIsActive = createAccountPrismaActiveQuery(prisma);
  * Boots the same Express surface the API host uses: Better Auth under
  * `/api/auth`, the OAuth well-known documents, and the hosted MCP endpoint.
  */
-async function startApi(options: { readonly allowedClientIds: readonly string[] }) {
+async function startApi(options: {
+  readonly allowedClientIds: readonly string[];
+  readonly cimdFetch?: (input: string, init?: RequestInit) => Promise<Response>;
+}) {
   const app = express();
   app.use(createRequestContextMiddleware({ observer: { complete() {} } }));
   app.use(express.json({ limit: '256kb' }));
@@ -55,22 +58,25 @@ async function startApi(options: { readonly allowedClientIds: readonly string[] 
   const origin = `http://127.0.0.1:${port}`;
   const issuer = `${origin}/api/auth`;
   const resource = `${origin}/mcp`;
-  const auth = createCloudAuth({
-    database: prisma,
-    baseUrl: issuer,
-    secret: 'eag-provisioning-fixture-secret-thirty-two-characters',
-    deviceVerificationUrl: `${origin}/auth/device`,
-    trustedOrigins: [origin],
-    userProvisioner: { provision: async () => {} },
-    emailDelivery: { send: async () => {} },
-    rateLimit: { enabled: false },
-    externalAgents: {
-      resource,
-      webOrigin: origin,
-      allowedClientIds: options.allowedClientIds,
-      accountIsActive,
+  const auth = createCloudAuth(
+    {
+      database: prisma,
+      baseUrl: issuer,
+      secret: 'eag-provisioning-fixture-secret-thirty-two-characters',
+      deviceVerificationUrl: `${origin}/auth/device`,
+      trustedOrigins: [origin],
+      userProvisioner: { provision: async () => {} },
+      emailDelivery: { send: async () => {} },
+      rateLimit: { enabled: false },
+      externalAgents: {
+        resource,
+        webOrigin: origin,
+        allowedClientIds: options.allowedClientIds,
+        accountIsActive,
+      },
     },
-  });
+    options.cimdFetch ? { cimdFetch: options.cimdFetch } : {},
+  );
   const handler = auth.expressHandler;
   app.all('/api/auth/*splat', handler);
   app.all(
@@ -166,7 +172,9 @@ async function authorize(
   const response = await fetch(`${api.issuer}/oauth2/authorize?${query}`, {
     headers: { authorization: `Bearer ${session}`, accept: 'application/json' },
   });
-  const redirect = z.object({ url: z.string() }).parse(await response.json());
+  const body = await response.text();
+  if (!response.ok) throw new Error(`authorize failed ${response.status}: ${body}`);
+  const redirect = z.object({ url: z.string() }).parse(JSON.parse(body));
   let url = new URL(redirect.url);
   if (url.origin === api.origin) {
     const consent = await fetch(`${api.issuer}/oauth2/consent`, {
@@ -337,7 +345,14 @@ describe.skipIf(!process.env.EAG_CIMD_E2E)('CIMD just-in-time client registratio
   });
 
   it('creates the client row on first authorization and serves a goal read', async () => {
-    const api = await startApi({ allowedClientIds: [cimdClientId] });
+    // The production transport pins a resolve-once public DNS answer. Sandboxes
+    // behind fake-IP DNS resolve every host to a reserved range, so only the
+    // transport is swapped here; document fetch, validation and persistence
+    // stay on the production path.
+    const api = await startApi({
+      allowedClientIds: [cimdClientId],
+      cimdFetch: (input, init) => fetch(input, init),
+    });
     try {
       expect(await prisma.oauthClient.count({ where: { clientId: cimdClientId } })).toBe(0);
       const [userId, session] = (await login()).split('\n') as [string, string];
