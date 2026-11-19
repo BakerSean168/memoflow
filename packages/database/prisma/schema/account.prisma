@@ -22,6 +22,7 @@ model Account {
 
   // 关联的业务模块
   externalMutationReceipts         ExternalMutationReceipt[]
+  externalAgentAuditEvents         ExternalAgentAuditEvent[]
   goals                           Goal[]
   profileImportOperations         ProfileImportOperation[]
   profileImportArchives           ProfileImportArchive[]

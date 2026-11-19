@@ -22,6 +22,7 @@ import type { createScopedPatService, createCloudAuth } from '@memoflow/cloud-au
 import type { IApiModule } from '../../shared/contracts/api-module';
 import type { AuthenticatedRequest } from '../../shared/infrastructure/http/middlewares/auth-middleware';
 import type { RequestContextCarrierRequest } from '../../shared/infrastructure/http/middlewares/request-context.middleware';
+import { ExternalAgentAuditQuerySchema, type ExternalAgentAuditQueryPort } from './audit-query';
 
 interface Options {
   readonly enabled: boolean;
@@ -43,6 +44,7 @@ interface Options {
   readonly routines?: RoutineReadPort;
   readonly relations?: RelationReadPort;
   readonly audit: (event: GatewayAuditEvent) => void;
+  readonly auditQuery: ExternalAgentAuditQueryPort;
   readonly diagnose?: (event: GatewayDiagnostic) => void;
 }
 /**
@@ -131,6 +133,7 @@ export function composeAgentGatewayModule(options: Options): IApiModule {
         })(req, res, req.body);
       });
       const path = '/agent-connections/pats';
+      const auditEventsPath = '/agent-connections/audit-events';
       router.use(
         '/agent-connections',
         (req, res, next) => {
@@ -138,32 +141,37 @@ export function composeAgentGatewayModule(options: Options): IApiModule {
           const started = Date.now();
           // Express restores req.url as nested routers unwind; capture the lane now.
           const oauthManagement = req.path.startsWith('/oauth');
-          res.once('finish', () => {
-            const context = (req as typeof req & RequestContextCarrierRequest).requestContext;
-            options.audit({
-              version: '1',
-              effect: 'credential',
-              scopeDecision: res.statusCode < 400 ? 'allowed' : 'denied',
-              requestId: context?.requestId ?? 'unavailable',
-              traceId: context?.traceId ?? 'unavailable',
-              identityId: (req as AuthenticatedRequest).user?.identityId,
-              credentialId:
-                typeof res.locals.externalAgentCredentialId === 'string'
-                  ? res.locals.externalAgentCredentialId
-                  : undefined,
-              tool: oauthManagement
-                ? req.method === 'DELETE'
-                  ? 'oauth_revoke'
-                  : 'oauth_list'
-                : req.method === 'POST'
-                  ? 'pat_create'
-                  : req.method === 'DELETE'
-                    ? 'pat_revoke'
-                    : 'pat_list',
-              outcome: res.statusCode < 400 ? 'OK' : `HTTP_${res.statusCode}`,
-              durationMs: Date.now() - started,
+          const auditQueryLane = req.path.startsWith('/audit-events');
+          // Reading audit facts is not a credential mutation lane, so it emits no
+          // credential event of its own and keeps the terminal response cache-free.
+          if (!auditQueryLane) {
+            res.once('finish', () => {
+              const context = (req as typeof req & RequestContextCarrierRequest).requestContext;
+              options.audit({
+                version: '1',
+                effect: 'credential',
+                scopeDecision: res.statusCode < 400 ? 'allowed' : 'denied',
+                requestId: context?.requestId ?? 'unavailable',
+                traceId: context?.traceId ?? 'unavailable',
+                identityId: (req as AuthenticatedRequest).user?.identityId,
+                credentialId:
+                  typeof res.locals.externalAgentCredentialId === 'string'
+                    ? res.locals.externalAgentCredentialId
+                    : undefined,
+                tool: oauthManagement
+                  ? req.method === 'DELETE'
+                    ? 'oauth_revoke'
+                    : 'oauth_list'
+                  : req.method === 'POST'
+                    ? 'pat_create'
+                    : req.method === 'DELETE'
+                      ? 'pat_revoke'
+                      : 'pat_list',
+                outcome: res.statusCode < 400 ? 'OK' : `HTTP_${res.statusCode}`,
+                durationMs: Date.now() - started,
+              });
             });
-          });
+          }
           next();
         },
         middleware.auth,
@@ -230,8 +238,45 @@ export function composeAgentGatewayModule(options: Options): IApiModule {
           ),
         });
       });
-      router.delete(`${path}/:id`, async (req, res) => {
-        const parsed = z.uuid().safeParse(req.params.id);
+      router.get(auditEventsPath, async (req, res) => {
+        const identityId = (req as AuthenticatedRequest).user?.identityId;
+        if (!identityId) {
+          res.sendStatus(401);
+          return;
+        }
+        const parsed = ExternalAgentAuditQuerySchema.safeParse(req.query);
+        if (!parsed.success) {
+          res.status(400).json({ error: 'INVALID_INPUT' });
+          return;
+        }
+        const { credentialId, requestId, from, to, limit } = parsed.data;
+        const page = await options.auditQuery.list(identityId, {
+          credentialId,
+          requestId,
+          from: from ? new Date(from) : undefined,
+          to: to ? new Date(to) : undefined,
+          limit,
+        });
+        res.json({
+          data: {
+            items: page.items.map((entry) => ({
+              credentialId: entry.credentialId,
+              effect: entry.effect,
+              tool: entry.tool,
+              outcome: entry.outcome,
+              scopeDecision: entry.scopeDecision,
+              requestId: entry.requestId,
+              traceId: entry.traceId,
+              receiptId: entry.receiptId,
+              replayed: entry.replayed,
+              durationMs: entry.durationMs,
+              createdAt: entry.createdAt.toISOString(),
+            })),
+            hasMore: page.hasMore,
+          },
+        });
+      });
+      router.delete(`${path}/:id`, async (req, res) => {        const parsed = z.uuid().safeParse(req.params.id);
         if (!parsed.success) {
           res.status(400).json({ error: 'INVALID_INPUT' });
           return;
