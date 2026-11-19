@@ -269,7 +269,9 @@ describe('OAuth client provisioning', () => {
       expect(structured.items.map((item) => item.name)).toEqual(['OAuth provisioning fixture']);
 
       expect((await disableOAuthClient(prisma, clientId)).status).toBe('disabled');
-      expect(await api.auth.externalAgents!.authenticate(`Bearer ${token.access_token}`)).toBeNull();
+      expect(
+        await api.auth.externalAgents!.authenticate(`Bearer ${token.access_token}`),
+      ).toBeNull();
       const refresh = await fetch(`${api.issuer}/oauth2/token`, {
         method: 'POST',
         headers: { 'content-type': 'application/x-www-form-urlencoded' },
@@ -281,7 +283,9 @@ describe('OAuth client provisioning', () => {
         }),
       });
       expect(refresh.status).toBe(400);
-      await expect(withClient(api.resource, token.access_token, async () => null)).rejects.toThrow();
+      await expect(
+        withClient(api.resource, token.access_token, async () => null),
+      ).rejects.toThrow();
       expect((await listOAuthClients(prisma))[0]).toMatchObject({
         clientId,
         disabled: true,

@@ -303,12 +303,12 @@ function auditLine(record: AuditRecord): string {
   return JSON.stringify(record);
 }
 
-const KNOWN_FLAGS = {
+const KNOWN_FLAGS: Record<Command, ReadonlySet<string>> = {
   seed: new Set(['client-id', 'name', 'redirect-uri', 'resource', 'scopes', 'actor']),
   list: new Set<string>(),
   disable: new Set(['client-id', 'actor']),
   enable: new Set(['client-id', 'actor']),
-} as const;
+};
 
 /**
  * Execute one command. Returns the process exit code; output goes through the

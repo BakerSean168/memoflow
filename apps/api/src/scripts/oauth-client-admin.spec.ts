@@ -47,7 +47,8 @@ function memoryDb() {
         return clients.get(args.where.clientId) ?? null;
       },
       async create(args: { data: ClientRow }) {
-        if (clients.has(args.data.clientId)) throw Object.assign(new Error('unique'), { code: 'P2002' });
+        if (clients.has(args.data.clientId))
+          throw Object.assign(new Error('unique'), { code: 'P2002' });
         const row = { ...args.data };
         clients.set(row.clientId, row);
         return row;
@@ -161,7 +162,19 @@ describe('OAuth client admin command', () => {
     const lines: string[] = [];
     const now = new Date('2026-11-19T00:00:00.000Z');
     const code = await runOAuthClientAdmin(
-      ['seed', '--client-id', clientId, '--name', 'Fixture Agent', '--redirect-uri', seed.redirectUris[0]!, '--resource', seed.resource, '--actor', 'ops-runner'],
+      [
+        'seed',
+        '--client-id',
+        clientId,
+        '--name',
+        'Fixture Agent',
+        '--redirect-uri',
+        seed.redirectUris[0]!,
+        '--resource',
+        seed.resource,
+        '--actor',
+        'ops-runner',
+      ],
       { db: memory.db, now, write: (line) => lines.push(line) },
     );
     expect(code).toBe(0);
@@ -180,10 +193,10 @@ describe('OAuth client admin command', () => {
   it('reports a missing client as a failed disable', async () => {
     const memory = memoryDb();
     const lines: string[] = [];
-    const code = await runOAuthClientAdmin(
-      ['disable', '--client-id', clientId],
-      { db: memory.db, write: (line) => lines.push(line) },
-    );
+    const code = await runOAuthClientAdmin(['disable', '--client-id', clientId], {
+      db: memory.db,
+      write: (line) => lines.push(line),
+    });
     expect(code).toBe(1);
     expect(JSON.parse(lines[0]!)).toMatchObject({ action: 'disable', result: 'missing' });
   });
