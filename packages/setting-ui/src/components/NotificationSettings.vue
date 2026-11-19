@@ -148,6 +148,7 @@
 <script setup lang="ts">
 import { computed, inject, onMounted, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
+import { toast } from 'vue-sonner';
 import { Label, Switch } from '@memoflow/ui-vue-shadcn';
 import type { DesktopNotificationPreference } from '@memoflow/desktop-contracts';
 import {
@@ -198,12 +199,26 @@ async function updateSoundEnabled(value: boolean) {
   await updateDevicePreference({ soundEnabled: value });
 }
 
+async function readDevicePreference(): Promise<void> {
+  if (!devicePreferencePort) return;
+  const result = await devicePreferencePort.get();
+  if (result.ok) {
+    devicePreference.value = result.data;
+    devicePreferenceAvailable.value = true;
+  }
+}
+
 async function updateDevicePreference(patch: Partial<typeof devicePreference.value>) {
   if (!devicePreferencePort) return;
   deviceBusy.value = true;
   try {
     const result = await devicePreferencePort.update(patch);
-    if (result.ok) devicePreference.value = result.data;
+    if (result.ok) {
+      devicePreference.value = result.data;
+      return;
+    }
+    toast.error(t('setting.notifications.devicePreferenceUpdateFailed'));
+    await readDevicePreference();
   } finally {
     deviceBusy.value = false;
   }
@@ -248,12 +263,7 @@ onMounted(() => {
 
   void loadPreferences();
   if (devicePreferencePort) {
-    void devicePreferencePort.get().then((result) => {
-      if (result.ok) {
-        devicePreference.value = result.data;
-        devicePreferenceAvailable.value = true;
-      }
-    });
+    void readDevicePreference();
   }
 });
 </script>

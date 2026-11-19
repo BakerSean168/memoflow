@@ -10726,6 +10726,14 @@
       "measurementCollectors": []
     },
     {
+      "path": "packages/setting-ui/src/components/DataSettingsSection.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/setting-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "packages/setting-ui/src/components/DesktopStartupNavigation.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -10831,6 +10839,14 @@
     },
     {
       "path": "packages/setting-ui/src/components/desktop-update-settings.presentation.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/setting-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/setting-ui/src/composables/useDataPortability.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/setting-ui/vitest.config.ts"
@@ -14292,7 +14308,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 23
+      "fileCount": 25
     },
     {
       "id": "packages/setting/vitest.config.ts",
@@ -15048,7 +15064,7 @@
   "duplicate": [],
   "unexpected": [],
   "counts": {
-    "unit": 1246,
+    "unit": 1249,
     "integration": 59,
     "smoke": 3,
     "boundary-ipc": 6,

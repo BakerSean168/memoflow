@@ -130,6 +130,12 @@ describe('GoalProgressRow (GOAL-5101)', () => {
       global: { plugins: [i18n] },
     });
     expect(wrapper.text()).toContain('Past Target');
+    expect(wrapper.get('[data-testid="goal-row-past-target"]').text()).toBe('Past Target');
+    expect(wrapper.get('[data-testid="goal-row-target"]').text()).toContain('2026-08-20');
+    expect(wrapper.get('[data-testid="goal-row-target"]').find('.text-warning').exists()).toBe(
+      true,
+    );
+    expect(wrapper.find('.text-destructive\\/85').exists()).toBe(false);
     vi.useRealTimers();
   });
 });

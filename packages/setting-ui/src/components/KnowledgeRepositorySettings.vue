@@ -99,7 +99,7 @@
               <div class="min-w-0 flex-1">
                 <div class="flex min-w-0 items-center gap-2">
                   <span class="truncate text-sm font-medium">{{ repository.fullName }}</span>
-                  <Badge :variant="repository.private ? 'secondary' : 'destructive'">
+                  <Badge :variant="repository.private ? 'secondary' : 'outline'">
                     {{
                       repository.private
                         ? t('setting.knowledgeRepository.private')
