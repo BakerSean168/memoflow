@@ -439,6 +439,27 @@ export default {
         'Describe the knowledge topic in chat, then start the Knowledge Capture workflow. The reviewed note draft appears here.',
       knowledgeCaptureAwaitingApprovalHint:
         'Review the generated knowledge note draft, then approve to save it to the knowledge base.',
+      status: {
+        running: 'Running',
+        suspended: 'Awaiting review',
+        completed: 'Completed',
+        failed: 'Failed',
+        cancelled: 'Cancelled',
+      },
+      taskScheduleKind: {
+        oneTime: 'One-time task',
+        recurring: 'Recurring task',
+      },
+      taskCount: 'no tasks | one task | {count} tasks',
+      knowledgeCaptureResultStatus: {
+        success: 'Saved to the knowledge base',
+        partial: 'Partially saved to the knowledge base',
+        failed: 'Could not save to the knowledge base',
+      },
+      recovery: {
+        retryable: 'Retryable',
+        blocked: 'Needs manual action',
+      },
     },
     emptyModelsHint: 'No AI models are configured. Connect a provider in Settings first.',
     emptyModelsConfigure: 'Configure models',

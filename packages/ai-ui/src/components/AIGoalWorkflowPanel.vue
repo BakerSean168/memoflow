@@ -45,7 +45,7 @@
         </p>
         <div class="flex flex-wrap items-center gap-2">
           <span class="rounded-full border bg-muted px-3 py-1 text-xs text-muted-foreground">
-            {{ goalWorkflowRun.status }}
+            {{ t('aiAssistant.chatPage.workflow.status.' + goalWorkflowRun.status) }}
           </span>
           <AIRuntimeUsageBadge :usage="goalWorkflowRun.usage" />
           <span
@@ -242,18 +242,23 @@
             {{ t('aiAssistant.dialogs.automation.recoveryTitle') }}
           </p>
           <span class="rounded-full border bg-muted px-2 py-1 text-xs text-muted-foreground">
-            {{ goalRecovery.retryable ? 'retryable' : 'blocked' }}
+            {{
+              t(
+                goalRecovery.retryable
+                  ? 'aiAssistant.chatPage.workflow.recovery.retryable'
+                  : 'aiAssistant.chatPage.workflow.recovery.blocked',
+              )
+            }}
           </span>
         </div>
         <div
           v-for="(failure, index) in goalRecovery.failures"
           :key="`${failure.operation}-${failure.code}-${index}`"
           class="rounded-2xl border bg-muted/20 p-4"
+          :title="failureDiagnostic(failure)"
+          data-testid="goal-workflow-failure"
         >
           <p class="text-sm font-medium text-foreground">
-            {{ failure.operation }} · {{ failure.code }}
-          </p>
-          <p class="mt-2 text-sm leading-6 text-muted-foreground">
             {{ publicFailureMessage(failure) }}
           </p>
         </div>
@@ -476,6 +481,9 @@ defineEmits<{
 const { t } = useI18n();
 const publicFailureMessage = (failure: AIWorkflowExecutionFailure) =>
   getAIWorkflowFailureMessage(failure, t);
+/** Raw operation/code stay diagnosable in the tooltip, never as the headline. */
+const failureDiagnostic = (failure: AIWorkflowExecutionFailure) =>
+  `${failure.operation} · ${failure.code}`;
 type KnowledgeRelatedNote = NonNullable<KnowledgeAnswer['relatedNotes']>[number];
 
 const goalReviewDraft = computed(() => {

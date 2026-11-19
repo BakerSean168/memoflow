@@ -45,7 +45,7 @@
       "path": "packages/ai-ui/src/components/AIFooterComposer.vue",
       "native": ["button", "file-input", "textarea"],
       "category": "custom-control",
-      "reason": "The composer surface owns its auto-growing textarea, attachment chips, mention rows and hidden file input."
+      "reason": "The composer textarea is the interaction surface itself: mention autocomplete needs every native input event during IME composition, the chat view clamps and re-measures its height, and the view exposes the raw HTMLTextAreaElement for caret control. ProductAutoTextarea buffers composition input and lives in app-vue, which ai-ui cannot import, so a library wrapper would change mention/IME behaviour. Mention rows and the hidden file input belong to the same surface."
     },
     {
       "path": "packages/ai-ui/src/components/AIMessagePanel.vue",

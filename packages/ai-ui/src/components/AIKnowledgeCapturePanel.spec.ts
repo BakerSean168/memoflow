@@ -18,6 +18,18 @@ const i18n = createI18n({
           workflow: {
             knowledgeCaptureAwaitingApprovalHint: 'Review note',
             cancelRemaining: 'Cancel remaining',
+            status: {
+              running: 'Running',
+              suspended: 'Awaiting review',
+              completed: 'Completed',
+              failed: 'Failed',
+              cancelled: 'Cancelled',
+            },
+            knowledgeCaptureResultStatus: {
+              success: 'Saved to the knowledge base',
+              partial: 'Partially saved to the knowledge base',
+              failed: 'Could not save to the knowledge base',
+            },
           },
         },
         dialogs: {
@@ -108,6 +120,36 @@ describe('AIKnowledgeCapturePanel', () => {
     await wrapper.get('[data-testid="knowledge-capture-agent-cancel-remaining"]').trigger('click');
     expect(wrapper.emitted('retry')).toHaveLength(1);
     expect(wrapper.emitted('cancel-remaining')).toHaveLength(1);
+  });
+  it('renders product copy instead of the raw receipt status after completion', () => {
+    const wrapper = mount(AIKnowledgeCapturePanel, {
+      global: { plugins: [i18n] },
+      props: {
+        toolMode: 'knowledge-capture',
+        knowledgeCaptureRun: {
+          runId: 'run-complete',
+          conversationId: 'conv-complete',
+          kind: 'knowledge.capture',
+          status: 'completed',
+          createdAt: 1,
+          updatedAt: 2,
+          result: {
+            workflowRunId: 'run-complete',
+            revision: 1,
+            status: 'success',
+            failures: [],
+            retryable: false,
+            noteName: 'Stable identity',
+            notePath: 'Notes/Stable.md',
+          },
+        },
+      },
+    });
+
+    const result = wrapper.get('[data-testid="knowledge-capture-workflow-result"]').text();
+    expect(result).toContain('Saved to the knowledge base');
+    expect(result).not.toContain('success');
+    expect(result).toContain('Notes/Stable.md');
   });
   it('keeps clarification display-only because the main Composer owns the answer', () => {
     const wrapper = mount(AIKnowledgeCapturePanel, {

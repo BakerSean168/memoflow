@@ -10,7 +10,7 @@
       </p>
       <div class="flex flex-wrap gap-2">
         <span class="rounded-full border bg-muted px-3 py-1 text-xs text-muted-foreground">{{
-          taskWorkflowRun.status
+          t('aiAssistant.chatPage.workflow.status.' + taskWorkflowRun.status)
         }}</span>
         <AIRuntimeUsageBadge :usage="taskWorkflowRun.usage" />
         <span
@@ -24,7 +24,7 @@
         {{ reviewDraft.task.title }}
       </h2>
       <p v-if="reviewDraft" class="text-sm text-muted-foreground">
-        {{ reviewDraft.task.schedule.kind }}
+        {{ scheduleKindLabel(reviewDraft.task.schedule.kind) }}
       </p>
       <p v-if="reviewDraft" class="whitespace-pre-wrap text-sm leading-6 text-muted-foreground">
         {{ reviewDraft.rationale }}
@@ -74,8 +74,9 @@
         v-for="(failure, index) in taskWorkflowRun.suspension.failures"
         :key="`${failure.operation}-${failure.code}-${index}`"
         class="text-sm text-destructive"
+        :title="failureDiagnostic(failure)"
       >
-        {{ failure.operation }} · {{ publicFailureMessage(failure) }}
+        {{ publicFailureMessage(failure) }}
       </p>
       <div class="flex flex-wrap gap-2">
         <Button
@@ -113,10 +114,16 @@
       data-testid="task-workflow-result"
     >
       <p class="text-sm text-muted-foreground">
-        {{ taskWorkflowRun.result.status }}
+        {{ executionOutcomeLabel(taskWorkflowRun.result.status) }}
       </p>
       <p class="text-sm text-muted-foreground">
-        {{ Object.keys(taskWorkflowRun.result.referenceMap).length }} task
+        {{
+          t(
+            'aiAssistant.chatPage.workflow.taskCount',
+            { count: createdTaskCount },
+            createdTaskCount,
+          )
+        }}
       </p>
     </div>
     <div v-if="taskWorkflowRun.status === 'suspended' && reviewDraft" class="flex gap-2">
@@ -153,6 +160,17 @@ import { getAIWorkflowFailureMessage } from '../composables/error';
 const { t } = useI18n();
 const publicFailureMessage = (failure: AIWorkflowExecutionFailure) =>
   getAIWorkflowFailureMessage(failure, t);
+/** Raw operation/code stay diagnosable in the tooltip, never as the headline. */
+const failureDiagnostic = (failure: AIWorkflowExecutionFailure) =>
+  `${failure.operation} · ${failure.code}`;
+function scheduleKindLabel(kind: 'OneTime' | 'Recurring'): string {
+  return t(
+    `aiAssistant.chatPage.workflow.taskScheduleKind.${kind === 'OneTime' ? 'oneTime' : 'recurring'}`,
+  );
+}
+function executionOutcomeLabel(status: 'success' | 'partial' | 'failed'): string {
+  return t(`aiAssistant.dialogs.automation.outcomeLabels.${status}`);
+}
 const props = defineProps<{
   toolMode: WorkflowMode;
   taskWorkflowRun: Extract<AIWorkflowRunView, { kind: 'task.create' }> | null;
@@ -175,5 +193,8 @@ const reviewDraft = computed(() =>
   props.taskWorkflowRun?.suspension?.type === 'task_draft_review'
     ? props.taskWorkflowRun.suspension.draft
     : null,
+);
+const createdTaskCount = computed(() =>
+  props.taskWorkflowRun?.result ? Object.keys(props.taskWorkflowRun.result.referenceMap).length : 0,
 );
 </script>

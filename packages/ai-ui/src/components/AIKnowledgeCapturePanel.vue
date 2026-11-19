@@ -10,7 +10,7 @@
       </p>
       <div class="flex flex-wrap gap-2">
         <span class="rounded-full border bg-muted px-3 py-1 text-xs text-muted-foreground">{{
-          knowledgeCaptureRun.status
+          t('aiAssistant.chatPage.workflow.status.' + knowledgeCaptureRun.status)
         }}</span>
         <AIRuntimeUsageBadge :usage="knowledgeCaptureRun.usage" />
         <span
@@ -72,8 +72,9 @@
         v-for="(failure, index) in knowledgeCaptureRun.suspension.failures"
         :key="`${failure.operation}-${failure.code}-${index}`"
         class="text-sm text-destructive"
+        :title="failureDiagnostic(failure)"
       >
-        {{ failure.operation }} · {{ publicFailureMessage(failure) }}
+        {{ publicFailureMessage(failure) }}
       </p>
       <div class="flex flex-wrap gap-2">
         <Button
@@ -103,7 +104,7 @@
       data-testid="knowledge-capture-workflow-result"
     >
       <p class="text-sm text-muted-foreground">
-        {{ knowledgeCaptureRun.result.status }}
+        {{ resultStatusLabel(knowledgeCaptureRun.result.status) }}
       </p>
       <p class="text-sm text-muted-foreground">
         {{ knowledgeCaptureRun.result.noteName || '—' }} ·
@@ -143,6 +144,12 @@ import { getAIWorkflowFailureMessage } from '../composables/error';
 const { t } = useI18n();
 const publicFailureMessage = (failure: AIWorkflowExecutionFailure) =>
   getAIWorkflowFailureMessage(failure, t);
+/** Raw operation/code stay diagnosable in the tooltip, never as the headline. */
+const failureDiagnostic = (failure: AIWorkflowExecutionFailure) =>
+  `${failure.operation} · ${failure.code}`;
+function resultStatusLabel(status: 'success' | 'partial' | 'failed'): string {
+  return t(`aiAssistant.chatPage.workflow.knowledgeCaptureResultStatus.${status}`);
+}
 const props = defineProps<{
   toolMode: WorkflowMode;
   knowledgeCaptureRun: Extract<AIWorkflowRunView, { kind: 'knowledge.capture' }> | null;

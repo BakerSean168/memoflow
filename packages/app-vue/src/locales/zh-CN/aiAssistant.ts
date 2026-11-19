@@ -404,6 +404,27 @@ export default {
       knowledgeCaptureCollectingHint:
         '在对话中描述知识主题，然后启动知识捕获工作流。生成的笔记草稿会显示在这里供审阅。',
       knowledgeCaptureAwaitingApprovalHint: '请审阅生成的知识笔记草稿，确认后保存到知识库。',
+      status: {
+        running: '运行中',
+        suspended: '等待确认',
+        completed: '已完成',
+        failed: '执行失败',
+        cancelled: '已取消',
+      },
+      taskScheduleKind: {
+        oneTime: '一次性任务',
+        recurring: '重复任务',
+      },
+      taskCount: '{count} 个任务',
+      knowledgeCaptureResultStatus: {
+        success: '已写入知识库',
+        partial: '已部分写入知识库',
+        failed: '写入知识库失败',
+      },
+      recovery: {
+        retryable: '可重试',
+        blocked: '需人工处理',
+      },
     },
     emptyModelsHint: '尚未配置可用模型。请先在设置中接入 AI 服务商。',
     emptyModelsConfigure: '去配置模型',
