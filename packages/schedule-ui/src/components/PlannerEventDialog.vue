@@ -34,13 +34,13 @@
         </div>
 
         <div
-          v-if="event.sourceType !== 'task' && event.displayMetadata.status"
+          v-if="event.sourceType !== 'task' && statusLabel"
           class="grid grid-cols-[6rem_minmax(0,1fr)] gap-3 py-3"
         >
           <dt class="text-xs font-medium text-muted-foreground">
             {{ t('schedule.eventDetail.status') }}
           </dt>
-          <dd class="text-sm text-foreground">{{ event.displayMetadata.status }}</dd>
+          <dd class="text-sm text-foreground">{{ statusLabel }}</dd>
         </div>
 
         <div
@@ -169,6 +169,7 @@ const { ProductDialogShell } = scheduleUiHost.components;
 import {
   formatPlannerProjectionTimeRange,
   plannerProjectionSourcePresentation,
+  plannerProjectionStatusLabel,
   plannerSemanticI18nKey,
 } from '../planner/planner-presentation';
 
@@ -215,6 +216,10 @@ const sourceLabel = computed(() => (props.event ? t(sourcePresentation.value.lab
 
 const semanticLabel = computed(() =>
   props.event ? t(plannerSemanticI18nKey[props.event.displayMetadata.semantic]) : '',
+);
+
+const statusLabel = computed(() =>
+  plannerProjectionStatusLabel(props.event?.displayMetadata.status, (key) => t(key)),
 );
 
 const isScheduleEntry = computed(() => props.event?.sourceType === 'schedule');

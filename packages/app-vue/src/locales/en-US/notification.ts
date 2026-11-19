@@ -79,6 +79,15 @@ export default {
     actionCompleted: 'Action completed',
     actionRejected: 'This action cannot be completed',
   },
+  custom: {
+    reminder: 'Reminder',
+    autoReadHint: 'Marked as read automatically after 30s',
+    emptyBody: 'Reminder triggered. Please confirm you received it.',
+    actionFailed: 'Action failed. Please try again.',
+    actionComplete: 'Complete',
+    actionSnooze10m: 'Remind me in 10 min',
+    acknowledge: 'Got it',
+  },
   permission: {
     warningTitle: 'Notification Permission',
   },

@@ -9,6 +9,7 @@ import {
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
+  useConfirm,
 } from '@memoflow/ui-vue-shadcn';
 import type {
   AgentInstance,
@@ -222,6 +223,14 @@ async function saveNative(input: LocalAgentConnectionInput) {
 async function resetSelected() {
   const current = selected.value;
   if (!current || current.instanceId !== current.driver) return;
+  const confirmed = await useConfirm({
+    title: t('setting.agentInstances.resetDefaultConfirmTitle'),
+    description: t('setting.agentInstances.resetDefaultConfirmDescription'),
+    confirmText: t('setting.agentInstances.resetDefault'),
+    cancelText: t('common.cancel'),
+    variant: 'destructive',
+  });
+  if (!confirmed) return;
   await mutate(() =>
     registry!.execute({
       action: 'reset',
@@ -235,6 +244,16 @@ async function resetSelected() {
 async function removeSelected() {
   const current = selected.value;
   if (!current?.revision || current.instanceId === current.driver) return;
+  const confirmed = await useConfirm({
+    title: t('setting.agentInstances.deleteProviderConfirmTitle'),
+    description: t('setting.agentInstances.deleteProviderConfirmDescription', {
+      count: bindings.value.length,
+    }),
+    confirmText: t('setting.ai.deleteProvider'),
+    cancelText: t('common.cancel'),
+    variant: 'destructive',
+  });
+  if (!confirmed) return;
   await mutate(() =>
     registry!.execute({
       action: 'remove',

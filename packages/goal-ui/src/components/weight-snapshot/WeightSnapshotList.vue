@@ -149,7 +149,13 @@
                   <div class="text-xs text-muted-foreground">
                     {{ t('goal.weightSnapshotList.operator') }}
                   </div>
-                  <div class="text-sm">{{ snapshot.operatorId }}</div>
+                  <div
+                    class="text-sm"
+                    :title="snapshot.operatorId || undefined"
+                    data-testid="weight-snapshot-operator"
+                  >
+                    {{ t('goal.weightSnapshotList.operatorSystem') }}
+                  </div>
                 </div>
                 <div v-if="snapshot.reason" class="col-span-2">
                   <div class="text-xs text-muted-foreground">

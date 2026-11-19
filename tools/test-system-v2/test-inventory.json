@@ -7030,6 +7030,14 @@
       "measurementCollectors": []
     },
     {
+      "path": "packages/goal-ui/src/components/weight-snapshot/WeightSnapshotList.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/goal-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "packages/goal-ui/src/composables/goal-status-transitions.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -10750,6 +10758,14 @@
       "measurementCollectors": []
     },
     {
+      "path": "packages/setting-ui/src/components/ExternalMcpClients.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/setting-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "packages/setting-ui/src/components/KeyboardSettings.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -14054,7 +14070,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 27
+      "fileCount": 28
     },
     {
       "id": "packages/goal-workspace-contracts/vitest.config.ts",
@@ -14292,7 +14308,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 24
+      "fileCount": 25
     },
     {
       "id": "packages/setting/vitest.config.ts",
@@ -15048,7 +15064,7 @@
   "duplicate": [],
   "unexpected": [],
   "counts": {
-    "unit": 1247,
+    "unit": 1249,
     "integration": 59,
     "smoke": 3,
     "boundary-ipc": 6,

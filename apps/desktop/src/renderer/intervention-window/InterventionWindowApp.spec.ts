@@ -2,13 +2,25 @@
 
 import { mount } from '@vue/test-utils';
 import { nextTick } from 'vue';
+import { createI18n } from 'vue-i18n';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import {
   RoutineWindowChannels,
+  WindowChannels,
   type InterventionWindowProjection,
 } from '@memoflow/desktop-contracts';
+import { productionLocaleMessages } from '@memoflow/app-vue/locales/production-messages';
 import { ok } from '@memoflow/transport-contracts/result';
 import InterventionWindowApp from './InterventionWindowApp.vue';
+
+function mountApp(attachTo?: Element) {
+  return mount(InterventionWindowApp, {
+    attachTo,
+    global: {
+      plugins: [createI18n({ legacy: false, locale: 'en-US', messages: productionLocaleMessages })],
+    },
+  });
+}
 
 const t0 = Date.parse('2026-08-27T04:00:00.000Z');
 
@@ -65,7 +77,7 @@ describe('InterventionWindowApp (ROUTINE-4104)', () => {
   });
 
   it('renders Gentle/Guided from Main projection and local countdown never advances runtime', async () => {
-    const wrapper = mount(InterventionWindowApp);
+    const wrapper = mountApp();
     await vi.waitFor(() => expect(wrapper.text()).toContain('A pause is coming'));
     expect(wrapper.get('[data-testid="intervention-countdown"]').text()).toBe('02:00');
 
@@ -98,7 +110,7 @@ describe('InterventionWindowApp (ROUTINE-4104)', () => {
   });
 
   it('routes complete, snooze, and dismiss through the minimal Main Process IPC surface', async () => {
-    const wrapper = mount(InterventionWindowApp);
+    const wrapper = mountApp();
     await vi.waitFor(() => expect(wrapper.text()).toContain('A pause is coming'));
     let buttons = wrapper.findAll('button');
     await buttons[0]!.trigger('click');
@@ -121,7 +133,7 @@ describe('InterventionWindowApp (ROUTINE-4104)', () => {
     wrapper.unmount();
   });
   it('Escape from a focused action uses the existing dismiss command; Tab stays native', async () => {
-    const wrapper = mount(InterventionWindowApp, { attachTo: document.body });
+    const wrapper = mountApp(document.body);
     await vi.waitFor(() => expect(wrapper.findAll('button').length).toBeGreaterThan(0));
     const buttons = wrapper.findAll<HTMLButtonElement>('button');
     for (const button of buttons) {
@@ -151,5 +163,28 @@ describe('InterventionWindowApp (ROUTINE-4104)', () => {
     invoke.mockClear();
     document.body.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
     expect(invoke).not.toHaveBeenCalled();
+  });
+
+  it('renders a localized empty state and closes through the shared window channel', async () => {
+    invoke.mockImplementation(async (channel: string) => {
+      if (channel === RoutineWindowChannels.INTERVENTION_WINDOW_GET) return ok(null);
+      if (channel === WindowChannels.CLOSE) return ok(null);
+      throw new Error(`unexpected channel ${channel}`);
+    });
+    const wrapper = mountApp();
+    await vi.waitFor(() =>
+      expect(wrapper.get('[data-testid="intervention-empty"]').text()).toContain(
+        'No active intervention',
+      ),
+    );
+    const empty = wrapper.get('[data-testid="intervention-empty"]');
+    expect(empty.text()).toContain(
+      'When a routine reaches its reminder time, it will appear here.',
+    );
+    const closeButton = empty.get('button');
+    expect(closeButton.text()).toBe('Close window');
+    await closeButton.trigger('click');
+    expect(invoke).toHaveBeenCalledWith(WindowChannels.CLOSE);
+    wrapper.unmount();
   });
 });

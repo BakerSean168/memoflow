@@ -132,6 +132,9 @@ export default {
     },
     currentDevice: '当前设备',
     revoke: '撤销会话',
+    revokeConfirmTitle: '撤销该会话？',
+    revokeConfirmDescription: '该设备将被登出，需要重新登录后才能继续使用。',
+    revokeConfirmText: '撤销会话',
     deleteTitle: '永久删除云端账号',
     deleteDescription:
       '永久删除云端账号及云端数据，同时删除本机数据和快速登录瓦片。未同步的更改也会丢失，此操作不可恢复。',

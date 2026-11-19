@@ -26,35 +26,51 @@
         Take the break now. Return when the routine feels complete.
       </p>
       <div class="intervention-window__actions no-drag">
-        <button type="button" class="primary" @click="sendCommand({ action: 'complete' })">
-          {{ projection.state === 'Guided' ? 'Complete break' : 'Done' }}
-        </button>
-        <button type="button" @click="sendCommand({ action: 'snooze', durationMs: 300_000 })">
-          Snooze 5 min
-        </button>
-        <button
-          type="button"
-          aria-label="Dismiss intervention"
+        <WindowActionButton variant="primary" @click="sendCommand({ action: 'complete' })">
+          {{
+            projection.state === 'Guided'
+              ? t('routine.intervention.completeBreak')
+              : t('routine.intervention.done')
+          }}
+        </WindowActionButton>
+        <WindowActionButton @click="sendCommand({ action: 'snooze', durationMs: 300_000 })">
+          {{ t('routine.intervention.snooze5m') }}
+        </WindowActionButton>
+        <WindowActionButton
+          :aria-label="t('routine.intervention.dismissAria')"
           @click="sendCommand({ action: 'dismiss' })"
         >
-          Dismiss
-        </button>
+          {{ t('routine.intervention.dismiss') }}
+        </WindowActionButton>
       </div>
     </section>
 
-    <section v-else class="intervention-window__empty">No active intervention</section>
+    <section v-else class="intervention-window__empty" data-testid="intervention-empty">
+      <p class="intervention-window__empty-title">{{ t('routine.intervention.emptyTitle') }}</p>
+      <p class="intervention-window__empty-description">
+        {{ t('routine.intervention.emptyDescription') }}
+      </p>
+      <WindowActionButton @click="closeWindow">
+        {{ t('routine.intervention.closeWindow') }}
+      </WindowActionButton>
+    </section>
   </main>
 </template>
 
 <script setup lang="ts">
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
+import { useI18n } from 'vue-i18n';
 import {
   RoutineWindowChannels,
+  WindowChannels,
   type InterventionWindowCommand,
   type InterventionWindowProjection,
 } from '@memoflow/desktop-contracts';
 import type { Result } from '@memoflow/transport-contracts/result';
 import { getElectronBridge } from '../platform/electron-bridge';
+import WindowActionButton from '../components/WindowActionButton.vue';
+
+const { t } = useI18n();
 
 const projection = ref<InterventionWindowProjection | null>(null);
 const now = ref(Date.now());
@@ -112,6 +128,12 @@ async function sendCommand(command: InterventionWindowCommand): Promise<void> {
     await bridge.invoke(RoutineWindowChannels.INTERVENTION_WINDOW_COMMAND, command),
   );
   now.value = Date.now();
+}
+
+// The empty state has no occurrence to dismiss, so it uses the shared window
+// control channel instead of the intervention command surface.
+function closeWindow(): void {
+  void getElectronBridge()?.invoke(WindowChannels.CLOSE);
 }
 
 const onProjection = (value: unknown): void => {
@@ -222,34 +244,28 @@ onBeforeUnmount(() => {
   gap: 6px;
 }
 
-.no-drag,
-button {
+.no-drag {
   -webkit-app-region: no-drag;
 }
 
-button {
-  min-height: 30px;
-  padding: 5px 9px;
-  color: #e4e4e7;
-  border: 1px solid #3f3f46;
-  border-radius: 8px;
-  background: #18181b;
-  cursor: pointer;
-  font-size: 12px;
-}
-
-button:hover {
-  background: #27272a;
-}
-
-button.primary {
-  border-color: #2563eb;
-  background: #1d4ed8;
-  color: #eff6ff;
-}
-
 .intervention-window__empty {
+  display: grid;
+  justify-items: start;
+  gap: 8px;
   padding: 18px;
   color: #a1a1aa;
+}
+
+.intervention-window__empty-title {
+  margin: 0;
+  color: #e4e4e7;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.intervention-window__empty-description {
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.45;
 }
 </style>

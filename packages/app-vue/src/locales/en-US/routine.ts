@@ -167,6 +167,16 @@ export default {
     create: 'Create',
     cancel: 'Cancel',
   },
+  intervention: {
+    done: 'Done',
+    completeBreak: 'Complete break',
+    snooze5m: 'Snooze 5 min',
+    dismiss: 'Dismiss',
+    dismissAria: 'Dismiss intervention',
+    emptyTitle: 'No active intervention',
+    emptyDescription: 'When a routine reaches its reminder time, it will appear here.',
+    closeWindow: 'Close window',
+  },
   trigger: {
     daily: 'Daily',
     weekly: 'Weekly',

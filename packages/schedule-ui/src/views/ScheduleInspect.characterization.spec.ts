@@ -479,6 +479,32 @@ describe('Schedule CalendarEntry inspect — SCHED-4201', () => {
     },
   );
 
+  it('renders a goal lifecycle status with translated copy instead of the raw enum', async () => {
+    const wrapper = mount(PlannerEventDialog, {
+      props: {
+        open: true,
+        event: {
+          ...projection,
+          sourceType: 'goal',
+          sourceId: 'goal-1:target',
+          displayMetadata: { semantic: 'goal-target', status: 'InProgress' },
+          ownerCommandTarget: { ownerType: 'goal.goal', ownerId: 'goal-1' },
+        },
+      },
+      global: {
+        plugins: [
+          createI18n({ legacy: false, locale: 'zh-CN', messages: productionLocaleMessages }),
+        ],
+        stubs: { Dialog: dialog, ProductDialogShell: shell },
+      },
+    });
+    await flushPromises();
+
+    const properties = wrapper.get('[data-testid="event-detail-properties"]');
+    expect(properties.text()).toContain('进行中');
+    expect(properties.text()).not.toContain('InProgress');
+  });
+
   it.each(['day', 'event'])(
     'localizes the narrow %s sheet close accessible name',
     async (surface) => {

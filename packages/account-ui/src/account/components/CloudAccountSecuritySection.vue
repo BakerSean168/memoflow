@@ -15,6 +15,7 @@ import {
   DialogTitle,
   Input,
   Label,
+  useConfirm,
 } from '@memoflow/ui-vue-shadcn';
 import { CLOUD_ACCOUNT_SECURITY_KEY, accountUiHost } from '../../account-ui-host';
 import { parseSessionUserAgent } from '../lib/session-device';
@@ -87,6 +88,14 @@ async function submitEmail() {
 }
 async function revoke(sessionId: string) {
   if (!service) return;
+  const confirmed = await useConfirm({
+    title: t('account.security.revokeConfirmTitle'),
+    description: t('account.security.revokeConfirmDescription'),
+    confirmText: t('account.security.revokeConfirmText'),
+    cancelText: t('common.cancel'),
+    variant: 'destructive',
+  });
+  if (!confirmed) return;
   await run(async () => {
     const result = await service.revokeAccountSession(sessionId);
     if (!result.ok) throw new Error(result.error.message);
