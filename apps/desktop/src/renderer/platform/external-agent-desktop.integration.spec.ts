@@ -181,14 +181,14 @@ describe('desktop external agent connections (#1030)', () => {
       }),
     );
 
-    expect(await client.listPats()).toMatchObject({ ok: false, error: { code: 'EAG_UNAUTHORIZED' } });
+    expect(await client.listPats()).toMatchObject({
+      ok: false,
+      error: { code: 'EAG_UNAUTHORIZED' },
+    });
   });
 
   it('wires the shared settings key to the desktop IPC transport', () => {
-    const source = readFileSync(
-      resolve(__dirname, 'di-app.ts'),
-      'utf8',
-    );
+    const source = readFileSync(resolve(__dirname, 'di-app.ts'), 'utf8');
     expect(source).toContain(
       'app.provide(EXTERNAL_AGENT_SERVICE_KEY, createExternalAgentIpcClient(resultIpcClient))',
     );

@@ -57,9 +57,7 @@ export function registerExternalAgentIpc(deps: ExternalAgentIpcDeps): void {
       const token = await deps.sessions.getValidToken(profile.profileId);
       if (!token) return failure('EAG_UNAUTHORIZED');
       return toIpc(
-        await run(
-          createExternalAgentBearerClient({ origin: apiOrigin, webOrigin, token }),
-        ),
+        await run(createExternalAgentBearerClient({ origin: apiOrigin, webOrigin, token })),
       );
     } catch {
       return failure('EAG_SERVICE_UNAVAILABLE');

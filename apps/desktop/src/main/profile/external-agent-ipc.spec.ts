@@ -8,7 +8,10 @@ vi.mock('../utils/api-config', () => ({
   getWebAppUrl: () => 'https://memo.test',
 }));
 
-type Handler = (_event: unknown, input?: unknown) => Promise<{
+type Handler = (
+  _event: unknown,
+  input?: unknown,
+) => Promise<{
   ok: boolean;
   data?: unknown;
   error?: { code: string; message: string; failure?: { code: string } };
@@ -27,7 +30,9 @@ const summary = {
   revokedAt: null,
 };
 
-function registerFixture(options: { profileKind?: 'local' | 'registered'; token?: string | null } = {}) {
+function registerFixture(
+  options: { profileKind?: 'local' | 'registered'; token?: string | null } = {},
+) {
   const handlers = new Map<string, Handler>();
   vi.mocked(ipcMain.handle).mockImplementation((channel, handler) => {
     handlers.set(channel, handler as unknown as Handler);
@@ -75,9 +80,7 @@ describe('registerExternalAgentIpc (#1030)', () => {
   });
 
   it('forwards the active cloud session as a bearer credential', async () => {
-    const fetcher = stubFetch(
-      new Response(JSON.stringify({ data: [summary] }), { status: 200 }),
-    );
+    const fetcher = stubFetch(new Response(JSON.stringify({ data: [summary] }), { status: 200 }));
     const { call, sessions } = registerFixture();
 
     expect(await call(ExternalAgentChannels.LIST_PATS)).toMatchObject({
