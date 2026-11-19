@@ -2,7 +2,7 @@ import { defineComponent, h, reactive, ref, KeepAlive } from 'vue';
 import { flushPromises, mount } from '@vue/test-utils';
 import { createI18n } from 'vue-i18n';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { ok } from '@memoflow/transport-contracts/result';
+import { fail, ok } from '@memoflow/transport-contracts/result';
 import type {
   LocalVaultBindingSnapshotDTO,
   LocalVaultNoteDTO,
@@ -21,6 +21,12 @@ const routerMocks = vi.hoisted(() => ({
   },
 }));
 
+const toastMocks = vi.hoisted(() => ({
+  error: vi.fn(),
+}));
+
+vi.mock('vue-sonner', () => ({ toast: toastMocks }));
+
 vi.mock('vue-router', () => ({
   useRoute: () => route,
   useRouter: () => ({ replace: routerMocks.replace }),
@@ -33,6 +39,7 @@ const messages = {
     retry: 'Retry',
     cancel: 'Cancel',
     clear: 'Clear',
+    operationFailed: 'Operation failed',
   },
   repository: {
     localVault: {
@@ -234,9 +241,33 @@ function mountWorkspace(
 
 beforeEach(() => {
   route.query = {};
+  toastMocks.error.mockClear();
 });
 
 describe('LocalVaultWorkspaceView', () => {
+  it('reports a failed scan as a toast with a retry action instead of a layout banner', async () => {
+    const mocks = createService();
+    mocks.scanLocalVault.mockResolvedValueOnce(fail({ code: 'INTERNAL', message: 'scan failed' }));
+    const wrapper = mountWorkspace(mocks.service);
+    await flushPromises();
+
+    expect(wrapper.find('[role="alert"]').exists()).toBe(false);
+    expect(toastMocks.error).toHaveBeenCalledTimes(1);
+    const [title, options] = toastMocks.error.mock.calls[0] as [
+      string,
+      { id: string; description: string; action: { label: string; onClick: () => void } },
+    ];
+    expect(title).toBe('Operation failed');
+    expect(options.id).toBe('local-vault-error');
+    expect(options.description).toBeTruthy();
+    expect(options.action.label).toBe('Retry');
+
+    options.action.onClick();
+    await flushPromises();
+    expect(mocks.getLocalVaultBinding).toHaveBeenCalledTimes(2);
+    wrapper.unmount();
+  });
+
   it('loads a Vault bound in settings while an initially unbound workspace was hidden', async () => {
     const mocks = createService();
     mocks.getLocalVaultBinding.mockResolvedValueOnce(ok(null));

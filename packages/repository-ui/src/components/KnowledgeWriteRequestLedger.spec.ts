@@ -22,8 +22,20 @@ const i18n = createI18n({
           description: 'Ledger description',
           refresh: 'Refresh',
           empty: 'No write requests',
+          emptyHint: 'Records appear after a note is written.',
           commitStatus: 'Commit: {status}',
           projectionStatus: 'Projection: {status}',
+          commitStatuses: {
+            Pending: 'Pending commit',
+            Committed: 'Committed',
+            Failed: 'Commit failed',
+          },
+          projectionStatuses: {
+            Pending: 'Pending projection',
+            Succeeded: 'Projected',
+            Failed: 'Projection failed',
+          },
+          projectionFailedHint: 'Projection did not finish. Replay this write request.',
           commitSha: '{sha}',
           projectionAttempts: '{count} attempt(s)',
           replay: 'Replay',
@@ -160,16 +172,21 @@ describe('KnowledgeWriteRequestLedger (W6 P1-1 ledger/replay UI)', () => {
 
     expect(service.listKnowledgeWriteRequests).toHaveBeenCalledTimes(1);
     expect(wrapper.get('[data-testid="ledger-row-wr-succeeded"]').text()).toContain(
-      'Projection: Succeeded',
+      'Commit: Committed',
+    );
+    expect(wrapper.get('[data-testid="ledger-row-wr-succeeded"]').text()).toContain(
+      'Projection: Projected',
     );
     expect(wrapper.get('[data-testid="ledger-row-wr-failed"]').text()).toContain(
-      'Projection: Failed',
+      'Projection: Projection failed',
     );
     expect(wrapper.get('[data-testid="ledger-row-wr-failed"]').text()).toContain('3 attempt(s)');
-    // Failed projection exposes the actionable server error.
-    expect(wrapper.get('[data-testid="ledger-projection-error"]').text()).toContain(
-      'applyChanges crashed',
-    );
+    // The failure body stays actionable; the technical code moves into the tooltip.
+    const projectionError = wrapper.get('[data-testid="ledger-projection-error"]');
+    expect(projectionError.text()).toContain('Replay this write request');
+    expect(projectionError.text()).not.toContain('PROJECTION_ERROR');
+    expect(projectionError.attributes('title')).toContain('PROJECTION_ERROR');
+    expect(projectionError.attributes('title')).toContain('applyChanges crashed');
     // Replay is offered only for replayable (Pending/Failed) projections.
     expect(
       wrapper
@@ -224,7 +241,7 @@ describe('KnowledgeWriteRequestLedger (W6 P1-1 ledger/replay UI)', () => {
     const wrapper = mountLedger(service);
     await flushPromises();
     expect(wrapper.get('[data-testid="ledger-row-wr-pending"]').text()).toContain(
-      'Projection: Pending',
+      'Projection: Pending projection',
     );
 
     await wrapper
@@ -233,10 +250,10 @@ describe('KnowledgeWriteRequestLedger (W6 P1-1 ledger/replay UI)', () => {
     await flushPromises();
 
     expect(service.replayKnowledgeWriteRequestProjection).toHaveBeenCalledWith('wr-pending');
-    expect(wrapper.get('[data-testid="ledger-replay-message"]').text()).toContain('Succeeded');
+    expect(wrapper.get('[data-testid="ledger-replay-message"]').text()).toContain('Projected');
     // After replay the ledger is re-read: the same row is now Succeeded in the UI.
     expect(wrapper.get('[data-testid="ledger-row-wr-pending"]').text()).toContain(
-      'Projection: Succeeded',
+      'Projection: Projected',
     );
     // Succeeded rows no longer offer replay.
     expect(
@@ -282,5 +299,8 @@ describe('KnowledgeWriteRequestLedger (W6 P1-1 ledger/replay UI)', () => {
       limit: 50,
     });
     expect(wrapper.get('[data-testid="ledger-empty"]').text()).toContain('No write requests');
+    expect(wrapper.get('[data-testid="ledger-empty"]').text()).toContain(
+      'Records appear after a note is written',
+    );
   });
 });
