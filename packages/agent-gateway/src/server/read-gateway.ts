@@ -245,6 +245,8 @@ export function createReadGateway(options: Options) {
               if (
                 (isWriteToolName(name) && !options.writes) ||
                 (isAssistedToolName(name) && !options.assisted) ||
+                // Deliberate boundary: writes are PAT-only until the OAuth
+                // write-consent design conditions are met (#1033).
                 ((isWriteToolName(name) || isAssistedToolName(name)) &&
                   principal.credentialType !== 'pat')
               ) {

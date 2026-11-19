@@ -15,6 +15,7 @@ const summary = {
   createdAt: '2026-11-16T00:00:00.000Z',
   expiresAt: '2027-02-14T00:00:00.000Z',
   revokedAt: null,
+  lastUsedAt: null,
 };
 const revokedSummary = {
   ...summary,
@@ -308,6 +309,32 @@ describe('ExternalAgentConnectionsSection PAT issuing (#970)', () => {
 });
 
 describe('ExternalAgentConnectionsSection PAT list (#1010)', () => {
+  it('shows the last successful use and an explicit empty state before first use (#1029)', async () => {
+    const used = {
+      ...summary,
+      id: 'c1a2b3c4-d5e6-4f70-8192-a3b4c5d6e7f8',
+      name: 'active agent',
+      prefix: 'mfp_Used',
+      lastUsedAt: '2026-11-18T09:30:00.000Z',
+    };
+    const fresh = {
+      ...summary,
+      id: 'd2b3c4d5-e6f7-4a81-9b03-b4c5d6e7f809',
+      name: 'fresh agent',
+      prefix: 'mfp_Fresh',
+    };
+    const { wrapper } = fixture([used, fresh]);
+    await flushPromises();
+
+    const lines = wrapper
+      .findAll('[data-testid="pat-last-used"]')
+      .map((node) => node.text())
+      .filter((text) => text.length > 0);
+    expect(lines).toHaveLength(2);
+    expect(lines[0]).toMatch(/^last used \S/);
+    expect(lines[1]).toBe('Never used');
+  });
+
   it('hides revoked and expired tokens from the list', async () => {
     const { wrapper } = fixture([summary, revokedSummary, expiredSummary]);
     await flushPromises();

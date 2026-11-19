@@ -411,6 +411,7 @@ exports.Prisma.ExternalAgentPatScalarFieldEnum = {
   scopes: 'scopes',
   expiresAt: 'expiresAt',
   revokedAt: 'revokedAt',
+  lastUsedAt: 'lastUsedAt',
   createdAt: 'createdAt',
   rateWindow: 'rateWindow',
   rateCount: 'rateCount'

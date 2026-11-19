@@ -3,6 +3,7 @@ import { createHash } from 'node:crypto';
 import { once } from 'node:events';
 import type { Server } from 'node:http';
 import express from 'express';
+import { Client, StreamableHTTPClientTransport } from '@modelcontextprotocol/client';
 import { prisma } from '@memoflow/database';
 import { IdentityId } from '@memoflow/utils/domain';
 import { createAccountPrismaActiveQuery } from '@memoflow/account';
@@ -233,5 +234,73 @@ describe('scoped PAT durable authority', () => {
     expect(
       (await prisma.externalAgentPat.findUniqueOrThrow({ where: { id: issued.id } })).rateCount,
     ).toBe(60);
+  });
+
+  it('reports the first MCP use on the management surface and throttles the rewrite (#1029)', async () => {
+    const owner = IdentityId.generate();
+    await seedAccount({ id: owner });
+    const api = await mountPatApi(String(owner));
+    const origin = new URL(api.url).origin;
+    const firstParty = { authorization: 'Bearer firstparty', origin: 'https://memo.test' };
+    const listPats = async () => {
+      const response = await fetch(api.url, { headers: firstParty });
+      expect(response.status).toBe(200);
+      const body = (await response.json()) as {
+        data: { id: string; lastUsedAt: string | null }[];
+      };
+      return body.data;
+    };
+    const callMcp = async (secret: string) => {
+      const client = new Client(
+        { name: 'last-used-fixture', version: '1' },
+        { versionNegotiation: { mode: { pin: '2026-07-28' } } },
+      );
+      try {
+        await client.connect(
+          new StreamableHTTPClientTransport(new URL(`${origin}/mcp`), {
+            requestInit: { headers: { authorization: `Bearer ${secret}` } },
+          }),
+        );
+        await client.listTools();
+      } finally {
+        await client.close();
+      }
+    };
+    try {
+      const created = await fetch(api.url, {
+        method: 'POST',
+        headers: { ...firstParty, 'content-type': 'application/json' },
+        body: JSON.stringify({
+          name: 'usage probe',
+          scopes: ['goals:read'],
+          idempotencyKey: 'usage-probe-1',
+        }),
+      });
+      expect(created.status).toBe(201);
+      const { data: pat } = (await created.json()) as {
+        data: { id: string; secret?: string; lastUsedAt: string | null };
+      };
+      if (!pat.secret) throw new Error('issuance did not return the one-time secret');
+      expect(pat.lastUsedAt).toBeNull();
+      // No MCP call yet: the management projection carries the never-used state.
+      expect((await listPats())[0].lastUsedAt).toBeNull();
+
+      await callMcp(pat.secret);
+      const firstUse = (await listPats())[0].lastUsedAt;
+      expect(firstUse).toEqual(expect.any(String));
+      expect(Date.parse(String(firstUse))).toBeGreaterThan(Date.now() - 60_000);
+      // The durable row is the authority the page projects.
+      expect(
+        (
+          await prisma.externalAgentPat.findUniqueOrThrow({ where: { id: pat.id } })
+        ).lastUsedAt?.toISOString(),
+      ).toBe(firstUse);
+
+      // A second verified call inside the throttle window must not move the timestamp.
+      await callMcp(pat.secret);
+      expect((await listPats())[0].lastUsedAt).toBe(firstUse);
+    } finally {
+      await api.close();
+    }
   });
 });

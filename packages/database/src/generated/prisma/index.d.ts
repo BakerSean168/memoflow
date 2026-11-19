@@ -39101,6 +39101,7 @@ export namespace Prisma {
     audience: string | null
     expiresAt: Date | null
     revokedAt: Date | null
+    lastUsedAt: Date | null
     createdAt: Date | null
     rateWindow: Date | null
     rateCount: number | null
@@ -39115,6 +39116,7 @@ export namespace Prisma {
     audience: string | null
     expiresAt: Date | null
     revokedAt: Date | null
+    lastUsedAt: Date | null
     createdAt: Date | null
     rateWindow: Date | null
     rateCount: number | null
@@ -39130,6 +39132,7 @@ export namespace Prisma {
     scopes: number
     expiresAt: number
     revokedAt: number
+    lastUsedAt: number
     createdAt: number
     rateWindow: number
     rateCount: number
@@ -39154,6 +39157,7 @@ export namespace Prisma {
     audience?: true
     expiresAt?: true
     revokedAt?: true
+    lastUsedAt?: true
     createdAt?: true
     rateWindow?: true
     rateCount?: true
@@ -39168,6 +39172,7 @@ export namespace Prisma {
     audience?: true
     expiresAt?: true
     revokedAt?: true
+    lastUsedAt?: true
     createdAt?: true
     rateWindow?: true
     rateCount?: true
@@ -39183,6 +39188,7 @@ export namespace Prisma {
     scopes?: true
     expiresAt?: true
     revokedAt?: true
+    lastUsedAt?: true
     createdAt?: true
     rateWindow?: true
     rateCount?: true
@@ -39285,6 +39291,7 @@ export namespace Prisma {
     scopes: string[]
     expiresAt: Date
     revokedAt: Date | null
+    lastUsedAt: Date | null
     createdAt: Date
     rateWindow: Date
     rateCount: number
@@ -39319,6 +39326,7 @@ export namespace Prisma {
     scopes?: boolean
     expiresAt?: boolean
     revokedAt?: boolean
+    lastUsedAt?: boolean
     createdAt?: boolean
     rateWindow?: boolean
     rateCount?: boolean
@@ -39335,6 +39343,7 @@ export namespace Prisma {
     scopes?: boolean
     expiresAt?: boolean
     revokedAt?: boolean
+    lastUsedAt?: boolean
     createdAt?: boolean
     rateWindow?: boolean
     rateCount?: boolean
@@ -39351,6 +39360,7 @@ export namespace Prisma {
     scopes?: boolean
     expiresAt?: boolean
     revokedAt?: boolean
+    lastUsedAt?: boolean
     createdAt?: boolean
     rateWindow?: boolean
     rateCount?: boolean
@@ -39367,12 +39377,13 @@ export namespace Prisma {
     scopes?: boolean
     expiresAt?: boolean
     revokedAt?: boolean
+    lastUsedAt?: boolean
     createdAt?: boolean
     rateWindow?: boolean
     rateCount?: boolean
   }
 
-  export type ExternalAgentPatOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "userId" | "name" | "prefix" | "tokenDigest" | "audience" | "scopes" | "expiresAt" | "revokedAt" | "createdAt" | "rateWindow" | "rateCount", ExtArgs["result"]["externalAgentPat"]>
+  export type ExternalAgentPatOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "userId" | "name" | "prefix" | "tokenDigest" | "audience" | "scopes" | "expiresAt" | "revokedAt" | "lastUsedAt" | "createdAt" | "rateWindow" | "rateCount", ExtArgs["result"]["externalAgentPat"]>
   export type ExternalAgentPatInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     user?: boolean | CloudAuthUserDefaultArgs<ExtArgs>
   }
@@ -39398,6 +39409,7 @@ export namespace Prisma {
       scopes: string[]
       expiresAt: Date
       revokedAt: Date | null
+      lastUsedAt: Date | null
       createdAt: Date
       rateWindow: Date
       rateCount: number
@@ -39834,6 +39846,7 @@ export namespace Prisma {
     readonly scopes: FieldRef<"ExternalAgentPat", 'String[]'>
     readonly expiresAt: FieldRef<"ExternalAgentPat", 'DateTime'>
     readonly revokedAt: FieldRef<"ExternalAgentPat", 'DateTime'>
+    readonly lastUsedAt: FieldRef<"ExternalAgentPat", 'DateTime'>
     readonly createdAt: FieldRef<"ExternalAgentPat", 'DateTime'>
     readonly rateWindow: FieldRef<"ExternalAgentPat", 'DateTime'>
     readonly rateCount: FieldRef<"ExternalAgentPat", 'Int'>
@@ -128731,6 +128744,7 @@ export namespace Prisma {
     scopes: 'scopes',
     expiresAt: 'expiresAt',
     revokedAt: 'revokedAt',
+    lastUsedAt: 'lastUsedAt',
     createdAt: 'createdAt',
     rateWindow: 'rateWindow',
     rateCount: 'rateCount'
@@ -132190,6 +132204,7 @@ export namespace Prisma {
     scopes?: StringNullableListFilter<"ExternalAgentPat">
     expiresAt?: DateTimeFilter<"ExternalAgentPat"> | Date | string
     revokedAt?: DateTimeNullableFilter<"ExternalAgentPat"> | Date | string | null
+    lastUsedAt?: DateTimeNullableFilter<"ExternalAgentPat"> | Date | string | null
     createdAt?: DateTimeFilter<"ExternalAgentPat"> | Date | string
     rateWindow?: DateTimeFilter<"ExternalAgentPat"> | Date | string
     rateCount?: IntFilter<"ExternalAgentPat"> | number
@@ -132206,6 +132221,7 @@ export namespace Prisma {
     scopes?: SortOrder
     expiresAt?: SortOrder
     revokedAt?: SortOrderInput | SortOrder
+    lastUsedAt?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     rateWindow?: SortOrder
     rateCount?: SortOrder
@@ -132225,6 +132241,7 @@ export namespace Prisma {
     scopes?: StringNullableListFilter<"ExternalAgentPat">
     expiresAt?: DateTimeFilter<"ExternalAgentPat"> | Date | string
     revokedAt?: DateTimeNullableFilter<"ExternalAgentPat"> | Date | string | null
+    lastUsedAt?: DateTimeNullableFilter<"ExternalAgentPat"> | Date | string | null
     createdAt?: DateTimeFilter<"ExternalAgentPat"> | Date | string
     rateWindow?: DateTimeFilter<"ExternalAgentPat"> | Date | string
     rateCount?: IntFilter<"ExternalAgentPat"> | number
@@ -132241,6 +132258,7 @@ export namespace Prisma {
     scopes?: SortOrder
     expiresAt?: SortOrder
     revokedAt?: SortOrderInput | SortOrder
+    lastUsedAt?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     rateWindow?: SortOrder
     rateCount?: SortOrder
@@ -132264,6 +132282,7 @@ export namespace Prisma {
     scopes?: StringNullableListFilter<"ExternalAgentPat">
     expiresAt?: DateTimeWithAggregatesFilter<"ExternalAgentPat"> | Date | string
     revokedAt?: DateTimeNullableWithAggregatesFilter<"ExternalAgentPat"> | Date | string | null
+    lastUsedAt?: DateTimeNullableWithAggregatesFilter<"ExternalAgentPat"> | Date | string | null
     createdAt?: DateTimeWithAggregatesFilter<"ExternalAgentPat"> | Date | string
     rateWindow?: DateTimeWithAggregatesFilter<"ExternalAgentPat"> | Date | string
     rateCount?: IntWithAggregatesFilter<"ExternalAgentPat"> | number
@@ -141266,6 +141285,7 @@ export namespace Prisma {
     scopes?: ExternalAgentPatCreatescopesInput | string[]
     expiresAt: Date | string
     revokedAt?: Date | string | null
+    lastUsedAt?: Date | string | null
     createdAt?: Date | string
     rateWindow?: Date | string
     rateCount?: number
@@ -141282,6 +141302,7 @@ export namespace Prisma {
     scopes?: ExternalAgentPatCreatescopesInput | string[]
     expiresAt: Date | string
     revokedAt?: Date | string | null
+    lastUsedAt?: Date | string | null
     createdAt?: Date | string
     rateWindow?: Date | string
     rateCount?: number
@@ -141296,6 +141317,7 @@ export namespace Prisma {
     scopes?: ExternalAgentPatUpdatescopesInput | string[]
     expiresAt?: DateTimeFieldUpdateOperationsInput | Date | string
     revokedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    lastUsedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     rateWindow?: DateTimeFieldUpdateOperationsInput | Date | string
     rateCount?: IntFieldUpdateOperationsInput | number
@@ -141312,6 +141334,7 @@ export namespace Prisma {
     scopes?: ExternalAgentPatUpdatescopesInput | string[]
     expiresAt?: DateTimeFieldUpdateOperationsInput | Date | string
     revokedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    lastUsedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     rateWindow?: DateTimeFieldUpdateOperationsInput | Date | string
     rateCount?: IntFieldUpdateOperationsInput | number
@@ -141327,6 +141350,7 @@ export namespace Prisma {
     scopes?: ExternalAgentPatCreatescopesInput | string[]
     expiresAt: Date | string
     revokedAt?: Date | string | null
+    lastUsedAt?: Date | string | null
     createdAt?: Date | string
     rateWindow?: Date | string
     rateCount?: number
@@ -141341,6 +141365,7 @@ export namespace Prisma {
     scopes?: ExternalAgentPatUpdatescopesInput | string[]
     expiresAt?: DateTimeFieldUpdateOperationsInput | Date | string
     revokedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    lastUsedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     rateWindow?: DateTimeFieldUpdateOperationsInput | Date | string
     rateCount?: IntFieldUpdateOperationsInput | number
@@ -141356,6 +141381,7 @@ export namespace Prisma {
     scopes?: ExternalAgentPatUpdatescopesInput | string[]
     expiresAt?: DateTimeFieldUpdateOperationsInput | Date | string
     revokedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    lastUsedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     rateWindow?: DateTimeFieldUpdateOperationsInput | Date | string
     rateCount?: IntFieldUpdateOperationsInput | number
@@ -150907,6 +150933,7 @@ export namespace Prisma {
     scopes?: SortOrder
     expiresAt?: SortOrder
     revokedAt?: SortOrder
+    lastUsedAt?: SortOrder
     createdAt?: SortOrder
     rateWindow?: SortOrder
     rateCount?: SortOrder
@@ -150925,6 +150952,7 @@ export namespace Prisma {
     audience?: SortOrder
     expiresAt?: SortOrder
     revokedAt?: SortOrder
+    lastUsedAt?: SortOrder
     createdAt?: SortOrder
     rateWindow?: SortOrder
     rateCount?: SortOrder
@@ -150939,6 +150967,7 @@ export namespace Prisma {
     audience?: SortOrder
     expiresAt?: SortOrder
     revokedAt?: SortOrder
+    lastUsedAt?: SortOrder
     createdAt?: SortOrder
     rateWindow?: SortOrder
     rateCount?: SortOrder
@@ -169882,6 +169911,7 @@ export namespace Prisma {
     scopes?: ExternalAgentPatCreatescopesInput | string[]
     expiresAt: Date | string
     revokedAt?: Date | string | null
+    lastUsedAt?: Date | string | null
     createdAt?: Date | string
     rateWindow?: Date | string
     rateCount?: number
@@ -169896,6 +169926,7 @@ export namespace Prisma {
     scopes?: ExternalAgentPatCreatescopesInput | string[]
     expiresAt: Date | string
     revokedAt?: Date | string | null
+    lastUsedAt?: Date | string | null
     createdAt?: Date | string
     rateWindow?: Date | string
     rateCount?: number
@@ -170416,6 +170447,7 @@ export namespace Prisma {
     scopes?: StringNullableListFilter<"ExternalAgentPat">
     expiresAt?: DateTimeFilter<"ExternalAgentPat"> | Date | string
     revokedAt?: DateTimeNullableFilter<"ExternalAgentPat"> | Date | string | null
+    lastUsedAt?: DateTimeNullableFilter<"ExternalAgentPat"> | Date | string | null
     createdAt?: DateTimeFilter<"ExternalAgentPat"> | Date | string
     rateWindow?: DateTimeFilter<"ExternalAgentPat"> | Date | string
     rateCount?: IntFilter<"ExternalAgentPat"> | number
@@ -190775,6 +190807,7 @@ export namespace Prisma {
     scopes?: ExternalAgentPatCreatescopesInput | string[]
     expiresAt: Date | string
     revokedAt?: Date | string | null
+    lastUsedAt?: Date | string | null
     createdAt?: Date | string
     rateWindow?: Date | string
     rateCount?: number
@@ -191002,6 +191035,7 @@ export namespace Prisma {
     scopes?: ExternalAgentPatUpdatescopesInput | string[]
     expiresAt?: DateTimeFieldUpdateOperationsInput | Date | string
     revokedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    lastUsedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     rateWindow?: DateTimeFieldUpdateOperationsInput | Date | string
     rateCount?: IntFieldUpdateOperationsInput | number
@@ -191016,6 +191050,7 @@ export namespace Prisma {
     scopes?: ExternalAgentPatUpdatescopesInput | string[]
     expiresAt?: DateTimeFieldUpdateOperationsInput | Date | string
     revokedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    lastUsedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     rateWindow?: DateTimeFieldUpdateOperationsInput | Date | string
     rateCount?: IntFieldUpdateOperationsInput | number
@@ -191030,6 +191065,7 @@ export namespace Prisma {
     scopes?: ExternalAgentPatUpdatescopesInput | string[]
     expiresAt?: DateTimeFieldUpdateOperationsInput | Date | string
     revokedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    lastUsedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     rateWindow?: DateTimeFieldUpdateOperationsInput | Date | string
     rateCount?: IntFieldUpdateOperationsInput | number

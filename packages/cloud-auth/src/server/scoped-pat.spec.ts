@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import { createScopedPatService } from './scoped-pat';
+import { PAT_LAST_USED_WRITE_INTERVAL_MS, createScopedPatService } from './scoped-pat';
 
 describe('External scoped PAT boundary', () => {
   it('uses the injected Account owner authority without touching its table', async () => {
@@ -147,5 +147,74 @@ describe('External scoped PAT boundary', () => {
       credentialType: 'pat',
       scopes: ['relations:read'],
     });
+  });
+});
+
+describe('External scoped PAT last-used writeback', () => {
+  /** Real service over a fake client, so the throttle decision is exercised, not mocked. */
+  async function authenticateWith(lastUsedAt: Date | null, write: () => Promise<unknown>) {
+    const updateMany = vi.fn(write);
+    const service = createScopedPatService({
+      database: {
+        $transaction: async (run: (tx: unknown) => unknown) =>
+          run({
+            $executeRaw: vi.fn(),
+            externalAgentPat: {
+              findUnique: vi.fn().mockResolvedValue({
+                id: 'pat-usage',
+                userId: 'identity-a',
+                audience: 'https://api.memo.test/mcp',
+                expiresAt: new Date(Date.now() + 60_000),
+                revokedAt: null,
+                lastUsedAt,
+                scopes: ['goals:read'],
+              }),
+            },
+            cloudAuthUser: { findUnique: vi.fn().mockResolvedValue({ disabledAt: null }) },
+          }),
+        externalAgentPat: { updateMany },
+      } as never,
+      audience: 'https://api.memo.test/mcp',
+      accountIsActive: async () => true,
+    });
+    const principal = await service.authenticate(`Bearer mfp_${'d'.repeat(43)}`);
+    return { principal, updateMany };
+  }
+
+  it('records the first successful use after the credential checks pass', async () => {
+    const { principal, updateMany } = await authenticateWith(null, async () => ({ count: 1 }));
+    expect(principal).toMatchObject({ credentialId: 'pat-usage', identityId: 'identity-a' });
+    expect(updateMany).toHaveBeenCalledTimes(1);
+    const [args] = updateMany.mock.calls[0] as [{ where: unknown; data: { lastUsedAt: Date } }];
+    expect(args.data.lastUsedAt).toBeInstanceOf(Date);
+    // The conditional where is what stops a second instance writing inside the window.
+    expect(args.where).toMatchObject({
+      id: 'pat-usage',
+      OR: [{ lastUsedAt: null }, { lastUsedAt: { lt: expect.any(Date) } }],
+    });
+  });
+
+  it('does not write again inside the throttle window', async () => {
+    const { principal, updateMany } = await authenticateWith(
+      new Date(Date.now() - 60_000),
+      async () => ({ count: 1 }),
+    );
+    expect(principal).not.toBeNull();
+    expect(updateMany).not.toHaveBeenCalled();
+  });
+
+  it('refreshes a timestamp older than the window', async () => {
+    const { updateMany } = await authenticateWith(
+      new Date(Date.now() - PAT_LAST_USED_WRITE_INTERVAL_MS - 1_000),
+      async () => ({ count: 1 }),
+    );
+    expect(updateMany).toHaveBeenCalledTimes(1);
+  });
+
+  it('still authenticates when the usage write fails', async () => {
+    const { principal } = await authenticateWith(null, async () => {
+      throw new Error('write stalled');
+    });
+    expect(principal).toMatchObject({ credentialId: 'pat-usage' });
   });
 });

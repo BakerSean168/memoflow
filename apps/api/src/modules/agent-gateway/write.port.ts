@@ -54,6 +54,8 @@ export function bindGatewayWrites(
     requiredScope: string,
   ): ExternalMutationAuthority {
     scope(authority, requiredScope);
+    // Only PAT reaches this port. OAuth write authority would need its own
+    // connection/consent transaction check; see #1033 before adding a branch.
     return {
       ...authority,
       authorizeInTransaction: async (tx) => {
