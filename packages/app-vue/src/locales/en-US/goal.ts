@@ -143,6 +143,10 @@ export default {
     createGoal: 'Create Goal',
     askAi: 'Let AI plan it with me →',
     viewEmpty: 'No goals in this view',
+    viewEmptyDescription:
+      'No goals in this view. Try another view, clear the filters, or create a goal.',
+    viewAllGoals: 'View all goals',
+    clearFilters: 'Clear filters',
     pastTarget: 'Past Target',
     target: 'Target',
     statusPlanned: 'Planned',
@@ -688,6 +692,7 @@ export default {
     beforeWeight: 'Before Weight',
     afterWeight: 'After Weight',
     operator: 'Operator',
+    operatorSystem: 'System',
     reason: 'Reason',
     prevPage: 'Previous',
     nextPage: 'Next',

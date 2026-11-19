@@ -6,10 +6,10 @@
   "nativeKinds": ["button", "input", "textarea", "file-input"],
   "exceptions": [
     {
-      "path": "apps/desktop/src/renderer/CustomNotificationView.vue",
+      "path": "apps/desktop/src/renderer/components/WindowActionButton.vue",
       "native": ["button"],
       "category": "custom-control",
-      "reason": "The notification window owns its visual layer; action buttons are styled by the window chrome (separate visual ticket)."
+      "reason": "Minimal window-chrome button atom shared by the standalone intervention and custom-notification windows; it is the interaction surface implementation, not a page action."
     },
     {
       "path": "apps/desktop/src/renderer/DesktopAuthApp.vue",
@@ -22,12 +22,6 @@
       "native": ["button"],
       "category": "custom-control",
       "reason": "Standalone focus window chrome; window and session actions use the window visual layer."
-    },
-    {
-      "path": "apps/desktop/src/renderer/intervention-window/InterventionWindowApp.vue",
-      "native": ["button"],
-      "category": "custom-control",
-      "reason": "Standalone intervention window chrome; its action buttons use the window visual layer."
     },
     {
       "path": "packages/account-ui/src/account/components/AccountAvatarUploader.vue",
@@ -319,6 +313,14 @@
     }
   ],
   "converted": [
+    {
+      "path": "apps/desktop/src/renderer/CustomNotificationView.vue",
+      "native": ["button"]
+    },
+    {
+      "path": "apps/desktop/src/renderer/intervention-window/InterventionWindowApp.vue",
+      "native": ["button"]
+    },
     {
       "path": "apps/web/src/auth/WebAuthView.vue",
       "native": ["button"]
