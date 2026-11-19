@@ -5,9 +5,11 @@ import { asInstant, asYmd } from '@memoflow/time';
 import { setProductTimePreferences } from '@schedule-ui-test-host/shared/utils/product-time';
 import {
   formatPlannerProjectionTimeRange,
+  plannerGoalStatusI18nKey,
   plannerProjectionDateKey,
   plannerProjectionSourceLabel,
   plannerProjectionSourcePresentation,
+  plannerProjectionStatusLabel,
   plannerProjectionToneClass,
 } from './planner-presentation';
 
@@ -129,5 +131,30 @@ describe('planner projection presentation', () => {
 
     const event = timedProjection(Date.parse('2026-03-08T04:30:00.000Z'), null);
     expect(plannerProjectionDateKey(event)).toBe('2026-03-07');
+  });
+
+  it('translates goal lifecycle statuses instead of exposing raw enum values', () => {
+    const translate = (key: string) => `translated:${key}`;
+
+    expect(plannerGoalStatusI18nKey).toEqual({
+      Planned: 'goal.list.statusPlanned',
+      InProgress: 'goal.list.statusInProgress',
+      Completed: 'goal.list.statusCompleted',
+      Abandoned: 'goal.list.statusAbandoned',
+    });
+    expect(plannerProjectionStatusLabel('Planned', translate)).toBe(
+      'translated:goal.list.statusPlanned',
+    );
+    expect(plannerProjectionStatusLabel('InProgress', translate)).toBe(
+      'translated:goal.list.statusInProgress',
+    );
+    expect(plannerProjectionStatusLabel('Completed', translate)).toBe(
+      'translated:goal.list.statusCompleted',
+    );
+    expect(plannerProjectionStatusLabel('Abandoned', translate)).toBe(
+      'translated:goal.list.statusAbandoned',
+    );
+    expect(plannerProjectionStatusLabel(null, translate)).toBe('');
+    expect(plannerProjectionStatusLabel('Unknown', translate)).toBe('');
   });
 });
