@@ -567,9 +567,7 @@
           "pattern": "if \\(!service \\|\\| desktopApi !== undefined\\)"
         }
       ],
-      "requireStringLiterals": [
-        "Server-held data disclosure is available from the authenticated Web runtime"
-      ]
+      "requireStringLiterals": ["setting.advanced.serverDisclosureUnavailable"]
     },
     {
       "id": "rule-use-data-portability-172",

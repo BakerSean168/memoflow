@@ -1,6 +1,8 @@
 <script setup lang="ts">
 /** Data owner composition: V3 preferences portability + full Data Portability + Desktop native file dialogs. */
 import { inject, ref } from 'vue';
+import { useI18n } from 'vue-i18n';
+import { toast } from 'vue-sonner';
 import { SystemChannels } from '@memoflow/desktop-contracts';
 import { isOk, type Result } from '@memoflow/transport-contracts/result';
 import { settingUiHost } from '../setting-ui-host';
@@ -8,16 +10,16 @@ import { usePreferencePortability } from '../composables/usePreferencePortabilit
 import { useDataPortability } from '../composables/useDataPortability';
 import SettingAdvancedActions from './SettingAdvancedActions.vue';
 
+const { t } = useI18n();
 const desktopApi = inject(settingUiHost.DESKTOP_AUTH_API_KEY, undefined);
 const fileInput = ref<HTMLInputElement | null>(null);
-const { exportSettings, importSettings } = usePreferencePortability();
+const { error: preferenceImportError, exportSettings, importSettings } = usePreferencePortability();
 const {
   isAvailable: isDataPortabilityAvailable,
   isServerDisclosureAvailable,
   isExporting: isExportingData,
   isExportingServerDisclosure,
   isImporting: isImportingData,
-  lastResult: dataPortabilityResult,
   exportAllData,
   exportServerHeldDataDisclosure,
   importAllData,
@@ -25,18 +27,42 @@ const {
 
 type OpenTextResult = { canceled: boolean; content: string | null };
 
+async function importPreferenceContent(content: string): Promise<void> {
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(content);
+  } catch {
+    toast.error(t('setting.advanced.preferenceContentInvalid'));
+    return;
+  }
+
+  const receipt = await importSettings(parsed);
+  if (!receipt) {
+    toast.error(preferenceImportError.value ?? t('setting.advanced.preferenceContentInvalid'));
+  }
+}
+
 async function handlePreferenceImport(): Promise<void> {
   if (desktopApi?.invoke) {
+    let response: Result<OpenTextResult>;
     try {
-      const response = (await desktopApi.invoke(SystemChannels.USER_FILES_OPEN_TEXT, {
+      response = (await desktopApi.invoke(SystemChannels.USER_FILES_OPEN_TEXT, {
         filters: [{ name: 'JSON', extensions: ['json'] }],
       })) as Result<OpenTextResult>;
-      if (isOk(response) && !response.data.canceled && response.data.content) {
-        await importSettings(JSON.parse(response.data.content));
-      }
-    } catch (error) {
-      console.error('Failed to import preference JSON from Desktop file dialog:', error);
+    } catch {
+      toast.error(t('setting.advanced.preferenceFileUnreadable'));
+      return;
     }
+    if (!isOk(response)) {
+      toast.error(t('setting.advanced.preferenceFileUnreadable'));
+      return;
+    }
+    if (response.data.canceled) return;
+    if (!response.data.content) {
+      toast.error(t('setting.advanced.preferenceFileUnreadable'));
+      return;
+    }
+    await importPreferenceContent(response.data.content);
     return;
   }
   fileInput.value?.click();
@@ -75,12 +101,18 @@ function onFileSelected(event: Event): void {
   if (!file) return;
 
   const reader = new FileReader();
+  reader.onerror = () => {
+    toast.error(t('setting.advanced.preferenceFileUnreadable'));
+    input.value = '';
+  };
   reader.onload = async (loadEvent) => {
     try {
       const content = loadEvent.target?.result;
-      if (typeof content === 'string') await importSettings(JSON.parse(content));
-    } catch (error) {
-      console.error('Failed to parse preference JSON:', error);
+      if (typeof content !== 'string') {
+        toast.error(t('setting.advanced.preferenceContentInvalid'));
+        return;
+      }
+      await importPreferenceContent(content);
     } finally {
       input.value = '';
     }
@@ -105,7 +137,6 @@ function onFileSelected(event: Event): void {
       :data-portability-available="isDataPortabilityAvailable"
       :server-data-disclosure-available="isServerDisclosureAvailable"
       :exporting-server-data-disclosure="isExportingServerDisclosure"
-      :data-portability-result="dataPortabilityResult"
       @export-j-s-o-n="handlePreferenceExport"
       @import="handlePreferenceImport"
       @export-all-data="exportAllData"

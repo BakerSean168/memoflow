@@ -63,7 +63,6 @@ function mountActions(dataPortabilityAvailable: boolean, serverDataDisclosureAva
       exportingServerDataDisclosure: false,
       exportingData: false,
       importingData: false,
-      dataPortabilityResult: null,
     },
     global: {
       plugins: [i18n],
