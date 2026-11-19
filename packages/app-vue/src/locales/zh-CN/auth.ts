@@ -55,6 +55,8 @@ export default {
     selectTitle: '选择账号',
     name: '昵称',
     create: '新建本地账户',
+    createProfile: '新建档案',
+    localProfileFallback: '本地档案',
     signInTitle: '登录',
     signInAction: '登录',
     forgotPassword: '忘记密码？',

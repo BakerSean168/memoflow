@@ -167,6 +167,16 @@ export default {
     create: '创建',
     cancel: '取消',
   },
+  intervention: {
+    done: '完成',
+    completeBreak: '完成休息',
+    snooze5m: '延后 5 分钟',
+    dismiss: '忽略',
+    dismissAria: '忽略本次干预',
+    emptyTitle: '当前没有进行中的干预',
+    emptyDescription: '当例程到达提醒时间时，提醒会显示在这里。',
+    closeWindow: '关闭窗口',
+  },
   trigger: {
     daily: '每天',
     weekly: '每周',

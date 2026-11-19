@@ -55,7 +55,15 @@
             testid="goals-empty-state"
             @action="openCreate"
           />
-          <AppEmptyState v-else :title="t('goal.list.viewEmpty')" testid="goals-view-empty" />
+          <AppEmptyState
+            v-else
+            :icon="Target"
+            :title="t('goal.list.viewEmpty')"
+            :description="t('goal.list.viewEmptyDescription')"
+            :action-label="emptyViewAction.label"
+            testid="goals-view-empty"
+            @action="emptyViewAction.run()"
+          />
         </template>
       </div>
     </ScrollArea>
@@ -67,6 +75,7 @@ import { goalUiHost } from '../goal-ui-host';
 const { vKeyboardList } = goalUiHost;
 const { AppEmptyState } = goalUiHost.components;
 
+import { computed } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import { Target } from '@lucide/vue';
@@ -79,7 +88,16 @@ import type { GoalClientDTO } from '@memoflow/goal-contracts';
 const { t } = useI18n();
 const router = useRouter();
 const route = useRoute();
-const { goals, isLoading, systemView, deleteGoal } = useGoal();
+const { goals, isLoading, systemView, deleteGoal, setSystemView, hasActiveFilter, clearFilters } =
+  useGoal();
+
+const emptyViewAction = computed<{ label: string; run: () => void }>(() => {
+  if (hasActiveFilter.value) return { label: t('goal.list.clearFilters'), run: clearFilters };
+  if (systemView.value !== 'all') {
+    return { label: t('goal.list.viewAllGoals'), run: () => setSystemView('all') };
+  }
+  return { label: t('goal.list.createGoal'), run: openCreate };
+});
 
 function openCreate() {
   openGoalEditor('create');

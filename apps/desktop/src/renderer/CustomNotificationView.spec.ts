@@ -1,9 +1,19 @@
 // @vitest-environment happy-dom
 import { mount } from '@vue/test-utils';
 import { nextTick } from 'vue';
+import { createI18n } from 'vue-i18n';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { NotificationChannels } from '@memoflow/desktop-contracts';
+import { productionLocaleMessages } from '@memoflow/app-vue/locales/production-messages';
 import CustomNotificationView from './CustomNotificationView.vue';
+
+function mountView() {
+  return mount(CustomNotificationView, {
+    global: {
+      plugins: [createI18n({ legacy: false, locale: 'zh-CN', messages: productionLocaleMessages })],
+    },
+  });
+}
 
 const bridge = vi.hoisted(() => ({
   invoke: vi.fn<(...args: unknown[]) => Promise<unknown>>(async () => undefined),
@@ -27,7 +37,7 @@ describe('custom notification presentation lifecycle', () => {
     'executes the canonical %s action before closing the card',
     async (actionKey) => {
       bridge.invoke.mockResolvedValue({ ok: true, data: { interaction: { outcome: 'accepted' } } });
-      const wrapper = mount(CustomNotificationView);
+      const wrapper = mountView();
       const receive = bridge.on.mock.calls.find(
         ([channel]) => channel === NotificationChannels.CUSTOM_RECEIVE,
       )![1];
@@ -64,7 +74,7 @@ describe('custom notification presentation lifecycle', () => {
         ? { ok: true, data: { interaction: { outcome: 'rejected' } } }
         : undefined,
     );
-    const wrapper = mount(CustomNotificationView);
+    const wrapper = mountView();
     const receive = bridge.on.mock.calls.find(
       ([channel]) => channel === NotificationChannels.CUSTOM_RECEIVE,
     )![1];
@@ -92,7 +102,7 @@ describe('custom notification presentation lifecycle', () => {
   it('runs the countdown only while a visible notification needs it and clears scheduled work on unmount', async () => {
     const interval = vi.spyOn(window, 'setInterval');
     const clearInterval = vi.spyOn(window, 'clearInterval');
-    const wrapper = mount(CustomNotificationView);
+    const wrapper = mountView();
     await nextTick();
     expect(interval).not.toHaveBeenCalled();
     // Settle Vue's development-only devtools discovery timeout.
@@ -103,6 +113,8 @@ describe('custom notification presentation lifecycle', () => {
     receive({ id: 'toast-1', title: 'Reminder', body: 'Body', sound: false });
     await nextTick();
     expect(wrapper.text()).toContain('Reminder');
+    expect(wrapper.text()).toContain('30s 内未处理将自动标记为已读');
+    expect(wrapper.get('button').text()).toBe('收到');
     expect(interval).toHaveBeenCalledTimes(1);
 
     vi.spyOn(document, 'visibilityState', 'get').mockReturnValue('hidden');

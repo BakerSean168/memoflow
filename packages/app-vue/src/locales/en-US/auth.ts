@@ -55,6 +55,8 @@ export default {
     selectTitle: 'Choose an account',
     name: 'Nickname',
     create: 'New local account',
+    createProfile: 'New profile',
+    localProfileFallback: 'Local profile',
     signInTitle: 'Sign in',
     signInAction: 'Sign in',
     forgotPassword: 'Forgot password?',

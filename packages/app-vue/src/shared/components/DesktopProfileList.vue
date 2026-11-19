@@ -6,6 +6,7 @@ import {
   AvatarFallback,
   AvatarImage,
   Button,
+  Dialog,
   Input,
   Popover,
   PopoverContent,
@@ -19,6 +20,7 @@ import {
 import { LockKeyhole, Pencil, Plus, Trash2 } from '@lucide/vue';
 import type { ProfileSummary } from '@memoflow/desktop-contracts';
 import type { useDesktopProfiles } from '../composables/useDesktopProfiles';
+import ProductDialogShell from './ProductDialogShell.vue';
 
 const props = defineProps<{
   presenter: ReturnType<typeof useDesktopProfiles>;
@@ -45,9 +47,51 @@ const {
 function initials(name: string): string {
   return name.trim().slice(0, 2).toUpperCase() || 'MF';
 }
+
+// The visible secondary line never exposes the raw Profile ID. The ID stays in
+// the `title` attribute so it remains available on hover, not in the layout.
+function identifierLabel(profile: ProfileSummary): string {
+  return (
+    profile.identifierHint || profile.displayName || t('auth.profileAccess.localProfileFallback')
+  );
+}
 const vFocusPassword = { mounted: (element: HTMLElement) => element.focus() };
 
 const activeProfileId = computed(() => snapshot.value?.profile?.profileId ?? null);
+
+// Creation lives behind an explicit entry point: the list itself stays a list,
+// and the credential-bearing form only exists while the dialog is open.
+const createDialogOpen = ref(false);
+const canCreateProfile = computed(
+  () =>
+    newName.value.trim().length > 0 &&
+    newPassword.value.length >= 8 &&
+    busyProfileId.value === null,
+);
+
+function openCreateDialog(): void {
+  newName.value = '';
+  newPassword.value = '';
+  createDialogOpen.value = true;
+}
+
+function closeCreateDialog(): void {
+  createDialogOpen.value = false;
+  newPassword.value = '';
+}
+
+function handleCreateDialogOpenChange(open: boolean): void {
+  if (open) createDialogOpen.value = true;
+  else closeCreateDialog();
+}
+
+async function submitCreateProfile(): Promise<void> {
+  if (!canCreateProfile.value) return;
+  await createLocalAccount();
+  // The presenter clears both fields only after a successful creation; a
+  // failure leaves them intact so the dialog stays open for a retry.
+  if (!newName.value && !newPassword.value) createDialogOpen.value = false;
+}
 
 // Access mode exposes one detail card per tile. Hover reveals it after a short
 // dwell so sweeping the pointer across the row cannot open a card by accident;
@@ -159,28 +203,16 @@ onBeforeUnmount(() => {
 </script>
 <template>
   <div v-if="management" class="space-y-3">
-    <form
-      class="flex gap-2"
-      data-testid="desktop-profile-create"
-      @submit.prevent="createLocalAccount"
-    >
-      <Input
-        v-model="newName"
-        maxlength="80"
-        :aria-label="t('auth.profileAccess.name')"
-        :placeholder="t('auth.profileAccess.name')"
-      />
-      <Input
-        v-model="newPassword"
-        type="password"
-        autocomplete="new-password"
-        :aria-label="t('auth.profileAccess.password')"
-        :placeholder="t('auth.profileAccess.password')"
-      />
-      <Button data-testid="shell-create-profile" type="submit" :disabled="busyProfileId !== null">{{
-        t('auth.profileAccess.create')
-      }}</Button>
-    </form>
+    <div class="flex items-center justify-end">
+      <Button
+        data-testid="desktop-profile-create-open"
+        :disabled="busyProfileId !== null"
+        @click="openCreateDialog"
+      >
+        <Plus class="mr-1.5 h-4 w-4" aria-hidden="true" />
+        {{ t('auth.profileAccess.createProfile') }}
+      </Button>
+    </div>
     <div class="space-y-2">
       <div
         v-for="profile in profiles"
@@ -214,7 +246,7 @@ onBeforeUnmount(() => {
                     ? t('auth.profileAccess.local')
                     : t('auth.profileAccess.registered')
                 }}
-                · {{ profile.identifierHint || profile.profileId }}
+                · {{ identifierLabel(profile) }}
                 <span v-if="activeProfileId === profile.profileId">
                   · {{ t('shell.account.currentProfile') }}</span
                 >
@@ -311,6 +343,59 @@ onBeforeUnmount(() => {
         </form>
       </div>
     </div>
+
+    <Dialog :open="createDialogOpen" @update:open="handleCreateDialogOpenChange">
+      <ProductDialogShell
+        :open="createDialogOpen"
+        test-id="desktop-profile-create-dialog"
+        recipe="form"
+        size="sm"
+        :close-label="t('common.close')"
+        initial-focus-selector="input"
+        @request-close="closeCreateDialog"
+      >
+        <template #title>{{ t('auth.profileAccess.createProfile') }}</template>
+        <form
+          id="desktop-profile-create-form"
+          class="space-y-3"
+          data-testid="desktop-profile-create"
+          @submit.prevent="submitCreateProfile"
+        >
+          <Input
+            v-model="newName"
+            maxlength="80"
+            :aria-label="t('auth.profileAccess.name')"
+            :placeholder="t('auth.profileAccess.name')"
+            data-testid="desktop-profile-create-name"
+            @keydown.enter.prevent="submitCreateProfile"
+          />
+          <Input
+            v-model="newPassword"
+            type="password"
+            autocomplete="new-password"
+            :aria-label="t('auth.profileAccess.password')"
+            :placeholder="t('auth.profileAccess.password')"
+            data-testid="desktop-profile-create-password"
+            @keydown.enter.prevent="submitCreateProfile"
+          />
+        </form>
+        <template #footer>
+          <Button
+            variant="outline"
+            data-testid="desktop-profile-create-cancel"
+            @click="closeCreateDialog"
+          >
+            {{ t('common.cancel') }}
+          </Button>
+          <Button
+            data-testid="shell-create-profile"
+            :disabled="!canCreateProfile"
+            @click="submitCreateProfile"
+            >{{ t('auth.profileAccess.create') }}</Button
+          >
+        </template>
+      </ProductDialogShell>
+    </Dialog>
   </div>
 
   <div v-else class="flex flex-col items-center gap-6" data-testid="desktop-profile-tiles">
@@ -387,10 +472,11 @@ onBeforeUnmount(() => {
                 </template>
               </p>
               <p
-                class="truncate font-mono text-[11px] text-muted-foreground/80"
-                :title="profile.identifierHint || profile.profileId"
+                class="truncate text-[11px] text-muted-foreground/80"
+                :class="profile.identifierHint ? 'font-mono' : undefined"
+                :title="profile.profileId"
               >
-                {{ profile.identifierHint || profile.profileId }}
+                {{ identifierLabel(profile) }}
               </p>
             </div>
             <Separator />

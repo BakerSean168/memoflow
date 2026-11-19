@@ -192,6 +192,9 @@ export default {
     newConnection: 'New connection',
     resetDefault: 'Reset default instance',
     resetDefaultHint: 'Restore instance defaults; keep model connections and conversation history.',
+    resetDefaultConfirmTitle: 'Reset the default instance?',
+    resetDefaultConfirmDescription:
+      'Its custom name and configuration will be restored to defaults. Model connections and conversation history are kept.',
     nativePermissionHint:
       'These scopes limit MemoFlow business writes. They do not grant unrestricted access to this device.',
     registryUnavailable: 'Agent configuration is unavailable. Retry after the host reconnects.',
@@ -217,6 +220,12 @@ export default {
     bindExisting: 'Connect existing model service',
     noBindings: 'No model services connected yet.',
     removeBinding: 'Disconnect',
+    removeBindingConfirmTitle: 'Disconnect this model service?',
+    removeBindingConfirmDescription:
+      'This Agent will lose its configured model. You can connect a model service again later.',
+    deleteProviderConfirmTitle: 'Delete this Provider?',
+    deleteProviderConfirmDescription:
+      'This Provider has {count} model binding(s). Deleting it cannot be undone.',
     instanceSaveError: 'Unable to save Agent instance',
     connectionReady: 'Model service configured',
     createService: 'Add model service',
@@ -708,6 +717,11 @@ export default {
       scopeTasks: 'Task writes',
       scopeGoals: 'Goal writes',
       create: 'Create connection',
+      createClient: 'New client',
+      createDescription:
+        'Issue a bearer token for a long-running MCP client. The token is shown once, inside this dialog.',
+      createdTitle: 'Client created',
+      createdDescription: 'The client is now listed. Copy the token before closing this dialog.',
       empty: 'No external connections yet.',
       tokenOnce: 'This token is shown once',
       tokenWarning:

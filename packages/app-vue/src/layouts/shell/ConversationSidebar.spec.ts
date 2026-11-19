@@ -762,6 +762,9 @@ describe('ConversationSidebar account footer', () => {
       expect(rows[0]?.getAttribute('data-testid')).toBe('shell-switch-profile-id-2');
       expect(rows[1]?.getAttribute('data-testid')).toBe('shell-switch-profile-id-29');
       expect(rows[0]?.getAttribute('aria-current')).toBe('true');
+      expect(rows[0]?.textContent).toContain('Same very long name');
+      expect(rows[0]?.textContent).not.toContain('id-2');
+      expect(rows[0]?.querySelector('[title="id-2"]')).not.toBeNull();
       expect(rows[0]?.getAttribute('aria-label')).toContain('Local account');
       expect(rows[0]?.getAttribute('aria-label')).toContain('Current Profile');
       expect(item('shell-switch-profile-id-1').getAttribute('aria-label')).toContain(

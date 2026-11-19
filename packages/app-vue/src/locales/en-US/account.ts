@@ -140,6 +140,10 @@ export default {
     },
     currentDevice: 'Current device',
     revoke: 'Revoke session',
+    revokeConfirmTitle: 'Revoke this session?',
+    revokeConfirmDescription:
+      'That device will be signed out and will need to sign in again before it can continue.',
+    revokeConfirmText: 'Revoke session',
     deleteTitle: 'Permanently delete cloud account',
     deleteDescription:
       'Permanently delete your cloud account and cloud data, remove local data and the quick-login tile. Unsynced changes are lost. This cannot be undone.',
