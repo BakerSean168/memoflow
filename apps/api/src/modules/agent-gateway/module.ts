@@ -276,7 +276,8 @@ export function composeAgentGatewayModule(options: Options): IApiModule {
           },
         });
       });
-      router.delete(`${path}/:id`, async (req, res) => {        const parsed = z.uuid().safeParse(req.params.id);
+      router.delete(`${path}/:id`, async (req, res) => {
+        const parsed = z.uuid().safeParse(req.params.id);
         if (!parsed.success) {
           res.status(400).json({ error: 'INVALID_INPUT' });
           return;

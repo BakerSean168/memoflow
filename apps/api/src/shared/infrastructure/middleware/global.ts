@@ -81,8 +81,7 @@ export function applyGlobalMiddleware(
       (() => {
         const auditLogger = createLogger('ExternalAgentAudit');
         auditLogger.setLevel('info');
-        return (event: GatewayAuditEvent) =>
-          auditLogger.info('External agent audit', { ...event });
+        return (event: GatewayAuditEvent) => auditLogger.info('External agent audit', { ...event });
       })();
     app.use(createExternalAgentEdgeAudit(audit));
   }

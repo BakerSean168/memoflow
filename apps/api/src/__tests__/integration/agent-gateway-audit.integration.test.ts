@@ -1,7 +1,15 @@
 import { afterAll, beforeEach, expect, it } from 'vitest';
-import { createExternalAgentAuditQuery, createExternalAgentAuditStore, prisma } from '@memoflow/database';
+import {
+  createExternalAgentAuditQuery,
+  createExternalAgentAuditStore,
+  prisma,
+} from '@memoflow/database';
 import { IdentityId } from '@memoflow/utils/domain';
-import { cleanAll, disconnectPrisma, seedAccount } from '@memoflow/test-utils/setup/integration-helpers';
+import {
+  cleanAll,
+  disconnectPrisma,
+  seedAccount,
+} from '@memoflow/test-utils/setup/integration-helpers';
 
 beforeEach(cleanAll);
 afterAll(disconnectPrisma);
@@ -61,7 +69,7 @@ it('never returns another owner rows for a shared request or credential filter',
   await seedAccount({ id: a });
   await seedAccount({ id: b });
   const store = createExternalAgentAuditStore(prisma, { batchSize: 100, flushDelayMs: 10_000 });
-  store.record({ ...record(b, 'credential-b', 'shared-request'), identityId: b });
+  store.record(record(b, 'credential-b', 'shared-request'));
   await store.flush();
   const query = createExternalAgentAuditQuery(prisma);
   expect((await query.list(a, { requestId: 'shared-request' })).items).toHaveLength(0);

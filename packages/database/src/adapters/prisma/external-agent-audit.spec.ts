@@ -1,6 +1,9 @@
 import { describe, expect, it, vi } from 'vitest';
 import type { PrismaClient } from '../../generated/prisma/client.js';
-import { createExternalAgentAuditQuery, createExternalAgentAuditStore } from './external-agent-audit';
+import {
+  createExternalAgentAuditQuery,
+  createExternalAgentAuditStore,
+} from './external-agent-audit';
 
 const event = (requestId: string) => ({
   identityId: 'identity-a',

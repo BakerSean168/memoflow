@@ -239,10 +239,7 @@ async function bootstrap(): Promise<void> {
   auditStore = createExternalAgentAuditStore(prisma, {
     onDrop: (count) => logger.warn('External agent audit rows dropped', { count }),
   });
-  const externalAgentAudit = createGatewayAudit(
-    createLogger('ExternalAgentAudit'),
-    auditStore,
-  );
+  const externalAgentAudit = createGatewayAudit(createLogger('ExternalAgentAudit'), auditStore);
   bootstrapper = new ApiBootstrapper(
     prisma,
     cloudAuth,
