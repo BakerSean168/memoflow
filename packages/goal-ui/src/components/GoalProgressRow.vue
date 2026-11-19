@@ -69,13 +69,21 @@
             {{ goal.completedKeyResults }} / {{ goal.totalKeyResults }}
           </div>
 
-          <div
-            class="truncate text-sm tabular-nums"
-            :class="isPastTarget ? 'text-destructive/85' : 'text-muted-foreground'"
-            data-testid="goal-row-target"
-          >
-            {{ targetText || '—' }}
-            <span v-if="isPastTarget" class="sr-only"> {{ t('goal.list.pastTarget') }}</span>
+          <div class="flex min-w-0 items-center gap-1.5" data-testid="goal-row-target">
+            <span
+              class="truncate text-sm tabular-nums"
+              :class="isPastTarget ? 'text-warning' : 'text-muted-foreground'"
+            >
+              {{ targetText || '—' }}
+            </span>
+            <Badge
+              v-if="isPastTarget && targetText"
+              variant="outline"
+              class="h-5 shrink-0 border-warning/40 px-1.5 py-0 text-[10px] text-warning"
+              data-testid="goal-row-past-target"
+            >
+              {{ t('goal.list.pastTarget') }}
+            </Badge>
           </div>
 
           <div
@@ -117,13 +125,18 @@
               {{ t('goal.list.keyResultsColumn') }}</span
             >
             <span v-if="targetText" aria-hidden="true">·</span>
-            <span
-              v-if="targetText"
-              class="truncate tabular-nums"
-              :class="isPastTarget ? 'text-destructive/85' : ''"
-            >
-              {{ targetText }}
-              <span v-if="isPastTarget" class="sr-only"> {{ t('goal.list.pastTarget') }}</span>
+            <span v-if="targetText" class="inline-flex min-w-0 items-center gap-1.5">
+              <span class="truncate tabular-nums" :class="isPastTarget ? 'text-warning' : ''">
+                {{ targetText }}
+              </span>
+              <Badge
+                v-if="isPastTarget"
+                variant="outline"
+                class="h-5 shrink-0 border-warning/40 px-1.5 py-0 text-[10px] text-warning"
+                data-testid="goal-row-past-target-compact"
+              >
+                {{ t('goal.list.pastTarget') }}
+              </Badge>
             </span>
           </div>
         </div>

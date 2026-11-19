@@ -891,6 +891,7 @@ export default {
       'Choose MemoFlow windows or native OS notifications on this device.',
     soundEnabled: 'Notification sound',
     soundEnabledDescription: 'Play a sound when a desktop notification is shown.',
+    devicePreferenceUpdateFailed: 'Failed to update this device’s notification preference.',
     comingSoon: 'This feature is under development. Stay tuned.',
     deliveryTitle: 'User delivery',
     deliveryDescription: 'Choose the notification channels enabled for your account.',
@@ -927,6 +928,20 @@ export default {
     exportingServerDataDisclosure: 'Preparing disclosure...',
     serverDataDisclosureDescription:
       'Web-only, non-importable JSON disclosure of repository connection metadata and the projections, cached attachment bytes, webhook/write history, and RAG index held by MemoFlow. AI conversation messages can be restored through a local-account import; attachment binaries, provider secrets, and AI runtime state remain non-importable. It excludes MemoFlow-managed replayable GitHub authorization, local Vault files, and GitHub history; repository content is included verbatim.',
+    exportUnavailable: 'Data export is not available in this runtime.',
+    importUnavailable: 'Data import is not available in this runtime.',
+    serverDisclosureUnavailable:
+      'Server-held data disclosure is available from the authenticated Web runtime.',
+    exportCompleted: 'Export completed: {capabilities}',
+    serverDisclosureCompleted:
+      'Server data disclosure completed: {counts}; cached attachment bytes: {bytes}',
+    importCompleted: 'Import completed: created {created}, updated {updated}',
+    importConfirmTitle: 'Import this data backup?',
+    importConfirmDescription: 'New entries: {created} · Updated entries: {updated}. Continue?',
+    importConfirm: 'Import',
+    importWarnings: 'Warnings: {warnings}',
+    preferenceFileUnreadable: 'Could not read the selected file. Choose a readable JSON file.',
+    preferenceContentInvalid: 'The selected file is not a valid MemoFlow settings file.',
   },
   resetPreferences: {
     title: 'Reset preferences',

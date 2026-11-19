@@ -2,6 +2,7 @@ import { defineComponent, h } from 'vue';
 import { flushPromises, mount } from '@vue/test-utils';
 import { createI18n } from 'vue-i18n';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { toast } from 'vue-sonner';
 import { createTestPinia } from '@memoflow/test-utils';
 import { fail, ok } from '@memoflow/transport-contracts/result';
 import {
@@ -10,6 +11,10 @@ import {
 } from '@setting-ui-test-host/di/keys';
 import { installNotificationUiHost } from '@setting-ui-test-host/di/notification-ui-host';
 import NotificationSettings from './NotificationSettings.vue';
+
+vi.mock('vue-sonner', () => ({
+  toast: { success: vi.fn(), error: vi.fn() },
+}));
 
 installNotificationUiHost();
 
@@ -39,6 +44,7 @@ const messages = {
       presentationModeDescription: 'custom desc',
       soundEnabled: 'Notification sound',
       soundEnabledDescription: 'sound desc',
+      devicePreferenceUpdateFailed: 'device preference update failed',
       deliveryTitle: 'User delivery',
       deliveryDescription: 'delivery desc',
       globalChannelsTitle: 'Global channels',
@@ -202,6 +208,24 @@ describe('NotificationSettings residual 199', () => {
     await flushPromises();
 
     expect(devicePreferencePort.update).toHaveBeenCalledWith({ presentationMode: 'native' });
+    expect(service.updatePreferences).not.toHaveBeenCalled();
+  });
+
+  it('reports a device preference failure and re-reads the snapshot instead of silently reverting', async () => {
+    devicePreferencePort.update.mockResolvedValueOnce(
+      fail({ code: 'SERVICE_UNAVAILABLE', message: 'unavailable' }),
+    );
+    const wrapper = mountSettings();
+    await flushPromises();
+
+    await wrapper.get('[data-testid="notification-settings-switch"]').trigger('click');
+    await flushPromises();
+
+    expect(toast.error).toHaveBeenCalledWith('device preference update failed');
+    expect(devicePreferencePort.get).toHaveBeenCalledTimes(2);
+    expect(
+      wrapper.get('[data-testid="notification-settings-switch"]').attributes('data-checked'),
+    ).toBe('true');
     expect(service.updatePreferences).not.toHaveBeenCalled();
   });
 

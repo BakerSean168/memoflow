@@ -7,9 +7,27 @@
  */
 
 import { ref, inject } from 'vue';
+import { toast } from 'vue-sonner';
 import { SystemChannels } from '@memoflow/desktop-contracts';
+import { useConfirm } from '@memoflow/ui-vue-shadcn';
 import { isOk, type Result } from '@memoflow/transport-contracts/result';
 import { settingUiHost } from '../setting-ui-host';
+
+type PortableImportReceipt = {
+  created?: Record<string, number>;
+  updated?: Record<string, number>;
+  warnings?: string[];
+};
+
+function sumCounts(counts: Record<string, number> | undefined): number {
+  return Object.values(counts ?? {}).reduce((total, count) => total + count, 0);
+}
+
+function formatCounts(counts: Record<string, number>): string {
+  return Object.entries(counts)
+    .map(([key, value]) => `${key}: ${value}`)
+    .join(', ');
+}
 
 export function useDataPortability() {
   const service = inject(settingUiHost.DATA_PORTABILITY_SERVICE_KEY, undefined);
@@ -21,7 +39,6 @@ export function useDataPortability() {
   const isExporting = ref(false);
   const isExportingServerDisclosure = ref(false);
   const isImporting = ref(false);
-  const lastResult = ref<string | null>(null);
 
   async function saveJsonFile(fileName: string, content: string): Promise<void> {
     if (desktopApi?.invoke) {
@@ -52,31 +69,34 @@ export function useDataPortability() {
 
   async function exportAllData(): Promise<void> {
     if (!service) {
-      lastResult.value = 'Data export is not available in this runtime';
+      toast.error(t('setting.advanced.exportUnavailable'));
       return;
     }
 
     isExporting.value = true;
-    lastResult.value = null;
     try {
       const result = await service.exportPortableDataV3({});
       if (!result.ok) {
-        lastResult.value = settingUiHost.translateResultError(result.error, t, {
-          scope: 'setting',
-          fallbackKey: 'setting.errors.exportFailed',
-        });
+        toast.error(
+          settingUiHost.translateResultError(result.error, t, {
+            scope: 'setting',
+            fallbackKey: 'setting.errors.exportFailed',
+          }),
+        );
         return;
       }
 
       const { fileName, content, summary } = result.data;
-      const warnings =
-        summary.warnings.length > 0 ? `\nWarnings: ${summary.warnings.join(', ')}` : '';
-
       await saveJsonFile(fileName, content);
 
-      lastResult.value = `Exported capabilities: ${summary.capabilityKeys.join(', ')}${warnings}`;
+      const capabilities = summary.capabilityKeys.join(', ');
+      const warnings =
+        summary.warnings.length > 0
+          ? ` ${t('setting.advanced.importWarnings', { warnings: summary.warnings.join(', ') })}`
+          : '';
+      toast.success(`${t('setting.advanced.exportCompleted', { capabilities })}${warnings}`);
     } catch (err) {
-      lastResult.value = `Export error: ${err instanceof Error ? err.message : String(err)}`;
+      toast.error(err instanceof Error ? err.message : t('setting.errors.exportFailed'));
     } finally {
       isExporting.value = false;
     }
@@ -84,33 +104,33 @@ export function useDataPortability() {
 
   async function exportServerHeldDataDisclosure(): Promise<void> {
     if (!service || desktopApi !== undefined) {
-      lastResult.value =
-        'Server-held data disclosure is available from the authenticated Web runtime';
+      toast.error(t('setting.advanced.serverDisclosureUnavailable'));
       return;
     }
 
     isExportingServerDisclosure.value = true;
-    lastResult.value = null;
     try {
       const result = await service.exportServerHeldDataDisclosure({});
       if (!result.ok) {
-        lastResult.value = settingUiHost.translateResultError(result.error, t, {
-          scope: 'setting',
-          fallbackKey: 'setting.errors.exportFailed',
-        });
+        toast.error(
+          settingUiHost.translateResultError(result.error, t, {
+            scope: 'setting',
+            fallbackKey: 'setting.errors.exportFailed',
+          }),
+        );
         return;
       }
 
       const { fileName, content, summary } = result.data;
       await saveJsonFile(fileName, content);
-      const counts = Object.entries(summary.entityCounts)
-        .map(([key, value]) => `${key}: ${value}`)
-        .join(', ');
-      lastResult.value = `Disclosed ${counts}; cached attachment bytes: ${summary.cachedAttachmentBytes}`;
+      toast.success(
+        t('setting.advanced.serverDisclosureCompleted', {
+          counts: formatCounts(summary.entityCounts),
+          bytes: summary.cachedAttachmentBytes,
+        }),
+      );
     } catch (err) {
-      lastResult.value = `Disclosure export error: ${
-        err instanceof Error ? err.message : String(err)
-      }`;
+      toast.error(err instanceof Error ? err.message : t('setting.errors.exportFailed'));
     } finally {
       isExportingServerDisclosure.value = false;
     }
@@ -118,12 +138,11 @@ export function useDataPortability() {
 
   async function importAllData(): Promise<void> {
     if (!service) {
-      lastResult.value = 'Data import is not available in this runtime';
+      toast.error(t('setting.advanced.importUnavailable'));
       return;
     }
 
     isImporting.value = true;
-    lastResult.value = null;
     try {
       let content: string | null = null;
 
@@ -163,36 +182,53 @@ export function useDataPortability() {
 
       const dryRun = await service.dryRunPortableDataV3({ content });
       if (!dryRun.ok) {
-        lastResult.value = settingUiHost.translateResultError(dryRun.error, t, {
-          scope: 'setting',
-          fallbackKey: 'setting.errors.importFailed',
-        });
+        toast.error(
+          settingUiHost.translateResultError(dryRun.error, t, {
+            scope: 'setting',
+            fallbackKey: 'setting.errors.importFailed',
+          }),
+        );
         return;
       }
 
+      const preview = (dryRun.data ?? {}) as PortableImportReceipt;
+      isImporting.value = false;
+      const confirmed = await useConfirm({
+        title: t('setting.advanced.importConfirmTitle'),
+        description: t('setting.advanced.importConfirmDescription', {
+          created: sumCounts(preview.created),
+          updated: sumCounts(preview.updated),
+        }),
+        confirmText: t('setting.advanced.importConfirm'),
+        cancelText: t('common.cancel'),
+      });
+      if (!confirmed) return;
+      isImporting.value = true;
+
       const result = await service.applyPortableDataV3({ content });
       if (!result.ok) {
-        lastResult.value = settingUiHost.translateResultError(result.error, t, {
-          scope: 'setting',
-          fallbackKey: 'setting.errors.importFailed',
-        });
+        toast.error(
+          settingUiHost.translateResultError(result.error, t, {
+            scope: 'setting',
+            fallbackKey: 'setting.errors.importFailed',
+          }),
+        );
         return;
       }
 
       const { created, updated, warnings } = result.data;
-      const createdCounts = Object.entries(created)
-        .map(([k, v]) => `${k}: ${v}`)
-        .join(', ');
-      const updatedCounts = Object.entries(updated)
-        .map(([k, v]) => `${k}: ${v}`)
-        .join(', ');
-      const parts = [];
-      if (createdCounts) parts.push(`Created: ${createdCounts}`);
-      if (updatedCounts) parts.push(`Updated: ${updatedCounts}`);
-      if (warnings.length > 0) parts.push(`Warnings: ${warnings.join(', ')}`);
-      lastResult.value = parts.join(' | ') || 'Import completed (no data)';
+      const warningsText =
+        warnings.length > 0
+          ? ` ${t('setting.advanced.importWarnings', { warnings: warnings.join(', ') })}`
+          : '';
+      toast.success(
+        `${t('setting.advanced.importCompleted', {
+          created: sumCounts(created),
+          updated: sumCounts(updated),
+        })}${warningsText}`,
+      );
     } catch (err) {
-      lastResult.value = `Import error: ${err instanceof Error ? err.message : String(err)}`;
+      toast.error(err instanceof Error ? err.message : t('setting.errors.importFailed'));
     } finally {
       isImporting.value = false;
     }
@@ -204,7 +240,6 @@ export function useDataPortability() {
     isExporting,
     isExportingServerDisclosure,
     isImporting,
-    lastResult,
     exportAllData,
     exportServerHeldDataDisclosure,
     importAllData,
