@@ -48,7 +48,11 @@ const perSecond = 40;
 const windowRiskMs = 45_000;
 const { ipPerMinute, ownerPerMinute, credentialPerMinute } = DEFAULT_EXTERNAL_AGENT_RATE_LIMITS;
 
-type Reply = { readonly status: number; readonly error: string | null; readonly retryAfter: string | null };
+type Reply = {
+  readonly status: number;
+  readonly error: string | null;
+  readonly retryAfter: string | null;
+};
 type Outcome = Reply & { readonly atMs: number };
 
 type Scenario = {
@@ -64,10 +68,7 @@ const bucket = (kind: 'ip' | 'owner', value: string) =>
   `eag:read-pilot:${kind}:${createHash('sha256').update(value).digest('hex')}`;
 
 /** Dispatch at a fixed cadence; latency below the cadence does not distort the rate. */
-async function drive(
-  count: number,
-  send: (index: number) => Promise<Reply>,
-): Promise<Outcome[]> {
+async function drive(count: number, send: (index: number) => Promise<Reply>): Promise<Outcome[]> {
   const outcomes: Outcome[] = new Array(count);
   const startedAt = performance.now();
   const interval = 1000 / perSecond;
@@ -79,13 +80,11 @@ async function drive(
     while (inFlight >= 64) await sleep(1);
     inFlight++;
     void send(index)
-      .catch(
-        (cause: unknown): Reply => ({
-          status: 0,
-          error: cause instanceof Error ? cause.name : 'TRANSPORT',
-          retryAfter: null,
-        }),
-      )
+      .catch((cause: unknown): Reply => ({
+        status: 0,
+        error: cause instanceof Error ? cause.name : 'TRANSPORT',
+        retryAfter: null,
+      }))
       .then((reply) => {
         outcomes[index] = { ...reply, atMs: performance.now() - startedAt };
       })
@@ -247,7 +246,12 @@ describe.skipIf(!enabled)('hosted MCP admission calibration', () => {
       });
       const text = await response.text();
       if (index === 0)
-        console.log('[rate-limit-probe]', response.status, response.headers.get('content-type'), text.slice(0, 160));
+        console.log(
+          '[rate-limit-probe]',
+          response.status,
+          response.headers.get('content-type'),
+          text.slice(0, 160),
+        );
       let error: string | null = null;
       try {
         error = (JSON.parse(text) as { error?: string }).error ?? null;

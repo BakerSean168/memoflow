@@ -25,7 +25,10 @@ export interface PilotAdmission {
  */
 export function createPilotAdmission(
   redis: Redis,
-  limits: Pick<ExternalAgentRateLimits, 'ipPerMinute' | 'ownerPerMinute'> = DEFAULT_EXTERNAL_AGENT_RATE_LIMITS,
+  limits: Pick<
+    ExternalAgentRateLimits,
+    'ipPerMinute' | 'ownerPerMinute'
+  > = DEFAULT_EXTERNAL_AGENT_RATE_LIMITS,
 ): PilotAdmission {
   const key = (kind: string, value: string) =>
     `eag:read-pilot:${kind}:${createHash('sha256').update(value).digest('hex')}`;

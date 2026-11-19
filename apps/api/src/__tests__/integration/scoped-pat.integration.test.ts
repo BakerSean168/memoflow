@@ -229,7 +229,12 @@ describe('scoped PAT durable authority', () => {
     await seedAccount({ id: owner });
     const issued = await service().create(String(owner), { name: 'quota fixture' });
     const limited = () =>
-      createScopedPatService({ database: prisma, audience, accountIsActive, readQuotaPerMinute: 12 });
+      createScopedPatService({
+        database: prisma,
+        audience,
+        accountIsActive,
+        readQuotaPerMinute: 12,
+      });
     const results = await Promise.all(
       Array.from({ length: 20 }, () => limited().consumeReadQuota(issued.id)),
     );

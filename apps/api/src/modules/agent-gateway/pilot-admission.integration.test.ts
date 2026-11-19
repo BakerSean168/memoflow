@@ -70,9 +70,7 @@ describe('private pilot shared Redis admission', () => {
     await admission.start();
     const fixture = randomUUID();
     try {
-      const ips = await Promise.all(
-        Array.from({ length: 6 }, () => admission.consumeIp(fixture)),
-      );
+      const ips = await Promise.all(Array.from({ length: 6 }, () => admission.consumeIp(fixture)));
       expect(ips.filter(Boolean)).toHaveLength(4);
       const owners = await Promise.all(
         Array.from({ length: 4 }, () => admission.consumeOwner(fixture)),
