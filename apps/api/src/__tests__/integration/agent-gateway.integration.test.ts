@@ -97,6 +97,7 @@ describe('PAT → hosted MCP → real Goal application → PostgreSQL', () => {
       pats,
       goals: bindGoalReadPort(createGoalPrismaPageQuery(prisma)),
       audit: (event) => audit.push(event),
+      auditQuery: { list: async () => ({ items: [], hasMore: false }) },
     });
     await module.register({
       app,

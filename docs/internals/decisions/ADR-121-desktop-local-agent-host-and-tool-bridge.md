@@ -12,7 +12,7 @@ updated: 2026-10-09T00:00:00Z
 **依赖：** [ADR-120](./ADR-120-selectable-assistant-runtimes-and-builtin-mastra.md)  
 **关联：** ADR-004、ADR-006、ADR-045、ADR-049、ADR-058、ADR-105、ADR-116～118；与已实施的 ADR-119 对齐 Profile 生命周期，但不依赖其导入功能。
 
-> 逐次业务审批部分由 [ADR-123](./ADR-123-unified-agent-business-permission-checkpoint.md) 替换；凭据、owner、幂等和事务边界继续有效。
+> 逐次业务审批部分由 [ADR-123](./ADR-123-unified-agent-business-permission-checkpoint.md) 替换；凭据、owner、幂等和事务边界继续有效。本地 MCP 通道的宿主形态、凭据双轨、WSL 绑定、跨机结论与云端分工由 [ADR-124](./ADR-124-local-mcp-host-credentials-and-cloud-boundary.md) 修订。
 
 ## 背景与复用基线
 
@@ -28,7 +28,7 @@ Vue 使用受校验的 Electron IPC；Desktop 组合根绑定本地 Agent 会话
 
 不复制 T3 的远程环境、设备配对、全套 WebSocket 客户端、Git/worktree/PR、终端/浏览器工作台、后台调度或跨 Agent 委派。应用退出后不承诺持续执行；重新打开只恢复原生会话，不自动续跑未完成写入。
 
-这是单机范围，不等同离线模型。首批按 Windows 原生和 Linux 分别验收；WSL 跨宿主桥、macOS 原生验收及远程主机不计入首批完成范围。
+这是单机范围，不等同离线模型。首批按 Windows 原生和 Linux 分别验收；WSL 跨宿主桥、macOS 原生验收及远程主机不计入首批完成范围（WSL 客户端的 loopback 直连策略见 [ADR-124](./ADR-124-local-mcp-host-credentials-and-cloud-boundary.md)）。
 
 ### 2. 连接和登录复用 Agent 原生能力
 

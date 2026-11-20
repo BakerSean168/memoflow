@@ -2,12 +2,18 @@
 tags: [architecture, mcp, ai, external-agent]
 description: MemoFlow External Agent Gateway 当前能力、认证、事务写入与运行边界
 created: 2026-10-07T00:00:00Z
-updated: 2026-11-16T00:00:00Z
+updated: 2026-11-19T00:00:00Z
 ---
 
 # MemoFlow External Agent Gateway
 
-**状态：代码与组装已就绪，全部默认关闭。** Gateway 当前实现 32 个工具：14 个只读（Goal/Task/Routine 9 个 + Notification 2 个 + Label 2 个 + Relation 1 个）、13 个写（Goal/KR、TaskPlan、TaskOccurrence、Routine 全写、`notification_mark_read`）、5 个 assisted Task workflow；OAuth 仍只有 9 个只读工具。写与 assisted 只对 PAT 开放，且每次调用都经过 AI 权限 checkpoint。生产开关尚未翻转，公共 rollout 未完成；开启步骤见 [§10 runbook](#10-一期开启-runbook)。#490/#538/#539 的本地验收只代表代码路径，不代表生产已部署。
+**状态：代码与组装已就绪，全部默认关闭。** Gateway 当前实现 40 个工具：22 个只读（Goal 2、Task 4、Relation 1、Routine 3、Notification 3、AI 5、Schedule 2、Label 2）、13 个写（Goal/KR、TaskPlan、TaskOccurrence、Routine 全写、`notification_mark_read`）、5 个 assisted Task workflow；OAuth 仍只有 6 个只读工具（`goals:read` + `tasks:read`）。写与 assisted 只对 PAT 开放，且每次调用都经过 AI 权限 checkpoint。生产开关尚未翻转，公共 rollout 未完成；开启步骤见 [§10 runbook](#10-一期开启-runbook)。#490/#538/#539 的本地验收只代表代码路径，不代表生产已部署。
+
+## 0. 硬边界：OAuth 只读，写只走 PAT
+
+**OAuth 的只读范围是产品与安全设计边界，不是实现缺口。** OAuth 授权服务器只发布 `goals:read`、`tasks:read`（以及显式 `offline_access`），因此 OAuth 客户端只能看到 6 个读工具；任何写工具和 assisted workflow 都要求 PAT，并在 Gateway 发布、AI checkpoint 与写事务三处分别校验 `credentialType === 'pat'`。不要为了让“默认登录流客户端也能写”而局部放开 `EXTERNAL_AGENT_SCOPES` 或删除 `credentialType` 判断——那会绕过签发时预授权和事务内 PAT authority 校验。
+
+若未来开放 OAuth 写，必须先满足 [OAuth 写 consent 设计评估](./external-agent-oauth-write-consent.md) 的前置条件，并新增独立默认关闭的开关；该文同时给出 scope 映射、consent/审计/吊销要求和回滚方案。[#1033](https://github.com/BakerSean168/memoflow/issues/1033) 当前结论为“有条件开放、当前不开放”。
 
 先读 [仓库核验](https://github.com/BakerSean168/memoflow/blob/7a45112e1840950ead1ba98b748fc70fa1b38344/docs/analysis/2026-10-07-external-agent-repository-assessment.md) 和 [协议研究](https://github.com/BakerSean168/memoflow/blob/7a45112e1840950ead1ba98b748fc70fa1b38344/docs/analysis/2026-10-07-external-agent-protocol-research.md)。长期决策分别是 [ADR-116：能力边界](./decisions/ADR-116-external-agent-capability-and-gateway-boundary.md)、[ADR-117：授权](./decisions/ADR-117-external-agent-authorization-and-credentials.md)、[ADR-118：写入与工作流](./decisions/ADR-118-external-agent-mutations-and-assisted-workflows.md)。执行顺序以 [实施总方案](https://github.com/BakerSean168/memoflow/issues/490) 为准；[术语表](./glossary.md) 只定义概念。
 
@@ -92,7 +98,7 @@ ID 使用稳定 snake_case，内部 capability ID 可采用 `goal.get` 等命名
 | A1   | `assisted_workflow_resume`      | Task / tasks:write                 | 回答澄清、批准精确 draft 或恢复 apply                                                                                                   |
 | A1   | `assisted_workflow_cancel`      | Task / tasks:write                 | 取消剩余工作并保留已提交的 Task facts                                                                                                   |
 
-R1 为 **9 个工具**（Goal 2 个 + Task 4 个 + Notification 3 个），R2 为 **6 个只读工具**（Routine 3 个、Label 2 个、Relation 1 个），R3 为 **2 个 Schedule 只读工具**，W1 为 **13 个写工具**（含 `notification_mark_read`），A1 为 **5 个 assisted 工具**，合计 **35 个**。R3 由宿主绑定 Schedule owner 端口后发布（本地桥接绑定；托管 API 尚未绑定该端口，因此托管连接不可见），只读且不提供日历写入。OAuth 仍只有九个只读工具；写与 assisted 仅对 PAT 发布，且需要对应 write scope 和相应开关。MCP 自带发现功能足够，不新增 `capabilities_list` 平台 API。
+R1 为 **9 个工具**（Goal 2 个 + Task 4 个 + Notification 3 个），R2 为 **6 个只读工具**（Routine 3 个、Label 2 个、Relation 1 个），R3 为 **2 个 Schedule 只读工具**，另有 **5 个 `ai:read` 工具**（会话 3 个、Agent 2 个），只读合计 **22 个**；W1 为 **13 个写工具**（含 `notification_mark_read`），A1 为 **5 个 assisted 工具**，全量合计 **40 个**。R3 由宿主绑定 Schedule owner 端口后发布（本地桥接绑定；托管 API 尚未绑定该端口，因此托管连接不可见），只读且不提供日历写入。OAuth 仍只有 **6 个**只读工具（`goals:read` 与 `tasks:read` 对应）；写与 assisted 仅对 PAT 发布，且需要对应 write scope 和相应开关。MCP 自带发现功能足够，不新增 `capabilities_list` 平台 API。
 
 ### 跨 owner 权限
 
@@ -135,6 +141,8 @@ R1 list/search 默认 20 条、最多 100 条，时间列表默认最多 31 天�
 
 现有 owner public failures 通过 ADR-049 的单一边界映射；上述新增接入 code 只表达 Gateway 语义，不建立另一套领域错误体系。
 
+Desktop 离线写入经 PowerSync 上行时使用同一冲突口径：`goals`/`task_plans` 以 `version` 乐观锁拒绝过期上传，同步接口返回 409 `row_version_conflict`，客户端留证后不重试该笔；规则见 [ADR-125](./decisions/ADR-125-powersync-uplink-row-version-guard.md)。
+
 ## 6. 写入与审批
 
 原子性和重试契约以 ADR-118 为准。`packages/database/src/adapters/prisma/external-mutation.ts` 提供两个真实 Owner 共用的 PostgreSQL 事务 receipt runner。身份 + capability version + key 的 SHA-256 标识使用数据库 advisory transaction lock 串行化；凭据轮换后同一 owner 的重试仍重放已提交结果，`connection_id` 只作首次执行审计。schema 归一化后按排序字段计算摘要。同 key 异 body 返回 `IDEMPOTENCY_CONFLICT`，同 body 返回原始结果及 `replayed: true`。回执只保存响应实际返回的最小投影，不保存 Owner 完整 read model；回执不自动过期；原结果不会用当前对象替换。账户删除通过 Account 外键级联清理回执。
@@ -149,7 +157,7 @@ Goal/Task 各自在自己的 infrastructure factory 中创建 transaction-bound 
 
 ## 7. OAuth/PAT 连接与运行策略
 
-OAuth 协议步骤和撤销边界见 ADR-117。canonical resource URI 由部署配置指定，例如 `https://api.example.com/mcp`；这是占位符，不是已部署地址。metadata URI 按 RFC 与实际 root route 映射，API `/api/v1` prefix 不自动应用到 MCP discovery。
+OAuth 协议步骤和撤销边界见 ADR-117。canonical resource URI 由部署配置指定，例如 `https://api.example.com/mcp`；这是占位符，不是已部署地址。metadata URI 按 RFC 与实际 root route 映射，API `/api/v1` prefix 不自动应用到 MCP discovery。**OAuth 车道固定只读**：`EXTERNAL_AGENT_SCOPES` 不含 write scope，写工具要求 PAT；该边界与开放条件见 [OAuth 写 consent 设计评估](./external-agent-oauth-write-consent.md)。
 
 新授权数据不得进入 PowerSync、数据导出、浏览器日志或 AI conversation；用户可见连接名称、scope、最近使用、有效期和撤销按钮。scope 扩大必须重新 consent；已存在只读 connection 不因发布新工具自动获得写能力。
 
@@ -159,7 +167,11 @@ rate limit 分三层，都是固定 60 秒窗口且多实例共享计数：请�
 
 EAG-02 的具体 owner read budget：Goal 行最多 101（含 lookahead），每 Goal 先检查 KR count，最多 100；正文 description/review/snapshot 不进入读取。name/summary/KR title/unit 的字节长度先由 PostgreSQL 检查，超出 owner 投影上限的单聚合返回明确 `RESPONSE_TOO_LARGE`，不伪造部分 KR 的 overallProgress。搜索页超出传输预算时缩小返回页并标记 `truncated=response-budget`，游标仍从最后实际返回项继续。整个 HTTP 调用有共同截止时间；取消信号单独传给查询，不扩展或混用 ExecutionContext。Goal 查询使用 transaction-local PostgreSQL statement_timeout 和 transaction timeout，认证/账户 authority 的独立只读查询最多 5 秒；响应停止等待之后数据库工作仍有明确上界。Redis admission 同样必须有命令超时，429 含 Retry-After。
 
-audit 最小字段：request/trace ID、connection/credential ID、owner identity、tool/version、effect、scope decision、duration、outcome code、operation receipt ID、replayed。默认不记录 token、参数全文、知识正文或模型对话。unauthenticated/denied/read 调用也要可追踪；首版使用现有结构化日志与持久日志收集，写成功 receipt 是 durable audit fact。
+audit 最小字段：request/trace ID、connection/credential ID、owner identity、tool/version、effect、scope decision、duration、outcome code、operation receipt ID、replayed。默认不记录 token、参数全文、知识正文或模型对话。unauthenticated/denied/read 调用也要可追踪；写成功 receipt 是 durable audit fact。
+
+自 #1031 起同一事件双写：`ExternalAgentAudit` 结构化日志保持同步写出（既有日志采集不变），随后由有界批量写入器落入 `external_agent_audit_events`。热路径只做内存入队（默认 250ms 去抖、50 条一批、2000 条上限），批量 INSERT 使用 5s statement timeout；写失败丢弃该批并计数，不重试、不阻塞响应——日志副本仍是该事件的兜底。进程优雅关闭时先 flush 再断开连接。
+
+查询入口为 `GET /api/v1/agent-connections/audit-events`（`/api` 别名同样可用），与 PAT 管理 API 共用 session、邮箱验证和 `no-store` 口径。支持 `credentialId`、`requestId`、`from`/`to`（ISO 8601，闭区间）与 `limit`（1–200，默认 50）；identity 只取自 session，任何过滤条件都不扩大 owner 范围，查他人 credential/request 返回空页。审计只读入口不产生 credential 审计事件。未认证的 edge 早期拒绝（identity 为空）只保留日志副本，不进入按 owner 的查询；管理 UI 尚未交付，可在后续单沿用该 API。edge 早期拒绝观察器现在同时匹配 `/api` 与 `/api/v1` 两条管理别名；此前只匹配 `/api/v1`，`/api/agent-connections/*` 在 CORS、解析或中断等早期失败时不产生任何审计。
 
 ## 8. Hosted 能力与 Workflow 适配
 
@@ -192,19 +204,19 @@ Elapsed/ActiveUsage/专注 protocol 需要设备本地执行，暂不通过 Host
 
 生产模板见 `deployment/production/docker-compose.production.yml`；本 runbook 只说明运维翻转，本单不改生产 env。
 
-| 变量                                | 开启值                   | 说明                                                                                |
-| ----------------------------------- | ------------------------ | ----------------------------------------------------------------------------------- |
-| `EAG_READ_PILOT_ENABLED`            | `1`                      | 总开关；为 `0` 时 `/mcp` 与 PAT/OAuth 管理路由都不挂载                              |
-| `EAG_AUDIENCE`                      | `https://<api-host>/mcp` | 必须是 HTTPS 的规范 origin + `/mcp`；其 host 必须与请求 `Host` 一致，否则 403       |
-| `EAG_CURSOR_SECRET`                 | 随机 ≥32 字节            | 分页游标密钥；跨重启保持稳定                                                        |
-| `EAG_TASK_READ_ENABLED`             | `1`                      | Task 只读工具；默认已为 `1`                                                         |
-| `EAG_WRITE_ENABLED`                 | `1`                      | 发布 8 个 PAT 写工具                                                                |
-| `EAG_ROUTINE_WRITE_ENABLED`         | `1`                      | 在 writes 打开的前提下发布 Routine 写工具（create/update/delete/pause/override）    |
-| `EAG_ASSISTED_ENABLED`              | `1`                      | 发布 5 个 assisted 工具；要求 durable AI workflow runtime，否则启动失败             |
-| `EAG_OAUTH_ENABLED`                 | 可选 `1`                 | 需要总开关、`AUTH_BASE_URL`（HTTPS `/api/auth`）与 `MEMOFLOW_WEB_URL`；OAuth 仍只读 |
-| `EAG_RATE_LIMIT_IP_PER_MIN`         | `1200`                   | 请求源 IP 的每分钟预算；认证前后都计，共享出口共用一个桶，只作体量防护              |
-| `EAG_RATE_LIMIT_OWNER_PER_MIN`      | `480`                    | 同一身份每分钟预算，覆盖该身份的全部凭据与客户端                                    |
-| `EAG_RATE_LIMIT_CREDENTIAL_PER_MIN` | `240`                    | 单个 PAT/OAuth connection 的每分钟预算                                              |
+| 变量 | 开启值 | 说明 |
+| --- | --- | --- |
+| `EAG_READ_PILOT_ENABLED` | `1` | 总开关；为 `0` 时 `/mcp` 与 PAT/OAuth 管理路由都不挂载 |
+| `EAG_AUDIENCE` | `https://<api-host>/mcp` | 必须是 HTTPS 的规范 origin + `/mcp`；其 host 必须与请求 `Host` 一致，否则 403 |
+| `EAG_CURSOR_SECRET` | 随机 ≥32 字节 | 分页游标密钥；跨重启保持稳定 |
+| `EAG_TASK_READ_ENABLED` | `1` | Task 只读工具；默认已为 `1` |
+| `EAG_WRITE_ENABLED` | `1` | 发布 8 个 PAT 写工具（Routine 写另由下一项控制） |
+| `EAG_ROUTINE_WRITE_ENABLED` | `1` | 在 writes 打开的前提下发布 Routine 写工具（create/update/delete/pause/override） |
+| `EAG_ASSISTED_ENABLED` | `1` | 发布 5 个 assisted 工具；要求 durable AI workflow runtime，否则启动失败 |
+| `EAG_OAUTH_ENABLED` | 可选 `1` | 需要总开关、`AUTH_BASE_URL`（HTTPS `/api/auth`）与 `MEMOFLOW_WEB_URL`；OAuth 仍只读，写只走 PAT |
+| `EAG_RATE_LIMIT_IP_PER_MIN` | `1200` | 请求源 IP 的每分钟预算；认证前后都计，共享出口共用一个桶，只作体量防护 |
+| `EAG_RATE_LIMIT_OWNER_PER_MIN` | `480` | 同一身份每分钟预算，覆盖该身份的全部凭据与客户端 |
+| `EAG_RATE_LIMIT_CREDENTIAL_PER_MIN` | `240` | 单个 PAT/OAuth connection 的每分钟预算 |
 
 一致性检查：
 

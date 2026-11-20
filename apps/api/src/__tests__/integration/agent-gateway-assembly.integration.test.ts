@@ -67,6 +67,7 @@ async function fixture() {
       createTaskPrismaReadQueries(prisma, createSettingPrismaTimeQuery(prisma)),
     ),
     audit: (event) => audit.push(event),
+    auditQuery: { list: async () => ({ items: [], hasMore: false }) },
   });
   await module.register({
     app,

@@ -39,6 +39,7 @@ model Account {
 
   // 关联的业务模块
   externalMutationReceipts      ExternalMutationReceipt[]
+  externalAgentAuditEvents      ExternalAgentAuditEvent[]
   goals                         Goal[]
   profileImportOperations       ProfileImportOperation[]
   profileImportArchives         ProfileImportArchive[]
@@ -551,6 +552,7 @@ model ExternalAgentPat {
   scopes      String[]
   expiresAt   DateTime  @map("expires_at")
   revokedAt   DateTime? @map("revoked_at")
+  lastUsedAt  DateTime? @map("last_used_at")
   createdAt   DateTime  @default(now()) @map("created_at")
   rateWindow  DateTime  @default(now()) @map("rate_window")
   rateCount   Int       @default(0) @map("rate_count")
@@ -1367,6 +1369,30 @@ model ExternalMutationReceipt {
 
   @@index([identityId, createdAt])
   @@map("external_mutation_receipts")
+}
+
+/// Queryable copy of every hosted MCP/edge audit event. The structured log stays the
+/// synchronous write; this table is appended asynchronously in bounded batches.
+model ExternalAgentAuditEvent {
+  account       Account? @relation(fields: [identityId], references: [id], onDelete: Cascade)
+  id            String   @id @default(uuid())
+  identityId    String?  @map("identity_id")
+  credentialId  String?  @map("credential_id")
+  effect        String
+  tool          String
+  outcome       String
+  scopeDecision String   @map("scope_decision")
+  requestId     String   @map("request_id")
+  traceId       String?  @map("trace_id")
+  receiptId     String?  @map("receipt_id")
+  replayed      Boolean?
+  durationMs    Int      @map("duration_ms")
+  createdAt     DateTime @default(now()) @map("created_at")
+
+  @@index([identityId, createdAt])
+  @@index([identityId, requestId])
+  @@index([identityId, credentialId, createdAt])
+  @@map("external_agent_audit_events")
 }
 
 // ==========================================

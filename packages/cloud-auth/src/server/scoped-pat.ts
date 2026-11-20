@@ -30,6 +30,15 @@ interface Options {
 
 const digest = (token: string) => createHash('sha256').update(token).digest('hex');
 /**
+ * Hot-path budget for the observability timestamp. The gateway verifies a PAT on
+ * every MCP call, so persisting `lastUsedAt` per verification would turn an
+ * indexed read path into write amplification across all live tokens. Advancing
+ * the durable value at most once per window keeps "is this token still in use?"
+ * answerable at management-page resolution while bounding writes to one per
+ * token per window.
+ */
+export const PAT_LAST_USED_WRITE_INTERVAL_MS = 5 * 60_000;
+/**
  * Receipt domain for first-party credential management. There is no external
  * connection here; the value only records which lane produced the receipt.
  */
@@ -42,6 +51,7 @@ const publicFields = {
   scopes: true,
   expiresAt: true,
   revokedAt: true,
+  lastUsedAt: true,
   createdAt: true,
 } as const;
 
@@ -66,6 +76,30 @@ export function createScopedPatService(options: Options) {
       options.accountIsActive(identityId, context),
     ]);
     return Boolean(user && user.disabledAt === null && account === true);
+  }
+  /**
+   * Record that a verified credential was actually used, at most once per window.
+   * The conditional update is what makes the throttle shared across API instances:
+   * a concurrent caller that already advanced the row matches nothing, so only one
+   * write lands per window regardless of how many calls arrive together.
+   */
+  async function touchLastUsed(id: string, previous: Date | null): Promise<void> {
+    const now = Date.now();
+    if (previous && now - previous.getTime() < PAT_LAST_USED_WRITE_INTERVAL_MS) return;
+    try {
+      await db.externalAgentPat.updateMany({
+        where: {
+          id,
+          OR: [
+            { lastUsedAt: null },
+            { lastUsedAt: { lt: new Date(now - PAT_LAST_USED_WRITE_INTERVAL_MS) } },
+          ],
+        },
+        data: { lastUsedAt: new Date(now) },
+      });
+    } catch {
+      // Usage telemetry must never turn a valid credential into a failed call.
+    }
   }
   return {
     async create(identityId: string, input: CreateScopedPatInput, context?: RequestContext) {
@@ -114,6 +148,7 @@ export function createScopedPatService(options: Options) {
               createdAt: pat.createdAt.toISOString(),
               expiresAt: pat.expiresAt.toISOString(),
               revokedAt: pat.revokedAt?.toISOString() ?? null,
+              lastUsedAt: pat.lastUsedAt?.toISOString() ?? null,
             },
           };
         },
@@ -123,6 +158,7 @@ export function createScopedPatService(options: Options) {
         createdAt: new Date(receipt.result.createdAt),
         expiresAt: new Date(receipt.result.expiresAt),
         revokedAt: receipt.result.revokedAt === null ? null : new Date(receipt.result.revokedAt),
+        lastUsedAt: receipt.result.lastUsedAt === null ? null : new Date(receipt.result.lastUsedAt),
       };
       // The plaintext is deliberately absent from the receipt: a replay can
       // return the same credential identity, never a second copy of the secret.
@@ -188,6 +224,7 @@ export function createScopedPatService(options: Options) {
         !(await isActive(pat.userId, context))
       )
         return null;
+      await touchLastUsed(pat.id, pat.lastUsedAt);
       return {
         identityId: pat.userId,
         credentialId: pat.id,

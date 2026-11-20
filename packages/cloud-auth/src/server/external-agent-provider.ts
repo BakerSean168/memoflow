@@ -13,6 +13,11 @@ export interface ExternalAgentOAuthOptions {
   readonly readQuotaPerMinute?: number;
 }
 
+/**
+ * OAuth is read-only by design, not because write support is missing. Write
+ * scopes are PAT-only until the consent, audit and revocation conditions in
+ * docs/internals/external-agent-oauth-write-consent.md are met (#1033).
+ */
 export const EXTERNAL_AGENT_SCOPES = ['goals:read', 'tasks:read'] as const;
 export const EXTERNAL_AGENT_OAUTH_SCOPES = [...EXTERNAL_AGENT_SCOPES, 'offline_access'];
 export const CONNECTION_CLAIM = 'urn:memoflow:connection_id';

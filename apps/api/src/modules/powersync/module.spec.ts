@@ -7,6 +7,7 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import type { DatabaseClient, IApiModuleContext } from '../../shared/contracts/api-module.js';
 import { env } from '../../shared/infrastructure/config/env.js';
 import { composePowerSyncApiModule } from './module.js';
+import { PowerSyncRowVersionConflictError } from './row-version-guard.js';
 import { computeProfileSnapshotKey } from './snapshot-storage.js';
 import { PowerSyncPreferenceConflictError } from './user-preference-crud-executor.js';
 
@@ -117,6 +118,42 @@ describe('PowerSyncApiModule profile snapshot routes', () => {
           namespace: 'presentation',
           expectedRevision: 0,
           latest: { revision: 1, preferences: { theme: 'dark', language: 'zh-CN' } },
+        },
+      },
+    });
+  });
+
+  it('returns a machine-readable 409 when a stale upload loses the row version race', async () => {
+    const db = {
+      $transaction: async () => {
+        throw new PowerSyncRowVersionConflictError(
+          'goals',
+          'goal-1',
+          'PATCH',
+          2,
+          3,
+          'stale_version',
+        );
+      },
+    } as unknown as DatabaseClient;
+    const app = await createTestApp(db);
+    const response = await request(app)
+      .put('/api/v1/powersync/crud')
+      .send({ transactions: [{ ops: [] }] });
+    expect(response.status).toBe(409);
+    expect(response.body).toMatchObject({
+      ok: false,
+      error: {
+        code: 'CONFLICT',
+        context: {
+          code: 'row_version_conflict',
+          reason: 'stale_version',
+          identityId: TEST_IDENTITY_ID,
+          table: 'goals',
+          rowId: 'goal-1',
+          operation: 'PATCH',
+          incomingVersion: 2,
+          currentVersion: 3,
         },
       },
     });

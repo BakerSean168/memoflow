@@ -60,7 +60,14 @@ import {
 } from './modules/agent-gateway/ai-read.port';
 import { bindRoutineReadPort } from './modules/agent-gateway/routine-read.port';
 import { getTrustedWebOrigins } from './shared/infrastructure/config/web-origin.js';
-import { prisma, connectDatabase, disconnectDatabase } from '@memoflow/database';
+import {
+  prisma,
+  connectDatabase,
+  disconnectDatabase,
+  createExternalAgentAuditQuery,
+  createExternalAgentAuditStore,
+  type ExternalAgentAuditStore,
+} from '@memoflow/database';
 import { getStartupInfo } from './shared/infrastructure/config/logger.config';
 import { createLogger } from '@memoflow/utils/logger';
 import { createAccountPrismaActiveQuery } from '@memoflow/account';
@@ -142,6 +149,7 @@ const logger = createLogger('API');
 let bootstrapper: ApiBootstrapper | null = null;
 let scheduler: CronSchedulerManager | null = null;
 let traceRuntime: TraceRuntime | null = null;
+let auditStore: ExternalAgentAuditStore | null = null;
 const repositoryStorageBaseDir = resolveRepositoryStorageBaseDir();
 
 async function bootstrap(): Promise<void> {
@@ -227,6 +235,12 @@ async function bootstrap(): Promise<void> {
   });
 
   // 2. 白名单注册 & 启动
+  // Audit keeps the synchronous structured log and appends a durable, queryable
+  // copy through a bounded batch writer; request paths never await PostgreSQL.
+  auditStore = createExternalAgentAuditStore(prisma, {
+    onDrop: (count) => logger.warn('External agent audit rows dropped', { count }),
+  });
+  const externalAgentAudit = createGatewayAudit(createLogger('ExternalAgentAudit'), auditStore);
   bootstrapper = new ApiBootstrapper(
     prisma,
     cloudAuth,
@@ -236,6 +250,7 @@ async function bootstrap(): Promise<void> {
       github: Boolean(githubOAuthConfig),
     },
     env.API_TRUST_PROXY_HOPS,
+    externalAgentAudit,
   );
 
   // Step C：宿主 runtime 负责 feature 装配。所有 remaining 模块（account /
@@ -529,7 +544,8 @@ async function bootstrap(): Promise<void> {
     ),
     agents: bindAgentArchiveReadPort(aiComposed.agentInstanceRead),
     routines: bindRoutineReadPort(routineComposed.routineQueryPort),
-    audit: createGatewayAudit(createLogger('ExternalAgentAudit')),
+    audit: externalAgentAudit,
+    auditQuery: createExternalAgentAuditQuery(prisma),
     diagnose: createGatewayDiagnostics(createLogger('ExternalAgentDiagnostics')),
   });
   const app = await bootstrapper
@@ -607,6 +623,11 @@ async function gracefulShutdown(signal: string, exitCode = 0): Promise<void> {
   if (bootstrapper) {
     await bootstrapper.destroy();
   }
+
+  // Flush queued audit rows before the pool closes; batches are bounded so this
+  // cannot delay shutdown beyond the store's timeout.
+  await auditStore?.close();
+  auditStore = null;
 
   await disconnectDatabase();
   logger.info('Database disconnected');

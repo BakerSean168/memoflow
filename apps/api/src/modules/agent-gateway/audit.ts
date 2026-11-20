@@ -2,14 +2,32 @@ import { createHash } from 'node:crypto';
 import type { ILogger } from '@memoflow/utils/logger';
 import type { GatewayAuditEvent, GatewayDiagnostic } from '@memoflow/agent-gateway';
 
+/** Synchronous seam for the durable audit copy; the concrete writer is batched. */
+export interface GatewayAuditPersistence {
+  record(event: GatewayAuditEvent): void;
+}
+
 /**
  * Keeps credential/read audit enabled independently of the host diagnostic level.
+ * The log write stays synchronous; the durable copy is only enqueued so the
+ * request's terminal path never awaits PostgreSQL.
  * @param logger - A dedicated provider-backed logger, never the shared API logger.
+ * @param persistence - Optional bounded, batched durable sink.
  * @returns The minimal structured audit sink.
  */
-export function createGatewayAudit(logger: ILogger): (event: GatewayAuditEvent) => void {
+export function createGatewayAudit(
+  logger: ILogger,
+  persistence?: GatewayAuditPersistence,
+): (event: GatewayAuditEvent) => void {
   logger.setLevel('info');
-  return (event) => logger.info('External agent audit', { ...event });
+  return (event) => {
+    logger.info('External agent audit', { ...event });
+    try {
+      persistence?.record(event);
+    } catch {
+      /* The log copy above already retains the event. */
+    }
+  };
 }
 
 /**
