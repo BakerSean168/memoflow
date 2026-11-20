@@ -86,10 +86,12 @@ const RULES = [
   {
     level: 'package',
     reason: 'test harness ownership metadata changed',
-    // Inventory / ownership / retirement registries are validated by the
-    // governance lane and the test-system-v2 unit tests (Nx-affected).
+    // Inventory / ownership / review-hash / retirement registries are validated
+    // by the governance lane and the test-system-v2 unit tests (Nx-affected).
     test: (file) =>
-      /^tools\/test-system-v2\/(?:test-inventory|e2e-ownership|e2e-retirement)\.json$/u.test(file),
+      /^tools\/test-system-v2\/(?:test-inventory|architecture-review-registry|e2e-ownership|e2e-retirement)\.json$/u.test(
+        file,
+      ),
   },
   {
     level: 'package',
