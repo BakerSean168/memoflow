@@ -1,7 +1,11 @@
 import { createHash } from 'node:crypto';
+import {
+  DEFAULT_EXTERNAL_AGENT_RATE_LIMITS,
+  type ExternalAgentRateLimits,
+} from '@memoflow/agent-gateway';
 import type Redis from 'ioredis';
 
-/** Fixed private-pilot budgets; Lua makes each bucket atomic across API instances. */
+/** Host admission budgets; Lua makes each fixed one-minute bucket atomic across API instances. */
 const CONSUME = `
 local n = redis.call('INCR', KEYS[1])
 if n == 1 then redis.call('PEXPIRE', KEYS[1], 60000) end
@@ -14,21 +18,28 @@ export interface PilotAdmission {
   destroy(): Promise<void>;
 }
 /**
- * Creates host-owned shared admission for the Goal PAT pilot (120 requests per minute).
+ * Creates host-owned shared admission for the external agent gateway.
  * @param redis - Dedicated configured Redis connection, owned by this module.
+ * @param limits - Fixed-window per-minute budgets; unlimited hosts use the calibrated defaults.
  * @returns The bounded IP/owner admission port and its explicit lifecycle.
  */
-export function createPilotAdmission(redis: Redis): PilotAdmission {
+export function createPilotAdmission(
+  redis: Redis,
+  limits: Pick<
+    ExternalAgentRateLimits,
+    'ipPerMinute' | 'ownerPerMinute'
+  > = DEFAULT_EXTERNAL_AGENT_RATE_LIMITS,
+): PilotAdmission {
   const key = (kind: string, value: string) =>
     `eag:read-pilot:${kind}:${createHash('sha256').update(value).digest('hex')}`;
-  const consume = async (kind: string, value: string) =>
-    (await redis.eval(CONSUME, 1, key(kind, value), 120)) === 1;
+  const consume = async (kind: string, value: string, perMinute: number) =>
+    (await redis.eval(CONSUME, 1, key(kind, value), perMinute)) === 1;
   return {
     async start() {
       if (redis.status === 'wait') await redis.connect();
     },
-    consumeIp: (ip) => consume('ip', ip),
-    consumeOwner: (identityId) => consume('owner', identityId),
+    consumeIp: (ip) => consume('ip', ip, limits.ipPerMinute),
+    consumeOwner: (identityId) => consume('owner', identityId, limits.ownerPerMinute),
     async destroy() {
       try {
         await redis.quit();

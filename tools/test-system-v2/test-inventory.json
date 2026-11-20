@@ -224,6 +224,14 @@
       "measurementCollectors": []
     },
     {
+      "path": "apps/api/src/modules/agent-gateway/rate-limit.calibration.integration.test.ts",
+      "primarySuite": "integration",
+      "collectors": [
+        "apps/api/vitest.integration.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "apps/api/src/modules/agent-gateway/relation-read.port.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -13866,7 +13874,7 @@
       "type": "primary",
       "suite": "integration",
       "runner": "vitest",
-      "fileCount": 25
+      "fileCount": 26
     },
     {
       "id": "packages/account/vitest.integration.config.ts",
@@ -15143,7 +15151,7 @@
   "unexpected": [],
   "counts": {
     "unit": 1253,
-    "integration": 62,
+    "integration": 63,
     "smoke": 3,
     "boundary-ipc": 7,
     "boundary-main": 18,

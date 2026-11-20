@@ -1,6 +1,7 @@
 import { createHash, randomBytes, randomUUID } from 'node:crypto';
 import {
   CreateScopedPatSchema,
+  DEFAULT_EXTERNAL_AGENT_RATE_LIMITS,
   ScopedPatCreateReceiptSchema,
   type CreateScopedPatInput,
 } from '@memoflow/agent-gateway';
@@ -23,6 +24,8 @@ interface Options {
   readonly audience: string;
   readonly accountIsActive: (identityId: string, context?: RequestContext) => Promise<boolean>;
   readonly closureChecker?: (identityId: string) => Promise<boolean>;
+  /** Fixed-window read budget per credential; defaults to the calibrated gateway limit. */
+  readonly readQuotaPerMinute?: number;
 }
 
 const digest = (token: string) => createHash('sha256').update(token).digest('hex');
@@ -229,8 +232,10 @@ export function createScopedPatService(options: Options) {
         scopes: pat.scopes,
       };
     },
-    /** PostgreSQL CAS keeps the pilot's fixed-window quota effective across API instances. */
+    /** PostgreSQL CAS keeps the fixed-window per-credential quota effective across API instances. */
     async consumeReadQuota(credentialId: string): Promise<boolean> {
+      const perMinute =
+        options.readQuotaPerMinute ?? DEFAULT_EXTERNAL_AGENT_RATE_LIMITS.credentialPerMinute;
       const count = await read(
         (tx) => tx.$executeRaw`
         UPDATE external_agent_pats
@@ -244,7 +249,7 @@ export function createScopedPatService(options: Options) {
             END
         WHERE id = ${credentialId}
           AND revoked_at IS NULL AND expires_at > CURRENT_TIMESTAMP
-          AND (rate_window <= CURRENT_TIMESTAMP - INTERVAL '1 minute' OR rate_count < 60)
+          AND (rate_window <= CURRENT_TIMESTAMP - INTERVAL '1 minute' OR rate_count < ${perMinute})
       `,
       );
       return count === 1;

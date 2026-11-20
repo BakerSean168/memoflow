@@ -163,7 +163,7 @@ OAuth 协议步骤和撤销边界见 ADR-117。canonical resource URI 由部署�
 
 Gateway 由 `EAG_READ_PILOT_ENABLED` 总开关控制，默认 `0`；关闭时 `/mcp` 与 `/agent-connections/*`（PAT/OAuth 管理）都不挂载，而不是返回空工具列表。其余子开关默认：`EAG_TASK_READ_ENABLED=1`、`EAG_WRITE_ENABLED=0`、`EAG_ROUTINE_WRITE_ENABLED=0`、`EAG_ASSISTED_ENABLED=0`、`EAG_OAUTH_ENABLED=0`。`apps/api/src/server.ts` 的 compose 已把 `enabled`、`writes`（含 `routineWriteEnabled`）和 `assisted` 传入 Gateway；写关闭时不再发现或执行写工具，assisted 关闭时 5 个 assisted 工具不发布。`EAG_ASSISTED_ENABLED=1` 依赖 durable AI workflow runtime，启动时缺失会直接失败。shutdown 沿用现有 API host 生命周期；本轮未执行完整容器 shutdown/drain 验收，不宣称已验证该运行边界。
 
-rate limit 按 IP（未认证）、owner/connection/tool（认证后）组合，在多实例下仍有效。具体阈值来自 load test；请求体建议 256 KiB、普通工具截止时间 30 秒、页大小硬上限作为初值写入统一配置。所有 limits 都在转换为昂贵 owner query 前检查。
+rate limit 分三层，都是固定 60 秒窗口且多实例共享计数：请求源 IP（Redis，键 `eag:read-pilot:ip:<sha256(ip)>`，认证前计数，认证请求也计）、认证后的 owner（Redis，键 `eag:read-pilot:owner:<sha256(identityId)>`）、以及凭据（PAT 的 `external_agent_pats` / OAuth 的 `external_agent_connections` 行内 `rate_count`/`rate_window`，PostgreSQL CAS）。默认预算 IP 1200/min、owner 480/min、凭据 240/min；分别由 `EAG_RATE_LIMIT_IP_PER_MIN`、`EAG_RATE_LIMIT_OWNER_PER_MIN`、`EAG_RATE_LIMIT_CREDENTIAL_PER_MIN` 覆盖，默认值只维护在 `packages/agent-gateway/src/rate-limits.ts`。超限统一返回 `429 {"error":"RATE_LIMITED"}` 与 `Retry-After: 60`，不发送 `RateLimit-*` 头。IP 桶在认证前检查，是体量防护而不是按用户预算：共享出口（企业 NAT、托管客户端出口）共用同一桶，公平性由 owner/凭据维度承担；owner 与凭据检查在认证后、解析请求体和 owner 查询之前，顺序为 owner 后凭据：凭据被拒的请求已经计入 owner，三层互不对称，任一层拒绝都不回滚上层计数。预算按 MCP 客户端工具调用密度校准（一个 assistant turn 可并发多个 `tools/call`，一个 owner 可开多个客户端）：凭据要容纳单个激进 agent loop，owner 要容纳同一身份的多客户端，IP 只挡体量滥用。估算口径：Codex 类会话启动握手约 4 次请求，普通 turn 1–5 次 `tools/call`，持续跑工具的循环约 30–60 次/分钟。据此凭据 240/min（4 次/秒）对 60/min 的激进循环留 4 倍余量、对 30/min 的常规会话留 8 倍，并能吸收 5 个并发工具调用的瞬时突发；owner 480/min 等于两个跑满的凭据，覆盖同身份 4–8 个并发会话（按 30–60 次/分钟计）；IP 1200/min（20 次/秒）按常规用户 30 次/分钟可支撑约 40 个共享出口使用者，只在该出口聚合时生效。这是推算而非生产遥测：试点期没有线上峰值数据，取值按保守上界取整，并保留环境覆盖以便拿到真实分布后收紧。校准脚本是 `apps/api/src/modules/agent-gateway/rate-limit.calibration.integration.test.ts`，对本地路由按固定速率打 `/mcp` 并逐维报告首次拒绝位置与拒绝形态（并发下发使发送序不等于准入序，脚本只断言准入数与拒绝形态，不复用上次运行的 IP 桶）；设置 `EAG_RATE_LIMIT_CALIBRATION=1` 才运行，禁止指向已部署环境。请求体上限 256 KiB、普通工具截止时间 30 秒、页大小硬上限仍作为初值。
 
 EAG-02 的具体 owner read budget：Goal 行最多 101（含 lookahead），每 Goal 先检查 KR count，最多 100；正文 description/review/snapshot 不进入读取。name/summary/KR title/unit 的字节长度先由 PostgreSQL 检查，超出 owner 投影上限的单聚合返回明确 `RESPONSE_TOO_LARGE`，不伪造部分 KR 的 overallProgress。搜索页超出传输预算时缩小返回页并标记 `truncated=response-budget`，游标仍从最后实际返回项继续。整个 HTTP 调用有共同截止时间；取消信号单独传给查询，不扩展或混用 ExecutionContext。Goal 查询使用 transaction-local PostgreSQL statement_timeout 和 transaction timeout，认证/账户 authority 的独立只读查询最多 5 秒；响应停止等待之后数据库工作仍有明确上界。Redis admission 同样必须有命令超时，429 含 Retry-After。
 
@@ -204,16 +204,19 @@ Elapsed/ActiveUsage/专注 protocol 需要设备本地执行，暂不通过 Host
 
 生产模板见 `deployment/production/docker-compose.production.yml`；本 runbook 只说明运维翻转，本单不改生产 env。
 
-| 变量                        | 开启值                   | 说明                                                                                            |
-| --------------------------- | ------------------------ | ----------------------------------------------------------------------------------------------- |
-| `EAG_READ_PILOT_ENABLED`    | `1`                      | 总开关；为 `0` 时 `/mcp` 与 PAT/OAuth 管理路由都不挂载                                          |
-| `EAG_AUDIENCE`              | `https://<api-host>/mcp` | 必须是 HTTPS 的规范 origin + `/mcp`；其 host 必须与请求 `Host` 一致，否则 403                   |
-| `EAG_CURSOR_SECRET`         | 随机 ≥32 字节            | 分页游标密钥；跨重启保持稳定                                                                    |
-| `EAG_TASK_READ_ENABLED`     | `1`                      | Task 只读工具；默认已为 `1`                                                                     |
-| `EAG_WRITE_ENABLED`         | `1`                      | 发布 8 个 PAT 写工具（Routine 写另由下一项控制）                                                |
-| `EAG_ROUTINE_WRITE_ENABLED` | `1`                      | 在 writes 打开的前提下发布 Routine 写工具（create/update/delete/pause/override）                |
-| `EAG_ASSISTED_ENABLED`      | `1`                      | 发布 5 个 assisted 工具；要求 durable AI workflow runtime，否则启动失败                         |
-| `EAG_OAUTH_ENABLED`         | 可选 `1`                 | 需要总开关、`AUTH_BASE_URL`（HTTPS `/api/auth`）与 `MEMOFLOW_WEB_URL`；OAuth 仍只读，写只走 PAT |
+| 变量                                | 开启值                   | 说明                                                                                            |
+| ----------------------------------- | ------------------------ | ----------------------------------------------------------------------------------------------- |
+| `EAG_READ_PILOT_ENABLED`            | `1`                      | 总开关；为 `0` 时 `/mcp` 与 PAT/OAuth 管理路由都不挂载                                          |
+| `EAG_AUDIENCE`                      | `https://<api-host>/mcp` | 必须是 HTTPS 的规范 origin + `/mcp`；其 host 必须与请求 `Host` 一致，否则 403                   |
+| `EAG_CURSOR_SECRET`                 | 随机 ≥32 字节            | 分页游标密钥；跨重启保持稳定                                                                    |
+| `EAG_TASK_READ_ENABLED`             | `1`                      | Task 只读工具；默认已为 `1`                                                                     |
+| `EAG_WRITE_ENABLED`                 | `1`                      | 发布 8 个 PAT 写工具（Routine 写另由下一项控制）                                                |
+| `EAG_ROUTINE_WRITE_ENABLED`         | `1`                      | 在 writes 打开的前提下发布 Routine 写工具（create/update/delete/pause/override）                |
+| `EAG_ASSISTED_ENABLED`              | `1`                      | 发布 5 个 assisted 工具；要求 durable AI workflow runtime，否则启动失败                         |
+| `EAG_OAUTH_ENABLED`                 | 可选 `1`                 | 需要总开关、`AUTH_BASE_URL`（HTTPS `/api/auth`）与 `MEMOFLOW_WEB_URL`；OAuth 仍只读，写只走 PAT |
+| `EAG_RATE_LIMIT_IP_PER_MIN`         | `1200`                   | 请求源 IP 的每分钟预算；认证前后都计，共享出口共用一个桶，只作体量防护                          |
+| `EAG_RATE_LIMIT_OWNER_PER_MIN`      | `480`                    | 同一身份每分钟预算，覆盖该身份的全部凭据与客户端                                                |
+| `EAG_RATE_LIMIT_CREDENTIAL_PER_MIN` | `240`                    | 单个 PAT/OAuth connection 的每分钟预算                                                          |
 
 一致性检查：
 

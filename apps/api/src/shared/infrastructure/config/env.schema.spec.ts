@@ -87,6 +87,40 @@ describe('envSchema assisted Agent Gateway rollout', () => {
   });
 });
 
+describe('envSchema external agent rate limits', () => {
+  const required = {
+    JWT_SECRET: 'local-validation-secret-at-least-32-characters',
+    AI_PROVIDER_ENCRYPTION_KEY: 'provider-encryption-secret-at-least-32-chars',
+  };
+
+  it('defaults to the gateway admission budgets', () => {
+    expect(envSchema.parse(required)).toMatchObject({
+      EAG_RATE_LIMIT_IP_PER_MIN: 1200,
+      EAG_RATE_LIMIT_OWNER_PER_MIN: 480,
+      EAG_RATE_LIMIT_CREDENTIAL_PER_MIN: 240,
+    });
+  });
+
+  it('reads explicit per-minute budgets from the environment', () => {
+    expect(
+      envSchema.parse({
+        ...required,
+        EAG_RATE_LIMIT_IP_PER_MIN: '60',
+        EAG_RATE_LIMIT_OWNER_PER_MIN: '30',
+        EAG_RATE_LIMIT_CREDENTIAL_PER_MIN: '15',
+      }),
+    ).toMatchObject({
+      EAG_RATE_LIMIT_IP_PER_MIN: 60,
+      EAG_RATE_LIMIT_OWNER_PER_MIN: 30,
+      EAG_RATE_LIMIT_CREDENTIAL_PER_MIN: 15,
+    });
+  });
+
+  it.each(['0', '-1', '1.5', 'unbounded'])('rejects invalid budget %s', (value) => {
+    expect(() => envSchema.parse({ ...required, EAG_RATE_LIMIT_IP_PER_MIN: value })).toThrow();
+  });
+});
+
 describe('envSchema GitHub installation routing', () => {
   const required = {
     JWT_SECRET: 'local-validation-secret-at-least-32-characters',

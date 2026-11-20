@@ -1178,7 +1178,7 @@
         "status": "none-verified",
         "testFiles": []
       },
-      "sourceSha256": "b5609a2a557cccf7d3a3d5d46a03d9491e9f794fa66041783afa4b8bef1b3c77"
+      "sourceSha256": "ace5e6691f0654808782b7d555290d7d32dd4e945404ddd48cbd2f4f6af0b2b8"
     },
     {
       "path": "apps/api/src/modules/powersync/user-preference-crud-executor.postgres.integration.spec.ts",
@@ -1411,7 +1411,7 @@
         "status": "none-verified",
         "testFiles": []
       },
-      "sourceSha256": "631d531efb54f09f6fb17ba56b3c86d2a5065a87184090b8d6c4cb0fc53a1721"
+      "sourceSha256": "929015d910bed6cf213fc9c131cc21945963c7679095c6d2e33b45be3c84cc24"
     },
     {
       "path": "packages/desktop-contracts/src/intervention-window.spec.ts",

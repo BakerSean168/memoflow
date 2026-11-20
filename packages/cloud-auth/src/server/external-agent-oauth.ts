@@ -8,6 +8,7 @@ import {
   sessionMiddleware,
 } from 'better-auth/api';
 import { getOAuthProviderApi, getOAuthProviderState } from '@better-auth/oauth-provider';
+import { DEFAULT_EXTERNAL_AGENT_RATE_LIMITS } from '@memoflow/agent-gateway';
 import {
   CONNECTION_CLAIM,
   CONNECTION_LIFETIME_MS,
@@ -373,13 +374,15 @@ export function createExternalAgentOAuth(
       });
     },
     async consumeReadQuota(id: string) {
+      const perMinute =
+        options.readQuotaPerMinute ?? DEFAULT_EXTERNAL_AGENT_RATE_LIMITS.credentialPerMinute;
       return store.bounded(async () => {
         const count = await db.$executeRaw`
         UPDATE external_agent_connections
         SET rate_count = CASE WHEN rate_window <= CURRENT_TIMESTAMP - INTERVAL '1 minute' THEN 1 ELSE rate_count + 1 END,
             rate_window = CASE WHEN rate_window <= CURRENT_TIMESTAMP - INTERVAL '1 minute' THEN CURRENT_TIMESTAMP ELSE rate_window END
         WHERE id = ${id} AND revoked_at IS NULL AND expires_at > CURRENT_TIMESTAMP
-          AND (rate_window <= CURRENT_TIMESTAMP - INTERVAL '1 minute' OR rate_count < 60)`;
+          AND (rate_window <= CURRENT_TIMESTAMP - INTERVAL '1 minute' OR rate_count < ${perMinute})`;
         return count === 1;
       });
     },

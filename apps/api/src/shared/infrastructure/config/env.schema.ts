@@ -6,6 +6,7 @@
  */
 
 import { z } from 'zod';
+import { DEFAULT_EXTERNAL_AGENT_RATE_LIMITS } from '@memoflow/agent-gateway';
 
 const emptyStringToUndefined = (value: unknown) => {
   if (typeof value === 'string' && value.trim() === '') {
@@ -93,6 +94,21 @@ export const envSchema = z
           .min(1),
       ),
     EAG_CURSOR_SECRET: z.preprocess(emptyStringToUndefined, z.string().min(32).optional()),
+    EAG_RATE_LIMIT_IP_PER_MIN: z.coerce
+      .number()
+      .int()
+      .positive()
+      .default(DEFAULT_EXTERNAL_AGENT_RATE_LIMITS.ipPerMinute),
+    EAG_RATE_LIMIT_OWNER_PER_MIN: z.coerce
+      .number()
+      .int()
+      .positive()
+      .default(DEFAULT_EXTERNAL_AGENT_RATE_LIMITS.ownerPerMinute),
+    EAG_RATE_LIMIT_CREDENTIAL_PER_MIN: z.coerce
+      .number()
+      .int()
+      .positive()
+      .default(DEFAULT_EXTERNAL_AGENT_RATE_LIMITS.credentialPerMinute),
 
     API_TRUST_PROXY_HOPS: z
       .enum(['0', '1'])

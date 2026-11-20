@@ -26,6 +26,8 @@ export type {
 
 export { GatewayReadError, GatewayPermissionDeniedError } from './ports';
 
+export { DEFAULT_EXTERNAL_AGENT_RATE_LIMITS, type ExternalAgentRateLimits } from './rate-limits';
+
 export { readToolDescriptors, type GatewayReadToolName } from './read-tool-descriptors';
 
 export type { GatewayWritePort, GatewayWriteAuthority } from './ports';
