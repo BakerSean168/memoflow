@@ -60,18 +60,45 @@ export const PROJECT_LAYERS = {
   '@memoflow/test-utils': 'testing',
 };
 
+/**
+ * Surfaces whose change invalidates the whole plan: CI definitions, workspace
+ * configuration and the CI/tooling sources themselves.
+ *
+ * `packages/database/` and any `prisma` path are deliberately absent. A schema
+ * change is selected through the Nx project graph instead: the schema is part
+ * of the database project's `production` inputs, so the database targets and
+ * every consumer that declares `^production` (api, migrator, desktop main,
+ * integration suites, …) stay selected. Keeping them here forced a full run
+ * for every data-layer change, including the Nx-affected path that already
+ * covers its consumers.
+ */
 export const GLOBAL_SURFACE_PATTERNS = [
   /^\.github\//u,
   /^tools\/(?:ci-cd-platform|test-system-v2|governance|ci|docker|build|mcp)\//u,
   /^(?:package\.json|pnpm-lock\.yaml|pnpm-workspace\.yaml|nx\.json|tsconfig[^/]*\.json|eslint\.config\.[^/]+|\.npmrc)$/u,
-  /^packages\/database\//u,
-  /(^|\/)prisma(\/|$)/iu,
 ];
+
+/**
+ * Generated/ledger data files that live inside a global-surface directory.
+ * Every PR that touches tests must regenerate the inventory and refresh the
+ * review registry, so treating them as a global trigger made the narrowing
+ * self-defeating: any test change forced a full run. They are exempted by
+ * exact path only — the surrounding source (inventory.mjs, scope-detector.mjs,
+ * …) keeps triggering a full run. Their correctness stays guarded by the
+ * always-on Lint lane, which runs `memoflow:governance-check`
+ * (`inventory.mjs --check` + `architecture.mjs --check`).
+ */
+export const GLOBAL_SURFACE_EXCEPTIONS = Object.freeze([
+  'tools/test-system-v2/test-inventory.json',
+  'tools/test-system-v2/architecture-review-registry.json',
+]);
 
 export function isGlobalSurface(files) {
   if (!Array.isArray(files) || files.length === 0) return false;
   return files.some(
-    (file) => GLOBAL_SURFACE_PATTERNS.some((pattern) => pattern.test(file)) || !file.includes('/'),
+    (file) =>
+      !GLOBAL_SURFACE_EXCEPTIONS.includes(file) &&
+      (GLOBAL_SURFACE_PATTERNS.some((pattern) => pattern.test(file)) || !file.includes('/')),
   );
 }
 
