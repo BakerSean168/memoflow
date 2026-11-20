@@ -13832,7 +13832,7 @@
       "type": "primary",
       "suite": "integration",
       "runner": "vitest",
-      "fileCount": 23
+      "fileCount": 24
     },
     {
       "id": "packages/account/vitest.integration.config.ts",
@@ -15107,8 +15107,8 @@
   "duplicate": [],
   "unexpected": [],
   "counts": {
-    "unit": 1250,
-    "integration": 60,
+    "unit": 1251,
+    "integration": 61,
     "smoke": 3,
     "boundary-ipc": 6,
     "boundary-main": 18,
