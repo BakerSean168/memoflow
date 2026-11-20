@@ -147,6 +147,23 @@ export const CloudAuthChannels = {
   CLOUD_CONNECTION_CANCEL: 'cloud-auth:connection:cancel',
 } as const;
 
+/**
+ * External Agent connection management (Issue #1030).
+ *
+ * Desktop keeps the Better Auth session token in the main process, so the
+ * renderer manages PATs/OAuth connections through these channels instead of
+ * the Web cookie session. Payloads and failures match the Web
+ * `ExternalAgentClientPort`; no credential or token crosses the boundary.
+ */
+export const ExternalAgentChannels = {
+  CAPABILITIES: 'external-agent:capabilities',
+  LIST_PATS: 'external-agent:pats:list',
+  CREATE_PAT: 'external-agent:pats:create',
+  REVOKE_PAT: 'external-agent:pats:revoke',
+  LIST_CONNECTIONS: 'external-agent:oauth:list',
+  REVOKE_CONNECTION: 'external-agent:oauth:revoke',
+} as const;
+
 export const AIChannels = {
   CAPABILITIES_GET: 'ai:capabilities:get',
   PROVIDER_CATALOG_GET: 'ai:provider:catalog:get',

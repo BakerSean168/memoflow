@@ -128,6 +128,7 @@ import { registerProfileAccessIpc } from './profile/profile-access-ipc';
 import { ProfileAutoEnterPreference } from './profile/profile-auto-enter-preference';
 import { registerProfileAvatarIpc } from './profile/profile-avatar-ipc';
 import { registerCloudAuthIpc } from './profile/cloud-auth-ipc';
+import { registerExternalAgentIpc } from './profile/external-agent-ipc';
 import { CloudSessionStore } from './profile/cloud-session-store';
 import { DesktopCloudConnectionManager } from './profile/desktop-cloud-connection-manager';
 import { DesktopCloudConnectionService } from './profile/desktop-cloud-connection-service';
@@ -1007,6 +1008,10 @@ async function initializeShellRuntime(): Promise<void> {
     deviceAuthCoordinator,
     cloudSignInService,
   );
+  registerExternalAgentIpc({
+    runtime: profileRuntimeManager,
+    sessions: cloudSessionStore,
+  });
 
   // Set up module registration — this closure captures the business module
   // creation logic and provides it to the runtime manager for profile activation
