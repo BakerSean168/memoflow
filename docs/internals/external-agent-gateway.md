@@ -204,19 +204,19 @@ Elapsed/ActiveUsage/专注 protocol 需要设备本地执行，暂不通过 Host
 
 生产模板见 `deployment/production/docker-compose.production.yml`；本 runbook 只说明运维翻转，本单不改生产 env。
 
-| 变量 | 开启值 | 说明 |
-| --- | --- | --- |
-| `EAG_READ_PILOT_ENABLED` | `1` | 总开关；为 `0` 时 `/mcp` 与 PAT/OAuth 管理路由都不挂载 |
-| `EAG_AUDIENCE` | `https://<api-host>/mcp` | 必须是 HTTPS 的规范 origin + `/mcp`；其 host 必须与请求 `Host` 一致，否则 403 |
-| `EAG_CURSOR_SECRET` | 随机 ≥32 字节 | 分页游标密钥；跨重启保持稳定 |
-| `EAG_TASK_READ_ENABLED` | `1` | Task 只读工具；默认已为 `1` |
-| `EAG_WRITE_ENABLED` | `1` | 发布 8 个 PAT 写工具（Routine 写另由下一项控制） |
-| `EAG_ROUTINE_WRITE_ENABLED` | `1` | 在 writes 打开的前提下发布 Routine 写工具（create/update/delete/pause/override） |
-| `EAG_ASSISTED_ENABLED` | `1` | 发布 5 个 assisted 工具；要求 durable AI workflow runtime，否则启动失败 |
-| `EAG_OAUTH_ENABLED` | 可选 `1` | 需要总开关、`AUTH_BASE_URL`（HTTPS `/api/auth`）与 `MEMOFLOW_WEB_URL`；OAuth 仍只读，写只走 PAT |
-| `EAG_RATE_LIMIT_IP_PER_MIN` | `1200` | 请求源 IP 的每分钟预算；认证前后都计，共享出口共用一个桶，只作体量防护 |
-| `EAG_RATE_LIMIT_OWNER_PER_MIN` | `480` | 同一身份每分钟预算，覆盖该身份的全部凭据与客户端 |
-| `EAG_RATE_LIMIT_CREDENTIAL_PER_MIN` | `240` | 单个 PAT/OAuth connection 的每分钟预算 |
+| 变量                                | 开启值                   | 说明                                                                                            |
+| ----------------------------------- | ------------------------ | ----------------------------------------------------------------------------------------------- |
+| `EAG_READ_PILOT_ENABLED`            | `1`                      | 总开关；为 `0` 时 `/mcp` 与 PAT/OAuth 管理路由都不挂载                                          |
+| `EAG_AUDIENCE`                      | `https://<api-host>/mcp` | 必须是 HTTPS 的规范 origin + `/mcp`；其 host 必须与请求 `Host` 一致，否则 403                   |
+| `EAG_CURSOR_SECRET`                 | 随机 ≥32 字节            | 分页游标密钥；跨重启保持稳定                                                                    |
+| `EAG_TASK_READ_ENABLED`             | `1`                      | Task 只读工具；默认已为 `1`                                                                     |
+| `EAG_WRITE_ENABLED`                 | `1`                      | 发布 8 个 PAT 写工具（Routine 写另由下一项控制）                                                |
+| `EAG_ROUTINE_WRITE_ENABLED`         | `1`                      | 在 writes 打开的前提下发布 Routine 写工具（create/update/delete/pause/override）                |
+| `EAG_ASSISTED_ENABLED`              | `1`                      | 发布 5 个 assisted 工具；要求 durable AI workflow runtime，否则启动失败                         |
+| `EAG_OAUTH_ENABLED`                 | 可选 `1`                 | 需要总开关、`AUTH_BASE_URL`（HTTPS `/api/auth`）与 `MEMOFLOW_WEB_URL`；OAuth 仍只读，写只走 PAT |
+| `EAG_RATE_LIMIT_IP_PER_MIN`         | `1200`                   | 请求源 IP 的每分钟预算；认证前后都计，共享出口共用一个桶，只作体量防护                          |
+| `EAG_RATE_LIMIT_OWNER_PER_MIN`      | `480`                    | 同一身份每分钟预算，覆盖该身份的全部凭据与客户端                                                |
+| `EAG_RATE_LIMIT_CREDENTIAL_PER_MIN` | `240`                    | 单个 PAT/OAuth connection 的每分钟预算                                                          |
 
 一致性检查：
 
