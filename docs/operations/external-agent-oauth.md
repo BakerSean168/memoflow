@@ -7,7 +7,7 @@ updated: 2026-10-07T00:00:00Z
 
 # External Agent OAuth 只读连接
 
-OAuth 与 [PAT](./external-agent-pat.md) 共存。OAuth 让用户登录 MemoFlow 后，明确授权 Codex 或 Claude Code 读取自己的 Goal 和 Task；GitHub 仍只是 MemoFlow 的一种登录方式。当前支持六个只读工具，不支持创建、修改或完成任务。实现证据见 [EAG-04](https://github.com/BakerSean168/memoflow/blob/7a45112e1840950ead1ba98b748fc70fa1b38344/docs/analysis/2026-10-07-eag-04-oauth-read-evidence.md)。
+OAuth 与 [PAT](./external-agent-pat.md) 共存。OAuth 让用户登录 MemoFlow 后，明确授权 Codex 或 Claude Code 读取自己的 Goal 和 Task；GitHub 仍只是 MemoFlow 的一种登录方式。当前支持六个只读工具，不支持创建、修改或完成任务。**OAuth 只读是设计边界，不是未完成的缺陷**：写权限只通过 PAT 签发时的预授权提供，评估与开放条件见 [OAuth 写 consent 设计评估](../internals/external-agent-oauth-write-consent.md)。实现证据见 [EAG-04](https://github.com/BakerSean168/memoflow/blob/7a45112e1840950ead1ba98b748fc70fa1b38344/docs/analysis/2026-10-07-eag-04-oauth-read-evidence.md)。
 
 ## 部署配置
 

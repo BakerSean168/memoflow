@@ -1,5 +1,12 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { createExternalAgentHttpClient } from './external-agent-client';
+import { fail, ok, type Result } from '@memoflow/transport-contracts/result';
+import type { IResultIpcClient } from '@memoflow/ipc-client';
+import { ExternalAgentChannels } from '@memoflow/desktop-contracts';
+import {
+  createExternalAgentBearerClient,
+  createExternalAgentHttpClient,
+  createExternalAgentIpcClient,
+} from './external-agent-client';
 import { ExternalAgentFailureSchema, externalAgentFailure } from '@memoflow/agent-gateway';
 
 afterEach(() => vi.unstubAllGlobals());
@@ -67,6 +74,7 @@ it('sends the idempotency key in both the body and the transport header', async 
     createdAt: '2026-11-18T00:00:00.000Z',
     expiresAt: '2027-02-16T00:00:00.000Z',
     revokedAt: null,
+    lastUsedAt: null,
     secret: 'mfp_once',
     replayed: false,
   };
@@ -102,4 +110,124 @@ it('rejects diagnostic or credential fields in public failure details', async ()
   expect(
     ExternalAgentFailureSchema.safeParse({ ...failure, providerBody: 'never-public' }).success,
   ).toBe(false);
+});
+
+describe('desktop bearer transport (#1030)', () => {
+  it('sends the session token as a bearer credential with the trusted Web Origin', async () => {
+    const fetcher = vi
+      .fn()
+      .mockResolvedValue(new Response(JSON.stringify({ data: [] }), { status: 200 }));
+    vi.stubGlobal('fetch', fetcher);
+
+    const result = await createExternalAgentBearerClient({
+      origin: 'https://api.memo.test',
+      webOrigin: 'https://memo.test',
+      token: 'session-token',
+    }).listPats();
+
+    expect(result).toMatchObject({ ok: true, data: [] });
+    const [url, init] = fetcher.mock.calls[0] as [string, RequestInit];
+    expect(url).toBe('https://api.memo.test/api/v1/agent-connections/pats');
+    expect(init.headers).toMatchObject({
+      authorization: 'Bearer session-token',
+      origin: 'https://memo.test',
+    });
+    expect(init.credentials).toBeUndefined();
+  });
+
+  it('keeps the Web cookie transport for the browser client', async () => {
+    const fetcher = vi
+      .fn()
+      .mockResolvedValue(new Response(JSON.stringify({ data: [] }), { status: 200 }));
+    vi.stubGlobal('fetch', fetcher);
+
+    await createExternalAgentHttpClient('https://api.memo.test/api/v1').listPats();
+
+    const [, init] = fetcher.mock.calls[0] as [string, RequestInit];
+    expect(init.credentials).toBe('include');
+    expect(init.headers).toBeUndefined();
+  });
+});
+
+describe('desktop IPC transport (#1030)', () => {
+  const summary = {
+    id: '5b5d8a2b-9934-4be8-8e07-3f62ed122e15',
+    name: 'desktop agent',
+    prefix: 'mfp_Desktop',
+    audience: 'https://memo.test/mcp',
+    scopes: ['goals:read'],
+    createdAt: '2026-11-18T00:00:00.000Z',
+    expiresAt: '2027-02-16T00:00:00.000Z',
+    revokedAt: null,
+  };
+
+  function fixture(handler: (channel: string, ...args: unknown[]) => Promise<Result<unknown>>) {
+    const invoke = vi.fn(handler);
+    const client = createExternalAgentIpcClient({ invoke } as unknown as IResultIpcClient);
+    return { client, invoke };
+  }
+
+  it('routes every management operation through its own channel', async () => {
+    const { client, invoke } = fixture(async (channel) => {
+      if (channel === ExternalAgentChannels.CAPABILITIES) return ok({ oauth: true });
+      if (channel === ExternalAgentChannels.CREATE_PAT)
+        return ok({ ...summary, secret: 'mfp_once', replayed: false });
+      if (
+        channel === ExternalAgentChannels.LIST_PATS ||
+        channel === ExternalAgentChannels.LIST_CONNECTIONS
+      )
+        return ok([]);
+      return ok(undefined);
+    });
+
+    expect(await client.capabilities()).toMatchObject({ ok: true, data: { oauth: true } });
+    expect(await client.listPats()).toMatchObject({ ok: true, data: [] });
+    expect(await client.listConnections()).toMatchObject({ ok: true, data: [] });
+    expect(await client.createPat({ name: 'desktop agent', scopes: ['goals:read'] })).toMatchObject(
+      { ok: true, data: { secret: 'mfp_once' } },
+    );
+    expect(await client.revokePat(summary.id)).toMatchObject({ ok: true });
+    expect(await client.revokeConnection(summary.id)).toMatchObject({ ok: true });
+
+    expect(invoke.mock.calls.map(([channel]) => channel)).toEqual([
+      ExternalAgentChannels.CAPABILITIES,
+      ExternalAgentChannels.LIST_PATS,
+      ExternalAgentChannels.LIST_CONNECTIONS,
+      ExternalAgentChannels.CREATE_PAT,
+      ExternalAgentChannels.REVOKE_PAT,
+      ExternalAgentChannels.REVOKE_CONNECTION,
+    ]);
+    expect(invoke.mock.calls[3][1]).toMatchObject({
+      name: 'desktop agent',
+      scopes: ['goals:read'],
+      expiresInDays: 90,
+    });
+    expect(invoke.mock.calls[4][1]).toBe(summary.id);
+  });
+
+  it('restores the typed public failure the main process returned', async () => {
+    const { client } = fixture(async () =>
+      fail({
+        code: 'EAG_FORBIDDEN',
+        message: 'denied',
+        failure: externalAgentFailure('EAG_FORBIDDEN'),
+      }),
+    );
+    expect(await client.listPats()).toMatchObject({ ok: false, error: { code: 'EAG_FORBIDDEN' } });
+  });
+
+  it('never exposes an untyped IPC error as a domain failure', async () => {
+    const { client } = fixture(async () => fail({ code: 'INTERNAL_ERROR', message: 'boom' }));
+    expect(await client.capabilities()).toMatchObject({
+      ok: false,
+      error: { code: 'EAG_INVALID_RESPONSE' },
+    });
+  });
+
+  it('does not invoke the main process for invalid PAT input', async () => {
+    const { client, invoke } = fixture(async () => ok(summary));
+    expect(() => client.createPat({ name: '', scopes: ['goals:read'] } as never)).toThrow();
+    expect(() => client.revokePat('not-a-uuid')).toThrow();
+    expect(invoke).not.toHaveBeenCalled();
+  });
 });
