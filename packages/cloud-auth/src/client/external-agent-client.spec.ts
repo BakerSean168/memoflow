@@ -67,6 +67,7 @@ it('sends the idempotency key in both the body and the transport header', async 
     createdAt: '2026-11-18T00:00:00.000Z',
     expiresAt: '2027-02-16T00:00:00.000Z',
     revokedAt: null,
+    lastUsedAt: null,
     secret: 'mfp_once',
     replayed: false,
   };

@@ -45,6 +45,8 @@ export function createGatewayPermissionCheckpoint(
           // The credential id stays in every allow/deny audit record.
           agentId: `external-mcp:${principal.credentialId}`,
           operationId: operation?.id ?? tool,
+          // OAuth writes are intentionally never pre-authorized (#1033); only
+          // a PAT whose issuance already recorded this write scope qualifies.
           preAuthorizedWrite:
             principal.credentialType === 'pat' &&
             writeScope !== undefined &&
