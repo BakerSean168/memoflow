@@ -231,6 +231,71 @@ Elapsed/ActiveUsage/专注 protocol 需要设备本地执行，暂不通过 Host
 
 回滚：把对应开关置回 `0` 并重启 API。子开关回滚只隐藏对应工具；总开关回滚会同时卸下 `/mcp` 与管理路由，需重新打开才能恢复。已持久化的 receipt 和 assisted workflow 行保留，无需数据迁移回滚。
 
+## 11. OAuth 投产
+
+OAuth 只有在 §10 第 5 步之后才有意义；本节说明客户端从何而来、如何停用、如何回滚。写 consent 不在本路径内（见 [#1033](https://github.com/BakerSean168/memoflow/issues/1033)），下面所有命令都只接受 `goals:read`、`tasks:read`、`offline_access`。
+
+### 前置
+
+1. 数据库已通过 migrator 建好 OAuth provider 与 `ExternalAgentConnection` 表；`apps/api` 启动时会 insert-only 播种 `oauthResource`（identifier = `EAG_AUDIENCE`）。
+2. `EAG_READ_PILOT_ENABLED=1`、`EAG_OAUTH_ENABLED=1`、`EAG_AUDIENCE=https://<api-host>/mcp`、`AUTH_BASE_URL=https://<auth-host>/api/auth`、`MEMOFLOW_WEB_URL`、`CORS_ORIGIN` 已配置。
+3. 待接入的客户端列入 `EAG_OAUTH_CLIENT_IDS`（逗号分隔、精确 HTTPS URL）。该列表同时是 CIMD 拉取策略与产品授权 allowlist；不在列表内的 client_id 在 authorize 和 consent 阶段都会被拒绝。
+4. DCR 保持关闭（`allowDynamicClientRegistration: false`）：没有 `registration_endpoint`，客户端不能自助写入 `oauthClient`。
+
+### 客户端落地路径
+
+**A. CIMD（默认路径，无需预置）。** client_id 本身就是 HTTPS metadata 文档 URL。首次 `/oauth2/authorize` 时 provider 拉取文档、按 MCP 2026-07-28 profile 校验 `client_name`/`redirect_uris`/公钥方法，然后即时插入 `oauthClient`（`clientDiscoveryId=cimd`），随后才进入登录与 consent。之后同一 client_id 复用它自己的行；运维无需执行任何写库命令。
+
+已实测（`apps/api/src/__tests__/integration/external-agent-oauth-provisioning.integration.test.ts`，`EAG_CIMD_E2E=1`）：本地启动与 API 相同的 Express + Better Auth + `/mcp` 组合，client_id 使用 `https://claude.ai/oauth/claude-code-client-metadata`（真实托管文档）。首轮 authorize 前 `oauthClient` 计数为 0，authorize 后出现 `clientDiscoveryId=cimd`、`name=Claude Code` 的行；随后授权码 + PKCE 换到只读 token，`goal_search` 返回本人 Goal。结论：**CIMD 能 JIT 建行，投产主路径成立**。
+
+CIMD 的边界：
+
+- 文档必须 HTTPS、可公网路由、无重定向、JSON、≤ 大小上限；校验失败按 `invalid_client` 拒绝，不建行。
+- `disabled`、`skipConsent` 等运维列在文档刷新时保留，但 `name`/`redirect_uris`/`scopes` 以文档为准；不要把 CIMD 行当作手工可编辑的配置。
+- 客户端域名被收回或文档改坏时，该客户端立即无法刷新；停用请用下方 `disable`，不要靠改文档。
+
+**B. 预置种子（CIMD 不可用时）。** 适用于内网/受限网络或客户端无法发布 metadata 文档的场景。种子行写入 `clientDiscoveryId=null`，因此不会被 CIMD 刷新覆盖。
+
+```bash
+pnpm nx run api:oauth-client -- seed \
+  --client-id https://agents.example.com/oauth/client.json \
+  --name "Ops Agent" \
+  --redirect-uri http://127.0.0.1:43210/callback \
+  --resource https://api.example.com/mcp
+```
+
+- 命令需要 `DATABASE_URL`；`--resource` 缺省取 `EAG_AUDIENCE`；`--scopes` 缺省为三个只读 scope，传入其他值会直接失败。
+- 幂等：插入前按 `clientId` 查行，已存在则只补齐 `oauthClientResource` 链接并返回 `exists`；重复执行不新增行，也不会把已停用的客户端重新启用。
+- client_id 仍须符合 `EAG_OAUTH_CLIENT_IDS` 的 HTTPS 形式并被列入其中；种子不会绕过 allowlist。
+- 每次 seed/disable/enable 在 stdout 打印一行 JSON 审计（`actor`、`at`、`action`、`clientId`、`result`、`resource`、`redirectUris`、`scopes`）。把该行接入运维日志采集；持久化查询入口属 [#973](https://github.com/BakerSean168/memoflow/issues/973) 的审计项，不在本路径内。
+
+### 管理入口
+
+```bash
+pnpm nx run api:oauth-client -- list
+pnpm nx run api:oauth-client -- disable --client-id https://agents.example.com/oauth/client.json
+pnpm nx run api:oauth-client -- enable  --client-id https://agents.example.com/oauth/client.json
+```
+
+`list` 输出 `{ clients: [...] }`，含 `clientId`、`name`、`disabled`、`createdAt`、`redirectUris`、`scopes` 和 `discovery`（`cimd` / `managed`）。`--actor` 缺省取 `EAG_OAUTH_ADMIN_ACTOR`，再退化到 `user@host`。
+
+`disable` 的效果是即时的：每次 MCP 认证、token 交换和 refresh 都会重新检查 `oauthClient.disabled`，因此既有 access token 在下次调用即 401，refresh 返回 `invalid_grant`，新的 authorize/consent 被拒绝。不需要删除 token 行；这也意味着 `enable` 会让仍在有效期内的旧 token 恢复可用，重新启用前应确认这是预期行为。Web 端不提供这套 UI，运维只走命令行。
+
+### 回滚
+
+1. 停止新授权：`pnpm nx run api:oauth-client -- disable --client-id <url>`，或把 `EAG_OAUTH_ENABLED` 置 `0` 并重启 API（OAuth 路由与 discovery 一起消失，PAT 不受影响）。
+2. 用户侧撤销走「设置 → 账户与隐私 → 已连接的应用」；服务端 disable 只停用客户端，不会替用户删除 consent 记录。需要彻底清理时由用户撤销，再删除对应 `oauthClient` 行（`oauthClientResource`、token 通过外键级联）。
+3. 重新开启按 §10 第 5 步；已存在的 `oauthClient` 行保留，不需要重新种子。
+
+### 与 PAT 的分工
+
+| 路径  | 适用                        | 凭据形态                             | 能力边界                                         |
+| ----- | --------------------------- | ------------------------------------ | ------------------------------------------------ |
+| PAT   | 自动化、脚本、需要写工具    | `mfp_` 前缀长期凭据，用户自建/撤销   | 按 scope 发布读或写工具                          |
+| OAuth | Codex/Claude 等交互式客户端 | 10 分钟 access token + refresh token | 仅 `goals:read`、`tasks:read`；写 consent 未开放 |
+
+两条路径共用同一 owner 权限、审计与 rate limit；OAuth 不因为 PAT 开了写权限而获得写能力。第一方 Web/Desktop session token 不能当 MCP Bearer。
+
 ## 生产边界
 
 生产 API 不发布宿主端口，只信任一个内部代理 hop（`API_TRUST_PROXY_HOPS=1`）。Caddy 仅信任 Cloudflare 公布网段的 `CF-Connecting-IP`，将解析后的地址覆盖为单一 `X-Forwarded-For`；直连 origin 的伪造 forwarding header 无效。其他宿主默认不信任代理。

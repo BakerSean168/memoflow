@@ -2,7 +2,13 @@ import { cimd } from '@better-auth/cimd';
 import { fetchClientMetadataResource } from '@better-auth/cimd/node';
 import { mcp } from '@better-auth/mcp';
 import { jwt } from 'better-auth/plugins';
-import type { OAuthOptions, Scope } from '@better-auth/oauth-provider';
+import type { ClientMetadataResourceFetch, OAuthOptions, Scope } from '@better-auth/oauth-provider';
+
+/**
+ * CIMD metadata transport injection point. Production resolves and pins the
+ * hostname at the runtime network boundary; tests swap only this transport.
+ */
+export type CimdFetchTransport = ClientMetadataResourceFetch;
 
 export interface ExternalAgentOAuthOptions {
   readonly resource: string;
@@ -25,6 +31,7 @@ export const CONNECTION_LIFETIME_MS = 90 * 86400_000;
 export function createExternalAgentProvider(
   options: ExternalAgentOAuthOptions,
   lifecycle: Pick<OAuthOptions<Scope[]>, 'postLogin' | 'customAccessTokenClaims'> = {},
+  cimdFetch?: CimdFetchTransport,
 ) {
   return [
     jwt(),
@@ -49,7 +56,7 @@ export function createExternalAgentProvider(
       ...lifecycle,
     }),
     cimd({
-      fetchClientMetadataResource,
+      fetchClientMetadataResource: cimdFetch ?? fetchClientMetadataResource,
       metadataProfile: 'mcp-2026-07-28',
       isMetadataDocumentUrlAllowed: (url) => options.allowedClientIds.includes(url),
     }),

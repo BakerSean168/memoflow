@@ -66,6 +66,14 @@
       "measurementCollectors": []
     },
     {
+      "path": "apps/api/src/__tests__/integration/external-agent-oauth-provisioning.integration.test.ts",
+      "primarySuite": "integration",
+      "collectors": [
+        "apps/api/vitest.integration.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "apps/api/src/__tests__/integration/external-agent-oauth.integration.test.ts",
       "primarySuite": "integration",
       "collectors": [
@@ -719,6 +727,16 @@
     },
     {
       "path": "apps/api/src/scripts/database-startup-chain.test.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "apps/api/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "apps/api/vitest.config.ts"
+      ]
+    },
+    {
+      "path": "apps/api/src/scripts/oauth-client-admin.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "apps/api/vitest.config.ts"
@@ -13480,7 +13498,7 @@
       "type": "measurement",
       "suite": "coverage",
       "runner": "vitest",
-      "fileCount": 72
+      "fileCount": 73
     },
     {
       "id": "packages/account/vitest.config.ts",
@@ -13848,7 +13866,7 @@
       "type": "primary",
       "suite": "integration",
       "runner": "vitest",
-      "fileCount": 24
+      "fileCount": 25
     },
     {
       "id": "packages/account/vitest.integration.config.ts",
@@ -13960,7 +13978,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 72
+      "fileCount": 73
     },
     {
       "id": "apps/desktop/vitest.config.ts",
@@ -14513,6 +14531,7 @@
       "apps/api/src/runtime/compose-task.spec.ts",
       "apps/api/src/runtime/message-export-composition.surface.spec.ts",
       "apps/api/src/scripts/database-startup-chain.test.ts",
+      "apps/api/src/scripts/oauth-client-admin.spec.ts",
       "apps/api/src/shared/infrastructure/config/env.schema.spec.ts",
       "apps/api/src/shared/infrastructure/config/get-github-oauth-config.surface.spec.ts",
       "apps/api/src/shared/infrastructure/config/logger-bootstrap.spec.ts",
@@ -15123,8 +15142,8 @@
   "duplicate": [],
   "unexpected": [],
   "counts": {
-    "unit": 1252,
-    "integration": 61,
+    "unit": 1253,
+    "integration": 62,
     "smoke": 3,
     "boundary-ipc": 7,
     "boundary-main": 18,

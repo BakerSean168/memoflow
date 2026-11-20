@@ -105,6 +105,14 @@
         "command": "pnpm nx run database:prisma-push"
       }
     },
+    "oauth-client": {
+      "executor": "nx:run-commands",
+      "cache": false,
+      "options": {
+        "command": "node ../../node_modules/tsx/dist/cli.mjs src/scripts/oauth-client-admin.ts",
+        "cwd": "apps/api"
+      }
+    },
     "docs:export": {
       "executor": "nx:run-commands",
       "options": {

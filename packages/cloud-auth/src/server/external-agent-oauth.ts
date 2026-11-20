@@ -14,6 +14,7 @@ import {
   EXTERNAL_AGENT_OAUTH_SCOPES,
   EXTERNAL_AGENT_SCOPES,
   createExternalAgentProvider,
+  type CimdFetchTransport,
   type ExternalAgentOAuthOptions,
 } from './external-agent-provider';
 import type { createOAuthStore } from './oauth-store';
@@ -38,6 +39,7 @@ export function createExternalAgentOAuth(
   store: ReturnType<typeof createOAuthStore>,
   options: ExternalAgentOAuthOptions,
   closureBlocked: (identityId: string) => Promise<boolean>,
+  cimdFetch?: CimdFetchTransport,
 ) {
   const db = store.db;
   const requests = new AsyncLocalStorage<{
@@ -76,64 +78,68 @@ export function createExternalAgentOAuth(
     return { connection, consent, client };
   }
 
-  const plugins = createExternalAgentProvider(options, {
-    postLogin: {
-      page: new URL('/auth/external-agent', options.webOrigin).href,
-      shouldRedirect: async ({ user }) => {
-        if (!user?.emailVerified || !(await activeUser(user.id)))
-          throw new APIError('FORBIDDEN', { error: 'access_denied' });
-        return false;
+  const plugins = createExternalAgentProvider(
+    options,
+    {
+      postLogin: {
+        page: new URL('/auth/external-agent', options.webOrigin).href,
+        shouldRedirect: async ({ user }) => {
+          if (!user?.emailVerified || !(await activeUser(user.id)))
+            throw new APIError('FORBIDDEN', { error: 'access_denied' });
+          return false;
+        },
+        consentReferenceId: async ({ user }) => {
+          const query = new URLSearchParams((await getOAuthProviderState())?.query);
+          const clientId = query.get('client_id');
+          if (
+            !user?.emailVerified ||
+            !clientId ||
+            !options.allowedClientIds.includes(clientId) ||
+            !(await activeUser(user.id))
+          )
+            throw new APIError('FORBIDDEN', { error: 'access_denied' });
+          const existing = await db.externalAgentConnection.findFirst({
+            where: {
+              userId: user.id,
+              clientId,
+              resource: options.resource,
+              revokedAt: null,
+              expiresAt: { gt: new Date() },
+            },
+            orderBy: { createdAt: 'desc' },
+          });
+          if (existing) return existing.id;
+          // No product authority is created by login, a rejected consent, or discovery.
+          if (!requests.getStore()?.acceptingConsent) return 'ungranted';
+          const connection = await db.externalAgentConnection.create({
+            data: {
+              id: randomUUID(),
+              userId: user.id,
+              clientId,
+              resource: options.resource,
+              expiresAt: new Date(Date.now() + CONNECTION_LIFETIME_MS),
+            },
+          });
+          return connection.id;
+        },
       },
-      consentReferenceId: async ({ user }) => {
-        const query = new URLSearchParams((await getOAuthProviderState())?.query);
-        const clientId = query.get('client_id');
+      customAccessTokenClaims: async ({ user, referenceId, resources, scopes }) => {
+        if (!user || !referenceId || resources?.length !== 1 || resources[0] !== options.resource)
+          throw invalidGrant();
+        const grant = await currentGrant(referenceId, user.id);
         if (
-          !user?.emailVerified ||
-          !clientId ||
-          !options.allowedClientIds.includes(clientId) ||
-          !(await activeUser(user.id))
+          !grant ||
+          !scopes.every(
+            (scope) =>
+              grant.consent.scopes.includes(scope) && EXTERNAL_AGENT_OAUTH_SCOPES.includes(scope),
+          )
         )
-          throw new APIError('FORBIDDEN', { error: 'access_denied' });
-        const existing = await db.externalAgentConnection.findFirst({
-          where: {
-            userId: user.id,
-            clientId,
-            resource: options.resource,
-            revokedAt: null,
-            expiresAt: { gt: new Date() },
-          },
-          orderBy: { createdAt: 'desc' },
-        });
-        if (existing) return existing.id;
-        // No product authority is created by login, a rejected consent, or discovery.
-        if (!requests.getStore()?.acceptingConsent) return 'ungranted';
-        const connection = await db.externalAgentConnection.create({
-          data: {
-            id: randomUUID(),
-            userId: user.id,
-            clientId,
-            resource: options.resource,
-            expiresAt: new Date(Date.now() + CONNECTION_LIFETIME_MS),
-          },
-        });
-        return connection.id;
+          throw invalidGrant();
+        return { [CONNECTION_CLAIM]: referenceId };
       },
     },
-    customAccessTokenClaims: async ({ user, referenceId, resources, scopes }) => {
-      if (!user || !referenceId || resources?.length !== 1 || resources[0] !== options.resource)
-        throw invalidGrant();
-      const grant = await currentGrant(referenceId, user.id);
-      if (
-        !grant ||
-        !scopes.every(
-          (scope) =>
-            grant.consent.scopes.includes(scope) && EXTERNAL_AGENT_OAUTH_SCOPES.includes(scope),
-        )
-      )
-        throw invalidGrant();
-      return { [CONNECTION_CLAIM]: referenceId };
-    },
-  });
+    cimdFetch,
+  );
   const provider = plugins.find((plugin) => plugin.id === 'oauth-provider');
   if (!provider || !('options' in provider)) throw new Error('OAuth provider is required');
 
