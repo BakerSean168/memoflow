@@ -1,10 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import {
-  GLOBAL_SURFACE_EXCEPTIONS,
-  isGlobalSurface,
-  detectScope,
-} from '../lib/scope-detector.mjs';
+import { GLOBAL_SURFACE_EXCEPTIONS, isGlobalSurface, detectScope } from '../lib/scope-detector.mjs';
 import { classifyRisk } from '../lib/risk.mjs';
 
 test('generated inventory and review registry are the only exemptions from the global surface', () => {
