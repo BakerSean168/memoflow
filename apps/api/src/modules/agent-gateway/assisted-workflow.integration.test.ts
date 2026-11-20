@@ -662,6 +662,7 @@ it('serves the assisted start → review → approve lifecycle through the real 
     pats: gatewayPats,
     goals: bindGoalReadPort(createGoalPrismaPageQuery(prisma)),
     audit: (event) => audit.push(event),
+    auditQuery: { list: async () => ({ items: [], hasMore: false }) },
   });
   await module.register({
     app,

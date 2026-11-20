@@ -334,6 +334,12 @@ export type OperationAuditLog = $Result.DefaultSelection<Prisma.$OperationAuditL
  */
 export type ExternalMutationReceipt = $Result.DefaultSelection<Prisma.$ExternalMutationReceiptPayload>
 /**
+ * Model ExternalAgentAuditEvent
+ * Queryable copy of every hosted MCP/edge audit event. The structured log stays the
+ * synchronous write; this table is appended asynchronously in bounded batches.
+ */
+export type ExternalAgentAuditEvent = $Result.DefaultSelection<Prisma.$ExternalAgentAuditEventPayload>
+/**
  * Model RoutineDefinition
  *
  */
@@ -1270,6 +1276,16 @@ export class PrismaClient<
   get externalMutationReceipt(): Prisma.ExternalMutationReceiptDelegate<ExtArgs, ClientOptions>;
 
   /**
+   * `prisma.externalAgentAuditEvent`: Exposes CRUD operations for the **ExternalAgentAuditEvent** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more ExternalAgentAuditEvents
+    * const externalAgentAuditEvents = await prisma.externalAgentAuditEvent.findMany()
+    * ```
+    */
+  get externalAgentAuditEvent(): Prisma.ExternalAgentAuditEventDelegate<ExtArgs, ClientOptions>;
+
+  /**
    * `prisma.routineDefinition`: Exposes CRUD operations for the **RoutineDefinition** model.
     * Example usage:
     * ```ts
@@ -2155,6 +2171,7 @@ export namespace Prisma {
     AccountClosureOperation: 'AccountClosureOperation',
     OperationAuditLog: 'OperationAuditLog',
     ExternalMutationReceipt: 'ExternalMutationReceipt',
+    ExternalAgentAuditEvent: 'ExternalAgentAuditEvent',
     RoutineDefinition: 'RoutineDefinition',
     RoutinePreference: 'RoutinePreference',
     RoutineProfile: 'RoutineProfile',
@@ -2208,7 +2225,7 @@ export namespace Prisma {
       omit: GlobalOmitOptions
     }
     meta: {
-      modelProps: "account" | "accountAvatar" | "aiConversation" | "aiGoalSurfaceLease" | "aiConversationAttention" | "aiExecutionRecord" | "aiPermissionSetting" | "aiPermissionRule" | "aiPermissionAudit" | "aiProviderConfig" | "aiAgentInstance" | "aiAgentInstanceBinding" | "aiAgentConversationBinding" | "aiProviderOnboardingSession" | "aiProviderSecret" | "aiKnowledgeIndexEntry" | "aiAgentRegistryMigration" | "aiAssistedWorkflow" | "cloudAuthUser" | "cloudAuthSession" | "cloudAuthProviderAccount" | "cloudAuthVerification" | "cloudAuthDeviceCode" | "externalAgentPat" | "externalAgentConnection" | "goal" | "keyResult" | "goalRecord" | "goalReview" | "keyResultWeightSnapshot" | "habit" | "habitOccurrence" | "habitCheckIn" | "habitStreakProjection" | "label" | "goalLabel" | "taskLabel" | "notification" | "notificationInteraction" | "notificationDeliveryDecisionRecord" | "notificationPreference" | "notificationDispatchOutbox" | "jwks" | "oauthClient" | "oauthResource" | "oauthClientResource" | "oauthRefreshToken" | "oauthAccessToken" | "oauthConsent" | "oauthClientAssertion" | "profileImportOperation" | "profileImportArchive" | "profileImportArchiveChunk" | "relation" | "outboxMessage" | "inboxReceipt" | "projectionCursor" | "accountClosureOperation" | "operationAuditLog" | "externalMutationReceipt" | "routineDefinition" | "routinePreference" | "routineProfile" | "routineProfileMembership" | "routineProtocolDefinition" | "routineProtocolSession" | "routineOccurrence" | "routineInteraction" | "routineTemporaryOverride" | "knowledgeRepositoryInstallationIntent" | "knowledgeSpace" | "knowledgeDocumentIdentity" | "knowledgeRemoteBinding" | "remoteRepositoryObservation" | "remoteHistoryFence" | "knowledgeProjectionCheckpoint" | "githubWebhookDelivery" | "knowledgeNoteProjection" | "knowledgeAttachmentProjection" | "knowledgeAttachmentContentCache" | "knowledgeWriteRequest" | "knowledgeRepositoryLease" | "schedule" | "scheduledInvocation" | "invocationAttempt" | "schedulingReconcileOperation" | "scheduleLease" | "scheduleRebuildOutbox" | "scheduleDomainEventOutbox" | "scheduleEventConsumerReceipt" | "scheduleEventDeliveryLog" | "userPreferenceRecord" | "taskPlan" | "taskOccurrence" | "taskGoalOutbox" | "taskPlanHistory" | "walletAccount" | "walletTransaction"
+      modelProps: "account" | "accountAvatar" | "aiConversation" | "aiGoalSurfaceLease" | "aiConversationAttention" | "aiExecutionRecord" | "aiPermissionSetting" | "aiPermissionRule" | "aiPermissionAudit" | "aiProviderConfig" | "aiAgentInstance" | "aiAgentInstanceBinding" | "aiAgentConversationBinding" | "aiProviderOnboardingSession" | "aiProviderSecret" | "aiKnowledgeIndexEntry" | "aiAgentRegistryMigration" | "aiAssistedWorkflow" | "cloudAuthUser" | "cloudAuthSession" | "cloudAuthProviderAccount" | "cloudAuthVerification" | "cloudAuthDeviceCode" | "externalAgentPat" | "externalAgentConnection" | "goal" | "keyResult" | "goalRecord" | "goalReview" | "keyResultWeightSnapshot" | "habit" | "habitOccurrence" | "habitCheckIn" | "habitStreakProjection" | "label" | "goalLabel" | "taskLabel" | "notification" | "notificationInteraction" | "notificationDeliveryDecisionRecord" | "notificationPreference" | "notificationDispatchOutbox" | "jwks" | "oauthClient" | "oauthResource" | "oauthClientResource" | "oauthRefreshToken" | "oauthAccessToken" | "oauthConsent" | "oauthClientAssertion" | "profileImportOperation" | "profileImportArchive" | "profileImportArchiveChunk" | "relation" | "outboxMessage" | "inboxReceipt" | "projectionCursor" | "accountClosureOperation" | "operationAuditLog" | "externalMutationReceipt" | "externalAgentAuditEvent" | "routineDefinition" | "routinePreference" | "routineProfile" | "routineProfileMembership" | "routineProtocolDefinition" | "routineProtocolSession" | "routineOccurrence" | "routineInteraction" | "routineTemporaryOverride" | "knowledgeRepositoryInstallationIntent" | "knowledgeSpace" | "knowledgeDocumentIdentity" | "knowledgeRemoteBinding" | "remoteRepositoryObservation" | "remoteHistoryFence" | "knowledgeProjectionCheckpoint" | "githubWebhookDelivery" | "knowledgeNoteProjection" | "knowledgeAttachmentProjection" | "knowledgeAttachmentContentCache" | "knowledgeWriteRequest" | "knowledgeRepositoryLease" | "schedule" | "scheduledInvocation" | "invocationAttempt" | "schedulingReconcileOperation" | "scheduleLease" | "scheduleRebuildOutbox" | "scheduleDomainEventOutbox" | "scheduleEventConsumerReceipt" | "scheduleEventDeliveryLog" | "userPreferenceRecord" | "taskPlan" | "taskOccurrence" | "taskGoalOutbox" | "taskPlanHistory" | "walletAccount" | "walletTransaction"
       txIsolationLevel: Prisma.TransactionIsolationLevel
     }
     model: {
@@ -6652,6 +6669,80 @@ export namespace Prisma {
           }
         }
       }
+      ExternalAgentAuditEvent: {
+        payload: Prisma.$ExternalAgentAuditEventPayload<ExtArgs>
+        fields: Prisma.ExternalAgentAuditEventFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.ExternalAgentAuditEventFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ExternalAgentAuditEventPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.ExternalAgentAuditEventFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ExternalAgentAuditEventPayload>
+          }
+          findFirst: {
+            args: Prisma.ExternalAgentAuditEventFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ExternalAgentAuditEventPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.ExternalAgentAuditEventFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ExternalAgentAuditEventPayload>
+          }
+          findMany: {
+            args: Prisma.ExternalAgentAuditEventFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ExternalAgentAuditEventPayload>[]
+          }
+          create: {
+            args: Prisma.ExternalAgentAuditEventCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ExternalAgentAuditEventPayload>
+          }
+          createMany: {
+            args: Prisma.ExternalAgentAuditEventCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.ExternalAgentAuditEventCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ExternalAgentAuditEventPayload>[]
+          }
+          delete: {
+            args: Prisma.ExternalAgentAuditEventDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ExternalAgentAuditEventPayload>
+          }
+          update: {
+            args: Prisma.ExternalAgentAuditEventUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ExternalAgentAuditEventPayload>
+          }
+          deleteMany: {
+            args: Prisma.ExternalAgentAuditEventDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.ExternalAgentAuditEventUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.ExternalAgentAuditEventUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ExternalAgentAuditEventPayload>[]
+          }
+          upsert: {
+            args: Prisma.ExternalAgentAuditEventUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ExternalAgentAuditEventPayload>
+          }
+          aggregate: {
+            args: Prisma.ExternalAgentAuditEventAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateExternalAgentAuditEvent>
+          }
+          groupBy: {
+            args: Prisma.ExternalAgentAuditEventGroupByArgs<ExtArgs>
+            result: $Utils.Optional<ExternalAgentAuditEventGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.ExternalAgentAuditEventCountArgs<ExtArgs>
+            result: $Utils.Optional<ExternalAgentAuditEventCountAggregateOutputType> | number
+          }
+        }
+      }
       RoutineDefinition: {
         payload: Prisma.$RoutineDefinitionPayload<ExtArgs>
         fields: Prisma.RoutineDefinitionFieldRefs
@@ -9647,6 +9738,7 @@ export namespace Prisma {
     accountClosureOperation?: AccountClosureOperationOmit
     operationAuditLog?: OperationAuditLogOmit
     externalMutationReceipt?: ExternalMutationReceiptOmit
+    externalAgentAuditEvent?: ExternalAgentAuditEventOmit
     routineDefinition?: RoutineDefinitionOmit
     routinePreference?: RoutinePreferenceOmit
     routineProfile?: RoutineProfileOmit
@@ -9767,6 +9859,7 @@ export namespace Prisma {
   export type AccountCountOutputType = {
     assistedWorkflows: number
     externalMutationReceipts: number
+    externalAgentAuditEvents: number
     goals: number
     profileImportOperations: number
     profileImportArchives: number
@@ -9817,6 +9910,7 @@ export namespace Prisma {
   export type AccountCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     assistedWorkflows?: boolean | AccountCountOutputTypeCountAssistedWorkflowsArgs
     externalMutationReceipts?: boolean | AccountCountOutputTypeCountExternalMutationReceiptsArgs
+    externalAgentAuditEvents?: boolean | AccountCountOutputTypeCountExternalAgentAuditEventsArgs
     goals?: boolean | AccountCountOutputTypeCountGoalsArgs
     profileImportOperations?: boolean | AccountCountOutputTypeCountProfileImportOperationsArgs
     profileImportArchives?: boolean | AccountCountOutputTypeCountProfileImportArchivesArgs
@@ -9887,6 +9981,13 @@ export namespace Prisma {
    */
   export type AccountCountOutputTypeCountExternalMutationReceiptsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: ExternalMutationReceiptWhereInput
+  }
+
+  /**
+   * AccountCountOutputType without action
+   */
+  export type AccountCountOutputTypeCountExternalAgentAuditEventsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: ExternalAgentAuditEventWhereInput
   }
 
   /**
@@ -11372,6 +11473,7 @@ export namespace Prisma {
     cloudUser?: boolean | CloudAuthUserDefaultArgs<ExtArgs>
     avatar?: boolean | Account$avatarArgs<ExtArgs>
     externalMutationReceipts?: boolean | Account$externalMutationReceiptsArgs<ExtArgs>
+    externalAgentAuditEvents?: boolean | Account$externalAgentAuditEventsArgs<ExtArgs>
     goals?: boolean | Account$goalsArgs<ExtArgs>
     profileImportOperations?: boolean | Account$profileImportOperationsArgs<ExtArgs>
     profileImportArchives?: boolean | Account$profileImportArchivesArgs<ExtArgs>
@@ -11459,6 +11561,7 @@ export namespace Prisma {
     cloudUser?: boolean | CloudAuthUserDefaultArgs<ExtArgs>
     avatar?: boolean | Account$avatarArgs<ExtArgs>
     externalMutationReceipts?: boolean | Account$externalMutationReceiptsArgs<ExtArgs>
+    externalAgentAuditEvents?: boolean | Account$externalAgentAuditEventsArgs<ExtArgs>
     goals?: boolean | Account$goalsArgs<ExtArgs>
     profileImportOperations?: boolean | Account$profileImportOperationsArgs<ExtArgs>
     profileImportArchives?: boolean | Account$profileImportArchivesArgs<ExtArgs>
@@ -11521,6 +11624,7 @@ export namespace Prisma {
       cloudUser: Prisma.$CloudAuthUserPayload<ExtArgs>
       avatar: Prisma.$AccountAvatarPayload<ExtArgs> | null
       externalMutationReceipts: Prisma.$ExternalMutationReceiptPayload<ExtArgs>[]
+      externalAgentAuditEvents: Prisma.$ExternalAgentAuditEventPayload<ExtArgs>[]
       goals: Prisma.$GoalPayload<ExtArgs>[]
       profileImportOperations: Prisma.$ProfileImportOperationPayload<ExtArgs>[]
       profileImportArchives: Prisma.$ProfileImportArchivePayload<ExtArgs>[]
@@ -11974,6 +12078,7 @@ export namespace Prisma {
     cloudUser<T extends CloudAuthUserDefaultArgs<ExtArgs> = {}>(args?: Subset<T, CloudAuthUserDefaultArgs<ExtArgs>>): Prisma__CloudAuthUserClient<$Result.GetResult<Prisma.$CloudAuthUserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
     avatar<T extends Account$avatarArgs<ExtArgs> = {}>(args?: Subset<T, Account$avatarArgs<ExtArgs>>): Prisma__AccountAvatarClient<$Result.GetResult<Prisma.$AccountAvatarPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
     externalMutationReceipts<T extends Account$externalMutationReceiptsArgs<ExtArgs> = {}>(args?: Subset<T, Account$externalMutationReceiptsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ExternalMutationReceiptPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    externalAgentAuditEvents<T extends Account$externalAgentAuditEventsArgs<ExtArgs> = {}>(args?: Subset<T, Account$externalAgentAuditEventsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ExternalAgentAuditEventPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     goals<T extends Account$goalsArgs<ExtArgs> = {}>(args?: Subset<T, Account$goalsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$GoalPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     profileImportOperations<T extends Account$profileImportOperationsArgs<ExtArgs> = {}>(args?: Subset<T, Account$profileImportOperationsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ProfileImportOperationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     profileImportArchives<T extends Account$profileImportArchivesArgs<ExtArgs> = {}>(args?: Subset<T, Account$profileImportArchivesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ProfileImportArchivePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
@@ -12521,6 +12626,30 @@ export namespace Prisma {
     take?: number
     skip?: number
     distinct?: ExternalMutationReceiptScalarFieldEnum | ExternalMutationReceiptScalarFieldEnum[]
+  }
+
+  /**
+   * Account.externalAgentAuditEvents
+   */
+  export type Account$externalAgentAuditEventsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ExternalAgentAuditEvent
+     */
+    select?: ExternalAgentAuditEventSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ExternalAgentAuditEvent
+     */
+    omit?: ExternalAgentAuditEventOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ExternalAgentAuditEventInclude<ExtArgs> | null
+    where?: ExternalAgentAuditEventWhereInput
+    orderBy?: ExternalAgentAuditEventOrderByWithRelationInput | ExternalAgentAuditEventOrderByWithRelationInput[]
+    cursor?: ExternalAgentAuditEventWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: ExternalAgentAuditEventScalarFieldEnum | ExternalAgentAuditEventScalarFieldEnum[]
   }
 
   /**
@@ -82308,6 +82437,1226 @@ export namespace Prisma {
 
 
   /**
+   * Model ExternalAgentAuditEvent
+   */
+
+  export type AggregateExternalAgentAuditEvent = {
+    _count: ExternalAgentAuditEventCountAggregateOutputType | null
+    _avg: ExternalAgentAuditEventAvgAggregateOutputType | null
+    _sum: ExternalAgentAuditEventSumAggregateOutputType | null
+    _min: ExternalAgentAuditEventMinAggregateOutputType | null
+    _max: ExternalAgentAuditEventMaxAggregateOutputType | null
+  }
+
+  export type ExternalAgentAuditEventAvgAggregateOutputType = {
+    durationMs: number | null
+  }
+
+  export type ExternalAgentAuditEventSumAggregateOutputType = {
+    durationMs: number | null
+  }
+
+  export type ExternalAgentAuditEventMinAggregateOutputType = {
+    id: string | null
+    identityId: string | null
+    credentialId: string | null
+    effect: string | null
+    tool: string | null
+    outcome: string | null
+    scopeDecision: string | null
+    requestId: string | null
+    traceId: string | null
+    receiptId: string | null
+    replayed: boolean | null
+    durationMs: number | null
+    createdAt: Date | null
+  }
+
+  export type ExternalAgentAuditEventMaxAggregateOutputType = {
+    id: string | null
+    identityId: string | null
+    credentialId: string | null
+    effect: string | null
+    tool: string | null
+    outcome: string | null
+    scopeDecision: string | null
+    requestId: string | null
+    traceId: string | null
+    receiptId: string | null
+    replayed: boolean | null
+    durationMs: number | null
+    createdAt: Date | null
+  }
+
+  export type ExternalAgentAuditEventCountAggregateOutputType = {
+    id: number
+    identityId: number
+    credentialId: number
+    effect: number
+    tool: number
+    outcome: number
+    scopeDecision: number
+    requestId: number
+    traceId: number
+    receiptId: number
+    replayed: number
+    durationMs: number
+    createdAt: number
+    _all: number
+  }
+
+
+  export type ExternalAgentAuditEventAvgAggregateInputType = {
+    durationMs?: true
+  }
+
+  export type ExternalAgentAuditEventSumAggregateInputType = {
+    durationMs?: true
+  }
+
+  export type ExternalAgentAuditEventMinAggregateInputType = {
+    id?: true
+    identityId?: true
+    credentialId?: true
+    effect?: true
+    tool?: true
+    outcome?: true
+    scopeDecision?: true
+    requestId?: true
+    traceId?: true
+    receiptId?: true
+    replayed?: true
+    durationMs?: true
+    createdAt?: true
+  }
+
+  export type ExternalAgentAuditEventMaxAggregateInputType = {
+    id?: true
+    identityId?: true
+    credentialId?: true
+    effect?: true
+    tool?: true
+    outcome?: true
+    scopeDecision?: true
+    requestId?: true
+    traceId?: true
+    receiptId?: true
+    replayed?: true
+    durationMs?: true
+    createdAt?: true
+  }
+
+  export type ExternalAgentAuditEventCountAggregateInputType = {
+    id?: true
+    identityId?: true
+    credentialId?: true
+    effect?: true
+    tool?: true
+    outcome?: true
+    scopeDecision?: true
+    requestId?: true
+    traceId?: true
+    receiptId?: true
+    replayed?: true
+    durationMs?: true
+    createdAt?: true
+    _all?: true
+  }
+
+  export type ExternalAgentAuditEventAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which ExternalAgentAuditEvent to aggregate.
+     */
+    where?: ExternalAgentAuditEventWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     *
+     * Determine the order of ExternalAgentAuditEvents to fetch.
+     */
+    orderBy?: ExternalAgentAuditEventOrderByWithRelationInput | ExternalAgentAuditEventOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     *
+     * Sets the start position
+     */
+    cursor?: ExternalAgentAuditEventWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     *
+     * Take `±n` ExternalAgentAuditEvents from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     *
+     * Skip the first `n` ExternalAgentAuditEvents.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     *
+     * Count returned ExternalAgentAuditEvents
+    **/
+    _count?: true | ExternalAgentAuditEventCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     *
+     * Select which fields to average
+    **/
+    _avg?: ExternalAgentAuditEventAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     *
+     * Select which fields to sum
+    **/
+    _sum?: ExternalAgentAuditEventSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     *
+     * Select which fields to find the minimum value
+    **/
+    _min?: ExternalAgentAuditEventMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     *
+     * Select which fields to find the maximum value
+    **/
+    _max?: ExternalAgentAuditEventMaxAggregateInputType
+  }
+
+  export type GetExternalAgentAuditEventAggregateType<T extends ExternalAgentAuditEventAggregateArgs> = {
+        [P in keyof T & keyof AggregateExternalAgentAuditEvent]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateExternalAgentAuditEvent[P]>
+      : GetScalarType<T[P], AggregateExternalAgentAuditEvent[P]>
+  }
+
+
+
+
+  export type ExternalAgentAuditEventGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: ExternalAgentAuditEventWhereInput
+    orderBy?: ExternalAgentAuditEventOrderByWithAggregationInput | ExternalAgentAuditEventOrderByWithAggregationInput[]
+    by: ExternalAgentAuditEventScalarFieldEnum[] | ExternalAgentAuditEventScalarFieldEnum
+    having?: ExternalAgentAuditEventScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: ExternalAgentAuditEventCountAggregateInputType | true
+    _avg?: ExternalAgentAuditEventAvgAggregateInputType
+    _sum?: ExternalAgentAuditEventSumAggregateInputType
+    _min?: ExternalAgentAuditEventMinAggregateInputType
+    _max?: ExternalAgentAuditEventMaxAggregateInputType
+  }
+
+  export type ExternalAgentAuditEventGroupByOutputType = {
+    id: string
+    identityId: string | null
+    credentialId: string | null
+    effect: string
+    tool: string
+    outcome: string
+    scopeDecision: string
+    requestId: string
+    traceId: string | null
+    receiptId: string | null
+    replayed: boolean | null
+    durationMs: number
+    createdAt: Date
+    _count: ExternalAgentAuditEventCountAggregateOutputType | null
+    _avg: ExternalAgentAuditEventAvgAggregateOutputType | null
+    _sum: ExternalAgentAuditEventSumAggregateOutputType | null
+    _min: ExternalAgentAuditEventMinAggregateOutputType | null
+    _max: ExternalAgentAuditEventMaxAggregateOutputType | null
+  }
+
+  type GetExternalAgentAuditEventGroupByPayload<T extends ExternalAgentAuditEventGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<ExternalAgentAuditEventGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof ExternalAgentAuditEventGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], ExternalAgentAuditEventGroupByOutputType[P]>
+            : GetScalarType<T[P], ExternalAgentAuditEventGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type ExternalAgentAuditEventSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    identityId?: boolean
+    credentialId?: boolean
+    effect?: boolean
+    tool?: boolean
+    outcome?: boolean
+    scopeDecision?: boolean
+    requestId?: boolean
+    traceId?: boolean
+    receiptId?: boolean
+    replayed?: boolean
+    durationMs?: boolean
+    createdAt?: boolean
+    account?: boolean | ExternalAgentAuditEvent$accountArgs<ExtArgs>
+  }, ExtArgs["result"]["externalAgentAuditEvent"]>
+
+  export type ExternalAgentAuditEventSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    identityId?: boolean
+    credentialId?: boolean
+    effect?: boolean
+    tool?: boolean
+    outcome?: boolean
+    scopeDecision?: boolean
+    requestId?: boolean
+    traceId?: boolean
+    receiptId?: boolean
+    replayed?: boolean
+    durationMs?: boolean
+    createdAt?: boolean
+    account?: boolean | ExternalAgentAuditEvent$accountArgs<ExtArgs>
+  }, ExtArgs["result"]["externalAgentAuditEvent"]>
+
+  export type ExternalAgentAuditEventSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    identityId?: boolean
+    credentialId?: boolean
+    effect?: boolean
+    tool?: boolean
+    outcome?: boolean
+    scopeDecision?: boolean
+    requestId?: boolean
+    traceId?: boolean
+    receiptId?: boolean
+    replayed?: boolean
+    durationMs?: boolean
+    createdAt?: boolean
+    account?: boolean | ExternalAgentAuditEvent$accountArgs<ExtArgs>
+  }, ExtArgs["result"]["externalAgentAuditEvent"]>
+
+  export type ExternalAgentAuditEventSelectScalar = {
+    id?: boolean
+    identityId?: boolean
+    credentialId?: boolean
+    effect?: boolean
+    tool?: boolean
+    outcome?: boolean
+    scopeDecision?: boolean
+    requestId?: boolean
+    traceId?: boolean
+    receiptId?: boolean
+    replayed?: boolean
+    durationMs?: boolean
+    createdAt?: boolean
+  }
+
+  export type ExternalAgentAuditEventOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "identityId" | "credentialId" | "effect" | "tool" | "outcome" | "scopeDecision" | "requestId" | "traceId" | "receiptId" | "replayed" | "durationMs" | "createdAt", ExtArgs["result"]["externalAgentAuditEvent"]>
+  export type ExternalAgentAuditEventInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    account?: boolean | ExternalAgentAuditEvent$accountArgs<ExtArgs>
+  }
+  export type ExternalAgentAuditEventIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    account?: boolean | ExternalAgentAuditEvent$accountArgs<ExtArgs>
+  }
+  export type ExternalAgentAuditEventIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    account?: boolean | ExternalAgentAuditEvent$accountArgs<ExtArgs>
+  }
+
+  export type $ExternalAgentAuditEventPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "ExternalAgentAuditEvent"
+    objects: {
+      account: Prisma.$AccountPayload<ExtArgs> | null
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      identityId: string | null
+      credentialId: string | null
+      effect: string
+      tool: string
+      outcome: string
+      scopeDecision: string
+      requestId: string
+      traceId: string | null
+      receiptId: string | null
+      replayed: boolean | null
+      durationMs: number
+      createdAt: Date
+    }, ExtArgs["result"]["externalAgentAuditEvent"]>
+    composites: {}
+  }
+
+  type ExternalAgentAuditEventGetPayload<S extends boolean | null | undefined | ExternalAgentAuditEventDefaultArgs> = $Result.GetResult<Prisma.$ExternalAgentAuditEventPayload, S>
+
+  type ExternalAgentAuditEventCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<ExternalAgentAuditEventFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: ExternalAgentAuditEventCountAggregateInputType | true
+    }
+
+  export interface ExternalAgentAuditEventDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['ExternalAgentAuditEvent'], meta: { name: 'ExternalAgentAuditEvent' } }
+    /**
+     * Find zero or one ExternalAgentAuditEvent that matches the filter.
+     * @param {ExternalAgentAuditEventFindUniqueArgs} args - Arguments to find a ExternalAgentAuditEvent
+     * @example
+     * // Get one ExternalAgentAuditEvent
+     * const externalAgentAuditEvent = await prisma.externalAgentAuditEvent.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends ExternalAgentAuditEventFindUniqueArgs>(args: SelectSubset<T, ExternalAgentAuditEventFindUniqueArgs<ExtArgs>>): Prisma__ExternalAgentAuditEventClient<$Result.GetResult<Prisma.$ExternalAgentAuditEventPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one ExternalAgentAuditEvent that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {ExternalAgentAuditEventFindUniqueOrThrowArgs} args - Arguments to find a ExternalAgentAuditEvent
+     * @example
+     * // Get one ExternalAgentAuditEvent
+     * const externalAgentAuditEvent = await prisma.externalAgentAuditEvent.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends ExternalAgentAuditEventFindUniqueOrThrowArgs>(args: SelectSubset<T, ExternalAgentAuditEventFindUniqueOrThrowArgs<ExtArgs>>): Prisma__ExternalAgentAuditEventClient<$Result.GetResult<Prisma.$ExternalAgentAuditEventPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first ExternalAgentAuditEvent that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ExternalAgentAuditEventFindFirstArgs} args - Arguments to find a ExternalAgentAuditEvent
+     * @example
+     * // Get one ExternalAgentAuditEvent
+     * const externalAgentAuditEvent = await prisma.externalAgentAuditEvent.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends ExternalAgentAuditEventFindFirstArgs>(args?: SelectSubset<T, ExternalAgentAuditEventFindFirstArgs<ExtArgs>>): Prisma__ExternalAgentAuditEventClient<$Result.GetResult<Prisma.$ExternalAgentAuditEventPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first ExternalAgentAuditEvent that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ExternalAgentAuditEventFindFirstOrThrowArgs} args - Arguments to find a ExternalAgentAuditEvent
+     * @example
+     * // Get one ExternalAgentAuditEvent
+     * const externalAgentAuditEvent = await prisma.externalAgentAuditEvent.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends ExternalAgentAuditEventFindFirstOrThrowArgs>(args?: SelectSubset<T, ExternalAgentAuditEventFindFirstOrThrowArgs<ExtArgs>>): Prisma__ExternalAgentAuditEventClient<$Result.GetResult<Prisma.$ExternalAgentAuditEventPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more ExternalAgentAuditEvents that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ExternalAgentAuditEventFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all ExternalAgentAuditEvents
+     * const externalAgentAuditEvents = await prisma.externalAgentAuditEvent.findMany()
+     *
+     * // Get first 10 ExternalAgentAuditEvents
+     * const externalAgentAuditEvents = await prisma.externalAgentAuditEvent.findMany({ take: 10 })
+     *
+     * // Only select the `id`
+     * const externalAgentAuditEventWithIdOnly = await prisma.externalAgentAuditEvent.findMany({ select: { id: true } })
+     *
+     */
+    findMany<T extends ExternalAgentAuditEventFindManyArgs>(args?: SelectSubset<T, ExternalAgentAuditEventFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ExternalAgentAuditEventPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a ExternalAgentAuditEvent.
+     * @param {ExternalAgentAuditEventCreateArgs} args - Arguments to create a ExternalAgentAuditEvent.
+     * @example
+     * // Create one ExternalAgentAuditEvent
+     * const ExternalAgentAuditEvent = await prisma.externalAgentAuditEvent.create({
+     *   data: {
+     *     // ... data to create a ExternalAgentAuditEvent
+     *   }
+     * })
+     *
+     */
+    create<T extends ExternalAgentAuditEventCreateArgs>(args: SelectSubset<T, ExternalAgentAuditEventCreateArgs<ExtArgs>>): Prisma__ExternalAgentAuditEventClient<$Result.GetResult<Prisma.$ExternalAgentAuditEventPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many ExternalAgentAuditEvents.
+     * @param {ExternalAgentAuditEventCreateManyArgs} args - Arguments to create many ExternalAgentAuditEvents.
+     * @example
+     * // Create many ExternalAgentAuditEvents
+     * const externalAgentAuditEvent = await prisma.externalAgentAuditEvent.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *
+     */
+    createMany<T extends ExternalAgentAuditEventCreateManyArgs>(args?: SelectSubset<T, ExternalAgentAuditEventCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many ExternalAgentAuditEvents and returns the data saved in the database.
+     * @param {ExternalAgentAuditEventCreateManyAndReturnArgs} args - Arguments to create many ExternalAgentAuditEvents.
+     * @example
+     * // Create many ExternalAgentAuditEvents
+     * const externalAgentAuditEvent = await prisma.externalAgentAuditEvent.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *
+     * // Create many ExternalAgentAuditEvents and only return the `id`
+     * const externalAgentAuditEventWithIdOnly = await prisma.externalAgentAuditEvent.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     *
+     */
+    createManyAndReturn<T extends ExternalAgentAuditEventCreateManyAndReturnArgs>(args?: SelectSubset<T, ExternalAgentAuditEventCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ExternalAgentAuditEventPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a ExternalAgentAuditEvent.
+     * @param {ExternalAgentAuditEventDeleteArgs} args - Arguments to delete one ExternalAgentAuditEvent.
+     * @example
+     * // Delete one ExternalAgentAuditEvent
+     * const ExternalAgentAuditEvent = await prisma.externalAgentAuditEvent.delete({
+     *   where: {
+     *     // ... filter to delete one ExternalAgentAuditEvent
+     *   }
+     * })
+     *
+     */
+    delete<T extends ExternalAgentAuditEventDeleteArgs>(args: SelectSubset<T, ExternalAgentAuditEventDeleteArgs<ExtArgs>>): Prisma__ExternalAgentAuditEventClient<$Result.GetResult<Prisma.$ExternalAgentAuditEventPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one ExternalAgentAuditEvent.
+     * @param {ExternalAgentAuditEventUpdateArgs} args - Arguments to update one ExternalAgentAuditEvent.
+     * @example
+     * // Update one ExternalAgentAuditEvent
+     * const externalAgentAuditEvent = await prisma.externalAgentAuditEvent.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     *
+     */
+    update<T extends ExternalAgentAuditEventUpdateArgs>(args: SelectSubset<T, ExternalAgentAuditEventUpdateArgs<ExtArgs>>): Prisma__ExternalAgentAuditEventClient<$Result.GetResult<Prisma.$ExternalAgentAuditEventPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more ExternalAgentAuditEvents.
+     * @param {ExternalAgentAuditEventDeleteManyArgs} args - Arguments to filter ExternalAgentAuditEvents to delete.
+     * @example
+     * // Delete a few ExternalAgentAuditEvents
+     * const { count } = await prisma.externalAgentAuditEvent.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     *
+     */
+    deleteMany<T extends ExternalAgentAuditEventDeleteManyArgs>(args?: SelectSubset<T, ExternalAgentAuditEventDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more ExternalAgentAuditEvents.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ExternalAgentAuditEventUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many ExternalAgentAuditEvents
+     * const externalAgentAuditEvent = await prisma.externalAgentAuditEvent.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     *
+     */
+    updateMany<T extends ExternalAgentAuditEventUpdateManyArgs>(args: SelectSubset<T, ExternalAgentAuditEventUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more ExternalAgentAuditEvents and returns the data updated in the database.
+     * @param {ExternalAgentAuditEventUpdateManyAndReturnArgs} args - Arguments to update many ExternalAgentAuditEvents.
+     * @example
+     * // Update many ExternalAgentAuditEvents
+     * const externalAgentAuditEvent = await prisma.externalAgentAuditEvent.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *
+     * // Update zero or more ExternalAgentAuditEvents and only return the `id`
+     * const externalAgentAuditEventWithIdOnly = await prisma.externalAgentAuditEvent.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     *
+     */
+    updateManyAndReturn<T extends ExternalAgentAuditEventUpdateManyAndReturnArgs>(args: SelectSubset<T, ExternalAgentAuditEventUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ExternalAgentAuditEventPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one ExternalAgentAuditEvent.
+     * @param {ExternalAgentAuditEventUpsertArgs} args - Arguments to update or create a ExternalAgentAuditEvent.
+     * @example
+     * // Update or create a ExternalAgentAuditEvent
+     * const externalAgentAuditEvent = await prisma.externalAgentAuditEvent.upsert({
+     *   create: {
+     *     // ... data to create a ExternalAgentAuditEvent
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the ExternalAgentAuditEvent we want to update
+     *   }
+     * })
+     */
+    upsert<T extends ExternalAgentAuditEventUpsertArgs>(args: SelectSubset<T, ExternalAgentAuditEventUpsertArgs<ExtArgs>>): Prisma__ExternalAgentAuditEventClient<$Result.GetResult<Prisma.$ExternalAgentAuditEventPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of ExternalAgentAuditEvents.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ExternalAgentAuditEventCountArgs} args - Arguments to filter ExternalAgentAuditEvents to count.
+     * @example
+     * // Count the number of ExternalAgentAuditEvents
+     * const count = await prisma.externalAgentAuditEvent.count({
+     *   where: {
+     *     // ... the filter for the ExternalAgentAuditEvents we want to count
+     *   }
+     * })
+    **/
+    count<T extends ExternalAgentAuditEventCountArgs>(
+      args?: Subset<T, ExternalAgentAuditEventCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], ExternalAgentAuditEventCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a ExternalAgentAuditEvent.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ExternalAgentAuditEventAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends ExternalAgentAuditEventAggregateArgs>(args: Subset<T, ExternalAgentAuditEventAggregateArgs>): Prisma.PrismaPromise<GetExternalAgentAuditEventAggregateType<T>>
+
+    /**
+     * Group by ExternalAgentAuditEvent.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ExternalAgentAuditEventGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     *
+    **/
+    groupBy<
+      T extends ExternalAgentAuditEventGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: ExternalAgentAuditEventGroupByArgs['orderBy'] }
+        : { orderBy?: ExternalAgentAuditEventGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, ExternalAgentAuditEventGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetExternalAgentAuditEventGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the ExternalAgentAuditEvent model
+   */
+  readonly fields: ExternalAgentAuditEventFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for ExternalAgentAuditEvent.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__ExternalAgentAuditEventClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    account<T extends ExternalAgentAuditEvent$accountArgs<ExtArgs> = {}>(args?: Subset<T, ExternalAgentAuditEvent$accountArgs<ExtArgs>>): Prisma__AccountClient<$Result.GetResult<Prisma.$AccountPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the ExternalAgentAuditEvent model
+   */
+  interface ExternalAgentAuditEventFieldRefs {
+    readonly id: FieldRef<"ExternalAgentAuditEvent", 'String'>
+    readonly identityId: FieldRef<"ExternalAgentAuditEvent", 'String'>
+    readonly credentialId: FieldRef<"ExternalAgentAuditEvent", 'String'>
+    readonly effect: FieldRef<"ExternalAgentAuditEvent", 'String'>
+    readonly tool: FieldRef<"ExternalAgentAuditEvent", 'String'>
+    readonly outcome: FieldRef<"ExternalAgentAuditEvent", 'String'>
+    readonly scopeDecision: FieldRef<"ExternalAgentAuditEvent", 'String'>
+    readonly requestId: FieldRef<"ExternalAgentAuditEvent", 'String'>
+    readonly traceId: FieldRef<"ExternalAgentAuditEvent", 'String'>
+    readonly receiptId: FieldRef<"ExternalAgentAuditEvent", 'String'>
+    readonly replayed: FieldRef<"ExternalAgentAuditEvent", 'Boolean'>
+    readonly durationMs: FieldRef<"ExternalAgentAuditEvent", 'Int'>
+    readonly createdAt: FieldRef<"ExternalAgentAuditEvent", 'DateTime'>
+  }
+
+
+  // Custom InputTypes
+  /**
+   * ExternalAgentAuditEvent findUnique
+   */
+  export type ExternalAgentAuditEventFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ExternalAgentAuditEvent
+     */
+    select?: ExternalAgentAuditEventSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ExternalAgentAuditEvent
+     */
+    omit?: ExternalAgentAuditEventOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ExternalAgentAuditEventInclude<ExtArgs> | null
+    /**
+     * Filter, which ExternalAgentAuditEvent to fetch.
+     */
+    where: ExternalAgentAuditEventWhereUniqueInput
+  }
+
+  /**
+   * ExternalAgentAuditEvent findUniqueOrThrow
+   */
+  export type ExternalAgentAuditEventFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ExternalAgentAuditEvent
+     */
+    select?: ExternalAgentAuditEventSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ExternalAgentAuditEvent
+     */
+    omit?: ExternalAgentAuditEventOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ExternalAgentAuditEventInclude<ExtArgs> | null
+    /**
+     * Filter, which ExternalAgentAuditEvent to fetch.
+     */
+    where: ExternalAgentAuditEventWhereUniqueInput
+  }
+
+  /**
+   * ExternalAgentAuditEvent findFirst
+   */
+  export type ExternalAgentAuditEventFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ExternalAgentAuditEvent
+     */
+    select?: ExternalAgentAuditEventSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ExternalAgentAuditEvent
+     */
+    omit?: ExternalAgentAuditEventOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ExternalAgentAuditEventInclude<ExtArgs> | null
+    /**
+     * Filter, which ExternalAgentAuditEvent to fetch.
+     */
+    where?: ExternalAgentAuditEventWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     *
+     * Determine the order of ExternalAgentAuditEvents to fetch.
+     */
+    orderBy?: ExternalAgentAuditEventOrderByWithRelationInput | ExternalAgentAuditEventOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     *
+     * Sets the position for searching for ExternalAgentAuditEvents.
+     */
+    cursor?: ExternalAgentAuditEventWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     *
+     * Take `±n` ExternalAgentAuditEvents from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     *
+     * Skip the first `n` ExternalAgentAuditEvents.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     *
+     * Filter by unique combinations of ExternalAgentAuditEvents.
+     */
+    distinct?: ExternalAgentAuditEventScalarFieldEnum | ExternalAgentAuditEventScalarFieldEnum[]
+  }
+
+  /**
+   * ExternalAgentAuditEvent findFirstOrThrow
+   */
+  export type ExternalAgentAuditEventFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ExternalAgentAuditEvent
+     */
+    select?: ExternalAgentAuditEventSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ExternalAgentAuditEvent
+     */
+    omit?: ExternalAgentAuditEventOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ExternalAgentAuditEventInclude<ExtArgs> | null
+    /**
+     * Filter, which ExternalAgentAuditEvent to fetch.
+     */
+    where?: ExternalAgentAuditEventWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     *
+     * Determine the order of ExternalAgentAuditEvents to fetch.
+     */
+    orderBy?: ExternalAgentAuditEventOrderByWithRelationInput | ExternalAgentAuditEventOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     *
+     * Sets the position for searching for ExternalAgentAuditEvents.
+     */
+    cursor?: ExternalAgentAuditEventWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     *
+     * Take `±n` ExternalAgentAuditEvents from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     *
+     * Skip the first `n` ExternalAgentAuditEvents.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     *
+     * Filter by unique combinations of ExternalAgentAuditEvents.
+     */
+    distinct?: ExternalAgentAuditEventScalarFieldEnum | ExternalAgentAuditEventScalarFieldEnum[]
+  }
+
+  /**
+   * ExternalAgentAuditEvent findMany
+   */
+  export type ExternalAgentAuditEventFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ExternalAgentAuditEvent
+     */
+    select?: ExternalAgentAuditEventSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ExternalAgentAuditEvent
+     */
+    omit?: ExternalAgentAuditEventOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ExternalAgentAuditEventInclude<ExtArgs> | null
+    /**
+     * Filter, which ExternalAgentAuditEvents to fetch.
+     */
+    where?: ExternalAgentAuditEventWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     *
+     * Determine the order of ExternalAgentAuditEvents to fetch.
+     */
+    orderBy?: ExternalAgentAuditEventOrderByWithRelationInput | ExternalAgentAuditEventOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     *
+     * Sets the position for listing ExternalAgentAuditEvents.
+     */
+    cursor?: ExternalAgentAuditEventWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     *
+     * Take `±n` ExternalAgentAuditEvents from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     *
+     * Skip the first `n` ExternalAgentAuditEvents.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     *
+     * Filter by unique combinations of ExternalAgentAuditEvents.
+     */
+    distinct?: ExternalAgentAuditEventScalarFieldEnum | ExternalAgentAuditEventScalarFieldEnum[]
+  }
+
+  /**
+   * ExternalAgentAuditEvent create
+   */
+  export type ExternalAgentAuditEventCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ExternalAgentAuditEvent
+     */
+    select?: ExternalAgentAuditEventSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ExternalAgentAuditEvent
+     */
+    omit?: ExternalAgentAuditEventOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ExternalAgentAuditEventInclude<ExtArgs> | null
+    /**
+     * The data needed to create a ExternalAgentAuditEvent.
+     */
+    data: XOR<ExternalAgentAuditEventCreateInput, ExternalAgentAuditEventUncheckedCreateInput>
+  }
+
+  /**
+   * ExternalAgentAuditEvent createMany
+   */
+  export type ExternalAgentAuditEventCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many ExternalAgentAuditEvents.
+     */
+    data: ExternalAgentAuditEventCreateManyInput | ExternalAgentAuditEventCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * ExternalAgentAuditEvent createManyAndReturn
+   */
+  export type ExternalAgentAuditEventCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ExternalAgentAuditEvent
+     */
+    select?: ExternalAgentAuditEventSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the ExternalAgentAuditEvent
+     */
+    omit?: ExternalAgentAuditEventOmit<ExtArgs> | null
+    /**
+     * The data used to create many ExternalAgentAuditEvents.
+     */
+    data: ExternalAgentAuditEventCreateManyInput | ExternalAgentAuditEventCreateManyInput[]
+    skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ExternalAgentAuditEventIncludeCreateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * ExternalAgentAuditEvent update
+   */
+  export type ExternalAgentAuditEventUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ExternalAgentAuditEvent
+     */
+    select?: ExternalAgentAuditEventSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ExternalAgentAuditEvent
+     */
+    omit?: ExternalAgentAuditEventOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ExternalAgentAuditEventInclude<ExtArgs> | null
+    /**
+     * The data needed to update a ExternalAgentAuditEvent.
+     */
+    data: XOR<ExternalAgentAuditEventUpdateInput, ExternalAgentAuditEventUncheckedUpdateInput>
+    /**
+     * Choose, which ExternalAgentAuditEvent to update.
+     */
+    where: ExternalAgentAuditEventWhereUniqueInput
+  }
+
+  /**
+   * ExternalAgentAuditEvent updateMany
+   */
+  export type ExternalAgentAuditEventUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update ExternalAgentAuditEvents.
+     */
+    data: XOR<ExternalAgentAuditEventUpdateManyMutationInput, ExternalAgentAuditEventUncheckedUpdateManyInput>
+    /**
+     * Filter which ExternalAgentAuditEvents to update
+     */
+    where?: ExternalAgentAuditEventWhereInput
+    /**
+     * Limit how many ExternalAgentAuditEvents to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * ExternalAgentAuditEvent updateManyAndReturn
+   */
+  export type ExternalAgentAuditEventUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ExternalAgentAuditEvent
+     */
+    select?: ExternalAgentAuditEventSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the ExternalAgentAuditEvent
+     */
+    omit?: ExternalAgentAuditEventOmit<ExtArgs> | null
+    /**
+     * The data used to update ExternalAgentAuditEvents.
+     */
+    data: XOR<ExternalAgentAuditEventUpdateManyMutationInput, ExternalAgentAuditEventUncheckedUpdateManyInput>
+    /**
+     * Filter which ExternalAgentAuditEvents to update
+     */
+    where?: ExternalAgentAuditEventWhereInput
+    /**
+     * Limit how many ExternalAgentAuditEvents to update.
+     */
+    limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ExternalAgentAuditEventIncludeUpdateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * ExternalAgentAuditEvent upsert
+   */
+  export type ExternalAgentAuditEventUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ExternalAgentAuditEvent
+     */
+    select?: ExternalAgentAuditEventSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ExternalAgentAuditEvent
+     */
+    omit?: ExternalAgentAuditEventOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ExternalAgentAuditEventInclude<ExtArgs> | null
+    /**
+     * The filter to search for the ExternalAgentAuditEvent to update in case it exists.
+     */
+    where: ExternalAgentAuditEventWhereUniqueInput
+    /**
+     * In case the ExternalAgentAuditEvent found by the `where` argument doesn't exist, create a new ExternalAgentAuditEvent with this data.
+     */
+    create: XOR<ExternalAgentAuditEventCreateInput, ExternalAgentAuditEventUncheckedCreateInput>
+    /**
+     * In case the ExternalAgentAuditEvent was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<ExternalAgentAuditEventUpdateInput, ExternalAgentAuditEventUncheckedUpdateInput>
+  }
+
+  /**
+   * ExternalAgentAuditEvent delete
+   */
+  export type ExternalAgentAuditEventDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ExternalAgentAuditEvent
+     */
+    select?: ExternalAgentAuditEventSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ExternalAgentAuditEvent
+     */
+    omit?: ExternalAgentAuditEventOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ExternalAgentAuditEventInclude<ExtArgs> | null
+    /**
+     * Filter which ExternalAgentAuditEvent to delete.
+     */
+    where: ExternalAgentAuditEventWhereUniqueInput
+  }
+
+  /**
+   * ExternalAgentAuditEvent deleteMany
+   */
+  export type ExternalAgentAuditEventDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which ExternalAgentAuditEvents to delete
+     */
+    where?: ExternalAgentAuditEventWhereInput
+    /**
+     * Limit how many ExternalAgentAuditEvents to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * ExternalAgentAuditEvent.account
+   */
+  export type ExternalAgentAuditEvent$accountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Account
+     */
+    select?: AccountSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Account
+     */
+    omit?: AccountOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AccountInclude<ExtArgs> | null
+    where?: AccountWhereInput
+  }
+
+  /**
+   * ExternalAgentAuditEvent without action
+   */
+  export type ExternalAgentAuditEventDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ExternalAgentAuditEvent
+     */
+    select?: ExternalAgentAuditEventSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ExternalAgentAuditEvent
+     */
+    omit?: ExternalAgentAuditEventOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ExternalAgentAuditEventInclude<ExtArgs> | null
+  }
+
+
+  /**
    * Model RoutineDefinition
    */
 
@@ -128031,6 +129380,25 @@ export namespace Prisma {
   export type ExternalMutationReceiptScalarFieldEnum = (typeof ExternalMutationReceiptScalarFieldEnum)[keyof typeof ExternalMutationReceiptScalarFieldEnum]
 
 
+  export const ExternalAgentAuditEventScalarFieldEnum: {
+    id: 'id',
+    identityId: 'identityId',
+    credentialId: 'credentialId',
+    effect: 'effect',
+    tool: 'tool',
+    outcome: 'outcome',
+    scopeDecision: 'scopeDecision',
+    requestId: 'requestId',
+    traceId: 'traceId',
+    receiptId: 'receiptId',
+    replayed: 'replayed',
+    durationMs: 'durationMs',
+    createdAt: 'createdAt'
+  };
+
+  export type ExternalAgentAuditEventScalarFieldEnum = (typeof ExternalAgentAuditEventScalarFieldEnum)[keyof typeof ExternalAgentAuditEventScalarFieldEnum]
+
+
   export const RoutineDefinitionScalarFieldEnum: {
     id: 'id',
     identityId: 'identityId',
@@ -128859,6 +130227,7 @@ export namespace Prisma {
     cloudUser?: XOR<CloudAuthUserScalarRelationFilter, CloudAuthUserWhereInput>
     avatar?: XOR<AccountAvatarNullableScalarRelationFilter, AccountAvatarWhereInput> | null
     externalMutationReceipts?: ExternalMutationReceiptListRelationFilter
+    externalAgentAuditEvents?: ExternalAgentAuditEventListRelationFilter
     goals?: GoalListRelationFilter
     profileImportOperations?: ProfileImportOperationListRelationFilter
     profileImportArchives?: ProfileImportArchiveListRelationFilter
@@ -128919,6 +130288,7 @@ export namespace Prisma {
     cloudUser?: CloudAuthUserOrderByWithRelationInput
     avatar?: AccountAvatarOrderByWithRelationInput
     externalMutationReceipts?: ExternalMutationReceiptOrderByRelationAggregateInput
+    externalAgentAuditEvents?: ExternalAgentAuditEventOrderByRelationAggregateInput
     goals?: GoalOrderByRelationAggregateInput
     profileImportOperations?: ProfileImportOperationOrderByRelationAggregateInput
     profileImportArchives?: ProfileImportArchiveOrderByRelationAggregateInput
@@ -128982,6 +130352,7 @@ export namespace Prisma {
     cloudUser?: XOR<CloudAuthUserScalarRelationFilter, CloudAuthUserWhereInput>
     avatar?: XOR<AccountAvatarNullableScalarRelationFilter, AccountAvatarWhereInput> | null
     externalMutationReceipts?: ExternalMutationReceiptListRelationFilter
+    externalAgentAuditEvents?: ExternalAgentAuditEventListRelationFilter
     goals?: GoalListRelationFilter
     profileImportOperations?: ProfileImportOperationListRelationFilter
     profileImportArchives?: ProfileImportArchiveListRelationFilter
@@ -134189,6 +135560,103 @@ export namespace Prisma {
     createdAt?: DateTimeWithAggregatesFilter<"ExternalMutationReceipt"> | Date | string
   }
 
+  export type ExternalAgentAuditEventWhereInput = {
+    AND?: ExternalAgentAuditEventWhereInput | ExternalAgentAuditEventWhereInput[]
+    OR?: ExternalAgentAuditEventWhereInput[]
+    NOT?: ExternalAgentAuditEventWhereInput | ExternalAgentAuditEventWhereInput[]
+    id?: StringFilter<"ExternalAgentAuditEvent"> | string
+    identityId?: StringNullableFilter<"ExternalAgentAuditEvent"> | string | null
+    credentialId?: StringNullableFilter<"ExternalAgentAuditEvent"> | string | null
+    effect?: StringFilter<"ExternalAgentAuditEvent"> | string
+    tool?: StringFilter<"ExternalAgentAuditEvent"> | string
+    outcome?: StringFilter<"ExternalAgentAuditEvent"> | string
+    scopeDecision?: StringFilter<"ExternalAgentAuditEvent"> | string
+    requestId?: StringFilter<"ExternalAgentAuditEvent"> | string
+    traceId?: StringNullableFilter<"ExternalAgentAuditEvent"> | string | null
+    receiptId?: StringNullableFilter<"ExternalAgentAuditEvent"> | string | null
+    replayed?: BoolNullableFilter<"ExternalAgentAuditEvent"> | boolean | null
+    durationMs?: IntFilter<"ExternalAgentAuditEvent"> | number
+    createdAt?: DateTimeFilter<"ExternalAgentAuditEvent"> | Date | string
+    account?: XOR<AccountNullableScalarRelationFilter, AccountWhereInput> | null
+  }
+
+  export type ExternalAgentAuditEventOrderByWithRelationInput = {
+    id?: SortOrder
+    identityId?: SortOrderInput | SortOrder
+    credentialId?: SortOrderInput | SortOrder
+    effect?: SortOrder
+    tool?: SortOrder
+    outcome?: SortOrder
+    scopeDecision?: SortOrder
+    requestId?: SortOrder
+    traceId?: SortOrderInput | SortOrder
+    receiptId?: SortOrderInput | SortOrder
+    replayed?: SortOrderInput | SortOrder
+    durationMs?: SortOrder
+    createdAt?: SortOrder
+    account?: AccountOrderByWithRelationInput
+  }
+
+  export type ExternalAgentAuditEventWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    AND?: ExternalAgentAuditEventWhereInput | ExternalAgentAuditEventWhereInput[]
+    OR?: ExternalAgentAuditEventWhereInput[]
+    NOT?: ExternalAgentAuditEventWhereInput | ExternalAgentAuditEventWhereInput[]
+    identityId?: StringNullableFilter<"ExternalAgentAuditEvent"> | string | null
+    credentialId?: StringNullableFilter<"ExternalAgentAuditEvent"> | string | null
+    effect?: StringFilter<"ExternalAgentAuditEvent"> | string
+    tool?: StringFilter<"ExternalAgentAuditEvent"> | string
+    outcome?: StringFilter<"ExternalAgentAuditEvent"> | string
+    scopeDecision?: StringFilter<"ExternalAgentAuditEvent"> | string
+    requestId?: StringFilter<"ExternalAgentAuditEvent"> | string
+    traceId?: StringNullableFilter<"ExternalAgentAuditEvent"> | string | null
+    receiptId?: StringNullableFilter<"ExternalAgentAuditEvent"> | string | null
+    replayed?: BoolNullableFilter<"ExternalAgentAuditEvent"> | boolean | null
+    durationMs?: IntFilter<"ExternalAgentAuditEvent"> | number
+    createdAt?: DateTimeFilter<"ExternalAgentAuditEvent"> | Date | string
+    account?: XOR<AccountNullableScalarRelationFilter, AccountWhereInput> | null
+  }, "id">
+
+  export type ExternalAgentAuditEventOrderByWithAggregationInput = {
+    id?: SortOrder
+    identityId?: SortOrderInput | SortOrder
+    credentialId?: SortOrderInput | SortOrder
+    effect?: SortOrder
+    tool?: SortOrder
+    outcome?: SortOrder
+    scopeDecision?: SortOrder
+    requestId?: SortOrder
+    traceId?: SortOrderInput | SortOrder
+    receiptId?: SortOrderInput | SortOrder
+    replayed?: SortOrderInput | SortOrder
+    durationMs?: SortOrder
+    createdAt?: SortOrder
+    _count?: ExternalAgentAuditEventCountOrderByAggregateInput
+    _avg?: ExternalAgentAuditEventAvgOrderByAggregateInput
+    _max?: ExternalAgentAuditEventMaxOrderByAggregateInput
+    _min?: ExternalAgentAuditEventMinOrderByAggregateInput
+    _sum?: ExternalAgentAuditEventSumOrderByAggregateInput
+  }
+
+  export type ExternalAgentAuditEventScalarWhereWithAggregatesInput = {
+    AND?: ExternalAgentAuditEventScalarWhereWithAggregatesInput | ExternalAgentAuditEventScalarWhereWithAggregatesInput[]
+    OR?: ExternalAgentAuditEventScalarWhereWithAggregatesInput[]
+    NOT?: ExternalAgentAuditEventScalarWhereWithAggregatesInput | ExternalAgentAuditEventScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"ExternalAgentAuditEvent"> | string
+    identityId?: StringNullableWithAggregatesFilter<"ExternalAgentAuditEvent"> | string | null
+    credentialId?: StringNullableWithAggregatesFilter<"ExternalAgentAuditEvent"> | string | null
+    effect?: StringWithAggregatesFilter<"ExternalAgentAuditEvent"> | string
+    tool?: StringWithAggregatesFilter<"ExternalAgentAuditEvent"> | string
+    outcome?: StringWithAggregatesFilter<"ExternalAgentAuditEvent"> | string
+    scopeDecision?: StringWithAggregatesFilter<"ExternalAgentAuditEvent"> | string
+    requestId?: StringWithAggregatesFilter<"ExternalAgentAuditEvent"> | string
+    traceId?: StringNullableWithAggregatesFilter<"ExternalAgentAuditEvent"> | string | null
+    receiptId?: StringNullableWithAggregatesFilter<"ExternalAgentAuditEvent"> | string | null
+    replayed?: BoolNullableWithAggregatesFilter<"ExternalAgentAuditEvent"> | boolean | null
+    durationMs?: IntWithAggregatesFilter<"ExternalAgentAuditEvent"> | number
+    createdAt?: DateTimeWithAggregatesFilter<"ExternalAgentAuditEvent"> | Date | string
+  }
+
   export type RoutineDefinitionWhereInput = {
     AND?: RoutineDefinitionWhereInput | RoutineDefinitionWhereInput[]
     OR?: RoutineDefinitionWhereInput[]
@@ -137614,6 +139082,7 @@ export namespace Prisma {
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
     avatar?: AccountAvatarCreateNestedOneWithoutAccountInput
     externalMutationReceipts?: ExternalMutationReceiptCreateNestedManyWithoutAccountInput
+    externalAgentAuditEvents?: ExternalAgentAuditEventCreateNestedManyWithoutAccountInput
     goals?: GoalCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationCreateNestedManyWithoutAccountInput
     profileImportArchives?: ProfileImportArchiveCreateNestedManyWithoutAccountInput
@@ -137673,6 +139142,7 @@ export namespace Prisma {
     assistedWorkflows?: AiAssistedWorkflowUncheckedCreateNestedManyWithoutAccountInput
     avatar?: AccountAvatarUncheckedCreateNestedOneWithoutAccountInput
     externalMutationReceipts?: ExternalMutationReceiptUncheckedCreateNestedManyWithoutAccountInput
+    externalAgentAuditEvents?: ExternalAgentAuditEventUncheckedCreateNestedManyWithoutAccountInput
     goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationUncheckedCreateNestedManyWithoutAccountInput
     profileImportArchives?: ProfileImportArchiveUncheckedCreateNestedManyWithoutAccountInput
@@ -137732,6 +139202,7 @@ export namespace Prisma {
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
     avatar?: AccountAvatarUpdateOneWithoutAccountNestedInput
     externalMutationReceipts?: ExternalMutationReceiptUpdateManyWithoutAccountNestedInput
+    externalAgentAuditEvents?: ExternalAgentAuditEventUpdateManyWithoutAccountNestedInput
     goals?: GoalUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUpdateManyWithoutAccountNestedInput
     profileImportArchives?: ProfileImportArchiveUpdateManyWithoutAccountNestedInput
@@ -137791,6 +139262,7 @@ export namespace Prisma {
     assistedWorkflows?: AiAssistedWorkflowUncheckedUpdateManyWithoutAccountNestedInput
     avatar?: AccountAvatarUncheckedUpdateOneWithoutAccountNestedInput
     externalMutationReceipts?: ExternalMutationReceiptUncheckedUpdateManyWithoutAccountNestedInput
+    externalAgentAuditEvents?: ExternalAgentAuditEventUncheckedUpdateManyWithoutAccountNestedInput
     goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUncheckedUpdateManyWithoutAccountNestedInput
     profileImportArchives?: ProfileImportArchiveUncheckedUpdateManyWithoutAccountNestedInput
@@ -143588,6 +145060,117 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
+  export type ExternalAgentAuditEventCreateInput = {
+    id?: string
+    credentialId?: string | null
+    effect: string
+    tool: string
+    outcome: string
+    scopeDecision: string
+    requestId: string
+    traceId?: string | null
+    receiptId?: string | null
+    replayed?: boolean | null
+    durationMs: number
+    createdAt?: Date | string
+    account?: AccountCreateNestedOneWithoutExternalAgentAuditEventsInput
+  }
+
+  export type ExternalAgentAuditEventUncheckedCreateInput = {
+    id?: string
+    identityId?: string | null
+    credentialId?: string | null
+    effect: string
+    tool: string
+    outcome: string
+    scopeDecision: string
+    requestId: string
+    traceId?: string | null
+    receiptId?: string | null
+    replayed?: boolean | null
+    durationMs: number
+    createdAt?: Date | string
+  }
+
+  export type ExternalAgentAuditEventUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    credentialId?: NullableStringFieldUpdateOperationsInput | string | null
+    effect?: StringFieldUpdateOperationsInput | string
+    tool?: StringFieldUpdateOperationsInput | string
+    outcome?: StringFieldUpdateOperationsInput | string
+    scopeDecision?: StringFieldUpdateOperationsInput | string
+    requestId?: StringFieldUpdateOperationsInput | string
+    traceId?: NullableStringFieldUpdateOperationsInput | string | null
+    receiptId?: NullableStringFieldUpdateOperationsInput | string | null
+    replayed?: NullableBoolFieldUpdateOperationsInput | boolean | null
+    durationMs?: IntFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    account?: AccountUpdateOneWithoutExternalAgentAuditEventsNestedInput
+  }
+
+  export type ExternalAgentAuditEventUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    identityId?: NullableStringFieldUpdateOperationsInput | string | null
+    credentialId?: NullableStringFieldUpdateOperationsInput | string | null
+    effect?: StringFieldUpdateOperationsInput | string
+    tool?: StringFieldUpdateOperationsInput | string
+    outcome?: StringFieldUpdateOperationsInput | string
+    scopeDecision?: StringFieldUpdateOperationsInput | string
+    requestId?: StringFieldUpdateOperationsInput | string
+    traceId?: NullableStringFieldUpdateOperationsInput | string | null
+    receiptId?: NullableStringFieldUpdateOperationsInput | string | null
+    replayed?: NullableBoolFieldUpdateOperationsInput | boolean | null
+    durationMs?: IntFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type ExternalAgentAuditEventCreateManyInput = {
+    id?: string
+    identityId?: string | null
+    credentialId?: string | null
+    effect: string
+    tool: string
+    outcome: string
+    scopeDecision: string
+    requestId: string
+    traceId?: string | null
+    receiptId?: string | null
+    replayed?: boolean | null
+    durationMs: number
+    createdAt?: Date | string
+  }
+
+  export type ExternalAgentAuditEventUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    credentialId?: NullableStringFieldUpdateOperationsInput | string | null
+    effect?: StringFieldUpdateOperationsInput | string
+    tool?: StringFieldUpdateOperationsInput | string
+    outcome?: StringFieldUpdateOperationsInput | string
+    scopeDecision?: StringFieldUpdateOperationsInput | string
+    requestId?: StringFieldUpdateOperationsInput | string
+    traceId?: NullableStringFieldUpdateOperationsInput | string | null
+    receiptId?: NullableStringFieldUpdateOperationsInput | string | null
+    replayed?: NullableBoolFieldUpdateOperationsInput | boolean | null
+    durationMs?: IntFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type ExternalAgentAuditEventUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    identityId?: NullableStringFieldUpdateOperationsInput | string | null
+    credentialId?: NullableStringFieldUpdateOperationsInput | string | null
+    effect?: StringFieldUpdateOperationsInput | string
+    tool?: StringFieldUpdateOperationsInput | string
+    outcome?: StringFieldUpdateOperationsInput | string
+    scopeDecision?: StringFieldUpdateOperationsInput | string
+    requestId?: StringFieldUpdateOperationsInput | string
+    traceId?: NullableStringFieldUpdateOperationsInput | string | null
+    receiptId?: NullableStringFieldUpdateOperationsInput | string | null
+    replayed?: NullableBoolFieldUpdateOperationsInput | boolean | null
+    durationMs?: IntFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
   export type RoutineDefinitionCreateInput = {
     id: string
     name: string
@@ -147477,6 +149060,12 @@ export namespace Prisma {
     none?: ExternalMutationReceiptWhereInput
   }
 
+  export type ExternalAgentAuditEventListRelationFilter = {
+    every?: ExternalAgentAuditEventWhereInput
+    some?: ExternalAgentAuditEventWhereInput
+    none?: ExternalAgentAuditEventWhereInput
+  }
+
   export type GoalListRelationFilter = {
     every?: GoalWhereInput
     some?: GoalWhereInput
@@ -147762,6 +149351,10 @@ export namespace Prisma {
   }
 
   export type ExternalMutationReceiptOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
+  export type ExternalAgentAuditEventOrderByRelationAggregateInput = {
     _count?: SortOrder
   }
 
@@ -151365,6 +152958,62 @@ export namespace Prisma {
     createdAt?: SortOrder
   }
 
+  export type ExternalAgentAuditEventCountOrderByAggregateInput = {
+    id?: SortOrder
+    identityId?: SortOrder
+    credentialId?: SortOrder
+    effect?: SortOrder
+    tool?: SortOrder
+    outcome?: SortOrder
+    scopeDecision?: SortOrder
+    requestId?: SortOrder
+    traceId?: SortOrder
+    receiptId?: SortOrder
+    replayed?: SortOrder
+    durationMs?: SortOrder
+    createdAt?: SortOrder
+  }
+
+  export type ExternalAgentAuditEventAvgOrderByAggregateInput = {
+    durationMs?: SortOrder
+  }
+
+  export type ExternalAgentAuditEventMaxOrderByAggregateInput = {
+    id?: SortOrder
+    identityId?: SortOrder
+    credentialId?: SortOrder
+    effect?: SortOrder
+    tool?: SortOrder
+    outcome?: SortOrder
+    scopeDecision?: SortOrder
+    requestId?: SortOrder
+    traceId?: SortOrder
+    receiptId?: SortOrder
+    replayed?: SortOrder
+    durationMs?: SortOrder
+    createdAt?: SortOrder
+  }
+
+  export type ExternalAgentAuditEventMinOrderByAggregateInput = {
+    id?: SortOrder
+    identityId?: SortOrder
+    credentialId?: SortOrder
+    effect?: SortOrder
+    tool?: SortOrder
+    outcome?: SortOrder
+    scopeDecision?: SortOrder
+    requestId?: SortOrder
+    traceId?: SortOrder
+    receiptId?: SortOrder
+    replayed?: SortOrder
+    durationMs?: SortOrder
+    createdAt?: SortOrder
+  }
+
+  export type ExternalAgentAuditEventSumOrderByAggregateInput = {
+    durationMs?: SortOrder
+  }
+
   export type RoutineTemporaryOverrideNullableScalarRelationFilter = {
     is?: RoutineTemporaryOverrideWhereInput | null
     isNot?: RoutineTemporaryOverrideWhereInput | null
@@ -153471,6 +155120,13 @@ export namespace Prisma {
     connect?: ExternalMutationReceiptWhereUniqueInput | ExternalMutationReceiptWhereUniqueInput[]
   }
 
+  export type ExternalAgentAuditEventCreateNestedManyWithoutAccountInput = {
+    create?: XOR<ExternalAgentAuditEventCreateWithoutAccountInput, ExternalAgentAuditEventUncheckedCreateWithoutAccountInput> | ExternalAgentAuditEventCreateWithoutAccountInput[] | ExternalAgentAuditEventUncheckedCreateWithoutAccountInput[]
+    connectOrCreate?: ExternalAgentAuditEventCreateOrConnectWithoutAccountInput | ExternalAgentAuditEventCreateOrConnectWithoutAccountInput[]
+    createMany?: ExternalAgentAuditEventCreateManyAccountInputEnvelope
+    connect?: ExternalAgentAuditEventWhereUniqueInput | ExternalAgentAuditEventWhereUniqueInput[]
+  }
+
   export type GoalCreateNestedManyWithoutAccountInput = {
     create?: XOR<GoalCreateWithoutAccountInput, GoalUncheckedCreateWithoutAccountInput> | GoalCreateWithoutAccountInput[] | GoalUncheckedCreateWithoutAccountInput[]
     connectOrCreate?: GoalCreateOrConnectWithoutAccountInput | GoalCreateOrConnectWithoutAccountInput[]
@@ -153810,6 +155466,13 @@ export namespace Prisma {
     connectOrCreate?: ExternalMutationReceiptCreateOrConnectWithoutAccountInput | ExternalMutationReceiptCreateOrConnectWithoutAccountInput[]
     createMany?: ExternalMutationReceiptCreateManyAccountInputEnvelope
     connect?: ExternalMutationReceiptWhereUniqueInput | ExternalMutationReceiptWhereUniqueInput[]
+  }
+
+  export type ExternalAgentAuditEventUncheckedCreateNestedManyWithoutAccountInput = {
+    create?: XOR<ExternalAgentAuditEventCreateWithoutAccountInput, ExternalAgentAuditEventUncheckedCreateWithoutAccountInput> | ExternalAgentAuditEventCreateWithoutAccountInput[] | ExternalAgentAuditEventUncheckedCreateWithoutAccountInput[]
+    connectOrCreate?: ExternalAgentAuditEventCreateOrConnectWithoutAccountInput | ExternalAgentAuditEventCreateOrConnectWithoutAccountInput[]
+    createMany?: ExternalAgentAuditEventCreateManyAccountInputEnvelope
+    connect?: ExternalAgentAuditEventWhereUniqueInput | ExternalAgentAuditEventWhereUniqueInput[]
   }
 
   export type GoalUncheckedCreateNestedManyWithoutAccountInput = {
@@ -154189,6 +155852,20 @@ export namespace Prisma {
     update?: ExternalMutationReceiptUpdateWithWhereUniqueWithoutAccountInput | ExternalMutationReceiptUpdateWithWhereUniqueWithoutAccountInput[]
     updateMany?: ExternalMutationReceiptUpdateManyWithWhereWithoutAccountInput | ExternalMutationReceiptUpdateManyWithWhereWithoutAccountInput[]
     deleteMany?: ExternalMutationReceiptScalarWhereInput | ExternalMutationReceiptScalarWhereInput[]
+  }
+
+  export type ExternalAgentAuditEventUpdateManyWithoutAccountNestedInput = {
+    create?: XOR<ExternalAgentAuditEventCreateWithoutAccountInput, ExternalAgentAuditEventUncheckedCreateWithoutAccountInput> | ExternalAgentAuditEventCreateWithoutAccountInput[] | ExternalAgentAuditEventUncheckedCreateWithoutAccountInput[]
+    connectOrCreate?: ExternalAgentAuditEventCreateOrConnectWithoutAccountInput | ExternalAgentAuditEventCreateOrConnectWithoutAccountInput[]
+    upsert?: ExternalAgentAuditEventUpsertWithWhereUniqueWithoutAccountInput | ExternalAgentAuditEventUpsertWithWhereUniqueWithoutAccountInput[]
+    createMany?: ExternalAgentAuditEventCreateManyAccountInputEnvelope
+    set?: ExternalAgentAuditEventWhereUniqueInput | ExternalAgentAuditEventWhereUniqueInput[]
+    disconnect?: ExternalAgentAuditEventWhereUniqueInput | ExternalAgentAuditEventWhereUniqueInput[]
+    delete?: ExternalAgentAuditEventWhereUniqueInput | ExternalAgentAuditEventWhereUniqueInput[]
+    connect?: ExternalAgentAuditEventWhereUniqueInput | ExternalAgentAuditEventWhereUniqueInput[]
+    update?: ExternalAgentAuditEventUpdateWithWhereUniqueWithoutAccountInput | ExternalAgentAuditEventUpdateWithWhereUniqueWithoutAccountInput[]
+    updateMany?: ExternalAgentAuditEventUpdateManyWithWhereWithoutAccountInput | ExternalAgentAuditEventUpdateManyWithWhereWithoutAccountInput[]
+    deleteMany?: ExternalAgentAuditEventScalarWhereInput | ExternalAgentAuditEventScalarWhereInput[]
   }
 
   export type GoalUpdateManyWithoutAccountNestedInput = {
@@ -154867,6 +156544,20 @@ export namespace Prisma {
     update?: ExternalMutationReceiptUpdateWithWhereUniqueWithoutAccountInput | ExternalMutationReceiptUpdateWithWhereUniqueWithoutAccountInput[]
     updateMany?: ExternalMutationReceiptUpdateManyWithWhereWithoutAccountInput | ExternalMutationReceiptUpdateManyWithWhereWithoutAccountInput[]
     deleteMany?: ExternalMutationReceiptScalarWhereInput | ExternalMutationReceiptScalarWhereInput[]
+  }
+
+  export type ExternalAgentAuditEventUncheckedUpdateManyWithoutAccountNestedInput = {
+    create?: XOR<ExternalAgentAuditEventCreateWithoutAccountInput, ExternalAgentAuditEventUncheckedCreateWithoutAccountInput> | ExternalAgentAuditEventCreateWithoutAccountInput[] | ExternalAgentAuditEventUncheckedCreateWithoutAccountInput[]
+    connectOrCreate?: ExternalAgentAuditEventCreateOrConnectWithoutAccountInput | ExternalAgentAuditEventCreateOrConnectWithoutAccountInput[]
+    upsert?: ExternalAgentAuditEventUpsertWithWhereUniqueWithoutAccountInput | ExternalAgentAuditEventUpsertWithWhereUniqueWithoutAccountInput[]
+    createMany?: ExternalAgentAuditEventCreateManyAccountInputEnvelope
+    set?: ExternalAgentAuditEventWhereUniqueInput | ExternalAgentAuditEventWhereUniqueInput[]
+    disconnect?: ExternalAgentAuditEventWhereUniqueInput | ExternalAgentAuditEventWhereUniqueInput[]
+    delete?: ExternalAgentAuditEventWhereUniqueInput | ExternalAgentAuditEventWhereUniqueInput[]
+    connect?: ExternalAgentAuditEventWhereUniqueInput | ExternalAgentAuditEventWhereUniqueInput[]
+    update?: ExternalAgentAuditEventUpdateWithWhereUniqueWithoutAccountInput | ExternalAgentAuditEventUpdateWithWhereUniqueWithoutAccountInput[]
+    updateMany?: ExternalAgentAuditEventUpdateManyWithWhereWithoutAccountInput | ExternalAgentAuditEventUpdateManyWithWhereWithoutAccountInput[]
+    deleteMany?: ExternalAgentAuditEventScalarWhereInput | ExternalAgentAuditEventScalarWhereInput[]
   }
 
   export type GoalUncheckedUpdateManyWithoutAccountNestedInput = {
@@ -158243,6 +159934,22 @@ export namespace Prisma {
     update?: XOR<XOR<AccountUpdateToOneWithWhereWithoutExternalMutationReceiptsInput, AccountUpdateWithoutExternalMutationReceiptsInput>, AccountUncheckedUpdateWithoutExternalMutationReceiptsInput>
   }
 
+  export type AccountCreateNestedOneWithoutExternalAgentAuditEventsInput = {
+    create?: XOR<AccountCreateWithoutExternalAgentAuditEventsInput, AccountUncheckedCreateWithoutExternalAgentAuditEventsInput>
+    connectOrCreate?: AccountCreateOrConnectWithoutExternalAgentAuditEventsInput
+    connect?: AccountWhereUniqueInput
+  }
+
+  export type AccountUpdateOneWithoutExternalAgentAuditEventsNestedInput = {
+    create?: XOR<AccountCreateWithoutExternalAgentAuditEventsInput, AccountUncheckedCreateWithoutExternalAgentAuditEventsInput>
+    connectOrCreate?: AccountCreateOrConnectWithoutExternalAgentAuditEventsInput
+    upsert?: AccountUpsertWithoutExternalAgentAuditEventsInput
+    disconnect?: AccountWhereInput | boolean
+    delete?: AccountWhereInput | boolean
+    connect?: AccountWhereUniqueInput
+    update?: XOR<XOR<AccountUpdateToOneWithWhereWithoutExternalAgentAuditEventsInput, AccountUpdateWithoutExternalAgentAuditEventsInput>, AccountUncheckedUpdateWithoutExternalAgentAuditEventsInput>
+  }
+
   export type AccountCreateNestedOneWithoutRoutineDefinitionsInput = {
     create?: XOR<AccountCreateWithoutRoutineDefinitionsInput, AccountUncheckedCreateWithoutRoutineDefinitionsInput>
     connectOrCreate?: AccountCreateOrConnectWithoutRoutineDefinitionsInput
@@ -160225,6 +161932,46 @@ export namespace Prisma {
     skipDuplicates?: boolean
   }
 
+  export type ExternalAgentAuditEventCreateWithoutAccountInput = {
+    id?: string
+    credentialId?: string | null
+    effect: string
+    tool: string
+    outcome: string
+    scopeDecision: string
+    requestId: string
+    traceId?: string | null
+    receiptId?: string | null
+    replayed?: boolean | null
+    durationMs: number
+    createdAt?: Date | string
+  }
+
+  export type ExternalAgentAuditEventUncheckedCreateWithoutAccountInput = {
+    id?: string
+    credentialId?: string | null
+    effect: string
+    tool: string
+    outcome: string
+    scopeDecision: string
+    requestId: string
+    traceId?: string | null
+    receiptId?: string | null
+    replayed?: boolean | null
+    durationMs: number
+    createdAt?: Date | string
+  }
+
+  export type ExternalAgentAuditEventCreateOrConnectWithoutAccountInput = {
+    where: ExternalAgentAuditEventWhereUniqueInput
+    create: XOR<ExternalAgentAuditEventCreateWithoutAccountInput, ExternalAgentAuditEventUncheckedCreateWithoutAccountInput>
+  }
+
+  export type ExternalAgentAuditEventCreateManyAccountInputEnvelope = {
+    data: ExternalAgentAuditEventCreateManyAccountInput | ExternalAgentAuditEventCreateManyAccountInput[]
+    skipDuplicates?: boolean
+  }
+
   export type GoalCreateWithoutAccountInput = {
     id: string
     name: string
@@ -162185,6 +163932,41 @@ export namespace Prisma {
     createdAt?: DateTimeFilter<"ExternalMutationReceipt"> | Date | string
   }
 
+  export type ExternalAgentAuditEventUpsertWithWhereUniqueWithoutAccountInput = {
+    where: ExternalAgentAuditEventWhereUniqueInput
+    update: XOR<ExternalAgentAuditEventUpdateWithoutAccountInput, ExternalAgentAuditEventUncheckedUpdateWithoutAccountInput>
+    create: XOR<ExternalAgentAuditEventCreateWithoutAccountInput, ExternalAgentAuditEventUncheckedCreateWithoutAccountInput>
+  }
+
+  export type ExternalAgentAuditEventUpdateWithWhereUniqueWithoutAccountInput = {
+    where: ExternalAgentAuditEventWhereUniqueInput
+    data: XOR<ExternalAgentAuditEventUpdateWithoutAccountInput, ExternalAgentAuditEventUncheckedUpdateWithoutAccountInput>
+  }
+
+  export type ExternalAgentAuditEventUpdateManyWithWhereWithoutAccountInput = {
+    where: ExternalAgentAuditEventScalarWhereInput
+    data: XOR<ExternalAgentAuditEventUpdateManyMutationInput, ExternalAgentAuditEventUncheckedUpdateManyWithoutAccountInput>
+  }
+
+  export type ExternalAgentAuditEventScalarWhereInput = {
+    AND?: ExternalAgentAuditEventScalarWhereInput | ExternalAgentAuditEventScalarWhereInput[]
+    OR?: ExternalAgentAuditEventScalarWhereInput[]
+    NOT?: ExternalAgentAuditEventScalarWhereInput | ExternalAgentAuditEventScalarWhereInput[]
+    id?: StringFilter<"ExternalAgentAuditEvent"> | string
+    identityId?: StringNullableFilter<"ExternalAgentAuditEvent"> | string | null
+    credentialId?: StringNullableFilter<"ExternalAgentAuditEvent"> | string | null
+    effect?: StringFilter<"ExternalAgentAuditEvent"> | string
+    tool?: StringFilter<"ExternalAgentAuditEvent"> | string
+    outcome?: StringFilter<"ExternalAgentAuditEvent"> | string
+    scopeDecision?: StringFilter<"ExternalAgentAuditEvent"> | string
+    requestId?: StringFilter<"ExternalAgentAuditEvent"> | string
+    traceId?: StringNullableFilter<"ExternalAgentAuditEvent"> | string | null
+    receiptId?: StringNullableFilter<"ExternalAgentAuditEvent"> | string | null
+    replayed?: BoolNullableFilter<"ExternalAgentAuditEvent"> | boolean | null
+    durationMs?: IntFilter<"ExternalAgentAuditEvent"> | number
+    createdAt?: DateTimeFilter<"ExternalAgentAuditEvent"> | Date | string
+  }
+
   export type GoalUpsertWithWhereUniqueWithoutAccountInput = {
     where: GoalWhereUniqueInput
     update: XOR<GoalUpdateWithoutAccountInput, GoalUncheckedUpdateWithoutAccountInput>
@@ -163760,6 +165542,7 @@ export namespace Prisma {
     assistedWorkflows?: AiAssistedWorkflowCreateNestedManyWithoutAccountInput
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
     externalMutationReceipts?: ExternalMutationReceiptCreateNestedManyWithoutAccountInput
+    externalAgentAuditEvents?: ExternalAgentAuditEventCreateNestedManyWithoutAccountInput
     goals?: GoalCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationCreateNestedManyWithoutAccountInput
     profileImportArchives?: ProfileImportArchiveCreateNestedManyWithoutAccountInput
@@ -163818,6 +165601,7 @@ export namespace Prisma {
     avatarUpdatedAt?: Date | string | null
     assistedWorkflows?: AiAssistedWorkflowUncheckedCreateNestedManyWithoutAccountInput
     externalMutationReceipts?: ExternalMutationReceiptUncheckedCreateNestedManyWithoutAccountInput
+    externalAgentAuditEvents?: ExternalAgentAuditEventUncheckedCreateNestedManyWithoutAccountInput
     goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationUncheckedCreateNestedManyWithoutAccountInput
     profileImportArchives?: ProfileImportArchiveUncheckedCreateNestedManyWithoutAccountInput
@@ -163892,6 +165676,7 @@ export namespace Prisma {
     assistedWorkflows?: AiAssistedWorkflowUpdateManyWithoutAccountNestedInput
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
     externalMutationReceipts?: ExternalMutationReceiptUpdateManyWithoutAccountNestedInput
+    externalAgentAuditEvents?: ExternalAgentAuditEventUpdateManyWithoutAccountNestedInput
     goals?: GoalUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUpdateManyWithoutAccountNestedInput
     profileImportArchives?: ProfileImportArchiveUpdateManyWithoutAccountNestedInput
@@ -163950,6 +165735,7 @@ export namespace Prisma {
     avatarUpdatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     assistedWorkflows?: AiAssistedWorkflowUncheckedUpdateManyWithoutAccountNestedInput
     externalMutationReceipts?: ExternalMutationReceiptUncheckedUpdateManyWithoutAccountNestedInput
+    externalAgentAuditEvents?: ExternalAgentAuditEventUncheckedUpdateManyWithoutAccountNestedInput
     goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUncheckedUpdateManyWithoutAccountNestedInput
     profileImportArchives?: ProfileImportArchiveUncheckedUpdateManyWithoutAccountNestedInput
@@ -164009,6 +165795,7 @@ export namespace Prisma {
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
     avatar?: AccountAvatarCreateNestedOneWithoutAccountInput
     externalMutationReceipts?: ExternalMutationReceiptCreateNestedManyWithoutAccountInput
+    externalAgentAuditEvents?: ExternalAgentAuditEventCreateNestedManyWithoutAccountInput
     goals?: GoalCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationCreateNestedManyWithoutAccountInput
     profileImportArchives?: ProfileImportArchiveCreateNestedManyWithoutAccountInput
@@ -164067,6 +165854,7 @@ export namespace Prisma {
     assistedWorkflows?: AiAssistedWorkflowUncheckedCreateNestedManyWithoutAccountInput
     avatar?: AccountAvatarUncheckedCreateNestedOneWithoutAccountInput
     externalMutationReceipts?: ExternalMutationReceiptUncheckedCreateNestedManyWithoutAccountInput
+    externalAgentAuditEvents?: ExternalAgentAuditEventUncheckedCreateNestedManyWithoutAccountInput
     goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationUncheckedCreateNestedManyWithoutAccountInput
     profileImportArchives?: ProfileImportArchiveUncheckedCreateNestedManyWithoutAccountInput
@@ -164160,6 +165948,7 @@ export namespace Prisma {
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
     avatar?: AccountAvatarUpdateOneWithoutAccountNestedInput
     externalMutationReceipts?: ExternalMutationReceiptUpdateManyWithoutAccountNestedInput
+    externalAgentAuditEvents?: ExternalAgentAuditEventUpdateManyWithoutAccountNestedInput
     goals?: GoalUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUpdateManyWithoutAccountNestedInput
     profileImportArchives?: ProfileImportArchiveUpdateManyWithoutAccountNestedInput
@@ -164218,6 +166007,7 @@ export namespace Prisma {
     assistedWorkflows?: AiAssistedWorkflowUncheckedUpdateManyWithoutAccountNestedInput
     avatar?: AccountAvatarUncheckedUpdateOneWithoutAccountNestedInput
     externalMutationReceipts?: ExternalMutationReceiptUncheckedUpdateManyWithoutAccountNestedInput
+    externalAgentAuditEvents?: ExternalAgentAuditEventUncheckedUpdateManyWithoutAccountNestedInput
     goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUncheckedUpdateManyWithoutAccountNestedInput
     profileImportArchives?: ProfileImportArchiveUncheckedUpdateManyWithoutAccountNestedInput
@@ -164301,6 +166091,7 @@ export namespace Prisma {
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
     avatar?: AccountAvatarCreateNestedOneWithoutAccountInput
     externalMutationReceipts?: ExternalMutationReceiptCreateNestedManyWithoutAccountInput
+    externalAgentAuditEvents?: ExternalAgentAuditEventCreateNestedManyWithoutAccountInput
     goals?: GoalCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationCreateNestedManyWithoutAccountInput
     profileImportArchives?: ProfileImportArchiveCreateNestedManyWithoutAccountInput
@@ -164359,6 +166150,7 @@ export namespace Prisma {
     assistedWorkflows?: AiAssistedWorkflowUncheckedCreateNestedManyWithoutAccountInput
     avatar?: AccountAvatarUncheckedCreateNestedOneWithoutAccountInput
     externalMutationReceipts?: ExternalMutationReceiptUncheckedCreateNestedManyWithoutAccountInput
+    externalAgentAuditEvents?: ExternalAgentAuditEventUncheckedCreateNestedManyWithoutAccountInput
     goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationUncheckedCreateNestedManyWithoutAccountInput
     profileImportArchives?: ProfileImportArchiveUncheckedCreateNestedManyWithoutAccountInput
@@ -164433,6 +166225,7 @@ export namespace Prisma {
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
     avatar?: AccountAvatarUpdateOneWithoutAccountNestedInput
     externalMutationReceipts?: ExternalMutationReceiptUpdateManyWithoutAccountNestedInput
+    externalAgentAuditEvents?: ExternalAgentAuditEventUpdateManyWithoutAccountNestedInput
     goals?: GoalUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUpdateManyWithoutAccountNestedInput
     profileImportArchives?: ProfileImportArchiveUpdateManyWithoutAccountNestedInput
@@ -164491,6 +166284,7 @@ export namespace Prisma {
     assistedWorkflows?: AiAssistedWorkflowUncheckedUpdateManyWithoutAccountNestedInput
     avatar?: AccountAvatarUncheckedUpdateOneWithoutAccountNestedInput
     externalMutationReceipts?: ExternalMutationReceiptUncheckedUpdateManyWithoutAccountNestedInput
+    externalAgentAuditEvents?: ExternalAgentAuditEventUncheckedUpdateManyWithoutAccountNestedInput
     goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUncheckedUpdateManyWithoutAccountNestedInput
     profileImportArchives?: ProfileImportArchiveUncheckedUpdateManyWithoutAccountNestedInput
@@ -164549,6 +166343,7 @@ export namespace Prisma {
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
     avatar?: AccountAvatarCreateNestedOneWithoutAccountInput
     externalMutationReceipts?: ExternalMutationReceiptCreateNestedManyWithoutAccountInput
+    externalAgentAuditEvents?: ExternalAgentAuditEventCreateNestedManyWithoutAccountInput
     goals?: GoalCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationCreateNestedManyWithoutAccountInput
     profileImportArchives?: ProfileImportArchiveCreateNestedManyWithoutAccountInput
@@ -164607,6 +166402,7 @@ export namespace Prisma {
     assistedWorkflows?: AiAssistedWorkflowUncheckedCreateNestedManyWithoutAccountInput
     avatar?: AccountAvatarUncheckedCreateNestedOneWithoutAccountInput
     externalMutationReceipts?: ExternalMutationReceiptUncheckedCreateNestedManyWithoutAccountInput
+    externalAgentAuditEvents?: ExternalAgentAuditEventUncheckedCreateNestedManyWithoutAccountInput
     goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationUncheckedCreateNestedManyWithoutAccountInput
     profileImportArchives?: ProfileImportArchiveUncheckedCreateNestedManyWithoutAccountInput
@@ -164681,6 +166477,7 @@ export namespace Prisma {
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
     avatar?: AccountAvatarUpdateOneWithoutAccountNestedInput
     externalMutationReceipts?: ExternalMutationReceiptUpdateManyWithoutAccountNestedInput
+    externalAgentAuditEvents?: ExternalAgentAuditEventUpdateManyWithoutAccountNestedInput
     goals?: GoalUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUpdateManyWithoutAccountNestedInput
     profileImportArchives?: ProfileImportArchiveUpdateManyWithoutAccountNestedInput
@@ -164739,6 +166536,7 @@ export namespace Prisma {
     assistedWorkflows?: AiAssistedWorkflowUncheckedUpdateManyWithoutAccountNestedInput
     avatar?: AccountAvatarUncheckedUpdateOneWithoutAccountNestedInput
     externalMutationReceipts?: ExternalMutationReceiptUncheckedUpdateManyWithoutAccountNestedInput
+    externalAgentAuditEvents?: ExternalAgentAuditEventUncheckedUpdateManyWithoutAccountNestedInput
     goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUncheckedUpdateManyWithoutAccountNestedInput
     profileImportArchives?: ProfileImportArchiveUncheckedUpdateManyWithoutAccountNestedInput
@@ -164797,6 +166595,7 @@ export namespace Prisma {
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
     avatar?: AccountAvatarCreateNestedOneWithoutAccountInput
     externalMutationReceipts?: ExternalMutationReceiptCreateNestedManyWithoutAccountInput
+    externalAgentAuditEvents?: ExternalAgentAuditEventCreateNestedManyWithoutAccountInput
     goals?: GoalCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationCreateNestedManyWithoutAccountInput
     profileImportArchives?: ProfileImportArchiveCreateNestedManyWithoutAccountInput
@@ -164855,6 +166654,7 @@ export namespace Prisma {
     assistedWorkflows?: AiAssistedWorkflowUncheckedCreateNestedManyWithoutAccountInput
     avatar?: AccountAvatarUncheckedCreateNestedOneWithoutAccountInput
     externalMutationReceipts?: ExternalMutationReceiptUncheckedCreateNestedManyWithoutAccountInput
+    externalAgentAuditEvents?: ExternalAgentAuditEventUncheckedCreateNestedManyWithoutAccountInput
     goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationUncheckedCreateNestedManyWithoutAccountInput
     profileImportArchives?: ProfileImportArchiveUncheckedCreateNestedManyWithoutAccountInput
@@ -164929,6 +166729,7 @@ export namespace Prisma {
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
     avatar?: AccountAvatarUpdateOneWithoutAccountNestedInput
     externalMutationReceipts?: ExternalMutationReceiptUpdateManyWithoutAccountNestedInput
+    externalAgentAuditEvents?: ExternalAgentAuditEventUpdateManyWithoutAccountNestedInput
     goals?: GoalUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUpdateManyWithoutAccountNestedInput
     profileImportArchives?: ProfileImportArchiveUpdateManyWithoutAccountNestedInput
@@ -164987,6 +166788,7 @@ export namespace Prisma {
     assistedWorkflows?: AiAssistedWorkflowUncheckedUpdateManyWithoutAccountNestedInput
     avatar?: AccountAvatarUncheckedUpdateOneWithoutAccountNestedInput
     externalMutationReceipts?: ExternalMutationReceiptUncheckedUpdateManyWithoutAccountNestedInput
+    externalAgentAuditEvents?: ExternalAgentAuditEventUncheckedUpdateManyWithoutAccountNestedInput
     goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUncheckedUpdateManyWithoutAccountNestedInput
     profileImportArchives?: ProfileImportArchiveUncheckedUpdateManyWithoutAccountNestedInput
@@ -165045,6 +166847,7 @@ export namespace Prisma {
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
     avatar?: AccountAvatarCreateNestedOneWithoutAccountInput
     externalMutationReceipts?: ExternalMutationReceiptCreateNestedManyWithoutAccountInput
+    externalAgentAuditEvents?: ExternalAgentAuditEventCreateNestedManyWithoutAccountInput
     goals?: GoalCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationCreateNestedManyWithoutAccountInput
     profileImportArchives?: ProfileImportArchiveCreateNestedManyWithoutAccountInput
@@ -165103,6 +166906,7 @@ export namespace Prisma {
     assistedWorkflows?: AiAssistedWorkflowUncheckedCreateNestedManyWithoutAccountInput
     avatar?: AccountAvatarUncheckedCreateNestedOneWithoutAccountInput
     externalMutationReceipts?: ExternalMutationReceiptUncheckedCreateNestedManyWithoutAccountInput
+    externalAgentAuditEvents?: ExternalAgentAuditEventUncheckedCreateNestedManyWithoutAccountInput
     goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationUncheckedCreateNestedManyWithoutAccountInput
     profileImportArchives?: ProfileImportArchiveUncheckedCreateNestedManyWithoutAccountInput
@@ -165177,6 +166981,7 @@ export namespace Prisma {
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
     avatar?: AccountAvatarUpdateOneWithoutAccountNestedInput
     externalMutationReceipts?: ExternalMutationReceiptUpdateManyWithoutAccountNestedInput
+    externalAgentAuditEvents?: ExternalAgentAuditEventUpdateManyWithoutAccountNestedInput
     goals?: GoalUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUpdateManyWithoutAccountNestedInput
     profileImportArchives?: ProfileImportArchiveUpdateManyWithoutAccountNestedInput
@@ -165235,6 +167040,7 @@ export namespace Prisma {
     assistedWorkflows?: AiAssistedWorkflowUncheckedUpdateManyWithoutAccountNestedInput
     avatar?: AccountAvatarUncheckedUpdateOneWithoutAccountNestedInput
     externalMutationReceipts?: ExternalMutationReceiptUncheckedUpdateManyWithoutAccountNestedInput
+    externalAgentAuditEvents?: ExternalAgentAuditEventUncheckedUpdateManyWithoutAccountNestedInput
     goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUncheckedUpdateManyWithoutAccountNestedInput
     profileImportArchives?: ProfileImportArchiveUncheckedUpdateManyWithoutAccountNestedInput
@@ -165293,6 +167099,7 @@ export namespace Prisma {
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
     avatar?: AccountAvatarCreateNestedOneWithoutAccountInput
     externalMutationReceipts?: ExternalMutationReceiptCreateNestedManyWithoutAccountInput
+    externalAgentAuditEvents?: ExternalAgentAuditEventCreateNestedManyWithoutAccountInput
     goals?: GoalCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationCreateNestedManyWithoutAccountInput
     profileImportArchives?: ProfileImportArchiveCreateNestedManyWithoutAccountInput
@@ -165351,6 +167158,7 @@ export namespace Prisma {
     assistedWorkflows?: AiAssistedWorkflowUncheckedCreateNestedManyWithoutAccountInput
     avatar?: AccountAvatarUncheckedCreateNestedOneWithoutAccountInput
     externalMutationReceipts?: ExternalMutationReceiptUncheckedCreateNestedManyWithoutAccountInput
+    externalAgentAuditEvents?: ExternalAgentAuditEventUncheckedCreateNestedManyWithoutAccountInput
     goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationUncheckedCreateNestedManyWithoutAccountInput
     profileImportArchives?: ProfileImportArchiveUncheckedCreateNestedManyWithoutAccountInput
@@ -165425,6 +167233,7 @@ export namespace Prisma {
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
     avatar?: AccountAvatarUpdateOneWithoutAccountNestedInput
     externalMutationReceipts?: ExternalMutationReceiptUpdateManyWithoutAccountNestedInput
+    externalAgentAuditEvents?: ExternalAgentAuditEventUpdateManyWithoutAccountNestedInput
     goals?: GoalUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUpdateManyWithoutAccountNestedInput
     profileImportArchives?: ProfileImportArchiveUpdateManyWithoutAccountNestedInput
@@ -165483,6 +167292,7 @@ export namespace Prisma {
     assistedWorkflows?: AiAssistedWorkflowUncheckedUpdateManyWithoutAccountNestedInput
     avatar?: AccountAvatarUncheckedUpdateOneWithoutAccountNestedInput
     externalMutationReceipts?: ExternalMutationReceiptUncheckedUpdateManyWithoutAccountNestedInput
+    externalAgentAuditEvents?: ExternalAgentAuditEventUncheckedUpdateManyWithoutAccountNestedInput
     goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUncheckedUpdateManyWithoutAccountNestedInput
     profileImportArchives?: ProfileImportArchiveUncheckedUpdateManyWithoutAccountNestedInput
@@ -165541,6 +167351,7 @@ export namespace Prisma {
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
     avatar?: AccountAvatarCreateNestedOneWithoutAccountInput
     externalMutationReceipts?: ExternalMutationReceiptCreateNestedManyWithoutAccountInput
+    externalAgentAuditEvents?: ExternalAgentAuditEventCreateNestedManyWithoutAccountInput
     goals?: GoalCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationCreateNestedManyWithoutAccountInput
     profileImportArchives?: ProfileImportArchiveCreateNestedManyWithoutAccountInput
@@ -165599,6 +167410,7 @@ export namespace Prisma {
     assistedWorkflows?: AiAssistedWorkflowUncheckedCreateNestedManyWithoutAccountInput
     avatar?: AccountAvatarUncheckedCreateNestedOneWithoutAccountInput
     externalMutationReceipts?: ExternalMutationReceiptUncheckedCreateNestedManyWithoutAccountInput
+    externalAgentAuditEvents?: ExternalAgentAuditEventUncheckedCreateNestedManyWithoutAccountInput
     goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationUncheckedCreateNestedManyWithoutAccountInput
     profileImportArchives?: ProfileImportArchiveUncheckedCreateNestedManyWithoutAccountInput
@@ -165673,6 +167485,7 @@ export namespace Prisma {
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
     avatar?: AccountAvatarUpdateOneWithoutAccountNestedInput
     externalMutationReceipts?: ExternalMutationReceiptUpdateManyWithoutAccountNestedInput
+    externalAgentAuditEvents?: ExternalAgentAuditEventUpdateManyWithoutAccountNestedInput
     goals?: GoalUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUpdateManyWithoutAccountNestedInput
     profileImportArchives?: ProfileImportArchiveUpdateManyWithoutAccountNestedInput
@@ -165731,6 +167544,7 @@ export namespace Prisma {
     assistedWorkflows?: AiAssistedWorkflowUncheckedUpdateManyWithoutAccountNestedInput
     avatar?: AccountAvatarUncheckedUpdateOneWithoutAccountNestedInput
     externalMutationReceipts?: ExternalMutationReceiptUncheckedUpdateManyWithoutAccountNestedInput
+    externalAgentAuditEvents?: ExternalAgentAuditEventUncheckedUpdateManyWithoutAccountNestedInput
     goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUncheckedUpdateManyWithoutAccountNestedInput
     profileImportArchives?: ProfileImportArchiveUncheckedUpdateManyWithoutAccountNestedInput
@@ -165789,6 +167603,7 @@ export namespace Prisma {
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
     avatar?: AccountAvatarCreateNestedOneWithoutAccountInput
     externalMutationReceipts?: ExternalMutationReceiptCreateNestedManyWithoutAccountInput
+    externalAgentAuditEvents?: ExternalAgentAuditEventCreateNestedManyWithoutAccountInput
     goals?: GoalCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationCreateNestedManyWithoutAccountInput
     profileImportArchives?: ProfileImportArchiveCreateNestedManyWithoutAccountInput
@@ -165847,6 +167662,7 @@ export namespace Prisma {
     assistedWorkflows?: AiAssistedWorkflowUncheckedCreateNestedManyWithoutAccountInput
     avatar?: AccountAvatarUncheckedCreateNestedOneWithoutAccountInput
     externalMutationReceipts?: ExternalMutationReceiptUncheckedCreateNestedManyWithoutAccountInput
+    externalAgentAuditEvents?: ExternalAgentAuditEventUncheckedCreateNestedManyWithoutAccountInput
     goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationUncheckedCreateNestedManyWithoutAccountInput
     profileImportArchives?: ProfileImportArchiveUncheckedCreateNestedManyWithoutAccountInput
@@ -165944,6 +167760,7 @@ export namespace Prisma {
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
     avatar?: AccountAvatarUpdateOneWithoutAccountNestedInput
     externalMutationReceipts?: ExternalMutationReceiptUpdateManyWithoutAccountNestedInput
+    externalAgentAuditEvents?: ExternalAgentAuditEventUpdateManyWithoutAccountNestedInput
     goals?: GoalUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUpdateManyWithoutAccountNestedInput
     profileImportArchives?: ProfileImportArchiveUpdateManyWithoutAccountNestedInput
@@ -166002,6 +167819,7 @@ export namespace Prisma {
     assistedWorkflows?: AiAssistedWorkflowUncheckedUpdateManyWithoutAccountNestedInput
     avatar?: AccountAvatarUncheckedUpdateOneWithoutAccountNestedInput
     externalMutationReceipts?: ExternalMutationReceiptUncheckedUpdateManyWithoutAccountNestedInput
+    externalAgentAuditEvents?: ExternalAgentAuditEventUncheckedUpdateManyWithoutAccountNestedInput
     goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUncheckedUpdateManyWithoutAccountNestedInput
     profileImportArchives?: ProfileImportArchiveUncheckedUpdateManyWithoutAccountNestedInput
@@ -166076,6 +167894,7 @@ export namespace Prisma {
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
     avatar?: AccountAvatarCreateNestedOneWithoutAccountInput
     externalMutationReceipts?: ExternalMutationReceiptCreateNestedManyWithoutAccountInput
+    externalAgentAuditEvents?: ExternalAgentAuditEventCreateNestedManyWithoutAccountInput
     goals?: GoalCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationCreateNestedManyWithoutAccountInput
     profileImportArchives?: ProfileImportArchiveCreateNestedManyWithoutAccountInput
@@ -166134,6 +167953,7 @@ export namespace Prisma {
     assistedWorkflows?: AiAssistedWorkflowUncheckedCreateNestedManyWithoutAccountInput
     avatar?: AccountAvatarUncheckedCreateNestedOneWithoutAccountInput
     externalMutationReceipts?: ExternalMutationReceiptUncheckedCreateNestedManyWithoutAccountInput
+    externalAgentAuditEvents?: ExternalAgentAuditEventUncheckedCreateNestedManyWithoutAccountInput
     goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationUncheckedCreateNestedManyWithoutAccountInput
     profileImportArchives?: ProfileImportArchiveUncheckedCreateNestedManyWithoutAccountInput
@@ -166255,6 +168075,7 @@ export namespace Prisma {
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
     avatar?: AccountAvatarUpdateOneWithoutAccountNestedInput
     externalMutationReceipts?: ExternalMutationReceiptUpdateManyWithoutAccountNestedInput
+    externalAgentAuditEvents?: ExternalAgentAuditEventUpdateManyWithoutAccountNestedInput
     goals?: GoalUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUpdateManyWithoutAccountNestedInput
     profileImportArchives?: ProfileImportArchiveUpdateManyWithoutAccountNestedInput
@@ -166313,6 +168134,7 @@ export namespace Prisma {
     assistedWorkflows?: AiAssistedWorkflowUncheckedUpdateManyWithoutAccountNestedInput
     avatar?: AccountAvatarUncheckedUpdateOneWithoutAccountNestedInput
     externalMutationReceipts?: ExternalMutationReceiptUncheckedUpdateManyWithoutAccountNestedInput
+    externalAgentAuditEvents?: ExternalAgentAuditEventUncheckedUpdateManyWithoutAccountNestedInput
     goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUncheckedUpdateManyWithoutAccountNestedInput
     profileImportArchives?: ProfileImportArchiveUncheckedUpdateManyWithoutAccountNestedInput
@@ -166415,6 +168237,7 @@ export namespace Prisma {
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
     avatar?: AccountAvatarCreateNestedOneWithoutAccountInput
     externalMutationReceipts?: ExternalMutationReceiptCreateNestedManyWithoutAccountInput
+    externalAgentAuditEvents?: ExternalAgentAuditEventCreateNestedManyWithoutAccountInput
     goals?: GoalCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationCreateNestedManyWithoutAccountInput
     profileImportArchives?: ProfileImportArchiveCreateNestedManyWithoutAccountInput
@@ -166473,6 +168296,7 @@ export namespace Prisma {
     assistedWorkflows?: AiAssistedWorkflowUncheckedCreateNestedManyWithoutAccountInput
     avatar?: AccountAvatarUncheckedCreateNestedOneWithoutAccountInput
     externalMutationReceipts?: ExternalMutationReceiptUncheckedCreateNestedManyWithoutAccountInput
+    externalAgentAuditEvents?: ExternalAgentAuditEventUncheckedCreateNestedManyWithoutAccountInput
     goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationUncheckedCreateNestedManyWithoutAccountInput
     profileImportArchives?: ProfileImportArchiveUncheckedCreateNestedManyWithoutAccountInput
@@ -166625,6 +168449,7 @@ export namespace Prisma {
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
     avatar?: AccountAvatarUpdateOneWithoutAccountNestedInput
     externalMutationReceipts?: ExternalMutationReceiptUpdateManyWithoutAccountNestedInput
+    externalAgentAuditEvents?: ExternalAgentAuditEventUpdateManyWithoutAccountNestedInput
     goals?: GoalUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUpdateManyWithoutAccountNestedInput
     profileImportArchives?: ProfileImportArchiveUpdateManyWithoutAccountNestedInput
@@ -166683,6 +168508,7 @@ export namespace Prisma {
     assistedWorkflows?: AiAssistedWorkflowUncheckedUpdateManyWithoutAccountNestedInput
     avatar?: AccountAvatarUncheckedUpdateOneWithoutAccountNestedInput
     externalMutationReceipts?: ExternalMutationReceiptUncheckedUpdateManyWithoutAccountNestedInput
+    externalAgentAuditEvents?: ExternalAgentAuditEventUncheckedUpdateManyWithoutAccountNestedInput
     goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUncheckedUpdateManyWithoutAccountNestedInput
     profileImportArchives?: ProfileImportArchiveUncheckedUpdateManyWithoutAccountNestedInput
@@ -166971,6 +168797,7 @@ export namespace Prisma {
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
     avatar?: AccountAvatarCreateNestedOneWithoutAccountInput
     externalMutationReceipts?: ExternalMutationReceiptCreateNestedManyWithoutAccountInput
+    externalAgentAuditEvents?: ExternalAgentAuditEventCreateNestedManyWithoutAccountInput
     goals?: GoalCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationCreateNestedManyWithoutAccountInput
     profileImportArchives?: ProfileImportArchiveCreateNestedManyWithoutAccountInput
@@ -167029,6 +168856,7 @@ export namespace Prisma {
     assistedWorkflows?: AiAssistedWorkflowUncheckedCreateNestedManyWithoutAccountInput
     avatar?: AccountAvatarUncheckedCreateNestedOneWithoutAccountInput
     externalMutationReceipts?: ExternalMutationReceiptUncheckedCreateNestedManyWithoutAccountInput
+    externalAgentAuditEvents?: ExternalAgentAuditEventUncheckedCreateNestedManyWithoutAccountInput
     goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationUncheckedCreateNestedManyWithoutAccountInput
     profileImportArchives?: ProfileImportArchiveUncheckedCreateNestedManyWithoutAccountInput
@@ -167103,6 +168931,7 @@ export namespace Prisma {
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
     avatar?: AccountAvatarUpdateOneWithoutAccountNestedInput
     externalMutationReceipts?: ExternalMutationReceiptUpdateManyWithoutAccountNestedInput
+    externalAgentAuditEvents?: ExternalAgentAuditEventUpdateManyWithoutAccountNestedInput
     goals?: GoalUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUpdateManyWithoutAccountNestedInput
     profileImportArchives?: ProfileImportArchiveUpdateManyWithoutAccountNestedInput
@@ -167161,6 +168990,7 @@ export namespace Prisma {
     assistedWorkflows?: AiAssistedWorkflowUncheckedUpdateManyWithoutAccountNestedInput
     avatar?: AccountAvatarUncheckedUpdateOneWithoutAccountNestedInput
     externalMutationReceipts?: ExternalMutationReceiptUncheckedUpdateManyWithoutAccountNestedInput
+    externalAgentAuditEvents?: ExternalAgentAuditEventUncheckedUpdateManyWithoutAccountNestedInput
     goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUncheckedUpdateManyWithoutAccountNestedInput
     profileImportArchives?: ProfileImportArchiveUncheckedUpdateManyWithoutAccountNestedInput
@@ -167219,6 +169049,7 @@ export namespace Prisma {
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
     avatar?: AccountAvatarCreateNestedOneWithoutAccountInput
     externalMutationReceipts?: ExternalMutationReceiptCreateNestedManyWithoutAccountInput
+    externalAgentAuditEvents?: ExternalAgentAuditEventCreateNestedManyWithoutAccountInput
     goals?: GoalCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationCreateNestedManyWithoutAccountInput
     profileImportArchives?: ProfileImportArchiveCreateNestedManyWithoutAccountInput
@@ -167277,6 +169108,7 @@ export namespace Prisma {
     assistedWorkflows?: AiAssistedWorkflowUncheckedCreateNestedManyWithoutAccountInput
     avatar?: AccountAvatarUncheckedCreateNestedOneWithoutAccountInput
     externalMutationReceipts?: ExternalMutationReceiptUncheckedCreateNestedManyWithoutAccountInput
+    externalAgentAuditEvents?: ExternalAgentAuditEventUncheckedCreateNestedManyWithoutAccountInput
     goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationUncheckedCreateNestedManyWithoutAccountInput
     profileImportArchives?: ProfileImportArchiveUncheckedCreateNestedManyWithoutAccountInput
@@ -167351,6 +169183,7 @@ export namespace Prisma {
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
     avatar?: AccountAvatarUpdateOneWithoutAccountNestedInput
     externalMutationReceipts?: ExternalMutationReceiptUpdateManyWithoutAccountNestedInput
+    externalAgentAuditEvents?: ExternalAgentAuditEventUpdateManyWithoutAccountNestedInput
     goals?: GoalUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUpdateManyWithoutAccountNestedInput
     profileImportArchives?: ProfileImportArchiveUpdateManyWithoutAccountNestedInput
@@ -167409,6 +169242,7 @@ export namespace Prisma {
     assistedWorkflows?: AiAssistedWorkflowUncheckedUpdateManyWithoutAccountNestedInput
     avatar?: AccountAvatarUncheckedUpdateOneWithoutAccountNestedInput
     externalMutationReceipts?: ExternalMutationReceiptUncheckedUpdateManyWithoutAccountNestedInput
+    externalAgentAuditEvents?: ExternalAgentAuditEventUncheckedUpdateManyWithoutAccountNestedInput
     goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUncheckedUpdateManyWithoutAccountNestedInput
     profileImportArchives?: ProfileImportArchiveUncheckedUpdateManyWithoutAccountNestedInput
@@ -167467,6 +169301,7 @@ export namespace Prisma {
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
     avatar?: AccountAvatarCreateNestedOneWithoutAccountInput
     externalMutationReceipts?: ExternalMutationReceiptCreateNestedManyWithoutAccountInput
+    externalAgentAuditEvents?: ExternalAgentAuditEventCreateNestedManyWithoutAccountInput
     goals?: GoalCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationCreateNestedManyWithoutAccountInput
     profileImportArchives?: ProfileImportArchiveCreateNestedManyWithoutAccountInput
@@ -167525,6 +169360,7 @@ export namespace Prisma {
     assistedWorkflows?: AiAssistedWorkflowUncheckedCreateNestedManyWithoutAccountInput
     avatar?: AccountAvatarUncheckedCreateNestedOneWithoutAccountInput
     externalMutationReceipts?: ExternalMutationReceiptUncheckedCreateNestedManyWithoutAccountInput
+    externalAgentAuditEvents?: ExternalAgentAuditEventUncheckedCreateNestedManyWithoutAccountInput
     goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationUncheckedCreateNestedManyWithoutAccountInput
     profileImportArchives?: ProfileImportArchiveUncheckedCreateNestedManyWithoutAccountInput
@@ -167599,6 +169435,7 @@ export namespace Prisma {
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
     avatar?: AccountAvatarUpdateOneWithoutAccountNestedInput
     externalMutationReceipts?: ExternalMutationReceiptUpdateManyWithoutAccountNestedInput
+    externalAgentAuditEvents?: ExternalAgentAuditEventUpdateManyWithoutAccountNestedInput
     goals?: GoalUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUpdateManyWithoutAccountNestedInput
     profileImportArchives?: ProfileImportArchiveUpdateManyWithoutAccountNestedInput
@@ -167657,6 +169494,7 @@ export namespace Prisma {
     assistedWorkflows?: AiAssistedWorkflowUncheckedUpdateManyWithoutAccountNestedInput
     avatar?: AccountAvatarUncheckedUpdateOneWithoutAccountNestedInput
     externalMutationReceipts?: ExternalMutationReceiptUncheckedUpdateManyWithoutAccountNestedInput
+    externalAgentAuditEvents?: ExternalAgentAuditEventUncheckedUpdateManyWithoutAccountNestedInput
     goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUncheckedUpdateManyWithoutAccountNestedInput
     profileImportArchives?: ProfileImportArchiveUncheckedUpdateManyWithoutAccountNestedInput
@@ -167714,6 +169552,7 @@ export namespace Prisma {
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
     avatar?: AccountAvatarCreateNestedOneWithoutAccountInput
     externalMutationReceipts?: ExternalMutationReceiptCreateNestedManyWithoutAccountInput
+    externalAgentAuditEvents?: ExternalAgentAuditEventCreateNestedManyWithoutAccountInput
     goals?: GoalCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationCreateNestedManyWithoutAccountInput
     profileImportArchives?: ProfileImportArchiveCreateNestedManyWithoutAccountInput
@@ -167772,6 +169611,7 @@ export namespace Prisma {
     avatarUpdatedAt?: Date | string | null
     avatar?: AccountAvatarUncheckedCreateNestedOneWithoutAccountInput
     externalMutationReceipts?: ExternalMutationReceiptUncheckedCreateNestedManyWithoutAccountInput
+    externalAgentAuditEvents?: ExternalAgentAuditEventUncheckedCreateNestedManyWithoutAccountInput
     goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationUncheckedCreateNestedManyWithoutAccountInput
     profileImportArchives?: ProfileImportArchiveUncheckedCreateNestedManyWithoutAccountInput
@@ -167846,6 +169686,7 @@ export namespace Prisma {
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
     avatar?: AccountAvatarUpdateOneWithoutAccountNestedInput
     externalMutationReceipts?: ExternalMutationReceiptUpdateManyWithoutAccountNestedInput
+    externalAgentAuditEvents?: ExternalAgentAuditEventUpdateManyWithoutAccountNestedInput
     goals?: GoalUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUpdateManyWithoutAccountNestedInput
     profileImportArchives?: ProfileImportArchiveUpdateManyWithoutAccountNestedInput
@@ -167904,6 +169745,7 @@ export namespace Prisma {
     avatarUpdatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     avatar?: AccountAvatarUncheckedUpdateOneWithoutAccountNestedInput
     externalMutationReceipts?: ExternalMutationReceiptUncheckedUpdateManyWithoutAccountNestedInput
+    externalAgentAuditEvents?: ExternalAgentAuditEventUncheckedUpdateManyWithoutAccountNestedInput
     goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUncheckedUpdateManyWithoutAccountNestedInput
     profileImportArchives?: ProfileImportArchiveUncheckedUpdateManyWithoutAccountNestedInput
@@ -168366,6 +170208,7 @@ export namespace Prisma {
     assistedWorkflows?: AiAssistedWorkflowCreateNestedManyWithoutAccountInput
     avatar?: AccountAvatarCreateNestedOneWithoutAccountInput
     externalMutationReceipts?: ExternalMutationReceiptCreateNestedManyWithoutAccountInput
+    externalAgentAuditEvents?: ExternalAgentAuditEventCreateNestedManyWithoutAccountInput
     goals?: GoalCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationCreateNestedManyWithoutAccountInput
     profileImportArchives?: ProfileImportArchiveCreateNestedManyWithoutAccountInput
@@ -168424,6 +170267,7 @@ export namespace Prisma {
     assistedWorkflows?: AiAssistedWorkflowUncheckedCreateNestedManyWithoutAccountInput
     avatar?: AccountAvatarUncheckedCreateNestedOneWithoutAccountInput
     externalMutationReceipts?: ExternalMutationReceiptUncheckedCreateNestedManyWithoutAccountInput
+    externalAgentAuditEvents?: ExternalAgentAuditEventUncheckedCreateNestedManyWithoutAccountInput
     goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationUncheckedCreateNestedManyWithoutAccountInput
     profileImportArchives?: ProfileImportArchiveUncheckedCreateNestedManyWithoutAccountInput
@@ -168828,6 +170672,7 @@ export namespace Prisma {
     assistedWorkflows?: AiAssistedWorkflowUpdateManyWithoutAccountNestedInput
     avatar?: AccountAvatarUpdateOneWithoutAccountNestedInput
     externalMutationReceipts?: ExternalMutationReceiptUpdateManyWithoutAccountNestedInput
+    externalAgentAuditEvents?: ExternalAgentAuditEventUpdateManyWithoutAccountNestedInput
     goals?: GoalUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUpdateManyWithoutAccountNestedInput
     profileImportArchives?: ProfileImportArchiveUpdateManyWithoutAccountNestedInput
@@ -168886,6 +170731,7 @@ export namespace Prisma {
     assistedWorkflows?: AiAssistedWorkflowUncheckedUpdateManyWithoutAccountNestedInput
     avatar?: AccountAvatarUncheckedUpdateOneWithoutAccountNestedInput
     externalMutationReceipts?: ExternalMutationReceiptUncheckedUpdateManyWithoutAccountNestedInput
+    externalAgentAuditEvents?: ExternalAgentAuditEventUncheckedUpdateManyWithoutAccountNestedInput
     goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUncheckedUpdateManyWithoutAccountNestedInput
     profileImportArchives?: ProfileImportArchiveUncheckedUpdateManyWithoutAccountNestedInput
@@ -169553,6 +171399,7 @@ export namespace Prisma {
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
     avatar?: AccountAvatarCreateNestedOneWithoutAccountInput
     externalMutationReceipts?: ExternalMutationReceiptCreateNestedManyWithoutAccountInput
+    externalAgentAuditEvents?: ExternalAgentAuditEventCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationCreateNestedManyWithoutAccountInput
     profileImportArchives?: ProfileImportArchiveCreateNestedManyWithoutAccountInput
     labels?: LabelCreateNestedManyWithoutAccountInput
@@ -169611,6 +171458,7 @@ export namespace Prisma {
     assistedWorkflows?: AiAssistedWorkflowUncheckedCreateNestedManyWithoutAccountInput
     avatar?: AccountAvatarUncheckedCreateNestedOneWithoutAccountInput
     externalMutationReceipts?: ExternalMutationReceiptUncheckedCreateNestedManyWithoutAccountInput
+    externalAgentAuditEvents?: ExternalAgentAuditEventUncheckedCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationUncheckedCreateNestedManyWithoutAccountInput
     profileImportArchives?: ProfileImportArchiveUncheckedCreateNestedManyWithoutAccountInput
     labels?: LabelUncheckedCreateNestedManyWithoutAccountInput
@@ -169824,6 +171672,7 @@ export namespace Prisma {
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
     avatar?: AccountAvatarUpdateOneWithoutAccountNestedInput
     externalMutationReceipts?: ExternalMutationReceiptUpdateManyWithoutAccountNestedInput
+    externalAgentAuditEvents?: ExternalAgentAuditEventUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUpdateManyWithoutAccountNestedInput
     profileImportArchives?: ProfileImportArchiveUpdateManyWithoutAccountNestedInput
     labels?: LabelUpdateManyWithoutAccountNestedInput
@@ -169882,6 +171731,7 @@ export namespace Prisma {
     assistedWorkflows?: AiAssistedWorkflowUncheckedUpdateManyWithoutAccountNestedInput
     avatar?: AccountAvatarUncheckedUpdateOneWithoutAccountNestedInput
     externalMutationReceipts?: ExternalMutationReceiptUncheckedUpdateManyWithoutAccountNestedInput
+    externalAgentAuditEvents?: ExternalAgentAuditEventUncheckedUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUncheckedUpdateManyWithoutAccountNestedInput
     profileImportArchives?: ProfileImportArchiveUncheckedUpdateManyWithoutAccountNestedInput
     labels?: LabelUncheckedUpdateManyWithoutAccountNestedInput
@@ -170800,6 +172650,7 @@ export namespace Prisma {
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
     avatar?: AccountAvatarCreateNestedOneWithoutAccountInput
     externalMutationReceipts?: ExternalMutationReceiptCreateNestedManyWithoutAccountInput
+    externalAgentAuditEvents?: ExternalAgentAuditEventCreateNestedManyWithoutAccountInput
     goals?: GoalCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationCreateNestedManyWithoutAccountInput
     profileImportArchives?: ProfileImportArchiveCreateNestedManyWithoutAccountInput
@@ -170858,6 +172709,7 @@ export namespace Prisma {
     assistedWorkflows?: AiAssistedWorkflowUncheckedCreateNestedManyWithoutAccountInput
     avatar?: AccountAvatarUncheckedCreateNestedOneWithoutAccountInput
     externalMutationReceipts?: ExternalMutationReceiptUncheckedCreateNestedManyWithoutAccountInput
+    externalAgentAuditEvents?: ExternalAgentAuditEventUncheckedCreateNestedManyWithoutAccountInput
     goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationUncheckedCreateNestedManyWithoutAccountInput
     profileImportArchives?: ProfileImportArchiveUncheckedCreateNestedManyWithoutAccountInput
@@ -170981,6 +172833,7 @@ export namespace Prisma {
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
     avatar?: AccountAvatarUpdateOneWithoutAccountNestedInput
     externalMutationReceipts?: ExternalMutationReceiptUpdateManyWithoutAccountNestedInput
+    externalAgentAuditEvents?: ExternalAgentAuditEventUpdateManyWithoutAccountNestedInput
     goals?: GoalUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUpdateManyWithoutAccountNestedInput
     profileImportArchives?: ProfileImportArchiveUpdateManyWithoutAccountNestedInput
@@ -171039,6 +172892,7 @@ export namespace Prisma {
     assistedWorkflows?: AiAssistedWorkflowUncheckedUpdateManyWithoutAccountNestedInput
     avatar?: AccountAvatarUncheckedUpdateOneWithoutAccountNestedInput
     externalMutationReceipts?: ExternalMutationReceiptUncheckedUpdateManyWithoutAccountNestedInput
+    externalAgentAuditEvents?: ExternalAgentAuditEventUncheckedUpdateManyWithoutAccountNestedInput
     goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUncheckedUpdateManyWithoutAccountNestedInput
     profileImportArchives?: ProfileImportArchiveUncheckedUpdateManyWithoutAccountNestedInput
@@ -171399,6 +173253,7 @@ export namespace Prisma {
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
     avatar?: AccountAvatarCreateNestedOneWithoutAccountInput
     externalMutationReceipts?: ExternalMutationReceiptCreateNestedManyWithoutAccountInput
+    externalAgentAuditEvents?: ExternalAgentAuditEventCreateNestedManyWithoutAccountInput
     goals?: GoalCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationCreateNestedManyWithoutAccountInput
     profileImportArchives?: ProfileImportArchiveCreateNestedManyWithoutAccountInput
@@ -171457,6 +173312,7 @@ export namespace Prisma {
     assistedWorkflows?: AiAssistedWorkflowUncheckedCreateNestedManyWithoutAccountInput
     avatar?: AccountAvatarUncheckedCreateNestedOneWithoutAccountInput
     externalMutationReceipts?: ExternalMutationReceiptUncheckedCreateNestedManyWithoutAccountInput
+    externalAgentAuditEvents?: ExternalAgentAuditEventUncheckedCreateNestedManyWithoutAccountInput
     goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationUncheckedCreateNestedManyWithoutAccountInput
     profileImportArchives?: ProfileImportArchiveUncheckedCreateNestedManyWithoutAccountInput
@@ -171569,6 +173425,7 @@ export namespace Prisma {
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
     avatar?: AccountAvatarUpdateOneWithoutAccountNestedInput
     externalMutationReceipts?: ExternalMutationReceiptUpdateManyWithoutAccountNestedInput
+    externalAgentAuditEvents?: ExternalAgentAuditEventUpdateManyWithoutAccountNestedInput
     goals?: GoalUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUpdateManyWithoutAccountNestedInput
     profileImportArchives?: ProfileImportArchiveUpdateManyWithoutAccountNestedInput
@@ -171627,6 +173484,7 @@ export namespace Prisma {
     assistedWorkflows?: AiAssistedWorkflowUncheckedUpdateManyWithoutAccountNestedInput
     avatar?: AccountAvatarUncheckedUpdateOneWithoutAccountNestedInput
     externalMutationReceipts?: ExternalMutationReceiptUncheckedUpdateManyWithoutAccountNestedInput
+    externalAgentAuditEvents?: ExternalAgentAuditEventUncheckedUpdateManyWithoutAccountNestedInput
     goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUncheckedUpdateManyWithoutAccountNestedInput
     profileImportArchives?: ProfileImportArchiveUncheckedUpdateManyWithoutAccountNestedInput
@@ -171717,6 +173575,7 @@ export namespace Prisma {
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
     avatar?: AccountAvatarCreateNestedOneWithoutAccountInput
     externalMutationReceipts?: ExternalMutationReceiptCreateNestedManyWithoutAccountInput
+    externalAgentAuditEvents?: ExternalAgentAuditEventCreateNestedManyWithoutAccountInput
     goals?: GoalCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationCreateNestedManyWithoutAccountInput
     profileImportArchives?: ProfileImportArchiveCreateNestedManyWithoutAccountInput
@@ -171775,6 +173634,7 @@ export namespace Prisma {
     assistedWorkflows?: AiAssistedWorkflowUncheckedCreateNestedManyWithoutAccountInput
     avatar?: AccountAvatarUncheckedCreateNestedOneWithoutAccountInput
     externalMutationReceipts?: ExternalMutationReceiptUncheckedCreateNestedManyWithoutAccountInput
+    externalAgentAuditEvents?: ExternalAgentAuditEventUncheckedCreateNestedManyWithoutAccountInput
     goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationUncheckedCreateNestedManyWithoutAccountInput
     profileImportArchives?: ProfileImportArchiveUncheckedCreateNestedManyWithoutAccountInput
@@ -171929,6 +173789,7 @@ export namespace Prisma {
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
     avatar?: AccountAvatarUpdateOneWithoutAccountNestedInput
     externalMutationReceipts?: ExternalMutationReceiptUpdateManyWithoutAccountNestedInput
+    externalAgentAuditEvents?: ExternalAgentAuditEventUpdateManyWithoutAccountNestedInput
     goals?: GoalUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUpdateManyWithoutAccountNestedInput
     profileImportArchives?: ProfileImportArchiveUpdateManyWithoutAccountNestedInput
@@ -171987,6 +173848,7 @@ export namespace Prisma {
     assistedWorkflows?: AiAssistedWorkflowUncheckedUpdateManyWithoutAccountNestedInput
     avatar?: AccountAvatarUncheckedUpdateOneWithoutAccountNestedInput
     externalMutationReceipts?: ExternalMutationReceiptUncheckedUpdateManyWithoutAccountNestedInput
+    externalAgentAuditEvents?: ExternalAgentAuditEventUncheckedUpdateManyWithoutAccountNestedInput
     goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUncheckedUpdateManyWithoutAccountNestedInput
     profileImportArchives?: ProfileImportArchiveUncheckedUpdateManyWithoutAccountNestedInput
@@ -172137,6 +173999,7 @@ export namespace Prisma {
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
     avatar?: AccountAvatarCreateNestedOneWithoutAccountInput
     externalMutationReceipts?: ExternalMutationReceiptCreateNestedManyWithoutAccountInput
+    externalAgentAuditEvents?: ExternalAgentAuditEventCreateNestedManyWithoutAccountInput
     goals?: GoalCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationCreateNestedManyWithoutAccountInput
     profileImportArchives?: ProfileImportArchiveCreateNestedManyWithoutAccountInput
@@ -172195,6 +174058,7 @@ export namespace Prisma {
     assistedWorkflows?: AiAssistedWorkflowUncheckedCreateNestedManyWithoutAccountInput
     avatar?: AccountAvatarUncheckedCreateNestedOneWithoutAccountInput
     externalMutationReceipts?: ExternalMutationReceiptUncheckedCreateNestedManyWithoutAccountInput
+    externalAgentAuditEvents?: ExternalAgentAuditEventUncheckedCreateNestedManyWithoutAccountInput
     goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationUncheckedCreateNestedManyWithoutAccountInput
     profileImportArchives?: ProfileImportArchiveUncheckedCreateNestedManyWithoutAccountInput
@@ -172358,6 +174222,7 @@ export namespace Prisma {
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
     avatar?: AccountAvatarUpdateOneWithoutAccountNestedInput
     externalMutationReceipts?: ExternalMutationReceiptUpdateManyWithoutAccountNestedInput
+    externalAgentAuditEvents?: ExternalAgentAuditEventUpdateManyWithoutAccountNestedInput
     goals?: GoalUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUpdateManyWithoutAccountNestedInput
     profileImportArchives?: ProfileImportArchiveUpdateManyWithoutAccountNestedInput
@@ -172416,6 +174281,7 @@ export namespace Prisma {
     assistedWorkflows?: AiAssistedWorkflowUncheckedUpdateManyWithoutAccountNestedInput
     avatar?: AccountAvatarUncheckedUpdateOneWithoutAccountNestedInput
     externalMutationReceipts?: ExternalMutationReceiptUncheckedUpdateManyWithoutAccountNestedInput
+    externalAgentAuditEvents?: ExternalAgentAuditEventUncheckedUpdateManyWithoutAccountNestedInput
     goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUncheckedUpdateManyWithoutAccountNestedInput
     profileImportArchives?: ProfileImportArchiveUncheckedUpdateManyWithoutAccountNestedInput
@@ -172709,6 +174575,7 @@ export namespace Prisma {
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
     avatar?: AccountAvatarCreateNestedOneWithoutAccountInput
     externalMutationReceipts?: ExternalMutationReceiptCreateNestedManyWithoutAccountInput
+    externalAgentAuditEvents?: ExternalAgentAuditEventCreateNestedManyWithoutAccountInput
     goals?: GoalCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationCreateNestedManyWithoutAccountInput
     profileImportArchives?: ProfileImportArchiveCreateNestedManyWithoutAccountInput
@@ -172767,6 +174634,7 @@ export namespace Prisma {
     assistedWorkflows?: AiAssistedWorkflowUncheckedCreateNestedManyWithoutAccountInput
     avatar?: AccountAvatarUncheckedCreateNestedOneWithoutAccountInput
     externalMutationReceipts?: ExternalMutationReceiptUncheckedCreateNestedManyWithoutAccountInput
+    externalAgentAuditEvents?: ExternalAgentAuditEventUncheckedCreateNestedManyWithoutAccountInput
     goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationUncheckedCreateNestedManyWithoutAccountInput
     profileImportArchives?: ProfileImportArchiveUncheckedCreateNestedManyWithoutAccountInput
@@ -172905,6 +174773,7 @@ export namespace Prisma {
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
     avatar?: AccountAvatarUpdateOneWithoutAccountNestedInput
     externalMutationReceipts?: ExternalMutationReceiptUpdateManyWithoutAccountNestedInput
+    externalAgentAuditEvents?: ExternalAgentAuditEventUpdateManyWithoutAccountNestedInput
     goals?: GoalUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUpdateManyWithoutAccountNestedInput
     profileImportArchives?: ProfileImportArchiveUpdateManyWithoutAccountNestedInput
@@ -172963,6 +174832,7 @@ export namespace Prisma {
     assistedWorkflows?: AiAssistedWorkflowUncheckedUpdateManyWithoutAccountNestedInput
     avatar?: AccountAvatarUncheckedUpdateOneWithoutAccountNestedInput
     externalMutationReceipts?: ExternalMutationReceiptUncheckedUpdateManyWithoutAccountNestedInput
+    externalAgentAuditEvents?: ExternalAgentAuditEventUncheckedUpdateManyWithoutAccountNestedInput
     goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUncheckedUpdateManyWithoutAccountNestedInput
     profileImportArchives?: ProfileImportArchiveUncheckedUpdateManyWithoutAccountNestedInput
@@ -173021,6 +174891,7 @@ export namespace Prisma {
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
     avatar?: AccountAvatarCreateNestedOneWithoutAccountInput
     externalMutationReceipts?: ExternalMutationReceiptCreateNestedManyWithoutAccountInput
+    externalAgentAuditEvents?: ExternalAgentAuditEventCreateNestedManyWithoutAccountInput
     goals?: GoalCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationCreateNestedManyWithoutAccountInput
     profileImportArchives?: ProfileImportArchiveCreateNestedManyWithoutAccountInput
@@ -173079,6 +174950,7 @@ export namespace Prisma {
     assistedWorkflows?: AiAssistedWorkflowUncheckedCreateNestedManyWithoutAccountInput
     avatar?: AccountAvatarUncheckedCreateNestedOneWithoutAccountInput
     externalMutationReceipts?: ExternalMutationReceiptUncheckedCreateNestedManyWithoutAccountInput
+    externalAgentAuditEvents?: ExternalAgentAuditEventUncheckedCreateNestedManyWithoutAccountInput
     goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationUncheckedCreateNestedManyWithoutAccountInput
     profileImportArchives?: ProfileImportArchiveUncheckedCreateNestedManyWithoutAccountInput
@@ -173220,6 +175092,7 @@ export namespace Prisma {
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
     avatar?: AccountAvatarUpdateOneWithoutAccountNestedInput
     externalMutationReceipts?: ExternalMutationReceiptUpdateManyWithoutAccountNestedInput
+    externalAgentAuditEvents?: ExternalAgentAuditEventUpdateManyWithoutAccountNestedInput
     goals?: GoalUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUpdateManyWithoutAccountNestedInput
     profileImportArchives?: ProfileImportArchiveUpdateManyWithoutAccountNestedInput
@@ -173278,6 +175151,7 @@ export namespace Prisma {
     assistedWorkflows?: AiAssistedWorkflowUncheckedUpdateManyWithoutAccountNestedInput
     avatar?: AccountAvatarUncheckedUpdateOneWithoutAccountNestedInput
     externalMutationReceipts?: ExternalMutationReceiptUncheckedUpdateManyWithoutAccountNestedInput
+    externalAgentAuditEvents?: ExternalAgentAuditEventUncheckedUpdateManyWithoutAccountNestedInput
     goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUncheckedUpdateManyWithoutAccountNestedInput
     profileImportArchives?: ProfileImportArchiveUncheckedUpdateManyWithoutAccountNestedInput
@@ -173616,6 +175490,7 @@ export namespace Prisma {
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
     avatar?: AccountAvatarCreateNestedOneWithoutAccountInput
     externalMutationReceipts?: ExternalMutationReceiptCreateNestedManyWithoutAccountInput
+    externalAgentAuditEvents?: ExternalAgentAuditEventCreateNestedManyWithoutAccountInput
     goals?: GoalCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationCreateNestedManyWithoutAccountInput
     profileImportArchives?: ProfileImportArchiveCreateNestedManyWithoutAccountInput
@@ -173674,6 +175549,7 @@ export namespace Prisma {
     assistedWorkflows?: AiAssistedWorkflowUncheckedCreateNestedManyWithoutAccountInput
     avatar?: AccountAvatarUncheckedCreateNestedOneWithoutAccountInput
     externalMutationReceipts?: ExternalMutationReceiptUncheckedCreateNestedManyWithoutAccountInput
+    externalAgentAuditEvents?: ExternalAgentAuditEventUncheckedCreateNestedManyWithoutAccountInput
     goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationUncheckedCreateNestedManyWithoutAccountInput
     profileImportArchives?: ProfileImportArchiveUncheckedCreateNestedManyWithoutAccountInput
@@ -173821,6 +175697,7 @@ export namespace Prisma {
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
     avatar?: AccountAvatarUpdateOneWithoutAccountNestedInput
     externalMutationReceipts?: ExternalMutationReceiptUpdateManyWithoutAccountNestedInput
+    externalAgentAuditEvents?: ExternalAgentAuditEventUpdateManyWithoutAccountNestedInput
     goals?: GoalUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUpdateManyWithoutAccountNestedInput
     profileImportArchives?: ProfileImportArchiveUpdateManyWithoutAccountNestedInput
@@ -173879,6 +175756,7 @@ export namespace Prisma {
     assistedWorkflows?: AiAssistedWorkflowUncheckedUpdateManyWithoutAccountNestedInput
     avatar?: AccountAvatarUncheckedUpdateOneWithoutAccountNestedInput
     externalMutationReceipts?: ExternalMutationReceiptUncheckedUpdateManyWithoutAccountNestedInput
+    externalAgentAuditEvents?: ExternalAgentAuditEventUncheckedUpdateManyWithoutAccountNestedInput
     goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUncheckedUpdateManyWithoutAccountNestedInput
     profileImportArchives?: ProfileImportArchiveUncheckedUpdateManyWithoutAccountNestedInput
@@ -175700,6 +177578,7 @@ export namespace Prisma {
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
     avatar?: AccountAvatarCreateNestedOneWithoutAccountInput
     externalMutationReceipts?: ExternalMutationReceiptCreateNestedManyWithoutAccountInput
+    externalAgentAuditEvents?: ExternalAgentAuditEventCreateNestedManyWithoutAccountInput
     goals?: GoalCreateNestedManyWithoutAccountInput
     profileImportArchives?: ProfileImportArchiveCreateNestedManyWithoutAccountInput
     labels?: LabelCreateNestedManyWithoutAccountInput
@@ -175758,6 +177637,7 @@ export namespace Prisma {
     assistedWorkflows?: AiAssistedWorkflowUncheckedCreateNestedManyWithoutAccountInput
     avatar?: AccountAvatarUncheckedCreateNestedOneWithoutAccountInput
     externalMutationReceipts?: ExternalMutationReceiptUncheckedCreateNestedManyWithoutAccountInput
+    externalAgentAuditEvents?: ExternalAgentAuditEventUncheckedCreateNestedManyWithoutAccountInput
     goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
     profileImportArchives?: ProfileImportArchiveUncheckedCreateNestedManyWithoutAccountInput
     labels?: LabelUncheckedCreateNestedManyWithoutAccountInput
@@ -175869,6 +177749,7 @@ export namespace Prisma {
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
     avatar?: AccountAvatarUpdateOneWithoutAccountNestedInput
     externalMutationReceipts?: ExternalMutationReceiptUpdateManyWithoutAccountNestedInput
+    externalAgentAuditEvents?: ExternalAgentAuditEventUpdateManyWithoutAccountNestedInput
     goals?: GoalUpdateManyWithoutAccountNestedInput
     profileImportArchives?: ProfileImportArchiveUpdateManyWithoutAccountNestedInput
     labels?: LabelUpdateManyWithoutAccountNestedInput
@@ -175927,6 +177808,7 @@ export namespace Prisma {
     assistedWorkflows?: AiAssistedWorkflowUncheckedUpdateManyWithoutAccountNestedInput
     avatar?: AccountAvatarUncheckedUpdateOneWithoutAccountNestedInput
     externalMutationReceipts?: ExternalMutationReceiptUncheckedUpdateManyWithoutAccountNestedInput
+    externalAgentAuditEvents?: ExternalAgentAuditEventUncheckedUpdateManyWithoutAccountNestedInput
     goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
     profileImportArchives?: ProfileImportArchiveUncheckedUpdateManyWithoutAccountNestedInput
     labels?: LabelUncheckedUpdateManyWithoutAccountNestedInput
@@ -176028,6 +177910,7 @@ export namespace Prisma {
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
     avatar?: AccountAvatarCreateNestedOneWithoutAccountInput
     externalMutationReceipts?: ExternalMutationReceiptCreateNestedManyWithoutAccountInput
+    externalAgentAuditEvents?: ExternalAgentAuditEventCreateNestedManyWithoutAccountInput
     goals?: GoalCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationCreateNestedManyWithoutAccountInput
     labels?: LabelCreateNestedManyWithoutAccountInput
@@ -176086,6 +177969,7 @@ export namespace Prisma {
     assistedWorkflows?: AiAssistedWorkflowUncheckedCreateNestedManyWithoutAccountInput
     avatar?: AccountAvatarUncheckedCreateNestedOneWithoutAccountInput
     externalMutationReceipts?: ExternalMutationReceiptUncheckedCreateNestedManyWithoutAccountInput
+    externalAgentAuditEvents?: ExternalAgentAuditEventUncheckedCreateNestedManyWithoutAccountInput
     goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationUncheckedCreateNestedManyWithoutAccountInput
     labels?: LabelUncheckedCreateNestedManyWithoutAccountInput
@@ -176217,6 +178101,7 @@ export namespace Prisma {
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
     avatar?: AccountAvatarUpdateOneWithoutAccountNestedInput
     externalMutationReceipts?: ExternalMutationReceiptUpdateManyWithoutAccountNestedInput
+    externalAgentAuditEvents?: ExternalAgentAuditEventUpdateManyWithoutAccountNestedInput
     goals?: GoalUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUpdateManyWithoutAccountNestedInput
     labels?: LabelUpdateManyWithoutAccountNestedInput
@@ -176275,6 +178160,7 @@ export namespace Prisma {
     assistedWorkflows?: AiAssistedWorkflowUncheckedUpdateManyWithoutAccountNestedInput
     avatar?: AccountAvatarUncheckedUpdateOneWithoutAccountNestedInput
     externalMutationReceipts?: ExternalMutationReceiptUncheckedUpdateManyWithoutAccountNestedInput
+    externalAgentAuditEvents?: ExternalAgentAuditEventUncheckedUpdateManyWithoutAccountNestedInput
     goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUncheckedUpdateManyWithoutAccountNestedInput
     labels?: LabelUncheckedUpdateManyWithoutAccountNestedInput
@@ -176479,6 +178365,7 @@ export namespace Prisma {
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
     avatar?: AccountAvatarCreateNestedOneWithoutAccountInput
     externalMutationReceipts?: ExternalMutationReceiptCreateNestedManyWithoutAccountInput
+    externalAgentAuditEvents?: ExternalAgentAuditEventCreateNestedManyWithoutAccountInput
     goals?: GoalCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationCreateNestedManyWithoutAccountInput
     profileImportArchives?: ProfileImportArchiveCreateNestedManyWithoutAccountInput
@@ -176537,6 +178424,7 @@ export namespace Prisma {
     assistedWorkflows?: AiAssistedWorkflowUncheckedCreateNestedManyWithoutAccountInput
     avatar?: AccountAvatarUncheckedCreateNestedOneWithoutAccountInput
     externalMutationReceipts?: ExternalMutationReceiptUncheckedCreateNestedManyWithoutAccountInput
+    externalAgentAuditEvents?: ExternalAgentAuditEventUncheckedCreateNestedManyWithoutAccountInput
     goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationUncheckedCreateNestedManyWithoutAccountInput
     profileImportArchives?: ProfileImportArchiveUncheckedCreateNestedManyWithoutAccountInput
@@ -176611,6 +178499,7 @@ export namespace Prisma {
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
     avatar?: AccountAvatarUpdateOneWithoutAccountNestedInput
     externalMutationReceipts?: ExternalMutationReceiptUpdateManyWithoutAccountNestedInput
+    externalAgentAuditEvents?: ExternalAgentAuditEventUpdateManyWithoutAccountNestedInput
     goals?: GoalUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUpdateManyWithoutAccountNestedInput
     profileImportArchives?: ProfileImportArchiveUpdateManyWithoutAccountNestedInput
@@ -176669,6 +178558,7 @@ export namespace Prisma {
     assistedWorkflows?: AiAssistedWorkflowUncheckedUpdateManyWithoutAccountNestedInput
     avatar?: AccountAvatarUncheckedUpdateOneWithoutAccountNestedInput
     externalMutationReceipts?: ExternalMutationReceiptUncheckedUpdateManyWithoutAccountNestedInput
+    externalAgentAuditEvents?: ExternalAgentAuditEventUncheckedUpdateManyWithoutAccountNestedInput
     goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUncheckedUpdateManyWithoutAccountNestedInput
     profileImportArchives?: ProfileImportArchiveUncheckedUpdateManyWithoutAccountNestedInput
@@ -176726,6 +178616,7 @@ export namespace Prisma {
     assistedWorkflows?: AiAssistedWorkflowCreateNestedManyWithoutAccountInput
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
     avatar?: AccountAvatarCreateNestedOneWithoutAccountInput
+    externalAgentAuditEvents?: ExternalAgentAuditEventCreateNestedManyWithoutAccountInput
     goals?: GoalCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationCreateNestedManyWithoutAccountInput
     profileImportArchives?: ProfileImportArchiveCreateNestedManyWithoutAccountInput
@@ -176784,6 +178675,7 @@ export namespace Prisma {
     avatarUpdatedAt?: Date | string | null
     assistedWorkflows?: AiAssistedWorkflowUncheckedCreateNestedManyWithoutAccountInput
     avatar?: AccountAvatarUncheckedCreateNestedOneWithoutAccountInput
+    externalAgentAuditEvents?: ExternalAgentAuditEventUncheckedCreateNestedManyWithoutAccountInput
     goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationUncheckedCreateNestedManyWithoutAccountInput
     profileImportArchives?: ProfileImportArchiveUncheckedCreateNestedManyWithoutAccountInput
@@ -176858,6 +178750,7 @@ export namespace Prisma {
     assistedWorkflows?: AiAssistedWorkflowUpdateManyWithoutAccountNestedInput
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
     avatar?: AccountAvatarUpdateOneWithoutAccountNestedInput
+    externalAgentAuditEvents?: ExternalAgentAuditEventUpdateManyWithoutAccountNestedInput
     goals?: GoalUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUpdateManyWithoutAccountNestedInput
     profileImportArchives?: ProfileImportArchiveUpdateManyWithoutAccountNestedInput
@@ -176916,6 +178809,259 @@ export namespace Prisma {
     avatarUpdatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     assistedWorkflows?: AiAssistedWorkflowUncheckedUpdateManyWithoutAccountNestedInput
     avatar?: AccountAvatarUncheckedUpdateOneWithoutAccountNestedInput
+    externalAgentAuditEvents?: ExternalAgentAuditEventUncheckedUpdateManyWithoutAccountNestedInput
+    goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
+    profileImportOperations?: ProfileImportOperationUncheckedUpdateManyWithoutAccountNestedInput
+    profileImportArchives?: ProfileImportArchiveUncheckedUpdateManyWithoutAccountNestedInput
+    labels?: LabelUncheckedUpdateManyWithoutAccountNestedInput
+    goalLabels?: GoalLabelUncheckedUpdateManyWithoutAccountNestedInput
+    taskLabels?: TaskLabelUncheckedUpdateManyWithoutAccountNestedInput
+    routineDefinitions?: RoutineDefinitionUncheckedUpdateManyWithoutAccountNestedInput
+    routinePreference?: RoutinePreferenceUncheckedUpdateOneWithoutAccountNestedInput
+    routineTemporaryOverrides?: RoutineTemporaryOverrideUncheckedUpdateManyWithoutAccountNestedInput
+    routineProfiles?: RoutineProfileUncheckedUpdateManyWithoutAccountNestedInput
+    routineProfileMemberships?: RoutineProfileMembershipUncheckedUpdateManyWithoutAccountNestedInput
+    routineProtocolDefinitions?: RoutineProtocolDefinitionUncheckedUpdateManyWithoutAccountNestedInput
+    routineProtocolSessions?: RoutineProtocolSessionUncheckedUpdateManyWithoutAccountNestedInput
+    schedules?: ScheduleUncheckedUpdateManyWithoutAccountNestedInput
+    schedulingReconcileOperations?: SchedulingReconcileOperationUncheckedUpdateManyWithoutAccountNestedInput
+    scheduledInvocations?: ScheduledInvocationUncheckedUpdateManyWithoutAccountNestedInput
+    invocationAttempts?: InvocationAttemptUncheckedUpdateManyWithoutAccountNestedInput
+    habits?: HabitUncheckedUpdateManyWithoutAccountNestedInput
+    relations?: RelationUncheckedUpdateManyWithoutAccountNestedInput
+    walletAccounts?: WalletAccountUncheckedUpdateManyWithoutAccountNestedInput
+    walletTransactions?: WalletTransactionUncheckedUpdateManyWithoutAccount_identityNestedInput
+    taskPlans?: TaskPlanUncheckedUpdateManyWithoutAccountNestedInput
+    taskOccurrences?: TaskOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
+    userPreferenceRecords?: UserPreferenceRecordUncheckedUpdateManyWithoutAccountNestedInput
+    notifications?: NotificationUncheckedUpdateManyWithoutAccountNestedInput
+    aiConversations?: AiConversationUncheckedUpdateManyWithoutAccountNestedInput
+    aiExecutionRecords?: AiExecutionRecordUncheckedUpdateManyWithoutAccountNestedInput
+    aiPermissionSettings?: AiPermissionSettingUncheckedUpdateManyWithoutAccountNestedInput
+    aiPermissionRules?: AiPermissionRuleUncheckedUpdateManyWithoutAccountNestedInput
+    aiPermissionAudits?: AiPermissionAuditUncheckedUpdateManyWithoutAccountNestedInput
+    aiGoalSurfaceLeases?: AiGoalSurfaceLeaseUncheckedUpdateManyWithoutAccountNestedInput
+    aiConversationAttention?: AiConversationAttentionUncheckedUpdateManyWithoutAccountNestedInput
+    aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedUpdateManyWithoutAccountNestedInput
+    aiProviderConfigs?: AiProviderConfigUncheckedUpdateManyWithoutAccountNestedInput
+    aiAgentInstances?: AiAgentInstanceUncheckedUpdateManyWithoutAccountNestedInput
+    aiAgentInstanceBindings?: AiAgentInstanceBindingUncheckedUpdateManyWithoutAccountNestedInput
+    aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedUpdateManyWithoutAccountNestedInput
+    aiProviderSecrets?: AiProviderSecretUncheckedUpdateManyWithoutAccountNestedInput
+    taskPlanHistory?: TaskPlanHistoryUncheckedUpdateManyWithoutIdentityNestedInput
+    routineOccurrences?: RoutineOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
+    routineInteractions?: RoutineInteractionUncheckedUpdateManyWithoutAccountNestedInput
+    notificationInteractions?: NotificationInteractionUncheckedUpdateManyWithoutIdentityNestedInput
+    notificationDispatchOutboxes?: NotificationDispatchOutboxUncheckedUpdateManyWithoutAccountNestedInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingUncheckedUpdateManyWithoutAccountNestedInput
+    knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentUncheckedUpdateManyWithoutAccountNestedInput
+    knowledgeWriteRequests?: KnowledgeWriteRequestUncheckedUpdateManyWithoutAccountNestedInput
+  }
+
+  export type AccountCreateWithoutExternalAgentAuditEventsInput = {
+    status?: string
+    profile: JsonNullValueInput | InputJsonValue
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    closedAt?: Date | string | null
+    avatarUpdatedAt?: Date | string | null
+    assistedWorkflows?: AiAssistedWorkflowCreateNestedManyWithoutAccountInput
+    cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
+    avatar?: AccountAvatarCreateNestedOneWithoutAccountInput
+    externalMutationReceipts?: ExternalMutationReceiptCreateNestedManyWithoutAccountInput
+    goals?: GoalCreateNestedManyWithoutAccountInput
+    profileImportOperations?: ProfileImportOperationCreateNestedManyWithoutAccountInput
+    profileImportArchives?: ProfileImportArchiveCreateNestedManyWithoutAccountInput
+    labels?: LabelCreateNestedManyWithoutAccountInput
+    goalLabels?: GoalLabelCreateNestedManyWithoutAccountInput
+    taskLabels?: TaskLabelCreateNestedManyWithoutAccountInput
+    routineDefinitions?: RoutineDefinitionCreateNestedManyWithoutAccountInput
+    routinePreference?: RoutinePreferenceCreateNestedOneWithoutAccountInput
+    routineTemporaryOverrides?: RoutineTemporaryOverrideCreateNestedManyWithoutAccountInput
+    routineProfiles?: RoutineProfileCreateNestedManyWithoutAccountInput
+    routineProfileMemberships?: RoutineProfileMembershipCreateNestedManyWithoutAccountInput
+    routineProtocolDefinitions?: RoutineProtocolDefinitionCreateNestedManyWithoutAccountInput
+    routineProtocolSessions?: RoutineProtocolSessionCreateNestedManyWithoutAccountInput
+    schedules?: ScheduleCreateNestedManyWithoutAccountInput
+    schedulingReconcileOperations?: SchedulingReconcileOperationCreateNestedManyWithoutAccountInput
+    scheduledInvocations?: ScheduledInvocationCreateNestedManyWithoutAccountInput
+    invocationAttempts?: InvocationAttemptCreateNestedManyWithoutAccountInput
+    habits?: HabitCreateNestedManyWithoutAccountInput
+    relations?: RelationCreateNestedManyWithoutAccountInput
+    walletAccounts?: WalletAccountCreateNestedManyWithoutAccountInput
+    walletTransactions?: WalletTransactionCreateNestedManyWithoutAccount_identityInput
+    taskPlans?: TaskPlanCreateNestedManyWithoutAccountInput
+    taskOccurrences?: TaskOccurrenceCreateNestedManyWithoutAccountInput
+    userPreferenceRecords?: UserPreferenceRecordCreateNestedManyWithoutAccountInput
+    notifications?: NotificationCreateNestedManyWithoutAccountInput
+    aiConversations?: AiConversationCreateNestedManyWithoutAccountInput
+    aiExecutionRecords?: AiExecutionRecordCreateNestedManyWithoutAccountInput
+    aiPermissionSettings?: AiPermissionSettingCreateNestedManyWithoutAccountInput
+    aiPermissionRules?: AiPermissionRuleCreateNestedManyWithoutAccountInput
+    aiPermissionAudits?: AiPermissionAuditCreateNestedManyWithoutAccountInput
+    aiGoalSurfaceLeases?: AiGoalSurfaceLeaseCreateNestedManyWithoutAccountInput
+    aiConversationAttention?: AiConversationAttentionCreateNestedManyWithoutAccountInput
+    aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryCreateNestedManyWithoutAccountInput
+    aiProviderConfigs?: AiProviderConfigCreateNestedManyWithoutAccountInput
+    aiAgentInstances?: AiAgentInstanceCreateNestedManyWithoutAccountInput
+    aiAgentInstanceBindings?: AiAgentInstanceBindingCreateNestedManyWithoutAccountInput
+    aiProviderOnboardingSessions?: AiProviderOnboardingSessionCreateNestedManyWithoutAccountInput
+    aiProviderSecrets?: AiProviderSecretCreateNestedManyWithoutAccountInput
+    taskPlanHistory?: TaskPlanHistoryCreateNestedManyWithoutIdentityInput
+    routineOccurrences?: RoutineOccurrenceCreateNestedManyWithoutAccountInput
+    routineInteractions?: RoutineInteractionCreateNestedManyWithoutAccountInput
+    notificationInteractions?: NotificationInteractionCreateNestedManyWithoutIdentityInput
+    notificationDispatchOutboxes?: NotificationDispatchOutboxCreateNestedManyWithoutAccountInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingCreateNestedManyWithoutAccountInput
+    knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentCreateNestedManyWithoutAccountInput
+    knowledgeWriteRequests?: KnowledgeWriteRequestCreateNestedManyWithoutAccountInput
+  }
+
+  export type AccountUncheckedCreateWithoutExternalAgentAuditEventsInput = {
+    id: string
+    status?: string
+    profile: JsonNullValueInput | InputJsonValue
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    closedAt?: Date | string | null
+    avatarUpdatedAt?: Date | string | null
+    assistedWorkflows?: AiAssistedWorkflowUncheckedCreateNestedManyWithoutAccountInput
+    avatar?: AccountAvatarUncheckedCreateNestedOneWithoutAccountInput
+    externalMutationReceipts?: ExternalMutationReceiptUncheckedCreateNestedManyWithoutAccountInput
+    goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
+    profileImportOperations?: ProfileImportOperationUncheckedCreateNestedManyWithoutAccountInput
+    profileImportArchives?: ProfileImportArchiveUncheckedCreateNestedManyWithoutAccountInput
+    labels?: LabelUncheckedCreateNestedManyWithoutAccountInput
+    goalLabels?: GoalLabelUncheckedCreateNestedManyWithoutAccountInput
+    taskLabels?: TaskLabelUncheckedCreateNestedManyWithoutAccountInput
+    routineDefinitions?: RoutineDefinitionUncheckedCreateNestedManyWithoutAccountInput
+    routinePreference?: RoutinePreferenceUncheckedCreateNestedOneWithoutAccountInput
+    routineTemporaryOverrides?: RoutineTemporaryOverrideUncheckedCreateNestedManyWithoutAccountInput
+    routineProfiles?: RoutineProfileUncheckedCreateNestedManyWithoutAccountInput
+    routineProfileMemberships?: RoutineProfileMembershipUncheckedCreateNestedManyWithoutAccountInput
+    routineProtocolDefinitions?: RoutineProtocolDefinitionUncheckedCreateNestedManyWithoutAccountInput
+    routineProtocolSessions?: RoutineProtocolSessionUncheckedCreateNestedManyWithoutAccountInput
+    schedules?: ScheduleUncheckedCreateNestedManyWithoutAccountInput
+    schedulingReconcileOperations?: SchedulingReconcileOperationUncheckedCreateNestedManyWithoutAccountInput
+    scheduledInvocations?: ScheduledInvocationUncheckedCreateNestedManyWithoutAccountInput
+    invocationAttempts?: InvocationAttemptUncheckedCreateNestedManyWithoutAccountInput
+    habits?: HabitUncheckedCreateNestedManyWithoutAccountInput
+    relations?: RelationUncheckedCreateNestedManyWithoutAccountInput
+    walletAccounts?: WalletAccountUncheckedCreateNestedManyWithoutAccountInput
+    walletTransactions?: WalletTransactionUncheckedCreateNestedManyWithoutAccount_identityInput
+    taskPlans?: TaskPlanUncheckedCreateNestedManyWithoutAccountInput
+    taskOccurrences?: TaskOccurrenceUncheckedCreateNestedManyWithoutAccountInput
+    userPreferenceRecords?: UserPreferenceRecordUncheckedCreateNestedManyWithoutAccountInput
+    notifications?: NotificationUncheckedCreateNestedManyWithoutAccountInput
+    aiConversations?: AiConversationUncheckedCreateNestedManyWithoutAccountInput
+    aiExecutionRecords?: AiExecutionRecordUncheckedCreateNestedManyWithoutAccountInput
+    aiPermissionSettings?: AiPermissionSettingUncheckedCreateNestedManyWithoutAccountInput
+    aiPermissionRules?: AiPermissionRuleUncheckedCreateNestedManyWithoutAccountInput
+    aiPermissionAudits?: AiPermissionAuditUncheckedCreateNestedManyWithoutAccountInput
+    aiGoalSurfaceLeases?: AiGoalSurfaceLeaseUncheckedCreateNestedManyWithoutAccountInput
+    aiConversationAttention?: AiConversationAttentionUncheckedCreateNestedManyWithoutAccountInput
+    aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedCreateNestedManyWithoutAccountInput
+    aiProviderConfigs?: AiProviderConfigUncheckedCreateNestedManyWithoutAccountInput
+    aiAgentInstances?: AiAgentInstanceUncheckedCreateNestedManyWithoutAccountInput
+    aiAgentInstanceBindings?: AiAgentInstanceBindingUncheckedCreateNestedManyWithoutAccountInput
+    aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedCreateNestedManyWithoutAccountInput
+    aiProviderSecrets?: AiProviderSecretUncheckedCreateNestedManyWithoutAccountInput
+    taskPlanHistory?: TaskPlanHistoryUncheckedCreateNestedManyWithoutIdentityInput
+    routineOccurrences?: RoutineOccurrenceUncheckedCreateNestedManyWithoutAccountInput
+    routineInteractions?: RoutineInteractionUncheckedCreateNestedManyWithoutAccountInput
+    notificationInteractions?: NotificationInteractionUncheckedCreateNestedManyWithoutIdentityInput
+    notificationDispatchOutboxes?: NotificationDispatchOutboxUncheckedCreateNestedManyWithoutAccountInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingUncheckedCreateNestedManyWithoutAccountInput
+    knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentUncheckedCreateNestedManyWithoutAccountInput
+    knowledgeWriteRequests?: KnowledgeWriteRequestUncheckedCreateNestedManyWithoutAccountInput
+  }
+
+  export type AccountCreateOrConnectWithoutExternalAgentAuditEventsInput = {
+    where: AccountWhereUniqueInput
+    create: XOR<AccountCreateWithoutExternalAgentAuditEventsInput, AccountUncheckedCreateWithoutExternalAgentAuditEventsInput>
+  }
+
+  export type AccountUpsertWithoutExternalAgentAuditEventsInput = {
+    update: XOR<AccountUpdateWithoutExternalAgentAuditEventsInput, AccountUncheckedUpdateWithoutExternalAgentAuditEventsInput>
+    create: XOR<AccountCreateWithoutExternalAgentAuditEventsInput, AccountUncheckedCreateWithoutExternalAgentAuditEventsInput>
+    where?: AccountWhereInput
+  }
+
+  export type AccountUpdateToOneWithWhereWithoutExternalAgentAuditEventsInput = {
+    where?: AccountWhereInput
+    data: XOR<AccountUpdateWithoutExternalAgentAuditEventsInput, AccountUncheckedUpdateWithoutExternalAgentAuditEventsInput>
+  }
+
+  export type AccountUpdateWithoutExternalAgentAuditEventsInput = {
+    status?: StringFieldUpdateOperationsInput | string
+    profile?: JsonNullValueInput | InputJsonValue
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    avatarUpdatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    assistedWorkflows?: AiAssistedWorkflowUpdateManyWithoutAccountNestedInput
+    cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
+    avatar?: AccountAvatarUpdateOneWithoutAccountNestedInput
+    externalMutationReceipts?: ExternalMutationReceiptUpdateManyWithoutAccountNestedInput
+    goals?: GoalUpdateManyWithoutAccountNestedInput
+    profileImportOperations?: ProfileImportOperationUpdateManyWithoutAccountNestedInput
+    profileImportArchives?: ProfileImportArchiveUpdateManyWithoutAccountNestedInput
+    labels?: LabelUpdateManyWithoutAccountNestedInput
+    goalLabels?: GoalLabelUpdateManyWithoutAccountNestedInput
+    taskLabels?: TaskLabelUpdateManyWithoutAccountNestedInput
+    routineDefinitions?: RoutineDefinitionUpdateManyWithoutAccountNestedInput
+    routinePreference?: RoutinePreferenceUpdateOneWithoutAccountNestedInput
+    routineTemporaryOverrides?: RoutineTemporaryOverrideUpdateManyWithoutAccountNestedInput
+    routineProfiles?: RoutineProfileUpdateManyWithoutAccountNestedInput
+    routineProfileMemberships?: RoutineProfileMembershipUpdateManyWithoutAccountNestedInput
+    routineProtocolDefinitions?: RoutineProtocolDefinitionUpdateManyWithoutAccountNestedInput
+    routineProtocolSessions?: RoutineProtocolSessionUpdateManyWithoutAccountNestedInput
+    schedules?: ScheduleUpdateManyWithoutAccountNestedInput
+    schedulingReconcileOperations?: SchedulingReconcileOperationUpdateManyWithoutAccountNestedInput
+    scheduledInvocations?: ScheduledInvocationUpdateManyWithoutAccountNestedInput
+    invocationAttempts?: InvocationAttemptUpdateManyWithoutAccountNestedInput
+    habits?: HabitUpdateManyWithoutAccountNestedInput
+    relations?: RelationUpdateManyWithoutAccountNestedInput
+    walletAccounts?: WalletAccountUpdateManyWithoutAccountNestedInput
+    walletTransactions?: WalletTransactionUpdateManyWithoutAccount_identityNestedInput
+    taskPlans?: TaskPlanUpdateManyWithoutAccountNestedInput
+    taskOccurrences?: TaskOccurrenceUpdateManyWithoutAccountNestedInput
+    userPreferenceRecords?: UserPreferenceRecordUpdateManyWithoutAccountNestedInput
+    notifications?: NotificationUpdateManyWithoutAccountNestedInput
+    aiConversations?: AiConversationUpdateManyWithoutAccountNestedInput
+    aiExecutionRecords?: AiExecutionRecordUpdateManyWithoutAccountNestedInput
+    aiPermissionSettings?: AiPermissionSettingUpdateManyWithoutAccountNestedInput
+    aiPermissionRules?: AiPermissionRuleUpdateManyWithoutAccountNestedInput
+    aiPermissionAudits?: AiPermissionAuditUpdateManyWithoutAccountNestedInput
+    aiGoalSurfaceLeases?: AiGoalSurfaceLeaseUpdateManyWithoutAccountNestedInput
+    aiConversationAttention?: AiConversationAttentionUpdateManyWithoutAccountNestedInput
+    aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUpdateManyWithoutAccountNestedInput
+    aiProviderConfigs?: AiProviderConfigUpdateManyWithoutAccountNestedInput
+    aiAgentInstances?: AiAgentInstanceUpdateManyWithoutAccountNestedInput
+    aiAgentInstanceBindings?: AiAgentInstanceBindingUpdateManyWithoutAccountNestedInput
+    aiProviderOnboardingSessions?: AiProviderOnboardingSessionUpdateManyWithoutAccountNestedInput
+    aiProviderSecrets?: AiProviderSecretUpdateManyWithoutAccountNestedInput
+    taskPlanHistory?: TaskPlanHistoryUpdateManyWithoutIdentityNestedInput
+    routineOccurrences?: RoutineOccurrenceUpdateManyWithoutAccountNestedInput
+    routineInteractions?: RoutineInteractionUpdateManyWithoutAccountNestedInput
+    notificationInteractions?: NotificationInteractionUpdateManyWithoutIdentityNestedInput
+    notificationDispatchOutboxes?: NotificationDispatchOutboxUpdateManyWithoutAccountNestedInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingUpdateManyWithoutAccountNestedInput
+    knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentUpdateManyWithoutAccountNestedInput
+    knowledgeWriteRequests?: KnowledgeWriteRequestUpdateManyWithoutAccountNestedInput
+  }
+
+  export type AccountUncheckedUpdateWithoutExternalAgentAuditEventsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    status?: StringFieldUpdateOperationsInput | string
+    profile?: JsonNullValueInput | InputJsonValue
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    avatarUpdatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    assistedWorkflows?: AiAssistedWorkflowUncheckedUpdateManyWithoutAccountNestedInput
+    avatar?: AccountAvatarUncheckedUpdateOneWithoutAccountNestedInput
+    externalMutationReceipts?: ExternalMutationReceiptUncheckedUpdateManyWithoutAccountNestedInput
     goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUncheckedUpdateManyWithoutAccountNestedInput
     profileImportArchives?: ProfileImportArchiveUncheckedUpdateManyWithoutAccountNestedInput
@@ -176975,6 +179121,7 @@ export namespace Prisma {
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
     avatar?: AccountAvatarCreateNestedOneWithoutAccountInput
     externalMutationReceipts?: ExternalMutationReceiptCreateNestedManyWithoutAccountInput
+    externalAgentAuditEvents?: ExternalAgentAuditEventCreateNestedManyWithoutAccountInput
     goals?: GoalCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationCreateNestedManyWithoutAccountInput
     profileImportArchives?: ProfileImportArchiveCreateNestedManyWithoutAccountInput
@@ -177033,6 +179180,7 @@ export namespace Prisma {
     assistedWorkflows?: AiAssistedWorkflowUncheckedCreateNestedManyWithoutAccountInput
     avatar?: AccountAvatarUncheckedCreateNestedOneWithoutAccountInput
     externalMutationReceipts?: ExternalMutationReceiptUncheckedCreateNestedManyWithoutAccountInput
+    externalAgentAuditEvents?: ExternalAgentAuditEventUncheckedCreateNestedManyWithoutAccountInput
     goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationUncheckedCreateNestedManyWithoutAccountInput
     profileImportArchives?: ProfileImportArchiveUncheckedCreateNestedManyWithoutAccountInput
@@ -177264,6 +179412,7 @@ export namespace Prisma {
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
     avatar?: AccountAvatarUpdateOneWithoutAccountNestedInput
     externalMutationReceipts?: ExternalMutationReceiptUpdateManyWithoutAccountNestedInput
+    externalAgentAuditEvents?: ExternalAgentAuditEventUpdateManyWithoutAccountNestedInput
     goals?: GoalUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUpdateManyWithoutAccountNestedInput
     profileImportArchives?: ProfileImportArchiveUpdateManyWithoutAccountNestedInput
@@ -177322,6 +179471,7 @@ export namespace Prisma {
     assistedWorkflows?: AiAssistedWorkflowUncheckedUpdateManyWithoutAccountNestedInput
     avatar?: AccountAvatarUncheckedUpdateOneWithoutAccountNestedInput
     externalMutationReceipts?: ExternalMutationReceiptUncheckedUpdateManyWithoutAccountNestedInput
+    externalAgentAuditEvents?: ExternalAgentAuditEventUncheckedUpdateManyWithoutAccountNestedInput
     goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUncheckedUpdateManyWithoutAccountNestedInput
     profileImportArchives?: ProfileImportArchiveUncheckedUpdateManyWithoutAccountNestedInput
@@ -177454,6 +179604,7 @@ export namespace Prisma {
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
     avatar?: AccountAvatarCreateNestedOneWithoutAccountInput
     externalMutationReceipts?: ExternalMutationReceiptCreateNestedManyWithoutAccountInput
+    externalAgentAuditEvents?: ExternalAgentAuditEventCreateNestedManyWithoutAccountInput
     goals?: GoalCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationCreateNestedManyWithoutAccountInput
     profileImportArchives?: ProfileImportArchiveCreateNestedManyWithoutAccountInput
@@ -177512,6 +179663,7 @@ export namespace Prisma {
     assistedWorkflows?: AiAssistedWorkflowUncheckedCreateNestedManyWithoutAccountInput
     avatar?: AccountAvatarUncheckedCreateNestedOneWithoutAccountInput
     externalMutationReceipts?: ExternalMutationReceiptUncheckedCreateNestedManyWithoutAccountInput
+    externalAgentAuditEvents?: ExternalAgentAuditEventUncheckedCreateNestedManyWithoutAccountInput
     goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationUncheckedCreateNestedManyWithoutAccountInput
     profileImportArchives?: ProfileImportArchiveUncheckedCreateNestedManyWithoutAccountInput
@@ -177586,6 +179738,7 @@ export namespace Prisma {
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
     avatar?: AccountAvatarUpdateOneWithoutAccountNestedInput
     externalMutationReceipts?: ExternalMutationReceiptUpdateManyWithoutAccountNestedInput
+    externalAgentAuditEvents?: ExternalAgentAuditEventUpdateManyWithoutAccountNestedInput
     goals?: GoalUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUpdateManyWithoutAccountNestedInput
     profileImportArchives?: ProfileImportArchiveUpdateManyWithoutAccountNestedInput
@@ -177644,6 +179797,7 @@ export namespace Prisma {
     assistedWorkflows?: AiAssistedWorkflowUncheckedUpdateManyWithoutAccountNestedInput
     avatar?: AccountAvatarUncheckedUpdateOneWithoutAccountNestedInput
     externalMutationReceipts?: ExternalMutationReceiptUncheckedUpdateManyWithoutAccountNestedInput
+    externalAgentAuditEvents?: ExternalAgentAuditEventUncheckedUpdateManyWithoutAccountNestedInput
     goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUncheckedUpdateManyWithoutAccountNestedInput
     profileImportArchives?: ProfileImportArchiveUncheckedUpdateManyWithoutAccountNestedInput
@@ -177702,6 +179856,7 @@ export namespace Prisma {
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
     avatar?: AccountAvatarCreateNestedOneWithoutAccountInput
     externalMutationReceipts?: ExternalMutationReceiptCreateNestedManyWithoutAccountInput
+    externalAgentAuditEvents?: ExternalAgentAuditEventCreateNestedManyWithoutAccountInput
     goals?: GoalCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationCreateNestedManyWithoutAccountInput
     profileImportArchives?: ProfileImportArchiveCreateNestedManyWithoutAccountInput
@@ -177760,6 +179915,7 @@ export namespace Prisma {
     assistedWorkflows?: AiAssistedWorkflowUncheckedCreateNestedManyWithoutAccountInput
     avatar?: AccountAvatarUncheckedCreateNestedOneWithoutAccountInput
     externalMutationReceipts?: ExternalMutationReceiptUncheckedCreateNestedManyWithoutAccountInput
+    externalAgentAuditEvents?: ExternalAgentAuditEventUncheckedCreateNestedManyWithoutAccountInput
     goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationUncheckedCreateNestedManyWithoutAccountInput
     profileImportArchives?: ProfileImportArchiveUncheckedCreateNestedManyWithoutAccountInput
@@ -177861,6 +180017,7 @@ export namespace Prisma {
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
     avatar?: AccountAvatarUpdateOneWithoutAccountNestedInput
     externalMutationReceipts?: ExternalMutationReceiptUpdateManyWithoutAccountNestedInput
+    externalAgentAuditEvents?: ExternalAgentAuditEventUpdateManyWithoutAccountNestedInput
     goals?: GoalUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUpdateManyWithoutAccountNestedInput
     profileImportArchives?: ProfileImportArchiveUpdateManyWithoutAccountNestedInput
@@ -177919,6 +180076,7 @@ export namespace Prisma {
     assistedWorkflows?: AiAssistedWorkflowUncheckedUpdateManyWithoutAccountNestedInput
     avatar?: AccountAvatarUncheckedUpdateOneWithoutAccountNestedInput
     externalMutationReceipts?: ExternalMutationReceiptUncheckedUpdateManyWithoutAccountNestedInput
+    externalAgentAuditEvents?: ExternalAgentAuditEventUncheckedUpdateManyWithoutAccountNestedInput
     goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUncheckedUpdateManyWithoutAccountNestedInput
     profileImportArchives?: ProfileImportArchiveUncheckedUpdateManyWithoutAccountNestedInput
@@ -177993,6 +180151,7 @@ export namespace Prisma {
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
     avatar?: AccountAvatarCreateNestedOneWithoutAccountInput
     externalMutationReceipts?: ExternalMutationReceiptCreateNestedManyWithoutAccountInput
+    externalAgentAuditEvents?: ExternalAgentAuditEventCreateNestedManyWithoutAccountInput
     goals?: GoalCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationCreateNestedManyWithoutAccountInput
     profileImportArchives?: ProfileImportArchiveCreateNestedManyWithoutAccountInput
@@ -178051,6 +180210,7 @@ export namespace Prisma {
     assistedWorkflows?: AiAssistedWorkflowUncheckedCreateNestedManyWithoutAccountInput
     avatar?: AccountAvatarUncheckedCreateNestedOneWithoutAccountInput
     externalMutationReceipts?: ExternalMutationReceiptUncheckedCreateNestedManyWithoutAccountInput
+    externalAgentAuditEvents?: ExternalAgentAuditEventUncheckedCreateNestedManyWithoutAccountInput
     goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationUncheckedCreateNestedManyWithoutAccountInput
     profileImportArchives?: ProfileImportArchiveUncheckedCreateNestedManyWithoutAccountInput
@@ -178189,6 +180349,7 @@ export namespace Prisma {
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
     avatar?: AccountAvatarUpdateOneWithoutAccountNestedInput
     externalMutationReceipts?: ExternalMutationReceiptUpdateManyWithoutAccountNestedInput
+    externalAgentAuditEvents?: ExternalAgentAuditEventUpdateManyWithoutAccountNestedInput
     goals?: GoalUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUpdateManyWithoutAccountNestedInput
     profileImportArchives?: ProfileImportArchiveUpdateManyWithoutAccountNestedInput
@@ -178247,6 +180408,7 @@ export namespace Prisma {
     assistedWorkflows?: AiAssistedWorkflowUncheckedUpdateManyWithoutAccountNestedInput
     avatar?: AccountAvatarUncheckedUpdateOneWithoutAccountNestedInput
     externalMutationReceipts?: ExternalMutationReceiptUncheckedUpdateManyWithoutAccountNestedInput
+    externalAgentAuditEvents?: ExternalAgentAuditEventUncheckedUpdateManyWithoutAccountNestedInput
     goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUncheckedUpdateManyWithoutAccountNestedInput
     profileImportArchives?: ProfileImportArchiveUncheckedUpdateManyWithoutAccountNestedInput
@@ -178381,6 +180543,7 @@ export namespace Prisma {
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
     avatar?: AccountAvatarCreateNestedOneWithoutAccountInput
     externalMutationReceipts?: ExternalMutationReceiptCreateNestedManyWithoutAccountInput
+    externalAgentAuditEvents?: ExternalAgentAuditEventCreateNestedManyWithoutAccountInput
     goals?: GoalCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationCreateNestedManyWithoutAccountInput
     profileImportArchives?: ProfileImportArchiveCreateNestedManyWithoutAccountInput
@@ -178439,6 +180602,7 @@ export namespace Prisma {
     assistedWorkflows?: AiAssistedWorkflowUncheckedCreateNestedManyWithoutAccountInput
     avatar?: AccountAvatarUncheckedCreateNestedOneWithoutAccountInput
     externalMutationReceipts?: ExternalMutationReceiptUncheckedCreateNestedManyWithoutAccountInput
+    externalAgentAuditEvents?: ExternalAgentAuditEventUncheckedCreateNestedManyWithoutAccountInput
     goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationUncheckedCreateNestedManyWithoutAccountInput
     profileImportArchives?: ProfileImportArchiveUncheckedCreateNestedManyWithoutAccountInput
@@ -178548,6 +180712,7 @@ export namespace Prisma {
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
     avatar?: AccountAvatarUpdateOneWithoutAccountNestedInput
     externalMutationReceipts?: ExternalMutationReceiptUpdateManyWithoutAccountNestedInput
+    externalAgentAuditEvents?: ExternalAgentAuditEventUpdateManyWithoutAccountNestedInput
     goals?: GoalUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUpdateManyWithoutAccountNestedInput
     profileImportArchives?: ProfileImportArchiveUpdateManyWithoutAccountNestedInput
@@ -178606,6 +180771,7 @@ export namespace Prisma {
     assistedWorkflows?: AiAssistedWorkflowUncheckedUpdateManyWithoutAccountNestedInput
     avatar?: AccountAvatarUncheckedUpdateOneWithoutAccountNestedInput
     externalMutationReceipts?: ExternalMutationReceiptUncheckedUpdateManyWithoutAccountNestedInput
+    externalAgentAuditEvents?: ExternalAgentAuditEventUncheckedUpdateManyWithoutAccountNestedInput
     goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUncheckedUpdateManyWithoutAccountNestedInput
     profileImportArchives?: ProfileImportArchiveUncheckedUpdateManyWithoutAccountNestedInput
@@ -178680,6 +180846,7 @@ export namespace Prisma {
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
     avatar?: AccountAvatarCreateNestedOneWithoutAccountInput
     externalMutationReceipts?: ExternalMutationReceiptCreateNestedManyWithoutAccountInput
+    externalAgentAuditEvents?: ExternalAgentAuditEventCreateNestedManyWithoutAccountInput
     goals?: GoalCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationCreateNestedManyWithoutAccountInput
     profileImportArchives?: ProfileImportArchiveCreateNestedManyWithoutAccountInput
@@ -178738,6 +180905,7 @@ export namespace Prisma {
     assistedWorkflows?: AiAssistedWorkflowUncheckedCreateNestedManyWithoutAccountInput
     avatar?: AccountAvatarUncheckedCreateNestedOneWithoutAccountInput
     externalMutationReceipts?: ExternalMutationReceiptUncheckedCreateNestedManyWithoutAccountInput
+    externalAgentAuditEvents?: ExternalAgentAuditEventUncheckedCreateNestedManyWithoutAccountInput
     goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationUncheckedCreateNestedManyWithoutAccountInput
     profileImportArchives?: ProfileImportArchiveUncheckedCreateNestedManyWithoutAccountInput
@@ -178837,6 +181005,7 @@ export namespace Prisma {
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
     avatar?: AccountAvatarUpdateOneWithoutAccountNestedInput
     externalMutationReceipts?: ExternalMutationReceiptUpdateManyWithoutAccountNestedInput
+    externalAgentAuditEvents?: ExternalAgentAuditEventUpdateManyWithoutAccountNestedInput
     goals?: GoalUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUpdateManyWithoutAccountNestedInput
     profileImportArchives?: ProfileImportArchiveUpdateManyWithoutAccountNestedInput
@@ -178895,6 +181064,7 @@ export namespace Prisma {
     assistedWorkflows?: AiAssistedWorkflowUncheckedUpdateManyWithoutAccountNestedInput
     avatar?: AccountAvatarUncheckedUpdateOneWithoutAccountNestedInput
     externalMutationReceipts?: ExternalMutationReceiptUncheckedUpdateManyWithoutAccountNestedInput
+    externalAgentAuditEvents?: ExternalAgentAuditEventUncheckedUpdateManyWithoutAccountNestedInput
     goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUncheckedUpdateManyWithoutAccountNestedInput
     profileImportArchives?: ProfileImportArchiveUncheckedUpdateManyWithoutAccountNestedInput
@@ -179021,6 +181191,7 @@ export namespace Prisma {
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
     avatar?: AccountAvatarCreateNestedOneWithoutAccountInput
     externalMutationReceipts?: ExternalMutationReceiptCreateNestedManyWithoutAccountInput
+    externalAgentAuditEvents?: ExternalAgentAuditEventCreateNestedManyWithoutAccountInput
     goals?: GoalCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationCreateNestedManyWithoutAccountInput
     profileImportArchives?: ProfileImportArchiveCreateNestedManyWithoutAccountInput
@@ -179079,6 +181250,7 @@ export namespace Prisma {
     assistedWorkflows?: AiAssistedWorkflowUncheckedCreateNestedManyWithoutAccountInput
     avatar?: AccountAvatarUncheckedCreateNestedOneWithoutAccountInput
     externalMutationReceipts?: ExternalMutationReceiptUncheckedCreateNestedManyWithoutAccountInput
+    externalAgentAuditEvents?: ExternalAgentAuditEventUncheckedCreateNestedManyWithoutAccountInput
     goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationUncheckedCreateNestedManyWithoutAccountInput
     profileImportArchives?: ProfileImportArchiveUncheckedCreateNestedManyWithoutAccountInput
@@ -179230,6 +181402,7 @@ export namespace Prisma {
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
     avatar?: AccountAvatarUpdateOneWithoutAccountNestedInput
     externalMutationReceipts?: ExternalMutationReceiptUpdateManyWithoutAccountNestedInput
+    externalAgentAuditEvents?: ExternalAgentAuditEventUpdateManyWithoutAccountNestedInput
     goals?: GoalUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUpdateManyWithoutAccountNestedInput
     profileImportArchives?: ProfileImportArchiveUpdateManyWithoutAccountNestedInput
@@ -179288,6 +181461,7 @@ export namespace Prisma {
     assistedWorkflows?: AiAssistedWorkflowUncheckedUpdateManyWithoutAccountNestedInput
     avatar?: AccountAvatarUncheckedUpdateOneWithoutAccountNestedInput
     externalMutationReceipts?: ExternalMutationReceiptUncheckedUpdateManyWithoutAccountNestedInput
+    externalAgentAuditEvents?: ExternalAgentAuditEventUncheckedUpdateManyWithoutAccountNestedInput
     goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUncheckedUpdateManyWithoutAccountNestedInput
     profileImportArchives?: ProfileImportArchiveUncheckedUpdateManyWithoutAccountNestedInput
@@ -179362,6 +181536,7 @@ export namespace Prisma {
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
     avatar?: AccountAvatarCreateNestedOneWithoutAccountInput
     externalMutationReceipts?: ExternalMutationReceiptCreateNestedManyWithoutAccountInput
+    externalAgentAuditEvents?: ExternalAgentAuditEventCreateNestedManyWithoutAccountInput
     goals?: GoalCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationCreateNestedManyWithoutAccountInput
     profileImportArchives?: ProfileImportArchiveCreateNestedManyWithoutAccountInput
@@ -179420,6 +181595,7 @@ export namespace Prisma {
     assistedWorkflows?: AiAssistedWorkflowUncheckedCreateNestedManyWithoutAccountInput
     avatar?: AccountAvatarUncheckedCreateNestedOneWithoutAccountInput
     externalMutationReceipts?: ExternalMutationReceiptUncheckedCreateNestedManyWithoutAccountInput
+    externalAgentAuditEvents?: ExternalAgentAuditEventUncheckedCreateNestedManyWithoutAccountInput
     goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationUncheckedCreateNestedManyWithoutAccountInput
     profileImportArchives?: ProfileImportArchiveUncheckedCreateNestedManyWithoutAccountInput
@@ -179602,6 +181778,7 @@ export namespace Prisma {
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
     avatar?: AccountAvatarUpdateOneWithoutAccountNestedInput
     externalMutationReceipts?: ExternalMutationReceiptUpdateManyWithoutAccountNestedInput
+    externalAgentAuditEvents?: ExternalAgentAuditEventUpdateManyWithoutAccountNestedInput
     goals?: GoalUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUpdateManyWithoutAccountNestedInput
     profileImportArchives?: ProfileImportArchiveUpdateManyWithoutAccountNestedInput
@@ -179660,6 +181837,7 @@ export namespace Prisma {
     assistedWorkflows?: AiAssistedWorkflowUncheckedUpdateManyWithoutAccountNestedInput
     avatar?: AccountAvatarUncheckedUpdateOneWithoutAccountNestedInput
     externalMutationReceipts?: ExternalMutationReceiptUncheckedUpdateManyWithoutAccountNestedInput
+    externalAgentAuditEvents?: ExternalAgentAuditEventUncheckedUpdateManyWithoutAccountNestedInput
     goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUncheckedUpdateManyWithoutAccountNestedInput
     profileImportArchives?: ProfileImportArchiveUncheckedUpdateManyWithoutAccountNestedInput
@@ -179875,6 +182053,7 @@ export namespace Prisma {
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
     avatar?: AccountAvatarCreateNestedOneWithoutAccountInput
     externalMutationReceipts?: ExternalMutationReceiptCreateNestedManyWithoutAccountInput
+    externalAgentAuditEvents?: ExternalAgentAuditEventCreateNestedManyWithoutAccountInput
     goals?: GoalCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationCreateNestedManyWithoutAccountInput
     profileImportArchives?: ProfileImportArchiveCreateNestedManyWithoutAccountInput
@@ -179933,6 +182112,7 @@ export namespace Prisma {
     assistedWorkflows?: AiAssistedWorkflowUncheckedCreateNestedManyWithoutAccountInput
     avatar?: AccountAvatarUncheckedCreateNestedOneWithoutAccountInput
     externalMutationReceipts?: ExternalMutationReceiptUncheckedCreateNestedManyWithoutAccountInput
+    externalAgentAuditEvents?: ExternalAgentAuditEventUncheckedCreateNestedManyWithoutAccountInput
     goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationUncheckedCreateNestedManyWithoutAccountInput
     profileImportArchives?: ProfileImportArchiveUncheckedCreateNestedManyWithoutAccountInput
@@ -180050,6 +182230,7 @@ export namespace Prisma {
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
     avatar?: AccountAvatarUpdateOneWithoutAccountNestedInput
     externalMutationReceipts?: ExternalMutationReceiptUpdateManyWithoutAccountNestedInput
+    externalAgentAuditEvents?: ExternalAgentAuditEventUpdateManyWithoutAccountNestedInput
     goals?: GoalUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUpdateManyWithoutAccountNestedInput
     profileImportArchives?: ProfileImportArchiveUpdateManyWithoutAccountNestedInput
@@ -180108,6 +182289,7 @@ export namespace Prisma {
     assistedWorkflows?: AiAssistedWorkflowUncheckedUpdateManyWithoutAccountNestedInput
     avatar?: AccountAvatarUncheckedUpdateOneWithoutAccountNestedInput
     externalMutationReceipts?: ExternalMutationReceiptUncheckedUpdateManyWithoutAccountNestedInput
+    externalAgentAuditEvents?: ExternalAgentAuditEventUncheckedUpdateManyWithoutAccountNestedInput
     goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUncheckedUpdateManyWithoutAccountNestedInput
     profileImportArchives?: ProfileImportArchiveUncheckedUpdateManyWithoutAccountNestedInput
@@ -180166,6 +182348,7 @@ export namespace Prisma {
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
     avatar?: AccountAvatarCreateNestedOneWithoutAccountInput
     externalMutationReceipts?: ExternalMutationReceiptCreateNestedManyWithoutAccountInput
+    externalAgentAuditEvents?: ExternalAgentAuditEventCreateNestedManyWithoutAccountInput
     goals?: GoalCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationCreateNestedManyWithoutAccountInput
     profileImportArchives?: ProfileImportArchiveCreateNestedManyWithoutAccountInput
@@ -180224,6 +182407,7 @@ export namespace Prisma {
     assistedWorkflows?: AiAssistedWorkflowUncheckedCreateNestedManyWithoutAccountInput
     avatar?: AccountAvatarUncheckedCreateNestedOneWithoutAccountInput
     externalMutationReceipts?: ExternalMutationReceiptUncheckedCreateNestedManyWithoutAccountInput
+    externalAgentAuditEvents?: ExternalAgentAuditEventUncheckedCreateNestedManyWithoutAccountInput
     goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationUncheckedCreateNestedManyWithoutAccountInput
     profileImportArchives?: ProfileImportArchiveUncheckedCreateNestedManyWithoutAccountInput
@@ -180298,6 +182482,7 @@ export namespace Prisma {
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
     avatar?: AccountAvatarUpdateOneWithoutAccountNestedInput
     externalMutationReceipts?: ExternalMutationReceiptUpdateManyWithoutAccountNestedInput
+    externalAgentAuditEvents?: ExternalAgentAuditEventUpdateManyWithoutAccountNestedInput
     goals?: GoalUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUpdateManyWithoutAccountNestedInput
     profileImportArchives?: ProfileImportArchiveUpdateManyWithoutAccountNestedInput
@@ -180356,6 +182541,7 @@ export namespace Prisma {
     assistedWorkflows?: AiAssistedWorkflowUncheckedUpdateManyWithoutAccountNestedInput
     avatar?: AccountAvatarUncheckedUpdateOneWithoutAccountNestedInput
     externalMutationReceipts?: ExternalMutationReceiptUncheckedUpdateManyWithoutAccountNestedInput
+    externalAgentAuditEvents?: ExternalAgentAuditEventUncheckedUpdateManyWithoutAccountNestedInput
     goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUncheckedUpdateManyWithoutAccountNestedInput
     profileImportArchives?: ProfileImportArchiveUncheckedUpdateManyWithoutAccountNestedInput
@@ -180600,6 +182786,7 @@ export namespace Prisma {
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
     avatar?: AccountAvatarCreateNestedOneWithoutAccountInput
     externalMutationReceipts?: ExternalMutationReceiptCreateNestedManyWithoutAccountInput
+    externalAgentAuditEvents?: ExternalAgentAuditEventCreateNestedManyWithoutAccountInput
     goals?: GoalCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationCreateNestedManyWithoutAccountInput
     profileImportArchives?: ProfileImportArchiveCreateNestedManyWithoutAccountInput
@@ -180658,6 +182845,7 @@ export namespace Prisma {
     assistedWorkflows?: AiAssistedWorkflowUncheckedCreateNestedManyWithoutAccountInput
     avatar?: AccountAvatarUncheckedCreateNestedOneWithoutAccountInput
     externalMutationReceipts?: ExternalMutationReceiptUncheckedCreateNestedManyWithoutAccountInput
+    externalAgentAuditEvents?: ExternalAgentAuditEventUncheckedCreateNestedManyWithoutAccountInput
     goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationUncheckedCreateNestedManyWithoutAccountInput
     profileImportArchives?: ProfileImportArchiveUncheckedCreateNestedManyWithoutAccountInput
@@ -181022,6 +183210,7 @@ export namespace Prisma {
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
     avatar?: AccountAvatarUpdateOneWithoutAccountNestedInput
     externalMutationReceipts?: ExternalMutationReceiptUpdateManyWithoutAccountNestedInput
+    externalAgentAuditEvents?: ExternalAgentAuditEventUpdateManyWithoutAccountNestedInput
     goals?: GoalUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUpdateManyWithoutAccountNestedInput
     profileImportArchives?: ProfileImportArchiveUpdateManyWithoutAccountNestedInput
@@ -181080,6 +183269,7 @@ export namespace Prisma {
     assistedWorkflows?: AiAssistedWorkflowUncheckedUpdateManyWithoutAccountNestedInput
     avatar?: AccountAvatarUncheckedUpdateOneWithoutAccountNestedInput
     externalMutationReceipts?: ExternalMutationReceiptUncheckedUpdateManyWithoutAccountNestedInput
+    externalAgentAuditEvents?: ExternalAgentAuditEventUncheckedUpdateManyWithoutAccountNestedInput
     goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUncheckedUpdateManyWithoutAccountNestedInput
     profileImportArchives?: ProfileImportArchiveUncheckedUpdateManyWithoutAccountNestedInput
@@ -182046,6 +184236,7 @@ export namespace Prisma {
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
     avatar?: AccountAvatarCreateNestedOneWithoutAccountInput
     externalMutationReceipts?: ExternalMutationReceiptCreateNestedManyWithoutAccountInput
+    externalAgentAuditEvents?: ExternalAgentAuditEventCreateNestedManyWithoutAccountInput
     goals?: GoalCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationCreateNestedManyWithoutAccountInput
     profileImportArchives?: ProfileImportArchiveCreateNestedManyWithoutAccountInput
@@ -182104,6 +184295,7 @@ export namespace Prisma {
     assistedWorkflows?: AiAssistedWorkflowUncheckedCreateNestedManyWithoutAccountInput
     avatar?: AccountAvatarUncheckedCreateNestedOneWithoutAccountInput
     externalMutationReceipts?: ExternalMutationReceiptUncheckedCreateNestedManyWithoutAccountInput
+    externalAgentAuditEvents?: ExternalAgentAuditEventUncheckedCreateNestedManyWithoutAccountInput
     goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationUncheckedCreateNestedManyWithoutAccountInput
     profileImportArchives?: ProfileImportArchiveUncheckedCreateNestedManyWithoutAccountInput
@@ -182223,6 +184415,7 @@ export namespace Prisma {
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
     avatar?: AccountAvatarUpdateOneWithoutAccountNestedInput
     externalMutationReceipts?: ExternalMutationReceiptUpdateManyWithoutAccountNestedInput
+    externalAgentAuditEvents?: ExternalAgentAuditEventUpdateManyWithoutAccountNestedInput
     goals?: GoalUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUpdateManyWithoutAccountNestedInput
     profileImportArchives?: ProfileImportArchiveUpdateManyWithoutAccountNestedInput
@@ -182281,6 +184474,7 @@ export namespace Prisma {
     assistedWorkflows?: AiAssistedWorkflowUncheckedUpdateManyWithoutAccountNestedInput
     avatar?: AccountAvatarUncheckedUpdateOneWithoutAccountNestedInput
     externalMutationReceipts?: ExternalMutationReceiptUncheckedUpdateManyWithoutAccountNestedInput
+    externalAgentAuditEvents?: ExternalAgentAuditEventUncheckedUpdateManyWithoutAccountNestedInput
     goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUncheckedUpdateManyWithoutAccountNestedInput
     profileImportArchives?: ProfileImportArchiveUncheckedUpdateManyWithoutAccountNestedInput
@@ -182390,6 +184584,7 @@ export namespace Prisma {
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
     avatar?: AccountAvatarCreateNestedOneWithoutAccountInput
     externalMutationReceipts?: ExternalMutationReceiptCreateNestedManyWithoutAccountInput
+    externalAgentAuditEvents?: ExternalAgentAuditEventCreateNestedManyWithoutAccountInput
     goals?: GoalCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationCreateNestedManyWithoutAccountInput
     profileImportArchives?: ProfileImportArchiveCreateNestedManyWithoutAccountInput
@@ -182448,6 +184643,7 @@ export namespace Prisma {
     assistedWorkflows?: AiAssistedWorkflowUncheckedCreateNestedManyWithoutAccountInput
     avatar?: AccountAvatarUncheckedCreateNestedOneWithoutAccountInput
     externalMutationReceipts?: ExternalMutationReceiptUncheckedCreateNestedManyWithoutAccountInput
+    externalAgentAuditEvents?: ExternalAgentAuditEventUncheckedCreateNestedManyWithoutAccountInput
     goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationUncheckedCreateNestedManyWithoutAccountInput
     profileImportArchives?: ProfileImportArchiveUncheckedCreateNestedManyWithoutAccountInput
@@ -182522,6 +184718,7 @@ export namespace Prisma {
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
     avatar?: AccountAvatarUpdateOneWithoutAccountNestedInput
     externalMutationReceipts?: ExternalMutationReceiptUpdateManyWithoutAccountNestedInput
+    externalAgentAuditEvents?: ExternalAgentAuditEventUpdateManyWithoutAccountNestedInput
     goals?: GoalUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUpdateManyWithoutAccountNestedInput
     profileImportArchives?: ProfileImportArchiveUpdateManyWithoutAccountNestedInput
@@ -182580,6 +184777,7 @@ export namespace Prisma {
     assistedWorkflows?: AiAssistedWorkflowUncheckedUpdateManyWithoutAccountNestedInput
     avatar?: AccountAvatarUncheckedUpdateOneWithoutAccountNestedInput
     externalMutationReceipts?: ExternalMutationReceiptUncheckedUpdateManyWithoutAccountNestedInput
+    externalAgentAuditEvents?: ExternalAgentAuditEventUncheckedUpdateManyWithoutAccountNestedInput
     goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUncheckedUpdateManyWithoutAccountNestedInput
     profileImportArchives?: ProfileImportArchiveUncheckedUpdateManyWithoutAccountNestedInput
@@ -182638,6 +184836,7 @@ export namespace Prisma {
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
     avatar?: AccountAvatarCreateNestedOneWithoutAccountInput
     externalMutationReceipts?: ExternalMutationReceiptCreateNestedManyWithoutAccountInput
+    externalAgentAuditEvents?: ExternalAgentAuditEventCreateNestedManyWithoutAccountInput
     goals?: GoalCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationCreateNestedManyWithoutAccountInput
     profileImportArchives?: ProfileImportArchiveCreateNestedManyWithoutAccountInput
@@ -182696,6 +184895,7 @@ export namespace Prisma {
     assistedWorkflows?: AiAssistedWorkflowUncheckedCreateNestedManyWithoutAccountInput
     avatar?: AccountAvatarUncheckedCreateNestedOneWithoutAccountInput
     externalMutationReceipts?: ExternalMutationReceiptUncheckedCreateNestedManyWithoutAccountInput
+    externalAgentAuditEvents?: ExternalAgentAuditEventUncheckedCreateNestedManyWithoutAccountInput
     goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationUncheckedCreateNestedManyWithoutAccountInput
     profileImportArchives?: ProfileImportArchiveUncheckedCreateNestedManyWithoutAccountInput
@@ -182814,6 +185014,7 @@ export namespace Prisma {
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
     avatar?: AccountAvatarUpdateOneWithoutAccountNestedInput
     externalMutationReceipts?: ExternalMutationReceiptUpdateManyWithoutAccountNestedInput
+    externalAgentAuditEvents?: ExternalAgentAuditEventUpdateManyWithoutAccountNestedInput
     goals?: GoalUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUpdateManyWithoutAccountNestedInput
     profileImportArchives?: ProfileImportArchiveUpdateManyWithoutAccountNestedInput
@@ -182872,6 +185073,7 @@ export namespace Prisma {
     assistedWorkflows?: AiAssistedWorkflowUncheckedUpdateManyWithoutAccountNestedInput
     avatar?: AccountAvatarUncheckedUpdateOneWithoutAccountNestedInput
     externalMutationReceipts?: ExternalMutationReceiptUncheckedUpdateManyWithoutAccountNestedInput
+    externalAgentAuditEvents?: ExternalAgentAuditEventUncheckedUpdateManyWithoutAccountNestedInput
     goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUncheckedUpdateManyWithoutAccountNestedInput
     profileImportArchives?: ProfileImportArchiveUncheckedUpdateManyWithoutAccountNestedInput
@@ -182946,6 +185148,7 @@ export namespace Prisma {
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
     avatar?: AccountAvatarCreateNestedOneWithoutAccountInput
     externalMutationReceipts?: ExternalMutationReceiptCreateNestedManyWithoutAccountInput
+    externalAgentAuditEvents?: ExternalAgentAuditEventCreateNestedManyWithoutAccountInput
     goals?: GoalCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationCreateNestedManyWithoutAccountInput
     profileImportArchives?: ProfileImportArchiveCreateNestedManyWithoutAccountInput
@@ -183004,6 +185207,7 @@ export namespace Prisma {
     assistedWorkflows?: AiAssistedWorkflowUncheckedCreateNestedManyWithoutAccountInput
     avatar?: AccountAvatarUncheckedCreateNestedOneWithoutAccountInput
     externalMutationReceipts?: ExternalMutationReceiptUncheckedCreateNestedManyWithoutAccountInput
+    externalAgentAuditEvents?: ExternalAgentAuditEventUncheckedCreateNestedManyWithoutAccountInput
     goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationUncheckedCreateNestedManyWithoutAccountInput
     profileImportArchives?: ProfileImportArchiveUncheckedCreateNestedManyWithoutAccountInput
@@ -183143,6 +185347,7 @@ export namespace Prisma {
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
     avatar?: AccountAvatarUpdateOneWithoutAccountNestedInput
     externalMutationReceipts?: ExternalMutationReceiptUpdateManyWithoutAccountNestedInput
+    externalAgentAuditEvents?: ExternalAgentAuditEventUpdateManyWithoutAccountNestedInput
     goals?: GoalUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUpdateManyWithoutAccountNestedInput
     profileImportArchives?: ProfileImportArchiveUpdateManyWithoutAccountNestedInput
@@ -183201,6 +185406,7 @@ export namespace Prisma {
     assistedWorkflows?: AiAssistedWorkflowUncheckedUpdateManyWithoutAccountNestedInput
     avatar?: AccountAvatarUncheckedUpdateOneWithoutAccountNestedInput
     externalMutationReceipts?: ExternalMutationReceiptUncheckedUpdateManyWithoutAccountNestedInput
+    externalAgentAuditEvents?: ExternalAgentAuditEventUncheckedUpdateManyWithoutAccountNestedInput
     goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUncheckedUpdateManyWithoutAccountNestedInput
     profileImportArchives?: ProfileImportArchiveUncheckedUpdateManyWithoutAccountNestedInput
@@ -183330,6 +185536,7 @@ export namespace Prisma {
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
     avatar?: AccountAvatarCreateNestedOneWithoutAccountInput
     externalMutationReceipts?: ExternalMutationReceiptCreateNestedManyWithoutAccountInput
+    externalAgentAuditEvents?: ExternalAgentAuditEventCreateNestedManyWithoutAccountInput
     goals?: GoalCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationCreateNestedManyWithoutAccountInput
     profileImportArchives?: ProfileImportArchiveCreateNestedManyWithoutAccountInput
@@ -183388,6 +185595,7 @@ export namespace Prisma {
     assistedWorkflows?: AiAssistedWorkflowUncheckedCreateNestedManyWithoutAccountInput
     avatar?: AccountAvatarUncheckedCreateNestedOneWithoutAccountInput
     externalMutationReceipts?: ExternalMutationReceiptUncheckedCreateNestedManyWithoutAccountInput
+    externalAgentAuditEvents?: ExternalAgentAuditEventUncheckedCreateNestedManyWithoutAccountInput
     goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationUncheckedCreateNestedManyWithoutAccountInput
     profileImportArchives?: ProfileImportArchiveUncheckedCreateNestedManyWithoutAccountInput
@@ -183462,6 +185670,7 @@ export namespace Prisma {
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
     avatar?: AccountAvatarUpdateOneWithoutAccountNestedInput
     externalMutationReceipts?: ExternalMutationReceiptUpdateManyWithoutAccountNestedInput
+    externalAgentAuditEvents?: ExternalAgentAuditEventUpdateManyWithoutAccountNestedInput
     goals?: GoalUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUpdateManyWithoutAccountNestedInput
     profileImportArchives?: ProfileImportArchiveUpdateManyWithoutAccountNestedInput
@@ -183520,6 +185729,7 @@ export namespace Prisma {
     assistedWorkflows?: AiAssistedWorkflowUncheckedUpdateManyWithoutAccountNestedInput
     avatar?: AccountAvatarUncheckedUpdateOneWithoutAccountNestedInput
     externalMutationReceipts?: ExternalMutationReceiptUncheckedUpdateManyWithoutAccountNestedInput
+    externalAgentAuditEvents?: ExternalAgentAuditEventUncheckedUpdateManyWithoutAccountNestedInput
     goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUncheckedUpdateManyWithoutAccountNestedInput
     profileImportArchives?: ProfileImportArchiveUncheckedUpdateManyWithoutAccountNestedInput
@@ -183578,6 +185788,7 @@ export namespace Prisma {
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
     avatar?: AccountAvatarCreateNestedOneWithoutAccountInput
     externalMutationReceipts?: ExternalMutationReceiptCreateNestedManyWithoutAccountInput
+    externalAgentAuditEvents?: ExternalAgentAuditEventCreateNestedManyWithoutAccountInput
     goals?: GoalCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationCreateNestedManyWithoutAccountInput
     profileImportArchives?: ProfileImportArchiveCreateNestedManyWithoutAccountInput
@@ -183636,6 +185847,7 @@ export namespace Prisma {
     assistedWorkflows?: AiAssistedWorkflowUncheckedCreateNestedManyWithoutAccountInput
     avatar?: AccountAvatarUncheckedCreateNestedOneWithoutAccountInput
     externalMutationReceipts?: ExternalMutationReceiptUncheckedCreateNestedManyWithoutAccountInput
+    externalAgentAuditEvents?: ExternalAgentAuditEventUncheckedCreateNestedManyWithoutAccountInput
     goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationUncheckedCreateNestedManyWithoutAccountInput
     profileImportArchives?: ProfileImportArchiveUncheckedCreateNestedManyWithoutAccountInput
@@ -183710,6 +185922,7 @@ export namespace Prisma {
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
     avatar?: AccountAvatarUpdateOneWithoutAccountNestedInput
     externalMutationReceipts?: ExternalMutationReceiptUpdateManyWithoutAccountNestedInput
+    externalAgentAuditEvents?: ExternalAgentAuditEventUpdateManyWithoutAccountNestedInput
     goals?: GoalUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUpdateManyWithoutAccountNestedInput
     profileImportArchives?: ProfileImportArchiveUpdateManyWithoutAccountNestedInput
@@ -183768,6 +185981,7 @@ export namespace Prisma {
     assistedWorkflows?: AiAssistedWorkflowUncheckedUpdateManyWithoutAccountNestedInput
     avatar?: AccountAvatarUncheckedUpdateOneWithoutAccountNestedInput
     externalMutationReceipts?: ExternalMutationReceiptUncheckedUpdateManyWithoutAccountNestedInput
+    externalAgentAuditEvents?: ExternalAgentAuditEventUncheckedUpdateManyWithoutAccountNestedInput
     goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUncheckedUpdateManyWithoutAccountNestedInput
     profileImportArchives?: ProfileImportArchiveUncheckedUpdateManyWithoutAccountNestedInput
@@ -183826,6 +186040,7 @@ export namespace Prisma {
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
     avatar?: AccountAvatarCreateNestedOneWithoutAccountInput
     externalMutationReceipts?: ExternalMutationReceiptCreateNestedManyWithoutAccountInput
+    externalAgentAuditEvents?: ExternalAgentAuditEventCreateNestedManyWithoutAccountInput
     goals?: GoalCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationCreateNestedManyWithoutAccountInput
     profileImportArchives?: ProfileImportArchiveCreateNestedManyWithoutAccountInput
@@ -183884,6 +186099,7 @@ export namespace Prisma {
     assistedWorkflows?: AiAssistedWorkflowUncheckedCreateNestedManyWithoutAccountInput
     avatar?: AccountAvatarUncheckedCreateNestedOneWithoutAccountInput
     externalMutationReceipts?: ExternalMutationReceiptUncheckedCreateNestedManyWithoutAccountInput
+    externalAgentAuditEvents?: ExternalAgentAuditEventUncheckedCreateNestedManyWithoutAccountInput
     goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationUncheckedCreateNestedManyWithoutAccountInput
     profileImportArchives?: ProfileImportArchiveUncheckedCreateNestedManyWithoutAccountInput
@@ -184095,6 +186311,7 @@ export namespace Prisma {
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
     avatar?: AccountAvatarUpdateOneWithoutAccountNestedInput
     externalMutationReceipts?: ExternalMutationReceiptUpdateManyWithoutAccountNestedInput
+    externalAgentAuditEvents?: ExternalAgentAuditEventUpdateManyWithoutAccountNestedInput
     goals?: GoalUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUpdateManyWithoutAccountNestedInput
     profileImportArchives?: ProfileImportArchiveUpdateManyWithoutAccountNestedInput
@@ -184153,6 +186370,7 @@ export namespace Prisma {
     assistedWorkflows?: AiAssistedWorkflowUncheckedUpdateManyWithoutAccountNestedInput
     avatar?: AccountAvatarUncheckedUpdateOneWithoutAccountNestedInput
     externalMutationReceipts?: ExternalMutationReceiptUncheckedUpdateManyWithoutAccountNestedInput
+    externalAgentAuditEvents?: ExternalAgentAuditEventUncheckedUpdateManyWithoutAccountNestedInput
     goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUncheckedUpdateManyWithoutAccountNestedInput
     profileImportArchives?: ProfileImportArchiveUncheckedUpdateManyWithoutAccountNestedInput
@@ -184313,6 +186531,7 @@ export namespace Prisma {
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
     avatar?: AccountAvatarCreateNestedOneWithoutAccountInput
     externalMutationReceipts?: ExternalMutationReceiptCreateNestedManyWithoutAccountInput
+    externalAgentAuditEvents?: ExternalAgentAuditEventCreateNestedManyWithoutAccountInput
     goals?: GoalCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationCreateNestedManyWithoutAccountInput
     profileImportArchives?: ProfileImportArchiveCreateNestedManyWithoutAccountInput
@@ -184371,6 +186590,7 @@ export namespace Prisma {
     assistedWorkflows?: AiAssistedWorkflowUncheckedCreateNestedManyWithoutAccountInput
     avatar?: AccountAvatarUncheckedCreateNestedOneWithoutAccountInput
     externalMutationReceipts?: ExternalMutationReceiptUncheckedCreateNestedManyWithoutAccountInput
+    externalAgentAuditEvents?: ExternalAgentAuditEventUncheckedCreateNestedManyWithoutAccountInput
     goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationUncheckedCreateNestedManyWithoutAccountInput
     profileImportArchives?: ProfileImportArchiveUncheckedCreateNestedManyWithoutAccountInput
@@ -184507,6 +186727,7 @@ export namespace Prisma {
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
     avatar?: AccountAvatarUpdateOneWithoutAccountNestedInput
     externalMutationReceipts?: ExternalMutationReceiptUpdateManyWithoutAccountNestedInput
+    externalAgentAuditEvents?: ExternalAgentAuditEventUpdateManyWithoutAccountNestedInput
     goals?: GoalUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUpdateManyWithoutAccountNestedInput
     profileImportArchives?: ProfileImportArchiveUpdateManyWithoutAccountNestedInput
@@ -184565,6 +186786,7 @@ export namespace Prisma {
     assistedWorkflows?: AiAssistedWorkflowUncheckedUpdateManyWithoutAccountNestedInput
     avatar?: AccountAvatarUncheckedUpdateOneWithoutAccountNestedInput
     externalMutationReceipts?: ExternalMutationReceiptUncheckedUpdateManyWithoutAccountNestedInput
+    externalAgentAuditEvents?: ExternalAgentAuditEventUncheckedUpdateManyWithoutAccountNestedInput
     goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUncheckedUpdateManyWithoutAccountNestedInput
     profileImportArchives?: ProfileImportArchiveUncheckedUpdateManyWithoutAccountNestedInput
@@ -184691,6 +186913,7 @@ export namespace Prisma {
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
     avatar?: AccountAvatarCreateNestedOneWithoutAccountInput
     externalMutationReceipts?: ExternalMutationReceiptCreateNestedManyWithoutAccountInput
+    externalAgentAuditEvents?: ExternalAgentAuditEventCreateNestedManyWithoutAccountInput
     goals?: GoalCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationCreateNestedManyWithoutAccountInput
     profileImportArchives?: ProfileImportArchiveCreateNestedManyWithoutAccountInput
@@ -184749,6 +186972,7 @@ export namespace Prisma {
     assistedWorkflows?: AiAssistedWorkflowUncheckedCreateNestedManyWithoutAccountInput
     avatar?: AccountAvatarUncheckedCreateNestedOneWithoutAccountInput
     externalMutationReceipts?: ExternalMutationReceiptUncheckedCreateNestedManyWithoutAccountInput
+    externalAgentAuditEvents?: ExternalAgentAuditEventUncheckedCreateNestedManyWithoutAccountInput
     goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationUncheckedCreateNestedManyWithoutAccountInput
     profileImportArchives?: ProfileImportArchiveUncheckedCreateNestedManyWithoutAccountInput
@@ -184885,6 +187109,7 @@ export namespace Prisma {
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
     avatar?: AccountAvatarUpdateOneWithoutAccountNestedInput
     externalMutationReceipts?: ExternalMutationReceiptUpdateManyWithoutAccountNestedInput
+    externalAgentAuditEvents?: ExternalAgentAuditEventUpdateManyWithoutAccountNestedInput
     goals?: GoalUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUpdateManyWithoutAccountNestedInput
     profileImportArchives?: ProfileImportArchiveUpdateManyWithoutAccountNestedInput
@@ -184943,6 +187168,7 @@ export namespace Prisma {
     assistedWorkflows?: AiAssistedWorkflowUncheckedUpdateManyWithoutAccountNestedInput
     avatar?: AccountAvatarUncheckedUpdateOneWithoutAccountNestedInput
     externalMutationReceipts?: ExternalMutationReceiptUncheckedUpdateManyWithoutAccountNestedInput
+    externalAgentAuditEvents?: ExternalAgentAuditEventUncheckedUpdateManyWithoutAccountNestedInput
     goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUncheckedUpdateManyWithoutAccountNestedInput
     profileImportArchives?: ProfileImportArchiveUncheckedUpdateManyWithoutAccountNestedInput
@@ -185069,6 +187295,7 @@ export namespace Prisma {
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
     avatar?: AccountAvatarCreateNestedOneWithoutAccountInput
     externalMutationReceipts?: ExternalMutationReceiptCreateNestedManyWithoutAccountInput
+    externalAgentAuditEvents?: ExternalAgentAuditEventCreateNestedManyWithoutAccountInput
     goals?: GoalCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationCreateNestedManyWithoutAccountInput
     profileImportArchives?: ProfileImportArchiveCreateNestedManyWithoutAccountInput
@@ -185127,6 +187354,7 @@ export namespace Prisma {
     assistedWorkflows?: AiAssistedWorkflowUncheckedCreateNestedManyWithoutAccountInput
     avatar?: AccountAvatarUncheckedCreateNestedOneWithoutAccountInput
     externalMutationReceipts?: ExternalMutationReceiptUncheckedCreateNestedManyWithoutAccountInput
+    externalAgentAuditEvents?: ExternalAgentAuditEventUncheckedCreateNestedManyWithoutAccountInput
     goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationUncheckedCreateNestedManyWithoutAccountInput
     profileImportArchives?: ProfileImportArchiveUncheckedCreateNestedManyWithoutAccountInput
@@ -185235,6 +187463,7 @@ export namespace Prisma {
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
     avatar?: AccountAvatarUpdateOneWithoutAccountNestedInput
     externalMutationReceipts?: ExternalMutationReceiptUpdateManyWithoutAccountNestedInput
+    externalAgentAuditEvents?: ExternalAgentAuditEventUpdateManyWithoutAccountNestedInput
     goals?: GoalUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUpdateManyWithoutAccountNestedInput
     profileImportArchives?: ProfileImportArchiveUpdateManyWithoutAccountNestedInput
@@ -185293,6 +187522,7 @@ export namespace Prisma {
     assistedWorkflows?: AiAssistedWorkflowUncheckedUpdateManyWithoutAccountNestedInput
     avatar?: AccountAvatarUncheckedUpdateOneWithoutAccountNestedInput
     externalMutationReceipts?: ExternalMutationReceiptUncheckedUpdateManyWithoutAccountNestedInput
+    externalAgentAuditEvents?: ExternalAgentAuditEventUncheckedUpdateManyWithoutAccountNestedInput
     goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUncheckedUpdateManyWithoutAccountNestedInput
     profileImportArchives?: ProfileImportArchiveUncheckedUpdateManyWithoutAccountNestedInput
@@ -185392,6 +187622,7 @@ export namespace Prisma {
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
     avatar?: AccountAvatarCreateNestedOneWithoutAccountInput
     externalMutationReceipts?: ExternalMutationReceiptCreateNestedManyWithoutAccountInput
+    externalAgentAuditEvents?: ExternalAgentAuditEventCreateNestedManyWithoutAccountInput
     goals?: GoalCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationCreateNestedManyWithoutAccountInput
     profileImportArchives?: ProfileImportArchiveCreateNestedManyWithoutAccountInput
@@ -185450,6 +187681,7 @@ export namespace Prisma {
     assistedWorkflows?: AiAssistedWorkflowUncheckedCreateNestedManyWithoutAccountInput
     avatar?: AccountAvatarUncheckedCreateNestedOneWithoutAccountInput
     externalMutationReceipts?: ExternalMutationReceiptUncheckedCreateNestedManyWithoutAccountInput
+    externalAgentAuditEvents?: ExternalAgentAuditEventUncheckedCreateNestedManyWithoutAccountInput
     goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationUncheckedCreateNestedManyWithoutAccountInput
     profileImportArchives?: ProfileImportArchiveUncheckedCreateNestedManyWithoutAccountInput
@@ -185555,6 +187787,7 @@ export namespace Prisma {
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
     avatar?: AccountAvatarUpdateOneWithoutAccountNestedInput
     externalMutationReceipts?: ExternalMutationReceiptUpdateManyWithoutAccountNestedInput
+    externalAgentAuditEvents?: ExternalAgentAuditEventUpdateManyWithoutAccountNestedInput
     goals?: GoalUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUpdateManyWithoutAccountNestedInput
     profileImportArchives?: ProfileImportArchiveUpdateManyWithoutAccountNestedInput
@@ -185613,6 +187846,7 @@ export namespace Prisma {
     assistedWorkflows?: AiAssistedWorkflowUncheckedUpdateManyWithoutAccountNestedInput
     avatar?: AccountAvatarUncheckedUpdateOneWithoutAccountNestedInput
     externalMutationReceipts?: ExternalMutationReceiptUncheckedUpdateManyWithoutAccountNestedInput
+    externalAgentAuditEvents?: ExternalAgentAuditEventUncheckedUpdateManyWithoutAccountNestedInput
     goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUncheckedUpdateManyWithoutAccountNestedInput
     profileImportArchives?: ProfileImportArchiveUncheckedUpdateManyWithoutAccountNestedInput
@@ -185683,6 +187917,21 @@ export namespace Prisma {
     capability: string
     inputDigest: string
     resultJson: string
+    createdAt?: Date | string
+  }
+
+  export type ExternalAgentAuditEventCreateManyAccountInput = {
+    id?: string
+    credentialId?: string | null
+    effect: string
+    tool: string
+    outcome: string
+    scopeDecision: string
+    requestId: string
+    traceId?: string | null
+    receiptId?: string | null
+    replayed?: boolean | null
+    durationMs: number
     createdAt?: Date | string
   }
 
@@ -186399,6 +188648,51 @@ export namespace Prisma {
     capability?: StringFieldUpdateOperationsInput | string
     inputDigest?: StringFieldUpdateOperationsInput | string
     resultJson?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type ExternalAgentAuditEventUpdateWithoutAccountInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    credentialId?: NullableStringFieldUpdateOperationsInput | string | null
+    effect?: StringFieldUpdateOperationsInput | string
+    tool?: StringFieldUpdateOperationsInput | string
+    outcome?: StringFieldUpdateOperationsInput | string
+    scopeDecision?: StringFieldUpdateOperationsInput | string
+    requestId?: StringFieldUpdateOperationsInput | string
+    traceId?: NullableStringFieldUpdateOperationsInput | string | null
+    receiptId?: NullableStringFieldUpdateOperationsInput | string | null
+    replayed?: NullableBoolFieldUpdateOperationsInput | boolean | null
+    durationMs?: IntFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type ExternalAgentAuditEventUncheckedUpdateWithoutAccountInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    credentialId?: NullableStringFieldUpdateOperationsInput | string | null
+    effect?: StringFieldUpdateOperationsInput | string
+    tool?: StringFieldUpdateOperationsInput | string
+    outcome?: StringFieldUpdateOperationsInput | string
+    scopeDecision?: StringFieldUpdateOperationsInput | string
+    requestId?: StringFieldUpdateOperationsInput | string
+    traceId?: NullableStringFieldUpdateOperationsInput | string | null
+    receiptId?: NullableStringFieldUpdateOperationsInput | string | null
+    replayed?: NullableBoolFieldUpdateOperationsInput | boolean | null
+    durationMs?: IntFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type ExternalAgentAuditEventUncheckedUpdateManyWithoutAccountInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    credentialId?: NullableStringFieldUpdateOperationsInput | string | null
+    effect?: StringFieldUpdateOperationsInput | string
+    tool?: StringFieldUpdateOperationsInput | string
+    outcome?: StringFieldUpdateOperationsInput | string
+    scopeDecision?: StringFieldUpdateOperationsInput | string
+    requestId?: StringFieldUpdateOperationsInput | string
+    traceId?: NullableStringFieldUpdateOperationsInput | string | null
+    receiptId?: NullableStringFieldUpdateOperationsInput | string | null
+    replayed?: NullableBoolFieldUpdateOperationsInput | boolean | null
+    durationMs?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 

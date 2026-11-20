@@ -38,4 +38,45 @@ describe('External agent early rejection audit', () => {
       await new Promise<void>((resolve) => server.close(() => resolve()));
     }
   });
+
+  it.each(['/api/v1', '/api'])(
+    'observes early credential-lane rejections on the %s alias',
+    async (prefix) => {
+      const audit = vi.fn();
+      const app = express();
+      app.use(createRequestContextMiddleware({ observer: { complete() {} } }));
+      app.use(createExternalAgentEdgeAudit(audit));
+      app.use(express.json({ limit: '1kb' }));
+      const router = express.Router();
+      router.post('/agent-connections/pats', (_req, res) => res.sendStatus(201));
+      app.use(prefix, router);
+      const server = app.listen(0, '127.0.0.1');
+      await once(server, 'listening');
+      const address = server.address();
+      if (!address || typeof address === 'string') throw new Error('address');
+      try {
+        const response = await fetch(
+          `http://127.0.0.1:${address.port}${prefix}/agent-connections/pats`,
+          {
+            method: 'POST',
+            headers: { 'content-type': 'application/json' },
+            body: JSON.stringify({ name: 'oversized'.repeat(200) }),
+          },
+        );
+        expect(response.status).toBe(413);
+        expect(audit).toHaveBeenCalledTimes(1);
+        expect(audit).toHaveBeenCalledWith(
+          expect.objectContaining({
+            effect: 'credential',
+            tool: 'pat_create',
+            outcome: 'HTTP_413',
+            scopeDecision: 'denied',
+          }),
+        );
+      } finally {
+        server.closeAllConnections();
+        await new Promise<void>((resolve) => server.close(() => resolve()));
+      }
+    },
+  );
 });

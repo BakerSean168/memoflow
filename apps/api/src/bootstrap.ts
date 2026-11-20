@@ -27,6 +27,7 @@
 import express, { type Express, type RequestHandler, Router } from 'express';
 import type { CloudSessionCapability } from '@memoflow/cloud-auth/server';
 import type { CloudAuthEmailKind, CloudAuthEmailLinkCapture } from '@memoflow/cloud-auth/server';
+import type { GatewayAuditEvent } from '@memoflow/agent-gateway';
 import type {
   IApiModule,
   IApiModuleContext,
@@ -75,6 +76,8 @@ export class ApiBootstrapper {
     trace: HttpRequestTrace = NOOP_HTTP_REQUEST_TRACE,
     private readonly authCapabilities: PublicAuthCapabilities = NO_PUBLIC_AUTH_CAPABILITIES,
     trustProxyHops: 0 | 1 = 0,
+    /** Single audit sink shared by the edge observer and the Gateway module. */
+    private readonly externalAgentAudit?: (event: GatewayAuditEvent) => void,
   ) {
     this.app = express();
     this.app.set('trust proxy', trustProxyHops);
@@ -108,6 +111,7 @@ export class ApiBootstrapper {
     // 1. 全局中间件
     applyGlobalMiddleware(this.app, this.metricsRecorder, {
       trace: this.trace,
+      externalAgentAudit: this.externalAgentAudit,
       beforeBodyParsing: (app) => {
         app.get('/api/auth/capabilities', (_req, res) => {
           res.setHeader('Cache-Control', 'no-store');

@@ -22,3 +22,16 @@ export * from './generated/prisma/client.js';
 
 // 单例实例 & 生命周期管理
 export { prisma, connectDatabase, disconnectDatabase } from './client.js';
+
+// Hosted MCP/edge audit persistence and owner-scoped query seam
+export {
+  createExternalAgentAuditStore,
+  createExternalAgentAuditQuery,
+  type ExternalAgentAuditRecord,
+  type ExternalAgentAuditEntry,
+  type ExternalAgentAuditStore,
+  type ExternalAgentAuditStoreOptions,
+  type ExternalAgentAuditFilter,
+  type ExternalAgentAuditPage,
+  type ExternalAgentAuditQueryPort,
+} from './adapters/prisma/external-agent-audit.js';

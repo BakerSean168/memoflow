@@ -34,6 +34,7 @@ async function fixture(oauthEnabled = false, trustProxyHops = 0, enabled = true)
     consumeReadQuota: vi.fn().mockResolvedValue(true),
   };
   const audit = vi.fn();
+  const auditQuery = { list: vi.fn().mockResolvedValue({ items: [], hasMore: false }) };
   const consumeIp = vi.fn().mockResolvedValue(true);
   const start = vi.fn(async () => {});
   const oauth = {
@@ -58,6 +59,7 @@ async function fixture(oauthEnabled = false, trustProxyHops = 0, enabled = true)
     oauth: oauthEnabled ? oauth : undefined,
     goals: { getGoal: vi.fn(), searchGoalPage: vi.fn() },
     audit,
+    auditQuery,
   });
   const router = express.Router();
   await module.register({
@@ -77,7 +79,7 @@ async function fixture(oauthEnabled = false, trustProxyHops = 0, enabled = true)
     },
   } as never);
   app.use('/api/v1', router);
-  return { base, pats, oauth, audit, consumeIp, start };
+  return { base, pats, oauth, audit, auditQuery, consumeIp, start };
 }
 describe('Gateway API host admission', () => {
   it('mounts neither /mcp nor PAT management while the pilot switch is off', async () => {
@@ -270,4 +272,74 @@ it('ignores client-supplied forwarding headers without trusted proxy configurati
     body: '{}',
   });
   expect(f.consumeIp).toHaveBeenCalledWith('127.0.0.1');
+});
+
+describe('Audit query API', () => {
+  it('reads the session owner lane and forwards bounded filters', async () => {
+    const f = await fixture();
+    f.auditQuery.list.mockResolvedValueOnce({
+      items: [
+        {
+          identityId: 'owner-a',
+          credentialId: 'credential-a',
+          effect: 'write',
+          tool: 'goal_create',
+          outcome: 'OK',
+          scopeDecision: 'allowed',
+          requestId: 'request-a',
+          traceId: 'trace-a',
+          receiptId: 'receipt-a',
+          replayed: false,
+          durationMs: 12,
+          createdAt: new Date('2026-11-19T10:00:00.000Z'),
+        },
+      ],
+      hasMore: false,
+    });
+    const response = await fetch(
+      `${f.base}/api/v1/agent-connections/audit-events?credentialId=credential-a&requestId=request-a&from=2026-11-01T00:00:00Z&to=2026-11-19T23:59:59Z&limit=10&identityId=owner-b`,
+      { headers: { authorization: 'Bearer firstparty' } },
+    );
+    expect(response.status).toBe(200);
+    expect(f.auditQuery.list).toHaveBeenCalledWith('owner-a', {
+      credentialId: 'credential-a',
+      requestId: 'request-a',
+      from: new Date('2026-11-01T00:00:00Z'),
+      to: new Date('2026-11-19T23:59:59Z'),
+      limit: 10,
+    });
+    expect(await response.json()).toEqual({
+      data: {
+        items: [
+          {
+            credentialId: 'credential-a',
+            effect: 'write',
+            tool: 'goal_create',
+            outcome: 'OK',
+            scopeDecision: 'allowed',
+            requestId: 'request-a',
+            traceId: 'trace-a',
+            receiptId: 'receipt-a',
+            replayed: false,
+            durationMs: 12,
+            createdAt: '2026-11-19T10:00:00.000Z',
+          },
+        ],
+        hasMore: false,
+      },
+    });
+    // Reading audit facts is not a credential mutation lane.
+    expect(f.audit).not.toHaveBeenCalled();
+  });
+
+  it('rejects an inverted time range without querying the store', async () => {
+    const f = await fixture();
+    const response = await fetch(
+      `${f.base}/api/v1/agent-connections/audit-events?from=2026-11-19T00:00:00Z&to=2026-11-18T00:00:00Z`,
+      { headers: { authorization: 'Bearer firstparty' } },
+    );
+    expect(response.status).toBe(400);
+    expect(await response.json()).toEqual({ error: 'INVALID_INPUT' });
+    expect(f.auditQuery.list).not.toHaveBeenCalled();
+  });
 });
