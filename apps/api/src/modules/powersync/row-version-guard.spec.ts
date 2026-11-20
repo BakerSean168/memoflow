@@ -107,7 +107,9 @@ describe('row version guard', () => {
       { id: 'goal-1', identityId: IDENTITY, name: 'Cloud edit', version: 2 },
     ]);
     await expect(
-      executeCrudBatch(db as never, IDENTITY, [{ ops: [patch({ name: 'Offline edit', version: 2 })] }]),
+      executeCrudBatch(db as never, IDENTITY, [
+        { ops: [patch({ name: 'Offline edit', version: 2 })] },
+      ]),
     ).rejects.toMatchObject({
       code: 'row_version_conflict',
       table: 'goals',
@@ -125,7 +127,9 @@ describe('row version guard', () => {
       { id: 'goal-1', identityId: IDENTITY, name: 'Cloud edit', version: 4 },
     ]);
     await expect(
-      executeCrudBatch(db as never, IDENTITY, [{ ops: [patch({ name: 'Offline edit', version: 2 })] }]),
+      executeCrudBatch(db as never, IDENTITY, [
+        { ops: [patch({ name: 'Offline edit', version: 2 })] },
+      ]),
     ).rejects.toMatchObject({ currentVersion: 4, reason: 'stale_version' });
   });
 
@@ -154,7 +158,9 @@ describe('row version guard', () => {
   it('rejects a patch for a row the server no longer has', async () => {
     const { db } = createDatabase([]);
     await expect(
-      executeCrudBatch(db as never, IDENTITY, [{ ops: [patch({ name: 'Local edit', version: 2 })] }]),
+      executeCrudBatch(db as never, IDENTITY, [
+        { ops: [patch({ name: 'Local edit', version: 2 })] },
+      ]),
     ).rejects.toMatchObject({ reason: 'row_missing', currentVersion: null });
   });
 
@@ -187,7 +193,9 @@ describe('row version guard', () => {
       { id: 'goal-1', identityId: IDENTITY, name: 'Base', version: 1 },
     ]);
     await expect(
-      executeCrudBatch(db as never, IDENTITY, [{ ops: [patch({ name: 'Local edit', version: '2' })] }]),
+      executeCrudBatch(db as never, IDENTITY, [
+        { ops: [patch({ name: 'Local edit', version: '2' })] },
+      ]),
     ).rejects.toThrow(/Invalid goals row version/);
   });
 
@@ -206,7 +214,9 @@ describe('row version guard', () => {
       { id: 'goal-1', identityId: 'other-identity', name: 'Foreign', version: 1 },
     ]);
     await expect(
-      executeCrudBatch(db as never, IDENTITY, [{ ops: [patch({ name: 'Local edit', version: 2 })] }]),
+      executeCrudBatch(db as never, IDENTITY, [
+        { ops: [patch({ name: 'Local edit', version: 2 })] },
+      ]),
     ).rejects.toMatchObject({ reason: 'row_missing' });
     expect(goal.rows.get('goal-1')).toMatchObject({ name: 'Foreign', version: 1 });
   });

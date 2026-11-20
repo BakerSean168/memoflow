@@ -126,7 +126,14 @@ describe('PowerSyncApiModule profile snapshot routes', () => {
   it('returns a machine-readable 409 when a stale upload loses the row version race', async () => {
     const db = {
       $transaction: async () => {
-        throw new PowerSyncRowVersionConflictError('goals', 'goal-1', 'PATCH', 2, 3, 'stale_version');
+        throw new PowerSyncRowVersionConflictError(
+          'goals',
+          'goal-1',
+          'PATCH',
+          2,
+          3,
+          'stale_version',
+        );
       },
     } as unknown as DatabaseClient;
     const app = await createTestApp(db);

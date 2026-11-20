@@ -7,7 +7,7 @@ updated: 2026-11-19T00:00:00Z
 
 # ADR-124: 本地 MCP 宿主形态、凭据双轨与云端分工
 
-**状态：** 已采纳（#1036）；跨端并发规则待 [#1035](https://github.com/BakerSean168/memoflow/issues/1035) 定案
+**状态：** 已采纳（#1036）；跨端并发规则见 [ADR-125](./ADR-125-powersync-uplink-row-version-guard.md)
 
 **日期：** 2026-11-19
 
@@ -110,14 +110,11 @@ ADR-121 的本地 MCP 通道最初只服务内置本地 Agent 的 run：由宿�
 - 云端不代理本地工具，本地不缓存或转发云端凭据；同名工具不因另一端存在而改变 effect 或 scope 语义。
 - 工具语义（输入/输出契约、失败码、幂等键）尽量共享；执行所有权、事务边界和授权判定各自独立。
 
-### 6. 冲突规则：现行 LWW，目标规则以 #1035 定案为准
+### 6. 跨端冲突规则：以 ADR-125 为准
 
-**现行规则（截至本文）**：云端与本地同时修改同一行时，PowerSync 上行是整行后写覆盖（last-write-wins，无逐列合并）。本地 `expectedVersion` / CAS 只对本地已同步的快照有效，挡不住尚未下发到本地的云端写入；因此当前**不承诺跨端冲突检测**，最终结果由上传顺序决定。
+[#1035](https://github.com/BakerSean168/memoflow/issues/1035) 已定案并落为 [ADR-125](./ADR-125-powersync-uplink-row-version-guard.md)：`goals` / `task_plans` 的 PowerSync 上行以 `version` 乐观锁拒绝过期上传，服务端返回 409 `row_version_conflict`，客户端留证后不重试该笔；云端 owner 命令继续使用 `expectedVersion` CAS。两个入口共享同一权威事实——PostgreSQL 中的 `version`——不再存在「整行后写覆盖」的默认路径。
 
-**目标规则**：由 [#1035](https://github.com/BakerSean168/memoflow/issues/1035) 定案——为 `goals` / `task_plans` 上行增加版本或幂等守卫（服务端拒绝过期上传，或改走 owner 命令上行），并给出稳定的拒绝语义。本文只登记引用关系：
-
-- 在 #1035 落地前，界面、文档与工具回执不得宣称跨端冲突会被检测；回执中的 `replayed`、`CONFLICT` 只表示入口内幂等与本地 CAS。
-- #1035 定案后，若与本节「现行规则」冲突，以 #1035 为准，并同步修订本文，而不是在两处各留一套口径。
+本文 §5 的写路径与入口分工不变；冲突语义、拒绝码与客户端处理一律以 ADR-125 为准，本节不再保留第二套口径。本文定稿前的「现行 LWW、不承诺跨端冲突检测」表述自 ADR-125 起失效，界面、文档与工具回执可以声明该冲突会被检测。
 
 ## Considered Options
 

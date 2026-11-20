@@ -282,7 +282,7 @@ export class DesktopPowerSyncConnector implements PowerSyncBackendConnector {
           }
           const rowConflict = await resolveRowVersionConflict(database, ops, conflict);
           if (rowConflict) {
-            // ADR-124: the stored revision already won. Retrying the stale
+            // ADR-125: the stored revision already won. Retrying the stale
             // upload can never succeed, so the rejected payloads are journalled
             // and only their queued ops are dropped; the pending download
             // brings the winning revision into the local view.

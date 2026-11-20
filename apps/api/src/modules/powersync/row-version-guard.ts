@@ -13,7 +13,7 @@ import type { CrudDelegateContainer } from './table-mapping.js';
  * when the stored revision is still behind that value; otherwise the upload is
  * stale and must fail loudly instead of overwriting the winning write.
  *
- * See ADR-124 (PowerSync uplink row version guard).
+ * See ADR-125 (PowerSync uplink row version guard).
  */
 export const ROW_VERSION_GUARDED_TABLES: ReadonlySet<string> = new Set(['goals', 'task_plans']);
 
@@ -56,10 +56,7 @@ const TABLE_TO_DELEGATE: Readonly<Record<string, string>> = {
   task_plans: 'taskPlan',
 };
 
-function getVersionedDelegate(
-  tx: CrudDelegateContainer,
-  tableName: string,
-): VersionedRowDelegate {
+function getVersionedDelegate(tx: CrudDelegateContainer, tableName: string): VersionedRowDelegate {
   const modelName = TABLE_TO_DELEGATE[tableName];
   const value = modelName ? tx[modelName] : undefined;
   if (
@@ -106,10 +103,7 @@ function comparable(value: unknown): unknown {
  * A replayed upload (lost 2xx response, at-least-once delivery) already landed.
  * Treat it as success only when every column it carries is already stored.
  */
-function isAppliedReplay(
-  data: Record<string, unknown>,
-  current: Record<string, unknown>,
-): boolean {
+function isAppliedReplay(data: Record<string, unknown>, current: Record<string, unknown>): boolean {
   return Object.entries(data).every(([key, value]) =>
     isDeepStrictEqual(comparable(value), comparable(current[key])),
   );

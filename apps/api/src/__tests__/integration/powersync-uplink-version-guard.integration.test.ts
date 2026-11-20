@@ -19,7 +19,7 @@ import { composePowerSyncApiModule } from '../../modules/powersync/module';
 import { bindGatewayWrites } from '../../modules/agent-gateway/write.port';
 
 /**
- * Cross-boundary proof for ADR-124: a cloud MCP write and a desktop PowerSync
+ * Cross-boundary proof for ADR-125: a cloud MCP write and a desktop PowerSync
  * uplink racing on the same `goals` / `task_plans` row. Both legs use the real
  * server entry points and the real PostgreSQL database.
  */
@@ -91,7 +91,10 @@ async function createFixture() {
     writes: bindGatewayWrites(prisma, time),
   });
   const call = async (name: string, args: unknown) => {
-    const response = await gateway.fetch(mcpRequest(pat.secret, 'tools/call', name, args), cx(identityId));
+    const response = await gateway.fetch(
+      mcpRequest(pat.secret, 'tools/call', name, args),
+      cx(identityId),
+    );
     const payload: unknown = await response.json();
     return payload as {
       result?: { structuredContent?: unknown; isError?: boolean; content?: { text: string }[] };
@@ -120,7 +123,9 @@ function createUplinkApp(identityId: string): Express {
 }
 
 function upload(app: Express, ops: unknown[]) {
-  return request(app).put('/api/v1/powersync/crud').send({ transactions: [{ ops }] });
+  return request(app)
+    .put('/api/v1/powersync/crud')
+    .send({ transactions: [{ ops }] });
 }
 
 beforeEach(cleanAll);

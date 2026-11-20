@@ -226,11 +226,8 @@ export async function executeCrudBatch(
           continue;
         }
 
-        if (
-          ROW_VERSION_GUARDED_TABLES.has(tableName) &&
-          (opType === 'PUT' || opType === 'PATCH')
-        ) {
-          // ADR-124: a stale cloud/local double write must fail loudly instead
+        if (ROW_VERSION_GUARDED_TABLES.has(tableName) && (opType === 'PUT' || opType === 'PATCH')) {
+          // ADR-125: a stale cloud/local double write must fail loudly instead
           // of overwriting the winning aggregate revision.
           await executeRowVersionGuardedCrudOperation(tx, identityId, op);
           continue;

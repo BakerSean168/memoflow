@@ -142,14 +142,12 @@ describe('stale row version resolution with the real Node SDK queue', () => {
       rowId: 'goal-1',
     });
     expect(
-      await db.getAll(
-        `SELECT id FROM ps_crud WHERE json_extract(data, '$.type') = 'goals'`,
-      ),
+      await db.getAll(`SELECT id FROM ps_crud WHERE json_extract(data, '$.type') = 'goals'`),
     ).toEqual([]);
     expect(await db.getAll('SELECT id FROM ps_crud')).toHaveLength(1);
-    expect(await db.get<{ payload: string }>('SELECT payload FROM desktop_sync_row_conflicts')).toEqual(
-      { payload: expect.stringContaining('Second edit') },
-    );
+    expect(
+      await db.get<{ payload: string }>('SELECT payload FROM desktop_sync_row_conflicts'),
+    ).toEqual({ payload: expect.stringContaining('Second edit') });
   });
 
   it.each([

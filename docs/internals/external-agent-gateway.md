@@ -141,7 +141,7 @@ R1 list/search 默认 20 条、最多 100 条，时间列表默认最多 31 天�
 
 现有 owner public failures 通过 ADR-049 的单一边界映射；上述新增接入 code 只表达 Gateway 语义，不建立另一套领域错误体系。
 
-Desktop 离线写入经 PowerSync 上行时使用同一冲突口径：`goals`/`task_plans` 以 `version` 乐观锁拒绝过期上传，同步接口返回 409 `row_version_conflict`，客户端留证后不重试该笔；规则见 [ADR-124](./decisions/ADR-124-powersync-uplink-row-version-guard.md)。
+Desktop 离线写入经 PowerSync 上行时使用同一冲突口径：`goals`/`task_plans` 以 `version` 乐观锁拒绝过期上传，同步接口返回 409 `row_version_conflict`，客户端留证后不重试该笔；规则见 [ADR-125](./decisions/ADR-125-powersync-uplink-row-version-guard.md)。
 
 ## 6. 写入与审批
 

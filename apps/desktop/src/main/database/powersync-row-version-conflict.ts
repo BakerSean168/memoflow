@@ -3,7 +3,7 @@ import { isDeepStrictEqual } from 'node:util';
 import type { SerializedCrudOperation } from './powersync-crud';
 
 /**
- * Resolution for the server's ADR-124 row-version conflict (409
+ * Resolution for the server's ADR-125 row-version conflict (409
  * `row_version_conflict`) on `goals` / `task_plans` uplink.
  *
  * The server rejected every queued op for the row because the stored revision
@@ -47,7 +47,15 @@ function readConflict(body: unknown): RowVersionConflict | null {
   const current = currentVersion === null ? null : versionOf(currentVersion);
   if (incomingVersion !== null && incoming === null) return null;
   if (currentVersion !== null && current === null) return null;
-  return { table, rowId, identityId, operation, incomingVersion: incoming, currentVersion: current, reason };
+  return {
+    table,
+    rowId,
+    identityId,
+    operation,
+    incomingVersion: incoming,
+    currentVersion: current,
+    reason,
+  };
 }
 
 interface QueueRow {
@@ -136,9 +144,10 @@ export async function resolveRowVersionConflict(
   if (!headOp || !Number.isSafeInteger(headOp.op_id)) return null;
 
   const resolved = await database.writeTransaction(async (tx) => {
-    const head = await tx.getOptional<QueueRow>('SELECT id, tx_id, data FROM ps_crud WHERE id = ?', [
-      headOp.op_id,
-    ]);
+    const head = await tx.getOptional<QueueRow>(
+      'SELECT id, tx_id, data FROM ps_crud WHERE id = ?',
+      [headOp.op_id],
+    );
     if (!head || head.tx_id !== (headOp.tx_id ?? null)) return false;
     const original = queuedData(head);
     if (

@@ -11,13 +11,15 @@ created: 2026-11-19T00:00:00Z
 updated: 2026-11-19T00:00:00Z
 ---
 
-# ADR-124: PowerSync Uplink Row Version Guard
+# ADR-125: PowerSync Uplink Row Version Guard
 
 **状态：** 已采纳（#1035）
 
 **日期：** 2026-11-19
 
-**关联：** ADR-038、ADR-118、ADR-121、#982、#1036
+**关联：** ADR-038、ADR-118、ADR-121、ADR-124（本地 MCP 宿主）、#982、#1036
+
+> 本文回应 ADR-124 第 6 节挂起的跨端冲突规则，并取代该节「现行规则」中的 last-write-wins 表述。
 
 ## Context
 
@@ -36,12 +38,12 @@ updated: 2026-11-19T00:00:00Z
 
 `goals`、`task_plans` 的 PowerSync 上行不再走通用 last-write-wins 分支，由 `row-version-guard.ts` 处理：
 
-| 操作 | 上行携带 | 服务端判定 | 结果 |
-| ---- | -------- | ---------- | ---- |
-| `PATCH`（带 `version`） | `version = 本地基线 + 1` | `updateMany where { id, identityId, version: { lt: incoming } }` | 命中即写入；未命中且内容已是该状态视为重放成功；否则冲突 |
-| `PATCH`（不带 `version`） | 辅助列（Goal 状态投影、TaskPlan 删除/恢复墓碑） | `where { id, identityId }` | 保持单列 last-write-wins，不写 `version` |
-| `PUT`（新建） | `version = 1` | `createMany skipDuplicates` | 插入成功即写入；已存在且版本落后才允许按 CAS 更新；否则冲突 |
-| `DELETE` | 无版本 | 通用分支 | 保持现状（业务删除是 `deleted_at` 列 PATCH） |
+| 操作                      | 上行携带                                        | 服务端判定                                                       | 结果                                                        |
+| ------------------------- | ----------------------------------------------- | ---------------------------------------------------------------- | ----------------------------------------------------------- |
+| `PATCH`（带 `version`）   | `version = 本地基线 + 1`                        | `updateMany where { id, identityId, version: { lt: incoming } }` | 命中即写入；未命中且内容已是该状态视为重放成功；否则冲突    |
+| `PATCH`（不带 `version`） | 辅助列（Goal 状态投影、TaskPlan 删除/恢复墓碑） | `where { id, identityId }`                                       | 保持单列 last-write-wins，不写 `version`                    |
+| `PUT`（新建）             | `version = 1`                                   | `createMany skipDuplicates`                                      | 插入成功即写入；已存在且版本落后才允许按 CAS 更新；否则冲突 |
+| `DELETE`                  | 无版本                                          | 通用分支                                                         | 保持现状（业务删除是 `deleted_at` 列 PATCH）                |
 
 使用 `version < incoming` 而非 `version = incoming - 1`：离线期间同一行可能被多次修改并被 PowerSync 合并成一次上行，严格等于会把合法的离线连改误判为冲突；`lt` 仍能拒绝一切「服务端已经前进过」的上传。
 
@@ -59,20 +61,21 @@ updated: 2026-11-19T00:00:00Z
 
 ### 3. 云/本地双写同一行的规则
 
-| 场景 | 规则 |
-| ---- | ---- |
-| 云端先写、本地后上行 | 本地过期上传被 409 拒绝，云端数据保留，本地留证并回落到服务端版本 |
-| 本地先上行、云端后写 | 云端 `expectedVersion` 已过期，MCP 返回 `CONFLICT`，本地数据保留 |
-| 双方都基于同一基线 | 先落库者胜出，后到者在自己的入口被拒绝，语义一致 |
-| 重放（响应丢失） | 内容已落库则按成功处理，不推进版本、不覆盖 |
-| 无版本的辅助列写 | 单列 last-write-wins，不参与版本链，见「Consequences」中的残留风险 |
+| 场景                 | 规则                                                               |
+| -------------------- | ------------------------------------------------------------------ |
+| 云端先写、本地后上行 | 本地过期上传被 409 拒绝，云端数据保留，本地留证并回落到服务端版本  |
+| 本地先上行、云端后写 | 云端 `expectedVersion` 已过期，MCP 返回 `CONFLICT`，本地数据保留   |
+| 双方都基于同一基线   | 先落库者胜出，后到者在自己的入口被拒绝，语义一致                   |
+| 重放（响应丢失）     | 内容已落库则按成功处理，不推进版本、不覆盖                         |
+| 无版本的辅助列写     | 单列 last-write-wins，不参与版本链，见「Consequences」中的残留风险 |
 
 云端 MCP 与本地上行共享同一权威事实：Postgres 中的 `version` 是唯一裁决依据；任何一端都不做「整行后写覆盖」。
 
 ### 4. 与 #1036 及既有 ADR 的口径
 
 - ADR-038 已要求 owner 写入使用 `expectedVersion` 并返回类型化冲突；本决策把同一语义补到 PowerSync 上行，二者不再是两套规则。
-- #1036（本地 MCP 宿主 ADR）按本决策引用冲突规则：本地 MCP 写走本地 owner 命令 + PowerSync 上行，云端 MCP 写走云端 owner 命令；两端都不得静默覆盖，冲突一律显式返回。
+- ADR-124 第 6 节登记的「现行规则」是上行整行后写覆盖、不承诺跨端冲突检测；本决策落地后该表述按 ADR-124 自身的约定被本节接管，ADR-124 只保留引用。
+- 本地 MCP 写走本地 owner 命令 + PowerSync 上行，云端 MCP 写走云端 owner 命令；两端都不得静默覆盖，冲突一律显式返回。
 - 不新增第二个治理运行时、不引入 CRDT 逐列合并，也不把上行改造成 owner 命令通道（方案 B 会重复实现幂等回执与命令编解码，收益不抵成本）。
 
 ## Consequences
