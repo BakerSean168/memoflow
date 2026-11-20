@@ -1,6 +1,6 @@
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import { execFileSync } from 'node:child_process';
-import { createHash } from 'node:crypto';
+import { createHash, randomBytes } from 'node:crypto';
 import { once } from 'node:events';
 import type { Server } from 'node:http';
 import express from 'express';
@@ -47,6 +47,13 @@ const wants = (dimension: 'credential' | 'owner' | 'ip') => !only || only === di
 const perSecond = 40;
 const windowRiskMs = 45_000;
 const { ipPerMinute, ownerPerMinute, credentialPerMinute } = DEFAULT_EXTERNAL_AGENT_RATE_LIMITS;
+/**
+ * A private address space unique to this run. IP buckets are shared per address, so a
+ * fixed documentation range would inherit the previous run's counts inside one window
+ * and make a repeated calibration unreproducible.
+ */
+const [first, second] = randomBytes(2);
+const addressBlock = (offset: number) => `10.${first}.${(second + offset) % 256}`;
 
 type Reply = {
   readonly status: number;
@@ -105,6 +112,7 @@ function summarize(name: string, budget: number, outcomes: Outcome[]) {
     configuredPerMinute: budget,
     requests: outcomes.length,
     allowed: outcomes.length - denied.length,
+    denied: denied.length,
     firstRejectedRequest: firstDenied === -1 ? 'none' : firstDenied + 1,
     firstRejectionAtMs: firstDenied === -1 ? null : Math.round(outcomes[firstDenied].atMs),
     status: firstDenied === -1 ? 'never' : String(denied[0].status),
@@ -115,7 +123,15 @@ function summarize(name: string, budget: number, outcomes: Outcome[]) {
   };
   console.log(`[rate-limit-calibration] ${JSON.stringify(report)}`);
   expect(report.allowed, `${name}: allowed requests`).toBe(budget);
-  expect(report.firstRejectedRequest, `${name}: first rejection`).toBe(budget + 1);
+  expect(report.denied, `${name}: rejected requests`).toBe(outcomes.length - budget);
+  // Concurrency makes send order differ from admission order, so the index of the first
+  // rejection is not an invariant; the budget being admitted exactly, and no rejection
+  // before the budget's worth of requests could have been dispatched, is.
+  expect(report.firstRejectionAtMs, `${name}: rejection observed`).not.toBeNull();
+  expect(
+    report.firstRejectionAtMs!,
+    `${name}: rejection before budget dispatch`,
+  ).toBeGreaterThanOrEqual(((budget - 1) / perSecond) * 1000);
   expect(report.status).toBe('429');
   expect(report.error).toBe('RATE_LIMITED');
   expect(report.retryAfter).toBe('60');
@@ -269,18 +285,19 @@ describe.skipIf(!enabled)('hosted MCP admission calibration', () => {
       const identity = String(IdentityId.generate());
       await seedAccount({ id: identity });
       const secret = await credential(identity, 'credential dimension');
+      const address = `${addressBlock(0)}.10`;
       reports.push(
         await run({
           name: 'credential',
           budget: credentialPerMinute,
           requests: credentialPerMinute + 20,
-          address: () => '198.51.100.10',
+          address: () => address,
           token: () => secret,
         }),
       );
       // Isolation: this budget binds before the owner and IP budgets.
       expect(Number(await redis.get(bucket('owner', identity)))).toBeLessThan(ownerPerMinute);
-      expect(Number(await redis.get(bucket('ip', '198.51.100.10')))).toBeLessThan(ipPerMinute);
+      expect(Number(await redis.get(bucket('ip', address)))).toBeLessThan(ipPerMinute);
     }
     if (wants('owner')) {
       const identity = String(IdentityId.generate());
@@ -293,7 +310,7 @@ describe.skipIf(!enabled)('hosted MCP admission calibration', () => {
           name: 'owner',
           budget: ownerPerMinute,
           requests: ownerPerMinute + 20,
-          address: (index) => `203.0.113.${(index % 200) + 1}`,
+          address: (index) => `${addressBlock(1)}.${(index % 200) + 1}`,
           token: (index) => secrets[index % secrets.length],
         }),
       );
@@ -316,7 +333,7 @@ describe.skipIf(!enabled)('hosted MCP admission calibration', () => {
           name: 'ip',
           budget: ipPerMinute,
           requests: ipPerMinute + 20,
-          address: () => '192.0.2.20',
+          address: () => `${addressBlock(2)}.20`,
           token: (index) => secrets[index % secrets.length],
         }),
       );

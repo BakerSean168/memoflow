@@ -1411,7 +1411,7 @@
         "status": "none-verified",
         "testFiles": []
       },
-      "sourceSha256": "631d531efb54f09f6fb17ba56b3c86d2a5065a87184090b8d6c4cb0fc53a1721"
+      "sourceSha256": "929015d910bed6cf213fc9c131cc21945963c7679095c6d2e33b45be3c84cc24"
     },
     {
       "path": "packages/desktop-contracts/src/intervention-window.spec.ts",
