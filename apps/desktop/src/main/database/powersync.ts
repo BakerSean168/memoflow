@@ -35,6 +35,7 @@ import { createLogger } from '@memoflow/utils/logger';
 import { getApiBaseUrl } from '../utils/api-config';
 import { serializeCrudTransaction } from './powersync-crud';
 import { recoverPreferenceCanonicalId } from './powersync-preference-recovery';
+import { resolveRowVersionConflict } from './powersync-row-version-conflict';
 import { normalizePowerSyncTableName, POWER_SYNC_CHANGE_TABLES } from './powersync-table-changes';
 import { resolvePackagedWorkerPath } from './packaged-worker-path';
 import { describePowerSyncStatus, type SafeSyncHealth } from './powersync-health';
@@ -277,6 +278,22 @@ export class DesktopPowerSyncConnector implements PowerSyncBackendConnector {
           if (await recoverPreferenceCanonicalId(database, ops, conflict)) {
             // Migration retains every queued operation. Reacquire the SDK
             // transaction and upload its canonical IDs; never complete a 409.
+            continue;
+          }
+          const rowConflict = await resolveRowVersionConflict(database, ops, conflict);
+          if (rowConflict) {
+            // ADR-125: the stored revision already won. Retrying the stale
+            // upload can never succeed, so the rejected payloads are journalled
+            // and only their queued ops are dropped; the pending download
+            // brings the winning revision into the local view.
+            syncLogger.warn('Stale row version upload rejected', {
+              table: rowConflict.table,
+              rowId: rowConflict.rowId,
+              operation: rowConflict.operation,
+              incomingVersion: rowConflict.incomingVersion,
+              currentVersion: rowConflict.currentVersion,
+              reason: rowConflict.reason,
+            });
             continue;
           }
           throw new Error('[PowerSync] CRUD conflict requires resolution; queued edits retained');

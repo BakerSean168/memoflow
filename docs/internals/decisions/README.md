@@ -142,7 +142,8 @@ updated: 2026-10-07T00:00:00Z
 | [ADR-122](./ADR-122-routine-offline-scheduler-host-ownership.md) | Routine Offline Scheduler Host Ownership | 已采纳并部分实施（#737） | 2026-10-30 |
 
 | [ADR-123](./ADR-123-unified-agent-business-permission-checkpoint.md) | Agent 统一业务权限检查点、四档预设与 Mastra/MCP 接入 | 已采纳（#757/#761） | 2026-10-31 |
-| [ADR-124](./ADR-124-local-mcp-host-credentials-and-cloud-boundary.md) | 本地 MCP 宿主形态、凭据双轨与云端分工 | 已采纳（#1036；冲突规则待 #1035） | 2026-11-19 |
+| [ADR-124](./ADR-124-local-mcp-host-credentials-and-cloud-boundary.md) | 本地 MCP 宿主形态、凭据双轨与云端分工 | 已采纳（#1036；冲突规则见 ADR-125） | 2026-11-19 |
+| [ADR-125](./ADR-125-powersync-uplink-row-version-guard.md) | PowerSync 上行行版本守卫与云/本地双写冲突规则 | 已采纳（#1035） | 2026-11-19 |
 
 ## 维护规则
 
