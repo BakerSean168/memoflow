@@ -8,7 +8,7 @@ import { fromNodeHeaders, toNodeHandler } from 'better-auth/node';
 import { bearer } from 'better-auth/plugins';
 import { deviceAuthorization } from 'better-auth/plugins/device-authorization';
 import { verifyJwsAccessToken } from 'better-auth/oauth2';
-import type { ExternalAgentOAuthOptions } from './external-agent-provider';
+import type { CimdFetchTransport, ExternalAgentOAuthOptions } from './external-agent-provider';
 import { createExternalAgentOAuth, type VerifiedOAuthPrincipal } from './external-agent-oauth';
 import { createOAuthStore } from './oauth-store';
 import type { RequestHandler } from 'express';
@@ -80,6 +80,8 @@ interface CloudAuth extends CloudSessionCapability {
 interface CloudAuthDependencies {
   /** Opaque test/internal adapter override; Better Auth types stay implementation-private. */
   readonly database?: unknown;
+  /** Test/internal transport override for the CIMD metadata document fetch. */
+  readonly cimdFetch?: CimdFetchTransport;
 }
 
 export function createCloudAuth(
@@ -104,7 +106,12 @@ export function createCloudAuth(
   }
 
   const externalAgents = options.externalAgents
-    ? createExternalAgentOAuth(oauthStore, options.externalAgents, isClosureBlocked)
+    ? createExternalAgentOAuth(
+        oauthStore,
+        options.externalAgents,
+        isClosureBlocked,
+        dependencies.cimdFetch,
+      )
     : undefined;
   const databaseOverride = dependencies.database as BetterAuthOptions['database'] | undefined;
   const auth = betterAuth({

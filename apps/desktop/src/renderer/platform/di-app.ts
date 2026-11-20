@@ -17,7 +17,7 @@ import { ref } from 'vue';
 import { createResultIpcClient } from '@memoflow/ipc-client';
 import { getI18nGlobal } from '@memoflow/app-vue/plugins/i18n';
 import { createAccountIpcClient } from '@memoflow/account-client';
-import { createCloudAuthIpcClient } from '@memoflow/cloud-auth';
+import { createCloudAuthIpcClient, createExternalAgentIpcClient } from '@memoflow/cloud-auth';
 import { createGoalIpcClient } from '@memoflow/goal-client';
 import { createGoalKnowledgeIpcClient } from '@memoflow/relation/client';
 import { createLabelIpcClient } from '@memoflow/label/client';
@@ -41,6 +41,7 @@ import {
   ACCOUNT_SERVICE_KEY,
   ACCOUNT_AVATAR_STORE_KEY,
   DESKTOP_CLOUD_AUTH_SERVICE_KEY,
+  EXTERNAL_AGENT_SERVICE_KEY,
   GOAL_SERVICE_KEY,
   GOAL_DRAFT_CHECKPOINT_KEY,
   GOAL_KNOWLEDGE_SERVICE_KEY,
@@ -116,6 +117,9 @@ export function installDesktopAppServices(
 
   const cloudAuth = createCloudAuthIpcClient(resultIpcClient);
   app.provide(DESKTOP_CLOUD_AUTH_SERVICE_KEY, cloudAuth);
+  // Issue #1030: the same settings surface as Web; the main process owns the
+  // cloud session token, so connection management crosses IPC instead of cookies.
+  app.provide(EXTERNAL_AGENT_SERVICE_KEY, createExternalAgentIpcClient(resultIpcClient));
   app.provide(CLOUD_ACCOUNT_SECURITY_KEY, {
     verifyAccountPassword: (password) => cloudAuth.verifyAccountPassword(password),
     requestEmailChange: (input) => cloudAuth.requestEmailChange(input),

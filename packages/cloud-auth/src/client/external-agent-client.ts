@@ -1,20 +1,50 @@
 import { z } from 'zod';
+import type { IResultIpcClient } from '@memoflow/ipc-client';
+import { ExternalAgentChannels } from '@memoflow/desktop-contracts';
 import {
-  ExternalAgentConsentSchema,
-  OAuthConnectionSchema,
-  ScopedPatSummarySchema,
-  ScopedPatCreationSchema,
   CreateScopedPatSchema,
+  ExternalAgentConsentSchema,
+  ExternalAgentFailureSchema,
+  OAuthConnectionSchema,
+  ScopedPatCreationSchema,
+  ScopedPatSummarySchema,
   externalAgentFailure,
+  type CreateScopedPatInput,
   type ExternalAgentClientPort,
-  type ExternalAgentResult,
   type ExternalAgentFailureCode,
+  type ExternalAgentResult,
 } from '@memoflow/agent-gateway';
 import { fail, ok } from '@memoflow/transport-contracts/result';
 
-/** Cookie-authenticated account controls with validated wire responses. */
-export function createExternalAgentHttpClient(baseUrl: string): ExternalAgentClientPort {
-  const origin = baseUrl.replace(/\/api\/v1\/?$/, '').replace(/\/$/, '');
+const CONNECTIONS_ROOT = '/api/v1/agent-connections';
+
+/** HTTP status → public failure code, shared by every transport variant. */
+function failureCodeForStatus(status: number, path: string): ExternalAgentFailureCode {
+  if (status === 401) return 'EAG_UNAUTHORIZED';
+  if (status === 403) return 'EAG_FORBIDDEN';
+  if (status === 404) return 'EAG_SERVICE_DISABLED';
+  if (status === 409) return 'EAG_CONFLICT';
+  if (status === 429) return 'EAG_RATE_LIMITED';
+  if (status >= 500) return 'EAG_SERVICE_UNAVAILABLE';
+  if (status === 400)
+    return path.includes('consent') ? 'EAG_CONSENT_INVALID' : 'EAG_VALIDATION_ERROR';
+  return 'EAG_INVALID_RESPONSE';
+}
+
+interface ExternalAgentRequestContext {
+  origin: string;
+  /** Web cookie sessions; the desktop main process authenticates with a bearer token. */
+  credentials?: RequestCredentials;
+  /** Extra headers resolved per request (desktop: bearer token + trusted Web Origin). */
+  headers?: () => Record<string, string>;
+}
+
+function normalizeOrigin(baseUrl: string): string {
+  return baseUrl.replace(/\/api\/v1\/?$/, '').replace(/\/$/, '');
+}
+
+function createExternalAgentClient(context: ExternalAgentRequestContext): ExternalAgentClientPort {
+  const origin = normalizeOrigin(context.origin);
   async function request<T>(
     path: string,
     schema: z.ZodType<T>,
@@ -23,39 +53,19 @@ export function createExternalAgentHttpClient(baseUrl: string): ExternalAgentCli
     extraHeaders?: Record<string, string>,
   ): Promise<ExternalAgentResult<T>> {
     try {
+      const extra = { ...context.headers?.(), ...extraHeaders };
+      const headers: Record<string, string> = {};
+      if (body !== undefined) headers['content-type'] = 'application/json';
+      Object.assign(headers, extra);
       const response = await fetch(`${origin}${path}`, {
         method,
-        credentials: 'include',
+        credentials: context.credentials,
         redirect: 'error',
-        headers:
-          body === undefined && !extraHeaders
-            ? undefined
-            : {
-                ...(body === undefined ? {} : { 'content-type': 'application/json' }),
-                ...extraHeaders,
-              },
+        headers: Object.keys(headers).length > 0 ? headers : undefined,
         body: body === undefined ? undefined : JSON.stringify(body),
       });
       if (!response.ok) {
-        const code: ExternalAgentFailureCode =
-          response.status === 401
-            ? 'EAG_UNAUTHORIZED'
-            : response.status === 403
-              ? 'EAG_FORBIDDEN'
-              : response.status === 404
-                ? 'EAG_SERVICE_DISABLED'
-                : response.status === 409
-                  ? 'EAG_CONFLICT'
-                  : response.status === 429
-                    ? 'EAG_RATE_LIMITED'
-                    : response.status >= 500
-                      ? 'EAG_SERVICE_UNAVAILABLE'
-                      : response.status === 400
-                        ? path.includes('consent')
-                          ? 'EAG_CONSENT_INVALID'
-                          : 'EAG_VALIDATION_ERROR'
-                        : 'EAG_INVALID_RESPONSE';
-        return fail(externalAgentFailure(code));
+        return fail(externalAgentFailure(failureCodeForStatus(response.status, path)));
       }
       try {
         const payload: unknown = response.status === 204 ? undefined : await response.json();
@@ -70,13 +80,13 @@ export function createExternalAgentHttpClient(baseUrl: string): ExternalAgentCli
       return fail(externalAgentFailure('EAG_NETWORK_ERROR'));
     }
   }
-  const root = '/api/v1/agent-connections';
   const list = <T>(path: string, schema: z.ZodType<T>) =>
     request(path, z.object({ data: schema })).then((result) =>
       result.ok ? ok(result.data.data) : result,
     );
   return {
-    capabilities: () => request(`${root}/capabilities`, z.object({ oauth: z.boolean() })),
+    capabilities: () =>
+      request(`${CONNECTIONS_ROOT}/capabilities`, z.object({ oauth: z.boolean() })),
     consentRequest: (oauthQuery) =>
       request('/api/auth/external-agent/consent-request', ExternalAgentConsentSchema, 'POST', {
         oauth_query: oauthQuery,
@@ -90,20 +100,80 @@ export function createExternalAgentHttpClient(baseUrl: string): ExternalAgentCli
         'POST',
         { oauth_query: oauthQuery, accept },
       ),
-    listConnections: () => list(`${root}/oauth`, z.array(OAuthConnectionSchema)),
+    listConnections: () => list(`${CONNECTIONS_ROOT}/oauth`, z.array(OAuthConnectionSchema)),
     revokeConnection: (id) =>
-      request(`${root}/oauth/${z.uuid().parse(id)}`, z.undefined(), 'DELETE'),
-    listPats: () => list(`${root}/pats`, z.array(ScopedPatSummarySchema)),
+      request(`${CONNECTIONS_ROOT}/oauth/${z.uuid().parse(id)}`, z.undefined(), 'DELETE'),
+    listPats: () => list(`${CONNECTIONS_ROOT}/pats`, z.array(ScopedPatSummarySchema)),
     createPat: (input) => {
       const parsed = CreateScopedPatSchema.parse(input);
       return request(
-        `${root}/pats`,
+        `${CONNECTIONS_ROOT}/pats`,
         z.object({ data: ScopedPatCreationSchema }),
         'POST',
         parsed,
         parsed.idempotencyKey ? { 'idempotency-key': parsed.idempotencyKey } : undefined,
       ).then((result) => (result.ok ? ok(result.data.data) : result));
     },
-    revokePat: (id) => request(`${root}/pats/${z.uuid().parse(id)}`, z.undefined(), 'DELETE'),
+    revokePat: (id) =>
+      request(`${CONNECTIONS_ROOT}/pats/${z.uuid().parse(id)}`, z.undefined(), 'DELETE'),
+  };
+}
+
+/** Cookie-authenticated account controls with validated wire responses (Web). */
+export function createExternalAgentHttpClient(baseUrl: string): ExternalAgentClientPort {
+  return createExternalAgentClient({ origin: baseUrl, credentials: 'include' });
+}
+
+/**
+ * Main-process desktop variant (Issue #1030).
+ *
+ * The Better Auth session token never leaves the main process, so this client
+ * sends it as a bearer credential. The explicit trusted Web Origin header
+ * satisfies the API's first-party mutation gate, which cookie-less clients
+ * otherwise fail.
+ */
+export function createExternalAgentBearerClient(options: {
+  origin: string;
+  webOrigin: string;
+  token: string;
+}): ExternalAgentClientPort {
+  return createExternalAgentClient({
+    origin: options.origin,
+    headers: () => ({
+      authorization: `Bearer ${options.token}`,
+      origin: options.webOrigin,
+    }),
+  });
+}
+
+/**
+ * Renderer-side desktop variant (Issue #1030).
+ *
+ * The same port the Web components inject, backed by the main process. Failures
+ * arrive as typed public failures so the shared UI keeps its code branches
+ * (`EAG_SERVICE_DISABLED` hides the section, 401 renders a retry).
+ */
+export function createExternalAgentIpcClient(ipcClient: IResultIpcClient): ExternalAgentClientPort {
+  async function invoke<T>(channel: string, ...args: unknown[]): Promise<ExternalAgentResult<T>> {
+    const result = await ipcClient.invoke<T>(channel, ...args);
+    if (result.ok) return ok(result.data);
+    const failure = ExternalAgentFailureSchema.safeParse(result.error.failure);
+    return fail(failure.success ? failure.data : externalAgentFailure('EAG_INVALID_RESPONSE'));
+  }
+  // Consent belongs to the browser OAuth journey; the desktop settings surface
+  // never calls it, so the port reports the service as unavailable there.
+  const unsupported = () => Promise.resolve(fail(externalAgentFailure('EAG_SERVICE_DISABLED')));
+  return {
+    capabilities: () => invoke(ExternalAgentChannels.CAPABILITIES),
+    consentRequest: unsupported,
+    decideConsent: unsupported,
+    listConnections: () => invoke(ExternalAgentChannels.LIST_CONNECTIONS),
+    revokeConnection: (id) => invoke(ExternalAgentChannels.REVOKE_CONNECTION, z.uuid().parse(id)),
+    listPats: () => invoke(ExternalAgentChannels.LIST_PATS),
+    createPat: (input: CreateScopedPatInput) => {
+      const parsed = CreateScopedPatSchema.parse(input);
+      return invoke(ExternalAgentChannels.CREATE_PAT, parsed);
+    },
+    revokePat: (id) => invoke(ExternalAgentChannels.REVOKE_PAT, z.uuid().parse(id)),
   };
 }
