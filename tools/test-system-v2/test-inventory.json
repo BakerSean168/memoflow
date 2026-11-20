@@ -18,6 +18,14 @@
       "measurementCollectors": []
     },
     {
+      "path": "apps/api/src/__tests__/integration/agent-gateway-audit.integration.test.ts",
+      "primarySuite": "integration",
+      "collectors": [
+        "apps/api/vitest.integration.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "apps/api/src/__tests__/integration/agent-gateway-routine-write.integration.test.ts",
       "primarySuite": "integration",
       "collectors": [
@@ -67,6 +75,14 @@
     },
     {
       "path": "apps/api/src/__tests__/integration/label-owner-lifecycle.integration.test.ts",
+      "primarySuite": "integration",
+      "collectors": [
+        "apps/api/vitest.integration.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "apps/api/src/__tests__/integration/powersync-uplink-version-guard.integration.test.ts",
       "primarySuite": "integration",
       "collectors": [
         "apps/api/vitest.integration.config.ts"
@@ -401,6 +417,16 @@
     },
     {
       "path": "apps/api/src/modules/powersync/routine-compound-crud-executor.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "apps/api/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "apps/api/vitest.config.ts"
+      ]
+    },
+    {
+      "path": "apps/api/src/modules/powersync/row-version-guard.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "apps/api/vitest.config.ts"
@@ -1143,6 +1169,14 @@
     },
     {
       "path": "apps/desktop/src/main/database/__tests__/powersync-public-surface.spec.ts",
+      "primarySuite": "boundary-main",
+      "collectors": [
+        "apps/desktop/vitest.main.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "apps/desktop/src/main/database/__tests__/powersync-row-version-conflict.spec.ts",
       "primarySuite": "boundary-main",
       "collectors": [
         "apps/desktop/vitest.main.config.ts"
@@ -6540,6 +6574,14 @@
       "measurementCollectors": [
         "packages/data-portability/vitest.config.ts"
       ]
+    },
+    {
+      "path": "packages/database/src/adapters/prisma/external-agent-audit.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/database/vitest.config.ts"
+      ],
+      "measurementCollectors": []
     },
     {
       "path": "packages/database/src/adapters/prisma/external-mutation.spec.ts",
@@ -13438,7 +13480,7 @@
       "type": "measurement",
       "suite": "coverage",
       "runner": "vitest",
-      "fileCount": 71
+      "fileCount": 72
     },
     {
       "id": "packages/account/vitest.config.ts",
@@ -13571,7 +13613,7 @@
       "type": "primary",
       "suite": "boundary-main",
       "runner": "vitest",
-      "fileCount": 17
+      "fileCount": 18
     },
     {
       "id": "apps/desktop/playwright.config.ts",
@@ -13806,7 +13848,7 @@
       "type": "primary",
       "suite": "integration",
       "runner": "vitest",
-      "fileCount": 22
+      "fileCount": 24
     },
     {
       "id": "packages/account/vitest.integration.config.ts",
@@ -13918,7 +13960,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 71
+      "fileCount": 72
     },
     {
       "id": "apps/desktop/vitest.config.ts",
@@ -14051,7 +14093,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 17
+      "fileCount": 18
     },
     {
       "id": "packages/desktop-contracts/vitest.config.ts",
@@ -14448,6 +14490,7 @@
       "apps/api/src/modules/powersync/powersync-schema-result-envelope.surface.spec.ts",
       "apps/api/src/modules/powersync/relation-crud-executor.spec.ts",
       "apps/api/src/modules/powersync/routine-compound-crud-executor.spec.ts",
+      "apps/api/src/modules/powersync/row-version-guard.spec.ts",
       "apps/api/src/modules/powersync/snapshot-builder.spec.ts",
       "apps/api/src/modules/powersync/snapshot-storage.spec.ts",
       "apps/api/src/modules/powersync/user-preference-crud-executor.spec.ts",
@@ -15080,11 +15123,11 @@
   "duplicate": [],
   "unexpected": [],
   "counts": {
-    "unit": 1250,
-    "integration": 59,
+    "unit": 1252,
+    "integration": 61,
     "smoke": 3,
     "boundary-ipc": 7,
-    "boundary-main": 17,
+    "boundary-main": 18,
     "e2e": 43,
     "perf": 2,
     "governance": 93

@@ -141,6 +141,8 @@ R1 list/search 默认 20 条、最多 100 条，时间列表默认最多 31 天�
 
 现有 owner public failures 通过 ADR-049 的单一边界映射；上述新增接入 code 只表达 Gateway 语义，不建立另一套领域错误体系。
 
+Desktop 离线写入经 PowerSync 上行时使用同一冲突口径：`goals`/`task_plans` 以 `version` 乐观锁拒绝过期上传，同步接口返回 409 `row_version_conflict`，客户端留证后不重试该笔；规则见 [ADR-125](./decisions/ADR-125-powersync-uplink-row-version-guard.md)。
+
 ## 6. 写入与审批
 
 原子性和重试契约以 ADR-118 为准。`packages/database/src/adapters/prisma/external-mutation.ts` 提供两个真实 Owner 共用的 PostgreSQL 事务 receipt runner。身份 + capability version + key 的 SHA-256 标识使用数据库 advisory transaction lock 串行化；凭据轮换后同一 owner 的重试仍重放已提交结果，`connection_id` 只作首次执行审计。schema 归一化后按排序字段计算摘要。同 key 异 body 返回 `IDEMPOTENCY_CONFLICT`，同 body 返回原始结果及 `replayed: true`。回执只保存响应实际返回的最小投影，不保存 Owner 完整 read model；回执不自动过期；原结果不会用当前对象替换。账户删除通过 Account 外键级联清理回执。
@@ -165,7 +167,11 @@ rate limit 按 IP（未认证）、owner/connection/tool（认证后）组合，
 
 EAG-02 的具体 owner read budget：Goal 行最多 101（含 lookahead），每 Goal 先检查 KR count，最多 100；正文 description/review/snapshot 不进入读取。name/summary/KR title/unit 的字节长度先由 PostgreSQL 检查，超出 owner 投影上限的单聚合返回明确 `RESPONSE_TOO_LARGE`，不伪造部分 KR 的 overallProgress。搜索页超出传输预算时缩小返回页并标记 `truncated=response-budget`，游标仍从最后实际返回项继续。整个 HTTP 调用有共同截止时间；取消信号单独传给查询，不扩展或混用 ExecutionContext。Goal 查询使用 transaction-local PostgreSQL statement_timeout 和 transaction timeout，认证/账户 authority 的独立只读查询最多 5 秒；响应停止等待之后数据库工作仍有明确上界。Redis admission 同样必须有命令超时，429 含 Retry-After。
 
-audit 最小字段：request/trace ID、connection/credential ID、owner identity、tool/version、effect、scope decision、duration、outcome code、operation receipt ID、replayed。默认不记录 token、参数全文、知识正文或模型对话。unauthenticated/denied/read 调用也要可追踪；首版使用现有结构化日志与持久日志收集，写成功 receipt 是 durable audit fact。
+audit 最小字段：request/trace ID、connection/credential ID、owner identity、tool/version、effect、scope decision、duration、outcome code、operation receipt ID、replayed。默认不记录 token、参数全文、知识正文或模型对话。unauthenticated/denied/read 调用也要可追踪；写成功 receipt 是 durable audit fact。
+
+自 #1031 起同一事件双写：`ExternalAgentAudit` 结构化日志保持同步写出（既有日志采集不变），随后由有界批量写入器落入 `external_agent_audit_events`。热路径只做内存入队（默认 250ms 去抖、50 条一批、2000 条上限），批量 INSERT 使用 5s statement timeout；写失败丢弃该批并计数，不重试、不阻塞响应——日志副本仍是该事件的兜底。进程优雅关闭时先 flush 再断开连接。
+
+查询入口为 `GET /api/v1/agent-connections/audit-events`（`/api` 别名同样可用），与 PAT 管理 API 共用 session、邮箱验证和 `no-store` 口径。支持 `credentialId`、`requestId`、`from`/`to`（ISO 8601，闭区间）与 `limit`（1–200，默认 50）；identity 只取自 session，任何过滤条件都不扩大 owner 范围，查他人 credential/request 返回空页。审计只读入口不产生 credential 审计事件。未认证的 edge 早期拒绝（identity 为空）只保留日志副本，不进入按 owner 的查询；管理 UI 尚未交付，可在后续单沿用该 API。edge 早期拒绝观察器现在同时匹配 `/api` 与 `/api/v1` 两条管理别名；此前只匹配 `/api/v1`，`/api/agent-connections/*` 在 CORS、解析或中断等早期失败时不产生任何审计。
 
 ## 8. Hosted 能力与 Workflow 适配
 

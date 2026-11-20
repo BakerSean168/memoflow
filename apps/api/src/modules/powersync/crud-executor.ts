@@ -9,6 +9,10 @@ import { createHash } from 'node:crypto';
 
 import { createLogger } from '@memoflow/utils/logger';
 import { normalizeCrudData } from './crud-normalization.js';
+import {
+  ROW_VERSION_GUARDED_TABLES,
+  executeRowVersionGuardedCrudOperation,
+} from './row-version-guard.js';
 import { executeUserPreferenceCrudOperation } from './user-preference-crud-executor.js';
 import { executeRelationCrudOperation } from './relation-crud-executor.js';
 import {
@@ -219,6 +223,13 @@ export async function executeCrudBatch(
 
         if (!delegate) {
           logger.warn(`Unknown table in CRUD operation: ${tableName}`);
+          continue;
+        }
+
+        if (ROW_VERSION_GUARDED_TABLES.has(tableName) && (opType === 'PUT' || opType === 'PATCH')) {
+          // ADR-125: a stale cloud/local double write must fail loudly instead
+          // of overwriting the winning aggregate revision.
+          await executeRowVersionGuardedCrudOperation(tx, identityId, op);
           continue;
         }
 

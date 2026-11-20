@@ -48,6 +48,7 @@ async function mountPatApi(
     pats: createScopedPatService({ database: prisma, audience: `${origin}/mcp`, accountIsActive }),
     goals: { getGoal: vi.fn(), searchGoalPage: vi.fn() },
     audit: () => {},
+    auditQuery: { list: async () => ({ items: [], hasMore: false }) },
   });
   const router = express.Router();
   await module.register({

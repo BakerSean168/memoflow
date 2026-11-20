@@ -936,6 +936,22 @@ exports.Prisma.ExternalMutationReceiptScalarFieldEnum = {
   createdAt: 'createdAt'
 };
 
+exports.Prisma.ExternalAgentAuditEventScalarFieldEnum = {
+  id: 'id',
+  identityId: 'identityId',
+  credentialId: 'credentialId',
+  effect: 'effect',
+  tool: 'tool',
+  outcome: 'outcome',
+  scopeDecision: 'scopeDecision',
+  requestId: 'requestId',
+  traceId: 'traceId',
+  receiptId: 'receiptId',
+  replayed: 'replayed',
+  durationMs: 'durationMs',
+  createdAt: 'createdAt'
+};
+
 exports.Prisma.RoutineDefinitionScalarFieldEnum = {
   id: 'id',
   identityId: 'identityId',
@@ -1566,6 +1582,7 @@ exports.Prisma.ModelName = {
   AccountClosureOperation: 'AccountClosureOperation',
   OperationAuditLog: 'OperationAuditLog',
   ExternalMutationReceipt: 'ExternalMutationReceipt',
+  ExternalAgentAuditEvent: 'ExternalAgentAuditEvent',
   RoutineDefinition: 'RoutineDefinition',
   RoutinePreference: 'RoutinePreference',
   RoutineProfile: 'RoutineProfile',

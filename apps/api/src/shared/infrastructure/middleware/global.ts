@@ -15,6 +15,7 @@
  */
 
 import type { Express, Request } from 'express';
+import type { GatewayAuditEvent } from '@memoflow/agent-gateway';
 import cors from 'cors';
 import { createLogger } from '@memoflow/utils/logger';
 import { createExternalAgentEdgeAudit } from '../observability/external-agent-edge-audit';
@@ -55,6 +56,8 @@ export function applyGlobalMiddleware(
   options: {
     readonly beforeBodyParsing?: (app: Express) => void;
     readonly trace?: HttpRequestTrace;
+    /** The host's single audit sink; absent only in isolated middleware tests. */
+    readonly externalAgentAudit?: (event: GatewayAuditEvent) => void;
   } = {},
 ): void {
   const allowedOrigins = getTrustedWebOrigins(getCorsOrigins(), env.MEMOFLOW_WEB_URL);
@@ -71,13 +74,16 @@ export function applyGlobalMiddleware(
   );
 
   if (env.EAG_READ_PILOT_ENABLED) {
-    const auditLogger = createLogger('ExternalAgentEdgeAudit');
-    auditLogger.setLevel('info');
-    app.use(
-      createExternalAgentEdgeAudit((event) =>
-        auditLogger.info('External agent audit', { ...event }),
-      ),
-    );
+    // One sink for early-edge and Gateway events keeps the log context, request id
+    // and durable copy identical; the fallback exists for isolated tests only.
+    const audit =
+      options.externalAgentAudit ??
+      (() => {
+        const auditLogger = createLogger('ExternalAgentAudit');
+        auditLogger.setLevel('info');
+        return (event: GatewayAuditEvent) => auditLogger.info('External agent audit', { ...event });
+      })();
+    app.use(createExternalAgentEdgeAudit(audit));
   }
 
   // Security. Controlled HTTP local-validation origins (for example Tailscale
