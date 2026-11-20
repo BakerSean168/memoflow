@@ -10,6 +10,9 @@ import type { IElectronDatabase } from '@memoflow/desktop-contracts';
 import { createDesktopLocalAgentTools } from './local-agent-tools';
 
 const identityId = 'IdentityId_00000000-0000-4000-8000-000000000001';
+// routine_create rejects a WallClock trigger without a future occurrence, so a
+// fixed start date goes red once that date's localTime has passed.
+const routineStartDate = new Date(Date.now() + 86_400_000).toISOString().slice(0, 10);
 
 describe('Local Agent Domain Expansion (Phase 2, #995)', () => {
   let root: string;
@@ -130,7 +133,7 @@ describe('Local Agent Domain Expansion (Phase 2, #995)', () => {
             type: 'WallClock',
             localTime: '08:00',
             timeZone: 'UTC',
-            startDate: '2026-11-20',
+            startDate: routineStartDate,
           },
         },
       };
@@ -202,7 +205,7 @@ describe('Local Agent Domain Expansion (Phase 2, #995)', () => {
             type: 'WallClock',
             localTime: '09:00',
             timeZone: 'UTC',
-            startDate: '2026-11-20',
+            startDate: routineStartDate,
           },
         },
       })) as {
@@ -252,7 +255,7 @@ describe('Local Agent Domain Expansion (Phase 2, #995)', () => {
             type: 'WallClock',
             localTime: '08:00',
             timeZone: 'UTC',
-            startDate: '2026-11-20',
+            startDate: routineStartDate,
           },
         },
       })) as { error?: { message: string } };
@@ -301,7 +304,7 @@ describe('Local Agent Domain Expansion (Phase 2, #995)', () => {
             type: 'WallClock',
             localTime: '08:00',
             timeZone: 'UTC',
-            startDate: '2026-11-20',
+            startDate: routineStartDate,
           },
         },
       });
