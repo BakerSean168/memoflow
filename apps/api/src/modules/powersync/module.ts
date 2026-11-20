@@ -36,6 +36,7 @@ import { createApiResponseBuilder } from '../../shared/infrastructure/http/respo
 import { readStoredProfileSnapshotManifest } from './snapshot-storage.js';
 import { issuePowerSyncToken } from './token-issuer.js';
 import { executeCrudBatch } from './crud-executor.js';
+import { PowerSyncRowVersionConflictError } from './row-version-guard.js';
 import { PowerSyncPreferenceConflictError } from './user-preference-crud-executor.js';
 
 const logger = createLogger('PowerSync');
@@ -245,6 +246,29 @@ export function composePowerSyncApiModule(options: ComposePowerSyncApiModuleOpti
           });
           return res.json(responseBuilder.success(result));
         } catch (error) {
+          if (error instanceof PowerSyncRowVersionConflictError) {
+            logger.warn('PowerSync row version conflict', {
+              identityId: authenticatedReq.user?.identityId,
+              table: error.table,
+              rowId: error.rowId,
+              operation: error.operation,
+              incomingVersion: error.incomingVersion,
+              currentVersion: error.currentVersion,
+              reason: error.reason,
+            });
+            return res.status(409).json(
+              responseBuilder.error(ResultCode.CONFLICT, error.message, undefined, {
+                code: error.code,
+                reason: error.reason,
+                identityId: authenticatedReq.user?.identityId,
+                table: error.table,
+                rowId: error.rowId,
+                operation: error.operation,
+                incomingVersion: error.incomingVersion,
+                currentVersion: error.currentVersion,
+              }),
+            );
+          }
           if (error instanceof PowerSyncPreferenceConflictError) {
             logger.warn('PowerSync preference CAS conflict', {
               identityId: authenticatedReq.user?.identityId,

@@ -141,6 +141,8 @@ R1 list/search 默认 20 条、最多 100 条，时间列表默认最多 31 天�
 
 现有 owner public failures 通过 ADR-049 的单一边界映射；上述新增接入 code 只表达 Gateway 语义，不建立另一套领域错误体系。
 
+Desktop 离线写入经 PowerSync 上行时使用同一冲突口径：`goals`/`task_plans` 以 `version` 乐观锁拒绝过期上传，同步接口返回 409 `row_version_conflict`，客户端留证后不重试该笔；规则见 [ADR-125](./decisions/ADR-125-powersync-uplink-row-version-guard.md)。
+
 ## 6. 写入与审批
 
 原子性和重试契约以 ADR-118 为准。`packages/database/src/adapters/prisma/external-mutation.ts` 提供两个真实 Owner 共用的 PostgreSQL 事务 receipt runner。身份 + capability version + key 的 SHA-256 标识使用数据库 advisory transaction lock 串行化；凭据轮换后同一 owner 的重试仍重放已提交结果，`connection_id` 只作首次执行审计。schema 归一化后按排序字段计算摘要。同 key 异 body 返回 `IDEMPOTENCY_CONFLICT`，同 body 返回原始结果及 `replayed: true`。回执只保存响应实际返回的最小投影，不保存 Owner 完整 read model；回执不自动过期；原结果不会用当前对象替换。账户删除通过 Account 外键级联清理回执。
