@@ -43,6 +43,17 @@ export function isPrismaError(
   return typeof code === 'string' && PRISMA_CODE_RE.test(code);
 }
 
+/**
+ * Check whether an unknown value is a Prisma unique-constraint violation (P2002).
+ *
+ * Idempotent insert paths (seed scripts, upsert fallbacks) use this instead of
+ * comparing provider codes themselves, keeping Prisma vocabulary inside the
+ * error mapper (ADR-049 provider ACL).
+ */
+export function isUniqueConstraintError(err: unknown): boolean {
+  return isPrismaError(err) && err.code === 'P2002';
+}
+
 // ============================================================================
 // Mapping
 // ============================================================================

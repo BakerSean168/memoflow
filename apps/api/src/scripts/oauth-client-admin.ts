@@ -14,6 +14,7 @@ import { hostname, userInfo } from 'node:os';
 import { pathToFileURL } from 'node:url';
 import { EXTERNAL_AGENT_OAUTH_SCOPES } from '@memoflow/cloud-auth/server';
 import type { PrismaClient } from '@memoflow/database';
+import { isUniqueConstraintError } from '@memoflow/utils/errors';
 
 /** Scopes an operator may pre-provision. OAuth stays read-only (#1033 owns writes). */
 export const CLIENT_ADMIN_SCOPES = EXTERNAL_AGENT_OAUTH_SCOPES;
@@ -103,10 +104,6 @@ function normalizeScopes(scopes: readonly string[] | undefined): string[] {
   return values;
 }
 
-function isUniqueViolation(error: unknown): boolean {
-  return typeof error === 'object' && error !== null && 'code' in error && error.code === 'P2002';
-}
-
 /**
  * Insert the shared MCP resource only when absent. Mirrors the values the
  * provider seeds from `createExternalAgentProvider`, so a pre-provisioned row
@@ -128,7 +125,7 @@ async function ensureResource(db: PrismaClient, identifier: string, now: Date): 
       },
     });
   } catch (error) {
-    if (!isUniqueViolation(error)) throw error;
+    if (!isUniqueConstraintError(error)) throw error;
   }
 }
 
@@ -192,7 +189,7 @@ export async function seedOAuthClient(
       },
     });
   } catch (error) {
-    if (!isUniqueViolation(error)) throw error;
+    if (!isUniqueConstraintError(error)) throw error;
     created = false;
   }
   await linkResource(db, clientId, resource, now);
