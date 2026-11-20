@@ -56,6 +56,7 @@ export default {
     revokeNamed: 'Revoke {name}',
     patTitle: 'Personal Access Tokens',
     patEmpty: 'No active tokens.',
+    patNeverUsed: 'Never used',
     create: 'Create token',
     createDialogTitle: 'Create a personal access token',
     createDialogDescription:

@@ -53,6 +53,7 @@ export default {
     revokeNamed: '撤销 {name}',
     patTitle: '个人访问令牌',
     patEmpty: '暂无有效令牌。',
+    patNeverUsed: '从未使用',
     create: '创建令牌',
     createDialogTitle: '创建个人访问令牌',
     createDialogDescription: '用于自己的脚本和自托管 Agent。完整令牌只在创建后显示一次。',

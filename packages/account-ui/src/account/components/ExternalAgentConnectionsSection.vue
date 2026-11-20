@@ -311,6 +311,15 @@ onMounted(load);
         </div>
         <p class="mt-2 font-mono">{{ pat.prefix }}…</p>
         <p class="mt-1">{{ pat.scopes.map(scopeName).join(' · ') }}</p>
+        <p class="mt-1 text-xs text-muted-foreground" data-testid="pat-last-used">
+          {{
+            pat.lastUsedAt
+              ? t('account.externalAgents.lastUsedOn', {
+                  date: accountUiHost.formatProductDateTime(pat.lastUsedAt),
+                })
+              : t('account.externalAgents.patNeverUsed')
+          }}
+        </p>
         <p class="mt-1 text-xs text-muted-foreground">
           {{
             t('account.externalAgents.expiresOn', {

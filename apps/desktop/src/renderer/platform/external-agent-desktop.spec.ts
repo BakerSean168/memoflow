@@ -28,6 +28,7 @@ const existing = {
   createdAt: '2026-11-18T00:00:00.000Z',
   expiresAt: '2027-02-16T00:00:00.000Z',
   revokedAt: null,
+  lastUsedAt: null,
 };
 const createdId = '15d9a2d0-51be-4e31-9d4b-14b0a92b5e11';
 

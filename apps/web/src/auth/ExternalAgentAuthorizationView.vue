@@ -125,8 +125,8 @@ onMounted(async () => {
           </ul>
         </div>
         <p class="text-sm leading-6 text-white/60">
-          此应用不能创建或修改 Goal、创建或完成 Task，也不能访问其他用户的数据。连接最长保留 90
-          天，你可以随时在账户设置中撤销。
+          此应用不能创建或修改 Goal、创建或完成 Task，也不能访问其他用户的数据。只读是当前 OAuth
+          车道的设计边界，写权限需使用 PAT；连接最长保留 90 天，你可以随时在账户设置中撤销。
         </p>
         <div class="flex gap-3">
           <Button class="flex-1" variant="outline" @click="decide(false)">取消</Button>
