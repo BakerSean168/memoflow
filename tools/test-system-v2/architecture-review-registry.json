@@ -12,9 +12,10 @@
         "testRole": "behavior"
       },
       "decision": "retain",
-      "behavior": "真实本地 SQLite/模型缓存配合假 Agent Driver，验证身份绑定和重启恢复",
+      "behavior": "真实本地 SQLite/模型缓存配合假 Agent Driver，验证身份绑定、重启恢复及四路并发排队",
       "assertionEvidence": [
-        "reuses only the exact owner, revision and native OAuth identity without new ACP calls"
+        "reuses only the exact owner, revision and native OAuth identity without new ACP calls",
+        "keeps the four-run bound and same-conversation conflict"
       ],
       "reason": "readFile 读取运行期 model-catalog，不是源码；原 Structural 错分",
       "confirmedDependencies": ["database"],
@@ -22,7 +23,7 @@
         "status": "none-verified",
         "testFiles": []
       },
-      "sourceSha256": "0abec399ff04ba2703e40489be8f46568ff91327fcf95db4a0ddfbb56864a7fd"
+      "sourceSha256": "0efafca22df6c8d209c9f34285c06de8953d66d681625d5debe2e9794b9b3a31"
     },
     {
       "path": "apps/desktop/src/main/profile/ProfileSnapshotService.spec.ts",
