@@ -1,23 +1,15 @@
-/**
- * Notification characterization tests.
- *
- * Locks the current NotificationService behavior (DND suppression, native vs
- * custom notification routing, and the schedule/goal/task helpers) so
- * the capability ownership migration cannot change it silently.
- */
-import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { BrowserWindow, Notification } from 'electron';
-import { NotificationService, type NotificationOptions } from './notification.service';
+import { describe, expect, it, vi } from 'vitest';
+import { NotificationService } from './notification.service';
 import type { CustomNotificationManager } from './custom-notification.manager';
-import { eventBus } from '@memoflow/utils/domain';
-import { DesktopNotificationPreferenceStore } from './desktop-notification-preference.store';
 
 function createService() {
-  const dispatch = vi.fn();
-  const custom = { dispatch } as unknown as CustomNotificationManager;
-  const store = new DesktopNotificationPreferenceStore();
-  const service = new NotificationService(custom, store);
-  return { service, dispatch, store };
+  const dispatch = vi.fn().mockResolvedValue(true);
+  const custom = {
+    dispatch,
+    clearPresentation: vi.fn(),
+    destroy: vi.fn(),
+  } as unknown as CustomNotificationManager;
+  return { service: new NotificationService(custom), dispatch };
 }
 
 describe('NotificationService DND state', () => {
@@ -54,77 +46,15 @@ describe('NotificationService DND state', () => {
   });
 });
 
-describe('NotificationService routing', () => {
-  let window: BrowserWindow;
-
-  beforeEach(() => {
-    vi.clearAllMocks();
-    Notification.clearInstances();
-    window = new BrowserWindow({});
-    window.show();
-  });
-
-  it('routes to the custom manager by default and does not create a native notification', () => {
+describe('NotificationService custom presentation', () => {
+  it('forwards actionable content unchanged to the custom window', async () => {
     const { service, dispatch } = createService();
-    service.setMainWindow(window);
-    const result = service.showNotification({
-      title: 'Hello',
-      body: 'World',
-      sound: true,
-    });
-    expect(dispatch).toHaveBeenCalledWith(
-      expect.objectContaining({ title: 'Hello', body: 'World', sound: true }),
-    );
-    expect(result).toBeNull();
-    expect(Notification.lastInstance()).toBeNull();
+    const options = { title: 'Due', body: 'Move', data: { actions: [{ actionKey: 'complete' }] } };
+    await expect(service.showCanonicalDelivery(options)).resolves.toBe(true);
+    expect(dispatch).toHaveBeenCalledWith(options);
   });
 
-  it('uses the native notification path when custom notifications are disabled', () => {
-    const { service, dispatch } = createService();
-    service.setMainWindow(window);
-    service.updateDevicePreference({ presentationMode: 'native' });
-    const options: NotificationOptions = { title: 'Native', body: 'Body' };
-    const result = service.showNotification(options);
-    expect(dispatch).not.toHaveBeenCalled();
-    expect(result).toBeInstanceOf(Notification);
-    expect(Notification.lastInstance()).toBe(result);
-    expect(Notification.lastInstance()?.show).toHaveBeenCalled();
-  });
-
-  it('forces native silence when device sound is disabled', () => {
-    const { service } = createService();
-    service.updateDevicePreference({
-      presentationMode: 'native',
-      soundEnabled: false,
-    });
-    service.showNotification({
-      title: 'Silent',
-      body: 'Body',
-      sound: true,
-      silent: false,
-    });
-    expect(Notification.lastInstance()?.options.silent).toBe(true);
-  });
-
-  it('forces custom delivery sound off while preserving requested sound when enabled', () => {
-    const { service, dispatch } = createService();
-    service.updateDevicePreference({ soundEnabled: false });
-    service.showNotification({ title: 'Muted', body: 'Body', sound: true });
-    expect(dispatch).toHaveBeenLastCalledWith(expect.objectContaining({ sound: false }));
-    service.updateDevicePreference({ soundEnabled: true });
-    service.showNotification({ title: 'Audible', body: 'Body', sound: true });
-    expect(dispatch).toHaveBeenLastCalledWith(expect.objectContaining({ sound: true }));
-  });
-
-  it('reads the current store preference at render time', () => {
-    const { service, store, dispatch } = createService();
-    store.update({ presentationMode: 'native' });
-    service.showNotification({ title: 'Native', body: 'Body' });
-    expect(dispatch).not.toHaveBeenCalled();
-    expect(Notification.lastInstance()).toBeTruthy();
-  });
-
-  it('waits for custom presentation before acknowledging canonical delivery', async () => {
+  it('waits for the renderer acknowledgement and preserves a failed presentation', async () => {
     const { service, dispatch } = createService();
     let complete!: (shown: boolean) => void;
     dispatch.mockReturnValue(
@@ -133,19 +63,17 @@ describe('NotificationService routing', () => {
       }),
     );
     let settled = false;
-    const delivery = Promise.resolve(
-      service.showCanonicalDelivery({ title: 'Due', body: '' }),
-    ).then((value) => {
+    const delivery = service.showCanonicalDelivery({ title: 'Due', body: '' }).then((value) => {
       settled = true;
       return value;
     });
     await Promise.resolve();
     expect(settled).toBe(false);
-    complete(true);
-    await expect(delivery).resolves.toBe(true);
+    complete(false);
+    await expect(delivery).resolves.toBe(false);
   });
 
-  it('records canonical device DND as suppressed without dispatching', async () => {
+  it('records device DND as suppressed without dispatching', async () => {
     const { service, dispatch } = createService();
     service.enableDND();
     await expect(service.showCanonicalDelivery({ title: 'Due', body: '' })).resolves.toEqual({
@@ -153,110 +81,5 @@ describe('NotificationService routing', () => {
       reason: 'device-dnd',
     });
     expect(dispatch).not.toHaveBeenCalled();
-  });
-
-  it('records unavailable native permission/capability as suppressed', async () => {
-    const { service, dispatch } = createService();
-    service.updateDevicePreference({ presentationMode: 'native' });
-    vi.mocked(Notification.isSupported).mockReturnValueOnce(false);
-    await expect(service.showCanonicalDelivery({ title: 'Due', body: '' })).resolves.toEqual({
-      status: 'suppressed',
-      reason: 'native-unavailable',
-    });
-    expect(dispatch).not.toHaveBeenCalled();
-    expect(Notification.lastInstance()).toBeNull();
-  });
-
-  it('suppresses native notifications when Do Not Disturb is manually enabled', () => {
-    const { service } = createService();
-    service.setMainWindow(window);
-    service.updateDevicePreference({ presentationMode: 'native' });
-    service.enableDND();
-    const result = service.showNotification({ title: 'Suppressed', body: 'x' });
-    expect(result).toBeNull();
-    expect(Notification.lastInstance()).toBeNull();
-    expect(window.webContents.send).toHaveBeenCalledWith(
-      'notification:suppressed',
-      expect.objectContaining({ title: 'Suppressed', body: 'x' }),
-    );
-  });
-
-  it('does not render again when the canonical desktop-dispatch event is published', async () => {
-    const { dispatch } = createService();
-
-    await eventBus.dispatch('notification:dispatch_desktop', {
-      id: 'NotificationId_once',
-      identityId: 'IdentityId_once',
-      title: 'Already rendered by durable transport',
-      body: 'Do not render twice',
-      category: 'System',
-      type: 'Info',
-      importance: 'Normal',
-      data: {},
-      sound: { enabled: true, name: null },
-    } as never);
-
-    expect(dispatch).not.toHaveBeenCalled();
-  });
-
-  it('returns null when native notifications are unsupported', () => {
-    const { service } = createService();
-    service.setMainWindow(window);
-    service.updateDevicePreference({ presentationMode: 'native' });
-    vi.mocked(Notification.isSupported).mockReturnValueOnce(false);
-    const result = service.showNotification({ title: 'nope', body: 'x' });
-    expect(result).toBeNull();
-  });
-});
-
-describe('NotificationService helper notifications', () => {
-  let window: BrowserWindow;
-
-  beforeEach(() => {
-    vi.clearAllMocks();
-    Notification.clearInstances();
-    window = new BrowserWindow({});
-    window.show();
-  });
-
-  it('showScheduleNotification sets schedule type and default body', () => {
-    const { service, dispatch } = createService();
-    service.showScheduleNotification({ id: 's1', name: 'Review' });
-    expect(dispatch).toHaveBeenCalledWith(
-      expect.objectContaining({
-        title: '📅 Review',
-        body: '调度任务已触发',
-        data: { type: 'schedule', id: 's1' },
-      }),
-    );
-  });
-
-  it('showGoalProgressNotification computes the percentage rounded', () => {
-    const { service, dispatch } = createService();
-    service.showGoalProgressNotification({
-      id: 'g1',
-      title: 'Ship',
-      progress: 25,
-      targetValue: 100,
-    });
-    expect(dispatch).toHaveBeenCalledWith(
-      expect.objectContaining({
-        title: '🎯 目标进度更新',
-        body: 'Ship: 25% (25/100)',
-        data: { type: 'goal', id: 'g1' },
-      }),
-    );
-  });
-
-  it('showTaskCompletedNotification sets task type', () => {
-    const { service, dispatch } = createService();
-    service.showTaskCompletedNotification({ id: 't1', title: 'Done' });
-    expect(dispatch).toHaveBeenCalledWith(
-      expect.objectContaining({
-        title: '✅ 任务已完成',
-        body: 'Done',
-        data: { type: 'task', id: 't1' },
-      }),
-    );
   });
 });

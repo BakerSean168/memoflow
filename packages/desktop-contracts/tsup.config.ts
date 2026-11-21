@@ -18,7 +18,6 @@ export default createTsupConfig({
     'src/auth-context.ts',
     'src/database.ts',
     'src/desktop-update.ts',
-    'src/device-notification-preference.ts',
     'src/focus-window.ts',
     'src/intervention-window.ts',
     'src/ipc-channels.ts',

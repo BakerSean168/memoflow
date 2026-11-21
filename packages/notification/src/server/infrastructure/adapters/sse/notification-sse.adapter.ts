@@ -157,7 +157,6 @@ export class NotificationSseAdapter {
           'Info') as NotificationEventMap['notification:dispatch_desktop']['type'],
         importance: 'Normal' as NotificationEventMap['notification:dispatch_desktop']['importance'],
         data: payload.data ?? {},
-        sound: { enabled: true, name: null },
       });
     }
   }

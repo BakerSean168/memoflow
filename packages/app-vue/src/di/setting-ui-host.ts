@@ -8,14 +8,7 @@
  * owned here; this module is the single place where they are handed over.
  */
 import { bindSettingUiHost } from '@memoflow/setting-ui/host';
-import {
-  browserSystemNotificationPermission,
-  isBrowserSystemNotificationEnabled,
-  isBrowserSystemNotificationSupported,
-  requestBrowserSystemNotificationPermission,
-  setBrowserSystemNotificationEnabled,
-  useNotificationPreferences,
-} from '@memoflow/notification-ui';
+import { useNotificationPreferences } from '@memoflow/notification-ui';
 import {
   SettingsDangerZone,
   SettingsDialogShell,
@@ -63,7 +56,6 @@ import {
   DESKTOP_ACCESS_SNAPSHOT_KEY,
   DESKTOP_AUTH_API_KEY,
   DESKTOP_BRIDGE_KEY,
-  DESKTOP_NOTIFICATION_DEVICE_PREFERENCE_KEY,
   DESKTOP_UPDATE_SERVICE_KEY,
   DESKTOP_STARTUP_SERVICE_KEY,
   EXTERNAL_AGENT_SERVICE_KEY,
@@ -82,7 +74,7 @@ export function installSettingUiHost(): void {
     DESKTOP_AUTH_API_KEY,
     DESKTOP_BRIDGE_KEY,
     DESKTOP_ACCESS_SNAPSHOT_KEY,
-    DESKTOP_NOTIFICATION_DEVICE_PREFERENCE_KEY,
+
     DESKTOP_UPDATE_SERVICE_KEY,
     DESKTOP_STARTUP_SERVICE_KEY,
     AI_AGENT_REGISTRY_KEY,
@@ -108,13 +100,6 @@ export function installSettingUiHost(): void {
     sortAgentInstances,
     useNativeModelVisibility,
     useNotificationPreferences,
-    browserNotification: {
-      permission: browserSystemNotificationPermission,
-      isEnabled: isBrowserSystemNotificationEnabled,
-      isSupported: isBrowserSystemNotificationSupported,
-      requestPermission: requestBrowserSystemNotificationPermission,
-      setEnabled: setBrowserSystemNotificationEnabled,
-    },
     useAppShellStore,
     returnFromSettingsScene,
     components: {

@@ -2006,22 +2006,6 @@
       "measurementCollectors": []
     },
     {
-      "path": "apps/desktop/src/main/services/desktop-notification-preference-wiring.surface.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "apps/desktop/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
-      "path": "apps/desktop/src/main/services/desktop-notification-preference.store.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "apps/desktop/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
       "path": "apps/desktop/src/main/services/device-keymap.store.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -6752,14 +6736,6 @@
       "measurementCollectors": []
     },
     {
-      "path": "packages/desktop-contracts/src/device-notification-preference.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/desktop-contracts/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
       "path": "packages/desktop-contracts/src/intervention-window.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -8552,14 +8528,6 @@
       "primarySuite": "unit",
       "collectors": [
         "packages/notification-contracts/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
-      "path": "packages/notification-ui/src/browser-system-notification.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/notification-ui/vitest.config.ts"
       ],
       "measurementCollectors": []
     },
@@ -10833,14 +10801,6 @@
     },
     {
       "path": "packages/setting-ui/src/components/SettingsNavigation.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/setting-ui/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
-      "path": "packages/setting-ui/src/components/SettingsResetSection.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/setting-ui/vitest.config.ts"
@@ -13943,7 +13903,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 110
+      "fileCount": 108
     },
     {
       "id": "apps/migrator/vitest.config.ts",
@@ -14076,7 +14036,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 10
+      "fileCount": 9
     },
     {
       "id": "packages/goal-client/vitest.config.ts",
@@ -14174,7 +14134,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 14
+      "fileCount": 13
     },
     {
       "id": "packages/notification/vitest.config.ts",
@@ -14342,7 +14302,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 24
+      "fileCount": 23
     },
     {
       "id": "packages/setting/vitest.config.ts",
@@ -15100,7 +15060,7 @@
   "duplicate": [],
   "unexpected": [],
   "counts": {
-    "unit": 1244,
+    "unit": 1239,
     "integration": 63,
     "smoke": 3,
     "boundary-ipc": 7,

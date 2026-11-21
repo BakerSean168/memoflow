@@ -31,12 +31,8 @@ import type {
 
 /** Options accepted by {@link createElectronNotificationPort}. */
 export interface NotificationPortOptions {
-  /** Host-owned main window bound at construction. */
-  mainWindow: BrowserWindow;
   /** Host-owned window manager needed by the custom notification renderer. */
   windowManager: WindowManager;
-  /** Resolve the active Profile's narrow notification preference file. */
-  resolveDevicePreferencePath: () => string | null;
 }
 
 /** Options accepted by {@link createElectronAutoLaunchPort}. */
@@ -99,21 +95,11 @@ export function createElectronAutoLaunchPort(options?: AutoLaunchPortOptions): A
 /**
  * Build the notification capability port from `NotificationService`.
  *
- * The service maintains Do-Not-Disturb state and renders via the custom/native
- * renderers. The broad
- * `initNotificationService` farm is narrowed here to the port surface: boolean
- * "was rendered" returns and no Electron leakage.
+ * The service keeps device DND local and awaits custom-window presentation.
  */
 export function createElectronNotificationPort(options: NotificationPortOptions): NotificationPort {
-  const service = initNotificationService(
-    options.mainWindow,
-    options.windowManager,
-    options.resolveDevicePreferencePath,
-  );
+  const service = initNotificationService(options.windowManager);
   return {
-    getDevicePreference: () => service.getDevicePreference(),
-    updateDevicePreference: (patch) => service.updateDevicePreference(patch),
-    resetDevicePreference: () => service.resetDevicePreference(),
     enableDND: () => service.enableDND(),
     disableDND: () => service.disableDND(),
     toggleDND: () => service.toggleDND(),
@@ -122,9 +108,6 @@ export function createElectronNotificationPort(options: NotificationPortOptions)
     disableDNDSchedule: () => service.disableDNDSchedule(),
     getDNDConfig: () => service.getDNDConfig(),
     show: (config) => service.showCanonicalDelivery(config),
-    showSchedule: (config) => service.showScheduleNotification(config) !== null,
-    showGoalProgress: (config) => service.showGoalProgressNotification(config) !== null,
-    showTaskCompleted: (config) => service.showTaskCompletedNotification(config) !== null,
     destroy: () => service.destroy(),
     clearPresentation: () => service.clearPresentation(),
   };

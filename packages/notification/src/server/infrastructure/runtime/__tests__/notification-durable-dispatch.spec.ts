@@ -10,6 +10,7 @@ import {
   buildIdempotencyKeyString,
 } from '@memoflow/reliable-messaging-contracts';
 import { Notification } from '../../../domain/aggregates/notification';
+import { NotificationPreference } from '../../../domain/aggregates/notification-preference';
 import { NotificationChannelType } from '@memoflow/notification-contracts';
 import { InMemoryReliableAdapter } from './helpers/in-memory-reliable-adapter';
 
@@ -48,6 +49,7 @@ async function dispatchNotificationOutbox(
       channel,
       payloadJson: JSON.stringify({
         notificationId,
+        workflowKey: notification.workflowKey,
         title: notification.title,
         content: notification.content,
       }),
@@ -150,6 +152,39 @@ describe('Notification Durable Dispatch Worker & Capability', () => {
     expect(runtime.getMetrics().deliveredTotal).toBe(1);
     expect(repository.save).not.toHaveBeenCalled();
   });
+
+  it.each(['global', 'group'] as const)(
+    'rechecks %s Desktop preferences after enqueue while still delivering InApp',
+    async (scope) => {
+      const notification = fact('user_paused', `paused-${scope}`);
+      const preference = NotificationPreference.create({ identityId: notification.identityId });
+      const adapter = new InMemoryReliableAdapter();
+      await dispatchNotificationOutbox(adapter, notification, NotificationChannelType.Desktop);
+      await dispatchNotificationOutbox(adapter, notification, NotificationChannelType.InApp);
+      if (scope === 'global') preference.setGlobalChannel(NotificationChannelType.Desktop, false);
+      else
+        preference.setWorkflowChannelOverride(
+          'system.general',
+          NotificationChannelType.Desktop,
+          false,
+        );
+      const deliver = vi.fn().mockResolvedValue(undefined);
+      const runtime = createNotificationRuntimeContribution({
+        userTimeContextPort: TEST_USER_TIME_CONTEXT_PORT,
+        environment: 'test',
+        repository: { findByIdForIdentity: vi.fn().mockResolvedValue(notification) } as never,
+        preferenceRepository: { findByIdentityId: vi.fn().mockResolvedValue(preference) } as never,
+        reliableAdapter: adapter,
+        deliverer: { deliver },
+      });
+      await runtime.tick();
+      const receipts = await adapter.queryReceipts(String(notification.identityId));
+      expect(receipts.map((receipt) => receipt.status).sort()).toEqual(['skipped', 'succeeded']);
+      expect(deliver).toHaveBeenCalledTimes(1);
+      expect(deliver.mock.calls[0][1].channelType).toBe(NotificationChannelType.InApp);
+      expect(runtime.getMetrics().deliveredTotal).toBe(1);
+    },
+  );
 
   it('builds the canonical idempotency key for notification dispatch', () => {
     const key = buildIdempotencyKeyString({

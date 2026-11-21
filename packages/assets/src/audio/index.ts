@@ -8,7 +8,6 @@
 import alertSoundUrl from './notifications/alert.wav';
 import defaultSoundUrl from './notifications/default.wav';
 import errorSoundUrl from './notifications/error.wav';
-import notificationSoundUrl from './notifications/notification.wav';
 import reminderSoundUrl from './notifications/reminder.wav';
 import successSoundUrl from './notifications/success.wav';
 
@@ -16,7 +15,6 @@ export const audioAssetPaths = {
   alertSound: './notifications/alert.wav',
   defaultSound: './notifications/default.wav',
   errorSound: './notifications/error.wav',
-  notificationSound: './notifications/notification.wav',
   reminderSound: './notifications/reminder.wav',
   successSound: './notifications/success.wav',
 } as const;
@@ -27,7 +25,6 @@ export type AudioAssetKey = keyof typeof audioAssetPaths;
 export const alertSound = alertSoundUrl;
 export const defaultSound = defaultSoundUrl;
 export const errorSound = errorSoundUrl;
-export const notificationSound = notificationSoundUrl;
 export const reminderSound = reminderSoundUrl;
 export const successSound = successSoundUrl;
 
@@ -36,7 +33,6 @@ export const sounds = {
   alert: alertSound,
   default: defaultSound,
   error: errorSound,
-  notification: notificationSound,
   reminder: reminderSound,
   success: successSound,
 } as const;

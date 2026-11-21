@@ -146,10 +146,6 @@ export default defineConfig(({ mode }) =>
             'packages/desktop-contracts/src/desktop-update.ts',
           ],
           [
-            '@memoflow/desktop-contracts/device-notification-preference',
-            'packages/desktop-contracts/src/device-notification-preference.ts',
-          ],
-          [
             '@memoflow/desktop-contracts/focus-window',
             'packages/desktop-contracts/src/focus-window.ts',
           ],

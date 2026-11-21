@@ -265,14 +265,10 @@ export class PowerSyncDesktopTransportAckStore implements DesktopTransportAckSto
 }
 
 /**
- * Default desktop transport for Electron main process.
- * Calls Electron's native Notification if available and returns a verifiable delivery ack.
- *
- * Fail-closed: the native side effect (Notification.show()) must actually succeed for
- * the ack to be `delivered`. Any failure — electron module unavailable, Notification
- * unsupported, or show() throwing — returns `status: 'failed'` with the error instead of
- * a fabricated success. Consumers (RealDesktopChannelDeliverer) treat anything other than
- * a valid `delivered` ack as a failed delivery (retry/failed), never as success.
+ * Desktop transport for the custom Electron notification renderer.
+ * A delivered acknowledgement requires the injected renderer to confirm presentation.
+ * Missing renderers and failed presentation produce failed acknowledgements for retry;
+ * suppressed presentation produces a skipped acknowledgement. There is no native fallback.
  */
 export function createDefaultElectronDesktopTransport(optionsOrDb?: unknown): unknown {
   let ackStore: DesktopTransportAckStore;
@@ -362,46 +358,8 @@ export function createDefaultElectronDesktopTransport(optionsOrDb?: unknown): un
         return deliveredAck;
       }
 
-      // Fallback for Electron main-process hosts without an injected renderer.
-      // Plain Node/Vitest processes must fail closed without loading the Electron package:
-      // requiring it outside a real Electron runtime can trigger binary resolution/download.
-      if (!process.versions.electron) {
-        throw new Error('Electron native Notification unavailable outside Electron runtime');
-      }
-      const electron = require('electron');
-      if (
-        electron &&
-        electron.Notification &&
-        typeof electron.Notification.isSupported === 'function' &&
-        electron.Notification.isSupported()
-      ) {
-        const data = dto as Record<string, unknown>;
-        const notif = new electron.Notification({
-          title: String(data.title ?? 'Notification'),
-          body: String(data.content ?? ''),
-        });
-        notif.show();
-        const deliveredAck = {
-          ackId,
-          status: 'delivered' as const,
-          timestamp: Date.now(),
-        };
-        if (idempotencyKey) {
-          await ackStore.saveAck(idempotencyKey, deliveredAck);
-        }
-        return deliveredAck;
-      }
-      const failedAck = {
-        ackId,
-        status: 'failed' as const,
-        timestamp,
-        error:
-          'Electron native Notification unavailable (electron module missing or Notification.isSupported() is false)',
-      };
-      if (idempotencyKey) {
-        await ackStore.saveAck(idempotencyKey, failedAck);
-      }
-      return failedAck;
+      // Custom presentation must acknowledge delivery; no native fallback may forge success.
+      throw new Error('Desktop notification renderer is unavailable');
     } catch (err) {
       const errorMsg = err instanceof Error ? err.message : String(err);
       const failedAck = {

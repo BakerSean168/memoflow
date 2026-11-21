@@ -4,33 +4,38 @@
     :description="t('setting.appearance.themeDescription')"
     test-id="appearance-settings-card"
   >
-    <SettingsPropertyRow
-      :label="t('setting.appearance.theme')"
-      html-for="theme-select"
-      test-id="appearance-theme-row"
-    >
-      <Select
-        :model-value="modelValue.theme"
-        @update:model-value="
-          (value: any) =>
-            emit('update:modelValue', { ...modelValue, theme: value as AppearanceTheme })
-        "
-      >
-        <SelectTrigger id="theme-select" class="w-full" data-testid="appearance-theme-trigger">
-          <SelectValue :placeholder="t('setting.appearance.themePlaceholder')" />
-        </SelectTrigger>
-        <SelectContent>
-          <SelectItem
-            v-for="option in themeOptions"
-            :key="option.value"
+    <fieldset class="min-w-0 pb-6" data-testid="appearance-theme-row">
+      <legend class="sr-only">{{ t('setting.appearance.theme') }}</legend>
+      <div class="grid grid-cols-3 gap-2 sm:gap-3">
+        <label v-for="option in themeOptions" :key="option.value" class="min-w-0 cursor-pointer">
+          <input
+            type="radio"
+            :name="themeGroupId"
             :value="option.value"
+            :checked="(modelValue.theme ?? 'auto') === option.value"
+            :aria-label="option.label"
             :data-testid="`appearance-theme-option-${option.value}`"
+            class="peer sr-only"
+            @change="emit('update:modelValue', { ...modelValue, theme: option.value })"
+          />
+          <span
+            class="block rounded-lg border border-border/70 p-1.5 transition-colors hover:border-muted-foreground/50 peer-checked:border-primary peer-checked:ring-1 peer-checked:ring-primary peer-focus-visible:outline-2 peer-focus-visible:outline-offset-4 peer-focus-visible:outline-ring sm:p-2"
           >
-            {{ option.label }}
-          </SelectItem>
-        </SelectContent>
-      </Select>
-    </SettingsPropertyRow>
+            <ThemePreview :theme="option.value" :accent="previewAccent" />
+            <span
+              class="mt-2 flex min-h-5 items-center justify-center gap-1.5 text-xs font-medium sm:text-sm"
+            >
+              {{ option.label }}
+              <Check
+                v-if="(modelValue.theme ?? 'auto') === option.value"
+                class="size-3.5 shrink-0 text-primary"
+                aria-hidden="true"
+              />
+            </span>
+          </span>
+        </label>
+      </div>
+    </fieldset>
 
     <SettingsPropertyRow
       :label="t('setting.appearance.accentColor')"
@@ -48,6 +53,7 @@
           type="button"
           role="radio"
           :aria-checked="selectedAccent === option.value"
+          :tabindex="selectedAccent === option.value ? 0 : -1"
           :aria-label="option.label"
           :title="option.label"
           :data-testid="`appearance-accent-option-${option.value}`"
@@ -59,6 +65,7 @@
           "
           :style="{ backgroundColor: option.swatch }"
           @click="selectAccent(option.value)"
+          @keydown="onAccentKeydown($event, option.value)"
         >
           <svg
             v-if="selectedAccent === option.value"
@@ -81,21 +88,17 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue';
+import { computed, useId } from 'vue';
+import { Check } from '@lucide/vue';
+import ThemePreview from './ThemePreview.vue';
 import { useI18n } from 'vue-i18n';
 import type { Accent } from '@memoflow/setting-contracts';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@memoflow/ui-vue-shadcn';
 import { settingUiHost } from '../setting-ui-host';
 
 const { SettingsPropertyRow, SettingsSection } = settingUiHost.components;
 
 const { t } = useI18n();
+const themeGroupId = useId();
 
 type AppearanceTheme = 'light' | 'dark' | 'auto';
 
@@ -106,7 +109,7 @@ interface AppearanceSettings {
 
 interface Props {
   modelValue: AppearanceSettings;
-  themeOptions?: Array<{ label: string; value: string }>;
+  themeOptions?: Array<{ label: string; value: AppearanceTheme }>;
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -120,9 +123,9 @@ const emit = defineEmits<{
 const themeOptions = computed(
   () =>
     props.themeOptions ?? [
-      { label: '☀️ ' + t('setting.appearance.themeLight'), value: 'light' },
-      { label: '🌙 ' + t('setting.appearance.themeDark'), value: 'dark' },
-      { label: '🖥️ ' + t('setting.appearance.themeAuto'), value: 'auto' },
+      { label: t('setting.appearance.themeAuto'), value: 'auto' as const },
+      { label: t('setting.appearance.themeLight'), value: 'light' as const },
+      { label: t('setting.appearance.themeDark'), value: 'dark' as const },
     ],
 );
 
@@ -182,6 +185,26 @@ const accentOptions = computed(() =>
 );
 
 const selectedAccent = computed<Accent>(() => props.modelValue.accent ?? 'brand-gold');
+const previewAccent = computed(
+  () => ACCENT_OPTIONS.find((option) => option.value === selectedAccent.value)!.swatch,
+);
+
+function onAccentKeydown(event: KeyboardEvent, accent: Accent): void {
+  const direction = ['ArrowRight', 'ArrowDown'].includes(event.key)
+    ? 1
+    : ['ArrowLeft', 'ArrowUp'].includes(event.key)
+      ? -1
+      : 0;
+  if (!direction) return;
+  event.preventDefault();
+  const index = ACCENT_OPTIONS.findIndex((option) => option.value === accent);
+  const next = ACCENT_OPTIONS[(index + direction + ACCENT_OPTIONS.length) % ACCENT_OPTIONS.length]!;
+  selectAccent(next.value);
+  const group = (event.currentTarget as HTMLElement).parentElement;
+  group
+    ?.querySelector<HTMLButtonElement>(`[data-testid="appearance-accent-option-${next.value}"]`)
+    ?.focus();
+}
 
 function selectAccent(accent: Accent): void {
   if (accent === selectedAccent.value) return;

@@ -11,16 +11,11 @@ const mocks = vi.hoisted(() => {
   });
   return {
     toast: toastFn,
-    presentSystem: vi.fn(() => false),
   };
 });
 
 vi.mock('vue-sonner', () => ({
   toast: mocks.toast,
-}));
-
-vi.mock('./browser-system-notification', () => ({
-  presentBrowserSystemNotification: mocks.presentSystem,
 }));
 
 import { presentWebLiveNotification } from './web-live-notification';
@@ -64,25 +59,11 @@ function event(): NotificationDispatchInAppEvent {
 describe('presentWebLiveNotification', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    mocks.presentSystem.mockReturnValue(false);
     Object.defineProperty(document, 'visibilityState', {
       configurable: true,
       value: 'visible',
     });
     vi.spyOn(document, 'hasFocus').mockReturnValue(true);
-  });
-
-  it('prefers the browser/OS surface when it presents the event', () => {
-    mocks.presentSystem.mockReturnValue(true);
-    const executeAction = vi.fn();
-    const result = presentWebLiveNotification(event(), {
-      executeAction,
-      translate: (key) => key,
-    });
-
-    expect(result).toBe('system');
-    expect(mocks.toast).not.toHaveBeenCalled();
-    expect(executeAction).not.toHaveBeenCalled();
   });
 
   it('shows a focused Web toast with typed Complete and Snooze actions', async () => {
@@ -152,7 +133,7 @@ describe('presentWebLiveNotification', () => {
     expect(mocks.toast.success).toHaveBeenCalledWith('Completed');
   });
 
-  it('does not create an invisible toast when the page is not focused and OS presentation is unavailable', () => {
+  it('keeps background notifications in the inbox without creating a hidden toast', () => {
     vi.mocked(document.hasFocus).mockReturnValue(false);
 
     const result = presentWebLiveNotification(event(), {

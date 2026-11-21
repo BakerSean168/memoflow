@@ -1,4 +1,4 @@
-import { afterAll, beforeEach, describe, expect, it } from 'vitest';
+import { afterAll, beforeEach, describe, expect, it, vi } from 'vitest';
 import { randomUUID } from 'crypto';
 import { buildIdempotencyKeyString } from '@memoflow/reliable-messaging-contracts';
 import { createTimeContext } from '@memoflow/time';
@@ -34,6 +34,7 @@ import { NotificationPreferencePrismaRepository } from '../notification-preferen
 import { NotificationReliableOperationPrismaAdapter } from '../notification-reliable-operation-prisma.adapter';
 import {
   createNotificationRuntimeContribution,
+  type NotificationChannelDeliverer,
   type NotificationReliableOperationPort,
 } from '../../../runtime/notification.runtime';
 import { RealInAppChannelDeliverer } from '../../deliverers/real-channel-deliverers';
@@ -93,7 +94,7 @@ describe('NotificationRequested durable envelope consumer (NOTIF-3301)', () => {
     });
   }
 
-  function buildRuntime() {
+  function buildRuntime(delivererRegistry?: Record<string, NotificationChannelDeliverer>) {
     return createNotificationRuntimeContribution({
       userTimeContextPort: TEST_USER_TIME_CONTEXT_PORT,
       environment: 'test',
@@ -103,6 +104,7 @@ describe('NotificationRequested durable envelope consumer (NOTIF-3301)', () => {
       closureChecker: async () => false,
       reliableAdapter: reliableAdapter as NotificationReliableOperationPort,
       deliverer: new RealInAppChannelDeliverer(notificationRepo),
+      delivererRegistry,
     });
   }
 
@@ -210,7 +212,7 @@ describe('NotificationRequested durable envelope consumer (NOTIF-3301)', () => {
     expect(shared.status).toBe('succeeded');
   });
 
-  it('4. Per-channel policy is evaluated at consumption: disabled InApp yields no dispatch + observable decision', async () => {
+  it('4. Historical InApp opt-out still enqueues and completes durable in-app delivery', async () => {
     const preference = NotificationPreference.create({ identityId: identityId as never });
     preference.setGlobalChannel('InApp', false);
     await preferenceRepo.save(preference);
@@ -225,18 +227,25 @@ describe('NotificationRequested durable envelope consumer (NOTIF-3301)', () => {
     const fact = await prisma.notification.findFirstOrThrow({
       where: { identityId, idempotencyKey: envelope.idempotencyKey },
     });
-    // The Fact is still durable; only the channel plan was suppressed.
-    const dispatch = await prisma.notificationDispatchOutbox.count({
+    // Historical opt-out preferences cannot suppress the required in-app channel.
+    const dispatch = await prisma.notificationDispatchOutbox.findMany({
       where: { notificationId: fact.id },
     });
-    expect(dispatch).toBe(0);
+    expect(dispatch).toHaveLength(1);
+    expect(dispatch[0]).toMatchObject({ channel: 'InApp', status: 'pending' });
 
     const decision = await prisma.notificationDeliveryDecisionRecord.findFirstOrThrow({
       where: { notificationId: fact.id, channel: 'InApp' },
     });
-    expect(decision.outcome).toBe('disabled');
+    expect(decision.outcome).toBe('enqueued');
     const shared = await prisma.outboxMessage.findUniqueOrThrow({ where: { id: opId } });
     expect(shared.status).toBe('succeeded');
+
+    await runtime.tick();
+    const delivered = await prisma.notificationDispatchOutbox.findUniqueOrThrow({
+      where: { id: dispatch[0].id },
+    });
+    expect(delivered.status).toBe('succeeded');
   });
 
   it('5. Writer enqueue is idempotent by operationId (re-enqueue returns the existing receipt)', async () => {
@@ -525,5 +534,54 @@ describe('NotificationRequested durable envelope consumer (NOTIF-3301)', () => {
     });
     expect(dispatch.map((d) => d.channel).sort()).toEqual(['InApp', 'Push']);
     expect(dispatch.every((d) => d.status === 'pending')).toBe(true);
+  });
+
+  it('10. Disabled Desktop records a disabled decision while InApp completes durable delivery', async () => {
+    const preference = NotificationPreference.create({
+      identityId: identityId as never,
+    });
+    preference.setGlobalChannel('Desktop', false);
+    await preferenceRepo.save(preference);
+
+    const opId = randomUUID();
+    const envelope = buildEnvelope({ suggestedChannels: ['InApp', 'Desktop'] });
+    await writer.enqueueNotificationRequested({ operationId: opId, envelope });
+    const deliverDesktop = vi
+      .fn<NotificationChannelDeliverer['deliver']>()
+      .mockResolvedValue(undefined);
+    // Register Desktop explicitly so a missing host capability cannot masquerade as an opt-out.
+    const runtime = buildRuntime({ Desktop: { deliver: deliverDesktop } });
+
+    await runtime.tick();
+
+    const shared = await prisma.outboxMessage.findUniqueOrThrow({
+      where: { id: opId },
+    });
+    expect(shared.status).toBe('succeeded');
+    const fact = await prisma.notification.findFirstOrThrow({
+      where: { identityId, idempotencyKey: envelope.idempotencyKey },
+    });
+    const dispatch = await prisma.notificationDispatchOutbox.findMany({
+      where: { notificationId: fact.id },
+    });
+    expect(dispatch).toHaveLength(1);
+    expect(dispatch[0]).toMatchObject({ channel: 'InApp', status: 'pending' });
+
+    const decisions = await prisma.notificationDeliveryDecisionRecord.findMany({
+      where: { notificationId: fact.id },
+      orderBy: { channel: 'asc' },
+    });
+    expect(decisions.map(({ channel, outcome }) => ({ channel, outcome }))).toEqual([
+      { channel: 'Desktop', outcome: 'disabled' },
+      { channel: 'InApp', outcome: 'enqueued' },
+    ]);
+
+    await runtime.tick();
+
+    const delivered = await prisma.notificationDispatchOutbox.findUniqueOrThrow({
+      where: { id: dispatch[0].id },
+    });
+    expect(delivered.status).toBe('succeeded');
+    expect(deliverDesktop).not.toHaveBeenCalled();
   });
 });

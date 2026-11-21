@@ -132,6 +132,7 @@
 
 <script setup lang="ts">
 import { computed } from 'vue';
+import { createTimeFacade } from '@memoflow/time';
 import { useI18n } from 'vue-i18n';
 import {
   Select,
@@ -162,7 +163,7 @@ export type CanonicalLocaleSettings = RegionalPreferences & {
 };
 
 const { t } = useI18n();
-defineProps<{ modelValue: CanonicalLocaleSettings }>();
+const props = defineProps<{ modelValue: CanonicalLocaleSettings }>();
 const emit = defineEmits<{ 'update:modelValue': [value: CanonicalLocaleSettings] }>();
 
 const languageOptions = [
@@ -174,21 +175,35 @@ const timezoneOpts = computed<Array<{ label: string; value: RegionalPreferences[
   () => [
     { label: 'UTC', value: TimeZoneIdSchema.parse('UTC') },
     { label: t('setting.locale.tzBeijing'), value: TimeZoneIdSchema.parse('Asia/Shanghai') },
-    { label: 'Tokyo', value: TimeZoneIdSchema.parse('Asia/Tokyo') },
+    { label: t('setting.locale.tzTokyo'), value: TimeZoneIdSchema.parse('Asia/Tokyo') },
     { label: t('setting.locale.tzNewYork'), value: TimeZoneIdSchema.parse('America/New_York') },
   ],
 );
 
-const dateStyleOpts: Array<{ label: string; value: DateStyle }> = [
-  { label: 'Short', value: 'short' },
-  { label: 'Medium', value: 'medium' },
-  { label: 'Long', value: 'long' },
-];
-
-const timeStyleOpts = computed<Array<{ label: string; value: TimeStyle }>>(() => [
-  { label: t('setting.locale.time24h'), value: '24h' },
-  { label: t('setting.locale.time12h'), value: '12h' },
-]);
+// One stable instant makes the formats comparable; use the same facade as product dates.
+const sampleInstant = Date.UTC(2026, 8, 23, 13, 45);
+const previewTime = computed(() =>
+  createTimeFacade({
+    context: { timeZone: props.modelValue.timeZone, weekStartsOn: props.modelValue.weekStartsOn },
+    presentation: {
+      locale: props.modelValue.language,
+      dateStyle: props.modelValue.dateStyle,
+      timeStyle: props.modelValue.timeStyle,
+    },
+  }),
+);
+const dateStyleOpts = computed<Array<{ label: string; value: DateStyle }>>(() =>
+  (['short', 'medium', 'long'] as const).map((value) => ({
+    value,
+    label: `${previewTime.value.format.date(sampleInstant, { dateStyle: value })} · ${t(`setting.locale.dateStyles.${value}`)}`,
+  })),
+);
+const timeStyleOpts = computed<Array<{ label: string; value: TimeStyle }>>(() =>
+  (['24h', '12h'] as const).map((value) => ({
+    value,
+    label: `${previewTime.value.format.hm(sampleInstant, { timeStyle: value })} · ${t(`setting.locale.time${value}`)}`,
+  })),
+);
 
 const weekStartOpts = computed<Array<{ label: string; value: Weekday }>>(() => [
   { label: t('setting.locale.weekSunday'), value: 0 },

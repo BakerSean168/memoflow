@@ -3,15 +3,6 @@ export { createAppRouter } from './router';
 export { useAuthenticationStore } from '@memoflow/account-ui';
 export { createNotificationStartupHook } from '@memoflow/notification-ui';
 export {
-  presentBrowserSystemNotification,
-  browserSystemNotificationPermission,
-  isBrowserSystemNotificationEnabled,
-  isBrowserSystemNotificationSupported,
-  requestBrowserSystemNotificationPermission,
-  setBrowserSystemNotificationEnabled,
-  type BrowserSystemNotificationPermission,
-} from '@memoflow/notification-ui';
-export {
   presentWebLiveNotification,
   type WebLiveNotificationPresenterOptions,
   type WebLiveNotificationPresentation,

@@ -79,8 +79,6 @@ async function handleAppReady(
       mainWindow: win,
       windowManager,
       lifecyclePreference,
-      resolveDeviceNotificationPreferencePath: () =>
-        runtimeManager.getActiveProfileResolver()?.desktopNotificationPreferencePath ?? null,
     });
     mainRuntime.setDesktopFeaturesRuntime(desktopFeaturesRuntime);
 
@@ -111,7 +109,6 @@ async function handleAppReady(
       desktopFeaturesRuntime.tray,
       desktopFeaturesRuntime.shortcut,
       desktopFeaturesRuntime.autolaunch,
-      desktopFeaturesRuntime.notification,
       desktopFeaturesRuntime.startup,
     );
     console.log('[Lifecycle] System IPC handlers registered');

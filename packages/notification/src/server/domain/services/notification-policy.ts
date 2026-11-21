@@ -4,7 +4,7 @@ import {
   NotificationDndBehavior,
   NotificationPreferenceControl,
   NotificationPreferenceDecisionSource,
-  type NotificationChannelType,
+  NotificationChannelType,
   type NotificationDeliveryPlanOutcome as DeliveryPlanOutcome,
   type NotificationDeliveryReason as DeliveryReason,
   type NotificationPreferenceDecisionSource as PreferenceDecisionSource,
@@ -43,18 +43,45 @@ export class NotificationPolicy {
       };
     }
 
+    const global = context.preference?.getGlobalChannel(context.channel);
+    const groupOverride = context.preference?.getWorkflowChannelOverride(
+      `${context.workflow.groupKey}.general`,
+      context.channel,
+    );
+    // Desktop switches are delivery gates, including for previously queued work.
+    // A more specific workflow cannot opt back into a paused channel or category.
+    if (
+      context.channel === NotificationChannelType.Desktop &&
+      (global === false || groupOverride === false)
+    ) {
+      return {
+        channel: context.channel,
+        outcome: NotificationDeliveryPlanOutcome.Disabled,
+        reason:
+          global === false
+            ? NotificationDeliveryReason.UserGlobalDisabled
+            : NotificationDeliveryReason.WorkflowOverrideDisabled,
+        preferenceSource:
+          global === false
+            ? NotificationPreferenceDecisionSource.UserGlobal
+            : NotificationPreferenceDecisionSource.WorkflowOverride,
+      };
+    }
+
     let enabled = capability.enabledByDefault;
     let source: PreferenceDecisionSource = NotificationPreferenceDecisionSource.WorkflowDefault;
     let enabledReason: DeliveryReason = enabled
       ? NotificationDeliveryReason.WorkflowDefaultEnabled
       : NotificationDeliveryReason.WorkflowDefaultDisabled;
 
-    if (capability.preferenceControl === NotificationPreferenceControl.ReadOnly) {
+    if (
+      context.channel === NotificationChannelType.InApp ||
+      capability.preferenceControl === NotificationPreferenceControl.ReadOnly
+    ) {
       enabled = true;
       source = NotificationPreferenceDecisionSource.ReadOnlyAllowlist;
       enabledReason = NotificationDeliveryReason.ReadOnlyAllowlist;
     } else {
-      const global = context.preference?.getGlobalChannel(context.channel);
       if (global !== undefined) {
         enabled = global;
         source = NotificationPreferenceDecisionSource.UserGlobal;

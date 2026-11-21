@@ -88,7 +88,6 @@ describe('storage path derivation', () => {
       ),
       uiDir: ui,
       mainWindowStatePath: path.join(ui, 'main-window-state.json'),
-      desktopNotificationPreferencePath: path.join(ui, 'notification-preference.json'),
     });
   });
   it('creates only directories needed to open a Profile, idempotently', () => {

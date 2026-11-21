@@ -2,9 +2,12 @@ import { createLogger } from '@memoflow/utils/logger';
 import {
   NotificationChannelType as ChannelTypeEnum,
   NotificationRequestedSchema,
+  NotificationDeliveryPlanOutcome,
   NOTIFICATION_REQUESTED_MESSAGE_TYPE,
 } from '@memoflow/notification-contracts';
 import type { BusinessOperationReceipt } from '@memoflow/reliable-messaging-contracts';
+import { NotificationPolicy } from '../../domain/services/notification-policy';
+import { NotificationWorkflowCatalog } from '../../domain/services/notification-workflow-catalog';
 import type { Notification } from '../../domain/aggregates/notification';
 import type {
   NotificationDeliveryTarget,
@@ -33,6 +36,9 @@ export interface NotificationRuntimeDispatchLoopPort {
 export function createNotificationDispatchLoop(
   ctx: NotificationRuntimeContext,
 ): NotificationRuntimeDispatchLoopPort {
+  const policy = new NotificationPolicy();
+  const workflows = new NotificationWorkflowCatalog();
+
   /**
    * Deliver a claimed durable dispatch outbox entry using W0 lease/claim fencing.
    * Returns the final recorded receipt so callers can reconcile downstream state.
@@ -88,25 +94,44 @@ export function createNotificationDispatchLoop(
         channelType: outbox.channel,
         recipient: outbox.identityId,
       };
-      let deliveryResult: void | { status: 'suppressed'; reason: string };
-      if (notification) {
-        deliveryResult = await deliverer.deliver(notification, deliveryTarget, deliveryContext);
-      } else {
-        // No persisted Fact is required to execute a durable dispatch.
-        deliveryResult = await deliverer.deliver(
-          {
-            id: outbox.notificationId,
-            identityId: outbox.identityId,
-            title: (payloadData.title as string) ?? 'Notification',
-            content: (payloadData.content as string) ?? '',
-            type: (payloadData.type as never) ?? 'Info',
-            category: (payloadData.category as never) ?? 'System',
-          } as never,
-          deliveryTarget,
-          deliveryContext,
-        );
+      let deliveryResult: void | { status: 'suppressed'; reason: string } = undefined;
+      if (outbox.channel === ChannelTypeEnum.Desktop) {
+        if (!ctx.preferenceRepository)
+          throw new Error('Desktop dispatch requires notification preferences');
+        const workflowKey = notification?.workflowKey ?? payloadData.workflowKey;
+        if (typeof workflowKey !== 'string' || !workflowKey.trim()) {
+          throw new Error('Desktop dispatch requires a workflowKey');
+        }
+        const preference = await ctx.preferenceRepository.findByIdentityId(outbox.identityId);
+        const decision = policy.evaluate({
+          workflow: workflows.resolve(workflowKey),
+          channel: ChannelTypeEnum.Desktop,
+          preference,
+          quietHours: preference?.quietHours,
+        });
+        if (decision.outcome !== NotificationDeliveryPlanOutcome.Enqueued) {
+          deliveryResult = { status: 'suppressed', reason: decision.reason };
+        }
       }
-
+      if (!deliveryResult) {
+        if (notification) {
+          deliveryResult = await deliverer.deliver(notification, deliveryTarget, deliveryContext);
+        } else {
+          // No persisted Fact is required to execute a durable dispatch.
+          deliveryResult = await deliverer.deliver(
+            {
+              id: outbox.notificationId,
+              identityId: outbox.identityId,
+              title: (payloadData.title as string) ?? 'Notification',
+              content: (payloadData.content as string) ?? '',
+              type: (payloadData.type as never) ?? 'Info',
+              category: (payloadData.category as never) ?? 'System',
+            } as never,
+            deliveryTarget,
+            deliveryContext,
+          );
+        }
+      }
       if (deliveryResult?.status === 'suppressed') {
         logger.info('[NotificationRuntime] Desktop delivery suppressed', {
           operationId: outbox.id,

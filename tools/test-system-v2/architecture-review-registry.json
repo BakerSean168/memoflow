@@ -207,26 +207,6 @@
       "sourceSha256": "f90cc409f796b86bf3e5a1a1dec527fffad02f68f14c15ac996d992e2f1d1825"
     },
     {
-      "path": "apps/desktop/src/main/services/desktop-notification-preference-wiring.surface.spec.ts",
-      "reviewScope": "representative-assertions",
-      "classification": {
-        "testType": null,
-        "testRole": "source-constraint"
-      },
-      "decision": "retain",
-      "behavior": "源码/Prisma Schema/产品文档静态约束：wires NotificationService to the active Profile narrow preference path",
-      "assertionEvidence": [
-        "wires NotificationService to the active Profile narrow preference path",
-        "keeps window presentation state and native file dialogs out of the notification preference owner"
-      ],
-      "reason": "已检查 readFileSync 实际读取源文件、Schema 或产品架构文档；路径可由 read(name) 或 path.resolve 间接构成，这不是业务运行态 I/O 或错误的 Structural 归类。静态字符串约束的必要性可在后续 Contract/AST 改良中讨论，现阶段保留。",
-      "replacement": {
-        "status": "none-verified",
-        "testFiles": []
-      },
-      "sourceSha256": "3b55946b192e5db9e22acf72a696fb2b3c48c7a411261dba684d7a3b81b5c531"
-    },
-    {
       "path": "packages/goal-contracts/src/protocol/goal-rpc-map.surface.spec.ts",
       "reviewScope": "representative-assertions",
       "classification": {
@@ -1498,14 +1478,14 @@
         "testRole": "behavior"
       },
       "decision": "retain",
-      "behavior": "System 共享 IPC 辅助通道与设备通知偏好通道保持稳定",
+      "behavior": "System 共享 IPC 辅助通道保持稳定",
       "assertionEvidence": ["SystemChannels"],
       "reason": "维护通道公开枚举和禁用旧 Lazy Module Diagnostics 通道。 代表性源码/断言已审，不代表运行依赖已验证。",
       "replacement": {
         "status": "none-verified",
         "testFiles": []
       },
-      "sourceSha256": "7d6f5d7a5db69c3054c38a129a30a294c321b4e188a4846d04008d12c11322e9"
+      "sourceSha256": "92face5859b2202db5aa995045693d1d63a377848faf2d7ddfab666e1ec979e7"
     },
     {
       "path": "packages/desktop-contracts/src/ipc-channels.task-surface.spec.ts",

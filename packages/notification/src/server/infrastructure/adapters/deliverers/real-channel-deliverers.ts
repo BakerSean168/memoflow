@@ -32,7 +32,7 @@ export class RealInAppChannelDeliverer implements NotificationChannelDeliverer {
   }
 }
 
-/** Desktop/native transport callable. */
+/** Custom desktop presentation transport callable. */
 type TransportDeliverFn = (dto: unknown, context?: unknown) => Promise<unknown> | unknown;
 
 export function getTransportDeliverFn(transport: unknown): TransportDeliverFn | null {
@@ -44,7 +44,7 @@ export function getTransportDeliverFn(transport: unknown): TransportDeliverFn | 
   return null;
 }
 
-/** A durable success requires an explicit native transport acknowledgement. */
+/** A durable success requires an explicit custom presentation acknowledgement. */
 export function isDeliveredAck(
   ack: unknown,
 ): ack is { ackId: string; status: 'delivered'; timestamp?: number } {
@@ -158,7 +158,6 @@ export class RealDesktopChannelDeliverer implements NotificationChannelDeliverer
         NotificationDispatchDesktopEvent['importance']
       >,
       data: ((dto as TargetObject).data as Record<string, unknown>) ?? {},
-      sound: { enabled: true, name: null },
     });
   }
 }

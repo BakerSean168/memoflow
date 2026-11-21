@@ -513,15 +513,19 @@ describe('PowerSync Notification delivery execution', () => {
     }
   });
 
-  it('fail-closes when the native Electron notification transport is unavailable', async () => {
+  it('fail-closes when the custom desktop renderer is unavailable', async () => {
     const transport = createDefaultElectronDesktopTransport() as {
-      deliver: (dto: unknown, context?: unknown) => Promise<{ ackId: string; status: string }>;
+      deliver: (
+        dto: unknown,
+        context?: unknown,
+      ) => Promise<{ ackId: string; status: string; error?: string }>;
     };
     const result = await transport.deliver({
       title: 'Unavailable',
       content: 'Body',
     });
     expect(result.status).toBe('failed');
+    expect(result.error).toBe('Desktop notification renderer is unavailable');
     expect(result.ackId).toBeDefined();
   });
 

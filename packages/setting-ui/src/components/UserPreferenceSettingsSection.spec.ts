@@ -102,10 +102,10 @@ function mountSection(service = createService()) {
 }
 
 function themeValue(wrapper: ReturnType<typeof mount>) {
-  return wrapper
-    .get('[data-testid="appearance-settings-card"]')
-    .get('[data-testid="select-model-value"]')
-    .attributes('data-value');
+  const selected = wrapper
+    .findAll<HTMLInputElement>('input[type="radio"]')
+    .find((input) => input.element.checked);
+  return selected?.element.value;
 }
 
 describe('UserPreferenceSettingsSection canonical ownership', () => {

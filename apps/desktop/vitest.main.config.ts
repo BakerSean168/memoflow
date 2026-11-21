@@ -241,13 +241,6 @@ const mainWorkspaceAliasEntries = [
     ),
   },
   {
-    find: '@memoflow/desktop-contracts/device-notification-preference',
-    replacement: resolve(
-      import.meta.dirname,
-      '../../packages/desktop-contracts/src/device-notification-preference.ts',
-    ),
-  },
-  {
     find: '@memoflow/desktop-contracts/focus-window',
     replacement: resolve(
       import.meta.dirname,

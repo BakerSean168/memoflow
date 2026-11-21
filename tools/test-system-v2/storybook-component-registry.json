@@ -887,13 +887,6 @@
       "status": "present"
     },
     {
-      "path": "packages/notification-ui/src/components/NotificationPermissionWarning.vue",
-      "package": "@memoflow/notification-ui",
-      "kind": "component",
-      "storyPath": "packages/notification-ui/src/components/NotificationPermissionWarning.stories.ts",
-      "status": "present"
-    },
-    {
       "path": "packages/notification-ui/src/components/NotificationCapsulePreview.vue",
       "package": "@memoflow/notification-ui",
       "kind": "component",

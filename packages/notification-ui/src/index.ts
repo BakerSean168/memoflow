@@ -41,16 +41,6 @@ export { createNotificationClickNavigation } from './desktop/notification-click-
 
 // Device / live presentation of an already-created InApp Notification fact
 export {
-  browserSystemNotificationPermission,
-  browserSystemNotificationTargetUrl,
-  isBrowserSystemNotificationEnabled,
-  isBrowserSystemNotificationSupported,
-  presentBrowserSystemNotification,
-  requestBrowserSystemNotificationPermission,
-  setBrowserSystemNotificationEnabled,
-  type BrowserSystemNotificationPermission,
-} from './browser-system-notification';
-export {
   presentWebLiveNotification,
   type WebLiveNotificationPresentation,
   type WebLiveNotificationPresenterOptions,

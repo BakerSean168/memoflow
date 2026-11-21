@@ -17,6 +17,7 @@ import type { CreateTaskPlanReq } from '@memoflow/task-contracts';
 import { RoutineConfigurationSnapshotSchema } from '@memoflow/routine-contracts';
 import { AIWorkflowRunViewSchema } from '@memoflow/ai-contracts';
 import { fail, ok } from '@memoflow/transport-contracts/result';
+import { DEFAULT_USER_PREFERENCE_PROFILE } from '@memoflow/setting-contracts';
 import * as keys from '@memoflow/app-vue/di/keys';
 import { productionLocaleMessages } from '@memoflow/app-vue/locales/production-messages';
 import { installServerStateRuntime } from '@memoflow/app-vue/platform/server-state';
@@ -349,15 +350,54 @@ app.provide(keys.GOAL_SERVICE_KEY, {
 } as never);
 app.provide(keys.LABEL_SERVICE_KEY, { listLabels: async () => ok([]) } as never);
 app.provide(keys.GOAL_KNOWLEDGE_SERVICE_KEY, {} as never);
+let notificationPreferences = {
+  globalChannels: { Desktop: true },
+  workflowOverrides: { 'task.general': { Desktop: false } },
+};
 app.provide(keys.NOTIFICATION_SERVICE_KEY, {
   findNotifications: async () => ok({ notifications, total: 1 }),
   getUnreadCount: async () => ok({ count: 1 }),
   getAttentionCount: async () => ok({ count: 1, nextAttentionAt: null }),
+  getPreferences: async () => ok(notificationPreferences),
+  updatePreferences: async (patch: Partial<typeof notificationPreferences>) => {
+    notificationPreferences = {
+      globalChannels: { ...notificationPreferences.globalChannels, ...patch.globalChannels },
+      workflowOverrides: {
+        ...notificationPreferences.workflowOverrides,
+        ...patch.workflowOverrides,
+      },
+    };
+    return ok(notificationPreferences);
+  },
 } as never);
+const preferenceRevisions = { presentation: 1, regional: 1 };
 app.provide(keys.SETTING_SERVICE_KEY, {
   getPreferenceProfile: async () => ok(profile),
   getPreferenceNamespace: async (namespace: 'presentation' | 'regional') =>
-    ok({ namespace, preferences: profile[namespace], revision: 1 }),
+    ok({
+      namespace,
+      preferences: { ...profile[namespace] },
+      revision: preferenceRevisions[namespace],
+    }),
+  patchPreferenceNamespace: async (
+    namespace: 'presentation' | 'regional',
+    patch: Record<string, unknown>,
+  ) => {
+    Object.assign(profile[namespace], patch);
+    return ok({
+      namespace,
+      revision: ++preferenceRevisions[namespace],
+      changedKeys: Object.keys(patch),
+    });
+  },
+  resetUserPreferences: async () => {
+    Object.assign(profile.presentation, DEFAULT_USER_PREFERENCE_PROFILE.presentation);
+    Object.assign(profile.regional, DEFAULT_USER_PREFERENCE_PROFILE.regional);
+    return ok({
+      presentation: { revision: ++preferenceRevisions.presentation, changedKeys: [] },
+      regional: { revision: ++preferenceRevisions.regional, changedKeys: [] },
+    });
+  },
 } as never);
 // AppShell also mounts the edit-profile dialog (#857), whose setup strict-injects
 // the account service production provides at app level. The fixture has no

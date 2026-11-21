@@ -241,9 +241,9 @@
     },
     {
       "path": "packages/setting-ui/src/components/AppearanceSettings.vue",
-      "native": ["button"],
+      "native": ["button", "input"],
       "category": "custom-control",
-      "reason": "Accent swatches are radio-like colour tiles."
+      "reason": "Theme preview cards use native radio inputs; accent swatches use radio-style buttons with roving keyboard focus."
     },
     {
       "path": "packages/setting-ui/src/components/DataSettingsSection.vue",

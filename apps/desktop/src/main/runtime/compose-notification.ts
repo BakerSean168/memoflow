@@ -66,7 +66,7 @@ export interface ComposeNotificationDesktopDependencies {
   readonly userTimeContextPort: UserTimeContextPort;
   /** Explicit channel capabilities selected by the host (InApp + Desktop). 宿主显式选择的 channel capabilities（InApp + Desktop）。 */
   readonly channelCapabilities: readonly ChannelCapabilitySpec[];
-  /** Native Electron desktop transport (acks + native Notification side effect). 原生 Electron desktop transport（ack + 原生 Notification 副作用）。 */
+  /** Custom Electron desktop transport with durable presentation acknowledgements. 自定义桌面通知传输，确认呈现后持久化回执。 */
   readonly desktopTransport?: unknown;
   /** Late-bound device renderer used by the durable Desktop transport. */
   readonly desktopRenderer?: (

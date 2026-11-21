@@ -9,4 +9,3 @@
 
 export { NotificationService, initNotificationService } from './notification.service';
 export type { NotificationOptions } from './notification.service';
-export { DesktopNotificationPreferenceStore } from './desktop-notification-preference.store';
