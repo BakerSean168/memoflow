@@ -4,7 +4,6 @@ import { useI18n } from 'vue-i18n';
 import { Eye, Check, Clock } from '@lucide/vue';
 import WindowActionButton from './components/WindowActionButton.vue';
 import WindowNumberInput from './components/WindowNumberInput.vue';
-import { notificationSound } from '@memoflow/assets/audio';
 import type { Result } from '@memoflow/transport-contracts/result';
 import type {
   NotificationActionIntent,
@@ -24,7 +23,6 @@ interface CustomNotification {
   title: string;
   body: string;
   data?: Record<string, unknown>;
-  sound?: boolean;
   timeoutId?: number;
   shownAt?: number;
 }
@@ -39,7 +37,6 @@ const snoozeMinutes = ref<number | string>(10);
 let clockInterval: number | null = null;
 let resizeTimer: number | null = null;
 let refreshTimer: number | null = null;
-let activeAudio: HTMLAudioElement | null = null;
 let disposed = false;
 const bridge = getElectronBridge();
 if (!bridge) throw new Error('Custom notification requires the preload bridge');
@@ -150,7 +147,6 @@ const elapsedTimes = computed<Record<string, string>>(() =>
 
 function handleReceiveNotification(data: CustomNotification) {
   if (disposed || notifications.value.some((notification) => notification.id === data.id)) return;
-  if (data.sound === true) void playNotificationSound(notificationSound);
   while (notifications.value.length >= MAX_VISIBLE_NOTIFICATIONS) {
     const oldest = notifications.value[0]!;
     // Visual overflow never changes the durable inbox or the routine owner.
@@ -163,25 +159,6 @@ function handleReceiveNotification(data: CustomNotification) {
     }, AUTO_DISMISS_MS);
   }
   notifications.value.push(notification);
-}
-
-async function playNotificationSound(src: string) {
-  try {
-    activeAudio?.pause();
-    const audio = new Audio(src);
-    activeAudio = audio;
-    audio.addEventListener(
-      'ended',
-      () => {
-        if (activeAudio === audio) activeAudio = null;
-      },
-      { once: true },
-    );
-    audio.volume = 0.6;
-    await audio.play();
-  } catch (error) {
-    console.warn('[CustomNotificationView] Failed to play notification sound', error);
-  }
 }
 
 function removeNotification(id: string) {
@@ -316,7 +293,6 @@ onUnmounted(() => {
   bridge.off(RendererEventChannels.DB_CHANGED, handleDatabaseChanged);
   if (refreshTimer !== null) window.clearTimeout(refreshTimer);
   if (resizeTimer !== null) window.clearTimeout(resizeTimer);
-  activeAudio?.pause();
   notifications.value.forEach((notification) => {
     if (notification.timeoutId !== undefined) window.clearTimeout(notification.timeoutId);
   });

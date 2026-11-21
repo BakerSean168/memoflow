@@ -12,12 +12,7 @@
 
 import { app, dialog, ipcMain, shell } from 'electron';
 import fs from 'node:fs/promises';
-import type {
-  AutoLaunchPort,
-  NotificationPort,
-  ShortcutPort,
-  TrayPort,
-} from '../capabilities/ports';
+import type { AutoLaunchPort, ShortcutPort, TrayPort } from '../capabilities/ports';
 import { getIpcCache } from '../utils';
 import { getSharedPathResolver } from '../runtime-init';
 import {
@@ -26,7 +21,6 @@ import {
   type OpenTextFileRequest,
 } from '../paths/native-file-dialogs';
 import { DesktopFeatureChannels, SystemChannels } from '@memoflow/desktop-contracts';
-import { DesktopNotificationPreferencePatchSchema } from '@memoflow/desktop-contracts';
 import { DesktopStartupChannels, DesktopStartupPatchSchema } from '@memoflow/desktop-contracts';
 import type { DesktopStartupSettingsService } from '../lifecycle/desktop-startup-settings-service';
 import { fail, ok } from '@memoflow/transport-contracts/result';
@@ -137,7 +131,6 @@ function registerDesktopFeaturesHandlers(
   trayPort: TrayPort | null,
   shortcutPort: ShortcutPort | null,
   autoLaunchPort: AutoLaunchPort | null,
-  notificationPort: NotificationPort | null,
   startup?: DesktopStartupSettingsService,
 ): void {
   ipcMain.handle(DesktopStartupChannels.GET, async () =>
@@ -264,44 +257,6 @@ function registerDesktopFeaturesHandlers(
     trayPort?.stopFlashing();
     return ok(null);
   });
-
-  const devicePreferenceUnavailable = () =>
-    fail({
-      code: 'SERVICE_UNAVAILABLE',
-      message: 'Desktop notification preference requires an active Profile',
-    });
-
-  ipcMain.handle(DesktopFeatureChannels.NOTIFICATION_DEVICE_PREFERENCE_GET, async () => {
-    if (!notificationPort) return devicePreferenceUnavailable();
-    try {
-      return ok(notificationPort.getDevicePreference());
-    } catch {
-      return devicePreferenceUnavailable();
-    }
-  });
-  ipcMain.handle(DesktopFeatureChannels.NOTIFICATION_DEVICE_PREFERENCE_UPDATE, async (_, patch) => {
-    if (!notificationPort) return devicePreferenceUnavailable();
-    const parsed = DesktopNotificationPreferencePatchSchema.safeParse(patch);
-    if (!parsed.success) {
-      return fail({
-        code: 'VALIDATION_ERROR',
-        message: 'Invalid desktop notification preference patch',
-      });
-    }
-    try {
-      return ok(notificationPort.updateDevicePreference(parsed.data));
-    } catch {
-      return devicePreferenceUnavailable();
-    }
-  });
-  ipcMain.handle(DesktopFeatureChannels.NOTIFICATION_DEVICE_PREFERENCE_RESET, async () => {
-    if (!notificationPort) return devicePreferenceUnavailable();
-    try {
-      return ok(notificationPort.resetDevicePreference());
-    } catch {
-      return devicePreferenceUnavailable();
-    }
-  });
 }
 
 // Flag to prevent duplicate handler registration
@@ -322,7 +277,6 @@ export function registerSystemIpcHandlers(
   trayPort: TrayPort | null,
   shortcutPort: ShortcutPort | null,
   autoLaunchPort: AutoLaunchPort | null,
-  notificationPort: NotificationPort | null = null,
   startup?: DesktopStartupSettingsService,
 ): void {
   // Prevent duplicate registration
@@ -336,11 +290,5 @@ export function registerSystemIpcHandlers(
   registerSystemHandlers();
 
   // ========== Desktop Features Channels ==========
-  registerDesktopFeaturesHandlers(
-    trayPort,
-    shortcutPort,
-    autoLaunchPort,
-    notificationPort,
-    startup,
-  );
+  registerDesktopFeaturesHandlers(trayPort, shortcutPort, autoLaunchPort, startup);
 }

@@ -1,85 +1,18 @@
-/**
- * Notification Service
- *
- * Manages native desktop notifications using Electron's Notification API.
- * Handles system tray notifications, sounds, and interaction events.
- * Includes support for "Do Not Disturb" (DND) mode and scheduling.
- *
- * @module services/notification
- */
-
 import type { DesktopPresentationResult } from '@memoflow/notification-contracts';
-import { Notification, nativeImage, BrowserWindow } from 'electron';
-import path from 'node:path';
-import { fileURLToPath } from 'node:url';
-import { createLogger } from '@memoflow/utils/logger';
 import { CustomNotificationManager } from './custom-notification.manager';
 import type { WindowManager } from '../lifecycle/window-manager';
-import { resolveAssetPath, resolveAssetPathFromKey } from '../utils/asset-path';
-import { assetManifest, type AssetImageKey } from '@memoflow/assets';
-import { RendererEventChannels } from '@memoflow/desktop-contracts';
-import type {
-  DesktopNotificationPreference,
-  DesktopNotificationPreferencePatch,
-} from '@memoflow/desktop-contracts';
-import {
-  DesktopNotificationPreferenceStore,
-  type DesktopNotificationPreferencePathResolver,
-} from './desktop-notification-preference.store';
 
-const logger = createLogger('NotificationService');
-export type DeviceNotificationPreference = DesktopNotificationPreference;
+import type { NotificationConfig } from '../capabilities/ports';
 
-/**
- * Configuration options for displaying a notification.
- */
-export interface NotificationOptions {
-  /** The title of the notification. */
-  title: string;
-  /** The body text of the notification. */
-  body: string;
-  /** Path to a custom icon. */
-  icon?: string;
-  /** Whether to play a sound. */
-  sound?: boolean;
-  /** The urgency level of the notification. */
-  urgency?: 'normal' | 'critical' | 'low';
-  /** Whether the notification should be silent. Overrides `sound` if true. */
-  silent?: boolean;
-  /** Arbitrary data payload to attach to the notification (useful for click handling). */
-  data?: Record<string, unknown>;
-}
+export type NotificationOptions = NotificationConfig;
 
-/**
- * Service class for managing application notifications.
- * Implements the Singleton pattern.
- */
 export class NotificationService {
-  private mainWindow: BrowserWindow | null = null;
-  private defaultIcon: Electron.NativeImage | null = null;
+  private dndEnabled = false;
+  private dndStartHour = 22;
+  private dndEndHour = 7;
+  private dndScheduleEnabled = false;
 
-  // Do Not Disturb (DND) state
-  private dndEnabled: boolean = false;
-  private dndStartHour: number = 22; // Default: Starts at 22:00
-  private dndEndHour: number = 7; // Default: Ends at 07:00
-  private dndScheduleEnabled: boolean = false;
-
-  constructor(
-    private readonly customNotificationManager: CustomNotificationManager,
-    private readonly devicePreferenceStore = new DesktopNotificationPreferenceStore(),
-  ) {
-    this.initDefaultIcon();
-  }
-
-  /**
-   * Sets the main window reference.
-   * Required for sending IPC messages back to the renderer process upon notification interaction.
-   *
-   * @param {BrowserWindow} window - The main application window.
-   */
-  setMainWindow(window: BrowserWindow): void {
-    this.mainWindow = window;
-  }
+  constructor(private readonly customNotificationManager: CustomNotificationManager) {}
 
   clearPresentation(): void {
     this.customNotificationManager.clearPresentation();
@@ -87,19 +20,6 @@ export class NotificationService {
 
   destroy(): void {
     this.customNotificationManager.destroy();
-    this.mainWindow = null;
-  }
-
-  getDevicePreference(): DeviceNotificationPreference {
-    return this.devicePreferenceStore.get();
-  }
-
-  updateDevicePreference(patch: DesktopNotificationPreferencePatch): DeviceNotificationPreference {
-    return this.devicePreferenceStore.update(patch);
-  }
-
-  resetDevicePreference(): DeviceNotificationPreference {
-    return this.devicePreferenceStore.reset();
   }
 
   // ===== Do Not Disturb Methods =====
@@ -207,252 +127,13 @@ export class NotificationService {
     return currentHour >= this.dndStartHour && currentHour < this.dndEndHour;
   }
 
-  /**
-   * Initializes the default application icon for notifications.
-   */
-  private initDefaultIcon(): void {
-    try {
-      const iconPath =
-        resolveAssetPathFromKey('images', 'logo128', assetManifest) ??
-        resolveAssetPath('images/logos/MemoFlow-128.png');
-      this.defaultIcon = nativeImage.createFromPath(iconPath);
-    } catch (err) {
-      console.warn('[NotificationService] Failed to load default icon:', err);
-    }
-  }
-
-  /**
-   * Displays a system notification.
-   *
-   * @param {NotificationOptions} options - The notification options.
-   * @returns {Notification | null} The Notification instance, or null if suppressed/unsupported.
-   */
-  showNotification(options: NotificationOptions): Notification | null {
-    logger.info('[Desktop][NotificationFlow] showNotification invoked', {
-      title: options.title,
-      bodyLength: options.body?.length ?? 0,
-      presentationMode: this.devicePreferenceStore.get().presentationMode,
-      dndEnabled: this.dndEnabled,
-      dndScheduleEnabled: this.dndScheduleEnabled,
-    });
-
-    // Check DND status
-    if (this.isInDNDPeriod()) {
-      console.log('[NotificationService] Notification suppressed (DND mode):', options.title);
-      // Log notification but do not show, optionally inform renderer of suppression
-      if (this.mainWindow) {
-        this.mainWindow.webContents.send('notification:suppressed', {
-          title: options.title,
-          body: options.body,
-          data: options.data,
-        });
-      }
-      return null;
-    }
-
-    return this.renderNotification(options).notification;
-  }
-
-  /** Canonical policy runs upstream; device DND and native permission remain local. */
+  /** Delivery policy runs upstream; device DND and the renderer acknowledgement stay local. */
   async showCanonicalDelivery(options: NotificationOptions): Promise<DesktopPresentationResult> {
     if (this.isInDNDPeriod()) return { status: 'suppressed', reason: 'device-dnd' };
-    if (
-      this.devicePreferenceStore.get().presentationMode === 'native' &&
-      !Notification.isSupported()
-    ) {
-      return { status: 'suppressed', reason: 'native-unavailable' };
-    }
-    return this.renderNotification(options).rendered;
-  }
-
-  private renderNotification(options: NotificationOptions): {
-    rendered: boolean | Promise<boolean>;
-    notification: Notification | null;
-  } {
-    // Device presentation is intentionally separate from Notification policy.
-    // The durable Notification runtime evaluates Product-Time QuietHours;
-    // showCanonicalDelivery also applies current device DND.
-    const preference = this.devicePreferenceStore.get();
-    if (preference.presentationMode === 'custom') {
-      logger.info('[Desktop][NotificationFlow] Routing notification to custom manager', {
-        title: options.title,
-      });
-      const rendered = this.customNotificationManager.dispatch({
-        ...options,
-        sound: preference.soundEnabled && options.sound === true,
-      });
-      return { rendered, notification: null };
-    }
-
-    logger.info(
-      '[Desktop][NotificationFlow] Routing notification to native Electron notification',
-      {
-        title: options.title,
-      },
-    );
-    if (!Notification.isSupported()) {
-      console.warn('[NotificationService] Notifications are not supported on this system');
-      return { rendered: false, notification: null };
-    }
-
-    const notification = new Notification({
-      title: options.title,
-      body: options.body,
-      icon: options.icon
-        ? nativeImage.createFromPath(this.resolveNotificationIconPath(options.icon))
-        : (this.defaultIcon ?? undefined),
-      silent: !preference.soundEnabled || options.silent === true || options.sound !== true,
-      urgency: options.urgency ?? 'normal',
-    });
-
-    notification.on('click', () => {
-      this.handleNotificationClick(options.data);
-    });
-    notification.on('close', () => {
-      console.log('[NotificationService] Notification closed:', options.title);
-    });
-
-    notification.show();
-    return { rendered: true, notification };
-  }
-
-  /**
-   * Handles user click on a notification.
-   * Restores focus to the main window and sends a navigation event to the renderer.
-   *
-   * @param {Record<string, unknown>} [data] - The data payload associated with the notification.
-   */
-  private handleNotificationClick(data?: Record<string, unknown>): void {
-    // Focus main window
-    if (this.mainWindow) {
-      if (this.mainWindow.isMinimized()) {
-        this.mainWindow.restore();
-      }
-      this.mainWindow.focus();
-
-      // Send IPC message to renderer
-      if (data) {
-        this.mainWindow.webContents.send(RendererEventChannels.NOTIFICATION_CLICKED, data);
-      }
-    }
-  }
-
-  private resolveNotificationIconPath(icon: string): string {
-    const manifestMatch = resolveAssetPathFromKey('images', icon as AssetImageKey, assetManifest);
-
-    if (manifestMatch) {
-      return manifestMatch;
-    }
-
-    if (icon.startsWith('file://')) {
-      return fileURLToPath(new URL(icon));
-    }
-
-    if (path.isAbsolute(icon)) {
-      return icon;
-    }
-
-    if (icon.startsWith('images/') || icon.startsWith('audio/') || icon.startsWith('fonts/')) {
-      return resolveAssetPath(icon);
-    }
-
-    return icon;
-  }
-
-  /**
-   * Handles custom actions on notifications (if implemented).
-   *
-   * @param {string} actionType - The type of action performed.
-   * @param {Record<string, unknown>} [data] - Associated data.
-   */
-  private handleNotificationAction(actionType: string, data?: Record<string, unknown>): void {
-    if (this.mainWindow) {
-      this.mainWindow.webContents.send('notification:action', {
-        actionType,
-        data,
-      });
-    }
-  }
-
-  /**
-   * Helper to show a schedule notification.
-   *
-   * @param {Object} task - Schedule task details.
-   * @returns {Notification | null} The notification instance.
-   */
-  showScheduleNotification(task: {
-    id: string;
-    name: string;
-    description?: string;
-  }): Notification | null {
-    return this.showNotification({
-      title: `📅 ${task.name}`,
-      body: task.description || '调度任务已触发',
-      sound: true,
-      data: {
-        type: 'schedule',
-        id: task.id,
-      },
-    });
-  }
-
-  /**
-   * Helper to show a goal progress notification.
-   *
-   * @param {Object} goal - Goal progress details.
-   * @returns {Notification | null} The notification instance.
-   */
-  showGoalProgressNotification(goal: {
-    id: string;
-    title: string;
-    progress: number;
-    targetValue: number;
-  }): Notification | null {
-    const percentage = Math.round((goal.progress / goal.targetValue) * 100);
-    return this.showNotification({
-      title: `🎯 目标进度更新`,
-      body: `${goal.title}: ${percentage}% (${goal.progress}/${goal.targetValue})`,
-      data: {
-        type: 'goal',
-        id: goal.id,
-      },
-    });
-  }
-
-  /**
-   * Helper to show a task completion notification.
-   *
-   * @param {Object} task - Completed task details.
-   * @returns {Notification | null} The notification instance.
-   */
-  showTaskCompletedNotification(task: { id: string; title: string }): Notification | null {
-    return this.showNotification({
-      title: `✅ 任务已完成`,
-      body: task.title,
-      data: {
-        type: 'task',
-        id: task.id,
-      },
-    });
+    return this.customNotificationManager.dispatch(options);
   }
 }
 
-/**
- * Initializes the notification service with the main window.
- *
- * @param {BrowserWindow} mainWindow - The main application window.
- * @returns {NotificationService} The initialized service instance.
- */
-export function initNotificationService(
-  mainWindow: BrowserWindow,
-  windowManager: WindowManager,
-  resolveDevicePreferencePath: DesktopNotificationPreferencePathResolver,
-): NotificationService {
-  const customManager = new CustomNotificationManager(windowManager);
-  const service = new NotificationService(
-    customManager,
-    new DesktopNotificationPreferenceStore(resolveDevicePreferencePath),
-  );
-  service.setMainWindow(mainWindow);
-  return service;
+export function initNotificationService(windowManager: WindowManager): NotificationService {
+  return new NotificationService(new CustomNotificationManager(windowManager));
 }

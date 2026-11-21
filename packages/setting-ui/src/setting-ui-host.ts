@@ -41,8 +41,6 @@ import type {
 } from '@memoflow/ai-contracts';
 import type {
   DesktopAccessSnapshot,
-  DesktopNotificationPreference,
-  DesktopNotificationPreferencePatch,
   DesktopStartupPatch,
   DesktopStartupSnapshot,
   DesktopStartupUpdate,
@@ -309,6 +307,7 @@ export interface SettingRepositoryServicePort {
 /** Notification preference surface owned by `@memoflow/notification-ui`. */
 export interface SettingNotificationPreferenceFacade {
   modules: readonly SettingNotificationPreferenceModule[];
+  isLoaded: Readonly<Ref<boolean>>;
   isLoading: Readonly<Ref<boolean>>;
   isSaving: Readonly<Ref<boolean>>;
   error: Readonly<Ref<string | null>>;
@@ -326,23 +325,11 @@ export interface SettingNotificationPreferenceFacade {
 export type SettingNotificationPreferenceModule =
   | 'task'
   | 'goal'
-  | 'schedule'
-  | 'reminder'
+  | 'routine'
   | 'account'
   | 'system';
 
-export type SettingPreferenceChannelFlag = 'inApp' | 'push' | 'email';
-
-/** Browser system-notification presentation owned by `@memoflow/notification-ui`. */
-export interface SettingBrowserNotificationFacade {
-  permission(): SettingBrowserNotificationPermission;
-  isEnabled(): boolean;
-  isSupported(): boolean;
-  requestPermission(): Promise<SettingBrowserNotificationPermission>;
-  setEnabled(enabled: boolean): void;
-}
-
-export type SettingBrowserNotificationPermission = 'default' | 'granted' | 'denied' | 'unsupported';
+export type SettingPreferenceChannelFlag = 'desktop';
 
 /** Shell scene controls the settings view drives. */
 export interface SettingShellStore {
@@ -360,7 +347,6 @@ export interface SettingUiHost extends PlatformRendererHost {
   DESKTOP_AUTH_API_KEY: InjectionKey<SettingDesktopAuthApi>;
   DESKTOP_BRIDGE_KEY: InjectionKey<SettingDesktopBridge>;
   DESKTOP_ACCESS_SNAPSHOT_KEY: InjectionKey<Ref<DesktopAccessSnapshot | null>>;
-  DESKTOP_NOTIFICATION_DEVICE_PREFERENCE_KEY: InjectionKey<SettingNotificationDevicePreferencePort>;
   DESKTOP_STARTUP_SERVICE_KEY: InjectionKey<SettingDesktopStartupService>;
   DESKTOP_UPDATE_SERVICE_KEY: InjectionKey<SettingDesktopUpdateService>;
   AI_AGENT_REGISTRY_KEY: InjectionKey<SettingAgentRegistryPort>;
@@ -404,7 +390,6 @@ export interface SettingUiHost extends PlatformRendererHost {
   ): SettingNativeModelVisibility;
 
   useNotificationPreferences(): SettingNotificationPreferenceFacade;
-  browserNotification: SettingBrowserNotificationFacade;
 
   useAppShellStore(): SettingShellStore;
   returnFromSettingsScene(
@@ -428,13 +413,6 @@ export interface SettingUiHost extends PlatformRendererHost {
     | 'ExternalAgentConnectionsSection',
     Component
   >;
-}
-
-/** Desktop notification device preference port. */
-export interface SettingNotificationDevicePreferencePort {
-  get(): Promise<Result<DesktopNotificationPreference>>;
-  update(patch: DesktopNotificationPreferencePatch): Promise<Result<DesktopNotificationPreference>>;
-  reset(): Promise<Result<DesktopNotificationPreference>>;
 }
 
 /** Cloud auth service projection used by the account section. */

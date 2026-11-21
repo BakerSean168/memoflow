@@ -13,12 +13,10 @@ import {
 } from '@memoflow/setting-contracts';
 import AppearanceSettings from './AppearanceSettings.vue';
 import LocaleSettings from './LocaleSettings.vue';
-import SettingsResetSection from './SettingsResetSection.vue';
 import { settingUiHost } from '../setting-ui-host';
 
 const { SettingsStatusBlock } = settingUiHost.components;
 
-type PreferenceResetTarget = 'all' | 'presentation' | 'regional';
 import { useUserPreferences } from '../composables/useUserPreferences';
 import { useSettingsSectionReset } from '../composables/useSettingsSectionReset';
 import { applyAccent, applyThemeMode } from '../composables';
@@ -34,7 +32,6 @@ const {
   loadPreferences,
   patchPresentation,
   patchRegional,
-  resetPreferenceNamespace,
   resetAllUserPreferences,
 } = useUserPreferences();
 
@@ -46,7 +43,6 @@ const locale = ref<RegionalPreferences & { language: PresentationPreferences['la
   language: DEFAULT_USER_PREFERENCE_PROFILE.presentation.language,
   ...DEFAULT_USER_PREFERENCE_PROFILE.regional,
 });
-const resetting = ref(false);
 const hasLoadedPreferences = computed(() => presentation.value !== null && regional.value !== null);
 
 function isSupportedLocale(value: unknown): value is SettingLocale {
@@ -121,21 +117,14 @@ async function handleLocaleUpdate(
   hydrateCanonicalPreferences();
 }
 
-async function handleReset(target: PreferenceResetTarget): Promise<void> {
-  resetting.value = true;
-  try {
-    const resetOk =
-      target === 'all' ? await resetAllUserPreferences() : await resetPreferenceNamespace(target);
-    if (resetOk) hydrateCanonicalPreferences();
-  } finally {
-    resetting.value = false;
-  }
+async function handleReset(): Promise<void> {
+  if (await resetAllUserPreferences()) hydrateCanonicalPreferences();
 }
 
 watch([presentation, regional], hydrateCanonicalPreferences);
 
 // The settings shell restores the active section through the same action.
-useSettingsSectionReset('appearance', () => handleReset('all'));
+useSettingsSectionReset('appearance', handleReset);
 
 onMounted(async () => {
   await loadPreferences();
@@ -167,11 +156,6 @@ onMounted(async () => {
       />
       <AppearanceSettings :model-value="appearance" @update:model-value="handleAppearanceUpdate" />
       <LocaleSettings :model-value="locale" @update:model-value="handleLocaleUpdate" />
-      <SettingsResetSection
-        :current-theme="presentation?.preferences.theme ?? null"
-        :resetting="resetting"
-        @reset="handleReset"
-      />
     </template>
   </section>
 </template>

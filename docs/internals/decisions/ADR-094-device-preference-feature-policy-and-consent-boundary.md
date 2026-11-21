@@ -160,6 +160,14 @@ profiles/<profileId>/ui/notification-preference.json
 
 文件只保存 versioned `presentationMode + soundEnabled`，由 active Profile resolver 驱动；Profile switch 不共享缓存，无 active Profile 时 mutation fail closed。Window state 与 UserFiles 继续由各自 host/presentation owner 管理。此实现没有引入 generic device settings bag，也没有提前实现尚无真实 CommandRegistry 的 shortcut editor。
 
+### 4.3 Issue #1053: custom-only desktop delivery
+
+2026-11-21 起，Desktop 固定使用 MemoFlow 自定义通知窗口，保留可操作按钮和 renderer-ready delivery acknowledgement。原生通知、声音及对应 device preference store、IPC、profile path 已退役；历史 `notification-preference.json` 不再读取或写入，无需迁移到其他偏好。
+
+上面 4.1/4.2 描述历史演进，不再是当前实现。当前唯一用户控制是 Notification owner 的 `Desktop` 总开关及工作流分组开关；分组关闭和总开关关闭均不能被单个工作流覆盖。在入队与实际投递前分别检查最新偏好，关闭后的队列项记为 skipped，不能记为 delivered。
+
+InApp 始终启用，保留通知中心记录；关闭 Desktop 只停止桌面弹窗。Web 在前台提供应用内提示，在后台保留通知中心记录，不请求浏览器系统通知权限。
+
 ## 5. Keyboard shortcut boundary
 
 当前：
@@ -398,7 +406,8 @@ Consent Granted
 原则仍是 owner-oriented：
 
 ```text
-Desktop Notification preference -> Desktop notification owner/local store
+Desktop notification delivery -> Notification owner Desktop/group preferences
+Desktop popup presentation -> fixed custom window (no device preference)
 Keymap -> Command/Keymap owner/local store
 Window/sidebar -> Shell presentation state
 User files -> UserFiles capability

@@ -42,5 +42,4 @@ export interface ProfilePathResolver {
   readonly knowledgeRepositoryAutoSyncStatePath: string;
   readonly uiDir: string;
   readonly mainWindowStatePath: string;
-  readonly desktopNotificationPreferencePath: string;
 }

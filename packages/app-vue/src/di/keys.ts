@@ -10,11 +10,7 @@ import type { GoalDraftCheckpointStore } from '@memoflow/goal-ui';
 import type { InjectionKey, Ref, ShallowRef } from 'vue';
 import type { CloudAuthDesktopClientPort } from '@memoflow/cloud-auth-contracts';
 import type { ExternalAgentClientPort } from '@memoflow/agent-gateway';
-import type {
-  DesktopAccessSnapshot,
-  DesktopNotificationPreference,
-  DesktopNotificationPreferencePatch,
-} from '@memoflow/desktop-contracts';
+import type { DesktopAccessSnapshot } from '@memoflow/desktop-contracts';
 import type { ElectronBridge } from '@memoflow/ipc-client';
 import type { LocalAgentClient, AgentRegistryClient } from '@memoflow/ai-client';
 import type { AIRuntimeSurface } from '@memoflow/ai-contracts';
@@ -63,13 +59,6 @@ export const NOTIFICATION_SERVICE_KEY: InjectionKey<INotificationService> =
   Symbol('NotificationService');
 export const GOAL_KNOWLEDGE_SERVICE_KEY: InjectionKey<IGoalKnowledgeService> =
   Symbol('GoalKnowledgeService');
-export interface DesktopNotificationDevicePreferencePort {
-  get(): Promise<Result<DesktopNotificationPreference>>;
-  update(patch: DesktopNotificationPreferencePatch): Promise<Result<DesktopNotificationPreference>>;
-  reset(): Promise<Result<DesktopNotificationPreference>>;
-}
-export const DESKTOP_NOTIFICATION_DEVICE_PREFERENCE_KEY: InjectionKey<DesktopNotificationDevicePreferencePort> =
-  Symbol('DesktopNotificationDevicePreference');
 export const SETTING_SERVICE_KEY: InjectionKey<ISettingService> = Symbol('SettingService');
 export const DATA_PORTABILITY_SERVICE_KEY: InjectionKey<IDataPortabilityService> =
   Symbol('DataPortabilityService');

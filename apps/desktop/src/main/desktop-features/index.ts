@@ -40,8 +40,6 @@ export interface DesktopFeaturesOptions {
   mainWindow: BrowserWindow;
   /** Window manager required by the notification renderer. */
   windowManager: WindowManager;
-  /** Active Profile resolver for the narrow device notification preference owner. */
-  resolveDeviceNotificationPreferencePath: () => string | null;
   /** Auto-launch provider configuration. */
   autoLaunch?: AutoLaunchPortOptions;
   lifecyclePreference?: DesktopLifecyclePreference;
@@ -107,8 +105,7 @@ export class DesktopFeaturesRuntime {
 export async function initializeDesktopFeatures(
   options: DesktopFeaturesOptions,
 ): Promise<DesktopFeaturesRuntime> {
-  const { mainWindow, windowManager, resolveDeviceNotificationPreferencePath, autoLaunch } =
-    options;
+  const { mainWindow, windowManager, autoLaunch } = options;
   console.log('[Desktop Features] Initializing via CapabilityRegistry...');
 
   const registry = new CapabilityRegistry();
@@ -151,13 +148,7 @@ export async function initializeDesktopFeatures(
     return port;
   });
   await startup?.refresh();
-  await registry.register('notification', () =>
-    createElectronNotificationPort({
-      mainWindow,
-      windowManager,
-      resolveDevicePreferencePath: resolveDeviceNotificationPreferencePath,
-    }),
-  );
+  await registry.register('notification', () => createElectronNotificationPort({ windowManager }));
   await registry.register('external-editor', () => createElectronExternalEditorPort());
 
   console.log('[Desktop Features] Capability registry initialized');

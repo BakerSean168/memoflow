@@ -40,9 +40,9 @@ import { logo, logo128 } from '@memoflow/assets/images';
 ### 导入音频
 
 ```typescript
-import { notificationSound } from '@memoflow/assets/audio';
+import { successSound } from '@memoflow/assets/audio';
 
-const audio = new Audio(notificationSound);
+const audio = new Audio(successSound);
 audio.play();
 ```
 

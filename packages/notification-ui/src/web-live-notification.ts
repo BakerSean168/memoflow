@@ -6,7 +6,6 @@ import type {
 } from '@memoflow/notification-contracts';
 import type { Result } from '@memoflow/transport-contracts';
 import { toast } from 'vue-sonner';
-import { presentBrowserSystemNotification } from './browser-system-notification';
 
 type OwnerCommandAction = Extract<NotificationActionIntent, { kind: 'owner-command' }>;
 
@@ -25,7 +24,7 @@ export interface WebLiveNotificationPresenterOptions {
   translate: (key: string) => string;
 }
 
-export type WebLiveNotificationPresentation = 'system' | 'in-app' | 'none';
+export type WebLiveNotificationPresentation = 'in-app' | 'none';
 
 function isFocusedForeground(): boolean {
   return (
@@ -98,7 +97,7 @@ async function executeLiveAction(
 /**
  * Presents one already-canonical InApp Notification Fact on the current Web host.
  *
- * - hidden/minimized/unfocused -> optional browser/OS notification, if user enabled it;
+ * - hidden/minimized/unfocused -> Inbox only; desktop windows belong to the Desktop host;
  * - focused foreground -> transient in-app toast;
  * - owner-command actions are executed through Notification's typed action endpoint.
  *
@@ -108,7 +107,6 @@ export function presentWebLiveNotification(
   event: NotificationDispatchInAppEvent,
   options: WebLiveNotificationPresenterOptions,
 ): WebLiveNotificationPresentation {
-  if (presentBrowserSystemNotification(event)) return 'system';
   if (!isFocusedForeground()) return 'none';
 
   const actions = ownerCommandActions(event);

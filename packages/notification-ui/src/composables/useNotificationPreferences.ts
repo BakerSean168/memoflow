@@ -1,7 +1,5 @@
-// Product boundary (architecture decision A): Desktop notifications are system-explicit
-// (desktop durable worker), NOT user-configurable via preferences UI.
 /**
- * useNotificationPreferences — residual 199
+ * Desktop notification preferences
  *
  * Loads/updates NotificationPreference via NotificationClientPort.
  * Identity is never passed from the UI; transport auth stamps it server-side.
@@ -19,20 +17,17 @@ import type {
 export const NOTIFICATION_PREFERENCE_MODULES = [
   'task',
   'goal',
-  'schedule',
-  'reminder',
+  'routine',
   'account',
   'system',
 ] as const;
 
 export type NotificationPreferenceModule = (typeof NOTIFICATION_PREFERENCE_MODULES)[number];
 
-export type PreferenceChannelFlag = 'inApp' | 'push' | 'email';
+export type PreferenceChannelFlag = 'desktop';
 
 const CHANNEL_FLAG_TO_TYPE: Record<PreferenceChannelFlag, NotificationChannelType> = {
-  inApp: 'InApp',
-  push: 'Push',
-  email: 'Email',
+  desktop: 'Desktop',
 };
 
 function toPreferenceErrorMessage(
@@ -59,6 +54,7 @@ export function useNotificationPreferences() {
   const isSaving = ref(false);
   const error = ref<string | null>(null);
 
+  const isLoaded = computed(() => preference.value !== null);
   const settings = computed(() => preference.value?.workflowOverrides ?? {});
 
   function hasChannel(moduleName: string, flag: PreferenceChannelFlag): boolean {
@@ -66,7 +62,8 @@ export function useNotificationPreferences() {
     const workflowKey = `${moduleName}.general`;
     const workflowValue = preference.value?.workflowOverrides?.[workflowKey]?.[type];
     if (workflowValue !== undefined) return workflowValue;
-    return preference.value?.globalChannels?.[type] ?? true;
+    // The master switch pauses delivery without changing the category choices.
+    return true;
   }
 
   function hasGlobalChannel(flag: PreferenceChannelFlag): boolean {
@@ -87,12 +84,19 @@ export function useNotificationPreferences() {
           'setting.notifications.loadPreferencesFailed',
         );
       }
+    } catch (cause) {
+      error.value = toPreferenceErrorMessage(
+        cause,
+        t,
+        'setting.notifications.loadPreferencesFailed',
+      );
     } finally {
       isLoading.value = false;
     }
   }
 
   async function updatePreferences(request: UpdateNotificationPreferenceReq): Promise<boolean> {
+    if (!isLoaded.value || isSaving.value) return false;
     isSaving.value = true;
     error.value = null;
     try {
@@ -103,6 +107,13 @@ export function useNotificationPreferences() {
       }
       error.value = toPreferenceErrorMessage(
         result.error,
+        t,
+        'setting.notifications.updatePreferencesFailed',
+      );
+      return false;
+    } catch (cause) {
+      error.value = toPreferenceErrorMessage(
+        cause,
         t,
         'setting.notifications.updatePreferencesFailed',
       );
@@ -138,6 +149,7 @@ export function useNotificationPreferences() {
   return {
     preference,
     settings,
+    isLoaded,
     isLoading,
     isSaving,
     error,

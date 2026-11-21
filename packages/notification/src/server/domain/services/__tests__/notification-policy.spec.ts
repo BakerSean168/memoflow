@@ -21,8 +21,9 @@ const identityId = 'user-1' as never;
 
 function configurableWorkflow(enabledByDefault: boolean): NotificationWorkflowDefinitionDTO {
   return {
+    ...catalog.resolve('task.reminder'),
     workflowKey: 'task.deadline',
-    topic: 'task.deadline',
+    topicKey: 'task.deadline',
     channels: {
       [NotificationChannelType.Email]: {
         supported: true,
@@ -99,35 +100,75 @@ describe('Notification user/workflow policy', () => {
     });
   });
 
-  it('keeps the explicit read-only allowlist authoritative over user channel choices', () => {
+  it.each([
+    'system.general',
+    'task.reminder',
+    'routine.intervention',
+    'system.account-security',
+    'unknown.workflow',
+  ])('always delivers InApp for %s despite old disabled preferences', (workflowKey) => {
     const preference = NotificationPreference.create({ identityId });
-    preference.setGlobalChannel(NotificationChannelType.Desktop, false);
-    preference.setWorkflowChannelOverride(
-      'system.account-security',
-      NotificationChannelType.Desktop,
-      false,
-    );
-
+    preference.setGlobalChannel(NotificationChannelType.InApp, false);
+    preference.setWorkflowChannelOverride(workflowKey, NotificationChannelType.InApp, false);
     expect(
       policy.evaluate({
-        workflow: catalog.resolve('system.account-security'),
-        channel: NotificationChannelType.Desktop,
+        workflow: catalog.resolve(workflowKey),
+        channel: NotificationChannelType.InApp,
         preference,
       }),
-    ).toEqual({
-      channel: NotificationChannelType.Desktop,
-      outcome: NotificationDeliveryPlanOutcome.Enqueued,
-      reason: NotificationDeliveryReason.ReadOnlyAllowlist,
-      preferenceSource: NotificationPreferenceDecisionSource.ReadOnlyAllowlist,
-    });
+    ).toMatchObject({ outcome: NotificationDeliveryPlanOutcome.Enqueued });
   });
+
+  it.each(['task.reminder', 'routine.intervention', 'system.account-security'])(
+    'uses Desktop global and group gates before exact overrides for %s',
+    (workflowKey) => {
+      const workflow = catalog.resolve(workflowKey);
+      const preference = NotificationPreference.create({ identityId });
+      preference.setWorkflowChannelOverride(workflowKey, NotificationChannelType.Desktop, true);
+      preference.setGlobalChannel(NotificationChannelType.Desktop, false);
+      expect(
+        policy.evaluate({ workflow, channel: NotificationChannelType.Desktop, preference }),
+      ).toMatchObject({
+        outcome: NotificationDeliveryPlanOutcome.Disabled,
+        reason: NotificationDeliveryReason.UserGlobalDisabled,
+      });
+      preference.setGlobalChannel(NotificationChannelType.Desktop, true);
+      preference.setWorkflowChannelOverride(
+        `${workflow.groupKey}.general`,
+        NotificationChannelType.Desktop,
+        false,
+      );
+      expect(
+        policy.evaluate({ workflow, channel: NotificationChannelType.Desktop, preference }),
+      ).toMatchObject({
+        outcome: NotificationDeliveryPlanOutcome.Disabled,
+        reason: NotificationDeliveryReason.WorkflowOverrideDisabled,
+      });
+      preference.setWorkflowChannelOverride(
+        `${workflow.groupKey}.general`,
+        NotificationChannelType.Desktop,
+        true,
+      );
+      expect(
+        policy.evaluate({ workflow, channel: NotificationChannelType.Desktop, preference }),
+      ).toMatchObject({ outcome: NotificationDeliveryPlanOutcome.Enqueued });
+      preference.setWorkflowChannelOverride(workflowKey, NotificationChannelType.Desktop, false);
+      expect(
+        policy.evaluate({ workflow, channel: NotificationChannelType.Desktop, preference }),
+      ).toMatchObject({ outcome: NotificationDeliveryPlanOutcome.Disabled });
+    },
+  );
 
   it('returns unsupported before user preference evaluation', () => {
     const preference = NotificationPreference.create({ identityId });
     preference.setGlobalChannel(NotificationChannelType.Email, true);
     expect(
       policy.evaluate({
-        workflow: { workflowKey: 'task.local-only', topic: 'task.local-only', channels: {} },
+        workflow: {
+          ...catalog.resolve('task.reminder'),
+          workflowKey: 'task.local-only',
+          channels: {},
+        },
         channel: NotificationChannelType.Email,
         preference,
       }),
@@ -225,7 +266,7 @@ describe('QuietHours and SystemDeliveryGuard boundaries', () => {
       }),
     ).toMatchObject({
       outcome: NotificationDeliveryPlanOutcome.Enqueued,
-      reason: NotificationDeliveryReason.ReadOnlyAllowlist,
+      reason: NotificationDeliveryReason.WorkflowDefaultEnabled,
     });
   });
 

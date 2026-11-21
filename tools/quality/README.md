@@ -131,7 +131,6 @@ comment at the call site naming what the space is reserved for.
 | `packages/ai-ui/src/components/AIConversationSidebar.vue`                             | `pr-24`             | floating action area at the end of a conversation row |
 | `packages/notification-ui/src/components/NotificationCapsulePreview.vue`              | conditional `pr-28` | `owner-command` action buttons                        |
 | `packages/notification-ui/src/components/NotificationItem.vue`                        | conditional `pr-28` | quick actions                                         |
-| `packages/notification-ui/src/components/NotificationPermissionWarning.vue`           | `top-20`            | fixed banner clearing the window title bar            |
 | `packages/ui-vue-shadcn/src/components/custom/form/date-time/ReminderOffsetField.vue` | `pr-20`             | suffix unit rendered inside the field                 |
 | `packages/ui-vue-shadcn/src/components/ui/drawer/DrawerContent.vue`                   | `mt-24`             | upstream parity with shadcn/vaul drawers              |
 

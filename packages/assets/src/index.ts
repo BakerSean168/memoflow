@@ -5,7 +5,7 @@
  *
  * @example
  * ```typescript
- * import { logo, notificationSound } from '@memoflow/assets';
+ * import { logo } from '@memoflow/assets';
  * ```
  */
 

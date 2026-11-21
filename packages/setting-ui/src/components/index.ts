@@ -3,4 +3,3 @@ export { default as AISettings } from './AISettings.vue';
 export { default as LocaleSettings } from './LocaleSettings.vue';
 export { default as NotificationSettings } from './NotificationSettings.vue';
 export { default as SettingAdvancedActions } from './SettingAdvancedActions.vue';
-export { default as SettingsResetSection } from './SettingsResetSection.vue';

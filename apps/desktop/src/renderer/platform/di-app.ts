@@ -62,7 +62,6 @@ import {
   DATA_PORTABILITY_SERVICE_KEY,
   DESKTOP_AUTH_API_KEY,
   DESKTOP_BRIDGE_KEY,
-  DESKTOP_NOTIFICATION_DEVICE_PREFERENCE_KEY,
   DESKTOP_UPDATE_SERVICE_KEY,
   DESKTOP_SYNC_STATUS_SERVICE_KEY,
   DESKTOP_STARTUP_SERVICE_KEY,
@@ -84,7 +83,6 @@ import { createDesktopSyncStatusService } from './desktop-sync-status-service';
 import {
   CloudAuthChannels,
   WindowChannels,
-  type DesktopNotificationPreferencePatch,
   type DesktopAccessSnapshot,
 } from '@memoflow/desktop-contracts';
 import { fromIpcResult, isOk, type IpcResult } from '@memoflow/transport-contracts/result';
@@ -148,12 +146,6 @@ export function installDesktopAppServices(
   app.provide(ROUTINE_SERVICE_KEY, createRoutineIpcClient(resultIpcClient));
 
   app.provide(NOTIFICATION_SERVICE_KEY, createNotificationIpcClient(resultIpcClient));
-  app.provide(DESKTOP_NOTIFICATION_DEVICE_PREFERENCE_KEY, {
-    get: () => resultIpcClient.invoke('desktop:notification:device-preference:get'),
-    update: (patch: DesktopNotificationPreferencePatch) =>
-      resultIpcClient.invoke('desktop:notification:device-preference:update', patch),
-    reset: () => resultIpcClient.invoke('desktop:notification:device-preference:reset'),
-  });
 
   app.provide(SETTING_SERVICE_KEY, createSettingIpcClient(resultIpcClient));
 

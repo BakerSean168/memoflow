@@ -54,6 +54,5 @@ export function createProfilePathResolver(
 
     uiDir,
     mainWindowStatePath: path.join(uiDir, 'main-window-state.json'),
-    desktopNotificationPreferencePath: path.join(uiDir, 'notification-preference.json'),
   };
 }

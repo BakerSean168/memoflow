@@ -5,7 +5,7 @@ withDefaults(
     description?: string;
     htmlFor?: string;
     testId?: string;
-    layout?: 'inline' | 'stacked';
+    layout?: 'inline' | 'stacked' | 'toggle';
   }>(),
   {
     description: undefined,
@@ -20,9 +20,11 @@ withDefaults(
   <div
     class="min-w-0 py-3 first:pt-0 last:pb-0"
     :class="
-      layout === 'inline'
-        ? 'grid gap-3 sm:grid-cols-[minmax(0,1fr)_minmax(12rem,18rem)] sm:items-center'
-        : 'space-y-2'
+      layout === 'toggle'
+        ? 'flex items-center justify-between gap-4'
+        : layout === 'inline'
+          ? 'grid gap-3 sm:grid-cols-[minmax(0,1fr)_minmax(12rem,18rem)] sm:items-center'
+          : 'space-y-2'
     "
     :data-testid="testId"
   >
@@ -36,7 +38,16 @@ withDefaults(
       </p>
     </div>
 
-    <div class="min-w-0" :class="layout === 'inline' ? 'sm:w-full sm:justify-self-end' : ''">
+    <div
+      class="min-w-0"
+      :class="
+        layout === 'toggle'
+          ? 'shrink-0'
+          : layout === 'inline'
+            ? 'sm:w-full sm:justify-self-end'
+            : ''
+      "
+    >
       <slot />
     </div>
   </div>

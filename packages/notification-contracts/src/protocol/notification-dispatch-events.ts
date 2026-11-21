@@ -17,15 +17,10 @@ export interface NotificationDispatchBase {
   urgency?: UrgencyLevel;
   importance?: ImportanceLevel;
   data?: Record<string, unknown>;
-  sound?: {
-    enabled: boolean;
-    name?: string | null;
-  } | null;
 }
 
 export interface NotificationDispatchDesktopEvent extends NotificationDispatchBase {
   icon?: string | null;
-  silent?: boolean;
 }
 
 export interface NotificationDispatchInAppEvent extends NotificationDispatchBase {

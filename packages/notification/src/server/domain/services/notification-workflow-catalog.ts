@@ -31,7 +31,10 @@ const UNSUPPORTED: NotificationWorkflowChannelCapabilityDTO = {
 
 function commonExternalChannels(): NotificationWorkflowDefinitionDTO['channels'] {
   return {
-    [NotificationChannelType.InApp]: { ...USER_CONFIGURABLE_DEFER },
+    [NotificationChannelType.InApp]: {
+      ...USER_CONFIGURABLE_DEFER,
+      preferenceControl: NotificationPreferenceControl.ReadOnly,
+    },
     [NotificationChannelType.Desktop]: { ...USER_CONFIGURABLE_SUPPRESS },
     [NotificationChannelType.Email]: { ...USER_CONFIGURABLE_DEFER },
     [NotificationChannelType.Push]: { ...USER_CONFIGURABLE_DEFER },
@@ -130,7 +133,7 @@ export const BUILTIN_NOTIFICATION_WORKFLOWS: readonly NotificationWorkflowDefini
       [NotificationChannelType.Desktop]: {
         supported: true,
         enabledByDefault: true,
-        preferenceControl: NotificationPreferenceControl.ReadOnly,
+        preferenceControl: NotificationPreferenceControl.UserConfigurable,
         dndBehavior: NotificationDndBehavior.Bypass,
       },
       [NotificationChannelType.Email]: { ...USER_CONFIGURABLE_DEFER },
@@ -155,7 +158,10 @@ function unknownWorkflow(
     type: NotificationType.Info,
     category: NotificationCategory.Other,
     channels: {
-      [NotificationChannelType.InApp]: { ...USER_CONFIGURABLE_DEFER },
+      [NotificationChannelType.InApp]: {
+        ...USER_CONFIGURABLE_DEFER,
+        preferenceControl: NotificationPreferenceControl.ReadOnly,
+      },
     },
   });
 }

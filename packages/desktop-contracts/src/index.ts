@@ -47,14 +47,6 @@ export {
   type SystemNoticeId,
   type SystemNoticeReadyResult,
 } from './system-notice';
-export type {
-  DesktopNotificationPreference,
-  DesktopNotificationPreferencePatch,
-} from './device-notification-preference';
-export {
-  DesktopNotificationPreferenceSchema,
-  DesktopNotificationPreferencePatchSchema,
-} from './device-notification-preference';
 export {
   DesktopInstallationOwnerSchema,
   DesktopUpdateCapabilitiesSchema,

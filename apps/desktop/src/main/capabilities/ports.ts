@@ -51,7 +51,7 @@ export interface ShortcutConfig {
   action: () => void;
 }
 
-/** Configuration for rendering a native or custom notification. */
+/** Content for the actionable MemoFlow notification window. */
 export interface NotificationConfig {
   /** The title of the notification. */
   title: string;
@@ -59,12 +59,8 @@ export interface NotificationConfig {
   body: string;
   /** Optional icon path. */
   icon?: string;
-  /** Whether to play a sound. */
-  sound?: boolean;
   /** The urgency level of the notification. */
   urgency?: 'normal' | 'critical' | 'low';
-  /** Whether the notification should be silent. Overrides `sound` if true. */
-  silent?: boolean;
   /** Arbitrary data payload attached to the notification (click handling). */
   data?: Record<string, unknown>;
 }
@@ -138,17 +134,10 @@ export interface AutoLaunchPort {
 /**
  * Notification capability port.
  *
- * Native/custom desktop notifications, Do-Not-Disturb state, and the typed
- * helper surfaces (schedule/goal/task). The port returns whether a
- * notification was rendered; callers that need the raw instance cast it.
+ * Custom desktop notifications and Do-Not-Disturb state. Presentation is
+ * acknowledged only after the renderer confirms it was shown.
  */
 export interface NotificationPort {
-  getDevicePreference(): import('@memoflow/desktop-contracts').DesktopNotificationPreference;
-  updateDevicePreference(
-    patch: import('@memoflow/desktop-contracts').DesktopNotificationPreferencePatch,
-  ): import('@memoflow/desktop-contracts').DesktopNotificationPreference;
-  resetDevicePreference(): import('@memoflow/desktop-contracts').DesktopNotificationPreference;
-
   // ===== Do Not Disturb =====
   enableDND(): void;
   disableDND(): void;
@@ -162,16 +151,6 @@ export interface NotificationPort {
   show(
     config: NotificationConfig,
   ): Promise<import('@memoflow/notification-contracts').DesktopPresentationResult>;
-
-  /** Typed helpers for domain notification types. */
-  showSchedule(config: { id: string; name: string; description?: string }): boolean;
-  showGoalProgress(config: {
-    id: string;
-    title: string;
-    progress: number;
-    targetValue: number;
-  }): boolean;
-  showTaskCompleted(config: { id: string; title: string }): boolean;
 
   /** Release notification resources at shutdown. */
   destroy(): void;

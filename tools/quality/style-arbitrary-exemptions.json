@@ -468,16 +468,6 @@
       "reason": "组件几何宽度（面板/画布/控件）"
     },
     {
-      "file": "packages/notification-ui/src/components/NotificationPermissionWarning.vue",
-      "token": "max-w-[500px]",
-      "reason": "内容/浮层容器最大宽度，几何约束"
-    },
-    {
-      "file": "packages/notification-ui/src/components/NotificationPermissionWarning.vue",
-      "token": "w-[90%]",
-      "reason": "相对容器比例尺寸，无刻度等价值"
-    },
-    {
       "file": "packages/notification-ui/src/views/SSEMonitorPage.vue",
       "token": "h-[50vh]",
       "reason": "视口高度约束，随窗口变化，无刻度等价值"
