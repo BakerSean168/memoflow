@@ -25,6 +25,7 @@ import type {
   IResultIpcClient,
   NotificationListResponse,
   UnreadCountResponse,
+  AttentionCountResponse,
 } from './infrastructure-client/adapters/types';
 
 export type {
@@ -37,6 +38,7 @@ export type {
   NotificationIpcAdapters,
   NotificationListResponse,
   UnreadCountResponse,
+  AttentionCountResponse,
 };
 
 export function createNotificationHttpClient(

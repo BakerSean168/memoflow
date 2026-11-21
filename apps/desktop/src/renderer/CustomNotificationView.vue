@@ -1,17 +1,21 @@
 <script setup lang="ts">
 import { computed, ref, onMounted, onUnmounted, nextTick, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
+import { Eye, Check, Clock } from '@lucide/vue';
 import { notificationSound } from '@memoflow/assets/audio';
 import type { Result } from '@memoflow/transport-contracts/result';
 import type {
   NotificationActionIntent,
   ExecuteNotificationActionRes,
+  NotificationClientDTO,
 } from '@memoflow/notification-contracts';
-import { NotificationChannels } from '@memoflow/desktop-contracts';
+import { NotificationChannels, RendererEventChannels } from '@memoflow/desktop-contracts';
+import { NOTIFICATION_ATTENTION_TABLES } from './platform/notification-attention-tables';
 // Residual 911: local ElectronBridge dual retired — sole body from @memoflow/ipc-client.
 // Residual 941: local getElectronBridge dual retired — sole host helper in platform/electron-bridge.
 import { getElectronBridge } from './platform/electron-bridge';
 import WindowActionButton from './components/WindowActionButton.vue';
+import WindowNumberInput from './components/WindowNumberInput.vue';
 
 const { t } = useI18n();
 
@@ -19,8 +23,6 @@ interface CustomNotification {
   id: string;
   title: string;
   body: string;
-  icon?: string;
-  urgency?: 'normal' | 'critical' | 'low';
   data?: Record<string, unknown>;
   sound?: boolean;
   timeoutId?: number;
@@ -30,40 +32,64 @@ interface CustomNotification {
 const notifications = ref<CustomNotification[]>([]);
 const containerRef = ref<HTMLElement | null>(null);
 const now = ref(Date.now());
+const actionPending = ref<string | null>(null);
+const actionError = ref<string | null>(null);
+const snoozeOpen = ref<string | null>(null);
+const snoozeMinutes = ref<number | string>(10);
 let clockInterval: number | null = null;
 let resizeTimer: number | null = null;
+let refreshTimer: number | null = null;
 let activeAudio: HTMLAudioElement | null = null;
 let disposed = false;
 const bridge = getElectronBridge();
 if (!bridge) throw new Error('Custom notification requires the preload bridge');
 
-const actionPending = ref<string | null>(null);
-const actionError = ref<string | null>(null);
+const AUTO_DISMISS_MS = 30_000;
+const MAX_VISIBLE_NOTIFICATIONS = 3;
 
-function ownerActions(notification: CustomNotification) {
+function routineAction(notification: CustomNotification, commandKey: string) {
   const actions = notification.data?.actions;
   return Array.isArray(actions)
-    ? (actions as NotificationActionIntent[]).filter(
+    ? (actions as NotificationActionIntent[]).find(
         (action) =>
           action.kind === 'owner-command' &&
-          (action.actionKey === 'complete' || action.actionKey === 'snooze-10m'),
+          action.owner?.type === 'routine-occurrence' &&
+          action.commandKey === commandKey,
       )
-    : [];
+    : undefined;
 }
 
-async function executeAction(notification: CustomNotification, actionKey: string) {
-  if (actionPending.value) return;
+function isRoutine(notification: CustomNotification): boolean {
+  return (
+    notification.data?.workflowKey === 'routine.intervention' &&
+    !!routineAction(notification, 'routine.complete')
+  );
+}
+
+async function closeNotification(notification: CustomNotification) {
+  removeNotification(notification.id);
+  if (!disposed) await bridge.invoke(NotificationChannels.CUSTOM_CLOSE, notification.id);
+}
+
+async function executeAction(
+  notification: CustomNotification,
+  commandKey: string,
+  durationMs?: number,
+) {
+  const action = routineAction(notification, commandKey);
+  if (!action || actionPending.value) return;
   actionPending.value = notification.id;
   actionError.value = null;
+  if (notification.timeoutId !== undefined) window.clearTimeout(notification.timeoutId);
   try {
     const result = (await bridge.invoke(NotificationChannels.EXECUTE_ACTION, {
       notificationId: notification.data?.notificationId,
-      actionKey,
+      actionKey: action.actionKey,
+      ...(durationMs === undefined ? {} : { snoozeDurationMs: durationMs }),
     })) as Result<ExecuteNotificationActionRes>;
     if (!result?.ok || result.data.interaction.outcome !== 'accepted')
       throw new Error('Action rejected');
-    removeNotification(notification.id);
-    await bridge.invoke(NotificationChannels.CUSTOM_CLOSE, notification.id);
+    await closeNotification(notification);
   } catch {
     actionError.value = notification.id;
   } finally {
@@ -71,72 +97,72 @@ async function executeAction(notification: CustomNotification, actionKey: string
   }
 }
 
-const AUTO_DISMISS_MS = 30_000;
-const MAX_VISIBLE_NOTIFICATIONS = 5;
+async function acknowledgeNotification(notification: CustomNotification) {
+  if (disposed || actionPending.value) return;
+  actionPending.value = notification.id;
+  actionError.value = null;
+  if (notification.timeoutId !== undefined) window.clearTimeout(notification.timeoutId);
+  try {
+    const notificationId = notification.data?.notificationId;
+    if (typeof notificationId === 'string') {
+      const result = (await bridge.invoke(
+        NotificationChannels.MARK_READ,
+        notificationId,
+      )) as Result<unknown>;
+      if (!result?.ok) throw new Error('Mark read rejected');
+    }
+    await closeNotification(notification);
+  } catch {
+    actionError.value = notification.id;
+  } finally {
+    actionPending.value = null;
+  }
+}
 
 function synchronizeClock() {
-  const running = notifications.value.length > 0 && document.visibilityState !== 'hidden';
+  const running = notifications.value.some(isRoutine) && document.visibilityState !== 'hidden';
   if (running && clockInterval === null) {
     now.value = Date.now();
     clockInterval = window.setInterval(() => {
       now.value = Date.now();
-    }, 250);
+    }, 1_000);
   } else if (!running && clockInterval !== null) {
     window.clearInterval(clockInterval);
     clockInterval = null;
   }
 }
 
-const notificationProgress = computed<Record<string, number>>(() => {
-  return Object.fromEntries(
+const elapsedTimes = computed<Record<string, string>>(() =>
+  Object.fromEntries(
     notifications.value.map((notification) => {
-      const createdAt = notification.shownAt ?? now.value;
-      const elapsed = Math.max(0, now.value - createdAt);
-      const remaining = Math.max(0, AUTO_DISMISS_MS - elapsed);
-      return [notification.id, remaining / AUTO_DISMISS_MS];
+      const seconds = Math.floor(
+        Math.max(0, now.value - (notification.shownAt ?? now.value)) / 1_000,
+      );
+      return [
+        notification.id,
+        String(Math.floor(seconds / 60)).padStart(2, '0') +
+          ':' +
+          String(seconds % 60).padStart(2, '0'),
+      ];
     }),
-  );
-});
-
-const notificationRemainingSeconds = computed<Record<string, number>>(() => {
-  return Object.fromEntries(
-    notifications.value.map((notification) => {
-      const createdAt = notification.shownAt ?? now.value;
-      const elapsed = Math.max(0, now.value - createdAt);
-      const remaining = Math.max(0, AUTO_DISMISS_MS - elapsed);
-      return [notification.id, Math.ceil(remaining / 1000)];
-    }),
-  );
-});
+  ),
+);
 
 function handleReceiveNotification(data: CustomNotification) {
-  if (disposed) return;
-  console.info('[CustomNotificationView] Received notification payload', {
-    id: data.id,
-    title: data.title,
-    hasBody: !!data.body,
-  });
-  // If we already have one with this ID, ignore
-  if (notifications.value.some((n) => n.id === data.id)) return;
-
+  if (disposed || notifications.value.some((notification) => notification.id === data.id)) return;
   if (data.sound === true) void playNotificationSound(notificationSound);
   while (notifications.value.length >= MAX_VISIBLE_NOTIFICATIONS) {
     const oldest = notifications.value[0]!;
-    removeNotification(oldest.id);
-    // Presentation overflow leaves the durable inbox unread.
-    void bridge.invoke(NotificationChannels.CUSTOM_CLOSE, oldest.id).catch(console.warn);
+    // Visual overflow never changes the durable inbox or the routine owner.
+    void closeNotification(oldest).catch(console.warn);
   }
-
-  // Add timeout for auto dismiss
-  const timeoutId = window.setTimeout(() => {
-    void acknowledgeNotification(data, 'timeout');
-  }, AUTO_DISMISS_MS);
-
-  notifications.value.push({
-    ...data,
-    timeoutId,
-    shownAt: Date.now(),
-  });
+  const notification = { ...data, shownAt: Date.now() };
+  if (!isRoutine(notification)) {
+    notification.timeoutId = window.setTimeout(() => {
+      void closeNotification(notification).catch(console.warn);
+    }, AUTO_DISMISS_MS);
+  }
+  notifications.value.push(notification);
 }
 
 async function playNotificationSound(src: string) {
@@ -159,75 +185,105 @@ async function playNotificationSound(src: string) {
 }
 
 function removeNotification(id: string) {
-  const index = notifications.value.findIndex((n) => n.id === id);
-  if (index !== -1) {
-    console.info('[CustomNotificationView] Removing notification', { id });
-    const n = notifications.value[index];
-    if (n.timeoutId !== undefined) window.clearTimeout(n.timeoutId);
-    notifications.value.splice(index, 1);
+  const index = notifications.value.findIndex((notification) => notification.id === id);
+  if (index === -1) return;
+  const notification = notifications.value[index]!;
+  if (notification.timeoutId !== undefined) window.clearTimeout(notification.timeoutId);
+  if (snoozeOpen.value === id) snoozeOpen.value = null;
+  notifications.value.splice(index, 1);
+}
+
+async function refreshVisibleNotifications() {
+  const reads = await Promise.allSettled(
+    [...notifications.value].map(async (notification) => {
+      const id = notification.data?.notificationId;
+      if (typeof id !== 'string') return;
+      const result = (await bridge.invoke(
+        NotificationChannels.GET,
+        id,
+      )) as Result<NotificationClientDTO>;
+      if (disposed || !notifications.value.some((current) => current.id === notification.id))
+        return;
+      if (!result.ok) {
+        if (result.error.code === 'NOT_FOUND') await closeNotification(notification);
+        else return true;
+        return;
+      }
+      const current = result.data;
+      const newlyRead =
+        current.isRead &&
+        (!notification.data?.isRead || current.readAt !== notification.data?.readAt);
+      if (
+        newlyRead ||
+        current.deletedAt != null ||
+        current.archivedAt != null ||
+        (isRoutine(notification) && current.needsAttention === false)
+      ) {
+        await closeNotification(notification);
+      }
+    }),
+  );
+  if (
+    !disposed &&
+    notifications.value.length > 0 &&
+    refreshTimer === null &&
+    reads.some((read) => read.status === 'rejected' || read.value === true)
+  ) {
+    scheduleVisibleRefresh(5_000);
   }
 }
 
-async function acknowledgeNotification(
-  notification: CustomNotification,
-  source: 'button' | 'timeout',
-) {
-  if (disposed) return;
-  console.info('[CustomNotificationView] Acknowledging notification', {
-    id: notification.id,
-    source,
-    notificationId: notification.data?.notificationId,
-  });
-
-  const notificationId =
-    typeof notification.data?.notificationId === 'string' ? notification.data.notificationId : null;
-
-  removeNotification(notification.id);
-
-  if (notificationId) {
-    try {
-      await bridge.invoke(NotificationChannels.MARK_READ, notificationId);
-    } catch (error) {
-      console.error('[CustomNotificationView] Failed to mark notification as read', error);
-    }
-  }
-
-  if (!disposed) await bridge.invoke(NotificationChannels.CUSTOM_CLOSE, notification.id);
+function scheduleVisibleRefresh(delay: number) {
+  if (refreshTimer !== null) window.clearTimeout(refreshTimer);
+  refreshTimer = window.setTimeout(() => {
+    refreshTimer = null;
+    if (!disposed) void refreshVisibleNotifications();
+  }, delay);
 }
 
-// Helper to recalculate window bounds after a short delay to account for transitions
+function handleDatabaseChanged(payload: unknown) {
+  const tables = (payload as { tables?: string[] } | undefined)?.tables;
+  if (!Array.isArray(tables) || !tables.some((table) => NOTIFICATION_ATTENTION_TABLES.has(table)))
+    return;
+  scheduleVisibleRefresh(80);
+}
+
+function toggleSnooze(id: string) {
+  snoozeMinutes.value = 10;
+  snoozeOpen.value = snoozeOpen.value === id ? null : id;
+}
+
+function applyCustomSnooze(notification: CustomNotification) {
+  const minutes = Number(snoozeMinutes.value);
+  if (Number.isSafeInteger(minutes) && minutes > 0 && minutes <= 525_600) {
+    void executeAction(notification, 'routine.snooze', minutes * 60_000);
+  }
+}
+
 async function updateWindowBounds() {
   await nextTick();
   if (disposed) return;
   if (resizeTimer !== null) window.clearTimeout(resizeTimer);
-  // Slight delay to allow transition classes to apply/finish if needed
   resizeTimer = window.setTimeout(() => {
     resizeTimer = null;
-    if (containerRef.value) {
-      const height = notifications.value.length > 0 ? containerRef.value.scrollHeight : 0;
-      console.info('[CustomNotificationView] Requesting window resize', {
-        notificationCount: notifications.value.length,
-        height,
-      });
-      const ids = notifications.value.map((notification) => notification.id);
-      void bridge
-        .invoke(NotificationChannels.CUSTOM_RESIZE, height)
-        .then(async () => {
-          if (disposed || height <= 0) return;
-          for (const id of ids) {
-            if (notifications.value.some((notification) => notification.id === id)) {
-              await bridge.invoke(NotificationChannels.CUSTOM_PRESENTED, id);
-            }
-          }
-        })
-        .catch(console.warn);
-    }
+    if (!containerRef.value) return;
+    const height = notifications.value.length > 0 ? containerRef.value.scrollHeight : 0;
+    const ids = notifications.value.map((notification) => notification.id);
+    void bridge
+      .invoke(NotificationChannels.CUSTOM_RESIZE, height)
+      .then(async () => {
+        if (disposed || height <= 0) return;
+        for (const id of ids) {
+          if (notifications.value.some((notification) => notification.id === id))
+            await bridge.invoke(NotificationChannels.CUSTOM_PRESENTED, id);
+        }
+      })
+      .catch(console.warn);
   }, 50);
 }
 
-// Watch for changes in the notification list to trigger window resize
 watch(
-  () => notifications.value.length,
+  () => [notifications.value.length, snoozeOpen.value, actionError.value],
   () => {
     synchronizeClock();
     void updateWindowBounds();
@@ -238,199 +294,193 @@ watch(
 function handleMouseEnter() {
   void bridge.invoke(NotificationChannels.CUSTOM_MOUSE_ENTER).catch(console.warn);
 }
-
 function handleMouseLeave() {
   void bridge.invoke(NotificationChannels.CUSTOM_MOUSE_LEAVE).catch(console.warn);
 }
 
 onMounted(() => {
-  document.documentElement.style.background = 'transparent';
-  document.documentElement.style.backgroundColor = 'transparent';
-  document.body.style.background = 'transparent';
-  document.body.style.backgroundColor = 'transparent';
+  for (const element of [document.documentElement, document.body, document.getElementById('app')]) {
+    if (element) element.style.background = 'transparent';
+  }
   document.body.style.overflow = 'hidden';
-  const appRoot = document.getElementById('app');
-  if (appRoot) {
-    appRoot.style.background = 'transparent';
-    appRoot.style.backgroundColor = 'transparent';
-  }
-
   document.addEventListener('visibilitychange', synchronizeClock);
-  synchronizeClock();
-
-  console.info('[CustomNotificationView] Mounted', {
-    hasElectronApi: !!getElectronBridge(),
-  });
-  if (getElectronBridge()) {
-    bridge.on(NotificationChannels.CUSTOM_RECEIVE, handleReceiveNotification);
-    bridge
-      .invoke(NotificationChannels.CUSTOM_RENDERER_READY)
-      .then(() => {
-        console.info('[CustomNotificationView] Renderer ready acknowledged by main process');
-      })
-      .catch((error: unknown) => {
-        console.error('[CustomNotificationView] Failed to notify renderer-ready', error);
-      });
-  }
+  bridge.on(NotificationChannels.CUSTOM_RECEIVE, handleReceiveNotification);
+  bridge.on(RendererEventChannels.DB_CHANGED, handleDatabaseChanged);
+  void bridge.invoke(NotificationChannels.CUSTOM_RENDERER_READY).catch(console.warn);
 });
 
 onUnmounted(() => {
   disposed = true;
   document.removeEventListener('visibilitychange', synchronizeClock);
+  bridge.off(NotificationChannels.CUSTOM_RECEIVE, handleReceiveNotification);
+  bridge.off(RendererEventChannels.DB_CHANGED, handleDatabaseChanged);
+  if (refreshTimer !== null) window.clearTimeout(refreshTimer);
   if (resizeTimer !== null) window.clearTimeout(resizeTimer);
   activeAudio?.pause();
-  activeAudio = null;
-  if (getElectronBridge()) {
-    bridge.off(NotificationChannels.CUSTOM_RECEIVE, handleReceiveNotification);
-  }
-  // Clear any remaining timeouts
-  notifications.value.forEach((n) => {
-    if (n.timeoutId !== undefined) window.clearTimeout(n.timeoutId);
+  notifications.value.forEach((notification) => {
+    if (notification.timeoutId !== undefined) window.clearTimeout(notification.timeoutId);
   });
-  if (clockInterval !== null) {
-    window.clearInterval(clockInterval);
-    clockInterval = null;
-  }
+  if (clockInterval !== null) window.clearInterval(clockInterval);
 });
 </script>
 
 <template>
   <div
     ref="containerRef"
-    class="flex w-full min-h-2.5 flex-col gap-3 bg-transparent p-3 pointer-events-none"
+    class="pointer-events-none flex min-h-2.5 w-full flex-col gap-2 bg-transparent p-2"
   >
     <TransitionGroup name="notification-list" @after-leave="updateWindowBounds">
       <div
         v-for="notification in notifications"
         :key="notification.id"
-        @click="bridge.invoke(NotificationChannels.CUSTOM_CLICK, notification.id)"
-        class="pointer-events-auto relative overflow-hidden rounded-[22px] border border-white/15 bg-slate-950/92 p-5 text-white shadow-[0_20px_60px_rgba(15,23,42,0.45)] backdrop-blur-xl"
+        :data-notification-id="notification.id"
+        class="pointer-events-auto overflow-hidden rounded-xl border border-white/15 bg-slate-950/95 px-3 py-2.5 text-white shadow-lg"
         @mouseenter="handleMouseEnter"
         @mouseleave="handleMouseLeave"
       >
+        <WindowActionButton
+          variant="ghost"
+          type="button"
+          class="block w-full truncate rounded text-left text-sm font-semibold leading-5 text-slate-50 focus-visible:outline focus-visible:outline-1"
+          :title="notification.title"
+          data-testid="notification-open"
+          @click="bridge.invoke(NotificationChannels.CUSTOM_CLICK, notification.id)"
+        >
+          {{ notification.title }}
+        </WindowActionButton>
         <div
-          class="absolute inset-x-0 top-0 h-1 origin-left bg-gradient-to-r from-amber-400 via-orange-400 to-rose-500 transition-transform duration-250 ease-linear"
-          :style="{
-            transform: `scaleX(${notificationProgress[notification.id] ?? 0})`,
-          }"
-        />
-
-        <div class="flex items-start gap-4">
-          <div
-            class="mt-0.5 flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-amber-400/16 text-amber-300 ring-1 ring-amber-300/20"
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="22"
-              height="22"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-            >
-              <path d="M10.268 21a2 2 0 0 0 3.464 0" />
-              <path
-                d="M3.262 15.326A1 1 0 0 0 4 17h16a1 1 0 0 0 .738-1.674C19.41 13.86 18 12.127 18 8A6 6 0 0 0 6 8c0 4.127-1.411 5.86-2.738 7.326"
-              />
-            </svg>
-          </div>
-
-          <div class="min-w-0 flex-1">
-            <div class="mb-2 flex items-center gap-2">
-              <span
-                class="inline-flex items-center rounded-full border border-amber-300/20 bg-amber-300/10 px-2 py-1 text-[11px] font-medium tracking-[0.18em] text-amber-200"
-              >
-                {{ t('notification.custom.reminder') }}
-              </span>
-              <span class="text-xs text-slate-400">{{
-                t('notification.custom.autoReadHint')
-              }}</span>
-            </div>
-
-            <div class="text-base font-semibold leading-6 text-slate-50">
-              {{ notification.title }}
-            </div>
-            <div v-if="notification.body" class="mt-2 text-sm leading-6 text-slate-300">
-              {{ notification.body }}
-            </div>
-            <div v-else class="mt-2 text-sm leading-6 text-slate-400">
-              {{ t('notification.custom.emptyBody') }}
-            </div>
-
-            <p
-              v-if="actionError === notification.id"
-              role="alert"
-              class="mt-2 text-sm text-rose-300"
-            >
-              {{ t('notification.custom.actionFailed') }}
-            </p>
-            <div class="mt-4 flex items-center justify-between gap-3">
-              <div class="text-xs text-slate-500">
-                {{ notificationRemainingSeconds[notification.id] ?? 0 }}s
-              </div>
-
-              <div v-if="ownerActions(notification).length" class="flex gap-2">
-                <WindowActionButton
-                  v-for="action in ownerActions(notification)"
-                  :key="action.actionKey"
-                  variant="primary"
-                  :disabled="actionPending === notification.id"
-                  @click.stop="executeAction(notification, action.actionKey)"
-                >
-                  {{
-                    action.actionKey === 'complete'
-                      ? t('notification.custom.actionComplete')
-                      : t('notification.custom.actionSnooze10m')
-                  }}
-                </WindowActionButton>
-              </div>
-              <WindowActionButton
-                v-else
-                variant="primary"
-                class="min-w-[92px]"
-                @click.stop="void acknowledgeNotification(notification, 'button')"
-              >
-                {{ t('notification.custom.acknowledge') }}
-              </WindowActionButton>
-            </div>
+          v-if="notification.body"
+          class="mt-0.5 truncate text-xs leading-5 text-slate-300"
+          :title="notification.body"
+        >
+          {{ notification.body }}
+        </div>
+        <div class="mt-1.5 flex items-center justify-between gap-2">
+          <span data-testid="notification-elapsed" class="text-xs tabular-nums text-slate-400">
+            <template v-if="isRoutine(notification)">{{
+              t('notification.custom.elapsed', { time: elapsedTimes[notification.id] })
+            }}</template>
+          </span>
+          <div class="flex items-center gap-1">
+            <WindowActionButton
+              variant="ghost"
+              class="h-8 w-8 p-0 text-slate-300 hover:bg-white/10 hover:text-white"
+              data-testid="notification-read"
+              :aria-label="t('notification.custom.markReadClose')"
+              :title="t('notification.custom.markReadClose')"
+              :disabled="!!actionPending"
+              @click="acknowledgeNotification(notification)"
+              ><Eye class="h-4 w-4" aria-hidden="true"
+            /></WindowActionButton>
+            <WindowActionButton
+              v-if="routineAction(notification, 'routine.complete')"
+              variant="ghost"
+              class="h-8 w-8 p-0 text-emerald-300 hover:bg-emerald-400/15 hover:text-emerald-200"
+              data-testid="notification-complete"
+              :aria-label="t('notification.custom.actionComplete')"
+              :title="t('notification.custom.actionComplete')"
+              :disabled="!!actionPending"
+              @click="executeAction(notification, 'routine.complete')"
+              ><Check class="h-4 w-4" aria-hidden="true"
+            /></WindowActionButton>
+            <WindowActionButton
+              v-if="routineAction(notification, 'routine.snooze')"
+              variant="ghost"
+              class="h-8 w-8 p-0 text-slate-300 hover:bg-white/10 hover:text-white"
+              data-testid="notification-snooze"
+              :aria-label="t('notification.action.snoozeApply')"
+              :title="t('notification.action.snoozeApply')"
+              :aria-expanded="snoozeOpen === notification.id"
+              :disabled="!!actionPending"
+              @click="toggleSnooze(notification.id)"
+              ><Clock class="h-4 w-4" aria-hidden="true"
+            /></WindowActionButton>
           </div>
         </div>
+        <form
+          v-if="snoozeOpen === notification.id"
+          class="mt-2 border-t border-white/10 pt-2"
+          @submit.prevent="applyCustomSnooze(notification)"
+          @keydown.esc.stop="snoozeOpen = null"
+        >
+          <div class="flex flex-wrap gap-1">
+            <WindowActionButton
+              variant="ghost"
+              v-for="minutes in [10, 60, 180, 1440, 10080]"
+              :key="minutes"
+              type="button"
+              class="rounded px-2 py-1 text-xs text-slate-300 hover:bg-white/10 focus-visible:outline focus-visible:outline-1"
+              :disabled="!!actionPending"
+              @click="executeAction(notification, 'routine.snooze', minutes * 60_000)"
+            >
+              {{
+                t(
+                  minutes === 10
+                    ? 'notification.action.snooze10m'
+                    : minutes === 60
+                      ? 'notification.action.snooze1h'
+                      : minutes === 180
+                        ? 'notification.action.snooze3h'
+                        : minutes === 1440
+                          ? 'notification.action.snoozeTomorrow'
+                          : 'notification.action.snoozeNextWeek',
+                )
+              }}
+            </WindowActionButton>
+          </div>
+          <div class="mt-1 flex items-center gap-2">
+            <WindowNumberInput
+              v-model.number="snoozeMinutes"
+              data-testid="notification-snooze-minutes"
+              type="number"
+              min="1"
+              max="525600"
+              step="1"
+              required
+              :aria-label="t('notification.action.snoozeMinutes')"
+              class="h-7 min-w-0 flex-1 rounded border border-white/20 bg-transparent px-2 text-xs text-white"
+            />
+            <span class="text-xs text-slate-400">{{ t('notification.action.snoozeMinutes') }}</span>
+            <WindowActionButton
+              variant="ghost"
+              type="submit"
+              data-testid="notification-snooze-apply"
+              :disabled="!!actionPending"
+              :aria-label="t('notification.action.snoozeApply')"
+              :title="t('notification.action.snoozeApply')"
+              class="flex h-8 w-8 items-center justify-center rounded text-slate-200 hover:bg-white/10"
+            >
+              <Check class="h-4 w-4" aria-hidden="true" />
+            </WindowActionButton>
+          </div>
+        </form>
+        <p v-if="actionError === notification.id" role="alert" class="mt-1 text-xs text-rose-300">
+          {{ t('notification.custom.actionFailed') }}
+        </p>
       </div>
     </TransitionGroup>
   </div>
 </template>
 
 <style scoped>
-/* Ensure the body doesn't add its own scrollbars */
-:global(body) {
-  overflow: hidden !important;
-  background-color: transparent !important;
-  background: transparent !important;
-}
-:global(#app) {
-  background-color: transparent !important;
-  background: transparent !important;
-}
-:global(html) {
-  background-color: transparent !important;
-  background: transparent !important;
-}
+:global(html),
+:global(body),
+:global(#app),
 :global(#app > *) {
   background: transparent !important;
 }
-
+:global(body) {
+  overflow: hidden !important;
+}
 .notification-list-enter-active,
 .notification-list-leave-active {
-  transition: all 0.28s ease;
+  transition:
+    opacity 0.2s,
+    transform 0.2s;
 }
-.notification-list-enter-from {
-  opacity: 0;
-  transform: translateX(20px) translateY(8px) scale(0.97);
-}
+.notification-list-enter-from,
 .notification-list-leave-to {
   opacity: 0;
-  transform: translateX(16px) scale(0.96);
+  transform: translateX(12px);
 }
 </style>

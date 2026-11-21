@@ -6,6 +6,7 @@ import { PowerSyncDatabase } from '@powersync/node';
 import { buildIdempotencyKeyString } from '@memoflow/reliable-messaging-contracts';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { PowerSyncNotificationRepository } from '../notification-powersync.repository';
+import { NotificationInteractionPowerSyncRepository } from '../notification-interaction-powersync.repository';
 import { PowerSyncNotificationReliableAdapter } from '../power-sync-notification-reliable.adapter';
 import { PowerSyncDesktopTransportAckStore } from '../../../powersync';
 
@@ -72,6 +73,67 @@ const heartbeat = () =>
 const outbox = () => db.get<Record<string, unknown>>('SELECT * FROM notification_dispatch_outbox');
 
 describe('notification mutations on real PowerSync views', () => {
+  it('reads a large identity history without losing receipt order or leaking another identity', async () => {
+    const interactions = new NotificationInteractionPowerSyncRepository(db);
+    const ids = Array.from({ length: 40_000 }, (_, index) => 'history-' + index);
+    for (const [index, occurredAt] of [
+      [0, 3_000],
+      [20_000, 1_000],
+      [39_999, 2_000],
+    ]) {
+      await interactions.record({
+        identityId,
+        notificationId: ids[index!]!,
+        idempotencyKey: 'receipt-' + index,
+        actionKey: 'complete',
+        actionKind: 'owner-command',
+        outcome: 'accepted',
+        occurredAt: occurredAt!,
+      });
+    }
+    await interactions.record({
+      identityId: 'another-identity',
+      notificationId: ids[0]!,
+      idempotencyKey: 'foreign',
+      actionKey: 'complete',
+      actionKind: 'owner-command',
+      outcome: 'accepted',
+      occurredAt: 0,
+    });
+    const result = await interactions.listByNotifications(identityId, [...ids, ids[0]!]);
+    expect(result.map((row) => row.notificationId)).toEqual([ids[20_000], ids[39_999], ids[0]]);
+    expect(result.every((row) => row.identityId === identityId)).toBe(true);
+  });
+
+  it('repairs failed receipts on real views and never downgrades an accepted owner command', async () => {
+    const interactions = new NotificationInteractionPowerSyncRepository(db);
+    const input = {
+      identityId,
+      notificationId: 'notification',
+      idempotencyKey: 'retry-key',
+      actionKey: 'complete',
+      actionKind: 'owner-command',
+      occurredAt: 1_000,
+    } as const;
+    const failed = await interactions.record({ ...input, outcome: 'failed' });
+    const accepted = await interactions.record({
+      ...input,
+      outcome: 'accepted',
+      occurredAt: 2_000,
+      commandReceiptId: 'owner-receipt',
+    });
+    expect(accepted).toMatchObject({
+      id: failed.id,
+      outcome: 'accepted',
+      commandReceiptId: 'owner-receipt',
+      occurredAt: 2_000,
+    });
+    expect(await interactions.record({ ...input, outcome: 'failed' })).toEqual(accepted);
+    await expect(
+      interactions.record({ ...input, identityId: 'foreign', outcome: 'accepted' }),
+    ).rejects.toThrow('another fact');
+  });
+
   it('proves synced and local-only tables are views with zero affected rows', async () => {
     for (const table of [
       'notifications',

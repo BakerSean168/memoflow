@@ -304,4 +304,55 @@ describe('PowerSyncRoutineOccurrenceTruthStore', () => {
       db.close();
     }
   });
+  it.each(['Satisfied', 'Skipped'] as const)(
+    'rejects a new live snooze after %s without changing owner facts',
+    async (state) => {
+      const db = createDb();
+      try {
+        const store = new PowerSyncRoutineOccurrenceTruthStore(db);
+        const owner = { identityId: 'identity-1', routineId: 'routine-1', occurrenceKey: 'occ-1' };
+        await store.ensureOpenOccurrence({ ...owner, triggerKind: 'Elapsed', becameDueAt: 1_000 });
+        const snooze = {
+          ...owner,
+          idempotencyKey: 'snooze-1',
+          action: 'Snoozed' as const,
+          actedAt: 2_000,
+          snoozeDurationMs: 60_000,
+          temporaryOverride: createSnoozeOverride({
+            now: 2_000,
+            durationMs: 60_000,
+            reason: 'notification-snooze',
+          }),
+          requireOpenOccurrence: true,
+        };
+        await store.applyInteraction(snooze);
+        await store.resolveOccurrence({
+          ...owner,
+          state,
+          resolutionKind: state === 'Satisfied' ? 'ExplicitComplete' : 'UserSkipped',
+          resolvedAt: 3_000,
+        });
+        await expect(
+          store.applyInteraction({ ...snooze, idempotencyKey: 'stale-clock' }),
+        ).rejects.toThrow('already resolved');
+        expect(await store.listInteractions(owner)).toHaveLength(1);
+        expect((await store.applyInteraction(snooze)).replayed).toBe(true);
+        const override = await db.get<{ override_json: string; version: number }>(
+          'SELECT override_json, version FROM routine_temporary_overrides',
+        );
+        expect(JSON.parse(override.override_json).snoozeUntil).toBe(62_000);
+        expect(override.version).toBe(1);
+        // Portability restores historical interactions after terminal facts.
+        await expect(
+          store.applyInteraction({
+            ...snooze,
+            idempotencyKey: 'historical',
+            requireOpenOccurrence: false,
+          }),
+        ).resolves.toMatchObject({ replayed: false });
+      } finally {
+        db.close();
+      }
+    },
+  );
 });

@@ -66,6 +66,10 @@ export class NotificationController {
     return ok({ count });
   }
 
+  async getAttentionCount(identityId: string): Promise<Result<unknown>> {
+    return this.inbox.getAttentionCount(identityId);
+  }
+
   async getUnreadCount(identityId: string): Promise<Result<unknown>> {
     return this.inbox.getUnreadCount(identityId);
   }

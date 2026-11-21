@@ -27,8 +27,8 @@ vi.mock('@memoflow/notification-ui', async (importOriginal) => {
   const { ref: vueRef } = await import('vue');
   return {
     ...(await importOriginal<typeof import('@memoflow/notification-ui')>()),
-    useNotificationUnreadQuery: () => ({
-      unreadCount: vueRef(0),
+    useNotificationAttentionQuery: () => ({
+      attentionCount: vueRef(0),
       hasUnread: vueRef(false),
       refetch: vi.fn(async () => undefined),
     }),

@@ -56,6 +56,7 @@ export interface NotificationListQueryKeyInput {
   limit: number;
   type?: string;
   isRead?: boolean;
+  needsAttention?: boolean;
   archiveState?: 'active' | 'archived' | 'all';
   startDate?: string;
   endDate?: string;
@@ -70,6 +71,7 @@ export interface NotificationQueryKeys {
   details(identityScope: string): QueryKey;
   detail(identityScope: string, id: string): QueryKey;
   unread(identityScope: string): QueryKey;
+  attention(identityScope: string): QueryKey;
 }
 
 /**

@@ -19,6 +19,7 @@ export {
 } from './services/routine-configuration-query.service';
 export {
   registerRoutineNotificationOwnerCommands,
+  createRoutineNotificationAttentionReader,
   type RoutineNotificationOwnerCommandRegistry,
 } from './services/routine-notification-owner-command.adapter';
 export { RoutinePortableCapability, createRoutinePortableCapability } from './routine-portability';

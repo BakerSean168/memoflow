@@ -1090,6 +1090,20 @@
       }
     },
     {
+      "path": "apps/desktop/e2e/notification-attention.spec.mts",
+      "primarySuite": "e2e",
+      "collectors": [
+        "apps/desktop/playwright.config.ts"
+      ],
+      "measurementCollectors": [],
+      "e2eOwnership": {
+        "surface": "notification-attention",
+        "role": "canonical",
+        "lifecycle": "active",
+        "primaryCollector": "apps/desktop/playwright.config.ts"
+      }
+    },
+    {
       "path": "apps/desktop/e2e/packaged-runtime/packaged-runtime.spec.ts",
       "primarySuite": "e2e",
       "collectors": [
@@ -8598,6 +8612,14 @@
       "measurementCollectors": []
     },
     {
+      "path": "packages/notification-ui/src/composables/useNotificationAttentionQuery.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/notification-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "packages/notification-ui/src/composables/useNotificationListQuery.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -13654,7 +13676,7 @@
       "type": "primary",
       "suite": "e2e",
       "runner": "playwright",
-      "fileCount": 13,
+      "fileCount": 14,
       "e2eOwnership": {
         "lane": "desktop",
         "lifecycle": "active",
@@ -14232,7 +14254,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 13
+      "fileCount": 14
     },
     {
       "id": "packages/notification/vitest.config.ts",
@@ -15158,12 +15180,12 @@
   "duplicate": [],
   "unexpected": [],
   "counts": {
-    "unit": 1253,
+    "unit": 1254,
     "integration": 63,
     "smoke": 3,
     "boundary-ipc": 7,
     "boundary-main": 18,
-    "e2e": 43,
+    "e2e": 44,
     "perf": 2,
     "governance": 94
   },
@@ -15171,7 +15193,7 @@
     "version": 2,
     "issues": [],
     "countsByLane": {
-      "desktop": 13,
+      "desktop": 14,
       "local-validation": 6,
       "nightly": 7,
       "reference": 8,
@@ -15181,7 +15203,7 @@
     },
     "countsByRole": {
       "artifact": 3,
-      "canonical": 4,
+      "canonical": 5,
       "reference": 8,
       "supplemental": 28
     },

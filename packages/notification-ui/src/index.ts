@@ -6,12 +6,13 @@
 
 // Store (UI state only: page/pageSize/readFilter; server state lives in the query cache)
 export { useNotificationStore } from './stores/notification-store';
-export type { NotificationStoreType, NotificationReadFilter } from './stores/notification-store';
+export type { NotificationStoreType, NotificationFilter } from './stores/notification-store';
 
 // Composables (Query Cache authority pilot)
 export {
   useNotificationListQuery,
   useNotificationUnreadQuery,
+  useNotificationAttentionQuery,
   useNotificationMutations,
   type UseNotificationListQueryOptions,
 } from './composables';

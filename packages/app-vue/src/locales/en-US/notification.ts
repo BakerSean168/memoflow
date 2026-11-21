@@ -45,7 +45,11 @@ export default {
     title: 'Notification Center',
     viewAll: 'View all notifications',
   },
+  pagination: { previous: 'Previous page', next: 'Next page', page: 'Page {page} of {total}' },
+  attentionEmptyDescription:
+    'There are no notifications needing attention. New reminders will appear here.',
   filter: {
+    attention: 'Needs attention',
     all: 'All',
     unread: 'Unread',
     read: 'Read',
@@ -81,7 +85,8 @@ export default {
   },
   custom: {
     reminder: 'Reminder',
-    autoReadHint: 'Marked as read automatically after 30s',
+    elapsed: 'Reminded {time} ago',
+    markReadClose: 'Mark as read and close',
     emptyBody: 'Reminder triggered. Please confirm you received it.',
     actionFailed: 'Action failed. Please try again.',
     actionComplete: 'Complete',

@@ -3,16 +3,6 @@
   "description": "Per-occurrence exemptions for real-geometry arbitrary values. See tools/quality/README.md. Each entry needs file, exact token and reason; stale entries fail the guard.",
   "entries": [
     {
-      "file": "apps/desktop/src/renderer/CustomNotificationView.vue",
-      "token": "min-w-[92px]",
-      "reason": "组件几何宽度（面板/画布/控件）"
-    },
-    {
-      "file": "apps/desktop/src/renderer/CustomNotificationView.vue",
-      "token": "rounded-[22px]",
-      "reason": "组件圆角像素值，主题 --radius-* 无等值档"
-    },
-    {
       "file": "apps/web/e2e/goal/reference/main.ts",
       "token": "w-[44%]",
       "reason": "相对容器比例尺寸，无刻度等价值"

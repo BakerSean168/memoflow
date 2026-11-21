@@ -9,6 +9,7 @@ import NotificationCapsulePreview from './NotificationCapsulePreview.vue';
 
 const notificationsRef = ref<NotificationClientDTO[]>([]);
 const unreadCountRef = ref(0);
+const attentionCountRef = ref(0);
 const isLoadingRef = ref(false);
 
 const markAsRead = vi.fn().mockResolvedValue(undefined);
@@ -22,6 +23,12 @@ vi.mock('../composables/useNotificationListQuery', () => ({
     notifications: computed(() => notificationsRef.value),
     isLoading: computed(() => isLoadingRef.value),
     refetch: vi.fn(),
+  }),
+}));
+
+vi.mock('../composables/useNotificationAttentionQuery', () => ({
+  useNotificationAttentionQuery: () => ({
+    attentionCount: computed(() => attentionCountRef.value),
   }),
 }));
 
@@ -141,6 +148,7 @@ describe('NotificationCapsulePreview (V2 §6.5)', () => {
   afterEach(() => {
     notificationsRef.value = [];
     unreadCountRef.value = 0;
+    attentionCountRef.value = 0;
     isLoadingRef.value = false;
     vi.clearAllMocks();
   });
@@ -259,6 +267,15 @@ describe('NotificationCapsulePreview (V2 §6.5)', () => {
     expect(wrapper.emitted('navigate')).toEqual([
       [{ path: '/tasks/plan-1', query: { from: 'notification' } }],
     ]);
+    wrapper.unmount();
+  });
+  it('shows full attention count even when all visible reminders are read', async () => {
+    notificationsRef.value = [createNotification({ isRead: true, needsAttention: true })];
+    attentionCountRef.value = 25;
+    const wrapper = mountPreview();
+    expect(wrapper.get('[data-testid="notification-capsule-attention-count"]').text()).toBe('25');
+    expect(wrapper.find('[data-testid="notification-capsule-mark-all-read"]').exists()).toBe(false);
+    expect(wrapper.findAll('[data-testid^="notification-capsule-item-"]')).toHaveLength(1);
     wrapper.unmount();
   });
 });

@@ -29,6 +29,9 @@ type NotificationDtoOverrides = Partial<{
   deletedAt: number | null;
   archivedAt: number | null;
   actions: NotificationClientDTO['actions'];
+  expiresAt: number | null;
+  relatedEntityType: string;
+  relatedEntityId: string;
 }>;
 
 function createNotificationRecord(overrides: NotificationDtoOverrides = {}) {
@@ -135,9 +138,9 @@ describe('NotificationQueryApplicationService', () => {
     });
 
     expect(notificationRepository.findByIdentityId).toHaveBeenCalledWith(IDENTITY_ID, {
-      includeDeleted: false,
-      includeRead: false,
-      archiveState: 'active',
+      includeDeleted: true,
+      includeRead: true,
+      archiveState: 'all',
     });
     expect(result.ok).toBe(true);
     if (result.ok) {
@@ -152,14 +155,17 @@ describe('NotificationQueryApplicationService', () => {
         page: 1,
         pageSize: 1,
         hasMore: true,
+        nextAttentionAt: null,
       });
     }
   });
 
-  it('uses related-entity lookup when relatedEntity filters are provided', async () => {
-    (notificationRepository.findByRelatedEntity as ReturnType<typeof vi.fn>).mockResolvedValue([
+  it('filters related entities after projecting the identity', async () => {
+    (notificationRepository.findByIdentityId as ReturnType<typeof vi.fn>).mockResolvedValue([
       createNotificationRecord({
         id: 'INotificationId_550e8400-e29b-41d4-a716-446655440010',
+        relatedEntityType: 'Task',
+        relatedEntityId: 'TaskId_550e8400-e29b-41d4-a716-446655440001',
       }),
     ]);
 
@@ -169,12 +175,11 @@ describe('NotificationQueryApplicationService', () => {
       relatedEntityId: 'TaskId_550e8400-e29b-41d4-a716-446655440001',
     });
 
-    expect(notificationRepository.findByRelatedEntity).toHaveBeenCalledWith(
-      IDENTITY_ID,
-      'Task',
-      'TaskId_550e8400-e29b-41d4-a716-446655440001',
-      { archiveState: 'active' },
-    );
+    expect(notificationRepository.findByIdentityId).toHaveBeenCalledWith(IDENTITY_ID, {
+      includeDeleted: true,
+      includeRead: true,
+      archiveState: 'all',
+    });
     expect(result.ok).toBe(true);
     if (result.ok) {
       expect(result.data.total).toBe(1);
@@ -309,5 +314,181 @@ describe('NotificationQueryApplicationService', () => {
         message: 'notification not found',
       },
     });
+  });
+  it('counts all pending facts before pagination and preserves read-but-open routines after read-all', async () => {
+    const records = Array.from({ length: 25 }, (_, index) =>
+      createNotificationRecord({ id: 'ordinary-' + index, createdAt: index }),
+    );
+    const routine = createNotificationRecord({
+      id: 'routine',
+      workflowKey: 'routine.intervention',
+      isRead: true,
+      createdAt: 100,
+    });
+    records.push(
+      routine,
+      createNotificationRecord({ id: 'read', isRead: true }),
+      createNotificationRecord({ id: 'foreign', identityId: 'other' }),
+    );
+    vi.mocked(notificationRepository.findByIdentityId).mockResolvedValue(records as never);
+    const readAttention = vi.fn(
+      async () =>
+        new Map([
+          ['routine', { groupKey: 'routine/occurrence', needsAction: true, nextAttentionAt: null }],
+        ]),
+    );
+    service = new NotificationQueryApplicationService(
+      notificationRepository,
+      interactionRepository,
+      { readAttention },
+      () => 1_000,
+    );
+    const page = await service.listNotifications({
+      identityId: IDENTITY_ID,
+      needsAttention: true,
+      limit: 20,
+    });
+    expect(page.ok && page.data.total).toBe(26);
+    expect(page.ok && page.data.notifications).toHaveLength(20);
+    expect(await service.getAttentionCount(IDENTITY_ID)).toEqual({
+      ok: true,
+      data: { count: 26, nextAttentionAt: null },
+    });
+    for (const record of records)
+      record.toServerDTO.mockReturnValue({ ...record.toServerDTO(), isRead: true });
+    expect(await service.getAttentionCount(IDENTITY_ID)).toEqual({
+      ok: true,
+      data: { count: 1, nextAttentionAt: null },
+    });
+    const read = await service.listNotifications({ identityId: IDENTITY_ID, needsAttention: true });
+    expect(read.ok && read.data.notifications.map((notification) => notification.id)).toEqual([
+      'routine',
+    ]);
+  });
+
+  it('restores snoozed attention at the deadline and supersedes old presentations even through history filters', async () => {
+    const complete = {
+      kind: 'owner-command',
+      actionKey: 'complete',
+      labelKey: 'complete',
+      owner: { type: 'routine-occurrence', id: 'occ-1' },
+      commandKey: 'routine.complete',
+    } as const;
+    const snooze = { ...complete, actionKey: 'snooze-10m', commandKey: 'routine.snooze' } as const;
+    const records = [
+      createNotificationRecord({
+        id: 'old',
+        title: 'Old presentation',
+        workflowKey: 'routine.intervention',
+        isRead: true,
+        createdAt: 100,
+        actions: [complete, snooze],
+      }),
+    ];
+    vi.mocked(notificationRepository.findByIdentityId).mockResolvedValue(records as never);
+    vi.mocked(interactionRepository.listByNotifications).mockResolvedValue([
+      {
+        identityId: IDENTITY_ID,
+        notificationId: 'old',
+        actionKey: 'snooze-10m',
+        actionKind: 'owner-command',
+        outcome: 'accepted',
+      },
+    ] as never);
+    let now = 1_000;
+    const readAttention = vi.fn(
+      async (_identity: string, notifications: readonly NotificationClientDTO[]) =>
+        new Map(
+          notifications.map((notification) => [
+            String(notification.id),
+            {
+              groupKey: 'routine/occurrence',
+              needsAction: now >= 2_000,
+              nextAttentionAt: now < 2_000 ? 2_000 : null,
+            },
+          ]),
+        ),
+    );
+    service = new NotificationQueryApplicationService(
+      notificationRepository,
+      interactionRepository,
+      { readAttention },
+      () => now,
+    );
+    expect(await service.getAttentionCount(IDENTITY_ID)).toEqual({
+      ok: true,
+      data: { count: 0, nextAttentionAt: 2_000 },
+    });
+    now = 2_000;
+    const due = await service.listNotifications({ identityId: IDENTITY_ID, needsAttention: true });
+    expect(due.ok && due.data.notifications[0]).toMatchObject({
+      id: 'old',
+      isRead: true,
+      needsAttention: true,
+      actions: [complete],
+    });
+    records.push(
+      createNotificationRecord({
+        id: 'new',
+        workflowKey: 'routine.intervention',
+        createdAt: 2_000,
+        actions: [complete, snooze],
+      }),
+    );
+    expect(await service.getAttentionCount(IDENTITY_ID)).toEqual({
+      ok: true,
+      data: { count: 1, nextAttentionAt: null },
+    });
+    const latest = await service.listNotifications({
+      identityId: IDENTITY_ID,
+      needsAttention: true,
+    });
+    expect(latest.ok && latest.data.notifications[0]).toMatchObject({
+      id: 'new',
+      actions: [complete, snooze],
+    });
+    const oldSearch = await service.listNotifications({
+      identityId: IDENTITY_ID,
+      keyword: 'Old',
+      isRead: true,
+    });
+    expect(oldSearch.ok && oldSearch.data.notifications[0]).toMatchObject({
+      needsAttention: false,
+      actions: [],
+    });
+  });
+
+  it('keeps count/list visibility consistent for resolved, archived, deleted and expired facts', async () => {
+    const records = [
+      createNotificationRecord({ id: 'old', createdAt: 100 }),
+      createNotificationRecord({ id: 'deleted-new', createdAt: 200, deletedAt: 500 }),
+      createNotificationRecord({ id: 'archived', archivedAt: 500 }),
+      createNotificationRecord({ id: 'expired', expiresAt: 900 }),
+      createNotificationRecord({ id: 'done', isRead: false }),
+    ];
+    vi.mocked(notificationRepository.findByIdentityId).mockResolvedValue(records as never);
+    const readAttention = vi.fn(
+      async () =>
+        new Map([
+          ['old', { groupKey: 'same', needsAction: true, nextAttentionAt: null }],
+          ['deleted-new', { groupKey: 'same', needsAction: true, nextAttentionAt: null }],
+          ['done', { groupKey: 'done', needsAction: false, nextAttentionAt: null }],
+        ]),
+    );
+    service = new NotificationQueryApplicationService(
+      notificationRepository,
+      interactionRepository,
+      { readAttention },
+      () => 1_000,
+    );
+    expect(await service.getAttentionCount(IDENTITY_ID)).toEqual({
+      ok: true,
+      data: { count: 0, nextAttentionAt: null },
+    });
+    const result = await service.listNotifications({
+      identityId: IDENTITY_ID,
+      needsAttention: true,
+    });
+    expect(result.ok && result.data.total).toBe(0);
   });
 });

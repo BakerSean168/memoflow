@@ -159,6 +159,7 @@ export function createNotificationModule(
   const notificationQueryApplicationService = new NotificationQueryApplicationService(
     notificationRepository,
     interactionRepository,
+    ownerCommandRegistry,
   );
   const notificationMaintenanceApplicationService = new NotificationMaintenanceApplicationService(
     notificationRepository,
@@ -187,6 +188,8 @@ export function createNotificationModule(
       notificationMaintenanceApplicationService.restore(id, identityId),
     markAllAsRead: async (identityId) => useCases.markAsRead.executeAll(identityId),
     getUnreadCount: async (identityId) => useCases.getUnreadNotifications.getCount(identityId),
+    getAttentionCount: async (identityId) =>
+      notificationQueryApplicationService.getAttentionCount(identityId),
     batchMarkAsRead: async (data, identityId) => {
       if (data.notificationIds?.length) {
         return useCases.markAsRead.executeMany(data.notificationIds, identityId);

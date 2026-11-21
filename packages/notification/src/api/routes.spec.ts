@@ -33,6 +33,7 @@ function createControllerStub(): NotificationInboxPort {
     markAsRead: vi.fn(),
     markAllAsRead: vi.fn(),
     getUnreadCount: vi.fn(),
+    getAttentionCount: vi.fn(),
     batchMarkAsRead: vi.fn(),
     batchDelete: vi.fn(),
     cleanupOldNotifications: vi.fn(),

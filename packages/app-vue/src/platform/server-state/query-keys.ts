@@ -29,6 +29,7 @@ export interface CanonicalNotificationListQuery {
   limit: number;
   type?: string;
   isRead?: boolean;
+  needsAttention?: boolean;
   archiveState?: 'active' | 'archived' | 'all';
   startDate?: string;
   endDate?: string;
@@ -44,12 +45,14 @@ export type NotificationListQueryInput = Partial<CanonicalNotificationListQuery>
 export function canonicalizeNotificationListQuery(
   query?: NotificationListQueryInput,
 ): CanonicalNotificationListQuery {
-  const { page, limit, type, isRead, archiveState, startDate, endDate } = query ?? {};
+  const { page, limit, type, isRead, needsAttention, archiveState, startDate, endDate } =
+    query ?? {};
   return {
     page: page ?? 1,
     limit: limit ?? 20,
     ...(type !== undefined ? { type } : {}),
     ...(isRead !== undefined ? { isRead } : {}),
+    ...(needsAttention !== undefined ? { needsAttention } : {}),
     ...(archiveState !== undefined ? { archiveState } : {}),
     ...(startDate !== undefined ? { startDate: String(startDate) } : {}),
     ...(endDate !== undefined ? { endDate: String(endDate) } : {}),
@@ -73,6 +76,8 @@ export const notificationQueryKeys = {
     [...notificationQueryKeys.details(identityScope), id] as const,
   unread: (identityScope: string) =>
     [...notificationQueryKeys.identity(identityScope), 'unread-count'] as const,
+  attention: (identityScope: string) =>
+    [...notificationQueryKeys.identity(identityScope), 'attention-count'] as const,
 };
 
 // ─── Task template ────────────────────────────────────────────────────────────

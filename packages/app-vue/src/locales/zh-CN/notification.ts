@@ -39,7 +39,10 @@ export default {
     title: '通知中心',
     viewAll: '查看全部通知',
   },
+  pagination: { previous: '上一页', next: '下一页', page: '第 {page} / {total} 页' },
+  attentionEmptyDescription: '暂时没有待处理的通知。新的提醒到达后会显示在这里。',
   filter: {
+    attention: '待处理',
     all: '全部',
     unread: '未读',
     read: '已读',
@@ -75,7 +78,8 @@ export default {
   },
   custom: {
     reminder: '提醒',
-    autoReadHint: '30s 内未处理将自动标记为已读',
+    elapsed: '已提醒 {time}',
+    markReadClose: '标为已读并关闭',
     emptyBody: '提醒已触发，请确认已收到。',
     actionFailed: '操作失败，请重试',
     actionComplete: '完成',

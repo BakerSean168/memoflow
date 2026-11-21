@@ -202,6 +202,7 @@ export function createMembershipCommands(
         responseLatencyMs,
         snoozeDurationMs,
         temporaryOverride,
+        requireOpenOccurrence: input.action === 'snooze',
         metadata: input.metadata,
       });
       if (input.action === 'snooze') {

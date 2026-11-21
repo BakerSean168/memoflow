@@ -23,12 +23,13 @@ installNotificationUiHost();
 it('reuses the notification owner queries through hover, pin and keyboard reopen', async () => {
   vi.useFakeTimers();
   const runtime = createServerStateRuntime('web');
-  const result = ok({ notifications: [], total: 0, page: 1, pageSize: 10, hasMore: false });
+  const result = ok({ notifications: [], total: 0, page: 1, pageSize: 5, hasMore: false });
   let release!: () => void;
   const findNotifications = vi.fn(
     () => new Promise<typeof result>((resolve) => (release = () => resolve(result))),
   );
   const getUnreadCount = vi.fn().mockResolvedValue(ok({ count: 0 }));
+  const getAttentionCount = vi.fn().mockResolvedValue(ok({ count: 0, nextAttentionAt: null }));
   const wrapper = mount(ModuleCapsule, {
     attachTo: document.body,
     props: { id: 'notification', label: 'Notifications', route: '/notifications', icon: Bell },
@@ -47,6 +48,7 @@ it('reuses the notification owner queries through hover, pin and keyboard reopen
               shell: { previewModule: 'Preview {name}' },
               notification: {
                 empty: 'No notifications',
+                emptyAttention: 'No notifications to handle',
                 drawer: { title: 'Notification Center', viewAll: 'View all notifications' },
               },
             },
@@ -54,7 +56,11 @@ it('reuses the notification owner queries through hover, pin and keyboard reopen
         }),
       ],
       provide: {
-        [NOTIFICATION_SERVICE_KEY as symbol]: { findNotifications, getUnreadCount },
+        [NOTIFICATION_SERVICE_KEY as symbol]: {
+          findNotifications,
+          getUnreadCount,
+          getAttentionCount,
+        },
         [SERVER_STATE_RUNTIME_KEY]: runtime,
         [SERVER_STATE_IDENTITY_SCOPE_KEY]: () => 'owner',
       },
@@ -76,7 +82,12 @@ it('reuses the notification owner queries through hover, pin and keyboard reopen
     await vi.advanceTimersByTimeAsync(300);
     await flushPromises();
     expect(ownerPreview()).not.toBeNull();
-    expect(findNotifications).toHaveBeenCalledExactlyOnceWith({ page: 1, limit: 10 });
+    expect(findNotifications).toHaveBeenCalledExactlyOnceWith({
+      page: 1,
+      limit: 5,
+      needsAttention: true,
+    });
+    expect(getAttentionCount).toHaveBeenCalledTimes(1);
     expect(getUnreadCount).toHaveBeenCalledTimes(1);
     expect(wrapper.emitted('open')).toHaveLength(1);
 

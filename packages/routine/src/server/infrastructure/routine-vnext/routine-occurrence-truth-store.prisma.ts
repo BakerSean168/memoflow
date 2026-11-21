@@ -346,7 +346,21 @@ export class PrismaRoutineOccurrenceTruthStore implements RoutineOccurrenceTruth
           };
         }
 
+        if (input.requireOpenOccurrence) {
+          // Serialize the live precondition with concurrent owner completion.
+          await tx.$queryRaw(Prisma.sql`
+            SELECT id FROM routine_occurrences
+             WHERE identity_id = ${input.identityId} AND routine_id = ${input.routineId}
+               AND occurrence_key = ${input.occurrenceKey}
+             FOR NO KEY UPDATE
+          `);
+        }
         let occurrence = await requireOccurrence(tx, input);
+        if (input.requireOpenOccurrence && occurrence.resolutionState !== 'Open') {
+          throw new Error(
+            `Routine occurrence '${input.occurrenceKey}' is already resolved as ${occurrence.resolutionState}`,
+          );
+        }
         const resolution = resolutionForInteraction(input);
         if (resolution) {
           occurrence = await resolveOnDb(tx, { ...input, ...resolution });

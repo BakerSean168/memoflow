@@ -26,6 +26,7 @@ export function toNotificationQueryParams(
     limit: query.limit,
     type: query.type,
     isRead: query.isRead,
+    needsAttention: query.needsAttention,
     archiveState: query.archiveState,
     workflowKey: query.workflowKey,
     topic: query.topic,

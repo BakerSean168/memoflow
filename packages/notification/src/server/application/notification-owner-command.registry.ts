@@ -1,6 +1,9 @@
 import type {
   NotificationActionIntent,
   NotificationEntityRef,
+  NotificationClientDTO,
+  NotificationOwnerAttention,
+  NotificationOwnerAttentionReader,
 } from '@memoflow/notification-contracts';
 import type { JsonValue } from '@memoflow/transport-contracts/result';
 
@@ -56,6 +59,40 @@ function registryKey(workflowKey: string, ownerType: string, commandKey: string)
 /** Explicit owner-command allowlist. Unknown workflow/owner/command combinations fail closed. */
 export class NotificationOwnerCommandRegistry implements NotificationOwnerCommandPort {
   private readonly registrations = new Map<string, NotificationOwnerCommandRegistration<unknown>>();
+
+  private readonly attentionReaders = new Map<string, NotificationOwnerAttentionReader>();
+
+  registerAttentionReader(
+    workflowKey: string,
+    reader: NotificationOwnerAttentionReader,
+  ): () => void {
+    if (this.attentionReaders.has(workflowKey))
+      throw new Error('Notification attention reader already registered: ' + workflowKey);
+    this.attentionReaders.set(workflowKey, reader);
+    return () => {
+      if (this.attentionReaders.get(workflowKey) === reader)
+        this.attentionReaders.delete(workflowKey);
+    };
+  }
+
+  async readAttention(
+    identityId: string,
+    notifications: readonly NotificationClientDTO[],
+    now: number,
+  ): Promise<ReadonlyMap<string, NotificationOwnerAttention>> {
+    const states = new Map<string, NotificationOwnerAttention>();
+    await Promise.all(
+      [...this.attentionReaders].map(async ([workflowKey, reader]) => {
+        const owned = notifications.filter(
+          (notification) => notification.workflowKey === workflowKey,
+        );
+        if (!owned.length) return;
+        for (const [id, state] of await reader({ identityId, notifications: owned, now }))
+          states.set(id, state);
+      }),
+    );
+    return states;
+  }
 
   register<TInput>(registration: NotificationOwnerCommandRegistration<TInput>): () => void {
     const key = registryKey(

@@ -114,8 +114,8 @@ export interface ModuleCapsule {
   previewSize?: 'compact' | 'default' | 'wide';
   /**
    * Semantic token naming the source of a numeric badge (e.g.
-   * 'notification.unread'). Resolved by the shell; unresolved tokens render
-   * no badge. S1 wires only the notification unread source.
+   * 'notification.attention'). Resolved by the shell; unresolved tokens render
+   * no badge. S1 wires only the notification attention source.
    */
   badgeSource?: string;
 }

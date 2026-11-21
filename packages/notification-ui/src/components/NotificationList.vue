@@ -65,7 +65,9 @@ const { t } = useI18n();
 defineEmits<{
   'notification-click': [notification: NotificationClientDTO];
   'mark-read': [id: string];
-  'execute-action': [input: { notificationId: string; actionKey: string }];
+  'execute-action': [
+    input: { notificationId: string; actionKey: string; snoozeDurationMs?: number },
+  ];
   delete: [id: string];
 }>();
 </script>

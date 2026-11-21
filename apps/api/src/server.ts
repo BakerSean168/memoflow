@@ -279,6 +279,7 @@ async function bootstrap(): Promise<void> {
   registerRoutineNotificationOwnerCommands(
     notificationApiModule.ownerCommandRegistry,
     routineComposed.routineCommandPort,
+    routineComposed.notificationAttentionReader,
   );
   const routineApiModule = composeRoutineApiModule({
     commandPort: routineComposed.routineCommandPort,

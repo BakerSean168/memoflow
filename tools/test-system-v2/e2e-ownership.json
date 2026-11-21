@@ -179,6 +179,12 @@
       "lifecycle": "active",
       "primaryCollector": "apps/desktop/playwright.config.ts"
     },
+    "apps/desktop/e2e/notification-attention.spec.mts": {
+      "surface": "notification-attention",
+      "role": "canonical",
+      "lifecycle": "active",
+      "primaryCollector": "apps/desktop/playwright.config.ts"
+    },
     "apps/desktop/e2e/workspace-attention.spec.mts": {
       "surface": "ai-workspace",
       "role": "supplemental",

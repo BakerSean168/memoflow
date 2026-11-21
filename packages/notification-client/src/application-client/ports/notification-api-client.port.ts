@@ -15,6 +15,7 @@ import type {
   NotificationClientDTO,
   NotificationPreferenceClientDTO,
   UnreadCountResponse,
+  AttentionCountResponse,
   UpdateNotificationPreferenceReq,
 } from '@memoflow/notification-contracts';
 
@@ -33,6 +34,7 @@ export interface QueryNotificationsRequest {
   limit?: number;
   type?: string;
   isRead?: boolean;
+  needsAttention?: boolean;
   archiveState?: 'active' | 'archived' | 'all';
   workflowKey?: string;
   topic?: string;
@@ -47,10 +49,12 @@ export interface NotificationListResponse {
   page: number;
   pageSize: number;
   hasMore: boolean;
+  nextAttentionAt?: number | null;
 }
 
 // Residual 801: UnreadCountResponse dual retired — contracts UnreadCountResponseSchema + z.infer.
 export type { UnreadCountResponse };
+export type { AttentionCountResponse };
 
 // ============ Port Interface ============
 
@@ -74,6 +78,7 @@ export interface INotificationApiClient {
     request: ExecuteNotificationActionReq,
   ): Promise<Result<ExecuteNotificationActionRes>>;
   getUnreadCount(): Promise<Result<UnreadCountResponse>>;
+  getAttentionCount(): Promise<Result<AttentionCountResponse>>;
   /** Residual 197: identity comes from transport auth, not client body dual-track. */
   getPreferences(): Promise<Result<NotificationPreferenceClientDTO>>;
   updatePreferences(

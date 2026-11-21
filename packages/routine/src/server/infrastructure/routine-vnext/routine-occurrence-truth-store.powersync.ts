@@ -404,6 +404,11 @@ export class PowerSyncRoutineOccurrenceTruthStore implements RoutineOccurrenceTr
       }
 
       let occurrence = await requireOccurrenceRow(tx, input);
+      if (input.requireOpenOccurrence && occurrence.resolution_state !== 'Open') {
+        throw new Error(
+          `Routine occurrence '${input.occurrenceKey}' is already resolved as ${occurrence.resolution_state}`,
+        );
+      }
       const resolution = resolutionForInteraction(input);
       if (resolution) occurrence = await resolveOnDb(tx, { ...input, ...resolution });
       if (temporaryOverrideJson != null) {

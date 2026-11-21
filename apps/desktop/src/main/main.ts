@@ -266,6 +266,9 @@ async function registerBusinessModules(
         body: String(payload.content ?? ''),
         data: {
           notificationId: payload.id,
+          workflowKey: payload.workflowKey,
+          isRead: payload.isRead,
+          readAt: payload.readAt,
           deliveryId: delivery?.deliveryId,
           identityId: payload.identityId,
           notificationType: payload.type,
@@ -294,6 +297,7 @@ async function registerBusinessModules(
   registerRoutineNotificationOwnerCommands(
     notificationComposed.ownerCommandRegistry,
     routineComposed.routineCommandPort,
+    routineComposed.notificationAttentionReader,
   );
   const routineConfigurationElectronModule = createRoutineConfigurationElectronModule({
     commandPort: routineComposed.routineCommandPort,

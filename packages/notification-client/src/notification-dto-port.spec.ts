@@ -11,6 +11,7 @@ describe('Notification client DTO port', () => {
       findNotificationById: async () => ok(notification),
       markAsRead: async () => ok({ ...notification, isRead: true }),
       getUnreadCount: async () => ok({ count: 3 }),
+      getAttentionCount: async () => ok({ count: 3, nextAttentionAt: null }),
     } as INotificationApiClient);
 
     const detail = await service.findNotificationById(notification.id);

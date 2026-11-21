@@ -21,7 +21,7 @@ import type { ModuleCapsule } from './types';
  * still share this registry so host overrides remain authoritative.
  *
  * `route` is the panel landing route; `badgeSource` is a semantic token the
- * shell resolves to a count (S1 wires notification unread only).
+ * shell resolves to a count (S1 wires notification attention only).
  */
 export const defaultModuleCapsules: ModuleCapsule[] = [
   { id: 'goal', title: 'nav.capsule.goal', icon: Target, route: '/goals' },
@@ -34,6 +34,6 @@ export const defaultModuleCapsules: ModuleCapsule[] = [
     title: 'nav.capsule.notification',
     icon: Bell,
     route: '/notifications',
-    badgeSource: 'notification.unread',
+    badgeSource: 'notification.attention',
   },
 ];

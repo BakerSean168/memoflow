@@ -42,7 +42,7 @@ import { useShellRouterSync, moduleForPath, returnFromSettingsScene } from './us
 import { isStandaloneSettingsPath } from './shell-scene';
 import { useDesktopWindowControls } from '../../shared/composables/useDesktopWindowControls';
 import { hasDesktopAuthApi } from '../../shared/utils/desktop-auth-recovery';
-import { useNotificationUnreadQuery } from '@memoflow/notification-ui';
+import { useNotificationAttentionQuery } from '@memoflow/notification-ui';
 import {
   useAccountSignOut,
   useAccountStore,
@@ -156,10 +156,10 @@ const {
 });
 const configuredModuleCapsules = inject(MODULE_CAPSULES_KEY, defaultModuleCapsules);
 
-// Phase 5 / UI-008：badgeSource token → 实时计数（notification unread）。
-const { unreadCount: notificationUnreadCount } = useNotificationUnreadQuery();
+// Phase 5 / UI-008：badgeSource token → 实时计数（notification attention）。
+const { attentionCount: notificationAttentionCount } = useNotificationAttentionQuery();
 function resolveCapsuleBadge(source: string | undefined): number | null {
-  if (source === 'notification.unread') return notificationUnreadCount.value;
+  if (source === 'notification.attention') return notificationAttentionCount.value;
   return null;
 }
 

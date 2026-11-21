@@ -43,6 +43,8 @@ export const NotificationResponseSchema = z.object({
   correlationId: z.string().nullable().optional(),
   causationId: z.string().nullable().optional(),
   isRead: z.boolean(),
+  needsAttention: z.boolean().optional(),
+  nextAttentionAt: z.number().nullable().optional(),
   readAt: z.number().nullable().optional(),
   expiresAt: z.number().nullable().optional(),
   version: z.number(),
@@ -73,6 +75,13 @@ export const UnreadCountResponseSchema = z.object({
 
 // Residual 801: UnreadCountResponse dual retired from notification package port interface.
 export type UnreadCountResponse = z.infer<typeof UnreadCountResponseSchema>;
+
+/** Same identity-wide projection as the NeedsAttention list. */
+export const AttentionCountResponseSchema = z.object({
+  count: z.number().int().nonnegative(),
+  nextAttentionAt: z.number().nullable(),
+});
+export type AttentionCountResponse = z.infer<typeof AttentionCountResponseSchema>;
 
 // ============ Inferred response aliases ============
 // ADR-047: the RPC map imports ONLY inferred types from `../api`; these aliases

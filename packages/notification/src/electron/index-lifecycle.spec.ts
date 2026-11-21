@@ -66,6 +66,7 @@ const coreChannels = [
   NotificationChannels.DELETE,
   NotificationChannels.CLEAR_ALL,
   NotificationChannels.GET_UNREAD_COUNT,
+  NotificationChannels.GET_ATTENTION_COUNT,
   NotificationChannels.PREFERENCES_GET,
   NotificationChannels.PREFERENCES_UPDATE,
   NotificationChannels.EXECUTE_ACTION,
@@ -84,6 +85,7 @@ function createFakeInstance() {
     deleteNotification: vi.fn(() => ok(null as never)),
     batchDelete: vi.fn(() => ok(null as never)),
     getUnreadCount: vi.fn(() => ok(null as never)),
+    getAttentionCount: vi.fn(() => ok({ count: 0, nextAttentionAt: null })),
     getPreferences: vi.fn(() => ok(null as never)),
     updatePreferences: vi.fn(() => ok(null as never)),
   };

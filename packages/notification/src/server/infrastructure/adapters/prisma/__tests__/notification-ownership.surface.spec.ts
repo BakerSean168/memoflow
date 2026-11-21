@@ -148,9 +148,10 @@ describe('notification ownership surface', () => {
   });
 
   it('query and maintenance paths pass identity into related/delete after domain-service retirement', () => {
-    expect(queryService).toMatch(
-      /findByRelatedEntity\(\s*query\.identityId,\s*query\.relatedEntityType,/,
-    );
+    // Owner projection must load the complete scoped identity before related filters.
+    expect(queryService).toContain('this.projectIdentity(query.identityId)');
+    expect(queryService).toContain('findByIdentityId(identityId, {');
+    expect(queryService).toContain('notification.identityId === identityId');
     expect(maintenance).toContain('deleteMany(data.identityId, expiredIds)');
   });
 });

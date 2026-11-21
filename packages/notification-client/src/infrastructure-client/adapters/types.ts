@@ -20,4 +20,5 @@ export type {
   QueryNotificationsRequest,
   NotificationListResponse,
   UnreadCountResponse,
+  AttentionCountResponse,
 } from '../../application-client/ports/notification-api-client.port';

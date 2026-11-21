@@ -1,3 +1,9 @@
+import type {
+  NotificationOwnerAttention,
+  NotificationOwnerAttentionReader,
+} from '@memoflow/notification-contracts';
+import type { RoutineOccurrenceTruthStore } from '../../domain/ports/routine-occurrence-truth-store.port';
+import type { RoutineTemporaryOverrideStore } from '../../domain/ports/routine-temporary-override-store.port';
 import type { JsonValue } from '@memoflow/transport-contracts/result';
 import type { RoutineCoachCommandPort } from './routine-coach-command.service';
 
@@ -28,6 +34,10 @@ interface Registration<TInput> {
   readonly execute: (invocation: Invocation<TInput>) => Promise<Receipt>;
 }
 export interface RoutineNotificationOwnerCommandRegistry {
+  registerAttentionReader(
+    workflowKey: string,
+    reader: NotificationOwnerAttentionReader,
+  ): () => void;
   register<TInput>(registration: Registration<TInput>): () => void;
 }
 
@@ -75,8 +85,12 @@ function assertOwnerMatches(invocation: Invocation<RoutineOccurrenceActionInput>
 export function registerRoutineNotificationOwnerCommands(
   registry: RoutineNotificationOwnerCommandRegistry,
   routineCommandPort: RoutineCoachCommandPort,
+  attentionReader?: NotificationOwnerAttentionReader,
 ): () => void {
   const inputSchema = { parse: parseRoutineOccurrenceInput };
+  const disposeAttention = attentionReader
+    ? registry.registerAttentionReader('routine.intervention', attentionReader)
+    : undefined;
 
   const disposeComplete = registry.register<RoutineOccurrenceActionInput>({
     workflowKey: 'routine.intervention',
@@ -125,7 +139,73 @@ export function registerRoutineNotificationOwnerCommands(
   });
 
   return () => {
+    disposeAttention?.();
     disposeSnooze();
     disposeComplete();
+  };
+}
+
+/** Routine owns occurrence/snooze truth; Notification only consumes this projection. */
+export function createRoutineNotificationAttentionReader(deps: {
+  occurrenceTruthStore: RoutineOccurrenceTruthStore;
+  temporaryOverrideStore: RoutineTemporaryOverrideStore;
+}): NotificationOwnerAttentionReader {
+  return async ({ identityId, notifications, now }) => {
+    const candidates = notifications.flatMap((notification) => {
+      const action = notification.actions?.find(
+        (candidate) =>
+          candidate.kind === 'owner-command' &&
+          candidate.owner.type === 'routine-occurrence' &&
+          candidate.commandKey === 'routine.complete',
+      );
+      if (action?.kind !== 'owner-command') return [];
+      try {
+        const input = parseRoutineOccurrenceInput(action.input);
+        if (input.occurrenceKey !== action.owner.id) return [];
+        return [{ notification, input }];
+      } catch {
+        return [];
+      }
+    });
+    const occurrences = await deps.occurrenceTruthStore.listOccurrences({ identityId });
+    const occurrenceByKey = new Map(
+      occurrences
+        .filter((occurrence) => occurrence.identityId === identityId)
+        .map((occurrence) => [
+          JSON.stringify([occurrence.routineId, occurrence.occurrenceKey]),
+          occurrence,
+        ]),
+    );
+    const overrides = new Map(
+      await Promise.all(
+        [...new Set(candidates.map(({ input }) => input.routineId))].map(
+          async (routineId) =>
+            [
+              routineId,
+              await deps.temporaryOverrideStore.findRoutineTemporaryOverride({
+                identityId,
+                routineId,
+              }),
+            ] as const,
+        ),
+      ),
+    );
+    const result = new Map<string, NotificationOwnerAttention>();
+    for (const { notification, input } of candidates) {
+      const groupKey = JSON.stringify([input.routineId, input.occurrenceKey]);
+      const occurrence = occurrenceByKey.get(groupKey);
+      if (!occurrence) continue;
+      const override = overrides.get(input.routineId);
+      const snoozeUntil = override?.snoozeUntil == null ? 0 : Number(override.snoozeUntil);
+      const suppressUntil = override?.suppressUntil == null ? 0 : Number(override.suppressUntil);
+      const dueAt = Math.max(Number(occurrence.becameDueAt), snoozeUntil, suppressUntil);
+      const open = occurrence.resolutionState === 'Open';
+      result.set(String(notification.id), {
+        groupKey,
+        needsAction: open && dueAt <= now,
+        nextAttentionAt: open && dueAt > now ? dueAt : null,
+      });
+    }
+    return result;
   };
 }

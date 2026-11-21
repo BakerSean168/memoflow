@@ -2589,7 +2589,7 @@
         "status": "none-verified",
         "testFiles": []
       },
-      "sourceSha256": "75b93ec1f69b316b709582e621661f838d179000a4b462bedb454174aad66d04"
+      "sourceSha256": "6caae193337b13385d712fed15bc058ba723c2ad8a4d8d75e925d54271389fdb"
     },
     {
       "path": "packages/patterns/src/events/create-event-bus-adapter-dual.surface.spec.ts",
