@@ -8,13 +8,17 @@ import {
   sessionMiddleware,
 } from 'better-auth/api';
 import { getOAuthProviderApi, getOAuthProviderState } from '@better-auth/oauth-provider';
-import { DEFAULT_EXTERNAL_AGENT_RATE_LIMITS } from '@memoflow/agent-gateway';
+import {
+  DEFAULT_EXTERNAL_AGENT_RATE_LIMITS,
+  type GatewayAuditEvent,
+} from '@memoflow/agent-gateway';
+import type { Prisma } from '@memoflow/database';
 import {
   CONNECTION_CLAIM,
   CONNECTION_LIFETIME_MS,
-  EXTERNAL_AGENT_OAUTH_SCOPES,
-  EXTERNAL_AGENT_SCOPES,
   createExternalAgentProvider,
+  externalAgentOAuthScopes,
+  externalAgentScopes,
   type CimdFetchTransport,
   type ExternalAgentOAuthOptions,
 } from './external-agent-provider';
@@ -33,6 +37,9 @@ export interface VerifiedOAuthPrincipal {
   readonly credentialId: string;
   readonly credentialType: 'oauth';
   readonly scopes: readonly string[];
+  readonly clientId: string;
+  /** Consent scopes current at authentication time; revalidated again in the write transaction. */
+  readonly consentScopes: readonly string[];
 }
 
 /** Product grant policy around the provider's code/PKCE/token implementation. */
@@ -41,15 +48,42 @@ export function createExternalAgentOAuth(
   options: ExternalAgentOAuthOptions,
   closureBlocked: (identityId: string) => Promise<boolean>,
   cimdFetch?: CimdFetchTransport,
+  resolveIdentity?: (request: Request) => Promise<string | null>,
 ) {
   const db = store.db;
   const requests = new AsyncLocalStorage<{
     acceptingConsent: boolean;
     refresh?: { userId: string; clientId: string };
     revokedConnection?: string;
+    revokedOwner?: { userId: string; clientId: string };
     codeConnections?: string[];
+    consentGrant?: {
+      userId: string;
+      clientId: string;
+      scopes: string[];
+      credentialId?: string;
+    };
   }>();
+  const allowWrite = options.writeEnabled === true;
+  const allowedOAuthScopes = externalAgentOAuthScopes(allowWrite);
+  const allowedScopes = externalAgentScopes(allowWrite);
   const invalidGrant = () => new APIError('BAD_REQUEST', { error: 'invalid_grant' });
+  function audit(
+    event: Omit<GatewayAuditEvent, 'version' | 'durationMs' | 'requestId' | 'traceId'>,
+    requestId = 'unavailable',
+  ) {
+    try {
+      options.audit?.({
+        ...event,
+        version: '1',
+        requestId,
+        traceId: 'unavailable',
+        durationMs: 0,
+      });
+    } catch {
+      /* Audit collection never changes an OAuth response. */
+    }
+  }
 
   async function activeUser(userId: string) {
     return !(await closureBlocked(userId)) && (await options.accountIsActive(userId));
@@ -89,7 +123,7 @@ export function createExternalAgentOAuth(
             throw new APIError('FORBIDDEN', { error: 'access_denied' });
           return false;
         },
-        consentReferenceId: async ({ user }) => {
+        consentReferenceId: async ({ user, scopes }) => {
           const query = new URLSearchParams((await getOAuthProviderState())?.query);
           const clientId = query.get('client_id');
           if (
@@ -99,6 +133,11 @@ export function createExternalAgentOAuth(
             !(await activeUser(user.id))
           )
             throw new APIError('FORBIDDEN', { error: 'access_denied' });
+          const store = requests.getStore();
+          const rememberGrant = (credentialId: string) => {
+            if (store?.acceptingConsent)
+              store.consentGrant = { userId: user.id, clientId, scopes: [...scopes], credentialId };
+          };
           const existing = await db.externalAgentConnection.findFirst({
             where: {
               userId: user.id,
@@ -109,9 +148,12 @@ export function createExternalAgentOAuth(
             },
             orderBy: { createdAt: 'desc' },
           });
-          if (existing) return existing.id;
+          if (existing) {
+            rememberGrant(existing.id);
+            return existing.id;
+          }
           // No product authority is created by login, a rejected consent, or discovery.
-          if (!requests.getStore()?.acceptingConsent) return 'ungranted';
+          if (!store?.acceptingConsent) return 'ungranted';
           const connection = await db.externalAgentConnection.create({
             data: {
               id: randomUUID(),
@@ -121,6 +163,7 @@ export function createExternalAgentOAuth(
               expiresAt: new Date(Date.now() + CONNECTION_LIFETIME_MS),
             },
           });
+          rememberGrant(connection.id);
           return connection.id;
         },
       },
@@ -131,8 +174,7 @@ export function createExternalAgentOAuth(
         if (
           !grant ||
           !scopes.every(
-            (scope) =>
-              grant.consent.scopes.includes(scope) && EXTERNAL_AGENT_OAUTH_SCOPES.includes(scope),
+            (scope) => grant.consent.scopes.includes(scope) && allowedOAuthScopes.includes(scope),
           )
         )
           throw invalidGrant();
@@ -171,8 +213,10 @@ export function createExternalAgentOAuth(
               const digest = await api.hashToken(ctx.body.token, 'refresh_token');
               const token = await db.oauthRefreshToken.findUnique({ where: { token: digest } });
               if (token && token.clientId !== ctx.body.client_id) throw invalidGrant();
-              if (request && token?.clientId === ctx.body.client_id && token?.referenceId)
+              if (request && token?.clientId === ctx.body.client_id && token?.referenceId) {
                 request.revokedConnection = token.referenceId;
+                request.revokedOwner = { userId: token.userId, clientId: token.clientId };
+              }
               return;
             }
             if (ctx.path !== '/oauth2/token') return;
@@ -204,9 +248,18 @@ export function createExternalAgentOAuth(
             if (!token || token.clientId !== input.data.client_id || !token.referenceId)
               throw invalidGrant();
             const grant = await currentGrant(token.referenceId, token.userId, token.clientId);
-            const requestedScopes: string[] =
-              typeof ctx.body.scope === 'string' ? ctx.body.scope.split(' ') : token.scopes;
-            if (!grant || !requestedScopes.every((scope) => grant.consent.scopes.includes(scope)))
+            // Explicit refresh scopes must still be grantable; an unspecified
+            // scope keeps the stored set, and the call path filters write scopes
+            // out while the OAuth write switch is off.
+            const explicitScopes: string[] | undefined =
+              typeof ctx.body.scope === 'string' ? ctx.body.scope.split(' ') : undefined;
+            const requestedScopes: string[] = explicitScopes ?? token.scopes;
+            if (
+              !grant ||
+              !requestedScopes.every((scope) => grant.consent.scopes.includes(scope)) ||
+              (explicitScopes !== undefined &&
+                !explicitScopes.every((scope) => allowedOAuthScopes.includes(scope)))
+            )
               throw invalidGrant();
             if (!request) throw invalidGrant();
             request.refresh = { userId: token.userId, clientId: token.clientId };
@@ -230,14 +283,34 @@ export function createExternalAgentOAuth(
           const client = await getOAuthProviderApi(ctx, provider.options).getClient(clientId);
           if (!client || client.disabled) throw new APIError('FORBIDDEN');
           const scopes = (query.get('scope') ?? '').split(' ').filter(Boolean);
-          if (!scopes.every((scope) => EXTERNAL_AGENT_OAUTH_SCOPES.includes(scope)))
+          if (!scopes.every((scope) => allowedOAuthScopes.includes(scope)))
             throw new APIError('FORBIDDEN');
+          const userId = ctx.context.session.user.id;
+          const existing = await db.externalAgentConnection.findFirst({
+            where: {
+              userId,
+              clientId,
+              resource: options.resource,
+              revokedAt: null,
+              expiresAt: { gt: new Date() },
+            },
+            orderBy: { createdAt: 'desc' },
+          });
+          const prior = existing
+            ? await db.oauthConsent.findFirst({
+                where: { referenceId: existing.id, userId, clientId },
+                select: { scopes: true },
+              })
+            : null;
           return ctx.json({
             clientId,
+            clientHost: new URL(clientId).host,
             name: client.name ?? clientId,
             scopes,
+            existingScopes: prior?.scopes ?? [],
             resource: options.resource,
             lifetimeDays: 90,
+            writeEnabled: allowWrite,
           });
         },
       ),
@@ -253,11 +326,19 @@ export function createExternalAgentOAuth(
         acceptingConsent: boolean;
         refresh?: { userId: string; clientId: string };
         revokedConnection?: string;
+        revokedOwner?: { userId: string; clientId: string };
         codeConnections?: string[];
+        consentGrant?: {
+          userId: string;
+          clientId: string;
+          scopes: string[];
+          credentialId?: string;
+        };
       } = {
         acceptingConsent:
           path.endsWith('/oauth2/consent') && input.success && input.data.accept === true,
       };
+      const requestId = request.headers.get('x-request-id') ?? 'unavailable';
       const run = () =>
         requests.run(state, async () => {
           const response = await operation();
@@ -277,6 +358,19 @@ export function createExternalAgentOAuth(
               where: { id: state.revokedConnection, revokedAt: null },
               data: { revokedAt: new Date() },
             });
+            audit(
+              {
+                effect: 'credential',
+                scopeDecision: 'allowed',
+                credentialType: 'oauth',
+                credentialId: state.revokedConnection,
+                clientId: state.revokedOwner?.clientId,
+                identityId: state.revokedOwner?.userId,
+                tool: 'oauth_revoke',
+                outcome: 'REVOKED',
+              },
+              requestId,
+            );
           }
           for (const id of new Set(state.codeConnections)) {
             if ((await db.oauthRefreshToken.count({ where: { referenceId: id } })) === 0) {
@@ -287,6 +381,42 @@ export function createExternalAgentOAuth(
             }
           }
           if (path.endsWith('/oauth2/consent') && !response.ok) throw response;
+          if (path.endsWith('/oauth2/consent') && response.ok) {
+            const granted = state.consentGrant;
+            if (granted)
+              audit(
+                {
+                  effect: 'credential',
+                  scopeDecision: 'allowed',
+                  credentialType: 'oauth',
+                  credentialId: granted.credentialId,
+                  clientId: granted.clientId,
+                  identityId: granted.userId,
+                  tool: 'oauth_consent_grant',
+                  outcome: 'OK',
+                },
+                requestId,
+              );
+            else if (input.success && input.data.accept === false) {
+              const identityId = await (resolveIdentity ?? options.resolveIdentity)?.(
+                request,
+              ).catch(() => null);
+              audit(
+                {
+                  effect: 'credential',
+                  scopeDecision: 'denied',
+                  credentialType: 'oauth',
+                  clientId:
+                    new URLSearchParams(String(input.data.oauth_query ?? '')).get('client_id') ??
+                    undefined,
+                  identityId: identityId ?? undefined,
+                  tool: 'oauth_consent_deny',
+                  outcome: 'DENIED',
+                },
+                requestId,
+              );
+            }
+          }
           return response;
         });
       return ['/oauth2/token', '/oauth2/consent', '/oauth2/revoke'].some((suffix) =>
@@ -306,7 +436,7 @@ export function createExternalAgentOAuth(
         const grant = await currentGrant(claims[CONNECTION_CLAIM], claims.sub, claims.client_id);
         if (!grant) return null;
         const tokenScopes = claims.scope.split(' ');
-        const scopes = EXTERNAL_AGENT_SCOPES.filter(
+        const scopes = allowedScopes.filter(
           (scope) => tokenScopes.includes(scope) && grant.consent.scopes.includes(scope),
         );
         if (!scopes.length) return null;
@@ -319,6 +449,8 @@ export function createExternalAgentOAuth(
           credentialId: grant.connection.id,
           credentialType: 'oauth',
           scopes,
+          clientId: claims.client_id,
+          consentScopes: grant.consent.scopes,
         };
       });
     },
@@ -387,4 +519,83 @@ export function createExternalAgentOAuth(
       });
     },
   };
+}
+
+/**
+ * Revalidates an OAuth grant using the mutation transaction's own connection.
+ * Connection and consent rows are locked with `FOR SHARE` through the
+ * mutation/receipt commit, matching the PAT authority semantics (#971).
+ * @param tx - Receipt transaction.
+ * @param principal - Verified bearer principal from the gateway.
+ * @param options - OAuth write switch and the host's account-activity check.
+ * @param requiredScope - Scope the current tool needs.
+ * @returns Current consent scopes for receipt metadata, or `null` when stale.
+ */
+export async function readExternalAgentOAuthAuthority(
+  tx: Prisma.TransactionClient,
+  principal: {
+    identityId: string;
+    credentialId: string;
+    clientId: string;
+    scopes: readonly string[];
+  },
+  options: {
+    writeEnabled: boolean;
+    accountIsActive: (identityId: string) => Promise<boolean>;
+  },
+  requiredScope: string,
+): Promise<{ consentScopes: readonly string[] } | null> {
+  if (!options.writeEnabled) return null;
+  // SHARE blocks revocation/scope updates until the receipt commits.
+  await tx.$queryRaw`
+    SELECT id FROM external_agent_connections WHERE id = ${principal.credentialId} FOR SHARE
+  `;
+  const connection = await tx.externalAgentConnection.findUnique({
+    where: { id: principal.credentialId },
+  });
+  if (
+    !connection ||
+    connection.userId !== principal.identityId ||
+    connection.clientId !== principal.clientId ||
+    connection.revokedAt !== null ||
+    connection.expiresAt.getTime() <= Date.now()
+  )
+    return null;
+  await tx.$queryRaw`
+    SELECT id FROM "oauthConsent"
+    WHERE "referenceId" = ${principal.credentialId}
+      AND "userId" = ${principal.identityId}
+      AND "clientId" = ${principal.clientId}
+    FOR SHARE
+  `;
+  const consent = await tx.oauthConsent.findFirst({
+    where: {
+      referenceId: principal.credentialId,
+      userId: principal.identityId,
+      clientId: principal.clientId,
+    },
+  });
+  if (
+    !consent ||
+    !consent.resources.includes(connection.resource) ||
+    !consent.scopes.includes(requiredScope) ||
+    principal.scopes.some((scope) => !consent.scopes.includes(scope))
+  )
+    return null;
+  const [client, user] = await Promise.all([
+    tx.oauthClient.findUnique({ where: { clientId: principal.clientId } }),
+    tx.cloudAuthUser.findUnique({
+      where: { id: principal.identityId },
+      select: { disabledAt: true },
+    }),
+  ]);
+  if (
+    !client ||
+    client.disabled === true ||
+    !user ||
+    user.disabledAt !== null ||
+    !(await options.accountIsActive(principal.identityId))
+  )
+    return null;
+  return { consentScopes: consent.scopes };
 }

@@ -1,4 +1,5 @@
 import { registerWriteTools } from './register-write-tools';
+import { createHash } from 'node:crypto';
 import { writeToolDescriptors, type GatewayWriteToolName } from '../write-tool-descriptors';
 import {
   assistedToolDescriptors,
@@ -31,6 +32,8 @@ interface Options {
   readonly toolCheckpoint: import('../ports').GatewayToolCheckpoint;
   readonly writes?: GatewayWritePort;
   readonly assisted?: GatewayAssistedPort;
+  /** OAuth write/assisted calls; `EAG_OAUTH_WRITE_ENABLED=1` only. */
+  readonly oauthWrites?: boolean;
   readonly audience: string;
   readonly trustedOrigins: readonly string[];
   readonly cursorSecret: string;
@@ -146,6 +149,9 @@ export function createReadGateway(options: Options) {
       let tool: GatewayAuditEvent['tool'] = 'transport';
       let identityId: string | undefined;
       let credentialId: string | undefined;
+      let credentialType: 'pat' | 'oauth' | undefined;
+      let clientId: string | undefined;
+      let consentScopesHash: string | undefined;
       let outcome = 'TRANSPORT_PENDING';
       let scopeDecision: GatewayAuditEvent['scopeDecision'] = 'denied';
       const reject = (status: number, code: string) => {
@@ -190,6 +196,14 @@ export function createReadGateway(options: Options) {
         if (!principal) return reject(401, 'INVALID_CREDENTIAL');
         identityId = principal.identityId;
         credentialId = principal.credentialId;
+        credentialType = principal.credentialType;
+        clientId = principal.clientId;
+        if (principal.consentScopes)
+          consentScopesHash = createHash('sha256')
+            .update([...principal.consentScopes].sort().join(' '))
+            .digest('hex');
+        const oauthWrites = options.oauthWrites === true && principal.credentialType === 'oauth';
+        const mayWrite = principal.credentialType === 'pat' || oauthWrites;
         if (
           !principal.scopes.some(
             (scope) =>
@@ -202,7 +216,7 @@ export function createReadGateway(options: Options) {
               scope === 'schedules:read' ||
               scope === 'relations:read' ||
               ((options.writes || options.assisted) &&
-                principal.credentialType === 'pat' &&
+                mayWrite &&
                 (scope === 'goals:write' ||
                   scope === 'tasks:write' ||
                   scope === 'routines:write' ||
@@ -245,10 +259,9 @@ export function createReadGateway(options: Options) {
               if (
                 (isWriteToolName(name) && !options.writes) ||
                 (isAssistedToolName(name) && !options.assisted) ||
-                // Deliberate boundary: writes are PAT-only until the OAuth
-                // write-consent design conditions are met (#1033).
-                ((isWriteToolName(name) || isAssistedToolName(name)) &&
-                  principal.credentialType !== 'pat')
+                // Scope already gated this call; the switch hides write tools
+                // from OAuth credentials when EAG_OAUTH_WRITE_ENABLED=0.
+                ((isWriteToolName(name) || isAssistedToolName(name)) && !mayWrite)
               ) {
                 scopeDecision = 'denied';
                 return reject(404, 'DISABLED');
@@ -258,10 +271,7 @@ export function createReadGateway(options: Options) {
                 scopeDecision = 'denied';
                 return reject(404, 'DISABLED');
               }
-              if (
-                isAssistedToolName(name) &&
-                (!options.assisted || principal.credentialType !== 'pat')
-              ) {
+              if (isAssistedToolName(name) && (!options.assisted || !mayWrite)) {
                 scopeDecision = 'denied';
                 return reject(404, 'DISABLED');
               }
@@ -399,6 +409,9 @@ export function createReadGateway(options: Options) {
             registerReadTools(server, options, context, budget, principal.scopes, call);
             const authority: import('../ports').GatewayWriteAuthority = {
               connectionId: principal.credentialId,
+              credentialType: principal.credentialType,
+              clientId: principal.clientId,
+              consentScopesHash,
               scopes: principal.scopes,
               authorize: async () => {
                 const current = await within(
@@ -418,7 +431,7 @@ export function createReadGateway(options: Options) {
                   throw new ControlledError('FORBIDDEN');
               },
             };
-            if (options.writes && principal.credentialType === 'pat')
+            if (options.writes && mayWrite)
               registerWriteTools(
                 server,
                 options.writes,
@@ -427,7 +440,7 @@ export function createReadGateway(options: Options) {
                 authority,
                 call,
               );
-            if (options.assisted && principal.credentialType === 'pat')
+            if (options.assisted && mayWrite)
               registerAssistedTools(server, options.assisted, context, authority, call);
 
             return server;
@@ -484,6 +497,9 @@ export function createReadGateway(options: Options) {
             traceId: requestContext.traceId,
             identityId,
             credentialId,
+            credentialType,
+            clientId,
+            consentScopesHash,
             tool,
             outcome,
             durationMs: Date.now() - started,

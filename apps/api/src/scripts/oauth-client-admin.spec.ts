@@ -126,9 +126,14 @@ describe('OAuth client seeding', () => {
     expect(memory.row(clientId)?.disabled).toBe(false);
   });
 
-  it('rejects write scopes and non-https client ids', async () => {
+  it('accepts the shared write scopes and rejects unknown scopes or non-https client ids', async () => {
     const memory = memoryDb();
-    await expect(seedOAuthClient(memory.db, { ...seed, scopes: ['goals:write'] })).rejects.toThrow(
+    const withWrite = await seedOAuthClient(memory.db, {
+      ...seed,
+      scopes: ['goals:read', 'goals:write', 'tasks:write'],
+    });
+    expect(withWrite.scopes).toEqual(['goals:read', 'goals:write', 'tasks:write']);
+    await expect(seedOAuthClient(memory.db, { ...seed, scopes: ['admin:write'] })).rejects.toThrow(
       /not available to OAuth clients/,
     );
     await expect(

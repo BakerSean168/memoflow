@@ -11,6 +11,12 @@ export const EXTERNAL_MUTATION_TRANSACTION_OPTIONS = {
   timeout: 15_000,
   maxWait: 2_000,
 } as const;
+export interface ExternalMutationReceiptMetadata {
+  readonly credentialType: 'pat' | 'oauth';
+  readonly clientId?: string;
+  /** Consent scopes locked in the same transaction; OAuth only. */
+  readonly consentScopes?: readonly string[];
+}
 export interface ExternalMutationAuthority {
   readonly connectionId: string;
   /**
@@ -21,6 +27,8 @@ export interface ExternalMutationAuthority {
   authorize(): Promise<void>;
   /** Optional owner-host check using this transaction, without another pool connection. */
   authorizeInTransaction?(tx: Prisma.TransactionClient): Promise<void>;
+  /** Read after `authorizeInTransaction` so OAuth metadata reflects the locked consent. */
+  receiptMetadata?(): ExternalMutationReceiptMetadata | undefined;
   readonly receiptScope?: 'credential';
 }
 function canonical(value: unknown): string {
@@ -90,6 +98,7 @@ export async function runExternalMutation<T extends { receiptId: string }>(
       const result = schema.parse({ receiptId, ...(await work(tx)) });
       if (Buffer.byteLength(JSON.stringify(result)) > 240 * 1024)
         throw new ExternalMutationError('RESPONSE_TOO_LARGE');
+      const metadata = authority.receiptMetadata?.();
       await tx.externalMutationReceipt.create({
         data: {
           id: receiptId,
@@ -98,6 +107,9 @@ export async function runExternalMutation<T extends { receiptId: string }>(
           capability,
           inputDigest: digest,
           resultJson: JSON.stringify(result),
+          credentialType: metadata?.credentialType ?? null,
+          clientId: metadata?.clientId ?? null,
+          consentScopes: metadata?.consentScopes ? [...metadata.consentScopes] : [],
         },
       });
       return { ...result, replayed: false };

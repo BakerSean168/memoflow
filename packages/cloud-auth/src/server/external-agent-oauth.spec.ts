@@ -63,7 +63,74 @@ describe('production external-agent OAuth composition', () => {
     expect(await protectedResource.json()).toMatchObject({
       resource,
       authorization_servers: [issuer],
-      scopes_supported: ['goals:read', 'tasks:read'],
+      scopes_supported: [
+        'goals:read',
+        'tasks:read',
+        'routines:read',
+        'notifications:read',
+        'schedules:read',
+        'labels:read',
+        'relations:read',
+        'ai:read',
+      ],
+    });
+  });
+
+  it('publishes all twelve shared scopes when the OAuth write switch is on', async () => {
+    const memory: MemoryDB = Object.fromEntries(
+      [
+        'cloudAuthUser',
+        'cloudAuthSession',
+        'cloudAuthProviderAccount',
+        'cloudAuthVerification',
+        'cloudAuthDeviceCode',
+        'jwks',
+        'oauthClient',
+        'oauthResource',
+        'oauthClientResource',
+        'oauthAccessToken',
+        'oauthRefreshToken',
+        'oauthConsent',
+        'oauthClientAssertion',
+      ].map((name) => [name, []]),
+    );
+    const auth = createCloudAuth(
+      {
+        database: {} as never,
+        baseUrl: issuer,
+        secret: 'oauth-fixture-only-secret-at-least-thirty-two-characters',
+        deviceVerificationUrl: 'https://app.memo.test/auth/device',
+        trustedOrigins: ['https://app.memo.test'],
+        userProvisioner: { provision: vi.fn() },
+        emailDelivery: { send: vi.fn() },
+        externalAgents: {
+          resource,
+          webOrigin: 'https://app.memo.test',
+          allowedClientIds: ['https://chatgpt.com/oauth/codex/client.json'],
+          accountIsActive: async () => true,
+          writeEnabled: true,
+        },
+      },
+      { database: memoryAdapter(memory) },
+    );
+    const protectedResource = await auth.handler(
+      new Request('https://api.memo.test/.well-known/oauth-protected-resource/mcp'),
+    );
+    expect(await protectedResource.json()).toMatchObject({
+      scopes_supported: [
+        'goals:read',
+        'tasks:read',
+        'routines:read',
+        'notifications:read',
+        'schedules:read',
+        'labels:read',
+        'relations:read',
+        'ai:read',
+        'goals:write',
+        'tasks:write',
+        'routines:write',
+        'notifications:write',
+      ],
     });
   });
 });

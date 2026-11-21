@@ -5,9 +5,9 @@ import { permissionOperationForTool, type PermissionObject } from './operation-c
 import type { PermissionRepository } from './permission.repository';
 
 /**
- * Write scope that covers each mutating business object. PAT issuance already
- * required the user to choose these scopes; a PAT write inside one is a
- * pre-authorized mutation. Objects without a gateway write scope (knowledge,
+ * Write scope that covers each mutating business object. PAT issuance and OAuth
+ * consent both required the user to choose these scopes; a write inside one is
+ * a pre-authorized mutation. Objects without a gateway write scope (knowledge,
  * ai_permission) never qualify.
  */
 const WRITE_SCOPE_BY_OBJECT: Partial<Record<PermissionObject, string>> = {
@@ -45,10 +45,10 @@ export function createGatewayPermissionCheckpoint(
           // The credential id stays in every allow/deny audit record.
           agentId: `external-mcp:${principal.credentialId}`,
           operationId: operation?.id ?? tool,
-          // OAuth writes are intentionally never pre-authorized (#1033); only
-          // a PAT whose issuance already recorded this write scope qualifies.
+          // The Gateway already gates credential type and the OAuth write
+          // switch; a present write scope is the user's pre-authorization for
+          // either credential lane (#1054).
           preAuthorizedWrite:
-            principal.credentialType === 'pat' &&
             writeScope !== undefined &&
             principal.scopes.includes(writeScope) &&
             !(operation && PREAUTHORIZED_WRITE_EXCLUSIONS.has(operation.id)),

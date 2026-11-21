@@ -4,6 +4,9 @@ import type { Prisma, PrismaClient } from '../../generated/prisma/client.js';
 export interface ExternalAgentAuditRecord {
   readonly identityId?: string;
   readonly credentialId?: string;
+  readonly credentialType?: string;
+  readonly clientId?: string;
+  readonly consentScopesHash?: string;
   readonly effect: string;
   readonly tool: string;
   readonly outcome: string;
@@ -40,6 +43,9 @@ function toRow(event: ExternalAgentAuditRecord): Prisma.ExternalAgentAuditEventC
   return {
     identityId: event.identityId ?? null,
     credentialId: event.credentialId ?? null,
+    credentialType: event.credentialType ?? null,
+    clientId: event.clientId ?? null,
+    consentScopesHash: event.consentScopesHash ?? null,
     effect: event.effect,
     tool: event.tool,
     outcome: event.outcome,
@@ -204,6 +210,9 @@ export function createExternalAgentAuditQuery(db: PrismaClient): ExternalAgentAu
         items: rows.slice(0, take).map((row) => ({
           identityId: row.identityId ?? undefined,
           credentialId: row.credentialId ?? undefined,
+          credentialType: row.credentialType ?? undefined,
+          clientId: row.clientId ?? undefined,
+          consentScopesHash: row.consentScopesHash ?? undefined,
           effect: row.effect,
           tool: row.tool,
           outcome: row.outcome,

@@ -87,6 +87,7 @@ async function credential(identityId: string): Promise<GatewayWriteAuthority> {
   const pat = await pats.create(identityId, { name: 'Assisted fixture', scopes: ['tasks:write'] });
   return {
     connectionId: pat.id,
+    credentialType: 'pat',
     scopes: pat.scopes,
     authorize: async () => {
       const principal = await pats.authenticate(`Bearer ${pat.secret}`);

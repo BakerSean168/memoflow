@@ -29,6 +29,7 @@ test('production keeps external OAuth access disabled until the operator enables
   const environment = apiEnvironment();
   assert.equal(environment.EAG_READ_PILOT_ENABLED, '0');
   assert.equal(environment.EAG_OAUTH_ENABLED, '0');
+  assert.equal(environment.EAG_OAUTH_WRITE_ENABLED, '0');
   assert.equal(environment.EAG_WRITE_ENABLED, '0');
   assert.equal(environment.EAG_ROUTINE_WRITE_ENABLED, '0');
   assert.equal(environment.EAG_ASSISTED_ENABLED, '0');

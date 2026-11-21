@@ -91,14 +91,18 @@ function createExternalAgentClient(context: ExternalAgentRequestContext): Extern
       request('/api/auth/external-agent/consent-request', ExternalAgentConsentSchema, 'POST', {
         oauth_query: oauthQuery,
       }),
-    decideConsent: (oauthQuery, accept) =>
+    decideConsent: (oauthQuery, accept, scopes) =>
       request(
         '/api/auth/oauth2/consent',
         z.object({
           url: z.url().refine((url) => ['http:', 'https:'].includes(new URL(url).protocol)),
         }),
         'POST',
-        { oauth_query: oauthQuery, accept },
+        {
+          oauth_query: oauthQuery,
+          accept,
+          ...(scopes && scopes.length > 0 ? { scope: scopes.join(' ') } : {}),
+        },
       ),
     listConnections: () => list(`${CONNECTIONS_ROOT}/oauth`, z.array(OAuthConnectionSchema)),
     revokeConnection: (id) =>
