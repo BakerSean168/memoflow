@@ -146,6 +146,17 @@ const fixture = await vi.hoisted(async () => {
   };
 });
 
+// The native flow uses a synthetic RPC transport, so OS executable/auth checks must
+// use the same isolated environment. Unknown still requires the full driver probe;
+// otherwise a queued refresh can overwrite its ready result with host login state.
+vi.mock('../../../ai/src/server/local-agent/snapshot-cheap-check', async (importOriginal) => {
+  const actual =
+    await importOriginal<
+      typeof import('../../../ai/src/server/local-agent/snapshot-cheap-check')
+    >();
+  return { ...actual, cheapVerdict: vi.fn(async () => ({ kind: 'unknown' as const })) };
+});
+
 vi.mock('./useAI', async () => {
   const { ref } = await import('vue');
   return {
