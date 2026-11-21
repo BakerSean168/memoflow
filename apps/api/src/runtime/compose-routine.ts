@@ -3,6 +3,7 @@ import type { PrismaClient } from '@memoflow/database';
 import {
   createRoutinePrismaRepositories,
   createRoutinePortableCapability,
+  createRoutineNotificationAttentionReader,
   type RoutineCoachCommandPort,
 } from '@memoflow/routine';
 import {
@@ -20,6 +21,7 @@ export interface ComposeRoutineDependencies {
 
 export interface ComposedRoutine {
   readonly routineCommandPort: RoutineCoachCommandPort;
+  readonly notificationAttentionReader: ReturnType<typeof createRoutineNotificationAttentionReader>;
   readonly routineQueryPort: RoutineConfigurationQueryPort;
   readonly portableCapability: ReturnType<typeof createRoutinePortableCapability>;
 }
@@ -51,6 +53,10 @@ export function composeRoutine(dependencies: ComposeRoutineDependencies): Compos
   });
   return {
     routineCommandPort,
+    notificationAttentionReader: createRoutineNotificationAttentionReader({
+      occurrenceTruthStore: repositories.routineOccurrenceTruthStore,
+      temporaryOverrideStore: repositories.routineTemporaryOverrideStore,
+    }),
     routineQueryPort,
     portableCapability: createRoutinePortableCapability(repositories),
   };

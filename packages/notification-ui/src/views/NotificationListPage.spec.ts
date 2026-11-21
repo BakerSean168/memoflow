@@ -16,6 +16,11 @@ const viewMocks = vi.hoisted(() => ({
   isError: { __v_isRef: true, value: false },
   error: { __v_isRef: true, value: null as string | null },
   unreadCount: { __v_isRef: true, value: 0 },
+  attentionCount: { __v_isRef: true, value: 0 },
+  total: { __v_isRef: true, value: 0 },
+  hasMore: { __v_isRef: true, value: false },
+  isFetching: { __v_isRef: true, value: false },
+  isSuccess: { __v_isRef: true, value: true },
   hasUnread: { __v_isRef: true, value: false },
   refetch: vi.fn(async () => undefined),
   markAsRead: {
@@ -35,19 +40,29 @@ const viewMocks = vi.hoisted(() => ({
     })),
   },
   store: {
-    readFilter: 'all' as 'all' | 'unread',
-    setReadFilter: vi.fn<(value: 'all' | 'unread') => void>(),
+    filter: 'attention' as 'all' | 'attention',
+    pagination: { page: 1, pageSize: 20 },
+    setPage: vi.fn(),
+    setFilter: vi.fn<(value: 'all' | 'attention') => void>(),
   },
 }));
 
 vi.mock('../composables/useNotificationListQuery', () => ({
   useNotificationListQuery: () => ({
     notifications: viewMocks.notifications,
+    total: viewMocks.total,
+    hasMore: viewMocks.hasMore,
+    isFetching: viewMocks.isFetching,
+    isSuccess: viewMocks.isSuccess,
     isLoading: viewMocks.isLoading,
     isError: viewMocks.isError,
     error: viewMocks.error,
     refetch: viewMocks.refetch,
   }),
+}));
+
+vi.mock('../composables/useNotificationAttentionQuery', () => ({
+  useNotificationAttentionQuery: () => ({ attentionCount: viewMocks.attentionCount }),
 }));
 
 vi.mock('../composables/useNotificationUnreadQuery', () => ({
@@ -296,9 +311,12 @@ beforeEach(() => {
   viewMocks.error.value = null;
   viewMocks.unreadCount.value = 0;
   viewMocks.hasUnread.value = false;
-  viewMocks.store.readFilter = 'all';
-  viewMocks.store.setReadFilter.mockImplementation((value) => {
-    viewMocks.store.readFilter = value;
+  viewMocks.attentionCount.value = 0;
+  viewMocks.total.value = 0;
+  viewMocks.store.pagination.page = 1;
+  viewMocks.store.filter = 'attention';
+  viewMocks.store.setFilter.mockImplementation((value) => {
+    viewMocks.store.filter = value;
   });
   vi.clearAllMocks();
 });
@@ -324,6 +342,7 @@ describe('NotificationListPage', () => {
     mounted.wrapper.unmount();
 
     viewMocks.isError.value = false;
+    viewMocks.store.filter = 'all';
     mounted = await mountPage();
     const emptyState = mounted.wrapper.get('[data-testid="notifications-empty-state"]');
     expect(emptyState.text()).toContain('No notifications');
@@ -406,19 +425,20 @@ describe('NotificationListPage', () => {
     expect(wrapper.text()).not.toContain('raw router failure');
   });
 
-  it('routes collection filter changes through the existing read-filter store contract', async () => {
+  it('routes collection filter changes through the canonical attention-filter store contract', async () => {
+    viewMocks.attentionCount.value = 25;
     viewMocks.notifications.value = [createNotification()];
     viewMocks.unreadCount.value = 1;
     viewMocks.hasUnread.value = true;
     const { wrapper } = await mountPage();
 
-    const unreadFilter = wrapper.get('[data-testid="notification-filter-unread"]');
-    expect(unreadFilter.attributes('aria-selected')).toBe('false');
-    expect(wrapper.get('[data-testid="notification-unread-badge"]').text()).toBe('1');
+    const attentionFilter = wrapper.get('[data-testid="notification-filter-attention"]');
+    expect(attentionFilter.attributes('aria-selected')).toBe('true');
+    expect(wrapper.get('[data-testid="notification-attention-badge"]').text()).toBe('25');
 
-    await unreadFilter.trigger('click');
+    await wrapper.get('[data-testid="notification-filter-all"]').trigger('click');
 
-    expect(viewMocks.store.setReadFilter).toHaveBeenCalledWith('unread');
+    expect(viewMocks.store.setFilter).toHaveBeenCalledWith('all');
   });
 
   it('preserves Notification Center toolbar, filters, and scroll-host contracts', async () => {
@@ -427,7 +447,7 @@ describe('NotificationListPage', () => {
     expect(wrapper.get('[data-testid="notification-center"]')).toBeTruthy();
     expect(wrapper.get('[data-testid="notification-page-toolbar"]')).toBeTruthy();
     expect(wrapper.get('[data-testid="notification-filter-all"]')).toBeTruthy();
-    expect(wrapper.get('[data-testid="notification-filter-unread"]')).toBeTruthy();
+    expect(wrapper.get('[data-testid="notification-filter-attention"]')).toBeTruthy();
     expect(
       wrapper.get('[data-testid="notification-scroll-host"]').attributes('data-scroll-host'),
     ).toBe('notification');

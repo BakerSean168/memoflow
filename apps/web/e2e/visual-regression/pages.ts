@@ -181,6 +181,7 @@ const notifications = [
     type: 'Info',
     category: 'Goal',
     isRead: false,
+    needsAttention: true,
     isArchived: false,
     createdAt: stamp,
     updatedAt: stamp,
@@ -320,6 +321,7 @@ app.provide(keys.GOAL_KNOWLEDGE_SERVICE_KEY, {} as never);
 app.provide(keys.NOTIFICATION_SERVICE_KEY, {
   findNotifications: async () => ok({ notifications, total: 1 }),
   getUnreadCount: async () => ok({ count: 1 }),
+  getAttentionCount: async () => ok({ count: 1, nextAttentionAt: null }),
 } as never);
 app.provide(keys.SETTING_SERVICE_KEY, {
   getPreferenceProfile: async () => ok(profile),

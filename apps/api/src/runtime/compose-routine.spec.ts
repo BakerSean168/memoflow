@@ -8,6 +8,7 @@ const mocks = vi.hoisted(() => {
   const commandPort = { tag: 'routine-command-port' };
   const queryPort = { tag: 'routine-query-port' };
   const portableCapability = { tag: 'routine-portable-capability' };
+  const notificationAttentionReader = vi.fn();
   const repositories = {
     routineProfileStore: {
       tag: 'profile-store',
@@ -25,6 +26,8 @@ const mocks = vi.hoisted(() => {
     commandPort,
     queryPort,
     portableCapability,
+    notificationAttentionReader,
+    createRoutineNotificationAttentionReader: vi.fn(() => notificationAttentionReader),
     repositories,
     createRoutinePrismaRepositories: vi.fn(() => repositories),
     createRoutinePortableCapability: vi.fn(() => portableCapability),
@@ -39,6 +42,7 @@ const mocks = vi.hoisted(() => {
 vi.mock('@memoflow/routine', () => ({
   createRoutinePrismaRepositories: mocks.createRoutinePrismaRepositories,
   createRoutinePortableCapability: mocks.createRoutinePortableCapability,
+  createRoutineNotificationAttentionReader: mocks.createRoutineNotificationAttentionReader,
 }));
 
 vi.mock('@memoflow/routine/routine-runtime', () => ({
@@ -82,10 +86,15 @@ describe('composeRoutine', () => {
       localRuntimeAvailable: false,
     });
     expect(mocks.createRoutinePortableCapability).toHaveBeenCalledWith(mocks.repositories);
+    expect(mocks.createRoutineNotificationAttentionReader).toHaveBeenCalledWith({
+      occurrenceTruthStore: mocks.repositories.routineOccurrenceTruthStore,
+      temporaryOverrideStore: mocks.repositories.routineTemporaryOverrideStore,
+    });
     expect(composed).toEqual({
       routineCommandPort: mocks.commandPort,
       routineQueryPort: mocks.queryPort,
       portableCapability: mocks.portableCapability,
+      notificationAttentionReader: mocks.notificationAttentionReader,
     });
   });
 

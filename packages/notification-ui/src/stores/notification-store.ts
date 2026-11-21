@@ -1,45 +1,33 @@
-/**
- * Notification Store - Pinia 状态管理（UI state only）
- *
- * RefArch Phase 5（Query Cache authority pilot）后，Notification 的 server state
- * （list/count/loading/error/total）由 TanStack Vue Query 承载；本 store 只保留
- * page/pageSize 与 read filter 等 UI state 及其持久化。
- */
-
 import { defineStore } from 'pinia';
 
-/** Notification UI read filter（全部/未读）。 */
-export type NotificationReadFilter = 'all' | 'unread';
-
-export interface NotificationState {
-  pagination: { page: number; pageSize: number };
-  readFilter: NotificationReadFilter;
-}
+export type NotificationFilter = 'attention' | 'all';
 
 export const useNotificationStore = defineStore('notification', {
-  state: (): NotificationState => ({
+  state: () => ({
     pagination: { page: 1, pageSize: 20 },
-    readFilter: 'all',
+    filter: 'attention' as NotificationFilter,
   }),
-
   actions: {
-    setPage(p: number) {
-      this.pagination.page = p;
+    setPage(page: number) {
+      this.pagination.page = page;
     },
     setPageSize(size: number) {
       this.pagination.pageSize = size;
+      this.pagination.page = 1;
     },
-    setReadFilter(filter: NotificationReadFilter) {
-      this.readFilter = filter;
+    setFilter(filter: NotificationFilter) {
+      this.filter = filter;
+      this.pagination.page = 1;
     },
     reset() {
       this.$reset();
     },
   },
-
   persist: {
-    pick: ['pagination', 'readFilter'] as string[],
+    pick: ['pagination.pageSize', 'filter'] as string[],
+    afterHydrate: ({ store }) => {
+      store.pagination.page = 1;
+    },
   },
 });
-
 export type NotificationStoreType = ReturnType<typeof useNotificationStore>;

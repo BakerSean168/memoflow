@@ -31,6 +31,7 @@ import type {
   NotificationBatchResult,
   NotificationResponse,
   UnreadCountResponse,
+  AttentionCountResponse,
 } from '../api/response-schemas';
 
 // === Notification Module RPC Map ===
@@ -55,6 +56,7 @@ export type NotificationRpcMap = {
   // === Statistics ===
   'notification:get-stats': [GetNotificationStatsReq, GetNotificationStatsRes];
   'notification:unread-count': [void, UnreadCountResponse];
+  'notification:attention-count': [void, AttentionCountResponse];
 
   // === Dead-letter ===
   'notification:dead-letter-replay': [ReplayDeadLetterInvocation, NotificationResponse];

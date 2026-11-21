@@ -4,3 +4,4 @@
  */
 
 export * from './notification-requested';
+export * from './notification-attention';

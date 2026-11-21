@@ -129,7 +129,7 @@ import {
   BellRing,
   CalendarClock,
   Bell,
-  Check,
+  Eye,
   Trash2,
   ArrowUpRight,
   Archive,
@@ -206,7 +206,7 @@ const menuActions = computed<NotificationMenuAction[]>(() => {
     actions.push({
       key: 'markRead',
       label: menuLabel('markRead'),
-      icon: Check,
+      icon: Eye,
       handler: () => emit('mark-read', props.notification.id),
     });
   }

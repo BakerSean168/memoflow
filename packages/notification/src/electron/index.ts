@@ -161,6 +161,7 @@ const coreChannels = [
   NotificationChannels.DELETE,
   NotificationChannels.CLEAR_ALL,
   NotificationChannels.GET_UNREAD_COUNT,
+  NotificationChannels.GET_ATTENTION_COUNT,
   NotificationChannels.PREFERENCES_GET,
   NotificationChannels.PREFERENCES_UPDATE,
   NotificationChannels.EXECUTE_ACTION,
@@ -355,6 +356,10 @@ export function createNotificationElectronModule(
           );
         });
         installed.push(NotificationChannels.GET_UNREAD_COUNT);
+        ipcMain.handle(NotificationChannels.GET_ATTENTION_COUNT, async () =>
+          withAuthenticatedIdentity(ctx, (identityId) => controller.getAttentionCount(identityId)),
+        );
+        installed.push(NotificationChannels.GET_ATTENTION_COUNT);
         ipcMain.handle(NotificationChannels.PREFERENCES_GET, async () => {
           return withAuthenticatedValue(ctx, (requestContext) =>
             controller.getPreferences(requestContext),

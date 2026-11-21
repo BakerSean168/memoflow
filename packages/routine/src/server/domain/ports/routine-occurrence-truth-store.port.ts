@@ -74,6 +74,8 @@ export interface ApplyRoutineInteractionInput {
   readonly snoozeDurationMs?: number | null;
   /** Snooze product state committed atomically with the interaction fact. */
   readonly temporaryOverride?: RoutineTemporaryOverride | null;
+  /** Live commands require an Open occurrence; historical import retains its own ordering. */
+  readonly requireOpenOccurrence?: boolean;
   readonly metadata?: Readonly<Record<string, unknown>> | null;
 }
 

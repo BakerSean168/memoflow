@@ -22,6 +22,7 @@ import type {
   QueryNotificationsRequest,
   NotificationListResponse,
   UnreadCountResponse,
+  AttentionCountResponse,
 } from './ports/notification-api-client.port';
 
 // ─── Client Application Port ────────────────────────────────────────────────
@@ -47,6 +48,7 @@ export class NotificationClientService implements INotificationApiClient {
     this.batchDeleteNotifications = this.batchDeleteNotifications.bind(this);
     this.executeAction = this.executeAction.bind(this);
     this.getUnreadCount = this.getUnreadCount.bind(this);
+    this.getAttentionCount = this.getAttentionCount.bind(this);
     this.getPreferences = this.getPreferences.bind(this);
     this.updatePreferences = this.updatePreferences.bind(this);
   }
@@ -101,6 +103,10 @@ export class NotificationClientService implements INotificationApiClient {
     request: ExecuteNotificationActionReq,
   ): Promise<Result<ExecuteNotificationActionRes>> {
     return this.notificationApi.executeAction(request);
+  }
+
+  async getAttentionCount(): Promise<Result<AttentionCountResponse>> {
+    return this.notificationApi.getAttentionCount();
   }
 
   async getUnreadCount(): Promise<Result<UnreadCountResponse>> {

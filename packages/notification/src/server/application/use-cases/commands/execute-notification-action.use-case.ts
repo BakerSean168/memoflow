@@ -71,7 +71,20 @@ export class ExecuteNotificationActionUseCase {
       input.identityId,
       idempotencyKey,
     );
-    if (existing) return ok({ interaction: existing, action });
+    if (existing?.outcome === 'accepted') {
+      try {
+        if (action.kind === 'owner-command' && !notification.isRead) {
+          notification.markAsRead(this.clock());
+          await this.notificationRepository.save(notification);
+        }
+        return ok({ interaction: existing, action });
+      } catch (cause) {
+        return error(
+          'INTERNAL_ERROR',
+          cause instanceof Error ? cause.message : 'Failed to mark notification read',
+        );
+      }
+    }
 
     const occurredAt = this.clock().getTime();
     let outcome: 'accepted' | 'rejected' | 'failed' = 'accepted';
@@ -107,6 +120,14 @@ export class ExecuteNotificationActionUseCase {
         correlationId: notification.correlationId,
         causationId: notification.causationId,
       });
+      if (
+        interaction.outcome === 'accepted' &&
+        action.kind === 'owner-command' &&
+        !notification.isRead
+      ) {
+        notification.markAsRead(new Date(occurredAt));
+        await this.notificationRepository.save(notification);
+      }
       return ok({ interaction, action });
     } catch (cause) {
       await this.interactionRepository.record({

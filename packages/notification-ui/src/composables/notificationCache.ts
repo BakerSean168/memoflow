@@ -51,12 +51,31 @@ export function patchNotificationFromServer(
     if (!data) continue;
     queryClient.setQueryData<NotificationListResponse>(queryKey as QueryKey, {
       ...data,
-      notifications: data.notifications.map((n) => (n.id === notification.id ? notification : n)),
+      notifications: data.notifications.map((n) =>
+        n.id === notification.id
+          ? {
+              ...n,
+              ...notification,
+              needsAttention: n.needsAttention,
+              nextAttentionAt: n.nextAttentionAt,
+              actions: n.actions,
+            }
+          : n,
+      ),
     });
   }
   queryClient.setQueryData<NotificationClientDTO>(
     notificationUiHost.notificationQueryKeys.detail(identityScope, notification.id),
-    notification,
+    (previous) =>
+      previous
+        ? {
+            ...previous,
+            ...notification,
+            needsAttention: previous.needsAttention,
+            nextAttentionAt: previous.nextAttentionAt,
+            actions: previous.actions,
+          }
+        : notification,
   );
 }
 

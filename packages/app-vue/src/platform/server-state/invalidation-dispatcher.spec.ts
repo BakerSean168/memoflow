@@ -55,6 +55,7 @@ describe('invalidation-dispatcher — key mapping', () => {
     const keys = calledQueryKeys();
     expect(keys).toContainEqual(notificationQueryKeys.lists('id-1'));
     expect(keys).toContainEqual(notificationQueryKeys.unread('id-1'));
+    expect(keys).toContainEqual(notificationQueryKeys.attention('id-1'));
     expect(keys).not.toContainEqual(notificationQueryKeys.details('id-1'));
   });
 
@@ -96,6 +97,7 @@ describe('invalidation-dispatcher — key mapping', () => {
     const keys = calledQueryKeys();
     expect(keys).toContainEqual(notificationQueryKeys.lists('id-1'));
     expect(keys).toContainEqual(notificationQueryKeys.unread('id-1'));
+    expect(keys).toContainEqual(notificationQueryKeys.attention('id-1'));
     expect(keys).toContainEqual(notificationQueryKeys.detail('id-1', 'n-1'));
   });
 

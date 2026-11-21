@@ -79,7 +79,7 @@ describe('useNotificationListQuery (Query Cache authority pilot)', () => {
       service,
     });
     const { api: capsule } = mountNotificationComposable(
-      () => useNotificationListQuery({ page: 1, limit: 10 }),
+      () => useNotificationListQuery({ page: 1, limit: 10, filter: 'attention' }),
       { service, runtime },
     );
 
@@ -87,8 +87,16 @@ describe('useNotificationListQuery (Query Cache authority pilot)', () => {
     await vi.waitFor(() => expect(capsule.isLoading.value).toBe(false));
 
     expect(service.findNotifications).toHaveBeenCalledTimes(2);
-    expect(service.findNotifications).toHaveBeenCalledWith({ page: 1, limit: 20 });
-    expect(service.findNotifications).toHaveBeenCalledWith({ page: 1, limit: 10 });
+    expect(service.findNotifications).toHaveBeenCalledWith({
+      page: 1,
+      limit: 20,
+      needsAttention: true,
+    });
+    expect(service.findNotifications).toHaveBeenCalledWith({
+      page: 1,
+      limit: 10,
+      needsAttention: true,
+    });
   });
 
   it('does not refetch within the 30s stale window on remount (unread + list cached)', async () => {
@@ -174,11 +182,37 @@ describe('useNotificationListQuery (Query Cache authority pilot)', () => {
     });
 
     await vi.waitFor(() => expect(api.isLoading.value).toBe(false));
-    expect(service.findNotifications).toHaveBeenCalledWith({ page: 1, limit: 20 });
+    expect(service.findNotifications).toHaveBeenCalledWith({
+      page: 1,
+      limit: 20,
+      needsAttention: true,
+    });
 
     useNotificationStore().setPage(2);
     await vi.waitFor(() =>
-      expect(service.findNotifications).toHaveBeenCalledWith({ page: 2, limit: 20 }),
+      expect(service.findNotifications).toHaveBeenCalledWith({
+        page: 2,
+        limit: 20,
+        needsAttention: true,
+      }),
+    );
+  });
+  it('uses the canonical server filter and resets pagination when switching to All', async () => {
+    const service = makeService(
+      vi
+        .fn()
+        .mockResolvedValue(
+          ok(listResponse([createNotification({ isRead: true, needsAttention: true })], 45)),
+        ),
+    );
+    const { api } = mountNotificationComposable(() => useNotificationListQuery(), { service });
+    await vi.waitFor(() => expect(api.isLoading.value).toBe(false));
+    expect(api.notifications.value).toHaveLength(1);
+    expect(api.total.value).toBe(45);
+    useNotificationStore().setPage(3);
+    useNotificationStore().setFilter('all');
+    await vi.waitFor(() =>
+      expect(service.findNotifications).toHaveBeenLastCalledWith({ page: 1, limit: 20 }),
     );
   });
 });

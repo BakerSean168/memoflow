@@ -85,6 +85,7 @@ function createPortStub(): NotificationInboxPort {
     listNotifications: vi.fn(),
     getNotification: vi.fn(),
     getUnreadCount: vi.fn(),
+    getAttentionCount: vi.fn(),
     getPreferences: vi.fn(),
     queryDeadLetters: vi.fn(),
     replayDeadLetter: vi.fn(),

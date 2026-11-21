@@ -23,6 +23,7 @@ export interface NotificationInboxPort {
   restore(id: string, identityId: string): Promise<Result<unknown>>;
   markAllAsRead(identityId: string): Promise<Result<unknown>>;
   getUnreadCount(identityId: string): Promise<Result<unknown>>;
+  getAttentionCount(identityId: string): Promise<Result<unknown>>;
   batchMarkAsRead(data: MarkAsReadBatchReq, identityId: string): Promise<Result<unknown>>;
   batchDelete(data: DeleteNotificationsBatchReq, identityId: string): Promise<Result<unknown>>;
   cleanupOldNotifications(data: {

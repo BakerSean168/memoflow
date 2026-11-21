@@ -9,15 +9,16 @@
 withDefaults(
   defineProps<{
     variant?: 'primary' | 'secondary' | 'ghost';
+    type?: 'button' | 'submit';
     disabled?: boolean;
   }>(),
-  { variant: 'secondary', disabled: false },
+  { variant: 'secondary', disabled: false, type: 'button' },
 );
 </script>
 
 <template>
   <button
-    type="button"
+    :type="type"
     :disabled="disabled"
     class="inline-flex h-7 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border px-2.5 text-xs font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50"
     :class="{

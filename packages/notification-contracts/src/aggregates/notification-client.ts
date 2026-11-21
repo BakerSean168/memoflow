@@ -1,3 +1,7 @@
 /** Notification Fact client contract. Delivery execution is queried separately. */
 import type { NotificationServerDTO } from './notification-server';
-export type NotificationClientDTO = NotificationServerDTO;
+export type NotificationClientDTO = NotificationServerDTO & {
+  /** Derived from read and owner facts; never stored. */
+  needsAttention?: boolean;
+  nextAttentionAt?: number | null;
+};

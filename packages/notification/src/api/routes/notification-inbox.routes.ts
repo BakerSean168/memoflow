@@ -26,6 +26,7 @@ import {
   NotificationResponseSchema,
   NotificationBatchResultSchema,
   UnreadCountResponseSchema,
+  AttentionCountResponseSchema,
   MarkAllNotificationsReadInvocationSchema,
   MarkNotificationReadInvocationSchema,
   MarkNotificationUnreadInvocationSchema,
@@ -89,6 +90,7 @@ export function registerNotificationInboxRoutes(
           topic: parseString(req.query?.topic),
           archiveState: parseString(req.query?.archiveState),
           isRead: parseBoolean(req.query?.isRead),
+          needsAttention: parseBoolean(req.query?.needsAttention),
           relatedEntityType: parseString(req.query?.relatedEntityType),
           relatedEntityId: parseString(req.query?.relatedEntityId),
           startDate: parseNumber(req.query?.startDate),
@@ -172,6 +174,17 @@ export function registerNotificationInboxRoutes(
     },
     [auth],
     (_req, ctx) => controller.getUnreadCount(ctx.identityId),
+  );
+
+  r.route(
+    {
+      method: 'get',
+      path: '/attention-count',
+      summary: '获取待处理通知数量',
+      responses: { 200: successResponse(AttentionCountResponseSchema, '获取成功') },
+    },
+    [auth],
+    (_req, ctx) => controller.getAttentionCount(ctx.identityId),
   );
 
   // PATCH /read-all — Mark all notifications as read (must be before /:id)

@@ -14,7 +14,8 @@ import { useI18n } from 'vue-i18n';
 import type { NotificationClientDTO } from '@memoflow/notification-contracts';
 import { translateResultErrorMessage } from '@memoflow/http-client';
 import { notificationUiHost } from '../notification-ui-host';
-import { useNotificationStore } from '../stores/notification-store';
+import { nextAttentionRefresh } from './notificationAttentionRefresh';
+import { useNotificationStore, type NotificationFilter } from '../stores/notification-store';
 
 /** Options for the Notification list query. 通知列表查询选项。 */
 export interface UseNotificationListQueryOptions {
@@ -24,6 +25,7 @@ export interface UseNotificationListQueryOptions {
   limit?: number;
   /** Server-side `isRead` filter. 服务端 isRead 过滤。 */
   isRead?: boolean;
+  filter?: NotificationFilter;
   /** Server-side archive filter. */
   archiveState?: 'active' | 'archived' | 'all';
   /** Server-side type filter. 服务端 type 过滤。 */
@@ -52,6 +54,7 @@ export function useNotificationListQuery(options: UseNotificationListQueryOption
       page: options.page ?? store.pagination.page,
       limit: options.limit ?? store.pagination.pageSize,
       isRead: options.isRead,
+      needsAttention: (options.filter ?? store.filter) === 'attention' ? true : undefined,
       archiveState: options.archiveState,
       type: options.type,
       startDate: options.startDate,
@@ -69,6 +72,8 @@ export function useNotificationListQuery(options: UseNotificationListQueryOption
           service.findNotifications(params as Parameters<typeof service.findNotifications>[0]),
         )(),
       staleTime: notificationUiHost.NOTIFICATION_STALE_TIME_MS,
+      refetchInterval: (state) => nextAttentionRefresh(state.state.data?.nextAttentionAt),
+      refetchIntervalInBackground: true,
     };
   });
 
@@ -90,6 +95,9 @@ export function useNotificationListQuery(options: UseNotificationListQueryOption
     query,
     notifications,
     total,
+    hasMore: computed(() => query.data.value?.hasMore ?? false),
+    isFetching: computed(() => query.isFetching.value),
+    isSuccess: computed(() => query.isSuccess.value),
     isLoading,
     isError,
     error,

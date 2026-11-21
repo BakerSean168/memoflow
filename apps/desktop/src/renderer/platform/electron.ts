@@ -1,3 +1,4 @@
+import { NOTIFICATION_ATTENTION_TABLES } from './notification-attention-tables';
 /**
  * Desktop Platform — Electron-specific Feature Initialization
  *
@@ -108,7 +109,9 @@ function setupDbChangeListener(): void {
     const identityScope = useAccountStore().getCurrentAccountId ?? '';
     const runtime = getDesktopServerStateRuntime();
 
-    const pilotTables = payload.tables.filter((table) => PILOT_TABLES.has(table));
+    const pilotTables = payload.tables.filter(
+      (table) => PILOT_TABLES.has(table) || NOTIFICATION_ATTENTION_TABLES.has(table),
+    );
     if (runtime && identityScope && pilotTables.length > 0) {
       for (const intent of mapTablesToInvalidationIntents(pilotTables, identityScope)) {
         void runtime.dispatcher.invalidate(intent);

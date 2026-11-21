@@ -18,6 +18,7 @@ import {
   createRoutineOccurrenceNotificationWriter,
   createRoutinePowerSyncRepositories,
   createRoutinePortableCapability,
+  createRoutineNotificationAttentionReader,
   loadPowerSyncRoutineLocalRegistrations,
 } from '@memoflow/routine';
 import {
@@ -76,6 +77,7 @@ const DEFAULT_DESKTOP_INTERVENTION_POLICY: InterventionPolicy = {
 export interface ComposedRoutineDesktop {
   /** Routine Coach owner-domain command seam for approved AI/product orchestration. */
   readonly routineCommandPort: RoutineCoachCommandPort;
+  readonly notificationAttentionReader: ReturnType<typeof createRoutineNotificationAttentionReader>;
   /** Owner-backed read projection for the renderer configuration center. */
   readonly routineQueryPort: RoutineConfigurationQueryPort;
   readonly portableCapability: ReturnType<typeof createRoutinePortableCapability>;
@@ -405,6 +407,10 @@ export function composeRoutine(
 
   return {
     routineCommandPort,
+    notificationAttentionReader: createRoutineNotificationAttentionReader({
+      occurrenceTruthStore: repositories.routineOccurrenceTruthStore,
+      temporaryOverrideStore: repositories.routineTemporaryOverrideStore,
+    }),
     routineQueryPort,
     portableCapability: createRoutinePortableCapability(repositories),
     interventionRuntime,

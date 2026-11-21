@@ -12,6 +12,7 @@ import type {
   QueryNotificationsRequest,
   NotificationListResponse,
   UnreadCountResponse,
+  AttentionCountResponse,
 } from '../types';
 import type {
   BatchOperationResultDTO,
@@ -83,6 +84,10 @@ export class NotificationHttpAdapter implements INotificationApiClient {
     request: ExecuteNotificationActionReq,
   ): Promise<Result<ExecuteNotificationActionRes>> {
     return this.httpClient.post(`${this.baseUrl}/actions`, request);
+  }
+
+  async getAttentionCount(): Promise<Result<AttentionCountResponse>> {
+    return this.httpClient.get(`${this.baseUrl}/attention-count`);
   }
 
   async getUnreadCount(): Promise<Result<UnreadCountResponse>> {

@@ -58,6 +58,25 @@ export class NotificationInteractionPrismaRepository implements INotificationInt
     if (row.identityId !== input.identityId || row.notificationId !== input.notificationId) {
       throw new Error('Notification interaction idempotency key is already owned by another fact');
     }
+    if (row.outcome !== 'accepted' && input.outcome === 'accepted') {
+      await this.prisma.notificationInteraction.updateMany({
+        where: {
+          id: row.id,
+          identityId: input.identityId,
+          notificationId: input.notificationId,
+          outcome: { in: ['failed', 'rejected'] },
+        },
+        data: {
+          outcome: 'accepted',
+          occurredAt: new Date(input.occurredAt),
+          commandReceiptId: input.commandReceiptId ?? null,
+        },
+      });
+      const repaired = await this.prisma.notificationInteraction.findFirstOrThrow({
+        where: { id: row.id, identityId: input.identityId, notificationId: input.notificationId },
+      });
+      return toDTO(repaired);
+    }
     return toDTO(row);
   }
 
@@ -86,14 +105,18 @@ export class NotificationInteractionPrismaRepository implements INotificationInt
     identityId: string,
     notificationIds: readonly string[],
   ): Promise<NotificationInteractionDTO[]> {
-    if (notificationIds.length === 0) return [];
-    const rows = await this.prisma.notificationInteraction.findMany({
-      where: {
-        identityId,
-        notificationId: { in: Array.from(notificationIds) },
-      },
-      orderBy: { occurredAt: 'asc' },
-    });
-    return rows.map(toDTO);
+    const ids = [...new Set(notificationIds)];
+    const interactions: NotificationInteractionDTO[] = [];
+    for (let offset = 0; offset < ids.length; offset += 500) {
+      const rows = await this.prisma.notificationInteraction.findMany({
+        where: {
+          identityId,
+          notificationId: { in: ids.slice(offset, offset + 500) },
+        },
+        orderBy: { occurredAt: 'asc' },
+      });
+      interactions.push(...rows.map(toDTO));
+    }
+    return interactions.sort((a, b) => a.occurredAt - b.occurredAt);
   }
 }

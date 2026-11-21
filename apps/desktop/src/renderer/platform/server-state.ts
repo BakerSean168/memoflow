@@ -7,6 +7,7 @@
  */
 
 import type { App } from 'vue';
+import { NOTIFICATION_ATTENTION_TABLES } from './notification-attention-tables';
 import {
   installServerStateRuntime,
   useAccountStore,
@@ -81,7 +82,7 @@ export function mapTablesToInvalidationIntents(
 ): ServerStateInvalidation[] {
   const intents: ServerStateInvalidation[] = [];
   const unique = [...new Set(tables)];
-  if (unique.includes('notifications')) {
+  if (unique.some((table) => NOTIFICATION_ATTENTION_TABLES.has(table))) {
     intents.push({
       target: 'notification',
       identityScope,

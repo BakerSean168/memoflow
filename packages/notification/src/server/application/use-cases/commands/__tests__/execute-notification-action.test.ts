@@ -76,7 +76,8 @@ describe('ExecuteNotificationActionUseCase', () => {
     interactionRepository = {
       findByIdempotencyKey: vi.fn(async () => stored),
       record: vi.fn(async (input) => {
-        stored ??= interactionFrom(input);
+        if (!stored || (stored.outcome !== 'accepted' && input.outcome === 'accepted'))
+          stored = interactionFrom(input);
         return stored;
       }),
       listByNotification: vi.fn(async () => (stored ? [stored] : [])),
@@ -213,6 +214,7 @@ describe('ExecuteNotificationActionUseCase', () => {
       }),
     );
     expect(stored).toMatchObject({ outcome: 'accepted', commandReceiptId: 'routine-int-1' });
+    expect(notification.isRead).toBe(true);
   });
 
   it('fails closed for an unregistered owner command and records rejection', async () => {
@@ -277,5 +279,52 @@ describe('ExecuteNotificationActionUseCase', () => {
     expect(notification.archivedAt).not.toBeNull();
     expect(notificationRepository.save).toHaveBeenCalledWith(notification);
     expect(stored).toMatchObject({ actionKind: 'archive', outcome: 'accepted' });
+  });
+  it('retries a failed owner action with the same logical idempotency key', async () => {
+    const execute = vi
+      .fn()
+      .mockRejectedValueOnce(new Error('Temporarily unavailable'))
+      .mockResolvedValue({ outcome: 'accepted', commandReceiptId: 'owner-receipt' });
+    registry.register({
+      workflowKey: 'routine.intervention',
+      ownerType: 'routine-occurrence',
+      commandKey: 'routine.complete',
+      execute,
+    });
+    const useCase = new ExecuteNotificationActionUseCase(
+      notificationRepository,
+      interactionRepository,
+      registry,
+    );
+    const request = { identityId, notificationId: String(notification.id), actionKey: 'complete' };
+    expect((await useCase.execute(request)).ok).toBe(false);
+    expect(notification.isRead).toBe(false);
+    const retried = await useCase.execute(request);
+    expect(retried.ok && retried.data.interaction.outcome).toBe('accepted');
+    expect(execute.mock.calls[0]![0].idempotencyKey).toBe(execute.mock.calls[1]![0].idempotencyKey);
+    expect(notification.isRead).toBe(true);
+    await useCase.execute(request);
+    expect(execute).toHaveBeenCalledTimes(2);
+  });
+
+  it('repairs read state on accepted replay without repeating the owner command', async () => {
+    const execute = vi.fn(async () => ({ outcome: 'accepted' as const }));
+    registry.register({
+      workflowKey: 'routine.intervention',
+      ownerType: 'routine-occurrence',
+      commandKey: 'routine.complete',
+      execute,
+    });
+    const useCase = new ExecuteNotificationActionUseCase(
+      notificationRepository,
+      interactionRepository,
+      registry,
+    );
+    const request = { identityId, notificationId: String(notification.id), actionKey: 'complete' };
+    await useCase.execute(request);
+    notification.markAsUnread();
+    await useCase.execute(request);
+    expect(notification.isRead).toBe(true);
+    expect(execute).toHaveBeenCalledTimes(1);
   });
 });

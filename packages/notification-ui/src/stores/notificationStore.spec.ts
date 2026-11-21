@@ -7,21 +7,23 @@ describe('useNotificationStore (UI state only after Query Cache authority pilot)
     setActivePinia(createPinia());
   });
 
-  it('executes pagination and read-filter actions against real Pinia state', () => {
+  it('executes pagination and attention-filter actions against real Pinia state', () => {
     const store = useNotificationStore();
     expect(store.pagination).toEqual({ page: 1, pageSize: 20 });
-    expect(store.readFilter).toBe('all');
+    expect(store.filter).toBe('attention');
 
     store.setPage(4);
     expect(store.pagination.page).toBe(4);
     store.setPageSize(50);
     expect(store.pagination.pageSize).toBe(50);
-    store.setReadFilter('unread');
-    expect(store.readFilter).toBe('unread');
+    store.setPage(4);
+    store.setFilter('all');
+    expect(store.filter).toBe('all');
+    expect(store.pagination.page).toBe(1);
 
     store.reset();
     expect(store.pagination).toEqual({ page: 1, pageSize: 20 });
-    expect(store.readFilter).toBe('all');
+    expect(store.filter).toBe('attention');
   });
 
   it('holds no Notification server authority fields', () => {

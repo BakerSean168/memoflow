@@ -10,6 +10,7 @@ export const NotificationQuerySchema = z.object({
   type: z.enum(NotificationType).optional(),
   category: z.enum(NotificationCategory).optional(),
   isRead: z.boolean().optional(),
+  needsAttention: z.boolean().optional(),
   archiveState: z.enum(['active', 'archived', 'all']).default('active').optional(),
   relatedEntityType: z.string().trim().min(1).max(120).optional(),
   relatedEntityId: brandedId<string>().optional(),

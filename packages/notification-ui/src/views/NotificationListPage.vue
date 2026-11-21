@@ -25,7 +25,7 @@
           :disabled="!hasUnread"
           @click="handleMarkAllRead"
         >
-          <CheckCheck class="h-3.5 w-3.5" />
+          <Eye class="h-3.5 w-3.5" />
           <span class="hidden @lg/panel:inline">{{ t('notification.action.markAllRead') }}</span>
         </Button>
       </template>
@@ -82,18 +82,18 @@
         </ProductSurfaceState>
 
         <ProductSurfaceState
-          v-else-if="filteredNotifications.length === 0 && selectedFilter === 'unread'"
+          v-else-if="notifications.length === 0 && selectedFilter === 'attention'"
           family="collection"
           kind="empty"
           :title="t('notification.allCaughtUp')"
-          :description="t('notification.unreadEmptyDescription')"
-          test-id="notifications-unread-empty"
+          :description="t('notification.attentionEmptyDescription')"
+          test-id="notifications-attention-empty"
         >
           <template #icon><CheckCheck class="h-8 w-8" /></template>
         </ProductSurfaceState>
 
         <ProductSurfaceState
-          v-else-if="filteredNotifications.length === 0"
+          v-else-if="notifications.length === 0"
           family="collection"
           kind="empty"
           :title="t('notification.empty')"
@@ -105,7 +105,7 @@
 
         <div v-else data-testid="notifications-list">
           <NotificationList
-            :notifications="filteredNotifications"
+            :notifications="notifications"
             :loading="false"
             @mark-read="handleMarkRead"
             @execute-action="handleExecuteAction"
@@ -113,20 +113,46 @@
             @notification-click="handleNotificationClick"
           />
         </div>
+        <div
+          v-if="total > store.pagination.pageSize || store.pagination.page > 1"
+          class="mt-3 flex items-center justify-end gap-2 text-xs text-muted-foreground"
+          data-testid="notification-pagination"
+        >
+          <Button
+            variant="ghost"
+            size="icon"
+            :disabled="store.pagination.page <= 1"
+            :aria-label="t('notification.pagination.previous')"
+            @click="store.setPage(store.pagination.page - 1)"
+            ><ChevronLeft class="h-4 w-4"
+          /></Button>
+          <span>{{
+            t('notification.pagination.page', { page: store.pagination.page, total: pageCount })
+          }}</span>
+          <Button
+            variant="ghost"
+            size="icon"
+            :disabled="!hasMore"
+            :aria-label="t('notification.pagination.next')"
+            @click="store.setPage(store.pagination.page + 1)"
+            ><ChevronRight class="h-4 w-4"
+          /></Button>
+        </div>
       </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue';
+import { computed, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import { toast } from 'vue-sonner';
-import { Bell, CheckCheck, CircleAlert } from '@lucide/vue';
+import { Bell, CheckCheck, CircleAlert, Eye, ChevronLeft, ChevronRight } from '@lucide/vue';
 import { Button, Skeleton } from '@memoflow/ui-vue-shadcn';
 import NotificationList from '../components/NotificationList.vue';
 import { useNotificationListQuery } from '../composables/useNotificationListQuery';
+import { useNotificationAttentionQuery } from '../composables/useNotificationAttentionQuery';
 import { useNotificationUnreadQuery } from '../composables/useNotificationUnreadQuery';
 import { useNotificationMutations } from '../composables/useNotificationMutations';
 import { useNotificationStore } from '../stores/notification-store';
@@ -138,8 +164,10 @@ const ModuleHeader = notificationUiHost.components.ModuleHeader;
 const ProductSurfaceState = notificationUiHost.components.ProductSurfaceState;
 const ResponsiveSegmentedFilter = notificationUiHost.components.ResponsiveSegmentedFilter;
 
-const { notifications, isLoading, isError, refetch } = useNotificationListQuery();
-const { unreadCount, hasUnread } = useNotificationUnreadQuery();
+const { notifications, total, hasMore, isLoading, isError, isFetching, isSuccess, refetch } =
+  useNotificationListQuery();
+const { hasUnread } = useNotificationUnreadQuery();
+const { attentionCount } = useNotificationAttentionQuery();
 const { markAsRead, markAllAsRead, dismiss, executeAction } = useNotificationMutations();
 
 const store = useNotificationStore();
@@ -147,34 +175,26 @@ const store = useNotificationStore();
 const { t } = useI18n();
 const router = useRouter();
 
-// 过滤收敛为 全部/未读 两态（§11-5；「已读」不是信箱高频动作）；read filter 是 UI state。
 const selectedFilter = computed({
-  get: () => store.readFilter,
-  set: (value: 'all' | 'unread') => store.setReadFilter(value),
+  get: () => store.filter,
+  set: (value: 'all' | 'attention') => store.setFilter(value),
 });
-
 const filterTabs = computed(() => [
   {
-    label: t('notification.filter.all'),
-    value: 'all' as const,
-    count: notifications.value.length,
+    label: t('notification.filter.attention'),
+    value: 'attention' as const,
+    count: attentionCount.value,
+    countTestId: attentionCount.value > 0 ? 'notification-attention-badge' : undefined,
   },
-  {
-    label: t('notification.filter.unread'),
-    value: 'unread' as const,
-    count: unreadCount.value,
-    countTestId: unreadCount.value > 0 ? 'notification-unread-badge' : undefined,
-  },
+  { label: t('notification.filter.all'), value: 'all' as const },
 ]);
-
-const filteredNotifications = computed(() => {
-  if (selectedFilter.value === 'unread') return notifications.value.filter((n) => !n.isRead);
-  return notifications.value;
+const pageCount = computed(() => Math.max(1, Math.ceil(total.value / store.pagination.pageSize)));
+watch([total, isFetching, isSuccess], () => {
+  if (isSuccess.value && !isFetching.value && store.pagination.page > pageCount.value)
+    store.setPage(pageCount.value);
 });
-
 function updateFilter(value: string): void {
-  if (value !== 'all' && value !== 'unread') return;
-  selectedFilter.value = value;
+  if (value === 'all' || value === 'attention') selectedFilter.value = value;
 }
 
 function handleNotificationClick(notification: NotificationClientDTO) {

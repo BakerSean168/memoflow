@@ -6,6 +6,12 @@
   "nativeKinds": ["button", "input", "textarea", "file-input"],
   "exceptions": [
     {
+      "path": "apps/desktop/src/renderer/components/WindowNumberInput.vue",
+      "native": ["input"],
+      "category": "custom-control",
+      "reason": "Minimal number-input atom for standalone Desktop windows; custom snooze retains native numeric validation and keyboard interaction without loading the authenticated shell runtime."
+    },
+    {
       "path": "apps/desktop/src/renderer/components/WindowActionButton.vue",
       "native": ["button"],
       "category": "custom-control",

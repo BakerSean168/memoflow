@@ -7,11 +7,11 @@
     <CapsulePreviewHeader :title="t('notification.drawer.title')">
       <template #badge>
         <span
-          v-if="unreadCount > 0"
+          v-if="attentionCount > 0"
           class="rounded-full bg-primary/10 px-1.5 py-0.5 font-mono text-[10px] tabular-nums text-primary"
-          data-testid="notification-capsule-unread-count"
+          data-testid="notification-capsule-attention-count"
         >
-          {{ unreadCount }}
+          {{ attentionCount }}
         </span>
       </template>
       <template #actions>
@@ -133,6 +133,7 @@ import { Button } from '@memoflow/ui-vue-shadcn';
 import { notificationUiHost } from '../notification-ui-host';
 import { resolveNotificationDestination } from '../notification-destination';
 import { useNotificationListQuery } from '../composables/useNotificationListQuery';
+import { useNotificationAttentionQuery } from '../composables/useNotificationAttentionQuery';
 import { useNotificationUnreadQuery } from '../composables/useNotificationUnreadQuery';
 import { useNotificationMutations } from '../composables/useNotificationMutations';
 import type { NotificationClientDTO } from '@memoflow/notification-contracts';
@@ -154,21 +155,16 @@ const emit = defineEmits<{
 const { t } = useI18n();
 const { notifications, isLoading } = useNotificationListQuery({
   page: 1,
-  limit: RECENT_LIMIT * 2,
+  limit: RECENT_LIMIT,
+  filter: 'attention',
 });
-const { hasUnread, unreadCount } = useNotificationUnreadQuery();
+const { hasUnread } = useNotificationUnreadQuery();
+const { attentionCount } = useNotificationAttentionQuery();
 const { markAsRead, markAllAsRead, executeAction } = useNotificationMutations();
 
 const isMarkingAll = computed(() => markAllAsRead.isPending.value);
 
-const recentItems = computed(() => {
-  // 未读优先，其次按创建时间倒序；预览只展示最近 N 条
-  const sorted = [...notifications.value].sort((a, b) => {
-    if (a.isRead !== b.isRead) return a.isRead ? 1 : -1;
-    return Number(b.createdAt ?? 0) - Number(a.createdAt ?? 0);
-  });
-  return sorted.slice(0, RECENT_LIMIT);
-});
+const recentItems = computed(() => notifications.value.slice(0, RECENT_LIMIT));
 
 async function handleMarkAllRead() {
   if (!hasUnread.value || isMarkingAll.value) return;

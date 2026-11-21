@@ -54,6 +54,28 @@ export class NotificationInteractionPowerSyncRepository implements INotification
             'Notification interaction idempotency key is already owned by another fact',
           );
         }
+        // Retry the SAME logical owner command after a transient failure.
+        // Accepted receipts are immutable and can never be downgraded.
+        if (existing.outcome !== 'accepted' && input.outcome === 'accepted') {
+          await tx.execute(
+            `UPDATE notification_interactions SET outcome = ?, occurred_at = ?, command_receipt_id = ?
+             WHERE id = ? AND identity_id = ? AND notification_id = ? AND outcome != 'accepted'`,
+            [
+              'accepted',
+              new Date(input.occurredAt).toISOString(),
+              input.commandReceiptId ?? null,
+              existing.id,
+              input.identityId,
+              input.notificationId,
+            ],
+          );
+          return toDTO(
+            await tx.get<InteractionRow>(
+              'SELECT * FROM notification_interactions WHERE id = ? LIMIT 1',
+              [existing.id],
+            ),
+          );
+        }
         return toDTO(existing);
       }
 
@@ -111,14 +133,20 @@ export class NotificationInteractionPowerSyncRepository implements INotification
     identityId: string,
     notificationIds: readonly string[],
   ): Promise<NotificationInteractionDTO[]> {
-    if (notificationIds.length === 0) return [];
-    const placeholders = notificationIds.map(() => '?').join(', ');
-    const rows = await this.db.getAll<InteractionRow>(
-      `SELECT * FROM notification_interactions
-       WHERE identity_id = ? AND notification_id IN (${placeholders})
-       ORDER BY occurred_at ASC`,
-      [identityId, ...notificationIds],
-    );
-    return rows.map(toDTO);
+    const ids = [...new Set(notificationIds)];
+    const interactions: NotificationInteractionDTO[] = [];
+    // Identity-wide attention reads can exceed SQLite's bind-variable limit.
+    for (let offset = 0; offset < ids.length; offset += 500) {
+      const batch = ids.slice(offset, offset + 500);
+      const placeholders = batch.map(() => '?').join(', ');
+      const rows = await this.db.getAll<InteractionRow>(
+        `SELECT * FROM notification_interactions
+         WHERE identity_id = ? AND notification_id IN (${placeholders})
+         ORDER BY occurred_at ASC`,
+        [identityId, ...batch],
+      );
+      interactions.push(...rows.map(toDTO));
+    }
+    return interactions.sort((a, b) => a.occurredAt - b.occurredAt);
   }
 }

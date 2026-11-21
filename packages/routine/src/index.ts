@@ -25,6 +25,7 @@ export {
   createRoutineCoachCommandService,
   createRoutineConfigurationQueryService,
   registerRoutineNotificationOwnerCommands,
+  createRoutineNotificationAttentionReader,
   type CreateRoutineCoachCommandServiceOptions,
   type RoutineCoachCommandPort,
   type RoutineConfigurationQueryPort,

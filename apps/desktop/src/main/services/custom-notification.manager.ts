@@ -80,7 +80,7 @@ export class CustomNotificationManager {
     } = primaryDisplay.workArea;
 
     // Fixed width for notifications, height is initially small but can grow
-    const windowWidth = 360;
+    const windowWidth = 320;
     const windowHeight = 10; // Start small, resize later based on content
 
     const win = new BrowserWindow({
@@ -92,7 +92,7 @@ export class CustomNotificationManager {
       transparent: true,
       alwaysOnTop: true,
       skipTaskbar: true,
-      focusable: false,
+      focusable: true, // showInactive avoids stealing focus; user interaction can focus controls.
       resizable: false,
       hasShadow: false, // Let CSS handle shadows
       backgroundColor: '#00000000',
@@ -388,7 +388,7 @@ export class CustomNotificationManager {
             width: workAreaWidth,
             height: workAreaHeight,
           } = primaryDisplay.workArea;
-          const windowWidth = 360;
+          const windowWidth = 320;
           height = Math.min(Math.ceil(height), workAreaHeight - 40);
 
           // Reposition to stay anchored to the bottom right

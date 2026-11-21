@@ -31,6 +31,7 @@ function createFakeInstance() {
     deleteNotification: vi.fn(),
     batchDelete: vi.fn(),
     getUnreadCount: vi.fn(),
+    getAttentionCount: vi.fn(),
     getPreferences: vi.fn(),
     updatePreferences: vi.fn(),
   };

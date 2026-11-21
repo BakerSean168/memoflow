@@ -124,6 +124,7 @@ export function createServerStateInvalidationDispatcher(
     const keys: QueryKey[] = [
       notificationQueryKeys.lists(intent.identityScope),
       notificationQueryKeys.unread(intent.identityScope),
+      notificationQueryKeys.attention(intent.identityScope),
     ];
     if (intent.entityId !== undefined) {
       keys.push(notificationQueryKeys.detail(intent.identityScope, intent.entityId));
