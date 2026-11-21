@@ -172,7 +172,7 @@ describe('hosted Routine write contracts', () => {
       expect(GatewayRoutineOverrideSchema.safeParse({ ...override, ...patch }).success).toBe(false);
   });
 
-  it('issues all six PAT scopes explicitly while OAuth stays read-only', () => {
+  it('issues all six PAT scopes explicitly and accepts shared OAuth write scopes', () => {
     expect(
       CreateScopedPatSchema.parse({
         name: 'routine',
@@ -207,7 +207,7 @@ describe('hosted Routine write contracts', () => {
       }).success,
     ).toBe(false);
     expect(ExternalAgentConsentSchema.shape.scopes.safeParse(['routines:write']).success).toBe(
-      false,
+      true,
     );
   });
 
