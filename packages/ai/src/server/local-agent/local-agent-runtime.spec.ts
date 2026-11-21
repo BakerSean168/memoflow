@@ -821,8 +821,9 @@ describe('local Agent conversation execution', () => {
     const streams = conversations.map((conversationId) =>
       runtime.dispatchMessage({ identityId: 'owner', conversationId, content: 'Hello' }),
     );
-    const firstEvents = streams.map((stream) => stream.next());
-    const started = await Promise.all(firstEvents.slice(0, 4));
+    // Preflight I/O can reorder admission. Occupy all four slots before starting
+    // the queued stream so it cannot displace one of the runs we await here.
+    const started = await Promise.all(streams.slice(0, 4).map((stream) => stream.next()));
     expect(started.map((event) => event.value?.type)).toEqual([
       'assistant.run.started',
       'assistant.run.started',
@@ -830,8 +831,9 @@ describe('local Agent conversation execution', () => {
       'assistant.run.started',
     ]);
 
+    const fifthEvent = streams[4]!.next();
     let fifthSettled = false;
-    void firstEvents[4]!.finally(() => {
+    void fifthEvent.finally(() => {
       fifthSettled = true;
     });
     await Promise.resolve();
@@ -847,7 +849,7 @@ describe('local Agent conversation execution', () => {
     ).rejects.toMatchObject({ code: 'CONFLICT' });
 
     for (const stream of streams.slice(0, 4)) await stream.return(undefined);
-    const fifth = await firstEvents[4]!;
+    const fifth = await fifthEvent;
     expect(fifth.value).toMatchObject({ type: 'assistant.run.started' });
     await streams[4]!.return(undefined);
     await runtime.dispose();
