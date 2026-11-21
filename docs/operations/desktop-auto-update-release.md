@@ -15,7 +15,7 @@ updated: 2026-10-01T00:00:00+00:00
 
 Use this runbook to prepare, verify, publish, recover, and contain a MemoFlow Desktop stable release. It covers GitHub Release authority, platform packages, installed-update proof, bounded client diagnostics, and immutable release identities.
 
-**Current executable mode:** the runtime uses the GitHub Release provider through `electron-updater`; stable resolves to GitHub `latest`. Publishing a Release as latest exposes it to all eligible clients. The retained initial **10% rollout artifact is evidence only**, not a live rollout.
+**Current executable mode:** the runtime uses a published-GitHub-Release provider through the `electron-updater` custom-provider interface; stable resolves to GitHub `latest`, while Nightly selects complete published releases in its own channel. Publishing a Release as latest exposes it to all eligible clients. The retained initial **10% rollout artifact is evidence only**, not a live rollout.
 
 **Future gated mode:** projected feed publication and 10/30/50/100/pause controls are designed and locally materializable. No remote pointer writer/host or live client provider cutover is implemented. Sections explicitly labeled FUTURE must not be treated as current containment controls.
 
@@ -25,41 +25,47 @@ Repository code/workflows are authoritative. [ADR-114](../internals/decisions/AD
 
 ## 2. Current topology and authority map
 
-```text
-Prepare Release → Release PR → merge to main
-  → successful exact-SHA main push CI
-  → Publish Main Candidate (same SHA; candidate-set/v1)
-  → Release Publish: create/resume immutable tag + Draft
-      ├─ Desktop Release Lane (release-assets.yml)
-      │    ├─ platform build/package + packaged runtime smoke
-      │    ├─ Windows NSIS + Linux AppImage installed-update gate
-      │    ├─ desktop-release-manifest + metadata closure
-      │    └─ retained feed + initial p10 rollout evidence; Draft asset upload
-      └─ Docker Release Lane (publish-images.yml; promote candidate digests)
-  → remote Desktop asset verification + canonical release-manifest
-  → GitHub Release Published/latest
-```
+Nightly publication starts from `nightly-release.yml`. Its timer checks every 30 minutes and selects current main only when exact-SHA main CI and retained runtime artifacts are verified, there are new commits, and at least six hours have elapsed since the previous published Nightly. Manual dispatch uses the same eligibility checks and defaults to a dry run.
 
-| Authority                       | Owner and operational meaning                                                                                                                                                                                                                                                                                          |
-| ------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Version/release intent          | `Prepare Release` (`release-please.yml`) creates/updates a Release PR. Successful main push CI can trigger it automatically; manual dispatch also exists. It never publishes.                                                                                                                                          |
-| Tested source                   | Exact successful `CI` push run on `main`, not a PR run or a green run for a different SHA. Release SHA must remain an ancestor of main.                                                                                                                                                                                |
-| Candidate                       | `Publish Main Candidate` (`candidate-publish.yml`) builds immutable SHA images and `candidate-set-<SHA>` evidence. Candidate publication precedes release publication.                                                                                                                                                 |
-| Draft/tag and final publication | `Release Publish` (`release-publish.yml`) automatically follows successful `Publish Main Candidate` on main when the release contract is eligible. It creates/resumes the Draft, invokes both reusable release lanes, and finalizes only after both pass. Manual dispatch is recovery-only with an existing draft tag. |
-| Desktop assets                  | `Release Assets` (`release-assets.yml`), called as `Desktop Release Lane`, owns packages, platform receipts, smoke, metadata closure, and manifest-owned Draft uploads.                                                                                                                                                |
-| Docker assets                   | `Docker Release Lane` calls `publish-images.yml`, promoting exact candidate identities rather than rebuilding release images. Publishing a Release does not deploy production.                                                                                                                                         |
-| Canonical release evidence      | `desktop-release-manifest.json`, `docker-release-manifest.json`, and `candidate-set-v1.json` feed `release-manifest.json`. Finalization verifies every remote manifest-owned Desktop asset before publishing.                                                                                                          |
-| Runtime updater                 | `DesktopMainRuntime` owns one process/Shell updater, independent of Profile/window switching. Coordinator → install coordinator → shared shutdown owner → updater handoff is the sole restart/install path. Renderer consumes validated snapshots/commands.                                                            |
-| Live provider                   | `apps/desktop/desktop-update-release.json`: GitHub `BakerSean168/memoflow`, tag prefix `v`, stable → `latest`; the adapter owns `electron-updater` integration.                                                                                                                                                        |
-| Projected controls              | `desktop-update-feed-evidence` and `desktop-update-rollout-evidence` are retained Actions evidence. Their receipts describe future publication/pointers; receipt creation performs no remote publication.                                                                                                              |
+Stable publication starts from an explicit `release-publish.yml` dispatch selecting a published, verified `nightly_tag`. It preserves that Nightly's Git SHA, repackages Desktop assets under the prepared stable version, and promotes the existing image digests.
+
+Both paths create or resume a Draft bound to a full source SHA, run Desktop native acceptance and exact-source release acceptance, verify image and remote asset evidence, and publish only after all gates pass. New Git tags are created at publication. Nightly is a prerelease with `make_latest=false`; Stable is marked latest. Neither path selects a staging or production deployment.
+
+| Authority                   | Owner and operational meaning                                                                                                                                                                                                                               |
+| --------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Version intent              | `Prepare Release` (`release-please.yml`) is manually dispatched on verified current main. It creates or updates a version/changelog PR and never publishes.                                                                                                 |
+| Tested source               | Exact successful `CI` push run on `main`, not a PR run or a green run for a different SHA. Release SHA must remain an ancestor of main.                                                                                                                     |
+| Candidate images            | `candidate-publish.yml` runs within Nightly publication to produce exact-source image and runtime evidence. Stable reuses the selected Nightly's verified image digests.                                                                                    |
+| Nightly eligibility         | `nightly-release.yml` selects eligible current-main source through its timer or explicit dispatch. Main CI does not directly trigger publication.                                                                                                           |
+| Stable selection            | `release-publish.yml` requires an explicit published `nightly_tag`; that Nightly's source and evidence must remain verifiable.                                                                                                                              |
+| Draft and final publication | The shared workflow creates or resumes a Draft with full-SHA `target_commitish`, then publishes after Desktop, image and exact-source acceptance gates pass. Preparation creates no public Git tag.                                                         |
+| Release acceptance          | `release-quality.yml` runs exact-source acceptance journeys and supplies the receipt required by finalization.                                                                                                                                              |
+| Desktop assets              | `Release Assets` (`release-assets.yml`), called as `Desktop Release Lane`, owns packages, platform receipts, smoke, metadata closure, and manifest-owned Draft uploads.                                                                                     |
+| Docker assets               | `Docker Release Lane` calls `publish-images.yml`, promoting exact candidate identities rather than rebuilding release images. Publishing a Release does not deploy production.                                                                              |
+| Canonical release evidence  | `desktop-release-manifest.json`, `docker-release-manifest.json`, and `candidate-set-v1.json` feed `release-manifest.json`. Finalization verifies every remote manifest-owned Desktop asset before publishing.                                               |
+| Runtime updater             | `DesktopMainRuntime` owns one process/Shell updater, independent of Profile/window switching. Coordinator → install coordinator → shared shutdown owner → updater handoff is the sole restart/install path. Renderer consumes validated snapshots/commands. |
+| Live provider               | `apps/desktop/desktop-update-release.json`: GitHub `BakerSean168/memoflow`, tag prefix `v`, stable → `latest`; the adapter owns `electron-updater` integration.                                                                                             |
+| Projected controls          | `desktop-update-feed-evidence` and `desktop-update-rollout-evidence` are retained Actions evidence. Their receipts describe future publication/pointers; receipt creation performs no remote publication.                                                   |
+
+### Published-release discovery and draft isolation
+
+A public Git tag is not proof that a release is ready to install. GitHub's Atom feed can include tag-only entries while the associated Release is still a Draft. The client therefore uses the public Releases API: stable requests the explicitly designated latest Release; Nightly reads up to three pages of 100 published release records, sorts matching candidates by SemVer within each recent page, and continues only when no complete candidate exists. Drafts, other channels, missing metadata and missing uploaded installers are ineligible. Exhausted lookup budgets, malformed responses, network errors and rate limits remain failures rather than fabricated “up to date” results.
+
+The provider uses the existing platform/architecture projection contract, verifies that metadata version equals the selected tag, and permits only uploaded assets from that same Release. The SDK still owns download, differential fallback, checksum/signature verification and installation. Checks have a 15-second request timeout and at most five metadata requests; successful discovery is cached for one minute. Public GitHub API quotas are shared by IP. HTTP 403/429 pauses requests for one full hour because the pinned v6 executor does not expose rate-limit response headers. No user token is shipped in the application. If shared-IP quotas become a real scale limit, publish the already-defined static channel projection; do not introduce another version authority.
+
+Draft creation records a full source SHA in `target_commitish` without creating a public tag. Build and recovery lanes resolve that immutable Draft source; an existing tag must point to the same SHA. After all gates and asset verification pass, finalization revalidates source identity and publishes the Release, allowing GitHub to create its tag at publication. A published tag is checked again afterwards. Old failed drafts with matching pre-existing tags remain recoverable; this change does not delete historical tags.
+
+Older installed clients retain their Atom discovery until they install a corrected build. A new complete Nightly can deliver the fix through the existing updater; changing the repository cannot patch a running installation. Do not publish incomplete drafts, replace artifacts under an existing version or remove gates to recover old clients.
+
+References: [GitHub Releases API](https://docs.github.com/en/rest/releases/releases#list-releases), [Joplin published release discovery](https://github.com/laurent22/joplin/blob/dev/packages/app-desktop/checkForUpdates.ts), and [VSCodium static update publication](https://github.com/VSCodium/vscodium/blob/master/update_version.sh).
 
 ## 3. Preconditions and operator checklist
 
-Before merging the Release PR (automatic publication can follow without an operator hold):
+Before starting or recovering publication, or promoting a Nightly to Stable, verify the following. Eligible Nightly publication can proceed from its scheduler; Stable always requires explicit operator selection.
 
-- [ ] Record operator, release purpose, proposed version/tag, Release PR, and incident/contact owner.
+- [ ] Record channel, source SHA, publication purpose and original run if recovering. For Stable, record the selected published Nightly and prepared Release Please milestone.
 - [ ] Review current workflow revisions and confirm GitHub Actions/Release access, workflow credentials, candidate registry access, and existing local tools. Authenticate `gh` without putting tokens into evidence.
-- [ ] Review version, CHANGELOG, and release notes. Root `package.json`, Desktop `package.json`, `.release-please-manifest.json`, release commit identity, and CHANGELOG heading must satisfy `release-contract.mjs`.
+- [ ] Confirm that root `package.json`, Desktop `package.json` and `.release-please-manifest.json` agree at the selected source SHA. For a new Stable version, verify that Release Please prepared its version and changelog before the selected Nightly was built.
 - [ ] Confirm the proposed version/tag is new; it must never be moved or reused for changed bytes. Record any existing Draft asset digests before a recovery run.
 - [ ] Confirm signing policy. Leave `MACOS_RELEASE_MODE` unset or `unsigned-pilot` for current scope; do not introduce placeholder Apple credentials. An explicitly selected signed mode must fail closed on trust failure.
 - [ ] Establish observation coverage on direct Windows NSIS and Linux AppImage installations, an incident evidence destination, and criteria for stopping further release activity.
@@ -68,35 +74,50 @@ Before merging the Release PR (automatic publication can follow without an opera
 
 ## 4. CURRENT EXECUTABLE release procedure
 
-### 4.1 Prepare and merge the Release PR
+### 4.1 Prepare version metadata when needed
 
-1. Observe `Prepare Release` after successful main CI, or dispatch it at the release milestone:
+1. For a new Stable milestone, manually dispatch `Prepare Release` after current main has passed exact-SHA CI:
 
    ```bash
    gh workflow run release-please.yml --ref main
    gh run list --workflow release-please.yml --limit 10
    ```
 
-2. Review the resulting release-please PR: version updates, CHANGELOG, intended changes, required checks, and signing policy. Updating the Release PR remains release-please's responsibility. Do not manufacture a tag or a Draft as the normal first step.
-3. Merge through the normal reviewed PR process, preserving the release-please subject `chore(main): release x.y.z` (the contract also accepts a merge commit whose second parent has that subject). A custom merge/squash subject can make the release contract ineligible. Record the **full release merge SHA**, not the branch's later head. Observe the successful `CI` push run on `main` for that exact SHA:
+2. Review and merge its version/changelog PR through normal checks. This prepares the version; it does not publish Stable. Ordinary Nightlies can use the version already recorded in main and do not require a new Release PR for every build.
+3. Require successful exact-SHA main push CI and retained canonical runtime build artifacts for the source selected by the Nightly controller. Retain the source SHA and CI run ID from its decision output; a PR run or a green run for another SHA is insufficient.
 
    ```bash
-   RELEASE_SHA='<full release merge SHA>'
+   RELEASE_SHA='<full source SHA selected by the Nightly controller>'
    gh run list --workflow ci.yml --commit "$RELEASE_SHA" --limit 20
    gh run view '<CI run ID>' --json headSha,event,headBranch,status,conclusion,url
    ```
 
-   Require `headSha=$RELEASE_SHA`, `event=push`, `headBranch=main`, and completed/success. A different SHA or PR CI is insufficient.
+### 4.2 Select Nightly or Stable publication
 
-### 4.2 Candidate and Draft creation
+4. For Nightly, inspect `Nightly Release` and its eligibility summary. A manual dry run uses the same current-main, artifact and six-hour checks:
 
-4. Observe `Publish Main Candidate` for the same SHA; retain its run ID and `candidate-set-<SHA>` artifact containing `candidate-set-v1.json`. Verify the recorded source CI and image digests. A skipped/ineligible/failed publication is not release readiness.
-5. Observe automatically triggered `Release Publish`. `Resolve Release Candidate` validates the eligible release contract, exact successful main CI, and ancestry on main. Non-release main commits produce a no-op; do not dispatch them as releases.
-6. `Create or Resume Draft Release` validates the tag identity, creates the immutable tag if absent, and creates/resumes the Draft. Record tag, resolved SHA, release ID/URL, and workflow run ID. A tag collision or ambiguous duplicate release record is a stop condition. This step can mark the Release PR tagged before final publication; the label alone is not proof of publication.
+   ```bash
+   gh workflow run nightly-release.yml --ref main -f dry_run=true
+   gh run list --workflow nightly-release.yml --limit 10
+   ```
+
+   An explicit dispatch with `dry_run=false` may publish if eligible. It does not bypass eligibility or select an arbitrary historical Draft.
+
+5. For Stable, select a published, verified Nightly and inspect its dry-run result:
+
+   ```bash
+   SOURCE_NIGHTLY='v<version>-nightly.<date>.<run>'
+   gh workflow run release-publish.yml --ref main \
+     -f nightly_tag="$SOURCE_NIGHTLY" -f dry_run=true
+   ```
+
+   After verifying the selected source and plan, dispatch the same `nightly_tag` with `dry_run=false`.
+
+6. The shared workflow creates or resumes the Draft bound to the selected full SHA. Record its pending tag name, source SHA, Release ID and publication run. A new Draft requires no public Git tag; existing tags must resolve to the same SHA. Release Please labels are reconciled after successful Stable publication.
 
 ### 4.3 Package and installed-update gates
 
-7. Inspect both release lanes. Desktop builds exact release source on Windows x64, Linux x64, macOS x64, and macOS arm64 runners. The workflow separately checks out packaging tooling at `github.workflow_sha`; retain that tooling/workflow identity as well as the source SHA.
+7. Inspect Desktop, image and exact-source release acceptance lanes. Desktop builds exact release source on Windows x64, Linux x64, macOS x64, and macOS arm64 runners. The workflow separately checks out packaging tooling at `github.workflow_sha`; retain that tooling/workflow identity as well as the source SHA.
 8. Require production build, Electron native dependency rebuild, packaging, packaged runtime closure verification, packaged smoke, and platform receipt success. Windows packages NSIS + ZIP; Linux packages AppImage + deb + rpm; macOS packages DMG + ZIP. Current macOS smoke and arch-specific metadata are unsigned-pilot evidence, not signed installed-update gates.
 9. For Linux, inspect **actual AppImage smoke** and the separate installed Debian smoke. Debian install checks `/opt/MemoFlow/resources/package-type` equals `deb`. Do not substitute Debian smoke for AppImage updater proof or claim native RPM installation was proven.
 10. Require both reusable `Desktop Update Installed E2E` jobs: `Windows NSIS N to N+1` and `Linux AppImage N to N+1`. The release-assets parent job ID `windows-installed-update-e2e` invokes the entire two-platform workflow. Its `ref` is the resolved exact release SHA.
@@ -109,25 +130,34 @@ Before merging the Release PR (automatic publication can follow without an opera
 12. Desktop upload waits for all platform builds and installed-update jobs. Require canonical Desktop manifest creation and `verify-desktop-update-metadata.mjs` success: metadata version/references, artifact bytes/digests, and required platform evidence must close over the manifest. Inspect `SHA256SUMS.txt` and platform receipts.
 13. Confirm the feed materializer and rollout materializer succeed and retain `desktop-update-feed-evidence` and `desktop-update-rollout-evidence`. The workflow's initial command uses `10`. Inspect eligible/skipped lanes, release identity, and receipt hashes. **No live channel/pointer changes at this step.**
 14. Require Draft upload of the manifest-owned assets and remote asset verification. Require Docker lane success and exact candidate digest preservation in its manifest. A feed receipt alone cannot substitute for either lane.
-15. `Release Postflight & Publish` downloads the lane/candidate manifests from the Draft, verifies remote Desktop assets (exactly one uploaded asset per manifest name, matching size and GitHub SHA-256 digest), builds `release-manifest.json`, uploads it, then executes `gh release edit ... --draft=false --latest`. This is automatic finalization, not a separate current 10% rollout approval stage.
-16. Confirm Published/latest state, tag SHA, canonical manifest identities, asset coverage, and workflow success. Retain evidence and observe representative eligible clients via Settings. Keep server production deployment as the separate delivery-platform operation.
+15. `Verify all release evidence and publish` downloads the lane/candidate manifests from the Draft, verifies remote Desktop assets (exactly one uploaded asset per manifest name, matching size and GitHub SHA-256 digest), builds `release-manifest.json`, uploads it, then revalidates the Draft source and publishes through `publishDraft`, marking stable as latest and Nightly as prerelease. This is automatic finalization, not a separate current 10% rollout approval stage.
+16. Confirm Published/prerelease for Nightly or Published/latest for Stable, tag SHA, canonical manifest identities, asset coverage, and workflow success. Retain evidence and observe representative eligible clients via Settings. Keep server production deployment as the separate delivery-platform operation.
 
-## 5. Retry/resume an existing Draft
+## 5. Retry or resume a failed publication
 
-Use recovery dispatch only after identifying the existing draft tag, validating its immutable SHA, exact successful main CI, candidate evidence, and the previous failure. It is not a new release creation shortcut.
+Identify the original publication run, Draft, full source SHA and failing gate before retrying. Inspect the Draft through its Release record; a pending tag name does not imply that a Git ref exists:
 
 ```bash
 RELEASE_TAG='v<existing draft version>'
-gh release view "$RELEASE_TAG" --json tagName,isDraft,url
-gh workflow run release-publish.yml --ref main -f tag="$RELEASE_TAG"
-gh run list --workflow release-publish.yml --limit 10
+gh release view "$RELEASE_TAG" --json tagName,isDraft,targetCommitish,url
+gh run view '<publication run ID>' --json status,conclusion,url
 ```
 
-Require `isDraft=true` before dispatch. `Release Publish` checks out the tag, requires its matching release contract/main ancestry/CI, resumes the Draft, invokes both lanes, and can publish automatically once all gates pass. Inspect the new run rather than assuming dispatch success means release success. Already-published releases are detected and skip the lanes/finalization; dispatch is not a repair mechanism for published bytes.
+For a transient failure after source resolution succeeded, restore the prerequisite and rerun failed jobs of the original publication run:
 
-For a transient runner/network/credential failure, restore the external prerequisite and retry only if existing byte identities can be preserved. The workflows currently use `gh release upload --clobber` for Draft assets/manifests. That implementation detail is **not permission to replace different bytes under a version/tag**. Preserve and compare existing digests; if a rebuild would differ or identity is uncertain, abandon that Draft and release a new version. Do not manually upload around the gates.
+```bash
+gh run rerun '<publication run ID>' --failed
+```
 
-Candidate recovery, if needed, uses the existing `Publish Main Candidate` recovery inputs (`ci_run_id`, `sha`) and revalidates successful exact-SHA main CI. Missing/expired candidate evidence must be restored with its original identity, not replaced by newly built server images masquerading as the same candidate.
+This retains that run's resolved source and successful evidence. Inspect the resumed run; starting a retry is not proof of successful publication.
+
+Nightly's next eligibility check can reuse a single Draft associated with the **same current-main SHA**. A manual `nightly-release.yml` dispatch evaluates current main and cannot force publication of an arbitrary older Draft. If a product or test correction changes the source SHA, merge the correction and release that new source instead of rebuilding the old version from different code.
+
+To resume a failed Stable promotion in a new run, select the same published `nightly_tag` through `release-publish.yml`, first with `dry_run=true`, then with `dry_run=false`. Its manual dispatch has no `tag` input. A dispatch for an already-published same-SHA Stable is a no-op and cannot replace published bytes.
+
+Draft uploads use `--clobber`, but this does not authorize replacing different bytes under an existing version. Preserve and compare existing digests; when byte identity cannot be preserved, use a new release identity. Never manually publish a failed Draft or bypass its gates.
+
+Prefer recovering candidate jobs within the original Nightly run so that required same-run artifacts remain available. A separate `candidate-publish.yml` dispatch does not automatically attach its artifacts to an existing Nightly publication. Missing or expired evidence must not be replaced with unrelated artifacts.
 
 ## 6. Evidence checklist
 

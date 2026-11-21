@@ -308,7 +308,15 @@ test('packaged MemoFlow boots through renderer readiness', async ({}, testInfo) 
         .filter({ hasText: `Packaged unavailable ${driver}` });
       await expect(row).toBeVisible({ timeout: SETTINGS_READY_TIMEOUT_MS });
       await row.getByRole('button').click();
-      await restoredLocalSettings.getByRole('button', { name: '删除', exact: true }).click();
+      await restoredLocalSettings.getByTestId('ai-agent-delete').click();
+      const confirmation = restartedWindow.getByRole('alertdialog', {
+        name: '删除该 Provider？',
+      });
+      await expect(confirmation).toBeVisible();
+      await confirmation.getByRole('button', { name: '删除', exact: true }).click();
+      // A modal hides background roles; count only after it closes so a hidden
+      // provider cannot be mistaken for a successfully deleted provider.
+      await expect(confirmation).toBeHidden();
       await expect(row).toHaveCount(0);
     }
     await expect(restartedWindow.getByTestId('ai-provider-add')).toBeEnabled();

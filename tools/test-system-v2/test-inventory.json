@@ -1552,6 +1552,14 @@
       "measurementCollectors": []
     },
     {
+      "path": "apps/desktop/src/main/modules/desktop-update/infrastructure/published-github.provider.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "apps/desktop/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "apps/desktop/src/main/modules/desktop-update/infrastructure/update-install-receipt.store.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -14023,7 +14031,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 115
+      "fileCount": 116
     },
     {
       "id": "apps/migrator/vitest.config.ts",
@@ -15180,7 +15188,7 @@
   "duplicate": [],
   "unexpected": [],
   "counts": {
-    "unit": 1254,
+    "unit": 1255,
     "integration": 63,
     "smoke": 3,
     "boundary-ipc": 7,

@@ -39,6 +39,55 @@ async function findRelease(github, coordinates, tag) {
   assert(found.length <= 1, 'ambiguous release records');
   return found[0] ?? null;
 }
+/** Drafts bind a source SHA without publishing a Git tag into releases.atom. */
+async function resolveReleaseSource({ github, owner, repo, tag, sha, channel }) {
+  const coordinates = { owner, repo };
+  if (channel) releaseVersion(tag, channel);
+  if (sha) requireSha(sha);
+  const release = await findRelease(github, coordinates, tag);
+  assert(release, 'release record required');
+  if (channel) assert(release.prerelease === (channel === 'nightly'), 'release channel collision');
+  let tagSha;
+  try {
+    tagSha = await resolveTag(github, coordinates, tag);
+  } catch (error) {
+    if (error.status !== 404 || !release.draft) throw error;
+  }
+  const sourceSha = release.draft ? requireSha(release.target_commitish) : tagSha;
+  assert(!sha || sourceSha === sha, 'release source SHA collision');
+  assert(!tagSha || tagSha === sourceSha, 'immutable release tag collision');
+  return { release, sha: sourceSha };
+}
+
+/** Called only after all release gates and remote asset verification pass. */
+async function publishDraft({ github, owner, repo, tag, sha, channel }) {
+  requireSha(sha);
+  releaseVersion(tag, channel);
+  const identity = await resolveReleaseSource({
+    github,
+    owner,
+    repo,
+    tag,
+    sha,
+    channel,
+  });
+  assert(identity.release.draft, 'published releases are immutable; no asset overwrite allowed');
+  await github.rest.repos.updateRelease({
+    owner,
+    repo,
+    release_id: identity.release.id,
+    tag_name: tag,
+    target_commitish: sha,
+    draft: false,
+    prerelease: channel === 'nightly',
+    make_latest: channel === 'nightly' ? 'false' : 'true',
+  });
+  assert(
+    (await resolveTag(github, { owner, repo }, tag)) === sha,
+    'published tag identity mismatch',
+  );
+}
+
 async function sourceVersion(github, coordinates, sha) {
   const files = await Promise.all(
     ['package.json', 'apps/desktop/package.json', '.release-please-manifest.json'].map(
@@ -351,11 +400,7 @@ async function resolveReleasePlan({
   }
   const existing = await findRelease(github, coordinates, tag);
   if (existing) {
-    assert(
-      (await resolveTag(github, coordinates, tag)) === sha,
-      'release tag collision: refusing to replace another SHA',
-    );
-    assert(existing.prerelease === (channel === 'nightly'), 'existing release channel mismatch');
+    await resolveReleaseSource({ github, owner, repo, tag, sha, channel });
   }
   return {
     eligible: !existing || existing.draft,
@@ -381,10 +426,9 @@ async function ensureDraft({ github, owner, repo, tag, sha, channel }) {
     if (error.status !== 404) throw error;
   }
   assert(!tagSha || tagSha === sha, 'immutable release tag collision');
-  if (!tagSha) await github.rest.git.createRef({ ...coordinates, ref: 'refs/tags/' + tag, sha });
   let release = await findRelease(github, coordinates, tag);
   if (release) {
-    assert(release.prerelease === (channel === 'nightly'), 'release channel collision');
+    await resolveReleaseSource({ github, owner, repo, tag, sha, channel });
     assert(release.draft, 'published releases are immutable; no asset overwrite allowed');
   } else {
     release = (
@@ -408,6 +452,8 @@ module.exports = {
   releaseVersion,
   sourceVersion,
   resolveTag,
+  resolveReleaseSource,
+  publishDraft,
   findRelease,
   verifyMainCi,
   readAsset,

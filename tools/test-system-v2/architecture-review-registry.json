@@ -856,13 +856,19 @@
       },
       "decision": "supplement",
       "behavior": "已打包 Electron 真正冷启动、设置页面及 Profile/快捷键重启持久化，检查 CSS/窗口/安装包资源",
-      "assertionEvidence": ["MEMOFLOW_PACKAGED_EXECUTABLE"],
-      "reason": "必须由已构建/安装产物运行；当前未核实 CI SHA 回执，不应列为常规单元或无门禁。 仅做源码/断言阅读，未运行真实浏览器或 Electron。",
+      "assertionEvidence": [
+        "MEMOFLOW_PACKAGED_EXECUTABLE",
+        "ai-agent-delete",
+        "删除该 Provider？",
+        "toBeHidden",
+        "toHaveCount"
+      ],
+      "reason": "Issue #1049 重新审阅：已打包应用冷启动及重启后验证五类 Provider，删除必须显式确认，并在确认层关闭后验证列表项真正消失。保留 e2e/behavior 分类；本记录仅表示源码断言审阅，实际 Electron 执行证据由 PR/CI 记录。",
       "replacement": {
         "status": "none-verified",
         "testFiles": []
       },
-      "sourceSha256": "7eee78290f2de4c65af363516f898b12d628bacb12bb208a1fb8b778991012c8"
+      "sourceSha256": "b97d47cba9da36ae7ccbbe3132f31acbeae6a609bdccd1cd270c870463803984"
     },
     {
       "path": "apps/web/e2e/account/account-management.spec.ts",
