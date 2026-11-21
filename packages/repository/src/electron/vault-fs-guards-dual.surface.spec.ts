@@ -18,21 +18,6 @@ describe('vault FS guards dual retired (residual 957)', () => {
   const sole = readFileSync(resolve(dir, 'vault-fs-guards.ts'), 'utf8');
   const localVault = readFileSync(resolve(dir, 'local-vault-runtime.ts'), 'utf8');
   const index = readFileSync(resolve(dir, 'index.ts'), 'utf8');
-  const repoRoot = resolve(dir, '../../../../');
-  const autoSync = readFileSync(
-    resolve(
-      repoRoot,
-      'apps/desktop/src/main/modules/repository/desktop-knowledge-repository-auto-sync.scheduler.ts',
-    ),
-    'utf8',
-  );
-  const gitRuntime = readFileSync(
-    resolve(
-      repoRoot,
-      'apps/desktop/src/main/modules/repository/desktop-knowledge-repository-git.runtime.ts',
-    ),
-    'utf8',
-  );
 
   it('owns sole isMissing / isTemporaryFile helper bodies and electron barrel export', () => {
     expect(sole).toContain('Residual 957');
@@ -40,7 +25,6 @@ describe('vault FS guards dual retired (residual 957)', () => {
     expect(sole).toMatch(/export function isTemporaryFile\b/);
     expect(sole).toContain("code === 'ENOENT'");
     expect(sole).toContain("name === '.DS_Store'");
-    expect(index).toContain('Residual 957');
     expect(index).toContain("export { isMissing, isTemporaryFile } from './vault-fs-guards'");
   });
 
@@ -52,24 +36,6 @@ describe('vault FS guards dual retired (residual 957)', () => {
     expect(localVault).not.toMatch(/function isTemporarySyncFile\b/);
     expect(localVault).toContain('isTemporaryFile(entry.name)');
     expect(localVault).toContain('isMissing(error)');
-
-    expect(autoSync).toContain('Residual 957');
-    expect(autoSync).toContain(
-      "import { isMissing, isTemporaryFile } from '@memoflow/repository/electron'",
-    );
-    expect(autoSync).not.toMatch(/function isMissing\b/);
-    expect(autoSync).not.toMatch(/function isTemporaryFile\b/);
-    expect(autoSync).toContain('isTemporaryFile');
-    expect(autoSync).toContain('isMissing(error)');
-
-    expect(gitRuntime).toContain('Residual 957');
-    expect(gitRuntime).toContain(
-      "import { isMissing, isTemporaryFile } from '@memoflow/repository/electron'",
-    );
-    expect(gitRuntime).not.toMatch(/function isMissing\b/);
-    expect(gitRuntime).not.toMatch(/function isTemporaryFile\b/);
-    expect(gitRuntime).toContain('isTemporaryFile');
-    expect(gitRuntime).toContain('isMissing(error)');
   });
 
   it('type-guards ENOENT errors and temporary basenames', () => {

@@ -482,6 +482,7 @@ const props = withDefaults(
     /** Show workflow decision/actions + artifact surface near the timeline. */
     showWorkflowSurface?: boolean;
     canSaveLocalNote?: boolean;
+    canCaptureKnowledge?: boolean;
   }>(),
   {
     hasModels: true,
@@ -501,20 +502,22 @@ const emit = defineEmits<{
   'ask-user-cancel': [request: ChatAskUserRequest];
 }>();
 
-const shortcutEntries = [
-  { mode: 'goal-create' as const, localeKey: 'goalCreate', icon: Sparkles },
-  {
-    mode: 'task-create' as const,
-    localeKey: 'taskCreate',
-    icon: ClipboardCheck,
-  },
-  {
-    mode: 'knowledge-capture' as const,
-    localeKey: 'knowledgeCapture',
-    icon: NotebookPen,
-  },
-  { mode: 'knowledge-qa' as const, localeKey: 'knowledgeQa', icon: Search },
-];
+const shortcutEntries = computed(() =>
+  [
+    { mode: 'goal-create' as const, localeKey: 'goalCreate', icon: Sparkles },
+    {
+      mode: 'task-create' as const,
+      localeKey: 'taskCreate',
+      icon: ClipboardCheck,
+    },
+    {
+      mode: 'knowledge-capture' as const,
+      localeKey: 'knowledgeCapture',
+      icon: NotebookPen,
+    },
+    { mode: 'knowledge-qa' as const, localeKey: 'knowledgeQa', icon: Search },
+  ].filter((entry) => entry.mode !== 'knowledge-capture' || props.canCaptureKnowledge),
+);
 
 const viewport = ref<HTMLElement | null>(null);
 const copiedMessageId = ref<string | null>(null);

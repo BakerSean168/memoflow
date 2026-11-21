@@ -66,6 +66,7 @@ function createHostPorts() {
     openInObsidian: vi.fn(),
     writeConfirmedNote: vi.fn(),
     inspectSyncContent: vi.fn(),
+    listRecentWrites: vi.fn(),
   };
   const knowledgeRepositoryConnectionPort = {
     startKnowledgeRepositoryInstallation: vi.fn(),
@@ -108,12 +109,6 @@ function createFakeContext(): IElectronModuleContext {
   } as unknown as IElectronModuleContext;
 }
 
-function registered(channel: string) {
-  const handler = mocks.handlers.get(channel);
-  expect(handler, `Expected ${channel} to be registered`).toBeDefined();
-  return handler!;
-}
-
 describe('createRepositoryElectronModule lifecycle', () => {
   let ports: ReturnType<typeof createHostPorts>;
   let context: IElectronModuleContext;
@@ -124,10 +119,6 @@ describe('createRepositoryElectronModule lifecycle', () => {
     context = createFakeContext();
     moduleDef = createRepositoryElectronModule({
       localVaultPort: ports.localVaultPort as never,
-      knowledgeRepositoryConnectionPort: ports.knowledgeRepositoryConnectionPort as never,
-      knowledgeRepositoryReconciliationPort: ports.knowledgeRepositoryReconciliationPort,
-      knowledgeRepositorySyncPort: ports.knowledgeRepositorySyncPort,
-      knowledgeRepositoryAutoSyncScheduler: ports.knowledgeRepositoryAutoSyncScheduler,
     });
   });
 
@@ -141,20 +132,21 @@ describe('createRepositoryElectronModule lifecycle', () => {
     mocks.handlers.clear();
   });
 
-  it('registers all repository channels and starts the auto-sync scheduler once', async () => {
+  it('registers only local Vault channels', async () => {
     await moduleDef.register(context);
 
-    for (const channel of Object.values(RepositoryChannels)) {
+    for (const channel of Object.entries(RepositoryChannels)
+      .filter(([name]) => name.startsWith('LOCAL_VAULT_'))
+      .map(([, channel]) => channel)) {
       expect(mocks.handlers.has(channel), `Expected ${channel} to be registered`).toBe(true);
     }
-    expect(ports.knowledgeRepositoryAutoSyncScheduler.start).toHaveBeenCalledWith('identity-1');
   });
 
   it('throws on a second register() call (single registration per handle)', async () => {
     await moduleDef.register(context);
 
     await expect(moduleDef.register(context)).rejects.toThrow(/only register once/);
-    expect(ports.knowledgeRepositoryAutoSyncScheduler.start).toHaveBeenCalledTimes(1);
+    expect(mocks.handlers.size).toBe(9);
   });
 
   it('cancels the previous search from the same renderer when the query is cleared', async () => {
@@ -187,22 +179,25 @@ describe('createRepositoryElectronModule lifecycle', () => {
     await expect(moduleDef.register(context)).rejects.toThrow(/only register once/);
   });
 
-  it('destroy stops the scheduler once, removes all channels, and is idempotent', async () => {
+  it('destroy disposes the Vault, removes local channels, and is idempotent', async () => {
     await moduleDef.register(context);
 
     await moduleDef.destroy?.();
-    expect(ports.knowledgeRepositoryAutoSyncScheduler.stop).toHaveBeenCalledTimes(1);
-    expect(ports.knowledgeRepositoryAutoSyncScheduler.stop).toHaveBeenCalledWith({
-      commitPendingChanges: true,
-    });
-    for (const channel of Object.values(RepositoryChannels)) {
+    expect(ports.localVaultPort.dispose).toHaveBeenCalledTimes(1);
+    for (const channel of Object.entries(RepositoryChannels)
+      .filter(([name]) => name.startsWith('LOCAL_VAULT_'))
+      .map(([, channel]) => channel)) {
       expect(mocks.handlers.has(channel)).toBe(false);
     }
-    expect(fakeRemoveHandlerCount()).toBe(Object.values(RepositoryChannels).length);
+    expect(fakeRemoveHandlerCount()).toBe(
+      Object.entries(RepositoryChannels)
+        .filter(([name]) => name.startsWith('LOCAL_VAULT_'))
+        .map(([, channel]) => channel).length,
+    );
 
     await moduleDef.destroy?.();
     await moduleDef.destroy?.();
-    expect(ports.knowledgeRepositoryAutoSyncScheduler.stop).toHaveBeenCalledTimes(1);
+    expect(ports.localVaultPort.dispose).toHaveBeenCalledTimes(1);
   });
 
   it('removes the channels installed before ipcMain.handle() throws mid-registration', async () => {

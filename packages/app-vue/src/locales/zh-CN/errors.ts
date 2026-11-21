@@ -1,4 +1,7 @@
 export default {
+  AI_PERMISSION_DENIED: '当前 Agent 权限未授权读取所选笔记，请检查知识读取权限，或移除这些引用。',
+  KNOWLEDGE_CONTEXT_STALE:
+    "所选笔记已变化、移动或来源已断开。请先移除失效的笔记引用，再输入 {'@'} 重新选择。",
   EAG_SERVICE_UNAVAILABLE: '服务暂不可用，请稍后再试',
   EAG_RATE_LIMITED: '请求过于频繁，请稍后再试',
   EAG_VALIDATION_ERROR: '提交信息不合法，请检查后重试',

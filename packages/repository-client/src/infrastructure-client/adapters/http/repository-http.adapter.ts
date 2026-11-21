@@ -1,3 +1,4 @@
+import type { LocalVaultWriteReceipt } from '@memoflow/repository-contracts';
 /**
  * Repository HTTP Adapter
  *
@@ -150,11 +151,9 @@ export class RepositoryHttpAdapter implements IRepositoryApiClient {
   }
 
   async issueDesktopKnowledgeRepositoryToken(
-    connectionId: string,
+    _connectionId: string,
   ): Promise<Result<KnowledgeRepositoryInstallationTokenRes>> {
-    return this.httpClient.post(
-      `${this.baseUrl}/knowledge-connections/${encodeURIComponent(connectionId)}/desktop-token`,
-    );
+    return this.knowledgeSourceReadOnly();
   }
 
   async listKnowledgeNoteProjections(
@@ -258,15 +257,15 @@ export class RepositoryHttpAdapter implements IRepositoryApiClient {
   }
 
   async createConfirmedKnowledgeNote(
-    request: CreateConfirmedKnowledgeNoteReq,
+    _request: CreateConfirmedKnowledgeNoteReq,
   ): Promise<Result<CreateConfirmedKnowledgeNoteResponse>> {
-    return this.httpClient.post(`${this.baseUrl}/knowledge-notes`, request);
+    return this.knowledgeSourceReadOnly();
   }
 
   async adoptKnowledgeDocument(
-    request: AdoptKnowledgeDocumentReq,
+    _request: AdoptKnowledgeDocumentReq,
   ): Promise<Result<AdoptKnowledgeDocumentResponse>> {
-    return this.httpClient.post(`${this.baseUrl}/knowledge-notes/adopt`, request);
+    return this.knowledgeSourceReadOnly();
   }
 
   async listKnowledgeWriteRequests(
@@ -281,12 +280,17 @@ export class RepositoryHttpAdapter implements IRepositoryApiClient {
   }
 
   async replayKnowledgeWriteRequestProjection(
-    writeRequestId: string,
+    _writeRequestId: string,
   ): Promise<Result<KnowledgeWriteRequestReplayResponse>> {
-    return this.httpClient.post(
-      `${this.baseUrl}/knowledge-write-requests/${encodeURIComponent(writeRequestId)}/replay`,
-      {},
-    );
+    return this.knowledgeSourceReadOnly();
+  }
+
+  private knowledgeSourceReadOnly<T>(): Result<T> {
+    return fail({
+      code: 'FORBIDDEN',
+      message: 'Web knowledge sources are read-only',
+      context: { reason: 'knowledge-source-read-only' },
+    });
   }
 
   private localVaultUnavailable<T>(): Result<T> {
@@ -308,6 +312,10 @@ export class RepositoryHttpAdapter implements IRepositoryApiClient {
 
   async detachLocalVault(): Promise<Result<void>> {
     return this.localVaultUnavailable();
+  }
+
+  async listLocalVaultWrites(): Promise<Result<LocalVaultWriteReceipt[]>> {
+    return fail({ code: 'FORBIDDEN', message: 'Local Vault is available only in Desktop' });
   }
 
   async scanLocalVault(): Promise<Result<ScanLocalVaultRes>> {

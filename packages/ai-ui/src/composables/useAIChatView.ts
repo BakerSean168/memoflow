@@ -85,7 +85,8 @@ export function useAIChatView(options: UseAIChatViewOptions) {
   const repository = inject(REPOSITORY_SERVICE_KEY, undefined);
   const knowledgeNativeSurface = aiUiHost.useKnowledgeNativeSurfaceRegistration();
   async function saveLocalNote(content: string) {
-    if (!localAgent || !repository || !knowledgeNativeSurface) return;
+    if (assistantSurface !== 'desktop' || !localAgent || !repository || !knowledgeNativeSurface)
+      return;
     try {
       const binding = unwrapOrThrowError(await repository.getLocalVaultBinding());
       if (!binding || binding.health.state !== 'Available')
@@ -108,7 +109,7 @@ export function useAIChatView(options: UseAIChatViewOptions) {
   const { goals, fetchGoals } = aiUiHost.useGoal();
   const task = aiUiHost.useTask();
   const recentKnowledgeNotes = aiUiHost.useRecentKnowledgeNotes();
-  const referenceableKnowledgeNotes = aiUiHost.useReferenceableKnowledgeNotes();
+  const contextNotes = aiUiHost.useKnowledgeContextNotes();
   const formatters = useAIFormatters();
 
   async function requestOpenKnowledgeNote(note: string | KnowledgeDocumentRef): Promise<void> {
@@ -343,13 +344,7 @@ export function useAIChatView(options: UseAIChatViewOptions) {
   });
 
   const referenceKnowledgeNoteList = computed<AIWorkspaceRecentKnowledgeNote[]>(() =>
-    referenceableKnowledgeNotes.notes.value.slice(0, 20).map((note) => ({
-      id: note.documentId,
-      contextId: note.documentId,
-      title: note.title,
-      path: note.path,
-      updatedAt: note.updatedAt,
-    })),
+    contextNotes.notes.value.map((note) => ({ ...note, contextId: note.id })),
   );
 
   async function loadWorkspaceLists() {
@@ -358,7 +353,6 @@ export function useAIChatView(options: UseAIChatViewOptions) {
       fetchGoals().catch(() => undefined),
       task.fetchTemplates({ page: 1, limit: 50 }).catch(() => undefined),
       loadRecentKnowledgeNotes().catch(() => undefined),
-      referenceableKnowledgeNotes.load({ limit: 20 }).catch(() => undefined),
     ]);
   }
 
@@ -601,7 +595,7 @@ export function useAIChatView(options: UseAIChatViewOptions) {
 
   onBeforeUnmount(() => {
     composerModel.markDisposed();
-    referenceableKnowledgeNotes.cancel();
+    contextNotes.cancel();
   });
 
   onMounted(async () => {
@@ -682,6 +676,9 @@ export function useAIChatView(options: UseAIChatViewOptions) {
       referenceGoalList,
       referenceTaskList,
       referenceKnowledgeNoteList,
+      searchKnowledgeContext: contextNotes.search,
+      knowledgeContextLoading: contextNotes.isLoading,
+      knowledgeContextError: contextNotes.error,
       recentKnowledgeNotesEmailVerificationRequired: computed(
         () => recentKnowledgeNotes.emailVerificationRequired.value,
       ),
@@ -744,7 +741,7 @@ export function useAIChatView(options: UseAIChatViewOptions) {
       executionFailureMessage: computed(() =>
         getNativeAgentExecutionFailureMessage(localChoices.lastExecutionFailure.value, t),
       ),
-      canSaveNote: Boolean(repository && knowledgeNativeSurface),
+      canSaveNote: assistantSurface === 'desktop' && Boolean(repository && knowledgeNativeSurface),
       saveNote: saveLocalNote,
       async select(choice: import('@memoflow/ai-contracts').AssistantRuntimeChoice) {
         const key =

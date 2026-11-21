@@ -18,7 +18,7 @@ import { registerProfileImportIpc } from './profile/profile-import-ipc';
 
 import path from 'node:path';
 import { pathToFileURL } from 'node:url';
-import { app, powerMonitor, session, BrowserWindow } from 'electron';
+import { app, session, BrowserWindow } from 'electron';
 import { clearDesktopStorageCache } from './paths/clear-storage-cache';
 import { runIdentityResetOnce } from './profile/identity-reset';
 import { initMemoryMonitorForDev, registerCacheIpcHandlers } from './utils';
@@ -137,11 +137,6 @@ import { DeviceAuthCoordinator } from './profile/device-auth-coordinator';
 import type { PowerSyncDatabase } from '@powersync/node';
 import { getCurrentSyncHealth, refreshSyncHealth, subscribeSyncHealth } from './database/powersync';
 import { createDesktopSyncStatusModule } from './sync/desktop-sync-status';
-import { KnowledgeRepositoryRemoteGateway } from './modules/repository/knowledge-repository-remote.gateway';
-import { DesktopKnowledgeRepositoryGitRuntime } from './modules/repository/desktop-knowledge-repository-git.runtime';
-import { DesktopKnowledgeRepositoryReconciliationService } from './modules/repository/desktop-knowledge-repository-reconciliation.service';
-import { DesktopKnowledgeRepositorySyncService } from './modules/repository/desktop-knowledge-repository-sync.service';
-import { DesktopKnowledgeRepositoryAutoSyncScheduler } from './modules/repository/desktop-knowledge-repository-auto-sync.scheduler';
 import { DesktopMainRuntime } from './desktop-main-runtime';
 import { composeDesktopUpdateShellRuntime } from './modules/desktop-update/runtime/desktop-update-shell';
 import { resolveDesktopUpdateE2EConfig } from './modules/desktop-update/runtime/desktop-update-e2e-harness';
@@ -761,53 +756,7 @@ async function registerBusinessModules(
     ],
   });
 
-  const knowledgeRepositoryRemoteGateway = new KnowledgeRepositoryRemoteGateway({
-    getAccessToken: getCloudAccessToken,
-  });
-  const knowledgeRepositoryGitRuntime = new DesktopKnowledgeRepositoryGitRuntime();
-  const knowledgeRepositoryReconciliationService =
-    new DesktopKnowledgeRepositoryReconciliationService({
-      localVault: localVaultRuntime,
-      remote: knowledgeRepositoryRemoteGateway,
-      gitRuntime: knowledgeRepositoryGitRuntime,
-    });
-  const knowledgeRepositorySyncService = new DesktopKnowledgeRepositorySyncService({
-    localVault: localVaultRuntime,
-    remote: knowledgeRepositoryRemoteGateway,
-    gitRuntime: knowledgeRepositoryGitRuntime,
-  });
-  const knowledgeRepositoryAutoSyncScheduler = new DesktopKnowledgeRepositoryAutoSyncScheduler({
-    localVault: localVaultRuntime,
-    remote: knowledgeRepositoryRemoteGateway,
-    synchronization: knowledgeRepositorySyncService,
-    lifecycle: {
-      onNetworkOnline(listener) {
-        void listener;
-        return () => undefined;
-      },
-      onSystemResume(listener) {
-        let resumeTimer: ReturnType<typeof setTimeout> | null = null;
-        const handleResume = () => {
-          if (resumeTimer) clearTimeout(resumeTimer);
-          resumeTimer = setTimeout(listener, 2_000);
-          resumeTimer.unref?.();
-        };
-        powerMonitor.on('resume', handleResume);
-        return () => {
-          powerMonitor.off('resume', handleResume);
-          if (resumeTimer) clearTimeout(resumeTimer);
-        };
-      },
-    },
-    stateFilePath: profilePaths.knowledgeRepositoryAutoSyncStatePath,
-  });
-  const repositoryElectronModule = composeRepository({
-    localVaultPort: localVaultRuntime,
-    knowledgeRepositoryConnectionPort: knowledgeRepositoryRemoteGateway,
-    knowledgeRepositoryReconciliationPort: knowledgeRepositoryReconciliationService,
-    knowledgeRepositorySyncPort: knowledgeRepositorySyncService,
-    knowledgeRepositoryAutoSyncScheduler,
-  });
+  const repositoryElectronModule = composeRepository({ localVaultPort: localVaultRuntime });
 
   // Schedule runtime controller wiring: the SAME composed controller is handed
   // to both lifecycle owners (WindowManager drives delayed start/stop on window

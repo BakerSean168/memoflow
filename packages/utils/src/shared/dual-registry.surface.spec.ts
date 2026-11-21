@@ -133,10 +133,6 @@ import {
       sharedDir,
       '../../../ai/src/server/infrastructure/runtime/ai-runtime.ts',
     );
-    const localVault = readFileSync(
-      resolve(sharedDir, '../../../repository-ui/src/composables/useLocalVault.ts'),
-      'utf8',
-    );
     const databaseScript = readFileSync(
       resolve(sharedDir, '../../../database/scripts/prepare-ai-knowledge-index-pgvector.ts'),
       'utf8',
@@ -152,10 +148,6 @@ import {
     });
 
     it('keeps the current local-vault consumer on the sole helper and the legacy AI runtime deleted', () => {
-      expect(localVault).toContain('Residual 999');
-      expect(localVault).toContain("import { errorMessage } from '@memoflow/utils/shared'");
-      expect(localVault).not.toMatch(/function errorMessage\b/);
-      expect(localVault).toContain('errorMessage(');
       expect(existsSync(legacyAiRuntimePath)).toBe(false);
     });
 

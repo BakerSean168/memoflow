@@ -69,7 +69,7 @@ describe('legacy editor/repository runtime surface', () => {
   });
 
   it('server module does not assemble legacy Folder/Resource CRUD (residual 167)', () => {
-    expect(repositoryModule).toContain('confirmed note create');
+    expect(repositoryModule).toContain('read-only content');
     expect(repositoryModule).not.toContain('FolderUseCase');
     expect(repositoryModule).not.toContain('ResourceUseCase');
     expect(repositoryModule).not.toContain('BookmarkUseCase');

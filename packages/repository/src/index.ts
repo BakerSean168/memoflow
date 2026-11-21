@@ -44,7 +44,6 @@ export {
   type IGitHubAppClient,
   type IKnowledgeRepositoryConnectionService,
   type IKnowledgeRepositoryProjectionService,
-  type IKnowledgeNoteCommitService,
 } from './server';
 export type { RepositoryApplicationPort } from './server';
 export { KnowledgeDocumentRefResolverService } from './server/application';

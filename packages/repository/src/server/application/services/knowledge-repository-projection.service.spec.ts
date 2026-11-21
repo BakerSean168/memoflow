@@ -517,10 +517,18 @@ function githubClient(overrides: Partial<IGitHubAppClient> = {}): IGitHubAppClie
         },
       ],
     })),
-    getFullMarkdownSnapshot: vi.fn(),
+    getFullMarkdownSnapshot: vi.fn(async () => ({
+      commitSha: 'after-sha',
+      files: [],
+      attachments: [],
+    })),
     getBlob: vi.fn(),
-    getRepositorySnapshot: vi.fn(),
-    createFileCommit: vi.fn(),
+    getRepositorySnapshot: vi.fn(async () => ({
+      repositoryId: 'repository-1',
+      defaultBranch: 'main',
+      empty: false,
+      headSha: 'after-sha',
+    })),
     createInstallationAccessToken: vi.fn(),
     ...overrides,
   };
@@ -691,7 +699,23 @@ describe('KnowledgeRepositoryProjectionService', () => {
       connectionRepository: new MemoryConnectionRepository(),
       deliveryRepository,
       projectionRepository,
-      githubAppClient: githubClient({ getMarkdownChanges }),
+      githubAppClient: githubClient({
+        getMarkdownChanges,
+        getRepositorySnapshot: vi
+          .fn()
+          .mockResolvedValueOnce({
+            repositoryId: 'repository-1',
+            defaultBranch: 'main',
+            empty: false,
+            headSha: 'after-sha',
+          })
+          .mockResolvedValueOnce({
+            repositoryId: 'repository-1',
+            defaultBranch: 'main',
+            empty: false,
+            headSha: 'after-sha-2',
+          }),
+      }),
       publishMutation,
       now: () => 1_750_000_000_000,
     });
@@ -815,7 +839,23 @@ describe('KnowledgeRepositoryProjectionService', () => {
       connectionRepository: new MemoryConnectionRepository(),
       deliveryRepository,
       projectionRepository,
-      githubAppClient: githubClient({ getMarkdownChanges }),
+      githubAppClient: githubClient({
+        getMarkdownChanges,
+        getRepositorySnapshot: vi
+          .fn()
+          .mockResolvedValueOnce({
+            repositoryId: 'repository-1',
+            defaultBranch: 'main',
+            empty: false,
+            headSha: 'after-sha',
+          })
+          .mockResolvedValueOnce({
+            repositoryId: 'repository-1',
+            defaultBranch: 'main',
+            empty: false,
+            headSha: 'after-sha-2',
+          }),
+      }),
     });
 
     await service.ingest({
@@ -937,7 +977,23 @@ describe('KnowledgeRepositoryProjectionService', () => {
       connectionRepository,
       deliveryRepository,
       projectionRepository: new MemoryProjectionRepository(),
-      githubAppClient: githubClient({ getMarkdownChanges }),
+      githubAppClient: githubClient({
+        getMarkdownChanges,
+        getRepositorySnapshot: vi
+          .fn()
+          .mockResolvedValueOnce({
+            repositoryId: 'repository-1',
+            defaultBranch: 'main',
+            empty: false,
+            headSha: 'commit-1',
+          })
+          .mockResolvedValueOnce({
+            repositoryId: 'repository-1',
+            defaultBranch: 'main',
+            empty: false,
+            headSha: 'commit-2',
+          }),
+      }),
       publishMutation: vi.fn(),
     });
 
@@ -996,6 +1052,13 @@ describe('KnowledgeRepositoryProjectionService', () => {
         },
       ],
     }));
+    const getFullMarkdownSnapshot = vi.fn(async () => ({
+      commitSha: 'after-sha',
+      files: [
+        { relativePath: 'notes/shared.md', blobSha: 'shared-blob', markdownContent: '# Shared' },
+      ],
+      attachments: [],
+    }));
     const fourAxis = buildFourAxisRepositories();
     const createService = () =>
       new KnowledgeRepositoryProjectionService({
@@ -1004,7 +1067,7 @@ describe('KnowledgeRepositoryProjectionService', () => {
         connectionRepository,
         deliveryRepository,
         projectionRepository,
-        githubAppClient: githubClient({ getMarkdownChanges }),
+        githubAppClient: githubClient({ getMarkdownChanges, getFullMarkdownSnapshot }),
         leaseRepository,
         reconciliationIntervalMs: 0,
       });
@@ -1016,7 +1079,19 @@ describe('KnowledgeRepositoryProjectionService', () => {
     await vi.waitFor(() =>
       expect(deliveryRepository.rows.get('delivery-shared')?.status).toBe('Processed'),
     );
-    expect(getMarkdownChanges).toHaveBeenCalledOnce();
+    // Startup reconciliation and delivery processing share the same connection lease.
+    // Whichever wins must project the current HEAD once; the other sees that checkpoint.
+    expect(getMarkdownChanges.mock.calls.length + getFullMarkdownSnapshot.mock.calls.length).toBe(
+      1,
+    );
+    expect([...projectionRepository.rows.values()]).toEqual([
+      expect.objectContaining({ relativePath: 'notes/shared.md', markdownContent: '# Shared' }),
+    ]);
+    expect(fourAxis.projectionCheckpointRepository.rows.get(connection().id)).toMatchObject({
+      branch: 'main',
+      projectedCommitSha: 'after-sha',
+      state: 'Ready',
+    });
     first.stop();
     second.stop();
   });
@@ -1157,40 +1232,150 @@ describe('KnowledgeRepositoryProjectionService', () => {
     );
   });
 
-  it('pauses projection when the live default branch no longer matches the connection', async () => {
-    const connectionRepository = new MemoryConnectionRepository();
+  it('rebuilds from the current default branch when a delayed old-branch delivery arrives', async () => {
     const deliveryRepository = new MemoryDeliveryRepository();
     const projectionRepository = new MemoryProjectionRepository();
+    const github = githubClient({
+      getInstallationInventory: vi.fn(async () => ({
+        ...inventory(),
+        repositories: [{ ...githubRepository(), defaultBranch: 'trunk' }],
+      })),
+      getRepositorySnapshot: vi.fn(async () => ({
+        repositoryId: 'repository-1',
+        defaultBranch: 'trunk',
+        empty: false,
+        headSha: 'trunk-head',
+      })),
+      getFullMarkdownSnapshot: vi.fn(async () => ({
+        commitSha: 'trunk-head',
+        files: [{ relativePath: 'trunk.md', blobSha: 'trunk-blob', markdownContent: '# Trunk' }],
+      })),
+    });
     const service = new KnowledgeRepositoryProjectionService({
       ...createFourAxisRepositories(),
       webhookSecret,
-      connectionRepository,
+      connectionRepository: new MemoryConnectionRepository(),
       deliveryRepository,
       projectionRepository,
-      githubAppClient: githubClient({
-        getInstallationInventory: vi.fn(async () => ({
-          ...inventory(),
-          repositories: [{ ...githubRepository(), defaultBranch: 'trunk' }],
-        })),
-      }),
-      publishMutation: vi.fn(),
+      githubAppClient: github,
     });
+    await service.ingest({ deliveryId: 'delayed-main', eventName: 'push', ...signedPushPayload() });
+    await vi.waitFor(() =>
+      expect([...deliveryRepository.rows.values()][0]?.status).toBe('Processed'),
+    );
+    expect(github.getMarkdownChanges).not.toHaveBeenCalled();
+    expect(github.getFullMarkdownSnapshot).toHaveBeenCalledWith(
+      'installation-1',
+      expect.objectContaining({ defaultBranch: 'trunk' }),
+      'trunk-head',
+    );
+    expect(latestCheckpointRepository().rows.get(connection().id)).toMatchObject({
+      branch: 'trunk',
+      projectedCommitSha: 'trunk-head',
+      state: 'Ready',
+    });
+    expect(latestObservationRepository().rows.get(connection().id)?.eligibility).toEqual({
+      state: 'Ready',
+    });
+  });
 
-    await service.ingest({
-      deliveryId: 'delivery-default-branch-changed',
+  it('accepts the first signed push to a new default branch despite an old sync fence', async () => {
+    const deliveryRepository = new MemoryDeliveryRepository();
+    const github = githubClient({
+      getInstallationInventory: vi.fn(async () => ({
+        ...inventory(),
+        repositories: [{ ...githubRepository(), defaultBranch: 'trunk' }],
+      })),
+      getRepositorySnapshot: vi.fn(async () => ({
+        repositoryId: 'repository-1',
+        defaultBranch: 'trunk',
+        empty: false,
+        headSha: 'after-sha',
+      })),
+    });
+    const service = new KnowledgeRepositoryProjectionService({
+      ...createFourAxisRepositories(),
+      webhookSecret,
+      connectionRepository: new MemoryConnectionRepository(),
+      deliveryRepository,
+      projectionRepository: new MemoryProjectionRepository(),
+      githubAppClient: github,
+    });
+    const result = await service.ingest({
+      deliveryId: 'trunk-first',
       eventName: 'push',
-      ...signedPushPayload(),
+      ...signedPushPayload({
+        ref: 'refs/heads/trunk',
+        repository: { id: 'repository-1', default_branch: 'trunk' },
+      }),
     });
-    await vi.waitFor(() => {
-      expect([...deliveryRepository.rows.values()][0]?.status).toBe('Failed');
-    });
+    expect(result).toMatchObject({ ok: true, data: { accepted: true } });
+    await vi.waitFor(() =>
+      expect([...deliveryRepository.rows.values()][0]?.status).toBe('Processed'),
+    );
+    expect(github.getFullMarkdownSnapshot).toHaveBeenCalled();
+  });
 
-    expect(connectionRepository.row.disconnectedAt).toBeNull();
-    expect(latestObservationRepository().rows.get(connection().id)).toMatchObject({
-      eligibility: { state: 'Blocked', reason: 'DefaultBranchChanged' },
-      defaultBranch: 'trunk',
+  it('updates the projection branch even when the new default branch has the same SHA', async () => {
+    const fourAxis = buildFourAxisRepositories();
+    const github = githubClient({
+      getInstallationInventory: vi.fn(async () => ({
+        ...inventory(),
+        repositories: [{ ...githubRepository(), defaultBranch: 'trunk' }],
+      })),
+      getRepositorySnapshot: vi.fn(async () => ({
+        repositoryId: 'repository-1',
+        defaultBranch: 'trunk',
+        empty: false,
+        headSha: 'before-sha',
+      })),
+      getFullMarkdownSnapshot: vi.fn(async () => ({ commitSha: 'before-sha', files: [] })),
     });
-    expect(projectionRepository.applyChanges).not.toHaveBeenCalled();
+    const service = new KnowledgeRepositoryProjectionService({
+      ...fourAxis,
+      webhookSecret,
+      connectionRepository: new MemoryConnectionRepository(),
+      deliveryRepository: new MemoryDeliveryRepository(),
+      projectionRepository: new MemoryProjectionRepository(),
+      githubAppClient: github,
+    });
+    await service.reconcileNow();
+    expect(github.getFullMarkdownSnapshot).toHaveBeenCalledOnce();
+    expect(fourAxis.projectionCheckpointRepository.rows.get(connection().id)).toMatchObject({
+      branch: 'trunk',
+      projectedCommitSha: 'before-sha',
+      state: 'Ready',
+    });
+  });
+
+  it('rebuilds the live HEAD when a same-branch delivery has a missing predecessor', async () => {
+    const deliveryRepository = new MemoryDeliveryRepository();
+    const github = githubClient();
+    const service = new KnowledgeRepositoryProjectionService({
+      ...createFourAxisRepositories(),
+      webhookSecret,
+      connectionRepository: new MemoryConnectionRepository(),
+      deliveryRepository,
+      projectionRepository: new MemoryProjectionRepository(),
+      githubAppClient: github,
+    });
+    await service.ingest({
+      deliveryId: 'missing-predecessor',
+      eventName: 'push',
+      ...signedPushPayload({ before: 'unprojected-commit' }),
+    });
+    await vi.waitFor(() =>
+      expect([...deliveryRepository.rows.values()][0]?.status).toBe('Processed'),
+    );
+    expect(github.getMarkdownChanges).not.toHaveBeenCalled();
+    expect(github.getFullMarkdownSnapshot).toHaveBeenCalledWith(
+      'installation-1',
+      expect.any(Object),
+      'after-sha',
+    );
+    expect(latestCheckpointRepository().rows.get(connection().id)?.projectedCommitSha).toBe(
+      'after-sha',
+    );
   });
 
   it('does not fetch a full snapshot when reconciliation finds the projected HEAD unchanged', async () => {

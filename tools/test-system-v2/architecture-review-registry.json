@@ -23,7 +23,7 @@
         "status": "none-verified",
         "testFiles": []
       },
-      "sourceSha256": "0efafca22df6c8d209c9f34285c06de8953d66d681625d5debe2e9794b9b3a31"
+      "sourceSha256": "33fd0bb4620318726125a1c15ed86c893340a33ae04e47a591baa575189c29da"
     },
     {
       "path": "apps/desktop/src/main/profile/ProfileSnapshotService.spec.ts",
@@ -516,16 +516,18 @@
         "testRole": "source-constraint"
       },
       "decision": "retain",
-      "behavior": "Desktop and API persisted note refs preserve KnowledgeDocumentId",
+      "behavior": "Desktop 确认写入保留 KnowledgeDocumentId；临时来源引用不冒充稳定身份；API 不再装配已退役的知识写入器。",
       "assertionEvidence": [
-        "forbids relativePath hash IDs; stable committed KnowledgeDocumentId in both hosts"
+        "uses the reviewed KnowledgeDocumentId for Desktop confirmed persisted refs",
+        "does not compose the retired API note writer",
+        "does not turn temporary source references into durable document identities"
       ],
-      "reason": "PR #602 single-file assertion review: replace with cross-host identity contract assertions. Never retire before equivalent replacement and target CI evidence.",
+      "reason": "ADR-126 退役 API 写入后，保留 Desktop 稳定身份与只读 API 装配的源码约束。真实 Desktop Vault/MCP 与 API 只读行为由对应边界及集成测试覆盖；此项不宣称运行态证据。",
       "replacement": {
         "status": "none-verified",
         "testFiles": []
       },
-      "sourceSha256": "38ef5646bfa1af0ed093418944ed1d5473697d93f98cf7d14843618f0d109d3e"
+      "sourceSha256": "f81f89bc967dd6aa7201b59fc6cf2c852e3338cc08e8f0a4ed2eec8ebcd0cbfd"
     },
     {
       "path": "apps/desktop/src/main/runtime/compose-goal.surface.spec.ts",
@@ -2625,12 +2627,12 @@
       "decision": "retain",
       "behavior": "Repository Prisma Factory 与 GithubApp可选 Runtime 组合、ClosureChecker fail-closed及 API 生命周期",
       "assertionEvidence": ["createRepositoryPrismaRepositories"],
-      "reason": "Fake DB/Port 装配验证，真实 GithubApp/Persistence 由 Ledger Integration 覆盖。 源码/代表性断言审查；不宣称实际数据库、外部服务或桌面运行凭证。",
+      "reason": "使用 fake DB/port 验证 factory 和模块组合；真实 HTTP/Prisma 来源投影由 ledger integration 覆盖，GitHub provider 在该测试中为 fixture，不宣称外部 GitHub 执行证据。",
       "replacement": {
         "status": "none-verified",
         "testFiles": []
       },
-      "sourceSha256": "d6e23bd8c1414abf05b539e53d100a9a64a7bc2ce07427ea15bb7fea8798f31f",
+      "sourceSha256": "8dbe5c2af5bbd92d4c96f3ba16c41cc16adf857f9fe88683de26b3d3b5d5bc03",
       "confirmedDependencies": []
     },
     {
@@ -2665,7 +2667,7 @@
         "status": "none-verified",
         "testFiles": []
       },
-      "sourceSha256": "65e208237e70ddb8481d343b3c87aae6b0c66c6a72a3e67d99ff1acccfe28f35"
+      "sourceSha256": "647283df3b8640d383c681282350f074bb385c9fdbc2f40b445440d7081b37ca"
     },
     {
       "path": "packages/repository/src/server/infrastructure/adapters/prisma/__tests__/knowledge-write-request-ownership.surface.spec.ts",
@@ -2675,14 +2677,17 @@
         "testRole": "source-constraint"
       },
       "decision": "retain",
-      "behavior": "知识写 Ledger 状态更新都要求 identityId，Commit Service 不允许裸主键改状态",
-      "assertionEvidence": ["identityId"],
-      "reason": "静态 Port/Prisma/Service 所有者检查，实际事务回放另有 Test。 源码/代表性断言审查；不宣称实际数据库、外部服务或桌面运行凭证。",
+      "behavior": "历史知识写入收据的 port/Prisma 状态更新要求 identityId，禁止仅按裸主键更新。",
+      "assertionEvidence": [
+        "port status methods require identityId",
+        "prisma updates filter by id + identityId"
+      ],
+      "reason": "测试检查历史 ledger 的源码归属约束，不覆盖已退役的 CommitService 或 replay 执行。",
       "replacement": {
         "status": "none-verified",
         "testFiles": []
       },
-      "sourceSha256": "7f6b2fccb9dfd5215724b11c9afe7b3b139eac5d40ef13ce962bebb5ac62b4ad"
+      "sourceSha256": "d2d75223714149d12f71c2e12bc2bcd5e83596c3be160f2b0e41d96ea4692629"
     },
     {
       "path": "packages/scheduler/src/scheduling/__tests__/scheduling-contracts.spec.ts",
@@ -2904,23 +2909,6 @@
         "testFiles": []
       },
       "sourceSha256": "9fefbfcb52034ff82f990f86b698af95bace62eb8f1420a22bb2dca82af56f2b"
-    },
-    {
-      "path": "packages/repository-ui/src/components/DocumentPresentationPrimitives.spec.ts",
-      "reviewScope": "representative-assertions",
-      "classification": {
-        "testType": "component",
-        "testRole": "behavior"
-      },
-      "decision": "retain",
-      "behavior": "文件目录的搜索清除、单选列表操作、Header 属性及 Loading/Error/Empty 状态",
-      "assertionEvidence": ["catalog-search-clear"],
-      "reason": "只是渲染语义与组件 emit，未要求真实滚动/物理键盘导航。 Next phase: no-immediate-change. T2 keeps this test; no deletion or Browser Mode migration was performed.",
-      "replacement": {
-        "status": "none-verified",
-        "testFiles": []
-      },
-      "sourceSha256": "109dd2c21906a89348490919c80afdd546301ab044e0eac2137f7b1a55f7320b"
     },
     {
       "path": "packages/app-vue/src/shared/components/KeyboardHelp.spec.ts",

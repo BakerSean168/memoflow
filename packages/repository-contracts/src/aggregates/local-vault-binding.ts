@@ -59,6 +59,8 @@ export const LocalVaultNoteSummaryDTOSchema = z.object({
   knowledgeDocumentId: KnowledgeDocumentIdSchema.nullable(),
   title: z.string(),
   excerpt: z.string(),
+  contentHash: z.string(),
+  aliases: z.array(z.string()),
   tags: z.array(z.string()),
   outgoingLinks: z.array(z.string()),
   size: z.number(),
@@ -141,3 +143,12 @@ export const ConfirmedLocalVaultWriteResSchema = z.object({
   created: z.boolean(),
 });
 export type ConfirmedLocalVaultWriteRes = z.infer<typeof ConfirmedLocalVaultWriteResSchema>;
+
+/** Successful MemoFlow deliveries into the currently selected Vault. */
+export const LocalVaultWriteReceiptSchema = z.object({
+  documentId: KnowledgeDocumentIdSchema,
+  title: z.string(),
+  relativePath: z.string(),
+  createdAt: z.number(),
+});
+export type LocalVaultWriteReceipt = z.infer<typeof LocalVaultWriteReceiptSchema>;

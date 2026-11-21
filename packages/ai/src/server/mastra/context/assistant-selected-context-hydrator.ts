@@ -1,3 +1,4 @@
+import { AIExecutionError } from '../../../shared/ai-execution-error';
 import type { AssistantRuntimeSelectedEntity } from '@memoflow/ai-contracts';
 import type {
   IAISelectedEntityContextReadPort,
@@ -73,21 +74,37 @@ export class AssistantSelectedContextHydrator {
     const knowledgeEvidence = (
       await Promise.all(
         selected
-          .filter((entity) => entity.entityType === 'knowledge_document')
+          .filter(
+            (entity) =>
+              entity.entityType === 'knowledge_document' ||
+              entity.entityType === 'knowledge_source',
+          )
           .map(async (entity): Promise<AIKnowledgeEvidenceInput | null> => {
             try {
-              const note = await this.knowledgeSourcePort.getNoteById(identityId, entity.id);
-              if (!note) return null;
+              const note =
+                entity.entityType === 'knowledge_source'
+                  ? await this.knowledgeSourcePort.getNoteBySource(identityId, entity.source)
+                  : await this.knowledgeSourcePort.getNoteById(identityId, entity.id);
+              if (!note)
+                throw new AIExecutionError(
+                  'knowledge_context_stale',
+                  'A selected note changed or is no longer connected. Select the note again.',
+                );
               return {
-                id: `selected:knowledge_document:${entity.id}`,
+                id: `selected:${entity.entityType}:${entity.id}`,
                 title: note.title,
                 excerpt: note.content,
                 sourceRef: note.sourcePath,
                 contentHash: note.sourceContentHash,
                 sensitivity: 'private',
               };
-            } catch {
-              return null;
+            } catch (error) {
+              if (error instanceof AIExecutionError) throw error;
+              throw new AIExecutionError(
+                'knowledge_context_stale',
+                'The selected note could not be read. Reconnect the source or select it again.',
+                { cause: error },
+              );
             }
           }),
       )

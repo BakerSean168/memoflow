@@ -196,6 +196,13 @@ vi.mock('@memoflow/repository-ui', async (importOriginal) => {
   return {
     ...actual,
     useRecentKnowledgeNotes: () => ({ notes: ref([]), load: vi.fn() }),
+    useKnowledgeContextNotes: () => ({
+      notes: ref([]),
+      isLoading: ref(false),
+      error: ref(null),
+      search: vi.fn(),
+      cancel: vi.fn(),
+    }),
     useReferenceableKnowledgeNotes: () => ({ notes: ref([]), load: vi.fn(), cancel: vi.fn() }),
   };
 });

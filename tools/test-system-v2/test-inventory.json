@@ -312,16 +312,6 @@
       ]
     },
     {
-      "path": "apps/api/src/modules/ai/repository-knowledge-note-persistence.adapter.test.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "apps/api/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "apps/api/vitest.config.ts"
-      ]
-    },
-    {
       "path": "apps/api/src/modules/ai/repository-knowledge-source.adapter.test.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -1633,54 +1623,6 @@
     },
     {
       "path": "apps/desktop/src/main/modules/relation/relation.electron-module.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "apps/desktop/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
-      "path": "apps/desktop/src/main/modules/repository/desktop-knowledge-repository-auto-sync.scheduler.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "apps/desktop/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
-      "path": "apps/desktop/src/main/modules/repository/desktop-knowledge-repository-git.runtime.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "apps/desktop/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
-      "path": "apps/desktop/src/main/modules/repository/desktop-knowledge-repository-reconciliation.service.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "apps/desktop/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
-      "path": "apps/desktop/src/main/modules/repository/desktop-knowledge-repository-sync.acceptance.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "apps/desktop/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
-      "path": "apps/desktop/src/main/modules/repository/desktop-knowledge-repository-sync.service.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "apps/desktop/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
-      "path": "apps/desktop/src/main/modules/repository/knowledge-repository-remote.gateway.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "apps/desktop/vitest.config.ts"
@@ -3584,6 +3526,14 @@
       "measurementCollectors": []
     },
     {
+      "path": "packages/ai-contracts/src/api/knowledge-context-source.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/ai-contracts/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "packages/ai-contracts/src/api/local-agent.dto.test.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -4975,6 +4925,16 @@
     },
     {
       "path": "packages/ai/src/server/local-agent/pi-driver.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/ai/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "packages/ai/vitest.config.ts"
+      ]
+    },
+    {
+      "path": "packages/ai/src/server/local-agent/selected-knowledge.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/ai/vitest.config.ts"
@@ -9348,14 +9308,6 @@
       "measurementCollectors": []
     },
     {
-      "path": "packages/repository-ui/src/components/DocumentPresentationPrimitives.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/repository-ui/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
       "path": "packages/repository-ui/src/components/KnowledgeCaptureReviewDialog.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -9364,47 +9316,15 @@
       "measurementCollectors": []
     },
     {
-      "path": "packages/repository-ui/src/components/KnowledgeMarkdownPreview.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/repository-ui/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
-      "path": "packages/repository-ui/src/components/KnowledgeNoteCatalog.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/repository-ui/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
-      "path": "packages/repository-ui/src/components/KnowledgeNoteContextPanel.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/repository-ui/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
-      "path": "packages/repository-ui/src/components/KnowledgeProjectionRelationsView.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/repository-ui/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
-      "path": "packages/repository-ui/src/components/KnowledgeWriteRequestLedger.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/repository-ui/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
       "path": "packages/repository-ui/src/composables/localAgentNoteReview.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/repository-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/repository-ui/src/composables/useKnowledgeContextNotes.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/repository-ui/vitest.config.ts"
@@ -9541,14 +9461,6 @@
     },
     {
       "path": "packages/repository/src/server/application/services/knowledge-document-workspace-resolver.service.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/repository/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
-      "path": "packages/repository/src/server/application/services/knowledge-note-commit.service.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/repository/vitest.config.ts"
@@ -9696,6 +9608,14 @@
       "primarySuite": "integration",
       "collectors": [
         "packages/repository/vitest.integration.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/repository/src/server/infrastructure/repository-read-only.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/repository/vitest.config.ts"
       ],
       "measurementCollectors": []
     },
@@ -10881,14 +10801,6 @@
     },
     {
       "path": "packages/setting-ui/src/components/KeyboardSettings.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/setting-ui/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
-      "path": "packages/setting-ui/src/components/KnowledgeRepositorySettings.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/setting-ui/vitest.config.ts"
@@ -13544,7 +13456,7 @@
       "type": "measurement",
       "suite": "coverage",
       "runner": "vitest",
-      "fileCount": 73
+      "fileCount": 72
     },
     {
       "id": "packages/account/vitest.config.ts",
@@ -13558,7 +13470,7 @@
       "type": "measurement",
       "suite": "coverage",
       "runner": "vitest",
-      "fileCount": 137
+      "fileCount": 138
     },
     {
       "id": "packages/app-vue/vitest.store-coverage.config.ts",
@@ -14024,14 +13936,14 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 73
+      "fileCount": 72
     },
     {
       "id": "apps/desktop/vitest.config.ts",
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 116
+      "fileCount": 110
     },
     {
       "id": "apps/migrator/vitest.config.ts",
@@ -14094,7 +14006,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 18
+      "fileCount": 19
     },
     {
       "id": "packages/ai-ui/vitest.config.ts",
@@ -14108,7 +14020,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 137
+      "fileCount": 138
     },
     {
       "id": "packages/app-vue/vitest.config.ts",
@@ -14332,7 +14244,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 13
+      "fileCount": 8
     },
     {
       "id": "packages/repository/vitest.config.ts",
@@ -14430,7 +14342,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 25
+      "fileCount": 24
     },
     {
       "id": "packages/setting/vitest.config.ts",
@@ -14541,7 +14453,6 @@
       "apps/api/src/modules/ai/owner-activity-read.adapter.spec.ts",
       "apps/api/src/modules/ai/planner-read.adapter.spec.ts",
       "apps/api/src/modules/ai/repository-knowledge-cloud-data-purger.adapter.test.ts",
-      "apps/api/src/modules/ai/repository-knowledge-note-persistence.adapter.test.ts",
       "apps/api/src/modules/ai/repository-knowledge-source.adapter.test.ts",
       "apps/api/src/modules/ai/routine-command.adapter.spec.ts",
       "apps/api/src/modules/goal/goal-workspace.module.spec.ts",
@@ -14725,6 +14636,7 @@
       "packages/ai/src/server/local-agent/native-identity.spec.ts",
       "packages/ai/src/server/local-agent/native-rpc-transport-acp.spec.ts",
       "packages/ai/src/server/local-agent/pi-driver.spec.ts",
+      "packages/ai/src/server/local-agent/selected-knowledge.spec.ts",
       "packages/ai/src/server/local-agent/snapshot-cheap-check.spec.ts",
       "packages/ai/src/server/mastra/agents/goal-planner.worker.spec.ts",
       "packages/ai/src/server/mastra/agents/planner-observability.spec.ts",
@@ -15188,7 +15100,7 @@
   "duplicate": [],
   "unexpected": [],
   "counts": {
-    "unit": 1255,
+    "unit": 1244,
     "integration": 63,
     "smoke": 3,
     "boundary-ipc": 7,

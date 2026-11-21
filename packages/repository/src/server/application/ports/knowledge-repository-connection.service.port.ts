@@ -14,13 +14,10 @@ import type { Result } from '@memoflow/transport-contracts/result';
 import type {
   CompleteKnowledgeRepositoryInstallationReq,
   CompleteKnowledgeRepositoryInstallationRes,
-  ConfirmKnowledgeRepositoryHeadReq,
   CreateKnowledgeRepositoryConnectionReq,
   KnowledgeRemoteBindingClientDTO,
   KnowledgeRepositoryInstallationIntentStatusResponse,
-  KnowledgeRepositoryReconciliationPreview,
   ListKnowledgeRepositoryConnectionsRes,
-  PreviewKnowledgeRepositoryReconciliationReq,
   StartKnowledgeRepositoryInstallationReq,
   StartKnowledgeRepositoryInstallationRes,
 } from '@memoflow/repository-contracts';
@@ -70,18 +67,4 @@ export interface IKnowledgeRepositoryConnectionService {
     connectionId: string,
     purgeCloudData?: boolean,
   ): Promise<Result<null>>;
-  issueInstallationToken(
-    identityId: string,
-    connectionId: string,
-  ): Promise<Result<{ token: string; expiresAt: number; repositoryId: string }>>;
-  previewFirstReconciliation(
-    identityId: string,
-    connectionId: string,
-    request: PreviewKnowledgeRepositoryReconciliationReq,
-  ): Promise<Result<KnowledgeRepositoryReconciliationPreview>>;
-  confirmHead(
-    identityId: string,
-    connectionId: string,
-    request: ConfirmKnowledgeRepositoryHeadReq,
-  ): Promise<Result<KnowledgeRemoteBindingClientDTO>>;
 }

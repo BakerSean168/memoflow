@@ -14,6 +14,8 @@ updated: 2026-09-08T21:25:00+08:00
 
 # ADR-091: Knowledge Projection、AI Index 与 Operation Boundary
 
+> 2026-11-21：知识页面、Desktop Git、Web 写入与读取权限边界已由 [ADR-126](./ADR-126-obsidian-knowledge-connection-and-read-only-web.md) 更新。本文保留历史决策背景；冲突部分以 ADR-126 为准。
+
 **状态：** 已采纳并实施（KNOW-2003，2026-09-19）
 **日期：** 2026-09-08
 **影响范围：** Repository/Knowledge、AI、Web confirmed create、GitHub webhook/reconciliation、Application Ports、Operations、Legacy Repository tables

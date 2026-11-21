@@ -2,7 +2,7 @@
  * Repository Module Composition Root
  *
  * Knowledge-repository runtime only: GitHub App connection, projection,
- * confirmed note create, and webhook ingest. Legacy database Repository /
+ * read-only content, and webhook ingest. Legacy database Repository /
  * Folder / Resource / Bookmark CRUD is no longer assembled here.
  */
 
@@ -10,7 +10,6 @@ import { fail, ok, type Result, ResultErrorException } from '@memoflow/transport
 import type { RepositoryApplicationPort } from '../application';
 import type { IKnowledgeRepositoryConnectionService } from '../application/ports/knowledge-repository-connection.service.port';
 import type { IKnowledgeRepositoryProjectionService } from '../application/ports/knowledge-repository-projection.service.port';
-import type { IKnowledgeNoteCommitService } from '../application/ports/knowledge-note-commit.service.port';
 import type { OperationAuditRepository } from '@memoflow/patterns/operations';
 import { runTimelineQueryWithAudit } from '@memoflow/patterns/operations';
 import { OperationTimelineEntrySchema } from '@memoflow/operations-contracts';
@@ -30,7 +29,6 @@ export interface RepositoryModuleDependencies {
   readonly runtimeContributions?: RepositoryRuntimeContributionsInput;
   readonly knowledgeRepositoryConnectionService?: IKnowledgeRepositoryConnectionService | null;
   readonly knowledgeRepositoryProjectionService?: IKnowledgeRepositoryProjectionService | null;
-  readonly knowledgeNoteCommitService?: IKnowledgeNoteCommitService | null;
   /** W7：审计仓库（最小权限 + 审计） */
   readonly auditRepository?: OperationAuditRepository;
 }
@@ -43,7 +41,6 @@ export interface RepositoryModuleRuntimeContribution {
 export interface RepositoryModuleInstance {
   readonly knowledgeRepositoryConnectionService: IKnowledgeRepositoryConnectionService | null;
   readonly knowledgeRepositoryProjectionService: IKnowledgeRepositoryProjectionService | null;
-  readonly knowledgeNoteCommitService: IKnowledgeNoteCommitService | null;
   readonly api: RepositoryApplicationPort;
   start(): void;
   dispose(): void;
@@ -58,7 +55,6 @@ function normalizeRuntimeContributions(
 function buildApplicationPort(deps: RepositoryModuleDependencies): RepositoryApplicationPort {
   const connectionService = deps.knowledgeRepositoryConnectionService ?? null;
   const projectionService = deps.knowledgeRepositoryProjectionService ?? null;
-  const noteCommitService = deps.knowledgeNoteCommitService ?? null;
   const auditRepository = deps.auditRepository;
   const unavailable = <T>(): Promise<Result<T>> =>
     Promise.resolve(
@@ -70,6 +66,13 @@ function buildApplicationPort(deps: RepositoryModuleDependencies): RepositoryApp
         context: { reason: KNOWLEDGE_REPOSITORY_NOT_CONFIGURED_REASON },
       }),
     );
+
+  const readOnly = <T>(): Result<T> =>
+    fail({
+      code: 'FORBIDDEN',
+      message: 'Web knowledge sources are read-only. Save notes in MemoFlow Desktop.',
+      context: { reason: 'knowledge-source-read-only' },
+    });
 
   return {
     startKnowledgeRepositoryInstallation: async (ctx, request) =>
@@ -115,42 +118,9 @@ function buildApplicationPort(deps: RepositoryModuleDependencies): RepositoryApp
       connectionService
         ? connectionService.disconnect(ctx.identityId, connectionId, purgeCloudData)
         : unavailable(),
-    issueDesktopKnowledgeRepositoryToken: async (ctx, connectionId) => {
-      const deviceType = ctx.device?.deviceType?.toLowerCase();
-      if (deviceType !== 'desktop') {
-        return fail({
-          code: 'FORBIDDEN',
-          message: 'GitHub installation tokens are available only to Desktop clients',
-        });
-      }
-      return connectionService
-        ? connectionService.issueInstallationToken(ctx.identityId, connectionId)
-        : unavailable();
-    },
-    previewKnowledgeRepositoryReconciliation: async (ctx, connectionId, request) => {
-      const deviceType = ctx.device?.deviceType?.toLowerCase();
-      if (deviceType !== 'desktop') {
-        return fail({
-          code: 'FORBIDDEN',
-          message: 'Knowledge repository reconciliation is available only to Desktop clients',
-        });
-      }
-      return connectionService
-        ? connectionService.previewFirstReconciliation(ctx.identityId, connectionId, request)
-        : unavailable();
-    },
-    confirmKnowledgeRepositoryHead: async (ctx, connectionId, request) => {
-      const deviceType = ctx.device?.deviceType?.toLowerCase();
-      if (deviceType !== 'desktop') {
-        return fail({
-          code: 'FORBIDDEN',
-          message: 'Knowledge repository head confirmation is available only to Desktop clients',
-        });
-      }
-      return connectionService
-        ? connectionService.confirmHead(ctx.identityId, connectionId, request)
-        : unavailable();
-    },
+    issueDesktopKnowledgeRepositoryToken: async () => readOnly(),
+    previewKnowledgeRepositoryReconciliation: async () => readOnly(),
+    confirmKnowledgeRepositoryHead: async () => readOnly(),
     listKnowledgeNoteProjections: async (ctx, request) =>
       projectionService
         ? projectionService.listNotes(ctx.identityId, request)
@@ -181,58 +151,15 @@ function buildApplicationPort(deps: RepositoryModuleDependencies): RepositoryApp
       projectionService
         ? projectionService.getAttachmentContent(ctx.identityId, projectionId)
         : unavailable(),
-    createConfirmedKnowledgeNote: async (ctx, request) =>
-      noteCommitService ? noteCommitService.create(ctx.identityId, request) : unavailable(),
-    adoptKnowledgeDocument: async (ctx, request) =>
-      noteCommitService ? noteCommitService.adopt(ctx.identityId, request) : unavailable(),
+    createConfirmedKnowledgeNote: async () => readOnly(),
+    adoptKnowledgeDocument: async () => readOnly(),
     ingestGithubWebhook: async (request) =>
       projectionService ? projectionService.ingest(request) : unavailable(),
     listKnowledgeWriteRequests: async (ctx, request) =>
       projectionService
         ? projectionService.listWriteRequests(ctx.identityId, request)
         : unavailable(),
-    replayKnowledgeWriteRequestProjection: async (ctx, writeRequestId) => {
-      if (!projectionService) return unavailable();
-      if (!auditRepository) {
-        return fail({
-          code: 'FAIL_CLOSED',
-          message:
-            '[FAIL-CLOSED] knowledge projection replay requires an explicit auditRepository dependency (replay audit is mandatory).',
-        });
-      }
-      // P1-4：审计先行。外部 GitHub projection 无法与审计共享事务，因此把
-      // "replay intent" 事实在发起任何外部投影之前先行落库；审计写失败即
-      // fail-closed，外部投影绝不执行，杜绝"投影已成功但 replay audit 缺失"
-      // 的部分成功。投影结果（成功/失败）再追加 outcome 审计事实。
-      try {
-        await auditRepository.record({
-          actorIdentityId: ctx.identityId,
-          source: 'knowledge-projection',
-          operationId: writeRequestId,
-          action: 'replay',
-          details: `replay intent for write request ${writeRequestId} (audit-first)`,
-        });
-      } catch (err) {
-        return fail({
-          code: 'FAIL_CLOSED',
-          message: `[FAIL-CLOSED] knowledge replay audit intent write failed; projection not executed: ${err instanceof Error ? err.message : String(err)}`,
-        });
-      }
-      const result = await projectionService.replayWriteRequestProjection(
-        ctx.identityId,
-        writeRequestId,
-      );
-      await auditRepository.record({
-        actorIdentityId: ctx.identityId,
-        source: 'knowledge-projection',
-        operationId: writeRequestId,
-        action: 'replay',
-        details: result.ok
-          ? `status -> ${result.data.status}`
-          : `replay attempted; projection result: ${result.error.code} ${result.error.message}`,
-      });
-      return result;
-    },
+    replayKnowledgeWriteRequestProjection: async () => readOnly(),
     queryKnowledgeTimeline: async (ctx) => {
       if (!projectionService) return unavailable();
       if (!auditRepository) {
@@ -296,7 +223,6 @@ export function createRepositoryModule(
   return {
     knowledgeRepositoryConnectionService: dependencies.knowledgeRepositoryConnectionService ?? null,
     knowledgeRepositoryProjectionService: dependencies.knowledgeRepositoryProjectionService ?? null,
-    knowledgeNoteCommitService: dependencies.knowledgeNoteCommitService ?? null,
     api,
     start() {
       if (started) return;
@@ -351,7 +277,7 @@ function mapWriteRequestToTimelineEntry(
     failureReason: request.projectionErrorMessage ?? request.errorMessage ?? null,
     attempts: request.projectionAttempts,
     nextRetryAt: null,
-    replayable: projectionStatus === 'Failed',
+    replayable: false,
     updatedAt: new Date(request.updatedAt).toISOString(),
   };
   return OperationTimelineEntrySchema.parse(entry);

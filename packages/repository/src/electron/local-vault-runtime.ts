@@ -1,4 +1,5 @@
-import { randomUUID } from 'node:crypto';
+import type { LocalVaultWriteReceipt } from '@memoflow/repository-contracts';
+import { createHash, randomUUID } from 'node:crypto';
 import fs from 'node:fs';
 import path from 'node:path';
 import { serialize } from 'node:v8';
@@ -102,6 +103,7 @@ interface VaultCatalog {
 }
 
 interface WriteLedgerEntry {
+  bindingId?: string;
   requestId: string;
   proposalId: string;
   proposalRevision: number;
@@ -144,6 +146,7 @@ export interface LocalVaultElectronPort {
   selectVault(request?: SelectLocalVaultReq): Promise<LocalVaultBindingSnapshotDTO | null>;
   detachVault(): Promise<void>;
   scanVault(): Promise<ScanLocalVaultRes>;
+  listRecentWrites(): Promise<LocalVaultWriteReceipt[]>;
   readNote(request: ReadLocalVaultNoteReq): Promise<LocalVaultNoteDTO>;
   findNoteById(documentId: KnowledgeDocumentId): Promise<{
     binding: LocalVaultBindingClientDTO;
@@ -396,6 +399,34 @@ export class LocalVaultRuntime implements LocalVaultElectronPort {
         detachedAt: this.now(),
       });
     });
+  }
+
+  async listRecentWrites(): Promise<LocalVaultWriteReceipt[]> {
+    const ledger = await this.loadLedger();
+    if (!ledger.entries.length) return [];
+    const catalog = await this.getCatalog();
+    if (!catalog) return [];
+    this.assertScope(catalog.scope);
+    const seen = new Set<string>();
+    return [...ledger.entries]
+      .reverse()
+      .flatMap((entry) => {
+        if (entry.bindingId && entry.bindingId !== catalog.scope.binding.id) return [];
+        if (seen.has(entry.knowledgeDocumentId)) return [];
+        const matches = catalog.byId.get(entry.knowledgeDocumentId);
+        if (matches?.length !== 1) return [];
+        const note = matches[0]!;
+        seen.add(entry.knowledgeDocumentId);
+        return [
+          {
+            documentId: note.knowledgeDocumentId!,
+            title: note.title,
+            relativePath: note.relativePath,
+            createdAt: entry.createdAt,
+          },
+        ];
+      })
+      .slice(0, 20);
   }
 
   async scanVault(): Promise<ScanLocalVaultRes> {
@@ -761,6 +792,7 @@ export class LocalVaultRuntime implements LocalVaultElectronPort {
     }
 
     ledger.entries.push({
+      bindingId: scope.binding.id,
       requestId: request.requestId,
       proposalId: request.proposalId,
       proposalRevision: request.proposalRevision,
@@ -949,6 +981,13 @@ export class LocalVaultRuntime implements LocalVaultElectronPort {
       knowledgeDocumentId: readStableKnowledgeDocumentId(frontmatter),
       title: extractTitle(relativePath, parsed.content, frontmatter),
       excerpt: buildExcerpt(parsed.content),
+      contentHash: createHash('sha256').update(contentMarkdown).digest('hex'),
+      aliases:
+        typeof frontmatter.aliases === 'string'
+          ? [frontmatter.aliases]
+          : Array.isArray(frontmatter.aliases)
+            ? frontmatter.aliases.filter((alias): alias is string => typeof alias === 'string')
+            : [],
       tags: extractTags(frontmatter),
       outgoingLinks: extractOutgoingLinks(parsed.content),
       size: stat.size,

@@ -606,3 +606,28 @@ describe('ApplyGoalPlanService V2', () => {
     expect(port.createGoal).toHaveBeenCalledOnce();
   });
 });
+
+it('rejects Web note creation before any Goal, Task or label mutation', async () => {
+  const port = mutationPort();
+  await expect(
+    new ApplyGoalPlanService(port, false).apply({ workflowRunId: 'web-1', draft, context }),
+  ).rejects.toMatchObject({ category: 'capability_unsupported' });
+  for (const operation of Object.values(port)) expect(operation).not.toHaveBeenCalled();
+});
+it('allows a Web plan to link existing stable notes without creating notes', async () => {
+  const port = mutationPort();
+  const linked = {
+    ...draft,
+    knowledge: draft.knowledge.filter((item) => item.mode === 'linkExisting'),
+  };
+  expect(
+    (
+      await new ApplyGoalPlanService(port, false).apply({
+        workflowRunId: 'web-2',
+        draft: linked,
+        context,
+      })
+    ).status,
+  ).toBe('success');
+  expect(port.createKnowledgeDocument).not.toHaveBeenCalled();
+});

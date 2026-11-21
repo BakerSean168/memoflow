@@ -28,7 +28,6 @@ import {
   createAssistantConversationMessageCountSource,
   createMastraStorage,
   ConversationShellSource,
-  KnowledgeCapturePersistenceAdapter,
   MastraAIRuntime,
   PermissionPrismaRepository,
   AiGoalSurfaceLeasePrismaRepository,
@@ -67,7 +66,6 @@ import type { UserTimeContextPort } from '@memoflow/time';
 import { GoalPlanMutationAdapter } from '../modules/ai/goal-plan-mutation.adapter';
 import { TaskPlanMutationAdapter } from '../modules/ai/task-plan-mutation.adapter';
 import { ControlledAnalyticsReadAdapter } from '../modules/ai/controlled-analytics-read.adapter';
-import { RepositoryKnowledgeNotePersistenceAdapter } from '../modules/ai/repository-knowledge-note-persistence.adapter';
 import { RepositoryKnowledgeSourceAdapter } from '../modules/ai/repository-knowledge-source.adapter';
 import { RoutineAICommandAdapter } from '../modules/ai/routine-command.adapter';
 import { PlannerAIReadAdapter } from '../modules/ai/planner-read.adapter';
@@ -182,14 +180,11 @@ export function composeAI(dependencies: ComposeAIDependencies): ComposedAI {
     dependencies.db,
     dependencies.repositoryStorageBaseDir,
   );
-  const knowledgeNotePersistence = new RepositoryKnowledgeNotePersistenceAdapter(
-    dependencies.repositoryApiPort,
-  );
   const goalPlanMutationPort = new GoalPlanMutationAdapter(
     dependencies.goalApplicationPort,
     dependencies.taskApplicationPort,
     dependencies.labelService,
-    knowledgeNotePersistence,
+    undefined,
     dependencies.knowledgeDocumentRefResolver,
     dependencies.goalKnowledgeService,
   );
@@ -213,7 +208,6 @@ export function composeAI(dependencies: ComposeAIDependencies): ComposedAI {
     goalPlanMutationPort,
     goalSurfaceLeaseRepository: new AiGoalSurfaceLeasePrismaRepository(dependencies.db),
     taskPlanMutationPort,
-    knowledgeCaptureMutationPort: new KnowledgeCapturePersistenceAdapter(knowledgeNotePersistence),
     knowledgeSourcePort,
     webResearchPort: new ProviderWebResearchAdapter(
       repositorySet.providerConfigRepository,
@@ -246,7 +240,6 @@ export function composeAI(dependencies: ComposeAIDependencies): ComposedAI {
     executionRecordPort: repositorySet.executionRecordPort,
     conversationAttentionPort: repositorySet.conversationAttentionPort,
     evaluationReportPort,
-    knowledgeNotePersistence,
     knowledgeSourcePort,
     analyticsReadPort,
   });

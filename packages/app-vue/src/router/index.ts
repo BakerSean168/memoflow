@@ -89,6 +89,13 @@ export function createAppRouter(options?: {
   });
 
   router.beforeEach(createAppAccessGuard({ canAccessApp, accessEntryRoute: loginRoute }));
+  // Preserve old GitHub callback/deep links after moving connection UI out of Settings.
+  router.beforeEach((to) => {
+    if (to.path !== '/settings' || to.query.tab !== 'repository') return;
+    const query = { ...to.query };
+    delete query.tab;
+    return { path: '/repository', query, replace: true };
+  });
   router.beforeEach(createSettingsSceneGuard());
 
   return router;

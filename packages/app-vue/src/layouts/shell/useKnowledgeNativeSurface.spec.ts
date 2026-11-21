@@ -1,3 +1,4 @@
+import { DESKTOP_BRIDGE_KEY } from '../../di/keys';
 import { mount } from '@vue/test-utils';
 import { defineComponent, h, nextTick } from 'vue';
 import { createPinia, setActivePinia } from 'pinia';
@@ -8,7 +9,7 @@ import { provideKnowledgeNativeSurface } from './useKnowledgeNativeSurface';
 import { useAppShellStore } from './useAppShellStore';
 import type { KnowledgeCaptureNativeEditSession } from '@memoflow/repository-ui';
 
-async function setup(initialPath = '/repository?dialog=knowledge-capture') {
+async function setup(initialPath = '/repository?dialog=knowledge-capture', desktop = true) {
   const pinia = createPinia();
   setActivePinia(pinia);
   const router = createRouter({
@@ -36,6 +37,7 @@ async function setup(initialPath = '/repository?dialog=knowledge-capture') {
     }),
     {
       global: {
+        provide: desktop ? { [DESKTOP_BRIDGE_KEY as symbol]: {} } : {},
         plugins: [pinia, router, createI18n({ legacy: false, locale: 'en-US', messages: {} })],
       },
     },
@@ -53,6 +55,12 @@ async function setup(initialPath = '/repository?dialog=knowledge-capture') {
   return { host, wrapper, store, router, session };
 }
 describe('Knowledge native surface host', () => {
+  it('rejects Web creation before opening a route or waiting for a desktop editor', async () => {
+    const { host, wrapper, router } = await setup('/', false);
+    await expect(host.openCreate()).rejects.toThrow('read-only on Web');
+    expect(router.currentRoute.value.fullPath).toBe('/');
+    wrapper.unmount();
+  });
   it('locates and reuses only full-create owner registration on its active route', async () => {
     const { host, wrapper, session, store } = await setup();
     const unregister = host.register('/repository?dialog=knowledge-capture', session);

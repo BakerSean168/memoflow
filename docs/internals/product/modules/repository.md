@@ -3,228 +3,65 @@ tags:
   - product
   - module
   - repository
-description: 资源库模块当前实现、本地 Vault、可选 GitHub 同步与跨端边界
+description: Obsidian 知识连接、Desktop 本地确认写入与 Web 只读上下文
 created: 2026-06-02T00:00:00
-updated: 2026-09-19T00:00:00+00:00
+updated: 2026-11-21T00:00:00+08:00
 ---
 
-# 资源库模块说明
+# 知识模块
 
-## 1. 功能定位
+## 定位与边界
 
-资源库模块负责把用户的 Markdown 知识资产接入 MemoFlow 的浏览、搜索、引用、AI 和跨端流程。长期定位不是独立知识编辑器，而是本地 Obsidian Vault、可选 GitHub private repository 和 Memory Flow 业务能力之间的边界。
+知识模块连接用户已有的 Obsidian/Markdown 资产，为 MemoFlow 对话与业务提供上下文，并在 Desktop 完成确认后的本地交付。笔记阅读、日常编辑和文件管理交给 Obsidian，Git 同步交给用户选择的外部工具。
 
-[ADR-034](../../decisions/ADR-034-obsidian-vault-repository.md) 已采纳：本地 Vault 优先；GitHub 登录与仓库授权解耦；用户需要同步时再连接 GitHub；绑定后 Web 可以安全地快捷创建新笔记。
+当前权威决策是 [ADR-126](../../decisions/ADR-126-obsidian-knowledge-connection-and-read-only-web.md)。它取代旧方案中的内置文件工作台、Desktop Git 同步和 Web 创建笔记。
 
-## 1.1 当前 canonical 建模
+| 能力               | Desktop                                               | Web                                    |
+| ------------------ | ----------------------------------------------------- | -------------------------------------- |
+| 连接知识源         | 选择本地 Vault 文件夹，按 Profile 持有                | 授权已有 GitHub 私有仓库，只读默认分支 |
+| 创建笔记           | 用户审核、确认后写入本地 Vault，保留幂等收据          | 不允许，API/AI/workflow 同样禁止       |
+| 编辑与管理现有笔记 | 在 Obsidian 中打开                                    | 提供 GitHub 原文入口；MemoFlow 不修改  |
+| `@` 上下文         | 查询本地笔记，包括无 MemoFlow 元数据的普通 Markdown   | 查询服务端已有投影，包括普通 Markdown  |
+| 同步               | Obsidian Sync、Obsidian Git 或外部 Git 工具由用户配置 | 读取外部工具已推送到 GitHub 的内容     |
 
-Repository/Knowledge vNext 已完成 ADR-089~091 destructive cutover；当前不恢复旧 Repository/Folder/Resource Aggregate，而是收敛为：
+## 页面与连接状态
 
-```text
-KnowledgeSpace
-├── LocalVaultBinding + LocalVaultHealth
-├── KnowledgeRemoteBinding + RemoteRepositoryObservation
-├── RemoteHistoryFence
-├── KnowledgeProjectionCheckpoint
-├── Stable KnowledgeDocumentId
-├── Document/Asset Projection
-└── KnowledgeCommitOperation
-```
+“知识”业务页面直接管理连接；Settings 不再重复展示知识仓库。旧设置深链和 GitHub callback 参数迁移到知识页面。
 
-同时明确：
+Desktop 展示当前 Vault 的名称、路径、文件系统健康、打开 Obsidian、重新选择和断开操作。未连接显示中性引导；已选路径 Missing/Unreadable 时保留原绑定并提示检查，不把来源丢失显示成从未连接。
 
-- `KnowledgeDocumentId` 与 path 分离，跨模块 Goal/Task Relation 不得引用 path-derived projection id；
-- AI 独占 knowledge index state，Repository projection 不再长期保存 `indexStatus` 双真值；
-- Web confirmed commit、Webhook 与 reconciliation 最终共用单一 `KnowledgeProjectionEngine`；
-- Local Vault ownership 从 online identity 收敛到 Local Profile / KnowledgeSpace 语义；
-- 现有 GitHub InstallationIntent、local-first Git、no-force-push、conflict pause、webhook dedup、lease、confirmed-write idempotency 等作为 protected assets。
+“MemoFlow 写入记录”只展示本地 confirmed-write ledger 对应、仍存在于当前 Vault 的笔记。改名后通过稳定文档 ID 解析现存路径。未保存草稿由原会话持有，用户回到会话继续审核；页面不会伪造待审核总数。
 
-权威设计包：
+Web 展示仓库、实际默认分支、投影状态、刷新连接状态和断开操作。未配置 GitHub App 是中性能力状态，普通网络/认证故障仍显示失败反馈。安装流程支持回调、轮询、取消等待和失败重试；显式回调优先于旧 sessionStorage intent。
 
-- [Knowledge Repository vNext](../knowledge-repository-vnext.md)
-- [Current System Map](https://github.com/BakerSean168/memoflow/blob/7a45112e1840950ead1ba98b748fc70fa1b38344/docs/analysis/2026-09-08-knowledge-repository-vnext-current-system-map.md)
-- [ADR-089](../../decisions/ADR-089-knowledge-space-source-binding-and-health-boundaries.md)
-- [ADR-090](../../decisions/ADR-090-stable-knowledge-document-identity.md)
-- [ADR-091](../../decisions/ADR-091-knowledge-projection-index-and-operation-boundaries.md)
+## 上下文与身份
 
-**当前实施状态：** ADR-089、ADR-090/KNOW-2002 与 ADR-091/KNOW-2003 均已实施；`KnowledgeProjectionEngine` 是 confirmed create、webhook 与 reconciliation 共用的 projection owner。
+动态补全按输入查询来源，避免只筛选预加载的最近列表。临时引用包含来源类型、绑定、相对路径与内容 hash。宿主在读取时校验归属和版本；变化后要求用户重新选择。客户端的标签仅用于展示，不能替代真实正文或授权。
 
-### 1.2 2026-09-11 Local Vault checkpoint
+普通 Markdown 无须补写 `memoflow_id`。Goal/Task 持久关联仍遵循 [ADR-090](../../decisions/ADR-090-stable-knowledge-document-identity.md)，使用稳定 `KnowledgeDocumentId`，不得把路径或临时上下文 ID 当作关系 ID。
 
-Local Vault 已从旧的 `identityId + status + obsidianVaultId + lastScannedAt` 混合 DTO 切换为：
+Mastra 和 Native Agent 都能读取显式选中的普通笔记；Native 使用 MCP 权限和审计边界，取消读取保持取消终态。所有知识正文按不可信参考资料处理。
 
-```text
-LocalVaultBinding
-├── id: LocalVaultBindingId
-├── knowledgeSpaceId: KnowledgeSpaceId
-├── localProfileId
-├── rootPath / displayName
-├── boundAt
-└── detachedAt
+## 服务端只读
 
-LocalVaultHealth
-├── bindingId
-├── state: Available | Missing | Unreadable
-├── observedAt
-└── detail
-```
+API 不装配知识写 persistence；Web 不执行 create/adopt、Git commit、Desktop token 颁发、HEAD 确认或旧正文回放。Goal Plan 含知识新建时，在创建其他对象前拒绝；关联已有文档继续支持。旧 capture 草稿可查看和取消，不能继续落库。
 
-关键行为：
+GitHub App token 显式降为 Contents/Metadata read。GitHub 登录和知识源安装授权仍分开。连接资格要求 private、非 archived/disabled、installation 可用且能够读取；无需 push 权限。
 
-- binding 文件位于 per-profile storage，owner 由 Desktop composition root 注入的稳定 `profileId` 决定，不再由 cloud identity 决定；
-- `getBinding()` 只读 binding + 实时观察 filesystem health，不再因为读取而重写 owner/status/timestamp；
-- Guest profile 登录/注册后保留同一 `profileId`，因此 Vault 不搬家、不重绑；
-- 本地 Vault port 不再接收 cloud `identityId`；renderer 也不能指定 local owner；
-- schemaVersion 1 binding 不迁移、不作为兼容真值；重新选择 Vault 后写入 V2 binding，但从不删除用户 Vault 内容；
-- sync/reconciliation/auto-sync、Desktop AI、Settings/Local Vault workspace 都消费明确的 `{ binding, health }` snapshot。
+Webhook 验签、delivery 去重、连接 lease 和投影引擎保持有效。读取使用实际默认分支与当前 HEAD，历史同步 fence 不阻断读取。满足连续版本前提才使用增量；分支变化、乱序、缺失事件或 force push 从当前 HEAD 重建，避免旧内容覆盖当前投影。历史写入 ledger 不再向投影注入正文。
 
-### 1.3 2026-09-11 Remote Binding checkpoint
+## 迁移与数据
 
-Remote Knowledge 不再持久化单一 Connection lifecycle/status：
+升级后 Desktop 不启动任何知识 Git watcher、scheduler、resume sync 或退出提交。它不会删除 `.git`、重置 Git 配置、丢弃未提交内容、修改远端或解除现有用户文件。
 
-```text
-KnowledgeRemoteBinding       = 用户长期选择 + connect/disconnect
-RemoteRepositoryObservation  = GitHub 当前事实/eligibility
-RemoteHistoryFence           = 最后确认的安全 remote HEAD
-KnowledgeProjectionCheckpoint = server projection cursor/state/failure
-```
+`LocalVaultBinding` 继续由稳定 Desktop Profile 持有，filesystem health 独立观察。云端 `KnowledgeRemoteBinding`、observation、checkpoint、稳定身份注册表与历史 ledger 保留。旧 local/remote pairing 不会自动变成同步关系，Desktop 没有远端 fallback。
 
-普通 list 仅组合这四轴数据库状态，不访问 GitHub；Settings 中的“检查 GitHub 状态”是显式 observation refresh。Token、confirmed write、reconciliation 等安全敏感操作仍 live preflight。Provider loss 只令 observation `Blocked`，不会自动 disconnect binding。
+默认断开云端来源保留历史派生数据；现有服务端显式清理操作与数据披露能力保持原有身份校验。断开和清理均不删除用户 Vault、Git 历史或 GitHub 仓库。Repository 不加入可导入 portable backup；源文件应从 Vault/GitHub 导出，GitHub 授权不得进入备份。服务端持有数据披露继续包含当前用户的来源元数据、稳定身份、投影、附件缓存、Webhook/历史写入收据及 AI 索引，不含可重放凭据。
 
-Desktop GitHub connect 必须把当前 Local Vault 的 `knowledgeSpaceId` 交给 server；Web connect 不能指定 device-local space。continuous sync 还要求 Local/Remote `knowledgeSpaceId` 完全一致、observation `Ready` 且 history fence 已建立。
+## 相关决策
 
-Prisma 已删除 `knowledge_repository_connections` canonical model，改为五张四轴表；关联 webhook/projection/cache/write request 使用 `binding_id`。迁移是 ADR-111 destructive cutover，不 backfill 旧数据。
-
-## 2. 当前实现
-
-- Desktop Local Vault 已完成 ADR-089 本地侧切换：稳定 profile-owned binding 与 filesystem health 分离；选择、扫描、搜索、安全预览、Obsidian 打开和确认后写入保持可用；未连接 GitHub 时不上传 Vault 内容。
-- GitHub 登录与 GitHub App 仓库授权使用独立 contract、token 和 UI；只允许连接明确选择的 private、active、admin
-  repository。
-- Desktop 已实现首次对账、真实 Git commit/fetch/pull-rebase/push、冲突暂停、离线 pending commit 和 profile-scoped
-  自动同步。
-- 服务端已实现 GitHub webhook、default branch reconciliation、Markdown/附件投影、链接关系、受认证附件读取、短期附件
-  cache、Web 幂等新建笔记和 RAG 自动索引。
-- Web 设置页可下载独立、不可导入的服务端持有数据披露，覆盖 retained connection metadata、投影、附件缓存字节、
-  Webhook/write history 与 RAG index，不包含 MemoFlow 管理的可重放 GitHub 授权。
-- Web 已收缩为投影浏览、搜索、安全 Markdown 预览、关系查看和确认后创建新 Markdown 文件，不开放已有笔记全文编辑。
-- 旧数据库 Repository/Folder/Resource CRUD、Editor content API、Desktop legacy IPC、Vue `/note/:id` 与 Mobile
-  Repository/note-editor 路由均已从 host 运行时移除；旧 backup/import compatibility surface 不受支持。
-- 断开仓库默认保留可重建云端数据；用户可显式选择永久清理 MemoFlow 投影/cache/ledger/RAG，且两种模式都不删除
-  本地 Vault 或 GitHub repository。
-- 真实 Git 服务边界验收已覆盖；真实 GitHub fixture E2E 仍需在具备受控 GitHub App 凭据的环境执行。
-
-## 3. 当前产品边界
-
-### 本地 Desktop
-
-- 账密用户、GitHub 用户和访客都可以选择本地 Obsidian Vault。
-- 未连接 GitHub 时，所有笔记和附件只存在本地。
-- Desktop 扫描、监听、预览、搜索，并使用 `obsidian://` 外部编辑。
-- Agent 根据运行时可用上下文、知识库结构和用户当前指令提出路径和内容，用户确认后写入 Vault。
-
-### GitHub 同步
-
-- 登录方式和知识仓库授权分开。
-- 账密或 GitHub 在线账号可创建/连接一个 private repository。
-- Desktop 将 Vault 作为 Git working tree，批量 commit、pull/rebase 和 push。
-- GitHub App webhook 驱动服务端 read model、链接索引和 RAG。
-- GitHub 故障或撤销授权不影响本地 Vault。
-
-### Web 与 Mobile
-
-- 未连接仓库时提示去 Desktop 连接同步。
-- 连接后支持浏览、搜索、预览、反链和 RAG。
-- Web 首期支持创建唯一的新 Markdown 文件和确认 AI 草稿入库。
-- 已有笔记编辑、移动、重命名、删除和冲突解决暂不开放。
-- 所有 Web 写入先创建 Git commit，不能只写服务端数据库。
-
-## 4. 核心数据流
-
-```text
-Local Obsidian Vault
-  <-> Desktop Git runtime
-  <-> GitHub private repository
-       -> verified webhook
-       -> server read model + RAG
-       -> Web/Mobile
-
-Web create
-  -> MemoFlow API
-  -> GitHub App commit
-  -> webhook/read model
-  -> Desktop pull
-```
-
-## 5. 目标用户路径
-
-- 访客：进入 Desktop → 选择 Vault → 本地浏览与 Obsidian 编辑。
-- 在线但未同步：登录 → 选择 Vault → 保持仅本地，或主动连接 GitHub。
-- 创建仓库：连接 GitHub → 确认 private repo → 安装 App 到该仓库 → 首次 push。
-- 连接已有仓库：授权指定 repo → 选择空目录 clone，或显式处理本地/远端差异。
-- Web 快捷创建：Agent 生成完整写入提案 → 用户确认 → Git commit → Desktop pull。
-- 访客升级：注册/登录 → 保留原 Vault → 再决定是否连接 GitHub。
-
-## 6. 业务规则
-
-- GitHub 登录不自动授权知识仓库；账密用户同样可以绑定 GitHub。
-- 未绑定 GitHub 时不上传 Vault 内容。
-- 新建 GitHub 仓库默认 private，GitHub App 安装范围限定到该仓库。
-- 本地和远端都非空时不得自动覆盖或静默合并。
-- Desktop 不 force push；冲突时暂停并保留双方内容。
-- Web 创建按 repository 串行提交，以 request ID 和 commit SHA 幂等。
-- 服务端投影可以从 default branch 重建，不是可独立编辑的数据源。
-- Agent 写入提案包含 path、title、frontmatter、content 和 reason；写入始终需要用户确认。
-- Agent 上下文、Capability、Tool Policy 和 Proposal revision 遵循 ADR-035；不预先规定固定 Vault 指令文件。
-- 移除 AI 固定默认目录设置；无指令时由用户确认提议路径。
-- 仓库改为 public 时告警并暂停新的 RAG ingestion。
-
-## 7. 断开与导出
-
-- 默认断开是可恢复撤销：停止同步并隐藏连接，但保留服务端可重建投影和索引。
-- 勾选“删除 MemoFlow 云端投影与 AI 索引”后，服务端按当前 identity 在单事务中永久清理连接及所有派生数据。
-- 本地 Vault、本地 Git 历史和 GitHub repository 在两种模式下都保留。
-- Data owner 的可导入备份使用 owner-driven `PortableBackupEnvelopeV3`（文件名形如
-  `memoflow-user-data-v3-*.json`）；Repository/Knowledge 不注册 portable capability。该备份不包含
-  Vault/GitHub 内容、授权或服务端 projection，也不是服务端持有数据披露。
-- GitHub authorization、installation token 和派生投影不得进入可导入文件。权威 Markdown/附件应从 Vault 或 GitHub
-  repository 导出/clone。
-- Web 的“服务端持有数据披露”生成 `memoflow.server-held-data-disclosure` JSON；它按认证 identity 包含
-  KnowledgeSpace metadata、去重后的 durable `KnowledgeDocumentIdentity` registry（`knowledgeSpaceId`、
-  `knowledgeDocumentId`、`origin`、`originRequestId`、`createdAt`、`updatedAt`）、repository connection metadata（含不可重放
-  installation identifier）、Markdown/附件投影、附件 cache bytes、Webhook delivery、Web write ledger 与 AI knowledge
-  index。Note projection 的 `knowledgeDocumentId` 可为 `null`，write request disclosure 始终带 stable `knowledgeDocumentId`。
-  该 artifact 没有 import route，并明确排除本地 Vault/Git history、GitHub repository history、worker lease、数据库内部
-  retrieval vector 及所有 MemoFlow 管理的可重放授权材料。Markdown、frontmatter 和 cache bytes 属于用户仓库内容，按原样
-  进入披露文件；disclosure 仍保持当前 schemaVersion 1，不是 portable backup。
-
-## 8. 当前差距
-
-Repository/Knowledge vNext 已完成 ADR-089~091 的 Local/Remote binding、stable document identity 与 single projection engine 收敛。
-
-- 真实 GitHub App fixture E2E 仍依赖外部凭据与受控 private repository。
-- Mobile 尚未接入服务端 GitHub 投影的只读浏览、搜索与预览。
-- Agent proposal/capability/tool-policy 继续遵守 ADR-035 与当前 AI owner-port contract；本模块不再引用一个未完成的 active plan 作为实现前提。
-
-## 9. 风险点
-
-- GitHub private repository 不是对 GitHub/MemoFlow 服务端不可见的 E2E 加密。
-- Git 冲突、仓库体积、大附件和 Git LFS 会增加 Desktop 复杂度。
-- GitHub App 撤销、仓库删除/公开、账号限制会影响跨端能力。
-- 同时使用 Obsidian Git 插件与 MemoFlow 自动 Git 可能产生 lock 和竞态。
-- Agent 读取的知识内容不可信，必须防止路径穿越、命令执行和提示注入越权。
-- Web 创建和 Desktop push 并发时必须通过远端 HEAD 和串行提交控制。
-
-## 10. 相关资料
-
-- [ADR-034: 本地 Obsidian Vault 与可选 GitHub 知识仓库](../../decisions/ADR-034-obsidian-vault-repository.md)
-- [Knowledge Repository vNext](../knowledge-repository-vnext.md)
-- [ADR-089: KnowledgeSpace、Source Binding 与 Health/Observation Boundary](../../decisions/ADR-089-knowledge-space-source-binding-and-health-boundaries.md)
-- [ADR-090: Stable KnowledgeDocument Identity](../../decisions/ADR-090-stable-knowledge-document-identity.md)
-- [ADR-091: Knowledge Projection、AI Index 与 Operation Boundary](../../decisions/ADR-091-knowledge-projection-index-and-operation-boundaries.md)
-- [Knowledge Repository vNext Current System Map](https://github.com/BakerSean168/memoflow/blob/7a45112e1840950ead1ba98b748fc70fa1b38344/docs/analysis/2026-09-08-knowledge-repository-vnext-current-system-map.md)
-- [ADR-035: 统一助手与可插拔 Agent Host](../../decisions/ADR-035-unified-assistant-agent-host.md)
-- [统一助手与可插拔 Agent Host 实施方案](https://github.com/BakerSean168/memoflow/blob/7a45112e1840950ead1ba98b748fc70fa1b38344/docs/plan/archive/2026-07-17-unified-assistant-agent-host.md)
-- [Obsidian Vault 与 GitHub 知识仓库后续优化方案](https://github.com/BakerSean168/memoflow/blob/7a45112e1840950ead1ba98b748fc70fa1b38344/docs/plan/archive/2026-07-16-obsidian-vault-repository-optimization.md)
-- [编辑器模块说明](./editor.md)
-- [AI 模块说明](./ai.md)
-- [资源库模块文件索引](https://github.com/BakerSean168/memoflow/blob/7a45112e1840950ead1ba98b748fc70fa1b38344/docs/internals/product/module-index/repository-files.md)
+- [ADR-126：Obsidian 连接与 Web 只读](../../decisions/ADR-126-obsidian-knowledge-connection-and-read-only-web.md)
+- [ADR-089：来源绑定与健康观察](../../decisions/ADR-089-knowledge-space-source-binding-and-health-boundaries.md)
+- [ADR-090：稳定文档身份](../../decisions/ADR-090-stable-knowledge-document-identity.md)
+- [ADR-091：投影与 AI 索引 owner](../../decisions/ADR-091-knowledge-projection-index-and-operation-boundaries.md)
+- [ADR-124：本地 MCP 宿主与云端边界](../../decisions/ADR-124-local-mcp-host-credentials-and-cloud-boundary.md)

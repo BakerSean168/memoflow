@@ -21,7 +21,7 @@ export class GoalPlanMutationAdapter implements GoalPlanMutationPort {
     goal: GoalApplicationPort,
     task: TaskApplicationPort,
     labels: LabelService,
-    knowledgeNotes: IKnowledgeNotePersistencePort,
+    knowledgeNotes: IKnowledgeNotePersistencePort | undefined,
     knowledgeRefs: KnowledgeDocumentRefResolver,
     goalKnowledge: Pick<GoalKnowledgeService, 'link'>,
   ) {

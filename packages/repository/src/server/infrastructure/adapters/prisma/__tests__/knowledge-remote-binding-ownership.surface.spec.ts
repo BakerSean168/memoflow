@@ -60,7 +60,6 @@ describe('knowledge remote binding ownership surface', () => {
   it('connection service uses authenticated binding reads and never mutates provider state into binding lifecycle', () => {
     expect(service).toContain('findByIdForIdentity(identityId, bindingId)');
     expect(service).toContain('observationRepository.save(');
-    expect(service).toContain('historyFenceRepository.save(');
     expect(service).not.toContain('.updateStatus(');
   });
 

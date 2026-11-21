@@ -1,4 +1,4 @@
-import { mkdtemp, mkdir, readFile, rm } from 'node:fs/promises';
+import { mkdtemp, mkdir, readFile, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { expect, it } from 'vitest';
@@ -30,6 +30,11 @@ it('reads a confirmed local Vault note through MCP and rejects paths as document
     new DesktopKnowledgeSourceAdapter(runtime),
   );
   try {
+    const ordinary = '# Ordinary knowledge\n\nUnmanaged orchard evidence.';
+    const ordinaryPath =
+      Array.from({ length: 6 }, () => '中文路径'.repeat(5)).join('/') + '/ordinary.md';
+    await mkdir(join(vault, ordinaryPath, '..'), { recursive: true });
+    await writeFile(join(vault, ordinaryPath), ordinary);
     const binding = await runtime.selectVault();
     const documentId = KnowledgeDocumentIdSchema.parse('kdoc_00000000-0000-4000-8000-000000000001');
     await runtime.writeConfirmedNote({
@@ -49,7 +54,7 @@ it('reads a confirmed local Vault note through MCP and rejects paths as document
       enabled: true,
       writeScopes: [],
     });
-    const grant = await bridge.open({
+    let grant = await bridge.open({
       identityId: 'owner',
       connectionId: connection.id,
       conversationId: 'test',
@@ -116,6 +121,50 @@ it('reads a confirmed local Vault note through MCP and rejects paths as document
     expect(await call('knowledge_get', { documentId: '../../secret.md' })).not.toContain(
       'Orchard evidence',
     );
+    const searchBody = await call('knowledge_search', { query: 'Unmanaged', limit: 5 });
+    const parseFrame = (body: string) =>
+      JSON.parse(
+        body.trimStart().startsWith('{')
+          ? body
+          : body
+              .split('\n')
+              .find((line) => line.startsWith('data: '))!
+              .slice(6),
+      );
+    const sourceItem = parseFrame(searchBody).result.structuredContent.items[0];
+    expect(sourceItem.documentId).toBeNull();
+    expect(sourceItem.url).toContain('sourceBindingId=');
+    expect(sourceItem.url.length).toBeGreaterThan(1024);
+    expect(await call('knowledge_get', { source: sourceItem.source })).toContain(
+      'Unmanaged orchard evidence',
+    );
+    expect(await readFile(join(vault, ordinaryPath), 'utf8')).toBe(ordinary);
+    await writeFile(join(vault, ordinaryPath), '# Changed ordinary note');
+    expect(
+      parseFrame(await call('knowledge_get', { source: sourceItem.source })).result
+        .structuredContent.note,
+    ).toBeNull();
+    await bridge.permissions('owner', {
+      action: 'settings',
+      settings: {
+        preset: 'custom',
+        agentPresets: {},
+        customMatrix: { knowledge: { read: 'deny' } },
+        revision: 1,
+      },
+    });
+    grant = await bridge.open({
+      identityId: 'owner',
+      connectionId: connection.id,
+      conversationId: 'test',
+      runId: 'denied-read',
+    });
+    const denied = parseFrame(await call('knowledge_get', { documentId }));
+    expect(denied.result).toMatchObject({
+      isError: true,
+      structuredContent: { error: { code: 'PERMISSION_DENIED' } },
+    });
+    expect(JSON.stringify(denied)).not.toContain('Orchard evidence');
     expect(await readFile(join(vault, 'notes/review.md'), 'utf8')).toBe(content);
   } finally {
     await bridge.dispose();

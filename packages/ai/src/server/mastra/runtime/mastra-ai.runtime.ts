@@ -1,5 +1,5 @@
 import { AIChatPermissionModeSchema, type AIChatPermissionMode } from '@memoflow/ai-contracts';
-import type { PermissionRepository } from '../../permissions';
+import { PermissionDeniedError, type PermissionRepository } from '../../permissions';
 import { Agent } from '@mastra/core/agent';
 import type { ConversationTitleGeneration } from '@memoflow/ai-contracts';
 import type { ExternalWorkflowInvocation } from './workflow-runtime.port';
@@ -8,6 +8,7 @@ import { MastraDurableWorkflowRuntime } from './mastra-durable-workflow.runtime'
 import {
   applyMemoFlowSessionToolPolicy,
   checkMemoFlowToolPermission,
+  executeMemoFlowTool,
   recordMemoFlowToolDecision,
   memoFlowToolCategory,
   memoFlowToolPolicy,
@@ -107,7 +108,7 @@ export interface MastraAIRuntimeDependencies {
   /** Host-bound canonical Task application mutation for the task.create workflow. */
   readonly taskPlanMutationPort: TaskPlanMutationPort;
   /** Host-bound canonical knowledge-note persistence mutation for knowledge.capture. */
-  readonly knowledgeCaptureMutationPort: KnowledgeCaptureMutationPort;
+  readonly knowledgeCaptureMutationPort?: KnowledgeCaptureMutationPort;
   /** Existing Knowledge read owner reused by GoalPlan V2 for search/reuse evidence. */
   readonly knowledgeSourcePort: import('../../application/ports').IKnowledgeSourcePort;
   /** Read-only provider-backed public web research used only by Goal planning. */
@@ -210,10 +211,14 @@ export class MastraAIRuntime implements AIWorkflowRuntimePort {
       deps.executionRecordPort,
       deps.contextAssembler,
       deps.webResearchPort,
+      Boolean(deps.knowledgeCaptureMutationPort),
     );
     this.goalCreateWorkflow = createGoalCreateWorkflow({
       planner: this.goalPlanner,
-      applyService: new ApplyGoalPlanService(deps.goalPlanMutationPort),
+      applyService: new ApplyGoalPlanService(
+        deps.goalPlanMutationPort,
+        Boolean(deps.knowledgeCaptureMutationPort),
+      ),
       liveActionStorage: deps.storage,
     });
     this.taskPlanner = new TaskPlannerWorker(
@@ -232,7 +237,16 @@ export class MastraAIRuntime implements AIWorkflowRuntimePort {
     );
     this.knowledgeCaptureWorkflow = createKnowledgeCaptureWorkflow({
       planner: this.knowledgeCapturePlanner,
-      applyService: new ApplyKnowledgeNoteService(deps.knowledgeCaptureMutationPort),
+      applyService: new ApplyKnowledgeNoteService(
+        deps.knowledgeCaptureMutationPort ?? {
+          async createConfirmedKnowledgeNote() {
+            throw new AIExecutionError(
+              'capability_unsupported',
+              'Knowledge sources are read-only on Web. Save notes in MemoFlow Desktop.',
+            );
+          },
+        },
+      ),
     });
     this.controller = new AgentController({
       id: 'memoflow-assistant-controller',
@@ -347,12 +361,22 @@ export class MastraAIRuntime implements AIWorkflowRuntimePort {
     }
   }
 
+  private assertKnowledgeWorkflowCapability(kind: string): void {
+    if (kind === 'knowledge.capture' && !this.deps.knowledgeCaptureMutationPort) {
+      throw new AIExecutionError(
+        'capability_unsupported',
+        'Knowledge sources are read-only on Web. Save notes in MemoFlow Desktop.',
+      );
+    }
+  }
+
   async start(input: {
     context: ExecutionContext;
     request: AIWorkflowStartClientRequest;
     runId?: string;
     external?: ExternalWorkflowInvocation;
   }): Promise<AIWorkflowRunView> {
+    this.assertKnowledgeWorkflowCapability(input.request.kind);
     await this.init();
     const run = await this.durableWorkflows.start(input);
     await this.recordConversationActivity(
@@ -369,6 +393,7 @@ export class MastraAIRuntime implements AIWorkflowRuntimePort {
     runId?: string;
     external?: ExternalWorkflowInvocation;
   }): Promise<AIWorkflowRunView> {
+    this.assertKnowledgeWorkflowCapability(input.request.kind);
     await this.init();
     const run = await this.durableWorkflows.startDetached(input);
     await this.recordConversationActivity(
@@ -385,6 +410,19 @@ export class MastraAIRuntime implements AIWorkflowRuntimePort {
     external?: ExternalWorkflowInvocation;
   }): Promise<AIWorkflowRunView> {
     await this.init();
+    if (!this.deps.knowledgeCaptureMutationPort) {
+      const existing = await this.durableWorkflows.get({
+        identityId: input.context.identityId,
+        runId: input.request.runId,
+      });
+      if (
+        existing &&
+        !['completed', 'failed', 'cancelled'].includes(existing.status) &&
+        !['cancel', 'cancel_remaining'].includes(input.request.command.type)
+      ) {
+        this.assertKnowledgeWorkflowCapability(existing.kind);
+      }
+    }
     const run = await this.durableWorkflows.resume(input);
     await this.recordConversationActivity(
       input.context.identityId,
@@ -400,6 +438,19 @@ export class MastraAIRuntime implements AIWorkflowRuntimePort {
     external?: ExternalWorkflowInvocation;
   }): Promise<AIWorkflowRunView> {
     await this.init();
+    if (!this.deps.knowledgeCaptureMutationPort) {
+      const existing = await this.durableWorkflows.get({
+        identityId: input.context.identityId,
+        runId: input.request.runId,
+      });
+      if (
+        existing &&
+        !['completed', 'failed', 'cancelled'].includes(existing.status) &&
+        !['cancel', 'cancel_remaining'].includes(input.request.command.type)
+      ) {
+        this.assertKnowledgeWorkflowCapability(existing.kind);
+      }
+    }
     return this.durableWorkflows.resumeDetached(input);
   }
 
@@ -1209,10 +1260,42 @@ export class MastraAIRuntime implements AIWorkflowRuntimePort {
     requestContext.setRaw(MASTRA_THREAD_ID_KEY, input.conversationId);
 
     const selectedEntities = input.selectedEntities ?? [];
-    const selectedContext = await this.selectedContextHydrator.hydrate(
-      input.identityId,
-      selectedEntities,
+    const hydrate = () => this.selectedContextHydrator.hydrate(input.identityId, selectedEntities);
+    const hasSelectedKnowledge = selectedEntities.some(
+      (entity) =>
+        entity.entityType === 'knowledge_source' || entity.entityType === 'knowledge_document',
     );
+    let selectedContext: Awaited<ReturnType<typeof hydrate>>;
+    try {
+      if (hasSelectedKnowledge) {
+        // Pre-context hydration has no native approval continuation. Never treat a custom
+        // ask rule as already approved; default confirm_each permits ordinary reads.
+        const decision = await checkMemoFlowToolPermission(
+          this.deps.permissions,
+          'knowledge_get',
+          requestContext,
+        );
+        if (decision !== 'allow')
+          throw new AIExecutionError(
+            'permission_denied',
+            'Selected knowledge reading is not authorized',
+          );
+        selectedContext = await executeMemoFlowTool(
+          this.deps.permissions,
+          'knowledge_get',
+          requestContext,
+          hydrate,
+        );
+      } else selectedContext = await hydrate();
+    } catch (failure) {
+      if (failure instanceof PermissionDeniedError)
+        throw new AIExecutionError(
+          'permission_denied',
+          'Selected knowledge reading is not authorized',
+          { cause: failure },
+        );
+      throw failure;
+    }
 
     const contextEnvelope = await this.deps.contextAssembler.assemble({
       invocation: {

@@ -53,7 +53,7 @@ export interface GoalPlanMutationAdapterDeps {
   readonly labels: {
     resolveNames(identityId: string, names: readonly string[]): Promise<readonly { id: string }[]>;
   };
-  readonly knowledgeNotes: IKnowledgeNotePersistencePort;
+  readonly knowledgeNotes?: IKnowledgeNotePersistencePort;
   readonly knowledgeRefs: {
     resolve(
       identityId: string,
@@ -123,6 +123,8 @@ export function createGoalPlanMutationAdapter(
     },
 
     async createKnowledgeDocument(request, context) {
+      if (!deps.knowledgeNotes)
+        return error('FORBIDDEN', 'Knowledge sources are read-only on this host');
       try {
         const fileName = request.targetSubpath.split('/').slice(-1)[0] ?? `${request.title}.md`;
         const persisted = await deps.knowledgeNotes.createKnowledgeNote({

@@ -25,7 +25,7 @@ import { useAuthenticationStore } from '@memoflow/account-ui';
 import { useAppShellStore } from '@memoflow/app-vue/layouts/shell/useAppShellStore';
 import RoutineConfigurationView from '@memoflow/routine-ui/views/RoutineConfigurationView';
 import { NotificationListPage } from '@memoflow/notification-ui';
-import { KnowledgeProjectionWorkspaceView } from '@memoflow/repository-ui';
+import { KnowledgeProjectionWorkspaceView, LocalVaultWorkspaceView } from '@memoflow/repository-ui';
 import { UserSettingsView } from '@memoflow/app-vue';
 import { TaskManagementView } from '@memoflow/task-ui';
 import GlobalConfirmDialog from '@memoflow/app-vue/shared/components/GlobalConfirmDialog.vue';
@@ -132,7 +132,36 @@ const binding = {
     projectedAt: stamp,
   },
 };
+const localBinding = {
+  id: 'local-1',
+  knowledgeSpaceId: 'space-1',
+  localProfileId: 'profile-1',
+  rootPath: 'D:\\home\\baker\\projects\\thought-forest',
+  displayName: 'Thought Forest',
+  boundAt: stamp,
+  detachedAt: null,
+};
 const repository = {
+  getLocalVaultBinding: async () =>
+    ok({
+      binding: localBinding,
+      health: { bindingId: 'local-1', state: 'Available', observedAt: stamp, detail: null },
+    }),
+  listLocalVaultWrites: async () =>
+    ok([
+      {
+        documentId: 'doc-1',
+        title: 'Obsidian integration / Obsidian 连接方案',
+        relativePath: 'Notes/Engineering/obsidian-integration.md',
+        createdAt: stamp,
+      },
+      {
+        documentId: 'doc-2',
+        title: 'Weekly reflection / 每周复盘',
+        relativePath: 'Notes/Journal/weekly-reflection.md',
+        createdAt: stamp - 86400000,
+      },
+    ]),
   listKnowledgeRepositoryConnections: async () => ok({ connections: [binding] }),
   listKnowledgeNoteProjections: async () => ok({ notes: [note], total: 1, nextCursor: null }),
   listKnowledgeNoteTree: async () =>
@@ -194,6 +223,7 @@ const components = {
   routine: RoutineConfigurationView,
   notification: NotificationListPage,
   knowledge: KnowledgeProjectionWorkspaceView,
+  'knowledge-local': LocalVaultWorkspaceView,
   settings: UserSettingsView,
 };
 const SharedListFixture = defineComponent({
@@ -238,6 +268,7 @@ const router = createRouter({
     : [
         {
           path: '/:pathMatch(.*)*',
+          name: surface.startsWith('knowledge') ? 'repository' : undefined,
           component:
             surface === 'shared-list'
               ? SharedListFixture
@@ -437,8 +468,8 @@ const route = shell
   ? '/tasks'
   : surface === 'settings'
     ? `/settings?tab=${params.get('tab') ?? 'appearance'}`
-    : surface === 'knowledge'
-      ? '/repository?note=projection-1'
+    : surface.startsWith('knowledge')
+      ? '/repository'
       : '/routines';
 await router.push(route);
 await router.isReady();

@@ -42,7 +42,6 @@ describe('RepositoryKnowledgeSourceAdapter', () => {
     expect(findMany).toHaveBeenCalledWith({
       where: {
         deletedAt: null,
-        knowledgeDocumentId: { not: null },
         binding: { identityId: 'identity-1', disconnectedAt: null },
       },
       include: { binding: { select: { knowledgeSpaceId: true } } },
@@ -111,5 +110,35 @@ describe('RepositoryKnowledgeSourceAdapter', () => {
     const adapter = new RepositoryKnowledgeSourceAdapter(db);
 
     await expect(adapter.listIndexableNotes('identity-1', 1)).resolves.toEqual([]);
+  });
+  it('hydrates an ordinary source only at the exact owned active binding, path and content hash', async () => {
+    const findFirst = vi.fn(async () => projectionRow({ knowledgeDocumentId: null }));
+    const adapter = new RepositoryKnowledgeSourceAdapter({
+      knowledgeNoteProjection: { findFirst },
+    } as never);
+    const source = {
+      kind: 'github_projection' as const,
+      bindingId: 'binding-1',
+      relativePath: 'notes/architecture.md',
+      contentHash: 'b'.repeat(64),
+    };
+    expect(await adapter.getNoteBySource('identity-1', source)).toMatchObject({
+      knowledgeDocumentId: null,
+      content: '# Architecture\n\nRepository-backed knowledge.',
+    });
+    expect(findFirst).toHaveBeenCalledWith({
+      where: {
+        bindingId: 'binding-1',
+        relativePath: source.relativePath,
+        contentHash: source.contentHash,
+        deletedAt: null,
+        binding: { identityId: 'identity-1', disconnectedAt: null },
+      },
+      include: { binding: { select: { knowledgeSpaceId: true } } },
+    });
+    await expect(
+      adapter.getNoteBySource('identity-1', { ...source, kind: 'local_vault' }),
+    ).resolves.toBeNull();
+    expect(findFirst).toHaveBeenCalledTimes(1);
   });
 });

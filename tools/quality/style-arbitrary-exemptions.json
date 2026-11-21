@@ -483,21 +483,6 @@
       "reason": "视口高度约束，随窗口变化，无刻度等价值"
     },
     {
-      "file": "packages/repository-ui/src/views/KnowledgeProjectionWorkspaceView.vue",
-      "token": "max-w-[46%]",
-      "reason": "相对容器比例尺寸，无刻度等价值"
-    },
-    {
-      "file": "packages/repository-ui/src/views/KnowledgeProjectionWorkspaceView.vue",
-      "token": "w-[min(20rem,32%)]",
-      "reason": "相对容器比例尺寸，无刻度等价值"
-    },
-    {
-      "file": "packages/repository-ui/src/views/LocalVaultWorkspaceView.vue",
-      "token": "max-w-[46%]",
-      "reason": "相对容器比例尺寸，无刻度等价值"
-    },
-    {
       "file": "packages/routine-ui/src/components/RoutineProfileDialog.vue",
       "token": "max-w-[440px]",
       "reason": "内容/浮层容器最大宽度，几何约束"

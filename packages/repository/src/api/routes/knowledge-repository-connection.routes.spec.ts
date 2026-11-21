@@ -156,6 +156,22 @@ function createResponse() {
 }
 
 describe('knowledge repository connection routes', () => {
+  it('does not mount note mutation, Desktop sync or historical payload replay routes', () => {
+    const router = registerRepositoryRoutes(createApiStub(), { auth: passThrough });
+    const paths = (router as unknown as { stack: LayerWithRoute[] }).stack
+      .filter((layer) => layer.route?.methods.post)
+      .map((layer) => layer.route!.path);
+    for (const path of [
+      '/knowledge-notes',
+      '/knowledge-notes/adopt',
+      '/knowledge-connections/:connectionId/desktop-token',
+      '/knowledge-connections/:connectionId/reconciliation-preview',
+      '/knowledge-connections/:connectionId/head-confirmation',
+      '/knowledge-write-requests/:writeRequestId/replay',
+    ])
+      expect(paths).not.toContain(path);
+  });
+
   it('keeps legacy database Repository/Folder/Resource routes outside the mounted API', () => {
     const router = registerRepositoryRoutes(createApiStub(), { auth: passThrough });
     const paths = (router as unknown as { stack: LayerWithRoute[] }).stack
@@ -336,104 +352,6 @@ describe('knowledge repository connection routes', () => {
         error: expect.objectContaining({ code: 'VALIDATION_ERROR' }),
       }),
     );
-  });
-
-  it('derives a Desktop-only token context from the Electron transport edge', async () => {
-    const api = createApiStub();
-    const router = registerKnowledgeRepositoryConnectionRoutes(api, { auth: passThrough });
-    const handler = getRouteHandler(
-      router,
-      'post',
-      '/knowledge-connections/:connectionId/desktop-token',
-    );
-    const res = createResponse();
-
-    await handler(
-      {
-        params: { connectionId: 'connection-1' },
-        headers: {
-          'user-agent': 'Mozilla/5.0 MemoFlow/1.0 Electron/36.0.0',
-          'x-device-id': 'desktop-device-1',
-        },
-        user: { identityId: 'identity-desktop' },
-        requestContext: carrier(),
-      },
-      res,
-    );
-
-    expect(api.issueDesktopKnowledgeRepositoryToken).toHaveBeenCalledWith(
-      expect.objectContaining({
-        identityId: 'identity-desktop',
-        deviceId: 'desktop-device-1',
-        device: expect.objectContaining({ deviceType: 'Desktop' }),
-      }),
-      'connection-1',
-    );
-    expect(res.status).toHaveBeenCalledWith(200);
-  });
-
-  it('forwards a validated first-reconciliation preflight in Desktop context', async () => {
-    const api = createApiStub();
-    const router = registerKnowledgeRepositoryConnectionRoutes(api, { auth: passThrough });
-    const handler = getRouteHandler(
-      router,
-      'post',
-      '/knowledge-connections/:connectionId/reconciliation-preview',
-    );
-    const res = createResponse();
-
-    await handler(
-      {
-        params: { connectionId: 'connection-1' },
-        body: { localState: 'NonEmpty' },
-        headers: { 'user-agent': 'MemoFlow/1.0 Electron/43.0.0' },
-        user: { identityId: 'identity-desktop' },
-        requestContext: carrier(),
-      },
-      res,
-    );
-
-    expect(api.previewKnowledgeRepositoryReconciliation).toHaveBeenCalledWith(
-      expect.objectContaining({
-        identityId: 'identity-desktop',
-        device: expect.objectContaining({ deviceType: 'Desktop' }),
-      }),
-      'connection-1',
-      { localState: 'NonEmpty' },
-    );
-    expect(res.status).toHaveBeenCalledWith(200);
-  });
-
-  it('forwards a validated reconciliation confirmation in Desktop context', async () => {
-    const api = createApiStub();
-    const router = registerKnowledgeRepositoryConnectionRoutes(api, { auth: passThrough });
-    const handler = getRouteHandler(
-      router,
-      'post',
-      '/knowledge-connections/:connectionId/head-confirmation',
-    );
-    const res = createResponse();
-
-    await handler(
-      {
-        params: { connectionId: 'connection-1' },
-        body: { headSha: 'a'.repeat(40) },
-        headers: { 'user-agent': 'MemoFlow/1.0 Electron/43.0.0' },
-        user: { identityId: 'identity-desktop' },
-        requestContext: carrier(),
-      },
-      res,
-    );
-
-    expect(api.confirmKnowledgeRepositoryHead).toHaveBeenCalledWith(
-      expect.objectContaining({
-        identityId: 'identity-desktop',
-        device: expect.objectContaining({ deviceType: 'Desktop' }),
-      }),
-      'connection-1',
-      { headSha: 'a'.repeat(40) },
-    );
-    expect(res.status).toHaveBeenCalledWith(200);
   });
 
   it('returns 401 before invoking a protected route without an authenticated identity', async () => {
@@ -710,38 +628,5 @@ describe('knowledge repository connection routes', () => {
 
     expect(api.listKnowledgeWriteRequests).not.toHaveBeenCalled();
     expect(res.status).toHaveBeenCalledWith(401);
-  });
-
-  it('forwards an authenticated replay of a write request projection', async () => {
-    const api = createApiStub();
-    const router = registerKnowledgeRepositoryConnectionRoutes(api, { auth: passThrough });
-    const handler = getRouteHandler(
-      router,
-      'post',
-      '/knowledge-write-requests/:writeRequestId/replay',
-    );
-    const res = createResponse();
-
-    await handler(
-      {
-        params: { writeRequestId: 'write-request-1' },
-        headers: { 'user-agent': 'Mozilla/5.0' },
-        user: { identityId: 'identity-route' },
-        requestContext: carrier(),
-      },
-      res,
-    );
-
-    expect(api.replayKnowledgeWriteRequestProjection).toHaveBeenCalledWith(
-      expect.objectContaining({ identityId: 'identity-route' }),
-      'write-request-1',
-    );
-    expect(res.status).toHaveBeenCalledWith(200);
-    expect(res.json).toHaveBeenCalledWith(
-      expect.objectContaining({
-        ok: true,
-        data: expect.objectContaining({ writeRequestId: 'write-request-1', status: 'Succeeded' }),
-      }),
-    );
   });
 });

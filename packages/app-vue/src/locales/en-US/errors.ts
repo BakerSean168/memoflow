@@ -1,4 +1,8 @@
 export default {
+  AI_PERMISSION_DENIED:
+    'Current Agent permissions do not allow reading the selected notes. Review knowledge read permissions or remove the selections.',
+  KNOWLEDGE_CONTEXT_STALE:
+    "A selected note changed, moved, or its source disconnected. Remove the outdated reference, then type {'@'} to select the note again.",
   EAG_SERVICE_UNAVAILABLE: 'The service is temporarily unavailable. Please try again later.',
   EAG_RATE_LIMITED: 'Too many requests. Please try again later.',
   EAG_VALIDATION_ERROR: 'Some submitted data is invalid. Please review and try again.',

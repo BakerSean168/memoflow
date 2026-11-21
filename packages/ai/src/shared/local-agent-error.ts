@@ -2,6 +2,8 @@ import type { LocalAgentDriver } from '@memoflow/ai-contracts';
 
 /** Public failures contain no provider stderr, credentials, configuration or raw protocol data. */
 export const LOCAL_AGENT_FAILURES = {
+  KNOWLEDGE_CONTEXT_STALE:
+    'A selected note changed, moved, or its source disconnected. Remove the outdated reference, then select the note again.',
   NOT_FOUND: 'Local Agent connection or conversation was not found.',
   CONFLICT: 'This local Agent resource changed or already has an active turn.',
   LOCAL_AGENT_NOT_INSTALLED: 'The configured Agent executable could not be started.',

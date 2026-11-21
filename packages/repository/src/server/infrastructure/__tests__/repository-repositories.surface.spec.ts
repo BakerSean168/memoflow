@@ -12,7 +12,6 @@ import {
   type RepositoryModuleInstance,
   type IKnowledgeRemoteBindingRepository,
   type IKnowledgeRepositoryProjectionService,
-  type IKnowledgeNoteCommitService,
 } from '../../../../src';
 
 /**
@@ -63,7 +62,6 @@ describe('repository factories surface', () => {
     const runtime = createRepositoryPrismaRuntimeContributions({ repositories });
     expect(runtime.knowledgeRepositoryConnectionService).toBeNull();
     expect(runtime.knowledgeRepositoryProjectionService).toBeNull();
-    expect(runtime.knowledgeNoteCommitService).toBeNull();
     expect(runtime.runtimeContribution).toBeNull();
     const typed: RepositoryPrismaRuntimeContributions = runtime;
     expect(typeof typed).toBe('object');
@@ -113,12 +111,10 @@ describe('repository factories surface', () => {
       stop: () => undefined,
       reconcileNow: async () => undefined,
     } as IKnowledgeRepositoryProjectionService;
-    const noteCommitService = {} as IKnowledgeNoteCommitService;
 
     const instance = createRepositoryModule({
       knowledgeRepositoryConnectionService: null,
       knowledgeRepositoryProjectionService: projectionService,
-      knowledgeNoteCommitService: noteCommitService,
     });
     expect(instance.api).toBeDefined();
     expect(connectionRepo).toBeDefined();

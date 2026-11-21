@@ -425,8 +425,7 @@ export interface SettingUiHost extends PlatformRendererHost {
     | 'AgentDriverIcon'
     | 'AccountProfileSection'
     | 'CloudPasswordSection'
-    | 'ExternalAgentConnectionsSection'
-    | 'KnowledgeWriteRequestLedger',
+    | 'ExternalAgentConnectionsSection',
     Component
   >;
 }

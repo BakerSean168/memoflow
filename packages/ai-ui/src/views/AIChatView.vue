@@ -140,6 +140,7 @@
         "
         :tool-mode="toolMode"
         :has-models="modelGroups.length > 0 || runtimeChoice.runtimeKind === 'local_agent'"
+        :can-capture-knowledge="localAssistant.canSaveNote"
         :can-save-local-note="
           runtimeChoice.runtimeKind === 'local_agent' && localAssistant.canSaveNote
         "
@@ -317,6 +318,9 @@
           :recent-goals="referenceGoalList"
           :recent-tasks="referenceTaskList"
           :recent-knowledge-notes="referenceKnowledgeNoteList"
+          :knowledge-loading="knowledgeContextLoading"
+          :knowledge-error="knowledgeContextError"
+          @knowledge-query="searchKnowledgeContext"
           :model-groups="modelGroups"
           :local-agent="runtimeChoice.runtimeKind === 'local_agent'"
           :selected-model-key="selectedModelKey"
@@ -482,6 +486,9 @@ const {
   referenceGoalList,
   referenceTaskList,
   referenceKnowledgeNoteList,
+  searchKnowledgeContext,
+  knowledgeContextLoading,
+  knowledgeContextError,
   recentKnowledgeNotesEmailVerificationRequired,
   recentKnowledgeNotesErrorMessageKey,
   messagesViewport,

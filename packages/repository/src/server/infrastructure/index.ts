@@ -55,7 +55,6 @@ export type { IGitHubAppClient } from '../application/ports/github-app-client.po
 export type { IKnowledgeRepositoryInstallationIntentRepository } from '../application/ports/knowledge-repository-installation-intent.repository';
 export type { IKnowledgeRepositoryConnectionService } from '../application/ports/knowledge-repository-connection.service.port';
 export type { IKnowledgeRepositoryProjectionService } from '../application/ports/knowledge-repository-projection.service.port';
-export type { IKnowledgeNoteCommitService } from '../application/ports/knowledge-note-commit.service.port';
 
 // ============ Host-used concrete consumer ============
 /** Host-used by apps/api: closure worker consumer. 宿主使用：apps/api 的账户关闭 consumer。 */

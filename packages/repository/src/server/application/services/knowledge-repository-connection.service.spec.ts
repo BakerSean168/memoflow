@@ -148,7 +148,6 @@ function createGithubClient(overrides: Partial<IGitHubAppClient> = {}): IGitHubA
     getMarkdownChanges: vi.fn(),
     getFullMarkdownSnapshot: vi.fn(),
     getBlob: vi.fn(),
-    createFileCommit: vi.fn(),
     ...overrides,
   };
 }
@@ -813,72 +812,6 @@ describe('KnowledgeRepositoryConnectionService', () => {
     expect(bindingRepository.rows.get(connected.data.id)?.disconnectedAt).toBeNull();
   });
 
-  it('default-branch drift blocks Observation until confirmHead establishes a new history fence', async () => {
-    const { service, github } = createService();
-    await completeInstallation(service);
-    const connected = await service.connect('identity-1', {
-      installationId: 'installation-1',
-      githubRepositoryId: 'repository-1',
-    });
-    if (!connected.ok) throw new Error('expected connection');
-    vi.mocked(github.getRepositorySnapshot).mockResolvedValueOnce({
-      repositoryId: 'repository-1',
-      defaultBranch: 'main',
-      empty: false,
-      headSha: 'a'.repeat(40),
-    });
-    const initial = await service.confirmHead('identity-1', connected.data.id, {
-      headSha: 'a'.repeat(40),
-    });
-    expect(initial).toMatchObject({ ok: true, data: { historyFence: { defaultBranch: 'main' } } });
-
-    vi.mocked(github.getInstallationInventory).mockResolvedValue(
-      installationInventory({ defaultBranch: 'trunk' }),
-    );
-    await expect(
-      service.refreshObservation('identity-1', connected.data.id),
-    ).resolves.toMatchObject({
-      ok: true,
-      data: { observation: { eligibility: { state: 'Blocked', reason: 'DefaultBranchChanged' } } },
-    });
-    vi.mocked(github.getRepositorySnapshot).mockResolvedValueOnce({
-      repositoryId: 'repository-1',
-      defaultBranch: 'trunk',
-      empty: false,
-      headSha: 'b'.repeat(40),
-    });
-    await expect(
-      service.confirmHead('identity-1', connected.data.id, { headSha: 'b'.repeat(40) }),
-    ).resolves.toMatchObject({
-      ok: true,
-      data: {
-        historyFence: { defaultBranch: 'trunk', lastConfirmedRemoteHeadSha: 'b'.repeat(40) },
-        observation: { eligibility: { state: 'Ready' }, defaultBranch: 'trunk' },
-        projectionCheckpoint: { branch: 'trunk', state: 'Lagging', projectedCommitSha: null },
-      },
-    });
-  });
-
-  it('revalidates provider state before issuing a repository-scoped Desktop token', async () => {
-    const { service, github } = createService();
-    await completeInstallation(service);
-    const connected = await service.connect('identity-1', {
-      installationId: 'installation-1',
-      githubRepositoryId: 'repository-1',
-    });
-    if (!connected.ok) throw new Error('expected connection');
-    vi.mocked(github.getInstallationInventory).mockResolvedValueOnce(
-      installationInventory({ archived: true }),
-    );
-    await expect(
-      service.issueInstallationToken('identity-1', connected.data.id),
-    ).resolves.toMatchObject({
-      ok: false,
-      error: { code: 'FORBIDDEN', context: { remoteRepositoryBlockReason: 'RepositoryArchived' } },
-    });
-    expect(github.createInstallationAccessToken).not.toHaveBeenCalled();
-  });
-
   it('disconnect mutates only binding lifecycle while explicit purge remains opt-in', async () => {
     const cloudDataPurger = { purge: vi.fn(async () => true) };
     const { service, bindingRepository } = createService(createGithubClient(), cloudDataPurger);
@@ -896,11 +829,11 @@ describe('KnowledgeRepositoryConnectionService', () => {
     expect(cloudDataPurger.purge).not.toHaveBeenCalled();
   });
 
-  it('rejects repositories that are public, archived, or not writable', async () => {
+  it('rejects repositories that are public, archived, or not readable', async () => {
     for (const inventory of [
       installationInventory({ private: false }),
       installationInventory({ archived: true }),
-      installationInventory({ permissions: { admin: false, push: false, pull: true } }),
+      installationInventory({ permissions: { admin: false, push: false, pull: false } }),
     ]) {
       const github = createGithubClient({ getInstallationInventory: vi.fn(async () => inventory) });
       const { service } = createService(github);

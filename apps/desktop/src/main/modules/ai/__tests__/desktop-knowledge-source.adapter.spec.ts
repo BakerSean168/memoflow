@@ -11,6 +11,8 @@ const summary = {
   knowledgeDocumentId: DOCUMENT_ID,
   title: 'Runtime architecture',
   excerpt: 'Capability resolution',
+  contentHash: 'a'.repeat(64),
+  aliases: [],
   tags: ['architecture'],
   outgoingLinks: ['ADR-035'],
   size: 100,
@@ -19,6 +21,7 @@ const summary = {
 
 function createLocalVaultPort(active = true): LocalVaultElectronPort {
   return {
+    listRecentWrites: vi.fn(async () => []),
     getBinding: vi.fn(async () => {
       if (!active) return null;
       const bindingId = BINDING_ID;

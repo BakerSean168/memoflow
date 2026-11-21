@@ -8,10 +8,6 @@ export {
   type KnowledgeRepositoryProjectionServiceOptions,
 } from './knowledge-repository-projection.service';
 export {
-  KnowledgeNoteCommitService,
-  type KnowledgeNoteCommitServiceOptions,
-} from './knowledge-note-commit.service';
-export {
   publishRepositoryNoteMutation,
   type RepositoryNoteMutationPayload,
 } from './repository-note-mutation.publisher';

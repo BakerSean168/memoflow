@@ -1,3 +1,4 @@
+import type { LocalVaultWriteReceipt } from '@memoflow/repository-contracts';
 /**
  * Repository IPC Adapter
  *
@@ -64,98 +65,76 @@ import type {
 export class RepositoryIpcAdapter implements IRepositoryApiClient {
   constructor(private readonly ipcClient: IResultIpcClient) {}
   async startKnowledgeRepositoryInstallation(
-    request: StartKnowledgeRepositoryInstallationReq = {},
+    _request: StartKnowledgeRepositoryInstallationReq = {},
   ): Promise<Result<StartKnowledgeRepositoryInstallationRes>> {
-    return this.ipcClient.invoke(
-      RepositoryChannels.KNOWLEDGE_CONNECTION_INSTALLATION_START,
-      request,
-    );
+    return this.serverProjectionUnavailable();
   }
 
   async completeKnowledgeRepositoryInstallation(
-    request: CompleteKnowledgeRepositoryInstallationReq,
+    _request: CompleteKnowledgeRepositoryInstallationReq,
   ): Promise<Result<CompleteKnowledgeRepositoryInstallationRes>> {
-    return this.ipcClient.invoke(
-      RepositoryChannels.KNOWLEDGE_CONNECTION_INSTALLATION_COMPLETE,
-      request,
-    );
+    return this.serverProjectionUnavailable();
   }
 
   async getKnowledgeRepositoryInstallationIntentStatus(
-    intentId: string,
+    _intentId: string,
   ): Promise<Result<KnowledgeRepositoryInstallationIntentStatusResponse>> {
-    return this.ipcClient.invoke(RepositoryChannels.KNOWLEDGE_CONNECTION_INSTALLATION_STATUS, {
-      intentId,
-    });
+    return this.serverProjectionUnavailable();
   }
 
   async finalizeKnowledgeRepositoryInstallationIntent(
-    intentId: string,
+    _intentId: string,
   ): Promise<Result<CompleteKnowledgeRepositoryInstallationRes>> {
-    return this.ipcClient.invoke(RepositoryChannels.KNOWLEDGE_CONNECTION_INSTALLATION_FINALIZE, {
-      intentId,
-    });
+    return this.serverProjectionUnavailable();
   }
 
   async listKnowledgeRepositoryConnections(): Promise<
     Result<ListKnowledgeRepositoryConnectionsRes>
   > {
-    return this.ipcClient.invoke(RepositoryChannels.KNOWLEDGE_CONNECTION_LIST);
+    return this.serverProjectionUnavailable();
   }
 
   async refreshKnowledgeRepositoryObservation(
-    connectionId: string,
+    _connectionId: string,
   ): Promise<Result<KnowledgeRemoteBindingClientDTO>> {
-    return this.ipcClient.invoke(RepositoryChannels.KNOWLEDGE_CONNECTION_REFRESH_OBSERVATION, {
-      connectionId,
-    });
+    return this.serverProjectionUnavailable();
   }
 
   async connectKnowledgeRepository(
-    request: CreateKnowledgeRepositoryConnectionReq,
+    _request: CreateKnowledgeRepositoryConnectionReq,
   ): Promise<Result<KnowledgeRemoteBindingClientDTO>> {
-    return this.ipcClient.invoke(RepositoryChannels.KNOWLEDGE_CONNECTION_CONNECT, request);
+    return this.serverProjectionUnavailable();
   }
 
   async disconnectKnowledgeRepository(
-    connectionId: string,
-    purgeCloudData = false,
+    _connectionId: string,
+    _purgeCloudData = false,
   ): Promise<Result<DisconnectKnowledgeRepositoryConnectionRes>> {
-    return this.ipcClient.invoke(RepositoryChannels.KNOWLEDGE_CONNECTION_DISCONNECT, {
-      connectionId,
-      purgeCloudData,
-    });
+    return this.serverProjectionUnavailable();
   }
 
   async previewKnowledgeRepositoryReconciliation(
-    connectionId: string,
+    _connectionId: string,
   ): Promise<Result<KnowledgeRepositoryReconciliationPreview>> {
-    return this.ipcClient.invoke(RepositoryChannels.KNOWLEDGE_CONNECTION_RECONCILIATION_PREVIEW, {
-      connectionId,
-    });
+    return this.serverProjectionUnavailable();
   }
 
   async executeKnowledgeRepositoryReconciliation(
-    request: ExecuteKnowledgeRepositoryReconciliationReq,
+    _request: ExecuteKnowledgeRepositoryReconciliationReq,
   ): Promise<Result<ExecuteKnowledgeRepositoryReconciliationRes>> {
-    return this.ipcClient.invoke(
-      RepositoryChannels.KNOWLEDGE_CONNECTION_RECONCILIATION_EXECUTE,
-      request,
-    );
+    return this.serverProjectionUnavailable();
   }
 
   async syncKnowledgeRepository(
-    request: SyncKnowledgeRepositoryReq,
+    _request: SyncKnowledgeRepositoryReq,
   ): Promise<Result<SyncKnowledgeRepositoryRes>> {
-    return this.ipcClient.invoke(RepositoryChannels.KNOWLEDGE_CONNECTION_SYNC, request);
+    return this.serverProjectionUnavailable();
   }
 
   async issueDesktopKnowledgeRepositoryToken(
-    connectionId: string,
+    _connectionId: string,
   ): Promise<Result<KnowledgeRepositoryInstallationTokenRes>> {
-    return this.ipcClient.invoke(RepositoryChannels.KNOWLEDGE_CONNECTION_DESKTOP_TOKEN, {
-      connectionId,
-    });
+    return this.serverProjectionUnavailable();
   }
 
   async listKnowledgeNoteProjections(
@@ -225,17 +204,15 @@ export class RepositoryIpcAdapter implements IRepositoryApiClient {
   }
 
   async listKnowledgeWriteRequests(
-    request: ListKnowledgeWriteRequestsReq = { limit: 50 },
+    _request: ListKnowledgeWriteRequestsReq = { limit: 50 },
   ): Promise<Result<ListKnowledgeWriteRequestsRes>> {
-    return this.ipcClient.invoke(RepositoryChannels.KNOWLEDGE_WRITE_REQUEST_LIST, request);
+    return this.serverProjectionUnavailable();
   }
 
   async replayKnowledgeWriteRequestProjection(
-    writeRequestId: string,
+    _writeRequestId: string,
   ): Promise<Result<KnowledgeWriteRequestReplayResponse>> {
-    return this.ipcClient.invoke(RepositoryChannels.KNOWLEDGE_WRITE_REQUEST_REPLAY, {
-      writeRequestId,
-    });
+    return this.serverProjectionUnavailable();
   }
 
   async getLocalVaultBinding(): Promise<Result<LocalVaultBindingSnapshotDTO | null>> {
@@ -250,6 +227,10 @@ export class RepositoryIpcAdapter implements IRepositoryApiClient {
 
   async detachLocalVault(): Promise<Result<void>> {
     return this.ipcClient.invoke(RepositoryChannels.LOCAL_VAULT_DETACH);
+  }
+
+  async listLocalVaultWrites(): Promise<Result<LocalVaultWriteReceipt[]>> {
+    return this.ipcClient.invoke(RepositoryChannels.LOCAL_VAULT_WRITES);
   }
 
   async scanLocalVault(): Promise<Result<ScanLocalVaultRes>> {

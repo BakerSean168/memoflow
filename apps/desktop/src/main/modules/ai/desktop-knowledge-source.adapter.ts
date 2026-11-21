@@ -1,3 +1,4 @@
+import type { KnowledgeContextSource } from '@memoflow/ai-contracts';
 import { createHash } from 'node:crypto';
 import type { IKnowledgeSourcePort, KnowledgeSourceNote } from '@memoflow/ai/ports';
 import {
@@ -26,7 +27,7 @@ export class DesktopKnowledgeSourceAdapter implements IKnowledgeSourcePort {
       identityId,
       snapshot.binding.id,
       snapshot.binding.knowledgeSpaceId,
-      summaries.filter((summary) => summary.knowledgeDocumentId !== null).slice(0, limit),
+      summaries.slice(0, limit),
     );
   }
 
@@ -39,6 +40,30 @@ export class DesktopKnowledgeSourceAdapter implements IKnowledgeSourcePort {
       snapshot.binding.id,
       snapshot.binding.knowledgeSpaceId,
       scanned.notes.filter((note) => note.knowledgeDocumentId !== null).slice(0, limit),
+    );
+  }
+
+  async getNoteBySource(
+    identityId: string,
+    source: KnowledgeContextSource,
+  ): Promise<KnowledgeSourceNote | null> {
+    if (source.kind !== 'local_vault') return null;
+    const snapshot = await this.localVault.getBinding();
+    if (
+      !snapshot ||
+      snapshot.health.state !== 'Available' ||
+      snapshot.binding.id !== source.bindingId
+    )
+      return null;
+    const note = await this.localVault.readNote({ relativePath: source.relativePath });
+    const current = await this.localVault.getBinding();
+    if (current?.binding.id !== source.bindingId || note.contentHash !== source.contentHash)
+      return null;
+    return this.toKnowledgeNote(
+      identityId,
+      snapshot.binding.id,
+      snapshot.binding.knowledgeSpaceId,
+      note,
     );
   }
 

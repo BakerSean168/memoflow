@@ -4,7 +4,6 @@ import { fail, ok } from '@memoflow/transport-contracts/result';
 import type {
   CompleteKnowledgeRepositoryInstallationReq,
   CompleteKnowledgeRepositoryInstallationRes,
-  ConfirmKnowledgeRepositoryHeadReq,
   CreateKnowledgeRepositoryConnectionReq,
   KnowledgeRemoteBindingClientDTO,
   KnowledgeRemoteBindingServerDTO,
@@ -13,13 +12,9 @@ import type {
   RemoteRepositoryBlockReason,
   RemoteRepositoryObservation,
   GitHubInstallationRepositoryDTO,
-  KnowledgeRepositoryContentState,
   KnowledgeRepositoryInstallationClientKind,
   KnowledgeRepositoryInstallationIntentStatusResponse,
-  KnowledgeRepositoryFirstReconciliationAction,
-  KnowledgeRepositoryReconciliationPreview,
   ListKnowledgeRepositoryConnectionsRes,
-  PreviewKnowledgeRepositoryReconciliationReq,
   StartKnowledgeRepositoryInstallationReq,
   StartKnowledgeRepositoryInstallationRes,
 } from '@memoflow/repository-contracts';
@@ -52,23 +47,7 @@ import {
 } from './knowledge-repository-installation-state';
 import { buildRemoteRepositoryObservation } from './remote-repository-observation.policy';
 
-function firstReconciliationAction(
-  localState: KnowledgeRepositoryContentState,
-  remoteState: KnowledgeRepositoryContentState,
-): KnowledgeRepositoryFirstReconciliationAction {
-  if (localState === 'NonEmpty' && remoteState === 'Empty') {
-    return 'InitializeRemoteFromLocal';
-  }
-  if (localState === 'Empty' && remoteState === 'NonEmpty') {
-    return 'CloneRemoteIntoLocal';
-  }
-  if (localState === 'Empty' && remoteState === 'Empty') {
-    return 'InitializeBoth';
-  }
-  return 'ManualResolutionRequired';
-}
-
-const DEFAULT_INSTALLATION_RETURN_PATH = '/settings?tab=repository';
+const DEFAULT_INSTALLATION_RETURN_PATH = '/repository';
 const INSTALLATION_INTENT_TTL_MS = 10 * 60 * 1000;
 const VERIFIED_INSTALLATION_RETRY_WINDOW_MS = 24 * 60 * 60 * 1000;
 const INSTALLATION_SETUP_PATH = '/api/v1/repositories/knowledge-connections/installations/setup';
@@ -460,8 +439,8 @@ export class KnowledgeRepositoryConnectionService {
           message: 'Archived or disabled repositories cannot connect',
         });
       }
-      if (!repository.permissions.push || inventory.contentsPermission !== 'write') {
-        return fail({ code: 'FORBIDDEN', message: 'Contents write permission is required' });
+      if (inventory.contentsPermission === 'none' || !repository.permissions.pull) {
+        return fail({ code: 'FORBIDDEN', message: 'Contents read permission is required' });
       }
 
       const timestamp = this.now();
@@ -656,135 +635,6 @@ export class KnowledgeRepositoryConnectionService {
     return ok(null);
   }
 
-  async issueInstallationToken(
-    identityId: string,
-    bindingId: string,
-  ): Promise<Result<{ token: string; expiresAt: number; repositoryId: string }>> {
-    const binding = await this.options.bindingRepository.findByIdForIdentity(identityId, bindingId);
-    if (!binding || binding.disconnectedAt !== null) {
-      return fail({ code: 'NOT_FOUND', message: 'Active knowledge remote binding was not found' });
-    }
-    const preflight = await this.requireLiveProviderState(binding);
-    if (!preflight.ok) return preflight;
-    try {
-      const token = await this.options.githubAppClient.createInstallationAccessToken(
-        binding.installationId,
-        binding.repositoryId,
-      );
-      return ok({
-        token: token.token,
-        expiresAt: token.expiresAt,
-        repositoryId: binding.repositoryId,
-      });
-    } catch (error) {
-      return fail({
-        code: 'SERVICE_UNAVAILABLE',
-        message:
-          error instanceof Error ? error.message : 'GitHub installation token issuance failed',
-      });
-    }
-  }
-
-  async previewFirstReconciliation(
-    identityId: string,
-    bindingId: string,
-    request: PreviewKnowledgeRepositoryReconciliationReq,
-  ): Promise<Result<KnowledgeRepositoryReconciliationPreview>> {
-    const binding = await this.options.bindingRepository.findByIdForIdentity(identityId, bindingId);
-    if (!binding || binding.disconnectedAt !== null) {
-      return fail({ code: 'NOT_FOUND', message: 'Active knowledge remote binding was not found' });
-    }
-
-    const preflight = await this.requireLiveProviderState(binding, ['DefaultBranchChanged']);
-    if (!preflight.ok) return preflight;
-    try {
-      const snapshot = await this.options.githubAppClient.getRepositorySnapshot(
-        binding.installationId,
-        preflight.data.repository,
-      );
-      const remoteState: KnowledgeRepositoryContentState = snapshot.empty ? 'Empty' : 'NonEmpty';
-      return ok({
-        connectionId: bindingId,
-        localState: request.localState,
-        remoteState,
-        action: firstReconciliationAction(request.localState, remoteState),
-        defaultBranch: snapshot.defaultBranch,
-        remoteHeadSha: snapshot.headSha,
-      });
-    } catch (error) {
-      return fail({
-        code: 'SERVICE_UNAVAILABLE',
-        message:
-          error instanceof Error ? error.message : 'GitHub repository reconciliation check failed',
-      });
-    }
-  }
-
-  async confirmHead(
-    identityId: string,
-    bindingId: string,
-    request: ConfirmKnowledgeRepositoryHeadReq,
-  ): Promise<Result<KnowledgeRemoteBindingClientDTO>> {
-    const binding = await this.options.bindingRepository.findByIdForIdentity(identityId, bindingId);
-    if (!binding || binding.disconnectedAt !== null) {
-      return fail({ code: 'NOT_FOUND', message: 'Active knowledge remote binding was not found' });
-    }
-
-    const preflight = await this.requireLiveProviderState(binding, ['DefaultBranchChanged']);
-    if (!preflight.ok) return preflight;
-    try {
-      const snapshot = await this.options.githubAppClient.getRepositorySnapshot(
-        binding.installationId,
-        preflight.data.repository,
-      );
-      if (snapshot.headSha !== request.headSha) {
-        return fail({
-          code: 'CONFLICT',
-          message: 'GitHub default branch changed before reconciliation was confirmed',
-        });
-      }
-      const timestamp = this.now();
-      const fence: RemoteHistoryFence = {
-        bindingId: binding.id,
-        defaultBranch: snapshot.defaultBranch,
-        lastConfirmedRemoteHeadSha: request.headSha,
-        confirmedAt: timestamp,
-      };
-      await this.options.historyFenceRepository.save(fence);
-      await this.options.observationRepository.save(
-        this.buildObservation(
-          binding,
-          preflight.data.inventory,
-          preflight.data.repository,
-          fence,
-          timestamp,
-        ),
-      );
-
-      const checkpoint = await this.options.projectionCheckpointRepository.findByBindingId(
-        binding.id,
-      );
-      if (checkpoint && checkpoint.branch !== snapshot.defaultBranch) {
-        await this.options.projectionCheckpointRepository.save({
-          ...checkpoint,
-          branch: snapshot.defaultBranch,
-          projectedCommitSha: null,
-          state: 'Lagging',
-          failure: null,
-          lastAttemptAt: null,
-          projectedAt: null,
-        });
-      }
-      return ok(await this.composeClient(binding));
-    } catch (error) {
-      return fail({
-        code: 'SERVICE_UNAVAILABLE',
-        message:
-          error instanceof Error ? error.message : 'GitHub repository HEAD confirmation failed',
-      });
-    }
-  }
-
   private async tryRediscoverInstalledApp(
     identityId: string,
     clientKind: KnowledgeRepositoryInstallationClientKind,
@@ -923,7 +773,7 @@ export class KnowledgeRepositoryConnectionService {
     }
     if (
       inventory.suspended ||
-      inventory.contentsPermission !== 'write' ||
+      inventory.contentsPermission === 'none' ||
       inventory.accountId !== candidate.providerAccountId
     ) {
       return ok(null);
@@ -950,10 +800,10 @@ export class KnowledgeRepositoryConnectionService {
       if (inventory.suspended) {
         return fail({ code: 'FORBIDDEN', message: 'GitHub App installation is suspended' });
       }
-      if (inventory.contentsPermission !== 'write') {
+      if (inventory.contentsPermission === 'none') {
         return fail({
           code: 'FORBIDDEN',
-          message: 'GitHub App installation requires Contents write permission',
+          message: 'GitHub App installation requires Contents read permission',
         });
       }
       return ok(inventory);
@@ -1070,50 +920,5 @@ export class KnowledgeRepositoryConnectionService {
     );
     await this.options.observationRepository.save(observation);
     return { observation, inventory, repository };
-  }
-
-  private async requireLiveProviderState(
-    binding: KnowledgeRemoteBindingServerDTO,
-    allowedBlockedReasons: readonly RemoteRepositoryBlockReason[] = [],
-  ): Promise<
-    Result<{
-      inventory: GitHubAppInstallationInventory;
-      repository: GitHubInstallationRepositoryDTO;
-      observation: RemoteRepositoryObservation;
-    }>
-  > {
-    let state: Awaited<ReturnType<KnowledgeRepositoryConnectionService['refreshObservationState']>>;
-    try {
-      state = await this.refreshObservationState(binding);
-    } catch (error) {
-      return fail({
-        code: 'SERVICE_UNAVAILABLE',
-        message: error instanceof Error ? error.message : 'GitHub repository check failed',
-      });
-    }
-
-    const blockedReason =
-      state.observation.eligibility.state === 'Blocked'
-        ? state.observation.eligibility.reason
-        : null;
-    if (blockedReason && !allowedBlockedReasons.includes(blockedReason)) {
-      return fail({
-        code: 'FORBIDDEN',
-        message: 'Knowledge repository authorization or provider state requires attention',
-        context: { remoteRepositoryBlockReason: blockedReason },
-      });
-    }
-    if (!state.inventory || !state.repository) {
-      return fail({
-        code: blockedReason === 'CheckUnavailable' ? 'SERVICE_UNAVAILABLE' : 'FORBIDDEN',
-        message: 'Knowledge repository provider state is unavailable',
-        context: blockedReason ? { remoteRepositoryBlockReason: blockedReason } : undefined,
-      });
-    }
-    return ok({
-      inventory: state.inventory,
-      repository: state.repository,
-      observation: state.observation,
-    });
   }
 }
