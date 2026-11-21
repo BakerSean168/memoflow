@@ -119,7 +119,7 @@
         {
           "runner": "notification-integration",
           "file": "packages/notification/src/server/infrastructure/adapters/prisma/__tests__/notification-requested-writer.integration.test.ts",
-          "title": "4. Per-channel policy is evaluated at consumption: disabled InApp yields no dispatch + observable decision"
+          "title": "10. Disabled Desktop records a disabled decision while InApp completes durable delivery"
         }
       ]
     },
