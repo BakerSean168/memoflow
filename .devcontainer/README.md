@@ -40,3 +40,13 @@ pnpm exec nx affected -t lint,typecheck,test --base=origin/main
 Use `gh codespace list` / `gh codespace ssh -c NAME` / `gh codespace stop -c NAME` / `gh codespace delete -c NAME`. Always commit and push a task branch before stopping/deleting the worker; never run production services inside it. Keep ports private and do not expose PostgreSQL.
 
 Verified GitHub Education students receive **180 core-hours + 20 GB-month of storage** each month for personal-account Codespaces; this is a shared quota, not per repository. Check actual available usage and budgets before scheduling agents. No prebuild is enabled here.
+
+Default forwarded host-dev endpoints are Web `20220` and API `20221`; Full also forwards PowerSync `20222`. These match `tools/runtime/profiles.json` and `.env.development`. PostgreSQL `20230` and Redis `20231` remain private.
+
+## Container acceptance
+
+The `Dev Containers` workflow builds and starts both original profiles on an isolated GitHub runner, runs their automatic postCreate commands, and checks the development user, exact Node/pnpm versions, GitHub CLI and the SSH listener. Full also verifies the running Docker daemon, Compose and a small build that needs no image download.
+
+Run `bash .devcontainer/verify.sh lite` or `bash .devcontainer/verify.sh full` inside the corresponding container for the same checks. The workflow uses no repository secrets, installs no monorepo dependencies, creates no Codespace, and removes its container and dedicated volumes. It also runs when root `package.json` changes so pnpm drift is detected.
+
+Both matrix results must pass alongside the repository's required CI check before accepting a container change. Successful runner validation does not authorize or prove a real Codespace session; `gh codespace create` and an Agent/Mius SSH connection still require the controller account's Codespaces authorization.
