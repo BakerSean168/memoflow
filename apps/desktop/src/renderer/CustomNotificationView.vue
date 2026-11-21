@@ -14,8 +14,6 @@ import { NOTIFICATION_ATTENTION_TABLES } from './platform/notification-attention
 // Residual 911: local ElectronBridge dual retired — sole body from @memoflow/ipc-client.
 // Residual 941: local getElectronBridge dual retired — sole host helper in platform/electron-bridge.
 import { getElectronBridge } from './platform/electron-bridge';
-import WindowActionButton from './components/WindowActionButton.vue';
-import WindowNumberInput from './components/WindowNumberInput.vue';
 
 const { t } = useI18n();
 
@@ -330,86 +328,87 @@ onUnmounted(() => {
     class="pointer-events-none flex min-h-2.5 w-full flex-col gap-2 bg-transparent p-2"
   >
     <TransitionGroup name="notification-list" @after-leave="updateWindowBounds">
-      <div
+      <section
         v-for="notification in notifications"
         :key="notification.id"
         :data-notification-id="notification.id"
-        class="pointer-events-auto overflow-hidden rounded-xl border border-white/15 bg-slate-950/95 px-3 py-2.5 text-white shadow-lg"
+        class="notification-card pointer-events-auto"
         @mouseenter="handleMouseEnter"
         @mouseleave="handleMouseLeave"
       >
-        <WindowActionButton
-          variant="ghost"
-          type="button"
-          class="block w-full truncate rounded text-left text-sm font-semibold leading-5 text-slate-50 focus-visible:outline focus-visible:outline-1"
-          :title="notification.title"
-          data-testid="notification-open"
-          @click="bridge.invoke(NotificationChannels.CUSTOM_CLICK, notification.id)"
-        >
-          {{ notification.title }}
-        </WindowActionButton>
-        <div
-          v-if="notification.body"
-          class="mt-0.5 truncate text-xs leading-5 text-slate-300"
-          :title="notification.body"
-        >
+        <header class="notification-card__header">
+          <button
+            type="button"
+            class="notification-card__title"
+            :title="notification.title"
+            data-testid="notification-open"
+            @click="bridge.invoke(NotificationChannels.CUSTOM_CLICK, notification.id)"
+          >
+            {{ notification.title }}
+          </button>
+        </header>
+        <p v-if="notification.body" class="notification-card__body" :title="notification.body">
           {{ notification.body }}
-        </div>
-        <div class="mt-1.5 flex items-center justify-between gap-2">
-          <span data-testid="notification-elapsed" class="text-xs tabular-nums text-slate-400">
-            <template v-if="isRoutine(notification)">{{
-              t('notification.custom.elapsed', { time: elapsedTimes[notification.id] })
-            }}</template>
+        </p>
+        <footer class="notification-card__footer">
+          <span
+            v-if="isRoutine(notification)"
+            data-testid="notification-elapsed"
+            class="notification-card__elapsed"
+          >
+            {{ t('notification.custom.elapsed', { time: elapsedTimes[notification.id] }) }}
           </span>
-          <div class="flex items-center gap-1">
-            <WindowActionButton
-              variant="ghost"
-              class="h-8 w-8 p-0 text-slate-300 hover:bg-white/10 hover:text-white"
+          <div class="notification-card__actions">
+            <button
+              type="button"
+              class="notification-card__icon-button"
               data-testid="notification-read"
               :aria-label="t('notification.custom.markReadClose')"
               :title="t('notification.custom.markReadClose')"
               :disabled="!!actionPending"
               @click="acknowledgeNotification(notification)"
-              ><Eye class="h-4 w-4" aria-hidden="true"
-            /></WindowActionButton>
-            <WindowActionButton
+            >
+              <Eye :size="16" :stroke-width="1.8" aria-hidden="true" />
+            </button>
+            <button
               v-if="routineAction(notification, 'routine.complete')"
-              variant="ghost"
-              class="h-8 w-8 p-0 text-emerald-300 hover:bg-emerald-400/15 hover:text-emerald-200"
+              type="button"
+              class="notification-card__icon-button notification-card__icon-button--complete"
               data-testid="notification-complete"
               :aria-label="t('notification.custom.actionComplete')"
               :title="t('notification.custom.actionComplete')"
               :disabled="!!actionPending"
               @click="executeAction(notification, 'routine.complete')"
-              ><Check class="h-4 w-4" aria-hidden="true"
-            /></WindowActionButton>
-            <WindowActionButton
+            >
+              <Check :size="16" :stroke-width="1.8" aria-hidden="true" />
+            </button>
+            <button
               v-if="routineAction(notification, 'routine.snooze')"
-              variant="ghost"
-              class="h-8 w-8 p-0 text-slate-300 hover:bg-white/10 hover:text-white"
+              type="button"
+              class="notification-card__icon-button"
               data-testid="notification-snooze"
               :aria-label="t('notification.action.snoozeApply')"
               :title="t('notification.action.snoozeApply')"
               :aria-expanded="snoozeOpen === notification.id"
               :disabled="!!actionPending"
               @click="toggleSnooze(notification.id)"
-              ><Clock class="h-4 w-4" aria-hidden="true"
-            /></WindowActionButton>
+            >
+              <Clock :size="16" :stroke-width="1.8" aria-hidden="true" />
+            </button>
           </div>
-        </div>
+        </footer>
         <form
           v-if="snoozeOpen === notification.id"
-          class="mt-2 border-t border-white/10 pt-2"
+          class="notification-card__snooze"
           @submit.prevent="applyCustomSnooze(notification)"
           @keydown.esc.stop="snoozeOpen = null"
         >
-          <div class="flex flex-wrap gap-1">
-            <WindowActionButton
-              variant="ghost"
+          <div class="notification-card__quick-options">
+            <button
               v-for="minutes in [10, 60, 180, 1440, 10080]"
               :key="minutes"
               type="button"
-              class="rounded px-2 py-1 text-xs text-slate-300 hover:bg-white/10 focus-visible:outline focus-visible:outline-1"
+              class="notification-card__quick-option"
               :disabled="!!actionPending"
               @click="executeAction(notification, 'routine.snooze', minutes * 60_000)"
             >
@@ -426,10 +425,10 @@ onUnmounted(() => {
                           : 'notification.action.snoozeNextWeek',
                 )
               }}
-            </WindowActionButton>
+            </button>
           </div>
-          <div class="mt-1 flex items-center gap-2">
-            <WindowNumberInput
+          <div class="notification-card__custom-snooze">
+            <input
               v-model.number="snoozeMinutes"
               data-testid="notification-snooze-minutes"
               type="number"
@@ -438,49 +437,28 @@ onUnmounted(() => {
               step="1"
               required
               :aria-label="t('notification.action.snoozeMinutes')"
-              class="h-7 min-w-0 flex-1 rounded border border-white/20 bg-transparent px-2 text-xs text-white"
+              class="notification-card__minutes-input"
             />
-            <span class="text-xs text-slate-400">{{ t('notification.action.snoozeMinutes') }}</span>
-            <WindowActionButton
-              variant="ghost"
+            <span class="notification-card__minutes-label">
+              {{ t('notification.action.snoozeMinutes') }}
+            </span>
+            <button
               type="submit"
               data-testid="notification-snooze-apply"
               :disabled="!!actionPending"
               :aria-label="t('notification.action.snoozeApply')"
-              :title="t('notification.action.snoozeApply')"
-              class="flex h-8 w-8 items-center justify-center rounded text-slate-200 hover:bg-white/10"
+              class="notification-card__snooze-submit"
             >
-              <Check class="h-4 w-4" aria-hidden="true" />
-            </WindowActionButton>
+              {{ t('notification.action.snoozeApply') }}
+            </button>
           </div>
         </form>
-        <p v-if="actionError === notification.id" role="alert" class="mt-1 text-xs text-rose-300">
+        <p v-if="actionError === notification.id" role="alert" class="notification-card__error">
           {{ t('notification.custom.actionFailed') }}
         </p>
-      </div>
+      </section>
     </TransitionGroup>
   </div>
 </template>
 
-<style scoped>
-:global(html),
-:global(body),
-:global(#app),
-:global(#app > *) {
-  background: transparent !important;
-}
-:global(body) {
-  overflow: hidden !important;
-}
-.notification-list-enter-active,
-.notification-list-leave-active {
-  transition:
-    opacity 0.2s,
-    transform 0.2s;
-}
-.notification-list-enter-from,
-.notification-list-leave-to {
-  opacity: 0;
-  transform: translateX(12px);
-}
-</style>
+<style scoped src="./styles/custom-notification.css"></style>
