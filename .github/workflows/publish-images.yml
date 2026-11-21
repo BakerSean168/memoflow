@@ -39,7 +39,7 @@ on:
         required: true
         type: string
       sha:
-        description: Exact release SHA; empty resolves from the tag
+        description: Exact release SHA; empty resolves from the immutable draft source
         required: false
         type: string
       ci_run_id:
@@ -69,13 +69,20 @@ jobs:
       release_tag: ${{ steps.resolve.outputs.release_tag }}
       release_sha: ${{ steps.resolve.outputs.release_sha }}
     steps:
+      - name: Checkout pinned release control plane
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          ref: ${{ github.workflow_sha }}
+          sparse-checkout: tools/ci-cd-platform/lib
       - name: Resolve exact tag and SHA
         id: resolve
         uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8
         env:
           RELEASE_TAG: ${{ inputs.tag }}
           RELEASE_SHA: ${{ inputs.sha }}
+          RELEASE_CHANNEL: ${{ inputs.channel || 'stable' }}
         with:
+          github-token: ${{ secrets.RELEASE_PLEASE_TOKEN }}
           script: |
             const tag = process.env.RELEASE_TAG;
             const requestedSha = process.env.RELEASE_SHA;
@@ -83,24 +90,12 @@ jobs:
               core.setFailed('release tag is required');
               return;
             }
-            const ref = await github.rest.git.getRef({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              ref: `tags/${tag}`,
+            const { resolveReleaseSource } = require('./tools/ci-cd-platform/lib/release-lifecycle.cjs');
+            const { release, sha: tagSha } = await resolveReleaseSource({
+              github, ...context.repo, tag, sha: requestedSha || undefined,
+              channel: process.env.RELEASE_CHANNEL,
             });
-            let tagSha = ref.data.object.sha;
-            if (ref.data.object.type === 'tag') {
-              const annotated = await github.rest.git.getTag({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                tag_sha: tagSha,
-              });
-              tagSha = annotated.data.object.sha;
-            }
-            if (requestedSha && requestedSha !== tagSha) {
-              core.setFailed(`${tag} points to ${tagSha}, requested SHA was ${requestedSha}`);
-              return;
-            }
+            if (!release.draft) throw new Error('asset publication requires a Draft release');
             core.setOutput('release_tag', tag);
             core.setOutput('release_sha', tagSha);
 

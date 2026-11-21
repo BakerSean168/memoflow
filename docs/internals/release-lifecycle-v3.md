@@ -71,12 +71,7 @@ Root/Desktop versions and the Release Please manifest at the source SHA remain t
 
 ## 5. Draft-first publication
 
-Release Publish first creates or resumes:
-
-```text
-vX.Y.Z-nightly.YYYYMMDD.run or vX.Y.Z immutable Git tag
-Draft GitHub Release with explicit channel
-```
+Release Publish creates or resumes a Draft with its pending version tag, explicit channel and full-SHA `target_commitish`. Preparation does not create a public Git ref. After all gates pass, publication creates the new tag; any existing tag must already resolve to the same source SHA.
 
 A failed Server promotion, Desktop platform, release acceptance, manifest or postflight leaves the Release Draft and resumable. One same-source Nightly draft is resumed on retry; published tags and assets are immutable.
 

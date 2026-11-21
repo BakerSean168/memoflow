@@ -178,6 +178,7 @@ function fixture(change = () => {}) {
     id: 20,
     tag_name: TAG,
     draft: state.releaseDraft,
+    target_commitish: state.sha,
     prerelease: state.prerelease,
     assets,
   };
@@ -539,7 +540,12 @@ test('Stable rejects published version downgrade', async () => {
 });
 test('Stable refuses an existing immutable tag pointing to another SHA', async () => {
   const f = fixture((s) => {
-    s.extraReleases.push({ tag_name: 'v1.4.2', draft: true, prerelease: false });
+    s.extraReleases.push({
+      tag_name: 'v1.4.2',
+      draft: true,
+      prerelease: false,
+      target_commitish: SHA,
+    });
     s.existingTagSha = OTHER;
   });
   await assert.rejects(
@@ -569,9 +575,11 @@ test('draft creation is immutable and resumes only draft assets', async () => {
     sha: SHA,
     channel: 'stable',
   });
-  assert.equal(f.state.actions[0].ref, 'refs/tags/v1.4.2');
-  assert.equal(f.state.actions[1].draft, true);
-  assert.equal(f.state.actions[1].prerelease, false);
+  assert.equal(f.state.actions.length, 1);
+  assert.equal(f.state.actions[0].draft, true);
+  assert.equal(f.state.actions[0].prerelease, false);
+  assert.equal(f.state.actions[0].target_commitish, SHA);
+  assert.equal(f.state.actions[0].ref, undefined);
   await assert.rejects(
     () =>
       lifecycle.ensureDraft({
@@ -583,6 +591,198 @@ test('draft creation is immutable and resumes only draft assets', async () => {
       }),
     /published releases are immutable/u,
   );
+});
+test('draft recovery resolves its immutable source before a public tag exists', async () => {
+  for (const existingTagSha of [undefined, SHA]) {
+    const f = fixture((s) => {
+      s.existingTagSha = existingTagSha;
+      s.extraReleases.push({
+        id: 44,
+        tag_name: 'v1.4.2',
+        draft: true,
+        prerelease: false,
+        target_commitish: SHA,
+      });
+    });
+    const identity = await lifecycle.resolveReleaseSource({
+      github: f.github,
+      ...coordinates,
+      tag: 'v1.4.2',
+      channel: 'stable',
+    });
+    assert.equal(identity.sha, SHA);
+    await lifecycle.ensureDraft({
+      github: f.github,
+      ...coordinates,
+      tag: 'v1.4.2',
+      sha: SHA,
+      channel: 'stable',
+    });
+    assert.deepEqual(f.state.actions, []);
+    const plan = await lifecycle.resolveReleasePlan({
+      github: f.github,
+      ...coordinates,
+      nightlyTag: TAG,
+    });
+    assert.equal(plan.eligible, true);
+    assert.equal(plan.sha, SHA);
+  }
+});
+test('draft source drift, moving branches and conflicting existing tags fail closed', async () => {
+  for (const [target, existingTagSha, expected] of [
+    [OTHER, undefined, /source SHA collision/u],
+    ['main', undefined, /full immutable source SHA/u],
+    [SHA, OTHER, /tag collision/u],
+  ]) {
+    const f = fixture((s) => {
+      s.existingTagSha = existingTagSha;
+      s.extraReleases.push({
+        tag_name: 'v1.4.2',
+        draft: true,
+        prerelease: false,
+        target_commitish: target,
+      });
+    });
+    await assert.rejects(
+      () =>
+        lifecycle.resolveReleaseSource({
+          github: f.github,
+          ...coordinates,
+          tag: 'v1.4.2',
+          sha: SHA,
+          channel: 'stable',
+        }),
+      expected,
+    );
+    await assert.rejects(() =>
+      lifecycle.ensureDraft({
+        github: f.github,
+        ...coordinates,
+        tag: 'v1.4.2',
+        sha: SHA,
+        channel: 'stable',
+      }),
+    );
+    assert.deepEqual(f.state.actions, []);
+  }
+});
+test('draft source lookup does not hide permission or server errors as a missing tag', async () => {
+  for (const status of [403, 500]) {
+    const f = fixture((s) =>
+      s.extraReleases.push({
+        tag_name: 'v1.4.2',
+        draft: true,
+        prerelease: false,
+        target_commitish: SHA,
+      }),
+    );
+    f.github.rest.git.getRef = async () => {
+      throw Object.assign(new Error('API error'), { status });
+    };
+    await assert.rejects(
+      () =>
+        lifecycle.resolveReleaseSource({
+          github: f.github,
+          ...coordinates,
+          tag: 'v1.4.2',
+          sha: SHA,
+        }),
+      { status },
+    );
+  }
+});
+test('published releases require their public tag rather than trusting target_commitish', async () => {
+  const f = fixture((s) =>
+    s.extraReleases.push({
+      tag_name: 'v1.4.2',
+      draft: false,
+      prerelease: false,
+      target_commitish: SHA,
+    }),
+  );
+  await assert.rejects(
+    () =>
+      lifecycle.resolveReleaseSource({
+        github: f.github,
+        ...coordinates,
+        tag: 'v1.4.2',
+        sha: SHA,
+      }),
+    { status: 404 },
+  );
+});
+test('publication validates required immutable identity before any API mutation', async () => {
+  const f = fixture((s) =>
+    s.extraReleases.push({
+      id: 44,
+      tag_name: 'v1.4.2',
+      draft: true,
+      prerelease: false,
+      target_commitish: SHA,
+    }),
+  );
+  f.github.rest.repos.updateRelease = async (args) => {
+    f.state.actions.push(args);
+  };
+  for (const identity of [
+    { tag: 'v1.4.2', channel: 'stable' },
+    { tag: 'v1.4.2', channel: 'stable', sha: 'main' },
+    { tag: 'v1.4.2', sha: SHA },
+    { tag: 'v1.4.2-nightly.20261121.1', channel: 'stable', sha: SHA },
+  ]) {
+    await assert.rejects(() =>
+      lifecycle.publishDraft({ github: f.github, ...coordinates, ...identity }),
+    );
+    assert.deepEqual(f.state.actions, []);
+  }
+});
+test('final publication revalidates source and lets GitHub create the tag with publication', async () => {
+  const f = fixture((s) =>
+    s.extraReleases.push({
+      id: 44,
+      tag_name: 'v1.4.2',
+      draft: true,
+      prerelease: false,
+      target_commitish: SHA,
+    }),
+  );
+  f.github.rest.repos.updateRelease = async (args) => {
+    f.state.actions.push(args);
+    f.state.existingTagSha = args.target_commitish;
+    return { data: { ...args, id: 44 } };
+  };
+  await lifecycle.publishDraft({
+    github: f.github,
+    ...coordinates,
+    tag: 'v1.4.2',
+    sha: SHA,
+    channel: 'stable',
+  });
+  assert.deepEqual(f.state.actions, [
+    {
+      ...coordinates,
+      release_id: 44,
+      tag_name: 'v1.4.2',
+      target_commitish: SHA,
+      draft: false,
+      prerelease: false,
+      make_latest: 'true',
+    },
+  ]);
+  f.state.actions.length = 0;
+  f.state.extraReleases[0].target_commitish = OTHER;
+  await assert.rejects(
+    () =>
+      lifecycle.publishDraft({
+        github: f.github,
+        ...coordinates,
+        tag: 'v1.4.2',
+        sha: SHA,
+        channel: 'stable',
+      }),
+    /source SHA collision/u,
+  );
+  assert.deepEqual(f.state.actions, []);
 });
 test('Nightly packaging overlay changes only package metadata and never Release Please authority', async () => {
   const root = await mkdtemp(path.join(tmpdir(), 'release-overlay-'));

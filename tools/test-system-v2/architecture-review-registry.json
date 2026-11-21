@@ -12,9 +12,10 @@
         "testRole": "behavior"
       },
       "decision": "retain",
-      "behavior": "真实本地 SQLite/模型缓存配合假 Agent Driver，验证身份绑定和重启恢复",
+      "behavior": "真实本地 SQLite/模型缓存配合假 Agent Driver，验证身份绑定、重启恢复及四路并发排队",
       "assertionEvidence": [
-        "reuses only the exact owner, revision and native OAuth identity without new ACP calls"
+        "reuses only the exact owner, revision and native OAuth identity without new ACP calls",
+        "keeps the four-run bound and same-conversation conflict"
       ],
       "reason": "readFile 读取运行期 model-catalog，不是源码；原 Structural 错分",
       "confirmedDependencies": ["database"],
@@ -22,7 +23,7 @@
         "status": "none-verified",
         "testFiles": []
       },
-      "sourceSha256": "0abec399ff04ba2703e40489be8f46568ff91327fcf95db4a0ddfbb56864a7fd"
+      "sourceSha256": "0efafca22df6c8d209c9f34285c06de8953d66d681625d5debe2e9794b9b3a31"
     },
     {
       "path": "apps/desktop/src/main/profile/ProfileSnapshotService.spec.ts",
@@ -856,13 +857,19 @@
       },
       "decision": "supplement",
       "behavior": "已打包 Electron 真正冷启动、设置页面及 Profile/快捷键重启持久化，检查 CSS/窗口/安装包资源",
-      "assertionEvidence": ["MEMOFLOW_PACKAGED_EXECUTABLE"],
-      "reason": "必须由已构建/安装产物运行；当前未核实 CI SHA 回执，不应列为常规单元或无门禁。 仅做源码/断言阅读，未运行真实浏览器或 Electron。",
+      "assertionEvidence": [
+        "MEMOFLOW_PACKAGED_EXECUTABLE",
+        "ai-agent-delete",
+        "删除该 Provider？",
+        "toBeHidden",
+        "toHaveCount"
+      ],
+      "reason": "Issue #1049 重新审阅：已打包应用冷启动及重启后验证五类 Provider，删除必须显式确认，并在确认层关闭后验证列表项真正消失。保留 e2e/behavior 分类；本记录仅表示源码断言审阅，实际 Electron 执行证据由 PR/CI 记录。",
       "replacement": {
         "status": "none-verified",
         "testFiles": []
       },
-      "sourceSha256": "7eee78290f2de4c65af363516f898b12d628bacb12bb208a1fb8b778991012c8"
+      "sourceSha256": "b97d47cba9da36ae7ccbbe3132f31acbeae6a609bdccd1cd270c870463803984"
     },
     {
       "path": "apps/web/e2e/account/account-management.spec.ts",

@@ -72,11 +72,15 @@ describe('ElectronUpdaterAdapter', () => {
     expect(updater.autoDownload).toBe(false);
     expect(updater.autoInstallOnAppQuit).toBe(false);
     expect(updater.setFeedURL).toHaveBeenCalledWith({
-      provider: 'github',
-      owner: 'BakerSean168',
-      repo: 'memoflow',
-      channel: 'nightly',
-      tagNamePrefix: 'v',
+      provider: 'custom',
+      updateProvider: expect.any(Function),
+      github: {
+        provider: 'github',
+        owner: 'BakerSean168',
+        repo: 'memoflow',
+        channel: 'nightly',
+        tagNamePrefix: 'v',
+      },
     });
   });
 
@@ -100,11 +104,15 @@ describe('ElectronUpdaterAdapter', () => {
     expect(updater.allowPrerelease).toBe(false);
     expect(updater.disableWebInstaller).toBe(true);
     expect(updater.setFeedURL).toHaveBeenCalledWith({
-      provider: 'github',
-      owner: 'BakerSean168',
-      repo: 'memoflow',
-      channel: 'latest',
-      tagNamePrefix: 'v',
+      provider: 'custom',
+      updateProvider: expect.any(Function),
+      github: {
+        provider: 'github',
+        owner: 'BakerSean168',
+        repo: 'memoflow',
+        channel: 'latest',
+        tagNamePrefix: 'v',
+      },
     });
   });
 

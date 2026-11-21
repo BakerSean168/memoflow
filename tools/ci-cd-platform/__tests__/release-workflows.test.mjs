@@ -62,8 +62,8 @@ test('Stable publication requires an explicitly selected verified Nightly and al
   );
   assert.match(workflow, /ensureDraft/u);
   assert.match(workflow, /release-manifest\.json/u);
-  assert.match(workflow, /--draft=false --prerelease=false --latest/u);
-  assert.match(workflow, /--draft=false --prerelease --latest=false/u);
+  assert.match(workflow, /publishDraft/u);
+  assert.doesNotMatch(workflow, /gh release edit[^\n]*--draft=false/u);
   assert.match(workflow, /needs\.release-quality\.result == 'success'/u);
   assert.match(workflow, /needs\.finalize\.result == 'success'/u);
   assert.match(workflow, /autorelease: pending/u);
@@ -135,15 +135,16 @@ test('GitHub Release mutations use the configured operator token instead of the 
     /test -n "\$RELEASE_WRITE_TOKEN"/u,
   );
   for (const name of [
-    'Create or validate draft release and tag',
+    'Create or validate draft release source',
     'Reconcile release-please labels',
+    'Revalidate immutable source and publish',
   ]) {
     assert.ok(workflowStep(publish, name).includes(expectedScriptToken), name);
   }
   for (const name of [
     'Download lane evidence from draft release',
     'Verify the remote Draft contains every manifest-owned Desktop asset',
-    'Upload canonical manifest and publish',
+    'Upload canonical manifests',
   ]) {
     assert.ok(workflowStep(publish, name).includes(expectedCliToken), name);
   }
@@ -156,6 +157,16 @@ test('GitHub Release mutations use the configured operator token instead of the 
   assert.ok(
     workflowStep(images, 'Upload Server evidence to draft release').includes(expectedCliToken),
   );
+  for (const lane of [assets, images]) {
+    const resolve = workflowStep(lane, 'Resolve exact tag and SHA');
+    assert.ok(resolve.includes(expectedScriptToken));
+    assert.match(resolve, /resolveReleaseSource/u);
+    assert.doesNotMatch(resolve, /git\.getRef/u);
+    assert.match(
+      workflowStep(lane, 'Checkout pinned release control plane'),
+      /github\.workflow_sha/u,
+    );
+  }
   // Registry auth needs the scoped workflow token and remains unchanged.
   assert.match(images, /password: \$\{\{ github\.token \}\}/u);
 });
@@ -194,7 +205,7 @@ test('desktop assets and image publishing are reusable retryable lanes, not publ
   assert.match(assets, /desktop-release-manifest\.json/);
   assert.match(images, /docker-release-manifest\.json/);
   assert.doesNotMatch(images, /prod-latest/);
-  assert.match(images, /requested SHA was/);
+  assert.match(images, /resolveReleaseSource/);
 });
 
 test('Windows Desktop release promotion is gated by a real installed N to N+1 updater proof', async () => {
@@ -685,7 +696,7 @@ test('Desktop upload and release publication are manifest-owned and verify the r
   assert.match(remoteGate, /verify-desktop-release-assets\.mjs/);
   assert.ok(
     publish.indexOf('Verify the remote Draft contains every manifest-owned Desktop asset') <
-      publish.indexOf('Upload canonical manifest and publish'),
+      publish.indexOf('Upload canonical manifests'),
   );
   for (const workflow of [assets, publish]) {
     for (const [, action, ref] of workflow.matchAll(/uses:\s+([^./\s][^@\s]+)@([^\s#]+)/gu)) {

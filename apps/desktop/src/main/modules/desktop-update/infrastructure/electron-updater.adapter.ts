@@ -51,10 +51,21 @@ function errorCode(error: unknown): string | null {
   return typeof code === 'string' ? code : null;
 }
 
-function safeErrorMetadata(error: unknown): { errorName: string; updaterErrorCode: string | null } {
+function safeErrorMetadata(error: unknown) {
+  const details =
+    error && typeof error === 'object'
+      ? (error as {
+          httpStatus?: unknown;
+          channel?: unknown;
+          releaseTag?: unknown;
+        })
+      : {};
   return {
     errorName: error instanceof Error ? error.name : typeof error,
     updaterErrorCode: errorCode(error),
+    ...(typeof details.httpStatus === 'number' ? { httpStatus: details.httpStatus } : {}),
+    ...(typeof details.channel === 'string' ? { channel: details.channel } : {}),
+    ...(typeof details.releaseTag === 'string' ? { releaseTag: details.releaseTag } : {}),
   };
 }
 
@@ -67,6 +78,9 @@ function mapFailureCode(
   if (code === 'ERR_CHECKSUM_MISMATCH') return 'checksum-mismatch';
   if (
     code === 'ERR_UPDATER_INVALID_VERSION' ||
+    code === 'ERR_UPDATER_INVALID_UPDATE_INFO' ||
+    code === 'ERR_UPDATER_NO_FILES_PROVIDED' ||
+    code === 'ERR_UPDATER_NO_CHECKSUM' ||
     code === 'ERR_UPDATER_INVALID_PROVIDER_CONFIGURATION' ||
     code === 'ERR_UPDATER_UNSUPPORTED_PROVIDER'
   ) {
@@ -194,12 +208,11 @@ export class ElectronUpdaterAdapter implements DesktopUpdateEngine {
 
     if (options.feed) {
       if (options.feed.provider === 'github') {
+        const { PublishedGitHubProvider } = await import('./published-github.provider');
         autoUpdater.setFeedURL({
-          provider: 'github',
-          owner: options.feed.owner,
-          repo: options.feed.repo,
-          channel: options.feed.channel,
-          ...(options.feed.tagNamePrefix ? { tagNamePrefix: options.feed.tagNamePrefix } : {}),
+          provider: 'custom',
+          updateProvider: PublishedGitHubProvider,
+          github: options.feed,
         });
       } else {
         autoUpdater.setFeedURL({

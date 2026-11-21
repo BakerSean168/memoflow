@@ -40,7 +40,8 @@ async function launchDesktop(
       ...process.env,
       NODE_ENV: 'test',
       MEMOFLOW_DESKTOP_STORAGE_TEST_ROOT: userDataPath,
-      ...(apiOrigin ? { MEMOFLOW_API_URL: `${apiOrigin}/api/v1` } : {}),
+      // Local-only cases explicitly run offline; never inherit a developer's API.
+      MEMOFLOW_API_URL: `${apiOrigin ?? 'http://127.0.0.1:59999'}/api/v1`,
       ELECTRON_DISABLE_SECURITY_WARNINGS: 'true',
     },
   });

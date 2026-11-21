@@ -2,6 +2,8 @@
 import { computed, ref, onMounted, onUnmounted, nextTick, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { Eye, Check, Clock } from '@lucide/vue';
+import WindowActionButton from './components/WindowActionButton.vue';
+import WindowNumberInput from './components/WindowNumberInput.vue';
 import { notificationSound } from '@memoflow/assets/audio';
 import type { Result } from '@memoflow/transport-contracts/result';
 import type {
@@ -337,7 +339,8 @@ onUnmounted(() => {
         @mouseleave="handleMouseLeave"
       >
         <header class="notification-card__header">
-          <button
+          <WindowActionButton
+            variant="ghost"
             type="button"
             class="notification-card__title"
             :title="notification.title"
@@ -345,7 +348,7 @@ onUnmounted(() => {
             @click="bridge.invoke(NotificationChannels.CUSTOM_CLICK, notification.id)"
           >
             {{ notification.title }}
-          </button>
+          </WindowActionButton>
         </header>
         <p v-if="notification.body" class="notification-card__body" :title="notification.body">
           {{ notification.body }}
@@ -359,7 +362,8 @@ onUnmounted(() => {
             {{ t('notification.custom.elapsed', { time: elapsedTimes[notification.id] }) }}
           </span>
           <div class="notification-card__actions">
-            <button
+            <WindowActionButton
+              variant="ghost"
               type="button"
               class="notification-card__icon-button"
               data-testid="notification-read"
@@ -369,8 +373,9 @@ onUnmounted(() => {
               @click="acknowledgeNotification(notification)"
             >
               <Eye :size="16" :stroke-width="1.8" aria-hidden="true" />
-            </button>
-            <button
+            </WindowActionButton>
+            <WindowActionButton
+              variant="ghost"
               v-if="routineAction(notification, 'routine.complete')"
               type="button"
               class="notification-card__icon-button notification-card__icon-button--complete"
@@ -381,8 +386,9 @@ onUnmounted(() => {
               @click="executeAction(notification, 'routine.complete')"
             >
               <Check :size="16" :stroke-width="1.8" aria-hidden="true" />
-            </button>
-            <button
+            </WindowActionButton>
+            <WindowActionButton
+              variant="ghost"
               v-if="routineAction(notification, 'routine.snooze')"
               type="button"
               class="notification-card__icon-button"
@@ -394,7 +400,7 @@ onUnmounted(() => {
               @click="toggleSnooze(notification.id)"
             >
               <Clock :size="16" :stroke-width="1.8" aria-hidden="true" />
-            </button>
+            </WindowActionButton>
           </div>
         </footer>
         <form
@@ -404,7 +410,8 @@ onUnmounted(() => {
           @keydown.esc.stop="snoozeOpen = null"
         >
           <div class="notification-card__quick-options">
-            <button
+            <WindowActionButton
+              variant="ghost"
               v-for="minutes in [10, 60, 180, 1440, 10080]"
               :key="minutes"
               type="button"
@@ -425,10 +432,10 @@ onUnmounted(() => {
                           : 'notification.action.snoozeNextWeek',
                 )
               }}
-            </button>
+            </WindowActionButton>
           </div>
           <div class="notification-card__custom-snooze">
-            <input
+            <WindowNumberInput
               v-model.number="snoozeMinutes"
               data-testid="notification-snooze-minutes"
               type="number"
@@ -442,7 +449,8 @@ onUnmounted(() => {
             <span class="notification-card__minutes-label">
               {{ t('notification.action.snoozeMinutes') }}
             </span>
-            <button
+            <WindowActionButton
+              variant="ghost"
               type="submit"
               data-testid="notification-snooze-apply"
               :disabled="!!actionPending"
@@ -450,7 +458,7 @@ onUnmounted(() => {
               class="notification-card__snooze-submit"
             >
               {{ t('notification.action.snoozeApply') }}
-            </button>
+            </WindowActionButton>
           </div>
         </form>
         <p v-if="actionError === notification.id" role="alert" class="notification-card__error">

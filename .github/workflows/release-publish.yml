@@ -110,7 +110,7 @@ jobs:
         env:
           RELEASE_WRITE_TOKEN: ${{ secrets.RELEASE_PLEASE_TOKEN }}
         run: test -n "$RELEASE_WRITE_TOKEN"
-      - name: Create or validate draft release and tag
+      - name: Create or validate draft release source
         uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8
         env:
           RELEASE_TAG: ${{ needs.resolve.outputs.tag }}
@@ -233,7 +233,7 @@ jobs:
         run: |
           node ./tools/ci-cd-platform/release-tools/build-release-manifest.mjs .release-evidence/desktop-release-manifest.json .release-evidence/docker-release-manifest.json .release-evidence/candidate-set-v1.json "$RELEASE_TAG" "$RELEASE_SHA" "$CI_RUN_ID" release-manifest.json
           node ./tools/ci-cd-platform/release-tools/finalize-release-channel.mjs release-manifest.json .release-evidence
-      - name: Upload canonical manifest and publish
+      - name: Upload canonical manifests
         env:
           GH_TOKEN: ${{ secrets.RELEASE_PLEASE_TOKEN }}
           RELEASE_TAG: ${{ needs.resolve.outputs.tag }}
@@ -243,11 +243,25 @@ jobs:
           gh release upload "$RELEASE_TAG" release-manifest.json --clobber
           if [ "$RELEASE_CHANNEL" = nightly ]; then
             gh release upload "$RELEASE_TAG" nightly-manifest.json --clobber
-            gh release edit "$RELEASE_TAG" --draft=false --prerelease --latest=false
-          else
-            gh release edit "$RELEASE_TAG" --draft=false --prerelease=false --latest
           fi
-          echo "Published $RELEASE_TAG with exact-SHA CI, native and image evidence; no Production deployment." >> "$GITHUB_STEP_SUMMARY"
+      - name: Checkout pinned publication control plane
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          ref: ${{ github.workflow_sha }}
+          path: .release-control
+          sparse-checkout: tools/ci-cd-platform/lib
+      - name: Revalidate immutable source and publish
+        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8
+        env:
+          RELEASE_TAG: ${{ needs.resolve.outputs.tag }}
+          RELEASE_SHA: ${{ needs.resolve.outputs.sha }}
+          RELEASE_CHANNEL: ${{ needs.resolve.outputs.channel }}
+        with:
+          github-token: ${{ secrets.RELEASE_PLEASE_TOKEN }}
+          script: |
+            const { publishDraft } = require('./.release-control/tools/ci-cd-platform/lib/release-lifecycle.cjs');
+            await publishDraft({ github, ...context.repo, tag: process.env.RELEASE_TAG, sha: process.env.RELEASE_SHA, channel: process.env.RELEASE_CHANNEL });
+            await core.summary.addRaw(`Published ${process.env.RELEASE_TAG} after exact-source native, image and release-quality verification.`).write();
 
   reconcile-release-pr:
     name: Reconcile successful Stable publication
