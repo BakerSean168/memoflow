@@ -208,18 +208,6 @@ import { describe, expect, it } from 'vitest';
     it('disconnect still extends the shared connection params schema', () => {
       expect(dto).toContain('KnowledgeRepositoryConnectionParamsSchema.extend({');
     });
-
-    it('desktop sync service parses KnowledgeRepositoryConnectionParamsSchema only', () => {
-      const desktop = readFileSync(
-        resolve(
-          apiDir,
-          '../../../../apps/desktop/src/main/modules/repository/desktop-knowledge-repository-sync.service.ts',
-        ),
-        'utf8',
-      );
-      expect(desktop).toContain('KnowledgeRepositoryConnectionParamsSchema.safeParse');
-      expect(desktop).not.toContain('SyncKnowledgeRepositorySchema');
-    });
   });
 }
 

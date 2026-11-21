@@ -39,13 +39,6 @@ vi.mock('@memoflow/ai/api', async (importOriginal) => {
   return { ...actual, createAIApiModule: vi.fn() };
 });
 
-vi.mock('../modules/ai/repository-knowledge-note-persistence.adapter', () => ({
-  RepositoryKnowledgeNotePersistenceAdapter: vi.fn(
-    function RepositoryKnowledgeNotePersistenceAdapterMock(port: unknown) {
-      return { tag: 'knowledge-note-persistence', port };
-    },
-  ),
-}));
 vi.mock('../modules/ai/repository-knowledge-source.adapter', () => ({
   RepositoryKnowledgeSourceAdapter: vi.fn(function RepositoryKnowledgeSourceAdapterMock(
     ...args: unknown[]
@@ -107,7 +100,6 @@ import {
 import { createAIApiModule } from '@memoflow/ai/api';
 import { ControlledAnalyticsReadAdapter } from '../modules/ai/controlled-analytics-read.adapter';
 import { GoalPlanMutationAdapter } from '../modules/ai/goal-plan-mutation.adapter';
-import { RepositoryKnowledgeNotePersistenceAdapter } from '../modules/ai/repository-knowledge-note-persistence.adapter';
 import { RepositoryKnowledgeSourceAdapter } from '../modules/ai/repository-knowledge-source.adapter';
 import { TaskPlanMutationAdapter } from '../modules/ai/task-plan-mutation.adapter';
 import { RoutineAICommandAdapter } from '../modules/ai/routine-command.adapter';
@@ -210,12 +202,11 @@ describe('API composeAI Mastra-only ownership', () => {
       repositories.providerSecretVault,
     );
     expect(ConversationShellSource).toHaveBeenCalledWith(repositories.conversationRepository);
-    const persistence = vi.mocked(RepositoryKnowledgeNotePersistenceAdapter).mock.results[0].value;
     expect(GoalPlanMutationAdapter).toHaveBeenCalledWith(
       goalApplicationPort,
       taskApplicationPort,
       labelService,
-      persistence,
+      undefined,
       knowledgeDocumentRefResolver,
       goalKnowledgeService,
     );
@@ -232,7 +223,7 @@ describe('API composeAI Mastra-only ownership', () => {
       taskApplicationPort,
     );
 
-    expect(KnowledgeCapturePersistenceAdapter).toHaveBeenCalledWith(persistence);
+    expect(KnowledgeCapturePersistenceAdapter).not.toHaveBeenCalled();
 
     expect(MastraAIRuntime).toHaveBeenCalledTimes(1);
     expect(MastraAIRuntime).toHaveBeenCalledWith({
@@ -247,8 +238,6 @@ describe('API composeAI Mastra-only ownership', () => {
       goalPlanMutationPort: vi.mocked(GoalPlanMutationAdapter).mock.results[0].value,
       goalSurfaceLeaseRepository: expect.any(AiGoalSurfaceLeasePrismaRepository),
       taskPlanMutationPort: vi.mocked(TaskPlanMutationAdapter).mock.results[0].value,
-      knowledgeCaptureMutationPort: vi.mocked(KnowledgeCapturePersistenceAdapter).mock.results[0]
-        .value,
       knowledgeSourcePort: vi.mocked(RepositoryKnowledgeSourceAdapter).mock.results[0].value,
       executionRecordPort: repositories.executionRecordPort,
       usageReadPort: repositories.executionRecordPort,
@@ -266,7 +255,6 @@ describe('API composeAI Mastra-only ownership', () => {
   it('passes the canonical repositories and host capability ports into one transport-neutral AI module', () => {
     composeAI(dependencies);
 
-    expect(RepositoryKnowledgeNotePersistenceAdapter).toHaveBeenCalledWith(repositoryApiPort);
     expect(RepositoryKnowledgeSourceAdapter).toHaveBeenCalledWith(fakeDb, repositoryStorageBaseDir);
     expect(ControlledAnalyticsReadAdapter).toHaveBeenCalledWith({
       goalApplicationPort,
@@ -284,9 +272,7 @@ describe('API composeAI Mastra-only ownership', () => {
     expect(moduleInput.providerSecretVault).toBe(repositories.providerSecretVault);
     expect(moduleInput.knowledgeIndexRepository).toBe(repositories.knowledgeIndexRepository);
     expect(moduleInput.executionRecordPort).toBe(repositories.executionRecordPort);
-    expect(moduleInput.knowledgeNotePersistence).toBe(
-      vi.mocked(RepositoryKnowledgeNotePersistenceAdapter).mock.results[0].value,
-    );
+    expect(moduleInput.knowledgeNotePersistence).toBeUndefined();
     expect(moduleInput.knowledgeSourcePort).toBe(
       vi.mocked(RepositoryKnowledgeSourceAdapter).mock.results[0].value,
     );

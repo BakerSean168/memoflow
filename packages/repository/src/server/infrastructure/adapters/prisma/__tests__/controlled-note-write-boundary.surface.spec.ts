@@ -2,14 +2,7 @@ import { existsSync, readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
 
-/**
- * Controlled note-write boundary (ADR-090): generic existing-note editing stays
- * closed. Confirmed create remains an application capability for explicit
- * AI/automation proposals, but the Notes workspace itself is read/search only.
- * Its only direct Web mutation is stable-id adoption under an exact-blob CAS
- * guard. Desktop editing remains delegated to Obsidian. packages/editor stays
- * deleted; portable editor_* backup remains data-portability-only.
- */
+/** ADR-126: Web sources are read-only; reviewed Desktop creates are local and exclusive. */
 describe('controlled note-write boundary surface', () => {
   const repoRoot = resolve(__dirname, '../../../../../../../../');
 
@@ -95,32 +88,12 @@ describe('controlled note-write boundary surface', () => {
     expect(applicationPort).not.toContain('writeConfirmedLocalVaultNote');
   });
 
-  it('HTTP knowledge-notes surface allows confirmed create and specialized CAS adoption, not generic edit', () => {
-    expect(knowledgeRoutes).toContain("method: 'get'");
+  it('HTTP note surfaces retain reads and retire create, adoption and edits', () => {
     expect(knowledgeRoutes).toContain("path: '/knowledge-notes'");
     expect(knowledgeRoutes).toContain("path: '/knowledge-notes/:projectionId'");
-    expect(knowledgeRoutes).toContain("method: 'post'");
-    expect(knowledgeRoutes).toContain('创建已确认的 GitHub 知识笔记');
-    expect(knowledgeRoutes).toContain('只允许创建新 Markdown 文件');
-    expect(knowledgeRoutes).toContain('CreateConfirmedKnowledgeNoteSchema');
-    expect(knowledgeRoutes).toContain('controller.createNote');
-    expect(knowledgeRoutes).toContain("path: '/knowledge-notes/adopt'");
-    expect(knowledgeRoutes).toContain('AdoptKnowledgeDocumentSchema');
-    expect(knowledgeRoutes).toContain('controller.adoptNote');
-    expect(knowledgeRoutes).toContain('expectedBlobSha');
-
-    // No full-text update / replace of an existing projection note.
-    expect(knowledgeRoutes).not.toMatch(/method:\s*'put'/);
-    expect(knowledgeRoutes).not.toMatch(/method:\s*'patch'/);
-    expect(knowledgeRoutes).not.toContain('updateNote');
-    expect(knowledgeRoutes).not.toContain('controller.updateNote');
-    // GET detail stays; no write methods on /knowledge-notes/:projectionId.
-    const writeMethodsOnProjectionId = [
-      ...knowledgeRoutes.matchAll(
-        /method:\s*'(put|patch|post|delete)'[\s\S]{0,200}?path:\s*'\/knowledge-notes\/:projectionId'/g,
-      ),
-    ];
-    expect(writeMethodsOnProjectionId).toHaveLength(0);
+    expect(knowledgeRoutes).not.toContain('controller.createNote');
+    expect(knowledgeRoutes).not.toContain('controller.adoptNote');
+    expect(knowledgeRoutes).not.toMatch(/method:\s*'(put|patch)'/);
   });
 
   it('Desktop Local Vault write is exclusive create + confirmed proposal metadata only', () => {
@@ -169,19 +142,17 @@ describe('controlled note-write boundary surface', () => {
     expect(vueRepositoryRouter).not.toContain('note-edit');
     expect(vueRepositoryRouter).not.toContain('/note/:id');
 
-    // Web is a read/search surface plus the specialized metadata-only adoption command.
-    // Confirmed create stays an application capability for explicitly confirmed AI/automation
-    // workflows, but the Notes workspace does not expose a manual create editor.
+    // Web only manages the connection and original-file links.
     expect(projectionWorkspace).not.toContain('createConfirmedKnowledgeNote');
     expect(projectionWorkspace).not.toContain('knowledge-projection-create');
-    expect(projectionWorkspace).toContain('adoptKnowledgeDocument');
-    expect(projectionWorkspace).toContain('knowledge-projection-adopt-document-id');
+    expect(projectionWorkspace).not.toContain('adoptKnowledgeDocument');
+    expect(projectionWorkspace).not.toContain('knowledge-projection-adopt-document-id');
     expect(projectionWorkspace).not.toMatch(
       /updateKnowledgeNote|saveKnowledgeNote|writeConfirmedLocalVaultNote|editExistingNote/,
     );
 
-    // Desktop previews are read-only; editing is delegated to Obsidian.
-    expect(localVaultWorkspace).toContain('openInObsidian');
+    // Desktop opens files in Obsidian and keeps reviewed create in its existing workflow.
+    expect(localVaultWorkspace).toContain('openLocalVaultInObsidian');
     expect(localVaultWorkspace).not.toContain('createConfirmedKnowledgeNote');
     expect(localVaultWorkspace).not.toMatch(
       /updateLocalVaultNote|saveLocalVaultNote|editExistingNote/,

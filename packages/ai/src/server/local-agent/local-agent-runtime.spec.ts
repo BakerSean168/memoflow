@@ -1792,3 +1792,62 @@ it.each(['approve_once', 'decline'] as const)(
     await runtime.dispose();
   },
 );
+
+it('persists a cancelled outcome when stopped while reading selected knowledge', async () => {
+  const { store, conversation } = await setup();
+  const fetch = vi.spyOn(globalThis, 'fetch').mockImplementation(
+    async (_url, options) =>
+      new Promise((_resolve, reject) => {
+        options?.signal?.addEventListener(
+          'abort',
+          () => reject(new DOMException('Stopped', 'AbortError')),
+          { once: true },
+        );
+      }),
+  );
+  const run = vi.fn(async function* () {
+    yield { type: 'completed' as const };
+  });
+  const runtime = new LocalAgentRuntime({
+    store,
+    cwd: '/tmp',
+    bridge: {
+      open: async () => ({ url: 'http://127.0.0.1:1/mcp', token: 'fixture', revoke() {} }),
+      dispose: async () => {},
+    },
+    createDriver: () => ({
+      run,
+      respond: () => false,
+      cancel() {},
+      close: async () => {},
+      probe: async () => ({ status: 'ready' as const, models: [] }),
+    }),
+  });
+  const stream = runtime.dispatchMessage({
+    identityId: 'owner',
+    conversationId: conversation.id,
+    content: 'Read',
+    selectedEntities: [
+      {
+        entityType: 'knowledge_source',
+        id: 'source-1',
+        source: {
+          kind: 'local_vault',
+          bindingId: 'binding-1',
+          relativePath: 'note.md',
+          contentHash: 'a'.repeat(64),
+        },
+      },
+    ],
+  });
+  const started = await stream.next();
+  const pending = stream.next();
+  await vi.waitFor(() => expect(fetch).toHaveBeenCalled());
+  runtime.cancelRun({ identityId: 'owner', runId: started.value!.runId });
+  expect((await pending).value).toMatchObject({ type: 'assistant.run.cancelled' });
+  await stream.return();
+  const history = await store.listMessages('owner', conversation.id);
+  expect(history.messages.at(-1)?.runOutcome).toMatchObject({ status: 'cancelled' });
+  expect(run).not.toHaveBeenCalled();
+  await runtime.dispose();
+});

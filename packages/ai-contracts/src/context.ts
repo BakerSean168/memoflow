@@ -55,6 +55,7 @@ export const AIContextEntityTypeSchema = z.enum([
   'key_result',
   'task',
   'knowledge_document',
+  'knowledge_source',
   'planner_window',
   'routine',
   'notification',

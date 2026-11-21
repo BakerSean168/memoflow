@@ -30,7 +30,6 @@ import {
   CloudPasswordSection,
   ExternalAgentConnectionsSection,
 } from '@memoflow/account-ui';
-import { KnowledgeWriteRequestLedger } from '@memoflow/repository-ui';
 import {
   getAIErrorMessage,
   getNativeAgentExecutionFailureMessage,
@@ -131,7 +130,6 @@ export function installSettingUiHost(): void {
       AccountProfileSection,
       CloudPasswordSection,
       ExternalAgentConnectionsSection,
-      KnowledgeWriteRequestLedger,
     },
   } satisfies SettingUiHost);
 }

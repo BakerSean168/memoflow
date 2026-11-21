@@ -4,9 +4,6 @@ import { GitHubAppClientFailureError } from '../../application/ports/github-app-
 import type {
   GitHubAppInstallationInventory,
   GitHubBlobContent,
-  GitHubFileCommitInput,
-  GitHubFileUpdateInput,
-  GitHubFileCommitResult,
   GitHubInstallationAccessToken,
   GitHubMarkdownChanges,
   GitHubMarkdownSnapshot,
@@ -85,22 +82,6 @@ interface GitHubBlobResponse {
   size?: number;
   encoding?: string;
   content?: string;
-}
-
-interface GitHubRefResponse {
-  object?: { sha?: string };
-}
-
-interface GitHubCommitResponse {
-  sha?: string;
-  tree?: { sha?: string };
-}
-
-interface GitHubContentsResponse {
-  type?: string;
-  sha?: string;
-  content?: string;
-  encoding?: string;
 }
 
 const REPOSITORY_SCAFFOLD_ROOT_ENTRIES = new Set([
@@ -185,7 +166,7 @@ export class GitHubAppClient implements IGitHubAppClient {
           ? 'read'
           : 'none';
     const suspended = Boolean(installation.suspended_at);
-    if (suspended || contentsPermission !== 'write') {
+    if (suspended || contentsPermission === 'none') {
       return {
         installationId: String(installation.id),
         accountId: String(installation.account.id),
@@ -230,7 +211,10 @@ export class GitHubAppClient implements IGitHubAppClient {
       `/app/installations/${encodeURIComponent(installationId)}/access_tokens`,
       { authorization: `Bearer ${this.createAppJwt()}` },
       'POST',
-      numericRepositoryId ? { repository_ids: [numericRepositoryId] } : undefined,
+      {
+        ...(numericRepositoryId ? { repository_ids: [numericRepositoryId] } : {}),
+        permissions: { contents: 'read', metadata: 'read' },
+      },
     );
     const expiresAt = response.expires_at ? Date.parse(response.expires_at) : Number.NaN;
     if (!response.token || !Number.isFinite(expiresAt) || expiresAt <= this.now()) {
@@ -480,175 +464,6 @@ export class GitHubAppClient implements IGitHubAppClient {
     return this.getBlobWithToken(accessToken.token, repository, blobSha, maxBytes);
   }
 
-  async createFileCommit(
-    installationId: string,
-    input: GitHubFileCommitInput,
-  ): Promise<GitHubFileCommitResult> {
-    const accessToken = await this.createInstallationAccessToken(
-      installationId,
-      input.repository.id,
-    );
-    let lastConflict: GitHubAppClientFailureError | null = null;
-    for (let attempt = 0; attempt < 3; attempt += 1) {
-      const ref = await this.requestJson<GitHubRefResponse>(
-        `/repos/${this.encodeRepository(input.repository)}/git/ref/heads/${this.encodeBranch(input.branch)}`,
-        { authorization: `Bearer ${accessToken.token}` },
-      );
-      const headSha = ref.object?.sha;
-      if (!headSha) throw new Error('GitHub returned an invalid branch ref');
-      if (await this.pathExists(accessToken.token, input.repository, input.path, input.branch)) {
-        throw new GitHubAppClientFailureError(
-          { kind: 'conflict' },
-          'Knowledge note path already exists',
-        );
-      }
-      const commit = await this.requestJson<GitHubCommitResponse>(
-        `/repos/${this.encodeRepository(input.repository)}/git/commits/${encodeURIComponent(headSha)}`,
-        { authorization: `Bearer ${accessToken.token}` },
-      );
-      const treeSha = commit.tree?.sha;
-      if (!treeSha) throw new Error('GitHub returned an invalid commit tree');
-      const blob = await this.requestJson<{ sha?: string }>(
-        `/repos/${this.encodeRepository(input.repository)}/git/blobs`,
-        { authorization: `Bearer ${accessToken.token}` },
-        'POST',
-        { content: Buffer.from(input.content, 'utf8').toString('base64'), encoding: 'base64' },
-      );
-      if (!blob.sha) throw new Error('GitHub returned an invalid blob');
-      const tree = await this.requestJson<{ sha?: string }>(
-        `/repos/${this.encodeRepository(input.repository)}/git/trees`,
-        { authorization: `Bearer ${accessToken.token}` },
-        'POST',
-        {
-          base_tree: treeSha,
-          tree: [{ path: input.path, mode: '100644', type: 'blob', sha: blob.sha }],
-        },
-      );
-      if (!tree.sha) throw new Error('GitHub returned an invalid tree');
-      const created = await this.requestJson<{ sha?: string }>(
-        `/repos/${this.encodeRepository(input.repository)}/git/commits`,
-        { authorization: `Bearer ${accessToken.token}` },
-        'POST',
-        {
-          message: `${input.message}\n\nMemoFlow-Request-Id: ${input.requestId}`,
-          tree: tree.sha,
-          parents: [headSha],
-        },
-      );
-      if (!created.sha) throw new Error('GitHub returned an invalid commit');
-      try {
-        await this.requestJson(
-          `/repos/${this.encodeRepository(input.repository)}/git/refs/heads/${this.encodeBranch(input.branch)}`,
-          { authorization: `Bearer ${accessToken.token}` },
-          'PATCH',
-          { sha: created.sha, force: false },
-        );
-      } catch (error) {
-        if (error instanceof GitHubAppClientFailureError && error.failure.kind === 'conflict') {
-          lastConflict = error;
-          continue;
-        }
-        throw error;
-      }
-      return { commitSha: created.sha, blobSha: blob.sha };
-    }
-    throw (
-      lastConflict ??
-      new GitHubAppClientFailureError({ kind: 'conflict' }, 'GitHub branch changed during commit')
-    );
-  }
-
-  async updateFileCommit(
-    installationId: string,
-    input: GitHubFileUpdateInput,
-  ): Promise<GitHubFileCommitResult> {
-    const accessToken = await this.createInstallationAccessToken(
-      installationId,
-      input.repository.id,
-    );
-    let lastConflict: GitHubAppClientFailureError | null = null;
-    for (let attempt = 0; attempt < 3; attempt += 1) {
-      const ref = await this.requestJson<GitHubRefResponse>(
-        `/repos/${this.encodeRepository(input.repository)}/git/ref/heads/${this.encodeBranch(input.branch)}`,
-        { authorization: `Bearer ${accessToken.token}` },
-      );
-      const headSha = ref.object?.sha;
-      if (!headSha) throw new Error('GitHub returned an invalid branch ref');
-      const currentBlobSha = await this.getPathBlobSha(
-        accessToken.token,
-        input.repository,
-        input.path,
-        headSha,
-      );
-      if (!currentBlobSha) {
-        throw new GitHubAppClientFailureError(
-          { kind: 'not_found' },
-          'Knowledge note path no longer exists',
-        );
-      }
-      if (currentBlobSha !== input.expectedBlobSha) {
-        throw new GitHubAppClientFailureError(
-          { kind: 'conflict' },
-          'Knowledge note changed after adoption review',
-        );
-      }
-
-      const commit = await this.requestJson<GitHubCommitResponse>(
-        `/repos/${this.encodeRepository(input.repository)}/git/commits/${encodeURIComponent(headSha)}`,
-        { authorization: `Bearer ${accessToken.token}` },
-      );
-      const treeSha = commit.tree?.sha;
-      if (!treeSha) throw new Error('GitHub returned an invalid commit tree');
-      const blob = await this.requestJson<{ sha?: string }>(
-        `/repos/${this.encodeRepository(input.repository)}/git/blobs`,
-        { authorization: `Bearer ${accessToken.token}` },
-        'POST',
-        { content: Buffer.from(input.content, 'utf8').toString('base64'), encoding: 'base64' },
-      );
-      if (!blob.sha) throw new Error('GitHub returned an invalid blob');
-      const tree = await this.requestJson<{ sha?: string }>(
-        `/repos/${this.encodeRepository(input.repository)}/git/trees`,
-        { authorization: `Bearer ${accessToken.token}` },
-        'POST',
-        {
-          base_tree: treeSha,
-          tree: [{ path: input.path, mode: '100644', type: 'blob', sha: blob.sha }],
-        },
-      );
-      if (!tree.sha) throw new Error('GitHub returned an invalid tree');
-      const created = await this.requestJson<{ sha?: string }>(
-        `/repos/${this.encodeRepository(input.repository)}/git/commits`,
-        { authorization: `Bearer ${accessToken.token}` },
-        'POST',
-        {
-          message: `${input.message}\n\nMemoFlow-Request-Id: ${input.requestId}`,
-          tree: tree.sha,
-          parents: [headSha],
-        },
-      );
-      if (!created.sha) throw new Error('GitHub returned an invalid commit');
-      try {
-        await this.requestJson(
-          `/repos/${this.encodeRepository(input.repository)}/git/refs/heads/${this.encodeBranch(input.branch)}`,
-          { authorization: `Bearer ${accessToken.token}` },
-          'PATCH',
-          { sha: created.sha, force: false },
-        );
-      } catch (error) {
-        if (error instanceof GitHubAppClientFailureError && error.failure.kind === 'conflict') {
-          lastConflict = error;
-          continue;
-        }
-        throw error;
-      }
-      return { commitSha: created.sha, blobSha: blob.sha };
-    }
-    throw (
-      lastConflict ??
-      new GitHubAppClientFailureError({ kind: 'conflict' }, 'GitHub branch changed during commit')
-    );
-  }
-
   private createAppJwt(): string {
     const nowSeconds = Math.floor(this.now() / 1000);
     const unsigned = `${encodeJson({ alg: 'RS256', typ: 'JWT' })}.${encodeJson({
@@ -735,45 +550,6 @@ export class GitHubAppClient implements IGitHubAppClient {
       throw new Error('GitHub returned a blob with inconsistent size metadata');
     }
     return { blobSha, byteSize: blob.size!, bytes };
-  }
-
-  private async pathExists(
-    accessToken: string,
-    repository: GitHubInstallationRepositoryDTO,
-    relativePath: string,
-    branch: string,
-  ): Promise<boolean> {
-    return (await this.getPathBlobSha(accessToken, repository, relativePath, branch)) !== null;
-  }
-
-  private async getPathBlobSha(
-    accessToken: string,
-    repository: GitHubInstallationRepositoryDTO,
-    relativePath: string,
-    ref: string,
-  ): Promise<string | null> {
-    const response = await this.fetchImpl(
-      `${this.apiBaseUrl}/repos/${this.encodeRepository(repository)}/contents/${this.encodeRelativePath(relativePath)}?ref=${encodeURIComponent(ref)}`,
-      {
-        headers: {
-          accept: 'application/vnd.github+json',
-          authorization: `Bearer ${accessToken}`,
-          'user-agent': 'memoflow-github-app',
-          'x-github-api-version': '2022-11-28',
-        },
-      },
-    );
-    if (response.status === 404) return null;
-    if (!response.ok) {
-      throw new GitHubAppClientFailureError(
-        mapGitHubHttpStatusToFailure(response.status, response.headers.get('retry-after')),
-        `GitHub API request failed (${response.status})`,
-      );
-    }
-    const payload = (await response.json()) as GitHubContentsResponse;
-    return payload.type === 'file' && typeof payload.sha === 'string' && payload.sha
-      ? payload.sha
-      : null;
   }
 
   private encodeRepository(repository: GitHubInstallationRepositoryDTO): string {

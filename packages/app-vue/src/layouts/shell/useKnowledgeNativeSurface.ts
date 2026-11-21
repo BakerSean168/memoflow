@@ -1,3 +1,4 @@
+import { DESKTOP_BRIDGE_KEY } from '../../di/keys';
 import {
   inject,
   nextTick,
@@ -27,6 +28,7 @@ const KnowledgeNativeSurfaceKey: InjectionKey<KnowledgeNativeSurfaceHost> =
 /** Shell-scoped placement for the Repository-owned AI capture review surface. */
 export function provideKnowledgeNativeSurface(): KnowledgeNativeSurfaceHost {
   const router = useRouter();
+  const desktop = inject(DESKTOP_BRIDGE_KEY, undefined);
   const store = useAppShellStore();
   const { t } = useI18n();
   const live = shallowRef<{
@@ -50,6 +52,7 @@ export function provideKnowledgeNativeSurface(): KnowledgeNativeSurfaceHost {
   }
 
   async function openCreate(): Promise<KnowledgeCaptureNativeEditSession> {
+    if (!desktop) throw new Error('Knowledge sources are read-only on Web');
     await nextTick();
     if (disposed.value) throw new Error('Knowledge surface host is closed');
 

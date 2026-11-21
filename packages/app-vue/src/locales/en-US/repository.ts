@@ -1,6 +1,57 @@
 export default {
+  hub: {
+    openGitHub: 'View on GitHub',
+    title: 'Knowledge',
+    desktopLabel: 'Local knowledge',
+    webLabel: 'Read-only cloud source',
+    desktopDescription:
+      'Connect your Obsidian Vault, reference notes in conversations, and save reviewed content locally.',
+    webDescription:
+      'Connect the GitHub version of your knowledge base for conversation context. Web only reads existing content.',
+    localSource: 'Local Vault',
+    githubSource: 'GitHub repository',
+    readOnly: 'Read only',
+    connected: 'Connected',
+    needsAttention: 'Check connection',
+    localEmpty:
+      'Choose an existing Obsidian Vault or Markdown folder. Read, edit, and organize your notes in Obsidian.',
+    localUnavailable:
+      'The selected folder is unavailable. Check its location or disk, or choose the folder again.',
+    openObsidian: 'Open in Obsidian',
+    contextTitle: 'Use knowledge in conversations',
+    contextDescription:
+      "Type {'@'} in the composer to find notes by title, path, or alias. Selected notes provide conversation context without changing the original files.",
+    contextUnavailable:
+      "Knowledge is temporarily unavailable. Check the connection and type {'@'} again.",
+    desktopSyncHint:
+      'Configure cross-device sync in Obsidian or an external Git tool. MemoFlow does not run Git synchronization.',
+    webSyncHint:
+      'Web reads the repository’s default branch. Local changes appear after your external sync pushes them; create and edit in Desktop or Obsidian.',
+    writesTitle: 'Saved by MemoFlow',
+    writesDescription:
+      'Notes confirmed and saved by MemoFlow in the current Vault. Return to the original conversation to review unfinished drafts.',
+    writesEmpty: 'No saved notes yet. Review and save content from a conversation to see it here.',
+    refresh: 'Refresh connection status',
+    webEmpty:
+      'No knowledge source connected yet. Connect an existing private repository to reference its notes in conversations.',
+    connectGitHub: 'Connect GitHub repository',
+    connectAnother: 'Connect another repository',
+    chooseRepository: 'Choose your knowledge repository',
+    connect: 'Connect',
+    privateRepositoryHint:
+      'Choose a private repository with read access. This connection never creates or modifies repository files.',
+    unavailableTitle: 'Cloud knowledge is not enabled yet',
+    unavailableDescription:
+      'This service has not configured GitHub connectivity. Other features remain available, and Desktop can connect directly to a local Vault.',
+    disconnectTitle: 'Disconnect this knowledge source?',
+    disconnectDescription:
+      'The source will no longer provide knowledge context. Your GitHub repository and historical receipts are preserved.',
+    noteUnavailable:
+      'This note has moved, was deleted, or belongs to another Vault. Select it again.',
+    cancelAuthorization: 'Cancel waiting',
+  },
   route: {
-    workspace: 'Notes',
+    workspace: 'Knowledge',
     noteEdit: 'Edit Note',
   },
   projection: {

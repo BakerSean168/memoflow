@@ -135,7 +135,6 @@ describe('composeRepository assembly order', () => {
     expect(moduleCall).toMatchObject({
       knowledgeRepositoryConnectionService: runtime.knowledgeRepositoryConnectionService,
       knowledgeRepositoryProjectionService: runtime.knowledgeRepositoryProjectionService,
-      knowledgeNoteCommitService: runtime.knowledgeNoteCommitService,
       auditRepository: repoSet.auditRepository,
     });
     expect(moduleCall.runtimeContributions).toContain(runtime.runtimeContribution);

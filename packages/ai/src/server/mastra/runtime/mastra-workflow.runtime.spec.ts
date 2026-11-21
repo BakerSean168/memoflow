@@ -149,6 +149,7 @@ function taskMutationPort(): ReturnType<typeof vi.fn> {
 async function createRuntime(
   file = join(tmpdir(), `memoflow-mastra-runtime-${randomUUID()}.db`),
   agentRegistry?: Pick<AgentInstanceRegistry, 'assertTurnSelection'>,
+  knowledgeWritesEnabled = true,
 ) {
   const storage = new LibSQLStore({ id: randomUUID(), url: `file:${file}` });
   const mutations = mutationPort();
@@ -184,6 +185,12 @@ async function createRuntime(
     agentPresets: {},
     revision: 1,
   });
+  const knowledgeSourcePort = {
+    listRelevantNotes: vi.fn(async () => []),
+    listIndexableNotes: vi.fn(async () => []),
+    getNoteById: vi.fn(async () => null),
+    getNoteBySource: vi.fn(async () => null),
+  };
   const runtime = new MastraAIRuntime({
     permissions,
     agentRegistry,
@@ -199,12 +206,10 @@ async function createRuntime(
       ),
       createTaskPlan,
     },
-    knowledgeCaptureMutationPort: { createConfirmedKnowledgeNote },
-    knowledgeSourcePort: {
-      listRelevantNotes: vi.fn(async () => []),
-      listIndexableNotes: vi.fn(async () => []),
-      getNoteById: vi.fn(async () => null),
-    },
+    knowledgeCaptureMutationPort: knowledgeWritesEnabled
+      ? { createConfirmedKnowledgeNote }
+      : undefined,
+    knowledgeSourcePort,
     usageReadPort: { summarizeUsage },
     executionRecordPort: { record: recordExecution },
     routineCommandPort: { createRoutine, setProfileActive } as never,
@@ -250,8 +255,57 @@ async function createRuntime(
     createRoutine,
     setProfileActive,
     permissions,
+    knowledgeSourcePort,
   };
 }
+
+describe('Mastra selected knowledge authorization', () => {
+  it.each(['deny', 'ask'] as const)(
+    'does not read selected source content under an explicit %s rule',
+    async (effect) => {
+      const { runtime, modelResolver, permissions, knowledgeSourcePort } = await createRuntime();
+      vi.spyOn(runtime.history, 'ensureConversation').mockResolvedValue();
+      vi.spyOn(modelResolver, 'resolve').mockResolvedValue({
+        providerId: 'p',
+        providerName: 'p',
+        modelId: 'test',
+        model: 'openai/test',
+        capabilities: {},
+      } as never);
+      await permissions.saveRule('identity-a', {
+        id: 'knowledge-rule',
+        agentId: null,
+        object: 'knowledge',
+        action: 'read',
+        effect,
+        source: 'user',
+      });
+      await runtime.init();
+      const session = vi.spyOn(runtime.controller, 'createSession');
+      const run = runtime.dispatchMessage({
+        identityId: 'identity-a',
+        conversationId: 'selected-source',
+        content: 'Use this note',
+        selectedEntities: [
+          {
+            entityType: 'knowledge_source',
+            id: 'source',
+            source: {
+              kind: 'local_vault',
+              bindingId: 'binding',
+              relativePath: 'note.md',
+              contentHash: 'a'.repeat(64),
+            },
+          },
+        ],
+      });
+      await expect(run.next()).rejects.toMatchObject({ category: 'permission_denied' });
+      expect(knowledgeSourcePort.getNoteBySource).not.toHaveBeenCalled();
+      expect(knowledgeSourcePort.getNoteById).not.toHaveBeenCalled();
+      expect(session).not.toHaveBeenCalled();
+    },
+  );
+});
 
 describe('MastraAIRuntime Assistant approval protocol', () => {
   async function parkedTurn() {
@@ -2520,6 +2574,49 @@ describe('MastraAIRuntime goal.create product projection', () => {
 });
 
 describe('MastraAIRuntime knowledge.capture product projection', () => {
+  it('keeps read-only Web capture history cancellable without allowing new or resumed writes', async () => {
+    const desktop = await createRuntime();
+    const identityId = 'identity-read-only';
+    const start = {
+      context: context(identityId, 'start-local'),
+      request: {
+        kind: 'knowledge.capture' as const,
+        conversationId: 'history',
+        input: { topic: 'Existing draft' },
+        locale: 'en-US',
+      },
+    };
+    const draft = await desktop.runtime.start(start);
+    await desktop.runtime.dispose();
+    const web = await createRuntime(desktop.file, undefined, false);
+    await expect(web.runtime.start(start)).rejects.toMatchObject({
+      category: 'capability_unsupported',
+    });
+    await expect(web.runtime.startDetached(start)).rejects.toMatchObject({
+      category: 'capability_unsupported',
+    });
+    expect(await web.runtime.get({ identityId, runId: draft.runId })).toMatchObject({
+      status: 'suspended',
+    });
+    const approval = {
+      context: context(identityId, 'approve-web'),
+      request: { runId: draft.runId, command: { type: 'approve' as const } },
+    };
+    await expect(web.runtime.resume(approval)).rejects.toMatchObject({
+      category: 'capability_unsupported',
+    });
+    await expect(web.runtime.resumeDetached(approval)).rejects.toMatchObject({
+      category: 'capability_unsupported',
+    });
+    const cancelled = await web.runtime.resume({
+      context: context(identityId, 'cancel-web'),
+      request: { runId: draft.runId, command: { type: 'cancel' } },
+    });
+    expect(cancelled.status).toBe('cancelled');
+    expect(web.createConfirmedKnowledgeNote).not.toHaveBeenCalled();
+    expect(desktop.createConfirmedKnowledgeNote).not.toHaveBeenCalled();
+  });
+
   it('owns start/get/list/resume and persists a note only after approval', async () => {
     const { runtime, createConfirmedKnowledgeNote } = await createRuntime();
     const identityId = 'identity-knowledge';

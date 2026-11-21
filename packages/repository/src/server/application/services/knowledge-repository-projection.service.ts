@@ -21,7 +21,6 @@ import type {
   KnowledgeProjectionCheckpoint,
   RemoteRepositoryBlockReason,
 } from '@memoflow/repository-contracts';
-import { createLogger } from '@memoflow/utils/logger';
 import type { KnowledgeRemoteBindingServerDTO } from '@memoflow/repository-contracts';
 import type { IGitHubAppClient } from '../ports/github-app-client.port';
 import type {
@@ -35,7 +34,6 @@ import type {
   IGithubWebhookDeliveryRepository,
   IKnowledgeNoteProjectionRepository,
   IKnowledgeWriteRequestRepository,
-  KnowledgeWriteRequestRecord,
 } from '../ports/knowledge-note-projection.repository';
 import type { IKnowledgeAttachmentProjectionRepository } from '../ports/knowledge-attachment-projection.repository';
 import type { IKnowledgeAttachmentContentCache } from '../ports/knowledge-attachment-content-cache.port';
@@ -43,11 +41,7 @@ import type { IKnowledgeDocumentIdentityRepository } from '../ports/knowledge-do
 import type { IKnowledgeRepositoryLeaseRepository } from '../ports/knowledge-repository-lease.repository';
 import type { RepositoryNoteMutationPayload } from './repository-note-mutation.publisher';
 import { buildKnowledgeNoteLinkGraph } from './knowledge-note-link-graph';
-import {
-  KnowledgeRepositoryLeaseCoordinator,
-  KnowledgeRepositoryLeaseLostError,
-  knowledgeRepositoryConnectionLeaseKey,
-} from './knowledge-repository-lease-coordinator';
+import { KnowledgeRepositoryLeaseCoordinator } from './knowledge-repository-lease-coordinator';
 import {
   KnowledgeProjectionEngine,
   type IKnowledgeProjectionEngine,
@@ -55,7 +49,6 @@ import {
 import { KnowledgeAttachmentContentReader } from './knowledge-attachment-content';
 import { KnowledgeDeliveryQueue } from './knowledge-delivery-queue';
 
-const logger = createLogger('KnowledgeRepositoryProjectionService');
 const MAX_LINK_GRAPH_SOURCE_NOTES = 2_000;
 
 export interface GithubWebhookIngressRequest {
@@ -168,7 +161,6 @@ export class KnowledgeRepositoryProjectionService {
         this.persistObservationUnavailable(connection, reason),
       persistMissingRepositoryObservation: (connection, inventory, reason) =>
         this.persistMissingRepositoryObservation(connection, inventory, reason),
-      replayPendingWriteRequests: (connectionId) => this.replayPendingWriteRequests(connectionId),
     });
   }
 
@@ -215,12 +207,8 @@ export class KnowledgeRepositoryProjectionService {
     if (!connection) {
       return ok({ accepted: false, duplicate: false, reason: 'connection_not_found' });
     }
-    const [historyFence, observation] = await Promise.all([
-      this.options.historyFenceRepository.findByBindingId(connection.id),
-      this.options.observationRepository.findByBindingId(connection.id),
-    ]);
-    const expectedBranch = historyFence?.defaultBranch ?? observation?.defaultBranch ?? null;
-    if (!expectedBranch || ref !== `refs/heads/${expectedBranch}`) {
+    // The signed event chooses whether to enqueue; the worker verifies the live HEAD.
+    if (ref !== `refs/heads/${repositoryBranch}`) {
       const ignored = await this.options.deliveryRepository.reserve({
         id: `github-delivery-${randomUUID()}`,
         connectionId: connection.id,
@@ -350,73 +338,15 @@ export class KnowledgeRepositoryProjectionService {
     return this.deliveryQueue.reconcileNow();
   }
 
-  /**
-   * Replays the projection operation for one Committed write request whose
-   * projection is Pending or Failed. Idempotent: a write request whose
-   * projection is already Succeeded is returned without re-projecting and never
-   * regresses. Replay is serialized under the connection lease so it cannot race
-   * the webhook/reconciliation projection path.
-   */
+  /** Retired: projections must be rebuilt from current remote HEAD, never historical write payloads. */
   async replayWriteRequestProjection(
-    identityId: string,
-    writeRequestId: string,
+    _identityId: string,
+    _writeRequestId: string,
   ): Promise<Result<KnowledgeWriteRequestReplayResponse>> {
-    if (!this.options.writeRequestRepository) {
-      return fail({
-        code: 'SERVICE_UNAVAILABLE',
-        message: 'Knowledge write request projection replay is not configured',
-      });
-    }
-    const writeRequest = await this.options.writeRequestRepository.findByIdForIdentity(
-      identityId,
-      writeRequestId,
-    );
-    if (!writeRequest) {
-      return fail({ code: 'NOT_FOUND', message: 'Knowledge write request was not found' });
-    }
-    if (writeRequest.status !== 'Committed' || !writeRequest.commitSha) {
-      return fail({
-        code: 'CONFLICT',
-        message: 'Knowledge write request is not committed; projection cannot be replayed',
-      });
-    }
-    if (writeRequest.projectionStatus === 'Succeeded') {
-      return ok({
-        writeRequestId: writeRequest.id,
-        commitSha: writeRequest.commitSha,
-        status: 'Succeeded',
-      });
-    }
-    const connection = await this.options.connectionRepository.findByIdForIdentity(
-      identityId,
-      writeRequest.connectionId,
-    );
-    if (!connection) {
-      return fail({
-        code: 'NOT_FOUND',
-        message: 'Knowledge repository connection was not found',
-      });
-    }
-    // P1-5：对已 Failed 的 write request 再次 replay 是一次 retry（不得笼统计为 failed）。
-    if (writeRequest.projectionStatus === 'Failed') {
-      this.options.metrics?.recordOutbox('knowledge', 'retried');
-    }
-    const outcome = await this.leaseCoordinator.execute(
-      knowledgeRepositoryConnectionLeaseKey(connection.id),
-      async (guard) =>
-        this.replayWriteRequestCore(connection, writeRequest, {
-          ensureHeld: guard.ensureHeld,
-        }),
-    );
-    if (!outcome.acquired) {
-      return fail({
-        code: 'CONFLICT',
-        message: 'Knowledge repository is processing another write or projection',
-      });
-    }
-    // P1-5：replay 取得连接级 lease 即 claim 成功。
-    this.options.metrics?.recordOutbox('knowledge', 'claimed');
-    return outcome.value!;
+    return fail({
+      code: 'FORBIDDEN',
+      message: 'Historical write replay is retired. Refresh the read-only source instead.',
+    });
   }
 
   async listWriteRequests(
@@ -456,100 +386,6 @@ export class KnowledgeRepositoryProjectionService {
     });
   }
 
-  /**
-   * Replays all Committed write requests whose projection is Pending/Failed for
-   * one connection (automatic replay used by the reconciliation cycle).
-   */
-  private async replayPendingWriteRequests(connectionId: string): Promise<void> {
-    const repository = this.options.writeRequestRepository;
-    if (!repository) return;
-    const candidates = await repository.listProjectionPendingOrFailedForConnection(
-      connectionId,
-      50,
-    );
-    for (const writeRequest of candidates) {
-      if (!this.deliveryQueue.isRunning()) return;
-      const result = await this.replayWriteRequestProjection(
-        writeRequest.identityId,
-        writeRequest.id,
-      );
-      if (!result.ok) {
-        logger.warn('Knowledge write request projection replay failed', {
-          error: result.error,
-          connectionId,
-          writeRequestId: writeRequest.id,
-        });
-      }
-    }
-  }
-
-  private async replayWriteRequestCore(
-    connection: KnowledgeRemoteBindingServerDTO,
-    writeRequest: KnowledgeWriteRequestRecord,
-    guard: { ensureHeld(): Promise<void> },
-  ): Promise<Result<KnowledgeWriteRequestReplayResponse>> {
-    if (!this.options.writeRequestRepository) {
-      return fail({
-        code: 'SERVICE_UNAVAILABLE',
-        message: 'Knowledge write request projection replay is not configured',
-      });
-    }
-    const commitSha = writeRequest.commitSha;
-    const blobSha = writeRequest.blobSha;
-    const markdownContent = writeRequest.markdownContent;
-    if (!commitSha || !blobSha || !markdownContent) {
-      return fail({
-        code: 'CONFLICT',
-        message: 'Knowledge write request has no rebuildable projection source',
-      });
-    }
-    try {
-      await guard.ensureHeld();
-      await this.projectionEngine.applyChanges(connection, commitSha, {
-        notes: [
-          {
-            relativePath: writeRequest.relativePath,
-            blobSha,
-            markdownContent,
-          },
-        ],
-      });
-      await guard.ensureHeld();
-      await this.options.writeRequestRepository.markProjectionSucceeded(
-        writeRequest.identityId,
-        writeRequest.id,
-        this.now(),
-      );
-      this.options.metrics?.recordOutbox('knowledge', 'succeeded');
-      this.options.metrics?.recordWorker('knowledge', 'completed');
-      return ok({
-        writeRequestId: writeRequest.id,
-        commitSha,
-        status: 'Succeeded',
-      });
-    } catch (error) {
-      if (error instanceof KnowledgeRepositoryLeaseLostError) throw error;
-      await guard.ensureHeld();
-      await this.options.writeRequestRepository.markProjectionFailed(
-        writeRequest.identityId,
-        writeRequest.id,
-        'PROJECTION_REPLAY_FAILED',
-        error instanceof Error ? error.message : 'Knowledge write request projection replay failed',
-        this.now(),
-      );
-      this.options.metrics?.recordOutbox('knowledge', 'failed');
-      this.options.metrics?.recordWorker('knowledge', 'failed');
-      return fail({
-        code: 'SERVICE_UNAVAILABLE',
-        message: 'Knowledge write request projection replay failed',
-      });
-    }
-  }
-
-  /**
-   * System paths (webhook/reconcile) start from bare connection id, then re-load
-   * ownership-scoped once identity is known from the aggregate.
-   */
   private async loadOwnedConnectionById(
     connectionId: string,
   ): Promise<KnowledgeRemoteBindingServerDTO | null> {

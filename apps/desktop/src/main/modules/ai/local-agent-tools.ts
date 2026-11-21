@@ -76,6 +76,7 @@ import {
   GoalPanelRemoveKeyResultCommandSchema,
   GoalPanelFocusCommandSchema,
   GoalPanelSubmitCommandSchema,
+  KnowledgeContextSourceSchema,
   type GoalPanelCommand,
 } from '@memoflow/ai-contracts';
 import type { IDesktopNativePanelBridge } from './desktop-native-panel-bridge';
@@ -258,8 +259,9 @@ export function createDesktopLocalAgentTools(
       const panels = context.origin === 'client' ? undefined : panelBridge;
       if (knowledge) {
         const reference = z.object({
-          documentId: KnowledgeDocumentIdWireSchema,
-          url: z.string().max(1024),
+          documentId: KnowledgeDocumentIdWireSchema.nullable(),
+          source: KnowledgeContextSourceSchema,
+          url: z.string().max(16 * 1024),
           spaceId: z.string(),
           path: z.string(),
           title: z.string(),
@@ -270,7 +272,15 @@ export function createDesktopLocalAgentTools(
           if (note.identityId !== context.identityId) throw new GatewayReadError('FORBIDDEN');
           return reference.parse({
             documentId: note.knowledgeDocumentId,
-            url: `/repository?note=${note.knowledgeDocumentId}`,
+            url: note.knowledgeDocumentId
+              ? `/repository?note=${note.knowledgeDocumentId}`
+              : `/repository?notePath=${encodeURIComponent(note.sourcePath)}&sourceBindingId=${encodeURIComponent(note.repositoryId)}`,
+            source: {
+              kind: 'local_vault',
+              bindingId: note.repositoryId,
+              relativePath: note.sourcePath,
+              contentHash: note.sourceContentHash,
+            },
             spaceId: note.knowledgeSpaceId,
             path: note.sourcePath,
             title: note.title ?? note.sourcePath,
@@ -294,19 +304,18 @@ export function createDesktopLocalAgentTools(
               structuredContent: result,
             };
           } catch (error) {
+            const rawCode = error instanceof Error && 'code' in error ? error.code : undefined;
+            const parsedCode = GatewayFailureCodeSchema.safeParse(rawCode);
+            const code =
+              rawCode === 'LOCAL_AGENT_PERMISSION_DENIED'
+                ? 'PERMISSION_DENIED'
+                : parsedCode.success
+                  ? parsedCode.data
+                  : 'UNAVAILABLE';
             return {
               isError: true,
-              content: [
-                {
-                  type: 'text' as const,
-                  text:
-                    error instanceof GatewayReadError
-                      ? error.code
-                      : error instanceof Error && 'code' in error
-                        ? String(error.code)
-                        : 'UNAVAILABLE',
-                },
-              ],
+              content: [{ type: 'text' as const, text: code }],
+              structuredContent: { error: { code } },
             };
           }
         }
@@ -320,7 +329,7 @@ export function createDesktopLocalAgentTools(
           'knowledge_search',
           {
             description:
-              'Search managed Markdown notes in the current local Vault. Returns stable document references and excerpts; no filesystem path input or cloud fallback.',
+              'Search Markdown notes in the current local Vault. Returns read-only source references and excerpts, including ordinary Obsidian notes.',
             inputSchema: z
               .object({
                 query: z.string().trim().min(1).max(500),
@@ -335,7 +344,6 @@ export function createDesktopLocalAgentTools(
               items: (
                 await knowledge.listRelevantNotes(context.identityId, input.query, input.limit)
               )
-                .filter((note) => note.knowledgeDocumentId)
                 .slice(0, input.limit)
                 .map(project),
             })),
@@ -344,10 +352,11 @@ export function createDesktopLocalAgentTools(
           'knowledge_get',
           {
             description:
-              'Read one managed local Vault note by the stable documentId from knowledge_search. Source paths are references, never write permissions.',
+              'Read a local Vault note using the exact source reference or stable documentId returned by knowledge_search. Supply exactly one; changed sources must be searched again.',
             inputSchema: z
               .object({
-                documentId: KnowledgeDocumentIdWireSchema,
+                documentId: KnowledgeDocumentIdWireSchema.optional(),
+                source: KnowledgeContextSourceSchema.optional(),
                 spaceId: z.string().min(1).max(512).optional(),
               })
               .strict(),
@@ -356,11 +365,15 @@ export function createDesktopLocalAgentTools(
           },
           (input) =>
             read('knowledge_get', async () => {
-              const note = await knowledge.getNoteById(
-                context.identityId,
-                KnowledgeDocumentIdSchema.parse(input.documentId),
-                input.spaceId,
-              );
+              if (Boolean(input.documentId) === Boolean(input.source))
+                throw new GatewayReadError('VALIDATION_ERROR');
+              const note = input.source
+                ? await knowledge.getNoteBySource(context.identityId, input.source)
+                : await knowledge.getNoteById(
+                    context.identityId,
+                    KnowledgeDocumentIdSchema.parse(input.documentId),
+                    input.spaceId,
+                  );
               if (!note) return { note: null };
               if (Buffer.byteLength(note.content) > 100 * 1024)
                 throw new GatewayReadError('RESPONSE_TOO_LARGE');

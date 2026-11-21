@@ -101,7 +101,7 @@
         </div>
 
         <div
-          v-if="mentionSuggestions.length"
+          v-if="mentionQuery !== null"
           class="absolute bottom-[calc(100%-0.25rem)] left-2 z-50 w-[min(20rem,calc(100%-1rem))] overflow-hidden rounded-xl border border-[hsl(var(--border-subtle))] bg-[hsl(var(--surface-overlay))] p-1"
           :class="aiUiHost.semanticElevationClass('floating')"
           data-testid="ai-composer-mention-menu"
@@ -109,6 +109,19 @@
           <div class="px-2 py-1.5 text-[11px] font-medium text-muted-foreground">
             {{ t('aiAssistant.chatPage.context.mentionHint') }}
           </div>
+          <p v-if="knowledgeLoading" class="px-2 py-2 text-xs text-muted-foreground" role="status">
+            {{ t('common.loading') }}
+          </p>
+          <p
+            v-else-if="knowledgeError"
+            class="px-2 py-2 text-xs text-muted-foreground"
+            role="status"
+          >
+            {{ t('repository.hub.contextUnavailable') }}
+          </p>
+          <p v-else-if="!mentionSuggestions.length" class="px-2 py-2 text-xs text-muted-foreground">
+            {{ t('aiAssistant.chatPage.context.noNotes') }}
+          </p>
           <button
             v-for="(suggestion, index) in mentionSuggestions"
             :key="`${suggestion.entityType}:${suggestion.id}`"
@@ -125,7 +138,14 @@
             <Target v-if="suggestion.entityType === 'goal'" class="h-4 w-4 shrink-0" />
             <ListChecks v-else-if="suggestion.entityType === 'task'" class="h-4 w-4 shrink-0" />
             <FileText v-else class="h-4 w-4 shrink-0" />
-            <span class="min-w-0 flex-1 truncate">{{ suggestion.label }}</span>
+            <span class="min-w-0 flex-1"
+              ><span class="block truncate">{{ suggestion.label }}</span
+              ><span
+                v-if="suggestion.path"
+                class="block truncate text-[11px] text-muted-foreground"
+                >{{ suggestion.path }}</span
+              ></span
+            >
             <span class="shrink-0 text-[10px] text-muted-foreground/70">
               {{ mentionTypeLabel(suggestion.entityType) }}
             </span>
@@ -147,7 +167,7 @@
           @input="handleInput"
           @paste="handlePaste"
           @keydown="handleKeydown"
-          @keyup="updateMentionState"
+          @keyup="handleMentionKeyup"
           @click="updateMentionState"
           @compositionstart="isComposing = true"
           @compositionend="handleCompositionEnd"
@@ -250,14 +270,20 @@
                       :key="note.contextId"
                       @click="
                         toggleEntity({
-                          entityType: 'knowledge_document',
+                          entityType: note.source ? 'knowledge_source' : 'knowledge_document',
                           id: note.contextId,
                           label: note.title,
+                          ...(note.source ? { source: note.source } : {}),
                         })
                       "
                     >
                       <Check
-                        v-if="hasContextEntity('knowledge_document', note.contextId)"
+                        v-if="
+                          hasContextEntity(
+                            note.source ? 'knowledge_source' : 'knowledge_document',
+                            note.contextId,
+                          )
+                        "
                         class="mr-2 h-4 w-4"
                       />
                       <FileText v-else class="mr-2 h-4 w-4 text-muted-foreground" />
@@ -408,6 +434,8 @@ const props = withDefaults(
     recentGoals?: AIWorkspaceRecentGoal[];
     recentTasks?: AIWorkspaceRecentTask[];
     recentKnowledgeNotes?: AIWorkspaceRecentKnowledgeNote[];
+    knowledgeLoading?: boolean;
+    knowledgeError?: string | null;
     modelGroups: Array<{
       providerId: string;
       providerName: string;
@@ -428,6 +456,7 @@ const props = withDefaults(
 
 const emit = defineEmits<{
   'update:modelValue': [value: string];
+  'knowledge-query': [query: string | null];
   send: [];
   stop: [];
   'select-model': [modelKey: string];
@@ -454,6 +483,10 @@ const contextSubmenuOpen = ref({
   note: false,
 });
 
+watch([mentionQuery, () => contextSubmenuOpen.value.note], ([query, open]) =>
+  emit('knowledge-query', query ?? (open ? '' : null)),
+);
+
 const menuGoals = computed(() => props.recentGoals.slice(0, 8));
 const menuTasks = computed(() => props.recentTasks.slice(0, 8));
 
@@ -478,9 +511,11 @@ const mentionCandidates = computed<Array<Omit<ComposerContextEntity, 'origin'>>>
     label: task.title,
   })),
   ...referenceableKnowledgeNotes.value.map((note) => ({
-    entityType: 'knowledge_document' as const,
+    entityType: note.source ? ('knowledge_source' as const) : ('knowledge_document' as const),
     id: note.contextId,
     label: note.title,
+    path: note.path,
+    ...(note.source ? { source: note.source } : {}),
   })),
 ]);
 
@@ -488,7 +523,7 @@ const mentionSuggestions = computed(() => {
   if (mentionQuery.value === null) return [];
   const query = mentionQuery.value.trim().toLocaleLowerCase();
   const ranked = mentionCandidates.value.filter((candidate) => {
-    if (!query) return true;
+    if (!query || candidate.entityType === 'knowledge_source') return true;
     return candidate.label.toLocaleLowerCase().includes(query);
   });
   return ranked.slice(0, 6);
@@ -539,14 +574,19 @@ function handleCompositionEnd(event: CompositionEvent) {
   }
 }
 
+function handleMentionKeyup(event: KeyboardEvent) {
+  if (event.key !== 'Escape' && !event.isComposing) updateMentionState();
+}
+
 function handleKeydown(event: KeyboardEvent) {
-  if (mentionSuggestions.value.length) {
-    if (event.key === 'ArrowDown') {
+  if (isComposing.value || event.isComposing || event.keyCode === 229) return;
+  if (mentionQuery.value !== null) {
+    if (event.key === 'ArrowDown' && mentionSuggestions.value.length) {
       event.preventDefault();
       mentionActiveIndex.value = (mentionActiveIndex.value + 1) % mentionSuggestions.value.length;
       return;
     }
-    if (event.key === 'ArrowUp') {
+    if (event.key === 'ArrowUp' && mentionSuggestions.value.length) {
       event.preventDefault();
       mentionActiveIndex.value =
         (mentionActiveIndex.value - 1 + mentionSuggestions.value.length) %
@@ -642,7 +682,11 @@ function selectMention(entity: Omit<ComposerContextEntity, 'origin'>) {
   const token = `@${entity.label}`;
   const next = `${before}${token} ${after}`;
   emit('update:modelValue', next);
-  if (!hasContextEntity(entity.entityType, entity.id)) emit('toggle-context-entity', entity);
+  const existing = props.contextEntities.find(
+    (item) => item.entityType === entity.entityType && item.id === entity.id,
+  );
+  if (!existing || (entity.source && entity.source.contentHash !== existing.source?.contentHash))
+    emit('toggle-context-entity', entity);
   closeMentionMenu();
   void nextTick(() => {
     const nextCaret = before.length + token.length + 1;

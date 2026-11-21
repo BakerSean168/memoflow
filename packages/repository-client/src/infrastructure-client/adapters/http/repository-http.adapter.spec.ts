@@ -44,7 +44,9 @@ describe('RepositoryHttpAdapter knowledge repository connections', () => {
       ok: false,
       error: { code: 'SERVICE_UNAVAILABLE' },
     });
-    await adapter.issueDesktopKnowledgeRepositoryToken('connection/1');
+    await expect(
+      adapter.issueDesktopKnowledgeRepositoryToken('connection/1'),
+    ).resolves.toMatchObject({ ok: false, error: { code: 'FORBIDDEN' } });
 
     expect(httpClient.post).toHaveBeenNthCalledWith(
       1,
@@ -77,10 +79,7 @@ describe('RepositoryHttpAdapter knowledge repository connections', () => {
       '/repositories/knowledge-connections/connection%2F1',
       { params: { purgeCloudData: true } },
     );
-    expect(httpClient.post).toHaveBeenNthCalledWith(
-      5,
-      '/repositories/knowledge-connections/connection%2F1/desktop-token',
-    );
+    expect(httpClient.post).toHaveBeenCalledTimes(4);
   });
 
   it('uses the dedicated referenceable knowledge-document endpoint', async () => {
@@ -107,7 +106,7 @@ describe('RepositoryHttpAdapter knowledge repository connections', () => {
     });
   });
 
-  it('uses the projection read and confirmed-create endpoints', async () => {
+  it('reads projections while rejecting content writes before transport', async () => {
     const httpClient = createResultHttpClientStub();
     const adapter = new RepositoryHttpAdapter(httpClient);
 
@@ -147,7 +146,7 @@ describe('RepositoryHttpAdapter knowledge repository connections', () => {
       limit: 20,
     });
     await adapter.getKnowledgeAttachmentContent('attachment/1');
-    await adapter.createConfirmedKnowledgeNote({
+    const create = await adapter.createConfirmedKnowledgeNote({
       connectionId: 'connection/1',
       proposalId: 'proposal-1',
       revision: 1,
@@ -201,10 +200,17 @@ describe('RepositoryHttpAdapter knowledge repository connections', () => {
       7,
       '/repositories/knowledge-attachments/attachment%2F1/content',
     );
-    expect(httpClient.post).toHaveBeenCalledWith(
-      '/repositories/knowledge-notes',
-      expect.objectContaining({ requestId: 'request-1', proposedPath: 'notes/Approved.md' }),
+    expect(create).toMatchObject({ ok: false, error: { code: 'FORBIDDEN' } });
+    await expect(adapter.adoptKnowledgeDocument({} as never)).resolves.toMatchObject({
+      ok: false,
+      error: { code: 'FORBIDDEN' },
+    });
+    await expect(adapter.replayKnowledgeWriteRequestProjection('old-write')).resolves.toMatchObject(
+      { ok: false, error: { code: 'FORBIDDEN' } },
     );
+    expect(httpClient.post).not.toHaveBeenCalled();
+    expect(httpClient.put).not.toHaveBeenCalled();
+    expect(httpClient.patch).not.toHaveBeenCalled();
   });
 });
 

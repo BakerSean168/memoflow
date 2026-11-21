@@ -43,9 +43,6 @@ import { settingUiHost } from '../setting-ui-host';
 
 const KeyboardSettings = defineAsyncComponent(() => import('../components/KeyboardSettings.vue'));
 const AISettings = defineAsyncComponent(() => import('../components/AISettings.vue'));
-const KnowledgeRepositorySettings = defineAsyncComponent(
-  () => import('../components/KnowledgeRepositorySettings.vue'),
-);
 const NotificationSettings = defineAsyncComponent(
   () => import('../components/NotificationSettings.vue'),
 );
@@ -89,7 +86,6 @@ let settingsResizeObserver: ResizeObserver | null = null;
 type SettingsGroup =
   | 'shortcuts'
   | 'appearance'
-  | 'repository'
   | 'ai'
   | 'notifications'
   | 'account'
@@ -103,7 +99,6 @@ const GROUP_DEFINITIONS: ReadonlyArray<{
 }> = [
   { value: 'shortcuts', labelKey: 'setting.groups.shortcuts' },
   { value: 'appearance', labelKey: 'setting.groups.appearance' },
-  { value: 'repository', labelKey: 'setting.groups.repository' },
   { value: 'ai', labelKey: 'setting.groups.ai' },
   { value: 'notifications', labelKey: 'setting.groups.notifications' },
   { value: 'account', labelKey: 'setting.groups.account' },
@@ -283,7 +278,6 @@ onBeforeUnmount(() => {
             <UserPreferenceSettingsSection v-if="activeTab === 'appearance'" />
             <KeyboardSettings v-else-if="activeTab === 'shortcuts'" />
             <AISettings v-else-if="activeTab === 'ai'" />
-            <KnowledgeRepositorySettings v-else-if="activeTab === 'repository'" />
             <NotificationSettings v-else-if="activeTab === 'notifications'" />
             <AccountSettingsSection v-else-if="activeTab === 'account'" />
             <DataSettingsSection v-else-if="activeTab === 'data'" />

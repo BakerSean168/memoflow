@@ -1,6 +1,6 @@
 import { afterAll, beforeEach, describe, expect, it } from 'vitest';
 import { createSystemClock, createTimeContext } from '@memoflow/time';
-import { createHash, createHmac, randomUUID } from 'node:crypto';
+import { createHash, randomUUID } from 'node:crypto';
 import { prisma } from '@memoflow/database';
 import {
   OperationTimelineEntrySchema,
@@ -22,7 +22,7 @@ import type { IGitHubAppClient } from '@memoflow/repository/server';
  * W7 跨模块回归门禁 (C1)：
  * 统一 OperationTimelineEntry 契约在 Notification / Schedule rebuild /
  * Account closure / Knowledge projection 四个 durable operation owner 的真实 DB 数据上一致成立；
- * 故障注入（dead-letter / failed）后 replay 恢复状态，并把审计写入同一张共享审计表。
+ * 可重放业务恢复状态并写入共享审计表；Knowledge 历史收据只读，不重放旧内容。
  */
 describe('W7 cross-module operation gate (real DB)', () => {
   let identityId: string;
@@ -52,7 +52,7 @@ describe('W7 cross-module operation gate (real DB)', () => {
     await prisma.$disconnect();
   });
 
-  it('notification + schedule-rebuild + account-closure + knowledge expose schema-conformant timeline, replay recover faults, and audit lands in the shared table', async () => {
+  it('keeps unified timelines, audits supported recovery, and preserves read-only Knowledge history', async () => {
     // ── Fault injection: seed failed/dead operations across modules ──
     const now = new Date();
 
@@ -262,7 +262,11 @@ describe('W7 cross-module operation gate (real DB)', () => {
       (await repository.api.replayKnowledgeWriteRequestProjection(otherCtx, knowledgeOp)).ok,
     ).toBe(false);
 
-    // ── Fault recovery: authorized replay advances state for every module ──
+    expect(all.find((entry) => entry.source === 'knowledge-projection')).toMatchObject({
+      replayable: false,
+    });
+
+    // ── Fault recovery: current replay capabilities advance state ──
     const notifReplay = await notifModule.operations.replayDeadLetter(notificationOp, identityId);
     expect(notifReplay.ok).toBe(true);
     expect((notifReplay.data as any).status).toBe('retryable');
@@ -275,34 +279,33 @@ describe('W7 cross-module operation gate (real DB)', () => {
     expect(accountReplay.ok).toBe(true);
     expect((accountReplay.data as any).status).toBe('running');
 
+    const historicalRequest = await prisma.knowledgeWriteRequest.findUniqueOrThrow({
+      where: { id: knowledgeOp },
+    });
     const knowledgeReplay = await repository.api.replayKnowledgeWriteRequestProjection(
       ctx,
       knowledgeOp,
     );
-    expect(knowledgeReplay.ok).toBe(true);
-    expect((knowledgeReplay.data as any).status).toBe('Succeeded');
+    expect(knowledgeReplay).toMatchObject({
+      ok: false,
+      error: { code: 'FORBIDDEN', context: { reason: 'knowledge-source-read-only' } },
+    });
+    expect(
+      await prisma.knowledgeWriteRequest.findUniqueOrThrow({ where: { id: knowledgeOp } }),
+    ).toEqual(historicalRequest);
+    expect(
+      await prisma.knowledgeNoteProjection.count({ where: { bindingId: knowledgeConnectionId } }),
+    ).toBe(0);
 
-    // ── Audit: all four replay actions landed in the SAME shared table ──
+    // Only supported replay actions create recovery audits; retired Knowledge cannot resurrect content.
     const auditRows = await prisma.operationAuditLog.findMany({
       where: { actorIdentityId: identityId, action: 'replay' },
     });
-    const auditedOperations = auditRows.map((r) => r.operationId).sort();
-    // Knowledge is audit-first: each replay writes an intent record + an outcome
-    // record, so its operation appears twice; the other three write once each.
-    expect(auditedOperations).toEqual(
-      [accountOp, knowledgeOp, knowledgeOp, notificationOp, scheduleOp].sort(),
+    expect(auditRows.map((row) => row.operationId).sort()).toEqual(
+      [accountOp, notificationOp, scheduleOp].sort(),
     );
-    const knowledgeAudits = auditRows
-      .filter((r) => r.operationId === knowledgeOp)
-      .sort((a, b) => (a.createdAt < b.createdAt ? -1 : 1));
-    expect(knowledgeAudits.length).toBe(2);
-    expect(knowledgeAudits[0].details).toContain('replay intent');
-    expect(knowledgeAudits[1].details).toContain('status ->');
-    const sources = auditRows.map((r) => r.source).sort();
-    expect(sources).toEqual([
+    expect(auditRows.map((row) => row.source).sort()).toEqual([
       'account-closure',
-      'knowledge-projection',
-      'knowledge-projection',
       'notification',
       'schedule-rebuild',
     ]);
@@ -325,7 +328,7 @@ function createMockGithubAppClient(commitSha: string): IGitHubAppClient {
     getInstallationInventory: async () => ({
       installationId: `install-${randomUUID()}`,
       accountId: '42',
-      contentsPermission: 'write',
+      contentsPermission: 'read',
       suspended: false,
       repositories: [],
     }),
@@ -345,7 +348,6 @@ function createMockGithubAppClient(commitSha: string): IGitHubAppClient {
       files: [],
     }),
     getBlob: async () => ({ blobSha: 'b'.repeat(40), byteSize: 1, bytes: new Uint8Array() }),
-    createFileCommit: async () => ({ commitSha, blobSha: 'b'.repeat(40) }),
     createInstallationAccessToken: async () => ({
       token: 'gate-token',
       expiresAt: 1_750_000_000_000,

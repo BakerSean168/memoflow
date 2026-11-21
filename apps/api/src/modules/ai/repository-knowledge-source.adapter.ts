@@ -1,3 +1,4 @@
+import type { KnowledgeContextSource } from '@memoflow/ai-contracts';
 /**
  * App-local AI host adapter (API lane).
  * apps/api 本地的 AI 宿主适配器（API lane）。
@@ -56,7 +57,7 @@ export class RepositoryKnowledgeSourceAdapter implements IKnowledgeSourcePort {
     query: string,
     limit: number,
   ): Promise<KnowledgeSourceNote[]> {
-    const resources = await this.loadNotes(identityId, limit * 3);
+    const resources = await this.loadNotes(identityId, limit * 3, false);
     return resources
       .map((resource) => ({ resource, score: scoreNote(resource, query) }))
       .filter(({ score }) => score > 0 || query.trim().length === 0)
@@ -67,6 +68,24 @@ export class RepositoryKnowledgeSourceAdapter implements IKnowledgeSourcePort {
 
   async listIndexableNotes(identityId: string, limit: number): Promise<KnowledgeSourceNote[]> {
     return this.loadNotes(identityId, limit);
+  }
+
+  async getNoteBySource(
+    identityId: string,
+    source: KnowledgeContextSource,
+  ): Promise<KnowledgeSourceNote | null> {
+    if (source.kind !== 'github_projection') return null;
+    const row = await this.db.knowledgeNoteProjection.findFirst({
+      where: {
+        bindingId: source.bindingId,
+        relativePath: source.relativePath,
+        contentHash: source.contentHash,
+        deletedAt: null,
+        binding: { identityId, disconnectedAt: null },
+      },
+      include: { binding: { select: { knowledgeSpaceId: true } } },
+    });
+    return row ? this.toKnowledgeNote(identityId, row) : null;
   }
 
   async getNoteById(
@@ -89,11 +108,15 @@ export class RepositoryKnowledgeSourceAdapter implements IKnowledgeSourcePort {
     return row ? this.toKnowledgeNote(identityId, row) : null;
   }
 
-  private async loadNotes(identityId: string, limit: number): Promise<KnowledgeSourceNote[]> {
+  private async loadNotes(
+    identityId: string,
+    limit: number,
+    stableOnly = true,
+  ): Promise<KnowledgeSourceNote[]> {
     const rows = await this.db.knowledgeNoteProjection.findMany({
       where: {
         deletedAt: null,
-        knowledgeDocumentId: { not: null },
+        ...(stableOnly ? { knowledgeDocumentId: { not: null } } : {}),
         binding: { identityId, disconnectedAt: null },
       },
       include: { binding: { select: { knowledgeSpaceId: true } } },
@@ -101,7 +124,7 @@ export class RepositoryKnowledgeSourceAdapter implements IKnowledgeSourcePort {
       take: limit,
     });
     return rows
-      .filter((row) => row.knowledgeDocumentId !== null)
+      .filter((row) => !stableOnly || row.knowledgeDocumentId !== null)
       .map((row) => this.toKnowledgeNote(identityId, row));
   }
 

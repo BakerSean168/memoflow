@@ -11,18 +11,15 @@ import type { GitHubAppInstallationInventory } from '../ports/github-app-client.
 export function classifyRemoteRepositoryEligibility(
   inventory: GitHubAppInstallationInventory,
   repository: GitHubInstallationRepositoryDTO,
-  historyFence: RemoteHistoryFence | null,
+  _historyFence: RemoteHistoryFence | null,
 ): RemoteRepositoryEligibility {
   let reason: RemoteRepositoryBlockReason | null = null;
   if (inventory.suspended) reason = 'InstallationSuspended';
-  else if (inventory.contentsPermission !== 'write' || !repository.permissions.push) {
+  else if (inventory.contentsPermission === 'none' || !repository.permissions.pull) {
     reason = 'ContentsPermissionRequired';
   } else if (!repository.private) reason = 'RepositoryPublic';
   else if (repository.archived) reason = 'RepositoryArchived';
   else if (repository.disabled) reason = 'RepositoryDisabled';
-  else if (historyFence && repository.defaultBranch !== historyFence.defaultBranch) {
-    reason = 'DefaultBranchChanged';
-  }
   return reason ? { state: 'Blocked', reason } : { state: 'Ready' };
 }
 

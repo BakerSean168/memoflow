@@ -26,7 +26,7 @@ describe('desktop shared ipc-channels dual single-track surface', () => {
     expect(existsSync(dualSharedIndex)).toBe(false);
   });
 
-  it('allows every repository channel invoked by the renderer IPC adapter', () => {
+  it('allows exactly the local repository channels invoked by the renderer IPC adapter', () => {
     const adapterSource = readFileSync(repositoryIpcAdapter, 'utf8');
     const channelKeys = Array.from(
       adapterSource.matchAll(/RepositoryChannels\.([A-Z0-9_]+)/gu),
@@ -38,6 +38,7 @@ describe('desktop shared ipc-channels dual single-track surface', () => {
     const supportedChannels = new Set<string>(SUPPORTED_REPOSITORY_CHANNELS);
 
     expect(invokedChannels.size).toBeGreaterThan(0);
+    expect(supportedChannels).toEqual(invokedChannels);
     for (const channel of invokedChannels) {
       expect(
         supportedChannels.has(channel),

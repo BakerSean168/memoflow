@@ -1,3 +1,4 @@
+import { AIExecutionError } from '../../../shared/ai-execution-error';
 import {
   GoalPlanExecutionReceiptSchema,
   type GoalPlanDraft,
@@ -245,10 +246,19 @@ function taskRequest(
  * retries only the missing draftRef operations using stable child identities.
  */
 export class ApplyGoalPlanService {
-  constructor(private readonly mutations: GoalPlanMutationPort) {}
+  constructor(
+    private readonly mutations: GoalPlanMutationPort,
+    private readonly knowledgeWritesEnabled = true,
+  ) {}
 
   async apply(input: ApplyGoalPlanInput): Promise<GoalPlanExecutionReceipt> {
     const { workflowRunId, draft, context } = input;
+    if (!this.knowledgeWritesEnabled && draft.knowledge.some((item) => item.mode === 'create')) {
+      throw new AIExecutionError(
+        'capability_unsupported',
+        'Knowledge sources are read-only. This plan can link existing notes but cannot create notes.',
+      );
+    }
     const prior =
       input.priorReceipt?.workflowRunId === workflowRunId &&
       input.priorReceipt.revision === draft.revision

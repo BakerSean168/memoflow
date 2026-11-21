@@ -31,7 +31,6 @@ import type { IKnowledgeProjectionEngine } from './knowledge-projection.engine';
 
 const logger = createLogger('KnowledgeRepositoryProjectionService');
 const DEFAULT_RECONCILIATION_INTERVAL_MS = 15 * 60 * 1_000;
-const FORCE_PUSH_ERROR = 'GITHUB_FORCE_PUSH_REQUIRES_RECONCILIATION';
 
 export interface KnowledgeDeliveryQueueOptions {
   connectionRepository: IKnowledgeRemoteBindingRepository;
@@ -79,7 +78,6 @@ export interface KnowledgeDeliveryQueueHost {
     inventory: Awaited<ReturnType<IGitHubAppClient['getInstallationInventory']>>,
     reason: Extract<RemoteRepositoryBlockReason, 'RepositoryAccessLost'>,
   ) => Promise<void>;
-  replayPendingWriteRequests: (connectionId: string) => Promise<void>;
 }
 
 /**
@@ -226,9 +224,6 @@ export class KnowledgeDeliveryQueue {
         candidates.map((connection) =>
           this.queueConnectionTask(connection.id, async () => {
             await this.reconcileConnection(connection.id);
-            // Automatic replay: Committed write requests whose projection is
-            // Pending/Failed are replayed during the reconciliation cycle.
-            await this.host.replayPendingWriteRequests(connection.id);
           }),
         ),
       );
@@ -310,7 +305,12 @@ export class KnowledgeDeliveryQueue {
         });
         return;
       }
-      if (checkpoint?.projectedCommitSha === remote.headSha && checkpoint.state === 'Ready') return;
+      if (
+        checkpoint?.projectedCommitSha === remote.headSha &&
+        checkpoint.branch === remote.defaultBranch &&
+        checkpoint.state === 'Ready'
+      )
+        return;
 
       await this.host.saveProjectionCheckpoint(connection, {
         branch: remote.defaultBranch,
@@ -413,22 +413,6 @@ export class KnowledgeDeliveryQueue {
       'Processing',
     );
 
-    if (delivery.forced) {
-      await guard.ensureHeld();
-      await this.host.saveProjectionFailure(
-        connection,
-        FORCE_PUSH_ERROR,
-        'Force push requires full reconciliation',
-      );
-      await this.options.deliveryRepository.updateStatus(
-        delivery.id,
-        delivery.connectionId,
-        'Failed',
-        'Force push requires full reconciliation',
-      );
-      return;
-    }
-
     let inventory: Awaited<ReturnType<IGitHubAppClient['getInstallationInventory']>>;
     try {
       inventory = await this.options.githubAppClient.getInstallationInventory(
@@ -482,36 +466,61 @@ export class KnowledgeDeliveryQueue {
       return;
     }
 
-    const afterSha = delivery.afterSha;
-    if (!afterSha) {
-      await this.options.deliveryRepository.updateStatus(
-        delivery.id,
-        delivery.connectionId,
-        'Failed',
-        'Webhook delivery has no after SHA',
-      );
-      return;
-    }
-    const attemptAt = this.now();
-    const previousCheckpoint = await this.options.projectionCheckpointRepository.findByBindingId(
-      connection.id,
-    );
-    await this.host.saveProjectionCheckpoint(connection, {
-      branch: repository.defaultBranch,
-      projectedCommitSha: previousCheckpoint?.projectedCommitSha ?? null,
-      state: 'Rebuilding',
-      failure: null,
-      lastAttemptAt: attemptAt,
-      projectedAt: previousCheckpoint?.projectedAt ?? null,
-    });
-
     try {
-      const changes = await this.options.githubAppClient.getMarkdownChanges(
+      const remote = await this.options.githubAppClient.getRepositorySnapshot(
         connection.installationId,
         repository,
-        delivery.beforeSha,
-        afterSha,
       );
+      const afterSha = remote.headSha;
+      if (!afterSha) {
+        await this.options.deliveryRepository.updateStatus(
+          delivery.id,
+          delivery.connectionId,
+          'Failed',
+          'Repository default branch is empty',
+        );
+        return;
+      }
+      const attemptAt = this.now();
+      const previousCheckpoint = await this.options.projectionCheckpointRepository.findByBindingId(
+        connection.id,
+      );
+      if (
+        previousCheckpoint?.state === 'Ready' &&
+        previousCheckpoint.branch === remote.defaultBranch &&
+        previousCheckpoint.projectedCommitSha === afterSha
+      ) {
+        await guard.ensureHeld();
+        await this.options.deliveryRepository.updateStatus(
+          delivery.id,
+          delivery.connectionId,
+          'Processed',
+        );
+        return;
+      }
+      const incremental =
+        !delivery.forced &&
+        previousCheckpoint?.state === 'Ready' &&
+        previousCheckpoint.branch === remote.defaultBranch &&
+        previousCheckpoint.projectedCommitSha === delivery.beforeSha &&
+        delivery.afterSha === afterSha;
+      await this.host.saveProjectionCheckpoint(connection, {
+        branch: remote.defaultBranch,
+        projectedCommitSha: previousCheckpoint?.projectedCommitSha ?? null,
+        state: 'Rebuilding',
+        failure: null,
+        lastAttemptAt: attemptAt,
+        projectedAt: previousCheckpoint?.projectedAt ?? null,
+      });
+
+      const changes = incremental
+        ? await this.options.githubAppClient.getMarkdownChanges(
+            connection.installationId,
+            repository,
+            delivery.beforeSha,
+            afterSha,
+          )
+        : { requiresFullSnapshot: true, changes: [], attachmentChanges: [] };
       await guard.ensureHeld();
       if (changes.requiresFullSnapshot) {
         const snapshot = await this.options.githubAppClient.getFullMarkdownSnapshot(
@@ -568,7 +577,7 @@ export class KnowledgeDeliveryQueue {
       await guard.ensureHeld();
       const projectedAt = this.now();
       await this.host.saveProjectionCheckpoint(connection, {
-        branch: repository.defaultBranch,
+        branch: remote.defaultBranch,
         projectedCommitSha: afterSha,
         state: 'Ready',
         failure: null,

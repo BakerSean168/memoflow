@@ -425,6 +425,8 @@ function providerOnboardingFailure<T>(cause: unknown): Result<T> {
     case 'upstream_provider_error':
     case 'transport':
       return error('SERVICE_UNAVAILABLE', 'AI provider is unavailable');
+    case 'permission_denied':
+    case 'knowledge_context_stale':
     case 'internal':
       return error('INTERNAL_ERROR', 'AI provider onboarding failed');
   }

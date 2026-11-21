@@ -20,7 +20,8 @@ function isRuntimeSelectableEntity(
   return (
     entity.entityType === 'goal' ||
     entity.entityType === 'task' ||
-    entity.entityType === 'knowledge_document'
+    entity.entityType === 'knowledge_document' ||
+    (entity.entityType === 'knowledge_source' && !!entity.source)
   );
 }
 
@@ -141,7 +142,12 @@ export function useAIComposerContext() {
       (item) => `${item.entityType}:${item.id}` === key && item.origin === 'explicit',
     );
     if (existing >= 0) {
-      composerContextEntities.value.splice(existing, 1);
+      if (
+        entity.source &&
+        entity.source.contentHash !== composerContextEntities.value[existing]?.source?.contentHash
+      ) {
+        upsertContextEntity({ ...entity, origin: 'explicit' });
+      } else composerContextEntities.value.splice(existing, 1);
       return;
     }
     if (composerContextEntities.value.length >= MAX_COMPOSER_CONTEXT_ENTITIES) {
@@ -210,11 +216,16 @@ export function useAIComposerContext() {
   }
 
   function selectedEntities(): AssistantRuntimeSelectedEntity[] {
-    return composerContextEntities.value.filter(isRuntimeSelectableEntity).map((entity) => ({
-      entityType: entity.entityType,
-      id: entity.id,
-      label: entity.label,
-    }));
+    return composerContextEntities.value.filter(isRuntimeSelectableEntity).map((entity) => {
+      if (entity.entityType === 'knowledge_source')
+        return {
+          entityType: 'knowledge_source' as const,
+          id: entity.id,
+          label: entity.label,
+          source: entity.source!,
+        };
+      return { entityType: entity.entityType, id: entity.id, label: entity.label };
+    });
   }
   return {
     selectedEntities,

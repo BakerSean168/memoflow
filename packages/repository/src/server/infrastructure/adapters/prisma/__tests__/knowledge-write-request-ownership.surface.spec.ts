@@ -16,11 +16,6 @@ describe('knowledge write request ownership surface', () => {
     resolve(__dirname, '../knowledge-write-request-prisma.repository.ts'),
     'utf8',
   );
-  const service = readFileSync(
-    resolve(__dirname, '../../../../application/services/knowledge-note-commit.service.ts'),
-    'utf8',
-  );
-
   it('port status methods require identityId', () => {
     expect(port).toContain(
       'retryFailed(identityId: string, id: string, updatedAt: number): Promise<boolean>;',
@@ -47,13 +42,5 @@ describe('knowledge write request ownership surface', () => {
     expect(prisma).toContain("where: { id, identityId, status: 'Failed' }");
     // No bare where: { id } status updates via update/updateMany.
     expect(prisma).not.toMatch(/where:\s*\{\s*id\s*\}/);
-  });
-
-  it('commit service passes identityId into status transitions', () => {
-    expect(service).toContain('retryFailed(identityId, existing.id, now)');
-    expect(service).toContain('markFailed(identityId, record.id, code, message)');
-    expect(service).toMatch(
-      /markCommitted\(\s*identityId,\s*record\.id,\s*committed\.commitSha,?\s*\)/,
-    );
   });
 });

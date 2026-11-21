@@ -24,7 +24,6 @@ import type { IGitHubAppClient } from '../application/ports/github-app-client.po
 import type { IKnowledgeRepositoryCloudDataPurger } from '../application/ports/knowledge-repository-cloud-data-purger.port';
 import type { IKnowledgeRepositoryConnectionService } from '../application/ports/knowledge-repository-connection.service.port';
 import type { IKnowledgeRepositoryProjectionService } from '../application/ports/knowledge-repository-projection.service.port';
-import type { IKnowledgeNoteCommitService } from '../application/ports/knowledge-note-commit.service.port';
 import { GitHubAppClient } from './services/github-app-client';
 import {
   KnowledgeProjectionCheckpointPrismaRepository,
@@ -44,7 +43,6 @@ import { KnowledgeWriteRequestPrismaRepository } from './adapters/prisma/knowled
 import { KnowledgeRepositoryLeasePrismaRepository } from './adapters/prisma/knowledge-repository-lease-prisma.repository';
 import { KnowledgeRepositoryProjectionService } from '../application/services/knowledge-repository-projection.service';
 import { KnowledgeProjectionEngine } from '../application/services/knowledge-projection.engine';
-import { KnowledgeNoteCommitService } from '../application/services/knowledge-note-commit.service';
 import {
   PrismaOperationAuditRepository,
   globalUnifiedOperationMetrics,
@@ -176,7 +174,6 @@ export interface CreateRepositoryPrismaRuntimeContributionsInput {
 export interface RepositoryPrismaRuntimeContributions {
   readonly knowledgeRepositoryConnectionService: IKnowledgeRepositoryConnectionService | null;
   readonly knowledgeRepositoryProjectionService: IKnowledgeRepositoryProjectionService | null;
-  readonly knowledgeNoteCommitService: IKnowledgeNoteCommitService | null;
   readonly runtimeContribution: RepositoryModuleRuntimeContribution | null;
 }
 
@@ -274,27 +271,10 @@ export function createRepositoryPrismaRuntimeContributions(
           projectionEngine: knowledgeProjectionEngine ?? undefined,
         })
       : null;
-  const knowledgeNoteCommitService =
-    githubApp && bindingRepository && githubAppClient && projectionRepository && deps.closureChecker
-      ? new KnowledgeNoteCommitService({
-          connectionRepository: bindingRepository,
-          observationRepository: repositories.observationRepository,
-          historyFenceRepository: repositories.historyFenceRepository,
-          documentIdentityRepository: repositories.documentIdentityRepository,
-          projectionRepository,
-          writeRequestRepository: writeRequestRepository ?? repositories.writeRequestRepository,
-          leaseRepository: leaseRepository ?? undefined,
-          githubAppClient,
-          closureChecker: deps.closureChecker,
-          metrics: globalUnifiedOperationMetrics,
-          projectionEngine: knowledgeProjectionEngine ?? undefined,
-        })
-      : null;
 
   return {
     knowledgeRepositoryConnectionService,
     knowledgeRepositoryProjectionService,
-    knowledgeNoteCommitService,
     runtimeContribution: knowledgeRepositoryProjectionService,
   };
 }
@@ -338,7 +318,6 @@ export function createRepositoryPrismaModule(
   return createRepositoryModule({
     knowledgeRepositoryConnectionService: runtime.knowledgeRepositoryConnectionService,
     knowledgeRepositoryProjectionService: runtime.knowledgeRepositoryProjectionService,
-    knowledgeNoteCommitService: runtime.knowledgeNoteCommitService,
     runtimeContributions: [
       ...configuredRuntimeContributions,
       ...(runtime.runtimeContribution ? [runtime.runtimeContribution] : []),

@@ -28,6 +28,7 @@ function createPorts() {
     selectedPort: { getSelectedEntityContext } satisfies IAISelectedEntityContextReadPort,
     knowledgePort: {
       getNoteById,
+      getNoteBySource: vi.fn(),
       listRelevantNotes: vi.fn(),
       listIndexableNotes: vi.fn(),
     } satisfies IKnowledgeSourcePort,
@@ -90,7 +91,7 @@ describe('AssistantSelectedContextHydrator', () => {
     ]);
   });
 
-  it('fails soft for stale or temporarily unavailable selections', async () => {
+  it('blocks an explicitly selected note that can no longer be read', async () => {
     const selectedPort: IAISelectedEntityContextReadPort = {
       getSelectedEntityContext: vi.fn(async ({ id }) => {
         if (id === 'goal-error') throw new Error('owner unavailable');
@@ -98,6 +99,7 @@ describe('AssistantSelectedContextHydrator', () => {
       }),
     };
     const knowledgePort: IKnowledgeSourcePort = {
+      getNoteBySource: vi.fn(),
       getNoteById: vi.fn(async () => {
         throw new Error('projection unavailable');
       }),
@@ -112,6 +114,40 @@ describe('AssistantSelectedContextHydrator', () => {
         { entityType: 'task', id: 'task-missing' },
         { entityType: 'knowledge_document', id: 'kdoc-missing' },
       ]),
-    ).resolves.toEqual({ domainFacts: [], knowledgeEvidence: [] });
+    ).rejects.toMatchObject({ category: 'knowledge_context_stale' });
+  });
+});
+
+it('hydrates ordinary Markdown through its source snapshot and rejects a stale hash', async () => {
+  const ports = createPorts();
+  const source = {
+    kind: 'local_vault' as const,
+    bindingId: 'vault-1',
+    relativePath: 'ordinary.md',
+    contentHash: 'a'.repeat(64),
+  };
+  ports.knowledgePort.getNoteBySource.mockResolvedValueOnce({
+    identityId: 'identity-a',
+    knowledgeDocumentId: null,
+    title: 'Ordinary',
+    content: '# Authoritative body',
+    sourcePath: 'ordinary.md',
+    sourceContentHash: source.contentHash,
+  });
+  const hydrator = new AssistantSelectedContextHydrator(ports.selectedPort, ports.knowledgePort);
+  const selection = {
+    entityType: 'knowledge_source' as const,
+    id: 'source-1',
+    label: 'Untrusted label',
+    source,
+  };
+  expect((await hydrator.hydrate('identity-a', [selection])).knowledgeEvidence[0]).toMatchObject({
+    title: 'Ordinary',
+    excerpt: '# Authoritative body',
+  });
+  expect(ports.knowledgePort.getNoteBySource).toHaveBeenCalledWith('identity-a', source);
+  ports.knowledgePort.getNoteBySource.mockResolvedValueOnce(null);
+  await expect(hydrator.hydrate('identity-a', [selection])).rejects.toMatchObject({
+    category: 'knowledge_context_stale',
   });
 });

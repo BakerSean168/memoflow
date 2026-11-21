@@ -3,29 +3,20 @@ import { z } from 'zod';
 import type { OpenApiRegistryLike } from '@memoflow/utils/result';
 import {
   CompleteKnowledgeRepositoryInstallationResponseSchema,
-  ConfirmKnowledgeRepositoryHeadSchema,
   CreateKnowledgeRepositoryConnectionSchema,
   DisconnectKnowledgeRepositoryConnectionResponseSchema,
   KnowledgeRemoteBindingClientSchema,
-  KnowledgeRepositoryInstallationTokenSchema,
   KnowledgeRepositoryInstallationIntentStatusResponseSchema,
-  KnowledgeRepositoryReconciliationPreviewSchema,
   ListKnowledgeRepositoryConnectionsResSchema,
-  PreviewKnowledgeRepositoryReconciliationSchema,
   StartKnowledgeRepositoryInstallationResponseSchema,
-  CreateConfirmedKnowledgeNoteResponseSchema,
-  AdoptKnowledgeDocumentSchema,
-  AdoptKnowledgeDocumentResponseSchema,
   KnowledgeNoteProjectionClientSchema,
   KnowledgeNoteProjectionListResponseSchema,
   ReferenceableKnowledgeDocumentListResponseSchema,
   KnowledgeNoteTreeResponseSchema,
-  CreateConfirmedKnowledgeNoteSchema,
   KnowledgeNoteLinkGraphResponseSchema,
   KnowledgeAttachmentContentResponseSchema,
   KnowledgeAttachmentProjectionListResponseSchema,
   ListKnowledgeWriteRequestsResSchema,
-  KnowledgeWriteRequestReplayResponseSchema,
 } from '@memoflow/repository-contracts';
 import {
   OperationTimelineEntrySchema,
@@ -345,53 +336,6 @@ export function registerKnowledgeRepositoryConnectionRoutes(
 
   r.route(
     {
-      method: 'post',
-      path: '/knowledge-notes',
-      summary: '创建已确认的 GitHub 知识笔记',
-      description: '只允许创建新 Markdown 文件；已有路径和重复 requestId 不会覆盖或重复提交。',
-      request: {
-        body: { content: { 'application/json': { schema: CreateConfirmedKnowledgeNoteSchema } } },
-      },
-      responses: {
-        200: successResponse(CreateConfirmedKnowledgeNoteResponseSchema, '提交成功'),
-        401: errorResponse('未授权，请登录'),
-        403: errorResponse('仓库不可写'),
-        404: errorResponse('连接不存在'),
-        409: errorResponse('requestId、路径或 Git HEAD 冲突'),
-        422: errorResponse('参数错误'),
-        503: errorResponse('GitHub 服务不可用'),
-      },
-    },
-    auth,
-    (req, ctx) => controller.createNote(ctx, req.body),
-  );
-
-  r.route(
-    {
-      method: 'post',
-      path: '/knowledge-notes/adopt',
-      summary: '显式纳入现有 GitHub 知识笔记的稳定身份',
-      description:
-        '仅允许给当前未管理 Markdown 写入受控 memoflow_id；expectedBlobSha 不匹配时拒绝覆盖并发修改。',
-      request: {
-        body: { content: { 'application/json': { schema: AdoptKnowledgeDocumentSchema } } },
-      },
-      responses: {
-        200: successResponse(AdoptKnowledgeDocumentResponseSchema, '纳入成功'),
-        401: errorResponse('未授权，请登录'),
-        403: errorResponse('仓库不可写'),
-        404: errorResponse('笔记或连接不存在'),
-        409: errorResponse('笔记已变化、已有稳定身份或 ID 冲突'),
-        422: errorResponse('参数错误'),
-        503: errorResponse('GitHub 服务不可用'),
-      },
-    },
-    auth,
-    (req, ctx) => controller.adoptNote(ctx, req.body),
-  );
-
-  r.route(
-    {
       method: 'get',
       path: '/knowledge-attachments',
       summary: '浏览 GitHub 知识附件投影',
@@ -586,81 +530,6 @@ export function registerKnowledgeRepositoryConnectionRoutes(
 
   r.route(
     {
-      method: 'post',
-      path: '/knowledge-connections/:connectionId/reconciliation-preview',
-      summary: '预检 Desktop 本地 Vault 与 GitHub 仓库的首次对账',
-      description: '只读取双方内容形态并给出安全动作；不会写文件、commit、pull 或 push。',
-      request: {
-        params: connectionParams,
-        body: {
-          content: {
-            'application/json': { schema: PreviewKnowledgeRepositoryReconciliationSchema },
-          },
-        },
-      },
-      responses: {
-        200: successResponse(KnowledgeRepositoryReconciliationPreviewSchema, '对账预检完成'),
-        401: errorResponse('未授权，请登录'),
-        403: errorResponse('仅 Desktop 客户端可预检或仓库权限不足'),
-        404: errorResponse('连接或仓库不存在'),
-        422: errorResponse('参数错误'),
-        503: errorResponse('GitHub 服务不可用'),
-      },
-    },
-    auth,
-    (req, ctx) => controller.previewReconciliation(ctx, req.params, req.body),
-  );
-
-  r.route(
-    {
-      method: 'post',
-      path: '/knowledge-connections/:connectionId/desktop-token',
-      summary: '为 Desktop 签发仓库级短期凭据',
-      description: '仅接受 Desktop 客户端上下文；token 不写入连接 DTO 或持久化存储。',
-      request: { params: connectionParams },
-      responses: {
-        200: successResponse(KnowledgeRepositoryInstallationTokenSchema, '凭据已签发'),
-        401: errorResponse('未授权，请登录'),
-        403: errorResponse('仅 Desktop 客户端可获取凭据'),
-        404: errorResponse('连接不存在'),
-        503: errorResponse('GitHub 服务不可用'),
-      },
-    },
-    auth,
-    (req, ctx) => controller.issueDesktopToken(ctx, req.params),
-  );
-
-  r.route(
-    {
-      method: 'post',
-      path: '/knowledge-connections/:connectionId/head-confirmation',
-      summary: '确认 Desktop 同步后的 GitHub HEAD',
-      description:
-        '服务端重新读取 GitHub default branch；只有 HEAD 与 Desktop 报告一致才推进同步游标。',
-      request: {
-        params: connectionParams,
-        body: {
-          content: {
-            'application/json': { schema: ConfirmKnowledgeRepositoryHeadSchema },
-          },
-        },
-      },
-      responses: {
-        200: successResponse(KnowledgeRemoteBindingClientSchema, '同步 HEAD 已确认'),
-        401: errorResponse('未授权，请登录'),
-        403: errorResponse('仅 Desktop 客户端可确认或仓库权限不足'),
-        404: errorResponse('连接或仓库不存在'),
-        409: errorResponse('GitHub HEAD 已变化'),
-        422: errorResponse('参数错误'),
-        503: errorResponse('GitHub 服务不可用'),
-      },
-    },
-    auth,
-    (req, ctx) => controller.confirmHead(ctx, req.params, req.body),
-  );
-
-  r.route(
-    {
       method: 'get',
       path: '/knowledge-write-requests',
       summary: '列出 Git commit 的 projection 操作状态',
@@ -682,27 +551,6 @@ export function registerKnowledgeRepositoryConnectionRoutes(
     (req, ctx) => controller.listWriteRequests(ctx, req.query),
   );
 
-  r.route(
-    {
-      method: 'post',
-      path: '/knowledge-write-requests/:writeRequestId/replay',
-      summary: '重放一个 Committed 且投影 Pending/Failed 的 projection 操作',
-      description:
-        '在连接 lease 下重放投影；重复重放幂等，已 Succeeded 的投影不会倒退。W7：重放写审计。',
-      request: { params: z.object({ writeRequestId: z.string().min(1) }) },
-      responses: {
-        200: successResponse(KnowledgeWriteRequestReplayResponseSchema, '重放完成'),
-        401: errorResponse('未授权，请登录'),
-        404: errorResponse('写请求不存在'),
-        409: errorResponse('写请求未提交或仓库正忙'),
-        503: errorResponse('知识投影服务不可用'),
-      },
-    },
-    auth,
-    (req, ctx) => controller.replayWriteRequestProjection(ctx, req.params?.writeRequestId ?? ''),
-  );
-
-  // GET /operations/timeline — W7 unified knowledge projection timeline (identity-scoped)
   r.route(
     {
       method: 'get',

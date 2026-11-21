@@ -13,6 +13,8 @@ export type AIExecutionErrorKind =
   | 'provider_unavailable'
   | 'upstream_provider_error'
   | 'transport'
+  | 'permission_denied'
+  | 'knowledge_context_stale'
   | 'conflict'
   | 'internal';
 

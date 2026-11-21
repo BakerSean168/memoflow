@@ -1,6 +1,49 @@
 export default {
+  hub: {
+    openGitHub: '在 GitHub 中查看',
+    title: '知识',
+    desktopLabel: '本地知识库',
+    webLabel: '云端只读来源',
+    desktopDescription: '连接你的 Obsidian 知识库，在对话中引用笔记，将确认后的内容保存到本地。',
+    webDescription: '连接知识库的 GitHub 版本，为对话提供上下文。Web 端只读取已有内容。',
+    localSource: '本地 Vault',
+    githubSource: 'GitHub 仓库',
+    readOnly: '只读',
+    connected: '已连接',
+    needsAttention: '需要检查',
+    localEmpty:
+      '选择已有的 Obsidian Vault 或 Markdown 文件夹。笔记的阅读、编辑和文件管理继续在 Obsidian 中进行。',
+    localUnavailable: '原文件夹当前无法访问。请检查磁盘或文件夹位置，也可以重新选择。',
+    openObsidian: '在 Obsidian 中打开',
+    contextTitle: '在对话中使用知识',
+    contextDescription:
+      "在输入框中输入 {'@'}，按标题、路径或别名查找笔记。选中的内容仅作为本次对话的上下文，不会改动原文件。",
+    contextUnavailable: "暂时无法读取知识源，请检查连接后重新输入 {'@'}。",
+    desktopSyncHint:
+      '需要跨设备同步时，请在 Obsidian 或外部 Git 工具中配置。MemoFlow 不执行 Git 同步。',
+    webSyncHint:
+      'Web 显示仓库默认分支中已同步的内容。本地尚未推送的更改不会在这里出现；创建和编辑请使用桌面端或 Obsidian。',
+    writesTitle: 'MemoFlow 写入记录',
+    writesDescription:
+      '仅显示 MemoFlow 在当前知识库中确认保存的笔记。未保存的草稿请回到原对话继续审核。',
+    writesEmpty: '还没有写入记录。在对话中整理内容并确认保存后，记录会出现在这里。',
+    refresh: '刷新连接状态',
+    webEmpty: '尚未连接知识源。连接已有的私有仓库后，即可在对话中引用其中的笔记。',
+    connectGitHub: '连接 GitHub 仓库',
+    connectAnother: '连接其他仓库',
+    chooseRepository: '选择知识库仓库',
+    connect: '连接',
+    privateRepositoryHint: '请选择已授权读取的私有仓库。此连接不会创建或修改仓库文件。',
+    unavailableTitle: '云端知识连接暂未启用',
+    unavailableDescription:
+      '当前服务尚未配置 GitHub 连接。你可以继续使用其他功能；桌面端可直接连接本地知识库。',
+    disconnectTitle: '断开知识源连接？',
+    disconnectDescription: '断开后，这个来源不再参与知识引用。GitHub 仓库和历史写入记录会保留。',
+    noteUnavailable: '这篇笔记已移动、删除或不属于当前知识库。请重新选择。',
+    cancelAuthorization: '取消等待',
+  },
   route: {
-    workspace: '笔记',
+    workspace: '知识',
     noteEdit: '编辑笔记',
   },
   projection: {

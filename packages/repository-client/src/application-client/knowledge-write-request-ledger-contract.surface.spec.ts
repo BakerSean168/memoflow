@@ -2,14 +2,8 @@ import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
 
-/**
- * W6-A contract surface: the Git commit ledger and the projection operation
- * ledger must stay separate and visible through the whole client stack
- * (contract DTO -> client port -> HTTP/IPC adapters -> server application port).
- * Committed/Pending/Failed states are asserted as one shared vocabulary so the
- * UI and the server cannot drift.
- */
-describe('knowledge write-request ledger client/server contract surface (W6-A)', () => {
+/** Historical receipt vocabulary remains readable; replay and Desktop remote IPC are retired. */
+describe('historical knowledge ledger and retired write transport boundary', () => {
   const dto = readFileSync(
     resolve(__dirname, '../../../repository-contracts/src/api/knowledge-note-projection.dto.ts'),
     'utf8',
@@ -45,45 +39,28 @@ describe('knowledge write-request ledger client/server contract surface (W6-A)',
     expect(dto).toMatch(/'Pending'[\s\S]*'Succeeded'[\s\S]*'Failed'/);
   });
 
-  it('client port exposes list and replay for the UI to render/retry the ledger', () => {
+  it('retains receipt queries and compatibility method types', () => {
     expect(clientPort).toContain('listKnowledgeWriteRequests(');
-    expect(clientPort).toContain('replayKnowledgeWriteRequestProjection(');
-  });
-
-  it('both transports forward list/replay', () => {
-    expect(httpAdapter).toContain('listKnowledgeWriteRequests(');
-    expect(httpAdapter).toContain('replayKnowledgeWriteRequestProjection(');
+    expect(appPort).toContain('listKnowledgeWriteRequests(');
     expect(httpAdapter).toContain('/knowledge-write-requests');
-    expect(ipcAdapter).toContain('listKnowledgeWriteRequests(');
-    expect(ipcAdapter).toContain('replayKnowledgeWriteRequestProjection(');
+    expect(routes).toContain("path: '/knowledge-write-requests'");
   });
 
-  it('desktop IPC forwards list/replay through real channels instead of the unavailable stub', () => {
-    expect(ipcAdapter).toContain('RepositoryChannels.KNOWLEDGE_WRITE_REQUEST_LIST');
-    expect(ipcAdapter).toContain('RepositoryChannels.KNOWLEDGE_WRITE_REQUEST_REPLAY');
-    // The two ledger methods must not degrade to serverProjectionUnavailable().
-    const listSlice = ipcAdapter.slice(
-      ipcAdapter.indexOf('listKnowledgeWriteRequests('),
-      ipcAdapter.indexOf('getLocalVaultBinding()'),
-    );
-    expect(listSlice).not.toContain('serverProjectionUnavailable');
-  });
-
-  it('electron main registers list/replay IPC handlers over the remote connection port', () => {
+  it('does not register remote ledger IPC in the local Desktop runtime', () => {
     const electron = readFileSync(
       resolve(__dirname, '../../../repository/src/electron/index.ts'),
       'utf8',
     );
-    expect(electron).toContain('RepositoryChannels.KNOWLEDGE_WRITE_REQUEST_LIST');
-    expect(electron).toContain('RepositoryChannels.KNOWLEDGE_WRITE_REQUEST_REPLAY');
-    expect(electron).toContain('port.listKnowledgeWriteRequests(');
-    expect(electron).toContain('port.replayKnowledgeWriteRequestProjection(');
+    for (const channel of ['KNOWLEDGE_WRITE_REQUEST_LIST', 'KNOWLEDGE_WRITE_REQUEST_REPLAY']) {
+      expect(electron).not.toContain(`RepositoryChannels.${channel}`);
+      expect(ipcAdapter).not.toContain(`RepositoryChannels.${channel}`);
+    }
+    expect(electron).toContain('RepositoryChannels.LOCAL_VAULT_WRITES');
   });
 
-  it('server application port and routes expose the same operations', () => {
-    expect(appPort).toContain('listKnowledgeWriteRequests(');
-    expect(appPort).toContain('replayKnowledgeWriteRequestProjection(');
-    expect(routes).toContain("path: '/knowledge-write-requests'");
-    expect(routes).toContain("path: '/knowledge-write-requests/:writeRequestId/replay'");
+  it('does not expose the retired replay endpoint', () => {
+    expect(routes).not.toContain("path: '/knowledge-write-requests/:writeRequestId/replay'");
+    expect(httpAdapter).not.toContain('/replay`');
+    expect(httpAdapter).toContain('knowledgeSourceReadOnly');
   });
 });

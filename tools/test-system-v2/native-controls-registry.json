@@ -114,12 +114,6 @@
       "reason": "Preview list rows are the navigation surface of the goal capsule."
     },
     {
-      "path": "packages/app-vue/src/layouts/shell/previews/NoteCapsulePreview.vue",
-      "native": ["button"],
-      "category": "custom-control",
-      "reason": "Preview list rows are the navigation surface of the note capsule."
-    },
-    {
       "path": "packages/app-vue/src/layouts/shell/previews/ScheduleCapsulePreview.vue",
       "native": ["button"],
       "category": "custom-control",
@@ -196,30 +190,6 @@
       "native": ["button"],
       "category": "custom-control",
       "reason": "The notification row is the click target; its actions stay separate."
-    },
-    {
-      "path": "packages/repository-ui/src/components/DocumentCatalogRow.vue",
-      "native": ["button"],
-      "category": "custom-control",
-      "reason": "The document catalog row is the navigation control."
-    },
-    {
-      "path": "packages/repository-ui/src/components/KnowledgeNoteCatalog.vue",
-      "native": ["button"],
-      "category": "custom-control",
-      "reason": "Directory and note tree nodes are the tree control itself."
-    },
-    {
-      "path": "packages/repository-ui/src/components/KnowledgeNoteContextPanel.vue",
-      "native": ["button"],
-      "category": "custom-control",
-      "reason": "Outline entries are navigation rows for the note outline."
-    },
-    {
-      "path": "packages/repository-ui/src/components/KnowledgeProjectionRelationsView.vue",
-      "native": ["button"],
-      "category": "custom-control",
-      "reason": "Depth segmented buttons and relation list entries are the relations surface."
     },
     {
       "path": "packages/routine-ui/src/components/RoutineCapsulePreview.vue",
@@ -394,10 +364,6 @@
     {
       "path": "packages/notification-ui/src/components/NotificationQuickActions.vue",
       "native": ["input"]
-    },
-    {
-      "path": "packages/repository-ui/src/components/DocumentCatalogSearch.vue",
-      "native": ["button"]
     },
     {
       "path": "packages/setting-ui/src/components/LocalAgentSettings.vue",

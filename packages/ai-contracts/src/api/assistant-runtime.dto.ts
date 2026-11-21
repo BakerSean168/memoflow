@@ -67,13 +67,40 @@ export const AssistantRuntimeAttachmentSchema = z
   });
 export type AssistantRuntimeAttachment = z.infer<typeof AssistantRuntimeAttachmentSchema>;
 
-export const AssistantRuntimeSelectedEntitySchema = z
+/** Invocation-scoped, read-only locator. It never grants file-write permission. */
+export const KnowledgeContextSourceSchema = z
   .object({
-    entityType: z.enum(['goal', 'task', 'knowledge_document']),
-    id: z.string().trim().min(1).max(512),
-    label: z.string().trim().min(1).max(240).optional(),
+    kind: z.enum(['local_vault', 'github_projection']),
+    bindingId: z.string().min(1).max(128),
+    relativePath: z
+      .string()
+      .min(1)
+      .max(1024)
+      .regex(
+        /^(?!\/)(?![a-zA-Z]:)(?!.*\\)(?!.*\x00)(?!.*(?:^|\/)\.\.(?:\/|$)).+\.(?:md|markdown)$/i,
+      ),
+    contentHash: z.string().regex(/^[a-f0-9]{64}$/),
   })
   .strict();
+export type KnowledgeContextSource = z.infer<typeof KnowledgeContextSourceSchema>;
+
+export const AssistantRuntimeSelectedEntitySchema = z.discriminatedUnion('entityType', [
+  z
+    .object({
+      entityType: z.enum(['goal', 'task', 'knowledge_document']),
+      id: z.string().trim().min(1).max(512),
+      label: z.string().trim().min(1).max(240).optional(),
+    })
+    .strict(),
+  z
+    .object({
+      entityType: z.literal('knowledge_source'),
+      id: z.string().trim().min(1).max(100),
+      label: z.string().trim().min(1).max(240).optional(),
+      source: KnowledgeContextSourceSchema,
+    })
+    .strict(),
+]);
 export type AssistantRuntimeSelectedEntity = z.infer<typeof AssistantRuntimeSelectedEntitySchema>;
 
 export const AssistantToolNameSchema = z.enum([

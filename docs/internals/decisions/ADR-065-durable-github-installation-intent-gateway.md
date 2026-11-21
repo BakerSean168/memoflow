@@ -13,6 +13,8 @@ updated: 2026-09-06T17:20:00+08:00
 
 # ADR-065: Durable GitHub App Installation Intent + Setup Gateway
 
+> 2026-11-21：知识页面、Desktop Git、Web 写入与读取权限边界已由 [ADR-126](./ADR-126-obsidian-knowledge-connection-and-read-only-web.md) 更新。本文保留历史决策背景；冲突部分以 ADR-126 为准。
+
 **状态：** 已采纳
 **日期：** 2026-08-28
 **影响范围：** Repository、GitHub App、Web、Desktop、API、Prisma、Deployment

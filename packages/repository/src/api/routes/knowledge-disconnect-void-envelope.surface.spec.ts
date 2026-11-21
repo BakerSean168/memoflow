@@ -46,7 +46,6 @@ describe('knowledge disconnect void success envelope surface', () => {
     expect(service).not.toContain('disconnected: true');
     expect(controller).toMatch(/async disconnect[\s\S]*?Promise<Result<null>>/);
     expect(controller).toContain('return ok(null)');
-    expect(electron).toContain('RepositoryChannels.KNOWLEDGE_CONNECTION_DISCONNECT');
-    expect(electron).toContain('return ok(null)');
+    expect(electron).not.toContain('RepositoryChannels.KNOWLEDGE_CONNECTION_DISCONNECT');
   });
 });

@@ -17,6 +17,8 @@ export const AI_PUBLIC_FAILURE_CODES = [
   'NOT_FOUND',
   'CANCELED',
   'SERVICE_UNAVAILABLE',
+  'AI_PERMISSION_DENIED',
+  'KNOWLEDGE_CONTEXT_STALE',
   'CONFLICT',
   'INTERNAL_ERROR',
   'AI_RUNTIME_TRANSPORT_ERROR',
@@ -194,6 +196,10 @@ function mapAIExecutionCategory(category: AIExecutionErrorKind): AIPublicFailure
     case 'upstream_provider_error':
     case 'transport':
       return 'SERVICE_UNAVAILABLE';
+    case 'permission_denied':
+      return 'AI_PERMISSION_DENIED';
+    case 'knowledge_context_stale':
+      return 'KNOWLEDGE_CONTEXT_STALE';
     case 'conflict':
       return 'CONFLICT';
     case 'internal':
@@ -225,6 +231,10 @@ function safeAIPublicMessage(code: AIPublicFailureCode): string {
       return 'The selected AI model does not support the required capability';
     case 'AI_CAPABILITY_UNVERIFIED':
       return 'The selected AI model capability has not been verified';
+    case 'AI_PERMISSION_DENIED':
+      return 'Current Agent permissions do not allow reading the selected notes. Review knowledge read permissions or remove the selections.';
+    case 'KNOWLEDGE_CONTEXT_STALE':
+      return 'A selected note changed, moved, or its source disconnected. Remove the outdated reference, then select the note again.';
     case 'CONFLICT':
       return 'AI operation conflicts with current state';
     case 'INTERNAL_ERROR':

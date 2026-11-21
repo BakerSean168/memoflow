@@ -131,7 +131,6 @@ export function composeRepository(
   const instance = createRepositoryModule({
     knowledgeRepositoryConnectionService: runtime.knowledgeRepositoryConnectionService,
     knowledgeRepositoryProjectionService: runtime.knowledgeRepositoryProjectionService,
-    knowledgeNoteCommitService: runtime.knowledgeNoteCommitService,
     runtimeContributions: runtime.runtimeContribution ? [runtime.runtimeContribution] : [],
     auditRepository: repositories.auditRepository,
   });

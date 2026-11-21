@@ -74,72 +74,23 @@ describe('repository module GitHub credential boundary', () => {
     expect(issueInstallationToken).not.toHaveBeenCalled();
   });
 
-  it('forwards only Desktop contexts to the identity-scoped connection service', async () => {
-    const { module, issueInstallationToken } = createModule();
-
-    await expect(
-      module.api.issueDesktopKnowledgeRepositoryToken(
-        {
-          identityId: 'identity-desktop',
-          deviceId: 'desktop-device',
-          device: { deviceType: 'Desktop' },
-        },
-        'connection-1',
-      ),
-    ).resolves.toMatchObject({ ok: true, data: { repositoryId: 'repository-1' } });
-    expect(issueInstallationToken).toHaveBeenCalledWith('identity-desktop', 'connection-1');
-  });
-
-  it('keeps local reconciliation preflight behind the Desktop context boundary', async () => {
-    const { module, previewFirstReconciliation } = createModule();
-
-    await expect(
-      module.api.previewKnowledgeRepositoryReconciliation(
-        {
-          identityId: 'identity-browser',
-          device: { deviceType: 'Browser' },
-        },
-        'connection-1',
-        { localState: 'NonEmpty' },
-      ),
-    ).resolves.toMatchObject({ ok: false, error: { code: 'FORBIDDEN' } });
+  it('rejects retired sync operations even when a caller claims Desktop context', async () => {
+    const { module, issueInstallationToken, previewFirstReconciliation, confirmHead } =
+      createModule();
+    const context = { identityId: 'identity-desktop', device: { deviceType: 'Desktop' as const } };
+    for (const result of [
+      await module.api.issueDesktopKnowledgeRepositoryToken(context, 'connection-1'),
+      await module.api.previewKnowledgeRepositoryReconciliation(context, 'connection-1', {
+        localState: 'NonEmpty',
+      }),
+      await module.api.confirmKnowledgeRepositoryHead(context, 'connection-1', {
+        headSha: 'a'.repeat(40),
+      }),
+    ])
+      expect(result).toMatchObject({ ok: false, error: { code: 'FORBIDDEN' } });
+    expect(issueInstallationToken).not.toHaveBeenCalled();
     expect(previewFirstReconciliation).not.toHaveBeenCalled();
-
-    await expect(
-      module.api.previewKnowledgeRepositoryReconciliation(
-        {
-          identityId: 'identity-desktop',
-          device: { deviceType: 'Desktop' },
-        },
-        'connection-1',
-        { localState: 'NonEmpty' },
-      ),
-    ).resolves.toMatchObject({ ok: true, data: { action: 'InitializeRemoteFromLocal' } });
-    expect(previewFirstReconciliation).toHaveBeenCalledWith('identity-desktop', 'connection-1', {
-      localState: 'NonEmpty',
-    });
-  });
-
-  it('keeps reconciliation confirmation behind the Desktop context boundary', async () => {
-    const { module, confirmHead } = createModule();
-
-    await expect(
-      module.api.confirmKnowledgeRepositoryHead(
-        { identityId: 'identity-browser', device: { deviceType: 'Browser' } },
-        'connection-1',
-        { headSha: 'a'.repeat(40) },
-      ),
-    ).resolves.toMatchObject({ ok: false, error: { code: 'FORBIDDEN' } });
     expect(confirmHead).not.toHaveBeenCalled();
-
-    await module.api.confirmKnowledgeRepositoryHead(
-      { identityId: 'identity-desktop', device: { deviceType: 'Desktop' } },
-      'connection-1',
-      { headSha: 'a'.repeat(40) },
-    );
-    expect(confirmHead).toHaveBeenCalledWith('identity-desktop', 'connection-1', {
-      headSha: 'a'.repeat(40),
-    });
   });
 
   it('starts projection reconciliation immediately after a repository is connected', async () => {
@@ -199,7 +150,7 @@ describe('repository module GitHub credential boundary', () => {
     }
   });
 
-  it('reports write-request list/replay as unavailable when the GitHub App is not configured', async () => {
+  it('reports unconfigured receipt queries separately from forbidden replay', async () => {
     const module = createRepositoryModule({});
 
     await expect(
@@ -214,6 +165,6 @@ describe('repository module GitHub credential boundary', () => {
         { identityId: 'identity-without-github-app' },
         'write-request-1',
       ),
-    ).resolves.toMatchObject({ ok: false, error: { code: 'SERVICE_UNAVAILABLE' } });
+    ).resolves.toMatchObject({ ok: false, error: { code: 'FORBIDDEN' } });
   });
 });

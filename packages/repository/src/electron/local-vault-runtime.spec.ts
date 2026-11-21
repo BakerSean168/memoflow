@@ -623,6 +623,14 @@ describe('LocalVaultRuntime', () => {
     expect(written).toContain('# Approved note\n\nUser reviewed this body.');
     expect(created.note.knowledgeDocumentId).toBe(DOCUMENT_ID);
     expect(replayed.note.knowledgeDocumentId).toBe(DOCUMENT_ID);
+    expect(await runtime.listRecentWrites()).toEqual([
+      {
+        documentId: DOCUMENT_ID,
+        title: 'Approved note',
+        relativePath: 'Agent/Approved note.md',
+        createdAt: NOW,
+      },
+    ]);
     await expect(
       runtime.writeConfirmedNote({ ...request, proposalRevision: 3 }),
     ).rejects.toMatchObject<Partial<LocalVaultRuntimeError>>({ code: 'CONFLICT' });

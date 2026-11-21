@@ -1,6 +1,6 @@
 import { nativeDraftFromKnowledgeDraft } from '@memoflow/repository-ui';
 import { useGoalNativeSurface } from '@memoflow/goal-ui';
-import { useReferenceableKnowledgeNotes } from '@memoflow/repository-ui';
+import { useKnowledgeContextNotes, useReferenceableKnowledgeNotes } from '@memoflow/repository-ui';
 import { openLocalAgentNoteReview } from '@memoflow/repository-ui';
 import { useRecentKnowledgeNotes } from '@memoflow/repository-ui';
 import { useTask } from '@memoflow/task-ui';
@@ -44,6 +44,7 @@ export function installAiUiHost(): void {
     ...installPlatformRendererHost(),
     nativeDraftFromKnowledgeDraft: (...args) => nativeDraftFromKnowledgeDraft(...args),
     useGoalNativeSurface: (...args) => useGoalNativeSurface(...args),
+    useKnowledgeContextNotes,
     useReferenceableKnowledgeNotes: (...args) => useReferenceableKnowledgeNotes(...args),
     openLocalAgentNoteReview: (...args) => openLocalAgentNoteReview(...args),
     useRecentKnowledgeNotes: (...args) => useRecentKnowledgeNotes(...args),

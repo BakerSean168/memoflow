@@ -166,14 +166,6 @@
         "cwd": "apps/desktop"
       }
     },
-    "test:live-github": {
-      "executor": "nx:run-commands",
-      "cache": false,
-      "options": {
-        "command": "node ../../node_modules/vitest/vitest.mjs run --config vitest.live-github.config.ts",
-        "cwd": "apps/desktop"
-      }
-    },
     "e2e": {
       "executor": "nx:run-commands",
       "dependsOn": ["build", "native-rebuild"],

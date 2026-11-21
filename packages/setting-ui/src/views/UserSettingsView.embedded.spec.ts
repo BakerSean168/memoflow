@@ -124,9 +124,9 @@ describe('UserSettingsView embedded mode', () => {
     // Without initialTab the view falls back to its own default; the URL is inert.
     expect(wrapper.get('nav').attributes('data-active')).toBe('appearance');
 
-    await wrapper.get('[data-testid="settings-tab-repository"]').trigger('click');
+    await wrapper.get('[data-testid="settings-tab-updates"]').trigger('click');
     await flushPromises();
-    expect(wrapper.get('nav').attributes('data-active')).toBe('repository');
+    expect(wrapper.get('nav').attributes('data-active')).toBe('updates');
     expect(replace).not.toHaveBeenCalled();
     expect(router.currentRoute.value.query.tab).toBe('ai');
 
@@ -138,10 +138,10 @@ describe('UserSettingsView embedded mode', () => {
   });
 
   it('keeps the breadcrumb on the active section and hides reset without a section action', async () => {
-    const { wrapper, storeSpy } = await mountView('/settings', { initialTab: 'repository' });
+    const { wrapper, storeSpy } = await mountView('/settings', { initialTab: 'updates' });
 
     expect(wrapper.get('[data-testid="settings-breadcrumb-current"]').text()).toBe(
-      'Knowledge Repository',
+      'About & Updates',
     );
     // No section is mounted under shallowMount, so nothing registered a restore action.
     expect(wrapper.find('[data-testid="settings-restore-defaults"]').exists()).toBe(false);
@@ -189,7 +189,7 @@ describe('UserSettingsView embedded mode', () => {
     expect(resetAction).toHaveBeenCalledTimes(1);
 
     // The registered action belongs to the appearance section only.
-    await wrapper.get('[data-testid="settings-tab-repository"]').trigger('click');
+    await wrapper.get('[data-testid="settings-tab-updates"]').trigger('click');
     await flushPromises();
     expect(wrapper.find('[data-testid="settings-restore-defaults"]').exists()).toBe(false);
 

@@ -181,27 +181,34 @@ describe('AIMessagePanel (V2 §6.0 welcome)', () => {
     expect(status.text()).toContain('草稿已保留');
     wrapper.unmount();
   });
-  it('renders compact workflow shortcuts without owning the shell today overview', () => {
-    const wrapper = mount(AIMessagePanel, {
-      props: {
-        timeline: [],
-        toolMode: 'chat',
-      },
-      global: { plugins: [i18n] },
-    });
+  it.each([false, true])(
+    'renders workflow shortcuts with knowledge capture capability %s',
+    (canCaptureKnowledge) => {
+      const wrapper = mount(AIMessagePanel, {
+        props: {
+          timeline: [],
+          toolMode: 'chat',
+          canCaptureKnowledge,
+          canSaveLocalNote: false,
+        },
+        global: { plugins: [i18n] },
+      });
 
-    expect(wrapper.find('[data-testid="ai-welcome-state"]').exists()).toBe(true);
-    expect(wrapper.text()).toContain('What do you want to move forward today?');
-    expect(wrapper.find('[data-testid="ai-welcome-entry-chat"]').exists()).toBe(false);
-    expect(wrapper.find('[data-testid="ai-welcome-entry-goal-create"]').exists()).toBe(true);
-    expect(wrapper.find('[data-testid="ai-welcome-entry-task-create"]').exists()).toBe(true);
-    expect(wrapper.find('[data-testid="ai-welcome-entry-knowledge-capture"]').exists()).toBe(true);
-    expect(wrapper.find('[data-testid="ai-welcome-entry-knowledge-qa"]').exists()).toBe(true);
-    expect(
-      wrapper.find('[data-testid="ai-welcome-state"] [data-testid="memoflow-ai-icon"]').exists(),
-    ).toBe(true);
-    expect(wrapper.find('[data-testid="ai-today-overview"]').exists()).toBe(false);
-  });
+      expect(wrapper.find('[data-testid="ai-welcome-state"]').exists()).toBe(true);
+      expect(wrapper.text()).toContain('What do you want to move forward today?');
+      expect(wrapper.find('[data-testid="ai-welcome-entry-chat"]').exists()).toBe(false);
+      expect(wrapper.find('[data-testid="ai-welcome-entry-goal-create"]').exists()).toBe(true);
+      expect(wrapper.find('[data-testid="ai-welcome-entry-task-create"]').exists()).toBe(true);
+      expect(wrapper.find('[data-testid="ai-welcome-entry-knowledge-capture"]').exists()).toBe(
+        canCaptureKnowledge,
+      );
+      expect(wrapper.find('[data-testid="ai-welcome-entry-knowledge-qa"]').exists()).toBe(true);
+      expect(
+        wrapper.find('[data-testid="ai-welcome-state"] [data-testid="memoflow-ai-icon"]').exists(),
+      ).toBe(true);
+      expect(wrapper.find('[data-testid="ai-today-overview"]').exists()).toBe(false);
+    },
+  );
 
   it('hides today overview once messages exist and emits select-shortcut', async () => {
     const wrapper = mount(AIMessagePanel, {

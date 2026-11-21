@@ -1,3 +1,4 @@
+import type { KnowledgeContextSource } from '@memoflow/ai-contracts';
 import type { Ref } from 'vue';
 import type {
   AIContextEntityType,
@@ -110,6 +111,8 @@ export type ComposerContextEntity = {
   id: string;
   label: string;
   origin: 'explicit' | 'surface';
+  source?: KnowledgeContextSource;
+  path?: string;
 };
 
 export type ChatToolApproval = Extract<
@@ -232,9 +235,10 @@ export type AIWorkspaceRecentTask = {
   updatedAt: number;
 };
 export type AIWorkspaceRecentKnowledgeNote = {
+  source?: KnowledgeContextSource;
   /** Navigation id/path used by the Repository surface. */
   id: string;
-  /** Stable KnowledgeDocument owner id used when attaching note context to AI. */
+  /** Composer identity: source fingerprint for transient references, stable document id otherwise. */
   contextId: string | null;
   title: string;
   path: string;

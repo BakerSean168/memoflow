@@ -83,24 +83,6 @@ export interface GitHubBlobContent {
   bytes: Uint8Array;
 }
 
-export interface GitHubFileCommitInput {
-  repository: GitHubInstallationRepositoryDTO;
-  path: string;
-  branch: string;
-  content: string;
-  message: string;
-  requestId: string;
-}
-
-export interface GitHubFileUpdateInput extends GitHubFileCommitInput {
-  expectedBlobSha: string;
-}
-
-export interface GitHubFileCommitResult {
-  commitSha: string;
-  blobSha: string;
-}
-
 export interface IGitHubAppClient {
   /** Discover an already-installed copy of this App for a verified GitHub account. */
   findInstallationForAccount?(
@@ -128,14 +110,6 @@ export interface IGitHubAppClient {
     blobSha: string,
     maxBytes: number,
   ): Promise<GitHubBlobContent>;
-  createFileCommit(
-    installationId: string,
-    input: GitHubFileCommitInput,
-  ): Promise<GitHubFileCommitResult>;
-  updateFileCommit(
-    installationId: string,
-    input: GitHubFileUpdateInput,
-  ): Promise<GitHubFileCommitResult>;
   createInstallationAccessToken(
     installationId: string,
     repositoryId?: string,

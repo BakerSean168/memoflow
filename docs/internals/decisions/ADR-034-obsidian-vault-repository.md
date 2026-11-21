@@ -12,6 +12,8 @@ updated: 2026-07-22T00:00:00
 
 # ADR-034: 本地 Obsidian Vault 与可选 GitHub 知识仓库
 
+> 2026-11-21：知识页面、Desktop Git、Web 写入与读取权限边界已由 [ADR-126](./ADR-126-obsidian-knowledge-connection-and-read-only-web.md) 更新。本文保留历史决策背景；冲突部分以 ADR-126 为准。
+
 **状态：** 已采纳  
 **日期：** 2026-07-16  
 **影响范围：** Authentication、Repository、Editor、AI Knowledge、Desktop、Web、Mobile

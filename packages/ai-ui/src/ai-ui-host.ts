@@ -1,3 +1,4 @@
+import type { KnowledgeContextSource } from '@memoflow/ai-contracts';
 import type { GoalNativeDraftState } from '@memoflow/goal-client';
 export interface GoalAIEditSurface {
   openCreate(): Promise<GoalNativeEditSession>;
@@ -61,6 +62,21 @@ interface KnowledgeSurface {
 export interface AiUiHost extends PlatformRendererHost {
   nativeDraftFromKnowledgeDraft: (draft: KnowledgeDraft) => KnowledgeCaptureNativeDraft;
   useGoalNativeSurface: () => GoalAIEditSurface;
+  useKnowledgeContextNotes: () => {
+    notes: Ref<
+      Array<{
+        id: string;
+        title: string;
+        path: string;
+        updatedAt: number;
+        source: KnowledgeContextSource;
+      }>
+    >;
+    isLoading: Ref<boolean>;
+    error: Ref<string | null>;
+    search(query: string | null): void;
+    cancel(): void;
+  };
   useReferenceableKnowledgeNotes: () => {
     notes: Ref<
       Array<{

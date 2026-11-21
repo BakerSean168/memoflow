@@ -796,27 +796,6 @@
       "status": "present"
     },
     {
-      "path": "packages/repository-ui/src/components/KnowledgeMarkdownPreview.vue",
-      "package": "@memoflow/repository-ui",
-      "kind": "component",
-      "storyPath": "packages/repository-ui/src/components/KnowledgeMarkdownPreview.stories.ts",
-      "status": "present"
-    },
-    {
-      "path": "packages/repository-ui/src/components/KnowledgeNoteCatalog.vue",
-      "package": "@memoflow/repository-ui",
-      "kind": "component",
-      "storyPath": "packages/repository-ui/src/components/KnowledgeNoteCatalog.stories.ts",
-      "status": "present"
-    },
-    {
-      "path": "packages/repository-ui/src/components/DocumentCatalogRow.vue",
-      "package": "@memoflow/repository-ui",
-      "kind": "component",
-      "storyPath": "packages/repository-ui/src/components/DocumentCatalogRow.stories.ts",
-      "status": "present"
-    },
-    {
       "path": "packages/routine-ui/src/components/RoutineEditorDialog.vue",
       "package": "@memoflow/routine-ui",
       "kind": "component",

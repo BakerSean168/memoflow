@@ -7,6 +7,7 @@ import { createI18n } from 'vue-i18n';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { productionLocaleMessages } from '@ai-ui-test-host/locales/production-messages';
 import AIFooterComposer from './AIFooterComposer.vue';
+import type { AIWorkspaceRecentKnowledgeNote, ComposerContextEntity } from '../composables/types';
 import { semanticElevationClass } from '@ai-ui-test-host/shared/constants/semantic-elevation';
 
 vi.mock('@memoflow/ui-vue-shadcn', async () => {
@@ -68,12 +69,7 @@ function mountComposer(
       filename?: string;
       size: number;
     }>;
-    contextEntities: Array<{
-      entityType: 'goal' | 'task' | 'knowledge_document';
-      id: string;
-      label: string;
-      origin: 'explicit' | 'surface';
-    }>;
+    contextEntities: ComposerContextEntity[];
     recentGoals: Array<{
       id: string;
       title: string;
@@ -82,12 +78,9 @@ function mountComposer(
       progress: number | null;
     }>;
     recentTasks: Array<{ id: string; title: string; updatedAt: number }>;
-    recentKnowledgeNotes: Array<{
-      id: string;
-      title: string;
-      path: string;
-      updatedAt: number;
-    }>;
+    recentKnowledgeNotes: AIWorkspaceRecentKnowledgeNote[];
+    knowledgeLoading: boolean;
+    knowledgeError: string | null;
     modelGroups: Array<{
       providerId: string;
       providerName: string;
@@ -193,6 +186,77 @@ describe('AIFooterComposer (Global Composer input)', () => {
 
     await textarea.trigger('keydown', { key: 'Enter', shiftKey: true });
     expect(wrapper.emitted('send')).toHaveLength(1);
+    wrapper.unmount();
+  });
+
+  it('keeps Enter inside a pending mention query and closes it through Escape without reopening on keyup', async () => {
+    const wrapper = mountComposer({ knowledgeLoading: true });
+    const textarea = wrapper.get('[data-testid="ai-chat-composer"]');
+    await textarea.setValue('@missing');
+    await wrapper.setProps({ modelValue: '@missing' });
+    await nextTick();
+    expect(wrapper.emitted('knowledge-query')?.at(-1)).toEqual(['missing']);
+    expect(wrapper.find('[data-testid="ai-composer-mention-menu"]').exists()).toBe(true);
+    await textarea.trigger('keydown', { key: 'Enter' });
+    expect(wrapper.emitted('send')).toBeUndefined();
+    expect(wrapper.emitted('toggle-context-entity')).toBeUndefined();
+    await textarea.trigger('keydown', { key: 'Escape' });
+    await textarea.trigger('keyup', { key: 'Escape' });
+    expect(wrapper.find('[data-testid="ai-composer-mention-menu"]').exists()).toBe(false);
+    expect(wrapper.emitted('knowledge-query')?.at(-1)).toEqual([null]);
+    wrapper.unmount();
+  });
+
+  it('selects ordinary Markdown by its source and replaces a previously selected stale version', async () => {
+    const source = {
+      kind: 'local_vault' as const,
+      bindingId: 'vault-1',
+      relativePath: 'ideas/ordinary.md',
+      contentHash: 'b'.repeat(64),
+    };
+    const wrapper = mountComposer({
+      recentKnowledgeNotes: [
+        {
+          id: 'source-1',
+          contextId: 'source-1',
+          title: 'Ordinary note',
+          path: source.relativePath,
+          updatedAt: 1,
+          source,
+        },
+      ],
+      contextEntities: [
+        {
+          entityType: 'knowledge_source',
+          id: 'source-1',
+          label: 'Ordinary note',
+          origin: 'explicit',
+          source: { ...source, contentHash: 'a'.repeat(64) },
+        },
+      ],
+    });
+    const textarea = wrapper.get('[data-testid="ai-chat-composer"]');
+    await textarea.setValue('@ideas');
+    await wrapper.setProps({ modelValue: '@ideas' });
+    await nextTick();
+    expect(wrapper.get('[data-testid="ai-composer-mention-option"]').text()).toContain(
+      'ideas/ordinary.md',
+    );
+    await textarea.trigger('keydown', { key: 'Enter' });
+    expect(wrapper.emitted('toggle-context-entity')).toEqual([
+      [
+        {
+          entityType: 'knowledge_source',
+          id: 'source-1',
+          label: 'Ordinary note',
+          path: source.relativePath,
+          source,
+        },
+      ],
+    ]);
+    expect(wrapper.emitted('send')).toBeUndefined();
+    expect(wrapper.emitted('update:modelValue')?.at(-1)).toEqual(['@Ordinary note ']);
+    expect(wrapper.find('[data-testid="ai-composer-mention-menu"]').exists()).toBe(false);
     wrapper.unmount();
   });
 
