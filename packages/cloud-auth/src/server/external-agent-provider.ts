@@ -3,6 +3,7 @@ import { fetchClientMetadataResource } from '@better-auth/cimd/node';
 import { mcp } from '@better-auth/mcp';
 import { jwt } from 'better-auth/plugins';
 import type { ClientMetadataResourceFetch, OAuthOptions, Scope } from '@better-auth/oauth-provider';
+import type { GatewayAuditEvent } from '@memoflow/agent-gateway';
 
 /**
  * CIMD metadata transport injection point. Production resolves and pins the
@@ -15,17 +16,58 @@ export interface ExternalAgentOAuthOptions {
   readonly webOrigin: string;
   readonly allowedClientIds: readonly string[];
   readonly accountIsActive: (identityId: string) => Promise<boolean>;
+  /**
+   * Grants OAuth write scopes and enables OAuth write/assisted gateway calls.
+   * Defaults to `false`; `EAG_OAUTH_WRITE_ENABLED=0` must also invalidate writes
+   * that were already issued, so this flag is read on the call path too.
+   */
+  readonly writeEnabled?: boolean;
+  /** Credential-level audit sink for consent and revocation facts. */
+  readonly audit?: (event: GatewayAuditEvent) => void;
+  /** Resolves the signed-in user for audit events that have no token subject. */
+  readonly resolveIdentity?: (request: Request) => Promise<string | null>;
   /** Fixed-window read budget per connection; defaults to the calibrated gateway limit. */
   readonly readQuotaPerMinute?: number;
 }
 
 /**
- * OAuth is read-only by design, not because write support is missing. Write
- * scopes are PAT-only until the consent, audit and revocation conditions in
- * docs/internals/external-agent-oauth-write-consent.md are met (#1033).
+ * OAuth reuses the same twelve domain scopes as PAT (#1054). Read and write do
+ * not imply each other, and write scopes are only reachable while the OAuth
+ * write switch is on.
  */
-export const EXTERNAL_AGENT_SCOPES = ['goals:read', 'tasks:read'] as const;
-export const EXTERNAL_AGENT_OAUTH_SCOPES = [...EXTERNAL_AGENT_SCOPES, 'offline_access'];
+export const EXTERNAL_AGENT_READ_SCOPES = [
+  'goals:read',
+  'tasks:read',
+  'routines:read',
+  'notifications:read',
+  'schedules:read',
+  'labels:read',
+  'relations:read',
+  'ai:read',
+] as const;
+export const EXTERNAL_AGENT_WRITE_SCOPES = [
+  'goals:write',
+  'tasks:write',
+  'routines:write',
+  'notifications:write',
+] as const;
+export const EXTERNAL_AGENT_SCOPES = [
+  ...EXTERNAL_AGENT_READ_SCOPES,
+  ...EXTERNAL_AGENT_WRITE_SCOPES,
+] as const;
+export const EXTERNAL_AGENT_OAUTH_SCOPES = [...EXTERNAL_AGENT_SCOPES, 'offline_access'] as const;
+
+/** Scopes the OAuth grant may actually contain for the current deployment. */
+export function externalAgentScopes(writeEnabled: boolean): readonly string[] {
+  return writeEnabled ? EXTERNAL_AGENT_SCOPES : EXTERNAL_AGENT_READ_SCOPES;
+}
+
+/** OAuth grant scopes, including the explicit offline continuation scope. */
+export function externalAgentOAuthScopes(writeEnabled: boolean): readonly string[] {
+  return writeEnabled
+    ? EXTERNAL_AGENT_OAUTH_SCOPES
+    : [...EXTERNAL_AGENT_READ_SCOPES, 'offline_access'];
+}
 export const CONNECTION_CLAIM = 'urn:memoflow:connection_id';
 export const CONNECTION_LIFETIME_MS = 90 * 86400_000;
 
@@ -35,6 +77,7 @@ export function createExternalAgentProvider(
   lifecycle: Pick<OAuthOptions<Scope[]>, 'postLogin' | 'customAccessTokenClaims'> = {},
   cimdFetch?: CimdFetchTransport,
 ) {
+  const allowedScopes = [...externalAgentOAuthScopes(options.writeEnabled === true)];
   return [
     jwt(),
     mcp({
@@ -43,12 +86,12 @@ export function createExternalAgentProvider(
         {
           identifier: options.resource,
           name: 'MemoFlow',
-          allowedScopes: EXTERNAL_AGENT_OAUTH_SCOPES,
+          allowedScopes,
         },
       ],
       loginPage: new URL('/auth/external-agent', options.webOrigin).href,
       consentPage: new URL('/auth/external-agent', options.webOrigin).href,
-      scopes: EXTERNAL_AGENT_OAUTH_SCOPES,
+      scopes: allowedScopes,
       grantTypes: ['authorization_code', 'refresh_token'],
       accessTokenExpiresIn: 600,
       refreshTokenExpiresIn: 30 * 86400,

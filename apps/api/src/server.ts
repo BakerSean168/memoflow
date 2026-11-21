@@ -193,6 +193,13 @@ async function bootstrap(): Promise<void> {
   const closureRepo = new PrismaAccountClosureOperationRepository(prisma);
   const accountActiveChecker = async (identityId: string) =>
     (await closureRepo.findActiveByIdentityId(identityId)) !== null;
+  // Audit keeps the synchronous structured log and appends a durable, queryable
+  // copy through a bounded batch writer; request paths never await PostgreSQL.
+  // Created before Cloud Auth so consent/revocation facts can share the sink.
+  auditStore = createExternalAgentAuditStore(prisma, {
+    onDrop: (count) => logger.warn('External agent audit rows dropped', { count }),
+  });
+  const externalAgentAudit = createGatewayAudit(createLogger('ExternalAgentAudit'), auditStore);
   const cloudAuth = createCloudAuth({
     externalAgents: env.EAG_OAUTH_ENABLED
       ? {
@@ -201,6 +208,8 @@ async function bootstrap(): Promise<void> {
           allowedClientIds: env.EAG_OAUTH_CLIENT_IDS,
           accountIsActive: createAccountPrismaActiveQuery(prisma),
           readQuotaPerMinute: env.EAG_RATE_LIMIT_CREDENTIAL_PER_MIN,
+          writeEnabled: env.EAG_OAUTH_WRITE_ENABLED,
+          audit: externalAgentAudit,
         }
       : undefined,
     database: prisma,
@@ -235,12 +244,6 @@ async function bootstrap(): Promise<void> {
   });
 
   // 2. 白名单注册 & 启动
-  // Audit keeps the synchronous structured log and appends a durable, queryable
-  // copy through a bounded batch writer; request paths never await PostgreSQL.
-  auditStore = createExternalAgentAuditStore(prisma, {
-    onDrop: (count) => logger.warn('External agent audit rows dropped', { count }),
-  });
-  const externalAgentAudit = createGatewayAudit(createLogger('ExternalAgentAudit'), auditStore);
   bootstrapper = new ApiBootstrapper(
     prisma,
     cloudAuth,
@@ -439,6 +442,7 @@ async function bootstrap(): Promise<void> {
           writes: (guard) =>
             bindGatewayWrites(prisma, settingApiModule.userTimeContextPort, {
               assistedGuard: guard,
+              oauthWriteEnabled: env.EAG_OAUTH_WRITE_ENABLED,
             }),
         });
       })()
@@ -508,10 +512,12 @@ async function bootstrap(): Promise<void> {
       ? {
           ...bindGatewayWrites(prisma, settingApiModule.userTimeContextPort, {
             routineWriteEnabled: env.EAG_ROUTINE_WRITE_ENABLED,
+            oauthWriteEnabled: env.EAG_OAUTH_WRITE_ENABLED,
           }),
           notificationMarkRead: bindNotificationMarkRead(notificationApiModule.inbox),
         }
       : undefined,
+    oauthWrites: env.EAG_OAUTH_WRITE_ENABLED,
     assisted: assistedWorkflow,
     audience: env.EAG_AUDIENCE ?? 'http://localhost:3000/mcp',
     cursorSecret: env.EAG_CURSOR_SECRET ?? '',

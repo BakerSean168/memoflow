@@ -93,6 +93,10 @@ export interface GatewayPrincipal {
   readonly credentialId: string;
   readonly credentialType: 'pat' | 'oauth';
   readonly scopes: readonly string[];
+  /** OAuth client binding; absent for PAT. */
+  readonly clientId?: string;
+  /** Consent scopes observed at authentication time; OAuth only. */
+  readonly consentScopes?: readonly string[];
 }
 export interface GatewayCredentialPort {
   authenticate(
@@ -110,6 +114,10 @@ export interface GatewayAuditEvent {
   readonly requestId: string;
   readonly traceId: string;
   readonly credentialId?: string;
+  readonly credentialType?: 'pat' | 'oauth';
+  readonly clientId?: string;
+  /** SHA-256 of the sorted consent scopes; never the raw consent document. */
+  readonly consentScopesHash?: string;
   readonly identityId?: string;
   readonly tool:
     | GatewayWriteToolName
@@ -141,7 +149,9 @@ export interface GatewayAuditEvent {
     | 'pat_list'
     | 'pat_revoke'
     | 'oauth_list'
-    | 'oauth_revoke';
+    | 'oauth_revoke'
+    | 'oauth_consent_grant'
+    | 'oauth_consent_deny';
   readonly outcome: string;
   readonly durationMs: number;
 }
@@ -328,6 +338,9 @@ export interface GatewayDiagnostic {
 
 export interface GatewayWriteAuthority {
   readonly connectionId: string;
+  readonly credentialType: 'pat' | 'oauth';
+  readonly clientId?: string;
+  readonly consentScopesHash?: string;
   authorize(): Promise<void>;
   readonly scopes: readonly string[];
 }

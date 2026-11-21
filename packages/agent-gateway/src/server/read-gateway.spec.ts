@@ -567,6 +567,7 @@ describe('Routine hosted write capability', () => {
     enabled = true,
     type: 'pat' | 'oauth' = 'pat',
     scopes = ['routines:write'],
+    oauthWrites = false,
   ) {
     const f = fixture();
     f.authenticate.mockResolvedValue({
@@ -642,7 +643,7 @@ describe('Routine hosted write capability', () => {
       routineDelete,
       routinePause,
       routineOverride,
-      gateway: createReadGateway({ ...f.options, writes }),
+      gateway: createReadGateway({ ...f.options, oauthWrites, writes }),
     };
   }
   const input = {
@@ -688,7 +689,7 @@ describe('Routine hosted write capability', () => {
       ).toBe(403);
     }
   });
-  it('denies OAuth even with a fabricated write scope', async () => {
+  it('keeps OAuth writes hidden while the switch is off and publishes them when it is on', async () => {
     const f = routineFixture(true, 'oauth', ['routines:write', 'goals:read']);
     expect(
       (await (await f.gateway.fetch(request('tools/list'), context)).json()).result.tools.map(
@@ -699,6 +700,16 @@ describe('Routine hosted write capability', () => {
       (await f.gateway.fetch(request('tools/call', input, 'routine_create'), context)).status,
     ).toBe(404);
     expect(f.routineCreate).not.toHaveBeenCalled();
+    const enabled = routineFixture(true, 'oauth', ['routines:write', 'goals:read'], true);
+    expect(
+      (await (await enabled.gateway.fetch(request('tools/list'), context)).json()).result.tools.map(
+        (t) => t.name,
+      ),
+    ).toContain('routine_create');
+    expect(
+      (await enabled.gateway.fetch(request('tools/call', input, 'routine_create'), context)).status,
+    ).toBe(200);
+    expect(enabled.routineCreate).toHaveBeenCalledTimes(1);
   });
   it('revalidates authority, passes verified identity, and audits without private payloads', async () => {
     const f = routineFixture();
@@ -1157,6 +1168,7 @@ describe('Notification hosted read and mark-read capability', () => {
   function notificationFixture(
     scopes: string[] = ['notifications:read', 'notifications:write'],
     credentialType: 'pat' | 'oauth' = 'pat',
+    oauthWrites = false,
   ) {
     const f = fixture();
     f.authenticate.mockResolvedValue({
@@ -1199,6 +1211,7 @@ describe('Notification hosted read and mark-read capability', () => {
       markAsRead,
       gateway: createReadGateway({
         ...f.options,
+        oauthWrites,
         notifications: { listNotifications, getUnreadCount, getNotification },
         writes,
       }),
@@ -1224,6 +1237,17 @@ describe('Notification hosted read and mark-read capability', () => {
       'notification_get',
       'notification_list',
       'notification_unread_count',
+    ]);
+    const oauthWrites = notificationFixture(
+      ['notifications:read', 'notifications:write'],
+      'oauth',
+      true,
+    );
+    expect(await names(oauthWrites.gateway)).toEqual([
+      'notification_get',
+      'notification_list',
+      'notification_unread_count',
+      'notification_mark_read',
     ]);
   });
   it('bounds page and limit, rejects injected identity and projects the owner whitelist', async () => {
@@ -1306,7 +1330,7 @@ describe('Notification hosted read and mark-read capability', () => {
       ).json(),
     ).toMatchObject({ result: { isError: true, content: [{ text: 'FORBIDDEN' }] } });
   });
-  it('denies mark-read for a read-only PAT and for OAuth credentials', async () => {
+  it('denies mark-read for a read-only PAT and for OAuth while the write switch is off', async () => {
     const readOnly = notificationFixture(['notifications:read']);
     expect(
       (
@@ -1327,6 +1351,20 @@ describe('Notification hosted read and mark-read capability', () => {
       ).status,
     ).toBe(404);
     expect(oauth.markAsRead).not.toHaveBeenCalled();
+    const enabled = notificationFixture(
+      ['notifications:write', 'notifications:read'],
+      'oauth',
+      true,
+    );
+    expect(
+      (
+        await enabled.gateway.fetch(
+          request('tools/call', { id: fact.id }, 'notification_mark_read'),
+          context,
+        )
+      ).status,
+    ).toBe(200);
+    expect(enabled.markAsRead).toHaveBeenCalledTimes(1);
   });
 });
 

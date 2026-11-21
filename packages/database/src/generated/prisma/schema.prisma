@@ -1358,14 +1358,18 @@ model OperationAuditLog {
 
 /// External command result and durable audit; never expire uniqueness automatically.
 model ExternalMutationReceipt {
-  account      Account  @relation(fields: [identityId], references: [id], onDelete: Cascade)
-  id           String   @id
-  identityId   String   @map("identity_id")
-  connectionId String   @map("connection_id")
-  capability   String
-  inputDigest  String   @map("input_digest")
-  resultJson   String   @map("result_json")
-  createdAt    DateTime @default(now()) @map("created_at")
+  account        Account  @relation(fields: [identityId], references: [id], onDelete: Cascade)
+  id             String   @id
+  identityId     String   @map("identity_id")
+  connectionId   String   @map("connection_id")
+  capability     String
+  inputDigest    String   @map("input_digest")
+  resultJson     String   @map("result_json")
+  /// OAuth receipt provenance; PAT receipts omit client/consent metadata.
+  credentialType String?  @map("credential_type")
+  clientId       String?  @map("client_id")
+  consentScopes  String[] @default([]) @map("consent_scopes")
+  createdAt      DateTime @default(now()) @map("created_at")
 
   @@index([identityId, createdAt])
   @@map("external_mutation_receipts")
@@ -1374,20 +1378,24 @@ model ExternalMutationReceipt {
 /// Queryable copy of every hosted MCP/edge audit event. The structured log stays the
 /// synchronous write; this table is appended asynchronously in bounded batches.
 model ExternalAgentAuditEvent {
-  account       Account? @relation(fields: [identityId], references: [id], onDelete: Cascade)
-  id            String   @id @default(uuid())
-  identityId    String?  @map("identity_id")
-  credentialId  String?  @map("credential_id")
-  effect        String
-  tool          String
-  outcome       String
-  scopeDecision String   @map("scope_decision")
-  requestId     String   @map("request_id")
-  traceId       String?  @map("trace_id")
-  receiptId     String?  @map("receipt_id")
-  replayed      Boolean?
-  durationMs    Int      @map("duration_ms")
-  createdAt     DateTime @default(now()) @map("created_at")
+  account           Account? @relation(fields: [identityId], references: [id], onDelete: Cascade)
+  id                String   @id @default(uuid())
+  identityId        String?  @map("identity_id")
+  credentialId      String?  @map("credential_id")
+  credentialType    String?  @map("credential_type")
+  clientId          String?  @map("client_id")
+  /// SHA-256 of the sorted consent scopes; raw consent never enters the audit row.
+  consentScopesHash String?  @map("consent_scopes_hash")
+  effect            String
+  tool              String
+  outcome           String
+  scopeDecision     String   @map("scope_decision")
+  requestId         String   @map("request_id")
+  traceId           String?  @map("trace_id")
+  receiptId         String?  @map("receipt_id")
+  replayed          Boolean?
+  durationMs        Int      @map("duration_ms")
+  createdAt         DateTime @default(now()) @map("created_at")
 
   @@index([identityId, createdAt])
   @@index([identityId, requestId])

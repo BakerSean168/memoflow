@@ -496,6 +496,7 @@ export function createDesktopLocalAgentTools(
       };
       const writeAuthority: GatewayWriteAuthority = {
         connectionId: context.connectionId,
+        credentialType: 'pat',
         scopes: context.writeScopes,
         // The local gate revalidates the tool scope and connection revision
         // inside every owner transaction (mutationAuthority); this shared

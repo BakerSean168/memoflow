@@ -4,7 +4,7 @@ import { z } from 'zod';
 import { prisma } from '@memoflow/database';
 import { IdentityId } from '@memoflow/utils/domain';
 import { createAccountPrismaActiveQuery } from '@memoflow/account';
-import { createCloudAuth } from '@memoflow/cloud-auth/server';
+import { createCloudAuth, readExternalAgentOAuthAuthority } from '@memoflow/cloud-auth/server';
 import {
   cleanAll,
   disconnectPrisma,
@@ -23,7 +23,7 @@ const TokenSchema = z.object({
   expires_in: z.number(),
 });
 
-function runtime(baseUrl = issuer, resourceUri = resource) {
+function runtime(baseUrl = issuer, resourceUri = resource, writeEnabled = false) {
   return createCloudAuth({
     database: prisma,
     baseUrl,
@@ -38,17 +38,18 @@ function runtime(baseUrl = issuer, resourceUri = resource) {
       webOrigin: origin,
       allowedClientIds: [clientId],
       accountIsActive: createAccountPrismaActiveQuery(prisma),
+      writeEnabled,
     },
   });
 }
-async function fixture() {
+async function fixture(writeEnabled = false) {
   const userId = String(IdentityId.generate());
   await seedAccount({ id: userId });
   const session = randomBytes(32).toString('hex');
   await prisma.cloudAuthSession.create({
     data: { userId, token: session, expiresAt: new Date(Date.now() + 86400_000) },
   });
-  const auth = runtime();
+  const auth = runtime(issuer, resource, writeEnabled);
   const discovery = await auth.handler(
     new Request('https://api.memo.test/.well-known/oauth-authorization-server/api/auth'),
   );
@@ -58,7 +59,15 @@ async function fixture() {
       clientId,
       name: 'Fixture Agent',
       redirectUris: [callback],
-      scopes: ['goals:read', 'tasks:read', 'offline_access'],
+      scopes: [
+        'goals:read',
+        'tasks:read',
+        'goals:write',
+        'tasks:write',
+        'routines:write',
+        'notifications:write',
+        'offline_access',
+      ],
       grantTypes: ['authorization_code', 'refresh_token'],
       responseTypes: ['code'],
       requirePKCE: true,
@@ -73,6 +82,7 @@ async function fixture() {
 async function authorize(
   f: Awaited<ReturnType<typeof fixture>>,
   scopes = 'goals:read tasks:read offline_access',
+  consentScopes?: string,
 ) {
   const verifier = randomBytes(32).toString('base64url');
   const query = new URLSearchParams({
@@ -101,7 +111,11 @@ async function authorize(
           origin,
           'content-type': 'application/json',
         },
-        body: JSON.stringify({ accept: true, oauth_query: url.search.slice(1) }),
+        body: JSON.stringify({
+          accept: true,
+          oauth_query: url.search.slice(1),
+          ...(consentScopes !== undefined ? { scope: consentScopes } : {}),
+        }),
       }),
     );
     expect(consent.status).toBe(200);
@@ -131,7 +145,7 @@ async function authorize(
   ).toBe(200);
   return { ...TokenSchema.parse(body), exchange };
 }
-async function refresh(auth: ReturnType<typeof runtime>, token: string) {
+async function refresh(auth: ReturnType<typeof runtime>, token: string, scope?: string) {
   return auth.handler(
     new Request(`${issuer}/oauth2/token`, {
       method: 'POST',
@@ -141,6 +155,7 @@ async function refresh(auth: ReturnType<typeof runtime>, token: string) {
         client_id: clientId,
         refresh_token: token,
         resource,
+        ...(scope ? { scope } : {}),
       }),
     }),
   );
@@ -319,6 +334,72 @@ describe('external-agent OAuth durable lifecycle', () => {
     });
     expect(await f.auth.externalAgents!.authenticate(authorization)).toBeNull();
     expect((await refresh(f.auth, issued.refresh_token!)).status).toBe(400);
+  });
+
+  it('grants write scopes when enabled and filters them out of existing tokens when disabled', async () => {
+    const f = await fixture(true);
+    const issued = await authorize(
+      f,
+      'goals:read tasks:read goals:write tasks:write offline_access',
+    );
+    const principal = await f.auth.externalAgents!.authenticate(`Bearer ${issued.access_token}`);
+    expect(principal).toMatchObject({
+      clientId,
+      credentialType: 'oauth',
+      scopes: ['goals:read', 'tasks:read', 'goals:write', 'tasks:write'],
+      consentScopes: ['goals:read', 'tasks:read', 'goals:write', 'tasks:write', 'offline_access'],
+    });
+    // The same grant under EAG_OAUTH_WRITE_ENABLED=0 keeps reads and rejects writes.
+    const disabled = runtime(issuer, resource, false);
+    const readOnly = await disabled.externalAgents!.authenticate(`Bearer ${issued.access_token}`);
+    expect(readOnly?.credentialId).toBe(principal!.credentialId);
+    expect(readOnly?.scopes).toEqual(['goals:read', 'tasks:read']);
+  });
+
+  it('binds partial consent to the granted write subset and rejects refresh scope escalation', async () => {
+    const f = await fixture(true);
+    const issued = await authorize(
+      f,
+      'goals:read goals:write offline_access',
+      'goals:read offline_access',
+    );
+    const principal = await f.auth.externalAgents!.authenticate(`Bearer ${issued.access_token}`);
+    expect(principal?.scopes).toEqual(['goals:read']);
+    const consent = await prisma.oauthConsent.findFirst({ where: { userId: f.userId } });
+    expect(consent?.scopes).toEqual(['goals:read', 'offline_access']);
+    expect((await refresh(f.auth, issued.refresh_token!, 'goals:write')).status).toBe(400);
+    expect((await refresh(f.auth, issued.refresh_token!)).status).toBe(200);
+  });
+
+  it('rejects OAuth write authority inside the transaction after revocation, scope reduction or switch-off', async () => {
+    const f = await fixture(true);
+    const issued = await authorize(f, 'goals:read goals:write offline_access');
+    const principal = (await f.auth.externalAgents!.authenticate(`Bearer ${issued.access_token}`))!;
+    const current = (writeEnabled = true) =>
+      prisma.$transaction((tx) =>
+        readExternalAgentOAuthAuthority(
+          tx,
+          {
+            identityId: principal.identityId,
+            credentialId: principal.credentialId,
+            clientId: principal.clientId,
+            scopes: principal.scopes,
+          },
+          { writeEnabled, accountIsActive: createAccountPrismaActiveQuery(tx) },
+          'goals:write',
+        ),
+      );
+    expect(await current()).toMatchObject({
+      consentScopes: expect.arrayContaining(['goals:write']),
+    });
+    expect(await current(false)).toBeNull();
+    await prisma.oauthConsent.updateMany({
+      where: { userId: f.userId },
+      data: { scopes: ['goals:read', 'offline_access'] },
+    });
+    expect(await current()).toBeNull();
+    await f.auth.externalAgents!.revoke(f.userId, principal.credentialId);
+    expect(await current()).toBeNull();
   });
 
   it('rolls back a failed refresh persistence operation so the original token remains usable', async () => {

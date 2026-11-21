@@ -15,6 +15,7 @@ const context: ExecutionContext = {
 
 const authority = {
   connectionId: 'pat-1',
+  credentialType: 'pat' as const,
   scopes: ['goals:write', 'tasks:write', 'routines:write', 'labels:read'],
   authorize: async () => {},
 };
@@ -63,6 +64,30 @@ describe('Gateway write-side label rejection (#993)', () => {
     ).rejects.toMatchObject({
       code: 'VALIDATION_ERROR',
     });
+  });
+
+  it('refuses OAuth writes before the owner transaction when the switch is off', async () => {
+    const writes = bindGatewayWrites(dummyPrisma, dummyTime, { oauthWriteEnabled: false });
+    await expect(
+      writes.taskCreate(
+        {
+          idempotencyKey: 'oauth-task-create-1',
+          plan: {
+            name: 'OAuth task',
+            importance: 'Moderate',
+            schedule: { kind: 'OneTime', date: '2026-11-20', timing: { kind: 'AllDay' } },
+          },
+        },
+        context,
+        {
+          connectionId: 'connection-1',
+          credentialType: 'oauth',
+          clientId: 'https://client.example.test/meta',
+          scopes: ['tasks:write'],
+          authorize: async () => {},
+        },
+      ),
+    ).rejects.toMatchObject({ code: 'FORBIDDEN' });
   });
 });
 

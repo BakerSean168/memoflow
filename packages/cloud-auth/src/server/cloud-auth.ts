@@ -105,12 +105,16 @@ export function createCloudAuth(
     return false;
   }
 
+  // Audit-only session lookup; assigned after the provider instance exists so
+  // the consent endpoint can attribute a denied grant without a token subject.
+  let resolveSessionIdentity: (request: Request) => Promise<string | null> = async () => null;
   const externalAgents = options.externalAgents
     ? createExternalAgentOAuth(
         oauthStore,
         options.externalAgents,
         isClosureBlocked,
         dependencies.cimdFetch,
+        (request) => resolveSessionIdentity(request),
       )
     : undefined;
   const databaseOverride = dependencies.database as BetterAuthOptions['database'] | undefined;
@@ -247,6 +251,10 @@ export function createCloudAuth(
       ...(externalAgents?.plugins ?? []),
     ],
   });
+  resolveSessionIdentity = async (request) => {
+    const session = await auth.api.getSession({ headers: request.headers });
+    return session?.user.id ?? null;
+  };
 
   const rawHandler = auth.handler;
 

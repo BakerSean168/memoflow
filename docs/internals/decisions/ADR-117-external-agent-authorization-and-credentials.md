@@ -2,12 +2,12 @@
 tags: [adr, mcp, oauth, security, cloud-auth]
 description: OAuth 委托授权与 scoped PAT 分离于第一方登录 session，并维持 owner 访问控制
 created: 2026-10-07T00:00:00Z
-updated: 2026-11-16T00:00:00Z
+updated: 2026-11-21T00:00:00Z
 ---
 
 # ADR-117: External Agent Authorization 与 Credential 边界
 
-**状态：** 已采纳并实现；PAT checkpoint `320dd1ac994`、只读 OAuth 实现 checkpoint `5a9a26221c4`。真实 PostgreSQL、浏览器与 Codex/Claude 六工具旅程已通过，最终 prod-like 验证见 [实施证据](https://github.com/BakerSean168/memoflow/blob/7a45112e1840950ead1ba98b748fc70fa1b38344/docs/analysis/2026-10-07-eag-04-oauth-read-evidence.md)。默认关闭 OAuth，公共 rollout 单独验收。
+**状态：** 已采纳并实现；PAT checkpoint `320dd1ac994`、只读 OAuth 实现 checkpoint `5a9a26221c4`。真实 PostgreSQL、浏览器与 Codex/Claude 六工具旅程已通过，最终 prod-like 验证见 [实施证据](https://github.com/BakerSean168/memoflow/blob/7a45112e1840950ead1ba98b748fc70fa1b38344/docs/analysis/2026-10-07-eag-04-oauth-read-evidence.md)。默认关闭 OAuth，公共 rollout 单独验收。**2026-11-21 更新：** [#1054](https://github.com/BakerSean168/memoflow/issues/1054) 已开放 OAuth 写 scope（`EAG_OAUTH_WRITE_ENABLED`，默认 `0`）；授权与吊销模型不变，写能力见 [OAuth 写 consent 设计评估](../external-agent-oauth-write-consent.md)。
 **日期：** 2026-10-07
 **关联：** ADR-036、ADR-039、ADR-045、ADR-104、ADR-105、ADR-116、ADR-118
 

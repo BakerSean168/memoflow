@@ -12,7 +12,7 @@ let messages: Awaited<ReturnType<typeof loadLocaleMessages>>;
 beforeAll(async () => {
   messages = await loadLocaleMessages('zh-CN');
 });
-function fixture(loggedIn = true) {
+function fixture(loggedIn = true, scopes = ['goals:read'], existingScopes: string[] = []) {
   const auth = {
     getSession: vi
       .fn()
@@ -24,8 +24,11 @@ function fixture(loggedIn = true) {
     consentRequest: vi.fn().mockResolvedValue(
       ok({
         clientId: 'https://client.example.test/meta',
+        clientHost: 'client.example.test',
         name: 'Fixture client',
-        scopes: ['goals:read'],
+        scopes,
+        existingScopes,
+        writeEnabled: true,
         lifetimeDays: 90,
         resource: 'https://memo.example.test/mcp',
       }),
@@ -48,20 +51,67 @@ describe('external agent consent', () => {
   beforeEach(() =>
     window.history.replaceState({}, '', '/auth/external-agent?client_id=fixture&sig=signed-query'),
   );
-  it('shows only validated requested permissions and requires an explicit decision', async () => {
+  it('shows the exact host and only validated requested permissions, and requires an explicit decision', async () => {
     const f = fixture();
     await flushPromises();
     expect(f.service.consentRequest).toHaveBeenCalledWith('client_id=fixture&sig=signed-query');
-    expect(f.wrapper.text()).toContain('查看你的 Goals');
-    expect(f.wrapper.text()).not.toContain('查看你的 Tasks');
+    expect(f.wrapper.text()).toContain('client.example.test');
+    expect(f.wrapper.text()).toContain('读取目标和关键结果');
+    expect(f.wrapper.text()).not.toContain('读取任务');
+    expect(f.wrapper.text()).toContain('允许只读访问');
     expect(f.service.decideConsent).not.toHaveBeenCalled();
     await f.wrapper.get('[data-testid="oauth-consent-allow"]').trigger('click');
     await flushPromises();
     expect(f.service.decideConsent).toHaveBeenCalledWith(
       'client_id=fixture&sig=signed-query',
       true,
+      ['goals:read'],
     );
     expect(f.wrapper.get('[role="alert"]').text()).toContain('重新连接');
+  });
+  it('groups reads and writes by domain, leaves writes unchecked, and never offers an "allow all" primary action', async () => {
+    const f = fixture(true, ['goals:read', 'goals:write', 'tasks:write', 'offline_access']);
+    await flushPromises();
+    const text = f.wrapper.text();
+    expect(text).toContain('目标');
+    expect(text).toContain('任务');
+    expect(text).toContain('仅允许只读');
+    expect(text).toContain('写入');
+    expect(text).not.toContain('允许全部');
+    // Default selection excludes every write scope.
+    expect(f.wrapper.get('[data-testid="oauth-consent-allow"]').text()).toBe('允许只读访问');
+    await f.wrapper.get('[data-testid="oauth-consent-allow"]').trigger('click');
+    await flushPromises();
+    expect(f.service.decideConsent).toHaveBeenLastCalledWith(
+      'client_id=fixture&sig=signed-query',
+      true,
+      ['goals:read', 'offline_access'],
+    );
+  });
+  it('lets the user pick a write domain, switches the primary label to "允许写入", and can downgrade to read-only', async () => {
+    const f = fixture(true, ['goals:read', 'goals:write']);
+    await flushPromises();
+    const boxes = f.wrapper.findAll('[role="checkbox"]');
+    expect(boxes).toHaveLength(2);
+    await boxes[1].trigger('click');
+    expect(f.wrapper.get('[data-testid="oauth-consent-allow"]').text()).toContain('允许写入');
+    await f.wrapper.get('[data-testid="oauth-consent-readonly"]').trigger('click');
+    expect(f.wrapper.get('[data-testid="oauth-consent-allow"]').text()).toBe('允许只读访问');
+    await boxes[1].trigger('click');
+    await f.wrapper.get('[data-testid="oauth-consent-allow"]').trigger('click');
+    await flushPromises();
+    expect(f.service.decideConsent).toHaveBeenLastCalledWith(
+      'client_id=fixture&sig=signed-query',
+      true,
+      ['goals:read', 'goals:write'],
+    );
+  });
+  it('highlights scopes that were not already granted', async () => {
+    const f = fixture(true, ['goals:read', 'tasks:write'], ['goals:read']);
+    await flushPromises();
+    expect(f.wrapper.text()).toContain('本次新增授权');
+    expect(f.wrapper.text()).toContain('tasks:write');
+    expect(f.wrapper.text()).toContain('新增');
   });
   it('preserves the signed request through login without approving it', async () => {
     const f = fixture(false);

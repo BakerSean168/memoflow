@@ -9,6 +9,14 @@ export type {
   CloudAuthEmailKind,
   CreateCloudAuthEmailDeliveryOptions,
 } from './email-delivery.js';
-export { EXTERNAL_AGENT_OAUTH_SCOPES, EXTERNAL_AGENT_SCOPES } from './external-agent-provider.js';
+export {
+  EXTERNAL_AGENT_OAUTH_SCOPES,
+  EXTERNAL_AGENT_READ_SCOPES,
+  EXTERNAL_AGENT_SCOPES,
+  EXTERNAL_AGENT_WRITE_SCOPES,
+  externalAgentOAuthScopes,
+  externalAgentScopes,
+} from './external-agent-provider.js';
 export { createScopedPatService, isScopedPatAuthorityCurrent } from './scoped-pat.js';
 export type { VerifiedPatPrincipal } from './scoped-pat.js';
+export { readExternalAgentOAuthAuthority } from './external-agent-oauth.js';

@@ -1,6 +1,9 @@
 import { createGoalPrismaAgentMutations, createGoalPrismaAgentReadPort } from '@memoflow/goal';
 import { createRoutinePrismaAgentMutations } from '@memoflow/routine';
-import { isScopedPatAuthorityCurrent } from '@memoflow/cloud-auth/server';
+import {
+  isScopedPatAuthorityCurrent,
+  readExternalAgentOAuthAuthority,
+} from '@memoflow/cloud-auth/server';
 import { createAccountPrismaActiveQuery } from '@memoflow/account';
 import { createTaskPrismaAgentMutations } from '@memoflow/task';
 import {
@@ -38,6 +41,8 @@ export function bindGatewayWrites(
   time: UserTimeContextPort,
   options: {
     routineWriteEnabled?: boolean;
+    /** OAuth write calls; `EAG_OAUTH_WRITE_ENABLED=1` only. */
+    oauthWriteEnabled?: boolean;
     assistedGuard?: { handleId: string; pendingJson: string; taskId: string };
   } = {},
 ): GatewayWritePort {
@@ -54,10 +59,19 @@ export function bindGatewayWrites(
     requiredScope: string,
   ): ExternalMutationAuthority {
     scope(authority, requiredScope);
-    // Only PAT reaches this port. OAuth write authority would need its own
-    // connection/consent transaction check; see #1033 before adding a branch.
+    const credentialType = authority.credentialType;
+    // Closing the switch also invalidates OAuth grants issued while it was on;
+    // the gateway hides the tools, and this check refuses a direct call.
+    if (credentialType === 'oauth' && options.oauthWriteEnabled !== true)
+      throw new GatewayReadError('FORBIDDEN');
+    let consentScopes: readonly string[] | undefined;
     return {
       ...authority,
+      receiptMetadata: () => ({
+        credentialType,
+        clientId: authority.clientId,
+        consentScopes,
+      }),
       authorizeInTransaction: async (tx) => {
         if (options.assistedGuard) {
           const guard = options.assistedGuard;
@@ -71,6 +85,26 @@ export function bindGatewayWrites(
             },
           });
           if (!binding) throw new GatewayReadError('FORBIDDEN');
+        }
+        if (credentialType === 'oauth') {
+          if (!authority.clientId) throw new GatewayReadError('FORBIDDEN');
+          const current = await readExternalAgentOAuthAuthority(
+            tx,
+            {
+              identityId: cx.identityId,
+              credentialId: authority.connectionId,
+              clientId: authority.clientId,
+              scopes: authority.scopes,
+            },
+            {
+              writeEnabled: options.oauthWriteEnabled === true,
+              accountIsActive: createAccountPrismaActiveQuery(tx),
+            },
+            requiredScope,
+          );
+          if (!current) throw new GatewayReadError('FORBIDDEN');
+          consentScopes = current.consentScopes;
+          return;
         }
         if (
           !(await isScopedPatAuthorityCurrent(

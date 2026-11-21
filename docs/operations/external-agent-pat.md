@@ -7,7 +7,7 @@ updated: 2026-11-18T00:00:00Z
 
 # External Agent PAT 连接
 
-本车道保留 PAT 与 40 个工具（22 个只读、13 个写、5 个 assisted），全部默认关闭；常规 Agent 连接另见 [OAuth 指南](./external-agent-oauth.md)。OAuth 车道固定只读，写只走 PAT 签发时预授权；这是设计边界，不是缺陷，开放条件见 [OAuth 写 consent 设计评估](../internals/external-agent-oauth-write-consent.md)。PAT 验证状态见 [EAG-03 证据](https://github.com/BakerSean168/memoflow/blob/7a45112e1840950ead1ba98b748fc70fa1b38344/docs/analysis/2026-10-07-eag-03-task-read-evidence.md)。受控开发入口为 `http://127.0.0.1:20201/mcp`，只适用于同机客户端。
+本车道保留 PAT 与 40 个工具（22 个只读、13 个写、5 个 assisted），全部默认关闭；常规 Agent 连接另见 [OAuth 指南](./external-agent-oauth.md)。OAuth 也复用同一组 12 个 scope，写在 `EAG_OAUTH_WRITE_ENABLED=1` 时开放；见 [OAuth 写 consent 设计评估](../internals/external-agent-oauth-write-consent.md)。PAT 验证状态见 [EAG-03 证据](https://github.com/BakerSean168/memoflow/blob/7a45112e1840950ead1ba98b748fc70fa1b38344/docs/analysis/2026-10-07-eag-03-task-read-evidence.md)。受控开发入口为 `http://127.0.0.1:20201/mcp`，只适用于同机客户端。
 
 在既有 `docker-compose.local.yml` prod-like 车道中配置 `EAG_READ_PILOT_ENABLED=1`、`EAG_AUDIENCE=http://127.0.0.1:20201/mcp` 和私密的至少 32 字符 `EAG_CURSOR_SECRET`，沿用 [本地 Docker 流程](./local-docker.md)。Task 注册由 `EAG_TASK_READ_ENABLED` 控制，默认开启；设为 0 可回退至 Goal 两工具。写与 assisted 分别由 `EAG_WRITE_ENABLED`、`EAG_ROUTINE_WRITE_ENABLED`、`EAG_ASSISTED_ENABLED` 控制，默认 `0`；完整顺序见 [Gateway runbook](../internals/external-agent-gateway.md#10-一期开启-runbook)。
 
@@ -41,7 +41,7 @@ tool_timeout_sec = 30
 
 ## 受控写入（#490）
 
-写入默认关闭。仅在验证环境中为 API 进程显式设置 `EAG_WRITE_ENABLED=1`；read pilot 也须开启。`deployment/production/docker-compose.production.yml` 已把 `EAG_WRITE_ENABLED`、`EAG_ROUTINE_WRITE_ENABLED`、`EAG_ASSISTED_ENABLED` 传入 API 容器并默认 `0`。OAuth 当前仍只读；写只走 PAT 预授权，这是设计边界而不是待修缺陷。
+写入默认关闭。仅在验证环境中为 API 进程显式设置 `EAG_WRITE_ENABLED=1`；read pilot 也须开启。`deployment/production/docker-compose.production.yml` 已把 `EAG_WRITE_ENABLED`、`EAG_ROUTINE_WRITE_ENABLED`、`EAG_ASSISTED_ENABLED`、`EAG_OAUTH_WRITE_ENABLED` 传入 API 容器并默认 `0`。OAuth 写另有自己的开关；PAT 的授权与撤销不依赖它。
 
 通过上面的第一方 PAT 管理 API 显式申请所需 scope，例如：
 

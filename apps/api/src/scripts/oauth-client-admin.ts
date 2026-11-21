@@ -16,8 +16,10 @@ import { EXTERNAL_AGENT_OAUTH_SCOPES } from '@memoflow/cloud-auth/server';
 import type { PrismaClient } from '@memoflow/database';
 import { isUniqueConstraintError } from '@memoflow/utils/errors';
 
-/** Scopes an operator may pre-provision. OAuth stays read-only (#1033 owns writes). */
+/** Scopes an operator may pre-provision; write scopes are gated by EAG_OAUTH_WRITE_ENABLED at runtime. */
 export const CLIENT_ADMIN_SCOPES = EXTERNAL_AGENT_OAUTH_SCOPES;
+/** Seeding stays least-privilege unless the operator passes --scopes explicitly. */
+const DEFAULT_CLIENT_ADMIN_SCOPES = ['goals:read', 'tasks:read', 'offline_access'];
 
 const DEFAULT_RESOURCE_NAME = 'MemoFlow';
 
@@ -93,9 +95,9 @@ function normalizeRedirectUris(uris: readonly string[]): string[] {
 }
 
 function normalizeScopes(scopes: readonly string[] | undefined): string[] {
-  const values = [...new Set((scopes ?? CLIENT_ADMIN_SCOPES).map((scope) => scope.trim()))].filter(
-    Boolean,
-  );
+  const values = [
+    ...new Set((scopes ?? DEFAULT_CLIENT_ADMIN_SCOPES).map((scope) => scope.trim())),
+  ].filter(Boolean);
   if (values.length === 0) fail('at least one scope is required');
   for (const scope of values) {
     if (!(CLIENT_ADMIN_SCOPES as readonly string[]).includes(scope))
