@@ -652,10 +652,13 @@ export default {
     localMcp: {
       title: '外部 MCP 客户端',
       description:
-        '允许 Codex 等常驻客户端通过本地 loopback MCP 访问当前 Profile 的 Goal/Task。读取始终可用；写入需在创建时勾选。',
+        'MemoFlow 运行且当前 Profile 已打开时，Codex 等客户端即可连接。无需云端登录或配置 AI 模型，重启后本地地址保持不变；写入权限在创建客户端时选择。',
       endpoint: '端点',
       discovery: '发现文件',
       noEndpoint: '本地 MCP 端点暂不可用',
+      retry: '重试连接',
+      portInUse: '本地 MCP 的固定端口已被占用。关闭占用该端口的服务后重试，原连接地址保持不变。',
+      bindingInvalid: '保存的本地 MCP 地址无效或无法读取。请恢复本地宿主配置后重试。',
       name: '名称',
       namePlaceholder: '例如 Codex CLI',
       scopes: '写入范围',

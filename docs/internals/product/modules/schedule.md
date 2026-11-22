@@ -5,7 +5,7 @@ tags:
   - schedule
 description: Planner / Calendar 产品模块与 Scheduler 边界说明
 created: 2026-06-02T00:00:00
-updated: 2026-09-21T20:45:00+08:00
+updated: 2026-11-22T00:00:00+08:00
 ---
 
 # 日程模块说明
@@ -53,6 +53,7 @@ updated: 2026-09-21T20:45:00+08:00
 - Scheduler 的执行选择由 handler key / registry 驱动；历史 `SourceModule` 行为路由已退休；执行选择由 handler key / registry 驱动。
 - Calendar reliability worker 依赖 `@memoflow/patterns/lease` 抽象；具体 ScheduleLease coordinator/repository 属于 Scheduler。
 - API 与 Desktop 都分别装配 Calendar module 与 Scheduler module；不能重新创建一个混合的“大 Schedule module”。
+- Desktop 的 Profile runtime 在本地模块 bootstrap 后启动 Scheduler，再发布 Profile 就绪；锁定、切换和退出时停止并 drain。主窗口的 ready-to-show、显示、隐藏和重建只影响 UI，不启动或停止调度。
 
 ## 5. 相关文件索引
 

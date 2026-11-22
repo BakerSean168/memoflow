@@ -19,7 +19,7 @@
 
 MemoFlow is an AI-first productivity workspace designed for long-term personal use. It does not place a chatbot next to a traditional todo application. Instead, AI conversations and business objects such as Goal, Task, Note, Schedule, Reminder, and Notification share the same product context: an intention can begin in conversation, move into a structured workspace for confirmation and editing, execute through product contracts, and return as a traceable outcome.
 
-The repository contains the Web client, Electron Desktop client, API, shared domain packages, contracts, AI runtime, synchronization, and delivery infrastructure. It is a complete multi-surface product system rather than a frontend demo.
+MemoFlow runs primarily as an Electron Local Host, with the full local workspace in the desktop application. Cloud Web/API is an optional entry for a lightweight trial, data synchronization and Hosted MCP. The repository includes both hosts, shared domain packages, contracts, AI runtime and delivery infrastructure.
 
 ## Product model
 
@@ -71,23 +71,27 @@ See [`docs/internals/product/workspace-ui.md`](./docs/internals/product/workspac
 
 ## Architecture
 
-```text
-┌──────────────────────────────────────────────┐
-│ Web (Vue)          Desktop (Electron + Vue) │
-└───────────────┬───────────────┬──────────────┘
-                │ shared contracts / client APIs
-                ▼
-┌──────────────────────────────────────────────┐
-│ API / composition root                      │
-│ Express · Zod · Prisma · Mastra runtime     │
-└───────────────┬───────────────┬──────────────┘
-                │               │
-                ▼               ▼
-          PostgreSQL          Redis
-                │
-                ▼
-            PowerSync
+```mermaid
+flowchart TB
+  subgraph Local["Local device"]
+    UI["Desktop renderer"] -->|IPC| Host["Electron Main: Profile services, Scheduler, AI, MCP"]
+    Agent["Local MCP clients"] -->|Loopback MCP| Host
+    Host --> DB["Profile SQLite"]
+    Host --> Vault["Local Vault"]
+  end
+  subgraph Cloud["Optional cloud"]
+    Web["Web trial"] --> API["Cloud API and Hosted MCP"]
+    Remote["Remote agents"] --> API
+    API --> PG["PostgreSQL"]
+  end
+  DB <-.->|Optional PowerSync| PG
 ```
+
+Electron Main is the complete Local Host while the application runs with an unlocked Profile. Local business services, scheduling and MCP do not require MemoFlow cloud authentication or a configured AI model. The renderer uses IPC; its loading and visibility do not control background services.
+
+Cloud Web/API provides a lightweight browser trial, optional synchronization and optional Hosted MCP for remote agents. Local and cloud hosts share domain contracts while owning their own data and transactions. Cloud Knowledge remains read-only; the desktop connects to the local Vault. The chosen model provider or native Agent may still need its own network connection.
+
+See [architecture boundaries](./docs/internals/standards/architecture.md) and [ADR-124](./docs/internals/decisions/ADR-124-local-mcp-host-credentials-and-cloud-boundary.md).
 
 The monorepo keeps product surfaces thin and pushes reusable business behavior into shared packages:
 

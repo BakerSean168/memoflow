@@ -16,9 +16,10 @@ import { writeToolDescriptors } from '@memoflow/agent-gateway';
 import { getPermissionOperation } from '../permissions/operation-catalog';
 import { PERMISSION_PRESETS } from '../permissions/permission-policy';
 import { createHash, randomBytes, randomUUID } from 'node:crypto';
-import { chmod, mkdir, rename, rm, writeFile } from 'node:fs/promises';
+import { chmod, mkdir, readFile, rename, rm, writeFile } from 'node:fs/promises';
+import { z } from 'zod';
 import { createServer, type IncomingMessage, type Server, type ServerResponse } from 'node:http';
-import { dirname } from 'node:path';
+import { dirname, join } from 'node:path';
 import { createMcpHandler, McpServer } from '@modelcontextprotocol/server';
 import { toNodeHandler } from '@modelcontextprotocol/node';
 import type { ExecutionContext } from '@memoflow/transport-contracts';
@@ -35,6 +36,25 @@ import type { PermissionRepository } from '../permissions/permission.repository'
 import { executeAuthorized, PermissionDeniedError } from '../permissions/authorize';
 import { migrateLegacyPermissions } from '../permissions/permission-migration';
 import { withAllowedBusinessAccess } from '../permissions/permission-grants';
+
+const LocalMcpBindingSchema = z
+  .object({
+    version: z.literal(1),
+    port: z.number().int().min(1).max(65535),
+  })
+  .strict();
+
+async function writePrivateJson(target: string, value: unknown): Promise<void> {
+  await mkdir(dirname(target), { recursive: true, mode: 0o700 });
+  const temp = `${target}.${randomUUID()}.tmp`;
+  try {
+    await writeFile(temp, JSON.stringify(value, null, 2), { mode: 0o600 });
+    await chmod(temp, 0o600);
+    await rename(temp, target);
+  } finally {
+    await rm(temp, { force: true }).catch(() => undefined);
+  }
+}
 
 type GrantInput = Parameters<LocalAgentToolBridgePort['open']>[0];
 function tokenDigest(token: string): string {
@@ -123,7 +143,7 @@ interface Options {
   clients?: LocalMcpClientRepository;
   /** Append-only local audit sink; absent means tool calls are not audited. */
   audit?: LocalGatewayAuditRepository;
-  /** 0600 discovery file published with the loopback endpoint and client hint. */
+  /** Live discovery file; a sibling host.json preserves this Profile's local port. */
   discoveryPath?: string;
   /** Loopback by default; the reachability decision (WSL/cross-host) is separate. */
   bindHost?: string;
@@ -242,7 +262,10 @@ export class LocalAgentToolBridge implements LocalAgentToolBridgePort {
   private readonly clientTokens = new Map<string, McpClientCredentialRef>();
   private server?: Server;
   private endpointUrl?: string;
-  private listening?: Promise<string>;
+  private startup?: Promise<void>;
+  private disposal?: Promise<void>;
+  private ready = false;
+  private discoveryPublished = false;
   private stopped = false;
   private pending = 0;
   private readonly inFlight = new Set<Promise<unknown>>();
@@ -288,8 +311,22 @@ export class LocalAgentToolBridge implements LocalAgentToolBridgePort {
     }
     return migration;
   }
-  private listen(): Promise<string> {
-    this.listening ??= new Promise((resolve, reject) => {
+  private get bindingPath(): string | undefined {
+    return this.options.discoveryPath
+      ? join(dirname(this.options.discoveryPath), 'host.json')
+      : undefined;
+  }
+  private async readBindingPort(): Promise<number> {
+    if (!this.bindingPath) return 0;
+    try {
+      return LocalMcpBindingSchema.parse(JSON.parse(await readFile(this.bindingPath, 'utf8'))).port;
+    } catch (error) {
+      if (error instanceof Error && 'code' in error && error.code === 'ENOENT') return 0;
+      throw new LocalAgentError('LOCAL_MCP_BINDING_INVALID');
+    }
+  }
+  private listen(port: number): Promise<string> {
+    return new Promise((resolve, reject) => {
       const server = createServer(
         {
           maxHeaderSize: 8192,
@@ -306,8 +343,10 @@ export class LocalAgentToolBridge implements LocalAgentToolBridgePort {
       );
       this.server = server;
       server.maxConnections = 16;
-      server.once('error', reject);
-      server.listen(0, this.options.bindHost ?? '127.0.0.1', () => {
+      server.once('error', (error: NodeJS.ErrnoException) => {
+        reject(error.code === 'EADDRINUSE' ? new LocalAgentError('LOCAL_MCP_PORT_IN_USE') : error);
+      });
+      server.listen(port, this.options.bindHost ?? '127.0.0.1', () => {
         const address = server.address();
         if (this.stopped || !address || typeof address === 'string') {
           server.close();
@@ -319,7 +358,6 @@ export class LocalAgentToolBridge implements LocalAgentToolBridgePort {
         resolve(url);
       });
     });
-    return this.listening;
   }
   /**
    * Start the bridge with the Profile instead of the first Agent run. The
@@ -328,9 +366,30 @@ export class LocalAgentToolBridge implements LocalAgentToolBridgePort {
    */
   async start(): Promise<void> {
     if (this.stopped) throw new LocalAgentError('LOCAL_AGENT_UNAVAILABLE');
-    await this.listen();
+    this.startup ??= this.startHost().catch(async (error: unknown) => {
+      this.ready = false;
+      await this.closeListener();
+      await this.removeDiscovery();
+      this.clientTokens.clear();
+      this.startup = undefined;
+      throw error;
+    });
+    await this.startup;
+  }
+  private async startHost(): Promise<void> {
+    const port = await this.readBindingPort();
+    if (this.stopped) throw new LocalAgentError('LOCAL_AGENT_UNAVAILABLE');
+    const url = await this.listen(port);
+    // Persist only after binding, without a probe/close/rebind race. An existing
+    // address is never silently changed when another process occupies its port.
+    if (this.bindingPath && port === 0) {
+      await writePrivateJson(this.bindingPath, { version: 1, port: Number(new URL(url).port) });
+    }
     await this.indexClients();
+    if (this.stopped) throw new LocalAgentError('LOCAL_AGENT_UNAVAILABLE');
     await this.publishDiscovery();
+    if (this.stopped) throw new LocalAgentError('LOCAL_AGENT_UNAVAILABLE');
+    this.ready = true;
   }
   private async indexClients(): Promise<void> {
     const clients = this.options.clients;
@@ -346,27 +405,28 @@ export class LocalAgentToolBridge implements LocalAgentToolBridgePort {
     const hint =
       'Add this server to your MCP client: {"mcpServers":{"memoflow":{"type":"http",' +
       `"url":"${url}","headers":{"Authorization":"Bearer <token from Settings>"}}}}`;
-    const body = JSON.stringify(
-      {
-        version: 1,
-        url,
-        hint,
-        pid: process.pid,
-        updatedAt: new Date().toISOString(),
-      },
-      null,
-      2,
-    );
-    await mkdir(dirname(target), { recursive: true, mode: 0o700 });
-    const temp = `${target}.tmp`;
-    await rm(temp, { force: true });
-    await writeFile(temp, body, { mode: 0o600 });
-    await chmod(temp, 0o600);
-    await rename(temp, target);
+    await writePrivateJson(target, {
+      version: 1,
+      url,
+      hint,
+      pid: process.pid,
+      updatedAt: new Date().toISOString(),
+    });
+    this.discoveryPublished = true;
   }
   private async removeDiscovery(): Promise<void> {
-    if (!this.options.discoveryPath) return;
+    // Failed starts and repeated disposal must not erase another instance's record.
+    if (!this.discoveryPublished || !this.options.discoveryPath) return;
+    this.discoveryPublished = false;
     await rm(this.options.discoveryPath, { force: true }).catch(() => undefined);
+  }
+  private async closeListener(): Promise<void> {
+    const server = this.server;
+    this.server = undefined;
+    this.endpointUrl = undefined;
+    if (!server) return;
+    server.closeAllConnections();
+    await new Promise<void>((resolve) => server.close(() => resolve()));
   }
   /**
    * Wraps every registered tool so built-in runs and external clients share one
@@ -448,6 +508,7 @@ export class LocalAgentToolBridge implements LocalAgentToolBridgePort {
     const grant = token ? this.grants.get(token) : undefined;
     const clientRef = token && !grant ? this.clientTokens.get(tokenDigest(token)) : undefined;
     if (
+      !this.ready ||
       !token ||
       (grant ? !this.live(token, grant) : !clientRef || this.stopped || !this.options.isActive())
     ) {
@@ -748,7 +809,8 @@ export class LocalAgentToolBridge implements LocalAgentToolBridgePort {
       throw new LocalAgentError('LOCAL_AGENT_PERMISSION_DENIED');
     if (!connection.enabled) throw new LocalAgentError('LOCAL_AGENT_PERMISSION_DENIED');
     await this.migratePermissions(input.identityId);
-    const url = await this.listen();
+    await this.start();
+    const url = this.endpointUrl!;
     if (this.stopped || !this.options.isActive())
       throw new LocalAgentError('LOCAL_AGENT_PERMISSION_DENIED');
     // Awaiting startup/connection lookup admits concurrent contenders. Enforce
@@ -775,8 +837,9 @@ export class LocalAgentToolBridge implements LocalAgentToolBridgePort {
   }
   /** Loopback endpoint for the current Profile, published through the discovery file. */
   async endpoint(): Promise<LocalMcpEndpoint> {
-    const url = await this.listen();
-    return { url, discoveryPath: this.options.discoveryPath ?? null };
+    await this.start();
+    if (this.stopped || !this.endpointUrl) throw new LocalAgentError('LOCAL_AGENT_UNAVAILABLE');
+    return { url: this.endpointUrl, discoveryPath: this.options.discoveryPath ?? null };
   }
   async listMcpClients(owner: string): Promise<LocalMcpClient[]> {
     const clients = this.options.clients;
@@ -828,21 +891,25 @@ export class LocalAgentToolBridge implements LocalAgentToolBridgePort {
     }
     return client;
   }
-  async dispose(): Promise<void> {
+  dispose(): Promise<void> {
+    this.disposal ??= this.disposeHost();
+    return this.disposal;
+  }
+  private async disposeHost(): Promise<void> {
     this.conversations.clear();
     this.stopped = true;
+    this.ready = false;
     for (const grant of this.grants.values()) {
       grant.controller.abort();
       this.options.onRevokeGrant?.(grant.input);
     }
     this.grants.clear();
     this.clientTokens.clear();
+    // Include indexing and atomic publication, not only listen(), before final
+    // cleanup; a late startup continuation must never republish a dead endpoint.
+    await this.startup?.catch(() => undefined);
+    await this.closeListener();
     await this.removeDiscovery();
-    await this.listening?.catch(() => undefined);
-    if (this.server) {
-      this.server.closeAllConnections();
-      await new Promise<void>((resolve) => this.server!.close(() => resolve()));
-    }
     await Promise.allSettled([...this.inFlight]);
   }
 }

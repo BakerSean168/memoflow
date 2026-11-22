@@ -10,6 +10,10 @@ export const LOCAL_AGENT_FAILURES = {
   LOCAL_AGENT_LOGIN_REQUIRED: 'Sign in using the Agent’s native login command, then refresh.',
   LOCAL_AGENT_LOGIN_DENIED: 'The provider account did not approve the sign-in request.',
   LOCAL_AGENT_UNAVAILABLE: 'The local Agent is unavailable. Check its native configuration.',
+  LOCAL_MCP_PORT_IN_USE:
+    'The saved local MCP port is in use. Close the conflicting service and retry. Your MCP address has not changed.',
+  LOCAL_MCP_BINDING_INVALID:
+    'The saved local MCP address is invalid or unreadable. Restore the Profile host configuration before retrying.',
   LOCAL_AGENT_RATE_LIMITED:
     'The Agent provider is rate limiting requests. Try again later or choose another model.',
   LOCAL_AGENT_QUOTA_EXHAUSTED:

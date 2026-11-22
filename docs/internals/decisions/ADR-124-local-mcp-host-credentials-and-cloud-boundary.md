@@ -2,12 +2,12 @@
 tags: [adr, mcp, desktop, security, networking, cloud]
 description: 本地外部 MCP 宿主的主进程内形态、per-run 与持久令牌双轨、WSL 绑定策略、跨机关闭结论及与云端 MCP 的分工
 created: 2026-11-19T00:00:00Z
-updated: 2026-11-19T00:00:00Z
+updated: 2026-11-22T00:00:00+08:00
 ---
 
 # ADR-124: 本地 MCP 宿主形态、凭据双轨与云端分工
 
-**状态：** 已采纳（#1036）；跨端并发规则见 [ADR-125](./ADR-125-powersync-uplink-row-version-guard.md)
+**状态：** 已采纳（#1036）；Electron Local Host 与稳定端点细化见 [#1066](https://github.com/BakerSean168/memoflow/issues/1066)；跨端并发规则见 [ADR-125](./ADR-125-powersync-uplink-row-version-guard.md)
 
 **日期：** 2026-11-19
 
@@ -23,16 +23,21 @@ ADR-121 的本地 MCP 通道最初只服务内置本地 Agent 的 run：由宿�
 
 ## Decision
 
-### 1. 宿主就是 Electron 主进程，不是独立进程
+### 1. Electron 主进程承载完整 Local Host
 
 本地 MCP 宿主由 `LocalAgentToolBridge`（`packages/ai/src/server/local-agent/local-tool-bridge.ts`）在 Desktop 主进程中实现，随活动 Profile 启停。它不新起守护进程、不开第二套运行时，也不把工具执行下沉到 renderer。
 
-- 单个 loopback HTTP 服务，`listen(0)` 随机端口，只接受 `POST /mcp`；其他路径返回 405，`Origin` 存在即 403，`Host` 必须严格等于实际绑定地址与端口。
+- 单个 loopback HTTP 服务，首次 `listen(0)` 分配端口，绑定成功后将 `{ version: 1, port }` 原子保存到 Profile 的 `storage/local-mcp/host.json`；后续严格复用该端口。只接受 `POST /mcp`；其他路径返回 405，`Origin` 存在即 403，`Host` 必须严格等于实际绑定地址与端口。
 - 无长连接会话：每个请求重新校验凭据、Profile 活跃状态和连接/客户端记录，用完即弃。
 - 有界资源：请求体 ≤ 256 KiB，请求期限 30 秒，并发请求 ≤ 8，连接数 ≤ 16，活跃 per-run grant ≤ 4。
-- 端点通过 `0600` 发现文件发布（URL、pid、配置提示），发现文件只提供便利，不构成授权。
+- `host.json` 是本机持久配置；`endpoint.json` 是本次活跃实例的发现信息（URL、pid、配置提示）。两者均为 `0600`，不保存令牌、不参与 PowerSync 或业务导出；停止只删除 live discovery，保留绑定。
+- 启动 promise 覆盖 bind、持久化、客户端索引和 discovery 发布，完成后才接收工具请求。启动失败关闭 listener，后续显式重试复用原地址；dispose 先撤销入口，等待启动收尾，再关闭 listener、删除发现文件并 drain DB 工作。重复 dispose 不清理后一个实例的文件。
+- 保存端口被占用时返回 `LOCAL_MCP_PORT_IN_USE`，非法配置返回 `LOCAL_MCP_BINDING_INVALID`；MCP 单独不可用，Profile 其余功能继续运行。设置页保留客户端管理并提供重试，不静默换端口。
+- 从旧随机端口版本首次升级后，已有客户端需将 URL 更新为设置页显示的地址，原令牌仍有效；其后同一 Profile 正常重启无需修改配置。
 
-**硬约束是 PowerSync 本地库单进程单开。** 本地写路径不是「调用一个 API」，而是在持有 Profile 数据库句柄的进程内开启 owner 事务：`authority.authorize(tx)`、expectedVersion/CAS、本地幂等回执与业务写入同属一次 `writeTransaction`（见 `packages/*/src/server/infrastructure/**/*-agent-mutations.ts`）。独立进程既无法安全地第二次打开同一个 SQLite，也无法共享这条事务与回执边界；加上 Profile 锁定/切换/teardown 由主进程拥有，跨进程宿主只能退化成代理回主进程，没有解耦收益。因此「独立 MCP 宿主进程」在本架构中不可行，不列为备选。
+**当前约束是一个 Profile 数据库句柄与一条 owner 事务边界。** `authority.authorize(tx)`、expectedVersion/CAS、本地幂等回执与业务写入同属主进程中的一次 `writeTransaction`（见 `packages/*/src/server/infrastructure/**/*-agent-mutations.ts`）。用户选择当前完整宿主继续由 Electron 承载；本轮不增加第二个数据库 owner 或代理进程。
+
+本地模块完成 bootstrap 后，由 `DesktopProfileRuntimeManager` 启动同一 Schedule controller，再发布 active Profile。锁定、切换和退出在销毁模块/数据库前停止该 controller；`WindowManager` 只管理窗口。Local MCP 随 Profile 的模块生命周期启动，不要求模型配置、原生 CLI 或已有 Agent turn；云会话恢复在本地激活后后台进行。
 
 **代价**：Desktop 未运行或 Profile 未激活时本地 MCP 不可用；不承诺后台常驻、开机自启或退出后继续执行。外部客户端必须把连接失败当作正常状态处理，而不是无限重试。
 
@@ -66,7 +71,7 @@ ADR-121 的本地 MCP 通道最初只服务内置本地 Agent 的 run：由宿�
 
 据此固定绑定策略：
 
-1. 只绑 `127.0.0.1` + 随机端口；产品组装不暴露 `bindHost` 配置，也不绑 `0.0.0.0`、局域网地址或 Tailscale 地址。
+1. 只绑 `127.0.0.1` + Profile 持久端口；首次由系统分配，后续冲突明确失败；产品组装不暴露 `bindHost` 配置，也不绑 `0.0.0.0`、局域网地址或 Tailscale 地址。
 2. `Host` 校验按实际绑定值严格匹配；当前实现只接受 `127.0.0.1:<port>`。客户端必须写字面量 `127.0.0.1`，不要用主机名，也不要依赖 `localhost`（WSL 的 `localhost` 优先解析 `::1`，且当前 Host 校验会拒绝 `localhost:<port>`）。
 3. 不需要薄中继、不需要端口转发、不需要为 WSL 增加来源 IP 特判。
 4. 前置条件是用户的 WSL 配置，不是产品代码；NAT 模式 WSL、IPv6 与 macOS 不在已验证范围。
@@ -90,7 +95,9 @@ ADR-121 的本地 MCP 通道最初只服务内置本地 Agent 的 run：由宿�
 
 届时新立 ADR 修订本文；本文的默认绑定与关闭结论在此之前保持有效。
 
-### 5. 与云端 MCP 的分工
+### 5. 与云端 Web/API/MCP 的分工
+
+Desktop Local Host 是主要运行路径。云端有三个辅助角色：免安装的 Web 轻量体验、可选数据同步、少量需要设备不在场的 Hosted MCP。云端 API 不代理本地工具，也不是本地 Profile 可用性的前置条件。Web Knowledge 沿用 [ADR-126](./ADR-126-obsidian-knowledge-connection-and-read-only-web.md) 的只读边界。
 
 云端 Hosted MCP（ADR-116～118，`docs/internals/external-agent-gateway.md`）与本地 MCP 是同一协议下的两个入口，服务不同数据面。边界如下：
 
@@ -118,7 +125,7 @@ ADR-121 的本地 MCP 通道最初只服务内置本地 Agent 的 run：由宿�
 
 ## Considered Options
 
-- **独立进程 / 常驻守护宿主**：被 PowerSync 单进程单开与 owner 事务边界否决，见 §1。
+- **独立进程 / 常驻守护宿主**：当前产品不需要；保留 Electron 内的单一数据库和事务 owner，见 §1。
 - **绑 `0.0.0.0` 或 Tailscale IP 以「顺便」支持远程**：收益为零（loopback 已覆盖 WSL），暴露面与凭据风险显著上升，见 §3、§4。
 - **只保留 per-run 凭据**：无法支持用户自己的客户端长期连接，每次使用都要手工搬运短期令牌。
 - **只保留持久令牌**：内置 Agent 会获得超出单次 run 的长期能力，违背最小授权；且持久令牌没有逐次审批语义。
@@ -126,7 +133,15 @@ ADR-121 的本地 MCP 通道最初只服务内置本地 Agent 的 run：由宿�
 
 ## Consequences
 
-- 本地 MCP 的可用性绑定 Desktop 进程生命周期；这是单进程约束的直接结果，不作为缺陷修复。
+- 本地 MCP 的可用性绑定 Desktop 进程与活动 Profile；正常重启复用本机地址，端口冲突单独呈现为 MCP 不可用。
 - 持久令牌无到期时间，安全性依赖可见的撤销入口与每次调用重读记录；后续若要加 TTL 或设备绑定，须另立决策。
 - 跨机方向关闭后，文档与代码都不应再出现「远程/尾网访问本地 MCP」的配置项或预留分支。
 - 未验证项继续挂在一期记录中：NAT 模式 WSL、IPv6、真实对端入站、Electron 进程首次监听时的防火墙提示、macOS。实现与文档不一致处（例如 Host 校验对 `localhost` 的实际行为）以实现为准，并在修订对应文档时修正。
+
+## 源码参考
+
+本次参照 T3 Code `620cf4770d992d642f822a13dc2539c2605a3500` 的控制关系：
+[serverRuntimeStartup.ts](https://github.com/pingdotgg/t3code/blob/620cf4770d992d642f822a13dc2539c2605a3500/apps/server/src/serverRuntimeStartup.ts) 将本地服务就绪与联网辅助任务分开；
+[DesktopApp.ts](https://github.com/pingdotgg/t3code/blob/620cf4770d992d642f822a13dc2539c2605a3500/apps/desktop/src/app/DesktopApp.ts) 优先使用配置端口；
+[serverOwnership.ts](https://github.com/pingdotgg/t3code/blob/620cf4770d992d642f822a13dc2539c2605a3500/apps/server/src/serverOwnership.ts) 使运行信息的发布和清理归属同一宿主。
+T3 Desktop 使用 backend 子进程，默认端口扫描也与这里不同；MemoFlow 采用现有 Promise/Profile 生命周期并保存每个 Profile 的本机端口，不复制进程拓扑或引入 Effect。

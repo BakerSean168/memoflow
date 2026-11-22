@@ -11,6 +11,9 @@ import {
   MEMOFLOW_NATIVE_TOOL_ROUTING_INSTRUCTIONS,
 } from './local-agent-runtime';
 import { LocalAgentError } from '../../shared/local-agent-error';
+import { LocalAgentToolBridge } from './local-tool-bridge';
+import { LocalMcpClientRepository } from '../infrastructure/adapters/powersync/local-mcp-client.repository';
+import { PermissionLocalRepository } from '../permissions/permission-powersync.repository';
 import { nativeIdentity, nativeModelVisibilityContext } from './native-identity';
 import type { NativeAgentEvent, NativeAgentRunInput } from './codex-driver';
 
@@ -1850,4 +1853,92 @@ it('persists a cancelled outcome when stopped while reading selected knowledge',
   expect(history.messages.at(-1)?.runOutcome).toMatchObject({ status: 'cancelled' });
   expect(run).not.toHaveBeenCalled();
   await runtime.dispose();
+});
+
+it('starts the Profile MCP host without any native Agent connection or model configuration', async () => {
+  const db = createLocalAgentSqlite();
+  databases.push(db);
+  const store = new LocalAgentRepository(db);
+  const home = await mkdtemp(join(tmpdir(), 'mf-local-host-'));
+  ephemeralHomes.push(home);
+  const createDriver = vi.fn(() => {
+    throw new Error('No native Agent may be started');
+  });
+  const bridge = new LocalAgentToolBridge({
+    store,
+    clients: new LocalMcpClientRepository(db),
+    permissions: new PermissionLocalRepository(db),
+    discoveryPath: join(home, 'local-mcp/endpoint.json'),
+    isActive: () => true,
+    registerTools(server, context) {
+      server.registerTool('profile_read', {}, async () => {
+        await context.authorize('goals:read');
+        return { content: [{ type: 'text', text: context.identityId }] };
+      });
+    },
+  });
+  const runtime = new LocalAgentRuntime({
+    store,
+    cwd: home,
+    isActive: () => true,
+    bridge,
+    createDriver,
+  });
+  try {
+    await runtime.start();
+    expect(await store.listConnections('owner')).toEqual([]);
+    const credential = await runtime.createMcpClient('owner', {
+      name: 'External',
+      writeScopes: [],
+    });
+    expect((await runtime.mcpEndpoint())?.url).toBe(credential.endpoint.url);
+    const response = await fetch(credential.endpoint.url, {
+      method: 'POST',
+      headers: {
+        authorization: `Bearer ${credential.token}`,
+        accept: 'application/json, text/event-stream',
+        'content-type': 'application/json',
+      },
+      body: JSON.stringify({
+        jsonrpc: '2.0',
+        id: 1,
+        method: 'tools/call',
+        params: { name: 'profile_read', arguments: {} },
+      }),
+    });
+    expect(response.status).toBe(200);
+    expect(await response.text()).toContain('owner');
+    expect(createDriver).not.toHaveBeenCalled();
+  } finally {
+    await runtime.dispose();
+  }
+});
+
+it('keeps the local runtime available when its optional MCP listener cannot start', async () => {
+  const db = createLocalAgentSqlite();
+  databases.push(db);
+  const store = new LocalAgentRepository(db);
+  const dispose = vi.fn(async () => {});
+  const runtime = new LocalAgentRuntime({
+    store,
+    cwd: '/tmp',
+    isActive: () => true,
+    bridge: {
+      start: async () => {
+        throw new LocalAgentError('LOCAL_MCP_PORT_IN_USE');
+      },
+      open: async () => {
+        throw new LocalAgentError('LOCAL_MCP_PORT_IN_USE');
+      },
+      listMcpClients: async () => [],
+      dispose,
+    },
+  });
+  try {
+    await expect(runtime.start()).resolves.toBeUndefined();
+    await expect(runtime.listMcpClients('owner')).resolves.toEqual([]);
+  } finally {
+    await runtime.dispose();
+  }
+  expect(dispose).toHaveBeenCalledOnce();
 });

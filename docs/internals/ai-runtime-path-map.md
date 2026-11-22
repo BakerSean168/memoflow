@@ -6,7 +6,7 @@ tags:
   - mastra
 description: MemoFlow AI 运行路径：内置 Mastra 与 Desktop 本地 Agent 的会话归属和业务工具边界
 created: 2026-07-26T00:00:00
-updated: 2026-10-09T00:00:00+00:00
+updated: 2026-11-22T00:00:00+08:00
 ---
 
 # AI 运行路径地图
@@ -35,7 +35,7 @@ AIChatView → AssistantRuntimeIpcClient
       → Profile localOnly 会话、绑定、消息/工具展示快照
 ```
 
-`LocalAgentToolBridge` 按运行签发 loopback MCP 凭据。Goal/Task 读取复用 Gateway descriptors 和 owner queries；写入经 owner use case、外层事务、expectedVersion、持久 receipt 与事务内授权。Knowledge 读取现有 Vault source port；保存通过用户确认的 Repository 编辑面，不开放任意文件写入。
+`LocalAgentToolBridge` 的 loopback listener 随 Profile 模块启动；内置 Agent 的 per-run grant 与外部客户端持久凭据共用该 listener。确定性的本地业务工具不要求模型配置、原生 CLI 安装或先创建 AI 会话。端口与发现文件随 [ADR-124](./decisions/ADR-124-local-mcp-host-credentials-and-cloud-boundary.md) 管理。Goal/Task 读取复用 Gateway descriptors 和 owner queries；写入经 owner use case、外层事务、expectedVersion、持久 receipt 与事务内授权。Knowledge 读取现有 Vault source port；保存通过用户确认的 Repository 编辑面，不开放任意文件写入。
 
 Profile teardown 先撤销工具权限、关闭原生资源，再等待正在使用 owner DB 的调用完成。删除 MemoFlow 关联不会清理原生 home。原生历史恢复不进入 Mastra hydration，不上传或 V3 导出；Profile 本地账户复制遇到未支持的本地记录会阻止源清理。
 
@@ -130,7 +130,7 @@ API 与 Desktop 的内置路径均创建一个 `MastraAIRuntime`，并将同一�
 - execution-log producer；
 - durable usage read consumer。
 
-API 使用 PostgreSQL-backed Mastra storage；Desktop 使用 profile-local LibSQL storage。两端共享 contracts/client 语义，不共享 framework private types。Desktop 额外组合 Profile 所有的 `LocalAgentRuntime`；HTTP 明确拒绝 `local_agent`，Web 不加载 native driver。
+API 使用 PostgreSQL-backed Mastra storage；Desktop 使用 profile-local LibSQL storage。两端共享 contracts/client 语义，不共享 framework private types。Desktop 额外组合 Profile 所有的 `LocalAgentRuntime`；HTTP 明确拒绝 `local_agent`，Web 不加载 native driver。Mastra/provider 的能力不可用不会阻断 Local MCP 的确定性业务工具；云会话恢复不作为 Desktop 本地启动前置条件。
 
 ## 6. 反回退锁
 

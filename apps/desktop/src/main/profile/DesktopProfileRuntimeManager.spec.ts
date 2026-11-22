@@ -507,6 +507,64 @@ describe('DesktopProfileRuntimeManager', () => {
     expect(runtime.getActiveProfileId()).toBe(next.descriptor.profileId);
   });
 
+  it('starts the Profile scheduler before publishing local readiness without a renderer', async () => {
+    const ready = Promise.withResolvers<void>();
+    const start = vi.fn(() => ready.promise);
+    const stop = vi.fn(async () => {});
+    mocks.moduleRegistration.mockImplementationOnce(async () => {
+      runtime.setScheduleRuntimeController({ start, stop });
+    });
+    const opening = openSeeded();
+    await vi.waitFor(() => expect(mocks.bootstrapInit).toHaveBeenCalledOnce());
+    try {
+      expect(start).toHaveBeenCalledOnce();
+      expect(runtime.getActiveProfileId()).toBeNull();
+      expect(start.mock.invocationCallOrder[0]).toBeGreaterThan(
+        mocks.bootstrapInit.mock.invocationCallOrder[0]!,
+      );
+    } finally {
+      ready.resolve();
+      await opening;
+    }
+    expect(runtime.getActiveProfileId()).not.toBeNull();
+    await runtime.deactivateProfile();
+    expect(stop).toHaveBeenCalledOnce();
+    expect(stop.mock.invocationCallOrder[0]).toBeLessThan(
+      mocks.bootstrapDestroy.mock.invocationCallOrder[0]!,
+    );
+    expect(mocks.bootstrapDestroy.mock.invocationCallOrder[0]).toBeLessThan(
+      mocks.shutdownPowerSync.mock.invocationCallOrder[0]!,
+    );
+  });
+
+  it('rolls back a failed scheduler startup and never reuses the failed controller', async () => {
+    const start = vi.fn(async () => {
+      throw new Error('scheduler startup failed');
+    });
+    const stop = vi.fn(async () => {});
+    mocks.moduleRegistration.mockImplementationOnce(async () => {
+      runtime.setScheduleRuntimeController({ start, stop });
+    });
+    await expect(openSeeded()).rejects.toThrow('scheduler startup failed');
+    expect(runtime.getActiveProfileId()).toBeNull();
+    expect(stop).toHaveBeenCalledOnce();
+    expect(stop.mock.invocationCallOrder[0]).toBeLessThan(
+      mocks.bootstrapDestroy.mock.invocationCallOrder[0]!,
+    );
+    expect(mocks.shutdownPowerSync).toHaveBeenCalledOnce();
+
+    const nextStart = vi.fn(async () => {});
+    const nextStop = vi.fn(async () => {});
+    mocks.moduleRegistration.mockImplementationOnce(async () => {
+      runtime.setScheduleRuntimeController({ start: nextStart, stop: nextStop });
+    });
+    await openSeeded();
+    expect(nextStart).toHaveBeenCalledOnce();
+    await runtime.deactivateProfile();
+    expect(stop).toHaveBeenCalledOnce();
+    expect(nextStop).toHaveBeenCalledOnce();
+  });
+
   it('clears shell-held references before the bootstrapper destroys modules', async () => {
     const beforeDeactivation = vi.fn();
     runtime.setBeforeDeactivation(beforeDeactivation);

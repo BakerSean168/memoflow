@@ -1,9 +1,9 @@
 import { PermissionSettingsSchema } from '@memoflow/ai-contracts';
-import { request as httpRequest } from 'node:http';
-import { mkdtemp, readFile, rm, stat } from 'node:fs/promises';
+import { createServer, request as httpRequest } from 'node:http';
+import { mkdir, mkdtemp, readFile, rm, stat, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { it, expect } from 'vitest';
+import { it, expect, vi } from 'vitest';
 import { z } from 'zod';
 import { LocalAgentToolBridge } from './local-tool-bridge';
 import { LocalAgentRepository } from '../infrastructure/adapters/powersync/local-agent.repository';
@@ -725,38 +725,162 @@ it('re-checks external client write scopes on every call', async () => {
   }
 });
 
-it('rotates the endpoint and discovery file when the Profile restarts', async () => {
+async function profileHost() {
   const db = createLocalAgentSqlite();
   const store = new LocalAgentRepository(db);
   const clients = new LocalMcpClientRepository(db);
   const directory = await mkdtemp(join(tmpdir(), 'memoflow-mcp-'));
   const discoveryPath = join(directory, 'endpoint.json');
-  const create = () =>
-    new LocalAgentToolBridge({
-      store,
-      permissions: new PermissionLocalRepository(db),
-      isActive: () => true,
-      clients,
-      discoveryPath,
-      registerTools() {},
-    });
-  try {
-    const first = create();
-    await first.start();
-    const firstEndpoint = await first.endpoint();
-    expect((await discover(directory)).discovery.url).toBe(firstEndpoint.url);
-    await first.dispose();
-    await expect(readFile(discoveryPath, 'utf8')).rejects.toThrow();
+  const hostPath = join(directory, 'host.json');
+  const bridges: LocalAgentToolBridge[] = [];
+  return {
+    directory,
+    discoveryPath,
+    hostPath,
+    clients,
+    create() {
+      const bridge = new LocalAgentToolBridge({
+        store,
+        permissions: new PermissionLocalRepository(db),
+        isActive: () => true,
+        clients,
+        discoveryPath,
+        registerTools(server, context) {
+          server.registerTool('owned_read', { inputSchema: z.object({}).strict() }, async () => {
+            await context.authorize('goals:read');
+            return { content: [{ type: 'text', text: context.identityId }] };
+          });
+        },
+      });
+      bridges.push(bridge);
+      return bridge;
+    },
+    async dispose() {
+      for (const bridge of bridges) await bridge.dispose();
+      db.close();
+      await rm(directory, { recursive: true, force: true });
+    },
+  };
+}
 
-    const second = create();
+it('keeps the copied MCP URL and persistent token usable after a Profile restart', async () => {
+  const host = await profileHost();
+  try {
+    const first = host.create();
+    const credential = await first.createMcpClient('owner', { name: 'External', writeScopes: [] });
+    const url = credential.endpoint.url;
+    expect((await discover(host.directory)).discovery.url).toBe(url);
+    await first.dispose();
+    await expect(readFile(host.discoveryPath, 'utf8')).rejects.toThrow();
+
+    const second = host.create();
     await second.start();
-    const secondEndpoint = await second.endpoint();
-    expect(secondEndpoint.url).not.toBe(firstEndpoint.url);
-    expect((await discover(directory)).discovery.url).toBe(secondEndpoint.url);
-    await second.dispose();
+    expect((await second.endpoint()).url).toBe(url);
+    expect(JSON.parse(await readFile(host.hostPath, 'utf8'))).toEqual({
+      version: 1,
+      port: Number(new URL(url).port),
+    });
+    expect((await stat(host.hostPath)).mode & 0o777).toBe(0o600);
+    // Repeated cleanup of an old instance cannot erase the new live discovery.
+    await first.dispose();
+    expect((await discover(host.directory)).discovery.url).toBe(url);
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: {
+        authorization: `Bearer ${credential.token}`,
+        accept: 'application/json, text/event-stream',
+        'content-type': 'application/json',
+      },
+      body: JSON.stringify({
+        jsonrpc: '2.0',
+        id: 1,
+        method: 'tools/call',
+        params: { name: 'owned_read', arguments: {} },
+      }),
+    });
+    expect(response.status).toBe(200);
+    expect(await response.text()).toContain('owner');
   } finally {
-    db.close();
-    await rm(directory, { recursive: true, force: true });
+    await host.dispose();
+  }
+});
+
+it('keeps the saved MCP address on a port conflict and retries it after the listener is released', async () => {
+  const host = await profileHost();
+  const occupied = createServer();
+  try {
+    const first = host.create();
+    await first.start();
+    const url = (await first.endpoint()).url;
+    await first.dispose();
+    await new Promise<void>((resolve, reject) => {
+      occupied.once('error', reject);
+      occupied.listen(Number(new URL(url).port), '127.0.0.1', resolve);
+    });
+    const second = host.create();
+    await expect(second.start()).rejects.toMatchObject({ code: 'LOCAL_MCP_PORT_IN_USE' });
+    await expect(readFile(host.discoveryPath, 'utf8')).rejects.toThrow();
+    expect(JSON.parse(await readFile(host.hostPath, 'utf8')).port).toBe(Number(new URL(url).port));
+    await new Promise<void>((resolve) => occupied.close(() => resolve()));
+    expect((await second.endpoint()).url).toBe(url);
+  } finally {
+    await new Promise<void>((resolve) => occupied.close(() => resolve()));
+    await host.dispose();
+  }
+});
+
+it('finishes startup before disposal removes discovery and closes the listener', async () => {
+  const host = await profileHost();
+  const entered = Promise.withResolvers<void>();
+  const release = Promise.withResolvers<void>();
+  const index = vi.spyOn(host.clients, 'listCredentials').mockImplementationOnce(async () => {
+    entered.resolve();
+    await release.promise;
+    return [];
+  });
+  const bridge = host.create();
+  const starting = bridge.start().catch((error: unknown) => error);
+  try {
+    await entered.promise;
+    const disposing = bridge.dispose();
+    release.resolve();
+    await Promise.all([starting, disposing]);
+    await expect(readFile(host.discoveryPath, 'utf8')).rejects.toThrow();
+    await expect(bridge.endpoint()).rejects.toThrow();
+  } finally {
+    release.resolve();
+    index.mockRestore();
+    await host.dispose();
+  }
+});
+
+it('closes a partially started listener when discovery publication fails, then permits explicit retry', async () => {
+  const host = await profileHost();
+  const bridge = host.create();
+  try {
+    await mkdir(host.discoveryPath);
+    await expect(bridge.start()).rejects.toThrow();
+    const binding = JSON.parse(await readFile(host.hostPath, 'utf8')) as { port: number };
+    const url = `http://127.0.0.1:${binding.port}/mcp`;
+    await expect(fetch(url)).rejects.toThrow();
+    await rm(host.discoveryPath, { recursive: true });
+    expect((await bridge.endpoint()).url).toBe(url);
+    expect((await discover(host.directory)).discovery.url).toBe(url);
+  } finally {
+    await host.dispose();
+  }
+});
+
+it('rejects invalid saved bindings instead of silently giving existing clients a new address', async () => {
+  const host = await profileHost();
+  try {
+    await writeFile(host.hostPath, JSON.stringify({ version: 1, port: 0 }));
+    const bridge = host.create();
+    await expect(bridge.start()).rejects.toMatchObject({ code: 'LOCAL_MCP_BINDING_INVALID' });
+    await expect(readFile(host.discoveryPath, 'utf8')).rejects.toThrow();
+    expect(JSON.parse(await readFile(host.hostPath, 'utf8')).port).toBe(0);
+  } finally {
+    await host.dispose();
   }
 });
 

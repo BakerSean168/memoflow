@@ -6,12 +6,16 @@ tags:
   - contracts
 description: MemoFlow 运行时容器、垂直 feature、领域/应用/基础设施、契约和组合根规范
 created: 2026-01-15T00:00:00
-updated: 2026-08-17T00:00:00+09:00
+updated: 2026-11-22T00:00:00+08:00
 ---
 
 # 架构与分层规则
 
 ## 1. 核心边界
+
+**Electron Local Host。** Desktop 的活动 Profile 在 Electron 主进程内拥有本地模块实例、PowerSync SQLite、Scheduler、AI adapters 和 loopback MCP。Renderer 通过 IPC 使用服务；start/stop/drain 属于 Profile runtime，不由窗口加载、显示或隐藏驱动。本地 Profile 与确定性业务操作不等待云端登录、同步或模型配置。当前由 Electron 承载完整宿主，不拆独立 daemon。
+
+云端 Web/API 为轻量体验、可选数据同步和可选 Hosted MCP 独立装配相同业务契约；云端故障只影响对应在线能力。模型服务和原生 Agent 可以使用各自的远端 provider，这不改变本地业务的所有权。认证边界见[认证模块](../product/modules/authentication.md)，Knowledge 的 Obsidian/Vault 与 Web 只读分工见[知识库模块](../product/modules/repository.md)，端点和凭据规则见 [ADR-124](../decisions/ADR-124-local-mcp-host-credentials-and-cloud-boundary.md)。
 
 - `apps/*` 是运行时容器，负责入口、宿主装配、环境配置、生命周期和平台适配。
 - `packages/<feature>` 是垂直业务切片，内部包含 domain、application、transport、infrastructure 和 client seam。

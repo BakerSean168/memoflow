@@ -81,6 +81,8 @@ const technicalFiles = new Set([
   'db/powersync.sqlite-shm',
   'db/snapshot-meta.json',
   'ui/main-window-state.json',
+  'storage/local-mcp/host.json',
+  'storage/local-mcp/endpoint.json',
 ]);
 
 /** Content proofs stay in the host; neither raw rows nor filenames are uploaded. */
@@ -449,6 +451,9 @@ export async function inspectProfileSource(
       } else if (
         entry.isFile() &&
         !technicalFiles.has(relative) &&
+        !/^storage\/local-mcp\/(?:host|endpoint)\.json\.[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}\.tmp$/.test(
+          relative,
+        ) &&
         !/^storage\/local-agents\/model-catalog\/[a-f0-9]{64}\.json(?:\.[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}\.tmp)?$/.test(
           relative,
         )

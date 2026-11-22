@@ -24,7 +24,6 @@ import {
 } from '@memoflow/desktop-contracts';
 import { fail, ok } from '@memoflow/transport-contracts/result';
 import { createLogger } from '@memoflow/utils/logger';
-import type { ScheduleRuntimeController } from '../runtime/compose-schedule';
 import { applyWindowChromeTheme, createNativeWindowChromeOptions } from './desktop-chrome';
 import type { DesktopChromeTheme } from './desktop-chrome';
 import { hasResolvedPreload, resolvePreloadPath } from '../utils/resolve-preload-path';
@@ -94,7 +93,6 @@ export class WindowManager {
   private allowProcessExit = () => false;
   private cleaningUp = false;
   private lifecyclePreference: DesktopLifecyclePreference | null = null;
-  private scheduleRuntimeController: ScheduleRuntimeController | null = null;
 
   constructor(config: WindowManagerConfig = {}) {
     const preloadPath = config.preloadPath || resolvePreloadPath(__dirname);
@@ -127,23 +125,6 @@ export class WindowManager {
 
   setDesktopFeaturesRuntime(runtime: DesktopFeaturesRuntime | null): void {
     this.desktopFeaturesRuntime = runtime;
-  }
-
-  /**
-   * Set the bound schedule runtime controller for the active profile.
-   * 为当前激活 profile 设置绑定的 schedule runtime controller。
-   *
-   * The controller is the ONLY schedule start/stop owner in the desktop lane
-   * (composed per profile activation and cleared before profile teardown).
-   * Delayed start/stop timing is preserved: the main-window transition starts
-   * the runtime, the profile-access transition and profile deactivation stop it.
-   *
-   * controller 是桌面 lane 中 schedule 启停的唯一所有者（按 profile 激活组装，并在
-   * profile 拆除前清除）。保留延迟启停时序：主窗口切换时启动 runtime，profile-access
-   * 切换与 profile 停用时停止它。
-   */
-  setScheduleRuntimeController(controller: ScheduleRuntimeController | null): void {
-    this.scheduleRuntimeController = controller;
   }
 
   configureCloseBehavior(
@@ -399,7 +380,6 @@ export class WindowManager {
       if (this.returnToActiveSessionOnGateClose) {
         const preserved = this.mainWindow;
         if (preserved && !preserved.isDestroyed()) {
-          await this.scheduleRuntimeController?.stop();
           preserved.destroy();
         }
         this.returnToActiveSessionOnGateClose = false;
@@ -420,7 +400,6 @@ export class WindowManager {
       // 3. 显示主窗口
       if (!this.startupHidden) mainWin.show();
       this.desktopFeaturesRuntime?.bindWindow(mainWin);
-      await this.scheduleRuntimeController?.start();
 
       // Close the outgoing renderer before accepting another Profile transition.
       if (this.profileAccessWindow && !this.profileAccessWindow.isDestroyed())
@@ -456,7 +435,6 @@ export class WindowManager {
 
     try {
       this.mainWindow?.hide();
-      if (!preserveActiveSession) await this.scheduleRuntimeController?.stop();
       this.returnToActiveSessionOnGateClose = preserveActiveSession;
       const profileAccessWindow = this.createProfileAccessWindow(
         targetProfileId,

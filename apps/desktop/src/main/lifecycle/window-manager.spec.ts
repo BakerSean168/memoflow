@@ -32,8 +32,6 @@ describe('Windows main-window close lifecycle', () => {
   let manager: WindowManager;
   let preference: DesktopLifecyclePreference;
   let root: string;
-  const start = vi.fn(async () => {});
-  const stop = vi.fn(async () => {});
   beforeEach(() => {
     vi.clearAllMocks();
     vi.spyOn(process, 'platform', 'get').mockReturnValue('win32');
@@ -44,7 +42,6 @@ describe('Windows main-window close lifecycle', () => {
     manager.setRuntimeManager({
       getActiveProfileId: () => 'profile-a',
     } as DesktopProfileRuntimeManager);
-    manager.setScheduleRuntimeController({ start, stop });
     manager.setDesktopFeaturesRuntime({
       tray: {},
       bindWindow: vi.fn(),
@@ -63,15 +60,13 @@ describe('Windows main-window close lifecycle', () => {
     return manager.getMainWindow()!;
   }
 
-  it('close hides the same renderer without stopping the Profile scheduler; restore preserves it', async () => {
+  it('close hides the same renderer; restore preserves it', async () => {
     const main = await open();
     const send = main.webContents.send;
     main.close();
     expect(main.isDestroyed()).toBe(false);
     expect(main.isVisible()).toBe(false);
     expect(manager.getMainWindow()).toBe(main);
-    expect(start).toHaveBeenCalledTimes(1);
-    expect(stop).not.toHaveBeenCalled();
     expect(app.quit).not.toHaveBeenCalled();
     main.minimize();
     expect(manager.focusActiveWindow()).toBe(true);
@@ -137,7 +132,6 @@ describe('Windows main-window close lifecycle', () => {
     // The session window and its scheduler survive the login gate.
     expect(main.isDestroyed()).toBe(false);
     expect(manager.getMainWindow()).toBe(main);
-    expect(stop).not.toHaveBeenCalled();
     // The gate owns the foreground; the session window is never exposed under it.
     expect(manager.focusActiveWindow()).toBe(true);
     expect(gate.isVisible()).toBe(true);
@@ -149,7 +143,6 @@ describe('Windows main-window close lifecycle', () => {
     expect(manager.getProfileAccessWindow()).toBeNull();
     expect(manager.getMainWindow()).toBe(main);
     expect(main.isVisible()).toBe(true);
-    expect(start).toHaveBeenCalledTimes(1);
   });
 
   it('closing an identity gate without a session still quits the app', () => {
@@ -180,14 +173,13 @@ describe('Windows main-window close lifecycle', () => {
     expect(app.quit).not.toHaveBeenCalled();
   });
 
-  it('lock stops scheduling and destroys the old renderer; restore opens only Profile Access', async () => {
+  it('the Profile Access transition destroys the old renderer and restores only the access window', async () => {
     const main = await open();
     main.close();
     const transition = manager.transitionToProfileAccessWindow();
     await Promise.resolve();
     manager.getProfileAccessWindow()!.emit('ready-to-show');
     await transition;
-    expect(stop).toHaveBeenCalledTimes(1);
     expect(main.isDestroyed()).toBe(true);
     expect(manager.canNavigateToMainWindow()).toBe(false);
     manager.getProfileAccessWindow()!.hide();
@@ -196,29 +188,19 @@ describe('Windows main-window close lifecycle', () => {
     expect(manager.getMainWindow()).toBeNull();
   });
 
-  it('does not expose an outgoing renderer while profile teardown awaits', async () => {
+  it('does not expose an outgoing renderer while the Profile Access window loads', async () => {
     const main = await open();
-    let finish!: () => void;
-    stop.mockImplementationOnce(
-      () =>
-        new Promise<void>((resolve) => {
-          finish = resolve;
-        }),
-    );
     const transition = manager.transitionToProfileAccessWindow();
     expect(manager.focusActiveWindow()).toBe(false);
     expect(manager.focusMainWindow()).toBe(false);
-    expect(main.isVisible()).toBe(false);
-    finish();
-    await Promise.resolve();
+    expect(main.isDestroyed()).toBe(true);
     manager.getProfileAccessWindow()!.emit('ready-to-show');
     await transition;
   });
 
-  it('hidden startup still starts scheduling without showing the main window', async () => {
+  it('hidden startup binds the main window without showing it', async () => {
     manager.setStartupHidden(true);
     const main = await open();
-    expect(start).toHaveBeenCalledTimes(1);
     expect(main.isVisible()).toBe(false);
   });
 
