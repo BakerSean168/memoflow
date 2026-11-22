@@ -9,7 +9,6 @@
     "dist"
   ],
   "exports": {
-    "./style.css": "./dist/setting-ui.css",
     ".": {
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js"
