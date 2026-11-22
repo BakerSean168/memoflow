@@ -1,0 +1,107 @@
+name: Issue 881 historical Windows native crash reproduction
+
+# Ephemeral investigation branch only. Never runs on main, schedules, or PRs.
+on:
+  push:
+    branches:
+      - investigation/issue-881-windows-repro-20261122
+    paths:
+      - .github/workflows/issue-881-windows-repro.yml
+      - tools/ci/native-binding-load-trace.cjs
+
+permissions:
+  contents: read
+
+concurrency:
+  group: issue-881-windows-repro
+  cancel-in-progress: false
+
+jobs:
+  historical-windows-build:
+    name: Historical d21ac88 Windows build (attempt ${{ matrix.attempt }}/4)
+    runs-on: windows-latest
+    timeout-minutes: 35
+    strategy:
+      fail-fast: false
+      matrix:
+        attempt: [1, 2, 3, 4]
+    steps:
+      - name: Checkout current diagnosis scripts
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+
+      - name: Checkout exact failing source (Vite 8.3.1, Rolldown 1.2.9)
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          ref: d21ac88c03a84623bc9029dbef9fa84ba7ffdc34
+          path: historical
+          fetch-depth: 1
+          persist-credentials: false
+
+      - name: Setup Node.js
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7
+        with:
+          node-version: '24'
+          package-manager-cache: false
+
+      - name: Setup pnpm
+        shell: pwsh
+        run: |
+          corepack enable
+          pnpm --version
+
+      - name: Setup Python
+        uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
+        with:
+          python-version-file: historical/apps/desktop/.python-version
+
+      - name: Setup MSBuild
+        uses: microsoft/setup-msbuild@6fb02220983dee41ce7ae257b6f4d8f9bf5ed4ce # v2
+        with:
+          msbuild-architecture: x64
+
+      - name: Install historical dependencies
+        working-directory: historical
+        shell: pwsh
+        env:
+          PYTHON: ${{ env.pythonLocation }}\python.exe
+          npm_config_python: ${{ env.pythonLocation }}\python.exe
+        run: pnpm install --frozen-lockfile --reporter=append-only
+
+      - name: Install exact Rolldown 1.2.9 PDB
+        working-directory: historical
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: node ../tools/ci/prepare-rolldown-debug-symbols.mjs
+
+      - name: Reproduce historical Desktop production build
+        working-directory: historical
+        shell: pwsh
+        env:
+          NX_DAEMON: 'false'
+          NX_SKIP_NX_CACHE: 'true'
+          NODE_OPTIONS: --require=${{ github.workspace }}/historical/tools/ci/node-process-bootstrap.cjs --require=${{ github.workspace }}/tools/ci/native-binding-load-trace.cjs
+          RUST_BACKTRACE: full
+          PYTHON: ${{ env.pythonLocation }}\python.exe
+          npm_config_python: ${{ env.pythonLocation }}\python.exe
+        run: |
+          $ErrorActionPreference = 'Continue'
+          New-Item -ItemType Directory -Force -Path (Join-Path $env:GITHUB_WORKSPACE 'diagnostics') | Out-Null
+          Write-Host "source=d21ac88c03a84623bc9029dbef9fa84ba7ffdc34 attempt=${{ matrix.attempt }}"
+          node -p "require('rolldown/package.json').version"
+          pnpm nx run desktop:build:production --outputStyle=static 2>&1 |
+            Tee-Object -FilePath (Join-Path $env:GITHUB_WORKSPACE 'diagnostics/desktop-build.log')
+          $exitCode = $LASTEXITCODE
+          "exitCode=$exitCode" | Set-Content -Path (Join-Path $env:GITHUB_WORKSPACE 'diagnostics/result.txt')
+          exit $exitCode
+
+      - name: Preserve reproduction log
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: issue-881-windows-legacy-attempt-${{ matrix.attempt }}
+          path: diagnostics/
+          if-no-files-found: ignore
+          retention-days: 7
