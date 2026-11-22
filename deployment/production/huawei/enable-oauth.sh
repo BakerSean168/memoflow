@@ -58,6 +58,9 @@ for i in $(seq 1 120); do
   sleep 2
 done
 [[ -n "$id" && $(docker inspect "$id" --format '{{.State.Health.Status}}') == healthy ]]
+[[ $(docker exec "$id" printenv EAG_OAUTH_ENABLED) == 1 ]]
+[[ $(docker exec "$id" printenv EAG_OAUTH_WRITE_ENABLED) == "$WRITE" ]]
+[[ $(docker exec "$id" printenv EAG_OAUTH_CLIENT_IDS) == "$LIST" ]]
 [[ "$(for service in postgres redis powersync caddy; do docker ps -q --filter 'label=com.docker.compose.project=memoflow' --filter "label=com.docker.compose.service=$service" | head -n1; done)" == "$BASE_IDS" ]]
 # Both metadata URLs must be JSON on their correct HTTPS origins, not SPA HTML.
 api_metadata=$(curl -fsS --max-time 20 --resolve memoflowapi.bakersean.top:443:127.0.0.1 'https://memoflowapi.bakersean.top/.well-known/oauth-protected-resource/mcp')

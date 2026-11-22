@@ -61,7 +61,10 @@ MANIFEST="$STAGE/production-set-v1.json"
 RELEASE_TAG=$(jq -r .releaseTag "$MANIFEST")
 VERSION=$(jq -r .version "$MANIFEST")
 [[ "$RELEASE_TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+(-nightly\.[0-9]{8}\.[0-9]+)?$ && "$VERSION" == "${RELEASE_TAG#v}" ]] || fail 'invalid published release version'
-[[ "$(value "$STATE_ROOT/deploy-state" status)" != BLOCKED ]] || fail 'previous deployment BLOCKED; inspect preserved backup first'
+case "$(value "$STATE_ROOT/deploy-state" status)" in
+  ''|DEPLOYED|PRE_MIGRATION_FAILED) ;;
+  *) fail 'previous deployment is non-terminal or BLOCKED; inspect backup before any retry' ;;
+esac
 # First adoption is anchored to the exact inspected Huawei baseline. Later
 # deployments use the last successful release receipt. Older Published releases
 # remain available for a separately reviewed data/schema recovery, not this
