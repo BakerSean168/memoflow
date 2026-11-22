@@ -92,6 +92,13 @@ jobs:
           npm_config_python: ${{ env.pythonLocation }}\python.exe
         run: pnpm install --frozen-lockfile --reporter=append-only
 
+      - name: Install Rolldown Windows debug symbols for crash traces
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        continue-on-error: true
+        run: node tools/ci/prepare-rolldown-debug-symbols.mjs
+
       - name: Build Desktop application
         shell: pwsh
         env:

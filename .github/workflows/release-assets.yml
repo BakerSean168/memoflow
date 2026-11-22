@@ -237,6 +237,14 @@ jobs:
         run: |
           node ../release-tooling/tools/ci-cd-platform/release-tools/prepare-release-source.mjs "$RELEASE_TAG" "$RELEASE_CHANNEL" --apply
 
+      - name: Install Rolldown Windows debug symbols for crash traces
+        if: runner.os == 'Windows'
+        working-directory: release-source
+        env:
+          GH_TOKEN: ${{ github.token }}
+        continue-on-error: true
+        run: node tools/ci/prepare-rolldown-debug-symbols.mjs
+
       - name: Build desktop application
         working-directory: release-source
         env:
