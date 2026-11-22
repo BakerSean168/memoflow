@@ -133,6 +133,31 @@ describe('UserPreferenceSettingsSection canonical ownership', () => {
     ).toBe('false');
   });
 
+  it('indicates the selected theme and accent through borders only, without check icons', async () => {
+    const { wrapper } = mountSection();
+    await flushPromises();
+
+    const themeInputs = wrapper.findAll<HTMLInputElement>(
+      '[data-testid^="appearance-theme-option-"]',
+    );
+    expect(themeInputs).toHaveLength(3);
+    expect(
+      themeInputs.every((input) => input.element.closest('label')?.querySelector('svg') == null),
+    ).toBe(true);
+    expect(
+      themeInputs.every((input) =>
+        input.element.nextElementSibling?.classList.contains('peer-checked:border-primary'),
+      ),
+    ).toBe(true);
+
+    const accentButtons = wrapper.findAll('[data-testid^="appearance-accent-option-"]');
+    expect(accentButtons).toHaveLength(6);
+    expect(accentButtons.every((button) => button.find('svg').exists() === false)).toBe(true);
+    expect(
+      wrapper.get('[data-testid="appearance-accent-option-linear-indigo"]').classes(),
+    ).toContain('ring-2');
+  });
+
   it('uses canonical defaults/profile values and stays independent from legacy setting availability', async () => {
     const profile: UserPreferenceProfile = {
       presentation: { theme: 'auto', language: 'zh-CN', accent: 'brand-gold' },

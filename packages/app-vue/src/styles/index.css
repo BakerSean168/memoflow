@@ -3,6 +3,8 @@
 @import '../../../ui-core/src/styles/globals.css';
 @import './base-styles.css';
 @import 'vue-sonner/style.css';
+/* Import the source CSS; Storybook does not build dependent libraries first. */
+@import '../../../setting-ui/src/components/ThemePreview.css';
 @import './priority-colors.css';
 @import './settings-animations.css';
 

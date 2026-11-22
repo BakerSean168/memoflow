@@ -23,14 +23,9 @@
           >
             <ThemePreview :theme="option.value" :accent="previewAccent" />
             <span
-              class="mt-2 flex min-h-5 items-center justify-center gap-1.5 text-xs font-medium sm:text-sm"
+              class="mt-2 flex min-h-5 items-center justify-center text-xs font-medium sm:text-sm"
             >
               {{ option.label }}
-              <Check
-                v-if="(modelValue.theme ?? 'auto') === option.value"
-                class="size-3.5 shrink-0 text-primary"
-                aria-hidden="true"
-              />
             </span>
           </span>
         </label>
@@ -57,7 +52,7 @@
           :aria-label="option.label"
           :title="option.label"
           :data-testid="`appearance-accent-option-${option.value}`"
-          class="relative inline-flex h-7 w-7 items-center justify-center rounded-full transition-shadow focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+          class="inline-block h-7 w-7 shrink-0 rounded-full transition-shadow focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
           :class="
             selectedAccent === option.value
               ? 'ring-2 ring-ring ring-offset-2 ring-offset-background'
@@ -66,22 +61,7 @@
           :style="{ backgroundColor: option.swatch }"
           @click="selectAccent(option.value)"
           @keydown="onAccentKeydown($event, option.value)"
-        >
-          <svg
-            v-if="selectedAccent === option.value"
-            class="h-3.5 w-3.5"
-            :class="option.checkClassName"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="3"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            aria-hidden="true"
-          >
-            <path d="M20 6 9 17l-5-5" />
-          </svg>
-        </button>
+        ></button>
       </div>
     </SettingsPropertyRow>
   </SettingsSection>
@@ -89,7 +69,6 @@
 
 <script setup lang="ts">
 import { computed, useId } from 'vue';
-import { Check } from '@lucide/vue';
 import ThemePreview from './ThemePreview.vue';
 import { useI18n } from 'vue-i18n';
 import type { Accent } from '@memoflow/setting-contracts';
@@ -136,43 +115,36 @@ const themeOptions = computed(
 const ACCENT_OPTIONS: Array<{
   value: Accent;
   swatch: string;
-  checkClassName: string;
   labelKey: string;
 }> = [
   {
     value: 'brand-gold',
     swatch: '#C37C09',
-    checkClassName: 'text-[#25190E]',
     labelKey: 'setting.appearance.accentBrandGold',
   },
   {
     value: 'linear-indigo',
     swatch: '#4E59D0',
-    checkClassName: 'text-white',
     labelKey: 'setting.appearance.accentLinearIndigo',
   },
   {
     value: 'ocean-blue',
     swatch: '#0A73A4',
-    checkClassName: 'text-white',
     labelKey: 'setting.appearance.accentOceanBlue',
   },
   {
     value: 'emerald-green',
     swatch: '#0B7A55',
-    checkClassName: 'text-white',
     labelKey: 'setting.appearance.accentEmeraldGreen',
   },
   {
     value: 'rose-red',
     swatch: '#D91C45',
-    checkClassName: 'text-white',
     labelKey: 'setting.appearance.accentRoseRed',
   },
   {
     value: 'violet',
     swatch: '#6A1FEA',
-    checkClassName: 'text-white',
     labelKey: 'setting.appearance.accentViolet',
   },
 ];
