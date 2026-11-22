@@ -708,10 +708,15 @@ export default {
     localMcp: {
       title: 'External MCP clients',
       description:
-        "Let long-running clients such as Codex reach this Profile's Goals and Tasks through the local loopback MCP host. Reads are always available; tick the writes it may perform.",
+        'Connect clients such as Codex to this Profile while MemoFlow is running. No cloud sign-in or AI provider is needed. The local address stays the same after a restart; choose write access when creating a client.',
       endpoint: 'Endpoint',
       discovery: 'Discovery file',
       noEndpoint: 'The local MCP endpoint is unavailable',
+      retry: 'Retry connection',
+      portInUse:
+        'The saved local MCP port is in use. Close the conflicting service and retry. Your connection address has not changed.',
+      bindingInvalid:
+        'The saved local MCP address is invalid or unreadable. Restore the local host configuration and retry.',
       name: 'Name',
       namePlaceholder: 'e.g. Codex CLI',
       scopes: 'Write scopes',

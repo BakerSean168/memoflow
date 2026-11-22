@@ -758,13 +758,7 @@ async function registerBusinessModules(
 
   const repositoryElectronModule = composeRepository({ localVaultPort: localVaultRuntime });
 
-  // Schedule runtime controller wiring: the SAME composed controller is handed
-  // to both lifecycle owners (WindowManager drives delayed start/stop on window
-  // transitions; the profile manager stops it on deactivation before teardown).
-  // schedule runtime controller 接线：同一组装 controller 同时交给两个生命周期
-  // 所有者（WindowManager 在窗口切换时驱动延迟启停；profile manager 在停用拆除前
-  // 停止它）。
-  windowManager.setScheduleRuntimeController(scheduleComposed.runtimeController);
+  // The Profile owns local services; windows only present the active runtime.
   mainRuntime?.profileRuntimeManager.setScheduleRuntimeController(
     scheduleComposed.runtimeController,
   );
@@ -1029,11 +1023,6 @@ async function initializeShellRuntime(): Promise<void> {
     mainRuntime?.notification?.clearPresentation();
     activeInterventionWindowController = null;
     activeFocusWindowController = null;
-    // Clear the WindowManager's bound schedule runtime controller BEFORE the
-    // modules are torn down so no stale controller outlives its instance.
-    // 在模块拆除前清除 WindowManager 绑定的 schedule runtime controller，
-    // 避免过期 controller 越过其实例存活。
-    windowManager.setScheduleRuntimeController(null);
   });
 
   // Cross-module event listeners (task→goal 联动) 现由 composeGoal 把

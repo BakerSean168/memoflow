@@ -1,4 +1,5 @@
 import { nextTick } from 'vue';
+import { ResultErrorException } from '@memoflow/transport-contracts/result';
 import { mount } from '@vue/test-utils';
 import { createI18n } from 'vue-i18n';
 import { afterEach, describe, expect, it, vi } from 'vitest';
@@ -47,7 +48,7 @@ async function settle(): Promise<void> {
   await nextTick();
 }
 
-function mountSection() {
+function mountSection(endpointError?: string) {
   writeText.mockClear();
   Object.defineProperty(navigator, 'clipboard', {
     configurable: true,
@@ -55,7 +56,10 @@ function mountSection() {
   });
   const list = vi.fn(async () => [existingClient, createdCredential.client]);
   const port = {
-    getMcpEndpoint: vi.fn(async () => createdCredential.endpoint),
+    getMcpEndpoint: vi.fn(async () => {
+      if (endpointError) throw new ResultErrorException('private host diagnostics', endpointError);
+      return createdCredential.endpoint;
+    }),
     listMcpClients: list,
     listGatewayAudit: vi.fn(async () => []),
     createMcpClient: vi.fn(async () => createdCredential),
@@ -89,6 +93,27 @@ async function openCreatedCredential() {
 }
 
 describe('ExternalMcpClients', () => {
+  it.each([
+    ['LOCAL_MCP_PORT_IN_USE', 'port is in use'],
+    ['LOCAL_MCP_BINDING_INVALID', 'invalid or unreadable'],
+  ])(
+    'shows an actionable %s error, retains client management, and retries the saved endpoint',
+    async (code, message) => {
+      const { wrapper, port } = mountSection(code);
+      await settle();
+      expect(element('ai-external-mcp-error')?.textContent).toContain(message);
+      expect(wrapper.text()).toContain('Existing CLI');
+      expect(wrapper.text()).not.toContain('private host diagnostics');
+      expect((element('ai-external-mcp-create-open') as HTMLButtonElement).disabled).toBe(true);
+      port.getMcpEndpoint.mockResolvedValue(createdCredential.endpoint);
+      element('ai-external-mcp-retry')!.click();
+      await settle();
+      expect(element('ai-external-mcp-endpoint')?.textContent).toBe(createdCredential.endpoint.url);
+      expect(element('ai-external-mcp-error')).toBeNull();
+      expect((element('ai-external-mcp-create-open') as HTMLButtonElement).disabled).toBe(false);
+    },
+  );
+
   it('keeps the creation form out of the resting section', async () => {
     const { wrapper } = mountSection();
     await settle();

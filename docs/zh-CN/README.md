@@ -19,7 +19,7 @@
 
 MemoFlow 是一个面向个人长期使用的 AI 效能工作区。它不是把 Chatbot 放到传统 Todo 应用旁边，而是让 AI 对话与 Goal、Task、Note、Schedule、Reminder、Notification 等业务对象共享同一套产品上下文：用户可以从对话中形成意图，再进入结构化工作区确认和编辑，通过产品契约执行，最后沉淀为可追踪结果。
 
-当前仓库同时包含 Web、Electron Desktop、API、共享领域包、契约、AI 运行时、同步与发布基础设施，是一个完整的多端产品工程，而不只是前端演示。
+MemoFlow 以 Electron Local Host 为主要运行形态，桌面应用承载完整的本地工作区。云端 Web/API 提供轻量体验、数据同步和 Hosted MCP 等可选入口。仓库包含两种宿主、共享领域包、契约、AI 运行时与发布基础设施。
 
 ## 产品模型
 
@@ -71,23 +71,27 @@ AI 区是持续协作入口，业务工作区则拥有结构化状态和更大�
 
 ## 系统架构
 
-```text
-┌──────────────────────────────────────────────┐
-│ Web (Vue)          Desktop (Electron + Vue) │
-└───────────────┬───────────────┬──────────────┘
-                │ 共享契约 / 客户端 API
-                ▼
-┌──────────────────────────────────────────────┐
-│ API / 组合根                                │
-│ Express · Zod · Prisma · Mastra runtime     │
-└───────────────┬───────────────┬──────────────┘
-                │               │
-                ▼               ▼
-          PostgreSQL          Redis
-                │
-                ▼
-            PowerSync
+```mermaid
+flowchart TB
+  subgraph Local["本机"]
+    UI["Desktop 界面"] -->|IPC| Host["Electron 主进程：Profile 业务、调度、AI、MCP"]
+    Agent["本地 MCP 客户端"] -->|回环 MCP| Host
+    Host --> DB["Profile SQLite"]
+    Host --> Vault["本地 Vault"]
+  end
+  subgraph Cloud["可选云端"]
+    Web["Web 轻量体验"] --> API["云端 API 与 Hosted MCP"]
+    Remote["远端 Agent"] --> API
+    API --> PG["PostgreSQL"]
+  end
+  DB <-.->|可选 PowerSync 同步| PG
 ```
+
+应用运行且 Profile 已解锁时，Electron 主进程就是完整的 Local Host。本地业务、调度和 MCP 无需 MemoFlow 云端登录或模型配置；界面通过 IPC 使用服务，窗口加载、显示和隐藏不控制后台服务的生命周期。
+
+云端 Web/API 提供免安装的轻量体验、可选数据同步和可选 Hosted MCP。两种宿主复用领域契约，各自拥有数据与事务；云端知识面保持只读，桌面连接本地 Vault。用户选择的模型服务或原生 Agent 仍可能需要自己的网络连接。
+
+详见[架构边界](../internals/standards/architecture.md)与 [ADR-124](../internals/decisions/ADR-124-local-mcp-host-credentials-and-cloud-boundary.md)。
 
 Monorepo 让产品运行面保持轻量，把可复用业务行为下沉到共享包：
 

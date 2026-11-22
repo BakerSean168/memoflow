@@ -12,18 +12,20 @@
         "testRole": "behavior"
       },
       "decision": "retain",
-      "behavior": "真实本地 SQLite/模型缓存配合假 Agent Driver，验证身份绑定、重启恢复及四路并发排队",
+      "behavior": "真实本地 SQLite、模型缓存和本机 HTTP MCP 配合假 Agent Driver，验证身份绑定、重启恢复、四路并发排队及未配置 native Agent/模型时的本地宿主可用性",
       "assertionEvidence": [
         "reuses only the exact owner, revision and native OAuth identity without new ACP calls",
-        "keeps the four-run bound and same-conversation conflict"
+        "keeps the four-run bound and same-conversation conflict",
+        "starts the Profile MCP host without any native Agent connection or model configuration",
+        "keeps the local runtime available when its optional MCP listener cannot start"
       ],
-      "reason": "readFile 读取运行期 model-catalog，不是源码；原 Structural 错分",
+      "reason": "readFile 读取运行期 model-catalog，不是源码；原 Structural 错分。新增 MCP 用例使用真实本机 HTTP 与本地仓储，验证服务独立启动和监听失败隔离，不依赖远程服务。",
       "confirmedDependencies": ["database"],
       "replacement": {
         "status": "none-verified",
         "testFiles": []
       },
-      "sourceSha256": "33fd0bb4620318726125a1c15ed86c893340a33ae04e47a591baa575189c29da"
+      "sourceSha256": "304a72989f7eb6a7075aca21c6aa2cfdf49c3ccab1492d9e48ff3c4465249c81"
     },
     {
       "path": "apps/desktop/src/main/profile/ProfileSnapshotService.spec.ts",

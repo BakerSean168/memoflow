@@ -120,12 +120,9 @@ export class DesktopProfileRuntimeManager {
    * Set the bound schedule runtime controller for the active profile.
    * 为当前激活 profile 设置绑定的 schedule runtime controller。
    *
-   * The controller is the ONLY schedule start/stop owner in the desktop lane;
-   * profile deactivation stops the same instance that the profile's module
-   * handle owns, then clears the reference before teardown.
-   *
-   * controller 是桌面 lane 中 schedule 启停的唯一所有者；profile 停用会停止同一
-   * profile 的 module handle 所持有的同一实例，随后在拆除前清除引用。
+   * The Profile lifecycle starts the composed controller before local readiness
+   * and stops that same instance before module/database teardown. Window
+   * creation, visibility and renderer loading do not own background services.
    */
   setScheduleRuntimeController(controller: ScheduleRuntimeController | null): void {
     this.scheduleRuntimeController = controller;
@@ -432,6 +429,9 @@ export class DesktopProfileRuntimeManager {
       if (this.registerModules)
         await this.registerModules(bootstrapper, prepared.db, prepared.profileResolver);
       await bootstrapper.init(prepared.profileAccessContext);
+      // Local Host readiness belongs to the Profile, not a renderer's ready-to-show.
+      // The prepared identity is already available to the scheduler's owner gate.
+      await this.scheduleRuntimeController?.start();
       await this.profileRegistry.setActiveProfile(preparedProfileId);
       await this.profileRegistry.touch(preparedProfileId);
       this.activeRuntime = { ...prepared, bootstrapper };
@@ -457,6 +457,7 @@ export class DesktopProfileRuntimeManager {
       } catch (cleanupError) {
         logger.warn('Failed to run profile activation cleanup hook', { error: cleanupError });
       }
+      await this.stopScheduleRuntime();
       await bootstrapper?.destroy().catch(() => undefined);
       this.activeProfileKey?.fill(0);
       this.activeProfileKey = null;
@@ -464,6 +465,16 @@ export class DesktopProfileRuntimeManager {
       await this.profileRegistry.markError(preparedProfileId).catch(() => undefined);
       await this.disposePreparedRuntime();
       throw error;
+    }
+  }
+
+  private async stopScheduleRuntime(): Promise<void> {
+    const controller = this.scheduleRuntimeController;
+    this.scheduleRuntimeController = null;
+    try {
+      await controller?.stop();
+    } catch (error) {
+      logger.warn('Failed to stop schedule runtime', { error });
     }
   }
 
@@ -492,18 +503,7 @@ export class DesktopProfileRuntimeManager {
     // No IPC may resolve the runtime while its modules are being destroyed.
     this.activeRuntime = null;
 
-    // Stop the bound schedule runtime controller (idempotent; the SAME instance
-    // the profile's module handle owns), then clear the reference BEFORE the
-    // modules are torn down so no stale controller outlives its instance.
-    // 先停止绑定的 schedule runtime controller（幂等；与 profile 的 module handle
-    // 所持实例是同一实例），再在模块拆除前清除引用，避免过期 controller 越过其实例存活。
-    const scheduleController = this.scheduleRuntimeController;
-    this.scheduleRuntimeController = null;
-    try {
-      await scheduleController?.stop();
-    } catch (error) {
-      logger.warn('Failed to stop schedule runtime', { error });
-    }
+    await this.stopScheduleRuntime();
     // Shell-held references were cleared by beforeDeactivation before module
     // teardown, so concurrent IPC cannot resolve a half-destroyed repository.
     await active.bootstrapper

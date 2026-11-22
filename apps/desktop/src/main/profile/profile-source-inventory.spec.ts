@@ -464,3 +464,39 @@ it('changes the inventory digest when a message arrives after export', async () 
     f.close();
   }
 });
+
+it('treats local MCP runtime metadata as technical data without discarding adjacent files', async () => {
+  const dir = mkdtempSync(path.join(tmpdir(), 'profile-mcp-inventory-'));
+  mkdirSync(path.join(dir, 'db'));
+  mkdirSync(path.join(dir, 'storage/local-mcp'), { recursive: true });
+  const filename = path.join(dir, 'db/powersync.sqlite');
+  const writer = new Database(filename);
+  try {
+    writeFileSync(path.join(dir, 'storage/local-mcp/host.json'), '{"version":1,"port":37731}');
+    writeFileSync(path.join(dir, 'storage/local-mcp/endpoint.json'), '{"version":1,"pid":1234}');
+    for (const name of ['host', 'endpoint']) {
+      writeFileSync(
+        path.join(dir, `storage/local-mcp/${name}.json.12345678-1234-1234-1234-123456789abc.tmp`),
+        '{}',
+      );
+    }
+    const inspect = () =>
+      readProfileSqliteSnapshot(filename, (db) => inspectProfileSource(db, dir));
+    expect((await inspect()).blockers).toEqual([]);
+    writeFileSync(path.join(dir, 'storage/local-mcp/notes.txt'), 'keep this user data');
+    writeFileSync(path.join(dir, 'storage/local-mcp/host.json.notes.tmp'), 'keep this too');
+    expect((await inspect()).blockers).toContainEqual({
+      capability: 'local-source',
+      field: 'storage/local-mcp/host.json.notes.tmp',
+      reason: 'unsupported_user_data',
+    });
+    expect((await inspect()).blockers).toContainEqual({
+      capability: 'local-source',
+      field: 'storage/local-mcp/notes.txt',
+      reason: 'unsupported_user_data',
+    });
+  } finally {
+    writer.close();
+    rmSync(dir, { recursive: true, force: true });
+  }
+});

@@ -2,6 +2,7 @@
 import { computed, inject, onBeforeUnmount, onMounted, ref } from 'vue';
 import { Copy, Plus, ShieldOff } from '@lucide/vue';
 import { useI18n } from 'vue-i18n';
+import { extractStructuredResultError } from '@memoflow/transport-contracts/result';
 import { Button, Checkbox, Dialog, Input, Label } from '@memoflow/ui-vue-shadcn';
 import type {
   LocalAgentWriteScope,
@@ -37,7 +38,9 @@ const scopes = [
   { value: 'goals:write' as const, label: t('setting.ai.localMcp.scopeGoals') },
 ];
 const active = computed(() => clients.value.filter((client) => client.revokedAt === null));
-const canCreate = computed(() => Boolean(local) && name.value.trim().length > 0 && !busy.value);
+const canCreate = computed(
+  () => Boolean(local && endpoint.value) && name.value.trim().length > 0 && !busy.value,
+);
 const snippet = computed(() => {
   const current = credential.value;
   const url = current?.endpoint.url;
@@ -64,16 +67,32 @@ function toggle(value: LocalAgentWriteScope, enabled: boolean | 'indeterminate')
       : writeScopes.value.filter((item) => item !== value);
 }
 
+function failureMessage(cause: unknown): string {
+  switch (extractStructuredResultError(cause)?.code) {
+    case 'LOCAL_MCP_PORT_IN_USE':
+      return t('setting.ai.localMcp.portInUse');
+    case 'LOCAL_MCP_BINDING_INVALID':
+      return t('setting.ai.localMcp.bindingInvalid');
+    default:
+      return t('setting.ai.localMcp.error');
+  }
+}
+
 async function refresh() {
   if (!local) return;
   loading.value = true;
   error.value = '';
   try {
-    if (local.getMcpEndpoint) endpoint.value = await local.getMcpEndpoint();
+    if (local.getMcpEndpoint) {
+      endpoint.value = await local.getMcpEndpoint().catch((cause: unknown) => {
+        error.value = failureMessage(cause);
+        return null;
+      });
+    }
     if (local.listMcpClients) clients.value = await local.listMcpClients();
     if (local.listGatewayAudit) audit.value = await local.listGatewayAudit(20);
-  } catch {
-    error.value = t('setting.ai.localMcp.error');
+  } catch (cause) {
+    error.value = failureMessage(cause);
   } finally {
     loading.value = false;
   }
@@ -98,8 +117,8 @@ async function create() {
       created.client,
       ...clients.value.filter((client) => client.id !== created.client.id),
     ];
-  } catch {
-    error.value = t('setting.ai.localMcp.error');
+  } catch (cause) {
+    error.value = failureMessage(cause);
   } finally {
     busy.value = false;
   }
@@ -136,8 +155,8 @@ async function revoke(client: LocalMcpClient) {
     await local.revokeMcpClient(client.id);
     if (credential.value?.client.id === client.id) credential.value = null;
     await refresh();
-  } catch {
-    error.value = t('setting.ai.localMcp.error');
+  } catch (cause) {
+    error.value = failureMessage(cause);
   } finally {
     busy.value = false;
   }
@@ -216,6 +235,7 @@ onBeforeUnmount(() => {
         size="sm"
         class="h-8 shrink-0 gap-1.5"
         data-testid="ai-external-mcp-create-open"
+        :disabled="!endpoint || loading"
         @click="openCreateDialog"
         ><Plus class="size-3.5" />{{ t('setting.ai.localMcp.createClient') }}</Button
       >
@@ -226,7 +246,18 @@ onBeforeUnmount(() => {
         <span class="font-medium text-foreground">{{ t('setting.ai.localMcp.endpoint') }}:</span>
         <code data-testid="ai-external-mcp-endpoint">{{ endpoint.url }}</code>
       </p>
-      <p v-else>{{ t('setting.ai.localMcp.noEndpoint') }}</p>
+      <div v-else class="flex items-center gap-2">
+        <p>{{ t('setting.ai.localMcp.noEndpoint') }}</p>
+        <Button
+          variant="ghost"
+          size="sm"
+          class="h-7 px-2 text-[11px]"
+          :disabled="loading"
+          data-testid="ai-external-mcp-retry"
+          @click="refresh"
+          >{{ t('setting.ai.localMcp.retry') }}</Button
+        >
+      </div>
       <p v-if="endpoint?.discoveryPath" class="break-all">
         <span class="font-medium text-foreground">{{ t('setting.ai.localMcp.discovery') }}:</span>
         <code>{{ endpoint.discoveryPath }}</code>
