@@ -65,8 +65,8 @@ done
 # Both metadata URLs must be JSON on their correct HTTPS origins, not SPA HTML.
 api_metadata=$(curl -fsS --max-time 20 --resolve memoflowapi.bakersean.top:443:127.0.0.1 'https://memoflowapi.bakersean.top/.well-known/oauth-protected-resource/mcp')
 issuer_metadata=$(curl -fsS --max-time 20 --resolve memoflow.bakersean.top:443:127.0.0.1 'https://memoflow.bakersean.top/.well-known/oauth-authorization-server/api/auth')
-python3 -c 'import json,sys; m=json.loads(sys.argv[1]); assert m.get("resource")=="https://memoflowapi.bakersean.top/mcp"; print("RESOURCE_METADATA=PASS")' "$api_metadata"
-python3 -c 'import json,sys; m=json.loads(sys.argv[1]); assert m.get("authorization_endpoint") and m.get("token_endpoint") and m.get("issuer"); print("ISSUER_METADATA=PASS")' "$issuer_metadata"
+python3 -c 'import json,sys; m=json.loads(sys.argv[1]); assert m.get("resource")=="https://memoflowapi.bakersean.top/mcp"; assert "https://memoflow.bakersean.top/api/auth" in m.get("authorization_servers",[]); print("RESOURCE_METADATA=PASS")' "$api_metadata"
+python3 -c 'import json,sys; m=json.loads(sys.argv[1]); issuer="https://memoflow.bakersean.top/api/auth"; assert m.get("issuer")==issuer; assert m.get("authorization_endpoint")==issuer+"/oauth2/authorize"; assert m.get("token_endpoint")==issuer+"/oauth2/token"; print("ISSUER_METADATA=PASS")' "$issuer_metadata"
 HEADERS=$(mktemp "$STATE_ROOT/oauth-headers.XXXXXX")
 trap 'rm -f "$HEADERS"' EXIT
 status=$(curl -sS --max-time 20 --resolve memoflowapi.bakersean.top:443:127.0.0.1 -o /dev/null -D "$HEADERS" -w '%{http_code}' -H 'content-type: application/json' --data '{"jsonrpc":"2.0","id":1,"method":"tools/list"}' 'https://memoflowapi.bakersean.top/mcp')
