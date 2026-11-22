@@ -4,7 +4,7 @@ import { useI18n } from 'vue-i18n';
 import { EXTERNAL_AGENT_SERVICE_KEY } from '@memoflow/app-vue/di';
 import type { ExternalAgentConsent, ExternalAgentFailureCode } from '@memoflow/agent-gateway';
 import { Button } from '@memoflow/ui-vue-shadcn/components/ui/button';
-import { Checkbox } from '@memoflow/ui-vue-shadcn/components/ui/checkbox';
+import { Checkbox } from '@memoflow/ui-vue-shadcn';
 import { APP_DISPLAY_NAME, logo128 } from '@memoflow/assets';
 import { useAuthService } from './service';
 import { startGithubPopupSignIn } from './github-popup-sign-in';
