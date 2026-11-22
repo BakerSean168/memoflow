@@ -52,7 +52,7 @@ rollback(){ local rc=$?; trap - ERR INT TERM HUP; cp "$BACKUP/production.before.
 trap rollback ERR INT TERM HUP
 mv -f "$TMP" "$SECRET"
 docker compose -p memoflow --project-directory "$RUNTIME" -f "$RUNTIME/docker-compose.production.yml" --env-file "$SECRET" --env-file "$RUNTIME/runtime-images.env" up -d --no-build --no-deps api >/dev/null
-for i in $(seq 1 120); do
+for ((attempt=0; attempt<120; attempt++)); do
   id=$(docker ps -q --filter 'label=com.docker.compose.project=memoflow' --filter 'label=com.docker.compose.service=api' | head -n1)
   if [[ -n "$id" && $(docker inspect "$id" --format '{{if .State.Health}}{{.State.Health.Status}}{{else}}{{.State.Status}}{{end}}') == healthy ]]; then break; fi
   sleep 2
