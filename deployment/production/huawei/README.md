@@ -47,6 +47,7 @@ control OCI image by `Dockerfile.runtime`.
    API/Web, then executes the one-shot Migrator, starts only API/Web and tests
    all three trusted HTTPS origins. Caddy, Redis, PostgreSQL and PowerSync
    container IDs must be unchanged.
+
 4. `HUAWEI_DEPLOY=PASS` and `deploy-state=status=DEPLOYED` are mandatory.
    A failure after starting migrator writes `BLOCKED` with the backup path; do
    **not** blindly roll back images across a possibly changed DB schema.
