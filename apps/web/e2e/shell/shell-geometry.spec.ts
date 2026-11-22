@@ -314,8 +314,7 @@ test.describe('Electron shell geometry matrix', () => {
     await expect(page.getByTestId('appearance-settings-card')).toBeVisible({ timeout: 15_000 });
 
     // Theme: dark
-    await page.getByTestId('appearance-theme-trigger').click();
-    await page.getByTestId('appearance-theme-option-dark').click();
+    await page.getByTestId('appearance-theme-option-dark').locator('..').click();
     await expect
       .poll(async () => page.evaluate(() => document.documentElement.classList.contains('dark')))
       .toBe(true);
@@ -325,8 +324,7 @@ test.describe('Electron shell geometry matrix', () => {
     await saveMatrixShot(page, '1200-theme-dark-zh.png');
 
     // Theme: light
-    await page.getByTestId('appearance-theme-trigger').click();
-    await page.getByTestId('appearance-theme-option-light').click();
+    await page.getByTestId('appearance-theme-option-light').locator('..').click();
     await expect
       .poll(async () => page.evaluate(() => document.documentElement.classList.contains('dark')))
       .toBe(false);
