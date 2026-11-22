@@ -246,6 +246,8 @@ OAuth 只有在 §10 第 5 步之后才有意义；本节说明客户端从何�
 3. 待接入的客户端列入 `EAG_OAUTH_CLIENT_IDS`（逗号分隔、精确 HTTPS URL）。该列表同时是 CIMD 拉取策略与产品授权 allowlist；不在列表内的 client_id 在 authorize 和 consent 阶段都会被拒绝。
 4. DCR 保持关闭（`allowDynamicClientRegistration: false`）：没有 `registration_endpoint`，客户端不能自助写入 `oauthClient`。
 
+ChatGPT Web 默认 CIMD 为 `https://chatgpt.com/oauth/client.json`，与 Codex CLI 的 `https://chatgpt.com/oauth/codex/client.json` 不同。两者使用精确 allowlist；若实际插件使用 callback-specific CIMD，需要依据真实客户端元数据单独登记（见 [OAuth 客户端连接指南](../operations/external-agent-oauth.md#chatgpt-web-插件连接1060)）。
+
 ### 客户端落地路径
 
 **A. CIMD（默认路径，无需预置）。** client_id 本身就是 HTTPS metadata 文档 URL。首次 `/oauth2/authorize` 时 provider 拉取文档、按 MCP 2026-07-28 profile 校验 `client_name`/`redirect_uris`/公钥方法，然后即时插入 `oauthClient`（`clientDiscoveryId=cimd`），随后才进入登录与 consent。之后同一 client_id 复用它自己的行；运维无需执行任何写库命令。

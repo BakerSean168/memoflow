@@ -93,6 +93,20 @@ describe('envSchema external agent rate limits', () => {
     AI_PROVIDER_ENCRYPTION_KEY: 'provider-encryption-secret-at-least-32-chars',
   };
 
+  it('allows ChatGPT Web CIMD independently of Codex CLI and rejects unlisted clients', () => {
+    expect(envSchema.parse(required).EAG_OAUTH_CLIENT_IDS).toEqual([
+      'https://chatgpt.com/oauth/client.json',
+      'https://chatgpt.com/oauth/codex/client.json',
+      'https://claude.ai/oauth/claude-code-client-metadata',
+    ]);
+    expect(
+      envSchema.parse({
+        ...required,
+        EAG_OAUTH_CLIENT_IDS: 'https://client.example.test/client.json',
+      }).EAG_OAUTH_CLIENT_IDS,
+    ).toEqual(['https://client.example.test/client.json']);
+  });
+
   it('keeps OAuth writes off by default and requires both parent switches', () => {
     expect(envSchema.parse(required).EAG_OAUTH_WRITE_ENABLED).toBe(false);
     expect(() => envSchema.parse({ ...required, EAG_OAUTH_WRITE_ENABLED: '1' })).toThrow(
