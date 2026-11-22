@@ -28,9 +28,19 @@ import {
 
 const clientId = 'https://oauth.fixture.test/client.json';
 const callback = 'http://127.0.0.1:43210/callback';
-/** The real, publicly hosted Claude Code metadata document (CIMD). */
-const cimdClientId = 'https://claude.ai/oauth/claude-code-client-metadata';
-const cimdCallback = 'http://127.0.0.1/callback';
+/** Real, publicly hosted CIMD documents used by external clients. */
+const cimdClients = [
+  {
+    clientId: 'https://claude.ai/oauth/claude-code-client-metadata',
+    redirectUri: 'http://127.0.0.1/callback',
+    name: 'Claude Code',
+  },
+  {
+    clientId: 'https://chatgpt.com/oauth/client.json',
+    redirectUri: 'https://chatgpt.com/connector_platform_oauth_redirect',
+    name: 'ChatGPT',
+  },
+] as const;
 const seededClient = { clientId, redirectUri: callback } as const;
 const TokenSchema = z.object({
   access_token: z.string(),
@@ -327,8 +337,8 @@ describe('OAuth client provisioning', () => {
 });
 
 /**
- * Opt-in network check: `EAG_CIMD_E2E=1` fetches the real Claude Code metadata
- * document. It answers whether a CIMD client id creates its row during the
+ * Opt-in network check: `EAG_CIMD_E2E=1` fetches live Claude Code and ChatGPT Web
+ * CIMD documents. It answers whether a CIMD client id creates its row during the
  * authorization request, so the runbook can rely on it instead of seeding.
  */
 describe.skipIf(!process.env.EAG_CIMD_E2E)('CIMD just-in-time client registration', () => {
@@ -344,42 +354,66 @@ describe.skipIf(!process.env.EAG_CIMD_E2E)('CIMD just-in-time client registratio
     await disconnectPrisma();
   });
 
-  it('creates the client row on first authorization and serves a goal read', async () => {
-    // The production transport pins a resolve-once public DNS answer. Sandboxes
-    // behind fake-IP DNS resolve every host to a reserved range, so only the
-    // transport is swapped here; document fetch, validation and persistence
-    // stay on the production path.
-    const api = await startApi({
-      allowedClientIds: [cimdClientId],
-      cimdFetch: (input, init) => fetch(input, init),
-    });
-    try {
-      expect(await prisma.oauthClient.count({ where: { clientId: cimdClientId } })).toBe(0);
-      const [userId, session] = (await login()).split('\n') as [string, string];
-      const token = await issue(api, session, {
-        clientId: cimdClientId,
-        redirectUri: cimdCallback,
+  it.each(cimdClients)(
+    'registers $name CIMD with the advertised token authentication',
+    async ({ clientId: cimdClientId, redirectUri: cimdCallback, name }) => {
+      // The production transport pins a resolve-once public DNS answer. Sandboxes
+      // behind fake-IP DNS resolve every host to a reserved range, so only the
+      // transport is swapped here; document fetch, validation and persistence
+      // stay on the production path.
+      const api = await startApi({
+        allowedClientIds: [cimdClientId],
+        cimdFetch: (input, init) => fetch(input, init),
       });
+      try {
+        expect(await prisma.oauthClient.count({ where: { clientId: cimdClientId } })).toBe(0);
+        const [userId, session] = (await login()).split('\n') as [string, string];
+        if (name === 'ChatGPT') {
+          // ChatGPT advertises both none and private_key_jwt. Better Auth
+          // selects signed JWT authentication for this official CIMD client.
+          // This unsigned fixture must not bypass that requirement.
+          const grant = await authorize(api, session, {
+            clientId: cimdClientId,
+            redirectUri: cimdCallback,
+          });
+          const registered = await prisma.oauthClient.findUnique({
+            where: { clientId: cimdClientId },
+          });
+          expect(registered).toMatchObject({
+            clientDiscoveryId: 'cimd',
+            name: 'ChatGPT',
+            tokenEndpointAuthMethod: 'private_key_jwt',
+          });
+          const unsigned = await grant.exchange();
+          expect(unsigned.status).toBe(400);
+          expect(await unsigned.json()).toMatchObject({ error: 'invalid_client' });
+          return;
+        }
+        const token = await issue(api, session, {
+          clientId: cimdClientId,
+          redirectUri: cimdCallback,
+        });
 
-      const row = await prisma.oauthClient.findUnique({ where: { clientId: cimdClientId } });
-      expect(row).toMatchObject({ clientDiscoveryId: 'cimd', name: 'Claude Code' });
-      expect(
-        await api.auth.externalAgents!.authenticate(`Bearer ${token.access_token}`),
-      ).toMatchObject({ identityId: userId, scopes: ['goals:read', 'tasks:read'] });
+        const row = await prisma.oauthClient.findUnique({ where: { clientId: cimdClientId } });
+        expect(row).toMatchObject({ clientDiscoveryId: 'cimd', name });
+        expect(
+          await api.auth.externalAgents!.authenticate(`Bearer ${token.access_token}`),
+        ).toMatchObject({ identityId: userId, scopes: ['goals:read', 'tasks:read'] });
 
-      const result = await withClient(api.resource, token.access_token, (client) =>
-        client.callTool({ name: 'goal_search', arguments: { limit: 1 } }),
-      );
-      const structured = z
-        .object({ items: z.array(z.object({ name: z.string() })) })
-        .parse(result.structuredContent);
-      expect(structured.items.map((item) => item.name)).toEqual(['OAuth provisioning fixture']);
-      expect((await listOAuthClients(prisma))[0]).toMatchObject({
-        clientId: cimdClientId,
-        discovery: 'cimd',
-      });
-    } finally {
-      api.server.close();
-    }
-  });
+        const result = await withClient(api.resource, token.access_token, (client) =>
+          client.callTool({ name: 'goal_search', arguments: { limit: 1 } }),
+        );
+        const structured = z
+          .object({ items: z.array(z.object({ name: z.string() })) })
+          .parse(result.structuredContent);
+        expect(structured.items.map((item) => item.name)).toEqual(['OAuth provisioning fixture']);
+        expect((await listOAuthClients(prisma))[0]).toMatchObject({
+          clientId: cimdClientId,
+          discovery: 'cimd',
+        });
+      } finally {
+        api.server.close();
+      }
+    },
+  );
 });

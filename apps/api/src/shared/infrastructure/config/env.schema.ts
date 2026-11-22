@@ -79,7 +79,7 @@ export const envSchema = z
         z
           .string()
           .default(
-            'https://chatgpt.com/oauth/codex/client.json,https://claude.ai/oauth/claude-code-client-metadata',
+            'https://chatgpt.com/oauth/client.json,https://chatgpt.com/oauth/codex/client.json,https://claude.ai/oauth/claude-code-client-metadata',
           ),
       )
       .transform((value) =>
