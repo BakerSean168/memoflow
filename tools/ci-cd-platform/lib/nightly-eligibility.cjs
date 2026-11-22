@@ -47,7 +47,7 @@ function findLatestNightly(releases) {
 }
 
 // Pure decision logic: all external data is validated before selecting a release.
-function decideNightly({ now, mainSha, ci, latestNightly, comparison }) {
+function decideNightly({ now, mainSha, ci, latestNightly, comparison, allowEarly = false }) {
   const nowMs = Date.parse(now);
   if (!Number.isFinite(nowMs)) throw new Error('invalid current time');
   assertSha(mainSha, 'main');
@@ -83,7 +83,9 @@ function decideNightly({ now, mainSha, ci, latestNightly, comparison }) {
     return { eligible: false, reason: 'nightly_not_ancestor_of_main' };
   }
   if (nowMs - lastPublished < MINIMUM_GAP_MS) {
-    return { eligible: false, reason: 'minimum_nightly_gap' };
+    return allowEarly === true
+      ? { eligible: true, reason: 'operator_explicit_early_release' }
+      : { eligible: false, reason: 'minimum_nightly_gap' };
   }
   return { eligible: true, reason: 'new_verified_main_commits' };
 }
@@ -108,6 +110,7 @@ async function resolveNightlyEligibility({
   now = new Date().toISOString(),
   runNumber,
   tagTime,
+  allowEarly = false,
 }) {
   if (!github?.rest || typeof github.paginate !== 'function') {
     throw new Error('GitHub client is required');
@@ -196,7 +199,14 @@ async function resolveNightlyEligibility({
       );
     }
   }
-  const decision = decideNightly({ now, mainSha, ci: verifiedCi, latestNightly, comparison });
+  const decision = decideNightly({
+    now,
+    mainSha,
+    ci: verifiedCi,
+    latestNightly,
+    comparison,
+    allowEarly,
+  });
   if (!decision.eligible) {
     return { ...decision, mainSha, ciRunId: verifiedCi.id, lastNightlyTag: last?.tag ?? null };
   }

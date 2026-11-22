@@ -1,5 +1,7 @@
 # MemoFlow canonical production delivery
 
+> **Current Huawei ECS (November 2026):** the live, single-Compose amd64 production stack uses an app-only, fail-closed release executor. Use [Huawei production deployment](./huawei/README.md) and the immutable `production-selected` control artifact. The sections below document the earlier Alibaba/Oracle2 implementations; do **not** install the Alibaba watcher or Oracle2 app-only watcher on Huawei.
+
 > Status: OCI multi-architecture release contract implemented. The **Oracle2-native, app-only production-selected watcher** is maintained under [oracle2/](./oracle2/README.md), separate from the Alibaba watcher. Check Issue #543 for actual host activation evidence.
 >
 > **Oracle2 operator gate:** The Alibaba watcher/Compose below own a separate Caddy and ports 80/443. **Never install them on Oracle2.** Only [the new Oracle2-native installer](./oracle2/README.md) can adopt the existing app-only Compose after checks, and it does not enable the timer automatically.

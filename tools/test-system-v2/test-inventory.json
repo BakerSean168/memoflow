@@ -12826,6 +12826,14 @@
       "measurementCollectors": []
     },
     {
+      "path": "tools/ci-cd-platform/__tests__/huawei-production-deploy.test.mjs",
+      "primarySuite": "governance",
+      "collectors": [
+        "ci-cd-platform:test"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "tools/ci-cd-platform/__tests__/lane-details.test.mjs",
       "primarySuite": "governance",
       "collectors": [
@@ -13749,7 +13757,7 @@
       "type": "primary",
       "suite": "governance",
       "runner": "node-test",
-      "fileCount": 52
+      "fileCount": 53
     },
     {
       "id": "memoflow:test:governance",
@@ -15067,7 +15075,7 @@
     "boundary-main": 18,
     "e2e": 44,
     "perf": 2,
-    "governance": 94
+    "governance": 95
   },
   "e2eGovernance": {
     "version": 2,

@@ -142,6 +142,15 @@ describe('production GitHub login callback wiring', () => {
     expect(nginx).toContain('location /api/ {');
     expect(nginx).toContain('proxy_pass $api_upstream;');
   });
+
+  it('routes OAuth and OIDC discovery from the Web origin to the API instead of SPA fallback', () => {
+    const nginx = readFileSync(resolve(__dirname, '../../../../../../nginx.conf'), 'utf8');
+    expect(nginx).toContain(
+      'location ~ ^/\\.well-known/(oauth-authorization-server|openid-configuration)/api/auth$ {',
+    );
+    expect(nginx).toContain('proxy_set_header Host $host;');
+    expect(nginx).toContain('proxy_set_header X-Forwarded-For $http_x_forwarded_for;');
+  });
 });
 
 describe('O2V-01 machine-public URL wiring', () => {

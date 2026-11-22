@@ -22,3 +22,8 @@ COPY Caddyfile /runtime/production/Caddyfile
 COPY reports/production/release-runtime/docker/powersync /runtime/production/docker/powersync
 COPY reports/production/production-set-v1.json /runtime/production/production-set-v1.json
 COPY reports/production/production-set-v1.sha256 /runtime/production/production-set-v1.sha256
+# Huawei's existing unified Compose stack adopts published app images only;
+# the retained datastore/PowerSync/Caddy runtime is not reinstalled.
+COPY deployment/production/huawei/deploy.sh /runtime/production/huawei/deploy.sh
+COPY deployment/production/huawei/verify-candidate.py /runtime/production/huawei/verify-candidate.py
+COPY deployment/production/huawei/enable-oauth.sh /runtime/production/huawei/enable-oauth.sh

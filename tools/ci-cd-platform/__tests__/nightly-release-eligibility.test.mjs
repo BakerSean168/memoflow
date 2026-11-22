@@ -199,6 +199,40 @@ test('minimum interval is exactly six hours; shorter is skipped', () => {
   );
 });
 
+test('explicit manual hotfix skips cadence only and never bypasses CI or release ancestry', () => {
+  const recent = { ...RELEASE, publishedAt: '2026-10-25T17:00:00.000Z' };
+  assert.deepEqual(decide({ latestNightly: recent, allowEarly: true }), {
+    eligible: true,
+    reason: 'operator_explicit_early_release',
+  });
+  assert.deepEqual(decide({ latestNightly: recent, allowEarly: false }), {
+    eligible: false,
+    reason: 'minimum_nightly_gap',
+  });
+  assert.deepEqual(decide({ latestNightly: recent, allowEarly: true, ci: null }), {
+    eligible: false,
+    reason: 'main_ci_not_verified',
+  });
+  assert.deepEqual(
+    decide({
+      latestNightly: recent,
+      allowEarly: true,
+      comparison: { status: 'diverged', ahead_by: 0 },
+    }),
+    {
+      eligible: false,
+      reason: 'nightly_not_ancestor_of_main',
+    },
+  );
+  assert.deepEqual(
+    decide({ latestNightly: { ...recent, sha: SHA_MAIN }, allowEarly: true, comparison: null }),
+    {
+      eligible: false,
+      reason: 'already_published_this_sha',
+    },
+  );
+});
+
 test('non-descendant, divergence or missing ancestry cannot authorize release', () => {
   for (const status of ['behind', 'diverged', 'identical']) {
     assert.deepEqual(decide({ comparison: { status, ahead_by: 0 } }), {
