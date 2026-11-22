@@ -81364,6 +81364,8 @@ export namespace Prisma {
     capability: string | null
     inputDigest: string | null
     resultJson: string | null
+    credentialType: string | null
+    clientId: string | null
     createdAt: Date | null
   }
 
@@ -81374,6 +81376,8 @@ export namespace Prisma {
     capability: string | null
     inputDigest: string | null
     resultJson: string | null
+    credentialType: string | null
+    clientId: string | null
     createdAt: Date | null
   }
 
@@ -81384,6 +81388,9 @@ export namespace Prisma {
     capability: number
     inputDigest: number
     resultJson: number
+    credentialType: number
+    clientId: number
+    consentScopes: number
     createdAt: number
     _all: number
   }
@@ -81396,6 +81403,8 @@ export namespace Prisma {
     capability?: true
     inputDigest?: true
     resultJson?: true
+    credentialType?: true
+    clientId?: true
     createdAt?: true
   }
 
@@ -81406,6 +81415,8 @@ export namespace Prisma {
     capability?: true
     inputDigest?: true
     resultJson?: true
+    credentialType?: true
+    clientId?: true
     createdAt?: true
   }
 
@@ -81416,6 +81427,9 @@ export namespace Prisma {
     capability?: true
     inputDigest?: true
     resultJson?: true
+    credentialType?: true
+    clientId?: true
+    consentScopes?: true
     createdAt?: true
     _all?: true
   }
@@ -81499,6 +81513,9 @@ export namespace Prisma {
     capability: string
     inputDigest: string
     resultJson: string
+    credentialType: string | null
+    clientId: string | null
+    consentScopes: string[]
     createdAt: Date
     _count: ExternalMutationReceiptCountAggregateOutputType | null
     _min: ExternalMutationReceiptMinAggregateOutputType | null
@@ -81526,6 +81543,9 @@ export namespace Prisma {
     capability?: boolean
     inputDigest?: boolean
     resultJson?: boolean
+    credentialType?: boolean
+    clientId?: boolean
+    consentScopes?: boolean
     createdAt?: boolean
     account?: boolean | AccountDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["externalMutationReceipt"]>
@@ -81537,6 +81557,9 @@ export namespace Prisma {
     capability?: boolean
     inputDigest?: boolean
     resultJson?: boolean
+    credentialType?: boolean
+    clientId?: boolean
+    consentScopes?: boolean
     createdAt?: boolean
     account?: boolean | AccountDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["externalMutationReceipt"]>
@@ -81548,6 +81571,9 @@ export namespace Prisma {
     capability?: boolean
     inputDigest?: boolean
     resultJson?: boolean
+    credentialType?: boolean
+    clientId?: boolean
+    consentScopes?: boolean
     createdAt?: boolean
     account?: boolean | AccountDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["externalMutationReceipt"]>
@@ -81559,10 +81585,13 @@ export namespace Prisma {
     capability?: boolean
     inputDigest?: boolean
     resultJson?: boolean
+    credentialType?: boolean
+    clientId?: boolean
+    consentScopes?: boolean
     createdAt?: boolean
   }
 
-  export type ExternalMutationReceiptOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "identityId" | "connectionId" | "capability" | "inputDigest" | "resultJson" | "createdAt", ExtArgs["result"]["externalMutationReceipt"]>
+  export type ExternalMutationReceiptOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "identityId" | "connectionId" | "capability" | "inputDigest" | "resultJson" | "credentialType" | "clientId" | "consentScopes" | "createdAt", ExtArgs["result"]["externalMutationReceipt"]>
   export type ExternalMutationReceiptInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     account?: boolean | AccountDefaultArgs<ExtArgs>
   }
@@ -81585,6 +81614,12 @@ export namespace Prisma {
       capability: string
       inputDigest: string
       resultJson: string
+      /**
+       * OAuth receipt provenance; PAT receipts omit client/consent metadata.
+       */
+      credentialType: string | null
+      clientId: string | null
+      consentScopes: string[]
       createdAt: Date
     }, ExtArgs["result"]["externalMutationReceipt"]>
     composites: {}
@@ -82016,6 +82051,9 @@ export namespace Prisma {
     readonly capability: FieldRef<"ExternalMutationReceipt", 'String'>
     readonly inputDigest: FieldRef<"ExternalMutationReceipt", 'String'>
     readonly resultJson: FieldRef<"ExternalMutationReceipt", 'String'>
+    readonly credentialType: FieldRef<"ExternalMutationReceipt", 'String'>
+    readonly clientId: FieldRef<"ExternalMutationReceipt", 'String'>
+    readonly consentScopes: FieldRef<"ExternalMutationReceipt", 'String[]'>
     readonly createdAt: FieldRef<"ExternalMutationReceipt", 'DateTime'>
   }
 
@@ -82460,6 +82498,9 @@ export namespace Prisma {
     id: string | null
     identityId: string | null
     credentialId: string | null
+    credentialType: string | null
+    clientId: string | null
+    consentScopesHash: string | null
     effect: string | null
     tool: string | null
     outcome: string | null
@@ -82476,6 +82517,9 @@ export namespace Prisma {
     id: string | null
     identityId: string | null
     credentialId: string | null
+    credentialType: string | null
+    clientId: string | null
+    consentScopesHash: string | null
     effect: string | null
     tool: string | null
     outcome: string | null
@@ -82492,6 +82536,9 @@ export namespace Prisma {
     id: number
     identityId: number
     credentialId: number
+    credentialType: number
+    clientId: number
+    consentScopesHash: number
     effect: number
     tool: number
     outcome: number
@@ -82518,6 +82565,9 @@ export namespace Prisma {
     id?: true
     identityId?: true
     credentialId?: true
+    credentialType?: true
+    clientId?: true
+    consentScopesHash?: true
     effect?: true
     tool?: true
     outcome?: true
@@ -82534,6 +82584,9 @@ export namespace Prisma {
     id?: true
     identityId?: true
     credentialId?: true
+    credentialType?: true
+    clientId?: true
+    consentScopesHash?: true
     effect?: true
     tool?: true
     outcome?: true
@@ -82550,6 +82603,9 @@ export namespace Prisma {
     id?: true
     identityId?: true
     credentialId?: true
+    credentialType?: true
+    clientId?: true
+    consentScopesHash?: true
     effect?: true
     tool?: true
     outcome?: true
@@ -82653,6 +82709,9 @@ export namespace Prisma {
     id: string
     identityId: string | null
     credentialId: string | null
+    credentialType: string | null
+    clientId: string | null
+    consentScopesHash: string | null
     effect: string
     tool: string
     outcome: string
@@ -82688,6 +82747,9 @@ export namespace Prisma {
     id?: boolean
     identityId?: boolean
     credentialId?: boolean
+    credentialType?: boolean
+    clientId?: boolean
+    consentScopesHash?: boolean
     effect?: boolean
     tool?: boolean
     outcome?: boolean
@@ -82705,6 +82767,9 @@ export namespace Prisma {
     id?: boolean
     identityId?: boolean
     credentialId?: boolean
+    credentialType?: boolean
+    clientId?: boolean
+    consentScopesHash?: boolean
     effect?: boolean
     tool?: boolean
     outcome?: boolean
@@ -82722,6 +82787,9 @@ export namespace Prisma {
     id?: boolean
     identityId?: boolean
     credentialId?: boolean
+    credentialType?: boolean
+    clientId?: boolean
+    consentScopesHash?: boolean
     effect?: boolean
     tool?: boolean
     outcome?: boolean
@@ -82739,6 +82807,9 @@ export namespace Prisma {
     id?: boolean
     identityId?: boolean
     credentialId?: boolean
+    credentialType?: boolean
+    clientId?: boolean
+    consentScopesHash?: boolean
     effect?: boolean
     tool?: boolean
     outcome?: boolean
@@ -82751,7 +82822,7 @@ export namespace Prisma {
     createdAt?: boolean
   }
 
-  export type ExternalAgentAuditEventOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "identityId" | "credentialId" | "effect" | "tool" | "outcome" | "scopeDecision" | "requestId" | "traceId" | "receiptId" | "replayed" | "durationMs" | "createdAt", ExtArgs["result"]["externalAgentAuditEvent"]>
+  export type ExternalAgentAuditEventOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "identityId" | "credentialId" | "credentialType" | "clientId" | "consentScopesHash" | "effect" | "tool" | "outcome" | "scopeDecision" | "requestId" | "traceId" | "receiptId" | "replayed" | "durationMs" | "createdAt", ExtArgs["result"]["externalAgentAuditEvent"]>
   export type ExternalAgentAuditEventInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     account?: boolean | ExternalAgentAuditEvent$accountArgs<ExtArgs>
   }
@@ -82771,6 +82842,12 @@ export namespace Prisma {
       id: string
       identityId: string | null
       credentialId: string | null
+      credentialType: string | null
+      clientId: string | null
+      /**
+       * SHA-256 of the sorted consent scopes; raw consent never enters the audit row.
+       */
+      consentScopesHash: string | null
       effect: string
       tool: string
       outcome: string
@@ -83208,6 +83285,9 @@ export namespace Prisma {
     readonly id: FieldRef<"ExternalAgentAuditEvent", 'String'>
     readonly identityId: FieldRef<"ExternalAgentAuditEvent", 'String'>
     readonly credentialId: FieldRef<"ExternalAgentAuditEvent", 'String'>
+    readonly credentialType: FieldRef<"ExternalAgentAuditEvent", 'String'>
+    readonly clientId: FieldRef<"ExternalAgentAuditEvent", 'String'>
+    readonly consentScopesHash: FieldRef<"ExternalAgentAuditEvent", 'String'>
     readonly effect: FieldRef<"ExternalAgentAuditEvent", 'String'>
     readonly tool: FieldRef<"ExternalAgentAuditEvent", 'String'>
     readonly outcome: FieldRef<"ExternalAgentAuditEvent", 'String'>
@@ -129374,6 +129454,9 @@ export namespace Prisma {
     capability: 'capability',
     inputDigest: 'inputDigest',
     resultJson: 'resultJson',
+    credentialType: 'credentialType',
+    clientId: 'clientId',
+    consentScopes: 'consentScopes',
     createdAt: 'createdAt'
   };
 
@@ -129384,6 +129467,9 @@ export namespace Prisma {
     id: 'id',
     identityId: 'identityId',
     credentialId: 'credentialId',
+    credentialType: 'credentialType',
+    clientId: 'clientId',
+    consentScopesHash: 'consentScopesHash',
     effect: 'effect',
     tool: 'tool',
     outcome: 'outcome',
@@ -135505,6 +135591,9 @@ export namespace Prisma {
     capability?: StringFilter<"ExternalMutationReceipt"> | string
     inputDigest?: StringFilter<"ExternalMutationReceipt"> | string
     resultJson?: StringFilter<"ExternalMutationReceipt"> | string
+    credentialType?: StringNullableFilter<"ExternalMutationReceipt"> | string | null
+    clientId?: StringNullableFilter<"ExternalMutationReceipt"> | string | null
+    consentScopes?: StringNullableListFilter<"ExternalMutationReceipt">
     createdAt?: DateTimeFilter<"ExternalMutationReceipt"> | Date | string
     account?: XOR<AccountScalarRelationFilter, AccountWhereInput>
   }
@@ -135516,6 +135605,9 @@ export namespace Prisma {
     capability?: SortOrder
     inputDigest?: SortOrder
     resultJson?: SortOrder
+    credentialType?: SortOrderInput | SortOrder
+    clientId?: SortOrderInput | SortOrder
+    consentScopes?: SortOrder
     createdAt?: SortOrder
     account?: AccountOrderByWithRelationInput
   }
@@ -135530,6 +135622,9 @@ export namespace Prisma {
     capability?: StringFilter<"ExternalMutationReceipt"> | string
     inputDigest?: StringFilter<"ExternalMutationReceipt"> | string
     resultJson?: StringFilter<"ExternalMutationReceipt"> | string
+    credentialType?: StringNullableFilter<"ExternalMutationReceipt"> | string | null
+    clientId?: StringNullableFilter<"ExternalMutationReceipt"> | string | null
+    consentScopes?: StringNullableListFilter<"ExternalMutationReceipt">
     createdAt?: DateTimeFilter<"ExternalMutationReceipt"> | Date | string
     account?: XOR<AccountScalarRelationFilter, AccountWhereInput>
   }, "id">
@@ -135541,6 +135636,9 @@ export namespace Prisma {
     capability?: SortOrder
     inputDigest?: SortOrder
     resultJson?: SortOrder
+    credentialType?: SortOrderInput | SortOrder
+    clientId?: SortOrderInput | SortOrder
+    consentScopes?: SortOrder
     createdAt?: SortOrder
     _count?: ExternalMutationReceiptCountOrderByAggregateInput
     _max?: ExternalMutationReceiptMaxOrderByAggregateInput
@@ -135557,6 +135655,9 @@ export namespace Prisma {
     capability?: StringWithAggregatesFilter<"ExternalMutationReceipt"> | string
     inputDigest?: StringWithAggregatesFilter<"ExternalMutationReceipt"> | string
     resultJson?: StringWithAggregatesFilter<"ExternalMutationReceipt"> | string
+    credentialType?: StringNullableWithAggregatesFilter<"ExternalMutationReceipt"> | string | null
+    clientId?: StringNullableWithAggregatesFilter<"ExternalMutationReceipt"> | string | null
+    consentScopes?: StringNullableListFilter<"ExternalMutationReceipt">
     createdAt?: DateTimeWithAggregatesFilter<"ExternalMutationReceipt"> | Date | string
   }
 
@@ -135567,6 +135668,9 @@ export namespace Prisma {
     id?: StringFilter<"ExternalAgentAuditEvent"> | string
     identityId?: StringNullableFilter<"ExternalAgentAuditEvent"> | string | null
     credentialId?: StringNullableFilter<"ExternalAgentAuditEvent"> | string | null
+    credentialType?: StringNullableFilter<"ExternalAgentAuditEvent"> | string | null
+    clientId?: StringNullableFilter<"ExternalAgentAuditEvent"> | string | null
+    consentScopesHash?: StringNullableFilter<"ExternalAgentAuditEvent"> | string | null
     effect?: StringFilter<"ExternalAgentAuditEvent"> | string
     tool?: StringFilter<"ExternalAgentAuditEvent"> | string
     outcome?: StringFilter<"ExternalAgentAuditEvent"> | string
@@ -135584,6 +135688,9 @@ export namespace Prisma {
     id?: SortOrder
     identityId?: SortOrderInput | SortOrder
     credentialId?: SortOrderInput | SortOrder
+    credentialType?: SortOrderInput | SortOrder
+    clientId?: SortOrderInput | SortOrder
+    consentScopesHash?: SortOrderInput | SortOrder
     effect?: SortOrder
     tool?: SortOrder
     outcome?: SortOrder
@@ -135604,6 +135711,9 @@ export namespace Prisma {
     NOT?: ExternalAgentAuditEventWhereInput | ExternalAgentAuditEventWhereInput[]
     identityId?: StringNullableFilter<"ExternalAgentAuditEvent"> | string | null
     credentialId?: StringNullableFilter<"ExternalAgentAuditEvent"> | string | null
+    credentialType?: StringNullableFilter<"ExternalAgentAuditEvent"> | string | null
+    clientId?: StringNullableFilter<"ExternalAgentAuditEvent"> | string | null
+    consentScopesHash?: StringNullableFilter<"ExternalAgentAuditEvent"> | string | null
     effect?: StringFilter<"ExternalAgentAuditEvent"> | string
     tool?: StringFilter<"ExternalAgentAuditEvent"> | string
     outcome?: StringFilter<"ExternalAgentAuditEvent"> | string
@@ -135621,6 +135731,9 @@ export namespace Prisma {
     id?: SortOrder
     identityId?: SortOrderInput | SortOrder
     credentialId?: SortOrderInput | SortOrder
+    credentialType?: SortOrderInput | SortOrder
+    clientId?: SortOrderInput | SortOrder
+    consentScopesHash?: SortOrderInput | SortOrder
     effect?: SortOrder
     tool?: SortOrder
     outcome?: SortOrder
@@ -135645,6 +135758,9 @@ export namespace Prisma {
     id?: StringWithAggregatesFilter<"ExternalAgentAuditEvent"> | string
     identityId?: StringNullableWithAggregatesFilter<"ExternalAgentAuditEvent"> | string | null
     credentialId?: StringNullableWithAggregatesFilter<"ExternalAgentAuditEvent"> | string | null
+    credentialType?: StringNullableWithAggregatesFilter<"ExternalAgentAuditEvent"> | string | null
+    clientId?: StringNullableWithAggregatesFilter<"ExternalAgentAuditEvent"> | string | null
+    consentScopesHash?: StringNullableWithAggregatesFilter<"ExternalAgentAuditEvent"> | string | null
     effect?: StringWithAggregatesFilter<"ExternalAgentAuditEvent"> | string
     tool?: StringWithAggregatesFilter<"ExternalAgentAuditEvent"> | string
     outcome?: StringWithAggregatesFilter<"ExternalAgentAuditEvent"> | string
@@ -144997,6 +145113,9 @@ export namespace Prisma {
     capability: string
     inputDigest: string
     resultJson: string
+    credentialType?: string | null
+    clientId?: string | null
+    consentScopes?: ExternalMutationReceiptCreateconsentScopesInput | string[]
     createdAt?: Date | string
     account: AccountCreateNestedOneWithoutExternalMutationReceiptsInput
   }
@@ -145008,6 +145127,9 @@ export namespace Prisma {
     capability: string
     inputDigest: string
     resultJson: string
+    credentialType?: string | null
+    clientId?: string | null
+    consentScopes?: ExternalMutationReceiptCreateconsentScopesInput | string[]
     createdAt?: Date | string
   }
 
@@ -145017,6 +145139,9 @@ export namespace Prisma {
     capability?: StringFieldUpdateOperationsInput | string
     inputDigest?: StringFieldUpdateOperationsInput | string
     resultJson?: StringFieldUpdateOperationsInput | string
+    credentialType?: NullableStringFieldUpdateOperationsInput | string | null
+    clientId?: NullableStringFieldUpdateOperationsInput | string | null
+    consentScopes?: ExternalMutationReceiptUpdateconsentScopesInput | string[]
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     account?: AccountUpdateOneRequiredWithoutExternalMutationReceiptsNestedInput
   }
@@ -145028,6 +145153,9 @@ export namespace Prisma {
     capability?: StringFieldUpdateOperationsInput | string
     inputDigest?: StringFieldUpdateOperationsInput | string
     resultJson?: StringFieldUpdateOperationsInput | string
+    credentialType?: NullableStringFieldUpdateOperationsInput | string | null
+    clientId?: NullableStringFieldUpdateOperationsInput | string | null
+    consentScopes?: ExternalMutationReceiptUpdateconsentScopesInput | string[]
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
@@ -145038,6 +145166,9 @@ export namespace Prisma {
     capability: string
     inputDigest: string
     resultJson: string
+    credentialType?: string | null
+    clientId?: string | null
+    consentScopes?: ExternalMutationReceiptCreateconsentScopesInput | string[]
     createdAt?: Date | string
   }
 
@@ -145047,6 +145178,9 @@ export namespace Prisma {
     capability?: StringFieldUpdateOperationsInput | string
     inputDigest?: StringFieldUpdateOperationsInput | string
     resultJson?: StringFieldUpdateOperationsInput | string
+    credentialType?: NullableStringFieldUpdateOperationsInput | string | null
+    clientId?: NullableStringFieldUpdateOperationsInput | string | null
+    consentScopes?: ExternalMutationReceiptUpdateconsentScopesInput | string[]
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
@@ -145057,12 +145191,18 @@ export namespace Prisma {
     capability?: StringFieldUpdateOperationsInput | string
     inputDigest?: StringFieldUpdateOperationsInput | string
     resultJson?: StringFieldUpdateOperationsInput | string
+    credentialType?: NullableStringFieldUpdateOperationsInput | string | null
+    clientId?: NullableStringFieldUpdateOperationsInput | string | null
+    consentScopes?: ExternalMutationReceiptUpdateconsentScopesInput | string[]
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type ExternalAgentAuditEventCreateInput = {
     id?: string
     credentialId?: string | null
+    credentialType?: string | null
+    clientId?: string | null
+    consentScopesHash?: string | null
     effect: string
     tool: string
     outcome: string
@@ -145080,6 +145220,9 @@ export namespace Prisma {
     id?: string
     identityId?: string | null
     credentialId?: string | null
+    credentialType?: string | null
+    clientId?: string | null
+    consentScopesHash?: string | null
     effect: string
     tool: string
     outcome: string
@@ -145095,6 +145238,9 @@ export namespace Prisma {
   export type ExternalAgentAuditEventUpdateInput = {
     id?: StringFieldUpdateOperationsInput | string
     credentialId?: NullableStringFieldUpdateOperationsInput | string | null
+    credentialType?: NullableStringFieldUpdateOperationsInput | string | null
+    clientId?: NullableStringFieldUpdateOperationsInput | string | null
+    consentScopesHash?: NullableStringFieldUpdateOperationsInput | string | null
     effect?: StringFieldUpdateOperationsInput | string
     tool?: StringFieldUpdateOperationsInput | string
     outcome?: StringFieldUpdateOperationsInput | string
@@ -145112,6 +145258,9 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     identityId?: NullableStringFieldUpdateOperationsInput | string | null
     credentialId?: NullableStringFieldUpdateOperationsInput | string | null
+    credentialType?: NullableStringFieldUpdateOperationsInput | string | null
+    clientId?: NullableStringFieldUpdateOperationsInput | string | null
+    consentScopesHash?: NullableStringFieldUpdateOperationsInput | string | null
     effect?: StringFieldUpdateOperationsInput | string
     tool?: StringFieldUpdateOperationsInput | string
     outcome?: StringFieldUpdateOperationsInput | string
@@ -145128,6 +145277,9 @@ export namespace Prisma {
     id?: string
     identityId?: string | null
     credentialId?: string | null
+    credentialType?: string | null
+    clientId?: string | null
+    consentScopesHash?: string | null
     effect: string
     tool: string
     outcome: string
@@ -145143,6 +145295,9 @@ export namespace Prisma {
   export type ExternalAgentAuditEventUpdateManyMutationInput = {
     id?: StringFieldUpdateOperationsInput | string
     credentialId?: NullableStringFieldUpdateOperationsInput | string | null
+    credentialType?: NullableStringFieldUpdateOperationsInput | string | null
+    clientId?: NullableStringFieldUpdateOperationsInput | string | null
+    consentScopesHash?: NullableStringFieldUpdateOperationsInput | string | null
     effect?: StringFieldUpdateOperationsInput | string
     tool?: StringFieldUpdateOperationsInput | string
     outcome?: StringFieldUpdateOperationsInput | string
@@ -145159,6 +145314,9 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     identityId?: NullableStringFieldUpdateOperationsInput | string | null
     credentialId?: NullableStringFieldUpdateOperationsInput | string | null
+    credentialType?: NullableStringFieldUpdateOperationsInput | string | null
+    clientId?: NullableStringFieldUpdateOperationsInput | string | null
+    consentScopesHash?: NullableStringFieldUpdateOperationsInput | string | null
     effect?: StringFieldUpdateOperationsInput | string
     tool?: StringFieldUpdateOperationsInput | string
     outcome?: StringFieldUpdateOperationsInput | string
@@ -152935,6 +153093,9 @@ export namespace Prisma {
     capability?: SortOrder
     inputDigest?: SortOrder
     resultJson?: SortOrder
+    credentialType?: SortOrder
+    clientId?: SortOrder
+    consentScopes?: SortOrder
     createdAt?: SortOrder
   }
 
@@ -152945,6 +153106,8 @@ export namespace Prisma {
     capability?: SortOrder
     inputDigest?: SortOrder
     resultJson?: SortOrder
+    credentialType?: SortOrder
+    clientId?: SortOrder
     createdAt?: SortOrder
   }
 
@@ -152955,6 +153118,8 @@ export namespace Prisma {
     capability?: SortOrder
     inputDigest?: SortOrder
     resultJson?: SortOrder
+    credentialType?: SortOrder
+    clientId?: SortOrder
     createdAt?: SortOrder
   }
 
@@ -152962,6 +153127,9 @@ export namespace Prisma {
     id?: SortOrder
     identityId?: SortOrder
     credentialId?: SortOrder
+    credentialType?: SortOrder
+    clientId?: SortOrder
+    consentScopesHash?: SortOrder
     effect?: SortOrder
     tool?: SortOrder
     outcome?: SortOrder
@@ -152982,6 +153150,9 @@ export namespace Prisma {
     id?: SortOrder
     identityId?: SortOrder
     credentialId?: SortOrder
+    credentialType?: SortOrder
+    clientId?: SortOrder
+    consentScopesHash?: SortOrder
     effect?: SortOrder
     tool?: SortOrder
     outcome?: SortOrder
@@ -152998,6 +153169,9 @@ export namespace Prisma {
     id?: SortOrder
     identityId?: SortOrder
     credentialId?: SortOrder
+    credentialType?: SortOrder
+    clientId?: SortOrder
+    consentScopesHash?: SortOrder
     effect?: SortOrder
     tool?: SortOrder
     outcome?: SortOrder
@@ -159920,10 +160094,19 @@ export namespace Prisma {
     update?: XOR<XOR<AccountUpdateToOneWithWhereWithoutRelationsInput, AccountUpdateWithoutRelationsInput>, AccountUncheckedUpdateWithoutRelationsInput>
   }
 
+  export type ExternalMutationReceiptCreateconsentScopesInput = {
+    set: string[]
+  }
+
   export type AccountCreateNestedOneWithoutExternalMutationReceiptsInput = {
     create?: XOR<AccountCreateWithoutExternalMutationReceiptsInput, AccountUncheckedCreateWithoutExternalMutationReceiptsInput>
     connectOrCreate?: AccountCreateOrConnectWithoutExternalMutationReceiptsInput
     connect?: AccountWhereUniqueInput
+  }
+
+  export type ExternalMutationReceiptUpdateconsentScopesInput = {
+    set?: string[]
+    push?: string | string[]
   }
 
   export type AccountUpdateOneRequiredWithoutExternalMutationReceiptsNestedInput = {
@@ -161910,6 +162093,9 @@ export namespace Prisma {
     capability: string
     inputDigest: string
     resultJson: string
+    credentialType?: string | null
+    clientId?: string | null
+    consentScopes?: ExternalMutationReceiptCreateconsentScopesInput | string[]
     createdAt?: Date | string
   }
 
@@ -161919,6 +162105,9 @@ export namespace Prisma {
     capability: string
     inputDigest: string
     resultJson: string
+    credentialType?: string | null
+    clientId?: string | null
+    consentScopes?: ExternalMutationReceiptCreateconsentScopesInput | string[]
     createdAt?: Date | string
   }
 
@@ -161935,6 +162124,9 @@ export namespace Prisma {
   export type ExternalAgentAuditEventCreateWithoutAccountInput = {
     id?: string
     credentialId?: string | null
+    credentialType?: string | null
+    clientId?: string | null
+    consentScopesHash?: string | null
     effect: string
     tool: string
     outcome: string
@@ -161950,6 +162142,9 @@ export namespace Prisma {
   export type ExternalAgentAuditEventUncheckedCreateWithoutAccountInput = {
     id?: string
     credentialId?: string | null
+    credentialType?: string | null
+    clientId?: string | null
+    consentScopesHash?: string | null
     effect: string
     tool: string
     outcome: string
@@ -163929,6 +164124,9 @@ export namespace Prisma {
     capability?: StringFilter<"ExternalMutationReceipt"> | string
     inputDigest?: StringFilter<"ExternalMutationReceipt"> | string
     resultJson?: StringFilter<"ExternalMutationReceipt"> | string
+    credentialType?: StringNullableFilter<"ExternalMutationReceipt"> | string | null
+    clientId?: StringNullableFilter<"ExternalMutationReceipt"> | string | null
+    consentScopes?: StringNullableListFilter<"ExternalMutationReceipt">
     createdAt?: DateTimeFilter<"ExternalMutationReceipt"> | Date | string
   }
 
@@ -163955,6 +164153,9 @@ export namespace Prisma {
     id?: StringFilter<"ExternalAgentAuditEvent"> | string
     identityId?: StringNullableFilter<"ExternalAgentAuditEvent"> | string | null
     credentialId?: StringNullableFilter<"ExternalAgentAuditEvent"> | string | null
+    credentialType?: StringNullableFilter<"ExternalAgentAuditEvent"> | string | null
+    clientId?: StringNullableFilter<"ExternalAgentAuditEvent"> | string | null
+    consentScopesHash?: StringNullableFilter<"ExternalAgentAuditEvent"> | string | null
     effect?: StringFilter<"ExternalAgentAuditEvent"> | string
     tool?: StringFilter<"ExternalAgentAuditEvent"> | string
     outcome?: StringFilter<"ExternalAgentAuditEvent"> | string
@@ -187917,12 +188118,18 @@ export namespace Prisma {
     capability: string
     inputDigest: string
     resultJson: string
+    credentialType?: string | null
+    clientId?: string | null
+    consentScopes?: ExternalMutationReceiptCreateconsentScopesInput | string[]
     createdAt?: Date | string
   }
 
   export type ExternalAgentAuditEventCreateManyAccountInput = {
     id?: string
     credentialId?: string | null
+    credentialType?: string | null
+    clientId?: string | null
+    consentScopesHash?: string | null
     effect: string
     tool: string
     outcome: string
@@ -188630,6 +188837,9 @@ export namespace Prisma {
     capability?: StringFieldUpdateOperationsInput | string
     inputDigest?: StringFieldUpdateOperationsInput | string
     resultJson?: StringFieldUpdateOperationsInput | string
+    credentialType?: NullableStringFieldUpdateOperationsInput | string | null
+    clientId?: NullableStringFieldUpdateOperationsInput | string | null
+    consentScopes?: ExternalMutationReceiptUpdateconsentScopesInput | string[]
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
@@ -188639,6 +188849,9 @@ export namespace Prisma {
     capability?: StringFieldUpdateOperationsInput | string
     inputDigest?: StringFieldUpdateOperationsInput | string
     resultJson?: StringFieldUpdateOperationsInput | string
+    credentialType?: NullableStringFieldUpdateOperationsInput | string | null
+    clientId?: NullableStringFieldUpdateOperationsInput | string | null
+    consentScopes?: ExternalMutationReceiptUpdateconsentScopesInput | string[]
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
@@ -188648,12 +188861,18 @@ export namespace Prisma {
     capability?: StringFieldUpdateOperationsInput | string
     inputDigest?: StringFieldUpdateOperationsInput | string
     resultJson?: StringFieldUpdateOperationsInput | string
+    credentialType?: NullableStringFieldUpdateOperationsInput | string | null
+    clientId?: NullableStringFieldUpdateOperationsInput | string | null
+    consentScopes?: ExternalMutationReceiptUpdateconsentScopesInput | string[]
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type ExternalAgentAuditEventUpdateWithoutAccountInput = {
     id?: StringFieldUpdateOperationsInput | string
     credentialId?: NullableStringFieldUpdateOperationsInput | string | null
+    credentialType?: NullableStringFieldUpdateOperationsInput | string | null
+    clientId?: NullableStringFieldUpdateOperationsInput | string | null
+    consentScopesHash?: NullableStringFieldUpdateOperationsInput | string | null
     effect?: StringFieldUpdateOperationsInput | string
     tool?: StringFieldUpdateOperationsInput | string
     outcome?: StringFieldUpdateOperationsInput | string
@@ -188669,6 +188888,9 @@ export namespace Prisma {
   export type ExternalAgentAuditEventUncheckedUpdateWithoutAccountInput = {
     id?: StringFieldUpdateOperationsInput | string
     credentialId?: NullableStringFieldUpdateOperationsInput | string | null
+    credentialType?: NullableStringFieldUpdateOperationsInput | string | null
+    clientId?: NullableStringFieldUpdateOperationsInput | string | null
+    consentScopesHash?: NullableStringFieldUpdateOperationsInput | string | null
     effect?: StringFieldUpdateOperationsInput | string
     tool?: StringFieldUpdateOperationsInput | string
     outcome?: StringFieldUpdateOperationsInput | string
@@ -188684,6 +188906,9 @@ export namespace Prisma {
   export type ExternalAgentAuditEventUncheckedUpdateManyWithoutAccountInput = {
     id?: StringFieldUpdateOperationsInput | string
     credentialId?: NullableStringFieldUpdateOperationsInput | string | null
+    credentialType?: NullableStringFieldUpdateOperationsInput | string | null
+    clientId?: NullableStringFieldUpdateOperationsInput | string | null
+    consentScopesHash?: NullableStringFieldUpdateOperationsInput | string | null
     effect?: StringFieldUpdateOperationsInput | string
     tool?: StringFieldUpdateOperationsInput | string
     outcome?: StringFieldUpdateOperationsInput | string

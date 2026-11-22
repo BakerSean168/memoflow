@@ -138,7 +138,7 @@ it('pre-authorizes a scoped PAT write, keeps explicit denies, and preserves the 
   expect(f.create).toHaveBeenCalledOnce();
 });
 
-it('denies OAuth writes, out-of-scope PAT writes and unregistered operations at the checkpoint', async () => {
+it('pre-authorizes OAuth writes by scope and denies out-of-scope or unregistered operations', async () => {
   const f = fixture();
   const checkpoint = createGatewayPermissionCheckpoint(f.repository);
   const work = vi.fn(async () => 'ok');
@@ -148,6 +148,12 @@ it('denies OAuth writes, out-of-scope PAT writes and unregistered operations at 
     code: 'PERMISSION_DENIED',
     decision: 'ask',
   });
+  const oauthWrite = {
+    ...f.principal,
+    credentialType: 'oauth' as const,
+    scopes: ['goals:write', 'goals:read'],
+  };
+  expect(await checkpoint(oauthWrite, 'goal_create', work)).toBe('ok');
   await expect(
     checkpoint({ ...f.principal, scopes: ['tasks:write'] }, 'goal_create', work),
   ).rejects.toMatchObject({ code: 'PERMISSION_DENIED', decision: 'ask' });
@@ -155,7 +161,7 @@ it('denies OAuth writes, out-of-scope PAT writes and unregistered operations at 
     code: 'PERMISSION_DENIED',
     decision: 'deny',
   });
-  expect(work).toHaveBeenCalledOnce();
+  expect(work).toHaveBeenCalledTimes(2);
   expect(await f.repository.listAudit('owner')).toEqual(
     expect.arrayContaining([
       expect.objectContaining({ operationId: 'goal.create', decision: 'ask' }),

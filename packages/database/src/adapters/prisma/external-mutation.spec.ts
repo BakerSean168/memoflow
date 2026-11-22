@@ -97,3 +97,47 @@ it('checks transaction-local authority after the receipt lock and before replay'
   ).rejects.toThrow('revoked');
   expect(events).toEqual(['before', 'sql', 'sql', 'sql', 'current-authority']);
 });
+
+it('persists OAuth receipt provenance read from the locked transaction', async () => {
+  let created: Record<string, unknown> | undefined;
+  const tx = {
+    $executeRaw: async () => 0,
+    externalMutationReceipt: {
+      findUnique: async () => null,
+      create: async ({ data }: { data: Record<string, unknown> }) => {
+        created = data;
+        return {};
+      },
+    },
+  };
+  const db = {
+    $transaction: async (work: (client: unknown) => Promise<unknown>) => work(tx),
+  } as unknown as PrismaClient;
+  let consentScopes: readonly string[] | undefined;
+  await runExternalMutation(
+    db,
+    'identity-a',
+    {
+      connectionId: 'connection-a',
+      receiptScope: 'credential',
+      authorize: async () => {},
+      authorizeInTransaction: async () => {
+        consentScopes = ['goals:write', 'offline_access'];
+      },
+      receiptMetadata: () => ({
+        credentialType: 'oauth',
+        clientId: 'https://client.example.test/meta',
+        consentScopes,
+      }),
+    },
+    'goal.create.v1',
+    { idempotencyKey: 'once' },
+    receipt,
+    async () => ({ result: { ok: true } }),
+  );
+  expect(created).toMatchObject({
+    credentialType: 'oauth',
+    clientId: 'https://client.example.test/meta',
+    consentScopes: ['goals:write', 'offline_access'],
+  });
+});

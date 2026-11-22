@@ -124,12 +124,33 @@ export const OAuthConnectionSchema = z.object({
   lastUsedAt: z.iso.datetime().nullable(),
   ...credentialDates,
 });
+export const ExternalAgentScopeSchema = z.enum([
+  'goals:read',
+  'tasks:read',
+  'routines:read',
+  'notifications:read',
+  'schedules:read',
+  'labels:read',
+  'relations:read',
+  'ai:read',
+  'goals:write',
+  'tasks:write',
+  'routines:write',
+  'notifications:write',
+  'offline_access',
+]);
 export const ExternalAgentConsentSchema = z.object({
   clientId: z.url(),
+  /** Exact host from client_id; the display name is client-declared, never identity. */
+  clientHost: z.string().min(1),
   name: z.string(),
   resource: z.url(),
   lifetimeDays: z.literal(90),
-  scopes: z.array(z.enum(['goals:read', 'tasks:read', 'offline_access'])),
+  scopes: z.array(ExternalAgentScopeSchema),
+  /** Scopes already granted on an active connection; drives the re-consent diff. */
+  existingScopes: z.array(ExternalAgentScopeSchema).default([]),
+  /** False when the deployment switch forbids granting write scopes. */
+  writeEnabled: z.boolean().default(false),
 });
 export type ScopedPatSummary = z.infer<typeof ScopedPatSummarySchema>;
 /**
@@ -166,7 +187,11 @@ export type ExternalAgentResult<T> = Result<T, ExternalAgentFailure>;
 export interface ExternalAgentClientPort {
   capabilities(): Promise<ExternalAgentResult<{ oauth: boolean }>>;
   consentRequest(oauthQuery: string): Promise<ExternalAgentResult<ExternalAgentConsent>>;
-  decideConsent(oauthQuery: string, accept: boolean): Promise<ExternalAgentResult<{ url: string }>>;
+  decideConsent(
+    oauthQuery: string,
+    accept: boolean,
+    scopes?: readonly string[],
+  ): Promise<ExternalAgentResult<{ url: string }>>;
   listConnections(): Promise<ExternalAgentResult<OAuthConnection[]>>;
   revokeConnection(id: string): Promise<ExternalAgentResult<void>>;
   listPats(): Promise<ExternalAgentResult<ScopedPatSummary[]>>;

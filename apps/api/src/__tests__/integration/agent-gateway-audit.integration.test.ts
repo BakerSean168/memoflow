@@ -63,6 +63,29 @@ it('persists a flushed batch and answers credential, request and time filters', 
   await store.close();
 });
 
+it('persists OAuth credential provenance for write audit rows', async () => {
+  const a = String(IdentityId.generate());
+  await seedAccount({ id: a });
+  const store = createExternalAgentAuditStore(prisma, { batchSize: 100, flushDelayMs: 10_000 });
+  store.record({
+    ...record(a, 'connection-a', 'request-oauth'),
+    credentialType: 'oauth',
+    clientId: 'https://client.example.test/meta',
+    consentScopesHash: 'a'.repeat(64),
+  });
+  await store.flush();
+  const page = await createExternalAgentAuditQuery(prisma).list(a, {
+    credentialId: 'connection-a',
+  });
+  expect(page.items[0]).toMatchObject({
+    credentialType: 'oauth',
+    clientId: 'https://client.example.test/meta',
+    consentScopesHash: 'a'.repeat(64),
+    effect: 'write',
+  });
+  await store.close();
+});
+
 it('never returns another owner rows for a shared request or credential filter', async () => {
   const a = String(IdentityId.generate());
   const b = String(IdentityId.generate());

@@ -68,6 +68,11 @@ export const envSchema = z
       .enum(['0', '1'])
       .default('0')
       .transform((value) => value === '1'),
+    EAG_OAUTH_WRITE_ENABLED: z
+      .enum(['0', '1'])
+      .default('0')
+      .transform((value) => value === '1')
+      .describe('Grant and execute OAuth write scopes; reads stay unaffected when off'),
     EAG_OAUTH_CLIENT_IDS: z
       .preprocess(
         emptyStringToUndefined,
@@ -426,6 +431,19 @@ export const envSchema = z
       .describe('OTel service name for the API process (required when tracing is enabled)'),
   })
   .superRefine((env, context) => {
+    if (env.EAG_OAUTH_WRITE_ENABLED) {
+      for (const [key, gate] of [
+        ['EAG_OAUTH_ENABLED', env.EAG_OAUTH_ENABLED],
+        ['EAG_WRITE_ENABLED', env.EAG_WRITE_ENABLED],
+      ] as const) {
+        if (!gate)
+          context.addIssue({
+            code: 'custom',
+            path: ['EAG_OAUTH_WRITE_ENABLED'],
+            message: `OAuth writes require ${key}`,
+          });
+      }
+    }
     if (env.EAG_OAUTH_ENABLED) {
       if (!env.EAG_READ_PILOT_ENABLED)
         context.addIssue({

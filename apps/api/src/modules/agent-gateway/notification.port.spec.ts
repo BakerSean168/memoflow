@@ -95,6 +95,7 @@ const context = (identityId: string): ExecutionContext => ({
 });
 const authority: GatewayWriteAuthority = {
   connectionId: 'pat-a',
+  credentialType: 'pat',
   scopes: ['notifications:write'],
   authorize: async () => {},
 };

@@ -1,22 +1,37 @@
 ---
 tags: [architecture, mcp, oauth, security, external-agent]
-description: OAuth 写 consent 的安全模型评估、scope 映射、consent/审计/吊销要求与分步投产建议
+description: OAuth 写 consent 的安全模型评估、scope 映射、consent/审计/吊销要求，以及 #1054 一次开放的实施状态
 created: 2026-11-19T00:00:00Z
-updated: 2026-11-19T00:00:00Z
+updated: 2026-11-21T00:00:00Z
 ---
 
 # External Agent OAuth 写 consent 设计评估
 
-**状态：设计评估，未实现。当前产品语义仍是 OAuth 只读、写只走 PAT。** 本文是 [#1033](https://github.com/BakerSean168/memoflow/issues/1033) 的结论载体；父单 [#973](https://github.com/BakerSean168/memoflow/issues/973) 的“OAuth 写 consent 决策”以本文为准。本次变更没有新增开关，也没有改变任何放行逻辑。
+**状态：已实施（2026-11-21，[#1054](https://github.com/BakerSean168/memoflow/issues/1054)）。OAuth 写权限已直接开放，取代本文原“有条件、分阶段、默认关闭”的推荐。** 本文是 [#1033](https://github.com/BakerSean168/memoflow/issues/1033) 的设计评估，其 §2–§8 仍是机制依据；§1、§9、§10、§11 的阶段性结论已被用户决策覆盖，以本节和 #1054 为准。
+
+## 0. 实施状态与决策（2026-11-21）
+
+用户看过本文的分阶段推荐后明确拍板：**直接开放，不按分阶段方案实施。**
+
+- 不以 §10 的 C1–C7 作为开工门槛，不做“一期只开 goals/tasks”的分投，也不把客户端白名单作为上线门槛。客户端仍受 `EAG_OAUTH_CLIENT_IDS` 的既有 allowlist 约束，但该列表不是本次开放的前置条件。
+- OAuth 允许集一次扩展到现有 12 个 scope 加 `offline_access`；不新增 scope 名。读不隐含写、写不隐含读，复合条件沿用 PAT 侧规则（如 Task 建/改 binding 需 `goals:write`）。
+- 新增全局开关 `EAG_OAUTH_WRITE_ENABLED`（代码默认 `0`，依赖 `EAG_OAUTH_ENABLED=1` 与 `EAG_WRITE_ENABLED=1`）。开关为 `0` 时：写 scope 不可授予、已发 token 的写能力在调用侧立即失效，读与 PAT 完全不受影响。上线置 `1` 是发布动作，不在 #1054。
+- 写事务内新增 OAuth authority：`external_agent_connections` 与 `oauthConsent` 行按 `FOR SHARE` 锁定，复核 connection 未撤销/未过期、client 未停用、account 活跃、consent 仍覆盖本次 scope；撤销后写调用即时失效。
+- Consent 页面改为按域分组的读写清单，写权限默认不勾选，支持逐域取消与“仅允许只读”降级（provider 的 consent 端点接受原始请求 scope 的子集）。写 scope 明示副作用，主按钮在含写授权时显示“允许写入”。
+- Assisted workflow 不再保留 PAT-only 例外：具备 `tasks:write` 的 OAuth 连接同样发布并执行 5 个 assisted 工具。
+- 审计：写回执在同一事务写入 `credentialType`、`clientId`、`consentScopes`；transport audit 增加 `credentialType`、`clientId`、`consentScopesHash`，写拒绝保留 `scopeDecision='denied'` 与稳定 `outcome`；consent 授予/拒绝与连接撤销产生 `effect='credential'` 事件。
+- §4.3 的每客户端 `allowedScopes`/`writeEnabled` 上限未在本单实现：当前只有全局开关；客户端仍可通过既有 `disabled` 停用。该差异在 #1054 终报中记录。
 
 ## 1. 结论摘要
 
-**推荐：有条件开放，且当前阶段保持关闭（等价于“暂不开放”）。**
+**原推荐（已被 #1054 覆盖）：有条件开放，且当前阶段保持关闭。实际决策：一次开放全部 12 个 scope（见 §0）。**
 
-- 现在：OAuth 只授予 `goals:read`、`tasks:read`（以及显式 `offline_access`），写只走 PAT 签发时预授权。这是设计边界，不是实现缺口。
-- 满足 §10 的全部前置条件后，第一阶段只开放 `goals:write` 与 `tasks:write`，按客户端白名单、独立开关、默认 `0`。
-- `routines:write`、`notifications:write` 和 5 个 assisted workflow 继续只对 PAT 开放；观察一期真实使用与审计后再逐项评估。
-- 不新增 scope 名称，直接复用现有 12 个 scope 中的写 scope；读 scope 与写 scope 继续互不隐含。
+以下为原评估理由，作为风险与机制的背景保留：
+
+- 变更前：OAuth 只授予 `goals:read`、`tasks:read`（以及显式 `offline_access`），写只走 PAT 签发时预授权。
+- 原计划满足 §10 前置条件后，第一阶段只开放 `goals:write` 与 `tasks:write`，按客户端白名单、独立开关、默认 `0`。
+- 原计划 `routines:write`、`notifications:write` 和 5 个 assisted workflow 继续只对 PAT 开放。
+- 不新增 scope 名称，直接复用现有 12 个 scope；读 scope 与写 scope 互不隐含。这一条在 #1054 中保持不变。
 
 理由：
 
@@ -40,7 +55,7 @@ OAuth 写现在一定失败，不是某一处漏判，而是五处独立约束�
 | 写事务 authority   | `apps/api/src/modules/agent-gateway/write.port.ts:73`                    | 写事务只接受 `isScopedPatAuthorityCurrent`（PAT 表 + `FOR SHARE`），没有 OAuth authority 适配        |
 | AI 权限 checkpoint | `packages/ai/src/server/permissions/gateway-permission-checkpoint.ts:48` | `preAuthorizedWrite` 仅在 `credentialType === 'pat'` 时成立；OAuth 写会进入逐次确认/拒绝路径         |
 
-因此当前 OAuth 可见工具只有 6 个：`goal_get`、`goal_search`、`task_plan_get`、`task_plan_search`、`task_occurrence_get`、`task_occurrence_list`。PAT 侧另有 16 个只读、13 个写和 5 个 assisted 工具（合计 40 个），其 scope 映射见 §4。
+因此变更前 OAuth 可见工具只有 6 个：`goal_get`、`goal_search`、`task_plan_get`、`task_plan_search`、`task_occurrence_get`、`task_occurrence_list`。PAT 侧另有 16 个只读、13 个写和 5 个 assisted 工具（合计 40 个），其 scope 映射见 §4。该边界在 #1054 中已按 §0 放开。
 
 > 结论：开放 OAuth 写必须同时改动授权集、consent 校验、Gateway 发布门、写事务 authority 与 checkpoint；只改其中一处会得到“能发现工具但调用必失败”或“能调用但绕过事务校验”的半成品。
 
@@ -235,11 +250,11 @@ EAG_OAUTH_NOTIFICATION_WRITE_ENABLED=0    # 二期，默认 0
 4. 不需要数据迁移回滚；consent 行可保留，重新开启时按新 scope 重新 consent。
 5. 观察 403/404、consent 拒绝率、写 QPS 和异常率；回滚后确认写工具从 `tools/list` 消失。
 
-## 10. 推荐与触发条件
+## 10. 推荐与触发条件（原分阶段方案，已被 #1054 覆盖）
 
 ### 10.1 推荐
 
-**有条件开放，分阶段，默认关闭。** 一期只开放 `goals:write` + `tasks:write`（以及现有两个读 scope），其余写能力继续 PAT-only。
+**原推荐：有条件开放，分阶段，默认关闭。** 用户 2026-11-21 已决定直接开放全部 12 个 scope；C1–C7 不再作为开工门槛，客户端白名单也不是上线前提。本节其余条件作为风险控制清单保留，不再是发布闸门。
 
 ### 10.2 前置条件（全部满足才进入 P1/P2）
 
@@ -259,9 +274,9 @@ EAG_OAUTH_NOTIFICATION_WRITE_ENABLED=0    # 二期，默认 0
 
 ## 11. 对父单 #973 的口径
 
-- #973 清单中的“OAuth 写 consent 决策”以本文 §1 与 §10 为准。
-- 当前结论：**不立即开放**；满足 C1-C7 后按 P2 开放 `goals:write` + `tasks:write`；`routines:write`、`notifications:write`、assisted 不在首期。
-- 本文不代表任何开关已翻转；生产仍为 OAuth 只读、写走 PAT。若后续实现与本设计不一致，以新的 Issue/ADR 和代码为准，并更新本文。
+- #973 清单中的“OAuth 写 consent 决策”原以本文 §1 与 §10 为准；2026-11-21 用户拍板后以 #1054 与 §0 为准。
+- 当前结论：**一次开放 12 个 scope + `offline_access`**，由 `EAG_OAUTH_WRITE_ENABLED` 控制；原 P2 的“仅白名单客户端开放 goals/tasks”已取消。
+- 本文不代表任何部署开关已翻转；生产是否启用写由发布方设置 `EAG_OAUTH_WRITE_ENABLED=1`，代码默认仍为 `0`。
 
 ## 12. 证据索引
 

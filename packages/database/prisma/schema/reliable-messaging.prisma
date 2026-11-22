@@ -119,6 +119,10 @@ model ExternalMutationReceipt {
   capability   String
   inputDigest  String @map("input_digest")
   resultJson   String @map("result_json")
+  /// OAuth receipt provenance; PAT receipts omit client/consent metadata.
+  credentialType String?  @map("credential_type")
+  clientId       String?  @map("client_id")
+  consentScopes  String[] @default([]) @map("consent_scopes")
   createdAt    DateTime @default(now()) @map("created_at")
 
   @@index([identityId, createdAt])
@@ -132,6 +136,10 @@ model ExternalAgentAuditEvent {
   id            String   @id @default(uuid())
   identityId    String?  @map("identity_id")
   credentialId  String?  @map("credential_id")
+  credentialType String? @map("credential_type")
+  clientId      String?  @map("client_id")
+  /// SHA-256 of the sorted consent scopes; raw consent never enters the audit row.
+  consentScopesHash String? @map("consent_scopes_hash")
   effect        String
   tool          String
   outcome       String

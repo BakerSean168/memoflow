@@ -29,6 +29,8 @@ interface Options {
   readonly toolCheckpoint: GatewayToolCheckpoint;
   readonly writes?: GatewayWritePort;
   readonly assisted?: GatewayAssistedPort;
+  /** OAuth write/assisted calls; `EAG_OAUTH_WRITE_ENABLED=1` only. */
+  readonly oauthWrites?: boolean;
   readonly admission: PilotAdmission;
   readonly audience: string;
   readonly cursorSecret: string;

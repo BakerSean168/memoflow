@@ -933,6 +933,9 @@ exports.Prisma.ExternalMutationReceiptScalarFieldEnum = {
   capability: 'capability',
   inputDigest: 'inputDigest',
   resultJson: 'resultJson',
+  credentialType: 'credentialType',
+  clientId: 'clientId',
+  consentScopes: 'consentScopes',
   createdAt: 'createdAt'
 };
 
@@ -940,6 +943,9 @@ exports.Prisma.ExternalAgentAuditEventScalarFieldEnum = {
   id: 'id',
   identityId: 'identityId',
   credentialId: 'credentialId',
+  credentialType: 'credentialType',
+  clientId: 'clientId',
+  consentScopesHash: 'consentScopesHash',
   effect: 'effect',
   tool: 'tool',
   outcome: 'outcome',

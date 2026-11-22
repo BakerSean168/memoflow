@@ -93,6 +93,22 @@ describe('envSchema external agent rate limits', () => {
     AI_PROVIDER_ENCRYPTION_KEY: 'provider-encryption-secret-at-least-32-chars',
   };
 
+  it('keeps OAuth writes off by default and requires both parent switches', () => {
+    expect(envSchema.parse(required).EAG_OAUTH_WRITE_ENABLED).toBe(false);
+    expect(() => envSchema.parse({ ...required, EAG_OAUTH_WRITE_ENABLED: '1' })).toThrow(
+      /EAG_OAUTH_ENABLED/,
+    );
+    expect(() =>
+      envSchema.parse({
+        ...required,
+        EAG_OAUTH_ENABLED: '1',
+        EAG_OAUTH_WRITE_ENABLED: '1',
+        AUTH_BASE_URL: 'https://api.example.com/api/auth',
+        MEMOFLOW_WEB_URL: 'https://app.example.com',
+      }),
+    ).toThrow(/EAG_WRITE_ENABLED/);
+  });
+
   it('defaults to the gateway admission budgets', () => {
     expect(envSchema.parse(required)).toMatchObject({
       EAG_RATE_LIMIT_IP_PER_MIN: 1200,
