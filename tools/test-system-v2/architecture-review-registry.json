@@ -1077,7 +1077,7 @@
         "status": "none-verified",
         "testFiles": []
       },
-      "sourceSha256": "f53410005e44dfd1d5ee93265a15939ac0f1b7c1e237ec0a4f8871490d0781ab"
+      "sourceSha256": "3dad1d6aceaadc962041631a2ebfad082a439f977caf3816f281fb8e80720573"
     },
     {
       "path": "apps/api/src/__tests__/integration/agent-instance-registry.integration.test.ts",

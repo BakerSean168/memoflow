@@ -32,8 +32,8 @@ async function selectTheme(page: Page, theme: 'light' | 'dark'): Promise<void> {
     { timeout: TIMEOUT_CONFIG.AUTH_MUTATION },
   );
 
-  await page.getByTestId('appearance-theme-trigger').click();
-  await page.getByTestId(`appearance-theme-option-${theme}`).click();
+  // The selected theme is a native radio inside its visible preview-card label.
+  await page.getByTestId(`appearance-theme-option-${theme}`).locator('..').click();
 
   const response = await responsePromise;
   expect(response.ok()).toBe(true);
@@ -49,10 +49,11 @@ test.describe('Canonical appearance and locale settings', () => {
   });
 
   test('[P0] renders the owner-backed presentation and regional settings', async ({ page }) => {
-    await expect(page.getByTestId('appearance-theme-trigger')).toBeVisible();
+    await expect(page.getByTestId('appearance-theme-row')).toBeVisible();
+    await expect(page.getByTestId('appearance-theme-option-auto')).toBeChecked();
     await expect(page.locator('#language-select')).toBeVisible();
     await expect(page.locator('#timezone-select')).toBeVisible();
-    await expect(page.getByTestId('settings-reset-button')).toBeVisible();
+    await expect(page.getByTestId('settings-restore-defaults')).toBeVisible();
   });
 
   test('[P0] applies and persists the canonical theme preference', async ({ page }) => {
@@ -155,8 +156,7 @@ test.describe('Canonical appearance and locale settings', () => {
       await route.continue();
     });
 
-    await page.getByTestId('appearance-theme-trigger').click();
-    await page.getByTestId(`appearance-theme-option-${attemptedTheme}`).click();
+    await page.getByTestId(`appearance-theme-option-${attemptedTheme}`).locator('..').click();
 
     await expect(page.getByTestId('user-preference-mutation-error')).toBeVisible({
       timeout: TIMEOUT_CONFIG.ELEMENT_WAIT,
