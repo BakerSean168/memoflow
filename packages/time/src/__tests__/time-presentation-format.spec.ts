@@ -119,6 +119,25 @@ describe('TIME-1204 locale/timezone-aware presentation', () => {
     expect(fromLaHost).toBe(fromUtcHost);
   });
 
+  it('makes complete dates include the weekday in Chinese and English', () => {
+    const context = createTimeContext({ timeZone: 'UTC', weekStartsOn: 1 });
+    const medium = createTimeFacade({
+      context,
+      presentation: { locale: 'zh-CN', dateStyle: 'medium', timeStyle: '24h' },
+    });
+    const sample = asInstant(Date.parse('2026-09-23T12:00:00.000Z'));
+    const complete = medium.withPresentation({ dateStyle: 'long' });
+
+    expect(medium.withPresentation({ dateStyle: 'short' }).format.date(sample)).toBe('2026/9/23');
+    expect(medium.format.date(sample)).toBe('2026年9月23日');
+    expect(complete.format.date(sample)).toBe('2026年9月23日星期三');
+    expect(complete.format.dateTime(sample)).toContain('星期三');
+    expect(complete.format.ymdDisplay('2026-09-23')).toBe('2026年9月23日星期三');
+    expect(complete.withPresentation({ locale: 'en-US' }).format.date(sample)).toBe(
+      'Wednesday, September 23, 2026',
+    );
+  });
+
   it('keeps Ymd display independent from hosts that skip a calendar date', () => {
     const time = createTimeFacade({
       context: createTimeContext({ timeZone: 'UTC', weekStartsOn: 1 }),
@@ -130,7 +149,7 @@ describe('TIME-1204 locale/timezone-aware presentation', () => {
     process.env.TZ = 'UTC';
     const fromUtcHost = time.format.ymdDisplay('2011-12-30');
 
-    expect(fromApiaHost).toBe('December 30, 2011');
+    expect(fromApiaHost).toBe('Friday, December 30, 2011');
     expect(fromApiaHost).toBe(fromUtcHost);
   });
 

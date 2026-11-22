@@ -3,6 +3,8 @@
 @import '../../../ui-core/src/styles/globals.css';
 @import './base-styles.css';
 @import 'vue-sonner/style.css';
+/* App bundlers alias @memoflow/setting-ui to src/index.ts, so resolve its emitted CSS explicitly. */
+@import '../../../setting-ui/dist/setting-ui.css';
 @import './priority-colors.css';
 @import './settings-animations.css';
 

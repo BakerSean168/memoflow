@@ -8,6 +8,12 @@ const FALLBACK_LOCALE = 'zh-CN';
 type DateStyle = TimePresentationStyle['dateStyle'];
 type TimeStyle = TimePresentationStyle['timeStyle'];
 
+// `long` is the product's complete date preset. Intl `long` equals `medium`
+// in zh-CN, so use `full` to include the weekday in every locale.
+function intlDateStyle(style: DateStyle): Intl.DateTimeFormatOptions['dateStyle'] {
+  return style === 'long' ? 'full' : style;
+}
+
 function utcDateAtNoon(year: number, month: number, day: number): Date {
   const date = new Date(0);
   date.setUTCFullYear(year, month - 1, day);
@@ -47,7 +53,7 @@ export function formatInstantDate(
 ): string {
   return formatter(presentation.locale, {
     timeZone: context.timeZone,
-    dateStyle: presentation.dateStyle,
+    dateStyle: intlDateStyle(presentation.dateStyle),
   }).format(new Date(instant));
 }
 
@@ -58,7 +64,7 @@ export function formatInstantDateTime(
 ): string {
   return formatter(presentation.locale, {
     timeZone: context.timeZone,
-    dateStyle: presentation.dateStyle,
+    dateStyle: intlDateStyle(presentation.dateStyle),
     timeStyle: 'short',
     hourCycle: hourCycle(presentation.timeStyle),
   }).format(new Date(instant));
@@ -108,7 +114,7 @@ export function formatYmdForDisplay(
   const instant = utcDateAtNoon(year, month, day);
   return formatter(locale, {
     timeZone: 'UTC',
-    dateStyle,
+    dateStyle: intlDateStyle(dateStyle),
   }).format(instant);
 }
 

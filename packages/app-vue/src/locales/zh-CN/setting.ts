@@ -602,7 +602,7 @@ export default {
     timezonePlaceholder: '选择时区',
     dateFormat: '日期格式',
     dateFormatPlaceholder: '选择日期格式',
-    dateStyles: { short: '简短', medium: '标准', long: '完整' },
+    dateStyles: { short: '简短', medium: '标准', long: '完整（含星期）' },
     timeFormat: '时间格式',
     timeFormatPlaceholder: '选择时间格式',
     weekStartsOn: '每周开始于',

@@ -656,7 +656,7 @@ export default {
     timezonePlaceholder: 'Select timezone',
     dateFormat: 'Date Format',
     dateFormatPlaceholder: 'Select date format',
-    dateStyles: { short: 'Short', medium: 'Medium', long: 'Long' },
+    dateStyles: { short: 'Short', medium: 'Medium', long: 'Full (weekday)' },
     timeFormat: 'Time Format',
     timeFormatPlaceholder: 'Select time format',
     weekStartsOn: 'Week Starts On',

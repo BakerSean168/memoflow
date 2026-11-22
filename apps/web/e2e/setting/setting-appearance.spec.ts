@@ -51,6 +51,15 @@ test.describe('Canonical appearance and locale settings', () => {
   test('[P0] renders the owner-backed presentation and regional settings', async ({ page }) => {
     await expect(page.getByTestId('appearance-theme-row')).toBeVisible();
     await expect(page.getByTestId('appearance-theme-option-auto')).toBeChecked();
+    // A build that drops @memoflow/setting-ui styles collapses these into text-only buttons.
+    for (const theme of ['auto', 'light', 'dark']) {
+      const preview = page
+        .getByTestId(`appearance-theme-option-${theme}`)
+        .locator('..')
+        .locator('.theme-preview');
+      await expect(preview).toBeVisible();
+      expect((await preview.boundingBox())?.height).toBeGreaterThan(50);
+    }
     await expect(page.locator('#language-select')).toBeVisible();
     await expect(page.locator('#timezone-select')).toBeVisible();
     await expect(page.getByTestId('settings-restore-defaults')).toBeVisible();
