@@ -21,6 +21,7 @@ import { z } from 'zod';
 import { createServer, type IncomingMessage, type Server, type ServerResponse } from 'node:http';
 import { dirname, join } from 'node:path';
 import { createMcpHandler, McpServer } from '@modelcontextprotocol/server';
+import { MEMOFLOW_WORKFLOW_INSTRUCTIONS } from '@memoflow/agent-gateway';
 import { toNodeHandler } from '@modelcontextprotocol/node';
 import type { ExecutionContext } from '@memoflow/transport-contracts';
 import type { IElectronDatabaseTransaction } from '@memoflow/desktop-contracts';
@@ -74,6 +75,8 @@ function writeScopeForOperation(
 /** Tools that mutate business state or the visible Goal panel; everything else is a read. */
 const LOCAL_WRITE_TOOLS: ReadonlySet<string> = new Set([
   ...Object.keys(writeToolDescriptors),
+  'goal_plan_apply',
+  'goal_panel_present',
   'goal_panel_open',
   'goal_panel_patch',
   'goal_panel_add_key_result',
@@ -106,7 +109,7 @@ function outcomeOfError(error: unknown): string {
   return 'ERROR';
 }
 function scopeDenied(outcome: string): boolean {
-  return /(?:PERMISSION_DENIED|FORBIDDEN)/u.test(outcome);
+  return /(?:PERMISSION_DENIED|FORBIDDEN|INSUFFICIENT_SCOPE)/u.test(outcome);
 }
 export interface LocalToolContext extends ExecutionContext {
   readonly connectionId: string;
@@ -136,7 +139,7 @@ interface Options {
   store: LocalAgentRepository;
   permissions: PermissionRepository;
   isActive: () => boolean;
-  registerTools(server: McpServer, context: LocalToolContext): void;
+  registerTools(server: McpServer, context: LocalToolContext): void | Promise<void>;
   approvalTimeoutMs?: number;
   onRevokeGrant?(input: GrantInput): void;
   /** Persistent external MCP clients. Absent means the external surface is unavailable. */
@@ -726,13 +729,16 @@ export class LocalAgentToolBridge implements LocalAgentToolBridgePort {
           track: <T>(work: () => Promise<T>) => this.track(work),
         };
     const handler = createMcpHandler(
-      () => {
-        const mcp = new McpServer({
-          name: 'memoflow-local',
-          version: '1',
-        });
+      async () => {
+        const mcp = new McpServer(
+          {
+            name: 'memoflow-local',
+            version: '1',
+          },
+          { instructions: MEMOFLOW_WORKFLOW_INSTRUCTIONS },
+        );
         this.instrumentServer(mcp, context);
-        this.options.registerTools(mcp, context);
+        await this.options.registerTools(mcp, context);
         return mcp;
       },
       { legacy: 'stateless' },

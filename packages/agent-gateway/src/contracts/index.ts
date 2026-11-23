@@ -352,6 +352,7 @@ export const LabelResolveNamesOutputSchema = z.strictObject({
 export type LabelResolveNamesOutput = z.infer<typeof LabelResolveNamesOutputSchema>;
 
 export * from './writes';
+export * from './goal-plan';
 export * from './routine-reads';
 export * from './notification-reads';
 export * from './schedule-reads';

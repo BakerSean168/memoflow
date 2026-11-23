@@ -46,7 +46,9 @@ function value<T>(result: Result<T>): T {
 export function createTaskPowerSyncAgentMutations(
   db: IElectronDatabase,
   timePort: UserTimeContextPort,
-  goalReadFactory?: (tx: IElectronDatabaseTransaction) => TaskGoalMeasurementReadPort,
+  goalReadFactory?: (tx: IElectronDatabaseTransaction) => TaskGoalMeasurementReadPort & {
+    assertGoalOwnership(goalId: string, identityId: string): Promise<boolean>;
+  },
   events: IEventBus = committedTaskWriteEventBus,
 ) {
   async function mutate(
@@ -111,6 +113,7 @@ export function createTaskPowerSyncAgentMutations(
     return {
       plans: planRepository,
       occurrences: occurrenceRepository,
+      goals,
       create: new CreateTaskPlanUseCase(planRepository, occurrenceRepository, runner, time, goals),
       update: new UpdateTaskPlanUseCase(
         planRepository,
@@ -131,17 +134,33 @@ export function createTaskPowerSyncAgentMutations(
   return {
     create(input: unknown, cx: ExecutionContext, authority: TaskAgentMutationAuthority) {
       const parsed = TaskAgentCreateSchema.parse(input);
-      return mutate(parsed, 'task.plan.create.v1', cx, authority, async (owner, identityId) => ({
-        kind: 'plan',
-        ...value(await owner.create.execute({ ...parsed.plan, identityId })),
-      }));
+      return mutate(parsed, 'task.plan.create.v1', cx, authority, async (owner, identityId) => {
+        if (
+          parsed.plan.goalBinding &&
+          (!owner.goals ||
+            !(await owner.goals.assertGoalOwnership(parsed.plan.goalBinding.goalId, identityId)))
+        )
+          throw new TaskAgentMutationError('NOT_FOUND');
+        return {
+          kind: 'plan',
+          ...value(await owner.create.execute({ ...parsed.plan, identityId })),
+        };
+      });
     },
     update(input: unknown, cx: ExecutionContext, authority: TaskAgentMutationAuthority) {
       const parsed = TaskAgentUpdateSchema.parse(input);
-      return mutate(parsed, 'task.plan.update.v1', cx, authority, async (owner, identityId) => ({
-        kind: 'plan',
-        plan: value(await owner.update.execute(parsed.planId, identityId, parsed.changes)),
-      }));
+      return mutate(parsed, 'task.plan.update.v1', cx, authority, async (owner, identityId) => {
+        if (
+          parsed.changes.goalBinding &&
+          (!owner.goals ||
+            !(await owner.goals.assertGoalOwnership(parsed.changes.goalBinding.goalId, identityId)))
+        )
+          throw new TaskAgentMutationError('NOT_FOUND');
+        return {
+          kind: 'plan',
+          plan: value(await owner.update.execute(parsed.planId, identityId, parsed.changes)),
+        };
+      });
     },
     complete(input: unknown, cx: ExecutionContext, authority: TaskAgentMutationAuthority) {
       const parsed = TaskAgentCompleteSchema.parse(input);

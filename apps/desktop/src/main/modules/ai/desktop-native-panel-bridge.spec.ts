@@ -484,4 +484,58 @@ describe('DesktopNativePanelBridge', () => {
         }),
     ).not.toThrow();
   });
+  it('isolates external request editors without chat/run IDs and never sends external submit', async () => {
+    const webContents = Object.assign(new EventEmitter(), {
+      send: vi.fn(),
+      isDestroyed: () => false,
+    });
+    const window = { isDestroyed: () => false, webContents };
+    const bridge = new DesktopNativePanelBridge({
+      getMainWindow: () => window as any,
+      isActive: () => true,
+    });
+    const first = {
+      ...createMockContext(),
+      origin: 'client' as const,
+      conversationId: '',
+      runId: '',
+    };
+    const second = { ...first, requestId: 'other-request' };
+    async function send(context: LocalToolContext) {
+      const pending = bridge.executeCommand(context, { action: 'open', mode: 'create' });
+      const request = webContents.send.mock.calls.at(-1)![1];
+      electronMock.handle.mock.calls.at(-1)![1](
+        { sender: webContents },
+        { requestId: request.requestId, ok: true },
+      );
+      await pending;
+      return request;
+    }
+    try {
+      const a = await send(first);
+      const b = await send(second);
+      expect(a).toMatchObject({ clientId: first.connectionId, sessionBinding: expect.any(String) });
+      expect(a).not.toHaveProperty('conversationId');
+      expect(a).not.toHaveProperty('runId');
+      expect(a.sessionBinding).not.toBe(b.sessionBinding);
+      await bridge.releaseForContext(first);
+      expect(webContents.send.mock.calls.at(-1)![1]).toMatchObject({
+        clientId: first.connectionId,
+        sessionBinding: a.sessionBinding,
+        command: { action: 'release' },
+      });
+      await bridge.releaseForContext(second);
+      expect(webContents.send.mock.calls.at(-1)![1]).toMatchObject({
+        sessionBinding: b.sessionBinding,
+        command: { action: 'release' },
+      });
+      const sent = webContents.send.mock.calls.length;
+      await expect(bridge.executeCommand(first, { action: 'submit' })).rejects.toThrow(
+        'cannot submit',
+      );
+      expect(webContents.send).toHaveBeenCalledTimes(sent);
+    } finally {
+      bridge.dispose();
+    }
+  });
 });

@@ -1390,6 +1390,14 @@
       "measurementCollectors": []
     },
     {
+      "path": "apps/desktop/src/main/modules/ai/local-agent-goal-plan.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "apps/desktop/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "apps/desktop/src/main/modules/ai/local-agent-knowledge.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -3334,7 +3342,23 @@
       "measurementCollectors": []
     },
     {
+      "path": "packages/agent-gateway/src/server/apply-goal-plan.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/agent-gateway/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "packages/agent-gateway/src/server/read-gateway.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/agent-gateway/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/agent-gateway/src/server/workflow-guides.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/agent-gateway/vitest.config.ts"
@@ -13911,7 +13935,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 108
+      "fileCount": 109
     },
     {
       "id": "apps/migrator/vitest.config.ts",
@@ -13960,7 +13984,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 6
+      "fileCount": 8
     },
     {
       "id": "packages/ai-client/vitest.config.ts",
@@ -15068,7 +15092,7 @@
   "duplicate": [],
   "unexpected": [],
   "counts": {
-    "unit": 1239,
+    "unit": 1242,
     "integration": 63,
     "smoke": 3,
     "boundary-ipc": 7,

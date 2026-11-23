@@ -1582,14 +1582,18 @@
         "testRole": "behavior"
       },
       "decision": "retain",
-      "behavior": "Goal Panel 快照、命令 discriminated union 与 IPC 请求/响应外形严格",
-      "assertionEvidence": ["GoalPanelCommandSchema.safeParse"],
+      "behavior": "Goal Panel 快照、命令与 IPC 契约；external caller 无虚构会话、禁止 submit，并严格限制 presentation 输入",
+      "assertionEvidence": [
+        "GoalPanelCommandSchema.safeParse",
+        "NativePanelIpcRequestSchema.safeParse",
+        "GoalPanelPresentInputSchema.safeParse"
+      ],
       "reason": "抽象面板协议验证，不是 UI DOM 可访问性测试。 代表性源码/断言已审，不代表运行依赖已验证。",
       "replacement": {
         "status": "none-verified",
         "testFiles": []
       },
-      "sourceSha256": "3df18ffba0af80734a268ca892ab35fa8ae0e3ebce704cfa71c783c99e401243"
+      "sourceSha256": "d7b104c384b991e4a3380a262c63a37aea1e352290f81245a0c4d88e824f8b33"
     },
     {
       "path": "packages/goal-contracts/src/api/goal-label-projection-contract.spec.ts",

@@ -77,6 +77,7 @@ it('commits Task changes and immutable receipts once, preserving explicit Prompt
   const f = createPowerSyncSqliteFixture();
   try {
     const port = createTaskPowerSyncAgentMutations(f.db, time, () => ({
+      assertGoalOwnership: async () => true,
       getKeyResultMeasurementContext: async () => ({
         ok: true as const,
         data: {
@@ -229,3 +230,67 @@ it('rolls back generated occurrences and TaskPlan when receipt insertion fails',
     f.close();
   }
 });
+
+it.each([false, true])(
+  'rejects foreign Goal bindings on create and update (reader present: %s)',
+  async (hasReader) => {
+    const f = createPowerSyncSqliteFixture();
+    try {
+      const deniedReader = () => ({
+        assertGoalOwnership: async () => false,
+        getKeyResultMeasurementContext: async () => {
+          throw new Error('Measurement must not run');
+        },
+      });
+      const port = createTaskPowerSyncAgentMutations(
+        f.db,
+        time,
+        hasReader ? deniedReader : undefined,
+      );
+      const plan = {
+        name: 'Unbound task',
+        importance: 'Moderate',
+        schedule: { kind: 'OneTime', date: '2026-12-01', timing: { kind: 'AllDay' } },
+      };
+      const goalBinding = { goalId: 'GoalId_00000000-0000-4000-8000-000000000099' };
+      await expect(
+        port.create(
+          {
+            idempotencyKey: 'denied-create',
+            plan: { ...plan, goalBinding },
+          },
+          cx,
+          authority,
+        ),
+      ).rejects.toMatchObject({ code: 'NOT_FOUND' });
+      expect(f.sql.prepare('SELECT COUNT(*) AS n FROM task_plans').get()).toMatchObject({ n: 0 });
+      expect(
+        f.sql.prepare('SELECT COUNT(*) AS n FROM task_agent_mutation_receipts').get(),
+      ).toMatchObject({ n: 0 });
+
+      const created = await port.create({ idempotencyKey: 'unbound', plan }, cx, authority);
+      if (created.result.kind !== 'plan') throw new Error('Expected plan');
+      const original = created.result.plan;
+      const before = f.sql.prepare('SELECT * FROM task_plans WHERE id = ?').get(original.id);
+      await expect(
+        port.update(
+          {
+            idempotencyKey: 'denied-update',
+            planId: original.id,
+            changes: { expectedVersion: original.version, goalBinding },
+          },
+          cx,
+          authority,
+        ),
+      ).rejects.toMatchObject({ code: 'NOT_FOUND' });
+      expect(f.sql.prepare('SELECT * FROM task_plans WHERE id = ?').get(original.id)).toEqual(
+        before,
+      );
+      expect(
+        f.sql.prepare('SELECT COUNT(*) AS n FROM task_agent_mutation_receipts').get(),
+      ).toMatchObject({ n: 1 });
+    } finally {
+      f.close();
+    }
+  },
+);

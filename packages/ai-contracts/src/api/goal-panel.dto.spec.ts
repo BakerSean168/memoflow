@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
   GoalPanelCommandSchema,
+  GoalPanelPresentInputSchema,
   GoalPanelSnapshotSchema,
   NativePanelIpcRequestSchema,
   NativePanelIpcResponseSchema,
@@ -122,4 +123,41 @@ describe('GoalPanel DTO and IPC schemas', () => {
     };
     expect(NativePanelIpcResponseSchema.safeParse(response).success).toBe(true);
   });
+});
+
+it('accepts a bounded external presentation without inventing a conversation or submission authority', () => {
+  const request = {
+    requestId: 'external-request',
+    identityId: 'owner',
+    clientId: 'mcp-client',
+    sessionBinding: 'host-issued',
+    command: { action: 'open', mode: 'create' },
+  };
+  expect(NativePanelIpcRequestSchema.safeParse(request).success).toBe(true);
+  expect(
+    NativePanelIpcRequestSchema.safeParse({ ...request, command: { action: 'submit' } }).success,
+  ).toBe(false);
+  expect(
+    NativePanelIpcRequestSchema.safeParse({ ...request, sessionBinding: undefined }).success,
+  ).toBe(false);
+  expect(
+    NativePanelIpcRequestSchema.safeParse({ ...request, conversationId: 'injected' }).success,
+  ).toBe(false);
+  expect(
+    GoalPanelPresentInputSchema.safeParse({
+      mode: 'create',
+      fields: { name: ' Release ' },
+      keyResults: [{ title: 'Released', targetValue: 1 }],
+    }),
+  ).toMatchObject({ success: true, data: { fields: { name: 'Release' } } });
+  expect(
+    GoalPanelPresentInputSchema.safeParse({ mode: 'create', fields: { name: ' ' } }).success,
+  ).toBe(false);
+  expect(
+    GoalPanelPresentInputSchema.safeParse({
+      mode: 'edit',
+      goalId: 'saved-goal',
+      fields: { name: 'overwrite' },
+    }).success,
+  ).toBe(false);
 });

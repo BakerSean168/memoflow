@@ -76,7 +76,7 @@ export const writeToolDescriptors = {
   goal_create: {
     requiredScope: 'goals:write',
     definition: definition(
-      'Create an owned Goal with initial KRs. Retry using the same idempotencyKey.',
+      'Create an owned Goal with initial KRs. For goal planning, first read workflow_guide_get and consider goal_plan_apply to include linked Tasks. Retry using the same idempotencyKey.',
       GatewayGoalCreateSchema,
       GatewayGoalReceiptSchema,
     ),

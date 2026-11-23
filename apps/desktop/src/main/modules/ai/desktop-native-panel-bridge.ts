@@ -23,7 +23,14 @@ export interface IDesktopNativePanelBridge {
     command: GoalPanelCommand,
   ): Promise<NativePanelIpcResponse>;
   releaseAllForRun?(conversationId: string, runId: string): Promise<void>;
+  releaseForContext?(context: LocalToolContext): Promise<void>;
   dispose?(): void;
+}
+
+function editorKey(context: LocalToolContext): string {
+  return context.origin === 'client'
+    ? JSON.stringify(['client', context.connectionId, context.requestId])
+    : JSON.stringify([context.conversationId, context.runId]);
 }
 
 export class DesktopNativePanelBridge implements IDesktopNativePanelBridge {
@@ -32,11 +39,12 @@ export class DesktopNativePanelBridge implements IDesktopNativePanelBridge {
   private static activeBridge: DesktopNativePanelBridge | null = null;
   private rendererGeneration = 0;
   private readonly profileGeneration = randomUUID();
-  private readonly runRequests = new Map<
+  private readonly editorRequests = new Map<
     string,
     {
       identityId: string;
       sessionBinding: string;
+      caller: { clientId: string } | { conversationId: string; runId: string };
       window: BrowserWindow;
       generation: number;
     }
@@ -126,6 +134,9 @@ export class DesktopNativePanelBridge implements IDesktopNativePanelBridge {
       throw new Error('Active profile is locked, switched, or inactive');
     }
 
+    if (context.origin === 'client' && command.action === 'submit') {
+      throw new Error('External panel presentation cannot submit');
+    }
     if (context.signal.aborted || context.grantSignal.aborted) {
       throw new Error('Panel command was aborted');
     }
@@ -161,12 +172,18 @@ export class DesktopNativePanelBridge implements IDesktopNativePanelBridge {
           context.identityId,
           context.connectionId,
           context.conversationId,
+          ...(context.origin === 'client' ? [context.requestId] : []),
         ]),
       )
       .digest('hex');
-    this.runRequests.set(JSON.stringify([context.conversationId, context.runId]), {
+    const caller =
+      context.origin === 'client'
+        ? { clientId: context.connectionId }
+        : { conversationId: context.conversationId, runId: context.runId };
+    this.editorRequests.set(editorKey(context), {
       identityId: context.identityId,
       sessionBinding,
+      caller,
       window: win,
       generation: this.rendererGeneration,
     });
@@ -180,7 +197,7 @@ export class DesktopNativePanelBridge implements IDesktopNativePanelBridge {
         this.pendingRequests.delete(requestId);
         // Also invalidate a renderer open that is still awaiting owner registration.
         if (this.options.getMainWindow() === win) {
-          void this.releaseAllForRun(context.conversationId, context.runId);
+          void this.releaseForContext(context);
         }
         reject(error);
       };
@@ -215,16 +232,14 @@ export class DesktopNativePanelBridge implements IDesktopNativePanelBridge {
       win.webContents.on('render-process-gone', onRendererGone);
       win.webContents.on('did-start-navigation', onNavigation);
 
-      const request: NativePanelIpcRequest = {
-        requestId,
-        identityId: context.identityId,
-        sessionBinding,
-        conversationId: context.conversationId,
-        runId: context.runId,
-        command,
-      };
-
       try {
+        const request = NativePanelIpcRequestSchema.parse({
+          requestId,
+          identityId: context.identityId,
+          sessionBinding,
+          ...caller,
+          command,
+        });
         win.webContents.send(AIChannels.LOCAL_AGENT_PANEL_COMMAND, request);
       } catch (err) {
         cleanup();
@@ -235,9 +250,16 @@ export class DesktopNativePanelBridge implements IDesktopNativePanelBridge {
   }
 
   async releaseAllForRun(conversationId: string, runId: string): Promise<void> {
-    const runKey = JSON.stringify([conversationId, runId]);
-    const binding = this.runRequests.get(runKey);
-    this.runRequests.delete(runKey);
+    return this.releaseEditor(JSON.stringify([conversationId, runId]));
+  }
+
+  async releaseForContext(context: LocalToolContext): Promise<void> {
+    return this.releaseEditor(editorKey(context));
+  }
+
+  private async releaseEditor(key: string): Promise<void> {
+    const binding = this.editorRequests.get(key);
+    this.editorRequests.delete(key);
     const win = this.options.getMainWindow();
     if (
       !binding ||
@@ -257,8 +279,7 @@ export class DesktopNativePanelBridge implements IDesktopNativePanelBridge {
         requestId,
         identityId: binding.identityId,
         sessionBinding: binding.sessionBinding,
-        conversationId,
-        runId,
+        ...binding.caller,
         command: { action: 'release' },
       };
       win.webContents.send(AIChannels.LOCAL_AGENT_PANEL_COMMAND, request);
@@ -292,7 +313,7 @@ export class DesktopNativePanelBridge implements IDesktopNativePanelBridge {
         req.reject(new Error('DesktopNativePanelBridge was disposed'));
       }
       this.pendingRequests.clear();
-      this.runRequests.clear();
+      this.editorRequests.clear();
     }
   }
 }

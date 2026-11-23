@@ -119,3 +119,25 @@ it('does not read another identity and reports storage failure without clearing 
 });
 
 installGoalUiHost();
+
+it('restores an interrupted external presentation as an editable draft without a workflow runtime', async () => {
+  const f = fixture();
+  const owner = 'local-agent:external:host-issued-binding';
+  const first = useGoalDraftCheckpoint(f.store);
+  await first.begin();
+  first.capture(draft, owner);
+  await vi.waitFor(() => expect(first.status.value).toBe('saved'));
+  const restored = useGoalDraftCheckpoint(f.store);
+  const saved = await restored.begin();
+  expect(restored.blocked.value).toBe(true);
+  expect(await restored.detachTransientWorkflow(owner)).toBe(true);
+  expect(restored.blocked.value).toBe(false);
+  expect(restored.content.value).toMatchObject({
+    createId: saved!.createId,
+    workflowRunId: null,
+    phase: 'editing',
+    draft,
+  });
+  restored.capture({ ...draft, name: 'Human refinement' }, null);
+  await vi.waitFor(() => expect(restored.content.value?.draft.name).toBe('Human refinement'));
+});

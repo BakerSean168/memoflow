@@ -5,6 +5,13 @@ import { GatewayPermissionDeniedError } from '../ports';
 import type { ExecutionContext } from '@memoflow/transport-contracts';
 import { createReadGateway } from './read-gateway';
 
+function scopedToolNames(tools: { name: string }[]): string[] {
+  const names = tools.map(({ name }) => name);
+  const metadata = new Set(['workflow_guide_get', 'goal_plan_validate']);
+  expect(names.filter((name) => metadata.has(name)).sort()).toEqual([...metadata].sort());
+  return names.filter((name) => !metadata.has(name));
+}
+
 const context = {
   requestId: 'request-a',
   traceId: 'trace-a',
@@ -228,10 +235,7 @@ it('discovers six reads only for explicit owner scopes and denies a cached Task 
   };
   const gateway = createReadGateway({ ...f.options, tasks });
   const listing = await gateway.fetch(request('tools/list'), context);
-  expect((await listing.json()).result.tools.map((t: { name: string }) => t.name)).toEqual([
-    'goal_get',
-    'goal_search',
-  ]);
+  expect(scopedToolNames((await listing.json()).result.tools)).toEqual(['goal_get', 'goal_search']);
   const denied = await gateway.fetch(
     request(
       'tools/call',
@@ -250,7 +254,7 @@ it('discovers six reads only for explicit owner scopes and denies a cached Task 
     scopes: ['goals:read', 'tasks:read'],
   });
   const all = await gateway.fetch(request('tools/list'), context);
-  expect((await all.json()).result.tools.map((t: { name: string }) => t.name)).toEqual([
+  expect(scopedToolNames((await all.json()).result.tools)).toEqual([
     'goal_get',
     'goal_search',
     'task_plan_get',
@@ -289,7 +293,7 @@ it('discovers assisted lifecycle tools only when the independent assisted port i
   const listing = await enabled.fetch(request('tools/list'), context);
   const listingBody = await listing.json();
   expect(listingBody, JSON.stringify(listingBody)).toHaveProperty('result.tools');
-  expect(listingBody.result.tools.map((tool: { name: string }) => tool.name)).toEqual([
+  expect(scopedToolNames(listingBody.result.tools)).toEqual([
     'assisted_workflow_start',
     'assisted_workflow_get',
     'assisted_workflow_review',
@@ -455,7 +459,7 @@ describe('AI hosted read capability', () => {
   it('discovers the five AI reads only for ai:read and never for another read scope', async () => {
     const f = aiFixture();
     const listing = await f.gateway.fetch(request('tools/list'), context);
-    expect((await listing.json()).result.tools.map((tool: { name: string }) => tool.name)).toEqual([
+    expect(scopedToolNames((await listing.json()).result.tools)).toEqual([
       'ai_conversation_list',
       'ai_conversation_get',
       'ai_conversation_transcript',
@@ -659,8 +663,8 @@ describe('Routine hosted write capability', () => {
   it('discovers the routine write set with a routine-only PAT, and keeps the separate gate off', async () => {
     const f = routineFixture();
     expect(
-      (await (await f.gateway.fetch(request('tools/list'), context)).json()).result.tools.map(
-        (t) => t.name,
+      scopedToolNames(
+        (await (await f.gateway.fetch(request('tools/list'), context)).json()).result.tools,
       ),
     ).toEqual([
       'routine_create',
@@ -671,7 +675,9 @@ describe('Routine hosted write capability', () => {
     ]);
     const off = routineFixture(false);
     expect(
-      (await (await off.gateway.fetch(request('tools/list'), context)).json()).result.tools,
+      scopedToolNames(
+        (await (await off.gateway.fetch(request('tools/list'), context)).json()).result.tools,
+      ),
     ).toEqual([]);
     expect(
       (await off.gateway.fetch(request('tools/call', input, 'routine_create'), context)).status,
@@ -692,8 +698,8 @@ describe('Routine hosted write capability', () => {
   it('keeps OAuth writes hidden while the switch is off and publishes them when it is on', async () => {
     const f = routineFixture(true, 'oauth', ['routines:write', 'goals:read']);
     expect(
-      (await (await f.gateway.fetch(request('tools/list'), context)).json()).result.tools.map(
-        (t) => t.name,
+      scopedToolNames(
+        (await (await f.gateway.fetch(request('tools/list'), context)).json()).result.tools,
       ),
     ).not.toContain('routine_create');
     expect(
@@ -1218,8 +1224,8 @@ describe('Notification hosted read and mark-read capability', () => {
     };
   }
   const names = async (gateway: ReturnType<typeof createReadGateway>) =>
-    (await (await gateway.fetch(request('tools/list'), context)).json()).result.tools.map(
-      (tool: { name: string }) => tool.name,
+    scopedToolNames(
+      (await (await gateway.fetch(request('tools/list'), context)).json()).result.tools,
     );
   it('publishes only the notification tools the credential scopes allow', async () => {
     const reads = notificationFixture(['notifications:read']);
@@ -1488,4 +1494,117 @@ describe('Label read tools (#993)', () => {
       (await disabled.gateway.fetch(request('tools/call', {}, 'label_list'), context)).status,
     ).toBe(404);
   });
+});
+
+it('keeps Hosted plan application write-only and stops on a mid-plan scope revocation', async () => {
+  const f = fixture();
+  const principal = {
+    identityId: 'owner-a',
+    credentialId: 'pat-a',
+    credentialType: 'pat' as const,
+    scopes: ['goals:write', 'tasks:write'] as ('goals:write' | 'tasks:write')[],
+  };
+  f.authenticate.mockResolvedValue(principal);
+  const goalId = 'GoalId_00000000-0000-4000-8000-000000000001';
+  const keyResultId = 'KeyResultId_00000000-0000-4000-8000-000000000001';
+  let taskCommits = 0;
+  const goalCreate = vi.fn(
+    async (_input: unknown, _context: ExecutionContext, authority: GatewayWriteAuthority) => {
+      await authority.authorize();
+      f.authenticate.mockResolvedValue({ ...principal, scopes: ['goals:write'] });
+      return {
+        receiptId: 'created',
+        result: {
+          goalId,
+          goalVersion: 1,
+          affectedEntityIds: {
+            goalIds: [goalId],
+            keyResultIds: [keyResultId],
+            recordIds: [],
+            reviewIds: [],
+          },
+        },
+      };
+    },
+  );
+  const taskCreate = vi.fn(
+    async (_input: unknown, _context: ExecutionContext, authority: GatewayWriteAuthority) => {
+      await authority.authorize();
+      taskCommits++;
+      throw new Error('Revoked Task must not commit');
+    },
+  );
+  const checkpoints: string[] = [];
+  const gateway = createReadGateway({
+    ...f.options,
+    writes: { goalCreate, taskCreate } as unknown as import('../ports').GatewayWritePort,
+    toolCheckpoint: async (_principal, name, work) => {
+      checkpoints.push(name);
+      return work();
+    },
+  });
+  const input = {
+    idempotencyKey: 'hosted-plan',
+    plan: {
+      target: { mode: 'create', goal: { name: 'Release' } },
+      keyResults: [{ ref: 'kr:release', keyResult: { title: 'Released', targetValue: 1 } }],
+      tasks: [
+        {
+          ref: 'task:release',
+          keyResultRef: 'kr:release',
+          plan: {
+            name: 'Ship',
+            importance: 'Moderate',
+            schedule: { kind: 'OneTime', date: '2026-12-01', timing: { kind: 'AllDay' } },
+          },
+        },
+      ],
+    },
+  };
+  const response = await gateway.fetch(request('tools/call', input, 'goal_plan_apply'), context);
+  const body = await response.json();
+  expect(body.result).toMatchObject({
+    isError: true,
+    structuredContent: {
+      status: 'partial',
+      referenceMap: { goal: goalId, 'kr:release': keyResultId },
+      failures: [{ ref: 'task:release', code: 'FORBIDDEN', retryable: false }],
+    },
+  });
+  expect(checkpoints).toEqual(['goal_create', 'goal_key_result_create', 'task_plan_create']);
+  expect(taskCommits).toBe(0);
+  expect(JSON.stringify(body)).not.toContain('readModel');
+  expect(f.audit).toHaveBeenLastCalledWith(
+    expect.objectContaining({
+      tool: 'goal_plan_apply',
+      effect: 'write',
+      outcome: 'FORBIDDEN',
+      scopeDecision: 'denied',
+    }),
+  );
+  checkpoints.length = 0;
+  const missingScope = await gateway.fetch(
+    request('tools/call', input, 'goal_plan_apply'),
+    context,
+  );
+  expect((await missingScope.json()).result.structuredContent.failures[0].code).toBe(
+    'INSUFFICIENT_SCOPE',
+  );
+  expect(checkpoints).toEqual([]);
+  expect(f.audit).toHaveBeenLastCalledWith(
+    expect.objectContaining({
+      tool: 'goal_plan_apply',
+      effect: 'write',
+      outcome: 'INSUFFICIENT_SCOPE',
+      scopeDecision: 'denied',
+    }),
+  );
+  f.authenticate.mockResolvedValue({
+    ...principal,
+    credentialType: 'oauth',
+    scopes: [...principal.scopes, 'goals:read'],
+  });
+  expect(
+    (await gateway.fetch(request('tools/call', input, 'goal_plan_apply'), context)).status,
+  ).toBe(404);
 });
