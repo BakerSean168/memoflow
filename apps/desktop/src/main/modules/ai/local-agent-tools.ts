@@ -63,6 +63,8 @@ import type { ScheduleEventApplicationPort } from '@memoflow/schedule';
 import {
   registerReadTools,
   registerWriteTools,
+  registerWorkflowGuides,
+  registerGoalPlanTools,
   type ReadToolCall,
 } from '@memoflow/agent-gateway/server';
 import type { Result } from '@memoflow/transport-contracts/result';
@@ -79,6 +81,7 @@ import {
   KnowledgeContextSourceSchema,
   type GoalPanelCommand,
 } from '@memoflow/ai-contracts';
+import { registerGoalPanelPresentation } from './present-goal-panel';
 import type { IDesktopNativePanelBridge } from './desktop-native-panel-bridge';
 import { IdentityId } from '@memoflow/utils/domain';
 
@@ -253,10 +256,11 @@ export function createDesktopLocalAgentTools(
     onRevokeGrant(grantInput) {
       panelBridge?.releaseAllForRun?.(grantInput.conversationId, grantInput.runId);
     },
-    registerTools(server, context: LocalToolContext) {
-      // External MCP clients have no visible Agent panel or run, so the panel
-      // tools (and the "use the form" write rule) only apply to built-in runs.
+    async registerTools(server, context: LocalToolContext) {
+      await registerWorkflowGuides(server);
+      // Native runs retain multi-step control; external clients get a bounded presentation/handoff.
       const panels = context.origin === 'client' ? undefined : panelBridge;
+      if (panelBridge) registerGoalPanelPresentation(server, panelBridge, context);
       if (knowledge) {
         const reference = z.object({
           documentId: KnowledgeDocumentIdWireSchema.nullable(),
@@ -411,11 +415,13 @@ export function createDesktopLocalAgentTools(
                 ? failure.data.code === 'PERMISSION_DENIED'
                   ? 'PERMISSION_DENIED'
                   : 'FORBIDDEN'
-                : error instanceof z.ZodError
-                  ? 'VALIDATION_ERROR'
-                  : error instanceof GoalIntentCommitBlockedError
-                    ? error.code
-                    : 'INTERNAL_ERROR';
+                : error instanceof GatewayReadError
+                  ? error.code
+                  : error instanceof z.ZodError
+                    ? 'VALIDATION_ERROR'
+                    : error instanceof GoalIntentCommitBlockedError
+                      ? error.code
+                      : 'INTERNAL_ERROR';
           return {
             isError: true,
             content: [{ type: 'text' as const, text: code }],
@@ -504,6 +510,14 @@ export function createDesktopLocalAgentTools(
         authorize: () => context.authorize('read'),
       };
       registerWriteTools(server, writes, context, context.writeScopes, writeAuthority, writeCall);
+      registerGoalPlanTools(server, {
+        writes,
+        context,
+        authority: writeAuthority,
+        call: writeCall,
+        signal: context.signal,
+        deadlineAt: context.deadlineAt,
+      });
       if (panels) {
         async function runPanelAction(command: GoalPanelCommand) {
           try {

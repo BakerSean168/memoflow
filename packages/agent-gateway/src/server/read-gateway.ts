@@ -1,3 +1,10 @@
+import {
+  goalPlanToolDescriptors,
+  type GatewayGoalPlanToolName,
+} from '../goal-plan-tool-descriptors';
+import { registerGoalPlanTools } from './register-goal-plan-tools';
+import { registerWorkflowGuides } from './register-workflow-guides';
+import { MEMOFLOW_WORKFLOW_INSTRUCTIONS, workflowGuideToolDescriptor } from '../workflow-guides';
 import { registerWriteTools } from './register-write-tools';
 import { createHash } from 'node:crypto';
 import { writeToolDescriptors, type GatewayWriteToolName } from '../write-tool-descriptors';
@@ -54,11 +61,18 @@ interface Options {
   readonly consumeOwnerQuota: (identityId: string) => Promise<boolean>;
 }
 const toolDescriptors = {
+  ...goalPlanToolDescriptors,
+  workflow_guide_get: workflowGuideToolDescriptor,
   ...readToolDescriptors,
   ...writeToolDescriptors,
   ...assistedToolDescriptors,
 };
-type ToolName = GatewayReadToolName | GatewayWriteToolName | GatewayAssistedToolName;
+type ToolName =
+  | GatewayReadToolName
+  | GatewayWriteToolName
+  | GatewayAssistedToolName
+  | GatewayGoalPlanToolName
+  | 'workflow_guide_get';
 function isToolName(name: string): name is ToolName {
   return Object.prototype.hasOwnProperty.call(toolDescriptors, name);
 }
@@ -252,16 +266,20 @@ export function createReadGateway(options: Options) {
             const name = probe.data.params.name;
             if (isToolName(name)) {
               tool = name;
-              if (!principal.scopes.includes(toolDescriptors[name].requiredScope)) {
+              const requiredScope = toolDescriptors[name].requiredScope;
+              if (requiredScope && !principal.scopes.includes(requiredScope)) {
                 scopeDecision = 'denied';
                 return reject(403, 'INSUFFICIENT_SCOPE');
               }
               if (
-                (isWriteToolName(name) && !options.writes) ||
+                ((isWriteToolName(name) || name === 'goal_plan_apply') && !options.writes) ||
                 (isAssistedToolName(name) && !options.assisted) ||
                 // Scope already gated this call; the switch hides write tools
                 // from OAuth credentials when EAG_OAUTH_WRITE_ENABLED=0.
-                ((isWriteToolName(name) || isAssistedToolName(name)) && !mayWrite)
+                ((isWriteToolName(name) ||
+                  isAssistedToolName(name) ||
+                  name === 'goal_plan_apply') &&
+                  !mayWrite)
               ) {
                 scopeDecision = 'denied';
                 return reject(404, 'DISABLED');
@@ -401,11 +419,14 @@ export function createReadGateway(options: Options) {
           }
         }
         const handler = createMcpHandler(
-          () => {
+          async () => {
             const server = new McpServer(
               { name: 'memoflow-agent-gateway', version: '0.1.0' },
-              { capabilities: { tools: {} } },
+              { capabilities: { tools: {} }, instructions: MEMOFLOW_WORKFLOW_INSTRUCTIONS },
             );
+            await registerWorkflowGuides(server, () => {
+              outcome = 'OK';
+            });
             registerReadTools(server, options, context, budget, principal.scopes, call);
             const authority: import('../ports').GatewayWriteAuthority = {
               connectionId: principal.credentialId,
@@ -440,6 +461,25 @@ export function createReadGateway(options: Options) {
                 authority,
                 call,
               );
+            registerGoalPlanTools(
+              server,
+              options.writes && mayWrite
+                ? {
+                    writes: options.writes,
+                    context,
+                    authority,
+                    call,
+                    signal,
+                    deadlineAt,
+                  }
+                : undefined,
+              (name, status) => {
+                tool = name;
+                outcome = status;
+                if (status === 'FORBIDDEN' || status === 'INSUFFICIENT_SCOPE')
+                  scopeDecision = 'denied';
+              },
+            );
             if (options.assisted && mayWrite)
               registerAssistedTools(server, options.assisted, context, authority, call);
 
@@ -489,7 +529,10 @@ export function createReadGateway(options: Options) {
         try {
           options.audit({
             version: '1',
-            effect: isWriteToolName(tool) || isAssistedToolName(tool) ? 'write' : 'read',
+            effect:
+              isWriteToolName(tool) || isAssistedToolName(tool) || tool === 'goal_plan_apply'
+                ? 'write'
+                : 'read',
             receiptId,
             replayed,
             scopeDecision,

@@ -274,6 +274,45 @@ describe('useNativeBusinessPanelBridge', () => {
     expect(patchResp.ok).toBe(false);
     expect(patchResp.error?.code).toBe('PANEL_NOT_CONTROLLED');
   });
+  it('uses a transient external owner and preserves a presented draft after handing control to the user', async () => {
+    const store = useAppShellStore();
+    store.openTab({ module: 'goal', route: '/goals', title: 'Goal', intent: 'deeplink' });
+    const bridge = useNativeBusinessPanelBridge();
+    const request = {
+      requestId: 'external-request',
+      identityId: 'id-1',
+      clientId: 'external-client',
+      sessionBinding: 'request-binding',
+    };
+    expect(
+      (await bridge.handleCommand({ ...request, command: { action: 'open', mode: 'create' } })).ok,
+    ).toBe(true);
+    expect(store.businessControl?.ownerId).toBe('local-agent:external:request-binding');
+    expect(
+      (
+        await bridge.handleCommand({
+          ...request,
+          command: {
+            action: 'patch',
+            name: 'Presented draft',
+            expectedRevision: 1,
+          },
+        })
+      ).ok,
+    ).toBe(true);
+    const result = await bridge.handleCommand({ ...request, command: { action: 'release' } });
+    expect(result).toMatchObject({
+      ok: true,
+      snapshot: {
+        formOpen: true,
+        controlledByMe: false,
+        fields: { name: 'Presented draft' },
+      },
+    });
+    expect(store.businessControl).toBeNull();
+    expect(mockSession.requestSubmit).not.toHaveBeenCalled();
+    expect(draftState.draft.name).toBe('Presented draft');
+  });
 });
 
 installGoalUiHost();

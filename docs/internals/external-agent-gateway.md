@@ -2,12 +2,12 @@
 tags: [architecture, mcp, ai, external-agent]
 description: MemoFlow External Agent Gateway 当前能力、认证、事务写入与运行边界
 created: 2026-10-07T00:00:00Z
-updated: 2026-11-19T00:00:00Z
+updated: 2026-11-23T00:00:00Z
 ---
 
 # MemoFlow External Agent Gateway
 
-**状态：代码与组装已就绪，全部默认关闭。** Gateway 当前实现 40 个工具：22 个只读（Goal 2、Task 4、Relation 1、Routine 3、Notification 3、AI 5、Schedule 2、Label 2）、13 个写（Goal/KR、TaskPlan、TaskOccurrence、Routine 全写、`notification_mark_read`）、5 个 assisted Task workflow。OAuth 复用同一组 12 个 scope：写与 assisted 由 `EAG_OAUTH_WRITE_ENABLED` 控制，关闭时只发布读工具（[#1054](https://github.com/BakerSean168/memoflow/issues/1054)）。生产开关尚未翻转，公共 rollout 未完成；开启步骤见 [§10 runbook](#10-一期开启-runbook)。#490/#538/#539 的本地验收只代表代码路径，不代表生产已部署。
+**状态：代码与组装已就绪，全部默认关闭。** Hosted Gateway 当前实现 43 个工具：2 个静态指南/校验、22 个只读（Goal 2、Task 4、Relation 1、Routine 3、Notification 3、AI 5、Schedule 2、Label 2）、14 个写（Goal/KR、Goal plan、TaskPlan、TaskOccurrence、Routine 全写、`notification_mark_read`）、5 个 assisted Task workflow。OAuth 复用同一组 12 个 scope：写与 assisted 由 `EAG_OAUTH_WRITE_ENABLED` 控制，关闭时只发布读工具（[#1054](https://github.com/BakerSean168/memoflow/issues/1054)）。生产开关尚未翻转，公共 rollout 未完成；开启步骤见 [§10 runbook](#10-一期开启-runbook)。#490/#538/#539 的本地验收只代表代码路径，不代表生产已部署。
 
 ## 0. 硬边界：OAuth 写由全局开关控制
 
@@ -22,9 +22,9 @@ updated: 2026-11-19T00:00:00Z
 第一里程碑：添加 MemoFlow MCP URL，经 OAuth 登录/注册及同意后，用户可以问“列出本周任务和相关目标”，获得只属于自己的结构化对象。
 第二里程碑：用户授予写权限后，可以创建 Goal（包括 KRs）、创建 TaskPlan、修改定义、完成指定 TaskOccurrence；网络重试不会重复写入，和 Web/Desktop 并发编辑会明确返回冲突。
 
-高级能力随后提供 MemoFlow-assisted planning、云端提醒及 Knowledge capture。当前有云端 Routine 读写（`routine_get/list/upcoming` 与 `routine_create/update/delete/pause/override`）和 5 个 assisted Task workflow 工具，均默认关闭；SDK/CLI/skills/webhooks 是后续分发渠道，不能成为 Gateway 首版依赖。
+高级能力随后提供 MemoFlow-assisted planning、云端提醒及 Knowledge capture。当前有云端 Routine 读写（`routine_get/list/upcoming` 与 `routine_create/update/delete/pause/override`）和 5 个 assisted Task workflow 工具，均默认关闭；当前另提供共享业务 Skill 与普通指南工具，供当前 Agent 自主规划；CLI/webhooks 等后续分发渠道不成为 Gateway 依赖。
 
-第一版不提供账号创建工具、全量 REST 自动翻译、批量永久删除、管理员工具、任意 SQL、任意 URL/file 读取、Desktop 远程控制或自建 Agent runtime。ChatGPT 等其他客户端列为后续兼容对象，不将未测试支持写成已交付。
+第一版不提供账号创建工具、全量 REST 自动翻译、批量永久删除、管理员工具、任意 SQL、任意 URL/file 读取或自建 Agent runtime。Hosted Gateway 不提供 Desktop 窗口控制；Local Host 的原生表单交接见下文。ChatGPT 等其他客户端列为后续兼容对象，不将未测试支持写成已交付。
 
 ## 2. 责任与包落点
 
@@ -116,6 +116,55 @@ Notification 域在 #990 接入：开放 `notification_list` 与 `notification_u
 - **错误码**：返回确定性错误码 `VALIDATION_ERROR`（对外错误文本即该 code；标签写不另造业务错误体系）。
 - **暂不开放原因**：标签体系涉及跨实体双向引用和组织治理策略，目前 External Agent 尚未建立标签生命周期与写安全模型，为避免脏数据和多端同步不一致，暂不开放外部 Agent 写入标签。
 - **回归保证**：写端口与 assisted workflow 集成测试包含显式回归用例，确保写拒绝路径不退化。
+
+### Agent 自主规划与共享 Skill
+
+Goal 规划的默认链路是「当前 Agent 理解意图 → 规划 Goal、可衡量 KR 和关联 Task → 必要时询问用户 → 确定性业务工具写入 → 按回执报告结果」。用户明确只要一个简单 Goal 或单项修改时，保留原子工具的自由组合。这里不启动第二个模型，不创建内部 Conversation/Run，也没有必须恢复的规划工作流状态。
+
+共享内容位于 `packages/agent-gateway/src/workflow-guides.ts`。内置 Mastra planner 只引用业务准则，保留既有 structured decision、review 与 durable runtime；native BYOA 引用同一准则并遵循宿主原生表单策略。外部 Agent 通过两种入口读取完整指南：
+
+- 标准 `io.modelcontextprotocol/skills` 扩展：`skills/list`、`skills/get`、`resources/read`；文件 URI 为 `skill://goal-planning/SKILL.md`。
+- 普通 MCP 工具 `workflow_guide_get`：返回同一份完整 Markdown，兼容只支持 tools 的宿主。
+
+扩展直接使用官方 TypeScript SDK 的 `SkillsExtension` 与 `memorySkillFiles`，固定 server 版本 2.4.0；不自建 manifest、摘要、YAML 解析或资源协议。一个只读 catalog 附到每次请求的 server。读取指南仍经过当前 MCP 连接认证，但静态资料不访问 owner 数据，不额外要求某个业务 read scope。
+
+**提供 Skill 不等于宿主自动激活 Skill。** 宿主是否加载、注入和遵循指南由客户端决定；server instructions、工具描述与普通指南工具共同提供发现路径。没有原生 Ask User 的客户端可在当前文字对话中询问。
+
+| 工具                 | 必要 scope / 宿主                                         | 行为                                                                            |
+| -------------------- | --------------------------------------------------------- | ------------------------------------------------------------------------------- |
+| `workflow_guide_get` | 已认证连接；Local / Hosted                                | 返回业务指南，无模型调用和写入                                                  |
+| `goal_plan_validate` | 已认证连接；Local / Hosted                                | 校验计划结构、引用和字段；缺 KR/Task 只产生完整度提醒                           |
+| `goal_plan_apply`    | `goals:write`，含 Task 另需 `tasks:write`；Local / Hosted | 组合既有 owner 操作，逐项权限检查，返回实际回执和引用映射                       |
+| `goal_panel_present` | `goals:write`；有活动原生窗口的 Local Host                | 单次请求填入 Goal/KR 草稿，或打开已保存 Goal，然后交还用户；不保存、不创建 Task |
+
+Hosted 的 read/write scopes 独立。当前 Local MCP 沿用本地凭证模型：连接认证提供 read transport 能力，只有写授权单列 `writeScopes`；读取与表单展示仍分别经过既有业务 permission checkpoint（如 `goal.read`），不新增第二套权限体系。
+
+`goal_plan_apply` 的 `plan` 使用 owner schema 组合，`tools/list` 为完整输入契约：
+
+- `target.mode=create` 携带 Goal fields；初始 KRs 随 Goal 在同一 owner 事务内创建。即便合并为一个写入，也检查 KR-specific permission rule。
+- `target.mode=existing` 携带 `goalId`、`expectedVersion`，只补充 KR/Task；不会创建替代 Goal 或覆盖已有字段。新增 KR 沿真实回执传递版本。
+- `keyResults` 为新 KR 分配稳定 `kr:<slug>` 引用；`existingKeyResults` 只为已有 Goal 映射已验证的 KR ID。
+- `tasks` 为每项分配稳定 `task:<slug>`，可通过 `keyResultRef` 绑定 KR；实际 ID 来自 owner 回执。Task schedule 必须来自用户信息或可信上下文，不能为满足 schema 随意编造。当前缺少日期的 Task 需先询问，或明确保留为未保存建议。
+- 现有 Goal、KR、Task 原子工具继续可用。组合工具不能绕过 native Agent 的表单策略。
+
+计划是多个 owner 本地事务的顺序组合，**不是跨域原子事务**。结果明确区分 `success`、`partial`、`failed`，只报告实际成功的 receipts、referenceMap、版本与失败项。任何步骤的权限拒绝、冲突或取消都会停止后续步骤；成功步骤不会自动删除。
+
+重试必须保留同一 `idempotencyKey`、原计划、稳定 refs 与原始 expectedVersion。排序变化不改变子操作 key，owner 会重放持久回执；已提交项的内容变化会冲突。幂等性按 item 及既有 owner/credential 边界成立，没有全计划 manifest 锁；不要在中断操作下追加新 refs，也不要自动刷新版本覆盖人类修改。冲突后读取当前状态，只为剩余工作制定新操作。跨本地凭证轮换前先核实已有对象。
+
+### Local Host 原生表单交接
+
+Electron 的活动 Profile 持有本地业务服务与 MCP，应用启动/解锁后即可工作；此链路不依赖远端 API 或独立常驻 daemon。Hosted Web/API 继续作为云端入口与同步服务，复用业务工具但不提供本地窗口能力。
+
+外部 `goal_panel_present` 是一次请求内的有界交接：
+
+1. 按连接权限打开干净且可用的表单。
+2. create 模式逐步填入 Goal 字段与 KRs，每一步使用前一 snapshot 的 revision；edit 模式只打开指定的已保存 Goal。
+3. 等待释放编辑权的回包，再报告 `handedOff: true`、`savedByTool: false`。失败、取消或凭证吊销也执行清理，保留草稿。
+4. 人在既有表单里继续微调和保存。若需要先保存完整 Goal/KR/Task 计划，再调用 `goal_plan_apply` 并用返回的 Goal ID 打开面板。
+
+IPC caller 显式区分 native conversation/run 与 external client。外部只用真实 client ID 和主进程签发的请求 binding；不同 HTTP 请求互相隔离，binding 关联 Profile/window generation。临时编辑者沿用 `local-agent:` 恢复命名空间，renderer 重启后可恢复草稿给用户，无须 Mastra run。
+
+外部不发布 `goal_panel_submit`，主进程和 IPC schema 也拒绝 external submit。dirty/busy、旧 revision、失去控制或窗口切换时不重新抢占表单。原生长流程的 review、持久租约与提交策略保留；这里没有扩展为外部长期编辑会话。
 
 ## 5. 输入、时间、结果与分页
 

@@ -1,3 +1,4 @@
+import { GOAL_PLANNING_GUIDANCE } from '@memoflow/agent-gateway';
 import { Agent } from '@mastra/core/agent';
 import type { RequestContext } from '@mastra/core/request-context';
 import {
@@ -170,6 +171,7 @@ export class GoalPlannerWorker implements GoalPlannerPort {
         const locale = stringContext(requestContext, 'locale') === 'en-US' ? 'en-US' : 'zh-CN';
         const language = locale === 'en-US' ? 'English' : 'Simplified Chinese';
         return [
+          GOAL_PLANNING_GUIDANCE,
           'You are an internal MemoFlow planning worker. You are not a user-facing assistant.',
           'Return only the requested structured planning decision. Never claim that any Goal, Key Result, Task or Reminder has been created.',
           'You cannot persist Goals, Key Results, Tasks or Reminders. Product mutation occurs only after explicit owner approval.',

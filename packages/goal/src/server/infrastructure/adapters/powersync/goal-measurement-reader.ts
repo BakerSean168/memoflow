@@ -6,6 +6,8 @@ import { GoalPowerSyncRepository } from './goal-powersync.repository';
 export function createGoalPowerSyncMeasurementReader(tx: IElectronDatabaseTransaction) {
   const query = new GetGoalUseCase(new GoalPowerSyncRepository(tx));
   return {
+    assertGoalOwnership: async (goalId: string, identityId: string) =>
+      (await query.execute(goalId, identityId)).ok,
     getKeyResultMeasurementContext: (goalId: string, keyResultId: string, identityId: string) =>
       query.getKeyResultMeasurementContext(goalId, keyResultId, identityId),
   };

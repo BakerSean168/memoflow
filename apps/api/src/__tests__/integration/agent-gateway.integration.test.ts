@@ -128,8 +128,10 @@ describe('PAT → hosted MCP → real Goal application → PostgreSQL', () => {
         }),
       );
       expect((await client.listTools()).tools.map((t) => t.name)).toEqual([
+        'workflow_guide_get',
         'goal_get',
         'goal_search',
+        'goal_plan_validate',
       ]);
       const first = await client.callTool({
         name: 'goal_search',
@@ -269,23 +271,36 @@ it('serves all six reads through the official SDK with separate Task scopes and 
         requestInit: { headers: { authorization: `Bearer ${pa.secret}` } },
       }),
     );
-    expect((await legacy.listTools()).tools).toHaveLength(6);
-    expect(
-      await legacy.callTool({ name: 'task_plan_search', arguments: { limit: 1 } }),
-    ).toMatchObject({ structuredContent: { hasMore: true } });
-    expect((await client.listTools()).tools.map((t) => t.name)).toEqual([
+    expect((await legacy.listTools()).tools.map((tool) => tool.name)).toEqual([
+      'workflow_guide_get',
       'goal_get',
       'goal_search',
       'task_plan_get',
       'task_plan_search',
       'task_occurrence_get',
       'task_occurrence_list',
+      'goal_plan_validate',
     ]);
-    expect((await other.listTools()).tools.map((t) => t.name)).toEqual([
+    expect(
+      await legacy.callTool({ name: 'task_plan_search', arguments: { limit: 1 } }),
+    ).toMatchObject({ structuredContent: { hasMore: true } });
+    expect((await client.listTools()).tools.map((t) => t.name)).toEqual([
+      'workflow_guide_get',
+      'goal_get',
+      'goal_search',
       'task_plan_get',
       'task_plan_search',
       'task_occurrence_get',
       'task_occurrence_list',
+      'goal_plan_validate',
+    ]);
+    expect((await other.listTools()).tools.map((t) => t.name)).toEqual([
+      'workflow_guide_get',
+      'task_plan_get',
+      'task_plan_search',
+      'task_occurrence_get',
+      'task_occurrence_list',
+      'goal_plan_validate',
     ]);
     const first = await client.callTool({
       name: 'task_plan_search',
@@ -378,8 +393,10 @@ it('serves all six reads through the official SDK with separate Task scopes and 
       data: { scopes: ['goals:read'] },
     });
     expect((await client.listTools()).tools.map((t) => t.name)).toEqual([
+      'workflow_guide_get',
       'goal_get',
       'goal_search',
+      'goal_plan_validate',
     ]);
     await expect(
       client.callTool({ name: 'task_plan_get', arguments: { id: plans[0].id } }),

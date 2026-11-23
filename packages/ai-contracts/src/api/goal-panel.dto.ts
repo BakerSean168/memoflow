@@ -161,17 +161,45 @@ export const GoalPanelSubmitResultSchema = z
   .strict();
 export type GoalPanelSubmitResult = z.infer<typeof GoalPanelSubmitResultSchema>;
 
-export const NativePanelIpcRequestSchema = z
-  .object({
-    requestId: z.string().min(1),
-    identityId: z.string().min(1),
+export const GoalPanelPresentInputSchema = z.discriminatedUnion('mode', [
+  z
+    .object({
+      mode: z.literal('create'),
+      fields: GoalPanelFieldsSchema.omit({ status: true })
+        .extend({
+          name: GoalPanelFieldsSchema.shape.name.trim().min(1),
+        })
+        .strict(),
+      keyResults: z
+        .array(GoalPanelKeyResultDraftSchema.omit({ id: true, index: true }))
+        .max(50)
+        .default([]),
+    })
+    .strict(),
+  z.object({ mode: z.literal('edit'), goalId: z.string().min(1) }).strict(),
+]);
+
+/** External presentation is one request; it never invents an Agent conversation/run. */
+const NativePanelRequestBase = z.object({
+  requestId: z.string().min(1),
+  identityId: z.string().min(1),
+  // Issued by the Desktop host, never accepted from MCP tool arguments.
+  sessionBinding: z.string().min(1).optional(),
+  command: GoalPanelCommandSchema,
+});
+export const NativePanelIpcRequestSchema = z.union([
+  NativePanelRequestBase.extend({
     conversationId: z.string().min(1),
     runId: z.string().min(1),
-    // Issued by the Desktop host, never accepted from MCP tool arguments.
-    sessionBinding: z.string().min(1).optional(),
-    command: GoalPanelCommandSchema,
-  })
-  .strict();
+  }).strict(),
+  NativePanelRequestBase.extend({
+    clientId: z.string().min(1),
+    sessionBinding: z.string().min(1),
+    command: GoalPanelCommandSchema.refine((command) => command.action !== 'submit', {
+      message: 'External presentation cannot submit a native form.',
+    }),
+  }).strict(),
+]);
 export type NativePanelIpcRequest = z.infer<typeof NativePanelIpcRequestSchema>;
 
 export const NativePanelIpcResponseSchema = z

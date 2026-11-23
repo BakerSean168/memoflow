@@ -685,6 +685,8 @@ it('serves the assisted start → review → approve lifecycle through the real 
       }),
     );
     expect((await client.listTools()).tools.map((tool) => tool.name)).toEqual([
+      'workflow_guide_get',
+      'goal_plan_validate',
       'assisted_workflow_start',
       'assisted_workflow_get',
       'assisted_workflow_review',

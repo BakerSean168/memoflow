@@ -1,3 +1,4 @@
+import { GOAL_PLANNING_GUIDANCE, MEMOFLOW_WORKFLOW_INSTRUCTIONS } from '@memoflow/agent-gateway';
 import { readSelectedLocalAgentKnowledge } from './selected-knowledge';
 import { createHash, randomUUID } from 'node:crypto';
 import { createLogger } from '@memoflow/utils/logger';
@@ -202,6 +203,10 @@ export interface LocalAgentSnapshotChange {
   status: LocalAgentStatus | null;
 }
 export const MEMOFLOW_NATIVE_TOOL_ROUTING_INSTRUCTIONS =
+  GOAL_PLANNING_GUIDANCE +
+  '\n\n' +
+  MEMOFLOW_WORKFLOW_INSTRUCTIONS +
+  '\n\n' +
   'MemoFlow business tool policy: use only the MemoFlow MCP tools for MemoFlow Goals, Tasks, and Knowledge. Never use shell, filesystem, browser, or Chrome DevTools tools to inspect or operate MemoFlow. Creating a Goal always uses the right-side native form, even when the user does not mention the form: call goal_panel_open first, then use goal_panel_snapshot/patch/add_key_result/remove_key_result/focus and finish with goal_panel_submit; do not use goal_create for that flow. Use goal_create or goal_update only when the user explicitly requests a direct background Goal write without the form; if goal_create returns GOAL_PANEL_REQUIRED, continue with goal_panel_open. Say a Goal was created only after goal_panel_submit or goal_create returned its Goal id, and cite that id; never describe a Goal from shell or filesystem output. If a required MemoFlow tool is missing or access is denied, report the specific failure and stop without retrying or switching paths.';
 /** One persisted discovery observation. v1 files only contained `ready`; v2 also
  * stores explicit failures so a cold start can explain why a native Agent is not

@@ -1,4 +1,9 @@
 export * from './contracts';
+export * from './workflow-guides';
+export {
+  goalPlanToolDescriptors,
+  type GatewayGoalPlanToolName,
+} from './goal-plan-tool-descriptors';
 
 export type {
   GoalReadPort,

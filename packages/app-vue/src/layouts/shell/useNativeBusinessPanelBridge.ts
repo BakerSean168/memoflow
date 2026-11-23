@@ -137,9 +137,12 @@ export function useNativeBusinessPanelBridge(
   }
 
   async function handleCommand(request: NativePanelIpcRequest): Promise<NativePanelIpcResponse> {
-    const ownerId = request.sessionBinding
-      ? `local-agent:${JSON.stringify([request.sessionBinding, request.conversationId, request.runId])}`
-      : `local-agent:${request.conversationId}:${request.runId}`;
+    const ownerId =
+      'clientId' in request
+        ? `local-agent:external:${request.sessionBinding}`
+        : request.sessionBinding
+          ? `local-agent:${JSON.stringify([request.sessionBinding, request.conversationId, request.runId])}`
+          : `local-agent:${request.conversationId}:${request.runId}`;
     const cmd = request.command;
 
     try {
