@@ -5,7 +5,7 @@
 set -Eeuo pipefail
 umask 077
 MODE=${1:---check-only}
-[[ "$MODE" == --check-only || "$MODE" == --apply ]] || { echo 'usage: deploy.sh [--check-only|--apply]' >&2; exit 2; }
+[[ "$MODE" == --check-only || "$MODE" == --apply || "$MODE" == --resume-blocked-check || "$MODE" == --resume-blocked ]] || { echo 'usage: deploy.sh [--check-only|--apply|--resume-blocked-check|--resume-blocked]' >&2; exit 2; }
 [[ $(id -u) == 0 ]] || { echo 'must run as root' >&2; exit 2; }
 for cmd in docker jq python3 curl sha256sum gzip flock; do command -v "$cmd" >/dev/null || { echo "missing $cmd" >&2; exit 2; }; done
 RUNTIME=${MEMOFLOW_HUAWEI_RUNTIME:-/opt/memoflow/runtime}
@@ -35,9 +35,11 @@ NEXT_ENV="$RUNTIME/.candidate-images-$$.env"
 CONTROL_CONTAINER=''
 MIGRATION_STARTED=0
 BACKUP=''
+PHASE=preflight
+FAILURE_RC=none
 cleanup(){ if [[ -n "$CONTROL_CONTAINER" ]]; then docker rm -f "$CONTROL_CONTAINER" >/dev/null 2>&1 || true; fi; rm -rf "$STAGE"; rm -f "$NEXT_COMPOSE" "$NEXT_ENV"; }
-record(){ local status="$1" path="$STATE_ROOT/deploy-state"; printf 'status=%s\nrelease_tag=%s\nrelease_sha=%s\nproduction_set_digest=%s\nbackup_dir=%s\nupdated_at=%s\n' "$status" "$RELEASE_TAG" "$SOURCE_SHA" "$SET_DIGEST" "$BACKUP" "$(date -u +%FT%TZ)" > "$path.next.$$"; chmod 0600 "$path.next.$$"; mv "$path.next.$$" "$path"; }
-recover(){ local rc=$?; trap - ERR INT TERM HUP; if [[ $MIGRATION_STARTED == 1 ]]; then record BLOCKED; log 'migration boundary crossed; recorded BLOCKED, no blind database rollback'; elif [[ -n "$BACKUP" ]]; then log 'restoring previous app services before migration boundary'; compose "$ORIG_COMPOSE" "$ORIG_ENV" up -d --no-build --no-deps api web >/dev/null 2>&1 || true; record PRE_MIGRATION_FAILED; fi; cleanup; exit "$rc"; }
+record(){ local status="$1" path="$STATE_ROOT/deploy-state"; printf 'status=%s\nrelease_tag=%s\nrelease_sha=%s\nproduction_set_digest=%s\nbackup_dir=%s\nupdated_at=%s\nphase=%s\nfailure_rc=%s\n' "$status" "$RELEASE_TAG" "$SOURCE_SHA" "$SET_DIGEST" "$BACKUP" "$(date -u +%FT%TZ)" "$PHASE" "$FAILURE_RC" > "$path.next.$$"; chmod 0600 "$path.next.$$"; mv "$path.next.$$" "$path"; }
+recover(){ local rc="${1:-$?}"; trap - ERR INT TERM HUP; [[ "$rc" != 0 ]] || rc=1; FAILURE_RC="$rc"; log "HUAWEI_DEPLOY_FAILED phase=$PHASE rc=$rc"; if [[ $MIGRATION_STARTED == 1 ]]; then record BLOCKED; log 'migration boundary crossed; recorded BLOCKED, no blind database rollback'; elif [[ -n "$BACKUP" ]]; then log 'restoring previous app services before migration boundary'; compose "$ORIG_COMPOSE" "$ORIG_ENV" up -d --no-build --no-deps api web >/dev/null 2>&1 || true; record PRE_MIGRATION_FAILED; fi; cleanup; exit "$rc"; }
 trap cleanup EXIT
 log 'pulling immutable production-selected control artifact'
 docker pull "$CONTROL" >/dev/null
@@ -61,10 +63,37 @@ MANIFEST="$STAGE/production-set-v1.json"
 RELEASE_TAG=$(jq -r .releaseTag "$MANIFEST")
 VERSION=$(jq -r .version "$MANIFEST")
 [[ "$RELEASE_TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+(-nightly\.[0-9]{8}\.[0-9]+)?$ && "$VERSION" == "${RELEASE_TAG#v}" ]] || fail 'invalid published release version'
-case "$(value "$STATE_ROOT/deploy-state" status)" in
-  ''|DEPLOYED|PRE_MIGRATION_FAILED) ;;
-  *) fail 'previous deployment is non-terminal or BLOCKED; inspect backup before any retry' ;;
-esac
+STATE_STATUS=$(value "$STATE_ROOT/deploy-state" status)
+RESUME=0
+if [[ "$MODE" == --resume-blocked || "$MODE" == --resume-blocked-check ]]; then
+  [[ "$STATE_STATUS" == BLOCKED ]] || fail 'resume requires a BLOCKED deployment receipt'
+  [[ "$(value "$STATE_ROOT/deploy-state" release_tag)" == "$RELEASE_TAG" &&
+     "$(value "$STATE_ROOT/deploy-state" release_sha)" == "$SOURCE_SHA" &&
+     "$(value "$STATE_ROOT/deploy-state" production_set_digest)" == "$SET_DIGEST" ]] ||
+    fail 'BLOCKED receipt does not match the selected immutable release'
+  BACKUP=$(value "$STATE_ROOT/deploy-state" backup_dir)
+  case "$BACKUP" in "$STATE_ROOT/backups/${RELEASE_TAG}-"*) ;; *) fail 'BLOCKED backup path outside selected release backup root';; esac
+  [[ -d "$BACKUP" && -s "$BACKUP/postgres.sql.gz" && -s "$BACKUP/postgres.sql.gz.sha256" &&
+     -s "$BACKUP/retained-containers.txt" ]] || fail 'BLOCKED backup incomplete'
+  [[ "$(stat -c %u "$BACKUP")" == 0 ]] || fail 'BLOCKED backup must be root-owned'
+  gzip -t "$BACKUP/postgres.sql.gz"
+  sha256sum -c "$BACKUP/postgres.sql.gz.sha256" >/dev/null
+  for name in docker-compose.production.yml runtime-images.env release-images.env; do
+    case "$name" in
+      docker-compose.production.yml) origin="$ORIG_COMPOSE";;
+      runtime-images.env) origin="$ORIG_ENV";;
+      release-images.env) origin="$RUNTIME/release-images.env";;
+    esac
+    cmp -s "$origin" "$BACKUP/$name" || fail "production configuration changed since BLOCKED: $name"
+  done
+  RESUME=1
+  log "BLOCKED_BACKUP_VERIFIED release=$RELEASE_TAG; migration will not repeat"
+else
+  case "$STATE_STATUS" in
+    ''|DEPLOYED|PRE_MIGRATION_FAILED) ;;
+    *) fail 'previous deployment is non-terminal or BLOCKED; inspect backup before any retry' ;;
+  esac
+fi
 # First adoption is anchored to the exact inspected Huawei baseline. Later
 # deployments use the last successful release receipt. Older Published releases
 # remain available for a separately reviewed data/schema recovery, not this
@@ -113,7 +142,26 @@ for key in API WEB MIGRATOR; do
 done
 # Refuse stale Compose, unexpected containers or substituted local image tags.
 for key in "${SVC[@]}"; do
-  id=$(container "$key"); [[ -n "$id" ]] || fail "missing $key service"
+  id=$(container "$key")
+  if [[ "$RESUME" == 1 && "$key" == api ]]; then
+    [[ -n "$id" && $(health api) == healthy ]] || fail 'selected API must be healthy before resume'
+    [[ $(docker inspect "$id" --format '{{.Config.Image}}') == "$API_REF" ]] || fail 'resume API differs from selected release'
+    continue
+  fi
+  if [[ "$RESUME" == 1 && "$key" == web ]]; then
+    if [[ -n "$id" ]]; then
+      [[ $(health web) == healthy ]] || fail 'existing Web must be healthy before resume'
+      actual_ref=$(docker inspect "$id" --format '{{.Config.Image}}')
+      previous_web_ref=$(value "$RUNTIME/release-images.env" WEB_IMAGE)
+      if [[ "$actual_ref" == "$previous_web_ref" ]]; then
+        [[ $(docker image inspect "$actual_ref" --format '{{.Id}}') == $(docker image inspect "$(value "$ORIG_ENV" WEB_IMAGE)" --format '{{.Id}}') ]] || fail 'existing Web differs from recorded previous release'
+      else
+        [[ "$actual_ref" == "$WEB_REF" ]] || fail 'existing Web is neither recorded nor selected release'
+      fi
+    fi
+    continue
+  fi
+  [[ -n "$id" ]] || fail "missing $key service"
   case "$key" in caddy) [[ $(health "$key") == running || $(health "$key") == healthy ]] || fail 'Caddy not running';; *) [[ $(health "$key") == healthy ]] || fail "$key not healthy";; esac
   old_ref=$(value "$ORIG_ENV" "${key^^}_IMAGE")
   actual_ref=$(docker inspect "$id" --format '{{.Config.Image}}')
@@ -125,6 +173,9 @@ for key in "${SVC[@]}"; do
 done
 API_ID=$(container api); WEB_ID=$(container web)
 DATA_IDS="$(for key in postgres redis powersync caddy; do printf '%s=%s\n' "$key" "$(container "$key")"; done)"
+if [[ "$RESUME" == 1 ]]; then
+  [[ $(cat "$BACKUP/retained-containers.txt") == "$DATA_IDS" ]] || fail 'retained infrastructure identities changed since BLOCKED'
+fi
 # Candidate lives beside the production YAML so relative mounts resolve to the
 # existing PowerSync config and Caddyfile; no alternate networks or data paths.
 cp "$STAGE/docker-compose.production.yml" "$NEXT_COMPOSE"
@@ -143,30 +194,43 @@ compose "$ORIG_COMPOSE" "$ORIG_ENV" config --format json > "$STAGE/current.json"
 compose "$NEXT_COMPOSE" "$NEXT_ENV" config --format json > "$STAGE/candidate.json"
 python3 "$STAGE/huawei/verify-candidate.py" "$STAGE/current.json" "$STAGE/candidate.json" "$API_REF" "$WEB_REF" "$MIGRATOR_REF" "$VERSION"
 log "HUAWEI_PREFLIGHT=PASS release=$RELEASE_TAG source=$SOURCE_SHA set=$SET_DIGEST"
-if [[ "$MODE" == --check-only ]]; then exit 0; fi
-if [[ "$(value "$STATE_ROOT/deploy-state" release_sha)" == "$SOURCE_SHA" && $(docker inspect "$API_ID" --format '{{.Config.Image}}') == "$API_REF" && $(docker inspect "$WEB_ID" --format '{{.Config.Image}}') == "$WEB_REF" ]]; then
+if [[ "$MODE" == --check-only || "$MODE" == --resume-blocked-check ]]; then exit 0; fi
+if [[ "$MODE" == --apply && "$(value "$STATE_ROOT/deploy-state" release_sha)" == "$SOURCE_SHA" && $(docker inspect "$API_ID" --format '{{.Config.Image}}') == "$API_REF" && $(docker inspect "$WEB_ID" --format '{{.Config.Image}}') == "$WEB_REF" ]]; then
   log "HUAWEI_DEPLOY=NO_CHANGE release=$RELEASE_TAG"
   exit 0
 fi
-trap recover ERR INT TERM HUP
-BACKUP="$STATE_ROOT/backups/${RELEASE_TAG}-$(date -u +%Y%m%dT%H%M%SZ)"
-mkdir -m 0700 "$BACKUP"
-cp -p "$ORIG_COMPOSE" "$ORIG_ENV" "$RUNTIME/release-images.env" "$SECRET" "$BACKUP/"
-printf '%s\n' "$DATA_IDS" > "$BACKUP/retained-containers.txt"
-# Mandatory crash-consistent logical database snapshot before any application
-# process is stopped; the archive stays root-only on the production host.
-docker exec "$(container postgres)" sh -lc 'pg_dump -U "$POSTGRES_USER" "$POSTGRES_DB"' | gzip -9 > "$BACKUP/postgres.sql.gz"
-gzip -t "$BACKUP/postgres.sql.gz"
-[[ -s "$BACKUP/postgres.sql.gz" ]] || fail 'empty database backup'
-sha256sum "$BACKUP/postgres.sql.gz" > "$BACKUP/postgres.sql.gz.sha256"
-record APPLYING
-log "backup verified: $BACKUP"
-compose "$ORIG_COMPOSE" "$ORIG_ENV" stop web api >/dev/null
-MIGRATION_STARTED=1
-log 'MIGRATOR_START'
-compose "$NEXT_COMPOSE" "$NEXT_ENV" run --rm --no-deps -T migrator >/dev/null
-log 'MIGRATOR_PASS'
+trap 'recover "$?"' ERR
+trap 'recover 130' INT
+trap 'recover 143' TERM
+trap 'recover 129' HUP
+if [[ "$RESUME" == 1 ]]; then
+  MIGRATION_STARTED=1
+  PHASE=resume-after-migration
+  log "HUAWEI_RESUME_BLOCKED=START release=$RELEASE_TAG backup=$BACKUP; no migrator execution"
+else
+  PHASE=backup
+  BACKUP="$STATE_ROOT/backups/${RELEASE_TAG}-$(date -u +%Y%m%dT%H%M%SZ)"
+  mkdir -m 0700 "$BACKUP"
+  cp -p "$ORIG_COMPOSE" "$ORIG_ENV" "$RUNTIME/release-images.env" "$SECRET" "$BACKUP/"
+  printf '%s\n' "$DATA_IDS" > "$BACKUP/retained-containers.txt"
+  # Mandatory logical database snapshot before any application process is stopped.
+  docker exec "$(container postgres)" sh -lc 'pg_dump -U "$POSTGRES_USER" "$POSTGRES_DB"' | gzip -9 > "$BACKUP/postgres.sql.gz"
+  gzip -t "$BACKUP/postgres.sql.gz"
+  [[ -s "$BACKUP/postgres.sql.gz" ]] || fail 'empty database backup'
+  sha256sum "$BACKUP/postgres.sql.gz" > "$BACKUP/postgres.sql.gz.sha256"
+  record APPLYING
+  log "backup verified: $BACKUP"
+  PHASE=stop-app
+  compose "$ORIG_COMPOSE" "$ORIG_ENV" stop web api >/dev/null
+  MIGRATION_STARTED=1
+  PHASE=migrator
+  log 'MIGRATOR_START'
+  compose "$NEXT_COMPOSE" "$NEXT_ENV" run --rm --no-deps -T migrator >/dev/null
+  log 'MIGRATOR_PASS'
+fi
 for service in api web; do
+  PHASE="rollout-$service"
+  log "HUAWEI_ROLLOUT_START service=$service"
   compose "$NEXT_COMPOSE" "$NEXT_ENV" up -d --no-build --no-deps "$service" >/dev/null
   until [[ "$(health "$service")" == healthy ]]; do
     (( ${TIMEOUT:-0} < 120 )) || fail "$service health timeout"
@@ -176,13 +240,16 @@ for service in api web; do
   TIMEOUT=0
   expected_ref="$API_REF"; [[ "$service" != web ]] || expected_ref="$WEB_REF"
   [[ $(docker inspect "$(container "$service")" --format '{{.Config.Image}}') == "$expected_ref" ]] || fail "$service wrong image after rollout"
+  log "HUAWEI_ROLLOUT_HEALTHY service=$service"
 done
+PHASE=postflight
 [[ "$(for key in postgres redis powersync caddy; do printf '%s=%s\n' "$key" "$(container "$key")"; done)" == "$DATA_IDS" ]] || fail 'retained infrastructure container unexpectedly changed'
 for key in postgres redis powersync; do [[ $(health "$key") == healthy ]] || fail "$key lost health"; done
 for url in 'https://memoflow.bakersean.top/' 'https://memoflowapi.bakersean.top/healthz' 'https://memoflowsync.bakersean.top/probes/liveness'; do
   host=${url#https://}; host=${host%%/*}
   curl -fsS --connect-timeout 5 --max-time 20 --resolve "$host:443:127.0.0.1" "$url" >/dev/null || fail "HTTPS failed for $host"
 done
+PHASE=promote
 install -m 0644 "$NEXT_COMPOSE" "$ORIG_COMPOSE.promote.$$"
 install -m 0600 "$NEXT_ENV" "$ORIG_ENV.promote.$$"
 mv -f "$ORIG_COMPOSE.promote.$$" "$ORIG_COMPOSE"
@@ -196,6 +263,7 @@ next_file=p.with_name(p.name+'.next-release')
 next_file.write_text('\n'.join(k+'='+subs[k] if k in subs else line for line in lines for k in [line.split('=',1)[0]])+'\n')
 next_file.replace(p)
 PY
+PHASE=complete
 record DEPLOYED
 trap - ERR INT TERM HUP
 log "HUAWEI_DEPLOY=PASS release=$RELEASE_TAG source=$SOURCE_SHA set=$SET_DIGEST"
