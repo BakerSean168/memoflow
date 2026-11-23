@@ -274,13 +274,15 @@ describe('Local Agent Domain Expansion (Phase 2, #995)', () => {
       for (const name of [
         'routine_create',
         'routine_update',
-        'routine_delete',
         'routine_pause',
         'routine_override',
       ]) {
         expect(limitedNames).not.toContain(name);
         expect(privilegedNames).toContain(name);
       }
+      // No synchronous approval channel exists for a persistent bearer, so
+      // permanent deletion is not an available external tool even with scope.
+      expect(privilegedNames).not.toContain('routine_delete');
       const create = await callMcp(
         { url: allScopes.endpoint.url, token: allScopes.token },
         'tools/call',
@@ -363,11 +365,10 @@ describe('Local Agent Domain Expansion (Phase 2, #995)', () => {
           },
         },
       );
-      expect(deleted.result?.isError, JSON.stringify(deleted.result)).toBeFalsy();
-      expect(parsePayload(deleted).result.routineId).toBe(routineId);
+      expect(Boolean(deleted.error || deleted.result?.isError)).toBe(true);
       expect(
         await db.getOptional('SELECT id FROM routine_definitions WHERE id = ?', [routineId]),
-      ).toBeNull();
+      ).not.toBeNull();
     } finally {
       await bridge.dispose();
     }

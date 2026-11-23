@@ -523,13 +523,18 @@ export function createDesktopLocalAgentTools(
             mutationAuthority('routines:write'),
           );
         },
-        routineDelete(input, cx) {
-          return routineWrites.delete(
-            GatewayRoutineDeleteSchema.parse(input),
-            cx,
-            mutationAuthority('routines:write'),
-          );
-        },
+        // Permanent deletion always needs a fresh user approval. External
+        // persistent-token clients have no interactive approval channel, so
+        // do not advertise an operation they can never safely complete.
+        routineDelete:
+          context.origin === 'client'
+            ? undefined
+            : (input, cx) =>
+                routineWrites.delete(
+                  GatewayRoutineDeleteSchema.parse(input),
+                  cx,
+                  mutationAuthority('routines:write'),
+                ),
         routinePause(input, cx) {
           return routineWrites.pause(
             GatewayRoutinePauseSchema.parse(input),

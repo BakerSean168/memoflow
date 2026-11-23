@@ -76,9 +76,10 @@ export async function authorize(
         ? 'system'
         : 'rule';
   if (storageUnavailable && result.operation?.action !== 'read') decidedBy = 'system';
-  // The scope ceiling already admitted this call; a scoped PAT minted by the
-  // user supplies the missing business grant for its own writes.
-  if (decision === 'ask' && input.preAuthorizedWrite) {
+  // A scoped credential pre-authorizes ordinary writes, but is never a fresh
+  // human confirmation for irreversible deletion, bulk changes or sending.
+  // Without an interactive approval channel these high-risk calls fail closed.
+  if (decision === 'ask' && input.preAuthorizedWrite && !result.operation?.risks.length) {
     decision = 'allow';
     decidedBy = 'preset';
   }
