@@ -362,7 +362,7 @@ export const LocalMcpClientSchema = z
   .object({
     id,
     name: z.string().trim().min(1).max(80),
-    writeScopes: z.array(LocalAgentWriteScopeSchema).max(2),
+    writeScopes: z.array(LocalAgentWriteScopeSchema).max(3),
     tokenPrefix: z.string().min(8).max(16),
     createdAt: z.number().int().nonnegative(),
     revokedAt: z.number().int().nonnegative().nullable(),
@@ -373,7 +373,7 @@ export type LocalMcpClient = z.infer<typeof LocalMcpClientSchema>;
 export const LocalMcpClientCreateSchema = z
   .object({
     name: z.string().trim().min(1).max(80),
-    writeScopes: z.array(LocalAgentWriteScopeSchema).max(2),
+    writeScopes: z.array(LocalAgentWriteScopeSchema).max(3),
   })
   .strict();
 export type LocalMcpClientCreate = z.infer<typeof LocalMcpClientCreateSchema>;

@@ -68,7 +68,13 @@ function mountSection(endpointError?: string) {
   const wrapper = mount(ExternalMcpClients, {
     attachTo: document.body,
     global: {
-      plugins: [createI18n({ legacy: false, locale: 'en-US', messages: productionLocaleMessages })],
+      plugins: [
+        createI18n({
+          legacy: false,
+          locale: 'en-US',
+          messages: productionLocaleMessages,
+        }),
+      ],
       provide: { [settingUiHost.AI_LOCAL_AGENT_KEY as symbol]: port },
     },
   });
@@ -128,7 +134,10 @@ describe('ExternalMcpClients', () => {
   it('creates through the dialog, shows the one-time token there and pins the new client', async () => {
     const { port } = await openCreatedCredential();
 
-    expect(port.createMcpClient).toHaveBeenCalledWith({ name: 'Codex CLI', writeScopes: [] });
+    expect(port.createMcpClient).toHaveBeenCalledWith({
+      name: 'Codex CLI',
+      writeScopes: [],
+    });
     expect(element('ai-external-mcp-create-form')).toBeNull();
     const credential = element('ai-external-mcp-credential')!;
     expect(credential.textContent).toContain(createdCredential.token);
@@ -144,6 +153,29 @@ describe('ExternalMcpClients', () => {
     expect(element('ai-external-mcp-create-dialog')).toBeNull();
     expect(element('ai-external-mcp-credential')).toBeNull();
     expect(document.body.textContent).not.toContain(createdCredential.token);
+  });
+
+  it('offers Routine write scope explicitly when creating a local MCP client', async () => {
+    const { port } = mountSection();
+    await settle();
+    element('ai-external-mcp-create-open')!.click();
+    await settle();
+    const routine = element('ai-external-mcp-scope-routines:write');
+    expect(routine).not.toBeNull();
+    routine!.click();
+    await settle();
+    const name = element('ai-external-mcp-name') as HTMLInputElement;
+    name.value = 'Routine Agent';
+    name.dispatchEvent(new Event('input', { bubbles: true }));
+    await settle();
+    element('ai-external-mcp-create-form')!.dispatchEvent(
+      new Event('submit', { bubbles: true, cancelable: true }),
+    );
+    await settle();
+    expect(port.createMcpClient).toHaveBeenCalledWith({
+      name: 'Routine Agent',
+      writeScopes: ['routines:write'],
+    });
   });
 
   it('scopes copy feedback to one control and clears it after two seconds', async () => {

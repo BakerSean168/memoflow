@@ -130,7 +130,11 @@ export function createRoutinePrismaAgentMutations(
             });
           return {
             result: {
-              routine: { id: routine.routineId, name: routine.name, version: routine.version },
+              routine: {
+                id: routine.routineId,
+                name: routine.name,
+                version: routine.version,
+              },
               scheduledFor: Number(scheduledFor),
             },
           };
@@ -178,7 +182,11 @@ export function createRoutinePrismaAgentMutations(
           });
           return {
             result: {
-              routine: { id: routine.routineId, name: routine.name, version: routine.version },
+              routine: {
+                id: routine.routineId,
+                name: routine.name,
+                version: routine.version,
+              },
             },
           };
         },
@@ -317,7 +325,15 @@ export class RoutineAgentMutationError extends Error {
 
 /** Owner stores see the enclosing write transaction as the database seam. */
 function asTransactionDatabase(tx: IElectronDatabaseTransaction): IElectronDatabase {
-  return { ...tx, writeTransaction: (work) => work(tx) };
+  // PowerSync transaction operations live on a prototype, so spreading tx
+  // silently drops get/getOptional/getAll. Forward each method explicitly.
+  return {
+    execute: (sql, parameters) => tx.execute(sql, parameters),
+    getAll: (sql, parameters) => tx.getAll(sql, parameters),
+    getOptional: (sql, parameters) => tx.getOptional(sql, parameters),
+    get: (sql, parameters) => tx.get(sql, parameters),
+    writeTransaction: (work) => work(tx),
+  };
 }
 
 /** Desktop owner write: facts and exact result commit together in SQLite; triggers ps_crud sync queue. */
@@ -390,7 +406,10 @@ export function createRoutinePowerSyncAgentMutations(
 
     const receipt = await db.writeTransaction<TReceipt & { replayed?: boolean }>(async (tx) => {
       await authority.authorize(tx);
-      const row = await tx.getOptional<{ input_digest: string; result_json: string }>(
+      const row = await tx.getOptional<{
+        input_digest: string;
+        result_json: string;
+      }>(
         'SELECT input_digest, result_json FROM routine_agent_mutation_receipts WHERE id = ? AND identity_id = ?',
         [receiptId, cx.identityId],
       );
@@ -486,7 +505,11 @@ export function createRoutinePowerSyncAgentMutations(
           return {
             receiptId,
             result: {
-              routine: { id: routine.routineId, name: routine.name, version: routine.version },
+              routine: {
+                id: routine.routineId,
+                name: routine.name,
+                version: routine.version,
+              },
               scheduledFor: Number(scheduledFor),
             },
           };
@@ -552,7 +575,11 @@ export function createRoutinePowerSyncAgentMutations(
           return {
             receiptId,
             result: {
-              routine: { id: routine.routineId, name: routine.name, version: routine.version },
+              routine: {
+                id: routine.routineId,
+                name: routine.name,
+                version: routine.version,
+              },
             },
           };
         },

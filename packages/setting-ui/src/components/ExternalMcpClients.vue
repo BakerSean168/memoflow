@@ -36,6 +36,10 @@ let copyTimer: ReturnType<typeof setTimeout> | null = null;
 const scopes = [
   { value: 'tasks:write' as const, label: t('setting.ai.localMcp.scopeTasks') },
   { value: 'goals:write' as const, label: t('setting.ai.localMcp.scopeGoals') },
+  {
+    value: 'routines:write' as const,
+    label: t('setting.ai.localMcp.scopeRoutines'),
+  },
 ];
 const active = computed(() => clients.value.filter((client) => client.revokedAt === null));
 const canCreate = computed(
@@ -183,7 +187,9 @@ function scopeLabel(client: LocalMcpClient) {
       t(
         value === 'tasks:write'
           ? 'setting.ai.localMcp.scopeTasks'
-          : 'setting.ai.localMcp.scopeGoals',
+          : value === 'goals:write'
+            ? 'setting.ai.localMcp.scopeGoals'
+            : 'setting.ai.localMcp.scopeRoutines',
       ),
     )
     .join(' · ');
@@ -226,7 +232,9 @@ onBeforeUnmount(() => {
   >
     <header class="flex items-start justify-between gap-3">
       <div class="space-y-1">
-        <h3 class="text-[13px] font-semibold">{{ t('setting.ai.localMcp.title') }}</h3>
+        <h3 class="text-[13px] font-semibold">
+          {{ t('setting.ai.localMcp.title') }}
+        </h3>
         <p class="text-[11px] leading-4 text-muted-foreground">
           {{ t('setting.ai.localMcp.description') }}
         </p>
@@ -332,7 +340,9 @@ onBeforeUnmount(() => {
           class="space-y-2 rounded-lg border border-[hsl(var(--border-subtle))] bg-muted/20 p-3"
           data-testid="ai-external-mcp-credential"
         >
-          <p class="text-[11px] font-medium">{{ t('setting.ai.localMcp.tokenOnce') }}</p>
+          <p class="text-[11px] font-medium">
+            {{ t('setting.ai.localMcp.tokenOnce') }}
+          </p>
           <div class="flex items-center gap-2">
             <code class="min-w-0 flex-1 break-all rounded bg-muted px-2 py-1 text-[11px]">{{
               credential.token
@@ -352,7 +362,9 @@ onBeforeUnmount(() => {
             {{ t('setting.ai.localMcp.tokenWarning') }}
           </p>
           <div class="space-y-1">
-            <p class="text-[11px] font-medium">{{ t('setting.ai.localMcp.config') }}</p>
+            <p class="text-[11px] font-medium">
+              {{ t('setting.ai.localMcp.config') }}
+            </p>
             <pre
               class="max-h-40 overflow-auto whitespace-pre-wrap break-all rounded bg-muted px-2 py-1 text-[11px]"
               data-testid="ai-external-mcp-snippet"
@@ -412,7 +424,8 @@ onBeforeUnmount(() => {
           <p class="truncate text-[12px] font-medium">{{ client.name }}</p>
           <p class="truncate text-[11px] text-muted-foreground">
             {{ scopeLabel(client) }} · {{ t('setting.ai.localMcp.createdAt') }}
-            {{ formatDate(client.createdAt) }} · <code>{{ client.tokenPrefix }}…</code>
+            {{ formatDate(client.createdAt) }} ·
+            <code>{{ client.tokenPrefix }}…</code>
           </p>
         </div>
         <Button
@@ -428,7 +441,9 @@ onBeforeUnmount(() => {
     </ul>
 
     <div class="space-y-2 border-t border-[hsl(var(--border-subtle))] pt-3">
-      <h4 class="text-[12px] font-semibold">{{ t('setting.ai.localMcp.auditTitle') }}</h4>
+      <h4 class="text-[12px] font-semibold">
+        {{ t('setting.ai.localMcp.auditTitle') }}
+      </h4>
       <p v-if="!audit.length" class="text-[11px] text-muted-foreground">
         {{ t('setting.ai.localMcp.auditEmpty') }}
       </p>
