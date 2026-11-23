@@ -22,7 +22,10 @@ const scheduleProjection: Extract<CalendarEventProjection, { sourceType: 'schedu
   occupancy: 'blocking',
   displayMetadata: { semantic: 'calendar-entry' },
   editableCapabilities: { move: true, resize: true },
-  ownerCommandTarget: { ownerType: 'schedule.calendar-entry', ownerId: 'calendar-entry-1' },
+  ownerCommandTarget: {
+    ownerType: 'schedule.calendar-entry',
+    ownerId: 'calendar-entry-1',
+  },
   revision: 3,
 };
 
@@ -49,7 +52,10 @@ describe('PlannerCalendar production renderer (PLAN-4304)', () => {
       props: {
         projections: [scheduleProjection],
         ownerCommands: {
-          route: vi.fn(async () => ({ status: 'unsupported' as const, message: 'unused' })),
+          route: vi.fn(async () => ({
+            status: 'unsupported' as const,
+            message: 'unused',
+          })),
         },
         view: 'week',
         initialDate: Date.parse('2026-08-27T12:00:00.000Z'),
@@ -80,13 +86,64 @@ describe('PlannerCalendar production renderer (PLAN-4304)', () => {
     wrapper.unmount();
   });
 
+  it('keeps a late-night Routine marker in its own day without a phantom next-day 00:00 event', () => {
+    const profile = createDefaultUserPreferenceProfile();
+    setProductTimePreferences({
+      ...profile,
+      regional: { ...profile.regional, timeZone: 'Asia/Shanghai' },
+    });
+    const bedtime = {
+      identityId: 'identity-1',
+      sourceType: 'routine' as const,
+      sourceId: 'routine:bedtime:oc:1795449000000',
+      title: '睡前准备',
+      start: asInstant(Date.parse('2026-11-23T15:50:00.000Z')),
+      end: null,
+      allDay: false as const,
+      occupancy: 'marker' as const,
+      displayMetadata: { semantic: 'routine-wall-clock' as const },
+      editableCapabilities: { move: false, resize: false },
+      ownerCommandTarget: {
+        ownerType: 'routine.routine' as const,
+        ownerId: 'bedtime',
+      },
+      revision: 1,
+    };
+    const wrapper = mount(PlannerCalendar, {
+      props: {
+        projections: [bedtime],
+        ownerCommands: {
+          route: vi.fn(async () => ({
+            status: 'unsupported' as const,
+            message: 'unused',
+          })),
+        },
+        view: 'week',
+        initialDate: Date.parse('2026-11-23T12:00:00.000Z'),
+      },
+    });
+    // FullCalendar uses an exclusive end. Exactly midnight is on the boundary,
+    // so no second event block may be placed at 00:00 on November 24.
+    expect(wrapper.getComponent(FullCalendar).props('options').events).toEqual([
+      expect.objectContaining({
+        start: bedtime.start,
+        end: Date.parse('2026-11-23T16:00:00.000Z'),
+        allDay: false,
+      }),
+    ]);
+    wrapper.unmount();
+  });
+
   it('emits one semantic range even when projection updates make FullCalendar refresh its options', async () => {
     const wrapper = mount(PlannerCalendar, {
       attachTo: document.body,
       props: {
         projections: [],
         ownerCommands: {
-          route: vi.fn(async () => ({ status: 'unsupported' as const, message: 'unused' })),
+          route: vi.fn(async () => ({
+            status: 'unsupported' as const,
+            message: 'unused',
+          })),
         },
         view: 'week',
         initialDate: Date.parse('2026-08-27T12:00:00.000Z'),
@@ -109,7 +166,10 @@ describe('PlannerCalendar production renderer (PLAN-4304)', () => {
       props: {
         projections: [],
         ownerCommands: {
-          route: vi.fn(async () => ({ status: 'unsupported' as const, message: 'unused' })),
+          route: vi.fn(async () => ({
+            status: 'unsupported' as const,
+            message: 'unused',
+          })),
         },
         view: 'week',
         initialDate: Date.parse('2026-08-27T12:00:00.000Z'),
@@ -138,7 +198,11 @@ describe('PlannerCalendar production renderer (PLAN-4304)', () => {
     const profile = createDefaultUserPreferenceProfile();
     setProductTimePreferences({
       ...profile,
-      regional: { ...profile.regional, timeZone: 'America/New_York', weekStartsOn: 0 },
+      regional: {
+        ...profile.regional,
+        timeZone: 'America/New_York',
+        weekStartsOn: 0,
+      },
     });
 
     const wrapper = mount(PlannerCalendar, {
@@ -146,7 +210,10 @@ describe('PlannerCalendar production renderer (PLAN-4304)', () => {
       props: {
         projections: [],
         ownerCommands: {
-          route: vi.fn(async () => ({ status: 'unsupported' as const, message: 'unused' })),
+          route: vi.fn(async () => ({
+            status: 'unsupported' as const,
+            message: 'unused',
+          })),
         },
         view: 'day',
         initialDate: Date.parse('2026-03-08T16:00:00.000Z'),
@@ -154,7 +221,10 @@ describe('PlannerCalendar production renderer (PLAN-4304)', () => {
     });
 
     await vi.waitFor(() => expect(wrapper.emitted('range-change')?.length).toBeGreaterThan(0));
-    const range = wrapper.emitted('range-change')?.at(-1)?.[0] as { start: number; end: number };
+    const range = wrapper.emitted('range-change')?.at(-1)?.[0] as {
+      start: number;
+      end: number;
+    };
     expect(range.start).toBe(Date.parse('2026-03-08T05:00:00.000Z'));
     expect(range.end).toBe(Date.parse('2026-03-09T03:59:59.999Z'));
     wrapper.unmount();
@@ -167,7 +237,10 @@ describe('PlannerCalendar production renderer (PLAN-4304)', () => {
         projections: [scheduleProjection],
         conflicts: [scheduleTaskConflict],
         ownerCommands: {
-          route: vi.fn(async () => ({ status: 'unsupported' as const, message: 'unused' })),
+          route: vi.fn(async () => ({
+            status: 'unsupported' as const,
+            message: 'unused',
+          })),
         },
         view: 'week',
         initialDate: Date.parse('2026-08-27T12:00:00.000Z'),
@@ -202,7 +275,10 @@ describe('PlannerCalendar production renderer (PLAN-4304)', () => {
       props: {
         projections: [],
         ownerCommands: {
-          route: vi.fn(async () => ({ status: 'unsupported' as const, message: 'unused' })),
+          route: vi.fn(async () => ({
+            status: 'unsupported' as const,
+            message: 'unused',
+          })),
         },
         view: 'week',
         loading: true,
@@ -224,7 +300,11 @@ describe('PlannerCalendar production renderer (PLAN-4304)', () => {
       ownerType: 'schedule.calendar-entry',
     });
     const wrapper = mount(PlannerCalendar, {
-      props: { projections: [scheduleProjection], ownerCommands: { route }, view: 'week' },
+      props: {
+        projections: [scheduleProjection],
+        ownerCommands: { route },
+        view: 'week',
+      },
     });
     const options = wrapper.getComponent(FullCalendar).props('options');
     const info = {

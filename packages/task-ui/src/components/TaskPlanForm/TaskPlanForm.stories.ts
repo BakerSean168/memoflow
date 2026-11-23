@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/vue3-vite';
-import { expect, userEvent, within } from 'storybook/test';
+import { expect, userEvent, waitFor, within } from 'storybook/test';
 import { provide, ref, toRaw } from 'vue';
 import { LABEL_SERVICE_KEY } from '@task-ui-test-host/di/keys';
 import type { ILabelService } from '@task-ui-test-host/di/types';
@@ -49,11 +49,12 @@ export const Default: Story = {
     await userEvent.type(title, 'Updated practice');
     await expect(title).toHaveValue('Updated practice');
     await userEvent.click(canvas.getByTestId('task-schedule-chip'));
-    await expect(
-      await within(canvasElement.ownerDocument.body).findByTestId('task-schedule-popover'),
-    ).toBeVisible();
+    const popover = await within(canvasElement.ownerDocument.body).findByTestId(
+      'task-schedule-popover',
+    );
+    await waitFor(() => expect(popover).toBeVisible());
     await userEvent.keyboard('{Escape}');
-    await expect(canvas.getByTestId('task-schedule-chip')).toHaveFocus();
+    await waitFor(() => expect(canvas.getByTestId('task-schedule-chip')).toHaveFocus());
   },
 };
 

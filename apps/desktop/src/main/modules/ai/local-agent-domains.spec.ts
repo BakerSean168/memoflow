@@ -4,10 +4,15 @@ import { Worker } from 'node:worker_threads';
 import { PowerSyncDatabase } from '@powersync/node';
 import { PowerSyncAppSchema } from '@memoflow/powersync-schema';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
-import { LocalAgentRepository, PermissionLocalRepository } from '@memoflow/ai';
+import {
+  LocalAgentRepository,
+  LocalMcpClientRepository,
+  PermissionLocalRepository,
+} from '@memoflow/ai';
 import { createTimeContext } from '@memoflow/time';
 import type { IElectronDatabase } from '@memoflow/desktop-contracts';
 import { createDesktopLocalAgentTools } from './local-agent-tools';
+import { GatewayRoutineUpdateSchema } from '@memoflow/agent-gateway';
 
 const identityId = 'IdentityId_00000000-0000-4000-8000-000000000001';
 // routine_create rejects a WallClock trigger without a future occurrence, so a
@@ -118,6 +123,10 @@ describe('Local Agent Domain Expansion (Phase 2, #995)', () => {
       };
       const toolNames = tools.result.tools.map((t) => t.name);
       expect(toolNames).toContain('routine_create');
+      expect(toolNames).toContain('routine_update');
+      expect(toolNames).toContain('routine_delete');
+      expect(toolNames).toContain('routine_pause');
+      expect(toolNames).toContain('routine_override');
       expect(toolNames).toContain('routine_get');
       expect(toolNames).toContain('routine_list');
       expect(toolNames).toContain('routine_upcoming');
@@ -147,18 +156,21 @@ describe('Local Agent Domain Expansion (Phase 2, #995)', () => {
       expect(routineId).toBeDefined();
 
       // 4. Verify insertion in local routine_definitions table
-      const routineRow = await db.getOptional<{ id: string; name: string; identity_id: string }>(
-        'SELECT id, name, identity_id FROM routine_definitions WHERE id = ?',
-        [routineId],
-      );
+      const routineRow = await db.getOptional<{
+        id: string;
+        name: string;
+        identity_id: string;
+      }>('SELECT id, name, identity_id FROM routine_definitions WHERE id = ?', [routineId]);
       expect(routineRow).not.toBeNull();
       expect(routineRow?.name).toBe('Morning Stretch');
       expect(routineRow?.identity_id).toBe(identityId);
 
       // 5. Verify insertion in PowerSync sync queue (ps_crud)
-      const crudRows = await db.getAll<{ id: string; tx_id: number; data: string }>(
-        'SELECT id, tx_id, data FROM ps_crud ORDER BY id ASC',
-      );
+      const crudRows = await db.getAll<{
+        id: string;
+        tx_id: number;
+        data: string;
+      }>('SELECT id, tx_id, data FROM ps_crud ORDER BY id ASC');
       expect(crudRows.length).toBeGreaterThan(0);
       const routineCrud = crudRows.find((row) => {
         try {
@@ -171,10 +183,12 @@ describe('Local Agent Domain Expansion (Phase 2, #995)', () => {
       expect(routineCrud).toBeDefined();
 
       // 6. Verify local mutation receipt is stored locally
-      const receiptRows = await db.getAll<{ id: string; idempotency_key: string }>(
-        'SELECT id, idempotency_key FROM routine_agent_mutation_receipts WHERE identity_id = ?',
-        [identityId],
-      );
+      const receiptRows = await db.getAll<{
+        id: string;
+        idempotency_key: string;
+      }>('SELECT id, idempotency_key FROM routine_agent_mutation_receipts WHERE identity_id = ?', [
+        identityId,
+      ]);
       expect(receiptRows).toHaveLength(1);
       expect(receiptRows[0].idempotency_key).toBe('idem-routine-smoke-1');
 
@@ -213,6 +227,148 @@ describe('Local Agent Domain Expansion (Phase 2, #995)', () => {
       };
       expect(conflictCall.result.isError).toBe(true);
       expect(conflictCall.result.content[0].text).toBe('IDEMPOTENCY_CONFLICT');
+    } finally {
+      await bridge.dispose();
+    }
+  });
+
+  it('external MCP clients only discover Routine writes after a separately granted routines:write scope', async () => {
+    const clients = new LocalMcpClientRepository(db);
+    const bridge = createDesktopLocalAgentTools(
+      db,
+      store,
+      () => true,
+      {
+        getUserTimeContext: async () => createTimeContext({ timeZone: 'UTC', weekStartsOn: 1 }),
+      },
+      undefined,
+      undefined,
+      { clients },
+    );
+    try {
+      await new PermissionLocalRepository(db).saveSettings(identityId, {
+        preset: 'full_auto',
+        agentPresets: {},
+        revision: 2,
+      });
+      const limited = await bridge.createMcpClient(identityId, {
+        name: 'Limited Reader',
+        writeScopes: ['goals:write', 'tasks:write'],
+      });
+      const allScopes = await bridge.createMcpClient(identityId, {
+        name: 'Routine Operator',
+        writeScopes: ['goals:write', 'tasks:write', 'routines:write'],
+      });
+      const limitedList = await callMcp(
+        { url: limited.endpoint.url, token: limited.token },
+        'tools/list',
+      );
+      const privilegedList = await callMcp(
+        { url: allScopes.endpoint.url, token: allScopes.token },
+        'tools/list',
+      );
+      const limitedNames = limitedList.result.tools.map((tool: { name: string }) => tool.name);
+      const privilegedNames = privilegedList.result.tools.map(
+        (tool: { name: string }) => tool.name,
+      );
+      for (const name of [
+        'routine_create',
+        'routine_update',
+        'routine_pause',
+        'routine_override',
+      ]) {
+        expect(limitedNames).not.toContain(name);
+        expect(privilegedNames).toContain(name);
+      }
+      // No synchronous approval channel exists for a persistent bearer, so
+      // permanent deletion is not an available external tool even with scope.
+      expect(privilegedNames).not.toContain('routine_delete');
+      const create = await callMcp(
+        { url: allScopes.endpoint.url, token: allScopes.token },
+        'tools/call',
+        {
+          name: 'routine_create',
+          arguments: {
+            idempotencyKey: 'external-routine-create',
+            name: 'Bedtime',
+            trigger: {
+              type: 'WallClock',
+              localTime: '23:30',
+              timeZone: 'UTC',
+              startDate: routineStartDate,
+            },
+          },
+        },
+      );
+      expect(create.result?.isError).toBeFalsy();
+      const routineId = parsePayload(create).result.routine.id;
+      const updateInput = {
+        idempotencyKey: 'external-routine-update',
+        routineId,
+        expectedVersion: 1,
+        name: 'Bedtime preparation',
+      };
+      const validation = GatewayRoutineUpdateSchema.safeParse(updateInput);
+      expect(validation.success, JSON.stringify(validation.error?.issues)).toBe(true);
+      const update = await callMcp(
+        { url: allScopes.endpoint.url, token: allScopes.token },
+        'tools/call',
+        {
+          name: 'routine_update',
+          arguments: updateInput,
+        },
+      );
+      expect(update.result?.isError, JSON.stringify(update.result)).toBeFalsy();
+      expect(parsePayload(update).result.routine).toMatchObject({
+        id: routineId,
+        name: 'Bedtime preparation',
+        version: 2,
+      });
+      const pause = await callMcp(
+        { url: allScopes.endpoint.url, token: allScopes.token },
+        'tools/call',
+        {
+          name: 'routine_pause',
+          arguments: {
+            idempotencyKey: 'external-routine-pause',
+            routineId,
+            until: Date.now() + 60 * 60_000,
+            reason: 'integration test',
+          },
+        },
+      );
+      expect(pause.result?.isError, JSON.stringify(pause.result)).toBeFalsy();
+      const temporary = await callMcp(
+        { url: allScopes.endpoint.url, token: allScopes.token },
+        'tools/call',
+        {
+          name: 'routine_override',
+          arguments: {
+            idempotencyKey: 'external-routine-override',
+            routineId,
+            suppressUntil: Date.now() + 40 * 60_000,
+            expiresAt: Date.now() + 60 * 60_000,
+            reason: 'integration test',
+          },
+        },
+      );
+      expect(temporary.result?.isError, JSON.stringify(temporary.result)).toBeFalsy();
+      const deleted = await callMcp(
+        { url: allScopes.endpoint.url, token: allScopes.token },
+        'tools/call',
+        {
+          name: 'routine_delete',
+          arguments: {
+            idempotencyKey: 'external-routine-delete',
+            routineId,
+            expectedVersion: 2,
+          },
+        },
+      );
+      expect(Boolean(deleted.error || deleted.result?.isError)).toBe(true);
+      expect(
+        await db.getOptional('SELECT id FROM routine_definitions WHERE id = ?', [routineId]),
+      ).not.toBeNull();
     } finally {
       await bridge.dispose();
     }

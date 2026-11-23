@@ -15,7 +15,7 @@ import { createI18n } from 'vue-i18n';
 import { createMemoryHistory, createRouter } from 'vue-router';
 import { productionLocaleMessages } from '../../../packages/app-vue/src/locales/production-messages';
 import { installServerStateRuntime } from '../../../packages/app-vue/src/platform/server-state';
-import '../../../packages/ui-vue-shadcn/src/styles/globals.css';
+import '../../../packages/app-vue/src/styles/index.css';
 
 setup((app) => {
   installAccountUiHost();

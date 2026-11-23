@@ -664,6 +664,7 @@ export default {
       scopes: '写入范围',
       scopeTasks: '任务写入',
       scopeGoals: '目标写入',
+      scopeRoutines: '例程写入',
       create: '创建连接',
       createClient: '新建客户端',
       createDescription: '为常驻 MCP 客户端签发访问令牌。令牌仅在此弹窗内展示一次。',
@@ -865,7 +866,13 @@ export default {
     typesTitle: '通知类型',
     loadPreferencesFailed: '加载通知偏好失败',
     updatePreferencesFailed: '更新通知偏好失败',
-    modules: { task: '任务', goal: '目标', routine: '例程', account: '账户', system: '系统' },
+    modules: {
+      task: '任务',
+      goal: '目标',
+      routine: '例程',
+      account: '账户',
+      system: '系统',
+    },
   },
   advanced: {
     title: '数据迁移',

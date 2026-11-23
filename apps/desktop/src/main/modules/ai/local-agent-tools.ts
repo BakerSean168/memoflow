@@ -51,6 +51,10 @@ import {
   GatewayTaskUpdateSchema,
   GatewayTaskCompleteSchema,
   GatewayRoutineCreateSchema,
+  GatewayRoutineUpdateSchema,
+  GatewayRoutineDeleteSchema,
+  GatewayRoutinePauseSchema,
+  GatewayRoutineOverrideSchema,
   projectNotificationFact,
   type GatewayWriteAuthority,
   type GatewayWritePort,
@@ -105,9 +109,18 @@ function bindNotificationReadPort(
       return projectNotificationFact(res.data);
     },
     async listNotifications(query, cx) {
-      const res = await inbox.listNotifications({ ...query, identityId: cx.identityId });
+      const res = await inbox.listNotifications({
+        ...query,
+        identityId: cx.identityId,
+      });
       if (!res.ok || !res.data)
-        return { items: [], total: 0, page: 1, pageSize: query.limit, hasMore: false };
+        return {
+          items: [],
+          total: 0,
+          page: 1,
+          pageSize: query.limit,
+          hasMore: false,
+        };
       const data = res.data as Record<string, unknown>;
       const list = (
         Array.isArray(data) ? data : ((data.notifications ?? data.items ?? []) as unknown[])
@@ -364,7 +377,9 @@ export function createDesktopLocalAgentTools(
                 spaceId: z.string().min(1).max(512).optional(),
               })
               .strict(),
-            outputSchema: z.object({ note: reference.extend({ content: z.string() }).nullable() }),
+            outputSchema: z.object({
+              note: reference.extend({ content: z.string() }).nullable(),
+            }),
             annotations,
           },
           (input) =>
@@ -404,7 +419,9 @@ export function createDesktopLocalAgentTools(
           };
         } catch (error) {
           const failure = z
-            .object({ code: z.enum(['LOCAL_AGENT_PERMISSION_DENIED', 'PERMISSION_DENIED']) })
+            .object({
+              code: z.enum(['LOCAL_AGENT_PERMISSION_DENIED', 'PERMISSION_DENIED']),
+            })
             .safeParse(error);
           const code =
             error instanceof GoalAgentMutationError ||
@@ -499,6 +516,39 @@ export function createDesktopLocalAgentTools(
             mutationAuthority('routines:write'),
           );
         },
+        routineUpdate(input, cx) {
+          return routineWrites.update(
+            GatewayRoutineUpdateSchema.parse(input),
+            cx,
+            mutationAuthority('routines:write'),
+          );
+        },
+        // Permanent deletion always needs a fresh user approval. External
+        // persistent-token clients have no interactive approval channel, so
+        // do not advertise an operation they can never safely complete.
+        routineDelete:
+          context.origin === 'client'
+            ? undefined
+            : (input, cx) =>
+                routineWrites.delete(
+                  GatewayRoutineDeleteSchema.parse(input),
+                  cx,
+                  mutationAuthority('routines:write'),
+                ),
+        routinePause(input, cx) {
+          return routineWrites.pause(
+            GatewayRoutinePauseSchema.parse(input),
+            cx,
+            mutationAuthority('routines:write'),
+          );
+        },
+        routineOverride(input, cx) {
+          return routineWrites.override(
+            GatewayRoutineOverrideSchema.parse(input),
+            cx,
+            mutationAuthority('routines:write'),
+          );
+        },
       };
       const writeAuthority: GatewayWriteAuthority = {
         connectionId: context.connectionId,
@@ -526,7 +576,9 @@ export function createDesktopLocalAgentTools(
             await context.authorize(scope);
             let response;
             if (command.action === 'submit') {
-              const snapshot = await panelBridge!.executeCommand(context, { action: 'snapshot' });
+              const snapshot = await panelBridge!.executeCommand(context, {
+                action: 'snapshot',
+              });
               const operationId = goalPanelSubmitOperationId(snapshot.snapshot?.mode === 'edit');
               response = await context.executeAuthorized(
                 operationId,
@@ -548,11 +600,17 @@ export function createDesktopLocalAgentTools(
                     text: response.error?.message ?? 'Panel command failed',
                   },
                 ],
-                structuredContent: { error: response.error, snapshot: response.snapshot },
+                structuredContent: {
+                  error: response.error,
+                  snapshot: response.snapshot,
+                },
               };
             }
             const structured = response.submitResult
-              ? { submitResult: response.submitResult, snapshot: response.snapshot }
+              ? {
+                  submitResult: response.submitResult,
+                  snapshot: response.snapshot,
+                }
               : { snapshot: response.snapshot };
             return {
               content: [{ type: 'text' as const, text: JSON.stringify(structured) }],
@@ -606,7 +664,12 @@ export function createDesktopLocalAgentTools(
                 openWorldHint: false,
               },
             },
-            (input) => runPanelAction({ action: 'open', mode: input.mode, goalId: input.goalId }),
+            (input) =>
+              runPanelAction({
+                action: 'open',
+                mode: input.mode,
+                goalId: input.goalId,
+              }),
           );
 
           server.registerTool(
@@ -629,7 +692,9 @@ export function createDesktopLocalAgentTools(
             'goal_panel_add_key_result',
             {
               description: 'Add a new Key Result to the controlled Goal draft.',
-              inputSchema: GoalPanelAddKeyResultCommandSchema.omit({ action: true }),
+              inputSchema: GoalPanelAddKeyResultCommandSchema.omit({
+                action: true,
+              }),
               annotations: {
                 readOnlyHint: false,
                 destructiveHint: false,
@@ -644,7 +709,9 @@ export function createDesktopLocalAgentTools(
             'goal_panel_remove_key_result',
             {
               description: 'Remove a Key Result by index from the controlled Goal draft.',
-              inputSchema: GoalPanelRemoveKeyResultCommandSchema.omit({ action: true }),
+              inputSchema: GoalPanelRemoveKeyResultCommandSchema.omit({
+                action: true,
+              }),
               annotations: {
                 readOnlyHint: false,
                 destructiveHint: true,

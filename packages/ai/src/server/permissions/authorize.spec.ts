@@ -7,6 +7,57 @@ import {
   type PermissionRepository,
 } from './permission.repository';
 
+it('scoped bearer pre-authorization never bypasses fresh confirmation for high-risk writes', async () => {
+  const db = createLocalAgentSqlite();
+  const repository = new PermissionPowerSyncRepository(db);
+  try {
+    await repository.saveSettings('owner', {
+      preset: 'full_auto',
+      agentPresets: {},
+      revision: 1,
+    });
+    for (const operationId of [
+      'routine.delete_permanent',
+      'task.bulk_update',
+      'notification.send_external',
+    ]) {
+      const decision = await authorize(repository, {
+        owner: 'owner',
+        agentId: 'external-bearer',
+        operationId,
+        preAuthorizedWrite: true,
+      });
+      expect(decision).toMatchObject({ decision: 'ask', decidedBy: 'preset' });
+      await expect(
+        executeAuthorized(
+          repository,
+          { owner: 'owner', agentId: 'external-bearer', operationId, preAuthorizedWrite: true },
+          async () => 'must not mutate',
+        ),
+      ).rejects.toBeInstanceOf(PermissionDeniedError);
+    }
+    expect(
+      (
+        await authorize(repository, {
+          owner: 'owner',
+          agentId: 'external-bearer',
+          operationId: 'routine.update',
+          preAuthorizedWrite: true,
+        })
+      ).decision,
+    ).toBe('allow');
+    const approved = await authorize(repository, {
+      owner: 'owner',
+      agentId: 'native-run',
+      operationId: 'routine.delete_permanent',
+      ask: async () => 'allow',
+    });
+    expect(approved).toMatchObject({ decision: 'allow', decidedBy: 'user' });
+  } finally {
+    db.close();
+  }
+});
+
 it('audits preset decisions, confirmation outcomes and execution results', async () => {
   const db = createLocalAgentSqlite();
   const repository = new PermissionPowerSyncRepository(db);
