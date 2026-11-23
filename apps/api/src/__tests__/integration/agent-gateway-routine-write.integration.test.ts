@@ -240,16 +240,20 @@ it('authenticates real MCP PAT writes, gates discovery, rejects private claims a
     f.gateway().fetch(request(secret, method, args), cx(f.a));
   const listed = await (await send(f.pa.secret, 'tools/list')).json();
   expect(listed.result.tools.map((t: { name: string }) => t.name)).toEqual([
+    'workflow_guide_get',
     'routine_create',
     'routine_update',
     'routine_delete',
     'routine_pause',
     'routine_override',
+    'goal_plan_validate',
   ]);
   const off = createReadGateway({ ...f.options, writes: bindGatewayWrites(prisma, time) });
   expect(
-    (await (await off.fetch(request(f.pa.secret, 'tools/list'), cx(f.a))).json()).result.tools,
-  ).toEqual([]);
+    (await (await off.fetch(request(f.pa.secret, 'tools/list'), cx(f.a))).json()).result.tools.map(
+      (tool: { name: string }) => tool.name,
+    ),
+  ).toEqual(['workflow_guide_get', 'goal_plan_validate']);
   expect((await off.fetch(request(f.pa.secret, 'tools/call', future), cx(f.a))).status).toBe(404);
   const first = await (await send(f.pa.secret, 'tools/call', future)).json();
   expect(first.result, JSON.stringify(first)).toHaveProperty('structuredContent');

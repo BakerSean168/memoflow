@@ -3,6 +3,7 @@ import { once } from 'node:events';
 import express from 'express';
 import { Client, StreamableHTTPClientTransport } from '@modelcontextprotocol/client';
 import { prisma } from '@memoflow/database';
+import { GatewayGoalPlanResultSchema } from '@memoflow/agent-gateway';
 import { IdentityId } from '@memoflow/utils/domain';
 import { createAccountPrismaActiveQuery } from '@memoflow/account';
 import { createScopedPatService } from '@memoflow/cloud-auth/server';
@@ -115,11 +116,16 @@ it('serves goal/task reads, writes and routine_create through the real compose f
         'goal_create',
         'task_plan_create',
         'routine_create',
+        'workflow_guide_get',
+        'goal_plan_validate',
+        'goal_plan_apply',
       ]),
     );
     expect((await reader.listTools()).tools.map((tool) => tool.name)).toEqual([
+      'workflow_guide_get',
       'goal_get',
       'goal_search',
+      'goal_plan_validate',
     ]);
 
     const goal = await client.callTool({
@@ -204,6 +210,132 @@ it('serves goal/task reads, writes and routine_create through the real compose f
   } finally {
     await client.close();
     await reader.close();
+    f.server.closeAllConnections();
+    await new Promise<void>((resolve) => f.server.close(() => resolve()));
+    await f.close();
+  }
+});
+
+it('applies and replays a complete Goal plan through real Hosted owners', async () => {
+  const f = await fixture();
+  const client = await f.connect(f.writePat.secret);
+  try {
+    const date = new Date(Date.now() + 3 * 86400000).toISOString().slice(0, 10);
+    const args = {
+      idempotencyKey: 'assembly-complete-goal-plan',
+      plan: {
+        target: { mode: 'create', goal: { name: 'Hosted release fixture' } },
+        // Deliberately reverse ref order to verify the returned KR mapping.
+        keyResults: [
+          {
+            ref: 'kr:release',
+            keyResult: { title: 'Publish release', targetValue: 1 },
+          },
+          {
+            ref: 'kr:quality',
+            keyResult: { title: 'Verify core paths', targetValue: 3 },
+          },
+        ],
+        tasks: [
+          {
+            ref: 'task:release',
+            keyResultRef: 'kr:release',
+            plan: {
+              name: 'Package release',
+              importance: 'Moderate',
+              schedule: { kind: 'OneTime', date, timing: { kind: 'AllDay' } },
+            },
+          },
+          {
+            ref: 'task:quality',
+            keyResultRef: 'kr:quality',
+            plan: {
+              name: 'Run smoke verification',
+              importance: 'Moderate',
+              schedule: { kind: 'OneTime', date, timing: { kind: 'AllDay' } },
+            },
+          },
+        ],
+      },
+    };
+
+    const firstResponse = await client.callTool({
+      name: 'goal_plan_apply',
+      arguments: args,
+    });
+    expect(firstResponse.isError, JSON.stringify(firstResponse)).not.toBe(true);
+    const first = GatewayGoalPlanResultSchema.parse(firstResponse.structuredContent);
+    expect(first).toMatchObject({ status: 'success', failures: [], retryable: false });
+    expect(first.receipts).toHaveLength(3);
+    expect(first.receipts.every(({ receipt }) => receipt.replayed === false)).toBe(true);
+
+    const replayResponse = await client.callTool({
+      name: 'goal_plan_apply',
+      arguments: args,
+    });
+    expect(replayResponse.isError, JSON.stringify(replayResponse)).not.toBe(true);
+    const replay = GatewayGoalPlanResultSchema.parse(replayResponse.structuredContent);
+    expect(replay).toMatchObject({ status: 'success', failures: [], retryable: false });
+    expect(replay.referenceMap).toEqual(first.referenceMap);
+    expect(replay.goalVersion).toBe(first.goalVersion);
+    expect(
+      replay.receipts.map(({ ref, tool, receipt }) => ({
+        ref,
+        tool,
+        receiptId: receipt.receiptId,
+        result: receipt.result,
+      })),
+    ).toEqual(
+      first.receipts.map(({ ref, tool, receipt }) => ({
+        ref,
+        tool,
+        receiptId: receipt.receiptId,
+        result: receipt.result,
+      })),
+    );
+    expect(replay.receipts.every(({ receipt }) => receipt.replayed === true)).toBe(true);
+
+    const refs = first.referenceMap;
+    const goalId = refs.goal!;
+    expect(await prisma.goal.count({ where: { identityId: f.identity } })).toBe(1);
+    expect(await prisma.keyResult.count({ where: { identityId: f.identity } })).toBe(2);
+    expect(await prisma.taskPlan.count({ where: { identityId: f.identity } })).toBe(2);
+    expect(await prisma.externalMutationReceipt.count({ where: { identityId: f.identity } })).toBe(
+      3,
+    );
+
+    expect(
+      await prisma.keyResult.findMany({
+        where: { identityId: f.identity },
+        select: { id: true, goalId: true, title: true },
+        orderBy: { title: 'asc' },
+      }),
+    ).toEqual([
+      { id: refs['kr:release'], goalId, title: 'Publish release' },
+      { id: refs['kr:quality'], goalId, title: 'Verify core paths' },
+    ]);
+    expect(
+      await prisma.taskPlan.findMany({
+        where: { identityId: f.identity },
+        select: { id: true, name: true, goalId: true, keyResultId: true },
+        orderBy: { name: 'asc' },
+      }),
+    ).toEqual([
+      {
+        id: refs['task:release'],
+        name: 'Package release',
+        goalId,
+        keyResultId: refs['kr:release'],
+      },
+      {
+        id: refs['task:quality'],
+        name: 'Run smoke verification',
+        goalId,
+        keyResultId: refs['kr:quality'],
+      },
+    ]);
+  } finally {
+    await client.close();
     f.server.closeAllConnections();
     await new Promise<void>((resolve) => f.server.close(() => resolve()));
     await f.close();
