@@ -35,7 +35,12 @@ control OCI image by `Dockerfile.runtime`.
    docker cp "$cid:/runtime/production/." /root/memoflow-selected/
    docker rm "$cid"
    bash /root/memoflow-selected/huawei/deploy.sh --check-only
-   bash /root/memoflow-selected/huawei/deploy.sh --apply
+   # Run the mutation in a host-owned systemd unit, never in a foreground SSH session.
+   unit="memoflow-huawei-$(date -u +%Y%m%dT%H%M%SZ)"
+   systemd-run --unit="$unit" --property=Type=exec --property=RuntimeMaxSec=2400 \
+     /bin/bash /root/memoflow-selected/huawei/deploy.sh --apply
+   systemctl show "$unit.service" -p ActiveState -p Result -p ExecMainStatus
+   journalctl -u "$unit.service" --no-pager -n 100
    ```
 
    The executor separately checks the OCI control's embedded
@@ -54,6 +59,34 @@ control OCI image by `Dockerfile.runtime`.
    A pre-migration failure attempts to restart the old app and records
    `PRE_MIGRATION_FAILED`. The executor is intentionally **not scheduled**;
    no unattended producer or duplicate writer is introduced.
+
+## After-migration BLOCKED recovery
+
+After the migrator starts, a failed or disconnected deployment is BLOCKED.
+The backup must be inspected; never alter the receipt by hand, downgrade
+the database or rerun the migrator just to clear BLOCKED.
+
+The reviewed resume-aware executor requires the exact matching selected
+release SHA and production-set digest, unchanged canonical configuration,
+a root-owned valid backup with checksum, unchanged infrastructure container
+identities, and the already healthy selected API. The resume path skips
+database backup and migration, finishing only the application rollout and
+the original HTTPS/Compose/digest postflight before recording DEPLOYED.
+
+    # The path below must contain the approved resume-capable executor.
+    bash /root/memoflow-selected/huawei/deploy.sh --resume-blocked-check
+    unit="memoflow-huawei-resume-$(date -u +%Y%m%dT%H%M%SZ)"
+    systemd-run --unit="$unit" --property=Type=exec --property=RuntimeMaxSec=2400 \
+      /bin/bash /root/memoflow-selected/huawei/deploy.sh --resume-blocked
+    systemctl show "$unit.service" -p ActiveState -p Result -p ExecMainStatus
+    journalctl -u "$unit.service" --no-pager -n 100
+
+Historical control images may not yet include resume support. In that case
+an operator must obtain a reviewed and SHA256-verified recovery executor
+from the repository; do not overwrite the selected OCI image or bypass its
+immutable source checks. The systemd-run launch itself is not completion:
+require the final DEPLOYED receipt, exact images and public health checks.
+The unit journal preserves the failure phase and exit code after SSH loss.
 
 ## OAuth activation after a successful release
 
