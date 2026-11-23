@@ -126,11 +126,21 @@ function hasDerivedConflict(projection: CalendarEventProjection): boolean {
 }
 
 function projectionToEvent(projection: CalendarEventProjection): EventInput {
+  // FullCalendar invents a default timed duration for end-less markers. A
+  // 23:50 Routine would otherwise spill into the next day's 00:00 lane.
+  // Keep this as presentation-only duration; the canonical event remains a point.
+  const markerEnd =
+    !projection.allDay && projection.end == null && projection.occupancy === 'marker'
+      ? Math.min(
+          Number(projection.start) + 30 * 60_000,
+          Number(scheduleUiHost.getProductTime().calendar.endOfDay(Number(projection.start))) + 1,
+        )
+      : undefined;
   return {
     id: `${projection.sourceType}:${projection.sourceId}`,
     title: projection.title,
     start: projection.start,
-    end: projection.end ?? undefined,
+    end: projection.end ?? markerEnd,
     allDay: projection.allDay,
     editable: projection.editableCapabilities.move || projection.editableCapabilities.resize,
     startEditable: projection.editableCapabilities.move,
