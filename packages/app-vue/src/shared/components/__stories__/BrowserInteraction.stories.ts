@@ -30,14 +30,17 @@ export const EditorDialog: Story = {
     const opener = page.getByTestId('t3-open-editor');
     await userEvent.click(opener);
     const draft = await page.findByTestId('t3-draft');
-    // Reka moves initial focus after mounting/entering the Portal.
+    const dialog = await page.findByTestId('t3-editor');
+    // Production styles animate the overlay into visibility. Keyboard
+    // interaction must begin after it is visibly open, not just mounted.
+    await waitFor(() => expect(dialog).toBeVisible());
     await waitFor(() => expect(draft).toHaveFocus());
     await userEvent.tab();
     await expect(page.getByTestId('t3-editor-next')).toHaveFocus();
     await userEvent.tab({ shift: true });
     await expect(draft).toHaveFocus();
     await userEvent.keyboard('{Escape}');
-    await expect(page.queryByTestId('t3-editor')).not.toBeInTheDocument();
+    await waitFor(() => expect(page.queryByTestId('t3-editor')).not.toBeInTheDocument());
     await waitFor(() => expect(opener).toHaveFocus());
   },
 };
@@ -50,14 +53,14 @@ export const DateTimePickerDialog: Story = {
     const opener = page.getByTestId('t3-open-picker');
     await userEvent.click(opener);
     const dialog = await page.findByTestId('t3-date-time-picker');
-    await expect(dialog).toBeVisible();
+    await waitFor(() => expect(dialog).toBeVisible());
     for (let i = 0; i < 8; i += 1) {
       await userEvent.tab();
       await expect(dialog.contains(canvasElement.ownerDocument.activeElement)).toBe(true);
     }
     await userEvent.keyboard('{Escape}');
-    await expect(page.queryByTestId('t3-date-time-picker')).not.toBeInTheDocument();
-    await expect(opener).toHaveFocus();
+    await waitFor(() => expect(page.queryByTestId('t3-date-time-picker')).not.toBeInTheDocument());
+    await waitFor(() => expect(opener).toHaveFocus());
   },
 };
 
