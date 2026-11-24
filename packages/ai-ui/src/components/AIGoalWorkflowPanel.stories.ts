@@ -100,6 +100,7 @@ const reviewRun: GoalWorkflowRun = AIWorkflowRunViewSchema.parse({
       goalId: 'GoalId_550e8400-e29b-41d4-a716-446655440001',
       keyResultIds: {
         'kr:reference-journey': 'KeyResultId_550e8400-e29b-41d4-a716-446655440002',
+        'kr:owner-handoff': 'KeyResultId_550e8400-e29b-41d4-a716-446655440003',
       },
     },
     draft,
@@ -280,7 +281,7 @@ export const Recovery: Story = {
     const page = within(canvasElement.ownerDocument.body);
     await expect(page.getByTestId('goal-workflow-recovery')).toBeVisible();
     await expect(page.getByTestId('goal-workflow-failure')).toHaveTextContent(
-      'Execution failed (SERVICE_UNAVAILABLE)',
+      'Workflow execution failed (SERVICE_UNAVAILABLE)',
     );
     await expect(page.getByTestId('goal-agent-retry-execution')).toBeVisible();
     await expect(page.getByTestId('goal-agent-accept-partial')).toBeVisible();
