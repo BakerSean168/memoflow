@@ -50,7 +50,10 @@ function renderSection(options: Options = {}) {
           failedAt: Date.UTC(2026, 10, 24, 9, 0),
         });
       }
-      provide(accountUiHost.AUTH_SERVICE_KEY as symbol, (options.service ?? authService()) as never);
+      provide(
+        accountUiHost.AUTH_SERVICE_KEY as symbol,
+        (options.service ?? authService()) as never,
+      );
       return {};
     },
     template: '<div style="max-width: 720px"><CloudPasswordSection /></div>',
