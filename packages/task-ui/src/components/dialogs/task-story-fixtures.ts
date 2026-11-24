@@ -20,9 +20,7 @@ function startOfToday(): number {
 export const storyPlanId = 'story-task-plan-1' as TaskPlanClientDTO['id'];
 export const storyOccurrenceId = 'story-task-occurrence-1' as TaskOccurrenceClientDTO['id'];
 
-export function createStoryTaskPlan(
-  overrides: Partial<TaskPlanClientDTO> = {},
-): TaskPlanClientDTO {
+export function createStoryTaskPlan(overrides: Partial<TaskPlanClientDTO> = {}): TaskPlanClientDTO {
   return createMockTaskPlan({
     id: storyPlanId,
     name: 'Morning focus block',

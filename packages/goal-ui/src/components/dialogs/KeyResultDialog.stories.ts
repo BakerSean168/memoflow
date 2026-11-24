@@ -90,10 +90,7 @@ export const SubmissionFailureRetainsDraft: Story = {
   args: { onSubmit: fn(async () => false) },
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement.ownerDocument.body);
-    await userEvent.type(
-      await canvas.findByTestId('draft-kr-title-input'),
-      'Reliable delivery',
-    );
+    await userEvent.type(await canvas.findByTestId('draft-kr-title-input'), 'Reliable delivery');
     await userEvent.type(canvas.getByTestId('draft-kr-target-input'), '100');
     await userEvent.click(canvas.getByTestId('save-key-result-button'));
     await expect(await canvas.findByRole('alert')).toBeVisible();

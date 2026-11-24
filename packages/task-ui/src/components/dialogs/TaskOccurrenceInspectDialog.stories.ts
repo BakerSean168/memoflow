@@ -20,9 +20,7 @@ function installInspectPorts(parameters: InspectStoryParameters) {
   provide(TASK_SERVICE_KEY, {
     getWorkspace: async () => ({
       ok: true,
-      data: createStoryWorkspace(
-        parameters.goalContext === 'missing' ? null : storyGoalContext,
-      ),
+      data: createStoryWorkspace(parameters.goalContext === 'missing' ? null : storyGoalContext),
     }),
   } as unknown as ITaskService);
 }
@@ -32,7 +30,12 @@ const meta = {
   component: TaskOccurrenceInspectDialog,
   tags: ['autodocs'],
   parameters: { layout: 'fullscreen' },
-  args: { modelValue: true, occurrence: createStoryOccurrence(), planName: 'Morning focus block', busy: false },
+  args: {
+    modelValue: true,
+    occurrence: createStoryOccurrence(),
+    planName: 'Morning focus block',
+    busy: false,
+  },
   render: (_args, { parameters }) => ({
     components: { TaskOccurrenceInspectDialog },
     setup() {

@@ -18,8 +18,7 @@ import {
  * drift between runs.
  */
 export const storyGoalId = 'IGoalId_story_goal_p1b' as GoalClientDTO['id'];
-export const storyKeyResultId =
-  'IKeyResultId_story_kr_p1b' as KeyResultClientDTO['id'];
+export const storyKeyResultId = 'IKeyResultId_story_kr_p1b' as KeyResultClientDTO['id'];
 
 export const storyKeyResults: KeyResultClientDTO[] = [
   createMockKeyResult({
@@ -56,9 +55,7 @@ export const storyKeyResults: KeyResultClientDTO[] = [
   }),
 ];
 
-export function createStoryGoal(
-  overrides: Partial<GoalClientDTO> = {},
-): GoalClientDTO {
+export function createStoryGoal(overrides: Partial<GoalClientDTO> = {}): GoalClientDTO {
   return createMockGoal({
     id: storyGoalId,
     name: 'Build a sustainable deep-work system',

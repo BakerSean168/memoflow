@@ -150,4 +150,3 @@ export const SaveFailureKeepsDraft: Story = {
     await expect(amount).toHaveValue(4);
   },
 };
-
