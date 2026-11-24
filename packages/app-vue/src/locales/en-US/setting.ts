@@ -723,6 +723,7 @@ export default {
       scopeTasks: 'Task writes',
       scopeGoals: 'Goal writes',
       scopeRoutines: 'Routine writes',
+      scopeNotifications: 'Notification writes',
       create: 'Create connection',
       createClient: 'New client',
       createDescription:

@@ -8,6 +8,7 @@ import {
   GoalSearchOutputSchema,
   NotificationListOutputSchema,
   NotificationUnreadCountOutputSchema,
+  NotificationPreferencesOutputSchema,
   TaskPlanGetOutputSchema,
   TaskPlanSearchOutputSchema,
   TaskOccurrenceGetOutputSchema,
@@ -615,6 +616,16 @@ export function registerReadTools(
           NotificationUnreadCountOutputSchema.parse({
             count: await notifications.getUnreadCount(context, budget),
           }),
+        ),
+    );
+    server.registerTool(
+      'notification_preferences_get',
+      readToolDescriptors.notification_preferences_get.definition,
+      () =>
+        call('notification_preferences_get', 'notifications:read', async () =>
+          NotificationPreferencesOutputSchema.parse(
+            await notifications.getPreferences(context, budget),
+          ),
         ),
     );
   }

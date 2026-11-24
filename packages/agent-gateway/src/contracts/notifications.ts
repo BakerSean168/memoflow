@@ -1,5 +1,10 @@
 import { z } from 'zod';
-import { NotificationCategory, NotificationType } from '@memoflow/notification-contracts';
+import {
+  NotificationCategory,
+  NotificationChannelType,
+  NotificationType,
+  QuietHoursSchema,
+} from '@memoflow/notification-contracts';
 import { ImportanceLevel, UrgencyLevel } from '@memoflow/shared-primitives';
 
 /**
@@ -122,3 +127,95 @@ export const NotificationMarkReadOutputSchema = z.strictObject({
   updatedAt: z.number().int(),
 });
 export type NotificationMarkReadReceipt = z.infer<typeof NotificationMarkReadOutputSchema>;
+
+export const NotificationMarkUnreadInputSchema = z.strictObject({
+  id: z.string().min(1).max(100),
+});
+/** Unread is the absence of a read marker; the receipt reflects that state. */
+export const NotificationMarkUnreadOutputSchema = z.strictObject({
+  id: z.string().min(1).max(100),
+  isRead: z.literal(false),
+  readAt: z.literal(null),
+  version: z.number().int().nonnegative(),
+  updatedAt: z.number().int(),
+});
+export type NotificationMarkUnreadReceipt = z.infer<typeof NotificationMarkUnreadOutputSchema>;
+
+export const NotificationArchiveInputSchema = z.strictObject({
+  id: z.string().min(1).max(100),
+});
+/** Archiving is recoverable through `notification_restore`. */
+export const NotificationArchiveOutputSchema = z.strictObject({
+  id: z.string().min(1).max(100),
+  archivedAt: z.number().int(),
+  version: z.number().int().nonnegative(),
+  updatedAt: z.number().int(),
+});
+export type NotificationArchiveReceipt = z.infer<typeof NotificationArchiveOutputSchema>;
+
+export const NotificationRestoreInputSchema = z.strictObject({
+  id: z.string().min(1).max(100),
+});
+export const NotificationRestoreOutputSchema = z.strictObject({
+  id: z.string().min(1).max(100),
+  archivedAt: z.literal(null),
+  version: z.number().int().nonnegative(),
+  updatedAt: z.number().int(),
+});
+export type NotificationRestoreReceipt = z.infer<typeof NotificationRestoreOutputSchema>;
+
+/** Preference bounds keep one MCP response and one owner write bounded. */
+export const NOTIFICATION_WORKFLOW_OVERRIDE_MAX = 50;
+export const NOTIFICATION_QUIET_HOURS_WINDOW_MAX = 14;
+const NotificationChannelFlagsSchema = z.partialRecord(
+  z.enum(NotificationChannelType),
+  z.boolean(),
+);
+const NotificationWorkflowOverridesSchema = z
+  .record(z.string().min(1).max(200), NotificationChannelFlagsSchema)
+  .refine(
+    (value) => Object.keys(value).length <= NOTIFICATION_WORKFLOW_OVERRIDE_MAX,
+    `at most ${NOTIFICATION_WORKFLOW_OVERRIDE_MAX} workflow overrides`,
+  );
+const BoundedQuietHoursSchema = QuietHoursSchema.refine(
+  (value) => value.weeklyWindows.length <= NOTIFICATION_QUIET_HOURS_WINDOW_MAX,
+  `at most ${NOTIFICATION_QUIET_HOURS_WINDOW_MAX} quiet-hour windows`,
+);
+/** Partial delivery preference patch; identity and audit fields are host-owned. */
+export const NotificationPreferencesInputSchema = z.strictObject({
+  globalChannels: NotificationChannelFlagsSchema.optional(),
+  workflowOverrides: NotificationWorkflowOverridesSchema.optional(),
+  quietHours: BoundedQuietHoursSchema.nullable().optional(),
+});
+export const NotificationPreferencesOutputSchema = z.strictObject({
+  globalChannels: NotificationChannelFlagsSchema,
+  workflowOverrides: NotificationWorkflowOverridesSchema,
+  quietHours: BoundedQuietHoursSchema.nullable(),
+  version: z.number().int().nonnegative(),
+  updatedAt: z.number().int(),
+});
+export type ExternalNotificationPreferences = z.infer<typeof NotificationPreferencesOutputSchema>;
+
+/** Owner output is untrusted shape: parse the whitelisted preference fields only. */
+const NotificationPreferenceSourceSchema = z.object({
+  globalChannels: z.unknown(),
+  workflowOverrides: z.unknown(),
+  quietHours: z.unknown(),
+  version: z.number().int().nonnegative(),
+  updatedAt: z.number().int(),
+});
+
+/** Projects only delivery preference state; identity and soft-delete stay owner-local. */
+export function projectNotificationPreferences(raw: unknown): ExternalNotificationPreferences {
+  const preference = NotificationPreferenceSourceSchema.parse(raw);
+  return NotificationPreferencesOutputSchema.parse({
+    globalChannels: NotificationChannelFlagsSchema.parse(preference.globalChannels ?? {}),
+    workflowOverrides: NotificationWorkflowOverridesSchema.parse(
+      preference.workflowOverrides ?? {},
+    ),
+    quietHours:
+      preference.quietHours == null ? null : BoundedQuietHoursSchema.parse(preference.quietHours),
+    version: preference.version,
+    updatedAt: preference.updatedAt,
+  });
+}

@@ -19,7 +19,13 @@ import type {
 import type { GatewayWriteToolName } from './write-tool-descriptors';
 import type { GatewayAssistedToolName } from './assisted-tool-descriptors';
 import type { GatewayFailureCode, ExternalSchedule } from './contracts';
-import type { ExternalNotification, NotificationMarkReadReceipt } from './contracts/notifications';
+import type {
+  ExternalNotification,
+  NotificationMarkReadReceipt,
+  NotificationMarkUnreadReceipt,
+  NotificationArchiveReceipt,
+  NotificationRestoreReceipt,
+} from './contracts/notifications';
 import type {
   GoalAgentPersistedReceipt,
   GoalClientDTO,
@@ -131,6 +137,7 @@ export interface GatewayAuditEvent {
     | 'notification_get'
     | 'notification_list'
     | 'notification_unread_count'
+    | 'notification_preferences_get'
     | 'ai_conversation_list'
     | 'ai_conversation_get'
     | 'ai_conversation_transcript'
@@ -239,6 +246,11 @@ export interface NotificationReadPort {
     budget?: GatewayReadBudget,
   ): Promise<NotificationReadPage>;
   getUnreadCount(context: ExecutionContext, budget?: GatewayReadBudget): Promise<number>;
+  /** Delivery preferences owned by the credential principal; no identity input crosses. */
+  getPreferences(
+    context: ExecutionContext,
+    budget?: GatewayReadBudget,
+  ): Promise<import('./contracts').ExternalNotificationPreferences>;
 }
 export interface NotificationReadQuery {
   readonly isRead?: boolean;
@@ -374,6 +386,12 @@ export interface GatewayWritePort {
   taskComplete: WriteCall<TaskWriteReceipt>;
   /** Idempotent read-state transition; no mutation receipt, execute-action stays closed. */
   notificationMarkRead?: WriteCall<NotificationMarkReadReceipt>;
+  notificationMarkUnread?: WriteCall<NotificationMarkUnreadReceipt>;
+  /** Recoverable archive lifecycle; restore returns the same notification to the active list. */
+  notificationArchive?: WriteCall<NotificationArchiveReceipt>;
+  notificationRestore?: WriteCall<NotificationRestoreReceipt>;
+  /** Delivery preference patch; the owner decides persistence and event fan-out. */
+  notificationPreferencesUpdate?: WriteCall<import('./contracts').ExternalNotificationPreferences>;
 }
 
 /** Fully implemented lifecycle is supplied only behind the assisted rollout flag. */

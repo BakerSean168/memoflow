@@ -19,6 +19,14 @@ import {
   GatewayTaskReceiptSchema,
   NotificationMarkReadInputSchema,
   NotificationMarkReadOutputSchema,
+  NotificationMarkUnreadInputSchema,
+  NotificationMarkUnreadOutputSchema,
+  NotificationArchiveInputSchema,
+  NotificationArchiveOutputSchema,
+  NotificationRestoreInputSchema,
+  NotificationRestoreOutputSchema,
+  NotificationPreferencesInputSchema,
+  NotificationPreferencesOutputSchema,
 } from './contracts';
 const annotations = {
   readOnlyHint: false,
@@ -135,6 +143,38 @@ export const writeToolDescriptors = {
       'Mark one owned notification as read (idempotent). Notification action execution is not available through MCP.',
       NotificationMarkReadInputSchema,
       NotificationMarkReadOutputSchema,
+    ),
+  },
+  notification_mark_unread: {
+    requiredScope: 'notifications:write',
+    definition: definition(
+      'Mark one owned notification as unread (idempotent). Notification action execution is not available through MCP.',
+      NotificationMarkUnreadInputSchema,
+      NotificationMarkUnreadOutputSchema,
+    ),
+  },
+  notification_archive: {
+    requiredScope: 'notifications:write',
+    definition: definition(
+      'Archive one owned notification (idempotent, recoverable with notification_restore).',
+      NotificationArchiveInputSchema,
+      NotificationArchiveOutputSchema,
+    ),
+  },
+  notification_restore: {
+    requiredScope: 'notifications:write',
+    definition: definition(
+      'Restore one archived owned notification (idempotent).',
+      NotificationRestoreInputSchema,
+      NotificationRestoreOutputSchema,
+    ),
+  },
+  notification_preferences_update: {
+    requiredScope: 'notifications:write',
+    definition: definition(
+      'Patch delivery preferences (global channels, workflow overrides, quiet hours) for the credential owner.',
+      NotificationPreferencesInputSchema,
+      NotificationPreferencesOutputSchema,
     ),
   },
 } as const;

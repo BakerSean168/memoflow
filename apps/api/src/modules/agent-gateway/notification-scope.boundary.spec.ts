@@ -83,7 +83,18 @@ function gatewayWith(credentials: GatewayCredentialPort) {
       getGoal: async () => null,
       searchGoalPage: async () => ({ items: [], hasMore: false, next: null }),
     },
-    notifications: { listNotifications, getUnreadCount, getNotification },
+    notifications: {
+      listNotifications,
+      getUnreadCount,
+      getNotification,
+      getPreferences: async () => ({
+        globalChannels: { InApp: true },
+        workflowOverrides: {},
+        quietHours: null,
+        version: 1,
+        updatedAt: 1,
+      }),
+    },
     audit,
   });
   return { gateway, listNotifications, getUnreadCount, audit };

@@ -40,6 +40,10 @@ const scopes = [
     value: 'routines:write' as const,
     label: t('setting.ai.localMcp.scopeRoutines'),
   },
+  {
+    value: 'notifications:write' as const,
+    label: t('setting.ai.localMcp.scopeNotifications'),
+  },
 ];
 const active = computed(() => clients.value.filter((client) => client.revokedAt === null));
 const canCreate = computed(
@@ -189,7 +193,9 @@ function scopeLabel(client: LocalMcpClient) {
           ? 'setting.ai.localMcp.scopeTasks'
           : value === 'goals:write'
             ? 'setting.ai.localMcp.scopeGoals'
-            : 'setting.ai.localMcp.scopeRoutines',
+            : value === 'notifications:write'
+              ? 'setting.ai.localMcp.scopeNotifications'
+              : 'setting.ai.localMcp.scopeRoutines',
       ),
     )
     .join(' · ');
