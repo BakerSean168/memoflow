@@ -899,6 +899,34 @@
       "kind": "component",
       "storyPath": "packages/notification-ui/src/components/NotificationQuickActions.stories.ts",
       "status": "present"
+    },
+    {
+      "path": "packages/account-ui/src/account/components/AccountAvatarUploader.vue",
+      "package": "@memoflow/account-ui",
+      "kind": "component",
+      "storyPath": "packages/account-ui/src/account/components/AccountAvatarUploader.stories.ts",
+      "status": "present"
+    },
+    {
+      "path": "packages/app-vue/src/layouts/shell/CloudConnectionDialog.vue",
+      "package": "@memoflow/app-vue",
+      "kind": "component",
+      "storyPath": "packages/app-vue/src/layouts/shell/CloudConnectionDialog.stories.ts",
+      "status": "present"
+    },
+    {
+      "path": "packages/app-vue/src/layouts/shell/ConversationSidebar.vue",
+      "package": "@memoflow/app-vue",
+      "kind": "component",
+      "storyPath": "packages/app-vue/src/layouts/shell/ConversationSidebar.stories.ts",
+      "status": "present"
+    },
+    {
+      "path": "packages/app-vue/src/views/DesktopProfileAccessView.vue",
+      "package": "@memoflow/app-vue",
+      "kind": "component",
+      "storyPath": "packages/app-vue/src/views/DesktopProfileAccessView.stories.ts",
+      "status": "present"
     }
   ]
 }
