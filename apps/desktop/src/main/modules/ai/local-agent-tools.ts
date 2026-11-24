@@ -572,7 +572,7 @@ export function createDesktopLocalAgentTools(
           'knowledge_draft_get',
           {
             description:
-              'Read one owned knowledge draft by id, including its current revision and reviewed Markdown. Foreign and missing ids both answer NOT_FOUND (a null draft).',
+              'Read one owned knowledge draft by id, including its current revision and reviewed Markdown. Foreign and missing ids both answer a null draft.',
             inputSchema: KnowledgeDraftGetInputSchema,
             outputSchema: KnowledgeDraftGetOutputSchema,
             annotations: draftRead,
