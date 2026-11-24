@@ -10,4 +10,4 @@ Long-lived architecture and constraints that are not obvious from source code. R
 - [Testing architecture](./testing/README.md)
 - [Engineering governance](./governance/README.md)
 
-For specialized internals, consult the closest existing page, e.g. [AI runtime](./ai-runtime-path-map.md), [CI/CD platform](./ci-cd-platform-v2.md) or [delivery architecture](./delivery-platform-v3.md). The owning source/configuration remains authoritative.
+For specialized internals, consult the closest existing page, e.g. [AI runtime](./ai-runtime-path-map.md), [Local MCP capability matrix](./local-mcp-capability-matrix.md), [CI/CD platform](./ci-cd-platform-v2.md) or [delivery architecture](./delivery-platform-v3.md). The owning source/configuration remains authoritative.
