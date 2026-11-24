@@ -7,7 +7,7 @@ updated: 2026-11-23T00:00:00Z
 
 # MemoFlow External Agent Gateway
 
-**状态：代码与组装已就绪，全部默认关闭。** Hosted Gateway 当前实现 43 个工具：2 个静态指南/校验、22 个只读（Goal 2、Task 4、Relation 1、Routine 3、Notification 3、AI 5、Schedule 2、Label 2）、14 个写（Goal/KR、Goal plan、TaskPlan、TaskOccurrence、Routine 全写、`notification_mark_read`）、5 个 assisted Task workflow。OAuth 复用同一组 12 个 scope：写与 assisted 由 `EAG_OAUTH_WRITE_ENABLED` 控制，关闭时只发布读工具（[#1054](https://github.com/BakerSean168/memoflow/issues/1054)）。生产开关尚未翻转，公共 rollout 未完成；开启步骤见 [§10 runbook](#10-一期开启-runbook)。#490/#538/#539 的本地验收只代表代码路径，不代表生产已部署。
+**状态：代码与组装已就绪，全部默认关闭。** 共享 descriptor 定义 43 个工具：2 个静态指南/校验、22 个只读（Goal 2、Task 4、Relation 1、Routine 3、Notification 3、AI 5、Schedule 2、Label 2）、14 个写（Goal/KR、Goal plan、TaskPlan、TaskOccurrence、Routine 全写、`notification_mark_read`）、5 个 assisted Task workflow。Hosted 当前未绑定 Schedule 读端口，因此实际发布上限为 41 个（只读 20 个）；逐工具、逐宿主的真实可用性以 [Desktop Local MCP capability matrix](./local-mcp-capability-matrix.md) 为准。OAuth 复用同一组 12 个 scope：写与 assisted 由 `EAG_OAUTH_WRITE_ENABLED` 控制，关闭时只发布读工具（[#1054](https://github.com/BakerSean168/memoflow/issues/1054)）。生产开关尚未翻转，公共 rollout 未完成；开启步骤见 [§10 runbook](#10-一期开启-runbook)。#490/#538/#539 的本地验收只代表代码路径，不代表生产已部署。
 
 ## 0. 硬边界：OAuth 写由全局开关控制
 
