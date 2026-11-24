@@ -252,6 +252,16 @@
       ]
     },
     {
+      "path": "apps/api/src/modules/agent-gateway/schedule.port.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "apps/api/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "apps/api/vitest.config.ts"
+      ]
+    },
+    {
       "path": "apps/api/src/modules/agent-gateway/write.port.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -13448,7 +13458,7 @@
       "type": "measurement",
       "suite": "coverage",
       "runner": "vitest",
-      "fileCount": 72
+      "fileCount": 73
     },
     {
       "id": "packages/account/vitest.config.ts",
@@ -13928,7 +13938,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 72
+      "fileCount": 73
     },
     {
       "id": "apps/desktop/vitest.config.ts",
@@ -14439,6 +14449,7 @@
       "apps/api/src/modules/agent-gateway/notification.port.spec.ts",
       "apps/api/src/modules/agent-gateway/relation-read.port.spec.ts",
       "apps/api/src/modules/agent-gateway/relation-scope.boundary.spec.ts",
+      "apps/api/src/modules/agent-gateway/schedule.port.spec.ts",
       "apps/api/src/modules/agent-gateway/write.port.spec.ts",
       "apps/api/src/modules/ai/controlled-analytics-read.adapter.spec.ts",
       "apps/api/src/modules/ai/owner-activity-read.adapter.equivalence.spec.ts",
@@ -15092,7 +15103,7 @@
   "duplicate": [],
   "unexpected": [],
   "counts": {
-    "unit": 1242,
+    "unit": 1243,
     "integration": 63,
     "smoke": 3,
     "boundary-ipc": 7,

@@ -7,7 +7,7 @@ updated: 2026-11-24T00:00:00Z
 
 # External Agent OAuth 写 consent 设计评估
 
-**状态：已实施（2026-11-21，[#1054](https://github.com/BakerSean168/memoflow/issues/1054)）。OAuth 写权限已直接开放，取代本文原“有条件、分阶段、默认关闭”的推荐。** 本文是 [#1033](https://github.com/BakerSean168/memoflow/issues/1033) 的设计评估，其 §2–§8 仍是机制依据；§1、§9、§10、§11 的阶段性结论已被用户决策覆盖，以本节和 #1054 为准。
+**状态：已实施（2026-11-21，[#1054](https://github.com/BakerSean168/memoflow/issues/1054)）；2026-11-24 [#1076](https://github.com/BakerSean168/memoflow/issues/1076) 第三步新增 `schedules:write`，scope 集合变为 13 个。OAuth 写权限已直接开放，取代本文原“有条件、分阶段、默认关闭”的推荐。** 本文是 [#1033](https://github.com/BakerSean168/memoflow/issues/1033) 的设计评估，其 §2–§8 仍是机制依据；§1、§9、§10、§11 的阶段性结论已被用户决策覆盖，以本节和 #1054 为准。
 
 ## 0. 实施状态与决策（2026-11-21）
 
@@ -17,6 +17,7 @@ updated: 2026-11-24T00:00:00Z
 - OAuth 允许集一次扩展到现有 12 个 scope 加 `offline_access`；不新增 scope 名。读不隐含写、写不隐含读，复合条件沿用 PAT 侧规则（如 Task 建/改 binding 需 `goals:write`）。
 - 新增全局开关 `EAG_OAUTH_WRITE_ENABLED`（代码默认 `0`，依赖 `EAG_OAUTH_ENABLED=1` 与 `EAG_WRITE_ENABLED=1`）。开关为 `0` 时：写 scope 不可授予、已发 token 的写能力在调用侧立即失效，读与 PAT 完全不受影响。上线置 `1` 是发布动作，不在 #1054。
 - 写事务内新增 OAuth authority：`external_agent_connections` 与 `oauthConsent` 行按 `FOR SHARE` 锁定，复核 connection 未撤销/未过期、client 未停用、account 活跃、consent 仍覆盖本次 scope；撤销后写调用即时失效。
+- 2026-11-24（#1076 第三步）新增 `schedules:write`，scope 数变为 13；本文其余处提到的“12 个 scope”指 #1054 当时的集合。
 - Consent 页面改为按域分组的读写清单，写权限默认不勾选，支持逐域取消与“仅允许只读”降级（provider 的 consent 端点接受原始请求 scope 的子集）。写 scope 明示副作用，主按钮在含写授权时显示“允许写入”。
 - Assisted workflow 不再保留 PAT-only 例外：具备 `tasks:write` 的 OAuth 连接同样发布并执行 5 个 assisted 工具。
 - 审计：写回执在同一事务写入 `credentialType`、`clientId`、`consentScopes`；transport audit 增加 `credentialType`、`clientId`、`consentScopesHash`，写拒绝保留 `scopeDecision='denied'` 与稳定 `outcome`；consent 授予/拒绝与连接撤销产生 `effect='credential'` 事件。

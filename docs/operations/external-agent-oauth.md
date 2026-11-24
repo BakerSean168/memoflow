@@ -7,7 +7,7 @@ updated: 2026-11-24T00:00:00Z
 
 # External Agent OAuth 连接
 
-OAuth 与 [PAT](./external-agent-pat.md) 共存。OAuth 让用户登录 MemoFlow 后，明确授权 ChatGPT Web、Codex 或 Claude Code 访问自己的 MemoFlow 数据；GitHub 仍只是 MemoFlow 的一种登录方式。读写复用同一组 12 个 scope：读和写互不隐含，写能力由 `EAG_OAUTH_WRITE_ENABLED` 控制（[#1054](https://github.com/BakerSean168/memoflow/issues/1054)）。机制与审计要求见 [OAuth 写 consent 设计评估](../internals/external-agent-oauth-write-consent.md)。实现证据见 [EAG-04](https://github.com/BakerSean168/memoflow/blob/7a45112e1840950ead1ba98b748fc70fa1b38344/docs/analysis/2026-10-07-eag-04-oauth-read-evidence.md)。
+OAuth 与 [PAT](./external-agent-pat.md) 共存。OAuth 让用户登录 MemoFlow 后，明确授权 ChatGPT Web、Codex 或 Claude Code 访问自己的 MemoFlow 数据；GitHub 仍只是 MemoFlow 的一种登录方式。读写复用同一组 13 个 scope：读和写互不隐含，写能力由 `EAG_OAUTH_WRITE_ENABLED` 控制（[#1054](https://github.com/BakerSean168/memoflow/issues/1054)）。机制与审计要求见 [OAuth 写 consent 设计评估](../internals/external-agent-oauth-write-consent.md)。实现证据见 [EAG-04](https://github.com/BakerSean168/memoflow/blob/7a45112e1840950ead1ba98b748fc70fa1b38344/docs/analysis/2026-10-07-eag-04-oauth-read-evidence.md)。
 
 ## 部署配置
 

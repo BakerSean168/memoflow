@@ -58,7 +58,7 @@ describe('scoped PAT lifetime contract (#970)', () => {
     expect(ScopedPatSummarySchema.parse(summary)).toEqual(summary);
   });
 
-  it('grants notification and schedule read scopes within the raised twelve-scope ceiling (#990/#995)', () => {
+  it('grants notification and schedule scopes within the raised thirteen-scope ceiling (#990/#995)', () => {
     const scopes = [
       'goals:read',
       'goals:write',
@@ -70,6 +70,7 @@ describe('scoped PAT lifetime contract (#970)', () => {
       'notifications:read',
       'schedules:read',
       'notifications:write',
+      'schedules:write',
       'labels:read',
       'relations:read',
     ];
@@ -78,7 +79,7 @@ describe('scoped PAT lifetime contract (#970)', () => {
       CreateScopedPatSchema.safeParse({ name: 'agent', scopes: [...scopes, 'goals:read'] }).success,
     ).toBe(false);
     expect(
-      CreateScopedPatSchema.safeParse({ name: 'agent', scopes: ['schedules:write'] }).success,
+      CreateScopedPatSchema.safeParse({ name: 'agent', scopes: ['schedules:admin'] }).success,
     ).toBe(false);
     expect(
       CreateScopedPatSchema.safeParse({ name: 'agent', scopes: ['notifications:admin'] }).success,

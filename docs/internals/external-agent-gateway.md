@@ -7,7 +7,7 @@ updated: 2026-11-24T00:00:00Z
 
 # MemoFlow External Agent Gateway
 
-**状态：代码与组装已就绪，全部默认关闭。** 共享 descriptor 定义 47 个工具：2 个静态指南/校验、23 个只读（Goal 2、Task 4、Relation 1、Routine 3、Notification 4、AI 5、Schedule 2、Label 2）、17 个写（Goal/KR、Goal plan、TaskPlan、TaskOccurrence、Routine 全写、Notification 已读/未读/归档/恢复/偏好）、5 个 assisted Task workflow。Hosted 当前未绑定 Schedule 读端口，因此实际发布上限为 45 个（只读 21 个）；逐工具、逐宿主的真实可用性以 [Desktop Local MCP capability matrix](./local-mcp-capability-matrix.md) 为准。OAuth 复用同一组 12 个 scope：写与 assisted 由 `EAG_OAUTH_WRITE_ENABLED` 控制，关闭时只发布读工具（[#1054](https://github.com/BakerSean168/memoflow/issues/1054)）。生产开关尚未翻转，公共 rollout 未完成；开启步骤见 [§10 runbook](#10-一期开启-runbook)。#490/#538/#539 的本地验收只代表代码路径，不代表生产已部署。
+**状态：代码与组装已就绪，全部默认关闭。** 共享 descriptor 定义 51 个工具：2 个静态指南/校验、23 个只读（Goal 2、Task 4、Relation 1、Routine 3、Notification 4、AI 5、Schedule 2、Label 2）、21 个写（Goal/KR、Goal plan、TaskPlan、TaskOccurrence、Routine 全写、Notification 已读/未读/归档/恢复/偏好、Schedule 创建/更新/改期/删除）、5 个 assisted Task workflow。Hosted 当前未绑定 Schedule 读端口，因此实际发布上限为 49 个（只读 21 个）；逐工具、逐宿主的真实可用性以 [Desktop Local MCP capability matrix](./local-mcp-capability-matrix.md) 为准。OAuth 复用同一组 13 个 scope：写与 assisted 由 `EAG_OAUTH_WRITE_ENABLED` 控制，关闭时只发布读工具（[#1054](https://github.com/BakerSean168/memoflow/issues/1054)）。生产开关尚未翻转，公共 rollout 未完成；开启步骤见 [§10 runbook](#10-一期开启-runbook)。#490/#538/#539 的本地验收只代表代码路径，不代表生产已部署。
 
 ## 0. 硬边界：OAuth 写由全局开关控制
 
@@ -95,13 +95,17 @@ ID 使用稳定 snake_case，内部 capability ID 可采用 `goal.get` 等命名
 | W1   | `notification_mark_read/mark_unread` | Notification / notifications:write | 切换已读/未读（幂等）；execute-action 动作执行不开放（留三期评估）                                                                      |
 | W1   | `notification_archive/restore`       | Notification / notifications:write | 可恢复的归档生命周期（幂等）                                                                                                            |
 | W1   | `notification_preferences_update`    | Notification / notifications:write | 有界偏好补丁（≤50 workflow overrides、≤14 静默窗口）                                                                                    |
+| W1   | `schedule_create`                    | Schedule / schedules:write         | 创建单个日历条目；不使用 idempotencyKey，重试会产生第二条记录                                                                           |
+| W1   | `schedule_update`                    | Schedule / schedules:write         | 仅补丁标题/描述/地点/参与者 + expectedVersion；时间迁移走 `schedule_reschedule`                                                         |
+| W1   | `schedule_reschedule`                | Schedule / schedules:write         | 以 expectedVersion 迁移时间范围并回显被接受的 range                                                                                     |
+| W1   | `schedule_delete`                    | Schedule / schedules:write         | expectedVersion；不可恢复的永久删除，无交互通道的宿主 fail closed                                                                       |
 | A1   | `assisted_workflow_start`            | Task / tasks:write                 | 启动或恢复一个受审核的 Task planning run                                                                                                |
 | A1   | `assisted_workflow_get`              | Task / tasks:write                 | 读取自有 run 的当前 revision                                                                                                            |
 | A1   | `assisted_workflow_review`           | Task / tasks:write                 | 读取待决定的 typed ask 或 Task draft                                                                                                    |
 | A1   | `assisted_workflow_resume`           | Task / tasks:write                 | 回答澄清、批准精确 draft 或恢复 apply                                                                                                   |
 | A1   | `assisted_workflow_cancel`           | Task / tasks:write                 | 取消剩余工作并保留已提交的 Task facts                                                                                                   |
 
-R1 为 **10 个工具**（Goal 2 个 + Task 4 个 + Notification 4 个），R2 为 **6 个只读工具**（Routine 3 个、Label 2 个、Relation 1 个），R3 为 **2 个 Schedule 只读工具**，另有 **5 个 `ai:read` 工具**（会话 3 个、Agent 2 个），只读合计 **23 个**；W1 为 **17 个写工具**（含 Notification 的已读、未读、归档、恢复与偏好补丁），A1 为 **5 个 assisted 工具**，全量合计 **45 个**。R3 由宿主绑定 Schedule owner 端口后发布（本地桥接绑定；托管 API 尚未绑定该端口，因此托管连接不可见），只读且不提供日历写入。OAuth 复用同一组 12 个 scope：读工具按请求 scope 发布；写与 assisted 在 `EAG_OAUTH_WRITE_ENABLED=1` 时按 write scope 发布，关闭时只有读工具。MCP 自带发现功能足够，不新增 `capabilities_list` 平台 API。
+R1 为 **10 个工具**（Goal 2 个 + Task 4 个 + Notification 4 个），R2 为 **6 个只读工具**（Routine 3 个、Label 2 个、Relation 1 个），R3 为 **2 个 Schedule 只读工具**，另有 **5 个 `ai:read` 工具**（会话 3 个、Agent 2 个），只读合计 **23 个**；W1 为 **21 个写工具**（含 Notification 的已读、未读、归档、恢复与偏好补丁，以及 Schedule 的创建、更新、改期与删除），A1 为 **5 个 assisted 工具**，全量合计 **49 个**。R3 由宿主绑定 Schedule owner 端口后发布（本地桥接绑定；托管 API 尚未绑定该读端口，因此托管连接不可见其读工具）；Schedule 写由 `schedules:write` 单独控制，托管与本地各自绑定 owner 命令端口，删除对无交互通道的宿主 fail closed。OAuth 复用同一组 13 个 scope：读工具按请求 scope 发布；写与 assisted 在 `EAG_OAUTH_WRITE_ENABLED=1` 时按 write scope 发布，关闭时只有读工具。MCP 自带发现功能足够，不新增 `capabilities_list` 平台 API。
 
 ### 跨 owner 权限
 
@@ -109,7 +113,7 @@ read scope 与 write scope 不互相隐含。MCP write 结果只返回该写操�
 
 Task 的已配置 Goal contribution 是完成动作的一部分，`tasks:write` consent 必须说明它会按既有配置影响目标进度；它不授权直接更新任意 Goal/KR。创建或更改 binding 要求 `tasks:write + goals:write` 及双方归属，不能靠对已有 Task 的写权限引入新 Goal 影响。读取 Goal 名称/测量上下文仍需 `goals:read`；没有时只允许 complete-only，不能偷偷取 protected context。
 
-Notification 域在 #990 接入：开放 `notification_list` 与 `notification_unread_count` 读工具及 `notification_mark_read` 写工具；#995 追加单条读取 `notification_get`（同一 `notifications:read` scope）；#1076 第二步补齐 `notification_mark_unread`、`notification_archive`、`notification_restore`、`notification_preferences_get` 与 `notification_preferences_update`，五个写工具共用 `notifications:write` 与同一个最小状态 receipt。**execute-action 动作执行明确不开放**（动作执行牵涉各业务域副作用，留三期评估），在工具清单与文档中均明确标注。Planner/Knowledge 的扩展按真实需求单列在 [#539](https://github.com/BakerSean168/memoflow/issues/539)；Routine 读写已随 [#972](https://github.com/BakerSean168/memoflow/issues/972) 二期注册，写工具由 `EAG_ROUTINE_WRITE_ENABLED` 单独开关，其余工具尚未注册。
+Notification 域在 #990 接入：开放 `notification_list` 与 `notification_unread_count` 读工具及 `notification_mark_read` 写工具；#995 追加单条读取 `notification_get`（同一 `notifications:read` scope）；#1076 第二步补齐 `notification_mark_unread`、`notification_archive`、`notification_restore`、`notification_preferences_get` 与 `notification_preferences_update`，五个写工具共用 `notifications:write` 与同一个最小状态 receipt。**execute-action 动作执行明确不开放**（动作执行牵涉各业务域副作用，留三期评估），在工具清单与文档中均明确标注。Planner/Knowledge 的扩展按真实需求单列在 [#539](https://github.com/BakerSean168/memoflow/issues/539)；Routine 读写已随 [#972](https://github.com/BakerSean168/memoflow/issues/972) 二期注册，写工具由 `EAG_ROUTINE_WRITE_ENABLED` 单独开关，其余工具尚未注册。 Schedule 写由 #1076 第三步接入：`schedule_create`、`schedule_update`、`schedule_reschedule`、`schedule_delete` 共用 `schedules:write` 与同一个最小状态 receipt；更新只改元数据，时间迁移只走 `schedule_reschedule`，删除不可恢复且对无交互通道的宿主 fail closed。
 
 ### 标签写操作显式拒绝契约（#993）
 
@@ -205,7 +209,7 @@ Goal/Task 各自在自己的 infrastructure factory 中创建 transaction-bound 
 
 首批 `goal_update` 排除会整组替换/删除 KRs 的字段；保留 name/summary/description/timeframe/reminderConfig 等经过 owner 允许的 patch。增加危险操作时重新评估 tool effect 和 server approval，不能因为名叫 update 就自动标记无破坏性。
 
-所有普通写工具要求 idempotencyKey。每次工具调用（读、写、assisted）都经过 `packages/ai` 的 AI 权限 checkpoint，Gateway 不直连 owner port。checkpoint 的默认 preset 是 `confirm_each`；对 MCP 写调用，`命中该 operation 的写 scope + operation 已在 operation-catalog 登记` 视为签发/consent 时的用户预授权，checkpoint 放行并写审计（PAT 与 OAuth 同规则，OAuth 的 credential type 与开关已由 Gateway 先校验）。scope 外、未登记 operation 仍拒；显式 deny 规则和 `read_only` preset 仍然优先。放行与拒绝都记录 `credentialId`（权限审计中的 `agentId` 为 `external-mcp:<credentialId>`，传输审计另带 `credentialId`）。需要再次确认的高风险命令先不发布，直到有真实 approval intent 流程；不把它当作所有 CRUD 的平台前置。
+Goal/Task/Routine 写工具要求 idempotencyKey；Notification 写工具以单条 `id` 自身幂等；Schedule 写工具不使用 idempotencyKey，创建重试会产生第二条记录，更新与删除以 `expectedVersion` 防覆盖。每次工具调用（读、写、assisted）都经过 `packages/ai` 的 AI 权限 checkpoint，Gateway 不直连 owner port。checkpoint 的默认 preset 是 `confirm_each`；对 MCP 写调用，`命中该 operation 的写 scope + operation 已在 operation-catalog 登记` 视为签发/consent 时的用户预授权，checkpoint 放行并写审计（PAT 与 OAuth 同规则，OAuth 的 credential type 与开关已由 Gateway 先校验）。scope 外、未登记 operation 仍拒；显式 deny 规则和 `read_only` preset 仍然优先。放行与拒绝都记录 `credentialId`（权限审计中的 `agentId` 为 `external-mcp:<credentialId>`，传输审计另带 `credentialId`）。需要再次确认的高风险命令先不发布，直到有真实 approval intent 流程；不把它当作所有 CRUD 的平台前置。
 
 ## 7. OAuth/PAT 连接与运行策略
 
@@ -262,7 +266,7 @@ Elapsed/ActiveUsage/专注 protocol 需要设备本地执行，暂不通过 Host
 | `EAG_AUDIENCE`                      | `https://<api-host>/mcp` | 必须是 HTTPS 的规范 origin + `/mcp`；其 host 必须与请求 `Host` 一致，否则 403            |
 | `EAG_CURSOR_SECRET`                 | 随机 ≥32 字节            | 分页游标密钥；跨重启保持稳定                                                             |
 | `EAG_TASK_READ_ENABLED`             | `1`                      | Task 只读工具；默认已为 `1`                                                              |
-| `EAG_WRITE_ENABLED`                 | `1`                      | 发布 8 个 PAT 写工具（Routine 写另由下一项控制）                                         |
+| `EAG_WRITE_ENABLED`                 | `1`                      | 发布 Goal/Task/Notification/Schedule 写工具（Routine 写另由下一项控制）                  |
 | `EAG_ROUTINE_WRITE_ENABLED`         | `1`                      | 在 writes 打开的前提下发布 Routine 写工具（create/update/delete/pause/override）         |
 | `EAG_ASSISTED_ENABLED`              | `1`                      | 发布 5 个 assisted 工具；要求 durable AI workflow runtime，否则启动失败                  |
 | `EAG_OAUTH_ENABLED`                 | 可选 `1`                 | 需要总开关、`AUTH_BASE_URL`（HTTPS `/api/auth`）与 `MEMOFLOW_WEB_URL`                    |

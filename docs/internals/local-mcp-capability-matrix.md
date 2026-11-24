@@ -103,13 +103,20 @@ updated: 2026-11-24T00:00:00Z
 
 ### 3.5 Schedule / Calendar
 
-| Action (tool)                         | Owner port / command                                         | Input → output                           | Permission              | Audit     | Local native | Local client | Hosted                                                  |
-| ------------------------------------- | ------------------------------------------------------------ | ---------------------------------------- | ----------------------- | --------- | ------------ | ------------ | ------------------------------------------------------- |
-| `schedule_get`                        | `ScheduleReadPort` ← `ScheduleEventApplicationPort.getEvent` | `ScheduleGetInput → ScheduleGetOutput`   | `task.read`（现有映射） | call+perm | supported    | supported    | missing（descriptor 存在，Host 未绑定 Schedule 读端口） |
-| `schedule_list`                       | 同上 `.listEvents`                                           | `ScheduleListInput → ScheduleListOutput` | `task.read`             | call+perm | supported    | supported    | missing（同上）                                         |
-| create / update / delete / reschedule | Schedule owner（expectedVersion / 幂等收据）                 | 未接入 MCP                               | —                       | —         | missing      | missing      | missing                                                 |
+| Action (tool)         | Owner port / command                                         | Input → output                                        | Permission                                               | Audit     | Local native            | Local client                                   | Hosted                                                  |
+| --------------------- | ------------------------------------------------------------ | ----------------------------------------------------- | -------------------------------------------------------- | --------- | ----------------------- | ---------------------------------------------- | ------------------------------------------------------- |
+| `schedule_get`        | `ScheduleReadPort` ← `ScheduleEventApplicationPort.getEvent` | `ScheduleGetInput → ScheduleGetOutput`                | `task.read`（现有映射）                                  | call+perm | supported               | supported                                      | missing（descriptor 存在，Host 未绑定 Schedule 读端口） |
+| `schedule_list`       | 同上 `.listEvents`                                           | `ScheduleListInput → ScheduleListOutput`              | `task.read`                                              | call+perm | supported               | supported                                      | missing（同上）                                         |
+| `schedule_create`     | `ScheduleEventApplicationPort.createEvent` → Schedule owner  | `ScheduleCreateInput → ScheduleWriteReceipt`          | `schedule.create` + `schedules:write`                    | call+perm | supported               | supported (scope)                              | supported (scope)                                       |
+| `schedule_update`     | 同上 `.updateEvent`（expectedVersion，仅元数据）             | `ScheduleUpdateInput → ScheduleWriteReceipt`          | `schedule.update` + `schedules:write`                    | call+perm | supported               | supported (scope)                              | supported (scope)                                       |
+| `schedule_reschedule` | 同上 `.updateEvent`（range + expectedVersion）               | `ScheduleRescheduleInput → ScheduleRescheduleReceipt` | `schedule.update` + `schedules:write`                    | call+perm | supported               | supported (scope)                              | supported (scope)                                       |
+| `schedule_delete`     | 同上 `.deleteEvent`（expectedVersion）                       | `ScheduleDeleteInput → ScheduleDeleteReceipt`         | `schedule.delete_permanent`（高风险）+ `schedules:write` | call+perm | supported（可交互确认） | blocked（持久 bearer 无 fresh human approval） | supported（scope，无交互通道时 fail closed）            |
 
-“睡前准备”类的 end-less Routine marker 只在 UI 投影层补展示时长并在当日 24:00 前裁切（`packages/schedule-ui/src/planner/PlannerCalendar.vue`），不修改源例程触发时间。
+证据：`apps/desktop/src/main/modules/ai/local-agent-domains.spec.ts`（`schedule write tools execute through the real Calendar owner and read back`，真实 PowerSync Schedule owner + 外部持久客户端 + 经 `schedule_get`/`schedule_list` 回读 + 过期版本 CONFLICT + 删除需确认）；`packages/agent-gateway/src/server/read-gateway.spec.ts`（`Schedule hosted write capability`，发布/拒绝与 audit）；`apps/api/src/modules/agent-gateway/schedule.port.spec.ts`（Hosted 绑定、所有权与 scope 拒绝、CONFLICT）。
+
+四个写工具共用同一个最小状态 receipt：创建/更新只返回 `id`、`version`、`updatedAt`，改期额外回显被接受的 `range`，删除返回 `id` + `deleted`；不返回 owner 完整 read model、identity 或审计字段。`schedules:write` 是新的 Local scope，只对新签发连接/客户端生效，不追溯扩大旧 token。`schedule_update` 只改标题、描述、地点与参与者，时间迁移只能走 `schedule_reschedule`，避免元数据补丁意外移动日程。Local 在每次调用前重新校验 connection revision 与 `schedules:write`；Hosted 由 credential scope 与 write authority 校验。删除不可恢复，因此按 #762 的高风险规则要求 fresh human approval：Local 原生 run 走交互确认，外部持久 token 不发布该工具，Hosted 在无交互通道时 fail closed。
+
+“…睡前准备”类的 end-less Routine marker 只在 UI 投影层补展示时长并在当日 24:00 前裁切（`packages/schedule-ui/src/planner/PlannerCalendar.vue`），不修改源例程触发时间。
 
 ### 3.6 Knowledge / Notes
 
@@ -161,7 +168,7 @@ updated: 2026-11-24T00:00:00Z
 | scope 不得替代高风险 fresh consent                         | #1077 已覆盖                                                 | `packages/ai/src/server/permissions/authorize.ts`                                                               |
 | 23:50 Routine 被延伸到次日 00:00                           | #1077 已覆盖（仅 UI 投影裁切，源触发时间不变）               | `packages/schedule-ui/src/planner/PlannerCalendar.vue:128`；`PlannerCalendar.spec.ts`                           |
 
-本页不重做上述实现；#1076 第 3–7 项中，Notification 一组已在第二步补齐（见 3.4），Schedule 写、Knowledge 草稿流、Governance UI 与完整验收仍为后续步骤。
+本页不重做上述实现；#1076 第 3–7 项中，Notification 一组已在第二步补齐（见 3.4），Schedule 写已在本步补齐（见 3.5），Knowledge 草稿流、Governance UI 与完整验收仍为后续步骤。
 
 ## 6. 验证证据
 
@@ -175,6 +182,17 @@ updated: 2026-11-24T00:00:00Z
 | `pnpm exec vitest run --project=ai packages/ai/src/server/permissions/authorize.spec.ts`                                                      | 7 passed |
 
 未验证：真实 Windows Desktop 安装、真实 ChatGPT Web 经 WSL tunnel 的端到端路径、主机重启/断连恢复。本页只声明代码路径与定向测试事实。
+
+### 6.1 Schedule 写（#1076 第三步，2026-11-24）
+
+新增/更新的定向测试（CI 执行）：
+
+- `pnpm exec vitest run --project=desktop apps/desktop/src/main/modules/ai/local-agent-domains.spec.ts`：真实 Schedule owner + 外部持久客户端 + 回读/冲突/删除确认。
+- `pnpm exec vitest run --project=api apps/api/src/modules/agent-gateway/schedule.port.spec.ts`：Hosted 绑定、所有权、scope 与 CONFLICT。
+- `pnpm exec vitest run --project=agent-gateway packages/agent-gateway/src/server/read-gateway.spec.ts`：descriptor 发布、scope 门禁、OAuth 开关与 audit。
+- `pnpm exec vitest run --project=ai packages/ai/src/server/permissions/permission-policy.spec.ts`：`schedule.delete_permanent` 高风险登记。
+
+本步在 dev 槽内无法执行 vitest（`node_modules/vitest/dist`、`vite/dist` 与 `oxfmt/dist` 缺文件，属该槽 ENOSPC 后的残留安装）。已执行的等效证据：`packages/agent-gateway` 全量 `tsc --noEmit`（含 spec）通过；用 Node 类型剥离 + 仓库 `paths` 加载真实源码，驱动 `registerWriteTools` → `bindScheduleWrites` → 真实 `ScheduleEventApplicationService`/`CalendarEntry` → `getEvent`/`listEvents` 回读，并调用真实 `authorize()` 验证 `schedules:write` 预授权普通写、`schedule.delete_permanent` 必须 ask。基线对照：`origin/main` 的 `write-tool-descriptors.ts` 中四个 `schedule_*` 写工具计数均为 0，本分支对应为 1。格式化未在本槽执行（oxfmt 缺失），提交前仅做人工 100 列换行与 `git diff --check`。
 
 ## 7. 维护规则
 

@@ -7,7 +7,7 @@ updated: 2026-11-24T00:00:00Z
 
 # External Agent PAT 连接
 
-本车道保留 PAT 与 45 个工具（23 个只读、17 个写、5 个 assisted），全部默认关闭；常规 Agent 连接另见 [OAuth 指南](./external-agent-oauth.md)。OAuth 也复用同一组 12 个 scope，写在 `EAG_OAUTH_WRITE_ENABLED=1` 时开放；见 [OAuth 写 consent 设计评估](../internals/external-agent-oauth-write-consent.md)。PAT 验证状态见 [EAG-03 证据](https://github.com/BakerSean168/memoflow/blob/7a45112e1840950ead1ba98b748fc70fa1b38344/docs/analysis/2026-10-07-eag-03-task-read-evidence.md)。受控开发入口为 `http://127.0.0.1:20201/mcp`，只适用于同机客户端。
+本车道保留 PAT 与 49 个工具（23 个只读、21 个写、5 个 assisted），全部默认关闭；常规 Agent 连接另见 [OAuth 指南](./external-agent-oauth.md)。OAuth 也复用同一组 13 个 scope，写在 `EAG_OAUTH_WRITE_ENABLED=1` 时开放；见 [OAuth 写 consent 设计评估](../internals/external-agent-oauth-write-consent.md)。PAT 验证状态见 [EAG-03 证据](https://github.com/BakerSean168/memoflow/blob/7a45112e1840950ead1ba98b748fc70fa1b38344/docs/analysis/2026-10-07-eag-03-task-read-evidence.md)。受控开发入口为 `http://127.0.0.1:20201/mcp`，只适用于同机客户端。
 
 在既有 `docker-compose.local.yml` prod-like 车道中配置 `EAG_READ_PILOT_ENABLED=1`、`EAG_AUDIENCE=http://127.0.0.1:20201/mcp` 和私密的至少 32 字符 `EAG_CURSOR_SECRET`，沿用 [本地 Docker 流程](./local-docker.md)。Task 注册由 `EAG_TASK_READ_ENABLED` 控制，默认开启；设为 0 可回退至 Goal 两工具。写与 assisted 分别由 `EAG_WRITE_ENABLED`、`EAG_ROUTINE_WRITE_ENABLED`、`EAG_ASSISTED_ENABLED` 控制，默认 `0`；完整顺序见 [Gateway runbook](../internals/external-agent-gateway.md#10-一期开启-runbook)。
 
@@ -55,7 +55,7 @@ tool_timeout_sec = 30
 
 写 scope 不隐含读 scope。`tasks:write` 包含既有 Task binding 的 Fixed/Prompt KR 派生贡献；创建或更改 binding 另需 `goals:write`，记录 Prompt measurement 另需 `goals:read`。PAT 设置界面的既有只读快捷入口不代表已选择写权限。
 
-写工具为 `goal_create`、`goal_update`、`goal_key_result_create`、`goal_key_result_update`、`task_plan_create`、`task_plan_update`、`task_occurrence_complete`、`routine_create`、`routine_update`、`routine_delete`、`routine_pause`、`routine_override`（Routine 写需 `routines:write` 且 `EAG_ROUTINE_WRITE_ENABLED=1`）、`notification_mark_read`、`notification_mark_unread`、`notification_archive`、`notification_restore`、`notification_preferences_update`（需 `notifications:write`；execute-action 不开放）。Assisted 工具为 `assisted_workflow_start/get/review/resume/cancel`（需 `tasks:write` 且 `EAG_ASSISTED_ENABLED=1`）。由 MCP 发现严格 input schema；Goal/Task/Routine 写入必须带 `idempotencyKey`，更新/删除/完成必须带调用者读取的 `expectedVersion`；Notification 写工具只接受单条 `id` 且自身幂等。KR 命令使用 Goal 的版本。
+写工具为 `goal_create`、`goal_update`、`goal_key_result_create`、`goal_key_result_update`、`task_plan_create`、`task_plan_update`、`task_occurrence_complete`、`routine_create`、`routine_update`、`routine_delete`、`routine_pause`、`routine_override`（Routine 写需 `routines:write` 且 `EAG_ROUTINE_WRITE_ENABLED=1`）、`notification_mark_read`、`notification_mark_unread`、`notification_archive`、`notification_restore`、`notification_preferences_update`（需 `notifications:write`；execute-action 不开放）、`schedule_create`、`schedule_update`、`schedule_reschedule`、`schedule_delete`（需 `schedules:write`；删除不可恢复，无交互通道时 fail closed）。Assisted 工具为 `assisted_workflow_start/get/review/resume/cancel`（需 `tasks:write` 且 `EAG_ASSISTED_ENABLED=1`）。由 MCP 发现严格 input schema；Goal/Task/Routine 写入必须带 `idempotencyKey`；Goal/Task/Routine 的更新/删除/完成与全部 Schedule 写工具必须带调用者读取的 `expectedVersion`；Notification 写工具只接受单条 `id` 且自身幂等，Schedule 创建不使用 `idempotencyKey`。KR 命令使用 Goal 的版本。
 
 写侧暂不开放标签写入：`task_plan_create` 与 `task_plan_update` 传入非空 `labelIds` 将明确返回 `VALIDATION_ERROR`。External Agent 二期仅开放 `labels:read` 用于查询与名称解析。
 

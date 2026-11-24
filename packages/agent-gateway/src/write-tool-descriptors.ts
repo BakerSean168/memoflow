@@ -27,6 +27,13 @@ import {
   NotificationRestoreOutputSchema,
   NotificationPreferencesInputSchema,
   NotificationPreferencesOutputSchema,
+  ScheduleCreateInputSchema,
+  ScheduleUpdateInputSchema,
+  ScheduleRescheduleInputSchema,
+  ScheduleDeleteInputSchema,
+  ScheduleWriteReceiptSchema,
+  ScheduleRescheduleReceiptSchema,
+  ScheduleDeleteReceiptSchema,
 } from './contracts';
 const annotations = {
   readOnlyHint: false,
@@ -176,6 +183,44 @@ export const writeToolDescriptors = {
       NotificationPreferencesInputSchema,
       NotificationPreferencesOutputSchema,
     ),
+  },
+  schedule_create: {
+    requiredScope: 'schedules:write',
+    definition: {
+      ...definition(
+        'Create one Calendar entry in the user’s Product Time zone. Retrying creates a second entry, so only retry after an explicit failure.',
+        ScheduleCreateInputSchema,
+        ScheduleWriteReceiptSchema,
+      ),
+      annotations: { ...annotations, idempotentHint: false },
+    },
+  },
+  schedule_update: {
+    requiredScope: 'schedules:write',
+    definition: definition(
+      'Patch the title, description, location or attendees of an owned Calendar entry using expectedVersion. The time range moves only through schedule_reschedule.',
+      ScheduleUpdateInputSchema,
+      ScheduleWriteReceiptSchema,
+    ),
+  },
+  schedule_reschedule: {
+    requiredScope: 'schedules:write',
+    definition: definition(
+      'Move an owned Calendar entry to a new range using expectedVersion. Returns the accepted range.',
+      ScheduleRescheduleInputSchema,
+      ScheduleRescheduleReceiptSchema,
+    ),
+  },
+  schedule_delete: {
+    requiredScope: 'schedules:write',
+    definition: {
+      ...definition(
+        'Permanently delete an owned Calendar entry using expectedVersion. This cannot be undone.',
+        ScheduleDeleteInputSchema,
+        ScheduleDeleteReceiptSchema,
+      ),
+      annotations: { ...annotations, destructiveHint: true, idempotentHint: false },
+    },
   },
 } as const;
 export type GatewayWriteToolName = keyof typeof writeToolDescriptors;

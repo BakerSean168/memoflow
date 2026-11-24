@@ -31,7 +31,7 @@ export interface ExternalAgentOAuthOptions {
 }
 
 /**
- * OAuth reuses the same twelve domain scopes as PAT (#1054). Read and write do
+ * OAuth reuses the same thirteen domain scopes as PAT (#1054). Read and write do
  * not imply each other, and write scopes are only reachable while the OAuth
  * write switch is on.
  */
@@ -50,6 +50,7 @@ export const EXTERNAL_AGENT_WRITE_SCOPES = [
   'tasks:write',
   'routines:write',
   'notifications:write',
+  'schedules:write',
 ] as const;
 export const EXTERNAL_AGENT_SCOPES = [
   ...EXTERNAL_AGENT_READ_SCOPES,

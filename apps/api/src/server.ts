@@ -58,6 +58,7 @@ import {
   bindNotificationReadPort,
   bindNotificationRestore,
 } from './modules/agent-gateway/notification.port';
+import { bindScheduleWrites } from './modules/agent-gateway/schedule.port';
 import {
   bindAgentArchiveReadPort,
   bindAssistantConversationReadPort,
@@ -525,6 +526,7 @@ async function bootstrap(): Promise<void> {
           notificationPreferencesUpdate: bindNotificationPreferencesUpdate(
             notificationApiModule.inbox,
           ),
+          ...bindScheduleWrites(scheduleApiModule.eventApi),
         }
       : undefined,
     oauthWrites: env.EAG_OAUTH_WRITE_ENABLED,

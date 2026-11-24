@@ -52,6 +52,7 @@ const scopeOptions = [
   'notifications:read',
   'schedules:read',
   'notifications:write',
+  'schedules:write',
   'labels:read',
   'relations:read',
 ] as const;
@@ -67,6 +68,7 @@ const selectedScopes = ref<Record<PatScope, boolean>>({
   'notifications:read': false,
   'schedules:read': false,
   'notifications:write': false,
+  'schedules:write': false,
   'labels:read': false,
   'relations:read': false,
 });
@@ -106,6 +108,7 @@ const scopeName = (scope: string) =>
     'notifications:read': t('account.externalAgents.scopes.notificationsRead'),
     'schedules:read': t('account.externalAgents.scopes.schedulesRead'),
     'notifications:write': t('account.externalAgents.scopes.notificationsWrite'),
+    'schedules:write': t('account.externalAgents.scopes.schedulesWrite'),
     'labels:read': t('account.externalAgents.scopes.labelsRead'),
     'relations:read': t('account.externalAgents.scopes.relationsRead'),
     offline_access: t('account.externalAgents.scopes.offlineAccess'),
