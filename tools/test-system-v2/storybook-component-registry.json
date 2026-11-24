@@ -955,6 +955,13 @@
       "kind": "component",
       "storyPath": "packages/setting-ui/src/components/AgentInstanceWizard.stories.ts",
       "status": "present"
+    },
+    {
+      "path": "packages/setting-ui/src/components/DataSettingsSection.vue",
+      "package": "@memoflow/setting-ui",
+      "kind": "component",
+      "storyPath": "packages/setting-ui/src/components/DataSettingsSection.stories.ts",
+      "status": "present"
     }
   ]
 }
