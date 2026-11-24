@@ -777,9 +777,9 @@ describe('DesktopProfileRuntimeManager', () => {
       expect(fs.existsSync(partitions.get(profile.profileId)!)).toBe(false);
       expect(await runtime.isProfileCleanupPending(profile.profileId)).toBe(false);
     }
-    expect(await fs.promises.readFile(path.join(partitions.get(current.profileId)!, 'Cookies'), 'utf8')).toBe(
-      current.profileId,
-    );
+    expect(
+      await fs.promises.readFile(path.join(partitions.get(current.profileId)!, 'Cookies'), 'utf8'),
+    ).toBe(current.profileId);
     expect(await runtime.hasCredential(current.profileId)).toBe(true);
     expect(runtime.getActiveProfileId()).toBe(current.profileId);
   }, 15_000);

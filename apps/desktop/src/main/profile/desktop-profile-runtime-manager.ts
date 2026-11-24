@@ -640,7 +640,10 @@ export class DesktopProfileRuntimeManager {
     await this.runCleanupStep('registry', () => this.profileRegistry.remove(profileId));
   }
 
-  private async runCleanupStep(stage: ProfileCleanupStage, step: () => Promise<void>): Promise<void> {
+  private async runCleanupStep(
+    stage: ProfileCleanupStage,
+    step: () => Promise<void>,
+  ): Promise<void> {
     try {
       await step();
     } catch (error) {

@@ -94,7 +94,11 @@ export function describeProfileCleanupFailure(error: unknown): ProfileCleanupFai
   if (error instanceof ProfileCleanupError) {
     return { stage: error.stage, category: error.category, systemCode: error.systemCode };
   }
-  return { stage: 'unknown', category: categorizeProfileCleanupError(error), systemCode: systemCodeOf(error) };
+  return {
+    stage: 'unknown',
+    category: categorizeProfileCleanupError(error),
+    systemCode: systemCodeOf(error),
+  };
 }
 
 /** Durable phase of a deletion request; diagnostic only, recovery is idempotent. */
@@ -249,7 +253,10 @@ export class ProfileCleanup {
       }
     }
     await this.removePath(trash, 'business-directory');
-    await this.removePath(path.join(this.roots.stateRoot, 'profiles', profileId), 'state-directory');
+    await this.removePath(
+      path.join(this.roots.stateRoot, 'profiles', profileId),
+      'state-directory',
+    );
     try {
       await syncProfileDirectory(path.dirname(source));
     } catch (error) {

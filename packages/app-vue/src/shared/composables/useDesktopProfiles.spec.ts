@@ -284,7 +284,7 @@ describe('useDesktopProfiles removal', () => {
     await flushPromises();
 
     expect(confirmMock).toHaveBeenCalledTimes(1);
-    expect(invoke).toHaveBeenCalledWith(ProfileAccessChannels.REMOVE, expect.anything(), {
+    expect(invoke).toHaveBeenCalledWith(ProfileAccessChannels.REMOVE, {
       profileId: 'other',
     });
     expect(invoke).toHaveBeenCalledWith(ProfileAccessChannels.LIST);
@@ -303,9 +303,7 @@ describe('useDesktopProfiles removal', () => {
     await presenter.removeProfile(profile('other'));
     await flushPromises();
 
-    expect(toast.success).toHaveBeenCalledWith(
-      auth.profileAccess.removedPendingPartitionCleanup,
-    );
+    expect(toast.success).toHaveBeenCalledWith(auth.profileAccess.removedPendingPartitionCleanup);
   });
 
   it('never offers to delete the active Profile', async () => {

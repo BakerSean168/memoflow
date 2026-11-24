@@ -31,10 +31,7 @@ const logger = createLogger('ProfileAccessIpc');
  * Raw system messages and paths never reach the renderer; the stage and system
  * code go to the main-process log instead.
  */
-const REMOVAL_FAILURES: Record<
-  ProfileCleanupErrorCategory,
-  { code: string; message: string }
-> = {
+const REMOVAL_FAILURES: Record<ProfileCleanupErrorCategory, { code: string; message: string }> = {
   IN_USE: {
     code: 'PROFILE_REMOVE_IN_USE',
     message: '账户数据仍被系统占用，剩余内容将在下次启动 MemoFlow 时自动清理。',

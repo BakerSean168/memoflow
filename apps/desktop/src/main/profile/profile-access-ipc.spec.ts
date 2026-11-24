@@ -401,16 +401,14 @@ describe('registerProfileAccessIpc', () => {
     });
     const runtime = {
       getActiveProfileId: vi.fn().mockReturnValue(null),
-      removeProfile: vi
-        .fn()
-        .mockRejectedValue(
-          new ProfileCleanupError(
-            'partition-directory',
-            Object.assign(new Error('EPERM: operation not permitted, rmdir C:\\Users\\x'), {
-              code: 'EPERM',
-            }),
-          ),
+      removeProfile: vi.fn().mockRejectedValue(
+        new ProfileCleanupError(
+          'partition-directory',
+          Object.assign(new Error('EPERM: operation not permitted, rmdir C:\\Users\\x'), {
+            code: 'EPERM',
+          }),
         ),
+      ),
     };
 
     registerProfileAccessIpc({} as never, runtime as never, {} as never);

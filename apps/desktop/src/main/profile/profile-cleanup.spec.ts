@@ -127,7 +127,9 @@ it.each(['rename', 'directory', 'session', 'pin', 'key', 'registry'] as const)(
       // Filesystem stages now raise a structured error; credential stages are
       // reported by the caller-supplied finalize and stay raw. Both must leave
       // the durable tombstone for the next launch.
-      await expect(new ProfileCleanup(roots, emptyPartition).remove(id, finalize)).rejects.toThrow();
+      await expect(
+        new ProfileCleanup(roots, emptyPartition).remove(id, finalize),
+      ).rejects.toThrow();
       expect(await new ProfileCleanup(roots, emptyPartition).isPending(id)).toBe(true);
       if (fault === 'rename' || fault === 'directory') expect(finalized).toEqual([]);
       // A restart never calls Session APIs again; recovery finishes on disk only.
@@ -224,10 +226,10 @@ it('falls back to clearStorageData and clearCache when Electron exposes no clear
   const clearCache = vi.fn(async () => undefined);
   const finalize = vi.fn(async () => undefined);
   try {
-    const outcome = await new ProfileCleanup(roots, () => ({ clearStorageData, clearCache })).remove(
-      id,
-      finalize,
-    );
+    const outcome = await new ProfileCleanup(roots, () => ({
+      clearStorageData,
+      clearCache,
+    })).remove(id, finalize);
     expect(clearStorageData).toHaveBeenCalledOnce();
     expect(clearCache).toHaveBeenCalledOnce();
     expect(finalize).toHaveBeenCalledOnce();
