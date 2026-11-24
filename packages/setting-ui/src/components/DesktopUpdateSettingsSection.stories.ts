@@ -62,10 +62,7 @@ function diagnostics(
   };
 }
 
-function renderSection(
-  initial: DesktopUpdateSnapshotDTO,
-  detail: DesktopUpdateDiagnosticsDTO,
-) {
+function renderSection(initial: DesktopUpdateSnapshotDTO, detail: DesktopUpdateDiagnosticsDTO) {
   return {
     components: { DesktopUpdateSettingsSection },
     setup() {

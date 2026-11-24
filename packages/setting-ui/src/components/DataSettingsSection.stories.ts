@@ -6,8 +6,7 @@ import { settingUiHost } from '../setting-ui-host';
 import DataSettingsSection from './DataSettingsSection.vue';
 
 const settingsService = {
-  exportSettings: async () =>
-    ok({ fileName: 'memoflow-preferences.json', data: '{}' }),
+  exportSettings: async () => ok({ fileName: 'memoflow-preferences.json', data: '{}' }),
   importSettings: async () => ok({ applied: [], skipped: [] }),
 };
 
