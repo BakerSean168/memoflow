@@ -65,6 +65,13 @@ import {
   NotificationPreferencesOutputSchema,
   NotificationRestoreInputSchema,
   NotificationRestoreOutputSchema,
+  ScheduleCreateInputSchema,
+  ScheduleUpdateInputSchema,
+  ScheduleRescheduleInputSchema,
+  ScheduleDeleteInputSchema,
+  ScheduleWriteReceiptSchema,
+  ScheduleRescheduleReceiptSchema,
+  ScheduleDeleteReceiptSchema,
   projectNotificationFact,
   projectNotificationPreferences,
   type GatewayWriteAuthority,
@@ -279,6 +286,12 @@ export function createDesktopLocalAgentTools(
       ? domains.notifications
       : undefined;
   const scheduleReadPort = domains?.schedules ? bindScheduleReadPort(domains.schedules) : undefined;
+  // Calendar writes need the owner command seam; a read-only binding cannot
+  // silently gain write methods.
+  const scheduleEventApi =
+    domains?.schedules && 'createEvent' in domains.schedules
+      ? (domains.schedules as ScheduleEventApplicationPort)
+      : undefined;
   const cursorSecret = randomBytes(32).toString('base64url');
   const assistantConversations = createAssistantConversationExternalReadPort(
     new LocalConversationExternalReadSource(db),
@@ -485,6 +498,24 @@ export function createDesktopLocalAgentTools(
         await context.authorize('notifications:write');
         return projectNotificationFact(ownerResult(await invoke()));
       };
+      // Calendar writes have the same shape: the connection revision and
+      // `schedules:write` are revalidated immediately before the owner call.
+      const scheduleWrite = async (
+        authority: GatewayWriteAuthority,
+        invoke: () => Promise<Result<unknown>>,
+      ) => {
+        if (!authority.scopes.includes('schedules:write')) throw new GatewayReadError('FORBIDDEN');
+        await context.authorize('schedules:write');
+        return ownerResult(await invoke());
+      };
+      const scheduleReceipt = (dto: unknown) => {
+        const row = dto as Record<string, unknown>;
+        return ScheduleWriteReceiptSchema.parse({
+          id: String(row.id),
+          version: row.version,
+          updatedAt: row.updatedAt,
+        });
+      };
       // The bridge revalidates the connection revision and the tool's write
       // scope inside every owner transaction; a port must never bypass it.
       const mutationAuthority = (
@@ -656,6 +687,58 @@ export function createDesktopLocalAgentTools(
               );
             }
           : undefined,
+        scheduleCreate: scheduleEventApi
+          ? async (input, cx, authority) => {
+              const parsed = ScheduleCreateInputSchema.parse(input);
+              return scheduleReceipt(
+                await scheduleWrite(authority, () => scheduleEventApi.createEvent(parsed, cx)),
+              );
+            }
+          : undefined,
+        scheduleUpdate: scheduleEventApi
+          ? async (input, cx, authority) => {
+              const parsed = ScheduleUpdateInputSchema.parse(input);
+              return scheduleReceipt(
+                await scheduleWrite(authority, () =>
+                  scheduleEventApi.updateEvent(
+                    parsed.id,
+                    { ...parsed.changes, expectedVersion: parsed.expectedVersion },
+                    cx,
+                  ),
+                ),
+              );
+            }
+          : undefined,
+        scheduleReschedule: scheduleEventApi
+          ? async (input, cx, authority) => {
+              const parsed = ScheduleRescheduleInputSchema.parse(input);
+              const dto = await scheduleWrite(authority, () =>
+                scheduleEventApi.updateEvent(
+                  parsed.id,
+                  { range: parsed.range, expectedVersion: parsed.expectedVersion },
+                  cx,
+                ),
+              );
+              const receipt = scheduleReceipt(dto);
+              return ScheduleRescheduleReceiptSchema.parse({
+                ...receipt,
+                range: (dto as Record<string, unknown>).range,
+              });
+            }
+          : undefined,
+        // Permanent deletion needs a fresh user approval every time. External
+        // persistent-token clients have no interactive approval channel, so the
+        // tool is not advertised to them at all.
+        scheduleDelete:
+          scheduleEventApi && context.origin !== 'client'
+            ? async (input, cx, authority) => {
+                const parsed = ScheduleDeleteInputSchema.parse(input);
+                await scheduleWrite(authority, () =>
+                  scheduleEventApi.deleteEvent(parsed.id, cx, parsed.expectedVersion),
+                );
+                return ScheduleDeleteReceiptSchema.parse({ id: parsed.id, deleted: true });
+              }
+            : undefined,
       };
       const writeAuthority: GatewayWriteAuthority = {
         connectionId: context.connectionId,
