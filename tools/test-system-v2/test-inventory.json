@@ -3560,6 +3560,14 @@
       "measurementCollectors": []
     },
     {
+      "path": "packages/ai-contracts/src/api/local-agent.dto.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/ai-contracts/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "packages/ai-contracts/src/api/local-agent.dto.test.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -14016,7 +14024,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 19
+      "fileCount": 20
     },
     {
       "id": "packages/ai-ui/vitest.config.ts",
@@ -15111,7 +15119,7 @@
   "duplicate": [],
   "unexpected": [],
   "counts": {
-    "unit": 1244,
+    "unit": 1245,
     "integration": 63,
     "smoke": 3,
     "boundary-ipc": 7,
