@@ -57,6 +57,14 @@ async function handleAppReady(
 
   const mainRuntime = getMainRuntime();
   const runtimeManager = mainRuntime.profileRuntimeManager;
+  // #1078: consume durable deletion tombstones before any window (and therefore
+  // any Session attached to a doomed partition) exists. This is the cold-start
+  // phase that physically removes the partition directories a live process
+  // cannot delete on Windows.
+  const cleanupRecovery = await runtimeManager.recoverPendingCleanups();
+  if (cleanupRecovery.attempted > 0) {
+    logger.info('Consumed pending Profile deletion tombstones', cleanupRecovery);
+  }
   registerKeyboardHandlers(() => runtimeManager.getActiveProfileResolver());
 
   // Profile Access is the startup gate. Local Profile access is the desktop

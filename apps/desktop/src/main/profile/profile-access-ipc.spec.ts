@@ -9,6 +9,7 @@ import { resolveDesktopStorageRoots } from '../paths/desktop-storage-roots';
 import { createSharedPathResolver } from '../paths/shared-path-resolver';
 import { registerProfileAccessIpc } from './profile-access-ipc';
 import { ProfileAutoEnterPreference } from './profile-auto-enter-preference';
+import { ProfileCleanupError } from './profile-cleanup';
 import { suppressProfileAutoEnterForLaunch } from './profile-auto-enter-suppression';
 
 const accessLogs = vi.hoisted(() => ({ info: vi.fn(), warn: vi.fn(), error: vi.fn() }));
@@ -223,6 +224,7 @@ describe('registerProfileAccessIpc', () => {
       getSharedResolver: () => sharedResolver,
       hasCredential: vi.fn(async () => true),
       hasRememberedKey: vi.fn(async (profileId: string) => profileId === 'local-remembered'),
+      isProfileCleanupPending: vi.fn(async () => false),
     };
     const registry = {
       list: vi.fn(async () => [
@@ -351,14 +353,14 @@ describe('registerProfileAccessIpc', () => {
     expect(runtime.removeProfile).not.toHaveBeenCalled();
   });
 
-  it('removes a non-active Profile', async () => {
+  it('removes a non-active Profile and reports the deferred partition cleanup honestly', async () => {
     const handlers = new Map<string, Handler>();
     vi.mocked(ipcMain.handle).mockImplementation((channel, handler) => {
       handlers.set(channel, handler as Handler);
     });
     const runtime = {
       getActiveProfileId: vi.fn().mockReturnValue(null),
-      removeProfile: vi.fn().mockResolvedValue(undefined),
+      removeProfile: vi.fn().mockResolvedValue({ partitionRemoved: false }),
     };
 
     registerProfileAccessIpc({} as never, runtime as never, {} as never);
@@ -369,8 +371,99 @@ describe('registerProfileAccessIpc', () => {
       },
     );
 
-    expect(result).toMatchObject({ ok: true });
+    expect(result).toMatchObject({
+      ok: true,
+      data: { state: 'removed-partition-pending' },
+    });
     expect(runtime.removeProfile).toHaveBeenCalledWith('profile-2');
+  });
+
+  it('reports a completed removal without pretending the partition is still owed', async () => {
+    const handlers = new Map<string, Handler>();
+    vi.mocked(ipcMain.handle).mockImplementation((channel, handler) => {
+      handlers.set(channel, handler as Handler);
+    });
+    const runtime = {
+      getActiveProfileId: vi.fn().mockReturnValue(null),
+      removeProfile: vi.fn().mockResolvedValue({ partitionRemoved: true }),
+    };
+
+    registerProfileAccessIpc({} as never, runtime as never, {} as never);
+    expect(
+      await handlers.get(ProfileAccessChannels.REMOVE)?.({}, { profileId: 'profile-2' }),
+    ).toMatchObject({ ok: true, data: { state: 'removed' } });
+  });
+
+  it('classifies a locked partition without exposing the system path or message', async () => {
+    const handlers = new Map<string, Handler>();
+    vi.mocked(ipcMain.handle).mockImplementation((channel, handler) => {
+      handlers.set(channel, handler as Handler);
+    });
+    const runtime = {
+      getActiveProfileId: vi.fn().mockReturnValue(null),
+      removeProfile: vi
+        .fn()
+        .mockRejectedValue(
+          new ProfileCleanupError(
+            'partition-directory',
+            Object.assign(new Error('EPERM: operation not permitted, rmdir C:\\Users\\x'), {
+              code: 'EPERM',
+            }),
+          ),
+        ),
+    };
+
+    registerProfileAccessIpc({} as never, runtime as never, {} as never);
+    const result = await handlers.get(ProfileAccessChannels.REMOVE)?.(
+      {},
+      { profileId: 'profile-2' },
+    );
+
+    expect(result).toMatchObject({
+      ok: false,
+      error: { code: 'PROFILE_REMOVE_IN_USE', message: expect.any(String) },
+    });
+    const message = (result as { error: { message: string } }).error.message;
+    expect(message).not.toContain('EPERM');
+    expect(message).not.toContain('C:');
+    expect(accessLogs.error).toHaveBeenCalledWith(
+      'Profile removal failed',
+      expect.objectContaining({
+        profileId: 'profile-2',
+        stage: 'partition-directory',
+        category: 'IN_USE',
+        systemCode: 'EPERM',
+      }),
+    );
+  });
+
+  it('hides a Profile whose deletion is already pending from the login list', async () => {
+    const handlers = new Map<string, Handler>();
+    vi.mocked(ipcMain.handle).mockImplementation((channel, handler) => {
+      handlers.set(channel, handler as Handler);
+    });
+    const descriptor = (profileId: string) => ({
+      profileId,
+      profileKind: 'registered' as const,
+      displayName: profileId,
+      avatarSeed: profileId,
+      identifier: null,
+      cloudBinding: null,
+      lastActiveAt: 1,
+      hasSnapshot: false,
+    });
+    const runtime = {
+      getSharedResolver: () => sharedResolver,
+      hasCredential: vi.fn(async () => false),
+      hasRememberedKey: vi.fn(async () => false),
+      isProfileCleanupPending: vi.fn(async (profileId: string) => profileId === 'doomed'),
+    };
+    const registry = { list: vi.fn(async () => [descriptor('doomed'), descriptor('healthy')]) };
+    registerProfileAccessIpc(registry as never, runtime as never, {} as never);
+
+    const result = await handlers.get(ProfileAccessChannels.LIST)?.({});
+    expect(result).toMatchObject({ ok: true, data: [{ profileId: 'healthy' }] });
+    expect((result as { data: unknown[] }).data).toHaveLength(1);
   });
 
   describe('automatic entry preference (#926)', () => {
@@ -392,6 +485,7 @@ describe('registerProfileAccessIpc', () => {
     const runtime = {
       hasRememberedKey: vi.fn(async (profileId: string) => profileId === 'local-remembered'),
       getSharedResolver: () => sharedResolver,
+      isProfileCleanupPending: vi.fn(async () => false),
     };
     const registry = { list: vi.fn(async () => profiles) };
 
@@ -427,6 +521,21 @@ describe('registerProfileAccessIpc', () => {
           },
         },
       );
+    });
+
+    it('never auto-enters an account whose deletion is pending', async () => {
+      const { handlers } = mount();
+      runtime.isProfileCleanupPending.mockImplementation(
+        async (profileId: string) => profileId === 'local-remembered',
+      );
+
+      await expect(handlers.get(ProfileAccessChannels.AUTO_ENTER_GET)?.({})).resolves.toMatchObject(
+        {
+          ok: true,
+          data: { candidates: [{ profileId: 'work', profileKind: 'registered' }] },
+        },
+      );
+      runtime.isProfileCleanupPending.mockImplementation(async () => false);
     });
 
     it('stores an eligible target and refuses a local account without remembered material', async () => {
