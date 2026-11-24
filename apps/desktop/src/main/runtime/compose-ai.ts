@@ -22,11 +22,16 @@ import type { ScheduleEventApplicationPort } from '@memoflow/schedule';
 import type { NotificationInboxPort } from '@memoflow/notification';
 import type { TaskApplicationPort } from '@memoflow/task';
 import type { LabelService } from '@memoflow/label';
-import type { GoalKnowledgeService, KnowledgeDocumentRefResolver } from '@memoflow/relation';
+import type {
+  GoalKnowledgeService,
+  KnowledgeDocumentRefResolver,
+  RelationService,
+} from '@memoflow/relation';
 import type { UserTimeContextPort } from '@memoflow/time';
 import {
   AIEvaluationReportFileAdapter,
   AIContextAssembler,
+  AgentInstanceReadService,
   createAIModule,
   createAIPowerSyncRepositories,
   createMastraStorage,
@@ -57,6 +62,8 @@ import { DesktopRoutineAICommandAdapter } from '../modules/ai/routine-command.ad
 import { DesktopPlannerAIReadAdapter } from '../modules/ai/planner-read.adapter';
 import { DesktopNotificationAIReadAdapter } from '../modules/ai/notification-read.adapter';
 import { DesktopSelectedEntityContextReadAdapter } from '../modules/ai/selected-entity-context-read.adapter';
+import { bindLocalLabelReadPort } from '../modules/ai/label-read.adapter';
+import { bindLocalAgentArchiveReadPort } from '../modules/ai/agent-archive-read.adapter';
 
 export interface ComposeAIElectronDependencies {
   readonly db: IElectronDatabase;
@@ -68,6 +75,7 @@ export interface ComposeAIElectronDependencies {
   readonly goalKnowledgeService: Pick<GoalKnowledgeService, 'link'>;
   readonly knowledgeDocumentRefResolver: KnowledgeDocumentRefResolver;
   readonly labelService: LabelService;
+  readonly relationService: Pick<RelationService, 'forward' | 'reverse'>;
   readonly routineCommandPort: RoutineCoachCommandPort;
   /** Schedule-owned Calendar Event read seam for Planner projections. */
   readonly scheduleEventApi: ScheduleEventApplicationPort;
@@ -121,6 +129,7 @@ export function composeAI(dependencies: ComposeAIElectronDependencies): Composed
     dependencies.labelService,
   );
   const agentRegistry = new AgentInstanceRegistry(agentInstanceRepository, 'desktop');
+  const agentArchiveRead = new AgentInstanceReadService(agentInstanceRepository);
   let mastraRuntime: MastraAIRuntime | undefined;
   try {
     mastraRuntime = new MastraAIRuntime({
@@ -184,6 +193,13 @@ export function composeAI(dependencies: ComposeAIElectronDependencies): Composed
       {
         notifications: dependencies.notificationInbox,
         schedules: dependencies.scheduleEventApi,
+        labels: bindLocalLabelReadPort(dependencies.labelService),
+        agents: bindLocalAgentArchiveReadPort(agentArchiveRead),
+        relations: {
+          service: dependencies.relationService,
+          knowledge: dependencies.knowledgeDocumentRefResolver,
+        },
+        knowledgeNotes: dependencies.knowledgeNotePersistence,
       },
     ),
     ...dependencies.localAgent,

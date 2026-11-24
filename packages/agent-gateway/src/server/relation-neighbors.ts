@@ -24,10 +24,7 @@ export interface RelationGatewaySource {
     identityId: string,
     subject: RelationGatewayNode,
   ): Promise<readonly RelationGatewayEdge[]>;
-  reverse(
-    identityId: string,
-    object: RelationGatewayNode,
-  ): Promise<readonly RelationGatewayEdge[]>;
+  reverse(identityId: string, object: RelationGatewayNode): Promise<readonly RelationGatewayEdge[]>;
 }
 
 /**
@@ -84,12 +81,7 @@ export function createRelationNeighborsReader(
       budget?: GatewayReadBudget,
     ): Promise<RelationNeighborsPage> {
       // 1. Check source node visibility.
-      const isSourceVisible = await isNodeVisible(
-        query.node,
-        context,
-        budget,
-        options.visibility,
-      );
+      const isSourceVisible = await isNodeVisible(query.node, context, budget, options.visibility);
       if (!isSourceVisible) return { items: [], hasMore: false };
 
       // 2. Fetch candidate edges from both directions.
@@ -159,7 +151,7 @@ export function createRelationNeighborsReader(
         if (!(await isNodeVisible(targetNodeRef, context, budget, options.visibility))) continue;
         visible.push({
           relationId: edge.relation.id,
-          relationType: edge.relation.relationType,
+          relationType: edge.relation.relationType as ExternalRelationNeighbor['relationType'],
           direction: edge.direction,
           targetNode: targetNodeRef,
           createdAt: edge.relation.createdAt,

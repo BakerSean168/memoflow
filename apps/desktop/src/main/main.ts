@@ -65,6 +65,7 @@ import {
   TaskKnowledgeService,
   PowerSyncRelationRepository,
   PowerSyncGoalRelationCleanupCapability,
+  RelationService,
 } from '@memoflow/relation';
 import { createGoalKnowledgeElectronModule } from './modules/relation/relation.electron-module';
 import { LocalVaultKnowledgeDocumentRefResolver } from './modules/relation/local-vault-knowledge-document-ref.resolver';
@@ -730,6 +731,7 @@ async function registerBusinessModules(
     taskApplicationPort: taskComposed.applicationPort,
     goalKnowledgeService,
     knowledgeDocumentRefResolver: localVaultKnowledgeRefResolver,
+    relationService: new RelationService(relationRepository),
     routineCommandPort: routineComposed.routineCommandPort,
     scheduleEventApi: scheduleComposed.eventApi,
     notificationInbox: notificationComposed.inbox,

@@ -8,9 +8,12 @@ import {
   LocalConversationExternalReadSource,
   createAssistantConversationExternalReadPort,
   registerLocalConversationReadTools,
+  LocalKnowledgeDraftRepository,
+  LocalKnowledgeDraftService,
   PermissionLocalRepository,
   permissionOperationForTool,
   goalPanelSubmitOperationId,
+  type IKnowledgeNotePersistencePort,
   type LocalToolContext,
 } from '@memoflow/ai';
 import type { IKnowledgeSourcePort, KnowledgeSourceNote } from '@memoflow/ai/ports';
@@ -79,16 +82,23 @@ import {
   type RoutineReadPort,
   type NotificationReadPort,
   type ScheduleReadPort,
+  type GoalReadPort,
+  type TaskReadPort,
+  type LabelReadPort,
+  type AgentArchiveReadPort,
 } from '@memoflow/agent-gateway';
 import type { NotificationInboxPort } from '@memoflow/notification';
 import type { ScheduleEventApplicationPort } from '@memoflow/schedule';
 import {
+  createRelationNeighborsReader,
   registerReadTools,
   registerWriteTools,
   registerWorkflowGuides,
   registerGoalPlanTools,
   type ReadToolCall,
 } from '@memoflow/agent-gateway/server';
+import type { KnowledgeDocumentRefResolver, RelationService } from '@memoflow/relation';
+import type { SubjectRef } from '@memoflow/relation-contracts';
 import type { Result } from '@memoflow/transport-contracts/result';
 import type { IElectronDatabase, IElectronDatabaseTransaction } from '@memoflow/desktop-contracts';
 import {
@@ -101,6 +111,13 @@ import {
   GoalPanelFocusCommandSchema,
   GoalPanelSubmitCommandSchema,
   KnowledgeContextSourceSchema,
+  KnowledgeDraftCreateInputSchema,
+  KnowledgeDraftUpdateInputSchema,
+  KnowledgeDraftGetInputSchema,
+  KnowledgeDraftDeliverInputSchema,
+  KnowledgeDraftOutputSchema,
+  KnowledgeDraftGetOutputSchema,
+  KnowledgeDraftDeliverReceiptSchema,
   type GoalPanelCommand,
 } from '@memoflow/ai-contracts';
 import { registerGoalPanelPresentation } from './present-goal-panel';
@@ -111,6 +128,14 @@ export interface DesktopLocalAgentToolsDomains {
   readonly routineQuery?: RoutineConfigurationQueryPort;
   readonly notifications?: NotificationReadPort | NotificationInboxPort;
   readonly schedules?: ScheduleReadPort | ScheduleEventApplicationPort;
+  readonly labels?: LabelReadPort;
+  readonly agents?: AgentArchiveReadPort;
+  readonly relations?: {
+    readonly service: Pick<RelationService, 'forward' | 'reverse'>;
+    readonly knowledge?: KnowledgeDocumentRefResolver;
+  };
+  /** Canonical confirmed-note write port; absent means drafts are unavailable. */
+  readonly knowledgeNotes?: IKnowledgeNotePersistencePort;
 }
 
 function isNotificationInbox(
@@ -256,6 +281,57 @@ export function createDesktopLocalAgentTools(
 ) {
   const tasks = createTaskPowerSyncReadQueries(db, time);
   const goals = createGoalPowerSyncPageQuery(db);
+  const goalReadPort: GoalReadPort = {
+    async getGoal(id, cx, budget) {
+      return ownerResult(await goals.getGoal(cx.identityId, id, budget));
+    },
+    async searchGoalPage(query, cx, budget) {
+      return ownerResult(await goals.searchGoalPage(cx.identityId, query, budget));
+    },
+  };
+  const taskReadPort: TaskReadPort = {
+    async getTaskPlan(id, cx, budget) {
+      return ownerResult(await tasks.getTaskPlan(cx.identityId, id, budget));
+    },
+    async searchTaskPlans(query, cx, budget) {
+      return ownerResult(await tasks.searchTaskPlans(cx.identityId, query, budget));
+    },
+    async getTaskOccurrence(id, cx, budget) {
+      return ownerResult(await tasks.getTaskOccurrence(cx.identityId, id, budget));
+    },
+    async listTaskOccurrences(query, cx, budget) {
+      return ownerResult(await tasks.listTaskOccurrences(cx.identityId, query, budget));
+    },
+  };
+  // Relation visibility reuses the same owner read ports as the tool surface,
+  // so an edge is only returned when both ends are readable by this identity.
+  const relationReadPort = domains?.relations
+    ? createRelationNeighborsReader({
+        relations: {
+          forward: (identityId, node) =>
+            domains.relations!.service.forward(identityId, node as SubjectRef),
+          reverse: (identityId, node) =>
+            domains.relations!.service.reverse(identityId, node as SubjectRef),
+        },
+        visibility: {
+          goal: async (id, cx, budget) => (await goalReadPort.getGoal(id, cx, budget)) !== null,
+          task: async (id, cx, budget) => (await taskReadPort.getTaskPlan(id, cx, budget)) !== null,
+          note: domains.relations.knowledge
+            ? async (id, identityId) => {
+                const documentId = KnowledgeDocumentIdSchema.safeParse(id);
+                if (!documentId.success) return false;
+                return (
+                  (await domains.relations!.knowledge!.resolve(identityId, documentId.data)) !==
+                  null
+                );
+              }
+            : undefined,
+        },
+      })
+    : undefined;
+  const knowledgeDrafts = domains?.knowledgeNotes
+    ? new LocalKnowledgeDraftService(new LocalKnowledgeDraftRepository(db), domains.knowledgeNotes)
+    : undefined;
   const goalWrites = createGoalPowerSyncAgentMutations(db);
   const taskWrites = createTaskPowerSyncAgentMutations(
     db,
@@ -436,6 +512,140 @@ export function createDesktopLocalAgentTools(
               return { note: { ...project(note), content: note.content } };
             }),
         );
+      }
+      if (knowledgeDrafts) {
+        type DraftCallResult = {
+          content: { type: 'text'; text: string }[];
+          structuredContent?: Record<string, unknown>;
+          isError?: boolean;
+        };
+        const draftCall = async (
+          toolName:
+            | 'knowledge_draft_get'
+            | 'knowledge_draft_create'
+            | 'knowledge_draft_update'
+            | 'knowledge_draft_deliver',
+          operationId: string,
+          scope: 'knowledge:read' | 'knowledge:write',
+          work: () => Promise<Record<string, unknown>>,
+        ): Promise<DraftCallResult> => {
+          try {
+            const value = await context.executeAuthorized(operationId, toolName, async () => {
+              await context.authorize(scope);
+              return context.track(work);
+            });
+            return {
+              content: [{ type: 'text' as const, text: JSON.stringify(value) }],
+              structuredContent: value,
+            };
+          } catch (error) {
+            const rawCode = error instanceof Error && 'code' in error ? error.code : undefined;
+            const parsedCode = GatewayFailureCodeSchema.safeParse(rawCode);
+            const code =
+              rawCode === 'LOCAL_AGENT_PERMISSION_DENIED'
+                ? 'PERMISSION_DENIED'
+                : parsedCode.success
+                  ? parsedCode.data
+                  : error instanceof z.ZodError
+                    ? 'VALIDATION_ERROR'
+                    : 'INTERNAL_ERROR';
+            return {
+              isError: true,
+              content: [{ type: 'text' as const, text: code }],
+              structuredContent: { error: { code } },
+            };
+          }
+        };
+        const draftRead = {
+          readOnlyHint: true,
+          destructiveHint: false,
+          idempotentHint: true,
+          openWorldHint: false,
+        };
+        const draftWrite = {
+          readOnlyHint: false,
+          destructiveHint: false,
+          idempotentHint: false,
+          openWorldHint: false,
+        };
+        server.registerTool(
+          'knowledge_draft_get',
+          {
+            description:
+              'Read one owned knowledge draft by id, including its current revision and reviewed Markdown. Foreign and missing ids both answer NOT_FOUND (a null draft).',
+            inputSchema: KnowledgeDraftGetInputSchema,
+            outputSchema: KnowledgeDraftGetOutputSchema,
+            annotations: draftRead,
+          },
+          (input) =>
+            draftCall('knowledge_draft_get', 'knowledge.get', 'knowledge:read', async () =>
+              KnowledgeDraftGetOutputSchema.parse({
+                draft: await knowledgeDrafts.get(context.identityId, input),
+              }),
+            ),
+        );
+        if (context.writeScopes.includes('knowledge:write')) {
+          server.registerTool(
+            'knowledge_draft_create',
+            {
+              description:
+                'Create an owned knowledge draft for later review. Nothing is written to the Vault until knowledge_draft_deliver is called with the reviewed revision.',
+              inputSchema: KnowledgeDraftCreateInputSchema,
+              outputSchema: KnowledgeDraftOutputSchema,
+              annotations: draftWrite,
+            },
+            (input) =>
+              draftCall(
+                'knowledge_draft_create',
+                'knowledge.note.create',
+                'knowledge:write',
+                async () =>
+                  KnowledgeDraftOutputSchema.parse({
+                    draft: await knowledgeDrafts.create(context.identityId, input),
+                  }) as unknown as Record<string, unknown>,
+              ),
+          );
+          server.registerTool(
+            'knowledge_draft_update',
+            {
+              description:
+                'Update a draft field set under an expectedRevision fence. A stale or already-delivered revision answers CONFLICT.',
+              inputSchema: KnowledgeDraftUpdateInputSchema,
+              outputSchema: KnowledgeDraftOutputSchema,
+              annotations: draftWrite,
+            },
+            (input) =>
+              draftCall(
+                'knowledge_draft_update',
+                'knowledge.note.update',
+                'knowledge:write',
+                async () =>
+                  KnowledgeDraftOutputSchema.parse({
+                    draft: await knowledgeDrafts.update(context.identityId, input),
+                  }) as unknown as Record<string, unknown>,
+              ),
+          );
+          server.registerTool(
+            'knowledge_draft_deliver',
+            {
+              description:
+                'Confirm one reviewed draft revision and create the note in the selected local Vault. The same revision is idempotent and never creates a duplicate note.',
+              inputSchema: KnowledgeDraftDeliverInputSchema,
+              outputSchema: KnowledgeDraftDeliverReceiptSchema,
+              annotations: draftWrite,
+            },
+            (input) =>
+              draftCall(
+                'knowledge_draft_deliver',
+                'knowledge.note.create',
+                'knowledge:write',
+                async () =>
+                  KnowledgeDraftDeliverReceiptSchema.parse(
+                    await knowledgeDrafts.deliver(context.identityId, input, context),
+                  ) as unknown as Record<string, unknown>,
+              ),
+          );
+        }
       }
       // Local AI sessions are read through the bounded projection only; the
       // provider credential and permission tables have no tool surface.
@@ -964,31 +1174,14 @@ export function createDesktopLocalAgentTools(
         server,
         {
           cursorSecret,
-          tasks: {
-            async getTaskPlan(id, cx, budget) {
-              return ownerResult(await tasks.getTaskPlan(cx.identityId, id, budget));
-            },
-            async searchTaskPlans(query, cx, budget) {
-              return ownerResult(await tasks.searchTaskPlans(cx.identityId, query, budget));
-            },
-            async getTaskOccurrence(id, cx, budget) {
-              return ownerResult(await tasks.getTaskOccurrence(cx.identityId, id, budget));
-            },
-            async listTaskOccurrences(query, cx, budget) {
-              return ownerResult(await tasks.listTaskOccurrences(cx.identityId, query, budget));
-            },
-          },
-          goals: {
-            async getGoal(id, cx, budget) {
-              return ownerResult(await goals.getGoal(cx.identityId, id, budget));
-            },
-            async searchGoalPage(query, cx, budget) {
-              return ownerResult(await goals.searchGoalPage(cx.identityId, query, budget));
-            },
-          },
+          tasks: taskReadPort,
+          goals: goalReadPort,
           routines: routineReads,
           ...(notificationReadPort ? { notifications: notificationReadPort } : {}),
           ...(scheduleReadPort ? { schedules: scheduleReadPort } : {}),
+          ...(domains?.labels ? { labels: domains.labels } : {}),
+          ...(domains?.agents ? { agents: domains.agents } : {}),
+          ...(relationReadPort ? { relations: relationReadPort } : {}),
         },
         context,
         { deadlineAt: context.deadlineAt, signal: context.signal },
@@ -998,6 +1191,9 @@ export function createDesktopLocalAgentTools(
           'routines:read',
           ...(notificationReadPort ? ['notifications:read'] : []),
           ...(scheduleReadPort ? ['schedules:read'] : []),
+          ...(domains?.labels ? ['labels:read'] : []),
+          ...(domains?.agents ? ['ai:read'] : []),
+          ...(relationReadPort ? ['relations:read'] : []),
         ],
         async (toolName, scope, work) => {
           try {

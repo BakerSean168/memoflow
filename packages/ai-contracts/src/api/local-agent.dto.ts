@@ -53,6 +53,7 @@ export const LocalAgentWriteScopeSchema = z.enum([
   'routines:write',
   'notifications:write',
   'schedules:write',
+  'knowledge:write',
 ]);
 export type LocalAgentWriteScope = z.infer<typeof LocalAgentWriteScopeSchema>;
 const nativePath = z
@@ -81,7 +82,7 @@ export const LocalAgentConnectionInputSchema = z
     homePath: nativePath.optional(),
     enabled: z.boolean(),
     nativePermissionMode: z.enum(['supervised', 'auto-approve']).optional(),
-    writeScopes: z.array(LocalAgentWriteScopeSchema).max(5).default([]),
+    writeScopes: z.array(LocalAgentWriteScopeSchema).max(6).default([]),
   })
   .strict();
 export type LocalAgentConnectionInput = z.infer<typeof LocalAgentConnectionInputSchema>;
