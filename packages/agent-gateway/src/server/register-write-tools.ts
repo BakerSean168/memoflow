@@ -10,6 +10,9 @@ import {
   NotificationArchiveOutputSchema,
   NotificationRestoreOutputSchema,
   NotificationPreferencesOutputSchema,
+  ScheduleWriteReceiptSchema,
+  ScheduleRescheduleReceiptSchema,
+  ScheduleDeleteReceiptSchema,
 } from '../contracts';
 import type { McpServer } from '@modelcontextprotocol/server';
 import type { ExecutionContext } from '@memoflow/transport-contracts';
@@ -185,6 +188,46 @@ export function registerWriteTools(
             NotificationPreferencesOutputSchema.parse(result),
           ),
         ),
+    );
+  }
+  const scheduleCreate = writes.scheduleCreate;
+  if (scheduleCreate && scopes.includes('schedules:write')) {
+    server.registerTool('schedule_create', d.schedule_create.definition, (input) =>
+      call('schedule_create', 'schedules:write', () =>
+        scheduleCreate(input, context, authority).then((result) =>
+          ScheduleWriteReceiptSchema.parse(result),
+        ),
+      ),
+    );
+  }
+  const scheduleUpdate = writes.scheduleUpdate;
+  if (scheduleUpdate && scopes.includes('schedules:write')) {
+    server.registerTool('schedule_update', d.schedule_update.definition, (input) =>
+      call('schedule_update', 'schedules:write', () =>
+        scheduleUpdate(input, context, authority).then((result) =>
+          ScheduleWriteReceiptSchema.parse(result),
+        ),
+      ),
+    );
+  }
+  const scheduleReschedule = writes.scheduleReschedule;
+  if (scheduleReschedule && scopes.includes('schedules:write')) {
+    server.registerTool('schedule_reschedule', d.schedule_reschedule.definition, (input) =>
+      call('schedule_reschedule', 'schedules:write', () =>
+        scheduleReschedule(input, context, authority).then((result) =>
+          ScheduleRescheduleReceiptSchema.parse(result),
+        ),
+      ),
+    );
+  }
+  const scheduleDelete = writes.scheduleDelete;
+  if (scheduleDelete && scopes.includes('schedules:write')) {
+    server.registerTool('schedule_delete', d.schedule_delete.definition, (input) =>
+      call('schedule_delete', 'schedules:write', () =>
+        scheduleDelete(input, context, authority).then((result) =>
+          ScheduleDeleteReceiptSchema.parse(result),
+        ),
+      ),
     );
   }
 }

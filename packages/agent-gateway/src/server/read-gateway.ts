@@ -234,7 +234,8 @@ export function createReadGateway(options: Options) {
                 (scope === 'goals:write' ||
                   scope === 'tasks:write' ||
                   scope === 'routines:write' ||
-                  scope === 'notifications:write')),
+                  scope === 'notifications:write' ||
+                  scope === 'schedules:write')),
           )
         )
           return reject(403, 'INSUFFICIENT_SCOPE');
@@ -352,6 +353,7 @@ export function createReadGateway(options: Options) {
             | 'tasks:write'
             | 'routines:write'
             | 'notifications:write'
+            | 'schedules:write'
             | 'ai:read'
             | 'relations:read',
           operation: () => Promise<T>,

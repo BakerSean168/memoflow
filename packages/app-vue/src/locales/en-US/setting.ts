@@ -724,6 +724,7 @@ export default {
       scopeGoals: 'Goal writes',
       scopeRoutines: 'Routine writes',
       scopeNotifications: 'Notification writes',
+      scopeSchedules: 'Calendar writes',
       create: 'Create connection',
       createClient: 'New client',
       createDescription:

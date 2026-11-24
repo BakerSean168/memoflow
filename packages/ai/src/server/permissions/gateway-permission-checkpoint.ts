@@ -16,6 +16,7 @@ const WRITE_SCOPE_BY_OBJECT: Partial<Record<PermissionObject, string>> = {
   task: 'tasks:write',
   routine: 'routines:write',
   notification: 'notifications:write',
+  schedule: 'schedules:write',
 };
 
 /**

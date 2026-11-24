@@ -27,6 +27,11 @@ import type {
   NotificationRestoreReceipt,
 } from './contracts/notifications';
 import type {
+  ScheduleWriteReceipt,
+  ScheduleRescheduleReceipt,
+  ScheduleDeleteReceipt,
+} from './contracts/schedule-writes';
+import type {
   GoalAgentPersistedReceipt,
   GoalClientDTO,
   GoalPage,
@@ -392,6 +397,11 @@ export interface GatewayWritePort {
   notificationRestore?: WriteCall<NotificationRestoreReceipt>;
   /** Delivery preference patch; the owner decides persistence and event fan-out. */
   notificationPreferencesUpdate?: WriteCall<import('./contracts').ExternalNotificationPreferences>;
+  /** Calendar entry writes; the owner enforces expectedVersion and version conflict. */
+  scheduleCreate?: WriteCall<ScheduleWriteReceipt>;
+  scheduleUpdate?: WriteCall<ScheduleWriteReceipt>;
+  scheduleReschedule?: WriteCall<ScheduleRescheduleReceipt>;
+  scheduleDelete?: WriteCall<ScheduleDeleteReceipt>;
 }
 
 /** Fully implemented lifecycle is supplied only behind the assisted rollout flag. */

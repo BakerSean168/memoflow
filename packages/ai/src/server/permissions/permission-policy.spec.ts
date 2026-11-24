@@ -379,6 +379,7 @@ describe('evaluatePermission', () => {
         'routine',
         'knowledge',
         'notification',
+        'schedule',
       ] as const) {
         expect(
           PERMISSION_OPERATIONS.find((candidate) => candidate.id === `${object}.delete_permanent`),

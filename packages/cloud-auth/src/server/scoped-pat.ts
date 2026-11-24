@@ -202,7 +202,7 @@ export function createScopedPatService(options: Options) {
         return null;
       if (
         pat.scopes.length < 1 ||
-        pat.scopes.length > 12 ||
+        pat.scopes.length > 13 ||
         new Set(pat.scopes).size !== pat.scopes.length ||
         pat.scopes.some(
           (scope) =>
@@ -217,6 +217,7 @@ export function createScopedPatService(options: Options) {
               'notifications:read',
               'schedules:read',
               'notifications:write',
+              'schedules:write',
               'labels:read',
               'relations:read',
             ].includes(scope),

@@ -76,7 +76,7 @@ describe('production external-agent OAuth composition', () => {
     });
   });
 
-  it('publishes all twelve shared scopes when the OAuth write switch is on', async () => {
+  it('publishes all thirteen shared scopes when the OAuth write switch is on', async () => {
     const memory: MemoryDB = Object.fromEntries(
       [
         'cloudAuthUser',
@@ -130,6 +130,7 @@ describe('production external-agent OAuth composition', () => {
         'tasks:write',
         'routines:write',
         'notifications:write',
+        'schedules:write',
       ],
     });
   });

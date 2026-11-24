@@ -64,6 +64,7 @@ export interface ReadToolCall {
       | 'ai:read'
       | 'routines:write'
       | 'notifications:write'
+      | 'schedules:write'
       | 'relations:read',
     work: () => Promise<T>,
   ): Promise<{

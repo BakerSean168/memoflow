@@ -5,6 +5,7 @@ export type PermissionObject =
   | 'routine'
   | 'knowledge'
   | 'notification'
+  | 'schedule'
   | 'label'
   | 'ai'
   | 'relation'
@@ -47,6 +48,16 @@ export const PERMISSION_OPERATIONS: readonly PermissionOperation[] = [
   { id: 'task.plan.create', object: 'task', action: 'create' },
   { id: 'task.plan.update', object: 'task', action: 'update' },
   { id: 'task.occurrence.complete', object: 'task', action: 'update' },
+  // Calendar entries are a separate owner: they are not recoverable once
+  // deleted, so only `.delete_permanent` may describe their removal.
+  { id: 'schedule.create', object: 'schedule', action: 'create' },
+  { id: 'schedule.update', object: 'schedule', action: 'update' },
+  {
+    id: 'schedule.delete_permanent',
+    object: 'schedule',
+    action: 'delete',
+    risks: ['delete_permanent'],
+  },
   { id: 'knowledge.search', object: 'knowledge', action: 'read' },
   { id: 'knowledge.get', object: 'knowledge', action: 'read' },
   { id: 'knowledge.note.create', object: 'knowledge', action: 'create' },
@@ -154,6 +165,10 @@ const TOOL_OPERATIONS: Readonly<Record<string, string>> = {
   notification_execute_action: 'notification.execute_action',
   schedule_get: 'task.read',
   schedule_list: 'task.read',
+  schedule_create: 'schedule.create',
+  schedule_update: 'schedule.update',
+  schedule_reschedule: 'schedule.update',
+  schedule_delete: 'schedule.delete_permanent',
   label_list: 'label.read',
   label_resolve_names: 'label.read',
   notification_mark_read: 'notification.update',

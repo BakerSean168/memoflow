@@ -74,12 +74,13 @@ export const CreateScopedPatSchema = z.strictObject({
         'notifications:read',
         'schedules:read',
         'notifications:write',
+        'schedules:write',
         'labels:read',
         'relations:read',
       ]),
     )
     .min(1)
-    .max(12)
+    .max(13)
     .refine((scopes) => new Set(scopes).size === scopes.length, 'Duplicate scopes')
     .default(['goals:read']),
 });
@@ -107,6 +108,7 @@ export const ScopedPatSummarySchema = z.object({
       'notifications:read',
       'schedules:read',
       'notifications:write',
+      'schedules:write',
       'labels:read',
       'relations:read',
     ]),
@@ -137,6 +139,7 @@ export const ExternalAgentScopeSchema = z.enum([
   'tasks:write',
   'routines:write',
   'notifications:write',
+  'schedules:write',
   'offline_access',
 ]);
 export const ExternalAgentConsentSchema = z.object({
@@ -356,6 +359,7 @@ export * from './goal-plan';
 export * from './routine-reads';
 export * from './notification-reads';
 export * from './schedule-reads';
+export * from './schedule-writes';
 
 export * from './assisted';
 
