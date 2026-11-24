@@ -67,7 +67,9 @@ const accountService = {
   closeAccount: async () => ok({ account, cloudIdentity: identity }),
 };
 
-function externalAgents(options: { oauth?: boolean; pats?: unknown[]; connections?: unknown[] } = {}) {
+function externalAgents(
+  options: { oauth?: boolean; pats?: unknown[]; connections?: unknown[] } = {},
+) {
   return {
     capabilities: async () => ok({ oauth: options.oauth ?? false }),
     listPats: async () => ok(options.pats ?? [pat]),

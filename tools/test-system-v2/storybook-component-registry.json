@@ -969,6 +969,20 @@
       "kind": "component",
       "storyPath": "packages/app-vue/src/views/AccountSettingsSection.stories.ts",
       "status": "present"
+    },
+    {
+      "path": "packages/account-ui/src/account/components/CloudPasswordSection.vue",
+      "package": "@memoflow/account-ui",
+      "kind": "component",
+      "storyPath": "packages/account-ui/src/account/components/CloudPasswordSection.stories.ts",
+      "status": "present"
+    },
+    {
+      "path": "packages/account-ui/src/account/components/ExternalAgentConnectionsSection.vue",
+      "package": "@memoflow/account-ui",
+      "kind": "component",
+      "storyPath": "packages/account-ui/src/account/components/ExternalAgentConnectionsSection.stories.ts",
+      "status": "present"
     }
   ]
 }
