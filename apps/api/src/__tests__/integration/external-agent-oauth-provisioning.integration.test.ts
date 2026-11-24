@@ -337,6 +337,139 @@ describe('OAuth client provisioning', () => {
 });
 
 /**
+ * `EAG_OAUTH_CLIENT_IDS` matches whole URLs, never hosts or prefixes. These
+ * cases pin that contract for the two ChatGPT entries: the Web client and the
+ * Codex CLI client are independent allowlist entries, and a look-alike id can
+ * neither fetch a document nor inherit either entry.
+ */
+describe('OAuth client allowlist exact matching', () => {
+  beforeEach(async () => {
+    await cleanAll();
+    await prisma.oauthClient.deleteMany();
+    await prisma.oauthResource.deleteMany();
+  });
+  const web = {
+    clientId: 'https://chatgpt.com/oauth/client.json',
+    redirectUri: 'https://chatgpt.com/connector_platform_oauth_redirect',
+    name: 'ChatGPT',
+  } as const;
+  const codex = {
+    clientId: 'https://chatgpt.com/oauth/codex/client.json',
+    redirectUri: 'http://127.0.0.1:1455/callback',
+    name: 'Codex CLI',
+  } as const;
+  const documents = new Map(
+    [web, codex].map(
+      (client) =>
+        [
+          client.clientId,
+          {
+            client_id: client.clientId,
+            client_name: client.name,
+            redirect_uris: [client.redirectUri],
+            grant_types: ['authorization_code', 'refresh_token'],
+            response_types: ['code'],
+            token_endpoint_auth_method: 'none',
+          },
+        ] as const,
+    ),
+  );
+  // Only the transport is replaced; document fetch, validation and persistence
+  // stay on the production path.
+  const cimdFetch = async (input: string) => {
+    const document = documents.get(input);
+    return document
+      ? Response.json(document)
+      : Response.json({ error: 'not_found' }, { status: 404 });
+  };
+
+  function authorizeRequest(api: Api, session: string, clientIdValue: string, redirectUri: string) {
+    const verifier = randomBytes(32).toString('base64url');
+    const query = new URLSearchParams({
+      client_id: clientIdValue,
+      redirect_uri: redirectUri,
+      response_type: 'code',
+      scope: 'goals:read tasks:read offline_access',
+      resource: api.resource,
+      code_challenge_method: 'S256',
+      code_challenge: createHash('sha256').update(verifier).digest('base64url'),
+      state: randomUUID(),
+    });
+    return fetch(`${api.issuer}/oauth2/authorize?${query}`, {
+      headers: { authorization: `Bearer ${session}`, accept: 'application/json' },
+    });
+  }
+
+  // A forged id is refused either by the CIMD fetch policy (4xx JSON) or, when
+  // the provider drops the malformed id before URL validation, by its error
+  // redirect (200 with `redirect: true`). Both must name `invalid_client` and
+  // must never hand out an authorization code.
+  function expectRejected(response: Response, body: string) {
+    if (response.status >= 400) {
+      expect(JSON.parse(body)).toMatchObject({ error: 'invalid_client' });
+      return;
+    }
+    expect(response.status, body).toBe(200);
+    const payload = z
+      .object({ redirect: z.literal(true), url: z.string() })
+      .parse(JSON.parse(body));
+    const url = new URL(payload.url);
+    expect(url.searchParams.get('error')).toBe('invalid_client');
+    expect(url.searchParams.get('code')).toBeNull();
+  }
+
+  it('accepts the exact Web CIMD and keeps the Codex entry independent', async () => {
+    const api = await startApi({
+      allowedClientIds: [web.clientId, codex.clientId],
+      cimdFetch,
+    });
+    try {
+      const [userId, session] = (await login()).split('\n') as [string, string];
+      const webToken = await issue(api, session, web);
+      expect(
+        await prisma.oauthClient.findUnique({ where: { clientId: web.clientId } }),
+      ).toMatchObject({ clientDiscoveryId: 'cimd', name: web.name });
+      expect(
+        await api.auth.externalAgents!.authenticate(`Bearer ${webToken.access_token}`),
+      ).toMatchObject({ identityId: userId, scopes: ['goals:read', 'tasks:read'] });
+
+      const codexToken = await issue(api, session, codex);
+      expect(
+        await prisma.oauthClient.findUnique({ where: { clientId: codex.clientId } }),
+      ).toMatchObject({ clientDiscoveryId: 'cimd', name: codex.name });
+      expect(
+        await api.auth.externalAgents!.authenticate(`Bearer ${codexToken.access_token}`),
+      ).toMatchObject({ identityId: userId, scopes: ['goals:read', 'tasks:read'] });
+    } finally {
+      api.server.close();
+    }
+  });
+
+  it.each([
+    ['trailing slash', 'https://chatgpt.com/oauth/client.json/'],
+    ['query suffix', 'https://chatgpt.com/oauth/client.json?client=other'],
+    ['look-alike host', 'https://chatgpt.com.evil.test/oauth/client.json'],
+    ['insecure scheme', 'http://chatgpt.com/oauth/client.json'],
+  ])('rejects a %s client id that is not allowlisted', async (_label, forgedClientId) => {
+    const api = await startApi({
+      allowedClientIds: [web.clientId, codex.clientId],
+      cimdFetch,
+    });
+    try {
+      const [, session] = (await login()).split('\n') as [string, string];
+      const response = await authorizeRequest(api, session, forgedClientId, web.redirectUri);
+      const body = await response.text();
+      expectRejected(response, body);
+      expect(await prisma.oauthClient.count()).toBe(0);
+      expect(await prisma.oauthConsent.count()).toBe(0);
+      expect(await prisma.externalAgentConnection.count()).toBe(0);
+    } finally {
+      api.server.close();
+    }
+  });
+});
+
+/**
  * Opt-in network check: `EAG_CIMD_E2E=1` fetches live Claude Code and ChatGPT Web
  * CIMD documents. It answers whether a CIMD client id creates its row during the
  * authorization request, so the runbook can rely on it instead of seeding.

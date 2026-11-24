@@ -2,7 +2,7 @@
 tags: [guide, development, mcp, oauth]
 description: ChatGPT Web、Codex 和 Claude Code 的 OAuth 连接、授权、读写开关与撤销
 created: 2026-10-07T00:00:00Z
-updated: 2026-11-22T00:00:00Z
+updated: 2026-11-24T00:00:00Z
 ---
 
 # External Agent OAuth 连接
@@ -40,14 +40,14 @@ CIMD 不代表软件可信背书。添加其他客户端前应核实身份与回
 
 ## ChatGPT Web 插件连接（#1060）
 
-ChatGPT Web 是独立 MCP 客户端，不使用 Codex CLI 的 `https://chatgpt.com/oauth/codex/client.json`。标准 CIMD client ID 为 `https://chatgpt.com/oauth/client.json`，真实元数据声明的回调为 `https://chatgpt.com/connector_platform_oauth_redirect`。ChatGPT 插件如果因回调配置改用 `https://chatgpt.com/oauth/{callback_id}/client.json`，先从插件管理页核对**精确 client ID、metadata 文档和 redirect URI**，并单独添加到 `EAG_OAUTH_CLIENT_IDS`；不能加入 `chatgpt.com` 通配符或随意预置不受控 redirect URI。CIMD 首次授权会按文档自动创建 OAuth client 行，不需要向数据库写入 ChatGPT 的密钥。
+ChatGPT Web 是独立 MCP 客户端，不使用 Codex CLI 的 `https://chatgpt.com/oauth/codex/client.json`。标准 CIMD client ID 为 `https://chatgpt.com/oauth/client.json`，稳定回调为 `https://chatgpt.com/connector_platform_oauth_redirect`；稳定回调要求 MemoFlow 的 `issuer` 与 `authorization_servers` 完全一致并在每个授权响应回传 `iss`（RFC 9207）。若工作区改用回调专用模式，ChatGPT 会换成 `https://chatgpt.com/oauth/{callback_id}/client.json` 与 `https://chatgpt.com/connector/oauth/{callback_id}`，先从插件管理页核对**精确 client ID、metadata 文档和 redirect URI**，再单独添加到 `EAG_OAUTH_CLIENT_IDS`；不能加入 `chatgpt.com` 通配符、callback 前缀通配或随意预置不受控 redirect URI。CIMD 首次授权会按文档自动创建 OAuth client 行，不需要向数据库写入 ChatGPT 的密钥。
 
 在具有自定义 MCP 插件权限的 ChatGPT Web 工作区：
 
 1. 打开 Plugins → `+` → Add custom MCP server，填写 MemoFlow 的**公网 HTTPS** `https://<api-host>/mcp`；选择 OAuth 和 CIMD 客户端注册，不要填写 PAT、用户登录 Cookie、服务端密钥或 `localhost`。
 2. 在 MemoFlow 登录页使用已验证邮箱的本人账号。首次连接先授权 `goals:read` / `tasks:read`，建议同时允许 `offline_access` 以便 refresh；在 ChatGPT 中先执行 `goal_search` 与 `task_plan_search`。发现工具或 Token 认证成功不代表写权限已生效。
 3. 需要创建或修改目标、任务时，在 API 上启用 `EAG_WRITE_ENABLED=1` 与 `EAG_OAUTH_WRITE_ENABLED=1` 并重新授权 `goals:write` / `tasks:write`。确认授权页面列出的客户端域名、精确 client ID 和副作用，仅勾选必要的权限。调用 `goal_create` / `task_plan_create` 成功须回显 durable receipt，使用 `goal_get` / `task_plan_get` 回读；最后核查 Desktop 的 PowerSync 同步。
-4. 授权或写入失败时先检查 `/mcp` HTTPS / Host、授权服务器与 protected-resource metadata、CIMD allowlist、scope / consent 和各开关。`EAG_OAUTH_WRITE_ENABLED=0` 会隐藏 OAuth 写工具并拒绝写入，但不影响读操作。ChatGPT 连接配置需在 ChatGPT 插件管理界面由用户完成，服务器部署无法代替用户完成 OAuth 同意。
+4. 授权或写入失败时先检查 `/mcp` HTTPS / Host、授权服务器与 protected-resource metadata、CIMD allowlist、scope / consent 和各开关；`issuer` 不一致、缺少 `iss` 或 `authorization_response_iss_parameter_supported` 未生效会让 ChatGPT 拒绝回跳。`EAG_OAUTH_WRITE_ENABLED=0` 会隐藏 OAuth 写工具并拒绝写入，但不影响读操作。ChatGPT 连接配置需在 ChatGPT 插件管理界面由用户完成，服务器部署无法代替用户完成 OAuth 同意。
 
 官方参考：[ChatGPT MCP 认证要求](https://developers.openai.com/plugins/build/auth) 和 [在 ChatGPT 中连接自定义 MCP](https://help.openai.com/en/articles/12584461-connecting-custom-mcp-servers-in-chatgpt)。`EAG_CIMD_E2E=1` 下的 `external-agent-oauth-provisioning.integration.test.ts` 可针对官方 ChatGPT / Claude 的真实 CIMD 文档执行隔离数据库验证；ChatGPT CIMD 会注册为 `private_key_jwt` 客户端，因此隔离测试仅验证真实元数据注册以及无签名 token 兑换被拒绝；真实 ChatGPT 必须通过签名的客户端断言完成 token 兑换。此测试不等于 ChatGPT Web 完整交互或实际生产部署验收。
 
