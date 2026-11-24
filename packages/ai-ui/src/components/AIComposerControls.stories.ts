@@ -135,9 +135,10 @@ export const ModelPickerOpen: Story = {
     const page = within(canvasElement.ownerDocument.body);
     await userEvent.click(await page.findByTestId('ai-chat-model-selector'));
     await page.findByTestId('ai-model-picker');
-    await expect(page.getByTestId('ai-model-picker-sidebar')).toBeVisible();
+    await waitFor(() => expect(page.getByTestId('ai-model-picker')).toBeVisible());
+    await waitFor(() => expect(page.getByTestId('ai-model-picker-sidebar')).toBeVisible());
     await expect(page.getByTestId('ai-model-picker-search')).toBeVisible();
-    await expect(page.getAllByTestId('ai-model-picker-option')).toHaveLength(2);
+    await waitFor(() => expect(page.getAllByTestId('ai-model-picker-option')).toHaveLength(2));
     await expect(page.getByTestId('ai-model-picker-footer')).toBeVisible();
     await expect(page.getByTestId('ai-model-picker-permissions')).toBeVisible();
   },
@@ -164,12 +165,12 @@ export const PermissionMenuOpen: Story = {
     await userEvent.click(await page.findByTestId('ai-chat-model-selector'));
     await userEvent.click(await page.findByTestId('ai-model-picker-permissions'));
     await page.findByTestId('ai-model-picker-permissions-menu');
+    await waitFor(() => expect(page.getByTestId('ai-model-picker-permissions-menu')).toBeVisible());
     await expect(page.getByTestId('ai-model-picker-permission-approval-required')).toHaveAttribute(
       'aria-checked',
       'true',
     );
     await expect(page.getByTestId('ai-permission-preview')).not.toBeEmptyDOMElement();
-    await expect(page.getByTestId('ai-model-picker-permissions-menu')).toBeVisible();
   },
 };
 
@@ -190,12 +191,12 @@ export const NativeModelOptions: Story = {
     await expect(page.getByTestId('ai-chat-model-effort-label')).toHaveTextContent('high');
     await userEvent.click(trigger);
     await page.findByTestId('ai-model-picker');
-    await expect(page.getByTestId('ai-model-picker-speed')).toBeVisible();
+    await waitFor(() => expect(page.getByTestId('ai-model-picker-speed')).toBeVisible());
     await expect(page.getByTestId('ai-model-picker-speed-priority')).toHaveAttribute(
       'aria-checked',
       'true',
     );
-    await expect(page.getByTestId('ai-model-picker-options')).toBeVisible();
+    await waitFor(() => expect(page.getByTestId('ai-model-picker-options')).toBeVisible());
   },
 };
 
