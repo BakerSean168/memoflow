@@ -929,6 +929,62 @@
       "status": "present"
     },
     {
+      "path": "packages/setting-ui/src/components/ExternalMcpClients.vue",
+      "package": "@memoflow/setting-ui",
+      "kind": "component",
+      "storyPath": "packages/setting-ui/src/components/ExternalMcpClients.stories.ts",
+      "status": "present"
+    },
+    {
+      "path": "packages/setting-ui/src/components/AIPermissionSettings.vue",
+      "package": "@memoflow/setting-ui",
+      "kind": "component",
+      "storyPath": "packages/setting-ui/src/components/AIPermissionSettings.stories.ts",
+      "status": "present"
+    },
+    {
+      "path": "packages/setting-ui/src/components/DesktopUpdateSettingsSection.vue",
+      "package": "@memoflow/setting-ui",
+      "kind": "component",
+      "storyPath": "packages/setting-ui/src/components/DesktopUpdateSettingsSection.stories.ts",
+      "status": "present"
+    },
+    {
+      "path": "packages/setting-ui/src/components/AgentInstanceWizard.vue",
+      "package": "@memoflow/setting-ui",
+      "kind": "component",
+      "storyPath": "packages/setting-ui/src/components/AgentInstanceWizard.stories.ts",
+      "status": "present"
+    },
+    {
+      "path": "packages/setting-ui/src/components/DataSettingsSection.vue",
+      "package": "@memoflow/setting-ui",
+      "kind": "component",
+      "storyPath": "packages/setting-ui/src/components/DataSettingsSection.stories.ts",
+      "status": "present"
+    },
+    {
+      "path": "packages/setting-ui/src/components/AccountSettingsSection.vue",
+      "package": "@memoflow/setting-ui",
+      "kind": "component",
+      "storyPath": "packages/app-vue/src/views/AccountSettingsSection.stories.ts",
+      "status": "present"
+    },
+    {
+      "path": "packages/account-ui/src/account/components/CloudPasswordSection.vue",
+      "package": "@memoflow/account-ui",
+      "kind": "component",
+      "storyPath": "packages/account-ui/src/account/components/CloudPasswordSection.stories.ts",
+      "status": "present"
+    },
+    {
+      "path": "packages/account-ui/src/account/components/ExternalAgentConnectionsSection.vue",
+      "package": "@memoflow/account-ui",
+      "kind": "component",
+      "storyPath": "packages/account-ui/src/account/components/ExternalAgentConnectionsSection.stories.ts",
+      "status": "present"
+    },
+    {
       "path": "packages/goal-ui/src/components/dialogs/GoalRecordDialog.vue",
       "package": "@memoflow/goal-ui",
       "kind": "component",
