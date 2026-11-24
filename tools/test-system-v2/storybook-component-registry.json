@@ -962,6 +962,13 @@
       "kind": "component",
       "storyPath": "packages/setting-ui/src/components/DataSettingsSection.stories.ts",
       "status": "present"
+    },
+    {
+      "path": "packages/setting-ui/src/components/AccountSettingsSection.vue",
+      "package": "@memoflow/setting-ui",
+      "kind": "component",
+      "storyPath": "packages/app-vue/src/views/AccountSettingsSection.stories.ts",
+      "status": "present"
     }
   ]
 }
