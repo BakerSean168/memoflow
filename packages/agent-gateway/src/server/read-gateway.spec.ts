@@ -949,6 +949,13 @@ describe('Notification and Schedule read capability', () => {
         hasMore: false,
       }),
       getUnreadCount: vi.fn().mockResolvedValue(1),
+      getPreferences: vi.fn().mockResolvedValue({
+        globalChannels: { InApp: true },
+        workflowOverrides: {},
+        quietHours: null,
+        version: 1,
+        updatedAt: 1,
+      }),
     };
     const schedules = {
       getSchedule: vi.fn().mockResolvedValue(schedule),
@@ -1183,19 +1190,81 @@ describe('Notification hosted read and mark-read capability', () => {
       credentialType,
       scopes,
     });
-    const listNotifications = vi.fn().mockResolvedValue({
-      items: [fact],
+    const state = {
+      ...fact,
+      id: fact.id as string,
+      isRead: fact.isRead as boolean,
+      readAt: fact.readAt as number | null,
+      archivedAt: fact.archivedAt as number | null,
+      version: fact.version as number,
+      updatedAt: fact.updatedAt as number,
+    };
+    const listNotifications = vi.fn(async () => ({
+      items: [{ ...state }],
       total: 1,
       page: 1,
       pageSize: 20,
       hasMore: false,
-    });
-    const getUnreadCount = vi.fn().mockResolvedValue(3);
-    const getNotification = vi.fn().mockResolvedValue(fact);
+    }));
+    const getUnreadCount = vi.fn(async () => (state.isRead ? 0 : 3));
+    const getNotification = vi.fn(async () => ({ ...state }));
+    const preferences = {
+      globalChannels: { InApp: true } as Record<string, boolean>,
+      workflowOverrides: {} as Record<string, Record<string, boolean>>,
+      quietHours: null,
+      version: 1,
+      updatedAt: 1,
+    };
+    const getPreferences = vi.fn(async () => ({ ...preferences }));
     const markAsRead = vi.fn(
       async (_input: unknown, _cx: ExecutionContext, authority: GatewayWriteAuthority) => {
         await authority.authorize();
-        return { id: fact.id, isRead: true, readAt: 5, version: 2, updatedAt: 6 };
+        state.isRead = true;
+        state.readAt = 5;
+        state.version = 2;
+        state.updatedAt = 6;
+        return { id: state.id, isRead: true, readAt: 5, version: 2, updatedAt: 6 };
+      },
+    );
+    const markAsUnread = vi.fn(
+      async (_input: unknown, _cx: ExecutionContext, authority: GatewayWriteAuthority) => {
+        await authority.authorize();
+        state.isRead = false;
+        state.readAt = null;
+        state.version = 3;
+        state.updatedAt = 7;
+        return { id: state.id, isRead: false, readAt: null, version: 3, updatedAt: 7 };
+      },
+    );
+    const archive = vi.fn(
+      async (_input: unknown, _cx: ExecutionContext, authority: GatewayWriteAuthority) => {
+        await authority.authorize();
+        state.archivedAt = 4;
+        state.version = 4;
+        state.updatedAt = 8;
+        return { id: state.id, archivedAt: 4, version: 4, updatedAt: 8 };
+      },
+    );
+    const restore = vi.fn(
+      async (_input: unknown, _cx: ExecutionContext, authority: GatewayWriteAuthority) => {
+        await authority.authorize();
+        state.archivedAt = null;
+        state.version = 5;
+        state.updatedAt = 9;
+        return { id: state.id, archivedAt: null, version: 5, updatedAt: 9 };
+      },
+    );
+    const updatePreferences = vi.fn(
+      async (
+        input: { globalChannels?: Record<string, boolean> },
+        _cx: ExecutionContext,
+        authority: GatewayWriteAuthority,
+      ) => {
+        await authority.authorize();
+        Object.assign(preferences.globalChannels, input.globalChannels ?? {});
+        preferences.version = 2;
+        preferences.updatedAt = 10;
+        return { ...preferences };
       },
     );
     const unavailable = vi.fn().mockRejectedValue(new Error('Unexpected owner'));
@@ -1208,17 +1277,26 @@ describe('Notification hosted read and mark-read capability', () => {
       taskUpdate: unavailable,
       taskComplete: unavailable,
       notificationMarkRead: markAsRead,
+      notificationMarkUnread: markAsUnread,
+      notificationArchive: archive,
+      notificationRestore: restore,
+      notificationPreferencesUpdate: updatePreferences,
     };
     return {
       ...f,
       listNotifications,
       getUnreadCount,
       getNotification,
+      getPreferences,
       markAsRead,
+      markAsUnread,
+      archive,
+      restore,
+      updatePreferences,
       gateway: createReadGateway({
         ...f.options,
         oauthWrites,
-        notifications: { listNotifications, getUnreadCount, getNotification },
+        notifications: { listNotifications, getUnreadCount, getNotification, getPreferences },
         writes,
       }),
     };
@@ -1233,9 +1311,16 @@ describe('Notification hosted read and mark-read capability', () => {
       'notification_get',
       'notification_list',
       'notification_unread_count',
+      'notification_preferences_get',
     ]);
     const writes = notificationFixture(['notifications:write']);
-    expect(await names(writes.gateway)).toEqual(['notification_mark_read']);
+    expect(await names(writes.gateway)).toEqual([
+      'notification_mark_read',
+      'notification_mark_unread',
+      'notification_archive',
+      'notification_restore',
+      'notification_preferences_update',
+    ]);
     const goalsOnly = notificationFixture(['goals:read']);
     expect(await names(goalsOnly.gateway)).not.toContain('notification_list');
     const oauth = notificationFixture(['notifications:read', 'notifications:write'], 'oauth');
@@ -1243,6 +1328,7 @@ describe('Notification hosted read and mark-read capability', () => {
       'notification_get',
       'notification_list',
       'notification_unread_count',
+      'notification_preferences_get',
     ]);
     const oauthWrites = notificationFixture(
       ['notifications:read', 'notifications:write'],
@@ -1253,7 +1339,12 @@ describe('Notification hosted read and mark-read capability', () => {
       'notification_get',
       'notification_list',
       'notification_unread_count',
+      'notification_preferences_get',
       'notification_mark_read',
+      'notification_mark_unread',
+      'notification_archive',
+      'notification_restore',
+      'notification_preferences_update',
     ]);
   });
   it('bounds page and limit, rejects injected identity and projects the owner whitelist', async () => {
@@ -1371,6 +1462,83 @@ describe('Notification hosted read and mark-read capability', () => {
       ).status,
     ).toBe(200);
     expect(enabled.markAsRead).toHaveBeenCalledTimes(1);
+  });
+  it('exposes unread, archive, restore and preferences with owner state read back', async () => {
+    const f = notificationFixture();
+    const unread = await f.gateway.fetch(
+      request('tools/call', { id: fact.id }, 'notification_mark_unread'),
+      context,
+    );
+    expect(await unread.json()).toMatchObject({
+      result: { structuredContent: { id: fact.id, isRead: false, readAt: null, version: 3 } },
+    });
+    const unreadReadBack = await (
+      await f.gateway.fetch(request('tools/call', { id: fact.id }, 'notification_get'), context)
+    ).json();
+    expect(unreadReadBack.result.structuredContent.notification).toMatchObject({
+      id: fact.id,
+      isRead: false,
+      readAt: null,
+    });
+
+    const archived = await f.gateway.fetch(
+      request('tools/call', { id: fact.id }, 'notification_archive'),
+      context,
+    );
+    expect(await archived.json()).toMatchObject({
+      result: { structuredContent: { id: fact.id, archivedAt: 4, version: 4 } },
+    });
+    const archivedReadBack = await (
+      await f.gateway.fetch(request('tools/call', { id: fact.id }, 'notification_get'), context)
+    ).json();
+    expect(archivedReadBack.result.structuredContent.notification.archivedAt).toBe(4);
+
+    const restored = await f.gateway.fetch(
+      request('tools/call', { id: fact.id }, 'notification_restore'),
+      context,
+    );
+    expect(await restored.json()).toMatchObject({
+      result: { structuredContent: { id: fact.id, archivedAt: null, version: 5 } },
+    });
+    const restoredReadBack = await (
+      await f.gateway.fetch(request('tools/call', { id: fact.id }, 'notification_get'), context)
+    ).json();
+    expect(restoredReadBack.result.structuredContent.notification.archivedAt).toBeNull();
+
+    const updated = await f.gateway.fetch(
+      request(
+        'tools/call',
+        { globalChannels: { InApp: false, Desktop: true } },
+        'notification_preferences_update',
+      ),
+      context,
+    );
+    expect(await updated.json()).toMatchObject({
+      result: {
+        structuredContent: {
+          globalChannels: { InApp: false, Desktop: true },
+          version: 2,
+          updatedAt: 10,
+        },
+      },
+    });
+    const preferencesReadBack = await (
+      await f.gateway.fetch(request('tools/call', {}, 'notification_preferences_get'), context)
+    ).json();
+    expect(preferencesReadBack.result.structuredContent.globalChannels).toMatchObject({
+      InApp: false,
+      Desktop: true,
+    });
+    expect(f.audit).toHaveBeenCalledWith(
+      expect.objectContaining({ tool: 'notification_archive', effect: 'write', outcome: 'OK' }),
+    );
+    expect(f.audit).toHaveBeenCalledWith(
+      expect.objectContaining({
+        tool: 'notification_preferences_update',
+        effect: 'write',
+        outcome: 'OK',
+      }),
+    );
   });
 });
 

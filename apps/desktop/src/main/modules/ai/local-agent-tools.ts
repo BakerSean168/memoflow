@@ -55,7 +55,18 @@ import {
   GatewayRoutineDeleteSchema,
   GatewayRoutinePauseSchema,
   GatewayRoutineOverrideSchema,
+  NotificationArchiveInputSchema,
+  NotificationArchiveOutputSchema,
+  NotificationMarkReadInputSchema,
+  NotificationMarkReadOutputSchema,
+  NotificationMarkUnreadInputSchema,
+  NotificationMarkUnreadOutputSchema,
+  NotificationPreferencesInputSchema,
+  NotificationPreferencesOutputSchema,
+  NotificationRestoreInputSchema,
+  NotificationRestoreOutputSchema,
   projectNotificationFact,
+  projectNotificationPreferences,
   type GatewayWriteAuthority,
   type GatewayWritePort,
   type RoutineReadPort,
@@ -93,6 +104,12 @@ export interface DesktopLocalAgentToolsDomains {
   readonly routineQuery?: RoutineConfigurationQueryPort;
   readonly notifications?: NotificationReadPort | NotificationInboxPort;
   readonly schedules?: ScheduleReadPort | ScheduleEventApplicationPort;
+}
+
+function isNotificationInbox(
+  port: NotificationReadPort | NotificationInboxPort,
+): port is NotificationInboxPort {
+  return 'createNotification' in port && 'markAsRead' in port && 'updatePreferences' in port;
 }
 
 function bindNotificationReadPort(
@@ -147,6 +164,9 @@ function bindNotificationReadPort(
           : typeof (data as { unreadCount?: number })?.unreadCount === 'number'
             ? (data as { unreadCount: number }).unreadCount
             : 0;
+    },
+    async getPreferences(cx) {
+      return projectNotificationPreferences(ownerResult(await inbox.getPreferences(cx.identityId)));
     },
   };
 }
@@ -254,6 +274,10 @@ export function createDesktopLocalAgentTools(
   const notificationReadPort = domains?.notifications
     ? bindNotificationReadPort(domains.notifications)
     : undefined;
+  const notificationInbox =
+    domains?.notifications && isNotificationInbox(domains.notifications)
+      ? domains.notifications
+      : undefined;
   const scheduleReadPort = domains?.schedules ? bindScheduleReadPort(domains.schedules) : undefined;
   const cursorSecret = randomBytes(32).toString('base64url');
   const assistantConversations = createAssistantConversationExternalReadPort(
@@ -449,6 +473,18 @@ export function createDesktopLocalAgentTools(
         connectionId: string;
         authorize(tx: IElectronDatabaseTransaction): Promise<void>;
       };
+      // Notification lifecycle calls have no owner transaction boundary in the
+      // desktop module, so the connection revision and write scope are
+      // revalidated immediately before each owner call.
+      const notificationTransition = async (
+        authority: GatewayWriteAuthority,
+        invoke: () => Promise<Result<unknown>>,
+      ) => {
+        if (!authority.scopes.includes('notifications:write'))
+          throw new GatewayReadError('FORBIDDEN');
+        await context.authorize('notifications:write');
+        return projectNotificationFact(ownerResult(await invoke()));
+      };
       // The bridge revalidates the connection revision and the tool's write
       // scope inside every owner transaction; a port must never bypass it.
       const mutationAuthority = (
@@ -549,6 +585,77 @@ export function createDesktopLocalAgentTools(
             mutationAuthority('routines:write'),
           );
         },
+        notificationMarkRead: notificationInbox
+          ? async (input, cx, authority) => {
+              const { id } = NotificationMarkReadInputSchema.parse(input);
+              const fact = await notificationTransition(authority, () =>
+                notificationInbox.markAsRead(id, cx.identityId),
+              );
+              return NotificationMarkReadOutputSchema.parse({
+                id: fact.id,
+                isRead: fact.isRead,
+                readAt: fact.readAt,
+                version: fact.version,
+                updatedAt: fact.updatedAt,
+              });
+            }
+          : undefined,
+        notificationMarkUnread: notificationInbox
+          ? async (input, cx, authority) => {
+              const { id } = NotificationMarkUnreadInputSchema.parse(input);
+              const fact = await notificationTransition(authority, () =>
+                notificationInbox.markAsUnread(id, cx.identityId),
+              );
+              return NotificationMarkUnreadOutputSchema.parse({
+                id: fact.id,
+                isRead: fact.isRead,
+                readAt: fact.readAt,
+                version: fact.version,
+                updatedAt: fact.updatedAt,
+              });
+            }
+          : undefined,
+        notificationArchive: notificationInbox
+          ? async (input, cx, authority) => {
+              const { id } = NotificationArchiveInputSchema.parse(input);
+              const fact = await notificationTransition(authority, () =>
+                notificationInbox.archive(id, cx.identityId),
+              );
+              return NotificationArchiveOutputSchema.parse({
+                id: fact.id,
+                archivedAt: fact.archivedAt,
+                version: fact.version,
+                updatedAt: fact.updatedAt,
+              });
+            }
+          : undefined,
+        notificationRestore: notificationInbox
+          ? async (input, cx, authority) => {
+              const { id } = NotificationRestoreInputSchema.parse(input);
+              const fact = await notificationTransition(authority, () =>
+                notificationInbox.restore(id, cx.identityId),
+              );
+              return NotificationRestoreOutputSchema.parse({
+                id: fact.id,
+                archivedAt: fact.archivedAt,
+                version: fact.version,
+                updatedAt: fact.updatedAt,
+              });
+            }
+          : undefined,
+        notificationPreferencesUpdate: notificationInbox
+          ? async (input, cx, authority) => {
+              const patch = NotificationPreferencesInputSchema.parse(input);
+              if (!authority.scopes.includes('notifications:write'))
+                throw new GatewayReadError('FORBIDDEN');
+              await context.authorize('notifications:write');
+              return NotificationPreferencesOutputSchema.parse(
+                projectNotificationPreferences(
+                  ownerResult(await notificationInbox.updatePreferences(patch, cx.identityId)),
+                ),
+              );
+            }
+          : undefined,
       };
       const writeAuthority: GatewayWriteAuthority = {
         connectionId: context.connectionId,

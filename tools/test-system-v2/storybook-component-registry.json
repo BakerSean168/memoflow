@@ -1018,6 +1018,69 @@
       "kind": "component",
       "storyPath": "packages/repository-ui/src/views/KnowledgeProjectionWorkspaceView.stories.ts",
       "status": "present"
+    },
+    {
+      "path": "packages/app-vue/src/layouts/shell/BusinessPanel.vue",
+      "package": "@memoflow/app-vue",
+      "kind": "component",
+      "storyPath": "packages/app-vue/src/layouts/shell/BusinessPanel.stories.ts",
+      "status": "present"
+    },
+    {
+      "path": "packages/app-vue/src/layouts/shell/TodayOverviewPanel.vue",
+      "package": "@memoflow/app-vue",
+      "kind": "component",
+      "storyPath": "packages/app-vue/src/layouts/shell/TodayOverviewPanel.stories.ts",
+      "status": "present"
+    },
+    {
+      "path": "packages/app-vue/src/layouts/shell/SyncStatusIndicator.vue",
+      "package": "@memoflow/app-vue",
+      "kind": "component",
+      "storyPath": "packages/app-vue/src/layouts/shell/SyncStatusIndicator.stories.ts",
+      "status": "present"
+    },
+    {
+      "path": "packages/app-vue/src/layouts/shell/GlobalComposer.vue",
+      "package": "@memoflow/app-vue",
+      "kind": "component",
+      "storyPath": "packages/app-vue/src/layouts/shell/GlobalComposer.stories.ts",
+      "status": "present"
+    },
+    {
+      "path": "packages/ai-ui/src/components/AIComposerControls.vue",
+      "package": "@memoflow/ai-ui",
+      "kind": "component",
+      "storyPath": "packages/ai-ui/src/components/AIComposerControls.stories.ts",
+      "status": "present"
+    },
+    {
+      "path": "packages/ai-ui/src/components/AIMessageContent.vue",
+      "package": "@memoflow/ai-ui",
+      "kind": "component",
+      "storyPath": "packages/ai-ui/src/components/AIMessageContent.stories.ts",
+      "status": "present"
+    },
+    {
+      "path": "packages/ai-ui/src/components/AIGoalWorkflowPanel.vue",
+      "package": "@memoflow/ai-ui",
+      "kind": "component",
+      "storyPath": "packages/ai-ui/src/components/AIGoalWorkflowPanel.stories.ts",
+      "status": "present"
+    },
+    {
+      "path": "packages/ai-ui/src/components/AITaskWorkflowPanel.vue",
+      "package": "@memoflow/ai-ui",
+      "kind": "component",
+      "storyPath": "packages/ai-ui/src/components/AITaskWorkflowPanel.stories.ts",
+      "status": "present"
+    },
+    {
+      "path": "packages/ai-ui/src/components/AIKnowledgeCapturePanel.vue",
+      "package": "@memoflow/ai-ui",
+      "kind": "component",
+      "storyPath": "packages/ai-ui/src/components/AIKnowledgeCapturePanel.stories.ts",
+      "status": "present"
     }
   ]
 }

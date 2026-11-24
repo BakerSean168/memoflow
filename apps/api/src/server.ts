@@ -51,8 +51,12 @@ import { bindGoalReadPort } from './modules/agent-gateway/goal-read.port';
 import { bindRelationReadPort } from './modules/agent-gateway/relation-read.port';
 import { bindLabelReadPort } from './modules/agent-gateway/label-read.port.js';
 import {
+  bindNotificationArchive,
   bindNotificationMarkRead,
+  bindNotificationMarkUnread,
+  bindNotificationPreferencesUpdate,
   bindNotificationReadPort,
+  bindNotificationRestore,
 } from './modules/agent-gateway/notification.port';
 import {
   bindAgentArchiveReadPort,
@@ -515,6 +519,12 @@ async function bootstrap(): Promise<void> {
             oauthWriteEnabled: env.EAG_OAUTH_WRITE_ENABLED,
           }),
           notificationMarkRead: bindNotificationMarkRead(notificationApiModule.inbox),
+          notificationMarkUnread: bindNotificationMarkUnread(notificationApiModule.inbox),
+          notificationArchive: bindNotificationArchive(notificationApiModule.inbox),
+          notificationRestore: bindNotificationRestore(notificationApiModule.inbox),
+          notificationPreferencesUpdate: bindNotificationPreferencesUpdate(
+            notificationApiModule.inbox,
+          ),
         }
       : undefined,
     oauthWrites: env.EAG_OAUTH_WRITE_ENABLED,
