@@ -95,10 +95,10 @@ ID 使用稳定 snake_case，内部 capability ID 可采用 `goal.get` 等命名
 | W1   | `notification_mark_read/mark_unread` | Notification / notifications:write | 切换已读/未读（幂等）；execute-action 动作执行不开放（留三期评估）                                                                      |
 | W1   | `notification_archive/restore`       | Notification / notifications:write | 可恢复的归档生命周期（幂等）                                                                                                            |
 | W1   | `notification_preferences_update`    | Notification / notifications:write | 有界偏好补丁（≤50 workflow overrides、≤14 静默窗口）                                                                                    |
-| W1   | `schedule_create`                    | Schedule / schedules:write         | 创建单个日历条目；不使用 idempotencyKey，重试会产生第二条记录                                                                            |
-| W1   | `schedule_update`                    | Schedule / schedules:write         | 仅补丁标题/描述/地点/参与者 + expectedVersion；时间迁移走 `schedule_reschedule`                                                          |
-| W1   | `schedule_reschedule`                | Schedule / schedules:write         | 以 expectedVersion 迁移时间范围并回显被接受的 range                                                                                      |
-| W1   | `schedule_delete`                    | Schedule / schedules:write         | expectedVersion；不可恢复的永久删除，无交互通道的宿主 fail closed                                                                        |
+| W1   | `schedule_create`                    | Schedule / schedules:write         | 创建单个日历条目；不使用 idempotencyKey，重试会产生第二条记录                                                                           |
+| W1   | `schedule_update`                    | Schedule / schedules:write         | 仅补丁标题/描述/地点/参与者 + expectedVersion；时间迁移走 `schedule_reschedule`                                                         |
+| W1   | `schedule_reschedule`                | Schedule / schedules:write         | 以 expectedVersion 迁移时间范围并回显被接受的 range                                                                                     |
+| W1   | `schedule_delete`                    | Schedule / schedules:write         | expectedVersion；不可恢复的永久删除，无交互通道的宿主 fail closed                                                                       |
 | A1   | `assisted_workflow_start`            | Task / tasks:write                 | 启动或恢复一个受审核的 Task planning run                                                                                                |
 | A1   | `assisted_workflow_get`              | Task / tasks:write                 | 读取自有 run 的当前 revision                                                                                                            |
 | A1   | `assisted_workflow_review`           | Task / tasks:write                 | 读取待决定的 typed ask 或 Task draft                                                                                                    |
@@ -266,7 +266,7 @@ Elapsed/ActiveUsage/专注 protocol 需要设备本地执行，暂不通过 Host
 | `EAG_AUDIENCE`                      | `https://<api-host>/mcp` | 必须是 HTTPS 的规范 origin + `/mcp`；其 host 必须与请求 `Host` 一致，否则 403            |
 | `EAG_CURSOR_SECRET`                 | 随机 ≥32 字节            | 分页游标密钥；跨重启保持稳定                                                             |
 | `EAG_TASK_READ_ENABLED`             | `1`                      | Task 只读工具；默认已为 `1`                                                              |
-| `EAG_WRITE_ENABLED`                 | `1`                      | 发布 Goal/Task/Notification/Schedule 写工具（Routine 写另由下一项控制）                         |
+| `EAG_WRITE_ENABLED`                 | `1`                      | 发布 Goal/Task/Notification/Schedule 写工具（Routine 写另由下一项控制）                  |
 | `EAG_ROUTINE_WRITE_ENABLED`         | `1`                      | 在 writes 打开的前提下发布 Routine 写工具（create/update/delete/pause/override）         |
 | `EAG_ASSISTED_ENABLED`              | `1`                      | 发布 5 个 assisted 工具；要求 durable AI workflow runtime，否则启动失败                  |
 | `EAG_OAUTH_ENABLED`                 | 可选 `1`                 | 需要总开关、`AUTH_BASE_URL`（HTTPS `/api/auth`）与 `MEMOFLOW_WEB_URL`                    |

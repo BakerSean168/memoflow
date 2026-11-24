@@ -37,10 +37,7 @@ function receipt(dto: unknown) {
  * One owner transition: the credential scope is rechecked and the write
  * authority revalidates the credential immediately before the owner call.
  */
-async function transition(
-  authority: GatewayWriteAuthority,
-  call: () => Promise<Result<unknown>>,
-) {
+async function transition(authority: GatewayWriteAuthority, call: () => Promise<Result<unknown>>) {
   if (!authority.scopes.includes('schedules:write')) throw new GatewayReadError('FORBIDDEN');
   await authority.authorize();
   return unwrapOwner(await call());
@@ -51,7 +48,9 @@ async function transition(
  * caller supplies no identity: ownership comes from the ExecutionContext, so
  * another owner's entries cannot be reached.
  */
-export function bindScheduleWrites(port: ScheduleEventApplicationPort): Required<
+export function bindScheduleWrites(
+  port: ScheduleEventApplicationPort,
+): Required<
   Pick<
     GatewayWritePort,
     'scheduleCreate' | 'scheduleUpdate' | 'scheduleReschedule' | 'scheduleDelete'

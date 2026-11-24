@@ -1958,11 +1958,7 @@ describe('Schedule hosted write capability', () => {
     expect(writer.entries.get('schedule-1')?.title).toBe('Team Sync v2');
 
     const rescheduled = await writer.gateway.fetch(
-      request(
-        'tools/call',
-        { id: 'schedule-1', expectedVersion: 2, range },
-        'schedule_reschedule',
-      ),
+      request('tools/call', { id: 'schedule-1', expectedVersion: 2, range }, 'schedule_reschedule'),
       context,
     );
     expect(await rescheduled.json()).toMatchObject({
