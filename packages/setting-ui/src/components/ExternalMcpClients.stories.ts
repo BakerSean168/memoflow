@@ -144,12 +144,21 @@ export const EndpointError: Story = {
   render: () => renderSection({ endpoint: null, endpointError: 'LOCAL_MCP_PORT_IN_USE' }),
 };
 
+/** The create action stays disabled until the endpoint resolves; wait, then open. */
+async function openCreateDialog() {
+  const open = await screen.findByTestId('ai-external-mcp-create-open');
+  await waitFor(() => {
+    if ((open as HTMLButtonElement).disabled) throw new Error('create action still disabled');
+  });
+  await userEvent.click(open);
+  await screen.findByTestId('ai-external-mcp-create-form');
+}
+
 /** Create form open and waiting for input. */
 export const CreateDialog: Story = {
   render: () => renderSection(),
   play: async () => {
-    await userEvent.click(await screen.findByTestId('ai-external-mcp-create-open'));
-    await screen.findByTestId('ai-external-mcp-create-form');
+    await openCreateDialog();
   },
 };
 
@@ -160,7 +169,7 @@ export const IssuedCredential: Story = {
       create: async () => ({ ...demoCredential, client: { ...demoCredential.client } }),
     }),
   play: async () => {
-    await userEvent.click(await screen.findByTestId('ai-external-mcp-create-open'));
+    await openCreateDialog();
     await userEvent.type(await screen.findByTestId('ai-external-mcp-name'), 'Demo CLI');
     await waitFor(() => {
       const submit = screen.getByTestId('ai-external-mcp-create') as HTMLButtonElement;
