@@ -157,7 +157,7 @@ export const Recovery: Story = {
     const page = within(canvasElement.ownerDocument.body);
     await expect(page.getByTestId('knowledge-capture-workflow-recovery')).toBeVisible();
     await expect(page.getByTestId('knowledge-capture-workflow-recovery')).toHaveTextContent(
-      'Execution failed (WRITE_FAILED)',
+      'Workflow execution failed (WRITE_FAILED)',
     );
     await expect(page.getByTestId('knowledge-capture-agent-retry-execution')).toBeVisible();
     await expect(page.getByTestId('knowledge-capture-agent-cancel-remaining')).toBeVisible();
