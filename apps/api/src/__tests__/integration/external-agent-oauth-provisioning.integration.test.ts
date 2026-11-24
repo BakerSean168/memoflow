@@ -354,17 +354,20 @@ describe('OAuth client allowlist exact matching', () => {
     name: 'Codex CLI',
   } as const;
   const documents = new Map(
-    [web, codex].map((client) => [
-      client.clientId,
-      {
-        client_id: client.clientId,
-        client_name: client.name,
-        redirect_uris: [client.redirectUri],
-        grant_types: ['authorization_code', 'refresh_token'],
-        response_types: ['code'],
-        token_endpoint_auth_method: 'none',
-      },
-    ]),
+    [web, codex].map(
+      (client) =>
+        [
+          client.clientId,
+          {
+            client_id: client.clientId,
+            client_name: client.name,
+            redirect_uris: [client.redirectUri],
+            grant_types: ['authorization_code', 'refresh_token'],
+            response_types: ['code'],
+            token_endpoint_auth_method: 'none',
+          },
+        ] as const,
+    ),
   );
   // Only the transport is replaced; document fetch, validation and persistence
   // stay on the production path.
