@@ -343,6 +343,11 @@ describe('OAuth client provisioning', () => {
  * neither fetch a document nor inherit either entry.
  */
 describe('OAuth client allowlist exact matching', () => {
+  beforeEach(async () => {
+    await cleanAll();
+    await prisma.oauthClient.deleteMany();
+    await prisma.oauthResource.deleteMany();
+  });
   const web = {
     clientId: 'https://chatgpt.com/oauth/client.json',
     redirectUri: 'https://chatgpt.com/connector_platform_oauth_redirect',
@@ -395,6 +400,24 @@ describe('OAuth client allowlist exact matching', () => {
     });
   }
 
+  // A forged id is refused either by the CIMD fetch policy (4xx JSON) or, when
+  // the provider drops the malformed id before URL validation, by its error
+  // redirect (200 with `redirect: true`). Both must name `invalid_client` and
+  // must never hand out an authorization code.
+  function expectRejected(response: Response, body: string) {
+    if (response.status >= 400) {
+      expect(JSON.parse(body)).toMatchObject({ error: 'invalid_client' });
+      return;
+    }
+    expect(response.status, body).toBe(200);
+    const payload = z
+      .object({ redirect: z.literal(true), url: z.string() })
+      .parse(JSON.parse(body));
+    const url = new URL(payload.url);
+    expect(url.searchParams.get('error')).toBe('invalid_client');
+    expect(url.searchParams.get('code')).toBeNull();
+  }
+
   it('accepts the exact Web CIMD and keeps the Codex entry independent', async () => {
     const api = await startApi({
       allowedClientIds: [web.clientId, codex.clientId],
@@ -436,8 +459,10 @@ describe('OAuth client allowlist exact matching', () => {
       const [, session] = (await login()).split('\n') as [string, string];
       const response = await authorizeRequest(api, session, forgedClientId, web.redirectUri);
       const body = await response.text();
-      expect(response.status, body).toBeGreaterThanOrEqual(400);
+      expectRejected(response, body);
       expect(await prisma.oauthClient.count()).toBe(0);
+      expect(await prisma.oauthConsent.count()).toBe(0);
+      expect(await prisma.externalAgentConnection.count()).toBe(0);
     } finally {
       api.server.close();
     }
