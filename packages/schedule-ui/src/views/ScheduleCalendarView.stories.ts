@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/vue3-vite';
 import { expect, userEvent, within } from 'storybook/test';
-import { provide } from 'vue';
+import { provide, type InjectionKey } from 'vue';
 import type { CalendarEntryClientDTO } from '@memoflow/schedule-contracts';
 import type { GoalClientDTO } from '@memoflow/goal-contracts';
 import type { TaskOccurrenceClientDTO, TaskPlanClientDTO } from '@memoflow/task-contracts';
@@ -9,20 +9,21 @@ import {
   createMockTaskOccurrence,
   createMockTaskPlan,
 } from '@memoflow/task-contracts/test-support/task.mock';
+import type { ScheduleClientPort } from '@memoflow/schedule-client';
 import {
-  GOAL_SERVICE_KEY,
-  ROUTINE_SERVICE_KEY,
-  SCHEDULE_SERVICE_KEY,
-  TASK_SERVICE_KEY,
-} from '../../../app-vue/src/di/keys';
-import type {
-  IGoalService,
-  IRoutineService,
-  IScheduleService,
-  ITaskService,
-} from '../../../app-vue/src/di/types';
+  scheduleUiHost,
+  type RoutineUpcomingSourcePort,
+  type ScheduleGoalPort,
+} from '../schedule-ui-host';
+// The application shell composes Schedule with the Task facade; this story
+// mirrors that seam without mounting the full shell. Both UI packages meet only
+// through the injection key owned by the Task host.
+// eslint-disable-next-line @nx/enforce-module-boundaries
+import { taskUiHost } from '@memoflow/task-ui/host';
 import ScheduleCalendarView from './ScheduleCalendarView.vue';
 import { createScheduleStoryEvent } from '../components/story-fixtures';
+
+type InjectionValue<K> = K extends InjectionKey<infer V> ? V : never;
 
 type CalendarStoryParameters = {
   mode?: 'ready' | 'empty';
@@ -137,26 +138,26 @@ const taskOccurrence: TaskOccurrenceClientDTO = createMockTaskOccurrence({
 function installCalendarPorts(parameters: CalendarStoryParameters) {
   const entries =
     parameters.mode === 'empty' ? [] : parameters.overlapping ? overlapEntries : baseEntries;
-  provide(SCHEDULE_SERVICE_KEY, {
+  provide(scheduleUiHost.SCHEDULE_SERVICE_KEY, {
     getSchedulesByAccount: async () => ({ ok: true, data: entries }),
-  } as unknown as IScheduleService);
-  provide(TASK_SERVICE_KEY, {
+  } as unknown as ScheduleClientPort);
+  provide(taskUiHost.TASK_SERVICE_KEY, {
     listOccurrencesByDateRange: async () => ({
       ok: true,
       data: parameters.mode === 'empty' ? [] : [taskOccurrence],
     }),
     listPlans: async () => ({ ok: true, data: { plans: [taskPlan], total: 1 } }),
-  } as unknown as ITaskService);
-  provide(GOAL_SERVICE_KEY, {
+  } as unknown as InjectionValue<typeof taskUiHost.TASK_SERVICE_KEY>);
+  provide(scheduleUiHost.GOAL_SERVICE_KEY, {
     listGoals: async () => ({
       ok: true,
       data: { goals: parameters.mode === 'empty' ? [] : [goal], pagination: { hasMore: false } },
     }),
     updateGoal: async () => ({ ok: true, data: {} }),
-  } as unknown as IGoalService);
-  provide(ROUTINE_SERVICE_KEY, {
+  } as unknown as ScheduleGoalPort);
+  provide(scheduleUiHost.ROUTINE_SERVICE_KEY, {
     getUpcomingOccurrences: async () => ({ ok: true, data: { occurrences: [] } }),
-  } as unknown as IRoutineService);
+  } as unknown as RoutineUpcomingSourcePort);
 }
 
 const meta = {

@@ -1,8 +1,8 @@
 import type { Meta, StoryObj } from '@storybook/vue3-vite';
 import { provide } from 'vue';
 import type { RoutineUpcomingOccurrence } from '@memoflow/routine-contracts';
-import { ROUTINE_SERVICE_KEY } from '../../../app-vue/src/di/keys';
-import type { IRoutineService } from '../../../app-vue/src/di/types';
+import type { RoutineClientPort } from '@memoflow/routine-client';
+import { routineUiHost } from '../routine-ui-host';
 import RoutineCapsulePreview from './RoutineCapsulePreview.vue';
 
 type CapsuleStoryParameters = {
@@ -54,7 +54,7 @@ const occurrences: RoutineUpcomingOccurrence[] = [
 
 function installCapsulePort(parameters: CapsuleStoryParameters) {
   const mode = parameters.mode ?? 'ready';
-  provide(ROUTINE_SERVICE_KEY, {
+  provide(routineUiHost.ROUTINE_SERVICE_KEY, {
     getUpcomingOccurrences: async () => {
       if (mode === 'loading') return new Promise(() => {});
       if (mode === 'error')
@@ -63,7 +63,7 @@ function installCapsulePort(parameters: CapsuleStoryParameters) {
       return { ok: true, data: { occurrences } };
     },
     setTemporaryOverride: async () => ({ ok: true, data: {} }),
-  } as unknown as IRoutineService);
+  } as unknown as RoutineClientPort);
 }
 
 const meta = {

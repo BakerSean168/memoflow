@@ -1,8 +1,8 @@
 import type { Meta, StoryObj } from '@storybook/vue3-vite';
 import { provide } from 'vue';
 import type { RoutineConfigurationSnapshot } from '@memoflow/routine-contracts';
-import { ROUTINE_SERVICE_KEY } from '../../../app-vue/src/di/keys';
-import type { IRoutineService } from '../../../app-vue/src/di/types';
+import type { RoutineClientPort } from '@memoflow/routine-client';
+import { routineUiHost } from '../routine-ui-host';
 import RoutineConfigurationView from './RoutineConfigurationView.vue';
 
 const createdAt = '2026-10-01T08:00:00.000Z';
@@ -125,12 +125,12 @@ type RoutineStoryParameters = {
 };
 
 function installRoutinePort(parameters: RoutineStoryParameters) {
-  provide(ROUTINE_SERVICE_KEY, {
+  provide(routineUiHost.ROUTINE_SERVICE_KEY, {
     getConfigurationSnapshot: async () =>
       parameters.fail
         ? { ok: false, error: { code: 'OFFLINE', message: 'Routine owner is offline' } }
         : { ok: true, data: parameters.snapshot ?? populatedSnapshot },
-  } as unknown as IRoutineService);
+  } as unknown as RoutineClientPort);
 }
 
 const meta = {

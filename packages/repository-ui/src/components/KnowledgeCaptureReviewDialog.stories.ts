@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from '@storybook/vue3-vite';
 import { expect, userEvent, within } from 'storybook/test';
 import { nextTick, onMounted, ref } from 'vue';
 import { useRouter } from 'vue-router';
-import { useAppShellStore } from '../../../app-vue/src/layouts/shell/useAppShellStore';
+import { useAppShellStore } from '@repository-ui-test-host/layouts/shell/useAppShellStore';
 import { repositoryUiHost } from '../repository-ui-host';
 import KnowledgeCaptureReviewDialog from './KnowledgeCaptureReviewDialog.vue';
 import type { KnowledgeCaptureSourceOption } from '../composables/knowledgeCaptureNativeEditSession';
