@@ -927,6 +927,97 @@
       "kind": "component",
       "storyPath": "packages/app-vue/src/views/DesktopProfileAccessView.stories.ts",
       "status": "present"
+    },
+    {
+      "path": "packages/goal-ui/src/components/dialogs/GoalRecordDialog.vue",
+      "package": "@memoflow/goal-ui",
+      "kind": "component",
+      "storyPath": "packages/goal-ui/src/components/dialogs/GoalRecordDialog.stories.ts",
+      "status": "present"
+    },
+    {
+      "path": "packages/goal-ui/src/components/dialogs/KeyResultDialog.vue",
+      "package": "@memoflow/goal-ui",
+      "kind": "component",
+      "storyPath": "packages/goal-ui/src/components/dialogs/KeyResultDialog.stories.ts",
+      "status": "present"
+    },
+    {
+      "path": "packages/goal-ui/src/views/GoalDetailView.vue",
+      "package": "@memoflow/goal-ui",
+      "kind": "component",
+      "storyPath": "packages/goal-ui/src/views/GoalDetailView.stories.ts",
+      "status": "present"
+    },
+    {
+      "path": "packages/task-ui/src/components/dialogs/TaskCompletionMeasurementDialog.vue",
+      "package": "@memoflow/task-ui",
+      "kind": "component",
+      "storyPath": "packages/task-ui/src/components/dialogs/TaskCompletionMeasurementDialog.stories.ts",
+      "status": "present"
+    },
+    {
+      "path": "packages/task-ui/src/components/dialogs/TaskOccurrenceInspectDialog.vue",
+      "package": "@memoflow/task-ui",
+      "kind": "component",
+      "storyPath": "packages/task-ui/src/components/dialogs/TaskOccurrenceInspectDialog.stories.ts",
+      "status": "present"
+    },
+    {
+      "path": "packages/task-ui/src/views/TaskManagementView.vue",
+      "package": "@memoflow/task-ui",
+      "kind": "component",
+      "storyPath": "packages/task-ui/src/views/TaskManagementView.stories.ts",
+      "status": "present"
+    },
+    {
+      "path": "packages/schedule-ui/src/components/PlannerDayDialog.vue",
+      "package": "@memoflow/schedule-ui",
+      "kind": "component",
+      "storyPath": "packages/schedule-ui/src/components/PlannerDayDialog.stories.ts",
+      "status": "present"
+    },
+    {
+      "path": "packages/schedule-ui/src/views/ScheduleCalendarView.vue",
+      "package": "@memoflow/schedule-ui",
+      "kind": "component",
+      "storyPath": "packages/schedule-ui/src/views/ScheduleCalendarView.stories.ts",
+      "status": "present"
+    },
+    {
+      "path": "packages/routine-ui/src/views/RoutineConfigurationView.vue",
+      "package": "@memoflow/routine-ui",
+      "kind": "component",
+      "storyPath": "packages/routine-ui/src/views/RoutineConfigurationView.stories.ts",
+      "status": "present"
+    },
+    {
+      "path": "packages/routine-ui/src/components/RoutineCapsulePreview.vue",
+      "package": "@memoflow/routine-ui",
+      "kind": "component",
+      "storyPath": "packages/routine-ui/src/components/RoutineCapsulePreview.stories.ts",
+      "status": "present"
+    },
+    {
+      "path": "packages/repository-ui/src/components/KnowledgeCaptureReviewDialog.vue",
+      "package": "@memoflow/repository-ui",
+      "kind": "component",
+      "storyPath": "packages/repository-ui/src/components/KnowledgeCaptureReviewDialog.stories.ts",
+      "status": "present"
+    },
+    {
+      "path": "packages/repository-ui/src/views/LocalVaultWorkspaceView.vue",
+      "package": "@memoflow/repository-ui",
+      "kind": "component",
+      "storyPath": "packages/repository-ui/src/views/LocalVaultWorkspaceView.stories.ts",
+      "status": "present"
+    },
+    {
+      "path": "packages/repository-ui/src/views/KnowledgeProjectionWorkspaceView.vue",
+      "package": "@memoflow/repository-ui",
+      "kind": "component",
+      "storyPath": "packages/repository-ui/src/views/KnowledgeProjectionWorkspaceView.stories.ts",
+      "status": "present"
     }
   ]
 }
