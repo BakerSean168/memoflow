@@ -1,7 +1,9 @@
 import type { Meta, StoryObj } from '@storybook/vue3-vite';
 import { provide, ref } from 'vue';
 import { expect, userEvent, waitFor, within } from 'storybook/test';
+import { Toaster } from '@memoflow/ui-vue-shadcn';
 import { accountUiHost } from '../../account-ui-host';
+import { useAccountStore } from '../../stores/account-store';
 import type { AccountAvatarStore } from '../avatar/account-avatar-store';
 import AccountAvatarUploader from './AccountAvatarUploader.vue';
 
@@ -45,13 +47,11 @@ interface UploaderDoubleOptions {
 
 function renderUploader(options: UploaderDoubleOptions = {}) {
   return {
-    components: { AccountAvatarUploader },
+    components: { AccountAvatarUploader, Toaster },
     setup() {
+      useAccountStore().reset();
       const avatarUrl = ref<string | null>(options.avatarUrl ?? null);
-      provide(
-        accountUiHost.ACCOUNT_AVATAR_STORE_KEY as symbol,
-        createAvatarStore(options.save),
-      );
+      provide(accountUiHost.ACCOUNT_AVATAR_STORE_KEY as symbol, createAvatarStore(options.save));
       const onUpdated = (url: string) => {
         avatarUrl.value = url;
       };
@@ -65,6 +65,7 @@ function renderUploader(options: UploaderDoubleOptions = {}) {
           :disabled="disabled"
           @updated="onUpdated"
         />
+        <Toaster position="bottom-center" />
       </div>
     `,
   };
@@ -96,14 +97,12 @@ export const SelectedPreview: Story = {
     const page = within(canvasElement.ownerDocument.body);
     const input = (await page.findByTestId('account-avatar-uploader-input')) as HTMLInputElement;
     await userEvent.upload(input, pngFile());
-    await waitFor(() =>
-      expect(canvasElement.querySelector('img')).not.toBeNull(),
-    );
+    await waitFor(() => expect(canvasElement.querySelector('img')).not.toBeNull());
     await expect(page.getByTestId('account-avatar-uploader')).toBeEnabled();
   },
 };
 
-/** A rejected file surfaces the failure and leaves the previous state untouched. */
+/** A corrupt image surfaces the failure toast and leaves the previous state untouched. */
 export const UploadError: Story = {
   render: () => renderUploader({ avatarUrl: EXISTING_AVATAR }),
   play: async ({ canvasElement }) => {
@@ -111,9 +110,10 @@ export const UploadError: Story = {
     const input = (await page.findByTestId('account-avatar-uploader-input')) as HTMLInputElement;
     await userEvent.upload(
       input,
-      new File(['not an image'], 'notes.txt', { type: 'text/plain' }),
+      new File(['not a real png'], 'broken.png', { type: 'image/png' }),
     );
     await waitFor(() => expect(input.value).toBe(''));
+    await page.findByText('Could not update avatar');
     await expect(canvasElement.querySelector('img')).not.toBeNull();
     await expect(page.getByTestId('account-avatar-uploader')).toBeEnabled();
   },
@@ -134,9 +134,7 @@ export const Uploading: Story = {
     const page = within(canvasElement.ownerDocument.body);
     const input = (await page.findByTestId('account-avatar-uploader-input')) as HTMLInputElement;
     await userEvent.upload(input, pngFile());
-    await waitFor(() =>
-      expect(page.getByText('Processing avatar...')).toBeInTheDocument(),
-    );
+    await waitFor(() => expect(page.getByText('Processing avatar...')).toBeInTheDocument());
     await expect(page.getByTestId('account-avatar-uploader')).toBeDisabled();
   },
 };

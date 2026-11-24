@@ -4,6 +4,8 @@ import { expect, userEvent, waitFor, within } from 'storybook/test';
 import { fail, ok } from '@memoflow/transport-contracts/result';
 import type { AccountClientPort } from '@memoflow/account-client';
 import type { AccountClientDTO } from '@memoflow/account-contracts';
+import { Toaster } from '@memoflow/ui-vue-shadcn';
+import { useAccountStore } from '../../stores/account-store';
 import { accountUiHost } from '../../account-ui-host';
 import type { AccountAvatarStore } from '../avatar/account-avatar-store';
 import AccountProfileEditorDialog from './AccountProfileEditorDialog.vue';
@@ -68,17 +70,22 @@ interface EditorDoubleOptions {
   account?: AccountClientDTO;
   service?: Partial<AccountClientPort>;
   initialOpen?: boolean;
+  /** Production mounts one Toaster in the shell; failure toasts need it to be visible. */
+  toaster?: boolean;
 }
 
 function renderEditor(options: EditorDoubleOptions = {}) {
   const account = options.account ?? createAccount();
   return {
-    components: { AccountProfileEditorDialog },
+    components: { AccountProfileEditorDialog, Toaster },
     setup() {
+      // The account store is a Pinia singleton; each story must load its own
+      // fixture instead of inheriting the previous story's account.
+      useAccountStore().reset();
       const open = ref(options.initialOpen ?? true);
       provide(accountUiHost.ACCOUNT_SERVICE_KEY as symbol, createService(account, options.service));
       provide(accountUiHost.ACCOUNT_AVATAR_STORE_KEY as symbol, createAvatarStore());
-      return { open };
+      return { open, toaster: options.toaster ?? false };
     },
     template: `
       <div class="flex flex-col items-center gap-3">
@@ -91,6 +98,7 @@ function renderEditor(options: EditorDoubleOptions = {}) {
           Reopen editor
         </button>
         <AccountProfileEditorDialog v-model:open="open" />
+        <Toaster v-if="toaster" position="bottom-center" />
       </div>
     `,
   };
@@ -167,16 +175,18 @@ export const AvatarPreview: Story = {
     }),
 };
 
-/** A non-image file is rejected by the uploader and the avatar stays untouched. */
+/** A corrupt image is rejected by the decoder and the avatar stays untouched. */
 export const AvatarUploadFailure: Story = {
+  render: () => renderEditor({ toaster: true }),
   play: async ({ canvasElement }) => {
     const page = within(canvasElement.ownerDocument.body);
     const input = (await page.findByTestId('profile-editor-avatar-input')) as HTMLInputElement;
     await userEvent.upload(
       input,
-      new File(['not an image'], 'avatar-notes.txt', { type: 'text/plain' }),
+      new File(['not a real png'], 'broken.png', { type: 'image/png' }),
     );
     await waitFor(() => expect(input.value).toBe(''));
+    await page.findByText('Could not update avatar');
     await expect(page.getByTestId('profile-editor-avatar')).toBeEnabled();
   },
 };
@@ -266,6 +276,7 @@ export const SaveBusy: Story = {
 export const SaveError: Story = {
   render: () =>
     renderEditor({
+      toaster: true,
       service: {
         updateMyProfile: async () =>
           fail({ code: 'CONFLICT', message: 'The profile could not be updated.' }),

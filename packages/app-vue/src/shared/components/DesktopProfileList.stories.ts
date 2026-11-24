@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from '@storybook/vue3-vite';
 import { computed, ref, type Ref } from 'vue';
 import { expect, userEvent, waitFor, within } from 'storybook/test';
 import type { ProfileSummary } from '@memoflow/desktop-contracts';
-import { useConfirm } from '@memoflow/ui-vue-shadcn';
+import { _resolveConfirm, useConfirm } from '@memoflow/ui-vue-shadcn';
 import type { useDesktopProfiles } from '../composables/useDesktopProfiles';
 import DesktopProfileList from './DesktopProfileList.vue';
 import GlobalConfirmDialog from './GlobalConfirmDialog.vue';
@@ -133,6 +133,9 @@ function renderList(
   return {
     components: { DesktopProfileList, GlobalConfirmDialog },
     setup() {
+      // The confirm dialog state is a module singleton; a story that leaves the
+      // dialog open must not leak it into the next visual review.
+      _resolveConfirm(false);
       return {
         args,
         presenter: asPresenter(presenter),
@@ -161,8 +164,7 @@ const meta = {
   component: DesktopProfileList,
   tags: ['autodocs'],
   args: { management: false },
-  render: (args) =>
-    renderList(args, createPresenter({ activeProfileId: 'profile-local-1' })),
+  render: (args) => renderList(args, createPresenter({ activeProfileId: 'profile-local-1' })),
 } satisfies Meta<typeof DesktopProfileList>;
 
 export default meta;
@@ -173,8 +175,7 @@ export const AccessTiles: Story = {};
 
 /** The active Profile is a cloud account; the local tiles stay inactive. */
 export const CloudProfileActive: Story = {
-  render: (args) =>
-    renderList(args, createPresenter({ activeProfileId: 'profile-cloud-1' })),
+  render: (args) => renderList(args, createPresenter({ activeProfileId: 'profile-cloud-1' })),
 };
 
 /**
@@ -265,7 +266,10 @@ export const PasswordPrompt: Story = {
 /** Busy state disables every tile action until the pending operation settles. */
 export const BusyProfile: Story = {
   render: (args) =>
-    renderList(args, createPresenter({ activeProfileId: 'profile-local-1', busyProfileId: 'profile-local-2' })),
+    renderList(
+      args,
+      createPresenter({ activeProfileId: 'profile-local-1', busyProfileId: 'profile-local-2' }),
+    ),
 };
 
 /** Narrow viewport keeps the tiles wrapping without horizontal overflow. */
