@@ -1,6 +1,8 @@
 import type { Meta, StoryObj } from '@storybook/vue3-vite';
 import { expect, userEvent, within } from 'storybook/test';
 import { nextTick, onMounted, ref } from 'vue';
+import { useRouter } from 'vue-router';
+import { useAppShellStore } from '../../../app-vue/src/layouts/shell/useAppShellStore';
 import { repositoryUiHost } from '../repository-ui-host';
 import KnowledgeCaptureReviewDialog from './KnowledgeCaptureReviewDialog.vue';
 import type { KnowledgeCaptureSourceOption } from '../composables/knowledgeCaptureNativeEditSession';
@@ -62,6 +64,25 @@ const meta = {
     components: { KnowledgeCaptureReviewDialog },
     setup() {
       const open = ref(true);
+      // The capture review registers itself against the shell's active business
+      // tab. Seed that one shell fact so we can hand the real session an
+      // interaction double without mounting the whole application shell.
+      const router = useRouter();
+      const store = useAppShellStore();
+      const route = router.currentRoute.value.fullPath;
+      store.tabs = [
+        {
+          id: 'story-knowledge-tab',
+          module: 'note',
+          route,
+          title: 'Knowledge',
+          titleKey: 'nav.capsule.note',
+          titleSource: 'module',
+          lastActiveAt: Date.now(),
+        },
+      ];
+      store.activeTabId = 'story-knowledge-tab';
+      store.panelSurface = 'business';
       onMounted(() => {
         void prepareReviewSession(parameters as CaptureStoryParameters);
       });
