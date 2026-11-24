@@ -2,7 +2,7 @@
 tags: [guide, development, mcp]
 description: 受控 PAT MCP 的本地连接、只读与写入 scope 配置
 created: 2026-10-07T00:00:00Z
-updated: 2026-11-18T00:00:00Z
+updated: 2026-11-24T00:00:00Z
 ---
 
 # External Agent PAT 连接
@@ -37,7 +37,7 @@ tool_timeout_sec = 30
 
 `bearer_token_env_var` 是 [Codex 官方 MCP 配置](https://learn.chatgpt.com/docs/extend/mcp?surface=cli) 支持的显式 Bearer 配置，无需 OAuth 登录步骤。当前证据使用官方 MCP SDK；不将其等同于真实 Codex/Claude OAuth 登录验收。
 
-工具：goal_get、goal_search、task_plan_get、task_plan_search、task_occurrence_get、task_occurrence_list、routine_get、routine_list、routine_upcoming、notification_get、notification_list、notification_unread_count、label_list、label_resolve_names、relation_neighbors（需 `relations:read`）。notification_list 分页 page ≤ 20、limit ≤ 50，正文截断 2000 字符；execute-action 动作执行不开放。Label 两读工具需 `labels:read`，返回有界强类型标签列表。relation_neighbors 查询 Goal/Task/Knowledge 跨域邻居并支持类型过滤，遵循可见性规则：只返回双方均可见的关系，指向不可见或跨 owner 节点的边直接省略、不泄露对端存在性。列表 limit 为 1～100，默认 20；Routine 列表上限 50，upcoming 单页上限 100 且窗口最长 31 天；nextCursor 必须连同原筛选和 limit 使用。Occurrence startDate/endDate 为 epoch 毫秒，最长 31 天，按照当前账户时区查询已有事实；分页固定 asOf，时区改变后应重新从第一页查询。
+工具：goal_get、goal_search、task_plan_get、task_plan_search、task_occurrence_get、task_occurrence_list、routine_get、routine_list、routine_upcoming、notification_get、notification_list、notification_unread_count、notification_preferences_get、label_list、label_resolve_names、relation_neighbors（需 `relations:read`）。notification_list 分页 page ≤ 20、limit ≤ 50，正文截断 2000 字符；execute-action 动作执行不开放。Label 两读工具需 `labels:read`，返回有界强类型标签列表。relation_neighbors 查询 Goal/Task/Knowledge 跨域邻居并支持类型过滤，遵循可见性规则：只返回双方均可见的关系，指向不可见或跨 owner 节点的边直接省略、不泄露对端存在性。列表 limit 为 1～100，默认 20；Routine 列表上限 50，upcoming 单页上限 100 且窗口最长 31 天；nextCursor 必须连同原筛选和 limit 使用。Occurrence startDate/endDate 为 epoch 毫秒，最长 31 天，按照当前账户时区查询已有事实；分页固定 asOf，时区改变后应重新从第一页查询。
 
 ## 受控写入（#490）
 
@@ -55,7 +55,7 @@ tool_timeout_sec = 30
 
 写 scope 不隐含读 scope。`tasks:write` 包含既有 Task binding 的 Fixed/Prompt KR 派生贡献；创建或更改 binding 另需 `goals:write`，记录 Prompt measurement 另需 `goals:read`。PAT 设置界面的既有只读快捷入口不代表已选择写权限。
 
-写工具为 `goal_create`、`goal_update`、`goal_key_result_create`、`goal_key_result_update`、`task_plan_create`、`task_plan_update`、`task_occurrence_complete`、`routine_create`、`routine_update`、`routine_delete`、`routine_pause`、`routine_override`（Routine 写需 `routines:write` 且 `EAG_ROUTINE_WRITE_ENABLED=1`）、`notification_mark_read`（需 `notifications:write`；execute-action 不开放）。Assisted 工具为 `assisted_workflow_start/get/review/resume/cancel`（需 `tasks:write` 且 `EAG_ASSISTED_ENABLED=1`）。由 MCP 发现严格 input schema；所有写入必须带 `idempotencyKey`，更新/删除/完成必须带调用者读取的 `expectedVersion`。KR 命令使用 Goal 的版本。
+写工具为 `goal_create`、`goal_update`、`goal_key_result_create`、`goal_key_result_update`、`task_plan_create`、`task_plan_update`、`task_occurrence_complete`、`routine_create`、`routine_update`、`routine_delete`、`routine_pause`、`routine_override`（Routine 写需 `routines:write` 且 `EAG_ROUTINE_WRITE_ENABLED=1`）、`notification_mark_read`、`notification_mark_unread`、`notification_archive`、`notification_restore`、`notification_preferences_update`（需 `notifications:write`；execute-action 不开放）。Assisted 工具为 `assisted_workflow_start/get/review/resume/cancel`（需 `tasks:write` 且 `EAG_ASSISTED_ENABLED=1`）。由 MCP 发现严格 input schema；Goal/Task/Routine 写入必须带 `idempotencyKey`，更新/删除/完成必须带调用者读取的 `expectedVersion`；Notification 写工具只接受单条 `id` 且自身幂等。KR 命令使用 Goal 的版本。
 
 写侧暂不开放标签写入：`task_plan_create` 与 `task_plan_update` 传入非空 `labelIds` 将明确返回 `VALIDATION_ERROR`。External Agent 二期仅开放 `labels:read` 用于查询与名称解析。
 

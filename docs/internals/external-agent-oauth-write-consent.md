@@ -2,7 +2,7 @@
 tags: [architecture, mcp, oauth, security, external-agent]
 description: OAuth 写 consent 的安全模型评估、scope 映射、consent/审计/吊销要求，以及 #1054 一次开放的实施状态
 created: 2026-11-19T00:00:00Z
-updated: 2026-11-21T00:00:00Z
+updated: 2026-11-24T00:00:00Z
 ---
 
 # External Agent OAuth 写 consent 设计评估
@@ -94,14 +94,14 @@ OAuth 写现在一定失败，不是某一处漏判，而是五处独立约束�
 | `tasks:read`          | `task_plan_get/search`、`task_occurrence_get/list`                       | Task 只读投影                                                      | 是                                 | 现有                                                     |
 | `relations:read`      | `relation_neighbors`                                                     | 跨域关系，双方可见才返回                                           | 否                                 | 与写无关，按需另评                                       |
 | `routines:read`       | `routine_get/list/upcoming`                                              | Routine 定义与 occurrence                                          | 否                                 | 按需另评                                                 |
-| `notifications:read`  | `notification_get/list/unread_count`                                     | 通知事实                                                           | 否                                 | 按需另评                                                 |
+| `notifications:read`  | `notification_get/list/unread_count/preferences_get`                     | 通知事实与投递偏好                                                 | 否                                 | 按需另评                                                 |
 | `schedules:read`      | `schedule_get/list`                                                      | 日历条目                                                           | 否                                 | 托管 API 尚未绑定 Schedule 端口                          |
 | `labels:read`         | `label_list`、`label_resolve_names`                                      | 标签注册表                                                         | 否                                 | 标签写仍显式拒绝                                         |
 | `ai:read`             | `ai_conversation_list/get/transcript`、`ai_agent_list/get`               | 会话正文、Agent 归档                                               | 否                                 | 内容敏感，不进入 OAuth 一期                              |
 | `goals:write`         | `goal_create/update`、`goal_key_result_create/update`                    | 创建/修改 Goal、KR；不自动 activate                                | **是**                             | 需 `goals:read` 才能回读；首期排除整组 KR replacement    |
 | `tasks:write`         | `task_plan_create/update`、`task_occurrence_complete`；assisted 5 个工具 | 创建/修改 Task，完成 occurrence；可能按既有 binding 影响 Goal 进度 | **是（仅 3 个 deterministic 写）** | assisted 仍 PAT-only；创建/改 binding 另需 `goals:write` |
 | `routines:write`      | `routine_create/update/delete/pause/override`                            | 创建/删除/暂停 Routine；删除不可恢复                               | 否                                 | 二期候选，需调度与删除保护                               |
-| `notifications:write` | `notification_mark_read`                                                 | 仅标记已读，幂等                                                   | 否                                 | 二期候选，风险最低但需求待验证                           |
+| `notifications:write` | `notification_mark_read/mark_unread/archive/restore/preferences_update`  | 切换已读、归档/恢复、修改投递偏好；均幂等且无外部发送              | 否                                 | 二期候选，风险最低但需求待验证                           |
 
 OAuth 一期允许集建议为：
 
@@ -154,7 +154,7 @@ goals:read tasks:read goals:write tasks:write offline_access
   - `goals:write`：创建/修改 Goal 和 KR。
   - `tasks:write`：创建/修改/完成任务；完成可能改变 Goal 进度。
   - `routines:write`：创建、暂停或**永久删除** Routine（二期）。
-  - `notifications:write`：把通知标记为已读（二期）。
+  - `notifications:write`：切换通知已读/未读、归档或恢复，以及修改投递偏好（二期）。
 - 有效期：连接最长 90 天，access token 10 分钟，refresh 最长 30 天；随时可在“设置 → 账户与隐私 → 已连接的应用”撤销。
 - 与当前授权相比新增的 scope（re-consent diff）高亮显示；不得静默复用旧同意。
 - 当客户端请求写时，提供“仅允许只读”降级入口；若 provider 不支持部分授权，则明确告知用户需返回客户端以只读范围重新发起。
