@@ -1776,3 +1776,249 @@ it('keeps Hosted plan application write-only and stops on a mid-plan scope revoc
     (await gateway.fetch(request('tools/call', input, 'goal_plan_apply'), context)).status,
   ).toBe(404);
 });
+
+describe('Schedule hosted write capability', () => {
+  type Range = { kind: 'Timed'; start: number; end: number };
+  interface Entry {
+    id: string;
+    title: string;
+    range: Range;
+    version: number;
+    updatedAt: number;
+  }
+  function scheduleFixture(
+    scopes: string[],
+    credentialType: 'pat' | 'oauth' = 'pat',
+    oauthWrites = false,
+  ) {
+    const f = fixture();
+    f.authenticate.mockResolvedValue({
+      identityId: 'owner-a',
+      credentialId: 'pat-a',
+      credentialType,
+      scopes,
+    });
+    const entries = new Map<string, Entry>([
+      [
+        'schedule-1',
+        {
+          id: 'schedule-1',
+          title: 'Team Sync',
+          range: { kind: 'Timed', start: 1_000, end: 2_000 },
+          version: 1,
+          updatedAt: 1,
+        },
+      ],
+    ]);
+    const getSchedule = vi.fn(async (id: string) => {
+      const entry = entries.get(id);
+      return entry ? { ...entry, createdAt: 1 } : null;
+    });
+    const listSchedules = vi.fn(async () => ({
+      items: [...entries.values()].map((entry) => ({ ...entry, createdAt: 1 })),
+      hasMore: false,
+    }));
+    const unavailable = vi.fn().mockRejectedValue(new Error('Unexpected owner'));
+    const scheduleCreate = vi.fn(
+      async (input: unknown, _cx: ExecutionContext, authority: GatewayWriteAuthority) => {
+        await authority.authorize();
+        const parsed = input as { name: string; range: Range };
+        const entry: Entry = {
+          id: `schedule-${entries.size + 1}`,
+          title: parsed.name,
+          range: parsed.range,
+          version: 1,
+          updatedAt: 5,
+        };
+        entries.set(entry.id, entry);
+        return { id: entry.id, version: entry.version, updatedAt: entry.updatedAt };
+      },
+    );
+    const scheduleUpdate = vi.fn(
+      async (input: unknown, _cx: ExecutionContext, authority: GatewayWriteAuthority) => {
+        await authority.authorize();
+        const parsed = input as { id: string; changes: { name?: string } };
+        const entry = entries.get(parsed.id)!;
+        if (parsed.changes.name !== undefined) entry.title = parsed.changes.name;
+        entry.version += 1;
+        entry.updatedAt += 10;
+        return { id: entry.id, version: entry.version, updatedAt: entry.updatedAt };
+      },
+    );
+    const scheduleReschedule = vi.fn(
+      async (input: unknown, _cx: ExecutionContext, authority: GatewayWriteAuthority) => {
+        await authority.authorize();
+        const parsed = input as { id: string; range: Range };
+        const entry = entries.get(parsed.id)!;
+        entry.range = parsed.range;
+        entry.version += 1;
+        entry.updatedAt += 20;
+        return {
+          id: entry.id,
+          version: entry.version,
+          updatedAt: entry.updatedAt,
+          range: entry.range,
+        };
+      },
+    );
+    const scheduleDelete = vi.fn(
+      async (input: unknown, _cx: ExecutionContext, authority: GatewayWriteAuthority) => {
+        await authority.authorize();
+        const parsed = input as { id: string };
+        entries.delete(parsed.id);
+        return { id: parsed.id, deleted: true as const };
+      },
+    );
+    const writes = {
+      goalCreate: unavailable,
+      goalUpdate: unavailable,
+      keyResultCreate: unavailable,
+      keyResultUpdate: unavailable,
+      taskCreate: unavailable,
+      taskUpdate: unavailable,
+      taskComplete: unavailable,
+      scheduleCreate,
+      scheduleUpdate,
+      scheduleReschedule,
+      scheduleDelete,
+    };
+    return {
+      ...f,
+      entries,
+      getSchedule,
+      listSchedules,
+      scheduleCreate,
+      scheduleUpdate,
+      scheduleReschedule,
+      scheduleDelete,
+      gateway: createReadGateway({
+        ...f.options,
+        oauthWrites,
+        schedules: { getSchedule, listSchedules },
+        writes,
+      }),
+    };
+  }
+  const names = async (gateway: ReturnType<typeof createReadGateway>) =>
+    scopedToolNames(
+      (await (await gateway.fetch(request('tools/list'), context)).json()).result.tools,
+    );
+  const range = { kind: 'Timed' as const, start: 5_000, end: 6_000 };
+
+  it('publishes Calendar writes only for schedules:write and routes them to the owner', async () => {
+    const readOnly = scheduleFixture(['schedules:read', 'goals:read']);
+    const readNames = await names(readOnly.gateway);
+    expect(readNames).toEqual(expect.arrayContaining(['schedule_get', 'schedule_list']));
+    for (const name of [
+      'schedule_create',
+      'schedule_update',
+      'schedule_reschedule',
+      'schedule_delete',
+    ])
+      expect(readNames).not.toContain(name);
+
+    const writer = scheduleFixture(['schedules:read', 'schedules:write', 'goals:read']);
+    expect(await names(writer.gateway)).toEqual(
+      expect.arrayContaining([
+        'schedule_create',
+        'schedule_update',
+        'schedule_reschedule',
+        'schedule_delete',
+      ]),
+    );
+
+    const created = await writer.gateway.fetch(
+      request('tools/call', { name: 'Design review', range }, 'schedule_create'),
+      context,
+    );
+    expect(await created.json()).toMatchObject({
+      result: { structuredContent: { id: 'schedule-2', version: 1, updatedAt: 5 } },
+    });
+    expect(writer.scheduleCreate).toHaveBeenCalledOnce();
+
+    const readBack = await writer.gateway.fetch(
+      request('tools/call', { id: 'schedule-2' }, 'schedule_get'),
+      context,
+    );
+    expect(await readBack.json()).toMatchObject({
+      result: { structuredContent: { schedule: { id: 'schedule-2', title: 'Design review' } } },
+    });
+
+    const updated = await writer.gateway.fetch(
+      request(
+        'tools/call',
+        { id: 'schedule-1', expectedVersion: 1, changes: { name: 'Team Sync v2' } },
+        'schedule_update',
+      ),
+      context,
+    );
+    expect(await updated.json()).toMatchObject({
+      result: { structuredContent: { id: 'schedule-1', version: 2 } },
+    });
+    expect(writer.entries.get('schedule-1')?.title).toBe('Team Sync v2');
+
+    const rescheduled = await writer.gateway.fetch(
+      request(
+        'tools/call',
+        { id: 'schedule-1', expectedVersion: 2, range },
+        'schedule_reschedule',
+      ),
+      context,
+    );
+    expect(await rescheduled.json()).toMatchObject({
+      result: { structuredContent: { id: 'schedule-1', version: 3, range } },
+    });
+
+    const deleted = await writer.gateway.fetch(
+      request('tools/call', { id: 'schedule-1', expectedVersion: 3 }, 'schedule_delete'),
+      context,
+    );
+    expect(await deleted.json()).toMatchObject({
+      result: { structuredContent: { id: 'schedule-1', deleted: true } },
+    });
+    expect(writer.entries.has('schedule-1')).toBe(false);
+
+    expect(writer.audit).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        tool: 'schedule_delete',
+        effect: 'write',
+        outcome: 'OK',
+        scopeDecision: 'allowed',
+      }),
+    );
+    expect(JSON.stringify(writer.audit.mock.calls)).not.toContain('Team Sync');
+  });
+
+  it('rejects a write call without schedules:write and hides writes from OAuth while the switch is off', async () => {
+    const reader = scheduleFixture(['schedules:read', 'goals:read']);
+    const denied = await reader.gateway.fetch(
+      request('tools/call', { name: 'Denied', range }, 'schedule_create'),
+      context,
+    );
+    expect(denied.status).toBe(403);
+    expect(reader.scheduleCreate).not.toHaveBeenCalled();
+
+    const oauth = scheduleFixture(['schedules:read', 'schedules:write'], 'oauth', false);
+    const oauthNames = await names(oauth.gateway);
+    expect(oauthNames).toContain('schedule_get');
+    expect(oauthNames).not.toContain('schedule_create');
+
+    const oauthWrites = scheduleFixture(['schedules:read', 'schedules:write'], 'oauth', true);
+    expect(await names(oauthWrites.gateway)).toContain('schedule_create');
+  });
+
+  it('rejects an invalid metadata patch and a range passed through schedule_update', async () => {
+    const writer = scheduleFixture(['schedules:read', 'schedules:write', 'goals:read']);
+    for (const args of [
+      { id: 'schedule-1', expectedVersion: 1, changes: {} },
+      { id: 'schedule-1', expectedVersion: 1, changes: { range } },
+    ]) {
+      const response = await writer.gateway.fetch(
+        request('tools/call', args, 'schedule_update'),
+        context,
+      );
+      expect((await response.json()).result.isError).toBe(true);
+    }
+    expect(writer.scheduleUpdate).not.toHaveBeenCalled();
+  });
+});

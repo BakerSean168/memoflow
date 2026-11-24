@@ -252,6 +252,16 @@
       ]
     },
     {
+      "path": "apps/api/src/modules/agent-gateway/schedule.port.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "apps/api/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "apps/api/vitest.config.ts"
+      ]
+    },
+    {
       "path": "apps/api/src/modules/agent-gateway/write.port.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -15092,7 +15102,7 @@
   "duplicate": [],
   "unexpected": [],
   "counts": {
-    "unit": 1242,
+    "unit": 1243,
     "integration": 63,
     "smoke": 3,
     "boundary-ipc": 7,

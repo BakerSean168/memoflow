@@ -11,6 +11,7 @@ import {
 } from '@memoflow/ai';
 import { createTimeContext } from '@memoflow/time';
 import { createNotificationPowerSyncModule } from '@memoflow/notification';
+import { createSchedulePowerSyncModule } from '@memoflow/schedule';
 import type { IElectronDatabase } from '@memoflow/desktop-contracts';
 import { createDesktopLocalAgentTools } from './local-agent-tools';
 import { GatewayRoutineUpdateSchema } from '@memoflow/agent-gateway';
@@ -869,6 +870,241 @@ describe('Local Agent Domain Expansion (Phase 2, #995)', () => {
     } finally {
       await bridge.dispose();
       notifications.dispose();
+    }
+  });
+
+  it('schedule write tools execute through the real Calendar owner and read back', async () => {
+    const calendar = createSchedulePowerSyncModule(db, {
+      async execute(_leaseKey, task) {
+        return { acquired: true, value: await task({ ensureHeld: async () => undefined }) };
+      },
+    });
+    const bridge = createDesktopLocalAgentTools(
+      db,
+      store,
+      () => true,
+      {
+        getUserTimeContext: async () => createTimeContext({ timeZone: 'UTC', weekStartsOn: 1 }),
+      },
+      undefined,
+      undefined,
+      { clients: new LocalMcpClientRepository(db) },
+      { schedules: calendar.eventApi },
+    );
+    try {
+      const connection = await store.createConnection(identityId, {
+        driver: 'codex',
+        name: 'Calendar Owner Client',
+        executablePath: 'codex',
+        enabled: true,
+        writeScopes: ['schedules:write'],
+      });
+      await new PermissionLocalRepository(db).saveSettings(identityId, {
+        preset: 'full_auto',
+        agentPresets: {},
+        revision: 2,
+      });
+      const grant = await bridge.open({
+        permissionMode: 'auto-approve',
+        identityId,
+        connectionId: connection.id,
+        conversationId: 'conv-schedule',
+        runId: 'run-schedule',
+      });
+
+      const tools = (await callMcp(grant, 'tools/list')) as {
+        result: { tools: { name: string }[] };
+      };
+      const toolNames = tools.result.tools.map((tool) => tool.name);
+      for (const name of [
+        'schedule_get',
+        'schedule_list',
+        'schedule_create',
+        'schedule_update',
+        'schedule_reschedule',
+        'schedule_delete',
+      ])
+        expect(toolNames).toContain(name);
+
+      const start = Date.UTC(2027, 0, 4, 9, 0);
+      const end = start + 3_600_000;
+      const created = parsePayload(
+        await callMcp(grant, 'tools/call', {
+          name: 'schedule_create',
+          arguments: {
+            name: 'Team Sync',
+            description: 'Weekly team sync',
+            range: { kind: 'Timed', start, end },
+            attendees: ['teammate@example.com'],
+          },
+        }),
+      );
+      expect(created).toMatchObject({ version: 1 });
+      expect(created.id).toEqual(expect.any(String));
+
+      const createdReadBack = parsePayload(
+        await callMcp(grant, 'tools/call', {
+          name: 'schedule_get',
+          arguments: { id: created.id },
+        }),
+      );
+      expect(createdReadBack.schedule).toMatchObject({
+        id: created.id,
+        title: 'Team Sync',
+        version: 1,
+      });
+      expect(createdReadBack.schedule.range).toEqual({ kind: 'Timed', start, end });
+
+      const updated = parsePayload(
+        await callMcp(grant, 'tools/call', {
+          name: 'schedule_update',
+          arguments: {
+            id: created.id,
+            expectedVersion: 1,
+            changes: { name: 'Team Sync v2' },
+          },
+        }),
+      );
+      expect(updated).toMatchObject({ id: created.id, version: 2 });
+      const updatedReadBack = parsePayload(
+        await callMcp(grant, 'tools/call', {
+          name: 'schedule_get',
+          arguments: { id: created.id },
+        }),
+      );
+      expect(updatedReadBack.schedule.title).toBe('Team Sync v2');
+
+      const movedStart = start + 86_400_000;
+      const movedEnd = movedStart + 3_600_000;
+      const rescheduled = parsePayload(
+        await callMcp(grant, 'tools/call', {
+          name: 'schedule_reschedule',
+          arguments: {
+            id: created.id,
+            expectedVersion: 2,
+            range: { kind: 'Timed', start: movedStart, end: movedEnd },
+          },
+        }),
+      );
+      expect(rescheduled).toMatchObject({
+        id: created.id,
+        version: 3,
+        range: { kind: 'Timed', start: movedStart, end: movedEnd },
+      });
+      const listed = parsePayload(
+        await callMcp(grant, 'tools/call', {
+          name: 'schedule_list',
+          arguments: { startTime: movedStart - 1, endTime: movedEnd + 1, limit: 10 },
+        }),
+      );
+      expect(listed.items.map((item: { id: string }) => item.id)).toContain(created.id);
+
+      // A stale expectedVersion must not overwrite the newer owner state.
+      const stale = (await callMcp(grant, 'tools/call', {
+        name: 'schedule_update',
+        arguments: { id: created.id, expectedVersion: 1, changes: { name: 'Stale' } },
+      })) as { result: { isError: boolean; content: [{ text: string }] } };
+      expect(stale.result.isError).toBe(true);
+      expect(stale.result.content[0].text).toBe('CONFLICT');
+
+      // Permanent deletion without a fresh approval fails closed.
+      const denied = (await callMcp(grant, 'tools/call', {
+        name: 'schedule_delete',
+        arguments: { id: created.id, expectedVersion: 3 },
+      })) as { result: { isError: boolean; content: [{ text: string }] } };
+      expect(denied.result.isError).toBe(true);
+      expect(denied.result.content[0].text).toBe('PERMISSION_DENIED');
+      const stillThere = parsePayload(
+        await callMcp(grant, 'tools/call', {
+          name: 'schedule_get',
+          arguments: { id: created.id },
+        }),
+      );
+      expect(stillThere.schedule.id).toBe(created.id);
+
+      // An approved delete removes the entry; the owner read then answers NOT_FOUND.
+      const approved = await bridge.open({
+        permissionMode: 'auto-approve',
+        identityId,
+        connectionId: connection.id,
+        conversationId: 'conv-schedule-delete',
+        runId: 'run-schedule-delete',
+        requestApproval: async () => true,
+      });
+      const deleted = parsePayload(
+        await callMcp(approved, 'tools/call', {
+          name: 'schedule_delete',
+          arguments: { id: created.id, expectedVersion: 3 },
+        }),
+      );
+      expect(deleted).toEqual({ id: created.id, deleted: true });
+      const gone = await callMcp(grant, 'tools/call', {
+        name: 'schedule_get',
+        arguments: { id: created.id },
+      });
+      expect(String(gone.result.content[0].text)).toBe('NOT_FOUND');
+
+      // The persistent external client owns the same owner path; permanent
+      // deletion stays unavailable because it has no approval channel.
+      const external = await bridge.createMcpClient(identityId, {
+        name: 'External Calendar Writer',
+        writeScopes: ['schedules:write'],
+      });
+      const externalTools = (await callMcp(
+        { url: external.endpoint.url, token: external.token },
+        'tools/list',
+      )) as { result: { tools: { name: string }[] } };
+      const externalNames = externalTools.result.tools.map((tool) => tool.name);
+      for (const name of ['schedule_create', 'schedule_update', 'schedule_reschedule'])
+        expect(externalNames).toContain(name);
+      expect(externalNames).not.toContain('schedule_delete');
+
+      const externalCreated = parsePayload(
+        await callMcp({ url: external.endpoint.url, token: external.token }, 'tools/call', {
+          name: 'schedule_create',
+          arguments: {
+            name: 'External Standup',
+            range: { kind: 'Timed', start: movedStart, end: movedEnd },
+          },
+        }),
+      );
+      const externalReadBack = parsePayload(
+        await callMcp(grant, 'tools/call', {
+          name: 'schedule_get',
+          arguments: { id: externalCreated.id },
+        }),
+      );
+      expect(externalReadBack.schedule).toMatchObject({
+        id: externalCreated.id,
+        title: 'External Standup',
+      });
+
+      // Without `schedules:write` the tools are not discovered and a direct
+      // call is refused, so scope is not replaced by the read binding.
+      const reader = await bridge.createMcpClient(identityId, {
+        name: 'Calendar Reader',
+        writeScopes: [],
+      });
+      const readerTools = (await callMcp(
+        { url: reader.endpoint.url, token: reader.token },
+        'tools/list',
+      )) as { result: { tools: { name: string }[] } };
+      expect(readerTools.result.tools.map((tool) => tool.name)).not.toContain('schedule_create');
+      const refused = (await callMcp(
+        { url: reader.endpoint.url, token: reader.token },
+        'tools/call',
+        {
+          name: 'schedule_create',
+          arguments: {
+            name: 'Refused',
+            range: { kind: 'Timed', start: movedStart, end: movedEnd },
+          },
+        },
+      )) as { error?: { message: string } };
+      expect(refused.error).toBeDefined();
+    } finally {
+      await bridge.dispose();
+      await calendar.dispose();
     }
   });
 });
