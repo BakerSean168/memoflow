@@ -1,5 +1,6 @@
 import vue from '@vitejs/plugin-vue';
 import { defineConfig } from 'vitest/config';
+import path from 'node:path';
 import { createSharedConfig } from '../../vitest.shared.ts';
 import {
   createAppVueSourceAliasEntries,
@@ -54,6 +55,15 @@ const sharedConfig = createSharedConfig({
   environment: 'node',
   aliasEntries: [
     { find: /^electron$/, replacement: './test-support/electron.stub.ts' },
+    // Test-only seam: renderer specs mount the shared settings section with the
+    // same production i18n catalogue the real shell loads.
+    {
+      find: /^@setting-ui-test-host\/locales\/production-messages$/,
+      replacement: path.resolve(
+        import.meta.dirname,
+        '../../packages/app-vue/src/locales/production-messages.ts',
+      ),
+    },
     ...createAppVueSourceAliasEntries(import.meta.dirname + '/../..'),
     ...createGoalUiAliasEntries(import.meta.dirname + '/../..'),
     ...createTaskUiAliasEntries(import.meta.dirname + '/../..'),

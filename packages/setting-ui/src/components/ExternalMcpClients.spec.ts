@@ -2,10 +2,21 @@ import { nextTick } from 'vue';
 import { ResultErrorException } from '@memoflow/transport-contracts/result';
 import { mount } from '@vue/test-utils';
 import { createI18n } from 'vue-i18n';
-import { afterEach, describe, expect, it, vi } from 'vitest';
-import type { LocalMcpClient, LocalMcpClientCredential } from '@memoflow/ai-contracts';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import type {
+  LocalGatewayAuditRecord,
+  LocalMcpClient,
+  LocalMcpClientCredential,
+} from '@memoflow/ai-contracts';
 import { productionLocaleMessages } from '@setting-ui-test-host/locales/production-messages';
 import { settingUiHost } from '../setting-ui-host';
+
+const confirmMock = vi.hoisted(() => vi.fn(async () => true));
+vi.mock('@memoflow/ui-vue-shadcn', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('@memoflow/ui-vue-shadcn')>()),
+  useConfirm: confirmMock,
+}));
+
 import ExternalMcpClients from './ExternalMcpClients.vue';
 
 const existingClient: LocalMcpClient = {
@@ -30,6 +41,28 @@ const createdCredential: LocalMcpClientCredential = {
   endpoint: { url: 'http://127.0.0.1:4123/mcp', discoveryPath: null },
 };
 
+const revokedClient: LocalMcpClient = {
+  ...existingClient,
+  id: 'revoked-1',
+  name: 'Old CLI',
+  revokedAt: 42,
+};
+
+const auditEntry: LocalGatewayAuditRecord = {
+  id: 'audit-1',
+  version: '1',
+  at: 3,
+  connectionId: 'revoked-1',
+  origin: 'client',
+  tool: 'goal_search',
+  effect: 'read',
+  scopeDecision: 'allowed',
+  outcome: 'ok',
+  durationMs: 12,
+  requestId: 'request-1',
+  traceId: 'trace-1',
+};
+
 const writeText = vi.fn(async () => {});
 
 function element(id: string): HTMLElement | null {
@@ -37,6 +70,10 @@ function element(id: string): HTMLElement | null {
 }
 
 const cleanups: Array<() => void> = [];
+beforeEach(() => {
+  confirmMock.mockReset();
+  confirmMock.mockResolvedValue(true);
+});
 afterEach(() => {
   cleanups.splice(0).forEach((cleanup) => cleanup());
   vi.useRealTimers();
@@ -48,22 +85,33 @@ async function settle(): Promise<void> {
   await nextTick();
 }
 
-function mountSection(endpointError?: string) {
+interface MountOptions {
+  endpointError?: string;
+  clients?: LocalMcpClient[];
+  audit?: LocalGatewayAuditRecord[];
+  listClients?: () => Promise<LocalMcpClient[]>;
+}
+
+function mountSection(options: MountOptions = {}) {
   writeText.mockClear();
   Object.defineProperty(navigator, 'clipboard', {
     configurable: true,
     value: { writeText },
   });
-  const list = vi.fn(async () => [existingClient, createdCredential.client]);
+  const list = vi.fn(
+    options.listClients ??
+      (async () => options.clients ?? [existingClient, createdCredential.client]),
+  );
   const port = {
     getMcpEndpoint: vi.fn(async () => {
-      if (endpointError) throw new ResultErrorException('private host diagnostics', endpointError);
+      if (options.endpointError)
+        throw new ResultErrorException('private host diagnostics', options.endpointError);
       return createdCredential.endpoint;
     }),
     listMcpClients: list,
-    listGatewayAudit: vi.fn(async () => []),
+    listGatewayAudit: vi.fn(async () => options.audit ?? []),
     createMcpClient: vi.fn(async () => createdCredential),
-    revokeMcpClient: vi.fn(async (id: string) => ({ ...existingClient, id })),
+    revokeMcpClient: vi.fn(async (id: string) => ({ ...existingClient, id, revokedAt: 7 })),
   };
   const wrapper = mount(ExternalMcpClients, {
     attachTo: document.body,
@@ -105,7 +153,7 @@ describe('ExternalMcpClients', () => {
   ])(
     'shows an actionable %s error, retains client management, and retries the saved endpoint',
     async (code, message) => {
-      const { wrapper, port } = mountSection(code);
+      const { wrapper, port } = mountSection({ endpointError: code });
       await settle();
       expect(element('ai-external-mcp-error')?.textContent).toContain(message);
       expect(wrapper.text()).toContain('Existing CLI');
@@ -176,6 +224,78 @@ describe('ExternalMcpClients', () => {
       name: 'Routine Agent',
       writeScopes: ['routines:write'],
     });
+  });
+
+  it('shows loading instead of the empty state until the client list settles', async () => {
+    let resolveList!: (clients: LocalMcpClient[]) => void;
+    const pending = new Promise<LocalMcpClient[]>((resolve) => {
+      resolveList = resolve;
+    });
+    mountSection({ listClients: () => pending });
+    await settle();
+
+    expect(element('ai-external-mcp-loading')).not.toBeNull();
+    expect(element('ai-external-mcp-empty')).toBeNull();
+    expect(element('ai-external-mcp-client-existing-1')).toBeNull();
+
+    resolveList([existingClient]);
+    await settle();
+
+    expect(element('ai-external-mcp-loading')).toBeNull();
+    expect(element('ai-external-mcp-client-existing-1')).not.toBeNull();
+  });
+
+  it('asks for confirmation and moves a revoked client into the revoked list', async () => {
+    let clients = [existingClient, createdCredential.client];
+    const { port } = mountSection({ listClients: async () => clients });
+    port.revokeMcpClient.mockImplementation(async (id: string) => {
+      clients = clients.map((client) => (client.id === id ? { ...client, revokedAt: 9 } : client));
+      return clients.find((client) => client.id === id)!;
+    });
+    await settle();
+
+    element('ai-external-mcp-revoke-existing-1')!.click();
+    await settle();
+
+    expect(confirmMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        title: 'Revoke Existing CLI?',
+        variant: 'destructive',
+      }),
+    );
+    expect(port.revokeMcpClient).toHaveBeenCalledWith('existing-1');
+    expect(element('ai-external-mcp-client-existing-1')).toBeNull();
+    expect(element('ai-external-mcp-revoked-client-existing-1')).not.toBeNull();
+    expect(element('ai-external-mcp-revoked')?.textContent).toContain('Revoked clients');
+  });
+
+  it('keeps the client active when revocation is cancelled', async () => {
+    confirmMock.mockResolvedValueOnce(false);
+    const { port } = mountSection();
+    await settle();
+
+    element('ai-external-mcp-revoke-existing-1')!.click();
+    await settle();
+
+    expect(confirmMock).toHaveBeenCalledTimes(1);
+    expect(port.revokeMcpClient).not.toHaveBeenCalled();
+    expect(element('ai-external-mcp-client-existing-1')).not.toBeNull();
+    expect(element('ai-external-mcp-revoked')).toBeNull();
+  });
+
+  it('lists revoked clients and resolves their audit origin and effect', async () => {
+    const { wrapper } = mountSection({
+      clients: [existingClient, revokedClient],
+      audit: [auditEntry],
+    });
+    await settle();
+
+    expect(element('ai-external-mcp-revoked-client-revoked-1')).not.toBeNull();
+    expect(wrapper.text()).toContain('Old CLI');
+    const audit = element('ai-external-mcp-audit')!;
+    expect(audit.textContent).toContain('goal_search');
+    expect(audit.textContent).toContain('Old CLI');
+    expect(element('ai-external-mcp-audit-effect-audit-1')?.textContent).toContain('Read');
   });
 
   it('scopes copy feedback to one control and clears it after two seconds', async () => {
