@@ -948,6 +948,13 @@
       "kind": "component",
       "storyPath": "packages/setting-ui/src/components/DesktopUpdateSettingsSection.stories.ts",
       "status": "present"
+    },
+    {
+      "path": "packages/setting-ui/src/components/AgentInstanceWizard.vue",
+      "package": "@memoflow/setting-ui",
+      "kind": "component",
+      "storyPath": "packages/setting-ui/src/components/AgentInstanceWizard.stories.ts",
+      "status": "present"
     }
   ]
 }
