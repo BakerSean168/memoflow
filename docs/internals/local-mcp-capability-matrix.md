@@ -218,6 +218,7 @@ dev 槽已补齐 vitest/vite/tsx 等缺失 `dist` 后，以下定向测试均真
 - `packages/setting-ui` `ExternalMcpClients.spec.ts`：6 passed（`knowledge:write` 选项仍按既有 UI 路径渲染）。
 - `packages/agent-gateway` `tsc --noEmit`：0 errors；改动文件的定向 `tsc`：0 errors。
 - `node ./tools/quality/fmt.mjs --check --changed`：0 different。
+- 基线对照：`origin/main` 的 `local-agent-tools.ts` 中 `knowledge_draft`、Local `labels`/`relations`/`agents` 绑定的计数均为 0；本分支 `knowledge_draft` 为 13 处，且对应工具只在传入 owner port 时注册。
 
 未验证：真实 Windows Desktop 安装、ChatGPT Web 经 WSL tunnel 的真实审批体验、Vault 写入后的 Obsidian 侧索引刷新。本页只声明代码路径与定向测试事实。
 
