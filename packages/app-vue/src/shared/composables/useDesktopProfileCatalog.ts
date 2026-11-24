@@ -23,6 +23,9 @@ export const profileSchema = z.object({
   hasCredential: z.boolean(),
   remembered: z.boolean(),
 });
+const removeProfileResultSchema = z
+  .object({ state: z.enum(['removed', 'removed-partition-pending']) })
+  .nullish();
 const snapshotSchema = z.object({
   profile: profileSchema.nullable(),
   unlockState: z.enum(['LOCKED', 'UNLOCKED']),
@@ -290,10 +293,19 @@ export function useDesktopProfileCatalog(
     if (!confirmed) return;
     busyProfileId.value = profile.profileId;
     try {
-      if (
-        await invoke(ProfileAccessChannels.REMOVE, z.unknown(), { profileId: profile.profileId })
-      ) {
-        toast.success(t('auth.profileAccess.removed'));
+      const result = await invoke(ProfileAccessChannels.REMOVE, removeProfileResultSchema, {
+        profileId: profile.profileId,
+      });
+      if (result) {
+        // The deferred Chromium partition cleanup is reported honestly instead
+        // of claiming every last byte is gone.
+        toast.success(
+          t(
+            result.data?.state === 'removed-partition-pending'
+              ? 'auth.profileAccess.removedPendingPartitionCleanup'
+              : 'auth.profileAccess.removed',
+          ),
+        );
         await refreshProfiles();
       }
     } finally {

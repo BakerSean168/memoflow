@@ -2,6 +2,7 @@ import { defineComponent } from 'vue';
 import { flushPromises, mount } from '@vue/test-utils';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { createI18n } from 'vue-i18n';
+import { toast } from 'vue-sonner';
 import { ok } from '@memoflow/transport-contracts/result';
 import {
   CloudAuthChannels,
@@ -283,8 +284,26 @@ describe('useDesktopProfiles removal', () => {
     await flushPromises();
 
     expect(confirmMock).toHaveBeenCalledTimes(1);
-    expect(invoke).toHaveBeenCalledWith(ProfileAccessChannels.REMOVE, { profileId: 'other' });
+    expect(invoke).toHaveBeenCalledWith(ProfileAccessChannels.REMOVE, {
+      profileId: 'other',
+    });
     expect(invoke).toHaveBeenCalledWith(ProfileAccessChannels.LIST);
+  });
+
+  it('tells the user when the partition directory is cleaned up on the next start', async () => {
+    const { wrapper, presenter, invoke } = setup();
+    cleanups.push(() => wrapper.unmount());
+    invoke.mockImplementation(async (channel: string) => {
+      if (channel === ProfileAccessChannels.REMOVE)
+        return ok({ state: 'removed-partition-pending' });
+      if (channel === ProfileAccessChannels.LIST) return ok([]);
+      return ok(null);
+    });
+
+    await presenter.removeProfile(profile('other'));
+    await flushPromises();
+
+    expect(toast.success).toHaveBeenCalledWith(auth.profileAccess.removedPendingPartitionCleanup);
   });
 
   it('never offers to delete the active Profile', async () => {

@@ -19,11 +19,36 @@ import type { ProfileAutoEnterPreference } from './profile-auto-enter-preference
 import { isProfileAutoEnterSuppressed } from './profile-auto-enter-suppression';
 import type { ProfileRegistry } from './profile-registry';
 import type { DesktopProfileRuntimeManager } from './desktop-profile-runtime-manager';
+import { describeProfileCleanupFailure, type ProfileCleanupErrorCategory } from './profile-cleanup';
 import { ProfileAvatarStore } from './profile-avatar-store';
 import type { DesktopCloudConnectionManager } from './desktop-cloud-connection-manager';
 import type { DeviceAuthCoordinator } from './device-auth-coordinator';
 
 const logger = createLogger('ProfileAccessIpc');
+
+/**
+ * Stable user-facing failure for a removal that could not finish in-process.
+ * Raw system messages and paths never reach the renderer; the stage and system
+ * code go to the main-process log instead.
+ */
+const REMOVAL_FAILURES: Record<ProfileCleanupErrorCategory, { code: string; message: string }> = {
+  IN_USE: {
+    code: 'PROFILE_REMOVE_IN_USE',
+    message: '账户数据仍被系统占用，剩余内容将在下次启动 MemoFlow 时自动清理。',
+  },
+  PERMISSION: {
+    code: 'PROFILE_REMOVE_PERMISSION',
+    message: '没有权限删除账户数据，剩余内容将在下次启动 MemoFlow 时继续清理。',
+  },
+  IO: {
+    code: 'PROFILE_REMOVE_IO',
+    message: '删除账户数据时发生磁盘读写错误，剩余内容将在下次启动 MemoFlow 时继续清理。',
+  },
+  UNKNOWN: {
+    code: 'PROFILE_REMOVE_FAILED',
+    message: '账户删除未完成，剩余内容将在下次启动 MemoFlow 时继续清理。',
+  },
+};
 
 /**
  * Resolves the display name of the Profile a failed selection targeted so the
@@ -82,6 +107,7 @@ export function registerProfileAccessIpc(
   const autoEnterCandidates = async (): Promise<ProfileAutoEnterCandidate[]> => {
     const candidates: ProfileAutoEnterCandidate[] = [];
     for (const profile of await registry.list()) {
+      if (await runtime.isProfileCleanupPending(profile.profileId)) continue;
       const eligible =
         profile.profileKind === 'registered' || (await runtime.hasRememberedKey(profile.profileId));
       if (eligible)
@@ -129,9 +155,17 @@ export function registerProfileAccessIpc(
     });
   });
 
-  ipcMain.handle(ProfileAccessChannels.LIST, async () =>
-    ok(await Promise.all((await registry.list()).map((profile) => toSummary(profile, runtime)))),
-  );
+  // A Profile with a pending deletion tombstone is no longer a login candidate:
+  // its disk state is being reclaimed and opening it would recreate the very
+  // partition the deletion is waiting to remove.
+  ipcMain.handle(ProfileAccessChannels.LIST, async () => {
+    const summaries: ProfileSummary[] = [];
+    for (const profile of await registry.list()) {
+      if (await runtime.isProfileCleanupPending(profile.profileId)) continue;
+      summaries.push(await toSummary(profile, runtime));
+    }
+    return ok(summaries);
+  });
 
   // Issue #926: the identity window reads this on a cold start and the Settings
   // account section reads/writes it. A target without remembered material is
@@ -211,12 +245,31 @@ export function registerProfileAccessIpc(
   ipcMain.handle(ProfileAccessChannels.REMOVE, async (_event, input: unknown) => {
     const parsed = RemoveProfileRequestSchema.safeParse(input);
     if (!parsed.success) return fail({ code: 'INVALID_REQUEST', message: 'Profile 格式无效' });
-    if (runtime.getActiveProfileId() === parsed.data.profileId) {
+    const profileId = parsed.data.profileId;
+    if (runtime.getActiveProfileId() === profileId) {
       return fail({ code: 'PROFILE_ACTIVE', message: '请先锁定或切换当前 Profile' });
     }
-    deviceAuth?.cancelForProfile(parsed.data.profileId);
-    await runtime.removeProfile(parsed.data.profileId);
-    return ok(null);
+    deviceAuth?.cancelForProfile(profileId);
+    try {
+      const outcome = await runtime.removeProfile(profileId);
+      // Deferred partition removal is normal, not a failure: the account is gone
+      // from the registry and the leftover directory is reclaimed at cold start.
+      logger.info('Profile removal finished', {
+        profileId,
+        partitionCleanupPending: !outcome.partitionRemoved,
+      });
+      return ok({ state: outcome.partitionRemoved ? 'removed' : 'removed-partition-pending' });
+    } catch (error) {
+      const failure = describeProfileCleanupFailure(error);
+      logger.error('Profile removal failed', {
+        profileId,
+        stage: failure.stage,
+        category: failure.category,
+        systemCode: failure.systemCode,
+        error,
+      });
+      return fail(REMOVAL_FAILURES[failure.category]);
+    }
   });
 
   ipcMain.handle(ProfileAccessChannels.LOCK, async () => {

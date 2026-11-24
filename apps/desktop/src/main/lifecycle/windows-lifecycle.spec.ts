@@ -49,6 +49,7 @@ describe('Windows shell lifecycle', () => {
   const runtime = {
     profileRuntimeManager: {
       getStartupProfile: vi.fn(async () => ({ profileId: 'a', profileKind: 'registered' })),
+      recoverPendingCleanups: vi.fn(async () => ({ attempted: 0, completed: 0, pending: 0 })),
       getActiveProfileResolver: vi.fn(),
       deactivateProfile: vi.fn(async () => {}),
     },
@@ -64,6 +65,11 @@ describe('Windows shell lifecycle', () => {
     runtime.profileRuntimeManager.getStartupProfile.mockResolvedValue({
       profileId: 'a',
       profileKind: 'registered',
+    });
+    runtime.profileRuntimeManager.recoverPendingCleanups.mockResolvedValue({
+      attempted: 0,
+      completed: 0,
+      pending: 0,
     });
     state.configDir = mkdtempSync(path.join(tmpdir(), 'mf-windows-lifecycle-'));
     state.initFeatures.mockImplementation(async () => ({ tray: state.tray, notification: {} }));
@@ -238,6 +244,21 @@ describe('Windows shell lifecycle', () => {
     expect(manager.createProfileAccessWindow).toHaveBeenCalledTimes(1);
     expect(manager.transitionToMainWindow).not.toHaveBeenCalled();
     expect(runtime.profileRuntimeManager.getStartupProfile).not.toHaveBeenCalled();
+  });
+
+  it('consumes pending Profile deletions before the Profile gate window opens', async () => {
+    const recover = runtime.profileRuntimeManager.recoverPendingCleanups;
+    recover.mockResolvedValue({ attempted: 2, completed: 2, pending: 0 });
+
+    await register();
+
+    // The gate window is the first thing that can create a Session for a doomed
+    // partition, so recovery must be ordered before it.
+    expect(recover).toHaveBeenCalledOnce();
+    expect(recover.mock.invocationCallOrder[0]).toBeLessThan(
+      manager.createProfileAccessWindow.mock.invocationCallOrder[0]!,
+    );
+    expect(manager.createProfileAccessWindow).toHaveBeenCalledOnce();
   });
 
   it('opens the empty account list instead of minting an identity when no Profile exists', async () => {

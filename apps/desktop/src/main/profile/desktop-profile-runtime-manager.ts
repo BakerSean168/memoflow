@@ -1,6 +1,13 @@
 import { session } from 'electron';
 import { ResultErrorException } from '@memoflow/transport-contracts/result';
-import { ProfileCleanup, LocalProfileIdSchema } from './profile-cleanup';
+import {
+  ProfileCleanup,
+  LocalProfileIdSchema,
+  type ProfileCleanupOutcome,
+  type ProfileCleanupStage,
+  describeProfileCleanupFailure,
+  wrapProfileCleanupError,
+} from './profile-cleanup';
 import { randomBytes } from 'node:crypto';
 import type { Clock } from '@memoflow/time';
 import fs from 'node:fs';
@@ -40,6 +47,15 @@ export interface PreparedProfileRuntime {
   profileResolver: ProfilePathResolver;
   db: PowerSyncDatabase;
   profileAccessContext: IElectronAuthContext;
+}
+
+/** Result of an accepted deletion; `partitionRemoved` is false while cold-start cleanup is owed. */
+export type ProfileRemovalResult = ProfileCleanupOutcome;
+
+export interface ProfileCleanupRecoveryReport {
+  attempted: number;
+  completed: number;
+  pending: number;
 }
 
 interface PrepareProfileOptions {
@@ -392,13 +408,7 @@ export class DesktopProfileRuntimeManager {
    * 启动不再静默创建身份：注册表为空时返回 null；调用方不得据此自动打开 Profile。
    */
   async getStartupProfile(): Promise<ProfileDescriptor | null> {
-    for (const profileId of await this.cleanup.pending()) {
-      try {
-        await this.finishCleanup(profileId);
-      } catch (error) {
-        logger.warn('Profile cleanup remains pending', { profileId, error });
-      }
-    }
+    await this.recoverPendingCleanups();
     const pending = new Set(await this.cleanup.pending());
     const selected = await this.profileRegistry.getActiveProfile();
     if (selected && !pending.has(selected.profileId)) return selected;
@@ -406,6 +416,40 @@ export class DesktopProfileRuntimeManager {
       (profile) => !pending.has(profile.profileId),
     );
     return available ?? null;
+  }
+
+  /**
+   * Consume leftover deletion tombstones from a previous session.
+   *
+   * Runs before any window or `Session` for a doomed partition exists, so the
+   * partition directory can be deleted without racing a live Chromium handle.
+   * This is the only physical partition removal path; it never opens the
+   * partition and never retries within one launch. A still-locked directory is
+   * logged with its stage/category and retried on the next cold start.
+   */
+  recoverPendingCleanups(): Promise<ProfileCleanupRecoveryReport> {
+    return this.runExclusive(async () => {
+      const profileIds = await this.cleanup.pending();
+      let completed = 0;
+      let pending = 0;
+      for (const profileId of profileIds) {
+        try {
+          await this.cleanup.recover(profileId, () => this.removeProfileArtifacts(profileId));
+          completed += 1;
+          logger.info('Pending Profile cleanup completed', { profileId });
+        } catch (error) {
+          pending += 1;
+          const failure = describeProfileCleanupFailure(error);
+          logger.warn('Pending Profile cleanup still owes the partition directory', {
+            profileId,
+            stage: failure.stage,
+            category: failure.category,
+            systemCode: failure.systemCode,
+          });
+        }
+      }
+      return { attempted: profileIds.length, completed, pending };
+    });
   }
 
   private async activatePreparedProfile(): Promise<void> {
@@ -532,7 +576,7 @@ export class DesktopProfileRuntimeManager {
     logger.info('Local profile deactivated', { profileId });
   }
 
-  removeProfile(profileId: string): Promise<void> {
+  removeProfile(profileId: string): Promise<ProfileRemovalResult> {
     return this.runExclusive(() => this.removeProfileNow(profileId));
   }
 
@@ -567,26 +611,44 @@ export class DesktopProfileRuntimeManager {
     });
   }
 
-  private async removeProfileNow(profileId: string): Promise<void> {
+  private async removeProfileNow(profileId: string): Promise<ProfileRemovalResult> {
     const descriptor = (await this.profileRegistry.list()).find(
       (profile) => profile.profileId === profileId,
     );
-    if (!descriptor) return;
+    if (!descriptor) {
+      // An earlier attempt may have removed the registry entry and left the
+      // partition directory behind; cold-start recovery owns that residue.
+      return { partitionRemoved: !(await this.cleanup.isPending(profileId)) };
+    }
     if (descriptor.profileId === this.activeRuntime?.descriptor.profileId)
       throw new Error('Cannot remove active profile');
     if (descriptor.profileId === this.preparedRuntime?.descriptor.profileId)
       throw new Error('Cannot remove prepared profile');
-    await this.finishCleanup(descriptor.profileId);
+    return this.finishCleanup(descriptor.profileId);
   }
 
-  private async finishCleanup(profileId: string): Promise<void> {
-    await this.cleanup.remove(profileId, async () => {
-      await this.cloudSessionStore.remove(profileId);
-      await this.passwordStore.remove(profileId);
-      await this.keyStore.remove(profileId);
-      await this.rememberedKeyStore.remove(profileId);
-      await this.profileRegistry.remove(profileId);
-    });
+  private async finishCleanup(profileId: string): Promise<ProfileRemovalResult> {
+    return this.cleanup.remove(profileId, () => this.removeProfileArtifacts(profileId));
+  }
+
+  /** Idempotent credential/registry removal, shared by live deletion and startup recovery. */
+  private async removeProfileArtifacts(profileId: string): Promise<void> {
+    await this.runCleanupStep('cloud-session', () => this.cloudSessionStore.remove(profileId));
+    await this.runCleanupStep('credential', () => this.passwordStore.remove(profileId));
+    await this.runCleanupStep('profile-key', () => this.keyStore.remove(profileId));
+    await this.runCleanupStep('remembered-key', () => this.rememberedKeyStore.remove(profileId));
+    await this.runCleanupStep('registry', () => this.profileRegistry.remove(profileId));
+  }
+
+  private async runCleanupStep(
+    stage: ProfileCleanupStage,
+    step: () => Promise<void>,
+  ): Promise<void> {
+    try {
+      await step();
+    } catch (error) {
+      throw wrapProfileCleanupError(stage, error);
+    }
   }
 
   /** These composition callbacks are used only inside runExclusive, never exposed over IPC. */

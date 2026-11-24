@@ -683,7 +683,20 @@ describe('DesktopProfileRuntimeManager', () => {
     const staging = path.join(rootDir, 'cache', 'snapshot-staging', descriptor.profileId);
     await fs.promises.mkdir(staging, { recursive: true });
     await fs.promises.writeFile(path.join(staging, 'old-snapshot'), 'old account');
-    await runtime.removeProfile(descriptor.profileId);
+    const roots = resolveDesktopStorageRoots({
+      platform: 'linux',
+      channel: 'test',
+      home: rootDir,
+      env: { MEMOFLOW_DESKTOP_STORAGE_TEST_ROOT: rootDir },
+    });
+    const partitionDir = path.join(
+      roots.electronSessionData,
+      'Partitions',
+      `profile-${descriptor.profileId}`,
+    );
+    await fs.promises.mkdir(partitionDir, { recursive: true });
+    await fs.promises.writeFile(path.join(partitionDir, 'Cookies'), 'old session');
+    const outcome = await runtime.removeProfile(descriptor.profileId);
     expect(session.fromPartition).toHaveBeenLastCalledWith(
       `persist:profile-${descriptor.profileId}`,
     );
@@ -697,11 +710,103 @@ describe('DesktopProfileRuntimeManager', () => {
     expect(fs.existsSync(keyPath)).toBe(false);
     expect(fs.existsSync(passwordPath)).toBe(false);
     expect(fs.existsSync(sessionPath)).toBe(false);
+    // The live Session may still hold the directory; completion is reported as
+    // pending instead of claimed, and the tombstone survives for cold start.
+    expect(outcome).toEqual({ partitionRemoved: false });
+    expect(await runtime.isProfileCleanupPending(descriptor.profileId)).toBe(true);
+    expect(fs.existsSync(path.join(partitionDir, 'Cookies'))).toBe(true);
+
+    await expect(runtime.recoverPendingCleanups()).resolves.toEqual({
+      attempted: 1,
+      completed: 1,
+      pending: 0,
+    });
+    expect(fs.existsSync(partitionDir)).toBe(false);
+    expect(await runtime.isProfileCleanupPending(descriptor.profileId)).toBe(false);
     const readded = await registry.register('cloud-1', 'Cloud User', 'user@example.com');
     expect(readded.profileId).toBe(descriptor.profileId);
     expect(fs.existsSync(staging)).toBe(false);
     expect(fs.existsSync(profileDir)).toBe(false);
   });
+
+  it('deletes two inactive accounts in a row and leaves the active and neighbouring accounts intact', async () => {
+    const first = await createLocal('First');
+    const second = await createLocal('Second');
+    const current = await createLocal('Current');
+    await runtime.openProfile(current.profileId, LOCAL_PASSWORD);
+    const roots = resolveDesktopStorageRoots({
+      platform: 'linux',
+      channel: 'test',
+      home: rootDir,
+      env: { MEMOFLOW_DESKTOP_STORAGE_TEST_ROOT: rootDir },
+    });
+    const partitions = new Map(
+      [first, second, current].map((profile) => {
+        const dir = path.join(
+          roots.electronSessionData,
+          'Partitions',
+          `profile-${profile.profileId}`,
+        );
+        return [profile.profileId, dir];
+      }),
+    );
+    for (const [profileId, dir] of partitions) {
+      await fs.promises.mkdir(dir, { recursive: true });
+      await fs.promises.writeFile(path.join(dir, 'Cookies'), profileId);
+    }
+
+    await expect(runtime.removeProfile(first.profileId)).resolves.toEqual({
+      partitionRemoved: false,
+    });
+    await expect(runtime.removeProfile(second.profileId)).resolves.toEqual({
+      partitionRemoved: false,
+    });
+
+    expect(runtime.getActiveProfileId()).toBe(current.profileId);
+    expect((await registry.list()).map((profile) => profile.profileId)).toEqual([
+      current.profileId,
+    ]);
+    expect(await runtime.hasCredential(current.profileId)).toBe(true);
+    // Both deletions converge on the same cold start without touching neighbours.
+    await expect(runtime.recoverPendingCleanups()).resolves.toEqual({
+      attempted: 2,
+      completed: 2,
+      pending: 0,
+    });
+    for (const profile of [first, second]) {
+      expect(fs.existsSync(partitions.get(profile.profileId)!)).toBe(false);
+      expect(await runtime.isProfileCleanupPending(profile.profileId)).toBe(false);
+    }
+    expect(
+      await fs.promises.readFile(path.join(partitions.get(current.profileId)!, 'Cookies'), 'utf8'),
+    ).toBe(current.profileId);
+    expect(await runtime.hasCredential(current.profileId)).toBe(true);
+    expect(runtime.getActiveProfileId()).toBe(current.profileId);
+  }, 15_000);
+
+  it('refuses to reopen a Profile whose deletion was accepted earlier in the same launch', async () => {
+    const doomed = await createLocal('Doomed');
+    const current = await createLocal('Current');
+    await runtime.openProfile(current.profileId, LOCAL_PASSWORD);
+    const roots = resolveDesktopStorageRoots({
+      platform: 'linux',
+      channel: 'test',
+      home: rootDir,
+      env: { MEMOFLOW_DESKTOP_STORAGE_TEST_ROOT: rootDir },
+    });
+    await fs.promises.mkdir(
+      path.join(roots.electronSessionData, 'Partitions', `profile-${doomed.profileId}`),
+      { recursive: true },
+    );
+
+    await runtime.removeProfile(doomed.profileId);
+
+    expect(await runtime.isProfileCleanupPending(doomed.profileId)).toBe(true);
+    expect((await registry.list()).map((profile) => profile.profileId)).toEqual([
+      current.profileId,
+    ]);
+    await expect(runtime.openProfile(doomed.profileId, LOCAL_PASSWORD)).rejects.toThrow();
+  }, 15_000);
 
   it('refuses to sign out when no Profile is active', async () => {
     const invalidate = vi.fn(async () => undefined);
@@ -739,7 +844,8 @@ describe('DesktopProfileRuntimeManager', () => {
 
     await expect(runtime.signOutActiveProfile(async () => undefined)).rejects.toMatchObject({
       code: 'SIGN_OUT_PARTIAL',
-      message: 'disk full',
+      // The stage is now part of the structured failure instead of a raw message.
+      message: expect.stringContaining('registry'),
     });
     expect(runtime.getActiveProfileId()).toBeNull();
   });
