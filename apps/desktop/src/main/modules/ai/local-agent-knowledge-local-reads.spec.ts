@@ -13,10 +13,7 @@ import {
 import { createSystemClock, createTimeContext } from '@memoflow/time';
 import { LabelService, PowerSyncLabelRepository } from '@memoflow/label';
 import { PowerSyncRelationRepository, RelationService } from '@memoflow/relation';
-import {
-  LocalVaultRuntime,
-  type LocalVaultPlatform,
-} from '@memoflow/repository/electron';
+import { LocalVaultRuntime, type LocalVaultPlatform } from '@memoflow/repository/electron';
 import { createDesktopLocalAgentTools } from './local-agent-tools';
 import { DesktopKnowledgeNotePersistenceAdapter } from './desktop-knowledge-note-persistence.adapter';
 import { DesktopKnowledgeSourceAdapter } from './desktop-knowledge-source.adapter';

@@ -44,14 +44,13 @@ const draftTags = z.array(z.string().trim().min(1).max(50)).max(20);
  * content; the owner service assigns identity, revision and the local Vault
  * delivery target. No absolute path or arbitrary Markdown write is accepted.
  */
-export const KnowledgeDraftCreateInputSchema = z
-  .strictObject({
-    title: draftTitle,
-    topic: draftTopic.optional(),
-    markdown: draftMarkdown,
-    targetSubpath: vaultRelativeSubpath.optional(),
-    tags: draftTags.default([]),
-  });
+export const KnowledgeDraftCreateInputSchema = z.strictObject({
+  title: draftTitle,
+  topic: draftTopic.optional(),
+  markdown: draftMarkdown,
+  targetSubpath: vaultRelativeSubpath.optional(),
+  tags: draftTags.default([]),
+});
 export type KnowledgeDraftCreateInput = z.infer<typeof KnowledgeDraftCreateInputSchema>;
 
 export const KnowledgeDraftUpdateChangesSchema = z
