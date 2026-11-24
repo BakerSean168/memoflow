@@ -7,7 +7,7 @@ updated: 2026-11-24T00:00:00Z
 
 # External Agent PAT 连接
 
-本车道保留 PAT 与 40 个工具（22 个只读、13 个写、5 个 assisted），全部默认关闭；常规 Agent 连接另见 [OAuth 指南](./external-agent-oauth.md)。OAuth 也复用同一组 12 个 scope，写在 `EAG_OAUTH_WRITE_ENABLED=1` 时开放；见 [OAuth 写 consent 设计评估](../internals/external-agent-oauth-write-consent.md)。PAT 验证状态见 [EAG-03 证据](https://github.com/BakerSean168/memoflow/blob/7a45112e1840950ead1ba98b748fc70fa1b38344/docs/analysis/2026-10-07-eag-03-task-read-evidence.md)。受控开发入口为 `http://127.0.0.1:20201/mcp`，只适用于同机客户端。
+本车道保留 PAT 与 45 个工具（23 个只读、17 个写、5 个 assisted），全部默认关闭；常规 Agent 连接另见 [OAuth 指南](./external-agent-oauth.md)。OAuth 也复用同一组 12 个 scope，写在 `EAG_OAUTH_WRITE_ENABLED=1` 时开放；见 [OAuth 写 consent 设计评估](../internals/external-agent-oauth-write-consent.md)。PAT 验证状态见 [EAG-03 证据](https://github.com/BakerSean168/memoflow/blob/7a45112e1840950ead1ba98b748fc70fa1b38344/docs/analysis/2026-10-07-eag-03-task-read-evidence.md)。受控开发入口为 `http://127.0.0.1:20201/mcp`，只适用于同机客户端。
 
 在既有 `docker-compose.local.yml` prod-like 车道中配置 `EAG_READ_PILOT_ENABLED=1`、`EAG_AUDIENCE=http://127.0.0.1:20201/mcp` 和私密的至少 32 字符 `EAG_CURSOR_SECRET`，沿用 [本地 Docker 流程](./local-docker.md)。Task 注册由 `EAG_TASK_READ_ENABLED` 控制，默认开启；设为 0 可回退至 Goal 两工具。写与 assisted 分别由 `EAG_WRITE_ENABLED`、`EAG_ROUTINE_WRITE_ENABLED`、`EAG_ASSISTED_ENABLED` 控制，默认 `0`；完整顺序见 [Gateway runbook](../internals/external-agent-gateway.md#10-一期开启-runbook)。
 

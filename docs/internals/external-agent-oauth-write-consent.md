@@ -55,7 +55,7 @@ OAuth 写现在一定失败，不是某一处漏判，而是五处独立约束�
 | 写事务 authority   | `apps/api/src/modules/agent-gateway/write.port.ts:73`                    | 写事务只接受 `isScopedPatAuthorityCurrent`（PAT 表 + `FOR SHARE`），没有 OAuth authority 适配        |
 | AI 权限 checkpoint | `packages/ai/src/server/permissions/gateway-permission-checkpoint.ts:48` | `preAuthorizedWrite` 仅在 `credentialType === 'pat'` 时成立；OAuth 写会进入逐次确认/拒绝路径         |
 
-因此变更前 OAuth 可见工具只有 6 个：`goal_get`、`goal_search`、`task_plan_get`、`task_plan_search`、`task_occurrence_get`、`task_occurrence_list`。PAT 侧另有 16 个只读、13 个写和 5 个 assisted 工具（合计 40 个），其 scope 映射见 §4。该边界在 #1054 中已按 §0 放开。
+因此变更前 OAuth 可见工具只有 6 个：`goal_get`、`goal_search`、`task_plan_get`、`task_plan_search`、`task_occurrence_get`、`task_occurrence_list`。PAT 侧另有 17 个只读、17 个写和 5 个 assisted 工具（合计 45 个），其 scope 映射见 §4。该边界在 #1054 中已按 §0 放开。
 
 > 结论：开放 OAuth 写必须同时改动授权集、consent 校验、Gateway 发布门、写事务 authority 与 checkpoint；只改其中一处会得到“能发现工具但调用必失败”或“能调用但绕过事务校验”的半成品。
 
@@ -143,7 +143,7 @@ goals:read tasks:read goals:write tasks:write offline_access
 | ------ | ---------------------------------------------------- | --------------------------------------------------------- | -------- |
 | 全量   | 实现最简单，当前页面即此形态                         | 用户无法区分读/写，无法只给最小权限；写权限容易被顺带授予 | 不采用   |
 | 逐域   | 与 12 个 scope 的域边界一致；可读/写分组；文案可解释 | 需要改 consent 请求/响应契约和页面                        | **推荐** |
-| 逐工具 | 权限最小                                             | 40 个工具，用户无法理解；scope 与工具映射会漂移           | 不采用   |
+| 逐工具 | 权限最小                                             | 45 个工具，用户无法理解；scope 与工具映射会漂移           | 不采用   |
 
 推荐“逐域 + 读写分组”：按 Goal、Task、Routine、Notification 分组，每组内分别列出“读取”和“写入”，写组默认不勾选（若客户端请求了写）。用户至少可以整体拒绝；如果 provider 支持部分授权，允许取消某个域。
 
