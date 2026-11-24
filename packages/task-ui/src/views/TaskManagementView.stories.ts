@@ -93,7 +93,7 @@ export const PlansSurface: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement.ownerDocument.body);
     await userEvent.click(await canvas.findByTestId('task-surface-trigger'));
-    await userEvent.click(await canvas.findByTestId('task-surface-trigger-plans'));
+    await userEvent.click(await canvas.findByTestId('task-surface-plans'));
     await expect(await canvas.findByTestId('task-plan-list')).toHaveTextContent(
       'Morning focus block',
     );
