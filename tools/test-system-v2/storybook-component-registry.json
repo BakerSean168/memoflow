@@ -950,6 +950,13 @@
       "status": "present"
     },
     {
+      "path": "packages/app-vue/src/layouts/shell/GlobalComposer.vue",
+      "package": "@memoflow/app-vue",
+      "kind": "component",
+      "storyPath": "packages/app-vue/src/layouts/shell/GlobalComposer.stories.ts",
+      "status": "present"
+    },
+    {
       "path": "packages/ai-ui/src/components/AIComposerControls.vue",
       "package": "@memoflow/ai-ui",
       "kind": "component",
