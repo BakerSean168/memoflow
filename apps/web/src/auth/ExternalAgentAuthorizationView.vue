@@ -77,6 +77,11 @@ const SCOPE_GROUPS: readonly ScopeGroup[] = [
     title: '日程',
     items: [
       { scope: 'schedules:read', label: '读取日程', description: '查看日历条目和时间安排。' },
+      {
+        scope: 'schedules:write',
+        label: '创建、修改、改期或删除日程',
+        description: '按版本校验写入日历条目；删除无法恢复，需要逐次确认。',
+      },
     ],
   },
   {

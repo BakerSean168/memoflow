@@ -89,6 +89,7 @@ export default {
       aiRead: 'AI conversations & agents (read)',
       notificationsRead: 'Notifications (read)',
       schedulesRead: 'Schedule (read)',
+      schedulesWrite: 'Schedule (create, update, reschedule, delete)',
       notificationsWrite: 'Notifications (mark read)',
       labelsRead: 'Labels (read)',
       relationsRead: 'Relations (read)',

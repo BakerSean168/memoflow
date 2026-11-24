@@ -109,7 +109,7 @@ describe('ExternalAgentConnectionsSection PAT issuing (#970)', () => {
 
     await openCreate(wrapper);
     expect(query('#external-pat-name')).not.toBeNull();
-    expect(document.querySelectorAll('[data-testid^="pat-scope-"]')).toHaveLength(12);
+    expect(document.querySelectorAll('[data-testid^="pat-scope-"]')).toHaveLength(13);
 
     await click('[data-testid="pat-create-cancel"]');
     expect(query('#external-pat-name')).toBeNull();
@@ -191,6 +191,26 @@ describe('ExternalAgentConnectionsSection PAT issuing (#970)', () => {
       name: 'domain reader',
       expiresInDays: 90,
       scopes: ['goals:read', 'tasks:read', 'notifications:read', 'schedules:read'],
+      idempotencyKey: expect.any(String),
+    });
+  });
+
+  it('offers the schedules:write scope and warns before issuing it (#1076)', async () => {
+    const { wrapper, service } = fixture();
+    await flushPromises();
+    await openCreate(wrapper);
+
+    await click('[data-testid="pat-scope-schedules:write"] [role="checkbox"]');
+    expect(get('[data-testid="pat-write-warning"]').textContent).toContain(
+      'can write directly within the granted scopes',
+    );
+    await nameToken('calendar writer');
+    await submit();
+
+    expect(service.createPat).toHaveBeenCalledWith({
+      name: 'calendar writer',
+      expiresInDays: 90,
+      scopes: ['goals:read', 'tasks:read', 'schedules:write'],
       idempotencyKey: expect.any(String),
     });
   });
