@@ -3,9 +3,11 @@ import { expect, userEvent, within } from 'storybook/test';
 import { nextTick, onMounted, ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { useAppShellStore } from '@repository-ui-test-host/layouts/shell/useAppShellStore';
-import { repositoryUiHost } from '../repository-ui-host';
+import { provideKnowledgeNativeSurface } from '@repository-ui-test-host/layouts/shell/useKnowledgeNativeSurface';
 import KnowledgeCaptureReviewDialog from './KnowledgeCaptureReviewDialog.vue';
 import type { KnowledgeCaptureSourceOption } from '../composables/knowledgeCaptureNativeEditSession';
+
+type KnowledgeSurfaceHost = ReturnType<typeof provideKnowledgeNativeSurface>;
 
 const localVaultSource: KnowledgeCaptureSourceOption = {
   key: 'local_vault',
@@ -25,9 +27,11 @@ type CaptureStoryParameters = {
   busy?: boolean;
 };
 
-async function prepareReviewSession(parameters: CaptureStoryParameters) {
+async function prepareReviewSession(
+  parameters: CaptureStoryParameters,
+  host: KnowledgeSurfaceHost,
+) {
   await nextTick();
-  const host = repositoryUiHost.useKnowledgeNativeSurfaceRegistration();
   const session = host?.locate();
   if (!session) return;
   if (parameters.prefilled) {
@@ -83,8 +87,12 @@ const meta = {
       ];
       store.activeTabId = 'story-knowledge-tab';
       store.panelSurface = 'business';
+      // The dialog only registers its native edit session when the application
+      // shell provides this key. Storybook has no shell, so the story owns the
+      // same seam; otherwise prepopulation and the busy state silently no-op.
+      const host = provideKnowledgeNativeSurface();
       onMounted(() => {
-        void prepareReviewSession(parameters as CaptureStoryParameters);
+        void prepareReviewSession(parameters as CaptureStoryParameters, host);
       });
       return {
         open,
