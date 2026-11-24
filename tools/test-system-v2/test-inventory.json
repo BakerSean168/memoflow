@@ -13458,7 +13458,7 @@
       "type": "measurement",
       "suite": "coverage",
       "runner": "vitest",
-      "fileCount": 72
+      "fileCount": 73
     },
     {
       "id": "packages/account/vitest.config.ts",
@@ -13938,7 +13938,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 72
+      "fileCount": 73
     },
     {
       "id": "apps/desktop/vitest.config.ts",
@@ -14449,6 +14449,7 @@
       "apps/api/src/modules/agent-gateway/notification.port.spec.ts",
       "apps/api/src/modules/agent-gateway/relation-read.port.spec.ts",
       "apps/api/src/modules/agent-gateway/relation-scope.boundary.spec.ts",
+      "apps/api/src/modules/agent-gateway/schedule.port.spec.ts",
       "apps/api/src/modules/agent-gateway/write.port.spec.ts",
       "apps/api/src/modules/ai/controlled-analytics-read.adapter.spec.ts",
       "apps/api/src/modules/ai/owner-activity-read.adapter.equivalence.spec.ts",
