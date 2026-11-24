@@ -19,6 +19,7 @@ import {
   NotificationListInputSchema,
   NotificationListOutputSchema,
   NotificationUnreadCountOutputSchema,
+  NotificationPreferencesOutputSchema,
   TaskPlanGetInputSchema,
   TaskPlanGetOutputSchema,
   TaskPlanSearchInputSchema,
@@ -257,6 +258,18 @@ export const readToolDescriptors = {
       description: 'Count owned unread notifications.',
       inputSchema: z.strictObject({}),
       outputSchema: NotificationUnreadCountOutputSchema,
+      annotations: readAnnotations,
+    },
+  },
+  notification_preferences_get: {
+    version: '1',
+    effect: 'read',
+    requiredScope: 'notifications:read',
+    definition: {
+      description:
+        'Read the notification delivery preferences (global channels, workflow overrides, quiet hours) of the credential owner.',
+      inputSchema: z.strictObject({}),
+      outputSchema: NotificationPreferencesOutputSchema,
       annotations: readAnnotations,
     },
   },

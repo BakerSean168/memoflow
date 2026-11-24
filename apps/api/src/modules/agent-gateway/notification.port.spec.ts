@@ -4,7 +4,14 @@ import type { GatewayWriteAuthority } from '@memoflow/agent-gateway';
 import type { NotificationInboxPort } from '@memoflow/notification';
 import type { ExecutionContext } from '@memoflow/transport-contracts';
 import { error, ok } from '@memoflow/transport-contracts/result';
-import { bindNotificationMarkRead, bindNotificationReadPort } from './notification.port';
+import {
+  bindNotificationArchive,
+  bindNotificationMarkRead,
+  bindNotificationMarkUnread,
+  bindNotificationPreferencesUpdate,
+  bindNotificationReadPort,
+  bindNotificationRestore,
+} from './notification.port';
 
 interface Row {
   id: string;
@@ -78,11 +85,71 @@ function inbox(rows: Row[]) {
     target.updatedAt = 10;
     return ok(target);
   });
+  const markAsUnread = vi.fn(async (id: string, identityId: string) => {
+    const target = rows.find((item) => item.id === id && item.identityId === identityId);
+    if (!target) return error('NOT_FOUND', `Notification not found: ${id}`);
+    target.isRead = false;
+    target.readAt = null;
+    target.version += 1;
+    target.updatedAt = 11;
+    return ok(target);
+  });
+  const archive = vi.fn(async (id: string, identityId: string) => {
+    const target = rows.find((item) => item.id === id && item.identityId === identityId);
+    if (!target) return error('NOT_FOUND', `Notification not found: ${id}`);
+    target.archivedAt = 12;
+    target.version += 1;
+    target.updatedAt = 13;
+    return ok(target);
+  });
+  const restore = vi.fn(async (id: string, identityId: string) => {
+    const target = rows.find((item) => item.id === id && item.identityId === identityId);
+    if (!target) return error('NOT_FOUND', `Notification not found: ${id}`);
+    target.archivedAt = null;
+    target.version += 1;
+    target.updatedAt = 14;
+    return ok(target);
+  });
+  const preferences = {
+    id: 'preference-1',
+    identityId: 'owner-a',
+    globalChannels: { InApp: true },
+    workflowOverrides: {},
+    quietHours: null,
+    version: 1,
+    createdAt: 1,
+    updatedAt: 1,
+    deletedAt: null,
+  };
+  const getPreferences = vi.fn(async () => ok({ ...preferences }));
+  const updatePreferences = vi.fn(async (dto: unknown, identityId: string) => {
+    if (identityId !== preferences.identityId)
+      return error('NOT_FOUND', 'Notification preference not found');
+    const patch = dto as { globalChannels?: Record<string, boolean> };
+    Object.assign(preferences.globalChannels, patch.globalChannels ?? {});
+    preferences.version += 1;
+    preferences.updatedAt = 20;
+    return ok({ ...preferences });
+  });
   return {
-    port: { listNotifications, getUnreadCount, markAsRead } as unknown as NotificationInboxPort,
+    port: {
+      listNotifications,
+      getUnreadCount,
+      markAsRead,
+      markAsUnread,
+      archive,
+      restore,
+      getPreferences,
+      updatePreferences,
+    } as unknown as NotificationInboxPort,
     listNotifications,
     getUnreadCount,
     markAsRead,
+    markAsUnread,
+    archive,
+    restore,
+    getPreferences,
+    updatePreferences,
   };
 }
 
@@ -163,5 +230,62 @@ describe('Notification owner binding', () => {
       markRead({ id: target.id }, context('owner-a'), { ...authority, scopes: ['goals:read'] }),
     ).rejects.toMatchObject({ code: 'FORBIDDEN' });
     expect(f.markAsRead).toHaveBeenCalledOnce();
+  });
+
+  it('binds unread, archive, restore and preference patches to the owner identity', async () => {
+    const target = row({ isRead: true, readAt: 5, version: 1 });
+    const f = inbox([target]);
+    const cx = context('owner-a');
+
+    expect(await bindNotificationMarkUnread(f.port)({ id: target.id }, cx, authority)).toEqual({
+      id: target.id,
+      isRead: false,
+      readAt: null,
+      version: 2,
+      updatedAt: 11,
+    });
+    expect(f.markAsUnread).toHaveBeenCalledWith(target.id, 'owner-a');
+    expect(target.isRead).toBe(false);
+
+    expect(await bindNotificationArchive(f.port)({ id: target.id }, cx, authority)).toEqual({
+      id: target.id,
+      archivedAt: 12,
+      version: 3,
+      updatedAt: 13,
+    });
+    expect(f.archive).toHaveBeenCalledWith(target.id, 'owner-a');
+
+    expect(await bindNotificationRestore(f.port)({ id: target.id }, cx, authority)).toEqual({
+      id: target.id,
+      archivedAt: null,
+      version: 4,
+      updatedAt: 14,
+    });
+    expect(target.archivedAt).toBeNull();
+
+    const updated = await bindNotificationPreferencesUpdate(f.port)(
+      { globalChannels: { InApp: false, Desktop: true } },
+      cx,
+      authority,
+    );
+    expect(updated).toMatchObject({
+      globalChannels: { InApp: false, Desktop: true },
+      version: 2,
+      updatedAt: 20,
+    });
+    expect(JSON.stringify(updated)).not.toContain('identityId');
+    const reads = bindNotificationReadPort(f.port);
+    expect((await reads.getPreferences(cx)).globalChannels).toMatchObject({
+      InApp: false,
+      Desktop: true,
+    });
+
+    await expect(
+      bindNotificationArchive(f.port)({ id: target.id }, cx, {
+        ...authority,
+        scopes: ['notifications:read'],
+      }),
+    ).rejects.toMatchObject({ code: 'FORBIDDEN' });
+    expect(f.archive).toHaveBeenCalledOnce();
   });
 });

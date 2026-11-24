@@ -64,12 +64,13 @@ function tokenDigest(token: string): string {
 /** Business write scope that covers an operation; undefined for reads and owners we do not expose. */
 function writeScopeForOperation(
   operationId: string,
-): 'goals:write' | 'tasks:write' | 'routines:write' | undefined {
+): 'goals:write' | 'tasks:write' | 'routines:write' | 'notifications:write' | undefined {
   const operation = getPermissionOperation(operationId);
   if (!operation || operation.action === 'read') return undefined;
   if (operation.object === 'goal' || operation.object === 'key_result') return 'goals:write';
   if (operation.object === 'task') return 'tasks:write';
   if (operation.object === 'routine') return 'routines:write';
+  if (operation.object === 'notification') return 'notifications:write';
   return undefined;
 }
 /** Tools that mutate business state or the visible Goal panel; everything else is a read. */

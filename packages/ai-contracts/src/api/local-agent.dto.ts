@@ -47,7 +47,12 @@ export const LocalAgentActivitySchema = z
   })
   .strict();
 export type LocalAgentActivity = z.infer<typeof LocalAgentActivitySchema>;
-export const LocalAgentWriteScopeSchema = z.enum(['goals:write', 'tasks:write', 'routines:write']);
+export const LocalAgentWriteScopeSchema = z.enum([
+  'goals:write',
+  'tasks:write',
+  'routines:write',
+  'notifications:write',
+]);
 export type LocalAgentWriteScope = z.infer<typeof LocalAgentWriteScopeSchema>;
 const nativePath = z
   .string()
@@ -75,7 +80,7 @@ export const LocalAgentConnectionInputSchema = z
     homePath: nativePath.optional(),
     enabled: z.boolean(),
     nativePermissionMode: z.enum(['supervised', 'auto-approve']).optional(),
-    writeScopes: z.array(LocalAgentWriteScopeSchema).max(3).default([]),
+    writeScopes: z.array(LocalAgentWriteScopeSchema).max(4).default([]),
   })
   .strict();
 export type LocalAgentConnectionInput = z.infer<typeof LocalAgentConnectionInputSchema>;
@@ -362,7 +367,7 @@ export const LocalMcpClientSchema = z
   .object({
     id,
     name: z.string().trim().min(1).max(80),
-    writeScopes: z.array(LocalAgentWriteScopeSchema).max(3),
+    writeScopes: z.array(LocalAgentWriteScopeSchema).max(4),
     tokenPrefix: z.string().min(8).max(16),
     createdAt: z.number().int().nonnegative(),
     revokedAt: z.number().int().nonnegative().nullable(),
@@ -373,7 +378,7 @@ export type LocalMcpClient = z.infer<typeof LocalMcpClientSchema>;
 export const LocalMcpClientCreateSchema = z
   .object({
     name: z.string().trim().min(1).max(80),
-    writeScopes: z.array(LocalAgentWriteScopeSchema).max(3),
+    writeScopes: z.array(LocalAgentWriteScopeSchema).max(4),
   })
   .strict();
 export type LocalMcpClientCreate = z.infer<typeof LocalMcpClientCreateSchema>;
