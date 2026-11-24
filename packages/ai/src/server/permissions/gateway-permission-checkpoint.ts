@@ -20,8 +20,9 @@ const WRITE_SCOPE_BY_OBJECT: Partial<Record<PermissionObject, string>> = {
 
 /**
  * Notification action execution fans out into other owners' commands, so it
- * stays outside MCP (#990). Only the notification read-state transition is
- * pre-authorized by `notifications:write`.
+ * stays outside MCP (#990). Read-state, archive/restore and preference
+ * transitions are the notification writes pre-authorized by
+ * `notifications:write`.
  */
 const PREAUTHORIZED_WRITE_EXCLUSIONS: ReadonlySet<string> = new Set([
   'notification.execute_action',
