@@ -15,7 +15,7 @@ const reviewRun: TaskWorkflowRun = AIWorkflowRunViewSchema.parse({
   suspension: {
     type: 'task_draft_review',
     ownerCreate: {
-      taskId: 'TaskPlanId_550e8400-e29b-41d4-a716-446655440001',
+      taskId: 'ITaskPlanId_550e8400-e29b-41d4-a716-446655440001',
       draftRef: 'task:ship-review',
     },
     draft: {
@@ -77,7 +77,7 @@ const completedRun: TaskWorkflowRun = AIWorkflowRunViewSchema.parse({
     workflowRunId: 'workflow-task-complete',
     revision: 3,
     status: 'success',
-    referenceMap: { 'task:ship-review': 'TaskPlanId_550e8400-e29b-41d4-a716-446655440001' },
+    referenceMap: { 'task:ship-review': 'ITaskPlanId_550e8400-e29b-41d4-a716-446655440001' },
     failures: [],
     retryable: false,
   },
@@ -170,7 +170,7 @@ export const Recovery: Story = {
     const page = within(canvasElement.ownerDocument.body);
     await expect(page.getByTestId('task-workflow-recovery')).toBeVisible();
     await expect(page.getByTestId('task-workflow-recovery')).toHaveTextContent(
-      'Execution failed (SERVICE_UNAVAILABLE)',
+      'Workflow execution failed (SERVICE_UNAVAILABLE)',
     );
     await expect(page.getByTestId('task-agent-retry-execution')).toBeVisible();
     await expect(page.getByTestId('task-agent-accept-partial')).toBeVisible();
@@ -185,7 +185,7 @@ export const Completed: Story = {
     await expect(page.getByTestId('task-workflow-result')).toHaveTextContent('Success');
     await expect(page.getByTestId('task-workflow-result')).toHaveTextContent('one task');
     await expect(page.getByTestId('task-workflow-result')).not.toHaveTextContent(
-      'TaskPlanId_550e8400',
+      'ITaskPlanId_550e8400',
     );
   },
 };
