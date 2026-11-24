@@ -934,6 +934,13 @@
       "kind": "component",
       "storyPath": "packages/setting-ui/src/components/ExternalMcpClients.stories.ts",
       "status": "present"
+    },
+    {
+      "path": "packages/setting-ui/src/components/AIPermissionSettings.vue",
+      "package": "@memoflow/setting-ui",
+      "kind": "component",
+      "storyPath": "packages/setting-ui/src/components/AIPermissionSettings.stories.ts",
+      "status": "present"
     }
   ]
 }
