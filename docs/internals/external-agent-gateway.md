@@ -266,7 +266,7 @@ Elapsed/ActiveUsage/专注 protocol 需要设备本地执行，暂不通过 Host
 | `EAG_AUDIENCE`                      | `https://<api-host>/mcp` | 必须是 HTTPS 的规范 origin + `/mcp`；其 host 必须与请求 `Host` 一致，否则 403            |
 | `EAG_CURSOR_SECRET`                 | 随机 ≥32 字节            | 分页游标密钥；跨重启保持稳定                                                             |
 | `EAG_TASK_READ_ENABLED`             | `1`                      | Task 只读工具；默认已为 `1`                                                              |
-| `EAG_WRITE_ENABLED`                 | `1`                      | 发布 8 个 PAT 写工具（Routine 写另由下一项控制）                                         |
+| `EAG_WRITE_ENABLED`                 | `1`                      | 发布 Goal/Task/Notification/Schedule 写工具（Routine 写另由下一项控制）                         |
 | `EAG_ROUTINE_WRITE_ENABLED`         | `1`                      | 在 writes 打开的前提下发布 Routine 写工具（create/update/delete/pause/override）         |
 | `EAG_ASSISTED_ENABLED`              | `1`                      | 发布 5 个 assisted 工具；要求 durable AI workflow runtime，否则启动失败                  |
 | `EAG_OAUTH_ENABLED`                 | 可选 `1`                 | 需要总开关、`AUTH_BASE_URL`（HTTPS `/api/auth`）与 `MEMOFLOW_WEB_URL`                    |
