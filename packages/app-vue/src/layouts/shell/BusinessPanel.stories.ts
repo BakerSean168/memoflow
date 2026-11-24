@@ -7,7 +7,7 @@ const modules: ShellModule[] = ['goal', 'task', 'routine', 'note', 'notification
 
 const tabs: BusinessTab[] = [
   {
-    id: 'tab-goal',
+    id: 'goal',
     module: 'goal',
     route: '/goals',
     title: 'Goals',
@@ -16,7 +16,7 @@ const tabs: BusinessTab[] = [
     lastActiveAt: 3,
   },
   {
-    id: 'tab-task',
+    id: 'task',
     module: 'task',
     route: '/tasks',
     title: 'Tasks',
@@ -25,7 +25,7 @@ const tabs: BusinessTab[] = [
     lastActiveAt: 2,
   },
   {
-    id: 'tab-routine',
+    id: 'routine',
     module: 'routine',
     route: '/routines',
     title: 'Routines',
@@ -38,7 +38,7 @@ const tabs: BusinessTab[] = [
 const manyTabs: BusinessTab[] = Array.from({ length: 8 }, (_, index) => {
   const module = modules[index % modules.length]!;
   return {
-    id: `tab-${module}-${index}`,
+    id: `${module}-${index}`,
     module,
     route: `/${module}s/${index}`,
     title:
@@ -92,7 +92,7 @@ const meta = {
   parameters: { layout: 'fullscreen' },
   args: {
     tabs,
-    activeTabId: 'tab-goal',
+    activeTabId: 'goal',
     layout: 'split',
     panelSurface: 'home',
     focusExitCollapsesPanel: false,
@@ -112,14 +112,14 @@ export const HomeSurface: Story = {
     await expect(page.getByTestId('business-panel-tab-goal')).toBeVisible();
     await expect(page.getByTestId('business-panel-focus-toggle')).toHaveAttribute(
       'aria-label',
-      'Enter focus',
+      'Focus workspace',
     );
   },
 };
 
 /** Business reveals the routed surface, marks the active tab and keeps its close control. */
 export const BusinessSurface: Story = {
-  args: { panelSurface: 'business', activeTabId: 'tab-task' },
+  args: { panelSurface: 'business', activeTabId: 'task' },
   play: async ({ canvasElement }) => {
     const page = within(canvasElement.ownerDocument.body);
     await expect(page.getByTestId('story-business-surface')).toBeVisible();
@@ -132,7 +132,7 @@ export const BusinessSurface: Story = {
 
 /** Eight tabs in a narrow panel degrade to icon density while the active tab keeps context. */
 export const IconDensity: Story = {
-  args: { tabs: manyTabs, activeTabId: 'tab-goal-0', panelSurface: 'business' },
+  args: { tabs: manyTabs, activeTabId: 'goal-0', panelSurface: 'business' },
   render: (args) => renderPanel(args as unknown as Record<string, unknown>, 'w-[30rem]'),
   play: async ({ canvasElement }) => {
     const page = within(canvasElement.ownerDocument.body);
@@ -151,7 +151,7 @@ export const NarrowObjectTitle: Story = {
   args: {
     tabs: [
       {
-        id: 'tab-object',
+        id: 'object',
         module: 'goal',
         route: '/goals/goal-1',
         title: 'Ship the annual planning review across every workspace before the quarter closes',
@@ -160,7 +160,7 @@ export const NarrowObjectTitle: Story = {
       },
       tabs[1]!,
     ],
-    activeTabId: 'tab-object',
+    activeTabId: 'object',
     panelSurface: 'business',
   },
   render: (args) => renderPanel(args as unknown as Record<string, unknown>, 'w-[24rem]'),
@@ -180,7 +180,7 @@ export const FocusMode: Story = {
     const page = within(canvasElement.ownerDocument.body);
     await expect(page.getByTestId('business-panel-focus-toggle')).toHaveAttribute(
       'aria-label',
-      'Exit focus',
+      'Exit workspace focus',
     );
   },
 };
