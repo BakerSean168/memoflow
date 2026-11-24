@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/vue3-vite';
 import { provide } from 'vue';
 import { ok } from '@memoflow/transport-contracts/result';
-import { screen, userEvent } from 'storybook/test';
+import { screen, userEvent, waitFor } from 'storybook/test';
 import { accountUiHost } from '../../account-ui-host';
 import ExternalAgentConnectionsSection from './ExternalAgentConnectionsSection.vue';
 
@@ -69,12 +69,21 @@ export const OAuthConnected: Story = {
   render: () => renderSection({ oauth: true, connections: [connection] }),
 };
 
+/** The create action stays disabled while the capability load settles; wait, then open. */
+async function openCreateDialog() {
+  const open = await screen.findByTestId('pat-create-open');
+  await waitFor(() => {
+    if ((open as HTMLButtonElement).disabled) throw new Error('create action still disabled');
+  });
+  await userEvent.click(open);
+  await screen.findByTestId('pat-create-dialog');
+}
+
 /** Token creation form open; selecting a write scope raises the elevated-access warning. */
 export const CreateDialogWriteWarning: Story = {
   render: () => renderSection(),
   play: async () => {
-    await userEvent.click(await screen.findByTestId('pat-create-open'));
-    await screen.findByTestId('pat-create-dialog');
+    await openCreateDialog();
     await userEvent.click(screen.getByTestId('pat-scope-goals:write'));
     await screen.findByTestId('pat-write-warning');
   },
@@ -84,12 +93,15 @@ export const CreateDialogWriteWarning: Story = {
 export const SecretIssued: Story = {
   render: () => renderSection(),
   play: async () => {
-    await userEvent.click(await screen.findByTestId('pat-create-open'));
-    await screen.findByTestId('pat-create-dialog');
+    await openCreateDialog();
     const nameInput = document.querySelector<HTMLInputElement>('#external-pat-name');
     if (!nameInput) throw new Error('PAT name input missing');
     await userEvent.type(nameInput, 'Demo CLI');
-    await userEvent.click(screen.getByTestId('pat-create-submit'));
+    const submit = screen.getByTestId('pat-create-submit') as HTMLButtonElement;
+    await waitFor(() => {
+      if (submit.disabled) throw new Error('submit still disabled');
+    });
+    await userEvent.click(submit);
     await screen.findByTestId('pat-create-secret');
   },
 };
@@ -98,7 +110,11 @@ export const SecretIssued: Story = {
 export const RevokeConfirmation: Story = {
   render: () => renderSection(),
   play: async () => {
-    await userEvent.click(await screen.findByTestId('pat-revoke-open'));
+    const open = await screen.findByTestId('pat-revoke-open');
+    await waitFor(() => {
+      if ((open as HTMLButtonElement).disabled) throw new Error('revoke action still disabled');
+    });
+    await userEvent.click(open);
     await screen.findByTestId('pat-revoke-dialog');
   },
 };
