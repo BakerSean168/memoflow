@@ -5,7 +5,7 @@ import { fail, ok } from '@memoflow/transport-contracts/result';
 import type { AccountClientPort } from '@memoflow/account-client';
 import type { AccountClientDTO } from '@memoflow/account-contracts';
 import { Toaster } from '@memoflow/ui-vue-shadcn';
-import { useAccountStore } from '../../stores/account-store';
+import { useAccountStore } from '../stores/account-store';
 import { accountUiHost } from '../../account-ui-host';
 import type { AccountAvatarStore } from '../avatar/account-avatar-store';
 import AccountProfileEditorDialog from './AccountProfileEditorDialog.vue';

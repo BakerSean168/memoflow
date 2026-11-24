@@ -3,7 +3,7 @@ import { provide, ref } from 'vue';
 import { expect, userEvent, waitFor, within } from 'storybook/test';
 import { Toaster } from '@memoflow/ui-vue-shadcn';
 import { accountUiHost } from '../../account-ui-host';
-import { useAccountStore } from '../../stores/account-store';
+import { useAccountStore } from '../stores/account-store';
 import type { AccountAvatarStore } from '../avatar/account-avatar-store';
 import AccountAvatarUploader from './AccountAvatarUploader.vue';
 

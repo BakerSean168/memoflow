@@ -7,7 +7,7 @@ import {
   type ProfileSummary,
 } from '@memoflow/desktop-contracts';
 import type { ElectronBridge } from '@memoflow/ipc-client';
-import { DESKTOP_BRIDGE_KEY } from '../../di/keys';
+import { DESKTOP_BRIDGE_KEY } from '../di/keys';
 import DesktopProfileAccessView from './DesktopProfileAccessView.vue';
 
 const now = 1_763_000_000_000;
