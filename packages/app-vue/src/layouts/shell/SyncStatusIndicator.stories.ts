@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/vue3-vite';
 import { provide } from 'vue';
-import { expect, userEvent, within } from 'storybook/test';
+import { expect, userEvent, waitFor, within } from 'storybook/test';
 import { ok } from '@memoflow/transport-contracts/result';
 import type { DesktopSyncSnapshotDTO, ProfileCloudState } from '@memoflow/desktop-contracts';
 import SyncStatusIndicator from './SyncStatusIndicator.vue';
@@ -180,7 +180,7 @@ export const ErrorDetails: Story = {
     await page.findByTestId('sync-status-popover');
     await expect(page.getByTestId('sync-status-indicator')).toHaveAttribute('data-state', 'error');
     await expect(page.getByTestId('sync-status-error')).toHaveTextContent('Sign-in expired');
-    await expect(page.getByTestId('sync-status-sync-now')).toBeVisible();
+    await waitFor(() => expect(page.getByTestId('sync-status-sync-now')).toBeVisible());
   },
 };
 
@@ -195,7 +195,9 @@ export const AvatarAlignmentNotice: Story = {
     const page = within(canvasElement.ownerDocument.body);
     await userEvent.click(await page.findByTestId('sync-status-indicator'));
     await page.findByTestId('sync-status-popover');
-    await expect(page.getByTestId('sync-status-aligned')).toContainText('avatar');
+    await expect(page.getByTestId('sync-status-aligned')).toHaveTextContent(
+      'Aligned with a newer cloud version',
+    );
     await expect(page.getByTestId('sync-status-dismiss-aligned')).toBeVisible();
   },
 };
@@ -208,7 +210,9 @@ export const SyncNowBusy: Story = {
     await userEvent.click(await page.findByTestId('sync-status-indicator'));
     const syncNow = await page.findByTestId('sync-status-sync-now');
     await userEvent.click(syncNow);
-    await expect(page.getByTestId('sync-status-sync-now')).toHaveTextContent('Syncing');
+    await waitFor(() =>
+      expect(page.getByTestId('sync-status-sync-now')).toHaveTextContent('Syncing'),
+    );
     await expect(page.getByTestId('sync-status-sync-now')).toBeDisabled();
   },
 };
