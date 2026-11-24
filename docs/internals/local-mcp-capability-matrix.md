@@ -65,7 +65,9 @@ updated: 2026-11-24T00:00:00Z
 | `task_plan_create`         | `GatewayWritePort.taskCreate` → Task owner | `GatewayTaskCreateSchema → GatewayTaskReceiptSchema`   | `task.plan.create` + `tasks:write`（绑定 Goal 再加 `goals:write`） | call+perm | supported    | supported (scope) | supported (scope)                    |
 | `task_plan_update`         | `GatewayWritePort.taskUpdate`              | `GatewayTaskUpdateSchema → GatewayTaskReceiptSchema`   | `task.plan.update` + `tasks:write`                                 | call+perm | supported    | supported (scope) | supported (scope)                    |
 | `task_occurrence_complete` | `GatewayWritePort.taskComplete`            | `GatewayTaskCompleteSchema → GatewayTaskReceiptSchema` | `task.occurrence.complete` + `tasks:write`                         | call+perm | supported    | supported (scope) | supported (scope)                    |
-| `relation_neighbors`       | `RelationReadPort.getNeighbors`            | `RelationNeighborsInput → RelationNeighborsOutput`     | `relation.read`                                                    | call+perm | missing      | missing           | supported                            |
+| `relation_neighbors`       | `RelationReadPort.getNeighbors`            | `RelationNeighborsInput → RelationNeighborsOutput`     | `relation.read`                                                    | call+perm | supported    | supported         | supported                            |
+
+`relation_neighbors` 的可见性策略已收敛到 `packages/agent-gateway/src/server/relation-neighbors.ts`；Local 与 Hosted 只绑定各自的 `forward/reverse` 与 node 可见性回调，不各自复写过滤规则。证据：`local-agent-knowledge-local-reads.spec.ts`（真实 task/note owner + 一条指向不可见 goal 的边被省略）。
 
 ### 3.3 Routine
 
@@ -120,12 +122,19 @@ updated: 2026-11-24T00:00:00Z
 
 ### 3.6 Knowledge / Notes
 
-| Action (tool)                         | Owner port / command                        | Input → output                      | Permission         | Audit     | Local native                    | Local client | Hosted                               |
-| ------------------------------------- | ------------------------------------------- | ----------------------------------- | ------------------ | --------- | ------------------------------- | ------------ | ------------------------------------ |
-| `knowledge_search`                    | `IKnowledgeSourcePort.listRelevantNotes`    | 本地 zod → 引用列表（≤20，≤120 KB） | `knowledge.search` | call+perm | supported（Knowledge 源已绑定） | supported    | blocked（ADR-126：Web 无本地 Vault） |
-| `knowledge_get`                       | `IKnowledgeSourcePort.getNoteBySource/ById` | 本地 zod → 单篇（正文 ≤100 KB）     | `knowledge.get`    | call+perm | supported（同前提）             | supported    | blocked（同上）                      |
-| 草稿/新建/审阅后交付 Vault            | Knowledge draft owner                       | 未接入 MCP                          | —                  | —         | missing                         | missing      | missing                              |
-| 任意 Markdown/路径写入、自动 Git 推送 | —                                           | —                                   | —                  | —         | blocked                         | blocked      | blocked                              |
+| Action (tool)                         | Owner port / command                                                  | Input → output                                            | Permission                                  | Audit     | Local native                    | Local client      | Hosted                                  |
+| ------------------------------------- | --------------------------------------------------------------------- | --------------------------------------------------------- | ------------------------------------------- | --------- | ------------------------------- | ----------------- | --------------------------------------- |
+| `knowledge_search`                    | `IKnowledgeSourcePort.listRelevantNotes`                              | 本地 zod → 引用列表（≤20，≤120 KB）                       | `knowledge.search`                          | call+perm | supported（Knowledge 源已绑定） | supported         | blocked（ADR-126：Web 无本地 Vault）    |
+| `knowledge_get`                       | `IKnowledgeSourcePort.getNoteBySource/ById`                           | 本地 zod → 单篇（正文 ≤100 KB）                           | `knowledge.get`                             | call+perm | supported（同前提）             | supported         | blocked（同上）                         |
+| `knowledge_draft_create`              | `LocalKnowledgeDraftService.create`                                   | `KnowledgeDraftCreateInput → KnowledgeDraftView`          | `knowledge.note.create` + `knowledge:write` | call+perm | supported                       | supported (scope) | blocked（ADR-126：Hosted 无本地 Vault） |
+| `knowledge_draft_get`                 | 同上 `.get`                                                           | `{ id } → KnowledgeDraftView \| null`                     | `knowledge.get`                             | call+perm | supported                       | supported         | blocked（同上）                         |
+| `knowledge_draft_update`              | 同上 `.update`（expectedRevision）                                    | `KnowledgeDraftUpdateInput → KnowledgeDraftView`          | `knowledge.note.update` + `knowledge:write` | call+perm | supported                       | supported (scope) | blocked（同上）                         |
+| `knowledge_draft_deliver`             | 同上 `.deliver` → `IKnowledgeNotePersistencePort.createKnowledgeNote` | `{ id, expectedRevision } → KnowledgeDraftDeliverReceipt` | `knowledge.note.create` + `knowledge:write` | call+perm | supported                       | supported (scope) | blocked（同上）                         |
+| 任意 Markdown/路径写入、自动 Git 推送 | —                                                                     | —                                                         | —                                           | —         | blocked                         | blocked           | blocked                                 |
+
+草稿只写入 Profile 本地 `local_knowledge_drafts`，不触碰 Vault；`knowledge_draft_deliver` 才通过 `IKnowledgeNotePersistencePort.createKnowledgeNote`（Desktop 绑定为 `LocalVaultRuntime.writeConfirmedNote`）写入已审阅内容。`expectedRevision` 使并发编辑 fail closed，同一 revision 的 `proposalId`/`requestId` 固定，重试重放同一次持久化而不产生副本。`knowledge:write` 是新的 Local scope，只对新签发连接/客户端生效；`knowledge_draft_get` 只需 `knowledge.get`，不要求写 scope。
+
+证据：`apps/desktop/src/main/modules/ai/local-agent-knowledge-local-reads.spec.ts`（真实 `LocalVaultRuntime` + `IKnowledgeNotePersistencePort` + 外部持久客户端；create/get/update/deliver、过期 revision、重复交付与 `knowledge_get` 回读）。
 
 ### 3.7 AI 会话与 Agent 归档
 
@@ -134,17 +143,21 @@ updated: 2026-11-24T00:00:00Z
 | `ai_conversation_list`       | `AssistantConversationReadPort` ← 本地会话投影 | metadata only             | `ai.read`  | call+perm | supported    | supported    | supported |
 | `ai_conversation_get`        | 同上                                           | 首屏 transcript（≤25 条） | `ai.read`  | call+perm | supported    | supported    | supported |
 | `ai_conversation_transcript` | 同上                                           | 分页 transcript           | `ai.read`  | call+perm | supported    | supported    | supported |
-| `ai_agent_list`              | `AgentArchiveReadPort`                         | 6 个归档字段              | `ai.read`  | call+perm | missing      | missing      | supported |
-| `ai_agent_get`               | 同上                                           | 单个归档条目              | `ai.read`  | call+perm | missing      | missing      | supported |
+| `ai_agent_list`              | `AgentArchiveReadPort`                         | 6 个归档字段              | `ai.read`  | call+perm | supported    | supported    | supported |
+| `ai_agent_get`               | 同上                                           | 单个归档条目              | `ai.read`  | call+perm | supported    | supported    | supported |
 | Provider 凭据 / 主机配置读取 | —                                              | —                         | —          | —         | blocked      | blocked      | blocked   |
+
+Local `ai_agent_list/get` 绑定 `AgentInstanceReadService` + Profile PowerSync 归档仓库，只投影 6 个字段，foreign/missing 都是 NOT_FOUND。证据同上（`local-agent-knowledge-local-reads.spec.ts`）。
 
 ### 3.8 标签与 assisted workflow
 
 | Action (tool)                 | Owner port / command     | Input → output                                     | Permission                  | Audit     | Local native              | Local client              | Hosted                                 |
 | ----------------------------- | ------------------------ | -------------------------------------------------- | --------------------------- | --------- | ------------------------- | ------------------------- | -------------------------------------- |
-| `label_list`                  | `LabelReadPort`          | `LabelListInput → LabelListOutput`                 | `label.read`                | call+perm | missing                   | missing                   | supported                              |
-| `label_resolve_names`         | 同上                     | `LabelResolveNamesInput → LabelResolveNamesOutput` | `label.read`                | call+perm | missing                   | missing                   | supported                              |
+| `label_list`                  | `LabelReadPort`          | `LabelListInput → LabelListOutput`                 | `label.read`                | call+perm | supported                 | supported                 | supported                              |
+| `label_resolve_names`         | 同上                     | `LabelResolveNamesInput → LabelResolveNamesOutput` | `label.read`                | call+perm | supported                 | supported                 | supported                              |
 | `assisted_workflow_*`（5 个） | Assistant workflow owner | 见 assisted descriptors                            | `task.plan.*` / `task.read` | call+perm | blocked（桌面走原生面板） | blocked（无持久交互通道） | supported（`EAG_OAUTH_WRITE_ENABLED`） |
+
+Local `label_list` / `label_resolve_names` 绑定已有 `LabelService`（`PowerSyncLabelRepository`），不直接读表。证据同上（真实 `LabelService` 创建与解析后经 MCP 回读）。
 
 ## 4. 显式非目标（intentionally blocked）
 
@@ -168,7 +181,7 @@ updated: 2026-11-24T00:00:00Z
 | scope 不得替代高风险 fresh consent                         | #1077 已覆盖                                                 | `packages/ai/src/server/permissions/authorize.ts`                                                               |
 | 23:50 Routine 被延伸到次日 00:00                           | #1077 已覆盖（仅 UI 投影裁切，源触发时间不变）               | `packages/schedule-ui/src/planner/PlannerCalendar.vue:128`；`PlannerCalendar.spec.ts`                           |
 
-本页不重做上述实现；#1076 第 3–7 项中，Notification 一组已在第二步补齐（见 3.4），Schedule 写已在本步补齐（见 3.5），Knowledge 草稿流、Governance UI 与完整验收仍为后续步骤。
+本页不重做上述实现；#1076 第 3–7 项中，Notification 一组已在第二步补齐（见 3.4），Schedule 写已在本步补齐（见 3.5），Knowledge 草稿流与 Local Label/Relation/AI-agent 读已在本步补齐（见 3.6–3.8）；Governance UI 与完整验收仍为后续步骤。
 
 ## 6. 验证证据
 
@@ -193,6 +206,21 @@ updated: 2026-11-24T00:00:00Z
 - `pnpm exec vitest run --project=ai packages/ai/src/server/permissions/permission-policy.spec.ts`：`schedule.delete_permanent` 高风险登记。
 
 本步在 dev 槽内无法执行 vitest（`node_modules/vitest/dist`、`vite/dist` 与 `oxfmt/dist` 缺文件，属该槽 ENOSPC 后的残留安装）。已执行的等效证据：`packages/agent-gateway` 全量 `tsc --noEmit`（含 spec）通过；用 Node 类型剥离 + 仓库 `paths` 加载真实源码，驱动 `registerWriteTools` → `bindScheduleWrites` → 真实 `ScheduleEventApplicationService`/`CalendarEntry` → `getEvent`/`listEvents` 回读，并调用真实 `authorize()` 验证 `schedules:write` 预授权普通写、`schedule.delete_permanent` 必须 ask。基线对照：`origin/main` 的 `write-tool-descriptors.ts` 中四个 `schedule_*` 写工具计数均为 0，本分支对应为 1。格式化未在本槽执行（oxfmt 缺失），提交前仅做人工 100 列换行与 `git diff --check`。
+
+### 6.2 Knowledge 草稿流与 Local 域读（#1076 第四步，2026-11-24）
+
+dev 槽已补齐 vitest/vite/tsx 等缺失 `dist` 后，以下定向测试均真实执行（`node node_modules/vitest/vitest.mjs run ...`，未触发 `pnpm install`）：
+
+- `apps/desktop/src/main/modules/ai/local-agent-knowledge-local-reads.spec.ts`：4 passed。真实 `LocalVaultRuntime` + `DesktopKnowledgeNotePersistenceAdapter` + 外部持久客户端；draft create/get/update/deliver、过期 revision CONFLICT、重复交付幂等、`knowledge_get` 回读、无 scope 客户端拒绝；真实 `LabelService`、`AgentInstanceReadService`、`RelationService` + task/note owner 回读与不可见 peer 省略。
+- `local-agent-knowledge.spec.ts`、`local-agent-domains.spec.ts`、`local-agent-tools.spec.ts`、`local-agent-writes.spec.ts`、`compose-ai.spec.ts`、`local-tool-bridge.spec.ts`、`permission-policy.spec.ts`：81 passed / 4 skipped。
+- `packages/agent-gateway` `read-gateway.spec.ts`：37 passed（共享 relation 可见性重构后 Hosted 行为不变）。
+- `apps/api/.../relation-read.port.spec.ts`：4 passed。
+- `packages/setting-ui` `ExternalMcpClients.spec.ts`：6 passed（`knowledge:write` 选项仍按既有 UI 路径渲染）。
+- `packages/agent-gateway` `tsc --noEmit`：0 errors；改动文件的定向 `tsc`：0 errors。
+- `node ./tools/quality/fmt.mjs --check --changed`：0 different。
+- 基线对照：`origin/main` 的 `local-agent-tools.ts` 中 `knowledge_draft`、Local `labels`/`relations`/`agents` 绑定的计数均为 0；本分支 `knowledge_draft` 为 13 处，且对应工具只在传入 owner port 时注册。
+
+未验证：真实 Windows Desktop 安装、ChatGPT Web 经 WSL tunnel 的真实审批体验、Vault 写入后的 Obsidian 侧索引刷新。本页只声明代码路径与定向测试事实。
 
 ## 7. 维护规则
 

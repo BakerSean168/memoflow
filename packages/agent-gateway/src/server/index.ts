@@ -6,4 +6,12 @@ export { toNodeHandler } from '@modelcontextprotocol/node';
 
 export { registerReadTools } from './register-read-tools';
 export type { ReadToolCall } from './register-read-tools';
+export {
+  createRelationNeighborsReader,
+  type RelationGatewayEdge,
+  type RelationGatewayNode,
+  type RelationGatewaySource,
+  type RelationNeighborsReaderOptions,
+  type RelationVisibilityChecker,
+} from './relation-neighbors';
 export { registerWriteTools } from './register-write-tools';

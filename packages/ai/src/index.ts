@@ -80,6 +80,8 @@ export {
 } from './server/application/services/agent-instance-read.service';
 export { AgentRegistryError } from './server/application/agent-instance/agent-instance.repository';
 export { LocalAgentRepository } from './server/infrastructure/adapters/powersync/local-agent.repository';
+export { LocalKnowledgeDraftRepository } from './server/infrastructure/adapters/powersync/local-knowledge-draft.repository';
+export { LocalKnowledgeDraftService } from './server/local-agent/knowledge-draft.service';
 export {
   LocalMcpClientRepository,
   type McpClientCredentialRef,

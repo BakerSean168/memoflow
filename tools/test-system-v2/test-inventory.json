@@ -1408,6 +1408,14 @@
       "measurementCollectors": []
     },
     {
+      "path": "apps/desktop/src/main/modules/ai/local-agent-knowledge-local-reads.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "apps/desktop/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "apps/desktop/src/main/modules/ai/local-agent-knowledge.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -13945,7 +13953,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 109
+      "fileCount": 110
     },
     {
       "id": "apps/migrator/vitest.config.ts",
@@ -15103,7 +15111,7 @@
   "duplicate": [],
   "unexpected": [],
   "counts": {
-    "unit": 1243,
+    "unit": 1244,
     "integration": 63,
     "smoke": 3,
     "boundary-ipc": 7,

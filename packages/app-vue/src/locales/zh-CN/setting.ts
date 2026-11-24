@@ -667,6 +667,7 @@ export default {
       scopeRoutines: '例程写入',
       scopeNotifications: '通知写入',
       scopeSchedules: '日程写入',
+      scopeKnowledge: '知识写入',
       create: '创建连接',
       createClient: '新建客户端',
       createDescription: '为常驻 MCP 客户端签发访问令牌。令牌仅在此弹窗内展示一次。',

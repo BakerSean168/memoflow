@@ -135,6 +135,7 @@ const dependencies = {
   notificationInbox,
   userTimeContextPort,
   labelService,
+  relationService: { tag: 'relation-service' } as never,
   goalKnowledgeService,
   knowledgeDocumentRefResolver,
   mastraStorage,

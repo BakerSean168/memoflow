@@ -70,6 +70,7 @@ function writeScopeForOperation(
   | 'routines:write'
   | 'notifications:write'
   | 'schedules:write'
+  | 'knowledge:write'
   | undefined {
   const operation = getPermissionOperation(operationId);
   if (!operation || operation.action === 'read') return undefined;
@@ -78,6 +79,7 @@ function writeScopeForOperation(
   if (operation.object === 'routine') return 'routines:write';
   if (operation.object === 'notification') return 'notifications:write';
   if (operation.object === 'schedule') return 'schedules:write';
+  if (operation.object === 'knowledge') return 'knowledge:write';
   return undefined;
 }
 /** Tools that mutate business state or the visible Goal panel; everything else is a read. */
@@ -92,6 +94,9 @@ const LOCAL_WRITE_TOOLS: ReadonlySet<string> = new Set([
   'goal_panel_focus',
   'goal_panel_submit',
   'goal_panel_release',
+  'knowledge_draft_create',
+  'knowledge_draft_update',
+  'knowledge_draft_deliver',
 ]);
 function outcomeOf(result: unknown): string {
   if (typeof result !== 'object' || result === null || !('isError' in result)) return 'ok';
