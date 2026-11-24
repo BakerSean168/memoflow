@@ -10,6 +10,7 @@ import {
   PermissionLocalRepository,
 } from '@memoflow/ai';
 import { createTimeContext } from '@memoflow/time';
+import { createNotificationPowerSyncModule } from '@memoflow/notification';
 import type { IElectronDatabase } from '@memoflow/desktop-contracts';
 import { createDesktopLocalAgentTools } from './local-agent-tools';
 import { GatewayRoutineUpdateSchema } from '@memoflow/agent-gateway';
@@ -576,6 +577,15 @@ describe('Local Agent Domain Expansion (Phase 2, #995)', () => {
           async getUnreadCount() {
             return 1;
           },
+          async getPreferences() {
+            return {
+              globalChannels: { InApp: true },
+              workflowOverrides: {},
+              quietHours: null,
+              version: 1,
+              updatedAt: 1,
+            };
+          },
         },
         schedules: {
           async getSchedule(id: string) {
@@ -683,6 +693,182 @@ describe('Local Agent Domain Expansion (Phase 2, #995)', () => {
       expect(invalidSchedList.result.isError).toBe(true);
     } finally {
       await bridge.dispose();
+    }
+  });
+
+  it('notification write tools execute through the real owner and read back', async () => {
+    const notifications = createNotificationPowerSyncModule(db, {
+      userTimeContextPort: {
+        getUserTimeContext: async () => createTimeContext({ timeZone: 'UTC', weekStartsOn: 1 }),
+      },
+      transport: {
+        deliver: async () => ({
+          ackId: 'ack-notification-owner',
+          status: 'delivered' as const,
+          timestamp: Date.now(),
+        }),
+      },
+    });
+    const notificationId = 'INotificationId_00000000-0000-4000-8000-000000000042';
+    const seededAt = new Date(Date.now() - 60_000).toISOString();
+    await db.execute(
+      `INSERT INTO notifications
+       (id, identity_id, type, category, workflow_key, topic, idempotency_key, title, content,
+        importance, urgency, read_at, version, created_at, updated_at, is_read)
+       VALUES (?, ?, 'Reminder', 'Goal', 'goal.reminder', 'goal', 'idem-owner-1',
+        'Owner read-back', 'Notification body', 'Moderate', 'Medium', ?, 1, ?, ?, 1)`,
+      [notificationId, identityId, seededAt, seededAt, seededAt],
+    );
+    const bridge = createDesktopLocalAgentTools(
+      db,
+      store,
+      () => true,
+      {
+        getUserTimeContext: async () => createTimeContext({ timeZone: 'UTC', weekStartsOn: 1 }),
+      },
+      undefined,
+      undefined,
+      { clients: new LocalMcpClientRepository(db) },
+      { notifications: notifications.api },
+    );
+    try {
+      const connection = await store.createConnection(identityId, {
+        driver: 'codex',
+        name: 'Notification Owner Client',
+        executablePath: 'codex',
+        enabled: true,
+        writeScopes: ['notifications:write'],
+      });
+      await new PermissionLocalRepository(db).saveSettings(identityId, {
+        preset: 'full_auto',
+        agentPresets: {},
+        revision: 2,
+      });
+      const grant = await bridge.open({
+        permissionMode: 'auto-approve',
+        identityId,
+        connectionId: connection.id,
+        conversationId: 'conv-notification-owner',
+        runId: 'run-notification-owner',
+      });
+
+      const tools = (await callMcp(grant, 'tools/list')) as {
+        result: { tools: { name: string }[] };
+      };
+      const toolNames = tools.result.tools.map((tool) => tool.name);
+      for (const name of [
+        'notification_get',
+        'notification_preferences_get',
+        'notification_mark_read',
+        'notification_mark_unread',
+        'notification_archive',
+        'notification_restore',
+        'notification_preferences_update',
+      ])
+        expect(toolNames).toContain(name);
+
+      const before = parsePayload(
+        await callMcp(grant, 'tools/call', {
+          name: 'notification_get',
+          arguments: { id: notificationId },
+        }),
+      );
+      expect(before.notification).toMatchObject({ id: notificationId, isRead: true });
+
+      const unread = parsePayload(
+        await callMcp(grant, 'tools/call', {
+          name: 'notification_mark_unread',
+          arguments: { id: notificationId },
+        }),
+      );
+      expect(unread).toMatchObject({ id: notificationId, isRead: false, readAt: null });
+      const unreadReadBack = parsePayload(
+        await callMcp(grant, 'tools/call', {
+          name: 'notification_get',
+          arguments: { id: notificationId },
+        }),
+      );
+      expect(unreadReadBack.notification).toMatchObject({ isRead: false, readAt: null });
+
+      const read = parsePayload(
+        await callMcp(grant, 'tools/call', {
+          name: 'notification_mark_read',
+          arguments: { id: notificationId },
+        }),
+      );
+      expect(read).toMatchObject({ id: notificationId, isRead: true });
+      expect(read.readAt).toEqual(expect.any(Number));
+
+      const archived = parsePayload(
+        await callMcp(grant, 'tools/call', {
+          name: 'notification_archive',
+          arguments: { id: notificationId },
+        }),
+      );
+      expect(archived.archivedAt).toEqual(expect.any(Number));
+      const archivedReadBack = parsePayload(
+        await callMcp(grant, 'tools/call', {
+          name: 'notification_get',
+          arguments: { id: notificationId },
+        }),
+      );
+      expect(archivedReadBack.notification.archivedAt).toBe(archived.archivedAt);
+      const archivedPage = parsePayload(
+        await callMcp(grant, 'tools/call', {
+          name: 'notification_list',
+          arguments: { archiveState: 'archived', limit: 10 },
+        }),
+      );
+      expect(archivedPage.items.map((item: { id: string }) => item.id)).toContain(notificationId);
+
+      const restored = parsePayload(
+        await callMcp(grant, 'tools/call', {
+          name: 'notification_restore',
+          arguments: { id: notificationId },
+        }),
+      );
+      expect(restored.archivedAt).toBeNull();
+
+      const updated = parsePayload(
+        await callMcp(grant, 'tools/call', {
+          name: 'notification_preferences_update',
+          arguments: { globalChannels: { InApp: false, Desktop: true } },
+        }),
+      );
+      expect(updated.globalChannels).toMatchObject({ InApp: false, Desktop: true });
+      expect(JSON.stringify(updated)).not.toContain(identityId);
+
+      const preferences = parsePayload(
+        await callMcp(grant, 'tools/call', {
+          name: 'notification_preferences_get',
+          arguments: {},
+        }),
+      );
+      expect(preferences.globalChannels).toMatchObject({ InApp: false, Desktop: true });
+
+      // The persistent external client owns the same write path through the
+      // token scope; the native run reads the resulting state back above.
+      const external = await bridge.createMcpClient(identityId, {
+        name: 'External Notification Writer',
+        writeScopes: ['notifications:write'],
+      });
+      const externalUnread = parsePayload(
+        await callMcp({ url: external.endpoint.url, token: external.token }, 'tools/call', {
+          name: 'notification_mark_unread',
+          arguments: { id: notificationId },
+        }),
+      );
+      expect(externalUnread).toMatchObject({ id: notificationId, isRead: false, readAt: null });
+      const externalReadBack = parsePayload(
+        await callMcp(grant, 'tools/call', {
+          name: 'notification_get',
+          arguments: { id: notificationId },
+        }),
+      );
+      expect(externalReadBack.notification).toMatchObject({ isRead: false, readAt: null });
+    } finally {
+      await bridge.dispose();
+      notifications.dispose();
     }
   });
 });

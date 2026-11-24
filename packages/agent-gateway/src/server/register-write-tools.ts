@@ -6,6 +6,10 @@ import {
   GatewayGoalReceiptSchema,
   GatewayTaskReceiptSchema,
   NotificationMarkReadOutputSchema,
+  NotificationMarkUnreadOutputSchema,
+  NotificationArchiveOutputSchema,
+  NotificationRestoreOutputSchema,
+  NotificationPreferencesOutputSchema,
 } from '../contracts';
 import type { McpServer } from '@modelcontextprotocol/server';
 import type { ExecutionContext } from '@memoflow/transport-contracts';
@@ -135,6 +139,52 @@ export function registerWriteTools(
           NotificationMarkReadOutputSchema.parse(result),
         ),
       ),
+    );
+  }
+  const markUnread = writes.notificationMarkUnread;
+  if (markUnread && scopes.includes('notifications:write')) {
+    server.registerTool(
+      'notification_mark_unread',
+      d.notification_mark_unread.definition,
+      (input) =>
+        call('notification_mark_unread', 'notifications:write', () =>
+          markUnread(input, context, authority).then((result) =>
+            NotificationMarkUnreadOutputSchema.parse(result),
+          ),
+        ),
+    );
+  }
+  const archive = writes.notificationArchive;
+  if (archive && scopes.includes('notifications:write')) {
+    server.registerTool('notification_archive', d.notification_archive.definition, (input) =>
+      call('notification_archive', 'notifications:write', () =>
+        archive(input, context, authority).then((result) =>
+          NotificationArchiveOutputSchema.parse(result),
+        ),
+      ),
+    );
+  }
+  const restore = writes.notificationRestore;
+  if (restore && scopes.includes('notifications:write')) {
+    server.registerTool('notification_restore', d.notification_restore.definition, (input) =>
+      call('notification_restore', 'notifications:write', () =>
+        restore(input, context, authority).then((result) =>
+          NotificationRestoreOutputSchema.parse(result),
+        ),
+      ),
+    );
+  }
+  const preferencesUpdate = writes.notificationPreferencesUpdate;
+  if (preferencesUpdate && scopes.includes('notifications:write')) {
+    server.registerTool(
+      'notification_preferences_update',
+      d.notification_preferences_update.definition,
+      (input) =>
+        call('notification_preferences_update', 'notifications:write', () =>
+          preferencesUpdate(input, context, authority).then((result) =>
+            NotificationPreferencesOutputSchema.parse(result),
+          ),
+        ),
     );
   }
 }
