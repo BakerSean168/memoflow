@@ -927,6 +927,13 @@
       "kind": "component",
       "storyPath": "packages/app-vue/src/views/DesktopProfileAccessView.stories.ts",
       "status": "present"
+    },
+    {
+      "path": "packages/setting-ui/src/components/ExternalMcpClients.vue",
+      "package": "@memoflow/setting-ui",
+      "kind": "component",
+      "storyPath": "packages/setting-ui/src/components/ExternalMcpClients.stories.ts",
+      "status": "present"
     }
   ]
 }
