@@ -50,7 +50,10 @@ function createRoutineService() {
   };
 }
 
-function mountConfiguration(service: ReturnType<typeof createRoutineService>, runtime: ServerStateRuntime) {
+function mountConfiguration(
+  service: ReturnType<typeof createRoutineService>,
+  runtime: ServerStateRuntime,
+) {
   let api!: ReturnType<typeof useRoutineConfiguration>;
   const Host = defineComponent({
     setup() {
@@ -74,7 +77,10 @@ function mountConfiguration(service: ReturnType<typeof createRoutineService>, ru
 type Mutator = (api: ReturnType<typeof useRoutineConfiguration>) => Promise<void>;
 
 const mutators: ReadonlyArray<readonly [string, Mutator]> = [
-  ['updatePreferences', (api) => api.updatePreferences({ globalEnabled: false, expectedVersion: 1 })],
+  [
+    'updatePreferences',
+    (api) => api.updatePreferences({ globalEnabled: false, expectedVersion: 1 }),
+  ],
   ['createRoutine', (api) => api.createRoutine({ name: 'Wind down' } as never)],
   ['updateRoutine', (api) => api.updateRoutine('routine-1', { expectedVersion: 1 } as never)],
   ['deleteRoutine', (api) => api.deleteRoutine('routine-1')],
@@ -114,9 +120,7 @@ describe('useRoutineConfiguration owner invalidation', () => {
     for (const [name, mutate] of mutators) {
       events.length = 0;
       await mutate(api);
-      expect(events, name).toEqual([
-        { target: 'routine-upcoming', identityScope: 'identity-1' },
-      ]);
+      expect(events, name).toEqual([{ target: 'routine-upcoming', identityScope: 'identity-1' }]);
     }
 
     wrapper.unmount();
