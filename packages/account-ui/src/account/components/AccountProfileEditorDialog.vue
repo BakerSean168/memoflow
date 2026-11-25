@@ -277,64 +277,66 @@ function focusNickname(event: Event): void {
               test-id="profile-editor-avatar"
             />
 
-            <div class="flex flex-col gap-2">
-              <Label for="profile-editor-nickname" class="text-sm font-medium">
-                {{ t('account.profile.nickname') }}
-              </Label>
-              <Input
-                id="profile-editor-nickname"
-                ref="nicknameInput"
-                v-model="draft.nickname"
-                data-testid="profile-editor-nickname"
-                :placeholder="t('account.placeholder.nickname')"
-                :disabled="fieldsDisabled"
-                :aria-invalid="!isNicknameValid"
-                :aria-describedby="!isNicknameValid ? 'profile-editor-nickname-hint' : undefined"
-                :maxlength="NICKNAME_MAX_LENGTH"
-                class="aria-invalid:border-destructive aria-invalid:focus-visible:ring-destructive"
-              />
-              <div class="flex items-start justify-between gap-3">
-                <p
-                  v-if="!isNicknameValid"
-                  id="profile-editor-nickname-hint"
-                  class="flex items-start gap-1.5 text-xs leading-5 text-destructive"
-                  data-testid="profile-editor-nickname-hint"
-                  role="alert"
-                >
-                  <CircleAlert class="mt-0.5 size-3.5 shrink-0" aria-hidden="true" />
-                  <span>{{ t('account.profileEditor.nicknameHint') }}</span>
-                </p>
-                <span class="flex-1" aria-hidden="true" />
-                <span
-                  class="shrink-0 text-xs leading-5 text-muted-foreground tabular-nums"
-                  data-testid="profile-editor-nickname-count"
-                >
-                  {{ draft.nickname.length }}/{{ NICKNAME_MAX_LENGTH }}
-                </span>
+            <div class="flex flex-col gap-4">
+              <div class="flex flex-col gap-2">
+                <Label for="profile-editor-nickname" class="text-sm font-medium">
+                  {{ t('account.profile.nickname') }}
+                </Label>
+                <Input
+                  id="profile-editor-nickname"
+                  ref="nicknameInput"
+                  v-model="draft.nickname"
+                  data-testid="profile-editor-nickname"
+                  :placeholder="t('account.placeholder.nickname')"
+                  :disabled="fieldsDisabled"
+                  :aria-invalid="!isNicknameValid"
+                  :aria-describedby="!isNicknameValid ? 'profile-editor-nickname-hint' : undefined"
+                  :maxlength="NICKNAME_MAX_LENGTH"
+                  class="aria-invalid:border-destructive aria-invalid:focus-visible:ring-destructive"
+                />
+                <div class="flex items-start justify-between gap-3">
+                  <p
+                    v-if="!isNicknameValid"
+                    id="profile-editor-nickname-hint"
+                    class="flex items-start gap-1.5 text-xs leading-5 text-destructive"
+                    data-testid="profile-editor-nickname-hint"
+                    role="alert"
+                  >
+                    <CircleAlert class="mt-0.5 size-3.5 shrink-0" aria-hidden="true" />
+                    <span>{{ t('account.profileEditor.nicknameHint') }}</span>
+                  </p>
+                  <span class="flex-1" aria-hidden="true" />
+                  <span
+                    class="shrink-0 text-xs leading-5 text-muted-foreground tabular-nums"
+                    data-testid="profile-editor-nickname-count"
+                  >
+                    {{ draft.nickname.length }}/{{ NICKNAME_MAX_LENGTH }}
+                  </span>
+                </div>
               </div>
-            </div>
 
-            <div class="flex flex-col gap-2">
-              <Label for="profile-editor-bio" class="text-sm font-medium">
-                {{ t('account.profile.bio') }}
-              </Label>
-              <Textarea
-                id="profile-editor-bio"
-                v-model="draft.bio"
-                class="resize-none"
-                data-testid="profile-editor-bio"
-                :placeholder="t('account.placeholder.bio')"
-                :disabled="fieldsDisabled"
-                :maxlength="BIO_MAX_LENGTH"
-                rows="4"
-              />
-              <div class="flex items-center justify-end">
-                <span
-                  class="text-xs leading-5 text-muted-foreground tabular-nums"
-                  data-testid="profile-editor-bio-count"
-                >
-                  {{ draft.bio.length }}/{{ BIO_MAX_LENGTH }}
-                </span>
+              <div class="flex flex-col gap-2">
+                <Label for="profile-editor-bio" class="text-sm font-medium">
+                  {{ t('account.profile.bio') }}
+                </Label>
+                <Textarea
+                  id="profile-editor-bio"
+                  v-model="draft.bio"
+                  class="resize-none"
+                  data-testid="profile-editor-bio"
+                  :placeholder="t('account.placeholder.bio')"
+                  :disabled="fieldsDisabled"
+                  :maxlength="BIO_MAX_LENGTH"
+                  rows="4"
+                />
+                <div class="flex items-center justify-end">
+                  <span
+                    class="text-xs leading-5 text-muted-foreground tabular-nums"
+                    data-testid="profile-editor-bio-count"
+                  >
+                    {{ draft.bio.length }}/{{ BIO_MAX_LENGTH }}
+                  </span>
+                </div>
               </div>
             </div>
           </div>
