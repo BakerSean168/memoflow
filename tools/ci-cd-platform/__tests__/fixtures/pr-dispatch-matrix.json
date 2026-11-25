@@ -2294,7 +2294,12 @@
           "verification-children": ["desktop:test:ipc", "desktop:test:main"],
           "web-visual": ["web:e2e:visual-regression"],
           "component-browser": ["ui-storybook:test:interaction"],
-          "contract": ["ai-ui:test:contract", "schedule-ui:test:contract", "task-client:test:contract", "task-ui:test:contract"]
+          "contract": [
+            "ai-ui:test:contract",
+            "schedule-ui:test:contract",
+            "task-client:test:contract",
+            "task-ui:test:contract"
+          ]
         },
         "serverShards": [
           {
