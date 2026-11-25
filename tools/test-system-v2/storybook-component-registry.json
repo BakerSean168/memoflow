@@ -1137,6 +1137,27 @@
       "kind": "component",
       "storyPath": "packages/ai-ui/src/components/AIKnowledgeCapturePanel.stories.ts",
       "status": "present"
+    },
+    {
+      "path": "packages/app-vue/src/layouts/shell/WindowHeader.vue",
+      "package": "@memoflow/app-vue",
+      "kind": "component",
+      "storyPath": "packages/app-vue/src/layouts/shell/WindowHeader.stories.ts",
+      "status": "present"
+    },
+    {
+      "path": "packages/app-vue/src/shared/components/ReleaseNotes.vue",
+      "package": "@memoflow/app-vue",
+      "kind": "component",
+      "storyPath": "packages/app-vue/src/shared/components/ReleaseNotes.stories.ts",
+      "status": "present"
+    },
+    {
+      "path": "packages/app-vue/src/shared/components/KeyboardHelp.vue",
+      "package": "@memoflow/app-vue",
+      "kind": "component",
+      "storyPath": "packages/app-vue/src/shared/components/KeyboardHelp.stories.ts",
+      "status": "present"
     }
   ]
 }
