@@ -1,6 +1,6 @@
 /** @vitest-environment happy-dom */
 import { defineComponent, h, ref } from 'vue';
-import { mount } from '@vue/test-utils';
+import { flushPromises, mount } from '@vue/test-utils';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { ok } from '@memoflow/transport-contracts/result';
 import { GOAL_SERVICE_KEY, ROUTINE_SERVICE_KEY } from '@schedule-ui-test-host/di/keys';
@@ -34,6 +34,7 @@ function mountCalendar(
   runtime: ServerStateRuntime,
   goalService: { listGoals: ReturnType<typeof vi.fn> },
   routineService: { getUpcomingOccurrences: ReturnType<typeof vi.fn> },
+  identityScope = 'identity-1',
 ) {
   let api!: ReturnType<typeof useCalendarView>;
   const Host = defineComponent({
@@ -48,11 +49,31 @@ function mountCalendar(
         [GOAL_SERVICE_KEY as symbol]: goalService,
         [ROUTINE_SERVICE_KEY as symbol]: routineService,
         [SERVER_STATE_RUNTIME_KEY as symbol]: runtime,
-        [SERVER_STATE_IDENTITY_SCOPE_KEY as symbol]: () => 'identity-1',
+        [SERVER_STATE_IDENTITY_SCOPE_KEY as symbol]: () => identityScope,
       },
     },
   });
   return { wrapper, api };
+}
+
+function routineOccurrence(occurrenceAt: number, revision = 1) {
+  return {
+    identityId: 'identity-1',
+    routineId: 'routine-1',
+    occurrenceKey: 'routine-1:wall-clock',
+    title: 'Wind down',
+    description: null,
+    editable: false,
+    occurrenceAt,
+    endAt: null,
+    revision,
+  };
+}
+
+function routineStartTimes(api: ReturnType<typeof useCalendarView>): number[] {
+  return api.projections.value
+    .filter((projection) => projection.sourceType === 'routine')
+    .map((projection) => Number(projection.start));
 }
 
 describe('useCalendarView Planner owner cache', () => {
@@ -178,6 +199,131 @@ describe('useCalendarView Planner owner cache', () => {
     routineService.getUpcomingOccurrences.mockResolvedValueOnce(ok({ occurrences: [] }));
     await api.fetchForRange(start, end, { force: true });
     expect(api.projections.value).toEqual([]);
+    wrapper.unmount();
+    runtime.dispose();
+  });
+
+  it('refreshes an already-mounted Planner range when a committed Routine mutation invalidates it', async () => {
+    const runtime = createTestServerStateRuntime();
+    const goalService = {
+      listGoals: vi.fn().mockResolvedValue(ok({ goals: [], pagination: { hasMore: false } })),
+    };
+    const occurrenceAt = ref(Date.UTC(2026, 8, 28, 23, 50));
+    const routineService = {
+      getUpcomingOccurrences: vi.fn(async () =>
+        ok({ occurrences: [routineOccurrence(occurrenceAt.value)] }),
+      ),
+    };
+    const { wrapper, api } = mountCalendar(runtime, goalService, routineService);
+    const start = Date.UTC(2026, 8, 28);
+    const end = Date.UTC(2026, 8, 29);
+
+    await api.fetchForRange(start, end);
+    expect(routineStartTimes(api)).toEqual([occurrenceAt.value]);
+
+    // Config edit 23:50 → 23:30 while the Planner stays mounted inside the 30s stale window.
+    occurrenceAt.value = Date.UTC(2026, 8, 28, 23, 30);
+    await runtime.dispatcher.invalidate({
+      target: 'routine-upcoming',
+      identityScope: 'identity-1',
+      source: 'mutation',
+    });
+
+    await vi.waitFor(() => expect(routineStartTimes(api)).toEqual([occurrenceAt.value]));
+    expect(routineService.getUpcomingOccurrences).toHaveBeenCalledTimes(2);
+    expect(api.ownerReadError.value).toBeNull();
+
+    // Re-entering the same range keeps reading the new projection without a restart.
+    await api.fetchForRange(start, end);
+    expect(routineStartTimes(api)).toEqual([occurrenceAt.value]);
+    expect(routineService.getUpcomingOccurrences).toHaveBeenCalledTimes(2);
+
+    wrapper.unmount();
+    runtime.dispose();
+  });
+
+  it('ignores a Routine invalidation for another identity', async () => {
+    const runtime = createTestServerStateRuntime();
+    const goalService = {
+      listGoals: vi.fn().mockResolvedValue(ok({ goals: [], pagination: { hasMore: false } })),
+    };
+    const routineService = {
+      getUpcomingOccurrences: vi
+        .fn()
+        .mockResolvedValue(ok({ occurrences: [routineOccurrence(Date.UTC(2026, 8, 28, 23, 50))] })),
+    };
+    const { wrapper, api } = mountCalendar(runtime, goalService, routineService);
+    await api.fetchForRange(Date.UTC(2026, 8, 28), Date.UTC(2026, 8, 29));
+
+    await runtime.dispatcher.invalidate({
+      target: 'routine-upcoming',
+      identityScope: 'identity-2',
+      source: 'mutation',
+    });
+    await flushPromises();
+
+    expect(routineService.getUpcomingOccurrences).toHaveBeenCalledTimes(1);
+    wrapper.unmount();
+    runtime.dispose();
+  });
+
+  it('keeps the current marker data and reports a failed owner refresh', async () => {
+    const runtime = createTestServerStateRuntime();
+    const goalService = {
+      listGoals: vi.fn().mockResolvedValue(ok({ goals: [], pagination: { hasMore: false } })),
+    };
+    const original = Date.UTC(2026, 8, 28, 23, 50);
+    const routineService = {
+      getUpcomingOccurrences: vi
+        .fn()
+        .mockResolvedValueOnce(ok({ occurrences: [routineOccurrence(original)] })),
+    };
+    const { wrapper, api } = mountCalendar(runtime, goalService, routineService);
+    await api.fetchForRange(Date.UTC(2026, 8, 28), Date.UTC(2026, 8, 29));
+
+    routineService.getUpcomingOccurrences.mockRejectedValueOnce(new Error('offline'));
+    await runtime.dispatcher.invalidate({
+      target: 'routine-upcoming',
+      identityScope: 'identity-1',
+      source: 'powersync',
+    });
+
+    await vi.waitFor(() => expect(api.ownerReadError.value).not.toBeNull());
+    expect(routineStartTimes(api)).toEqual([original]);
+    wrapper.unmount();
+    runtime.dispose();
+  });
+
+  it('never lets a superseded Routine read overwrite the current range', async () => {
+    const runtime = createTestServerStateRuntime();
+    const goalService = {
+      listGoals: vi.fn().mockResolvedValue(ok({ goals: [], pagination: { hasMore: false } })),
+    };
+    const stale = Date.UTC(2026, 8, 28, 23, 50);
+    const fresh = Date.UTC(2026, 8, 29, 0, 10);
+    let releaseStale!: () => void;
+    const routineService = {
+      getUpcomingOccurrences: vi
+        .fn()
+        .mockImplementationOnce(
+          () =>
+            new Promise((resolve) => {
+              releaseStale = () => resolve(ok({ occurrences: [routineOccurrence(stale)] }));
+            }),
+        )
+        .mockImplementation(async () => ok({ occurrences: [routineOccurrence(fresh)] })),
+    };
+    const { wrapper, api } = mountCalendar(runtime, goalService, routineService);
+
+    const staleRead = api.fetchForRange(Date.UTC(2026, 8, 28), Date.UTC(2026, 8, 29));
+    await api.fetchForRange(Date.UTC(2026, 8, 29), Date.UTC(2026, 8, 30));
+    expect(routineStartTimes(api)).toEqual([fresh]);
+
+    releaseStale();
+    await staleRead;
+    await flushPromises();
+    expect(routineStartTimes(api)).toEqual([fresh]);
+
     wrapper.unmount();
     runtime.dispose();
   });

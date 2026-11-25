@@ -15,6 +15,7 @@ import {
 } from '@memoflow/ui-vue-shadcn';
 import type { RoutineUpcomingOccurrence } from '@memoflow/routine-contracts';
 import { useI18n } from 'vue-i18n';
+import { useRoutineUpcomingInvalidation } from '../composables/useRoutineUpcomingInvalidation';
 
 const props = withDefaults(defineProps<{ active?: boolean; maxItems?: number }>(), {
   active: true,
@@ -47,7 +48,8 @@ async function load() {
   if (generation !== loadGeneration) return;
   if (result.ok) occurrences.value = result.data.occurrences;
   else {
-    occurrences.value = [];
+    // Keep the last owner projection visible; only clear when nothing was loaded yet.
+    if (occurrences.value.length === 0) occurrences.value = [];
     error.value = result.error.message;
   }
   loading.value = false;
@@ -61,6 +63,10 @@ watch(
   },
   { immediate: true },
 );
+
+useRoutineUpcomingInvalidation(() => {
+  void load();
+});
 </script>
 
 <template>
@@ -93,8 +99,17 @@ watch(
           <Skeleton class="h-3 flex-1" />
         </div>
       </div>
-      <p v-else-if="error" class="py-5 text-center text-xs text-destructive">{{ error }}</p>
+      <p v-else-if="error && !occurrences.length" class="py-5 text-center text-xs text-destructive">
+        {{ error }}
+      </p>
       <div v-else-if="visible.length" class="space-y-1">
+        <p
+          v-if="error"
+          class="px-1.5 pb-1 text-[11px] text-destructive"
+          data-testid="routine-upcoming-refresh-error"
+        >
+          {{ error }}
+        </p>
         <div
           v-for="occurrence in visible"
           :key="occurrence.occurrenceKey"

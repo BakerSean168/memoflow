@@ -48,6 +48,7 @@ export interface NotificationInvalidationIntent {
  */
 export interface NotificationInvalidationDispatcher {
   invalidate(intent: NotificationInvalidationIntent): Promise<void>;
+  subscribe(listener: (event: { target: string; identityScope: string }) => void): () => void;
 }
 
 /** Canonical, transport-safe notification list query used inside the cache key. */

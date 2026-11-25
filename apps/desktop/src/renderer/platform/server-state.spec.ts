@@ -32,6 +32,33 @@ describe('mapTablesToInvalidationIntents (plan §3.3 pilot table mapping)', () =
     );
   });
 
+  it('maps every Routine projection table → one routine-upcoming intent', () => {
+    const intents = mapTablesToInvalidationIntents(
+      [
+        'routine_definitions',
+        'routine_preferences',
+        'routine_profiles',
+        'routine_profile_memberships',
+        'routine_definitions',
+      ],
+      'id-1',
+    );
+    expect(intents).toEqual([
+      { target: 'routine-upcoming', identityScope: 'id-1', source: 'powersync' },
+    ]);
+  });
+
+  it('maps routine occurrence/override tables to notification attention and routine-upcoming', () => {
+    const intents = mapTablesToInvalidationIntents(
+      ['routine_occurrences', 'routine_temporary_overrides'],
+      'id-1',
+    );
+    expect(intents).toEqual([
+      { target: 'notification', identityScope: 'id-1', source: 'powersync' },
+      { target: 'routine-upcoming', identityScope: 'id-1', source: 'powersync' },
+    ]);
+  });
+
   it('carries the identityScope through for cache isolation', () => {
     const [intent] = mapTablesToInvalidationIntents(['notifications'], 'profile-9');
     expect(intent.identityScope).toBe('profile-9');

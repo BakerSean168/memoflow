@@ -26,6 +26,7 @@ export {
 } from './query-policy';
 export {
   createServerStateInvalidationDispatcher,
+  type ServerStateInvalidated,
   type ServerStateInvalidation,
   type ServerStateInvalidationDispatcher,
   type ServerStateInvalidationDispatcherOptions,
