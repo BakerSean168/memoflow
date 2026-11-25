@@ -159,6 +159,20 @@ Local `ai_agent_list/get` 绑定 `AgentInstanceReadService` + Profile PowerSync 
 
 Local `label_list` / `label_resolve_names` 绑定已有 `LabelService`（`PowerSyncLabelRepository`），不直接读表。证据同上（真实 `LabelService` 创建与解析后经 MCP 回读）。
 
+### 3.9 本地治理面（Settings → AI）
+
+治理面不是新工具，而是把上表的本地客户端、令牌与审计能力接到既有设置区；UI 只调用宿主端口，不新增第二套运行时。
+
+| 治理能力   | 宿主端口           | 界面落点                                                                  | 状态      | 证据                                                                             |
+| ---------- | ------------------ | ------------------------------------------------------------------------- | --------- | -------------------------------------------------------------------------------- |
+| 端点/发现  | `getMcpEndpoint`   | 区块头部展示 loopback URL 与 discovery path；失败可重试                   | supported | `ExternalMcpClients.spec.ts`（端口错误可操作、重试后恢复）                       |
+| 客户端列表 | `listMcpClients`   | 生效中列表与已撤销分区，显示 scope、创建/撤销时间与 token 前缀            | supported | 同上（加载态、空态、已撤销分区）                                                 |
+| 一次性令牌 | `createMcpClient`  | 新建客户端对话框，一次性展示 token 与客户端配置片段                       | supported | 同上（令牌不再回显）；`local-mcp-governance-desktop.spec.ts`（真实 bridge 落库） |
+| 吊销       | `revokeMcpClient`  | 行内撤销 → 应用内确认对话框 → 立即失效并转入已撤销分区                    | supported | 同上（确认/取消、旧 token 401）                                                  |
+| 审计       | `listGatewayAudit` | 最近工具调用，显示 origin、effect、scope decision、outcome 与耗时；可刷新 | supported | 同上（真实客户端调用后回读）                                                     |
+
+治理面只覆盖本 Profile 的持久客户端；provider 凭据、Hosted OAuth 客户端管理与云端审计查询仍不在本机界面内（见 §4 与 [External Agent Gateway](./external-agent-gateway.md)）。
+
 ## 4. 显式非目标（intentionally blocked）
 
 以下不是缺口，不应作为后续 step 的“补齐”项：
@@ -181,7 +195,7 @@ Local `label_list` / `label_resolve_names` 绑定已有 `LabelService`（`PowerS
 | scope 不得替代高风险 fresh consent                         | #1077 已覆盖                                                 | `packages/ai/src/server/permissions/authorize.ts`                                                               |
 | 23:50 Routine 被延伸到次日 00:00                           | #1077 已覆盖（仅 UI 投影裁切，源触发时间不变）               | `packages/schedule-ui/src/planner/PlannerCalendar.vue:128`；`PlannerCalendar.spec.ts`                           |
 
-本页不重做上述实现；#1076 第 3–7 项中，Notification 一组已在第二步补齐（见 3.4），Schedule 写已在本步补齐（见 3.5），Knowledge 草稿流与 Local Label/Relation/AI-agent 读已在本步补齐（见 3.6–3.8）；Governance UI 与完整验收仍为后续步骤。
+本页不重做上述实现；#1076 第 3–7 项中，Notification 一组已在第二步补齐（见 3.4），Schedule 写已在本步补齐（见 3.5），Knowledge 草稿流与 Local Label/Relation/AI-agent 读已在本步补齐（见 3.6–3.8）；Governance UI 已接入既有设置区（见 3.9），完整验收仍为后续步骤。
 
 ## 6. 验证证据
 
@@ -221,6 +235,18 @@ dev 槽已补齐 vitest/vite/tsx 等缺失 `dist` 后，以下定向测试均真
 - 基线对照：`origin/main` 的 `local-agent-tools.ts` 中 `knowledge_draft`、Local `labels`/`relations`/`agents` 绑定的计数均为 0；本分支 `knowledge_draft` 为 13 处，且对应工具只在传入 owner port 时注册。
 
 未验证：真实 Windows Desktop 安装、ChatGPT Web 经 WSL tunnel 的真实审批体验、Vault 写入后的 Obsidian 侧索引刷新。本页只声明代码路径与定向测试事实。
+
+### 6.3 治理 UI（#1076 第五步，2026-11-24）
+
+治理面复用 `packages/setting-ui/src/components/ExternalMcpClients.vue` 与既有 `SettingLocalAgentPort`，不新增运行时。本步补齐：撤销确认对话框、生效中/已撤销分区、加载态与空态区分、审计 effect 与刷新、以及撤销后旧 bearer 立即 401。另修正 `LocalMcpClient(ClientCreate)Schema` 仍把 `writeScopes` 上限写成 4 的旧值，现绑定 `LocalAgentWriteScopeSchema.options.length`，使 Settings 提供的六个 scope 可一次选中。
+
+定向测试（dev 槽真实执行，未触发 `pnpm install`）：
+
+- `cd packages/setting-ui && node ../../node_modules/vitest/vitest.mjs run --config vitest.config.ts src/components/ExternalMcpClients.spec.ts`：10 passed（确认/取消、加载态、已撤销分区、审计 origin/effect、错误重试与令牌一次性回显）。
+- `cd apps/desktop && node ../../node_modules/vitest/vitest.mjs run --config vitest.config.ts src/renderer/platform/local-mcp-governance-desktop.spec.ts`：3 passed。真实 `LocalAgentToolBridge` + `LocalMcpClientRepository`/`LocalGatewayAuditRepository` + 真实 SQLite；从 Settings 组件创建后回读仓储、确认后撤销并验证旧 token 401，以及真实工具调用后的审计回读。
+- `cd packages/ai-contracts && node ../../node_modules/vitest/vitest.mjs run src/api/local-agent.dto.spec.ts`：1 passed（六个 scope 的客户端契约）。
+
+未验证：真实 Windows Desktop 安装、宿主重启后已撤销列表的视觉回归。本页只声明代码路径与定向测试事实。
 
 ## 7. 维护规则
 

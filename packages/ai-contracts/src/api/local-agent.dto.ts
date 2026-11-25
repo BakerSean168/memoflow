@@ -369,7 +369,9 @@ export const LocalMcpClientSchema = z
   .object({
     id,
     name: z.string().trim().min(1).max(80),
-    writeScopes: z.array(LocalAgentWriteScopeSchema).max(4),
+    // Keep the ceiling tied to the published scope enum; the old literal four
+    // silently rejected clients that selected every scope offered by Settings.
+    writeScopes: z.array(LocalAgentWriteScopeSchema).max(LocalAgentWriteScopeSchema.options.length),
     tokenPrefix: z.string().min(8).max(16),
     createdAt: z.number().int().nonnegative(),
     revokedAt: z.number().int().nonnegative().nullable(),
@@ -380,7 +382,7 @@ export type LocalMcpClient = z.infer<typeof LocalMcpClientSchema>;
 export const LocalMcpClientCreateSchema = z
   .object({
     name: z.string().trim().min(1).max(80),
-    writeScopes: z.array(LocalAgentWriteScopeSchema).max(4),
+    writeScopes: z.array(LocalAgentWriteScopeSchema).max(LocalAgentWriteScopeSchema.options.length),
   })
   .strict();
 export type LocalMcpClientCreate = z.infer<typeof LocalMcpClientCreateSchema>;

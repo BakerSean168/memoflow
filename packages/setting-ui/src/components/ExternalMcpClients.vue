@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import { computed, inject, onBeforeUnmount, onMounted, ref } from 'vue';
-import { Copy, Plus, ShieldOff } from '@lucide/vue';
+import { Copy, Plus, RefreshCw, ShieldOff } from '@lucide/vue';
 import { useI18n } from 'vue-i18n';
 import { extractStructuredResultError } from '@memoflow/transport-contracts/result';
-import { Button, Checkbox, Dialog, Input, Label } from '@memoflow/ui-vue-shadcn';
+import { Button, Checkbox, Dialog, Input, Label, useConfirm } from '@memoflow/ui-vue-shadcn';
 import type {
   LocalAgentWriteScope,
   LocalGatewayAuditRecord,
@@ -24,6 +24,10 @@ const name = ref('');
 const writeScopes = ref<LocalAgentWriteScope[]>([]);
 const busy = ref(false);
 const loading = ref(false);
+// Empty and loading are different facts: a zero-length list only means "none"
+// after the host has replied, otherwise the section would claim no clients
+// while the first read is still in flight.
+const loaded = ref(false);
 const error = ref('');
 // Copy feedback is per control and self-clears, so the token and snippet
 // buttons can never both claim to have been copied.
@@ -54,6 +58,7 @@ const scopes = [
   },
 ];
 const active = computed(() => clients.value.filter((client) => client.revokedAt === null));
+const revoked = computed(() => clients.value.filter((client) => client.revokedAt !== null));
 const canCreate = computed(
   () => Boolean(local && endpoint.value) && name.value.trim().length > 0 && !busy.value,
 );
@@ -111,6 +116,7 @@ async function refresh() {
     error.value = failureMessage(cause);
   } finally {
     loading.value = false;
+    loaded.value = true;
   }
 }
 
@@ -165,6 +171,14 @@ function handleCreateOpenChange(open: boolean) {
 
 async function revoke(client: LocalMcpClient) {
   if (!local?.revokeMcpClient || busy.value) return;
+  const confirmed = await useConfirm({
+    title: t('setting.ai.localMcp.revokeConfirmTitle', { name: client.name }),
+    description: t('setting.ai.localMcp.revokeConfirmDescription'),
+    confirmText: t('setting.ai.localMcp.revoke'),
+    cancelText: t('common.cancel'),
+    variant: 'destructive',
+  });
+  if (!confirmed || busy.value) return;
   busy.value = true;
   error.value = '';
   try {
@@ -230,6 +244,14 @@ function auditDecision(entry: LocalGatewayAuditRecord) {
     entry.scopeDecision === 'allowed'
       ? 'setting.ai.localMcp.auditAllowed'
       : 'setting.ai.localMcp.auditDenied',
+  );
+}
+
+function auditEffect(entry: LocalGatewayAuditRecord) {
+  return t(
+    entry.effect === 'write'
+      ? 'setting.ai.localMcp.auditEffectWrite'
+      : 'setting.ai.localMcp.auditEffectRead',
   );
 }
 
@@ -428,10 +450,28 @@ onBeforeUnmount(() => {
       </SettingsDialogShell>
     </Dialog>
 
-    <p v-if="!active.length && !loading" class="text-[11px] text-muted-foreground">
+    <p
+      v-if="!loaded"
+      class="text-[11px] text-muted-foreground"
+      data-testid="ai-external-mcp-loading"
+    >
+      {{ t('setting.ai.localMcp.loading') }}
+    </p>
+    <p
+      v-else-if="!clients.length"
+      class="text-[11px] text-muted-foreground"
+      data-testid="ai-external-mcp-empty"
+    >
       {{ t('setting.ai.localMcp.empty') }}
     </p>
-    <ul v-else class="divide-y divide-[hsl(var(--border-subtle))]">
+    <p
+      v-else-if="!active.length"
+      class="text-[11px] text-muted-foreground"
+      data-testid="ai-external-mcp-empty-active"
+    >
+      {{ t('setting.ai.localMcp.emptyActive') }}
+    </p>
+    <ul v-if="active.length" class="divide-y divide-[hsl(var(--border-subtle))]">
       <li
         v-for="client in active"
         :key="client.id"
@@ -458,14 +498,60 @@ onBeforeUnmount(() => {
       </li>
     </ul>
 
-    <div class="space-y-2 border-t border-[hsl(var(--border-subtle))] pt-3">
+    <div
+      v-if="revoked.length"
+      class="space-y-1 border-t border-[hsl(var(--border-subtle))] pt-3"
+      data-testid="ai-external-mcp-revoked"
+    >
       <h4 class="text-[12px] font-semibold">
-        {{ t('setting.ai.localMcp.auditTitle') }}
+        {{ t('setting.ai.localMcp.revokedTitle') }}
       </h4>
-      <p v-if="!audit.length" class="text-[11px] text-muted-foreground">
+      <ul class="divide-y divide-[hsl(var(--border-subtle))]">
+        <li
+          v-for="client in revoked"
+          :key="client.id"
+          class="flex items-center gap-3 py-2"
+          :data-testid="`ai-external-mcp-revoked-client-${client.id}`"
+        >
+          <div class="min-w-0 flex-1">
+            <p class="truncate text-[12px] font-medium">{{ client.name }}</p>
+            <p class="truncate text-[11px] text-muted-foreground">
+              {{ scopeLabel(client) }} · {{ t('setting.ai.localMcp.createdAt') }}
+              {{ formatDate(client.createdAt) }} · {{ t('setting.ai.localMcp.revokedAt') }}
+              {{ formatDate(client.revokedAt ?? 0) }} ·
+              <code>{{ client.tokenPrefix }}…</code>
+            </p>
+          </div>
+          <span class="text-[11px] text-muted-foreground">{{
+            t('setting.ai.localMcp.revoked')
+          }}</span>
+        </li>
+      </ul>
+    </div>
+
+    <div class="space-y-2 border-t border-[hsl(var(--border-subtle))] pt-3">
+      <div class="flex items-center justify-between gap-2">
+        <h4 class="text-[12px] font-semibold">
+          {{ t('setting.ai.localMcp.auditTitle') }}
+        </h4>
+        <Button
+          variant="ghost"
+          size="sm"
+          class="h-7 gap-1 px-2 text-[11px]"
+          :disabled="loading"
+          data-testid="ai-external-mcp-audit-refresh"
+          @click="refresh"
+          ><RefreshCw class="size-3.5" />{{ t('setting.ai.localMcp.refresh') }}</Button
+        >
+      </div>
+      <p
+        v-if="loaded && !audit.length"
+        class="text-[11px] text-muted-foreground"
+        data-testid="ai-external-mcp-audit-empty"
+      >
         {{ t('setting.ai.localMcp.auditEmpty') }}
       </p>
-      <ul v-else class="space-y-1" data-testid="ai-external-mcp-audit">
+      <ul v-else-if="audit.length" class="space-y-1" data-testid="ai-external-mcp-audit">
         <li
           v-for="entry in audit"
           :key="entry.id"
@@ -473,6 +559,9 @@ onBeforeUnmount(() => {
         >
           <code class="text-foreground">{{ entry.tool }}</code>
           <span>{{ auditOrigin(entry) }}</span>
+          <span :data-testid="`ai-external-mcp-audit-effect-${entry.id}`"
+            >· {{ auditEffect(entry) }}</span
+          >
           <span>· {{ auditDecision(entry) }}</span>
           <span>· {{ entry.outcome }}</span>
           <span>· {{ entry.durationMs }}ms</span>
