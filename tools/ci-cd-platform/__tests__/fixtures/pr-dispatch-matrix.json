@@ -2218,6 +2218,7 @@
             "app-vue",
             "desktop",
             "governance-tools",
+            "schedule-ui",
             "task-client",
             "task-ui",
             "ui-storybook",
@@ -2229,6 +2230,7 @@
             "app-vue",
             "desktop",
             "mobile",
+            "schedule-ui",
             "task-client",
             "task-ui",
             "ui-storybook",
@@ -2239,11 +2241,12 @@
             "app-vue",
             "desktop",
             "governance-tools",
+            "schedule-ui",
             "task-client",
             "task-ui",
             "web"
           ],
-          "test:contract": ["ai-ui", "task-client", "task-ui"],
+          "test:contract": ["ai-ui", "schedule-ui", "task-client", "task-ui"],
           "test:smoke": [],
           "test:integration": [],
           "test:boundary": ["desktop"],
@@ -2269,6 +2272,7 @@
             "ai-ui:build",
             "app-vue:build",
             "desktop:build",
+            "schedule-ui:build",
             "task-client:build",
             "task-ui:build",
             "ui-storybook:build",
@@ -2278,6 +2282,7 @@
             "app-vue:typecheck",
             "desktop:typecheck",
             "mobile:typecheck",
+            "schedule-ui:typecheck",
             "task-client:typecheck",
             "task-ui:typecheck",
             "ui-storybook:typecheck",
@@ -2289,7 +2294,7 @@
           "verification-children": ["desktop:test:ipc", "desktop:test:main"],
           "web-visual": ["web:e2e:visual-regression"],
           "component-browser": ["ui-storybook:test:interaction"],
-          "contract": ["ai-ui:test:contract", "task-client:test:contract", "task-ui:test:contract"]
+          "contract": ["ai-ui:test:contract", "schedule-ui:test:contract", "task-client:test:contract", "task-ui:test:contract"]
         },
         "serverShards": [
           {
