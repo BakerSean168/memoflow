@@ -99,10 +99,15 @@ export const SelectedPreview: Story = {
     await userEvent.upload(input, pngFile());
     await waitFor(() => expect(canvasElement.querySelector('img')).not.toBeNull());
     await expect(page.getByTestId('account-avatar-uploader')).toBeEnabled();
+    await expect(page.getByTestId('account-avatar-uploader-helper')).toHaveAttribute(
+      'data-state',
+      'idle',
+    );
+    await page.findByText('Avatar updated');
   },
 };
 
-/** A corrupt image surfaces the failure toast and leaves the previous state untouched. */
+/** A corrupt image adds a danger line under the avatar and leaves the image untouched. */
 export const UploadError: Story = {
   render: () => renderUploader({ avatarUrl: EXISTING_AVATAR }),
   play: async ({ canvasElement }) => {
@@ -113,7 +118,10 @@ export const UploadError: Story = {
       new File(['not a real png'], 'broken.png', { type: 'image/png' }),
     );
     await waitFor(() => expect(input.value).toBe(''));
-    await page.findByText('Could not update avatar');
+    const helper = await page.findByTestId('account-avatar-uploader-helper');
+    await waitFor(() => expect(helper).toHaveAttribute('data-state', 'error'));
+    await expect(helper).toHaveTextContent('Could not update avatar');
+    await expect(helper).toHaveClass('text-destructive');
     await expect(canvasElement.querySelector('img')).not.toBeNull();
     await expect(page.getByTestId('account-avatar-uploader')).toBeEnabled();
   },
@@ -124,7 +132,7 @@ export const ReadOnly: Story = {
   render: () => renderUploader({ avatarUrl: EXISTING_AVATAR, disabled: true }),
 };
 
-/** While the platform port is still writing, the label reports progress and blocks picks. */
+/** While the platform port is still writing, a spinner replaces the camera and picks are blocked. */
 export const Uploading: Story = {
   render: () =>
     renderUploader({
@@ -134,7 +142,11 @@ export const Uploading: Story = {
     const page = within(canvasElement.ownerDocument.body);
     const input = (await page.findByTestId('account-avatar-uploader-input')) as HTMLInputElement;
     await userEvent.upload(input, pngFile());
+    const helper = await page.findByTestId('account-avatar-uploader-helper');
     await waitFor(() => expect(page.getByText('Processing avatar...')).toBeInTheDocument());
+    await expect(helper).toHaveAttribute('data-state', 'uploading');
     await expect(page.getByTestId('account-avatar-uploader')).toBeDisabled();
+    await expect(page.getByTestId('account-avatar-uploader')).toHaveAttribute('aria-busy', 'true');
+    await expect(canvasElement.querySelector('.animate-spin')).not.toBeNull();
   },
 };

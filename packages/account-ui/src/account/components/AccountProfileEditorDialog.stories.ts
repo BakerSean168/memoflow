@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/vue3-vite';
-import { provide, ref } from 'vue';
+import { onBeforeUnmount, onMounted, provide, ref } from 'vue';
 import { expect, userEvent, waitFor, within } from 'storybook/test';
 import { fail, ok } from '@memoflow/transport-contracts/result';
 import type { AccountClientPort } from '@memoflow/account-client';
@@ -11,6 +11,14 @@ import type { AccountAvatarStore } from '../avatar/account-avatar-store';
 import AccountProfileEditorDialog from './AccountProfileEditorDialog.vue';
 
 const now = Date.now();
+
+const PNG_BASE64 =
+  'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==';
+
+function pngFile(name = 'avatar.png'): File {
+  const bytes = Uint8Array.from(atob(PNG_BASE64), (character) => character.charCodeAt(0));
+  return new File([bytes], name, { type: 'image/png' });
+}
 
 function createAccount(profile: Partial<AccountClientDTO['profile']> = {}): AccountClientDTO {
   return {
@@ -55,13 +63,16 @@ function createService(account: AccountClientDTO, overrides: Partial<AccountClie
 }
 
 /** No platform storage is touched: the double only hands back a renderable URL. */
-function createAvatarStore(): AccountAvatarStore {
+function createAvatarStore(
+  save: AccountAvatarStore['save'] = async (_accountKey, image) => URL.createObjectURL(image),
+): AccountAvatarStore {
   let next: string | null = null;
   return {
     load: async () => next,
-    save: async (_accountKey, image) => {
-      next = URL.createObjectURL(image);
-      return next;
+    save: async (accountKey, image) => {
+      const url = await save(accountKey, image);
+      next = url;
+      return url;
     },
   };
 }
@@ -72,7 +83,19 @@ interface EditorDoubleOptions {
   initialOpen?: boolean;
   /** Production mounts one Toaster in the shell; failure toasts need it to be visible. */
   toaster?: boolean;
+  avatarSave?: AccountAvatarStore['save'];
+  /**
+   * Narrow review: Storybook ships without a viewport addon, so the story pins
+   * the portalled dialog to 320px instead of resizing the canvas. The responsive
+   * layout only depends on available width, so this shows the real narrow
+   * composition: 16px gutters, single column, no squeezed controls.
+   */
+  narrow?: boolean;
 }
+
+const NARROW_DIALOG_STYLE =
+  'div[role="dialog"]:has([data-testid="profile-editor-dialog"])' +
+  '{width:320px!important;max-width:320px!important;}';
 
 function renderEditor(options: EditorDoubleOptions = {}) {
   const account = options.account ?? createAccount();
@@ -84,7 +107,20 @@ function renderEditor(options: EditorDoubleOptions = {}) {
       useAccountStore().reset();
       const open = ref(options.initialOpen ?? true);
       provide(accountUiHost.ACCOUNT_SERVICE_KEY as symbol, createService(account, options.service));
-      provide(accountUiHost.ACCOUNT_AVATAR_STORE_KEY as symbol, createAvatarStore());
+      provide(
+        accountUiHost.ACCOUNT_AVATAR_STORE_KEY as symbol,
+        createAvatarStore(options.avatarSave),
+      );
+      if (options.narrow) {
+        let styleElement: HTMLStyleElement | null = null;
+        onMounted(() => {
+          styleElement = document.createElement('style');
+          styleElement.dataset.story = 'profile-editor-narrow';
+          styleElement.textContent = NARROW_DIALOG_STYLE;
+          document.head.appendChild(styleElement);
+        });
+        onBeforeUnmount(() => styleElement?.remove());
+      }
       return { open, toaster: options.toaster ?? false };
     },
     template: `
@@ -116,12 +152,18 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-/** Filled profile: both fields show the persisted values and no footer is shown. */
+/** Default open: filled profile, flat field groups, no footer until an edit. */
 export const Open: Story = {};
 
 /** A brand-new account has no nickname or bio; the empty fields stay editable. */
 export const EmptyProfile: Story = {
   render: () => renderEditor({ account: createAccount({ nickname: '', bio: null }) }),
+  play: async ({ canvasElement }) => {
+    const page = within(canvasElement.ownerDocument.body);
+    await expect(page.getByTestId('profile-editor-nickname-hint')).toBeInTheDocument();
+    await expect(page.getByTestId('profile-editor-nickname-count')).toHaveTextContent('0/20');
+    await expect(page.queryByTestId('profile-editor-footer')).not.toBeInTheDocument();
+  },
 };
 
 /** Long content keeps the layout: 20-character nickname and a multi-line bio. */
@@ -138,15 +180,21 @@ export const LongNicknameAndBio: Story = {
     }),
 };
 
-/** Over-long nickname stays in the field, flags the hint and blocks saving. */
+/** Over-long nickname stays in the field, flags the inline error and counter. */
 export const InvalidNickname: Story = {
   render: () =>
     renderEditor({
       account: createAccount({ nickname: 'A long nickname that exceeds twenty characters' }),
     }),
+  play: async ({ canvasElement }) => {
+    const page = within(canvasElement.ownerDocument.body);
+    await expect(page.getByTestId('profile-editor-nickname-hint')).toBeInTheDocument();
+    await expect(page.getByTestId('profile-editor-nickname-count')).toHaveTextContent('46/20');
+    await expect(page.queryByTestId('profile-editor-save')).not.toBeInTheDocument();
+  },
 };
 
-/** Short nickname is rejected by the same hint after the field is edited. */
+/** Short nickname is rejected by the same inline error and blocks saving. */
 export const NicknameTooShort: Story = {
   play: async ({ canvasElement }) => {
     const page = within(canvasElement.ownerDocument.body);
@@ -154,6 +202,7 @@ export const NicknameTooShort: Story = {
     await userEvent.clear(nickname);
     await userEvent.type(nickname, 'A');
     await expect(page.getByTestId('profile-editor-nickname-hint')).toBeInTheDocument();
+    await expect(page.getByTestId('profile-editor-nickname-count')).toHaveTextContent('1/20');
     await expect(page.getByTestId('profile-editor-save')).toBeDisabled();
   },
 };
@@ -167,7 +216,7 @@ export const AvatarPreview: Story = {
           'data:image/svg+xml;utf8,' +
           encodeURIComponent(
             '<svg xmlns="http://www.w3.org/2000/svg" width="80" height="80">' +
-              '<rect width="80" height="80" rx="40" fill="#4f46e5"/>' +
+              '<rect width="80" height="80" rx="40" fill="#0f766e"/>' +
               '<text x="40" y="50" font-family="sans-serif" font-size="28" fill="white" ' +
               'text-anchor="middle">DB</text></svg>',
           ),
@@ -175,7 +224,24 @@ export const AvatarPreview: Story = {
     }),
 };
 
-/** A corrupt image is rejected by the decoder and the avatar stays untouched. */
+/** While the avatar port is writing, the circle shows a spinner and blocks picks. */
+export const AvatarUploading: Story = {
+  render: () =>
+    renderEditor({
+      avatarSave: () => new Promise(() => undefined),
+    }),
+  play: async ({ canvasElement }) => {
+    const page = within(canvasElement.ownerDocument.body);
+    const input = (await page.findByTestId('profile-editor-avatar-input')) as HTMLInputElement;
+    await userEvent.upload(input, pngFile());
+    const helper = await page.findByTestId('profile-editor-avatar-helper');
+    await waitFor(() => expect(helper).toHaveTextContent('Processing avatar...'));
+    await expect(helper).toHaveAttribute('data-state', 'uploading');
+    await expect(page.getByTestId('profile-editor-avatar')).toBeDisabled();
+  },
+};
+
+/** A corrupt image is rejected by the decoder and reported inline under the avatar. */
 export const AvatarUploadFailure: Story = {
   render: () => renderEditor({ toaster: true }),
   play: async ({ canvasElement }) => {
@@ -186,18 +252,22 @@ export const AvatarUploadFailure: Story = {
       new File(['not a real png'], 'broken.png', { type: 'image/png' }),
     );
     await waitFor(() => expect(input.value).toBe(''));
-    await page.findByText('Could not update avatar');
+    const helper = await page.findByTestId('profile-editor-avatar-helper');
+    await waitFor(() => expect(helper).toHaveAttribute('data-state', 'error'));
+    await expect(helper).toHaveTextContent('Could not update avatar');
+    await expect(helper).toHaveClass('text-destructive');
     await expect(page.getByTestId('profile-editor-avatar')).toBeEnabled();
   },
 };
 
-/** Dirty draft exposes Reset/Save; the footer is the only place that saves. */
+/** Dirty draft exposes Reset/Save plus the muted unsaved line in the footer. */
 export const DirtyDraft: Story = {
   play: async ({ canvasElement }) => {
     const page = within(canvasElement.ownerDocument.body);
     const nickname = await page.findByTestId('profile-editor-nickname');
     await userEvent.type(nickname, ' Updated');
     await waitFor(() => expect(page.getByTestId('profile-editor-footer')).toBeInTheDocument());
+    await expect(page.getByTestId('profile-editor-prompt')).toBeInTheDocument();
     await expect(page.getByTestId('profile-editor-save')).toBeEnabled();
   },
 };
@@ -212,6 +282,7 @@ export const CloseGuardKeepsDraft: Story = {
     await userEvent.click(page.getByTestId('profile-editor-close'));
     const dialog = page.getByTestId('profile-editor-dialog');
     await waitFor(() => expect(dialog).toHaveAttribute('data-guard', 'alert'));
+    await expect(page.getByTestId('profile-editor-prompt')).toHaveClass('text-destructive');
     await expect(page.getByTestId('profile-editor-nickname')).toHaveValue('Draft name');
     await expect(page.getByTestId('profile-editor-footer')).toBeInTheDocument();
   },
@@ -251,7 +322,7 @@ export const ReopenStartsFromPersistedProfile: Story = {
   },
 };
 
-/** Saving disables both fields and the footer until the write settles. */
+/** Saving shows the muted progress row and disables fields plus both actions. */
 export const SaveBusy: Story = {
   render: () =>
     renderEditor({
@@ -266,13 +337,16 @@ export const SaveBusy: Story = {
     await userEvent.type(nickname, 'Draft name');
     await userEvent.click(page.getByTestId('profile-editor-save'));
     await waitFor(() => expect(page.getByTestId('profile-editor-save')).toBeDisabled());
+    await expect(page.getByTestId('profile-editor-status')).toHaveAttribute('data-phase', 'saving');
+    await expect(page.getByTestId('profile-editor-status')).toHaveTextContent('Saving');
     await expect(page.getByTestId('profile-editor-save')).toHaveTextContent('Saving');
     await expect(page.getByTestId('profile-editor-nickname')).toBeDisabled();
     await expect(page.getByTestId('profile-editor-bio')).toBeDisabled();
+    await expect(page.getByTestId('profile-editor-reset')).toBeDisabled();
   },
 };
 
-/** A refused write keeps the draft and the footer so the user can retry. */
+/** A refused write keeps the draft and adds a danger feedback row above the actions. */
 export const SaveError: Story = {
   render: () =>
     renderEditor({
@@ -288,13 +362,20 @@ export const SaveError: Story = {
     await userEvent.clear(nickname);
     await userEvent.type(nickname, 'Draft name');
     await userEvent.click(page.getByTestId('profile-editor-save'));
-    await waitFor(() => expect(page.getByTestId('profile-editor-save')).toBeEnabled());
+    await waitFor(() =>
+      expect(page.getByTestId('profile-editor-status')).toHaveAttribute('data-phase', 'error'),
+    );
+    await expect(page.getByTestId('profile-editor-status')).toHaveTextContent(
+      'Failed to update profile',
+    );
+    await expect(page.getByTestId('profile-editor-status')).toHaveAttribute('role', 'alert');
+    await expect(page.getByTestId('profile-editor-save')).toBeEnabled();
     await expect(page.getByTestId('profile-editor-footer')).toBeInTheDocument();
     await expect(page.getByTestId('profile-editor-nickname')).toHaveValue('Draft name');
   },
 };
 
-/** A successful write adopts the response: the footer clears without closing. */
+/** A successful write adopts the response and confirms in the feedback row. */
 export const SaveSuccess: Story = {
   play: async ({ canvasElement }) => {
     const page = within(canvasElement.ownerDocument.body);
@@ -303,9 +384,17 @@ export const SaveSuccess: Story = {
     await userEvent.type(nickname, 'Updated Builder');
     await userEvent.click(page.getByTestId('profile-editor-save'));
     await waitFor(() =>
-      expect(page.queryByTestId('profile-editor-footer')).not.toBeInTheDocument(),
+      expect(page.getByTestId('profile-editor-status')).toHaveAttribute('data-phase', 'success'),
     );
+    await expect(page.getByTestId('profile-editor-status')).toHaveTextContent('Profile updated');
+    await expect(page.queryByTestId('profile-editor-footer')).not.toBeInTheDocument();
     await expect(page.getByTestId('profile-editor-nickname')).toHaveValue('Updated Builder');
     await expect(page.getByTestId('profile-editor-dialog')).toBeInTheDocument();
   },
+};
+
+/** Narrow review: dialog near full width with single-column fields and 16px gutters. */
+export const NarrowDialog: Story = {
+  parameters: { layout: 'fullscreen' },
+  render: () => renderEditor({ narrow: true }),
 };
