@@ -47,14 +47,33 @@ export type ServerStateInvalidation =
       projection?: 'all' | 'lists' | 'details';
       entityId?: string;
       dedupeKey?: string;
+    }
+  | {
+      target: 'routine-upcoming';
+      identityScope: string;
+      source: 'mutation' | 'powersync' | 'reconnect';
+      entityId?: string;
+      dedupeKey?: string;
     };
 
 /**
- * Dispatcher public interface: `invalidate` for intents, `clearIdentity` on identity change.
- * Dispatcher 公共接口：`invalidate` 处理 intent；identity 变化时 `clearIdentity`。
+ * Post-flush invalidation event for mounted consumers that hold a copied owner read.
+ * 供已挂载消费者使用的失效事件（消费方需重新读取当前 range）。
+ */
+export interface ServerStateInvalidated {
+  target: ServerStateInvalidation['target'];
+  identityScope: string;
+}
+
+/**
+ * Dispatcher public interface: `invalidate` for intents, `subscribe` for post-flush
+ * consumers, `clearIdentity` on identity change.
+ * Dispatcher 公共接口：`invalidate` 处理 intent；`subscribe` 通知已挂载消费者；
+ * identity 变化时 `clearIdentity`。
  */
 export interface ServerStateInvalidationDispatcher {
   invalidate(intent: ServerStateInvalidation): Promise<void>;
+  subscribe(listener: (event: ServerStateInvalidated) => void): () => void;
   clearIdentity(identityScope: string): void;
 }
 
@@ -80,6 +99,9 @@ export function createServerStateInvalidationDispatcher(
   // Same-turn intent queue, flushed on a microtask. 同一 turn 的 intent 队列。
   let pendingBatch: { intent: ServerStateInvalidation; resolve: () => void }[] = [];
   let flushScheduled = false;
+
+  // Post-flush consumers (mounted Planner / capsule owner reads). 失效后消费者。
+  const listeners = new Set<(event: ServerStateInvalidated) => void>();
 
   function isValidIdentity(identityScope: string): boolean {
     return typeof identityScope === 'string' && identityScope.length > 0;
@@ -160,6 +182,12 @@ export function createServerStateInvalidationDispatcher(
 
   function intentKeys(intent: ServerStateInvalidation): QueryKey[] {
     if (intent.target === 'notification') return notificationIntentKeys(intent);
+    if (intent.target === 'routine-upcoming') {
+      // Every cached range belongs to one owner projection; all become stale, active
+      // consumers re-read their current range through `subscribe`.
+      // 所有已缓存 range 同属一个 owner 投影：全部标 stale，活跃消费者经 `subscribe` 重读当前 range。
+      return [routineUpcomingQueryKeys.identity(intent.identityScope)];
+    }
     return taskPlanIntentKeys(intent);
   }
 
@@ -171,15 +199,31 @@ export function createServerStateInvalidationDispatcher(
 
     const merged = mergeBatch(batch.map((b) => b.intent));
     const keys = new Set<string>();
+    const events = new Map<string, ServerStateInvalidated>();
     for (const intent of merged) {
       for (const key of intentKeys(intent)) {
         keys.add(JSON.stringify(key));
       }
+      events.set(`${intent.target}:${intent.identityScope}`, {
+        target: intent.target,
+        identityScope: intent.identityScope,
+      });
     }
 
     for (const serialized of keys) {
       const queryKey = JSON.parse(serialized) as QueryKey;
       await queryClient.invalidateQueries({ queryKey, refetchType: 'active' });
+    }
+
+    for (const event of events.values()) {
+      for (const listener of [...listeners]) {
+        try {
+          listener(event);
+        } catch (cause) {
+          // A consumer refresh failure must never break the authority flush.
+          console.warn('[server-state] invalidation listener failed', cause);
+        }
+      }
     }
 
     for (const entry of batch) entry.resolve();
@@ -211,6 +255,13 @@ export function createServerStateInvalidationDispatcher(
       });
       scheduleFlush();
       return promise;
+    },
+
+    subscribe(listener: (event: ServerStateInvalidated) => void): () => void {
+      listeners.add(listener);
+      return () => {
+        listeners.delete(listener);
+      };
     },
 
     clearIdentity(identityScope: string): void {

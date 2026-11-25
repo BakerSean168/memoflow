@@ -6,6 +6,11 @@ import type { RoutineClientPort } from '@memoflow/routine-client';
 import { ROUTINE_SERVICE_KEY } from '@routine-ui-test-host/di/keys';
 import { ProductSingleSelectFilter } from '@routine-ui-test-host/shared/components';
 import { productionLocaleMessages } from '@routine-ui-test-host/locales/production-messages';
+import {
+  createTestServerStateRuntime,
+  SERVER_STATE_IDENTITY_SCOPE_KEY,
+  SERVER_STATE_RUNTIME_KEY,
+} from '@routine-ui-test-host/platform/server-state';
 
 const confirmMock = vi.hoisted(() => vi.fn(async () => true));
 vi.mock('@memoflow/ui-vue-shadcn', async (importOriginal) => {
@@ -105,6 +110,8 @@ async function mountRoutineView(client: RoutineClientPort, initialPath = '/routi
       plugins: [i18n, router],
       provide: {
         [ROUTINE_SERVICE_KEY as symbol]: client,
+        [SERVER_STATE_RUNTIME_KEY as symbol]: createTestServerStateRuntime(),
+        [SERVER_STATE_IDENTITY_SCOPE_KEY as symbol]: () => 'identity-1',
       },
       renderStubDefaultSlot: true,
       stubs: {

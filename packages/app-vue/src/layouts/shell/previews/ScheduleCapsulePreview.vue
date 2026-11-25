@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue';
+import { computed, onMounted, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { ArrowRight, CalendarDays } from '@lucide/vue';
 import { Button } from '@memoflow/ui-vue-shadcn';
@@ -78,6 +78,15 @@ async function load(): Promise<void> {
     isLoading.value = false;
   }
 }
+
+// Owner reads (incl. Routine markers) refresh through the server-state authority; keep the
+// copied capsule snapshot in sync instead of waiting for the next mount.
+watch(
+  () => calendar.capsuleEvents.value,
+  () => {
+    snapshot.value = calendar.getScheduleCapsuleSnapshot();
+  },
+);
 
 onMounted(() => {
   void load();

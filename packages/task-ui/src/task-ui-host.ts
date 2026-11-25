@@ -83,6 +83,7 @@ export interface TaskUiTaskPlanInvalidation {
 
 export interface TaskUiInvalidationDispatcher {
   invalidate(intent: TaskUiTaskPlanInvalidation): Promise<void>;
+  subscribe(listener: (event: { target: string; identityScope: string }) => void): () => void;
   clearIdentity(identityScope: string): void;
 }
 

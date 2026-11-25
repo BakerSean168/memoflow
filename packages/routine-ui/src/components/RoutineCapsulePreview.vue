@@ -22,7 +22,11 @@
       />
     </CapsulePreviewState>
 
-    <CapsulePreviewState v-else-if="error" kind="error" data-testid="routine-capsule-error">
+    <CapsulePreviewState
+      v-else-if="error && occurrences.length === 0"
+      kind="error"
+      data-testid="routine-capsule-error"
+    >
       <p class="max-w-64 text-[11px] leading-4 text-muted-foreground">{{ error }}</p>
       <Button type="button" size="sm" variant="ghost" class="h-7 text-[11px]" @click="load(true)">
         <RotateCcw class="mr-1.5 h-3.5 w-3.5" />
@@ -39,6 +43,13 @@
     </CapsulePreviewState>
 
     <div v-else class="min-h-0 flex-1 overflow-y-auto py-1.5">
+      <p
+        v-if="error"
+        class="px-1.5 pb-1 text-[10px] leading-4 text-destructive"
+        data-testid="routine-capsule-refresh-error"
+      >
+        {{ error }}
+      </p>
       <div
         v-for="occurrence in occurrences"
         :key="occurrence.occurrenceKey"
@@ -135,6 +146,7 @@ import { Button } from '@memoflow/ui-vue-shadcn';
 import type { RoutineUpcomingOccurrence } from '@memoflow/routine-contracts';
 
 import { fetchRoutineUpcomingCached } from '../composables/routineUpcomingCache';
+import { useRoutineUpcomingInvalidation } from '../composables/useRoutineUpcomingInvalidation';
 
 const emit = defineEmits<{
   'view-all': [];
@@ -175,7 +187,8 @@ async function load(force = false): Promise<void> {
     });
     applyUpcoming(next, now);
   } catch (cause) {
-    occurrences.value = [];
+    // A failed background refresh keeps the last owner projection visible and reports it.
+    if (occurrences.value.length === 0) occurrences.value = [];
     const message =
       cause && typeof cause === 'object' && 'message' in cause
         ? (cause as { message?: unknown }).message
@@ -203,7 +216,13 @@ async function snoozeRoutine(routineId: string): Promise<void> {
       error.value = result.error.message;
       return;
     }
-    await load(true);
+    // Route the committed override through the owner authority; the subscription below
+    // re-reads this range (and every other mounted consumer does the same).
+    await runtime.dispatcher.invalidate({
+      target: 'routine-upcoming',
+      identityScope: resolveIdentityScope(),
+      source: 'mutation',
+    });
   } finally {
     mutatingRoutineId.value = null;
   }
@@ -219,6 +238,10 @@ const cachedOccurrences = runtime.queryClient.getQueryData<RoutineUpcomingOccurr
   ),
 );
 if (cachedOccurrences) applyUpcoming(cachedOccurrences);
+
+useRoutineUpcomingInvalidation(() => {
+  void load();
+});
 
 onMounted(() => {
   void load();

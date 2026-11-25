@@ -69,12 +69,26 @@ export function clearDesktopServerStateIdentity(identityScope: string): void {
   currentRuntime?.clearIdentity(identityScope);
 }
 
+/** PowerSync tables whose committed writes change the Routine upcoming projection. */
+export const ROUTINE_PROJECTION_TABLES = new Set([
+  'routine_definitions',
+  'routine_preferences',
+  'routine_profiles',
+  'routine_profile_memberships',
+  'routine_occurrences',
+  'routine_temporary_overrides',
+]);
+
 /**
  * Map a PowerSync table batch to pilot invalidation intents.
  *
  * Pilot tables: `notifications` → notification lists/unread; `task_plans` → task template
- * lists/details. Non-pilot tables yield no intents and keep flowing
- * through the legacy Pinia invalidator (plan §3.3 mapping table).
+ * lists/details; Routine projection tables → identity-scoped routine-upcoming. Non-pilot
+ * tables yield no intents and keep flowing through the legacy Pinia invalidator
+ * (plan §3.3 mapping table).
+ *
+ * Routine changes committed by Local MCP/AI or another client arrive here after PowerSync
+ * sync/reconnect, so the mounted Planner and capsules re-read the owner projection.
  */
 export function mapTablesToInvalidationIntents(
   tables: readonly string[],
@@ -95,6 +109,13 @@ export function mapTablesToInvalidationIntents(
       identityScope,
       source: 'powersync',
       projection: 'all',
+    });
+  }
+  if (unique.some((table) => ROUTINE_PROJECTION_TABLES.has(table))) {
+    intents.push({
+      target: 'routine-upcoming',
+      identityScope,
+      source: 'powersync',
     });
   }
 

@@ -15,7 +15,11 @@ import { useTaskStore } from '@memoflow/task-ui';
 import { useScheduleStore } from '@memoflow/schedule-ui';
 // Residual 941: host bridge via getElectronBridge sole helper.
 import { getElectronBridge } from './electron-bridge';
-import { getDesktopServerStateRuntime, mapTablesToInvalidationIntents } from './server-state';
+import {
+  getDesktopServerStateRuntime,
+  mapTablesToInvalidationIntents,
+  ROUTINE_PROJECTION_TABLES,
+} from './server-state';
 
 const api = getElectronBridge();
 
@@ -110,7 +114,10 @@ function setupDbChangeListener(): void {
     const runtime = getDesktopServerStateRuntime();
 
     const pilotTables = payload.tables.filter(
-      (table) => PILOT_TABLES.has(table) || NOTIFICATION_ATTENTION_TABLES.has(table),
+      (table) =>
+        PILOT_TABLES.has(table) ||
+        NOTIFICATION_ATTENTION_TABLES.has(table) ||
+        ROUTINE_PROJECTION_TABLES.has(table),
     );
     if (runtime && identityScope && pilotTables.length > 0) {
       for (const intent of mapTablesToInvalidationIntents(pilotTables, identityScope)) {

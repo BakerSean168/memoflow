@@ -16,5 +16,8 @@ export {
   type PlatformLabelCatalog,
   type PlatformLabelOption,
   type PlatformRendererHost,
+  type PlatformServerStateDispatcher,
+  type PlatformServerStateInvalidatedEvent,
+  type PlatformServerStateInvalidationIntent,
   type PlatformServerStateRuntime,
 } from './platform-renderer-host';

@@ -185,11 +185,16 @@ const { ProductSurfaceHeader, ResponsivePrimaryAction, TaskOccurrenceQuickSurfac
 
 const { t, locale } = useI18n();
 const router = useRouter();
-const { projections, conflicts, isLoading, fetchForRange, windowStart, windowEnd } =
+const { projections, conflicts, isLoading, fetchForRange, windowStart, windowEnd, ownerReadError } =
   useCalendarView();
 const schedule = useSchedule();
 const task = scheduleUiHost.useTask();
 const goal = scheduleUiHost.useStrictInject(scheduleUiHost.GOAL_SERVICE_KEY, 'GoalService');
+
+// A failed owner-read refresh keeps the current projections; tell the user it is stale.
+watch(ownerReadError, (message) => {
+  if (message) toast.warning(t('schedule.plannerMutation.refreshFailed'));
+});
 
 const ownerCommands = createPlannerOwnerCommandRouter({
   schedule: { updateSchedule: schedule.updateCalendarEntry },

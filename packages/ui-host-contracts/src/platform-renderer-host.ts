@@ -60,9 +60,38 @@ export interface PlatformLabelCatalog {
   resolveNames(names: readonly string[]): Promise<string[]>;
 }
 
-/** Renderer-owned server-state runtime (the QueryClient is the only shared fact). */
+/**
+ * Identity-scoped invalidation intent emitted by a UI mutation lifecycle or realtime adapter.
+ * The renderer server-state authority owns the mapping from intent to cached queries.
+ */
+export interface PlatformServerStateInvalidationIntent {
+  target: string;
+  identityScope: string;
+  source: 'mutation' | 'event-bus' | 'sse' | 'powersync' | 'reconnect';
+  entityId?: string;
+  dedupeKey?: string;
+}
+
+/** Post-flush notification delivered to consumers that must re-read an owner projection. */
+export interface PlatformServerStateInvalidatedEvent {
+  target: string;
+  identityScope: string;
+}
+
+/** Narrow server-state authority surface consumed by UI packages. */
+export interface PlatformServerStateDispatcher {
+  invalidate(intent: PlatformServerStateInvalidationIntent): Promise<void>;
+  /**
+   * Subscribe to identity-scoped invalidations after the authority marked its queries stale.
+   * Returns the unsubscribe function.
+   */
+  subscribe(listener: (event: PlatformServerStateInvalidatedEvent) => void): () => void;
+}
+
+/** Renderer-owned server-state runtime (the QueryClient + invalidation authority). */
 export interface PlatformServerStateRuntime {
   queryClient: QueryClient;
+  dispatcher: PlatformServerStateDispatcher;
 }
 
 /**

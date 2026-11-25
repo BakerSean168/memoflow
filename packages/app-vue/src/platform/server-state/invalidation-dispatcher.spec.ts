@@ -6,7 +6,7 @@ import {
   createServerStateInvalidationDispatcher,
   type ServerStateInvalidation,
 } from './invalidation-dispatcher';
-import { notificationQueryKeys, taskPlanQueryKeys } from './query-keys';
+import { notificationQueryKeys, routineUpcomingQueryKeys, taskPlanQueryKeys } from './query-keys';
 
 /** Wait for the current microtask turn so dispatcher turn-batching flushes. */
 async function flushTurn(): Promise<void> {
@@ -145,6 +145,18 @@ describe('invalidation-dispatcher — key mapping', () => {
     const keys = calledQueryKeys();
     expect(keys).toContainEqual(taskPlanQueryKeys.lists('id-1'));
     expect(keys).not.toContainEqual(taskPlanQueryKeys.details('id-1'));
+  });
+
+  it('routine-upcoming mutation invalidates every cached range under the identity root', async () => {
+    const dispatcher = createServerStateInvalidationDispatcher(queryClient);
+    await dispatcher.invalidate({
+      target: 'routine-upcoming',
+      identityScope: 'id-1',
+      source: 'mutation',
+    });
+    await flushTurn();
+
+    expect(calledQueryKeys()).toContainEqual(routineUpcomingQueryKeys.identity('id-1'));
   });
 });
 
@@ -351,5 +363,116 @@ describe('invalidation-dispatcher — active/inactive refetch & identity clearin
     await dispatcher.invalidate(intent);
 
     expect(queryClient.getQueryState(notificationQueryKeys.unread('id-1'))).toBeUndefined();
+  });
+});
+
+describe('invalidation-dispatcher — post-flush subscribers', () => {
+  let queryClient: QueryClient;
+
+  beforeEach(() => {
+    queryClient = createTestServerQueryClient();
+  });
+
+  afterEach(() => {
+    queryClient.clear();
+    vi.restoreAllMocks();
+  });
+
+  it('notifies once per merged identity+target batch', async () => {
+    const dispatcher = createServerStateInvalidationDispatcher(queryClient);
+    const listener = vi.fn();
+    const stop = dispatcher.subscribe(listener);
+
+    const first = dispatcher.invalidate({
+      target: 'routine-upcoming',
+      identityScope: 'id-1',
+      source: 'mutation',
+    });
+    const second = dispatcher.invalidate({
+      target: 'routine-upcoming',
+      identityScope: 'id-1',
+      source: 'powersync',
+    });
+    await Promise.all([first, second]);
+
+    expect(listener).toHaveBeenCalledTimes(1);
+    expect(listener).toHaveBeenCalledWith({
+      target: 'routine-upcoming',
+      identityScope: 'id-1',
+    });
+
+    stop();
+  });
+
+  it('keeps targets and identities separate for consumers that filter', async () => {
+    const dispatcher = createServerStateInvalidationDispatcher(queryClient);
+    const listener = vi.fn();
+    const stop = dispatcher.subscribe(listener);
+
+    await Promise.all([
+      dispatcher.invalidate({ target: 'notification', identityScope: 'id-1', source: 'event-bus' }),
+      dispatcher.invalidate({
+        target: 'routine-upcoming',
+        identityScope: 'id-1',
+        source: 'reconnect',
+      }),
+      dispatcher.invalidate({
+        target: 'routine-upcoming',
+        identityScope: 'id-2',
+        source: 'reconnect',
+      }),
+    ]);
+
+    expect(listener.mock.calls.map(([event]) => event)).toEqual([
+      { target: 'notification', identityScope: 'id-1' },
+      { target: 'routine-upcoming', identityScope: 'id-1' },
+      { target: 'routine-upcoming', identityScope: 'id-2' },
+    ]);
+    stop();
+  });
+
+  it('does not notify for dedupe-suppressed duplicates, failures or identity clearing', async () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    const dispatcher = createServerStateInvalidationDispatcher(queryClient);
+    const listener = vi.fn();
+    const stop = dispatcher.subscribe(listener);
+
+    await dispatcher.invalidate({
+      target: 'routine-upcoming',
+      identityScope: 'id-1',
+      source: 'powersync',
+      dedupeKey: 'table-change-1',
+    });
+    await dispatcher.invalidate({
+      target: 'routine-upcoming',
+      identityScope: 'id-1',
+      source: 'powersync',
+      dedupeKey: 'table-change-1',
+    });
+    await dispatcher.invalidate({
+      target: 'routine-upcoming',
+      identityScope: '',
+      source: 'mutation',
+    });
+    dispatcher.clearIdentity('id-1');
+
+    expect(listener).toHaveBeenCalledTimes(1);
+    stop();
+    warn.mockRestore();
+  });
+
+  it('stops delivering after unsubscribe', async () => {
+    const dispatcher = createServerStateInvalidationDispatcher(queryClient);
+    const listener = vi.fn();
+    const stop = dispatcher.subscribe(listener);
+    stop();
+
+    await dispatcher.invalidate({
+      target: 'routine-upcoming',
+      identityScope: 'id-1',
+      source: 'mutation',
+    });
+
+    expect(listener).not.toHaveBeenCalled();
   });
 });

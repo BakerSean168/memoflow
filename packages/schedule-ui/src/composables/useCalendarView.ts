@@ -5,7 +5,7 @@
  * 统一转换为内部 CalendarEventItem 类型后提供给日历组件渲染。
  */
 
-import { computed, ref } from 'vue';
+import { computed, onScopeDispose, ref } from 'vue';
 import { useSchedule } from './useSchedule';
 import type { GoalClientDTO } from '@memoflow/goal-contracts';
 import type {
@@ -236,6 +236,10 @@ export function useCalendarView() {
     Parameters<typeof projectPlannerReadModel>[0]['routineOccurrences']
   >([]);
   const plannerOwnerReadsLoading = ref(false);
+  /** Last canonical owner-read failure; data stays visible while this is set. */
+  const plannerOwnerReadsError = ref<string | null>(null);
+  let ownerReadGeneration = 0;
+  let ownerReadPending = 0;
 
   /** Currently displayed time window (set when calendar navigation changes) */
   const windowStart = ref<number>(0);
@@ -315,71 +319,128 @@ export function useCalendarView() {
     () => schedule.isLoading.value || task.isLoading.value || plannerOwnerReadsLoading.value,
   );
 
-  async function fetchPlannerOwnerMarkers(startTime: number, endTime: number, force = false) {
+  function beginOwnerRead(): void {
+    ownerReadPending += 1;
     plannerOwnerReadsLoading.value = true;
+  }
+
+  function endOwnerRead(): void {
+    ownerReadPending = Math.max(0, ownerReadPending - 1);
+    plannerOwnerReadsLoading.value = ownerReadPending > 0;
+  }
+
+  function toPlannerRoutineOccurrences(
+    occurrences: Awaited<ReturnType<typeof scheduleUiHost.fetchRoutineUpcomingCached>>,
+  ) {
+    return occurrences.map((occurrence) => ({
+      identityId: occurrence.identityId,
+      routineId: occurrence.routineId,
+      occurrenceKey: occurrence.occurrenceKey,
+      title: occurrence.title,
+      subtitle: occurrence.description,
+      occurrenceAt: asInstant(occurrence.occurrenceAt),
+      endAt: occurrence.endAt == null ? null : asInstant(occurrence.endAt),
+      revision: occurrence.revision,
+      editable: false,
+    }));
+  }
+
+  function fetchPlannerGoals(force: boolean, identityScope: string) {
+    return runtime.queryClient.fetchQuery<GoalClientDTO[]>({
+      queryKey: scheduleUiHost.plannerOwnerQueryKeys.goals(identityScope),
+      staleTime: force ? 0 : scheduleUiHost.PLANNER_OWNER_STALE_TIME_MS,
+      queryFn: async () => {
+        const collectedGoals: GoalClientDTO[] = [];
+        let page = 1;
+        let hasMore = true;
+
+        while (hasMore) {
+          const goalResult = await goalService.listGoals({
+            systemView: 'all',
+            page,
+            pageSize: PLANNER_GOAL_PAGE_SIZE,
+          });
+          if (!goalResult.ok) throw goalResult.error;
+          collectedGoals.push(...goalResult.data.goals);
+          hasMore = Boolean(goalResult.data.pagination?.hasMore);
+          page += 1;
+        }
+
+        return collectedGoals;
+      },
+    });
+  }
+
+  async function fetchPlannerOwnerMarkers(startTime: number, endTime: number, force = false) {
+    const generation = ++ownerReadGeneration;
     const identityScope = resolveIdentityScope();
+    beginOwnerRead();
     try {
-      const goalsPromise = runtime.queryClient.fetchQuery<GoalClientDTO[]>({
-        queryKey: scheduleUiHost.plannerOwnerQueryKeys.goals(identityScope),
-        staleTime: force ? 0 : scheduleUiHost.PLANNER_OWNER_STALE_TIME_MS,
-        queryFn: async () => {
-          const collectedGoals: GoalClientDTO[] = [];
-          let page = 1;
-          let hasMore = true;
-
-          while (hasMore) {
-            const goalResult = await goalService.listGoals({
-              systemView: 'all',
-              page,
-              pageSize: PLANNER_GOAL_PAGE_SIZE,
-            });
-            if (!goalResult.ok) throw goalResult.error;
-            collectedGoals.push(...goalResult.data.goals);
-            hasMore = Boolean(goalResult.data.pagination?.hasMore);
-            page += 1;
-          }
-
-          return collectedGoals;
-        },
-      });
-      const routinesPromise = scheduleUiHost.fetchRoutineUpcomingCached({
-        queryClient: runtime.queryClient,
-        identityScope,
-        service: routineService,
-        start: startTime,
-        end: endTime,
-        limit: 500,
-        force,
-      });
-
       const [goalsResult, routinesResult] = await Promise.allSettled([
-        goalsPromise,
-        routinesPromise,
+        fetchPlannerGoals(force, identityScope),
+        scheduleUiHost.fetchRoutineUpcomingCached({
+          queryClient: runtime.queryClient,
+          identityScope,
+          service: routineService,
+          start: startTime,
+          end: endTime,
+          limit: 500,
+          force,
+        }),
       ]);
+
+      // A superseded read must never overwrite the newer range/revision.
+      if (generation !== ownerReadGeneration) return;
 
       plannerGoals.value =
         goalsResult.status === 'fulfilled' ? goalsResult.value : force ? plannerGoals.value : [];
       plannerRoutineOccurrences.value =
         routinesResult.status === 'fulfilled'
-          ? routinesResult.value.map((occurrence) => ({
-              identityId: occurrence.identityId,
-              routineId: occurrence.routineId,
-              occurrenceKey: occurrence.occurrenceKey,
-              title: occurrence.title,
-              subtitle: occurrence.description,
-              occurrenceAt: asInstant(occurrence.occurrenceAt),
-              endAt: occurrence.endAt == null ? null : asInstant(occurrence.endAt),
-              revision: occurrence.revision,
-              editable: false,
-            }))
+          ? toPlannerRoutineOccurrences(routinesResult.value)
           : force
             ? plannerRoutineOccurrences.value
             : [];
-      if (force && (goalsResult.status === 'rejected' || routinesResult.status === 'rejected')) {
+      const failed = goalsResult.status === 'rejected' || routinesResult.status === 'rejected';
+      plannerOwnerReadsError.value = failed ? 'Planner canonical marker refresh failed' : null;
+      if (force && failed) {
         throw new Error('Planner canonical marker refresh failed');
       }
     } finally {
-      plannerOwnerReadsLoading.value = false;
+      endOwnerRead();
+    }
+  }
+
+  /**
+   * Controlled refresh for an already-mounted Planner: the Routine owner mutation
+   * authority invalidated this identity's projection, so re-read the current range.
+   * Non-active ranges stay invalidated and re-read on their next entry.
+   * 已挂载 Planner 的受控刷新：Routine owner 失效后只重读当前 range；非活跃范围保持
+   * invalidated，下次进入时再读新数据。
+   */
+  async function refreshPlannerRoutineMarkers(): Promise<void> {
+    if (windowStart.value <= 0 || windowEnd.value <= 0) return;
+    const generation = ++ownerReadGeneration;
+    beginOwnerRead();
+    try {
+      const occurrences = await scheduleUiHost.fetchRoutineUpcomingCached({
+        queryClient: runtime.queryClient,
+        identityScope: resolveIdentityScope(),
+        service: routineService,
+        start: windowStart.value,
+        end: windowEnd.value,
+        limit: 500,
+        force: true,
+      });
+      if (generation !== ownerReadGeneration) return;
+      plannerRoutineOccurrences.value = toPlannerRoutineOccurrences(occurrences);
+      plannerOwnerReadsError.value = null;
+    } catch (cause) {
+      if (generation !== ownerReadGeneration) return;
+      // Keep the last projection visible and surface the failure to the surface.
+      plannerOwnerReadsError.value =
+        cause instanceof Error ? cause.message : 'Planner canonical marker refresh failed';
+    } finally {
+      endOwnerRead();
     }
   }
 
@@ -415,12 +476,22 @@ export function useCalendarView() {
     return resolveScheduleCapsule(capsuleEvents.value, nowMs);
   }
 
+  // Mounted Planner/capsule consumers re-read the current range through the same authority
+  // that invalidated it; identity-scoped events for other accounts are ignored.
+  const stopRoutineInvalidation = runtime.dispatcher.subscribe((event) => {
+    if (event.target !== 'routine-upcoming') return;
+    if (event.identityScope !== resolveIdentityScope()) return;
+    void refreshPlannerRoutineMarkers();
+  });
+  onScopeDispose(stopRoutineInvalidation);
+
   return {
     projections,
     conflicts,
     events,
     capsuleEvents,
     isLoading,
+    ownerReadError: plannerOwnerReadsError,
     windowStart,
     windowEnd,
     fetchForRange,

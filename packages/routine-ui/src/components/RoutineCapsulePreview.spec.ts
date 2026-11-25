@@ -212,4 +212,104 @@ describe('RoutineCapsulePreview quick workspace', () => {
     expect(getUpcomingOccurrences).toHaveBeenCalledTimes(2);
     wrapper.unmount();
   });
+
+  it('shows the new owner projection after another surface commits a Routine mutation', async () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2026-09-28T09:00:00Z'));
+    getUpcomingOccurrences
+      .mockResolvedValueOnce({
+        ok: true,
+        data: {
+          occurrences: [
+            {
+              identityId: 'identity-1',
+              routineId: 'routine-1',
+              occurrenceKey: 'routine-1:old',
+              title: 'Wind down 23:50',
+              description: null,
+              occurrenceAt: Date.parse('2026-09-28T10:00:00Z'),
+              endAt: null,
+              revision: 1,
+              editable: false,
+            },
+          ],
+        },
+      })
+      .mockResolvedValueOnce({
+        ok: true,
+        data: {
+          occurrences: [
+            {
+              identityId: 'identity-1',
+              routineId: 'routine-1',
+              occurrenceKey: 'routine-1:new',
+              title: 'Wind down 23:30',
+              description: null,
+              occurrenceAt: Date.parse('2026-09-28T10:00:00Z'),
+              endAt: null,
+              revision: 2,
+              editable: false,
+            },
+          ],
+        },
+      });
+
+    const wrapper = mountPreview();
+    await flushPromises();
+    expect(wrapper.text()).toContain('Wind down 23:50');
+
+    await runtime.dispatcher.invalidate({
+      target: 'routine-upcoming',
+      identityScope: 'identity-1',
+      source: 'mutation',
+    });
+    await flushPromises();
+
+    expect(wrapper.text()).toContain('Wind down 23:30');
+    expect(wrapper.text()).not.toContain('Wind down 23:50');
+    expect(getUpcomingOccurrences).toHaveBeenCalledTimes(2);
+    wrapper.unmount();
+  });
+
+  it('keeps the loaded rows visible and surfaces the failure when a background refresh fails', async () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2026-09-28T09:00:00Z'));
+    getUpcomingOccurrences
+      .mockResolvedValueOnce({
+        ok: true,
+        data: {
+          occurrences: [
+            {
+              identityId: 'identity-1',
+              routineId: 'routine-1',
+              occurrenceKey: 'routine-1:kept',
+              title: 'Keep me',
+              description: null,
+              occurrenceAt: Date.parse('2026-09-28T10:00:00Z'),
+              endAt: null,
+              revision: 1,
+              editable: false,
+            },
+          ],
+        },
+      })
+      .mockRejectedValueOnce(new Error('offline'));
+
+    const wrapper = mountPreview();
+    await flushPromises();
+    expect(wrapper.text()).toContain('Keep me');
+
+    await runtime.dispatcher.invalidate({
+      target: 'routine-upcoming',
+      identityScope: 'identity-1',
+      source: 'powersync',
+    });
+    await flushPromises();
+
+    expect(wrapper.text()).toContain('Keep me');
+    expect(wrapper.get('[data-testid="routine-capsule-refresh-error"]').text()).toContain(
+      'offline',
+    );
+    wrapper.unmount();
+  });
 });

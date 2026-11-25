@@ -37,6 +37,8 @@ export function useRoutineConfiguration() {
     routineUiHost.ROUTINE_SERVICE_KEY,
     'routineUiHost.ROUTINE_SERVICE_KEY',
   );
+  const runtime = routineUiHost.useServerStateRuntime();
+  const resolveIdentityScope = routineUiHost.useServerStateIdentityScope();
   const snapshot = ref<RoutineConfigurationSnapshot>(EMPTY_SNAPSHOT);
   const loading = ref(false);
   const mutating = ref(false);
@@ -68,6 +70,18 @@ export function useRoutineConfiguration() {
     error.value = null;
     try {
       unwrapResult(await work());
+      // Only a committed owner write may invalidate the Planner/capsule projection.
+      // 仅已提交的 owner 写入才失效 Planner/capsule 投影；失败写入不污染缓存。
+      try {
+        await runtime.dispatcher.invalidate({
+          target: 'routine-upcoming',
+          identityScope: resolveIdentityScope(),
+          source: 'mutation',
+        });
+      } catch (cause) {
+        // The write is committed; a cache-invalidation failure must not report it as failed.
+        console.warn('[routine-ui] routine-upcoming invalidation failed', cause);
+      }
       await load();
     } catch (cause) {
       error.value = routineUiHost.translateResultError(cause, t, {
