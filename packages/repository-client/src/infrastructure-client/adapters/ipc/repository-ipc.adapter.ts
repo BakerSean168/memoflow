@@ -1,3 +1,4 @@
+import type { LocalVaultGitChanges } from '@memoflow/repository-contracts';
 import type { LocalVaultWriteReceipt } from '@memoflow/repository-contracts';
 /**
  * Repository IPC Adapter
@@ -231,6 +232,10 @@ export class RepositoryIpcAdapter implements IRepositoryApiClient {
 
   async listLocalVaultWrites(): Promise<Result<LocalVaultWriteReceipt[]>> {
     return this.ipcClient.invoke(RepositoryChannels.LOCAL_VAULT_WRITES);
+  }
+
+  async getLocalVaultGitChanges(): Promise<Result<LocalVaultGitChanges>> {
+    return this.ipcClient.invoke(RepositoryChannels.LOCAL_VAULT_GIT_CHANGES);
   }
 
   async scanLocalVault(): Promise<Result<ScanLocalVaultRes>> {

@@ -152,3 +152,18 @@ export const LocalVaultWriteReceiptSchema = z.object({
   createdAt: z.number(),
 });
 export type LocalVaultWriteReceipt = z.infer<typeof LocalVaultWriteReceiptSchema>;
+
+/** Read-only Git observation, scoped to the currently selected local Vault. */
+export const LocalVaultGitChangeSchema = z.object({
+  relativePath: z.string(),
+  previousPath: z.string().optional(),
+  status: z.enum(['added', 'modified', 'deleted', 'renamed', 'conflicted']),
+});
+export type LocalVaultGitChange = z.infer<typeof LocalVaultGitChangeSchema>;
+export const LocalVaultGitChangesSchema = z.object({
+  bindingId: LocalVaultBindingClientDTOSchema.shape.id,
+  state: z.enum(['ready', 'not-repository', 'unavailable']),
+  changes: z.array(LocalVaultGitChangeSchema),
+  observedAt: z.number(),
+});
+export type LocalVaultGitChanges = z.infer<typeof LocalVaultGitChangesSchema>;

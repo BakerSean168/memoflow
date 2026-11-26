@@ -107,6 +107,10 @@ export function createRepositoryElectronModule(
           withAuthenticatedValue(ctx, () => withLocalVault((port) => port.listRecentWrites())),
         );
         installed.push(RepositoryChannels.LOCAL_VAULT_WRITES);
+        ipcMain.handle(RepositoryChannels.LOCAL_VAULT_GIT_CHANGES, (_) =>
+          withAuthenticatedValue(ctx, () => withLocalVault((port) => port.getGitChanges())),
+        );
+        installed.push(RepositoryChannels.LOCAL_VAULT_GIT_CHANGES);
         ipcMain.handle(RepositoryChannels.LOCAL_VAULT_SCAN, (_) =>
           withAuthenticatedValue(ctx, () => withLocalVault((port) => port.scanVault())),
         );

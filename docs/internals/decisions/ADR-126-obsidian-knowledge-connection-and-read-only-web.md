@@ -7,7 +7,7 @@ tags:
   - web
 description: 知识模块作为 Obsidian 连接和上下文边界，Desktop 本地确认写入，Web 严格只读
 created: 2026-11-21T00:00:00+08:00
-updated: 2026-11-21T00:00:00+08:00
+updated: 2026-11-26T00:00:00+08:00
 ---
 
 # ADR-126: Obsidian Knowledge Connection and Read-only Web
@@ -41,7 +41,7 @@ GitHub installation token 显式请求 `contents: read` 和 `metadata: read`，�
 
 知识页面移除全文预览、正文搜索框、文件树和文件管理，Settings 不再有独立知识仓库分类。旧 `/settings?tab=repository` 保留为到 `/repository` 的重定向，并保留安装回调参数。
 
-Desktop 页面展示绑定与健康、打开 Obsidian、重新选择/断开，以及当前 Vault 的 MemoFlow 成功写入记录。历史记录来自 confirmed-write ledger，按稳定文档 ID 解析现存路径，不能把整个 Vault 的最近文件冒充为 MemoFlow 写入。未保存草稿继续由原会话的审核流程持有。
+Desktop 页面展示绑定与健康、打开 Obsidian、重新选择/断开，以及关联笔记和当前 Vault 的只读 Git 工作区状态。工作区状态不构成 Git 同步能力，不启动 watcher 或修改索引、配置和提交；也不能把所有变更归因为 MemoFlow 写入。业务关联按稳定文档 ID 解析现存路径；confirmed-write ledger 继续保留为交付事实。未保存草稿继续由原会话的审核流程持有。
 
 Web 页面展示只读仓库连接与投影状态。已有笔记深链解析后提供 GitHub 原文链接，不重新引入正文预览。未连接或部署尚未配置 GitHub App 是中性可用性状态；认证失败、网络失败和已连接来源失效有各自可操作反馈。
 

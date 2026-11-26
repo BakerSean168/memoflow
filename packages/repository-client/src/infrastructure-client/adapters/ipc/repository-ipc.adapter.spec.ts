@@ -32,6 +32,13 @@ describe('RepositoryIpcAdapter local-only knowledge boundary', () => {
     expect(ipcClient.invoke).not.toHaveBeenCalled();
   });
 
+  it('reads Git observations through the dedicated local-only channel', async () => {
+    const ipcClient = createResultIpcClientStub();
+    const adapter = new RepositoryIpcAdapter(ipcClient);
+    await adapter.getLocalVaultGitChanges();
+    expect(ipcClient.invoke).toHaveBeenCalledWith('repository:local-vault:git-changes');
+  });
+
   it('keeps local source selection, receipts and confirmed writes on the local channels', async () => {
     const ipcClient = createResultIpcClientStub();
     const adapter = new RepositoryIpcAdapter(ipcClient);

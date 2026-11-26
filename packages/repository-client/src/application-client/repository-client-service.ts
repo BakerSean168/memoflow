@@ -1,3 +1,4 @@
+import type { LocalVaultGitChanges } from '@memoflow/repository-contracts';
 import type { LocalVaultWriteReceipt } from '@memoflow/repository-contracts';
 /**
  * Repository Client Service
@@ -223,6 +224,10 @@ export class RepositoryClientService implements IRepositoryApiClient {
 
   listLocalVaultWrites(): Promise<Result<LocalVaultWriteReceipt[]>> {
     return this.repositoryApi.listLocalVaultWrites();
+  }
+
+  getLocalVaultGitChanges(): Promise<Result<LocalVaultGitChanges>> {
+    return this.repositoryApi.getLocalVaultGitChanges();
   }
 
   scanLocalVault(): Promise<Result<ScanLocalVaultRes>> {

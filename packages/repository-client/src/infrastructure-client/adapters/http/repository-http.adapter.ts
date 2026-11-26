@@ -1,3 +1,4 @@
+import type { LocalVaultGitChanges } from '@memoflow/repository-contracts';
 import type { LocalVaultWriteReceipt } from '@memoflow/repository-contracts';
 /**
  * Repository HTTP Adapter
@@ -316,6 +317,10 @@ export class RepositoryHttpAdapter implements IRepositoryApiClient {
 
   async listLocalVaultWrites(): Promise<Result<LocalVaultWriteReceipt[]>> {
     return fail({ code: 'FORBIDDEN', message: 'Local Vault is available only in Desktop' });
+  }
+
+  async getLocalVaultGitChanges(): Promise<Result<LocalVaultGitChanges>> {
+    return this.localVaultUnavailable();
   }
 
   async scanLocalVault(): Promise<Result<ScanLocalVaultRes>> {

@@ -44,6 +44,7 @@ describe('RepositoryElectronModule local ownership', () => {
     const localVault = {
       getBinding: vi.fn(async () => null),
       listRecentWrites: vi.fn(async () => []),
+      getGitChanges: vi.fn(async () => ({ state: 'ready', changes: [] })),
       writeConfirmedNote: vi.fn(async () => ({ note: { title: 'Saved' } })),
       dispose: vi.fn(async () => undefined),
     };
@@ -56,6 +57,9 @@ describe('RepositoryElectronModule local ownership', () => {
     const module = createRepositoryElectronModule({ localVaultPort: localVault as never });
     await module.register(context);
     expect(await handler(RepositoryChannels.LOCAL_VAULT_WRITES)({})).toEqual(ok([]));
+    expect(await handler(RepositoryChannels.LOCAL_VAULT_GIT_CHANGES)({})).toEqual(
+      ok({ state: 'ready', changes: [] }),
+    );
     expect(
       await handler(RepositoryChannels.LOCAL_VAULT_NOTE_WRITE_CONFIRMED)({}, { confirmed: true }),
     ).toEqual(ok({ note: { title: 'Saved' } }));

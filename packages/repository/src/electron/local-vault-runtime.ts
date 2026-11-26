@@ -1,3 +1,5 @@
+import type { LocalVaultGitChanges } from '@memoflow/repository-contracts';
+import { readVaultGitChanges } from './local-vault-git';
 import type { LocalVaultWriteReceipt } from '@memoflow/repository-contracts';
 import { createHash, randomUUID } from 'node:crypto';
 import fs from 'node:fs';
@@ -146,6 +148,7 @@ export interface LocalVaultElectronPort {
   selectVault(request?: SelectLocalVaultReq): Promise<LocalVaultBindingSnapshotDTO | null>;
   detachVault(): Promise<void>;
   scanVault(): Promise<ScanLocalVaultRes>;
+  getGitChanges(): Promise<LocalVaultGitChanges>;
   listRecentWrites(): Promise<LocalVaultWriteReceipt[]>;
   readNote(request: ReadLocalVaultNoteReq): Promise<LocalVaultNoteDTO>;
   findNoteById(documentId: KnowledgeDocumentId): Promise<{
@@ -427,6 +430,13 @@ export class LocalVaultRuntime implements LocalVaultElectronPort {
         ];
       })
       .slice(0, 20);
+  }
+
+  async getGitChanges(): Promise<LocalVaultGitChanges> {
+    const scope = await this.captureScope();
+    const observation = await readVaultGitChanges(scope.root);
+    this.assertScope(scope);
+    return { bindingId: scope.binding.id, ...observation, observedAt: this.now() };
   }
 
   async scanVault(): Promise<ScanLocalVaultRes> {
