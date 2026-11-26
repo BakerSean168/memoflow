@@ -189,6 +189,81 @@ describe('registerCloudAuthIpc', () => {
     expect(cloudConnection.cancelForProfile).toHaveBeenCalledWith('profile-1');
   });
 
+  it('forwards verification and password mutation requests without the IPC action field', async () => {
+    const { handlers, sessions } = registerFixture();
+    sessions.load.mockResolvedValue({ token: 'test-only-token' });
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValueOnce(
+        new Response(
+          JSON.stringify({
+            challengeId: '00000000-0000-4000-8000-000000000000',
+            retryAfterSeconds: 60,
+            expiresInSeconds: 600,
+          }),
+          { status: 200 },
+        ),
+      )
+      .mockResolvedValueOnce(
+        new Response(JSON.stringify({ verificationToken: 'g'.repeat(43) }), { status: 200 }),
+      )
+      .mockResolvedValueOnce(new Response(JSON.stringify({ status: true }), { status: 200 }));
+    vi.stubGlobal('fetch', fetchMock);
+    const invoke = handlers.get(CloudAuthChannels.ACCOUNT_SECURITY)!;
+
+    await invoke({}, { action: 'request-verification', purpose: 'change-password' } as never);
+    await invoke({}, {
+      action: 'verify-email-code',
+      purpose: 'change-password',
+      challengeId: '00000000-0000-4000-8000-000000000000',
+      code: '123456',
+    } as never);
+    await invoke({}, {
+      action: 'change-password',
+      currentPassword: 'current-password',
+      newPassword: 'new-password',
+      verificationToken: 'g'.repeat(43),
+    } as never);
+
+    expect(fetchMock).toHaveBeenNthCalledWith(
+      1,
+      'https://api.memo.test/api/auth/account-security/request-verification',
+      expect.objectContaining({ body: JSON.stringify({ purpose: 'change-password' }) }),
+    );
+    expect(fetchMock).toHaveBeenNthCalledWith(
+      2,
+      'https://api.memo.test/api/auth/account-security/verify-email-code',
+      expect.objectContaining({
+        body: JSON.stringify({
+          purpose: 'change-password',
+          challengeId: '00000000-0000-4000-8000-000000000000',
+          code: '123456',
+        }),
+      }),
+    );
+    expect(fetchMock).toHaveBeenNthCalledWith(
+      3,
+      'https://api.memo.test/api/auth/account-security/change-password',
+      expect.objectContaining({
+        body: JSON.stringify({
+          currentPassword: 'current-password',
+          newPassword: 'new-password',
+          verificationToken: 'g'.repeat(43),
+        }),
+      }),
+    );
+
+    expect(
+      await invoke({}, {
+        action: 'verify-email-code',
+        purpose: 'change-password',
+        challengeId: '00000000-0000-4000-8000-000000000000',
+        code: '12345',
+      } as never),
+    ).toMatchObject({ ok: false, error: { code: 'INVALID_REQUEST' } });
+    expect(fetchMock).toHaveBeenCalledTimes(3);
+  });
+
   it('forwards a valid sign-in to the cloud sign-in service and rejects malformed input', async () => {
     const { handlers, signIn } = registerFixture();
 
