@@ -211,12 +211,16 @@ for (const host of ['web', 'desktop'] as const) {
         expect((await paint()).color).not.toBe(focused.color);
         await surface.dispatchEvent('dragleave');
         expect((await paint()).color).toBe(focused.color);
-        await page.getByTestId('ai-chat-add-context').click();
-        const menu = page.getByRole('menu');
+        await input.fill('@');
+        const menu = page.getByTestId('ai-composer-mention-menu');
         await expect(menu).toBeVisible();
         expect(await menu.evaluate((el) => getComputedStyle(el).boxShadow)).not.toBe('none');
         await page.keyboard.press('Escape');
-        await expect(page.getByTestId('ai-chat-add-context')).toBeFocused();
+        await expect(menu).toBeHidden();
+        await expect(input).toBeFocused();
+        const fileChooser = page.waitForEvent('filechooser');
+        await page.getByTestId('ai-chat-upload-file').click();
+        await (await fileChooser).setFiles([]);
       });
     }
   }

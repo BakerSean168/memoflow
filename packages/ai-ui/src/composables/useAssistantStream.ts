@@ -1,4 +1,5 @@
 import { extractStructuredResultError } from '@memoflow/transport-contracts/result';
+import { AssistantRuntimeClientCommandSchema, inspectGoalIntent } from '@memoflow/ai-contracts';
 import type {
   AssistantRuntimeEvent,
   AssistantRuntimeSelectedEntity,
@@ -552,7 +553,12 @@ export function useAssistantStream(input: {
     adjustComposerHeight: () => void,
   ) {
     const choice = runtimeChoice.value;
-    if ((choice.runtimeKind === 'builtin' && !selectedModel) || chatLoading.value) return;
+    if (
+      (choice.runtimeKind === 'builtin' && !selectedModel) ||
+      chatLoading.value ||
+      composer.attachmentIntakePending.value
+    )
+      return;
     // A suspended ask_user turn must be resolved before another message can
     // mutate the same conversation. Avoid overlapping native Agent runs.
     if (
@@ -616,6 +622,24 @@ export function useAssistantStream(input: {
       const pendingEntities: AssistantRuntimeSelectedEntity[] = composer.selectedEntities();
       const pendingUserMessage = chatMessage.value.trim();
       if (!pendingUserMessage && pendingAttachments.length === 0) return;
+      if (pendingAttachments.length) {
+        const valid = AssistantRuntimeClientCommandSchema.safeParse({
+          type: 'message',
+          conversationId: 'draft',
+          content: pendingUserMessage,
+          surface: options.surface,
+          runtimeKind: choice.runtimeKind,
+          attachments: pendingAttachments,
+          selectedEntities: pendingEntities,
+        });
+        if (
+          !valid.success ||
+          (choice.runtimeKind === 'local_agent' && inspectGoalIntent(pendingUserMessage))
+        ) {
+          toast.error(t('aiAssistant.chatPage.attachments.incompatibleDraft'));
+          return;
+        }
+      }
 
       invalidateRuntimeHistory();
       chatLoading.value = true;

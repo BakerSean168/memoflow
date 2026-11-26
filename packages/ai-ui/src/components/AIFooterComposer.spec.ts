@@ -2,6 +2,7 @@ import { installAiUiHost } from '@ai-ui-test-host/di/ai-ui-host';
 installAiUiHost();
 /** @vitest-environment jsdom */
 import { nextTick } from 'vue';
+import { composerDocument } from './composer-editor';
 import { mount } from '@vue/test-utils';
 import { createI18n } from 'vue-i18n';
 import { afterEach, describe, expect, it, vi } from 'vitest';
@@ -57,9 +58,10 @@ const i18n = createI18n({
   messages: productionLocaleMessages,
 });
 
-function mountComposer(
+async function mountComposer(
   props: Partial<{
     modelValue: string;
+    localAgent: boolean;
     loading: boolean;
     canSend: boolean;
     attachments: Array<{
@@ -90,7 +92,7 @@ function mountComposer(
     density: 'comfortable' | 'compact' | 'icon';
   }> = {},
 ) {
-  return mount(AIFooterComposer, {
+  const wrapper = mount(AIFooterComposer, {
     props: {
       modelValue: '',
       loading: false,
@@ -127,16 +129,47 @@ function mountComposer(
       },
     },
   });
+  await nextTick();
+  await nextTick();
+  return wrapper;
+}
+
+async function editDraft(wrapper: Awaited<ReturnType<typeof mountComposer>>, value: string) {
+  const editor = wrapper.vm.editor!;
+  editor.commands.setContent(composerDocument(value));
+  editor.commands.setTextSelection(editor.state.doc.content.size - 1);
+  await wrapper.setProps({ modelValue: value });
+  await nextTick();
 }
 
 describe('AIFooterComposer (Global Composer input)', () => {
-  it('places attachments at the left and model choice beside the right-hand send action', () => {
-    const wrapper = mountComposer({ modelValue: 'hello' });
+  it('compiles the literal @ hint in both production locales', async () => {
+    for (const locale of ['zh-CN', 'en-US'] as const) {
+      i18n.global.locale.value = locale;
+      expect(i18n.global.t('aiAssistant.chatPage.context.mentionMoreHint')).toContain('@');
+    }
+    i18n.global.locale.value = 'en-US';
+  });
+
+  it('clears undo history on external draft resets and accepts subsequent edits', async () => {
+    const wrapper = await mountComposer();
+    await editDraft(wrapper, 'old conversation draft');
+    await wrapper.setProps({ modelValue: '' });
+    const editor = wrapper.vm.editor!;
+    expect(editor.getText()).toBe('');
+    expect(editor.commands.undo()).toBe(false);
+    editor.commands.insertContent('new draft');
+    expect(editor.getText()).toBe('new draft');
+    wrapper.unmount();
+  });
+
+  it('places attachments at the left and model choice beside the right-hand send action', async () => {
+    const wrapper = await mountComposer({ modelValue: 'hello' });
     const attachments = wrapper.get('[data-testid="ai-composer-attachments"]');
     const actions = wrapper.get('[data-testid="ai-composer-actions"]');
     const model = actions.get('[data-testid="ai-chat-model-selector"]');
     const send = actions.get('[data-testid="ai-chat-send-message"]');
-    expect(attachments.get('[data-testid="ai-chat-add-context"]').exists()).toBe(true);
+    expect(attachments.get('[data-testid="ai-chat-upload-file"]').exists()).toBe(true);
     expect(
       attachments.element.compareDocumentPosition(actions.element) &
         Node.DOCUMENT_POSITION_FOLLOWING,
@@ -152,7 +185,7 @@ describe('AIFooterComposer (Global Composer input)', () => {
   });
 
   it('uses a bordered composer without floating elevation and inset context chips while preserving removal events', async () => {
-    const wrapper = mountComposer({
+    const wrapper = await mountComposer({
       attachments: [
         {
           id: 'a1',
@@ -178,7 +211,7 @@ describe('AIFooterComposer (Global Composer input)', () => {
   });
 
   it('sends on Enter and keeps Shift+Enter as newline', async () => {
-    const wrapper = mountComposer({ modelValue: 'hello' });
+    const wrapper = await mountComposer({ modelValue: 'hello' });
     const textarea = wrapper.get('[data-testid="ai-chat-composer"]');
 
     await textarea.trigger('keydown', { key: 'Enter', shiftKey: false });
@@ -190,9 +223,9 @@ describe('AIFooterComposer (Global Composer input)', () => {
   });
 
   it('keeps Enter inside a pending mention query and closes it through Escape without reopening on keyup', async () => {
-    const wrapper = mountComposer({ knowledgeLoading: true });
+    const wrapper = await mountComposer({ knowledgeLoading: true });
     const textarea = wrapper.get('[data-testid="ai-chat-composer"]');
-    await textarea.setValue('@missing');
+    await editDraft(wrapper, '@missing');
     await wrapper.setProps({ modelValue: '@missing' });
     await nextTick();
     expect(wrapper.emitted('knowledge-query')?.at(-1)).toEqual(['missing']);
@@ -214,7 +247,7 @@ describe('AIFooterComposer (Global Composer input)', () => {
       relativePath: 'ideas/ordinary.md',
       contentHash: 'b'.repeat(64),
     };
-    const wrapper = mountComposer({
+    const wrapper = await mountComposer({
       recentKnowledgeNotes: [
         {
           id: 'source-1',
@@ -236,7 +269,7 @@ describe('AIFooterComposer (Global Composer input)', () => {
       ],
     });
     const textarea = wrapper.get('[data-testid="ai-chat-composer"]');
-    await textarea.setValue('@ideas');
+    await editDraft(wrapper, '@ideas');
     await wrapper.setProps({ modelValue: '@ideas' });
     await nextTick();
     expect(wrapper.get('[data-testid="ai-composer-mention-option"]').text()).toContain(
@@ -261,7 +294,7 @@ describe('AIFooterComposer (Global Composer input)', () => {
   });
 
   it('does not send while IME composition is active', async () => {
-    const wrapper = mountComposer({ modelValue: '你好' });
+    const wrapper = await mountComposer({ modelValue: '你好' });
     const textarea = wrapper.get('[data-testid="ai-chat-composer"]');
 
     await textarea.trigger('compositionstart');
@@ -285,10 +318,10 @@ describe('AIFooterComposer (Global Composer input)', () => {
   });
 
   it('allows typing during a run without submitting or queueing and keeps Stop independent', async () => {
-    const wrapper = mountComposer({ loading: true, modelValue: 'next' });
+    const wrapper = await mountComposer({ loading: true, modelValue: 'next' });
     const textarea = wrapper.get('[data-testid="ai-chat-composer"]');
-    expect((textarea.element as HTMLTextAreaElement).disabled).toBe(false);
-    await textarea.setValue('next message');
+    expect(textarea.attributes('contenteditable')).toBe('true');
+    await editDraft(wrapper, 'next message');
     await textarea.trigger('keydown', { key: 'Enter' });
     expect(wrapper.emitted('update:modelValue')?.at(-1)).toEqual(['next message']);
     expect(wrapper.emitted('send')).toBeUndefined();
@@ -300,98 +333,78 @@ describe('AIFooterComposer (Global Composer input)', () => {
   });
 
   it('emits stop while loading and send when idle', async () => {
-    const loading = mountComposer({ loading: true, modelValue: 'x' });
+    const loading = await mountComposer({ loading: true, modelValue: 'x' });
     await loading.get('[data-testid="ai-chat-stop-generating"]').trigger('click');
     expect(loading.emitted('stop')).toHaveLength(1);
     expect(loading.find('[data-testid="ai-chat-send-message"]').exists()).toBe(false);
     loading.unmount();
 
-    const idle = mountComposer({ loading: false, modelValue: 'x' });
+    const idle = await mountComposer({ loading: false, modelValue: 'x' });
     await idle.get('[data-testid="ai-chat-send-message"]').trigger('click');
     expect(idle.emitted('send')).toHaveLength(1);
     idle.unmount();
   });
 
-  it('disables send when empty or canSend is false', () => {
-    const empty = mountComposer({ modelValue: '   ' });
+  it('disables send when empty or canSend is false', async () => {
+    const empty = await mountComposer({ modelValue: '   ' });
     expect(
       (empty.get('[data-testid="ai-chat-send-message"]').element as HTMLButtonElement).disabled,
     ).toBe(true);
     empty.unmount();
 
-    const blocked = mountComposer({ modelValue: 'hi', canSend: false });
+    const blocked = await mountComposer({ modelValue: 'hi', canSend: false });
     expect(
       (blocked.get('[data-testid="ai-chat-send-message"]').element as HTMLButtonElement).disabled,
     ).toBe(true);
     blocked.unmount();
   });
 
-  it('shows a compact empty-models configuration control', () => {
-    const wrapper = mountComposer({ modelGroups: [] });
+  it('shows a compact empty-models configuration control', async () => {
+    const wrapper = await mountComposer({ modelGroups: [] });
     expect(wrapper.find('[data-testid="ai-chat-empty-models"]').exists()).toBe(true);
     wrapper.unmount();
   });
 
-  it('mounts context submenu content only after its submenu opens', async () => {
-    const wrapper = mountComposer({
-      recentGoals: [
-        {
-          id: 'g1',
-          title: 'Ship the next release',
-          status: 'active',
-          updatedAt: 1,
-          progress: 0.5,
-        },
-      ],
-    });
-
-    expect(wrapper.findAllComponents({ name: 'DropdownMenuSubContentStub' })).toHaveLength(0);
-
-    const goalSubmenu = wrapper.findComponent({ name: 'DropdownMenuSubStub' });
-    goalSubmenu.vm.$emit('update:open', true);
-    await nextTick();
-
-    expect(wrapper.findAllComponents({ name: 'DropdownMenuSubContentStub' })).toHaveLength(1);
-    expect(wrapper.text()).toContain('Ship the next release');
+  it('opens the native file picker directly and has no nested context menu', async () => {
+    const wrapper = await mountComposer({ localAgent: true });
+    const input = wrapper.get('[data-testid="ai-chat-file-input"]').element as HTMLInputElement;
+    const click = vi.spyOn(input, 'click').mockImplementation(() => undefined);
+    await wrapper.get('[data-testid="ai-chat-upload-file"]').trigger('click');
+    expect(click).toHaveBeenCalledOnce();
+    expect(wrapper.findAllComponents({ name: 'DropdownMenuSubStub' })).toHaveLength(0);
     wrapper.unmount();
   });
 
-  it('auto-grows textarea height up to the max cap', async () => {
-    const wrapper = mountComposer({ modelValue: '' });
-    const el = wrapper.get('[data-testid="ai-chat-composer"]').element as HTMLTextAreaElement;
-    Object.defineProperty(el, 'scrollHeight', {
-      configurable: true,
-      get: () => 320,
-    });
-    await wrapper.setProps({ modelValue: 'line\n'.repeat(20) });
-    await nextTick();
-    // height is clamped by COMPOSER_TEXTAREA_MAX_PX (168)
-    expect(el.style.height).toBe('168px');
+  it('keeps a bounded scrolling editor for multiline text', async () => {
+    const wrapper = await mountComposer();
+    await editDraft(wrapper, 'first\nsecond\nthird');
+    expect(wrapper.get('[data-testid="ai-chat-composer"]').findAll('p')).toHaveLength(3);
+    expect(wrapper.emitted('update:modelValue')?.at(-1)).toEqual(['first\nsecond\nthird']);
     wrapper.unmount();
   });
 
-  it('keeps the draft editable while AI is unavailable', () => {
-    const wrapper = mountComposer({
+  it('keeps the draft editable while AI is unavailable', async () => {
+    const wrapper = await mountComposer({
       modelGroups: [],
       canSend: false,
       selectedModelKey: '',
     });
 
-    expect(
-      (wrapper.get('[data-testid="ai-chat-composer"]').element as HTMLTextAreaElement).disabled,
-    ).toBe(false);
+    expect(wrapper.get('[data-testid="ai-chat-composer"]').attributes('contenteditable')).toBe(
+      'true',
+    );
     wrapper.unmount();
   });
 
-  it('removes the manual intent selector and exposes one add-context control instead', () => {
-    const wrapper = mountComposer({
+  it('removes the manual intent selector and exposes one add-context control instead', async () => {
+    const wrapper = await mountComposer({
       modelGroups: [],
       canSend: false,
       selectedModelKey: '',
     });
 
     expect(wrapper.find('[data-testid="ai-chat-tool-menu-trigger"]').exists()).toBe(false);
-    expect(wrapper.find('[data-testid="ai-chat-add-context"]').exists()).toBe(true);
+    expect(wrapper.find('[data-testid="ai-chat-upload-file"]').exists()).toBe(true);
     expect(wrapper.find('[data-testid="ai-chat-empty-models"]').exists()).toBe(true);
 
     const cueText = wrapper.find('[data-testid="ai-chat-empty-models"]').text();
@@ -402,7 +415,7 @@ describe('AIFooterComposer (Global Composer input)', () => {
   });
 
   it('allows attachment-only submit and emits pasted files', async () => {
-    const wrapper = mountComposer({
+    const wrapper = await mountComposer({
       attachments: [
         {
           id: 'a1',
@@ -428,7 +441,7 @@ describe('AIFooterComposer (Global Composer input)', () => {
   });
 
   it('accepts pasted screenshots from ClipboardItem when clipboard.files is empty', async () => {
-    const wrapper = mountComposer();
+    const wrapper = await mountComposer({ localAgent: true });
     const screenshot = new File(['png'], 'clipboard.png', {
       type: 'image/png',
     });
@@ -445,7 +458,7 @@ describe('AIFooterComposer (Global Composer input)', () => {
   });
 
   it('supports @ mention autocomplete for goals, tasks, and notes', async () => {
-    const wrapper = mountComposer({
+    const wrapper = await mountComposer({
       modelValue: 'compare @Ship',
       recentGoals: [
         {
@@ -467,11 +480,7 @@ describe('AIFooterComposer (Global Composer input)', () => {
         },
       ],
     });
-    const textarea = wrapper.get('[data-testid="ai-chat-composer"]');
-    const textareaEl = textarea.element as HTMLTextAreaElement;
-    textareaEl.setSelectionRange(textareaEl.value.length, textareaEl.value.length);
-    await textarea.trigger('keyup');
-    await nextTick();
+    await editDraft(wrapper, 'compare @Ship');
 
     expect(wrapper.find('[data-testid="ai-composer-mention-menu"]').exists()).toBe(true);
     const options = wrapper.findAll('[data-testid="ai-composer-mention-option"]');
@@ -485,11 +494,21 @@ describe('AIFooterComposer (Global Composer input)', () => {
       label: 'Ship v1',
     });
     expect(wrapper.emitted('update:modelValue')?.at(-1)?.[0]).toBe('compare @Ship v1 ');
+    expect(wrapper.get('[data-testid="ai-composer-inline-mention"]').text()).toContain('Ship v1');
+    await wrapper.setProps({
+      modelValue: 'compare @Ship v1 ',
+      contextEntities: [{ entityType: 'goal', id: 'g1', label: 'Ship v1', origin: 'explicit' }],
+    });
+    expect(wrapper.find('[data-testid="ai-composer-entity-chip"]').exists()).toBe(false);
+    const editor = wrapper.vm.editor!;
+    editor.commands.setContent(composerDocument('compare '));
+    await nextTick();
+    expect(wrapper.emitted('remove-context-entity')?.at(-1)).toEqual(['goal', 'g1']);
     wrapper.unmount();
   });
 
   it('renders explicit entity chips as removable context', async () => {
-    const wrapper = mountComposer({
+    const wrapper = await mountComposer({
       contextEntities: [{ entityType: 'goal', id: 'g1', label: 'Ship v1', origin: 'explicit' }],
     });
 

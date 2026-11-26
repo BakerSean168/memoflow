@@ -280,19 +280,21 @@ export default {
       currentNote: 'Current note',
       fromCurrentView: 'From the currently open view',
       mentionHint: 'Reference a goal, task, or knowledge note',
-      mentionMoreHint: 'Type @ to search more',
+      mentionMoreHint: "Type {'@'} to search more",
       goal: 'Goal',
       task: 'Task',
       note: 'Note',
       tooMany: 'You can reference up to {count} context items at a time.',
     },
     attachments: {
+      incompatibleDraft:
+        'These attachments are not supported by the current model or task. Check the file type and size, or clarify the goal before sending files.',
       addContext: 'Add attachment or context',
       upload: 'Upload file or image',
       dropHere: 'Drop to add files',
       file: 'Attachment',
       tooMany: 'You can add up to {count} attachments at a time.',
-      tooLarge: '“{name}” is too large. The current per-file limit is 1 MB.',
+      tooLarge: '“{name}” is too large. The current per-file limit is {limit} MB.',
       totalTooLarge: 'The attachments are too large in total. Remove some files and try again.',
       unsupportedType:
         '“{name}” is not supported yet. Images, PDF, TXT, and Markdown are supported.',

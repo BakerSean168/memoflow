@@ -89,7 +89,7 @@ export const Default: Story = {
     await expect(page.getByTestId('global-composer')).toBeVisible();
     await expect(page.getByTestId('global-composer-mount')).toBeVisible();
     await expect(page.getByTestId('ai-footer-composer')).toBeVisible();
-    await expect(page.getByTestId('ai-chat-composer')).toHaveValue(
+    await expect(page.getByTestId('ai-chat-composer')).toHaveText(
       'Summarize this week’s goal progress.',
     );
   },

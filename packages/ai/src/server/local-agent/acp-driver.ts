@@ -52,6 +52,7 @@ const initSchema = z.object({
   agentInfo: z.object({ version: z.string().optional() }).passthrough().optional(),
   agentCapabilities: z.object({
     mcpCapabilities: z.object({ http: z.boolean().optional() }).optional(),
+    promptCapabilities: z.object({ image: z.boolean().optional() }).optional(),
     sessionCapabilities: z
       .object({ resume: z.unknown().optional(), close: z.unknown().optional() })
       .optional(),
@@ -360,7 +361,13 @@ export class AcpDriver {
     const version = nativeVersion(
       antigravity ? reportedVersion?.replace(/^agy_acp_server_/u, '') : reportedVersion,
     );
-    return { sessionId, fingerprint, ...state, ...(version ? { version } : {}) };
+    return {
+      sessionId,
+      fingerprint,
+      ...state,
+      supportsImages: init.agentCapabilities.promptCapabilities?.image === true,
+      ...(version ? { version } : {}),
+    };
   }
 
   async probe(): Promise<LocalAgentStatus> {
@@ -413,6 +420,7 @@ export class AcpDriver {
         modelConfigId,
         thinkingConfigId,
         currentReasoningEffort,
+        supportsImages,
       } = await this.connect(input);
       const selectedModel = models.find((model) => model.id === input.modelId);
       if (!selectedModel || input.modelOptions?.serviceTier)
@@ -464,7 +472,22 @@ export class AcpDriver {
           'session/prompt',
           {
             sessionId,
-            prompt: [{ type: 'text', text: input.content }],
+            prompt: [
+              { type: 'text', text: input.content },
+              ...(supportsImages
+                ? (input.attachments ?? []).flatMap((attachment) =>
+                    attachment.image
+                      ? [
+                          {
+                            type: 'image',
+                            data: attachment.image.data,
+                            mimeType: attachment.image.mediaType,
+                          },
+                        ]
+                      : [],
+                  )
+                : []),
+            ],
           },
           300_000,
         )

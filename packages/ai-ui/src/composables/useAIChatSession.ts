@@ -47,9 +47,12 @@ export function useAIChatSession(options: UseAIChatSessionOptions) {
   const chatMessage = ref('');
   const messagesViewport = ref<HTMLElement | null>(null);
   const composerTextarea = ref<HTMLTextAreaElement | null>(null);
-  const composer = useAIComposerContext();
+  const composer = useAIComposerContext(
+    () => runtimeChoice.value.runtimeKind === 'local_agent' && options.surface === 'desktop',
+  );
   const {
     composerAttachments,
+    attachmentIntakePending,
     composerContextEntities,
     addComposerFiles,
     removeComposerAttachment,
@@ -305,7 +308,11 @@ export function useAIChatSession(options: UseAIChatSessionOptions) {
     conversationName: string,
     adjustComposerHeight: () => void,
   ): Promise<{ conversationId: string; content: string } | null> {
-    if (chatLoading.value) return null;
+    if (chatLoading.value || attachmentIntakePending.value) return null;
+    if (composerAttachments.value.length) {
+      toast.error(t('aiAssistant.chatPage.attachments.incompatibleDraft'));
+      return null;
+    }
     const pendingContent = chatMessage.value.trim();
     if (!pendingContent) return null;
     conversation.invalidateRuntimeHistory();
@@ -314,15 +321,10 @@ export function useAIChatSession(options: UseAIChatSessionOptions) {
       const conversationId = await ensureConversationCreated(loadService, conversationName);
       markConversationActivity(conversationId);
       void loadConversationList(loadService);
-      const pendingAttachments = composerAttachments.value.map((attachment) => ({
-        mediaType: attachment.mediaType,
-        ...(attachment.filename ? { filename: attachment.filename } : {}),
-      }));
       chatTimeline.value.push({
         id: `workflow-user-draft-${Date.now()}`,
         role: 'user',
         content: pendingContent,
-        ...(pendingAttachments.length ? { attachments: pendingAttachments } : {}),
         status: 'success',
       });
       chatMessage.value = '';
@@ -399,6 +401,7 @@ export function useAIChatSession(options: UseAIChatSessionOptions) {
     activeRuntimeRunId,
     lastRuntimeUsage,
     composerAttachments,
+    attachmentIntakePending,
     composerContextEntities,
     hasWorkflowMessages,
     hasWorkflowUserMessages,

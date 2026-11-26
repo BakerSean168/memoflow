@@ -1,10 +1,15 @@
-import type { AssistantRuntimeSelectedEntity } from '@memoflow/ai-contracts';
+import {
+  ASSISTANT_RUNTIME_ATTACHMENT_MAX_COUNT,
+  ASSISTANT_RUNTIME_NATIVE_FILE_MAX_BYTES,
+  ASSISTANT_RUNTIME_NATIVE_TOTAL_MAX_BYTES,
+  type AssistantRuntimeSelectedEntity,
+} from '@memoflow/ai-contracts';
 import { ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { toast } from 'vue-sonner';
 import type { ComposerAttachment, ComposerContextEntity } from './types';
 
-const MAX_COMPOSER_ATTACHMENTS = 4;
+const MAX_COMPOSER_ATTACHMENTS = ASSISTANT_RUNTIME_ATTACHMENT_MAX_COUNT;
 const MAX_COMPOSER_ATTACHMENT_BYTES = 1_000_000;
 const MAX_COMPOSER_ATTACHMENT_TOTAL_BYTES = 1_200_000;
 const MAX_COMPOSER_CONTEXT_ENTITIES = 12;
@@ -25,7 +30,7 @@ function isRuntimeSelectableEntity(
   );
 }
 
-export function useAIComposerContext() {
+export function useAIComposerContext(isLocalAgent: () => boolean = () => false) {
   const { t } = useI18n();
   const composerAttachments = ref<ComposerAttachment[]>([]);
   const composerContextEntities = ref<ComposerContextEntity[]>([]);
@@ -64,7 +69,36 @@ export function useAIComposerContext() {
     });
   }
 
-  async function addComposerFiles(files: readonly File[]) {
+  const attachmentIntakePending = ref(false);
+  let pendingCount = 0;
+  let attachmentGeneration = 0;
+  let pendingIntake = Promise.resolve();
+  function addComposerFiles(files: readonly File[]) {
+    const generation = attachmentGeneration;
+    const local = isLocalAgent();
+    pendingCount++;
+    attachmentIntakePending.value = true;
+    const task = pendingIntake
+      .then(async () => {
+        if (generation !== attachmentGeneration) return;
+        await intakeFiles(files, generation, local);
+      })
+      .finally(() => {
+        if (generation !== attachmentGeneration) return;
+        pendingCount--;
+        attachmentIntakePending.value = pendingCount > 0;
+      });
+    pendingIntake = task.catch(() => undefined);
+    return task;
+  }
+
+  async function intakeFiles(files: readonly File[], generation: number, local: boolean) {
+    const maxBytes = local
+      ? ASSISTANT_RUNTIME_NATIVE_FILE_MAX_BYTES
+      : MAX_COMPOSER_ATTACHMENT_BYTES;
+    const maxTotalBytes = local
+      ? ASSISTANT_RUNTIME_NATIVE_TOTAL_MAX_BYTES
+      : MAX_COMPOSER_ATTACHMENT_TOTAL_BYTES;
     const room = MAX_COMPOSER_ATTACHMENTS - composerAttachments.value.length;
     if (room <= 0) {
       toast.error(
@@ -87,8 +121,12 @@ export function useAIComposerContext() {
       0,
     );
     for (const file of accepted) {
-      const mediaType = inferAttachmentMediaType(file);
-      if (!isSupportedAttachmentMediaType(mediaType)) {
+      if (generation !== attachmentGeneration) return;
+      const inferred = inferAttachmentMediaType(file);
+      const mediaType = /^[a-z0-9.+-]+\/[a-z0-9.+-]+$/iu.test(inferred)
+        ? inferred
+        : 'application/octet-stream';
+      if (!local && !isSupportedAttachmentMediaType(mediaType)) {
         toast.error(
           t('aiAssistant.chatPage.attachments.unsupportedType', {
             name: file.name,
@@ -96,17 +134,27 @@ export function useAIComposerContext() {
         );
         continue;
       }
-      if (file.size > MAX_COMPOSER_ATTACHMENT_BYTES) {
-        toast.error(t('aiAssistant.chatPage.attachments.tooLarge', { name: file.name }));
+      if (file.size === 0) {
+        toast.error(t('aiAssistant.chatPage.attachments.readFailed', { name: file.name }));
         continue;
       }
-      if (totalBytes + file.size > MAX_COMPOSER_ATTACHMENT_TOTAL_BYTES) {
+      if (file.size > maxBytes) {
+        toast.error(
+          t('aiAssistant.chatPage.attachments.tooLarge', {
+            name: file.name,
+            limit: local ? 10 : 1,
+          }),
+        );
+        continue;
+      }
+      if (totalBytes + file.size > maxTotalBytes) {
         toast.error(t('aiAssistant.chatPage.attachments.totalTooLarge'));
         break;
       }
       try {
         const data = await fileToDataUrl(file, mediaType);
         if (!data) throw new Error('FILE_READ_EMPTY');
+        if (generation !== attachmentGeneration) return;
         composerAttachments.value.push({
           id: `${Date.now()}-${Math.random().toString(36).slice(2)}`,
           data,
@@ -206,11 +254,14 @@ export function useAIComposerContext() {
   }
 
   function clearComposerTurnState() {
+    attachmentGeneration++;
+    pendingCount = 0;
+    attachmentIntakePending.value = false;
     composerAttachments.value = [];
   }
 
   function clearComposerContext() {
-    composerAttachments.value = [];
+    clearComposerTurnState();
     composerContextEntities.value = [];
     suppressedSurfaceContextKey.value = null;
   }
@@ -230,6 +281,7 @@ export function useAIComposerContext() {
   return {
     selectedEntities,
     composerAttachments,
+    attachmentIntakePending,
     composerContextEntities,
     addComposerFiles,
     removeComposerAttachment,

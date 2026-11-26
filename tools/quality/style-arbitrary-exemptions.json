@@ -74,7 +74,7 @@
     },
     {
       "file": "packages/ai-ui/src/components/AIFooterComposer.vue",
-      "token": "w-[min(20rem,calc(100%-1rem))]",
+      "token": "w-[min(24rem,calc(100%-1rem))]",
       "reason": "相对容器比例尺寸，无刻度等价值"
     },
     {

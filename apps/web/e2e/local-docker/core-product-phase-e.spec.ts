@@ -70,7 +70,7 @@ test.describe('Local Docker core product Phase E', () => {
     await expect(page.locator('html')).toHaveAttribute('lang', 'zh-CN');
     await expect(page.getByTestId('app-shell')).toHaveAttribute('data-shell-state', 'split');
     await expect(page.getByTestId('ai-chat-empty-models')).toHaveCount(0);
-    await expect(page.getByTestId('ai-chat-add-context')).toBeEnabled();
+    await expect(page.getByTestId('ai-chat-upload-file')).toBeEnabled();
     await expect(page.getByTestId('shell-ai-column')).toBeVisible();
     await expect(page.getByTestId('business-panel')).toBeVisible();
     // Workflow details live in the optional Chat context, not a retired business-panel tab.
