@@ -119,6 +119,9 @@ export function installDesktopAppServices(
   // cloud session token, so connection management crosses IPC instead of cookies.
   app.provide(EXTERNAL_AGENT_SERVICE_KEY, createExternalAgentIpcClient(resultIpcClient));
   app.provide(CLOUD_ACCOUNT_SECURITY_KEY, {
+    requestAccountVerification: (purpose) => cloudAuth.requestAccountVerification(purpose),
+    verifyAccountVerification: (input) => cloudAuth.verifyAccountVerification(input),
+    changePassword: (input) => cloudAuth.changePassword(input),
     verifyAccountPassword: (password) => cloudAuth.verifyAccountPassword(password),
     requestEmailChange: (input) => cloudAuth.requestEmailChange(input),
     listAccountSessions: () => cloudAuth.listAccountSessions(),

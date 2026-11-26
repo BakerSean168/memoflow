@@ -69,6 +69,8 @@ describe('CloudAccountSecuritySection', () => {
     await flushPromises();
     expect(wrapper.text()).toContain('p***@example.com');
     expect(wrapper.text()).not.toContain('person@example.com');
+    expect(wrapper.find('[data-testid="account-sessions"]').exists()).toBe(false);
+    await wrapper.get('[data-testid="account-devices-open"]').trigger('click');
     expect(wrapper.findAll('[data-testid="account-session-revoke"]')).toHaveLength(1);
     await wrapper.get('[data-testid="account-session-revoke"]').trigger('click');
     await flushPromises();
@@ -88,6 +90,19 @@ describe('CloudAccountSecuritySection', () => {
     _resolveConfirm(true);
     await flushPromises();
     expect(service.revokeAccountSession).toHaveBeenCalledWith('other');
+    wrapper.unmount();
+  });
+  it('navigates between the account overview and devices without losing the session count', async () => {
+    const { wrapper } = fixture();
+    await flushPromises();
+    expect(wrapper.get('[data-testid="account-devices-open"]').text()).toContain('2 devices');
+    await wrapper.get('[data-testid="account-devices-open"]').trigger('click');
+    expect(wrapper.find('[data-testid="account-information-section"]').exists()).toBe(false);
+    expect(wrapper.find('[data-testid="account-devices-page"]').exists()).toBe(true);
+    await wrapper.get('[data-testid="account-devices-back"]').trigger('click');
+    expect(wrapper.find('[data-testid="account-devices-page"]').exists()).toBe(false);
+    expect(wrapper.find('[data-testid="account-information-section"]').exists()).toBe(true);
+    expect(wrapper.get('[data-testid="account-devices-open"]').text()).toContain('2 devices');
     wrapper.unmount();
   });
   it('requires password recheck before asking for the new email and displays failures', async () => {
@@ -163,6 +178,7 @@ describe('CloudAccountSecuritySection', () => {
       ]),
     );
     await flushPromises();
+    await wrapper.get('[data-testid="account-devices-open"]').trigger('click');
     expect(
       wrapper.findAll('[data-testid="account-session-device"]').map((node) => node.text()),
     ).toEqual(['MemoFlow Desktop · Windows', 'MemoFlow Desktop', 'Chrome · Windows']);
@@ -175,6 +191,8 @@ describe('CloudAccountSecuritySection', () => {
       fail({ code: 'ACCOUNT_SECURITY_FAILED', message: '服务返回异常，请稍后重试' }),
     );
     await flushPromises();
+    await wrapper.get('[data-testid="account-devices-open"]').trigger('click');
+    await flushPromises();
     expect(wrapper.get('[role="alert"]').text()).toContain('服务返回异常，请稍后重试');
     expect(document.querySelector('[data-testid="account-sessions-empty"]')).toBeNull();
     expect(document.querySelector('[data-testid="account-sessions"]')).toBeNull();
@@ -185,6 +203,7 @@ describe('CloudAccountSecuritySection', () => {
   it('shows the empty state without an error when a successful load returns no sessions', async () => {
     const { wrapper } = fixture(ok([]));
     await flushPromises();
+    await wrapper.get('[data-testid="account-devices-open"]').trigger('click');
     expect(document.querySelector('[data-testid="account-sessions-empty"]')).not.toBeNull();
     expect(wrapper.text()).toContain('No sessions.');
     expect(wrapper.find('[role="alert"]').exists()).toBe(false);

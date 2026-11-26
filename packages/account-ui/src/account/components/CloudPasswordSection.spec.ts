@@ -76,6 +76,13 @@ const PassthroughStub = defineComponent({
   },
 });
 
+const DialogStub = defineComponent({
+  props: ['open'],
+  setup(props, { slots }) {
+    return () => (props.open ? h('div', slots.default?.()) : null);
+  },
+});
+
 const ButtonStub = defineComponent({
   name: 'ButtonStub',
   props: ['disabled'],
@@ -148,6 +155,10 @@ function mountSection(service: CloudAuthClientPort, pinia = createPinia()) {
         [AUTH_SERVICE_KEY as symbol]: service,
       },
       stubs: {
+        Dialog: DialogStub,
+        DialogContent: PassthroughStub,
+        DialogTitle: PassthroughStub,
+        DialogDescription: PassthroughStub,
         Button: ButtonStub,
         Card: PassthroughStub,
         CardContent: PassthroughStub,
@@ -169,6 +180,7 @@ function mountSection(service: CloudAuthClientPort, pinia = createPinia()) {
 }
 
 async function fillChangePassword(wrapper: ReturnType<typeof mountSection>) {
+  await wrapper.get('[data-testid="cloud-password-open"]').trigger('click');
   await wrapper.get('[data-testid="cloud-password-current"]').setValue('old-pass');
   await wrapper.get('[data-testid="cloud-password-new"]').setValue('new-pass');
   await wrapper.get('[data-testid="cloud-password-confirm"]').setValue('new-pass');
@@ -191,11 +203,30 @@ describe('CloudPasswordSection (W6 P1-3 auth receipt restore UI)', () => {
     }
   });
 
-  it('keeps password actions enabled while the password service is idle', () => {
+  it('clears passwords on cancel and never sends a request when reopening', async () => {
+    const pinia = createPinia();
+    seedAuthenticatedAccount(pinia);
+    const service = createService();
+    const wrapper = mountSection(service, pinia);
+    await fillChangePassword(wrapper);
+    await wrapper.get('[data-testid="cloud-password-cancel"]').trigger('click');
+    expect(wrapper.find('[data-testid="cloud-password-current"]').exists()).toBe(false);
+    expect(service.changePassword).not.toHaveBeenCalled();
+    await wrapper.get('[data-testid="cloud-password-open"]').trigger('click');
+    for (const field of ['current', 'new', 'confirm']) {
+      expect(
+        (wrapper.get(`[data-testid="cloud-password-${field}"]`).element as HTMLInputElement).value,
+      ).toBe('');
+    }
+  });
+
+  it('keeps password actions enabled while the password service is idle', async () => {
     const pinia = createPinia();
     seedAuthenticatedAccount(pinia);
     const wrapper = mountSection(createService(), pinia);
 
+    expect(wrapper.find('[data-testid="cloud-password-current"]').exists()).toBe(false);
+    await wrapper.get('[data-testid="cloud-password-open"]').trigger('click');
     expect(
       (wrapper.get('[data-testid="cloud-password-change-button"]').element as HTMLButtonElement)
         .disabled,
@@ -211,6 +242,7 @@ describe('CloudPasswordSection (W6 P1-3 auth receipt restore UI)', () => {
     seedAuthenticatedAccount(pinia);
     const service = createService({ forgotPassword: vi.fn().mockResolvedValue(ok(undefined)) });
     const wrapper = mountSection(service, pinia);
+    await wrapper.get('[data-testid="cloud-password-open"]').trigger('click');
     expect(wrapper.get('[data-testid="cloud-password-reset-recipient"]').text()).toBe(
       'p***@example.com',
     );
@@ -278,6 +310,7 @@ describe('CloudPasswordSection (W6 P1-3 auth receipt restore UI)', () => {
     const firstPinia = createPinia();
     seedAuthenticatedAccount(firstPinia);
     const first = mountSection(service, firstPinia);
+    await first.get('[data-testid="cloud-password-open"]').trigger('click');
     await submitClosestForm(first, 'cloud-password-forgot-button');
     await flushPromises();
     expect(service.forgotPassword).toHaveBeenCalledTimes(1);

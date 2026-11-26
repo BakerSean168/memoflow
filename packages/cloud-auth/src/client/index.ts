@@ -1,5 +1,7 @@
 import type {
   CloudAccountSecurityPort,
+  AccountVerificationPurpose,
+  AccountVerificationChallenge,
   AccountSecuritySession,
   CloudAuthClientPort,
   CloudAuthDesktopClientPort,
@@ -133,13 +135,19 @@ class CloudAuthHttpClient implements CloudAuthWebClientPort, CloudAccountSecurit
   resetPassword(input: { token: string; newPassword: string }) {
     return this.request<void>('/reset-password', input);
   }
-  changePassword(input: { currentPassword: string; newPassword: string }) {
-    return this.request<void>('/change-password', input);
+  changePassword(input: { currentPassword: string; newPassword: string; verificationToken: string }) {
+    return this.request<void>('/account-security/change-password', input);
+  }
+  requestAccountVerification(purpose: AccountVerificationPurpose) {
+    return this.request<AccountVerificationChallenge>('/account-security/request-verification', { purpose });
+  }
+  verifyAccountVerification(input: { purpose: AccountVerificationPurpose; challengeId: string; code: string }) {
+    return this.request<{ verificationToken: string }>('/account-security/verify-email-code', input);
   }
   verifyAccountPassword(password: string) {
     return this.request<void>('/account-security/verify-password', { password });
   }
-  requestEmailChange(input: { password: string; newEmail: string }) {
+  requestEmailChange(input: { password: string; newEmail: string; verificationToken: string }) {
     return this.request<void>('/account-security/change-email', input);
   }
   listAccountSessions() {
@@ -185,13 +193,22 @@ class CloudAuthIpcClient implements CloudAuthDesktopClientPort, CloudAccountSecu
   getSession() {
     return this.ipc.invoke<CloudSessionState>(CloudAuthChannels.SESSION);
   }
+  requestAccountVerification(purpose: AccountVerificationPurpose) {
+    return this.ipc.invoke<AccountVerificationChallenge>(CloudAuthChannels.ACCOUNT_SECURITY, { action: 'request-verification', purpose });
+  }
+  verifyAccountVerification(input: { purpose: AccountVerificationPurpose; challengeId: string; code: string }) {
+    return this.ipc.invoke<{ verificationToken: string }>(CloudAuthChannels.ACCOUNT_SECURITY, { action: 'verify-email-code', ...input });
+  }
+  changePassword(input: { currentPassword: string; newPassword: string; verificationToken: string }) {
+    return this.ipc.invoke<void>(CloudAuthChannels.ACCOUNT_SECURITY, { action: 'change-password', ...input });
+  }
   verifyAccountPassword(password: string) {
     return this.ipc.invoke<void>(CloudAuthChannels.ACCOUNT_SECURITY, {
       action: 'verify-password',
       password,
     });
   }
-  requestEmailChange(input: { password: string; newEmail: string }) {
+  requestEmailChange(input: { password: string; newEmail: string; verificationToken: string }) {
     return this.ipc.invoke<void>(CloudAuthChannels.ACCOUNT_SECURITY, {
       action: 'change-email',
       ...input,

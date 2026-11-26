@@ -70,7 +70,7 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-/** Signed-in cloud account: change-password form and masked reset recipient. */
+/** Signed-in cloud account: password action and masked reset recipient. */
 export const Default: Story = {
   render: () => renderSection(),
 };
@@ -92,6 +92,7 @@ export const FailedChangeReceipt: Story = {
 export const PasswordMismatch: Story = {
   render: () => renderSection(),
   play: async () => {
+    await userEvent.click(await screen.findByTestId('cloud-password-open'));
     await userEvent.type(await screen.findByTestId('cloud-password-current'), 'current-pass');
     await userEvent.type(screen.getByTestId('cloud-password-new'), 'new-pass');
     await userEvent.type(screen.getByTestId('cloud-password-confirm'), 'different-pass');
@@ -112,4 +113,12 @@ export const NonRetryableFailure: Story = {
         retryable: false,
       },
     }),
+};
+
+export const ChangePasswordDialog: Story = {
+  render: () => renderSection(),
+  play: async () => {
+    await userEvent.click(await screen.findByTestId('cloud-password-open'));
+    await screen.findByTestId('cloud-password-dialog');
+  },
 };
