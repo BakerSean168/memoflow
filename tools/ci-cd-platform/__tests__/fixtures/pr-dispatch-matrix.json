@@ -3501,7 +3501,7 @@
     },
     {
       "id": "account-ui",
-      "files": ["packages/account-ui/src/account/components/AccountProfileSection.vue"],
+      "files": ["packages/account-ui/src/account/components/AccountSettingsComposition.vue"],
       "expected": {
         "full": false,
         "targets": {

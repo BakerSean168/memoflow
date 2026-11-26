@@ -670,10 +670,10 @@
       "status": "present"
     },
     {
-      "path": "packages/account-ui/src/account/components/AccountProfileSection.vue",
+      "path": "packages/account-ui/src/account/components/AccountSettingsComposition.vue",
       "package": "@memoflow/account-ui",
       "kind": "component",
-      "storyPath": "packages/account-ui/src/account/components/AccountProfileSection.stories.ts",
+      "storyPath": "packages/account-ui/src/account/components/AccountSettingsComposition.stories.ts",
       "status": "present"
     },
     {

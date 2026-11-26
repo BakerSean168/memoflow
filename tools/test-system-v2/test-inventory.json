@@ -2940,7 +2940,7 @@
       "measurementCollectors": []
     },
     {
-      "path": "packages/account-ui/src/account/components/AccountProfileSection.spec.ts",
+      "path": "packages/account-ui/src/account/components/AccountSettingsComposition.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/account-ui/vitest.config.ts"
@@ -2981,14 +2981,6 @@
     },
     {
       "path": "packages/account-ui/src/account/composables/useAccountSignOut.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/account-ui/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
-      "path": "packages/account-ui/src/account/index.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/account-ui/vitest.config.ts"
@@ -14028,7 +14020,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 16
+      "fileCount": 15
     },
     {
       "id": "packages/account/vitest.config.ts",
@@ -15151,7 +15143,7 @@
   "duplicate": [],
   "unexpected": [],
   "counts": {
-    "unit": 1249,
+    "unit": 1248,
     "integration": 63,
     "smoke": 3,
     "boundary-ipc": 7,

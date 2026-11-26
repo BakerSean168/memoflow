@@ -159,7 +159,7 @@ export const Uploading: Story = {
 };
 
 /** Editor affordance: persistent camera badge, no recommendation in the resting state. */
-export const ProfileCardAvatar: Story = {
+export const EditorAvatar: Story = {
   render: () => renderUploader({ compact: true, avatarUrl: EXISTING_AVATAR }),
   play: async ({ canvasElement }) => {
     const page = within(canvasElement.ownerDocument.body);
@@ -168,12 +168,12 @@ export const ProfileCardAvatar: Story = {
   },
 };
 
-export const ProfileCardUploading: Story = {
+export const EditorUploading: Story = {
   ...Uploading,
   render: () => renderUploader({ compact: true, save: () => new Promise(() => undefined) }),
 };
 
-export const ProfileCardUploadError: Story = {
+export const EditorUploadError: Story = {
   ...UploadError,
   render: () => renderUploader({ compact: true, avatarUrl: EXISTING_AVATAR }),
 };

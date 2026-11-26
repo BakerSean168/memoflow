@@ -6,7 +6,7 @@ import { ArrowLeft } from '@lucide/vue';
 import { Button } from '@memoflow/ui-vue-shadcn';
 import { settingUiHost } from '../setting-ui-host';
 
-const { AccountProfileSection, CloudPasswordSection, ExternalAgentConnectionsSection } =
+const { AccountSettingsComposition, CloudPasswordSection, ExternalAgentConnectionsSection } =
   settingUiHost.components;
 const { t } = useI18n();
 const connectionsHeading = ref<HTMLElement | null>(null);
@@ -26,11 +26,10 @@ watch(page, async (value, previous) => {
 
 <template>
   <section class="space-y-8" data-testid="account-settings-section">
-    <AccountProfileSection
+    <AccountSettingsComposition
       v-if="page === 'overview' || page === 'devices'"
       :page="page === 'devices' ? 'devices' : 'overview'"
       @update:page="page = $event"
-      :show-profile="false"
     >
       <template v-if="cloudPasswordService" #password
         ><CloudPasswordSection v-if="cloudPasswordService"
@@ -42,7 +41,7 @@ watch(page, async (value, previous) => {
           @open="page = $event === 'oauth' ? 'applications' : 'tokens'"
         />
       </template>
-    </AccountProfileSection>
+    </AccountSettingsComposition>
     <section v-else class="space-y-8" data-testid="account-connections-page">
       <Button
         variant="ghost"

@@ -7,11 +7,11 @@ import { settingUiHost } from '../setting-ui-host';
 import { AUTH_SERVICE_KEY } from '@setting-ui-test-host/di/keys';
 import AccountSettingsSection from './AccountSettingsSection.vue';
 
-const AccountProfileStub = defineComponent({
-  name: 'AccountProfileSection',
+const AccountCompositionStub = defineComponent({
+  name: 'AccountSettingsComposition',
   setup(_, { slots }) {
     return () =>
-      h('div', { 'data-testid': 'account-profile-stub' }, [
+      h('div', { 'data-testid': 'account-composition-stub' }, [
         slots.password?.(),
         slots.connections?.(),
       ]);
@@ -34,7 +34,7 @@ function mountSection(authService?: object, external = false) {
         ...(external ? { [settingUiHost.EXTERNAL_AGENT_SERVICE_KEY as symbol]: {} } : {}),
       },
       stubs: {
-        AccountProfileSection: AccountProfileStub,
+        AccountSettingsComposition: AccountCompositionStub,
         CloudPasswordSection: CloudPasswordStub,
         ExternalAgentConnectionsSection: {
           props: { summary: Boolean },
@@ -57,10 +57,10 @@ describe('AccountSettingsSection capability gating', () => {
     await wrapper.get('[data-testid="account-connections-open"]').trigger('click');
     expect(wrapper.find('[data-testid="account-connections-page"]').exists()).toBe(true);
     expect(wrapper.find('[data-testid="external-agent-stub"]').exists()).toBe(true);
-    expect(wrapper.find('[data-testid="account-profile-stub"]').exists()).toBe(false);
+    expect(wrapper.find('[data-testid="account-composition-stub"]').exists()).toBe(false);
     await wrapper.get('[data-testid="account-connections-back"]').trigger('click');
     expect(wrapper.find('[data-testid="account-connections-page"]').exists()).toBe(false);
-    expect(wrapper.find('[data-testid="account-profile-stub"]').exists()).toBe(true);
+    expect(wrapper.find('[data-testid="account-composition-stub"]').exists()).toBe(true);
     await flushPromises();
     wrapper.unmount();
   });
