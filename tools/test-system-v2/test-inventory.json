@@ -2924,6 +2924,14 @@
       "measurementCollectors": []
     },
     {
+      "path": "packages/account-ui/src/account/components/AccountEmailVerificationDialog.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/account-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "packages/account-ui/src/account/components/AccountProfileEditorDialog.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -14046,7 +14054,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 15
+      "fileCount": 16
     },
     {
       "id": "packages/account/vitest.config.ts",
@@ -15170,7 +15178,7 @@
   "duplicate": [],
   "unexpected": [],
   "counts": {
-    "unit": 1251,
+    "unit": 1252,
     "integration": 63,
     "smoke": 3,
     "boundary-ipc": 7,

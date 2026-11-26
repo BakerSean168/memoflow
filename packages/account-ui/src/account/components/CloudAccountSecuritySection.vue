@@ -16,6 +16,7 @@ import { ArrowLeft, ChevronRight, Monitor } from '@lucide/vue';
 import { CLOUD_ACCOUNT_SECURITY_KEY, accountUiHost } from '../../account-ui-host';
 import { parseSessionUserAgent } from '../lib/session-device';
 import { useAccountSignOut } from '../composables/useAccountSignOut';
+import AccountEmailVerificationDialog from './AccountEmailVerificationDialog.vue';
 
 const page = defineModel<'overview' | 'devices'>('page', { default: 'overview' });
 const props = defineProps<{ email: string | null }>();
@@ -25,6 +26,8 @@ const { SettingsSection } = accountUiHost.components;
 const { isDesktopSignOut, executeSignOut } = useAccountSignOut();
 const maskedEmail = computed(() => props.email?.replace(/^(.).*(@.*)$/, '$1***$2') ?? '—');
 const emailOpen = ref(false);
+const emailVerificationOpen = ref(false);
+const emailVerificationToken = ref('');
 const emailStage = ref<'password' | 'email' | 'sent'>('password');
 const password = ref('');
 const newEmail = ref('');
@@ -74,7 +77,11 @@ async function submitEmail() {
     const result =
       emailStage.value === 'password'
         ? await service.verifyAccountPassword(password.value)
-        : await service.requestEmailChange({ password: password.value, newEmail: newEmail.value });
+        : await service.requestEmailChange({
+            password: password.value,
+            newEmail: newEmail.value,
+            verificationToken: emailVerificationToken.value,
+          });
     if (!result.ok) throw new Error(result.error.message);
     if (emailStage.value === 'password') emailStage.value = 'email';
     else {
@@ -111,11 +118,12 @@ async function deleteAccount() {
     if (!isDesktopSignOut.value) await executeSignOut();
   });
 }
-watch(emailOpen, () => {
+watch(emailOpen, (open) => {
   password.value = '';
   newEmail.value = '';
   emailStage.value = 'password';
   error.value = '';
+  if (!open) emailVerificationToken.value = '';
 });
 watch(deleteOpen, () => {
   deletePassword.value = '';
@@ -157,7 +165,7 @@ onMounted(() => {
             <Button
               data-testid="account-change-email"
               variant="secondary"
-              @click="emailOpen = true"
+              @click="emailVerificationOpen = true"
               >{{ t('account.security.changeEmail') }}</Button
             >
           </div>
@@ -335,6 +343,17 @@ onMounted(() => {
         <p v-else data-testid="account-email-sent">{{ t('account.security.emailSent') }}</p>
       </DialogContent>
     </Dialog>
+    <AccountEmailVerificationDialog
+      v-model:open="emailVerificationOpen"
+      purpose="change-email"
+      :email="props.email"
+      @verified="
+        (token) => {
+          emailVerificationToken = token;
+          emailOpen = true;
+        }
+      "
+    />
     <Dialog
       :open="deleteOpen"
       @update:open="

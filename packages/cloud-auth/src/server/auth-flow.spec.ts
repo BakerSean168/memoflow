@@ -520,6 +520,32 @@ describe('account security', () => {
     ).toBe(403);
   });
 
+  it('refuses passwordless accounts instead of opening a verification-only bypass', async () => {
+    const fixture = await signedIn();
+    const accounts = fixture.memory.cloudAuthProviderAccount as MemoryRow[];
+    for (let index = accounts.length - 1; index >= 0; index -= 1) {
+      if (accounts[index]!.providerId === 'credential') accounts.splice(index, 1);
+    }
+    const passwordToken = await grantFor(fixture, 'change-password');
+    const passwordChange = await fixture.securedPost('/account-security/change-password', {
+      currentPassword: PASSWORD,
+      newPassword: NEXT_PASSWORD,
+      verificationToken: passwordToken,
+    });
+    expect(passwordChange.status).toBe(400);
+    expect(await passwordChange.json()).toMatchObject({ code: 'PASSWORD_NOT_SET' });
+
+    const emailToken = await grantFor(fixture, 'change-email');
+    const emailChange = await fixture.securedPost('/account-security/change-email', {
+      password: PASSWORD,
+      newEmail: 'new@example.com',
+      verificationToken: emailToken,
+    });
+    expect(emailChange.status).toBe(400);
+    expect(await emailChange.json()).toMatchObject({ code: 'PASSWORD_NOT_SET' });
+    expect(fixture.memory.cloudAuthUser[0]?.email).toBe('old@example.com');
+  });
+
   it('rejects expired grants and limits repeated sends', async () => {
     const fixture = await signedIn();
     const verificationToken = await grantFor(fixture, 'change-password');

@@ -142,7 +142,11 @@ export interface CloudAuthClientPort extends CloudSessionClientPort {
   signUp(request: CloudSignUpRequest): Promise<Result<CloudAuthResponse>>;
   forgotPassword(email: string): Promise<Result<void>>;
   resetPassword(input: { token: string; newPassword: string }): Promise<Result<void>>;
-  changePassword(input: { currentPassword: string; newPassword: string; verificationToken: string }): Promise<Result<void>>;
+  changePassword(input: {
+    currentPassword: string;
+    newPassword: string;
+    verificationToken: string;
+  }): Promise<Result<void>>;
 }
 
 export interface CloudAuthWebClientPort extends CloudAuthClientPort {
@@ -191,11 +195,25 @@ export interface AccountVerificationChallenge {
   expiresInSeconds: number;
 }
 export interface CloudAccountSecurityPort {
-  requestAccountVerification(purpose: AccountVerificationPurpose): Promise<Result<AccountVerificationChallenge>>;
-  verifyAccountVerification(input: { purpose: AccountVerificationPurpose; challengeId: string; code: string }): Promise<Result<{ verificationToken: string }>>;
-  changePassword(input: { currentPassword: string; newPassword: string; verificationToken: string }): Promise<Result<void>>;
+  requestAccountVerification(
+    purpose: AccountVerificationPurpose,
+  ): Promise<Result<AccountVerificationChallenge>>;
+  verifyAccountVerification(input: {
+    purpose: AccountVerificationPurpose;
+    challengeId: string;
+    code: string;
+  }): Promise<Result<{ verificationToken: string }>>;
+  changePassword(input: {
+    currentPassword: string;
+    newPassword: string;
+    verificationToken: string;
+  }): Promise<Result<void>>;
   verifyAccountPassword(password: string): Promise<Result<void>>;
-  requestEmailChange(input: { password: string; newEmail: string; verificationToken: string }): Promise<Result<void>>;
+  requestEmailChange(input: {
+    password: string;
+    newEmail: string;
+    verificationToken: string;
+  }): Promise<Result<void>>;
   listAccountSessions(): Promise<Result<AccountSecuritySession[]>>;
   revokeAccountSession(sessionId: string): Promise<Result<void>>;
   deleteAccountPermanently(input: {
@@ -205,9 +223,28 @@ export interface CloudAccountSecurityPort {
 }
 
 export const AccountSecurityRequestSchema = z.discriminatedUnion('action', [
-  z.object({ action: z.literal('request-verification'), purpose: AccountVerificationPurposeSchema }).strict(),
-  z.object({ action: z.literal('verify-email-code'), purpose: AccountVerificationPurposeSchema, challengeId: z.string().uuid(), code: z.string().regex(/^\d{6}$/) }).strict(),
-  z.object({ action: z.literal('change-password'), currentPassword: z.string().min(1).max(100), newPassword: z.string().min(8).max(100), verificationToken: z.string().min(32).max(200) }).strict(),
+  z
+    .object({
+      action: z.literal('request-verification'),
+      purpose: AccountVerificationPurposeSchema,
+    })
+    .strict(),
+  z
+    .object({
+      action: z.literal('verify-email-code'),
+      purpose: AccountVerificationPurposeSchema,
+      challengeId: z.string().uuid(),
+      code: z.string().regex(/^\d{6}$/),
+    })
+    .strict(),
+  z
+    .object({
+      action: z.literal('change-password'),
+      currentPassword: z.string().min(1).max(100),
+      newPassword: z.string().min(8).max(100),
+      verificationToken: z.string().min(32).max(200),
+    })
+    .strict(),
   z.object({ action: z.literal('verify-password'), password: z.string().min(1).max(100) }).strict(),
   z
     .object({

@@ -31,6 +31,14 @@ function fixture(
   ]),
 ) {
   const service = {
+    requestAccountVerification: vi.fn().mockResolvedValue(
+      ok({
+        challengeId: '00000000-0000-4000-8000-000000000000',
+        retryAfterSeconds: 0,
+        expiresInSeconds: 600,
+      }),
+    ),
+    verifyAccountVerification: vi.fn().mockResolvedValue(ok({ verificationToken: 'v'.repeat(43) })),
     verifyAccountPassword: vi.fn().mockResolvedValue(ok(undefined)),
     requestEmailChange: vi.fn().mockResolvedValue(ok(undefined)),
     listAccountSessions: vi.fn().mockResolvedValue(sessionsResult),
@@ -61,6 +69,15 @@ async function input(testId: string, value: string) {
 }
 function submit(testId: string) {
   (document.querySelector(`[data-testid="${testId}"]`) as HTMLButtonElement).click();
+}
+async function passEmailVerification(wrapper: ReturnType<typeof fixture>['wrapper']) {
+  await wrapper.get('[data-testid="account-change-email"]').trigger('click');
+  await flushPromises();
+  submit('account-verification-send');
+  await flushPromises();
+  await input('account-verification-code', '123456');
+  submit('account-verification-verify');
+  await flushPromises();
 }
 
 describe('CloudAccountSecuritySection', () => {
@@ -110,8 +127,9 @@ describe('CloudAccountSecuritySection', () => {
     service.verifyAccountPassword.mockResolvedValueOnce(
       fail({ code: 'INVALID_PASSWORD', message: 'Wrong password' }),
     );
-    await wrapper.get('[data-testid="account-change-email"]').trigger('click');
-    await flushPromises();
+    await passEmailVerification(wrapper);
+    expect(service.requestAccountVerification).toHaveBeenCalledWith('change-email');
+    expect(document.querySelector('[data-testid="account-email-dialog"]')).not.toBeNull();
     await input('account-email-password', 'wrong-password');
     submit('account-email-submit');
     await flushPromises();
@@ -126,6 +144,7 @@ describe('CloudAccountSecuritySection', () => {
     expect(service.requestEmailChange).toHaveBeenCalledWith({
       password: 'correct-password',
       newEmail: 'new@example.com',
+      verificationToken: 'v'.repeat(43),
     });
     expect(document.querySelector('[data-testid="account-email-sent"]')).not.toBeNull();
     wrapper.unmount();

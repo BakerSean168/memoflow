@@ -21,11 +21,15 @@ import {
 import { Copy, Mail, RotateCcw, X } from '@lucide/vue';
 import { usePassword } from '../../authentication/composables/usePassword';
 import { useAuthenticationStore } from '../../authentication/stores/authentication-store';
+import AccountEmailVerificationDialog from './AccountEmailVerificationDialog.vue';
 
 const { t } = useI18n();
 const changeOpen = ref(false);
-watch(changeOpen, () => {
+const verificationOpen = ref(false);
+const verificationToken = ref('');
+watch(changeOpen, (open) => {
   changeForm.value = { currentPassword: '', newPassword: '', confirmPassword: '' };
+  if (!open) verificationToken.value = '';
 });
 const store = useAuthenticationStore();
 const { isLoading: passwordLoading, changePassword, forgotPassword } = usePassword();
@@ -60,13 +64,15 @@ async function handleChangePassword() {
     passwordMismatch.value ||
     !changeForm.value.currentPassword ||
     !changeForm.value.newPassword ||
-    !changeForm.value.confirmPassword
+    !changeForm.value.confirmPassword ||
+    !verificationToken.value
   ) {
     return;
   }
   const changed = await changePassword({
     currentPassword: changeForm.value.currentPassword,
     newPassword: changeForm.value.newPassword,
+    verificationToken: verificationToken.value,
   });
   if (changed) {
     changeForm.value = { currentPassword: '', newPassword: '', confirmPassword: '' };
@@ -86,8 +92,10 @@ async function handleRetry() {
     return;
   }
   if (current.operation === 'change-password') {
-    if (!changeOpen.value) changeOpen.value = true;
-    else await handleChangePassword();
+    // A failed attempt may have consumed or expired the grant; always restart
+    // from the mailbox proof instead of retrying a stale token.
+    changeOpen.value = false;
+    verificationOpen.value = true;
     return;
   }
   await handleSendResetEmail();
@@ -146,9 +154,12 @@ onBeforeUnmount(clearRequestIdCopiedTimer);
   <div v-if="isAuthenticated">
     <div class="flex items-center justify-between gap-4 py-4">
       <span class="text-sm font-medium">{{ t('account.password.title') }}</span>
-      <Button variant="secondary" data-testid="cloud-password-open" @click="changeOpen = true">{{
-        t('account.password.changePassword')
-      }}</Button>
+      <Button
+        variant="secondary"
+        data-testid="cloud-password-open"
+        @click="verificationOpen = true"
+        >{{ t('account.password.changePassword') }}</Button
+      >
     </div>
     <div class="space-y-6">
       <div
@@ -330,5 +341,16 @@ onBeforeUnmount(clearRequestIdCopiedTimer);
         </DialogContent>
       </Dialog>
     </div>
+    <AccountEmailVerificationDialog
+      v-model:open="verificationOpen"
+      purpose="change-password"
+      :email="forgotEmail"
+      @verified="
+        (token) => {
+          verificationToken = token;
+          changeOpen = true;
+        }
+      "
+    />
   </div>
 </template>

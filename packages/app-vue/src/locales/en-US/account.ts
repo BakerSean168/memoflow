@@ -111,6 +111,25 @@ export default {
     logout: 'Log out',
     saveProfile: 'Save Profile',
   },
+  verification: {
+    title: 'Verify your current email',
+    description:
+      'For your security, confirm ownership of {email} before changing your password or email.',
+    explain:
+      'We will send a 6-digit code to your current email. Enter it on the next step to continue.',
+    sendCode: 'Send code',
+    sending: 'Sending...',
+    codeLabel: 'Verification code',
+    codePlaceholder: '6-digit code',
+    codeHint: 'Enter the 6-digit code sent to {email}.',
+    resend: 'Resend code',
+    resendIn: 'Resend in {seconds}s',
+    verify: 'Verify',
+    verifying: 'Verifying...',
+    changeEmail: 'Use another email',
+    expired: 'That code expired. Send a new code to continue.',
+    sendNewCode: 'Send new code',
+  },
   settings: {
     connections: 'Apps and connections',
     information: 'Account information',

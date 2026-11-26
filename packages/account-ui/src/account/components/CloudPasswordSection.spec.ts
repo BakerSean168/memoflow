@@ -6,6 +6,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { fail, ok } from '@memoflow/transport-contracts/result';
 import type { CloudAuthClientPort } from '@memoflow/cloud-auth-contracts';
 import { AUTH_SERVICE_KEY } from '@account-ui-test-host/di/keys';
+import { CLOUD_ACCOUNT_SECURITY_KEY } from '../../account-ui-host';
 import { useAuthenticationStore } from '../../authentication/stores/authentication-store';
 import CloudPasswordSection from './CloudPasswordSection.vue';
 
@@ -41,7 +42,25 @@ const i18n = createI18n({
           resetPasswordFailed: 'Failed to reset password',
         },
       },
+      common: { cancel: 'Cancel' },
       account: {
+        verification: {
+          title: 'Verify your current email',
+          description: 'Confirm ownership of {email}.',
+          explain: 'We will send a 6-digit code.',
+          sendCode: 'Send code',
+          sending: 'Sending...',
+          codeLabel: 'Verification code',
+          codePlaceholder: '6-digit code',
+          codeHint: 'Enter the 6-digit code sent to {email}.',
+          resend: 'Resend code',
+          resendIn: 'Resend in {seconds}s',
+          verify: 'Verify',
+          verifying: 'Verifying...',
+          changeEmail: 'Use another email',
+          expired: 'That code expired.',
+          sendNewCode: 'Send new code',
+        },
         password: {
           title: 'Cloud password',
           description: 'Manage your cloud password.',
@@ -128,6 +147,14 @@ function createService(overrides: Partial<CloudAuthClientPort> = {}) {
     forgotPassword: vi.fn(),
     resetPassword: vi.fn(),
     changePassword: vi.fn(),
+    requestAccountVerification: vi.fn().mockResolvedValue(
+      ok({
+        challengeId: '00000000-0000-4000-8000-000000000000',
+        retryAfterSeconds: 0,
+        expiresInSeconds: 600,
+      }),
+    ),
+    verifyAccountVerification: vi.fn().mockResolvedValue(ok({ verificationToken: 'v'.repeat(43) })),
     ...overrides,
   };
 }
@@ -153,6 +180,7 @@ function mountSection(service: CloudAuthClientPort, pinia = createPinia()) {
       plugins: [pinia, i18n],
       provide: {
         [AUTH_SERVICE_KEY as symbol]: service,
+        [CLOUD_ACCOUNT_SECURITY_KEY as symbol]: service,
       },
       stubs: {
         Dialog: DialogStub,
@@ -179,8 +207,16 @@ function mountSection(service: CloudAuthClientPort, pinia = createPinia()) {
   return wrapper;
 }
 
-async function fillChangePassword(wrapper: ReturnType<typeof mountSection>) {
+async function passEmailVerification(wrapper: ReturnType<typeof mountSection>) {
   await wrapper.get('[data-testid="cloud-password-open"]').trigger('click');
+  await wrapper.get('[data-testid="account-verification-send"]').trigger('click');
+  await flushPromises();
+  await wrapper.get('[data-testid="account-verification-code"]').setValue('123456');
+  await submitClosestForm(wrapper, 'account-verification-verify');
+}
+
+async function fillChangePassword(wrapper: ReturnType<typeof mountSection>) {
+  await passEmailVerification(wrapper);
   await wrapper.get('[data-testid="cloud-password-current"]').setValue('old-pass');
   await wrapper.get('[data-testid="cloud-password-new"]').setValue('new-pass');
   await wrapper.get('[data-testid="cloud-password-confirm"]').setValue('new-pass');
@@ -212,12 +248,11 @@ describe('CloudPasswordSection (W6 P1-3 auth receipt restore UI)', () => {
     await wrapper.get('[data-testid="cloud-password-cancel"]').trigger('click');
     expect(wrapper.find('[data-testid="cloud-password-current"]').exists()).toBe(false);
     expect(service.changePassword).not.toHaveBeenCalled();
+    // Reopening always restarts from the mailbox proof instead of a stale grant.
     await wrapper.get('[data-testid="cloud-password-open"]').trigger('click');
-    for (const field of ['current', 'new', 'confirm']) {
-      expect(
-        (wrapper.get(`[data-testid="cloud-password-${field}"]`).element as HTMLInputElement).value,
-      ).toBe('');
-    }
+    expect(wrapper.find('[data-testid="account-verification-send"]').exists()).toBe(true);
+    expect(wrapper.find('[data-testid="cloud-password-current"]').exists()).toBe(false);
+    expect(service.verifyAccountVerification).toHaveBeenCalledTimes(1);
   });
 
   it('keeps password actions enabled while the password service is idle', async () => {
@@ -226,7 +261,7 @@ describe('CloudPasswordSection (W6 P1-3 auth receipt restore UI)', () => {
     const wrapper = mountSection(createService(), pinia);
 
     expect(wrapper.find('[data-testid="cloud-password-current"]').exists()).toBe(false);
-    await wrapper.get('[data-testid="cloud-password-open"]').trigger('click');
+    await passEmailVerification(wrapper);
     expect(
       (wrapper.get('[data-testid="cloud-password-change-button"]').element as HTMLButtonElement)
         .disabled,
@@ -242,7 +277,7 @@ describe('CloudPasswordSection (W6 P1-3 auth receipt restore UI)', () => {
     seedAuthenticatedAccount(pinia);
     const service = createService({ forgotPassword: vi.fn().mockResolvedValue(ok(undefined)) });
     const wrapper = mountSection(service, pinia);
-    await wrapper.get('[data-testid="cloud-password-open"]').trigger('click');
+    await passEmailVerification(wrapper);
     expect(wrapper.get('[data-testid="cloud-password-reset-recipient"]').text()).toBe(
       'p***@example.com',
     );
@@ -292,6 +327,11 @@ describe('CloudPasswordSection (W6 P1-3 auth receipt restore UI)', () => {
     expect(requestIdDetails.text()).toContain('Give this ID to support');
     expect(wrapper.find('[data-testid="password-mutation-error-retry"]').exists()).toBe(true);
     expect(service.changePassword).toHaveBeenCalledTimes(1);
+    expect(service.changePassword).toHaveBeenCalledWith({
+      currentPassword: 'old-pass',
+      newPassword: 'new-pass',
+      verificationToken: 'v'.repeat(43),
+    });
   });
 
   it('restores the receipt into a remounted component (simulated page reload) and renders it without a fresh action', async () => {
@@ -310,7 +350,7 @@ describe('CloudPasswordSection (W6 P1-3 auth receipt restore UI)', () => {
     const firstPinia = createPinia();
     seedAuthenticatedAccount(firstPinia);
     const first = mountSection(service, firstPinia);
-    await first.get('[data-testid="cloud-password-open"]').trigger('click');
+    await passEmailVerification(first);
     await submitClosestForm(first, 'cloud-password-forgot-button');
     await flushPromises();
     expect(service.forgotPassword).toHaveBeenCalledTimes(1);
@@ -424,6 +464,16 @@ describe('CloudPasswordSection (W6 P1-3 auth receipt restore UI)', () => {
     expect(wrapper.find('[data-testid="password-mutation-error"]').exists()).toBe(true);
 
     await wrapper.get('[data-testid="password-mutation-error-retry"]').trigger('click');
+    await flushPromises();
+    // Retry restarts from mailbox proof, then re-submits the new password.
+    await wrapper.get('[data-testid="account-verification-send"]').trigger('click');
+    await flushPromises();
+    await wrapper.get('[data-testid="account-verification-code"]').setValue('123456');
+    await submitClosestForm(wrapper, 'account-verification-verify');
+    await wrapper.get('[data-testid="cloud-password-current"]').setValue('old-pass');
+    await wrapper.get('[data-testid="cloud-password-new"]').setValue('new-pass');
+    await wrapper.get('[data-testid="cloud-password-confirm"]').setValue('new-pass');
+    await submitClosestForm(wrapper, 'cloud-password-change-button');
     await flushPromises();
     expect(service.changePassword).toHaveBeenCalledTimes(2);
     expect(wrapper.find('[data-testid="password-mutation-error"]').exists()).toBe(false);

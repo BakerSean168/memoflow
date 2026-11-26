@@ -40,8 +40,12 @@ const requirePassword = createAuthMiddleware(async (ctx) => {
   if (!input.success)
     throw new APIError('BAD_REQUEST', { code: 'INVALID_PASSWORD', message: '请输入当前密码' });
   const credential = await ctx.context.internalAdapter.findCredentialAccount(session.user.id);
+  if (!credential?.password)
+    throw new APIError('BAD_REQUEST', {
+      code: 'PASSWORD_NOT_SET',
+      message: '该账户未设置密码，请先通过邮箱恢复流程设置密码',
+    });
   if (
-    !credential?.password ||
     !(await ctx.context.password.verify({
       hash: credential.password,
       password: input.data.password,
