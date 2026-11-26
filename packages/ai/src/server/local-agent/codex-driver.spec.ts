@@ -379,3 +379,30 @@ it('does not invent a stable visibility account for an API-key-only or absent ac
     expect(status).not.toHaveProperty('modelVisibilityContext');
   }
 });
+
+it('sends staged image paths as native Codex input blocks without embedding file data in text', async () => {
+  const native = driver(`if(frame.method === 'turn/start') {
+    const items = frame.params.input;
+    if(items.length !== 2 || items[0].type !== 'text' ||
+      items[1].type !== 'localImage' || items[1].path !== '/fixture/screen.png') process.exit(8);
+    reply({turn:{id:'turn-1'}});
+    send({method:'turn/completed',params:{threadId:'native-1',turn:{id:'turn-1',status:'completed'}}});
+    return;
+  }`);
+  const events = [];
+  for await (const event of native.run({
+    modelId: 'model',
+    content: 'Inspect screenshot',
+    attachments: [
+      {
+        path: '/fixture/screen.png',
+        filename: 'screen.png',
+        mediaType: 'image/png',
+        image: { data: 'AQID', mediaType: 'image/png' },
+      },
+    ],
+    mcp: { url: 'http://127.0.0.1/mcp', token: 'fixture' },
+  }))
+    events.push(event);
+  expect(events.at(-1)).toEqual({ type: 'completed' });
+});

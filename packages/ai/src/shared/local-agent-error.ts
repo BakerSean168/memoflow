@@ -23,7 +23,7 @@ export const LOCAL_AGENT_FAILURES = {
     'The native session cannot be resumed with this connection. Start a new conversation.',
   LOCAL_AGENT_REQUEST_EXPIRED: 'This Agent request is no longer active.',
   LOCAL_AGENT_UNSUPPORTED_INPUT:
-    'This local Agent connection currently supports text and MemoFlow references. Remove attachments to continue.',
+    'This input cannot be processed by the selected local Agent. Check attachments or clarify the request before attaching files.',
   LOCAL_AGENT_PROTOCOL_ERROR:
     'The local Agent returned an unsupported or invalid protocol message.',
   LOCAL_AGENT_PERMISSION_DENIED: 'This local Agent operation is not authorized.',

@@ -742,3 +742,27 @@ describe('AI vNext runtime contracts', () => {
     }
   });
 });
+
+it('accepts desktop native generic file attachments but preserves the builtin attachment allowlist', () => {
+  const command = {
+    type: 'message',
+    conversationId: 'c',
+    content: '',
+    surface: 'desktop',
+    runtimeKind: 'local_agent',
+    attachments: [
+      {
+        mediaType: 'application/octet-stream',
+        filename: 'main.ts',
+        data: 'data:application/octet-stream;base64,AQID',
+      },
+    ],
+  };
+  expect(AssistantRuntimeClientCommandSchema.safeParse(command).success).toBe(true);
+  expect(
+    AssistantRuntimeClientCommandSchema.safeParse({ ...command, runtimeKind: 'builtin' }).success,
+  ).toBe(false);
+  expect(
+    AssistantRuntimeClientCommandSchema.safeParse({ ...command, surface: 'web' }).success,
+  ).toBe(false);
+});

@@ -103,6 +103,7 @@ function createHarness() {
   } satisfies Parameters<typeof useAssistantStream>[0]['conversation'];
   const composer = {
     composerAttachments: ref([]),
+    attachmentIntakePending: ref(false),
     clearComposerTurnState: vi.fn(),
     selectedEntities: vi.fn(() => []),
   };

@@ -116,7 +116,28 @@ export class ClaudeDriver {
       if (!signal.aborted && input)
         yield {
           type: 'user',
-          message: { role: 'user', content: input.content },
+          message: {
+            role: 'user',
+            content: input.attachments?.some((attachment) => attachment.image)
+              ? [
+                  { type: 'text', text: input.content },
+                  ...input.attachments.flatMap((attachment) =>
+                    attachment.image
+                      ? [
+                          {
+                            type: 'image' as const,
+                            source: {
+                              type: 'base64' as const,
+                              media_type: attachment.image.mediaType,
+                              data: attachment.image.data,
+                            },
+                          },
+                        ]
+                      : [],
+                  ),
+                ]
+              : input.content,
+          },
           parent_tool_use_id: null,
           session_id: input.nativeSessionId ?? '',
         };

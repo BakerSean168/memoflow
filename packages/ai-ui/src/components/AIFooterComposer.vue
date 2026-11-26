@@ -26,13 +26,17 @@
           type="file"
           class="hidden"
           multiple
-          accept="image/png,image/jpeg,image/webp,image/gif,.pdf,.txt,.md,.markdown,text/plain,text/markdown,application/pdf"
+          :accept="
+            localAgent
+              ? undefined
+              : 'image/png,image/jpeg,image/webp,image/gif,.pdf,.txt,.md,.markdown,text/plain,text/markdown,application/pdf'
+          "
           data-testid="ai-chat-file-input"
           @change="handleFileInput"
         />
 
         <div
-          v-if="attachments.length || contextEntities.length"
+          v-if="attachments.length || detachedContextEntities.length"
           class="mb-2 flex flex-wrap items-center gap-1.5 px-0.5"
           data-testid="ai-composer-context-chips"
         >
@@ -44,7 +48,11 @@
             data-testid="ai-composer-attachment-chip"
           >
             <img
-              v-if="attachment.mediaType.startsWith('image/')"
+              v-if="
+                ['image/png', 'image/jpeg', 'image/webp', 'image/gif'].includes(
+                  attachment.mediaType,
+                )
+              "
               :src="attachment.data"
               alt=""
               class="h-5 w-5 shrink-0 rounded object-cover"
@@ -66,7 +74,7 @@
           </span>
 
           <span
-            v-for="entity in contextEntities"
+            v-for="entity in detachedContextEntities"
             :key="`${entity.entityType}:${entity.id}`"
             class="inline-flex h-7 max-w-[15rem] items-center gap-1.5 rounded-lg bg-[hsl(var(--surface-raised))] pl-2 pr-1 text-[11px] text-foreground"
             :class="aiUiHost.semanticElevationClass('inset')"
@@ -102,9 +110,11 @@
 
         <div
           v-if="mentionQuery !== null"
-          class="absolute bottom-[calc(100%-0.25rem)] left-2 z-50 w-[min(20rem,calc(100%-1rem))] overflow-hidden rounded-xl border border-[hsl(var(--border-subtle))] bg-[hsl(var(--surface-overlay))] p-1"
+          class="absolute bottom-[calc(100%-0.25rem)] left-2 z-50 max-h-72 w-[min(24rem,calc(100%-1rem))] overflow-y-auto rounded-xl border border-[hsl(var(--border-subtle))] bg-[hsl(var(--surface-overlay))] p-1"
           :class="aiUiHost.semanticElevationClass('floating')"
           data-testid="ai-composer-mention-menu"
+          role="listbox"
+          :aria-label="t('aiAssistant.chatPage.context.mentionHint')"
         >
           <div class="px-2 py-1.5 text-[11px] font-medium text-muted-foreground">
             {{ t('aiAssistant.chatPage.context.mentionHint') }}
@@ -119,7 +129,10 @@
           >
             {{ t('repository.hub.contextUnavailable') }}
           </p>
-          <p v-else-if="!mentionSuggestions.length" class="px-2 py-2 text-xs text-muted-foreground">
+          <p
+            v-if="!knowledgeLoading && !knowledgeError && !mentionSuggestions.length"
+            class="px-2 py-2 text-xs text-muted-foreground"
+          >
             {{ t('aiAssistant.chatPage.context.noNotes') }}
           </p>
           <button
@@ -133,6 +146,10 @@
                 : 'text-muted-foreground hover:bg-muted/70 hover:text-foreground'
             "
             data-testid="ai-composer-mention-option"
+            role="option"
+            :aria-selected="index === mentionActiveIndex"
+            tabindex="-1"
+            @mouseenter="mentionActiveIndex = index"
             @mousedown.prevent="selectMention(suggestion)"
           >
             <Target v-if="suggestion.entityType === 'goal'" class="h-4 w-4 shrink-0" />
@@ -152,156 +169,34 @@
           </button>
         </div>
 
-        <!-- Native textarea is a registered exception: tools/test-system-v2/native-controls-registry.json -->
-        <textarea
-          ref="composerTextarea"
-          :value="modelValue"
-          rows="1"
-          class="block w-full resize-none border-0 bg-transparent px-1 py-1 text-[13.5px] leading-6 text-foreground shadow-none outline-none placeholder:text-[hsl(var(--foreground-subtle))] focus-visible:ring-0"
-          :class="density === 'comfortable' ? 'min-h-16' : 'min-h-10'"
-          :style="{ maxHeight: `${textareaMaxPx}px` }"
-          :disabled="!canType"
-          :placeholder="t('aiAssistant.dialogs.chat.messagePlaceholder')"
-          :aria-label="t('aiAssistant.dialogs.chat.messagePlaceholder')"
-          data-testid="ai-chat-composer"
-          @input="handleInput"
-          @paste="handlePaste"
-          @keydown="handleKeydown"
-          @keyup="handleMentionKeyup"
-          @click="updateMentionState"
-          @compositionstart="isComposing = true"
-          @compositionend="handleCompositionEnd"
-        />
+        <div class="relative" :class="density === 'comfortable' ? 'min-h-16' : 'min-h-10'">
+          <span
+            v-if="!modelValue"
+            class="pointer-events-none absolute left-1 top-1 text-[13.5px] leading-6 text-[hsl(var(--foreground-subtle))]"
+            aria-hidden="true"
+            >{{ t('aiAssistant.dialogs.chat.messagePlaceholder') }}</span
+          >
+          <EditorContent
+            :editor="editor"
+            class="composer-editor text-[13.5px] leading-6 text-foreground"
+            :class="density === 'comfortable' ? 'min-h-16' : 'min-h-10'"
+            :style="{ '--composer-max-height': textareaMaxPx + 'px' }"
+          />
+        </div>
 
         <div class="mt-3 flex min-w-0 items-center gap-2" data-testid="ai-composer-footer-controls">
           <div class="flex min-w-0 flex-1 items-center" data-testid="ai-composer-attachments">
-            <DropdownMenu :modal="false">
-              <DropdownMenuTrigger as-child>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  class="h-7 w-7 shrink-0 rounded-md p-0 text-[hsl(var(--foreground-subtle))] hover:bg-[hsl(var(--hover))] hover:text-foreground"
-                  data-testid="ai-chat-add-context"
-                  :title="t('aiAssistant.chatPage.attachments.addContext')"
-                  :aria-label="t('aiAssistant.chatPage.attachments.addContext')"
-                >
-                  <Paperclip class="h-4 w-4" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="start" class="w-60">
-                <DropdownMenuItem
-                  v-if="!localAgent"
-                  data-testid="ai-chat-upload-file"
-                  @click="openFilePicker"
-                >
-                  <Paperclip class="mr-2 h-4 w-4" />
-                  {{ t('aiAssistant.chatPage.attachments.upload') }}
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-
-                <DropdownMenuSub v-model:open="contextSubmenuOpen.goal">
-                  <DropdownMenuSubTrigger>
-                    <Target class="mr-2 h-4 w-4" />
-                    {{ t('aiAssistant.chatPage.context.referenceGoal') }}
-                  </DropdownMenuSubTrigger>
-                  <DropdownMenuSubContent v-if="contextSubmenuOpen.goal" class="w-64">
-                    <DropdownMenuItem
-                      v-for="goal in menuGoals"
-                      :key="goal.id"
-                      @click="
-                        toggleEntity({
-                          entityType: 'goal',
-                          id: goal.id,
-                          label: goal.title,
-                        })
-                      "
-                    >
-                      <Check v-if="hasContextEntity('goal', goal.id)" class="mr-2 h-4 w-4" />
-                      <Target v-else class="mr-2 h-4 w-4 text-muted-foreground" />
-                      <span class="truncate">{{ goal.title }}</span>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem v-if="!recentGoals.length" disabled>
-                      {{ t('aiAssistant.chatPage.context.noGoals') }}
-                    </DropdownMenuItem>
-                    <DropdownMenuItem v-else-if="recentGoals.length > menuGoals.length" disabled>
-                      {{ t('aiAssistant.chatPage.context.mentionMoreHint') }}
-                    </DropdownMenuItem>
-                  </DropdownMenuSubContent>
-                </DropdownMenuSub>
-
-                <DropdownMenuSub v-model:open="contextSubmenuOpen.task">
-                  <DropdownMenuSubTrigger>
-                    <ListChecks class="mr-2 h-4 w-4" />
-                    {{ t('aiAssistant.chatPage.context.referenceTask') }}
-                  </DropdownMenuSubTrigger>
-                  <DropdownMenuSubContent v-if="contextSubmenuOpen.task" class="w-64">
-                    <DropdownMenuItem
-                      v-for="task in menuTasks"
-                      :key="task.id"
-                      @click="
-                        toggleEntity({
-                          entityType: 'task',
-                          id: task.id,
-                          label: task.title,
-                        })
-                      "
-                    >
-                      <Check v-if="hasContextEntity('task', task.id)" class="mr-2 h-4 w-4" />
-                      <ListChecks v-else class="mr-2 h-4 w-4 text-muted-foreground" />
-                      <span class="truncate">{{ task.title }}</span>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem v-if="!recentTasks.length" disabled>
-                      {{ t('aiAssistant.chatPage.context.noTasks') }}
-                    </DropdownMenuItem>
-                    <DropdownMenuItem v-else-if="recentTasks.length > menuTasks.length" disabled>
-                      {{ t('aiAssistant.chatPage.context.mentionMoreHint') }}
-                    </DropdownMenuItem>
-                  </DropdownMenuSubContent>
-                </DropdownMenuSub>
-
-                <DropdownMenuSub v-model:open="contextSubmenuOpen.note">
-                  <DropdownMenuSubTrigger>
-                    <FileText class="mr-2 h-4 w-4" />
-                    {{ t('aiAssistant.chatPage.context.referenceNote') }}
-                  </DropdownMenuSubTrigger>
-                  <DropdownMenuSubContent v-if="contextSubmenuOpen.note" class="w-64">
-                    <DropdownMenuItem
-                      v-for="note in menuKnowledgeNotes"
-                      :key="note.contextId"
-                      @click="
-                        toggleEntity({
-                          entityType: note.source ? 'knowledge_source' : 'knowledge_document',
-                          id: note.contextId,
-                          label: note.title,
-                          ...(note.source ? { source: note.source } : {}),
-                        })
-                      "
-                    >
-                      <Check
-                        v-if="
-                          hasContextEntity(
-                            note.source ? 'knowledge_source' : 'knowledge_document',
-                            note.contextId,
-                          )
-                        "
-                        class="mr-2 h-4 w-4"
-                      />
-                      <FileText v-else class="mr-2 h-4 w-4 text-muted-foreground" />
-                      <span class="truncate">{{ note.title }}</span>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem v-if="!referenceableKnowledgeNotes.length" disabled>
-                      {{ t('aiAssistant.chatPage.context.noNotes') }}
-                    </DropdownMenuItem>
-                    <DropdownMenuItem
-                      v-else-if="referenceableKnowledgeNotes.length > menuKnowledgeNotes.length"
-                      disabled
-                    >
-                      {{ t('aiAssistant.chatPage.context.mentionMoreHint') }}
-                    </DropdownMenuItem>
-                  </DropdownMenuSubContent>
-                </DropdownMenuSub>
-              </DropdownMenuContent>
-            </DropdownMenu>
+            <Button
+              variant="ghost"
+              size="icon"
+              class="h-7 w-7 shrink-0 rounded-md p-0 text-[hsl(var(--foreground-subtle))] hover:bg-[hsl(var(--hover))] hover:text-foreground"
+              data-testid="ai-chat-upload-file"
+              :title="t('aiAssistant.chatPage.attachments.upload')"
+              :aria-label="t('aiAssistant.chatPage.attachments.upload')"
+              @click="openFilePicker"
+            >
+              <Paperclip class="h-4 w-4" />
+            </Button>
           </div>
           <div class="flex min-w-0 shrink items-center gap-1.5" data-testid="ai-composer-actions">
             <div class="flex min-w-0 items-center gap-1" data-testid="ai-composer-options">
@@ -380,11 +275,25 @@
 </template>
 
 <script setup lang="ts">
-import { computed, nextTick, ref, watch } from 'vue';
+import { computed, ref, shallowRef, watch } from 'vue';
+import { EditorContent, useEditor } from '@tiptap/vue-3';
+import StarterKit from '@tiptap/starter-kit';
+import type { Editor } from '@tiptap/core';
+import { history } from '@tiptap/pm/history';
+import { TextSelection } from '@tiptap/pm/state';
+import {
+  COMPOSER_MENTION,
+  ComposerMentionExtension,
+  composerDocument,
+  composerMentionTrigger,
+  composerMentions,
+  composerText,
+  mentionKey,
+  type ComposerMention,
+} from './composer-editor';
 import {
   ArrowUp,
   Bot,
-  Check,
   FileText,
   ListChecks,
   Paperclip,
@@ -396,14 +305,6 @@ import {
 import { useI18n } from 'vue-i18n';
 import {
   Button,
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuSub,
-  DropdownMenuSubContent,
-  DropdownMenuSubTrigger,
-  DropdownMenuTrigger,
   Select,
   SelectContent,
   SelectGroup,
@@ -469,26 +370,22 @@ const emit = defineEmits<{
 
 const { t } = useI18n();
 
-const composerTextarea = ref<HTMLTextAreaElement | null>(null);
+// Keep the existing host focus/resize contract while replacing the native textarea.
+const composerTextarea = shallowRef<HTMLElement | null>(null);
 const fileInput = ref<HTMLInputElement | null>(null);
 const isComposing = ref(false);
 const dragging = ref(false);
 const mentionQuery = ref<string | null>(null);
-const mentionStart = ref<number | null>(null);
+const mentionRange = ref<{ from: number; to: number } | null>(null);
 const mentionActiveIndex = ref(0);
+const inlineMentions = shallowRef(new Map<string, ComposerMention>());
 const textareaMaxPx = COMPOSER_TEXTAREA_MAX_PX;
-const contextSubmenuOpen = ref({
-  goal: false,
-  task: false,
-  note: false,
-});
+let dismissedTrigger: string | null = null;
 
-watch([mentionQuery, () => contextSubmenuOpen.value.note], ([query, open]) =>
-  emit('knowledge-query', query ?? (open ? '' : null)),
+watch(mentionQuery, (query) => emit('knowledge-query', query));
+const detachedContextEntities = computed(() =>
+  props.contextEntities.filter((entity) => !inlineMentions.value.has(mentionKey(entity))),
 );
-
-const menuGoals = computed(() => props.recentGoals.slice(0, 8));
-const menuTasks = computed(() => props.recentTasks.slice(0, 8));
 
 const referenceableKnowledgeNotes = computed(() =>
   props.recentKnowledgeNotes.filter(
@@ -496,8 +393,6 @@ const referenceableKnowledgeNotes = computed(() =>
       typeof note.contextId === 'string' && note.contextId.length > 0,
   ),
 );
-
-const menuKnowledgeNotes = computed(() => referenceableKnowledgeNotes.value.slice(0, 8));
 
 const mentionCandidates = computed<Array<Omit<ComposerContextEntity, 'origin'>>>(() => [
   ...props.recentGoals.map((goal) => ({
@@ -524,12 +419,19 @@ const mentionSuggestions = computed(() => {
   const query = mentionQuery.value.trim().toLocaleLowerCase();
   const ranked = mentionCandidates.value.filter((candidate) => {
     if (!query || candidate.entityType === 'knowledge_source') return true;
-    return candidate.label.toLocaleLowerCase().includes(query);
+    return (
+      candidate.label.toLocaleLowerCase().includes(query) ||
+      candidate.path?.toLocaleLowerCase().includes(query)
+    );
   });
-  return ranked.slice(0, 6);
+  // A bare @ must not hide notes just because the user has many goals.
+  return [
+    ...ranked.filter((candidate) => candidate.entityType === 'goal').slice(0, 4),
+    ...ranked.filter((candidate) => candidate.entityType === 'task').slice(0, 4),
+    ...ranked.filter((candidate) => candidate.entityType.startsWith('knowledge_')).slice(0, 6),
+  ];
 });
 
-const canType = computed(() => true);
 const canSubmit = computed(
   () =>
     !props.loading &&
@@ -547,89 +449,151 @@ const maxWidthClass = computed(() =>
   props.density === 'comfortable' ? 'max-w-[52rem]' : 'max-w-none',
 );
 
-defineExpose({ composerTextarea });
-
-function resizeTextarea() {
-  const el = composerTextarea.value;
-  if (!el) return;
-  el.style.height = 'auto';
-  el.style.height = `${Math.min(el.scrollHeight, textareaMaxPx)}px`;
-}
-
-function handleInput(event: Event) {
-  const target = event.target as HTMLTextAreaElement;
-  emit('update:modelValue', target.value);
-  void nextTick(() => {
-    resizeTextarea();
-    updateMentionState();
-  });
-}
-
-function handleCompositionEnd(event: CompositionEvent) {
-  isComposing.value = false;
-  const target = event.target as HTMLTextAreaElement | null;
-  if (target) {
-    emit('update:modelValue', target.value);
-    void nextTick(resizeTextarea);
+function syncMentions(current: Editor) {
+  const previous = inlineMentions.value;
+  const next = composerMentions(current);
+  inlineMentions.value = next;
+  for (const [key, entity] of previous) {
+    if (
+      !next.has(key) &&
+      props.contextEntities.some((item) => mentionKey(item) === key && item.origin === 'explicit')
+    )
+      emit('remove-context-entity', entity.entityType, entity.id);
+  }
+  for (const [key, entity] of next) {
+    if (previous.has(key) && previous.get(key)?.source?.contentHash === entity.source?.contentHash)
+      continue;
+    const existing = props.contextEntities.find((item) => mentionKey(item) === key);
+    if (!existing || (entity.source && entity.source.contentHash !== existing.source?.contentHash))
+      emit('toggle-context-entity', entity);
   }
 }
 
-function handleMentionKeyup(event: KeyboardEvent) {
-  if (event.key !== 'Escape' && !event.isComposing) updateMentionState();
+function updateMentionState(current: Editor) {
+  const trigger = composerMentionTrigger(current);
+  if (!trigger) {
+    dismissedTrigger = null;
+    closeMentionMenu();
+    return;
+  }
+  const signature = trigger.from + ':' + trigger.to + ':' + trigger.query;
+  if (dismissedTrigger === signature) return;
+  dismissedTrigger = null;
+  if (mentionQuery.value !== trigger.query) mentionActiveIndex.value = 0;
+  mentionRange.value = { from: trigger.from, to: trigger.to };
+  mentionQuery.value = trigger.query;
 }
 
-function handleKeydown(event: KeyboardEvent) {
-  if (isComposing.value || event.isComposing || event.keyCode === 229) return;
+const editor = useEditor({
+  extensions: [
+    StarterKit.configure({
+      blockquote: false,
+      bold: false,
+      bulletList: false,
+      code: false,
+      codeBlock: false,
+      heading: false,
+      horizontalRule: false,
+      italic: false,
+      listItem: false,
+      orderedList: false,
+      strike: false,
+      link: false,
+      underline: false,
+    }),
+    ComposerMentionExtension,
+  ],
+  content: composerDocument(props.modelValue),
+  editorProps: {
+    attributes: {
+      'data-testid': 'ai-chat-composer',
+      role: 'textbox',
+      'aria-multiline': 'true',
+      'aria-label': t('aiAssistant.dialogs.chat.messagePlaceholder'),
+      spellcheck: 'false',
+    },
+    handleKeyDown: (_view, event) => handleKeydown(event),
+    handleDOMEvents: {
+      paste: (_view, event) => handlePaste(event),
+      drop: (_view, event) => {
+        if (!event.dataTransfer?.files.length) return false;
+        event.preventDefault();
+        event.stopPropagation();
+        handleDrop(event);
+        return true;
+      },
+      compositionstart: () => {
+        isComposing.value = true;
+        return false;
+      },
+      compositionend: () => {
+        isComposing.value = false;
+        return false;
+      },
+    },
+  },
+  onUpdate: ({ editor: current }) => {
+    syncMentions(current);
+    emit('update:modelValue', composerText(current));
+    if (!isComposing.value) updateMentionState(current);
+  },
+  onSelectionUpdate: ({ editor: current }) => {
+    if (!isComposing.value) updateMentionState(current);
+  },
+});
+watch(
+  editor,
+  (current) => {
+    composerTextarea.value = current?.view.dom ?? null;
+  },
+  { flush: 'post' },
+);
+defineExpose({ composerTextarea, editor });
+
+function handleKeydown(event: KeyboardEvent): boolean {
+  if (isComposing.value || event.isComposing || event.keyCode === 229) return false;
   if (mentionQuery.value !== null) {
     if (event.key === 'ArrowDown' && mentionSuggestions.value.length) {
-      event.preventDefault();
       mentionActiveIndex.value = (mentionActiveIndex.value + 1) % mentionSuggestions.value.length;
-      return;
+      return true;
     }
     if (event.key === 'ArrowUp' && mentionSuggestions.value.length) {
-      event.preventDefault();
       mentionActiveIndex.value =
         (mentionActiveIndex.value - 1 + mentionSuggestions.value.length) %
         mentionSuggestions.value.length;
-      return;
+      return true;
     }
     if (event.key === 'Escape') {
-      event.preventDefault();
+      const range = mentionRange.value;
+      if (range) dismissedTrigger = range.from + ':' + range.to + ':' + mentionQuery.value;
       closeMentionMenu();
-      return;
+      return true;
     }
     if (event.key === 'Enter' && !event.shiftKey) {
-      event.preventDefault();
       const suggestion = mentionSuggestions.value[mentionActiveIndex.value];
       if (suggestion) selectMention(suggestion);
-      return;
+      return true;
     }
   }
-
-  if (event.key !== 'Enter' || event.shiftKey) return;
-  if (isComposing.value || event.isComposing || event.keyCode === 229) return;
-  event.preventDefault();
-  if (!canSubmit.value) return;
-  emit('send');
+  if (event.key !== 'Enter' || event.shiftKey) return false;
+  if (canSubmit.value) emit('send');
+  return true;
 }
 
 function openFilePicker() {
-  if (props.localAgent) return;
   fileInput.value?.click();
 }
 
 function handleFileInput(event: Event) {
-  if (props.localAgent) return;
   const input = event.target as HTMLInputElement;
   const files = Array.from(input.files ?? []);
   if (files.length) emit('add-files', files);
   input.value = '';
 }
 
-function handlePaste(event: ClipboardEvent) {
-  if (props.localAgent) return;
+function handlePaste(event: ClipboardEvent): boolean {
   const clipboard = event.clipboardData;
-  if (!clipboard) return;
+  if (!clipboard) return false;
   const directFiles = Array.from(clipboard.files ?? []);
   const itemFiles = Array.from(clipboard.items ?? []).flatMap((item) => {
     if (item.kind !== 'file') return [];
@@ -637,63 +601,43 @@ function handlePaste(event: ClipboardEvent) {
     return file ? [file] : [];
   });
   const files = directFiles.length ? directFiles : itemFiles;
-  if (!files.length) return;
+  if (!files.length) return false;
   event.preventDefault();
   emit('add-files', files);
+  return true;
 }
 
 function handleDrop(event: DragEvent) {
   dragging.value = false;
-  if (props.localAgent) return;
   const files = Array.from(event.dataTransfer?.files ?? []);
   if (files.length) emit('add-files', files);
 }
 
 function closeMentionMenu() {
   mentionQuery.value = null;
-  mentionStart.value = null;
+  mentionRange.value = null;
   mentionActiveIndex.value = 0;
 }
 
-function updateMentionState() {
-  const textarea = composerTextarea.value;
-  if (!textarea) return closeMentionMenu();
-  const caret = textarea.selectionStart ?? textarea.value.length;
-  const prefix = textarea.value.slice(0, caret);
-  const match = prefix.match(/(?:^|\s)@([^@\s]{0,60})$/u);
-  if (!match) return closeMentionMenu();
-  const token = match[0];
-  const atOffset = token.lastIndexOf('@');
-  mentionQuery.value = match[1] ?? '';
-  mentionStart.value = caret - token.length + atOffset;
-  mentionActiveIndex.value = Math.min(
-    mentionActiveIndex.value,
-    Math.max(mentionSuggestions.value.length - 1, 0),
-  );
-}
-
-function selectMention(entity: Omit<ComposerContextEntity, 'origin'>) {
-  const textarea = composerTextarea.value;
-  const start = mentionStart.value;
-  if (!textarea || start === null) return;
-  const caret = textarea.selectionStart ?? textarea.value.length;
-  const before = textarea.value.slice(0, start);
-  const after = textarea.value.slice(caret);
-  const token = `@${entity.label}`;
-  const next = `${before}${token} ${after}`;
-  emit('update:modelValue', next);
-  const existing = props.contextEntities.find(
-    (item) => item.entityType === entity.entityType && item.id === entity.id,
-  );
-  if (!existing || (entity.source && entity.source.contentHash !== existing.source?.contentHash))
+function selectMention(entity: ComposerMention) {
+  const current = editor.value;
+  const range = mentionRange.value;
+  if (!current || !range) return;
+  const existing = props.contextEntities.some((item) => mentionKey(item) === mentionKey(entity));
+  if (!existing && props.contextEntities.length >= 12) {
+    // Keep the existing context-limit notification and do not insert a phantom reference.
     emit('toggle-context-entity', entity);
+    return;
+  }
+  current
+    .chain()
+    .focus()
+    .insertContentAt(range, [
+      { type: COMPOSER_MENTION, attrs: { entity } },
+      { type: 'text', text: ' ' },
+    ])
+    .run();
   closeMentionMenu();
-  void nextTick(() => {
-    const nextCaret = before.length + token.length + 1;
-    textarea.focus();
-    textarea.setSelectionRange(nextCaret, nextCaret);
-    resizeTextarea();
-  });
 }
 
 function mentionTypeLabel(entityType: ComposerContextEntity['entityType']) {
@@ -702,20 +646,48 @@ function mentionTypeLabel(entityType: ComposerContextEntity['entityType']) {
   return t('aiAssistant.chatPage.context.note');
 }
 
-function hasContextEntity(entityType: ComposerContextEntity['entityType'], id: string) {
-  return props.contextEntities.some(
-    (entity) => entity.entityType === entityType && entity.id === id,
-  );
-}
-
-function toggleEntity(entity: Omit<ComposerContextEntity, 'origin'>) {
-  emit('toggle-context-entity', entity);
-}
-
 watch(
   () => props.modelValue,
-  () => {
-    void nextTick(resizeTextarea);
+  (value) => {
+    const current = editor.value;
+    if (!current || composerText(current) === value) return;
+    // External resets (send/session changes) preserve the host-owned reference state.
+    inlineMentions.value = new Map();
+    closeMentionMenu();
+    current
+      .chain()
+      .setMeta('addToHistory', false)
+      .setContent(composerDocument(value), { emitUpdate: false })
+      .command(({ tr }) => {
+        tr.setSelection(TextSelection.atEnd(tr.doc));
+        return true;
+      })
+      .run();
+    // Use Tiptap's plugin APIs so Vue's reactive EditorState remains synchronized.
+    const undoPlugin = history();
+    if (undoPlugin.spec.key) {
+      current.unregisterPlugin(undoPlugin.spec.key);
+      current.registerPlugin(undoPlugin);
+    }
   },
 );
+
+watch(mentionSuggestions, (items) => {
+  mentionActiveIndex.value = Math.min(mentionActiveIndex.value, Math.max(items.length - 1, 0));
+});
 </script>
+
+<style scoped>
+.composer-editor :deep(.tiptap) {
+  min-height: inherit;
+  max-height: var(--composer-max-height);
+  overflow-y: auto;
+  padding: 0.25rem;
+  outline: none;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+.composer-editor :deep(.tiptap p) {
+  margin: 0;
+}
+</style>

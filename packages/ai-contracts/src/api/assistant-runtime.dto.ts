@@ -22,7 +22,11 @@ export type { AIChatPermissionMode } from './runtime-permission';
 export const AIRuntimeSurfaceSchema = z.enum(['web', 'desktop', 'mobile', 'server']);
 export type AIRuntimeSurface = z.infer<typeof AIRuntimeSurfaceSchema>;
 
-const ASSISTANT_RUNTIME_ATTACHMENT_MEDIA_TYPES = new Set([
+export const ASSISTANT_RUNTIME_ATTACHMENT_MAX_COUNT = 4;
+export const ASSISTANT_RUNTIME_NATIVE_FILE_MAX_BYTES = 10 * 1024 * 1024;
+export const ASSISTANT_RUNTIME_NATIVE_TOTAL_MAX_BYTES = 20 * 1024 * 1024;
+const NATIVE_MAX_DATA_URL_CHARS = Math.ceil(ASSISTANT_RUNTIME_NATIVE_FILE_MAX_BYTES / 3) * 4 + 160;
+export const ASSISTANT_RUNTIME_ATTACHMENT_MEDIA_TYPES = new Set([
   'image/png',
   'image/jpeg',
   'image/webp',
@@ -37,7 +41,7 @@ export const AssistantRuntimeAttachmentSchema = z
     data: z
       .string()
       .min(1)
-      .max(1_500_000)
+      .max(NATIVE_MAX_DATA_URL_CHARS)
       .regex(/^data:[a-z0-9.+-]+\/[a-z0-9.+-]+;base64,[a-z0-9+/=]+$/iu),
     mediaType: z
       .string()
@@ -49,13 +53,6 @@ export const AssistantRuntimeAttachmentSchema = z
   })
   .strict()
   .superRefine((attachment, context) => {
-    if (!ASSISTANT_RUNTIME_ATTACHMENT_MEDIA_TYPES.has(attachment.mediaType.toLowerCase())) {
-      context.addIssue({
-        code: 'custom',
-        path: ['mediaType'],
-        message: 'Unsupported assistant attachment media type',
-      });
-    }
     const prefix = `data:${attachment.mediaType};base64,`.toLowerCase();
     if (!attachment.data.toLowerCase().startsWith(prefix)) {
       context.addIssue({
@@ -212,7 +209,10 @@ export const AssistantRuntimeClientCommandSchema = z
         /** Desktop native-agent only; validated against the current host model catalog. */
         nativeModelOptions: LocalAgentModelOptionsSchema.optional(),
         locale: z.enum(['zh-CN', 'en-US']).optional(),
-        attachments: z.array(AssistantRuntimeAttachmentSchema).max(4).default([]),
+        attachments: z
+          .array(AssistantRuntimeAttachmentSchema)
+          .max(ASSISTANT_RUNTIME_ATTACHMENT_MAX_COUNT)
+          .default([]),
         selectedEntities: z.array(AssistantRuntimeSelectedEntitySchema).max(12).default([]),
         identityId: z.never().optional(),
       })
@@ -239,16 +239,35 @@ export const AssistantRuntimeClientCommandSchema = z
       });
     }
     if (command.type === 'message') {
+      const isNative = command.runtimeKind === 'local_agent' && command.surface === 'desktop';
       const totalAttachmentChars = command.attachments.reduce(
         (total, attachment) => total + attachment.data.length,
         0,
       );
-      if (totalAttachmentChars > 1_800_000) {
+      const maxTotalChars = isNative
+        ? Math.ceil(ASSISTANT_RUNTIME_NATIVE_TOTAL_MAX_BYTES / 3) * 4 +
+          ASSISTANT_RUNTIME_ATTACHMENT_MAX_COUNT * 160
+        : 1_800_000;
+      if (totalAttachmentChars > maxTotalChars) {
         context.addIssue({
           code: 'custom',
           path: ['attachments'],
           message: 'Assistant attachment payload is too large',
         });
+      }
+      if (!isNative) {
+        for (const [index, attachment] of command.attachments.entries()) {
+          if (
+            attachment.data.length > 1_500_000 ||
+            !ASSISTANT_RUNTIME_ATTACHMENT_MEDIA_TYPES.has(attachment.mediaType.toLowerCase())
+          ) {
+            context.addIssue({
+              code: 'custom',
+              path: ['attachments', index],
+              message: 'Unsupported or oversized built-in assistant attachment',
+            });
+          }
+        }
       }
     }
     if (

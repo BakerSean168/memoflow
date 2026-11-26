@@ -60,9 +60,9 @@ async function reloadAiWorkspace(page: Page): Promise<void> {
   });
 }
 
-async function openAddContextMenu(page: Page): Promise<void> {
-  await page.getByTestId('ai-chat-add-context').click();
-  await expect(page.getByTestId('ai-chat-upload-file')).toBeVisible({
+async function openMentionMenu(page: Page): Promise<void> {
+  await page.getByTestId('ai-chat-composer').fill('@');
+  await expect(page.getByTestId('ai-composer-mention-menu')).toBeVisible({
     timeout: TIMEOUT_CONFIG.ELEMENT_WAIT,
   });
 }
@@ -132,29 +132,12 @@ test.describe('AI workspace performance', () => {
     expect(lcp).toBeLessThanOrEqual(2000);
   });
 
-  test('[P1] opens the current Add Context menu within 300ms of the browser interaction', async ({
+  test('[P1] opens the @ reference menu within 300ms of the browser interaction', async ({
     page,
   }) => {
-    const latency = await page.evaluate(async () => {
-      const trigger = document.querySelector<HTMLElement>('[data-testid="ai-chat-add-context"]');
-      if (!trigger) throw new Error('AI Add Context trigger is unavailable');
-
-      const startedAt = performance.now();
-      trigger.click();
-
-      const deadline = startedAt + 2_000;
-      while (performance.now() < deadline) {
-        const item = document.querySelector<HTMLElement>('[data-testid="ai-chat-upload-file"]');
-        if (item && item.getClientRects().length > 0) {
-          return performance.now() - startedAt;
-        }
-        await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
-      }
-
-      return Number.POSITIVE_INFINITY;
-    });
-
-    expect(latency).toBeLessThanOrEqual(300);
+    const startedAt = Date.now();
+    await openMentionMenu(page);
+    expect(Date.now() - startedAt).toBeLessThanOrEqual(300);
   });
 
   test('[P1] preserves one AI workspace while resizing', async ({ page }) => {
@@ -182,15 +165,16 @@ test.describe('AI workspace performance', () => {
     }
   });
 
-  test('[P2] repeated Add Context interactions do not grow heap by 10MB', async ({ page }) => {
+  test('[P2] repeated reference interactions do not grow heap by 10MB', async ({ page }) => {
     const readHeap = () =>
       page.evaluate(() => (performance as PerformanceWithMemory).memory?.usedJSHeapSize ?? 0);
     const initialMemory = await readHeap();
 
     for (let index = 0; index < 5; index += 1) {
-      await openAddContextMenu(page);
+      await page.getByTestId('ai-chat-composer').fill('');
+      await openMentionMenu(page);
       await page.keyboard.press('Escape');
-      await expect(page.getByTestId('ai-chat-upload-file')).toBeHidden({
+      await expect(page.getByTestId('ai-composer-mention-menu')).toBeHidden({
         timeout: TIMEOUT_CONFIG.ELEMENT_WAIT,
       });
     }

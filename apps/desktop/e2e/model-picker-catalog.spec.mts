@@ -123,7 +123,7 @@ test('native picker browses a different enabled instance, directly selects its d
       'aria-pressed',
       'false',
     );
-    await expect(page.getByTestId('ai-chat-composer')).toHaveValue('Keep native draft');
+    await expect(page.getByTestId('ai-chat-composer')).toHaveText('Keep native draft');
     expect(await invoke(AIChannels.LOCAL_AGENT, { action: 'list_connections' })).toEqual(before);
     expect(fs.existsSync(promptLog)).toBe(false);
     await expect(page.getByTestId('ai-model-picker-select-agent')).toHaveCount(0);
@@ -137,7 +137,7 @@ test('native picker browses a different enabled instance, directly selects its d
       'true',
     );
     await page.keyboard.press('Escape');
-    await expect(page.getByTestId('ai-chat-composer')).toHaveValue('Keep native draft');
+    await expect(page.getByTestId('ai-chat-composer')).toHaveText('Keep native draft');
     await page.evaluate(() => {
       window.location.hash = '#/settings?tab=ai';
     });

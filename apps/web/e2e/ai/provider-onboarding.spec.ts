@@ -230,7 +230,7 @@ test('[P0] T3 Agent wizard and inline Endpoint/Key configure the persistent comp
   await page.getByTestId('ai-model-picker-agent-agent:mastra').click();
   await expect(page.getByTestId('ai-model-picker-option')).toHaveCount(2);
   await expect(page.getByTestId('ai-chat-model-selector')).toContainText('E2E Model Beta');
-  await expect(page.getByTestId('ai-chat-composer')).toHaveValue('Draft survives browsing');
+  await expect(page.getByTestId('ai-chat-composer')).toHaveText('Draft survives browsing');
   await expect(page.getByTestId('ai-model-picker-select-agent')).toHaveCount(0);
   await page.getByTestId('ai-model-picker-option').filter({ hasText: 'E2E Model Alpha' }).click();
   await expect(page.getByTestId('ai-chat-model-selector')).toContainText('E2E Model Alpha');

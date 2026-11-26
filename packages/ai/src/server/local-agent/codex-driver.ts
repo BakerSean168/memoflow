@@ -1,3 +1,4 @@
+import type { NativeAgentAttachment } from './native-attachments';
 import { randomUUID } from 'node:crypto';
 import { z } from 'zod';
 import type {
@@ -70,6 +71,7 @@ export interface NativeAgentRunInput {
   modelId: string;
   modelOptions?: LocalAgentModelOptions;
   content: string;
+  attachments?: readonly NativeAgentAttachment[];
   mcp?: { url: string; token: string; toolNames?: readonly string[] };
   signal?: AbortSignal;
 }
@@ -365,7 +367,12 @@ export class CodexDriver {
           ...(input.modelOptions?.serviceTier
             ? { serviceTierForTurn: input.modelOptions.serviceTier }
             : {}),
-          input: [{ type: 'text', text: input.content }],
+          input: [
+            { type: 'text', text: input.content },
+            ...(input.attachments ?? [])
+              .filter((attachment) => attachment.image)
+              .map((attachment) => ({ type: 'localImage', path: attachment.path })),
+          ],
         }),
       );
       if (this.turnId && turn.turn.id !== this.turnId)
