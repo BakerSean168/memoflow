@@ -50,6 +50,7 @@ import {
   type MastraStorageConfig,
   type IAnalyticsReadPort,
   type IKnowledgeNotePersistencePort,
+  type IKnowledgeNoteWritePort,
   type IKnowledgeSourcePort,
   type AIModuleInstance,
 } from '@memoflow/ai';
@@ -68,6 +69,7 @@ import { bindLocalAgentArchiveReadPort } from '../modules/ai/agent-archive-read.
 export interface ComposeAIElectronDependencies {
   readonly db: IElectronDatabase;
   readonly knowledgeNotePersistence: IKnowledgeNotePersistencePort;
+  readonly knowledgeNoteWrite: IKnowledgeNoteWritePort;
   readonly knowledgeSourcePort: IKnowledgeSourcePort;
   readonly analyticsReadPort: IAnalyticsReadPort;
   readonly goalApplicationPort: GoalApplicationPort;
@@ -200,6 +202,7 @@ export function composeAI(dependencies: ComposeAIElectronDependencies): Composed
           knowledge: dependencies.knowledgeDocumentRefResolver,
         },
         knowledgeNotes: dependencies.knowledgeNotePersistence,
+        knowledgeNoteWrites: dependencies.knowledgeNoteWrite,
       },
     ),
     ...dependencies.localAgent,

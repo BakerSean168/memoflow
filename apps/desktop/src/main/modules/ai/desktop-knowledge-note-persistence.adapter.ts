@@ -4,52 +4,73 @@ import type {
   CreateKnowledgeNotePersistenceInput,
   CreateKnowledgeNotePersistenceResult,
   IKnowledgeNotePersistencePort,
+  IKnowledgeNoteWritePort,
+  WriteKnowledgeNoteInput,
+  WriteKnowledgeNoteResult,
 } from '@memoflow/ai/ports';
 import type { LocalVaultElectronPort } from '@memoflow/repository/electron';
 
 /**
- * Desktop AI notes are committed to the selected local Vault only after the
- * Agent approval contract has supplied proposal metadata.
+ * Desktop knowledge writes hit the selected local Vault directly.
+ *
+ * Confirmed persistence (`proposalId`/`revision`) is no longer a user review
+ * gate; when the workflow supplies those fields they are treated as an
+ * idempotency identity. Direct agent writes provide their own deterministic
+ * `requestId`. Both paths share the runtime's atomic create/update boundary,
+ * which enforces path containment, symlink refusal and expected-hash fences.
  */
-export class DesktopKnowledgeNotePersistenceAdapter implements IKnowledgeNotePersistencePort {
+export class DesktopKnowledgeNotePersistenceAdapter
+  implements IKnowledgeNotePersistencePort, IKnowledgeNoteWritePort
+{
   constructor(private readonly localVault: LocalVaultElectronPort) {}
 
   async createKnowledgeNote(
     input: CreateKnowledgeNotePersistenceInput,
   ): Promise<CreateKnowledgeNotePersistenceResult> {
-    if (!input.proposalId || !input.proposalRevision || !input.requestId) {
-      throw new Error('A confirmed knowledge-note proposal is required for local Vault writes');
-    }
     if (input.source && input.source.kind !== 'local_vault') {
       throw new Error('Desktop knowledge persistence requires a local Vault source');
     }
 
-    const result = await this.localVault.writeConfirmedNote({
+    const result = await this.localVault.writeNote({
       relativePath: input.path,
       knowledgeDocumentId: input.knowledgeDocumentId,
       contentMarkdown: input.content,
-      proposalId: input.proposalId,
-      proposalRevision: input.proposalRevision,
-      requestId: input.requestId,
+      requestId:
+        input.requestId ??
+        `${input.context.requestId}:${input.knowledgeDocumentId}:${input.proposalRevision ?? 1}`,
     });
 
     return {
       note: toKnowledgeNoteRef(input.identityId, result.note),
     };
   }
+
+  async writeKnowledgeNote(input: WriteKnowledgeNoteInput): Promise<WriteKnowledgeNoteResult> {
+    const result = await this.localVault.writeNote({
+      relativePath: input.relativePath,
+      ...(input.knowledgeDocumentId ? { knowledgeDocumentId: input.knowledgeDocumentId } : {}),
+      contentMarkdown: input.contentMarkdown,
+      requestId: input.requestId,
+      ...(input.expectedContentHash ? { expectedContentHash: input.expectedContentHash } : {}),
+    });
+    return {
+      note: toKnowledgeNoteRef(input.identityId, result.note),
+      created: result.created,
+    };
+  }
 }
 
 /**
- * Desktop confirmed creates are managed documents. Their persisted AI reference
- * must use the reviewed KnowledgeDocumentId; a path-derived fallback would
- * silently reintroduce unstable identity after rename or move.
+ * Desktop writes are managed documents. Their persisted AI reference must use
+ * the stable KnowledgeDocumentId; a path-derived fallback would silently
+ * reintroduce unstable identity after rename or move.
  */
 function toKnowledgeNoteRef(
   identityId: string,
   note: LocalVaultNoteDTO,
 ): KnowledgeNotePersistedRef {
   if (!note.knowledgeDocumentId) {
-    throw new Error('Confirmed Local Vault write did not return a stable KnowledgeDocumentId');
+    throw new Error('Local Vault write did not return a stable KnowledgeDocumentId');
   }
   const timestamp = Number(note.updatedAt);
   return {

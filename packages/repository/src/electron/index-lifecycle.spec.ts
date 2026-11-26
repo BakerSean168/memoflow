@@ -146,7 +146,9 @@ describe('createRepositoryElectronModule lifecycle', () => {
     await moduleDef.register(context);
 
     await expect(moduleDef.register(context)).rejects.toThrow(/only register once/);
-    expect(mocks.handlers.size).toBe(9);
+    expect(mocks.handlers.size).toBe(
+      Object.keys(RepositoryChannels).filter((name) => name.startsWith('LOCAL_VAULT_')).length,
+    );
   });
 
   it('cancels the previous search from the same renderer when the query is cleared', async () => {

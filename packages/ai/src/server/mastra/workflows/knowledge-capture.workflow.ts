@@ -8,7 +8,6 @@ import {
   KnowledgeClarificationStateSchema,
   KnowledgeDraftSchema,
   type KnowledgeCaptureDecision,
-  type KnowledgeDraft,
   type KnowledgeCaptureWorkflowInput,
 } from '@memoflow/ai-contracts';
 import type { ExecutionContext } from '@memoflow/transport-contracts';
@@ -25,7 +24,15 @@ const MAX_CLARIFICATION_ROUNDS = 3;
 
 export const KnowledgeCaptureWorkflowStateSchema = z
   .object({
-    phase: z.enum(['planning', 'clarification', 'review', 'recovery', 'completed', 'cancelled']),
+    phase: z.enum([
+      'planning',
+      'applying',
+      'clarification',
+      'review',
+      'recovery',
+      'completed',
+      'cancelled',
+    ]),
     input: KnowledgeCaptureWorkflowInputSchema,
     clarification: KnowledgeClarificationStateSchema,
     pendingQuestions: z.array(z.string().min(1)).max(3),
@@ -64,44 +71,6 @@ export function initialKnowledgeCaptureWorkflowState(
 
 function plainRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null && !Array.isArray(value);
-}
-
-const dangerousPatchKeys = new Set(['__proto__', 'prototype', 'constructor']);
-const allowedDraftPatchKeys = new Set([
-  'title',
-  'topic',
-  'markdown',
-  'targetSubpath',
-  'tags',
-  'source',
-]);
-
-function mergeStructuredPatch(base: unknown, patch: unknown): unknown {
-  if (!plainRecord(patch) || !plainRecord(base)) return patch;
-  const result: Record<string, unknown> = { ...base };
-  for (const [key, value] of Object.entries(patch)) {
-    if (dangerousPatchKeys.has(key)) throw new Error(`Unsafe structured patch key: ${key}`);
-    result[key] = key in base ? mergeStructuredPatch(base[key], value) : value;
-  }
-  return result;
-}
-
-function applyStructuredDraftPatch(
-  draft: KnowledgeDraft,
-  patch: Record<string, unknown>,
-): KnowledgeDraft {
-  for (const key of Object.keys(patch)) {
-    if (!allowedDraftPatchKeys.has(key)) {
-      throw new Error(`Unsupported knowledge draft patch field: ${key}`);
-    }
-  }
-  const { revision: _revision, ...content } = draft;
-  const { source, ...contentPatch } = patch;
-  const merged = mergeStructuredPatch(content, contentPatch);
-  if (plainRecord(merged) && Object.prototype.hasOwnProperty.call(patch, 'source'))
-    merged.source = source;
-  const parsed = KnowledgeDraftSchema.omit({ revision: true }).parse(merged);
-  return KnowledgeDraftSchema.parse({ ...parsed, revision: draft.revision + 1 });
 }
 
 function currentExecutionContext(
@@ -167,25 +136,6 @@ export function createKnowledgeCaptureWorkflow(input: {
         await setState(current);
       };
 
-      const suspendReview = async (draft: KnowledgeDraft) => {
-        await persist({
-          ...current,
-          phase: 'review',
-          draft,
-          pendingQuestions: [],
-          planningMode: 'initial',
-          revisionInstruction: undefined,
-          targetRevision: draft.revision,
-          priorReceipt: undefined,
-        });
-        return await suspend({
-          type: 'knowledge_draft_review' as const,
-          draft,
-          warnings: [],
-          revision: draft.revision,
-        });
-      };
-
       const handlePlanningDecision = async (
         decision: KnowledgeCaptureDecision,
         targetRevision: number,
@@ -210,10 +160,26 @@ export function createKnowledgeCaptureWorkflow(input: {
         const draft = KnowledgeDraftSchema.parse({
           ...stripRevision(decision.candidateDraft),
           knowledgeDocumentId: knowledgeCaptureDocumentId({ workflowRunId: runId }),
-          ...(current.draft?.source ? { source: current.draft.source } : {}),
+          // knowledge.capture only runs on Desktop, where the unlocked profile
+          // has at most one owner-selected local Vault. A host without this
+          // capability never registers the workflow.
+          source: current.draft?.source ?? { kind: 'local_vault' },
           revision: targetRevision,
         });
-        return suspendReview(draft);
+        // The reviewed-dialog era ended with #1097: the draft is written as
+        // soon as the planner produces it. Failures still suspend for an
+        // explicit retry/cancel instead of pretending success.
+        await persist({
+          ...current,
+          phase: 'applying',
+          draft,
+          pendingQuestions: [],
+          planningMode: 'initial',
+          revisionInstruction: undefined,
+          targetRevision: draft.revision,
+          priorReceipt: undefined,
+        });
+        return applyAndResolve();
       };
 
       const planAndSuspend = async (options: {
@@ -319,25 +285,11 @@ export function createKnowledgeCaptureWorkflow(input: {
       }
 
       if (current.phase === 'review') {
-        if (!current.draft) throw new Error('knowledge.capture review phase is missing its draft');
-        if (resumeData.type === 'approve') return applyAndResolve();
-        if (resumeData.type === 'edit_structured') {
-          return suspendReview(applyStructuredDraftPatch(current.draft, resumeData.patch));
-        }
-        if (resumeData.type === 'revise_natural_language') {
-          return planAndSuspend({
-            mode: 'revise',
-            targetRevision: current.draft.revision + 1,
-            instruction: resumeData.instruction,
-          });
-        }
-        if (resumeData.type === 'regenerate') {
-          return planAndSuspend({
-            mode: 'regenerate',
-            targetRevision: current.draft.revision + 1,
-          });
-        }
-        throw new Error(`Unsupported knowledge.capture review command: ${resumeData.type}`);
+        // A run suspended by the retired draft-review contract must never be
+        // written implicitly after an upgrade. Any resume explicitly retires
+        // the stale draft instead of applying it.
+        await persist({ ...current, phase: 'cancelled', draft: undefined });
+        return KnowledgeCaptureWorkflowOutputSchema.parse({ outcome: 'cancelled' });
       }
 
       if (current.phase === 'recovery') {

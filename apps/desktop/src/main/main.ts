@@ -703,6 +703,7 @@ async function registerBusinessModules(
     userTimeContextPort: settingElectronModule.userTimeContextPort,
   });
 
+  const knowledgeNoteAdapter = new DesktopKnowledgeNotePersistenceAdapter(localVaultRuntime);
   const aiComposed = composeAI({
     db,
     localAgent: {
@@ -724,7 +725,8 @@ async function registerBusinessModules(
       isActive: () =>
         mainRuntime?.profileRuntimeManager.getActiveProfileId() === profilePaths.profileId,
     }),
-    knowledgeNotePersistence: new DesktopKnowledgeNotePersistenceAdapter(localVaultRuntime),
+    knowledgeNotePersistence: knowledgeNoteAdapter,
+    knowledgeNoteWrite: knowledgeNoteAdapter,
     knowledgeSourcePort: new DesktopKnowledgeSourceAdapter(localVaultRuntime),
     analyticsReadPort: analyticsReadAdapter,
     goalApplicationPort: goalComposed.applicationPort,

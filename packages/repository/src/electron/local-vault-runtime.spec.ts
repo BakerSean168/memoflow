@@ -680,6 +680,109 @@ describe('LocalVaultRuntime', () => {
     });
   });
 
+  it('writes directly, fences stale overwrites, and replays one request idempotently', async () => {
+    await selectVault();
+    const request = {
+      relativePath: 'Agent/Direct note.md',
+      contentMarkdown: '# Direct note\n\nversion one',
+      knowledgeDocumentId: KnowledgeDocumentIdSchema.parse(SECOND_DOCUMENT_ID),
+      requestId: 'direct-1',
+    };
+
+    const created = await runtime.writeNote(request);
+    const replayed = await runtime.writeNote(request);
+
+    expect(created.created).toBe(true);
+    expect(replayed.created).toBe(false);
+    expect(created.note.knowledgeDocumentId).toBe(SECOND_DOCUMENT_ID);
+    expect(created.note.contentMarkdown).toContain('version one');
+
+    await expect(
+      runtime.writeNote({ ...request, requestId: 'direct-2', contentMarkdown: '# v2' }),
+    ).rejects.toMatchObject<Partial<LocalVaultRuntimeError>>({ code: 'CONFLICT' });
+    await expect(
+      runtime.writeNote({
+        ...request,
+        requestId: 'direct-3',
+        contentMarkdown: '# v2',
+        expectedContentHash: '0'.repeat(64),
+      }),
+    ).rejects.toMatchObject<Partial<LocalVaultRuntimeError>>({ code: 'CONFLICT' });
+    await expect(
+      runtime.writeNote({
+        ...request,
+        requestId: 'direct-1',
+        contentMarkdown: '# different content',
+      }),
+    ).rejects.toMatchObject<Partial<LocalVaultRuntimeError>>({ code: 'CONFLICT' });
+
+    const current = await runtime.readNote({ relativePath: request.relativePath });
+    const updated = await runtime.writeNote({
+      relativePath: request.relativePath,
+      contentMarkdown: '# Direct note\n\nversion two',
+      requestId: 'direct-4',
+      expectedContentHash: current.contentHash,
+    });
+    expect(updated.created).toBe(false);
+    expect(updated.note.contentMarkdown).toContain('version two');
+    expect(updated.note.knowledgeDocumentId).toBe(SECOND_DOCUMENT_ID);
+    expect(await fs.promises.readdir(path.join(vault, 'Agent'))).toEqual(['Direct note.md']);
+  });
+
+  it('refuses direct writes that escape the Vault, cross bindings, or target symlinks', async () => {
+    await selectVault();
+    const base = {
+      contentMarkdown: '# Escape attempt',
+      knowledgeDocumentId: KnowledgeDocumentIdSchema.parse(SECOND_DOCUMENT_ID),
+    };
+    await expect(
+      runtime.writeNote({ ...base, relativePath: '../escape.md', requestId: 'escape-1' }),
+    ).rejects.toMatchObject<Partial<LocalVaultRuntimeError>>({ code: 'VALIDATION_ERROR' });
+    await expect(
+      runtime.writeNote({
+        ...base,
+        relativePath: '/absolute.md',
+        requestId: 'escape-2',
+      }),
+    ).rejects.toMatchObject<Partial<LocalVaultRuntimeError>>({ code: 'VALIDATION_ERROR' });
+    await expect(
+      runtime.writeNote({
+        ...base,
+        expectedBindingId: 'other-vault',
+        relativePath: 'Safe.md',
+        requestId: 'escape-3',
+      }),
+    ).rejects.toMatchObject<Partial<LocalVaultRuntimeError>>({ code: 'CONFLICT' });
+
+    const outsideFile = path.join(root, 'outside.md');
+    await fs.promises.writeFile(outsideFile, '# Outside');
+    await fs.promises.symlink(outsideFile, path.join(vault, 'Linked.md'));
+    await expect(
+      runtime.writeNote({
+        ...base,
+        relativePath: 'Linked.md',
+        requestId: 'escape-4',
+        expectedContentHash: '0'.repeat(64),
+      }),
+    ).rejects.toMatchObject<Partial<LocalVaultRuntimeError>>({ code: 'FORBIDDEN' });
+    expect(await fs.promises.readFile(outsideFile, 'utf8')).toBe('# Outside');
+
+    await runtime.writeNote({
+      relativePath: 'Agent/First.md',
+      contentMarkdown: '# First',
+      knowledgeDocumentId: KnowledgeDocumentIdSchema.parse(SECOND_DOCUMENT_ID),
+      requestId: 'identity-1',
+    });
+    await expect(
+      runtime.writeNote({
+        relativePath: 'Agent/Second.md',
+        contentMarkdown: '# Second',
+        knowledgeDocumentId: KnowledgeDocumentIdSchema.parse(SECOND_DOCUMENT_ID),
+        requestId: 'identity-2',
+      }),
+    ).rejects.toMatchObject<Partial<LocalVaultRuntimeError>>({ code: 'CONFLICT' });
+  });
+
   it('detaches without deleting user files and no longer exposes the binding as active', async () => {
     await selectVault();
     await fs.promises.writeFile(path.join(vault, 'Keep.md'), '# Keep');

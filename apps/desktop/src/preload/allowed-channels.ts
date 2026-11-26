@@ -39,6 +39,8 @@ export const SUPPORTED_REPOSITORY_CHANNELS = [
   RepositoryChannels.LOCAL_VAULT_SEARCH,
   RepositoryChannels.LOCAL_VAULT_OPEN_OBSIDIAN,
   RepositoryChannels.LOCAL_VAULT_NOTE_WRITE_CONFIRMED,
+  RepositoryChannels.LOCAL_VAULT_NOTE_WRITE,
+  RepositoryChannels.LOCAL_VAULT_GIT_DIFF,
 ] as const;
 
 export const ALLOWED_CHANNELS = [

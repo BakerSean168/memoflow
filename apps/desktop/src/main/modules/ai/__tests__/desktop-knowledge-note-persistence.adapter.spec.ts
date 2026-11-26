@@ -8,18 +8,23 @@ function createLocalVaultPort(): LocalVaultElectronPort {
     selectVault: vi.fn(),
     detachVault: vi.fn(),
     scanVault: vi.fn(),
+    getGitChanges: vi.fn(),
+    getGitDiff: vi.fn(),
+    listRecentWrites: vi.fn(),
     readNote: vi.fn(),
     findNoteById: vi.fn(),
     dispose: vi.fn(),
     searchVault: vi.fn(),
     openInObsidian: vi.fn(),
-    writeConfirmedNote: vi.fn(async () => ({
+    writeNote: vi.fn(async () => ({
       created: true,
       note: {
         relativePath: 'Research/Approved.md',
         knowledgeDocumentId: 'kdoc_550e8400-e29b-41d4-a716-446655440520' as never,
         title: 'Approved',
         excerpt: 'Reviewed body',
+        contentHash: 'a'.repeat(64),
+        aliases: [],
         tags: ['agent'],
         outgoingLinks: ['Source'],
         size: 31,
@@ -28,33 +33,53 @@ function createLocalVaultPort(): LocalVaultElectronPort {
         frontmatter: { status: 'reviewed' },
       },
     })),
+    writeConfirmedNote: vi.fn(),
     inspectSyncContent: vi.fn(async () => 'NonEmpty'),
   };
 }
 
 describe('DesktopKnowledgeNotePersistenceAdapter', () => {
-  it('refuses local writes without immutable proposal confirmation metadata', async () => {
+  it('writes directly without per-note proposal metadata and derives a stable request id', async () => {
     const localVault = createLocalVaultPort();
     const adapter = new DesktopKnowledgeNotePersistenceAdapter(localVault);
 
-    await expect(
-      adapter.createKnowledgeNote({
+    await adapter.createKnowledgeNote({
+      identityId: 'identity-1',
+      context: {
         identityId: 'identity-1',
-        path: 'Research/Unconfirmed.md',
-        fileName: 'Unconfirmed.md',
-        content: '# Unconfirmed',
-        knowledgeDocumentId: 'kdoc_550e8400-e29b-41d4-a716-446655440520' as never,
-      }),
-    ).rejects.toThrow(/confirmed knowledge-note proposal/i);
+        requestId: 'tool-request',
+        traceId: 'trace-1',
+        startedAt: 1,
+        source: 'ipc',
+      },
+      path: 'Research/Unconfirmed.md',
+      fileName: 'Unconfirmed.md',
+      content: '# Unconfirmed',
+      knowledgeDocumentId: 'kdoc_550e8400-e29b-41d4-a716-446655440520' as never,
+    });
+
+    expect(localVault.writeNote).toHaveBeenCalledWith({
+      relativePath: 'Research/Unconfirmed.md',
+      knowledgeDocumentId: 'kdoc_550e8400-e29b-41d4-a716-446655440520',
+      contentMarkdown: '# Unconfirmed',
+      requestId: 'tool-request:kdoc_550e8400-e29b-41d4-a716-446655440520:1',
+    });
     expect(localVault.writeConfirmedNote).not.toHaveBeenCalled();
   });
 
-  it('writes the approved revision and maps the Vault note to the AI resource contract', async () => {
+  it('maps the Vault note to the AI resource contract', async () => {
     const localVault = createLocalVaultPort();
     const adapter = new DesktopKnowledgeNotePersistenceAdapter(localVault);
 
     const result = await adapter.createKnowledgeNote({
       identityId: 'identity-1',
+      context: {
+        identityId: 'identity-1',
+        requestId: 'tool-request',
+        traceId: 'trace-1',
+        startedAt: 1,
+        source: 'ipc',
+      },
       path: 'Research/Approved.md',
       fileName: 'Approved.md',
       content: '# Approved\n\nReviewed body',
@@ -65,12 +90,10 @@ describe('DesktopKnowledgeNotePersistenceAdapter', () => {
       requestId: 'request-1',
     });
 
-    expect(localVault.writeConfirmedNote).toHaveBeenCalledWith({
+    expect(localVault.writeNote).toHaveBeenCalledWith({
       relativePath: 'Research/Approved.md',
       knowledgeDocumentId: 'kdoc_550e8400-e29b-41d4-a716-446655440520',
       contentMarkdown: '# Approved\n\nReviewed body',
-      proposalId: 'proposal-1',
-      proposalRevision: 4,
       requestId: 'request-1',
     });
     expect(result.note).toMatchObject({
@@ -83,6 +106,33 @@ describe('DesktopKnowledgeNotePersistenceAdapter', () => {
     });
   });
 
+  it('forwards expected hashes for direct updates', async () => {
+    const localVault = createLocalVaultPort();
+    const adapter = new DesktopKnowledgeNotePersistenceAdapter(localVault);
+
+    await adapter.writeKnowledgeNote({
+      identityId: 'identity-1',
+      context: {
+        identityId: 'identity-1',
+        requestId: 'tool-request',
+        traceId: 'trace-1',
+        startedAt: 1,
+        source: 'ipc',
+      },
+      relativePath: 'Research/Approved.md',
+      contentMarkdown: '# Approved\n\nNew body',
+      requestId: 'direct-1',
+      expectedContentHash: 'b'.repeat(64),
+    });
+
+    expect(localVault.writeNote).toHaveBeenCalledWith({
+      relativePath: 'Research/Approved.md',
+      contentMarkdown: '# Approved\n\nNew body',
+      requestId: 'direct-1',
+      expectedContentHash: 'b'.repeat(64),
+    });
+  });
+
   it('rejects a Web repository source on the Desktop persistence host', async () => {
     const localVault = createLocalVaultPort();
     const adapter = new DesktopKnowledgeNotePersistenceAdapter(localVault);
@@ -90,6 +140,13 @@ describe('DesktopKnowledgeNotePersistenceAdapter', () => {
     await expect(
       adapter.createKnowledgeNote({
         identityId: 'identity-1',
+        context: {
+          identityId: 'identity-1',
+          requestId: 'tool-request',
+          traceId: 'trace-1',
+          startedAt: 1,
+          source: 'ipc',
+        },
         path: 'Research/Approved.md',
         fileName: 'Approved.md',
         content: '# Approved',
@@ -100,6 +157,6 @@ describe('DesktopKnowledgeNotePersistenceAdapter', () => {
         requestId: 'request-1',
       }),
     ).rejects.toThrow(/requires a local Vault source/i);
-    expect(localVault.writeConfirmedNote).not.toHaveBeenCalled();
+    expect(localVault.writeNote).not.toHaveBeenCalled();
   });
 });

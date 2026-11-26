@@ -280,15 +280,22 @@ export function projectKnowledgeCaptureRun(
   let result: Extract<AIWorkflowRunView, { kind: 'knowledge.capture' }>['result'];
 
   if (lowLevelStatus === 'suspended') {
-    status = 'suspended';
     const parsed = KnowledgeWorkflowSuspensionSchema.safeParse(lifecycleRecord?.suspendPayload);
     if (!parsed.success) throw new Error('AI_WORKFLOW_SNAPSHOT_CORRUPT');
-    suspension = parsed.data;
-    if (
-      suspension.type === 'recovery_required' &&
-      suspension.receipt?.kind === 'knowledge.capture'
-    ) {
-      result = suspension.receipt.receipt;
+    // #1097 retired the draft-review contract. A legacy run suspended for
+    // review is projected as cancelled so no UI can confirm its old draft;
+    // the workflow itself also cancels on any resume command.
+    if (parsed.data.type === 'knowledge_draft_review') {
+      status = 'cancelled';
+    } else {
+      status = 'suspended';
+      suspension = parsed.data;
+      if (
+        suspension.type === 'recovery_required' &&
+        suspension.receipt?.kind === 'knowledge.capture'
+      ) {
+        result = suspension.receipt.receipt;
+      }
     }
   } else if (lowLevelStatus === 'canceled') {
     status = 'cancelled';

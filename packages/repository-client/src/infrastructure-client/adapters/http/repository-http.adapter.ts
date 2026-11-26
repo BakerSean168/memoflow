@@ -1,4 +1,5 @@
 import type { LocalVaultGitChanges } from '@memoflow/repository-contracts';
+import type { LocalVaultGitDiff } from '@memoflow/repository-contracts';
 import type { LocalVaultWriteReceipt } from '@memoflow/repository-contracts';
 /**
  * Repository HTTP Adapter
@@ -21,6 +22,8 @@ import type {
   OpenLocalVaultInObsidianReq,
   ConfirmedLocalVaultWriteReq,
   ConfirmedLocalVaultWriteRes,
+  LocalVaultNoteWriteReq,
+  LocalVaultNoteWriteRes,
   CompleteKnowledgeRepositoryInstallationReq,
   CompleteKnowledgeRepositoryInstallationRes,
   CreateKnowledgeRepositoryConnectionReq,
@@ -344,6 +347,16 @@ export class RepositoryHttpAdapter implements IRepositoryApiClient {
   async writeConfirmedLocalVaultNote(
     _request: ConfirmedLocalVaultWriteReq,
   ): Promise<Result<ConfirmedLocalVaultWriteRes>> {
+    return this.localVaultUnavailable();
+  }
+
+  async writeLocalVaultNote(
+    _request: LocalVaultNoteWriteReq,
+  ): Promise<Result<LocalVaultNoteWriteRes>> {
+    return this.localVaultUnavailable();
+  }
+
+  async getLocalVaultGitDiff(_relativePath: string): Promise<Result<LocalVaultGitDiff>> {
     return this.localVaultUnavailable();
   }
 }
