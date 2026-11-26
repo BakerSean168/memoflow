@@ -149,7 +149,8 @@ const TextareaStub = defineComponent({
 const AvatarUploaderStub = defineComponent({
   name: 'AccountAvatarUploader',
   props: ['avatarUrl', 'initials', 'disabled', 'sizeClass', 'testId'],
-  setup(props) {
+  setup(props, { expose }) {
+    expose({ reset: () => undefined, save: async () => true });
     return () =>
       h('div', {
         'data-testid': props.testId,
