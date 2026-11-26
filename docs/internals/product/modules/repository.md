@@ -3,7 +3,7 @@ tags:
   - product
   - module
   - repository
-description: Obsidian 知识连接、Desktop 本地确认写入与 Web 只读上下文
+description: Obsidian 知识连接、Desktop 授权直接写入与 Web 只读上下文
 created: 2026-06-02T00:00:00
 updated: 2026-11-26T00:00:00+08:00
 ---
@@ -12,17 +12,17 @@ updated: 2026-11-26T00:00:00+08:00
 
 ## 定位与边界
 
-知识模块连接用户已有的 Obsidian/Markdown 资产，为 MemoFlow 对话与业务提供上下文，并在 Desktop 完成确认后的本地交付。笔记阅读、日常编辑和文件管理交给 Obsidian，Git 同步交给用户选择的外部工具。
+知识模块连接用户已有的 Obsidian/Markdown 资产，为 MemoFlow 对话与业务提供上下文，并在 Desktop 完成会话授权后的直接本地交付。笔记阅读、日常编辑和文件管理交给 Obsidian，Git 同步交给用户选择的外部工具。
 
 当前权威决策是 [ADR-126](../../decisions/ADR-126-obsidian-knowledge-connection-and-read-only-web.md)。它取代旧方案中的内置文件工作台、Desktop Git 同步和 Web 创建笔记。
 
-| 能力               | Desktop                                               | Web                                    |
-| ------------------ | ----------------------------------------------------- | -------------------------------------- |
-| 连接知识源         | 选择本地 Vault 文件夹，按 Profile 持有                | 授权已有 GitHub 私有仓库，只读默认分支 |
-| 创建笔记           | 用户审核、确认后写入本地 Vault，保留幂等收据          | 不允许，API/AI/workflow 同样禁止       |
-| 编辑与管理现有笔记 | 在 Obsidian 中打开                                    | 提供 GitHub 原文入口；MemoFlow 不修改  |
-| `@` 上下文         | 查询本地笔记，包括无 MemoFlow 元数据的普通 Markdown   | 查询服务端已有投影，包括普通 Markdown  |
-| 同步               | Obsidian Sync、Obsidian Git 或外部 Git 工具由用户配置 | 读取外部工具已推送到 GitHub 的内容     |
+| 能力               | Desktop                                                  | Web                                    |
+| ------------------ | -------------------------------------------------------- | -------------------------------------- |
+| 连接知识源         | 选择本地 Vault 文件夹，按 Profile 持有                   | 授权已有 GitHub 私有仓库，只读默认分支 |
+| 创建/修改笔记      | 会话授权后直接写入本地 Vault，版本/hash fence + 幂等收据 | 不允许，API/AI/workflow 同样禁止       |
+| 编辑与管理现有笔记 | 在 Obsidian 中打开                                       | 提供 GitHub 原文入口；MemoFlow 不修改  |
+| `@` 上下文         | 查询本地笔记，包括无 MemoFlow 元数据的普通 Markdown      | 查询服务端已有投影，包括普通 Markdown  |
+| 同步               | Obsidian Sync、Obsidian Git 或外部 Git 工具由用户配置    | 读取外部工具已推送到 GitHub 的内容     |
 
 ## 页面与连接状态
 
@@ -32,7 +32,7 @@ Desktop 顶部工具栏展示当前 Vault 名称、笔记筛选、刷新和 Obsi
 
 内容区展示关联目标的笔记与当前 Git 工作区变更，可分别筛选。关联按稳定文档 ID 读取并解析当前路径；Git 观察覆盖 Vault 范围内暂存、未暂存和未跟踪的 Markdown，不展示兄弟目录文件。新增、修改、删除、重命名和冲突使用文字与颜色标记，删除项不能打开。无 Git 仓库或 Git 不可用与“没有变更”分别呈现；刷新失败保留可用关联并给出反馈。
 
-Git 状态仅在打开页面、返回页面或显式刷新时只读观察，不启动 watcher、提交或同步，也不把全部工作区变更冒充为 AI 或 MemoFlow 的写入。confirmed-write ledger 仍保留为幂等交付事实；未保存草稿由原会话持有，用户回到会话继续审核。
+知识工作区是唯一入口：Desktop 展示来源连接、健康、业务关联、只读 Git 工作区变更与按路径 Diff，并可打开 Obsidian；Web 在同一入口保留 GitHub 只读连接、投影状态和原文链接。Git 状态仅在打开页面、返回页面或显式刷新时只读观察，不启动 watcher、提交或同步，也不把全部工作区变更冒充为 AI 或 MemoFlow 的写入。写入账本仍保留为幂等交付事实；旧的独立知识投影页面已退休。
 
 Web 展示仓库、实际默认分支、投影状态、刷新连接状态和断开操作。未配置 GitHub App 是中性能力状态，普通网络/认证故障仍显示失败反馈。安装流程支持回调、轮询、取消等待和失败重试；显式回调优先于旧 sessionStorage intent。
 
@@ -46,7 +46,7 @@ Mastra 和 Native Agent 都能读取显式选中的普通笔记；Native 使用 
 
 ## 服务端只读
 
-API 不装配知识写 persistence；Web 不执行 create/adopt、Git commit、Desktop token 颁发、HEAD 确认或旧正文回放。Goal Plan 含知识新建时，在创建其他对象前拒绝；关联已有文档继续支持。旧 capture 草稿可查看和取消，不能继续落库。
+API 不装配知识写 persistence；Web 不执行 create/adopt、Git commit、Desktop token 颁发、HEAD 确认或旧正文回放。Goal Plan 含知识新建时，在创建其他对象前拒绝；关联已有文档继续支持。升级前挂起的 capture 审核草稿只可取消，不能被静默写入。
 
 GitHub App token 显式降为 Contents/Metadata read。GitHub 登录和知识源安装授权仍分开。连接资格要求 private、非 archived/disabled、installation 可用且能够读取；无需 push 权限。
 

@@ -36,7 +36,6 @@ import { provideTaskNativeSurface } from './useTaskNativeSurface';
 import { provideGoalNativeSurface } from './useGoalNativeSurface';
 import { canLeaveBusinessSurface } from './surface-leave-protocol';
 import { GoalSurfaceLeaveGuardKey, GoalSurfaceStatusSinkKey } from '@memoflow/goal-ui';
-import { provideKnowledgeNativeSurface } from './useKnowledgeNativeSurface';
 import { useNativeBusinessPanelBridge } from './useNativeBusinessPanelBridge';
 import { useShellRouterSync, moduleForPath, returnFromSettingsScene } from './useShellRouterSync';
 import { isStandaloneSettingsPath } from './shell-scene';
@@ -128,7 +127,6 @@ provide(GoalSurfaceStatusSinkKey, {
 });
 provide(GoalSurfaceLeaveGuardKey, (t, to) => canLeaveBusinessSurface(t, to));
 provideTaskNativeSurface();
-provideKnowledgeNativeSurface();
 useNativeBusinessPanelBridge(goalNativeSurface);
 
 // ── 宿主环境（沿 isDesktopEnvironment 分支模式，V2 决策 #6） ──

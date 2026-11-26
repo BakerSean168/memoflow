@@ -130,23 +130,6 @@ export default {
       Unchecked: 'GitHub not checked',
     },
   },
-  capture: {
-    title: 'Review AI knowledge note',
-    description: 'Review the note and choose where to save it. Approve when you are ready.',
-    noteTitle: 'Title',
-    topic: 'Topic',
-    path: 'Relative path',
-    pathHint:
-      'Use a repository/Vault-relative Markdown path. Absolute filesystem paths are never accepted.',
-    source: 'Knowledge source',
-    sourcePlaceholder: 'Select a Knowledge source',
-    tags: 'Tags',
-    markdown: 'Markdown',
-    openReview: 'Open Knowledge review',
-    confirm: 'Approve note',
-    confirming: 'Approving…',
-    validationFailed: 'Review the required fields before approving.',
-  },
   writeRequestLedger: {
     title: 'Write request ledger',
     description:
@@ -232,6 +215,11 @@ export default {
     goalLink: 'Goal · {title}',
     openNote: 'Open “{title}” in Obsidian',
     deletedNote: 'This note has been deleted and cannot be opened',
+    showDiff: 'View diff',
+    hideDiff: 'Hide diff',
+    diffUnavailable: 'The diff is unavailable for this change.',
+    emptyDiff: 'No textual diff for this file.',
+    diffTruncated: 'The diff was truncated.',
     status: {
       added: 'Added',
       modified: 'Modified',

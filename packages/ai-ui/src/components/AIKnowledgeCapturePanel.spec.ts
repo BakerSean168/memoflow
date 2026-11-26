@@ -11,12 +11,10 @@ const i18n = createI18n({
   messages: {
     'en-US': {
       common: { cancel: 'Cancel' },
-      repository: { capture: { openReview: 'Open Knowledge review' } },
       aiAssistant: {
         errors: { workflowExecutionFailed: 'Execution failed' },
         chatPage: {
           workflow: {
-            knowledgeCaptureAwaitingApprovalHint: 'Review note',
             cancelRemaining: 'Cancel remaining',
             status: {
               running: 'Running',
@@ -42,46 +40,6 @@ const i18n = createI18n({
 });
 
 describe('AIKnowledgeCapturePanel', () => {
-  it('keeps raw stable identity out of the normal panel and opens native Repository review', async () => {
-    const documentId = 'kdoc_550e8400-e29b-41d4-a716-446655440530';
-    const wrapper = mount(AIKnowledgeCapturePanel, {
-      global: { plugins: [i18n] },
-      props: {
-        toolMode: 'knowledge-capture',
-        knowledgeCaptureRun: {
-          runId: 'run-review',
-          conversationId: 'conv-review',
-          kind: 'knowledge.capture',
-          status: 'suspended',
-          createdAt: 1,
-          updatedAt: 2,
-          suspension: {
-            type: 'knowledge_draft_review',
-            revision: 1,
-            warnings: [],
-            draft: {
-              revision: 1,
-              knowledgeDocumentId: documentId,
-              title: 'Stable identity',
-              topic: 'Review stable identity',
-              markdown: '# Stable identity',
-              targetSubpath: 'Notes/Stable.md',
-              tags: [],
-              duplicateRisk: '',
-            },
-          },
-        },
-      },
-    });
-
-    expect(wrapper.text()).not.toContain(documentId);
-    expect(wrapper.find('[data-testid="knowledge-capture-workflow-document-id"]').exists()).toBe(
-      false,
-    );
-    await wrapper.get('[data-testid="knowledge-capture-open-native-review"]').trigger('click');
-    expect(wrapper.emitted('open-native-review')).toHaveLength(1);
-  });
-
   it('redacts raw knowledge persistence failure messages and retains recovery actions', async () => {
     const wrapper = mount(AIKnowledgeCapturePanel, {
       global: { plugins: [i18n] },

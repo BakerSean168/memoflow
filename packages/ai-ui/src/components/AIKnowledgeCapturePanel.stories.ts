@@ -7,32 +7,6 @@ import AIKnowledgeCapturePanel from './AIKnowledgeCapturePanel.vue';
 type PanelProps = InstanceType<typeof AIKnowledgeCapturePanel>['$props'];
 type KnowledgeCaptureRun = Extract<AIWorkflowRunView, { kind: 'knowledge.capture' }>;
 
-const reviewRun: KnowledgeCaptureRun = AIWorkflowRunViewSchema.parse({
-  runId: 'workflow-knowledge-review',
-  kind: 'knowledge.capture',
-  conversationId: 'conversation-knowledge',
-  status: 'suspended',
-  suspension: {
-    type: 'knowledge_draft_review',
-    revision: 2,
-    warnings: [],
-    draft: {
-      revision: 2,
-      knowledgeDocumentId: 'kdoc_550e8400-e29b-41d4-a716-446655440530',
-      title: 'Annual planning review brief',
-      topic:
-        'Summary of the planning review, open risks and the decisions that still need an owner.',
-      markdown:
-        '# Annual planning review brief\n\n## Decisions\n\n- Keep the quarterly review cadence.\n- Assign the risk log to the planning owner.\n',
-      targetSubpath: 'notes/annual-planning-review.md',
-      tags: ['planning', 'review', 'q4'],
-      duplicateRisk: '',
-    },
-  },
-  createdAt: 1,
-  updatedAt: 2,
-}) as KnowledgeCaptureRun;
-
 const recoveryRun: KnowledgeCaptureRun = AIWorkflowRunViewSchema.parse({
   runId: 'workflow-knowledge-recovery',
   kind: 'knowledge.capture',
@@ -75,10 +49,10 @@ const completedRun: KnowledgeCaptureRun = AIWorkflowRunViewSchema.parse({
 
 const baseProps: PanelProps = {
   toolMode: 'knowledge-capture',
-  knowledgeCaptureRun: reviewRun,
+  knowledgeCaptureRun: recoveryRun,
   busy: false,
-  canRetryExecution: false,
-  canCancelRemainingExecution: false,
+  canRetryExecution: true,
+  canCancelRemainingExecution: true,
 };
 
 const meta = {
@@ -102,24 +76,6 @@ const meta = {
 
 export default meta;
 type Story = StoryObj<typeof meta>;
-
-/** Draft review: title, topic, tags and the native Repository review entry. */
-export const DraftReview: Story = {
-  play: async ({ canvasElement }) => {
-    const page = within(canvasElement.ownerDocument.body);
-    await expect(page.getByTestId('knowledge-capture-workflow-panel')).toBeVisible();
-    await expect(page.getByTestId('knowledge-capture-workflow-revision')).toHaveTextContent(
-      'rev 2',
-    );
-    await expect(page.getByTestId('knowledge-capture-workflow-panel')).toHaveTextContent(
-      'Annual planning review brief',
-    );
-    await expect(page.getByTestId('knowledge-capture-workflow-panel')).toHaveTextContent(
-      'planning',
-    );
-    await expect(page.getByTestId('knowledge-capture-open-native-review')).toBeVisible();
-  },
-};
 
 /** Clarification stays display-only because the main Composer owns the answer. */
 export const Clarification: Story = {

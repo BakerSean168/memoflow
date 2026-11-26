@@ -22,10 +22,7 @@ export interface GoalAIEditSurface {
 
 import type { GoalClientDTO } from '@memoflow/goal-contracts';
 import type { TaskPlanClientDTO } from '@memoflow/task-contracts';
-import type { ConfirmedLocalVaultWriteReq } from '@memoflow/repository-contracts';
 import type { GoalNativeEditSession } from '@memoflow/goal-client';
-import type { KnowledgeCaptureNativeDraft } from './host-ports/knowledge-session';
-import type { KnowledgeDraft } from '@memoflow/ai-contracts';
 import type { InjectionKey, Ref, ShallowRef } from 'vue';
 import type { PlatformLabelCatalog, PlatformRendererHost } from '@memoflow/ui-host-contracts';
 import type { RouteLocationNormalized } from 'vue-router';
@@ -44,15 +41,10 @@ import type { TaskClientPort } from '@memoflow/task-client';
 import type { RepositoryClientPort } from '@memoflow/repository-client';
 import type { LabelClientDTO } from '@memoflow/label-contracts';
 import type { TaskNativeEditSession } from './host-ports/task-session';
-import type { KnowledgeCaptureNativeEditSession } from './host-ports/knowledge-session';
 
 export type IAIClient = AIClientPort;
 export type IWorkflowRuntimeService = WorkflowRuntimeClient;
 export type ComposerDensity = 'comfortable' | 'compact' | 'icon';
-interface KnowledgeSurface {
-  openCreate(): Promise<KnowledgeCaptureNativeEditSession>;
-  locate(): KnowledgeCaptureNativeEditSession | null;
-}
 /**
  * AI renderer dependencies supplied by the application composition root.
  *
@@ -60,7 +52,6 @@ interface KnowledgeSurface {
  * declares the AI slots.
  */
 export interface AiUiHost extends PlatformRendererHost {
-  nativeDraftFromKnowledgeDraft: (draft: KnowledgeDraft) => KnowledgeCaptureNativeDraft;
   useGoalNativeSurface: () => GoalAIEditSurface;
   useKnowledgeContextNotes: () => {
     notes: Ref<
@@ -90,17 +81,6 @@ export interface AiUiHost extends PlatformRendererHost {
     load(options?: { query?: string; limit?: number }): Promise<void>;
     cancel(): void;
   };
-  openLocalAgentNoteReview: (options: {
-    content: string;
-    surface: KnowledgeSurface;
-    bindingId: string;
-    currentBindingId(): Promise<string | null>;
-    persist(
-      request: ConfirmedLocalVaultWriteReq,
-    ): Promise<{ note: { knowledgeDocumentId: string | null } }>;
-    onSaved(documentId: string): Promise<void>;
-    onError?(error: unknown): void;
-  }) => Promise<void>;
   useRecentKnowledgeNotes: () => {
     notes: Ref<
       Array<{
@@ -145,12 +125,6 @@ export interface AiUiHost extends PlatformRendererHost {
     openCreate(): Promise<TaskNativeEditSession>;
     locate(): TaskNativeEditSession | null;
   };
-  useKnowledgeNativeSurface(): KnowledgeSurface;
-  useKnowledgeNativeSurfaceRegistration():
-    | (KnowledgeSurface & {
-        register(path: string, session: KnowledgeCaptureNativeEditSession): () => void;
-      })
-    | null;
   useAppShellStore(): {
     rightPanelOpen: boolean;
     panelSurface: string;

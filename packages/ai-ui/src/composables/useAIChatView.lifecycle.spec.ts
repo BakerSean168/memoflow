@@ -951,10 +951,17 @@ describe('AI conversation restoration and business navigation', () => {
           : kind === 'task.create'
             ? fixture.task
             : fixture.knowledge;
-      expect(workflow.projectRun).toHaveBeenCalledWith(
-        expect.objectContaining({ kind, runId: 'history-run' }),
-        false,
-      );
+      if (kind === 'knowledge.capture') {
+        // Direct writes have no native review surface to keep closed.
+        expect(workflow.projectRun).toHaveBeenCalledWith(
+          expect.objectContaining({ kind, runId: 'history-run' }),
+        );
+      } else {
+        expect(workflow.projectRun).toHaveBeenCalledWith(
+          expect.objectContaining({ kind, runId: 'history-run' }),
+          false,
+        );
+      }
       expect(fixture.session.chatConversationId.value).toBe('history-conversation');
       expect(fixture.openGoal).not.toHaveBeenCalled();
       expect(fixture.openTask).not.toHaveBeenCalled();

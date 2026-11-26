@@ -15,13 +15,11 @@ describe('stable knowledge-note persisted-ref boundary', () => {
   );
   const desktopSource = readFileSync(resolve(dir, 'desktop-knowledge-source.adapter.ts'), 'utf8');
 
-  it('uses the reviewed KnowledgeDocumentId for Desktop confirmed persisted refs', () => {
+  it('uses the stable KnowledgeDocumentId for Desktop direct persisted refs', () => {
     expect(desktop).toContain('id: note.knowledgeDocumentId');
-    expect(desktop).toContain(
-      'Confirmed Local Vault write did not return a stable KnowledgeDocumentId',
-    );
+    expect(desktop).toContain('Local Vault write did not return a stable KnowledgeDocumentId');
     expect(desktop).not.toContain("createHash('sha256').update(note.relativePath)");
-    expect(desktop).toContain('writeConfirmedNote');
+    expect(desktop).toContain('writeNote');
     expect(desktop).toContain('LocalVaultNoteDTO');
     expect(desktop).not.toContain('createConfirmedKnowledgeNote');
   });

@@ -5700,16 +5700,6 @@
       ]
     },
     {
-      "path": "packages/app-vue/src/layouts/shell/useKnowledgeNativeSurface.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/app-vue/vitest.store-coverage.config.ts"
-      ]
-    },
-    {
       "path": "packages/app-vue/src/layouts/shell/useNativeBusinessPanelBridge.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -9360,15 +9350,7 @@
       "measurementCollectors": []
     },
     {
-      "path": "packages/repository-ui/src/components/KnowledgeCaptureReviewDialog.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/repository-ui/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
-      "path": "packages/repository-ui/src/composables/localAgentNoteReview.spec.ts",
+      "path": "packages/repository-ui/src/components/KnowledgeSourceConnections.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/repository-ui/vitest.config.ts"
@@ -9409,14 +9391,6 @@
     },
     {
       "path": "packages/repository-ui/src/utils/local-vault-workspace.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/repository-ui/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
-      "path": "packages/repository-ui/src/views/KnowledgeProjectionWorkspaceView.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/repository-ui/vitest.config.ts"
@@ -13553,7 +13527,7 @@
       "type": "measurement",
       "suite": "coverage",
       "runner": "vitest",
-      "fileCount": 94
+      "fileCount": 93
     },
     {
       "id": "packages/data-portability/vitest.config.ts",
@@ -14103,7 +14077,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 94
+      "fileCount": 93
     },
     {
       "id": "packages/assets/vitest.config.ts",
@@ -14320,7 +14294,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 9
+      "fileCount": 7
     },
     {
       "id": "packages/repository/vitest.config.ts",
@@ -14783,7 +14757,6 @@
       "packages/app-vue/src/layouts/shell/sync-status-indicator.presentation.spec.ts",
       "packages/app-vue/src/layouts/shell/unverified-email-banner.spec.ts",
       "packages/app-vue/src/layouts/shell/useAppShellStore.spec.ts",
-      "packages/app-vue/src/layouts/shell/useKnowledgeNativeSurface.spec.ts",
       "packages/app-vue/src/layouts/shell/useNativeBusinessPanelBridge.spec.ts",
       "packages/app-vue/src/layouts/shell/usePanelWidth.spec.ts",
       "packages/app-vue/src/layouts/shell/useShellRouterSync.spec.ts",
@@ -15178,7 +15151,7 @@
   "duplicate": [],
   "unexpected": [],
   "counts": {
-    "unit": 1252,
+    "unit": 1249,
     "integration": 63,
     "smoke": 3,
     "boundary-ipc": 7,

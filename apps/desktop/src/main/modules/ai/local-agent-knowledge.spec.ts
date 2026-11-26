@@ -28,6 +28,16 @@ it('reads a confirmed local Vault note through MCP and rejects paths as document
     () => true,
     { getUserTimeContext: async () => createTimeContext({ timeZone: 'UTC', weekStartsOn: 1 }) },
     new DesktopKnowledgeSourceAdapter(runtime),
+    undefined,
+    undefined,
+    undefined,
+    {
+      knowledgeNoteWrites: {
+        writeKnowledgeNote: async () => {
+          throw new Error('external MCP clients must not reach the direct Vault write');
+        },
+      },
+    },
   );
   try {
     const ordinary = '# Ordinary knowledge\n\nUnmanaged orchard evidence.';
@@ -89,6 +99,10 @@ it('reads a confirmed local Vault note through MCP and rejects paths as document
     ) as Array<{ name: string; inputSchema: unknown; outputSchema: unknown }>;
     expect(knowledgeEntries.map((tool) => tool.name)).toEqual(
       expect.arrayContaining(['knowledge_search', 'knowledge_get']),
+    );
+    // Direct Vault writes are a native-session capability only.
+    expect(knowledgeEntries.map((tool) => tool.name)).not.toEqual(
+      expect.arrayContaining(['knowledge_note_create', 'knowledge_note_update']),
     );
     for (const tool of knowledgeEntries) {
       expect(tool.inputSchema).toMatchObject({ type: 'object' });

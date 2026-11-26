@@ -4,7 +4,7 @@ import { createI18n } from 'vue-i18n';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { fail, ok } from '@memoflow/transport-contracts/result';
 import { REPOSITORY_SERVICE_KEY } from '@repository-ui-test-host/di/keys';
-import KnowledgeProjectionWorkspaceView from './KnowledgeProjectionWorkspaceView.vue';
+import KnowledgeSourceConnections from './KnowledgeSourceConnections.vue';
 import { useGitHubKnowledgeConnection } from '../composables/useGitHubKnowledgeConnection';
 const route = reactive({ name: 'repository', query: {} as Record<string, string> });
 vi.mock('vue-router', () => ({
@@ -40,7 +40,7 @@ beforeEach(() => {
 describe('Web read-only knowledge connection', () => {
   it('renders an unconnected source as neutral state with no write or preview surface', async () => {
     const api = { listKnowledgeRepositoryConnections: vi.fn(async () => ok({ connections: [] })) };
-    const wrapper = mount(KnowledgeProjectionWorkspaceView, options(api));
+    const wrapper = mount(KnowledgeSourceConnections, options(api));
     await flushPromises();
     expect(wrapper.find('[data-testid="knowledge-not-connected"]').exists()).toBe(true);
     expect(wrapper.find('[role="alert"]').exists()).toBe(false);
@@ -57,7 +57,7 @@ describe('Web read-only knowledge connection', () => {
         }),
       ),
     };
-    const wrapper = mount(KnowledgeProjectionWorkspaceView, options(api));
+    const wrapper = mount(KnowledgeSourceConnections, options(api));
     await flushPromises();
     expect(wrapper.find('[data-testid="knowledge-not-configured"]').exists()).toBe(true);
     expect(wrapper.find('[role="alert"]').exists()).toBe(false);

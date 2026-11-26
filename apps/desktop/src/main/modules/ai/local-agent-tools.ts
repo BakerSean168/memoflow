@@ -727,14 +727,11 @@ export function createDesktopLocalAgentTools(
             const parsedCode = GatewayFailureCodeSchema.safeParse(
               error instanceof Error && 'code' in error ? error.code : undefined,
             );
-            const code =
-              error instanceof Error && error.message.includes('expected content hash')
-                ? 'CONFLICT'
-                : parsedCode.success
-                  ? parsedCode.data
-                  : error instanceof z.ZodError
-                    ? 'VALIDATION_ERROR'
-                    : 'INTERNAL_ERROR';
+            const code = parsedCode.success
+              ? parsedCode.data
+              : error instanceof z.ZodError
+                ? 'VALIDATION_ERROR'
+                : 'INTERNAL_ERROR';
             return {
               isError: true,
               content: [{ type: 'text' as const, text: code }],

@@ -1869,12 +1869,37 @@ describe('MastraAIRuntime Assistant tool policy', () => {
 const workflowRequests = [
   { kind: 'goal.create', conversationId: 'durable-goal', input: { idea: 'Plan a durable goal' } },
   { kind: 'task.create', conversationId: 'durable-task', input: { idea: 'Plan a durable task' } },
-  {
-    kind: 'knowledge.capture',
-    conversationId: 'durable-knowledge',
-    input: { topic: 'Capture durable workflow notes' },
-  },
 ] satisfies AIWorkflowStartClientRequest[];
+
+it('runs knowledge.capture detached through the direct write and never waits for review', async () => {
+  const { runtime, createConfirmedKnowledgeNote } = await createRuntime();
+  const identityId = 'detached-knowledge-owner';
+  const started = await runtime.startDetached({
+    context: context(identityId, 'detached-knowledge-start'),
+    request: {
+      kind: 'knowledge.capture',
+      conversationId: 'durable-knowledge',
+      input: { topic: 'Capture durable workflow notes' },
+    },
+  });
+  expect(started).toMatchObject({ kind: 'knowledge.capture', status: 'running' });
+  await vi.waitFor(
+    async () => {
+      expect(await runtime.get({ identityId, runId: started.runId })).toMatchObject({
+        status: 'completed',
+        result: { status: 'success', revision: 1 },
+      });
+    },
+    { timeout: 5_000 },
+  );
+  expect(createConfirmedKnowledgeNote).toHaveBeenCalledTimes(1);
+  const replay = await runtime.resumeDetached({
+    context: context(identityId, 'terminal-knowledge-replay'),
+    request: { runId: started.runId, command: { type: 'approve' } },
+  });
+  expect(replay.status).toBe('completed');
+  expect(createConfirmedKnowledgeNote).toHaveBeenCalledTimes(1);
+});
 
 describe.each(workflowRequests)('MastraAIRuntime $kind durable boundary', (request) => {
   it('acknowledges detached work before completion and does not redispatch a running resume', async () => {
@@ -2052,7 +2077,14 @@ describe('MastraAIRuntime workflow queries', () => {
     const { runtime, summarizeUsage } = await createRuntime();
     const identityId = 'query-owner';
     const runs = [];
-    for (const request of workflowRequests) {
+    for (const request of [
+      ...workflowRequests,
+      {
+        kind: 'knowledge.capture' as const,
+        conversationId: 'query-knowledge',
+        input: { topic: 'Query knowledge' },
+      },
+    ]) {
       runs.push(await runtime.start({ context: context(identityId, 'query-start'), request }));
     }
     const [goal, task, knowledge] = runs;
@@ -2573,8 +2605,8 @@ describe('MastraAIRuntime goal.create product projection', () => {
   });
 });
 
-describe('MastraAIRuntime knowledge.capture product projection', () => {
-  it('keeps read-only Web capture history cancellable without allowing new or resumed writes', async () => {
+describe('MastraAIRuntime knowledge.capture direct write', () => {
+  it('keeps read-only Web capture history readable while refusing new writes', async () => {
     const desktop = await createRuntime();
     const identityId = 'identity-read-only';
     const start = {
@@ -2582,11 +2614,12 @@ describe('MastraAIRuntime knowledge.capture product projection', () => {
       request: {
         kind: 'knowledge.capture' as const,
         conversationId: 'history',
-        input: { topic: 'Existing draft' },
+        input: { topic: 'Existing note' },
         locale: 'en-US',
       },
     };
-    const draft = await desktop.runtime.start(start);
+    const written = await desktop.runtime.start(start);
+    expect(written.status).toBe('completed');
     await desktop.runtime.dispose();
     const web = await createRuntime(desktop.file, undefined, false);
     await expect(web.runtime.start(start)).rejects.toMatchObject({
@@ -2595,29 +2628,21 @@ describe('MastraAIRuntime knowledge.capture product projection', () => {
     await expect(web.runtime.startDetached(start)).rejects.toMatchObject({
       category: 'capability_unsupported',
     });
-    expect(await web.runtime.get({ identityId, runId: draft.runId })).toMatchObject({
-      status: 'suspended',
+    expect(await web.runtime.get({ identityId, runId: written.runId })).toMatchObject({
+      status: 'completed',
     });
-    const approval = {
-      context: context(identityId, 'approve-web'),
-      request: { runId: draft.runId, command: { type: 'approve' as const } },
-    };
-    await expect(web.runtime.resume(approval)).rejects.toMatchObject({
-      category: 'capability_unsupported',
-    });
-    await expect(web.runtime.resumeDetached(approval)).rejects.toMatchObject({
-      category: 'capability_unsupported',
-    });
-    const cancelled = await web.runtime.resume({
-      context: context(identityId, 'cancel-web'),
-      request: { runId: draft.runId, command: { type: 'cancel' } },
-    });
-    expect(cancelled.status).toBe('cancelled');
+    // A terminal replay stays read-only instead of invoking the disabled writer.
+    expect(
+      await web.runtime.resume({
+        context: context(identityId, 'approve-web'),
+        request: { runId: written.runId, command: { type: 'approve' } },
+      }),
+    ).toMatchObject({ status: 'completed' });
     expect(web.createConfirmedKnowledgeNote).not.toHaveBeenCalled();
-    expect(desktop.createConfirmedKnowledgeNote).not.toHaveBeenCalled();
+    expect(desktop.createConfirmedKnowledgeNote).toHaveBeenCalledTimes(1);
   });
 
-  it('owns start/get/list/resume and persists a note only after approval', async () => {
+  it('writes the note during start without a review suspension and replays a duplicate approve', async () => {
     const { runtime, createConfirmedKnowledgeNote } = await createRuntime();
     const identityId = 'identity-knowledge';
 
@@ -2634,179 +2659,43 @@ describe('MastraAIRuntime knowledge.capture product projection', () => {
     expect(started).toMatchObject({
       kind: 'knowledge.capture',
       conversationId: 'conversation-knowledge',
-      status: 'suspended',
-      suspension: {
-        type: 'knowledge_draft_review',
-        revision: 1,
-        draft: { revision: 1, title: 'Mastra durable workflow notes' },
-      },
-    });
-    expect(await runtime.get({ identityId: 'identity-b', runId: started.runId })).toBeNull();
-    expect(await runtime.list({ identityId })).toHaveLength(1);
-    // No note write should occur before explicit approval.
-    expect(createConfirmedKnowledgeNote).not.toHaveBeenCalled();
-    const reviewedDocumentId =
-      started.suspension?.type === 'knowledge_draft_review'
-        ? started.suspension.draft.knowledgeDocumentId
-        : '';
-    expect(reviewedDocumentId).toMatch(/^kdoc_[0-9a-f-]{36}$/i);
-
-    const revised = await runtime.resume({
-      context: context(identityId, 'request-kedit'),
-      request: {
-        runId: started.runId,
-        command: {
-          type: 'edit_structured',
-          patch: {
-            title: 'Mastra durable workflow notes revised',
-            source: { kind: 'repository', connectionId: 'binding-knowledge' },
-          },
-        },
-      },
-    });
-    expect(revised).toMatchObject({
-      status: 'suspended',
-      suspension: {
-        type: 'knowledge_draft_review',
-        revision: 2,
-        draft: {
-          revision: 2,
-          title: 'Mastra durable workflow notes revised',
-          knowledgeDocumentId: reviewedDocumentId,
-          source: { kind: 'repository', connectionId: 'binding-knowledge' },
-        },
-      },
-    });
-    expect(createConfirmedKnowledgeNote).not.toHaveBeenCalled();
-
-    const completed = await runtime.resume({
-      context: context(identityId, 'request-kapprove'),
-      request: { runId: started.runId, command: { type: 'approve' } },
-    });
-    expect(completed).toMatchObject({
-      runId: started.runId,
       status: 'completed',
       result: {
         workflowRunId: started.runId,
-        revision: 2,
+        revision: 1,
         status: 'success',
       },
     });
+    expect(started.suspension).toBeUndefined();
+    expect(await runtime.get({ identityId: 'identity-b', runId: started.runId })).toBeNull();
+    expect(await runtime.list({ identityId })).toHaveLength(1);
     expect(createConfirmedKnowledgeNote).toHaveBeenCalledTimes(1);
     const createCall = createConfirmedKnowledgeNote.mock.calls[0]?.[0];
     expect(createCall).toMatchObject({
       workflowRunId: started.runId,
-      revision: 2,
-      knowledgeDocumentId: reviewedDocumentId,
-      source: { kind: 'repository', connectionId: 'binding-knowledge' },
-      path: 'Notes/Engineering',
-      title: 'Mastra durable workflow notes revised',
+      revision: 1,
+      source: { kind: 'local_vault' },
+      title: 'Mastra durable workflow notes',
     });
-    // requestId is a deterministic idempotency key, not a caller-supplied value.
+    expect(createCall.knowledgeDocumentId).toMatch(/^kdoc_[0-9a-f-]{36}$/i);
     expect(typeof createCall.requestId).toBe('string');
-    expect(createCall.requestId.length).toBeGreaterThan(0);
-    expect(createCall.context).toMatchObject({
-      identityId,
-      requestId: 'request-kapprove',
-    });
+    expect(createCall.context).toMatchObject({ identityId, requestId: 'request-kstart' });
 
-    // Double-approve after terminal completion is idempotent.
+    // A duplicate terminal resume is idempotent and never writes twice.
     const duplicateApprove = await runtime.resume({
       context: context(identityId, 'request-kapprove-again'),
       request: { runId: started.runId, command: { type: 'approve' } },
     });
-    expect(duplicateApprove).toEqual(completed);
+    expect(duplicateApprove).toEqual(started);
     expect(createConfirmedKnowledgeNote).toHaveBeenCalledTimes(1);
   });
-  it('fails closed on approval without an owner-selected source', async () => {
-    const { runtime, createConfirmedKnowledgeNote } = await createRuntime();
-    const started = await runtime.start({
-      context: context('identity-source', 'start-source'),
-      request: {
-        kind: 'knowledge.capture',
-        conversationId: 'source-conversation',
-        input: { topic: 'Source selection' },
-        locale: 'en-US',
-      },
-    });
-    const result = await runtime.resume({
-      context: context('identity-source', 'approve-source'),
-      request: { runId: started.runId, command: { type: 'approve' } },
-    });
-    expect(result.status).toBe('failed');
-    expect(createConfirmedKnowledgeNote).not.toHaveBeenCalled();
-  });
 
-  it('preserves owner source across revise, clarification, regenerate and durable reload', async () => {
-    const { runtime, createConfirmedKnowledgeNote } = await createRuntime();
-    const identityId = 'identity-preserve-source';
-    const started = await runtime.start({
-      context: context(identityId, 'start-preserve'),
-      request: {
-        kind: 'knowledge.capture',
-        conversationId: 'preserve-source',
-        input: { topic: 'Durable owner source' },
-        locale: 'en-US',
-      },
-    });
-    const selected = { kind: 'repository' as const, connectionId: 'owner-binding' };
-    await runtime.resume({
-      context: context(identityId, 'select-source'),
-      request: {
-        runId: started.runId,
-        command: { type: 'edit_structured', patch: { source: selected } },
-      },
-    });
-    vi.mocked(runtime.knowledgeCapturePlanner.plan).mockResolvedValueOnce({
-      status: 'needs_clarification',
-      reason: 'More context',
-      questions: ['Which topic?'],
-    });
-    await runtime.resume({
-      context: context(identityId, 'revise-source'),
-      request: {
-        runId: started.runId,
-        command: { type: 'revise_natural_language', instruction: 'Clarify topic' },
-      },
-    });
-    const answered = await runtime.resume({
-      context: context(identityId, 'answer-source'),
-      request: { runId: started.runId, command: { type: 'answer', answers: ['Durability'] } },
-    });
-    expect(answered.suspension).toMatchObject({
-      type: 'knowledge_draft_review',
-      revision: 3,
-      draft: { source: selected },
-    });
-    const regenerated = await runtime.resume({
-      context: context(identityId, 'regenerate-source'),
-      request: { runId: started.runId, command: { type: 'regenerate' } },
-    });
-    expect(regenerated.suspension).toMatchObject({
-      type: 'knowledge_draft_review',
-      revision: 4,
-      draft: { source: selected },
-    });
-    expect((await runtime.get({ identityId, runId: started.runId }))?.suspension).toMatchObject({
-      draft: { source: selected },
-    });
-    const switched = await runtime.resume({
-      context: context(identityId, 'switch-source'),
-      request: {
-        runId: started.runId,
-        command: { type: 'edit_structured', patch: { source: { kind: 'local_vault' } } },
-      },
-    });
-    expect(switched.suspension).toMatchObject({
-      revision: 5,
-      draft: { source: { kind: 'local_vault' } },
-    });
-    expect(createConfirmedKnowledgeNote).not.toHaveBeenCalled();
-  });
-
-  it('retains reviewed source, revision and stable identity through host recovery retry', async () => {
+  it('surfaces a failed owner write as retryable recovery and replays one request on retry', async () => {
     const { runtime, createConfirmedKnowledgeNote } = await createRuntime();
     const identityId = 'identity-retry-source';
+    createConfirmedKnowledgeNote.mockResolvedValueOnce(
+      error('SERVICE_UNAVAILABLE', 'Host temporarily unavailable') as never,
+    );
     const started = await runtime.start({
       context: context(identityId, 'start-retry'),
       request: {
@@ -2816,35 +2705,21 @@ describe('MastraAIRuntime knowledge.capture product projection', () => {
         locale: 'en-US',
       },
     });
-    await runtime.resume({
-      context: context(identityId, 'select-retry'),
-      request: {
-        runId: started.runId,
-        command: { type: 'edit_structured', patch: { source: { kind: 'local_vault' } } },
-      },
+    expect(started.suspension).toMatchObject({ type: 'recovery_required', retryable: true });
+    expect(started.result).toMatchObject({ status: 'failed', revision: 1, retryable: true });
+    expect((await runtime.get({ identityId, runId: started.runId }))?.suspension).toMatchObject({
+      type: 'recovery_required',
     });
-    createConfirmedKnowledgeNote.mockResolvedValueOnce(
-      error('SERVICE_UNAVAILABLE', 'Host temporarily unavailable') as never,
-    );
-    const recovery = await runtime.resume({
-      context: context(identityId, 'approve-retry'),
-      request: { runId: started.runId, command: { type: 'approve' } },
-    });
-    expect(recovery.suspension).toMatchObject({ type: 'recovery_required', retryable: true });
-    expect(recovery.result).toMatchObject({ status: 'failed', revision: 2, retryable: true });
-    const restored = await runtime.get({ identityId, runId: started.runId });
-    expect(restored?.suspension).toMatchObject({ type: 'recovery_required' });
-    expect(restored?.result).toMatchObject({ status: 'failed', revision: 2, retryable: true });
     const completed = await runtime.resume({
       context: context(identityId, 'retry-host'),
       request: { runId: started.runId, command: { type: 'retry' } },
     });
-    expect(completed).toMatchObject({ status: 'completed', result: { revision: 2 } });
+    expect(completed).toMatchObject({ status: 'completed', result: { revision: 1 } });
     expect(createConfirmedKnowledgeNote).toHaveBeenCalledTimes(2);
     const first = createConfirmedKnowledgeNote.mock.calls[0]?.[0];
     expect(createConfirmedKnowledgeNote.mock.calls[1]?.[0]).toMatchObject({
       source: { kind: 'local_vault' },
-      revision: 2,
+      revision: 1,
       knowledgeDocumentId: first.knowledgeDocumentId,
       requestId: first.requestId,
     });

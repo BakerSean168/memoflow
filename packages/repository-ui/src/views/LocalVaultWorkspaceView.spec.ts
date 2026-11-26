@@ -85,6 +85,15 @@ function service(state = 'Available') {
         ],
       }),
     ),
+    getLocalVaultGitDiff: vi.fn(async (relativePath: string) =>
+      ok({
+        relativePath,
+        state: 'ready',
+        patch: `diff --git a/${relativePath} b/${relativePath}\n+changed`,
+        truncated: false,
+        observedAt: 1,
+      }),
+    ),
     openLocalVaultInObsidian: vi.fn(async () => ok(undefined)),
   };
 }
@@ -101,7 +110,7 @@ function options(api: ReturnType<typeof service>) {
         }),
       ],
       provide: { [REPOSITORY_SERVICE_KEY as symbol]: api },
-      stubs: { Button, ProductSingleSelectFilter: Filter, KnowledgeCaptureReviewDialog: true },
+      stubs: { Button, ProductSingleSelectFilter: Filter },
     },
   };
 }
@@ -135,13 +144,31 @@ describe('Local Vault connection workspace', () => {
     expect(api.scanLocalVault).toHaveBeenCalledTimes(1);
     wrapper.unmount();
   });
+  it('shows the real Git diff for a changed note without attributing every change to AI', async () => {
+    const api = service();
+    const wrapper = mount(LocalVaultWorkspaceView, options(api));
+    await flushPromises();
+    await wrapper
+      .get('[data-note-path="notes/saved.md"] [data-testid="knowledge-note-diff-toggle"]')
+      .trigger('click');
+    await flushPromises();
+    expect(api.getLocalVaultGitDiff).toHaveBeenCalledWith('notes/saved.md');
+    expect(wrapper.get('[data-testid="knowledge-note-diff"]').text()).toContain('+changed');
+    await wrapper
+      .get('[data-note-path="notes/saved.md"] [data-testid="knowledge-note-diff-toggle"]')
+      .trigger('click');
+    expect(wrapper.find('[data-testid="knowledge-note-diff"]').exists()).toBe(false);
+    wrapper.unmount();
+  });
   it('filters linked notes and keeps deleted entries visible without an open action', async () => {
     const api = service();
     const wrapper = mount(LocalVaultWorkspaceView, options(api));
     await flushPromises();
     expect(wrapper.findAll('[data-note-path]')).toHaveLength(3);
     expect(
-      wrapper.get('[data-note-path="notes/deleted.md"] button').attributes('disabled'),
+      wrapper
+        .get('[data-note-path="notes/deleted.md"] [data-testid="knowledge-note-open"]')
+        .attributes('disabled'),
     ).toBeDefined();
     await wrapper.get('select').setValue('linked');
     expect(wrapper.findAll('[data-note-path]')).toHaveLength(1);

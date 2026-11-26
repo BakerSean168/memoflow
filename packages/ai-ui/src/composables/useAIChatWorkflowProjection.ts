@@ -64,7 +64,7 @@ export function useAIChatWorkflowProjection(options: UseAIChatWorkflowProjection
           break;
         case 'knowledge.capture':
           toolMode.value = 'knowledge-capture';
-          await knowledgeCaptureWorkflow.projectRun(run, false);
+          await knowledgeCaptureWorkflow.projectRun(run);
           break;
       }
       if (run.status === 'failed' || run.status === 'cancelled') {
@@ -113,9 +113,6 @@ export function useAIChatWorkflowProjection(options: UseAIChatWorkflowProjection
         return;
       case 'knowledge.capture':
         await knowledgeCaptureWorkflow.projectRun(run);
-        if (run.suspension?.type === 'knowledge_draft_review') {
-          await maybeRenameCurrentConversation(run.suspension.draft.title);
-        }
         return;
     }
   }

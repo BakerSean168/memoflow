@@ -83,25 +83,28 @@ export function useAIChatView(options: UseAIChatViewOptions) {
   );
   const configurationRevision = inject(AI_CONFIGURATION_REVISION_KEY, undefined);
   const repository = inject(REPOSITORY_SERVICE_KEY, undefined);
-  const knowledgeNativeSurface = aiUiHost.useKnowledgeNativeSurfaceRegistration();
+  /**
+   * Saving a chat message as a note is an explicit user action, so it writes
+   * straight into the selected Vault without an intermediate review dialog.
+   */
   async function saveLocalNote(content: string) {
-    if (assistantSurface !== 'desktop' || !localAgent || !repository || !knowledgeNativeSurface)
-      return;
+    if (assistantSurface !== 'desktop' || !localAgent || !repository) return;
     try {
       const binding = unwrapOrThrowError(await repository.getLocalVaultBinding());
       if (!binding || binding.health.state !== 'Available')
         throw new Error('Select an available local Vault first');
-      await aiUiHost.openLocalAgentNoteReview({
-        content,
-        surface: knowledgeNativeSurface,
-        bindingId: binding.binding.id,
-        currentBindingId: async () =>
-          unwrapOrThrowError(await repository.getLocalVaultBinding())?.binding.id ?? null,
-        persist: async (request) =>
-          unwrapOrThrowError(await repository.writeConfirmedLocalVaultNote(request)),
-        onSaved: requestOpenKnowledgeNote,
-        onError: () => toast.error(t('aiAssistant.local.noteSaveFailed')),
-      });
+      const knowledgeDocumentId = KnowledgeDocumentIdSchema.parse(`kdoc_${crypto.randomUUID()}`);
+      const result = unwrapOrThrowError(
+        await repository.writeLocalVaultNote({
+          expectedBindingId: binding.binding.id,
+          relativePath: `notes/${knowledgeDocumentId}.md`,
+          contentMarkdown: content,
+          requestId: `local-note-save:${knowledgeDocumentId}`,
+          knowledgeDocumentId,
+        }),
+      );
+      const documentId = result.note.knowledgeDocumentId;
+      if (documentId) await requestOpenKnowledgeNote(documentId);
     } catch {
       toast.error(t('aiAssistant.local.noteSaveFailed'));
     }
@@ -741,7 +744,7 @@ export function useAIChatView(options: UseAIChatViewOptions) {
       executionFailureMessage: computed(() =>
         getNativeAgentExecutionFailureMessage(localChoices.lastExecutionFailure.value, t),
       ),
-      canSaveNote: assistantSurface === 'desktop' && Boolean(repository && knowledgeNativeSurface),
+      canSaveNote: assistantSurface === 'desktop' && Boolean(repository),
       saveNote: saveLocalNote,
       async select(choice: import('@memoflow/ai-contracts').AssistantRuntimeChoice) {
         const key =

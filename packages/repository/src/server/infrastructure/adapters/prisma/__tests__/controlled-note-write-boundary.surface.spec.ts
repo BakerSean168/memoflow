@@ -56,7 +56,7 @@ describe('controlled note-write boundary surface', () => {
     'utf8',
   );
   const projectionWorkspace = readFileSync(
-    resolve(repoRoot, 'packages/repository-ui/src/views/KnowledgeProjectionWorkspaceView.vue'),
+    resolve(repoRoot, 'packages/repository-ui/src/components/KnowledgeSourceConnections.vue'),
     'utf8',
   );
   const localVaultWorkspace = readFileSync(
@@ -84,6 +84,7 @@ describe('controlled note-write boundary surface', () => {
     expect(clientPort).not.toMatch(/updateLocalVaultNote|saveLocalVaultNote|patchLocalVaultNote/);
 
     expect(apiClientPort).toContain('writeConfirmedLocalVaultNote');
+    expect(apiClientPort).toContain('writeLocalVaultNote');
     // Application port is server-side GitHub projection; Local Vault write is Desktop-only.
     expect(applicationPort).not.toContain('writeConfirmedLocalVaultNote');
   });
@@ -96,24 +97,21 @@ describe('controlled note-write boundary surface', () => {
     expect(knowledgeRoutes).not.toMatch(/method:\s*'(put|patch)'/);
   });
 
-  it('Desktop Local Vault write is exclusive create + confirmed proposal metadata only', () => {
-    expect(localVaultRuntime).toContain('writeConfirmedNote');
+  it('Desktop Local Vault write is direct, atomic and hash-fenced', () => {
+    expect(localVaultRuntime).toContain('writeNote');
+    expect(localVaultRuntime).toContain('expectedContentHash');
+    expect(localVaultRuntime).toContain('atomicReplace');
     expect(localVaultRuntime).toContain("open(candidate, 'wx'");
     expect(localVaultRuntime).toContain('A Vault note already exists at this path');
-    expect(localVaultRuntime).toContain('Confirmed proposal metadata is required');
     expect(localVaultRuntime).not.toMatch(/open\(candidate,\s*'w'/);
     expect(localVaultRuntime).not.toMatch(/open\(candidate,\s*'a'/);
-    expect(localVaultRuntime).not.toContain('updateNote(');
-    expect(localVaultRuntime).not.toContain('overwriteNote');
 
-    expect(electronIndex).toContain('LOCAL_VAULT_NOTE_WRITE_CONFIRMED');
-    expect(electronIndex).toContain('writeConfirmedNote');
+    expect(electronIndex).toContain('LOCAL_VAULT_NOTE_WRITE');
+    expect(electronIndex).toContain('LOCAL_VAULT_GIT_DIFF');
     expect(repositoryChannels).toContain(
-      "LOCAL_VAULT_NOTE_WRITE_CONFIRMED: 'repository:local-vault:note:write-confirmed'",
+      "LOCAL_VAULT_NOTE_WRITE: 'repository:local-vault:note:write'",
     );
-    expect(repositoryChannels).not.toMatch(
-      /LOCAL_VAULT_NOTE_UPDATE|LOCAL_VAULT_NOTE_SAVE|LOCAL_VAULT_NOTE_PATCH/,
-    );
+    expect(repositoryChannels).toContain("LOCAL_VAULT_GIT_DIFF: 'repository:local-vault:git-diff'");
   });
 
   it('confirmed-create DTOs and AI schema require proposal confirmation', () => {
@@ -151,7 +149,7 @@ describe('controlled note-write boundary surface', () => {
       /updateKnowledgeNote|saveKnowledgeNote|writeConfirmedLocalVaultNote|editExistingNote/,
     );
 
-    // Desktop opens files in Obsidian and keeps reviewed create in its existing workflow.
+    // Desktop opens files in Obsidian; AI writes happen outside this view.
     expect(localVaultWorkspace).toContain('openLocalVaultInObsidian');
     expect(localVaultWorkspace).not.toContain('createConfirmedKnowledgeNote');
     expect(localVaultWorkspace).not.toMatch(

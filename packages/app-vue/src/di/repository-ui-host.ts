@@ -8,7 +8,6 @@ import ProductSurfaceState from '../shared/components/ProductSurfaceState.vue';
 import ProductDialogShell from '../shared/components/ProductDialogShell.vue';
 import ProductSheetSurface from '../shared/components/ProductSheetSurface.vue';
 import { renderSafeMarkdown, stripMarkdownFrontmatter } from '../shared/utils/safe-markdown';
-import { useKnowledgeNativeSurfaceRegistration } from '../layouts/shell/useKnowledgeNativeSurface';
 import {
   SERVER_STATE_IDENTITY_SCOPE_KEY,
   SERVER_STATE_RUNTIME_KEY,
@@ -38,7 +37,6 @@ export function installRepositoryUiHost(): void {
     useKnowledgeBusinessLinks,
     stripMarkdownFrontmatter,
     renderSafeMarkdown,
-    useKnowledgeNativeSurfaceRegistration,
     recentKnowledgeQueryKeys,
     RECENT_KNOWLEDGE_STALE_TIME_MS,
   });

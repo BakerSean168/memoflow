@@ -16,10 +16,7 @@ export { repositoryRoutes } from './router';
 // Views
 export { default as RepositoryEntryView } from './views/RepositoryEntryView.vue';
 export { default as LocalVaultWorkspaceView } from './views/LocalVaultWorkspaceView.vue';
-export { default as KnowledgeProjectionWorkspaceView } from './views/KnowledgeProjectionWorkspaceView.vue';
-
-// Components
-export * from './components';
+export { default as KnowledgeSourceConnections } from './components/KnowledgeSourceConnections.vue';
 
 // Host
 export {

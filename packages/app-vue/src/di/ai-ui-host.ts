@@ -1,7 +1,5 @@
-import { nativeDraftFromKnowledgeDraft } from '@memoflow/repository-ui';
 import { useGoalNativeSurface } from '@memoflow/goal-ui';
 import { useKnowledgeContextNotes, useReferenceableKnowledgeNotes } from '@memoflow/repository-ui';
-import { openLocalAgentNoteReview } from '@memoflow/repository-ui';
 import { useRecentKnowledgeNotes } from '@memoflow/repository-ui';
 import { useTask } from '@memoflow/task-ui';
 import { useGoal } from '@memoflow/goal-ui';
@@ -26,10 +24,6 @@ import {
   SHELL_COMPOSER_MOUNT_KEY,
   TASK_SERVICE_KEY,
 } from '../di/keys';
-import {
-  useKnowledgeNativeSurface,
-  useKnowledgeNativeSurfaceRegistration,
-} from '../layouts/shell/useKnowledgeNativeSurface';
 import { useTaskNativeSurface } from '../layouts/shell/useTaskNativeSurface';
 import { useLabelCatalog } from '../shared/composables/useLabelCatalog';
 import { semanticElevationClass } from '../shared/constants/semantic-elevation';
@@ -42,11 +36,9 @@ import { installPlatformRendererHost } from './platform-ui-host';
 export function installAiUiHost(): void {
   bindAiUiHost({
     ...installPlatformRendererHost(),
-    nativeDraftFromKnowledgeDraft: (...args) => nativeDraftFromKnowledgeDraft(...args),
     useGoalNativeSurface: (...args) => useGoalNativeSurface(...args),
     useKnowledgeContextNotes,
     useReferenceableKnowledgeNotes: (...args) => useReferenceableKnowledgeNotes(...args),
-    openLocalAgentNoteReview: (...args) => openLocalAgentNoteReview(...args),
     useRecentKnowledgeNotes: (...args) => useRecentKnowledgeNotes(...args),
     useTask: (...args) => useTask(...args),
     useGoal: (...args) => useGoal(...args),
@@ -71,8 +63,6 @@ export function installAiUiHost(): void {
     semanticToneStatusClass,
     subscribeWorkspaceEvents,
     useAppShellStore,
-    useKnowledgeNativeSurface,
-    useKnowledgeNativeSurfaceRegistration,
     useLabelCatalog,
     useTaskNativeSurface,
   });

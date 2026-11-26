@@ -18,13 +18,6 @@ export default mergeConfig(
         ),
       },
       {
-        find: '@repository-ui-test-host/layouts/shell/useKnowledgeNativeSurface',
-        replacement: path.resolve(
-          import.meta.dirname,
-          'src/composables/useKnowledgeNativeSurface.ts',
-        ),
-      },
-      {
         find: /^@repository-ui-test-host\/(.+)$/,
         replacement: path.resolve(import.meta.dirname, '../app-vue/src/$1'),
       },

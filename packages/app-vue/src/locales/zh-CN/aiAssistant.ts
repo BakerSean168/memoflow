@@ -401,9 +401,6 @@ export default {
       taskLinkedGoalLabel: '关联目标（可选）',
       taskLinkedGoalNone: '不关联目标',
       linkedGoalFromContext: '已从当前上下文关联目标',
-      knowledgeCaptureCollectingHint:
-        '在对话中描述知识主题，然后启动知识捕获工作流。生成的笔记草稿会显示在这里供审阅。',
-      knowledgeCaptureAwaitingApprovalHint: '请审阅生成的知识笔记草稿，确认后保存到知识库。',
       status: {
         running: '运行中',
         suspended: '等待确认',

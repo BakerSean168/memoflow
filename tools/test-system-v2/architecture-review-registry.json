@@ -509,7 +509,7 @@
         "status": "none-verified",
         "testFiles": []
       },
-      "sourceSha256": "f81f89bc967dd6aa7201b59fc6cf2c852e3338cc08e8f0a4ed2eec8ebcd0cbfd"
+      "sourceSha256": "3ecb70bea7cf4874ec0dd0a18308dd7b8fe651a135ccc160383dd9a2cb1e88c5"
     },
     {
       "path": "apps/desktop/src/main/runtime/compose-goal.surface.spec.ts",

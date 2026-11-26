@@ -4,18 +4,11 @@ import type { KnowledgeDocumentRef } from '@memoflow/repository-contracts';
 import type { RepositoryClientPort } from '@memoflow/repository-client';
 import type { ElectronBridge } from '@memoflow/ipc-client';
 import type { PlatformRendererHost, PlatformServerStateRuntime } from '@memoflow/ui-host-contracts';
-import type { KnowledgeCaptureNativeEditSession } from './composables/knowledgeCaptureNativeEditSession';
 
 /** Panel transition status; single declaration lives in the platform contract. */
 export type { PanelSurfaceStatus } from '@memoflow/ui-host-contracts';
 /** Panel width shape; single declaration lives in the platform contract. */
 export type { PanelWidthContext, PanelWidthTier } from '@memoflow/ui-host-contracts';
-
-export interface KnowledgeNativeSurfaceHost {
-  openCreate(): Promise<KnowledgeCaptureNativeEditSession>;
-  locate(): KnowledgeCaptureNativeEditSession | null;
-  register(fullPath: string, session: KnowledgeCaptureNativeEditSession): () => void;
-}
 
 /**
  * Renderer composition dependencies. Platform capabilities come from
@@ -47,7 +40,6 @@ export interface RepositoryUiHost extends PlatformRendererHost {
   ) => Promise<KnowledgeBusinessLink[]>;
   stripMarkdownFrontmatter(source: string): string;
   renderSafeMarkdown(source: string): string;
-  useKnowledgeNativeSurfaceRegistration(): KnowledgeNativeSurfaceHost | null;
   recentKnowledgeQueryKeys: {
     all: readonly unknown[];
     identity?(identityScope: string): QueryKey;

@@ -26,7 +26,7 @@ import { useAuthenticationStore } from '@memoflow/account-ui';
 import { useAppShellStore } from '@memoflow/app-vue/layouts/shell/useAppShellStore';
 import RoutineConfigurationView from '@memoflow/routine-ui/views/RoutineConfigurationView';
 import { NotificationListPage } from '@memoflow/notification-ui';
-import { KnowledgeProjectionWorkspaceView, LocalVaultWorkspaceView } from '@memoflow/repository-ui';
+import { KnowledgeSourceConnections, LocalVaultWorkspaceView } from '@memoflow/repository-ui';
 import { UserSettingsView } from '@memoflow/app-vue';
 import { TaskManagementView } from '@memoflow/task-ui';
 import GlobalConfirmDialog from '@memoflow/app-vue/shared/components/GlobalConfirmDialog.vue';
@@ -223,7 +223,7 @@ const notifications = [
 const components = {
   routine: RoutineConfigurationView,
   notification: NotificationListPage,
-  knowledge: KnowledgeProjectionWorkspaceView,
+  knowledge: KnowledgeSourceConnections,
   'knowledge-local': LocalVaultWorkspaceView,
   settings: UserSettingsView,
 };

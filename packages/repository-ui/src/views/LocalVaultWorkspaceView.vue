@@ -214,6 +214,46 @@
                   }}</span
                 >
               </div>
+              <div v-if="row.change">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  class="h-7 px-2 text-xs text-muted-foreground"
+                  :disabled="diffBusy && diffPath === row.relativePath"
+                  :aria-expanded="diffPath === row.relativePath"
+                  data-testid="knowledge-note-diff-toggle"
+                  @click="toggleDiff(row.relativePath)"
+                  >{{
+                    t(
+                      diffPath === row.relativePath && diff
+                        ? 'repository.workspace.hideDiff'
+                        : 'repository.workspace.showDiff',
+                    )
+                  }}</Button
+                >
+                <p
+                  v-if="diffPath === row.relativePath && diffError"
+                  role="status"
+                  class="text-xs text-muted-foreground"
+                >
+                  {{ t('repository.workspace.diffUnavailable') }}
+                </p>
+                <div
+                  v-else-if="diffPath === row.relativePath && diff"
+                  class="mt-2 rounded-md border border-border/60 bg-muted/20"
+                  data-testid="knowledge-note-diff"
+                >
+                  <pre class="max-h-80 overflow-auto p-3 text-xs leading-5">{{
+                    diff.patch || t('repository.workspace.emptyDiff')
+                  }}</pre>
+                  <p
+                    v-if="diff.truncated"
+                    class="border-t border-border/60 px-3 py-1.5 text-xs text-muted-foreground"
+                  >
+                    {{ t('repository.workspace.diffTruncated') }}
+                  </p>
+                </div>
+              </div>
             </div>
             <Button
               variant="ghost"
@@ -236,11 +276,6 @@
         </TransitionGroup>
       </template>
     </section>
-    <KnowledgeCaptureReviewDialog
-      :open="captureOpen"
-      :source-options="sourceOptions"
-      @update:open="captureOpenChange"
-    />
   </main>
 </template>
 <script setup lang="ts">
@@ -267,8 +302,6 @@ import { unwrapOrThrowError } from '@memoflow/transport-contracts/result';
 import { buildVaultWorkspaceRows } from '../utils/local-vault-workspace';
 import type { KnowledgeBusinessLink } from '../repository-ui-host';
 import { repositoryUiHost } from '../repository-ui-host';
-import KnowledgeCaptureReviewDialog from '../components/KnowledgeCaptureReviewDialog.vue';
-import type { KnowledgeCaptureSourceOption } from '../composables/knowledgeCaptureNativeEditSession';
 const { t } = useI18n();
 const route = useRoute();
 const router = useRouter();
@@ -320,6 +353,10 @@ const tones = {
   conflicted: 'bg-warning/10 text-warning',
 };
 
+const diffPath = ref<string | null>(null);
+const diff = ref<{ patch: string; truncated: boolean } | null>(null);
+const diffBusy = ref(false);
+const diffError = ref(false);
 const loaded = ref(false);
 const busy = ref(false);
 const error = ref('');
@@ -327,18 +364,6 @@ const active = ref(true);
 let epoch = 0;
 let attemptedLink = '';
 const available = computed(() => snapshot.value?.health.state === 'Available');
-const captureOpen = computed(() => route.query.dialog === 'knowledge-capture');
-const sourceOptions = computed<KnowledgeCaptureSourceOption[]>(() =>
-  available.value && snapshot.value
-    ? [
-        {
-          key: 'local_vault',
-          label: snapshot.value.binding.displayName,
-          source: { kind: 'local_vault' },
-        },
-      ]
-    : [],
-);
 async function action(work: () => Promise<void>) {
   if (busy.value || !active.value) return;
   const actionEpoch = epoch;
@@ -391,6 +416,9 @@ async function load() {
   ]);
   if (readEpoch !== epoch || !active.value) return;
   notes.value = nextNotes;
+  diffPath.value = null;
+  diff.value = null;
+  diffError.value = false;
   if (changes.status === 'fulfilled' && changes.value.bindingId === binding.id)
     git.value = changes.value;
   else {
@@ -432,18 +460,36 @@ async function detach() {
     await load();
   });
 }
+async function toggleDiff(relativePath: string) {
+  if (diffPath.value === relativePath && diff.value) {
+    diffPath.value = null;
+    diff.value = null;
+    diffError.value = false;
+    return;
+  }
+  diffPath.value = relativePath;
+  diff.value = null;
+  diffError.value = false;
+  diffBusy.value = true;
+  try {
+    const result = await service.getLocalVaultGitDiff(relativePath);
+    if (diffPath.value !== relativePath) return;
+    if (!result.ok || result.data.state !== 'ready') {
+      diffError.value = true;
+      return;
+    }
+    diff.value = { patch: result.data.patch, truncated: result.data.truncated };
+  } catch {
+    if (diffPath.value === relativePath) diffError.value = true;
+  } finally {
+    if (diffPath.value === relativePath) diffBusy.value = false;
+  }
+}
 function openObsidian(relativePath?: string) {
   return action(async () => {
     const result = await service.openLocalVaultInObsidian(relativePath ? { relativePath } : {});
     if (!result.ok) throw unwrapOrThrowError(result);
   });
-}
-async function captureOpenChange(open: boolean) {
-  if (open) return;
-  const query = { ...route.query };
-  delete query.dialog;
-  await router.replace({ name: 'repository', query });
-  await reload();
 }
 function currentLink() {
   return `${route.query.sourceBindingId ?? ''}:${route.query.notePath ?? ''}:${route.query.note ?? ''}`;
