@@ -151,7 +151,7 @@ const localHealth = {
 const localNotes = [
   {
     relativePath: 'Notes/Engineering/obsidian-integration.md',
-    title: 'Obsidian integration / Obsidian 连接方案',
+    title: 'Obsidian integration',
     knowledgeDocumentId: null,
     excerpt: '',
     contentHash: 'e'.repeat(64),
@@ -163,7 +163,7 @@ const localNotes = [
   },
   {
     relativePath: 'Notes/Journal/weekly-reflection.md',
-    title: 'Weekly reflection / 每周复盘',
+    title: 'Weekly reflection',
     knowledgeDocumentId: null,
     excerpt: '',
     contentHash: 'f'.repeat(64),
