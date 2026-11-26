@@ -1,19 +1,5 @@
 <script setup lang="ts">
-/**
- * AccountProfileEditorDialog — inline profile editing with an unsaved-change guard
- * (Issue #857; visual redesign in Issue #1093).
- *
- * The shell account card only raises `ProfileEditorIntent`; AppShell owns the
- * intent and renders this dialog with `v-model:open`. Fields are inputs from the
- * first paint (no read-then-edit step) and saving reuses the settings profile
- * path (`useAccount().updateMyProfile`) so nickname/bio persist to the active
- * account exactly once, for local and cloud Profiles alike.
- *
- * Guard: from the first edit a persistent bar offers Reset/Save. Closing via the
- * X button, the backdrop or Escape shakes the dialog and reddens the bar instead
- * of discarding the draft. Avatar clicks persist immediately through
- * `AccountAvatarUploader`, so they are not part of the draft.
- */
+/** Profile card editor. Unconfirmed edits also participate in the close guard. */
 import { computed, nextTick, reactive, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import {
@@ -34,7 +20,7 @@ import AccountAvatarUploader from './AccountAvatarUploader.vue';
 const props = defineProps<{ open: boolean }>();
 const emit = defineEmits<{ (event: 'update:open', value: boolean): void }>();
 
-const { t } = useI18n();
+const { t, locale } = useI18n();
 
 const { currentAccount, isLoading, loadMyProfile, updateMyProfile } = useAccount();
 const { avatarUrl } = useAccountAvatar(() => currentAccount.value?.profile?.avatarUrl ?? null);
@@ -50,6 +36,24 @@ type SavePhase = 'idle' | 'saving' | 'success' | 'error';
 const draft = reactive<ProfileDraft>({ nickname: '', bio: '' });
 const baseline = reactive<ProfileDraft>({ nickname: '', bio: '' });
 const saving = ref(false);
+const confirmed = ref(false);
+const avatarDirty = ref(false);
+const avatarBusy = ref(false);
+const bioFocused = ref(false);
+const avatarUploader = ref<InstanceType<typeof AccountAvatarUploader> | null>(null);
+const memberSince = computed(() => {
+  const createdAt = currentAccount.value?.createdAt;
+  if (createdAt == null) return t('account.profileEditor.memberSinceUnavailable');
+  const date = new Date(createdAt);
+  if (Number.isNaN(date.getTime())) return t('account.profileEditor.memberSinceUnavailable');
+  return t('account.profileEditor.memberSince', {
+    date: new Intl.DateTimeFormat(locale.value, {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+    }).format(date),
+  });
+});
 const savePhase = ref<SavePhase>('idle');
 /** True after a blocked close attempt; reddens the bar until the next edit. */
 const guardAlert = ref(false);
@@ -63,14 +67,31 @@ const NICKNAME_MIN_LENGTH = 2;
 const NICKNAME_MAX_LENGTH = 20;
 const BIO_MAX_LENGTH = 500;
 
-const isDirty = computed(() => draft.nickname !== baseline.nickname || draft.bio !== baseline.bio);
+const isDirty = computed(
+  () => draft.nickname !== baseline.nickname || draft.bio !== baseline.bio || avatarDirty.value,
+);
+const showSaveBar = computed(() => isDirty.value && (confirmed.value || guardAlert.value));
+function confirmChanges(event: KeyboardEvent): void {
+  if (event.isComposing || event.shiftKey || fieldsDisabled.value || !isDirty.value) return;
+  event.preventDefault();
+  confirmed.value = isDirty.value;
+}
+function handleAvatarDraft(dirty: boolean): void {
+  avatarDirty.value = dirty;
+  guardAlert.value = false;
+  savePhase.value = 'idle';
+}
 const initials = computed(() => (draft.nickname || 'DU').slice(0, 2).toUpperCase());
 const isNicknameValid = computed(() => {
   const { length } = draft.nickname;
   return length >= NICKNAME_MIN_LENGTH && length <= NICKNAME_MAX_LENGTH;
 });
-const canSave = computed(() => isDirty.value && isNicknameValid.value && !saving.value);
-const fieldsDisabled = computed(() => saving.value || (!currentAccount.value && isLoading.value));
+const canSave = computed(
+  () => showSaveBar.value && isNicknameValid.value && !saving.value && !avatarBusy.value,
+);
+const fieldsDisabled = computed(
+  () => saving.value || avatarBusy.value || (!currentAccount.value && isLoading.value),
+);
 const saveStatusText = computed(() => {
   switch (savePhase.value) {
     case 'saving':
@@ -120,6 +141,9 @@ watch(
     shakeAttempts.value = 0;
     guardAlert.value = false;
     savePhase.value = 'idle';
+    confirmed.value = false;
+    avatarDirty.value = false;
+    avatarUploader.value?.reset();
     if (open) void hydrate();
   },
   { immediate: true },
@@ -149,10 +173,10 @@ function playShake(): void {
   element.animate(
     [
       { transform: 'translateX(0)' },
-      { transform: 'translateX(-7px)', offset: 0.2 },
+      { transform: 'translateX(-8px)', offset: 0.2 },
       { transform: 'translateX(6px)', offset: 0.4 },
       { transform: 'translateX(-4px)', offset: 0.6 },
-      { transform: 'translateX(3px)', offset: 0.8 },
+      { transform: 'translateX(2px)', offset: 0.8 },
       { transform: 'translateX(0)' },
     ],
     { duration: 360, easing: 'cubic-bezier(0.36, 0.07, 0.19, 0.97)' },
@@ -165,7 +189,7 @@ function blockDismiss(): void {
 }
 
 function requestClose(): void {
-  if (saving.value) return;
+  if (saving.value || avatarBusy.value) return;
   if (isDirty.value) {
     blockDismiss();
     return;
@@ -179,19 +203,22 @@ function handleOpenChange(value: boolean): void {
 }
 
 function handleEscapeKeyDown(event: KeyboardEvent): void {
-  if (!isDirty.value) return;
+  if (!isDirty.value && !avatarBusy.value) return;
   event.preventDefault();
   if (!saving.value) blockDismiss();
 }
 
 function handlePointerDownOutside(event: Event): void {
-  if (!isDirty.value) return;
+  if (!isDirty.value && !avatarBusy.value) return;
   event.preventDefault();
   if (!saving.value) blockDismiss();
 }
 
 function handleReset(): void {
-  if (saving.value) return;
+  if (saving.value || avatarBusy.value) return;
+  avatarUploader.value?.reset();
+  avatarDirty.value = false;
+  confirmed.value = false;
   draft.nickname = baseline.nickname;
   draft.bio = baseline.bio;
   guardAlert.value = false;
@@ -203,6 +230,10 @@ async function handleSave(): Promise<void> {
   saving.value = true;
   savePhase.value = 'saving';
   try {
+    if (avatarUploader.value && !(await avatarUploader.value.save())) {
+      savePhase.value = 'error';
+      return;
+    }
     const saved = await updateMyProfile({
       nickname: draft.nickname,
       bio: draft.bio || null,
@@ -211,10 +242,14 @@ async function handleSave(): Promise<void> {
     // existing toast from `useAccount` reports the failure.
     if (saved) {
       adoptPersistedProfile();
+      avatarDirty.value = false;
+      confirmed.value = false;
       savePhase.value = 'success';
     } else {
       savePhase.value = 'error';
     }
+  } catch {
+    savePhase.value = 'error';
   } finally {
     saving.value = false;
   }
@@ -232,7 +267,7 @@ function focusNickname(event: Event): void {
 <template>
   <Dialog :open="open" @update:open="handleOpenChange">
     <DialogContent
-      class="flex max-h-[min(88vh,620px)] w-[calc(100vw-2rem)] max-w-[440px] flex-col gap-0 overflow-hidden rounded-2xl p-0"
+      class="flex max-h-[88dvh] w-[calc(100vw-2rem)] max-w-[440px] bg-card text-card-foreground flex-col gap-0 overflow-hidden rounded-2xl p-0"
       @escape-key-down="handleEscapeKeyDown"
       @pointer-down-outside="handlePointerDownOutside"
       @open-auto-focus="focusNickname"
@@ -244,100 +279,119 @@ function focusNickname(event: Event): void {
         :data-guard="guardAlert ? 'alert' : 'idle'"
         :data-shake-attempts="shakeAttempts"
       >
-        <header class="flex shrink-0 items-start justify-between gap-4 px-6 pt-6 pb-2">
-          <div class="min-w-0 space-y-1">
-            <DialogTitle class="text-base leading-6 font-semibold tracking-[-0.01em]">
-              {{ t('account.profileEditor.title') }}
-            </DialogTitle>
-            <DialogDescription class="text-sm leading-5 text-muted-foreground">
-              {{ t('account.profileEditor.description') }}
-            </DialogDescription>
-          </div>
-          <Button
-            type="button"
-            variant="ghost"
-            size="icon"
-            class="size-8 shrink-0 text-muted-foreground hover:bg-accent hover:text-foreground"
-            :aria-label="t('common.close')"
-            :disabled="saving"
-            data-testid="profile-editor-close"
-            @click="requestClose"
-          >
-            <X class="size-4" aria-hidden="true" />
-          </Button>
-        </header>
+        <DialogTitle class="sr-only">{{ t('account.profileEditor.title') }}</DialogTitle>
+        <DialogDescription class="sr-only">
+          {{ t('account.profileEditor.description') }}
+        </DialogDescription>
+        <div class="min-h-0 flex-1 overflow-y-auto">
+          <header class="relative h-20 shrink-0 rounded-t-2xl bg-accent">
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              class="absolute top-2 right-2 size-8 rounded-full bg-card/80 text-card-foreground hover:bg-card"
+              :aria-label="t('common.close')"
+              :disabled="saving || avatarBusy"
+              data-testid="profile-editor-close"
+              @click="requestClose"
+            >
+              <X class="size-4" aria-hidden="true" />
+            </Button>
+          </header>
 
-        <div class="min-h-0 flex-1 overflow-y-auto px-6 pt-4 pb-6">
-          <div class="flex flex-col gap-6">
-            <AccountAvatarUploader
-              :avatar-url="avatarUrl"
-              :initials="initials"
-              :disabled="fieldsDisabled"
-              size-class="h-16 w-16"
-              test-id="profile-editor-avatar"
-            />
-
-            <div class="flex flex-col gap-4">
-              <div class="flex flex-col gap-2">
-                <Label for="profile-editor-nickname" class="text-sm font-medium">
-                  {{ t('account.profile.nickname') }}
-                </Label>
-                <Input
-                  id="profile-editor-nickname"
-                  ref="nicknameInput"
-                  v-model="draft.nickname"
-                  data-testid="profile-editor-nickname"
-                  :placeholder="t('account.placeholder.nickname')"
+          <div class="px-4 pb-6 sm:px-6">
+            <div class="flex flex-col gap-6">
+              <div class="relative shrink-0">
+                <AccountAvatarUploader
+                  ref="avatarUploader"
+                  class="-mt-10"
+                  @keydown.enter="confirmChanges"
+                  compact
+                  deferred
+                  @draft-change="handleAvatarDraft"
+                  @busy-change="avatarBusy = $event"
+                  :avatar-url="avatarUrl"
+                  :initials="initials"
                   :disabled="fieldsDisabled"
-                  :aria-invalid="!isNicknameValid"
-                  :aria-describedby="!isNicknameValid ? 'profile-editor-nickname-hint' : undefined"
-                  :maxlength="NICKNAME_MAX_LENGTH"
-                  class="aria-invalid:border-destructive aria-invalid:focus-visible:ring-destructive"
+                  size-class="h-20 w-20"
+                  test-id="profile-editor-avatar"
                 />
-                <div class="flex items-start justify-between gap-3">
-                  <p
-                    v-if="!isNicknameValid"
-                    id="profile-editor-nickname-hint"
-                    class="flex items-start gap-1.5 text-xs leading-5 text-destructive"
-                    data-testid="profile-editor-nickname-hint"
-                    role="alert"
-                  >
-                    <CircleAlert class="mt-0.5 size-3.5 shrink-0" aria-hidden="true" />
-                    <span>{{ t('account.profileEditor.nicknameHint') }}</span>
-                  </p>
-                  <span class="flex-1" aria-hidden="true" />
-                  <span
-                    class="shrink-0 text-xs leading-5 text-muted-foreground tabular-nums"
-                    data-testid="profile-editor-nickname-count"
-                  >
-                    {{ draft.nickname.length }}/{{ NICKNAME_MAX_LENGTH }}
-                  </span>
-                </div>
               </div>
 
-              <div class="flex flex-col gap-2">
-                <Label for="profile-editor-bio" class="text-sm font-medium">
-                  {{ t('account.profile.bio') }}
-                </Label>
-                <Textarea
-                  id="profile-editor-bio"
-                  v-model="draft.bio"
-                  class="resize-none"
-                  data-testid="profile-editor-bio"
-                  :placeholder="t('account.placeholder.bio')"
-                  :disabled="fieldsDisabled"
-                  :maxlength="BIO_MAX_LENGTH"
-                  rows="4"
-                />
-                <div class="flex items-center justify-end">
-                  <span
-                    class="text-xs leading-5 text-muted-foreground tabular-nums"
-                    data-testid="profile-editor-bio-count"
-                  >
-                    {{ draft.bio.length }}/{{ BIO_MAX_LENGTH }}
-                  </span>
+              <div class="flex flex-col gap-4">
+                <div class="flex flex-col gap-2">
+                  <Label for="profile-editor-nickname" class="text-sm font-medium">
+                    {{ t('account.profile.nickname') }}
+                  </Label>
+                  <Input
+                    id="profile-editor-nickname"
+                    ref="nicknameInput"
+                    v-model="draft.nickname"
+                    data-testid="profile-editor-nickname"
+                    :placeholder="t('account.placeholder.nickname')"
+                    :disabled="fieldsDisabled"
+                    :aria-invalid="!isNicknameValid"
+                    :aria-describedby="
+                      !isNicknameValid ? 'profile-editor-nickname-hint' : undefined
+                    "
+                    :maxlength="NICKNAME_MAX_LENGTH"
+                    @keydown.enter="confirmChanges"
+                    class="aria-invalid:border-destructive aria-invalid:focus-visible:ring-destructive"
+                  />
+                  <div v-if="!isNicknameValid" class="flex items-start justify-between gap-2">
+                    <p
+                      v-if="!isNicknameValid"
+                      id="profile-editor-nickname-hint"
+                      class="flex items-start gap-1 text-xs leading-5 text-destructive"
+                      data-testid="profile-editor-nickname-hint"
+                      role="alert"
+                    >
+                      <CircleAlert class="size-3 shrink-0" aria-hidden="true" />
+                      <span>{{ t('account.profileEditor.nicknameHint') }}</span>
+                    </p>
+                    <span class="flex-1" aria-hidden="true" />
+                    <span
+                      class="shrink-0 text-xs leading-5 text-muted-foreground tabular-nums"
+                      data-testid="profile-editor-nickname-count"
+                    >
+                      {{ draft.nickname.length }}/{{ NICKNAME_MAX_LENGTH }}
+                    </span>
+                  </div>
+                </div>
+
+                <div class="flex flex-col gap-2">
+                  <Label for="profile-editor-bio" class="text-sm font-medium">
+                    {{ t('account.profile.bio') }}
+                  </Label>
+                  <Textarea
+                    id="profile-editor-bio"
+                    v-model="draft.bio"
+                    class="resize-none"
+                    data-testid="profile-editor-bio"
+                    :placeholder="t('account.placeholder.bio')"
+                    :disabled="fieldsDisabled"
+                    :maxlength="BIO_MAX_LENGTH"
+                    rows="3"
+                    @focus="bioFocused = true"
+                    @blur="bioFocused = false"
+                    @keydown.enter="confirmChanges"
+                  />
+                  <div v-if="bioFocused" class="flex items-center justify-end">
+                    <span
+                      class="text-xs leading-5 text-muted-foreground tabular-nums"
+                      data-testid="profile-editor-bio-count"
+                    >
+                      {{ draft.bio.length }}/{{ BIO_MAX_LENGTH }}
+                    </span>
+                  </div>
                 </div>
               </div>
+              <p
+                class="border-t border-border pt-4 text-xs text-muted-foreground"
+                data-testid="profile-editor-member-since"
+              >
+                {{ memberSince }}
+              </p>
             </div>
           </div>
         </div>
@@ -345,7 +399,7 @@ function focusNickname(event: Event): void {
         <div
           v-if="savePhase !== 'idle'"
           class="flex shrink-0 items-start gap-2 px-6 text-xs leading-5"
-          :class="[isDirty ? 'pb-3' : 'pb-6', savePhase === 'error' ? 'text-destructive' : '']"
+          :class="[showSaveBar ? 'pb-2' : 'pb-4', savePhase === 'error' ? 'text-destructive' : '']"
           :data-phase="savePhase"
           data-testid="profile-editor-status"
           :role="savePhase === 'error' ? 'alert' : 'status'"
@@ -353,33 +407,33 @@ function focusNickname(event: Event): void {
         >
           <LoaderCircle
             v-if="savePhase === 'saving'"
-            class="mt-0.5 size-3.5 shrink-0 animate-spin text-muted-foreground"
+            class="size-3 shrink-0 animate-spin text-muted-foreground"
             aria-hidden="true"
           />
           <CircleAlert
             v-else-if="savePhase === 'error'"
-            class="mt-0.5 size-3.5 shrink-0"
+            class="size-3 shrink-0"
             aria-hidden="true"
           />
-          <CircleCheck v-else class="mt-0.5 size-3.5 shrink-0 text-success" aria-hidden="true" />
+          <CircleCheck v-else class="size-3 shrink-0 text-success" aria-hidden="true" />
           <span :class="savePhase === 'saving' ? 'text-muted-foreground' : ''">
             {{ saveStatusText }}
           </span>
         </div>
 
         <footer
-          v-if="isDirty"
-          class="flex shrink-0 flex-wrap items-center justify-between gap-3 border-t border-border/60 px-6 py-4"
+          v-if="showSaveBar"
+          class="mx-4 mb-4 flex shrink-0 flex-wrap items-center justify-between gap-2 rounded-xl border border-border bg-muted p-3 shadow-lg"
           data-testid="profile-editor-footer"
         >
           <p
-            class="flex min-w-0 items-start gap-1.5 text-xs leading-5"
+            class="flex min-w-0 items-start gap-1 text-xs leading-5"
             :class="guardAlert ? 'text-destructive' : 'text-muted-foreground'"
             data-testid="profile-editor-prompt"
             role="status"
             aria-live="polite"
           >
-            <CircleAlert v-if="guardAlert" class="mt-0.5 size-3.5 shrink-0" aria-hidden="true" />
+            <CircleAlert v-if="guardAlert" class="size-3 shrink-0" aria-hidden="true" />
             <span data-testid="profile-editor-prompt-text">
               {{ t('account.profileEditor.unsaved') }}
             </span>
@@ -388,7 +442,7 @@ function focusNickname(event: Event): void {
             <Button
               variant="ghost"
               size="sm"
-              :disabled="saving"
+              :disabled="saving || avatarBusy"
               data-testid="profile-editor-reset"
               @click="handleReset"
             >

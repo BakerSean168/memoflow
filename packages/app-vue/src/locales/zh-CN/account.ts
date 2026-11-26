@@ -200,6 +200,8 @@ export default {
     editProfile: '编辑资料',
   },
   profileEditor: {
+    memberSince: '加入于 {date}',
+    memberSinceUnavailable: '暂无账户创建时间',
     title: '编辑个人资料',
     description: '昵称就是你的唯一展示名，修改后会直接保存到当前账号。',
     nicknameHint: '昵称需为 2–20 个字符。',

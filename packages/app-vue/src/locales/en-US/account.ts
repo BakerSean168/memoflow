@@ -212,6 +212,8 @@ export default {
     editProfile: 'Edit Profile',
   },
   profileEditor: {
+    memberSince: 'Member since {date}',
+    memberSinceUnavailable: 'Join date unavailable',
     title: 'Edit profile',
     description: 'Your nickname is the primary display name and saves to the current account.',
     nicknameHint: 'Nickname must be 2–20 characters.',

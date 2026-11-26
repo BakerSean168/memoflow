@@ -13,6 +13,11 @@ import {
 import AccountProfileEditorDialog from './AccountProfileEditorDialog.vue';
 import { useAccountStore } from '../stores/account-store';
 
+vi.mock('../avatar/avatar-image', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('../avatar/avatar-image')>()),
+  processAvatarFile: vi.fn(async (file: Blob) => file),
+}));
+
 vi.mock('vue-sonner', () => ({
   toast: {
     error: vi.fn(),
@@ -38,6 +43,8 @@ const i18n = createI18n({
           saved: 'Avatar saved',
         },
         profileEditor: {
+          memberSince: 'Member since {date}',
+          memberSinceUnavailable: 'Join date unavailable',
           title: 'Edit profile',
           description: 'Update your profile.',
           nicknameHint: 'Nickname must be 2–20 characters.',
@@ -191,7 +198,12 @@ function accountService(
 
 function mountDialog(
   service: AccountClientPort,
-  options: { open?: boolean; avatarUrl?: string | null } = {},
+  options: {
+    open?: boolean;
+    avatarUrl?: string | null;
+    realAvatar?: boolean;
+    avatarSave?: ReturnType<typeof vi.fn>;
+  } = {},
 ) {
   const open = ref(options.open ?? true);
   const wrapper = mount(AccountProfileEditorDialog, {
@@ -211,7 +223,7 @@ function mountDialog(
         }),
         [ACCOUNT_AVATAR_STORE_KEY as symbol]: {
           load: vi.fn().mockResolvedValue(options.avatarUrl ?? null),
-          save: vi.fn().mockResolvedValue('data:image/png;base64,stored'),
+          save: options.avatarSave ?? vi.fn().mockResolvedValue('data:image/png;base64,stored'),
         },
       },
       stubs: {
@@ -225,7 +237,7 @@ function mountDialog(
         Label: Passthrough,
         X: true,
         LoaderCircle: true,
-        AccountAvatarUploader: AvatarUploaderStub,
+        AccountAvatarUploader: options.realAvatar ? false : AvatarUploaderStub,
       },
     },
   });
@@ -242,6 +254,122 @@ describe('AccountProfileEditorDialog', () => {
   beforeEach(() => {
     useAccountStore().reset();
     vi.clearAllMocks();
+  });
+
+  it('waits for Enter, ignores IME confirmation and Shift+Enter, and guards unconfirmed edits', async () => {
+    const { wrapper, open } = mountDialog(accountService());
+    await flushPromises();
+    const bio = wrapper.get('[data-testid="profile-editor-bio"]');
+    await bio.setValue('Unconfirmed bio');
+    expect(wrapper.find('[data-testid="profile-editor-footer"]').exists()).toBe(false);
+    await bio.trigger('keydown', { key: 'Enter', isComposing: true });
+    await bio.trigger('keydown', { key: 'Enter', shiftKey: true });
+    expect(wrapper.find('[data-testid="profile-editor-footer"]').exists()).toBe(false);
+    await wrapper.get('[data-testid="profile-editor-close"]').trigger('click');
+    expect(open.value).toBe(true);
+    expect(bio.element).toHaveProperty('value', 'Unconfirmed bio');
+    expect(wrapper.find('[data-testid="profile-editor-footer"]').exists()).toBe(true);
+    await wrapper.get('[data-testid="profile-editor-reset"]').trigger('click');
+    await bio.setValue('Confirmed bio');
+    await bio.trigger('keydown', { key: 'Enter' });
+    expect(wrapper.find('[data-testid="profile-editor-footer"]').exists()).toBe(true);
+  });
+
+  it('shows the real join date and only exposes the bio counter on focus', async () => {
+    const { wrapper } = mountDialog(accountService());
+    await flushPromises();
+    expect(wrapper.get('[data-testid="profile-editor-member-since"]').text()).toBe(
+      'Member since Jan 1, 1970',
+    );
+    expect(wrapper.find('[data-testid="profile-editor-nickname-count"]').exists()).toBe(false);
+    expect(wrapper.find('[data-testid="profile-editor-bio-count"]').exists()).toBe(false);
+    const bio = wrapper.get('[data-testid="profile-editor-bio"]');
+    await bio.trigger('focus');
+    expect(wrapper.get('[data-testid="profile-editor-bio-count"]').text()).toBe('12/500');
+    await bio.trigger('blur');
+    expect(wrapper.find('[data-testid="profile-editor-bio-count"]').exists()).toBe(false);
+  });
+
+  it('reports a missing join date without inventing one', async () => {
+    const service = accountService({
+      getMyProfile: vi.fn().mockResolvedValue({
+        ok: true,
+        data: { account: { ...storedAccount, createdAt: null }, cloudIdentity: null },
+      }),
+    });
+    const { wrapper } = mountDialog(service);
+    await flushPromises();
+    expect(wrapper.get('[data-testid="profile-editor-member-since"]').text()).toBe(
+      'Join date unavailable',
+    );
+  });
+
+  it('stages avatar changes until Enter and Save, and Reset discards the preview', async () => {
+    vi.spyOn(URL, 'createObjectURL').mockReturnValue('blob:draft');
+    const revoke = vi.spyOn(URL, 'revokeObjectURL').mockImplementation(() => undefined);
+    const avatarSave = vi.fn().mockResolvedValue('data:image/png;base64,stored');
+    const { wrapper } = mountDialog(accountService(), { realAvatar: true, avatarSave });
+    await flushPromises();
+    const input = wrapper.get('[data-testid="profile-editor-avatar-input"]');
+    Object.defineProperty(input.element, 'files', {
+      value: [new File(['image'], 'avatar.png', { type: 'image/png' })],
+    });
+    await input.trigger('change');
+    await flushPromises();
+    expect(avatarSave).not.toHaveBeenCalled();
+    expect(wrapper.find('[data-testid="profile-editor-footer"]').exists()).toBe(false);
+    await wrapper
+      .get('[data-testid="profile-editor-nickname"]')
+      .trigger('keydown', { key: 'Enter' });
+    await wrapper.get('[data-testid="profile-editor-reset"]').trigger('click');
+    expect(avatarSave).not.toHaveBeenCalled();
+    expect(revoke).toHaveBeenCalledWith('blob:draft');
+    expect(wrapper.find('[data-testid="profile-editor-footer"]').exists()).toBe(false);
+    await input.trigger('change');
+    await flushPromises();
+    await wrapper
+      .get('[data-testid="profile-editor-nickname"]')
+      .trigger('keydown', { key: 'Enter' });
+    await wrapper.get('[data-testid="profile-editor-save"]').trigger('click');
+    await flushPromises();
+    expect(avatarSave).toHaveBeenCalledTimes(1);
+    expect(wrapper.find('[data-testid="profile-editor-footer"]').exists()).toBe(false);
+    expect(wrapper.get('[data-testid="profile-editor-status"]').attributes('data-phase')).toBe(
+      'success',
+    );
+  });
+
+  it('keeps a failed avatar draft for retry and does not write profile fields on failure', async () => {
+    vi.spyOn(URL, 'createObjectURL').mockReturnValue('blob:draft');
+    const avatarSave = vi
+      .fn()
+      .mockRejectedValueOnce(new Error('disk unavailable'))
+      .mockResolvedValue('data:image/png;base64,stored');
+    const service = accountService();
+    const { wrapper } = mountDialog(service, { realAvatar: true, avatarSave });
+    await flushPromises();
+    const input = wrapper.get('[data-testid="profile-editor-avatar-input"]');
+    Object.defineProperty(input.element, 'files', {
+      value: [new File(['image'], 'avatar.png', { type: 'image/png' })],
+    });
+    await input.trigger('change');
+    await flushPromises();
+    await wrapper
+      .get('[data-testid="profile-editor-nickname"]')
+      .trigger('keydown', { key: 'Enter' });
+    await wrapper.get('[data-testid="profile-editor-save"]').trigger('click');
+    await flushPromises();
+    expect(service.updateMyProfile).not.toHaveBeenCalled();
+    expect(wrapper.get('[data-testid="profile-editor-avatar-helper"]').attributes('role')).toBe(
+      'alert',
+    );
+    expect(wrapper.get('[data-testid="profile-editor-status"]').attributes('data-phase')).toBe(
+      'error',
+    );
+    await wrapper.get('[data-testid="profile-editor-save"]').trigger('click');
+    await flushPromises();
+    expect(avatarSave).toHaveBeenCalledTimes(2);
+    expect(wrapper.find('[data-testid="profile-editor-footer"]').exists()).toBe(false);
   });
 
   it('opens with inline persisted values and saves through the account service', async () => {
@@ -264,6 +392,9 @@ describe('AccountProfileEditorDialog', () => {
     );
 
     await wrapper.get('[data-testid="profile-editor-nickname"]').setValue('Renamed');
+    await wrapper
+      .get('[data-testid="profile-editor-nickname"]')
+      .trigger('keydown', { key: 'Enter' });
     expect(prompt(wrapper).text()).toContain("Don't forget to save your changes!");
 
     await wrapper.get('[data-testid="profile-editor-save"]').trigger('click');
@@ -287,7 +418,13 @@ describe('AccountProfileEditorDialog', () => {
     await flushPromises();
 
     await wrapper.get('[data-testid="profile-editor-nickname"]').setValue('Renamed');
+    await wrapper
+      .get('[data-testid="profile-editor-nickname"]')
+      .trigger('keydown', { key: 'Enter' });
     await wrapper.get('[data-testid="profile-editor-bio"]').setValue('New bio');
+    await wrapper
+      .get('[data-testid="profile-editor-nickname"]')
+      .trigger('keydown', { key: 'Enter' });
     expect(wrapper.find('[data-testid="profile-editor-prompt"]').exists()).toBe(true);
 
     await wrapper.get('[data-testid="profile-editor-reset"]').trigger('click');
@@ -308,6 +445,9 @@ describe('AccountProfileEditorDialog', () => {
     await flushPromises();
 
     await wrapper.get('[data-testid="profile-editor-nickname"]').setValue('Renamed');
+    await wrapper
+      .get('[data-testid="profile-editor-nickname"]')
+      .trigger('keydown', { key: 'Enter' });
     await wrapper.get('[data-testid="profile-editor-close"]').trigger('click');
 
     expect(open.value).toBe(true);
@@ -336,6 +476,9 @@ describe('AccountProfileEditorDialog', () => {
     await wrapper.setProps({ open: true });
     await flushPromises();
     await wrapper.get('[data-testid="profile-editor-bio"]').setValue('New bio');
+    await wrapper
+      .get('[data-testid="profile-editor-nickname"]')
+      .trigger('keydown', { key: 'Enter' });
     const escape = new KeyboardEvent('keydown', { key: 'Escape', cancelable: true });
     content().vm.$emit('escapeKeyDown', escape);
     expect(escape.defaultPrevented).toBe(true);
@@ -365,6 +508,9 @@ describe('AccountProfileEditorDialog', () => {
     await flushPromises();
 
     await wrapper.get('[data-testid="profile-editor-bio"]').setValue('Draft bio');
+    await wrapper
+      .get('[data-testid="profile-editor-nickname"]')
+      .trigger('keydown', { key: 'Enter' });
     await wrapper.get('[data-testid="profile-editor-save"]').trigger('click');
     await flushPromises();
 
@@ -392,6 +538,9 @@ describe('AccountProfileEditorDialog', () => {
     await flushPromises();
 
     await wrapper.get('[data-testid="profile-editor-nickname"]').setValue('Renamed');
+    await wrapper
+      .get('[data-testid="profile-editor-nickname"]')
+      .trigger('keydown', { key: 'Enter' });
     const save = wrapper.get('[data-testid="profile-editor-save"]');
     await save.trigger('click');
     await save.trigger('click');
@@ -419,6 +568,9 @@ describe('AccountProfileEditorDialog', () => {
     await flushPromises();
 
     await wrapper.get('[data-testid="profile-editor-nickname"]').setValue('A');
+    await wrapper
+      .get('[data-testid="profile-editor-nickname"]')
+      .trigger('keydown', { key: 'Enter' });
 
     expect(wrapper.get('[data-testid="profile-editor-nickname-hint"]').text()).toBe(
       'Nickname must be 2–20 characters.',
@@ -440,6 +592,9 @@ describe('AccountProfileEditorDialog', () => {
     await flushPromises();
 
     await wrapper.get('[data-testid="profile-editor-nickname"]').setValue('A'.repeat(21));
+    await wrapper
+      .get('[data-testid="profile-editor-nickname"]')
+      .trigger('keydown', { key: 'Enter' });
 
     expect(wrapper.find('[data-testid="profile-editor-nickname-hint"]').exists()).toBe(true);
     expect(
@@ -460,6 +615,9 @@ describe('AccountProfileEditorDialog', () => {
 
     const nickname = 'A'.repeat(length);
     await wrapper.get('[data-testid="profile-editor-nickname"]').setValue(nickname);
+    await wrapper
+      .get('[data-testid="profile-editor-nickname"]')
+      .trigger('keydown', { key: 'Enter' });
 
     expect(wrapper.find('[data-testid="profile-editor-nickname-hint"]').exists()).toBe(false);
     const save = wrapper.get('[data-testid="profile-editor-save"]');
