@@ -142,12 +142,48 @@ const localBinding = {
   boundAt: stamp,
   detachedAt: null,
 };
+const localHealth = {
+  bindingId: 'local-1',
+  state: 'Available',
+  observedAt: stamp,
+  detail: null,
+};
+const localNotes = [
+  {
+    relativePath: 'Notes/Engineering/obsidian-integration.md',
+    title: 'Obsidian integration / Obsidian 连接方案',
+    knowledgeDocumentId: null,
+    excerpt: '',
+    contentHash: 'e'.repeat(64),
+    aliases: [],
+    tags: [],
+    outgoingLinks: [],
+    size: 128,
+    updatedAt: stamp,
+  },
+  {
+    relativePath: 'Notes/Journal/weekly-reflection.md',
+    title: 'Weekly reflection / 每周复盘',
+    knowledgeDocumentId: null,
+    excerpt: '',
+    contentHash: 'f'.repeat(64),
+    aliases: [],
+    tags: [],
+    outgoingLinks: [],
+    size: 128,
+    updatedAt: stamp - 86400000,
+  },
+];
+const localChanges = [
+  { relativePath: 'Notes/Engineering/obsidian-integration.md', status: 'modified' },
+  { relativePath: 'Notes/Journal/weekly-reflection.md', status: 'added' },
+];
 const repository = {
-  getLocalVaultBinding: async () =>
-    ok({
-      binding: localBinding,
-      health: { bindingId: 'local-1', state: 'Available', observedAt: stamp, detail: null },
-    }),
+  getLocalVaultBinding: async () => ok({ binding: localBinding, health: localHealth }),
+  scanLocalVault: async () =>
+    ok({ binding: localBinding, health: localHealth, notes: localNotes, scannedAt: stamp }),
+  getLocalVaultGitChanges: async () =>
+    ok({ bindingId: 'local-1', state: 'ready', changes: localChanges, observedAt: stamp }),
   listLocalVaultWrites: async () =>
     ok([
       {
