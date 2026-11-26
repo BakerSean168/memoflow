@@ -1,20 +1,36 @@
 import nodemailer from 'nodemailer';
 import type { Transporter } from 'nodemailer';
 
-export type CloudAuthEmailKind = 'email-verification' | 'password-reset' | 'email-changed';
+export type CloudAuthEmailKind =
+  | 'email-verification'
+  | 'password-reset'
+  | 'email-changed'
+  | 'account-security-code';
+
+/** Link messages carry a Better Auth URL; security codes are standalone digits. */
+export type CloudAuthEmailMessage =
+  | {
+      readonly kind: 'email-verification' | 'password-reset' | 'email-changed';
+      readonly email: string;
+      readonly url: string;
+    }
+  | {
+      readonly kind: 'account-security-code';
+      readonly email: string;
+      readonly code: string;
+    };
 
 export interface CloudAuthEmailDelivery {
-  send(input: {
-    readonly kind: CloudAuthEmailKind;
-    readonly email: string;
-    readonly url: string;
-  }): Promise<void>;
+  send(input: CloudAuthEmailMessage): Promise<void>;
 }
 
 export interface CapturedCloudAuthEmailLink {
   readonly kind: CloudAuthEmailKind;
   readonly email: string;
-  readonly url: string;
+  /** Present for link messages; absent for account security codes. */
+  readonly url?: string;
+  /** Present for account security codes; never persisted or logged. */
+  readonly code?: string;
   readonly capturedAt: string;
 }
 
@@ -59,25 +75,28 @@ function maskEmail(email: string): string {
   return `${local.slice(0, 2)}***@${domain}`;
 }
 
-function template(
-  kind: CloudAuthEmailKind,
-  url: string,
-): {
+function template(input: CloudAuthEmailMessage): {
   subject: string;
   text: string;
   html: string;
 } {
-  if (kind === 'email-changed')
+  if (input.kind === 'account-security-code')
+    return {
+      subject: 'MemoFlow 安全验证码',
+      text: `你的 MemoFlow 账户安全验证码是：\n${input.code}\n\n验证码 10 分钟内有效，仅用于本次账户安全操作。如非本人操作，请立即修改密码并忽略此邮件。`,
+      html: `<p>你的 MemoFlow 账户安全验证码是：</p><p style="font-size:24px;letter-spacing:4px;font-weight:600">${input.code}</p><p>验证码 10 分钟内有效，仅用于本次账户安全操作。如非本人操作，请立即修改密码并忽略此邮件。</p>`,
+    };
+  if (input.kind === 'email-changed')
     return {
       subject: 'MemoFlow 登录邮箱已更改',
       text: '你的 MemoFlow 登录邮箱已更改，旧邮箱现已无法用于登录。如非本人操作，请联系支持。',
       html: '<p>你的 MemoFlow 登录邮箱已更改，旧邮箱现已无法用于登录。如非本人操作，请联系支持。</p>',
     };
-  const action = kind === 'email-verification' ? '验证邮箱' : '重置密码';
+  const action = input.kind === 'email-verification' ? '验证邮箱' : '重置密码';
   return {
     subject: `MemoFlow ${action}`,
-    text: `请打开以下链接${action}：\n${url}\n\n如果不是你本人操作，请忽略此邮件。`,
-    html: `<p>请点击下面的链接${action}：</p><p><a href="${url}">${action}</a></p><p>如果不是你本人操作，请忽略此邮件。</p>`,
+    text: `请打开以下链接${action}：\n${input.url}\n\n如果不是你本人操作，请忽略此邮件。`,
+    html: `<p>请点击下面的链接${action}：</p><p><a href="${input.url}">${action}</a></p><p>如果不是你本人操作，请忽略此邮件。</p>`,
   };
 }
 
@@ -88,12 +107,8 @@ function required(env: CloudAuthEmailEnv, key: keyof CloudAuthEmailEnv): string 
 }
 
 class ConsoleEmailDelivery implements CloudAuthEmailDelivery {
-  async send(input: {
-    readonly kind: CloudAuthEmailKind;
-    readonly email: string;
-    readonly url: string;
-  }): Promise<void> {
-    console.info(`[CloudAuthEmail] ${input.kind} link issued for ${maskEmail(input.email)}`);
+  async send(input: CloudAuthEmailMessage): Promise<void> {
+    console.info(`[CloudAuthEmail] ${input.kind} issued for ${maskEmail(input.email)}`);
   }
 }
 
@@ -104,12 +119,8 @@ class SmtpEmailDelivery implements CloudAuthEmailDelivery {
     private readonly replyTo?: string,
   ) {}
 
-  async send(input: {
-    readonly kind: CloudAuthEmailKind;
-    readonly email: string;
-    readonly url: string;
-  }): Promise<void> {
-    const content = template(input.kind, input.url);
+  async send(input: CloudAuthEmailMessage): Promise<void> {
+    const content = template(input);
     await this.transport.sendMail({
       from: this.from,
       to: input.email.trim().toLowerCase(),
@@ -127,12 +138,8 @@ class ResendEmailDelivery implements CloudAuthEmailDelivery {
     private readonly replyTo?: string,
   ) {}
 
-  async send(input: {
-    readonly kind: CloudAuthEmailKind;
-    readonly email: string;
-    readonly url: string;
-  }): Promise<void> {
-    const content = template(input.kind, input.url);
+  async send(input: CloudAuthEmailMessage): Promise<void> {
+    const content = template(input);
     const response = await this.fetchImpl('https://api.resend.com/emails', {
       method: 'POST',
       headers: {
@@ -205,7 +212,8 @@ export function createCloudAuthEmailLinkCapture(
         links.set(key(input.email, input.kind), {
           kind: input.kind,
           email: input.email.trim().toLowerCase(),
-          url: input.url,
+          ...('url' in input ? { url: input.url } : {}),
+          ...('code' in input ? { code: input.code } : {}),
           capturedAt: new Date().toISOString(),
         });
       },

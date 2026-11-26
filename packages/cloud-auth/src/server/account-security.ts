@@ -9,8 +9,28 @@ import {
 } from 'better-auth/api';
 import type { BetterAuthPlugin } from 'better-auth';
 import { z } from 'zod';
+import { AccountVerificationPurposeSchema } from '@memoflow/cloud-auth-contracts';
+import { createAccountEmailVerification } from './account-email-verification.js';
+import type { CloudAuthEmailDelivery } from './email-delivery.js';
 
 const passwordBody = z.object({ password: z.string().min(1).max(100) });
+const verificationTokenBody = z.string().min(32).max(200);
+
+interface SessionSubject {
+  readonly user: { readonly id: string; readonly email: string; readonly emailVerified: boolean };
+  readonly session: { readonly id: string };
+}
+
+/** Bind every proof to the acting account, current mailbox, session and purpose. */
+const subjectOf = (
+  session: SessionSubject,
+  purpose: z.infer<typeof AccountVerificationPurposeSchema>,
+) => ({
+  userId: session.user.id,
+  sessionId: session.session.id,
+  email: session.user.email,
+  purpose,
+});
 
 /** Password recheck runs inside Better Auth's origin and rate-limit boundary. */
 const requirePassword = createAuthMiddleware(async (ctx) => {
@@ -65,19 +85,119 @@ export async function deleteCloudAccount(
   });
 }
 
-export function accountSecurityPlugin(database: PrismaClient): BetterAuthPlugin {
+export function accountSecurityPlugin(
+  database: PrismaClient,
+  emailDelivery: CloudAuthEmailDelivery,
+  secret: string,
+): BetterAuthPlugin {
+  const verification = createAccountEmailVerification(secret, emailDelivery);
+
   return {
     id: 'memoflow-account-security',
     endpoints: {
+      requestAccountVerification: createAuthEndpoint(
+        '/account-security/request-verification',
+        {
+          method: 'POST',
+          body: z.object({ purpose: AccountVerificationPurposeSchema }),
+          use: [sensitiveSessionMiddleware],
+        },
+        async (ctx) => {
+          const session = ctx.context.session;
+          if (!session.user.emailVerified)
+            throw new APIError('BAD_REQUEST', {
+              code: 'ACCOUNT_EMAIL_UNVERIFIED',
+              message: '当前邮箱尚未验证，请先完成邮箱验证',
+            });
+          return ctx.json(
+            await verification.request(
+              ctx.context.internalAdapter,
+              subjectOf(session, ctx.body.purpose),
+            ),
+          );
+        },
+      ),
+      verifyAccountEmailCode: createAuthEndpoint(
+        '/account-security/verify-email-code',
+        {
+          method: 'POST',
+          body: z.object({
+            purpose: AccountVerificationPurposeSchema,
+            challengeId: z.string().uuid(),
+            code: z.string().regex(/^\d{6}$/),
+          }),
+          use: [sensitiveSessionMiddleware],
+        },
+        async (ctx) =>
+          ctx.json(
+            await verification.verify(
+              ctx.context.internalAdapter,
+              subjectOf(ctx.context.session, ctx.body.purpose),
+              ctx.body.challengeId,
+              ctx.body.code,
+            ),
+          ),
+      ),
+      changeAccountPassword: createAuthEndpoint(
+        '/account-security/change-password',
+        {
+          method: 'POST',
+          body: z.object({
+            currentPassword: z.string().min(1).max(100),
+            newPassword: z.string().min(8).max(100),
+            verificationToken: verificationTokenBody,
+          }),
+          use: [sensitiveSessionMiddleware],
+        },
+        async (ctx) => {
+          const session = ctx.context.session;
+          const credential = await ctx.context.internalAdapter.findCredentialAccount(
+            session.user.id,
+          );
+          if (!credential?.password)
+            throw new APIError('BAD_REQUEST', {
+              code: 'PASSWORD_NOT_SET',
+              message: '该账户未设置密码，请先通过邮箱恢复流程设置密码',
+            });
+          if (
+            !(await ctx.context.password.verify({
+              hash: credential.password,
+              password: ctx.body.currentPassword,
+            }))
+          )
+            throw new APIError('BAD_REQUEST', {
+              code: 'INVALID_PASSWORD',
+              message: '当前密码不正确',
+            });
+          await verification.consume(
+            ctx.context.internalAdapter,
+            subjectOf(session, 'change-password'),
+            ctx.body.verificationToken,
+          );
+          await ctx.context.internalAdapter.updateAccount(credential.id, {
+            password: await ctx.context.password.hash(ctx.body.newPassword),
+          });
+          return ctx.json({ status: true });
+        },
+      ),
       changeAccountEmail: createAuthEndpoint(
         '/account-security/change-email',
         {
           method: 'POST',
-          body: passwordBody.extend({ newEmail: z.string().email() }),
+          body: passwordBody.extend({
+            newEmail: z.string().email(),
+            verificationToken: verificationTokenBody,
+          }),
           use: [sensitiveSessionMiddleware, requirePassword],
         },
-        async (ctx) =>
-          changeEmail({ ...ctx, body: { newEmail: ctx.body.newEmail }, asResponse: false }),
+        async (ctx) => {
+          await verification.consume(
+            ctx.context.internalAdapter,
+            subjectOf(ctx.context.session, 'change-email'),
+            ctx.body.verificationToken,
+          );
+          return changeEmail({ ...ctx, body: { newEmail: ctx.body.newEmail }, asResponse: false });
+        },
       ),
       verifyAccountPassword: createAuthEndpoint(
         '/account-security/verify-password',

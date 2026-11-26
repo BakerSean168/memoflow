@@ -66,6 +66,49 @@ describe('cloud auth email delivery', () => {
     ).rejects.toThrow('503');
   });
 
+  it('sends account security codes without logging them', async () => {
+    const info = vi.spyOn(console, 'info').mockImplementation(() => undefined);
+    const sendMail = vi.fn().mockResolvedValue(undefined);
+    const delivery = createCloudAuthEmailDelivery({
+      env: {
+        EMAIL_PROVIDER: 'smtp',
+        SMTP_HOST: 'smtp.example.com',
+        SMTP_USER: 'user',
+        SMTP_PASS: 'pass',
+        SMTP_FROM: 'MemoFlow <auth@example.com>',
+      },
+      smtpTransport: { sendMail },
+    });
+
+    await delivery.send({
+      kind: 'account-security-code',
+      email: 'alice@example.com',
+      code: '123456',
+    });
+
+    expect(sendMail).toHaveBeenCalledWith(
+      expect.objectContaining({
+        to: 'alice@example.com',
+        subject: 'MemoFlow 安全验证码',
+        text: expect.stringContaining('123456'),
+      }),
+    );
+    expect(info).not.toHaveBeenCalled();
+    info.mockRestore();
+  });
+
+  it('captures an account security code for tests without a link', async () => {
+    const capture = createCloudAuthEmailLinkCapture({ send: vi.fn().mockResolvedValue(undefined) });
+    await capture.delivery.send({
+      kind: 'account-security-code',
+      email: 'Alice@Example.com',
+      code: '654321',
+    });
+    expect(capture.findLatest('alice@example.com', 'account-security-code')).toEqual(
+      expect.objectContaining({ code: '654321' }),
+    );
+  });
+
   it('captures the latest Better Auth link only after delivery succeeds', async () => {
     const send = vi.fn().mockResolvedValue(undefined);
     const capture = createCloudAuthEmailLinkCapture({ send });

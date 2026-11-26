@@ -24,7 +24,7 @@ function createAuthFlowFixture() {
     cloudAuthVerification: [],
     cloudAuthDeviceCode: [],
   };
-  const sentEmails: Array<{ kind: string; email: string; url: string }> = [];
+  const sentEmails: Array<{ kind: string; email: string; url?: string; code?: string }> = [];
   const users = () => memory.cloudAuthUser as MemoryRow[];
   const sessions = () => memory.cloudAuthSession as MemoryRow[];
   const deviceCodes = () => memory.cloudAuthDeviceCode as MemoryRow[];
@@ -291,7 +291,7 @@ describe('account security', () => {
       password: PASSWORD,
       name: 'Person',
     });
-    const link = fixture.sentEmails[0]!.url;
+    const link = fixture.sentEmails[0]!.url!;
     expect((await fixture.auth.handler(new Request(link))).status).toBe(302);
     const signIn = await fixture.post('/sign-in/email', {
       email: 'old@example.com',
@@ -304,6 +304,317 @@ describe('account security', () => {
     return { ...fixture, headers, securedPost: post };
   }
 
+  const NEXT_PASSWORD = 'Next-password-456';
+  type Challenge = { challengeId: string; retryAfterSeconds: number; expiresInSeconds: number };
+  type Proof = { verificationToken: string };
+
+  async function requestCode(
+    fixture: Awaited<ReturnType<typeof signedIn>>,
+    purpose: 'change-password' | 'change-email',
+    email = 'old@example.com',
+  ) {
+    const response = await fixture.securedPost('/account-security/request-verification', {
+      purpose,
+    });
+    expect(response.status).toBe(200);
+    const challenge = (await response.json()) as Challenge;
+    const message = fixture.sentEmails.at(-1)!;
+    expect(message).toMatchObject({ kind: 'account-security-code', email });
+    return { challengeId: challenge.challengeId, code: message.code! };
+  }
+
+  async function grantFor(
+    fixture: Awaited<ReturnType<typeof signedIn>>,
+    purpose: 'change-password' | 'change-email',
+  ) {
+    const { challengeId, code } = await requestCode(fixture, purpose);
+    const response = await fixture.securedPost('/account-security/verify-email-code', {
+      purpose,
+      challengeId,
+      code,
+    });
+    expect(response.status).toBe(200);
+    return ((await response.json()) as Proof).verificationToken;
+  }
+
+  it('requires the current mailbox code before changing the password', async () => {
+    const fixture = await signedIn();
+    expect(
+      (
+        await fixture.securedPost('/change-password', {
+          currentPassword: PASSWORD,
+          newPassword: NEXT_PASSWORD,
+        })
+      ).status,
+    ).toBe(404);
+    expect(
+      (
+        await fixture.securedPost('/account-security/change-password', {
+          currentPassword: PASSWORD,
+          newPassword: NEXT_PASSWORD,
+        })
+      ).status,
+    ).toBe(400);
+
+    const { challengeId, code } = await requestCode(fixture, 'change-password');
+    expect(
+      (
+        await fixture.securedPost('/account-security/change-password', {
+          currentPassword: PASSWORD,
+          newPassword: NEXT_PASSWORD,
+          verificationToken: 'x'.repeat(43),
+        })
+      ).status,
+    ).toBe(403);
+    const wrongCode = await fixture.securedPost('/account-security/verify-email-code', {
+      purpose: 'change-password',
+      challengeId,
+      code: code === '000000' ? '000001' : '000000',
+    });
+    expect(wrongCode.status).toBe(400);
+    expect(await wrongCode.json()).toMatchObject({ code: 'ACCOUNT_VERIFICATION_INVALID' });
+
+    const verified = await fixture.securedPost('/account-security/verify-email-code', {
+      purpose: 'change-password',
+      challengeId,
+      code,
+    });
+    expect(verified.status).toBe(200);
+    const { verificationToken } = (await verified.json()) as Proof;
+
+    const wrongPassword = await fixture.securedPost('/account-security/change-password', {
+      currentPassword: 'incorrect-password',
+      newPassword: NEXT_PASSWORD,
+      verificationToken,
+    });
+    expect(wrongPassword.status).toBe(400);
+    expect(await wrongPassword.json()).toMatchObject({ code: 'INVALID_PASSWORD' });
+
+    expect(
+      (
+        await fixture.securedPost('/account-security/change-password', {
+          currentPassword: PASSWORD,
+          newPassword: NEXT_PASSWORD,
+          verificationToken,
+        })
+      ).status,
+    ).toBe(200);
+    expect(
+      (
+        await fixture.securedPost('/account-security/change-password', {
+          currentPassword: NEXT_PASSWORD,
+          newPassword: 'Third-password-789',
+          verificationToken,
+        })
+      ).status,
+    ).toBe(403);
+    expect(
+      (
+        await fixture.securedPost('/account-security/verify-email-code', {
+          purpose: 'change-password',
+          challengeId,
+          code,
+        })
+      ).status,
+    ).toBe(400);
+
+    expect(
+      (
+        await fixture.post('/sign-in/email', {
+          email: 'old@example.com',
+          password: PASSWORD,
+        })
+      ).status,
+    ).toBe(401);
+    expect(
+      (
+        await fixture.post('/sign-in/email', {
+          email: 'old@example.com',
+          password: NEXT_PASSWORD,
+        })
+      ).status,
+    ).toBe(200);
+  });
+
+  it('rejects proofs from another session, purpose, account or a tampered challenge', async () => {
+    const fixture = await signedIn();
+    const verificationToken = await grantFor(fixture, 'change-password');
+    const otherSignIn = await fixture.post('/sign-in/email', {
+      email: 'old@example.com',
+      password: PASSWORD,
+    });
+    const otherToken = ((await otherSignIn.json()) as { token: string }).token;
+    const otherHeaders = {
+      authorization: `Bearer ${otherToken}`,
+      'content-type': 'application/json',
+    };
+    const otherSession = (path: string, body: unknown) =>
+      fixture.request(path, { method: 'POST', headers: otherHeaders, body: JSON.stringify(body) });
+
+    expect(
+      (
+        await otherSession('/account-security/change-password', {
+          currentPassword: PASSWORD,
+          newPassword: NEXT_PASSWORD,
+          verificationToken,
+        })
+      ).status,
+    ).toBe(403);
+    expect(
+      (
+        await fixture.securedPost('/account-security/change-email', {
+          password: PASSWORD,
+          newEmail: 'new@example.com',
+          verificationToken,
+        })
+      ).status,
+    ).toBe(403);
+    expect(
+      (
+        await fixture.securedPost('/account-security/change-password', {
+          currentPassword: PASSWORD,
+          newPassword: NEXT_PASSWORD,
+          verificationToken: `${verificationToken.slice(0, -1)}x`,
+        })
+      ).status,
+    ).toBe(403);
+
+    const { challengeId } = await requestCode(fixture, 'change-email');
+    expect(
+      (
+        await fixture.securedPost('/account-security/verify-email-code', {
+          purpose: 'change-email',
+          challengeId: '00000000-0000-4000-8000-000000000000',
+          code: '123456',
+        })
+      ).status,
+    ).toBe(400);
+
+    await fixture.post('/sign-up/email', {
+      email: 'other@example.com',
+      password: PASSWORD,
+      name: 'Other',
+    });
+    const otherVerification = fixture.sentEmails.at(-1)!.url!;
+    expect((await fixture.auth.handler(new Request(otherVerification))).status).toBe(302);
+    const otherAccountSignIn = await fixture.post('/sign-in/email', {
+      email: 'other@example.com',
+      password: PASSWORD,
+    });
+    const otherAccountToken = ((await otherAccountSignIn.json()) as { token: string }).token;
+    expect(
+      (
+        await fixture.request('/account-security/change-password', {
+          method: 'POST',
+          headers: {
+            authorization: `Bearer ${otherAccountToken}`,
+            'content-type': 'application/json',
+          },
+          body: JSON.stringify({
+            currentPassword: PASSWORD,
+            newPassword: NEXT_PASSWORD,
+            verificationToken,
+          }),
+        })
+      ).status,
+    ).toBe(403);
+  });
+
+  it('rejects expired grants and limits repeated sends', async () => {
+    const fixture = await signedIn();
+    const verificationToken = await grantFor(fixture, 'change-password');
+    const grant = (fixture.memory.cloudAuthVerification as MemoryRow[]).find((row) =>
+      String(row.identifier).startsWith('account-security:grant:'),
+    )!;
+    grant.expiresAt = new Date(Date.now() - 1000);
+    expect(
+      (
+        await fixture.securedPost('/account-security/change-password', {
+          currentPassword: PASSWORD,
+          newPassword: NEXT_PASSWORD,
+          verificationToken,
+        })
+      ).status,
+    ).toBe(403);
+
+    // The resend cooldown is per minute; age the previous send so this test
+    // exercises expiry instead of the throttle.
+    // Adapter deletes replace the backing array, so re-read it each step.
+    const rows = () => fixture.memory.cloudAuthVerification as MemoryRow[];
+    for (let index = rows().length - 1; index >= 0; index -= 1) {
+      const row = rows()[index]!;
+      const identifier = String(row.identifier);
+      if (identifier.startsWith('account-security:send:')) rows().splice(index, 1);
+      else if (identifier.endsWith(':active')) {
+        const value = JSON.parse(String(row.value)) as { sentAt: number };
+        row.value = JSON.stringify({ ...value, sentAt: value.sentAt - 61_000 });
+      }
+    }
+    const { challengeId, code } = await requestCode(fixture, 'change-password');
+    const row = rows().find((candidate) =>
+      String(candidate.identifier).endsWith(`:code:${challengeId}`),
+    )!;
+    row.expiresAt = new Date(Date.now() - 1000);
+    expect(
+      (
+        await fixture.securedPost('/account-security/verify-email-code', {
+          purpose: 'change-password',
+          challengeId,
+          code,
+        })
+      ).status,
+    ).toBe(400);
+
+    expect(
+      (
+        await fixture.securedPost('/account-security/request-verification', {
+          purpose: 'change-password',
+        })
+      ).status,
+    ).toBe(429);
+  });
+
+  it('redeems a code and a grant at most once under concurrency', async () => {
+    const fixture = await signedIn();
+    const { challengeId, code } = await requestCode(fixture, 'change-password');
+    const verifications = await Promise.all([
+      fixture.securedPost('/account-security/verify-email-code', {
+        purpose: 'change-password',
+        challengeId,
+        code,
+      }),
+      fixture.securedPost('/account-security/verify-email-code', {
+        purpose: 'change-password',
+        challengeId,
+        code,
+      }),
+    ]);
+    expect(verifications.map((response) => response.status).sort()).toEqual([200, 400]);
+    const winner = verifications.find((response) => response.status === 200)!;
+    const { verificationToken } = (await winner.json()) as Proof;
+
+    const changes = await Promise.all([
+      fixture.securedPost('/account-security/change-password', {
+        currentPassword: PASSWORD,
+        newPassword: NEXT_PASSWORD,
+        verificationToken,
+      }),
+      fixture.securedPost('/account-security/change-password', {
+        currentPassword: PASSWORD,
+        newPassword: 'Third-password-789',
+        verificationToken,
+      }),
+    ]);
+    expect(changes.map((response) => response.status).sort()).toEqual([200, 403]);
+    // Exactly the winning request's password is in effect; the loser never wrote.
+    const signIns = await Promise.all(
+      [PASSWORD, NEXT_PASSWORD, 'Third-password-789'].map((password) =>
+        fixture.post('/sign-in/email', { email: 'old@example.com', password }),
+      ),
+    );
+    expect(signIns.map((response) => response.status).sort()).toEqual([200, 401, 401]);
+  });
+
   it('rechecks the password, verifies the new inbox and notifies the old inbox only after confirmation', async () => {
     const fixture = await signedIn();
     expect(
@@ -312,10 +623,13 @@ describe('account security', () => {
     const wrong = await fixture.securedPost('/account-security/change-email', {
       password: 'incorrect-password',
       newEmail: 'new@example.com',
+      verificationToken: 'x'.repeat(43),
     });
     expect(wrong.status).toBe(400);
     expect(await wrong.json()).toMatchObject({ code: 'INVALID_PASSWORD' });
-    expect(fixture.sentEmails).toHaveLength(1);
+    expect(fixture.sentEmails.filter((email) => email.kind === 'email-changed')).toHaveLength(0);
+
+    const verificationToken = await grantFor(fixture, 'change-email');
     expect(
       (
         await fixture.securedPost('/account-security/change-email', {
@@ -323,12 +637,21 @@ describe('account security', () => {
           newEmail: 'new@example.com',
         })
       ).status,
+    ).toBe(400);
+    expect(
+      (
+        await fixture.securedPost('/account-security/change-email', {
+          password: PASSWORD,
+          newEmail: 'new@example.com',
+          verificationToken,
+        })
+      ).status,
     ).toBe(200);
     expect(fixture.memory.cloudAuthUser[0]?.email).toBe('old@example.com');
     const link = fixture.sentEmails.at(-1)!;
     expect(link.email).toBe('new@example.com');
     expect(
-      (await fixture.auth.handler(new Request(link.url, { headers: fixture.headers }))).status,
+      (await fixture.auth.handler(new Request(link.url!, { headers: fixture.headers }))).status,
     ).toBe(302);
     expect(fixture.memory.cloudAuthUser[0]?.email).toBe('new@example.com');
     expect(fixture.sentEmails.at(-1)).toMatchObject({
