@@ -65,7 +65,16 @@ const meta = {
   argTypes: {
     initialTab: {
       control: 'select',
-      options: ['shortcuts', 'appearance', 'repository', 'ai', 'notifications', 'account', 'data'],
+      options: [
+        'shortcuts',
+        'appearance',
+        'ai',
+        'notifications',
+        'account',
+        'data',
+        'startup',
+        'updates',
+      ],
     },
   },
   render: (args) => ({

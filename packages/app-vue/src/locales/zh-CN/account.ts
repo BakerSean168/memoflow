@@ -95,15 +95,9 @@ export default {
       '该令牌已由先前的提交创建，密钥不会再次显示。如果当时没有保存，请撤销后重新创建。',
   },
   title: '个人中心',
-  center: '个人中心',
-  description: '昵称就是你的唯一展示名，修改后会直接持久化到当前账号。',
-  guestLabel: '本地账户',
-  emailVerified: '登录邮箱已验证',
-  emailUnverified: '登录邮箱未验证',
   logoutHandlerUnavailable: '退出登录服务当前不可用',
   actions: {
     logout: '退出登录',
-    saveProfile: '保存资料',
   },
   verification: {
     title: '验证当前邮箱',
@@ -132,7 +126,6 @@ export default {
   },
   security: {
     continue: '继续',
-    title: '云账户',
     emailDescription: '确认新邮箱后更改才会生效。旧邮箱随后将无法登录，并会收到变更通知。',
     changeEmail: '更改电子邮件',
     newEmail: '新邮箱',
@@ -214,16 +207,10 @@ export default {
     copiedRequestId: '已复制',
   },
   profile: {
-    editTitle: '编辑个人资料',
     changeAvatar: '更换头像',
     avatarRecommendation: '建议上传 200x200 像素的图片',
-    avatarUrl: '头像地址',
     nickname: '昵称',
-    realName: '真实姓名',
     bio: '个人简介',
-    gender: '性别',
-    birthday: '生日',
-    editProfile: '编辑资料',
   },
   profileEditor: {
     bioLimitExceeded: '简介最多可输入 {limit} 个字符。',
@@ -249,21 +236,10 @@ export default {
   },
   placeholder: {
     nickname: '请输入昵称',
-    avatarUrl: 'https://... ',
-    realNameOptional: '真实姓名（选填）',
     bio: '介绍一下你自己',
-    gender: '请选择性别',
-    selectDate: '请选择日期',
   },
   status: {
     loading: '正在加载账户资料...',
-  },
-  gender: {
-    male: '男',
-    female: '女',
-    other: '其他',
-    unspecified: '未指定',
-    notSet: '未设置',
   },
   toast: {
     loadProfileFailed: '加载个人资料失败',
@@ -271,7 +247,6 @@ export default {
     profileUpdated: '个人资料已更新',
     updateProfileFailed: '更新个人资料失败',
     updateFailed: '更新失败',
-    settingsUpdated: '设置已更新',
     accountClosed: '账户已注销',
     closeAccountFailed: '注销账户失败',
     closeFailed: '注销失败',

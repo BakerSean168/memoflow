@@ -100,16 +100,9 @@ export default {
       'This token was already created by an earlier submission, so its secret cannot be shown again. Revoke it and create a new one if you did not save it.',
   },
   title: 'Account',
-  center: 'Account Center',
-  description:
-    'Your nickname is the primary display name and will be saved to the current account.',
-  guestLabel: 'Local account',
-  emailVerified: 'Login email verified',
-  emailUnverified: 'Login email not verified',
   logoutHandlerUnavailable: 'The logout handler is currently unavailable',
   actions: {
     logout: 'Log out',
-    saveProfile: 'Save Profile',
   },
   verification: {
     title: 'Verify your current email',
@@ -140,7 +133,6 @@ export default {
   },
   security: {
     continue: 'Continue',
-    title: 'Cloud account',
     emailDescription:
       'The new email takes effect after confirmation. The old email then stops working for sign-in and receives a notification.',
     changeEmail: 'Change email',
@@ -228,16 +220,10 @@ export default {
     copiedRequestId: 'Copied',
   },
   profile: {
-    editTitle: 'Edit Profile',
     changeAvatar: 'Change Avatar',
     avatarRecommendation: 'Recommended: 200x200 pixels',
-    avatarUrl: 'Avatar URL',
     nickname: 'Nickname',
-    realName: 'Real Name',
     bio: 'Bio',
-    gender: 'Gender',
-    birthday: 'Birthday',
-    editProfile: 'Edit Profile',
   },
   profileEditor: {
     bioLimitExceeded: 'Bio is limited to {limit} characters.',
@@ -263,21 +249,10 @@ export default {
   },
   placeholder: {
     nickname: 'Enter nickname',
-    avatarUrl: 'https://... ',
-    realNameOptional: 'Real name (optional)',
     bio: 'Tell people a little about yourself',
-    gender: 'Select gender',
-    selectDate: 'Select date',
   },
   status: {
     loading: 'Loading account profile...',
-  },
-  gender: {
-    male: 'Male',
-    female: 'Female',
-    other: 'Other',
-    unspecified: 'Unspecified',
-    notSet: 'Not set',
   },
   toast: {
     loadProfileFailed: 'Failed to load profile',
@@ -285,7 +260,6 @@ export default {
     profileUpdated: 'Profile updated',
     updateProfileFailed: 'Failed to update profile',
     updateFailed: 'Update failed',
-    settingsUpdated: 'Settings updated',
     accountClosed: 'Account closed',
     closeAccountFailed: 'Failed to close account',
     closeFailed: 'Close failed',
