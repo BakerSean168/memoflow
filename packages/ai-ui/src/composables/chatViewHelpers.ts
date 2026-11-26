@@ -99,7 +99,7 @@ export interface ChatViewInitContext {
 }
 
 /** Adjusts the composer textarea height based on content. */
-export function adjustComposerHeight(getComposerTextarea: () => HTMLTextAreaElement | null): void {
+export function adjustComposerHeight(getComposerTextarea: () => HTMLElement | null): void {
   const textarea = getComposerTextarea();
   if (!textarea) return;
   const styles = window.getComputedStyle(textarea);

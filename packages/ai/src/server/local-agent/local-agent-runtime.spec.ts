@@ -1942,3 +1942,68 @@ it('keeps the local runtime available when its optional MCP listener cannot star
   }
   expect(dispose).toHaveBeenCalledOnce();
 });
+
+it('stages selected PDF, arbitrary files and images for the driver and cleans their paths after the run', async () => {
+  const { store, conversation } = await setup();
+  const cwd = await mkdtemp(join(tmpdir(), 'mf-native-attachments-test-'));
+  ephemeralHomes.push(cwd);
+  let observed: NativeAgentRunInput | undefined;
+  const runtime = new LocalAgentRuntime({
+    store,
+    cwd,
+    createDriver: () => ({
+      async *run(input): AsyncGenerator<NativeAgentEvent> {
+        observed = input;
+        expect(input.attachments).toHaveLength(3);
+        const [pdf, code, image] = input.attachments!;
+        expect(await readFile(pdf!.path, 'utf8')).toBe('%PDF-1.7');
+        expect(await readFile(code!.path, 'utf8')).toBe('const a = 1;');
+        expect(image!.image).toEqual({ mediaType: 'image/png', data: 'AQID' });
+        expect(pdf!.path.startsWith(cwd + '/')).toBe(true);
+        expect(pdf!.filename).toBe('report.pdf');
+        expect(input.content).toContain(pdf!.path);
+        expect(input.content).toContain('untrusted reference material');
+        yield { type: 'completed' };
+      },
+      respond: () => false,
+      cancel() {},
+      async close() {},
+      async probe() {
+        return { status: 'ready' as const, models: [] };
+      },
+    }),
+  });
+  const events = [];
+  for await (const event of runtime.dispatchMessage({
+    identityId: 'owner',
+    conversationId: conversation.id,
+    content: 'Compare the files',
+    attachments: [
+      {
+        mediaType: 'application/pdf',
+        filename: '../../report.pdf',
+        data: 'data:application/pdf;base64,' + Buffer.from('%PDF-1.7').toString('base64'),
+      },
+      {
+        mediaType: 'application/octet-stream',
+        filename: 'code.ts',
+        data:
+          'data:application/octet-stream;base64,' + Buffer.from('const a = 1;').toString('base64'),
+      },
+      { mediaType: 'image/png', filename: 'shot.png', data: 'data:image/png;base64,AQID' },
+    ],
+  }))
+    events.push(event);
+  expect(events.at(-1)?.type).toBe('assistant.run.completed');
+  expect(observed?.attachments).toHaveLength(3);
+  expect((await readdir(cwd)).filter((name) => name.startsWith('.memoflow-attachments-'))).toEqual(
+    [],
+  );
+  const history = await runtime.listMessages({
+    identityId: 'owner',
+    conversationId: conversation.id,
+  });
+  expect(history.messages[0]?.attachments).toHaveLength(3);
+  expect(JSON.stringify(history)).not.toContain('base64');
+  await runtime.dispose();
+});

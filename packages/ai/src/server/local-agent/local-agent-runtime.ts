@@ -28,6 +28,7 @@ import type {
   LocalAgentRequestResponse,
   AssistantRuntimeChoice,
   AssistantRuntimeSelectedEntity,
+  AssistantRuntimeAttachment,
 } from '@memoflow/ai-contracts';
 import {
   LocalAgentConversationSchema,
@@ -57,6 +58,7 @@ import {
 import type { LocalAgentRepository } from '../infrastructure/adapters/powersync/local-agent.repository';
 import { verifyLocalAgentMcpConnectivity } from './local-tool-bridge';
 import { NativeEventQueue } from './native-event-queue';
+import { stageNativeAttachments, nativeAttachmentPrompt } from './native-attachments';
 
 const logger = createLogger('LocalAgentRuntime');
 
@@ -114,6 +116,7 @@ export interface LocalAgentToolBridgePort {
   dispose(): Promise<void>;
 }
 interface ActiveRun {
+  cleanupAttachments?: () => Promise<void>;
   identityId: string;
   conversationId: string;
   connectionId?: string;
@@ -166,7 +169,7 @@ type MessageInput = {
   permissionMode?: AIChatPermissionMode;
   modelOptions?: LocalAgentModelOptions;
   selectedEntities?: readonly AssistantRuntimeSelectedEntity[];
-  attachments?: readonly unknown[];
+  attachments?: readonly AssistantRuntimeAttachment[];
   signal?: AbortSignal;
 };
 type ConversationInput = { identityId: string; conversationId: string };
@@ -1225,7 +1228,10 @@ export class LocalAgentRuntime {
     if ((await this.listAskUserSuspensions(input)).length) throw new LocalAgentError('CONFLICT');
     if (input.permissionMode && !AIChatPermissionModeSchema.safeParse(input.permissionMode).success)
       throw new LocalAgentError('LOCAL_AGENT_PERMISSION_DENIED');
-    if (input.attachments?.length) throw new LocalAgentError('LOCAL_AGENT_UNSUPPORTED_INPUT');
+    // The durable goal-intent continuation currently stores only the text.
+    // Reject rather than silently discard the selected files on clarification.
+    if (input.attachments?.length && inspectGoalIntent(input.content))
+      throw new LocalAgentError('LOCAL_AGENT_UNSUPPORTED_INPUT');
     // Snapshots decide admission, never spawn: a fresh deterministic failure is
     // reported early, while missing/stale/unavailable states pass through to the
     // native session so it can return the real reason.
@@ -1302,6 +1308,7 @@ export class LocalAgentRuntime {
     });
     let assistant: AssistantRuntimeMessageView | undefined;
     let started = false;
+    let staged: Awaited<ReturnType<typeof stageNativeAttachments>> | undefined;
     try {
       const { conversation, connection } = await this.persist(() =>
         this.options.store.resolveConversation(input.identityId, input.conversationId),
@@ -1318,6 +1325,13 @@ export class LocalAgentRuntime {
         yield { ...envelope(), type: 'assistant.run.cancelled', data: {} };
         return;
       }
+      staged = await stageNativeAttachments(this.options.cwd, input.attachments ?? []);
+      run.cleanupAttachments = staged.cleanup;
+      if (run.abort.signal.aborted || this.stopped || this.options.isActive?.() === false) {
+        await staged.cleanup();
+        yield { ...envelope(), type: 'assistant.run.cancelled', data: {} };
+        return;
+      }
       const now = Date.now();
       await this.persist(() =>
         this.options.store.saveMessage(
@@ -1327,7 +1341,10 @@ export class LocalAgentRuntime {
             conversationId: conversation.id,
             role: 'user',
             content: input.content,
-            attachments: [],
+            attachments: (input.attachments ?? []).map(({ mediaType, filename }) => ({
+              mediaType,
+              ...(filename ? { filename } : {}),
+            })),
             createdAt: now,
           },
           true,
@@ -1473,7 +1490,8 @@ export class LocalAgentRuntime {
           accountFingerprint: conversation.accountFingerprint,
           modelId,
           ...(input.modelOptions ? { modelOptions: input.modelOptions } : {}),
-          content,
+          content: nativeAttachmentPrompt(content, staged?.attachments ?? []),
+          attachments: staged?.attachments,
           mcp: run.grant,
           signal: run.abort.signal,
         });
@@ -1721,6 +1739,9 @@ export class LocalAgentRuntime {
       try {
         await run.driver?.close();
       } finally {
+        await staged
+          ?.cleanup()
+          .catch(() => logger.warn('Could not clean native attachment staging directory'));
         this.runs.delete(run.runId);
         // A finished turn only frees another turn; discovery has its own pool.
         this.wakeRunWaiter();
@@ -1925,6 +1946,7 @@ export class LocalAgentRuntime {
       // A UI consumer may stop advancing its generator at any yield. Resource
       // disposal must not depend on it requesting another event. The stopped
       // fence rejects resumed generators before they touch the Profile database.
+      await Promise.allSettled(runs.map((run) => run.cleanupAttachments?.()));
       await Promise.allSettled([...this.storageWork, ...this.backgroundWork]);
       this.runs.clear();
     })();

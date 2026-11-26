@@ -413,7 +413,7 @@ const composerHostAvailable = computed(
 
 const messagePanelRef = ref<{ viewport?: HTMLElement | null } | null>(null);
 const composerRef = ref<{
-  composerTextarea?: HTMLTextAreaElement | null;
+  composerTextarea?: HTMLElement | null;
 } | null>(null);
 const composerControlsRef = ref<{ openModelPicker: () => void } | null>(null);
 

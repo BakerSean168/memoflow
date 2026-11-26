@@ -35,6 +35,9 @@ type Pending = {
   timer: ReturnType<typeof setTimeout>;
 };
 const MAX_FRAME_BYTES = 2_000_000;
+// The native prompt alone may carry bounded base64 images (20 MiB total).
+// Keep all provider-controlled inbound frames and other requests on the original cap.
+const MAX_IMAGE_PROMPT_FRAME_BYTES = 30_000_000;
 
 /** JSON-lines app-server transport. Protocol lifecycle follows T3's MIT implementation;
  * see THIRD_PARTY_NOTICES.md. No T3/Effect runtime or Agent planning loop is embedded. */
@@ -118,6 +121,10 @@ export class NativeRpcTransport {
         this.options.protocol === 'pi'
           ? { ...z.record(z.string(), z.unknown()).parse(params), id, type: method }
           : { ...(this.options.protocol === 'acp' ? { jsonrpc: '2.0' } : {}), id, method, params },
+        (this.options.protocol === 'pi' && method === 'prompt') ||
+          (this.options.protocol === 'acp' && method === 'session/prompt')
+          ? MAX_IMAGE_PROMPT_FRAME_BYTES
+          : MAX_FRAME_BYTES,
       );
     });
   }
@@ -143,13 +150,10 @@ export class NativeRpcTransport {
     });
   }
 
-  private write(value: unknown) {
+  private write(value: unknown, maxBytes = MAX_FRAME_BYTES) {
     if (this.failure || this.closed) return;
     const line = `${JSON.stringify(value)}\n`;
-    if (
-      Buffer.byteLength(line) > MAX_FRAME_BYTES ||
-      this.child.stdin.writableLength > MAX_FRAME_BYTES
-    ) {
+    if (Buffer.byteLength(line) + this.child.stdin.writableLength > maxBytes) {
       this.fail(new LocalAgentError('LOCAL_AGENT_PROTOCOL_ERROR'));
       void this.close();
       return;

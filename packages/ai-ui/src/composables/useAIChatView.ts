@@ -48,7 +48,7 @@ import type {
 } from './types';
 
 export interface UseAIChatViewOptions {
-  getComposerTextarea: () => HTMLTextAreaElement | null;
+  getComposerTextarea: () => HTMLElement | null;
   /** Visible business tab beside chat; used as removable implicit Goal/Task context. */
   getActiveSurface?: () => AIActiveSurfaceDescriptor | null;
 }
@@ -470,6 +470,7 @@ export function useAIChatView(options: UseAIChatViewOptions) {
   const canSendMessage = computed(
     () =>
       !chatSession.chatLoading.value &&
+      !chatSession.attachmentIntakePending.value &&
       !goalWorkflow.goalAgentLoading.value &&
       !goalWorkflow.goalAgentResuming.value &&
       !goalWorkflow.goalManualHandoff.value &&

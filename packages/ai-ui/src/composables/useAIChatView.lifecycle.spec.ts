@@ -44,6 +44,7 @@ const fixture = await vi.hoisted(async () => {
     chatMessage: ref(''),
     chatTimeline: ref([]),
     chatLoading: ref(false),
+    attachmentIntakePending: ref(false),
     chatConversationId: ref<string | null>(null),
     conversationTitle: ref(''),
     conversationList: ref([]),

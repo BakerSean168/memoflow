@@ -3752,6 +3752,22 @@
       "measurementCollectors": []
     },
     {
+      "path": "packages/ai-ui/src/components/composer/composer-rich-text.test.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/ai-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/ai-ui/src/components/composer/composer-undo-grouping.test.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/ai-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "packages/ai-ui/src/composables/agentActivity.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -14055,7 +14071,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 44
+      "fileCount": 46
     },
     {
       "id": "packages/ai/vitest.config.ts",
@@ -15143,7 +15159,7 @@
   "duplicate": [],
   "unexpected": [],
   "counts": {
-    "unit": 1248,
+    "unit": 1250,
     "integration": 63,
     "smoke": 3,
     "boundary-ipc": 7,

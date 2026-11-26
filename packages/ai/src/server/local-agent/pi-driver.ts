@@ -168,9 +168,26 @@ export class PiDriver {
         yield { type: 'cancelled' };
         return;
       }
-      const response = z
-        .object({ disposition: z.string().optional() })
-        .parse(await this.transport!.request('prompt', { message: input.content }));
+      const response = z.object({ disposition: z.string().optional() }).parse(
+        await this.transport!.request('prompt', {
+          message: input.content,
+          ...(input.attachments?.some((attachment) => attachment.image)
+            ? {
+                images: input.attachments.flatMap((attachment) =>
+                  attachment.image
+                    ? [
+                        {
+                          type: 'image',
+                          data: attachment.image.data,
+                          mimeType: attachment.image.mediaType,
+                        },
+                      ]
+                    : [],
+                ),
+              }
+            : {}),
+        }),
+      );
       if (response.disposition === 'handled')
         throw new LocalAgentError('LOCAL_AGENT_UNSUPPORTED_INPUT');
       yield* this.queue;
