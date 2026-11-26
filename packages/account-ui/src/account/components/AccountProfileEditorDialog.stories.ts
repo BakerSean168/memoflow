@@ -49,6 +49,8 @@ function createService(account: AccountClientDTO, overrides: Partial<AccountClie
   let current = account;
   return {
     getMyProfile: async () => ok({ account: current, cloudIdentity: null }),
+    getMyAvatarMeta: async () => ok({ updatedAt: null }),
+    uploadMyAvatar: async () => ok({ updatedAt: now }),
     updateMyProfile: async (request: { nickname: string; bio: string | null }) => {
       current = {
         ...current,
