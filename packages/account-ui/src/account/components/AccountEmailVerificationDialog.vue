@@ -12,7 +12,15 @@ import type {
   AccountVerificationChallenge,
   AccountVerificationPurpose,
 } from '@memoflow/cloud-auth-contracts';
-import { Button, Dialog, DialogContent, DialogDescription, DialogTitle, Input, Label } from '@memoflow/ui-vue-shadcn';
+import {
+  Button,
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogTitle,
+  Input,
+  Label,
+} from '@memoflow/ui-vue-shadcn';
 import { CLOUD_ACCOUNT_SECURITY_KEY } from '../../account-ui-host';
 
 const open = defineModel<boolean>('open', { default: false });
@@ -159,7 +167,12 @@ function handleOpenChange(next: boolean) {
         <p class="text-sm text-muted-foreground">
           {{ t('account.verification.explain') }}
         </p>
-        <p v-if="error" role="alert" class="text-sm text-destructive" data-testid="account-verification-error">
+        <p
+          v-if="error"
+          role="alert"
+          class="text-sm text-destructive"
+          data-testid="account-verification-error"
+        >
           {{ error }}
         </p>
         <div class="flex justify-end gap-2">
@@ -208,7 +221,12 @@ function handleOpenChange(next: boolean) {
             {{ t('account.verification.codeHint', { email: maskedEmail }) }}
           </p>
         </div>
-        <p v-if="error" role="alert" class="text-sm text-destructive" data-testid="account-verification-error">
+        <p
+          v-if="error"
+          role="alert"
+          class="text-sm text-destructive"
+          data-testid="account-verification-error"
+        >
           {{ error }}
         </p>
         <div class="flex flex-wrap items-center justify-between gap-2">
@@ -238,7 +256,9 @@ function handleOpenChange(next: boolean) {
               type="submit"
               data-testid="account-verification-verify"
               :disabled="busy || code.length !== 6"
-              >{{ busy ? t('account.verification.verifying') : t('account.verification.verify') }}</Button
+              >{{
+                busy ? t('account.verification.verifying') : t('account.verification.verify')
+              }}</Button
             >
           </div>
         </div>

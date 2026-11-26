@@ -101,9 +101,7 @@ function mountDialog(
 function service(overrides: Record<string, unknown> = {}) {
   return {
     requestAccountVerification: vi.fn().mockResolvedValue(ok(challenge())),
-    verifyAccountVerification: vi
-      .fn()
-      .mockResolvedValue(ok({ verificationToken: 'v'.repeat(43) })),
+    verifyAccountVerification: vi.fn().mockResolvedValue(ok({ verificationToken: 'v'.repeat(43) })),
     ...overrides,
   };
 }
@@ -145,9 +143,11 @@ describe('AccountEmailVerificationDialog', () => {
 
   it('shows the server error, clears the code and stays on the input step', async () => {
     const api = service({
-      verifyAccountVerification: vi.fn().mockResolvedValue(
-        fail({ code: 'ACCOUNT_VERIFICATION_INVALID', message: 'Code is invalid or expired' }),
-      ),
+      verifyAccountVerification: vi
+        .fn()
+        .mockResolvedValue(
+          fail({ code: 'ACCOUNT_VERIFICATION_INVALID', message: 'Code is invalid or expired' }),
+        ),
     });
     const wrapper = mountDialog(api);
     await openCodeStep(wrapper);

@@ -21,7 +21,10 @@ function service(options: Options = {}) {
       }),
     verifyAccountVerification: async () =>
       options.verify === 'invalid'
-        ? fail({ code: 'ACCOUNT_VERIFICATION_INVALID', message: '验证码错误或已失效，请重试或重新发送' })
+        ? fail({
+            code: 'ACCOUNT_VERIFICATION_INVALID',
+            message: '验证码错误或已失效，请重试或重新发送',
+          })
         : ok({ verificationToken: 'v'.repeat(43) }),
   };
 }
