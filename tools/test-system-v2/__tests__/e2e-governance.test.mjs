@@ -173,8 +173,8 @@ test('retired spec paths cannot be reintroduced as active E2E files', async () =
 test('retired E2E references are scanned from active browser tests', async () => {
   const contract = structuredClone(retirement);
   contract.forbiddenReferences.push({
-    id: 'governance-fixture-current-add-context',
-    needle: 'ai-chat-add-context',
+    id: 'governance-fixture-current-upload-file',
+    needle: 'ai-chat-upload-file',
     reason: 'test fixture for governance validation',
   });
 
@@ -182,7 +182,7 @@ test('retired E2E references are scanned from active browser tests', async () =>
   assert.ok(
     governance.issues.some(
       (issue) =>
-        issue.id === 'governance-fixture-current-add-context' &&
+        issue.id === 'governance-fixture-current-upload-file' &&
         issue.reason === 'retired-reference' &&
         issue.path === 'apps/web/e2e/local-docker/core-product-phase-e.spec.ts',
     ),
