@@ -110,6 +110,7 @@
 
         <div
           v-if="mentionQuery !== null"
+          ref="mentionMenu"
           class="absolute bottom-[calc(100%-0.25rem)] left-2 z-50 max-h-72 w-[min(24rem,calc(100%-1rem))] overflow-y-auto rounded-xl border border-[hsl(var(--border-subtle))] bg-[hsl(var(--surface-overlay))] p-1"
           :class="aiUiHost.semanticElevationClass('floating')"
           data-testid="ai-composer-mention-menu"
@@ -275,9 +276,29 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref, shallowRef, watch } from 'vue';
+import { computed, nextTick, ref, shallowRef, watch } from 'vue';
 import { EditorContent, useEditor } from '@tiptap/vue-3';
-import StarterKit from '@tiptap/starter-kit';
+import { createComposerExtensions, hasAncestor } from './composer/composer-extensions';
+import { collapseShownMarkdownSource } from './composer/composer-markdown-source';
+import {
+  buildTiptapContent,
+  serializeSelection,
+  splitOrLiftListItem,
+  stepCaretAcrossStyledEdge,
+} from './composer/composer-rich-text-doc';
+import {
+  convertCodeFenceOnEnter,
+  exitCodeBlockOnClosingFence,
+  exitCodeBlockOnTrailingBlankLines,
+  indentCodeBlock,
+  indentedNewlineInCodeBlock,
+  selectionInOneCodeBlock,
+} from './composer/composer-code-block';
+import { COMPOSER_UNDO_GROUP_DELAY, markAsClipboardEdit } from './composer/composer-undo-grouping';
+import { caretLineDirection } from './composer/composer-text-direction';
+import { newlineInCode, splitBlockKeepMarks } from '@tiptap/pm/commands';
+import type { JSONContent } from '@tiptap/core';
+import type { EditorView } from '@tiptap/pm/view';
 import type { Editor } from '@tiptap/core';
 import { history } from '@tiptap/pm/history';
 import { TextSelection } from '@tiptap/pm/state';
@@ -378,6 +399,7 @@ const dragging = ref(false);
 const mentionQuery = ref<string | null>(null);
 const mentionRange = ref<{ from: number; to: number } | null>(null);
 const mentionActiveIndex = ref(0);
+const mentionMenu = ref<HTMLElement | null>(null);
 const inlineMentions = shallowRef(new Map<string, ComposerMention>());
 const textareaMaxPx = COMPOSER_TEXTAREA_MAX_PX;
 let dismissedTrigger: string | null = null;
@@ -485,36 +507,22 @@ function updateMentionState(current: Editor) {
 }
 
 const editor = useEditor({
-  extensions: [
-    StarterKit.configure({
-      blockquote: false,
-      bold: false,
-      bulletList: false,
-      code: false,
-      codeBlock: false,
-      heading: false,
-      horizontalRule: false,
-      italic: false,
-      listItem: false,
-      orderedList: false,
-      strike: false,
-      link: false,
-      underline: false,
-    }),
-    ComposerMentionExtension,
-  ],
+  extensions: [...createComposerExtensions(), ComposerMentionExtension],
   content: composerDocument(props.modelValue),
   editorProps: {
     attributes: {
       'data-testid': 'ai-chat-composer',
+      class: 'composer-tiptap',
       role: 'textbox',
       'aria-multiline': 'true',
       'aria-label': t('aiAssistant.dialogs.chat.messagePlaceholder'),
       spellcheck: 'false',
     },
-    handleKeyDown: (_view, event) => handleKeydown(event),
+    handleKeyDown: (view, event) => handleKeydown(event, view),
     handleDOMEvents: {
-      paste: (_view, event) => handlePaste(event),
+      paste: (view, event) => handlePaste(event, view),
+      copy: (view, event) => handleCopy(view, event, false),
+      cut: (view, event) => handleCopy(view, event, true),
       drop: (_view, event) => {
         if (!event.dataTransfer?.files.length) return false;
         event.preventDefault();
@@ -550,7 +558,7 @@ watch(
 );
 defineExpose({ composerTextarea, editor });
 
-function handleKeydown(event: KeyboardEvent): boolean {
+function handleKeydown(event: KeyboardEvent, view: EditorView): boolean {
   if (isComposing.value || event.isComposing || event.keyCode === 229) return false;
   if (mentionQuery.value !== null) {
     if (event.key === 'ArrowDown' && mentionSuggestions.value.length) {
@@ -569,15 +577,85 @@ function handleKeydown(event: KeyboardEvent): boolean {
       closeMentionMenu();
       return true;
     }
-    if (event.key === 'Enter' && !event.shiftKey) {
+    if ((event.key === 'Enter' || event.key === 'Tab') && !event.shiftKey) {
       const suggestion = mentionSuggestions.value[mentionActiveIndex.value];
-      if (suggestion) selectMention(suggestion);
+      if (suggestion) {
+        selectMention(suggestion);
+        return true;
+      }
+      if (event.key === 'Tab') return false;
       return true;
     }
   }
-  if (event.key !== 'Enter' || event.shiftKey) return false;
-  if (canSubmit.value) emit('send');
-  return true;
+  const current = editor.value;
+  if (!current) return false;
+  // Source-level port: styled edges, code indentation/fence handling and list continuation.
+  const backArrow = caretLineDirection(view.state) === 'rtl' ? 'ArrowRight' : 'ArrowLeft';
+  if (
+    ['ArrowLeft', 'ArrowRight'].includes(event.key) &&
+    !event.shiftKey &&
+    !event.altKey &&
+    !event.metaKey &&
+    !event.ctrlKey &&
+    view.state.selection.empty
+  ) {
+    const direction = event.key === backArrow ? -1 : 1;
+    const step = stepCaretAcrossStyledEdge(view.state, direction);
+    if (step) {
+      view.dispatch(step);
+      return true;
+    }
+    const { $from } = view.state.selection;
+    const adjacent = direction === -1 ? $from.nodeBefore : $from.nodeAfter;
+    if (adjacent?.type.name === COMPOSER_MENTION) {
+      view.dispatch(
+        view.state.tr
+          .setSelection(
+            TextSelection.create(view.state.doc, $from.pos + direction * adjacent.nodeSize),
+          )
+          .scrollIntoView(),
+      );
+      return true;
+    }
+  }
+  if (
+    event.key === 'Tab' &&
+    !event.metaKey &&
+    !event.ctrlKey &&
+    selectionInOneCodeBlock(view.state)
+  )
+    return indentCodeBlock(view.state, event.shiftKey ? 'out' : 'in', (tr) => view.dispatch(tr));
+  if (event.key !== 'Enter') return false;
+  if (!event.metaKey && !event.ctrlKey) {
+    const dispatch = (tr: typeof view.state.tr) => view.dispatch(tr.scrollIntoView());
+    if (selectionInOneCodeBlock(view.state))
+      return (
+        exitCodeBlockOnClosingFence(view.state, dispatch) ||
+        exitCodeBlockOnTrailingBlankLines(view) ||
+        indentedNewlineInCodeBlock(view.state, dispatch) ||
+        newlineInCode(view.state, dispatch)
+      );
+    if (convertCodeFenceOnEnter(view.state, dispatch)) return true;
+  }
+  // In rich-text blocks Enter edits the block; Ctrl/Cmd+Enter submits explicitly.
+  const inList = current.isActive('listItem') || current.isActive('taskItem');
+  if (event.ctrlKey || event.metaKey || (!event.shiftKey && !inList)) {
+    if (canSubmit.value) emit('send');
+    return true;
+  }
+  if (inList && splitOrLiftListItem(current, collapseShownMarkdownSource)) return true;
+  if (
+    hasAncestor(view.state.selection.$from, 'blockquote') &&
+    view.state.selection.$from.parent.content.size === 0 &&
+    current.commands.lift('blockquote')
+  )
+    return true;
+  return current
+    .chain()
+    .command(collapseShownMarkdownSource)
+    .command(({ state, dispatch }) => splitBlockKeepMarks(state, dispatch))
+    .scrollIntoView()
+    .run();
 }
 
 function openFilePicker() {
@@ -591,7 +669,7 @@ function handleFileInput(event: Event) {
   input.value = '';
 }
 
-function handlePaste(event: ClipboardEvent): boolean {
+function handlePaste(event: ClipboardEvent, view: EditorView): boolean {
   const clipboard = event.clipboardData;
   if (!clipboard) return false;
   const directFiles = Array.from(clipboard.files ?? []);
@@ -601,9 +679,54 @@ function handlePaste(event: ClipboardEvent): boolean {
     return file ? [file] : [];
   });
   const files = directFiles.length ? directFiles : itemFiles;
-  if (!files.length) return false;
+  if (files.length) {
+    event.preventDefault();
+    emit('add-files', files);
+    return true;
+  }
+  const text = clipboard.getData?.('text/plain');
+  const current = editor.value;
+  if (!text || !current) return false;
   event.preventDefault();
-  emit('add-files', files);
+  if (selectionInOneCodeBlock(view.state)) {
+    const { from, to } = view.state.selection;
+    view.dispatch(
+      markAsClipboardEdit(view.state.tr.insertText(text, from, to), 'paste').scrollIntoView(),
+    );
+    return true;
+  }
+  const $paste = view.state.selection.$from;
+  const nested = ['listItem', 'taskItem', 'blockquote'].some((name) => hasAncestor($paste, name));
+  // Keep active reference searches literal (not interpreted as Markdown).
+  const blocks = buildTiptapContent(text.replace(/\r\n?/gu, '\n'), {
+    blocks: !nested,
+    literalText: mentionQuery.value !== null,
+  });
+  const content =
+    blocks.length === 1 && blocks[0]?.type === 'paragraph'
+      ? (blocks[0].content as JSONContent[])
+      : (blocks as JSONContent[]);
+  if (!content?.length) return true;
+  current
+    .chain()
+    .command(({ tr }) => {
+      markAsClipboardEdit(tr, 'paste');
+      return true;
+    })
+    .command(collapseShownMarkdownSource)
+    .insertContent(content)
+    .run();
+  return true;
+}
+
+function handleCopy(view: EditorView, event: ClipboardEvent, cut: boolean): boolean {
+  const { from, to, empty } = view.state.selection;
+  if (empty || !event.clipboardData) return false;
+  const text = serializeSelection(view.state.doc, from, to);
+  event.clipboardData.setData('text/plain', text);
+  event.preventDefault();
+  if (cut)
+    view.dispatch(markAsClipboardEdit(view.state.tr.deleteSelection(), 'cut').scrollIntoView());
   return true;
 }
 
@@ -664,13 +787,20 @@ watch(
       })
       .run();
     // Use Tiptap's plugin APIs so Vue's reactive EditorState remains synchronized.
-    const undoPlugin = history();
+    const undoPlugin = history({ newGroupDelay: COMPOSER_UNDO_GROUP_DELAY });
     if (undoPlugin.spec.key) {
       current.unregisterPlugin(undoPlugin.spec.key);
       current.registerPlugin(undoPlugin);
     }
   },
 );
+
+watch(mentionActiveIndex, async () => {
+  await nextTick();
+  mentionMenu.value
+    ?.querySelector('[aria-selected="true"]')
+    ?.scrollIntoView?.({ block: 'nearest' });
+});
 
 watch(mentionSuggestions, (items) => {
   mentionActiveIndex.value = Math.min(mentionActiveIndex.value, Math.max(items.length - 1, 0));

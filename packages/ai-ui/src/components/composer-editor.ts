@@ -2,6 +2,7 @@ import { Node, type Editor, type JSONContent } from '@tiptap/core';
 import { VueNodeViewRenderer } from '@tiptap/vue-3';
 import type { ComposerContextEntity } from '../composables/types';
 import ComposerMentionNode from './ComposerMentionNode.vue';
+import { buildDocJson, serializeEditorDoc } from './composer/composer-rich-text-doc';
 
 export type ComposerMention = Omit<ComposerContextEntity, 'origin'>;
 export const COMPOSER_MENTION = 'composerMention';
@@ -31,20 +32,11 @@ export const ComposerMentionExtension = Node.create({
 export const mentionKey = (entity: ComposerMention) => entity.entityType + ':' + entity.id;
 
 export function composerDocument(text: string): JSONContent {
-  return {
-    type: 'doc',
-    content: text
-      .replace(/\r\n?/gu, '\n')
-      .split('\n')
-      .map((line) => ({
-        type: 'paragraph',
-        ...(line ? { content: [{ type: 'text', text: line }] } : {}),
-      })),
-  };
+  return buildDocJson(text.replace(/\r\n?/gu, '\n')) as JSONContent;
 }
 
 export function composerText(editor: Editor) {
-  return editor.getText({ blockSeparator: '\n' });
+  return serializeEditorDoc(editor.state.doc).value;
 }
 
 export function composerMentions(editor: Editor) {
@@ -59,7 +51,13 @@ export function composerMentions(editor: Editor) {
 
 export function composerMentionTrigger(editor: Editor) {
   const { from, empty, $from } = editor.state.selection;
-  if (!empty || !$from.parent.isTextblock) return null;
+  if (
+    !empty ||
+    !$from.parent.isTextblock ||
+    $from.parent.type.spec.code ||
+    $from.marks().some((mark) => mark.type.name === 'code')
+  )
+    return null;
   const prefix = editor.state.doc.textBetween($from.start(), from, '\n', '\uFFFC');
   const match = /(?:^|[\s\uFFFC])@([^@\s]{0,60})$/u.exec(prefix);
   if (!match) return null;
