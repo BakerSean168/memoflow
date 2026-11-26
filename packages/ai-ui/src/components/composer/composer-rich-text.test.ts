@@ -1,7 +1,16 @@
 // Adapted from T3 Code f9b19a7f8 (MIT); see THIRD_PARTY_NOTICES.md.
+import { getSchema } from '@tiptap/core';
 import { describe, expect, it } from 'vitest';
 
+import { createComposerExtensions } from './composer-extensions';
+import { buildDocJson, serializeEditorDoc } from './composer-rich-text-doc';
 import { inlineMarkdownUnitMarks, parseInlineMarkdown } from './composer-rich-text';
+
+const schema = getSchema(createComposerExtensions());
+
+function roundTrip(markdown: string) {
+  return serializeEditorDoc(schema.nodeFromJSON(buildDocJson(markdown))).value;
+}
 
 describe('composer rich text markdown', () => {
   it('preserves unmatched markers, escaped markers, and identifiers', () => {
@@ -131,5 +140,19 @@ describe('composer rich text markdown', () => {
       [],
       [],
     ]);
+  });
+});
+
+describe('composer rich text markdown round-trip', () => {
+  it.each([
+    ['list', '- alpha\n- beta\n  - nested'],
+    ['ordered list', '1. one\n2. two'],
+    ['task list', '- [x] done\n- [ ] todo'],
+    ['blockquote', '> quoted line\n> second'],
+    ['code block', '```ts\nconst a = 1\n```'],
+    ['display math', '$$\na + b\n$$'],
+    ['inline math', 'see $x^2$ here'],
+  ])('preserves %s through document and back', (_name, markdown) => {
+    expect(roundTrip(markdown)).toBe(markdown);
   });
 });
