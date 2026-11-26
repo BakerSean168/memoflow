@@ -29,6 +29,9 @@ test.describe('Account & Privacy settings', () => {
     const nickname = `Audit-${String(Date.now()).slice(-8)}`;
     const nicknameInput = page.getByTestId('profile-editor-nickname');
     await nicknameInput.fill(nickname);
+    // The card keeps the save bar hidden until the edit is confirmed with Enter.
+    await nicknameInput.press('Enter');
+    await expect(page.getByTestId('profile-editor-footer')).toBeVisible();
 
     const updateResponse = page.waitForResponse(
       (response) =>

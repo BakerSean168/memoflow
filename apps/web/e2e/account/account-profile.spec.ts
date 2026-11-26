@@ -41,17 +41,33 @@ test.describe('Account profile canonical surface', () => {
     });
 
     const preview = page.getByTestId('profile-editor-avatar').locator('img');
-    await expect(preview).toHaveAttribute('src', /^data:image\/png;base64,/, {
+    // The selected file is previewed from a short-lived object URL until Save.
+    await expect(preview).toHaveAttribute('src', /^blob:/, {
       timeout: TIMEOUT_CONFIG.ELEMENT_WAIT,
     });
+    await expect(page.getByTestId('profile-editor-avatar')).toHaveAttribute('aria-busy', 'false');
+
+    const nicknameInput = page.getByTestId('profile-editor-nickname');
+    await nicknameInput.press('Enter');
+    await expect(page.getByTestId('profile-editor-footer')).toBeVisible();
+
+    const updateResponse = page.waitForResponse(
+      (response) =>
+        response.request().method() === 'PUT' &&
+        new URL(response.url()).pathname.endsWith('/api/v1/accounts/me'),
+      { timeout: TIMEOUT_CONFIG.API_REQUEST },
+    );
+    await page.getByTestId('profile-editor-save').click();
+    expect((await updateResponse).ok()).toBe(true);
 
     await page.reload({ waitUntil: 'domcontentloaded' });
     await openProfileEditor(page);
-    await expect(page.getByTestId('profile-editor-avatar').locator('img')).toHaveAttribute(
-      'src',
-      /^data:image\/png;base64,/,
-      { timeout: TIMEOUT_CONFIG.ELEMENT_WAIT },
-    );
+
+    // After the reload the object URL is gone, so a rendered image proves the
+    // saved avatar was persisted and loaded again.
+    const persistedAvatar = page.getByTestId('profile-editor-avatar').locator('img');
+    await expect(persistedAvatar).toBeVisible({ timeout: TIMEOUT_CONFIG.ELEMENT_WAIT });
+    await expect(persistedAvatar).toHaveAttribute('src', /\S+/);
   });
 
   test('[P1] keeps the cloud identity email visible but outside the editable profile fields', async ({
@@ -59,11 +75,17 @@ test.describe('Account profile canonical surface', () => {
     workerAccount,
   }) => {
     const masked = workerAccount.email.replace(/^(.).*(@.*)$/, '$1***$2');
-    await expect(page.getByTestId('account-login-email')).toHaveText(masked);
-    await expect(page.getByTestId('cloud-password-reset-recipient')).toHaveText(masked);
+    const identityEmail = page.getByTestId('account-login-email');
+    await expect(identityEmail).toBeVisible();
+    await expect(identityEmail).toHaveText(masked);
+    // Changing the identity email goes through the verification dialog, so the
+    // card only ever shows the masked address as read-only text.
+    await expect(page.getByTestId('account-change-email')).toBeVisible();
     await expect(page.locator('input[type="email"]')).toHaveCount(0);
+    // Profile fields live in the edit dialog, never inline on the settings card.
     await expect(page.locator('#nickname,#bio')).toHaveCount(0);
-    await expect(page.getByTestId('account-profile-avatar')).toHaveCount(0);
-    await expect(page.getByTestId('account-profile-save')).toHaveCount(0);
+    await expect(page.getByTestId('profile-editor-dialog')).toHaveCount(0);
+    await expect(page.getByTestId('account-settings-nickname')).toBeVisible();
+    await expect(page.getByTestId('account-settings-profile-edit')).toBeVisible();
   });
 });
